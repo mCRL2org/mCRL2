@@ -94,7 +94,7 @@ void test2()
 
   data_specification data_spec;
 
-  data_spec.make_complete(nat());
+  data_spec.add_context_sort(nat());
 
   rewriter r(data_spec);
   data_expression d1 = parse_data_expression("2+7");

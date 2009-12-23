@@ -55,9 +55,9 @@ static bool push_comm_through_allow=true; //at some point is set to false to avo
 
   static inline
   bool gsIsDataExprNumber(ATermAppl DataExpr)
-  {
+  { 
     if (!gsIsOpId(DataExpr)) return false;
-    return gsIsNumericString(data::basic_sort(DataExpr).name().to_string().c_str());
+    return gsIsNumericString(data::function_symbol(DataExpr).name().to_string().c_str());
   }
 
   //from pnml2mcrl2

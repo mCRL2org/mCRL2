@@ -63,7 +63,7 @@ void bool_rewrite_test() {
 
   data_specification specification;
 
-  specification.make_complete(bool_());
+  specification.add_context_sort(bool_());
 
   data::rewriter R(specification);
 
@@ -86,7 +86,7 @@ void pos_rewrite_test() {
 
   data_specification specification;
 
-  specification.make_complete(pos());
+  specification.add_context_sort(pos());
 
   data::rewriter R(specification);
   data_expression p1(pos("1"));
@@ -117,7 +117,7 @@ void nat_rewrite_test() {
 
   data_specification specification;
 
-  specification.make_complete(nat());
+  specification.add_context_sort(nat());
 
   data::rewriter R(specification);
 
@@ -181,7 +181,7 @@ void int_rewrite_test() {
 
   data_specification specification;
 
-  specification.make_complete(int_());
+  specification.add_context_sort(int_());
 
   data::rewriter R(specification);
 
@@ -239,7 +239,7 @@ void real_rewrite_test()
   std::cerr << "real_rewrite_test\n";
 
   data_specification specification;
-  specification.make_complete(real_());
+  specification.add_context_sort(real_());
 
   data::rewriter R(specification);
 
@@ -300,7 +300,7 @@ void list_rewrite_test()
   std::cerr << "list_rewrite_test\n";
   data_specification specification;
 
-  specification.make_complete(list(bool_()));
+  specification.add_context_sort(list(bool_()));
 
   data::rewriter R(specification);
 
@@ -329,7 +329,7 @@ void set_rewrite_test() {
     "sort A = Set(Nat);"
   );
 
-  specification.make_complete(set_(nat()));
+  specification.add_context_sort(set_(nat()));
 
   data::rewriter R(specification);
 
@@ -374,7 +374,7 @@ void bag_rewrite_test() {
     "sort A = Bag(Nat);"
   );
 
-  specification.make_complete(bag(nat()));
+  specification.add_context_sort(bag(nat()));
 
   data::rewriter R(specification);
 

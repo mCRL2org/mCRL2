@@ -1351,7 +1351,10 @@ namespace mcrl2 {
           }
         }
         ATtablePut(context.actions,(ATerm)ActName,(ATerm)Types);
-        if (gsDebug) { std::cerr << "Read-in Act Name " << pp(ActName) << ", Types " << pp(Types) << "\n"; }
+        if (gsDebug) 
+        { std::cerr << "Read-in Act Name " << pp(ActName) << ", Types ";
+          ATfprintf(stderr,"%t\n",Types); // Types is a list of list, on which pp does not work.
+        }
       }
 
       return Result;
@@ -1396,7 +1399,10 @@ namespace mcrl2 {
 
         ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATLgetArgument(Proc,1));
         ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATAgetArgument(Proc,2));
-        if (gsDebug) { std::cerr << "Read-in Proc Name " << pp(ProcName) << ", Types " << pp(Types) << "\n"; }
+        if (gsDebug) 
+        { std::cerr << "Read-in Proc Name " << pp(ProcName) << ", Types " ;
+          ATfprintf(stderr,"%t\n",Types); // Types is a list of list, on which pp does not work.
+        }
       }
       ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
       ATtablePut(body.proc_bodies,(ATerm)INIT_KEY(),(ATerm)Init);
@@ -1452,7 +1458,10 @@ namespace mcrl2 {
         //ATtablePut(body.proc_freevars,(ATerm)Index,(ATerm)PBFreeVars);
         ATtablePut(body.proc_pars,(ATerm)Index,(ATerm)PBVars);
         ATtablePut(body.proc_bodies,(ATerm)Index,(ATerm)ATAgetArgument(PBEqn,2));
-        if (gsDebug) { std::cerr << "Read-in Proc Name " << pp(PBName) << ", Types " << pp(Types) << "\n"; }
+        if (gsDebug) 
+        { std::cerr << "Read-in Proc Name " << pp(PBName) << ", Types ";
+          ATfprintf(stderr,"%t\n",Types); // pp cannot print list of lists of types
+        }
       }
       //ATtablePut(body.proc_freevars,(ATerm)INIT_KEY(),(ATerm)PBFreeVars);
       ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
@@ -1787,7 +1796,9 @@ namespace mcrl2 {
         return ATfalse;
       }
 
-      if(ATLtableGet(gssystem.functions, (ATerm)Name) &&
+      ATermList L=ATLtableGet(gssystem.functions, (ATerm)Name);
+      if(L!=NULL &&
+         (ATindexOf(L,(ATerm)Sort,0)>=0) &&
          !ATisEqual(Name,static_cast<ATermAppl>(sort_real::maximum_name()))&&
          !ATisEqual(Name,static_cast<ATermAppl>(sort_real::minimum_name()))&&
          !ATisEqual(Name,static_cast<ATermAppl>(sort_real::abs_name()))&&
@@ -1803,9 +1814,10 @@ namespace mcrl2 {
          !ATisEqual(Name,static_cast<ATermAppl>(sort_list::tail_name()))&&
          !ATisEqual(Name,static_cast<ATermAppl>(sort_list::rhead_name()))&&
          !ATisEqual(Name,static_cast<ATermAppl>(sort_list::rtail_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::in_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::count_name()))
-        ){
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::in_name()))
+         // !ATisEqual(Name,static_cast<ATermAppl>(sort_list::count_name()))
+        )
+      {
         gsErrorMsg("attempt to redeclare the system function with %s %P\n", msg, Name);
         assert(0);
         return ATfalse;
@@ -1852,7 +1864,8 @@ namespace mcrl2 {
       ATermList Types=ATLtableGet(gssystem.functions, (ATerm)OpIdName);
 
       if (!Types) Types=ATmakeList0();
-      Types=ATappend(Types,(ATerm)Type); // TODO: Avoid ATappend!!!!
+      // Types=ATappend(Types,(ATerm)Type);  TODO: Avoid ATappend!!!!
+      Types=ATinsert(Types,(ATerm)Type); 
       ATtablePut(gssystem.functions,(ATerm)OpIdName,(ATerm)Types);
     }
 
@@ -3572,7 +3585,10 @@ namespace mcrl2 {
     }
 
     static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList){
-      // if (gsDebug) { std::cerr << "gstcTypeMatchL TypeList: " << pp(TypeList) << ";    PosTypeList: %T \n",TypeList,PosTypeList);
+      if (gsDebug) 
+      { std::cerr << "gstcTypeMatchL TypeList: " << pp(TypeList) << ";    PosTypeList: " <<
+               pp(PosTypeList) << "\n";
+      }
 
       if(ATgetLength(TypeList)!=ATgetLength(PosTypeList)) return NULL;
 
@@ -3593,11 +3609,13 @@ namespace mcrl2 {
       return ATfalse;
     }
 
-    static ATermAppl gstcUnwindType(ATermAppl Type){
-      // if (gsDebug) { std::cerr << "gstcUnwindType Type: %T\n",Type);
+    static ATermAppl gstcUnwindType(ATermAppl Type)
+    {
+      if (gsDebug) { std::cerr << "gstcUnwindType Type: " << pp(Type) << "\n"; }
 
       if(gsIsSortCons(Type)) return ATsetArgument(Type,(ATerm)gstcUnwindType(ATAgetArgument(Type,1)),1);
-      if(gsIsSortArrow(Type)){
+      if(gsIsSortArrow(Type))
+      {
         Type=ATsetArgument(Type,(ATerm)gstcUnwindType(ATAgetArgument(Type,1)),1);
         ATermList Args=ATLgetArgument(Type,0);
         ATermList NewArgs=ATmakeList0();
@@ -3609,7 +3627,8 @@ namespace mcrl2 {
         return Type;
       }
 
-      if(gsIsSortId(Type)){
+      if(gsIsSortId(Type))
+      {
         ATermAppl Value=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(Type,0));
         if(!Value) return Type;
         return gstcUnwindType(Value);

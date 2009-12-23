@@ -170,7 +170,7 @@ namespace process {
   {
     std::set<data::sort_expression> s;
     traverse_sort_expressions(spec, std::inserter(s, s.end()));
-    spec.data().make_complete(s);
+    spec.data().add_context_sorts(s);
   }
 
   /// \brief Conversion to ATermAppl.

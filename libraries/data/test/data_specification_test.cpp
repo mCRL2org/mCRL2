@@ -91,8 +91,8 @@ void test_sorts()
   basic_sort s2("S2");
   sort_expression_vector s2l(make_vector(reinterpret_cast<sort_expression&>(s2)));
   boost::iterator_range<sort_expression_vector::const_iterator> s2l_range(s2l);
-  spec.make_complete(s2);
-  spec1.make_complete(s2l_range);
+  spec.add_context_sort(s2);
+  spec1.add_context_sorts(s2l_range);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   spec.remove_sorts(s2l_range);
@@ -327,7 +327,7 @@ void test_is_certainly_finite()
   BOOST_CHECK(spec.is_certainly_finite(s));
   BOOST_CHECK(!spec.is_certainly_finite(s0));
 
-  spec.make_complete(sort_real::real_());
+  spec.add_context_sort(sort_real::real_());
   BOOST_CHECK(spec.is_certainly_finite(sort_bool::bool_()));
   BOOST_CHECK(!spec.is_certainly_finite(sort_pos::pos()));
   BOOST_CHECK(!spec.is_certainly_finite(sort_nat::nat()));

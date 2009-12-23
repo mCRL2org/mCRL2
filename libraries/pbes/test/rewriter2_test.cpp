@@ -148,7 +148,7 @@ void test_simplifying_rewriter()
   std::cout << "<test_simplifying_rewriter>" << std::endl;
 
   data::data_specification data_spec = data::data_specification();
-  data_spec.make_complete(data::sort_nat::nat());
+  data_spec.add_context_sort(data::sort_nat::nat());
   data::rewriter datar(data_spec);
   pbes_system::simplifying_quantifier_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
   pbes_system::data_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
@@ -220,7 +220,7 @@ void test_enumerate_quantifiers_rewriter()
   std::cout << "<test_enumerate_quantifiers_rewriter>" << std::endl;                                                                                  
                                                                                                                                                       
   data::data_specification data_spec = data::data_specification();                                                                                    
-  data_spec.make_complete(data::sort_nat::nat());                                                                                                     
+  data_spec.add_context_sort(data::sort_nat::nat());                                                                                                     
   data::rewriter datar(data_spec);                                                                                                                    
   data::number_postfix_generator generator("UNIQUE_PREFIX");                                                                                          
   data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);                                                           

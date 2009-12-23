@@ -46,27 +46,15 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
-      template < typename Term >
+      /* template < typename Term >
       Term apply_compatibility_renamings(const data_specification&, Term const&);
       template < typename Term >
-      Term undo_compatibility_renamings(const data_specification&, Term const&);
+      Term undo_compatibility_renamings(const data_specification&, Term const&); */
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&, bool = false);
     }
     /// \endcond
 
     /// \brief data specification.
-    ///
-    /// \invariant The specification is complete with respect to standard sorts:
-    ///  - for every s in sorts() all system-defined sorts in s are in sorts()
-    ///  - for every f in constructors() all system-defined sorts in f.sort() are in sorts()
-    ///  - for every f in mappings() all system-defined sorts in f.sort() are in sorts()
-    ///  - for every e in equations() all system-defined sorts occurring in subexpressions of e are in sorts()
-    ///  - for every s in sorts() the specification has the standard mappings/equations
-    ///  - for sorts of non-standard mappings/equations:
-    ///    - for every non-standard f in constructors() standard mappings/equations for f.sort() are in mappings() 
-    ///    - for every non-standard f in mappings() standard mappings/equations for f.sort() are in mappings() 
-    ///    - for every non-standard e in equations() all sorts of subexpressions are contained in mappings()
-    /// \invariant For every system defined sort s, if search_sort(s) if and only if search_function(s)
 
     class data_specification
     {
@@ -77,9 +65,6 @@ namespace mcrl2 {
 
         /// \brief map from basic_sort (names) to sort expression
         typedef atermpp::map< basic_sort, sort_expression >           ltr_aliases_map;
-
-        /// \brief map from sort expression to names
-        // typedef std::multimap< sort_expression, basic_sort >          reverse_aliases_map;
 
       private:
 
@@ -156,9 +141,6 @@ namespace mcrl2 {
         ///\brief Normalise sorts.
         sort_expression normalise_sorts_helper(const sort_expression & e) const;
 
-        /// \brief Helper function for make_complete() methods
-        /* template < typename Term >
-        void gather_sorts(Term const& term, std::set< sort_expression >& sorts) const; */
 
         ///\brief Builds a specification from aterm
         void build_from_aterm(const atermpp::aterm_appl& t);
@@ -590,20 +572,20 @@ namespace mcrl2 {
       }
 
   public:
-      // ///\brief Adds the sorts in t to the context sorts
-      // /// \param[in] t an object of which the sort expressions occurring in it are
-      // /// added to m_sorts_in_context. For these sorts standard functions are generated
-      // /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
-      // /// the necessary constructors, mappings and equations are added to the data type.
-      // 
-      // template < typename T >
-      // void make_complete(const T &t) const
-      // { atermpp::set < sort_expression >::size_type old_size=m_sorts_in_context.size();
-      //   find_sort_expressions(t, std::inserter(m_sorts_in_context, m_sorts_in_context.end()));
-      //   if (m_sorts_in_context.size()!=old_size)
-      //   { data_is_not_necessarily_normalised_anymore();
-      //   }
-      // }
+      ///\brief Adds the sort s to the context sorts
+      /// \param[in] s a sort expression. It is
+      /// added to m_sorts_in_context. For this sort standard functions are generated
+      /// automatically (if, <,<=,==,!=,>=,>) and if the sort is a standard sort,
+      /// the necessary constructors, mappings and equations are added to the data type.
+      void add_context_sort(const sort_expression& s) const
+      { 
+        atermpp::set<sort_expression>::size_type old_size = m_sorts_in_context.size();
+        m_sorts_in_context.insert(s);
+        if (m_sorts_in_context.size()!=old_size)
+        {
+          data_is_not_necessarily_normalised_anymore();
+        }
+      }
 
       ///\brief Adds the sorts in c to the context sorts
       /// \param[in] c a container of sort expressions. These are
@@ -611,7 +593,7 @@ namespace mcrl2 {
       /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
       /// the necessary constructors, mappings and equations are added to the data type.
       template <typename Container>
-      void make_complete(const Container &c, typename detail::enable_if_container<Container>::type* = 0) const
+      void add_context_sorts(const Container &c, typename detail::enable_if_container<Container>::type* = 0) const
       { 
         atermpp::set<sort_expression>::size_type old_size = m_sorts_in_context.size();
         m_sorts_in_context.insert(c.begin(), c.end());
@@ -620,63 +602,6 @@ namespace mcrl2 {
           data_is_not_necessarily_normalised_anymore();
         }
       }
-
-      ///\brief Adds the sort s to the context sorts
-      /// \param[in] s a sort expression. It is
-      /// added to m_sorts_in_context. For this sort standard functions are generated
-      /// automatically (if, <,<=,==,!=,>=,>) and if the sort is a standard sort,
-      /// the necessary constructors, mappings and equations are added to the data type.
-      // TODO: efficiency of this function can be improved
-      void make_complete(const sort_expression& s) const
-      { 
-        std::vector<sort_expression> S;
-        S.push_back(s);
-        make_complete(S);
-      }
-
-      ///\brief Adds system defined sorts when necessary to make the specification complete
-      /// \param[in] range an iterator range of objects: data/sort expressions,
-      ///  equations, assignments for which the specificaiton should be complete
-      /// \pre specification is complete, but not necessarily with respect to sorts in e
-      /// \post specification has all constructors/mappings/equations for sorts referenced in range
-      /* template < typename Container >
-      void make_complete(Container const& range,
-              typename detail::enable_if_container< Container >::type* = 0) const
-      { std::set< sort_expression > sorts;
-        for (typename Container::const_iterator i = range.begin(); i != range.end(); ++i)
-        { make_complete(*i);
-        }
-      }  */
-
-      ///\brief Adds system defined sorts when necessary to make the specification complete
-      /// \param[in] s a set of sort expressions that is added to a specification that is system-defined complete 
-      /// \pre specification is complete, but not necessarily with respect to sorts in e
-      /// \post specification has all constructors/mappings/equations for sorts in e
-      /* void make_complete(std::set< sort_expression > const& s) const
-      { atermpp::set < sort_expression >::size_type old_size=m_sorts_in_context.size();
-        m_sorts_in_context.insert(s.begin(),s.end());
-        if (m_sorts_in_context.size()!=old_size)
-        { data_is_not_necessarily_normalised_anymore();
-        } 
-      } */
-
-      ///\brief Adds system defined sorts when necessary to make the specification complete
-      /// \param[in] e a data expression that is added to a specification that is system-defined complete 
-      /// \pre specification is complete, but not necessarily with respect to sorts in e
-      /// \post specification has all constructors/mappings/equations for sorts in e
-      // void make_complete(data_expression const& e) const;
-
-      ///\brief Adds system defined sorts when necessary to make the specification complete
-      /// \param[in] e a equation that is added to a specification that is system-defined complete 
-      /// \pre specification is complete, but not necessarily with respect to sorts in e
-      /// \post specification has all constructors/mappings/equations for sorts in e
-      // void make_complete(data_equation const& e) const;
-
-      ///\brief Adds system defined sorts when necessary to make the specification complete
-      /// \param[in] s a sort that is added to a specification that is system-defined complete 
-      /// \pre specification is complete, but not necessarily with respect to s
-      /// \post specification has all constructors/mappings/equations for s
-      // void make_complete(sort_expression const& s) const;
 
   private:
 

@@ -282,7 +282,7 @@ inline
 void complete_data_specification(lps::specification& spec)
 { std::set<data::sort_expression> s;
   traverse_sort_expressions(spec, std::inserter(s, s.end()));
-  spec.data().make_complete(s);
+  spec.data().add_context_sorts(s);
 }
 
 /// \brief Conversion to ATermAppl.
@@ -290,27 +290,6 @@ void complete_data_specification(lps::specification& spec)
 inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compatible)
 {
-  /* if (compatible)
-  { assert(0);
-      atermpp::aterm_appl specification_term(core::detail::gsMakeLinProcSpec(
-      data::detail::data_specification_to_aterm_data_spec(data::data_specification()),
-      core::detail::gsMakeActSpec(spec.action_labels()),
-      core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
-      linear_process_to_aterm(spec.process()),
-      spec.initial_process()
-    ));
-
-    specification_term = data::detail::apply_compatibility_renamings(spec.data(), specification_term);
-
-    return core::detail::gsMakeLinProcSpec(
-        data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
-        atermpp::aterm_appl(specification_term(1)),
-        atermpp::aterm_appl(specification_term(2)),
-        atermpp::aterm_appl(specification_term(3)),
-        atermpp::aterm_appl(specification_term(4))
-    ); 
-  } */
-
   return core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
       core::detail::gsMakeActSpec(spec.action_labels()),

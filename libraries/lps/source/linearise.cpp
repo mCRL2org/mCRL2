@@ -7196,19 +7196,13 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   }
   data_specification data_spec=type_checked_spec.data();
   internal_format_conversion(data_spec);
-  // data_spec.make_complete(type_checked_spec);  // Take care that all sorts occuring in the specification 
-                                                  // are present in data_spec. As this does not work, we resort
-                                                  // to the construction below.
+  
   std::set<data::sort_expression> s;
   process::traverse_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));
   process::traverse_sort_expressions(type_checked_spec.equations(), std::inserter(s, s.end()));
   process::traverse_sort_expressions(type_checked_spec.init(), std::inserter(s, s.end()));
   s.insert(sort_real::real_());
-  data_spec.make_complete(s);
-  //data_spec.make_complete(type_checked_spec.action_labels());
-  //data_spec.make_complete(type_checked_spec.equations());
-  //data_spec.make_complete(type_checked_spec.init());
-  //data_spec.make_complete(sort_real::real_()); // Take care essential rewrite rules are present.
+  data_spec.add_context_sorts(s);
 
   specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),

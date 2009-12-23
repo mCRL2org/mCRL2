@@ -44,6 +44,7 @@ namespace mcrl2 {
 
   namespace data {
     /// \cond INTERNAL_DOCS
+
     namespace detail {
 
       /// \brief Specialised remove_if for manipulating std::set, std::map, std::multimap containers
@@ -54,7 +55,7 @@ namespace mcrl2 {
         container.swap(temporary);
       } */
 
-      struct sort_map_substitution_adapter 
+      /* struct sort_map_substitution_adapter 
       { atermpp::map< sort_expression, sort_expression > const& m_map;
         atermpp::aterm_appl operator()(atermpp::aterm_appl a) 
         { if (is_sort_expression(a))
@@ -68,7 +69,7 @@ namespace mcrl2 {
 
         sort_map_substitution_adapter(atermpp::map< sort_expression, sort_expression > const& map) : m_map(map)
         {}
-      };
+      }; */
 
       /* template < typename Expression >
       inline bool is_system_defined(data_specification const& s, Expression const& c)
@@ -76,11 +77,11 @@ namespace mcrl2 {
         return s.is_system_defined(c);
       } */
 
-      bool has_legacy_name(sort_expression const& s)
+      /* bool has_legacy_name(sort_expression const& s)
       { return is_basic_sort(s) && (std::string(basic_sort(s).name()).find("@legacy_") == 0);
-      }
+      } */
 
-      atermpp::map< sort_expression, sort_expression > make_compatible_renaming_map(const data_specification& s)
+      /* atermpp::map< sort_expression, sort_expression > make_compatible_renaming_map(const data_specification& s)
       {
         // Generates names for a specification assuming that no sorts with name prefix @legacy_ exist
         struct legacy_name_generator 
@@ -105,7 +106,7 @@ namespace mcrl2 {
         atermpp::map< sort_expression, sort_expression > renamings;
 
         // Step one: fix a name for all container sorts (legacy requirement)
-        /* for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
+        / * for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
         {
           sort_expression reference(s.normalise_sorts(r.front().reference()));
 
@@ -118,7 +119,7 @@ namespace mcrl2 {
 
             renamings[reference] = r.front().name();
           }
-        } */
+        } * /
 
         for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
         { if (r.front().is_container_sort() || r.front().is_structured_sort())
@@ -134,16 +135,18 @@ namespace mcrl2 {
           }
         }
         return renamings;
-      }
+      } */
 
-      /// Compatible conversion to ATerm is needlessly complicated only to appease the type checker
+      /* /// Compatible conversion to ATerm is needlessly complicated only to appease the type checker
       /// As a side effect data checked against the compatible specification
       /// may refer to names that do not exist at the level data_specification objects.
       /// This function reverts the naming to make data terms usable in combination with data_specification objects.
       /// \note temporary measure until a type checker at data level becomes available
       template < typename Term >
       Term apply_compatibility_renamings(const data_specification& s, Term const& term)
-      { // Maps container sort expressions to a unique name
+      { return term;
+
+        // Maps container sort expressions to a unique name
         atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
         return atermpp::replace(term, sort_map_substitution_adapter(renamings));
       }
@@ -156,6 +159,7 @@ namespace mcrl2 {
       template < typename Term >
       Term undo_compatibility_renamings(const data_specification& s, Term const& term)
       { // Maps container sort expressions to a unique name
+        return term;
         atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
         atermpp::map< sort_expression, sort_expression > inverse_renamings;
 
@@ -171,6 +175,8 @@ namespace mcrl2 {
       template
       atermpp::aterm_appl undo_compatibility_renamings(const data_specification& s, atermpp::aterm_appl const& term);
 
+      */
+
       /**
        * \param[in] compatible whether the produced ATerm is compatible with the `format after type checking'
        *
@@ -181,49 +187,16 @@ namespace mcrl2 {
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s, bool compatible)
       { using namespace core::detail;
 
-        /* if (compatible)
-        { assert(0);
-          atermpp::set< atermpp::aterm_appl > sorts;
-
-          // Maps container sort expressions to a unique name
-          atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
-
-          sort_map_substitution_adapter renaming_substitution(renamings);
-
-          for (atermpp::map< sort_expression, sort_expression >::const_iterator i = renamings.begin(); i != renamings.end(); ++i)
-          { if (detail::has_legacy_name(i->second))
-            { sorts.insert(alias(i->second, i->first));
-            }
-          }
-
-          for (data_specification::sorts_const_range r(s.m_sorts); !r.empty(); r.advance_begin(1))
-          { if ((!r.front().is_basic_sort() || !s.is_alias(basic_sort(r.front()))) &&
-			 !r.front().is_container_sort() && !r.front().is_structured_sort())
-            { sorts.insert(r.front());
-            }
-          }
-
-          return gsMakeDataSpec(
-             gsMakeSortSpec(convert< atermpp::aterm_list >(s.m_sorts) + 
-                            convert< atermpp::aterm_list >(data_specification::aliases_const_range(s.m_aliases))),
-             gsMakeConsSpec(atermpp::replace(convert< atermpp::aterm_list >(
-                                     data_specification::constructors_const_range(s.m_constructors)), renaming_substitution)),
-             gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(
-                                     data_specification::constructors_const_range(s.m_mappings)), renaming_substitution)),
-             gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.m_equations), renaming_substitution)));
-          
-        }
-        else */
-        { return gsMakeDataSpec(
+        return gsMakeDataSpec(
              gsMakeSortSpec(convert< atermpp::aterm_list >(s.m_sorts) +
                             convert< atermpp::aterm_list >(data_specification::aliases_const_range(s.m_aliases))),
              gsMakeConsSpec(convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_constructors))),
              gsMakeMapSpec(convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_mappings))),
              gsMakeDataEqnSpec(convert< atermpp::aterm_list >(s.m_equations)));
-        }
       }
     } // namespace detail
     /// \endcond
+
 
     template < typename Container, typename Sequence >
     void insert(Container& container, Sequence sequence)
@@ -845,7 +818,7 @@ namespace mcrl2 {
       // Store the sorts and aliases.
       for (atermpp::term_list_iterator< atermpp::aterm_appl > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       { if (data::is_alias(*i)) // Compatibility with legacy code
-        { if (!detail::has_legacy_name(alias(*i).name()))
+        { // if (!detail::has_legacy_name(alias(*i).name()))
           { add_alias(*i);
           }
         }

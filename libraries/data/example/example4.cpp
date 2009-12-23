@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   data_specification data_spec;
-  data_spec.make_complete(sort_nat::nat());
+  data_spec.add_context_sort(sort_nat::nat());
   rewriter r(data_spec);
 
   // Rewrite two data expressions, and check if they are the same

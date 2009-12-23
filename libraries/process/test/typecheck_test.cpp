@@ -152,6 +152,19 @@ const std::string case_11 =
   "init delta;                      \n"
   ;
 
+
+// Test case below went wrong, because sort expression was confused with a function symbol
+const std::string case_12 =
+  "map  const: Pos;"
+  "     f:Nat->Pos;"
+  
+  "eqn  const  =  10;"
+  
+  "proc P1(i: Nat) = delta;"
+  
+  "init P1(f(const));";
+
+
 void test_typechecker_case(std::string const& spec, bool const expected_result)
 {
   std::clog << std::endl
@@ -197,6 +210,7 @@ BOOST_AUTO_TEST_CASE(test_various)
   cases[case_9] = false;
   cases[case_10] = false;
   cases[case_11] = false;
+  cases[case_12] = true;
 
   for(std::map<std::string, bool>::const_iterator i = cases.begin(); i != cases.end(); ++i)
   {

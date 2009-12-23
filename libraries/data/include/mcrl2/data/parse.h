@@ -139,7 +139,7 @@ namespace data {
     if (data_vars == 0)
       throw mcrl2::runtime_error("Error while type checking data variable declarations.");
     // Undo sort renamings for compatibility with type checker
-    data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
+    // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     data_vars = atermpp::reverse(data_vars);
 
     // Check that variables do not have equal names.
@@ -290,7 +290,7 @@ namespace data {
       throw mcrl2::runtime_error("error type checking data expression");
     std::cerr << "Typed data expression " << data_expr << "\n";
     // Undo sort renamings for compatibility with type checker
-    data_expr = data::detail::undo_compatibility_renamings(data_spec, data_expr);
+    // data_expr = data::detail::undo_compatibility_renamings(data_spec, data_expr);
     detail::internal_format_conversion_helper converter(data_spec);
     return converter(data_expression(data_expr));
   }
@@ -370,7 +370,7 @@ namespace data {
     if (sort_expr == 0)
       throw mcrl2::runtime_error("error type checking sort expression");
     // Undo sort renamings for compatibility with type checker
-    sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
+    // sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
     return sort_expression(sort_expr);
   }
 

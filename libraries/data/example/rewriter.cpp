@@ -12,7 +12,7 @@ using namespace mcrl2::data;
 void rewrite1()
 {
   data_specification data_spec;
-  data_spec.make_complete(sort_nat::nat());
+  data_spec.add_context_sort(sort_nat::nat());
   rewriter r(data_spec);
 
   // Rewrite two data expressions, and check if they are the same
@@ -25,7 +25,7 @@ void rewrite1()
 void rewrite2()
 {
   data_specification data_spec;
-  data_spec.make_complete(sort_nat::nat());
+  data_spec.add_context_sort(sort_nat::nat());
   rewriter r(data_spec);
 
   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
