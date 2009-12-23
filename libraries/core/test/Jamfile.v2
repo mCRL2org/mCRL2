@@ -6,6 +6,7 @@ project libraries/core/test
       <use>/site-config//boost
       <toolset>msvc:<asynch-exceptions>on
       <library>/libraries//core
+      <include>../../data/include
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
