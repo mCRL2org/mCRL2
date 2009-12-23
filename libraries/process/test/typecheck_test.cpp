@@ -19,6 +19,7 @@
 
 using namespace mcrl2;
 
+
 // Example provided by Tim Willemse, 7 Oct 2009
 const std::string case_1 =
   "map place : List(Nat) -> List(Nat); \n"
@@ -75,7 +76,7 @@ const std::string case_5a =
   "                                 \n"
   "proc P1(i: Nat) = delta;         \n"
   "                                 \n"
-  "init P1(Nat2Pos(Pos2Nat(const)));\n"
+  "init P1(Pos2Nat(const));\n"
   ;
 
 // Test case for issue #644
@@ -132,25 +133,45 @@ const std::string case_11 =
   "init delta;                      \n"
   ;
 
-void test_typechecker()
+void test_typechecker_case(std::string const& spec, bool const expected_result)
 {
-  BOOST_CHECK_THROW(process::parse_process_specification(case_1), mcrl2::runtime_error);
-  process::parse_process_specification(case_2);
-  process::parse_process_specification(case_3);
-  process::parse_process_specification(case_4);
-  process::parse_process_specification(case_5);
-  process::parse_process_specification(case_5a);
-  BOOST_CHECK_THROW(process::parse_process_specification(case_6), mcrl2::runtime_error);
-  process::parse_process_specification(case_7);
-  process::parse_process_specification(case_8);
-  BOOST_CHECK_THROW(process::parse_process_specification(case_9), mcrl2::runtime_error);
-  BOOST_CHECK_THROW(process::parse_process_specification(case_10), mcrl2::runtime_error);
-  BOOST_CHECK_THROW(process::parse_process_specification(case_11), mcrl2::runtime_error);
+  std::clog << std::endl
+            << "<---- testing specification: ---->" << std::endl
+            << spec << std::endl;
+  if(expected_result)
+  {
+    std::clog << "expected result: success" << std::endl;
+    process::parse_process_specification(spec);
+  }
+  else
+  {
+    std::clog << "expected result:: failure" << std::endl;
+    BOOST_CHECK_THROW(process::parse_process_specification(spec), mcrl2::runtime_error);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_various)
 {
-  test_typechecker();
+  // Mapping containing all cases, with expected result,
+  // Note that false means that an mcrl2::runtime error is expected.
+  std::map<std::string, bool> cases;
+  cases[case_1] = false;
+  cases[case_2] = true;
+  cases[case_3] = true;
+  cases[case_4] = true;
+  cases[case_5] = true;
+  cases[case_5a] = true;
+  cases[case_6] = false;
+  cases[case_7] = true;
+  cases[case_8] = true;
+  cases[case_9] = false;
+  cases[case_10] = false;
+  cases[case_11] = false;
+
+  for(std::map<std::string, bool>::const_iterator i = cases.begin(); i != cases.end(); ++i)
+  {
+    test_typechecker_case(i->first, i->second);
+  }
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
