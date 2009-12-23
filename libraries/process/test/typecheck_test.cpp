@@ -36,16 +36,35 @@ const std::string case_2 =
   "                                    \n"
   "var l : List(Nat);                  \n"
   "                                    \n"
-  "eqn place (l) = l ++ tail(l); \n"
+  "eqn place (l) = l ++ tail(l);       \n"
   "                                    \n"
   "init delta;                         \n"
   ;
 
-// Test case corresponding to issue #528
+// First test case corresponding to issue #528
 const std::string case_3 =
   "sort S = struct c;                  \n"
   "map succ: S -> S;                   \n"
   "eqn succ(c) = c;                    \n"
+  "init delta;                         \n"
+  ;
+
+// Second test case corresponding to issue #528
+const std::string case_3a =
+  "sort S,T;                           \n"
+  "map  count: S # T -> Nat;           \n"
+  "var  x:S;                           \n"
+  "     y:T;                           \n"
+  "eqn  count(x, y) = 0;               \n"
+  "init delta;                         \n"
+  ;
+
+// Third test case corresponding to issue #528
+const std::string case_3b =
+  "sort S;                             \n"
+  "map  count: S -> Nat;               \n"
+  "var  x:S;                           \n"
+  "eqn  count(x) = 0;                  \n"
   "init delta;                         \n"
   ;
 
@@ -81,7 +100,7 @@ const std::string case_5a =
 
 // Test case for issue #644
 const std::string case_6 =
-  "const maybe: Bool;               \n"
+  "cons maybe: Bool;               \n"
   "init delta;                      \n"
   ;
 
@@ -141,11 +160,20 @@ void test_typechecker_case(std::string const& spec, bool const expected_result)
   if(expected_result)
   {
     std::clog << "expected result: success" << std::endl;
-    process::parse_process_specification(spec);
+    try
+    {
+      process::parse_process_specification(spec);
+    }
+    catch(mcrl2::runtime_error& e) // Catch errors and print them, such that all cases are treated.
+    {
+      std::clog << "type checking failed with error: " << std::endl
+                << e.what() << std::endl;
+      BOOST_CHECK(false);
+    }
   }
   else
   {
-    std::clog << "expected result:: failure" << std::endl;
+    std::clog << "expected result: failure" << std::endl;
     BOOST_CHECK_THROW(process::parse_process_specification(spec), mcrl2::runtime_error);
   }
 }
@@ -158,6 +186,8 @@ BOOST_AUTO_TEST_CASE(test_various)
   cases[case_1] = false;
   cases[case_2] = true;
   cases[case_3] = true;
+  cases[case_3a] = true;
+  cases[case_3b] = true;
   cases[case_4] = true;
   cases[case_5] = true;
   cases[case_5a] = true;
