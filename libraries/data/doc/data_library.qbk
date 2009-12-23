@@ -35,8 +35,6 @@ The code in the Data Library is inside the namespace =mcrl2::data=.
 
 [include sort_expressions.qbk]
 
-[include sort_aliases_and_normalisation.qbk]
-
 [include data_expressions.qbk]
 
 [include predefined_sorts.qbk]
@@ -48,6 +46,8 @@ The code in the Data Library is inside the namespace =mcrl2::data=.
 [endsect] [/ Expressions]
 
 [include data_specifications.qbk]
+
+[include sort_aliases_and_normalisation.qbk]
 
 [include data_rewriter.qbk]
 

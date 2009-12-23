@@ -1,5 +1,6 @@
 [section: Operations on data expressions]
 
+[section: Default operations]
 For all sorts, a number of operations is available by default. The corresponding
 functions can be found in `standard.h`.
 
@@ -20,6 +21,13 @@ operations are supported:
 
 For the predefined sorts, the most important operations are also available
 by default.
+[endsect] [/ Default operations]
+
+[note In all definitions of operations on predefined sorts, elements of which
+the syntax starts with @ cannot directly be entered by the user when writing
+an mCRL2 specification. The @ means that the specified operation is
+implementation specific. Printing such an expression as feedback to the user
+should be prevented at all times.]
 
 [section: Booleans]
 All standard operations for the Booleans are available in `bool.h`, and can be
@@ -240,6 +248,150 @@ correct result sort of =Pos= will automatically be inferred.]
 
 [endsect] [/ Real numbers]
 
-Real, List(S), Set(S), Bag(S), FSet(S), FBag(S)
+[section: Lists]
+All standard operations for lists are available in `list.h`, and can
+be found in the namespace =data::sort_list=. The lists have two
+constructors, the empty list ([]), and inserting an element into a list (|>).
+
+Let =x= be an element of sort =S=, and =l= of sort =List(S)=.
+[table Constructors for sort List(S)
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`nil(S)  `] [ [^ \[\] ] ]   [ The empty list of sort =S= ] ]
+  [ [`cons(S,x,l) `] [ [^ x |> l ] ]   [ The list =l= prefixed with =x= ] ]
+]
+
+Also, the following functions operating on lists are available. Again,
+let =x= be an element of sort =S=, =l= of sort =List(S)=, and =n= of sort Nat.
+[table Functions for sort List(S)
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`in(S,x,l)  `] [ [^ x in l ] ]   [ Test whether =x= is an element of =l= ] ]
+  [ [`count(S,l) `] [ [^ #l ] ]   [ The size of =l= ] ]
+  [ [`snoc(S,l,x) `] [ [^ l <| x ] ]   [ The list =l= suffixed with =x= ] ]
+  [ [`element_at(S,l,n)  `] [ [^ l.n ] ]   [ The element at position =n= in =l= ] ]
+  [ [`head(S,l) `] [ [^ head(l) ] ]   [ The first element of =l= ] ]
+  [ [`tail(S,l) `] [ [^ tail(l) ] ]   [ =l= from which the first element has been removed ] ]
+  [ [`rhead(S,l) `] [ [^ rhead(l) ] ]   [ The last element of =l= ] ]
+  [ [`rtail(S,l) `] [ [^ rtail(l) ] ]   [ =l= from which the last element has been removed ] ]
+]
+
+[endsect] [/ Lists]
+
+[section: Finite sets]
+The finite sets quite closely resemble lists. For sort =FSet(S)= the following
+constructors are available, assuming a sort =S=, an element =x= of sort =S=, and
+=t= being of sort =FSet(S)=.
+[table Constructors for sort FSet(S)
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`fset_empty(S)  `] [ [^ @fset_empty() ] ]   [ The empty finite set of sort =s= ] ]
+  [ [`fset_cons(S,x,t) `] [ [^ @fset_cons ] ]   [ The finite set =t= extended with =x= ] ]
+]
+
+Let =b= be a Boolean, =x= an element of sort =S=, =f=,=g= be functions of sort
+=S -> Bool=, and =s=,=t= be of sort =FSet(S)=. The operations of finite
+sets are defined as follows.
+[table Functions for sort FSet(S)
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`fsetinsert(S,x,s)  `] [ [^ @fsetinsert(x,s) ] ]   [ Insert =x= into =s= ] ]
+  [ [`fsetcinsert(S,x,b,s)  `] [ [^ @fsetinsert(x,b,s) ] ]   [ ??? ] ]
+  [ [`fsetin(S,x,s)  `] [ [^ @fsetin(x,s) ] ]   [ Test whether =x= is in =s= ] ]
+  [ [`fsetlte(S,f,s,t)  `] [ [^ @fsetlte(f,s,t) ] ]   [ =s= is a subset of =t= ] ]
+  [ [`fsetunion(S,f,g,s,t)  `] [ [^ @fsetunion(f,g,s,t) ] ]   [ Union of =s= and =t= ] ]
+  [ [`fsetintersection(S,f,g,s,t)  `] [ [^ @fsetinter(f,g,s,t) ] ]   [ Intersection of =s= and =t= ] ]
+]
+
+[endsect] [/ Finite sets]
+
+[section: Finite bags]
+Finite bags are defined in a similar vein as finite sets.
+For sort =FBag(S)= the following
+constructors are available, assuming a sort =S=, an element =x= of sort =S=,
+=p= being a positive number, and
+=b= being of sort =FBag(S)=.
+[table Constructors for sort FSet(S)
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`fbag_empty(S)  `] [ [^ @fbag_empty() ] ]   [ The empty finite bag of sort =s= ] ]
+  [ [`fbag_cons(S,x,p,b) `] [ [^ @bag_cons(x,p,b) ] ]   [ The finite bag =b=, extended with =p= occurrences of =x= ] ]
+]
+
+Let =x= an element of sort =S=, =f=,=g= be functions of sort
+=S -> Nat=, =t= of sort =FSet(S)=, and =b=,=c= be elements of sort =FBag(S)=.
+The operations on finite bags are defined as follows.
+[table Functions for sort FSet(S)
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`fbaginsert(S,x,p,b)  `] [ [^ @fbag_insert(x,p,b) ] ]   [ Insert =p= occurrences of =x= into =b= ] ]
+  [ [`fsetcinsert(S,x,n,b)  `] [ [^ @fbag_cinsert(x,n,b) ] ]   [ ??? ] ]
+  [ [`fbagcount(S,x,b)  `] [ [^ @fbag_count(x,b) ] ]   [ Test count the number of occurrences of =x= in =b= ] ]
+  [ [`fbagin(S,x,b)  `] [ [^ @fbag_in(x,b) ] ]   [ Test whether =x= is in =b= ] ]
+  [ [`fbaglte(S,f,b,c)  `] [ [^ @fbag_lte(f,b,c) ] ]   [ =b= is a subset of =c= ] ]
+  [ [`fbagjoin(S,f,g,b,c)  `] [ [^ @fbag_join(f,g,b,c) ] ]   [ Join of =b= and =c= ] ]
+  [ [`fbagintersect(S,f,g,b,c)  `] [ [^ @fbag_inter(f,g,b,c) ] ]   [ Intersection of =b= and =c= ] ]
+  [ [`fbagdifference(S,f,g,b,c)  `] [ [^ @fbag_diff(f,g,b,c) ] ]   [ Difference of =b= and =c= ] ]
+  [ [`fset2fbag(S,t)  `] [ [^ @fset2fbag(t) ] ]   [ Convert =t= to a finite bag ] ]
+]
+
+[endsect] [/ Finite bags]
+
+[section: Sets]
+Like the Real numbers, sets and bags do not have
+constructors. This means that elements of these sorts are built using functions,
+as well as their more simple counterparts, the finite sets and bags.
+
+For sets the following functions are available. Let =d=, =e= be of sort Set(S),
+=x= be of sort =S=, =s= be of sort =FSet(S)=, and =f= and =g= be function of
+sort =S -> Bool=.
+[table Functions for sort Set(S)
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`setconstructor(S, f, s)`] [ [^ @set(f,s) ] ] [ Construct a set from a function and a finite set ] ]
+  [ [`emptyset(S)`] [ [^ {} ] ] [ Empty set of sort S ] ]
+  [ [`setfset(S, s)`] [ [^ @setfset(s) ] ] [ Interpret finite set s as a set ] ]
+  [ [`setcomprehension(S, f)`] [ [^ @setcomp(f) ] ] [ The set of all elements of sort =S= satisfying =f= ] ]
+  [ [`in(S,x,d)  `] [ [^ x in d ] ]   [ Test whether =x= is an element of =d= ] ]
+  [ [`setcomplement(S,d)  `] [ [^ !d ] ]   [ Set complement of =d= ] ]
+  [ [`setunion_(S,d,e)  `] [ [^ d + e ] ]   [ Union of =d= and =e= ] ]
+  [ [`setintersection(S,d,e)  `] [ [^ d * e ] ]   [ Intersection of =d= and =e= ] ]
+  [ [`setdifference(S,d,e)  `] [ [^ d - e ] ]   [ Difference of =d= and =e= ] ]
+  [ [`false_function(S) `] [ [^ @false_ ] ] [ The constant function returning false ] ]
+  [ [`true_function(S) `] [ [^ @true_ ] ] [ The constant function returning true ] ]
+  [ [`false_function(S) `] [ [^ @false_ ] ] [ The constant function returning false ] ]
+  [ [`not_function(S,f) `] [ [^ @not_(f) ] ] [ The function returning =!f(x)= for all elements =x= in =S= ] ]
+  [ [`and_function(S,f,g) `] [ [^ @and_(f,g) ] ] [ The function returning =f(x) && g(x)= for all elements =x= in =S= ] ]
+  [ [`or_function(S,f,g) `] [ [^ @or_(f,g) ] ] [ The function returning =f(x) || g(x)= for all elements =x= in =S= ] ]
+]
+
+Note that the *_function operations are used as implementation details
+for representing sets.
+
+[endsect] [/ Sets]
+
+[section: Bags]
+For bags the following functions are available. Let =b=, =c= be of sort =FBag(S)=,
+=e= of sort =S=, =f=,=g=, of sort =S -> Nat=, =h= of sort =S -> Bool=, =s= of sort
+=FSet(S)=, and =x=,=y= of sort =Bag(S)=.
+[table Functions for sort Bag(S)
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`bagconstructor(S, f, b)`] [ [^ @bag(f,b) ] ] [ Construct a bag from a function and a finite bag ] ]
+  [ [`emptybag(S)`] [ [^ {} ] ] [ Empty bag of sort S ] ]
+  [ [`bagfbag(S, b)`] [ [^ @bagfset(b) ] ] [ Interpret finite bag =b= as a bag ] ]
+  [ [`bagcomprehension(S, f)`] [ [^ @bagcomp(f) ] ] [ The bag of all elements of sort =S= given by =f= ] ]
+  [ [`bagcount(S,e,x)  `] [ [^ count(e,x) ] ]   [ The number of occurrences of =e= in =x= ] ]
+  [ [`bagin(S,e,x)  `] [ [^ in(e,x) ] ]   [ Determine whether =e= occurs in =x= ] ]
+  [ [`bagjoin(S,x,y)  `] [ [^ x + y ] ]   [ Join of =x= and =y= ] ]
+  [ [`bagintersect(S,x,y)  `] [ [^ x * y ] ]   [ Intersection of =x= and =y= ] ]
+  [ [`bagdifference(S,x,y)  `] [ [^ x - y ] ]   [ Difference of =x= and =y= ] ]
+  [ [`bag2set(S,x)`] [ [^ Bag2Set(x) ] ] [ Convert bag =x= to a set ]]
+  [ [`set2bag(S,t)`] [ [^ Set2Bag(t) ] ] [ Convert set =t= to a bag ]]
+  [ [`zero_function(S) `] [ [^ @zero_ ] ] [ The constant function returning =0= ] ]
+  [ [`one_function(S) `] [ [^ @one_ ] ] [ The constant function returning =1= ] ]
+  [ [`add_function(S,f,g) `] [ [^ @add_(f,g) ] ] [ The function returning =f(x) + g(x)= for all elements =x= in =S= ] ]
+  [ [`min_function(S,f,g) `] [ [^ @min_(f,g) ] ] [ The function returning =min(f(x),g(x))= for all elements =x= in =S= ] ]
+  [ [`monus_function(S,f,g) `] [ [^ @monus_(f,g) ] ] [ The function returning =monus(f(x),g(x))= for all elements =x= in =S= ] ]
+  [ [`nat2bool_function(S,f) `] [ [^ @Nat2Bool_(f) ] ] [ The function returning false if =f(x)=0=, and true otherwise ] ]
+  [ [`bool2nat_function(S,h) `] [ [^ @Bool2Nat_(h) ] ] [ The function returning =1= if =f(x)=, =0= otherwise ] ]
+]
+
+Note that, like for sets, the *_function operations are used as implementation
+details for representing bags.
+
+[endsect] [/ Bags]
 
 [endsect] [/ Operations on data expressions]
