@@ -68,6 +68,18 @@ const std::string case_3b =
   "init delta;                         \n"
   ;
 
+// Fourth test case corresponding to issue #528. This one is expected to fail.
+const std::string case_3c = 
+  "map  count: Pos#Bag(Pos)->Nat;"
+  "     f:Nat->Pos;"
+  
+  "act  a:Nat;"
+ 
+  "proc P1(i: Nat) = a(i);"
+
+  "init P1(count(3,{3:4}));";
+
+
 // First test case corresponding to issue #663
 const std::string case_4 =
   "map const: Pos;                  \n"
@@ -201,6 +213,7 @@ BOOST_AUTO_TEST_CASE(test_various)
   cases[case_3] = true;
   cases[case_3a] = true;
   cases[case_3b] = true;
+  cases[case_3c] = false;
   cases[case_4] = true;
   cases[case_5] = true;
   cases[case_5a] = true;

@@ -1783,46 +1783,34 @@ namespace mcrl2 {
     static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool allow_double_decls){
       assert(gsIsOpId(OpId));
       ATbool Result=ATtrue;
-      ATermAppl Name = function_symbol(OpId).name();
-      ATermAppl Sort = function_symbol(OpId).sort();
+      const function_symbol f(OpId);
+      const function_sort::domain_const_range domain=function_sort(f.sort()).domain();
+      ATermAppl Name = f.name();
+      ATermAppl Sort = f.sort();
 
       //constants and functions can have the same names
       //  if(ATAtableGet(context.constants, (ATerm)Name)){
       //    ThrowMF("Double declaration of constant and %s %T\n", msg, Name);
       //  }
 
-      if(ATAtableGet(gssystem.constants, (ATerm)Name)){
-        gsErrorMsg("attempt to redeclare the system constant with %s %P\n", msg, Name);
-        return ATfalse;
+      if (domain.size()==0)
+      { if (ATAtableGet(gssystem.constants, (ATerm)Name))
+        {
+          gsErrorMsg("attempt to redeclare the system constant with %s %P\n", msg, OpId);
+          return ATfalse;
+        }
       }
-
-      ATermList L=ATLtableGet(gssystem.functions, (ATerm)Name);
-      if(L!=NULL &&
-         (ATindexOf(L,(ATerm)Sort,0)>=0) &&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::maximum_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::minimum_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::abs_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::succ_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::pred_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_int::div_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_int::mod_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::exp_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::floor_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::ceil_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::round_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::head_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::tail_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::rhead_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::rtail_name()))&&
-         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::in_name()))
-         // !ATisEqual(Name,static_cast<ATermAppl>(sort_list::count_name()))
-        )
-      {
-        gsErrorMsg("attempt to redeclare the system function with %s %P\n", msg, Name);
-        assert(0);
-        return ATfalse;
+      else // domain.size()>0
+      { ATermList L=ATLtableGet(gssystem.functions, (ATerm)Name);
+        for( ; L!=NULL && L!=ATempty ; L=ATgetNext(L))
+        { if (gstcTypeMatchA(Sort,(ATermAppl)ATgetFirst(L))!=NULL)
+          { // f matches a predefined function
+            gsErrorMsg("attempt to redeclare a system function with %s %P:%P\n", msg, OpId,Sort);
+            return ATfalse;
+          }
+        }
       }
-
+          
       ATermList Types=ATLtableGet(context.functions, (ATerm)Name);
       // the table context.functions contains a list of types for each
       // function name. We need to check if there is already such a type
@@ -1864,8 +1852,7 @@ namespace mcrl2 {
       ATermList Types=ATLtableGet(gssystem.functions, (ATerm)OpIdName);
 
       if (!Types) Types=ATmakeList0();
-      // Types=ATappend(Types,(ATerm)Type);  TODO: Avoid ATappend!!!!
-      Types=ATinsert(Types,(ATerm)Type); 
+      Types=ATappend(Types,(ATerm)Type);  // TODO: Avoid ATappend!!!! But the order is essential.
       ATtablePut(gssystem.functions,(ATerm)OpIdName,(ATerm)Types);
     }
 
@@ -3488,7 +3475,9 @@ namespace mcrl2 {
 
     static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
     {
-      //Checks if Type is allowed by PosType and returns the matching subtype of Type
+      // Checks if Type and PosType match by instantiating unknown sorts.
+      // It returns the matching instantiation of Type. If matching fails,
+      // it returns NULL.
 
       if (gsDebug) { std::cerr << "gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " \n"; }
 
