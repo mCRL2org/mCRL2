@@ -70,14 +70,15 @@ const std::string case_3b =
 
 // Fourth test case corresponding to issue #528. This one is expected to fail.
 const std::string case_3c = 
-  "map  count: Pos#Bag(Pos)->Nat;"
-  "     f:Nat->Pos;"
-  
-  "act  a:Nat;"
- 
-  "proc P1(i: Nat) = a(i);"
-
-  "init P1(count(3,{3:4}));";
+  "map  count: Pos#Bag(Pos)->Nat;      \n"
+  "     f:Nat->Pos;                    \n"
+  "                                    \n"
+  "act  a:Nat;                         \n"
+  "                                    \n"
+  "proc P1(i: Nat) = a(i);             \n"
+  "                                    \n"
+  "init P1(count(3,{3:4}));            \n"
+  ;
 
 
 // First test case corresponding to issue #663
@@ -112,7 +113,7 @@ const std::string case_5a =
 
 // Test case for issue #644
 const std::string case_6 =
-  "cons maybe: Bool;               \n"
+  "cons maybe: Bool;                \n"
   "init delta;                      \n"
   ;
 
@@ -167,14 +168,12 @@ const std::string case_11 =
 
 // Test case below went wrong, because sort expression was confused with a function symbol
 const std::string case_12 =
-  "map  const: Pos;"
-  "     f:Nat->Pos;"
-  
-  "eqn  const  =  10;"
-  
-  "proc P1(i: Nat) = delta;"
-  
-  "init P1(f(const));";
+  "map  const: Pos;                 \n"
+  "     f:Nat->Pos;                 \n"
+  "eqn  const  =  10;               \n"
+  "proc P1(i: Nat) = delta;         \n"
+  "init P1(f(const));               \n"
+  ;
 
 
 void test_typechecker_case(std::string const& spec, bool const expected_result)
