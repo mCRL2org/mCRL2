@@ -2901,7 +2901,15 @@ namespace mcrl2 {
       return Result;
     }
 
-    static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars, bool strict_ambiguous, int nFactPars, bool warn_upcasting)
+    static ATermAppl gstcTraverseVarConsTypeDN(
+                     ATermTable DeclaredVars, 
+                     ATermTable AllowedVars, 
+                     ATermAppl *DataTerm, 
+                     ATermAppl PosType, 
+                     ATermTable FreeVars, 
+                     const bool strict_ambiguous, 
+                     const int nFactPars, 
+                     const bool warn_upcasting)
     {
       // -1 means the number of arguments is not known.
       if (gsDebug) 
@@ -2909,26 +2917,30 @@ namespace mcrl2 {
                   ", nFactPars " << nFactPars << "\n";
       }
       if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
-      {
-        ATermAppl Name=ATAgetArgument(*DataTerm,0);
+      { ATermAppl Name=ATAgetArgument(*DataTerm,0);
         bool variable=false;
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
-        if(Type)
-        {
-          variable=true;
-          if(!ATAtableGet(AllowedVars,(ATerm)Name)) 
-          {
-            gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
-            return NULL;
-          }
+        if (Type)
+        { const sort_expression Type1(Type);
+          if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==nFactPars):(nFactPars==0))
+          { variable=true;
+            if(!ATAtableGet(AllowedVars,(ATerm)Name)) 
+            {
+              gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
+              return NULL;
+            }
 
-          //Add to free variables list
-          if(FreeVars)
-            ATtablePut(FreeVars, (ATerm)Name, (ATerm)Type);
+            //Add to free variables list
+            if(FreeVars)
+              ATtablePut(FreeVars, (ATerm)Name, (ATerm)Type);
+          }
+          else 
+          { Type=NULL; 
+          }
         }
         ATermList ParList;
 
-        if(nFactPars==0)
+        if (nFactPars==0)
         {
           if((Type=ATAtableGet(DeclaredVars,(ATerm)Name))) {
             if(!gstcTypeMatchA(Type,PosType)){
@@ -2946,7 +2958,8 @@ namespace mcrl2 {
             *DataTerm=gsMakeOpId(Name,Type);
             return Type;
           }
-          else{
+          else
+          {
             if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
               if(ATgetLength(ParList)==1){
                 ATermAppl Type=ATAgetFirst(ParList);
@@ -2984,31 +2997,41 @@ namespace mcrl2 {
           else gsErrorMsg("unknown operation %P\n",Name);
           return NULL;
         }
-        if (gsDebug) { std::cerr << "Possible types for Op/Var " << pp(Name) << " with " << nFactPars << " argument are (ParList: " <<                pp(ParList) << "; PosType: " << pp(PosType) << ")\n"; }
+        if (gsDebug) 
+        { std::cerr << "Possible types for Op/Var " << pp(Name) << " with " << nFactPars << 
+                " argument are (ParList: " << pp(ParList) << "; PosType: " << pp(PosType) << ")\n"; 
+        }
 
         ATermList CandidateParList=ParList;
+        ATfprintf(stderr,"BBBBB %t    \n",ParList);
 
         { // filter ParList keeping only functions A_0#...#A_nFactPars->A
           ATermList NewParList;
-          if(nFactPars>=0){
+          if(nFactPars>=0)
+          {
             NewParList=ATmakeList0();
-            for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+            for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList))
+            {
               ATermAppl Par=ATAgetFirst(ParList);
               if(!gsIsSortArrow(Par)) continue;
-              if(!(ATgetLength(ATLgetArgument(Par,0))==(unsigned int)nFactPars)) continue;
+              if ((ATgetLength(ATLgetArgument(Par,0))!=(unsigned int)nFactPars)) continue;
               NewParList=ATinsert(NewParList,(ATerm)Par);
             }
             ParList=ATreverse(NewParList);
           }
+
+          ATfprintf(stderr,"AAAAA %t    %t\n",ParList, CandidateParList);
 
           if(!ATisEmpty(ParList)) CandidateParList=ParList;
 
           // filter ParList keeping only functions of the right type
           ATermList BackupParList=ParList;
           NewParList=ATmakeList0();
-          for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+          for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList))
+          {
             ATermAppl Par=ATAgetFirst(ParList);
-            if((Par=gstcTypeMatchA(Par,PosType))) {
+            if((Par=gstcTypeMatchA(Par,PosType))) 
+            {
               NewParList=ATinsertUnique(NewParList,(ATerm)Par);
             }
           }
