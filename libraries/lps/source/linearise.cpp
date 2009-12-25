@@ -5407,7 +5407,7 @@ class specification_basic_type:public boost::noncopyable
         // lhs i matches only if comm_table[i] is empty
         if ( (!comm_table.match_failed[i]) && comm_table.tmp[i].empty())
         { if ( comm_table.rhs[i] == tau() )
-          { throw mcrl2::runtime_error("Communication should not result in tau");
+          { throw mcrl2::runtime_error("Cannot linearise a process with a communication operator, containing a communication that results in tau or that has an empty right hand side");
             return action_label();
           }
           return action_label(comm_table.rhs[i],m.front().label().sorts());

@@ -453,8 +453,8 @@ static void normalize_specification(
   for(summand_list::const_iterator i = smds.begin(); i != smds.end(); ++i)
   {
     atermpp::vector <data_expression_list> real_conditions, non_real_conditions;
-    std::cerr << "SUMMANDNORM: " << pp(*i) << "\n";
-    std::cerr << "Condition in: " << pp(i->condition()) << "\n";
+    // std::cerr << "SUMMANDNORM: " << pp(*i) << "\n";
+    // std::cerr << "Condition in: " << pp(i->condition()) << "\n";
     split_condition(i->condition(),real_conditions,non_real_conditions);
 
     for(atermpp::vector <data_expression_list>::const_iterator
@@ -663,7 +663,7 @@ static void add_inequalities_to_context_postponed(
             l.pop_back();
           }
           else
-          { std::cerr << "Reserved to be added <" << pp(left) << "," << pp(right) << "\n";
+          { // std::cerr << "Reserved to be added <" << pp(left) << "," << pp(right) << "\n";
             inequalities_to_add_lhs_size.push_back(i->lhs().size()); // store the number of variables at the lhs.
             inequalities_to_add_lhs.push_back(left);
             inequalities_to_add_rhs.push_back(right);
@@ -767,7 +767,7 @@ summand generate_summand(summand_information &summand_info,
                          identifier_generator<>& variable_generator,
                          const comp_struct &cs,
                          const bool is_may_summand=false)
-{ std::cerr << "SUMMNAND " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";
+{ // std::cerr << "SUMMNAND " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";
   static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
   static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map;
                                          // Used to recall which may actions labels have been
@@ -925,9 +925,9 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   const variable_list real_parameters = get_real_variables(lps.process_parameters());
   const variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
   std::vector < summand_information > summand_info;
-  std::cerr << "Normalize specification in\n";
+  // std::cerr << "Normalize specification in\n";
   normalize_specification(s, real_parameters, r, summand_info);
-  std::cerr << "Normalize specification out\n";
+  // std::cerr << "Normalize specification out\n";
 
   context_type context; // Contains introduced variables
 
@@ -946,7 +946,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
     for(std::vector < summand_information >::iterator i = summand_info.begin();
                        i != summand_info.end(); ++i)
     {
-      std::cerr << "SUMMAND_IN " << pp(i->get_summand()) << "\n" ;
+      // std::cerr << "SUMMAND_IN " << pp(i->get_summand()) << "\n" ;
 
       // First calculate the newly introduced variables xi for which the next_state value is not yet known.
       // get , by only looking at variables that
@@ -964,8 +964,8 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
         // std::cerr << "SUMVARS " << pp(sumvars) << "\n" ;
         std::vector < linear_inequality > condition2;
         remove_redundant_inequalities(*nextstate_combination,condition2,r);
-        std::cerr << "CONDITION IN" << pp_vector(*nextstate_combination) << "\n" ;
-        std::cerr << "REMOVING REDUNDANT INEQUALITIES: FROM1 " << nextstate_combination->size() << " TO " << condition2.size() << "\n";
+        // std::cerr << "CONDITION IN" << pp_vector(*nextstate_combination) << "\n" ;
+        // std::cerr << "REMOVING REDUNDANT INEQUALITIES: FROM1 " << nextstate_combination->size() << " TO " << condition2.size() << "\n";
         *nextstate_combination=condition2;
 
         std::vector < linear_inequality > condition1;
@@ -981,9 +981,9 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
 
         std::vector < linear_inequality > condition3;
         remove_redundant_inequalities(condition1,condition3,r);
-        std::cerr << "CONDITION OUT" << pp_vector(condition3) << "\n" ;
+        // std::cerr << "CONDITION OUT" << pp_vector(condition3) << "\n" ;
 
-        std::cerr << "REMOVING REDUNDANT INEQUALITIES: FROM2 " << condition1.size() << " TO " << condition3.size() << "\n";
+        // std::cerr << "REMOVING REDUNDANT INEQUALITIES: FROM2 " << condition1.size() << " TO " << condition3.size() << "\n";
         if (!is_inconsistent(condition3,r))
         { // condition contains the inequalities over the process parameters
           add_inequalities_to_context_postponed(new_inequalities_sizes,
@@ -1026,7 +1026,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   for(std::vector < summand_information >::iterator i = summand_info.begin();
                        i != summand_info.end(); ++i)
   {
-    std::cerr << "SUMMAND_IN__ " << pp(i->get_summand()) << "\n";
+    // std::cerr << "SUMMAND_IN__ " << pp(i->get_summand()) << "\n";
 
     // Construct the real time condition for summand in terms of xi variables.
 

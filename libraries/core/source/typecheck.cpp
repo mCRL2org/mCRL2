@@ -3003,7 +3003,6 @@ namespace mcrl2 {
         }
 
         ATermList CandidateParList=ParList;
-        ATfprintf(stderr,"BBBBB %t    \n",ParList);
 
         { // filter ParList keeping only functions A_0#...#A_nFactPars->A
           ATermList NewParList;
@@ -3019,8 +3018,6 @@ namespace mcrl2 {
             }
             ParList=ATreverse(NewParList);
           }
-
-          ATfprintf(stderr,"AAAAA %t    %t\n",ParList, CandidateParList);
 
           if(!ATisEmpty(ParList)) CandidateParList=ParList;
 
