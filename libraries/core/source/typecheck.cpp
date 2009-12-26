@@ -1982,7 +1982,10 @@ namespace mcrl2 {
 
         ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,PosType); //gstcExpandNumTypesDown(PosType));
 
-        if(!NewPosType) {gsErrorMsg("cannot typecheck %P as type %P (while typechecking %P)\n",Par,gstcExpandNumTypesDown(PosType),ProcTerm);return NULL;}
+        if (!NewPosType) 
+        { gsErrorMsg("cannot typecheck %P as type %P (while typechecking %P)\n",Par,gstcExpandNumTypesDown(PosType),ProcTerm);
+          return NULL;
+        }
         NewPars=ATinsert(NewPars,(ATerm)Par);
         NewPosTypeList=ATinsert(NewPosTypeList,(ATerm)NewPosType);
       }
@@ -2342,7 +2345,8 @@ namespace mcrl2 {
       return Result;
     }
 
-    static ATermAppl gstcTraversePBESVarConstPB(ATermTable Vars, ATermAppl PBESTerm){
+    static ATermAppl gstcTraversePBESVarConstPB(ATermTable Vars, ATermAppl PBESTerm)
+    {
       ATermAppl Result=NULL;
 
       if(gsIsDataExpr(PBESTerm)){
@@ -2391,7 +2395,15 @@ namespace mcrl2 {
       return Result;
     }
 
-    static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars, bool strict_ambiguous, bool warn_upcasting){
+    static ATermAppl gstcTraverseVarConsTypeD(
+                            ATermTable DeclaredVars, 
+                            ATermTable AllowedVars, 
+                            ATermAppl *DataTerm, 
+                            ATermAppl PosType, 
+                            ATermTable FreeVars, 
+                            const bool strict_ambiguous, 
+                            const bool warn_upcasting)
+    {
       //Type checks and transforms *DataTerm replacing Unknown datatype with other ones.
       //Returns the type of the term
       //which should match the PosType
@@ -2405,10 +2417,11 @@ namespace mcrl2 {
       if (gsDebug) { std::cerr << "gstcTraverseVarConsTypeD: DataTerm " << pp(*DataTerm) <<
                           " with PosType " << pp(PosType) << "\n"; }
 
-      if(gsIsBinder(*DataTerm)){
+      if(gsIsBinder(*DataTerm))
+      {
         //The variable declaration of a binder should have at least 1 declaration
         if(ATAgetFirst(ATLgetArgument(*DataTerm, 1)) == NULL)
-        {gsErrorMsg("binder %P should have at least one declared variable\n",*DataTerm); return NULL;}
+        { gsErrorMsg("binder %P should have at least one declared variable\n",*DataTerm); return NULL;}
 
         ATermAppl BindingOperator = ATAgetArgument(*DataTerm, 0);
         ATermTable CopyAllowedVars=ATtableCreate(63,50);
@@ -2418,14 +2431,15 @@ namespace mcrl2 {
         gstcATermTableCopy(DeclaredVars,CopyDeclaredVars);
 
         if(gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
-          || gsIsBagComp(BindingOperator)){
+          || gsIsBagComp(BindingOperator))
+        {
           ATermList VarDecls=ATLgetArgument(*DataTerm,1);
           ATermAppl VarDecl=ATAgetFirst(VarDecls);
 
           //A Set/bag comprehension should have exactly one variable declared
           VarDecls=ATgetNext(VarDecls);
           if(ATAgetFirst(VarDecls) != NULL)
-          {gsErrorMsg("set/bag comprehension %P should have exactly one declared variable\n", *DataTerm); return NULL;}
+          { gsErrorMsg("set/bag comprehension %P should have exactly one declared variable\n", *DataTerm); return NULL;}
 
           ATermAppl NewType=ATAgetArgument(VarDecl,1);
           ATermList VarList=ATmakeList1((ATerm)VarDecl);
@@ -2459,7 +2473,8 @@ namespace mcrl2 {
           return NewType;
         }
 
-        if(gsIsForall(BindingOperator) || gsIsExists(BindingOperator)){
+        if(gsIsForall(BindingOperator) || gsIsExists(BindingOperator))
+        {
           ATermList VarList=ATLgetArgument(*DataTerm,1);
           ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
           if(!NewAllowedVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
@@ -2481,7 +2496,8 @@ namespace mcrl2 {
           return sort_bool::bool_();
         }
 
-        if(gsIsLambda(BindingOperator)){
+        if(gsIsLambda(BindingOperator))
+        {
           ATermList VarList=ATLgetArgument(*DataTerm,1);
           ATermTable NewAllowedVars=gstcAddVars2Table(CopyAllowedVars,VarList);
           if(!NewAllowedVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
@@ -2495,7 +2511,10 @@ namespace mcrl2 {
 
           NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting);
 
-          // if (gsDebug) { std::cerr << "Result of gstcTraverseVarConsTypeD: DataTerm %T\n",Data);
+          if (gsDebug) 
+          { 
+            std::cerr << "Result of gstcTraverseVarConsTypeD: DataTerm " << pp(Data) << "\n";
+          }
 
           ATtableDestroy(CopyAllowedVars);
           ATtableDestroy(CopyDeclaredVars);
@@ -2508,7 +2527,8 @@ namespace mcrl2 {
         }
       }
 
-      if(gsIsWhr(*DataTerm)){
+      if(gsIsWhr(*DataTerm))
+      {
         ATermList WhereVarList=ATmakeList0();
         ATermList NewWhereList=ATmakeList0();
         for(ATermList WhereList=ATLgetArgument(*DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList)){
@@ -2546,14 +2566,16 @@ namespace mcrl2 {
         return NewType;
       }
 
-      if(gsIsDataAppl(*DataTerm)){
+      if(gsIsDataAppl(*DataTerm))
+      {
         //arguments
         ATermList Arguments=ATLgetArgument(*DataTerm,1);
         unsigned int nArguments=ATgetLength(Arguments);
 
         //The following is needed to check enumerations
         ATermAppl Arg0 = ATAgetArgument(*DataTerm,0);
-        if(gsIsOpId(Arg0) || gsIsId(Arg0)) {
+        if(gsIsOpId(Arg0) || gsIsId(Arg0)) 
+        {
           ATermAppl Name = ATAgetArgument(Arg0,0);
           if(Name == sort_list::list_enumeration_name()) {
             ATermAppl Type=gstcUnList(PosType);
@@ -2664,7 +2686,8 @@ namespace mcrl2 {
         ATermList NewArgumentTypes=ATmakeList0();
         ATermList NewArguments=ATmakeList0();
 
-        for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+        for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
+        {
           ATermAppl Arg=ATAgetFirst(Arguments);
           ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,data::unknown_sort(),FreeVars,false,warn_upcasting);
           if(!Type) {return NULL;}
@@ -2693,34 +2716,45 @@ namespace mcrl2 {
         //2) some parameter Types became sharper.
         //we do the arguments again with the types.
 
-        if(gsIsSortArrow(gstcUnwindType(NewType))){
+        if(gsIsSortArrow(gstcUnwindType(NewType)))
+        {
           ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
 
-          // if (gsDebug) { std::cerr << "Arguments again: NeededArgumentTypes: %P, ArgumentTypes: %P\n",NeededArgumentTypes,ArgumentTypes);
+          if (gsDebug) 
+          { std::cerr << "Arguments again: NeededArgumentTypes: " << pp(NeededArgumentTypes) << 
+                   ", ArgumentTypes: " << pp(ArgumentTypes) << "\n";
+          }
 
           //arguments again
           ATermList NewArgumentTypes=ATmakeList0();
           ATermList NewArguments=ATmakeList0();
           for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments),
-              ArgumentTypes=ATgetNext(ArgumentTypes),NeededArgumentTypes=ATgetNext(NeededArgumentTypes)){
+              ArgumentTypes=ATgetNext(ArgumentTypes),NeededArgumentTypes=ATgetNext(NeededArgumentTypes))
+          {
             ATermAppl Arg=ATAgetFirst(Arguments);
             ATermAppl NeededType=ATAgetFirst(NeededArgumentTypes);
             ATermAppl Type=ATAgetFirst(ArgumentTypes);
 
-            if(!gstcEqTypesA(NeededType,Type)){
+            if(!gstcEqTypesA(NeededType,Type))
+            {
               //upcasting
               ATermAppl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg,warn_upcasting);
               if(CastedNewType) Type=CastedNewType;
             }
-            if(!gstcEqTypesA(NeededType,Type)){
-              // if (gsDebug) { std::cerr << "Doing again on %T, Type: %T, Needed type: %T\n",Arg,Type,NeededType);
+            if(!gstcEqTypesA(NeededType,Type))
+            {
+              if (gsDebug) 
+              { std::cerr << "Doing again on " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "\n";
+              }
               ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
               if(!NewArgType) NewArgType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
-              //if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
               if(!NewArgType) NewArgType=NeededType;
               NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
-              // if (gsDebug) { std::cerr << "Result of Doing again gstcTraverseVarConsTypeD: DataTerm %T\n",Arg);
-              if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+              if (gsDebug) { std::cerr << "Result of Doing again gstcTraverseVarConsTypeD: DataTerm " << pp(Arg) << "\n"; }
+              if(!NewArgType) 
+              { gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);
+                return NULL;
+              }
               Type=NewArgType;
             }
             NewArguments=ATinsert(NewArguments,(ATerm)Arg);
@@ -2734,7 +2768,9 @@ namespace mcrl2 {
         NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
                                           &Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments,warn_upcasting);
 
-        // if (gsDebug) { std::cerr << "Result of gstcTraverseVarConsTypeDN: DataTerm %T\n",Data);
+        if (gsDebug) 
+        { std::cerr << "Result of gstcTraverseVarConsTypeDN: DataTerm " << pp(Data) << "\n";
+        }
 
         if(!NewType) {
           if(was_ambiguous) was_ambiguous=false;
@@ -2743,10 +2779,14 @@ namespace mcrl2 {
           return NULL;
         }
 
-        // if (gsDebug) { std::cerr << "Arguments once more: Arguments %T, ArgumentTypes: %T, NewType: %T\n",Arguments,ArgumentTypes,NewType);
+        if (gsDebug) 
+        { std::cerr << "Arguments once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " << 
+                            pp(ArgumentTypes) << ", NewType: " << pp(NewType) << "\n";
+        }
 
         //and the arguments once more
-        if(gsIsSortArrow(gstcUnwindType(NewType))){
+        if(gsIsSortArrow(gstcUnwindType(NewType)))
+        {
           ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
           ATermList NewArgumentTypes=ATmakeList0();
           ATermList NewArguments=ATmakeList0();
@@ -2767,10 +2807,10 @@ namespace mcrl2 {
               }
               ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
               if(!NewArgType) NewArgType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
-              //if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
               if(!NewArgType) NewArgType=NeededType;
               NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
-              if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+              if(!NewArgType) 
+              { gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
               Type=NewArgType;
             }
 
@@ -2781,7 +2821,7 @@ namespace mcrl2 {
           ArgumentTypes=ATreverse(NewArgumentTypes);
         }
 
-        // if (gsDebug) { std::cerr << "Arguments after once more: Arguments %T, ArgumentTypes: %T\n",Arguments,ArgumentTypes);
+        if (gsDebug) { std::cerr << "Arguments after once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " << pp(ArgumentTypes) << "\n"; }
 
         *DataTerm=gsMakeDataAppl(Data,Arguments);
 
@@ -2840,11 +2880,24 @@ namespace mcrl2 {
           return Type;
         }
 
-        if((Type=ATAtableGet(context.constants,(ATerm)Name)))
-        {
-          if(!(Type=gstcTypeMatchA(Type,PosType))) {gsErrorMsg("no constant %P with type %P\n",*DataTerm,PosType);return NULL;}
-          *DataTerm=gsMakeOpId(Name,Type);
-          return Type;
+        if ((Type=ATAtableGet(context.constants,(ATerm)Name)))
+        { 
+          ATermAppl NewType=gstcTypeMatchA(Type,PosType);
+          if (NewType) 
+          { Type=NewType;
+            *DataTerm=gsMakeOpId(Name,Type);
+            return Type;
+          } 
+          else
+          { // The type cannot be unified. Try upcasting the type.
+            *DataTerm=gsMakeOpId(Name,Type);
+            ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
+            if (NewType==NULL)
+            { gsErrorMsg("no constant %P with type %P\n",*DataTerm,PosType);
+              return NULL;
+            }
+            else return NewType;
+          }
         }
 
         ATermList ParList=ATLtableGet(gssystem.constants,(ATerm)Name);
@@ -2911,13 +2964,14 @@ namespace mcrl2 {
                      const int nFactPars, 
                      const bool warn_upcasting)
     {
-      // -1 means the number of arguments is not known.
+      // -1 for nFactPars means the number of arguments is not known.
       if (gsDebug) 
       { std::cerr << "gstcTraverseVarConsTypeDN: DataTerm " << pp(*DataTerm) << " with PosType " << pp(PosType) << 
                   ", nFactPars " << nFactPars << "\n";
       }
       if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
-      { ATermAppl Name=ATAgetArgument(*DataTerm,0);
+      { 
+        ATermAppl Name=ATAgetArgument(*DataTerm,0);
         bool variable=false;
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
         if (Type)
@@ -3310,7 +3364,7 @@ namespace mcrl2 {
         }
       }
       else 
-      {
+      { 
         return gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,DataTerm,PosType,FreeVars,strict_ambiguous,warn_upcasting);
       }
     }
@@ -3318,7 +3372,8 @@ namespace mcrl2 {
     // ================================================================================
     // Phase 2 -- type inference
     // ================================================================================
-    static ATermList gstcGetNotInferredList(ATermList TypeListList){
+    static ATermList gstcGetNotInferredList(ATermList TypeListList)
+    {
       //we get: List of Lists of SortExpressions
       //Outer list: possible parameter types 0..nPosParsVectors-1
       //inner lists: parameter types vectors 0..nFormPars-1
@@ -3352,8 +3407,11 @@ namespace mcrl2 {
       return Result;
     }
 
-    static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par, bool warn_upcasting){
-      // Makes upcasting from Type to Needed Type for Par. Returns the resulting type
+    static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par, bool warn_upcasting)
+    {
+      // Makes upcasting from Type to Needed Type for Par. Returns the resulting type.
+      // Moreover, *Par is extended with the required type transformations.
+
       if (gsDebug) std::cerr << "gstcUpCastNumericType " << pp(NeededType) << " -- " << pp(Type) << "\n";
 
       if(data::is_unknown_sort(data::sort_expression(Type))) return Type;
