@@ -158,8 +158,6 @@ void test_constructors()
 
   function_symbol_vector constructors(boost::copy_range< function_symbol_vector >(spec.constructors()));
   BOOST_CHECK(spec.constructors(s) == fgl_range);
-  std::cerr << "AAA1 " << constructors.size() << "\n";
-  std::cerr << "AAA1 " << pp(constructors) << "\n";
   BOOST_CHECK(constructors.size() == 5); // f,g,h, true, false.
   BOOST_CHECK(spec.search_constructor(f));
   BOOST_CHECK(spec.search_constructor(g));
@@ -223,7 +221,6 @@ void test_functions()
   data_specification spec1(spec);
   spec1.add_mappings(fghl_range);
 
-  std::cerr << "BBB " << boost::distance(spec.mappings()) << "\n";
   BOOST_CHECK(boost::distance(spec.mappings()) == 35);
   BOOST_CHECK(spec.search_mapping(f));
   BOOST_CHECK(spec.search_mapping(g));
@@ -418,7 +415,6 @@ void test_system_defined()
     "sort S;"
     "map f: Set(S);");
 
-  std::cerr << "SET " << specification.sorts() << "\n";
   BOOST_CHECK(search(specification.sorts(), sort_set::set_(basic_sort("S"))));
   // BOOST_CHECK(search(specification.sorts(), sort_fset::fset(basic_sort("S")))); MUST BE CHECKED ALSO?
 
@@ -446,7 +442,6 @@ void test_system_defined()
 
   BOOST_CHECK(specification.is_alias(basic_sort("D")));
   BOOST_CHECK(specification.is_alias(basic_sort("F")));
-  std::cerr << "CONSTRUCTORS " << specification.constructors(basic_sort("D")) << "\n";
   BOOST_CHECK(boost::distance(specification.constructors(basic_sort("D"))) == 1);
 
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
@@ -551,7 +546,7 @@ void test_normalisation()
 
   specification = parse_data_specification(
     "sort A = struct a(B);"
-    "sort B = struct b(A);");
+    "sort B = struct b(A)|c;");
 
   atermpp::vector< structured_sort_constructor_argument > arguments;
 
@@ -562,10 +557,10 @@ void test_normalisation()
 
   constructors.push_back(structured_sort_constructor("a", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   constructors.push_back(structured_sort_constructor("b", boost::make_iterator_range(arguments.begin() + 1, arguments.end())));
+  constructors.push_back(structured_sort_constructor("c"));
 
   structured_sort sA(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
   structured_sort sB(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
-
   BOOST_CHECK(specification.search_sort(specification.normalise_sorts(sA)));
   BOOST_CHECK(specification.search_sort(specification.normalise_sorts(sB)));
 

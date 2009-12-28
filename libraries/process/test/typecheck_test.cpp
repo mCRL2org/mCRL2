@@ -145,25 +145,61 @@ const std::string case_8 =
   "init a( f( lambda i:S. x(i) < 0 , c( 0 ) ) );\n"
   ;
 
-// First test case for issue #629, empty sorts
+// First test case for issue #629, constructor domain is empty.
 const std::string case_9 =
   "sort L_1=struct insert(L_1) ;    \n"
   "init delta;                      \n"
   ;
 
-// Second test case for issue #629, empty sorts
+// Second test case for issue #629, constructor domain is empty.
 const std::string case_10 =
   "sort L_2=struct insert(L_3);     \n"
   "     L_3=struct insert(L_2);     \n"
   "init delta;                      \n"
   ;
 
-// Third test case for issue #629, empty sorts
+// Third test case for issue #629, constructor domain is empty.
 const std::string case_11 =
   "sort D;                          \n"
   "cons f:D->D;                     \n"
   "init delta;                      \n"
   ;
+
+// fourth test case for issue #629, constructor domain is empty.
+const std::string case_11_1 =
+  "sort D =struct f(struct g(D));"
+  "init delta;";
+
+// fourth test case for issue #629, constructor domain is empty.
+const std::string case_11_2 =
+  "sort D =struct f(struct g(Nat));"
+  "init delta;";
+
+// Tricky test case that should succeed, as sorts are not recursively defined through sort containers.
+const std::string case_11a =
+   "sort MyRecType=struct f | g(MyRecType);"
+   "     D=List(MyRecType);"
+   "init delta;";
+
+
+// Tricky test case that should fail, as recursive sorts are are defined through sort containers
+// but in this case it is not that easy to see.
+const std::string case_11b =
+   "sort MyRecType=struct f | g(List(MyRecType));"
+   "init delta;";
+
+// Tricky test case that should succeed, as sorts are not recursively defined through sort containers.
+const std::string case_11c =
+   "sort MyRecType=struct f | g(MyRecType);"
+   "     D=List(MyRecType)->MyRecType;"
+   "init delta;";
+
+// Tricky test case that should fail, as recursive sorts are are defined through sort containers
+// but in this case it is not that easy to see.
+const std::string case_11d =
+   "sort MyRecType=struct f | g(MyRecType->Nat);"
+   "init delta;";
+
 
 
 // Test case below went wrong, because sort expression was confused with a function symbol
@@ -222,6 +258,12 @@ BOOST_AUTO_TEST_CASE(test_various)
   cases[case_9] = false;
   cases[case_10] = false;
   cases[case_11] = false;
+  cases[case_11_1] = false;
+  cases[case_11_2] = true;
+  cases[case_11a] = true;
+  cases[case_11b] = false;
+  cases[case_11c] = true;
+  cases[case_11d] = false;
   cases[case_12] = true;
 
   for(std::map<std::string, bool>::const_iterator i = cases.begin(); i != cases.end(); ++i)

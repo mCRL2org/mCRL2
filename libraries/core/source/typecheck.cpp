@@ -28,6 +28,7 @@
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/find.h"
 
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
@@ -1216,10 +1217,113 @@ namespace mcrl2 {
       ATunprotectList(&body.equations);
     }
 
-    static ATbool gstcReadInSorts (ATermList Sorts){
+    static bool gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+                   const sort_expression &sort_expression_start_search,
+                   const basic_sort &end_search,
+                   std::set < basic_sort > &visited,
+                   const bool observed_a_sort_constructor);
+
+    // This function checks whether there is a path of sort aliases
+    // from start_search to end_search. 
+    // The boolean observed_a_sort_constructor indicates whether on the 
+    // current path a sort constainer or a function sort has been
+    // observed. The set visited indicates which basic sorts have been
+    // encountered on the current path. This is only used for loop  checking.
+    // The current algorithm is exponential, which is considered not too
+    // much of a problem, given that sort expressions are generally small.
+    static bool gstc_check_for_sort_alias_loop_through_sort_container(
+                   const basic_sort &start_search,
+                   const basic_sort &end_search,
+                   std::set < basic_sort > &visited,
+                   const bool observed_a_sort_constructor)
+    { ATermAppl aterm_reference=(ATermAppl)ATtableGet(context.defined_sorts,
+                                               (ATerm)static_cast<ATermAppl>(start_search.name())); 
+   
+      if (aterm_reference==NULL)
+      { // start_search is not a sort alias, and hence not a recursive sort.
+        return false;
+      }
+    
+      if (visited.find(start_search)!=visited.end())
+      { // start_search has already been encountered. end_search will not be found via this path.
+        return false;
+      }
+     
+      const sort_expression reference(aterm_reference);
+      return gstc_check_for_sort_alias_loop_through_sort_container_via_expression(reference,end_search,visited,observed_a_sort_constructor);
+    }
+
+    static bool gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+                   const sort_expression &sort_expression_start_search,
+                   const basic_sort &end_search,
+                   std::set < basic_sort > &visited,
+                   const bool observed_a_sort_constructor)
+    { 
+      if (sort_expression_start_search.is_basic_sort())
+      { const basic_sort start_search(sort_expression_start_search);
+        if (end_search==start_search)
+        { return observed_a_sort_constructor;
+        }
+        else
+        { visited.insert(start_search);
+          return gstc_check_for_sort_alias_loop_through_sort_container(start_search,end_search,visited,observed_a_sort_constructor);
+        }
+      }
+
+      if (sort_expression_start_search.is_container_sort())
+      { const container_sort start_search_container(sort_expression_start_search);
+        return gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+                           start_search_container.element_sort(),end_search,visited,true);
+      }
+
+      if (sort_expression_start_search.is_function_sort())
+      { const function_sort f_start_search(sort_expression_start_search);
+        if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+                           f_start_search.codomain(),end_search,visited,true))
+        { return true;
+        }
+        for(function_sort::domain_const_range::const_iterator i=f_start_search.domain().begin();
+               i!=f_start_search.domain().end(); ++i)
+        { if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+                             *i,end_search,visited,true))
+          { return true;
+          }
+        }
+        // end_search has not been found, so:
+        return false;
+      }
+
+      if (sort_expression_start_search.is_structured_sort())
+      { const structured_sort struct_start_search(sort_expression_start_search);
+        const function_symbol_vector constructor_functions=struct_start_search.constructor_functions();
+        for(function_symbol_vector::const_iterator i=constructor_functions.begin();
+                   i!=constructor_functions.end(); ++i)
+        { 
+          if (i->sort().is_function_sort())
+          { const function_sort::domain_const_range domain_sorts=function_sort(i->sort()).domain();
+            for(function_sort::domain_const_range::const_iterator j=domain_sorts.begin();
+                 j!=domain_sorts.end(); ++j)
+            { if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+                               *j,end_search,visited,observed_a_sort_constructor))
+              { return true;
+              }
+            }
+          }
+        }
+        return false;
+     
+      }
+
+      assert(0); // start_search cannot be a multiple_possible_sorts, or an unknown sort.
+      return false;
+    }
+
+    static ATbool gstcReadInSorts (ATermList Sorts)
+    {
       ATbool nnew;
       ATbool Result=ATtrue;
-      for(;!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
+      for(;!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts))
+      {
         ATermAppl Sort=ATAgetFirst(Sorts);
         ATermAppl SortName=ATAgetArgument(Sort,0);
         if(sort_bool::is_bool(basic_sort(SortName))){
@@ -1248,19 +1352,37 @@ namespace mcrl2 {
           gsErrorMsg("double declaration of sort %P\n",SortName);
           return ATfalse;
         }
-        if(gsIsSortId(Sort)) ATindexedSetPut(context.basic_sorts, (ATerm)SortName, &nnew);
-        else
-          if(gsIsSortRef(Sort)){
-          ATtablePut(context.defined_sorts, (ATerm)SortName, (ATerm)ATAgetArgument(Sort,1));
-          if (gsDebug) { std::cerr << "recognized " << pp(SortName) << "  " << pp((ATerm)ATAgetArgument(Sort,1)) << "\n"; }
+        if (gsIsSortId(Sort)) 
+        { ATindexedSetPut(context.basic_sorts, (ATerm)SortName, &nnew);
+        }
+        else if (gsIsSortRef(Sort))
+        { ATtablePut(context.defined_sorts, (ATerm)SortName, (ATerm)ATAgetArgument(Sort,1));
+          if (gsDebug) 
+          { std::cerr << "Add sort alias " << pp(SortName) << "  " << pp((ATerm)ATAgetArgument(Sort,1)) << "\n"; 
+          }
         }
         else assert(0);
+      }
+
+      // Check for sorts that are recursive through container sorts.
+      // E.g. sort L=List(L);  
+      // This is forbidden.
+
+      ATermList sort_aliases=ATtableKeys(context.defined_sorts);
+      for( ; sort_aliases!=ATempty ; sort_aliases=ATgetNext(sort_aliases))
+      { std::set < basic_sort > visited;
+        const basic_sort s((ATermAppl)ATgetFirst(sort_aliases));
+        if (gstc_check_for_sort_alias_loop_through_sort_container(s,s,visited,false))
+        { gsErrorMsg("sort %P is recursively defined via a function sort, or a list, set or bag type container\n",ATgetFirst(sort_aliases));
+          return ATfalse;
+        }
       }
 
       return Result;
     }
 
-    static ATbool gstcReadInConstructors(ATermList NewSorts){
+    static ATbool gstcReadInConstructors(ATermList NewSorts)
+    {
       ATermList Sorts=NewSorts;
       if(!Sorts) Sorts=ATtableKeys(context.defined_sorts);
       for(;!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
@@ -1271,12 +1393,204 @@ namespace mcrl2 {
       return ATtrue;
     }
 
-    static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps){
+
+    atermpp::map < sort_expression,basic_sort > construct_normalised_aliases() 
+    { // This function does the same as data_specification::reconstruct_m_normalised_aliases().
+      // Therefore, it should be replaced by that function, after restructuring the type checker.
+      // First reset the normalised aliases and the mappings and constructors that have been
+      // inherited to basic sort aliases during a previous round of sort normalisation.
+      atermpp::map < sort_expression,basic_sort > normalised_aliases; 
+
+      // Fill normalised_aliases. Simple aliases are stored from left to 
+      // right. If the right hand side is non trivial (struct, list, set or bag)
+      // the alias is stored from right to left.
+      for(ATermList sort_walker=ATtableKeys(context.defined_sorts);  sort_walker!=ATempty; sort_walker=ATgetNext(sort_walker))
+      { ATermAppl sort_name=ATAgetFirst(sort_walker);
+        const basic_sort first(sort_name);
+        const sort_expression second((ATermAppl)ATtableGet(context.defined_sorts,(ATerm)sort_name));
+        if (is_structured_sort(second) ||
+            is_function_sort(second) ||
+            is_container_sort(second))
+        { // We deal here with a declaration of the shape sort A=ComplexType.
+          // Rewrite every occurrence of ComplexType to A. Suppose that there are
+          // two declarations of the shape sort A=ComplexType; B=ComplexType then
+          // ComplexType is rewritten to A and B is also rewritten to A.
+          const atermpp::map< sort_expression, basic_sort >::const_iterator j=normalised_aliases.find(second);
+          if (j!=normalised_aliases.end())
+          { normalised_aliases[first]=j->second;
+          }
+          else 
+          { normalised_aliases[second]=first;
+          }
+        }
+        else
+        { // We are dealing with a sort declaration of the shape sort A=B.
+          // Every occurrence of sort A is normalised to sort B.
+          assert(is_basic_sort(first));
+          normalised_aliases[first]=second;
+        }
+      }
+
+      // Close the mapping normalised_aliases under itself. If a rewriting
+      // loop is detected, throw a runtime error.
+
+      for(atermpp::map< sort_expression, basic_sort >::iterator i=normalised_aliases.begin();
+               i!=normalised_aliases.end(); i++)
+      { std::set < sort_expression > sort_already_seen;
+        sort_expression result_sort=i->second;
+
+        std::set< sort_expression > all_sorts;
+        if (is_container_sort(i->first) || is_function_sort(i->first))
+        { find_sort_expressions(i->first, std::inserter(all_sorts, all_sorts.end()));
+        }
+        while (normalised_aliases.count(result_sort)>0)
+        { sort_already_seen.insert(result_sort);
+          result_sort= normalised_aliases.find(result_sort)->second;
+          if (sort_already_seen.count(result_sort))
+          { mcrl2::runtime_error("Sort alias " + pp(result_sort) + " is defined in terms of itself.");
+          }
+
+          for (std::set< sort_expression >::const_iterator j = all_sorts.begin(); j != all_sorts.end(); ++j)
+          { if (*j==result_sort)
+            { mcrl2::runtime_error("Sort alias " + pp(i->first) + " depends on sort" +
+                                            pp(result_sort) + ", which is circularly defined.\n");
+            }
+          }
+        }
+        // So the normalised sort of i->first is result_sort. 
+        i->second=result_sort;
+      }
+      return normalised_aliases;
+    }
+
+    static sort_expression mapping(sort_expression s,atermpp::map < sort_expression, basic_sort > &m)
+    { if (m.find(s)==m.end())
+      { return s;
+      }
+      return m[s];
+    }
+
+    // Under the assumption that constructor_list contains all the constructors, this
+    // function checks whether there are sorts that must be necessarily empty because they
+    // have only constructors referring to the domain itself, e.g. sort D; cons f:D->D;
+    // If such a domain exists a message is printed to stderr and true is returned.
+    //
+    // The algorithm works by putting all target sorts of constructors in a set possibly_empty_constructor_sorts.
+    // Subsequently, those sorts for which there is a constructor function with
+    // argument sorts not in this set, are removed, until no more sorts can be removed.
+    // All sorts remaining in possibly_empty_constructor_sorts are empty constructor sorts
+    // and are reported. If this set is empty, true is reported, i.e. showing no problem.
+
+    static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
+    { 
+      // First add the constructors for structured sorts to the constructor list;
+      try
+      { 
+        ATermList defined_sorts=ATtableKeys(context.defined_sorts);
+        atermpp::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
+        std::set< sort_expression > all_sorts;
+        for( ; defined_sorts!=ATempty; defined_sorts=ATgetNext(defined_sorts))
+        { const basic_sort s(gstcUnwindType(ATAgetFirst(defined_sorts)));
+          ATermAppl reference=ATAtableGet(context.defined_sorts,(ATerm)static_cast<ATermAppl>(s.name()));
+          // if (is_container_sort(i->first) || is_function_sort(i->first)) 
+          find_sort_expressions(sort_expression(reference), std::inserter(all_sorts, all_sorts.end()));
+        }
+
+        for(std::set< sort_expression > ::const_iterator i=all_sorts.begin(); i!=all_sorts.end();++i) 
+        { if (i->is_structured_sort())
+          { 
+            const function_symbol_vector r=structured_sort(*i).constructor_functions();
+            for(function_symbol_vector::const_iterator j=r.begin();
+                   j!=r.end(); ++j)
+            { constructor_list=ATinsert(constructor_list,(ATerm)static_cast<ATermAppl>(*j));
+            }
+          }
+          
+          if (i->is_structured_sort())
+          { 
+            const function_symbol_vector r=structured_sort(*i).constructor_functions();
+            for(function_symbol_vector::const_iterator i=r.begin();
+                   i!=r.end(); ++i)
+            { constructor_list=ATinsert(constructor_list,(ATerm)static_cast<ATermAppl>(*i));
+            }
+          }
+          
+        }
+
+        std::set < sort_expression > possibly_empty_constructor_sorts;
+        for(ATermList constructor_list_walker=constructor_list; 
+                  constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))
+        { const sort_expression s=function_symbol(ATgetFirst(constructor_list_walker)).sort();
+          if (s.is_function_sort())
+          { 
+            // if s is a constant sort, nothing needs to be added.
+            possibly_empty_constructor_sorts.insert(mapping(function_sort(s).codomain(),normalised_aliases)); 
+          }
+        }
+
+        // Walk through the constructors removing constructor sorts that are not empty,
+        // until no more constructors sorts can be removed.
+        for(bool stable=false ; !stable ; )
+        { stable=true;
+          for(ATermList constructor_list_walker=constructor_list;
+                  constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))      
+          { const sort_expression s=function_symbol(ATgetFirst(constructor_list_walker)).sort();
+            if (!s.is_function_sort())        
+            { 
+              if (possibly_empty_constructor_sorts.erase(mapping(s,normalised_aliases))==1) // True if one element has been removed.
+              { stable=false;
+              }
+            }
+            else
+            { function_sort::domain_const_range r=function_sort(s).domain();
+              bool has_a_domain_sort_possibly_empty_sorts=false;
+              for(function_sort::domain_const_range::const_iterator i=r.begin();
+                     i!=r.end(); ++i)
+              { if (possibly_empty_constructor_sorts.find(mapping(*i,normalised_aliases))!=possibly_empty_constructor_sorts.end())
+                { // 
+                  has_a_domain_sort_possibly_empty_sorts=true;
+                  continue;
+                }
+              }
+              if (!has_a_domain_sort_possibly_empty_sorts)
+              { 
+                // Condition below is true if one element has been removed.
+                if (possibly_empty_constructor_sorts.erase(mapping(function_sort(s).codomain(),normalised_aliases))==1) 
+                { 
+                  stable=false;
+                }
+              }
+            }
+          }
+        }
+        // Print the sorts remaining in possibly_empty_constructor_sorts, as they must be empty
+        if (possibly_empty_constructor_sorts.empty())
+        { return true; // There are no empty sorts
+        }
+        else
+        { gsErrorMsg("the following domains are empty due to recursive constructors:\n");
+          for(std::set < sort_expression >:: const_iterator i=possibly_empty_constructor_sorts.begin();
+              i!=possibly_empty_constructor_sorts.end(); ++i)
+          { gsErrorMsg("%P\n",(ATerm)static_cast<ATermAppl>(*i));
+          }
+          return false;
+        }
+      }
+      catch (mcrl2::runtime_error &e)
+      { gsErrorMsg("%s",e.what());
+        return false;
+      }
+
+    }
+
+    static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps)
+    {
       if (gsDebug) { std::cerr << "Start Read-in Func\n"; }
       ATbool Result=ATtrue;
 
       unsigned constr_number=ATgetLength(Cons);
-      for(ATermList Funcs=ATconcat(Cons,Maps);!ATisEmpty(Funcs);Funcs=ATgetNext(Funcs)){
+      for(ATermList Funcs=ATconcat(Cons,Maps);!ATisEmpty(Funcs);Funcs=ATgetNext(Funcs))
+      {
         ATermAppl Func=ATAgetFirst(Funcs);
         ATermAppl FuncName=ATAgetArgument(Func,0);
         ATermAppl FuncType=ATAgetArgument(Func,1);
@@ -1304,22 +1618,49 @@ namespace mcrl2 {
           if(!gstcAddConstant(gsMakeOpId(FuncName,FuncType),"constant")) { gsErrorMsg("could not add constant\n"); return ATfalse; }
         }
 
-        if(constr_number){
+        if(constr_number)
+        {
           constr_number--;
 
           //Here checks for the constructors
           ATermAppl ConstructorType=FuncType;
           if(gsIsSortArrow(ConstructorType)) ConstructorType=ATAgetArgument(ConstructorType,1);
           ConstructorType=gstcUnwindType(ConstructorType);
-          if(!gsIsSortId(ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(sort_bool::is_bool(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(sort_pos::is_pos(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(sort_nat::is_nat(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(sort_int::is_int(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(sort_real::is_real(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+          if (!gsIsSortId(ConstructorType)) 
+          { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); 
+            return ATfalse; 
+          }
+          if (sort_bool::is_bool(sort_expression(ConstructorType))) 
+          { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); 
+            return ATfalse; 
+          }
+          if (sort_pos::is_pos(sort_expression(ConstructorType))) 
+          { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); 
+            return ATfalse; 
+          }
+          if (sort_nat::is_nat(sort_expression(ConstructorType))) 
+          { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); 
+            return ATfalse; 
+          }
+          if (sort_int::is_int(sort_expression(ConstructorType))) 
+          { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); 
+            return ATfalse; 
+          }
+          if (sort_real::is_real(sort_expression(ConstructorType))) 
+          { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); 
+            return ATfalse; 
+          }
         }
 
         if (gsDebug) { std::cerr << "Read-in Func " << pp(FuncName) << ", Types " << pp(FuncType) << "\n"; }
+      }
+
+      // Check that the constructors are defined such that they cannot generate an empty sort.
+      // E.g. in the specification sort D; cons f:D->D; the sort D must be necessarily empty, which is 
+      // forbidden. The function below checks whether such malicious specifications occur.
+
+      if (!gstc_check_for_empty_constructor_domains(Cons))
+      { return ATfalse;
       }
 
       return Result;
@@ -1720,14 +2061,17 @@ namespace mcrl2 {
         return ATtrue;
       }
 
-      if(gsIsSortStruct(SortExpr)){
-        for(ATermList Constrs=ATLgetArgument(SortExpr,0);!ATisEmpty(Constrs);Constrs=ATgetNext(Constrs)){
+      if(gsIsSortStruct(SortExpr))
+      {
+        for(ATermList Constrs=ATLgetArgument(SortExpr,0);!ATisEmpty(Constrs);Constrs=ATgetNext(Constrs))
+        {
           ATermAppl Constr=ATAgetFirst(Constrs);
 
           // recognizer -- if present -- a function from SortExpr to Bool
           ATermAppl Name=ATAgetArgument(Constr,2);
           if(!gsIsNil(Name) &&
-             !gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),sort_bool::bool_())),"recognizer")) {return ATfalse;}
+             !gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),sort_bool::bool_())),"recognizer")) 
+          {return ATfalse;}
 
           // constructor type and projections
           ATermList Projs=ATLgetArgument(Constr,1);
@@ -1738,19 +2082,26 @@ namespace mcrl2 {
           }
 
           ATermList ConstructorType=ATmakeList0();
-          for(;!ATisEmpty(Projs);Projs=ATgetNext(Projs)){
+          for(;!ATisEmpty(Projs);Projs=ATgetNext(Projs))
+          {
             ATermAppl Proj=ATAgetFirst(Projs);
             ATermAppl ProjSort=ATAgetArgument(Proj,1);
 
             // not to forget, recursive call for ProjSort ;-)
-            if(!gstcReadInSortStruct(ProjSort)) {return ATfalse;}
+            if (!gstcReadInSortStruct(ProjSort)) 
+            { return ATfalse;
+            }
 
             ATermAppl ProjName=ATAgetArgument(Proj,0);
-            if(!gsIsNil(ProjName) &&
-               !gstcAddFunction(gsMakeOpId(ProjName,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),ProjSort)),"projection",true)) {return ATfalse;}
+            if (!gsIsNil(ProjName) &&
+               !gstcAddFunction(gsMakeOpId(ProjName,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),ProjSort)),"projection",true)) 
+            { return ATfalse;
+            }
             ConstructorType=ATinsert(ConstructorType,(ATerm)ProjSort);
           }
-          if(!gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATreverse(ConstructorType),SortExpr)),"constructor")) {return ATfalse;}
+          if (!gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATreverse(ConstructorType),SortExpr)),"constructor")) 
+          { return ATfalse;
+          }
         }
         return ATtrue;
       }
@@ -1780,7 +2131,8 @@ namespace mcrl2 {
       return Result;
     }
 
-    static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool allow_double_decls){
+    static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool allow_double_decls)
+    {
       assert(gsIsOpId(OpId));
       ATbool Result=ATtrue;
       const function_symbol f(OpId);
@@ -1815,15 +2167,17 @@ namespace mcrl2 {
       // the table context.functions contains a list of types for each
       // function name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
-      if (Types && gstcInTypesA(Sort, Types)){
+      if (Types && gstcInTypesA(Sort, Types))
+      {
         if(!allow_double_decls){ gsErrorMsg("double declaration of %s %P\n", msg, Name); return ATfalse; }
       }
-      else{
+      else
+      {
         if (!Types) Types=ATmakeList0();
         Types=ATappend(Types,(ATerm)Sort);
         ATtablePut(context.functions,(ATerm)Name,(ATerm)Types);
       }
-      // if (gsDebug) { std::cerr << "Read-in %s %T Type %T\n",msg,Name,Types);
+      if (gsDebug) { std::cerr << "Read-in " << msg << " " << pp(Name) << ". Type " << pp(Types) << "\n"; }
       return Result;
     }
 
@@ -2976,7 +3330,7 @@ namespace mcrl2 {
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
         if (Type)
         { const sort_expression Type1(Type);
-          if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==nFactPars):(nFactPars==0))
+          if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==(unsigned int)nFactPars):(nFactPars==0))
           { variable=true;
             if(!ATAtableGet(AllowedVars,(ATerm)Name)) 
             {
