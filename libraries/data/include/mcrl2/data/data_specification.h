@@ -45,11 +45,8 @@ namespace mcrl2 {
     class data_specification;
 
     /// \cond INTERNAL_DOCS
-    namespace detail {
-      /* template < typename Term >
-      Term apply_compatibility_renamings(const data_specification&, Term const&);
-      template < typename Term >
-      Term undo_compatibility_renamings(const data_specification&, Term const&); */
+    namespace detail 
+    {
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&, bool = false);
     }
     /// \endcond
@@ -80,7 +77,7 @@ namespace mcrl2 {
 
         struct convert_to_alias : public std::unary_function< ltr_aliases_map::value_type const, alias >
         {
-          /// \brief Applicmation to constant pair
+          /// \brief Application to constant pair
           alias operator()(ltr_aliases_map::value_type const& e) const 
           { return alias(e.first,e.second);
           }
@@ -164,9 +161,6 @@ namespace mcrl2 {
 
         /// \brief The basic sorts and structured sorts in the specification.
         ltr_aliases_map                     m_aliases;
-
-        /// \brief The basic sorts and structured sorts in the specification.
-        // reverse_aliases_map                     m_aliases_by_sort;
 
         /// \brief A mapping of sort expressions to the constructors corresponding to that sort.
         sort_to_symbol_map                  m_constructors;
@@ -385,7 +379,10 @@ namespace mcrl2 {
 
       /// \brief Gets all sort declarations including those that are system defined.
       ///
-      /// Time complexity of this operation is constant.
+      /// \details The time complexity of this operation is constant, except when 
+      ///      the data specification has been changed, in which case it can be that
+      ///      it must be normalised again. This operation is linear in the size of 
+      ///      the specification.
       /// \return The sort declarations of this specification.
       inline
       sorts_const_range sorts() const
@@ -393,8 +390,17 @@ namespace mcrl2 {
         return sorts_const_range(m_normalised_sorts);
       }
 
-      /// \brief Gets all constructors including those that are system defined.
+      /// \brief Gets all sorts defined by a user (excluding the system defined sorts).
       ///
+      /// \details The time complexity of this operation is constant.
+      /// \return The user defined sort declaration.
+      inline
+      sorts_const_range user_defined_sorts() const
+      { return sorts_const_range(m_sorts);
+      }
+
+      /// \brief Gets all constructors including those that are system defined.
+      /// \details The time complexity is the same as for sorts().
       /// \return All constructors in this specification, including those for
       /// structured sorts.
       inline
@@ -403,9 +409,18 @@ namespace mcrl2 {
         return constructors_const_range(m_normalised_constructors);
       }
 
+      /// \brief Gets the constructors defined by the user, excluding those that
+      /// are system defined.
+      /// \details The time complexity for this operation is constant.
+      inline
+      constructors_const_range user_defined_constructors() const
+      { 
+        return constructors_const_range(m_constructors);
+      }
+
       /// \brief Gets all constructors of a sort including those that are system defined.
       ///
-      /// Time complexity of this operation is constant.
+      /// \details The time complexity is the same as for sorts().
       /// \param[in] s A sort expression.
       /// \return The constructors for sort s in this specification.
       inline
@@ -414,15 +429,26 @@ namespace mcrl2 {
         return constructors_const_range(m_normalised_constructors.equal_range(normalise_sorts(s)));
       }
 
-      /// \brief Gets all mappings in this specification including those that are system defined
+      /// \brief Gets all mappings in this specification including those that are system defined.
       ///
-      /// Time complexity of this operation is constant.
+      /// \brief The time complexity is the same as for sorts().
       /// \return All mappings in this specification, including recognisers and
       /// projection functions from structured sorts.
       inline
       mappings_const_range mappings() const
       { normalise_specification_if_required();
         return mappings_const_range(m_normalised_mappings);
+      }
+
+      /// \brief Gets all user defined mappings in this specification.
+      ///
+      /// \brief The time complexity is constant.
+      /// \return All mappings in this specification, including recognisers and
+      /// projection functions from structured sorts.
+      inline
+      mappings_const_range user_defined_mappings() const
+      { 
+        return mappings_const_range(m_mappings);
       }
 
       /// \brief Gets all mappings of a sort including those that are system defined
@@ -438,7 +464,7 @@ namespace mcrl2 {
 
       /// \brief Gets all equations in this specification including those that are system defined
       ///
-      /// Time complexity of this operation is constant.
+      /// \details The time complexity of this operation is the same as that for sort().
       /// \return All equations in this specification, including those for
       ///  structured sorts.
       inline
@@ -447,15 +473,39 @@ namespace mcrl2 {
         return equations_const_range(m_normalised_equations);
       } 
 
+      /// \brief Gets all user defined equations.
+      ///
+      /// \details The time complexity of this operation is constant. 
+      /// \return All equations in this specification, including those for
+      ///  structured sorts.
+      inline
+      equations_const_range user_defined_equations() const
+      { 
+        return equations_const_range(m_equations);
+      } 
+
       /// \brief Gets a normalisation mapping that maps each sort to its unique normalised sort
       /// \details When in a specification sort aliases are used, like sort A=B or
       ///    sort Tree=struct leaf | node(Tree,Tree) then there are different representations
       ///    for each sort. The normalisation mapping maps each sort to a unique representant.
       ///    Moreover, it is this unique sort that it provides in internal mappings.
-      /// 
       const atermpp::map< sort_expression, sort_expression > &sort_alias_map() const
       { normalise_specification_if_required();
         return m_normalised_aliases;
+      }
+
+      /// \brief Gets the user defined aliases.
+      /// \details The time complexity is constant.
+      inline
+      ltr_aliases_map user_defined_aliases() const
+      { 
+        return m_aliases;
+      }
+
+      /// \brief Return the user defined context sorts of the current specification.
+      /// \details Time complexity is constant.
+      sorts_const_range context_sorts()
+      { return m_sorts_in_context;
       }
 
       /// \brief Adds a sort to this specification
