@@ -2090,7 +2090,6 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                 {
                   channel* chan_ptr = channels.Item( i );
                   p_arch_dia_ptr->attach_channel_communication_to_channel( comm_ptr,  chan_ptr );
-                  chan_ptr->attach_channel_communication( comm_ptr );
                 }
               }
               else
