@@ -34,12 +34,15 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/map_substitution.h"
 
 
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
+#include "mcrl2/pbes/utility.h"
+
 
 
 #define RELEVANCE_MASK 1
@@ -124,15 +127,20 @@ namespace bes
   static void assign_variables_in_tree(
                         ATerm t,
                         mcrl2::data::variable_list::iterator &var_iter,
-                        atermpp::map<mcrl2::data::variable,
-                                        mcrl2::data::data_expression_with_variables> &sigma)
+                        boost::shared_ptr<mcrl2::data::detail::Rewriter> rewriter,
+                        const bool opt_precompile_pbes)
   { if (is_pair(t))
-    { assign_variables_in_tree(ATgetArgument(t,0),var_iter,sigma);
-      assign_variables_in_tree(ATgetArgument(t,1),var_iter,sigma);
+    { assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes);
+      assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes);
     }
     else
     {
-      sigma[*var_iter]=mcrl2::data::data_expression(t);
+      if (opt_precompile_pbes)
+      { rewriter->setSubstitutionInternal(*var_iter,t);
+      }
+      else
+      { rewriter->setSubstitution(*var_iter,(ATermAppl)t);
+      }
       var_iter++;
     }
   }
@@ -180,6 +188,20 @@ namespace bes
     }
     return apply_pair_symbol(p.name(),(ATermAppl)tree_store[0]);
   }
+
+  /* class pbes2bool_rewriter: public mcrl2::data::rewriter
+  { // This class is introduced to get access the the 
+    // rewriter made by Muck internally in the rewriter shell made by
+    // Wieger.
+    public:
+      mcrl2::data::detail::Rewriter *get_internal_rewriter() 
+      { return (mcrl2::data::detail::Rewriter *)(&m_rewriter);
+      }
+
+      pbes2bool_rewriter(mcrl2::data::rewriter &r)
+      { m_rewriter=r.m_rewriter;
+      } 
+  }; */
 
   class counter_example
   {
@@ -307,25 +329,6 @@ namespace bes
   { bes_global_variables<int>::opt_use_hashtables=true;
   }
 
-/*
-  inline bes_expression initBEStrue(bes_expression &BEStrue)
-  { BEStrue = ATmakeAppl0(ATmakeAFun("BESTrue", 0, ATfalse));
-    ATprotect(reinterpret_cast<ATerm*>(&BEStrue));
-    return BEStrue;
-  }
-
-  inline bes_expression initBESfalse(bes_expression &BESfalse)
-  { BESfalse = ATmakeAppl0(ATmakeAFun("BESFalse", 0, ATfalse));
-    ATprotect(reinterpret_cast<ATerm*>(&BESfalse));
-    return BESfalse;
-  }
-
-  inline bes_expression initBESdummy(bes_expression &BESdummy)
-  { BESdummy = ATmakeAppl0(ATmakeAFun("BESDummy", 0, ATfalse));
-    ATprotect(reinterpret_cast<ATerm*>(&BESdummy));
-    return BESdummy;
-  }
-*/
   inline AFun initAFunBESAnd(AFun& f)
   { f = ATmakeAFun("BESAnd", 2, ATfalse);
     ATprotectAFun(f);
@@ -358,25 +361,6 @@ namespace bes
   { static AFun BESIf = initAFunBESIf(BESIf);
     return BESIf;
   }
-
-/* This can't be put in a header file
-  bes_expression BESfalse;
-  inline bes_expression false_()
-  { return (BESfalse?BESfalse:BESfalse=initBESfalse(BESfalse));
-  }
-
-  bes_expression BEStrue;
-  inline bes_expression true_()
-  {
-    return (BEStrue?BEStrue:BEStrue=initBEStrue(BEStrue));
-  }
-
-  bes_expression BESdummy;
-  inline bes_expression dummy()
-  {
-    return (BESdummy?BESdummy:BESdummy=initBESdummy(BESdummy));
-  }
-*/
 
   // BESFalse
   inline
@@ -1527,6 +1511,193 @@ namespace bes
 ////////////////////////////  Functions to generate a bes out of a pbes  /////////////////////////
 
 
+      ///\brief returns a pbes expression which has been rewritten into internal rewrite format.
+      ///\details This function is used to translate a term into internal rewrite format, which is
+      /// required to get good performance out of the rewriter by Muck van Weerdenburg. This code
+      /// should be removed once the new rewriters are getting enough performance. Currently, however,
+      /// the performance of the rewriter with the nice interface is so bad that it cannot be used
+      /// for actual verification.
+      ///
+      /// This function simplifies all data expressions in p by applying the rewriter to it.
+      /// Data expressions that are true or false are translated to the pbes expressions true and false.
+      /// Quantified variables that do not occur in the body are removed.
+      /// Conjunctions and disjunctions of which one of the arguments is true or false are simplified.
+      /// If the boolean yield_internal_rewriter_format is set, the data expressions in the resulting
+      /// pbes expressions are translated into the internal format belonging to the rewriter. The
+      /// advantage of this is that the rewriter does not have to translate the data expressions
+      /// to internal format the next time the rewriter is applied to it. This is for instance useful
+      /// in the tool pbes2bool (or pbes2bes) where pbes expressions must iteratively be rewritten.
+      
+      inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
+                         mcrl2::pbes_system::pbes_expression p,
+                         boost::shared_ptr<mcrl2::data::detail::Rewriter> r,
+                         const bool yield_internal_rewriter_format)
+      {
+        using namespace mcrl2;
+        using namespace mcrl2::pbes_system;
+        using namespace mcrl2::pbes_system::pbes_expr;
+        using namespace mcrl2::pbes_system::accessors;
+
+        pbes_expression result;
+      
+        if (is_pbes_true(p))
+       
+        { // p is True
+          result = p;
+        }
+        else if (is_pbes_false(p))
+        { // p is False
+          result = p;
+        }
+        else if (is_pbes_and(p))
+        { // p = and(left, right)
+          //Rewrite left and right as far as possible
+          pbes_expression l = pbes_expression_rewrite_and_simplify(left(p),r,yield_internal_rewriter_format);
+          if (is_pbes_false(l))
+          { result = pbes_expr::false_();
+          }
+          else
+          { pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p),r,yield_internal_rewriter_format);
+            //Options for left and right
+            if (is_pbes_false(rt))
+            { result = pbes_expr::false_();
+            }
+            else if (is_pbes_true(l))
+            { result = rt;
+            }
+            else if (is_pbes_true(rt))
+            { result = l;
+            }
+            else result = pbes_expr::and_(l,rt);
+          }
+        }
+        else if (is_pbes_or(p))
+        { // p = or(left, right)
+          //Rewrite left and right as far as possible
+          pbes_expression l = pbes_expression_rewrite_and_simplify(left(p),r,yield_internal_rewriter_format);
+          if (is_pbes_true(l))
+          { result = pbes_expr::true_();
+          }
+          else
+          { pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p),r,yield_internal_rewriter_format);
+            if (is_pbes_true(rt))
+            { result = pbes_expr::true_();
+            }
+            else if (is_pbes_false(l))
+            { result = rt;
+            }
+            else if (is_pbes_false(rt))
+            { result = l;
+            }
+            else result = pbes_expr::or_(l,rt);
+          }
+        }
+        else if (is_pbes_forall(p))
+        { // p = forall(data::data_expression_list, pbes_expression)
+          data::variable_list data_vars = var(p);
+          pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p),r,yield_internal_rewriter_format);
+          //Remove data_vars which do not occur in expr
+          data::variable_list occurred_data_vars;
+          for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+          {
+            if (detail::occurs_in_varL(expr, *i)) // The var occurs in expr
+            {
+              occurred_data_vars = push_front(occurred_data_vars, *i);
+            }
+          }
+      
+          // If no data_vars
+          if (occurred_data_vars.empty())
+          { result = expr;
+          }
+          else
+          { result=pbes_expr::forall(occurred_data_vars,expr);
+          }
+        }
+        else if (is_pbes_exists(p))
+        { // p = exists(data::data_expression_list, pbes_expression)
+          data::variable_list data_vars = var(p);
+          pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p),r,yield_internal_rewriter_format);
+          //Remove data_vars which does not occur in expr
+          data::variable_list occurred_data_vars;
+          for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+          {
+            if (detail::occurs_in_varL(expr, *i)) // The var occurs in expr
+            {
+               occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
+            }
+          }
+      
+          //If no data_vars remaining
+          if (occurred_data_vars.empty())
+            result = expr;
+          else
+          { result=pbes_expr::exists(occurred_data_vars,expr);
+          }
+        }
+        else if (is_propositional_variable_instantiation(p))
+        { // p is a propositional variable
+          propositional_variable_instantiation propvar = p;
+          core::identifier_string name = propvar.name();
+          data::data_expression_list current_parameters(propvar.parameters());
+          data::data_expression_list parameters;
+          if (yield_internal_rewriter_format)
+          { 
+            for( data::data_expression_list::const_iterator l=current_parameters.begin();
+                 l != current_parameters.end(); ++l)
+            {
+              parameters = atermpp::push_front(parameters, data::data_expression(r->rewrite(*l)));
+              /* parameters = atermpp::push_front(parameters, data::data_expression(r.rewriteInternal(
+                                      r->toRewriteFormat(*l))));  */
+            }
+            parameters = atermpp::reverse(parameters); 
+          }
+          else
+          {
+            for( data::data_expression_list::const_iterator l=current_parameters.begin();
+                 l != current_parameters.end(); ++l)
+            {
+              parameters = atermpp::push_front(parameters, data::data_expression(r->rewrite(*l)));
+            }
+            parameters = atermpp::reverse(parameters);
+          }
+          result = pbes_expression(propositional_variable_instantiation(name, parameters));
+        }
+        else
+        { // p is a data::data_expression
+      
+          if (yield_internal_rewriter_format)
+          {
+            data::data_expression d = (data::data_expression)r->rewriteInternal(r->toRewriteFormat(p));
+            if (detail::is_true_in_internal_rewrite_format(d,r))
+            { result = pbes_expr::true_();
+            }
+            else if (detail::is_false_in_internal_rewrite_format(d,r))
+            { result = pbes_expr::false_();
+            }
+            else
+            { result = d;
+            } 
+          }
+          else
+          {
+            data::data_expression d(r->rewrite(p));
+            if (d == data::sort_bool::true_())
+            { result = pbes_expr::true_();
+            }
+            else if (d == data::sort_bool::false_())
+            { result = pbes_expr::false_();
+            }
+            else
+            { result = d;
+            }
+          }
+        }
+      
+        return result;
+      }
+
+
     //function add_propositional_variable_instantiations_to_indexed_set
     //and translate to pbes expression to a bes_expression in BDD format.
     bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
@@ -1536,9 +1707,10 @@ namespace bes
                        const bool to_bdd,
                        const transformation_strategy strategy,
                        const bool construct_counter_example,
-                       // bes::equations  &bes_equations,
                        const variable_type current_variable,
-                       const bool opt_store_as_tree)
+                       const bool opt_store_as_tree,
+                       const bool opt_precompile_pbes,
+                       boost::shared_ptr<mcrl2::data::detail::Rewriter> rewriter)
     { using namespace mcrl2::pbes_system;
       if (is_propositional_variable_instantiation(p))
       {
@@ -1586,13 +1758,15 @@ namespace bes
       else if (mcrl2::pbes_system::pbes_expr::is_and(p))
       { bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                                 accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
-                                construct_counter_example,current_variable,opt_store_as_tree);
+                                construct_counter_example,current_variable,opt_store_as_tree,
+                                opt_precompile_pbes,rewriter);
         if (is_false(b1))
         { return b1;
         }
         bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                                 accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
-                                construct_counter_example,current_variable,opt_store_as_tree);
+                                construct_counter_example,current_variable,opt_store_as_tree,
+                                opt_precompile_pbes,rewriter);
         if (is_false(b2))
         { return b2;
         }
@@ -1613,14 +1787,16 @@ namespace bes
       {
         bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                                 accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
-                                construct_counter_example,current_variable,opt_store_as_tree);
+                                construct_counter_example,current_variable,opt_store_as_tree,
+                                opt_precompile_pbes,rewriter);
         if (is_true(b1))
         { return b1;
         }
 
         bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                                 accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
-                                construct_counter_example,current_variable,opt_store_as_tree);
+                                construct_counter_example,current_variable,opt_store_as_tree,
+                                opt_precompile_pbes,rewriter);
         if (is_true(b2))
         { return b2;
         }
@@ -1644,8 +1820,16 @@ namespace bes
       else if (pbes_expr::is_false(p))
       { return false_();
       }
-      std::cerr << "TEYPETET " << p << "\n";
-      throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " + pp(p) + "\n");
+      
+      if (opt_precompile_pbes)
+      { throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
+                     pp(rewriter->fromRewriteFormat((ATerm)(ATermAppl)p)) + "\n");
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " + 
+                     pp(p) + "\n");
+      }
       return false_();
     }
 
@@ -1655,9 +1839,11 @@ namespace bes
     /// Global variables
     ///  atermpp::indexed_set variable_index(10000, 50);
     ///  bes_equations;
-    template < typename Container, typename PbesRewriter >
-    boolean_equation_system(const typename mcrl2::pbes_system::pbes<Container>& pbes_spec,
-        PbesRewriter &pbes_rewriter,
+    // template < typename Container, typename PbesRewriter >
+    template < typename Container >
+    boolean_equation_system(
+        const typename mcrl2::pbes_system::pbes<Container>& pbes_spec,
+        mcrl2::data::rewriter &data_rewriter,
         const transformation_strategy opt_strategy=lazy,
         const bool opt_store_as_tree=false,
         const bool opt_construct_counter_example=false,
@@ -1678,7 +1864,10 @@ namespace bes
 
       // Verbose msg: doing naive algorithm
 
-//      data_specification const& data = pbes_spec.data();
+      // Use the classic rewriter by Muck van Weerdenburg.
+      
+      boost::shared_ptr<mcrl2::data::detail::Rewriter> Mucks_rewriter=data_rewriter.get_internal_rewriter();
+      // mcrl2::data::detail::Rewriter *Mucks_rewriter=static_cast<pbes2bool_rewriter>(data_rewriter).get_internal_rewriter();
 
       // Variables in which the result is stored
       propositional_variable_instantiation new_initial_state;
@@ -1702,11 +1891,22 @@ namespace bes
       { todo.push_front(2);
       }
       // Data rewriter
-      pbes_expression p=pbes_rewriter(pbes_spec.initial_state());
-                         /* pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
-                         pbes_rewriter,
-                         opt_precompile_pbes);  */
-      variable_index.put((opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
+#ifdef NDEBUG  // Only in non-debug mode we want highest performance.
+      const bool opt_precompile_pbes=true;
+      const bool internal_opt_store_as_tree=store_as_tree;
+#else
+      const bool opt_precompile_pbes=false;
+      const bool internal_opt_store_as_tree=false;
+      if (opt_store_as_tree)
+      { std::cerr << "Warning. Do not store pbes variables in a tree structure in a debug build of pbes2bool\n";
+      }
+#endif
+      pbes_expression p=// pbes_rewriter(pbes_spec.initial_state());
+                         pbes_expression_rewrite_and_simplify(
+                                pbes_spec.initial_state(),
+                                Mucks_rewriter,
+                                opt_precompile_pbes);  
+      variable_index.put((internal_opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
       if (opt_strategy>=on_the_fly)
       { store_variable_occurrences();
@@ -1739,10 +1939,14 @@ namespace bes
       {
         pbes_equations.put(
                 eqi->variable().name(),
-                pbes_equation_to_aterm(pbes_equation(
-                    eqi->symbol(),
-                    eqi->variable(),
-                    eqi->formula())));
+                pbes_equation_to_aterm(
+                             pbes_equation(
+                                    eqi->symbol(),
+                                    eqi->variable(),
+                                    pbes_expression_rewrite_and_simplify(
+                                             eqi->formula(),
+                                             Mucks_rewriter,
+                                             opt_precompile_pbes))));
         // Rewriting terms here can lead to non termination, in 
         // case the quantifier-all rewriter is used. This kind of rewriting
         // should be done outside this method. 
@@ -1791,11 +1995,10 @@ namespace bes
         {
 
           pbes_equation current_pbeq;
-          atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression_with_variables > sigma;
-          // mcrl2::data::atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression > sigma;
+          // atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression_with_variables > sigma;
 
           // Add the required substitutions
-          if (opt_store_as_tree)
+          if (internal_opt_store_as_tree)
           {  // The current varable instantiation is stored as a tree, and this tree must be unfolded.
              ATerm t=variable_index.get(variable_to_be_processed);
              if (!is_pair(t))
@@ -1812,7 +2015,7 @@ namespace bes
 
                t=ATgetArgument(t,1);
                variable_list::iterator iter=current_pbeq.variable().parameters().begin();
-               assign_variables_in_tree(t,iter,sigma);
+               assign_variables_in_tree(t,iter,Mucks_rewriter,opt_precompile_pbes);
              }
 
           }
@@ -1833,15 +2036,29 @@ namespace bes
                    vlist!=current_pbeq.variable().parameters().end() ; vlist++)
             {
               assert(elist!=current_variable_instantiation.parameters().end());
-              // data_rewriter->setSubstitution(*vlist,*elist);
-              sigma[*vlist]=*elist;
+              if (opt_precompile_pbes)
+              { Mucks_rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
+              }
+              else
+              {
+                Mucks_rewriter->setSubstitution(*vlist,*elist);
+              }
+
+              // sigma[*vlist]=*elist;
               elist++;
             }
             assert(elist==current_variable_instantiation.parameters().end());
           }
 
           pbes_expression new_pbes_expression =
-                pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma));
+                // pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma)); This is the code if the
+                // rewriters work with an acceptable performance.
+                        mcrl2::pbes_system::detail::pbes_expression_substitute_and_rewrite
+                                    ( current_pbeq.formula(),
+                                      pbes_spec.data(),
+                                      Mucks_rewriter,
+                                      opt_precompile_pbes
+                                    );
 
           bes_expression new_bes_expression=
                add_propositional_variable_instantiations_to_indexed_set_and_translate(
@@ -1851,16 +2068,17 @@ namespace bes
                             opt_use_hashtables,
                             opt_strategy,
                             opt_construct_counter_example,
-                            // bes_equations,
                             variable_to_be_processed,
-                            opt_store_as_tree);
+                            internal_opt_store_as_tree,
+                            opt_precompile_pbes,
+                            Mucks_rewriter);
 
           /* No need to clear up sigma, as it was locally declared. */
-          /* Rewriter *data_rewriter=pbes_rewriter.get_rewriter();
+          /* Rewriter *data_rewriter=pbes_rewriter.get_rewriter(); */
           for(variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                    vlist!=current_pbeq.variable().parameters().end() ; vlist++)
-          { data_rewriter->clearSubstitution(*vlist);
-          }  */
+          { Mucks_rewriter->clearSubstitution(*vlist);
+          }  
 
 
           if (opt_strategy>=on_the_fly_with_fixed_points)
@@ -1971,7 +2189,13 @@ namespace bes
           }
         }
         nr_of_processed_variables++;
+//Due to internal consistency checks, pbes2bool is slow in non NDEBUG mode.
+//More messages are therefore required.
+#ifdef NDEBUG
+        if (nr_of_processed_variables % 1000 == 0)
+#else
         if (nr_of_processed_variables % 10 == 0)
+#endif
         {
           if (mcrl2::core::gsVerbose)
           {
@@ -1983,6 +2207,7 @@ namespace bes
       }
       refresh_relevances();
     }
+
 
   private:
 

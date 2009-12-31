@@ -89,6 +89,29 @@ std::string test09 =
     "init X(true,0);              \n"
     ;
 
+// Test case to check a simple forall quantifier elimination.
+std::string test10 =
+    "sort E=struct e1 | e2 | e3;"
+    "pbes mu X=forall x:E.val(x==e1);"
+    "init X;";
+
+// Test case to check a simple exists quantifier elimination.
+std::string test11 =
+    "sort E=struct e1 | e2 | e3;"
+    "pbes mu X=exists x:E.val(x==e1);"
+    "init X;";
+
+// Test case to check a more complex forall quantifier elimination.
+std::string test12 =
+    "pbes mu X=forall x:Nat.val(x<3 => x==1);"
+    "init X;";
+
+// Test case to check a more complex exists quantifier elimination.
+std::string test13 =
+    "pbes mu X=exists x:Nat.val(x<3 => x==1);"
+    "init X;";
+
+
 void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
 {
   pbes<> p = txt2pbes(pbes_spec);
@@ -154,6 +177,10 @@ void test_all()
   test_pbes_solve(test07, false);
   test_pbes_solve(test08, true);
   test_pbes_solve(test09, true);
+  test_pbes_solve(test10, false);
+  test_pbes_solve(test11, true);
+  test_pbes_solve(test12, false);
+  test_pbes_solve(test13, true);
 }
 
 int test_main(int argc, char** argv)

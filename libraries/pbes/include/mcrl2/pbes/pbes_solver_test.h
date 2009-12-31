@@ -56,7 +56,9 @@ bool pbes2_bool_test(pbes< Container > &pbes_spec)
   const bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,data::data_enumerator<> >
                           pbesr(datarv, datae, enumerate_infinite_sorts);
-  ::bes::boolean_equation_system bes_equations(pbes_spec, pbesr);
+  // The use of a pbesrewriter is switched off, because the pbesrewriter is too slow for the time being. 
+  // ::bes::boolean_equation_system bes_equations(pbes_spec, pbesr); 
+  ::bes::boolean_equation_system bes_equations(pbes_spec, datar);
   return solve_bes(bes_equations,false,false);
 } 
 

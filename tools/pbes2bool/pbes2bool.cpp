@@ -234,8 +234,20 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
             data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p, false)), rewrite_strategy()) :
             data::rewriter(p.data(), rewrite_strategy());
 
-      ::bes::boolean_equation_system bes_equations;
+      ::bes::boolean_equation_system bes_equations=
+                    ::bes::boolean_equation_system(
+                            p,
+                            datar,
+                            opt_strategy,
+                            opt_store_as_tree,
+                            opt_construct_counter_example,
+                            opt_use_hashtables);
+
+      
       // pbes rewriter
+      /* The code below can be reactivated, once the pbes_rewriters deliver acceptable performance.
+         As it stands their performance is so bad, that they cannot be used.
+
       switch (rewriter_type())
       {
         case simplify:
@@ -243,7 +255,8 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
           simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
           pbesrewr(p,pbesr); // Simplify p such that it does not have to be done
                              // repeatedly.
-          bes_equations=::bes::boolean_equation_system(p,
+          bes_equations=::bes::boolean_equation_system(
+                            p,
                             pbesr,
                             opt_strategy,
                             opt_store_as_tree,
@@ -262,7 +275,8 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
                           pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p,pbesr);  // Simplify p such that this does not need to be done
                               // repeatedly. 
-          bes_equations=::bes::boolean_equation_system(p,
+          bes_equations=::bes::boolean_equation_system(
+                            p,
                             pbesr,
                             opt_strategy,
                             opt_store_as_tree,
@@ -286,7 +300,8 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
                                                              data::data_enumerator<> >
                           pbesr2(datarv, datae, enumerate_infinite_sorts2);
-          bes_equations=::bes::boolean_equation_system(p,
+          bes_equations=::bes::boolean_equation_system(
+                            p,
                             pbesr2,
                             opt_strategy,
                             opt_store_as_tree,
@@ -302,7 +317,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
         {
           throw mcrl2::runtime_error("The prover based rewriter cannot be used\n");
         }
-      }
+      } */
 
       if (opt_outputformat == "cwi")
       { // in CWI format only if the result is a BES, otherwise Binary

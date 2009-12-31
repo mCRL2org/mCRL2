@@ -106,6 +106,17 @@ namespace data {
       {
         m_rewriter->removeRewriteRule(eq);
       }
+
+      /// \brief Yields the underlying rewriter made by Muck van Weerdenburg.
+      /// \details The underlying rewriter is for some applications much faster
+      /// than the standard rewriter. Using this function access to the underlying
+      /// rewriter is possible. However, its use is discouraged, and with time
+      /// the performance of the standard rewriter is expected to increase
+      /// and this function will become obsolete. Added by Jan Friso Groote on 
+      /// December 30, 2009.
+      boost::shared_ptr<mcrl2::data::detail::Rewriter> get_internal_rewriter()
+      { return m_rewriter;
+      }
   };
 
   /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
@@ -192,8 +203,9 @@ namespace data {
   /// \attention As long as normalisation of sorts remains necessary, the data
   /// specification object used for construction *must* exist during the
   /// lifetime of the rewriter object.
+
   class rewriter: public basic_rewriter<data_expression>
-  {
+  { 
     public:
       /// \brief Constructor.
       /// \param[in] r a rewriter.
