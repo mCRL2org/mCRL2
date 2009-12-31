@@ -19,8 +19,13 @@ void free_unused_blocks();
 /* Basic memory management functions mimicing the functionality of malloc, calloc, realloc and free
  */
 
+static int total_count=0;
+
 void *AT_malloc(size_t size)
-{
+{ static int count=0;
+  total_count+=size;
+  // fprintf(stderr,"AT_Malloc %d (%d)\n",size,total_count);
+  // assert(size!=1048576 || count++<10);
   void* ptr=malloc(size);
   if (!ptr) {
     free_unused_blocks();
@@ -30,7 +35,10 @@ void *AT_malloc(size_t size)
 }
 
 void *AT_calloc(size_t nmemb, size_t size)
-{
+{ static int count=0;
+  total_count+=size;
+  // fprintf(stderr,"AT_Calloc %d (%d)\n",size,total_count);
+  // assert(size!=65576 || count++<200);
   void* ptr=calloc(nmemb, size);
   if (!ptr) {
     free_unused_blocks();
@@ -41,6 +49,7 @@ void *AT_calloc(size_t nmemb, size_t size)
 
 void *AT_realloc(void *ptr, size_t size)
 {
+  // fprintf(stderr,"AT_Realloc %d\n",size);
   void* newptr=realloc(ptr, size);
   if (!newptr) {
     free_unused_blocks();
@@ -51,6 +60,7 @@ void *AT_realloc(void *ptr, size_t size)
 
 void AT_free(void* ptr)
 {
+  // fprintf(stderr,"AT_Free\n");
   free(ptr);
 }
 
@@ -79,7 +89,9 @@ size_t new_block_size(size_t old_size, size_t min_size, size_t max_size)
     return old_size;
     
   /* Reserve a bit extra space for future growth */
-  m = max_size + (max_size - old_size)/2;
+  // m = max_size + (max_size - old_size)/2;  JFG ODD TO RESERVE 1.5 times the memory.
+  // tenzij er sprake is van groeiend geheugen.
+  m = max_size;
   if (m < MIN_BLOCK_SIZE)
     return MIN_BLOCK_SIZE;
     
@@ -163,6 +175,8 @@ ATprotected_block find_free_block(size_t minsize, size_t maxsize)
   if (!block) {
     /* No existing block matches, create a new block */
     blocksize = new_block_size(0, minsize, maxsize);
+
+    // ATfprintf(stderr,"Allocate a new block of size %d   %d\nmaxsize %d minsize %d\n",blocksize,low_memory,maxsize, minsize);
     
     block = (ATprotected_block) AT_malloc(malloc_size(blocksize));
     if ((!block) && (blocksize > maxsize)) {
@@ -277,6 +291,7 @@ ATprotected_block resize_block(ATprotected_block block, size_t minsize, size_t m
   size_t blocksize = new_block_size(block->size, minsize, maxsize);
 
   if (blocksize != block->size) {
+  // ATfprintf(stderr,"Resize a block from %d to size %d   %d\nMaxsize %d Minsize %d\n",block->size,blocksize,low_memory,maxsize,minsize);
     /* New block size differs from old block, reallocate the block */
     newblock = (ATprotected_block)AT_realloc((void*)block, malloc_size(blocksize));
 
