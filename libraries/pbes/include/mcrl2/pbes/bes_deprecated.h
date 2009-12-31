@@ -1639,27 +1639,20 @@ namespace bes
         { // p is a propositional variable
           propositional_variable_instantiation propvar = p;
           core::identifier_string name = propvar.name();
-          data::data_expression_list current_parameters(propvar.parameters());
           data::data_expression_list parameters;
           if (yield_internal_rewriter_format)
           { 
+            data::data_expression_list current_parameters(propvar.parameters());
             for( data::data_expression_list::const_iterator l=current_parameters.begin();
                  l != current_parameters.end(); ++l)
             {
-              parameters = atermpp::push_front(parameters, data::data_expression(r->rewrite(*l)));
-              /* parameters = atermpp::push_front(parameters, data::data_expression(r.rewriteInternal(
-                                      r->toRewriteFormat(*l))));  */
+              parameters = atermpp::push_front(parameters, data::data_expression(r->rewriteInternal(
+                                      r->toRewriteFormat(*l))));  
             }
             parameters = atermpp::reverse(parameters); 
           }
           else
-          {
-            for( data::data_expression_list::const_iterator l=current_parameters.begin();
-                 l != current_parameters.end(); ++l)
-            {
-              parameters = atermpp::push_front(parameters, data::data_expression(r->rewrite(*l)));
-            }
-            parameters = atermpp::reverse(parameters);
+          { parameters=r->rewriteList(propvar.parameters());
           }
           result = pbes_expression(propositional_variable_instantiation(name, parameters));
         }
@@ -1694,6 +1687,7 @@ namespace bes
           }
         }
       
+        // ATfprintf(stderr,"RESULT PBES Rewrite and Substitute %t\n",(ATermAppl)result);
         return result;
       }
 
@@ -1893,7 +1887,7 @@ namespace bes
       // Data rewriter
 #ifdef NDEBUG  // Only in non-debug mode we want highest performance.
       const bool opt_precompile_pbes=true;
-      const bool internal_opt_store_as_tree=store_as_tree;
+      const bool internal_opt_store_as_tree=opt_store_as_tree;
 #else
       const bool opt_precompile_pbes=false;
       const bool internal_opt_store_as_tree=false;
@@ -1906,6 +1900,7 @@ namespace bes
                                 pbes_spec.initial_state(),
                                 Mucks_rewriter,
                                 opt_precompile_pbes);  
+      ATfprintf(stderr,"INITIAL PBES %t\n",(ATermAppl)p);
       variable_index.put((internal_opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
       if (opt_strategy>=on_the_fly)

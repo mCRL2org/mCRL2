@@ -592,7 +592,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     if (use_internal_rewrite_format)
     { 
       atermpp::term_list< data::data_expression > expressions(r->rewriteInternalList(
-      atermpp::term_list< data::data_expression >(current_parameters.begin(), current_parameters.end())));
+            atermpp::term_list< data::data_expression >(current_parameters.begin(), current_parameters.end())));
       parameters=data::data_expression_list(expressions.begin(), expressions.end());
     }
     else
