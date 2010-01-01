@@ -242,6 +242,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             if ( term.sort()!=sort_bool::bool_())
             { throw mcrl2::runtime_error("expression is not of sort Bool.");
             }
+            term=rewr(term);
             for (classic_enumerator< > i =
                  e.make(data::convert < std::set <variable > >(vars),rewr,term);
                                                           i != classic_enumerator<>() ; ++i)

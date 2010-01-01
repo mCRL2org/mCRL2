@@ -141,6 +141,7 @@ namespace data {
     // Undo sort renamings for compatibility with type checker
     // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     data_vars = atermpp::reverse(data_vars);
+    data_vars = data_spec.normalise_sorts(data_vars);
 
     // Check that variables do not have equal names.
     for(variable_list::const_iterator v=data_vars.begin(); v!=data_vars.end(); ++v)
@@ -215,7 +216,7 @@ namespace data {
   ///  \return the variable corresponding to the input istream.
   inline
   variable parse_variable(const std::string& text,
-                                      const data_specification& data_spec = detail::default_specification())
+                                   const data_specification& data_spec = detail::default_specification())
   {
     atermpp::vector < variable > variable_store;
 
@@ -280,19 +281,18 @@ namespace data {
       // the name of the variable is quoted, which is what the typechecker expects.
       variables.put(atermpp::aterm_string(v->name()),v->sort());
     }
-    std::cerr << "Parsed data expression " << data_expr << "\n";
-    /* data_expr = core::type_check_data_expr(data_expr, 0,
-                 mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                        mcrl2::data::remove_all_system_defined(data_spec), true), variables); */
+
+    // The typechecker replaces untyped identifiers by typed identifiers (when typechecking 
+    // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
     data_expr = core::type_check_data_expr(data_expr, 0,
                  mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true), variables);
     if (data_expr == 0)
       throw mcrl2::runtime_error("error type checking data expression");
-    std::cerr << "Typed data expression " << data_expr << "\n";
-    // Undo sort renamings for compatibility with type checker
-    // data_expr = data::detail::undo_compatibility_renamings(data_spec, data_expr);
+
     detail::internal_format_conversion_helper converter(data_spec);
-    return converter(data_expression(data_expr));
+    const data_expression d(converter(data_expression(data_expr)));  // replace list/set/bag enumerations, and
+                                                                     // number denotations.
+    return data_spec.normalise_sorts(d);                             // normalise sort aliases.
   }
 
   /// \brief Parses and type checks a data expression.
@@ -371,7 +371,7 @@ namespace data {
       throw mcrl2::runtime_error("error type checking sort expression");
     // Undo sort renamings for compatibility with type checker
     // sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
-    return sort_expression(sort_expr);
+    return data_spec.normalise_sorts(sort_expression(sort_expr));
   }
 
   /// \brief Parses and type checks a sort expression.

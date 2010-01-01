@@ -41,11 +41,12 @@ namespace mcrl2 {
       };
 
       template < >
-      struct compatibility_evaluator< rewriter > : public rewriter {
+      struct compatibility_evaluator< rewriter > : public rewriter 
+      {
         typedef compatibility_evaluator actual_type;
 
-        compatibility_evaluator(rewriter const& e) : rewriter(e) {
-        }
+        compatibility_evaluator(rewriter const& e) : rewriter(e) 
+        {}
 
         atermpp::aterm convert_to(data_expression const& e) const {
           return this->m_rewriter->toRewriteFormat(basic_rewriter< data_expression >::implement(e));
@@ -55,8 +56,8 @@ namespace mcrl2 {
           return basic_rewriter< data_expression >::reconstruct(this->m_rewriter->fromRewriteFormat(e));
         }
 
-        detail::Rewriter& get_rewriter() {
-          return *const_cast< detail::Rewriter* >(m_rewriter.get());
+        detail::Rewriter& get_rewriter() const
+        { return *const_cast< detail::Rewriter* >(m_rewriter.get());
         }
       };
 
@@ -143,13 +144,26 @@ namespace mcrl2 {
           // do not use directly, use the create method
           classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
                              expression_type const& c, substitution_type const& s, Evaluator const&) :
-                m_shared_context(context), m_generator(m_shared_context->m_enumerator.getInfo()), m_evaluator(context->m_evaluator), m_condition(c), m_substitution(s) {
-          }
+                m_shared_context(context), 
+                m_generator(m_shared_context->m_enumerator.getInfo()), 
+                m_evaluator(context->m_evaluator), 
+                m_condition(c), m_substitution(s) 
+          {}
 
           /// \param[in] v iterator range of the enumeration variables
           template < typename Container >
           bool initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type* = 0) 
-          { m_shared_context->m_enumerator.findSolutions(convert(v), m_evaluator.convert_to(m_condition), false, &m_generator); // Changed one but last argument into true JFG 7/12/2009. And changed it back to false on 8/12/2009. Tools like lpssuminst require that an enumeration is made for all elements satisfying the condition, except for those where the condition is false. 
+          { 
+            m_condition=(data_expression)(m_evaluator.get_rewriter()).rewrite((ATermAppl)m_condition);
+            // Changed one but last argument into true JFG 7/12/2009. And changed it back to false on 8/12/2009. 
+            // Tools like lpssuminst require that an enumeration is made for all elements satisfying the condition, 
+            // except for those where the condition is false. 
+            // Add a rewrite command to take
+            m_shared_context->m_enumerator.findSolutions(
+                                   convert(v), 
+                                   m_evaluator.convert_to(m_condition), 
+                                   false, 
+                                   &m_generator); 
 
             return increment();
           }
@@ -162,28 +176,31 @@ namespace mcrl2 {
                                                  m_generator(other.m_generator),
                                                  m_evaluator(other.m_evaluator),
                                                  m_condition(other.m_condition),
-                                                 m_substitution(other.m_substitution) {
-          }
+                                                 m_substitution(other.m_substitution) 
+          {}
 
-          bool increment() {
+          bool increment() 
+          {
 
             ATermList assignment_list;
 
-            while (m_generator.next(&assignment_list)) {
+            while (m_generator.next(&assignment_list)) 
+            {
               /* if (m_generator.errorOccurred()) {
               //  throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
               } */
 
               for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
-                                 i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
+                                 i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) 
+              {
                 assert(static_cast< variable_type >((*i)(0)).sort() == m_evaluator.convert_from((*i)(1)).sort());
 
                 m_substitution[static_cast< variable_type >((*i)(0))] =
                                m_evaluator.convert_from((*i)(1));
               }
-
               // Only do filtering, termination detection is taken care of by underlying implementation
-              if (Selector::test(m_evaluator(m_condition, m_substitution))) {
+              if (Selector::test(m_evaluator(m_condition, m_substitution))) 
+              {
                 return true;
               }
             }

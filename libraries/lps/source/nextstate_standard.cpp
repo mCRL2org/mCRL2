@@ -646,7 +646,7 @@ ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
                                 case GS_STATE_TREE:
 //                                      stateargs[i] = getTreeElement(old,i);
                                         stateargs[i] = info.m_rewriter.internally_associated_value((ATermAppl) ATgetFirst(l));
-                                        if ( ATisEqual(stateargs[i], ATgetFirst(l)) ) // Make sure substitutions where not reset by enumerator
+                                        if ( ATisEqual(stateargs[i], ATgetFirst(l)) ) // Make sure substitutions were not reset by enumerator
                                         {
                                                 set_substitutions();
                                                 stateargs[i] = info.m_rewriter.internally_associated_value((ATermAppl) ATgetFirst(l));
