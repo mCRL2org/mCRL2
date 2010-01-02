@@ -252,7 +252,8 @@ using namespace mcrl2::core::detail;
   // Class Confluence_Checker - Functions declared private ----------------------------------------
 
     void Confluence_Checker::save_dot_file(int a_summand_number_1, int a_summand_number_2) {
-      if (f_dot_file_name.empty()) {
+      if (!f_dot_file_name.empty()) 
+      {
         std::ostringstream v_file_name(f_dot_file_name);
 
         v_file_name << "-" << a_summand_number_1 << "-" << a_summand_number_2 << ".dot";
