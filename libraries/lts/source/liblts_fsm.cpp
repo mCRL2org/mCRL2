@@ -242,7 +242,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     ATermList vals = ATindexedSetElements(set[i]);
 
     if ( (params == NULL) || ATisEmpty(params) )
-    {
+    { 
       if ( type == lts_fsm || type == lts_dot )
       {
         ATermAppl type = (ATermAppl) ATgetArgument(ATAgetFirst(vals),1);
@@ -250,44 +250,47 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
       } else {
         os << "unknown" << i << "(" << ATgetLength(vals) << ") unknown ";
       }
-    } else {
+    } 
+    else 
+    { 
       if ( type == lts_mcrl )
       {
         std::string s;
         s = ATwriteToString(ATgetFirst(ATLgetFirst(params)));
-        s = s.substr(1,s.size()-3);
+        s = s.substr(1,s.size()-2);
         os << s << "(" << ATgetLength(vals) << ") ";
         s = ATwriteToString(ATgetFirst(ATgetNext(ATLgetFirst(params))));
         s = s.substr(1,s.size()-2);
-        os << s << " ";
+        os << s;
       } else { // type == lts_mcrl2
         ATermAppl param = ATAgetFirst(params);
         assert(gsIsDataVarId(param));
         PrintPart_CXX(os,ATgetArgument(param, 0),ppDefault);
         os << "(" << ATgetLength(vals) << ") ";
-        os << "\"";
         PrintPart_CXX(os,ATgetArgument(param, 1),ppDefault);
-        os << "\" ";
       }
 
       params = ATgetNext(params);
     }
 
     if ( type == lts_mcrl2 )
-    {
+    { 
       for(; !ATisEmpty(vals); vals=ATgetNext(vals))
       {
         os << " \"";
         PrintPart_CXX(os,ATgetFirst(vals),ppDefault);
         os << "\"";
       }
-    } else if ( type == lts_fsm || type == lts_dot )
-    {
+    } 
+    else if ( type == lts_fsm || type == lts_dot )
+    { 
       for(; !ATisEmpty(vals); vals=ATgetNext(vals))
       {
         os << " " << ATwriteToString(ATgetArgument(ATAgetFirst(vals),0));
       }
-    } else {
+    } 
+    else 
+    { 
       for(; !ATisEmpty(vals); vals=ATgetNext(vals))
       {
         os << " \"" << ATwriteToString(ATgetFirst(vals)) << "\"";

@@ -1687,7 +1687,6 @@ namespace bes
           }
         }
       
-        // ATfprintf(stderr,"RESULT PBES Rewrite and Substitute %t\n",(ATermAppl)result);
         return result;
       }
 
@@ -1900,7 +1899,6 @@ namespace bes
                                 pbes_spec.initial_state(),
                                 Mucks_rewriter,
                                 opt_precompile_pbes);  
-      ATfprintf(stderr,"INITIAL PBES %t\n",(ATermAppl)p);
       variable_index.put((internal_opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
       if (opt_strategy>=on_the_fly)
