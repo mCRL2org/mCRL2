@@ -34,7 +34,6 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/map_substitution.h"
 
 
@@ -2206,24 +2205,34 @@ namespace bes
 
     void print_tree_rec(const char c,
                         ATerm t,
+                        const bool opt_precompile_pbes,
+                        boost::shared_ptr<mcrl2::data::detail::Rewriter> rewriter,
                         std::ostream &f)
     { using namespace mcrl2::data;
       if (is_pair(t))
-      { print_tree_rec(',',ATgetArgument(t,0),f);
-        print_tree_rec(',',ATgetArgument(t,1),f);
+      { print_tree_rec(c,ATgetArgument(t,0),opt_precompile_pbes,rewriter,f);
+        print_tree_rec(',',ATgetArgument(t,1),opt_precompile_pbes,rewriter,f);
       }
       else
-      { data_expression t1(t);
-        f << c << mcrl2::core::pp(t1);
+      { if (opt_precompile_pbes)
+        { data_expression t1(rewriter->fromRewriteFormat((ATerm)t));
+          f << c << pp(t1);
+        }
+        else
+        { data_expression t1(t);
+          f << c << pp(t1);
+        }
       }
     }
 
 
     void print_counter_example_rec(bes::variable_type current_var,
-                                          std::string indent,
-                                          std::vector<bool> &already_printed,
-                                          const bool opt_store_as_tree,
-                                          std::ostream &f)
+                                   std::string indent,
+                                   std::vector<bool> &already_printed,
+                                   bool opt_precompile_pbes,
+                                   boost::shared_ptr<mcrl2::data::detail::Rewriter> rewriter,
+                                   const bool opt_store_as_tree,
+                                   std::ostream &f)
     { using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
       if (opt_store_as_tree)
@@ -2233,7 +2242,8 @@ namespace bes
         }
         else
         { f << ATgetName(ATgetAFun(ATgetArgument(t,0)));
-          print_tree_rec('(',ATgetArgument(t,1),f);
+          print_tree_rec('(',ATgetArgument(t,1),opt_precompile_pbes,rewriter,f);
+          f << ")";
         }
       }
       else
@@ -2243,13 +2253,18 @@ namespace bes
         data_expression_list tl=X.parameters();
         std::string s=X.name();
         f << s;
-        for(data_expression_list::iterator t=tl.begin();
-              t!=tl.end(); t++)
-        { f << (t==tl.begin()?"(":",");
+        data_expression_list::iterator t;
+        for(t=tl.begin(); t!=tl.end(); ++t)
+        { f << ((t==tl.begin())?"(":",");
+          if (opt_precompile_pbes)
+          { ATermAppl term=*t;
+            f << pp(rewriter->fromRewriteFormat((ATerm)term));
+          }
+          else
           { f << pp(*t);
           }
         }
-        f << ")";
+        f << ((t==tl.begin())?"":")"); // No closing bracket if there are tl.begin()==tl.end()
       }
 
       if (already_printed[current_var])
@@ -2265,20 +2280,25 @@ namespace bes
           f << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ;
           print_counter_example_rec((*walker).get_variable(),indent+"  ",
                                 already_printed,
+                                opt_precompile_pbes,
+                                rewriter,
                                 opt_store_as_tree,f);
         }
       }
     }
 
   public:
-    void print_counter_example( const bool opt_store_as_tree,
+    void print_counter_example( const bool opt_precompile_pbes,
+                                boost::shared_ptr<mcrl2::data::detail::Rewriter> rewriter,
+                                const bool opt_store_as_tree,
                                 const std::string filename)
-    { std::ofstream f;
+    { std::cerr << "Print counter example " << opt_precompile_pbes << "  " << opt_store_as_tree << "\n";
+      std::ofstream f;
       std::vector <bool> already_printed(nr_of_variables()+1,false);
       if (filename.empty())
       { // Print the counterexample to cout.
         std::cout << "Below the justification for this outcome is listed\n1: ";
-        print_counter_example_rec(2,"  ",already_printed,opt_store_as_tree,std::cout);
+        print_counter_example_rec(2,"  ",already_printed,opt_precompile_pbes,rewriter,opt_store_as_tree,std::cout);
       }
       if (f!=NULL)
       {
@@ -2286,7 +2306,7 @@ namespace bes
         {
           std::ofstream f(filename.c_str());
           f << "Below the justification for this outcome is listed\n1: ";
-          print_counter_example_rec(2,"  ",already_printed,opt_store_as_tree,f);
+          print_counter_example_rec(2,"  ",already_printed,opt_precompile_pbes,rewriter,opt_store_as_tree,f);
           f.close();
         }
         catch (std::exception& e)

@@ -343,9 +343,14 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
                         << ( result ? "true" : "false") << "\n";
 
       if (opt_construct_counter_example)
-      { bes_equations.print_counter_example(opt_store_as_tree,opt_counter_example_file);
+#ifdef NDEBUG // Precompile the data terms to compiler format.
+      { bes_equations.print_counter_example(true,datar.get_internal_rewriter(),opt_store_as_tree,opt_counter_example_file);
       }
-
+#else // Use data terms in standard format, and do not allow a tree format to store arguments, as this is not accepted
+      // by the internal consistency checks.
+      { bes_equations.print_counter_example(false,datar.get_internal_rewriter(),false,opt_counter_example_file);
+      }
+#endif
       return true;
     }
 
