@@ -22,7 +22,7 @@ void free_unused_blocks();
 static int total_count=0;
 
 void *AT_malloc(size_t size)
-{ static int count=0;
+{ //static int count=0;
   total_count+=size;
   // fprintf(stderr,"AT_Malloc %d (%d)\n",size,total_count);
   // assert(size!=1048576 || count++<10);
@@ -35,7 +35,7 @@ void *AT_malloc(size_t size)
 }
 
 void *AT_calloc(size_t nmemb, size_t size)
-{ static int count=0;
+{ //static int count=0;
   total_count+=size;
   // fprintf(stderr,"AT_Calloc %d (%d)\n",size,total_count);
   // assert(size!=65576 || count++<200);
