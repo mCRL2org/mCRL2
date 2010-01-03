@@ -19,11 +19,11 @@ void free_unused_blocks();
 /* Basic memory management functions mimicing the functionality of malloc, calloc, realloc and free
  */
 
-static int total_count=0;
+//static int total_count=0;
 
 void *AT_malloc(size_t size)
 { //static int count=0;
-  total_count+=size;
+  //total_count+=size;
   // fprintf(stderr,"AT_Malloc %d (%d)\n",size,total_count);
   // assert(size!=1048576 || count++<10);
   void* ptr=malloc(size);
@@ -36,7 +36,7 @@ void *AT_malloc(size_t size)
 
 void *AT_calloc(size_t nmemb, size_t size)
 { //static int count=0;
-  total_count+=size;
+  //total_count+=size;
   // fprintf(stderr,"AT_Calloc %d (%d)\n",size,total_count);
   // assert(size!=65576 || count++<200);
   void* ptr=calloc(nmemb, size);
