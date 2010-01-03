@@ -8,14 +8,15 @@
     ]
 ]
 
+[def __boost__     [@http://www.boost.org/ Boost C++ Libraries ]]
+[def __gl2ps__     [@http://www.geuz.org/gl2ps/ Gl2ps ]]
+[def __ticpp__     [@http://code.google.com/p/ticpp/ TinyXML++ ]]
+[def __tr__        [@http://www.mesa3d.org/brianp/TR.html TR ]]
+
 [section: Introduction]
-The mCRL2 codebase is organized as a set of libraries, located in the directory
-<MCRL2ROOT>/libraries. Each library has the following directory structure:
-...
-
-[endsect]
-
-[section: Libraries Overview]
+The mCRL2 Library consists of header files and source files that need to be linked.
+This section documents the structure of the files. The mCRL2 Library contains
+nine sub-libraries plus a directory with 3rd party software.
 
 [table Libraries
     [ [Name]                     [Contents]          ]
@@ -23,14 +24,33 @@ The mCRL2 codebase is organized as a set of libraries, located in the directory
     [ [ Core Library ] [ Common functionality ] ]
     [ [ Data Library ] [ The data language and constructs ] ]
     [ [ LPS Library ] [ Linear Processes ] ]
+    [ [ LTS Library ] [ Labeled Transition Systems ] ]
     [ [ Process Library ] [ Processes ] ]
     [ [ PBES Library ] [ Parameterized Boolean Equation Systems ] ]
+    [ [ Trace Library ] [ Action traces ] ]
     [ [ Utilities Library ] [ Utilities ] ]
 ]
 
-[note It is not very clear what the difference is between the  
-Core Library and the Utilities Library.
+[note It is not clear what the difference is between the  
+Core Library and the Utilities Library. May be they should be merged.
 ]
+
+[note It is not clear why the Trace Library exists outside of the LTS Library.
+]
+
+[table 3rd party software
+    [ [Name]                     [Contents]          ]
+    [ [ ATerm Library ] [ Term library ] ]
+    [ [ __boost__ ] [ Peer-reviewed portable C++ source libraries ] ]
+    [ [ __gl2ps__ ] [ OpenGL to PostScript printing ] ]
+    [ [ SVC ] [ File Format for Labeled Transition Systems ] ]
+    [ [ __ticpp__ ] [ XML parser ] ]
+    [ [ __tr__ ] [ OpenGL Tile Rendering Library ] ]
+]
+
+Each library is organized as a set of libraries, located in the directory
+<MCRL2ROOT>/libraries. Each library has the following directory structure:
+...
 
 [endsect]
 
