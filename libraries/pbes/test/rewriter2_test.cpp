@@ -135,11 +135,11 @@ void test_simplify(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string ex
     expr2,
     parser(),
     print<pbes_expression>,
+	  std::equal_to<pbes_expression>(),
 	  R1,
-	  R2,
     "simplify",
-    "datarewr",
-	  std::equal_to<pbes_expression>()
+	  R2,
+    "datarewr"
   );
 }
 
@@ -207,11 +207,11 @@ void test_enumerate_quantifiers(Rewriter1 R1, Rewriter2 R2, std::string expr1, s
     expr2,
     parser(),
     print<pbes_expression>,
+	  std::equal_to<pbes_expression>(),
 	  R1,
-	  R2,
     "quantify",
-    "datarewr",
-	  std::equal_to<pbes_expression>()
+	  R2,
+    "datarewr"
   );
 }
 

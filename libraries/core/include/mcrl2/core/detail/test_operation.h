@@ -35,11 +35,11 @@ namespace detail {
       const std::string& expr2,
       Parser parse,
       Printer print,
+  	  Compare comp,
   	  Operation1 op1,
-  	  Operation2 op2,
       const std::string& opname1,
-      const std::string& opname2,
-  	  Compare comp
+  	  Operation2 op2,
+      const std::string& opname2
     )
   {
   	typedef typename Compare::first_argument_type T;
@@ -59,8 +59,31 @@ namespace detail {
     }
     std::cout << "x"               << " = " << print(x1) << std::endl;
     std::cout << "y"               << " = " << print(x2) << std::endl;
-    std::cout << (opname1 + "(x)") << " = " << print(f1) << std::endl;
-    std::cout << (opname2 + "(y)") << " = " << print(f2) << std::endl;
+    if (!opname1.empty())
+    {
+      std::cout << (opname1 + "(x)") << " = " << print(f1) << std::endl;
+    }
+    if (!opname2.empty())
+    {
+      std::cout << (opname2 + "(y)") << " = " << print(f2) << std::endl;
+    }
+  }
+
+  /// \brief Generic function that applies an operation to an object, and compares it
+  /// with another object.
+  template <typename Parser, typename Printer, typename Operation, typename Compare>
+  void test_operation(
+      const std::string& expr1,
+      const std::string& expr2,
+      Parser parse,
+      Printer print,
+  	  Compare comp,
+  	  Operation op,
+      const std::string& opname
+    )
+  {
+  	typedef typename Compare::first_argument_type T;
+  	return test_operation(expr1, expr2, parse, print, comp, op, opname, identity<T>, "");
   }
 
 } // namespace detail

@@ -223,11 +223,11 @@ void test_normalize_and_or_equality(std::string expr1, std::string expr2)
     expr2,
     parse,
     print,
-	  detail::normalize_and_or,
+	  std::equal_to<pbes_expression>(),
 	  detail::normalize_and_or,
     "normalize_and_or",
-    "normalize_and_or",
-	  std::equal_to<pbes_expression>()
+	  detail::normalize_and_or,
+    "normalize_and_or"
   );
 }
 
