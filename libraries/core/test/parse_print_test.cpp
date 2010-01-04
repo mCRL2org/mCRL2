@@ -16,7 +16,8 @@
 
 #include <sstream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
+//#include "mcrl2/core/typecheck.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/messaging.h"
@@ -33,11 +34,15 @@ void test_data_expression(const std::string &de_in, bool test_type_checker = tru
   BOOST_CHECK(de_in == de_out);
 
   if (test_type_checker) {
-    de_aterm = mcrl2::core::type_check_data_expr(de_aterm, NULL, mcrl2::data::detail::data_specification_to_aterm_data_spec(mcrl2::data::data_specification()));
-    BOOST_REQUIRE(de_aterm != NULL);
+    //de_aterm = mcrl2::core::type_check_data_expr(de_aterm, NULL, mcrl2::data::detail::data_specification_to_aterm_data_spec(mcrl2::data::data_specification()));
+    //BOOST_REQUIRE(de_aterm != NULL);
+
+    mcrl2::data::data_expression x(de_aterm);
+    mcrl2::data::type_check(x);
+    de_aterm = x;
    
     de_out = mcrl2::core::PrintPart_CXX((ATerm) de_aterm);
-    //std::cerr << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+    std::cerr << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
     BOOST_CHECK(de_in == de_out);
   }
 }

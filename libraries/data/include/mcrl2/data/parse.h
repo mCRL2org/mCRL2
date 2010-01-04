@@ -25,7 +25,8 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
+//#include "mcrl2/core/typecheck.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/print.h"
@@ -284,15 +285,20 @@ namespace data {
 
     // The typechecker replaces untyped identifiers by typed identifiers (when typechecking 
     // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
-    data_expr = core::type_check_data_expr(data_expr, 0,
-                 mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true), variables);
-    if (data_expr == 0)
-      throw mcrl2::runtime_error("error type checking data expression");
+    //data_expr = core::type_check_data_expr(data_expr, 0,
+    //             mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true), variables);
+    //if (data_expr == 0)
+    //  throw mcrl2::runtime_error("error type checking data expression");
+    data_expression t(data_expr);
+    type_check(t, begin, end, data_spec);
 
     detail::internal_format_conversion_helper converter(data_spec);
-    const data_expression d(converter(data_expression(data_expr)));  // replace list/set/bag enumerations, and
-                                                                     // number denotations.
-    return data_spec.normalise_sorts(d);                             // normalise sort aliases.
+    //const data_expression d(converter(data_expression(data_expr)));  // replace list/set/bag enumerations, and
+    //                                                                 // number denotations.
+
+    // replace list/set/bag enumerations, and normalise sort aliases.
+    t = converter(t);
+    return data_spec.normalise_sorts(t);
   }
 
   /// \brief Parses and type checks a data expression.

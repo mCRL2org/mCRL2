@@ -13,7 +13,9 @@
 #define MCRL2_DATA_TYPECHECK_H
 
 #include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 
 namespace mcrl2 {
 
@@ -32,9 +34,51 @@ namespace mcrl2 {
       t = core::type_check_sort_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
       if (!t)
       {
-        throw mcrl2::runtime_error("could not type check " + core::pp(data_spec));
+        throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
       }
       sort_expr = sort_expression(t);
+    }
+
+    /** \brief     Type check a data expression.
+     *  Throws an exception if something went wrong.
+     *  \param[in] data_expr A data expression that has not been type checked.
+     *  \param[in] first The start of a variables that can occur in the data expression.
+     *  \param[in] last  The end of the potentially free variables in the expression.
+     *  \param[in] data_spec The data specification that is used for type checking. 
+     *  \post      data_expr is type checked.
+     **/
+    template <typename VariableIterator>
+    void type_check(data_expression& data_expr,
+                    const VariableIterator first,
+                    const VariableIterator last,
+                    const data_specification& data_spec = data_specification())
+    {
+      // TODO: replace all this nonsense code by a proper type check implementation
+      ATermAppl t = data_expr;
+
+      atermpp::table variables;
+      for (VariableIterator v = first; v != last; ++v)
+      {
+      	// The application of atermpp::aterm_string is necessary to take care that
+        // the name of the variable is quoted, which is what the typechecker expects.
+        variables.put(atermpp::aterm_string(v->name()),v->sort());
+      }
+
+      // The typechecker replaces untyped identifiers by typed identifiers (when typechecking 
+      // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
+      t = core::type_check_data_expr(t, 0, mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true), variables);
+      if (t == 0)
+      {
+        throw mcrl2::runtime_error("error type checking data expression");
+      }
+
+      //// ???
+      //detail::internal_format_conversion_helper converter(data_spec);
+      //
+      //// replace list/set/bag enumerations, and number denotations.
+      //data_expr = data_expression(converter(data_expression(t)));
+      
+      data_expr = data_expression(t);
     }
 
     /** \brief     Type check a data expression.
@@ -43,16 +87,10 @@ namespace mcrl2 {
      *  \post      data_expr is type checked.
      **/
     inline
-    void type_check(data_expression& data_expr, const data_specification& data_spec)
+    void type_check(data_expression& data_expr, const data_specification& data_spec = data_specification())
     {
-      // TODO: replace all this nonsense code by a proper type check implementation
-      ATermAppl t = detail::data_specification_to_aterm_data_spec(data_expr);
-      t = core::type_check_data_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
-      if (!t)
-      {
-        throw mcrl2::runtime_error("could not type check " + core::pp(data_expr));
-      }
-      data_expr = data_expression(t);
+    	variable_list v;
+    	return type_check(data_expr, v.begin(), v.end(), data_spec);
     }
 
     /** \brief     Type check a parsed mCRL2 data specification.
@@ -68,7 +106,7 @@ namespace mcrl2 {
       t = core::type_check_data_spec(t);
       if (!t)
       {
-        throw mcrl2::runtime_error("could not type check " + core::pp(data_spec));
+        throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
       }
       data_specification result(t);
       detail::internal_format_conversion(result);
