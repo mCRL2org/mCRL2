@@ -30,11 +30,11 @@ using namespace std;
 Frame::Frame(
     Mediator* m,
     wxString title )
-    : Colleague( m ),
-      wxFrame(
+    : wxFrame(
         NULL,
         wxID_ANY,
-        wxString( title ) )
+        wxString( title ) ),
+      Colleague( m )
 // ------------------------
 {
 	SetAutoLayout(true);

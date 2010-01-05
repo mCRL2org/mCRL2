@@ -24,8 +24,7 @@ PopupFrame::PopupFrame(
     wxString title,
     wxPoint position,
     wxSize size )
-    : Colleague( m ),
-      wxFrame(
+    : wxFrame(
         parent,
         id,
         wxString( title ),
@@ -34,7 +33,8 @@ PopupFrame::PopupFrame(
         wxDEFAULT_FRAME_STYLE |
         wxFRAME_FLOAT_ON_PARENT |
 		wxFRAME_TOOL_WINDOW |
-        wxFRAME_NO_TASKBAR )
+        wxFRAME_NO_TASKBAR ),
+      Colleague( m )
 // ------------------------------
 {}
 
