@@ -383,6 +383,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
   }
 }
 
+/*
 static void save_error_trace(ATerm state)
 {
   if ( lgopts->save_error_trace )
@@ -399,6 +400,7 @@ static void save_error_trace(ATerm state)
     fflush(stderr);
   }
 }
+*/
 
 static void check_deadlocktrace(ATerm state)
 {
