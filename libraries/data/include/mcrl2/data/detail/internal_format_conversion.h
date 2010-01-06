@@ -116,19 +116,19 @@ namespace mcrl2 {
               { // convert to snoc list
                 sort_expression element_sort(m_data_specification.normalise_sorts(*function_sort(head.sort()).domain().begin()));
 
-                return sort_list::list(element_sort, (*this)(expression.arguments()));
+                return m_data_specification.normalise_sorts(sort_list::list(element_sort, (*this)(expression.arguments())));
               }
               else if (head.name() == "@SetEnum")
               { // convert to finite set
                 sort_expression element_sort((*this)(*function_sort(head.sort()).domain().begin()));
 
-                return sort_set::setfset(element_sort, sort_fset::fset(element_sort, (*this)(expression.arguments())));
+                return m_data_specification.normalise_sorts(sort_set::setfset(element_sort, sort_fset::fset(element_sort, (*this)(expression.arguments()))));
               }
               else if (head.name() == "@BagEnum")
               { // convert to finite bag
                 sort_expression element_sort((*this)(*function_sort(head.sort()).domain().begin()));
 
-                return sort_bag::bagfbag(element_sort, sort_fbag::fbag(element_sort, (*this)(expression.arguments())));
+                return m_data_specification.normalise_sorts(sort_bag::bagfbag(element_sort, sort_fbag::fbag(element_sort, (*this)(expression.arguments()))));
               }
             }
 
