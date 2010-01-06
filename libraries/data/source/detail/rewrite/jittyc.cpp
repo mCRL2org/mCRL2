@@ -2334,7 +2334,7 @@ gsfprintf(IT_DEBUG_FILE "F(%P)\n",int2term[ATgetInt((ATermInt) ATgetArgument(tre
 #endif
                                 cur_arg,
 #ifdef USE_INT2ATERM_VALUE
-                                get_int2aterm_value((ATermInt) ATgetArgument(tree,0)),
+                                (void *)get_int2aterm_value((ATermInt) ATgetArgument(tree,0)),
 #else
                                 ATgetInt((ATermInt) ATgetArgument(tree,0)),
 #endif
@@ -2362,7 +2362,7 @@ gsfprintf(IT_DEBUG_FILE "F(%P)\n",int2term[ATgetInt((ATermInt) ATgetArgument(tre
 #endif
                                 (level==1)?"arg":"t",parent,cur_arg,
 #ifdef USE_INT2ATERM_VALUE
-                                get_int2aterm_value((ATermInt) ATgetArgument(tree,0)),
+                                (void*)get_int2aterm_value((ATermInt) ATgetArgument(tree,0)),
 #else
                                 ATgetInt((ATermInt) ATgetArgument(tree,0)),
 #endif
@@ -2415,7 +2415,7 @@ gsfprintf(IT_DEBUG_FILE "C\n");
 #ifdef USE_REWRAPPL_VALUE
     fprintf(f,",(ATermAppl) %p) ) // C\n"
         "%s{\n",
-      get_rewrappl_value(true_num),
+      (void *)get_rewrappl_value(true_num),
       whitespace(d*2)
       );
 #else
@@ -2479,7 +2479,7 @@ gsfprintf(IT_DEBUG_FILE "implement_tree %P (%i)\n",int2term[opid],opid);
     fprintf(f,",(ATermAppl) %p) ) // C\n"
         "%s{\n"
         "%sreturn ",
-      get_rewrappl_value(true_num),
+      (void *)get_rewrappl_value(true_num),
       whitespace(d*2),
       whitespace(d*2)
       );
@@ -2525,7 +2525,7 @@ static void finish_function(FILE *f, int arity, int opid, bool *used)
         {
 #ifdef USE_REWRAPPL_VALUE
   fprintf(f,  "  return ((ATermAppl) %p",
-      get_rewrappl_value(opid)
+      (void *)get_rewrappl_value(opid)
          );
 #else
   fprintf(f,  "  return (rewrAppl%i",
@@ -2552,7 +2552,7 @@ static void finish_function(FILE *f, int arity, int opid, bool *used)
       arity,
 #endif
 #ifdef USE_INT2ATERM_VALUE
-      get_int2aterm_value(opid)
+      (void *)get_int2aterm_value(opid)
 #else
       opid
 #endif
@@ -2576,7 +2576,7 @@ static void finish_function(FILE *f, int arity, int opid, bool *used)
       arity,
 #endif
 #ifdef USE_INT2ATERM_VALUE
-      get_int2aterm_value(opid)
+      (void *)get_int2aterm_value(opid)
 #else
       opid
 #endif
