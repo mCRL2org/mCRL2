@@ -709,6 +709,17 @@ const std::string various_case_LR2par=
   " (a);";
 
 
+/* This test case is a simple test to test sort normalisation in the lineariser,
+   added because assertion failures in the domineering example were observed */
+const std::string various_case_32 =
+  "sort Position = struct Full | Empty;\n"
+  "     Row = List(Position);\n"
+  "\n"
+  "proc P(r:Row) = delta;\n"
+  "init P([Empty]);\n"
+  ;
+
+
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
      debugging the translation of the linearizer to the new data
@@ -812,6 +823,8 @@ void test_various_aux(t_lin_options &options)
   core::garbage_collect();
   std::cerr << "Testcase LR2par\n";
   spec = linearise(various_case_LR2par, options);
+  std::cerr << "Testcase 32\n";
+  spec = linearise(various_case_32, options);
 }
 
 std::string print_rewrite_strategy(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
