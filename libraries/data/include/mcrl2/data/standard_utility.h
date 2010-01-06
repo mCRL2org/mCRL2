@@ -442,13 +442,14 @@ namespace mcrl2 {
     namespace sort_list {
       /// \brief Constructs a list expression from a range of expressions
       //
-      /// Type I must be a model of the Forward Traversal Iterator concept;
+      /// Type Sequence must be a model of the Forward Traversal Iterator concept;
       /// with value_type convertible to data_expression.
       /// \param[in] s the sort of list elements
       /// \param[in] range an iterator range of elements of sort s
       template < typename Sequence >
       inline
-      application list(const sort_expression& s, Sequence const& range,
+      application list(const sort_expression& s,
+                       Sequence const& range,
                        typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression                list_expression(nil(s));
@@ -496,13 +497,17 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol list_enumeration
+      ///
+      /// Type Sequence must be a model of the Forward Traversal Iterator concept;
+      /// with value_type convertible to data_expression.
       /// \param s A sort expression
       /// \param range A range of data expressions
       /// \return Application of list_enum to the data expressions in range.
       template <typename Sequence>
       inline
-      data_expression list_enumeration(const sort_expression& s, Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+      data_expression list_enumeration(const sort_expression& s,
+                                       Sequence const& range,
+                                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -510,13 +515,7 @@ namespace mcrl2 {
         }
         else
         {
-          sort_expression_vector v;
-          sort_expression t(range.begin()->sort());
-
-          for(size_t i = 0; i < range.count(); ++i)
-          {
-            v.push_back(t);
-          }
+          sort_expression_vector v(range.size(), range.begin()->sort());
 
           return application(list_enumeration(function_sort(v,s)), range);
         }
@@ -535,13 +534,7 @@ namespace mcrl2 {
         }
         else
         {
-          sort_expression_vector v;
-          sort_expression t(range.begin()->sort());
-
-          for(size_t i = 0; i < range.size(); ++i)
-          {
-            v.push_back(t);
-          }
+          sort_expression_vector v(range.size(), range.begin()->sort());
 
           return application(list_enumeration(function_sort(v,s)), range);
         }
@@ -596,13 +589,17 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol set_enumeration
+      ///
+      /// Type Sequence must be a model of the Forward Traversal Iterator concept;
+      /// with value_type convertible to data_expression.
       /// \param s A sort expression
       /// \param range A range of data expressions
       /// \return Application of set_enum to the data expressions in range.
       template <typename Sequence>
       inline
-      data_expression set_enumeration(const sort_expression& s, Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+      data_expression set_enumeration(const sort_expression& s,
+                                      Sequence const& range,
+                                      typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -610,13 +607,7 @@ namespace mcrl2 {
         }
         else
         {
-          sort_expression_vector v;
-          sort_expression t(range.begin()->sort());
-
-          for(size_t i = 0; i < range.count(); ++i)
-          {
-            v.push_back(t);
-          }
+          sort_expression_vector v(range.size(), range.begin()->sort());
 
           return application(set_enumeration(function_sort(v,s)), range);
         }
@@ -627,7 +618,8 @@ namespace mcrl2 {
       /// \param range A range of data expressions
       /// \return Application of set_enum to the data expressions in range.
       inline
-      data_expression set_enumeration(const sort_expression& s, data_expression_list const& range)
+      data_expression set_enumeration(const sort_expression& s,
+                                      data_expression_list const& range)
       {
         if(range.empty())
         {
@@ -635,13 +627,7 @@ namespace mcrl2 {
         }
         else
         {
-          sort_expression_vector v;
-          sort_expression t(range.begin()->sort());
-
-          for(size_t i = 0; i < range.size(); ++i)
-          {
-            v.push_back(t);
-          }
+          sort_expression_vector v(range.size(), range.begin()->sort());
 
           return application(set_enumeration(function_sort(v,s)), range);
         }
@@ -665,14 +651,15 @@ namespace mcrl2 {
     namespace sort_fset {
       /// \brief Constructs a finite set expression from a range of expressions
       //
-      /// Type I must be a model of the Forward Traversal Iterator concept;
+      /// Type Sequence must be a model of the Forward Traversal Iterator concept;
       /// with value_type convertible to data_expression.
       /// \param[in] s the sort of list elements
       /// \param[in] begin iterator that marks the start of a range of elements of sort s
       /// \param[in] end the past-end iterator for a range of elements of sort s
       template < typename Sequence >
       inline
-      application fset(const sort_expression& s, Sequence const& range,
+      application fset(const sort_expression& s,
+                       Sequence const& range,
                        typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression fset_expression(sort_fset::fset_empty(s));
@@ -721,13 +708,17 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol bag_enumeration
+      ///
+      /// Type Sequence must be a model of the Forward Traversal Iterator concept;
+      /// with value_type convertible to data_expression.
       /// \param s A sort expression
       /// \param range A range of data expressions
       /// \return Application of bag_enum to the data expressions in range.
       template <typename Sequence>
       inline
-      data_expression bag_enumeration(const sort_expression& s, Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+      data_expression bag_enumeration(const sort_expression& s,
+                                      Sequence const& range,
+                                      typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -735,11 +726,12 @@ namespace mcrl2 {
         }
         else
         {
-          assert(range.count() % 2 == 0);
-          sort_expression_vector v;
+          assert(range.size() % 2 == 0);
           sort_expression t(range.begin()->sort());
 
-          for(size_t i = 0; i < range.count() / 2; ++i)
+          sort_expression_vector v;
+
+          for(size_t i = 0; i < range.size() / 2; ++i)
           {
             v.push_back(t);
             v.push_back(sort_nat::nat());
@@ -754,7 +746,8 @@ namespace mcrl2 {
       /// \param range A range of data expressions
       /// \return Application of bag_enum to the data expressions in range.
       inline
-      data_expression bag_enumeration(const sort_expression& s, data_expression_list const& range)
+      data_expression bag_enumeration(const sort_expression& s,
+                                      data_expression_list const& range)
       {
         if(range.empty())
         {
@@ -763,8 +756,8 @@ namespace mcrl2 {
         else
         {
           assert(range.size() % 2 == 0);
-          sort_expression_vector v;
           sort_expression t(range.begin()->sort());
+          sort_expression_vector v;
 
           for(size_t i = 0; i < range.size() / 2; ++i)
           {
