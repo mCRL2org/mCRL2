@@ -17,6 +17,5 @@ test-suite core
       [ run text_utility_test.cpp ]
       [ run sequence_test.cpp ]
       [ run reachable_nodes_test.cpp ]
-      [ run parse_print_test.cpp ]
       [ compile-headers ../include ]
     ;

@@ -721,6 +721,15 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
   return result;
 }
 
+/// \brief Pretty print function
+/// \param spec A pbes specification
+/// \return A pretty print representation of the specification
+template <typename Container>
+std::string pp(const pbes<Container>& spec)
+{
+  return core::pp(pbes_to_aterm(spec));
+}
+
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param l A linear process specification
 template <typename Container>

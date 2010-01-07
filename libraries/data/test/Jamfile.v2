@@ -35,6 +35,7 @@ test-suite data
       [ run substitution_test.cpp ]
       [ run template_test.cpp ]
       [ run traverser_test.cpp ]
+      [ run typecheck_test.cpp ]
       [ run utility_test.cpp ]
       [ compile-headers ../include ]
     ;

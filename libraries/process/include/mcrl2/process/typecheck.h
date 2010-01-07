@@ -47,10 +47,10 @@ namespace mcrl2 {
     {
       // TODO: replace all this nonsense code by a proper type check implementation
       ATermAppl t = process_specification_to_aterm(proc_spec);
-      t = core::type_check_proc_spec(proc_spec);
+      t = core::type_check_proc_spec(t);
       if (!t)
       {
-        throw mcrl2::runtime_error("could not type check " + core::pp(proc_spec));
+        throw mcrl2::runtime_error("could not type check " + process::pp(proc_spec));
       }
       process_specification result(t);
       proc_spec = result;

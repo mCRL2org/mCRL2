@@ -33,7 +33,7 @@ namespace pbes_system {
       t = core::type_check_pbes_spec(t);
       if (!t)
       {
-        throw mcrl2::runtime_error("could not type check " + core::pp(pbes_spec));
+        throw mcrl2::runtime_error("could not type check " + core::pp(t));
       }
       pbes_spec = pbes<Container>(t);
     }

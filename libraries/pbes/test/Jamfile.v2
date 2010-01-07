@@ -40,5 +40,6 @@ test-suite pbes
       [ run sort_traverser_test.cpp ]
       [ run substitute_test.cpp ]
       [ run txt2pbes_test.cpp ]
+      [ run typecheck_test.cpp ]
       [ compile-headers ../include ]
     ;
