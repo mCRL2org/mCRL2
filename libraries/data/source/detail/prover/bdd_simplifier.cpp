@@ -17,7 +17,7 @@ namespace mcrl2 {
 // class BDD_Simplifier ---------------------------------------------------------------------------
   // class BDD_Simplifier - functions declared public ---------------------------------------------
 
-    void BDD_Simplifier::set_time_limit(int a_time_limit) {
+    void BDD_Simplifier::set_time_limit(time_t a_time_limit) {
       if (a_time_limit == 0) {
         f_deadline = 0;
       } else {

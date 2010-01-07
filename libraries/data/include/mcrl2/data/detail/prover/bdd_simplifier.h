@@ -32,14 +32,14 @@ class BDD_Simplifier {
   protected:
     /// \brief An integer representing the moment in time when the maximal amount of seconds has been spent on simplifying
     /// \brief the BDD.
-    int f_deadline;
+    time_t f_deadline;
   public:
     /// \brief Destructor without any additional functionality.
     virtual ~BDD_Simplifier() {
     }
 
     /// \brief Sets the attribute BDD_Simplifier::f_deadline.
-    void set_time_limit(int a_time_limit);
+    void set_time_limit(time_t a_time_limit);
 
     /// \brief Returns a simplified BDD, equivalent to the bdd a_bdd.
     /// precondition: The argument passed as parameter a_bdd is a data expression in internal mCRL2 format with the

@@ -174,12 +174,12 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void BDD_Prover::eliminate_paths() {
-      int v_new_time_limit;
+      time_t v_new_time_limit;
 
       v_new_time_limit = f_deadline - time(0);
       if (v_new_time_limit > 0 || f_time_limit == 0) {
         gsDebugMsg("Simplifying the BDD:\n");
-        f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, 0));
+        f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(0)));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
         gsDebugMsg("Resulting BDD: %P\n", f_bdd);
       }

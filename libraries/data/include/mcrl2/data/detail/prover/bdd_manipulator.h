@@ -23,9 +23,9 @@ class BDD_Manipulator {
     /// \brief Returns a BDD
     /// The method BDD_Manipulator::make_reduced_if_then_else returns a BDD with guard \c a_guard,
     /// true-branch \c a_true_branch and false-branch \c a_false_branch.
-    /// \param a_guard A propositional formula.
-    /// \param a_true_branch A BDD.
-    /// \param a_false_branch A BDD.
+    /// \param[in] a_guard A propositional formula.
+    /// \param[in] a_true_branch A BDD.
+    /// \param[in] a_false_branch A BDD.
     /// \return A BDD.
     inline ATermAppl make_if_then_else(ATermAppl a_guard, ATermAppl a_true_branch, ATermAppl a_false_branch) {
       return (a_true_branch == a_false_branch) ? a_true_branch : make_if_then_else(a_guard, a_true_branch, a_false_branch);
@@ -37,9 +37,9 @@ class BDD_Manipulator {
     /// The method BDD_Manipulator::make_reduced_if_then_else returns a BDD with guard \c a_guard,
     /// true-branch \c a_true_branch and false-branch \c a_false_branch. If the true-branch is equal to the
     /// false-branch, the true-branch is returned.
-    /// \param a_guard A proposition formula.
-    /// \param a_true_branch A BDD.
-    /// \param a_false_branch A BDD.
+    /// \param[in] a_guard A proposition formula.
+    /// \param[in] a_true_branch A BDD.
+    /// \param[in] a_false_branch A BDD.
     /// \return A reduced BDD.
     inline ATermAppl make_reduced_if_then_else(ATermAppl a_guard, ATermAppl a_true_branch, ATermAppl a_false_branch) {
       return mcrl2::data::if_(mcrl2::data::data_expression(a_guard), mcrl2::data::data_expression(a_true_branch), mcrl2::data::data_expression(a_false_branch));
