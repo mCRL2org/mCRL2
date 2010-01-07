@@ -1,11 +1,45 @@
 [library Utilities Library
     [quickbook 1.4]
-    [authors [Wesselink, Wieger]]
+    [authors [Wesselink, Wieger], [Wulp, Jeroen van der]]
     [copyright 2005-2009 Technische Universiteit Eindhoven]
     [category string-text]
     [id utilities]
     [dirname pbes]
 ]
 
-[/include introduction.qbk]
+[def __UTILITIES_LAYOUT__ [$images/layout.png]]
+
+[section: Introduction]
+
+This library holds functionality that does not (or not yet) fit in any of the other libraries. It mainly contains functionality that simplifies the use of other libraries or combinations thereof. The purpose of bundling this functionality is to encourage reuse.
+
+Much of the current functionality should at some point be integrated in one of the other libraries. Please contact any of the developers when you think this is the case.
+
+[endsect]
+
+[section: Structure]
+
+The header files of the utilities library are roughly organised as depicted below.
+
+__UTILITIES_LAYOUT__
+
+The top directory is mcrl2, containing a header file with toolset specific build information and the utilities directory.
+
+The toolset build information consists of a single header file setup.h. It should not be necessary to used it directly; it contains path information and compiler settings. At the time of writing it is used only to compile the compiling rewriters.
+
+The command line interfacing sublibrary standardises some more aspects of tool command line interfaces.
+
+The "mCRL2 toolset-specific SQuADT interface" group contains the header files tipi_ext.h and squadt_interface.h. It contains a set of classes and utility functions to make it easier to connect tools of the toolset to SQuADT. It roughly contains the following toolset-specific functionality:
+
+* the custom messaging system used by most tools in the toolset is set up such that it automatically relayes messages to SQuADT
+* support for using wxWidgets in combination with SQuADT connectivity 
+
+Custom wxWidgets controls are found in the header files colorbutton.h and spinctrlfloat.h. They are shared amongst the visualisation tools in the toolset. The color button control is a colour selection button that uses a colour picker dialog and that assumes the selected colour. The spinctrlfloat is a spin control as the one that is present in wxWidgets except for that it works with floating point values.
+
+ext is the BDD implementation (on top of the ATerm library), consisting of bdd2dot.h, bdd_info.h and bdd_manipulator.h.
+Reference
+
+[endsect]
+
+[include cli.qbk]
 [include tools.qbk]

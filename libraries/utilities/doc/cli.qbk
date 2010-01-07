@@ -1,0 +1,80 @@
+[section: CLI Library]
+
+[h1 Introduction]
+
+A set of user interface guidelines and conventions has been compiled to standardise user interfaces across the tools in the mCRL2 toolset. The purpose of this library is to simplify creation and maintenance of standard conforming command line user interfaces of tools in the mCRL2 toolset.
+
+[h1 Concepts]
+
+Here we introduce the set of concepts involved.
+
+[h2 Command line interface]
+
+A command line interface is an interaction mechanism for software systems based on textual commands. The system awaits the next command, at which point it interprets this command and starts waiting again for the next command.
+
+A shell is an example of a command line interface that provides a user with access to services typically services provided by the operating system kernel. The programs we would like to consider, mCRL2 tools, are typically started by feeding a command to a shell. The command that starts a tool program is an integral part of the command line interface of that program.
+
+[h2 Command]
+
+A command is a sequence of characters (also called string) that is used to invoke tools.
+
+[h2 Command Arguments]
+
+Commands consist of a part that identifies a tool and optional arguments that affect the behaviour of that tool. We distinguish two types of arguments options and non-option arguments.
+
+An option is a special command argument that is used to trigger optional behaviour in a tool. Every option has a long identifier and optionally a single-character short identifier. Additional structure is imposed on options, for one they need to be distinguishable from the arguments. To disambiguate between arguments and option identifiers (to specify options) the short and long option identifiers are prefixed with `-' and `--' respectively. An extension taken from the getopt library (a well-known C-style library command line parsing) is the chaining of short option identifiers. For example -bc2 is treated the same as -b -c2 (under context conditions stated below).
+
+For the sake of completeness, the following is a full EBNF(-like) grammar for commands:
+
+    command ::= white-space * tool-name ( white-space+ ( option | argument ) ) * white-space *
+    white-space ::= [ \t\n\r]
+    argument    ::= [^ \t\n\r-] + | '"' [^"]* '"' | "'" [^']* "'"
+    option      ::= ("--" long-option [ "=" argument ] ) | ("-" short-options [ white-space * argument ])
+    long-option   ::= alpha-low ( long-option-character ) *
+    short-options ::= ( short-option-character ) +
+    long-option-character  ::= '-' | digit | alpha-low
+    short-option-character ::= digit | alpha-low | alpha-high
+    alpha-low             ::= 'a' | 'b' | 'c' | ... | 'z'
+    alpha-high            ::= 'A' | 'B' | 'C' | ... | 'Z'
+    digit                 ::= '0' | '1' | '2' | ... | '9'
+
+[h2 Context conditions]
+
+An option argument is called optional (otherwise mandatory) if a default value is available that is assumed present as argument if the option was found without argument. The option identified by a short or long identifier is associated with the information that it either expects no arguments, an optional argument or a mandatory argument. A default value must be associated with every optional argument. Finally no white-space is allowed between a short option identifier and the optional argument. For example `-oA' (and not `-o A') for option o with argument A and `-o ' specifies the the default value for option o.
+
+For the chaining of short options it is required that all options except the last in the chain take no arguments (so not even an optional argument). The reason is that there is no reliable way to disambiguate between option argument and option identifiers. All that follows the first option in the chain that takes an optional or mandatory argument is taken as argument.
+
+[h1 Library interface]
+
+The public library interface consists of two classes, one for the specification of a command line interface and the other for the actual parsing of a command using an interface specification.
+
+Objects of class mcrl2::utilities::interface_description contain an interface specification and a description of this interface. The specification part consist of a set of option specifications each containing a long identifier, a description of the option, and optionally an argument specification and short identifier. The argument specification describes whether the argument is mandatory or optional (in the latter case case it also specifies a default value). The descriptive part consists of some general interface information and every option and option argument is equipped with a textual description of its use.
+
+Up to here functionality focusses on specifying input. The user interface conventions also mention standardised output. Formatting functionality is available for:
+
+* printing a textual interface description (for use with -h or --help option),
+* printing a copyright message,
+* printing a man page,
+* version information (--version option),
+* error reporting for command line parsing. 
+
+Especially the error reporting functionality can be useful for tool developers in situations where problems arise during processing the results of command line parsing.
+
+Parsing commands against an interface specification and accessing the results can be done using an mcrl2::utilities::command_line_parser object. The output of parsing is the set of options and arguments associated to options that were part of the input command. When parsing finishes without problems parse results are available for inspection. On a parse error an exception is thrown, with a properly formatted error description as message.
+Important usability notes
+
+The interface conventions specify a number of standard options:
+
+# for messaging --verbose (-v), --quiet (-q), --debug (-d), and
+# for strategy selection for rewriting using the rewrite library 
+
+If the tool uses the core messaging layer, it is necessary to include mcrl2/core/messaging.h prior to the header file of this library in order to activate automatic handling of messaging options on the command line. Similarly if a tool uses the rewriter library, it is necessary to include mcrl2/data/rewriter.h prior to header files of this library to activate handling of rewriter options.
+
+[h2 Tutorial]
+
+There is no tutorial for the use of this library, the reference documentation contains a number of small examples on the use of this library.
+Reference
+
+The command line interfacing library is part of the mCRL2 utilities library. It contains only infrastructure functionality for the construction of tools that provide the doorway to the core functionality of the mCRL2 toolset. The references pages are part of the utilities library reference pages.
+
+[endsect]
