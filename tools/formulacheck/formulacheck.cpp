@@ -132,7 +132,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
           s.load(infilename);
           return s.data();
         }
-        catch(mcrl2::runtime_error& e)
+        catch(mcrl2::runtime_error&)
         {}
 
         try {
@@ -140,7 +140,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
           p.load(infilename);
           return p.data();
         }
-        catch(mcrl2::runtime_error& e)
+        catch(mcrl2::runtime_error&)
         {}
 
         throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS, PBES or data specification");

@@ -51,7 +51,7 @@ class EnumeratorSolutions
 
 		/**
 		 * \brief Get next solutions (if available).
-		 * \param solution Place to store the solutions.
+		 * \param[out] solution Place to store the solutions.
 		 * \return Whether or not a solution was found and stored in
 		 *         solution. If so, *solution is a substitution list
 		 *         from libstruct, mapping mCRL2 data variables to terms
@@ -93,20 +93,20 @@ class Enumerator
 		/**
 		 * \brief Enumerate all valuations that (might) make an
 		 *        expression true.
-		 * \param Vars      A list of the variables to be instantiated.
-		 * \param Expr      A boolean expression, in the internal
+		 * \param[in] Vars      A list of the variables to be instantiated.
+		 * \param[in] Expr      A boolean expression, in the internal
 		 *                  rewriter format, for which to find the
 		 *                  valuations.
-		 * \param true_only Boolean to indicate whether only those
+		 * \param[in] true_only Boolean to indicate whether only those
 		 *                  valuations such that Expr is equivalent to
 		 *                  true should be returned or also those for
-		 *                  which expr cannot be determined to be true
+		 *                  which Expr cannot be determined to be true
 		 *                  or false.
-		 * \param old       An EnumeratorSolutions object which can be
-		 *                  used to retreive the satisfying valuations.
+		 * \param[in] old       An EnumeratorSolutions object which can be
+		 *                  used to retrieve the satisfying valuations.
 		 *                  If NULL, a new object is created.
 		 * \return An EnumeratorSolutions object which can be used to
-		 *         retreive all valuations of the variables in Var such
+		 *         retrieve all valuations of the variables in Var such
 		 *         that Expr becomes true. If old is not NULL, old
 		 *         itself is returned (reinitialised for the new
 		 *         enumeration).
@@ -134,14 +134,14 @@ class Enumerator
 		virtual EnumeratorSolutions *findSolutions(ATermList Vars, ATerm Expr, bool true_only, EnumeratorSolutions *old = NULL) = 0;
 		/**
 		 * \brief Enumerate all valuations that make an expression true.
-		 * \param Vars A list of the variables to be instantiated.
-		 * \param Expr A boolean expression, in the internal rewriter
+		 * \param[in] Vars A list of the variables to be instantiated.
+		 * \param[in] Expr A boolean expression, in the internal rewriter
 		 *             format, for which to find all solutions.
-		 * \param old An EnumeratorSolutions object which can be used to
-		 *            retreive the satisfying valuations. If NULL, a new
+		 * \param[in] old An EnumeratorSolutions object which can be used to
+		 *            retrieve the satisfying valuations. If NULL, a new
 		 *            object is created.
 		 * \return An EnumeratorSolutions object which can be used to
-		 *         retreive all valuations of the variables in Var such
+		 *         retrieve all valuations of the variables in Vars such
 		 *         that Expr is equivalent to true. If old is not NULL,
 		 *         old itself is returned (reinitialised for the new
 		 *         enumeration).
@@ -171,14 +171,14 @@ class Enumerator
 
 /**
  * \brief Create a Enumerator object.
- * \param spec              A mCRL2 LPS containing the data specification
+ * \param[in] spec              A mCRL2 LPS containing the data specification
  *                          related to the expressions which solutions need
  *                          to be found.
  * \param r                 Rewriter to use for rewriting terms.
- * \param clean_up_rewriter Whether or not to delete the Rewriter object on
+ * \param[in] clean_up_rewriter Whether or not to delete the Rewriter object on
  *                          destruction on the destruction of the returned
  *                          Enumerator object.
- * \param strategy          The strategy to use for solution finding.
+ * \param[in] strategy          The strategy to use for solution finding.
  * \return A Enumerator object with the given parameters.
  **/
 Enumerator *createEnumerator(mcrl2::data::data_specification const& spec, Rewriter *r, bool clean_up_rewriter = false, EnumerateStrategy strategy = ENUM_STANDARD);

@@ -26,7 +26,7 @@ namespace detail {
 struct assignment_lhs: public std::unary_function<assignment, variable>
 {
   /// \brief Function call operator
-  /// \param a An assignment to a data variable
+  /// \param[in] a An assignment to a data variable
   /// \return The function result
   variable operator()(const assignment& a) const
   {
@@ -44,7 +44,7 @@ struct has_left_hand_side
   {}
 
   /// \brief Function call operator
-  /// \param a An assignment to a data variable
+  /// \param[in] a An assignment to a data variable
   /// \return The function result
   bool operator()(const assignment& a) const
   {
@@ -62,7 +62,7 @@ struct has_left_hand_side_in
   {}
 
   /// \brief Function call operator
-  /// \param a An assignment to a data variable
+  /// \param[in] a An assignment to a data variable
   /// \return The function result
   bool operator()(assignment a) const
   {

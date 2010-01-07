@@ -88,7 +88,7 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       m_rewrite = (parser.options.count("rewrite")==0);
       m_sumelm  = (parser.options.count("sumelm")==0);
-      m_pretty = (parser.options.count("pretty"));
+      m_pretty = (parser.options.count("pretty")!=0);
 
       if (parser.options.count("end-phase")>0)
       {

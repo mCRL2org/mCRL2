@@ -418,19 +418,15 @@ using namespace mcrl2::core::detail;
       f_disjointness_checker(lps::linear_process_to_aterm(a_lps.process())),
       f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
       f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
-      f_lps(a_lps)
+      f_lps(a_lps),
+      f_no_marking(a_no_marking),
+      f_check_all(a_check_all),
+      f_counter_example(a_counter_example),
+      f_dot_file_name(a_dot_file_name),
+      f_generate_invariants(a_generate_invariants)
     { if (has_ctau_action(a_lps)) {
         throw mcrl2::runtime_error("An action named \'ctau\' already exists.\n");
       }
-
-      // FIXME
-      // f_lps = specification_to_aterm(a_lps);
-      // f_lps = a_lps;
-      f_no_marking = a_no_marking;
-      f_check_all = a_check_all;
-      f_counter_example = a_counter_example;
-      f_dot_file_name = a_dot_file_name;
-      f_generate_invariants = a_generate_invariants;
     }
 
     // --------------------------------------------------------------------------------------------

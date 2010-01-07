@@ -79,6 +79,8 @@ comment* diagram::add_comment( unsigned int p_id, coordinate &p_coord, float p_d
 
 void diagram::remove_comment( comment* p_comment )
 {
+  assert(p_comment != NULL);
+
   deselect_object( p_comment );
 
   // Remove relationships
@@ -115,6 +117,8 @@ arr_comment* diagram::get_comment_list( void )
 
 void diagram::attach_comment_to_object( comment* p_comm, object* p_object )
 {
+  assert(p_comm != NULL);
+  assert(p_object != NULL);
   assert( ( p_comm->get_diagram() == p_object->get_diagram() ) && ( p_object->get_diagram() == this ) );//, _T( "diagram::attach_comment_to_object pre ( comm_diag_ptr == obj_diag_ptr ) failed \n" ) );
   // Detach the comment first, if necessary
   object* object_ptr = p_comm->get_attached_object();
@@ -129,15 +133,13 @@ void diagram::attach_comment_to_object( comment* p_comm, object* p_object )
 
 void diagram::detach_comment_from_object( comment* p_comm )
 {
+  assert(p_comm != NULL);
   object* object_ptr = p_comm->get_attached_object();
   if (object_ptr)
   {
     object_ptr->detach_comment( p_comm );
   }
-  if (p_comm)
-  {
-    p_comm->detach_from_object();
-  }
+  p_comm->detach_from_object();
 }
 
 void diagram::select_object( object* p_object )
@@ -148,12 +150,16 @@ void diagram::select_object( object* p_object )
 
 void diagram::plus_select_object( object* p_object )
 {
+  assert(p_object != NULL);
+
   p_object->select();
   m_selected_objects.Add( p_object );
 }
 
 void diagram::deselect_object( object* p_object )
 {
+  assert(p_object != NULL);
+
   p_object->deselect();
   if ( m_selected_objects.Index( p_object ) != wxNOT_FOUND )
   {
