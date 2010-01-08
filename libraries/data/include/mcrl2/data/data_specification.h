@@ -58,7 +58,7 @@ namespace mcrl2 {
       protected:
 
         /// \brief map from sort expression to constructors
-        typedef atermpp::multimap< sort_expression, function_symbol > sort_to_symbol_map;
+        typedef atermpp::multimap< sort_expression, data::function_symbol > sort_to_symbol_map;
 
         /// \brief map from basic_sort (names) to sort expression
         typedef atermpp::map< basic_sort, sort_expression >           ltr_aliases_map;
@@ -67,10 +67,10 @@ namespace mcrl2 {
 
         /// \cond INTERNAL_DOCS
         /// \brief projects a pair of sort and a constructor to the latter
-        struct symbol_projection : public std::unary_function< sort_to_symbol_map::value_type const, function_symbol >
+        struct symbol_projection : public std::unary_function< sort_to_symbol_map::value_type const, data::function_symbol >
         {
           /// \brief Application to constant pair
-          function_symbol const& operator()(sort_to_symbol_map::value_type const& v) const 
+          data::function_symbol const& operator()(sort_to_symbol_map::value_type const& v) const
           { return v.second;
           }
         };
@@ -469,10 +469,10 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \note this operation does not invalidate iterators of sorts_const_range
       void add_sort(const sort_expression& s)
-      { atermpp::set < sort_expression >::size_type old_size=m_sorts.size();
-        m_sorts.insert(s);
-        if (old_size!=m_sorts.size())
-        { data_is_not_necessarily_normalised_anymore();
+      {
+        if(m_sorts.insert(s).second)
+        {
+          data_is_not_necessarily_normalised_anymore();
         }
       }
 
@@ -483,7 +483,7 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of aliases_const_range
       /// \post is_alias(s.name()) && normalise_sorts(s.name()) = normalise_sorts(s.reference())
       void add_alias(alias const& a)
-      { m_aliases[a.name()] = a.reference(); 
+      { m_aliases[a.name()] = a.reference();
         data_is_not_necessarily_normalised_anymore();
       }
 
@@ -768,44 +768,6 @@ namespace mcrl2 {
       bool is_alias(const basic_sort& s) const
       {
         return m_aliases.find(s) != m_aliases.end();
-      }
-
-      /// \brief Returns true if the data specification contains the given sort
-      /// param[in] s the target sort
-      bool search_sort(const sort_expression& s) const
-      { normalise_specification_if_required();
-        return m_normalised_sorts.find(normalise_sorts(s)) != m_normalised_sorts.end() || 
-               (s.is_basic_sort() && is_alias(s));
-      }
-
-      /// \brief Returns true if the data specification contains the constructor
-      bool search_constructor(const function_symbol& f) const
-      { normalise_specification_if_required();
-        constructors_const_range range(m_normalised_constructors.equal_range(f.sort().target_sort()));
-        return std::find(range.begin(), range.end(), f) != range.end();
-      }
-
-      /// \brief Returns true if the data specification contains the constructor
-      /// \param[in] f the symbol to look for
-      bool search_mapping(const function_symbol& f) const
-      { normalise_specification_if_required();
-        mappings_const_range range(m_normalised_mappings.equal_range(f.sort().target_sort()));
-
-        return std::find(range.begin(), range.end(), f) != range.end();
-      }
-
-      /// \brief Returns true if the data specification contains a mapping or constructor that matches f
-      /// \param[in] f the symbol to look for
-      bool search_function(const function_symbol& f) const
-      { normalise_specification_if_required();
-        return search_constructor(f) || search_mapping(f);
-      }
-
-      /// \brief Returns true if the data specification contains the constructor
-      /// \param[in] e the equation to look for
-      bool search_equation(const data_equation& e) const
-      { normalise_specification_if_required();
-        return std::find(m_normalised_equations.begin(), m_normalised_equations.end(), e) != m_normalised_equations.end();
       }
 
       bool operator==(const data_specification& other) const

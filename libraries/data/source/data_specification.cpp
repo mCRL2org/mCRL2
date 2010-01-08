@@ -133,7 +133,9 @@ namespace mcrl2 {
            i!=m_constructors.end(); ++i)
       { const sort_expression normalised_sort=normalise_sorts(i->first);
         const function_symbol normalised_constructor=normalise_sorts(i->second);
-        if (!search_constructor(normalised_constructor))
+
+        mappings_const_range range(m_normalised_constructors.equal_range(normalised_constructor.sort().target_sort()));
+        if (std::find(range.begin(), range.end(), normalised_constructor) == range.end())
         { m_normalised_constructors.insert(std::pair<sort_expression, function_symbol>
                      (normalised_sort,normalised_constructor));
         }
@@ -145,7 +147,9 @@ namespace mcrl2 {
            i!=m_mappings.end(); ++i)
       { const sort_expression normalised_sort=normalise_sorts(i->first);
         const function_symbol normalised_mapping=normalise_sorts(i->second);
-        if (!search_constructor(normalised_mapping))
+
+        mappings_const_range range(m_normalised_mappings.equal_range(normalised_mapping.sort().target_sort()));
+        if (std::find(range.begin(), range.end(), normalised_mapping) == range.end())
         { m_normalised_mappings.insert((std::pair<sort_expression, function_symbol>
                       (normalised_sort,normalised_mapping)));
         }
