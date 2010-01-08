@@ -1,0 +1,7 @@
+% Infinitely often enabled means infinitely often taken
+% Formula from "Modal logics and mu-calculi: an introduction", Bradfield and
+% Stirling.
+%
+% Can be applied to all communication protocols
+
+forall d:D . ([true*] nu X. mu Y. nu Z. ([r1(d)]X && ([r1(d)]false || [!r1(d)]Y) && [!r1(d)]Z))

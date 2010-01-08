@@ -1,0 +1,1 @@
+mu X . <RedWins>true || (!RedMoves || exists x,y:Pos. <RedMoves(x,y)>X)

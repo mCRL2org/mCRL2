@@ -1,0 +1,8 @@
+% Infinitely often enabled means infinitely often taken
+% Formula from "Modal logics and mu-calculi: an introduction", Bradfield and
+% Stirling.
+%
+% Can be applied to trains.mcrl2
+
+([true*] nu X. mu Y. nu Z. ([enter_p]X && ([enter_p]false || [!enter_p]Y) && [!enter_p]Z)) &&
+([true*] nu X. mu Y. nu Z. ([enter_q]X && ([enter_q]false || [!enter_q]Y) && [!enter_q]Z))

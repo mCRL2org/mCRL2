@@ -1,0 +1,2 @@
+% This property can be applied to the leader election protocol
+mu X. <leader>true || [!leader]X

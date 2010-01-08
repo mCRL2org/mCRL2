@@ -1,0 +1,6 @@
+% Model(s): {abp.mcrl2, abp_bw.mcrl2}
+%
+% Description: There is a path along which a message (after reading through
+%              action r1) can be lost infinitely often (through c3).
+
+<true*>(exists dd:D .<r1(dd)>(nu X. mu Y. (<c3(e)>X || <!c3(e) && !s4(dd)>Y)))

@@ -1,0 +1,1 @@
+mu X. <true>X || forall row:Row. ((row in b) && !(Empty in row))

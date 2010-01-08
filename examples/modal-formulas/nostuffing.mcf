@@ -1,0 +1,4 @@
+% This formula says that a philosopher can only eat for a finite consecutive
+% amount of time.
+% This can be used with all dining philosophers examples.
+forall p:Phil. nu X. mu Y. [eat(p)]Y && [!eat(p)]X
