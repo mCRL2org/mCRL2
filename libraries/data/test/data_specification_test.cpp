@@ -95,7 +95,7 @@ void test_sorts()
   spec1.add_context_sorts(s2l_range);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
-  std::for_each(s2l_range.begin(), s2l_range.end(), boost::bind(&data_specification::add_sort, &spec, _1))l
+  std::for_each(s2l_range.begin(), s2l_range.end(), boost::bind(&data_specification::remove_sort, &spec, _1));
   spec1.remove_sort(s2);
   compare_for_equality(spec, spec1);
 }
@@ -189,7 +189,7 @@ void test_constructors()
   BOOST_CHECK(!spec1.is_system_defined(h)); */
 
   spec.remove_constructor(i);
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::remove_constructor, &spec, _1));
+  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::remove_constructor, &spec1, _1));
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }
 

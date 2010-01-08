@@ -215,7 +215,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
                 rewr=rewriter(spec,m_rewrite_strategy);
               }
             }
-            catch (boost::bad_lexical_cast &e)
+            catch (boost::bad_lexical_cast &)
             { throw mcrl2::runtime_error("The string " + s + " does not describe a rewrite strategy.");
             }
           }
