@@ -158,20 +158,19 @@ namespace mcrl2 {
 
               if (r.front() != converted_equation)
               { // assumes that the range is not invalidated by inserts and remove operations
+                // this means that equations cannot be inserted and removed within this loop!
                 to_remove.insert(r.front());
                 to_insert.insert(converted_equation);
-
-                // specification.add_equation(converted_equation);
               }
             }
 
-            specification.remove_equations(boost::make_iterator_range(to_remove));
-            specification.add_equations(boost::make_iterator_range(to_insert));
+            std::for_each(to_remove.begin(), to_remove.end(), boost::bind(&data_specification::remove_equation, &specification, _1));
+            std::for_each(to_insert.begin(), to_insert.end(), boost::bind(&data_specification::add_equation, &specification, _1));
           }
 
           // assume the term represents a (linear) process or pbes
-          internal_format_conversion_helper(data_specification const& specification) :
-                                                         m_data_specification(specification)
+          internal_format_conversion_helper(data_specification const& specification)
+            : m_data_specification(specification)
           {
           }
       };

@@ -241,72 +241,27 @@ namespace mcrl2 {
         { m_normalised_equations.insert(normalise_sorts(e));
         }
   
-        /// \brief Adds equations to this specification, and marks them as system
-        ///        defined.
+        /// \brief Adds constructors, mappings and equations for a structured sort
+        ///        to this specification, and marks them as system defined.
         ///
-        /// \param[in] fl A container with equations (objects of type convertible to data_equation).
-        /// \post for all e in el: is_system_defined(e)
-        /// \note this operation does not invalidate iterators of equations_const_range
-        template < typename Container >
-        void add_system_defined_equations(const Container& el,
-                typename detail::enable_if_container< Container, data_equation >::type* = 0) const
-        { for (typename Container::const_iterator i = el.begin(); i != el.end(); ++i)
-          { add_system_defined_equation(*i); 
-          }
-        } 
-  
-        /// \brief Adds constructors to this specification, and marks them as
-        ///        system defined.
-        ///
-        /// \param[in] fl A container with function symbols (objects of type convertible to function_symbol).
-        /// \post for all f in fl: is_system_defined(f)
-        /// \note this operation does not invalidate iterators of constructors_const_range
-        template < typename Container >
-        void add_system_defined_constructors(const Container& fl,
-                typename detail::enable_if_container< Container, function_symbol >::type* = 0) const
-        { for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
-          { add_system_defined_constructor(*i);
-          }
-        } 
-  
-        /// \brief Adds mappings to this specification, and marks them as system
-        ///        defined.
-        ///
-        /// \param[in] fl A container with function symbols (objects of type convertible to function_symbol).
-        /// \post for all f in fl: is_system_defined(f)
-        /// \note this operation does not invalidate iterators of mappings_const_range
-        template < typename Container >
-        void add_system_defined_mappings(const Container& fl,
-                typename detail::enable_if_container< Container, function_symbol >::type* = 0) const
-        { for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
-          { add_system_defined_mapping(*i);
-          }
-        }
-  
-        /// \brief Adds sorts to this specification, and marks them as system
-        /// defined.
-        ///
-        /// \param[in] sl A container with sort expressions (objects of type convertible to sort expression).
-        /// \post for all s in sl: is_system_defined(s)
-        /// \note this operation does not invalidate iterators of sorts_const_range
-        template < typename Container >
-        void add_system_defined_sorts(const Container& sl,
-                typename detail::enable_if_container< Container, sort_expression >::type* = 0) const
-        { for (typename Container::const_iterator i = sl.begin(); i != sl.end(); ++i)
-          { add_system_defined_sort(*i);
-          }
-        }
-
+        /// \param[in] sort A sort expression that is representing the structured sort.
         void insert_mappings_constructors_for_structured_sort(const structured_sort &sort) const
         { add_system_defined_sort(normalise_sorts(sort));
 
           structured_sort s_sort(sort);
-          add_system_defined_constructors(s_sort.constructor_functions(sort));
-          add_system_defined_mappings(s_sort.projection_functions(sort));
-          add_system_defined_mappings(s_sort.recogniser_functions(sort));
-          add_system_defined_equations(s_sort.constructor_equations(sort));
-          add_system_defined_equations(s_sort.projection_equations(sort));
-          add_system_defined_equations(s_sort.recogniser_equations(sort));
+          function_symbol_vector f(s_sort.constructor_functions(sort));
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
+          f = s_sort.projection_functions(sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+          f = s_sort.recogniser_functions(sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+
+          data_equation_vector e(s_sort.constructor_equations(sort));
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+          e = s_sort.projection_equations(sort);
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+          e = s_sort.recogniser_equations(sort);
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }
 
         void remove_function(sort_to_symbol_map& container, const function_symbol& f)
@@ -490,7 +445,8 @@ namespace mcrl2 {
       ///    for each sort. The normalisation mapping maps each sort to a unique representant.
       ///    Moreover, it is this unique sort that it provides in internal mappings.
       const atermpp::map< sort_expression, sort_expression > &sort_alias_map() const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         return m_normalised_aliases;
       }
 
@@ -561,67 +517,6 @@ namespace mcrl2 {
         data_is_not_necessarily_normalised_anymore();
       }
 
-      /// \brief Adds sorts to this specification
-      ///
-      /// \param[in] sl A container with sort expressions (objects of type convertible to sort expression).
-      /// \note this operation does not invalidate iterators of sorts_const_range
-      template < typename Container >
-      void add_sorts(const Container& sl,
-              typename detail::enable_if_container< Container, sort_expression >::type* = 0)
-      { for (typename Container::const_iterator i = sl.begin(); i != sl.end(); ++i)
-        { add_sort(*i);
-        }
-      }
-
-      /// \brief Adds aliases to this specification
-      ///
-      /// \param[in] sl A container with sort expressions (objects of type convertible to sort expression).
-      /// \note this operation does not invalidate iterators of sorts_const_range
-      template < typename Container >
-      void add_aliases(const Container& sl,
-              typename detail::enable_if_container< Container, alias >::type* = 0)
-      { for (typename Container::const_iterator i = sl.begin(); i != sl.end(); ++i)
-        { add_alias(*i);
-        }
-      }
-
-      /// \brief Adds constructors to this specification
-      ///
-      /// \param[in] fl A container with function symbols (objects of type convertible to function_symbol).
-      /// \note this operation does not invalidate iterators of constructors_const_range
-      template < typename Container >
-      void add_constructors(const Container& fl,
-              typename detail::enable_if_container< Container, function_symbol >::type* = 0)
-      { for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
-        { add_constructor(*i);
-        }
-      }
-
-      /// \brief Adds mappings to this specification
-      ///
-      /// \param[in] fl A container with function symbols (objects of type convertible to function_symbol).
-      /// \note this operation does not invalidate iterators of mappings_const_range
-      template < typename Container >
-      void add_mappings(const Container& fl,
-              typename detail::enable_if_container< Container, function_symbol >::type* = 0)
-      { for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
-        { add_mapping(*i);
-        }
-      }
-
-      /// \brief Adds equations to this specification
-      ///
-      /// \param[in] fl A container with equations (objects of type convertible to data_equation).
-      /// \note this operation does not invalidate iterators of equations_const_range
-      template < typename Container >
-      void add_equations(const Container& el,
-              typename detail::enable_if_container< Container, data_equation >::type* = 0) 
-      { for (typename Container::const_iterator i = el.begin(); i != el.end(); ++i)
-        { add_equation(*i);
-        }
-      }
-
-  public:
       ///\brief Adds the sort s to the context sorts
       /// \param[in] s a sort expression. It is
       /// added to m_sorts_in_context. For this sort standard functions are generated
@@ -781,17 +676,6 @@ namespace mcrl2 {
         data_is_not_necessarily_normalised_anymore();
       }
 
-      /// \brief Removes sorts from specification.
-      ///
-      /// \param[in] sl A range of sorts.
-      /// \post for all s in sl: s no in sorts()
-      template < typename SortsForwardRange >
-      void remove_sorts(const SortsForwardRange& sl)
-      { for (typename SortsForwardRange::iterator i = sl.begin(); i != sl.end(); ++i)
-        { remove_sort(*i);
-        }
-      }
-
       /// \brief Removes constructor from specification.
       ///
       /// Note that this does not remove equations containing the constructor.
@@ -803,17 +687,6 @@ namespace mcrl2 {
       void remove_constructor(const function_symbol& f)
       { remove_function(m_normalised_constructors,normalise_sorts(f));
         remove_function(m_constructors,f);
-      }
-
-      /// \brief Removes constructors from specification.
-      ///
-      /// \param[in] cl A range of constructors.
-      /// \post for all c in cl: c not in constructors()
-      template < typename ConstructorsForwardRange >
-      void remove_constructors(const ConstructorsForwardRange& cl)
-      { for (typename ConstructorsForwardRange::const_iterator i = cl.begin(); i != cl.end(); ++i)
-        { remove_constructor(*i);
-        }
       }
 
       /// \brief Removes mapping from specification.
@@ -828,17 +701,6 @@ namespace mcrl2 {
         remove_function(m_normalised_mappings,normalise_sorts(f));
       }
 
-      /// \brief Removes mappings from specification.
-      ///
-      /// \param[in] fl A range of constructors.
-      /// \post for all f in fl: f not in mappings()
-      template < typename MappingsForwardRange >
-      void remove_mappings(const MappingsForwardRange& fl)
-      { for (typename MappingsForwardRange::const_iterator i = fl.begin(); i != fl.end(); ++i)
-        { remove_mapping(*i);
-        }
-      }
-
       /// \brief Removes equation from specification.
       ///
       /// \param[in] e An equation.
@@ -848,17 +710,6 @@ namespace mcrl2 {
       void remove_equation(const data_equation& e)
       { m_equations.erase(e);
         m_normalised_equations.erase(normalise_sorts(e));
-      }
-
-      /// \brief Removes equations from specification.
-      ///
-      /// \param[in] el A range of equations.
-      /// \post for all e in el: e not in equations()
-      template < typename EquationsForwardRange >
-      void remove_equations(const EquationsForwardRange& el)
-      { for (typename EquationsForwardRange::const_iterator i = el.begin(); i != el.end(); ++i)
-        { remove_equation(*i);
-        }
       }
 
       /// \brief Checks whether two sort expressions represent the same sort
@@ -938,7 +789,7 @@ namespace mcrl2 {
       /// \param[in] f the symbol to look for
       bool search_mapping(const function_symbol& f) const
       { normalise_specification_if_required();
-        mappings_const_range range(m_mappings.equal_range(f.sort().target_sort()));
+        mappings_const_range range(m_normalised_mappings.equal_range(f.sort().target_sort()));
 
         return std::find(range.begin(), range.end(), f) != range.end();
       }
@@ -954,7 +805,7 @@ namespace mcrl2 {
       /// \param[in] e the equation to look for
       bool search_equation(const data_equation& e) const
       { normalise_specification_if_required();
-        return std::find(m_equations.begin(), m_equations.end(), e) != m_equations.end();
+        return std::find(m_normalised_equations.begin(), m_normalised_equations.end(), e) != m_normalised_equations.end();
       }
 
       bool operator==(const data_specification& other) const

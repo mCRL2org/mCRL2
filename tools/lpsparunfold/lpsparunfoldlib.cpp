@@ -901,14 +901,13 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
   
     //Reconstruct data specification
     m_data_specification.add_sort( fresh_basic_sort );
-    m_data_specification.add_constructors( elements_of_new_sorts );
+    std::for_each(elements_of_new_sorts.begin(), elements_of_new_sorts.end(), boost::bind(&data_specification::add_constructor, &m_data_specification, _1));
     m_data_specification.add_mapping( determine_function );
     m_data_specification.add_mapping( case_function );
-    m_data_specification.add_mappings( m_additional_mappings );
-    m_data_specification.add_mappings( projection_functions );
+    std::for_each(m_additional_mappings.begin(), m_additional_mappings.end(), boost::bind(&data_specification::add_mapping, &m_data_specification, _1));
+    std::for_each(projection_functions.begin(), projection_functions.end(), boost::bind(&data_specification::add_mapping, &m_data_specification, _1));
 
-    boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range( data_equations ) );
-    m_data_specification.add_equations( dev_range );
+    std::for_each(data_equations.begin(), data_equations.end(), boost::bind(&data_specification::add_equation, &m_data_specification, _1));
   }
 
   mcrl2::lps::specification new_spec = mcrl2::lps::specification( m_data_specification, m_action_label_list, m_glob_vars, new_lps, new_init );
