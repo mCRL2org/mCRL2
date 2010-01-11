@@ -11,6 +11,175 @@
 [def __lts_library__           [@http://www.mcrl2.org/mcrl2/wiki/index.php/LTS_library LTS Library]]
 
 [section: Introduction]
-The __lts_library__ provides data structures and methods to handle /labelled transition systems/ (LTS).
+The __lts_library__ provides data structures and methods to handle /labelled
+transition systems/ (LTS). Using the library, an LTS can be read from/written
+to file (various file formats are supported), minimised using various
+equivalences, determinised, and analysed.
+
+This manual gives an overview of the library's structure and explains how to
+program with the library. The relevant concepts are introduced and defined
+[@ here].
+
+Note that the current implementation of this library is mainly focussed on
+creating LTSs. That is, it is easy to add states, transitions and labels, but
+there is virtually no functionality to change or remove parts of an LTS. 
+[endsect]
+
+[section: Structure]
+The LTS library resides in the namespace mcrl2::lts. The main class of this
+library is the lts class. This class represents an LTS and contains almost all
+available functionality to work with LTSs. States and labels are identified by
+unsigned ints and transitions are triples (from, label, to) of unsigned ints,
+where from and to are the source and target states, respectively, and label is
+the label of the transition.
+
+There is a possibility to assign ATerm values to states and labels. This has
+to be specified when creating an lts object or when one resets such an object
+(with the reset() method). In principle these values can be any ATerm, but not
+all LTS formats support this. In practice the following structures typically
+occur:
+* No state information (all formats)
+* μCRL states: ATermLists of μCRL data expressions (μCRL, FSM)
+* mCRL2 states: ATermAppl of mCRL2 data expressions (mCRL2, FSM) 
+* String labels: ATermAppl without arguments; the function symbol name is the
+  label (all formats except mCRL2)
+* mCRL2 multiaction labels: ATermAppl; mCRL2 multiaction in internal format (mCRL2) 
+
+Besides the main lts class, there are several auxiliary classes. Three of them
+(state_iterator, transition_iterator and label_iterator) are iterators to
+iterate over states, transitions and labels. The lts class has methods to
+obtain such iterators (e.g. lts::get_transitions()). Their use is illustrated
+in the tutorial below.
+
+The other classes, lts_dot_options, lts_eq_options and lts_extra, are used to
+store options for certain operations. 
+[endsect]
+
+[section: Tutorial]
+We perform two typical programming tasks to illustrate the use of the LTS
+library. Before we do so, however, we describe the common parts.
+
+First of all we must include the appropriate header to use the LTS library.
+
+  #include <mcrl2/lts/liblts.h>
+
+Most of the time it is also useful to specify that we are using the namespace
+of the LTS library.
+
+  using namespace mcrl2::lts;
+
+In the rest of the tutorial we assume that this is specified. If one does not
+wish to use this, one will have to prepend mcrl2::lts:: to all references to
+entities in the LTS library.
+
+[section: Creating an LTS]
+
+Now let us make a function make_blue_lts() that constructs the blue LTS as
+shown above and saves it to a file. We start with some declarations.
+
+  void make_blue_lts()
+  {
+    unsigned int s[5];
+    unsigned int lab_open,lab_car,lab_flowers;
+ 
+    lts l(false,true);
+
+All states and labels are identified by unsigned integers. We therefore have an
+array s of five unsigned integers to store the identifiers of the (five) states
+as well as an unsigned integer variable for each label. The LTS is created with
+two arguments: the first argument indicates that we do not store state
+information and the second argument indicates that we will use label information
+in this example.
+
+Before we can add any transitions to the LTS, we must first add the states and
+labels. This is done as follows.
+
+    for (unsigned int i=0; i<5; ++i)
+    {
+      s[i] = l.add_state();
+    }
+ 
+    lab_open = l.add_label((ATerm) ATmakeAppl0(ATmakeAFun("open_door",ATfalse,0)));
+    lab_car = l.add_label((ATerm) ATmakeAppl0(ATmakeAFun("win_car",ATfalse,0)));
+    lab_flowers = l.add_label((ATerm) ATmakeAppl0(ATmakeAFun("win_flowers",ATfalse,0)));
+
+Note that these functions return the identifier of the state or label. With this
+information we can construct the LTS. We specify the initial state:
+
+  l.set_initial_state(s[0]);
+
+And add the transitions:
+
+  l.add_transition(s[0],lab_open,s[1]);
+  l.add_transition(s[0],lab_open,s[2]);
+  l.add_transition(s[1],lab_car,s[3]);
+  l.add_transition(s[2],lab_flowers,s[4]);
+
+The LTS is now complete. To save it, we call the write_to() method with a
+filename and the type of the output (lts_aut in this case).
+
+  l.write_to("blue.aut",lts_aut);
+}
+[endsect]
+
+[section: Read, reduce and print]
+
+Now we have created an LTS file, we describe how to read it in again, apply
+some reduction and print its contents. There are two ways to read an LTS from a
+file. The most straightforward method is to use the appropriate constructor:
+
+  lts l("blue.aut");
+
+Note, however, that this method only works when the supplied file contains a
+valid LTS (according to the LTS library). If this is not the case, there is no
+way to detect failure. It is therefore advisable to use the following method.
+
+  lts l;
+  if ( l.read_from("blue.aut") )
+  {
+    // reading went ok
+  } else {
+    // reading failed
+  }
+
+Now that the LTS has been read from file, our goal is to print the transitions
+of the minimal deterministic trace-equivalent LTS to the screen.
+
+For the reduction we simply call the reduce() method with the option
+lts_eq_trace.
+
+  l.reduce(lts_eq_trace);
+
+The LTS l has now been reduced, so we can print the result. We iterate over all\
+transitions in a loop as follows.
+
+  for (transition_iterator i = l.get_transitions(); i.more(); ++i)
+  {
+
+We show the states by printing their identifiers (i.e. the unsigned integers),
+but for the labels we wish to use the actual value as a string, which we can
+obtain as follows.
+
+    string label = l.label_value_str(i.label());
+
+To print each transition we do the following.
+
+    cout << i.from() << "  -- " << label << " -->  " i.to() << endl;
+  }
+
+The output is as follows:
+
+1  -- open_door -->  0
+0  -- win_flowers -->  2
+0  -- win_car -->  2
+
+Note that the initial state is 1. To verify this one could also print
+l.initial_state(). 
+[endsect]
+
+[endsect]
+
+[section: References]
+# [@http://www.mcrl2.org/libref/lts/ LTS reference manual]
 
 [endsect]
