@@ -308,14 +308,18 @@ namespace mcrl2 {
 
     public:
 
-      ///\brief Default constructor. Generate a data specification that contains only booleans.
-      data_specification():m_normalised_data_is_up_to_date(false)
+      ///\brief Default constructor. Generate a data specification that contains
+      ///       only booleans.
+      data_specification()
+        : m_normalised_data_is_up_to_date(false)
       {}
 
       ///\brief Constructor from an aterm.
       /// \param[in] t a term adhering to the internal format.
-      data_specification(const atermpp::aterm_appl& t):m_normalised_data_is_up_to_date(false)
-      { build_from_aterm(t);
+      data_specification(const atermpp::aterm_appl& t)
+        : m_normalised_data_is_up_to_date(false)
+      {
+        build_from_aterm(t);
       }
 
       ///\brief Constructor
@@ -325,11 +329,17 @@ namespace mcrl2 {
                          const AliasesRange& aliases,
                          const ConstructorsRange& constructors,
                          const MappingsRange& mappings,
-                         const EquationsRange& equations):m_normalised_data_is_up_to_date(false)
-      { add_sorts(sorts);
-        add_constructors(constructors);
-        add_mappings(mappings);
-        add_equations(equations);
+                         const EquationsRange& equations)
+        : m_normalised_data_is_up_to_date(false)
+      {
+        std::for_each(sorts.begin(), sorts.end(),
+           boost::bind(&data_specification::add_sort, this, _1));
+        std::for_each(constructors.begin(), constructors.end(),
+                   boost::bind(&data_specification::add_constructor, this, _1));
+        std::for_each(mappings.begin(), mappings.end(),
+                   boost::bind(&data_specification::add_mapping, this, _1));
+        std::for_each(equations.begin(), equations.end(),
+                   boost::bind(&data_specification::add_equation, this, _1));
       }
 
       /// \brief Gets all sort declarations including those that are system defined.
@@ -341,7 +351,8 @@ namespace mcrl2 {
       /// \return The sort declarations of this specification.
       inline
       sorts_const_range sorts() const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         return sorts_const_range(m_normalised_sorts);
       }
 
@@ -351,7 +362,8 @@ namespace mcrl2 {
       /// \return The user defined sort declaration.
       inline
       sorts_const_range user_defined_sorts() const
-      { return sorts_const_range(m_sorts);
+      {
+        return sorts_const_range(m_sorts);
       }
 
       /// \brief Gets all constructors including those that are system defined.
@@ -360,7 +372,8 @@ namespace mcrl2 {
       /// structured sorts.
       inline
       constructors_const_range constructors() const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         return constructors_const_range(m_normalised_constructors);
       }
 
@@ -380,7 +393,8 @@ namespace mcrl2 {
       /// \return The constructors for sort s in this specification.
       inline
       constructors_const_range constructors(const sort_expression& s) const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         return constructors_const_range(m_normalised_constructors.equal_range(normalise_sorts(s)));
       }
 
@@ -391,7 +405,8 @@ namespace mcrl2 {
       /// projection functions from structured sorts.
       inline
       mappings_const_range mappings() const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         return mappings_const_range(m_normalised_mappings);
       }
 
@@ -413,8 +428,9 @@ namespace mcrl2 {
       /// right-hand side of the mapping's sort.
       inline
       mappings_const_range mappings(const sort_expression& s) const
-      { normalise_specification_if_required();
-         return mappings_const_range(m_normalised_mappings.equal_range(normalise_sorts(s)));
+      {
+        normalise_specification_if_required();
+        return mappings_const_range(m_normalised_mappings.equal_range(normalise_sorts(s)));
       }
 
       /// \brief Gets all equations in this specification including those that are system defined
@@ -424,7 +440,8 @@ namespace mcrl2 {
       ///  structured sorts.
       inline
       equations_const_range equations() const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         return equations_const_range(m_normalised_equations);
       } 
 
@@ -461,7 +478,8 @@ namespace mcrl2 {
       /// \brief Return the user defined context sorts of the current specification.
       /// \details Time complexity is constant.
       sorts_const_range context_sorts()
-      { return m_sorts_in_context;
+      {
+        return m_sorts_in_context;
       }
 
       /// \brief Adds a sort to this specification
@@ -483,7 +501,8 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of aliases_const_range
       /// \post is_alias(s.name()) && normalise_sorts(s.name()) = normalise_sorts(s.reference())
       void add_alias(alias const& a)
-      { m_aliases[a.name()] = a.reference();
+      {
+        m_aliases[a.name()] = a.reference();
         data_is_not_necessarily_normalised_anymore();
       }
 
@@ -493,7 +512,8 @@ namespace mcrl2 {
       /// \pre a mapping f does not yet occur in this specification.
       /// \note this operation does not invalidate iterators of constructors_const_range
       void add_constructor(const function_symbol& f)
-      { add_function(m_constructors, f);
+      {
+        add_function(m_constructors, f);
         data_is_not_necessarily_normalised_anymore();
       }
 
@@ -503,7 +523,8 @@ namespace mcrl2 {
       /// \pre a constructor f does not yet occur in this specification.
       /// \note this operation does not invalidate iterators of mappings_const_range
       void add_mapping(const function_symbol& f)
-      { add_function(m_mappings, f);
+      {
+        add_function(m_mappings, f);
         data_is_not_necessarily_normalised_anymore();
       }
 
@@ -513,7 +534,8 @@ namespace mcrl2 {
       /// \pre e does not yet occur in this specification.
       /// \note this operation does not invalidate iterators of equations_const_range
       void add_equation(const data_equation& e)
-      { m_equations.insert(e);
+      {
+        m_equations.insert(e);
         data_is_not_necessarily_normalised_anymore();
       }
 
@@ -523,10 +545,8 @@ namespace mcrl2 {
       /// automatically (if, <,<=,==,!=,>=,>) and if the sort is a standard sort,
       /// the necessary constructors, mappings and equations are added to the data type.
       void add_context_sort(const sort_expression& s) const
-      { 
-        atermpp::set<sort_expression>::size_type old_size = m_sorts_in_context.size();
-        m_sorts_in_context.insert(s);
-        if (m_sorts_in_context.size()!=old_size)
+      {
+        if (m_sorts_in_context.insert(s).second)
         {
           data_is_not_necessarily_normalised_anymore();
         }
@@ -539,13 +559,9 @@ namespace mcrl2 {
       /// the necessary constructors, mappings and equations are added to the data type.
       template <typename Container>
       void add_context_sorts(const Container &c, typename detail::enable_if_container<Container>::type* = 0) const
-      { 
-        atermpp::set<sort_expression>::size_type old_size = m_sorts_in_context.size();
-        m_sorts_in_context.insert(c.begin(), c.end());
-        if (m_sorts_in_context.size()!=old_size)
-        {
-          data_is_not_necessarily_normalised_anymore();
-        }
+      {
+        std::for_each(c.begin(), c.end(),
+            boost::bind(&data_specification::add_context_sort, this, _1));
       }
 
   private:
@@ -559,8 +575,10 @@ namespace mcrl2 {
       /// \brief 
       /// \details
       void normalise_specification_if_required() const
-      { if (!m_normalised_data_is_up_to_date)
-        { m_normalised_data_is_up_to_date=true;
+      {
+        if (!m_normalised_data_is_up_to_date)
+        {
+          m_normalised_data_is_up_to_date=true;
           normalise_sorts();
         }
       }
@@ -664,14 +682,16 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of sorts_const_range, 
       /// only if they point to the element that is removed
       void remove_sort(const sort_expression& s)
-      { m_sorts.erase(s);
+      {
+        m_sorts.erase(s);
         m_normalised_sorts.erase(normalise_sorts(s));
       }
 
       /// \brief Removes alias from specification.
       /// \post !search_sort(a.name()) && !is_alias(a.name())
       void remove_alias(alias const& a)
-      { m_sorts.erase(a.name());
+      {
+        m_sorts.erase(a.name());
         m_aliases.erase(a.name());
         data_is_not_necessarily_normalised_anymore();
       }
@@ -685,7 +705,8 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of constructors_const_range, 
       /// only if they point to the element that is removed
       void remove_constructor(const function_symbol& f)
-      { remove_function(m_normalised_constructors,normalise_sorts(f));
+      {
+        remove_function(m_normalised_constructors,normalise_sorts(f));
         remove_function(m_constructors,f);
       }
 
@@ -697,7 +718,8 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of mappings_const_range, 
       /// only if they point to the element that is removed
       void remove_mapping(const function_symbol& f)
-      { remove_function(m_mappings,f);
+      {
+        remove_function(m_mappings,f);
         remove_function(m_normalised_mappings,normalise_sorts(f));
       }
 
@@ -708,7 +730,8 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of equations_const_range, 
       /// only if they point to the element that is removed
       void remove_equation(const data_equation& e)
-      { m_equations.erase(e);
+      {
+        m_equations.erase(e);
         m_normalised_equations.erase(normalise_sorts(e));
       }
 
@@ -717,7 +740,8 @@ namespace mcrl2 {
       /// \param[in] s1 A sort expression
       /// \param[in] s2 A sort expression
       bool equal_sorts(sort_expression const& s1, sort_expression const& s2) const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         const sort_expression normalised_sort1=normalise_sorts(s1);
         const sort_expression normalised_sort2=normalise_sorts(s2);
         return (normalised_sort1 == normalised_sort2);
@@ -735,23 +759,10 @@ namespace mcrl2 {
       /// \param[in] s A sort expression
       /// \return true if s is a constructor sort
       bool is_constructor_sort(const sort_expression& s) const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         const sort_expression normalised_sort=normalise_sorts(s);
         return !normalised_sort.is_function_sort() && !constructors(normalised_sort).empty();
-      }
-
-      /// \brief Checks whether all sort expressions are certainly finite.
-      ///
-      /// \param[in] s A range of sort expressions
-      template < typename ForwardRange >
-      bool is_certainly_finite(const ForwardRange& s,
-		 typename detail::enable_if_container< ForwardRange, sort_expression >::type* = 0) const
-      { for (typename ForwardRange::const_iterator i = s.begin(); i != s.end(); ++i) {
-          if (!is_certainly_finite(*i)) {
-            return false;
-          }
-        }
-        return true;
       }
 
       /// \brief Returns true if
@@ -762,16 +773,9 @@ namespace mcrl2 {
       /// \return True if the data specification is well typed.
       bool is_well_typed() const;
 
-      /// \brief Determines whether a basic sort is in fact a sort under alias
-      ///
-      /// param[in] s the target sort
-      bool is_alias(const basic_sort& s) const
-      {
-        return m_aliases.find(s) != m_aliases.end();
-      }
-
       bool operator==(const data_specification& other) const
-      { normalise_specification_if_required();
+      {
+        normalise_specification_if_required();
         other.normalise_specification_if_required();
         return
           // m_sorts_in_context == other.m_sorts_in_context &&

@@ -92,6 +92,8 @@ void test_sorts()
   sort_expression_vector s2l(make_vector(reinterpret_cast<sort_expression&>(s2)));
   boost::iterator_range<sort_expression_vector::const_iterator> s2l_range(s2l);
   spec.add_context_sort(s2);
+  //std::for_each(s2l_range.begin(), s2l_range.end(),
+  //      boost::bind(&data_specification::add_context_sort, spec1, _1));
   spec1.add_context_sorts(s2l_range);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
