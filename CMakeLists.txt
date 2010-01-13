@@ -91,7 +91,7 @@ endif(NOT BUILD_IN_SOURCE)
 
 # Variables required for an additional build type "Maintainer"
  
-set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wshadow -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the C++ compiler during maintainer builds." FORCE)
+set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the C++ compiler during maintainer builds." FORCE)
 set(CMAKE_C_FLAGS_MAINTAINER "-g -O0 -Wall -pedantic -W -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the C compiler during maintainer builds." FORCE)
 set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used for linking binaries during maintainer builds." FORCE)
 set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the shared libraries linker during maintainer builds." FORCE)
