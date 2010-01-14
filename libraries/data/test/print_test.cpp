@@ -164,11 +164,11 @@ void test_bag_print() {
   BOOST_CHECK(stream_print_test(bagfbag(bool_(), bag_empty), "{}"));
   BOOST_CHECK(stream_print_test(bagconstructor(bool_(), zero_function(bool_()), fbag_empty_), "{}"));
   BOOST_CHECK(stream_print_test(bagin(bool_(), false_(), bag_empty), "false in {}"));
-  BOOST_CHECK(stream_print_test(bagin(bool_(), false_(), bag_false), "false in {false:1}"));
-  BOOST_CHECK(stream_print_test(bagcount(bool_(), false_(), bag_true), "count(false, {true:1})"));
-  BOOST_CHECK(stream_print_test(bagjoin(bool_(), bag_false, bag_true), "{false:1} + {true:1}"));
-  BOOST_CHECK(stream_print_test(bagintersect(bool_(), bag_false, bag_true), "{false:1} * {true:1}"));
-  BOOST_CHECK(stream_print_test(bagdifference(bool_(), bag_false, bag_true), "{false:1} - {true:1}"));
+  BOOST_CHECK(stream_print_test(bagin(bool_(), false_(), bag_false), "false in {false: 1}"));
+  BOOST_CHECK(stream_print_test(bagcount(bool_(), false_(), bag_true), "count(false, {true: 1})"));
+  BOOST_CHECK(stream_print_test(bagjoin(bool_(), bag_false, bag_true), "{false: 1} + {true: 1}"));
+  BOOST_CHECK(stream_print_test(bagintersect(bool_(), bag_false, bag_true), "{false: 1} * {true: 1}"));
+  BOOST_CHECK(stream_print_test(bagdifference(bool_(), bag_false, bag_true), "{false: 1} - {true: 1}"));
 }
 
 void test_structured_sort_print() {

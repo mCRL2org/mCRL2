@@ -1336,6 +1336,192 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part) {
   return Part;
 }
 
+static ATermAppl
+reconstruct_container_expression(ATermAppl Part)
+{
+  using namespace mcrl2::data;
+  using namespace mcrl2::data::sort_set;
+  using namespace mcrl2::data::sort_fset;
+  using namespace mcrl2::data::sort_bag;
+
+  data_expression expr(Part);
+  if (is_setconstructor_application(expr))
+  {
+    //gsDebugMsg("Reconstructing implementation of set comprehension\n");
+    //part is an internal set representation;
+    //replace by a finite set to set conversion or a set comprehension.
+    sort_expression element_sort = *function_sort(sort_set::left(expr).sort()).domain().begin();
+    if (is_false_function_function_symbol(sort_set::left(expr)))
+    {
+      Part = reconstruct_container_expression(static_cast<ATermAppl>(setfset(element_sort, sort_set::right(expr))));
+    }
+    else if (is_true_function_function_symbol(sort_set::right(expr)))
+    {
+      Part = static_cast<ATermAppl>(setcomplement(setfset(element_sort, sort_set::right(expr))));
+    }
+    else
+    {
+      ATermAppl se_func = sort_set::left(expr).sort();
+      ATermAppl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
+      ATermAppl var = gsMakeDataVarId(gsFreshString2ATermAppl("x",
+          (ATerm) static_cast<ATermAppl>(expr), true), se_func_dom);
+      ATermAppl body;
+      if (data::sort_fset::is_fset_empty_function_symbol(sort_set::right(expr)))
+      {
+        body = data::application(sort_set::left(expr), data::variable(var));
+      }
+      else
+      {
+        data_expression lhs(data::application(sort_set::left(expr), data::variable(var)));
+        data_expression rhs(setin(element_sort, data_expression(var), setfset(element_sort, sort_set::right(expr))));
+        body = static_cast<ATermAppl>(data::not_equal_to(lhs,rhs));
+      }
+      Part = gsMakeBinder(gsMakeSetComp(), ATmakeList1((ATerm) var), body);
+    }
+  }
+  else if (sort_set::is_setfset_application(expr))
+  {
+    //gsDebugMsg("Reconstructing SetFSet\n");
+    //try to reconstruct Part as the empty set or as a set enumeration
+    data_expression de_fset(sort_set::arg(expr));
+    bool elts_is_consistent = true;
+    data_expression_vector elements;
+    while (!sort_fset::is_fset_empty_function_symbol(de_fset) && elts_is_consistent)
+    {
+      if (sort_fset::is_fset_cons_application(de_fset))
+      {
+        elements.push_back(sort_fset::head(de_fset));
+        de_fset = sort_fset::tail(de_fset);
+      }
+      else if (sort_fset::is_fsetinsert_application(de_fset))
+      {
+        elements.push_back(sort_fset::right(de_fset));
+        de_fset = sort_fset::left(de_fset);
+      }
+      else
+      {
+        elts_is_consistent = false;
+      }
+    }
+    if (elts_is_consistent && is_container_sort(expr.sort()))
+    {
+      Part = static_cast<ATermAppl>(sort_set::set_enumeration(container_sort(expr.sort()).element_sort(), elements));
+    }
+  }
+  else if (sort_set::is_setcomprehension_application(expr))
+  {
+    //gsMessage("Setcomprehension\n");
+    data_expression body(sort_set::arg(expr));
+    data_expression_vector variables;
+    sort_expression_list domain_of_body_sort(function_sort(body.sort()).domain());
+    data_expression_list context = atermpp::make_list(body);
+
+    for(sort_expression_list::const_iterator i = domain_of_body_sort.begin();
+        i != domain_of_body_sort.end(); ++i)
+    {
+      variable var = data::variable(gsMakeDataVarId(gsFreshString2ATermAppl("x",
+          (ATerm) static_cast<ATermList>(context), true), static_cast<ATermAppl>(*i)));
+      context = atermpp::push_front(context, data_expression(var));
+      variables.push_back(var);
+    }
+
+    body = data::application(body, variables);
+    Part = gsMakeBinder(gsMakeSetComp(), convert<data_expression_list>(variables), body);
+  }
+
+  else if (sort_bag::is_bagconstructor_application(expr))
+  {
+    //gsMessage("Reconstructing implementation of bag comprehension\n");
+    //part is an internal set representation;
+    //replace by a finite set to set conversion or a set comprehension.
+    sort_expression element_sort = *function_sort(sort_bag::left(expr).sort()).domain().begin();
+    if (is_zero_function_function_symbol(sort_bag::left(expr)))
+    {
+      Part = reconstruct_container_expression(static_cast<ATermAppl>(bagfbag(element_sort, sort_bag::right(expr))));
+    }
+    else
+    {
+      ATermAppl se_func = sort_bag::left(expr).sort();
+      ATermAppl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
+      data_expression var(gsMakeDataVarId(gsFreshString2ATermAppl("x",
+          (ATerm) static_cast<ATermAppl>(expr), true), se_func_dom));
+      data_expression body;
+
+      if (sort_bag::is_one_function_function_symbol(sort_bag::left(expr)))
+      {
+        body = number(sort_nat::nat(), "1");
+      }
+      else
+      {
+        body = application(sort_bag::left(expr), var);
+      }
+      if(!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(expr)))
+      {
+        body = sort_nat::swap_zero(body, sort_bag::bagcount(element_sort, var, sort_bag::bagfbag(element_sort, sort_bag::right(expr))));
+      }
+      Part = gsMakeBinder(gsMakeBagComp(), make_list(var), body);
+    }
+  }
+  else if (sort_bag::is_bagfbag_application(expr))
+  {
+    //gsMessage("BagFBag\n");
+    //try to reconstruct Part as the empty set or as a set enumeration
+    data_expression de_fbag(sort_bag::arg(expr));
+    bool elts_is_consistent = true;
+    data_expression_vector elements;
+    while (!sort_fbag::is_fbag_empty_function_symbol(de_fbag) && elts_is_consistent)
+    {
+      if (sort_fbag::is_fbag_cons_application(de_fbag))
+      {
+        elements.push_back(sort_fbag::head(de_fbag));
+        elements.push_back(sort_fbag::headcount(de_fbag));
+        de_fbag = sort_fbag::tail(de_fbag);
+      }
+      else if (sort_fbag::is_fbaginsert_application(de_fbag))
+      {
+        elements.push_back(sort_fbag::arg1(de_fbag));
+        elements.push_back(sort_nat::cnat(sort_fbag::arg2(de_fbag)));
+        de_fbag = sort_fbag::arg3(de_fbag);
+      }
+      else if (sort_fbag::is_fbagcinsert_application(de_fbag))
+      {
+        elements.push_back(sort_fbag::arg1(de_fbag));
+        elements.push_back(sort_fbag::arg2(de_fbag));
+        de_fbag = sort_fbag::arg3(de_fbag);
+      }
+      else
+      {
+        elts_is_consistent = false;
+      }
+    }
+    if (elts_is_consistent && is_container_sort(expr.sort()))
+    {
+      Part = static_cast<ATermAppl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), elements));
+    }
+  }
+  else if (sort_bag::is_bagcomprehension_application(expr))
+  {
+    //gsMessage("BagComprehension\n");
+    data_expression body(sort_bag::arg(expr));
+    data_expression_vector variables;
+    sort_expression_list domain_of_body_sort(function_sort(body.sort()).domain());
+    data_expression_list context = atermpp::make_list(body);
+
+    for(sort_expression_list::const_iterator i = domain_of_body_sort.begin();
+        i != domain_of_body_sort.end(); ++i)
+    {
+      variable var = data::variable(gsMakeDataVarId(gsFreshString2ATermAppl("x",
+          (ATerm) static_cast<ATermList>(context), true), static_cast<ATermAppl>(*i)));
+      context = atermpp::push_front(context, data_expression(var));
+      variables.push_back(var);
+    }
+
+    body = data::application(body, variables);
+    Part = gsMakeBinder(gsMakeBagComp(), convert<data_expression_list>(variables), body);
+  }
+  return Part;
+}
+
 void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
   const ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
@@ -1432,6 +1618,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
           pp_format, ShowSorts, PrecLevel);
       } else if (gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr)) {
         ATermAppl Reconstructed(reconstruct_numeric_expression(DataExpr));
+        Reconstructed = reconstruct_container_expression(Reconstructed);
         //print data variable or operation identifier
         if (Reconstructed == DataExpr) {
           PRINT_FUNC(dbg_prints)("printing data variable or operation identifier\n");
@@ -1449,12 +1636,21 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       } else {
         ATermAppl Reconstructed(reconstruct_numeric_expression(DataExpr));
         if (Reconstructed == DataExpr) {
-          //print data application
-          PRINT_FUNC(dbg_prints)("printing data application\n");
-          PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecIdPrefix());
-          PRINT_FUNC(fprints)(OutStream, "(");
-          PRINT_FUNC(PrintPart_List)(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
-          PRINT_FUNC(fprints)(OutStream, ")");
+          ATermAppl CReconstructed(reconstruct_container_expression(DataExpr));
+          if (CReconstructed == Reconstructed)
+          {
+            //print data application
+            PRINT_FUNC(dbg_prints)("printing data application\n");
+            PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecIdPrefix());
+            PRINT_FUNC(fprints)(OutStream, "(");
+            PRINT_FUNC(PrintPart_List)(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
+            PRINT_FUNC(fprints)(OutStream, ")");
+          }
+          else
+          {
+            PRINT_FUNC(dbg_prints)("printing container representation\n");
+            PRINT_FUNC(PrintDataExpr)(OutStream, CReconstructed, pp_format, ShowSorts, PrecLevel);
+          }
         }
         else {
           PRINT_FUNC(dbg_prints)("printing numeric representation\n");
