@@ -13,7 +13,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Monday, October 19, 2009 15:45:27}
-%TCIDATA{LastRevised=Thursday, October 29, 2009 18:04:17}
+%TCIDATA{LastRevised=Friday, January 15, 2010 10:28:48}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -51,7 +51,230 @@
 
 This document describes rewrite algorithms that can be applied in the mCRL2
 tool set. Currently only a prototype implementation in python is available.
-Most of the content is based on \cite{weerdenburg2009}.
+Most of the content is based on \cite{weerdenburg2009} and on \cite%
+{vanderwulp2009}.
+
+\subsection{Higher order rewriting}
+
+There are several formalisms for higher order rewriting. We choose
+higher-order rewriting systems (HRSs) introduced by Nipkow. In \cite%
+{DBLP:conf/rta/Raamsdonk01} HRSs are summarized as follows:
+
+In a HRS we work modulo the $\beta \eta $-relation of simply typed $\lambda $%
+-calculus. \emph{Types} are built from a non-empty set of base types and the
+binary type constructor $\rightarrow $ as usual. For every type we assume a
+countably infinite set of \emph{variables} of that type, written as $%
+x,y,z,\ldots $. A \emph{signature} is a non-empty set of typed function
+symbols. The set of \emph{preterms} of type $A$ over a signature $\Sigma $
+consists exactly of the expressions $s$for which we can derive $s:A$ using
+the following rules:
+
+\begin{enumerate}
+\item $x:A$ for a variable $x$ of type $A$,
+
+\item $f:A$ for a function symbol $f$ of type $A$ in $\Sigma $,
+
+\item if $A=A^{\prime }\rightarrow A^{\prime \prime }$, and $x:A^{\prime }$
+and $s:A^{\prime \prime }$, then $(x.s):A$,
+
+\item if $s:A^{\prime }\rightarrow A$ and $t:A^{\prime }$, then $(s$\ $t):A$.
+\end{enumerate}
+
+The abstraction operator $\_.\_$ binds variables, so occurrences of $x$ in $s
+$ in the preterm $x.s$ are bound. We work modulo type-preserving $\alpha $%
+-conversion and assume that bound variables are renamed whenever necessary
+in order to avoid unintended capturing of free variables. Parentheses may be
+omitted according to the usual conventions. We make use of the usual notions
+of \emph{substitution} of a preterm $t$ for the free occurrences of a
+variable $x$ in a preterm $s$, notation $s[x:=t]$, and \emph{replacement in
+a context}, notation $C[t]$. We write $s\supseteq s^{\prime }$ if $s^{\prime
+}$ is a subpreterm of $s$, and use $\supset $ for the strict subpreterm
+relation.
+
+The $\beta $\emph{-reduction relation}, notation $\rightarrow _{\beta }$, is
+the smallest relation on preterms that is compatible with formation of
+preterms and that satisfies the following:%
+\begin{equation*}
+(x,s)t\rightarrow _{\beta }s[x:=t]
+\end{equation*}%
+The \emph{restricted }$\eta $\emph{-expansion relation}, notation $%
+\rightarrow _{\overline{\eta }}$, is defined as follows. We have%
+\begin{equation*}
+C[s]\rightarrow _{\overline{\eta }}C[x.(s\ x)]
+\end{equation*}%
+if $s:A\rightarrow B$, and $x:A$ is a fresh variable, and no $\beta $-redex
+is created (hence the terminology restricted $\eta $-expansion). The latter
+condition is satisfied if $s$ is not an abstraction (so not of the form $%
+z.s^{\prime }$), and doesn't occur in $C[s]$ as the left part of an
+application (so doesn't occur in a sub-preterm of the form $(s\ s^{\prime })$%
+).
+
+In the sequel we employ only preterms in $\overline{\eta }$-normal form,
+where every sub-preterm has the right number of arguments. Instead of $%
+s_{0}s_{1}\ldots s_{m}$ we often write $s_{0}(s_{1},\ldots ,s_{m})$. A
+preterm is then of the form $x_{1}\ldots x_{n}.s_{0}(s_{1},\ldots ,s_{m})$
+with $s_{0}(s_{1},\ldots ,s_{m})$ of base type and all $s_{i}$ in $\overline{%
+\eta }$-normal form.
+
+A \emph{term} is a preterm in $\beta $-normal form. It is also in $\overline{%
+\eta }$-normal form because $\overline{\eta }$-normal forms are closed under 
+$\beta $-reduction. A term is of the form $x_{1}\ldots x_{n}.a(s_{1},\ldots
+,s_{m})$ with $a$ a function symbol or a variable. Because the $\beta 
+\overline{\eta }$-reduction relation is confluent and terminating on the set
+of preterms, every $\beta \overline{\eta }$-equivalence class of preterms
+contains a unique term, which is taken as the representative of that class.
+
+Because in the discussion we will often use preterms, we use here the
+notation $s^{\sigma }$ for the replacement of variables according to the
+substitution $\sigma $ (\emph{without} reduction to $\beta $-normal form),
+and write explicitly $s^{\sigma }\downarrow _{\beta }$for its $\beta $%
+-normal form. This is in contrast with the usual notations for HRSs.
+
+A \emph{rewrite rule} is a pair of terms $(l,r)$, written as $l\rightarrow r$%
+, satisfying the following requirements:
+
+\begin{enumerate}
+\item $l$ and $r$ are of the same base type,
+
+\item $l$ is of the form $f(l_{1},\ldots ,l_{n})$,
+
+\item all free variables in $r$ occur also in $l$,
+
+\item a free variable $x$ in $l$ occurs in the form $x(y_{1},\ldots ,y_{n})$
+with $y_{i}$ $\eta $-equivalent to different bound variables.
+\end{enumerate}
+
+The last requirement guarantees that the rewrite relation is decidable
+because unification of patterns is decidable. The rewrite rules induce a
+rewrite relation $\rightarrow $ on the set of terms which is defined by the
+following rules:
+
+\begin{enumerate}
+\item if $s\rightarrow t$ then $x(\ldots ,s,\ldots )\rightarrow x(\ldots
+,t,\ldots )$,
+
+\item if $s\rightarrow t$ then $f(\ldots ,s,\ldots )\rightarrow f(\ldots
+,t,\ldots )$,
+
+\item if $s\rightarrow t$ then $x.s\rightarrow x.t$,
+
+\item if $l\rightarrow r$ is a rewrite rule and $\sigma $ is a substitution
+then $l^{\sigma }\downarrow _{\beta }\rightarrow r^{\sigma }\downarrow
+_{\beta }$.
+\end{enumerate}
+
+The last clause in this definition shows that HRSs use higher-order pattern
+matching, unlike AFSs, where matching is syntactic.
+
+\subsection{mCRL2 terms}
+
+In mCRL2 we have the following terms:%
+\begin{equation*}
+t:=x\ |\ f\ |\ t(t,\cdots ,t)\ |\ \lambda _{x}.t\ |\ \forall _{x}.t\ |\
+\exists _{x}.t\ |\ t\ whr\ x=t^{\prime }
+\end{equation*}%
+where $t$ is a term, $x$ is a variable and $f$ is a function symbol.
+
+\begin{remark}
+This needs to be further elaborated. Terms are typed, and function symbols
+(and terms?) have an arity. The term $t(t,\cdots ,t)$ is rather unusual, but
+it is covered by HRSs (?).
+\end{remark}
+
+\begin{remark}
+In fact the mCRL2 language uses slightly more general terms: $\lambda
+_{x_{1}\ldots x_{n}}.t$, $\forall _{x_{1}\ldots x_{n}}.t$, $\exists
+_{x_{1}\ldots x_{n}}.t$ and $t\ whr\ x_{1}=t_{1},\ldots ,x_{n}=t_{n}$.
+\end{remark}
+
+For a rewrite algorithm $rewr$ the following rules are suggested:%
+\begin{eqnarray*}
+rewr(\lambda _{x}.t,\sigma ) &=&\lambda _{x^{\prime }}.rewr(t,\sigma \lbrack
+x:=x^{\prime }]) \\
+rewr(\forall _{x}.t,\sigma ) &=&\forall _{x^{\prime }}.rewr(t,\sigma \lbrack
+x:=x^{\prime }]) \\
+rewr(\exists _{x}.t,\sigma ) &=&\exists _{x^{\prime }}.rewr(t,\sigma \lbrack
+x:=x^{\prime }]) \\
+rewr(t\ whr\ x &=&t^{\prime },\sigma )=rewr(t,\sigma \lbrack x:=t^{\prime }])
+\end{eqnarray*}%
+where $x^{\prime }$ is a fresh variable not appearing in $t$.
+
+\begin{remark}
+In a rewrite algorithm, the term types are unused. One can add correctness
+checks for proper typing however.
+\end{remark}
+
+\begin{remark}
+Types in mCRL2 need to be rewritten to normal form as well. A very simple
+rewrite system can be defined for this. 
+\end{remark}
+
+\begin{remark}
+What about normal forms for terms containing $\lambda $-expressions and/or
+quantifiers? Expressions can be equal modulo alpha-conversion, so the ATerm
+equality doesn't work here.
+\end{remark}
+
+\begin{remark}
+In a rewrite algorithm one has to explicitly describe where $\alpha $%
+-conversion and $\beta $-reduction is being done. Doing $\overline{\eta }$%
+-expansion is probably not necessary.
+\end{remark}
+
+\subsection{Types}
+
+A \emph{base type} is a non-function type, typical examples are the Booleans
+or Natural numbers. Let $B$ be a non-empty set of base types and $b\in B$.
+The set of types is inductively defined as follows:%
+\begin{equation*}
+type::=b\ |\ type\times type\ |\ type\rightarrow type\text{,}
+\end{equation*}%
+where $\rightarrow $ is the function-type constructor. The type constructor
+associates to the left, for example:%
+\begin{equation*}
+b\rightarrow b\rightarrow b\text{ is the same as }(b\rightarrow
+b)\rightarrow b\text{.}
+\end{equation*}%
+Product types are often not present in treatment of simply-typed lambda
+calculus. We need them later to type non-lambda terms.
+
+The \emph{arity} of a type $A$ is a natural number, denoted $arity(A)$,
+which is inductively defined on the structure of $A$ as follows:
+
+\begin{equation*}
+\begin{array}{ll}
+arity(A)=0 & \text{if }A\text{ is a base type,} \\ 
+arity(A\rightarrow A^{\prime })=arity(A^{\prime })+1 & 
+\end{array}%
+\end{equation*}
+
+A \emph{signature} $\Sigma $ is a non-empty set of \emph{function symbols}
+each of which has a type. We write $f:A$ to denote that symbol $f$ has type $%
+A$ and extend the notion arity to symbols such that if $f:A$ then $%
+arity(f)=arity(A)$. Symbols with arity zero are called \emph{constants}.
+
+Let $\Sigma $ be a signature and let $\chi _{A}$ be a countably finite set
+of variables of type $A$ such that $\Sigma \cap \chi _{A}=\emptyset $, for
+each type $A$. The set of terms over $\Sigma $, denoted $\mathcal{T}(\Sigma
+) $, is inductively defined as
+
+\begin{itemize}
+\item Let $x\in \chi _{A}$ be a variable of type $A$ then $x\in \mathcal{T}%
+(\Sigma )$.
+
+\item Let $f\in \Sigma $ be a function symbol of type $A_{1}\times \ldots
+\times A_{n}\rightarrow B$, and $t_{i}:A_{i}$ for all $i\in \{1,\ldots ,n\}$%
+, then $f(t_{1},\ldots ,t_{n})\in \mathcal{T}(\Sigma )$ is a term of type $B$%
+.
+
+\item Let $t:A_{1}\times \ldots \times A_{n}\rightarrow B$, and $t_{i}:A_{i}$
+for all $i\in \{1,\ldots ,n\}$, then $t(t_{1},\ldots ,t_{n})\in \mathcal{T}%
+(\Sigma )$ is a term of type $B$.
+
+\item Let $x\in \chi _{A}$ be a variable of type $A$ and $t$ a term of type $%
+B$, then $\lambda _{x}.(t)\in \mathcal{T}(\Sigma )$ is a term of type $%
+A\rightarrow B$.
+\end{itemize}
 
 \subsection{Simple terms}
 
@@ -61,19 +284,9 @@ t:=x\ |\ f\ |\ f(t,\cdots ,t),  \label{eq:simple_terms}
 \end{equation}%
 where $t$ is a term, $x$ is a variable and $f$ is a function symbol.
 
-\subsection{Flattened terms}
-
-Flattened terms are an extension of simple terms:%
-\begin{equation}
-t:=x\ |\ f\ |\ f(t,\cdots ,t)\ |\ x(t,\cdots ,t).  \label{eq:flattened_terms}
-\end{equation}%
-N.B. The notion of flattened terms doesn't seem very useful. The only reason
-we introduce it here is that several algorithms in \cite{weerdenburg2009}
-are only defined for flattened terms.
-
 \subsection{Applicative terms}
 
-Applicative terms are an extension of flattened terms:%
+Applicative terms are an extension of simple terms:%
 \begin{equation}
 t:=x\ |\ f\ |\ t(t,\cdots ,t).  \label{eq:applicative_terms}
 \end{equation}
@@ -167,18 +380,6 @@ closure of $\rightarrow _{R}$ and $t\nrightarrow _{R}$ if there is no $u$
 such that $t\rightarrow _{R}u$. A normal form is a term $u$ such that $%
 t\rightarrow _{R}^{\ast }u$ and $u\nrightarrow _{R}$.
 
-\subsection{Flatten operator}
-
-Let $\rightarrow _{flatten}$ be the rewrite relation given by%
-\begin{equation*}
-\begin{array}{c}
-t(t_{1},\cdots ,t_{m})(t_{m+1},\cdots ,t_{n})\rightarrow
-_{flatten}t(t_{1},\cdots ,t_{n}).%
-\end{array}%
-\end{equation*}%
-We define the operator $flatten$ such that $flatten(t)$ is the (unique)
-normal form of $t$ corresponding to $\rightarrow _{flatten}^{\ast }$.
-
 \subsection{Rewrite algorithm}
 
 We now fomulate an abstract rewrite algorithm $rewrite$, where we assume
@@ -211,7 +412,7 @@ compute $u=t\sigma $ and then compute $rewrite(u)$.
 A match tree is a tree structure that represents a number of rewrite rules
 that have left hand sides with the same function symbol as head. It is used
 to compute all possible results of applying one of these rules to a term.
-Currently match trees are only defined for flattened terms. A match tree
+Currently match trees are only defined for simple terms. A match tree
 consists of nodes of the following types:
 
 \begin{itemize}
@@ -225,7 +426,7 @@ with $T$, otherwise continue with $U$.
 \item $M(x,T,U):$ If the current term is equal to $x$ continue with $T$,
 otherwise continue with $U$.
 
-\item $R(Q):$ Return $Q$.
+\item $R(Q):$ Return $Q$
 
 \item $X:$ Return the empty set.
 
@@ -241,7 +442,7 @@ continue with $U$.
 
 where $f$ is a function symbol, $x$ is a variable, $t$ is a term, $Q$ is a
 set of terms annotated with a rewrite rule, and $T$ and $U$ are match tree
-nodes. Match trees are only defined for flattened terms.
+nodes.
 
 \subsection{Evaluating a match tree}
 
@@ -257,8 +458,7 @@ T(m,\sigma ) & \text{if }l=f\rhd m \\
 T(t_{1}\rhd \cdots \rhd t_{n}\rhd m,\sigma ) & \text{if }l=f(t_{1},\cdots
 ,t_{n})\rhd m \\ 
 U(l,\sigma ) & \text{if }l=g(t_{1},\cdots ,t_{n})\rhd m\wedge f\neq g \\ 
-U(l,\sigma ) & \text{if }l=x\rhd m \\ 
-U(l,\sigma ) & \text{if }l=x(t_{1},\cdots ,t_{n})\rhd m%
+U(l,\sigma ) & \text{if }l=x\rhd m%
 \end{array}%
 \right. \\ 
 X(l,\sigma ) & = & \emptyset \\ 
@@ -427,12 +627,13 @@ E(T,U)[x/V] & = & E(t,T[x/V],U[x/V]) &  \\
 R(Q)[x/V] & = & R(Q[x/y:y\in V]) & 
 \end{array}%
 \end{equation*}%
-\begin{equation*}
+$%
 \begin{array}{llll}
 clean(T) & = & T^{\prime } & \text{if }\chi (T)=\left\langle T^{\prime
 },V\right\rangle ,%
 \end{array}%
-\end{equation*}%
+$
+
 where $\chi $ is defined as%
 \begin{equation*}
 \begin{array}{llll}
@@ -513,6 +714,11 @@ term $true=true$. But if we give the first equation a higher priority than
 the second, the undesired derivation $true=true\rightarrow false$ is
 eliminated.
 
+\section{Rewriting}
+
+In this section we describe rewriting strategies. For the moment we only
+consider innermost rewriting.
+
 \subsection{Rewriting using match trees}
 
 Suppose that we have a rewrite system, and that for each function symbol $f$
@@ -535,15 +741,11 @@ u\in M_{f}([f(t_{1},\cdots ,t_{n})],\sigma ) & \text{if }M_{f}([f(t_{1},%
 \cdots ,t_{n})],\sigma )\neq \emptyset%
 \end{array}%
 \right. \\ 
-rewr_{M}(x(t_{1},\cdots ,t_{n}),\sigma ) & = & x(t_{1},\cdots ,t_{n})\sigma%
+rewr_{M}(x(t_{1},\cdots ,t_{n}),\sigma ) & = & x(t_{1},\cdots ,t_{n}) \\ 
+rewr_{M}(u(u_{1},\cdots ,u_{m})(t_{1},\cdots ,t_{n}),\sigma ) & = & 
+u(u_{1},\cdots ,u_{m})(t_{1},\cdots ,t_{n})%
 \end{array}%
-\end{equation*}%
-The function $rewr_{M}$ is defined for flattened terms.
-
-\section{Rewriting Strategies}
-
-In this section we describe rewriting strategies. For the moment we only
-consider innermost rewriting.
+\end{equation*}
 
 \subsection{Innermost rewriting}
 
@@ -552,21 +754,10 @@ for applicative terms. We assume that $\sigma (x)$ is always in normal form
 already.%
 \begin{equation*}
 \begin{array}{lll}
-rewr_{I}(x,\sigma ) & = & rewr_{M}(x,\sigma ) \\ 
+rewr_{I}(x,\sigma ) & = & \sigma (x) \\ 
 rewr_{I}(f,\sigma ) & = & rewr_{M}(f,\sigma ) \\ 
-rewr_{I}(f(t_{1},\cdots ,t_{n}),\sigma ) & = & rewr_{M}(f(t_{1},\cdots
-,t_{n}),\sigma ) \\ 
-rewr_{I}(x(t_{1},\cdots ,t_{n}),\sigma ) & = & \left\{ 
-\begin{array}{ll}
-rewr_{M}(g(rewr_{I}(t_{1},\sigma ),\cdots ,rewr_{I}(t_{n},\sigma )) & \text{%
-if }\sigma (x)=g \\ 
-\sigma (x)(rewr_{I}(t_{1},\sigma ),\cdots ,rewr_{I}(t_{n},\sigma )) & \text{%
-otherwise}%
-\end{array}%
-\right.  \\ 
-rewr_{I}(u(u_{1},\cdots ,u_{m})(t_{1},\cdots ,t_{n}),\sigma ) & = & 
-rewr_{I}(u(u_{1},\cdots ,u_{m}),\sigma )(rewr_{I}(t_{1},\sigma ),\cdots
-,rewr_{I}(t_{n},\sigma ))%
+rewr_{I}(t(t_{1},\cdots ,t_{n}),\sigma ) & = & rewr_{M}(rewr_{I}(t,\sigma
+)(rewr_{I}(t_{1},\sigma ),\cdots ,rewr_{I}(t_{n},\sigma )),\sigma )%
 \end{array}%
 \end{equation*}
 
