@@ -33,8 +33,6 @@ void test_process_specification(const std::string &ps_in, bool test_type_checker
   if (test_type_checker) {
     process::process_specification ps(ps_aterm);
     process::type_check(ps);
-    //ps_aterm = core::type_check_proc_spec(ps_aterm);
-    //BOOST_REQUIRE(ps_aterm != NULL);
  
     //ps_out = core::PrintPart_CXX((ATerm) ps_aterm);
     ps_out = process::pp(ps);

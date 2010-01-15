@@ -108,9 +108,7 @@ namespace mcrl2 {
       {
         throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
       }
-      data_specification result(t);
-      detail::internal_format_conversion(result);
-      data_spec = result;
+      data_spec = data_specification(t);
     }
 
   } // namespace data

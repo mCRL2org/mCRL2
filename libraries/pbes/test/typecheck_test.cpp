@@ -33,8 +33,6 @@ void test_pbes_specification(const std::string &pbes_in, bool test_type_checker 
   if (test_type_checker) {
     pbes_system::pbes<> p(pbes_aterm);
     pbes_system::type_check(p);
-    //pbes_aterm = core::type_check_pbes_spec(pbes_aterm);
-    //BOOST_REQUIRE(pbes_aterm != NULL);
  
     //pbes_out = core::PrintPart_CXX((ATerm) pbes_aterm);
     pbes_out = pbes_system::pp(p);

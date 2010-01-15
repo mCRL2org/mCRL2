@@ -94,28 +94,6 @@ namespace detail {
     return result;
   }
 
-  /// \brief     Type checks a state formula with respect to an mCRL2
-  ///            process specification or LPS.
-  /// \param[in] state_formula An ATerm representation of an mCRL2 state
-  ///            formula that adheres to internal ATerm format after
-  ///            parsing (before type checking).
-  /// \param[in] spec An ATerm representation of an mCRL2 process
-  ///            specification or LPS that adheres to the internal ATerm
-  ///            format after type checking.
-  /// \post      state_formula is type checked using the declarations from
-  ///            spec.
-  /// \return    The type checked state formula in the ATerm format after
-  ///            type checking.
-  /// \exception mcrl2::runtime_error Type checking failed.
-  inline
-  ATermAppl type_check_state_formula(ATermAppl state_formula, ATermAppl spec)
-  {
-    ATermAppl result = core::type_check_state_frm(state_formula, spec);
-    if (result == NULL)
-      throw mcrl2::runtime_error("type check error when checking state formula");
-    return result;
-  }
-
 } // namespace detail
 
 } // namespace core

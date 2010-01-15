@@ -25,6 +25,7 @@
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
@@ -45,26 +46,11 @@ namespace detail {
     return result;
   }
 
-  /// \brief Type checks a state formula against spec
-  /// \param formula A term
-  /// \param spec A term
-  /// a pbes specification before data implementation, or
-  /// a data specification before data implementation.
-  /// \return The type checked formula
-  inline
-  ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
-  {
-    ATermAppl result = core::type_check_state_frm(formula, spec);
-    if (result == NULL)
-      throw mcrl2::runtime_error("type check error");
-    return result;
-  }
-
   /// \brief Converts a regular formula to a state formula
   /// \param formula A term
   /// \return The converted formula
   inline
-  state_formula translate_regular_formula(ATermAppl formula)
+  state_formula translate_regular_formula(const state_formula& formula)
   {
     ATermAppl result = core::translate_reg_frms(formula);
     if (result == NULL)
@@ -80,11 +66,9 @@ namespace detail {
   /// \return The converted modal formula
   inline
   state_formula mcf2statefrm(std::istream& formula_stream, lps::specification& spec)
-  { atermpp::aterm_appl f = parse_state_formula(formula_stream);
-    lps::specification copy_spec = spec;
-    /* copy_spec.data() = remove_all_system_defined(spec.data()); */
-    atermpp::aterm_appl reconstructed_spec = specification_to_aterm(copy_spec,false);
-    f = type_check_state_formula(f, reconstructed_spec);
+  { 
+    state_formula f = parse_state_formula(formula_stream);
+    type_check(f, spec);
     f = translate_regular_formula(f);
     spec.data().add_context_sorts(data::find_sort_expressions(f)); // Make complete with respect to f
     f = data::detail::internal_format_conversion(spec.data(), f);

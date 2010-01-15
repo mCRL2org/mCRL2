@@ -73,13 +73,9 @@ namespace pbes_system {
     type_check(p);
     apply_internal_format_conversion(p);
 #else
-    result = core::type_check_pbes_spec(result);
-    if (result == NULL) {
-      throw mcrl2::runtime_error("type checking failed");
-    }
-    result = data::detail::internal_format_conversion(result);
-
     p = pbes<Container>(result);
+    type_check(p);
+    data::detail::internal_format_conversion(p);
 #endif
     complete_data_specification(p);
     return from;

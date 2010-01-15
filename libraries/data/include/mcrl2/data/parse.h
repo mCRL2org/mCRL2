@@ -73,13 +73,13 @@ namespace data {
                                  std::istream& text)
   { atermpp::aterm_appl spec = core::parse_data_spec(text);
     if (spec == 0)
+    {
       throw mcrl2::runtime_error("Error while parsing data specification");
-    spec = core::type_check_data_spec(spec);
-    if (spec == 0)
-      throw mcrl2::runtime_error("Error while type checking data specification");
-    data_specification d(spec);
-    detail::internal_format_conversion(d); // Translate bag/set enumerations and numbers to internal format.
-    return d;
+    }
+    data_specification result(spec);
+    type_check(result);
+    detail::internal_format_conversion(result); // Translate bag/set enumerations and numbers to internal format.
+    return result;
   }
 
   /// \brief Parses a and type checks a data specification.
@@ -285,16 +285,9 @@ namespace data {
 
     // The typechecker replaces untyped identifiers by typed identifiers (when typechecking 
     // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
-    //data_expr = core::type_check_data_expr(data_expr, 0,
-    //             mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true), variables);
-    //if (data_expr == 0)
-    //  throw mcrl2::runtime_error("error type checking data expression");
     data_expression t(data_expr);
     type_check(t, begin, end, data_spec);
-
     detail::internal_format_conversion_helper converter(data_spec);
-    //const data_expression d(converter(data_expression(data_expr)));  // replace list/set/bag enumerations, and
-    //                                                                 // number denotations.
 
     // replace list/set/bag enumerations, and normalise sort aliases.
     t = converter(t);
@@ -371,13 +364,16 @@ namespace data {
       throw mcrl2::runtime_error("error parsing sort expression");
     /* atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                                 mcrl2::data::remove_all_system_defined(data_spec), true); */
-    atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true);
-    sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
-    if (sort_expr == 0)
-      throw mcrl2::runtime_error("error type checking sort expression");
+    //atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true);
+    //sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
+    //if (sort_expr == 0)
+    //  throw mcrl2::runtime_error("error type checking sort expression");
+    sort_expression result(sort_expr);
+    type_check(result, data_spec);
+    return data_spec.normalise_sorts(result);
     // Undo sort renamings for compatibility with type checker
     // sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
-    return data_spec.normalise_sorts(sort_expression(sort_expr));
+    // return data_spec.normalise_sorts(sort_expression(sort_expr));
   }
 
   /// \brief Parses and type checks a sort expression.

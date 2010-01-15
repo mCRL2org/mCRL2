@@ -18,9 +18,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/data_specification.h"
+
+using namespace mcrl2;
 
 void compatibility_test()
 {
@@ -34,14 +36,14 @@ void compatibility_test()
   if (data_spec_aterm == 0) {
     throw mcrl2::runtime_error("Error while parsing data specification");
   }
-  data_spec_aterm = mcrl2::core::type_check_data_spec(data_spec_aterm);
-  if (data_spec_aterm == 0)
-    throw mcrl2::runtime_error("Error while type checking data specification");
+  data::data_specification data_spec(data_spec_aterm);
+  data::type_check(data_spec);
   
   atermpp::aterm_appl data_spec_aterm_new =
     mcrl2::data::detail::data_specification_to_aterm_data_spec(
+      data_spec
       // mcrl2::data::remove_all_system_defined(
-        mcrl2::data::data_specification(data_spec_aterm)
+      // mcrl2::data::data_specification(data_spec_aterm)
       // )
     );
 
