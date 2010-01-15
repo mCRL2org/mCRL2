@@ -47,18 +47,26 @@ void f2()
   std::cout << "hello, world!" << std::endl;
 }
 
+//-------------------------------------------------------------//
+template <typename Derived>
+class lps_traverser2: public data_traverser<Derived>
+{};
+
 int test_main(int argc, char* argv[])
 {
   make_find_helper<data_traverser>().print();
   f1<data_traverser>();
 
-  //--- This does not compile ---//
+  //--- The intended usage pattern does not compile ---//
   // make_find_helper<lps_traverser>().print();
   //f1<lps_traverser>();
+  
+  //--- This also doesn't compile ---//
   //f2<lps_traverser>();
 
-  // The question is: can we make a (make_)find_helper that accepts both
-  // data_traverser and lps_traverser?
+  //--- But this does compile ---//
+  make_find_helper<lps_traverser2>().print();
+  f1<lps_traverser2>();
 
   return 0;
 }
