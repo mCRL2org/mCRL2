@@ -67,16 +67,9 @@ namespace pbes_system {
     out << atermpp::aterm_appl(result).to_string() << std::endl;
 #endif
 
-#ifdef MCRL2_NEW_TYPECHECKER
-    std::cout << "CHECK PBES " << core::detail::check_rule_PBES(result) << std::endl;
     p = pbes<Container>(result);
     type_check(p);
     apply_internal_format_conversion(p);
-#else
-    p = pbes<Container>(result);
-    type_check(p);
-    data::detail::internal_format_conversion(p);
-#endif
     complete_data_specification(p);
     return from;
   }
