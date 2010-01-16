@@ -46,8 +46,8 @@ void test_case_1()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_variables(i->condition()).empty());
-    BOOST_CHECK(find_variables(i->actions()).empty());
+    BOOST_CHECK(data::find_variables(i->condition()).empty());
+    BOOST_CHECK(lps::find_variables(i->actions()).empty());
   }
 }
 
@@ -94,7 +94,7 @@ void test_case_3()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_variables(i->condition()).empty());
+    BOOST_CHECK(data::find_variables(i->condition()).empty());
   }
 }
 
@@ -117,7 +117,7 @@ void test_case_4()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_variables(i->condition()).empty());
+    BOOST_CHECK(data::find_variables(i->condition()).empty());
   }
 }
 
@@ -146,7 +146,7 @@ void test_case_5()
 
     // Check that the only data variables in the condition and time
     // are process parameters
-    std::set<variable> condition_vars = find_variables(i->condition());
+    std::set<variable> condition_vars = data::find_variables(i->condition());
     for (std::set<variable>::iterator j = condition_vars.begin()
         ; j != condition_vars.end()
         ; ++j)
@@ -156,7 +156,7 @@ void test_case_5()
 
     if (i->has_time())
     {
-      std::set<variable> time_vars = find_variables(i->time());
+      std::set<variable> time_vars = data::find_variables(i->time());
       for (std::set<variable>::iterator j = time_vars.begin()
           ; j != time_vars.end()
           ; ++j)
@@ -269,7 +269,7 @@ void test_case_8()
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
-      BOOST_CHECK(find_variables(i->condition()).empty());
+      BOOST_CHECK(data::find_variables(i->condition()).empty());
     }
   }
   BOOST_CHECK(sumvar_count == 1);

@@ -327,7 +327,7 @@ namespace lps {
     {
       atermpp::map< data::variable, data::variable > renamings;
 
-      std::set< data::variable > new_vars = find_variables(rleft.arguments());
+      std::set< data::variable > new_vars = data::find_variables(rleft.arguments());
 
       for (std::set< data::variable >::const_iterator i = new_vars.begin(); i != new_vars.end(); ++i)
       {
@@ -444,7 +444,7 @@ lps::specification action_rename(
                        rule_old_argument_i != rule_old_action.arguments().end();
                        rule_old_argument_i++)
     { if ((!rule_old_argument_i->is_variable()) &&
-          (!(find_variables(*rule_old_argument_i).empty())))
+          (!(data::find_variables(*rule_old_argument_i).empty())))
       { throw mcrl2::runtime_error("The arguments of the lhs " + core::pp(rule_old_action) +
                           " are not variables or closed expressions");
       }
@@ -549,7 +549,7 @@ lps::specification action_rename(
                                data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             else
-            { assert((find_variables(*rule_old_argument_i).empty())); // the argument must be closed,
+            { assert((data::find_variables(*rule_old_argument_i).empty())); // the argument must be closed,
                                                                                // which is checked above.
               renamed_rule_condition=
                         lazy::and_(renamed_rule_condition,

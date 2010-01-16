@@ -61,7 +61,7 @@ namespace mcrl2 {
         data::data_expression recursive_substitute_equalities(const summand_base& summand_,
                                                               data::data_expression working_condition,
                                                               std::map<data::variable, data::data_expression>& substitutions)
-        { 
+        {
           using namespace mcrl2::data;
 
           // In all cases not explicitly handled we return the original working_condition
@@ -93,29 +93,29 @@ namespace mcrl2 {
             if (application(working_condition).left().is_variable())
             {
               if (data::search_variable(summand_.summation_variables(), variable(application(working_condition).left())) &&
-                  !search_data_expression(application(working_condition).right(), application(working_condition).left()))
+                  !data::search_data_expression(application(working_condition).right(), application(working_condition).left()))
               {
                 if (substitutions.count(application(working_condition).left()) == 0)
                 {
                   // apply all previously added substitutions to the rhs.
                   sumelm_add_replacement(substitutions, application(working_condition).left(), application(working_condition).right());
                   result = sort_bool::true_();
-                } 
+                }
                 else if (application(working_condition).right().is_variable() &&
-                         data::search_variable(summand_.summation_variables(), variable(application(working_condition).right()))) 
+                         data::search_variable(summand_.summation_variables(), variable(application(working_condition).right())))
                 { // check whether the converse is possible
-                  if (substitutions.count(application(working_condition).right()) == 0) 
+                  if (substitutions.count(application(working_condition).right()) == 0)
                   {
-                    sumelm_add_replacement(substitutions, application(working_condition).right(), 
+                    sumelm_add_replacement(substitutions, application(working_condition).right(),
                                                   substitutions[application(working_condition).left()]);
                     result = sort_bool::true_();
                   }
-                } 
-                else 
+                }
+                else
                 {
                   if (substitutions[application(working_condition).left()].is_variable() &&
                       substitutions.count(substitutions[application(working_condition).left()]) == 0 &&
-                      data::search_variable(summand_.summation_variables(), variable(substitutions[application(working_condition).left()]))) 
+                      data::search_variable(summand_.summation_variables(), variable(substitutions[application(working_condition).left()])))
                   {
                     sumelm_add_replacement(substitutions, substitutions[application(working_condition).left()], application(working_condition).right());
                     sumelm_add_replacement(substitutions, application(working_condition).left(), application(working_condition).right());

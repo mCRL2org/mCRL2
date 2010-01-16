@@ -18,7 +18,7 @@ test-suite lps
       [ run confcheck_test.cpp ]
       [ run constelm_test.cpp ]
       [ run data_specification_test.cpp ]
-      #[ run find_test.cpp ]
+      [ run find_test.cpp ]
       [ run free_variables_test.cpp ]
       [ run linear_process_conversion_test.cpp ]
       [ run linearization_test.cpp ]

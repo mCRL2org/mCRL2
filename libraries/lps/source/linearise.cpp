@@ -1090,7 +1090,7 @@ class specification_basic_type:public boost::noncopyable
     /****************  occursinterm *** occursintermlist ***********/
 
     bool occursinterm(const variable var, const data_expression t)
-    { return search_free_variable(t, var);
+    { return data::search_free_variable(t, var);
     }
 
     void filter_vars_by_term(
@@ -5115,7 +5115,7 @@ class specification_basic_type:public boost::noncopyable
       const identifier_string s=actionId.name();
       for (rename_expression_list::const_iterator i=renamings.begin(); i!=renamings.end(); ++i)
       { if (s==i->source())
-        { 
+        {
           return action(action_label(i->target(),actionId.sorts()),
                         act.arguments());
         }
@@ -5299,7 +5299,7 @@ class specification_basic_type:public boost::noncopyable
 
       data_expression result=pairwiseMatch(pop_front(l1),pop_front(l2));
 
-      return lazy::and_(result,RewriteTerm(equal_to(t1,t2))); 
+      return lazy::and_(result,RewriteTerm(equal_to(t1,t2)));
     }
 
     // a tuple_list contains pairs of actions (multi-action) and the condition under which this action
@@ -5416,7 +5416,7 @@ class specification_basic_type:public boost::noncopyable
       return action_label();
     }
 
-    bool might_communicate(const action_list m, 
+    bool might_communicate(const action_list m,
                            comm_entry &comm_table,
                            const action_list n,
                            const bool n_is_null)
@@ -5573,9 +5573,9 @@ class specification_basic_type:public boost::noncopyable
       const data_expression condition=pairwiseMatch(d,firstaction.arguments());
       if (condition==sort_bool::false_())
       { return phi(m,d,push_back(w,firstaction),o,r,r_is_null,comm_table);
-      } 
-      else 
-      { 
+      }
+      else
+      {
         const tuple_list T=phi(push_back(m,firstaction),d,w,o,r,r_is_null,comm_table);
         return addActionCondition(
                     action(),
@@ -5708,7 +5708,7 @@ class specification_basic_type:public boost::noncopyable
                           smmnd);
         }
         else
-        { 
+        {
           const data_expression condition=smmnd.condition();
           const assignment_list nextstate=smmnd.assignments();
 
@@ -6250,9 +6250,9 @@ class specification_basic_type:public boost::noncopyable
         { // *i does not occur in pars1.
           pars3=push_front(pars3,*i);
         }
-        else 
-        { assert(!search_free_variable(init1,*i));
-          assert(!search_free_variable(init2,*i));
+        else
+        { assert(!data::search_free_variable(init1,*i));
+          assert(!data::search_free_variable(init2,*i));
         }
       }
 
@@ -6263,7 +6263,7 @@ class specification_basic_type:public boost::noncopyable
       { std::cerr << result.size() << " resulting summands.\n";
       }
       pars_result=pars1+pars3;
-      init_result=init1 + init2; 
+      init_result=init1 + init2;
       return result;
     }
 
@@ -6289,7 +6289,7 @@ class specification_basic_type:public boost::noncopyable
         init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
 
         // Make the bound variables and parameters in this process unique.
-        
+
         if ((objectdata[n].processstatus==GNF)||
             (objectdata[n].processstatus==pCRL)||
             (objectdata[n].processstatus==GNFalpha)||
@@ -6309,33 +6309,33 @@ class specification_basic_type:public boost::noncopyable
           // this is what the interface of constelm requires.
           // Note that this is only useful, in regular mode. This does not make sense if
           // stacks are being used.
-  
+
           linear_process lps(pars,deadlock_summand_vector(),action_summand_vector());
           lps.set_summands(t3);
           process_initializer initializer(init);
-   
+
           specification temporary_spec(data,acts,global_variables,lps,initializer);
-  
+
           constelm_algorithm < rewriter > alg(temporary_spec,rewr,core::gsVerbose);
           alg.run(true); // Remove constants from the specification, where global variables are
                          // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification
-  
+
           init=temporary_spec.initial_process().assignments();
           pars=temporary_spec.process().process_parameters();
-         
+
           // Add all free variables in objectdata[n].parameters that are not already in the parameter list
           // and are not global variables to pars
-  
+
           const std::set <variable> variable_list = data::find_free_variables(args);
-          for(std::set <variable>::const_iterator i=variable_list.begin(); 
+          for(std::set <variable>::const_iterator i=variable_list.begin();
                  i!=variable_list.end(); ++i)
           { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars
                 global_variables.find(*i)==global_variables.end())   // and it is neither a glabal variable
             { pars=push_front(pars,*i);
             }
           }
-  
+
           t3=summand_list();
           for(atermpp::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
                   i!=temporary_spec.process().action_summands().end(); ++i)
@@ -6454,7 +6454,7 @@ class specification_basic_type:public boost::noncopyable
                           const variable_list parameters,
                           const variable_list varlist,         // the variables varlist and tl must not be passed by reference.
                           const data_expression_list tl)
-    { 
+    {
       if (is_choice(t))
       { return choice(
                   alphaconversionterm(choice(t).left(),parameters,varlist,tl),
@@ -7148,7 +7148,7 @@ class specification_basic_type:public boost::noncopyable
       { result=push_back(result,action_label(i->name(),data.normalise_sorts(i->sorts())));
       }
       return reverse(result);
-    } 
+    }
 
     action_list normalise_sorts(
                 const action_list &l,
@@ -7163,7 +7163,7 @@ class specification_basic_type:public boost::noncopyable
       }
       return reverse(result);
     }
-  
+
     summand_list normalise_sorts(
                 const summand_list &l,
                 const data_specification &data)
@@ -7181,7 +7181,7 @@ class specification_basic_type:public boost::noncopyable
       return reverse(result);
     }
 
-    
+
 }; // End of the class specification basictype
 
 /**************** linearise **************************************/
@@ -7189,13 +7189,13 @@ class specification_basic_type:public boost::noncopyable
 mcrl2::lps::specification mcrl2::lps::linearise(
                  const mcrl2::process::process_specification& type_checked_spec,
                  mcrl2::lps::t_lin_options lin_options)
-{ 
+{
   if (core::gsVerbose)
-  { std::cerr << "Linearising the process specification using the '" + lin_method_to_string(lin_options.lin_method) + " ' method.\n"; 
+  { std::cerr << "Linearising the process specification using the '" + lin_method_to_string(lin_options.lin_method) + " ' method.\n";
   }
   data_specification data_spec=type_checked_spec.data();
   internal_format_conversion(data_spec);
-  
+
   std::set<data::sort_expression> s;
   process::traverse_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));
   process::traverse_sort_expressions(type_checked_spec.equations(), std::inserter(s, s.end()));
@@ -7223,7 +7223,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 
-  linear_process lps(spec.data.normalise_sorts(parameters),  
+  linear_process lps(spec.data.normalise_sorts(parameters),
                      deadlock_summand_vector(),
                      action_summand_vector());
   lps.set_summands(spec.normalise_sorts(result,spec.data));
