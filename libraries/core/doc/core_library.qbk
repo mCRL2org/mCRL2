@@ -16,7 +16,7 @@ directly, parsed from and printed to human readable textual descriptions.
 
 [section: Concepts]
 The low level data structures are represented as ATerms (short for Annotated
-Terms). Aterms can be used to represent tree-like data structures which have
+Terms). ATerms can be used to represent tree-like data structures which have
 distinguishing features as: maximal subterm sharing, annotations, automatic
 garbage collection and compressed binary exchange formats. A more elaborate
 description can be found
@@ -25,6 +25,7 @@ description can be found
 
 [section: Structure]
 The Core library is a collection of methods and functions in the core name space.
+In fact it is a collection of small sub-libraries, each with their own functionality.
 
 The alphabet reduction library transforms the mCRL2 specification to an
 equivalent specification where renaming operations (allow, hide, rename, block
@@ -50,9 +51,11 @@ a more human readable format.
 
 The struct library contains a set of operations defined on the ATerm structure.
 With these operations it is possible to:
+
 * check for a certain ATerm data structure,
 * create a predefined ATerm data structure, or
 * retrieve a value from the ATerm data structure. 
+
 [endsect]
 
 [section: Tutorial]
@@ -77,11 +80,12 @@ To address the methods and members in the libraries, the following namespaces ar
 
   using namespace mcrl2::core;                // core namespace
   using namespace mcrl2::core::detail;        // core::detail namespace
+
 [endsect] [/ Dependencies]
 
 [section: The specification]
 For the tutorial, we consider the following specification, which is stored in
-the [^std::string] variable [^spec]. 
+the `std::string` variable `spec`. 
 
   act a: Bool;
  
@@ -90,11 +94,11 @@ the [^std::string] variable [^spec].
 [endsect] [/ The specification]
 
 [section: The program]
-First we need to initialize the ATerm Library via MCRL2_ATERM_INIT(argc, argv).
+First we need to initialize the ATerm Library via `MCRL2_ATERM_INIT(argc, argv)`.
 This to prohibits the ATerm data structure from being removed on a run of the
 garbage collector. To display verbose information during the execution of the
-code, the method gsSetVerboseMsg() is called. After calling this method, all
-instances of gsVerboseMsg(...) will display show their output, which is supplied
+code, the method `gsSetVerboseMsg()` is called. After calling this method, all
+instances of `gsVerboseMsg(...)` will display show their output, which is supplied
 as an argument. The initialisation of the program is as follows:
 
   MCRL2_ATERM_INIT(argc, argv)   // initialise ATerm library
@@ -103,12 +107,13 @@ as an argument. The initialisation of the program is as follows:
 
 To ensure that our specification is correct, we need to parse and type check
 the specification. To parse the specification we call the parse_spec method
-from the core::detail namespace. The parse_spec reads the stringstream variable
-istr and stores the parsed specification in the ATermAppl variable parsed_spec.
+from the `core::detail` namespace. The function `parse_spec` reads the `stringstream`
+variable
+`istr` and stores the parsed specification in the `ATermAppl` variable `parsed_spec`.
 If the parser cannot parse the specification, it will return empty output. To
-ensure parsing went well, we check for the parsed_spec being empty. If parsing
-succeeded, the outcome is displayed via a gsVerboseMsg(...) method. If parsing
-failed, the outcome is shown via a gsErrorMsg(...) method. Type checking is
+ensure parsing went well, we check for the `parsed_spec` being empty. If parsing
+succeeded, the outcome is displayed via a `gsVerboseMsg(...)` method. If parsing
+failed, the outcome is shown via a `gsErrorMsg(...)` method. Type checking is
 performed in an analogue way.
 
   ATermAppl parsed_spec = parse_proc_spec( istr );
@@ -151,7 +156,7 @@ The second case shows output which looks like:
       [OpId("true",SortId("Bool"))]
     )
   )
-)
+ )
 
 It is possible log the output, but it is not always needed to show the logging.
 Therefore it is desirable to only log the output in debug mode. This can be
@@ -168,42 +173,44 @@ added.
 
 [section: Manipulating the specification]
 In this part of the tutorial, the initial specification is manipulated on a low
-level of the internal data structure. The methods that start with and gs... and
-ATA... are defined in the mCRL2 core library. Methods starting with AT... are
-defined in the ATerm Library The internal mcrl2 data format is described
-here.
+level of the internal data structure. The methods that start with `gs...` and
+`ATA...` are defined in the mCRL2 core library. Methods starting with `AT...` are
+defined in the ATerm Library.
 
+We perform the following construction and manipulation of the specification.
 First the new action b is created. In this tutorial we take the action b as
-void action. The method gsMakeActId provides the means to create a Action
+void action. The method `gsMakeActId` provides the means to create a Action
 Identifier. The method requires two arguments, namely a label and a type. To
-create a label and type, a string is converted to a ATermAppl and an empty
-ATermList is created, respectively. To redefine the action specification,
-the method gsMakeActSpec(...) needs to be called with a list of action
-identifiers. Via an ATmakeList1(...) it is possible to create a list of length
+create a label and type, a string is converted to a `ATermAppl` and an empty
+`ATermList` is created, respectively. To redefine the action specification,
+the method `gsMakeActSpec(...)` needs to be called with a list of action
+identifiers. Via an `ATmakeList1(...)` it is possible to create a list of length
 one. The task can be accomplished with the following piece of code:
 
   ATermAppl actIdB = gsMakeActSpec( ATmakeList1( (ATerm) gsMakeActId( gsString2ATermAppl("b"), ATmakeList0() ) ) );
 
-The variable actIdB is used to derive the action transistion b in the
-initialisation. To solely acquire the action transition, the actIdB, we taking
-the first argument of 'ActSpec' first . This leaves us with the the list of
+The variable `actIdB` is used to derive the action transistion b in the
+initialisation. To solely acquire the action transition, the `actIdB`, we are taking
+the first argument of `ActSpec` first . This leaves us with the the list of
 Actions. To acquire the first argument from a list, the head function
-ATgetFirst(...) is used. To create an action the function gsMakeAction is used.
-This function requires two arguments. The first argument specifies an ATermAppl
+`ATgetFirst(...)` is used. To create an action the function `gsMakeAction` is used.
+This function requires two arguments. The first argument specifies an `ATermAppl`
 Action. The second argument specifies the time conditions. While we do not
-consider time, an empty list is supplied. Note be careful when casting ATerm,
-ATermAppl and ATermList. These formats are interchangeable.
+consider time, an empty list is supplied.
+
+[warning be careful when casting `ATerm`,
+`ATermAppl` and `ATermList`. These formats are interchangeable.]
 
   ATermAppl actB = gsMakeAction( (ATermAppl) ATgetFirst( ATgetArgument(actIdB, 0 ) ), ATmakeList0() );
 
-To create the initialisation we take the variable actB:
+To create the initialisation we take the variable `actB`:
 
   ATermAppl init = gsMakeProcessInit( ATmakeList0(), actB );
 
 To reconstruct the new specification we take the first and third argument of
 the original specification, because their are untouched. The second and the
 fourth argument need to be adjusted, therefore the appropriate variables
-actIdB and init are substituted. To verify that the new specification is
+`actIdB` and `init` are substituted. To verify that the new specification is
 correct, addition logging information is printed.
 
   ATermAppl new_spec = gsMakeSpecV1( 
@@ -222,7 +229,7 @@ correct, addition logging information is printed.
 To finalize the tutorial we apply an alphabet reduction on the specification.
 For this small example the alphabet reduction does not have any effect. However
 it is only here to illustrate its usage. Alphabet reduction can be applied by
-using the method gsAlpha(...). To assert the validity of the specification,
+using the method `gsAlpha(...)`. To assert the validity of the specification,
 an addition check is performed.
 
   ATermAppl new_alpha_spec = gsAlpha(new_spec);

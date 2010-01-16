@@ -9,61 +9,124 @@
 ]
 
 [section: Introduction]
-The TIPi library is an implementation of a communication system, built around a communication protocol, that is used to `remotely control' software tools. This protocol describes two communication partners: controller and tool. The controller is assumed to be a software application that provides an interface to a user. That user can then use that interface to use connected software tools. The protocol provides the functionality to interactively configure a software tool to do a task within it's provided range of functionality.
+The TIPi library is an implementation of a communication system, built around
+a communication protocol, that is used to `remotely control' software tools.
+This protocol describes two communication partners: controller and tool. The
+controller is assumed to be a software application that provides an interface
+to a user. That user can then use that interface to use connected software
+tools. The protocol provides the functionality to interactively configure a
+software tool to do a task within it's provided range of functionality.
 
-The protocol has no name, but it is tied to the DeskSQuADT application that uses it as the primary means to control software tools. The goal of the DeskSQuADT application is to provide an environment that facilitates tool integration. The purpose of this library is to make it easy to create new tools, or adapt existing tools, to work in the context of the DeskSQuADT application. 
+The protocol has no name, but it is tied to the DeskSQuADT application that
+uses it as the primary means to control software tools. The goal of the
+DeskSQuADT application is to provide an environment that facilitates tool
+integration. The purpose of this library is to make it easy to create new tools,
+or adapt existing tools, to work in the context of the DeskSQuADT application. 
 [endsect]
 
 [section: Concepts]
-Important concepts are the communication partners (controller and tool), tasks, configurations and displays. Each is discussed in a separate subsection.
+Important concepts are the communication partners (controller and tool), tasks,
+configurations and displays. Each is discussed in a separate subsection.
 
 [section: Tool]
-A software tool processes input in order to create output. The output may somehow depend on the input. The output can be concrete, such as a file in the local filesystem. Or it can be abstract such as that it provides a user with a visualisation that may provide insight.
+A software tool processes input in order to create output. The output may
+somehow depend on the input. The output can be concrete, such as a file in the
+local filesystem. Or it can be abstract such as that it provides a user with a
+visualisation that may provide insight.
 
-When a software tool is adapted to use the communication protocol around which this library is built, then it can perform the role of tool as communication partner of a controller.
+When a software tool is adapted to use the communication protocol around which
+this library is built, then it can perform the role of tool as communication
+partner of a controller.
 [endsect]
 
 [section: Controller]
-The controller is a system that controls tools on behalf of a third party: the user. It can control multiple tools concurrently. However tools that run concurrently are assumed to be independent of each other. More precisely there is no communication between concurrently running tools.
+The controller is a system that controls tools on behalf of a third party: the
+user. It can control multiple tools concurrently. However tools that run
+concurrently are assumed to be independent of each other. More precisely there
+is no communication between concurrently running tools.
 [endsect]
 
 [section: Task]
-A task is a configurable indivisible amount of work that a tool can perform. A task may require specific input and provide specific output.
+A task is a configurable indivisible amount of work that a tool can perform. A
+task may require specific input and provide specific output.
 [endsect]
 
 [section: Configuration]
-Configuration usually refers to the process of bringing a software tool into a state from which it will perform the desired task. Of course assuming that the tool has the functionality to perform the task and that the tool allows configuration of this task. A (task) configuration (of a tool) is a specification that uniquely specifies a task for that specific tool.
+Configuration usually refers to the process of bringing a software tool into a
+state from which it will perform the desired task. Of course assuming that the
+tool has the functionality to perform the task and that the tool allows
+configuration of this task. A (task) configuration (of a tool) is a
+specification that uniquely specifies a task for that specific tool.
 [endsect]
 
 [section: Display]
-To facilitate user interaction the controller provides a display for each connected tool. Using this display involves communication of a layout specification, and updates that arise from interaction on either side. For instance the user can interact with the display and the tool must be made aware of this. On the other hand when there is progress on the side of the tool it can change whats on the display. 
+To facilitate user interaction the controller provides a display for each
+connected tool. Using this display involves communication of a layout
+specification, and updates that arise from interaction on either side. For
+instance the user can interact with the display and the tool must be made aware
+of this. On the other hand when there is progress on the side of the tool it can
+change what is on the display. 
 [endsect]
 
 [endsect]
 
 [section: Structure]
-The library structure, at the highest level is subdivided into three parts. The first part contains the functionality that is specific to the controller. The next part is functionality specific to a tool. What remains, the part that is shared between the communication partners, forms the final part. Furthermore strongly related functionality is grouped together.
+The library structure, at the highest level is subdivided into three parts. The
+first part contains the functionality that is specific to the controller. The
+next part is functionality specific to a tool. What remains, the part that is
+shared between the communication partners, forms the final part. Furthermore
+strongly related functionality is grouped together.
 
-This subdivision manifests itself in both the directory structure in which the header files are stored, and the use of C++ namespaces. The following image depicts the directory structure in which the header files are stored.
+This subdivision manifests itself in both the directory structure in which the
+header files are stored, and the use of C++ namespaces. The following image
+depicts the directory structure in which the header files are stored.
 
-The top level mcrl2 directory contains the tool.h and controller.h header files that serve as main library interface. From these header files all other necessary functionality is included. Controller specific functionality is found in the directory controller, and tool specific functionality is found in the tool directory. The remaining directory: detail contains functionality that is only used indirectly. More specifically, detail contains implementation details and non-public library interfaces. Never make direct use of anything in the detail directory!
+The top level mcrl2 directory contains the `tool.h` and `controller.h` header
+files that serve as main library interface. From these header files all other
+necessary functionality is included. Controller specific functionality is found
+in the directory controller, and tool specific functionality is found in the
+tool directory. The remaining directory: detail contains functionality that is
+only used indirectly. More specifically, detail contains implementation details
+and non-public library interfaces. Never make direct use of anything in the
+detail directory!
 
-Everything in the library is put into the tipi namespace. The hierarchy of namespaces (excluding the detail namespaces) of the tipi library is depicted below.
+Everything in the library is put into the tipi namespace. The hierarchy of
+namespaces (excluding the detail namespaces) of the tipi library is depicted
+below.
 
-The namespace hierarchy further categorises functionality where the categorisation in directories of the header files stops. So controller-specific functionality is put into namespace tipi::controller; likewise for tipi::tool. Funcionaly related classes are grouped together into a separate namespace within the tipi namespace. The tipi::layout namespace contains functionality that deals with the layout of a (graphical) user interface. The tipi::datatype namespace contains a set of data type definitions to facilitate data type specification for arguments to program options and to automatically validate user input in single controls. The tipi namespace itself harbors the public library interfaces:
+The namespace hierarchy further categorises functionality where the
+categorisation in directories of the header files stops. So controller-specific
+functionality is put into namespace `tipi::controller`; likewise for 
+`tipi::tool`. Funcionaly related classes are grouped together into a separate
+namespace within the tipi namespace. The `tipi::layout` namespace contains
+functionality that deals with the layout of a (graphical) user interface.
+The `tipi::datatype` namespace contains a set of data type definitions to
+facilitate data type specification for arguments to program options and to
+automatically validate user input in single controls. The tipi namespace itself
+harbors the public library interfaces:
 
 * controller communicator interface, used to implement a controller
 * tool communicator interface, used to implement a tool
 * configuration interface, used to specify concrete configurations
 * display interface, used to communicate with the user through the tool display 
 
-Typical use requires either the controller or tool interface, and both the configuration and display interfaces. 
+Typical use requires either the controller or tool interface, and both the
+configuration and display interfaces. 
 [endsect]
 
 [section: Tutorial]
-In this tutorial the step-by-step development of a proxy program is demonstrated. That is a program that assumes the role of tool in the protocol to facilitate communication between a controller (the deskSQuADT application) and a third party program. The focus of the tutorial is the introduction of the tool communicator interface, which is event-based and multi-threading, and the details of configuration specification using tipi::configuration.
+In this tutorial the step-by-step development of a proxy program is
+demonstrated. That is a program that assumes the role of tool in the protocol
+to facilitate communication between a controller (the deskSQuADT application)
+and a third party program. The focus of the tutorial is the introduction of the
+tool communicator interface, which is event-based and multi-threading, and the
+details of configuration specification using `tipi::configuration`.
 
-The first step is to create a tipi (tool) communicator and set up communication with a controller. The deskSQuADT application, that assumes the role of controller, uses command line arguments to instruct the communicator on how it can build a connection. The proxy program is always started by the deskSQuADT application. The following source code fragment shows just this.
+The first step is to create a tipi (tool) communicator and set up communication
+with a controller. The deskSQuADT application, that assumes the role of
+controller, uses command line arguments to instruct the communicator on how it
+can build a connection. The proxy program is always started by the deskSQuADT
+application. The following source code fragment shows just this.
 
  int main(int argc, char** argv) {
    tipi::tool::communicator c;
@@ -75,17 +138,39 @@ The first step is to create a tipi (tool) communicator and set up communication 
    return 0;
  }
 
-These are implementation details, but this creates a socket connection and authenticates the proxy program to the deskSQuADT application as a process that is allowed to connect (i.e. the process it started and was waiting for).
+These are implementation details, but this creates a socket connection and
+authenticates the proxy program to the deskSQuADT application as a process that
+is allowed to connect (i.e. the process it started and was waiting for).
 
-The third party program will be started from the proxy program.The purpose of the proxy program is to allow unmodified programs that are not adapted to communicate with the deskSQuADT application to be started and used anyway. This only makes sense for tool programs with a graphical user interface that do not require elaborate command line configuration. The only command line configuration allowed is a list of names for input and output files that are optionally prefixed with a flag (e.g. --lps=in.lps).
+The third party program will be started from the proxy program.The purpose of
+the proxy program is to allow unmodified programs that are not adapted to
+communicate with the deskSQuADT application to be started and used anyway. This
+only makes sense for tool programs with a graphical user interface that do not
+require elaborate command line configuration. The only command line
+configuration allowed is a list of names for input and output files that are
+optionally prefixed with a flag (e.g. `--lps=in.lps`).
 
-[Warning: A side effect of the activation of the communicator with the command line arguments, is that all tipi recognised command line options are removed. All of those options start with `--si-' so always avoid relying on the presence of such options after the initialisation event.]
+[warning A side effect of the activation of the communicator with the command
+line arguments, is that all tipi recognised command line options are removed.
+All of those options start with `--si-` so always avoid relying on the presence
+of such options after the initialisation event.]
 
-Assuming that a connection is established it is a matter of waiting and responding to incoming messages.
+Assuming that a connection is established it is a matter of waiting and
+responding to incoming messages.
 
 Conceptual overview of messages, responses and events (state diagram)
 
-The messages types that are interesting at this point are tipi::message_configuration, tipi::message_task_start and tipi::message_termination. The first message specifies a concrete configuration. In this case it should specify the information needed to find and execute the 3rd-party tool, the input and output files to the tool, and how all of this information can be used to generate the command that should be used to execute the tool. Task start is just that, it signals that the work on the configured task must commence. In this case it means that the tool must be started. Similarly , message_termination is a signal to stop execution and terminate the program. The following code fragment shows the basic event loop and hints at the response to each message.
+The messages types that are interesting at this point are
+`tipi::message_configuration`, `tipi::message_task_start` and 
+`tipi::message_termination`. The first message specifies a concrete
+configuration. In this case it should specify the information needed to find and
+execute the 3rd-party tool, the input and output files to the tool, and how all
+of this information can be used to generate the command that should be used to
+execute the tool. Task start is just that, it signals that the work on the
+configured task must commence. In this case it means that the tool must be
+started. Similarly , message_termination is a signal to stop execution and
+terminate the program. The following code fragment shows the basic event loop
+and hints at the response to each message.
 
    if (c.activate(argc, argv)) {
      // A connection with the controller has been established
@@ -132,13 +217,33 @@ The messages types that are interesting at this point are tipi::message_configur
      return 0;
    }
 
-Notice especially that so far no messages are sent in response to incoming messages. A set of default event handlers is in place that automatically responds to arrival of certain messages. For instance an incoming configuration message automatically triggers the handler that extracts the configuration and stores it locally. Before the await_message call in the code fragment above completes the response will have been sent. There are certain cases in which messages must be sent explicitly. Examples are signalling that a task is finished and creating a new layout on the tool display. It is also possible to remove or replace the default event handlers, but this is more advanced use that will not be treated in this tutorial.
+Notice especially that so far no messages are sent in response to incoming
+messages. A set of default event handlers is in place that automatically
+responds to arrival of certain messages. For instance an incoming configuration
+message automatically triggers the handler that extracts the configuration and
+stores it locally. Before the `await_message` call in the code fragment above
+completes the response will have been sent. There are certain cases in which
+messages must be sent explicitly. Examples are signalling that a task is
+finished and creating a new layout on the tool display. It is also possible to
+remove or replace the default event handlers, but this is more advanced use that
+will not be treated in this tutorial.
 
-The fragment above contains calls to the functions process_configuration and task_start, which are just place holders for handling the appropriate events. Task start is not really interesting to discuss in detail. What it does is starting a tool using a previously received tipi::configuration object. If something goes wrong, for example the configuration does not exist (note that configuration above is a smart pointer that does not necessarily point to a real object), it should abort the task. The following fragment shows how a task abort, or task finish is communicated by sending a message.
+The fragment above contains calls to the functions `process_configuration` and
+`task_start`, which are just place holders for handling the appropriate events.
+Task start is not really interesting to discuss in detail. What it does is
+starting a tool using a previously received `tipi::configuration` object. If
+something goes wrong, for example the configuration does not exist (note that
+configuration above is a smart pointer that does not necessarily point to a real
+object), it should abort the task. The following fragment shows how a task
+abort, or task finish is communicated by sending a message.
 
     c.send_task_done(false)
 
-What happens is that a message object is created as follows: tipi::message("success", tipi::message_task_done). Any other message content than "success" means that the task was aborted. The object is subsequently communicated with all parties that are connected to the communicator object (in this case c is the communicator object).
+What happens is that a message object is created as follows: 
+`tipi::message("success", tipi::message_task_done)`. Any other message content
+than "success" means that the task was aborted. The object is subsequently
+communicated with all parties that are connected to the communicator object (in
+this case `c` is the communicator object).
  
 [endsect]
 
