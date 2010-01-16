@@ -82,16 +82,12 @@ namespace mcrl2 {
         return a_formula;
       }
 
-      ATerm v_bdd;
-
-      v_bdd = ATtableGet(f_formula_to_bdd, a_formula);
+      ATerm v_bdd = ATtableGet(f_formula_to_bdd, a_formula);
       if (v_bdd) {
         return v_bdd;
       }
 
-      ATerm v_guard;
-
-      v_guard = smallest(a_formula);
+      ATerm v_guard = smallest(a_formula);
       if (!v_guard) {
         return a_formula;
       } else {

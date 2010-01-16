@@ -1191,7 +1191,7 @@ void Examiner::drawControls( const bool &inSelectMode )
         double dLft = 0;
         double dRgt = 0;
 
-        if ( posFramesHist.size() > 1 && focusFrameIdx < 0 )
+        if ( posFramesHist.size() > 1 )
         {
             dLft = ( -0.5*wth + bdr*pix ) - ( posFramesHist[0].x - scaleFramesHist*1.0 );
             dRgt = ( posFramesHist[posFramesHist.size()-1].x + scaleFramesHist*1.0 ) - ( 0.5*wth - bdr*pix );

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<squadt-project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project.xsd" version="1.0" count="2">
-<processor><output id="12435920" format="application/dgc" location="abp.dgc" status="0" digest="2828389034" timestamp="1210670656"/>
+<squadt-project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project.xsd" version="1.0" count="3">
+<processor><output id="49191328" format="application/dgc" location="abp.dgc" status="0" digest="2828389034" timestamp="1261140835"/>
 </processor>
-<processor><output id="12437248" format="application/dgd" location="abp.dgd" status="0" digest="3742458340" timestamp="1210670656"/>
+<processor><output id="49316080" format="application/dgd" location="abp.dgd" status="0" digest="3742458340" timestamp="1261140835"/>
 </processor>
-<processor><output id="12420704" format="text/mcrl2" location="abp.mcrl2" status="0" digest="200933664" timestamp="1247487160"/>
+<processor><output id="49181312" format="text/mcrl2" location="abp.mcrl2" status="0" digest="200933664" timestamp="1261140835"/>
 </processor>
 </squadt-project>

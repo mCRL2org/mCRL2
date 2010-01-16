@@ -39,7 +39,6 @@ set(mcrl2_core_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/print.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/messaging.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/aterm_ext.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/alpha.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/print_c.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/text_utility.cpp
 )

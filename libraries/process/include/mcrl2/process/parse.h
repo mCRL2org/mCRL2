@@ -19,10 +19,22 @@
 #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/core/detail/algorithms.h"
 #include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/typecheck.h"
+#include "mcrl2/process/alphabet_reduction.h"
 
 namespace mcrl2 {
 
 namespace process {
+
+  /// \brief Applies internal format conversion to a process specification
+  inline
+  void apply_internal_format_conversion(process_specification& p)
+  {
+    // TODO: make proper internal_format_conversion function process_specification
+    ATermAppl t = process_specification_to_aterm(p);
+    t = data::detail::internal_format_conversion(t);
+    p = process_specification(t);
+  }
 
   /// \brief Parses a process specification from an input stream
   /// \param spec_stream An input stream
@@ -33,14 +45,14 @@ namespace process {
                                   std::istream& spec_stream, 
                                   const bool alpha_reduce=false)
   {
-    ATermAppl result = core::detail::parse_process_specification(spec_stream);
-    result = core::detail::type_check_process_specification(result);
+    process_specification result(core::detail::parse_process_specification(spec_stream));
+    type_check(result);
     if (alpha_reduce)
     {
-      result = core::detail::alpha_reduce_process_specification(result);
+      apply_alphabet_reduction(result);
     }
-    result = data::detail::internal_format_conversion(result);
-    return atermpp::aterm_appl(result);
+    apply_internal_format_conversion(result);
+    return result;
   }
 
   /// \brief Parses a process specification from a string

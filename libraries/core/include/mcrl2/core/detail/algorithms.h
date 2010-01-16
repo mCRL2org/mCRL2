@@ -21,7 +21,6 @@
 #include "aterm2.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/alpha.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/exception.h"
 
@@ -60,22 +59,6 @@ namespace detail {
     ATermAppl result = core::type_check_proc_spec(proc_spec);
     if (result == NULL)
       throw mcrl2::runtime_error("type check error when checking process specification");
-    return result;
-  }
-
-  /// \brief     Applies alphabet reduction to a process specification.
-  /// \param[in] proc_spec An mCRL2 process specification in the
-  ///            ATerm format after type checking.
-  /// \post      Alphabet reductions are applied to proc_spec.
-  /// \return    An mCRL2 process specification in the ATerm format
-  ///            after type checking that is equivalent to proc_spec
-  /// \exception mcrl2::runtime_error Alphabet reduction failed.
-  inline
-  ATermAppl alpha_reduce_process_specification(ATermAppl proc_spec)
-  {
-    ATermAppl result = core::gsAlpha(proc_spec);
-    if (result == NULL)
-      throw mcrl2::runtime_error("alphabet reduction error");
     return result;
   }
 

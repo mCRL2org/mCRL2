@@ -504,7 +504,7 @@ namespace mcrl2 {
           {
             std::string::size_type findid = temps.find_first_of('\n');
 
-            if ((findid < 0) || (findid > startpos + addpos))
+            if (findid > startpos + addpos)
             {
                // if there is not a new line character
                // just take the next part of the string
@@ -513,14 +513,11 @@ namespace mcrl2 {
             }
             else
             {
-              if (findid <= startpos + addpos)
-              {
-                // if we found a new line character
-                // cut the string at the new line position
-                subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
-                startpos = 0;
-                temps = temps.substr(findid+1);
-              }
+              // if we found a new line character
+              // cut the string at the new line position
+              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+              startpos = 0;
+              temps = temps.substr(findid+1);
             }
             y = y - CHARHEIGHT*scale;
 
@@ -539,7 +536,7 @@ namespace mcrl2 {
           {
             std::string::size_type findid = temps.find_first_of('\n');
 
-            if ((findid < 0) || (findid > startpos + addpos))
+            if (findid > startpos + addpos)
             {
                // if there is not a new line character
                // just take the next part of the string
@@ -548,14 +545,11 @@ namespace mcrl2 {
             }
             else  
             {
-              if (findid <= startpos + addpos)
-              {
-                // if we found a new line character
-                // cut the string at the new line position
-                subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
-                startpos = 0;
-                temps = temps.substr(findid+1);
-              }
+              // if we found a new line character
+              // cut the string at the new line position
+              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+              startpos = 0;
+              temps = temps.substr(findid+1);
             }
         
             bool moretext = startpos >= s.length();
@@ -656,7 +650,7 @@ namespace mcrl2 {
           {
             std::string::size_type findid = temps.find_first_of('\n');
 
-            if ((findid < 0) || (findid > startpos + addpos))
+            if (findid > startpos + addpos)
             {
                // if there is not a new line character
                // just take the next part of the string
@@ -665,14 +659,11 @@ namespace mcrl2 {
             }
             else
             {
-              if (findid <= startpos + addpos)
-              {
-                // if we found a new line character
-                // cut the string at the new line position
-                subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
-                startpos = 0;
-                temps = temps.substr(findid+1);
-              }
+              // if we found a new line character
+              // cut the string at the new line position
+              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+              startpos = 0;
+              temps = temps.substr(findid+1);
             }
             y = y - CHARHEIGHT*scale;
 
@@ -691,7 +682,7 @@ namespace mcrl2 {
           {
             std::string::size_type findid = temps.find_first_of('\n');
 
-            if ((findid < 0) || (findid > startpos + addpos))
+            if (findid > startpos + addpos)
             {
                // if there is not a new line character
                // just take the next part of the string
@@ -700,14 +691,11 @@ namespace mcrl2 {
             }
             else  
             {
-              if (findid <= startpos + addpos)
-              {
-                // if we found a new line character
-                // cut the string at the new line position
-                subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
-                startpos = 0;
-                temps = temps.substr(findid+1);
-              }
+              // if we found a new line character
+              // cut the string at the new line position
+              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+              startpos = 0;
+              temps = temps.substr(findid+1);
             }
         
             bool moretext = startpos >= s.length();

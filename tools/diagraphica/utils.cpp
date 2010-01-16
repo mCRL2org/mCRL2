@@ -493,10 +493,10 @@ void Utils::classifyMeanStandardDeviation(
             idx  = static_cast <size_t> (floor( (values[i]-mean)/sdev ));
             idx += numClasses/2;
 
-            if ( idx < 0 )
-                idx = 0;
-            else if ( idx > numClasses-1 )
-                idx = numClasses-1;
+            if ( idx > numClasses-1 )
+            {
+              idx = numClasses-1;
+            }
 
             valuesToClasses.insert( pair< double, int >( values[i], idx ) );
         }
