@@ -1340,12 +1340,41 @@ static ATermAppl
 reconstruct_container_expression(ATermAppl Part)
 {
   using namespace mcrl2::data;
+  using namespace mcrl2::data::sort_list;
   using namespace mcrl2::data::sort_set;
   using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_bag;
 
   data_expression expr(Part);
-  if (is_setconstructor_application(expr))
+  if(is_cons_application(expr))
+  {
+    data_expression_vector elements;
+    while(is_cons_application(expr))
+    {
+      elements.push_back(sort_list::head(expr));
+      expr = sort_list::tail(expr);
+    }
+
+    if(is_nil_function_symbol(expr))
+    {
+      Part = list_enumeration(expr.sort(), elements);
+    }
+  }
+  else if (is_snoc_application(expr))
+  {
+    data_expression_vector elements;
+    while(is_snoc_application(expr))
+    {
+      elements.insert(elements.begin(), sort_list::rhead(expr));
+      expr = sort_list::rtail(expr);
+    }
+  
+    if(is_nil_function_symbol(expr))
+    {
+      Part = list_enumeration(expr.sort(), elements);
+    }
+  }
+  else if (is_setconstructor_application(expr))
   {
     //gsDebugMsg("Reconstructing implementation of set comprehension\n");
     //part is an internal set representation;

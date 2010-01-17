@@ -126,6 +126,20 @@ void test_list_print() {
   BOOST_CHECK(stream_print_test(snoc(list(bool_()), list_true, cons_(list(bool_()), list_false_true, list_empty)), "[[false, true], [true]]"));
   BOOST_CHECK(stream_print_test(in(list(bool_()), list_true, cons_(list(bool_()), list_true, list_empty)), "[true] in [[true]]"));
   BOOST_CHECK(stream_print_test(in(list(bool_()), list_true, cons_(list(bool_()), list_true, list_empty)), "[true] in [[true]]"));
+
+  // List enumeration
+  data_expression_vector v;
+  v.push_back(sort_bool::true_());
+  v.push_back(sort_bool::false_());
+  v.push_back(sort_bool::true_());
+  v.push_back(sort_bool::true_());
+  data_expression l1(list_enumeration(list(sort_bool::bool_()), v));
+  BOOST_CHECK(stream_print_test(l1, "[true, false, true, true]"));
+
+  data_expression l2(sort_list::list(sort_bool::bool_(), v));
+  BOOST_CHECK(stream_print_test(l2, "[true, false, true, true]"));
+
+  
 }
 
 void test_set_print() {
