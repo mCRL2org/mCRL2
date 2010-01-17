@@ -5,6 +5,7 @@ project process
 mcrl2-library process
        : alphabet_reduction.cpp
        : <library>/libraries//data
+         <include>../../lps/include
          <include>../include
          <use>/site-config//boost
        :
