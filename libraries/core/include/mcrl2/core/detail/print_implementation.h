@@ -1403,9 +1403,9 @@ reconstruct_container_expression(ATermAppl Part)
         elts_is_consistent = false;
       }
     }
-    if (elts_is_consistent && is_container_sort(expr.sort()))
+    if (elts_is_consistent)
     {
-      Part = static_cast<ATermAppl>(sort_set::set_enumeration(container_sort(expr.sort()).element_sort(), elements));
+      Part = static_cast<ATermAppl>(sort_set::set_enumeration(expr.sort(), elements));
     }
   }
   else if (sort_set::is_setcomprehension_application(expr))
@@ -1494,7 +1494,7 @@ reconstruct_container_expression(ATermAppl Part)
         elts_is_consistent = false;
       }
     }
-    if (elts_is_consistent && is_container_sort(expr.sort()))
+    if (elts_is_consistent)
     {
       Part = static_cast<ATermAppl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), elements));
     }

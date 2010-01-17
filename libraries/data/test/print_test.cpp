@@ -139,7 +139,7 @@ void test_set_print() {
 
   // Using all operations
   BOOST_CHECK(stream_print_test(emptyset(bool_()), "{}"));
-  BOOST_CHECK(stream_print_test(setfset(bool_(), set_empty), "{}"));
+  BOOST_CHECK(stream_print_test(setfset(bool_(), fset_empty(bool_())), "{}"));
   BOOST_CHECK(stream_print_test(setconstructor(bool_(), false_function(bool_()), fset_empty(bool_())), "{}"));
   BOOST_CHECK(stream_print_test(setin(bool_(), false_(), set_empty), "false in {}"));
   BOOST_CHECK(stream_print_test(setunion_(bool_(), set_false, set_true), "{false} + {true}"));
@@ -161,7 +161,7 @@ void test_bag_print() {
 
   // Using all operations
   BOOST_CHECK(stream_print_test(bag_empty, "{}"));
-  BOOST_CHECK(stream_print_test(bagfbag(bool_(), bag_empty), "{}"));
+  BOOST_CHECK(stream_print_test(bagfbag(bool_(), fbag_empty(bool_())), "{}"));
   BOOST_CHECK(stream_print_test(bagconstructor(bool_(), zero_function(bool_()), fbag_empty_), "{}"));
   BOOST_CHECK(stream_print_test(bagin(bool_(), false_(), bag_empty), "false in {}"));
   BOOST_CHECK(stream_print_test(bagin(bool_(), false_(), bag_false), "false in {false: 1}"));
