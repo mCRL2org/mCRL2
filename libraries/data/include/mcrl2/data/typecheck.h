@@ -106,7 +106,7 @@ namespace mcrl2 {
       t = core::type_check_data_spec(t);
       if (!t)
       {
-        throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
+        throw mcrl2::runtime_error("could not type check data specification");
       }
       data_spec = data_specification(t);
     }

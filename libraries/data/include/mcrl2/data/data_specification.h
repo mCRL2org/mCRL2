@@ -61,7 +61,7 @@ namespace mcrl2 {
         typedef atermpp::multimap< sort_expression, data::function_symbol > sort_to_symbol_map;
 
         /// \brief map from basic_sort (names) to sort expression
-        typedef atermpp::map< basic_sort, sort_expression >           ltr_aliases_map;
+        typedef atermpp::multimap< basic_sort, sort_expression >           ltr_aliases_map;
 
       private:
 
@@ -502,7 +502,7 @@ namespace mcrl2 {
       /// \post is_alias(s.name()) && normalise_sorts(s.name()) = normalise_sorts(s.reference())
       void add_alias(alias const& a)
       {
-        m_aliases[a.name()] = a.reference();
+        m_aliases.insert(std::pair<basic_sort, sort_expression>(a.name(),a.reference()));
         data_is_not_necessarily_normalised_anymore();
       }
 

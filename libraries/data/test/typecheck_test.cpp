@@ -9,7 +9,9 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
+#ifndef MCRL2_WITH_GARBAGE_COLLECTION
 #define MCRL2_WITH_GARBAGE_COLLECTION
+#endif
 
 #include <iostream>
 #include <sstream>
@@ -43,7 +45,7 @@ data::data_specification parse_data_specification(const std::string& ds_in)
   BOOST_REQUIRE(ds_aterm != NULL);
 
   std::string ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
-  //std::cerr << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
+  // std::cerr << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
   BOOST_CHECK_EQUAL(ds_in, ds_out);
 
   return data::data_specification(ds_aterm);
@@ -255,7 +257,7 @@ BOOST_AUTO_TEST_CASE(test_data_specification_constructor_map_same_signature)
     "\n"
     "cons f: S;\n"
     "\n"
-    "map f: T;\n",
+    "map  f: T;\n",
     false
   );
 }
