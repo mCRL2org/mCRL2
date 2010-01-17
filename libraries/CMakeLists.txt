@@ -60,6 +60,7 @@ add_library( ${PROJECT_NAME}
   ${mcrl2_lps_src}
   ${mcrl2_lts_src}
   ${mcrl2_trace_src}
+  ${mcrl2_process_src}
   ${squadt_tipi_src}
   ${mcrl2_utilities_command_line_src}
   ${CMAKE_SOURCE_DIR}/tools/xsim/simulator.cpp
@@ -91,6 +92,7 @@ endif(USE_BOOST_INTERNAL)
 if(MCRL2_BUILD_GUI_TOOLS)
   target_link_libraries(${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
+    ${OPENGL_LIBRARY}
   )
 endif(MCRL2_BUILD_GUI_TOOLS)
 
