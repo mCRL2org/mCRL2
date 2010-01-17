@@ -444,7 +444,7 @@ void test_system_defined()
     "sort E = D;"
     "sort F = E;");
 
-  atermpp::map< basic_sort, sort_expression > aliases(specification.user_defined_aliases());
+  atermpp::multimap< basic_sort, sort_expression > aliases(specification.user_defined_aliases());
   BOOST_CHECK(aliases.find(basic_sort("D")) != aliases.end());
   BOOST_CHECK(aliases.find(basic_sort("E")) != aliases.end());
   BOOST_CHECK(aliases.find(basic_sort("F")) != aliases.end());
