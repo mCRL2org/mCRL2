@@ -12,7 +12,6 @@ mcrl2-library core
          source/print.cpp
          source/print_c.cpp
          source/messaging.cpp
-         source/alpha.cpp
          source/aterm_ext.cpp
          source/text_utility.cpp
        : <library>/libraries//atermpp

@@ -1,9 +1,9 @@
 project process
-       : source-location ..
+       : source-location ../source
        ;
 
 mcrl2-library process
-       :
+       : alphabet_reduction.cpp
        : <library>/libraries//data
          <include>../include
          <use>/site-config//boost
