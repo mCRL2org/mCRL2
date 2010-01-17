@@ -3,6 +3,8 @@ import re
 from subprocess import call
 from optparse import OptionParser
 
+# Obtain the names of all files with the extension .spec in
+# the current directory
 def get_specifications():
   files = os.listdir(".")
   specs = []
@@ -12,6 +14,9 @@ def get_specifications():
       specs = specs + [parts[0]]
   return specs
 
+# For all files in the current directory with the extension .spec, generated
+# the code. For the file a.spec code is generated into 
+#  ../include/mcrl2/data/a.h
 def main():
   usage = "usage: %prog [options]"
   option_parser = OptionParser(usage)

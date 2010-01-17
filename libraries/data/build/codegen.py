@@ -58,62 +58,87 @@ def printVerbose(string, object):
 # Tokens/precedences. 
 
 # Precedences
+# -> Associates to the right
 class PArrow(Parsing.Precedence):
     "%right pArrow"
+# # associates to the left
 class PHash(Parsing.Precedence):
     "%left pHash"
 
 # Tokens
+# ->
 class TokenArrow(Parsing.Token):
     "%token arrow [pArrow]"
+# #
 class TokenHash(Parsing.Token):
     "%token hash [pHash]"
+# |
 class TokenMid(Parsing.Token):
     "%token mid"
+# #include
 class TokenInclude(Parsing.Token):
     "%token include"
+# :
 class TokenColon(Parsing.Token):
     "%token colon"
+# ;
 class TokenSemiColon(Parsing.Token):
     "%token semicolon"
+# ,
 class TokenComma(Parsing.Token):
     "%token comma"
+# (
 class TokenLBrack(Parsing.Token):
     "%token lbrack"
+# )
 class TokenRBrack(Parsing.Token):
     "%token rbrack"
+# <
 class TokenLAng(Parsing.Token):
     "%token lang"
+# >
 class TokenRAng(Parsing.Token):
     "%token rang"
+# =
 class TokenEquals(Parsing.Token):
     "%token equals"
 
+# sort
 class TokenSort(Parsing.Token):
     "%token sort"
+# struct
 class TokenStruct(Parsing.Token):
     "%token struct"
+# cons
 class TokenCons(Parsing.Token):
     "%token cons"
+# map
 class TokenMap(Parsing.Token):
     "%token map"
+# var
 class TokenVar(Parsing.Token):
     "%token var"
+# eqn
 class TokenEqn(Parsing.Token):
     "%token eqn"
+# lambda
 class TokenLambda(Parsing.Token):
     "%token lambda"
+# forall
 class TokenForall(Parsing.Token):
     "%token forall"
+# exists
 class TokenExists(Parsing.Token):
     "%token exists"
 
+# identifiers
 class TokenID(Parsing.Token):
     "%token id"
     def __init__(self, parser, s):
         Parsing.Token.__init__(self, parser)
         self.data = identifier(s)
 
+    # string representation
     def to_string(self):
         return self.data.to_string()
 
@@ -176,6 +201,8 @@ class TokenID(Parsing.Token):
 #                  | LPAR SortExpr RPAR
 # Label ::= LANG ID RANG
 
+# Result ::= Spec
+#          | Includes Spec
 class Result(Parsing.Nonterm):
     "%start"
     def reduceIncludesSpec(self, result):
@@ -190,6 +217,8 @@ class Result(Parsing.Nonterm):
           self.data.merge_specification(context)
           context = self.data
 
+# IncludesSpec ::= Spec
+#          | Includes Spec
 class IncludesSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceSpec(self, spec):
@@ -203,6 +232,8 @@ class IncludesSpec(Parsing.Nonterm):
         self.data.set_includes(includes.data)
         printVerbose("IncludesSpec", self.data)
 
+# Includes ::= Include
+#          | Includes Include
 class Includes(Parsing.Nonterm):
     "%nonterm"
     def reduceInclude(self, incl):
@@ -216,6 +247,7 @@ class Includes(Parsing.Nonterm):
         self.data.push_back(include.data)
         printVerbose("Includes", self.data)
 
+# Include ::= "#include" ID
 class Include(Parsing.Nonterm):
     "%nonterm"
     def reduceInclude(self, incl, id):
@@ -223,6 +255,7 @@ class Include(Parsing.Nonterm):
         self.data = include(id.data)
         printVerbose("Include", self.data)
 
+# Spec ::= SortSpec FunctionSpec VarSpec EqnSpec
 class Spec(Parsing.Nonterm):
     "%nonterm"
     def reduce(self, sortspec, functionspec, varspec, eqnspec):
@@ -230,6 +263,7 @@ class Spec(Parsing.Nonterm):
         self.data = specification(sortspec.data, functionspec.data, varspec.data, eqnspec.data)
         printVerbose("Spec", self.data)
 
+# SortSpec ::= "sort" SortDecls
 class SortSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceSortSpec(self, sort, sortdecls):
@@ -237,6 +271,8 @@ class SortSpec(Parsing.Nonterm):
         self.data = sort_specification(sortdecls.data)
         printVerbose("SortSpec", self.data)
 
+# FunctionSpec ::= MapSpec
+#                | ConsSpec MapSpec
 class FunctionSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceMapSpec(self, mapspec):
@@ -249,6 +285,7 @@ class FunctionSpec(Parsing.Nonterm):
         self.data = function_specification(mapspec.data, consspec.data)
         printVerbose("FunctionSpec", self.data)
 
+# ConsSpec ::= "cons" OpDecls
 class ConsSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceConsSpec(self, cons, opdecls):
@@ -256,6 +293,7 @@ class ConsSpec(Parsing.Nonterm):
         self.data = constructor_specification(opdecls.data)
         printVerbose("ConsSpec", self.data)
 
+# MapSpec ::= "map" OpDecls
 class MapSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceMapSpec(self, map, opdecls):
@@ -263,6 +301,7 @@ class MapSpec(Parsing.Nonterm):
         self.data = mapping_specification(opdecls.data)
         printVerbose("MapSpec", self.data)
 
+# VarSpec ::= "var" VarDecls
 class VarSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceVarSpec(self, var, vardecls):
@@ -270,6 +309,7 @@ class VarSpec(Parsing.Nonterm):
         self.data = variable_specification(vardecls.data)
         printVerbose("VarSpec", self.data)
 
+# EqnSpec ::= "eqn" EqnDecls
 class EqnSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceEqnSpec(self, eqn, eqndecls):
@@ -277,6 +317,8 @@ class EqnSpec(Parsing.Nonterm):
         self.data = equation_specification(eqndecls.data)
         printVerbose("EqnSpec", self.data)
 
+# SortDecls ::= SortDecl
+#            | SortDecls SortDecl
 class SortDecls(Parsing.Nonterm):
     "%nonterm"
     def reduceSortDecl(self, sortdecl, semicolon):
@@ -290,6 +332,9 @@ class SortDecls(Parsing.Nonterm):
         self.data.push_back(sortdecl.data)
         printVerbose("SortDecls", self.data)
 
+# SortDecl ::= SortExpr Label
+#            | ID "(" SortParam ")" Label
+#            | ID "(" SortParam ")" Label = StructSpec
 class SortDecl(Parsing.Nonterm):
     "%nonterm"
     def reduceSortDecl(self, sortexpr, label):
@@ -307,6 +352,7 @@ class SortDecl(Parsing.Nonterm):
         self.data = sort_declaration(sort_container(container.data, param.data), label.data, struct.data)
         printVerbose("SortDecl", self.data)
 
+# StructSpec ::= "struct" StructDecls
 class StructSpec(Parsing.Nonterm):
     "%nonterm"
     def reduceStructSpec(self, struct, structdecls):
@@ -314,6 +360,8 @@ class StructSpec(Parsing.Nonterm):
         self.data = structured_sort_specification(structdecls.data)
         printVerbose("StructSpec", self.data)
 
+# StructDecls ::= StructDecl |
+#                 StructDecl StructDecls
 class StructDecls(Parsing.Nonterm):
     "%nonterm"
     def reduceStructDecl(self, structdecl):
@@ -327,6 +375,8 @@ class StructDecls(Parsing.Nonterm):
         self.data.push_back(structdecl.data)
         printVerbose("StructDecls", self.data)
 
+# StructDecl ::= ID Label |
+#                ID Label ":" Domain
 class StructDecl(Parsing.Nonterm):
     "%nonterm"
     def reduceStructNoDomain(self, id, label):
@@ -338,7 +388,9 @@ class StructDecl(Parsing.Nonterm):
         "%reduce id Label colon LabelledDomain"
         self.data = structured_sort_declaration(id.data, label.data, labelleddomain.data)
         printVerbose("StructDecl", self.data)
-   
+
+# VarDecls ::= VarDecl
+#            | VarDecls VarDecl   
 class VarDecls(Parsing.Nonterm):
     "%nonterm"
     def reduceVarDecl(self, vardecl, semicolon):
@@ -352,6 +404,7 @@ class VarDecls(Parsing.Nonterm):
         self.data.push_back(vardecl.data)
         printVerbose("VarDecls", self.data)
 
+# VarDecl ::= ID ":" SortExpr
 class VarDecl(Parsing.Nonterm):
     "%nonterm"
     def reduceVarDecl(self, id, colon, sortexpr):
@@ -359,6 +412,8 @@ class VarDecl(Parsing.Nonterm):
         self.data = variable_declaration(id.data, sortexpr.data)
         printVerbose("VarDecl", self.data)
 
+# OpDecls ::= OpDecl
+#           | OpDecls OpDecl
 class OpDecls(Parsing.Nonterm):
     "%nonterm"
     def reduceOpDecl(self, opdecl, semicolon):
@@ -372,6 +427,7 @@ class OpDecls(Parsing.Nonterm):
         self.data.push_back(opdecl.data)
         printVerbose("OpDecls", self.data)
 
+# OpDecl ::= ID Label ":" SortExpr
 class OpDecl(Parsing.Nonterm):
     "%nonterm"
     def reduceOpDecl(self, id, label, colon, sortexpr):
@@ -386,6 +442,8 @@ class OpDecl(Parsing.Nonterm):
         self.data = function_declaration(id.data, sortexpr.data, label.data)
         printVerbose("OpDecl", self.data)
 
+# EqnDecls ::= EqnDecl
+#            | EqnDecls EqnDecl
 class EqnDecls(Parsing.Nonterm):
     "%nonterm"
     def reduceDataEqn(self, eqndecl, semicolon):
@@ -399,6 +457,7 @@ class EqnDecls(Parsing.Nonterm):
         self.data.push_back(eqndecl.data)
         printVerbose("EqnDecls", self.data)
 
+# EqnDecl ::= DataExpr "=" DataExpr
 class EqnDecl(Parsing.Nonterm):
     "%nonterm"
     def reduceDataEqn(self, lhs, equals, rhs):
@@ -411,6 +470,11 @@ class EqnDecl(Parsing.Nonterm):
         self.data = equation_declaration(lhs.data, rhs.data, condition.data)
         printVerbose("EqnDecl", self.data)
 
+# DataExpr ::= DataExprPrimary
+#            | DataExpr "(" DataExprs ")"
+#            | lambda(VarDecl, DataExpr)
+#            | forall(VarDecls, DataExpr)
+#            | exists(VarDecls, DataExpr)
 class DataExpr(Parsing.Nonterm):
     "%nonterm"
     def reduceDataExprPrimary(self, dataexprprimary):
@@ -438,6 +502,8 @@ class DataExpr(Parsing.Nonterm):
         self.data = exists(vardecl.data, expr.data)
         printVerbose("DataExpr", self.data)
 
+# DataExprPrimary ::= ID
+#                   | "(" DataExpr ")"
 class DataExprPrimary(Parsing.Nonterm):
     "%nonterm"
     def reduceID(self, id):
@@ -457,6 +523,8 @@ class DataExprPrimary(Parsing.Nonterm):
         self.data = dataexpr.data
         printVerbose("DataExprPrimary", self.data)
 
+# DataExprs ::= DataExpr
+#            | DataExprs "," DataExpr
 class DataExprs(Parsing.Nonterm):
     "%nonterm"
     def reduceDataExpr(self, dataexpr):
@@ -470,6 +538,10 @@ class DataExprs(Parsing.Nonterm):
         self.data.push_back(dataexpr.data)
         printVerbose("DataExprs", self.data)
 
+# SortExpr ::= SortExprPrimary
+#            | LabelledDomain -> SortExpr
+#            | Domain -> SortExpr
+#            | ID "(" SortParam ")"
 class SortExpr(Parsing.Nonterm):
     "%nonterm"
     def reduceSortExprPrimary(self, sortexpr):
@@ -487,6 +559,7 @@ class SortExpr(Parsing.Nonterm):
         self.data = sort_arrow(domain.data, sortexpr.data)
         printVerbose("SortExpr", self.data)
 
+# SortParam ::= ID
 class SortParam(Parsing.Nonterm):
     "%nonterm"
     def reduceId(self, id):
@@ -494,6 +567,8 @@ class SortParam(Parsing.Nonterm):
         self.data = sort_identifier(id.data)
         printVerbose("SortParam", self.data)
 
+# Domain ::= SortExprPrimary Label
+#          | Domain # SortExprPrimary Label
 class Domain(Parsing.Nonterm):
     "%nonterm"
     def reduceSortExprPrimary(self, expr):
@@ -507,6 +582,8 @@ class Domain(Parsing.Nonterm):
         self.data.push_back(SortExprPrimary.data)
         printVerbose("Domain", self.data)
 
+# LabelledDomain ::= SortExprPrimary Label
+#                  | LabelledDomain # SortExprPrimary Label
 class LabelledDomain(Parsing.Nonterm):
     "%nonterm"
     def reduceSortExprPrimary(self, expr, label):
@@ -520,6 +597,8 @@ class LabelledDomain(Parsing.Nonterm):
         self.data.push_back((SortExprPrimary.data, label.data))
         printVerbose("LabelledDomain", self.data)
 
+# SortExprPrimary ::= ID
+#                  | LPAR SortExpr RPAR
 class SortExprPrimary(Parsing.Nonterm):
     "%nonterm"
     def reduceId(self, expr):
@@ -537,6 +616,7 @@ class SortExprPrimary(Parsing.Nonterm):
         self.data = sort_container(container.data, param.data)
         printVerbose("SortExprPrimary", self.data)
 
+# Label ::= LANG ID RANG
 class Label(Parsing.Nonterm):
     "%nonterm"
     def reduce(self, lang, id, rang):
@@ -656,6 +736,7 @@ def filter_comments(filename):
 
 #
 # get_includes
+# Find the includes that are at the beginning of the input
 #
 def get_includes(input):
     lines = string.split(input, '\n')
@@ -671,6 +752,8 @@ def get_includes(input):
 # parse_spec
 #-------------------------------------------------------#
 # This parses the input file and removes comment lines from it
+# Furthermore, we use context from files that are included, therefore these
+# have to be parsed first.
 def parse_spec(infilename):
     global outputcode
     global parser
@@ -719,6 +802,7 @@ def main():
             print "Unable to open file ", filename, " ", e
             return
 
+        # Parse specification in infilename and write the code to outfile
         parse_spec(infilename)
         outputcode = context.code()
         outfile.write(outputcode)
