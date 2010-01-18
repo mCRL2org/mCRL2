@@ -30,7 +30,7 @@ namespace mcrl2 {
     void type_check(sort_expression& sort_expr, const data_specification& data_spec)
     {
       // TODO: replace all this nonsense code by a proper type check implementation
-      ATermAppl t = detail::data_specification_to_aterm_data_spec(sort_expr);
+      ATermAppl t = sort_expr;
       t = core::type_check_sort_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
       if (!t)
       {
