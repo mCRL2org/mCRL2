@@ -34,12 +34,6 @@ foreach( OBJ ${TERM_OBJS} )
     message(STATUS "skipped pbes_solve_test")
   else(NOT ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test" )
 
-    if( ${result} STREQUAL  "pbes_solve_test" )
-      if(MINGW)
-	 add_definitions( -mno-cygwin )
-      endif(MINGW)
-    endif( ${result} STREQUAL  "pbes_solve_test" )
-
     add_executable("${PREFIX}_${result}" "${OBJ}"  )
     if( MONO_LIB )
       target_link_libraries(${PREFIX}_${result}

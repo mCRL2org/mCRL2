@@ -21,7 +21,7 @@ class Logger
 public:
     //! Severity of reported messages.
     enum Severity {
-        DEBUG = 0, INFO = 1, WARN = 2, ERROR = 3, FATAL = 4, NONE = 5
+        myDEBUG = 0, myINFO = 1, myWARN = 2, myERROR = 3, myFATAL = 4, myNONE = 5
     };
 
     //! Return the minimum severity of displayed messages
@@ -57,55 +57,55 @@ private:
 
 void Logger::debug(const char *fmt, ...)
 {
-    if (enabled(DEBUG))
+    if (enabled(myDEBUG))
     {
         va_list ap;
         va_start(ap, fmt);
-        print_message(DEBUG, fmt, ap);
+        print_message(myDEBUG, fmt, ap);
         va_end(ap);
     }
 }
 
 void Logger::info(const char *fmt, ...)
 {
-    if (enabled(INFO))
+    if (enabled(myINFO))
     {
         va_list ap;
         va_start(ap, fmt);
-        print_message(INFO, fmt, ap);
+        print_message(myINFO, fmt, ap);
         va_end(ap);
     }
 }
 
 void Logger::warn(const char *fmt, ...)
 {
-    if (enabled(WARN))
+    if (enabled(myWARN))
     {
         va_list ap;
         va_start(ap, fmt);
-        print_message(WARN, fmt, ap);
+        print_message(myWARN, fmt, ap);
         va_end(ap);
     }
 }
 
 void Logger::error(const char *fmt, ...)
 {
-    if (enabled(ERROR))
+    if (enabled(myERROR))
     {
         va_list ap;
         va_start(ap, fmt);
-        print_message(ERROR, fmt, ap);
+        print_message(myERROR, fmt, ap);
         va_end(ap);
     }
 }
 
 void Logger::fatal(const char *fmt, ...)
 {
-    if (enabled(FATAL))
+    if (enabled(myFATAL))
     {
         va_list ap;
         va_start(ap, fmt);
-        print_message(FATAL, fmt, ap);
+        print_message(myFATAL, fmt, ap);
         va_end(ap);
     }
     abort();
