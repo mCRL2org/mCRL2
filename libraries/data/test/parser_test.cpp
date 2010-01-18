@@ -41,6 +41,7 @@ void parser_test()
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));
+  BOOST_CHECK(data::parse_sort_expression("Nat") == data::sort_nat::nat());
 //  BOOST_CHECK(data::parse_data_expression("-1") == data::sort_int::int_(-1));
 //  BOOST_CHECK(data::parse_data_expression("1/2") == data::sort_real::real_(1, 2));
 }
