@@ -25,6 +25,17 @@
 
 using namespace mcrl2;
 
+// Parse functions that do not change any context (i.e. do not typecheck and
+// normalise sorts).
+data::sort_expression parse_sort_expression(const std::string& se_in)
+{
+  std::istringstream se_in_stream(se_in);
+  atermpp::aterm_appl se_aterm = core::parse_sort_expr(se_in_stream);
+  BOOST_REQUIRE(se_aterm != NULL);
+
+  return data::sort_expression(se_aterm);
+}
+
 data::data_expression parse_data_expression(const std::string& de_in)
 {
   std::istringstream de_in_stream(de_in);
@@ -56,6 +67,7 @@ void test_data_expression(const std::string &de_in,
                           const VariableIterator begin,
                           const VariableIterator end,
                           bool expect_success = true,
+                          const std::string& expected_sort = "",
                           bool test_type_checker = true)
 {
   data::data_expression x(parse_data_expression(de_in));
@@ -69,7 +81,10 @@ void test_data_expression(const std::string &de_in,
       std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
       //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
       BOOST_CHECK_EQUAL(de_in, de_out);
-      std::clog << "Inferred sort " << x.sort() << std::endl;
+      if(expected_sort != "")
+      {
+        BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
+      }
     }
     else
     {
@@ -81,71 +96,84 @@ void test_data_expression(const std::string &de_in,
 
 void test_data_expression(const std::string &de_in,
                           bool expect_success = true,
+                          const std::string& expected_sort = "",
                           bool test_type_checker = true)
 {
   data::variable_vector v;
-  test_data_expression(de_in, v.begin(), v.end(), expect_success, test_type_checker);
+  test_data_expression(de_in, v.begin(), v.end(), expect_success, expected_sort, test_type_checker);
 }
 
 BOOST_AUTO_TEST_CASE(test_true) {
   //test boolean data expressions
-   test_data_expression("true");
+   test_data_expression("true", true, "Bool");
 }
 
 BOOST_AUTO_TEST_CASE(test_if) {
-  test_data_expression("if(true, true, false)");
+  test_data_expression("if(true, true, false)", true, "Bool");
 }
 
 BOOST_AUTO_TEST_CASE(test_not) {
-  test_data_expression("!true");
+  test_data_expression("!true", true, "Bool");
 }
 
 BOOST_AUTO_TEST_CASE(test_and) {
-  test_data_expression("true && false");
+  test_data_expression("true && false", true, "Bool");
 }
 
 BOOST_AUTO_TEST_CASE(test_zero) {
-  test_data_expression("0");
+  test_data_expression("0", true, "Nat");
 }
 
 BOOST_AUTO_TEST_CASE(test_minus_one) {
-  test_data_expression("-1");
+  test_data_expression("-1", true, "Int");
 }
 
 BOOST_AUTO_TEST_CASE(test_zero_plus_one) {
-  test_data_expression("0 + 1");
+  test_data_expression("0 + 1", true, "Pos");
+}
+
+BOOST_AUTO_TEST_CASE(test_one_plus_zero) {
+  test_data_expression("1 + 0", true, "Pos");
+}
+
+BOOST_AUTO_TEST_CASE(test_zero_plus_zero) {
+  test_data_expression("0 + 0", true, "Nat");
+}
+
+BOOST_AUTO_TEST_CASE(test_one_plus_one) {
+  test_data_expression("1 + 1", true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_one_times_two_plus_three) {
-  test_data_expression("1 * 2 + 3");
+  test_data_expression("1 * 2 + 3", true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_true_false) {
-  test_data_expression("[true, false]");
+  test_data_expression("[true, false]", true, "List(Bool)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_zero) {
-  test_data_expression("[0]");
+  test_data_expression("[0]", true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_one_two) {
-  test_data_expression("[1, 2]");
+  test_data_expression("[1, 2]", true, "List(Pos)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_zero_concat_one_two) {
-  test_data_expression("[0] ++ [1, 2]");
+  test_data_expression("[0] ++ [1, 2]", true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_nat_concat_one_two) {
   data::variable_vector v;
   v.push_back(data::parse_variable("l: List(Nat)"));
-  test_data_expression("l ++ [1, 2]", v.begin(), v.end());
+  test_data_expression("l ++ [1, 2]", v.begin(), v.end(), true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_pos_concat_one_two) {
   data::variable_vector v;
   v.push_back(data::parse_variable("l: List(Pos)"));
-  test_data_expression("l ++ [1, 2]", v.begin(), v.end());
+  test_data_expression("l ++ [1, 2]", v.begin(), v.end(), true, "List(Pos)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_pos) {
@@ -157,7 +185,7 @@ BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_pos) {
 BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_nat) {
   data::variable_vector v;
   v.push_back(data::parse_variable("l: List(Nat)"));
-  test_data_expression("[0] ++ l", v.begin(), v.end());
+  test_data_expression("[0] ++ l", v.begin(), v.end(), true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_pos_concat_list_nat) {
@@ -175,11 +203,11 @@ BOOST_AUTO_TEST_CASE(test_list_is_list_nat) {
 }
 
 BOOST_AUTO_TEST_CASE(test_set_true_false) {
-  test_data_expression("{true, false}");
+  test_data_expression("{true, false}", true, "Set(Bool)");
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_true_false) {
-  test_data_expression("{true: 1, false: 2}");
+  test_data_expression("{true: 1, false: 2}", true, "Bag(Bool)");
 }
 
 BOOST_AUTO_TEST_CASE(test_function_updates)
@@ -204,7 +232,7 @@ BOOST_AUTO_TEST_CASE(test_inline_struct)
 
 BOOST_AUTO_TEST_CASE(test_inline_structs_compare)
 {
-  test_data_expression("lambda x,y: struct t. x == y");
+  test_data_expression("lambda x,y: struct t. x == y", true, "struct t # struct t -> Bool");
 }
 
 BOOST_AUTO_TEST_CASE(test_inline_structs_compare_recogniser)
@@ -220,14 +248,14 @@ BOOST_AUTO_TEST_CASE(test_lambda_aliasing)
 BOOST_AUTO_TEST_CASE(test_lambda_context)
 {
   data::variable_vector v;
-  v.push_back(data::variable("x", data::parse_sort_expression("struct t")));
-  v.push_back(data::variable("y", data::parse_sort_expression("struct t?is_t")));
+  v.push_back(data::variable("x", parse_sort_expression("struct t")));
+  v.push_back(data::variable("y", parse_sort_expression("struct t?is_t")));
   test_data_expression("x == y", v.begin(), v.end(), false);
 }
 
 BOOST_AUTO_TEST_CASE(test_where)
 {
-  test_data_expression("x + y whr x = 3, y = 10 end");
+  test_data_expression("x + y whr x = 3, y = 10 end", true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two)
@@ -255,7 +283,7 @@ BOOST_AUTO_TEST_CASE(test_where_in_context)
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_pos::pos()));
   v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = 3, y = 10 end", v.begin(), v.end());
+  test_data_expression("x + y whr x = 3, y = 10 end", v.begin(), v.end(), true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_in_context)
@@ -263,7 +291,7 @@ BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_in_context)
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_pos::pos()));
   v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = 3, y = x + 10 end", v.begin(), v.end());
+  test_data_expression("x + y whr x = 3, y = x + 10 end", v.begin(), v.end(), true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_and_two_occur_in_two_in_context)
@@ -271,7 +299,7 @@ BOOST_AUTO_TEST_CASE(test_where_var_one_and_two_occur_in_two_in_context)
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_pos::pos()));
   v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = 3, y = x + y + 10 end", v.begin(), v.end());
+  test_data_expression("x + y whr x = 3, y = x + y + 10 end", v.begin(), v.end(), true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_two_occurs_in_one_in_context)
@@ -279,7 +307,7 @@ BOOST_AUTO_TEST_CASE(test_where_var_two_occurs_in_one_in_context)
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_pos::pos()));
   v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = y + 10, y = 3 end", v.begin(), v.end());
+  test_data_expression("x + y whr x = y + 10, y = 3 end", v.begin(), v.end(), true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_and_vice_versa_in_context)
@@ -287,7 +315,7 @@ BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_and_vice_versa_in_context)
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_pos::pos()));
   v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y whr x = y + 10, y = x + 3 end", v.begin(), v.end());
+  test_data_expression("x + y whr x = y + 10, y = x + 3 end", v.begin(), v.end(), true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_mix_nat_pos_list)
@@ -303,7 +331,7 @@ BOOST_AUTO_TEST_CASE(test_where_mix_nat_list)
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_nat::nat()));
   v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x ++ y whr x = [0, y], y = [x] end", v.begin(), v.end());
+  test_data_expression("x ++ y whr x = [0, y], y = [x] end", v.begin(), v.end(), true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_upcast_pos2nat)
@@ -311,8 +339,8 @@ BOOST_AUTO_TEST_CASE(test_upcast_pos2nat)
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_pos::pos()));
   v.push_back(data::variable("y", data::sort_nat::nat()));
-  test_data_expression("x + y", v.begin(), v.end());
-  test_data_expression("x == y", v.begin(), v.end());
+  test_data_expression("x + y", v.begin(), v.end(), true, "Pos");
+  test_data_expression("x == y", v.begin(), v.end(), true, "Bool");
 }
 
 void test_data_specification(const std::string &ds_in,
@@ -411,6 +439,7 @@ void test_data_expression_in_specification_context(const std::string &de_in,
                           const VariableIterator begin,
                           const VariableIterator end,
                           bool expect_success = true,
+                          const std::string& expected_sort = "",
                           bool test_type_checker = true)
 {
   data::data_specification ds(parse_data_specification(ds_in));
@@ -435,8 +464,10 @@ void test_data_expression_in_specification_context(const std::string &de_in,
       std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
 
       BOOST_CHECK_EQUAL(de_in, de_out);
-
-      std::clog << "Inferred sort: " << de.sort() << std::endl;
+      if(expected_sort != "")
+      {
+        BOOST_CHECK_EQUAL(de.sort(), parse_sort_expression(expected_sort));
+      }
     }
     else
     {
@@ -448,10 +479,11 @@ void test_data_expression_in_specification_context(const std::string &de_in,
 void test_data_expression_in_specification_context(const std::string &de_in,
                           const std::string& ds_in,
                           bool expect_success = true,
+                          const std::string& expected_sort = "",
                           bool test_type_checker = true)
 {
   data::variable_vector v;
-  test_data_expression_in_specification_context(de_in, ds_in, v.begin(), v.end(),expect_success,test_type_checker);
+  test_data_expression_in_specification_context(de_in, ds_in, v.begin(), v.end(), expect_success, expected_sort, test_type_checker);
 }
 
 BOOST_AUTO_TEST_CASE(test_data_expressions_different_signature)
@@ -462,7 +494,9 @@ BOOST_AUTO_TEST_CASE(test_data_expressions_different_signature)
     "     T;\n"
     "\n"
     "cons f: S;\n"
-    "     f: S -> T;\n"
+    "     f: S -> T;\n",
+    true,
+    "T"
   );
 }
 
@@ -475,7 +509,9 @@ BOOST_AUTO_TEST_CASE(test_data_expressions_struct)
   test_data_expression_in_specification_context(
     "x == t(e(3))",
     "sort S = struct t(struct e(Nat));\n",
-    v.begin(), v.end()
+    v.begin(), v.end(),
+    true,
+    "Bool"
   );
 }
 
@@ -495,7 +531,9 @@ BOOST_AUTO_TEST_CASE(test_lambda_anonymous_struct)
 {
   test_data_expression_in_specification_context(
     "lambda x: struct t. f(x)",
-    "map  f: struct t -> Bool;\n"
+    "map  f: struct t -> Bool;\n",
+    true,
+    "struct t -> Bool"
   );
 }
 
@@ -504,7 +542,9 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_application)
   test_data_expression_in_specification_context(
     "f(f)",
     "map  f: Nat -> Bool;\n"
-    "     f: Nat;\n"
+    "     f: Nat;\n",
+    true,
+    "Bool"
    );
 }
 
@@ -513,7 +553,9 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity)
   test_data_expression_in_specification_context(
     "f",
     "map  f: Nat -> Bool;\n"
-    "     f: Nat;\n"
+    "     f: Nat;\n",
+    true,
+    "Nat"
    );
 }
 
@@ -532,16 +574,20 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_nat_constant
   test_data_expression_in_specification_context(
     "f(0)",
     "map  f: Pos -> Nat;\n"
-    "     f: Nat -> Pos;\n"
+    "     f: Nat -> Pos;\n",
+    true,
+    "Pos"
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_pos_constant)
 {
   test_data_expression_in_specification_context(
-    "f(0)",
+    "f(1)",
     "map  f: Pos -> Nat;\n"
-    "     f: Nat -> Pos;\n"
+    "     f: Nat -> Pos;\n",
+    true,
+    "Nat"
   );
 }
 
@@ -553,7 +599,9 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_nat_variable
     "f(x)",
     "map  f: Pos -> Nat;\n"
     "     f: Nat -> Pos;\n",
-    v.begin(), v.end()
+    v.begin(), v.end(),
+    true,
+    "Pos"
   );
 }
 
@@ -565,7 +613,9 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity_application_pos_variable
     "f(x)",
     "map  f: Pos -> Nat;\n"
     "     f: Nat -> Pos;\n",
-    v.begin(), v.end()
+    v.begin(), v.end(),
+    true,
+    "Nat"
   );
 }
 
@@ -573,7 +623,9 @@ BOOST_AUTO_TEST_CASE(test_function_symbol)
 {
   test_data_expression_in_specification_context(
     "f",
-    "map  f: Nat -> Bool;\n"
+    "map  f: Nat -> Bool;\n",
+    true,
+    "Nat -> Bool"
   );
 }
 
@@ -581,7 +633,9 @@ BOOST_AUTO_TEST_CASE(test_function_application_pos_constant)
 {
   test_data_expression_in_specification_context(
     "f(1)",
-    "map  f: Nat -> Bool;\n"
+    "map  f: Nat -> Bool;\n",
+    true,
+    "Bool"
   );
 }
 
@@ -589,7 +643,9 @@ BOOST_AUTO_TEST_CASE(test_function_application_nat_constant)
 {
   test_data_expression_in_specification_context(
     "f(0)",
-    "map  f: Nat -> Bool;\n"
+    "map  f: Nat -> Bool;\n",
+    true,
+    "Bool"
   );
 }
 
@@ -609,7 +665,9 @@ BOOST_AUTO_TEST_CASE(test_function_application_pos_variable)
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Nat -> Bool;\n",
-    v.begin(), v.end()
+    v.begin(), v.end(),
+    true,
+    "Bool"
   );
 }
 
@@ -620,7 +678,9 @@ BOOST_AUTO_TEST_CASE(test_function_application_nat_variable)
   test_data_expression_in_specification_context(
     "f(x)",
     "map  f: Nat -> Bool;\n",
-    v.begin(), v.end()
+    v.begin(), v.end(),
+    true,
+    "Bool"
   );
 }
 
@@ -640,7 +700,9 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor)
 {
   test_data_expression_in_specification_context(
     "c",
-    "sort S = struct c(Nat);\n"
+    "sort S = struct c(Nat);\n",
+    true,
+    "Nat -> struct c(Nat)"
   );
 }
 
@@ -648,7 +710,9 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_pos_constant)
 {
   test_data_expression_in_specification_context(
     "c(1)",
-    "sort S = struct c(Nat);\n"
+    "sort S = struct c(Nat);\n",
+    true,
+    "struct c(Nat)"
   );
 }
 
@@ -656,7 +720,9 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_nat_constant)
 {
   test_data_expression_in_specification_context(
     "c(0)",
-    "sort S = struct c(Nat);\n"
+    "sort S = struct c(Nat);\n",
+    true,
+    "struct c(Nat)"
   );
 }
 
@@ -676,7 +742,9 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_pos_variable)
   test_data_expression_in_specification_context(
     "c(x)",
     "sort S = struct c(Nat);\n",
-    v.begin(), v.end()
+    v.begin(), v.end(),
+    true,
+    "struct c(Nat)"
   );
 }
 
@@ -687,7 +755,9 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_nat_variable)
   test_data_expression_in_specification_context(
     "c(x)",
     "sort S = struct c(Nat);\n",
-    v.begin(), v.end()
+    v.begin(), v.end(),
+    true,
+    "struct c(Nat)"
   );
 }
 
