@@ -478,8 +478,6 @@ namespace tipi {
    * \throws std::runtime_error if no input object corresponding to id is found
    **/
   inline configuration::object& configuration::get_input(std::string const& id) {
-      std::cerr << m_parameter_by_id.count(id) << " - " << id <<std::endl;
-
       if (m_parameter_by_id.count(id) == 0)
       {
         std::string s = "A tipi-input-configuration for \"";
