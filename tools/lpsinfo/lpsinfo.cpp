@@ -63,7 +63,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& c) const
-    { c.add_input_configuration("lps_in", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
+    { c.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
@@ -73,7 +73,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
     /** \brief check an existing configuration object to see if it is usable */
     bool check_configuration(tipi::configuration const& c) const
     {
-      return c.input_exists("lps_in");
+      return c.input_exists("main-input");
     }
 
     /** \brief performs the task specified by a configuration */
@@ -87,7 +87,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
       synchronise_with_configuration(c);
 
       specification spec;
-      spec.load(c.get_input(m_input_filename).location());
+      spec.load(c.get_input("main-input").location());
       lps::detail::specification_property_map info(spec);
 
       /* Create display */
@@ -109,7 +109,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
 
       /* Second column */
       m.append(d.create< vertical_box >().set_default_alignment(layout::left).
-                append(d.create< label >().set_text(c.get_input(m_input_filename).location())).
+                append(d.create< label >().set_text(c.get_input("main-input").location())).
                 append(d.create< label >().set_text(info["summand_count"               ])).
                 append(d.create< label >().set_text(info["tau_summand_count"           ])).
                 append(d.create< label >().set_text(info["declared_free_variable_count"])).
