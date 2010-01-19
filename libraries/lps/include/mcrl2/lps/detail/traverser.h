@@ -23,110 +23,122 @@ namespace lps {
 
 namespace detail {
 
-  /// \brief Traversal function object.
   template <typename Derived>
   class traverser: public data::detail::traverser<Derived>
   {
-    typedef data::detail::traverser<Derived> super;
-
     public:
-
+      typedef data::detail::traverser<Derived> super;
       using super::operator();
 
       /// \brief Traverses an action label
       void operator()(const action_label& l)
       {
-        (*this)(l.name());
+        static_cast<Derived&>(*this).enter(l);
+        static_cast<Derived&>(*this)(l.name());
+        static_cast<Derived&>(*this).leave(l);
       }
 
       /// \brief Traverses an action
       /// \param a An action
       void operator()(const action& a)
       {
-        (*this)(a.label());
-        super::operator()(a.arguments());
+        static_cast<Derived&>(*this).enter(a);
+        static_cast<Derived&>(*this)(a.label());
+        static_cast<Derived&>(*this)(a.arguments());
+        static_cast<Derived&>(*this).leave(a);
       }
 
       /// \brief Traverses a deadlock
       /// \param d A deadlock
       void operator()(const deadlock& d)
       {
-        if (d.has_time())
-        {
-          (*this)(d.time());
+        static_cast<Derived&>(*this).enter(d);
+        if (d.has_time()) {
+          static_cast<Derived&>(*this)(d.time());
         }
-      } 
+        static_cast<Derived&>(*this).leave(d);
+      }
 
       /// \brief Traverses a multi-action
       /// \param a A multi-action
       void operator()(const multi_action& a)
       {
-        if (a.has_time())
-        {
-          (*this)(a.time());
+        static_cast<Derived&>(*this).enter(a);
+        if (a.has_time()) {
+          static_cast<Derived&>(*this)(a.time());
         }
-
-        super::operator()(a.actions());
-      } 
+        static_cast<Derived&>(*this)(a.actions());
+        static_cast<Derived&>(*this).leave(a);
+      }
 
       /// \brief Traverses a summand
       /// \param s A summand
       void operator()(const action_summand& s)
       {
-        super::operator()(s.summation_variables());
-        (*this)(s.condition());
-        (*this)(s.multi_action());
-        super::operator()(s.assignments());
+        static_cast<Derived&>(*this).enter(s);
+        static_cast<Derived&>(*this)(s.summation_variables());
+        static_cast<Derived&>(*this)(s.condition());
+        static_cast<Derived&>(*this)(s.multi_action());
+        static_cast<Derived&>(*this)(s.assignments());
+        static_cast<Derived&>(*this).leave(s);
       }
 
       /// \brief Traverses a summand
       /// \param s A summand
       void operator()(const deadlock_summand& s)
       {
-        super::operator()(s.summation_variables());
-        (*this)(s.condition());
-        (*this)(s.deadlock());
+        static_cast<Derived&>(*this).enter(s);
+        static_cast<Derived&>(*this)(s.summation_variables());
+        static_cast<Derived&>(*this)(s.condition());
+        static_cast<Derived&>(*this)(s.deadlock());
+        static_cast<Derived&>(*this).leave(s);
       }
-    
+
       /// \brief Traverses a process_initializer
       /// \param s A process_initializer
       void operator()(const process_initializer& i)
       {
-        super::operator()(i.assignments());
+        static_cast<Derived&>(*this).enter(i);
+        static_cast<Derived&>(*this)(i.assignments());
+        static_cast<Derived&>(*this).leave(i);
       }
 
       /// \brief Traverses a linear_process
       /// \param s A linear_process
-      void operator()(const linear_process& p)
-      {
-        super::operator()(p.process_parameters());
-        super::operator()(p.action_summands());
-        super::operator()(p.deadlock_summands());
+      void operator()(const linear_process& p) {
+        static_cast<Derived&>(*this).enter(p);
+        static_cast<Derived&>(*this)(p.process_parameters());
+        static_cast<Derived&>(*this)(p.action_summands());
+        static_cast<Derived&>(*this)(p.deadlock_summands());
+        static_cast<Derived&>(*this).leave(p);
       }
-                        
+
       /// \brief Traverses a linear process specification
       /// \param spec A linear process specification
-      void operator()(const specification& spec)
-      {
-        (*this)(spec.process());
-        super::operator()(spec.global_variables());
-        (*this)(spec.initial_process());
-        super::operator()(spec.action_labels());
+      void operator()(const specification& spec) {
+        static_cast<Derived&>(*this).enter(spec);
+        static_cast<Derived&>(*this)(spec.process());
+        static_cast<Derived&>(*this)(spec.global_variables());
+        static_cast<Derived&>(*this)(spec.initial_process());
+        static_cast<Derived&>(*this)(spec.action_labels());
+        static_cast<Derived&>(*this).leave(spec);
       }
   };
 
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_data_traverser: public data::detail::selective_traverser<Derived, AdaptablePredicate>
-  {
-    typedef data::detail::selective_traverser<Derived, AdaptablePredicate> super;
+template<typename Derived, typename AdaptablePredicate>
+class selective_data_traverser: public data::detail::selective_traverser<
+		Derived, AdaptablePredicate> {
+	typedef data::detail::selective_traverser<Derived, AdaptablePredicate>
+			super;
 
-    public:
-      selective_data_traverser()
-      { }
+public:
+	selective_data_traverser() {
+	}
 
-      selective_data_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
+	selective_data_traverser(AdaptablePredicate predicate) :
+		super(predicate) {
+	}
+};
 
 } // namespace detail
 

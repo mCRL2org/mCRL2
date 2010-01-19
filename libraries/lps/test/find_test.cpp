@@ -63,11 +63,12 @@ void test_find()
   //--- find_variables ---//
   data::variable m = nat("m"); 
   std::set<data::variable> v = lps::find_variables(a);
-  //v = data::find_variables(s); // TODO: this doesn't compile!
+  v = lps::find_variables(s);
   BOOST_CHECK(v.find(m) != v.end());   
 
   //--- find_sort_expressions ---//
   std::set<data::sort_expression> e = lps::find_sort_expressions(a);
+  std::cout << "e.size() = " << e.size() << std::endl;
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
 }
