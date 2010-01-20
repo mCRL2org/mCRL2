@@ -1345,6 +1345,11 @@ reconstruct_container_expression(ATermAppl Part)
   using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_bag;
 
+  if(!gsIsDataAppl(Part))
+  {
+    return Part;
+  }
+
   data_expression expr(Part);
   if(is_cons_application(expr))
   {
@@ -1552,7 +1557,7 @@ reconstruct_container_expression(ATermAppl Part)
 }
 
 void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
-  const ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
+  ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
   assert(gsIsDataExpr(DataExpr));
   if (gsIsId(DataExpr) || gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr) ||
@@ -1569,6 +1574,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       }
     } else { //pp_format == ppDefault
       //print data expression in the external format, if possible
+      DataExpr = reconstruct_container_expression(DataExpr);
       ATermAppl Head;
       ATermList Args;
       if (!gsIsDataAppl(DataExpr)) {
@@ -1647,7 +1653,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
           pp_format, ShowSorts, PrecLevel);
       } else if (gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr)) {
         ATermAppl Reconstructed(reconstruct_numeric_expression(DataExpr));
-        Reconstructed = reconstruct_container_expression(Reconstructed);
         //print data variable or operation identifier
         if (Reconstructed == DataExpr) {
           PRINT_FUNC(dbg_prints)("printing data variable or operation identifier\n");
@@ -1665,21 +1670,12 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       } else {
         ATermAppl Reconstructed(reconstruct_numeric_expression(DataExpr));
         if (Reconstructed == DataExpr) {
-          ATermAppl CReconstructed(reconstruct_container_expression(DataExpr));
-          if (CReconstructed == Reconstructed)
-          {
-            //print data application
-            PRINT_FUNC(dbg_prints)("printing data application\n");
-            PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecIdPrefix());
-            PRINT_FUNC(fprints)(OutStream, "(");
-            PRINT_FUNC(PrintPart_List)(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
-            PRINT_FUNC(fprints)(OutStream, ")");
-          }
-          else
-          {
-            PRINT_FUNC(dbg_prints)("printing container representation\n");
-            PRINT_FUNC(PrintDataExpr)(OutStream, CReconstructed, pp_format, ShowSorts, PrecLevel);
-          }
+          //print data application
+          PRINT_FUNC(dbg_prints)("printing data application\n");
+          PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecIdPrefix());
+          PRINT_FUNC(fprints)(OutStream, "(");
+          PRINT_FUNC(PrintPart_List)(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
+          PRINT_FUNC(fprints)(OutStream, ")");
         }
         else {
           PRINT_FUNC(dbg_prints)("printing numeric representation\n");
