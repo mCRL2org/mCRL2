@@ -17,6 +17,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/core/messaging.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -908,6 +909,7 @@ BOOST_AUTO_TEST_CASE(test_various)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
+  core::gsSetVerboseMsg();
   MCRL2_ATERMPP_INIT(argc, argv)
 
   return 0;
