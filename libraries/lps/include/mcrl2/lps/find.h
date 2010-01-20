@@ -22,8 +22,6 @@ namespace mcrl2 {
 
 namespace lps {
 
-//--- generic find functions ---//
-
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \param[in,out] o an output iterator to which all data variables occurring in t
@@ -44,17 +42,6 @@ namespace lps {
     std::set<data::variable> result;
     lps::find_variables(container, std::inserter(result, result.end()));
     return result;
-  }
-
-  /// \brief Returns true if the term has a given variable as subterm.
-  /// \param[in] container an expression or container with expressions
-  /// \param[in] v an expression or container with expressions
-  /// \param d A variable
-  /// \return True if the term has a given variable as subterm.
-  template <typename Container>
-  bool search_variable(Container const& container, const data::variable& v)
-  {
-    return data::detail::make_search_helper<data::variable, lps::detail::selective_data_traverser>(data::detail::compare_variable(v)).apply(container);
   }
 
   /// \brief Returns all data variables that occur in a range of expressions
@@ -107,27 +94,6 @@ namespace lps {
     return result;
   }
 
-  /// \brief Returns true if the term has a given variable as subterm.
-  /// \param[in] container an expression or container with expressions
-  /// \param d A data variable
-  /// \return True if the term has a given variable as subterm.
-  template <typename Container>
-  bool search_free_variable(Container container, const data::variable& d)
-  {
-    return data::detail::make_free_variable_search_helper<lps::detail::selective_binding_aware_traverser>(data::detail::compare_variable(d)).apply(container);
-  }
-
-
-  /// \brief Returns true if the term has a given sort expression as subterm.
-  /// \param[in] container an expression or container of expressions
-  /// \param[in] s A sort expression
-  /// \return True if the term has a given sort expression as subterm.
-  template <typename Container>
-  bool search_sort_expression(Container const& container, const data::sort_expression& s)
-  {
-    return data::detail::make_search_helper<data::sort_expression, lps::detail::selective_sort_traverser>(data::detail::compare_sort(s)).apply(container);
-  }
-
   /// \brief Returns all sort expressions that occur in the term t
   /// \param[in] container an expression or container of expressions
   /// \param[in] o an output iterator
@@ -146,100 +112,6 @@ namespace lps {
   {
     std::set<data::sort_expression> result;
     lps::find_sort_expressions(container, std::inserter(result, result.end()));
-    return result;
-  }
-
-  /// \brief Returns true if the term has a given sort identifier as subterm.
-  /// \param[in] container an expression or container of expressions
-  /// \param[in] s A sort identifier
-  /// \return True if the term has a given sort identifier as subterm.
-  template <typename Container>
-  bool search_basic_sort(Container const& container, const data::basic_sort& s)
-  {
-    return data::detail::make_search_helper<data::basic_sort, lps::detail::selective_sort_traverser>(data::detail::compare_sort(s)).apply(container);
-  }
-
-  /// \brief Returns all sort identifiers that occur in the term t
-  /// \param[in] container an expression or container of expressions
-  /// \param[out] o an output iterator
-  /// \return All sort identifiers that occur in the term t
-  template <typename Container, typename OutputIterator>
-  void find_basic_sorts(Container const& container, OutputIterator o)
-  {
-    return data::detail::make_find_helper<data::basic_sort, lps::detail::sort_traverser>(o)(container);
-  }
-
-  /// \brief Returns all basic sorts that occur in the term t
-  /// \param[in] container an expression or container of expressions
-  /// \param[in] o an output iterator
-  /// \return All sort expressions that occur in the term t
-  template <typename Container>
-  std::set<data::basic_sort> find_basic_sorts(Container const& container)
-  {
-    std::set<data::basic_sort> result;
-    lps::find_basic_sorts(container, std::inserter(result, result.end()));
-    return result;
-  }
-
-  /// \brief Returns true if the term has a given identifier as subterm.
-  /// \param[in] container an expression or container of expressions
-  /// \param[in] s An identifier
-  /// \return True if the term has a given sort identifier as subterm.
-  template <typename Container>
-  bool search_identifiers(Container const& container, const core::identifier_string& s)
-  {
-    return data::detail::make_search_helper<core::identifier_string, lps::detail::selective_sort_traverser>(boost::bind(std::equal_to<core::identifier_string>(), s, _1)).apply(container);
-  }
-
-  /// \brief Returns all identifiers that occur in the term t
-  /// \param[in] container an expression or container of expressions
-  /// \param[out] o an output iterator
-  /// \return All sort identifiers that occur in the term t
-  template <typename Container, typename OutputIterator>
-  void find_identifiers(Container const& container, OutputIterator o)
-  {
-    return data::detail::make_find_helper<core::identifier_string, lps::detail::sort_traverser>(o)(container);
-  }
-
-  /// \brief Returns all basic sorts that occur in the term t
-  /// \param[in] container an expression or container of expressions
-  /// \param[in] o an output iterator
-  /// \return All sort expressions that occur in the term t
-  template <typename Container>
-  std::set<core::identifier_string> find_identifiers(Container const& container)
-  {
-    std::set<core::identifier_string> result;
-    lps::find_identifiers(container, std::inserter(result, result.end()));
-    return result;
-  }
-
-  /// \brief Returns true if the term has a given data expression as subterm.
-  /// \param[in] container an expression or container of expressions
-  /// \param[in] s A data expression
-  /// \return True if the term has a given data expression as subterm.
-  template <typename Container>
-  bool search_data_expression(Container const& container, const data::data_expression& s)
-  {
-    return data::detail::make_search_helper<data::data_expression, lps::detail::selective_data_traverser>(data::detail::compare_term<data::data_expression>(s)).apply(container);
-  }
-
-  /// \brief Returns all data expressions that occur in the term t
-  /// \param[in] container an expression or container of expressions
-  /// \return All data expressions that occur in the term t
-  template <typename Container, typename OutputIterator>
-  void find_data_expressions(Container const& container, OutputIterator o)
-  {
-    data::detail::make_find_helper<data::data_expression, lps::detail::traverser>(o)(container);
-  }
-
-  /// \brief Returns all data expressions that occur in the term t
-  /// \param[in] container an expression or container of expressions
-  /// \return All data expressions that occur in the term t
-  template <typename Container>
-  std::set<data::data_expression> find_data_expressions(Container const& container)
-  {
-    std::set<data::data_expression> result;
-    lps::find_data_expressions(container, std::inserter(result, result.end()));
     return result;
   }
 
