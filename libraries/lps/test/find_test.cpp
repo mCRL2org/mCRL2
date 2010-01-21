@@ -73,12 +73,37 @@ void test_find()
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
 }
 
+void test_free_variables()
+{
+  lps::specification specification(parse_linear_process_specification(
+    "act a : Bool;\n"
+    "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
+    "init X;\n"
+  ));
+
+  std::set<data::variable> free_variables = find_free_variables(specification.process());
+  BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
+  BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
+
+  specification = parse_linear_process_specification(
+    "act a;\n"
+    "proc X(z : Bool) = (z && forall x : Nat. exists y : Nat. x < y) -> a.X(!z);\n"
+    "init X(true);\n"
+  );
+  free_variables = find_free_variables(specification.process());
+  BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
+  BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
+
+  BOOST_CHECK(is_well_typed(specification));
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_find();
-  core::garbage_collect();
-    
+  test_free_variables();
+
   return EXIT_SUCCESS;
 }
