@@ -37,7 +37,7 @@ void operator()(const communication_expression& x)
 void operator()(const process_equation& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.identifier());
   static_cast<Derived&>(*this)(x.formal_parameters());
   static_cast<Derived&>(*this)(x.expression());
   static_cast<Derived&>(*this).leave(x);
