@@ -15,7 +15,7 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 
@@ -58,13 +58,15 @@ void test_find()
 
   //--- find_variables ---//
   data::variable m = nat("m"); 
-  std::set<data::variable> v = data::find_variables(x);
+  std::set<data::variable> v = process::find_variables(x);
   BOOST_CHECK(v.find(m) != v.end());   
 
   //--- find_sort_expressions ---//
-  std::set<data::sort_expression> e = data::find_sort_expressions(x);
+  std::set<data::sort_expression> e = process::find_sort_expressions(x);
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
+
+  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
@@ -72,7 +74,6 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_find();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

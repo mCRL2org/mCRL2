@@ -11,7 +11,7 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite process
     :
-      #[ run find_test.cpp ]
+      [ run find_test.cpp ]
       [ run parse_test.cpp ]
       [ run process_test.cpp ]
       [ run sort_traverser_test.cpp ]
