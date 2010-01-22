@@ -11,7 +11,7 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
-void operator()(const action_label& x)
+void operator()(const lps::action_label& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
@@ -19,7 +19,7 @@ void operator()(const action_label& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const action& x)
+void operator()(const lps::action& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.label());
@@ -196,7 +196,7 @@ void operator()(const process_identifier& x)
 void operator()(const process_equation& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.identifier());
   static_cast<Derived&>(*this)(x.formal_parameters());
   static_cast<Derived&>(*this)(x.expression());
   static_cast<Derived&>(*this).leave(x);

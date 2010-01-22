@@ -49,7 +49,7 @@ LinProcSpec       | specification(const data::data_specification& data, const ac
 PROCESS_CLASSES = r'''
 ProcSpec    | process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const process_equation_list& equations, const process_expression& init) | A process specification
 ProcVarId   | process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts) | A process identifier
-ProcEqn     | process_equation(const process_identifier& name, const data::variable_list& formal_parameters, const process_expression& expression) | A process equation
+ProcEqn     | process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression) | A process equation
 RenameExpr  | rename_expression(core::identifier_string source, core::identifier_string target) | A rename expression
 CommExpr    | communication_expression(const action_name_multiset& action_name, const core::identifier_string& name) | A communication expression
 MultActName | action_name_multiset(const &core::identifier_string_list& names) | A multi-action

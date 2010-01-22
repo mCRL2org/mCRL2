@@ -16,8 +16,7 @@ def make_traverser_inc_file(filename, text):
     for c in classes:
         (aterm, constructor, description) = c
         f = FunctionDeclaration(constructor)
-        classname = f.name()
-        print 'generating traverse functions for class', classname
+        print 'generating traverse functions for class', f.name()
         visit_functions = []
         for p in f.parameters():
             #----------------------------------------------------------------------------------------#
@@ -28,7 +27,7 @@ def make_traverser_inc_file(filename, text):
             visit_functions.append('\n  static_cast<Derived&>(*this)(x.%s());' % p.name())
         vtext = ''.join(visit_functions)
         ctext = TRAVERSE_FUNCTION
-        ctext = re.sub('QUALIFIED_NODE', classname, ctext)
+        ctext = re.sub('QUALIFIED_NODE', f.qualified_name(), ctext)
         ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
         if f.is_template():
             ctext = 'template <typename ' + ', typename '.join(f.template_arguments()) + '>\n' + ctext
