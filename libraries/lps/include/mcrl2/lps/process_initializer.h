@@ -42,7 +42,7 @@ class process_initializer: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    process_initializer(data::assignment_list assignments)
+    process_initializer(const data::assignment_list& assignments)
      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments)),
        m_assignments(assignments)
     {

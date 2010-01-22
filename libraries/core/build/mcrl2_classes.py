@@ -33,7 +33,28 @@ ActExists | exists(const data::variable_list& variables, const action_formula& o
 ActAt     | at(const action_formula& operand, const data::data_expression& time_stamp)  | The at operator for action formulas
 '''                                                                                       
 
-# Terms starting with @ are defined in another library
+# N.B. This one is problematic due to the optional time in deadlock/multi_action.
+LPS_CLASSES = r'''
+ActId             | action_label(const core::identifier_string& name, const data::sort_expression_list& sorts) | An action label
+Action            | action(const action_label& label, const data::data_expression_list& arguments) | An action
+None              | deadlock(const data::data_expression& time) | A deadlock
+None              | multi_action(const action_list& actions, const data::data_expression& time) | A multi-action
+None              | deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock) | A deadlock summand
+None              | action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments) | An action summand
+LinearProcessInit | process_initializer(const data::assignment_list& assignments) | A process initializer
+LinearProcess     | linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands) | A linear process
+LinProcSpec       | specification(const data::data_specification& data, const action_label_list& action_labels, const atermpp::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process) | A linear process specification
+'''
+
+PROCESS_CLASSES = r'''
+ProcSpec    | process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const process_equation_list& equations, const process_expression& init) | A process specification
+ProcVarId   | process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts) | A process identifier
+ProcEqn     | process_equation(const process_identifier& name, const data::variable_list& formal_parameters, const process_expression& expression) | A process equation
+RenameExpr  | rename_expression(core::identifier_string source, core::identifier_string target) | A rename expression
+CommExpr    | communication_expression(const action_name_multiset& action_name, const core::identifier_string& name) | A communication expression
+MultActName | action_name_multiset(const &core::identifier_string_list& names) | A multi-action
+'''
+
 PROCESS_EXPRESSION_CLASSES = r'''
 Action            | lps::action(const lps::action_label& label, const data::data_expression_list& arguments)                                       | An action
 Process           | process_instance(const process_identifier identifier, const data::data_expression_list& actual_parameters)                     | A process
@@ -55,6 +76,14 @@ BInit             | bounded_init(const process_expression& left, const process_e
 Merge             | merge(const process_expression& left, const process_expression& right)                                                         | The merge operator
 LMerge            | left_merge(const process_expression& left, const process_expression& right)                                                    | The left merge operator
 Choice            | choice(const process_expression& left, const process_expression& right)                                                        | The choice operator
+'''
+
+PBES_CLASSES = r'''
+FixPoint    | fixpoint_symbol() | A fixpoint symbol
+PropVarDecl | propositional_variable(const core::identifier_string& name, const data::variable_list& parameters) | A propositional variable declaration
+PropVarInst | propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) | A propositional variable instantiation
+PBEqn       | pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula) | A PBES equation
+PBES        | pbes<Container>(const data::data_specification& data, const Container& equations, const atermpp::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state) | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
@@ -122,16 +151,31 @@ class FunctionDeclaration:
     def __init__(self, text):
         self.text = text.strip()
     
-    # returns the name of the function
+    # returns the name of the function including a namespace qualification, if available
     #
     # 'name'
     def qualified_name(self):
         return re.sub('\(.*', '', self.text)
 
-    # returns the unqualified name of the function
+    # returns the name of the function without namespace qualification
     #
     def name(self):
         return re.sub(r'^.*::', '', self.qualified_name())
+
+    # returns true if it is a template function
+    #
+    def is_template(self):
+        return self.name().find('<') != -1
+
+    # returns the template arguments of the function
+    #
+    def template_arguments(self):
+        m = re.search('<(.*)>', self.name())
+        if m == None:
+            return []
+        text = m.group(1)
+        text = re.sub(r',', '', text)
+        return text.rsplit(r'\s')
 
     # returns the argument text of the function
     #

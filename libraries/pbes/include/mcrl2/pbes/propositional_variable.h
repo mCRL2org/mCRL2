@@ -69,7 +69,7 @@ class propositional_variable: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param name A
     /// \param parameters A sequence of data variables
-    propositional_variable(core::identifier_string name, data::variable_list parameters)
+    propositional_variable(const core::identifier_string& name, const data::variable_list& parameters)
       : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
         m_name(name),
         m_parameters(parameters)
@@ -144,7 +144,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param name A
     /// \param parameters A sequence of data expressions
-    propositional_variable_instantiation(core::identifier_string name, data::data_expression_list const& parameters)
+    propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
       : atermpp::aterm_appl(core::detail::gsMakePropVarInst(name, parameters)),
         m_name(name),
         m_parameters(parameters)

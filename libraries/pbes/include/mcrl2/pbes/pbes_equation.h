@@ -124,7 +124,7 @@ class pbes_equation
     /// \param symbol A fixpoint symbol
     /// \param variable A propositional variable declaration
     /// \param expr A PBES expression
-    pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
+    pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& expr)
       : 
         m_symbol(symbol),
         m_variable(variable),

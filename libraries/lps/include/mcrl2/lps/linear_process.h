@@ -52,7 +52,7 @@ class linear_process
     {}
 
     /// \brief Constructor.
-    linear_process(data::variable_list process_parameters,
+    linear_process(const data::variable_list& process_parameters,
         const deadlock_summand_vector& deadlock_summands,
         const action_summand_vector& action_summands
        )

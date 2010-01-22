@@ -93,7 +93,7 @@ class pbes_expression: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
-namespace temp {
+namespace traversal {
 //--- start generated expression classes ---//
 /// \brief The value true for pbes expressions
 class true_: public pbes_expression
@@ -294,7 +294,7 @@ class exists: public pbes_expression
     }
 };
 //--- end generated expression classes ---//
-} // namespace temp
+} // namespace traversal
 
 /// \brief The namespace for predicates on pbes expressions.
 namespace pbes_expr {

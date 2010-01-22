@@ -57,9 +57,9 @@ def generate_classes(text, superclass):
     for c in classes:
         (aterm, constructor, description) = c
         f = FunctionDeclaration(constructor)
-        classname = f.name()
-        if classname.find('::') != -1:
+        if f.qualified_name().find('::') != -1:
             continue
+        classname = f.name()
         print 'generating class', classname
 
         member_functions = f.class_member_functions()

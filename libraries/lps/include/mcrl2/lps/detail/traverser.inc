@@ -10,96 +10,80 @@
 /// \brief The content of this file is included in other header
 /// files, to prevent duplication.
 
-      /// \brief Traverses an action label
-      void operator()(const action_label& l)
-      {
-        static_cast<Derived&>(*this).enter(l);
-        static_cast<Derived&>(*this)(l.name());
-        static_cast<Derived&>(*this).leave(l);
-      }
+//--- start generated code ---//
+void operator()(const action_label& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.sorts());
+  static_cast<Derived&>(*this).leave(x);
+}
 
-      /// \brief Traverses an action
-      /// \param a An action
-      void operator()(const action& a)
-      {
-        static_cast<Derived&>(*this).enter(a);
-        static_cast<Derived&>(*this)(a.label());
-        static_cast<Derived&>(*this)(a.arguments());
-        static_cast<Derived&>(*this).leave(a);
-      }
+void operator()(const action& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.label());
+  static_cast<Derived&>(*this)(x.arguments());
+  static_cast<Derived&>(*this).leave(x);
+}
 
-      /// \brief Traverses a deadlock
-      /// \param d A deadlock
-      void operator()(const deadlock& d)
-      {
-        static_cast<Derived&>(*this).enter(d);
-        if (d.has_time()) {
-          static_cast<Derived&>(*this)(d.time());
-        }
-        static_cast<Derived&>(*this).leave(d);
-      }
+void operator()(const deadlock& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  if (x.has_time()) static_cast<Derived&>(*this)(x.time());;
+  static_cast<Derived&>(*this).leave(x);
+}
 
-      /// \brief Traverses a multi-action
-      /// \param a A multi-action
-      void operator()(const multi_action& a)
-      {
-        static_cast<Derived&>(*this).enter(a);
-        if (a.has_time()) {
-          static_cast<Derived&>(*this)(a.time());
-        }
-        static_cast<Derived&>(*this)(a.actions());
-        static_cast<Derived&>(*this).leave(a);
-      }
+void operator()(const multi_action& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.actions());
+  if (x.has_time()) static_cast<Derived&>(*this)(x.time());;
+  static_cast<Derived&>(*this).leave(x);
+}
 
-      /// \brief Traverses a summand
-      /// \param s A summand
-      void operator()(const action_summand& s)
-      {
-        static_cast<Derived&>(*this).enter(s);
-        static_cast<Derived&>(*this)(s.summation_variables());
-        static_cast<Derived&>(*this)(s.condition());
-        static_cast<Derived&>(*this)(s.multi_action());
-        static_cast<Derived&>(*this)(s.assignments());
-        static_cast<Derived&>(*this).leave(s);
-      }
+void operator()(const deadlock_summand& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.summation_variables());
+  static_cast<Derived&>(*this)(x.condition());
+  static_cast<Derived&>(*this)(x.deadlock());
+  static_cast<Derived&>(*this).leave(x);
+}
 
-      /// \brief Traverses a summand
-      /// \param s A summand
-      void operator()(const deadlock_summand& s)
-      {
-        static_cast<Derived&>(*this).enter(s);
-        static_cast<Derived&>(*this)(s.summation_variables());
-        static_cast<Derived&>(*this)(s.condition());
-        static_cast<Derived&>(*this)(s.deadlock());
-        static_cast<Derived&>(*this).leave(s);
-      }
+void operator()(const action_summand& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.summation_variables());
+  static_cast<Derived&>(*this)(x.condition());
+  static_cast<Derived&>(*this)(x.multi_action());
+  static_cast<Derived&>(*this)(x.assignments());
+  static_cast<Derived&>(*this).leave(x);
+}
 
-      /// \brief Traverses a process_initializer
-      /// \param s A process_initializer
-      void operator()(const process_initializer& i)
-      {
-        static_cast<Derived&>(*this).enter(i);
-        static_cast<Derived&>(*this)(i.assignments());
-        static_cast<Derived&>(*this).leave(i);
-      }
+void operator()(const process_initializer& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.assignments());
+  static_cast<Derived&>(*this).leave(x);
+}
 
-      /// \brief Traverses a linear_process
-      /// \param s A linear_process
-      void operator()(const linear_process& p) {
-        static_cast<Derived&>(*this).enter(p);
-        static_cast<Derived&>(*this)(p.process_parameters());
-        static_cast<Derived&>(*this)(p.action_summands());
-        static_cast<Derived&>(*this)(p.deadlock_summands());
-        static_cast<Derived&>(*this).leave(p);
-      }
+void operator()(const linear_process& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.process_parameters());
+  static_cast<Derived&>(*this)(x.deadlock_summands());
+  static_cast<Derived&>(*this)(x.action_summands());
+  static_cast<Derived&>(*this).leave(x);
+}
 
-      /// \brief Traverses a linear process specification
-      /// \param spec A linear process specification
-      void operator()(const specification& spec) {
-        static_cast<Derived&>(*this).enter(spec);
-        static_cast<Derived&>(*this)(spec.process());
-        static_cast<Derived&>(*this)(spec.global_variables());
-        static_cast<Derived&>(*this)(spec.initial_process());
-        static_cast<Derived&>(*this)(spec.action_labels());
-        static_cast<Derived&>(*this).leave(spec);
-      }
+void operator()(const specification& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.action_labels());
+  static_cast<Derived&>(*this)(x.global_variables());
+  static_cast<Derived&>(*this)(x.process());
+  static_cast<Derived&>(*this)(x.initial_process());
+  static_cast<Derived&>(*this).leave(x);
+}
+//--- end generated code ---//

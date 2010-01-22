@@ -11,21 +11,13 @@
 
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/find.h"
+//#include "mcrl2/pbes/find1.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
-
-std::string test1 =
-  "pbes                                                                   \n"
-  "                                                                       \n"
-  "nu X(b:Bool, n:Nat) = (val(b) => X(!b, n)) && (val(!b) => X(!b, n+1)); \n"
-  "mu Y(c:Nat, d:Bool) = forall m:Nat. Y(c, true) || X(d, m);             \n"
-  "                                                                       \n"
-  "init X(true, 0);                                                       \n"
-  ;
 
 template <typename VariableSet>
 void print_variable_set(const VariableSet& s, std::string msg = "variables: ")
@@ -38,8 +30,17 @@ void print_variable_set(const VariableSet& s, std::string msg = "variables: ")
   std::cout << std::endl;
 }
 
-void test_find()
+void test_find_free_variables()
 {
+  std::string test1 =
+    "pbes                                                                   \n"
+    "                                                                       \n"
+    "nu X(b:Bool, n:Nat) = (val(b) => X(!b, n)) && (val(!b) => X(!b, n+1)); \n"
+    "mu Y(c:Nat, d:Bool) = forall m:Nat. Y(c, true) || X(d, m);             \n"
+    "                                                                       \n"
+    "init X(true, 0);                                                       \n"
+    ;
+
   pbes<> p = txt2pbes(test1);
 
   std::set<data::variable> v = find_free_variables(p);
@@ -69,7 +70,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_find();
+  test_find_free_variables();
 
   return 0;
 }
