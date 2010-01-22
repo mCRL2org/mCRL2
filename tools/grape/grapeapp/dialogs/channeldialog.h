@@ -29,7 +29,7 @@ namespace grape
     /**
      * \short A class showing a dialog with two explaining text and text fields
      */
-    class grape_channel_dlg : protected wxDialog
+    class grape_channel_dlg : public wxDialog
     {
       private:
         wxTextCtrl       *m_name_input;         /**< The name field shown in the dialog. */

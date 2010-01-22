@@ -22,7 +22,7 @@ namespace grape
     /**
      * \short A class showing a dialog with an explaining text and text field (eventually multiline).
      */
-    class grape_text_dlg : protected wxDialog
+    class grape_text_dlg : public wxDialog
     {
       private:
         wxTextCtrl *m_input; /**< The input field shown in the dialog. */

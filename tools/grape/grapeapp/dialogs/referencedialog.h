@@ -36,7 +36,7 @@ namespace grape
     /**
      * \short A class showing a dialog with a combobox and text edit.
      */
-    class grape_reference_dialog : protected wxDialog
+    class grape_reference_dialog : public wxDialog
     {
       private:
         grape_frame   *m_main_frame;          /**< Pointer to the main frame. */
