@@ -165,7 +165,7 @@ struct MYEXPRESSION_builder<void>
 EXPRESSION_VISITOR_NODE_TEXT = r'''
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual bool visit_NODE(const NODE& xEXTRA_ARG)
+  virtual bool visit_NODE(const QUALIFIED_NODE& xEXTRA_ARG)
   {
     return continue_recursion;
   }
@@ -178,7 +178,7 @@ EXPRESSION_VISITOR_NODE_TEXT = r'''
 EXPRESSION_BUILDER_NODE_TEXT = r'''              
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual MYEXPRESSION visit_NODE(const NODE& xEXTRA_ARG)
+  virtual MYEXPRESSION visit_NODE(const QUALIFIED_NODE& xEXTRA_ARG)
   {
     return MYEXPRESSION();
   }
@@ -201,11 +201,14 @@ def make_expression_visitor(filename, expression, text):
         f = FunctionDeclaration(constructor)
 
         node = f.name()
+        qualified_node = f.qualified_name()
+        print 'generating visit function for class', node
         types = [p.type() for p in f.parameters()]
         names = [p.name() for p in f.parameters()]
         arguments = f.argument_text()
 
         text = EXPRESSION_VISITOR_NODE_TEXT
+        text = re.sub('QUALIFIED_NODE', qualified_node, text)
         text = re.sub('NODE', node, text)
         vtext = vtext + text
     
@@ -271,12 +274,14 @@ def make_expression_builder(filename, expression, text):
         f = FunctionDeclaration(constructor)
 
         node = f.name()
+        qualified_node = f.qualified_name()
         types = [p.type() for p in f.parameters()]
         names = [p.name() for p in f.parameters()]
         arguments = f.argument_text()
 
         text = EXPRESSION_BUILDER_NODE_TEXT
         text = re.sub('MYEXPRESSION', expression, text)
+        text = re.sub('QUALIFIED_NODE', qualified_node, text)
         text = re.sub('NODE', node, text)
         vtext = vtext + text
     

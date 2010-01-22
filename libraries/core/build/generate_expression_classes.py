@@ -58,6 +58,9 @@ def generate_classes(text, superclass):
         (aterm, constructor, description) = c
         f = FunctionDeclaration(constructor)
         classname = f.name()
+        if classname.find('::') != -1:
+            continue
+        print 'generating class', classname
 
         member_functions = f.class_member_functions()
         mtext = '\n\n'.join(member_functions)

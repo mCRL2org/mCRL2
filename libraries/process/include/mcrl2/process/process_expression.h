@@ -72,34 +72,6 @@ using lps::action;
   };
 
 //--- start generated expression classes ---//
-/// \brief An action
-class process_action: public process_expression
-{
-  public:
-    /// \brief Constructor.
-    /// \param term A term
-    process_action(atermpp::aterm_appl term)
-      : process_expression(term)
-    {
-      assert(core::detail::check_term_Action(m_term));
-    }
-
-    /// \brief Constructor.
-    process_action(const lps::action_label& label, const data::data_expression_list& arguments)
-      : process_expression(core::detail::gsMakeAction(label, arguments))
-    {}
-
-    lps::action_label label() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    data::data_expression_list arguments() const
-    {
-      return atermpp::list_arg2(*this);
-    }
-};
-
 /// \brief A process
 class process_instance: public process_expression
 {
@@ -620,11 +592,11 @@ class choice: public process_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a process_action expression
+    /// \brief Test for a action expression
     /// \param t A term
-    /// \return True if it is a process_action expression
+    /// \return True if it is a action expression
     inline
-    bool is_process_action(const process_expression& t)
+    bool is_action(const process_expression& t)
     {
       return core::detail::gsIsAction(t);
     }

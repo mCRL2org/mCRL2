@@ -46,15 +46,15 @@ struct process_expression_visitor
   virtual ~process_expression_visitor()
   { }
 
-  /// \brief Visit process_action node
+  /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual bool visit_process_action(const process_action& x, Arg& /* a */)
+  virtual bool visit_action(const lps::action& x, Arg& /* a */)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave process_action node
-  virtual void leave_process_action()
+  /// \brief Leave action node
+  virtual void leave_action()
   {}
 
   /// \brief Visit process_instance node
@@ -273,10 +273,10 @@ struct process_expression_visitor
   /// \param a An additional argument for the recursion
   void visit(const process_expression& x, Arg& a)
   {
-    if (is_process_action(x))
+    if (is_action(x))
     {
-      visit_process_action(process_action(x), a);
-      leave_process_action();
+      visit_action(action(x), a);
+      leave_action();
     }
     else if (is_process_instance(x))
     {
@@ -451,15 +451,15 @@ struct process_expression_visitor<void>
   virtual ~process_expression_visitor()
   { }
 
-  /// \brief Visit process_action node
+  /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual bool visit_process_action(const process_action& x)
+  virtual bool visit_action(const lps::action& x)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave process_action node
-  virtual void leave_process_action()
+  /// \brief Leave action node
+  virtual void leave_action()
   {}
 
   /// \brief Visit process_instance node
@@ -678,10 +678,10 @@ struct process_expression_visitor<void>
   /// \param x A term
   void visit(const process_expression& x)
   {
-    if (is_process_action(x))
+    if (is_action(x))
     {
-      visit_process_action(process_action(x));
-      leave_process_action();
+      visit_action(action(x));
+      leave_action();
     }
     else if (is_process_instance(x))
     {

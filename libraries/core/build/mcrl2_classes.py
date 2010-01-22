@@ -35,7 +35,7 @@ ActAt     | at(const action_formula& operand, const data::data_expression& time_
 
 # Terms starting with @ are defined in another library
 PROCESS_EXPRESSION_CLASSES = r'''
-Action            | process_action(const lps::action_label& label, const data::data_expression_list& arguments)                                    | An action
+Action            | lps::action(const lps::action_label& label, const data::data_expression_list& arguments)                                       | An action
 Process           | process_instance(const process_identifier identifier, const data::data_expression_list& actual_parameters)                     | A process
 ProcessAssignment | process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)                    | A process assignment
 Delta             | delta()                                                                                                                        | The value delta
@@ -125,8 +125,13 @@ class FunctionDeclaration:
     # returns the name of the function
     #
     # 'name'
-    def name(self):
+    def qualified_name(self):
         return re.sub('\(.*', '', self.text)
+
+    # returns the unqualified name of the function
+    #
+    def name(self):
+        return re.sub(r'^.*::', '', self.qualified_name())
 
     # returns the argument text of the function
     #

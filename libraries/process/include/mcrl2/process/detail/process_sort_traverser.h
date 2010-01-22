@@ -132,7 +132,7 @@ namespace detail {
 
     /// \brief Visit action node
     /// \return The result of visiting the node
-    bool visit_process_action(const process_action& x)
+    bool visit_action(const lps::action& x)
     {
       traverse(x.label());
       traverse_container(x.arguments());

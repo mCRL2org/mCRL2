@@ -139,7 +139,7 @@ namespace detail {
     /// \param x A process expression
     /// \param l An action label
     /// \param v A sequence of data expressions
-    bool visit_process_action(const process_action& x)
+    bool visit_action(const lps::action& x)
     {
       action a(x.label(), x.arguments());
       m_multi_action = lps::multi_action(a);

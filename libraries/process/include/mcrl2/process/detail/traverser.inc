@@ -73,8 +73,8 @@ void operator()(const rename_expression& x)
 void operator()(const process_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_process_action(x)) {
-    static_cast<Derived&>(*this)(process_action(x));
+  if (is_action(x)) {
+    static_cast<Derived&>(*this)(lps::action(x));
   }
   else if (is_process_instance(x)) {
     static_cast<Derived&>(*this)(process_instance(x));
@@ -136,7 +136,7 @@ void operator()(const process_expression& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const process_action& x)
+void operator()(const lps::action& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.label());
