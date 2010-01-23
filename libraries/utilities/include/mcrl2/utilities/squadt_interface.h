@@ -104,8 +104,6 @@ namespace mcrl2 {
           /** \brief virtual destructor */
           virtual ~tool_interface();
 
-        private:
-
           /** \brief checks for a connection and if so starts the event loop */
           bool try_run();
 

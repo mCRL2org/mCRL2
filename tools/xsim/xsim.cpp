@@ -74,7 +74,7 @@ public:
        std::vector< std::string >(1, "Muck van Weerdenburg"))
     { }
 
-    // Graphical subsystem needs to be initialised first, DoInit starts the application instead of run()
+    // Graphical subsystem needs to be initialised first, run() is the entry point
     bool run()
     {
       XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
@@ -83,15 +83,8 @@ public:
       frame->Show(true);
     
       if (!this->m_input_filename.empty()) 
-      { try
-        { frame->LoadFile(wxString(this->m_input_filename.c_str(), wxConvLocal));
-        }
-        catch(mcrl2::runtime_error e)
-        { wxString mystring(e.what(), wxConvUTF8);
-          wxMessageDialog msg(NULL, mystring ,wxT("Error"),wxOK|wxICON_ERROR); 
-          msg.ShowModal();
-          exit(EXIT_FAILURE);
-        }
+      {
+        frame->LoadFile(wxString(this->m_input_filename.c_str(), wxConvLocal));
       }
     
       instance = this;
@@ -129,7 +122,7 @@ public:
    bool perform_task(tipi::configuration& c) {
      this->m_input_filename = c.get_input("main-input").location();
 
-     return true;
+     return run_and_wait();
    }
 #endif
 };

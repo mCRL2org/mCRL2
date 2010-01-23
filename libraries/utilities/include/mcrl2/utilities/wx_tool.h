@@ -29,6 +29,14 @@
 
 namespace mcrl2 {
   namespace utilities {
+
+    /// \cond INTERNAL_DOCS
+    namespace tools {
+      template < typename Tool >
+      class squadt_tool;
+    }
+    /// \endcond
+
     /**
      * \brief Namespace containing wxWidgets utility functionality
      **/
@@ -63,9 +71,9 @@ namespace mcrl2 {
 
         private:
 
-          bool         m_execute;
+          bool                       m_execute;
 
-          std::string  m_parse_error;
+          std::string                m_parse_error;
 
           std::string                m_tool_name;
           std::string                m_description;
@@ -74,10 +82,28 @@ namespace mcrl2 {
 
         private:
 
+          template < class >
+          struct squadt_initialisation_wrapper;
+
+          bool squadt_specific_run()
+          {
+            return (ToolBase::is_active() && ToolBase::try_run()) || static_cast< Derived& >(*this).run();
+          }
+
+          int squadt_specific_initialisation(int& argc, char* argv[])
+          {
+            int result = ToolBase::initialise(argc, argv);
+
+            m_execute = ToolBase::is_active();
+
+            return result;
+          }
+
           static wxString wx_cast(std::string const& source) {
             return wxString(source.c_str(), wxConvLocal);
           };
 
+          /// used for signalling that no parse errors have occurred (command line)
           bool pre_run() {
             m_execute = true;
 
@@ -124,7 +150,7 @@ namespace mcrl2 {
               converted_arguments[i] = arguments.back().get();
             }
 
-            return ToolBase::execute(argc, converted_arguments.get());
+            return squadt_initialisation_wrapper< ToolBase >::initialise(*this, argc, converted_arguments.get());
           }
 
           class about_information : public wxAboutDialogInfo {
@@ -219,7 +245,7 @@ namespace mcrl2 {
 
           bool OnInit() {
             if (m_execute) {
-              if (static_cast< Derived& >(*this).run()) {
+              if (squadt_initialisation_wrapper< ToolBase >::run_method(*this)) {
                 if (!m_parse_error.empty()) {
                   wxMessageDialog(GetTopWindow(), wxString(m_parse_error.c_str(), wxConvLocal),
                                      wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
@@ -231,6 +257,16 @@ namespace mcrl2 {
           }
 
         protected:
+
+          /// \brief Wait for user to close the application
+          bool run_and_wait()
+          {
+            static_cast< Derived& >(*this).run();
+
+            MainLoop();
+
+            return true;
+          }
 
           /// \brief Override for wxApp::OnExit
           virtual int OnExit() {
@@ -262,24 +298,35 @@ namespace mcrl2 {
           }
       };
 
-      /// Backward compatibility (temporary measure)
-      /// \deprecated
-      template < typename Derived >
-      class tool< Derived, void > : public tool< Derived, tools::input_tool >
-      {
-        public:
-          bool run() {
-            return static_cast< Derived& >(*this).DoInit();
-          }
+      /// \cond INTERNAL_DOCS
+      template < typename Derived, typename ToolBase >
+      template < typename Tool >
+      struct tool< Derived, ToolBase >::squadt_initialisation_wrapper {
 
-          tool(std::string const& tool_name,
-                      std::string const& description,
-                      std::vector< std::string > const& developers,
-                      std::vector< std::string > const& documenters = std::vector< std::string >()) :
-                          tool< Derived, tools::input_tool >(
-                                   tool_name, "", description, description, developers, "", documenters)
-          { }
+        static bool run_method(tool< Derived, ToolBase >& w) {
+          return w.run();
+        }
+
+        static int initialise(wx::tool< Derived, ToolBase >& w, int& argc, char* argv[])
+        {
+          return static_cast< ToolBase& >(w).execute(argc, argv);
+        }
       };
+
+      template < typename Derived, typename ToolBase >
+      template < typename Tool >
+      struct tool< Derived, ToolBase >::squadt_initialisation_wrapper< tools::squadt_tool< Tool > > {
+
+        static bool run_method(tool< Derived, ToolBase >& w) {
+          return w.squadt_specific_run();
+        }
+
+        static int initialise(wx::tool< Derived, tools::squadt_tool< Tool > >& w, int& argc, char* argv[])
+        {
+          return w.squadt_specific_initialisation(argc, argv);
+        }
+      };
+      /// \endcond
     }
   }
 }

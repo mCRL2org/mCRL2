@@ -145,6 +145,19 @@ namespace mcrl2 {
             mcrl2::core::gsSetCustomMessageHandler(0);
           }
 
+        protected:
+
+          template < typename Char >
+          int initialise(int& argc, Char* argv[])
+          {
+            if (try_interaction(argc, argv))
+            {
+              return EXIT_SUCCESS;
+            }
+
+            return Tool::execute(argc, argv);
+          }
+
         public:
 
           void update_configuration(tipi::configuration& c);
@@ -160,14 +173,14 @@ namespace mcrl2 {
                         const std::string& tool_description,
                         std::string known_issues = ""
                        )
-            : Tool(name, author, what_is, tool_description)
+            : Tool(name, author, what_is, tool_description, known_issues)
           {}
 
           template < typename Char >
           int execute(int& argc, Char* argv[])
           {
             try {
-              if (try_interaction(argc, argv)) {
+              if (try_interaction(argc, argv) && try_run()) {
                 return EXIT_SUCCESS;
               }
 

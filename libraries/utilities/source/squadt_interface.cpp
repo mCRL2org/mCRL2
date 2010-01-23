@@ -128,7 +128,7 @@ namespace mcrl2 {
 
         active = m_communicator->activate(av);
 
-        return try_run();
+        return active;
       }
 
       /**
@@ -179,7 +179,7 @@ namespace mcrl2 {
                 if (AEProcessAppleEvent(&initial_apple_event_record) == noErr) {
                   if (argv) {
                     if (active = m_communicator->activate(argv)) {
-                      return try_run();
+                      return active;
                     }
                   }
                 }
@@ -191,11 +191,11 @@ namespace mcrl2 {
         }
 #endif
 
-        return try_run();
+        return active;
       }
 
       bool tool_interface::is_active() const {
-        return (active);
+        return active;
       }
 
       /**
