@@ -87,6 +87,11 @@ class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       okay_button.await_change();
 
+      if (!c.output_exists("main-output")) { 
+        c.add_output("main-output", 
+               tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps")); 
+      } 
+
       // let squadt_tool update configuration for rewriter and input/output files
       update_configuration(c);
     }

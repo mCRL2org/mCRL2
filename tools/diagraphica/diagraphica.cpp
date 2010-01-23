@@ -16,13 +16,12 @@
 #include <wx/wx.h>
 #include <wx/sysopt.h>
 #include <wx/clrpicker.h>
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
-#include "diagraph.h"
-
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
-#include "mcrl2/lts/lts.h"
+#include "diagraph.h"
 
 // windows debug libraries
 #ifdef _MSC_VER

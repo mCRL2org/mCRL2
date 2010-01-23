@@ -50,7 +50,7 @@ const char*  ::squadt_interactor::option_bithashsize          = "bithash_size";
 const char*  ::squadt_interactor::option_init_tsize           = "init_tsize";
 
 const char*  ::squadt_interactor::lps_file_for_input          = "main-input";
-const char*  ::squadt_interactor::lts_file_for_output         = "lts_out";
+const char*  ::squadt_interactor::lts_file_for_output         = "main-output";
 const char*  ::squadt_interactor::trc_file_for_output         = "trc_out";
 
 static bool initialise_types() {

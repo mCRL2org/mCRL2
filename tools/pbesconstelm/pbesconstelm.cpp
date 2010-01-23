@@ -142,13 +142,11 @@ class pbes_constelm_tool: public squadt_tool<pbes_rewriter_tool<rewriter_tool<in
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(c);
 
-/*
       if (!c.output_exists("main-output")) {
         c.add_output("main-output",
                  tipi::mime_type("pbes", tipi::mime_type::application),
                                                  c.get_output_name(".pbes"));
       }
-*/
 
       // Set defaults where the supplied configuration does not have values */
       if (!c.option_exists(option_compute_conditions))

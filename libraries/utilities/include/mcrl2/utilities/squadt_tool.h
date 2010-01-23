@@ -234,11 +234,7 @@ namespace mcrl2 {
 
       template <>
       inline void squadt_tool< input_output_tool >::synchronise_with_configuration(tipi::configuration& c) {
-        if (!c.output_exists("main-output")) {
-          c.add_output("main-output",
-              tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
-        }
-        else {
+        if (c.output_exists("main-output")) {
           input_output_tool::m_output_filename = c.get_output("main-output").location();
         }
 

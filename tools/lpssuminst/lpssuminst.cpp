@@ -41,7 +41,7 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_tau_summands_only    = 0 < parser.options.count("tau");
+      m_tau_summands_only = 0 < parser.options.count("tau");
       m_finite_sorts_only = 0 < parser.options.count("finite");
     }
 
@@ -107,6 +107,10 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         configuration.add_option(option_finite_only).
            set_argument_value< 0 >(true, false);
       }
+      if (!configuration.output_exists("main-output")) {
+        configuration.add_output("main-output",
+           tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
+      }
 
       /* Create display */
       tipi::tool_display d;
@@ -160,7 +164,7 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(configuration);
-
+   
       m_tau_summands_only = configuration.option_exists(option_tau_only);
       m_finite_sorts_only = configuration.option_exists(option_finite_only);
 

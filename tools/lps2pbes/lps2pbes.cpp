@@ -204,17 +204,13 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
       /* Add output file to the configuration */
       if (c.output_exists("main_output")) {
-        tipi::configuration::object& output_file = c.get_output("pbes_out");
+        tipi::configuration::object& output_file = c.get_output("main-output");
 
         output_file.location(c.get_output_name(".pbes"));
       }
       else {
-        if (format_selector.get_selection() == normal) {
-          c.add_output("pbes_out", tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
-        }
-        else {
-          c.add_output("pbes_out", tipi::mime_type("pbes", tipi::mime_type::text), c.get_output_name(".pbes"));
-        }
+          c.add_output("main-output", tipi::mime_type("pbes",
+               (format_selector.get_selection() == normal) ? tipi::mime_type::application : tipi::mime_type::text), c.get_output_name(".pbes"));
       }
 
       c.get_option("use_timed_algorithm").set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
