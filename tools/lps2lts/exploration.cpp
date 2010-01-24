@@ -200,6 +200,13 @@ bool initialise_lts_generation(lts_generation_options *opts)
   return true;
 }
 
+void finalise_lts_generation_when_interrupted(int param)
+{ 
+  finalise_lts_generation();
+  cerr << "Warning: tate space generation was aborted prematurely. \n";
+  exit(1);
+}
+
 bool finalise_lts_generation()
 {
   if ( lg_error )
@@ -1054,7 +1061,7 @@ bool generate_lts()
         if ( (current_state%200) == 0 ) {
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
         }
-        if ( gsVerbose && ((current_state%1000) == 0) )
+        if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
         {
           gsVerboseMsg(
             "monitor: currently explored %llu transition%s and encountered %llu unique state%s.\n",
@@ -1219,7 +1226,7 @@ bool generate_lts()
         if ( (current_state%200) == 0 ) {
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
         }
-        if ( gsVerbose && ((current_state%1000) == 0) )
+        if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
         {
           gsVerboseMsg(
             "monitor: currently explored %llu transition%s and encountered %llu unique state%s [MAX %d].\n",
@@ -1389,7 +1396,7 @@ bool generate_lts()
         if ( (current_state%200) == 0 ) {
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
         }
-        if ( gsVerbose && ((current_state%1000) == 0) )
+        if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
         {
           gsVerboseMsg(
             "monitor: currently explored %llu transition%s and encountered %llu unique state%s.\n",
@@ -1479,7 +1486,7 @@ bool generate_lts()
         if ( (current_state%200) == 0 ) {
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
         }
-        if ( gsVerbose && ((current_state%1000) == 0) )
+        if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
         {
           gsVerboseMsg(
             "monitor: currently at level %lu with %llu state%s and %llu transition%s explored and %llu state%s seen.\n",
@@ -1499,7 +1506,7 @@ bool generate_lts()
             swap_queues();
           }
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
-          if ( gsVerbose )
+          if ( !lgopts->suppress_progress_messages && gsVerbose )
           {
             gsVerboseMsg(
               "monitor: level %lu done. (%llu state%s, %llu transition%s)\n",
@@ -1632,7 +1639,7 @@ bool generate_lts()
           if ( (current_state%200) == 0 ) {
             lgopts->display_status(level,current_state,num_states,num_found_same,trans);
           }
-          if ( gsVerbose && ((current_state%1000) == 0) )
+          if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
           {
             gsVerboseMsg(
               "monitor: currently explored %llu state%s and %llu transition%s.\n",

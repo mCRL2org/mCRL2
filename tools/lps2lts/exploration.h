@@ -63,6 +63,7 @@ struct lts_generation_options {
   int stateformat;
   mcrl2::lts::lts_type outformat;
   bool outinfo;
+  bool suppress_progress_messages;
   boost::uint64_t max_states;
   std::string priority_action;
   bool trace;
@@ -93,6 +94,7 @@ inline lts_generation_options::lts_generation_options() :
     stateformat(GS_STATE_VECTOR),
     outformat(mcrl2::lts::lts_none),
     outinfo(true),
+    suppress_progress_messages(false),
     max_states(DEFAULT_MAX_STATES),
     trace(false),
     num_trace_actions(0),
@@ -121,5 +123,6 @@ const char *expl_strat_to_str(exploration_strategy es);
 bool initialise_lts_generation(lts_generation_options *opts);
 bool generate_lts();
 bool finalise_lts_generation();
+void finalise_lts_generation_when_interrupted(int param);
 
 #endif

@@ -15,6 +15,7 @@
 
 #include <string>
 #include <cassert>
+#include <signal.h>
 #include "aterm2.h"
 #include "boost/cstdint.hpp"
 #include "boost/lexical_cast.hpp"
@@ -107,6 +108,12 @@ class lps2lts_tool : public lps2lts_base
       {
         return false;
       }
+  
+      signal(SIGABRT,finalise_lts_generation_when_interrupted);
+      signal(SIGSEGV,finalise_lts_generation_when_interrupted);
+      signal(SIGINT,finalise_lts_generation_when_interrupted);
+      signal(SIGTERM,finalise_lts_generation_when_interrupted); // At ^C close files properly and
+                                                                // print a progress message.
 
       generate_lts();
 
@@ -166,6 +173,7 @@ class lps2lts_tool : public lps2lts_base
         add_option("out", make_mandatory_argument("FORMAT"),
           "save the output in the specified FORMAT", 'o').
         add_option("no-info", "do not add state information to OUTFILE").
+        add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions").
         add_option("init-tsize", make_mandatory_argument("NUM"),
           "set the initial size of the internally used hash tables (default is 10000)");
     }
@@ -177,9 +185,11 @@ class lps2lts_tool : public lps2lts_base
       options.detect_deadlock = parser.options.count("deadlock");
       options.detect_divergence = parser.options.count("divergence");
       options.outinfo         = parser.options.count("no-info") == 0;
+      options.suppress_progress_messages = parser.options.count("suppress");
       options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
-      if (parser.options.count("dummy")) {
+      if (parser.options.count("dummy")) 
+      {
         if (parser.options.count("dummy") > 1) {
           parser.error("multiple use of option -y/--dummy; only one occurrence is allowed");
         }
@@ -193,7 +203,8 @@ class lps2lts_tool : public lps2lts_base
         }
       }
 
-      if (parser.options.count("state-format")) {
+      if (parser.options.count("state-format")) 
+      {
         if (parser.options.count("state-format") > 1) {
           parser.error("multiple use of option -f/--state-format; only one occurrence is allowed");
         }
@@ -251,6 +262,10 @@ class lps2lts_tool : public lps2lts_base
 
       if ( options.bithashing && options.trace ) {
         parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
+      }
+
+      if (parser.options.count("suppress") && !gsVerbose)
+      { parser.error("option --suppress requires --verbose (of -v)");
       }
 
       if (2 < parser.arguments.size()) {
