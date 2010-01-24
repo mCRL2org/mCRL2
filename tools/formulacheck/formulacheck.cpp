@@ -124,7 +124,8 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
     ///  if infilename is empty, a minimal data specification is returned
     data_specification load_specification(const std::string &infilename)
     {
-      if (!infilename.empty()) {
+      if (!infilename.empty()) 
+      {
         //load data specification from file infilename
         gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
         try {
@@ -180,6 +181,10 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
 
       data_expression formula = parse_data_expression(instream, specification);
       instream.close();
+      
+      std::set<data::sort_expression> s;
+      traverse_sort_expressions(formula, std::inserter(s, s.end()));
+      specification.add_context_sorts(s);
 
       //check formula
       Formula_Checker v_formula_checker(
