@@ -383,7 +383,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
   }
 }
 
-/*
+
 static void save_error_trace(ATerm state)
 {
   if ( lgopts->save_error_trace )
@@ -393,14 +393,19 @@ static void save_error_trace(ATerm state)
     if ( saved_ok )
     {
       lgopts->error_trace_saved = true;
-      gsVerboseMsg("saved trace to error in '%s_error.trc'.\n",const_cast< char* >(basefilename.c_str()));
-    } else {
-      gsVerboseMsg("trace to error could not be saved in '%s_error.trc'.\n",const_cast< char* >(basefilename.c_str()));
+      if (gsVerbose)
+      { cerr << "saved trace to error in '" << basefilename << "_error.trc'.\n";
+      }
+    } 
+    else 
+    {
+      if (gsVerbose) 
+      { cerr << "trace to error could not be saved in '" << basefilename << "_error.trc'.\n";
+      }
     }
-    fflush(stderr);
   }
 }
-*/
+
 
 static void check_deadlocktrace(ATerm state)
 {
@@ -909,23 +914,24 @@ bool generate_lts()
         ATermAppl Transition;
         ATerm NewState;
 
-        nsgen = nstate->getNextStates(state,nsgen);
-        bool priority;
-        while ( nsgen->next(&Transition,&NewState,&priority) )
-        {
-          NewState = get_repr(NewState);
-          if ( !priority ) // don't store confluent self loops
-          { tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
-            tmp_states = ATinsert(tmp_states,NewState);
+        try
+        { nsgen = nstate->getNextStates(state,nsgen);
+          bool priority;
+          while ( nsgen->next(&Transition,&NewState,&priority) )
+          {
+            NewState = get_repr(NewState);
+            if ( !priority ) // don't store confluent self loops
+            { tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
+              tmp_states = ATinsert(tmp_states,NewState);
+            }
           }
         }
-
-        /* if ( nsgen->errorOccurred() )
-        {
+        catch (mcrl2::runtime_error &e)
+        { cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
           break;
-        } */
+        }
 
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
@@ -978,82 +984,90 @@ bool generate_lts()
         ATermAppl Transition;
         ATerm NewState;
         state = ATindexedSetGetElem(states,current_state);
-        nsgen = nstate->getNextStates(state,nsgen);
-        bool priority;
-        while ( nsgen->next(&Transition,&NewState,&priority) )
-        {
-          NewState = get_repr(NewState);
-          if ( !priority ) // don't store confluent self loops
+        try
+        { 
+          nsgen = nstate->getNextStates(state,nsgen);
+          bool priority;
+          while ( nsgen->next(&Transition,&NewState,&priority) )
           {
-            tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
-            tmp_states = ATinsert(tmp_states,NewState);
+            NewState = get_repr(NewState);
+            if ( !priority ) // don't store confluent self loops
+            {
+              tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
+              tmp_states = ATinsert(tmp_states,NewState);
+            }
           }
-        }
 
-        // Filter the transitions by only taking the actions that either have no
-        // positive number as first parameter, or that has the lowest positive number.
-        // This can be non-deterministic, as there can be more actions with this low number
-        // as first parameter.
-        //
-        // First find the lowest index.
+          // Filter the transitions by only taking the actions that either have no
+          // positive number as first parameter, or that has the lowest positive number.
+          // This can be non-deterministic, as there can be more actions with this low number
+          // as first parameter.
+          //
+          // First find the lowest index.
 
-        ATermAppl lowest_first_action_parameter=NULL;
+          ATermAppl lowest_first_action_parameter=NULL;
 
-        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
-                   tmp_trans_walker=ATgetNext(tmp_trans_walker))
-        { ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
-          if (ATgetLength(multi_action_list)==1)
-          { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
-            ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-            ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
-            if (ATgetLength(action_arguments)>0)
-            { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
-              ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
-              if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
-              {
-                if (lowest_first_action_parameter==NULL)
-                { lowest_first_action_parameter=first_argument;
-                }
-                else
-                { ATermAppl result=rewriter(mcrl2::data::greater(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
-                  if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
+          for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
+                     tmp_trans_walker=ATgetNext(tmp_trans_walker))
+          { ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
+            if (ATgetLength(multi_action_list)==1)
+            { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
+              ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
+              ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+              if (ATgetLength(action_arguments)>0)
+              { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
+                ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+                if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
+                {
+                  if (lowest_first_action_parameter==NULL)
                   { lowest_first_action_parameter=first_argument;
                   }
-                  else if (!mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)))
-                  { assert(0);
+                  else
+                  { ATermAppl result=rewriter(mcrl2::data::greater(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                    if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
+                    { lowest_first_action_parameter=first_argument;
+                    }
+                    else if (!mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)))
+                    { assert(0);
+                    }
                   }
                 }
               }
             }
           }
-        }
 
-        // Now carry out the actual filtering;
-        ATermList new_tmp_trans = ATmakeList0();
-        ATermList new_tmp_states = ATmakeList0();
-        ATermList tmp_state_walker = tmp_states;
-        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
-                   tmp_trans_walker=ATgetNext(tmp_trans_walker))
-        { ATermAppl multi_action=(ATermAppl)ATgetFirst(tmp_trans_walker);
-          ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
-          tmp_state_walker=ATgetNext(tmp_state_walker);
-          ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
-          if (ATgetLength(multi_action_list)==1)
-          { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
-            ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-            ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
-            if (ATgetLength(action_arguments)>0)
-            { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
-              ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
-              if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
-              { ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
-                if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
-                { new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
-                  new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+          // Now carry out the actual filtering;
+          ATermList new_tmp_trans = ATmakeList0();
+          ATermList new_tmp_states = ATmakeList0();
+          ATermList tmp_state_walker = tmp_states;
+          for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
+                     tmp_trans_walker=ATgetNext(tmp_trans_walker))
+          { ATermAppl multi_action=(ATermAppl)ATgetFirst(tmp_trans_walker);
+            ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
+            tmp_state_walker=ATgetNext(tmp_state_walker);
+            ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
+            if (ATgetLength(multi_action_list)==1)
+            { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
+              ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
+              ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+              if (ATgetLength(action_arguments)>0)
+              { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
+                ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+                if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
+                { ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                  if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
+                  { new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+                    new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                  }
+                  else
+                  { assert(mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)));
+                    // The transition is omitted!
+                  }
                 }
                 else
-                { assert(mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)));
-                  // The transition is omitted!
+                {
+                  new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+                  new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
                 }
               }
               else
@@ -1068,21 +1082,15 @@ bool generate_lts()
               new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
             }
           }
-          else
-          {
-            new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
-            new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
-          }
+          tmp_trans=ATreverse(new_tmp_trans);
+          tmp_states=ATreverse(new_tmp_states);
         }
-        tmp_trans=ATreverse(new_tmp_trans);
-        tmp_states=ATreverse(new_tmp_states);
-
-        /* if ( nsgen->errorOccurred() )
-        {
+        catch (mcrl2::runtime_error &e)
+        { cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
           break;
-        } */
+        }
 
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
@@ -1139,84 +1147,92 @@ bool generate_lts()
         ATermAppl Transition;
         ATerm NewState;
 
-        // state = ATindexedSetGetElem(states,current_state);
-        nsgen = nstate->getNextStates(state,nsgen);
-        bool priority;
-        while ( nsgen->next(&Transition,&NewState,&priority) )
+        try
         {
-          NewState = get_repr(NewState);
-          if ( !priority ) // don't store confluent self loops
+          // state = ATindexedSetGetElem(states,current_state);
+          nsgen = nstate->getNextStates(state,nsgen);
+          bool priority;
+          while ( nsgen->next(&Transition,&NewState,&priority) )
           {
-            tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
-            tmp_states = ATinsert(tmp_states,NewState);
+            NewState = get_repr(NewState);
+            if ( !priority ) // don't store confluent self loops
+            {
+              tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
+              tmp_states = ATinsert(tmp_states,NewState);
+            }
           }
-        }
-
-        // Filter the transitions by only taking the actions that either have no
-        // positive number as first parameter, or that has the lowest positive number.
-        // This can be non-deterministic, as there can be more actions with this low number
-        // as first parameter.
-        //
-        // First find the lowest index.
-
-        ATermAppl lowest_first_action_parameter=NULL;
-
-        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
-                   tmp_trans_walker=ATgetNext(tmp_trans_walker))
-        { ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
-          if (ATgetLength(multi_action_list)==1)
-          { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
-            ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-            ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
-            if (ATgetLength(action_arguments)>0)
-            { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
-              ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
-              if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
-              {
-                if (lowest_first_action_parameter==NULL)
-                { lowest_first_action_parameter=first_argument;
-                }
-                else
+  
+          // Filter the transitions by only taking the actions that either have no
+          // positive number as first parameter, or that has the lowest positive number.
+          // This can be non-deterministic, as there can be more actions with this low number
+          // as first parameter.
+          //
+          // First find the lowest index.
+  
+          ATermAppl lowest_first_action_parameter=NULL;
+  
+          for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
+                     tmp_trans_walker=ATgetNext(tmp_trans_walker))
+          { ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
+            if (ATgetLength(multi_action_list)==1)
+            { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
+              ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
+              ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+              if (ATgetLength(action_arguments)>0)
+              { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
+                ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+                if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
                 {
-                  ATermAppl result=rewriter(mcrl2::data::greater(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
-                  if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
+                  if (lowest_first_action_parameter==NULL)
                   { lowest_first_action_parameter=first_argument;
                   }
-                  else if (!mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)))
-                  { assert(0);
+                  else
+                  {
+                    ATermAppl result=rewriter(mcrl2::data::greater(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                    if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
+                    { lowest_first_action_parameter=first_argument;
+                    }
+                    else if (!mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)))
+                    { assert(0);
+                    }
                   }
                 }
               }
             }
           }
-        }
-
-        // Now carry out the actual filtering;
-        ATermList new_tmp_trans = ATmakeList0();
-        ATermList new_tmp_states = ATmakeList0();
-        ATermList tmp_state_walker = tmp_states;
-        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
-                   tmp_trans_walker=ATgetNext(tmp_trans_walker))
-        { ATermAppl multi_action=(ATermAppl)ATgetFirst(tmp_trans_walker);
-          ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
-          tmp_state_walker=ATgetNext(tmp_state_walker);
-          ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
-          if (ATgetLength(multi_action_list)==1)
-          { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
-            ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
-            ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
-            if (ATgetLength(action_arguments)>0)
-            { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
-              ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
-              if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
-              { ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
-                if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
-                { new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
-                  new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+  
+          // Now carry out the actual filtering;
+          ATermList new_tmp_trans = ATmakeList0();
+          ATermList new_tmp_states = ATmakeList0();
+          ATermList tmp_state_walker = tmp_states;
+          for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
+                     tmp_trans_walker=ATgetNext(tmp_trans_walker))
+          { ATermAppl multi_action=(ATermAppl)ATgetFirst(tmp_trans_walker);
+            ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
+            tmp_state_walker=ATgetNext(tmp_state_walker);
+            ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
+            if (ATgetLength(multi_action_list)==1)
+            { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
+              ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
+              ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+              if (ATgetLength(action_arguments)>0)
+              { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
+                ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+                if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
+                { ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                  if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
+                  { new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+                    new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                  }
+                  else
+                  {
+                    assert(mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)));
+                  }
                 }
                 else
                 {
-                  assert(mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)));
+                  new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+                  new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
                 }
               }
               else
@@ -1231,30 +1247,24 @@ bool generate_lts()
               new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
             }
           }
+  
+          // Randomly select one element from the list for experiments.
+          if (ATgetLength(new_tmp_trans)>0)
+          { int r = rand()%ATgetLength(new_tmp_trans);
+            tmp_trans=ATgetSlice(new_tmp_trans,r,r+1);
+            tmp_states=ATgetSlice(new_tmp_states,r,r+1);
+          }
           else
-          {
-            new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
-            new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+          { tmp_trans=ATempty;
+            tmp_states=ATempty;
           }
         }
-
-        // Randomly select one element from the list for experiments.
-        if (ATgetLength(new_tmp_trans)>0)
-        { int r = rand()%ATgetLength(new_tmp_trans);
-          tmp_trans=ATgetSlice(new_tmp_trans,r,r+1);
-          tmp_states=ATgetSlice(new_tmp_states,r,r+1);
-        }
-        else
-        { tmp_trans=ATempty;
-          tmp_states=ATempty;
-        }
-
-        /* if ( nsgen->errorOccurred() )
-        {
+        catch (mcrl2::runtime_error &e)
+        { cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
           break;
-        } */
+        }
 
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
@@ -1321,35 +1331,38 @@ bool generate_lts()
         }
         bool deadlockstate = true;
 
-        nsgen = nstate->getNextStates(state,nsgen);
-        ATermAppl Transition;
-        ATerm NewState;
-        bool priority;
-        while ( nsgen->next(&Transition,&NewState,&priority) )
+        try
         {
-          NewState = get_repr(NewState);
-          if ( !priority ) // don't store confluent self loops
+          nsgen = nstate->getNextStates(state,nsgen);
+          ATermAppl Transition;
+          ATerm NewState;
+          bool priority;
+          while ( nsgen->next(&Transition,&NewState,&priority) )
           {
-            deadlockstate = false;
-            bool b = add_transition(state,Transition,NewState);
-            if ( lgopts->bithashing && b )
+            NewState = get_repr(NewState);
+            if ( !priority ) // don't store confluent self loops
             {
-              ATerm removed_state = add_to_queue(NewState);
-              if ( removed_state != NULL )
+              deadlockstate = false;
+              bool b = add_transition(state,Transition,NewState);
+              if ( lgopts->bithashing && b )
               {
-                remove_state_from_bithash(removed_state);
-                num_states--;
+                ATerm removed_state = add_to_queue(NewState);
+                if ( removed_state != NULL )
+                {
+                  remove_state_from_bithash(removed_state);
+                  num_states--;
+                }
               }
             }
           }
         }
-
-        /* if ( nsgen->errorOccurred() )
-        {
+        catch (mcrl2::runtime_error &e)
+        { cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
           break;
-        } */
+        }
+
         if ( deadlockstate )
         {
           check_deadlocktrace(state);
@@ -1404,7 +1417,7 @@ bool generate_lts()
               }
             }
           }
-    current_state = nextcurrent;
+          current_state = nextcurrent;
           prevcurrent = current_state;
           prevtrans = trans;
         }
@@ -1441,60 +1454,64 @@ bool generate_lts()
         bool add_new_states = (current_state < lgopts->max_states);
         bool state_is_deadlock = !top_trans_seen /* && !nsgen->next(...) */ ;
         bool priority;
-        if ( nsgen->next(&Transition,&NewState,&priority) )
+        try
         {
-          NewState = get_repr(NewState);
-          if ( !priority ) // don't store confluent self loops
+          if ( nsgen->next(&Transition,&NewState,&priority) )
           {
-            top_trans_seen = true;
-            // inv
-            state_is_deadlock = false;
-            if ( add_transition(state,Transition,NewState) )
+            NewState = get_repr(NewState);
+            if ( !priority ) // don't store confluent self loops
             {
-              if ( add_new_states )
+              top_trans_seen = true;
+              // inv
+              state_is_deadlock = false;
+              if ( add_transition(state,Transition,NewState) )
               {
-                new_state = true;
-                if ( (nsgens_num == nsgens_size) && (nsgens_size < lgopts->todo_max) )
+                if ( add_new_states )
                 {
-                  nsgens_size = nsgens_size*2;
-                  if ( nsgens_size > lgopts->todo_max )
+                  new_state = true;
+                  if ( (nsgens_num == nsgens_size) && (nsgens_size < lgopts->todo_max) )
                   {
-                    nsgens_size = lgopts->todo_max;
+                    nsgens_size = nsgens_size*2;
+                    if ( nsgens_size > lgopts->todo_max )
+                    {
+                      nsgens_size = lgopts->todo_max;
+                    }
+                    nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
+                    if ( nsgens == NULL )
+                    {
+                      gsErrorMsg("cannot enlarge state stack\n");
+                      exit(1);
+                    }
+                    for (unsigned long i=nsgens_num; i<nsgens_size; i++)
+                    {
+                      nsgens[i] = NULL;
+                    }
                   }
-                  nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
-                  if ( nsgens == NULL )
+                  if ( nsgens_num < nsgens_size )
                   {
-                    gsErrorMsg("cannot enlarge state stack\n");
-                    exit(1);
+                    nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
+                    nsgens_num++;
+                    top_trans_seen = false;
+                    // inv
                   }
-                  for (unsigned long i=nsgens_num; i<nsgens_size; i++)
-                  {
-                    nsgens[i] = NULL;
-                  }
-                }
-                if ( nsgens_num < nsgens_size )
-                {
-                  nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
-                  nsgens_num++;
-                  top_trans_seen = false;
-                  // inv
                 }
               }
             }
+          } else {
+            nsgens_num--;
+            top_trans_seen = true;
+            // inv
           }
-        } else {
-          nsgens_num--;
-          top_trans_seen = true;
           // inv
+  
         }
-        // inv
-
-        /* if ( nsgen->errorOccurred() )
-        {
+        catch (mcrl2::runtime_error &e)
+        { cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
           break;
-        } */
+        }
+
         if ( state_is_deadlock )
         {
           check_deadlocktrace(state);
