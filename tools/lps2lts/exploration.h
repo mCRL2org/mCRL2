@@ -70,6 +70,7 @@ struct lts_generation_options {
   ATermAppl *trace_actions;
   unsigned long max_traces;
   bool detect_deadlock;
+  bool detect_divergence;
   bool detect_action;
   bool save_error_trace;
   bool error_trace_saved;
@@ -98,6 +99,7 @@ inline lts_generation_options::lts_generation_options() :
     trace_actions(NULL),
     max_traces(DEFAULT_MAX_TRACES),
     detect_deadlock(false),
+    detect_divergence(false),
     detect_action(false),
     save_error_trace(false),
     error_trace_saved(false),

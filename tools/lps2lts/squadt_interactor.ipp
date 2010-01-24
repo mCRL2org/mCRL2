@@ -34,6 +34,7 @@ const char*  ::squadt_interactor::option_rewrite_strategy     = "rewrite_strateg
 const char*  ::squadt_interactor::option_exploration_strategy = "expl_strat";
 
 const char*  ::squadt_interactor::option_detect_deadlock      = "detect_deadlock";
+const char*  ::squadt_interactor::option_detect_divergence    = "detect_divergence";
 const char*  ::squadt_interactor::option_detect_actions       = "detect_actions";
 const char*  ::squadt_interactor::option_trace                = "trace";
 const char*  ::squadt_interactor::option_max_traces           = "max_traces";
@@ -163,6 +164,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   if (!c.option_exists(option_detect_deadlock)) {
     c.add_option(option_detect_deadlock).set_argument_value< 0 >(false);
   }
+  if (!c.option_exists(option_detect_divergence)) {
+    c.add_option(option_detect_divergence).set_argument_value< 0 >(false);
+  }
   if (!c.option_exists(option_trace)) {
     c.add_option(option_trace).set_argument_value< 0 >(false);
   }
@@ -246,6 +250,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   }
 
   checkbox&       cb_deadlock    = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_detect_deadlock));
+  checkbox&       cb_divergence    = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_detect_divergence));
   checkbox&       cb_actions     = d.create< checkbox >().set_status(c.option_exists(option_detect_actions));
   text_field&     tf_actions     = d.create< text_field >();
   checkbox&       cb_trace       = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_trace));
@@ -263,8 +268,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   m.append(d.create< horizontal_box >().set_default_margins(margins(4,0,5,0)).
       append(d.create< vertical_box >().set_default_alignment(layout::left).set_default_margins(margins(1,0,1,0)).
           append(cb_deadlock.set_label("detect deadlocks")).
+          append(cb_divergence.set_label("detect divergences")).
           append(cb_actions.set_label("detect actions")).
-          append(cb_trace.set_label("save action/deadlock traces, but at most:")).
+          append(cb_trace.set_label("save action/divergence/deadlock traces; at most:")).
           append(cb_error_trace.set_label("save trace on error")).
           append(cb_confluence.set_label("confluence reduction with confluent tau:")).
           append(cb_max_states.set_label("maximum number of states")).
@@ -323,6 +329,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   c.get_option(option_rewrite_strategy).set_argument_value< 0 >(rewrite_strategy_selector.get_selection());
   c.get_option(option_exploration_strategy).set_argument_value< 0 >(exploration_strategy_selector.get_selection());
   c.add_option(option_detect_deadlock).set_argument_value< 0 >(cb_deadlock.get_status());
+  c.add_option(option_detect_divergence).set_argument_value< 0 >(cb_divergence.get_status());
 
   if (cb_actions.get_status() && !tf_actions.get_text().empty()) {
     c.add_option(option_detect_actions).set_argument_value< 0 >(tf_actions.get_text());
@@ -469,6 +476,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   lgopts.expl_strat = configuration.get_option_argument< exploration_strategy >(option_exploration_strategy);
 
   lgopts.detect_deadlock  = configuration.get_option_argument< bool >(option_detect_deadlock);
+  lgopts.detect_divergence  = configuration.get_option_argument< bool >(option_detect_divergence);
 
   if (configuration.option_exists(option_detect_actions)) {
     lgopts.detect_action = true;

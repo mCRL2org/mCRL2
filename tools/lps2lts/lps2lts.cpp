@@ -142,11 +142,13 @@ class lps2lts_tool : public lps2lts_base
           "states per level, and for depth first, where NUM is the maximum depth").
         add_option("deadlock",
           "detect deadlocks (i.e. for every deadlock a message is printed)", 'D').
+        add_option("divergence",
+          "detect divergences (i.e. for every state with a divergence (=tau loop) a message is printed).", 'F').
         add_option("action", make_mandatory_argument("NAMES"),
           "detect actions from NAMES, a comma-separated list of action names; a message "
           "is printed for every occurrence of one of these action names", 'a').
         add_option("trace", make_optional_argument("NUM", boost::lexical_cast<string>(DEFAULT_MAX_TRACES)),
-          "write at most NUM traces to states detected with the --deadlock or --action "
+          "write at most NUM traces to states detected with the --deadlock, --divergence or --action "
           "options (default is unlimited)", 't').
         add_option("error-trace",
           "if an error occurs during exploration, save a trace to the state that could "
@@ -173,6 +175,7 @@ class lps2lts_tool : public lps2lts_base
       lps2lts_base::parse_options(parser);
       options.removeunused    = parser.options.count("unused-data") == 0;
       options.detect_deadlock = parser.options.count("deadlock");
+      options.detect_divergence = parser.options.count("divergence");
       options.outinfo         = parser.options.count("no-info") == 0;
       options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
@@ -294,6 +297,7 @@ class lps2lts_tool : public lps2lts_base
     static const char*  option_exploration_strategy;
 
     static const char*  option_detect_deadlock;
+    static const char*  option_detect_divergence;
     static const char*  option_detect_actions;
     static const char*  option_trace;
     static const char*  option_max_traces;

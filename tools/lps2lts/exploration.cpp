@@ -166,8 +166,18 @@ bool initialise_lts_generation(lts_generation_options *opts)
     gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",lgopts->priority_action.c_str());
     nstate->prioritise(lgopts->priority_action.c_str());
     initialise_representation(true);
-  } else {
+  } 
+  else 
+  {
     initialise_representation(false);
+  }
+
+  if ( lgopts->detect_deadlock && gsVerbose)
+  { cerr << "Detect deadlocks.";
+  }
+
+  if ( lgopts->detect_divergence && gsVerbose)
+  { cerr << "Detect divergences with tau action is `" << lgopts->priority_action << "'.\n";
   }
 
   num_states = 0;
@@ -375,7 +385,9 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
           fflush(stderr);
         }
         tracecnt++;
-      } else {
+      } 
+      else 
+      {
         gsMessage("detect: action '%P' found.\n",Transition);
         fflush(stderr);
       }
@@ -422,16 +434,19 @@ static void check_deadlocktrace(ATerm state)
       {
         if ( saved_ok )
         {
-          gsMessage("deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",const_cast< char* >(basefilename.c_str()),tracecnt);
-        } else {
-          gsMessage("deadlock-detect: deadlock found, but could not be saved to '%s_dlk_%lu.trc'.\n",const_cast< char* >(basefilename.c_str()),tracecnt);
+          cerr << "deadlock-detect: deadlock found and saved to '" << basefilename << "_dlk_" << tracecnt << ".trc'.\n";
+        } 
+        else 
+        {
+          cerr << "deadlock-detect: deadlock found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << ".trc'.\n";
         }
         fflush(stderr);
       }
       tracecnt++;
-    } else  {
-      gsMessage("deadlock-detect: deadlock found.\n");
-      fflush(stderr);
+    } 
+    else  
+    {
+      cerr << "deadlock-detect: deadlock found.";
     }
   }
 }
@@ -466,6 +481,10 @@ static void initialise_representation(bool confluence_reduction)
     repr_back = ATtableCreate(1000,50);
     repr_nsgen = NULL;
   }
+  else if ( lgopts->detect_divergence )
+  { repr_visited = ATindexedSetCreate(1000,50);
+    lgopts->priority_action = "tau";
+  }
 }
 
 static void cleanup_representation()
@@ -478,6 +497,70 @@ static void cleanup_representation()
     ATtableDestroy(repr_low);
     ATtableDestroy(repr_number);
     ATindexedSetDestroy(repr_visited);
+  }
+}
+
+static void check_divergence(ATerm state) 
+{
+  if ( lgopts->detect_divergence )
+  {
+    ATerm v = state;
+    ATindexedSetReset(repr_visited);
+    ATbool b;
+    ATindexedSetPut(repr_visited,v,&b);
+    int num_visited = 1;
+    int num_explored = 0;
+    bool divergence_found=false;
+  
+    while ( !divergence_found && num_explored < num_visited )
+    { 
+      num_explored++;
+      repr_nsgen = nstate->getNextStates(v,repr_nsgen);
+      ATermAppl Transition;
+      ATerm NewState;
+      while ( repr_nsgen->next(&Transition,&NewState))
+      { 
+        if ((ATermList)ATgetArgument(Transition,0)==ATempty) // This is a tau transition.
+        { ATbool b;
+          ATindexedSetPut(repr_visited,NewState,&b);
+          if ( b == ATtrue )
+          {
+            num_visited++;
+          }
+          else  
+          { divergence_found=true;
+          }
+        }
+      }
+    }
+    
+    if ( divergence_found)
+    { 
+      if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
+      {
+        std::ostringstream ss;
+        ss << "divergence_" << tracecnt;
+        string sss(ss.str());
+        bool saved_ok = savetrace(sss,state,nstate);
+  
+        if ( lgopts->detect_divergence || gsVerbose )
+        {
+          if ( saved_ok )
+          {
+            cerr << "divergence-detect: divergence found and saved to '" << basefilename << "_dlk_" << tracecnt << ".trc'.\n";
+          } 
+          else 
+          {
+            cerr << "divergence-detect: divergence found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << ".trc'.\n";
+          }
+        }
+        tracecnt++;
+      } 
+      else  
+      {
+        cerr << "divergence-detect: divergence found.\n";
+      }
+    }
   }
 }
 
@@ -914,6 +997,8 @@ bool generate_lts()
         ATermAppl Transition;
         ATerm NewState;
 
+        check_divergence(state);
+
         try
         { nsgen = nstate->getNextStates(state,nsgen);
           bool priority;
@@ -949,7 +1034,9 @@ bool generate_lts()
             tmp_states = ATgetNext(tmp_states);
           }
           state = new_state;
-        } else {
+        } 
+        else 
+        {
           check_deadlocktrace(state);
           break;
         }
@@ -971,7 +1058,8 @@ bool generate_lts()
       }
       lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
-    } else if ( lgopts->expl_strat == es_value_prioritized )
+    } 
+    else if ( lgopts->expl_strat == es_value_prioritized )
     {
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator *nsgen = NULL;
@@ -984,6 +1072,7 @@ bool generate_lts()
         ATermAppl Transition;
         ATerm NewState;
         state = ATindexedSetGetElem(states,current_state);
+        check_divergence(state);
         try
         { 
           nsgen = nstate->getNextStates(state,nsgen);
@@ -1135,7 +1224,8 @@ bool generate_lts()
       }
       lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
-    } else if ( lgopts->expl_strat == es_value_random_prioritized )
+    } 
+    else if ( lgopts->expl_strat == es_value_random_prioritized )
     {
       srand((unsigned)time(NULL)+getpid());
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
@@ -1146,6 +1236,8 @@ bool generate_lts()
         ATermList tmp_states = ATmakeList0();
         ATermAppl Transition;
         ATerm NewState;
+
+        check_divergence(state);
 
         try
         {
@@ -1301,7 +1393,8 @@ bool generate_lts()
       }
       lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
-    } else if ( lgopts->expl_strat == es_breadth )
+    } 
+    else if ( lgopts->expl_strat == es_breadth )
     {
       NextStateGenerator *nsgen = NULL;
       boost::uint64_t limit = lgopts->max_states;
@@ -1326,9 +1419,14 @@ bool generate_lts()
         {
           state = get_from_queue();
           assert(state != NULL);
-        } else {
+        } 
+        else 
+        {
           state = ATindexedSetGetElem(states,current_state);
         }
+
+        check_divergence(state);
+
         bool deadlockstate = true;
 
         try
@@ -1424,7 +1522,8 @@ bool generate_lts()
       }
       lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
-    } else if ( lgopts->expl_strat == es_depth )
+    } 
+    else if ( lgopts->expl_strat == es_depth )
     {
       unsigned long nsgens_size = (lgopts->todo_max<128)?lgopts->todo_max:128;
       NextStateGenerator **nsgens = (NextStateGenerator **) malloc(nsgens_size*sizeof(NextStateGenerator *));
@@ -1448,6 +1547,7 @@ bool generate_lts()
       {
         NextStateGenerator *nsgen = nsgens[nsgens_num-1];
         state = nsgen->get_state();
+        check_divergence(state);
         ATermAppl Transition;
         ATerm NewState;
         bool new_state = false;
@@ -1541,7 +1641,9 @@ bool generate_lts()
       {
         delete nsgens[i];
       }
-    } else {
+    } 
+    else 
+    {
       gsErrorMsg("unknown exploration strategy\n");
     }
   }
