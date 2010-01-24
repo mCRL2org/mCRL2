@@ -320,12 +320,6 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
     { delete nsgen;
       throw e;
     }
-    /* if ( nsgen->errorOccurred() )
-    {
-      gsErrorMsg("error occurred while reconstructing trace\n");
-      delete nsgen;
-      return false;
-    } */
     tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,s));
     s = ns;
   }
@@ -378,18 +372,30 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         {
           if ( saved_ok )
           {
-            gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",Transition,const_cast< char* >(basefilename.c_str()),tracecnt,lgopts->trace_actions[j]);
-          } else {
-            gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",Transition,const_cast< char* >(basefilename.c_str()),tracecnt,lgopts->trace_actions[j]);
+            gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
+                           Transition,
+                           const_cast< char* >(basefilename.c_str()),
+                           tracecnt,
+                           lgopts->trace_actions[j],
+                           ATindexedSetGetIndex(states,OldState));
+          } 
+          else 
+          {
+            gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
+                           Transition,
+                           const_cast< char* >(basefilename.c_str()),
+                           tracecnt,
+                           lgopts->trace_actions[j],
+                           ATindexedSetGetIndex(states,OldState));
           }
-          fflush(stderr);
         }
         tracecnt++;
       } 
       else 
       {
-        gsMessage("detect: action '%P' found.\n",Transition);
-        fflush(stderr);
+        gsMessage("detect: action '%P' found (state index: %lu).\n",
+                           Transition,
+                           ATindexedSetGetIndex(states,OldState));
       }
     }
   }
@@ -434,19 +440,20 @@ static void check_deadlocktrace(ATerm state)
       {
         if ( saved_ok )
         {
-          cerr << "deadlock-detect: deadlock found and saved to '" << basefilename << "_dlk_" << tracecnt << ".trc'.\n";
+          cerr << "deadlock-detect: deadlock found and saved to '" << basefilename << "_dlk_" << tracecnt << ".trc' (state index: " <<
+                   ATindexedSetGetIndex(states,state) << ").\n";
         } 
         else 
         {
-          cerr << "deadlock-detect: deadlock found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << ".trc'.\n";
+          cerr << "deadlock-detect: deadlock found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << 
+                  ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
         }
-        fflush(stderr);
       }
       tracecnt++;
     } 
     else  
     {
-      cerr << "deadlock-detect: deadlock found.";
+      cerr << "deadlock-detect: deadlock found (state index: " << ATindexedSetGetIndex(states,state) <<  ").";
     }
   }
 }
@@ -547,18 +554,20 @@ static void check_divergence(ATerm state)
         {
           if ( saved_ok )
           {
-            cerr << "divergence-detect: divergence found and saved to '" << basefilename << "_dlk_" << tracecnt << ".trc'.\n";
+            cerr << "divergence-detect: divergence found and saved to '" << basefilename << "_dlk_" << tracecnt << 
+                    ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").";
           } 
           else 
           {
-            cerr << "divergence-detect: divergence found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << ".trc'.\n";
+            cerr << "divergence-detect: divergence found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << 
+                    ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").";
           }
         }
         tracecnt++;
       } 
       else  
       {
-        cerr << "divergence-detect: divergence found.\n";
+        cerr << "divergence-detect: divergence found (state index: " << ATindexedSetGetIndex(states,state) <<  ").";
       }
     }
   }
