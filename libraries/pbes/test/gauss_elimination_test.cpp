@@ -173,7 +173,7 @@ void test_abp()
   bool timed = false;
   std::string FORMULA = "[true*]<true*>true";
   lps::specification spec = lps::linearise(ABP_SPECIFICATION);
-  state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(FORMULA, spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
 
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   int result = pbes_system::gauss_elimination(p);

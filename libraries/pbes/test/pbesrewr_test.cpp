@@ -24,7 +24,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/detail/algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -93,7 +93,7 @@ void test_pbesrewr1()
 void test_pbesrewr2()
 {
   lps::specification spec = lps::linearise(ABP_SPECIFICATION);
-  state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(NO_DEADLOCK, spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(NO_DEADLOCK, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());

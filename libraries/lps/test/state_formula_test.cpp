@@ -15,7 +15,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
-#include "mcrl2/modal_formula/detail/algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
@@ -31,7 +31,6 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::state_formulas;
-using namespace mcrl2::state_formulas::detail;
 
 const std::string SPECIFICATION =
 "act a:Nat;                              \n"
@@ -333,7 +332,7 @@ void test_rename()
   std::cerr << "test_rename";
   specification spec    = linearise(SPECIFICATION);
 
-  state_formula formula = mcf2statefrm("(mu X. X) && (mu X. X)", spec);
+  state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
   set_identifier_generator generator;
   generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
   formula = rename_predicate_variables(formula, generator);
@@ -342,7 +341,7 @@ void test_rename()
 
   generator = set_identifier_generator();
   generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
-  formula = mcf2statefrm("mu X. mu X. X", spec);
+  formula = parse_state_formula("mu X. mu X. X", spec);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
@@ -380,8 +379,8 @@ void test_normalize()
 
 /* this takes too much time with linearise...
   specification model = linearise(MODEL);
-  state_formula req1_1 = mcf2statefrm(REQ1_1, model);
-  state_formula req1_2 = mcf2statefrm(REQ1_2, model);
+  state_formula req1_1 = parse_state_formula(REQ1_1, model);
+  state_formula req1_2 = parse_state_formula(REQ1_2, model);
   state_formula q1 = normalize(req1_1);
   state_formula q2 = normalize(req1_2);
   state_formula r1 = normalize(req1_1);
@@ -400,7 +399,7 @@ void test_type_checking()
     "init a([d]);"
   );
 
-  state_formula formula = mcf2statefrm("<a([d])>true", context);
+  state_formula formula = parse_state_formula("<a([d])>true", context);
 
   std::cerr << "Hier\n";
   BOOST_CHECK(is_may(formula));

@@ -20,6 +20,7 @@
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -98,7 +99,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (!instream.is_open()) {
         throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
       }
-      state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(instream, spec);
+      state_formulas::state_formula formula = state_formulas::parse_state_formula(instream, spec);
       instream.close();
       //convert formula and LPS to a PBES
       gsVerboseMsg("converting state formula and LPS to a PBES...\n");

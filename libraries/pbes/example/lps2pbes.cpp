@@ -25,7 +25,6 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::state_formulas;
-using namespace mcrl2::state_formulas::detail;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 
@@ -38,7 +37,7 @@ int main(int argc, char* argv[])
   string pbes_file(argv[3]); // resulting pbes file
 
   specification spec = linearise(core::read_text(spec_file));
-  state_formula sf = mcf2statefrm(core::read_text(mcf_file), spec);
+  state_formula sf = parse_state_formula(core::read_text(mcf_file), spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, sf, timed);
   p.save(pbes_file);

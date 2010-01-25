@@ -13,7 +13,7 @@
 #define MCRL2_PBES_LPS2PBES_H
 
 #include <string>
-#include "mcrl2/modal_formula/detail/algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_translate.h"
@@ -44,7 +44,7 @@ namespace pbes_system {
   {
     pbes<> result;
     lps::specification spec = lps::linearise(spec_text);
-    state_formulas::state_formula f = state_formulas::detail::mcf2statefrm(formula_text, spec);
+    state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
     return lps2pbes(spec, f, timed);
   }
 

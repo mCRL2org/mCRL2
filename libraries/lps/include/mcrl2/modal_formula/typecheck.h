@@ -26,7 +26,7 @@ namespace state_formulas {
      *  \post      formula is type checked.
      **/
     inline
-    void type_check_unknown_formula(atermpp::aterm_appl& formula, const lps::specification& lps_spec)
+    void type_check(state_formula& formula, const lps::specification& lps_spec)
     {
       // TODO: replace all this nonsense code by a proper type check implementation
       ATermAppl t = core::type_check_state_frm(formula, specification_to_aterm(lps_spec));

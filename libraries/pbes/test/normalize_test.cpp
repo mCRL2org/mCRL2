@@ -15,7 +15,7 @@
 #include "mcrl2/core/detail/test_operation.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/modal_formula/detail/algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/normalize.h"
@@ -113,7 +113,7 @@ void test_normalize2()
 {
   // test case from Aad Mathijssen, 2/11/2008
   lps::specification spec       = lps::linearise("init tau + tau;");
-  state_formulas::state_formula formula  = state_formulas::detail::mcf2statefrm("nu X. [true]X", spec);
+  state_formulas::state_formula formula  = state_formulas::parse_state_formula("nu X. [true]X", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   p.normalize();
@@ -127,7 +127,7 @@ void test_normalize3()
     "proc P = tau.P;\n"
     "init P;        \n"
   );
-  state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm("![true*]<true>true", spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   p.normalize();

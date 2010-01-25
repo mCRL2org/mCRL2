@@ -43,7 +43,6 @@ using data::data_expression;
 using data::variable;
 using data::basic_sort;
 using data::multiset_identifier_generator;
-using state_formulas::detail::mcf2statefrm;
 using state_formulas::state_formula;
 using lps::linearise;
 using lps::specification;
@@ -172,7 +171,7 @@ const std::string MPSU_FORMULA =
 void test_pbes()
 {
   specification spec = linearise(SPECIFICATION);
-  state_formula formula = mcf2statefrm(FORMULA2, spec);
+  state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   pbes_expression e = p.equations().front().formula();
@@ -237,7 +236,7 @@ void test_global_variables()
 // void test_pbes_expression_builder()
 // {
 //   specification mpsu_spec = linearise(MPSU_SPECIFICATION);
-//   state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
+//   state_formula mpsu_formula = state_formulas::parse_state_formula(MPSU_FORMULA, mpsu_spec);
 //   bool timed = false;
 //   pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
 //
@@ -317,7 +316,7 @@ void test_pbes_expression()
 void test_trivial()
 {
   specification spec    = linearise(ABP_SPECIFICATION);
-  state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
+  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
@@ -333,7 +332,7 @@ void test_instantiate_global_variables()
   ;
   std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
   specification spec = linearise(spec_text);
-  state_formula formula = mcf2statefrm(formula_text, spec);
+  state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
@@ -347,7 +346,7 @@ void test_traverse_sort_expressions()
   using data::sort_expression;
 
   specification spec    = linearise(ABP_SPECIFICATION);
-  state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
+  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   std::set<sort_expression> s;

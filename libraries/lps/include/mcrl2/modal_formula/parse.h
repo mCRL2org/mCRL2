@@ -14,21 +14,59 @@
 
 #include <iostream>
 #include "mcrl2/core/parse.h"
+#include "mcrl2/core/regfrmtrans.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
+#include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
 
 namespace mcrl2 {
 
 namespace state_formulas {
 
-  /// \brief Reads a state formula from a stream
-  /// \param from An input stream
-  /// \param f A modal formula
-  /// \return The read state formula
+  /// \brief Translates regular formulas appearing in f into action formulas.
+  /// \param f A state formula
   inline
-  std::istream& operator>>(std::istream& from, state_formula& f)
+  void translate_regular_formula(state_formula& f)
   {
-    f = state_formula(core::parse_state_frm(from));
-    return from;
+    ATermAppl result = core::translate_reg_frms(f);
+    if (result == NULL)
+    {
+      throw mcrl2::runtime_error("formula translation error");
+    }
+    f = state_formula(result);
+  }
+
+  /// \brief Parses a state formula from an input stream
+  // spec may be updated as the data implementation of the state formula
+  // may cause internal names to change.
+  /// \param formula_stream A stream from which can be read
+  /// \param spec A linear process specification
+  /// \return The converted modal formula
+  inline
+  state_formula parse_state_formula(std::istream& from, lps::specification& spec)
+  {
+    ATermAppl result = core::parse_state_frm(from);
+    if (result == NULL)
+      throw mcrl2::runtime_error("parse error in parse_state_frm()");
+    state_formula f = result;   
+    type_check(f, spec);
+    translate_regular_formula(f);
+    spec.data().add_context_sorts(data::find_sort_expressions(f)); // Make complete with respect to f
+    f = data::detail::internal_format_conversion(spec.data(), f);
+    return f;
+  }
+
+  /// \brief Parses a state formula from text
+  // spec may be updated as the data implementation of the state formula
+  // may cause internal names to change.
+  /// \param formula_text A string
+  /// \param spec A linear process specification
+  /// \return The converted modal formula
+  inline
+  state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec)
+  {
+    std::stringstream formula_stream(formula_text);
+    return parse_state_formula(formula_stream, spec);
   }
 
 } // namespace state_formulas

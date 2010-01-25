@@ -33,7 +33,6 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::state_formulas;
-using namespace mcrl2::state_formulas::detail;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
@@ -95,7 +94,7 @@ const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 void test_parelm()
 {
   specification spec    = linearise(ABP_SPECIFICATION);
-  state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
+  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   pbes_parelm_algorithm algorithm;
