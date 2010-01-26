@@ -103,6 +103,13 @@ def extract_type(text):
     text = re.sub('\s*&$', '', text)
     return text
 
+#indents the text with the given prefix
+def indent_text(text, indent):
+    lines = []
+    for line in string.split(text, '\n'):
+        lines.append(indent + line)
+    return string.join(lines, '\n')
+
 # Generates a member function of a class, by substituting values in a template
 def member_function(arg, n):
     MEMBER_FUNCTION = '''    TYPE NAME() const
@@ -156,6 +163,13 @@ class FunctionDeclaration:
     # 'name'
     def qualified_name(self):
         return re.sub('\(.*', '', self.text)
+
+    # returns the namespace qualifier of the function
+    #
+    def qualifier(self):
+        if self.qualified_name().find('::') == -1:
+            return ''
+        return re.sub('::.*$', '::', self.qualified_name())
 
     # returns the name of the function without namespace qualification
     #

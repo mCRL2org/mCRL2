@@ -90,7 +90,33 @@ def make_expression_classes(filename, class_text, class_name):
                   text)
     path(filename).write_text(text)   
 
+def make_is_functions(filename, text):
+    TERM_TRAITS_TEXT = r'''
+    /// \\brief Test for a %s expression
+    /// \\param t A term
+    /// \\return True if it is a %s expression
+    inline
+    bool is_%s(const process_expression& t)
+    {
+      return core::detail::gsIs%s(t);
+    }
+'''
+
+    rtext = ''
+    classes = parse_classes(text)
+    for c in classes:
+        (aterm, constructor, description) = c
+        f = FunctionDeclaration(constructor)
+        name = f.name()
+        rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, aterm)
+    text = path(filename).text()
+    text = re.compile(r'//--- start generated is-functions ---//.*//--- end generated is-functions ---//', re.S).sub(
+                  '//--- start generated is-functions ---//\n' + rtext + '//--- end generated is-functions ---//',
+                  text)
+    path(filename).write_text(text)
+
 make_expression_classes('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula')
 make_expression_classes('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula')
 make_expression_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
 make_expression_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
+make_is_functions(      '../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES)

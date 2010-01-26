@@ -184,12 +184,6 @@ EXPRESSION_BUILDER_NODE_TEXT = r'''
   }
 '''
 
-def indent_text(text, indent):
-    lines = []
-    for line in string.split(text, '\n'):
-        lines.append(indent + line)
-    return string.join(lines, '\n')
-
 def make_expression_visitor(filename, expression, text):
     classes = parse_classes(text)
     vtext = ''

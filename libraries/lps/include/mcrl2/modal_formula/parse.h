@@ -51,7 +51,9 @@ namespace state_formulas {
     state_formula f = result;   
     type_check(f, spec);
     translate_regular_formula(f);
-    spec.data().add_context_sorts(data::find_sort_expressions(f)); // Make complete with respect to f
+
+    // TODO: make find functions for state formulas
+    spec.data().add_context_sorts(data::find_sort_expressions(atermpp::aterm_appl(f)));
     f = data::detail::internal_format_conversion(spec.data(), f);
     return f;
   }
