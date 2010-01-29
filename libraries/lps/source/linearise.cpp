@@ -358,7 +358,11 @@ class specification_basic_type:public boost::noncopyable
         n=addObject(sort,isnew);
 
         if ((isnew==0) && (core::gsDebug))
-        { std::cerr << "sort " + pp(sort) +  "is added twice\n";
+        { 
+          std::string s;
+          s =  "sort " + pp(sort) +  "is added twice\n";
+          gsWarningMsg(s.c_str());
+
           return;
         }
 
@@ -1596,15 +1600,30 @@ class specification_basic_type:public boost::noncopyable
     { unsigned long numberOfNewProcesses=0, warningNumber=1000;
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
-      { std::cerr << "generated " << numberOfNewProcesses << " new internal processes.";
+      {
+          std::string s ;
+          std::stringstream out;
+          out << numberOfNewProcesses;
+          s = "generated " + out.str() + " new internal processes.";
+          gsWarningMsg(s.c_str());
+
         if (!options.lin_method!=lmStack)
-        { std::cerr << " A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method.\n";
+        { 
+          std::string s ;
+          s = " A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method.\n";
+          gsWarningMsg(s.c_str());
         }
         else if (options.lin_method==lmRegular2)
-        { std::cerr << " A possible unbounded loop can be avoided by using `stack' as the linearisation method.\n";
+        { 
+          std::string s ;
+          s = " A possible unbounded loop can be avoided by using `stack' as the linearisation method.\n";
+          gsWarningMsg(s.c_str());
         }
         else
-        { std::cerr << "\n";
+        { 
+          std::string s ;
+          s = "\n";
+          gsWarningMsg(s.c_str());
         }
         warningNumber=warningNumber*2;
       }
@@ -5014,8 +5033,11 @@ class specification_basic_type:public boost::noncopyable
                                               // is essential for all processes. In these cases a
                                               // message about the block operator is very confusing.
       { if (core::gsVerbose)
-        { std::cerr << "- calculating the " << (is_allow?"allow":"block") <<
+        { 
+          std::stringstream out;
+          out << "- calculating the " << (is_allow?"allow":"block") <<
                  " operator on " << sourcesumlist.size() << " summands";
+          gsVerboseMsg( out.str().c_str() );
         }
       }
 
@@ -5102,7 +5124,10 @@ class specification_basic_type:public boost::noncopyable
         }
       }
       if ((core::gsVerbose) && (sourcesumlist_length>2 || is_allow))
-      { std::cerr << ", resulting in " << resultsumlist.size() << " summands\n";
+      { 
+          std::stringstream out;
+          out << ", resulting in " << resultsumlist.size() << " summands\n";
+          gsVerboseMsg( out.str().c_str() );
       }
 
       return resultsumlist;
@@ -5676,7 +5701,10 @@ class specification_basic_type:public boost::noncopyable
          a note: Calculation of communication with open terms. */
 
       if (core::gsVerbose)
-      { std::cerr << "- calculating the communication operator on " << summands.size() << " summands";
+      { 
+        std::stringstream out;
+        out << "- calculating the communication operator on " << summands.size() << " summands";
+        gsVerboseMsg(out.str().c_str());
       }
 
       /* first we sort the multiactions in communications */
@@ -5789,7 +5817,10 @@ class specification_basic_type:public boost::noncopyable
       }
 
       if (core::gsVerbose)
-      { std::cerr << " resulting in " << resultsumlist.size() << " summands\n";
+      { 
+        std::stringstream out;
+        out << " resulting in " << resultsumlist.size() << " summands\n";
+        gsVerboseMsg( out.str().c_str() );
       }
       return reverse(resultsumlist);
     }
@@ -6236,8 +6267,11 @@ class specification_basic_type:public boost::noncopyable
                                variable_list &pars_result,
                                assignment_list &init_result)
     { if (core::gsVerbose)
-      { std::cerr << "- calculating parallel composition: " << summands1.size() <<
+      { 
+        std::stringstream out;
+        out << "- calculating parallel composition: " << summands1.size() <<
                          " || " << summands2.size() << " = ";
+        gsVerboseMsg(out.str().c_str());
       }
 
       // At this point the parameters of pars1 and pars2 are unique, except for
@@ -6260,7 +6294,10 @@ class specification_basic_type:public boost::noncopyable
       summand_list result=combine_summand_lists(summands1,summands2,pars1,pars3,pars2);
 
       if (core::gsVerbose)
-      { std::cerr << result.size() << " resulting summands.\n";
+      {
+        std::stringstream out; 
+        out << result.size() << " resulting summands.\n";
+        gsVerboseMsg(out.str().c_str());
       }
       pars_result=pars1+pars3;
       init_result=init1 + init2;
@@ -6704,7 +6741,10 @@ class specification_basic_type:public boost::noncopyable
         if ((ct) && !options.add_delta)
         { if (print_info)
           { if (core::gsVerbose)
-            { std::cerr << "process " << procId.name() << " contains time.\n";
+            { 
+              std::stringstream out;
+              out << "process " << procId.name() << " contains time.\n";
+              gsVerboseMsg(out.str().c_str());
             }
           }
         }
@@ -7035,8 +7075,11 @@ class specification_basic_type:public boost::noncopyable
         const action_list multiaction=smd.actions();
         if (multiaction==push_front(action_list(),terminationAction))
         { acts=push_front(acts,terminationAction.label());
-          std::cerr << "The action " << pp(terminationAction) <<
-                      " is added to signal termination of the linear process.\n";
+          std::string s;
+          s = "The action ";
+          s += pp(terminationAction);
+          s += " is added to signal termination of the linear process.\n";
+          gsWarningMsg(s.c_str());
           return;
         }
       }
@@ -7111,7 +7154,10 @@ class specification_basic_type:public boost::noncopyable
       determinewhetherprocessescanterminate(init);
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
       if (determinewhetherprocessescontaintime(init1) && !(options.add_delta))
-      { std::cerr << "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use SQuADT option `Add delta summands' or command line option `-D' to suppress.\n";
+      { 
+          std::string s;
+          s = "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use SQuADT option `Add delta summands' or command line option `-D' to suppress.\n";
+          gsWarningMsg(s.c_str());
       }
       atermpp::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);
@@ -7191,7 +7237,10 @@ mcrl2::lps::specification mcrl2::lps::linearise(
                  mcrl2::lps::t_lin_options lin_options)
 {
   if (core::gsVerbose)
-  { std::cerr << "Linearising the process specification using the '" + lin_method_to_string(lin_options.lin_method) + " ' method.\n";
+  { 
+          std::string s;
+          s = "Linearising the process specification using the '" + lin_method_to_string(lin_options.lin_method) + " ' method.\n";
+          gsWarningMsg(s.c_str());
   }
   data_specification data_spec=type_checked_spec.data();
   internal_format_conversion(data_spec);

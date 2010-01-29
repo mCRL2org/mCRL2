@@ -347,8 +347,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       checkbox& newstate            = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_newstate));
       checkbox& binary              = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_binary));
       checkbox& statenames          = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_statenames));
-      checkbox& add_delta           = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_add_delta));
-      checkbox& rewrite             = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_rewrite));
+      checkbox& add_delta           = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_add_delta));
+      checkbox& rewrite             = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_no_rewrite));
       checkbox& alpha               = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_alpha));
       checkbox& sumelm              = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_sumelm));
       checkbox& deltaelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_deltaelm));
