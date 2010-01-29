@@ -12,6 +12,7 @@
 #define UTILITY_GENERIC_VISITOR_H__
 
 #include <vector>
+#include <iostream>
 
 #include <boost/type_traits/is_const.hpp>
 #include <boost/shared_ptr.hpp>

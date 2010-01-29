@@ -54,7 +54,7 @@ namespace tipi {
    **/
   mime_type::mime_type(std::string const& s, category_type m) : m_main(m), m_sub(s) {
     if(!(!s.empty() && (s.find(' ') == std::string::npos) && (s.find('\t') == std::string::npos))){
-      throw mcrl2::runtime_error("String \""+ s + "\" must not contain white space characters");
+      throw std::runtime_error("String \""+ s + "\" must not contain white space characters");
     }
   }
 }

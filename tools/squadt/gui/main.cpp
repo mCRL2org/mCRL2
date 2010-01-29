@@ -200,7 +200,7 @@ namespace squadt {
 
       /* Only one project view supported at this time ... */
       if(!(project_view == 0)){
-        throw mcrl2::runtime_error( "Project view is empty" );
+        throw std::runtime_error( "Project view is empty" );
       }
 
       project_view = p;
@@ -232,7 +232,7 @@ namespace squadt {
     void main::remove_project_view(project* p) {
 
       if(!(project_view != 0)){
-        throw mcrl2::runtime_error( "Trying to remove an empty project" );
+        throw std::runtime_error( "Trying to remove an empty project" );
       }
 
       if (project_view != 0) {

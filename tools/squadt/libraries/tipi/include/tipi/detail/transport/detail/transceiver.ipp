@@ -25,7 +25,7 @@ namespace transport {
      **/
     inline basic_transceiver::basic_transceiver(boost::shared_ptr < transporter_impl > const& o) : owner(o) {
       if(!(o.get() != 0)){
-        throw mcrl2::runtime_error( "Transporter implementation is NULL" );
+        throw std::runtime_error( "Transporter implementation is NULL" );
       }
     }
 

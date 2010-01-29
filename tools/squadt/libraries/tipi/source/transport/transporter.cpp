@@ -51,7 +51,7 @@ namespace transport {
    **/
   void transporter_impl::relay_connection(transporter* t, basic_transceiver* c) {
     if(!(t != 0)){
-      throw  mcrl2::runtime_error("No transporter to relay a connection");
+      throw  std::runtime_error("No transporter to relay a connection");
     }
 
     boost::recursive_mutex::scoped_lock l(lock);
@@ -118,7 +118,7 @@ namespace transport {
   void transporter_impl::associate(boost::shared_ptr < transporter_impl > const& c, const basic_transceiver::ptr& t) {
     
     if(!(c.get() == this)){ 
-      throw mcrl2::runtime_error( "Using incorrect transporter" );
+      throw std::runtime_error( "Using incorrect transporter" );
     }
 
     boost::recursive_mutex::scoped_lock l(lock);
@@ -146,7 +146,7 @@ namespace transport {
 
     if (t->owner.lock().get() != 0) {
       if(!(t->owner.lock().get() == this)){
-        throw mcrl2::runtime_error( "Locking incorrect transceiver");
+        throw std::runtime_error( "Locking incorrect transceiver");
       };
 
       for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
@@ -174,13 +174,13 @@ namespace transport {
   void transporter_impl::associate(boost::shared_ptr < transporter_impl > const& c, basic_transceiver* t) {
 
     if(!(c.get() == this)){ 
-      throw mcrl2::runtime_error( "Using incorrect transporter" );
+      throw std::runtime_error( "Using incorrect transporter" );
     }
 
     boost::shared_ptr < transporter_impl > cc(t->owner.lock());
 
     if(!(c.get() != 0)){ 
-      throw mcrl2::runtime_error( "Using incorrect transporter, value equals 0" );
+      throw std::runtime_error( "Using incorrect transporter, value equals 0" );
     }
 
 
@@ -287,7 +287,7 @@ namespace transport {
    **/
   void transporter_impl::remove_listener(size_t n) {
     if(!(n < listeners.size())){ 
-      throw mcrl2::runtime_error( "Trying to remove more listeners than are available\n" );
+      throw std::runtime_error( "Trying to remove more listeners than are available\n" );
     }
 
     listener_list::iterator i = listeners.begin();

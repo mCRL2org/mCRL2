@@ -145,7 +145,7 @@ namespace tipi {
    **/
   configuration::option& configuration::add_option(std::string const& id, bool r) {
     if(!(m_parameter_by_id.count(id) == 0 || r)){
-      throw mcrl2::runtime_error("Cannot replace an existing option with the same ID");
+      throw std::runtime_error("Cannot replace an existing option with the same ID");
     };
 
     if ((m_parameter_by_id.count(id) == 0)) {
@@ -171,7 +171,7 @@ namespace tipi {
    **/
   configuration::option& configuration::add_option(std::string const& id, boost::shared_ptr < option >& o, bool r) {
     if(!(m_parameter_by_id.count(id) == 0 || r)){
-      throw mcrl2::runtime_error("Cannot replace an existing option with the same ID");
+      throw std::runtime_error("Cannot replace an existing option with the same ID");
     };
 
     if (m_parameter_by_id.count(id) == 0) {
@@ -208,7 +208,7 @@ namespace tipi {
    **/
   configuration::object& configuration::add_output(std::string const& id, boost::shared_ptr < object >& o) {
     if(!(m_parameter_by_id.count(id) == 0)){
-      throw mcrl2::runtime_error("Empty configuration");
+      throw std::runtime_error("Empty configuration");
     };
 
     if (m_parameter_by_id.count(id) == 0) {

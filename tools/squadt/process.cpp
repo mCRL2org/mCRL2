@@ -45,8 +45,6 @@
 #include "command.hpp"
 #include "process.hpp"
 
-#include "mcrl2/exception.h"
-
 namespace squadt {
   namespace execution {
 
@@ -521,7 +519,7 @@ namespace squadt {
 
     std::string process::get_executable_name() const {
       if(!(impl.get() != 0)){
-         throw mcrl2::runtime_error( "Empty implemention\n" );
+         throw std::runtime_error( "Empty implemention\n" );
       };
 
       if (impl->m_command.get()) {

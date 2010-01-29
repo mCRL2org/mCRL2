@@ -26,7 +26,6 @@ if (NOT MONO_LIB )
   include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
   include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
   include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
   add_library(${PROJECT_NAME}
     ${squadt_tipi_src}  

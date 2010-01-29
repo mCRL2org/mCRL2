@@ -124,7 +124,7 @@ namespace tipi {
       boost::shared_ptr < configuration > c(boost::static_pointer_cast < communicator_impl > (impl)->current_configuration);
 
       if(!c){
-        throw mcrl2::runtime_error( "No specification of the current configuration\n" );
+        throw std::runtime_error( "No specification of the current configuration\n" );
       }
 
       if (c) {

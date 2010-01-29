@@ -260,7 +260,7 @@ namespace tipi {
   template < typename T >
   inline T configuration::option::get_value(size_t const& n) const {
     if(!(n < m_arguments.size())){
-      throw mcrl2::runtime_error( "Value exceeds size of arguments" );
+      throw std::runtime_error( "Value exceeds size of arguments" );
     };
 
     return tipi::datatype::convert< T >(*m_arguments[n].first, m_arguments[n].second);
@@ -275,7 +275,7 @@ namespace tipi {
     boost::shared_ptr< datatype::basic_datatype > const& t, boost::call_traits< const std::string >::param_type d) {
 
     if(!(t->validate(d))){
-      throw mcrl2::runtime_error( "Data type does not pass validation" );
+      throw std::runtime_error( "Data type does not pass validation" );
     }
 
 
@@ -288,7 +288,7 @@ namespace tipi {
     if (n < m_arguments.size()) {
       if (b) {
         if(!(typeid(S) == typeid(*m_arguments[n].first))){
-          throw mcrl2::runtime_error( "Using different type names.\n" ) ;
+          throw std::runtime_error( "Using different type names.\n" ) ;
         }
         m_arguments[n].second = convert(*m_arguments[n].first, t);
       }

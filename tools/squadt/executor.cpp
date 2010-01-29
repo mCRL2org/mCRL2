@@ -66,7 +66,7 @@ namespace squadt {
      **/
     inline void executor_impl::start_process(const command& c, boost::shared_ptr < task_monitor >& l, boost::shared_ptr < executor_impl >& w) {
       if(!(l.get() != 0)){
-        throw mcrl2::runtime_error( "Task monitor is NULL " );
+        throw std::runtime_error( "Task monitor is NULL " );
       }
 
       boost::shared_ptr < process > p(process::create());

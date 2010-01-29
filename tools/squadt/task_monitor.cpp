@@ -30,7 +30,7 @@ namespace squadt {
      **/
     void task_monitor::attach_process(const boost::shared_ptr< process >& p) {
       if(!(p.get() != 0)){
-        throw mcrl2::runtime_error( "Process does not exist" );
+        throw std::runtime_error( "Process does not exist" );
       }
 
       boost::static_pointer_cast < task_monitor_impl > (impl)->attach_process(p);

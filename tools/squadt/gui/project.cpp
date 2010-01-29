@@ -69,7 +69,7 @@ namespace squadt {
                                  wxCommandEvent(wxEVT_DISPATCH), m_handler(h) {
           
           if(!(!m_handler.empty())){
-            throw mcrl2::runtime_error( "Empty handler" );
+            throw std::runtime_error( "Empty handler" );
           }
         }
 
@@ -473,7 +473,7 @@ namespace squadt {
       using namespace boost;
 
       if(!(n.get_processor().get() != 0)){
-         throw mcrl2::runtime_error( "Processor not available" );
+         throw std::runtime_error( "Processor not available" );
       }
 
       type_registry& registry(global_build_system.get_type_registry());

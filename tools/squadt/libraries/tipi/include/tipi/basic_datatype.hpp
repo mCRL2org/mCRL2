@@ -26,8 +26,6 @@
 #include <boost/type_traits/is_pod.hpp>
 #include <boost/type_traits/is_same.hpp>
 
-#include "mcrl2/exception.h"
-
 #include "tipi/detail/visitors.hpp"
 
 namespace tipi {
@@ -217,7 +215,7 @@ namespace tipi {
              m_values.find(s);
 
           if (i == m_values.end()) {
-            throw mcrl2::runtime_error("invalid operand to conversion");
+            throw std::runtime_error("invalid operand to conversion");
           }
 
           return i->second;
@@ -295,7 +293,7 @@ namespace tipi {
         inline std::string specialised_convert(boost::any const& v) const {
           if(get_single_instance().m_values.empty())
           {
-             throw mcrl2::runtime_error("m_values is empty");
+             throw std::runtime_error("m_values is empty");
           }
 
           return get_single_instance().convert(static_cast< size_t >(boost::any_cast< C >(v)));
@@ -305,7 +303,7 @@ namespace tipi {
         inline basic_enumeration::const_iterator_range values() const {
           if(get_single_instance().m_values.empty())
           {
-             throw mcrl2::runtime_error("m_values is empty");
+             throw std::runtime_error("m_values is empty");
           }
 
           return get_single_instance().values();
@@ -318,7 +316,7 @@ namespace tipi {
         inline std::string convert(C const& s) const {
           if(get_single_instance().m_values.empty())
           {
-             throw mcrl2::runtime_error("m_values is empty");
+             throw std::runtime_error("m_values is empty");
           }
 
           return get_single_instance().convert(static_cast< const size_t > (s));
@@ -330,7 +328,7 @@ namespace tipi {
         inline C evaluate(std::string const& s) const {
           if(get_single_instance().m_values.empty())
           {
-             throw mcrl2::runtime_error("m_values is empty");
+             throw std::runtime_error("m_values is empty");
           }
 
           return static_cast< C >(get_single_instance().evaluate(s));
@@ -449,7 +447,7 @@ namespace tipi {
          **/
         inline integer_range(C minimum = boost::integer_traits< C >::const_min, C maximum = boost::integer_traits< C >::const_max) : m_minimum(minimum), m_maximum(maximum) {
           if(!(m_minimum < m_maximum)){
-            throw mcrl2::runtime_error( "m_minimum < m_maximum" );
+            throw std::runtime_error( "m_minimum < m_maximum" );
           }
         }
 
@@ -615,7 +613,7 @@ namespace tipi {
         inline real_range(C minimum = (std::numeric_limits< C >::min)(), C maximum = (std::numeric_limits< C >::max)())
                                                                          : m_minimum(minimum), m_maximum(maximum) {
           if(!(m_minimum < m_maximum)){
-            throw mcrl2::runtime_error( "m_minimum < m_maximum" );
+            throw std::runtime_error( "m_minimum < m_maximum" );
           }
         }
 
@@ -725,7 +723,7 @@ namespace tipi {
         inline string(size_t minimum = 0, size_t maximum = boost::integer_traits< size_t >::const_max) :
                                                 m_minimum_length(minimum), m_maximum_length(maximum) {
           if(!(m_minimum_length < m_maximum_length)){
-            throw mcrl2::runtime_error( "m_minimum < m_maximum" );
+            throw std::runtime_error( "m_minimum < m_maximum" );
           }
         }
 

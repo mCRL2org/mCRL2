@@ -276,7 +276,7 @@ namespace utility {
     using namespace boost::xpressive;
 
     if(!(!regex_search(s, sregex(as_xpr("]]>"))))){
-      throw mcrl2::runtime_error( "No instance found for the data type in textual representation" );
+      throw std::runtime_error( "No instance found for the data type in textual representation" );
     };
 
     out << "<string";

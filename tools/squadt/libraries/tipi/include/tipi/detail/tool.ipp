@@ -165,7 +165,7 @@ namespace tipi {
      **/
     inline void communicator_impl::receive_configuration_handler(boost::shared_ptr< const tipi::message >& m) {
       if(!(m->get_type() == tipi::message_configuration)){
-        mcrl2::runtime_error( "Expected configuration message type ");
+        std::runtime_error( "Expected configuration message type ");
       }
 
       try {

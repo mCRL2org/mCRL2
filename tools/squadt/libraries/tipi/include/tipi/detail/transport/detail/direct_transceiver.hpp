@@ -63,7 +63,7 @@ namespace transport {
      **/
     inline direct_transceiver::direct_transceiver(boost::shared_ptr < transporter_impl > const& o, boost::shared_ptr < direct_transceiver > const& p) : basic_transceiver(o), peer(p.get()) {
       if(!(p.get() != 0)){
-        throw mcrl2::runtime_error("Direct transceiver does not exists");
+        throw std::runtime_error("Direct transceiver does not exists");
       }
 
       p->peer = this;

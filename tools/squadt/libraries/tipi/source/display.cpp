@@ -13,7 +13,7 @@ namespace tipi {
   /// \cond INTERNAL
   void display_impl::associate(element_identifier const& id, boost::shared_ptr < tipi::layout::element > const& e) {
     if(!(m_element_by_id.count(id) == 0)){
-      throw mcrl2::runtime_error("Empty element");
+      throw std::runtime_error("Empty element");
     };
 
     m_element_by_id[id] = e;

@@ -148,7 +148,7 @@ namespace utility {
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(tool& t) {
     if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool")){
-      throw mcrl2::runtime_error("Expected XML tree value \"tool\"");
+      throw std::runtime_error("Expected XML tree value \"tool\"");
     } 
 
     std::string location;
@@ -187,7 +187,7 @@ namespace utility {
     using namespace boost::filesystem;
 
     if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool-catalog")){
-      throw mcrl2::runtime_error("Expected XML tree value \"tool-catalog\"");
+      throw std::runtime_error("Expected XML tree value \"tool-catalog\"");
     } 
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
@@ -218,7 +218,7 @@ namespace utility {
     }
 
     if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "execution-settings")){
-      throw mcrl2::runtime_error("Expected XML tree value \"execution-settings\"");
+      throw std::runtime_error("Expected XML tree value \"execution-settings\"");
     } 
 
     if (tree->Value() == "execution-settings") {
@@ -248,7 +248,7 @@ namespace utility {
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(type_registry& r) {
     if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "default-actions")){
-      throw mcrl2::runtime_error("Expected XML tree value \"default-actions\"");
+      throw std::runtime_error("Expected XML tree value \"default-actions\"");
     } 
 
     if (tree->Value() == "default-actions") {
@@ -292,7 +292,7 @@ namespace utility {
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(processor_impl& p, id_helper& h) {
     if(!((h.tree->Type() == TiXmlNode::ELEMENT) && h.tree->Value() == "processor")){
-      throw mcrl2::runtime_error("Expected XML tree value \"processor\"");
+      throw std::runtime_error("Expected XML tree value \"processor\"");
     } 
 
     try {
@@ -331,7 +331,7 @@ namespace utility {
         e->GetAttribute("id", &id);
 
         if(!(h.cmap.find(id) == h.cmap.end())){
-           mcrl2::runtime_error("Cannot find ID in mapping");
+           std::runtime_error("Cannot find ID in mapping");
         };
 
         h.cmap[id] = boost::shared_ptr < processor_impl::object_descriptor >(
@@ -388,7 +388,7 @@ namespace utility {
   template <>
   void visitor< squadt::restore_visitor_impl >::visit(squadt::project_manager_impl& p) {
     if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "squadt-project")){
-      throw mcrl2::runtime_error("Expected XML tree value \"squadt-project\"");
+      throw std::runtime_error("Expected XML tree value \"squadt-project\"");
     } 
 
     tree->GetAttribute("count", &p.count);

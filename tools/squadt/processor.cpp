@@ -119,7 +119,7 @@ namespace squadt {
    **/
   void processor_impl::register_output(tipi::configuration::parameter::identifier const& id, boost::shared_ptr < object_descriptor >& o) {
     if(!(o->generator.lock().get() == interface_object.lock().get())){
-      throw mcrl2::runtime_error( "Object descriptor should be the interface object\n" );
+      throw std::runtime_error( "Object descriptor should be the interface object\n" );
     };
 
     boost::shared_ptr < project_manager > guard(manager.lock());
@@ -364,7 +364,7 @@ namespace squadt {
         return;
       }
     }
-    throw mcrl2::runtime_error( "No new format for location found\n" );
+    throw std::runtime_error( "No new format for location found\n" );
   }
 
   /**
@@ -379,7 +379,7 @@ namespace squadt {
         return;
       }
     }
-    throw mcrl2::runtime_error( "No new format for location found\n" );
+    throw std::runtime_error( "No new format for location found\n" );
 
   }
 
@@ -396,7 +396,7 @@ namespace squadt {
       }
     }
 
-    throw mcrl2::runtime_error( "No new format for location found\n" );
+    throw std::runtime_error( "No new format for location found\n" );
   }
 
   /**
@@ -556,7 +556,7 @@ namespace squadt {
 
     if (g.get()) {
       if(!(ic != 0)){
-        throw mcrl2::runtime_error( "Input combination is NULL" );
+        throw std::runtime_error( "Input combination is NULL" );
       };
 
       selected_input_configuration = ic;
@@ -627,7 +627,7 @@ namespace squadt {
         update_configuration(*c);
 
         if(!(t->impl.get() == this && g.get())){
-          throw mcrl2::runtime_error("Processors are not equal");
+          throw std::runtime_error("Processors are not equal");
         };
 
         /* Check that dependent files exist and rebuild if this is not the case */
@@ -648,7 +648,7 @@ namespace squadt {
             }
             else {
               /* Should signal an error via the monitor ... */
-              throw mcrl2::runtime_error("Do not know how to (re)create " + object.location);
+              throw std::runtime_error("Do not know how to (re)create " + object.location);
             }
           }
         }
@@ -687,7 +687,7 @@ namespace squadt {
     };
 
     if(!(t->impl.get() == this)){
-      throw mcrl2::runtime_error("Processors are not equal");
+      throw std::runtime_error("Processors are not equal");
     };
 
     if (!is_active() && c) {
@@ -759,7 +759,7 @@ namespace squadt {
     std::string target(make_output_path(output_directory));
 
     if(!(c != 0)){
-      throw mcrl2::runtime_error( "Trying to execute a non existing command.\n" );
+      throw std::runtime_error( "Trying to execute a non existing command.\n" );
     }
 
     // Try creating the file
@@ -779,10 +779,10 @@ namespace squadt {
 
   void processor_impl::object_descriptor::operator=(object_descriptor const& o) {
     if(!(generator.lock().get() == o.generator.lock().get())){
-      throw mcrl2::runtime_error("Generated locks does not equal lock for object descriptor.\n");
+      throw std::runtime_error("Generated locks does not equal lock for object descriptor.\n");
     }
     if(!(project.lock().get() == o.project.lock().get())){
-      throw mcrl2::runtime_error("Generated locks does not equal lock for object project descriptor.\n");
+      throw std::runtime_error("Generated locks does not equal lock for object project descriptor.\n");
     }
 
     status    = o.status;
@@ -1025,7 +1025,7 @@ namespace squadt {
   void processor::monitor::tool_configuration(boost::shared_ptr< processor > t, boost::shared_ptr < tipi::configuration > c) {
     try {
       if(!(t.get() == owner.lock().get())){
-         throw mcrl2::runtime_error("Lock of owner does not equal processor\n");
+         throw std::runtime_error("Lock of owner does not equal processor\n");
       };
 
       /* collect set of output arguments of the existing configuration */
@@ -1061,7 +1061,7 @@ namespace squadt {
 
   void processor::monitor::tool_operation(boost::shared_ptr< processor > t, boost::shared_ptr < tipi::configuration > const& c) {
     if(!(t.get() == owner.lock().get())){
-       throw mcrl2::runtime_error("Lock of owner does not equal processor\n");
+       throw std::runtime_error("Lock of owner does not equal processor\n");
     };
 
     try {
@@ -1315,7 +1315,7 @@ namespace squadt {
   void processor::configure(std::string const& w) {
     
     if(!(impl->interface_object.lock().get() == this)){
-       throw mcrl2::runtime_error("Interface lock object mismatch");
+       throw std::runtime_error("Interface lock object mismatch");
     };
 
     impl->configure(impl->interface_object.lock(), impl->current_monitor->get_configuration(), w);
@@ -1323,7 +1323,7 @@ namespace squadt {
 
   void processor::configure(boost::shared_ptr < const tool::input_configuration > i, const boost::filesystem::path& p, std::string const& w) {
     if(!(impl->interface_object.lock().get() == this)){
-       throw mcrl2::runtime_error("Interface lock object mismatch");
+       throw std::runtime_error("Interface lock object mismatch");
     };
 
     impl->configure(impl->interface_object.lock(), i, p, w);
@@ -1331,7 +1331,7 @@ namespace squadt {
 
   void processor::reconfigure(std::string const& w) {
     if(!(impl->interface_object.lock().get() == this)){
-       throw mcrl2::runtime_error("Interface lock object mismatch");
+       throw std::runtime_error("Interface lock object mismatch");
     };
 
     impl->reconfigure(impl->interface_object.lock(), boost::shared_ptr < tipi::configuration > (new tipi::configuration(*impl->current_monitor->get_configuration())), w);
@@ -1345,7 +1345,7 @@ namespace squadt {
    **/
   void processor::update(boost::function < void () > h, bool b) {
     if(!(impl->interface_object.lock().get() == this)){
-       throw mcrl2::runtime_error("Interface lock object mismatch");
+       throw std::runtime_error("Interface lock object mismatch");
     };
 
 
@@ -1354,7 +1354,7 @@ namespace squadt {
 
   void processor::update(bool b) {
     if(!(impl->interface_object.lock().get() == this)){
-       throw mcrl2::runtime_error("Interface lock object mismatch");
+       throw std::runtime_error("Interface lock object mismatch");
     };
 
 
@@ -1369,7 +1369,7 @@ namespace squadt {
    **/
   void processor::run(boost::function < void () > h, bool b) {
     if(!(impl->interface_object.lock().get() == this)){
-       throw mcrl2::runtime_error("Interface lock object mismatch");
+       throw std::runtime_error("Interface lock object mismatch");
     };
 
 
@@ -1383,7 +1383,7 @@ namespace squadt {
    **/
   void processor::run(bool b) {
     if(!(impl->interface_object.lock().get() == this)){
-       throw mcrl2::runtime_error("Interface lock object mismatch");
+       throw std::runtime_error("Interface lock object mismatch");
     };
 
 
