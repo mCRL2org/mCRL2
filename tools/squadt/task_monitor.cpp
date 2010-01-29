@@ -29,7 +29,9 @@ namespace squadt {
      * @param[in] p shared pointer to the process
      **/
     void task_monitor::attach_process(const boost::shared_ptr< process >& p) {
-      assert(p.get() != 0);
+      if(!(p.get() != 0)){
+        throw mcrl2::runtime_error( "Process does not exist" );
+      }
 
       boost::static_pointer_cast < task_monitor_impl > (impl)->attach_process(p);
     }

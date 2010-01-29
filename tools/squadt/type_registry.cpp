@@ -332,7 +332,9 @@ namespace squadt {
     else {
       using namespace boost::xpressive;
 
-      assert(regex_search(c, sregex(bos >> *set[~_w] >> +set[_w | punct] >> *(+set[~_w] >> *set[_w | punct]) >> eos)));
+      if(!(regex_search(c, sregex(bos >> *set[~_w] >> +set[_w | punct] >> *(+set[~_w] >> *set[_w | punct]) >> eos)))){
+         throw mcrl2::runtime_error("Cannot associate a command to a type\n");
+      };
 
       command_for_type[t] = c;
     }

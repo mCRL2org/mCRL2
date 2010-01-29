@@ -6,12 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost/bind.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/noncopyable.hpp"
-#include "boost/foreach.hpp"
 #include "boost/integer_traits.hpp"
-#include "boost/tuple/tuple.hpp"
 #include "boost/lexical_cast.hpp"
 
 #include "tipi/detail/utility/generic_visitor.hpp"
@@ -140,7 +137,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::message& o) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message")){
+      throw mcrl2::runtime_error("Expected XML tree value \"message\"");
+    } 
 
     tree->GetAttributeOrDefault("type", &o.m_type, tipi::message::unknown());
 
@@ -160,11 +159,16 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::boolean& e, std::string& s) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "boolean");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "boolean")){
+      throw mcrl2::runtime_error("Expected XML tree value \"boolean\"");
+    } 
 
     tree->GetAttributeOrDefault("value", &s, "false");
 
-    assert(e.validate(s));
+    if(!(e.validate(s))){
+      throw mcrl2::runtime_error("Cannot validate boolean tipi datatype");
+    } 
+ 
 
     /* Set to default if value is invalid */
     if (!(e.validate(s))) {
@@ -180,11 +184,15 @@ namespace utility {
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_integer_range& e, std::string& s) {
     /* Current element must be <integer> */
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "integer_range");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "integer_range")){
+      throw mcrl2::runtime_error("Expected XML tree value \"integer_range\"");
+    } 
 
     tree->GetAttributeOrDefault("value", &s, 0);
 
-    assert(e.validate(s));
+    if(!(e.validate(s))){
+      throw mcrl2::runtime_error("Cannot validate integer tipi datatype");
+    } 
 
     /* Set to default if value is invalid */
     if (!(e.validate(s))) {
@@ -200,11 +208,16 @@ namespace utility {
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_real_range& e, std::string& s) {
     /* Current element must be <integer> */
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "real_range");
-
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "real_range")){
+      throw mcrl2::runtime_error("Expected XML tree value \"real_range\"");
+    }
+ 
     tree->GetAttributeOrDefault("value", &s, 0);
 
-    assert(e.validate(s));
+    if(!(e.validate(s))){
+      throw mcrl2::runtime_error("Cannot validate Real tipi datatype");
+    } 
+
 
     /* Set to default if value is invalid */
     if (!(e.validate(s))) {
@@ -220,7 +233,9 @@ namespace utility {
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_enumeration& e, std::string& s) {
     /* Current element must be <enumeration> */
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "enumeration");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "enumeration")){
+      throw mcrl2::runtime_error("Expected XML tree value \"enumeration\"");
+    } 
 
     for (ticpp::Element* ae = tree->FirstChildElement(false); ae != 0; ae = ae->NextSiblingElement(false)) {
       if (ae->Value() == "element") {
@@ -230,7 +245,10 @@ namespace utility {
 
     tree->GetAttribute("value", &s, false);
 
-    assert(e.validate(s));
+    if(!(e.validate(s))){
+      throw mcrl2::runtime_error("Cannot validate enumeration tipi datatype");
+    } 
+
   }
 
   /**
@@ -241,14 +259,19 @@ namespace utility {
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::string& e, std::string& s) {
     /* Current element must be <string> */
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "string");
-
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "string")){
+      throw mcrl2::runtime_error("Expected XML tree value \"string\"");
+    }
+ 
     tree->GetAttributeOrDefault("minimum", &e.m_minimum_length, 0);
     tree->GetAttributeOrDefault("maximum", &e.m_maximum_length, boost::integer_traits< size_t >::const_max);
 
     s = tree->GetText(false);
 
-    assert(e.validate(s));
+    if(!(e.validate(s))){
+      throw mcrl2::runtime_error("Cannot validate string tipi datatype");
+    } 
+
   }
 
   /**
@@ -291,7 +314,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::configuration::object& o) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object")){
+      throw mcrl2::runtime_error("Expected XML tree value \"object\"");
+    } 
 
     o.m_mime_type = tipi::mime_type(tree->GetAttribute("format"));
 
@@ -304,7 +329,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::configuration::option& o) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "option");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "option")){
+      throw mcrl2::runtime_error("Expected XML tree value \"option\"");
+    } 
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       /* The current element must be a valid datatype specification */
@@ -322,7 +349,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::configuration& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "configuration");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "configuration")){
+      throw mcrl2::runtime_error("Expected XML tree value \"configuration\"");
+    } 
 
     /* reset object state */
     c.m_parameter_by_id.clear();
@@ -375,7 +404,9 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::tool::capabilities::input_configuration& c, boost::shared_ptr < tipi::tool::capabilities::input_configuration >& cp) {
     using tipi::tool::capabilities;
 
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "input-configuration");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "input-configuration")){
+      throw mcrl2::runtime_error("Expected XML tree value \"input-configuration\"");
+    } 
 
     cp.reset(new capabilities::input_configuration(tipi::tool::category::match(tree->GetAttribute("category"))));
 
@@ -390,7 +421,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::tool::capabilities& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "capabilities");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "capabilities")){
+      throw mcrl2::runtime_error("Expected XML tree value \"capabilities\"");
+    } 
 
     if (tree->Value() == "capabilities") {
       using tipi::tool::capabilities;
@@ -426,7 +459,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::controller::capabilities& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "capabilities");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "capabilities")){
+      throw mcrl2::runtime_error("Expected XML tree value \"capabilities\"");
+    } 
 
     if (tree->Value() == "capabilities") {
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
@@ -444,7 +479,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::report& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "report");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "report")){
+      throw mcrl2::runtime_error("Expected XML tree value \"report\"");
+    } 
 
     c.m_report_type = static_cast < tipi::report::type > (boost::lexical_cast < unsigned int > (tree->GetAttribute("type")));
 
@@ -463,7 +500,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::label& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "label");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "label")){
+      throw mcrl2::runtime_error("Expected XML tree value \"label\"");
+    } 
 
     c.m_text = tree->GetText(false);
 
@@ -476,7 +515,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::button& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "button");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "button")){
+      throw mcrl2::runtime_error("Expected XML tree value \"button\"");
+    } 
 
     c.m_label = tree->GetText(false);
 
@@ -498,7 +539,9 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::radio_button& c) {
     using tipi::layout::elements::radio_button;
 
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button")){
+      throw mcrl2::runtime_error("Expected XML tree value \"radio-button\"");
+    } 
 
     c.m_label = tree->GetText(false);
 
@@ -519,7 +562,9 @@ namespace utility {
     using ::tipi::layout::elements::radio_button;
     using ::tipi::display;
 
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button")){
+      throw mcrl2::runtime_error("Expected XML tree value \"radio-button\"");
+    } 
 
     c.m_label = tree->GetText(false);
 
@@ -561,7 +606,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::checkbox& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "checkbox");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "checkbox")){
+      throw mcrl2::runtime_error("Expected XML tree value \"checkbox\"");
+    } 
 
     c.m_label = tree->GetText(false);
 
@@ -576,7 +623,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::progress_bar& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "progress-bar");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "progress-bar")){
+      throw mcrl2::runtime_error("Expected XML tree value \"progress-bar\"");
+    } 
 
     tree->GetAttribute("minimum", &c.m_minimum);
     tree->GetAttribute("maximum", &c.m_maximum);
@@ -591,7 +640,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::text_field& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "text-field");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "text-field")){
+      throw mcrl2::runtime_error("Expected XML tree value \"text-field\"");
+    } 
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       if (e->Value() == "text") {
@@ -649,7 +700,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::properties& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "properties");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "properties")){
+      throw mcrl2::runtime_error("Expected XML tree value \"properties\"");
+    } 
 
     std::string s;
 
@@ -698,7 +751,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::vertical_box& c, tipi::display& d) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager")){
+      throw mcrl2::runtime_error("Expected XML tree value \"box-layout-manager\"");
+    } 
 
     tipi::layout::properties current_properties;
 
@@ -731,7 +786,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::horizontal_box& c, tipi::display& d) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager")){
+      throw mcrl2::runtime_error("Expected XML tree value \"box-layout-manager\"");
+    } 
 
     tipi::layout::properties current_properties;
 
@@ -858,7 +915,9 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::tool_display& c) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "display-layout");
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "display-layout")){
+      throw mcrl2::runtime_error("Expected XML tree value \"display-layout\"");
+    } 
 
     if (tree->Value() == "display-layout") {
       c.impl.reset(new tipi::display_impl);

@@ -73,7 +73,9 @@ namespace squadt {
     using namespace boost;
     using namespace boost::filesystem;
 
-    assert(!l.empty());
+    if(l.empty()){
+      mcrl2::runtime_error("Empty path");
+    };
 
     if (filename(l) == settings_manager::project_definition_base_name) {
       store = parent_path(l);
@@ -142,7 +144,10 @@ namespace squadt {
    * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
   void project_manager_impl::commit(boost::shared_ptr< processor > p) {
-    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+
+    if(!(p->impl->manager.lock().get() == m_interface.lock().get())){
+      throw mcrl2::runtime_error("Manager lock differs from interface lock");
+    }
 
     boost::recursive_mutex::scoped_lock l(list_lock);
 
@@ -162,7 +167,9 @@ namespace squadt {
   bool project_manager_impl::update_dependencies(boost::shared_ptr < processor > p) {
     bool changes = false;
 
-    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+    if(!(p->impl->manager.lock().get() == m_interface.lock().get())){
+      throw mcrl2::runtime_error("manager lock differs from interface lock");
+    }
 
     // Collect reverse dependencies
     std::set < processor* > collected;
@@ -211,7 +218,11 @@ namespace squadt {
    * \param l the directory that is to be imported
    **/
   void project_manager_impl::import_directory(const boost::filesystem::path& l) {
-    assert(bf::exists(l) && bf::is_directory(l));
+
+      
+    if(!(bf::exists(l) && bf::is_directory(l))){
+      mcrl2::runtime_error( "Directory does not exist" );
+    }
 
     bf::directory_iterator end;
 
@@ -309,7 +320,10 @@ namespace squadt {
    * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
   void project_manager_impl::demote_status(boost::shared_ptr < processor > p) {
-    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+
+    if(!(p->impl->manager.lock().get() == m_interface.lock().get())){
+      throw mcrl2::runtime_error("Manager lock differs from interface lock");
+    }
 
     if (0 < reverse_depends.count(p.get())) {
       std::stack < processor* > p_stack;
@@ -339,7 +353,9 @@ namespace squadt {
    * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
   void project_manager_impl::update_status(boost::shared_ptr< processor > p, bool u) {
-    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+    if(!(p->impl->manager.lock().get() == m_interface.lock().get())){
+      throw mcrl2::runtime_error("Manager lock differs from interface lock");
+    }
 
     if (0 < reverse_depends.count(p.get())) {
 
@@ -377,7 +393,9 @@ namespace squadt {
    * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
   std::auto_ptr < project_manager_impl::conflict_list > project_manager_impl::get_conflict_list(boost::shared_ptr< processor > p) const {
-    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+    if(!(p->impl->manager.lock().get() == m_interface.lock().get())){
+      throw mcrl2::runtime_error("Manager lock differs from interface lock");
+    }
 
     std::set < std::string > locations; // Names of files produced by p
 
@@ -413,7 +431,9 @@ namespace squadt {
    * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
   void project_manager_impl::update(boost::shared_ptr< processor > p, boost::function < void (processor*) > h) {
-    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+    if(!(p->impl->manager.lock().get() == m_interface.lock().get())){
+      throw mcrl2::runtime_error("Manager lock differs from interface lock");
+    }
 
     /* Recursively update inputs */
     p->check_status(true);
@@ -474,7 +494,9 @@ namespace squadt {
   boost::shared_ptr< processor > project_manager_impl::import_file(const boost::filesystem::path& s, std::string const& d) {
     using namespace boost::filesystem;
 
-    assert(exists(s) && !is_directory(s));
+    if(!(exists(s) && !is_directory(s))){
+      mcrl2::runtime_error( "Directory does not exist" );
+    }
 
     path           destination_path  = store / path(d.empty() ? filename(s) : d);
     boost::shared_ptr< processor > p = processor::create(m_interface.lock());
@@ -554,7 +576,9 @@ namespace squadt {
    * \pre p->impl->manager.lock().get() == m_interface.lock().get()
    **/
   void project_manager_impl::remove(boost::shared_ptr < processor > p, bool b) {
-    assert(p->impl->manager.lock().get() == m_interface.lock().get());
+    if(!(p->impl->manager.lock().get() == m_interface.lock().get())){
+      throw mcrl2::runtime_error("Manager lock differs from interface lock");
+    }
 
     std::set < processor* > obsolete;
 

@@ -74,8 +74,8 @@ namespace tipi {
 
     std::auto_ptr < basic_integer_range > basic_integer_range::reconstruct(std::string const&) {
       std::auto_ptr < basic_integer_range > new_range;
-
-      assert(false);
+ 
+      throw mcrl2::runtime_error( "Accessing function with unpredictable behaviour.\n" );
 
       return new_range;
     }
@@ -91,7 +91,7 @@ namespace tipi {
 
       std::auto_ptr < basic_real_range > new_range;
 
-      assert(false);
+      throw mcrl2::runtime_error( "Accessing function with unpredictable behaviour.\n" );
 
       return new_range;
     }

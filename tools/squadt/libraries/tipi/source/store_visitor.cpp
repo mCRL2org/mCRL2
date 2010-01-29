@@ -275,7 +275,9 @@ namespace utility {
   void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::string const& e, std::string const& s) {
     using namespace boost::xpressive;
 
-    assert(!regex_search(s, sregex(as_xpr("]]>"))));
+    if(!(!regex_search(s, sregex(as_xpr("]]>"))))){
+      throw mcrl2::runtime_error( "No instance found for the data type in textual representation" );
+    };
 
     out << "<string";
 

@@ -11,18 +11,9 @@
 #ifndef UTILITY_GENERIC_VISITOR_H__
 #define UTILITY_GENERIC_VISITOR_H__
 
-#include <iostream>
-#include <stdexcept>
-#include <algorithm>
-#include <typeinfo>
 #include <vector>
-#include <functional>
 
-#include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_void.hpp>
-#include <boost/type_traits/is_object.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace utility {

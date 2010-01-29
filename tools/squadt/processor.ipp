@@ -277,7 +277,9 @@ namespace squadt {
   inline processor_impl::processor_impl(boost::shared_ptr < processor > const& tp, boost::weak_ptr < project_manager > p) :
                 interface_object(tp), current_monitor(new monitor(tp)), manager(p) {
 
-    assert(manager.lock().get());
+    if(!(manager.lock().get())) {
+      mcrl2::runtime_error("Cannot get lock for manager.\n");
+    };
   }
 
   /**
@@ -290,9 +292,15 @@ namespace squadt {
         boost::weak_ptr < project_manager > p, boost::shared_ptr < const tool > t, boost::shared_ptr < const tool::input_configuration > c) :
                interface_object(tp), tool_descriptor(t), selected_input_configuration(c), current_monitor(new monitor(tp)), manager(p) {
 
-    assert(manager.lock().get());
-    assert(tool_descriptor.get());
-    assert(selected_input_configuration.get());
+    if(!(manager.lock().get())) {
+      mcrl2::runtime_error("Cannot get lock for manager.\n");
+    }
+    if(!(tool_descriptor.get())) {
+      mcrl2::runtime_error("Cannot get tool descriptor.\n");
+    }
+    if(!(selected_input_configuration.get())) {
+      mcrl2::runtime_error("Cannot get selected input configuration.\n");
+    }
   }
 
   /**
@@ -343,7 +351,9 @@ namespace squadt {
    * \attention This function is non-blocking
    **/
   inline void processor_impl::reconfigure(interface_ptr const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
-    assert(selected_input_configuration.get());
+    if(!(selected_input_configuration.get())) {
+      mcrl2::runtime_error("Cannot get selected input configuration.\n");
+    };
 
     c->fresh(true);
 

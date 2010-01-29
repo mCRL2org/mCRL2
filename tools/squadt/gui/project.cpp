@@ -67,7 +67,10 @@ namespace squadt {
 
         inline dispatch_event(boost::function< void () > const& h) :
                                  wxCommandEvent(wxEVT_DISPATCH), m_handler(h) {
-          assert(!m_handler.empty());
+          
+          if(!(!m_handler.empty())){
+            throw mcrl2::runtime_error( "Empty handler" );
+          }
         }
 
         inline void invoke() {
@@ -469,7 +472,9 @@ namespace squadt {
     void project::spawn_context_menu(tool_data& n) {
       using namespace boost;
 
-      assert(n.get_processor().get() != 0);
+      if(!(n.get_processor().get() != 0)){
+         throw mcrl2::runtime_error( "Processor not available" );
+      }
 
       type_registry& registry(global_build_system.get_type_registry());
 

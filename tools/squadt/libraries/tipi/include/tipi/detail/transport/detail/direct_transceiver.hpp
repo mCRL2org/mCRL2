@@ -11,8 +11,6 @@
 #ifndef DIRECT_TRANSCEIVER_H
 #define DIRECT_TRANSCEIVER_H
 
-#include <sstream>
-
 #include <tipi/detail/transport/detail/transceiver.ipp>
 
 namespace transport {
@@ -64,7 +62,9 @@ namespace transport {
      * @param p the other end point
      **/
     inline direct_transceiver::direct_transceiver(boost::shared_ptr < transporter_impl > const& o, boost::shared_ptr < direct_transceiver > const& p) : basic_transceiver(o), peer(p.get()) {
-      assert(p.get() != 0);
+      if(!(p.get() != 0)){
+        throw mcrl2::runtime_error("Direct transceiver does not exists");
+      }
 
       p->peer = this;
     }

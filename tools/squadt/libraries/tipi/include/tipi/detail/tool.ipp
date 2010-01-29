@@ -164,7 +164,9 @@ namespace tipi {
      * \param[in] m shared pointer reference to an offer_configuration message
      **/
     inline void communicator_impl::receive_configuration_handler(boost::shared_ptr< const tipi::message >& m) {
-      assert(m->get_type() == tipi::message_configuration);
+      if(!(m->get_type() == tipi::message_configuration)){
+        mcrl2::runtime_error( "Expected configuration message type ");
+      }
 
       try {
         boost::shared_ptr < configuration > c(new configuration);
