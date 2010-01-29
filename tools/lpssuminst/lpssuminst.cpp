@@ -175,7 +175,7 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
                     append(d.create< label >().set_text("Instantiation of summation variables in progress"), layout::left)));
 
       //Perform instantiation
-      bool result = run() == 0;
+      bool result = run();
 
       send_display_layout(d.manager(d.create< vertical_box >().
                     append(d.create< label >().set_text(std::string("Instantiation of summation variables ") + ((result) ? "succeeded" : "failed")), layout::left)));

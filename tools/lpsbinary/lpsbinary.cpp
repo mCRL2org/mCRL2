@@ -120,8 +120,8 @@ class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       send_display_layout(d.manager(d.create< vertical_box >().
                     append(d.create< label >().set_text("Binary in progress"), layout::left)));
 
-      //Perform declustering
-      bool result = run() == 0;
+      //Perform binary
+      bool result = run();
 
       send_display_layout(d.manager(d.create< vertical_box >().
                     append(d.create< label >().set_text(std::string("Binary ") + ((result) ? "succeeded" : "failed")), layout::left)));

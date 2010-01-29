@@ -86,7 +86,7 @@ class untime_tool: public squadt_tool< input_output_tool >
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(configuration);
 
-      return run() == 0;
+      return run();
     }
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
