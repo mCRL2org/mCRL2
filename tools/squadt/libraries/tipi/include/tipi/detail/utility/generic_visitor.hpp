@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <iostream>
+#include <stdexcept>
 
 #include <boost/type_traits/is_const.hpp>
 #include <boost/shared_ptr.hpp>
