@@ -206,8 +206,16 @@ BOOST_AUTO_TEST_CASE(test_set_true_false) {
   test_data_expression("{true, false}", true, "Set(Bool)");
 }
 
+BOOST_AUTO_TEST_CASE(test_set_numbers) {
+  test_data_expression("{1, 2, -7}", true, "Set(Int)");
+}
+
 BOOST_AUTO_TEST_CASE(test_bag_true_false) {
   test_data_expression("{true: 1, false: 2}", true, "Bag(Bool)");
+}
+
+BOOST_AUTO_TEST_CASE(test_bag_numbers) {
+  test_data_expression("{1: 1, 2: 2, -7: 7}", true, "Bag(Int)");
 }
 
 BOOST_AUTO_TEST_CASE(test_function_updates)

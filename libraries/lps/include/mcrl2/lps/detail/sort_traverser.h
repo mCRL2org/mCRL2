@@ -29,7 +29,7 @@ namespace detail {
     using super::operator();
 
 // Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/lps/detail/traverser.inc"
+#include "mcrl2/lps/detail/traverser.inc.h"
   };
 
   /// \brief
@@ -54,7 +54,7 @@ namespace detail {
     using super::operator();
 
 // Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/lps/detail/traverser.inc"
+#include "mcrl2/lps/detail/traverser.inc.h"
   };
 
   template <typename Derived, typename AdaptablePredicate>

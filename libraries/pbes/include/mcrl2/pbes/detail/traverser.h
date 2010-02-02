@@ -30,7 +30,7 @@ namespace traversal {
       using super::operator();
 
 // Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/pbes/detail/traverser.inc"
+#include "mcrl2/pbes/detail/traverser.inc.h"
   };
 
 template<typename Derived, typename AdaptablePredicate>
