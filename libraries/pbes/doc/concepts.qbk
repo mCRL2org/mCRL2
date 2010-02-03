@@ -6,16 +6,16 @@ A class or built-in type T models the `FixpointEquation` concept if it satisfies
 the following requirements:
 
 [table FixpointEquation Requirements
- [ [ Expression ] [ Requirement ] ]
- [ [ `T::expression_type ` ] [ is a valid C++ type ] ]
- [ [ `T::variable_type   ` ] [ is a valid C++ type ] ]
- [ [ `T::symbol_type     ` ] [ is a valid C++ type ] ]
- [ [ `eq.variable()      ` ] [ is a valid expression of type `T::variable_type` ] ]
- [ [ `eq.variable() = x  ` ] [ is a valid expression ] ]
- [ [ `eq.formula()       ` ] [ is a valid expression of type `T::expression_type` ] ]
- [ [ `eq.formula() = phi ` ] [ is a valid expression ] ]
- [ [ `eq.symbol()        ` ] [ is a valid expression of type `T::symbol_type` ] ]
- [ [ `eq.symbol() = sigma` ] [ is a valid expression ] ]
+ [ [ Expression ] [ Requirement ] [ Semantics ] ]
+ [ [ `T::expression_type ` ] [ is a valid C++ type ]                                [] ]
+ [ [ `T::variable_type   ` ] [ is a valid C++ type ]                                [] ]
+ [ [ `T::symbol_type     ` ] [ is a valid C++ type ]                                [] ]
+ [ [ `eq.variable()      ` ] [ is a valid expression of type `T::variable_type` ]   [] ]
+ [ [ `eq.variable() = x  ` ] [ is a valid expression ]                              [] ]
+ [ [ `eq.formula()       ` ] [ is a valid expression of type `T::expression_type` ] [] ]
+ [ [ `eq.formula() = phi ` ] [ is a valid expression ]                              [] ]
+ [ [ `eq.symbol()        ` ] [ is a valid expression of type `T::symbol_type` ]     [] ]
+ [ [ `eq.symbol() = sigma` ] [ is a valid expression ]                              [] ]
 ]
 
 where `eq`, `x`, `phi` and `sigma` are expressions of type `T`, `T::expression_type`, `T::variable_type`
@@ -25,21 +25,20 @@ A class or built-in type T models the `BooleanExpressionTraits` concept if it sa
 the following requirements:
 
 [table BooleanExpressionTraits Requirements
- [ [ Expression ] [ Requirement ] ]
+ [ [ Expression ] [ Requirement ] [ Semantics ] ]
  [ [ `T::equation_type` ] [ is a valid C++ type that models the FixpointEquation concept ] ]
- [ [ `T::expression_type     `       ] [ is a valid C++ type ] ]
- [ [ `T::variable_type       `       ] [ is a valid C++ type ] ]
- [ [ `T::symbol_type         `       ] [ is a valid C++ type ] ]
- [ [ `psi = substitute(psi, x, phi)` ] [ is a valid expression ] ]
- [ [ `s = print(eq)`                 ] [ is a valid expression ] ]
+ [ [ `T::expression_type     `       ] [ is a valid C++ type   ] [] ]
+ [ [ `T::variable_type       `       ] [ is a valid C++ type   ] [] ]
+ [ [ `T::symbol_type         `       ] [ is a valid C++ type   ] [] ]
+ [ [ `s = print(eq)`                 ] [ is a valid expression ] [] ]
 ]
 
 where
 `eq` is an expression of type `T::equation_type`,
 `x` is an expression of type `T::variable_type`,
 `s` is an expression of type `std::string`,
-and
-`phi` and `psi` are expressions of type `T::expression_type`.
+`phi` and `psi` are expressions of type `T::expression_type`,
+and `sigma` is an expression of type `T::symbol_type`.
 
 Examples of types modeling `BooleanExpressionTraits` are `boolean_expression_traits`
 and `pbes_expression_traits`.

@@ -10,8 +10,8 @@ def insert_text_in_file(filename, text, label):
     Replaces the text between the strings '//--- start %s ---//' % label and '//--- end %s ---//' % label
     with text in the file named filename.
     """
-    src = r'//--- %s ---//.*//--- %s ---//' % (label, label)
-    dest = ('//--- %s ---//\n' + text + '//--- %s ---//') % (label, label)
+    src = r'//--- start %s ---//.*//--- end %s ---//' % (label, label)
+    dest = ('//--- start %s ---//\n' + text + '//--- end %s ---//') % (label, label)
     old_text = path(filename).text()
     new_text = re.compile(src, re.S).sub(dest, old_text)
     if old_text == new_text:
