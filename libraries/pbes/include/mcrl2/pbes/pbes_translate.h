@@ -19,7 +19,6 @@
 #include <algorithm>
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
-#include "mcrl2/modal_formula/global_variables.h"
 #include "mcrl2/core/find.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
