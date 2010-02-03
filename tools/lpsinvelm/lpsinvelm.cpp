@@ -208,7 +208,8 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
 
         gsVerboseMsg("parsing input file '%s'...\n", m_invariant_file_name.c_str());
 
-        m_invariant = parse_data_expression(instream, specification.data());
+        data::variable_list &parameters=specification.process().process_parameters();
+        m_invariant = parse_data_expression(instream, parameters.begin(), parameters.end(), specification.data());
 
         instream.close();
       }
