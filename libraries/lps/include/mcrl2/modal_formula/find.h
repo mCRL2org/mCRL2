@@ -18,9 +18,6 @@
 #include "mcrl2/modal_formula/detail/sort_traverser.h"         
 #include "mcrl2/modal_formula/detail/binding_aware_traverser.h"
 
-// TODO: remove this code and use find_free_variables instead
-#include "mcrl2/modal_formula/detail/free_variable_visitor.h"
-
 namespace mcrl2 {
 
 namespace state_formulas {
