@@ -1,7 +1,11 @@
+#~ Copyright 2009, 2010 Wieger Wesselink.
+#~ Distributed under the Boost Software License, Version 1.0.
+#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+
 import re
-import string
 from path import *
 from mcrl2_classes import *
+from mcrl2_utility import *
 
 EXPRESSION_VISITOR_CODE = r'''/// \\brief Visitor class for MYEXPRESSIONs.
 ///
@@ -251,11 +255,7 @@ def make_expression_visitor(filename, expression, text):
     
     rtext = EXPRESSION_VISITOR_CODE % (vtext2, wtext2, vtext1, wtext1)
     rtext = re.sub('MYEXPRESSION', expression, rtext)
-    text = path(filename).text()
-    text = re.compile(r'//--- start generated visitor ---//.*//--- end generated visitor ---//', re.S).sub(
-                  '//--- start generated visitor ---//\n' + rtext + '//--- end generated visitor ---//',
-                  text)
-    path(filename).write_text(text)
+    insert_text_in_file(filename, rtext, 'generated visitor')
 
 def make_expression_builder(filename, expression, text):
     classes = parse_classes(text)
@@ -325,11 +325,7 @@ def make_expression_builder(filename, expression, text):
     
     rtext = EXPRESSION_BUILDER_CODE % (vtext2, wtext2, vtext1, wtext1)
     rtext = re.sub('MYEXPRESSION', expression, rtext)
-    text = path(filename).text()
-    text = re.compile(r'//--- start generated visitor ---//.*//--- end generated visitor ---//', re.S).sub(
-                  '//--- start generated visitor ---//\n' + rtext + '//--- end generated visitor ---//',
-                  text)
-    path(filename).write_text(text)
+    insert_text_in_file(filename, rtext, 'generated visitor')
 
 def make_is_functions(filename, text):
     TERM_TRAITS_TEXT = r'''
@@ -350,11 +346,7 @@ def make_is_functions(filename, text):
         f = FunctionDeclaration(constructor)
         name = f.name()
         rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, aterm)
-    text = path(filename).text()
-    text = re.compile(r'//--- start generated is-functions ---//.*//--- end generated is-functions ---//', re.S).sub(
-                  '//--- start generated is-functions ---//\n' + rtext + '//--- end generated is-functions ---//',
-                  text)
-    path(filename).write_text(text)
+    insert_text_in_file(filename, rtext, 'generated is-functions')
 
 make_expression_visitor('../../process/include/mcrl2/process/process_expression_visitor.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
 make_expression_builder('../../process/include/mcrl2/process/process_expression_builder.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)

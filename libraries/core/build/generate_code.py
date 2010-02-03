@@ -2,51 +2,11 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import os
 import re
 from optparse import OptionParser
 from mcrl2_parser import *
+from mcrl2_utility import *
 from path import *
-
-#--------------------------------------------------------#
-#                insert_text_in_file
-#--------------------------------------------------------#
-# search for the lines equal to 'beginline' and 'endline'
-# in filename, and replace the lines between them with 'text'
-#
-def insert_text_in_file(text, filename, beginline = '<!-- begin -->', endline = '<!-- end -->'):
-    tmpfile = filename + '.tmp'
-    try:
-        infile  = open(filename)
-        outfile = open(tmpfile, "w")
-    except IOError, e:
-        print "Unable to open file ", filename, " ", e
-        return
-
-    lines = infile.readlines()
-
-    for i in range(len(lines)):
-        outfile.write(lines[i])
-        if string.rstrip(lines[i]) == beginline:
-            break
-
-    first = i+1
-    for i in range(first, len(lines)):
-        if string.rstrip(lines[i]) == endline:
-            outfile.write(text + '\n')
-            outfile.write(lines[i])
-            break
-
-    if i < len(lines)-1:
-        first = i+1
-
-    for i in range(first, len(lines)):
-        outfile.write(lines[i])
-
-    infile.close()
-    outfile.close()
-    os.remove(filename)
-    os.rename(tmpfile, filename)
 
 LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
 inline
@@ -86,8 +46,6 @@ ATermAppl gsMake%(name)s(%(parameters)s)
 # generates C++ code for libstruct functions
 #
 def generate_libstruct_functions(rules, filename, ignored_phases = []):
-    begin = '//--- begin generated code'
-    end   = '//--- end generated code'
     names = {}
     calls = {}
     decls = {}
@@ -129,7 +87,8 @@ def generate_libstruct_functions(rules, filename, ignored_phases = []):
             'parameters' : decls[name],
             'arguments'  : comma + calls[name]
         }
-    insert_text_in_file(string.strip(text + mtext), filename, begin, end)
+    text = string.strip(text + mtext)
+    insert_text_in_file(filename, text, 'generated code')
 
 CHECK_RULE = '''template <typename Term>
 bool check_rule_%(name)s(Term t)
@@ -175,8 +134,6 @@ CHECK_TERM_CHILDREN = '''  // check the children
 # generates C++ code for checking if terms are in the right format
 #
 def generate_soundness_check_functions(rules, filename, ignored_phases = []):
-    begin = '//--- begin generated code'
-    end   = '//--- end generated code'
     text  = '' # function definitions
     ptext = '' # function declarations (prototypes)
 
@@ -228,7 +185,8 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
         }
         ptext = ptext + 'template <typename Term> bool %s(Term t);\n' % f.check_name()
 
-    insert_text_in_file(string.strip(ptext + '\n' + text), filename, begin, end)
+    text = string.strip(ptext + '\n' + text)
+    insert_text_in_file(filename, text, 'generated code')
 
 CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
@@ -263,8 +221,6 @@ ATermAppl construct%(name)s()
 # generates C++ code for constructor functions
 #
 def generate_constructor_functions(rules, filename, ignored_phases = []):
-    begin = '//--- begin generated code'
-    end   = '//--- end generated code'
     text  = ''
     ptext = '' # function declarations (prototypes)
 
@@ -297,7 +253,6 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
             'name'       : name
         }
 
-    ctext = ''
     function_names = map(lambda x: x.name(), functions)
     for rule in rules:
         if not rule.name() in function_names:
@@ -313,7 +268,8 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
                 'fname'      : fname
             }
 
-    insert_text_in_file(string.strip(ptext + '\n' + text), filename, begin, end)
+    text = ptext + '\n' + text
+    insert_text_in_file(filename, text, 'generated code')
 
 #---------------------------------------------------------------#
 #                          find_functions
@@ -341,8 +297,6 @@ def find_functions(rules, ignored_phases):
 #---------------------------------------------------------------#
 def parse_ebnf(filename):
     rules = []
-    nonterminals = []
-    nonterminal_names = {}
 
     paragraphs = read_paragraphs(filename)
     for paragraph in paragraphs:
@@ -418,20 +372,17 @@ def main():
         ignored_phases = [] # ['-lin', '-di', '-rft']
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
         generate_soundness_check_functions(rules, filename, ignored_phases)
-        print 'updated %s' % filename
 
     if options.libstruct:
         ignored_phases = []
         filename = '../include/mcrl2/core/detail/struct_core.h'
         generate_libstruct_functions(rules, filename, ignored_phases)
         postprocess_libstruct(filename)
-        print 'updated %s' % filename
 
     if options.constructors:
         ignored_phases = []
         filename = '../include/mcrl2/core/detail/constructors.h'
         generate_constructor_functions(rules, filename, ignored_phases)
-        print 'updated %s' % filename
 
     if not options.soundness_checks and not options.libstruct and not options.constructors:
         parser.print_help()

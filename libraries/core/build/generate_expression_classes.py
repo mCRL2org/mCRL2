@@ -1,7 +1,11 @@
+#~ Copyright 2009, 2010 Wieger Wesselink.
+#~ Distributed under the Boost Software License, Version 1.0.
+#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+
 import re
-import string
 from path import *
 from mcrl2_classes import *
+from mcrl2_utility import *
 
 # Example of generated class:
 #
@@ -84,11 +88,7 @@ def generate_classes(text, superclass):
 def make_expression_classes(filename, class_text, class_name):
     classes = generate_classes(class_text, class_name)
     ctext = '\n\n'.join(classes) + '\n'
-    text = path(filename).text()
-    text = re.compile(r'//--- start generated expression classes ---//.*//--- end generated expression classes ---//', re.S).sub(
-                  '//--- start generated expression classes ---//\n' + ctext + '//--- end generated expression classes ---//',
-                  text)
-    path(filename).write_text(text)   
+    insert_text_in_file(filename, ctext, 'generated expression classes')
 
 def make_is_functions(filename, text):
     TERM_TRAITS_TEXT = r'''
@@ -109,11 +109,7 @@ def make_is_functions(filename, text):
         f = FunctionDeclaration(constructor)
         name = f.name()
         rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, aterm)
-    text = path(filename).text()
-    text = re.compile(r'//--- start generated is-functions ---//.*//--- end generated is-functions ---//', re.S).sub(
-                  '//--- start generated is-functions ---//\n' + rtext + '//--- end generated is-functions ---//',
-                  text)
-    path(filename).write_text(text)
+    insert_text_in_file(filename, rtext, 'generated is-functions')
 
 make_expression_classes('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula')
 make_expression_classes('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula')
