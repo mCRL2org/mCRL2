@@ -137,7 +137,7 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       std::ifstream rename_stream(m_action_rename_filename.c_str());
       if (!rename_stream.is_open())
       {
-        throw mcrl2::runtime_error("cannot open rename file \"" + m_action_rename_filename "\"");
+        throw mcrl2::runtime_error("cannot open rename file \"" + m_action_rename_filename + "\"");
       }
 
       // Parse the rename spec in rename_stream.

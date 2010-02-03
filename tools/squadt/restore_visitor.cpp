@@ -331,7 +331,7 @@ namespace utility {
         e->GetAttribute("id", &id);
 
         if(!(h.cmap.find(id) == h.cmap.end())){
-           std::runtime_error("Cannot find ID in mapping");
+           throw std::runtime_error("Cannot find ID in mapping");
         };
 
         h.cmap[id] = boost::shared_ptr < processor_impl::object_descriptor >(

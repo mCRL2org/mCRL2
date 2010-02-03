@@ -74,7 +74,7 @@ namespace squadt {
     using namespace boost::filesystem;
 
     if(l.empty()){
-      std::runtime_error("Empty path");
+      throw std::runtime_error("Empty path");
     };
 
     if (filename(l) == settings_manager::project_definition_base_name) {
@@ -221,7 +221,7 @@ namespace squadt {
 
       
     if(!(bf::exists(l) && bf::is_directory(l))){
-      std::runtime_error( "Directory does not exist" );
+      throw std::runtime_error( "Directory does not exist" );
     }
 
     bf::directory_iterator end;
@@ -495,7 +495,7 @@ namespace squadt {
     using namespace boost::filesystem;
 
     if(!(exists(s) && !is_directory(s))){
-      std::runtime_error( "Directory does not exist" );
+      throw std::runtime_error( "Directory does not exist" );
     }
 
     path           destination_path  = store / path(d.empty() ? filename(s) : d);

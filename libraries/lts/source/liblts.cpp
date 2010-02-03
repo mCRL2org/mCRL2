@@ -701,7 +701,7 @@ lts_type p_lts::detect_type(istream &is)
 {
   if ( is == cin ) // XXX better test to see if is is seekable?
   {
-    mcrl2::runtime_error("Type detection does not work on stdin.");
+    throw mcrl2::runtime_error("Type detection does not work on stdin.");
     return lts_none;
   }
 
@@ -2392,7 +2392,7 @@ void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, 
   if ( fwrite(buf,1,8+12,f) != 8+12 )
   {
     fclose(f);
-    mcrl2::runtime_error("error writing extra LTS information to '" + filename + 
+    throw mcrl2::runtime_error("error writing extra LTS information to '" + filename + 
                      "', file could be corrupted.");
     return;
   }

@@ -510,12 +510,12 @@ namespace mcrl2 {
        { sort_already_seen.insert(result_sort);
          result_sort= m_normalised_aliases.find(result_sort)->second;
          if (sort_already_seen.count(result_sort))
-         { mcrl2::runtime_error("Sort alias " + pp(result_sort) + " is defined in terms of itself.");
+         { throw mcrl2::runtime_error("Sort alias " + pp(result_sort) + " is defined in terms of itself.");
          }
 
          for (std::set< sort_expression >::const_iterator j = all_sorts.begin(); j != all_sorts.end(); ++j)
          { if (*j==result_sort)
-           { mcrl2::runtime_error("Sort alias " + pp(i->first) + " depends on sort" +
+           { throw mcrl2::runtime_error("Sort alias " + pp(i->first) + " depends on sort" +
                                            pp(result_sort) + ", which is circularly defined.\n");
            }
          }

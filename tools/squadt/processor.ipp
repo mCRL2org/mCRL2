@@ -278,7 +278,7 @@ namespace squadt {
                 interface_object(tp), current_monitor(new monitor(tp)), manager(p) {
 
     if(!(manager.lock().get())) {
-      std::runtime_error("Cannot get lock for manager.\n");
+      throw std::runtime_error("Cannot get lock for manager.\n");
     };
   }
 
@@ -293,13 +293,13 @@ namespace squadt {
                interface_object(tp), tool_descriptor(t), selected_input_configuration(c), current_monitor(new monitor(tp)), manager(p) {
 
     if(!(manager.lock().get())) {
-      std::runtime_error("Cannot get lock for manager.\n");
+      throw std::runtime_error("Cannot get lock for manager.\n");
     }
     if(!(tool_descriptor.get())) {
-      std::runtime_error("Cannot get tool descriptor.\n");
+      throw std::runtime_error("Cannot get tool descriptor.\n");
     }
     if(!(selected_input_configuration.get())) {
-      std::runtime_error("Cannot get selected input configuration.\n");
+      throw std::runtime_error("Cannot get selected input configuration.\n");
     }
   }
 
@@ -352,7 +352,7 @@ namespace squadt {
    **/
   inline void processor_impl::reconfigure(interface_ptr const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
     if(!(selected_input_configuration.get())) {
-      std::runtime_error("Cannot get selected input configuration.\n");
+      throw std::runtime_error("Cannot get selected input configuration.\n");
     };
 
     c->fresh(true);

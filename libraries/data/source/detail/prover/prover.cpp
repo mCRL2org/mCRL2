@@ -70,7 +70,7 @@ namespace mcrl2 {
         }
 #ifdef MCRL2_INNERC_AVAILABLE
         case (mcrl2::data::rewriter::innermost_compiling_prover): {
-          mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover.");
+          throw mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover.");
           break;
         }
 #endif
@@ -91,7 +91,7 @@ namespace mcrl2 {
         }
 #endif
         default: {
-          mcrl2::runtime_error("Unknown type of rewriter.");
+          throw mcrl2::runtime_error("Unknown type of rewriter.");
           break;
         }
       }
