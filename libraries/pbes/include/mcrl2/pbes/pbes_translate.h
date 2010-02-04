@@ -589,10 +589,10 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           result = E(f0, not_(left(f)), lps, T) + E(f0, not_(right(f)), lps, T);
         } else if (is_imp(f)) {
           result = E(f0, left(f), lps, T) + E(f0, not_(right(f)), lps, T);
-        } else if (is_forall(not_(f))) {
-          result = E(f0, arg(f), lps, T);
-        } else if (is_exists(not_(f))) {
-          result = E(f0, arg(f), lps, T);
+        } else if (is_forall(f)) {
+          result = E(f0, not_(arg(f)), lps, T);
+        } else if (is_exists(f)) {
+          result = E(f0, not_(arg(f)), lps, T);
         } else if (is_must(f)) {
           result = E(f0, not_(arg(f)), lps, T);
         } else if (is_may(f)) {
@@ -995,10 +995,10 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           result = E(f0, not_(left(f)), lps) + E(f0, not_(right(f)), lps);
         } else if (is_imp(f)) {
           result = E(f0, left(f), lps) + E(f0, not_(right(f)), lps);
-        } else if (is_forall(not_(f))) {
-          result = E(f0, arg(f), lps);
-        } else if (is_exists(not_(f))) {
-          result = E(f0, arg(f), lps);
+        } else if (is_forall(f)) {
+          result = E(f0, not_(arg(f)), lps);
+        } else if (is_exists(f)) {
+          result = E(f0, not_(arg(f)), lps);
         } else if (is_must(f)) {
           result = E(f0, not_(arg(f)), lps);
         } else if (is_may(f)) {
