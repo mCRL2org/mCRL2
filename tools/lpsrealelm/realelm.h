@@ -348,8 +348,8 @@ class summand_information
         }
       }
       nextstate_context_combinations.swap(new_nextstate_context_combinations);
-      std::cerr << "SIZE new nextstate_context combinations " << nextstate_context_combinations.size() << "\n"
-                << "IN summand " << pp(smd) << "\n";
+      // std::cerr << "SIZE new nextstate_context combinations " << nextstate_context_combinations.size() << "\n"
+      //          << "IN summand " << pp(smd) << "\n";
     }
 };
 

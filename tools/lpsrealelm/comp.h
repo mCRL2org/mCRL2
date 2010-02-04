@@ -66,17 +66,18 @@ class comp_struct:public structured_sort
       c_equal().protect();
       c_larger().protect();
       comp_sort().protect();
-      f_smaller=c_smaller().constructor_function(*this);
-      f_equal=c_equal().constructor_function(*this);
-      f_larger=c_larger().constructor_function(*this);
-      f_is_smaller=c_smaller().recogniser_function(*this);
-      f_is_equal=c_equal().recogniser_function(*this);
-      f_is_larger=c_larger().recogniser_function(*this);
+      f_smaller=c_smaller().constructor_function(sort());
+      f_equal=c_equal().constructor_function(sort());
+      f_larger=c_larger().constructor_function(sort());
+      f_is_smaller=c_smaller().recogniser_function(sort());
+      f_is_equal=c_equal().recogniser_function(sort());
+      f_is_larger=c_larger().recogniser_function(sort());
       // f_is_larger=c_larger().recogniser_function(comp_sort());
     }
 
     sort_expression sort() const
-    { return *this;
+    { // return *this;
+      return comp_sort();
     }
 
     basic_sort basic_sort_name() const

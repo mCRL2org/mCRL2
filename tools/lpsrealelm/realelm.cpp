@@ -226,6 +226,12 @@ variable_list get_nonreal_variables(const variable_list& l)
   return r;
 }
 
+static data::function_symbol &negate_function_symbol(const sort_expression s)
+{ static data::function_symbol f("negate",data::function_sort(s,s));
+  assert(data::function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
+  return f;
+}
+
 /// \brief Returns a list of all real expressions in l
 /// \param l a list of data expressions
 /// \ret The list of all e in l such that e.sort() == real()
@@ -767,7 +773,7 @@ summand generate_summand(summand_information &summand_info,
                          identifier_generator<>& variable_generator,
                          const comp_struct &cs,
                          const bool is_may_summand=false)
-{ // std::cerr << "SUMMNAND " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";
+{ // std::cerr << "SUMMAND " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";
   static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
   static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map;
                                          // Used to recall which may actions labels have been
@@ -783,9 +789,12 @@ summand generate_summand(summand_information &summand_info,
                  realelm_data_expression_map_replace(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
     data_expression substituted_upperbound=
                  realelm_data_expression_map_replace(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map());
+    // std::cerr << "Lower Upper " << pp(substituted_lowerbound) << "  " << pp(substituted_upperbound) << "\n";
     linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
+    // std::cerr << "INequality: " << string(e) << "\n";
     data_expression t,u;
-    e.typical_pair(t,u,r);
+    const bool negate=e.typical_pair(t,u,r);  // XXXXXXXXX       This can negate inequality, causing trouble.
+    // std::cerr << "Typical pair " << pp(t) << "  " << pp(u) << "   " << negate << "\n";
 
     bool success(false);
     /* First check whether the pair < t,u >
@@ -794,7 +803,13 @@ summand generate_summand(summand_information &summand_info,
     for(context_type::const_reverse_iterator c=complete_context.rbegin();
              ((c!=complete_context.rend()) && !success) ; ++c)
     { if ((t==c->get_lowerbound()) && (u==c->get_upperbound()))
-      { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),c->get_variable()));
+      { if (negate)
+        { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),
+                           application(negate_function_symbol(cs.sort()),c->get_variable())));
+        }
+        else
+        { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),c->get_variable()));
+        }
         success=true;
       }
     }
@@ -803,12 +818,19 @@ summand generate_summand(summand_information &summand_info,
        one possibility. The nextstate_condition is changed for this purpose. The changes
        are restored at the end. */
     if (!success)
-    { nextstate_condition.push_back(linear_inequality(t,u,linear_inequality::less_eq,r));
+    { 
+      nextstate_condition.push_back(linear_inequality(
+                                           substituted_lowerbound,
+                                           substituted_upperbound,
+                                           linear_inequality::less_eq,r));
+      // std::cerr << "Nextstate_condition " << pp_vector(nextstate_condition) << "\n";
       if (is_inconsistent(nextstate_condition,r))
-      { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.larger())));
+      { // std::cerr << "ASSIGNMENT: " << c_complete->get_variable() << " := " << data_expression(cs.larger()) << "\n";
+        nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.larger())));
       }
       else
-      { nextstate_condition[nextstate_condition.size()-1]=linear_inequality(u,t,linear_inequality::less_eq,r);
+      { nextstate_condition[nextstate_condition.size()-1]=linear_inequality(substituted_upperbound,
+                        substituted_lowerbound,linear_inequality::less_eq,r);
         if (is_inconsistent(nextstate_condition,r))
         { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.smaller())));
         }
@@ -903,6 +925,7 @@ assignment_list determine_process_initialization(
 }
 
 
+
 /// \brief Perform elimination of real variables on a specification in a maximum
 ///        number of iterations.
 /// \param s A specification
@@ -914,10 +937,36 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   if (s.process().has_time())
   { throw  mcrl2::runtime_error("Input specification contains actions with time. Use lpsuntime first.");
   }
-  // First prepare the rewriter and normalize the specification.
+  // First add a constructor with elements smaller, larger and equal to the specification,
+  // including a mapping negate that reverses smaller into larger and vice versa.
   comp_struct c;
   data_specification ds=s.data();
   ds.add_alias(alias(c.basic_sort_name(),c));
+  ds.add_mapping(negate_function_symbol(c.sort()));
+  ds.add_equation(data_equation(  // negate(larger)=smaller;
+                     vector <variable>(),
+                     sort_bool::true_(),
+                     application(negate_function_symbol(c.sort()),c.larger()),
+                     c.smaller()));
+  ds.add_equation(data_equation(  // negate(smaller)=larger;
+                     vector <variable>(),
+                     sort_bool::true_(),
+                     application(negate_function_symbol(c.sort()),c.smaller()),
+                     c.larger()));
+  ds.add_equation(data_equation(  // negate(equal)=equal;
+                     vector <variable>(),
+                     sort_bool::true_(),
+                     application(negate_function_symbol(c.sort()),c.smaller()),
+                     c.larger()));
+  variable v("x",c.sort());
+  vector <variable> vars;
+  vars.push_back(v);
+  ds.add_equation(data_equation(  // negate(negate(x))=x;
+                     vars,
+                     sort_bool::true_(),
+                     application(negate_function_symbol(c.sort()),application(negate_function_symbol(c.sort()),v)),
+                     v));
+  
   s.data() = ds;
   postfix_identifier_generator variable_generator("");
   variable_generator.add_to_context(specification_to_aterm(s));
@@ -1052,7 +1101,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
       remove_redundant_inequalities(real_condition1,real_condition2,r);
 
       bool all_conditions_found=true;
-      // std::cerr << "Nextstate cond: " << pp_vector(real_condition2) << "\n";
+      // std::cerr << "Normalised nextstate cond: " << pp_vector(real_condition2) << "\n";
       for(std::vector <linear_inequality>::const_iterator j=real_condition2.begin();
                  j!=real_condition2.end(); ++j)
       {

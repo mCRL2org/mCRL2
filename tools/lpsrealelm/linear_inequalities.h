@@ -405,15 +405,17 @@ class linear_inequality
     }
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
-    void typical_pair(
+    /// \return The return value indicates whether the left and right hand side have been negated
+    ///         when yielding the critical pair. 
+    bool typical_pair(
             data_expression &lhs_expression,
             data_expression &rhs_expression,
             const rewriter &r) const
-    {
+    { 
       if (lhs_begin()==lhs_end())
       { lhs_expression=real_zero();
         rhs_expression=rhs();
-        return;
+        return false;
       }
 
       data_expression factor=lhs_begin()->second;
@@ -431,6 +433,7 @@ class linear_inequality
       }
 
       rhs_expression=rewrite_with_memory(sort_real::divides(rhs(),factor),r);
+      return is_negative(factor,r);
     }
 
     void divide(const data_expression e, const rewriter &r)
