@@ -12,6 +12,8 @@
 #include <cassert>
 #include <time.h>
 #include <sstream>
+#include <set>
+#include <stack>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
@@ -514,41 +516,54 @@ static void cleanup_representation()
   }
 }
 
-static void check_divergence(ATerm state) 
+static bool search_divergence_recursively(
+                const long current_state_index,
+                set < long > &on_current_depth_first_path)
 {
-  if ( lgopts->detect_divergence )
-  {
-    ATerm v = state;
-    ATindexedSetReset(repr_visited);
-    ATbool b;
-    ATindexedSetPut(repr_visited,v,&b);
-    int num_visited = 1;
-    int num_explored = 0;
-    bool divergence_found=false;
-  
-    while ( !divergence_found && num_explored < num_visited )
-    { 
-      num_explored++;
-      repr_nsgen = nstate->getNextStates(v,repr_nsgen);
-      ATermAppl Transition;
-      ATerm NewState;
-      while ( repr_nsgen->next(&Transition,&NewState))
-      { 
-        if ((ATermList)ATgetArgument(Transition,0)==ATempty) // This is a tau transition.
-        { ATbool b;
-          ATindexedSetPut(repr_visited,NewState,&b);
-          if ( b == ATtrue )
-          {
-            num_visited++;
-          }
-          else  
-          { divergence_found=true;
-          }
+  ATerm state=ATindexedSetGetElem(repr_visited,current_state_index);
+  on_current_depth_first_path.insert(current_state_index);
+  vector < long > new_states;
+  repr_nsgen = nstate->getNextStates(state,repr_nsgen);
+  ATermAppl Transition;
+  ATerm NewState;
+  while ( repr_nsgen->next(&Transition,&NewState))
+  { 
+    if ((ATermList)ATgetArgument(Transition,0)==ATempty) // This is a tau transition.
+    { ATbool b;
+      long n=ATindexedSetPut(repr_visited,NewState,&b);
+      if ( b == ATtrue )
+      {
+        new_states.push_back(n); 
+      }
+      else  
+      { if (on_current_depth_first_path.find(n)!=on_current_depth_first_path.end()) 
+        { // divergence found    
+          return true;
         }
       }
     }
-    
-    if ( divergence_found)
+  }
+
+  for(vector <long>::const_iterator i=new_states.begin();
+            i!=new_states.end(); ++i)
+  { if (search_divergence_recursively(*i,on_current_depth_first_path))
+    { return true;
+    }
+  }
+  on_current_depth_first_path.erase(current_state_index);
+  return false;
+}
+
+static void check_divergence(ATerm state) 
+{ 
+  if ( lgopts->detect_divergence )
+  {
+    ATindexedSetReset(repr_visited);
+    set < long > on_current_depth_first_path;
+    ATbool b;
+    ATindexedSetPut(repr_visited,state,&b);
+  
+    if (search_divergence_recursively(0,on_current_depth_first_path))
     { 
       if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
       {
@@ -562,19 +577,19 @@ static void check_divergence(ATerm state)
           if ( saved_ok )
           {
             cerr << "divergence-detect: divergence found and saved to '" << basefilename << "_dlk_" << tracecnt << 
-                    ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").";
+                    ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
           } 
           else 
           {
             cerr << "divergence-detect: divergence found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << 
-                    ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").";
+                    ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
           }
         }
         tracecnt++;
       } 
       else  
       {
-        cerr << "divergence-detect: divergence found (state index: " << ATindexedSetGetIndex(states,state) <<  ").";
+        cerr << "divergence-detect: divergence found (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
       }
     }
   }
