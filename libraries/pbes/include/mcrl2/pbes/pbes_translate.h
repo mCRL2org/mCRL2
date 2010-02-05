@@ -470,11 +470,11 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
         } else if (s::is_forall(f)) {
           std::set<std::string> names = data::detail::find_variable_name_strings(s::var(f));
           context.insert(names.begin(), names.end());
-          result = pbes_expr::forall(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, T, context));
+          result = pbes_expr::exists(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, T, context));
         } else if (s::is_exists(f)) {
           std::set<std::string> names = data::detail::find_variable_name_strings(s::var(f));
           context.insert(names.begin(), names.end());
-          result = pbes_expr::exists(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, T, context));
+          result = pbes_expr::forall(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, T, context));
         } else if (s::is_must(f)) {
           action_formulas::action_formula alpha = s::act(f);
           state_formulas::state_formula phi = s::arg(f);
@@ -877,11 +877,11 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
         } else if (s::is_forall(f)) {
           std::set<std::string> names = data::detail::find_variable_name_strings(s::var(f));
           context.insert(names.begin(), names.end());
-          result = pbes_expr::forall(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, context));
+          result = pbes_expr::exists(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, context));
         } else if (s::is_exists(f)) {
           std::set<std::string> names = data::detail::find_variable_name_strings(s::var(f));
           context.insert(names.begin(), names.end());
-          result = pbes_expr::exists(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, context));
+          result = pbes_expr::forall(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, context));
         } else if (s::is_must(f)) {
           action_formulas::action_formula alpha = s::act(f);
           state_formulas::state_formula phi = s::arg(f);
