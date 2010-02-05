@@ -138,6 +138,61 @@ void test_lps2pbes()
   formula = state_formulas::parse_state_formula(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
+  
+  SPECIFICATION =
+    "sort Closure = List(Bool);                                                   \n"
+    "sort State = struct state(closure: Closure, copy: Nat);                      \n"
+    "                                                                             \n"
+    "map initial: State -> Bool;                                                  \n"
+    "var q: State;                                                                \n"
+    "eqn initial(q) = closure(q).0 && (copy(q) == 0);                             \n"
+    "                                                                             \n"
+    "map accept: State -> Bool;                                                   \n"
+    "var q: State;                                                                \n"
+    "eqn accept(q) = ((copy(q) == 0) && (closure(q).0 => closure(q).2));          \n"
+    "                                                                             \n"
+    "map nextstate: State # State -> Bool;                                        \n"
+    "var q, q': State;                                                            \n"
+    "eqn nextstate(q, q') =                                                       \n"
+    "      (#closure(q) == #closure(q')) &&                                       \n"
+    "      (accept(q) => (copy(q') == (copy(q) + 1) mod 1)) &&                    \n"
+    "      (!accept(q) => (copy(q') == copy(q))) &&                               \n"
+    "      (closure(q).0 == (closure(q).2 || (closure(q).1 && closure(q').0))) && \n"
+    "      (closure(q').0 => closure(q').1 || closure(q').2) &&                   \n"
+    "      (closure(q').2 => closure(q').0);                                      \n"
+    "                                                                             \n"
+    "act a, b;                                                                    \n"
+    "proc P(s: Bool) =  s -> (a . P(false)) <> delta +                            \n"
+    "                  !s -> (b . P(s)) <> delta;                                 \n"
+    "init P(true);                                                                \n"
+    ;
+
+  FORMULA =
+    "forall c1: State .                                                                                                                                            \n"
+    " (exists c0: State .                                                                                                                                          \n"
+    "   (val(initial(c0) && nextstate(c0, c1)) &&                                                                                                                  \n"
+    "    (((<a>true) => val(closure(c1).1)) && (val(closure(c1).1) => (<a>true)) && ((<b>true) => val(closure(c1).2)) && (val(closure(c1).2) => (<b>true)))        \n"
+    "   )                                                                                                                                                          \n"
+    " ) => (                                                                                                                                                       \n"
+    "   mu X(c'': State = c1) . (                                                                                                                                  \n"
+    "     nu Y(c: State = c'') . (                                                                                                                                 \n"
+    "       forall c': State . (                                                                                                                                   \n"
+    "         val(nextstate(c, c')) =>                                                                                                                             \n"
+    "         [true](                                                                                                                                              \n"
+    "           (((<a>true) => val(closure(c).1)) && (val(closure(c).1) => (<a>true)) && ((<b>true) => val(closure(c).2)) && (val(closure(c).2) => (<b>true))) =>  \n"
+    "           ((val(accept(c)) && X(c')) || (val(!accept(c)) && Y(c')))                                                                                          \n"
+    "         )                                                                                                                                                    \n"
+    "       )                                                                                                                                                      \n"
+    "     )                                                                                                                                                        \n"
+    "   )                                                                                                                                                          \n"
+    " )                                                                                                                                                            \n"
+    ;
+
+  spec    = linearise(SPECIFICATION);
+  formula = state_formulas::parse_state_formula(FORMULA, spec);
+  p = lps2pbes(spec, formula, timed);
+  BOOST_CHECK(p.is_well_typed());
+
   core::garbage_collect();
 }
 
@@ -349,12 +404,12 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-//  test_lps2pbes();
-//  test_lps2pbes2();
+  test_lps2pbes();
+  test_lps2pbes2();
   test_lps2pbes3();
-//  test_trivial();
-//  test_formulas();
-//  test_equal_multi_actions();
+  test_trivial();
+  test_formulas();
+  test_equal_multi_actions();
   //test_directory();
 
   return 0;
