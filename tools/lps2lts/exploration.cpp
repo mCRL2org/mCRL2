@@ -1657,11 +1657,12 @@ bool generate_lts()
           if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
           {
             gsVerboseMsg(
-              "monitor: currently explored %llu state%s and %llu transition%s.\n",
+              "monitor: currently explored %llu state%s and %llu transition%s (stacksize is %d).\n",
               current_state,
               (current_state==1)?"":"s",
               trans,
-              (trans==1)?"":"s"
+              (trans==1)?"":"s",
+              nsgens_num
             );
           }
         }

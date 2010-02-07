@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(test_bag_true_false) {
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_numbers) {
-  test_data_expression("{1: 1, 2: 2, -7: 7}", true, "Bag(Int)");
+  test_data_expression("{1: 1, 2: 2, -8: 8}", true, "Bag(Int)");
 }
 
 BOOST_AUTO_TEST_CASE(test_function_updates)

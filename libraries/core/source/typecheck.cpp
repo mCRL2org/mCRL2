@@ -134,6 +134,8 @@ namespace mcrl2 {
     static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
 
     static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par, bool warn_upcasting=false);
+    static ATermAppl gstcMaximumType(ATermAppl Type1, ATermAppl Type2);
+
     static ATermList gstcGetNotInferredList(ATermList TypeListList);
     static ATermList gstcAdjustNotInferredList(ATermList TypeList, ATermList TypeListList);
     static ATbool gstcIsNotInferredL(ATermList TypeListList);
@@ -275,7 +277,7 @@ namespace mcrl2 {
     }
 
     ATermAppl type_check_proc_spec(ATermAppl proc_spec)
-    { // gsDebug=true;
+    { 
       if (gsVerbose)
       { std::cerr << "type checking process specification...\n";
       }
@@ -2768,6 +2770,8 @@ namespace mcrl2 {
 
       ATermAppl Result=NULL;
 
+      // gsDebug=true;
+
       if (gsDebug) { std::cerr << "gstcTraverseVarConsTypeD: DataTerm " << pp(*DataTerm) <<
                           " with PosType " << pp(PosType) << "\n"; }
 
@@ -2963,29 +2967,56 @@ namespace mcrl2 {
             *DataTerm=sort_list::list_enumeration(sort_expression(Type), atermpp::aterm_list(Arguments));
             return Type;
           }
-          if(Name == sort_set::set_enumeration_name()) {
+          if(Name == sort_set::set_enumeration_name()) 
+          { std::cerr << "HIERERERERRER \n";
             ATermAppl Type=gstcUnSet(PosType);
-            if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "set", PosType,Arguments);  return NULL;}
+            if(!Type) 
+            { gsErrorMsg("not possible to cast set to %P (while typechecking %P)\n", PosType,Arguments);  
+              return NULL;
+            }
+            ATfprintf(stderr,"AAAA %t     %t\n",Type,Arguments);
 
             ATermList OldArguments=Arguments;
 
-            //First time to determine the common type only!
-            ATermList NewArguments=ATmakeList0();
-            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
-              ATermAppl Argument=ATAgetFirst(Arguments);
+            //First time to determine the common type only (which will be NewType)!
+            ATermAppl NewType=NULL;
+            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
+            { ATermAppl Argument=ATAgetFirst(Arguments);
+              ATfprintf(stderr,"Consider: %t\n",Argument);
               ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
-              if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
-              NewArguments=ATinsert(NewArguments,(ATerm)Argument);
-              Type=Type0;
+              if(!Type0) 
+              { gsErrorMsg("not possible to cast element to %P (while typechecking %P)\n", Type,Argument);  
+                return NULL;
+              }
+        
+              ATfprintf(stderr,"Type: %t    %t\n",Type0,Type);
+              ATermAppl OldNewType=NewType;
+              if (NewType==NULL)
+              { NewType=Type0;
+              }
+              else NewType=gstcMaximumType(NewType,Type0);
+              
+              if (NewType==NULL)
+              { gsErrorMsg("Set contains incompatible elements of sorts %P and %P (while typechecking %P)\n", OldNewType,Type0,Argument);
+                return NULL;
+              }
             }
+       
+            // Type is now the most generic type to be used.
+            assert(Type!=NULL);
+            Type=NewType;
             Arguments=OldArguments;
 
             //Second time to do the real work.
-            NewArguments=ATmakeList0();
-            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+            ATermList NewArguments=ATmakeList0();
+            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
+            {
               ATermAppl Argument=ATAgetFirst(Arguments);
               ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
-              if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
+              if(!Type0) 
+              { gsErrorMsg("not possible to cast element to %P (while typechecking %P)\n", Type,Argument);  
+                return NULL;
+              }
               NewArguments=ATinsert(NewArguments,(ATerm)Argument);
               Type=Type0;
             }
@@ -2996,28 +3027,48 @@ namespace mcrl2 {
           }
           if(Name == sort_bag::bag_enumeration_name()) {
             ATermAppl Type=gstcUnBag(PosType);
-            if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "bag", PosType,Arguments);  return NULL;}
+            if(!Type) 
+            { gsErrorMsg("not possible to cast bag to %P (while typechecking %P)\n", PosType,Arguments);  
+              return NULL;
+            }
 
             ATermList OldArguments=Arguments;
 
             //First time to determine the common type only!
-            ATermList NewArguments=ATmakeList0();
-            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+            ATermAppl NewType=NULL;
+            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
+            {
               ATermAppl Argument0=ATAgetFirst(Arguments);
               Arguments=ATgetNext(Arguments);
               ATermAppl Argument1=ATAgetFirst(Arguments);
               ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
-              if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
+              if(!Type0) 
+              { gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  
+                return NULL;
+              }
               ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
-              if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", static_cast<ATermAppl>(sort_nat::nat()),Argument1);  return NULL;}
-              NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
-              NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
-              Type=Type0;
+              if(!Type1) 
+              { gsErrorMsg("not possible to cast number to %P (while typechecking %P)\n", 
+                         static_cast<ATermAppl>(sort_nat::nat()),Argument1);  
+                return NULL;
+              }
+              ATermAppl OldNewType=NewType;
+              if (NewType==NULL)
+              { NewType=Type0;
+              }
+              else NewType=gstcMaximumType(NewType,Type0);
+              if (NewType==NULL)
+              { gsErrorMsg("Bag contains incompatible elements of sorts %P and %P (while typechecking %P)\n", 
+                                     OldNewType,Type0,Argument0);
+                return NULL;
+              }
             }
+            assert(Type!=NULL);
+            Type=NewType;
             Arguments=OldArguments;
 
             //Second time to do the real work.
-            NewArguments=ATmakeList0();
+            ATermList NewArguments=ATmakeList0();
             for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
               ATermAppl Argument0=ATAgetFirst(Arguments);
               Arguments=ATgetNext(Arguments);
@@ -3835,7 +3886,8 @@ namespace mcrl2 {
       return NULL;
     }
 
-    static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type){
+    static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type)
+    {
       for(ATermList OldTypeList=TypeList;!ATisEmpty(OldTypeList);OldTypeList=ATgetNext(OldTypeList)){
         if(gstcEqTypesA(ATAgetFirst(OldTypeList),Type)) return TypeList;
       }
@@ -4190,7 +4242,42 @@ namespace mcrl2 {
                       sort_real::is_real(sort_expression(Type)));
     }
 
-    static ATermAppl gstcExpandNumTypesUp(ATermAppl Type){
+    static ATermAppl gstcMaximumType(ATermAppl Type1, ATermAppl Type2)
+    { // if Type1 is convertible into Type2 or vice versa, the most general
+      // of these types are returned. If not conversion is possible the result
+      // is NULL. Conversions only apply between numerical types
+      if (gstcEqTypesA(Type1,Type2)) return Type1;
+      if (data::is_unknown_sort(data::sort_expression(Type1))) return Type2;
+      if (data::is_unknown_sort(data::sort_expression(Type2))) return Type1;
+      if (gstcEqTypesA(Type1,sort_real::real_()))
+      { if (gstcEqTypesA(Type2,sort_int::int_())) return Type1;
+        if (gstcEqTypesA(Type2,sort_nat::nat())) return Type1;
+        if (gstcEqTypesA(Type2,sort_pos::pos())) return Type1;
+        return NULL;
+      }
+      if (gstcEqTypesA(Type1,sort_int::int_()))
+      { if (gstcEqTypesA(Type2,sort_real::real_())) return Type2;
+        if (gstcEqTypesA(Type2,sort_nat::nat())) return Type1;
+        if (gstcEqTypesA(Type2,sort_pos::pos())) return Type1;
+        return NULL;
+      }
+      if (gstcEqTypesA(Type1,sort_nat::nat()))
+      { if (gstcEqTypesA(Type2,sort_real::real_())) return Type2;
+        if (gstcEqTypesA(Type2,sort_int::int_())) return Type2;
+        if (gstcEqTypesA(Type2,sort_pos::pos())) return Type1;
+        return NULL;
+      }
+      if (gstcEqTypesA(Type1,sort_pos::pos()))
+      { if (gstcEqTypesA(Type2,sort_real::real_())) return Type2;
+        if (gstcEqTypesA(Type2,sort_int::int_())) return Type2;
+        if (gstcEqTypesA(Type2,sort_nat::nat())) return Type2;
+        return NULL;
+      }
+      return NULL;
+    }
+
+    static ATermAppl gstcExpandNumTypesUp(ATermAppl Type)
+    {
       //Expand Pos.. to possible bigger types.
       if(data::is_unknown_sort(data::sort_expression(Type))) return Type;
       if(gstcEqTypesA(sort_pos::pos(),Type)) return multiple_possible_sorts(atermpp::make_list(sort_pos::pos(), sort_nat::nat(), sort_int::int_(),sort_real::real_()));
