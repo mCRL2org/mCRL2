@@ -2968,13 +2968,12 @@ namespace mcrl2 {
             return Type;
           }
           if(Name == sort_set::set_enumeration_name()) 
-          { std::cerr << "HIERERERERRER \n";
+          { 
             ATermAppl Type=gstcUnSet(PosType);
             if(!Type) 
             { gsErrorMsg("not possible to cast set to %P (while typechecking %P)\n", PosType,Arguments);  
               return NULL;
             }
-            ATfprintf(stderr,"AAAA %t     %t\n",Type,Arguments);
 
             ATermList OldArguments=Arguments;
 
@@ -2982,14 +2981,12 @@ namespace mcrl2 {
             ATermAppl NewType=NULL;
             for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
             { ATermAppl Argument=ATAgetFirst(Arguments);
-              ATfprintf(stderr,"Consider: %t\n",Argument);
               ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
               if(!Type0) 
               { gsErrorMsg("not possible to cast element to %P (while typechecking %P)\n", Type,Argument);  
                 return NULL;
               }
         
-              ATfprintf(stderr,"Type: %t    %t\n",Type0,Type);
               ATermAppl OldNewType=NewType;
               if (NewType==NULL)
               { NewType=Type0;
