@@ -218,7 +218,7 @@ void LTSGraph::moveObject(double invect[4])
     selectedLabel->getLabelPos(x, y, z);
   }
   else
-	  return;
+		return;
   double width, height, depth;
   glCanvas->getSize(width, height, depth);
   double rad = glCanvas->getPixelSize() * visualizer->getRadius();
@@ -279,32 +279,32 @@ void LTSGraph::moveObject(double x, double y)
   }
   if(selectedState != NULL || selectedTransition != NULL || selectedLabel != NULL)
   {
-	  if(prevX > 1000)
-	  {
-		  prevX = 1000;
-	  }
+		if(prevX > 1000)
+		{
+			prevX = 1000;
+		}
 
-	  if (prevX < -1000)
-	  {
-		  prevX = -1000;
-	  }
+		if (prevX < -1000)
+		{
+			prevX = -1000;
+		}
 
-	  if (prevY > 1000)
-	  {
-		  prevY = 1000;
-	  }
+		if (prevY > 1000)
+		{
+			prevY = 1000;
+		}
 
-	  if (prevY < -1000)
-	  {
-		  prevY = -1000;
-	  }
+		if (prevY < -1000)
+		{
+			prevY = -1000;
+		}
   }
   
   
   if(selectedState != NULL)
   {
-	  selectedState->setX(prevX);
-	  selectedState->setY(prevY);
+		selectedState->setX(prevX);
+		selectedState->setY(prevY);
   }
   if(selectedTransition != NULL)
     selectedTransition->setControl(prevX, prevY, prevZ);
@@ -477,7 +477,7 @@ void LTSGraph::forceWalls()
   if (graph)
   {
       for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
-	  {
+		{
 		State* s = graph->getState(i);
 		double newX, newY;
 		newX = s->getX();
@@ -504,7 +504,7 @@ void LTSGraph::forceWalls()
 
 		s->setX(newX);
 		s->setY(newY);
-	  }
-	  glCanvas->display();
+		}
+		glCanvas->display();
   }
 }
