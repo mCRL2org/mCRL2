@@ -85,6 +85,7 @@ struct t_tool_options {
   lts_equivalence equivalence;
   lts_preorder    preorder;
   lts_eq_options  eq_opts;
+  std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
 };
 
 typedef tool ltscompare_base;
@@ -132,6 +133,14 @@ class ltscompare_tool : public ltscompare_base
         throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
       }
 
+      if (!l1.hide_actions(tool_options.tau_actions))
+      { throw mcrl2::runtime_error("Cannot hide actions in first transition system");
+      }
+
+      if (!l2.hide_actions(tool_options.tau_actions))
+      { throw mcrl2::runtime_error("Cannot hide actions in second transition system");
+      }
+
       bool result = true;
       if ( tool_options.equivalence != lts_eq_none )
       {
@@ -177,6 +186,17 @@ class ltscompare_tool : public ltscompare_base
       {
         parser.error("too few file arguments");
       }
+    }
+
+    void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
+    {
+      std::string::size_type lastpos = 0, pos;
+      while ( (pos = act_names.find(',',lastpos)) != std::string::npos )
+      {
+        tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));
+        lastpos = pos+1;
+      }
+      tau_actions.push_back(act_names.substr(lastpos));
     }
 
     void add_options(interface_description &desc)
@@ -256,8 +276,8 @@ class ltscompare_tool : public ltscompare_base
         }
       }
   
-      if (parser.options.count("tau")) {
-        lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
+      if (parser.options.count("tau")) 
+      { set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
       }
   
       if (parser.arguments.size() == 1) {

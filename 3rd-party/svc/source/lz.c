@@ -21,6 +21,7 @@
    $Id: lz.c,v 1.3 2008/09/30 08:22:51 bertl Exp $ */
 
 #include <string.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <svc/lz.h>
 
@@ -35,7 +36,8 @@ static void LZsplitToken(char *c, unsigned int *offset, unsigned int *length, LZ
 static void LZwriteToken(BitStream *bs, LZtoken token);
 static int LZreadToken(BitStream *bs, LZtoken token);
 
-static char scratch[102400];
+#define SCRATCH_BUFFER_LENGTH 2048000     // Buffer did turn out to be too small at times.
+static char scratch[SCRATCH_BUFFER_LENGTH];
 static int count=0;
 
 
@@ -238,7 +240,8 @@ fprintf(stderr, "OUT(%d, %d, %c)\n", offset, length,c);
    return 1;
 }
 
-static int decompress(BitStream *bs, LZbuffer *buffer, char **str){
+static int decompress(BitStream *bs, LZbuffer *buffer, char **str)
+{
    unsigned int offset, length, i, last;
    LZtoken token;
    char c;
@@ -268,11 +271,13 @@ fprintf(stderr,"%c", buffer->search[i]=='\0'?':':buffer->search[i]);
       if (length==0){
          buffer->last=(buffer->last+1)%SEARCHBUF_SIZE;
          buffer->search[buffer->last]=c;
+         assert(last+1<SCRATCH_BUFFER_LENGTH);
          scratch[last++]=c;
       } else {
          for(i=0;i<length;i++){
             buffer->last=(buffer->last+1)%SEARCHBUF_SIZE;
             buffer->search[buffer->last]=buffer->search[(buffer->last-offset-1+SEARCHBUF_SIZE)%SEARCHBUF_SIZE];
+            assert(last+1<SCRATCH_BUFFER_LENGTH);
             scratch[last++]=buffer->search[buffer->last];
          }
       }

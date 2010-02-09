@@ -142,12 +142,7 @@ namespace lts
          * This options only works with strong and branching bisimilarity.
          */
         bool add_class_to_state;
-        /** \brief List of internal action labels.
-         * \details The vector of transition labels that the reduction algorithm
-         * considers to be internal actions. (Besides those that are already
-         * marked as being internal.)
-         */
-        std::vector<std::string> tau_actions;
+        
       } reduce; /**< \brief Contains the options data.*/
   };
   /** \brief An empty lts_eq_options object */
@@ -181,14 +176,6 @@ namespace lts
      * If \a false, the states are not labelled. */
     bool print_states;
   };
-
-  /** \brief Adds transition labels to the list of internal actions.
-   * \param[in,out] opts The object of which the list of internal actions will be
-   * changed.
-   * \param[in] act_names A string containing a comma-separated list of
-   * transition labels that will be added to the list of internal actions.
-   */
-  void lts_reduce_add_tau_actions(lts_eq_options& opts, std::string const& act_names);
 
   /** \brief Checks whether an action is a timed mCRL2 action.
    * \param[in] t The action for which the check has to be performed.
@@ -309,9 +296,18 @@ namespace lts
       /** \brief Dereferences the iterator.
        * \return The transition label to which this iterator points.*/
       unsigned int operator *();
+
       /** \brief Increments the iterator.
        * \details Makes this iterator point to the next label of the LTS. */
       void operator ++();
+
+      /** \brief Equality on label iterators
+       * \details Indicates whether the current iterator is equal to the argument. */
+      bool operator ==(const label_iterator &i) const;
+  
+      /** \brief Inequality on label iterators
+       * \details Indicates whether the current iterator is equal to the argument. */
+      bool operator !=(const label_iterator &i) const;
   };
 
   /** \brief Iterator over transitions of an LTS.
@@ -345,6 +341,11 @@ namespace lts
       /** \brief Increments the iterator.
        * \details Makes this iterator point to the next transition of the LTS. */
       void operator ++();
+
+      /** \brief Dereferences the iterator.
+       * \return The state to which this iterator points.*/
+      unsigned int operator *();
+
   };
 
   /** \brief Class for labelled transition systems.
@@ -711,6 +712,21 @@ namespace lts
        * \return The number of the transition's target state. */
       unsigned int transition_to(unsigned int transition);
 
+      /** \brief Sets the source state of a transition.
+       * \param[in] transition The number of the transition.
+       * \param[in] from An index of the new from state */
+      void set_transition_from(const unsigned int transition, const unsigned int from);
+
+      /** \brief Sets the label of a transition.
+       * \param[in] transition The number of the transition.
+       * \param[in] label An index of the new label */
+      void set_transition_label(const unsigned int transition, const unsigned int label);
+
+      /** \brief Sets the target state of a transition.
+       * \param[in] transition The number of the transition.
+       * \param[in] to An index of the new to state. */
+      void set_transition_to(const unsigned int transition, const unsigned int to);
+
       /** \brief Gets an iterator to the states of this LTS.
        * \return An iterator to the states of this LTS. */
       state_iterator get_states();
@@ -748,6 +764,10 @@ namespace lts
        * \param[in] is_tau Indicates whether the label should become a tau action. */
       void set_tau(unsigned int label, bool is_tau = true);
 
+      /** \brief Sets all labels with string that occurs in tau_actions to tau.
+       *  \param[tau_actions] Vector with strings indicating which labels must be
+       *       considered to be equal to tau's */
+      bool hide_actions(const std::vector<std::string> &tau_actions);
 
       /** \brief Checks whether this LTS has a creator.
        * \retval true if the label has a creator;

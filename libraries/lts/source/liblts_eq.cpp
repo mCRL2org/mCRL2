@@ -29,25 +29,13 @@ namespace lts
 lts_eq_options::lts_eq_options()
 {
   reduce.add_class_to_state = false;
-  reduce.tau_actions.clear();
 }
 
 lts_eq_options lts_eq_no_options = lts_eq_options();
 
-void lts_reduce_add_tau_actions(lts_eq_options& opts, std::string const& act_names)
-{
-  string::size_type lastpos = 0, pos;
-  while ( (pos = act_names.find(',',lastpos)) != string::npos )
-  {
-    opts.reduce.tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));
-    lastpos = pos+1;
-  }
-  opts.reduce.tau_actions.push_back(act_names.substr(lastpos));
-}
 
 bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
 {
-  // set_tau_actions(&opts.reduce.tau_actions); TODO. This might not be properly dealt with now.
 
   switch ( eq )
   {
@@ -124,7 +112,6 @@ bool lts::destructive_compare(lts &l, const lts_equivalence eq, lts_eq_options c
   // state number i + N where N is the number of states in this
   // LTS (before the merge).
 
-  // set_tau_actions(&opts.reduce.tau_actions); TODO. This might not be properly dealt with now.
 
   switch ( eq )
   {
@@ -226,7 +213,6 @@ bool lts::compare(const lts &l, const lts_preorder pre, lts_eq_options const&opt
 
 bool lts::destructive_compare(lts &l, const lts_preorder pre, lts_eq_options const&opts)
 {
-  // set_tau_actions(&opts.reduce.tau_actions); TODO. This might not be properly dealt with now.
   switch ( pre )
   {
     case lts_pre_sim:

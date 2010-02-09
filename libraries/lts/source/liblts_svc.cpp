@@ -251,10 +251,10 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
           if ( t == NULL )
           {
             gsVerboseMsg("cannot parse action as mCRL2\n");
-          } else {
-            lps::specification copy(spec);
-            /* copy.data() = data::remove_all_system_defined(copy.data()); */
-            t = type_check_mult_act(t,specification_to_aterm(copy));
+          } 
+          else 
+          {
+            t = type_check_mult_act(t,specification_to_aterm(spec));
             if ( t == NULL )
             {
               gsVerboseMsg("error type checking action\n");
@@ -353,7 +353,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
       {
         params = ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0);
       }
-      act_spec = (ATermList) ATAgetArgument((ATermAppl) ATAgetArgument((ATermAppl) extra_data,2), 0);
+      act_spec = ATLgetArgument((ATermAppl) ATAgetArgument((ATermAppl) extra_data,2), 0);
       if ( gsIsNil(data_spec) )
       {
         act_spec = ATmakeList0();

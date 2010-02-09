@@ -72,7 +72,8 @@ static ATermAppl get_lps(std::string const& filename)
   return 0;
 }
 
-class t_tool_options {
+class t_tool_options 
+{
   private:
     std::string     infilename;
     std::string     outfilename;
@@ -83,6 +84,7 @@ class t_tool_options {
     lts_type        outtype;
     lts_equivalence equivalence;
     lts_eq_options  eq_opts;
+    std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
     bool            print_dot_state;
     bool            determinise;
     bool            check_reach;
@@ -154,6 +156,7 @@ class t_tool_options {
         }
       }
     }
+
 
     void set_source(std::string const& filename) {
       infilename = filename;
@@ -228,6 +231,9 @@ class ltsconvert_tool : public ltsconvert_base
       lts l;
 
       tool_options.read_lts(l);
+      if (!l.hide_actions(tool_options.tau_actions))
+      { throw mcrl2::runtime_error("Cannot hide actions");
+      }
 
       if ( tool_options.equivalence != lts_eq_none )
       {
@@ -282,6 +288,17 @@ class ltsconvert_tool : public ltsconvert_base
           "the input");
     }
 
+    void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
+    {
+      std::string::size_type lastpos = 0, pos;
+      while ( (pos = act_names.find(',',lastpos)) != std::string::npos )
+      {
+        tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));
+        lastpos = pos+1;
+      }
+      tau_actions.push_back(act_names.substr(lastpos));
+    }
+
     void parse_options(const command_line_parser &parser)
     {
       if (parser.options.count("lps")) {
@@ -328,8 +345,9 @@ class ltsconvert_tool : public ltsconvert_base
         }
       }
 
-      if (parser.options.count("tau")) {
-        lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
+      if (parser.options.count("tau")) 
+      {
+        set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
       }
 
       tool_options.determinise                       = 0 < parser.options.count("determinise");
@@ -584,18 +602,12 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
   send_clear_display();
 }
 
-bool ltsconvert_tool::check_configuration(tipi::configuration const& c) const {
+bool ltsconvert_tool::check_configuration(tipi::configuration const& c) const 
+{
   bool result = true;
 
   result &= c.input_exists(lts_file_for_input);
   result &= c.output_exists(lts_file_for_output);
-
-  if (c.option_exists(option_tau_actions)) {
-    lts_eq_options eq_opts;
-
-    /* Need to detect whether the next operation completes successfully or not, exceptions anyone? */
-    lts_reduce_add_tau_actions(eq_opts,(c.get_option_argument< std::string >(option_tau_actions)));
-  }
 
   return (result);
 }
@@ -631,7 +643,7 @@ bool ltsconvert_tool::perform_task(tipi::configuration& c) {
       tool_options.eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
     }
     if (c.option_exists(option_tau_actions)) {
-      lts_reduce_add_tau_actions(tool_options.eq_opts, c.get_option_argument< std::string >(option_tau_actions));
+      set_tau_actions(tool_options.tau_actions, c.get_option_argument< std::string >(option_tau_actions));
     }
   }
 

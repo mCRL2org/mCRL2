@@ -15,11 +15,14 @@
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
+#include <algorithm>
 #include <boost/bind.hpp>
 #include "aterm2.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/typecheck.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
@@ -1437,6 +1440,25 @@ unsigned int lts::transition_to(unsigned int transition)
   return transitions[transition].to;
 }
 
+void lts::set_transition_from(const unsigned int transition, const unsigned int from)
+{ 
+  assert(transition < ntransitions);
+  transitions[transition].from=from;
+}
+
+void lts::set_transition_label(const unsigned int transition, const unsigned int label)
+{ 
+  assert(transition < ntransitions);
+  transitions[transition].label=label;
+}
+
+void lts::set_transition_to(const unsigned int transition, const unsigned int to)
+{ 
+  assert(transition < ntransitions);
+  transitions[transition].to=to;
+}
+
+
 state_iterator lts::get_states()
 {
   return state_iterator(this);
@@ -2114,6 +2136,13 @@ void label_iterator::operator ++()
   pos++;
 }
 
+bool label_iterator::operator ==(const label_iterator &i) const
+{ return pos==i.pos;
+}
+  
+bool label_iterator::operator !=(const label_iterator &i) const
+{ return pos!=i.pos;
+}
 
 transition_iterator::transition_iterator(lts *l)
 {
@@ -2145,6 +2174,10 @@ unsigned int transition_iterator::to()
 void transition_iterator::operator ++()
 {
   pos++;
+}
+
+unsigned int transition_iterator::operator *()
+{ return pos;
 }
 
 lts_type lts::guess_format(string const& s) {
@@ -2588,6 +2621,96 @@ std::string lts::supported_lts_preorders_text(lts_preorder default_preorder, con
 std::string lts::supported_lts_preorders_text(const std::set<lts_preorder> &supported)
 {
   return supported_lts_preorders_text(lts_pre_none,supported);
+}
+
+ATermList sorted_insert(ATermList l,ATermAppl t)
+{ 
+  if (l==ATempty)
+  { return ATinsert(l,(ATerm)t);
+  }
+
+  if (ATgetName(ATgetAFun(ATgetArgument(t,0)))<
+         ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(l),0))))
+  { return ATinsert(l,(ATerm)t);
+  }
+  if ((ATgetName(ATgetAFun(ATgetArgument(t,0)))==
+         ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(l),0))))
+       &&
+      (ATgetArgument(t,1)< ATgetArgument(ATgetFirst(l),1)))
+  { return ATinsert(l,(ATerm)t);
+  }
+  return ATinsert(sorted_insert(ATgetNext(l),t),ATgetFirst(l));
+}
+
+ATerm sort_multi_action(ATerm ma)
+{ ATermList tl=ATLgetArgument((ATermAppl)(ma),0); //get the multi_action_list
+  ATermList result=ATempty;
+  for( ; tl!=ATempty ; tl=ATgetNext(tl))
+  { result=sorted_insert(result,ATAgetFirst(tl));
+  }
+  return (ATerm)gsMakeMultAct(result);
+}
+
+
+bool lts::hide_actions(const std::vector<std::string> &tau_actions)
+{ 
+  if (tau_actions.size()==0) return true; // Nothing needs to be hidden.
+
+  for(label_iterator i=get_labels(); i.more(); ++i)
+  { 
+    string s=p_label_value_str(*i);
+    stringstream ss(s); 
+    ATermAppl t=parse_mult_act(ss);
+    
+    if ( t == NULL )
+    {
+       std::cerr << "Cannot reconstruct multi action " << s << " (parsing)\n";
+       return false;
+    }
+
+    ATermList new_multi_action=ATempty;
+    for(ATermList mas=ATLgetArgument(t,0); mas!=ATempty; mas=ATgetNext(mas))
+    { ATermAppl multiaction=ATAgetFirst(mas);
+      
+      if (std::find(tau_actions.begin(),tau_actions.end(),
+                 string(ATgetName(ATgetAFun(ATgetArgument(multiaction,0)))))==tau_actions.end())  // this action must not be hidden.
+      { new_multi_action=ATinsert(new_multi_action,(ATerm)multiaction);
+      }
+    }
+    new_multi_action=ATreverse(new_multi_action);
+    set_label(*i, (ATerm)gsMakeMultAct(new_multi_action),new_multi_action==ATempty); // indicate that label i is now a tau label
+  }
+
+  // sort the multi-actions
+  for(label_iterator i=get_labels(); i.more(); ++i)
+  { set_label(*i, sort_multi_action(label_value(*i)),is_tau(*i));
+  }
+
+  // Now the labels have been adapted to the hiding operator. Check now whether labels
+  // did become equal.
+
+  map < unsigned int, unsigned int> map_multiaction_indices;
+  for(label_iterator i=get_labels(); i.more(); ++i)
+  { for (label_iterator j=get_labels(); j!=i; ++j)
+    { if (label_value(*i)==label_value(*j))  
+      { assert(map_multiaction_indices.count(*i)==0);
+        map_multiaction_indices.insert(pair<unsigned int, unsigned int>(*i,*j));
+        break;
+      }
+    }
+  }
+
+  // If labels became equal, take care they get equal numbers in the transition
+  // system, because all behavioural reduction algorithms only compare the labels.
+  if (!map_multiaction_indices.empty())
+  { 
+    for (transition_iterator i=get_transitions(); i.more(); ++i)
+    { if (map_multiaction_indices.count(i.label())>0)
+      { set_transition_label(*i,map_multiaction_indices[i.label()]);
+      }
+    }
+  }
+  return true;
 }
 
 }

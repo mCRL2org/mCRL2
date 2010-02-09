@@ -50,7 +50,7 @@ namespace mcrl2 {
       t = core::type_check_proc_spec(t);
       if (!t)
       {
-        throw mcrl2::runtime_error("could not type check " + process::pp(proc_spec));
+        throw mcrl2::runtime_error("could not type check process specification");
       }
       process_specification result(t);
       proc_spec = result;
