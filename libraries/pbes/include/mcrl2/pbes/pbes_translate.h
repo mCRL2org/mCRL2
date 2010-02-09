@@ -432,7 +432,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             data::data_expression ck(i->condition());
             data::data_expression tk(i->time());
             data::variable_list yk = i->summation_variables();
-            pbes_expression p = pbes_expr::exists(yk, and_(data::sort_bool::not_(ck), d::greater(t, tk)));
+            pbes_expression p = pbes_expr::forall(yk, or_(data::sort_bool::not_(ck), d::greater(t, tk)));
             v.push_back(p);
           }
           result = and_(join_or(v.begin(), v.end()), d::greater(t, T));
@@ -538,7 +538,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
         } else if (is_false(f)) {
           // do nothing
         } else if (is_and(f)) {
-          result = E(f0, not_(left(f)), lps, T) + E(f0, right(f), lps, T);
+          result = E(f0, left(f), lps, T) + E(f0, right(f), lps, T);
         } else if (is_or(f)) {
           result = E(f0, left(f), lps, T) + E(f0, right(f), lps, T);
         } else if (is_imp(f)) {
@@ -768,8 +768,6 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
           result = true_();
         } else if (s::is_false(f)) {
           result = false_();
-        } else if (s::is_not(f)) {
-          result = not_(RHS(f0, s::arg(f), lps, context));
         } else if (s::is_and(f)) {
           result = and_(RHS(f0, s::left(f), lps, context), RHS(f0, s::right(f), lps, context));
         } else if (s::is_or(f)) {
@@ -941,8 +939,6 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           // do nothing
         } else if (is_false(f)) {
           // do nothing
-        } else if (is_not(f)) {
-          result = E(f0, arg(f), lps);
         } else if (is_and(f)) {
           result = E(f0, left(f), lps) + E(f0, right(f), lps);
         } else if (is_or(f)) {

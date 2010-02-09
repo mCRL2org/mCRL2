@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Friday, December 11, 2009 13:13:18}
+%TCIDATA{LastRevised=Tuesday, February 09, 2010 16:15:21}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -264,9 +264,9 @@ h(\lnot \exists d{{:}D}.\varphi ) & =_{def} & \forall d{{:}D}.h(\lnot
 h(\lnot \lbrack \alpha ]\varphi ) & =_{def} & [\alpha ]h(\lnot \varphi ) \\ 
 h(\lnot \langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
 h(\lnot \varphi ) \\ 
-h(\lnot \nabla ) & =_{def} & \Delta \\ 
+h(\lnot \nabla ) & =_{def} & \Delta  \\ 
 h(\lnot \nabla (t)) & =_{def} & \Delta (t) \\ 
-h(\lnot \Delta ) & =_{def} & \nabla \\ 
+h(\lnot \Delta ) & =_{def} & \nabla  \\ 
 h(\lnot \Delta (t)) & =_{def} & \nabla (t) \\ 
 h(\lnot X(e)) & =_{def} & undefined \\ 
 h(\lnot \mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \nu X(d{:}%
@@ -277,21 +277,20 @@ h(b) & =_{def} & b \\
 h(\varphi \wedge \psi ) & =_{def} & h(\varphi )\wedge h(\psi ) \\ 
 h(\varphi \vee \psi ) & =_{def} & h(\varphi )\vee h(\psi ) \\ 
 h(\varphi \Rightarrow \psi ) & =_{def} & h(\lnot \varphi )\vee h(\psi ) \\ 
-h(\mathsf{Q}d{{:}D}.\varphi ) & =_{def} & \mathsf{\forall }d{{:}D}.h(\varphi
-) \\ 
+h(\mathsf{Q}d{{:}D}.\varphi ) & =_{def} & \mathsf{Q}d{{:}D}.h(\varphi ) \\ 
 h([\alpha ]\varphi ) & =_{def} & [\alpha ]h(\varphi ) \\ 
 h(\langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
 h(\varphi ) \\ 
-h(\nabla ) & =_{def} & \nabla \\ 
+h(\nabla ) & =_{def} & \nabla  \\ 
 h(\nabla (t)) & =_{def} & \nabla (t) \\ 
-h(\Delta ) & =_{def} & \Delta \\ 
+h(\Delta ) & =_{def} & \Delta  \\ 
 h(\Delta (t)) & =_{def} & \Delta (t) \\ 
 h(X(d)) & =_{def} & X(d) \\ 
 h(\sigma X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \sigma X(d{:}%
 D:=e).~h(\varphi )%
 \end{array}%
 \end{equation*}%
-\pagebreak
+\pagebreak 
 
 \subsection{The predicate formula normal form (PFNF)}
 
@@ -489,17 +488,17 @@ l & \mathsf{if\ }Y=X \\
 \mathbf{RHS}}(\varphi ) \\ 
 {\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
 {:}E_{i}}((\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))\mbox{\aap ,}%
-t_{i}(x_{p},y),\alpha )\ \wedge \\ 
+t_{i}(x_{p},y),\alpha )\ \wedge  \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}c_{i}(x_{p},y)%
-\wedge t_{i}(x_{p},y)>T\ )\Rightarrow \\ 
+\wedge t_{i}(x_{p},y)>T\ )\Rightarrow  \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(} {\mathbf{RHS}}%
 (\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
 {\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
 I}\exists _{y{:}E_{i}}(\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))%
 \mbox{\aap
-,}t_{i}(x_{p},y),\alpha )\ \wedge \\ 
+,}t_{i}(x_{p},y),\alpha )\ \wedge  \\ 
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(}c_{i}(x_{p},y)\wedge
-t_{i}(x_{p},y)>T\ \wedge \\ 
+t_{i}(x_{p},y)>T\ \wedge  \\ 
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(} {\mathbf{RHS}}%
 (\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
 {\mathbf{RHS}}(X(d)) & =_{def} & \tilde{X}(T,d,x_{p},\mathbf{Par}%
@@ -528,7 +527,7 @@ J}\exists _{y{:}E_{i}}((c_{i}(x_{p},y)\wedge t\leq t_{k}(x_{p},y))\right)
 \alpha \rangle (\lnot \varphi )) \\ 
 {\mathbf{RHS}}(\lnot (\langle \alpha \rangle \varphi )) & =_{def} & {\mathbf{%
 RHS}}([\alpha ](\lnot \varphi )) \\ 
-{\mathbf{RHS}}(\lnot X(d)) & =_{def} & {\mathbf{RHS}}(X(d)) \\ 
+{\mathbf{RHS}}(\lnot X(d)) & =_{def} & \lnot {\mathbf{RHS}}(X(d)) \\ 
 {\mathbf{RHS}}(\lnot (\sigma X(x_{f}{:}D_{f}:=d).~\varphi )) & =_{def}~~~ & {%
 \mathbf{RHS}}(\widetilde{\sigma }X(x_{f}{:}D_{f}:=d).~(\lnot \varphi \lbrack
 X:=\lnot X]))={\mathbf{RHS}}((\sigma X(x_{f}{:}D_{f}:=d).~\lnot \varphi ))
@@ -885,7 +884,7 @@ algorithm \textsc{Pbes2besLazy} that uses instantiation to compute a BES. It
 takes two extra parameters, an injective function $\rho $ that renames
 proposition variables to predicate variables, and a rewriter $R$ that
 eliminates quantifiers from predicate formulae. Let $\mathcal{E=(\sigma }%
-_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\cdots \mathcal{(\sigma }%
+_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\ldots \mathcal{(\sigma }%
 _{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES, and $X_{init}(e_{init})$ an
 initial state.%
 \begin{equation*}
@@ -1173,7 +1172,7 @@ Then we define%
 \begin{array}{l}
 \text{\textsc{Gau\textsc{\ss\ }Elimination(}}\mathcal{E},r,\text{\textsc{%
 solve)}} \\ 
-\mathcal{E}^{\prime }:=\varepsilon  \\ 
+\mathcal{E}^{\prime }:=\varepsilon \\ 
 i:=n \\ 
 \text{\textbf{while} \textbf{not} }i=0 \\ 
 \text{\textbf{do}} \\ 
