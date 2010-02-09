@@ -1,13 +1,61 @@
 ===============================================================================
-Changes between toolset releases January 2009 and July 2009:
+Changes between toolset releases January 2009 and January 2010:
 ===============================================================================
 
- General
-   - developed a new data  and process library and adapted most tools and 
+ General:
+   - developed a new data and process library and adapted most tools and 
      libraries to use it. Ultimately the classes in core will all be replaced
      such that core will become obsolete.
-   - introduced new tool classes and adapted all tools to it.
-   - adapted the user interface of mcrl2i. 
+   - introduced new tool classes and adapted all tools to it, leading to uniform
+     command line interfaces for all tools.
+   - adapted the user interface of mcrl2i.
+   - bisimulation reduction algorithms are much faster.
+   
+ New functionality:
+   - divergence preserving branching bisimulation has been implemented.
+   - lps2lts can search for divergences, and generated traces to divergent
+     states.
+   - lps2lts can generate a state space steered by the first argument of
+     actions (which must be a natural number). Only transitions with the
+     lowest number will be taken. It is also possible to do a random walk
+     in this way.
+   - ltsgraph can display transition systems in 3d.
+   - lps2pbes now properly supports the use of sorts in the modal formula that
+     were defined under alias in the lps.
+ 
+ The following tools have been marked stable:
+   - grape: a graphical process editor.
+   - mcrl2i: an mCRL2 interpreter that can be used for evaluating data
+     expressions.
+   - pbesconstelm: apply constant parameter elimination to a pbes.
+   - pbesparelm: apply parameter elimination to a pbes.
+   - lpsparunfold: unfold a set of given parameters in an lps. (Similar to the
+     muCRL tool structelm).
+   - lysa2mcrl2: convert a security protocol specified in Typed LySa to mCRL2.
+   - txt2lps: read a textual description of a linear process into a binary lps
+     file. Rejects anything that is not linear.
+ 
+ The following tools have been added (but are marked experimental):
+   - lpsbisim2pbes: encode process equivalences of two linear processes into a
+     pbes.
+   - lts2lps: convert a labelled transition system into an lps.
+   - pbespareqelm: eliminate equivalence relations between parameters of a pbes.
+   - pbespgsolve: solve a pbes using a parity game solver algorithm.
+     (Contributed by Maks Verver).
+
+The following tools have been removed:
+   - mcrl2pp
+   - pbessolve
+
+ Notes:
+   - SQuADT specific:
+     + The tool catalog must be regenerated to add newly connected tools;
+       to do this manually remove .squadt/tool_catalog in the home directory.
+   - the CMake build system is provided as an alternative to boost build.
+       
+ Known issues:
+   - ltsview and ltsgraph do not work when started from SQuADT in Windows 7 and
+     Windows Vista; if started directly they do function properly.
 
 ===============================================================================
 Changes between toolset releases July 2008 and January 2009:
