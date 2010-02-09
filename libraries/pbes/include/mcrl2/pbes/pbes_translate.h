@@ -1021,7 +1021,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
         } else if (is_delay_timed(f)) {
           // do nothing
         } else {
-          throw mcrl2::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
