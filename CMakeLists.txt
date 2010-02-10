@@ -936,9 +936,12 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Toolset for modelling, validation and ver
 set(CPACK_PACKAGE_CONTACT "info@mcrl2.org")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will overwrite standard path, which is: mcrl2-${CMAKE_BUILD_TYPE}svn{SVN_REV}
 
+SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
+SET(CPACK_PACKAGE_VENDOR "TUe")
+
 # Create Desktop link to squadt
 set(CPACK_CREATE_DESKTOP_LINKS squadt)
-set(CPACK_PACKAGE_EXECUTABLES "squadt" "squadt")
+set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grape;grape" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "xsim;xsim")
 
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
