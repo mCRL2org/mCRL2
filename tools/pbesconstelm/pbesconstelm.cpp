@@ -31,7 +31,7 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
-using namespace utilities::tools;
+using namespace mcrl2::utilities::tools;
 
 class pbes_constelm_tool: public squadt_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > >
 {
@@ -218,14 +218,12 @@ class pbes_constelm_tool: public squadt_tool<pbes_rewriter_tool<rewriter_tool<in
         append(d.create< label >().set_text("Constant elimination in progress"), layout::left)));
 
       // Run
-      bool result = run() == 0;
+      bool result = run();
 
       send_display_layout(d.manager(d.create<vertical_box>().
                                     append(d.create< label >().set_text(std::string("Constant elimination ") + ((result) ? "succeeded" : "failed")), layout::left)));
 
       return result;
-
-      return run();
     }
 #endif
 

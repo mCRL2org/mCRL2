@@ -19,14 +19,13 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
-using utilities::interface_description;
-using utilities::tools::input_output_tool;
-using utilities::tools::squadt_tool;
+using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::tools;
 
 //[pbes_parelm_tool
-class pbes_parelm_tool: public squadt_tool< input_output_tool >
+class pbes_parelm_tool: public squadt_tool<input_output_tool>
 {
-  typedef squadt_tool< input_output_tool > super;
+  typedef squadt_tool<input_output_tool> super;
 
   public:
     pbes_parelm_tool()
@@ -68,6 +67,7 @@ class pbes_parelm_tool: public squadt_tool< input_output_tool >
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& c) const {
       c.add_input_configuration("main-input",
@@ -77,11 +77,20 @@ class pbes_parelm_tool: public squadt_tool< input_output_tool >
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
     void user_interactive_configuration(tipi::configuration& c) {
+
+      using namespace tipi;
+      using namespace tipi::layout;
+      using namespace tipi::layout::elements;
+
+      synchronise_with_configuration(c);
+
       if (!c.output_exists("main-output")) {
         c.add_output("main-output",
                  tipi::mime_type("pbes", tipi::mime_type::application),
                                                  c.get_output_name(".pbes"));
       }
+
+      update_configuration(c);
     }
 
     /** \brief check an existing configuration object to see if it is usable */
@@ -91,19 +100,37 @@ class pbes_parelm_tool: public squadt_tool< input_output_tool >
 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration& c) {
+      using namespace tipi;
+      using namespace tipi::layout;
+      using namespace tipi::layout::elements;
+
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(c);
 
-      return run();
+      // Create display
+      tipi::tool_display d;
+
+      send_display_layout(d.manager(d.create< vertical_box >().
+        append(d.create< label >().set_text("Parameter elimination in progress"), layout::left)));
+
+      // Run
+      bool result = run();
+
+      send_display_layout(d.manager(d.create<vertical_box>().
+                                    append(d.create< label >().set_text(std::string("Parameter elimination ") + ((result) ? "succeeded" : "failed")), layout::left)));
+
+      return result;
     }
 #endif
+
 };
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return pbes_parelm_tool().execute(argc, argv); /*< The function `execute` first parses the command line
+  pbes_parelm_tool tool;
+  return tool.execute(argc, argv); /*< The function `execute` first parses the command line
                                        arguments, and then calls the function `run`. >*/
 }
 //]

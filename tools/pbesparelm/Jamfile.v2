@@ -1,4 +1,4 @@
-project toolset/pbesparelm ;
+project pbesparelm ;
 
 tool pbesparelm
        : pbesparelm.cpp
