@@ -199,13 +199,14 @@ grape_frame::grape_frame( const wxString &p_filename )
   }
   else
   {
-		std::string info = "- ";
-		info.append(GRAPE_HELP_DIR) ;
+		wxString info;
+                info << wxT("Help file \"grapehelp.zip\" could not be found in:\n- ");
+		info << wxT(GRAPE_HELP_DIR) ;
 #ifdef _WIN32
-    info.append( "\n- "+ win32_install_grape_help_dir );
+    info << wxT("\n- ");
+    info << win32_install_grape_help_dir ;
 #endif
-    wxMessageBox( _T("Help file \"grapehelp.zip\" could not be found in:\n" + info )
-										, _T("Warning"), wxOK | wxICON_EXCLAMATION);
+    wxMessageBox(  info  , _T("Warning"), wxOK | wxICON_EXCLAMATION);
   }
 
   // show frame
