@@ -32,6 +32,10 @@
 // window icon
 #include "pics/grape.xpm"
 
+#ifdef _WIN32
+  #include <windows.h>
+#endif
+
 using namespace grape::grapeapp;
 using namespace grape::libgrape;
 
@@ -155,14 +159,53 @@ grape_frame::grape_frame( const wxString &p_filename )
   wxString filename = wxEmptyString;
  
  //GRAPE_HELP_DIR
-  if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") ) )
+ //
+#ifdef _WIN32
+    std::string win32_install_grape_help_dir;
+		HKEY hKey = 0;
+    char buf[255] = {0};
+    DWORD dwBufSize = sizeof(buf);
+    DWORD dwType;
+ 
+    // TODO:
+	  // 
+	  // Following line has to become VENDOR and INSTALL_REGISTRY_KEY
+    //   if( RegOpenKey(HKEY_LOCAL_MACHINE,TEXT("SOFTWARE\\"+VENDOR+"\\"+ INSTALL_REGISTRY_KEY),&hKey) == ERROR_SUCCESS)
+	  // Instead of: 
+    if( RegOpenKey(HKEY_LOCAL_MACHINE,TEXT("SOFTWARE\\TUe\\mCRL2"),&hKey) == ERROR_SUCCESS)
+    {
+      dwType = REG_SZ;
+      if( RegQueryValueEx(hKey,"",0, &dwType, (BYTE*)buf, &dwBufSize) == ERROR_SUCCESS)
+      {
+							win32_install_grape_help_dir = buf;
+							win32_install_grape_help_dir.append("/share/mcrl2/grape");
+      }
+	    std::cerr << "Cannot find default value for key: HKEY_LOCAL_MACHINE\\SOFTWARE\\TUe\\mCRL2 \n" ;
+	  }
+    else 
+    { 
+  	  std::cerr << "Cannot find key for HKEY_LOCAL_MACHINE\\SOFTWARE\\TUe\\mCRL2 \n" ;
+    }
+#endif
+
+  if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") )
+#ifdef _WIN32
+		|| fs.FindFileInPath( &filename, _T( win32_install_grape_help_dir.c_str() ), _T("grapehelp.zip") )		
+#endif
+			)
   {
     // file found
     m_help_controller->AddBook( wxFileName( filename ) );
   }
   else
   {
-    wxMessageBox( _T("Help file \"grapehelp.zip\" could not be found in \"" GRAPE_HELP_DIR "\"") + filename, _T("Warning"), wxOK | wxICON_EXCLAMATION);
+		std::string info = "- ";
+		info.append(GRAPE_HELP_DIR) ;
+#ifdef _WIN32
+    info.append( "\n- "+ win32_install_grape_help_dir );
+#endif
+    wxMessageBox( _T("Help file \"grapehelp.zip\" could not be found in:\n" + info )
+										, _T("Warning"), wxOK | wxICON_EXCLAMATION);
   }
 
   // show frame
@@ -544,7 +587,7 @@ void grape_frame::set_mode( grape_mode p_mode )
     }
     default:
     {
-	  // cannot be the case
+		// cannot be the case
       // assert( false );
     }
   }
