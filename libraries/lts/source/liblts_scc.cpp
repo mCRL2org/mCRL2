@@ -91,11 +91,10 @@ namespace detail
     for(std::set < transition >::const_iterator i=resulting_transitions.begin();
           i!=resulting_transitions.end(); ++i)
     { 
-      new_transitions[counter]=transition(i->from,i->label,i->to);
-      counter++;
+      new_transitions[counter++]=transition(i->from,i->label,i->to);
     }
 
-    aut.set_transitions(new_transitions,resulting_transitions.size(),equivalence_class_index);
+    aut.set_transitions(new_transitions,resulting_transitions.size(),resulting_transitions.size());
   }
 
   unsigned int scc_partitioner::num_eq_classes() const

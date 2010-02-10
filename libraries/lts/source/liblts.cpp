@@ -22,7 +22,6 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
@@ -181,7 +180,7 @@ lts::lts(lts const &l) : p_lts(this)
 }
 
 lts::~lts()
-{
+{ 
   if ( state_values != NULL )
   {
     ATunprotectArray(state_values);
@@ -204,7 +203,7 @@ void lts::reset(bool state_info, bool label_info)
 }
 
 void p_lts::init(bool state_info, bool label_info)
-{
+{ 
   states_size = 0;
   nstates = 0;
   state_values = NULL;
@@ -1231,6 +1230,7 @@ unsigned int p_lts::p_add_transition(unsigned int from,
                                  unsigned int label,
                                  unsigned int to)
 {
+  assert(ntransitions <= transitions_size);
   if ( ntransitions == transitions_size )
   {
     unsigned int new_transitions_size = transitions_size*2;
@@ -1250,7 +1250,6 @@ unsigned int p_lts::p_add_transition(unsigned int from,
     }
     transitions_size = new_transitions_size;
   }
-
   transitions[ntransitions].from = from;
   transitions[ntransitions].label = label;
   transitions[ntransitions].to = to;

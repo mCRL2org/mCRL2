@@ -77,7 +77,7 @@ namespace detail
     }
 
     // Set the resulting number of states and transitions.
-    aut.set_transitions(new_transitions,resulting_transitions.size(),blocks.size());
+    aut.set_transitions(new_transitions,resulting_transitions.size(),resulting_transitions.size());
   }
 
   unsigned int bisim_partitioner::num_eq_classes() const

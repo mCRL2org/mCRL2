@@ -742,14 +742,14 @@ namespace lts
       /** \brief Sets the transitions to t malloced array of transitions t.
        *  The existing transitions are freed if necessary. If t is NULL the
        *  transitions are set to NULL. ntransitions and transition_size are
-       *  set to nt and ts respectively */
-      void set_transitions(transition *t, const unsigned int nt, const unsigned int ts)
+       *  set to new_number_of_transitions and new_transitions_size respectively */
+      void set_transitions(transition *t, const unsigned int new_number_of_transitions, const unsigned int new_transitions_size)
       { if (transitions!=NULL)
         { free(transitions);
         }
         transitions=t;
-        ntransitions=nt;
-        transitions_size=ts;
+        ntransitions=new_number_of_transitions;
+        transitions_size=new_transitions_size;
       }
 
       /** \brief Checks whether a label is a tau action.
