@@ -271,13 +271,13 @@ fprintf(stderr,"%c", buffer->search[i]=='\0'?':':buffer->search[i]);
       if (length==0){
          buffer->last=(buffer->last+1)%SEARCHBUF_SIZE;
          buffer->search[buffer->last]=c;
-         assert(last+1<SCRATCH_BUFFER_LENGTH);
+         assert(last<SCRATCH_BUFFER_LENGTH);
          scratch[last++]=c;
       } else {
          for(i=0;i<length;i++){
             buffer->last=(buffer->last+1)%SEARCHBUF_SIZE;
             buffer->search[buffer->last]=buffer->search[(buffer->last-offset-1+SEARCHBUF_SIZE)%SEARCHBUF_SIZE];
-            assert(last+1<SCRATCH_BUFFER_LENGTH);
+            assert(last<SCRATCH_BUFFER_LENGTH);
             scratch[last++]=buffer->search[buffer->last];
          }
       }
