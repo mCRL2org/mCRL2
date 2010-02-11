@@ -4,7 +4,6 @@
 
 import os
 import random
-import shutil
 from path import *
 
 # As a convention we use that k, m, n are always natural numbers and
@@ -321,7 +320,6 @@ def last_word(line):
 def test_pbes(filename, equation_count, atom_count = 5, propvar_count = 3):
     txtfile = filename + '.txt'
     pbesfile = filename + '.pbes'
-    besfile = filename + '.bes'
     answerfile = 'temp.answer'
     p = make_pbes(equation_count, atom_count, propvar_count)
     path(txtfile).write_text('%s' % p)
@@ -332,17 +330,14 @@ def test_pbes(filename, equation_count, atom_count = 5, propvar_count = 3):
     answer1 = last_word(path(answerfile).text())
 
     # pbespgsolve
-    os.system('pbespgsolve %s >& %s' % (pbesfile, answerfile))
+    #os.system('pbespgsolve %s >& %s' % (pbesfile, answerfile))
     answer2 = last_word(path(answerfile).text())
 
     # bessolve
-    os.system('pbes2bes %s %s' % (pbesfile, besfile))
-    os.system('bessolve %s >& %s' % (besfile, answerfile))
+    os.system('bessolve %s >& %s' % (pbesfile, answerfile))
     answer3 = last_word(path(answerfile).text())
 
     print 'FILE', filename, answer1, answer2, answer3
 
-for i in range(5):
+for i in range(100):
     test_pbes('%02d' % i, 5, 4, 3)
-#shutil.remove('temp.pbes')
-#shutil.remove('temp.answer')
