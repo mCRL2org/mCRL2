@@ -7,7 +7,7 @@
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/bisimulation.h"
-#include "mcrl2/pbes/pbes2bes.h"
+#include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -21,16 +21,6 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 namespace po = boost::program_options;
 
-std::string print_type(int type)
-{
-  switch (type)
-  {
-    case 0: return "lazy algorithm";
-    case 1: return "finite algorithm";
-  }
-  return "unknown type";
-}
-
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -40,7 +30,6 @@ int main(int argc, char* argv[])
   typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_pbes_rewriter;
 
   std::string infile;
-  int type;
   pbes<> p;
 
   try {
@@ -59,7 +48,6 @@ int main(int argc, char* argv[])
     );
     bessolve_options.add_options()
       ("help,h", "display this help")
-      ("variant,v", po::value<int> (&type)->default_value(0), "variant of pbes2bes")
       ;
 
     //--- hidden options ---------
@@ -90,7 +78,6 @@ int main(int argc, char* argv[])
     {
       std::cout << "bessolve parameters:" << std::endl;
       std::cout << "  input  file      : " << infile << std::endl;
-      std::cout << "  pbes2bes variant : " << print_type(type) << std::endl;
     }
 
     p.load(infile);
@@ -108,11 +95,11 @@ int main(int argc, char* argv[])
     // pbes rewriter
     my_pbes_rewriter pbesr(datar, datae);
 
-    switch (type)
-    {
-      case 0: q = do_lazy_algorithm(p, pbesr); break;
-      case 1: q = do_finite_algorithm(p, pbesr); break;
-    }
+    // apply pbes2bes
+    pbes2bes_algorithm algorithm(p.data());
+    algorithm.run(p);
+    q = algorithm.get_result();
+
     int result = gauss_elimination(q);
 
     std::string result_string;    
