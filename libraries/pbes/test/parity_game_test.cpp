@@ -112,6 +112,52 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
   core::garbage_collect();
 }
 
+std::string PBES1 =
+  "pbes                                                                                                                                                                                                                                                                                                                       \n"
+  "mu X0(m:Nat) = (((!X2(m > 0)) || (!X3(1))) => ((forall k:Nat.((val(k < 3)) && ((!X4(1)) => (val(m < 3))))) || ((val(m < 3)) && (val(m < 3))))) || (forall m:Nat.((val(m < 3)) && (!(val(m < 3)))));                                                                                                                        \n"
+  "mu X1 = (forall n:Nat.((val(n < 3)) && (!(val(n > 1))))) => (forall n:Nat.((val(n < 3)) && ((forall m:Nat.((val(m < 3)) && (((val(n < 3)) => ((val(m < 3)) && (X0(m + 1)))) || (exists n:Nat.((val(n < 3)) || (X4(1))))))) || ((X1) || (forall k:Nat.((val(k < 3)) && (forall n:Nat.((val(n < 3)) && (val(k < 3)))))))))); \n"
+  "mu X2(b:Bool) = ((X0(1)) && (exists n:Nat.((val(n < 3)) || (X1)))) || ((!((val(false)) => (val(b)))) && ((!(forall m:Nat.((val(m < 3)) && (X3(0))))) => ((val(false)) && (val(true)))));                                                                                                                                   \n"
+  "nu X3(n:Nat) = ((forall n:Nat.((val(n < 3)) && (val(true)))) && (X2(true))) && (forall m:Nat.((val(m < 3)) && ((((exists k:Nat.((val(k < 3)) || (val(k == m)))) || (exists m:Nat.((val(m < 3)) || (exists n:Nat.((val(n < 3)) || (!X1)))))) => ((val(m > 1)) && (val(n < 2)))) && (X3(0)))));                              \n"
+  "mu X4(m:Nat) = (exists k:Nat.((val(k < 3)) || (val(k > 0)))) || (((val(m > 0)) => (exists n:Nat.((val(n < 3)) || (X1)))) || ((((X2(true)) && (X0(m + 1))) && (val(true))) && (val(m < 2))));                                                                                                                               \n"
+  "                                                                                                                                                                                                                                                                                                                           \n"
+  "init X0(0);                                                                                                                                                                                                                                                                                                                \n"
+  ;
+
+// mimick the way parity_game_generator is used in parity game solver from Twente
+void test_pbes(std::string pbes_spec)
+{
+  pbes_system::pbes<> p = pbes_system::txt2pbes(pbes_spec);
+  pbes_system::parity_game_generator pgg(p, true, true);
+  unsigned int begin = 0;
+  unsigned int end = 3;
+  for (unsigned int v = begin; v < end; ++v)
+  {
+    std::set<unsigned> deps = pgg.get_dependencies(v);
+    for (std::set<unsigned>::const_iterator it = deps.begin(); it != deps.end(); ++it )
+    {
+      unsigned int w = *it;
+      assert(w >= begin);
+      if (w >= end)
+      {
+      	end = w + 1;
+      }
+      // edges.push_back(std::make_pair(v - begin, w - begin));
+    }
+
+    int max_prio = 0;                                                        
+    for (unsigned int v = begin; v < end; ++v)                                      
+    {                                                                        
+      max_prio = std::max(max_prio, (int)pgg.get_priority(v));             
+    }                                                                        
+                                                                             
+    for (unsigned int v = begin; v < end; ++v)                                      
+    {                                                                        
+      bool and_op = pgg.get_operation(v) == mcrl2::pbes_system::parity_game_generator::PGAME_AND;
+      pgg.get_priority(v);                   
+    }                                                                        
+  }
+}
+
 void test_one_bit_sliding_window()
 {
   std::string spec_text =
@@ -177,7 +223,7 @@ void test_one_bit_sliding_window()
     "                 Tim||                                                     \n"
     "                 C(frame(d1,e0,e0) ,read)))))));                           \n"
     ;
-  
+
   std::string formula_text = "nu X. <true>true && [true]X";
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec_text, formula_text, timed);
@@ -195,6 +241,20 @@ void test_bes_examples()
   test_bes(BES6, "parity_game_test_bes6.pg", true);
   test_bes(BES7, "parity_game_test_bes7.pg", false);
   test_bes(BES8, "parity_game_test_bes8.pg", true);
+  test_bes(PBES1, "parity_game_test_bes8.pg", true);
+}
+
+void test_pbes_examples()
+{
+  test_pbes(BES1 );
+  test_pbes(BES2 );
+  test_pbes(BES3 );
+  test_pbes(BES4 );
+  test_pbes(BES5 );
+  test_pbes(BES6 );
+  test_pbes(BES7 );
+  test_pbes(BES8 );
+  test_pbes(PBES1);
 }
 
 void test_abp()
@@ -245,27 +305,26 @@ void test_abp()
 
   bool timed = false;
   pbes<> pbes = lps2pbes(ABP, NODEADLOCK, timed);
-                                                                                
+
   // Generate min-priority parity game
   mcrl2::pbes_system::parity_game_generator pgg(pbes, true, true);
 
   // Build the edge list
-  typedef unsigned int verti;
-  verti num_vertices = 1 + *pgg.get_initial_values().rbegin();
-  for (verti v = 0; v < num_vertices; ++v)
+  unsigned int num_vertices = 1 + *pgg.get_initial_values().rbegin();
+  for (unsigned int v = 0; v < num_vertices; ++v)
   {
       std::set<unsigned> deps = pgg.get_dependencies(v);
       for ( std::set<unsigned>::const_iterator it = deps.begin();
             it != deps.end(); ++it )
       {
-          verti w = (verti)*it;
+          unsigned int w = (unsigned int)*it;
           if (w >= num_vertices) num_vertices = w + 1;
           printf("%6d -> %6d\n", v, w);
       }
   }
 
   // Find vertex properties
-  for (verti v = 0; v < num_vertices; ++v)
+  for (unsigned int v = 0; v < num_vertices; ++v)
   {
       bool and_op = pgg.get_operation(v) ==
                     mcrl2::pbes_system::parity_game_generator::PGAME_AND;
@@ -280,6 +339,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_bes_examples();
+  test_pbes_examples();
   // test_one_bit_sliding_window();
   test_abp();
 
