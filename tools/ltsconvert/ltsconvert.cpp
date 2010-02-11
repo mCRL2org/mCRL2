@@ -613,7 +613,6 @@ bool ltsconvert_tool::check_configuration(tipi::configuration const& c) const
 }
 
 bool ltsconvert_tool::perform_task(tipi::configuration& c) {
-  t_tool_options tool_options;
 
   if (c.input_exists(lps_file_auxiliary)) {
     tool_options.lpsfile = c.get_input(lps_file_auxiliary).location();
