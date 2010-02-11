@@ -16,7 +16,6 @@ def add_type(var):
         return '%s:Bool' % var
     elif var in ['k', 'm', 'n']:
         return '%s:Nat' % var
-    print 'VAR', var
     return None
 
 class bool:
@@ -316,32 +315,32 @@ def make_pbes(equation_count, atom_count = 5, propvar_count = 3):
     return p
 
 def last_word(line):
-    words = line.split()
+    words = line.strip().split()
     return words[len(words) - 1]
 
 def test_pbes(filename, equation_count, atom_count = 5, propvar_count = 3):
     txtfile = filename + '.txt'
     pbesfile = filename + '.pbes'
-    pbesfile2 = filename + '2.pbes'
+    besfile = filename + '.bes'
     answerfile = 'temp.answer'
     p = make_pbes(equation_count, atom_count, propvar_count)
     path(txtfile).write_text('%s' % p)
     os.system('txt2pbes %s %s' % (txtfile, pbesfile))
 
     # pbes2bool
-    os.system('pbes2bool %s > %s' % (pbesfile, answerfile))
+    os.system('pbes2bool %s >& %s' % (pbesfile, answerfile))
     answer1 = last_word(path(answerfile).text())
 
     # pbespgsolve
-    os.system('pbespgsolve %s > %s' % (pbesfile, answerfile))
+    os.system('pbespgsolve %s >& %s' % (pbesfile, answerfile))
     answer2 = last_word(path(answerfile).text())
 
     # bessolve
-    os.system('pbes2bes %s %s' % (pbesfile, pbesfile2))
-    os.system('bessolve %s > %s' % (pbesfile2, answerfile))
+    os.system('pbes2bes %s %s' % (pbesfile, besfile))
+    os.system('bessolve %s >& %s' % (besfile, answerfile))
     answer3 = last_word(path(answerfile).text())
 
-    print filename, answer1, answer3
+    print 'FILE', filename, answer1, answer2, answer3
 
 for i in range(5):
     test_pbes('%02d' % i, 5, 4, 3)
