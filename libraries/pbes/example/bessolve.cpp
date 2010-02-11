@@ -1,6 +1,6 @@
-#include <iostream>
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+#include <iostream>
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
@@ -86,9 +86,12 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    std::cout << "bessolve parameters:" << std::endl;
-    std::cout << "  input  file      : " << infile << std::endl;
-    std::cout << "  pbes2bes variant : " << print_type(type) << std::endl;
+    if (mcrl2::core::gsVerbose)
+    {
+      std::cout << "bessolve parameters:" << std::endl;
+      std::cout << "  input  file      : " << infile << std::endl;
+      std::cout << "  pbes2bes variant : " << print_type(type) << std::endl;
+    }
 
     p.load(infile);
     pbes<> q;
@@ -111,18 +114,21 @@ int main(int argc, char* argv[])
       case 1: q = do_finite_algorithm(p, pbesr); break;
     }
     int result = gauss_elimination(q);
+
+    std::string result_string;    
     if (result == 0)
     {
-      std::cout << "FALSE" << std::endl;
+      result_string = "false";
     }
     else if (result == 1)
     {
-      std::cout << "TRUE" << std::endl;
+      result_string = "true";
     }
     else
     {
-      std::cout << "UNKNOWN" << std::endl;
+      result_string = "unknown";
     }
+    std::cout << "The solution for the initial variable of the bes is " << result_string << "\n";
   }
   catch(mcrl2::runtime_error e)
   {

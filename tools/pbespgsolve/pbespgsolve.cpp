@@ -107,7 +107,8 @@ public:
     unsigned int log_level = mcrl2::core::gsVerbose ? 1 : 0;
     pbespgsolve_algorithm algorithm(log_level, m_options);
     bool result = algorithm.run(p);
-    std::clog << (result ? "Property holds.\n" : "Property DOES NOT hold.\n");
+    std::clog << "The solution for the initial variable of the pbes is " << (result ? "true" : "false") << "\n";
+
     return true;
   }
 };

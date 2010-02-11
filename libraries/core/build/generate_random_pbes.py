@@ -2,7 +2,9 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import os
 import random
+import shutil
 from path import *
 
 # As a convention we use that k, m, n are always natural numbers and
@@ -169,7 +171,7 @@ def implies(x, y):
 
 def forall(x):
     var, dummy = pick_element(['k', 'm', 'n'])
-    phi = or_(bool('val(%s < 3)' % var), x)
+    phi = and_(bool('val(%s < 3)' % var), x)
     return quantifier('forall', var, phi)
 
 def exists(x):
@@ -292,10 +294,10 @@ def join_terms(terms):
     terms.append(z)
     return terms
 
-def make_pbes(n, atom_count = 5, propvar_count = 3):
-    predvars = make_predvars(n)
+def make_pbes(equation_count, atom_count = 5, propvar_count = 3):
+    predvars = make_predvars(equation_count)
     equations = []
-    for i in range(n):
+    for i in range(equation_count):
         terms = make_terms(predvars, atom_count, propvar_count)
         while len(terms) > 1:
             terms = join_terms(terms)
@@ -313,4 +315,35 @@ def make_pbes(n, atom_count = 5, propvar_count = 3):
     p.finish()
     return p
 
-print make_pbes(4, 5, 2)
+def last_word(line):
+    words = line.split()
+    return words[len(words) - 1]
+
+def test_pbes(filename, equation_count, atom_count = 5, propvar_count = 3):
+    txtfile = filename + '.txt'
+    pbesfile = filename + '.pbes'
+    pbesfile2 = filename + '2.pbes'
+    answerfile = 'temp.answer'
+    p = make_pbes(equation_count, atom_count, propvar_count)
+    path(txtfile).write_text('%s' % p)
+    os.system('txt2pbes %s %s' % (txtfile, pbesfile))
+
+    # pbes2bool
+    os.system('pbes2bool %s > %s' % (pbesfile, answerfile))
+    answer1 = last_word(path(answerfile).text())
+
+    # pbespgsolve
+    os.system('pbespgsolve %s > %s' % (pbesfile, answerfile))
+    answer2 = last_word(path(answerfile).text())
+
+    # bessolve
+    os.system('pbes2bes %s %s' % (pbesfile, pbesfile2))
+    os.system('bessolve %s > %s' % (pbesfile2, answerfile))
+    answer3 = last_word(path(answerfile).text())
+
+    print filename, answer1, answer3
+
+for i in range(5):
+    test_pbes('%02d' % i, 5, 4, 3)
+#shutil.remove('temp.pbes')
+#shutil.remove('temp.answer')
