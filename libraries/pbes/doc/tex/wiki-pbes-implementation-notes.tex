@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, February 09, 2010 16:15:21}
+%TCIDATA{LastRevised=Friday, February 12, 2010 12:28:31}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -264,9 +264,9 @@ h(\lnot \exists d{{:}D}.\varphi ) & =_{def} & \forall d{{:}D}.h(\lnot
 h(\lnot \lbrack \alpha ]\varphi ) & =_{def} & [\alpha ]h(\lnot \varphi ) \\ 
 h(\lnot \langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
 h(\lnot \varphi ) \\ 
-h(\lnot \nabla ) & =_{def} & \Delta  \\ 
+h(\lnot \nabla ) & =_{def} & \Delta \\ 
 h(\lnot \nabla (t)) & =_{def} & \Delta (t) \\ 
-h(\lnot \Delta ) & =_{def} & \nabla  \\ 
+h(\lnot \Delta ) & =_{def} & \nabla \\ 
 h(\lnot \Delta (t)) & =_{def} & \nabla (t) \\ 
 h(\lnot X(e)) & =_{def} & undefined \\ 
 h(\lnot \mu X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \nu X(d{:}%
@@ -281,16 +281,16 @@ h(\mathsf{Q}d{{:}D}.\varphi ) & =_{def} & \mathsf{Q}d{{:}D}.h(\varphi ) \\
 h([\alpha ]\varphi ) & =_{def} & [\alpha ]h(\varphi ) \\ 
 h(\langle \alpha \rangle \varphi ) & =_{def} & \langle \alpha \rangle
 h(\varphi ) \\ 
-h(\nabla ) & =_{def} & \nabla  \\ 
+h(\nabla ) & =_{def} & \nabla \\ 
 h(\nabla (t)) & =_{def} & \nabla (t) \\ 
-h(\Delta ) & =_{def} & \Delta  \\ 
+h(\Delta ) & =_{def} & \Delta \\ 
 h(\Delta (t)) & =_{def} & \Delta (t) \\ 
 h(X(d)) & =_{def} & X(d) \\ 
 h(\sigma X(d{:}D:=e).~\varphi )~~~ & =_{def}~~~ & \sigma X(d{:}%
 D:=e).~h(\varphi )%
 \end{array}%
 \end{equation*}%
-\pagebreak 
+\pagebreak
 
 \subsection{The predicate formula normal form (PFNF)}
 
@@ -488,17 +488,17 @@ l & \mathsf{if\ }Y=X \\
 \mathbf{RHS}}(\varphi ) \\ 
 {\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
 {:}E_{i}}((\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))\mbox{\aap ,}%
-t_{i}(x_{p},y),\alpha )\ \wedge  \\ 
+t_{i}(x_{p},y),\alpha )\ \wedge \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}c_{i}(x_{p},y)%
-\wedge t_{i}(x_{p},y)>T\ )\Rightarrow  \\ 
+\wedge t_{i}(x_{p},y)>T\ )\Rightarrow \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(} {\mathbf{RHS}}%
 (\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
 {\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
 I}\exists _{y{:}E_{i}}(\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))%
 \mbox{\aap
-,}t_{i}(x_{p},y),\alpha )\ \wedge  \\ 
+,}t_{i}(x_{p},y),\alpha )\ \wedge \\ 
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(}c_{i}(x_{p},y)\wedge
-t_{i}(x_{p},y)>T\ \wedge  \\ 
+t_{i}(x_{p},y)>T\ \wedge \\ 
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(} {\mathbf{RHS}}%
 (\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
 {\mathbf{RHS}}(X(d)) & =_{def} & \tilde{X}(T,d,x_{p},\mathbf{Par}%
@@ -946,19 +946,79 @@ R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
 R(\varphi \oplus \psi ) &=&R(\varphi )\oplus (\psi ) \\
 R(X_{i}(d,e)) &=&\left\{ 
 \begin{array}{cc}
-\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset \\ 
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset  \\ 
 \dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
-\text{if }FV(d)\neq \emptyset%
+\text{if }FV(d)\neq \emptyset 
 \end{array}%
-\right. \\
+\right.  \\
 R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
 R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
 \end{eqnarray*}%
 where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and 
 $\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
-variables appearing in $d$.
+variables appearing in $d$.\newpage 
 
-\newpage
+\subsection{Parity game generator}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\ldots \mathcal{%
+(\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES with initial state $%
+X_{init}(e_{init})$, and let $R:PbesTerm\rightarrow PbesTerm$ be a rewriter.
+The PBES must be in normal form, i.e. it may not contain negations or
+implications. The following algorithm computes a BES.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{GenerateParityGame(}}\mathcal{E}\text{, }X_{init}(e_{init})%
+\text{, }R\text{\textsc{)}} \\ 
+\text{result}:=\{(\nu Y_{\top }=Y_{\top }),(\mu Y_{\bot }=Y_{\bot })\} \\ 
+\text{visited}:=\{R(X_{init}(e_{init}))\} \\ 
+\text{explored}:=\{\top ,\bot \} \\ 
+\text{\textbf{while }}\text{visited}\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad \text{\textbf{choose }}\psi \in \text{visited}\setminus \text{explored%
+} \\ 
+\qquad \text{visited}:=\text{visited}\ \backslash \ \{\psi \} \\ 
+\qquad \text{explored}:=\text{explored}\cup \{\psi \} \\ 
+\qquad \text{\textbf{if} }\{\psi =X_{k}(e)\}\text{ \textbf{then}} \\ 
+\qquad \qquad \xi :=R(\varphi _{k}[d_{k}:=e]) \\ 
+\qquad \text{\textbf{else}} \\ 
+\qquad \qquad \xi :=\psi  \\ 
+\qquad \text{\textbf{if} }\{\xi =X_{k}(e)\}\text{ \textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=Y_{\xi }) \\ 
+\qquad \qquad \sigma _{\psi }:=\sigma _{k} \\ 
+\qquad \qquad \text{visited}:=\text{visited}\cup \{Y_{\xi }\} \\ 
+\qquad \text{\textbf{else if} }\{\xi =\dbigwedge_{j\in J}\phi _{j}\}\text{ 
+\textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=\dbigwedge_{j\in J}Y_{\phi _{j}}) \\ 
+\qquad \qquad \text{\textbf{for} }j\in J\text{ \textbf{do} }\sigma _{\phi
+_{j}}:=\sigma _{\psi } \\ 
+\qquad \qquad \text{visited}:=\text{visited}\cup \{Y_{\phi _{j}}\}_{j\in J}
+\\ 
+\qquad \text{\textbf{else if} }\{\xi =\dbigvee_{j\in J}\phi _{j}\}\text{ 
+\textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=\dbigvee_{j\in J}Y_{\phi _{j}}) \\ 
+\qquad \qquad \text{\textbf{for} }j\in J\text{ \textbf{do} }\sigma _{\phi
+_{j}}:=\sigma _{\psi } \\ 
+\qquad \qquad \text{visited}:=\text{visited}\cup \{Y_{\phi _{j}}\}_{j\in J}
+\\ 
+\qquad \text{\textbf{else if} }\{\xi =\top \}\text{ \textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=Y_{\top }) \\ 
+\qquad \text{\textbf{else if} }\{\xi =\bot \}\text{ \textbf{then}} \\ 
+\qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
+}=Y_{\bot }) \\ 
+\text{\textbf{return }result}%
+\end{array}%
+\end{equation*}%
+In every step of the while loop the equation for $Y_{\psi }$ is computed. If 
+$\psi $ is a propositional variable instantiation, it is expanded into the
+right hand side of the corresponding PBES equation. Otherwise it is
+converted into a disjunction or conjunction by introducing new BES
+variables. The rewriter $R$ is expected to eliminate all quantifiers, so the
+while loop does not contain cases for handling them. The order of the
+equations in the BES is significant. Therefore in the implementation the $%
+\sigma _{\psi }$ fixpoint symbols are replaced by priority values.\pagebreak 
 
 \section{Constant Parameter Detection and Elimination}
 
