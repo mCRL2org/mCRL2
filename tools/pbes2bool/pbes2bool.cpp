@@ -34,9 +34,8 @@
 
 //Tool framework
 #include "mcrl2/utilities/input_tool.h"
-//#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-//#include "mcrl2/utilities/pbes_rewriter_tool.h"
+#include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
 //Data Framework
@@ -64,12 +63,10 @@ using namespace ::bes;
 using namespace mcrl2;
 using utilities::tools::input_tool;
 using utilities::tools::rewriter_tool;
-//using utilities::tools::pbes_rewriter_tool;
+using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-//class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input_output_tool> > >
-//class pbes2bool_tool: public squadt_tool< rewriter_tool<input_output_tool> >
-class pbes2bool_tool: public squadt_tool< rewriter_tool<input_tool> >
+class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input_tool> > >
 {
   protected:
     // Tool options.
@@ -82,12 +79,16 @@ class pbes2bool_tool: public squadt_tool< rewriter_tool<input_tool> >
     bool opt_data_elm;                         // The data elimination option
     std::string opt_counter_example_file;      // The counter example file name
 
-    //typedef squadt_tool< pbes_rewriter_tool<rewriter_tool<input_output_tool> > > super;
-    //typedef squadt_tool< rewriter_tool<input_output_tool> > super;
-    typedef squadt_tool< rewriter_tool<input_tool> > super;
+    typedef squadt_tool< pbes_rewriter_tool<rewriter_tool<input_tool> > > super;
 
     std::string default_rewriter() const
     { return "quantifier-all";
+    }
+
+    // Overload synopsis to cope with optional OUTFILE
+    std::string synopsis() const
+    {
+      return "[OPTION]...[INFILE [OUTFILE]]\n";
     }
 
   public:
@@ -223,7 +224,7 @@ class pbes2bool_tool: public squadt_tool< rewriter_tool<input_tool> >
         std::cerr << "  input file:         " << m_input_filename << std::endl;
         std::cerr << "  output file:        " << m_output_filename << std::endl;
         std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
-//        std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
+        std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
       }
 
       // load the pbes
@@ -467,7 +468,7 @@ class pbes2bool_tool: public squadt_tool< rewriter_tool<input_tool> >
       checkbox& unused_data(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_unused_data)));
 
       add_rewrite_option(d, m);
-//      add_pbes_rewrite_option(d, m);
+      add_pbes_rewrite_option(d, m);
 
       m.append(d.create< label >().set_text("Output format : ")).
         append(d.create< horizontal_box >().

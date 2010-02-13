@@ -42,12 +42,18 @@ using namespace mcrl2::utilities::tools;
 /// \brief tau-summands of an LPS are confluent. The tau-actions of all confluent tau-summands can be
 /// \brief renamed to ctau, depending on the flag m_no_marking.
 
-class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_output_tool> > >
+class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_tool> > >
 {
-  private:
+  protected:
+
+    typedef squadt_tool< prover_tool< rewriter_tool<input_tool> > > super;
+
+    /// \brief Name of the output file name
+    std::string m_output_filename;
+
     /// \brief The name of a file containing an invariant that is used to check confluence.
     /// \brief If this string is 0, the constant true is used as invariant.
-    std::string m_invariant_file_name;
+    std::string m_invariant_filename;
 
     /// \brief The number of the summand that is checked for confluence.
     /// \brief If this number is 0, all summands are checked.
@@ -58,7 +64,7 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
     bool m_generate_invariants;
 
     /// \brief The flag indicating whether or not the invariance of the formula as found in the file
-    /// \brief m_invariant_file_name is checked.
+    /// \brief m_invariant_filename is checked.
     bool m_no_check;
 
     /// \brief The flag indicating whether or not the tau-actions of the confluent summands should be renamed to ctau.
@@ -88,7 +94,11 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
     /// \brief If no invariant was provided, the constant true is used as invariant.
     data_expression m_invariant;
 
-    typedef squadt_tool< prover_tool< rewriter_tool<input_output_tool> > > super;
+    // Overload synopsis to cope with optional OUTFILE
+    std::string synopsis() const
+    {
+      return "[OPTION]...[INFILE [OUTFILE]]\n";
+    }
 
     void parse_options(const command_line_parser& parser)
     {
@@ -103,7 +113,7 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
 
       if (parser.options.count("invariant"))
       {
-        m_invariant_file_name = parser.option_argument_as< std::string >("invariant");
+        m_invariant_filename = parser.option_argument_as< std::string >("invariant");
       }
 
       if (parser.options.count("print-dot"))
@@ -193,16 +203,16 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
 
     specification.load(m_input_filename);
 
-    if (!m_invariant_file_name.empty())
+    if (!m_invariant_filename.empty())
     {
-      std::ifstream instream(m_invariant_file_name.c_str());
+      std::ifstream instream(m_invariant_filename.c_str());
 
       if (!instream.is_open())
       {
-        throw mcrl2::runtime_error("cannot open input file '" + m_invariant_file_name + "'");
+        throw mcrl2::runtime_error("cannot open input file '" + m_invariant_filename + "'");
       }
 
-      gsVerboseMsg("parsing input file '%s'...\n", m_invariant_file_name.c_str());
+      gsVerboseMsg("parsing input file '%s'...\n", m_invariant_filename.c_str());
 
       m_invariant = parse_data_expression(instream, specification.data());
 
@@ -229,14 +239,14 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
   }
 
   /// \brief Checks whether or not the invariant holds, if
-  /// Checks if the formula in the file m_invariant_file_name is an invariant,
+  /// Checks if the formula in the file m_invariant_filename is an invariant,
   /// if the flag m_no_check is set to false and
-  /// m_invariant_file_name differs from 0.
+  /// m_invariant_filename differs from 0.
   /// \return true, if the invariant holds or no invariant is specified.
   ///         false, if the invariant does not hold.
   bool check_invariant(lps::specification const& specification) const
   {
-    if (!m_invariant_file_name.empty()) {
+    if (!m_invariant_filename.empty()) {
       if (!m_no_check) {
         Invariant_Checker v_invariant_checker(specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), false, false, false, m_dot_file_name);
 
@@ -251,21 +261,21 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
   }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#define invariant_file_for_input = "invariant_in";
+#define option_generate_invariants "generate_invariants"
+#define option_check_invariant     "check_invariant"
+#define option_mark_tau            "mark_tau"
+#define option_check_combinations  "check_combinations"
+#define option_counter_example     "counter_example"
+#define option_induction_on_lists  "induction_on_lists"
+#define option_invariant           "invariant"
+#define option_time_limit          "time_limit"
+#define option_rewrite_strategy    "rewrite_strategy"
 
-#define option_generate_invariants = "generate_invariants";
-#define option_check_invariant     = "check_invariant";
-#define option_mark_tau            = "mark_tau";
-#define option_check_combinations  = "check_combinations";
-#define option_counter_example     = "counter_example";
-#define option_induction_on_lists  = "induction_on_lists";
-#define option_invariant           = "invariant";
-#define option_time_limit          = "time_limit";
-#define option_rewrite_strategy    = "rewrite_strategy";
+  protected:
 
   void set_capabilities(tipi::tool::capabilities& c) const
   {
-    c.add_input_configuration("main-input", tipi::mime_type("mcrl2", tipi::mime_type::text),
+    c.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application),
                                                             tipi::tool::category::transformation);
   }
 
@@ -277,7 +287,7 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
     using namespace tipi::datatype;
     using namespace tipi::layout::elements;
 
-    synchronise_with_configuration(configuration);
+    synchronise_with_configuration(c);
 
     std::string infilename = c.get_input("main-input").location();
 
@@ -324,7 +334,7 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
       append(d.create< horizontal_box >().
           append(d.create< vertical_box >().set_default_alignment(layout::right).
               append(generate_invariants.set_label("Generate invariants")).
-              append(check_invariant.set_label("Check invariant")).
+              append(check_invariant.set_label("Check invariant from file")).
               append(mark_tau.set_label("Mark confluent tau's")).
               append(check_combinations.set_label("Check all combinations of summands for confluence")).
               append(counter_example.set_label("Produce counter examples")).
@@ -382,11 +392,11 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
       c.remove_option(option_time_limit);
     }
     else {
-      c.add_option(option_time_limit).set_argument_value< 0, tipi::datatype::natural >(time_limit.get_text());
+      c.add_option(option_time_limit).set_argument_value< 0 > (time_limit.get_text());
     }
 
     // let squadt_tool update configuration for rewriter and input/output files
-    update_configuration(configuration);
+    super::update_configuration(c);
 
     send_clear_display();
   }
@@ -405,14 +415,22 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
     using namespace tipi::layout::elements;
 
     // Let squadt_tool update configuration for rewriter and add output file configuration
-    synchronise_with_configuration(configuration);
+    synchronise_with_configuration(c);
 
-    // TODO finish
-    run();
+    m_generate_invariants = c.get_option_argument<bool>(option_generate_invariants);
+    m_no_check = !c.get_option_argument<bool>(option_check_invariant);
+    m_no_marking = !c.get_option_argument<bool>(option_mark_tau);
+    m_check_all = c.get_option_argument<bool>(option_check_combinations);
+    m_counter_example = c.get_option_argument<bool>(option_counter_example);
+    m_time_limit = c.get_option_argument<size_t>(option_time_limit);
+    m_apply_induction = c.get_option_argument<bool>(option_induction_on_lists);
+    m_invariant_filename = c.get_option_argument<std::string>(option_invariant);
 
-    send_display_layout(d);
+    return run();
 
-    return true;
+//    send_display_layout(d);
+
+//    return true;
   }
 #endif
 };

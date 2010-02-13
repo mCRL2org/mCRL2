@@ -89,6 +89,10 @@ namespace mcrl2 {
 
           /// \brief Updates rewrite strategy in a configuration
           void update_configuration(tipi::configuration& c) {
+            if(!c.option_exists("pbes-rewriter-type")) {
+              c.add_option("pbes-rewriter-type");
+            }
+
             static_cast< tipi::configuration::option& >(c.add_option("pbes-rewriter-type")).
                 set_argument_value< 0 >(this->rewriter_type());
 
@@ -117,7 +121,11 @@ namespace mcrl2 {
                         const std::string& tool_description,
                         std::string known_issues = "")
             : super_type(name, author, what_is, tool_description, known_issues)
-          {}
+          {
+            bool initialised = activate_strategy_conversion();
+
+            static_cast< void >(initialised);
+          }
       };
     }
   }

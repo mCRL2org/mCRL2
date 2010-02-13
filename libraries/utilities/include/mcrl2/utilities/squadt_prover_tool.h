@@ -22,26 +22,25 @@ namespace mcrl2 {
       template < typename Tool >
       class squadt_tool< prover_tool< Tool > > : public prover_tool< squadt_tool< Tool > > {
 
-        private:
+        protected:
 
           typedef prover_tool< squadt_tool< Tool > > super_type;
+          typedef typename super_type::smt_solver_type smt_solver_type;
 
-          void set_solver_type(super::smt_solver_type s)
+          void set_solver_type(smt_solver_type s)
           {
             this->m_solver_type = s;
           }
 
-        protected:
-
           /// \brief activates convesion from rewriter::strategy to string and vice versa
           bool activate_solver_conversion()
           {
-            tipi::datatype::enumeration< super::solver_type > solver_enumeration;
+            tipi::datatype::enumeration< smt_solver_type > solver_enumeration;
 
-            strategy_enumeration.
-              add(solver_type_cvc_fast, "none").
-              add(solver_type_ario, "ario").
-              add(solver_type_cvc, "CVC3", true);
+            solver_enumeration.
+              add(mcrl2::data::detail::solver_type_ario, "ario").
+              add(mcrl2::data::detail::solver_type_cvc, "CVC3").
+              add(mcrl2::data::detail::solver_type_cvc_fast, "none");
 
             return true;
           }
@@ -55,7 +54,7 @@ namespace mcrl2 {
           /// \note the value of m_rewrite_strategy determines the default stratgy
           /// \note the value of m_rewrite_strategy is updated accordingly
           template < typename LayoutManager >
-          void add_rewrite_option(tipi::tool_display& display, LayoutManager& base)
+          void add_solver_option(tipi::tool_display& display, LayoutManager& base)
           {
             using namespace mcrl2::data::detail;
             using namespace tipi::layout;
@@ -65,7 +64,7 @@ namespace mcrl2 {
 
             static_cast< void >(initialised);
 
-            mcrl2::utilities::squadt::radio_button_helper< super::smt_solver_type > strategy_selector(display);
+            mcrl2::utilities::squadt::radio_button_helper< smt_solver_type > solver_selector(display);
 
             horizontal_box& m = display.create< horizontal_box >();
 
@@ -73,12 +72,12 @@ namespace mcrl2 {
               append(solver_selector.associate(solver_type_ario, "ario")).
               append(solver_selector.associate(solver_type_cvc, "CVC3", true));
 
-            strategy_selector.get_button(solver_type_cvc_fast).on_change(
-                boost::bind(&squadt_tool< rewriter_tool< Tool > >::set_solver_type, this, solver_type_cvc_fast));
-            strategy_selector.get_button(solver_type_ario).on_change(
-                boost::bind(&squadt_tool< rewriter_tool< Tool > >::set_solver_type, this, solver_type_ario));
-            strategy_selector.get_button(solver_type_cvc).on_change(
-                boost::bind(&squadt_tool< rewriter_tool< Tool > >::set_solver_type, this, solver_type_cvc));
+            solver_selector.get_button(solver_type_cvc_fast).on_change(
+                boost::bind(&squadt_tool< prover_tool< Tool > >::set_solver_type, this, solver_type_cvc_fast));
+            solver_selector.get_button(solver_type_ario).on_change(
+                boost::bind(&squadt_tool< prover_tool< Tool > >::set_solver_type, this, solver_type_ario));
+            solver_selector.get_button(solver_type_cvc).on_change(
+                boost::bind(&squadt_tool< prover_tool< Tool > >::set_solver_type, this, solver_type_cvc));
 
             base.append(display.create< label >().set_text("SMT solver")).append(m);
           }
@@ -98,7 +97,7 @@ namespace mcrl2 {
           /// \brief Adds rewrite strategy to the configuration or vice versa if the strategy is part of the configuration
           void synchronise_with_configuration(tipi::configuration& c) {
             if (c.option_exists("smt-solver")) {
-              this->m_rewrite_strategy = c.get_option_argument< super::smt_solver_type >("smt-solver", 0);
+              this->m_solver_type = c.get_option_argument< smt_solver_type >("smt-solver", 0);
             }
             else {
               static_cast< tipi::configuration::option& >(c.add_option("smt-solver")).
@@ -117,7 +116,10 @@ namespace mcrl2 {
                         const std::string& tool_description,
                         std::string known_issues = "")
             : super_type(name, author, what_is, tool_description, known_issues)
-          {}
+          {
+            bool initialised = activate_solver_conversion();
+            static_cast< void >(initialised);
+          }
       };
     }
   }

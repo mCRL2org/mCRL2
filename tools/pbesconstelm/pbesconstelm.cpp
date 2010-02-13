@@ -166,6 +166,7 @@ class pbes_constelm_tool: public squadt_tool<pbes_rewriter_tool<rewriter_tool<in
       layout::vertical_box& m = d.create< vertical_box >();
 
       add_rewrite_option(d, m);
+      add_pbes_rewrite_option(d, m);
 
       // Prepare user interaction
       checkbox& compute_conditions = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_compute_conditions));

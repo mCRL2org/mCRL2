@@ -293,7 +293,7 @@ namespace tipi {
         inline std::string specialised_convert(boost::any const& v) const {
           if(get_single_instance().m_values.empty())
           {
-             throw std::runtime_error("m_values is empty");
+             throw std::runtime_error("m_values is empty in specialised_convert");
           }
 
           return get_single_instance().convert(static_cast< size_t >(boost::any_cast< C >(v)));
@@ -303,7 +303,7 @@ namespace tipi {
         inline basic_enumeration::const_iterator_range values() const {
           if(get_single_instance().m_values.empty())
           {
-             throw std::runtime_error("m_values is empty");
+             throw std::runtime_error("m_values is empty in values");
           }
 
           return get_single_instance().values();
@@ -316,7 +316,7 @@ namespace tipi {
         inline std::string convert(C const& s) const {
           if(get_single_instance().m_values.empty())
           {
-             throw std::runtime_error("m_values is empty");
+             throw std::runtime_error("m_values is empty in convert");
           }
 
           return get_single_instance().convert(static_cast< const size_t > (s));
@@ -328,7 +328,7 @@ namespace tipi {
         inline C evaluate(std::string const& s) const {
           if(get_single_instance().m_values.empty())
           {
-             throw std::runtime_error("m_values is empty");
+             throw std::runtime_error("m_values is empty in evaluate");
           }
 
           return static_cast< C >(get_single_instance().evaluate(s));

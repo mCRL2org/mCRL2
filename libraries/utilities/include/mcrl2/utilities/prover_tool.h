@@ -67,7 +67,6 @@ namespace tools {
   class prover_tool: public Tool
   {
     protected:
-
       typedef mcrl2::data::detail::SMT_Solver_Type smt_solver_type;
 
       /// The data rewriter strategy
