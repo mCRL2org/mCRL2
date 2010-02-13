@@ -45,6 +45,27 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+  template <class T> // note, T is only a dummy
+  struct parity_game_generator_log_level
+  {
+    static unsigned int log_level;
+  };
+
+  template <class T>
+  unsigned int parity_game_generator_log_level<T>::log_level = 0;
+
+  inline
+  void set_parity_game_generator_log_level(unsigned int level)
+  {
+    parity_game_generator_log_level<int>::log_level = level;
+  }
+
+  inline
+  unsigned int get_parity_game_generator_log_level()
+  {
+    return parity_game_generator_log_level<int>::log_level;
+  }
+
   /// \brief Class for generating a BES from a PBES. This BES can be interpreted as
   /// a graph corresponding to a parity game problem. The proposition variables
   /// of the BES correspond to the vertices of the graph.
@@ -186,17 +207,10 @@ namespace pbes_system {
           m_true_false_dependencies(true_false_dependencies),
           m_is_min_parity(is_min_parity)
       {
-        // TODO: this is not the way the log level should be set...
+      	// Overrule the log level setting by the global value
         if (log_level == 0)
         {
-          if (mcrl2::core::gsVerbose)
-          {
-            verbose_level() = 1;
-          }
-          if (mcrl2::core::gsDebug)
-          {
-            verbose_level() = 2;
-          }
+        	verbose_level() = get_parity_game_generator_log_level();
         }
 
         // Nothing to be done for an empty PBES.
@@ -331,7 +345,6 @@ namespace pbes_system {
         const unsigned int priority = eqn.second;
 
         LOG(2, "\nGenerating equation for expression " + tr::pp(psi) + "\n");
-        pbes_expression xi = psi;
 
         // expand the right hand side if needed
         if (tr::is_prop_var(psi))
@@ -339,32 +352,32 @@ namespace pbes_system {
           const pbes_equation& eqn = *m_pbes_equation_index[tr::name(psi)];
           substitution_function sigma = make_substitution(eqn.variable().parameters(), tr::param(psi));
           LOG(2, "  Expanding right hand side " + tr::pp(eqn.formula()) + " into ");
-          xi = R(eqn.formula(), sigma);
-          LOG(2, tr::pp(xi) + "\n");
+          psi = R(eqn.formula(), sigma);
+          LOG(2, tr::pp(psi) + "\n");
         }
 
         // top_flatten
-        if (tr::is_prop_var(xi))
+        if (tr::is_prop_var(psi))
         {
-          result.insert(add_bes_equation(xi, m_priorities[tr::name(xi)]));
+          result.insert(add_bes_equation(psi, m_priorities[tr::name(psi)]));
         }
-        else if (tr::is_and(xi))
+        else if (tr::is_and(psi))
         {
-          atermpp::set<pbes_expression> terms = pbes_expr::split_and(xi);
+          atermpp::set<pbes_expression> terms = pbes_expr::split_and(psi);
           for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(add_bes_equation(*i, priority));
           }
         }
-        else if (tr::is_or(xi))
+        else if (tr::is_or(psi))
         {
-          atermpp::set<pbes_expression> terms = pbes_expr::split_or(xi);
+          atermpp::set<pbes_expression> terms = pbes_expr::split_or(psi);
           for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(add_bes_equation(*i, priority));
           }
         }
-        else if (tr::is_true(xi))
+        else if (tr::is_true(psi))
         {
           if (m_true_false_dependencies)
           {
@@ -373,7 +386,7 @@ namespace pbes_system {
             result.insert(i->second);
           }
         }
-        else if (tr::is_false(xi))
+        else if (tr::is_false(psi))
         {
           if (m_true_false_dependencies)
           {
@@ -384,12 +397,13 @@ namespace pbes_system {
         }
         else
         {
-          throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + core::pp(xi) + "\n" + xi.to_string()));
+          throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + core::pp(psi) + "\n" + psi.to_string()));
         }
         LOG_BES_EQUATION(2, index, result);
         return result;
       }
 
+      /// \brief Returns the successors of a vertex in the graph.
       /// \brief Prints the mapping from BES variables to the corresponding PBES expressions.
       void print_variable_mapping()
       {

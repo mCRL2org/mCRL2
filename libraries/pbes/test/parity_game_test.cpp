@@ -124,7 +124,7 @@ std::string PBES1 =
   ;
 
 // mimick the way parity_game_generator is used in parity game solver from Twente
-void test_pbes(std::string pbes_spec)
+void test_pbespgsolve(std::string pbes_spec)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::parity_game_generator pgg(p, true, true);
@@ -241,20 +241,20 @@ void test_bes_examples()
   test_bes(BES6, "parity_game_test_bes6.pg", true);
   test_bes(BES7, "parity_game_test_bes7.pg", false);
   test_bes(BES8, "parity_game_test_bes8.pg", true);
-  test_bes(PBES1, "parity_game_test_bes8.pg", true);
+  //test_bes(PBES1, "parity_game_test_bes8.pg", true);
 }
 
 void test_pbes_examples()
 {
-  test_pbes(BES1 );
-  test_pbes(BES2 );
-  test_pbes(BES3 );
-  test_pbes(BES4 );
-  test_pbes(BES5 );
-  test_pbes(BES6 );
-  test_pbes(BES7 );
-  test_pbes(BES8 );
-  test_pbes(PBES1);
+  test_pbespgsolve(BES1 );
+  test_pbespgsolve(BES2 );
+  test_pbespgsolve(BES3 );
+  test_pbespgsolve(BES4 );
+  test_pbespgsolve(BES5 );
+  test_pbespgsolve(BES6 );
+  test_pbespgsolve(BES7 );
+  test_pbespgsolve(BES8 );
+  //test_pbespgsolve(PBES1);
 }
 
 void test_abp()
@@ -339,7 +339,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_bes_examples();
-  // test_pbes_examples();
+  test_pbes_examples();
   // test_one_bit_sliding_window();
   test_abp();
 

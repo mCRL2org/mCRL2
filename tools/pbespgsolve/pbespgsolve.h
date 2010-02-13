@@ -17,7 +17,6 @@
 #endif
 
 #include <iostream>
-#include "mcrl2/core/algorithm.h"
 #include "ParityGame.h"
 #include "SmallProgressMeasures.h"
 #include "PredecessorLiftingStrategy.h"
@@ -84,7 +83,7 @@ namespace mcrl2 {
       }
     };
 
-    class pbespgsolve_algorithm : public core::algorithm
+    class pbespgsolve_algorithm
     {
     protected:
       std::auto_ptr<LiftingStrategyFactory> lift_strat_factory;
@@ -94,8 +93,8 @@ namespace mcrl2 {
 
     public:
 
-      pbespgsolve_algorithm(unsigned int log_level = 0, pbespgsolve_options options = pbespgsolve_options())
-      : core::algorithm(log_level), m_options(options)
+      pbespgsolve_algorithm(pbespgsolve_options options = pbespgsolve_options())
+      : m_options(options)
       {
         if (options.solver_type == spm_solver)
         {

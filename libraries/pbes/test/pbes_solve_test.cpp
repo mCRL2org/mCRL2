@@ -130,8 +130,7 @@ void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
 void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& options, bool expected_result)
 {
   pbes<> p = txt2pbes(pbes_spec);
-  unsigned int log_level = 0;
-  pbespgsolve_algorithm algorithm(log_level, options);
+  pbespgsolve_algorithm algorithm(options);
   bool result;
   try
   {
@@ -162,8 +161,8 @@ void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
   // test with and without scc decomposition
   pbespgsolve_options options;
   test_pbespgsolve(pbes_spec, options, expected_result);
-  options.use_scc_decomposition = false;
-  test_pbespgsolve(pbes_spec, options, expected_result);
+//  options.use_scc_decomposition = false;
+//  test_pbespgsolve(pbes_spec, options, expected_result);
 }
 
 void test_all()
@@ -187,6 +186,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  set_parity_game_generator_log_level(2);
   test_all();
 
   return 0;
