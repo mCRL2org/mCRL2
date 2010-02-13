@@ -114,7 +114,7 @@ public:
       log_level = 2;
     }
     set_parity_game_generator_log_level(log_level); 
-    pbespgsolve_algorithm algorithm(log_level, m_options);
+    pbespgsolve_algorithm algorithm(m_options);
     bool result = algorithm.run(p);
     std::clog << "The solution for the initial variable of the pbes is " << (result ? "true" : "false") << "\n";
 
