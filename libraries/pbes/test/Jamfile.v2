@@ -6,7 +6,6 @@ project libraries/pbes/test
        <library>/libraries//pbes
        <library>/site-config//boost_filesystem
        <library>/site-config//boost_system
-       <library>../../../tools/pbespgsolve//pg
        <include>../../../tools/pbespgsolve
        #<define>MCRL2_WITH_GARBAGE_COLLECTION
    ;
@@ -32,7 +31,7 @@ test-suite pbes
       [ run pbes_expression_test.cpp ]
       [ run pbes_property_map_test.cpp ]
       [ run pbesrewr_test.cpp ]
-      [ run pbes_solve_test.cpp ]
+      [ run pbes_solve_test.cpp : : <library>../../../tools/pbespgsolve//pg ]
       [ run pbes_test.cpp ]
       [ run remove_parameters_test.cpp ]
       [ run rewriter_test.cpp ]

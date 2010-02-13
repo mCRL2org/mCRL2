@@ -94,6 +94,11 @@ protected:
       "  Y: Nat;       \n"
       "  W: Bool;      \n"
       "  Z: Bool, Nat; \n"
+      "  X0;           \n"
+      "  X1: Bool;     \n"
+      "  X2: Nat, Nat; \n"
+      "  X3: Bool, Nat;\n"
+      "  X4: Nat, Bool;\n"
       ; 
   }
 
@@ -262,6 +267,8 @@ void test_enumerate_quantifiers_rewriter()
   test_enumerate_quantifiers(N(R), N(r),  "exists m:Nat.val(m > 3)"                                         , "true");                                                    
   test_enumerate_quantifiers(N(R), N(r),  "forall m:Nat. X"                                                 , "X");                                                       
   test_enumerate_quantifiers(N(R), N(r),  "exists d: Nat. X && val(d == 0)"                                 , "X");                         
+  test_enumerate_quantifiers(N(R), N(r),  "forall m: Nat. (val(!(m < 3)) || Y(m + 1))"                      , "Y(1) && Y(2) && Y(3)"); 
+  test_enumerate_quantifiers(N(R), N(r),  "val(!true) || (((forall m: Nat. val(!(m < 3)) && X3(false, m + 1)) && X2(1, 1) && val(!false) || val(false)) || (exists m: Nat. val(m < 3) || (forall k: Nat. val(k < 3) && val(k < 2)))) && X1(false)", "X1(false)");
 }                                                                                                                                                     
 
 int test_main(int argc, char* argv[])
