@@ -35,7 +35,7 @@ namespace mcrl2 {
 
       void LOG_EQUATION(unsigned int level, std::string message, const equation_type& eq) const
       {
-        if (verbose_level() >= level)
+        if (check_log_level(level))
         {
           std::clog << message;
           std::clog << "  " << ExpressionTraits::print(eq) << std::endl;
@@ -49,7 +49,7 @@ namespace mcrl2 {
       template <typename Iter>
       void LOG_EQUATIONS(unsigned int level, std::string message, Iter first, Iter last) const
       {
-        if (verbose_level() >= level)
+        if (check_log_level(level))
         {
           std::clog << message;
           for (Iter i = first; i != last; ++i)

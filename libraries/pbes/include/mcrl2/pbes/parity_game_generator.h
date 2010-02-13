@@ -19,6 +19,8 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/algorithm.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/substitution.h"
@@ -51,7 +53,7 @@ namespace pbes_system {
   /// no holes in the sequence.
   /// Each vertex is labeled with a priority value, which is the
   /// block nesting depth of the proposition variable in the BES.
-  class parity_game_generator
+  class parity_game_generator: public core::algorithm
   {
     protected:
       /// \brief The traits class of the expression type.
@@ -138,6 +140,32 @@ namespace pbes_system {
         return sigma;
       }
 
+      // very simplistic log function
+      void LOG(unsigned int level, const std::string& s) const
+      {
+        if (check_log_level(level))
+        {
+          std::clog << s << std::flush;
+        }
+      }
+
+      // prints the BES equation with left hand side 'index' and right hand side 'rhs'
+      void LOG_BES_EQUATION(unsigned int level, unsigned int index, const std::set<unsigned int>& rhs) const
+      {
+        if (check_log_level(level))
+        {
+          const std::pair<pbes_expression, unsigned int>& eqn = m_bes[index];
+          const unsigned int priority = eqn.second;
+          std::clog << (priority % 2 == 0 ? "mu Y" : "nu Y") << index << " = ";
+          std::string op =  (get_operation(index) == PGAME_AND ? " && " : " || ");
+          for (std::set<unsigned int>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
+          {
+            std::clog << (i == rhs.begin() ? "" : op) << "Y" << *i;
+          }
+          std::clog << std::endl;
+        }
+      }
+
     public:
       /// \brief The operation type of the vertices.
       enum operation_type { PGAME_OR, PGAME_AND };
@@ -146,8 +174,10 @@ namespace pbes_system {
       /// \param p A PBES
       /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
       /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-      parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true)
-        : m_pbes(p),
+      parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, unsigned int log_level = 0)
+        : 
+          core::algorithm(log_level),
+          m_pbes(p),
           generator("UNIQUE_PREFIX"),
           datar(p.data()),
           datae(p.data(), datar, generator),
@@ -156,6 +186,19 @@ namespace pbes_system {
           m_true_false_dependencies(true_false_dependencies),
           m_is_min_parity(is_min_parity)
       {
+        // TODO: this is not the way the log level should be set...
+        if (log_level == 0)
+        {
+          if (mcrl2::core::gsVerbose)
+          {
+            verbose_level() = 1;
+          }
+          if (mcrl2::core::gsDebug)
+          {
+            verbose_level() = 2;
+          }
+        }
+
         // Nothing to be done for an empty PBES.
         if (m_pbes.equations().empty())
         {
@@ -287,36 +330,41 @@ namespace pbes_system {
         pbes_expression& psi = eqn.first;
         const unsigned int priority = eqn.second;
 
+        LOG(2, "\nGenerating equation for expression " + tr::pp(psi) + "\n");
+        pbes_expression xi = psi;
+
         // expand the right hand side if needed
         if (tr::is_prop_var(psi))
         {
           const pbes_equation& eqn = *m_pbes_equation_index[tr::name(psi)];
           substitution_function sigma = make_substitution(eqn.variable().parameters(), tr::param(psi));
-          psi = R(eqn.formula(), sigma);
+          LOG(2, "  Expanding right hand side " + tr::pp(eqn.formula()) + " into ");
+          xi = R(eqn.formula(), sigma);
+          LOG(2, tr::pp(xi) + "\n");
         }
 
         // top_flatten
-        if (tr::is_prop_var(psi))
+        if (tr::is_prop_var(xi))
         {
-          result.insert(add_bes_equation(psi, m_priorities[tr::name(psi)]));
+          result.insert(add_bes_equation(xi, m_priorities[tr::name(xi)]));
         }
-        else if (tr::is_and(psi))
+        else if (tr::is_and(xi))
         {
-          atermpp::set<pbes_expression> terms = pbes_expr::split_and(psi);
+          atermpp::set<pbes_expression> terms = pbes_expr::split_and(xi);
           for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(add_bes_equation(*i, priority));
           }
         }
-        else if (tr::is_or(psi))
+        else if (tr::is_or(xi))
         {
-          atermpp::set<pbes_expression> terms = pbes_expr::split_or(psi);
+          atermpp::set<pbes_expression> terms = pbes_expr::split_or(xi);
           for (atermpp::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(add_bes_equation(*i, priority));
           }
         }
-        else if (tr::is_true(psi))
+        else if (tr::is_true(xi))
         {
           if (m_true_false_dependencies)
           {
@@ -325,7 +373,7 @@ namespace pbes_system {
             result.insert(i->second);
           }
         }
-        else if (tr::is_false(psi))
+        else if (tr::is_false(xi))
         {
           if (m_true_false_dependencies)
           {
@@ -336,8 +384,9 @@ namespace pbes_system {
         }
         else
         {
-          throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + core::pp(psi) + "\n" + psi.to_string()));
+          throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + core::pp(xi) + "\n" + xi.to_string()));
         }
+        LOG_BES_EQUATION(2, index, result);
         return result;
       }
 

@@ -104,7 +104,15 @@ public:
 
     pbes<> p;
     p.load(input_filename());
-    unsigned int log_level = mcrl2::core::gsVerbose ? 1 : 0;
+    unsigned int log_level = 0;
+    if (mcrl2::core::gsVerbose)
+    {
+      log_level = 1;
+    }
+    else if (mcrl2::core::gsDebug)
+    {
+      log_level = 2;
+    }
     pbespgsolve_algorithm algorithm(log_level, m_options);
     bool result = algorithm.run(p);
     std::clog << "The solution for the initial variable of the pbes is " << (result ? "true" : "false") << "\n";

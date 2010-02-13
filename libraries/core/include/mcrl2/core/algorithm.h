@@ -43,6 +43,12 @@ namespace mcrl2 {
       {
         return m_verbose_level;
       }
+      
+      /// \brief Returns true if a message with the given level should be printed.
+      bool check_log_level(unsigned int level) const
+      {
+        return m_verbose_level >= level;
+      }
     };
 
   } // namespace core
