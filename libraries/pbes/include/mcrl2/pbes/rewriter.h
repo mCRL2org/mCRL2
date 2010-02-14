@@ -257,25 +257,12 @@ namespace pbes_system {
 
         substitution_function sigma;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
-#ifdef MCRL2_SIMPLIFY_QUANTIFIERS
-        simplifying_quantifier_rewriter<Term, DataRewriter> simplify(m_rewriter);
-        term_type y = simplify(x);
-//if (core::gsDebug)
-//{
-//  std::cerr << "<simplify-step>" << core::pp(x) << " -> " << core::pp(y) << std::endl;
-//}
-        term_type result = r(y, sigma);
-//if (core::gsDebug)
-//{
-//  std::cerr << "<eliminate-quantifier-step>" << core::pp(y) << " -> " << core::pp(result) << std::endl;
-//}
+        term_type result = r(x, sigma);       
+
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << std::endl;
 #endif
         return result;
-#else
-        return r(x, sigma);
-#endif
       }
 
       /// \brief Rewrites a pbes expression.
@@ -289,17 +276,8 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
         typedef core::term_traits<term_type> tr;
 
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
-        simplifying_quantifier_rewriter<Term, DataRewriter> simplify(m_rewriter);
-        term_type y = simplify(x, sigma);
-//if (core::gsDebug)
-//{
-//  std::cerr << "<simplify-step>" << core::pp(x) << " -> " << core::pp(y) << std::endl;
-//}
-        term_type result = r(y, substitution_function(sigma));
-//if (core::gsDebug)
-//{
-//  std::cerr << "<eliminate-quantifier-step>" << core::pp(y) << " -> " << core::pp(result) << std::endl;
-//}
+        term_type result = r(x, substitution_function(sigma));
+
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << data::to_string(sigma) << std::endl;
 #endif

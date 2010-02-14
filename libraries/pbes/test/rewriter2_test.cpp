@@ -269,6 +269,8 @@ void test_enumerate_quantifiers_rewriter()
   test_enumerate_quantifiers(N(R), N(r),  "exists d: Nat. X && val(d == 0)"                                 , "X");                         
   test_enumerate_quantifiers(N(R), N(r),  "forall m: Nat. (val(!(m < 3)) || Y(m + 1))"                      , "Y(1) && Y(2) && Y(3)"); 
   test_enumerate_quantifiers(N(R), N(r),  "val(!true) || (((forall m: Nat. val(!(m < 3)) && X3(false, m + 1)) && X2(1, 1) && val(!false) || val(false)) || (exists m: Nat. val(m < 3) || (forall k: Nat. val(k < 3) && val(k < 2)))) && X1(false)", "X1(false)");
+  test_enumerate_quantifiers(N(R), N(r),  "forall n: Nat. (val(n < 3) && (exists n: Nat. val(n < 3)))", "false");
+  test_enumerate_quantifiers(N(R), N(r),  "Y(n + 1) || forall n: Nat. val(n < 3)", "Y(n + 1)");
 }                                                                                                                                                     
 
 int test_main(int argc, char* argv[])
