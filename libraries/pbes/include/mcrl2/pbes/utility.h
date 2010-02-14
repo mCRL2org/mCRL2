@@ -235,7 +235,6 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
   for(atermpp::set < pbes_expression>::const_iterator i=disjunction_set.begin();
           i!=disjunction_set.end() ; i++)
   {
-    // std::cerr << "DISJUNCTION " << pp(*i) << "\n";
     if (pbes_expr::is_pbes_false(t))
     { t=*i;
     }
@@ -285,7 +284,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                    const data::data_specification &data,
                    boost::shared_ptr<mcrl2::data::detail::Rewriter> r,
                    const bool use_internal_rewrite_format)
-{
+{ 
   using namespace pbes_system::pbes_expr;
   using namespace pbes_system::accessors;
   pbes_expression result;
@@ -349,19 +348,33 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   else if (is_pbes_forall(p))
   {
     data::variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
 
     // If no data_vars
     if (data_vars.empty())
     {
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
       result = expr;
     }
     else
     { /* Replace the quantified variables of constructor sorts by constructors.
          E.g. forall x:Nat.phi(x) is replaced by phi(0) && forall x':Nat.phi(successor(x')),
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
-         in de data-implementation of mCRL2).  Simplify the resulting expressions. */
+         in de data-implementation of mCRL2).  Simplify the resulting expressions. 
+         First the substitutions for existing variables that are also bound in the 
+         quantifier are saved and reset to the variable. At the end they must be reset. */
 
+      atermpp::map < data::variable, data::data_expression > saved_substitutions;
+      for(data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
+      { data::data_expression d(pbes_expression_substitute_and_rewrite(*i,data,r,use_internal_rewrite_format));
+        
+        if (*i!=d)
+        { saved_substitutions[*i]=d;
+          r->clearSubstitution(*i);
+        }
+      }
+
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
+      
       data::fresh_variable_generator<> variable_generator(expr, "x");
       unsigned int no_variables=0;
       data::variable_list new_data_vars;
@@ -435,7 +448,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   r->clearSubstitution(*i);
                   // sigma[*i] = *i; // erase *i
                   if (pbes_expr::is_pbes_false(rt)) /* the resulting expression is false, so we can terminate */
-                  {
+                  { // Restore the saved substitution.
+                    for(atermpp::map<data::variable,data::data_expression>::const_iterator i=saved_substitutions.begin();
+                                i!=saved_substitutions.end(); ++i)
+                    { r->setSubstitution(i->first,i->second);
+                    }
                     return pbes_expr::false_();
                   }
                   else
@@ -466,22 +483,42 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         throw mcrl2::runtime_error(message);
       }
       result=make_conjunction(conjunction_set);
+      for(atermpp::map<data::variable,data::data_expression>::const_iterator i=saved_substitutions.begin();
+             i!=saved_substitutions.end(); ++i)
+      { r->setSubstitution(i->first,i->second);
+      }
     }
   }
   else if (is_pbes_exists(p))
   {
     data::variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
     // If no data_vars
     if (data_vars.empty())
     {
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
       result = expr;
     }
     else
     { /* Replace the quantified variables of constructor sorts by constructors.
          E.g. forall x:Nat.phi(x) is replaced by phi(0) || forall x':Nat.phi(successor(x')),
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
-         in de data-implementation of mCRL2).  Simplify the resulting expressions. */
+         in de data-implementation of mCRL2).  Simplify the resulting expressions. 
+         First the substitutions for existing variables that are also bound in the 
+         quantifier are saved and reset to the variable. At the end they must be reset.
+      */
+
+      atermpp::map < data::variable, data::data_expression > saved_substitutions;
+      for(data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
+      { data::data_expression d(pbes_expression_substitute_and_rewrite(*i,data,r,use_internal_rewrite_format));
+        
+        if (*i!=d)
+        { saved_substitutions[*i]=d;
+          r->clearSubstitution(*i);
+        }
+      }
+
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
+
 
       data::fresh_variable_generator<> variable_generator(expr, "x");
       unsigned int no_variables=0;
@@ -552,6 +589,12 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   r->clearSubstitution(*i);
                   if (pbes_expr::is_pbes_true(rt)) /* the resulting expression is true, so we can terminate */
                   { 
+                    // Restore the saved substitution.
+                    for(atermpp::map<data::variable,data::data_expression>::const_iterator i=saved_substitutions.begin();
+                                                    i!=saved_substitutions.end(); ++i)
+                    { r->setSubstitution(i->first,i->second);
+                    }
+                    
                     return pbes_expr::true_();
                   }
                   else
@@ -581,6 +624,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         throw mcrl2::runtime_error(message);
       }
       result=make_disjunction(disjunction_set);
+      for(atermpp::map<data::variable,data::data_expression>::const_iterator i=saved_substitutions.begin();
+             i!=saved_substitutions.end(); ++i)
+      { r->setSubstitution(i->first,i->second);
+      }
+
     }
   }
   else if (is_propositional_variable_instantiation(p))
