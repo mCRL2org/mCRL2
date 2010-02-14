@@ -111,6 +111,17 @@ std::string test13 =
     "pbes mu X=exists x:Nat.val(x<3 => x==1);"
     "init X;";
 
+// What to expect here?
+std::string test14 =
+    "pbes mu X(n: Nat) = X(n + 1) \n"
+    "init X(0);                   \n"
+    ;
+
+// And here?
+std::string test15 =
+    "pbes mu X(n: Nat) = X(n + 1) || forall n: Nat. val(n < 3); \n"
+    "init X(0);                                                 \n"
+    ;
 
 void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
 {

@@ -6,7 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pgsolver.cpp
+/// \file pbespgsolve.cpp
+
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
 #include "boost.hpp" // precompiled headers
 
@@ -109,7 +112,7 @@ public:
     {
       log_level = 1;
     }
-    else if (mcrl2::core::gsDebug)
+    if (mcrl2::core::gsDebug)
     {
       log_level = 2;
     }

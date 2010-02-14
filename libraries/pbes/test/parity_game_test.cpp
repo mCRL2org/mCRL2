@@ -113,6 +113,20 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
 }
 
 std::string PBES1 =
+  "pbes mu X(m: Nat) =                          \n"
+  "       forall n: Nat. val(!(n < 3)) && X(n); \n"
+  "                                             \n"
+  "init X(0);                                   \n"
+  ;
+
+std::string PBES2 =
+  "pbes                                                 \n"
+  "mu X(m:Nat) = !(exists n:Nat.(val(n < 3) || !X(n))); \n"
+  "                                                     \n"
+  "init X(0);                                           \n"
+  ;
+
+std::string PBES3 =
   "pbes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          \n"
   "nu X0 = ((!(forall m:Nat.((val(m < 3)) && (!X2(m + 1, 0))))) || (((forall k:Nat.((val(k < 3)) && (val(k < 2)))) || (exists n:Nat.((val(n < 3)) || (val(n < 2))))) || ((val(true)) => (exists k:Nat.((val(k < 3)) || (exists m:Nat.((val(m < 3)) || (forall k:Nat.((val(k < 3)) && (X4(1, m + 1))))))))))) && ((!(exists n:Nat.((val(n < 3)) || (exists k:Nat.((val(k < 3)) || (val(false))))))) || (forall n:Nat.((val(n < 3)) && (exists n:Nat.((val(n < 3)) || (forall m:Nat.((val(m < 3)) && (exists k:Nat.((val(k < 3)) || (X3)))))))))); \n"
   "mu X1(b:Bool) = ((exists m:Nat.((val(m < 3)) || (val(b)))) => ((val(false)) || (X3))) && (forall k:Nat.((val(k < 3)) && ((((val(k > 1)) => (X1(k > 1))) && (val(false))) && (exists k:Nat.((val(k < 3)) || (X4(k + 1, k + 1)))))));                                                                                                                                                                                                                                                                                                           \n"
@@ -244,17 +258,11 @@ void test_bes_examples()
   //test_bes(PBES1, "parity_game_test_bes8.pg", true);
 }
 
-void test_pbes_examples()
+void test_pbespgsolve()
 {
-  test_pbespgsolve(BES1 );
-  test_pbespgsolve(BES2 );
-  test_pbespgsolve(BES3 );
-  test_pbespgsolve(BES4 );
-  test_pbespgsolve(BES5 );
-  test_pbespgsolve(BES6 );
-  test_pbespgsolve(BES7 );
-  test_pbespgsolve(BES8 );
-  //test_pbespgsolve(PBES1);
+  test_pbespgsolve(PBES1);
+  test_pbespgsolve(PBES2);
+  test_pbespgsolve(PBES3);
 }
 
 void test_abp()
@@ -338,8 +346,9 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  pbes_system::set_parity_game_generator_log_level(2);
   test_bes_examples();
-  test_pbes_examples();
+  test_pbespgsolve();
   // test_one_bit_sliding_window();
   test_abp();
 

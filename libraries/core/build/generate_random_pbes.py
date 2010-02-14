@@ -330,14 +330,14 @@ def test_pbes(filename, equation_count, atom_count = 5, propvar_count = 3):
     answer1 = last_word(path(answerfile).text())
 
     # pbespgsolve
-    #os.system('pbespgsolve %s >& %s' % (pbesfile, answerfile))
+    os.system('pbespgsolve -d %s >& %s' % (pbesfile, answerfile))
     answer2 = last_word(path(answerfile).text())
 
     # bessolve
-    os.system('bessolve %s >& %s' % (pbesfile, answerfile))
-    answer3 = last_word(path(answerfile).text())
+    #os.system('bessolve %s >& %s' % (pbesfile, answerfile))
+    #answer3 = last_word(path(answerfile).text())
 
-    print 'FILE', filename, answer1, answer2, answer3
+    print 'FILE', filename, answer1, answer2
 
 for i in range(100):
     test_pbes('%02d' % i, 5, 4, 3)
