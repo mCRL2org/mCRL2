@@ -111,16 +111,24 @@ std::string test13 =
     "pbes mu X=exists x:Nat.val(x<3 => x==1);"
     "init X;";
 
-// What to expect here?
+
+// N.B. The test cases below should not terminate, since they correspond
+// to infinite BESs.
+// TODO: Test that no solution for these cases is found within a certain number of steps.
 std::string test14 =
     "pbes mu X(n: Nat) = X(n + 1) \n"
     "init X(0);                   \n"
     ;
 
-// And here?
 std::string test15 =
     "pbes mu X(n: Nat) = X(n + 1) || forall n: Nat. val(n < 3); \n"
     "init X(0);                                                 \n"
+    ;
+
+// Test case supplied by Jan Friso
+std::string test16 =
+    "pbes mu X(n: Nat) = (n<3 && X(n + 1)) || forall n: Nat. val(n<3); \n"
+    "init X(0);                                                        \n"
     ;
 
 void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
