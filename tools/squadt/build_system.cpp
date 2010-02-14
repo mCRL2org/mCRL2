@@ -80,6 +80,7 @@ namespace squadt {
       "pnml2mcrl2",
       //"tbf2lps",
       //"tracepp",
+      //"txt2lps",
       //"txt2pbes",
       "xsim.app",
       0 };
