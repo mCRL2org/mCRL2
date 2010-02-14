@@ -314,6 +314,15 @@ namespace detail {
         std::cerr << "]" << std::endl;
       }
 
+      template <typename SubstitutionFunction, typename VariableMap>
+      void redo_substitutions(SubstitutionFunction& sigma, const VariableMap& v)
+      {
+      	for (typename VariableMap::const_iterator i = v.begin(); i != v.end(); ++i)
+        {
+        	sigma[i->first] = i->second;
+        }
+      }
+
       template <typename SubstitutionFunction,
                 typename StopCriterion,
                 typename PbesTermJoinFunction
@@ -326,12 +335,24 @@ namespace detail {
                           PbesTermJoinFunction join
                          )
       {
+      	// Undo substitutions to quantifier variables
+      	atermpp::map<variable_type, term_type> undo;
+        for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
+        {
+        	term_type sigma_i = sigma(*i);
+        	if (sigma_i != *i) {
+        		undo[*i] = sigma_i;
+        		sigma[*i] = *i;
+        	}
+        }
+
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   print_arguments(x, phi, sigma, stop_value);
 #endif
         term_type Rphi = pbesr(phi, sigma);
         if (tr::is_constant(Rphi))
         {
+        	redo_substitutions(sigma, undo);
           return Rphi;
         }
 
@@ -431,6 +452,7 @@ namespace detail {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cerr << "<return>stop early: " << core::pp(stop_value) << std::endl;
 #endif
+        	redo_substitutions(sigma, undo);
           return stop_value;
         }
 
@@ -443,6 +465,7 @@ namespace detail {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cerr << "<return> " << core::pp(result) << std::endl;
 #endif
+      	redo_substitutions(sigma, undo);
         return result;
       }
 
