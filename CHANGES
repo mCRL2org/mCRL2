@@ -51,7 +51,8 @@ The following tools have been removed:
    - SQuADT specific:
      + The tool catalog must be regenerated to add newly connected tools;
        to do this manually remove .squadt/tool_catalog in the home directory.
-   - the CMake build system is provided as an alternative to boost build.
+   - the CMake build system is provided as an alternative to boost build, but
+     it is still experimental.
        
  Known issues:
    - ltsview and ltsgraph do not work when started from SQuADT in Windows 7 and
