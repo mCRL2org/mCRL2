@@ -333,6 +333,7 @@
 \newcommand{\kwend}{{\bf end}}
 \newcommand{\kwdiv}{{\bf div}}
 \newcommand{\kwmod}{{\bf mod}}
+\newcommand{\kwglob}{{\bf glob}}
 \newcommand{\kwproc}{{\bf proc}}
 \newcommand{\kwinit}{{\bf init}}
 \newcommand{\kwpbes}{{\bf pbes}}
@@ -374,6 +375,7 @@ map
 var
 eqn
 act
+glob
 proc
 pbes
 init
@@ -390,6 +392,7 @@ Bag
 \\
 true
 false
+if
 div
 mod
 in
@@ -448,7 +451,7 @@ The binary operator $\to$ associates to the right.
 
 Data expressions $d$:
 \[\begin{tightarray}{lrl}
-d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|}\
+d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|}\ \mathsf{true}\ \mb{|}\ \mathsf{false}\ \mb{|}\ \mathsf{if}\ \mb{|}\
                \lnot d\ \mb{|}\ -d\ \mb{|}\ \overline{d}\ \mb{|}\ \#d\ \mb{|}\ d\ \oplus\ d\\
        & \mb{|} & \el\ \mb{|}\ [d,\mb{\ldots},d]\ \mb{|}\ \set{}\ \mb{|}\ \set{d,\mb{\ldots},d}\ \mb{|}\
                \set{d: d,\mb{\ldots},d: d}\ \mb{|}\ \scompr{x: s}{d}\\
@@ -503,19 +506,21 @@ and $\f{ad}$ for action declaration.
 Process expressions $p$:
 \[\begin{tightarray}{lrl}
 p   & \mb{::=} & a\ \mb{|}\ \delta\ \mb{|}\ \tau\ \mb{|}\ p \alt p\ \mb{|}\ p \seq p\ \mb{|}\ P\ \mb{|}\
-            p \sync p\ \mb{|}\ p \pmerge p\ \mb{|}\ p \lmerge p\\
-    & \mb{|} & \allow{\set{\f{as},\mb{\ldots},\f{as}}}(p)\ \mb{|}\
-            \block{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
-            \hide{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
-            \ren{\set{\f{ar},\mb{\ldots},\f{ar}}}(p)\ \mb{|}\
-            \comm{\set{\f{ac},\mb{\ldots},\f{ac}}}(p)\\
-    & \mb{|} & a(d, \mb{\ldots}, d)\ \mb{|}\
-            P(d, \mb{\ldots}, d)\ \mb{|}\
-            c \to p \diamond p\ \mb{|}\
-            c \to p\ \mb{|}\
-            \sum_{\f{mvd},\mb{\ldots},\f{mvd}}p\\
-     & \mb{|} & p\,\at\,t\ \mb{|}\ t \pinit p\ \mb{|}\ p \pbefore q\\
-     & \mb{|} & ( p )\\
+                 p \sync p\ \mb{|}\ p \pmerge p\ \mb{|}\ p \lmerge p\\
+    & \mb{|}   & \allow{\set{\f{as},\mb{\ldots},\f{as}}}(p)\ \mb{|}\
+                 \block{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
+                 \hide{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
+                 \ren{\set{\f{ar},\mb{\ldots},\f{ar}}}(p)\ \mb{|}\
+                 \comm{\set{\f{ac},\mb{\ldots},\f{ac}}}(p)\\
+    & \mb{|}   & a(d, \mb{\ldots}, d)\ \mb{|}\
+                 P(d, \mb{\ldots}, d)\ \mb{|}\
+                 P()\ \mb{|}\
+                 P(x = d, \mb{\ldots}, x = d)\\
+    & \mb{|}   & c \to p \diamond p\ \mb{|}\
+                 c \to p\ \mb{|}\
+                 \sum_{\f{mvd},\mb{\ldots},\f{mvd}}p\\
+     & \mb{|}  & p\,\at\,t\ \mb{|}\ t \pinit p\ \mb{|}\ p \pbefore q\\
+     & \mb{|}  & ( p )\\
 as  & \mb{::=} & a |\,\mb{\cdots} | a\\
 ar  & \mb{::=} & a \to a\\
 ac  & \mb{::=} & a\sync\f{as} \to a\ \mb{|}\ a\sync\f{as} \to \tau\ \mb{|}\ a\sync\f{as}\\
@@ -536,12 +541,13 @@ Process specifications $\f{proc\_spec}$:
 \f{proc\_spec}      & \mb{::=} & \mb{(}\f{proc\_spec\_elt}\mb{)^{*}}\\
 \f{proc\_spec\_elt} & \mb{::=} & \f{data\_spec}\\
                     & \mb{|}   & \kwact\ \mb{(}\f{ad};\mb{)^{+}}\\
+                    & \mb{|}   & \kwglob\ \mb{(}\f{mvd};\mb{)^{+}}\\
                     & \mb{|}   & \kwproc\ \mb{(}\f{pd};\mb{)^{+}}\\
                     & \mb{|}   & \kwinit\ p;\\
 \f{pd}              & \mb{::=} & P = p\ \mb{|}\ P(\f{mvd},\mb{\ldots},\f{mvd}) = p\\
 \f{ad}              & \mb{::=} & a\ \mb{|}\ a: s \times \mb{\cdots} \times s
 \end{tightarray}\]
-Here $\f{proc\_spec\_elt}$ represents a process specification element, $\f{pd}$ a process definition, and $\f{ad}$ an action declaration. Furthermore, we impose the restriction that $\f{proc\_spec}$ should contain precisely one occurrence of each of the keywords $\kwproc$ and $\kwinit$.
+Here $\f{proc\_spec\_elt}$ represents a process specification element, $\f{pd}$ a process definition, and $\f{ad}$ an action declaration. Furthermore, we impose the restriction that $\f{proc\_spec}$ should contain precisely one occurrence of the keyword $\kwinit$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Mu-calculus formulae}
@@ -662,6 +668,7 @@ PBES specifications $\f{pbes\_spec}$:
 \[\begin{tightarray}{lrl}
 \f{pbes\_spec}      & \mb{::=} & \mb{(}\f{pbes\_spec\_elt}\mb{)^{*}}\\
 \f{pbes\_spec\_elt} & \mb{::=} & \f{data\_spec}\\
+                    & \mb{|} & \kwglob\ \mb{(}\f{mvd};\mb{)^{+}}\\
                     & \mb{|} & \kwpbes\ \mb{(}\f{pb\_eqn};\mb{)^{+}}\\
                     & \mb{|} & \kwinit\ \f{pvo};
 \end{tightarray}\]

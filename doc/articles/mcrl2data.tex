@@ -1086,44 +1086,4 @@ pops up in practise and if it pops up, it can usually be circumvented by
 controlling the evaluation order. This can be achieved by the use of
 \emph{conditional rewrite rules}.
 
-\section{Future work}
-
-\subsection{Extensions of data types}
-
-\emph{Predefined data types} that could be desirable include the following:
-\begin{tdefinitions}{-}
-\item characters
-\item strings
-\end{tdefinitions}
-
-\noindent
-These data types will be provided when the need arises. However, for the
-rational and real numbers, a suitable representation has not yet been found.
-
-Desirable \emph{type constructors} include the following:
-\begin{tdefinitions}{-}
-\item natural numbers modulo \frm{n}, for finite \frm{n \in \nat}
-\item (infinite) tables, arrays
-\item stacks, queues
-\end{tdefinitions}
-
-\noindent
-These type constructors will be provided when the need arises. Note that most
-of these type constructors can be easily constructed using function types and
-structured types. However, for reasons of standardisation and better syntax, it
-might be important to add these to the language.
-
-\subsection{Miscellaneous}
-
-Based on the remarks by Jan Friso Groote and Jaco van de Pol, these issues are
-still open:
-\begin{tdefinitions}{-}
-\item It should investigated if the current bag notation is appropriate.
-\item It should be possible to use unnamed product types in sort expressions.
-\item Instead of having sort conversion operations, it should be possible to
-explicitly state the sort of a data expression, e.g.\ \frm{1: \f{Nat}}
-\item The \emph{if-then-else} construct should be in mixfix notation instead of
-function notation.
-\end{tdefinitions}
-
 \end{document}

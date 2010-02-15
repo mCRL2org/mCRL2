@@ -2,17 +2,11 @@ project pbes
        : source-location ../source
        ;
 
-
-
 mcrl2-library pbes
-       : pbes_rewrite.cpp
-         pbes2bool.cpp
-         gauss.cpp
-         sort_instantiator.cpp
-         data_elimination.cpp
+       :
        : <library>/libraries//data
-         <library>/libraries//lps
          <include>../include
+         <include>../../lps/include # for modal_formula
          <use>/site-config//boost
        :
        : <include>../include

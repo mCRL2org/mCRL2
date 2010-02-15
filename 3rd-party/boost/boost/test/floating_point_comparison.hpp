@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50388 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : defines algoirthms for comparing 2 floating point values
 // ***************************************************************************

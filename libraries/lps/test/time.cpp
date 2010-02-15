@@ -14,10 +14,13 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
@@ -62,15 +65,18 @@ std::string SPECIFICATION =
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec = mcrl22lps(SPECIFICATION);
+  specification spec = linearise(SPECIFICATION);
   linear_process lps = spec.process();
-  BOOST_CHECK(lps.is_well_typed());
+  BOOST_CHECK(is_well_typed(lps));
   BOOST_CHECK(!lps.has_time());
+  core::garbage_collect();
 
-  summand s = lps.summands().front();
+  summand_list summands = lps.summands();
+  summand s = summands.front();
   BOOST_CHECK(!s.has_time());
+  core::garbage_collect();
 
   return 0;
 }

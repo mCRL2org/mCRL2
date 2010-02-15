@@ -8,6 +8,8 @@
 //
 // Defines the label dialog.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
@@ -15,9 +17,11 @@
 
 #include "grape_ids.h"
 #include "labeldialog.h"
+#include "../../mcrl2gen/mcrl2gen_validate.h"
 
 
 using namespace grape::grapeapp;
+using namespace grape::mcrl2gen;
 
 grape_label_dialog::grape_label_dialog( const label &p_label )
 : wxDialog( 0, wxID_ANY, _T( "Edit label" ), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
@@ -36,7 +40,7 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
   wxSizer *var_decl_sizer = new wxBoxSizer(wxHORIZONTAL);
   var_decl_sizer->Add( text);
   var_decl_sizer->Add( m_var_decls_input );
-  vsizer->Add( var_decl_sizer );
+  vsizer->Add( var_decl_sizer, 0, wxLEFT | wxTOP | wxRIGHT, 5 );
   
   vsizer->AddSpacer( 5 );
     
@@ -51,7 +55,7 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
   wxSizer *condition_sizer = new wxBoxSizer(wxHORIZONTAL);
   condition_sizer->Add( text );
   condition_sizer->Add( m_condition_input );
-  vsizer->Add( condition_sizer );
+  vsizer->Add( condition_sizer, 0, wxLEFT | wxRIGHT, 5 );
   
   vsizer->AddSpacer( 5 );
   
@@ -66,7 +70,7 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
   wxSizer *multiaction_sizer = new wxBoxSizer(wxHORIZONTAL);
   multiaction_sizer->Add( text);
   multiaction_sizer->Add( m_multiaction_input );
-  vsizer->Add( multiaction_sizer );
+  vsizer->Add( multiaction_sizer, 0, wxLEFT | wxRIGHT, 5 );
   
   vsizer->AddSpacer( 5 );
   
@@ -81,7 +85,7 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
   wxSizer *timestamp_sizer = new wxBoxSizer(wxHORIZONTAL);
   timestamp_sizer->Add( text);
   timestamp_sizer->Add( m_timestamp_input );
-  vsizer->Add( timestamp_sizer );
+  vsizer->Add( timestamp_sizer, 0, wxLEFT | wxRIGHT, 5 );
   
   vsizer->AddSpacer( 5 );
   
@@ -96,33 +100,40 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
   wxSizer *var_updates_sizer = new wxBoxSizer(wxHORIZONTAL);
   var_updates_sizer->Add( text);
   var_updates_sizer->Add( m_var_updates_input );
-  vsizer->Add( var_updates_sizer );
+  vsizer->Add( var_updates_sizer, 0, wxLEFT | wxRIGHT, 5 );
   
-  vsizer->AddSpacer( 10 );
-  
-  // add preview
+  vsizer->AddSpacer( 5 );
+    
+  // create preview
   m_preview_text = new wxStaticText( this, wxID_ANY, m_label->get_text() );
   vsizer->Add(m_preview_text );
   
+  // create sizer
+  wxSizer *preview_sizer = new wxBoxSizer(wxHORIZONTAL);
+  preview_sizer->Add( new wxStaticText( this, wxID_ANY, _T("Preview: ") ) );
+  preview_sizer->Add( m_preview_text );
+  vsizer->Add( preview_sizer, 0, wxLEFT | wxRIGHT, 5 );
+
+  vsizer->AddSpacer( 5 );
+
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
-  vsizer->Add( sizer, 0, wxALIGN_RIGHT );
+  vsizer->Add( sizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1 );
   
   // add statusbar
   m_statusbar = new wxStatusBar(this, wxID_ANY);
-  m_statusbar->SetFieldsCount(1);
   m_statusbar->SetStatusText(_T(""), 0);
-  vsizer->Add( m_statusbar, 0, wxALIGN_BOTTOM );
+  vsizer->Add( m_statusbar, 0, wxALIGN_BOTTOM | wxEXPAND );
 
-  m_statusbar->GetFieldsCount();
   // realize sizers
   SetSizer(vsizer);
   vsizer->SetSizeHints(this);
   vsizer->Fit(this);
 
   m_var_decls_input->SetFocus();  
+  SetFocus();
   
-  Centre();
+  CentreOnParent();
 }
 
 grape_label_dialog::grape_label_dialog()
@@ -193,15 +204,67 @@ void grape_label_dialog::update_preview()
 
 bool grape_label_dialog::show_modal( label &p_label )
 {
-  int result = ShowModal();
-  if ( result == wxID_CANCEL )
+  bool is_valid = false;
+  while (!is_valid)
   {
-    return false;
+    int result = ShowModal();
+    if ( result == wxID_CANCEL )
+    {
+      return false;
+    }
+
+    is_valid = true;
+    update_preview();
+    p_label = *m_label;
+    
+    //check label variable declarations
+    wxString decls_true = p_label.get_declarations_text();
+    decls_true.Replace(_T(" "),_T(""));
+    wxString decls_field = m_var_decls_input->GetValue();
+    decls_field.Replace(_T(" "),_T(""));
+    if (decls_true != decls_field)
+    {
+      is_valid = false;      
+      wxMessageBox( _T("The variable declaration invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }
+    
+    //check label condition
+    if ((!m_condition_input->GetValue().IsEmpty()) && ( parse_data_expr(p_label.get_condition()) == 0 ))
+    {
+      is_valid = false;      
+      wxMessageBox( _T("The condition is invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }
+        
+    //check label multiactions
+    wxString actions_true = p_label.get_actions_text();
+    actions_true.Replace(_T(" "),_T(""));
+    wxString actions_field = m_multiaction_input->GetValue();
+    actions_field.Replace(_T(" "),_T(""));
+    if (actions_true != actions_field)
+    {
+      is_valid = false;      
+      wxMessageBox( _T("The multiaction is invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }
+    
+    //check label timestamp
+    if ((!m_timestamp_input->GetValue().IsEmpty()) && ( parse_sort_expr(p_label.get_timestamp()) == 0 ))
+    {      
+      is_valid = false;      
+      wxMessageBox( _T("The timestamp is invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }
+    
+    //check label variable updates
+    wxString vars_true = p_label.get_variable_updates_text();
+    vars_true.Replace(_T(" "),_T(""));
+    wxString vars_field = m_var_updates_input->GetValue();
+    vars_field.Replace(_T(" "),_T(""));
+    if (vars_true != vars_field)
+    {
+      is_valid = false;      
+      wxMessageBox( _T("The variable update is invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }   
+
   }
-
-  update_preview();
-
-  p_label = *m_label;
 
   return true;
 }

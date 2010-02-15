@@ -11,7 +11,10 @@
 #ifndef GRAPE_CHANNEL_DIALOG_H
 #define GRAPE_CHANNEL_DIALOG_H
 
+#include "wx/wx.h"
 #include <wx/dialog.h>
+#include <wx/event.h>
+#include <wx/radiobox.h>
 
 #include "channel.h"
 
@@ -26,17 +29,31 @@ namespace grape
     /**
      * \short A class showing a dialog with two explaining text and text fields
      */
-    class grape_channel_dlg : protected wxDialog
+    class grape_channel_dlg : public wxDialog
     {
       private:
         wxTextCtrl       *m_name_input;         /**< The name field shown in the dialog. */
         wxTextCtrl       *m_rename_input;       /**< The rename field shown in the dialog. */
-        wxComboBox       *m_combobox;           /**< The property combobox shown in the dialog. */
+        wxRadioBox       *m_radiobox;           /**< The property radiobox shown in the dialog. */
 
         /**
          * Private default constructor.
          */
         grape_channel_dlg();
+        
+        /**
+         * Update validation event handler.
+         * @param p_event The generated event.
+         */
+        void event_update_validation( wxCommandEvent &p_event );
+
+        /**
+         * Update validation function
+         * @return Returns whether all input fields are valid
+         */
+        bool update_validation();
+
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
       public:
         /**
          * Default destructor.

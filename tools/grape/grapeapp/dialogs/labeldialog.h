@@ -37,7 +37,7 @@ namespace grape
         wxTextCtrl     *m_timestamp_input;  /**< Input shown in the dialog, used for timestamp.*/
         wxTextCtrl     *m_multiaction_input;/**< Input shown in the dialog, used for a multi action.*/
         wxTextCtrl     *m_var_updates_input;/**< Input shown in the dialog, used for variable updates*/
-        
+
         wxStatusBar    *m_statusbar;          /**< Statusbar shown in the dialog*/
 
         wxStaticText   *m_preview_text;     /**< Preview text.*/
@@ -46,7 +46,7 @@ namespace grape
         /** Default constructor. */
         grape_label_dialog();
 
-        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
       public:
         /**
         * Constructor.
@@ -58,36 +58,36 @@ namespace grape
         ~grape_label_dialog();
 
         /**
-         * Change var decl grid event handler.
-         * Appending grid rows.
+         * Change var decl input event handler.
+         * Appending input rows.
          * @param p_event The generated event.
          */
         void event_change_var_decls_text( wxCommandEvent &p_event );
 
         /**
-         * Change var update grid event handler.
-         * Appending grid rows.
+         * Change var update input event handler.
+         * Appending input rows.
          * @param p_event The generated event.
          */
         void event_change_var_updates_text( wxCommandEvent &p_event );
 
         /**
-         * Change multi action grid event handler.
-         * Appending grid rows.
+         * Change multi action input event handler.
+         * Appending input rows.
          * @param p_event The generated event.
          */
         void event_change_multiaction_text( wxCommandEvent &p_event );
 
         /**
-         * Change condition grid event handler.
-         * Appending grid rows.
+         * Change condition input event handler.
+         * Appending input rows.
          * @param p_event The generated event.
          */
         void event_change_condition_text( wxCommandEvent &p_event );
 
         /**
-         * Change timestamp grid event handler.
-         * Appending grid rows.
+         * Change timestamp input event handler.
+         * Appending input rows.
          * @param p_event The generated event.
          */
         void event_change_timestamp_text( wxCommandEvent &p_event );

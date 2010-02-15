@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -12,175 +12,216 @@
 #ifndef MCRL2_DATA_SORT_EXPRESSION_H
 #define MCRL2_DATA_SORT_EXPRESSION_H
 
-#include <cassert>
-#include "mcrl2/atermpp/aterm.h"
+#include "boost/range/iterator_range.hpp"
+
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
+#include "mcrl2/data/detail/convert.h"
 
 namespace mcrl2 {
 
-namespace data {
+  namespace data {
 
-class sort_expression;
-
-/// \brief Read-only singly linked list of sort expressions
-typedef atermpp::term_list<sort_expression> sort_expression_list;
-
-/// \brief Sort expression.
-/// A sort expression can either be a sort identifier or a sort arrow.
-//<SortExpr>    ::= <SortId>
-//                | SortList(<SortExpr>)                                   (- di)
-//                | SortSet(<SortExpr>)                                    (- di)
-//                | SortBag(<SortExpr>)                                    (- di)
-//                | SortStruct(<StructCons>+)                              (- di)
-//                | SortArrow(<SortExpr>+, <SortExpr>)                     (- di)
-//                | SortArrow(<SortExpr>, <SortExpr>)                      (+ di)
-//
-//<SortId>       ::= SortId(<String>)
-class sort_expression: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Constructor.
-    sort_expression()
-      : atermpp::aterm_appl(core::detail::constructSortId())
-    {}
-
-    /// \brief Constructor.
+    /// \brief Returns true if the term t is a sort_expression
     /// \param t A term
-    sort_expression(ATermAppl t)
-      : atermpp::aterm_appl(t)
+    /// \return True if the term is a sort expression.
+    inline
+    bool is_sort_expression(atermpp::aterm_appl t)
     {
-      assert(core::detail::check_rule_SortExpr(m_term));
+      return core::detail::gsIsSortExpr(t);
     }
 
-    /// \brief Constructor.
-    /// \param t A term
-    sort_expression(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(core::detail::check_rule_SortExpr(m_term));
+    /// \brief Returns true if the term t is a basic sort
+    inline bool is_basic_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortId(p);
     }
 
-    /// \brief Constructor.
-    /// \param s A string
-    sort_expression(std::string s)
-      : atermpp::aterm_appl(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
-    {}
-
-    /// \brief Returns true if it is a sort_expression of type A -> B.
-    /// \return True if the sort is an arrow sort.
-    bool is_arrow() const
-    {
-      return core::detail::gsIsSortArrow(*this);
+    /// \brief Returns true if the term t is a function sort
+    inline bool is_function_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortArrow(p);
     }
-};
 
-/// \brief Returns true if the term t is a sort_expression
-/// \param t A term
-/// \return True if the term is a sort expression.
-inline
-bool is_sort_expression(atermpp::aterm_appl t)
-{
-  return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t);
-}
+    /// \brief Returns true if the term t is a container sort
+    inline bool is_container_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortCons(p);
+    }
 
-/// \brief Returns the sort_expression 'domain -> range'.
-/// \param domain A sequence of sort expressions
-/// \param range A sort expression
-/// \return The arrow sort corresponding to the given domain and range.
-inline
-sort_expression arrow(sort_expression_list domain, sort_expression range)
-{
-  return core::detail::gsMakeSortArrow(domain, range);
-}
+    /// \brief Returns true if the term t is a structured sort
+    inline bool is_structured_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortStruct(p);
+    }
 
-/// \brief Returns the domain sorts of s.
-/// \deprecated
-/// \param s A sort expression
-/// \return The domain sorts of the given sort.
-inline
-sort_expression_list domain_sorts(sort_expression s)
-{
-  return core::detail::gsGetSortExprDomain(s);
-}
+    /// \brief Returns true if the term t is the unknown sort
+    inline bool is_unknown_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortUnknown(p);
+    }
 
-/// \brief Returns the range sort of s.
-/// \deprecated
-/// \param s A sort expression
-/// \return The range sort of the given sort.
-inline
-sort_expression result_sort(sort_expression s)
-{
-  return core::detail::gsGetSortExprResult(s);
-}
+    /// \brief Returns true if the term t is an expression for multiple possible sorts
+    inline bool is_multiple_possible_sorts(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortsPossible(p);
+    }
 
-/// \brief Accessor functions and predicates for sort expressions.
-namespace sort_expr {
+    /// \brief sort expression.
+    ///
+    /// A sort expression can be any of:
+    /// - basic sort
+    /// - structured sort
+    /// - container sort
+    /// - function sort
+    /// - alias
+    /// In the type checker also the following expressions can be used:
+    /// - unknown sort
+    /// - multiple possible sorts
+    class sort_expression: public atermpp::aterm_appl
+    {
+      public:
 
-  /// \brief Returns the predefined sort_expression real.
-  /// \return The predefined sort Real.
-  inline
-  sort_expression real()
-  {
-    return core::detail::gsMakeSortExprReal();
-  }
+        /// \brief Constructor.
+        ///
+        sort_expression()
+          : atermpp::aterm_appl(core::detail::constructSortId())
+        {}
 
-  /// \brief Returns the predefined sort_expression int.
-  /// \return The predefined sort Int.
-  inline
-  sort_expression int_()
-  {
-    return core::detail::gsMakeSortExprInt();
-  }
+        /// \brief Constructor.
+        /// \param[in] t A term.
+        /// \pre t has the internal structure of a sort expression.
+        sort_expression(const atermpp::aterm_appl& t)
+          : atermpp::aterm_appl(t)
+        {
+          assert(is_sort_expression(t));
+        }
 
-  /// \brief Returns the predefined sort_expression pos.
-  /// \return The predefined sort Pos.
-  inline
-  sort_expression pos()
-  {
-    return core::detail::gsMakeSortExprPos();
-  }
+        /// \brief Returns true iff this expression is a basic sort.
+        inline
+        bool is_basic_sort() const
+        {
+          return data::is_basic_sort(*this);
+        }
 
-  /// \brief Returns the predefined sort_expression nat.
-  /// \return The predefined sort Nat.
-  inline
-  sort_expression nat()
-  {
-    return core::detail::gsMakeSortExprNat();
-  }
+        /// \brief Returns true iff this expression is a structured sort.
+        inline
+        bool is_structured_sort() const
+        {
+          return data::is_structured_sort(*this);
+        }
 
-  /// \brief Returns the predefined sort_expression bool.
-  /// \return The predefined sort Bool.
-  inline
-  sort_expression bool_()
-  {
-    return core::detail::gsMakeSortExprBool();
-  }
+        /// \brief Returns true iff this expression is a container sort.
+        inline
+        bool is_container_sort() const
+        {
+          return data::is_container_sort(*this);
+        }
 
-  /// \brief Returns true if the term t equals the sort_expression real
-  inline bool is_real(atermpp::aterm_appl t) { return t == real(); }
+        /// \brief Returns true iff this expression is a function sort.
+        inline
+        bool is_function_sort() const
+        {
+          return data::is_function_sort(*this);
+        }
 
-  /// \brief Returns true if the term t equals the sort_expression int
-  inline bool is_int (atermpp::aterm_appl t) { return t == int_(); }
+        /// \brief Returns true iff this expression is an unknown sort.
+        inline
+        bool is_unknown_sort() const
+        {
+          return data::is_unknown_sort(*this);
+        }
 
-  /// \brief Returns true if the term t equals the sort_expression pos
-  inline bool is_pos (atermpp::aterm_appl t) { return t == pos(); }
+        /// \brief Returns true iff this expression is an expression representing multiple possible sorts.
+        inline
+        bool is_multiple_possible_sorts() const
+        {
+          return data::is_multiple_possible_sorts(*this);
+        }
 
-  /// \brief Returns true if the term t equals the sort_expression nat
-  inline bool is_nat (atermpp::aterm_appl t) { return t == nat(); }
+        /// \brief Returns true iff the expression represents a standard sort.
+        bool is_system_defined() const;
 
-  /// \brief Returns true if the term t equals the sort_expression bool
-  inline bool is_bool(atermpp::aterm_appl t) { return t == bool_(); }
+        /// \brief Returns the target sort of this expression.
+        /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort.
+        inline
+        sort_expression target_sort() const
+        {
+          if(is_function_sort())
+          {
+            return atermpp::arg2(*this);
+          }
+          else
+          {
+            return *this;
+          }
+        }
 
-} // namespace sort_expr
+    }; // class sort_expression
 
-} // namespace data
+    /// \brief list of sorts
+    typedef atermpp::term_list< sort_expression >  sort_expression_list;
+    /// \brief vector of sorts
+    typedef atermpp::vector< sort_expression >     sort_expression_vector;
+
+    /// \brief Converts an iterator range to sort_expression_list
+    /// \param r A range of sort expressions.
+    /// \note This function uses implementation details of the iterator type
+    /// and hence is sometimes efficient than copying all elements of the list.
+    template < typename ForwardTraversalIterator >
+    inline sort_expression_list make_sort_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return convert< sort_expression_list >(r);
+    }
+
+    /// \brief Converts an iterator range to sort_expression_list
+    /// \param r A range of sort expressions.
+    template < typename ForwardTraversalIterator >
+    inline sort_expression_vector make_sort_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return convert< sort_expression_vector >(r);
+    }
+
+    /// \brief Converts a vector to a sort_expression_list
+    /// \param r A range of sort expressions.
+    template < typename Expression >
+    inline sort_expression_list make_sort_expresion_list(atermpp::vector< Expression >const& r) {
+      return convert< sort_expression_list >(r);
+    }
+
+    /// \brief Unknown sort.
+    ///
+    /// An unknown sort expresses a sort expression that represents the unknown
+    /// sort expression.
+    class unknown_sort: public sort_expression
+    {
+      /// \brief Default constructor for the unknown sort expression.
+      /// \details This should only be used before and during type checking!
+      public:
+        unknown_sort()
+          : sort_expression(mcrl2::core::detail::gsMakeSortUnknown())
+        {}
+     };
+
+     /// \brief Multiple possible sorts.
+     ///
+     /// An expression that expresses that one of multiple sorts is possible.
+     /// \details Only for use in the type checker!
+     class multiple_possible_sorts: public sort_expression
+     {
+       public:
+         /// \brief Default constructor. Denoting that no sorts are possible.
+         multiple_possible_sorts()
+          : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(sort_expression_list()))
+         {}
+
+         /// \brief Constructor that denotes that the sorts in s are possible.
+         /// \param s A container of possible sorts.
+         template <typename Container>
+         multiple_possible_sorts(Container const& s)
+           : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(convert<atermpp::aterm_list>(s)))
+         {}
+     };
+
+  } // namespace data
 
 } // namespace mcrl2
 
 #endif // MCRL2_DATA_SORT_EXPRESSION_H
+

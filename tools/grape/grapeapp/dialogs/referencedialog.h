@@ -36,7 +36,7 @@ namespace grape
     /**
      * \short A class showing a dialog with a combobox and text edit.
      */
-    class grape_reference_dialog : protected wxDialog
+    class grape_reference_dialog : public wxDialog
     {
       private:
         grape_frame   *m_main_frame;          /**< Pointer to the main frame. */
@@ -81,7 +81,12 @@ namespace grape
       	 */
          void event_change_combobox( wxCommandEvent &p_event );
        
-        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
+
+	      /**
+	       * Updates the combobox with variables.
+      	 */
+        void change_combobox();
 
       public:
 

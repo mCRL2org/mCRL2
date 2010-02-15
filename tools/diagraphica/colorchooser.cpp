@@ -572,7 +572,6 @@ void ColorChooser::processHits(
 // ----------------------------
 {
     GLuint *ptr;
-    int number;
     vector< int > ids;
 
     ptr = (GLuint*) buffer;
@@ -584,7 +583,7 @@ void ColorChooser::processHits(
         {
             for ( int i = 0; i < ( hits-1 ); ++i )
             {
-                number = *ptr;
+                int number = *ptr;
                 ++ptr; // number;
                 ++ptr; // z1
                 ++ptr; // z2
@@ -594,7 +593,7 @@ void ColorChooser::processHits(
         }
 
         // last hit
-        number = *ptr;
+        int number = *ptr;
         ++ptr; // number
         ++ptr; // z1
         ++ptr; // z2

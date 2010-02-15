@@ -8,6 +8,10 @@
 //
 // Implements the process_reference class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include <wx/tokenzr.h>
 
 #include "processreference.h"
@@ -94,4 +98,5 @@ wxString process_reference::get_text() const
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_process_reference );
+WX_DEFINE_OBJARRAY( arr_process_reference )
+

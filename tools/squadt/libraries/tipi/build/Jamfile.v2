@@ -12,18 +12,7 @@ project squadt/libraries/tipi
     ;
 
 alias messenger
-    : [ glob ../source/transport/*.cpp ]
-      [ obj capabilities_tool : tool/capabilities.cpp ]
-      [ obj capabilities_controller : controller/capabilities.cpp ]
-      restore_visitor.cpp/<use>/libraries/ticpp//ticpp
-      basic_datatype.cpp
-      common.cpp
-      command_line_interface.cpp
-      configuration.cpp
-      display.cpp
-      mime_type.cpp
-      store_visitor.cpp
-      detail/event_handlers.cpp
+    : implementations.cpp/<use>/libraries/ticpp//ticpp
       /libraries/ticpp//ticpp
       /site-config//boost_filesystem
       /site-config//boost_thread

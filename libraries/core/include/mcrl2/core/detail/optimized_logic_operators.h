@@ -27,6 +27,7 @@ namespace detail {
   /// \param is_false Function that tests for the value false
   /// \return The value <tt>!arg</tt>
   template <typename T1, typename T2, typename UnaryFunction, typename UnaryPredicate>
+  inline
   T1 optimized_not(T1 arg, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(arg))
@@ -47,6 +48,7 @@ namespace detail {
   /// \param is_false Function that tests for the value false
   /// \return The value <tt>left && right</tt>
   template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
+  inline
   T1 optimized_and(T1 left, T1 right, BinaryFunction and_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
@@ -73,6 +75,7 @@ namespace detail {
   /// \param is_false Function that tests for the value false
   /// \return The value <tt>left || right</tt>
   template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
+  inline
   T1 optimized_or(T1 left, T1 right, BinaryFunction or_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
@@ -100,6 +103,7 @@ namespace detail {
   /// \param is_false Function that tests for the value false
   /// \return The value <tt>left => right</tt>
   template <typename T1, typename T2, typename UnaryPredicate, typename UnaryFunction, typename BinaryFunction>
+  inline
   T1 optimized_imp(T1 left, T1 right, BinaryFunction imp, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
@@ -126,6 +130,7 @@ namespace detail {
   /// \param is_false Function that tests for the value false
   /// \return The universal quantification <tt>forall v.arg</tt>
   template <typename T1, typename T2, typename VariableSequence, typename UnaryPredicate, typename Forall>
+  inline
   T1 optimized_forall(VariableSequence v, T1 arg, Forall forall, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(arg))
@@ -146,6 +151,7 @@ namespace detail {
   /// \param is_false Function that tests for the value false
   /// \return The existential quantification <tt>exists v.arg</tt>
   template <typename T1, typename T2, typename VariableSequence, typename UnaryPredicate, typename Exists>
+  inline
   T1 optimized_exists(VariableSequence v, T1 arg, Exists exists, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(arg))

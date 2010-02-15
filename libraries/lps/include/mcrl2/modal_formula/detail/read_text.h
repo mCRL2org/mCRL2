@@ -20,7 +20,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace modal_formula {
 
 namespace detail {
 
@@ -52,7 +52,7 @@ std::string read_text(const std::string& filename, bool warn=false)
 
 } // namespace detail
 
-} // namespace modal
+} // namespace modal_formula
 
 } // namespace mcrl2
 

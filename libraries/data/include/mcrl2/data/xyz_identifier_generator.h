@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
 
+#include "boost/format.hpp"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
@@ -26,7 +27,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     int m_index;
 
     /// \brief The character of the last generated identifier.
-    char m_char;
+    char m_char; // character of last generated identifier
 
     /// \brief Returns the next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
     /// \return The next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
@@ -57,14 +58,14 @@ class xyz_identifier_generator: public multiset_identifier_generator
     {}
 
     /// \brief Constructor.
-    /// \param t A term
+    /// \param t A term.
     template <typename Term>
     xyz_identifier_generator(Term t)
      : m_index(-2), m_char('Z')
     {
       add_to_context(t);
     }
-
+    
     /// \brief Returns hint if it isn't in the context yet. Else the next available
     /// identifier in the range X, Y, Z, X0, Y0, Z0, X1, ... is returned.
     /// The returned variable is added to the context.

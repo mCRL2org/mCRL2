@@ -8,6 +8,7 @@
 //
 // Implements the logpanel class used to display log messages.
 
+#include "wx.hpp" // precompiled headers
 
 #include <memory>
 #include <streambuf>
@@ -107,7 +108,7 @@ static void relay_message(const ::mcrl2::core::messageType t, const char* data) 
 }
 
 grape_logpanel::grape_logpanel(wxWindow *p_parent)
-: wxTextCtrl(p_parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY)
+: wxTextCtrl(p_parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP)
 {
   message_relay::initialise(*this);
 }

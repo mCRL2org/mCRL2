@@ -23,10 +23,6 @@ namespace pbes_system {
 
 namespace detail {
 
-  struct no_substitution
-  {
-  };
-
   // Simplifying PBES rewriter.
   template <typename Term, typename DataRewriter, typename SubstitutionFunction = no_substitution>
   struct simplify_rewrite_builder: public pbes_expression_builder<Term, SubstitutionFunction>
@@ -40,7 +36,7 @@ namespace detail {
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<Term> tr;
 
-    DataRewriter& m_data_rewriter;
+    const DataRewriter& m_data_rewriter;
 
     /// \brief Is called in the case rewriting is done with a substitution function.
     /// \param d A data term
@@ -64,7 +60,7 @@ namespace detail {
 
     /// \brief Constructor.
     /// \param rewr A data rewriter
-    simplify_rewrite_builder(DataRewriter& rewr)
+    simplify_rewrite_builder(const DataRewriter& rewr)
       : m_data_rewriter(rewr)
     { }
 
@@ -225,7 +221,7 @@ namespace detail {
     {
       typedef typename core::term_traits<data_term_type> tt;
       term_type t = visit(phi, sigma);
-      return core::optimized_forall(tt::set_difference(variables, tr::free_variables(t)), t);
+      return core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
     }
 
     /// \brief Visit exists node
@@ -239,7 +235,7 @@ namespace detail {
     {
       typedef typename core::term_traits<data_term_type> tt;
       term_type t = visit(phi, sigma);
-      return core::optimized_exists(tt::set_difference(variables, tr::free_variables(t)), t);
+      return core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
     }
 
     /// \brief Visit propositional_variable node
@@ -273,7 +269,7 @@ namespace detail {
     /// \param x A term
     /// \param sigma A substitution function
     /// \return The rewrite result
-    term_type operator()(const term_type& x, SubstitutionFunction& sigma)
+    term_type operator()(const term_type& x, SubstitutionFunction sigma)
     {
       return visit(x, sigma);
     }

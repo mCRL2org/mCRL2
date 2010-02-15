@@ -1,0 +1,1 @@
+[true*](forall dd:D .([r1(dd)](nu X. mu Y. ([s4(dd)]X && [!s4(dd)]Y)))

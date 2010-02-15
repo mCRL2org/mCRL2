@@ -10,6 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
+#include "mcrl2/exception.h"
 #include "graph.h"
 #include <iostream>
 using namespace std;
@@ -157,7 +158,7 @@ void Graph::swapAttributes(
             nodes[i]->swapTupleVal( idx1, idx2 );
     }
     else
-        throw new string( "Error swapping attributes." );
+        throw mcrl2::runtime_error( "Error swapping attributes." );
 }
 
 
@@ -206,7 +207,7 @@ void Graph::moveAttribute(
             nodes[i]->moveTupleVal( idxFr, idxTo );
     }
     else
-        throw new string( "Error moving attribute." );
+        throw mcrl2::runtime_error( "Error moving attribute." );
 }
 
 
@@ -261,21 +262,14 @@ void Graph::configAttributes(
                 nodes[i]->moveTupleVals( idcsFrTo );
             }
         }
-        catch ( const string* msg )
+        catch ( const mcrl2::runtime_error& e)
         {
-            string* errMsg = new string( "Error moving attributes." );
-
-            errMsg->append( "\n" );
-            errMsg->append( *msg );
-
-            delete msg;
-            msg = NULL;
-
-            throw errMsg;
+          throw mcrl2::runtime_error(string("Error moving attributes.\n") + string(e.what()));
         }
+        
     }
     else
-        throw new string( "Error configuring attributes." );
+        throw mcrl2::runtime_error("Error configuring attributes.");
 
 }
 
@@ -462,7 +456,7 @@ Attribute* Graph::getAttribute( const size_t &idx )
     if ( 0 <= idx && idx < attributes.size() )
         return attributes[idx];
     else
-        throw new string( "Error retrieving attribute." );
+        throw mcrl2::runtime_error( "Error retrieving attribute." );
 }
 
 
@@ -497,7 +491,7 @@ Node* Graph::getNode( const size_t &idx )
     if ( 0 <= idx && idx < nodes.size() )
         return nodes[idx];
     else
-        throw new string( "Error retrieving node." );
+        throw mcrl2::runtime_error( "Error retrieving node." );
 }
 
 
@@ -516,7 +510,7 @@ Edge* Graph::getEdge( const size_t &idx )
     if ( 0 <= idx && idx < edges.size() )
         return edges[idx];
 	else
-        throw new string( "Error retrieving edge." );
+        throw mcrl2::runtime_error( "Error retrieving edge." );
 }
 
 
@@ -1654,7 +1648,6 @@ void Graph::clustClusterOnAttr(
     Attribute*         attr;
     Node*              node;
     vector< Cluster* > clstTmp;
-    int                clstIdxTmp;
     vector< int >      clstCoordNew;
 
     // delete descendants & move up nodes
@@ -1679,7 +1672,7 @@ void Graph::clustClusterOnAttr(
         clstIdxTmp = attr->mapToValue(
             (int)node->getTupleVal(attrIdx) )->getIndex();
         */
-        clstIdxTmp = attr->mapToValue(
+        int clstIdxTmp = attr->mapToValue(
             node->getTupleVal(attrIdx) )->getIndex();
 
         clstTmp[clstIdxTmp]->addNode( node );
@@ -1957,7 +1950,6 @@ void Graph::updateBundles( int &progress )
 // ---------------------------------------
 {
     vector< vector< Bundle* > > temp;
-    int idxFr, idxTo, idxBdl;
 
     // clear bundles
     deleteBundles();
@@ -1978,8 +1970,8 @@ void Graph::updateBundles( int &progress )
     {
     for ( size_t i = 0; i < edges.size(); ++i )
     {
-        idxFr = edges[i]->getInNode()->getCluster()->getIndex();
-        idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
+        int idxFr = edges[i]->getInNode()->getCluster()->getIndex();
+        int idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
 
         if ( temp[idxFr][idxTo] == NULL )
         {
@@ -2005,7 +1997,7 @@ void Graph::updateBundles( int &progress )
     }
 
     // iterate over temp data struct & update bundles
-    idxBdl = 0;
+    int idxBdl = 0;
     {
     for ( size_t i = 0; i < leaves.size(); ++i )
     {
@@ -2028,8 +2020,6 @@ void Graph::updateBundles( int &progress )
     Cluster* inClust;
     Cluster* outClust;
     Node*    node;
-    bool     hasLbl;
-    bool     must;
     {
     for ( size_t i = 0; i < bundles.size(); ++i )
     {
@@ -2040,11 +2030,11 @@ void Graph::updateBundles( int &progress )
 
         for ( size_t j = 0; j < labels.size(); ++j )
         {
-            must = true;
+            bool must = true;
             for ( int k = 0; k < inClust->getSizeNodes() && must == true; ++k )
             {
                 node = inClust->getNode( k );
-                hasLbl = false;
+                bool hasLbl = false;
 
                 for ( int m = 0; m < node->getSizeOutEdges() && hasLbl != true; ++m )
                 {
@@ -2079,7 +2069,6 @@ void Graph::updateBundles()
 // ------------------------
 {
     vector< vector< Bundle* > > temp;
-    int idxFr, idxTo, idxBdl;
 
     // clear bundles
     deleteBundles();
@@ -2100,8 +2089,8 @@ void Graph::updateBundles()
     {
     for ( size_t i = 0; i < edges.size(); ++i )
     {
-        idxFr = edges[i]->getInNode()->getCluster()->getIndex();
-        idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
+        int idxFr = edges[i]->getInNode()->getCluster()->getIndex();
+        int idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
 
         if ( temp[idxFr][idxTo] == NULL )
         {
@@ -2121,7 +2110,7 @@ void Graph::updateBundles()
     }
 
     // iterate over temp data struct & update bundles
-    idxBdl = 0;
+    int idxBdl = 0;
     {
     for ( size_t i = 0; i < leaves.size(); ++i )
     {

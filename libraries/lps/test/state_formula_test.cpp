@@ -15,21 +15,22 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
-#include "mcrl2/modal_formula/detail/algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/lps/rename.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-using namespace mcrl2::modal;
-using namespace mcrl2::modal::detail;
+using namespace mcrl2::state_formulas;
 
 const std::string SPECIFICATION =
 "act a:Nat;                              \n"
@@ -327,17 +328,20 @@ const std::string MODEL =
 
 void test_rename()
 {
-  specification spec    = mcrl22lps(SPECIFICATION);
+  using mcrl2::core::pp;
+  std::cerr << "test_rename";
+  specification spec    = linearise(SPECIFICATION);
 
-  state_formula formula = mcf2statefrm("(mu X. X) && (mu X. X)", spec);
+  state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
   set_identifier_generator generator;
-  generator.add_identifiers(find_identifiers(spec));
+  generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
   formula = rename_predicate_variables(formula, generator);
   BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X0. X0)");
+  std::cout << "formula: " << pp(formula) << std::endl;
 
   generator = set_identifier_generator();
-  generator.add_identifiers(find_identifiers(spec));
-  formula = mcf2statefrm("mu X. mu X. X", spec);
+  generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
+  formula = parse_state_formula("mu X. mu X. X", spec);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
@@ -346,11 +350,13 @@ void test_rename()
 
 void test_normalize()
 {
+  using mcrl2::core::pp;
   using namespace state_frm;
+  std::cerr << "test_normalize\n";
 
-  state_formula x = var(identifier_string("X"), data_expression_list());
-  state_formula y = var(identifier_string("Y"), data_expression_list());
-  state_formula z = var(identifier_string("Z"), data_expression_list());
+  state_formula x = state_formulas::state_frm::variable(identifier_string("X"), data_expression_list());
+  state_formula y = state_formulas::state_frm::variable(identifier_string("Y"), data_expression_list());
+  state_formula z = state_formulas::state_frm::variable(identifier_string("Z"), data_expression_list());
   state_formula f;
   state_formula f1;
   state_formula f2;
@@ -371,10 +377,10 @@ void test_normalize()
   std::cout << "f2 = " << pp(f2) << std::endl;
   BOOST_CHECK(f1 == f2);
 
-/* this takes too much time with mcrl22lps...
-  specification model = mcrl22lps(MODEL);
-  state_formula req1_1 = mcf2statefrm(REQ1_1, model);
-  state_formula req1_2 = mcf2statefrm(REQ1_2, model);
+/* this takes too much time with linearise...
+  specification model = linearise(MODEL);
+  state_formula req1_1 = parse_state_formula(REQ1_1, model);
+  state_formula req1_2 = parse_state_formula(REQ1_2, model);
   state_formula q1 = normalize(req1_1);
   state_formula q2 = normalize(req1_2);
   state_formula r1 = normalize(req1_1);
@@ -382,12 +388,34 @@ void test_normalize()
 */
 }
 
+void test_type_checking()
+{
+  using namespace state_frm;
+  std::cerr << "test_type_checking\n";
+
+  specification context = linearise(
+    "sort B = struct d;"
+    "act a: List(B);"
+    "init a([d]);"
+  );
+
+  state_formula formula = parse_state_formula("<a([d])>true", context);
+
+  std::cerr << "Hier\n";
+  BOOST_CHECK(is_may(formula));
+  BOOST_CHECK(act(formula));
+}
+
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test_rename();
+  core::garbage_collect();
   test_normalize();
+  core::garbage_collect();
+  test_type_checking();
+  core::garbage_collect();
 
   return 0;
 }

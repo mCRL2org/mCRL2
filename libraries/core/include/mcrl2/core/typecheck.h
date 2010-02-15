@@ -137,13 +137,13 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec);
 
 
 /** \brief     Type check a parsed mCRL2 state formula with respect to a
- *             type checked mCRL2 specification.
+ *             type checked mCRL2 process specification or LPS.
  *  \param[in] state_formula An ATerm representation of an mCRL2 state
  *             formula that adheres to the initial internal ATerm structure.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
- *             to the internal ATerm structure after type checking.
- *  \post      state_formula is type checked using the declarations from
- *             lps_spec.
+ *  \param[in] spec An ATerm representation of an mCRL2 process specification
+ *             or LPS that adheres to the internal ATerm structure after
+ *             type checking.
+ *  \post      state_formula is type checked using the declarations from spec.
  *  \return    If type checking went well, an equivalent version of
  *             state_formula is returned that adheres to the internal
  *             ATerm structure after type checking.  If something went

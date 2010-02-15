@@ -36,6 +36,13 @@ extern boost::shared_ptr<Expression> parse_tree;
 
 %}
 
+//Uncomment the line below to enable the bison debug facilities.
+//To produce traces, yydebug needs to be set to 1
+//%debug
+
+//more verbose and specific error messages
+%error-verbose
+
 //set name prefix
 %name-prefix="lysayy"
 
@@ -89,10 +96,6 @@ extern boost::shared_ptr<Expression> parse_tree;
 %token T_ALNUM
 %token T_ISET_DEF
 %token T_TYPENAME
-
-%debug
-%verbose
-%error-verbose
 
 %left T_INDEXED_PIPE
 %left T_PIPE

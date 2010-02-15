@@ -1,0 +1,11 @@
+sort Triple;
+cons t: Nat#Nat#Nat -> Triple; 
+map  first, second, third: Triple -> Nat;
+var  a,b,c: Nat;
+eqn  first(t(a,b,c)) = a;
+     second(t(a,b,c)) = b;
+     third(t(a,b,c)) = c;
+
+proc P(a: Triple)= (first(a) < 5) -> tau . P( t(first(a)+1, second(a), third(a)));
+
+init P(t(0,1,2));

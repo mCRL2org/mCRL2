@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -19,6 +19,15 @@
 #endif
 #include "state.h"
 #include "mcrl2/utilities/font_renderer.h"
+
+#ifndef __glu_h__
+#ifdef __APPLE__
+  #include <OpenGL/glu.h>
+#else
+  #include <GL/glu.h>
+#endif
+#endif
+
 class Visualizer
 {
   public:
@@ -26,7 +35,7 @@ class Visualizer
     ~Visualizer();
 
     void visualize(double width, double height, double pixelSize,
-                   bool inSelectMode);
+                   bool inSelectMode, bool enabled3D);
 
     void initFontRenderer();
 
@@ -38,6 +47,8 @@ class Visualizer
     void setCurves(bool value);
     void setTransLabels(bool value);
     void setStateLabels(bool value);
+    void drawCoorSystem();
+
     // Getters
     int getRadius() const;
   private:
@@ -45,12 +56,15 @@ class Visualizer
     double pixelSize; // Pixel size in world coordinates.
     double width; // Canvas width
     double height; // Canvas height
+    double depth;
     int radius;
     bool showHandles;
     bool showTransLabels;
     bool showStateLabels;
     bool showStateVector;
+    bool draw3d;
 
+    GLUquadricObj *quadratic;	
 
     void drawStates(bool inSelectMode);
     // Draws a single state s
@@ -59,12 +73,20 @@ class Visualizer
     // Draws a single transition, from its in to its out transition
     void drawTransition(Transition* t, size_t trid, bool inSelectMode);
 
-    // Draws an arrow head
-    void drawArrowHead(double baseLength);
+  	// Draws the transition label
+	  void drawTransLabel(Transition* t, size_t trid, bool inSelectMode);
 
+	  // Draws the state label and vector
+	  void drawStateText(State* s);
 
     // Draws a self-loop, a transition from a state to itself
     void drawSelfLoop(Transition* t, size_t trid, bool inSelectMode);
+
+	  // Draws an arrow head in 3d
+    void drawArrowHead3d(double baseLength);
+
+	  // Draws an arrow head
+	  void drawArrowHead(double baseLength);
 
     mcrl2::utilities::wx::font_renderer* fr;
 };

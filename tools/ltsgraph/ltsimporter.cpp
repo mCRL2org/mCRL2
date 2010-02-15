@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -61,15 +61,20 @@ Graph* LTSImporter::importFile(std::string fn)
         s->setParameters(stateValues);
       }
 
-      // Generate a random position (x, y) for this state
+      // Generate a random position (x, y, z) for this state
       int x = static_cast<int> (
                 (rand() / static_cast<float>(RAND_MAX) - .5) * 2000
               );
       int y = static_cast<int> (
                 (rand() / static_cast<float>(RAND_MAX) - .5) * 2000
               );
+      int z = static_cast<int>(
+                (rand() / static_cast<float>(RAND_MAX) - .5) * 2000
+              );
+
       s->setX(x);
       s->setY(y);
+	  s->setZ(z);
     }
 
     for(transition_iterator ti = fileLTS.get_transitions(); ti.more(); ++ti)

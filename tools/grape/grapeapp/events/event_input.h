@@ -26,7 +26,7 @@ namespace grape
     {
       private:
         coordinate    m_coord; /**< The coordinate that was clicked. */
-        visual_object *m_vis_obj; /**< A pointer to the clicked visual object, if applicable. If not, then a coordinate was clicked. */
+        visual_object *m_vis_obj; /**< A pointer to the clicked visual object, if applicable. If not, then a coordinate was clicked. */        
         bool          m_shift_pressed; /**< A boolean indicated whether the Shift key was pressed. */
       public:
         /**
@@ -64,6 +64,7 @@ namespace grape
     class grape_event_doubleclick : public grape_event_base
     {
       private:
+        wxMouseEvent  m_mouse_event;  /**< Mouse event */
         visual_object *m_vis_obj; /**< A pointer to the clicked visual object, if applicable. If not, then a coordinate was clicked. */
       public:
 
@@ -72,8 +73,9 @@ namespace grape
          * Initializes the event.
          * @param p_main_frame Pointer to the main frame.
          * @param p_vis_obj The visual object on which a click happened.
+         * @param p_event The triggered mouse event.
          */
-        grape_event_doubleclick( grape_frame *p_main_frame, visual_object* p_vis_obj );
+        grape_event_doubleclick( grape_frame *p_main_frame, visual_object* p_vis_obj, wxMouseEvent &p_event );
 
         /**
          * Default destructor.

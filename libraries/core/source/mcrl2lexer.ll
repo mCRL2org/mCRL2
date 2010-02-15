@@ -10,8 +10,8 @@
 #include <cstring>
 #include <cstdio>
 #include "mcrl2/core/detail/mcrl2lexer.h"
-#include "mcrl2/core/detail/mcrl2parser.hpp"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/mcrl2parser.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 
 //fix for the broken cygwin versions of flex
@@ -120,12 +120,10 @@ Number     "0"|([1-9][0-9]*)
 "|"        { process_string(); return BAR; }
 "("        { process_string(); return LPAR; }
 ")"        { process_string(); return RPAR; }
-"[]"       { process_string(); return PBRACK; }
 "["        { process_string(); return LBRACK; }
 "]"        { process_string(); return RBRACK; }
 "<"        { process_string(); return LANG; }
 ">"        { process_string(); return RANG; }
-"{}"       { process_string(); return PBRACE; }
 "{"        { process_string(); return LBRACE; }
 "}"        { process_string(); return RBRACE; }
 
@@ -135,6 +133,7 @@ map        { process_string(); return KWMAP; }
 var        { process_string(); return KWVAR; }
 eqn        { process_string(); return KWEQN; }
 act        { process_string(); return KWACT; }
+glob       { process_string(); return KWGLOB; }
 proc       { process_string(); return KWPROC; }
 pbes       { process_string(); return KWPBES; }
 init       { process_string(); return KWINIT; }
@@ -151,6 +150,7 @@ Bag        { process_string(); return BAG; }
 
 true       { process_string(); return CTRUE; }
 false      { process_string(); return CFALSE; }
+if         { process_string(); return IF; }
 div        { process_string(); return DIV; }
 mod        { process_string(); return MOD; }
 in         { process_string(); return IN; }
@@ -183,7 +183,7 @@ nil        { process_string(); return NIL; }
 .          {
              col_nr += YYLeng(); yyerror("unknown character");
              /* remaining characters */
-	   }
+     }
 
 %%
 

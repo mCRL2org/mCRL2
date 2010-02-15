@@ -12,26 +12,48 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
+using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-const std::string PBESSPEC =
+const std::string PBESSPEC1 =
   "pbes nu X(b: Bool) = exists n: Nat. Y(n) && val(b); \n"
   "     mu Y(n: Nat)  = X(n >= 10);                    \n"
   "                                                    \n"
   "init X(true);                                       \n"
   ;
 
+const std::string PBESSPEC2 =
+  "sort DATA = struct d1 | d2;                         \n"
+  "     Enum3 = struct e2_3 | e1_3 | e0_3;             \n"
+  "     Frame = struct frame(getd: DATA, getb: DATA);  \n"
+  "                                                    \n"
+  "glob dc: Frame;                                     \n"
+  "                                                    \n"
+  "pbes nu X(s30_K: Pos, f_K: Frame) =                 \n"
+  "       X(1, f_K);                                   \n"
+  "                                                    \n"
+  "init X(1, dc);                                      \n"
+  ;
+
 void test_txt2pbes()
 {
-  pbes<> p = txt2pbes(PBESSPEC);
+  pbes<> p;
+  p = txt2pbes(PBESSPEC1);
+  BOOST_CHECK(p.is_well_typed());
+  p = txt2pbes(PBESSPEC2);
+  BOOST_CHECK(p.is_well_typed());
 }
+
 
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_txt2pbes();
+  core::garbage_collect();
 
   return 0;
 }

@@ -1,5 +1,6 @@
 #include <string>
 #include "mcrl2/lps/parelm.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 

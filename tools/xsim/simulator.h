@@ -12,10 +12,11 @@
 #define __simulator_H__
 
 #include <string>
-#include <aterm2.h>
+#include <memory>
+#include "aterm2.h"
 
-#include <mcrl2/lps/nextstate.h>
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/data/rewriter.h"
 #include "simbase.h"
 
 class StandardSimulator: virtual public SimulatorInterface
@@ -25,7 +26,7 @@ public:
     StandardSimulator();
     virtual ~StandardSimulator();
 
-    virtual void LoadSpec(ATermAppl spec);
+    virtual void LoadSpec(mcrl2::lps::specification const& spec);
     /* Load mCRL2 specification spec for simulation */
     virtual void LoadView(const std::string &filename);
     /* Load DLL filename as simulation view */
@@ -39,13 +40,13 @@ public:
      * This function throws a string on errors */
     virtual bool IsActive();
     /* Returns true iff a specification has been loaded */
-    bool ErrorOccurred();
+    // bool ErrorOccurred();
     /* Returns true iff an error occurred while computing transitions
      * from the current state */
 
     // XXX make private and use functions?
     bool use_dummies;
-    RewriteStrategy rewr_strat;
+    mcrl2::data::rewriter::strategy rewr_strat;
 
     // SimulatorInterface methods
     virtual void Register(SimulatorViewInterface *View);
@@ -85,6 +86,8 @@ private:
     ATermList ecart;
     viewlist views;
     ATermIndexedSet seen_states;
+    std::auto_ptr< mcrl2::data::rewriter >  m_rewriter;
+    std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > > m_enumerator_factory;
     NextState *nextstate;
     NextStateGenerator *nextstategen;
 

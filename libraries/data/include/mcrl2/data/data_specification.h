@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen Keiren, Jeroen van der Wulp, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -12,434 +12,801 @@
 #ifndef MCRL2_DATA_DATA_SPECIFICATION_H
 #define MCRL2_DATA_DATA_SPECIFICATION_H
 
-#include <set>
-#include <boost/iterator/filter_iterator.hpp>
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/vector.h"
+#include <algorithm>
+#include <functional>
+#include <vector>
+
+#include "boost/iterator/transform_iterator.hpp"
+
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/table.h"
+#include "mcrl2/atermpp/set.h"
+
+// data expressions
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/assignment.h"
+// #include "mcrl2/data/map_substitution.h"
+
+// sorts
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/sort_utility1.h"
-#include "mcrl2/data/data_operation.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/detail/data_utility.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/alias.h"
+#include "mcrl2/data/standard.h"
+
+#include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
 
-namespace data {
+  namespace data {
 
-/// \cond INTERNAL_DOCS
-namespace detail {
+    class data_specification;
 
-  struct has_result_sort
-  {
-    sort_expression m_result;
-
-    has_result_sort(sort_expression target)
-      : m_result(target)
-    {}
-
-    /// \brief Function call operator
-    /// \param f A data operation
-    /// \return The function result
-    bool operator()(data_operation f)
+    /// \cond INTERNAL_DOCS
+    namespace detail 
     {
-      return result_sort(f.sort()) == m_result;
+      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&, bool = false);
     }
-  };
-} // namespace detail
+    /// \endcond
 
-/// \endcond
+    /// \brief data specification.
 
-/// \brief Container of sorts, constructors, mappings and equations.
-// <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
-//                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
-class data_specification: public atermpp::aterm_appl
-{
-
-  protected:
-
-    /// \brief The sorts of the data specification.
-    sort_expression_list m_sorts;
-
-    /// \brief The constructors of the data specification.
-    data_operation_list  m_constructors;
-
-    /// \brief The operations of the data specification.
-    data_operation_list  m_mappings;
-
-    /// \brief The equations of the data specification.
-    data_equation_list   m_equations;
-
-    /// \brief The following map contains for each sort a default term of that particular
-    /// sort. Each default term remains valid, as long as no constructors or mappings
-    /// are removed from the specification.
-    atermpp::map < sort_expression, data_expression > default_expression_map;
-
-    /// \brief Caches if a sort is finite or not.
-    mutable std::map<data::sort_expression, bool> m_finite_sorts;
-
-  public:
-
-    /// \brief Iterator for the sequence of sorts.
-    typedef sort_expression_list::iterator sort_iterator;
-
-    /// \brief Iterator for the sequences of constructors and mappings.
-    typedef data_operation_list::iterator  function_iterator;
-
-    /// \brief Iterator for the sequence of equations.
-    typedef data_equation_list::iterator   equation_iterator;
-
-    /// \brief Constructor.
-    data_specification()
-      : atermpp::aterm_appl(core::detail::constructDataSpec())
-    {}
-
-    /// \brief Constructor.
-    /// \param t A term
-    data_specification(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
+    class data_specification
     {
-      assert(core::detail::check_rule_DataSpec(m_term));
-      atermpp::aterm_appl::iterator i = t.begin();
-      m_sorts        = sort_expression_list(atermpp::aterm_appl(*i++).argument(0));
-      m_constructors = data_operation_list(atermpp::aterm_appl(*i++).argument(0));
-      m_mappings     = data_operation_list(atermpp::aterm_appl(*i++).argument(0));
-      m_equations    = data_equation_list(atermpp::aterm_appl(*i++).argument(0));
-    }
+      protected:
 
-    /// \brief Constructor.
-    /// \param sorts A sequence of sort expressions
-    /// \param constructors The constructors of the data specification.
-    /// \param mappings The mappings of the data specification.
-    /// \param equations The equations of the data specification.
-    data_specification(sort_expression_list sorts, data_operation_list constructors, data_operation_list mappings, data_equation_list equations)
-      : atermpp::aterm_appl(core::detail::gsMakeDataSpec(
-                      core::detail::gsMakeSortSpec(sorts),
-                      core::detail::gsMakeConsSpec(constructors),
-                      core::detail::gsMakeMapSpec(mappings),
-                      core::detail::gsMakeDataEqnSpec(equations)
-                     )
-                   ),
-        m_sorts(sorts),
-        m_constructors(constructors),
-        m_mappings(mappings),
-        m_equations(equations)
-    {}
+        /// \brief map from sort expression to constructors
+        typedef atermpp::multimap< sort_expression, data::function_symbol > sort_to_symbol_map;
 
-    /// \brief Returns the sorts of the data specification.
-    /// \return The sorts of the data specification.
-    sort_expression_list sorts() const
-    {
-      return m_sorts;
-    }
+        /// \brief map from basic_sort (names) to sort expression
+        typedef atermpp::multimap< basic_sort, sort_expression >           ltr_aliases_map;
 
-    /// \brief Returns the constructors of the data specification.
-    /// \return The constructors of the data specification.
-    data_operation_list constructors() const
-    {
-      return m_constructors;
-    }
+      private:
 
-    /// \brief Returns the constructors of the data specification that have s as their target.
-    /// \param s A sort expression
-    /// \return The constructors of the data specification that have s as their target.
-    data_operation_list constructors(sort_expression s) const
-    {
-      atermpp::vector<data_operation> result;
-
-      typedef boost::filter_iterator<detail::has_result_sort, data_operation_list::iterator> FilterIter;
-      detail::has_result_sort predicate(s);
-      FilterIter first(predicate, m_constructors.begin(), m_constructors.end());
-      FilterIter last(predicate, m_constructors.end(), m_constructors.end());
-      std::copy(first, last, std::back_inserter(result));
-      return data_operation_list(result.begin(), result.end());
-    }
-
-    /// \brief Returns the mappings of the data specification.
-    /// \return The mappings of the data specification.
-    data_operation_list mappings() const
-    {
-      return m_mappings;
-    }
-
-    /// \brief Returns the mappings of the data specification that have s as their target.
-    /// \param s A sort expression
-    /// \return The mappings of the data specification that have s as their target.
-    data_operation_list mappings(sort_expression s) const
-    {
-      atermpp::vector<data_operation> result;
-      typedef boost::filter_iterator<detail::has_result_sort, data_operation_list::iterator> FilterIter;
-      detail::has_result_sort predicate(s);
-      FilterIter first(predicate, m_mappings.begin(), m_mappings.end());
-      FilterIter last(predicate, m_mappings.end(), m_mappings.end());
-      std::copy(first, last, std::back_inserter(result));
-      return data_operation_list(result.begin(), result.end());
-    }
-
-    /// \brief Returns the equations of the data specification.
-    /// \return The equations of the data specification.
-    data_equation_list equations() const
-    {
-      return m_equations;
-    }
-
-    /// \brief Returns a default expression that has the sort s.
-    /// \brief Returns a valid data expression according to this data specification
-    /// of the given sort s. If no valid expression can be found, data_expression()
-    /// is returned. If s is a basic sort, it returns a minimal term with by default at most three nested function
-    /// symbols. When selecting function symbols, constructor symbols have a
-    /// preference over mappings. Constructors and functions that have arrows in their
-    /// target sorts (e.g. f:A->(B->C)) are not used to construct default terms.
-    /// <P>
-    /// For each sort, the same term is returned.
-    /// For function sorts a mapping with that sort is returned provided it exists, or otherwise
-    /// data_expression() is returned.
-    /// <P>
-    /// Terms that are generated are stored in a map such that they do not have to be
-    /// generated more than once. When generating a term the nesting depth is taken into
-    /// account. When the term is taken from the map, the nesting depth is ignored.
-    /// So, generating a term with nesting depth 10, and subsequentely with nesting depth
-    /// 1 can still yield a term of nesting depth larger than 1, because the earlier
-    /// generated term is returned.
-    /// <P>
-    /// It can be expected that this function will evolve through time, in the sense that
-    /// more complex terms will be generated over time to act as default terms of a certain
-    /// sort, for instance containing fucntion symbols with complex target sorts, containing
-    /// explicit function constructors (lambda's). So, no reliance is possible on the particular
-    /// shape of the terms that are generated.
-    /// \param s A sort expression
-    /// \param max_recursion_depth A positive integer
-    /// \return A constant data expression of the given sort.
-    data_expression default_expression(sort_expression s, const unsigned int max_recursion_depth=3)
-    // data_expression default_expression(sort_expression s) const
-    {
-      // first check whether a term has already been constructed for this sort.
-
-      data_expression result;
-      atermpp::map < sort_expression,data_expression >::iterator l=default_expression_map.find(s);
-
-      if (l!=default_expression_map.end())
-      { // a default data_expression is found.
-        return l->second;
-      }
-
-      if (s.is_arrow())
-      { // s is a function sort. We search for a constructor of mapping of this sort
-        // Although in principle possible, we do not do a lot of effort to construct
-        // a term of this sort. We just look whether a term of exactly this sort is
-        // present.
-
-        // check if there is a mapping with sort s (constructors with sort s cannot exist).
-        data_operation_list::iterator i =
-                     std::find_if(mappings().begin(), mappings().end(),
-                                 detail::is_operation_with_given_sort(s));
-        if (i != mappings().end())
+        /// \cond INTERNAL_DOCS
+        /// \brief projects a pair of sort and a constructor to the latter
+        struct symbol_projection : public std::unary_function< sort_to_symbol_map::value_type const, data::function_symbol >
         {
-          result=data_expression((atermpp::aterm_appl)*i);
-          default_expression_map.insert(std::make_pair(s,result));
-          return result;
-        }
-        // No term of sort s is found. At the end of this function we return
-        // data_expression()
-
-      }
-      else
-      { // s is a constant (not an arrow sort).
-        // check if there is a constant constructor for s
-        data_operation_list::iterator i = std::find_if(constructors(s).begin(),
-                                                       constructors(s).end(),
-                                                       detail::is_constant_operation());
-        if (i != constructors().end())
-        {
-          result=data_expression((atermpp::aterm_appl)*i);
-          default_expression_map.insert(std::make_pair(s,result));
-          return result;
-        }
-
-        // check if there is a constant mapping for s
-        i = std::find_if(mappings(s).begin(), mappings(s).end(), detail::is_constant_operation());
-        if (i != mappings().end())
-        {
-          result=data_expression((atermpp::aterm_appl)*i);
-          default_expression_map.insert(std::make_pair(s,result));
-          return result;
-        }
-
-        if (max_recursion_depth>0)
-        { // recursively traverse constructor functions
-          for(data_operation_list::iterator i=constructors(s).begin();
-              i!=constructors(s).end(); i++)
-          { assert(i->sort().is_arrow()); // If a basic constructor of this sort
-                                          // exists, a situation as mentioned above applies.
-            sort_arrow sa=i->sort();
-            sort_expression_list argument_sorts=sa.argument_sorts();
-            sort_expression target_sort=sa.result_sort();
-            if (target_sort==s)
-            { // We only deal with operators of the form
-              // f:s1#...#sn->s. Operators of the form
-              // f:s1#...#sn->G where G is a complex sort expression
-              // are ignored.
-              data_expression_list arguments;
-              sort_expression_list::iterator j;
-
-              for(j=argument_sorts.begin();j!=argument_sorts.end(); j++)
-              { data_expression t=default_expression(*j,max_recursion_depth-1);
-                if (t==data_expression())
-                { break;
-                }
-                else arguments=push_front(arguments,t);
-              }
-              if (j==argument_sorts.end())
-              { // a suitable set of arguments is found
-                arguments=reverse(arguments);
-                // The result sort can be equal to s, in which case
-                // we are ready, or it can have a more complex structure.
-                result=data_application((atermpp::aterm_appl)*i,arguments);
-                default_expression_map.insert(std::make_pair(s,result));
-                return result;
-              }
-            }
+          /// \brief Application to constant pair
+          data::function_symbol const& operator()(sort_to_symbol_map::value_type const& v) const
+          { return v.second;
           }
+        };
 
-          // recursively traverse mappings
-          for(data_operation_list::iterator i=mappings(s).begin();
-              i!=mappings(s).end(); i++)
-          { assert(i->sort().is_arrow()); // if a basic mapping of sort s would exist
-                                          // we cannot end up here.
-            sort_arrow sa=i->sort();
-            sort_expression_list argument_sorts=sa.argument_sorts();
-            sort_expression target_sort=sa.result_sort();
-            // sort_expression_list argument_sorts=source(i->sort());
-            // sort_expression target_sort=target(i->sort());
-            if (target_sort==s)
-            { // See comments for similar code for constructors.
-              data_expression_list arguments;
-              sort_expression_list::iterator j;
-              for(j=argument_sorts.begin();j!=argument_sorts.end(); j++)
-              { data_expression t=default_expression(*j,max_recursion_depth-1);
-                if (t==data_expression())
-                { break;
-                }
-                else arguments=push_front(arguments,t);
-              }
-              if (j==argument_sorts.end())
-              { // a suitable set of arguments is found
-                arguments=reverse(arguments);
-                result=data_application((atermpp::aterm_appl)*i,arguments);
-                default_expression_map.insert(std::make_pair(s,result));
-                return result;
-              }
-            }
+        struct convert_to_alias : public std::unary_function< ltr_aliases_map::value_type const, alias >
+        {
+          /// \brief Application to constant pair
+          alias operator()(ltr_aliases_map::value_type const& e) const 
+          { return alias(e.first,e.second);
+          }
+        };
+
+        /// \endcond
+
+      public:
+
+        /// \brief iterator range over list of sort expressions
+        typedef boost::iterator_range< atermpp::set< sort_expression >::iterator >                    sorts_range;
+        /// \brief iterator range over constant list of sort expressions
+        typedef boost::iterator_range< atermpp::set< sort_expression >::const_iterator >              sorts_const_range;
+
+        /// \brief iterator range over list of sort expressions
+        typedef boost::iterator_range< atermpp::set< variable >::iterator >                           variable_range;
+        /// \brief iterator range over constant list of sort expressions
+        typedef boost::iterator_range< atermpp::set< variable >::const_iterator >                     variable_const_range;
+
+        /// \brief iterator over aliases (objects of type function_symbol)
+        typedef boost::transform_iterator< convert_to_alias, ltr_aliases_map::iterator >          aliases_iterator;
+        /// \brief const iterator over aliases (objects of type function_symbol)
+        typedef boost::transform_iterator< convert_to_alias, ltr_aliases_map::const_iterator >    aliases_const_iterator;
+        /// \brief iterator range over list of aliases
+        typedef boost::iterator_range< aliases_iterator >                                             aliases_range;
+        /// \brief iterator range over constant list of aliases
+        typedef boost::iterator_range< aliases_const_iterator >                                       aliases_const_range;
+
+        /// \brief iterator over constructors (objects of type function_symbol)
+        typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::iterator >          constructors_iterator;
+        /// \brief const iterator over constructors (objects of type function_symbol)
+        typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    constructors_const_iterator;
+        /// \brief iterator range over constructors (objects of type function_symbol)
+        typedef boost::iterator_range< constructors_iterator >                                        constructors_range;
+        /// \brief const iterator range over constructors (objects of type function_symbol)
+        typedef boost::iterator_range< constructors_const_iterator >                                  constructors_const_range;
+
+        /// \brief iterator over mappings (objects of type function_symbol)
+        typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::iterator >          mappings_iterator;
+        /// \brief const iterator over mappings (objects of type function_symbol)
+        typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    mappings_const_iterator;
+        /// \brief iterator range over mappings (objects of type function_symbol)
+        typedef boost::iterator_range< mappings_iterator >                                            mappings_range;
+        /// \brief const iterator range over mappings (objects of type function_symbol)
+        typedef boost::iterator_range< mappings_const_iterator >                                      mappings_const_range;
+
+        /// \brief iterator range over list of data equations (objects of type data_equation)
+        typedef boost::iterator_range< atermpp::set< data_equation >::iterator >                      equations_range;
+        /// \brief iterator range over constant list of data equations (objects of type data_equation)
+        typedef boost::iterator_range< atermpp::set< data_equation >::const_iterator >                equations_const_range;
+
+      private:
+
+        friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&, bool);
+
+        ///\brief Adds system defined sorts and standard mappings for all internally used sorts
+
+        ///\brief Normalise sorts.
+        sort_expression normalise_sorts_helper(const sort_expression & e) const;
+
+
+        ///\brief Builds a specification from aterm
+        void build_from_aterm(const atermpp::aterm_appl& t);
+
+        void reconstruct_m_normalised_aliases() const;
+
+      protected:
+
+        /// \brief This boolean indicates whether the variables 
+        /// m_normalised_constructors, m_mappings, m_equations, m_normalised_sorts,
+        /// m_normalised_aliases.
+        mutable bool m_normalised_data_is_up_to_date;
+
+        /// \brief The basic sorts and structured sorts in the specification.
+        atermpp::set< sort_expression >     m_sorts;
+
+        /// \brief The sorts that occur in the context of this data specification.
+        /// The normalised sorts, constructors, mappings and equations are complete
+        /// with respect to these sorts. 
+        mutable atermpp::set< sort_expression >     m_sorts_in_context; 
+
+        /// \brief The basic sorts and structured sorts in the specification.
+        ltr_aliases_map                     m_aliases;
+
+        /// \brief A mapping of sort expressions to the constructors corresponding to that sort.
+        sort_to_symbol_map                  m_constructors;
+
+        /// \brief The mappings of the specification.
+        sort_to_symbol_map                  m_mappings;
+
+        /// \brief The equations of the specification.
+        atermpp::set< data_equation >       m_equations;
+
+        /// \brief Set containing all the sorts, including the system defined ones.
+        mutable atermpp::set< sort_expression >         m_normalised_sorts;
+
+        /// \brief Set containing all constructors, including the system defined ones.
+        /// The types in these constructors are normalised.
+        mutable sort_to_symbol_map         m_normalised_constructors;
+        
+        /// \brief Set containing system defined all mappings, including the system defined ones.
+        /// The types in these mappings are normalised.
+        mutable sort_to_symbol_map         m_normalised_mappings;
+        //
+        /// \brief Table containing all equations, including the system defined ones.
+        ///        The sorts in these equations are normalised.
+        mutable atermpp::set< data_equation >           m_normalised_equations;
+
+        /// \brief Table containing how sorts should be mapped to normalised sorts.
+        // sort_normaliser               m_sort_normaliser;
+        mutable atermpp::map< sort_expression, sort_expression > m_normalised_aliases;
+
+        void data_is_not_necessarily_normalised_anymore() const
+        { m_normalised_data_is_up_to_date=false;
+        }
+
+    protected: 
+
+        /// \brief Adds a sort to this specification, and marks it as system
+        ///        defined
+        ///
+        /// \param[in] s A sort expression.
+        /// \pre s does not yet occur in this specification.
+        /// \post is_system_defined(s) = true
+        /// \note this operation does not invalidate iterators of sorts_const_range
+        void add_system_defined_sort(const sort_expression& s) const
+        { m_normalised_sorts.insert(normalise_sorts(s));
+        }
+  
+        /// \brief Adds a constructor to this specification, and marks it as
+        ///        system defined.
+        ///
+        /// \param[in] f A function symbol.
+        /// \pre f does not yet occur in this specification.
+        /// \post is_system_defined(f) == true
+        /// \note this operation does not invalidate iterators of constructors_const_range
+        inline
+        void add_system_defined_constructor(const function_symbol& f) const
+        { add_function(m_normalised_constructors,normalise_sorts(f));
+        }
+  
+        /// \brief Adds a mapping to this specification, and marks it as system
+        ///        defined.
+        ///
+        /// \param[in] f A function symbol.
+        /// \pre f does not yet occur in this specification.
+        /// \post is_system_defined(f) == true
+        /// \note this operation does not invalidate iterators of mappings_const_range
+        void add_system_defined_mapping(const function_symbol& f) const
+        { add_function(m_normalised_mappings,normalise_sorts(f));
+        }
+  
+        /// \brief Adds an equation to this specification, and marks it as system
+        ///        defined.
+        ///
+        /// \param[in] e An equation.
+        /// \pre e does not yet occur in this specification.
+        /// \post is_system_defined(f) == true
+        /// \note this operation does not invalidate iterators of equations_const_range
+        void add_system_defined_equation(const data_equation& e) const
+        { m_normalised_equations.insert(normalise_sorts(e));
+        }
+  
+        /// \brief Adds constructors, mappings and equations for a structured sort
+        ///        to this specification, and marks them as system defined.
+        ///
+        /// \param[in] sort A sort expression that is representing the structured sort.
+        void insert_mappings_constructors_for_structured_sort(const structured_sort &sort) const
+        { add_system_defined_sort(normalise_sorts(sort));
+
+          structured_sort s_sort(sort);
+          function_symbol_vector f(s_sort.constructor_functions(sort));
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
+          f = s_sort.projection_functions(sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+          f = s_sort.recogniser_functions(sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+
+          data_equation_vector e(s_sort.constructor_equations(sort));
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+          e = s_sort.projection_equations(sort);
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+          e = s_sort.recogniser_equations(sort);
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+        }
+
+        void remove_function(sort_to_symbol_map& container, const function_symbol& f)
+        { boost::iterator_range< sort_to_symbol_map::iterator > r(container.equal_range(f.sort().target_sort()));
+
+          sort_to_symbol_map::iterator i =
+                  std::find(r.begin(), r.end(), sort_to_symbol_map::value_type(f.sort().target_sort(), f));
+  
+          if (i != container.end())
+          { container.erase(i);
           }
         }
-      }
 
-      return data_expression();
-    }
+        void add_function(sort_to_symbol_map& container, const function_symbol& f) const
+        { sort_expression index_sort(f.sort().target_sort());
+          constructors_const_range relevant_range(container.equal_range(index_sort));
+          if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
+          { container.insert(std::make_pair(index_sort, f));
+          }
+        }
 
-    /// \brief Returns true if the sort s has a finite number of values.
-    /// For efficiency, the results of this function are cached.
-    /// \param s A sort expression
-    /// \return True if the sort is finite.
-    bool is_finite(sort_expression s) const
-    {
-      std::map<sort_expression, bool>::const_iterator i = m_finite_sorts.find(s);
-      if (i != m_finite_sorts.end())
+        void add_function(sort_to_symbol_map& container, const function_symbol& f)
+        { sort_expression index_sort(f.sort().target_sort());
+          constructors_const_range relevant_range(container.equal_range(index_sort));
+          if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
+          { container.insert(std::make_pair(index_sort, f));
+          }
+        }
+
+        void add_standard_mappings_and_equations(sort_expression const& sort) const
+        {
+          function_symbol_vector symbols(standard_generate_functions_code(normalise_sorts(sort)));
+
+          for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
+          { add_function(m_normalised_mappings,*i);
+          }
+
+          data_equation_vector equations(standard_generate_equations_code(sort));
+
+          for (data_equation_vector::const_iterator i = equations.begin(); i != equations.end(); ++i)
+          { add_system_defined_equation(*i);
+          }
+        }
+
+    public:
+
+      ///\brief Default constructor. Generate a data specification that contains
+      ///       only booleans.
+      data_specification()
+        : m_normalised_data_is_up_to_date(false)
+      {}
+
+      ///\brief Constructor from an aterm.
+      /// \param[in] t a term adhering to the internal format.
+      data_specification(const atermpp::aterm_appl& t)
+        : m_normalised_data_is_up_to_date(false)
       {
-        return i->second;
+        build_from_aterm(t);
       }
-      bool b = data::is_finite(constructors(), s);
-      m_finite_sorts[s] = b;
-      return m_finite_sorts[s];
-    }
 
-    /// \brief Returns true if
-    /// <ul>
-    /// <li>the domain and range sorts of constructors are contained in the list of sorts</li>
-    /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
-    /// </ul>
-    /// \return True if the data specification is well typed.
-    bool is_well_typed() const
-    {
-      std::set<sort_expression> sorts = detail::make_set(m_sorts);
-
-      // check 1)
-      if (!detail::check_data_spec_sorts(constructors(), sorts))
+      ///\brief Constructor
+      template < typename SortsRange, typename AliasesRange, typename ConstructorsRange,
+                 typename MappingsRange, typename EquationsRange >
+      data_specification(const SortsRange& sorts,
+                         const AliasesRange& aliases,
+                         const ConstructorsRange& constructors,
+                         const MappingsRange& mappings,
+                         const EquationsRange& equations)
+        : m_normalised_data_is_up_to_date(false)
       {
-        std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors " << mcrl2::core::pp(constructors()) << " are declared in " << m_sorts << std::endl;
-        return false;
+        std::for_each(sorts.begin(), sorts.end(),
+           boost::bind(&data_specification::add_sort, this, _1));
+        std::for_each(constructors.begin(), constructors.end(),
+                   boost::bind(&data_specification::add_constructor, this, _1));
+        std::for_each(mappings.begin(), mappings.end(),
+                   boost::bind(&data_specification::add_mapping, this, _1));
+        std::for_each(equations.begin(), equations.end(),
+                   boost::bind(&data_specification::add_equation, this, _1));
       }
 
-      // check 2)
-      if (!detail::check_data_spec_sorts(mappings(), sorts))
+      /// \brief Gets all sort declarations including those that are system defined.
+      ///
+      /// \details The time complexity of this operation is constant, except when 
+      ///      the data specification has been changed, in which case it can be that
+      ///      it must be normalised again. This operation is linear in the size of 
+      ///      the specification.
+      /// \return The sort declarations of this specification.
+      inline
+      sorts_const_range sorts() const
       {
-        std::cerr << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings " << mcrl2::core::pp(mappings()) << " are declared in " << m_sorts << std::endl;
-        return false;
+        normalise_specification_if_required();
+        return sorts_const_range(m_normalised_sorts);
       }
 
-      return true;
-    }
-};
+      /// \brief Gets all sorts defined by a user (excluding the system defined sorts).
+      ///
+      /// \details The time complexity of this operation is constant.
+      /// \return The user defined sort declaration.
+      inline
+      sorts_const_range user_defined_sorts() const
+      {
+        return sorts_const_range(m_sorts);
+      }
 
-/// \brief Sets the sequence of sorts
-/// \param s A data specification
-/// \param sorts A sequence of sort expressions
-/// \return The updated data specification.
-inline
-data_specification set_sorts(data_specification s, sort_expression_list sorts)
-{
-  return data_specification(sorts,
-                            s.constructors(),
-                            s.mappings(),
-                            s.equations()
-                           );
-}
+      /// \brief Gets all constructors including those that are system defined.
+      /// \details The time complexity is the same as for sorts().
+      /// \return All constructors in this specification, including those for
+      /// structured sorts.
+      inline
+      constructors_const_range constructors() const
+      {
+        normalise_specification_if_required();
+        return constructors_const_range(m_normalised_constructors);
+      }
 
-/// \brief Sets the sequence of constructors
-/// \param s A data specification
-/// \param constructors A sequence of constructors.
-/// \return The updated data specification.
-inline
-data_specification set_constructors(data_specification s, data_operation_list constructors)
-{
-  return data_specification(s.sorts(),
-                            constructors,
-                            s.mappings(),
-                            s.equations()
-                           );
-}
+      /// \brief Gets the constructors defined by the user, excluding those that
+      /// are system defined.
+      /// \details The time complexity for this operation is constant.
+      inline
+      constructors_const_range user_defined_constructors() const
+      { 
+        return constructors_const_range(m_constructors);
+      }
 
-/// \brief Sets the sequence of mappings
-/// \param s A data specification
-/// \param mappings A sequence of mappings.
-/// \return The updated data specification.
-inline
-data_specification set_mappings(data_specification s, data_operation_list mappings)
-{
-  return data_specification(s.sorts(),
-                            s.constructors(),
-                            mappings,
-                            s.equations()
-                           );
-}
+      /// \brief Gets all constructors of a sort including those that are system defined.
+      ///
+      /// \details The time complexity is the same as for sorts().
+      /// \param[in] s A sort expression.
+      /// \return The constructors for sort s in this specification.
+      inline
+      constructors_const_range constructors(const sort_expression& s) const
+      {
+        normalise_specification_if_required();
+        return constructors_const_range(m_normalised_constructors.equal_range(normalise_sorts(s)));
+      }
 
-/// \brief Sets the sequence of data equations
-/// \param s A data specification
-/// \param equations A sequence of equations.
-/// \return The updated data specification.
-inline
-data_specification set_equations(data_specification s, data_equation_list equations)
-{
-  return data_specification(s.sorts(),
-                            s.constructors(),
-                            s.mappings(),
-                            equations
-                           );
-}
+      /// \brief Gets all mappings in this specification including those that are system defined.
+      ///
+      /// \brief The time complexity is the same as for sorts().
+      /// \return All mappings in this specification, including recognisers and
+      /// projection functions from structured sorts.
+      inline
+      mappings_const_range mappings() const
+      {
+        normalise_specification_if_required();
+        return mappings_const_range(m_normalised_mappings);
+      }
 
-} // namespace data
+      /// \brief Gets all user defined mappings in this specification.
+      ///
+      /// \brief The time complexity is constant.
+      /// \return All mappings in this specification, including recognisers and
+      /// projection functions from structured sorts.
+      inline
+      mappings_const_range user_defined_mappings() const
+      { 
+        return mappings_const_range(m_mappings);
+      }
+
+      /// \brief Gets all mappings of a sort including those that are system defined
+      ///
+      /// \param[in] s A sort expression.
+      /// \return All mappings in this specification, for which s occurs as a
+      /// right-hand side of the mapping's sort.
+      inline
+      mappings_const_range mappings(const sort_expression& s) const
+      {
+        normalise_specification_if_required();
+        return mappings_const_range(m_normalised_mappings.equal_range(normalise_sorts(s)));
+      }
+
+      /// \brief Gets all equations in this specification including those that are system defined
+      ///
+      /// \details The time complexity of this operation is the same as that for sort().
+      /// \return All equations in this specification, including those for
+      ///  structured sorts.
+      inline
+      equations_const_range equations() const
+      {
+        normalise_specification_if_required();
+        return equations_const_range(m_normalised_equations);
+      } 
+
+      /// \brief Gets all user defined equations.
+      ///
+      /// \details The time complexity of this operation is constant. 
+      /// \return All equations in this specification, including those for
+      ///  structured sorts.
+      inline
+      equations_const_range user_defined_equations() const
+      { 
+        return equations_const_range(m_equations);
+      } 
+
+      /// \brief Gets a normalisation mapping that maps each sort to its unique normalised sort
+      /// \details When in a specification sort aliases are used, like sort A=B or
+      ///    sort Tree=struct leaf | node(Tree,Tree) then there are different representations
+      ///    for each sort. The normalisation mapping maps each sort to a unique representant.
+      ///    Moreover, it is this unique sort that it provides in internal mappings.
+      const atermpp::map< sort_expression, sort_expression > &sort_alias_map() const
+      {
+        normalise_specification_if_required();
+        return m_normalised_aliases;
+      }
+
+      /// \brief Gets the user defined aliases.
+      /// \details The time complexity is constant.
+      inline
+      ltr_aliases_map user_defined_aliases() const
+      { 
+        return m_aliases;
+      }
+
+      /// \brief Return the user defined context sorts of the current specification.
+      /// \details Time complexity is constant.
+      sorts_const_range context_sorts()
+      {
+        return m_sorts_in_context;
+      }
+
+      /// \brief Adds a sort to this specification
+      ///
+      /// \param[in] s A sort expression.
+      /// \note this operation does not invalidate iterators of sorts_const_range
+      void add_sort(const sort_expression& s)
+      {
+        if(m_sorts.insert(s).second)
+        {
+          data_is_not_necessarily_normalised_anymore();
+        }
+      }
+
+      /// \brief Adds an alias (new name for a sort) to this specification
+      ///
+      /// \param[in] a an alias
+      /// \pre !search_sort(s.name()) || is_alias(s.name()) || constructors(s.name()).empty()
+      /// \note this operation does not invalidate iterators of aliases_const_range
+      /// \post is_alias(s.name()) && normalise_sorts(s.name()) = normalise_sorts(s.reference())
+      void add_alias(alias const& a)
+      {
+        m_aliases.insert(std::pair<basic_sort, sort_expression>(a.name(),a.reference()));
+        data_is_not_necessarily_normalised_anymore();
+      }
+
+      /// \brief Adds a constructor to this specification
+      ///
+      /// \param[in] f A function symbol.
+      /// \pre a mapping f does not yet occur in this specification.
+      /// \note this operation does not invalidate iterators of constructors_const_range
+      void add_constructor(const function_symbol& f)
+      {
+        add_function(m_constructors, f);
+        data_is_not_necessarily_normalised_anymore();
+      }
+
+      /// \brief Adds a mapping to this specification
+      ///
+      /// \param[in] f A function symbol.
+      /// \pre a constructor f does not yet occur in this specification.
+      /// \note this operation does not invalidate iterators of mappings_const_range
+      void add_mapping(const function_symbol& f)
+      {
+        add_function(m_mappings, f);
+        data_is_not_necessarily_normalised_anymore();
+      }
+
+      /// \brief Adds an equation to this specification
+      ///
+      /// \param[in] e An equation.
+      /// \pre e does not yet occur in this specification.
+      /// \note this operation does not invalidate iterators of equations_const_range
+      void add_equation(const data_equation& e)
+      {
+        m_equations.insert(e);
+        data_is_not_necessarily_normalised_anymore();
+      }
+
+      ///\brief Adds the sort s to the context sorts
+      /// \param[in] s a sort expression. It is
+      /// added to m_sorts_in_context. For this sort standard functions are generated
+      /// automatically (if, <,<=,==,!=,>=,>) and if the sort is a standard sort,
+      /// the necessary constructors, mappings and equations are added to the data type.
+      void add_context_sort(const sort_expression& s) const
+      {
+        if (m_sorts_in_context.insert(s).second)
+        {
+          data_is_not_necessarily_normalised_anymore();
+        }
+      }
+
+      ///\brief Adds the sorts in c to the context sorts
+      /// \param[in] c a container of sort expressions. These are
+      /// added to m_sorts_in_context. For these sorts standard functions are generated
+      /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
+      /// the necessary constructors, mappings and equations are added to the data type.
+      template <typename Container>
+      void add_context_sorts(const Container &c, typename detail::enable_if_container<Container>::type* = 0) const
+      {
+        std::for_each(c.begin(), c.end(),
+            boost::bind(&data_specification::add_context_sort, this, _1));
+      }
+
+  private:
+
+      ///\brief Normalises the sorts in the data specification
+      ///\details See \ref normalise_sorts on arbitrary objects for a more detailed description.
+      /// All sorts in the constructors, mappings and equations are normalised.
+    
+      void normalise_sorts() const;
+
+      /// \brief 
+      /// \details
+      void normalise_specification_if_required() const
+      {
+        if (!m_normalised_data_is_up_to_date)
+        {
+          m_normalised_data_is_up_to_date=true;
+          normalise_sorts();
+        }
+      }
+
+      ///\brief Adds the system defined sorts in a sequence
+      void import_system_defined_sort(sort_expression const&) const;
+
+   public:
+
+      /// \brief Normalises a sort expression by replacing sorts by a unique representative sort.
+      /// \details Sort aliases and structured sorts have as effect that different sort names
+      /// represent the same sort. E.g. after the alias sort A=B, the sort A and B are the same,
+      /// and every object of sort A is an object of sort B. As all algorithms use syntactic equality
+      /// to check whether objects are the same, the sorts A and B must be made equal. This is done
+      /// by defining a unique representative for each sort, and to replace each sort by this representative.
+      /// For sort aliases, the reprentative is always the sort at the right hand side, and for structured
+      /// sorts the sort at the left hand side is taken.
+      /// \param[in] e a sort expression
+      /// \result a sort expression with normalised sorts satisfying 
+      /// normalise_sorts(e) = normalise_sorts(normalise_sorts(e))
+      // template <typename Object> Object normalise_sorts(const Object& o) const;
+      /* { normalise_specification_if_required();
+        std::cerr << "Object " << o << "\n";
+        substitution < Object, sort_expression, Object > sigma(m_normalised_aliases);
+        return sigma(o);
+      } */
+      
+      /// \brief Normalises a sort expression by replacing sorts by a unique representative sort.
+      /// \details Sort aliases and structured sorts have as effect that different sort names
+      /// represent the same sort. E.g. after the alias sort A=B, the sort A and B are the same,
+      /// and every object of sort A is an object of sort B. As all algorithms use syntactic equality
+      /// to check whether objects are the same, the sorts A and B must be made equal. This is done
+      /// by defining a unique representative for each sort, and to replace each sort by this representative.
+      /// For sort aliases, the reprentative is always the sort at the right hand side, and for structured
+      /// sorts the sort at the left hand side is taken.
+      /// \param[in] e a sort expression
+      /// \result a sort expression with normalised sorts satisfying 
+      /// normalise_sorts(e) = normalise_sorts(normalise_sorts(e))
+      sort_expression normalise_sorts(sort_expression const& e) const;
+      
+      /// \brief Normalises a data expression by replacing all sorts in it by a unique 
+      /// representative sort.
+      /// \details See the explanation of normalise_sorts(sort_expression).
+      /// \param[in] e a data expression
+      /// \result a data expression e with normalised sorts 
+      data_expression normalise_sorts(data_expression const& e) const;
+
+      /// \brief Normalises a variable v by replacing sorts in it by a unique representative sort.
+      /// \details See the explanation of normalise_sorts(sort_expression).
+      /// \param[in] v a variable
+      /// \result a variable with a normalised sort expression
+      variable normalise_sorts(variable const& v) const
+      { normalise_specification_if_required();
+        return variable(v.name(),normalise_sorts(v.sort()));
+      }
+ 
+      /// \brief Normalises the sorts in a function symbol.
+      function_symbol normalise_sorts(function_symbol const& f) const;
+
+      /// \brief Normalises an equation e by replacing sorts in it by a unique representative sort.
+      /// \details See the explanation of normalise_sorts(sort_expression).
+      /// \param[in] e a data_equation.
+      /// \result a variable with a normalised sort expression
+      data_equation normalise_sorts(const data_equation& e) const
+      { normalise_specification_if_required();
+        return data_equation(normalise_sorts(e.variables()),
+                             normalise_sorts(e.condition()),
+                             normalise_sorts(e.lhs()),
+                             normalise_sorts(e.rhs())); 
+      }
+
+      /// \brief Normalises an assignment a by replacing sorts in it by a unique representative sort.
+      /// \details See the explanation of normalise_sorts(sort_expression).
+      /// \param[in] a an assignment
+      /// \result an assignment with normalised sort expressions
+      assignment normalise_sorts(assignment const& a) const
+      { normalise_specification_if_required();
+        return assignment(normalise_sorts(a.lhs()),normalise_sorts(a.rhs()));
+      }
+
+      /// \brief Normalises a atermpp list l by replacing sorts in it by a unique representative sort.
+      /// \details See the explanation of normalise_sorts(sort_expression).
+      /// \param[in] l a list of variables 
+      /// \result a variable list with a normalised sort expression
+      template < typename T>
+      atermpp::term_list <T> normalise_sorts(atermpp::term_list < T > const& l) const
+      { normalise_specification_if_required();
+        atermpp::term_list <T> result;
+        for(typename atermpp::term_list <T>::const_iterator i=l.begin();
+                i!=l.end(); ++i)
+        { result=push_front(result,normalise_sorts(*i));
+        }
+        return reverse(result);
+      } 
+
+      /// \brief Removes sort from specification.
+      /// Note that this also removes aliases for the sort but does not remove
+      /// constructors, mappings and equations.
+      /// \param[in] s A sort expression.
+      /// \post s does not occur in this specification.
+      /// \note this operation does not invalidate iterators of sorts_const_range, 
+      /// only if they point to the element that is removed
+      void remove_sort(const sort_expression& s)
+      {
+        m_sorts.erase(s);
+        m_normalised_sorts.erase(normalise_sorts(s));
+      }
+
+      /// \brief Removes alias from specification.
+      /// \post !search_sort(a.name()) && !is_alias(a.name())
+      void remove_alias(alias const& a)
+      {
+        m_sorts.erase(a.name());
+        m_aliases.erase(a.name());
+        data_is_not_necessarily_normalised_anymore();
+      }
+
+      /// \brief Removes constructor from specification.
+      ///
+      /// Note that this does not remove equations containing the constructor.
+      /// \param[in] f A constructor.
+      /// \pre f occurs in the specification as constructor.
+      /// \post f does not occur as constructor.
+      /// \note this operation does not invalidate iterators of constructors_const_range, 
+      /// only if they point to the element that is removed
+      void remove_constructor(const function_symbol& f)
+      {
+        remove_function(m_normalised_constructors,normalise_sorts(f));
+        remove_function(m_constructors,f);
+      }
+
+      /// \brief Removes mapping from specification.
+      ///
+      /// Note that this does not remove equations in which the mapping occurs.
+      /// \param[in] f A function.
+      /// \post f does not occur as constructor.
+      /// \note this operation does not invalidate iterators of mappings_const_range, 
+      /// only if they point to the element that is removed
+      void remove_mapping(const function_symbol& f)
+      {
+        remove_function(m_mappings,f);
+        remove_function(m_normalised_mappings,normalise_sorts(f));
+      }
+
+      /// \brief Removes equation from specification.
+      ///
+      /// \param[in] e An equation.
+      /// \post e is removed from this specification.
+      /// \note this operation does not invalidate iterators of equations_const_range, 
+      /// only if they point to the element that is removed
+      void remove_equation(const data_equation& e)
+      {
+        m_equations.erase(e);
+        m_normalised_equations.erase(normalise_sorts(e));
+      }
+
+      /// \brief Checks whether two sort expressions represent the same sort
+      ///
+      /// \param[in] s1 A sort expression
+      /// \param[in] s2 A sort expression
+      bool equal_sorts(sort_expression const& s1, sort_expression const& s2) const
+      {
+        normalise_specification_if_required();
+        const sort_expression normalised_sort1=normalise_sorts(s1);
+        const sort_expression normalised_sort2=normalise_sorts(s2);
+        return (normalised_sort1 == normalised_sort2);
+      }
+
+      /// \brief Checks whether a sort is certainly finite.
+      ///
+      /// \param[in] s A sort expression
+      /// \return true if s can be determined to be finite,
+      ///      false otherwise.
+      bool is_certainly_finite(const sort_expression& s) const;
+
+      /// \brief Checks whether a sort is a constructor sort
+      ///
+      /// \param[in] s A sort expression
+      /// \return true if s is a constructor sort
+      bool is_constructor_sort(const sort_expression& s) const
+      {
+        normalise_specification_if_required();
+        const sort_expression normalised_sort=normalise_sorts(s);
+        return !normalised_sort.is_function_sort() && !constructors(normalised_sort).empty();
+      }
+
+      /// \brief Returns true if
+      /// <ul>
+      /// <li>the domain and range sorts of constructors are contained in the list of sorts</li>
+      /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
+      /// </ul>
+      /// \return True if the data specification is well typed.
+      bool is_well_typed() const;
+
+      bool operator==(const data_specification& other) const
+      {
+        normalise_specification_if_required();
+        other.normalise_specification_if_required();
+        return
+          // m_sorts_in_context == other.m_sorts_in_context &&
+          m_normalised_sorts == other.m_normalised_sorts &&
+          m_normalised_constructors == other.m_normalised_constructors &&
+          m_normalised_mappings == other.m_normalised_mappings &&
+          m_normalised_equations == other.m_normalised_equations;
+      }
+
+      data_specification &operator=(const data_specification &other) 
+      { 
+        m_normalised_data_is_up_to_date=other.m_normalised_data_is_up_to_date;
+        m_sorts=other.m_sorts;
+        m_sorts_in_context=other.m_sorts_in_context;
+        m_aliases=other.m_aliases;
+        m_constructors=other.m_constructors;
+        m_mappings=other.m_mappings;
+        m_equations=other.m_equations;
+        m_normalised_sorts=other.m_normalised_sorts;
+        m_normalised_mappings=other.m_normalised_mappings;
+        m_normalised_constructors=other.m_normalised_constructors;
+        m_normalised_equations=other.m_normalised_equations;
+        m_normalised_aliases=other.m_normalised_aliases;
+        return *this;
+      }
+
+    }; // class data_specification
+
+  } // namespace data
 
 } // namespace mcrl2
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H
+

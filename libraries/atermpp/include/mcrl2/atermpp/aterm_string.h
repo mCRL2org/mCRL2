@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/detail/utility.h"
+#include "mcrl2/atermpp/utility.h"
 
 namespace atermpp
 {
@@ -45,6 +46,15 @@ namespace atermpp
         assert(t.size() == 0);
       }
 
+/*
+      /// \brief Constructor.
+      /// \param t A term containing a string.
+      aterm_string(const aterm_string& t)
+        : aterm_appl(t)
+      {
+        assert(t.size() == 0);
+      }
+
       /// Allow construction from an aterm. The aterm must be of the right type, and may have no children.
       /// \param t A term containing a string.
       aterm_string(aterm t)
@@ -53,11 +63,12 @@ namespace atermpp
         assert(t.type() == AT_APPL);
         assert(aterm_appl(t).size() == 0);
       }
+*/
 
       /// Allow construction from a string.
       /// \param s A string.
       /// \param quoted A boolean indicating if the string is quoted.
-      aterm_string(std::string s, bool quoted = true)
+      aterm_string(std::string const& s, bool quoted = true)
         : aterm_appl(quoted ? str2appl(s) : make_term(s))
       {
         assert(type() == AT_APPL);
@@ -80,7 +91,25 @@ namespace atermpp
       {
         return function().name();
       }
+
+      /// \brief Conversion operator
+      /// \return The term converted to string
+      bool operator==(char const* const other) const
+      {
+        return std::string(function().name()) == other;
+      }
   };
+
+  /// \brief Remove leading and trailing quotes from a quoted aterm_string.
+  /// \param t A term containing a quoted string.
+  /// \return The string without quotes.
+  inline
+  std::string unquote(aterm_string t)
+  {
+    std::string s(t);
+    assert(s.size() >= 2 && *s.begin() == '"' && *s.rbegin() == '"');
+    return std::string(s, 1, s.size() - 2);
+  }
 
   /// \cond INTERNAL_DOCS
   template <>

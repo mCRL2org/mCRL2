@@ -132,7 +132,7 @@ public:
     while (::InterlockedExchangeAdd(&outstanding_operations_, 0) > 0)
     {
       DWORD bytes_transferred = 0;
-#if (WINVER < 0x0500)
+#if defined(WINVER) && (WINVER < 0x0500)
       DWORD completion_key = 0;
 #else
       DWORD_PTR completion_key = 0;
@@ -419,7 +419,7 @@ private:
 
       // Get the next operation from the queue.
       DWORD bytes_transferred = 0;
-#if (WINVER < 0x0500)
+#if defined(WINVER) && (WINVER < 0x0500)
       DWORD completion_key = 0;
 #else
       DWORD_PTR completion_key = 0;
@@ -436,12 +436,15 @@ private:
         try
         {
           boost::asio::detail::mutex::scoped_lock lock(timer_mutex_);
-          timer_queues_copy_ = timer_queues_;
-          for (std::size_t i = 0; i < timer_queues_copy_.size(); ++i)
+          if (!timer_queues_.empty())
           {
-            timer_queues_copy_[i]->dispatch_timers();
-            timer_queues_copy_[i]->dispatch_cancellations();
-            timer_queues_copy_[i]->complete_timers();
+            timer_queues_copy_ = timer_queues_;
+            for (std::size_t i = 0; i < timer_queues_copy_.size(); ++i)
+            {
+              timer_queues_copy_[i]->dispatch_timers();
+              timer_queues_copy_[i]->dispatch_cancellations();
+              timer_queues_copy_[i]->complete_timers();
+            }
           }
         }
         catch (...)

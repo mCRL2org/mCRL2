@@ -15,7 +15,9 @@
 #include <iostream>
 #include <iterator>
 #include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/atermpp/list.h"
 #include "mcrl2/atermpp/map.h"

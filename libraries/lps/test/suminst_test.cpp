@@ -12,16 +12,18 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/suminst.h>
-#include <mcrl2/lps/mcrl22lps.h>
+#include <mcrl2/lps/linearise.h>
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 ///sum d:D should be unfolded
-void test_case_1(const t_suminst_options& opts)
+void test_case_1()
 {
   const std::string text(
     "sort D = struct d1|d2;\n"
@@ -30,9 +32,12 @@ void test_case_1(const t_suminst_options& opts)
     "init X;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, opts);
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1,r).run();
+std::clog << pp(s0) << std::endl;
+std::clog << pp(s1) << std::endl;
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -43,7 +48,7 @@ void test_case_1(const t_suminst_options& opts)
 }
 
 ///sum d:D should be unfolded (multiple occurrences of d per summand)
-void test_case_2(const t_suminst_options& opts)
+void test_case_2()
 {
   const std::string text(
     "sort D = struct d1|d2;\n"
@@ -53,12 +58,14 @@ void test_case_2(const t_suminst_options& opts)
     "init X(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, opts);
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
+  std::cerr << "SUMMANDS " << summands1 << "\n";
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
-  {
+  { std::cerr << "LEEG " << i->summation_variables() << "\n";
     BOOST_CHECK(i->summation_variables().empty());
   }
 
@@ -67,7 +74,7 @@ void test_case_2(const t_suminst_options& opts)
 
 ///sum d:D should not be removed, hence there should be a summand for
 ///which d is a sum variable.
-void test_case_3(const t_suminst_options& opts)
+void test_case_3()
 {
   const std::string text(
     "sort D;\n"
@@ -76,9 +83,10 @@ void test_case_3(const t_suminst_options& opts)
     "init X;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, opts);
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
   bool sum_occurs = false;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -91,7 +99,7 @@ void test_case_3(const t_suminst_options& opts)
 ///This is a test in which tau summands occur.
 ///We override opts such that only tau summands are instantiated.
 ///Note: Test case 5 tests the same specification, but uses the defaults.
-void test_case_4(const t_suminst_options& opts)
+void test_case_4()
 {
   const std::string text(
     "sort S = struct s1 | s2 | s3;\n"
@@ -102,12 +110,10 @@ void test_case_4(const t_suminst_options& opts)
     "init P;\n"
   );
 
-  t_suminst_options new_opts = opts;
-  new_opts.tau_only = true;
-
-  specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), new_opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, new_opts);
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1, r, true, true).run();
   summand_list summands1 = s1.process().summands();
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
@@ -131,7 +137,7 @@ void test_case_4(const t_suminst_options& opts)
 ///result.
 ///Note: Test case 4 tests the same specification, but only expands the tau
 ///summands.
-void test_case_5(const t_suminst_options& opts)
+void test_case_5()
 {
   const std::string text(
     "sort S = struct s1 | s2 | s3;\n"
@@ -142,9 +148,10 @@ void test_case_5(const t_suminst_options& opts)
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, opts);
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
@@ -163,17 +170,62 @@ void test_case_5(const t_suminst_options& opts)
   BOOST_CHECK(!sum_occurs);
 }
 
+void test_case_6()
+{
+  const std::string text(
+    "proc P(n0:Nat) = sum n : Nat . (n == n0) -> delta@n . P(n);\n"
+    "init P(5);\n"
+  );
+
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1, r, false).run();
+  summand_list summands1 = s1.process().summands();
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    BOOST_CHECK(i->summation_variables().empty());
+  }
+}
+
+void test_case_7()
+{
+  const std::string text(
+    "sort S;\n"
+    "act a:S;\n"
+    "proc P = sum s : S . a(s) . P;\n"
+    "init P;\n"
+  );
+
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1, r, false).run();
+  summand_list summands1 = s1.process().summands();
+  int sum_count = 0;
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    sum_count += i->summation_variables().size();
+  }
+  BOOST_CHECK(sum_count == 1);
+}
+
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERM_INIT(ac, av)
+  MCRL2_ATERMPP_INIT(ac, av)
 
-  t_suminst_options opts;
-
-  test_case_1(opts);
-  test_case_2(opts);
-  test_case_3(opts);
-  test_case_4(opts);
-  test_case_5(opts);
+  test_case_1();
+  core::garbage_collect();
+  test_case_2();
+  core::garbage_collect();
+  test_case_3();
+  core::garbage_collect();
+  test_case_4();
+  core::garbage_collect();
+  test_case_5();
+  core::garbage_collect();
+  test_case_6();
+  core::garbage_collect();
 
   return 0;
 }

@@ -416,7 +416,4 @@ namespace atermpp
 
 } // namespace atermpp
 
-#include "mcrl2/atermpp/aterm_make_match.h"
-#include "mcrl2/atermpp/aterm_init.h"
-
 #endif // MCRL2_ATERMPP_ATERM_H

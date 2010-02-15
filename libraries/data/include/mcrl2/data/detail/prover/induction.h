@@ -6,17 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/induction.h
+/// \file mcrl2/data/detail/prover/induction.h
 /// \brief Proving with induction on lists
 
 #ifndef INDUCTION_H
 #define INDUCTION_H
 
 #include "aterm2.h"
-#include "mcrl2/utilities/bdd_info.h"
-#include "mcrl2/utilities/expression_info.h"
-#include "mcrl2/utilities/sort_info.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/prover/bdd_info.h"
+#include "mcrl2/data/detail/prover/expression_info.h"
 
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
   /// The class Induction generates statements corresponding to
 
 class Induction {
@@ -31,7 +34,7 @@ class Induction {
     ATermAppl f_formula;
 
     /// \brief
-    ATermAppl f_constructors;
+    ATermList f_constructors;
 
     /// \brief
     ATermAppl f_cons_name;
@@ -47,9 +50,6 @@ class Induction {
 
     /// \brief
     Expression_Info f_expression_info;
-
-    /// \brief
-    Sort_Info f_sort_info;
 
     /// \brief
     void recurse_expression_for_lists(ATermAppl a_expression);
@@ -84,7 +84,7 @@ class Induction {
     );
   public:
     /// \brief
-    Induction(ATermAppl a_data_spec);
+    Induction(const data_specification &a_data_spec);
 
     /// \brief
     ~Induction();
@@ -98,5 +98,9 @@ class Induction {
     /// \brief
     ATermAppl apply_induction();
 };
+
+    }
+  }
+}
 
 #endif

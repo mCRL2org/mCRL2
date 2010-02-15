@@ -12,7 +12,6 @@
 #include <string.h>
 #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "translate.h"
 #include <vector>
 #include <sstream>
@@ -863,7 +862,8 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                                 ++itRAT)
       { if (itRAT->nextstate == terminate_state.state)
         {
-          collect_streams.insert(itRAT->stream);
+          int stream = itRAT->stream;
+          collect_streams.insert(stream);
         }
       }
       if (!collect_streams.empty())
@@ -1388,11 +1388,7 @@ std::string CAsttransform::processValue(ATermAppl input)
 
 std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList input)
 {
-  vector<RVT>::iterator it;
-  RPV tmpRPV;
-  RVT tmpRVT;
   vector<RPV> result;
-  string InitValue;
   gsDebugMsg("input of manipulateProcessVariableDeclarations: %T\n", input);
   // INPUT: ProcDecl( ... )
   // Arity is 1 because VarDecl the argument is of the form list*
@@ -1408,6 +1404,7 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
       ATerm element = ATgetFirst(to_process);
       if ( StrcmpIsFun( "DataVarID", (ATermAppl) element) )
       {
+        RPV tmpRPV;
         tmpRPV.Name = ATgetName(ATgetAFun(ATgetArgument(element,0)));
         tmpRPV.Type = processType((ATermAppl) ATgetArgument(element,1));
         tmpRPV.InitValue = initialValueVariable(tmpRPV.Type);
@@ -1416,6 +1413,7 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
       if ( StrcmpIsFun( "DataVarExprID", (ATermAppl) element) )
       {
         ATerm sub_element = ATgetArgument(element, 0);
+        RPV tmpRPV;
         tmpRPV.Name = ATgetName(ATgetAFun(ATgetArgument(sub_element,0)));
         tmpRPV.Type = processType((ATermAppl) ATgetArgument(sub_element,1));
         tmpRPV.InitValue = processValue((ATermAppl) ATgetArgument(element,1));

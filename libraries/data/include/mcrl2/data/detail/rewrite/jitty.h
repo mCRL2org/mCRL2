@@ -6,17 +6,22 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewrite/jitty.h
+/// \file mcrl2/data/detail/rewrite/jitty.h
 
 #ifndef __REWR_JITTY_H
 #define __REWR_JITTY_H
 
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/data_specification.h"
+
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
 
 class RewriterJitty: public Rewriter
 {
 	public:
-		RewriterJitty(mcrl2::data::data_specification DataSpec);
+		RewriterJitty(const data_specification &DataSpec);
 		~RewriterJitty();
 
 		RewriteStrategy getStrategy();
@@ -48,5 +53,8 @@ class RewriterJitty: public Rewriter
 		ATermAppl toInner(ATermAppl Term, bool add_opids);
 		ATermAppl fromInner(ATermAppl Term);
 };
+    }
+  }
+}
 
 #endif

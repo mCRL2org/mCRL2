@@ -141,7 +141,7 @@ if [ path.exists ./tools ] {
 
       # Introduce tool targets
       for tool in $(targets) {
-        alias $(tool) : /tools/$(targets)//install/<link>shared : <link>shared:<source>/libraries//install/<link>shared ;
+        alias $(tool) : /tools/$(targets)//install : <link>shared:<source>/libraries//install/<link>shared ;
       }
 
       alias install : $(targets) ;
@@ -152,21 +152,23 @@ if [ path.exists ./tools ] {
       # Complete install
       alias install : /tools/$(tools)//install /libraries//install examples $(boost-headers) ;
 
-      local all-boost-headers = [ MATCH (3rd-party/boost/boost/.*)$ : [ glob-tree *.hpp *.ipp : .svn ] ] ;
-      local header-location   = [ path.join [ get-install-root ] "include" ] ;
+      if $(boost-headers) { 
+        local all-boost-headers = [ MATCH (3rd-party/boost/boost/.*)$ : [ glob-tree *.hpp *.ipp : .svn ] ] ;
+        local header-location   = [ path.join [ get-install-root ] "include" ] ;
 
-      install install-boost-headers : [ set.difference $(all-boost-headers) :
-        [ MATCH (.*asio.*)|(.*xpressive.*)|(.*filesystem.*)|(.*test.*)|(.*thread.*)|(.*signal.*)|(.*program_options.*)|(.*aux_/preprocessed/.*) : $(all-boost-headers) ] ]
-              : <location>$(header-location) <install-type>H <install-source-root>3rd-party/boost ;
+        install install-boost-headers : [ set.difference $(all-boost-headers) :
+          [ MATCH (.*asio.*)|(.*xpressive.*)|(.*filesystem.*)|(.*test.*)|(.*thread.*)|(.*signal.*)|(.*program_options.*)|(.*aux_/preprocessed/.*) : $(all-boost-headers) ] ]
+                : <location>$(header-location) <install-type>H <install-source-root>3rd-party/boost ;
+
+        explicit install-boost-headers ;
+      }
 
       # General examples
       install-data examples
-              : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
+              : [ path.glob-tree $(TOP)/examples : *.gra *.dgc *.dgd *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc README project.xml : .svn ]
               : <install-source-root>./examples
                 <data-sub-location>examples
               ;
-
-      explicit install-boost-headers ;
     }
   }
 }
@@ -186,12 +188,12 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
 
 # Target for a tool in the mCRL2 toolset
 rule tool ( name : sources * : requirements * : defaults * : usage-requirements * ) {
-  build-requirements = <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
-                                [ process-requirements $(requirements) ] ;
+  build-requirements = [ process-requirements $(requirements) ] [ property.select install-rule : $(requirements) ] ;
 
   if ! <build>no in $(build-requirements) {
     exe $(name) : $(sources)
                 : $(build-requirements)
+                  <library>/libraries/utilities//command_line_interface
                 : $(defaults) : $(usage-requirements) ;
 
     # generate install targets

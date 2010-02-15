@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50557 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : defines and implements inline model of program environment 
 // ***************************************************************************

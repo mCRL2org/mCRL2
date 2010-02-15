@@ -8,6 +8,8 @@
 //
 // Implements the main frame of the application class.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/cmdproc.h>
 #include <wx/filesys.h>
 #include <wx/fs_arc.h>
@@ -15,6 +17,7 @@
 #include <wx/statusbr.h>
 #include <wx/tglbtn.h>
 #include <wx/timer.h>
+#include <wx/fontenum.h>
 
 #include "grape_frame.h"
 #include "grape_events.h"
@@ -29,6 +32,10 @@
 // window icon
 #include "pics/grape.xpm"
 
+#ifdef _WIN32
+  #include <windows.h>
+#endif
+
 using namespace grape::grapeapp;
 using namespace grape::libgrape;
 
@@ -38,24 +45,42 @@ grape_frame::grape_frame( const wxString &p_filename )
 , m_specification( 0 )
 , m_mode( GRAPE_MODE_NONE )
 {
+  m_current_diagram = 0;
   // initialize widgets
-  m_dataspecbutton = new wxToggleButton( this, GRAPE_DATATYPE_SPEC_BUTTON, _T("Datatype specification") );
+  m_dataspecbutton = new wxToggleButton( this, GRAPE_DATATYPE_SPEC_BUTTON, _T("Data type specification") );
   m_process_diagram_list = new grape_listbox(this, GRAPE_PROCESS_DIAGRAM_LIST, this);
   m_architecture_diagram_list = new grape_listbox(this, GRAPE_ARCHITECTURE_DIAGRAM_LIST, this);
   m_splitter = new wxSplitterWindow( this, GRAPE_SPLITTER );
-  m_splitter->SetMinimumPaneSize( 1 );
   m_clipboard = new grape_clipboard( this );
   m_timer = new wxTimer( this, GRAPE_TIMER );
   m_timer->Start( 2000, true );
 
 
   int gl_args[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
-  m_datatext = new wxTextCtrl( m_splitter, GRAPE_DATASPEC_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER );
+  m_datatext = new wxTextCtrl( m_splitter, GRAPE_DATASPEC_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_RICH | wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER );
+  wxFontEnumerator font_enum;
+  font_enum.EnumerateFacenames(wxFONTENCODING_SYSTEM, true);
+  wxArrayString font_names = font_enum.GetFacenames();
+  font_names.Sort();
+  wxString facename;
+  for (unsigned int i = 0; i < font_names.GetCount(); ++i)
+  {
+    if (font_names[i].Find(_T("Courier")) != wxNOT_FOUND)
+    {
+      facename = font_names[i];
+      break;
+    }
+  }
+  if (facename.IsEmpty())
+  {
+    if (font_names.GetCount() > 0) facename = font_names[0];
+  }
+  m_datatext_font = wxFont(10, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, facename);
   m_glcanvas = new grape_glcanvas(m_splitter, gl_args, this);
-  m_logpanel = new grape_logpanel(m_splitter);
+  m_logpanel = new grape_logpanel(this);
+  m_logpanel->Hide();
   m_splitter->SetSplitMode(wxSPLIT_HORIZONTAL);
-  m_splitter->SplitHorizontally(m_glcanvas, m_logpanel);
-  m_splitter->SetSashPosition( 5000 );
+  m_splitter->Initialize(m_glcanvas);
   m_statusbar = new wxStatusBar(this);
   m_menubar = new grape_menubar();
 
@@ -64,15 +89,15 @@ grape_frame::grape_frame( const wxString &p_filename )
   // place widgets in sizers
   wxBoxSizer *main_box = new wxBoxSizer(wxHORIZONTAL);
   main_box->Add(m_splitter, 1, wxEXPAND | wxBOTTOM, 5);
-
+	
   wxBoxSizer *process_box = new wxBoxSizer(wxVERTICAL);
   wxStaticText *proc_text = new wxStaticText( this, -1, _T("Processes"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
-  process_box->Add( proc_text, 0, wxALIGN_CENTRE | wxEXPAND );
+  process_box->Add( proc_text, 0, wxALIGN_CENTRE | wxEXPAND );  //Doesn't work in LINUX
   process_box->Add(m_process_diagram_list, 1, wxEXPAND | wxALL | wxALIGN_CENTER, 5);
 
   wxBoxSizer *architecture_box = new wxBoxSizer(wxVERTICAL);
   wxStaticText *arch_text = new wxStaticText( this, -1, _T("Architectures"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
-  architecture_box->Add( arch_text, 0, wxALIGN_CENTRE | wxEXPAND );
+  architecture_box->Add( arch_text, 0, wxALIGN_CENTRE | wxEXPAND );   //Doesn't work in LINUX
   architecture_box->Add(m_architecture_diagram_list, 1, wxEXPAND | wxALL | wxALIGN_CENTER, 5);
 
   wxBoxSizer *right_box = new wxBoxSizer(wxVERTICAL);
@@ -132,20 +157,64 @@ grape_frame::grape_frame( const wxString &p_filename )
   wxFileSystem::AddHandler(new wxArchiveFSHandler);
   m_help_controller = new wxHtmlHelpController(wxHF_DEFAULT_STYLE, this);
   wxString filename = wxEmptyString;
-  if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") ) )
+ 
+ //GRAPE_HELP_DIR
+ //
+#ifdef _WIN32
+    std::string win32_install_grape_help_dir;
+		HKEY hKey = 0;
+    char buf[255] = {0};
+    DWORD dwBufSize = sizeof(buf);
+    DWORD dwType;
+ 
+    // TODO:
+	  // 
+	  // Following line has to become VENDOR and INSTALL_REGISTRY_KEY
+    //   if( RegOpenKey(HKEY_LOCAL_MACHINE,TEXT("SOFTWARE\\"+VENDOR+"\\"+ INSTALL_REGISTRY_KEY),&hKey) == ERROR_SUCCESS)
+	  // Instead of: 
+    if( RegOpenKey(HKEY_LOCAL_MACHINE,TEXT("SOFTWARE\\TUe\\mCRL2"),&hKey) == ERROR_SUCCESS)
+    {
+      dwType = REG_SZ;
+      if( RegQueryValueEx(hKey,"",0, &dwType, (BYTE*)buf, &dwBufSize) == ERROR_SUCCESS)
+      {
+							win32_install_grape_help_dir = buf;
+							win32_install_grape_help_dir.append("/share/mcrl2/grape");
+      }
+	    std::cerr << "Cannot find default value for key: HKEY_LOCAL_MACHINE\\SOFTWARE\\TUe\\mCRL2 \n" ;
+	  }
+    else 
+    { 
+  	  std::cerr << "Cannot find key for HKEY_LOCAL_MACHINE\\SOFTWARE\\TUe\\mCRL2 \n" ;
+    }
+#endif
+
+  if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") )
+#ifdef _WIN32
+		|| fs.FindFileInPath( &filename, _T( win32_install_grape_help_dir.c_str() ), _T("grapehelp.zip") )		
+#endif
+			)
   {
     // file found
     m_help_controller->AddBook( wxFileName( filename ) );
   }
+  else
+  {
+		wxString info;
+                info << wxT("Help file \"grapehelp.zip\" could not be found in:\n- ");
+		info << wxT(GRAPE_HELP_DIR) ;
+#ifdef _WIN32
+    info << wxT("\n- ");
+    info << win32_install_grape_help_dir ;
+#endif
+    wxMessageBox(  info  , _T("Warning"), wxOK | wxICON_EXCLAMATION);
+  }
 
-  m_splitter->Unsplit();
-
-  // show frame;
+  // show frame
   Show();
-
+    
   if ( show_messagebox )
   {
-    wxMessageBox( _T("The file \"") + p_filename + _T("\" could not be opened."), _T("Warning"), wxOK | wxICON_EXCLAMATION, this );
+    wxMessageBox( _T("The file \"") + p_filename + _T("\" could not be opened."), _T("Warning"), wxOK | wxICON_EXCLAMATION );
   }
 }
 
@@ -155,6 +224,8 @@ grape_frame::~grape_frame( void )
   m_process_diagram_list = 0;
   delete m_architecture_diagram_list;
   m_architecture_diagram_list = 0;
+  delete m_datatext;
+  m_datatext = 0;
   delete m_glcanvas;
   m_glcanvas = 0;
   delete m_logpanel;
@@ -171,6 +242,12 @@ grape_frame::~grape_frame( void )
   m_help_controller = 0;
   delete m_clipboard;
   m_clipboard = 0;
+  delete m_dataspecbutton;
+  m_dataspecbutton = 0;
+  SetStatusBar(0);
+  delete m_statusbar;
+  SetMenuBar(0);
+  delete m_menubar;
 }
 
 grape_menubar * grape_frame::get_menubar( void )
@@ -234,6 +311,7 @@ void grape_frame::set_is_modified( bool p_modified )
   m_modified = p_modified;
   // set title
   set_title();
+  update_bars();
 }
 
 
@@ -282,6 +360,7 @@ void grape_frame::set_toolbar( grape_mode p_mode )
     default: toolbar = 0;
   }
 
+  toolbar->Realize();
   SetToolBar( toolbar );
 }
 
@@ -302,10 +381,6 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
   EVT_MENU(wxID_CLOSE, grape_frame::event_menu_close)
   EVT_MENU(wxID_SAVE, grape_frame::event_menu_save)
   EVT_MENU(wxID_SAVEAS, grape_frame::event_menu_saveas)
-  EVT_MENU(GRAPE_MENU_EXPORTMCRL2, grape_frame::event_menu_exportmcrl2)
-  EVT_MENU(GRAPE_MENU_EXPORTIMAGE, grape_frame::event_menu_exportimage)
-  EVT_MENU(GRAPE_MENU_EXPORTTEXT, grape_frame::event_menu_exporttext)
-  EVT_MENU(GRAPE_MENU_VALIDATE, grape_frame::event_menu_validate_specification)
   EVT_MENU(wxID_PRINT, grape_frame::event_menu_print)
   EVT_MENU(wxID_EXIT, grape_frame::event_menu_quit)
 
@@ -317,24 +392,24 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
   EVT_MENU(wxID_PASTE, grape_frame::event_menu_paste)
   EVT_MENU(wxID_DELETE, grape_frame::event_menu_delete)
   EVT_MENU(GRAPE_MENU_PROPERTIES, grape_frame::event_menu_properties)
-  EVT_MENU(GRAPE_MENU_SELECT_ALL, grape_frame::event_menu_select_all)
-  EVT_MENU(GRAPE_MENU_DESELECT_ALL, grape_frame::event_menu_deselect_all)
+  //EVT_MENU(GRAPE_MENU_SELECT_ALL, grape_frame::event_menu_select_all)
+  //EVT_MENU(GRAPE_MENU_DESELECT_ALL, grape_frame::event_menu_deselect_all)
   EVT_MENU(GRAPE_MENU_DATATYPESPEC, grape_frame::event_datatype_spec)
 
-  // diagram menu
+  // specification menu
   EVT_MENU(GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, grape_frame::event_menu_add_architecture_diagram)
   EVT_MENU(GRAPE_MENU_ADD_PROCESS_DIAGRAM, grape_frame::event_menu_add_process_diagram)
+  EVT_MENU(GRAPE_MENU_VALIDATE, grape_frame::event_menu_validate)
+  EVT_MENU(GRAPE_MENU_EXPORTMCRL2, grape_frame::event_menu_exportmcrl2)
+  EVT_MENU(GRAPE_MENU_EXPORTIMAGE, grape_frame::event_menu_exportimage)
   EVT_MENU(GRAPE_MENU_RENAME_DIAGRAM, grape_frame::event_menu_rename_diagram)
   EVT_MENU(GRAPE_MENU_REMOVE_DIAGRAM, grape_frame::event_menu_remove_diagram)
-  EVT_MENU(GRAPE_MENU_VALIDATE_DIAGRAM, grape_frame::event_menu_validate_diagram)
 
   // help menu
   EVT_MENU(wxID_HELP, grape_frame::event_menu_help)
 
   // toolbar + tools menu
   EVT_TOOL(GRAPE_TOOL_SELECT, grape_frame::event_tool_selected)
-//  EVT_TOOL(GRAPE_TOOL_ATTACH, grape_frame::event_tool_selected)
-  EVT_TOOL(GRAPE_TOOL_DETACH, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_INITIAL_DESIGNATOR, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_REFERENCE_STATE, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_STATE, grape_frame::event_tool_selected)
@@ -355,7 +430,6 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
   EVT_LISTBOX_DCLICK(GRAPE_PROCESS_DIAGRAM_LIST, grape_frame::event_menu_rename_diagram)
 
   // frame
-  EVT_SPLITTER_DCLICK(GRAPE_SPLITTER, grape_frame::event_splitter_dclick)
   EVT_CLOSE( grape_frame::event_window_close )
   EVT_TIMER(GRAPE_TIMER, grape_frame::grape_event_timer)
 
@@ -369,58 +443,46 @@ wxHtmlHelpController* grape_frame::get_help_controller( void )
   return m_help_controller;
 }
 
-void grape_frame::toggle_view( grape_mode p_mode )
+void grape_frame::toggle_view( grape_mode old_mode, grape_mode p_mode )
 {
   if ( p_mode == GRAPE_MODE_DATASPEC ) // switching to dts
   {
     load_datatype_specification();
     m_dataspecbutton->SetValue( true );
-    m_splitter->ReplaceWindow( m_splitter->GetWindow1(), m_datatext );
+    m_splitter->ReplaceWindow(m_splitter->GetWindow1(), m_datatext);
+    dataspec_setstyle();
     m_datatext->Show();
     m_datatext->SetFocus();
     m_glcanvas->Hide();
-
-    // update statusbar
-    m_statusbar->PushStatusText( _T("In the text field you can enter a datatype specification") );
   }
   else // switching back to canvas
   {
     save_datatype_specification();
-    m_splitter->ReplaceWindow( m_splitter->GetWindow1(), m_glcanvas );
-    m_datatext->Hide();
+    m_splitter->ReplaceWindow(m_splitter->GetWindow1(), m_glcanvas);
     m_glcanvas->Show();
-    if ( m_glcanvas->get_diagram() )
+    m_datatext->Hide();
+    if ( m_glcanvas->get_diagram() && (m_glcanvas->get_diagram() != m_current_diagram || p_mode == GRAPE_MODE_PROC || p_mode == GRAPE_MODE_ARCH || old_mode == GRAPE_MODE_DATASPEC))
     {
       grape_event_select_diagram *event = new grape_event_select_diagram( this, m_glcanvas->get_diagram()->get_name() );
       m_event_handler->Submit( event, false );
-
-      if ( !m_architecture_diagram_list->SetStringSelection( m_glcanvas->get_diagram()->get_name() ) )
-      {
-        m_process_diagram_list->SetStringSelection( m_glcanvas->get_diagram()->get_name() );
-      }
     }
-    // update statusbar
-    if ( m_statusbar->GetStatusText() == _T("In the text field you can enter a datatype specification") )
+    m_current_diagram = m_glcanvas->get_diagram();
+    if (m_current_diagram)
     {
-      m_statusbar->PopStatusText();
-      if ( m_statusbar->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
+      int pos = m_architecture_diagram_list->FindString(m_glcanvas->get_diagram()->get_name(), true);
+      if ( pos != wxNOT_FOUND )
       {
-        m_statusbar->PopStatusText();
-      }
-      else if ( m_statusbar->GetStatusText() == wxEmptyString )
-      {
-        if ( m_mode != GRAPE_MODE_SPEC )
-        {
-          m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
-        }
+        m_architecture_diagram_list->SetSelection( pos );
       }
       else
       {
-        m_statusbar->PopStatusText();
-        m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
+        pos = m_process_diagram_list->FindString(m_glcanvas->get_diagram()->get_name(), true);
+        m_process_diagram_list->SetSelection( pos );
       }
     }
   }
+  wxCommandEvent event;
+  update_statusbar(event);
 }
 
 void grape_frame::load_datatype_specification()
@@ -476,6 +538,7 @@ void grape_frame::set_mode( grape_mode p_mode )
     return;
   }
 
+  grape_mode old_mode = m_mode;
   m_mode = p_mode;
 
   switch( p_mode )
@@ -525,13 +588,13 @@ void grape_frame::set_mode( grape_mode p_mode )
     }
     default:
     {
-	  // cannot be the case
+		// cannot be the case
       // assert( false );
     }
   }
 
   set_toolbar( p_mode );
-  toggle_view( p_mode );
+  toggle_view( old_mode, p_mode );
 }
 
 grape_mode grape_frame::get_mode( void )
@@ -549,6 +612,9 @@ void grape_frame::update_bars( void )
 
 void grape_frame::update_toolbar( void )
 {
+  // update SAVE for the toolbar
+  GetToolBar()->EnableTool( wxID_SAVE, m_modified );
+
   // update UNDO and REDO right for the toolbar
   GetToolBar()->EnableTool( wxID_UNDO, m_menubar->IsEnabled( wxID_UNDO ) );
   GetToolBar()->SetToolShortHelp( wxID_UNDO, m_menubar->FindItem( wxID_UNDO )->GetLabelFromText( m_menubar->FindItem( wxID_UNDO )->GetLabel() ) );
@@ -558,24 +624,62 @@ void grape_frame::update_toolbar( void )
   // update DELETE and PROPERTIES right for the toolbar
   GetToolBar()->EnableTool( wxID_DELETE, m_menubar->IsEnabled( wxID_DELETE ) );
   GetToolBar()->EnableTool( GRAPE_MENU_PROPERTIES, m_menubar->IsEnabled( GRAPE_MENU_PROPERTIES ) );
+
+  // update VALIDATE for the toolbar
+  GetToolBar()->EnableTool( GRAPE_MENU_VALIDATE, m_menubar->IsEnabled( GRAPE_MENU_VALIDATE ) );
 }
 
 void grape_frame::update_menubar( void )
 {
+  // update SAVE for the menubar
+  m_menubar->Enable( wxID_SAVE, m_modified );
   diagram *dia_ptr = m_glcanvas->get_diagram();
   if ( dia_ptr && !(m_mode & GRAPE_MODE_DATASPEC) )
   {
     bool object_selected = dia_ptr->count_selected_objects() > 0;
+    wxString dia_name = dia_ptr->get_name();
+    m_menubar->SetLabel( GRAPE_MENU_VALIDATE, wxString(_T("&Validate ")).Append(dia_name).Append(wxString(_T("\tF5"))) );
+    m_menubar->SetHelpString( GRAPE_MENU_VALIDATE, _T("Validate diagram ") + dia_name );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTMCRL2, wxString(_T("Export ")).Append(dia_name).Append(_T(" to &mCRL2...\tCtrl-E")) );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTMCRL2, wxString(_T("Export diagram ")).Append(dia_name).Append(_T(" to mCRL2")) );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTIMAGE, wxString(_T("Export ")).Append(dia_name).Append(_T(" to &image...\tCtrl-I")) );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTIMAGE, wxString(_T("Export ")).Append(dia_name).Append(_T(" to image")) );
+    m_menubar->Enable( GRAPE_MENU_VALIDATE, true );
+    m_menubar->Enable( GRAPE_MENU_EXPORTMCRL2, true );
+    m_menubar->Enable( GRAPE_MENU_EXPORTIMAGE, true );
     m_menubar->Enable( wxID_DELETE, object_selected );
-    m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, object_selected );
+    //m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, object_selected );
     // m_menubar->Enable( GRAPE_MENU_SELECT_ALL, m_glcanvas->count_visual_object() > 1 ); // 1 because the visibility frame or the preamble are also visual objects, wich can not be selected
     m_menubar->Enable( GRAPE_MENU_PROPERTIES, dia_ptr->count_selected_objects() == 1 );
   }
-  else
+  else if (m_mode & GRAPE_MODE_DATASPEC)
   {
+    m_menubar->SetLabel( GRAPE_MENU_VALIDATE, _T("&Validate data type specification\tF5") );
+    m_menubar->SetHelpString( GRAPE_MENU_VALIDATE, _T("Validate data type specification") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTMCRL2, _T("Export data type specification to &mCRL2...\tCtrl-E") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTMCRL2, _T("Export data type specification to mCRL2") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTIMAGE, _T("Export to &image...\tCtrl-I") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTIMAGE, _T("Export to image") );
+    m_menubar->Enable( GRAPE_MENU_VALIDATE, true );
+    m_menubar->Enable( GRAPE_MENU_EXPORTMCRL2, true );
+    m_menubar->Enable( GRAPE_MENU_EXPORTIMAGE, false );
     m_menubar->Enable( wxID_DELETE, false );
-    m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, false );
-    m_menubar->Enable( GRAPE_MENU_SELECT_ALL, false );
+    //m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, false );
+    //m_menubar->Enable( GRAPE_MENU_SELECT_ALL, false );
+    m_menubar->Enable( GRAPE_MENU_PROPERTIES, false );
+  }
+  else if (m_mode & GRAPE_MODE_SPEC)
+  {
+    m_menubar->SetLabel( GRAPE_MENU_VALIDATE, _T("&Validate\tF5") );
+    m_menubar->SetHelpString( GRAPE_MENU_VALIDATE, _T("Validate") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTMCRL2, _T("Export to &mCRL2...\tCtrl-E") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTMCRL2, _T("Export diagram to mCRL2") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTIMAGE, _T("Export to &image...\tCtrl-I") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTIMAGE, _T("Export to image") );
+    m_menubar->Enable( GRAPE_MENU_VALIDATE, false );
+    m_menubar->Enable( GRAPE_MENU_EXPORTMCRL2, false );
+    m_menubar->Enable( GRAPE_MENU_EXPORTIMAGE, false );
+    m_menubar->Enable( wxID_DELETE, false );
     m_menubar->Enable( GRAPE_MENU_PROPERTIES, false );
   }
 }
@@ -584,78 +688,43 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
 {
   if ( m_mode == GRAPE_MODE_DATASPEC )
   {
-    if ( p_event.GetSelection() == -1 )
-    {
-      if ( m_statusbar->GetStatusText() != _T("In the text field you can enter a datatype specification") )
-      {
-        m_statusbar->PushStatusText( _T("In the text field you can enter a datatype specification") );
-      }
-    }
+    m_statusbar->SetStatusText( _T("In the text field you can enter a data type specification") );
   }
   else
   {
-    if ( p_event.GetSelection() == -1 )
+    if ( ( m_mode == GRAPE_MODE_ARCH ) || ( m_mode == GRAPE_MODE_PROC ) )
     {
-      if ( ( m_mode == GRAPE_MODE_ARCH ) || ( m_mode == GRAPE_MODE_PROC ) )
+      canvas_state state = m_glcanvas->get_canvas_state();
+      wxString status_text;
+      switch( state )
       {
-        canvas_state state = m_glcanvas->get_canvas_state();
-        wxString status_text;
-        switch( state )
-        {
-          case SELECT:
-            status_text = _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties."); break;
-          case ATTACH:
-            {
-              if ( m_architecture_diagram_list->GetSelection() != wxNOT_FOUND )
-              {
-                status_text = _T("Drag from visible / blocked to channel (communication), channel communication to channel, comment to an object or vice versa.");
-              }
-              else
-              {
-                status_text = _T("Drag from (terminating) transition / initial designator to state / process reference, comment to an object or vice versa.");
-              }
-              break;
-            }
-          case DETACH:
-            status_text = _T("Click one of the attached objects to detach it."); break;
-          case ADD_COMMENT:
-            status_text = _T("Click to add a comment"); break;
-          case ADD_TERMINATING_TRANSITION:
-            status_text = _T("Drag from a state to add a terminating transition"); break;
-          case ADD_NONTERMINATING_TRANSITION:
-            status_text = _T("Drag from a beginstate to an endstate to add a transition"); break;
-          case ADD_INITIAL_DESIGNATOR:
-            status_text = _T("Click a state to add an initial designator"); break;
-          case ADD_STATE:
-            status_text = _T("Click to add a state"); break;
-          case ADD_REFERENCE_STATE:
-          case ADD_PROCESS_REFERENCE:
-            status_text = _T("Click to add a process reference"); break;
-          case ADD_ARCHITECTURE_REFERENCE:
-            status_text = _T("Click to add an architecture reference"); break;
-          case ADD_CHANNEL:
-            status_text = _T("Click on a reference to add a channel"); break;
-          case ADD_CHANNEL_COMMUNICATION:
-            status_text = _T("Drag from a channel to another channel to add a channel communication"); break;
-          case IDLE:
-          default: status_text = wxEmptyString; break;
-        }
-        if ( ( m_statusbar->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) || ( m_glcanvas == FindFocus() ) )
-        {
-          if ( m_statusbar->GetStatusText() == wxEmptyString ) m_statusbar->PopStatusText();
-          m_statusbar->PushStatusText( status_text );
-        }
+        case SELECT:
+          status_text = _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties."); break;
+        case ADD_COMMENT:
+          status_text = _T("Click to add a comment"); break;
+        case ADD_TERMINATING_TRANSITION:
+          status_text = _T("Drag from a state to add a terminating transition"); break;
+        case ADD_NONTERMINATING_TRANSITION:
+          status_text = _T("Drag from a beginstate to an endstate to add a transition"); break;
+        case ADD_INITIAL_DESIGNATOR:
+          status_text = _T("Click a state to add an initial designator"); break;
+        case ADD_STATE:
+          status_text = _T("Click to add a state"); break;
+        case ADD_REFERENCE_STATE:
+        case ADD_PROCESS_REFERENCE:
+          status_text = _T("Click to add a process reference"); break;
+        case ADD_ARCHITECTURE_REFERENCE:
+          status_text = _T("Click to add an architecture reference"); break;
+        case ADD_CHANNEL:
+          status_text = _T("Click on a reference to add a channel"); break;
+        case ADD_CHANNEL_COMMUNICATION:
+          status_text = _T("Drag from a channel to another channel to add a channel communication"); break;
+        case IDLE:
+        default: status_text = wxEmptyString; break;
       }
-      else
+      if ( m_statusbar->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
       {
-        m_statusbar->PushStatusText( wxEmptyString );
-      }
-    }
-    else
-    {
-      if ( ( m_statusbar->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) && ( m_glcanvas == FindFocus() ) )
-      {
-        m_statusbar->PopStatusText();
+        m_statusbar->SetStatusText( status_text );
       }
     }
   }

@@ -19,10 +19,13 @@
 
 #include "simbasegui.h"
 #include "garageframe.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/basic_sort.h"
 #include <sstream>
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
 
 BEGIN_EVENT_TABLE(GarageFrame,wxFrame)
     EVT_CLOSE(GarageFrame::OnCloseWindow)
@@ -33,9 +36,9 @@ END_EVENT_TABLE()
 inline std::string intToString( int i )
 // -------------------------------
 {
-	std::ostringstream oss;
-	oss << i;
-	return oss.str();
+  std::ostringstream oss;
+  oss << i;
+  return oss.str();
 }
 
 // --------------------------------------------
@@ -221,21 +224,21 @@ ATermAppl GarageFrame::MakeFloorPos( int row,
   assert(row >= 1 && row <= 3);
   assert(col >= 1 && row <= 10);
   assert(part >= 0 && part <= 1);
-  ATermAppl sCol = MakeSortId("FloorCol");
-  ATermAppl sPart = MakeSortId("FloorPosPart");
-  ATermAppl fpSort;
+  basic_sort sCol("FloorCol");
+  basic_sort sPart("FloorPosPart");
+  function_sort fpSort;
   if (has_part) {
-    fpSort = gsMakeSortArrow2(sCol, sPart, MakeSortId("FloorPos"));
+    fpSort = function_sort(sCol, sPart, basic_sort("FloorPos"));
   } else {
-    fpSort = gsMakeSortArrow1(sCol, MakeSortId("FloorPos"));
+    fpSort = function_sort(sCol, basic_sort("FloorPos"));
   }
-  ATermAppl oPos = MakeOpId("pos_r" + intToString(row), fpSort);
-  ATermAppl tCol = MakeOpId("c" + intToString(col), sCol);
+  function_symbol oPos("pos_r" + intToString(row), fpSort);
+  function_symbol tCol("c" + intToString(col), sCol);
   if (has_part) {
-    ATermAppl tPart = MakeOpId((part == 0)?"pa":"pb", sPart);
-    return gsMakeDataAppl2(oPos, tCol, tPart);
+    function_symbol tPart((part == 0)?"pa":"pb", sPart);
+    return application(oPos, tCol, tPart);
   } else {
-    return gsMakeDataAppl1(oPos, tCol);
+    return application(oPos, tCol);
   }
 }
 
@@ -257,7 +260,7 @@ ATermAppl GarageFrame::MakeOpId( std::string name,
                                  ATermAppl SortExpr )
 // --------------------------------------------------
 {
-  return gsMakeOpId(gsString2ATermAppl(name.c_str()), SortExpr);
+  return mcrl2::data::function_symbol(name, mcrl2::data::sort_expression(SortExpr));
 }
 
 
@@ -268,7 +271,7 @@ ATermAppl GarageFrame::MakeDataVarId( std::string name,
                                       ATermAppl SortExpr )
 // -------------------------------------------------------
 {
-  return gsMakeDataVarId(gsString2ATermAppl(name.c_str()), SortExpr);
+  return mcrl2::data::variable(name, mcrl2::data::sort_expression(SortExpr));
 }
 
 
@@ -279,11 +282,20 @@ ATermAppl GarageFrame::MakeDataVarId( std::string name,
 ATermAppl GarageFrame::MakeSortId( std::string name )
 // --------------------------------------------------
 {
-  return gsMakeSortId(gsString2ATermAppl(name.c_str()));
+  return mcrl2::data::basic_sort(name);
 }
 
-
-
+/// FIXME: the following should be removed!
+static
+ATermList gsGetDataExprArgs(ATermAppl DataExpr)
+{
+  ATermList l = ATmakeList0();
+  while (gsIsDataAppl(DataExpr)) {
+    l = ATconcat(ATLgetArgument(DataExpr, 1), l);
+    DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  return l;
+}
 
 // ---------------------------------------------
 void GarageFrame::UpdateState( ATerm State )
@@ -295,14 +307,14 @@ void GarageFrame::UpdateState( ATerm State )
     //get value of variable gs_hal
     NextState* nextState = simulator->GetNextState();
     ATermAppl gs_hal = nextState->getStateArgument(State, stateIndex);
-    if (gsIsDataVarId(gs_hal)) {
+    if (mcrl2::data::data_expression(gs_hal).is_variable()) {
       //gs_hal has a dummy value
       canvas->InitialiseCanvas();
     } else {
       //get the elements of gs_hal
       ATermList gs_hal_elts = gsGetDataExprArgs(gs_hal);
 
-      Rewriter* rewriter = nextState->getRewriter();
+      mcrl2::data::rewriter& rewriter = nextState->getRewriter();
 
       //update floor state
       ATermAppl sOccState = MakeSortId("OccState");
@@ -313,7 +325,7 @@ void GarageFrame::UpdateState( ATerm State )
         for (int j = 1; j <= 10; ++j) {
           for (int k = 0; k <= 1; ++k) {
             ATermAppl fp = MakeFloorPos(i, j, i == 1, k);
-            ATermAppl state = rewriter->rewrite(gsMakeDataAppl1(fs, fp));
+            ATermAppl state = rewriter(application(data_expression(fs), data_expression(fp)));
             if (ATisEqual(state, tFree)) {
               floorState[i-1][(j-1)*2+k] = 0;
             } else if (ATisEqual(state, tOccupied)) {
@@ -341,7 +353,7 @@ void GarageFrame::UpdateState( ATerm State )
       for (int i = 1; i <= 3; ++i) {
         for (int j = 0; j <= 1; ++j) {
           ATermAppl sp = MakeShuttlePos(i, j);
-          ATermAppl lstate = rewriter->rewrite(gsMakeDataAppl2(shs, sp, tLowered));
+          ATermAppl lstate = rewriter(application(data_expression(shs), data_expression(sp), data_expression(tLowered)));
           if (ATisEqual(lstate, tNAvail)) {
             floorState[i-1][j*18]   = -1;
             floorState[i-1][j*18+1] = -1;
@@ -354,7 +366,7 @@ void GarageFrame::UpdateState( ATerm State )
               << " cannot be rewritten to normal form"
               << std::endl;
           }
-          ATermAppl tstate = rewriter->rewrite(gsMakeDataAppl2(shs, sp, tTilted));
+          ATermAppl tstate = rewriter(application(data_expression(shs), data_expression(sp), data_expression(tTilted)));
           if (ATisEqual(tstate, tAvail)) {
             shuttleState[i-1][j] = 1;
           } else if (ATisEqual(tstate, tNAvail)) {

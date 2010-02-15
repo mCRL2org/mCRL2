@@ -8,6 +8,8 @@
 //
 // Implements the event handlers of the main frame.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/msgdlg.h>
 #include <wx/textdlg.h>
 
@@ -34,9 +36,9 @@ void grape_frame::event_click( coordinate &p_coord )
   update_bars();
 }
 
-void grape_frame::event_doubleclick( visual_object* p_vis_obj )
+void grape_frame::event_doubleclick( visual_object* p_vis_obj, wxMouseEvent &p_event )
 {
-  grape_event_doubleclick *event = new grape_event_doubleclick( this, p_vis_obj );
+  grape_event_doubleclick *event = new grape_event_doubleclick( this, p_vis_obj, p_event );
   m_event_handler->Submit( event, false );
   update_bars();
 }
@@ -65,10 +67,6 @@ void grape_frame::event_tool_selected(wxCommandEvent& p_event)
   {
     case GRAPE_TOOL_SELECT:
       newstate = SELECT; break;
-    case GRAPE_TOOL_ATTACH:
-      newstate = ATTACH; break;
-    case GRAPE_TOOL_DETACH:
-      newstate = DETACH; break;
     case GRAPE_TOOL_ADD_COMMENT:
       newstate = ADD_COMMENT; break;
     case GRAPE_TOOL_ADD_TERMINATING_TRANSITION:
@@ -138,31 +136,35 @@ void grape_frame::event_menu_saveas(wxCommandEvent& WXUNUSED(p_event))
 
 void grape_frame::event_menu_exportmcrl2(wxCommandEvent& WXUNUSED(p_event))
 {
-  grape_event_export_current_diagram_mcrl2 *event = new grape_event_export_current_diagram_mcrl2(this);
-  m_event_handler->Submit(event, false);
+  if (m_mode == GRAPE_MODE_DATASPEC || m_mode == GRAPE_MODE_SPEC)
+  {
+    grape_event_export_datatype_specification_mcrl2 *event = new grape_event_export_datatype_specification_mcrl2(this);
+    m_event_handler->Submit(event, false);
+  }
+  else
+  {
+    grape_event_export_current_diagram_mcrl2 *event = new grape_event_export_current_diagram_mcrl2(this);
+    m_event_handler->Submit(event, false);
+  }
 }
 
-void grape_frame::event_menu_validate_specification(wxCommandEvent &WXUNUSED(p_event))
+void grape_frame::event_menu_validate(wxCommandEvent &WXUNUSED(p_event))
 {
-  grape_event_validate_specification *event = new grape_event_validate_specification(this);
-  m_event_handler->Submit(event, false);
-}
-
-void grape_frame::event_menu_validate_diagram(wxCommandEvent &WXUNUSED(p_event))
-{
-  grape_event_validate_diagram *event = new grape_event_validate_diagram(this);
-  m_event_handler->Submit(event, false);
+  if (m_mode == GRAPE_MODE_ARCH || m_mode == GRAPE_MODE_PROC)
+  {
+    grape_event_validate_diagram *event = new grape_event_validate_diagram(this);
+    m_event_handler->Submit(event, false);
+  }
+  else
+  {
+    grape_event_validate_datatype_specification *event = new grape_event_validate_datatype_specification(this);
+    m_event_handler->Submit(event, false);
+  }
 }
 
 void grape_frame::event_menu_exportimage(wxCommandEvent& WXUNUSED(p_event))
 {
   grape_event_export_current_diagram_image* event = new grape_event_export_current_diagram_image( this );
-  m_event_handler->Submit( event, false );
-}
-
-void grape_frame::event_menu_exporttext(wxCommandEvent& WXUNUSED(p_event))
-{
-  grape_event_export_datatype_specification_text* event = new grape_event_export_datatype_specification_text( this );
   m_event_handler->Submit( event, false );
 }
 
@@ -183,7 +185,6 @@ void grape_frame::event_menu_undo(wxCommandEvent& WXUNUSED(p_event))
   // undo last event
   if(m_event_handler->CanUndo())
   {
-    set_mode(GRAPE_MODE_SPEC);
     m_event_handler->Undo();
     wxCommandEvent event;
     event_menu_deselect_all(event);
@@ -198,12 +199,10 @@ void grape_frame::event_menu_undo(wxCommandEvent& WXUNUSED(p_event))
 void grape_frame::event_menu_redo(wxCommandEvent& WXUNUSED(p_event))
 {
   // redo last event
-  set_mode(GRAPE_MODE_SPEC);
   m_event_handler->Redo();
   wxCommandEvent event;
   event_menu_deselect_all(event);
-  m_statusbar->PopStatusText();
-  m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
+  m_statusbar->SetStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
   update_bars();
 
   // mark as modified
@@ -289,8 +288,10 @@ void grape_frame::event_menu_about(wxCommandEvent& WXUNUSED(p_event))
 
 void grape_frame::event_select_diagram( wxCommandEvent &p_event )
 {
-  m_architecture_diagram_list->SetStringSelection(p_event.GetString());
-  m_process_diagram_list->SetStringSelection(p_event.GetString());
+  int pos = m_architecture_diagram_list->FindString(p_event.GetString(), true);
+  m_architecture_diagram_list->SetSelection(pos);
+  pos = m_process_diagram_list->FindString(p_event.GetString(), true);
+  m_process_diagram_list->SetSelection(pos);
   grape_event_select_diagram *event = new grape_event_select_diagram(this, p_event.GetString());
   m_event_handler->Submit(event, false);
   update_bars();
@@ -312,8 +313,8 @@ void grape_frame::event_menu_remove_diagram( wxCommandEvent &p_event )
     return;
   }
 
-  int arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name());
-  int proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name());
+  int arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name(), true);
+  int proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name(), true);
   if ( ( ( arch != wxNOT_FOUND ) && ( get_architecture_diagram_listbox()->IsSelected(arch) ) ) || ( ( proc != wxNOT_FOUND ) && ( get_process_diagram_listbox()->IsSelected(proc) ) ) )
   {
     wxString s = _T( "Do you wish to remove the diagram " );
@@ -343,11 +344,11 @@ void grape_frame::event_listbox_remove_diagram( int p_diagram_type )
   int proc = wxNOT_FOUND;
   if (p_diagram_type == GRAPE_ARCHITECTURE_DIAGRAM_LIST)
   {
-    arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name());
+    arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name(), true);
   }
   else if (p_diagram_type == GRAPE_PROCESS_DIAGRAM_LIST)
   {
-    proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name());
+    proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name(), true);
   }
 
   if ( ( ( arch != wxNOT_FOUND ) && ( get_architecture_diagram_listbox()->IsSelected(arch) ) ) || ( ( proc != wxNOT_FOUND ) && ( get_process_diagram_listbox()->IsSelected(proc) ) ) )
@@ -364,12 +365,6 @@ void grape_frame::event_listbox_remove_diagram( int p_diagram_type )
       update_bars();
     }
   }
-}
-
-void grape_frame::event_splitter_dclick( wxSplitterEvent& WXUNUSED(p_event) )
-{
-  int height;
-  m_splitter->GetWindow2()->GetClientSize( 0, &height );
 }
 
 void grape_frame::event_window_close( wxCloseEvent &p_event )
@@ -405,6 +400,12 @@ void grape_frame::grape_event_timer( wxTimerEvent &p_event )
 void grape_frame::dataspec_modified( wxCommandEvent & WXUNUSED(p_event) )
 {
   set_is_modified( true );
+  dataspec_setstyle();
 }
 
-
+void grape_frame::dataspec_setstyle( void )
+{
+  wxTextAttr datatext_attr;
+  datatext_attr.SetFont(m_datatext_font);
+  m_datatext->SetStyle(0, m_datatext->GetLastPosition(), datatext_attr);
+}

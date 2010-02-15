@@ -252,11 +252,10 @@ void DiagramEditor::handleIntersection( )
 // --------------------------------------------------
 {
 	int shapeCount = diagram->getSizeShapes();
-	int i;
 	Shape* s = NULL;
 	if( !isAnyShapeSelected() ) // If not dragging shape, look for intersections
 	{
-		for( i = 0; i < shapeCount; i++ )
+		for( int i = 0; i < shapeCount; i++ )
 		{
 			s = diagram->getShape( i );
 			double sX1 = s->getXCtr() - s->getXDFC();
@@ -3117,7 +3116,6 @@ void DiagramEditor::processHits(
 // -----------------------------
 {
     GLuint *ptr;
-    int number;
     vector< int > ids;
 
     ptr = (GLuint*) buffer;
@@ -3129,7 +3127,7 @@ void DiagramEditor::processHits(
         {
             for ( int i = 0; i < ( hits-1 ); ++i )
             {
-                number = *ptr;
+                int number = *ptr;
                 ++ptr; // number;
                 ++ptr; // z1
                 ++ptr; // z2
@@ -3139,7 +3137,7 @@ void DiagramEditor::processHits(
         }
 
         // last hit
-        number = *ptr;
+        int number = *ptr;
         ++ptr; // number
         ++ptr; // z1
         ++ptr; // z2

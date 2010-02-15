@@ -8,6 +8,10 @@
 //
 // Implements the channel_communication class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "channelcommunication.h"
 
 using namespace grape::libgrape;
@@ -38,8 +42,24 @@ channel_communication::channel_communication( const channel_communication &p_cha
 : object( p_channel_comm )
 {
   m_communication = p_channel_comm.m_communication;
-  m_rename_to = p_channel_comm.m_rename_to;
+  m_name_to = p_channel_comm.m_name_to;
   set_channel_communication_type(p_channel_comm.get_channel_communication_type());
+}
+
+bool channel_communication::has_channel( const channel* p_channel)
+{
+  // for all channel communications  
+  for ( unsigned int i = 0; i < m_communication.GetCount(); ++i )
+  {
+    communication &comm = m_communication.Item ( i );
+    channel* channel_ptr = comm.get_channel();
+    // if they are equal
+    if (channel_ptr == p_channel)
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 channel_communication::~channel_communication( void )
@@ -55,14 +75,14 @@ channel_communication::~channel_communication( void )
   m_communication.Clear();
 }
 
-wxString channel_communication::get_rename_to(void) const
+wxString channel_communication::get_name_to(void) const
 {
-  return m_rename_to;
+  return m_name_to;
 }
 
-void channel_communication::set_rename_to( const wxString &p_rename_to)
+void channel_communication::set_name_to( const wxString &p_name_to)
 {
-  m_rename_to = p_rename_to;
+  m_name_to = p_name_to;
 }
 
 void channel_communication::attach_channel( channel* p_channel )
@@ -78,7 +98,7 @@ void channel_communication::detach_channel( channel* p_channel )
   for ( int i = 0; i < count; ++i )
   {
     communication &comm = m_communication.Item( i );
-    if ( comm.get_channel() == p_channel )
+    if ( &comm != 0 && comm.get_channel() == p_channel )
     {
       communication* del_comm = m_communication.Detach( i );
       delete del_comm;
@@ -115,4 +135,4 @@ void channel_communication::set_channel_communication_type( const channel_commun
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_channel_communication );
+WX_DEFINE_OBJARRAY( arr_channel_communication )

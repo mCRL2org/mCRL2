@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for selection.
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
@@ -43,7 +45,7 @@ bool grape_event_select::Do( void )
 
   // update menubar
   m_main_frame->get_menubar()->Enable( wxID_DELETE, true );
-  m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
+  //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
   // refresh visuals
   m_main_frame->get_glcanvas()->reload_visual_objects();
   return true;
@@ -75,7 +77,7 @@ bool grape_event_select_all::Do( void )
 
   // update menubar
   m_main_frame->get_menubar()->Enable( wxID_DELETE, true );
-  m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
+  //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
   return true;
 }
 
@@ -106,7 +108,7 @@ bool grape_event_plus_select::Do( void )
 
   // update menubar
   m_main_frame->get_menubar()->Enable( wxID_DELETE, true );
-  m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
+  //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
   return true;
 }
 
@@ -139,7 +141,7 @@ bool grape_event_deselect::Do( void )
   {
     // update menubar
     m_main_frame->get_menubar()->Enable( wxID_DELETE, false );
-    m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, false );
+    //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, false );
   }
   return true;
 }
@@ -161,14 +163,17 @@ grape_event_deselect_all::~grape_event_deselect_all( void )
 bool grape_event_deselect_all::Do( void )
 {
   diagram* dia = m_main_frame->get_glcanvas()->get_diagram();
-  dia->deselect_all_objects();
+  if (dia != 0)
+  {
+    dia->deselect_all_objects();
+  }
 
   // refresh canvas
   m_main_frame->get_glcanvas()->Refresh();
 
   // update menubar
   m_main_frame->get_menubar()->Enable( wxID_DELETE, false );
-  m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, false );
+  //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, false );
   return true;
 }
 

@@ -1,4 +1,0 @@
-sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;
-
-init true->delta;
-

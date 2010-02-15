@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -187,7 +187,7 @@ bool ExporterSVG::export_to(wxString filename)
 void ExporterSVG::drawBezier(Transition* tr)
 {
   State *from, *to;
-  double xFrom, yFrom, xTo, yTo, xVirtual, yVirtual, xControl, yControl;
+  double xFrom, yFrom, xTo, yTo, xVirtual, yVirtual, zVirtual, xControl, yControl;
   double aspect = owner->getAspectRatio();
 
   from = tr->getFrom();
@@ -199,7 +199,7 @@ void ExporterSVG::drawBezier(Transition* tr)
   xTo = (1000.0 + to->getX()) * aspect;
   yTo = 1000.0 - to->getY();
 
-  tr->getControl(xVirtual, yVirtual);
+  tr->getControl(xVirtual, yVirtual, zVirtual);
 
   xVirtual += 1000.0;
   xVirtual *= aspect;
@@ -239,7 +239,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   // For a self-loop, t.to == t.from
   State* s = tr->getFrom();
 
-  double alpha = tr->getControlAlpha();
+  double alpha = tr->getControlBeta();
   double beta = .25 * M_PI;
   double dist = tr->getControlDist();
   double aspect = owner->getAspectRatio();
@@ -253,7 +253,6 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   double gamma = alpha + beta;
   double delta = alpha - beta;
 
-  double xFactor, yFactor;
   double xControl1, yControl1;
   double xControl2, yControl2;
   double cosGamma = cos(gamma);
@@ -263,7 +262,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
 
   if(fabs(cosGamma + cosDelta) > 0.01)
   {
-    xFactor = (8 * (xVirtual - xState)) / (3 * (cos(gamma) + cos(delta)));
+    double xFactor = (8 * (xVirtual - xState)) / (3 * (cos(gamma) + cos(delta)));
     xControl1 = xState + xFactor * cosGamma;
     xControl2 = xState + xFactor * cosDelta;
   }
@@ -276,7 +275,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   }
   else
   {
-    yFactor = (8 * (yVirtual - yState)) / (3 * (sin(gamma) + sin(delta)));
+    double yFactor = (8 * (yVirtual - yState)) / (3 * (sin(gamma) + sin(delta)));
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
 

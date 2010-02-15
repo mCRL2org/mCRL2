@@ -12,8 +12,8 @@
 #include <cmath>
 #include <cctype>
 
+#include "boost/scoped_array.hpp"
 #include "mcrl2/core/aterm_ext.h"
-#include "workarounds.h"
 
 namespace mcrl2 {
   namespace core {
@@ -53,13 +53,12 @@ namespace mcrl2 {
             AFun Head = ATgetAFun((ATermAppl) Term);
             int NrArgs = ATgetArity(Head);
             if (NrArgs > 0) {
-              DECL_A(Args,ATerm,NrArgs);
+              boost::scoped_array< ATerm > Args(new ATerm[NrArgs]);
               for (int i = 0; i < NrArgs; i++) {
                 Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i),
                   Recursive);
               }
-              ATerm a = (ATerm) ATmakeApplArray(Head, Args);
-              FREE_A(Args);
+              ATerm a = (ATerm) ATmakeApplArray(Head, Args.get());
               return a;
             } else {
               return Term;
@@ -94,13 +93,12 @@ namespace mcrl2 {
             AFun Head = ATgetAFun((ATermAppl) Term);
             int NrArgs = ATgetArity(Head);
             if (NrArgs > 0) {
-              DECL_A(Args,ATerm,NrArgs);
+              boost::scoped_array< ATerm > Args(new ATerm[NrArgs]);
               for (int i = 0; i < NrArgs; i++) {
                 Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i),
                   Recursive);
               }
-              ATerm a = (ATerm) ATmakeApplArray(Head, Args);
-              FREE_A(Args);
+              ATerm a = (ATerm) ATmakeApplArray(Head, Args.get());
               return a;
             } else {
               return Term;

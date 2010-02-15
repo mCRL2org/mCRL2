@@ -8,6 +8,10 @@
 //
 // Implements the TerminatingTransition class.
 
+#include "wx.hpp" // precompiled headers 
+
+#include <wx/wx.h>
+
 #include "terminatingtransition.h"
 #include "compoundstate.h"
 
@@ -37,4 +41,4 @@ terminating_transition::~terminating_transition( void )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_terminating_transition );
+WX_DEFINE_OBJARRAY( arr_terminating_transition )

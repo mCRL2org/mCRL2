@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50352 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : defines Unit Test Framework public API
 // ***************************************************************************

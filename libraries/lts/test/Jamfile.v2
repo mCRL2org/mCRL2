@@ -2,7 +2,7 @@ project libraries/lts/test
    : requirements
        <use>/site-config//boost
        <toolset>msvc:<asynch-exceptions>on
-       <source>/libraries//lts
+       <library>/libraries//lts
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
@@ -10,6 +10,8 @@ include $(TOP)/build/testing/header_test.jam ;
 test-suite lts
     :
       [ run test_lib.cpp ]
+      [ run lts_test.cpp ]
       [ run trace_compare.cpp ]
+      [ run ltsconvert_test.cpp ]
       [ compile-headers ../include ]
     ;

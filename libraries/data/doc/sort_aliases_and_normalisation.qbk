@@ -1,0 +1,52 @@
+[section: Sort aliases and sort normalisation]
+
+Sort aliases are used to give an alternative name to a sort or a sort
+expression. Typical examples are (expressed in MCRL2):
+
+    sort Time=Nat;
+         L=List(List(Bool));
+         Tree=struct leaf(Nat) | node(Tree,Tree);
+
+Sort aliases are used to give alternative names or shorthands for existing
+sorts. Moreover, they allow to define recursive structured sorts. Note that
+at the left of a sort alias there is a `basic_ sort`, and at the right there
+is a `sort_expression`.
+
+An important consequence of the use of aliases is that different sort
+expressions can denote the same sort. In the example above, Time and
+Nat denote the same sort. So, the variables x:Time and x:Nat are the
+same object. It is time consuming to continuously calculate whether sorts are 
+the same, which is undesirable if it comes to verification. Therefore, we
+require that all sorts in expressions that are equal modulo sort aliases
+are represented by a unique sort expression. More concretely, for every
+sort expression 
+
+    sort A=B;
+
+where B is a basic sort, the unique sort is represented by B, whereas for
+each alias with a more complex right hand side the unique sort is represented by
+its left hand side. The process that is used to replace all sorts by their
+unique representation is called sort normalisation.
+
+Except for the untyped identifiers, all expressions in the Data Library
+are typed. There are many different kinds of sorts in the mCRL2 language, all
+of which can be represented in the data library.
+
+An alias is declared as follows:
+
+    #include "mcrl2/data/alias.h"
+    #include "mcrl2/data/container_sort.h"
+
+    using namespace mcrl2::data;
+
+    void alias_demo()
+    {
+      basic_sort b("sort_id");
+      container_sort c(bag,sort_nat::sort_nat());
+      
+      alias a(b,c);
+
+      std::cout << "Alias name: " << a.name() << " Alias rhs: " << pp(a.reference()) << "\n";
+    }
+
+[endsect] [/ Sort aliases and sort normalisation]

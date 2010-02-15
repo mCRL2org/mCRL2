@@ -13,177 +13,101 @@
 #define MCRL2_LPSRTA_COMP_H
 
 #include <iostream>
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/data_operation.h"
-#include "mcrl2/data/data_application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/detail/data_implementation_concrete.h"
+#include "mcrl2/data/structured_sort.h"
 
-using namespace atermpp;
+// using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
+// using namespace mcrl2::core;
+// using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+// using namespace mcrl2::data::data_expr;
+using namespace mcrl2::data::detail;
 
-/// \brief Name for the sort Comp.
-/// Comp is used as sort indicating relative order in lpsrealelm.
-inline identifier_string comp_name()
+/// \brief A local class defining a data type for use in lpsrealelm.
+/// \details The defined data type is 
+///          sort Comp = struct smaller?is_smaller | equal?is_equal | larger?is_larger;
+
+class comp_struct:public structured_sort
 {
-  return identifier_string("Comp");
-}
+  private:
+    function_symbol f_smaller;
+    function_symbol f_equal;
+    function_symbol f_larger;
+    function_symbol f_is_smaller;
+    function_symbol f_is_equal;
+    function_symbol f_is_larger;
 
-/// \brief Name for the operator smaller on sort Comp.
-inline
-identifier_string smaller_name()
-{
-  return identifier_string("smaller");
-}
+    static structured_sort_constructor &c_smaller()
+    { static structured_sort_constructor c_smaller("smaller","is_smaller");
+      return c_smaller;
+    }
 
-/// \brief Name for the operator equal on sort Comp.
-inline
-identifier_string equal_name()
-{
-  return identifier_string("equal");
-}
+    static structured_sort_constructor &c_equal()
+    { static structured_sort_constructor c_equal("equal","is_equal");
+      return c_equal;
+    }
 
-/// \brief Name for the operator larger on sort Comp.
-inline
-identifier_string larger_name()
-{
-  return identifier_string("larger");
-}
+    static structured_sort_constructor &c_larger()
+    { static structured_sort_constructor c_larger("larger","is_larger");
+      return c_larger;
+    }
 
-/// \brief Name for the operator is_smaller on sort Comp.
-inline
-identifier_string is_smaller_name()
-{
-  return identifier_string("is_smaller");
-}
+    static basic_sort &comp_sort()
+    { static basic_sort comp_sort("Comp");
+      return comp_sort;
+    }
 
-/// \brief Name of the operator is_equal on sort Comp.
-inline
-identifier_string is_equal_name()
-{
-  return identifier_string("is_equal");
-}
+  public:
+    comp_struct():
+           structured_sort(make_vector(c_smaller(),c_equal(),c_larger()))
+    { c_smaller().protect(); 
+      c_equal().protect();
+      c_larger().protect();
+      comp_sort().protect();
+      f_smaller=c_smaller().constructor_function(sort());
+      f_equal=c_equal().constructor_function(sort());
+      f_larger=c_larger().constructor_function(sort());
+      f_is_smaller=c_smaller().recogniser_function(sort());
+      f_is_equal=c_equal().recogniser_function(sort());
+      f_is_larger=c_larger().recogniser_function(sort());
+      // f_is_larger=c_larger().recogniser_function(comp_sort());
+    }
 
-/// \brief Name of the operator is_larger on sort Comp.
-inline
-identifier_string is_larger_name()
-{
-  return identifier_string("is_larger");
-}
+    sort_expression sort() const
+    { // return *this;
+      return comp_sort();
+    }
 
-/// \brief Sort expression for sort Comp.
-inline
-sort_expression comp()
-{
-  return sort_identifier(comp_name());
-}
+    basic_sort basic_sort_name() const
+    { return comp_sort();
+    } 
 
-/// \brief Constructor smaller for sort Comp.
-inline
-data_operation smaller()
-{
-  return data_operation(smaller_name(), comp());
-}
+    data_expression smaller() const
+    { return f_smaller;
+    }
 
-/// \brief Constructor equal for sort Comp.
-inline
-data_operation equal()
-{
-  return data_operation(equal_name(), comp());
-}
+    data_expression equal() const
+    { return f_equal;
+    }
 
-/// \brief Constructor larger for sort Comp.
-inline
-data_operation larger()
-{
-  return data_operation(larger_name(), comp());
-}
+    data_expression larger() const
+    { return f_larger;
+    }
 
-/// \brief Sort expression Comp -> Bool
-inline
-sort_expression comp2bool()
-{
-  return sort_arrow(make_list(comp()), sort_expr::bool_());
-}
+    data_expression is_smaller(const data_expression& e) const
+    { return f_is_smaller(e);
+    }
 
-/// \brief Operation is_smaller for sort Comp.
-inline
-data_operation is_smaller()
-{
-  return data_operation(is_smaller_name(), comp2bool());
-}
+    data_expression is_equal(const data_expression& e) const
+    { return f_is_equal(e);
+    }
 
-/// \brief Operation is_equal for sort Comp.
-inline
-data_operation is_equal()
-{
-  return data_operation(is_equal_name(), comp2bool());
-}
-
-/// \brief Operation is_larger for sort Comp.
-inline
-data_operation is_larger()
-{
-  return data_operation(is_larger_name(), comp2bool());
-}
-
-/// \brief Application of is_smaller on a data expression e.
-inline
-data_application is_smaller(const data_expression& e)
-{
-  return data_application(is_smaller(), make_list(e));
-}
-
-/// \brief Application of is_equal on a data expression e.
-inline
-data_application is_equal(const data_expression& e)
-{
-  return data_application(is_equal(), make_list(e));
-}
-
-/// \brief Application of is_larger on a data_expression e.
-inline
-data_application is_larger(const data_expression& e)
-{
-  return data_application(is_larger(), make_list(e));
-}
-
-/// \brief Add declarations for sort Comp to data specification s
-/// \param s A data specification.
-/// \ret s to which declarations for sort Comp have been added.
-inline
-data_specification add_comp_sort(const data_specification& s)
-{
-  // Constructors
-  aterm_appl comp_smaller = gsMakeStructCons(smaller_name(), aterm_list(), is_smaller_name());
-  aterm_appl comp_equal   = gsMakeStructCons(equal_name(), aterm_list(), is_equal_name());
-  aterm_appl comp_larger  = gsMakeStructCons(larger_name(), aterm_list(), is_larger_name());
-  aterm_list comp_constructors = make_list(comp_smaller, comp_equal, comp_larger);
-
-  // Build up structured sort
-  aterm_appl comp_struct = gsMakeSortStruct(comp_constructors);
-
-  // Empty data declarations and substitutions
-  t_data_decls data_decls;
-  initialize_data_decls(&data_decls);
-  ATermList substitutions = ATmakeList0();
-
-  // Implement Comp as structured sort, reusing data implementation
-  impl_sort_struct(comp_struct, comp(), &substitutions, &data_decls);
-
-  // Add declarations in data_decls to the specification
-  sort_expression_list sorts = ATconcat(s.sorts(), data_decls.sorts);
-  data_operation_list constructors = ATconcat(s.constructors(), data_decls.cons_ops);
-  data_operation_list mappings = ATconcat(s.mappings(), data_decls.ops);
-  data_equation_list equations = ATconcat(s.equations(), data_decls.data_eqns);
-
-  return data_specification(sorts, constructors, mappings, equations);
-}
+    data_expression is_larger(const data_expression& e) const
+    { return f_is_larger(e);
+    }
+};
 
 #endif //MCRL2_LPSRTA_COMP_H
 

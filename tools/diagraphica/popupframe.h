@@ -15,7 +15,7 @@
 #include "colleague.h"
 #include "mediator.h"
 
-class PopupFrame : public Colleague, public wxFrame
+class PopupFrame : public wxFrame, public Colleague 
 {
 public:
     // -- constructors and desctructor ------------------------------

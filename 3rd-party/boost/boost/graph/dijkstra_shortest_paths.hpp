@@ -6,6 +6,12 @@
 // accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //=======================================================================
+//
+//
+// Revision History:
+//   04 April 2001: Added named parameter variant. (Jeremy Siek)
+//   01 April 2001: Modified to use new <boost/limits.hpp> header. (JMaddock)
+//
 #ifndef BOOST_GRAPH_DIJKSTRA_HPP
 #define BOOST_GRAPH_DIJKSTRA_HPP
 
@@ -17,11 +23,12 @@
 #include <boost/pending/indirect_cmp.hpp>
 #include <boost/graph/exception.hpp>
 #include <boost/pending/relaxed_heap.hpp>
+#include <boost/graph/overloading.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/graph/detail/d_ary_heap.hpp>
 #include <boost/graph/two_bit_color_map.hpp>
-#include <boost/property_map.hpp>
-#include <boost/vector_property_map.hpp>
+#include <boost/property_map/property_map.hpp>
+#include <boost/property_map/vector_property_map.hpp>
 #include <boost/type_traits.hpp>
 
 #ifdef BOOST_GRAPH_DIJKSTRA_TESTING
@@ -29,6 +36,28 @@
 #endif // BOOST_GRAPH_DIJKSTRA_TESTING
 
 namespace boost {
+
+  /**
+   * @brief Updates a particular value in a queue used by Dijkstra's
+   * algorithm.
+   *
+   * This routine is called by Dijkstra's algorithm after it has
+   * decreased the distance from the source vertex to the given @p
+   * vertex. By default, this routine will just call @c
+   * Q.update(vertex). However, other queues may provide more
+   * specialized versions of this routine.
+   *
+   * @param Q             the queue that will be updated.
+   * @param vertex        the vertex whose distance has been updated
+   * @param old_distance  the previous distance to @p vertex
+   */
+  template<typename Buffer, typename Vertex, typename DistanceType>
+  inline void 
+  dijkstra_queue_update(Buffer& Q, Vertex vertex, DistanceType old_distance)
+  {
+    (void)old_distance;
+    Q.update(vertex);
+  }
 
 #ifdef BOOST_GRAPH_DIJKSTRA_TESTING
   // This is a misnomer now: it now just refers to the "default heap", which is
@@ -107,17 +136,20 @@ namespace boost {
       }
       template <class Edge, class Graph>
       void gray_target(Edge e, Graph& g) {
+        D old_distance = get(m_distance, target(e, g));
+
         bool decreased = relax(e, g, m_weight, m_predecessor, m_distance,
                                m_combine, m_compare);
         if (decreased) {
-          m_Q.update(target(e, g));
+          dijkstra_queue_update(m_Q, target(e, g), old_distance);
           m_vis.edge_relaxed(e, g);
         } else
           m_vis.edge_not_relaxed(e, g);
       }
 
       template <class Vertex, class Graph>
-      void initialize_vertex(Vertex /*u*/, Graph& /*g*/) { }
+      void initialize_vertex(Vertex u, Graph& g)
+        { m_vis.initialize_vertex(u, g); }
       template <class Edge, class Graph>
       void non_tree_edge(Edge, Graph&) { }
       template <class Vertex, class Graph>
@@ -127,7 +159,7 @@ namespace boost {
       template <class Edge, class Graph>
       void examine_edge(Edge e, Graph& g) {
         if (m_compare(get(m_weight, e), m_zero))
-          throw negative_edge();
+            boost::throw_exception(negative_edge());
         m_vis.examine_edge(e, g);
       }
       template <class Edge, class Graph>
@@ -165,7 +197,7 @@ namespace boost {
     struct vertex_property_map_generator_helper<Graph, IndexMap, Value, false> {
       typedef boost::vector_property_map<Value, IndexMap> type;
       static type build(const Graph& g, const IndexMap& index, boost::scoped_array<Value>& array_holder) {
-        return make_vector_property_map(index);
+        return boost::make_vector_property_map<Value>(index);
       }
     };
 
@@ -200,7 +232,7 @@ namespace boost {
     struct default_color_map_generator_helper<Graph, IndexMap, false> {
       typedef boost::vector_property_map<boost::two_bit_color_type, IndexMap> type;
       static type build(const Graph& g, const IndexMap& index) {
-        return make_vector_property_map(index);
+        return boost::make_vector_property_map<boost::two_bit_color_type>(index);
       }
     };
 
@@ -291,7 +323,7 @@ namespace boost {
       typedef d_ary_heap_indirect<Vertex, 4, IndexInHeapMap, DistanceMap, Compare>
         MutableQueue;
       MutableQueue Q(distance, index_in_heap, compare);
-#endif
+#endif // Relaxed heap
 
     detail::dijkstra_bfs_visitor<DijkstraVisitor, MutableQueue, WeightMap,
       PredecessorMap, DistanceMap, Combine, Compare>
@@ -304,7 +336,8 @@ namespace boost {
   template <class VertexListGraph, class DijkstraVisitor,
             class PredecessorMap, class DistanceMap,
             class WeightMap, class IndexMap, class Compare, class Combine,
-            class DistInf, class DistZero>
+            class DistInf, class DistZero, typename T, typename Tag, 
+            typename Base>
   inline void
   dijkstra_shortest_paths
     (const VertexListGraph& g,
@@ -312,7 +345,9 @@ namespace boost {
      PredecessorMap predecessor, DistanceMap distance, WeightMap weight,
      IndexMap index_map,
      Compare compare, Combine combine, DistInf inf, DistZero zero,
-     DijkstraVisitor vis)
+     DijkstraVisitor vis,
+     const bgl_named_params<T, Tag, Base>&
+     BOOST_GRAPH_ENABLE_IF_MODELS_PARM(VertexListGraph,vertex_list_graph_tag))
   {
     boost::two_bit_color_map<IndexMap> color(num_vertices(g), index_map);
     dijkstra_shortest_paths(g, s, predecessor, distance, weight, index_map,
@@ -349,18 +384,37 @@ namespace boost {
                             index_map, compare, combine, zero, vis, color);
   }
 
+  // Initialize distances and call breadth first search
+  template <class VertexListGraph, class DijkstraVisitor,
+            class PredecessorMap, class DistanceMap,
+            class WeightMap, class IndexMap, class Compare, class Combine,
+            class DistInf, class DistZero>
+  inline void
+  dijkstra_shortest_paths
+    (const VertexListGraph& g,
+     typename graph_traits<VertexListGraph>::vertex_descriptor s,
+     PredecessorMap predecessor, DistanceMap distance, WeightMap weight,
+     IndexMap index_map,
+     Compare compare, Combine combine, DistInf inf, DistZero zero,
+     DijkstraVisitor vis)
+  {
+    dijkstra_shortest_paths(g, s, predecessor, distance, weight, index_map,
+                            compare, combine, inf, zero, vis,
+                            no_named_parameters());
+  }
+
   namespace detail {
 
     // Handle defaults for PredecessorMap and
     // Distance Compare, Combine, Inf and Zero
     template <class VertexListGraph, class DistanceMap, class WeightMap,
-              class IndexMap, class Params, class ColorMap>
+              class IndexMap, class Params>
     inline void
     dijkstra_dispatch2
       (const VertexListGraph& g,
        typename graph_traits<VertexListGraph>::vertex_descriptor s,
        DistanceMap distance, WeightMap weight, IndexMap index_map,
-       const Params& params, ColorMap color)
+       const Params& params)
     {
       // Default for predecessor map
       dummy_property_map p_map;
@@ -380,17 +434,17 @@ namespace boost {
                       D()),
          choose_param(get_param(params, graph_visitor),
                       make_dijkstra_visitor(null_visitor())),
-         color);
+         params);
     }
 
     template <class VertexListGraph, class DistanceMap, class WeightMap,
-              class IndexMap, class Params, class ColorMap>
+              class IndexMap, class Params>
     inline void
     dijkstra_dispatch1
       (const VertexListGraph& g,
        typename graph_traits<VertexListGraph>::vertex_descriptor s,
        DistanceMap distance, WeightMap weight, IndexMap index_map,
-       const Params& params, ColorMap color)
+       const Params& params)
     {
       // Default for distance map
       typedef typename property_traits<WeightMap>::value_type D;
@@ -398,17 +452,11 @@ namespace boost {
         n = is_default_param(distance) ? num_vertices(g) : 1;
       std::vector<D> distance_map(n);
 
-      // Default for color map
-      typename std::vector<two_bit_color_type>::size_type
-        m = is_default_param(color) ? num_vertices(g) : 1;
-      boost::two_bit_color_map<IndexMap> color_map(m, index_map);
-
       detail::dijkstra_dispatch2
         (g, s, choose_param(distance, make_iterator_property_map
                             (distance_map.begin(), index_map,
                              distance_map[0])),
-         weight, index_map, params,
-         choose_param(color, color_map));
+         weight, index_map, params);
     }
   } // namespace detail
 
@@ -427,10 +475,13 @@ namespace boost {
        get_param(params, vertex_distance),
        choose_const_pmap(get_param(params, edge_weight), g, edge_weight),
        choose_const_pmap(get_param(params, vertex_index), g, vertex_index),
-       params,
-       get_param(params, vertex_color));
+       params);
   }
 
 } // namespace boost
+
+#ifdef BOOST_GRAPH_USE_MPI
+#  include <boost/graph/distributed/dijkstra_shortest_paths.hpp>
+#endif
 
 #endif // BOOST_GRAPH_DIJKSTRA_HPP

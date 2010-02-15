@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for diagrams
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/xml/xml.h>
 #include <iostream>
 #include <sstream>
@@ -22,10 +24,11 @@
 #include "event_diagram.h"
 
 #include "dialogs/parameterdialog.h"
+#include "dialogs/textdialog.h"
 
 #include "libgrape/xml.h"
 #include "mcrl2gen/mcrl2gen.h"
-
+#include "mcrl2/core/messaging.h"
 
 
 using namespace grape::libgrape;
@@ -34,18 +37,64 @@ using namespace grape::mcrl2gen;
 
 using namespace std;
 
-void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid)
+void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid, int error)
 {
+  int nl = p_main_frame->get_logpanel()->GetNumberOfLines();
   if (is_valid)
   {
     // display message in statusbar
-    if ( p_main_frame->get_statusbar()->GetStatusText() == wxEmptyString ) p_main_frame->get_statusbar()->PopStatusText();
-    p_main_frame->get_statusbar()->PushStatusText( p_main_frame->get_logpanel()->GetValue() );  
+    p_main_frame->get_statusbar()->SetStatusText( p_main_frame->get_logpanel()->GetLineText(nl-2) );  
   } 
   else
   {
     // display message in box
-    wxMessageBox( _T("Error messages: \n")+p_main_frame->get_logpanel()->GetValue(), _T("Error"), wxOK | wxICON_ERROR );
+    wxString message;
+    if (nl > 1) {
+      message = p_main_frame->get_logpanel()->GetLineText(nl-2);
+      for (int i = 0; i < nl-2; ++i)
+      {
+        message += _T("\n\n") + p_main_frame->get_logpanel()->GetLineText(i);
+      }
+    }
+    else
+    {
+      message = p_main_frame->get_logpanel()->GetValue();
+    }
+
+    switch ( error )
+    {
+    case CONVERSION_ERROR:
+      message = _T("Export to mCRL2 failed: \n\n") + message;
+      break;
+    case XML_ERROR:
+      message = _T("XML error: \n\n") + message;
+      break;
+    case DATA_TYPE_SPEC_PARSE_ERROR:
+      message = _T("Data type specification could not be parsed: \n\n") + message;
+      break;
+    case DATA_TYPE_SPEC_TYPE_CHECK_ERROR:
+      message = _T("Data type specification could not be type checked: \n\n") + message;
+      break;
+    case ARCH_DIA_ERROR:
+      message = _T("Architecture diagram error: \n\n") + message;
+      break;
+    case PROC_DIA_ERROR:
+      message = _T("Process diagram error: \n\n") + message;
+      break;
+    case PROC_DIA_PARSE_ERROR:
+      message = _T("Process diagram could not be parsed: \n\n") + message;
+      break;
+    case PROC_DIA_TYPE_CHECK_ERROR:
+      message = _T("Process diagram could not be type checked: \n\n") + message;
+      break;
+    case SPEC_ERROR:
+      message = _T("Specification error: \n\n") + message;
+      break;
+    default:
+      message = _T("Unknown error: \n\n") + message;
+      break;
+    }
+    wxMessageBox( message, (error==CONVERSION_ERROR?_T("Export error"):_T("Validation error")), wxOK | wxICON_ERROR );
   }    
 }
 
@@ -165,8 +214,9 @@ bool grape_event_rename_diagram::Do( void )
       // check whether any architecturereferences exist that should no longer point to the old name.
       spec->check_references( m_new_name, static_cast<process_diagram*> ( dia_ptr ) );
       grape_listbox *proc_list = m_main_frame->get_process_diagram_listbox();
-      proc_list->SetString( proc_list->FindString( m_orig_name ), m_new_name );
-      proc_list->SetStringSelection( m_new_name );
+      proc_list->SetString( proc_list->FindString( m_orig_name, true ), m_new_name );
+      int pos = proc_list->FindString( m_new_name, true);
+      proc_list->SetSelection( pos );
       // show selected diagram
       grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_new_name);
       m_main_frame->get_event_handler()->Submit(event, false);
@@ -178,8 +228,9 @@ bool grape_event_rename_diagram::Do( void )
       // check whether any  architecturereferences exist that should point to the new name.
       spec->check_references( m_new_name, static_cast<architecture_diagram*> ( dia_ptr ) );
       grape_listbox *arch_list = m_main_frame->get_architecture_diagram_listbox();
-      arch_list->SetString( arch_list->FindString( m_orig_name ), m_new_name );
-      arch_list->SetStringSelection( m_new_name );
+      arch_list->SetString( arch_list->FindString( m_orig_name, true ), m_new_name );
+      int pos = arch_list->FindString( m_new_name, true);
+      arch_list->SetSelection( pos );
       // show selected diagram
       grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_new_name);
       m_main_frame->get_event_handler()->Submit(event, false);
@@ -208,8 +259,9 @@ bool grape_event_rename_diagram::Undo( void )
       // check whether any architecturereferences exist that should no longer point to the old name.
       spec->check_references( m_new_name, static_cast<process_diagram*> ( dia_ptr ) );
       grape_listbox *proc_list = m_main_frame->get_process_diagram_listbox();
-      proc_list->SetString( proc_list->FindString( m_new_name ), m_orig_name );
-      proc_list->SetStringSelection( m_orig_name );
+      proc_list->SetString( proc_list->FindString( m_new_name, true ), m_orig_name );
+      int pos = proc_list->FindString( m_orig_name, true );
+      proc_list->SetSelection( pos );
       break;
     }
     case GRAPE_ARCHITECTURE_DIAGRAM:
@@ -218,8 +270,9 @@ bool grape_event_rename_diagram::Undo( void )
       // check whether any  architecturereferences exist that should point to the old name.
       spec->check_references( m_new_name, static_cast<architecture_diagram*> ( dia_ptr ) );
       grape_listbox *arch_list = m_main_frame->get_architecture_diagram_listbox();
-      arch_list->SetString( arch_list->FindString( m_new_name ), m_orig_name );
-      arch_list->SetStringSelection( m_orig_name );
+      arch_list->SetString( arch_list->FindString( m_new_name, true ), m_orig_name );
+      int pos = arch_list->FindString( m_orig_name, true );
+      arch_list->SetSelection( pos );
       break;
     }
     default: m_main_frame->set_mode( GRAPE_MODE_SPEC ); break;
@@ -252,8 +305,12 @@ bool grape_event_dialog_rename_diagram::Do(void)
   arr_architecture_diagram *arr_arch_dia = m_main_frame->get_grape_specification()->get_architecture_diagram_list();
   arr_process_diagram *arr_proc_dia = m_main_frame->get_grape_specification()->get_process_diagram_list();
 
-  wxString p_new_name = wxGetTextFromUser( _T("Please enter a name for the diagram."), _T("Rename diagram"), m_old_name, m_main_frame );
-  if ( p_new_name.IsEmpty() || ( p_new_name == m_old_name ) )
+  grape_text_dlg dialog( _T("Rename diagram"), _T("Please enter a name for the diagram."), m_old_name, false );
+  wxString p_new_name;
+  bool m_pressed_ok = dialog.show_modal( p_new_name );
+  p_new_name.Trim(true);
+  p_new_name.Trim(false);
+  if ( !m_pressed_ok || p_new_name.IsEmpty() || ( p_new_name == m_old_name ) )
   {
     return false;
   }
@@ -468,7 +525,7 @@ bool grape_event_remove_diagram::Do( void )
 
     // update architecture listbox
     grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
-    int pos = arch_listbox->FindString( del_arch_dia_ptr->get_name() );
+    int pos = arch_listbox->FindString( del_arch_dia_ptr->get_name(), true );
     arch_listbox->Delete( pos );
     if ( pos > 0 )
     {
@@ -538,7 +595,7 @@ bool grape_event_remove_diagram::Do( void )
 
     // update process listbox
     grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
-    int pos = proc_listbox->FindString( proc_dia_ptr->get_name() );
+    int pos = proc_listbox->FindString( proc_dia_ptr->get_name(), true );
     proc_listbox->Delete( pos );
     if ( pos > 0 )
     {
@@ -578,7 +635,8 @@ bool grape_event_remove_diagram::Undo( void )
   grape_specification* spec = m_main_frame->get_grape_specification();
   if ( m_type == GRAPE_ARCHITECTURE_DIAGRAM )
   {
-    architecture_diagram* arch_dia_ptr = spec->add_architecture_diagram( m_diagram, m_name );
+    architecture_diagram* arch_dia_ptr = spec->add_architecture_diagram( m_diagram );
+    arch_dia_ptr->set_name( m_name );
     for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
     {
       grape_event_remove_comment event = m_comments.Item( i );
@@ -619,7 +677,8 @@ bool grape_event_remove_diagram::Undo( void )
   }
   else
   {
-    process_diagram* proc_dia_ptr = spec->add_process_diagram( m_diagram, m_name );
+    process_diagram* proc_dia_ptr = spec->add_process_diagram( m_diagram );
+    proc_dia_ptr->set_name( m_name );
     proc_dia_ptr->set_preamble( m_preamble );
     for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
     {
@@ -681,8 +740,11 @@ grape_event_export_current_diagram_image::~grape_event_export_current_diagram_im
 bool grape_event_export_current_diagram_image::Do( void )
 {
 
+  diagram *export_diagram= m_main_frame->get_glcanvas()->get_diagram();
+  wxString diagram_name = export_diagram->get_name();
+
   // display save dialog
-  wxFileDialog save_dialog( m_main_frame, _T( "Export to image..." ),  m_main_frame->get_filename().GetPath(), _T( "" ), _T( "PNG files ( *.png )|*.png|BMP files ( *.bmp )|*.bmp" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
+  wxFileDialog save_dialog( m_main_frame, _T( "Export to image..." ),  m_main_frame->get_filename().GetPath(), m_main_frame->get_filename().GetName() + _T( "_" ) + diagram_name, _T( "PNG files ( *.png )|*.png|BMP files ( *.bmp )|*.bmp" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
   int result = save_dialog.ShowModal();
 
   if ( result == wxID_OK )
@@ -835,9 +897,10 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
   convert_spaces(export_doc);
 
   // determine current diagram and ask for a parameter initialisation in case it is a process diagram
-  diagram *export_diagram= m_main_frame->get_glcanvas()->get_diagram();
+  diagram *export_diagram = m_main_frame->get_glcanvas()->get_diagram();
   wxString diagram_id;
   diagram_id.Printf(_T("%d"), export_diagram->get_id());
+  wxString diagram_name = export_diagram->get_name();
   architecture_diagram *arch_diag = dynamic_cast<architecture_diagram*>(export_diagram);
     
   // export process diagram
@@ -845,6 +908,20 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
   process_diagram *proc_diag = dynamic_cast<process_diagram*>(export_diagram);
   if(proc_diag != 0)
   {
+    // validate process diagram
+    try
+    {
+      validate_process_diagram(export_doc, diagram_id);
+    }
+    catch ( int i )
+    {
+      display_message(m_main_frame, false, i);
+      return false;
+    }
+
+    // clear logpanel and catch cout
+    m_main_frame->get_logpanel()->Clear();
+
     // get parameter initialisation
     param_init.Empty();
     preamble *export_preamble = proc_diag->get_preamble();
@@ -856,11 +933,33 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
       if (!dialog->show_modal()) return false;
       param_init = dialog->get_initialisations();
       delete dialog;
+      try
+      {
+        validate_parameter_initialisations(export_doc, param_init);
+      }
+      catch (int i)
+      {
+        display_message(m_main_frame, false, i);
+        return false;
+      }
+    }
+  }
+  else if (arch_diag != 0)
+  {
+    // validate architecture diagram
+    try
+    {
+      validate_architecture_diagram(export_doc, diagram_id);
+    }
+    catch ( int i )
+    {
+      display_message(m_main_frame, false, i);
+      return false;
     }
   }
 
   // display save dialog
-  wxFileDialog save_dialog(m_main_frame, _T("Export to mCRL2..."), m_main_frame->get_filename().GetPath(), _T(""), _T("mCRL2 files ( *.mcrl2 )|*.mcrl2"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  wxFileDialog save_dialog(m_main_frame, _T("Export to mCRL2..."), m_main_frame->get_filename().GetPath(), m_main_frame->get_filename().GetName() + _T("_") + diagram_name, _T("mCRL2 files ( *.mcrl2 )|*.mcrl2"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
   if (save_dialog.ShowModal() == wxID_CANCEL ) return false;
   
   // get filename
@@ -879,40 +978,39 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
       if ( result == wxNO ) return false;
     }    
   }
-      
+
+  // clear logpanel and catch cout
+  m_main_frame->get_logpanel()->Clear();
+
   wxString export_name = filename.GetFullPath(); 
   if(arch_diag != 0)
   {
     // export architecture diagram
-    if (!validate_architecture_diagram(export_doc, diagram_id))
+    try
     {
-      cerr << "+mcrl2 conversion failed: architecture diagram is not valid." << endl;
-      display_message(m_main_frame, false);
-      return false;
+      export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, mcrl2::core::gsVerbose);
     }
-    if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, true))
+    catch ( int i )
     { 
-      display_message(m_main_frame, false);
+      display_message(m_main_frame, false, i);
       return false;
     }
   }
   else if(proc_diag != 0)
   {
     // export process diagram
-    if (!validate_process_diagram(export_doc, diagram_id))
+    try
     {
-      cerr << "+mcrl2 conversion failed: process diagram is not valid." << endl;
-      display_message(m_main_frame, false);
-      return false;
+      export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, mcrl2::core::gsVerbose);
     }
-    if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, true))
+    catch ( int i )
     {
-      display_message(m_main_frame, false);
+      display_message(m_main_frame, false, i);
       return false;
     }
   }
   
-  display_message(m_main_frame, true);
+  display_message(m_main_frame, true, 0);
   
   return true;
 }
@@ -920,36 +1018,6 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
 bool grape_event_export_current_diagram_mcrl2::Undo(void)
 {
   // cannot be undone
-  return true;
-}
-
-grape_event_validate_specification::grape_event_validate_specification(grape_frame *p_main_frame)
-: grape_event_base(p_main_frame, false, _T("validate specification"))
-{
-}
-
-grape_event_validate_specification::~grape_event_validate_specification(void)
-{
-}
-
-bool grape_event_validate_specification::Do(void)
-{
-  // clear logpanel
-  m_main_frame->get_logpanel()->Clear();
-
-  // convert specification to XML
-  wxString empty_filename = wxEmptyString;
-  grape_specification *validate_spec = m_main_frame->get_grape_specification();
-  wxXmlDocument validate_doc = xml_convert(*validate_spec, empty_filename, 2, false);
-  convert_spaces(validate_doc);
-
-  display_message(m_main_frame, validate(validate_doc));
-    
-  return true;
-}
-
-bool grape_event_validate_specification::Undo(void)
-{
   return true;
 }
 
@@ -979,19 +1047,34 @@ bool grape_event_validate_diagram::Do(void)
   d_id.Printf(_T("%u"), diagram_id);
 
   // determine type of diagram to validate
-  bool is_valid;
   architecture_diagram *arch_dia = dynamic_cast<architecture_diagram*>(dia);
   process_diagram *proc_dia = dynamic_cast<process_diagram*>(dia);
-  if(arch_dia != 0)
+  if (arch_dia != 0)
   {
-    is_valid = validate_architecture_diagram(validate_doc, d_id);
+    try
+    {
+      validate_architecture_diagram(validate_doc, d_id);
+    }
+    catch ( int i )
+    {
+      display_message(m_main_frame, false, i);
+      return false;
+    }
   }
   else if(proc_dia != 0)
   {
-    is_valid = validate_process_diagram(validate_doc, d_id);
+    try
+    {
+      validate_process_diagram(validate_doc, d_id);
+    }
+    catch ( int i )
+    {
+      display_message(m_main_frame, false, i);
+      return false;
+    }
   }
 
-  display_message(m_main_frame, is_valid);
+  display_message(m_main_frame, true, 0);
     
   return true;
 }

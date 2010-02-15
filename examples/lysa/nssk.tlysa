@@ -1,0 +1,96 @@
+/*
+This example is the well-known Needham-Schroeder Symmetric Key protocol [1].
+
+This implementation assumes that the attacker also models dishonest agents (because sets XZ and YZ
+contain 0), so the switch -a0 must be passed to lysa2mcrl2. This example models only a very small 
+amount of agents (honest agents 1 and 2, and attacker who is also dishonest agent 0), which is however
+sufficient to find the flaw. 
+
+To show the flaw as in chapter 6 of [2], do:
+  lysa2mcrl2 -a0 nssk.tlysa nssk.mcrl2
+  mcrl22lps -D nssk.mcrl2 nssk.lps
+  lps2lts -aFAIL -rjittyc nssk.lps nssk.svc
+  
+[1] R.Needham, M.Schroeder, "Using encryption for authentication in large networks of computers,"
+    in Communications of the ACM, 21(1), 1978.
+[2] E.Teeselink, "Verifying security protocols by combining static analysis and model checking,"
+    Master thesis, DTU Informatics / TU/e Computer Science and Mathematics, 2008
+
+*/
+
+let X = {1} in
+let Y = {2} in
+let XZ = {0,1} in
+let YZ = {0,2} in
+
+(new dec)
+(new_{i in XZ} A_i)
+(new_{i in YZ} B_i)
+(new S) 
+(
+  (new_{i in X} KA_i)
+  (new_{j in Y} KB_j)
+  (
+    /* leaking old session key */
+      (
+      (new Kold)
+      (new NAold)
+      <Kold>.
+      <S, A_1, {NAold, B_2, Kold, {A_1, Kold} : KB_2 [at olds1]} : KA_1 [at olds2]>.
+      <A_1, B_2, {A_1, Kold} : KB_2 [at olds3]>.
+      0
+      )
+    |
+  
+  /* start of protocol */  
+  
+      /* role A */
+      (|_{i in X, j in YZ} !
+        /* 1 */
+        (new NA_ij)
+        <A_i, S, A_i, B_j, NA_ij>.
+        
+        /* 2 */
+        (S, A_i; x1_ij: C).
+        decrypt x1_ij as {NA_ij, B_j; xK_ij: N, x2_ij: C} : KA_i [at a2_ij orig {s2_ij}] in
+        
+        /* 3 */
+        <A_i, B_j, x2_ij>.
+        
+        /* 4 */
+        (B_j, A_i; x3_ij: C).
+        decrypt x3_ij as {;xNB_ij: N} : xK_ij [at a4_ij orig {b4_ij}] in
+        
+        /* 5 */
+        <A_i, B_j, {{xNB_ij} : dec} : xK_ij [at a5_ij dest {b5_ij}]>.
+        0
+      )
+    |
+      (|_{j in Y, i in XZ} !
+        /* 3 */
+        (A_i, B_j; y1_ij: C).
+        decrypt y1_ij as {A_i; yK_ij: N} : KB_j [at b3_ij orig {s3_ij}] in
+        
+        /* 4 */
+        (new NB_ij)
+        <B_j, A_i, {NB_ij} : yK_ij [at b4_ij dest {a4_ij}]>.
+        
+        /* 5 */
+        (A_i, B_j; y2_ij: C).
+        decrypt y2_ij as {{NB_ij} : dec ;} : yK_ij [at b5_ij orig {a5_ij}] in
+        0
+      )
+    |
+      (|_{i in XZ, j in YZ} !
+        /* 1 */
+        (A_i, S, A_i, B_j; zNA_ij: N).
+        
+        /* 2 */
+        (new K_ij)
+        <S, A_i, {zNA_ij, B_j, K_ij, {A_i, K_ij} : KB_j [at s3_ij dest {b3_ij}]} : KA_i [at s2_ij dest {a2_ij}]>.
+        0
+      )
+  )
+|
+  DY #(KA(0), KB(0))
+)

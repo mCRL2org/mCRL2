@@ -13,7 +13,8 @@
 #define MCRL2_LPS_ACTION_LABEL_H
 
 #include <cassert>
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -70,7 +71,7 @@ class action_label: public atermpp::aterm_appl
 
     /// \brief Returns the sorts of the action label
     /// \return The sorts of the action label
-    data::sort_expression_list sorts() const
+    data::sort_expression_list const& sorts() const
     {
       return m_sorts;
     }

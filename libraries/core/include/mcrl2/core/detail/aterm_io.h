@@ -16,6 +16,7 @@
 #include <cerrno>
 #include <string>
 #include "mcrl2/exception.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "aterm2.h"
 
 namespace mcrl2 {
@@ -91,6 +92,14 @@ namespace detail {
       if (result == ATfalse) {
         throw mcrl2::runtime_error("could not write ATerm to " + ((stream == stdout)?"stdout":("'" + filename + "'")));
       }
+    }
+
+    /// \brief Specialization for aterm_appl.
+    inline
+    void save_aterm(atermpp::aterm_appl term, const std::string& filename, bool binary = true)
+    {
+      ATermAppl t = term;
+      save_aterm(reinterpret_cast<ATerm>(t), filename, binary);
     }
 
 } // namespace detail

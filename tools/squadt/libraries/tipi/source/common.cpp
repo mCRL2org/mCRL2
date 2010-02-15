@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #include "tipi/configuration.hpp"
 #include "tipi/tool/category.hpp"
 #include "tipi/common.hpp"

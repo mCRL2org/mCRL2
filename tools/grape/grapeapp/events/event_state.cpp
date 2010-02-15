@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for states
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
@@ -48,7 +50,7 @@ bool grape_event_add_state::Do( void )
   process_diagram* dia_ptr = dynamic_cast<process_diagram*> ( find_diagram( m_in_diagram ) );
   assert( dia_ptr != 0 ); // Has to be the case or the event wouldn't have been generated.
   state *state_ptr = dia_ptr->add_state( m_state, m_coord, m_def_state_width, m_def_state_height );
-  state_ptr->set_width( visual_object::get_width_hint( state_ptr->get_name() ) );
+  state_ptr->set_width( std::max(DEFAULT_STATE_WIDTH, visual_object::get_width_hint( state_ptr->get_name() ))  );
 
   finish_modification();
   return true;
@@ -263,4 +265,4 @@ bool grape_event_change_state::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_state );
+WX_DEFINE_OBJARRAY( arr_event_remove_state )

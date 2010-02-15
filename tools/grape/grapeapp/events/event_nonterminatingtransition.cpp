@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for nonterminating transitions.
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
@@ -285,4 +287,4 @@ bool grape_event_detach_nonterminating_transition_endstate::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_ntt );
+WX_DEFINE_OBJARRAY( arr_event_remove_ntt )

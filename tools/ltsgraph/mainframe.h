@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -68,10 +68,16 @@ class MainFrame : public wxFrame
     void onInfo(wxCommandEvent& event);
     void onTogglePositioning(wxCommandEvent& event);
     void onToggleVector(wxCommandEvent& event);
+	void onToggle3D(wxCommandEvent& event);
     void onExport(wxCommandEvent& event);
     void onImport(wxCommandEvent& event);
     void onSelect(wxCommandEvent& event);
     void onColour(wxCommandEvent& event);
+	void onResetAll(wxCommandEvent& event);
+	void onResetRot(wxCommandEvent& event);
+	void onResetPan(wxCommandEvent& event);
+	void onMode(wxCommandEvent& event);
+	void onShowSystem(wxCommandEvent& event);
 
   DECLARE_EVENT_TABLE()
 };

@@ -9,18 +9,18 @@
 /// \file source/invariant_checker.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 #include <sstream>
 #include <cstring>
 
-#include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/lps/invariant_checker.h"
+#include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/exception.h"
 
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
 
 // Class Invariant_Checker ------------------------------------------------------------------------
@@ -44,7 +44,7 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     void Invariant_Checker::save_dot_file(int a_summand_number) {
-      if (f_dot_file_name != 0) {
+      if (f_dot_file_name.empty()) {
         std::ostringstream v_file_name(f_dot_file_name);
 
         if (a_summand_number == -1) {
@@ -59,7 +59,7 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     bool Invariant_Checker::check_init(ATermAppl a_invariant) {
-      ATermList v_assignments = ATLgetArgument(f_init, 1);
+      ATermList v_assignments = ATLgetArgument(f_init, 0);
       ATermAppl v_assignment;
       ATermAppl v_variable;
       ATermAppl v_expression;
@@ -108,9 +108,9 @@ using namespace mcrl2::core;
       }
 
       ATermAppl v_subst_invariant = gsSubstValues_Appl(v_substitutions, a_invariant, true);
-      ATermAppl v_formula = mcrl2::core::detail::gsMakeDataExprAnd(a_invariant, v_condition);
+      ATermAppl v_formula = mcrl2::data::sort_bool::and_(data_expression(a_invariant), data_expression(v_condition));
 
-      v_formula = mcrl2::core::detail::gsMakeDataExprImp(v_formula, v_subst_invariant);
+      v_formula = mcrl2::data::sort_bool::implies(data_expression(v_formula), data_expression(v_subst_invariant));
       f_bdd_prover.set_formula(v_formula);
       if (f_bdd_prover.is_tautology() == answer_yes) {
         gsVerboseMsg("The invariant holds for summand %d.\n", a_summand_number);
@@ -145,20 +145,16 @@ using namespace mcrl2::core;
   // Class Invariant_Checker - Functions declared public --------------------------------------------
 
     Invariant_Checker::Invariant_Checker(
-      ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_apply_induction, bool a_counter_example, bool a_all_violations, char const* a_dot_file_name
+      mcrl2::lps::specification const& a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      bool a_apply_induction, bool a_counter_example, bool a_all_violations, std::string const& a_dot_file_name
     ):
-      f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps,0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
-      f_init = ATAgetArgument(a_lps, 3);
-      f_summands = ATLgetArgument(ATAgetArgument(a_lps, 2), 2);
+      f_init = a_lps.initial_process();
+      f_summands = a_lps.process().summands();
       f_counter_example = a_counter_example;
       f_all_violations = a_all_violations;
-      if (a_dot_file_name == 0) {
-        f_dot_file_name = 0;
-      } else {
-        f_dot_file_name = strdup(a_dot_file_name);
-      }
+      f_dot_file_name = a_dot_file_name;
     }
 
     // --------------------------------------------------------------------------------------------

@@ -239,24 +239,20 @@ void GarageCanvas::DrawGarage()
   VisUtils::drawWalls( 3, 10 );
 
   // Draw parking bays
-  int row;
-  int col;
-  int part;
   {
   for ( int i = 0; i < 3; ++i )
   {
     // Current row
-    row = i;
+    int row = i;
     for ( int j = 0; j < 20; ++j )
     {
       // Current col
-      col = j/2;
+      int col = j/2;
 
       // Current part of cell
+      int part = 1;
       if ( j%2 == 0 )
         part = 0;
-      else
-        part = 1;
 
       // Color cell
       if ( floorState[i][j] == -1 )

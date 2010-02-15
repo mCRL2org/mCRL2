@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for process diagrams
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
@@ -35,7 +37,7 @@ bool grape_event_add_process_diagram::Do( void )
   // add process diagram to grapespecification
   grape_specification* spec = m_main_frame->get_grape_specification();
   assert( spec != 0 );
-  process_diagram* new_proc_ptr = spec->add_process_diagram( m_proc, _T("ProcessDiagram") );
+  process_diagram* new_proc_ptr = spec->add_process_diagram( m_proc );
 
   m_main_frame->get_glcanvas()->set_diagram( new_proc_ptr );
 
@@ -65,7 +67,7 @@ bool grape_event_add_process_diagram::Undo( void )
 
   // update process listbox
   grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
-  int pos = proc_listbox->FindString( del_proc_ptr->get_name() );
+  int pos = proc_listbox->FindString( del_proc_ptr->get_name(), true );
   proc_listbox->Delete( pos );
   if ( pos > 0 )
   {
@@ -102,14 +104,14 @@ bool grape_event_add_process_diagram::Undo( void )
 
 
 
-grape_event_change_preamble::grape_event_change_preamble( grape_frame *p_main_frame, preamble *p_preamble )
+grape_event_change_preamble::grape_event_change_preamble( grape_frame *p_main_frame, preamble *p_preamble, bool p_edit_parameter )
 : grape_event_base( p_main_frame, true, _T( "edit preamble" ) )
 , m_preamble( p_preamble )
 {
   m_old_parameter_decls = p_preamble->get_parameter_declarations();
   m_old_local_var_decls = p_preamble->get_local_variable_declarations();
 
-  grape_preamble_dialog dialog( m_preamble );
+  grape_preamble_dialog dialog( m_preamble, p_edit_parameter );
   m_ok_pressed = dialog.ShowModal() == wxID_OK;
 
   if ( m_ok_pressed )
@@ -127,6 +129,7 @@ bool grape_event_change_preamble::Do( void )
 {
   if ( !m_ok_pressed )
   {
+    // user cancelled, don't push it on the undo stack
     return false;
   }
 

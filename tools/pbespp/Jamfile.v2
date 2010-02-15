@@ -3,4 +3,5 @@ project toolset/pbespp ;
 tool pbespp
        : pbespp.cpp
          /libraries//pbes
+       : <use>/libraries//lps # bad, only for pbes.h -> mcrl2/modal_formula/mucalculus.h
        ;

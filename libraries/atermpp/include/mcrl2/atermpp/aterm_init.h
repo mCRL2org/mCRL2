@@ -65,6 +65,4 @@ namespace atermpp
   char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" }; \
   MCRL2_ATERMPP_INIT_(3, debug_args, argv)\
 
-#include "mcrl2/atermpp/aterm_make_match.h"
-
 #endif // MCRL2_ATERMPP_ATERM_INIT_H

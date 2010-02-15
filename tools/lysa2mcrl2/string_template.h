@@ -23,16 +23,29 @@
 
 
 using namespace std;
-using boost::shared_ptr;
+
+class StringTemplate;
+
+class StringTemplateFile
+{
+protected:
+	std::map<std::string, std::string> format_strings;
+public:
+	StringTemplateFile(string filecontent);
+	StringTemplate get(string id);
+  string fmt_string(string id);
+	string all(string id, map<string, string> substitutions);
+};
 
 class StringTemplate
 {
 protected:
-	string subject;
-	string current_key;
-  map<string, shared_ptr<ostringstream> > streams;
+	std::string subject;
+	std::string current_key;
+  std::map<std::string, boost::shared_ptr<std::ostringstream> > streams;
 public:
 	StringTemplate(string format_string) : subject(format_string) {};
+  StringTemplate(StringTemplateFile& stf, string id) : subject(stf.fmt_string(id)) {};
 
 	void replace(string key, string value);
 	bool has(string key);
@@ -43,16 +56,5 @@ public:
 	string get() { finalise(); return subject; }
 };
 
-
-class StringTemplateFile
-{
-protected:
-	map<string, string> format_strings;
-public:
-	StringTemplateFile(string filename);
-	StringTemplate get(string id);
-  string fmt_string(string id);
-	string all(string id, map<string, string> substitutions);
-};
 
 #endif

@@ -24,6 +24,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -57,7 +58,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
     pbes_eqelm_tool()
       : super(
           "pbeseqelm",
-          "Wieger Wesselink",
+          "Wieger Wesselink; Simona Orzan and Tim Willemse",
           "Compute equivalence relations on parameters of a PBES",
           "Reads a file containing a PBES, and applies the eqelm algorithm to detect equivalence "
           "relations between the parameters. If OUTFILE is not present, standard output is used. "

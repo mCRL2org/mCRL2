@@ -460,7 +460,9 @@ namespace tipi {
    * \throws std::runtime_error if no input object corresponding to id is found
    **/
   inline configuration::object const& configuration::get_input(std::string const& id) const {
-    assert(m_parameter_by_id.count(id) != 0);
+    if (m_parameter_by_id.count(id) == 0) {
+      throw std::runtime_error("A tipi-input-configuration for \"" + id + "\" does not exist");
+    }
 
     return (*boost::static_pointer_cast< const object >(m_positions[(*m_parameter_by_id.find(id)).second]));
   }
@@ -472,7 +474,9 @@ namespace tipi {
    * \throws std::runtime_error if no input object corresponding to id is found
    **/
   inline configuration::object& configuration::get_input(std::string const& id) {
-    assert(m_parameter_by_id.count(id) != 0);
+    if (m_parameter_by_id.count(id) == 0) {
+      throw std::runtime_error("A tipi-input-configuration for \"" + id + "\" does not exist");
+    }
 
     return (*boost::static_pointer_cast< object >(m_positions[m_parameter_by_id[id]]));
   }
@@ -484,7 +488,9 @@ namespace tipi {
    * \throws std::runtime_error if no output object corresponding to id is found
    **/
   inline configuration::object const& configuration::get_output(std::string const& id) const {
-    assert(m_parameter_by_id.count(id) != 0);
+    if (m_parameter_by_id.count(id) == 0) {
+      throw std::runtime_error("A tipi-input-configuration for \"" + id + "\" does not exist");
+    }
 
     return (*boost::static_pointer_cast< const object >(m_positions[(*m_parameter_by_id.find(id)).second]));
   }
@@ -496,7 +502,9 @@ namespace tipi {
    * \throws std::runtime_error if no output object corresponding to id is found
    **/
   inline configuration::object& configuration::get_output(std::string const& id) {
-    assert(m_parameter_by_id.count(id) != 0);
+    if (m_parameter_by_id.count(id) == 0) {
+      throw std::runtime_error("A tipi-input-configuration for \"" + id + "\" does not exist");
+    }
 
     return (*boost::static_pointer_cast< object >(m_positions[m_parameter_by_id[id]]));
   }

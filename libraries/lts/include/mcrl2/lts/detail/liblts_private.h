@@ -14,19 +14,34 @@
       lts_extra_type type;
       union {
         ATerm mcrl1_spec;
-        lps::specification *mcrl2_spec;
+        ATermAppl mcrl2_spec;
 	lts_dot_options dot_options;
       } content;
   };
 
   class lts;
 
-  typedef struct
+  struct transition
   {
     unsigned int from;
     unsigned int label;
     unsigned int to;
-  } transition;
+
+    transition():from(0),label(0),to(0)
+    {}
+
+    transition(const unsigned int f, 
+               const unsigned int l,
+               const unsigned int t):from(f),label(l),to(t)
+    {}
+    
+     bool operator <(const transition &t) const
+     { return from < t.from ||
+              (from==t.from && (label<t.label ||
+                   (label==t.label && to<t.to)));
+     }
+
+  };
 
   class p_state_iterator
   {
@@ -66,10 +81,10 @@
       unsigned int nstates;
       unsigned int nlabels;
       unsigned int ntransitions;
+      transition *transitions;
       ATerm *state_values;
       bool *taus;
       ATerm *label_values;
-      transition *transitions;
       unsigned int init_state;
       ATerm extra_data;
 
@@ -105,22 +120,24 @@
       bool write_to_aut(std::string const& filename);
       bool write_to_aut(std::ostream& os);
 
+      static lps::specification const& empty_specification();
+
       bool read_from_svc(std::string const& filename, lts_type type);
-      bool write_to_svc(std::string const& filename, lts_type type, lps::specification *spec = NULL);
+      bool write_to_svc(std::string const& filename, lts_type type, lps::specification const& spec = empty_specification());
 
       lts_type fsm_get_lts_type();
-      bool read_from_fsm(std::string const& filename, lts_type type, lps::specification *spec = NULL);
-      bool read_from_fsm(std::string const& filename, ATerm lps = NULL);
-      bool read_from_fsm(std::string const& filename, lps::specification &spec);
-      bool read_from_fsm(std::istream& is, lts_type type, lps::specification *spec = NULL);
-      bool read_from_fsm(std::istream& is, ATerm lps = NULL);
-      bool read_from_fsm(std::istream& is, lps::specification &spec);
+      bool read_from_fsm(std::string const& filename, lts_type type, lps::specification const& spec = empty_specification());
+      bool read_from_fsm(std::string const& filename, ATerm lps);
+      bool read_from_fsm(std::string const& filename, lps::specification const& spec = empty_specification());
+      bool read_from_fsm(std::istream& is, lts_type type, lps::specification const& spec = empty_specification());
+      bool read_from_fsm(std::istream& is, ATerm lps);
+      bool read_from_fsm(std::istream& is, lps::specification const& spec = empty_specification());
       bool write_to_fsm(std::string const& filename, lts_type type, ATermList params);
-      bool write_to_fsm(std::string const& filename, ATerm lps = NULL);
-      bool write_to_fsm(std::string const& filename, lps::specification &spec);
+      bool write_to_fsm(std::string const& filename, ATerm lps);
+      bool write_to_fsm(std::string const& filename, lps::specification const& spec = empty_specification());
       bool write_to_fsm(std::ostream& os, lts_type type, ATermList params);
-      bool write_to_fsm(std::ostream& os, ATerm lps = NULL);
-      bool write_to_fsm(std::ostream& os, lps::specification &spec);
+      bool write_to_fsm(std::ostream& os, ATerm lps);
+      bool write_to_fsm(std::ostream& os, lps::specification const& spec = empty_specification());
 
       bool read_from_dot(std::string const& filename);
       bool read_from_dot(std::istream &is);

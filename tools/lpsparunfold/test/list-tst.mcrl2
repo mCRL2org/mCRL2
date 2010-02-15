@@ -1,0 +1,6 @@
+act  inc, dec;
+
+proc P(l:List(Nat)) = (#l < 5) -> inc . P( 1 |> l)
+                    + (#l > 0) -> dec . P( tail(l));
+
+init P([]);

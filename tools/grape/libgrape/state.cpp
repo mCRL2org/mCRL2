@@ -9,6 +9,10 @@
 //
 // Implements the state class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "state.h"
 
 using namespace grape::libgrape;
@@ -66,4 +70,4 @@ state::~state( void )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_state );
+WX_DEFINE_OBJARRAY( arr_state )

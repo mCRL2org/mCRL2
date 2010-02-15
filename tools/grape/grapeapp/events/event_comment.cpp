@@ -8,10 +8,13 @@
 //
 // Defines GraPE events for comments.
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "dialogs/textdialog.h"
+#include "../visuals/visualcomment.h"
 
 #include "event_comment.h"
 
@@ -91,7 +94,23 @@ bool grape_event_remove_comment::Do(  void  )
 {
   diagram* dia_ptr = find_diagram( m_in_diagram );
   comment* comm_ptr = static_cast<comment*> ( find_object( m_comm, COMMENT, dia_ptr->get_id() ) );
-  dia_ptr->remove_comment( comm_ptr );
+  
+  if ( comm_ptr )
+  {
+    visualcomment* vis_comm_ptr = static_cast<visualcomment*> (m_main_frame->get_glcanvas()->get_visual_object( comm_ptr ) );
+    
+    // if there is no valid selected communication
+    if (comm_ptr->get_reference_selected())
+    {
+      // remove the selected reference
+      comm_ptr->detach_from_object();
+      // deselect reference
+      comm_ptr->set_reference_selected(false);
+    } else {
+      // remove the entire comment
+      dia_ptr->remove_comment( comm_ptr );
+    }
+  }
 
   finish_modification();
   return true;
@@ -101,21 +120,37 @@ bool grape_event_remove_comment::Undo(  void  )
 {
   // find the diagram the comment was removed from
   diagram* dia_ptr = find_diagram( m_in_diagram );
-  comment* new_comm = dia_ptr->add_comment( m_comm, m_coordinate, m_width, m_height );
-  new_comm->set_text( m_text );
-  if ( m_object != -1 )
+  
+  comment* new_comm = static_cast<comment*> ( find_object( m_comm, COMMENT, dia_ptr->get_id() ) );
+  // only recreate the comment if it was removed
+  if (new_comm == 0) 
+  {
+    new_comm = dia_ptr->add_comment( m_comm, m_coordinate, m_width, m_height );
+
+    //re-attach all detached objects
+    new_comm->set_text( m_text );
+    if ( m_object )
+    {
+      object* obj_ptr = find_object( m_object );
+      if ( obj_ptr )
+      {
+        dia_ptr->attach_comment_to_object( new_comm, obj_ptr );
+      }
+    }
+    for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
+    {
+      unsigned int identifier = m_comments.Item( i );
+      comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
+      dia_ptr->attach_comment_to_object( comm_ptr, new_comm );
+    }
+  }
+  else
   {
     object* obj_ptr = find_object( m_object );
     if ( obj_ptr )
     {
       dia_ptr->attach_comment_to_object( new_comm, obj_ptr );
-    }
-  }
-  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
-  {
-    unsigned int identifier = m_comments.Item( i );
-    comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
-    dia_ptr->attach_comment_to_object( comm_ptr, new_comm );
+    }    
   }
 
   finish_modification();
@@ -185,9 +220,9 @@ bool grape_event_attach_comment::Do( void )
   comment* comm_ptr = static_cast<comment*> ( find_object( m_comment, COMMENT ) );
   object* obj_ptr = find_object( m_object );
   dia_ptr->attach_comment_to_object( comm_ptr, obj_ptr );
-
   finish_modification();
   return true;
+  comm_ptr->set_reference_selected(true);
 }
 
 bool grape_event_attach_comment::Undo( void )
@@ -198,7 +233,7 @@ bool grape_event_attach_comment::Undo( void )
   comment* comm_ptr = static_cast<comment*> ( find_object( m_comment, COMMENT ) );
   dia_ptr->detach_comment_from_object( comm_ptr );
 
-  // reattach if it was attached before
+  // re-attach if it was attached before
   if ( m_connected_to != -1 )
   {
     object* obj_ptr = find_object( m_connected_to );
@@ -256,4 +291,4 @@ bool grape_event_detach_comment::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_comment );
+WX_DEFINE_OBJARRAY( arr_event_remove_comment )

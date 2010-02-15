@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,15 +7,26 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/data.h
-/// \brief Contains includes of frequently used header files.
+/// \brief Contains includes of frequently used header files for data
+///        expressions.
 
 #ifndef MCRL2_DATA_DATA_H
 #define MCRL2_DATA_DATA_H
 
-#include "mcrl2/data/data_variable.h"
-#include "mcrl2/data/data_application.h"
-#include "mcrl2/data/data_assignment.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/data_operation.h"
+namespace mcrl2 {
+  /// \brief Namespace for all data library functionality
+  namespace data {
+  }
+}
+
+#include "abstraction.h"
+#include "application.h"
+#include "data_expression.h"
+#include "exists.h"
+#include "forall.h"
+#include "function_symbol.h"
+#include "lambda.h"
+#include "variable.h"
+#include "where_clause.h"
 
 #endif // MCRL2_DATA_DATA_H

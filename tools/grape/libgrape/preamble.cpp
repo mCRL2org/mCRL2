@@ -8,6 +8,10 @@
 //
 // Implements the preamble datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "preamble.h"
 #include <wx/tokenzr.h>
 
@@ -17,6 +21,8 @@ preamble::preamble( void )
 {
   m_parameter_declarations_list.Empty();
   m_local_variable_declarations_list.Empty();
+  m_width = 0;
+  m_height = 0;
 }
 
 preamble::preamble( const preamble &p_preamble )
@@ -133,4 +139,4 @@ void preamble::set_height( float p_height )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_preamble );
+WX_DEFINE_OBJARRAY( list_of_preamble )

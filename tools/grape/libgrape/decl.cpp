@@ -8,9 +8,18 @@
 //
 // Implements the decl datatype.
 
+#include "wx.hpp" // precompiled headers
+#include "wx/wx.h"
+#include <sstream>
+#include "mcrl2gen/mcrl2gen_validate.h"
+#include "mcrl2/core/print.h"
+
 #include "decl.h"
 
+using namespace mcrl2::core;
 using namespace grape::libgrape;
+using namespace grape::mcrl2gen;
+using namespace std;
 
 decl::decl( void )
 {
@@ -39,14 +48,29 @@ bool decl::set_decl( const wxString &p_decl )
   wxString type = p_decl.Mid( pos+1 );
   name.Trim(true); name.Trim(false);
   type.Trim(true); type.Trim(false);
-  //TODO: pos check not nessesary after update preambledialog
   if ( name.IsEmpty() || type.IsEmpty() || pos == wxNOT_FOUND )
   {
     return false;
   }
-  set_name( name );
-  set_type( type );
-  return true;
+
+  ATermAppl a_parsed_identifier = parse_identifier(name);
+
+// TODO: use other line
+  if ( is_identifier(name) )
+//  if ( a_parsed_identifier )
+  {
+    string a_name = identifier_string(a_parsed_identifier);
+    set_name( wxString(a_name.c_str(), wxConvLocal) );
+
+    ATermAppl a_parsed_sort_expr = parse_sort_expr(type);
+    if ( a_parsed_sort_expr )
+    {
+      string a_type = pp(a_parsed_sort_expr);
+      set_type( wxString(a_type.c_str(), wxConvLocal) );
+      return true;
+    }
+  }
+  return false;
 }
 
 wxString decl::get_name( void ) const
@@ -72,9 +96,7 @@ void decl::set_type( const wxString &p_type )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_decl );
-
-
+WX_DEFINE_OBJARRAY( list_of_decl )
 
 decl_init::decl_init(void) : decl()
 {
@@ -105,15 +127,35 @@ bool decl_init::set_decl_init( const wxString &p_decl_init )
   name.Trim(true); name.Trim(false);
   type.Trim(true); type.Trim(false);
   value.Trim(true); value.Trim(false);
-  //TODO: pos check not nessesary after update preambledialog
   if ( name.IsEmpty() || type.IsEmpty() || value.IsEmpty() || pos == wxNOT_FOUND || pos1 == wxNOT_FOUND )
   {
     return false;
   }
-  set_name( name );
-  set_type( type );
-  set_value( value );
-  return true;
+
+  ATermAppl a_parsed_identifier = parse_identifier(name);
+// TODO: use other line
+  if ( is_identifier(name) )
+//  if ( a_parsed_identifier )
+  {
+    string a_name = identifier_string(a_parsed_identifier);
+    set_name( wxString(a_name.c_str(), wxConvLocal) );
+
+    ATermAppl a_parsed_sort_expr = parse_sort_expr(type);
+    if ( a_parsed_sort_expr )
+    {
+      string a_type = pp(a_parsed_sort_expr);
+      set_type( wxString(a_type.c_str(), wxConvLocal) );
+
+      ATermAppl a_parsed_data_expr = parse_data_expr(value);
+      if ( a_parsed_data_expr )
+      {
+        string a_value = pp(a_parsed_data_expr);
+        set_value( wxString(a_value.c_str(), wxConvLocal) );
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 wxString decl_init::get_value(void) const
@@ -128,4 +170,5 @@ void decl_init::set_value(const wxString &p_value)
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_decl_init );
+WX_DEFINE_OBJARRAY( list_of_decl_init )
+

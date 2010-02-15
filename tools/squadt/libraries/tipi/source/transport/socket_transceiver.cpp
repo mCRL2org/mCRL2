@@ -6,12 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #include <iostream>
 #include <sstream>
 
-#include <tipi/detail/transport/detail/socket_transceiver.hpp>
+#include "tipi/detail/transport/detail/socket_transceiver.hpp"
 
 namespace transport {
   /// \internal

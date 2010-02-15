@@ -6,23 +6,27 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewrite/innerc.h
+/// \file mcrl2/data/detail/rewrite/innerc.h
 
 #ifndef __REWR_INNERC_H
 #define __REWR_INNERC_H
 
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/data_specification.h"
 
 #ifdef MCRL2_INNERC_AVAILABLE
 
-#include "mcrl2/data/data_specification.h"
 
 //#define _INNERC_STORE_TREES
+
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
 
 class RewriterCompilingInnermost: public Rewriter
 {
 	public:
-		RewriterCompilingInnermost(mcrl2::data::data_specification DataSpec);
+		RewriterCompilingInnermost(const data_specification &DataSpec);
 		~RewriterCompilingInnermost();
 
 		RewriteStrategy getStrategy();
@@ -38,9 +42,15 @@ class RewriterCompilingInnermost: public Rewriter
 		ATerm getSubstitutionInternal(ATermAppl Var);
 		void clearSubstitution(ATermAppl Var);
 		void clearSubstitutions();
+		using Rewriter::clearSubstitutions;
+		
+                bool addRewriteRule(ATermAppl Rule);
+                bool removeRewriteRule(ATermAppl Rule);
 
 	private:
+                ATermTable tmp_eqns, subst_store;
 		int num_opids;
+                bool need_rebuild, made_files;
 
 		int true_num;
 
@@ -48,11 +58,13 @@ class RewriterCompilingInnermost: public Rewriter
 		ATermAppl *int2term;
 		ATermList *innerc_eqns;
 
-		char *file_c;
-		char *file_o;
-		char *file_so;
+		std::string file_c;
+		std::string file_o;
+		std::string file_so;
 
+		void *so_handle;
 		void (*so_rewr_init)();
+		void (*so_rewr_cleanup)();
 		ATermAppl (*so_rewr)(ATermAppl);
 		void (*so_set_subst)(ATermAppl, ATerm);
 		ATerm (*so_get_subst)(ATermAppl);
@@ -68,7 +80,9 @@ class RewriterCompilingInnermost: public Rewriter
 		void calcTerm(FILE *f, ATerm t, int startarg);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid);
-		void CompileRewriteSystem(mcrl2::data::data_specification DataSpec);
+		void CompileRewriteSystem(const data_specification &DataSpec);
+		void CleanupRewriteSystem();
+		void BuildRewriteSystem();
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);
@@ -76,5 +90,9 @@ class RewriterCompilingInnermost: public Rewriter
 };
 
 #endif
+
+    }
+  }
+}
 
 #endif

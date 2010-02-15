@@ -12,14 +12,26 @@
 #ifndef MCRL2_LPS_MULTI_ACTION_H
 #define MCRL2_LPS_MULTI_ACTION_H
 
+#include <iterator>
+#include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/core/detail/struct_core.h" // gsMakeNil
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/lps/action.h"
+#include "mcrl2/core/print.h"
 
 namespace mcrl2 {
 
 namespace lps {
 
+  /// \brief Represents a multi action
+  /// \detail Multi actions consist of a list of actions together with an optional time tag.
   class multi_action
   {
+    friend class action_summand;
+    friend struct atermpp::aterm_traits<multi_action>;
+
     protected:
       /// \brief The actions of the summand
       action_list m_actions;
@@ -28,11 +40,40 @@ namespace lps {
       /// the multi action has no time.
       data::data_expression m_time;
 
+      /// \brief Protects the term from being freed during garbage collection.
+      void protect()
+      {
+        m_time.protect();
+        m_actions.protect();
+      }
+
+      /// \brief Unprotect the term.
+      /// Releases protection of the term which has previously been protected through a
+      /// call to protect.
+      void unprotect()
+      {
+        m_time.unprotect();
+        m_actions.unprotect();
+      }
+
+      /// \brief Mark the term for not being garbage collected.
+      void mark()
+      {
+        m_time.mark();
+        m_actions.mark();
+      }
+
     public:
       /// \brief Constructor
-      multi_action(action_list actions = action_list(), data::data_expression time = core::detail::gsMakeNil())
+      multi_action(action_list actions = action_list(), data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
         : m_actions(actions), m_time(time)
       {}
+
+      /// \brief Constructor
+      multi_action(const atermpp::aterm_appl& t) : m_time(core::detail::gsMakeNil())
+      {
+        m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t(0));
+      }
 
       /// \brief Constructor
       multi_action(const action& l)
@@ -44,16 +85,24 @@ namespace lps {
       /// \return True if time is available.
       bool has_time() const
       {
-        return m_time != data::data_expression();
+        // TODO: remove the Nil
+        return m_time != core::detail::gsMakeNil();
       }
-  
+
       /// \brief Returns the sequence of actions.
       /// \return The sequence of actions.
-      action_list actions() const
+      const action_list& actions() const
       {
         return m_actions;
       }
-  
+
+      /// \brief Returns the sequence of actions.
+      /// \return The sequence of actions.
+      action_list& actions()
+      {
+        return m_actions;
+      }
+
       /// \brief Returns the time.
       /// \return The time.
       const data::data_expression& time() const
@@ -91,7 +140,7 @@ namespace lps {
       template <typename Substitution>
       multi_action substitute(Substitution f)
       {
-        return multi_action(m_actions.substitute(f), m_time.substitute(f));
+        return multi_action(m_actions.substitute(f), f(m_time));
       }
 
       /// \brief Returns a string representation of the multi action
@@ -99,7 +148,7 @@ namespace lps {
       {
         return core::pp(m_actions) + (has_time() ? (" @ " + core::pp(m_time)) : "");
       }
-      
+
       /// \brief Joins the actions of both multi actions.
       /// \pre The time of both multi actions must be equal.
       multi_action operator+(const multi_action& other) const
@@ -107,7 +156,7 @@ namespace lps {
         assert(m_time == other.m_time);
         return multi_action(m_actions + other.m_actions, m_time);
       }
-      
+
       /// \brief Comparison operator
       bool operator==(const multi_action& other)
       {
@@ -120,6 +169,19 @@ namespace lps {
         return !(*this == other);
       }
   };
+
+/*
+  /// \brief Returns the set of free variables that appear in the multi-action.
+  /// \param bound_variables A set of bound variables
+  /// \return The set of free variables that appear in the multi-action.
+  inline
+  std::set<data::variable> find_free_variables(const multi_action& m, const std::set<data::variable>& bound_variables)
+  {
+    std::set<data::variable> used_variables;
+    lps::detail::find_all_free_variables(m.actions(), std::inserter(used_variables, used_variables.end()));
+    return mcrl2::data::detail::set_difference(used_variables, bound_variables);
+  }
+*/
 
 /// \cond INTERNAL_DOCS
 namespace detail {
@@ -215,8 +277,8 @@ namespace detail {
       /// \brief Adds the expression 'a == b' to result.
       void operator()()
       {
-        using namespace data::data_expr::optimized;
-        namespace d = data::data_expr;
+        using namespace data::lazy;
+        namespace d = data;
 
         atermpp::vector<data::data_expression> v;
         std::vector<action>::const_iterator i, j;
@@ -228,7 +290,7 @@ namespace detail {
           data::data_expression_list::iterator i1, i2;
           for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
           {
-            v.push_back(d::optimized::equal_to(*i1, *i2));
+            v.push_back(d::lazy::equal_to(*i1, *i2));
           }
         }
         data::data_expression expr = join_and(v.begin(), v.end());
@@ -258,8 +320,7 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
       /// \brief Adds the expression 'a == b' to result.
       void operator()()
       {
-        using namespace data::data_expr::optimized;
-        namespace d = data::data_expr;
+        using namespace data::lazy;
 
         atermpp::vector<data::data_expression> v;
         std::vector<action>::const_iterator i, j;
@@ -271,7 +332,7 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
           data::data_expression_list::iterator i1, i2;
           for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
           {
-            v.push_back(d::not_equal_to(*i1, *i2));
+            v.push_back(data::not_equal_to(*i1, *i2));
           }
         }
         result.push_back(join_or(v.begin(), v.end()));
@@ -293,7 +354,7 @@ std::cerr << "\n<equal multi actions>" << std::endl;
 std::cerr << "a = " << pp(a.actions()) << std::endl;
 std::cerr << "b = " << pp(b.actions()) << std::endl;
 #endif
-      using namespace data::data_expr::optimized;
+      using namespace data::lazy;
 
       // make copies of a and b and sort them
       std::vector<action> va(a.actions().begin(), a.actions().end()); // protection not needed
@@ -308,7 +369,7 @@ std::cerr << "different action signatures detected!" << std::endl;
 std::cerr << "a = " << action_list(va.begin(), va.end()) << std::endl;
 std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 #endif
-        return data::data_expr::false_();
+        return data::sort_bool::false_();
       }
 
       // compute the intervals of a with equal names
@@ -336,7 +397,7 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
     /// \return Necessary conditions for the inequality of a and b
     inline data::data_expression not_equal_multi_actions(const multi_action& a, const multi_action& b)
     {
-      using namespace data::data_expr::optimized;
+      using namespace data::lazy;
 
       // make copies of a and b and sort them
       std::vector<action> va(a.actions().begin(), a.actions().end());
@@ -346,7 +407,7 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 
       if (!detail::equal_action_signatures(va, vb))
       {
-        return data::data_expr::true_();
+        return data::sort_bool::true_();
       }
 
       // compute the intervals of a with equal names
@@ -369,5 +430,20 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 } // namespace lps
 
 } // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+namespace atermpp {
+template<>
+struct aterm_traits<mcrl2::lps::multi_action>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::multi_action t)   { t.protect(); }
+  static void unprotect(mcrl2::lps::multi_action t) { t.unprotect(); }
+  static void mark(mcrl2::lps::multi_action t)      { t.mark(); }
+  //static ATerm term(mcrl2::lps::multi_action t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::multi_action& t)    { return &t.term(); }
+};
+} // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_MULTI_ACTION_H

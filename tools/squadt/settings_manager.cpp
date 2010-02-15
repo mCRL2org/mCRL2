@@ -15,6 +15,10 @@
 #include <exception>
 #include <cstdio>
 
+#ifdef _WIN32
+  #include <windows.h>
+#endif
+
 #include "settings_manager.hpp"
 
 namespace squadt {
@@ -55,6 +59,31 @@ namespace squadt {
   }
 
   std::string settings_manager::path_to_default_binaries() const {
+  #ifdef _WIN32
+	HKEY hKey = 0;
+    char buf[255] = {0};
+    DWORD dwBufSize = sizeof(buf);
+    DWORD dwType;
+ 
+    // TODO:
+	// 
+	// Following line has to become VENDOR and INSTALL_REGISTRY_KEY
+    //   if( RegOpenKey(HKEY_LOCAL_MACHINE,TEXT("SOFTWARE\\"+VENDOR+"\\"+ INSTALL_REGISTRY_KEY),&hKey) == ERROR_SUCCESS)
+	// Instead of: 
+    if( RegOpenKey(HKEY_LOCAL_MACHINE,TEXT("SOFTWARE\\TUe\\mCRL2"),&hKey) == ERROR_SUCCESS)
+    {
+      dwType = REG_SZ;
+      if( RegQueryValueEx(hKey,"",0, &dwType, (BYTE*)buf, &dwBufSize) == ERROR_SUCCESS)
+      {
+		  return (bf::path(buf)/ bf::path("bin")).string();
+      }
+	  std::cerr << "Cannot find default value for key: HKEY_LOCAL_MACHINE\\SOFTWARE\\TUe\\mCRL2 \n" ;
+	}
+    else 
+    { 
+  	  std::cerr << "Cannot find key for HKEY_LOCAL_MACHINE\\SOFTWARE\\TUe\\mCRL2 \n" ;
+    }
+#endif
     return (bf::path(PREFIX)/ bf::path("bin")).string();
   }
 

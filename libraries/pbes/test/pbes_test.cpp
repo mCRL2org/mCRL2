@@ -15,30 +15,36 @@
 #include <iostream>
 #include <iterator>
 #include <utility>
+#include <set>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
-using atermpp::make_list;
+using data::make_vector;
 using core::identifier_string;
 using data::data_expression;
-using data::data_variable;
+using data::variable;
+using data::basic_sort;
 using data::multiset_identifier_generator;
-using modal::detail::mcf2statefrm;
-using modal::state_formula;
-using lps::mcrl22lps;
+using state_formulas::state_formula;
+using lps::linearise;
 using lps::specification;
 using pbes_system::pbes;
 using pbes_system::pbes_expression;
@@ -164,8 +170,8 @@ const std::string MPSU_FORMULA =
 
 void test_pbes()
 {
-  specification spec = mcrl22lps(SPECIFICATION);
-  state_formula formula = mcf2statefrm(FORMULA2, spec);
+  specification spec = linearise(SPECIFICATION);
+  state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   pbes_expression e = p.equations().front().formula();
@@ -200,15 +206,15 @@ void test_pbes()
   boost::filesystem::remove(boost::filesystem::path(filename));
 }
 
-void test_free_variables()
+void test_global_variables()
 {
   std::string TEXT =
-    "var k, n:Nat;                            \n"
+    "glob k, m, n:Nat;                        \n"
+    "                                         \n"
     "pbes                                     \n"
     "   mu X1(n1, m1:Nat) = X2(n1) || X2(m1); \n"
     "   mu X2(n2:Nat)     = X1(n2, n);        \n"
     "                                         \n"
-    "var m, n: Nat;                           \n"
     "init                                     \n"
     "   X1(m, n);                             \n"
     ;
@@ -216,10 +222,10 @@ void test_free_variables()
   pbes<> p;
   std::stringstream s(TEXT);
   s >> p;
-  atermpp::set<data_variable> freevars = p.free_variables();
+  atermpp::set<variable> freevars = p.global_variables();
   std::cout << freevars.size() << std::endl;
   BOOST_CHECK(freevars.size() == 3);
-  for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
+  for (atermpp::set< variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
   {
     std::cout << "<var>" << mcrl2::core::pp(*i) << std::endl;
   }
@@ -229,8 +235,8 @@ void test_free_variables()
 //
 // void test_pbes_expression_builder()
 // {
-//   specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
-//   state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
+//   specification mpsu_spec = linearise(MPSU_SPECIFICATION);
+//   state_formula mpsu_formula = state_formulas::parse_state_formula(MPSU_FORMULA, mpsu_spec);
 //   bool timed = false;
 //   pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
 //
@@ -245,21 +251,21 @@ void test_free_variables()
 
 void test_quantifier_rename_builder()
 {
+  using namespace pbes_system;
   using namespace pbes_system::pbes_expr;
-  namespace d = data::data_expr;
 
-  data_variable mN("m:N");
-  data_variable nN("n:N");
+  variable mN("m", basic_sort("N"));
+  variable nN("n", basic_sort("N"));
 
-  pbes_expression f = d::equal_to(mN, nN);
-  pbes_expression g = d::not_equal_to(mN, nN);
+  pbes_expression f = data::equal_to(mN, nN);
+  pbes_expression g = data::not_equal_to(mN, nN);
 
   multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
 
   pbes_expression p1 =
   and_(
-    forall(make_list(nN), exists(make_list(nN), f)),
-    forall(make_list(mN), exists(make_list(mN, nN), g))
+    pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), f)),
+    pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), g))
   );
   pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1);
   std::cout << "p1 = " << mcrl2::core::pp(p1) << std::endl;
@@ -267,10 +273,10 @@ void test_quantifier_rename_builder()
 
   pbes_expression p2 =
   and_(
-    forall(make_list(nN), exists(make_list(nN), p1)),
-    forall(make_list(mN), exists(make_list(mN, nN), q1))
+    pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), p1)),
+    pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), q1))
   );
-  pbes_expression q2 = rename_quantifier_variables(p2, make_list(data_variable("n00:N"), data_variable("n01:N")));
+  pbes_expression q2 = rename_quantifier_variables(p2, make_list(variable("n00", basic_sort("N")), variable("n01", basic_sort("N"))));
   std::cout << "p2 = " << mcrl2::core::pp(p2) << std::endl;
   std::cout << "q2 = " << mcrl2::core::pp(q2) << std::endl;
 
@@ -280,10 +286,10 @@ void test_quantifier_rename_builder()
 void test_complement_method_builder()
 {
   using namespace pbes_system::pbes_expr;
-  namespace d = data::data_expr;
+  namespace d = data::sort_bool;
 
-  data_variable X("x", data::sort_expr::bool_());
-  data_variable Y("y", data::sort_expr::bool_());
+  variable X("x", data::sort_bool::bool_());
+  variable Y("y", data::sort_bool::bool_());
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
@@ -296,9 +302,8 @@ void test_complement_method_builder()
 void test_pbes_expression()
 {
   namespace p = pbes_system::pbes_expr;
-  namespace d = data::data_expr;
 
-  data_variable x1("x1:X");
+  variable x1("x1", basic_sort("X"));
   pbes_expression e = x1;
   data_expression x2 = mcrl2::pbes_system::accessors::val(e);
   BOOST_CHECK(x1 == x2);
@@ -310,14 +315,14 @@ void test_pbes_expression()
 
 void test_trivial()
 {
-  specification spec    = mcrl22lps(ABP_SPECIFICATION);
-  state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
+  specification spec    = linearise(ABP_SPECIFICATION);
+  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 }
 
-void test_instantiate_free_variables()
+void test_instantiate_global_variables()
 {
   std::string spec_text =
     "act a,b:Nat;             \n"
@@ -326,15 +331,27 @@ void test_instantiate_free_variables()
     "init d.P(1);             \n"
   ;
   std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
-  specification spec = mcrl22lps(spec_text);
-  state_formula formula = mcf2statefrm(formula_text, spec);
+  specification spec = linearise(spec_text);
+  state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
-  std::cout << "<lps>" << mcrl2::core::pp(spec) << std::endl;
-  bool result = p.instantiate_free_variables();
-  std::cout << "<result>" << result << std::endl;
+  std::cout << "<lps>" << lps::pp(spec) << std::endl;
+  p.instantiate_global_variables();
   std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;
+}
+
+void test_traverse_sort_expressions()
+{
+  using data::sort_expression;
+
+  specification spec    = linearise(ABP_SPECIFICATION);
+  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed);
+  std::set<sort_expression> s;
+  traverse_sort_expressions(p, std::inserter(s, s.end()));
+  std::cout << core::detail::print_pp_set(s) << std::endl;
 }
 
 int test_main(int argc, char** argv)
@@ -342,13 +359,23 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_trivial();
+  core::garbage_collect();
   test_pbes();
+  core::garbage_collect();
   // test_xyz_generator();
-  test_free_variables();
+  core::garbage_collect();
+  test_global_variables();
+  core::garbage_collect();
   test_quantifier_rename_builder();
+  core::garbage_collect();
   test_complement_method_builder();
+  core::garbage_collect();
   test_pbes_expression();
-  test_instantiate_free_variables();
+  core::garbage_collect();
+  test_instantiate_global_variables();
+  core::garbage_collect();
+  test_traverse_sort_expressions();
+  core::garbage_collect();
 
   return 0;
 }

@@ -15,14 +15,17 @@
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
+#include <algorithm>
 #include <boost/bind.hpp>
 #include "aterm2.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/parse.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/data/data_specification.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -40,6 +43,12 @@ namespace mcrl2
 {
 namespace lts
 {
+
+lps::specification const& p_lts::empty_specification() {
+  static lps::specification dummy;
+
+  return dummy;
+}
 
 AFun timed_pair;
 bool timed_pair_not_set = true;
@@ -99,10 +108,10 @@ lts_extra::lts_extra(ATerm t)
   content.mcrl1_spec = t;
 }
 
-lts_extra::lts_extra(lps::specification *spec)
+lts_extra::lts_extra(lps::specification const& spec)
 {
   type = le_mcrl2;
-  content.mcrl2_spec = spec;
+  content.mcrl2_spec = lps::specification_to_aterm(spec, false);
 }
 
 lts_extra::lts_extra(lts_dot_options opts)
@@ -122,10 +131,10 @@ ATerm lts_extra::get_mcrl1_spec()
   return content.mcrl1_spec;
 }
 
-lps::specification *lts_extra::get_mcrl2_spec()
+lps::specification lts_extra::get_mcrl2_spec()
 {
   assert( type == le_mcrl2 );
-  return content.mcrl2_spec;
+  return lps::specification(content.mcrl2_spec);
 }
 
 lts_dot_options lts_extra::get_dot_options()
@@ -158,13 +167,20 @@ lts::lts(istream &is, lts_type type) : p_lts(this)
   read_from(is,type);
 }
 
+lts::lts(const std::string &s) : p_lts(this)
+{
+  init();
+  std::istringstream is(s);
+  read_from(is,lts_aut);
+}
+
 lts::lts(lts const &l) : p_lts(this)
 {
   init(l);
 }
 
 lts::~lts()
-{
+{ 
   if ( state_values != NULL )
   {
     ATunprotectArray(state_values);
@@ -187,7 +203,7 @@ void lts::reset(bool state_info, bool label_info)
 }
 
 void p_lts::init(bool state_info, bool label_info)
-{
+{ 
   states_size = 0;
   nstates = 0;
   state_values = NULL;
@@ -352,8 +368,7 @@ void p_lts::merge(lts *l)
     state_values = (ATerm*)realloc(state_values,states_size*sizeof(ATerm));
     if ( state_values == NULL )
     {
-      gsErrorMsg("insufficient memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory.");
     }
     for (state_iterator i = l->get_states(); i.more(); ++i)
     {
@@ -372,8 +387,7 @@ void p_lts::merge(lts *l)
   transitions = (transition*)realloc(transitions,transitions_size*sizeof(transition));
   if ( transitions == NULL )
   {
-    gsErrorMsg("insufficient memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("Insufficient memory.");
   }
 
   // Now add the source and target states of the transitions of LTS l.
@@ -420,8 +434,7 @@ void p_lts::merge(lts *l)
     bool* new_taus = (bool*)malloc(new_nlabels*sizeof(bool));
     if (new_taus == NULL)
     {
-      gsErrorMsg("insufficient memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory.");
     }
     for (unsigned int i = 0; i < nlabels; ++i)
     {
@@ -458,8 +471,7 @@ void p_lts::merge(lts *l)
     label_values = (ATerm*)realloc(label_values,labels_size*sizeof(ATerm));
     if ( label_values == NULL )
     {
-      gsErrorMsg("insufficient memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory.");
     }
     for (unsigned int i = 0; i < new_nlabels; ++i)
     {
@@ -488,8 +500,7 @@ void p_lts::merge(lts *l)
     taus = (bool*)realloc(taus,new_nlabels*sizeof(bool));
     if ( taus == NULL )
     {
-      gsErrorMsg("insufficient memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory.");
     }
     for (unsigned int i = 0; i < l->num_labels(); ++i)
     {
@@ -522,7 +533,7 @@ lts_type p_lts::detect_type(string const& filename)
   ifstream is(filename.c_str(),ifstream::in|ifstream::binary);
   if ( !is.is_open() )
   {
-    gsVerboseMsg("cannot open file '%s' for reading\n",filename.c_str());
+    throw mcrl2::runtime_error("Cannot open file '" + filename + "' for reading.");
     return lts_none;
   }
 
@@ -543,7 +554,7 @@ class svc_buffer
 {
   private:
     unsigned char buffer[56];
-    unsigned int buffer_size;
+    std::streamsize buffer_size;
     unsigned int pos;
     unsigned int count;
     istream *input;
@@ -603,7 +614,7 @@ class svc_buffer
 
     unsigned int get_bit()
     {
-      if ( pos/8 == buffer_size )
+      if ( static_cast< std::streamsize >(pos/8) == buffer_size )
       {
         input->read((char *) buffer,56);
         if ( input->eof() )
@@ -613,7 +624,7 @@ class svc_buffer
         buffer_size = input->gcount();
         pos = 0;
       }
-      if ( pos/8 == buffer_size )
+      if ( static_cast< std::streamsize >(pos/8) == buffer_size )
       {
         valid = false;
         return 0;
@@ -692,14 +703,14 @@ lts_type p_lts::detect_type(istream &is)
 {
   if ( is == cin ) // XXX better test to see if is is seekable?
   {
-    gsVerboseMsg("type detection does not work on stdin\n");
+    throw mcrl2::runtime_error("Type detection does not work on stdin.");
     return lts_none;
   }
 
   streampos init_pos = is.tellg();
   char buf[32]; is.read(buf,32);
   if ( is.eof() ) is.clear();
-  streamsize r = is.gcount();
+  std::streamsize r = is.gcount();
   is.seekg(init_pos);
 
   // detect lts_aut
@@ -724,8 +735,9 @@ lts_type p_lts::detect_type(istream &is)
       // if we are not at the end of the buffer, then we expect a opening
       // parenthesis
       if ( (i >= r) || (buf[i] == '(') )
-      {
-        gsVerboseMsg("detected AUT input file\n");
+      { if (core::gsVerbose)
+        { std::cerr << "detected AUT input file\n";
+        }
         return lts_aut;
       }
     }
@@ -745,7 +757,9 @@ lts_type p_lts::detect_type(istream &is)
     if ( (i+7 <= r) && !memcmp(buf+i,"digraph",7) )
     {
       i = i + 7;
-      gsVerboseMsg("detected DOT input file\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected DOT input file.\n";
+      }
       return lts_dot;
     }
   }
@@ -753,7 +767,7 @@ lts_type p_lts::detect_type(istream &is)
   // detect lts_svc, lts_mcrl and lts_mcrl2
   if ( r >= 18 )
   {
-    svc_buffer sbuf((unsigned char *) buf,r);
+    svc_buffer sbuf((unsigned char *) buf, static_cast< unsigned int >(r));
     sbuf.get_bit(); // indexed flag
     svc_int header_pos = sbuf.get_int(); // header pos
     if ( header_pos.flag == 0 )
@@ -798,14 +812,19 @@ lts_type p_lts::detect_type(istream &is)
                   {
                     if ( s == "generic" )
                     {
-                      gsVerboseMsg("detected mCRL input file\n");
+                      if (core::gsVerbose)
+                      { std::cerr << "Detected mCRL input file.\n";
+                      }
                       return lts_mcrl;
                     } else if ( (s == "mCRL2") || (s == "mCRL2+info") )
-                    {
-                      gsVerboseMsg("detected mCRL2 input file\n");
+                    { if (core::gsVerbose)
+                      { std::cerr << "Detected mCRL2 input file.\n";
+                      }
                       return lts_mcrl2;
                     } else {
-                      gsVerboseMsg("detected SVC input file\n");
+                      if (core::gsVerbose)
+                      { std::cerr << "Detected SVC input file\n";
+                      }
                       return lts_svc;
                     }
                   }
@@ -851,7 +870,9 @@ lts_type p_lts::detect_type(istream &is)
 
       if ( valid )
       {
-        gsVerboseMsg("detected BCG input file\n");
+        if (core::gsVerbose)
+        { std::cerr << "Detected BCG input file.\n";
+        }
         return lts_bcg;
       }
     }
@@ -869,7 +890,9 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
     type = detect_type(filename);
     if ( type == lts_none && (type = guess_format(filename)) == lts_none )
     {
-      gsVerboseMsg("could not determine type of input file '%s'\n",filename.c_str());
+      if (core::gsVerbose)
+      { std::cerr << std::string("Could not determine type of input file '") + filename + "'.";
+      }
       return false;
     }
   }
@@ -890,7 +913,7 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
         case le_mcrl1:
           return read_from_fsm(filename,extra.get_mcrl1_spec());
         case le_mcrl2:
-          return read_from_fsm(filename,*extra.get_mcrl2_spec());
+          return read_from_fsm(filename,extra.get_mcrl2_spec());
         default:
           return read_from_fsm(filename);
       }
@@ -902,7 +925,7 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
 #endif
     default:
       assert(0);
-      gsVerboseMsg("unknown source LTS type\n");
+      throw runtime_error ("Unknown source LTS type");
       return false;
   }
 }
@@ -914,8 +937,7 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
   {
     type = detect_type(is);
     if ( type == lts_none )
-    {
-      gsVerboseMsg("could not determine type of input stream\n");
+    { throw mcrl2::runtime_error("Could not determine type of input stream.");
       return false;
     }
   }
@@ -927,7 +949,7 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
     case lts_mcrl:
     case lts_mcrl2:
     case lts_svc:
-      gsVerboseMsg("cannot read SVC based files from streams\n");
+      throw mcrl2::runtime_error("Cannot read SVC based files from streams");
       return false;
     case lts_fsm:
       switch ( extra.get_type() )
@@ -935,7 +957,7 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
         case le_mcrl1:
           return read_from_fsm(is,extra.get_mcrl1_spec());
         case le_mcrl2:
-          return read_from_fsm(is,*extra.get_mcrl2_spec());
+          return read_from_fsm(is,extra.get_mcrl2_spec());
         default:
           return read_from_fsm(is);
       }
@@ -943,12 +965,12 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
       return read_from_dot(is);
 #ifdef USE_BCG
     case lts_bcg:
-      gsVerboseMsg("cannot read BCG files from streams\n");
+      throw mcrl2::runtime_error("Cannot read BCG files from streams.");
       return false;
 #endif
     default:
       assert(0);
-      gsVerboseMsg("unknown source LTS type\n");
+      throw mcrl2::runtime_error("Unknown source LTS type.");
       return false;
   }
 }
@@ -977,7 +999,7 @@ bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
         case le_mcrl1:
           return write_to_fsm(filename,extra.get_mcrl1_spec());
         case le_mcrl2:
-          return write_to_fsm(filename,*extra.get_mcrl2_spec());
+          return write_to_fsm(filename,extra.get_mcrl2_spec());
         default:
           if ( this->type == lts_mcrl2 && extra_data != NULL )
           {
@@ -1003,7 +1025,7 @@ bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
 #endif
     default:
       assert(0);
-      gsVerboseMsg("unknown target LTS type\n");
+      throw mcrl2::runtime_error("Unknown target LTS type.");
       return false;
   }
 }
@@ -1017,7 +1039,7 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
     case lts_mcrl:
     case lts_mcrl2:
     case lts_svc:
-      gsVerboseMsg("cannot write SVC based files to streams\n");
+      throw mcrl2::runtime_error("Cannot write SVC based files to streams.");
       return false;
     case lts_fsm:
       switch ( extra.get_type() )
@@ -1025,7 +1047,7 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
         case le_mcrl1:
           return write_to_fsm(os,extra.get_mcrl1_spec());
         case le_mcrl2:
-          return write_to_fsm(os,*extra.get_mcrl2_spec());
+          return write_to_fsm(os,extra.get_mcrl2_spec());
         default:
           if ( this->type == lts_mcrl2 && extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
           {
@@ -1047,32 +1069,32 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
       }
 #ifdef USE_BCG
     case lts_bcg:
-      gsVerboseMsg("cannot write BCG files to streams\n");
+      throw mcrl2::runtime_error("Cannot write BCG files to streams.");
       return false;
 #endif
     default:
+      throw mcrl2::runtime_error("Unknown target LTS type.");
       assert(0);
-      gsVerboseMsg("unknown target LTS type\n");
       return false;
   }
 }
 
-unsigned int lts::num_states()
+unsigned int lts::num_states() const
 {
   return nstates;
 }
 
-unsigned int lts::num_labels()
+unsigned int lts::num_labels() const
 {
   return nlabels;
 }
 
-unsigned int lts::num_transitions()
+unsigned int lts::num_transitions() const
 {
   return ntransitions;
 }
 
-unsigned int lts::initial_state()
+unsigned int lts::initial_state() const
 {
   return init_state;
 }
@@ -1117,8 +1139,7 @@ unsigned int p_lts::p_add_state(ATerm value)
       state_values = (ATerm *) realloc(state_values,new_states_size*sizeof(ATerm));
       if ( state_values == NULL )
       {
-        gsErrorMsg("insufficient memory to store LTS\n");
-        exit(1);
+        throw mcrl2::runtime_error("Insufficient memory to store LTS.");
       }
       for (unsigned int i=states_size; i<new_states_size; i++)
       {
@@ -1167,8 +1188,7 @@ unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
     taus = (bool *) realloc(taus,new_labels_size*sizeof(bool));
     if ( taus == NULL )
     {
-      gsErrorMsg("insufficient memory to store LTS\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory to store LTS.");
     }
     if ( label_info )
     {
@@ -1179,8 +1199,7 @@ unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
       label_values = (ATerm *) realloc(label_values,new_labels_size*sizeof(ATerm));
       if ( label_values == NULL )
       {
-        gsErrorMsg("insufficient memory to store LTS\n");
-        exit(1);
+        throw mcrl2::runtime_error("Insufficient memory to store LTS.");
       }
       for (unsigned int i=labels_size; i<new_labels_size; i++)
       {
@@ -1211,6 +1230,7 @@ unsigned int p_lts::p_add_transition(unsigned int from,
                                  unsigned int label,
                                  unsigned int to)
 {
+  assert(ntransitions <= transitions_size);
   if ( ntransitions == transitions_size )
   {
     unsigned int new_transitions_size = transitions_size*2;
@@ -1226,12 +1246,10 @@ unsigned int p_lts::p_add_transition(unsigned int from,
     transitions = (transition *) realloc(transitions,new_transitions_size*sizeof(transition));
     if ( transitions == NULL )
     {
-      gsErrorMsg("insufficient memory to store LTS\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory to store LTS.");
     }
     transitions_size = new_transitions_size;
   }
-
   transitions[ntransitions].from = from;
   transitions[ntransitions].label = label;
   transitions[ntransitions].to = to;
@@ -1255,8 +1273,7 @@ void p_lts::p_sort_transitions(transition_sort_style ts) {
 unsigned int* p_lts::p_get_transition_indices() {
   unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
   if (A == NULL) {
-    gsErrorMsg("out of memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("Out of memory.");
   }
   unsigned int t = 0;
   A[0] = 0;
@@ -1274,8 +1291,7 @@ unsigned int** p_lts::p_get_transition_pre_table()
   unsigned int **A = (unsigned int**)malloc(nlabels*sizeof(unsigned int*));
   if (A == NULL)
   {
-    gsErrorMsg("out of memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("Out of memory.");
   }
 
   unsigned int t = 0;
@@ -1285,8 +1301,7 @@ unsigned int** p_lts::p_get_transition_pre_table()
     A[l] = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
     if (A[l] == NULL)
     {
-      gsErrorMsg("out of memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Out of memory.");
     }
 
     A[l][0] = t;
@@ -1423,6 +1438,25 @@ unsigned int lts::transition_to(unsigned int transition)
   assert(transition < ntransitions);
   return transitions[transition].to;
 }
+
+void lts::set_transition_from(const unsigned int transition, const unsigned int from)
+{ 
+  assert(transition < ntransitions);
+  transitions[transition].from=from;
+}
+
+void lts::set_transition_label(const unsigned int transition, const unsigned int label)
+{ 
+  assert(transition < ntransitions);
+  transitions[transition].label=label;
+}
+
+void lts::set_transition_to(const unsigned int transition, const unsigned int to)
+{ 
+  assert(transition < ntransitions);
+  transitions[transition].to=to;
+}
+
 
 state_iterator lts::get_states()
 {
@@ -1564,7 +1598,7 @@ ATerm lts::state_parameter_sort(unsigned int idx)
 {
   if ( type == lts_mcrl2 )
   {
-    return (ATerm) gsGetSort((ATermAppl) get_state_parameter_value(0,idx));
+    return (ATerm) static_cast<ATermAppl>(data::data_expression(get_state_parameter_value(0,idx)).sort());
   } else if ( type == lts_mcrl )
   {
     char s[2+sizeof(unsigned int)*3];
@@ -1741,15 +1775,15 @@ data::data_specification lts::get_data_specification()
   return data::data_specification(ATAgetArgument((ATermAppl) extra_data,0));
 }
 
-void lts::set_data_specification(data::data_specification spec)
+void lts::set_data_specification(data::data_specification const& spec)
 {
   assert( type == lts_mcrl2 );
 
   if ( extra_data == NULL )
   {
-    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) spec, (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
+    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec, false), (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
   } else {
-    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) spec,0);
+    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec, false),0);
   }
 }
 
@@ -1800,8 +1834,7 @@ bool lts::reachability_check(bool remove_unreachable)
   #define in_visited(s) (visited[s/visited_bpi] & (1 << (s % visited_bpi)))
   if ( visited == NULL )
   {
-    gsErrorMsg("cannot allocate enough memory for reachability check");
-    exit(1);
+    throw mcrl2::runtime_error("cannot allocate enough memory for reachability check.");
   }
 
   // We try to allocate the memory for the faster algorithm. For ease we
@@ -1886,7 +1919,9 @@ bool lts::reachability_check(bool remove_unreachable)
   // must must hold for all states s reachable from the initial state
   if ( todo_stack == NULL )
   {
-    gsDebugMsg("checking reachability with incremental algorithm\n");
+    if (core::gsDebug)
+    { std::cerr << "Checking reachability with incremental algorithm.\n";
+    }
     // We're doing the slower algorithm: just loop over all transitions and add
     // target states from transitions that have a source that we have already
     // reached.
@@ -1907,8 +1942,10 @@ bool lts::reachability_check(bool remove_unreachable)
       }
     }
 
-  } else {
-    gsDebugMsg("checking reachability with todo list\n");
+  } else 
+  { if (core::gsDebug)
+    { std::cerr << "Checking reachability with todo list.\n";
+    }
     // We're doing the faster algorithm: we know that all transitions are
     // grouped on source state with state2trans[s] being the beginning of such
     // a group for source s. We keep a todo list in todo_stack of states that
@@ -1982,10 +2019,9 @@ bool lts::reachability_check(bool remove_unreachable)
     unsigned int *label_map = (unsigned int *) malloc(nlabels*sizeof(unsigned int));
     if ( (state_map == NULL) || (label_map == NULL) )
     {
-      gsErrorMsg("not enough memory to remove unreachable states\n");
       free(state_map);
       free(label_map);
-      exit(1);
+      throw mcrl2::runtime_error("Not enough memory to remove unreachable states.");
     }
 
     unsigned int new_nstates = 0;
@@ -2099,6 +2135,13 @@ void label_iterator::operator ++()
   pos++;
 }
 
+bool label_iterator::operator ==(const label_iterator &i) const
+{ return pos==i.pos;
+}
+  
+bool label_iterator::operator !=(const label_iterator &i) const
+{ return pos!=i.pos;
+}
 
 transition_iterator::transition_iterator(lts *l)
 {
@@ -2132,6 +2175,10 @@ void transition_iterator::operator ++()
   pos++;
 }
 
+unsigned int transition_iterator::operator *()
+{ return pos;
+}
+
 lts_type lts::guess_format(string const& s) {
   string::size_type pos = s.find_last_of('.');
 
@@ -2141,28 +2188,40 @@ lts_type lts::guess_format(string const& s) {
 
     if ( ext == "aut" )
     {
-      gsVerboseMsg("detected Aldebaran extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected Aldebaran extension.\n";
+      }
       return lts_aut;
     } else if ( ext == "lts" )
     {
-      gsVerboseMsg("detected mCRL2 extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected mCRL2 extension.\n";
+      }
       return lts_mcrl2;
     } else if ( ext == "svc" )
     {
-      gsVerboseMsg("detected SVC extension; assuming mCRL format\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected SVC extension; assuming mCRL format.\n";
+      }
       return lts_mcrl;
     } else if ( ext == "fsm" )
     {
-      gsVerboseMsg("detected Finite State Machine extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected Finite State Machine extension.\n";
+      }
       return lts_fsm;
     } else if ( ext == "dot" )
     {
-      gsVerboseMsg("detected GraphViz extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected GraphViz extension.\n";
+      }
       return lts_dot;
 #ifdef USE_BCG
     } else if ( ext == "bcg" )
     {
-      gsVerboseMsg("detected Binary Coded Graph extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected Binary Coded Graph extension.\n";
+      }
       return lts_bcg;
 #endif
     }
@@ -2235,6 +2294,9 @@ lts_equivalence lts::parse_equivalence(std::string const& s)
   } else if ( s == "branching-bisim" )
   {
     return lts_eq_branching_bisim;
+  } else if ( s == "dpbranching-bisim" )
+  {
+    return lts_eq_divergence_preserving_branching_bisim;
   } else if ( s == "sim" )
   {
     return lts_eq_sim;
@@ -2256,6 +2318,7 @@ static std::string equivalence_strings[] = {
   "unknown",
   "bisim",
   "branching-bisim",
+  "dpbranching-bisim",
   "sim",
   "trace",
   "weak-trace",
@@ -2266,6 +2329,7 @@ static std::string equivalence_desc_strings[] = {
   "unknown equivalence",
   "strong bisimilarity",
   "branching bisimilarity",
+  "divergence preserving branching bisimilarity",
   "strong simulation equivalence",
   "strong trace equivalence",
   "weak trace equivalence",
@@ -2320,32 +2384,34 @@ std::string lts::name_of_preorder(const lts_preorder pre)
   return preorder_desc_strings[pre];
 }
 
-void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermAppl act_spec)
+void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermList act_labels)
 {
   FILE *f = fopen(filename.c_str(),"ab");
   if ( f == NULL )
   {
-    gsErrorMsg("could not open file '%s' to add extra LTS information\n",filename.c_str());
+    throw mcrl2::runtime_error("Could not open file '" + filename + "' to add extra LTS information.");
     return;
   }
 
   ATerm arg1 = (ATerm) ((data_spec == NULL)?gsMakeNil():data_spec);
   ATerm arg2 = (ATerm) ((params == NULL)?gsMakeNil():ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params));
-  ATerm arg3 = (ATerm) ((act_spec == NULL)?gsMakeNil():act_spec);
+  ATerm arg3 = (ATerm) ((ATisEmpty(act_labels))?gsMakeNil():core::detail::gsMakeActSpec(act_labels));
   ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
 
   long position;
   if ( (position = ftell(f)) == -1 )
   {
-    gsErrorMsg("could not determine file size of '%s'; not adding extra information\n",filename.c_str());
     fclose(f);
+    throw mcrl2::runtime_error("Could not determine file size of '" + filename + 
+                          "'; not adding extra information.");
     return;
   }
 
   if ( ATwriteToBinaryFile(data,f) == ATfalse )
   {
-    gsErrorMsg("error writing extra LTS information to '%s', file could be corrupted\n",filename.c_str());
     fclose(f);
+    throw mcrl2::runtime_error("Error writing extra LTS information to '" + filename + 
+               "', file could be corrupted.");
     return;
   }
 
@@ -2357,8 +2423,9 @@ void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, 
   }
   if ( fwrite(buf,1,8+12,f) != 8+12 )
   {
-    gsErrorMsg("error writing extra LTS information to '%s', file could be corrupted\n",filename.c_str());
     fclose(f);
+    throw mcrl2::runtime_error("error writing extra LTS information to '" + filename + 
+                     "', file could be corrupted.");
     return;
   }
 
@@ -2553,6 +2620,96 @@ std::string lts::supported_lts_preorders_text(lts_preorder default_preorder, con
 std::string lts::supported_lts_preorders_text(const std::set<lts_preorder> &supported)
 {
   return supported_lts_preorders_text(lts_pre_none,supported);
+}
+
+ATermList sorted_insert(ATermList l,ATermAppl t)
+{ 
+  if (l==ATempty)
+  { return ATinsert(l,(ATerm)t);
+  }
+
+  if (ATgetName(ATgetAFun(ATgetArgument(t,0)))<
+         ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(l),0))))
+  { return ATinsert(l,(ATerm)t);
+  }
+  if ((ATgetName(ATgetAFun(ATgetArgument(t,0)))==
+         ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(l),0))))
+       &&
+      (ATgetArgument(t,1)< ATgetArgument(ATgetFirst(l),1)))
+  { return ATinsert(l,(ATerm)t);
+  }
+  return ATinsert(sorted_insert(ATgetNext(l),t),ATgetFirst(l));
+}
+
+ATerm sort_multi_action(ATerm ma)
+{ ATermList tl=ATLgetArgument((ATermAppl)(ma),0); //get the multi_action_list
+  ATermList result=ATempty;
+  for( ; tl!=ATempty ; tl=ATgetNext(tl))
+  { result=sorted_insert(result,ATAgetFirst(tl));
+  }
+  return (ATerm)gsMakeMultAct(result);
+}
+
+
+bool lts::hide_actions(const std::vector<std::string> &tau_actions)
+{ 
+  if (tau_actions.size()==0) return true; // Nothing needs to be hidden.
+
+  for(label_iterator i=get_labels(); i.more(); ++i)
+  { 
+    string s=p_label_value_str(*i);
+    stringstream ss(s); 
+    ATermAppl t=parse_mult_act(ss);
+    
+    if ( t == NULL )
+    {
+       std::cerr << "Cannot reconstruct multi action " << s << " (parsing)\n";
+       return false;
+    }
+
+    ATermList new_multi_action=ATempty;
+    for(ATermList mas=ATLgetArgument(t,0); mas!=ATempty; mas=ATgetNext(mas))
+    { ATermAppl multiaction=ATAgetFirst(mas);
+      
+      if (std::find(tau_actions.begin(),tau_actions.end(),
+                 string(ATgetName(ATgetAFun(ATgetArgument(multiaction,0)))))==tau_actions.end())  // this action must not be hidden.
+      { new_multi_action=ATinsert(new_multi_action,(ATerm)multiaction);
+      }
+    }
+    new_multi_action=ATreverse(new_multi_action);
+    set_label(*i, (ATerm)gsMakeMultAct(new_multi_action),new_multi_action==ATempty); // indicate that label i is now a tau label
+  }
+
+  // sort the multi-actions
+  for(label_iterator i=get_labels(); i.more(); ++i)
+  { set_label(*i, sort_multi_action(label_value(*i)),is_tau(*i));
+  }
+
+  // Now the labels have been adapted to the hiding operator. Check now whether labels
+  // did become equal.
+
+  map < unsigned int, unsigned int> map_multiaction_indices;
+  for(label_iterator i=get_labels(); i.more(); ++i)
+  { for (label_iterator j=get_labels(); j!=i; ++j)
+    { if (label_value(*i)==label_value(*j))  
+      { assert(map_multiaction_indices.count(*i)==0);
+        map_multiaction_indices.insert(pair<unsigned int, unsigned int>(*i,*j));
+        break;
+      }
+    }
+  }
+
+  // If labels became equal, take care they get equal numbers in the transition
+  // system, because all behavioural reduction algorithms only compare the labels.
+  if (!map_multiaction_indices.empty())
+  { 
+    for (transition_iterator i=get_transitions(); i.more(); ++i)
+    { if (map_multiaction_indices.count(i.label())>0)
+      { set_transition_label(*i,map_multiaction_indices[i.label()]);
+      }
+    }
+  }
+  return true;
 }
 
 }

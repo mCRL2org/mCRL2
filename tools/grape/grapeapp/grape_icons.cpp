@@ -8,6 +8,8 @@
 //
 // Maps all icons for the application.
 
+#include "wx.hpp" // precompiled headers
+
 #include "grape_icons.h"
 
 #include "pics/archref.xpm"

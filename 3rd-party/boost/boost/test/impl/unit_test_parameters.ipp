@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50557 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : simple implementation for Unit Test Framework parameter
 //  handling routines. May be rewritten in future to use some kind of
@@ -215,16 +215,22 @@ retrieve_parameter( const_string parameter_name, cla::parser const& s_cla_parser
             return s_cla_parser.get<T>( parameter_name );
 
         optional<T> val = s_cla_parser.get<optional<T> >( parameter_name );
-        return val ? *val : optional_value;
+        if( val )
+	    return *val;
+        else
+	    return optional_value;
     }
 
     boost::optional<T> v;
 
-	#ifndef UNDER_CE
+#ifndef UNDER_CE
     env::get( parameter_2_env_var[parameter_name], v );
-	#endif
+#endif
 
-    return v? *v : default_value;
+    if( v )
+        return *v;
+    else
+        return default_value;
 }
 
 //____________________________________________________________________________//
@@ -350,7 +356,9 @@ report_level()
 const_string
 test_to_run()
 {
-    return retrieve_parameter( TESTS_TO_RUN, s_cla_parser, s_empty );
+    static std::string s_test_to_run = retrieve_parameter( TESTS_TO_RUN, s_cla_parser, s_empty );
+
+    return s_test_to_run;
 }
 
 //____________________________________________________________________________//
@@ -358,7 +366,9 @@ test_to_run()
 const_string
 break_exec_path()
 {
-    return retrieve_parameter( BREAK_EXEC_PATH, s_cla_parser, s_empty );
+    static std::string s_break_exec_path = retrieve_parameter( BREAK_EXEC_PATH, s_cla_parser, s_empty );
+
+    return s_break_exec_path;
 }
 
 //____________________________________________________________________________//
@@ -446,7 +456,7 @@ log_format()
 long
 detect_memory_leaks()
 {
-    return retrieve_parameter( DETECT_MEM_LEAKS, s_cla_parser, (long)1 );
+    return retrieve_parameter( DETECT_MEM_LEAKS, s_cla_parser, static_cast<long>(1) );
 }
 
 //____________________________________________________________________________//

@@ -6,24 +6,27 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewrite/with_prover.h
+/// \file mcrl2/data/detail/rewrite/with_prover.h
 /// \brief Rewriting combined with semantic simplification using a prover
 
 #ifndef __REWR_PROVER_H
 #define __REWR_PROVER_H
 
 #include <aterm2.h>
-#include <mcrl2/data/data_specification.h>
-#include <mcrl2/data/bdd_prover.h>
-#include "mcrl2/data/rewrite.h"
+#include <mcrl2/data/detail/bdd_prover.h>
+#include "mcrl2/data/rewriter.h"
+
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
 
 class RewriterProver: public Rewriter
 {
 	public:
-		RewriterProver(mcrl2::data::data_specification DataSpec, RewriteStrategy strat);
+		RewriterProver(const data_specification &DataSpec, mcrl2::data::rewriter::strategy strat);
 		~RewriterProver();
 
-		RewriteStrategy getStrategy();
+		mcrl2::data::detail::RewriteStrategy getStrategy();
 
 		ATermAppl rewrite(ATermAppl Term);
 
@@ -48,5 +51,9 @@ class RewriterProver: public Rewriter
 		BDD_Prover *prover_obj;
 		Rewriter *rewr_obj;
 };
+
+    }
+  }
+}
 
 #endif

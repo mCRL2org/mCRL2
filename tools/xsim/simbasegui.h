@@ -21,6 +21,17 @@ public:
 	/* Returns the main window of the simulator. */
 };
 
+inline wxWindow *GetMainWindow(SimulatorInterface *Simulator)
+{
+  SimulatorInterfaceGUI *g = dynamic_cast<SimulatorInterfaceGUI *>(Simulator);
+  if ( g != NULL ) // downcast successful?
+  {
+    return g->MainWindow();
+  }
+
+  return NULL;
+}
+
 wxWindow *GetMainWindow(SimulatorInterface *Simulator);
 /* Returns Simulator->MainWindow() if Simulator is a SimulatorInterfaceGUI
  * and NULL otherwise */

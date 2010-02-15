@@ -14,9 +14,12 @@
 #include <boost/test/minimal.hpp>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/untime.h>
-#include <mcrl2/lps/mcrl22lps.h>
+#include <mcrl2/lps/linearise.h>
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
@@ -31,8 +34,9 @@ void test_case_1()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = untime(s0);
+  specification s0 = linearise(text);
+  specification s1 = s0;
+  lps::untime_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -40,6 +44,11 @@ void test_case_1()
   }
 
   BOOST_CHECK(s0 == s1);
+
+  if (s0 != s1) {
+    std::clog << "Input specification  : " << lps::pp(s0) << std::endl
+              << "Output specification : " << lps::pp(s1) << std::endl;
+  }
 }
 
 /*
@@ -56,8 +65,9 @@ void test_case_2()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = untime(s0);
+  specification s0 = linearise(text);
+  specification s1 = s0;
+  lps::untime_algorithm(s1).run();
   summand_list summands0 = s0.process().summands();
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
@@ -84,8 +94,9 @@ void test_case_3()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = untime(s0);
+  specification s0 = linearise(text);
+  specification s1 = s0;
+  lps::untime_algorithm(s1).run();
   summand_list summands0 = s0.process().summands();
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
@@ -115,8 +126,9 @@ void test_case_4()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = untime(s0);
+  specification s0 = linearise(text);
+  specification s1 = s0;
+  lps::untime_algorithm(s1).run();
   summand_list summands0 = s0.process().summands();
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
@@ -131,12 +143,16 @@ void test_case_4()
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERM_INIT(ac, av)
+  MCRL2_ATERMPP_INIT(ac, av)
 
   test_case_1();
+  core::garbage_collect();
   test_case_2();
+  core::garbage_collect();
   test_case_3();
+  core::garbage_collect();
   test_case_4();
+  core::garbage_collect();
 
   return 0;
 }

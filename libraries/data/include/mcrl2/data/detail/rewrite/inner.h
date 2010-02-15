@@ -6,19 +6,24 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewrite/inner.h
+/// \file mcrl2/data/detail/rewrite/inner.h
 
 #ifndef __REWR_INNER_H
 #define __REWR_INNER_H
 
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/data_specification.h"
 
 //#define _INNER_STORE_TREES
+
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
 
 class RewriterInnermost: public Rewriter
 {
 	public:
-		RewriterInnermost(mcrl2::data::data_specification DataSpec);
+		RewriterInnermost(const data_specification &DataSpec);
 		~RewriterInnermost();
 
 		RewriteStrategy getStrategy();
@@ -64,5 +69,8 @@ class RewriterInnermost: public Rewriter
 		ATerm toInner(ATermAppl Term, bool add_opids);
 		ATermAppl fromInner(ATerm Term);
 };
+    }
+  }
+}
 
 #endif

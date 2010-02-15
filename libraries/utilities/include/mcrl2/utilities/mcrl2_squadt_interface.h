@@ -12,7 +12,10 @@
 #ifndef MCRL2_SPECIFIC_SQUADT_INTERFACE_H_
 #define MCRL2_SPECIFIC_SQUADT_INTERFACE_H_
 
+#include <boost/cstdint.hpp>
+
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/deprecation.h"
 
 #include "mcrl2/utilities/squadt_interface.h"
 
@@ -54,22 +57,6 @@ namespace mcrl2 {
           }
 
           static bool initialise_enumerated_type_conversions() {
-#ifdef __LIBREWRITE_H
-            tipi::datatype::enumeration< RewriteStrategy > strategy_enumeration;
-
-            strategy_enumeration.
-              add(GS_REWR_INNER, "inner").
-# ifdef MCRL2_INNERC_AVAILABLE
-              add(GS_REWR_INNERC, "innerc").
-# endif
-# ifdef MCRL2_JITTYC_AVAILABLE
-              add(GS_REWR_JITTY, "jitty").
-              add(GS_REWR_JITTYC, "jittyc");
-# else
-              add(GS_REWR_JITTY, "jitty");
-# endif
-#endif
-
 #ifdef __LIBLTS_H
             using namespace mcrl2::lts;
 
@@ -162,10 +149,10 @@ namespace mcrl2 {
 #endif
 
       /// \brief Helper function for unsigned long to string conversion
-      std::ostream& operator<<(std::ostream& o, unsigned long const& t);
+      std::ostream& operator<<(std::ostream& o, boost::int64_t const& t);
 
       /// \brief Helper function for unsigned long long to string conversion
-      std::ostream& operator<<(std::ostream& o, unsigned long long const& t);
+      std::ostream& operator<<(std::ostream& o, boost::uint64_t const& t);
     }
   }
 }

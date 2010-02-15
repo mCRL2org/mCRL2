@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 49254 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : plain report formatter definition
 // ***************************************************************************

@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 47154 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : addition to STL algorithms
 // ***************************************************************************

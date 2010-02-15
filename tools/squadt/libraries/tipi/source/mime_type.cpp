@@ -6,9 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
-#include <boost/xpressive/xpressive_static.hpp>
+#include "boost/xpressive/xpressive_static.hpp"
 
 #include "tipi/mime_type.hpp"
 
@@ -55,7 +53,9 @@ namespace tipi {
    * \param[in] m the main type
    **/
   mime_type::mime_type(std::string const& s, category_type m) : m_main(m), m_sub(s) {
-    assert(!s.empty() && (s.find(' ') == std::string::npos) && (s.find('\t') == std::string::npos));
+    if(!(!s.empty() && (s.find(' ') == std::string::npos) && (s.find('\t') == std::string::npos))){
+      throw std::runtime_error("String \""+ s + "\" must not contain white space characters");
+    }
   }
 }
 

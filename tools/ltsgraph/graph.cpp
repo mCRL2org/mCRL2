@@ -9,7 +9,10 @@
 /// \file graph.cpp
 /// \brief Implementation of graph class
 
+#include "wx.hpp" // precompiled headers
+
 #include "graph.h"
+
 Graph::Graph()
 {
   initialState = NULL;

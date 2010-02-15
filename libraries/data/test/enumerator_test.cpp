@@ -13,19 +13,21 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/data_operation.h"
+#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/parser.h"
-#include "mcrl2/data/sort_arrow.h"
-#include "mcrl2/data/sort_utility.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
@@ -62,13 +64,13 @@ void test_enumerator()
   data_specification data = parse_data_specification(DATA_SPEC1);
   rewriter datar(data);
   enumerator e(datar, data);
-  sort_expression s1 = sort_expr::bool_();
+  sort_expression s1 = sort_bool::bool_();
   atermpp::vector<data_expression> v = e.enumerate_finite_sort(s1);
 
-  data_variable d1(core::identifier_string("d1"), sort_expr::bool_());
-  data_variable d2(core::identifier_string("d2"), sort_expr::bool_());
-  data_variable d3(core::identifier_string("d3"), sort_expr::bool_());
-  std::vector<data_variable> vars;
+  variable d1(core::identifier_string("d1"), sort_bool::bool_());
+  variable d2(core::identifier_string("d2"), sort_bool::bool_());
+  variable d3(core::identifier_string("d3"), sort_bool::bool_());
+  std::vector<variable> vars;
   vars.push_back(d1);
   vars.push_back(d2);
   data_expression t = and_(data_expr::equal_to(d1, d2), data_expr::not_equal_to(d1,d3));
@@ -87,30 +89,63 @@ void test_enumerator()
 
 void test_data_enumerator()
 {
-  using namespace data_expr;
+  try
+  {
+    data_specification data_spec = parse_data_specification(DATA_SPEC1);
+    rewriter rewr(data_spec);
+    number_postfix_generator generator("x_");
+    data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
 
-  data_specification data_spec = parse_data_specification(DATA_SPEC1);
+    variable x(identifier_string("x"), sort_pos::pos());
+    atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
+    for (atermpp::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
+    {
+      std::cout << mcrl2::core::pp(*i) << " " << mcrl2::data::pp(i->variables()) << std::endl;
+    }
+
+    data_expression_with_variables expr(x, make_vector(x));
+    atermpp::vector<data_expression_with_variables> y = e.enumerate(x);
+    for (atermpp::vector<data_expression_with_variables>::const_iterator i = y.begin(); i != y.end(); ++i)
+    {
+      atermpp::vector<data_expression_with_variables> z = e.enumerate(*i);
+      for (atermpp::vector<data_expression_with_variables>::const_iterator j = z.begin(); j != z.end(); ++j)
+      {
+        std::cout << mcrl2::core::pp(*j) << " " << mcrl2::data::pp(j->variables()) << std::endl;
+      }
+    }
+  }
+  catch(mcrl2::runtime_error)
+  {
+    // this is OK
+    return;
+  }
+  BOOST_CHECK(false); // this point should not be reached
+}
+
+void test_data_enumerator2()
+{
+  std::string DATA_SPEC =
+  "sort D;\n"
+  "map f:D -> Bool;\n"
+  ;
+
+  data_specification data_spec = parse_data_specification(DATA_SPEC);
+  variable x = parse_variable("d:D", data_spec);
+
   rewriter rewr(data_spec);
   number_postfix_generator generator("x_");
   data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
 
-  data_variable x(identifier_string("x"), sort_expr::pos());
-  atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
-  for (atermpp::vector<data_expression_with_variables>::iterator i = values.begin(); i != values.end(); ++i)
+  try
   {
-    std::cout << pp(*i) << " " << pp(i->variables()) << std::endl;
+    atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
   }
-
-  data_expression_with_variables expr(x, make_list(x));
-  atermpp::vector<data_expression_with_variables> y = e.enumerate(x);
-  for (atermpp::vector<data_expression_with_variables>::iterator i = y.begin(); i != y.end(); ++i)
+  catch(mcrl2::runtime_error)
   {
-    atermpp::vector<data_expression_with_variables> z = e.enumerate(*i);
-    for (atermpp::vector<data_expression_with_variables>::iterator j = z.begin(); j != z.end(); ++j)
-    {
-      std::cout << pp(*j) << " " << pp(j->variables()) << std::endl;
-    }
+    // this is OK
+    return;
   }
+  BOOST_CHECK(false); // this point should not be reached
 }
 
 class A: public data_expression
@@ -136,15 +171,15 @@ class A: public data_expression
 
 void f(data_expression d)
 {
-  std::cout << "d = " << pp(d) << std::endl;
+  std::cout << "d = " << mcrl2::core::pp(d) << std::endl;
 }
 
 void test2()
 {
-  data_variable n = parse_data_expression("n", "n: Pos;\n");
+  variable n("n", sort_pos::pos());
   A a = n;
   f(a);
-  std::cout << "a = " << pp(a) << std::endl;
+  std::cout << "a = " << mcrl2::core::pp(a) << std::endl;
 }
 
 void test3()
@@ -154,39 +189,55 @@ void test3()
   number_postfix_generator generator("x_");
   data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
 
-  data_variable   n = parse_data_expression("n", "n: Pos;\n");
+  variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");
-  data_expression_with_variables x(c, atermpp::make_list(n));
+  data_expression_with_variables x(c, make_vector(n));
+}
+
+void test4()
+{
+  data_specification data_spec(parse_data_specification("sort N = Nat;")); // import Nat
+  rewriter datar(data_spec);
+  number_postfix_generator generator("x_");
+  data_enumerator<number_postfix_generator> datae(data_spec, datar, generator);
+  variable y = parse_data_expression("n", "n: Nat;\n");
+  atermpp::vector<data_expression_with_variables> z = datae.enumerate(y);
+  BOOST_CHECK(z.size() > 0);
 }
 
 // This test verifies that the enumerator is able to find all terms n
 // that satisfy n < 3, with n:Nat.
 void test5()
 {
-	data_specification data_spec = default_data_specification();
+  data_specification data_spec;
+  data_spec.add_context_sort(sort_nat::nat());
   rewriter datar(data_spec);
   number_postfix_generator generator("x_");
   data_enumerator<number_postfix_generator> datae(data_spec, datar, generator);
   atermpp::deque<data_expression_with_variables> v;
-  data_variable n = parse_data_expression("n", "n: Nat;\n");
+  variable n("n", sort_nat::nat());
   v.push_front(data_expression_with_variables(n, make_list(n)));
-  data_expression_with_variables three = mcrl2::core::detail::gsMakeDataExprPos2Nat(parse_data_expression("3"));
+  data_expression_with_variables three = sort_nat::nat(3);
+
+  atermpp::vector< data_expression > result;
 
   while (!v.empty())
   {
     data_expression_with_variables e = v.back();
     v.pop_back();
     atermpp::vector<data_expression_with_variables> z = datae.enumerate(e);
+
     for (atermpp::vector<data_expression_with_variables>::iterator i = z.begin(); i != z.end(); ++i)
     {
-      data_expression b = datar(data_expr::greater(*i, three));
-      if (b == data_expr::false_())
+      data_expression b = datar(greater(*i, three));
+      if (b == sort_bool::false_())
       {
-        std::cout << "found solution " << pp(*i) << std::endl;
+        std::clog << "found solution " << pp(*i) << std::endl;
+        result.push_back(*i);
       }
-      else if (b == data_expr::true_())
+      else if (b == sort_bool::true_())
       {
-        std::cout << "found non-solution " << pp(*i) << std::endl;
+        std::clog << "found non-solution " << pp(*i) << std::endl;
       }
       else
       {
@@ -194,16 +245,31 @@ void test5()
       }
     }
   }
+
+  BOOST_CHECK(result.size() == 4);
 }
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_data_enumerator();
+  core::garbage_collect();
+
+  test_data_enumerator2();
+  core::garbage_collect();
+
   test2();
+  core::garbage_collect();
+
   test3();
+  core::garbage_collect();
+
+  test4();
+  core::garbage_collect();
+
   test5();
+  core::garbage_collect();
 
   return 0;
 }

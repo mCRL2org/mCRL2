@@ -28,7 +28,6 @@
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
-#include "mcrl2/pbes/find.h"
 
 namespace mcrl2 {
 
@@ -43,13 +42,13 @@ namespace detail {
   /// \param finite_variables A sequence of data variables
   /// \param infinite_variables A sequence of data variables
   inline
-  void split_finite_variables(data::data_variable_list variables, const data::data_specification& data, data::data_variable_list& finite_variables, data::data_variable_list& infinite_variables)
+  void split_finite_variables(data::variable_list variables, const data::data_specification& data, data::variable_list& finite_variables, data::variable_list& infinite_variables)
   {
-    std::vector<data::data_variable> finite;
-    std::vector<data::data_variable> infinite;
-    for (data::data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+    std::vector<data::variable> finite;
+    std::vector<data::variable> infinite;
+    for (data::variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
     {
-      if (data.is_finite(i->sort()))
+      if (data.is_certainly_finite(i->sort()))
       {
         finite.push_back(*i);
       }
@@ -58,8 +57,8 @@ namespace detail {
         infinite.push_back(*i);
       }
     }
-    finite_variables = data::data_variable_list(finite.begin(), finite.end());
-    infinite_variables = data::data_variable_list(infinite.begin(), infinite.end());
+    finite_variables = data::variable_list(finite.begin(), finite.end());
+    infinite_variables = data::variable_list(infinite.begin(), infinite.end());
   }
 
   /// \brief Returns a string representation of a container
@@ -146,8 +145,8 @@ namespace detail {
       template <typename SubstitutionFunction>
       struct sequence_assign
       {
-        typedef typename SubstitutionFunction::variable_type variable_type;
-        typedef typename SubstitutionFunction::term_type     term_type;
+        typedef typename SubstitutionFunction::variable_type   variable_type;
+        typedef typename SubstitutionFunction::expression_type term_type;
 
         SubstitutionFunction& sigma_;
 
@@ -216,7 +215,7 @@ namespace detail {
         {
           PbesTerm c = r_(phi_, sigma_);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << sigma_.to_string() << " dependencies = " << print_term_container(v_) << std::endl;
+  std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << to_string(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
 #endif
           if (stop_(c))
           {
@@ -268,7 +267,7 @@ namespace detail {
                   << (tr::is_false(stop_value) ? "forall " : "exists ")
                   << core::pp(x) << ". "
                   << core::pp(phi)
-                  << sigma.to_string() << std::endl;
+                  << to_string(sigma) << std::endl;
       }
 
       /// \brief Returns a string representation of D[i]
@@ -315,6 +314,15 @@ namespace detail {
         std::cerr << "]" << std::endl;
       }
 
+      template <typename SubstitutionFunction, typename VariableMap>
+      void redo_substitutions(SubstitutionFunction& sigma, const VariableMap& v)
+      {
+      	for (typename VariableMap::const_iterator i = v.begin(); i != v.end(); ++i)
+        {
+        	sigma[i->first] = i->second;
+        }
+      }
+
       template <typename SubstitutionFunction,
                 typename StopCriterion,
                 typename PbesTermJoinFunction
@@ -327,12 +335,24 @@ namespace detail {
                           PbesTermJoinFunction join
                          )
       {
+      	// Undo substitutions to quantifier variables
+      	atermpp::map<variable_type, term_type> undo;
+        for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
+        {
+        	term_type sigma_i = sigma(*i);
+        	if (sigma_i != *i) {
+        		undo[*i] = sigma_i;
+        		sigma[*i] = *i;
+        	}
+        }
+
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   print_arguments(x, phi, sigma, stop_value);
 #endif
         term_type Rphi = pbesr(phi, sigma);
         if (tr::is_constant(Rphi))
         {
+        	redo_substitutions(sigma, undo);
           return Rphi;
         }
 
@@ -373,7 +393,8 @@ namespace detail {
             bool is_constant = true;
 
             D[k].erase(std::find(D[k].begin(), D[k].end(), y));
-            for (typename variable_sequence_type::iterator i = y.variables().begin(); i != y.variables().end(); ++i)
+            variable_sequence_type variables(y.variables());
+            for (typename variable_sequence_type::iterator i = variables.begin(); i != variables.end(); ++i)
             {
               dependencies.erase(*i);
             }
@@ -407,7 +428,9 @@ namespace detail {
                 }
                 else
                 {
-                  for (typename variable_sequence_type::iterator j = i->variables().begin(); j != i->variables().end(); ++j)
+                  variable_sequence_type variables(i->variables());
+
+                  for (typename variable_sequence_type::iterator j = variables.begin(); j != variables.end(); ++j)
                   {
                     dependencies.erase(*j);
                   }
@@ -424,23 +447,25 @@ namespace detail {
           // remove the added substitutions from sigma
           for (typename variable_sequence_type::const_iterator j = x.begin(); j != x.end(); ++j)
           {
-            sigma.erase(*j);
+            sigma[*j] = *j; // erase *j
           }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cerr << "<return>stop early: " << core::pp(stop_value) << std::endl;
 #endif
+        	redo_substitutions(sigma, undo);
           return stop_value;
         }
 
         // remove the added substitutions from sigma
         for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
         {
-          sigma.erase(*i);
+          sigma[*i] = *i; // erase *i
         }
         term_type result = join(A.begin(), A.end());
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cerr << "<return> " << core::pp(result) << std::endl;
 #endif
+      	redo_substitutions(sigma, undo);
         return result;
       }
 
@@ -487,7 +512,7 @@ namespace detail {
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<Term> tr;
 
-    DataEnumerator& m_data_enumerator;
+    const DataEnumerator& m_data_enumerator;
 
     /// If true, quantifier variables of infinite sort are enumerated.
     bool m_enumerate_infinite_sorts;
@@ -496,7 +521,7 @@ namespace detail {
     /// \param r A data rewriter
     /// \param enumerator A data enumerator
     /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
-    enumerate_quantifiers_builder(DataRewriter& r, DataEnumerator& enumerator, bool enumerate_infinite_sorts = true)
+    enumerate_quantifiers_builder(const DataRewriter& r, const DataEnumerator& enumerator, bool enumerate_infinite_sorts = true)
       : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
     { }
 
@@ -516,8 +541,8 @@ namespace detail {
       }
       else
       {
-        data::data_variable_list finite;
-        data::data_variable_list infinite;
+        data::variable_list finite;
+        data::variable_list infinite;
         split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
         if (finite.empty())
         {
@@ -545,8 +570,8 @@ namespace detail {
       }
       else
       {
-        data::data_variable_list finite;
-        data::data_variable_list infinite;
+        data::variable_list finite;
+        data::variable_list infinite;
         split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
         if (finite.empty())
         {

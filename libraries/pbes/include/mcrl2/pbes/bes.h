@@ -110,6 +110,15 @@ namespace bes {
     return core::pp(v.name());
   }
 
+  /// \brief Returns true if the term t is a boolean variable
+  /// \param t A boolean variable
+  /// \return True if the term t is a boolean variable
+  inline
+  bool is_boolean_variable(atermpp::aterm_appl t)
+  {
+    return core::detail::gsIsBooleanVariable(t);
+  }
+
 } // namespace bes
 } // namespace mcrl2
 
@@ -159,6 +168,24 @@ namespace bes {
 
   /// \brief Read-only singly linked list of boolean expressions
   typedef atermpp::term_list<boolean_expression> boolean_expression_list;
+
+  /// \brief Returns true if the term t is a boolean expression
+  /// \param t A boolean expression
+  /// \return True if the term t is a boolean expression
+  inline
+  bool is_boolean_expression(atermpp::aterm_appl t)
+  {
+    // TODO: this code should be generated
+    return
+      core::detail::gsIsBooleanTrue    (t) ||
+      core::detail::gsIsBooleanFalse   (t) ||
+      core::detail::gsIsBooleanVariable(t) ||
+      core::detail::gsIsBooleanNot     (t) ||
+      core::detail::gsIsBooleanAnd     (t) ||
+      core::detail::gsIsBooleanOr      (t) ||
+      core::detail::gsIsBooleanImp     (t)
+    ;
+  }
 
 } // namespace bes
 } // namespace mcrl2
@@ -437,21 +464,42 @@ class boolean_equation: public atermpp::aterm_appl
 
     /// \brief Returns the fixpoint symbol of the equation.
     /// \return The fixpoint symbol of the equation.
-    fixpoint_symbol symbol() const
+    const fixpoint_symbol& symbol() const
+    {
+      return m_symbol;
+    }
+
+    /// \brief Returns the fixpoint symbol of the equation.
+    /// \return The fixpoint symbol of the equation.
+    fixpoint_symbol& symbol()
     {
       return m_symbol;
     }
 
     /// \brief Returns the boolean_equation_system variable of the equation.
     /// \return The boolean_equation_system variable of the equation.
-    boolean_variable variable() const
+    const boolean_variable& variable() const
+    {
+      return m_variable;
+    }
+
+    /// \brief Returns the boolean_equation_system variable of the equation.
+    /// \return The boolean_equation_system variable of the equation.
+    boolean_variable& variable()
     {
       return m_variable;
     }
 
     /// \brief Returns the predicate formula on the right hand side of the equation.
     /// \return The predicate formula on the right hand side of the equation.
-    boolean_expression formula() const
+    const boolean_expression& formula() const
+    {
+      return m_formula;
+    }
+
+    /// \brief Returns the predicate formula on the right hand side of the equation.
+    /// \return The predicate formula on the right hand side of the equation.
+    boolean_expression& formula()
     {
       return m_formula;
     }
@@ -595,7 +643,7 @@ namespace bes {
         {
           throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::save())");
         }
-        atermpp::aterm t = ATermAppl(*this);
+        atermpp::aterm_appl t = ATermAppl(*this);
         core::detail::save_aterm(t, filename, binary);
       }
 
@@ -641,7 +689,7 @@ namespace bes {
       {
         atermpp::set<boolean_variable> bnd = binding_variables();
         atermpp::set<boolean_variable> occ = occurring_variables();
-        return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state());
+        return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(initial_state()) != bnd.end();
       }
 
       /// \brief Applies a low level substitution function to this term.

@@ -15,59 +15,75 @@
 #include <set>
 #include <iterator>
 #include <functional>
-#include <boost/bind.hpp>
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/detail/pbes_functional.h"
+#include "mcrl2/pbes/detail/pbes_free_variable_finder.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param t A term
-/// \param v A propositional variable instantiation
-/// \return True if the term has a given variable as subterm.
-template <typename Term>
-bool find_propositional_variable(Term t, const propositional_variable_instantiation& v)
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] container a container with expressions
+/// \return All data variables that occur in the term t
+template <typename Container, typename OutputIterator >
+void find_free_variables(Container const& container, OutputIterator const& o)
 {
-  return atermpp::partial_find_if(t,
-                                  detail::compare_propositional_variable_instantiation(v),
-                                  is_propositional_variable_instantiation
-                                 ) != atermpp::aterm();
+  pbes_system::detail::pbes_free_variable_finder<std::insert_iterator<std::set<data::variable> > > finder(o);
+  finder(container);
 }
 
-/// \brief Returns all propositional variable instantiations that occur in the term t
-/// \param t A term
-/// \return All propositional variable instantiations that occur in the term t
-template <typename Term>
-std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(Term t)
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] container a container with expressions
+/// \return All data variables that occur in the term t
+template <typename Container>
+std::set<data::variable> find_free_variables(Container const& container)
 {
-  std::set<propositional_variable_instantiation> variables;
-  atermpp::find_all_if(t, is_propositional_variable_instantiation, std::inserter(variables, variables.end()));
-  return variables;
-/*
-  std::set<propositional_variable_instantiation> variables;
-  atermpp::partial_find_all_if(t,
-                               is_propositional_variable_instantiation,
-                               boost::bind(std::logical_or<bool>(), boost::bind(data::is_data_expression, _1), boost::bind(is_propositional_variable_instantiation, _1)),
-                               std::inserter(variables, variables.end())
-                              );
-*/
-  return variables;
+  std::set<data::variable> result;
+  pbes_system::find_free_variables(container, std::inserter(result, result.end()));
+  return result;
 }
 
-/// \brief Finds free data variables in a pbes expression.
-/// \param e A PBES expression
-/// \return The free data variables occurring in the expression.
+namespace detail {
+
+  template <typename OutputIterator>
+  struct find_propositional_variables_visitor: public pbes_expression_visitor<pbes_expression>
+  {
+    OutputIterator dest;
+    
+    find_propositional_variables_visitor(OutputIterator d)
+      : dest(d)
+    {}
+
+    /// \brief Visit propositional_variable node
+    /// \param e A term
+    /// \return The result of visiting the node
+    bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
+    {
+      *dest++ = v;
+      return true;
+    } 
+  };
+
+  template <typename OutputIterator>
+  find_propositional_variables_visitor<OutputIterator> make_find_propositional_variables_visitor(OutputIterator dest)
+  {
+    return find_propositional_variables_visitor<OutputIterator>(dest);
+  }
+
+} // namespace detail
+
+
+/// \brief Returns all propositional variable instantiations that occur in the pbes expression t
+/// \param t A term
+/// \return All propositional variable instantiations that occur in the pbes expression t
 inline
-std::set<data::data_variable> find_free_variables(const pbes_expression& e)
+std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(const pbes_expression& t)
 {
-  detail::free_variable_visitor<pbes_expression> visitor;
-  visitor.visit(e);
-  return visitor.result;
+  std::set<propositional_variable_instantiation> variables;
+  detail::make_find_propositional_variables_visitor(std::inserter(variables, variables.end())).visit(t);
+  return variables;
 }
 
 } // namespace pbes_system

@@ -20,6 +20,7 @@
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
+#include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 
@@ -63,7 +64,7 @@ namespace detail {
     std::vector<expression> expression_stack;
 
     /// \brief A stack containing quantifier variables.
-    std::vector<data::data_variable_list> quantifier_stack;
+    std::vector<data::variable_list> quantifier_stack;
 
     /// \brief Returns the top element of the expression stack converted to a pbes expression.
     /// \return The top element of the expression stack converted to a pbes expression.

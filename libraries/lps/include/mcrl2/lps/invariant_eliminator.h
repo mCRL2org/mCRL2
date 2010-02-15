@@ -16,8 +16,9 @@
 #define INVARIANT_ELIMINATOR_H
 
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/lps/specification.h"
 
   /// The class Invariant_Eliminator is initialized with an LPS using the constructor
   /// Invariant_Eliminator::Invariant_Eliminator. After initialization, the method Invariant_Eliminator::simplify can be
@@ -71,7 +72,7 @@
 
 class Invariant_Eliminator {
   private:
-    BDD_Prover f_bdd_prover;
+    mcrl2::data::detail::BDD_Prover f_bdd_prover;
     ATermAppl f_lps;
     bool f_simplify_all;
     ATermAppl simplify_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number);
@@ -80,11 +81,11 @@ class Invariant_Eliminator {
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Invariant_Eliminator(
-      ATermAppl a_lps,
-      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      mcrl2::lps::specification const& a_lps,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      SMT_Solver_Type a_solver_type = solver_type_ario,
+      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
       bool a_apply_induction = false,
       bool a_simplify_all = false
     );

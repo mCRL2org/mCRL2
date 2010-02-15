@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for input actions.
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
@@ -19,6 +21,7 @@
 #include "visuals/visualnonterminating_transition.h"
 #include "visuals/visualprocess_reference.h"
 #include "visuals/visualpreamble.h"
+#include "visuals/visualcomment.h"
 
 #include "event_architecturereference.h"
 #include "event_channel.h"
@@ -86,60 +89,6 @@ bool grape_event_click::Do( void )
         // deselect all objects
         grape_event_deselect_all* event = new grape_event_deselect_all( m_main_frame );
         m_main_frame->get_event_handler()->Submit(event, false );
-      }
-      break;
-    }
-    case DETACH:
-    {
-       // process detach event
-      if ( m_vis_obj != 0 ) // if an object was clicked.
-      {
-        object* obj_ptr = m_vis_obj->get_selectable_object();
-        // Determine the type of object and invoke the correct detach event.
-        switch( m_vis_obj->get_type() )
-        {
-          case COMMENT:
-          {
-            grape_event_detach_comment* event = new grape_event_detach_comment( m_main_frame, static_cast<comment*> ( obj_ptr ) );
-            m_main_frame->get_event_handler()->Submit( event, true );
-            break;
-          }
-          // Detach would determine an invalid process diagram. You can only add and remove.
-          case INITIAL_DESIGNATOR:
-/*
-//TODO: REMOVE EVENT
-          {
-            grape_event_detach_initial_designator* event = new grape_event_detach_initial_designator( m_main_frame, static_cast<initial_designator*> ( obj_ptr ) );
-            m_main_frame->get_event_handler()->Submit( event, true );
-            break;
-          }
-
-*/        // impelemented by dragging
-          case NONTERMINATING_TRANSITION: break;
-          // implemented by add and remove
-          case TERMINATING_TRANSITION: break;
-//TODO: REMOVE EVENT (grape_event_detach_terminating_transtition)
-          case CHANNEL:
-          {
-            // This event detaches the channel from whatever it is attached to.
-            grape_event_detach_channel* event = new grape_event_detach_channel( m_main_frame, static_cast<channel*> ( obj_ptr ) );
-//            m_main_frame->get_event_handler()->Submit( event, false ); // do not put on stack, control is passed to new events.
-            m_main_frame->get_event_handler()->Submit( event, true ); // do put on stack, control is not passed to new events.
-            break;
-          }
-          // Do not implement for now ( implementation would be detaching all objects attached to the state )
-          case STATE: break;
-          case REFERENCE_STATE: break;
-          // Detachment of all objects it is attached to, implies removement of the communication. ( Could be implemented later, if considered useful / necessary )
-          case CHANNEL_COMMUNICATION: break;
-
-
-          // Not 'attached' to objects, only owner of channels, cannot be detached.
-          case PROCESS_REFERENCE: break;
-          case ARCHITECTURE_REFERENCE: break;
-
-          default: /* assert( false ); */ break;
-        }
       }
       break;
     }
@@ -306,7 +255,6 @@ bool grape_event_click::Do( void )
       break;
     }
     // Below are the drag-events that cannot be handled in this event.
-    case ATTACH: break;
     case ADD_TERMINATING_TRANSITION: break;
     case ADD_CHANNEL_COMMUNICATION: break;
     default:
@@ -335,10 +283,11 @@ bool grape_event_click::Undo( void )
 
 
 
-grape_event_doubleclick::grape_event_doubleclick( grape_frame *p_main_frame, visual_object* p_vis_obj )
+grape_event_doubleclick::grape_event_doubleclick( grape_frame *p_main_frame, visual_object *p_vis_obj, wxMouseEvent &p_event )
 : grape_event_base( p_main_frame, false, _T( "doubleclick" ) )
 {
   m_vis_obj = p_vis_obj;
+  m_mouse_event = p_event;
 }
 
 grape_event_doubleclick::~grape_event_doubleclick( void )
@@ -347,7 +296,7 @@ grape_event_doubleclick::~grape_event_doubleclick( void )
 
 bool grape_event_doubleclick::Do( void )
 {
-  grape_event_properties *event = new grape_event_properties( m_main_frame, m_vis_obj );
+  grape_event_properties *event = new grape_event_properties( m_main_frame, m_vis_obj, m_mouse_event );
   return m_main_frame->get_event_handler()->Submit( event, false );
 }
 
@@ -388,7 +337,7 @@ bool grape_event_drag::Do( void )
   {
     return false;
   }
-
+  
   switch ( state )
   {
     case IDLE: break;
@@ -404,13 +353,13 @@ bool grape_event_drag::Do( void )
       static coordinate s_orig_center;
       static coordinate s_dif;
       // dynamic array containing initial transition coordinates
-      static coordinate* s_orig_ntt = NULL;
+      static coordinate* s_orig_ntt = 0;
       static float s_orig_width;
       static float s_orig_height;
       static int s_flag;
 
       // if we started a new drag
-      if ( m_mousedown && new_drag )
+      if ( m_mousedown && new_drag)
       {
         s_orig_center = begin_object_ptr->get_coordinate();
         s_orig_width = begin_object_ptr->get_width();
@@ -424,6 +373,7 @@ bool grape_event_drag::Do( void )
         {
           compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
           // set length of dynamic array
+          delete [] s_orig_ntt;
           s_orig_ntt = new coordinate[state->count_transition_endstate()];
 
           // fill dynamic array with initial coordinates
@@ -432,17 +382,22 @@ bool grape_event_drag::Do( void )
             nonterminating_transition* ntt = state->get_transition_endstate( i );
             s_orig_ntt[i] = ntt->get_coordinate();
           }
-        } else
-        {
-          // set length of dynamic array
-          s_orig_ntt = new coordinate[0];
         }
-
-        if (new_drag == true)
+        if (new_drag)
         {
           s_flag = -1;
           new_drag = false;
 
+          if (begin_object_ptr->get_type() == COMMENT) 
+          {
+            // get initial object
+            visual_object* visual_beginobject = m_main_frame->get_glcanvas()->get_visual_object( begin_object_ptr );
+            visualcomment* v_com = static_cast<grapeapp::visualcomment*> (visual_beginobject);
+        
+            comment* com = static_cast<libgrape::comment*> (begin_object_ptr); 
+            com->set_reference_selected(v_com->is_inside_reference(s_coord_mousedown));
+          }
+        
           if (begin_object_ptr->get_type() == NONTERMINATING_TRANSITION)  //change flag if the object is a nonterminating transition
           {
             nonterminating_transition* ntt_ptr = static_cast<nonterminating_transition*> ( begin_object_ptr );
@@ -455,7 +410,14 @@ bool grape_event_drag::Do( void )
             if (distance(head_coordinate, m_up) < 0.05f) s_flag = 0;
           }
         }
-      } else if ( !m_mousedown ) new_drag = true;
+      } 
+      else
+      {
+        if ( !m_mousedown ) 
+        {
+          new_drag = true;
+        }
+      }
 
       coordinate delta = m_up - s_coord_mousedown;
 
@@ -535,11 +497,57 @@ bool grape_event_drag::Do( void )
         } else {
           //other object
         }
-
-        //move object
-        grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
-        m_main_frame->get_event_handler()->Submit( event, !m_mousedown );
-
+        
+        // get initial object
+        visual_object* visual_beginobject = m_main_frame->get_glcanvas()->get_visual_object( begin_object_ptr );
+     
+        if (visual_beginobject->get_type() == COMMENT)
+        {       
+          comment* com = static_cast<libgrape::comment*> (begin_object_ptr); 
+          // test if the reference on the comment is selected
+          if (com->get_reference_selected())
+          {
+            if (visual_endobject && (visual_endobject->get_type() != COMMENT)) //only attach if it is not attached to a comment
+            { 
+              object* end_object_ptr = visual_endobject->get_selectable_object();      
+              if (end_object_ptr && (end_object_ptr != begin_object_ptr))
+              {
+                grape_event_attach_comment* event = new grape_event_attach_comment( m_main_frame, com, end_object_ptr );
+                m_main_frame->get_event_handler()->Submit( event, true );
+              }
+            }
+            else 
+            {
+              comment* com = static_cast<libgrape::comment*> (begin_object_ptr);
+              grape_event_detach_comment* event = new grape_event_detach_comment( m_main_frame, com );
+              m_main_frame->get_event_handler()->Submit( event, true );
+            }
+          }
+          else
+          {
+            //move object
+            grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
+            m_main_frame->get_event_handler()->Submit( event, !m_mousedown );
+          } 
+        }
+        else if (visual_beginobject->get_type() == CHANNEL)  
+        {
+          //find position near border
+          channel* chan = static_cast<libgrape::channel*> (begin_object_ptr);
+          compound_reference* ref = chan->get_reference();
+          coordinate coord = move_to_border_rectangle( ref->get_coordinate(), ref->get_width(), ref->get_height(), m_up );
+    
+          //move channel
+          grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, coord, !m_mousedown, s_flag );
+          m_main_frame->get_event_handler()->Submit( event, !m_mousedown ); 
+        }
+        else 
+        {
+          //move object
+          grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
+          m_main_frame->get_event_handler()->Submit( event, !m_mousedown );
+        }
+        
         //also move the nonterminating transitions attached to the state
         if ((begin_object_ptr != 0) && (begin_object_ptr->get_type() == STATE || begin_object_ptr->get_type() == REFERENCE_STATE))
         {
@@ -661,184 +669,6 @@ bool grape_event_drag::Do( void )
       }
       break;
     }
-    case ATTACH:
-    {
-      object* endobject = 0;
-      // Determine whether the second object exists as well.
-      if ( visual_endobject != 0 ) endobject = visual_endobject->get_selectable_object();
-      // If a selectable object is the endstate, determine the type of the begin and end object in order to perform the correct casts.
-      if ( endobject == 0 )
-      {
-        break; // nothing to do here, move along
-      }
-
-      if ( endobject->get_type() == COMMENT )
-      {
-        grape_event_attach_comment* event = new grape_event_attach_comment( m_main_frame, static_cast<comment*> ( endobject ), begin_object_ptr );
-        m_main_frame->get_event_handler()->Submit( event, true );
-        break; // nothing left to do, break out of case
-      }
-
-      // NOTE: comment doesn't need to be handled as endobject, was already handled in the if-statement before this switch
-      switch ( begin_object_ptr->get_type() )
-      {
-        case COMMENT:
-        {
-          grape_event_attach_comment* event = new grape_event_attach_comment( m_main_frame, static_cast<comment*> ( begin_object_ptr ), endobject );
-          m_main_frame->get_event_handler()->Submit( event, true );
-          break;
-        }
-        case STATE:
-        {
-          switch( endobject->get_type() )
-          {
-            // implemented by add and remove.
-            case INITIAL_DESIGNATOR: break;
-//TODO: REMOVE EVENT
-/*            {
-              grape_event_attach_initial_designator* event = new grape_event_attach_initial_designator( m_main_frame, static_cast<initial_designator*> ( endobject ), static_cast<libgrape::state*> ( begin_object_ptr ) );
-              m_main_frame->get_event_handler()->Submit( event, true );
-              break;
-            }
-*/
-            // implemented by add and remove.
-            case TERMINATING_TRANSITION: break;
-/*            {
-//TODO: remove event
-              grape_event_attach_transition_beginstate* event = new grape_event_attach_transition_beginstate( m_main_frame, static_cast<terminating_transition*> ( endobject ), static_cast<libgrape::state*> ( begin_object_ptr ) );
-              m_main_frame->get_event_handler()->Submit( event, true );
-              break;
-            }
-*/
-            // implemented by dragging in SELECT mode
-            case NONTERMINATING_TRANSITION: break;
-            // state cannot be attached to other things
-            default: break;
-          }
-          break;
-        }
-        case REFERENCE_STATE:
-        {
-          switch( endobject->get_type() )
-          {
-            // implemented by add and remove.
-            case INITIAL_DESIGNATOR: break;
-            // implemented by add and remove.
-            case TERMINATING_TRANSITION: break;
-            // implemented by dragging in SELECT mode
-            case NONTERMINATING_TRANSITION: break;
-            // reference state cannot be attached to other things
-            default: break;
-          }
-          break;
-        }
-        // implemented by dragging in SELECT mode
-        case NONTERMINATING_TRANSITION: break;
-/*        {
-          visual_object* visual_beginobject = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_down );
-          visualnonterminating_transition* vis_ntt_ptr = static_cast<visualnonterminating_transition*> ( visual_beginobject );
-          if ( vis_ntt_ptr->is_nearest_head( m_down ) )
-          {
-            if ( endobject->get_type() == REFERENCE_STATE )
-            {
-//TODO: remove event              grape_event_attach_nonterminating_transition_endstate* event = new grape_event_attach_nonterminating_transition_endstate( m_main_frame, static_cast<nonterminating_transition*> ( begin_object_ptr ), static_cast<libgrape::reference_state*> ( endobject ) );
-              m_main_frame->get_event_handler()->Submit( event, true );
-            }
-            else if ( endobject->get_type() == STATE )
-            {
-//TODO: remove event              grape_event_attach_nonterminating_transition_endstate* event = new grape_event_attach_nonterminating_transition_endstate( m_main_frame, static_cast<nonterminating_transition*> ( begin_object_ptr ), static_cast<libgrape::state*> ( endobject ) );
-              m_main_frame->get_event_handler()->Submit( event, true );
-            }
-          }
-          else
-          {
-            if ( endobject->get_type() == REFERENCE_STATE )
-            {
-//TODO: remove event              grape_event_attach_transition_beginstate* event = new grape_event_attach_transition_beginstate( m_main_frame, static_cast<transition*> ( begin_object_ptr ), static_cast<libgrape::reference_state*> ( endobject ) );
-              m_main_frame->get_event_handler()->Submit( event, true );
-            }
-            else if ( endobject->get_type() == STATE )
-            {
-//TODO: remove event              grape_event_attach_transition_beginstate* event = new grape_event_attach_transition_beginstate( m_main_frame, static_cast<transition*> ( begin_object_ptr ), static_cast<libgrape::state*> ( endobject ) );
-              m_main_frame->get_event_handler()->Submit( event, true );
-            }
-          }
-          break;
-        }
-*/
-        // implemented by dragging in SELECT mode
-        case TERMINATING_TRANSITION: break;
-/*        {
-          if ( endobject->get_type() == STATE )
-          {
-//TODO: remove event            grape_event_attach_transition_beginstate* event = new grape_event_attach_transition_beginstate( m_main_frame, static_cast<terminating_transition*> ( begin_object_ptr ), static_cast<libgrape::state*> ( endobject ) );
-            m_main_frame->get_event_handler()->Submit( event, true );
-            break;
-          }
-          else if  ( endobject->get_type() == REFERENCE_STATE )
-          {
-//TODO: remove event            grape_event_attach_transition_beginstate* event = new grape_event_attach_transition_beginstate( m_main_frame, static_cast<terminating_transition*> ( begin_object_ptr ), static_cast<libgrape::reference_state*> ( endobject) );
-            m_main_frame->get_event_handler()->Submit( event, true );
-            break;
-          }
-          break;
-        }
-*/
-        // implemented by add and remove
-        case INITIAL_DESIGNATOR: break;
-/*        {
-          if ( endobject->get_type() == STATE )
-          {
-//TODO: remove event            grape_event_attach_initial_designator* event = new grape_event_attach_initial_designator( m_main_frame, static_cast<initial_designator*> ( begin_object_ptr  ), static_cast<libgrape::state*> ( endobject ) );
-            m_main_frame->get_event_handler()->Submit( event, true );
-            break;
-          }
-          else if ( endobject->get_type() == REFERENCE_STATE )
-          {
-//TODO: remove event            grape_event_attach_initial_designator* event = new grape_event_attach_initial_designator( m_main_frame, static_cast<initial_designator*> ( begin_object_ptr  ), static_cast<libgrape::reference_state*> ( endobject ) );
-            m_main_frame->get_event_handler()->Submit( event, true );
-            break;
-          }
-          break;
-        }
-*/
-
-        case CHANNEL:
-        {
-          switch ( endobject->get_type() )
-          {
-            case CHANNEL_COMMUNICATION:
-            {
-              grape_event_attach_channel_communication* event = new grape_event_attach_channel_communication( m_main_frame, static_cast<channel_communication*> ( endobject  ), static_cast<channel*> ( begin_object_ptr ) );
-              m_main_frame->get_event_handler()->Submit( event, true );
-              break;
-            }
-            default: break;
-          }
-          break;
-        }
-        case CHANNEL_COMMUNICATION:
-        {
-          switch ( endobject->get_type() )
-          {
-            case CHANNEL:
-            {
-              grape_event_attach_channel_communication* event = new grape_event_attach_channel_communication( m_main_frame, static_cast<channel_communication*> ( begin_object_ptr ), static_cast<channel*> ( endobject ) );
-              m_main_frame->get_event_handler()->Submit( event, true );
-              break;
-            }
-            default: break;
-          }
-          break;
-        }
-        // do nothing for references, they can only be attached to a comment, which is already handled in the if statement right before this switch.
-        case PROCESS_REFERENCE:   break;
-        case ARCHITECTURE_REFERENCE: break;
-        default: /* assert( false ); */ break;
-      } // end switch
-
-      break;
-    }
     case ADD_TERMINATING_TRANSITION:
     {
       // Determine the type of the object in order the perform the correct cast.
@@ -922,7 +752,14 @@ bool grape_event_drag::Do( void )
           coord.m_y = ( chan_1->get_coordinate().m_y + chan_2->get_coordinate().m_y ) / 2;
           grape_event_add_channel_communication* event = new grape_event_add_channel_communication( m_main_frame, coord, chan_1, chan_2 );
           // Only do something if the two channels are not on the same reference; note this check was disabled because attach DOES allow it. It is enabled because we don't use attach.
-          if ( chan_1->get_reference() != chan_2->get_reference() ) m_main_frame->get_event_handler()->Submit( event, true );
+          if ( chan_1->get_reference() != chan_2->get_reference() )
+          {
+            m_main_frame->get_event_handler()->Submit( event, true );
+          }
+          else
+          {
+            delete event;
+          }
         }
         // or ended in a channel communication
         else if ( ( end_object_ptr != 0 ) && ( end_object_ptr->get_type() == CHANNEL_COMMUNICATION ) )
@@ -944,7 +781,14 @@ bool grape_event_drag::Do( void )
               break; // break from the for loop, the boolean can never become true again anyway.
             } // end if
           } // end for
-          if ( all_different_references ) m_main_frame->get_event_handler()->Submit( event, true );
+          if ( all_different_references )
+          {
+            m_main_frame->get_event_handler()->Submit( event, true );
+          }
+          else
+          {
+            delete event;
+          }
         } // end else if
       }
       // or we began in a channel communication
@@ -970,13 +814,19 @@ bool grape_event_drag::Do( void )
               break; // break from the for loop, the boolean can never become true again anyway.
             } // end if
           } // end for
-          if ( all_different_references ) m_main_frame->get_event_handler()->Submit( event, true );
+          if ( all_different_references )
+          {
+            m_main_frame->get_event_handler()->Submit( event, true );
+          }
+          else
+          {
+            delete event;
+          }
         }
       }
       break;
     }
     // Below are the click-events that cannot be handled in this event, because these are simple objects that require just a click.
-    case DETACH: break;
     case ADD_INITIAL_DESIGNATOR: break;
     case ADD_CHANNEL: break;
     case ADD_STATE: break;
@@ -998,8 +848,8 @@ bool grape_event_drag::Do( void )
   if ((state == ADD_NONTERMINATING_TRANSITION) || (state == ADD_TERMINATING_TRANSITION) || (state == ADD_STATE) || (state == ADD_REFERENCE_STATE) || (state == ADD_PROCESS_REFERENCE) || (state == ADD_ARCHITECTURE_REFERENCE) || (state == ADD_COMMENT) || (state == ADD_CHANNEL) || (state == ADD_INITIAL_DESIGNATOR) || (state == ADD_NONTERMINATING_TRANSITION))
   {
     //deselect all objects
-    grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
-    m_main_frame->get_event_handler()->Submit(event, false);
+    grape_event_deselect_all *deselect_event = new grape_event_deselect_all(m_main_frame);
+    m_main_frame->get_event_handler()->Submit(deselect_event, false);
   }
   
   return true;

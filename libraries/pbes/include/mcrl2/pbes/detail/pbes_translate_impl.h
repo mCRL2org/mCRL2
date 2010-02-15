@@ -23,9 +23,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/pbes/pbes.h"
@@ -44,7 +42,7 @@ namespace detail {
 /// \param e A PBES expression
 /// \return The free variables of a pbes expression
 inline
-std::set<data::data_variable> compute_free_pbes_expression_variables(const pbes_expression& e)
+std::set<data::variable> compute_free_pbes_expression_variables(const pbes_expression& e)
 {
   free_variable_visitor<pbes_expression> visitor;
   visitor.visit(e);
@@ -95,14 +93,14 @@ std::set<core::identifier_string> propositional_variable_names(Term t)
 /// \param f A modal formula
 /// \return The variables corresponding to ass(f)
 inline
-data::data_variable_list mu_variables(modal::state_formula f)
+data::variable_list mu_variables(state_formulas::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::data_assignment_list l = modal::state_frm::ass(f);
-  data::data_variable_list result;
-  for(data::data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  data::assignment_list l = state_formulas::state_frm::ass(f);
+  data::variable_list result;
+  for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = push_front(result, i->lhs());
+    result = atermpp::push_front(result, i->lhs());
   }
   return atermpp::reverse(result);
 }
@@ -111,14 +109,14 @@ data::data_variable_list mu_variables(modal::state_formula f)
 /// \param f A modal formula
 /// \return The data expressions corresponding to ass(f)
 inline
-data::data_expression_list mu_expressions(modal::state_formula f)
+data::data_expression_list mu_expressions(state_formulas::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::data_assignment_list l = modal::state_frm::ass(f);
+  data::assignment_list l = state_formulas::state_frm::ass(f);
   data::data_expression_list result;
-  for(data::data_assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result = push_front(result, i->rhs());
+    result = atermpp::push_front(result, i->rhs());
   }
   return atermpp::reverse(result);
 }

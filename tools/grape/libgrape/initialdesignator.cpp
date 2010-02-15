@@ -8,6 +8,10 @@
 //
 // Implements the initial_designator class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "initialdesignator.h"
 #include "compoundstate.h"
 
@@ -51,4 +55,4 @@ compound_state * initial_designator::get_attached_state( void )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_initial_designator );
+WX_DEFINE_OBJARRAY( arr_initial_designator )

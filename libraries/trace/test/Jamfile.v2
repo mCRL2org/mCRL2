@@ -4,8 +4,8 @@ project libraries/trace/test
    : requirements
        <use>/site-config//boost
        <toolset>msvc:<asynch-exceptions>on
-       <source>/libraries//core
-       <source>/libraries//trace
+       <library>/libraries//core
+       <library>/libraries//trace
    ;
 
 test-suite lps

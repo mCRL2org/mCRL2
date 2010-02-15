@@ -1,15 +1,17 @@
-#include <iostream>
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+#include <iostream>
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/bisimulation.h"
-#include "mcrl2/pbes/pbes2bes.h"
+#include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/bes_algorithms.h"
+#include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -18,16 +20,6 @@ using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 namespace po = boost::program_options;
-
-std::string print_type(int type)
-{
-  switch (type)
-  {
-    case 0: return "lazy algorithm";
-    case 1: return "finite algorithm";
-  }
-  return "unknown type";
-}
 
 int main(int argc, char* argv[])
 {
@@ -38,7 +30,6 @@ int main(int argc, char* argv[])
   typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_pbes_rewriter;
 
   std::string infile;
-  int type;
   pbes<> p;
 
   try {
@@ -57,7 +48,6 @@ int main(int argc, char* argv[])
     );
     bessolve_options.add_options()
       ("help,h", "display this help")
-      ("variant,v", po::value<int> (&type)->default_value(0), "variant of pbes2bes")
       ;
 
     //--- hidden options ---------
@@ -84,9 +74,11 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    std::cout << "bessolve parameters:" << std::endl;
-    std::cout << "  input  file      : " << infile << std::endl;
-    std::cout << "  pbes2bes variant : " << print_type(type) << std::endl;
+    if (mcrl2::core::gsVerbose)
+    {
+      std::cout << "bessolve parameters:" << std::endl;
+      std::cout << "  input  file      : " << infile << std::endl;
+    }
 
     p.load(infile);
     pbes<> q;
@@ -103,24 +95,27 @@ int main(int argc, char* argv[])
     // pbes rewriter
     my_pbes_rewriter pbesr(datar, datae);
 
-    switch (type)
-    {
-      case 0: q = do_lazy_algorithm(p, pbesr); break;
-      case 1: q = do_finite_algorithm(p, pbesr); break;
-    }
-    int result = pbes_gauss_elimination(q);
+    // apply pbes2bes
+    pbes2bes_algorithm algorithm(p.data());
+    algorithm.run(p);
+    q = algorithm.get_result();
+
+    int result = gauss_elimination(q);
+
+    std::string result_string;    
     if (result == 0)
     {
-      std::cout << "FALSE" << std::endl;
+      result_string = "false";
     }
     else if (result == 1)
     {
-      std::cout << "TRUE" << std::endl;
+      result_string = "true";
     }
     else
     {
-      std::cout << "UNKNOWN" << std::endl;
+      result_string = "unknown";
     }
+    std::cout << "The solution for the initial variable of the bes is " << result_string << "\n";
   }
   catch(mcrl2::runtime_error e)
   {

@@ -14,10 +14,12 @@
 #ifndef INVARIANT_CHECKER_H
 #define INVARIANT_CHECKER_H
 
+#include <string>
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/bdd_prover.h"
-#include "mcrl2/utilities/bdd2dot.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/bdd2dot.h"
+#include "mcrl2/lps/specification.h"
 
   /// The class Invariant_Checker is initialized with an LPS using the constructor Invariant_Checker::Invariant_Checker.
   /// After initialization, the function Invariant_Checker::check_invariant can be called any number of times to check
@@ -64,13 +66,13 @@
 
 class Invariant_Checker {
   private:
-    BDD_Prover f_bdd_prover;
+    mcrl2::data::detail::BDD_Prover f_bdd_prover;
     BDD2Dot f_bdd2dot;
     ATermAppl f_init;
     ATermList f_summands;
     bool f_counter_example;
     bool f_all_violations;
-    char* f_dot_file_name;
+    std::string f_dot_file_name;
     void print_counter_example();
     void save_dot_file(int a_summand_number);
     bool check_init(ATermAppl a_invariant);
@@ -82,15 +84,15 @@ class Invariant_Checker {
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Invariant_Checker(
-      ATermAppl a_lps,
-      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      mcrl2::lps::specification const& a_lps,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      SMT_Solver_Type a_solver_type = solver_type_ario,
+      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,
-      char const* a_dot_file_name = 0
+      std::string const& a_dot_file_name = std::string()
     );
     ~Invariant_Checker();
 

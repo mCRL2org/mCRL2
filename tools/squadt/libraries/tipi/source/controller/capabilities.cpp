@@ -6,13 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #include <ostream>
 #include <sstream>
 #include <utility>
-
-#include <boost/bind.hpp>
 
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/tool/capabilities.hpp"

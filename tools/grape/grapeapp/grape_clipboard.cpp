@@ -8,6 +8,8 @@
 //
 // Defines the clipboard of the application.
 
+#include "wx.hpp" // precompiled headers
+
 #include "grape_clipboard.h"
 #include "grape_frame.h"
 #include "specification.h"

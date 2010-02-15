@@ -11,6 +11,8 @@
 
 // Test program for timed lps2pbes.
 
+#define MCRL2_PBES_TRANSLATE_DEBUG
+
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
@@ -18,11 +20,13 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "test_specifications.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -30,8 +34,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-using namespace mcrl2::modal;
-using namespace mcrl2::modal::detail;
+using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 namespace fs = boost::filesystem;
@@ -80,11 +83,12 @@ const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
 void test_trivial()
 {
-  specification spec    = mcrl22lps(ABP_SPECIFICATION);
-  state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
+  specification spec    = linearise(ABP_SPECIFICATION);
+  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
+  core::garbage_collect();
 }
 
 void test_lps2pbes()
@@ -102,8 +106,8 @@ void test_lps2pbes()
   "init X(3);                              \n"
   ;
   FORMULA = "true => false";
-  spec    = mcrl22lps(SPECIFICATION);
-  formula = mcf2statefrm(FORMULA, spec);
+  spec    = linearise(SPECIFICATION);
+  formula = state_formulas::parse_state_formula(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 
@@ -113,8 +117,8 @@ void test_lps2pbes()
   "init X(3);                             \n"
   ;
   FORMULA = "nu X. (X && forall m:Nat. [a(m)]false)";
-  spec    = mcrl22lps(SPECIFICATION);
-  formula = mcf2statefrm(FORMULA, spec);
+  spec    = linearise(SPECIFICATION);
+  formula = state_formulas::parse_state_formula(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 
@@ -130,17 +134,71 @@ void test_lps2pbes()
   "  ( mu B. exists t3:Pos . [!a]B ) \n"
   ")                                 \n"
   ;
-  spec    = mcrl22lps(SPECIFICATION);
-  formula = mcf2statefrm(FORMULA, spec);
+  spec    = linearise(SPECIFICATION);
+  formula = state_formulas::parse_state_formula(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
+  
+  SPECIFICATION =
+    "sort Closure = List(Bool);                                                   \n"
+    "sort State = struct state(closure: Closure, copy: Nat);                      \n"
+    "                                                                             \n"
+    "map initial: State -> Bool;                                                  \n"
+    "var q: State;                                                                \n"
+    "eqn initial(q) = closure(q).0 && (copy(q) == 0);                             \n"
+    "                                                                             \n"
+    "map accept: State -> Bool;                                                   \n"
+    "var q: State;                                                                \n"
+    "eqn accept(q) = ((copy(q) == 0) && (closure(q).0 => closure(q).2));          \n"
+    "                                                                             \n"
+    "map nextstate: State # State -> Bool;                                        \n"
+    "var q, q': State;                                                            \n"
+    "eqn nextstate(q, q') =                                                       \n"
+    "      (#closure(q) == #closure(q')) &&                                       \n"
+    "      (accept(q) => (copy(q') == (copy(q) + 1) mod 1)) &&                    \n"
+    "      (!accept(q) => (copy(q') == copy(q))) &&                               \n"
+    "      (closure(q).0 == (closure(q).2 || (closure(q).1 && closure(q').0))) && \n"
+    "      (closure(q').0 => closure(q').1 || closure(q').2) &&                   \n"
+    "      (closure(q').2 => closure(q').0);                                      \n"
+    "                                                                             \n"
+    "act a, b;                                                                    \n"
+    "proc P(s: Bool) =  s -> (a . P(false)) <> delta +                            \n"
+    "                  !s -> (b . P(s)) <> delta;                                 \n"
+    "init P(true);                                                                \n"
+    ;
+
+  FORMULA =
+    "forall c1: State .                                                                                                                                            \n"
+    " (exists c0: State .                                                                                                                                          \n"
+    "   (val(initial(c0) && nextstate(c0, c1)) &&                                                                                                                  \n"
+    "    (((<a>true) => val(closure(c1).1)) && (val(closure(c1).1) => (<a>true)) && ((<b>true) => val(closure(c1).2)) && (val(closure(c1).2) => (<b>true)))        \n"
+    "   )                                                                                                                                                          \n"
+    " ) => (                                                                                                                                                       \n"
+    "   mu X(c'': State = c1) . (                                                                                                                                  \n"
+    "     nu Y(c: State = c'') . (                                                                                                                                 \n"
+    "       forall c': State . (                                                                                                                                   \n"
+    "         val(nextstate(c, c')) =>                                                                                                                             \n"
+    "         [true](                                                                                                                                              \n"
+    "           (((<a>true) => val(closure(c).1)) && (val(closure(c).1) => (<a>true)) && ((<b>true) => val(closure(c).2)) && (val(closure(c).2) => (<b>true))) =>  \n"
+    "           ((val(accept(c)) && X(c')) || (val(!accept(c)) && Y(c')))                                                                                          \n"
+    "         )                                                                                                                                                    \n"
+    "       )                                                                                                                                                      \n"
+    "     )                                                                                                                                                        \n"
+    "   )                                                                                                                                                          \n"
+    " )                                                                                                                                                            \n"
+    ;
+
+  spec    = linearise(SPECIFICATION);
+  formula = state_formulas::parse_state_formula(FORMULA, spec);
+  p = lps2pbes(spec, formula, timed);
+  BOOST_CHECK(p.is_well_typed());
+
+  core::garbage_collect();
 }
 
 void test_lps2pbes2()
 {
   std::string FORMULA;
-  specification spec;
-  state_formula formula;
   pbes<> p;
   bool timed = false;
 
@@ -163,6 +221,36 @@ void test_lps2pbes2()
   FORMULA = "nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))";
   p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
+  core::garbage_collect();
+}
+
+void test_lps2pbes3()
+{
+  std::string SPEC = "init delta;";
+
+  std::string FORMULA =
+    "(mu X(n:Nat = 0) . true) \n"
+    "&&                       \n"
+    "(mu X(n:Nat = 0) . true) \n"
+    ;   
+
+  // Expected result:
+  //
+  // pbes nu X1 =        
+  //        Y(0) && X(0);
+  //      mu Y(n: Nat) = 
+  //        true;        
+  //      mu X(n: Nat) = 
+  //        true;        
+  //                     
+  // init X1;            
+
+  pbes<> p;
+  bool timed = false;
+  p = lps2pbes(SPEC, FORMULA, timed);
+  BOOST_CHECK(p.is_well_typed());
+  std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
+  core::garbage_collect();
 }
 
 void test_directory(int argc, char** argv)
@@ -221,6 +309,7 @@ void test_directory(int argc, char** argv)
       }
     }
   }
+  core::garbage_collect();
 }
 
 void test_formulas()
@@ -258,6 +347,7 @@ void test_formulas()
     pbes<> result2 = lps2pbes(SPEC, *i, true);
     std::cout << " <untimed>" << std::endl;
   }
+  core::garbage_collect();
 }
 
 action act(std::string name, data_expression_list parameters)
@@ -274,13 +364,14 @@ action act(std::string name, data_expression_list parameters)
 void test_multi_actions(action_list a, action_list b, data_expression expected_result = data_expression())
 {
   data_expression result = equal_multi_actions(a, b);
-  std::cout << pp(result) << std::endl;
+  std::cout << mcrl2::core::pp(result) << std::endl;
   BOOST_CHECK(expected_result == data_expression() || result == expected_result);
+  core::garbage_collect();
 }
 
 void test_equal_multi_actions()
 {
-  namespace d = data_expr;
+  namespace d = data;
 
   data_expression d1 = nat("d1");
   data_expression d2 = nat("d2");
@@ -298,13 +389,13 @@ void test_equal_multi_actions()
   action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
   action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
 
-  test_multi_actions( a1,  a1, d::true_());
+  test_multi_actions( a1,  a1, d::sort_bool::true_());
   test_multi_actions( a1,  a2, d::equal_to(d1, d2));
-  test_multi_actions(a11, a11, d::true_());
-  test_multi_actions(a12, a21, d::true_());
+  test_multi_actions(a11, a11, d::sort_bool::true_());
+  test_multi_actions(a12, a21, d::sort_bool::true_());
   test_multi_actions(a11, a22, d::equal_to(d1, d2));
-  test_multi_actions(a1, a12,  d::false_());
-  test_multi_actions(a1, b1,   d::false_());
+  test_multi_actions(a1, a12,  d::sort_bool::false_());
+  test_multi_actions(a1, b1,   d::sort_bool::false_());
   test_multi_actions(a12, a34);
   test_multi_actions(a12b1, a34b2);
 }
@@ -315,6 +406,7 @@ int test_main(int argc, char* argv[])
 
   test_lps2pbes();
   test_lps2pbes2();
+  test_lps2pbes3();
   test_trivial();
   test_formulas();
   test_equal_multi_actions();

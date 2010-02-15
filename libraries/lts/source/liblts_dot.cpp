@@ -11,7 +11,7 @@
 #include <ostream>
 #include <fstream>
 #include <string>
-#include "mcrl2/core/detail/struct.h"
+#include <vector>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -51,7 +51,8 @@ bool p_lts::read_from_dot(istream &is)
 {
   if ( parse_dot(is,*lts_object) )
   {
-    unsigned int possible_inits = 0;
+    std::vector< unsigned int > vec_of_possible_inits;
+
     AFun no_incoming_fun = ATmakeAFun("no_incoming",2,ATfalse);
     AFun value_fun = ATmakeAFun("Value",2,ATfalse);
     ATermAppl id = ATmakeAppl2(ATmakeAFun("Type",2,ATfalse),
@@ -64,11 +65,7 @@ bool p_lts::read_from_dot(istream &is)
     {
       if ( ATisEqualAFun(no_incoming_fun,ATgetAFun((ATermAppl) state_values[i])) )
       {
-        if ( possible_inits == 0 )
-        {
-          init_state = i;
-        }
-        possible_inits++;
+        vec_of_possible_inits.push_back( i );
       }
 
       ATermAppl name = ATAgetArgument((ATermAppl) state_values[i],0);
@@ -76,16 +73,35 @@ bool p_lts::read_from_dot(istream &is)
       state_values[i] = (ATerm) ATmakeList2((ATerm) ATmakeAppl2(value_fun,(ATerm) name,(ATerm) id),(ATerm) ATmakeAppl2(value_fun,(ATerm) val,(ATerm) label));
     }
 
-    if ( possible_inits == 0 )
+    if ( vec_of_possible_inits.empty() )
     {
       init_state = 0;
       if ( nstates > 0 )
       {
         gsWarningMsg("could not find suitable initial state; taking first state (%s) as initial\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument((ATermAppl)state_values[0],0),0))));
       }
-    } else if ( possible_inits > 1 )
+    } else 
     {
-      gsWarningMsg("multiple suitable initial states; taking first suitable state (%s) as initial\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument((ATermAppl)state_values[init_state],0),0))));
+      init_state = vec_of_possible_inits[0]; 
+      if (vec_of_possible_inits.size() > 1)
+      {
+        gsWarningMsg("multiple suitable initial states; taking first suitable state (%s) as initial\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument((ATermAppl)state_values[vec_of_possible_inits[0]],0),0))));
+        if(gsVerbose)
+        {
+          gsVerboseMsg("set off initial states is:\n{");
+          for(std::vector< unsigned int >::iterator i = vec_of_possible_inits.begin(); i != vec_of_possible_inits.end(); ++i ) 
+          {
+            if (i != --vec_of_possible_inits.end())
+            {
+              gsVerboseMsg("%s, ", ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument((ATermAppl)state_values[vec_of_possible_inits[*i]],0),0))) );
+            } else {
+              gsVerboseMsg("%s}\n" , ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument((ATermAppl)state_values[vec_of_possible_inits[*i]],0),0))) );
+            }
+          }
+        }else{
+          gsWarningMsg("use verbose to print all other initial states\n");
+        }
+      }
     }
 
     type = lts_dot;

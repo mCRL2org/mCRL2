@@ -16,11 +16,13 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_real.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
 
@@ -87,30 +89,35 @@ void test_operators()
     aterm_appl a1 = make_term("a1");
     aterm_appl a2 = make_term("a2");
     bool b = (a1 < a2);
+    std::clog << "b = " << (b?"true":"false") << std::endl;
   }
 
   {
-    atermpp::aterm_string a1 = make_term("a1");
-    atermpp::aterm_string a2 = make_term("a2");
+    atermpp::aterm_string a1("a1");
+    atermpp::aterm_string a2("a2");
     bool b = (a1 < a2);
+    std::clog << "b = " << (b?"true":"false") << std::endl;
   }
 
   {
     aterm_int a1 = make_term("1");
     aterm_int a2 = make_term("2");
     bool b = (a1 < a2);
+    std::clog << "b = " << (b?"true":"false") << std::endl;
   }
 
   {
     aterm_real a1 = make_term("1.0");
     aterm_real a2 = make_term("2.0");
     bool b = (a1 < a2);
+    std::clog << "b = " << (b?"true":"false") << std::endl;
   }
 
   {
     aterm_list a1 = make_term("[1,2]");
     aterm_list a2 = make_term("[3,2]");
     bool b = (a1 < a2);
+    std::clog << "b = " << (b?"true":"false") << std::endl;
   }
 }
 

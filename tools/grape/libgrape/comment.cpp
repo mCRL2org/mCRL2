@@ -8,6 +8,10 @@
 //
 // Implements the comment class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "comment.h"
 
 using namespace grape::libgrape;
@@ -17,6 +21,7 @@ comment::comment( void )
 {
   m_text = wxEmptyString;
   m_connected_to = 0;
+  m_reference_selected = false;
 }
 
 comment::comment( const comment &p_comment )
@@ -24,15 +29,11 @@ comment::comment( const comment &p_comment )
 {
   m_text = p_comment.m_text;
   m_connected_to = p_comment.m_connected_to;
+  m_reference_selected = p_comment.m_reference_selected;
 }
 
 comment::~comment( void )
 {
-  // Remove references to the comment.
-  if ( m_connected_to != 0 )
-  {
-    m_connected_to->detach_comment( this );
-  }
 }
 
 wxString comment::get_text( void ) const
@@ -48,6 +49,7 @@ void comment::set_text( wxString &p_text )
 void comment::attach_to_object( object* p_object )
 {
   m_connected_to = p_object;
+  m_connected_to->attach_comment( this );
 }
 
 void comment::detach_from_object( void )
@@ -60,6 +62,16 @@ object* comment::get_attached_object( void )
   return m_connected_to;
 }
 
+bool comment::get_reference_selected()
+{
+  return m_reference_selected;
+}
+
+void comment::set_reference_selected(bool p_is_reference_selected)
+{
+  m_reference_selected = p_is_reference_selected;
+}
+
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_comment );
+WX_DEFINE_OBJARRAY( arr_comment )

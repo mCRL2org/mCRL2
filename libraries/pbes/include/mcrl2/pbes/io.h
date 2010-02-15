@@ -23,8 +23,9 @@
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 
@@ -61,13 +62,12 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
   {
     // PropVar => <Int>
     propositional_variable_instantiation propvarinst = propositional_variable_instantiation(p);
-    data::data_variable_list empty;
+    data::variable_list empty;
     propositional_variable propvar = propositional_variable(propvarinst.name(), empty);
     long variable = variables->index(propvar);
     if (variable < 0)
     {
-      core::gsErrorMsg("Error: The BES is not closed. Write to cwi-format failed.\n");
-      throw mcrl2::runtime_error("exit!");
+      throw mcrl2::runtime_error("The BES is not closed. Write to cwi-format failed.");
     }
     else
     {
@@ -78,8 +78,7 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
   }
   else
   {
-    core::gsErrorMsg("The used equation system is not a BES. Could not save this in CWI-format.\n");
-    throw mcrl2::runtime_error("exit!");
+    throw mcrl2::runtime_error("The used equation system is not a BES. Could not save this in CWI-format.");
   }
   return result;
 }
@@ -88,20 +87,20 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
 //--------------------------------
 /// \brief Convert the PBES to the format used at the CWI for their BES solvers
 inline
-void save_pbes_in_cwi_format(pbes<> pbes_spec, std::string outfilename)
+void save_pbes_in_cwi_format(const pbes<>& pbes_spec, std::string outfilename)
 {
   // Use an indexed set to keep track of the variables and their cwi-representations
-  atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
+  const atermpp::vector<pbes_equation>& eqsys = pbes_spec.equations();
   atermpp::indexed_set *variables = new atermpp::indexed_set(2*eqsys.size(), 50);
 
   // Fill the indexed set
-  for (atermpp::vector<pbes_equation>::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
+  for (atermpp::vector<pbes_equation>::const_iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
   {
     variables->put(eq->variable());
   } // because pbes is closed, all variables are done at this point
 
   std::vector< std::string > result;
-  for (atermpp::vector<pbes_equation>::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
+  for (atermpp::vector<pbes_equation>::const_iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
   {
     // fixpoint:
     //  mu => min
@@ -135,8 +134,7 @@ void save_pbes_in_cwi_format(pbes<> pbes_spec, std::string outfilename)
       }
       else
       {
-        core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-        throw mcrl2::runtime_error("exit!");
+        throw mcrl2::runtime_error("Could not save PBES to" + outfilename);
       }
     }
     outputfile.close();
@@ -154,7 +152,7 @@ void save_pbes_in_cwi_format(pbes<> pbes_spec, std::string outfilename)
 //------------------
 /// \brief Save a PBES in the format specified.
 inline
-void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputformat)
+void save_pbes(const pbes<>& pbes_spec, std::string outfilename, std::string outputformat)
 {
   // Check if the result is a BES or a PBES
   bool is_bes = true;
@@ -173,9 +171,9 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
     core::gsVerboseMsg("Saving result in internal format...\n");
     pbes_spec.save(outfilename, false);
   }
-  else if (outputformat == "binary")
+  else if (outputformat == "pbes")
   { // in binary format
-    core::gsVerboseMsg("Saving result in binary format...\n");
+    core::gsVerboseMsg("Saving result in PBES format...\n");
     pbes_spec.save(outfilename, true);
   }
   else if (outputformat == "cwi")
@@ -190,6 +188,10 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
       core::gsWarningMsg("Saving in CWI format not possible. Saving result in binary format.\n");
       pbes_spec.save(outfilename, true);
     }
+  }
+  else
+  {
+    throw mcrl2::runtime_error(std::string("unknown output format ") + outputformat);
   }
 }
 

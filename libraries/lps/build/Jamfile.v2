@@ -2,22 +2,10 @@ project lps
        : source-location ../source
        ;
 
-
-
 mcrl2-library lps
-       : lin_std.cpp
-         binary.cpp
-         sumelm.cpp
-         suminst.cpp
-         untime.cpp
-         nextstate.cpp
-         nextstate_standard.cpp
-         confluence_checker.cpp
-         disjointness_checker.cpp
-         invariant_checker.cpp
-         invariant_eliminator.cpp
-         data_elimination.cpp
+       : implementations.cpp
        : <library>/libraries//data
+         <library>/libraries//process
          <include>../include
          <use>/site-config//boost
        :

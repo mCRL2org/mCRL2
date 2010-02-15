@@ -7,13 +7,15 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/sort.h
-/// \brief Contains includes of frequently used header files.
+/// \brief Contains includes of frequently used header files for sorts.
 
 #ifndef MCRL2_DATA_SORT_H
 #define MCRL2_DATA_SORT_H
 
-#include "mcrl2/data/sort_identifier.h"
-#include "mcrl2/data/sort_arrow.h"
-#include "mcrl2/data/sort_expression.h"
+#include "alias.h"
+#include "basic_sort.h"
+#include "container_sort.h"
+#include "function_sort.h"
+#include "structured_sort.h"
 
 #endif // MCRL2_DATA_SORT_H

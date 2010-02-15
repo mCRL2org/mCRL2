@@ -1,0 +1,7 @@
+act  a: X;
+sort X = struct B | C;
+
+proc P(a:X) = a(a) . P(B)
+            + tau . P(C); 
+
+init P(B);

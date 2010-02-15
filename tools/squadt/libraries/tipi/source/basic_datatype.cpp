@@ -6,26 +6,23 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
+#include "boost/cstdint.hpp"
 #include "tipi/basic_datatype.hpp"
 
-#include <boost/xpressive/xpressive_static.hpp>
+#include "boost/xpressive/xpressive_static.hpp"
 
 namespace tipi {
 
   namespace datatype {
 
-    template class integer_range< char >;
-    template class integer_range< unsigned char >;
-    template class integer_range< short >;
-    template class integer_range< unsigned short >;
-    template class integer_range< int >;
-    template class integer_range< unsigned int >;
-    template class integer_range< long int >;
-    template class integer_range< unsigned long int >;
-    template class integer_range< long long int >;
-    template class integer_range< unsigned long long int >;
+    template class integer_range< boost::int8_t >;
+    template class integer_range< boost::uint8_t >;
+    template class integer_range< boost::int16_t >;
+    template class integer_range< boost::uint16_t >;
+    template class integer_range< boost::int32_t >;
+    template class integer_range< boost::uint32_t >;
+    template class integer_range< boost::int64_t >;
+    template class integer_range< boost::uint64_t >;
     template class real_range< float, false, false >;
     template class real_range< float, false, true >;
     template class real_range< float, true, false >;
@@ -77,8 +74,8 @@ namespace tipi {
 
     std::auto_ptr < basic_integer_range > basic_integer_range::reconstruct(std::string const&) {
       std::auto_ptr < basic_integer_range > new_range;
-
-      assert(false);
+ 
+      throw std::runtime_error( "Accessing function with unpredictable behaviour.\n" );
 
       return new_range;
     }
@@ -94,7 +91,7 @@ namespace tipi {
 
       std::auto_ptr < basic_real_range > new_range;
 
-      assert(false);
+      throw std::runtime_error( "Accessing function with unpredictable behaviour.\n" );
 
       return new_range;
     }

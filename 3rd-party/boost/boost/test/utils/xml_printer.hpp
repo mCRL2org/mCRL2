@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 47258 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : common code used by any agent serving as XML printer
 // ***************************************************************************

@@ -16,11 +16,11 @@
 #include "mcrl2/modal_formula/state_formula_builder.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/map_substitution.h"
 
 namespace mcrl2 {
 
-namespace modal {
+namespace state_formulas {
 
 /// Visitor that renames predicate variables using the specified identifier generator.
 /// \post In the generated formula, all predicate variables have different names.
@@ -72,7 +72,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
         break;
       }
     }
-    return state_frm::var(new_name, l);
+    return state_frm::variable(new_name, l);
   }
 
   /// \brief Visit mu node
@@ -81,7 +81,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula visit_mu(const state_formula& e, const core::identifier_string& n, const data::data_assignment_list& a, const state_formula& f)
+  state_formula visit_mu(const state_formula& e, const core::identifier_string& n, const data::assignment_list& a, const state_formula& f)
   {
     core::identifier_string new_name = push(n);
     state_formula new_formula = visit(f);
@@ -95,7 +95,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula visit_nu(const state_formula& e, const core::identifier_string& n, const data::data_assignment_list& a, const state_formula& f)
+  state_formula visit_nu(const state_formula& e, const core::identifier_string& n, const data::assignment_list& a, const state_formula& f)
   {
     core::identifier_string new_name = push(n);
     state_formula new_formula = visit(f);
@@ -129,23 +129,23 @@ state_formula rename_predicate_variables(const state_formula& f, IdentifierGener
 /// \param generator A generator for fresh identifiers
 /// \return The rename result
 template <typename IdentifierGenerator>
-state_formula rename_data_variables(const state_formula& f, IdentifierGenerator& generator)
+state_formula rename_variables(const state_formula& f, IdentifierGenerator& generator)
 {
   // find all data variables in f
-  std::set<data::data_variable> src = data::find_all_data_variables(f);
+  std::set<data::variable> src = data::find_free_variables(static_cast< atermpp::aterm_appl const& >(f));
 
   // create a mapping of replacements
-  std::map<data::data_variable, data::data_expression> replacements;
+  data::mutable_map_substitution<> replacements;
 
-  for (std::set<data::data_variable>::iterator i = src.begin(); i != src.end(); ++i)
+  for (std::set<data::variable>::const_iterator i = src.begin(); i != src.end(); ++i)
   {
-    replacements[*i] = data::data_variable(generator(i->name()), i->sort());
+    replacements[*i] = data::variable(generator(i->name()), i->sort());
   }
 
-  return data::data_variable_map_replace(f, replacements);
+  return data::replace_variables(f, replacements);
 }
 
-} // namespace modal
+} // namespace state_formulas
 
 } // namespace mcrl2
 

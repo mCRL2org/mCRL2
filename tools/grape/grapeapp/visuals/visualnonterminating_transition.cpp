@@ -8,6 +8,8 @@
 //
 // Implements the visualnonterminating_transition class.
 
+#include "wx.hpp" // precompiled headers
+
 #include "nonterminatingtransition.h"
 #include "transition.h"
 #include "visualnonterminating_transition.h"

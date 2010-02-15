@@ -28,8 +28,9 @@ namespace grape
     {
       private:
       protected:
+        int              m_communication_selected; /**< The selected communication -1 of there is no selection. */
       public:
-
+        
         /**
          * Default constructor.
          * Initializes visual_channel_communication.
@@ -68,6 +69,9 @@ namespace grape
          * @return Returns whether the specified coordinate on the border of a drawn object.
          */
         grape_direction is_on_border( libgrape::coordinate &p_coord );
+        
+        /** @return The selected communication. */
+        int get_communication_selected();
     };
   } // namespace grapeapp
 } // namespace grape

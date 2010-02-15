@@ -15,6 +15,7 @@
 #define BOOST_FILESYSTEM_OPERATIONS_HPP
 
 #include <boost/filesystem/path.hpp>
+#include <boost/detail/scoped_enum_emulation.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/utility/enable_if.hpp>
@@ -40,6 +41,14 @@
     namespace std { using ::time_t; }
 # endif
 
+//----------------------------------------------------------------------------//
+
+namespace boost
+{
+  namespace filesystem
+  {
+
+// typedef boost::filesystem::path Path; needs to be in namespace boost::filesystem
 # ifndef BOOST_FILESYSTEM_NARROW_ONLY
 #   define BOOST_FS_FUNC(BOOST_FS_TYPE) \
       template<class Path> typename boost::enable_if<is_basic_path<Path>, \
@@ -55,12 +64,6 @@
 #   define BOOST_FS_TYPENAME
 # endif
 
-//----------------------------------------------------------------------------//
-
-namespace boost
-{
-  namespace filesystem
-  {
     template<class Path> class basic_directory_iterator;
 
     // BOOST_FILESYSTEM_NARROW_ONLY needs this:
@@ -180,7 +183,7 @@ namespace boost
       BOOST_FILESYSTEM_DECL system::error_code
         rename_api( const std::string & from, const std::string & to );
       BOOST_FILESYSTEM_DECL system::error_code
-        copy_file_api( const std::string & from, const std::string & to );
+        copy_file_api( const std::string & from, const std::string & to, bool fail_if_exists );
 
 #   if defined(BOOST_WINDOWS_API)
       
@@ -224,7 +227,7 @@ namespace boost
       BOOST_FILESYSTEM_DECL system::error_code
         rename_api( const std::wstring & from, const std::wstring & to );
       BOOST_FILESYSTEM_DECL system::error_code
-        copy_file_api( const std::wstring & from, const std::wstring & to );
+        copy_file_api( const std::wstring & from, const std::wstring & to, bool fail_if_exists );
 
 #     endif
 #   endif
@@ -504,11 +507,16 @@ namespace boost
           from_path, to_path, ec ) );
     }
 
-    BOOST_FS_FUNC(void) copy_file( const Path & from_path, const Path & to_path )
+    BOOST_SCOPED_ENUM_START(copy_option)
+      { fail_if_exists, overwrite_if_exists };
+    BOOST_SCOPED_ENUM_END
+
+    BOOST_FS_FUNC(void) copy_file( const Path & from_path, const Path & to_path,
+      BOOST_SCOPED_ENUM(copy_option) option = copy_option::fail_if_exists )
     {
       system::error_code ec( detail::copy_file_api(
         from_path.external_directory_string(),
-        to_path.external_directory_string() ) );
+        to_path.external_directory_string(), option == copy_option::fail_if_exists ) );
       if ( ec )
         boost::throw_exception( basic_filesystem_error<Path>(
           "boost::filesystem::copy_file",
@@ -657,9 +665,9 @@ namespace boost
       { return is_symlink<wpath>( ph ); }
 
     inline bool is_empty( const path & ph )
-      { return is_empty<path>( ph ); }
+      { return boost::filesystem::is_empty<path>( ph ); }
     inline bool is_empty( const wpath & ph )
-      { return is_empty<wpath>( ph ); }
+      { return boost::filesystem::is_empty<wpath>( ph ); }
 
     inline bool equivalent( const path & ph1, const path & ph2 )
       { return equivalent<path>( ph1, ph2 ); }

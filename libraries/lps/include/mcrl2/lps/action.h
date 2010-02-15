@@ -13,8 +13,7 @@
 #define MCRL2_LPS_ACTION_H
 
 #include <cassert>
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/action_label.h"
 
@@ -48,7 +47,7 @@ class action: public atermpp::aterm_appl
       assert(core::detail::check_rule_Action(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
       m_label = action_label(*i++);
-      m_arguments = data::data_expression_list(*i);
+      m_arguments = *i;
     }
 
     /// \brief Constructor.

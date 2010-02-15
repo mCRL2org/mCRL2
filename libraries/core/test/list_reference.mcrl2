@@ -1,3 +1,0 @@
-sort LNat = List(Nat);
-
-init delta;

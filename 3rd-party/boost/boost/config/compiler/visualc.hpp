@@ -121,6 +121,8 @@
 #endif
 #if (_MSC_VER >= 1310) && defined(_MSC_EXTENSIONS)
 #   define BOOST_HAS_LONG_LONG
+#else
+#   define BOOST_NO_LONG_LONG
 #endif
 #if (_MSC_VER >= 1400) && !defined(_DEBUG)
 #   define BOOST_HAS_NRVO
@@ -129,10 +131,10 @@
 // disable Win32 API's if compiler extentions are
 // turned off:
 //
-#ifndef _MSC_EXTENSIONS
+#if !defined(_MSC_EXTENSIONS) && !defined(BOOST_DISABLE_WIN32)
 #  define BOOST_DISABLE_WIN32
 #endif
-#ifndef _CPPRTTI
+#if !defined(_CPPRTTI) && !defined(BOOST_NO_RTTI)
 #  define BOOST_NO_RTTI
 #endif
 
@@ -140,6 +142,40 @@
 // all versions support __declspec:
 //
 #define BOOST_HAS_DECLSPEC
+
+//
+// C++0x features
+//
+//   See above for BOOST_NO_LONG_LONG
+
+// C++ features supported by VC++ 10 (aka 2010)
+//
+#if _MSC_VER < 1600
+#define BOOST_NO_AUTO_DECLARATIONS
+#define BOOST_NO_AUTO_MULTIDECLARATIONS
+#define BOOST_NO_DECLTYPE
+#define BOOST_NO_LAMBDAS
+#define BOOST_NO_RVALUE_REFERENCES
+#define BOOST_NO_STATIC_ASSERT
+#endif // _MSC_VER < 1600
+
+// C++0x features not supported by any versions
+#define BOOST_NO_CHAR16_T
+#define BOOST_NO_CHAR32_T
+#define BOOST_NO_CONCEPTS
+#define BOOST_NO_CONSTEXPR
+#define BOOST_NO_DEFAULTED_FUNCTIONS
+#define BOOST_NO_DELETED_FUNCTIONS
+#define BOOST_NO_EXPLICIT_CONVERSION_OPERATORS
+#define BOOST_NO_EXTERN_TEMPLATE
+#define BOOST_NO_INITIALIZER_LISTS
+#define BOOST_NO_NULLPTR
+#define BOOST_NO_RAW_LITERALS
+#define BOOST_NO_SCOPED_ENUMS
+#define BOOST_NO_TEMPLATE_ALIASES
+#define BOOST_NO_UNICODE_LITERALS
+#define BOOST_NO_VARIADIC_TEMPLATES
+
 //
 // prefix and suffix headers:
 //
@@ -163,6 +199,10 @@
 #     define BOOST_COMPILER_VERSION evc4.0
 #   elif _MSC_VER == 1400
 #     define BOOST_COMPILER_VERSION evc8
+#   elif _MSC_VER == 1500
+#     define BOOST_COMPILER_VERSION evc9
+#   elif _MSC_VER == 1600
+#     define BOOST_COMPILER_VERSION evc10
 #   else
 #      if defined(BOOST_ASSERT_CONFIG)
 #         error "Unknown EVC++ compiler version - please run the configure tests and report the results"
@@ -200,7 +240,7 @@
 #error "Compiler not supported or configured - please reconfigure"
 #endif
 //
-// last known and checked version is 1500 (VC9):
+// last known and checked version is 1600 (VC10, aka 2010):
 #if (_MSC_VER > 1600)
 #  if defined(BOOST_ASSERT_CONFIG)
 #     error "Unknown compiler version - please run the configure tests and report the results"

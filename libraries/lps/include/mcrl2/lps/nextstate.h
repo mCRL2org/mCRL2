@@ -13,9 +13,11 @@
 
 #include <memory>
 #include <vector>
-#include <aterm2.h>
-#include <mcrl2/data/enum.h>
-#include <mcrl2/data/rewrite.h>
+#include "aterm2.h"
+#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator_factory.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/specification.h"
 
 /** \brief Internal NextState state storage method **/
 typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
@@ -46,7 +48,9 @@ class NextStateGenerator
 {
 	public:
 		/** \brief Destructor. **/
-		virtual ~NextStateGenerator();
+		virtual ~NextStateGenerator()
+                {
+                }
 
 		/**
 		 * \brief Get next transition (if available).
@@ -70,7 +74,7 @@ class NextStateGenerator
 		 *        exploration.
 		 * \return Whether or not an error occurred during exploration.
 		 **/
-		virtual bool errorOccurred() = 0;
+		// virtual bool errorOccurred() = 0; Should be done via exception handling.
 
 		/**
 		 * \brief Get the state from which the transitions (if any)
@@ -93,7 +97,9 @@ class NextState
 {
 	public:
 		/** \brief Destructor. **/
-		virtual ~NextState();
+		virtual ~NextState()
+                {
+                }
 
 		/**
 		 * \brief Prioritise an action.
@@ -213,54 +219,34 @@ class NextState
 		 **/
 		virtual ATerm parseStateVector(ATermAppl state, ATerm match = NULL) = 0;
 
-		/**
-		 * \brief Get rewriter used by this object.
-		 * \return Rewriter object used by this NextState object.
-		 **/
-		virtual Rewriter *getRewriter() = 0;
+                /**
+                 * \brief Get rewriter used by this object.
+                 * \deprecated
+                 * \details This function does not work reliably anymore with
+                 * the new data library and the new rewriters, especially when
+                 * standard data types are use.
+                 * \return Rewriter object used by this NextState object.
+                 **/
+                virtual mcrl2::data::rewriter& getRewriter() = 0;
+
 };
 
 /**
  * \brief Create a NextState object.
  * \param spec                A mCRL2 LPS containing the process to be explored.
- * \param allow_free_vars     Whether to allow free variables or to substitute
- *                            them  with dummy values.
- * \param state_format        Format to store the state in (internally).
  * \param e                   Enumerator to use for finding solutions of
  *                            conditions.
- * \param clean_up_enumerator Whether or not to delete the enumerator object on
- *                            destruction of the returned NextState object.
- * \param strategy            The strategy to use for state exploration.
- * \return A NextState object with the given parameters.
- **/
-NextState *createNextState(
-		ATermAppl spec,
-		bool allow_free_vars,
-		int state_format,
-		Enumerator *e,
-		bool clean_up_enumerator = false,
-		NextStateStrategy strategy = nsStandard
-		);
-
-/**
- * \brief Create a NextState object.
- * \param spec                A mCRL2 LPS containing the process to be explored.
  * \param allow_free_vars     Whether to allow free variables or to substitute
  *                            them  with dummy values.
  * \param state_format        Format to store the state in (internally).
- * \param rewrite_strategy    The strategy to use for rewriting data
- *                            expressions.
- * \param enumerator_strategy The strategy to use for enumerating solutions of
- *                            conditions.
  * \param strategy            The strategy to use for state exploration.
  * \return A NextState object with the given parameters.
  **/
 NextState *createNextState(
-		ATermAppl spec,
-		bool allow_free_vars = true,
+                mcrl2::lps::specification const& spec,
+		mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& e,
+		bool allow_free_vars,
 		int state_format = GS_STATE_VECTOR,
-		RewriteStrategy rewrite_strategy = GS_REWR_JITTY,
-		EnumerateStrategy enumerator_strategy = ENUM_STANDARD,
 		NextStateStrategy strategy = nsStandard
 		);
 

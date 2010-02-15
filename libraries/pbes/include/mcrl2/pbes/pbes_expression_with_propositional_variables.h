@@ -46,7 +46,7 @@ namespace pbes_system {
 
       /// \brief Constructor.
       pbes_expression_with_propositional_variables(pbes_expression expression,
-                                                   data::data_variable_list variables,
+                                                   data::variable_list variables,
                                                    propositional_variable_instantiation_list propositional_variables = propositional_variable_instantiation_list())
         : pbes_expression_with_variables(expression, variables), m_propositional_variables(propositional_variables)
       {}
@@ -109,10 +109,10 @@ namespace core {
     typedef data::data_expression_list data_term_sequence_type;
 
     /// \brief The variable type
-    typedef data::data_variable variable_type;
+    typedef data::variable variable_type;
 
     /// \brief The variable sequence type
-    typedef data::data_variable_list variable_sequence_type;
+    typedef data::variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
     typedef pbes_system::propositional_variable propositional_variable_decl_type;
@@ -164,6 +164,32 @@ namespace core {
     term_type or_(term_type p, term_type q)
     {
       return term_type(tr::or_(p, q),
+                       atermpp::term_list_union(p.variables(), q.variables()),
+                       atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
+                      );
+    }
+
+    /// \brief Make a sorted conjunction
+    /// \param p A term
+    /// \param q A term
+    /// \return The value <tt>p && q</tt>
+    static inline
+    term_type sorted_and(term_type p, term_type q)
+    {
+      return term_type(tr::sorted_and(p, q),
+                       atermpp::term_list_union(p.variables(), q.variables()),
+                       atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
+                      );
+    }
+
+    /// \brief Make a sorted disjunction
+    /// \param p A term
+    /// \param q A term
+    /// \return The value <tt>p || q</tt>
+    static inline
+    term_type sorted_or(term_type p, term_type q)
+    {
+      return term_type(tr::sorted_or(p, q),
                        atermpp::term_list_union(p.variables(), q.variables()),
                        atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
                       );
@@ -374,7 +400,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " " + core::pp(t.variables()) + " " + core::pp(t.propositional_variables());
+      return core::pp(t) + " variables: " + data::pp(t.variables()) + " propositional variables: " + data::pp(t.propositional_variables());
     }
   };
 

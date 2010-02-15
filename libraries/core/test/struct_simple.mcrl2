@@ -1,4 +1,0 @@
-% This test cases tests using a simple struct
-sort D = struct d1;
-
-init delta;

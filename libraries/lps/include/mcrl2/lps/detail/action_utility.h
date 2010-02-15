@@ -32,7 +32,7 @@ bool check_action_sorts(action_list actions, const std::set<data::sort_expressio
   for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
   {
     const data::sort_expression_list& s = i->label().sorts();
-    for (data::sort_expression_list::iterator j = s.begin(); j != s.end(); ++j)
+    for (data::sort_expression_list::const_iterator j = s.begin(); j != s.end(); ++j)
     {
       if (!data::detail::check_sort(*j, sorts))
         return false;
@@ -65,7 +65,9 @@ bool check_action_label_sorts(action_label_list action_labels, const std::set<da
 {
   for (action_label_list::iterator i = action_labels.begin(); i != action_labels.end(); ++i)
   {
-    for (data::sort_expression_list::iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
+    data::sort_expression_list i_sorts(i->sorts());
+
+    for (data::sort_expression_list::const_iterator j = i_sorts.begin(); j != i_sorts.end(); ++j)
     {
       if (!data::detail::check_sort(*j, sorts))
         return false;

@@ -14,7 +14,9 @@
 #include <cassert>
 #include <vector>
 
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 

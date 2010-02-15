@@ -127,7 +127,7 @@ namespace grape
      * @param p_color draw color
      * @param p_selected selection property of the object
      */
-    void set_color(const color p_c, bool p_selected);
+    void set_color(const color &p_c, bool p_selected);
 
     /**
      * Function to see if a nearest the endpoint of a line or (if false is returned) nearest the endpoint of the line.
@@ -198,6 +198,18 @@ namespace grape
     bool is_inside_rectangle( const coordinate &p_rect_coord, float p_rect_width, float p_rect_height, const coordinate &p_coord, bool p_minus_margin = true );
 
     /**
+     * Function to see if a coordinate is inside a rectangle with the upper left corner at the specified coordinate, and with the specified width and height. Note that the y-axis is negative and the origin is the upper left corner.
+     * @param p_rect_x The x coordinate of the rectangle.
+     * @param p_rect_y The y coordinate of the rectangle.
+     * @param p_rect_width The width of the rectangle.
+     * @param p_rect_height The height of the rectangle.
+     * @param p_coord The to be checked coordinate.
+     * @param p_minus_margin A flag indicating whether the cursor margin should be subtracted from the size of the rectangle.
+     * @return Returns whether the coordinate is inside the rectangle.
+     */
+    bool is_inside_rectangle( float p_rect_x, float p_rect_y, float p_rect_width, float p_rect_height, const coordinate &p_coord, bool p_minus_margin = true );
+
+    /**
      * Function to see if a coordinate is on the border of a rectangle with the upper left corner at the specified
      * coordinate, and with the specified width and height.
      * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the rectangle at each side.
@@ -262,7 +274,7 @@ namespace grape
      * @param p_end The end coordinate of the to be drawn line.
      * @param A flag indicating whether the object is selected.
      */
-    void draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color = g_color_black );
+    void draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color &p_color = g_color_black, const bool is_dashed = false );
 
     /**
      * Initial designator (arrow) draw function.
@@ -319,15 +331,6 @@ namespace grape
     void draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString &p_label_text );
 
     /**
-     * Nonterminating transition (arrow) draw function.
-     * @param p_begin The begin coordinate of the arrow
-     * @param p_end The end coordinate of the arrow.
-     * @param p_selected A flag indicating whether the object is selected.
-     * @param p_label_text The label of the object.
-     */
-    void draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text );
-
-    /**
      * Terminating transition (arrow) draw function.
      * @param p_begin The begin coordinate of the arrow
      * @param p_end The end coordinate of the arrow.
@@ -362,7 +365,7 @@ namespace grape
      * @param p_selected A flag indicating whether the object is selected.
      * @param p_color The intended fill color of the rectangle.
      */
-    void draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color );
+    void draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color &p_color );
 
     /**
      * Line rectangle draw function.
@@ -372,7 +375,7 @@ namespace grape
      * @param p_selected A flag indicating whether the object is selected.
      * @param p_color The intended color of the edge of the rectangle.
      */
-    void draw_line_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color );
+    void draw_line_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color &p_color );
 
     /**
      * Cross draw function.

@@ -12,15 +12,17 @@
 #include <iostream>
 #include <iterator>
 
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/core/find.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "test_specifications.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;
@@ -33,7 +35,7 @@ struct compare_variable
 {
   aterm d;
 
-  compare_variable(data_variable d_)
+  compare_variable(variable d_)
     : d(d_)
   {}
 
@@ -43,7 +45,7 @@ struct compare_variable
   }
 };
 
-bool occurs_in(data_expression d, data_variable v)
+bool occurs_in(data_expression d, variable v)
 {
   return find_if(aterm_appl(d), compare_variable(v)) != aterm_appl();
 }
@@ -52,21 +54,22 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec = mcrl22lps(ABP_SPECIFICATION);
+  specification spec = linearise(ABP_SPECIFICATION);
   linear_process lps = spec.process();
-  std::set<identifier_string> ids = find_identifiers(aterm(lps));
+  std::set<identifier_string> ids = core::find_identifiers(aterm(lps));
   for (std::set<identifier_string>::iterator i = ids.begin(); i != ids.end(); ++i)
   {
     cout << "- " << *i << endl;
   }
   cin.get();
 
-  summand summand_ = *lps.summands().begin();
+  summand_list summands = lps.summands();
+  summand summand_ = summands.begin();
   data_expression d = summand_.condition();
   cout << "d = " << d << endl;
-  for (data_variable_list::iterator j = summand_.summation_variables().begin(); j != summand_.summation_variables().end(); ++j)
+  for (variable_list::iterator j = summand_.summation_variables().begin(); j != summand_.summation_variables().end(); ++j)
   {
-    data_variable v = *j;
+    variable v = *j;
     bool b = occurs_in(d, v);
     cout << "v = " << v << endl;
     cout << "occurs: " << b << endl;

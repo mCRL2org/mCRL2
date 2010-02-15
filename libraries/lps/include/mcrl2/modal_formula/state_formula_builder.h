@@ -17,7 +17,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace state_formulas {
 
 //<StateFrm>     ::= <DataExpr>
 //                 | StateTrue
@@ -97,28 +97,28 @@ struct state_formula_builder
 
   /// \brief Visit forall node
   /// \return The result of visiting the node
-  virtual state_formula visit_forall(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
+  virtual state_formula visit_forall(const state_formula& /* e */, const data::variable_list& /* variables */, const state_formula& /* expression */)
   {
     return state_formula();
   }
 
   /// \brief Visit exists node
   /// \return The result of visiting the node
-  virtual state_formula visit_exists(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
+  virtual state_formula visit_exists(const state_formula& /* e */, const data::variable_list& /* variables */, const state_formula& /* expression */)
   {
     return state_formula();
   }
 
   /// \brief Visit must node
   /// \return The result of visiting the node
-  virtual state_formula visit_must(const state_formula& /* e */, const regular_formula& /* r */, const state_formula& /* f */)
+  virtual state_formula visit_must(const state_formula& /* e */, const regular_formulas::regular_formula& /* r */, const state_formula& /* f */)
   {
     return state_formula();
   }
 
   /// \brief Visit may node
   /// \return The result of visiting the node
-  virtual state_formula visit_may(const state_formula& /* e */, const regular_formula& /* r */, const state_formula& /* f */)
+  virtual state_formula visit_may(const state_formula& /* e */, const regular_formulas::regular_formula& /* r */, const state_formula& /* f */)
   {
     return state_formula();
   }
@@ -160,14 +160,14 @@ struct state_formula_builder
 
   /// \brief Visit mu node
   /// \return The result of visiting the node
-  virtual state_formula visit_mu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
+  virtual state_formula visit_mu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::assignment_list& /* a */, const state_formula& /* f */)
   {
     return state_formula();
   }
 
   /// \brief Visit nu node
   /// \return The result of visiting the node
-  virtual state_formula visit_nu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
+  virtual state_formula visit_nu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::assignment_list& /* a */, const state_formula& /* f */)
   {
     return state_formula();
   }
@@ -211,22 +211,22 @@ struct state_formula_builder
       state_formula result = visit_imp(e, l, r);
       return (result == state_formula()) ? imp(visit(l), visit(r)) : result;
     } else if (is_forall(e)) {
-      data::data_variable_list qvars = var(e);
+      data::variable_list qvars = var(e);
       state_formula qexpr = arg(e);
       state_formula result = visit_forall(e, qvars, qexpr);
-      return (result == state_formula()) ? forall(qvars, visit(qexpr)) : result;
+      return (result == state_formula()) ? state_frm::forall(qvars, visit(qexpr)) : result;
     } else if (is_exists(e)) {
-      data::data_variable_list qvars = var(e);
+      data::variable_list qvars = var(e);
       state_formula qexpr = arg(e);
       state_formula result = visit_exists(e, qvars, qexpr);
-      return (result == state_formula()) ? exists(qvars, visit(qexpr)) : result;
+      return (result == state_formula()) ? state_frm::exists(qvars, visit(qexpr)) : result;
     } else if(is_must(e)) {
-      const regular_formula& r = act(e);
+      const regular_formulas::regular_formula& r = act(e);
       state_formula s = arg(e);
       state_formula result = visit_must(e, r, s);
       return (result == state_formula()) ? must(r, visit(s)) : result;
     } else if(is_may(e)) {
-      const regular_formula& r = act(e);
+      const regular_formulas::regular_formula& r = act(e);
       state_formula s = arg(e);
       state_formula result = visit_may(e, r, s);
       return (result == state_formula()) ? may(r, visit(s)) : result;
@@ -244,20 +244,20 @@ struct state_formula_builder
       const data::data_expression& t = time(e);
       state_formula result = visit_delay_timed(e, t);
       return (result == state_formula()) ? e : result;
-    } else if(is_var(e)) {
+    } else if(is_variable(e)) {
       const core::identifier_string& n = name(e);
       const data::data_expression_list& l = param(e);
       state_formula result = visit_var(e, n, l);
       return (result == state_formula()) ? e : result;
     } else if(is_mu(e)) {
       const core::identifier_string& n = name(e);
-      const data::data_assignment_list& a = ass(e);
+      const data::assignment_list& a = ass(e);
       state_formula f = arg(e);
       state_formula result = visit_mu(e, n, a, f);
       return (result == state_formula()) ? mu(n, a, visit(f)) : result;
     } else if(is_nu(e)) {
       const core::identifier_string& n = name(e);
-      const data::data_assignment_list& a = ass(e);
+      const data::assignment_list& a = ass(e);
       state_formula f = arg(e);
       state_formula result = visit_nu(e, n, a, f);
       return (result == state_formula()) ? nu(n, a, visit(f)) : result;
@@ -268,7 +268,7 @@ struct state_formula_builder
   }
 };
 
-} // namespace modal
+} // namespace state_formulas
 
 } // namespace mcrl2
 

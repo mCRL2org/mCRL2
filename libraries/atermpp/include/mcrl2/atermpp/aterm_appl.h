@@ -113,7 +113,7 @@ namespace atermpp
         {
           arguments.push_back(aterm_traits<typename std::iterator_traits<Iter>::value_type>::term(*i));
         }
-        m_term = ATmakeApplArray(sym, &(arguments.front()));
+        m_term = reinterpret_cast< ATerm >(ATmakeApplArray(sym, &(arguments.front())));
       }
 
       /// \brief Constructor.
@@ -147,8 +147,8 @@ namespace atermpp
       /// \return The result of the assignment.
       term_appl<Term>& operator=(ATermAppl t)
       {
+        assert(t==NULL || ATgetType(t) != AT_FREE);
         m_term = reinterpret_cast<ATerm>(t);
-        assert(ATgetType(m_term) != AT_FREE);
         return *this;
       }
 
@@ -251,24 +251,24 @@ namespace atermpp
   {
     /// \brief The type of the aterm pointer (ATermAppl / ATermList ...)
     typedef ATermAppl aterm_type;
-  
+
     /// \brief Protects the term t from garbage collection.
     /// \param t A term
-    static void protect(aterm_appl t)   { t.protect(); }     
-  
+    static void protect(aterm_appl t)   { t.protect(); }
+
     /// \brief Unprotects the term t from garbage collection.
     /// \param t A term
-    static void unprotect(aterm_appl t) { t.unprotect(); }   
-  
+    static void unprotect(aterm_appl t) { t.unprotect(); }
+
     /// \brief Marks t for garbage collection.
     /// \param t A term
-    static void mark(aterm_appl t)      { t.mark(); }        
-  
+    static void mark(aterm_appl t)      { t.mark(); }
+
     /// \brief Returns the ATerm that corresponds to the term t.
     /// \param t A term
     /// \return The ATerm that corresponds to the term t.
-    static ATerm term(aterm_appl t)     { return t.term(); } 
-  
+    static ATerm term(aterm_appl t)     { return t.term(); }
+
     /// \brief Returns a pointer to the ATerm that corresponds to the term t.
     /// \param t A term
     /// \return A pointer to the  ATerm that corresponds to the term t.

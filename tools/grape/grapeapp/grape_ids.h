@@ -26,13 +26,7 @@ namespace grape
       // menubar events
       GRAPE_MENU_EXPORTMCRL2,
       GRAPE_MENU_EXPORTIMAGE,
-      GRAPE_MENU_EXPORTTEXT,
       GRAPE_MENU_VALIDATE,
-      GRAPE_MENU_VALIDATE_DIAGRAM,
-
-      // diagram manipulation
-      GRAPE_MENU_SELECT_ALL,
-      GRAPE_MENU_DESELECT_ALL,
 
       // dialog boxes appear when these are invoked
       GRAPE_MENU_ADD_PROCESS_DIAGRAM,
@@ -43,8 +37,6 @@ namespace grape
       // toolbar tools
       // both diagram tools
       GRAPE_TOOL_SELECT,
-      GRAPE_TOOL_ATTACH,
-      GRAPE_TOOL_DETACH,
       GRAPE_TOOL_ADD_COMMENT,
       // process diagram tools
       GRAPE_TOOL_ADD_TERMINATING_TRANSITION,
@@ -71,8 +63,6 @@ namespace grape
       GRAPE_MENU_DELETE,
 
       GRAPE_MENU_IMPORT_FROM_MCRL2,
-//      GRAPE_MENU_EXPORT_TO_MCRL2,
-//      GRAPE_MENU_EXPORT_TO_PICTURE,
       GRAPE_MENU_SET_PARAMETERS,
       GRAPE_MENU_SIMULATE,
 
@@ -81,6 +71,7 @@ namespace grape
       GRAPE_DATASPEC_TEXT,
 
       // dialog events
+      GRAPE_INPUT_TEXT,
       GRAPE_GRID_TEXT,
       GRAPE_PARAMETER_GRID_TEXT,
       GRAPE_LOCALVAR_GRID_TEXT,
@@ -93,6 +84,9 @@ namespace grape
       GRAPE_VAR_UPDATES_INPUT_TEXT,
       
       GRAPE_CHANNEL_NAME_INPUT_TEXT,
+      GRAPE_CHANNEL_RENAME_INPUT_TEXT,
+      
+      GRAPE_CHANNEL_COMMUNICATION_NAME_INPUT_TEXT,
       
       GRAPE_COMBO_TEXT,
       

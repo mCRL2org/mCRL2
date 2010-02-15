@@ -15,7 +15,8 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/dictionary.h"
 
 using namespace std;

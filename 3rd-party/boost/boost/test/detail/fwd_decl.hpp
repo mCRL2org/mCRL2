@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 47258 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : contains forward eclarations for Boost.Test data types
 // ***************************************************************************

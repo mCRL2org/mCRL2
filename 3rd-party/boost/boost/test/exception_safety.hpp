@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 47166 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : Facilities to perform exception safety tests
 // ***************************************************************************

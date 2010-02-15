@@ -8,6 +8,8 @@
 //
 // Implements the OpenGL canvas used to draw objects.
 
+#include "wx.hpp" // precompiled headers
+
 #include <cmath>
 #include <algorithm>
 
@@ -15,6 +17,7 @@
 #include "grape_frame.h"
 #include "architecturereference.h"
 #include "mcrl2/utilities/font_renderer.h"
+#include "visuals/geometric.h"
 #include "visuals/visualobject.h"
 #include "visuals/visualchannel_communication.h"
 #include "visuals/visualcomment.h"
@@ -84,9 +87,6 @@ void grape_glcanvas::update_scrollbars(void)
 
 grape_glcanvas::~grape_glcanvas(void)
 {
-  // free textures in video memory
-//  glDeleteTextures(256, &g_pool.m_textures[0]);
-
   m_visual_objects.Clear();
 }
 
@@ -109,9 +109,6 @@ void grape_glcanvas::init_gl(void)
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
-  // load used textures
-//  init_textures();
 
   m_initialized = true;
 }
@@ -145,6 +142,7 @@ void grape_glcanvas::reset()
   m_mousedown = false;
   m_diagram = 0;
 }
+
 void grape_glcanvas::draw_visual_objects()
 {
   // draw all objects
@@ -155,17 +153,37 @@ void grape_glcanvas::draw_visual_objects()
   }
 
   visual_object *v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_lmouse_down_coordinate );
-  if ((m_mousedown) && (v_obj != 0))
+  if (m_mousedown)
   {
-    if ((v_obj->get_type() == STATE) || (v_obj->get_type() == REFERENCE_STATE))
+    // if there is an object selected
+    if (v_obj != 0 )
     { 
-      // draw terminating transition if we are dragging
-      if ((m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION)) draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, _T(""));
-    }
-    if ((v_obj->get_type() == CHANNEL_COMMUNICATION) || (v_obj->get_type() == CHANNEL))
-    { 
-      // draw channel communication if we are dragging
-      if (m_canvas_state == ADD_CHANNEL_COMMUNICATION) draw_line(m_lmouse_down_coordinate, m_mouse_coordinate, true, g_color_black);
+      if ((v_obj->get_type() == STATE) || (v_obj->get_type() == REFERENCE_STATE))
+      { 
+        // draw terminating transition if we are dragging
+        if ((m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION)) 
+        {
+          draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, _T(""));
+        }
+      }
+      if ((v_obj->get_type() == CHANNEL_COMMUNICATION) || (v_obj->get_type() == CHANNEL))
+      { 
+        // draw channel communication if we are dragging
+        if (m_canvas_state == ADD_CHANNEL_COMMUNICATION)
+        {
+          draw_line(m_lmouse_down_coordinate, m_mouse_coordinate, true, g_color_black);
+        }
+      }
+    
+      comment* comm_ptr = static_cast<comment*> ( v_obj->get_selectable_object() );
+      if ((m_canvas_state == SELECT) && (v_obj->get_type() == COMMENT) && (comm_ptr->get_reference_selected()) && (comm_ptr->get_attached_object() == 0))
+      {
+        // find position on border rectangle
+        coordinate coord = move_to_border_rectangle( comm_ptr->get_coordinate(), comm_ptr->get_width(), comm_ptr->get_height(), m_mouse_coordinate );     
+        
+        // draw comment line if we are dragging in empty space
+        draw_line(coord, m_mouse_coordinate, true, g_color_black);
+      }
     }
   }
 }
@@ -453,28 +471,43 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
     m_mouse_coordinate = clicked_coord;
 
     if ( m_lmouse_down_coordinate.m_x != clicked_coord.m_x || m_lmouse_down_coordinate.m_y != clicked_coord.m_y ) //we are only dragging if there was a displacement
-    {
+    { 
       if ( m_touched_visual_object )
       {
         // select object
         object *obj_ptr = m_touched_visual_object->get_selectable_object();        
-          
-        // update canvas if we are dragging a transition or channel communication
+     
+        // update canvas if we are dragging a comment
+        if (obj_ptr && (obj_ptr->get_type() == COMMENT))
+        {  
+          draw();
+        }
+        
+        // update canvas if we are adding a transition or channel communication
         if (m_canvas_state == ADD_CHANNEL_COMMUNICATION || m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) 
         {
           draw();
-        } else {
+        } 
+        else
+        {
           if ( obj_ptr && (int)obj_ptr->get_id() == m_touched_visual_object_id )
           {
             m_diagram->select_object( obj_ptr );
           }
         }
+        
 
         m_dragging = true;
 
         m_main_frame->event_drag( m_touched_visual_object_id, m_lmouse_down_coordinate, clicked_coord, m_touched_click_location, true );
         // clear_visual_objects was called while processing the event, renew m_touched_visual_object properly
         m_touched_visual_object = get_visual_object( obj_ptr );
+      } 
+      
+      if (m_multiple_selection)
+      {
+        // always update canvas if we are selecting multiple objects
+        draw();
       }
     }
   }
@@ -483,12 +516,15 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 void grape_glcanvas::event_lmouse_down( wxMouseEvent &p_event )
 {
   coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;
-    m_mouse_coordinate = clicked_coord;
+  m_mouse_coordinate = clicked_coord;
 
   if ( !m_mousedown ) // first mousedown event
   {
     m_mousedown = true;
     m_touched_visual_object = get_selectable_visual_object( clicked_coord );
+    
+    m_multiple_selection = !m_touched_visual_object;
+  
     if ( m_touched_visual_object )
     {
       object *obj_ptr = m_touched_visual_object->get_selectable_object();
@@ -518,7 +554,7 @@ void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
   if ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) {
     if ( ( m_main_frame->get_mode() == GRAPE_MODE_ARCH ) || ( m_main_frame->get_mode() == GRAPE_MODE_PROC ) )
     {
-      m_main_frame->get_statusbar()->PopStatusText();
+      m_main_frame->get_statusbar()->SetStatusText(wxEmptyString);
     }
   }
 
@@ -582,7 +618,7 @@ void grape_glcanvas::event_lmouse_doubleclick( wxMouseEvent &p_event )
   visual_object *selected_obj = get_selectable_visual_object( coord );
   if ( selected_obj )
   {
-    m_main_frame->event_doubleclick( selected_obj );
+    m_main_frame->event_doubleclick( selected_obj, p_event );
   }
 }
 

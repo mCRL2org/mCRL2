@@ -15,8 +15,8 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id$
-// $Date: 2008-10-10 12:48:48 +0200 (Fri, 10 Oct 2008) $
-// $Revision: 49246 $
+// $Date: 2008-10-11 08:50:46 +0200 (Sat, 11 Oct 2008) $
+// $Revision: 49272 $
 
 #if !defined(BOOST_MPL_PREPROCESSING_MODE)
 #   include <boost/mpl/aux_/arity.hpp>

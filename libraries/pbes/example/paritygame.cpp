@@ -17,13 +17,14 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
 // Example usage of the parity_game_generator class.
-void run1(const pbes<>& p, bool min_parity_game)
+void run1(pbes<>& p, bool min_parity_game)
 {
   parity_game_generator pgg(p, min_parity_game);
   std::set<unsigned int> todo = pgg.get_initial_values();
@@ -53,7 +54,7 @@ void run1(const pbes<>& p, bool min_parity_game)
 
 // Create a parity game graph, and write it to outfile. The graph
 // is in pgsolver format, see http://www.tcs.ifi.lmu.de/~mlange/pgsolver/index.html.
-void run2(const pbes<>& p, bool min_parity_game, std::string outfile)
+void run2(pbes<>& p, bool min_parity_game, std::string outfile)
 {
   pbes_system::detail::parity_game_output pgg(p, min_parity_game);
   pgg.run();

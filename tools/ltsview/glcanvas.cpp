@@ -344,8 +344,8 @@ void GLCanvas::determineCurrentTool(wxMouseEvent& event) {
 }
 
 void GLCanvas::setMouseCursor() {
-  wxImage img;
   wxCursor cursor;
+  wxImage img;
   bool ok = true;
   switch (currentTool) {
     case myID_SELECT:

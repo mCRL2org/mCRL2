@@ -16,7 +16,6 @@
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mediator.h"
 #include "simulation.h"
 #include "state.h"

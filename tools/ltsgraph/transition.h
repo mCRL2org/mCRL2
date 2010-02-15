@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -27,19 +27,24 @@ class Transition
     Transition(State* from, State* to, std::string label);
 
     // Setters
-    void setControl(const double x, const double y);
+    void setControl(const double x, const double y, const double z);
     void setControlAlpha(const double alpha);
-    void setLabelPos(const double x, const double y);
+	void setcontrolBeta(const double beta);
+	void setcontrolGamma(const double gamma);
+
+    void setLabelPos(const double x, const double y, const double z);
 
     // Getters
     State* getFrom() const;
     State* getTo() const;
     std::string getLabel() const;
 
-    void getControl(double &x, double &y);
+    void getControl(double &x, double &y, double &z);
     double getControlAlpha() const;
+	double getControlBeta() const;
+	double getControlGamma() const;
     double getControlDist() const;
-    void getLabelPos(double &x, double &y);
+    void getLabelPos(double &x, double &y, double &z);
 
     void select();
     void deselect();
@@ -52,9 +57,12 @@ class Transition
 
     // The position of the control point relative to fromState
     double controlAlpha;
-    double controlDist;
+	double controlBeta;
+	double controlGamma;
+	double controlDist;
     double labelX;
     double labelY;
+	double labelZ;
 
     bool selected;
 

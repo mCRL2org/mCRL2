@@ -54,7 +54,7 @@ namespace grape
         grape_listbox   *m_process_diagram_list;      /**< Listbox used to list process diagrams of the current specification. */
         grape_listbox   *m_architecture_diagram_list; /**< Listbox used to list architecture diagrams of the current specification. */
         grape_glcanvas  *m_glcanvas;                  /**< Canvas used for drawing diagrams. */
-        wxSplitterWindow *m_splitter;                  /**< Splitter used to attach the logpanel. */
+        wxSplitterWindow *m_splitter;                  /**< Splitter used to attach the canvas and the datatypespecification. */
         grape_logpanel  *m_logpanel;                  /**< Logpanel used to display messages. */
         wxStatusBar *m_statusbar;                 /**< Statusbar used to display information. */
 
@@ -67,11 +67,13 @@ namespace grape
         wxHtmlHelpController    *m_help_controller;            /**< The help controller. */
         wxToggleButton      *m_dataspecbutton;             /**< The button to switch to datatype specification.*/
         wxTextCtrl          *m_datatext;                   /**< The text control for entering the datatype specification. */
+        wxFont              m_datatext_font;             /**< The monospace font used for the datatype specfication text control. */
         grape_mode            m_mode;                       /**< The frame's mode. */
         unsigned int                  m_counter;                    /**< The counter for new id's. */
         wxTimer             *m_timer;                       /**< Timer used to set the log panel right after some wall clock time. */
+        diagram             *m_current_diagram;       /**< The current diagram showed on the glcanvas. */
 
-        DECLARE_EVENT_TABLE();                        /**< The event table of this frame. */
+        DECLARE_EVENT_TABLE()                        /**< The event table of this frame. */
 
       protected:
         /**
@@ -94,7 +96,7 @@ namespace grape
          * for a value of GRAPE_MODE_DATASPEC the frame will show the
          * data specification editor.
          */
-        void toggle_view( grape_mode p_mode );
+        void toggle_view( grape_mode old_mode, grape_mode p_mode );
 
         /**
          * Sets the window title, with a filename and the modified status.
@@ -204,8 +206,9 @@ namespace grape
          * Doubleclick event handler.
          * Event handler called when a doubleclick on the canvas is performed.
          * @param p_vis_obj The doubleclicked object.
+         * @param p_event The triggered mouse event.
          */
-        void event_doubleclick( visual_object* p_vis_obj );
+        void event_doubleclick( visual_object* p_vis_obj, wxMouseEvent &p_event );
 
         /**
          * Move event handler.
@@ -267,28 +270,16 @@ namespace grape
         void event_menu_exportmcrl2(wxCommandEvent& p_event);
 
         /**
-         * Event handler for specification validation.
+         * Event handler for validation.
          * @param p_event The generated event.
          */
-        void event_menu_validate_specification(wxCommandEvent &p_event);
-
-        /**
-         * Event handler for diagram validation.
-         * @param p_event The generated event.
-         */
-        void event_menu_validate_diagram(wxCommandEvent &p_event);
+        void event_menu_validate(wxCommandEvent &p_event);
 
         /**
          * Event handler for exporting images.
          * @param p_event The generated event.
          */
         void event_menu_exportimage(wxCommandEvent& p_event );
-
-        /**
-         * Event handler for exporting the datatype specification to text.
-         * @param p_event The generated event.
-         */
-        void event_menu_exporttext(wxCommandEvent& p_event );
 
         /**
          * Print event handler.
@@ -418,12 +409,6 @@ namespace grape
         void event_listbox_remove_diagram( int p_diagram_type );
 
         /**
-         * This event is called whenever the user doubleclicks the splitter.
-         * @param p_event The generated event.
-         */
-        void event_splitter_dclick( wxSplitterEvent &p_event );
-
-        /**
          * This is called when the window is being closed (with the [X] or with File->Quit.
          */
         void event_window_close( wxCloseEvent &p_event );
@@ -528,6 +513,11 @@ namespace grape
          * @param p_event The generated event.
          */
         void dataspec_modified( wxCommandEvent &p_event );
+
+        /**
+         * Sets the font style for the data specification text field.
+         */
+        void dataspec_setstyle( void );
     };
   } // namespace grapeapp
 } // namespace grape

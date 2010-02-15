@@ -83,6 +83,4 @@ namespace atermpp
 
 } // namespace atermpp
 
-#include "mcrl2/atermpp/aterm_make_match.h"
-
 #endif // MCRL2_ATERMPP_ATERM_INT_H

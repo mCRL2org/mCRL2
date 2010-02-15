@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -11,9 +11,6 @@
 
 #include "wx.hpp" // precompiled headers
 
-#define NAME "ltsgraph"
-#define AUTHOR "Carst Tankink"
-
 #include "ltsgraph.h"
 #include "ltsimporter.h"
 #include "xmlimporter.h"
@@ -21,92 +18,53 @@
 #include "springlayout.h"
 
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-
-std::string lts_file_argument;
+#include "mcrl2/atermpp/aterm_init.h"
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-// On OS X, a macro called `check' is imported with one of the include directives above
-// which causes compilation failures in Boost header files.
-#undef check
+// Configures tool capabilities.
+void LTSGraph::set_capabilities(tipi::tool::capabilities& c) const {
+  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
 
-// SQuADT protocol interface
-# include <mcrl2/utilities/mcrl2_squadt_interface.h>
-using namespace mcrl2::utilities::squadt;
-using namespace mcrl2::lts;
-const char* lts_file_for_input  = "lts_in";
+  for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
+    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
+  }
+}
 
-class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
+// Queries the user via SQuADt if needed to obtain configuration information
+void LTSGraph::user_interactive_configuration(tipi::configuration&) { }
 
-  public:
-    // Configures tool capabilities.
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
-
-      for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-        c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
-      }
+// Check an existing configuration object to see if it is usable
+bool LTSGraph::check_configuration(tipi::configuration const& c) const {
+  if (c.input_exists("main-input")) {
+    /* The input object is present, verify whether the specified format is supported */
+    if (mcrl2::lts::lts::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
+      send_error("Invalid configuration: unsupported type `" +
+          c.get_input("main-input").type().sub_type() + "' for main input");
     }
-
-    // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(tipi::configuration&) { }
-
-    // Check an existing configuration object to see if it is usable
-    bool check_configuration(tipi::configuration const& c) const {
-      if (c.input_exists(lts_file_for_input)) {
-        /* The input object is present, verify whether the specified format is supported */
-        if (lts::parse_format(c.get_input(lts_file_for_input).type().sub_type().c_str()) == lts_none) {
-          send_error("Invalid configuration: unsupported type `" +
-              c.get_input(lts_file_for_input).type().sub_type() + "' for main input");
-        }
-        else {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    bool perform_task(tipi::configuration& c) {
-      lts_file_argument = c.get_input(lts_file_for_input).location();
-
-      return mcrl2_wx_tool_interface::perform_task(c);
-    }
-};
-#endif
-
-bool LTSGraph::parse_command_line(int argc, wxChar** argv)
-{
-  using namespace ::mcrl2::utilities;
-
-  interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
-    NAME, AUTHOR,
-    "visualise an LTS as a graph and manipulate its layout",
-    "[OPTION]... [INFILE]\n",
-    "Draw graphs and optimize their layout in a graphical environment. "
-    "If INFILE is supplied, the tool will use this file as input for drawing.");
-
-  command_line_parser parser(clinterface, argc, argv);
-
-  if (parser.continue_execution()) {
-    if (0 < parser.arguments.size()) {
-      lts_file_argument = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      parser.error("too many file arguments");
+    else {
+      return true;
     }
   }
 
-  return parser.continue_execution();
+  return false;
 }
 
-LTSGraph::LTSGraph() : mcrl2::utilities::wx::tool< LTSGraph >("LTSGraph",
-    "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.",
-    std::vector< std::string >(1, "Carst Tankink")) {
-}
+bool LTSGraph::perform_task(tipi::configuration& c) {
+  m_input_filename = c.get_input("main-input").location();
 
-bool LTSGraph::DoInit()
+  return run_and_wait();
+}
+#endif
+
+LTSGraph::LTSGraph() : super("LTSGraph",
+    "visualise an LTS as a graph and manipulate its layout in 2D and 3D", // what-is
+    "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.", // GUI specific description
+    "Draw graphs and optimize their layout in a graphical environment. "
+    "If INFILE is supplied, the tool will use this file as input for drawing.",
+    std::vector< std::string >(1, "Carst Tankink, Ali Deniz Aladagli"))
+{ }
+
+bool LTSGraph::run()
 {
   wxApp::SetExitOnFrameDelete(true);
   colouring = false;
@@ -117,8 +75,6 @@ bool LTSGraph::DoInit()
   graph = NULL;
   SpringLayout* springLayout = new SpringLayout(this);
   algorithms.push_back(springLayout);
-/*  GemLayout* gemLayout = new GemLayout(this);
-  algorithms.push_back(gemLayout);*/
 
   mainFrame = new MainFrame(this);
   visualizer = new Visualizer(this);
@@ -127,9 +83,9 @@ bool LTSGraph::DoInit()
   glCanvas->setVisualizer(visualizer);
 
   // Load a provided file.
-  if (!lts_file_argument.empty())
+  if (!m_input_filename.empty())
   {
-    openFile(lts_file_argument);
+    openFile(m_input_filename);
   }
 
   SetTopWindow(mainFrame);
@@ -149,36 +105,16 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,
                                   int nCmdShow) {
 
-  MCRL2_ATERM_INIT(0, lpCmdLine)
+  MCRL2_ATERMPP_INIT(0, lpCmdLine)
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
-#endif
-      return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    }
-
-    return 0;
-#endif
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
 int main(int argc, char **argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-  using namespace mcrl2::utilities::squadt;
-
-  if(!interactor< squadt_interactor >::free_activation(argc, argv)) {
-# endif
-    return wxEntry(argc, argv);
-# ifdef ENABLE_SQUADT_CONNECTIVITY
-  }
-
-  return 0;
-# endif
+  return wxEntry(argc, argv);
 }
 #endif
 
@@ -191,17 +127,17 @@ void LTSGraph::openFile(std::string const &path)
 
   // Get file's basename
 
-  Importer* imp;
+  std::auto_ptr<Importer> imp;
   // Create (on stack) appropriate importer imp
   if ( ext == "xml")
   {
     // path points to an XML layout file, so create an XML importer
-    imp = new XMLImporter();
+    imp.reset(new XMLImporter());
   }
   else
   {
     // Assume we have an LTS file, so create an LTS importer
-    imp = new LTSImporter();
+    imp.reset(new LTSImporter());
   }
 
   graph = imp->importFile(path);
@@ -260,28 +196,120 @@ void LTSGraph::toggleVectorSelected() {
   display();
 }
 
-void LTSGraph::moveObject(double x, double y)
-{
+void LTSGraph::moveObject(double invect[4])
+{ 
+  double trans[4];
+  double theMtrx[16];
+  glCanvas->getMdlvwMtrx(theMtrx);
+  Utils::GLUnTransform(theMtrx, invect, trans);
+  double x, y, z;
   if(selectedState != NULL)
   {
-    selectedState->setX(selectedState->getX() + x);
-    selectedState->setY(selectedState->getY() + y);
+	x = selectedState->getX();
+    y = selectedState->getY();
+	z = selectedState->getZ();
+  }
+  else if(selectedTransition != NULL)
+  {
+    selectedTransition->getControl(x, y, z);
+  }
+  else if(selectedLabel != NULL)
+  {
+    selectedLabel->getLabelPos(x, y, z);
+  }
+  else
+		return;
+  double width, height, depth;
+  glCanvas->getSize(width, height, depth);
+  double rad = glCanvas->getPixelSize() * visualizer->getRadius();
+  x = (x / 2000.0) * (width - rad * 2);
+  y = (y / 2000.0) * (height - rad * 2);
+  z = (z / 2000.0) * (depth - rad * 2);
+  glPushMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glTranslated(x, y, z);
+  glGetDoublev(GL_MODELVIEW_MATRIX, theMtrx);
+  glPopMatrix();
+  int pwidth, pheight;
+  glCanvas->GetClientSize(&pwidth, &pheight);
+  trans[0] = -trans[0] / (width - rad * 2) * theMtrx[14] * 3.0 * 550.0 / double(pheight);
+  trans[1] = -trans[1] / (height - rad * 2) * theMtrx[14] * 3.0 * 550.0 / double(pheight);
+  trans[2] = -trans[2] / (depth - rad * 2) * theMtrx[14] * 3.0 * 550.0 / double(pheight);
+  if(selectedState != NULL)
+  {
+
+    selectedState->setX(selectedState->getX() + trans[0]);
+    selectedState->setY(selectedState->getY() + trans[1]);
+    selectedState->setZ(selectedState->getZ() + trans[2]);
   }
 
   if(selectedTransition != NULL)
   {
-    double prevX, prevY;
-    selectedTransition->getControl(prevX, prevY);
-
-    selectedTransition->setControl(prevX + x, prevY + y);
+    double prevX, prevY, prevZ;
+    selectedTransition->getControl(prevX, prevY, prevZ);
+    selectedTransition->setControl(prevX + trans[0], prevY + trans[1], prevZ + trans[2]);
   }
   if(selectedLabel != NULL)
   {
-    double prevX, prevY;
-    selectedLabel->getLabelPos(prevX, prevY);
-
-    selectedLabel->setLabelPos(prevX + x, prevY + y);
+    double prevX, prevY, prevZ;
+    selectedLabel->getLabelPos(prevX, prevY, prevZ);
+    selectedLabel->setLabelPos(prevX + trans[0], prevY + trans[1], prevZ + trans[2]);
   }
+}
+
+void LTSGraph::moveObject(double x, double y)
+{
+  double prevX, prevY, prevZ;
+  if(selectedState != NULL)
+  {
+    prevX = selectedState->getX() + x;
+    prevY = selectedState->getY() + y;
+  }
+  if(selectedTransition != NULL)
+  {
+    selectedTransition->getControl(prevX, prevY, prevZ);
+	prevX = prevX + x;
+	prevY = prevY + y;
+  }
+  if(selectedLabel != NULL)
+  {
+    selectedLabel->getLabelPos(prevX, prevY, prevZ);
+	prevX = prevX + x;
+	prevY = prevY + y;
+  }
+  if(selectedState != NULL || selectedTransition != NULL || selectedLabel != NULL)
+  {
+		if(prevX > 1000)
+		{
+			prevX = 1000;
+		}
+
+		if (prevX < -1000)
+		{
+			prevX = -1000;
+		}
+
+		if (prevY > 1000)
+		{
+			prevY = 1000;
+		}
+
+		if (prevY < -1000)
+		{
+			prevY = -1000;
+		}
+  }
+  
+  
+  if(selectedState != NULL)
+  {
+		selectedState->setX(prevX);
+		selectedState->setY(prevY);
+  }
+  if(selectedTransition != NULL)
+    selectedTransition->setControl(prevX, prevY, prevZ);
+  if(selectedLabel != NULL)
+    selectedLabel->setLabelPos(prevX, prevY, prevZ);
 }
 
 void LTSGraph::lockObject()
@@ -336,21 +364,26 @@ void LTSGraph::deselect()
   display();
 }
 
-void LTSGraph::uncolourState(size_t selectedObject) {
-  if(colouring) {
+void LTSGraph::uncolourState(size_t selectedObject) 
+{
+  if(colouring) 
+  {
     graph->colourState(selectedObject);
   }
 }
 
-void LTSGraph::colourState(size_t selectedObject) {
-  if(colouring) {
+void LTSGraph::colourState(size_t selectedObject) 
+{
+  if(colouring) 
+  {
     graph->colourState(selectedObject, brushColour);
   }
 }
 
 void LTSGraph::selectState(size_t selectedObject)
 {
-  if(!colouring) {
+  if(!colouring) 
+  {
     selectedState = graph->selectState(selectedObject);
   }
 }
@@ -370,7 +403,8 @@ void LTSGraph::selectLabel(size_t state, size_t transition)
   selectedLabel = graph->selectTransition(state, transition);
 }
 
-void LTSGraph::selectSelfLabel(size_t state, size_t transition) {
+void LTSGraph::selectSelfLabel(size_t state, size_t transition) 
+{
   selectedLabel = graph->selectSelfLoop(state, transition);
 }
 
@@ -380,16 +414,19 @@ void LTSGraph::setRadius(int radius)
   display();
 }
 
-int LTSGraph::getRadius() const {
+int LTSGraph::getRadius() const 
+{
   return visualizer->getRadius();
 }
 
-void LTSGraph::setTransLabels(bool value) {
+void LTSGraph::setTransLabels(bool value) 
+{
   visualizer->setTransLabels(value);
   display();
 }
 
-void LTSGraph::setStateLabels(bool value) {
+void LTSGraph::setStateLabels(bool value) 
+{
   visualizer->setStateLabels(value);
   display();
 }
@@ -410,11 +447,64 @@ double LTSGraph::getAspectRatio() const
   return glCanvas->getAspectRatio();
 }
 
-
-void LTSGraph::setBrushColour(wxColour colour) {
+void LTSGraph::setBrushColour(wxColour colour) 
+{
   brushColour = colour;
 }
 
-void LTSGraph::setTool(bool isColour) {
+void LTSGraph::setTool(bool isColour) 
+{
   colouring = isColour;
+}
+
+void LTSGraph::getCanvasMdlvwMtrx(double * mtrx)
+{
+  glCanvas->getMdlvwMtrx(mtrx);
+}
+
+void LTSGraph::getCanvasCamPos(double & x, double & y, double & z)
+{
+  glCanvas->getCamPos(x, y, z);
+}
+
+bool LTSGraph::get3dMode()
+{
+  return glCanvas->get3D();
+}
+
+void LTSGraph::forceWalls()
+{
+  if (graph)
+  {
+      for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+		{
+		State* s = graph->getState(i);
+		double newX, newY;
+		newX = s->getX();
+		newY = s->getY();
+		if(newX > 1000)
+		{
+			newX = 1000;
+		}
+
+		if (newX < -1000)
+		{
+			newX = -1000;
+		}
+
+		if (newY > 1000)
+		{
+			newY = 1000;
+		}
+
+		if (newY < -1000)
+		{
+			newY = -1000;
+		}
+
+		s->setX(newX);
+		s->setY(newY);
+		}
+		glCanvas->display();
+  }
 }

@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50673 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : defines interface for identification_policy
 // ***************************************************************************

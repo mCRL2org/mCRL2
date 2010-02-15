@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -24,6 +24,7 @@ namespace IDS
     myID_DLG_ALGO,
     myID_TOGGLE_POSITIONING,
     myID_TOGGLE_VECTOR,
+	myID_TOGGLE_3D,
 
     myID_NS_SLIDER,
     myID_ES_SLIDER,
@@ -37,7 +38,15 @@ namespace IDS
     myID_TRANS_CHECK,
     myID_STATE_CHECK,
     myID_COLOUR,
-    myID_TOOL_SELECT
+    myID_SELECT,
+	myID_ROTATE,
+	myID_PAN,
+	myID_ZOOM,
+	myID_RESET_ALL,
+	myID_RESET_ROTATE,
+	myID_RESET_PAN,
+	myID_SHOW_SYSTEM,
+	myID_NONE
   };
 
   enum PickState {TRANSITION, SELF_LOOP, STATE, LABEL, SELF_LABEL};

@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for reference states.
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
@@ -296,4 +298,4 @@ bool grape_event_change_refstate::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_ref_state );
+WX_DEFINE_OBJARRAY( arr_event_remove_ref_state )

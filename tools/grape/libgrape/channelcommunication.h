@@ -41,7 +41,7 @@ namespace grape
         /** The communications involved in this channel communication. Each communication is associated with exactly one channel. */
         arr_communication           m_communication;
         channel_communication_type  m_channel_communication_type; /**< type of channel communication. */
-        wxString                    m_rename_to;                  /**< rename of the channel communication. */
+        wxString                    m_name_to;                  /**< rename of the channel communication. */
 
       public:
 
@@ -72,18 +72,18 @@ namespace grape
         ~channel_communication( void );
 
         /**
-         * Rename retrieval function.
+         * Name retrieval function.
          * @return The rename to of the channel communication.
          */
-        wxString get_rename_to(void) const;
+        wxString get_name_to(void) const;
 
        /**
-         * Rename assignment function.
+         * Name assignment function.
          * Assigns the name to the rename of the channel communication.
          * @pre The channel communication is selected.
-         * @param p_rename_to The new rename of the channel communication.
+         * @param p_name_to The new name of the channel communication.
          */
-        void set_rename_to( const wxString &p_rename_to );
+        void set_name_to( const wxString &p_name_to );
         
         /**
          * Channel addition function.
@@ -126,9 +126,15 @@ namespace grape
         /**
          * Channel communication type assignment function
          * Takes a new channeltype and assigns it to the channeltype of the channel.
-         * @param p_channeltype The new channeltype
+         * @param p_channel type The new channeltype
          */
         void set_channel_communication_type( const channel_communication_type &p_channel_communication_type );
+        
+        /**
+         * @param p_channel the channel
+         * @return channel communication is attached on p_channel
+         */
+        bool has_channel( const channel* p_channel);
     };
 
     /**

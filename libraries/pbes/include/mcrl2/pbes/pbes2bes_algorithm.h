@@ -11,10 +11,15 @@
 
 #include <set>
 #include <iostream>
+#include <sstream>
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbes2bes_rewriter.h"
+
+#ifdef PBES2BES_FINITE_ALGORITHM
+#include "mcrl2/pbes/detail/pbes2bes_finite_builder.h"
+#endif
 
 #ifndef MCRL2_PBES_PBES2BES_ALGORITHM_H
 #define MCRL2_PBES_PBES2BES_ALGORITHM_H
@@ -44,11 +49,11 @@ namespace pbes_system {
   /// \param e A sequence of data expressions
   /// \return The substitution that maps the i-th element of \p v to the i-th element of \p e
   inline
-  pbes2bes_substitution_function make_pbes2bes_substitution(data::data_variable_list v, data::data_expression_list e)
+  pbes2bes_substitution_function make_pbes2bes_substitution(data::variable_list v, data::data_expression_list e)
   {
     assert(v.size() == e.size());
     pbes2bes_substitution_function sigma;
-    data::data_variable_list::iterator i = v.begin();
+    data::variable_list::iterator i = v.begin();
     data::data_expression_list::iterator j = e.begin();
 
     for (; i != v.end(); ++i, ++j)
@@ -94,7 +99,7 @@ namespace pbes_system {
       /// \param rewriter_strategy A strategy for the data rewriter
       /// \param print_equations If true, the generated equations are printed
       /// \param print_rewriter_output If true, invocations of the rewriter are printed
-      pbes2bes_algorithm(data::data_specification data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
+      pbes2bes_algorithm(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
         : R(data_spec, rewriter_strategy, print_rewriter_output), equation_count(0), m_print_equations(print_equations)
       {}
 
@@ -102,11 +107,7 @@ namespace pbes_system {
       /// \param p A PBES
       void run(pbes<>& p)
       {
-        if (!p.instantiate_free_variables())
-        {
-          core::gsErrorMsg("Instantiatiation of free variables failed!\n");
-          throw mcrl2::runtime_error("exit!");
-        }
+        p.instantiate_global_variables();
 
         // initialize equation_index and E
         int eqn_index = 0;
@@ -137,7 +138,7 @@ namespace pbes_system {
               todo.insert(*i);
             }
           }
-          pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::data_variable_list()), psi_e);
+          pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::variable_list()), psi_e);
           if (m_print_equations)
           {
             std::cerr << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;
@@ -177,6 +178,113 @@ namespace pbes_system {
         return R;
       }
   };
+
+#ifdef PBES2BES_FINITE_ALGORITHM
+  /// \brief Algorithm class for the finite pbes2bes algorithm.
+  class pbes2bes_finite_algorithm
+  {
+    public:
+      struct rename
+      {
+        /// \brief Returns a name.
+        /// Based on implementation made by Alexander van Dam.
+        template <typename VariableContainer>
+        core::identifier_string operator()(core::identifier_string name, const VariableContainer& variables)
+        {
+          std::ostringstream out;
+          out << std::string(name);
+          for (typename Container::const_iterator i = variables.begin(); i != variables.end(); i++)
+          {
+            out << "@" << core::pp(*i);
+          }
+          return core::identifier_string(out.str());
+        }
+      };
+
+    protected:
+      /// \brief Data specification
+      data::data_specification m_dataspec;
+
+      /// \brief Stores the finite variables for each proposition variable declaration.
+      std::map<core::identifier_string, std::vector<data::variable> >& m_finite_variables;
+
+      /// \brief Data structure for storing the result. E[i] corresponds to the equations
+      /// generated from the i-th PBES equation.
+      std::vector<atermpp::vector<pbes_equation> > E;
+
+      /// \brief Returns the finite parameters of equation eq
+      std::vector<data::variable> finite_variables(const pbes_equation& eq, const data::data_specification& dataspec) const
+      {
+        std::vector<data::variable> result;
+        data::variable_list v = eq.variable().parameters();
+        for (data::variable_list::iterator i = v.begin(); i != v.end(); ++i)
+        {
+          if (dataspec.is_certainly_finite(i->sort()))
+          {
+            result.push_back(*i);
+          }
+        }
+        return result;
+      }
+
+    public:
+
+      /// \brief Constructor.
+      /// \param print_equations If true, the generated equations are printed
+      /// \param print_rewriter_output If true, invocations of the rewriter are printed
+      pbes2bes_finite_algorithm(bool print_equations = false, bool print_rewriter_output = false)
+      {}
+
+      /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
+      /// \param p A PBES
+      /// \param rewriter_strategy A strategy for the data rewriter
+      void run(pbes<>& p, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
+      {
+        p.instantiate_global_variables();
+
+        for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          m_finite_variables[i->variable().name()] = finite_variables(*i, p.data());
+        }
+
+        /// \brief The rewriter.
+        data::rewriter R(p.data(), rewriter_strategy);
+
+        pbes2bes_finite_builder visitor(R, rename(), p.data(), m_finite_variables);
+        for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          visitor.visit(
+        }
+      }
+
+      /// \brief Returns the computed bes in pbes format
+      /// \return The computed bes in pbes format
+      pbes<> get_result()
+      {
+        pbes<> result;
+        for (std::vector<atermpp::vector<pbes_equation> >::iterator i =  E.begin(); i != E.end(); ++i)
+        {
+          result.equations().insert(result.equations().end(), i->begin(), i->end());
+        }
+        result.initial_state() = init;
+        return result;
+      }
+
+      /// \brief Returns the flag for printing the generated bes equations
+      /// \return The flag for printing the generated bes equations
+      bool& print_equations()
+      {
+        return m_print_equations;
+      }
+
+      /// \brief Returns the flag for printing rewriter invocations
+      /// \return The flag for printing rewriter invocations
+      pbes2bes_rewriter& rewriter()
+      {
+        return R;
+      }
+  };
+#endif // PBES2BES_FINITE_ALGORITHM
 
 } // namespace pbes_system
 

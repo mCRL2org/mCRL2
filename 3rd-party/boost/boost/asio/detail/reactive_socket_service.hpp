@@ -448,7 +448,7 @@ public:
       // Flags are manipulated in a temporary variable so that the socket
       // implementation is not updated unless the ioctl operation succeeds.
       unsigned char new_flags = impl.flags_;
-      if (command.get())
+      if (*static_cast<ioctl_arg_type*>(command.data()))
         new_flags |= implementation_type::user_set_non_blocking;
       else
         new_flags &= ~implementation_type::user_set_non_blocking;
@@ -1454,7 +1454,6 @@ public:
     for (;;)
     {
       // Try to complete the operation without blocking.
-      boost::system::error_code ec;
       socket_holder new_socket;
       std::size_t addr_len = 0;
       if (peer_endpoint)

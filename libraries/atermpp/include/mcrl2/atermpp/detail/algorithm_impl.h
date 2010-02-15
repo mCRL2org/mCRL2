@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 #define MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 
-#include <boost/shared_array.hpp>
+#include <boost/scoped_array.hpp>
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -67,10 +67,16 @@ namespace detail {
     if (n > 0)
     {
       bool term_changed = false;
-      boost::shared_array< ATerm > t(new ATerm[n]);
+      boost::scoped_array< ATerm > t(new ATerm[n]);
+      for (unsigned int i = 0; i < n; ++i)
+      {
+        t[i] = 0;
+      }
+      ATprotectArray(t.get(), n);
       for (unsigned int i = 0; i < n; i++)
       {
         t[i] = f(a(i));
+
         if (t[i] != a(i))
         {
           term_changed = true;
@@ -80,6 +86,7 @@ namespace detail {
       {
         a = ATmakeApplArray(a.function(), t.get());
       }
+      ATunprotectArray(t.get());
     }
     return a;
   }
@@ -187,7 +194,7 @@ namespace detail {
       aterm_list l(t);
       for (aterm_list::iterator i = l.begin(); i != l.end(); ++i)
       {
-        find_all_if_impl(*i, op, destBegin);
+        find_all_if_impl< MatchPredicate >(*i, op, destBegin);
       }
     }
     else if (t.type() == AT_APPL) {
@@ -198,7 +205,7 @@ namespace detail {
       }
       for (aterm_appl::iterator i = a.begin(); i != a.end(); ++i)
       {
-        find_all_if_impl(*i, op, destBegin);
+        find_all_if_impl< MatchPredicate >(*i, op, destBegin);
       }
     }
     else {
@@ -227,7 +234,7 @@ namespace detail {
       }
       for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
       {
-        partial_find_if_impl(*i, match, stop);
+        partial_find_if_impl< MatchPredicate, StopPredicate >(*i, match, stop);
       }
     }
 
@@ -235,7 +242,7 @@ namespace detail {
     {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
       {
-        partial_find_if_impl(*i, match, stop);
+        partial_find_if_impl< MatchPredicate, StopPredicate >(*i, match, stop);
       }
     }
   }
@@ -260,7 +267,7 @@ namespace detail {
       }
       for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
       {
-        partial_find_all_if_impl(*i, match, stop, destBegin);
+        partial_find_all_if_impl< MatchPredicate, StopPredicate >(*i, match, stop, destBegin);
       }
     }
 
@@ -268,7 +275,7 @@ namespace detail {
     {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
       {
-        partial_find_all_if_impl(*i, match, stop, destBegin);
+        partial_find_all_if_impl< MatchPredicate, StopPredicate >(*i, match, stop, destBegin);
       }
     }
   }
@@ -419,14 +426,14 @@ namespace detail {
     if (t.type() == AT_APPL)
     {
       aterm_appl a(t);
-      result = appl_apply(a, bottom_up_replace_helpsr<ReplaceFunction>(f));
+      result = f(appl_apply(a, bottom_up_replace_helpsr<ReplaceFunction>(f)));
     }
     else if (t.type() == AT_LIST)
     {
       aterm_list l(t);
       result = list_apply(l, bottom_up_replace_helpsr<ReplaceFunction>(f));
     }
-    return f(result);
+    return result;
   }
 
   struct default_bottom_up_replace

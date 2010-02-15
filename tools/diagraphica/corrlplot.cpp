@@ -148,21 +148,17 @@ void CorrlPlot::drawAxes(
     const string &yLbl )
 // --------------------------
 {
-    double w, h;
-    double xLft, xRgt;
-    double yBot, yTop;
-    double pix;
-
     // get size of sides
+    double w, h;
     canvas->getSize( w, h );
     // get size of 1 pixel
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
 
     // calc size of bounding box
-    xLft = -0.5*w+20*pix;
-    xRgt =  0.5*w-10*pix;
-    yTop =  0.5*h-10*pix;
-    yBot = -0.5*h+20*pix;
+    double xLft = -0.5*w+20*pix;
+    double xRgt =  0.5*w-10*pix;
+    double yTop =  0.5*h-10*pix;
+    double yBot = -0.5*h+20*pix;
 
     // rendering mode
     if ( inSelectMode != true )
@@ -188,18 +184,13 @@ void CorrlPlot::drawAxes(
 void CorrlPlot::drawLabels( const bool &inSelectMode )
 // ---------------------------------------------------
 {
-    double w, h;
-    double x, y;
-    double pix;
-    double scaling;
-    string min, max;
-
     // get size of sides
+    double w, h;
     canvas->getSize( w, h );
     // get size of 1 pixel
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
     // calc scaling to use
-    scaling = ( 12*pix )/(double)CHARHEIGHT;
+    double scaling = ( 12*pix )/(double)CHARHEIGHT;
 
     // color
     VisUtils::setColorBlack();
@@ -207,8 +198,8 @@ void CorrlPlot::drawLabels( const bool &inSelectMode )
     if ( mapXToY.size() > 0 )
     {
         // x-axis label
-        x =  0.0;
-        y = -0.5*h+9*pix;
+        double x =  0.0;
+        double y = -0.5*h+9*pix;
         VisUtils::drawLabelCenter( texCharId, x, y, scaling, xLabel );
 
         // y-axis labels
@@ -223,9 +214,6 @@ void CorrlPlot::drawLabels( const bool &inSelectMode )
 void CorrlPlot::drawPlot( const bool &inSelectMode )
 // -------------------------------------------------
 {
-    double x, y, rad;
-    double pix;
-
     // selection mode
     if ( inSelectMode == true )
     {
@@ -234,9 +222,9 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
             glPushName( i );
             for ( size_t j = 0; j < positions[i].size(); ++j )
             {
-                x   = positions[i][j].x;
-                y   = positions[i][j].y;
-                rad = radii[i][j];
+                double x   = positions[i][j].x;
+                double y   = positions[i][j].y;
+                double rad = radii[i][j];
 
                 glPushName( j );
                 //VisUtils::fillCirc( x, y, rad, 21);
@@ -249,16 +237,16 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
     // rendering mode
     else
     {
-        ColorRGB col;
-        pix   = canvas->getPixelSize();
+        double pix   = canvas->getPixelSize();
 
         for ( size_t i = 0; i < positions.size(); ++i )
         {
             for ( size_t j = 0; j < positions[i].size(); ++j )
             {
-                x   = positions[i][j].x;
-                y   = positions[i][j].y;
-                rad = radii[i][j];
+                double x   = positions[i][j].x;
+                double y   = positions[i][j].y;
+                double rad = radii[i][j];
+                ColorRGB col;
 
                 VisUtils::mapColorCoolGreen( col );
                 col.a = 0.35;
@@ -527,44 +515,36 @@ void CorrlPlot::calcPositions()
 
     if ( mapXToY.size() > 0 )
     {
-        double w, h, pix;
-        double xLft, xRgt, yTop, yBot;
-        double numX, numY, fracX, fracY;
-        double frac, maxRadius;
-        double x, y, radius;
-        double maxArea, area;
-        Position2D pos;
-
         // get size of canvas & 1 pixel
+        double w,h;
         canvas->getSize( w, h );
-        pix = canvas->getPixelSize();
+        double pix = canvas->getPixelSize();
 
         // calc sides of bounding box
-        xLft = -0.5*w+20*pix;
-        xRgt =  0.5*w-10*pix;
-        yTop =  0.5*h-10*pix;
-        yBot = -0.5*h+20*pix;
+        double xLft = -0.5*w+20*pix;
+        double xRgt =  0.5*w-10*pix;
+        double yTop =  0.5*h-10*pix;
+        double yBot = -0.5*h+20*pix;
 
         // get number of values per axis
-        numX = graph->getAttribute( attrIdx1 )->getSizeCurValues();
-        numY = graph->getAttribute( attrIdx2 )->getSizeCurValues();
+        double numX = graph->getAttribute( attrIdx1 )->getSizeCurValues();
+        double numY = graph->getAttribute( attrIdx2 )->getSizeCurValues();
 
         // calc intervals per axis
+        double fracX = 1.0;
         if ( numX > 1 )
             fracX = ( 1.0/(double)(numX) )*( xRgt-xLft );
-        else
-            fracX = 1.0;
 
+        double fracY = 1.0;
         if ( numY > 1)
             fracY = ( 1.0/(double)(numY) )*( yTop-yBot );
-        else
-            fracY = 1.0;
 
         // clear prev positions
         positions.clear();
         radii.clear();
 
         // calc positions
+        double maxRadius;
         if ( (0.5*fracX > maxRadHintPx*pix) &&
              (0.5*fracY > maxRadHintPx*pix) )
              maxRadius = 0.5*Utils::minn( fracX, fracY );
@@ -588,19 +568,20 @@ void CorrlPlot::calcPositions()
             for ( size_t j = 0; j < mapXToY[i].size(); ++j )
             {
                 // fraction of total number
-                frac = (double)number[i][j]/(double)maxNumber;
+                double frac = (double)number[i][j]/(double)maxNumber;
 
                 // radius
-                maxArea = PI*maxRadius*maxRadius;
-                area    = frac*maxArea;
-                radius  = sqrt( area/PI );
+                double maxArea = PI*maxRadius*maxRadius;
+                double area    = frac*maxArea;
+                double radius  = sqrt( area/PI );
 
                 if ( radius < minRadHintPx*pix )
                     radius = minRadHintPx*pix;
                 radii[i].push_back( radius );
 
-                x = xLft + 0.5*fracX + i*fracX;
-                y = yBot + 0.5*fracY + mapXToY[i][j]*fracY;
+                double x = xLft + 0.5*fracX + i*fracX;
+                double y = yBot + 0.5*fracY + mapXToY[i][j]*fracY;
+                Position2D pos;
                 pos.x = x;
                 pos.y = y;
                 positions[i].push_back( pos );
@@ -635,10 +616,6 @@ void CorrlPlot::processHits(
 // -------------------------
 {
     GLuint *ptr;
-    int    number;
-    int    name1;
-    int    name2;
-
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )
@@ -648,7 +625,7 @@ void CorrlPlot::processHits(
         {
             for ( int i = 0; i < ( hits-1 ); ++i )
             {
-                number = *ptr;
+                int number = *ptr;
                 ++ptr; // number;
                 ++ptr; // z1
                 ++ptr; // z2
@@ -658,14 +635,13 @@ void CorrlPlot::processHits(
         }
 
         // last hit
-        number = *ptr;
         ++ptr; // number
         ++ptr; // z1
         ++ptr; // z2
 
-        name1 = *ptr;
+        int name1 = *ptr;
         ++ptr; // name1
-        name2 = *ptr;
+        int name2 = *ptr;
 
         displTooltip( name1, name2 );
     }

@@ -1,20 +1,11 @@
-project toolset/xsim
-       : requirements
-          <use>/libraries//lps
-          <use>/libraries//trace
-       ;
+project toolset/xsim ;
 
 alias sim_shared
-       : [ obj simbase.o   : simbase.cpp   ]
-         [ obj simulator.o : simulator.cpp ]
+       : [ obj simbase.o   : simbase.cpp   : <use>/libraries//lps <use>/libraries//trace ]
+         [ obj simulator.o : simulator.cpp : <use>/libraries//lps <use>/libraries//trace ]
        ;
 
-alias xsim_core
-       : [ obj simbasegui.o : simbasegui.cpp : <use>/site-config//wx_base ]
-         sim_shared
-       ;
-
-explicit sim_shared simbasegui.o xsim_core ;
+explicit sim_shared ;
 
 local plugins = [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] ;
 
@@ -24,10 +15,10 @@ for plugin in $(plugins) {
 
 tool xsim
        : xsim.cpp
-         xsim_core
          simulatorgui.cpp
          xsimmain.cpp
          xsimtrace.cpp
+         sim_shared
          /libraries//trace
          /libraries//lps
        : <squadt-connectivity>implemented

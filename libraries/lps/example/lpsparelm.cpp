@@ -15,6 +15,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parelm.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::lps;
 namespace po = boost::program_options;

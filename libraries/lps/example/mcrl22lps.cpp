@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \filemcrl22lps.cpp
+/// \file mcrl22lps.cpp
 /// \brief Add your file description here.
 
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
@@ -18,9 +18,10 @@
 #include <stdexcept>
 #include <boost/program_options.hpp>
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/process.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -119,7 +120,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-      spec = mcrl22lps(text);
+      spec = linearise(text);
     }
     spec.save(outfile);
   }

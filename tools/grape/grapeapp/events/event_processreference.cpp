@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for process references.
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
@@ -236,4 +238,4 @@ bool grape_event_change_procref::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_proc_ref );
+WX_DEFINE_OBJARRAY( arr_event_remove_proc_ref )

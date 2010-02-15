@@ -1,24 +1,14 @@
-[library Utilities Library
-    [quickbook 1.4]
-    [authors [Wesselink, Wieger]]
-    [copyright 2008-2009 Technische Universiteit Eindhoven]
-    [category string-text]
-    [purpose
-        The mCRL2 Utilities Library contains utility functions
-        for the mCRL2 toolset.
-    ]
-]
-
 [/  Images   ]
 [def __note__              [$images/note.png]]
 [def __alert__             [$images/caution.png]]
 [def __detail__            [$images/note.png]]
 [def __tip__               [$images/tip.png]]
+[def __pbes__              [$images/pbes.gif]]
+[def __pbes_expression__   [$images/pbes_expression.gif]]
 
 [/  Links   ]
-[def __mcrl2__          [@http://mcrl2.org mCRL2]]
-[def __cli_library__    [@http://www.mcrl2.org/mcrl2/wiki/index.php/CLI_sublibrary Command Line Interface Library]]
-[def __squadt_library__ [@http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/squadt Squadt Library]]
+[def __mcrl2__                 [@http://mcrl2.org mCRL2]]
+[def __cli_library__                   [@http://www.mcrl2.org/mcrl2/wiki/index.php/CLI_sublibrary Command Line Interface Library]]
 
 [section: Tool classes]
 To simplify the creation of a tool, a number of tool classes is available in the
@@ -37,11 +27,11 @@ available tool classes, and the command line options that they handle.
     [ [=template <typename Tool> class pbes_rewriter_tool=] [extends a tool with =--rewriter= and =--pbes-rewriter= options]]
 ]
                                                                                  
-The =--rewriter= option makes strategies of the data rewriter
+The class =rewriter_tool= makes strategies of the data rewriter
 available to the user. The class =pbes_rewriter_tool= makes pbes rewriters
 available to the user.
                                                            
-[section: Example]
+[h3 Example]
 Below an example is given for the pbesparelm tool. Since this is a tool that
 takes a file as input and also writes output to a file, it derives from the
 class =input_output_tool=.
@@ -49,7 +39,11 @@ class =input_output_tool=.
 [import ../../../tools/pbesparelm/pbesparelm.cpp]
 [pbes_parelm_tool]
 
-The following help message is produced for the tool:
+using the =execute= member function, that accepts the command line
+arguments specified by the user.
+
+In the constructor a few settings are provided.
+This is enough to create a tool with the follow help message:
 [pre
 Usage: pbesparelm [OPTION\]... [INFILE [OUTFILE\]\]
 Reads a file containing a PBES, and applies parameter elimination to it. If 
@@ -57,94 +51,122 @@ OUTFILE is not present, standard output is used. If INFILE is not present,
 standard input is used.
 ]
 
-[note Output of a tool is written to `std::clog`. It should never be written
-to `std::cout`, since this prevents the usage of a tool in piping commands.
-]
-
-[endsect] [/ Example]
-
-[section Tool properties]
-A tool has several properties, as given in the table below. For each of them a
-setter and a getter is defined, with the same name as the property. The synopsis 
-has a suitable default value, and the other properties have to be set via the
-constructor.
-
+[h3 Tool properties]
 [table Tool properties
     [[property] [meaning]]
-    [ [ name        ][ Name of the tool ]]
-    [ [ author      ][ Author(s) of the tool ]]
-    [ [ what_is     ][ One-line description of the tool ]]
-    [ [ description ][ Description of the tool ]]
-    [ [ synopsis    ][ Summary of the command-line syntax ]]
+    [ [ synopsis ][ Summary of command-line syntax ]]
+    [ [ what is  ][ don't know ]]
 ]
 
-[endsect] [/ Tool properties]
-
-[section Creating a tool]
+[h3 Creating a new tool]
 To create a new tool, the following needs to be done:
 
-[h5 1) Set some parameters in the constructor]
-In the constructor of a tool, one has to supply a name for the tool,
-an author and a description:
-
-[import ../../../libraries/utilities/example/tool_declaration.cpp]
-[tool_declaration]
-
-[h5 2) Override the `run` member function]
+[h5 1) Override the =run= member function]
 The actual execution of the tool happens in the virtual member function =run=.
 The developer has to override this function to add the behavior of the tool
 The =run= function is called from the =execute= member function, after the
 command line parameters have been parsed.
 
+[h5 2) Set some parameters in the constructor]
+In the constructor of a tool, one has to supply a name for the tool,
+an author and a description:
+
+  class my_tool: public input_tool
+  {
+    public:
+      my_tool()
+        : input_tool(
+            "mytool",
+            "John Doe",
+            "Reads a file and processes it"
+          )
+      {}
+  };
+
 [h5 3) Optionally add additional command line arguments]
 Additional command line arguments can be specified by overriding the virtual
 methods =parse_options= and =add_options=:
 
-[import ../../../tools/pbesconstelm/pbesconstelm.cpp]
-[pbes_constelm_tool]
+  class pbes_constelm_tool: public filter_tool_with_pbes_rewriter
+  {
+    protected:
+      bool m_compute_conditions;
 
-[h5 4) Optionally use a rewriter]
+      void parse_options(const command_line_parser& parser)
+      {
+        m_compute_conditions = parser.options.count("compute-conditions") > 0;
+      }
 
-If a tool needs a rewriter for data expressions, one should use the
-`rewriter_tool` class. A declaration could look like this:
+      void add_options(interface_description& clinterface)
+      {
+        clinterface.add_option("compute-conditions", "compute propagation conditions", 'c');
+      }
+    ...
+  };
 
-  class my_tool: public rewriter_tool<input_output_tool>
+One can change this selection
+by overriding the method =available_rewriters=.
 
-This allows the user to specify a rewrite strategy on the command line.
-A function `create_rewriter` is available to construct a rewriter.
 
-If a tool needs a rewriter for PBES expressions, one should use the
-`pbes_rewriter_tool` class. A declaration could look like this:
+[h3 Creating a squadt user interface for a tool]
+The preferred way to add a squadt user interface to a tool is to define a class
+that derives from tool class adapted by the =squadt_tool= template class.  In
+this class one has to override the four methods =set_capabilities=,
+=user_interactive_configuration=, =check_configuration= and =perform_task=. All
+squadt related code has to made conditional using the flag
+=ENABLE_SQUADT_CONNECTIVITY=.  An example is given below:
 
-  class my_tool: public pbes_rewriter_tool<input_output_tool>
+  class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
+  {
+    public:
 
-By default a selection of the available PBES rewriters is available on the
-command line. By overriding the method =available_rewriters= one can change
-this selection.
+      // Normal tool class implementation for rewriter_tool<input_output_tool>
+      ....
 
-If a tool needs both a data and a PBES rewriter, one can use the nested
-construction that is used in the pbesconstelm example above.
+  // squadt related functionality (see squadt::mcrl2_tool_interface)
+  #ifdef ENABLE_SQUADT_CONNECTIVITY
+      void set_capabilities(tipi::tool::capabilities&) const;
 
-[endsect] [/ Creating a tool]
+      void user_interactive_configuration(tipi::configuration& c)
+      {
+        // Let squadt_tool update configuration for rewriter and add output file configuration
+        synchronise_with_configuration(c);
 
-[section Creating a squadt user interface]
-For several tools a graphical user interface is available, based on the
-__squadt_library__.
-The preferred way to add a squadt user interface to a tool is to define a
-class that derives from the `tool` class, and from the class `squadt::mcrl2_tool_interface`.
-In this class one has to override the four methods `set_capabilities`,
-`user_interactive_configuration`, `check_configuration` and `perform_task`. All squadt
-related code has to made conditional using the flag `ENABLE_SQUADT_CONNECTIVITY`.
-An example is given below:
+        // do some user interaction ...
 
-[import ../../../tools/pbes2bes/pbes2bes.cpp]
-[pbes2bes_tool]
+        // update tool class specific part of the configuration
+        update_configuration(c);
+      }
 
-[note When running a tool in squadt, typically no command line parameters are
-supplied. All options of the tool must therefore be set manually. This typically
-is done in the function `perform_task`.
-]
+      bool check_configuration(tipi::configuration const&) const {
+        return true; // no tool class specific checking implemented
+      }
 
-[endsect] [/ Creating a squadt user interface]
+      bool perform_task(tipi::configuration&);
+  #endif
+  };
+
+  int main(int argc, char* argv[])
+  {
+    MCRL2_ATERMPP_INIT(argc, argv)
+ 
+    return pbes2bes_tool().execute(argc, argv);
+  }
+
+Properties of the tool class that are provided as argument to the squadt_tool
+template class are mimicked for the squadt context. For example
+squadt_tool<input_tool> takes an input file named "main-input". Similarly
+squadt_tool<rewriter_tool<input_output_tool>> adds input/output files named
+"main-input" and "main-output" and a mandatory option "rewrite-strategy".
+
+A =squadt_tool= template class instantiation has two methods that simplify
+dealing with configuration objects. One is =synchronise_with_configuration=, this
+synchronises the state of tool class variables with that of a configuration
+object (the latter has precedence).  This method should only be used in the
+user_interactive_configuration and perform_task methods. The other method is
+=update_configuration=; which updates a configuration with values received from
+the user. This one is typically used at the end of user interactive
+configuration. Both of these methods should become obsolete in the near future
+and will be removed in the future.
 
 [endsect]

@@ -9,12 +9,14 @@
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/utilities/utilities.h"
+#include "mcrl2/data/detail/prover/utilities.h"
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
+
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
 
 // Class Sort_And_Type ----------------------------------------------------------------------------
   // Class Sort_And_Type - Functions declared public ----------------------------------------------
@@ -77,7 +79,7 @@ using namespace mcrl2::core;
 // Class SMT_Solver_CVC_Fast -----------------------------------------------------------------
   // Class SMT_Solver_CVC_Fast - Functions declared private ----------------------------------
 
-    CVC3::Type SMT_Solver_CVC_Fast::translate_sort(ATermAppl a_sort_expression) {
+    CVC3::Type SMT_Solver_CVC_Fast::translate_sort(mcrl2::data::sort_expression a_sort_expression) {
       ATermAppl v_type;
       ATermAppl v_result_type;
       CVC3::Type v_translated_type;
@@ -685,3 +687,7 @@ using namespace mcrl2::core;
         return true;
       }
     }
+  }
+}
+}
+

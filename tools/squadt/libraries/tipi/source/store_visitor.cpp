@@ -6,15 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #include <sstream>
 #include <fstream>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/foreach.hpp>
-#include <boost/xpressive/xpressive_static.hpp>
+#include "boost/filesystem/path.hpp"
+#include "boost/noncopyable.hpp"
+#include "boost/foreach.hpp"
+#include "boost/xpressive/xpressive_static.hpp"
 
 #include "tipi/report.hpp"
 #include "tipi/detail/visitors.hpp"
@@ -277,7 +275,9 @@ namespace utility {
   void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::string const& e, std::string const& s) {
     using namespace boost::xpressive;
 
-    assert(!regex_search(s, sregex(as_xpr("]]>"))));
+    if(!(!regex_search(s, sregex(as_xpr("]]>"))))){
+      throw std::runtime_error( "No instance found for the data type in textual representation" );
+    };
 
     out << "<string";
 

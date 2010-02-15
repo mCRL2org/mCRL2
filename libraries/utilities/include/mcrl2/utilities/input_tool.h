@@ -12,6 +12,8 @@
 #ifndef MCRL2_UTILITIES_INPUT_TOOL_H
 #define MCRL2_UTILITIES_INPUT_TOOL_H
 
+#include <sstream>
+// #include "mcrl2/core/text_utility.h"
 #include "mcrl2/utilities/tool.h"
 
 namespace mcrl2 {
@@ -37,14 +39,37 @@ namespace tools {
         }
       }
 
+      /// \brief Returns the synopsis of the tool
+      /// \return The string "[OPTION]... [INFILE]\n"
+      std::string synopsis() const
+      {
+        return "[OPTION]... [INFILE]\n";
+      }
+
       /// \brief Parse non-standard options
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
       {
+        tool::parse_options(parser);
         if (0 < parser.arguments.size())
         {
           m_input_filename = parser.arguments[0];
         }
+      }
+
+      /// \brief Returns a message about the input filename
+      std::string input_file_message() const
+      {
+        std::ostringstream out;
+        out << "Input read from " << ((m_input_filename.empty())? "standard input" : ("'" + m_input_filename + "'"));
+        return out.str();
+      }
+
+      /// \brief Adds a message about input files to the given description.
+      std::string make_tool_description(const std::string& description) const
+      {
+        // return core::word_wrap_text(description + " If INFILE is not present, standard input is used.");
+        return description + " If INFILE is not present, standard input is used.";
       }
 
     public:
@@ -53,9 +78,9 @@ namespace tools {
                  const std::string& author,
                  const std::string& what_is,
                  const std::string& tool_description,
-                 std::string synopsis = "[OPTION]... [INFILE]\n"
+                 std::string known_issues = ""
                 )
-        : tool(name, author, what_is, tool_description, synopsis)
+        : tool(name, author, what_is, tool_description, known_issues)
       {
       }
 
@@ -69,7 +94,7 @@ namespace tools {
       std::string& input_filename()
       {
         return m_input_filename;
-      }
+      }     
   };
 
 } // namespace tools

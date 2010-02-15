@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -27,10 +27,22 @@
 #include <wx/app.h>
 
 #include "mcrl2/utilities/wx_tool.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
-class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
+#ifndef __glu_h__
+#ifdef __APPLE__
+  #include <OpenGL/glu.h>
+#else
+  #include <GL/glu.h>
+#endif
+#endif
+
+class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
+   mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >
 {
-  friend class mcrl2::utilities::wx::tool< LTSGraph >;
+    typedef mcrl2::utilities::wx::tool< LTSGraph,
+       mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
 
   private:
     Graph *graph; // The labeled transition system (graph) that we work on
@@ -48,17 +60,23 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     bool colouring;
     wxColour brushColour;
 
-    bool parse_command_line(int argc, wxChar** argv);
-
   public:
     LTSGraph();
 
-    bool DoInit();
+    bool run();
 
     void openFile(std::string const &path);
     void display();
 
-    void moveObject(double x, double y);
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    void set_capabilities(tipi::tool::capabilities&) const;
+    void user_interactive_configuration(tipi::configuration&);
+    bool check_configuration(tipi::configuration const&) const;
+    bool perform_task(tipi::configuration&);
+#endif
+
+	void moveObject(double invect[4]);
+	void moveObject(double x, double y);
     void toggleVectorSelected();
     void lockObject();
     void dragObject();
@@ -89,6 +107,10 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     std::string getFileName() const;
     int getRadius() const;
     double getAspectRatio() const;
+	void getCanvasMdlvwMtrx(double * mtrx);
+	void getCanvasCamPos(double & x, double & y, double & z);
+	void forceWalls();
+	bool get3dMode();
 };
 
 

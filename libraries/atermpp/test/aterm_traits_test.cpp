@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/indexed_set.h"
 
 class B : public atermpp::aterm_appl

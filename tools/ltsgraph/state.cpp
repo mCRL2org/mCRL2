@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -8,6 +8,8 @@
 //
 /// \file state.cpp
 /// \brief State class implementation.
+
+#include "wx.hpp" // precompiled headers
 
 #include "state.h"
 #include <cmath>
@@ -25,8 +27,9 @@ State::State(unsigned int _value, bool _isInitialState)
 
   pos.x = 0;
   pos.y = 0;
+  pos.z = 0;
 
-  colour = *wxWHITE;
+  colour = wxColour(255,255,255);
 }
 
 State::~State()
@@ -95,15 +98,6 @@ void State::setPosition(const Utils::Vect p)
 void State::setX(const double _x)
 {
   double newX = _x;
-  if (newX > 1000.0)
-  {
-    newX = 1000.0;
-  }
-
-  if (newX < -1000.0)
-  {
-    newX = -1000.0;
-  }
 
   pos.x = newX;
 }
@@ -112,17 +106,14 @@ void State::setY(const double _y)
 {
   double newY = _y;
 
-  if(newY > 1000.0)
-  {
-    newY = 1000.0;
-  }
-
-  if(newY < -1000.0)
-  {
-    newY = -1000.0;
-  }
-
   pos.y = newY;
+}
+
+void State::setZ(const double _z)
+{
+  double newZ = _z;
+
+  pos.z = newZ;
 }
 
 Utils::Vect State::getPosition() const
@@ -140,6 +131,10 @@ double State::getY() const
   return pos.y;
 }
 
+double State::getZ() const
+{
+  return pos.z;
+}
 
 void State::setLabel(std::string const _label)
 {

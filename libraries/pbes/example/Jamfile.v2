@@ -4,13 +4,17 @@ project libraries/pbes/example
        <source>/libraries//core
        <source>/libraries//lps
        <source>/libraries//pbes
+       <source>/libraries//utilities
+       <source>/libraries/utilities//command_line_interface
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
-       <define>MCRL2_REVISION=\"\\\"0\\\"\"
    ;
 
 exe paritygame   : paritygame.cpp : ;
+exe bes_bisimulation : bes_bisimulation.cpp : ;
+exe bes2besformat : bes2besformat.cpp : ;
+exe bes2txt      : bes2txt.cpp : ;
 exe bisimulation : bisimulation.cpp : ;
 exe lps2pbes     : lps2pbes.cpp : ;
 exe bessolve     : bessolve.cpp : ;
@@ -23,6 +27,8 @@ exe pbes2bes     : pbes2bes.cpp : ;
 install dist
    :
      paritygame
+     bes_bisimulation
+     bes2besformat
      bisimulation
      lps2pbes
      bessolve

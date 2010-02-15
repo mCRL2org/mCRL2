@@ -648,7 +648,8 @@ namespace lysa
 			string indices = join(*name.indices, ", ");
 			if(!indices.empty()) indices = "(" + indices + ")";
 
-			StringTemplate st(templates.get("name"));
+			//StringTemplate st(templates.get("name"));
+			StringTemplate st(templates, "name");
 			st["name"] << name.name << indices;
 
 			return st.get();
@@ -805,7 +806,7 @@ namespace lysa
 			proc_defs.str() + 
       st.get();
 
-		string preamble;
+		/*string preamble;
 		{
       ifstream inf(options.preamble_file_name.c_str());
 			string s;
@@ -813,8 +814,8 @@ namespace lysa
 			{
 				preamble += s + "\n";
 			}
-		}
-		return preamble + mcrl2;
+		}*/
+		return options.strategy->getPreamble() + mcrl2;
 	}
 }
 

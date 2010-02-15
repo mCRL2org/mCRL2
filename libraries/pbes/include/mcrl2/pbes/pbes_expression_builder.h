@@ -19,10 +19,51 @@
 
 // this is only needed because of the data_true <-> pbes_true problems
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
+
+namespace detail {
+
+  struct no_substitution
+  {
+  };
+
+}
+
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+// use a static variable to store the indentation depth
+/// \cond INTERNAL_DOCS
+  template <class T> // note, T is only a dummy
+  struct pbes_expression_builder_indentation
+  {
+    static unsigned int depth;
+  };
+
+  template <class T>
+  unsigned int pbes_expression_builder_indentation<T>::depth = 0;
+
+  inline
+  std::string pbes_expression_builder_indent()
+  {
+    return std::string(pbes_expression_builder_indentation<int>::depth, ' ');
+  }
+
+  inline
+  void pbes_expression_builder_increase_indent()
+  {
+    pbes_expression_builder_indentation<int>::depth += 2;
+  }
+
+  inline
+  void pbes_expression_builder_decrease_indent()
+  {
+    pbes_expression_builder_indentation<int>::depth -= 2;
+  }
+/// \endcond
+#endif // MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
 /// \brief Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
@@ -165,7 +206,8 @@ struct pbes_expression_builder
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit>" << tr::pp(e) << std::endl;
+  std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
+  pbes_expression_builder_increase_indent();
 #endif
 
     term_type result;
@@ -243,15 +285,16 @@ std::cerr << "<visit>" << tr::pp(e) << std::endl;
     // TODO: this is a hack, to deal with the data_true <-> pbes_true issue
     if (tr::is_true(result))
     {
-      result = data::data_expr::true_();
+      result = data::sort_bool::true_();
     }
     if (tr::is_false(result))
     {
-      result = data::data_expr::false_();
+      result = data::sort_bool::false_();
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit result>" << tr::pp(result) << std::endl;
+  pbes_expression_builder_decrease_indent();
+  std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
@@ -394,7 +437,8 @@ struct pbes_expression_builder<Term, void>
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
+  std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
+  pbes_expression_builder_increase_indent();
 #endif
 
     term_type result;
@@ -472,15 +516,16 @@ std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
     // TODO: this is a temporary hack, to deal with the data_true <-> pbes_true problems in the rewriter
     if (tr::is_true(result))
     {
-      result = data::data_expr::true_();
+      result = data::sort_bool::true_();
     }
     if (tr::is_false(result))
     {
-      result = data::data_expr::false_();
+      result = data::sort_bool::false_();
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit result>" << tr::pp(result) << " " << result << std::endl;
+  pbes_expression_builder_decrease_indent();
+  std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;

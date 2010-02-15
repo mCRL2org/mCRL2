@@ -19,12 +19,24 @@
 #include <wx/aboutdlg.h>
 
 #include "boost/bind.hpp"
+#include "boost/shared_array.hpp"
+#include "boost/algorithm/string/join.hpp"
 #include "boost/algorithm/string/case_conv.hpp"
 
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/toolset_revision.h"
+#include "mcrl2/utilities/input_tool.h" // temporary measure
 
 namespace mcrl2 {
   namespace utilities {
+
+    /// \cond INTERNAL_DOCS
+    namespace tools {
+      template < typename Tool >
+      class squadt_tool;
+    }
+    /// \endcond
+
     /**
      * \brief Namespace containing wxWidgets utility functionality
      **/
@@ -51,16 +63,17 @@ namespace mcrl2 {
        * The type parameter is the name of the class that implements the
        * wxWidgets application (using the Curiously Recurring Template
        * Pattern). Instead deriving directly of the application class (say A)
-       * from wxApp it should derive from wx::tool< A >.
+       * from wxApp it should derive from wx::tool< A, B >. Where B is an
+       * instance of another tool class.
        **/
-      template < typename CRTP >
-      class tool : public wxApp {
+      template < typename Derived, typename ToolBase = void >
+      class tool : public wxApp, public ToolBase {
 
         private:
 
-          bool         m_execute;
+          bool                       m_execute;
 
-          std::string  m_parse_error;
+          std::string                m_parse_error;
 
           std::string                m_tool_name;
           std::string                m_description;
@@ -69,13 +82,39 @@ namespace mcrl2 {
 
         private:
 
-          static inline wxString wx_cast(std::string const& source) {
+          template < class >
+          struct squadt_initialisation_wrapper;
+
+          bool squadt_specific_run()
+          {
+            return (ToolBase::is_active() && ToolBase::try_run()) || static_cast< Derived& >(*this).run();
+          }
+
+          int squadt_specific_initialisation(int& argc, char* argv[])
+          {
+            int result = ToolBase::initialise(argc, argv);
+
+            m_execute = ToolBase::is_active();
+
+            return result;
+          }
+
+          static wxString wx_cast(std::string const& source) {
             return wxString(source.c_str(), wxConvLocal);
           };
 
-          inline bool Initialize(int& argc, wxChar** argv) {
+          /// used for signalling that no parse errors have occurred (command line)
+          bool pre_run() {
+            m_execute = true;
+
+            return false;
+          }
+
+          bool Initialize(int& argc, wxChar** argv) {
             try {
-              m_execute = static_cast< CRTP& >(*this).parse_command_line(argc, argv);
+              bool result = execute(argc, argv) == 0;
+
+              m_execute = (m_execute || !result) && wxApp::Initialize(argc, argv);
             }
             catch (std::exception& e) {
               if (wxApp::Initialize(argc, argv)) {
@@ -87,15 +126,31 @@ namespace mcrl2 {
 
                 return false;
               }
-
-              return true;
-            }
-
-            if (!wxApp::Initialize(argc, argv) && m_execute) {
-              return false;
             }
 
             return true;
+          }
+
+          // Tool class compatibility
+          int execute(int& argc, wxChar** argv) {
+            std::vector< boost::shared_array< char > >   arguments;
+            boost::shared_array< char* >                 converted_arguments(new char*[argc]);
+
+            for (int i = 0; i < argc; ++i)
+            {
+              std::string argument(wxString(argv[i], wxConvLocal).fn_str());
+
+              arguments.push_back(boost::shared_array< char >(new char[argument.size() + 1]));
+
+              std::copy(argument.begin(), argument.end(), arguments.back().get());
+
+              // Make sure that the string is zero terminated
+              arguments.back()[argument.size()] = '\0';
+
+              converted_arguments[i] = arguments.back().get();
+            }
+
+            return squadt_initialisation_wrapper< ToolBase >::initialise(*this, argc, converted_arguments.get());
           }
 
           class about_information : public wxAboutDialogInfo {
@@ -108,7 +163,7 @@ namespace mcrl2 {
               }
           };
 
-          inline void OnAbout() const {
+          void OnAbout() const {
             about_information information;
 
             //set tool name
@@ -116,7 +171,7 @@ namespace mcrl2 {
 
             //our approach (put version in description to improve formatting):
             information.SetDescription(wx_cast("mCRL2 toolset " + mcrl2::utilities::version_tag() +
-                         "\n(revision " MCRL2_REVISION + ")\n\n" + m_description));
+                         "\n(revision " + get_toolset_revision() + ")\n\n" + m_description));
 
             //set copyright
             information.SetCopyright(wx_cast(std::string("Copyright \xA9 ") +
@@ -146,7 +201,7 @@ namespace mcrl2 {
           // Helper class for wxEventHandling
           class wx_handler : public wxEvtHandler {
 
-              wx::tool< CRTP > const& m_wx_tool;
+              wx::tool< Derived, ToolBase > const& m_wx_tool;
 
             public:
 
@@ -160,15 +215,15 @@ namespace mcrl2 {
                                + boost::to_lower_copy(m_wx_tool.m_tool_name)).c_str(), wxConvLocal));
               }
 
-              wx_handler(wx::tool< CRTP > const& wx_tool) : m_wx_tool(wx_tool) {
+              wx_handler(wx::tool< Derived, ToolBase > const& wx_tool) : m_wx_tool(wx_tool) {
               }
           };
 
           // Needed for successful termination
-          inline int OnRun() {
+          int OnRun() {
             if (m_execute) {
               if (wxWindow* window = GetTopWindow()) {
- 	        wx_handler* handler = new wx_handler(*this);
+                wx_handler* handler = new wx_handler(*this);
 
                 // register fallback event handler
                 wxEvtHandler* original(window->PopEventHandler());
@@ -188,9 +243,9 @@ namespace mcrl2 {
             return EXIT_SUCCESS;
           }
 
-          inline bool OnInit() {
+          bool OnInit() {
             if (m_execute) {
-              if (static_cast< CRTP& >(*this).DoInit()) {
+              if (squadt_initialisation_wrapper< ToolBase >::run_method(*this)) {
                 if (!m_parse_error.empty()) {
                   wxMessageDialog(GetTopWindow(), wxString(m_parse_error.c_str(), wxConvLocal),
                                      wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
@@ -203,28 +258,75 @@ namespace mcrl2 {
 
         protected:
 
-          inline virtual int OnExit() {
+          /// \brief Wait for user to close the application
+          bool run_and_wait()
+          {
+            static_cast< Derived& >(*this).run();
+
+            MainLoop();
+
+            return true;
+          }
+
+          /// \brief Override for wxApp::OnExit
+          virtual int OnExit() {
             return wxApp::OnExit();
           }
 
         public:
 
-
           /** \brief Preferred constructor
            *  \param[in] tool_name   The name of the tool
            *  \param[in] description A one line description of the tool
+           *  \param[in] description_gui A one line description of the tool (GUI specific)
            *  \param[in] developers  The developers of the tool
            *  \param[in] documenters The documenters of the tool
            **/
-          inline tool(std::string const& tool_name,
+          tool(std::string const& tool_name,
+                      std::string const& what_is,
+                      std::string const& description_gui,
                       std::string const& description,
                       std::vector< std::string > const& developers,
+                      std::string const& known_issues = "",
                       std::vector< std::string > const& documenters = std::vector< std::string >()) :
-                          m_execute(true), m_tool_name(tool_name),
-                          m_description(description), m_developers(developers),
+                          ToolBase(boost::to_lower_copy(tool_name),
+                                   boost::join(developers, ","),
+                                   what_is, description, known_issues),
+                          m_execute(false), m_tool_name(tool_name),
+                          m_description(description_gui), m_developers(developers),
                           m_documenters(documenters) {
           }
       };
+
+      /// \cond INTERNAL_DOCS
+      template < typename Derived, typename ToolBase >
+      template < typename Tool >
+      struct tool< Derived, ToolBase >::squadt_initialisation_wrapper {
+
+        static bool run_method(tool< Derived, ToolBase >& w) {
+          return w.run();
+        }
+
+        static int initialise(wx::tool< Derived, ToolBase >& w, int& argc, char* argv[])
+        {
+          return static_cast< ToolBase& >(w).execute(argc, argv);
+        }
+      };
+
+      template < typename Derived, typename ToolBase >
+      template < typename Tool >
+      struct tool< Derived, ToolBase >::squadt_initialisation_wrapper< tools::squadt_tool< Tool > > {
+
+        static bool run_method(tool< Derived, ToolBase >& w) {
+          return w.squadt_specific_run();
+        }
+
+        static int initialise(wx::tool< Derived, tools::squadt_tool< Tool > >& w, int& argc, char* argv[])
+        {
+          return w.squadt_specific_initialisation(argc, argv);
+        }
+      };
+      /// \endcond
     }
   }
 }

@@ -2,9 +2,9 @@
 #include <exception>
 #include <sstream>
 #include <aterm2.h>
-#include <mcrl2/atermpp/atermpp.h>
-#include <mcrl2/trace.h>
-#include <mcrl2/core/print.h>
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/trace.h"
+#include "mcrl2/core/print.h"
 
 using namespace std;
 using namespace mcrl2::trace;

@@ -13,14 +13,16 @@
 #define MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
 
 #include <stdexcept>
+#include "mcrl2/exception.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/lps/summand.h"
-#include "mcrl2/lps/process.h"
-#include "mcrl2/lps/process_expression_visitor.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/process_expression_visitor.h"
+#include "mcrl2/process/detail/is_linear.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
 namespace detail {
 
@@ -29,85 +31,79 @@ namespace detail {
   struct linear_process_conversion_visitor: public process_expression_visitor<void>
   {
     /// \brief The result of the conversion.
-    atermpp::vector<summand> result;
+    lps::action_summand_vector m_action_summands;
+
+    /// \brief The result of the conversion.
+    lps::deadlock_summand_vector m_deadlock_summands;
 
     /// \brief The process equation that is checked.
     process_equation m_equation;
 
     /// \brief Contains intermediary results.
-    data::data_variable_list m_sum_variables;
+    data::variable_list m_sum_variables;
 
     /// \brief Contains intermediary results.
-    data::data_assignment_list m_next_state;
+    data::assignment_list m_next_state;
 
     /// \brief Contains intermediary results.
-    multi_action m_multi_action;
+    lps::multi_action m_multi_action;
 
     /// \brief Contains intermediary results.
-    deadlock m_deadlock;
+    lps::deadlock m_deadlock;
 
     /// \brief True if m_deadlock was changed.
     bool m_deadlock_changed;
 
     /// \brief True if m_multi_action was changed.
     bool m_multi_action_changed;
-    
+
     /// \brief Contains intermediary results.
     data::data_expression m_condition;
 
     /// \brief Contains intermediary results.
-    summand m_summand;
+    lps::action_summand m_action_summand;
 
-    /// \brief The traits class for process expressions.
-    typedef core::term_traits<process_expression> tr;
+    /// \brief Contains intermediary results.
+    lps::deadlock_summand m_deadlock_summand;
 
     /// \brief Exception that is thrown to denote that the process is not linear.
     struct non_linear_process
-    {};
+    {
+      process_expression expr;
 
-    /// \brief Exception that is thrown to denote that a linear process is encountered
-    /// that can not be transformed into LPS format. For example P = a.
-    struct unsupported_linear_process
-    {};
+      non_linear_process(const process_expression& p)
+        : expr(p)
+      {}
+    };
 
+    /// \brief Clears the current summand
     void clear_summand()
     {
-      m_sum_variables = data::data_variable_list();
-      m_summand = summand();
-      m_deadlock = deadlock();
+      m_sum_variables = data::variable_list();
+      m_deadlock = lps::deadlock();
       m_deadlock_changed = false;
-      m_multi_action = multi_action();
+      m_multi_action = lps::multi_action();
       m_multi_action_changed = false;
-      m_condition = data::data_expr::true_();
-      m_next_state = data::data_assignment_list();
+      m_condition = data::sort_bool::true_();
+      m_next_state = data::assignment_list();
     }
 
+    /// \brief Adds a summand to the result
     void add_summand()
     {
-      if (m_summand == summand())
+      if ((m_multi_action != lps::multi_action()) || m_multi_action_changed)
       {
-        if ( (m_multi_action != multi_action()) || m_multi_action_changed)
-        {
-          if (m_next_state == data::data_assignment_list())
-          {
-            throw unsupported_linear_process();
-          }
-          m_summand = summand(m_sum_variables, m_condition, m_multi_action, m_next_state);
-        }
-        else if ( (m_deadlock != deadlock()) || m_deadlock_changed)
-        {
-          m_summand = summand(m_sum_variables, m_condition, m_deadlock);
-        }
-        else
-        {
-          return;
-        }
+        m_action_summands.push_back(lps::action_summand(m_sum_variables, m_condition, m_multi_action, m_next_state));
+        clear_summand();
       }
-      result.push_back(m_summand);
+      else if ((m_deadlock != lps::deadlock()) || m_deadlock_changed)
+      {
+        m_deadlock_summands.push_back(lps::deadlock_summand(m_sum_variables, m_condition, m_deadlock));
+        clear_summand();
+      }
 // std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << core::pp(m_summand) << std::endl;
-      clear_summand();
     }
-  
+
     /// \brief These names can be used as return types of the visit functions, to make
     /// the code more readible.
     enum return_type
@@ -118,9 +114,10 @@ namespace detail {
 
     /// \brief Visit delta node
     /// \return The result of visiting the node
-    bool visit_delta(const process_expression& x)
+    /// \param x A process expression
+    bool visit_delta(const delta& x)
     {
-      m_deadlock = deadlock();
+      m_deadlock = lps::deadlock();
       m_deadlock_changed = true;
 // std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
       return stop_recursion;
@@ -128,9 +125,10 @@ namespace detail {
 
     /// \brief Visit tau node
     /// \return The result of visiting the node
-    bool visit_tau(const process_expression& x)
+    /// \param x A process expression
+    bool visit_tau(const tau& x)
     {
-      m_multi_action = multi_action();
+      m_multi_action = lps::multi_action();
       m_multi_action_changed = true;
 // std::cout << "adding multi action tau\n" << m_multi_action.to_string() << std::endl;
       return stop_recursion;
@@ -138,89 +136,117 @@ namespace detail {
 
     /// \brief Visit action node
     /// \return The result of visiting the node
-    bool visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v)
+    /// \param x A process expression
+    /// \param l An action label
+    /// \param v A sequence of data expressions
+    bool visit_action(const lps::action& x)
     {
-      m_multi_action = multi_action(x);
+      action a(x.label(), x.arguments());
+      m_multi_action = lps::multi_action(a);
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
       return stop_recursion;
     }
 
     /// \brief Visit sum node
     /// \return The result of visiting the node
-    bool visit_sum(const process_expression& x, const data::data_variable_list& v, const process_expression& right)
+    /// \param x A process expression
+    /// \param v A sequence of data variables
+    /// \param right A process expression
+    bool visit_sum(const sum& x)
     {
-      visit(right);
-      m_sum_variables = m_sum_variables + v;
+      visit(x.operand());
+      m_sum_variables = m_sum_variables + x.bound_variables();
 // std::cout << "adding sum variables\n" << core::pp(v) << std::endl;
       return stop_recursion;
     }
 
     /// \brief Visit block node
     /// \return The result of visiting the node
-    bool visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
+    /// \param x A process expression
+    /// \param s A sequence of identifiers
+    /// \param right A process expression
+    bool visit_block(const block& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
     /// \brief Visit hide node
     /// \return The result of visiting the node
-    bool visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
+    /// \param x A process expression
+    /// \param s A sequence of identifiers
+    /// \param right A process expression
+    bool visit_hide(const hide& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
     /// \brief Visit rename node
     /// \return The result of visiting the node
-    bool visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
+    /// \param x A process expression
+    /// \param r A sequence of rename expressions
+    /// \param right A process expression
+    bool visit_rename(const rename& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
     /// \brief Visit comm node
     /// \return The result of visiting the node
-    bool visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
+    /// \param x A process expression
+    /// \param c A sequence of communication expressions
+    /// \param right A process expression
+    bool visit_comm(const comm& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
     /// \brief Visit allow node
     /// \return The result of visiting the node
-    bool visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
+    /// \param x A process expression
+    /// \param s A sequence of multi-action names
+    /// \param right A process expression
+    bool visit_allow(const allow& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
     /// \brief Visit sync node
     /// \return The result of visiting the node
-    bool visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
+    bool visit_sync(const sync& x)
     {
-      visit(left);
-      multi_action l = m_multi_action;
-      visit(right);
-      multi_action r = m_multi_action;
+      visit(x.left());
+      lps::multi_action l = m_multi_action;
+      visit(x.right());
+      lps::multi_action r = m_multi_action;
       m_multi_action = l + r;
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
       return stop_recursion;
     }
 
-    /// \brief Visit at_time node
+    /// \brief Visit at node
     /// \return The result of visiting the node
-    bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param d A data expression
+    bool visit_at(const at& x)
     {
-      visit(left);
-      if (tr::is_delta(x))
+      visit(x.operand());
+      if (is_delta(x))
       {
-        m_deadlock.time() = d;
+        m_deadlock.time() = x.time_stamp();
 // std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
       }
       else
       {
-        m_multi_action.time() = d;
+        m_multi_action.time() = x.time_stamp();
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
       }
       return stop_recursion;
@@ -228,68 +254,118 @@ namespace detail {
 
     /// \brief Visit seq node
     /// \return The result of visiting the node
-    bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
+    bool visit_seq(const seq& x)
     {
-      visit(left);
-      process p = right;
-      m_next_state = data::make_assignment_list(m_equation.variables2(), p.expressions());
+      visit(x.left());
+
+      // Check 1) The expression right must be a process instance or a process assignment
+      if (is_process_instance(x.right()))
+      {
+        process_instance p = x.right();
+        // Check 2) The process equation and and the process instance must match
+        if (!detail::check_process_instance(m_equation, p))
+        {
+          std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
+          throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
+        }
+        m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
+      }
+      else if (is_process_instance_assignment(x.right()))
+      {
+        process_instance_assignment p = x.right();
+        // Check 2) The process equation and and the process instance assignment must match
+        if (!detail::check_process_instance_assignment(m_equation, p))
+        {
+          std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
+          throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
+        }
+        m_next_state = p.assignments(); // TODO: check if this is correct
+      }
+      else
+      {
+        std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
+        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered with an unexpected right hand side");
+      }
+
 // std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
       return stop_recursion;
     }
 
     /// \brief Visit if_then node
     /// \return The result of visiting the node
-    bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
+    /// \param x A process expression
+    /// \param d A data expression
+    /// \param right A process expression
+    bool visit_if_then(const if_then& x)
     {
-      visit(right);
-      m_condition = d;
+      visit(x.then_case());
+      m_condition = x.condition();
 // std::cout << "adding condition\n" << core::pp(m_condition) << std::endl;
       return stop_recursion;
     }
 
     /// \brief Visit if_then_else node
     /// \return The result of visiting the node
-    bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
+    /// \param x A process expression
+    /// \param d A data expression
+    /// \param left A process expression
+    /// \param right A process expression
+    bool visit_if_then_else(const if_then_else& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
-  
-    /// \brief Visit binit node
+
+    /// \brief Visit bounded_init node
     /// \return The result of visiting the node
-    bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
+    bool visit_bounded_init(const bounded_init& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
     /// \brief Visit merge node
     /// \return The result of visiting the node
-    bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
+    bool visit_merge(const merge& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
-    /// \brief Visit lmerge node
+    /// \brief Visit left_merge node
     /// \return The result of visiting the node
-    bool visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
+    bool visit_left_merge(const left_merge& x)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
-    
+
     /// \brief Visit choice node
     /// \return The result of visiting the node
-    bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
+    bool visit_choice(const choice& x)
     {
-      visit(left);
-      if (!tr::is_choice(left))
+      visit(x.left());
+      if (!is_choice(x.left()))
       {
         add_summand();
       }
-      visit(right);
-      if (!tr::is_choice(right))
+      visit(x.right());
+      if (!is_choice(x.right()))
       {
         add_summand();
       }
@@ -297,59 +373,71 @@ namespace detail {
     }
 
     /// \brief Returns true if the process equation e is linear.
+    /// \param e A process equation
     void convert(const process_equation& e)
     {
       clear_summand();
-      try
-      {
-        m_equation = e;
-        visit(m_equation.expression());
-        add_summand(); // needed if it is not a choice
-      }
-      catch(unsupported_linear_process)
-      {
-        result.clear();
-        std::cerr << "Unsupported linear expression encountered in linear_process_conversion_visitor" << std::endl;
-      }
-      catch(non_linear_process)
-      {
-        result.clear();
-        std::cerr << "Non-linear expression encountered in linear_process_conversion_visitor" << std::endl;
-      }
+      visit(m_equation.expression());
+      add_summand(); // needed if it is not a choice
     }
 
     /// \brief Converts a process_specification into a specification.
-    /// Throws \p unsupported_linear_process if an unsupported linear process expression is encountered.
-    /// Throws \p non_linear_process if the process is not linear.
-    specification convert(const process_specification& p)
+    /// Throws \p non_linear_process if a non-linear sub-expression is encountered.
+    /// Throws \p mcrl2::runtime_error in the following cases:
+    /// \li The number of equations is not equal to one
+    /// \li The initial process is not a process instance, or it does not match with the equation
+    /// \li A sequential process is found with a right hand side that is not a process instance,
+    /// or it doesn't match the equation
+    /// \param p A process specification
+    /// \return The converted specification
+    lps::specification convert(const process_specification& p)
     {
-      data::data_variable_list m_process_parameters;
-      result.clear();
+      m_action_summands.clear();
+      m_deadlock_summands.clear();
 
-      for (process_equation_list::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      // Check 1) The number of equations must be one
+      if (p.equations().size() != 1)
       {
-        data::data_variable_list parameters = i->variables2();
-        if (m_process_parameters != data::data_variable_list() && m_process_parameters != parameters)
+        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the number of process equations is not equal to 1!");
+      }
+      m_equation = p.equations().front();
+
+      lps::process_initializer proc_init;
+
+      if (is_process_instance(p.init()))
+      {
+        process_instance init = p.init();
+        if (!check_process_instance(m_equation, init))
         {
-          std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
+          throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the initial process does not match the process equation");
         }
-        m_process_parameters = parameters;
-        convert(*i);
+        proc_init = lps::process_initializer(data::make_assignment_list(m_equation.formal_parameters(), init.actual_parameters()));
       }
-      linear_process lp(data::data_variable_list(), m_process_parameters, summand_list(result.begin(), result.end()));
-      if (!tr::is_process(p.init().expression()))
+      else if (is_process_instance_assignment(p.init()))
       {
-        std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
+        process_instance_assignment init = p.init();
+        if (!check_process_instance_assignment(m_equation, init))
+        {
+          throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the initial process does not match the process equation");
+        }
+        proc_init = lps::process_initializer(init.assignments());
       }
-      process q = p.init().expression();
-      process_initializer init(p.init().variables(), data::make_assignment_list(m_process_parameters, q.expressions()));
-      return specification(p.data(), p.action_labels(), lp, init);
+      else
+      {
+        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the initial process has an unexpected value");
+      }
+
+      // Do the conversion
+      convert(m_equation);
+
+      lps::linear_process proc(m_equation.formal_parameters(), m_deadlock_summands, m_action_summands);
+      return lps::specification(p.data(), p.action_labels(), p.global_variables(), proc, proc_init);
     }
   };
 
 } // namespace detail
 
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 

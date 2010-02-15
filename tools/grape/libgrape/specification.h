@@ -80,7 +80,7 @@ namespace grape
          * @param p_index The index used to eventually make a new unique name if the current suggested name exists already.
          * @return Returns a pointer to the newly created architecture diagram.
          */
-        architecture_diagram* add_architecture_diagram( unsigned int p_id, const wxString &p_name, int p_index = 0 );
+        architecture_diagram* add_architecture_diagram( unsigned int p_id, const wxString &p_name = _T("A"), int p_index = 0 );
 
         /**
          * Architecture diagram removal function.
@@ -109,7 +109,7 @@ namespace grape
          * @param p_index The index used to eventually make a new unique name if the current suggested name exists already.
          * @return Returns a pointer to the newly created process diagram.
          */
-        process_diagram* add_process_diagram( unsigned int p_id, const wxString &p_name, int p_index = 0 );
+        process_diagram* add_process_diagram( unsigned int p_id, const wxString &p_name = _T("P"), int p_index = 0 );
 
         /**
          * Process diagram removal function.

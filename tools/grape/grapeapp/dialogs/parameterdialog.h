@@ -28,7 +28,7 @@ namespace grape
     /**
      * \short A class showing a dialog with a combobox and text edit.
      */
-    class grape_parameter_dialog : protected wxDialog
+    class grape_parameter_dialog : public wxDialog
     {
       private:
         wxGrid        *m_grid;          /**< Grid shown in the dialog, used for parameters.*/
@@ -53,7 +53,7 @@ namespace grape
       	 */
          void event_change_text( wxGridEvent &p_event );
        
-        DECLARE_EVENT_TABLE();
+        DECLARE_EVENT_TABLE()
 
       public:
 

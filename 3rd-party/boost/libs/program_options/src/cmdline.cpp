@@ -23,6 +23,7 @@
 #include <cassert>
 #include <cstring>
 #include <cctype>
+#include <climits>
 
 #include <cstdio>
 
@@ -151,7 +152,7 @@ namespace boost { namespace program_options { namespace detail {
             error = "style disallows all characters for short options";
 
         if (error)
-            throw invalid_command_line_style(error);
+            boost::throw_exception(invalid_command_line_style(error));
 
         // Need to check that if guessing and long disguise are enabled
         // -f will mean the same as -foo
@@ -195,24 +196,24 @@ namespace boost { namespace program_options { namespace detail {
 
         if (m_additional_parser)
             style_parsers.push_back(
-                bind(&cmdline::handle_additional_parser, this, _1));
+                boost::bind(&cmdline::handle_additional_parser, this, _1));
 
         if (m_style & allow_long)
             style_parsers.push_back(
-                bind(&cmdline::parse_long_option, this, _1));
+                boost::bind(&cmdline::parse_long_option, this, _1));
 
         if ((m_style & allow_long_disguise))
             style_parsers.push_back(
-                bind(&cmdline::parse_disguised_long_option, this, _1));
+                boost::bind(&cmdline::parse_disguised_long_option, this, _1));
 
         if ((m_style & allow_short) && (m_style & allow_dash_for_short))
             style_parsers.push_back(
-                bind(&cmdline::parse_short_option, this, _1));
+                boost::bind(&cmdline::parse_short_option, this, _1));
 
         if ((m_style & allow_short) && (m_style & allow_slash_for_short))
-            style_parsers.push_back(bind(&cmdline::parse_dos_option, this, _1));
+            style_parsers.push_back(boost::bind(&cmdline::parse_dos_option, this, _1));
 
-        style_parsers.push_back(bind(&cmdline::parse_terminator, this, _1));
+        style_parsers.push_back(boost::bind(&cmdline::parse_terminator, this, _1));
 
         vector<option> result;
         while(!args.empty())
@@ -254,6 +255,62 @@ namespace boost { namespace program_options { namespace detail {
             }
         }
 
+        /* If an key option is followed by a positional option,
+           can can consume more tokens (e.g. it's multitoke option),
+           give those tokens to it.  */
+        vector<option> result2;
+        for (unsigned i = 0; i < result.size(); ++i)
+        {
+            result2.push_back(result[i]);
+            option& opt = result2.back();
+
+            if (opt.string_key.empty())
+                continue;
+
+            const option_description* xd = 
+                m_desc->find_nothrow(opt.string_key, 
+                                     (m_style & allow_guessing));
+            if (!xd)
+                continue;
+
+            unsigned min_tokens = xd->semantic()->min_tokens();
+            unsigned max_tokens = xd->semantic()->max_tokens();
+            if (min_tokens < max_tokens && opt.value.size() < max_tokens)
+            {
+                // This option may grab some more tokens.
+                // We only allow to grab tokens that are not already
+                // recognized as key options.
+
+                int can_take_more = max_tokens - opt.value.size();
+                unsigned j = i+1;
+                for (; can_take_more && j < result.size(); --can_take_more, ++j)
+                {
+                    option& opt2 = result[j];
+                    if (!opt2.string_key.empty())
+                        break;
+
+                    if (opt2.position_key == INT_MAX)
+                    {
+                        // We use INT_MAX to mark positional options that
+                        // were found after the '--' terminator and therefore
+                        // should stay positional forever.
+                        break;
+                    }
+
+                    assert(opt2.value.size() == 1);
+                    
+                    opt.value.push_back(opt2.value[0]);
+
+                    assert(opt2.original_tokens.size() == 1);
+
+                    opt.original_tokens.push_back(opt2.original_tokens[0]);
+                }
+                i = j-1;
+            }
+        }
+        result.swap(result2);
+        
+
         // Assign position keys to positional options.
         int position_key = 0;
         for(unsigned i = 0; i < result.size(); ++i) {
@@ -269,8 +326,8 @@ namespace boost { namespace program_options { namespace detail {
                 if (opt.position_key != -1) {
                     if (position >= m_positional->max_total_count())
                     {
-                        throw too_many_positional_options_error(
-                            "too many positional options");
+                        boost::throw_exception(too_many_positional_options_error(
+                                               "too many positional options"));
                     }
                     opt.string_key = m_positional->name_for_position(position);
                     ++position;
@@ -323,22 +380,25 @@ namespace boost { namespace program_options { namespace detail {
         if (present_tokens >= min_tokens)
         {
             if (!opt.value.empty() && max_tokens == 0) {
-                throw invalid_command_line_syntax(opt.string_key,
-                    invalid_command_line_syntax::extra_parameter);                                                                
+                boost::throw_exception(invalid_command_line_syntax(opt.string_key,
+                                             invalid_command_line_syntax::extra_parameter));
             }
             
-            max_tokens -= opt.value.size();
+            // If an option wants, at minimum, N tokens, we grab them
+            // there and don't care if they look syntactically like an
+            // option.
 
-            // A value is optional if min_tokens == 0, but max_tokens > 0.
-            // If a value is optional, it must appear in opt.value (because
-            // it was 'adjacent'.  Otherwise, remove the expectation of a
-            // non-adjacent value.  (For now, we just check max_tokens == 1,
-            // as there is no current support for max_tokens>1)
-            if (min_tokens == 0 && max_tokens == 1 && opt.value.empty())
-                --max_tokens;
+            if (opt.value.size() <= min_tokens)
+            {
+                min_tokens -= opt.value.size();
+            }
+            else
+            {
+                min_tokens = 0;
+            }
 
             // Everything's OK, move the values to the result.            
-            for(;!other_tokens.empty() && max_tokens--; ) {
+            for(;!other_tokens.empty() && min_tokens--; ) {
                 opt.value.push_back(other_tokens[0]);
                 opt.original_tokens.push_back(other_tokens[0]);
                 other_tokens.erase(other_tokens.begin());
@@ -346,8 +406,8 @@ namespace boost { namespace program_options { namespace detail {
         }
         else
         {
-            throw invalid_command_line_syntax(opt.string_key,
-                invalid_command_line_syntax::missing_parameter); 
+            boost::throw_exception(invalid_command_line_syntax(opt.string_key,
+                                            invalid_command_line_syntax::missing_parameter)); 
 
         }
     }
@@ -367,8 +427,8 @@ namespace boost { namespace program_options { namespace detail {
                 name = tok.substr(2, p-2);
                 adjacent = tok.substr(p+1);
                 if (adjacent.empty())
-                    throw invalid_command_line_syntax(name,
-                      invalid_command_line_syntax::empty_adjacent_parameter);
+                    boost::throw_exception( invalid_command_line_syntax(name,
+                                                      invalid_command_line_syntax::empty_adjacent_parameter));
             }
             else
             {
@@ -492,6 +552,8 @@ namespace boost { namespace program_options { namespace detail {
             {
                 option opt;
                 opt.value.push_back(args[i]);
+                opt.original_tokens.push_back(args[i]);
+                opt.position_key = INT_MAX;
                 result.push_back(opt);
             }
             args.clear();

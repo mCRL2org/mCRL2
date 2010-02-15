@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <csignal>
 #include <cstring>
+#include <iostream>
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <windows.h>
@@ -27,6 +28,7 @@
 # include <unistd.h>
 # include <sys/wait.h>
 # if defined(__APPLE__)
+#  include "boost/scoped_array.hpp"
 #  include <Carbon/Carbon.h>
 #  include <ApplicationServices/ApplicationServices.h>
 # endif
@@ -257,13 +259,13 @@ namespace squadt {
       struct local {
         inline static std::string as_string(const CFStringRef s) {
           size_t length = CFStringGetLength(s) + 1;
-          char   buffer[length];
+          boost::scoped_array< char > buffer(new char[length]);
 
-          if (!CFStringGetCString(s, buffer, length, kCFStringEncodingASCII)) {
+          if (!CFStringGetCString(s, buffer.get(), length, kCFStringEncodingASCII)) {
             throw false;
           }
 
-          return std::string(buffer);
+          return std::string(buffer.get());
         }
 
         static OSStatus termination_handler(EventHandlerCallRef, EventRef e, void* d) {
@@ -516,7 +518,9 @@ namespace squadt {
     }
 
     std::string process::get_executable_name() const {
-      assert(impl.get() != 0);
+      if(!(impl.get() != 0)){
+         throw std::runtime_error( "Empty implemention\n" );
+      };
 
       if (impl->m_command.get()) {
         return impl->m_command->get_executable();

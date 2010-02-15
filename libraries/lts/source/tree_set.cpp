@@ -10,10 +10,10 @@
 
 #include <cstdlib>
 #include <vector>
+#include <boost/scoped_array.hpp>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/detail/tree_set.h"
-
-#include "workarounds.h"
+#include "mcrl2/exception.h"
 
 using namespace mcrl2::core;
 
@@ -45,8 +45,7 @@ tree_set_store::tree_set_store() {
   hashmask = (1 << HASH_CLASS) - 1;
   hashtable = (int*)malloc((hashmask+1)*sizeof(int));
   if (hashtable == NULL) {
-    gsErrorMsg("out of memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("Out of memory.");
   }
   for (unsigned int i=0; i<=hashmask; ++i) {
   	hashtable[i] = EMPTY_LIST;
@@ -71,8 +70,7 @@ void tree_set_store::check_tags() {
     tags_size += TAGS_BLOCK;
     tags = (int*)realloc(tags,tags_size*sizeof(int));
     if (tags == NULL) {
-      gsErrorMsg("out of memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Out of memory.");
     }
   }
 }
@@ -82,16 +80,14 @@ void tree_set_store::check_buckets() {
     buckets_size += BUCKETS_BLOCK;
     buckets = (bucket*)realloc(buckets,buckets_size*sizeof(bucket));
     if (buckets == NULL) {
-      gsErrorMsg("out of memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Out of memory.");
     }
   }
   if (buckets_next*4 >= hashmask*3) {
     hashmask = hashmask + hashmask + 1;
     hashtable = (int*)realloc(hashtable,(hashmask+1)*sizeof(int));
     if (hashtable == NULL) {
-      gsErrorMsg("out of memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Out of memory.");
     }
     unsigned int i,hc;
     for (i=0; i<=hashmask; ++i) {
@@ -130,7 +126,7 @@ int tree_set_store::create_set(vector<unsigned int> &elems) {
 	if (elems.size() == 0) {
 		return EMPTY_SET;
 	}
-	DECL_A(nodes,int,elems.size());
+        boost::scoped_array< int > nodes(new int[elems.size()]);
 	unsigned int node_size = 0;
 	unsigned int i,j;
 	for (i=0; i < elems.size(); ++i) {
@@ -151,7 +147,6 @@ int tree_set_store::create_set(vector<unsigned int> &elems) {
 		node_size = j;
 	}
 	unsigned int r = nodes[0];
-	FREE_A(nodes);
 	return r;
 }
 

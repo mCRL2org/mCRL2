@@ -13,11 +13,11 @@
 #define MCRL2_PBES_LPS2PBES_H
 
 #include <string>
-#include "mcrl2/modal_formula/detail/algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_translate.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 
 namespace mcrl2 {
 
@@ -29,7 +29,7 @@ namespace pbes_system {
   /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
   /// \return The result of the algorithm
   inline
-  pbes<> lps2pbes(const lps::specification& spec, const modal::state_formula& formula, bool timed)
+  pbes<> lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed)
   {
     return pbes_translate(formula, spec, timed);
   }
@@ -43,8 +43,8 @@ namespace pbes_system {
   pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
   {
     pbes<> result;
-    lps::specification spec = lps::mcrl22lps(spec_text);
-    modal::state_formula f = modal::detail::mcf2statefrm(formula_text, spec);
+    lps::specification spec = lps::linearise(spec_text);
+    state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
     return lps2pbes(spec, f, timed);
   }
 

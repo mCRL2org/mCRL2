@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50358 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : defines framework interface
 // ***************************************************************************
@@ -70,7 +70,7 @@ BOOST_TEST_DECL test_unit&  get( test_unit_id, test_unit_type );
 template<typename UnitType>
 UnitType&               get( test_unit_id id )
 {
-    return static_cast<UnitType&>( get( id, (test_unit_type)UnitType::type ) );
+    return static_cast<UnitType&>( get( id, static_cast<test_unit_type>(UnitType::type) ) );
 }
 
 // test initiation

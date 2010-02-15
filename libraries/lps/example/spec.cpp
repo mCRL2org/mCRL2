@@ -18,8 +18,9 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "test_specifications.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;
@@ -33,7 +34,7 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec = mcrl22lps(ABP_SPECIFICATION);
+  specification spec = linearise(ABP_SPECIFICATION);
   cout << "check_term_LinProcSpec(spec) = " << check_term_LinProcSpec(spec) << endl;
 
   aterm_appl f1 = make_term("OpId(\"!=\",SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortId(\"Bool\"))))");
@@ -80,18 +81,18 @@ int main(int argc, char* argv[])
   cout << endl;
 
   cout << "--- process parameters: ---" << endl;
-  for (data_variable_list::iterator i = lps.process_parameters().begin(); i != lps.process_parameters().end(); ++i)
+  for (variable_list::iterator i = lps.process_parameters().begin(); i != lps.process_parameters().end(); ++i)
   {
     cout << str(format("%8s : %8s  %s") % i->name() % pp(i->sort()) % i->to_string()) << endl;
   }
   cout << endl;
 
   sort_expression D("D");
-  data_variable v("d1", D);
+  variable v("d1", D);
   cout << "v  = " << pp(v) << " " << v.to_string() << endl;
 
-  data_variable w("YES", D);
-  data_assignment a(v, w);
+  variable w("YES", D);
+  assignment a(v, w);
   cout << "a = " << pp(a) << " " << a.to_string() << endl;
 
   // test substitution
@@ -101,19 +102,20 @@ int main(int argc, char* argv[])
   data_expression_list d1 = d0.substitute(a);
   cout << "d1 = " << pp(d1) << " " << d1.to_string() << endl;
 
-  data_assignment_list aa;
+  assignment_list aa;
   aa = push_front(aa, a);
   aa = push_front(aa, a);
   data_expression_list d2 = d0.substitute(assignment_list_substitution(aa));
   cout << "d2 = " << pp(d2) << " " << d2.to_string() << endl;
   cin.get();
 
-  for (summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
+  summand_list summands = spec.process().summands();
+  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
-//    cout << "summand " << pp(*i) << endl;
+    cout << "summand " << pp(*i) << endl;
   }
 
-  summand s = spec.process().summands().front();
+  summand s = summands.front();
   cout << "actions:" << endl;
   for (action_list::iterator i = s.actions().begin(); i != s.actions().end(); ++i)
   {

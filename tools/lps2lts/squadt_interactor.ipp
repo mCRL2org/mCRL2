@@ -10,22 +10,17 @@
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <string>
-#include <boost/bind.hpp>
-#include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#include "boost/bind.hpp"
+#include "boost/cstdint.hpp"
+#include "boost/shared_ptr.hpp"
+#include "boost/lexical_cast.hpp"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/data/rewrite.h"
 #include "mcrl2/exception.h"
 #include "lps2lts.h"
 #include "exploration.h"
 
 #include "mcrl2/core/messaging.h"
-
-#include "squadt_interactor.h"
-
-#include "workarounds.h" // for strdup
 
 const char*  ::squadt_interactor::option_lts_type             = "lts_type";
 const char*  ::squadt_interactor::option_out_info             = "out_info";
@@ -39,6 +34,7 @@ const char*  ::squadt_interactor::option_rewrite_strategy     = "rewrite_strateg
 const char*  ::squadt_interactor::option_exploration_strategy = "expl_strat";
 
 const char*  ::squadt_interactor::option_detect_deadlock      = "detect_deadlock";
+const char*  ::squadt_interactor::option_detect_divergence    = "detect_divergence";
 const char*  ::squadt_interactor::option_detect_actions       = "detect_actions";
 const char*  ::squadt_interactor::option_trace                = "trace";
 const char*  ::squadt_interactor::option_max_traces           = "max_traces";
@@ -54,8 +50,8 @@ const char*  ::squadt_interactor::option_bithashsize          = "bithash_size";
 
 const char*  ::squadt_interactor::option_init_tsize           = "init_tsize";
 
-const char*  ::squadt_interactor::lps_file_for_input          = "lps_in";
-const char*  ::squadt_interactor::lts_file_for_output         = "lts_out";
+const char*  ::squadt_interactor::lps_file_for_input          = "main-input";
+const char*  ::squadt_interactor::lts_file_for_output         = "main-output";
 const char*  ::squadt_interactor::trc_file_for_output         = "trc_out";
 
 static bool initialise_types() {
@@ -67,12 +63,6 @@ static bool initialise_types() {
     add(es_random, "random");
 
   return true;
-}
-
-squadt_interactor::squadt_interactor() {
-  static bool initialised = initialise_types();
-
-  static_cast< void > (initialised); // harmless, and prevents unused variable warnings
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities &cp) const {
@@ -174,6 +164,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   if (!c.option_exists(option_detect_deadlock)) {
     c.add_option(option_detect_deadlock).set_argument_value< 0 >(false);
   }
+  if (!c.option_exists(option_detect_divergence)) {
+    c.add_option(option_detect_divergence).set_argument_value< 0 >(false);
+  }
   if (!c.option_exists(option_trace)) {
     c.add_option(option_trace).set_argument_value< 0 >(false);
   }
@@ -209,7 +202,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   mcrl2::utilities::squadt::radio_button_helper< exploration_strategy > exploration_strategy_selector(d);
 
   // Helper for rewrite strategy selection
-  mcrl2::utilities::squadt::radio_button_helper< RewriteStrategy >      rewrite_strategy_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper< mcrl2::data::rewriter::strategy > rewrite_strategy_selector(d);
 
   // Helper for rewrite strategy selection
   mcrl2::utilities::squadt::radio_button_helper< mcrl2::lts::lts_type > lts_type_selector(d);
@@ -223,15 +216,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
                 append(exploration_strategy_selector.associate(es_random, "random"))).
     append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
-                append(rewrite_strategy_selector.associate(GS_REWR_INNER, "Inner")).
+                append(rewrite_strategy_selector.associate(mcrl2::data::rewriter::innermost, "Inner")).
 #ifdef MCRL2_INNERC_AVAILABLE
-                append(rewrite_strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+                append(rewrite_strategy_selector.associate(mcrl2::data::rewriter::innermost_compiling, "Innerc")).
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
+                append(rewrite_strategy_selector.associate(mcrl2::data::rewriter::jitty, "Jitty", true)).
+                append(rewrite_strategy_selector.associate(mcrl2::data::rewriter::jitty_compiling, "Jittyc")));
 #else
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)));
+                append(rewrite_strategy_selector.associate(mcrl2::data::rewriter::jitty, "Jitty", true)));
 #endif
 
   if ( make_lts )
@@ -257,6 +250,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   }
 
   checkbox&       cb_deadlock    = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_detect_deadlock));
+  checkbox&       cb_divergence    = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_detect_divergence));
   checkbox&       cb_actions     = d.create< checkbox >().set_status(c.option_exists(option_detect_actions));
   text_field&     tf_actions     = d.create< text_field >();
   checkbox&       cb_trace       = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_trace));
@@ -274,8 +268,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   m.append(d.create< horizontal_box >().set_default_margins(margins(4,0,5,0)).
       append(d.create< vertical_box >().set_default_alignment(layout::left).set_default_margins(margins(1,0,1,0)).
           append(cb_deadlock.set_label("detect deadlocks")).
+          append(cb_divergence.set_label("detect divergences")).
           append(cb_actions.set_label("detect actions")).
-          append(cb_trace.set_label("save action/deadlock traces, but at most:")).
+          append(cb_trace.set_label("save action/divergence/deadlock traces; at most:")).
           append(cb_error_trace.set_label("save trace on error")).
           append(cb_confluence.set_label("confluence reduction with confluent tau:")).
           append(cb_max_states.set_label("maximum number of states")).
@@ -302,7 +297,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   }
   if (c.option_exists(option_rewrite_strategy)) {
     rewrite_strategy_selector.set_selection(
-        c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
+        c.get_option_argument< mcrl2::data::rewriter::strategy >(option_rewrite_strategy, 0));
   }
   if (c.option_exists(option_exploration_strategy)) {
     exploration_strategy_selector.set_selection(
@@ -334,6 +329,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   c.get_option(option_rewrite_strategy).set_argument_value< 0 >(rewrite_strategy_selector.get_selection());
   c.get_option(option_exploration_strategy).set_argument_value< 0 >(exploration_strategy_selector.get_selection());
   c.add_option(option_detect_deadlock).set_argument_value< 0 >(cb_deadlock.get_status());
+  c.add_option(option_detect_divergence).set_argument_value< 0 >(cb_divergence.get_status());
 
   if (cb_actions.get_status() && !tf_actions.get_text().empty()) {
     c.add_option(option_detect_actions).set_argument_value< 0 >(tf_actions.get_text());
@@ -388,8 +384,8 @@ class squadt_interactor::status_display {
 
     status_display(squadt_interactor& c, lts_generation_options&);
 
-    void update(unsigned long, unsigned long long, unsigned long long,
-                unsigned long long, unsigned long long);
+    void update(unsigned long, boost::uint64_t, boost::uint64_t,
+                boost::uint64_t, boost::uint64_t);
 };
 
 squadt_interactor::status_display::status_display(squadt_interactor& c, lts_generation_options& lgopts) :
@@ -424,8 +420,8 @@ squadt_interactor::status_display::status_display(squadt_interactor& c, lts_gene
   m_communicator.send_display_layout(display.manager(m));
 }
 
-void squadt_interactor::status_display::update(unsigned long level, unsigned long long explored,
-    unsigned long long seen, unsigned long long num_found_same, unsigned long long transitions) {
+void squadt_interactor::status_display::update(unsigned long level, boost::uint64_t explored,
+    boost::uint64_t seen, boost::uint64_t num_found_same, boost::uint64_t transitions) {
 
   lb_level.set_text(boost::lexical_cast < std::string > (level));
   lb_explored.set_text(boost::lexical_cast < std::string > (explored));
@@ -459,7 +455,10 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   lts_generation_options lgopts;
   status_display         display(*this, lgopts);
 
-  lgopts.specification = configuration.get_input(lps_file_for_input).location();
+  // Let squadt_tool update configuration for rewriter and add output file configuration
+  synchronise_with_configuration(configuration);
+
+  lgopts.filename = configuration.get_input(lps_file_for_input).location();
 
   if (configuration.category() == tipi::tool::category::transformation) {
     lgopts.lts = configuration.get_output(lts_file_for_output).location();
@@ -473,10 +472,11 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
     lgopts.removeunused = configuration.get_option_argument< bool >(option_removeunused);
   }
 
-  lgopts.strat      = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy);
+  lgopts.strat      = configuration.get_option_argument< mcrl2::data::rewriter::strategy >(option_rewrite_strategy);
   lgopts.expl_strat = configuration.get_option_argument< exploration_strategy >(option_exploration_strategy);
 
   lgopts.detect_deadlock  = configuration.get_option_argument< bool >(option_detect_deadlock);
+  lgopts.detect_divergence  = configuration.get_option_argument< bool >(option_detect_divergence);
 
   if (configuration.option_exists(option_detect_actions)) {
     lgopts.detect_action = true;
@@ -491,7 +491,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   }
 
   if (configuration.get_option_argument< bool >(option_confluence_reduction)) {
-    lgopts.priority_action = strdup(configuration.get_option_argument< std::string >(option_confluent_tau).c_str());
+    lgopts.priority_action = configuration.get_option_argument< std::string >(option_confluent_tau);
   }
 
   lgopts.max_states = (configuration.option_exists(option_max_states)) ?

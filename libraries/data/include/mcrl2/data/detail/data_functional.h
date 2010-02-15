@@ -20,15 +20,13 @@
 #include <utility>
 #include <vector>
 
-#include "boost/format.hpp"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/sort_identifier.h"
-#include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/function_symbol.h"
 
 namespace mcrl2 {
 
@@ -55,11 +53,26 @@ struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
   }
 };
 
-/// \brief Function object that determines if a term is equal to a given data variable.
-struct compare_data_variable: public compare_term<data_variable>
+/// Tests if a term is a sort, and if it is equal to s
+struct compare_sort : public std::unary_function< bool, atermpp::aterm_appl >
 {
-  compare_data_variable(const data_variable& v)
-   : compare_term<data_variable>(v)
+  sort_expression s;
+
+  compare_sort(sort_expression s_)
+    : s(s_)
+  {}
+
+  bool operator()(atermpp::aterm_appl t) const
+  {
+    return is_sort_expression(t) && s == t;
+  }
+};
+
+/// \brief Function object that determines if a term is equal to a given data variable.
+struct compare_variable: public compare_term<variable>
+{
+  compare_variable(const variable& v)
+   : compare_term<variable>(v)
   {}
 };
 
@@ -77,34 +90,38 @@ struct equal_data_expression_sort: public std::binary_function<data_expression, 
 };
 
 /// \brief Function object that returns the name of a data variable
-struct data_variable_name: public std::unary_function<data_variable, core::identifier_string>
+struct variable_name: public std::unary_function<variable, core::identifier_string>
 {
   /// \brief Function call operator
   /// \param v A data variable
   /// \return The function result
-  core::identifier_string operator()(const data_variable& v) const
+  core::identifier_string operator()(const variable& v) const
   {
     return v.name();
   }
 };
 
-/// \brief Function object that returns the sort of a data variable
-struct data_variable_sort: public std::unary_function<data_variable, sort_expression>
+/// \brief Function object that returns the name of a data expression
+template < typename Expression >
+struct sort_of_expression: public std::unary_function< Expression, sort_expression >
 {
   /// \brief Function call operator
   /// \param v A data variable
   /// \return The function result
-  sort_expression operator()(const data_variable& v) const
+  sort_expression operator()(const Expression& e) const
   {
-    return v.sort();
+    return e.sort();
   }
 };
+
+/// \brief Function object that returns the name of a data variable
+typedef sort_of_expression< variable > sort_of_variable;
 
 struct sort_has_name
 {
   std::string m_name;
 
-  sort_has_name(std::string name)
+  sort_has_name(std::string const& name)
     : m_name(name)
   {}
 
@@ -113,71 +130,26 @@ struct sort_has_name
   /// \return The function result
   bool operator()(sort_expression s) const
   {
-    return is_sort_identifier(s) && std::string(sort_identifier(s).name()) == m_name;
+    return s.is_basic_sort() && std::string(basic_sort(s).name()) == m_name;
   }
 };
 
-struct data_operation_has_name
+struct function_symbol_has_name
 {
   std::string m_name;
 
-  data_operation_has_name(std::string name)
+  function_symbol_has_name(std::string const& name)
     : m_name(name)
   {}
 
   /// \brief Function call operator
   /// \param c A data operation
   /// \return The function result
-  bool operator()(data_operation c) const
+  bool operator()(function_symbol c) const
   {
     return std::string(c.name()) == m_name;
   }
 };
-
-/// \brief Finds a mapping in a data specification.
-/// \param data A data specification
-/// \param s A string
-/// \return The found mapping
-inline
-data_operation find_mapping(data_specification data, std::string s)
-{
-  data_operation_list::iterator i = std::find_if(data.mappings().begin(), data.mappings().end(), data_operation_has_name(s));
-  if (i == data.mappings().end())
-  {
-    return data_operation();
-  }
-  return *i;
-}
-
-/// \brief Finds a constructor in a data specification.
-/// \param data A data specification
-/// \param s A string
-/// \return The found constructor
-inline
-data_operation find_constructor(data_specification data, std::string s)
-{
-  data_operation_list::iterator i = std::find_if(data.constructors().begin(), data.constructors().end(), data_operation_has_name(s));
-  if (i == data.constructors().end())
-  {
-    return data_operation();
-  }
-  return *i;
-}
-
-/// \brief Finds a sort in a data specification.
-/// \param data A data specification
-/// \param s A string
-/// \return The found sort
-inline
-sort_expression find_sort(data_specification data, std::string s)
-{
-  sort_expression_list::iterator i = std::find_if(data.sorts().begin(), data.sorts().end(), sort_has_name(s));
-  if (i == data.sorts().end())
-  {
-    return sort_expression();
-  }
-  return *i;
-}
 
 } // namespace detail
 

@@ -1,4 +1,0 @@
-sort A = struct a?is_a;
-     APos = struct ca(a:A)?is_ca | cpos(p:Pos)?is_cpos;
-
-init delta;

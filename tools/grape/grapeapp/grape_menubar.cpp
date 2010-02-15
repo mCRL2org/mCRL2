@@ -8,6 +8,8 @@
 //
 // Implements the menubar class used by the main frame.
 
+#include "wx.hpp" // precompiled headers
+
 #include "grape_menubar.h"
 #include "grape_ids.h"
 #include "grape_icons.h"
@@ -37,11 +39,6 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item->SetHelp( _T("Open specification") );
   m_menu_file->Append( item );
 
-  item = new wxMenuItem( m_menu_file, wxID_CLOSE );
-  item->SetBitmap( g_icons[ _T("close") ] );
-  item->SetHelp( _T("Close current specification") );
-  m_menu_file->Append( item );
-
   m_menu_file->AppendSeparator();
 
   item = new wxMenuItem( m_menu_file, wxID_SAVE );
@@ -53,22 +50,6 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item->SetBitmap( g_icons[ _T("saveas") ] );
   item->SetHelp( _T("Save current specification with a different filename") );
   m_menu_file->Append( item );
-
-  m_menu_file->AppendSeparator();
-
-  item = new wxMenuItem( m_menu_file, GRAPE_MENU_VALIDATE, _T("&Validate specification\tShift+F5"), _T("Validates current specification") );
-  item->SetBitmap( g_icons[ _T("validate") ] );
-  m_menu_file->Append(item);
-
-  m_menu_file->AppendSeparator();
-
-  item = new wxMenuItem( m_menu_file, GRAPE_MENU_EXPORTTEXT, _T("&Export datatype specification to text"), _T("Export current datatype specification to text") );
-  item->SetBitmap( g_icons[ _T("text") ] );
-  m_menu_file->Append( item );
-
-  item = new wxMenuItem( m_menu_file, wxID_PRINT );
-  m_menu_file->Append( item );
-  m_menu_file->Enable(wxID_PRINT, false);
 
   m_menu_file->AppendSeparator();
 
@@ -90,19 +71,22 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   m_menu_edit->Append( item );
 
   m_menu_edit->AppendSeparator();
-
+/*
   item = new wxMenuItem( m_menu_edit, wxID_CUT );
   item->SetBitmap( g_icons[ _T("cut") ] );
   m_menu_edit->Append( item );
+  m_menu_edit->Enable(wxID_CUT, false);
 
   item = new wxMenuItem( m_menu_edit, wxID_COPY );
   item->SetBitmap( g_icons[ _T("copy") ] );
   m_menu_edit->Append( item );
+  m_menu_edit->Enable(wxID_COPY, false);
 
   item = new wxMenuItem( m_menu_edit, wxID_PASTE );
   item->SetBitmap( g_icons[ _T("paste") ] );
   m_menu_edit->Append( item );
-
+  m_menu_edit->Enable(wxID_PASTE, false);
+*/
   item = new wxMenuItem( m_menu_edit, wxID_DELETE, _T("&Remove\tDel"), _T("Remove selected objects") );
   item->SetBitmap( g_icons[ _T("del") ] );
   m_menu_edit->Append( item );
@@ -114,8 +98,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   m_menu_edit->Append( item );
   m_menu_edit->Enable(GRAPE_MENU_PROPERTIES, false);
 
-  m_menu_edit->AppendSeparator();
-
+/*
   item = new wxMenuItem( m_menu_edit, GRAPE_MENU_SELECT_ALL, _T("Select &All\tCtrl-A"), _T("Select all objects in current diagram") );
   m_menu_edit->Append( item );
   m_menu_edit->Enable(GRAPE_MENU_SELECT_ALL, false);
@@ -125,59 +108,53 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   m_menu_edit->Enable(GRAPE_MENU_DESELECT_ALL, false);
 
   m_menu_edit->AppendSeparator();
-
-  item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DATATYPESPEC, _T("Edit Datatype specification"), _T("Edit Datatype specification"), wxITEM_CHECK );
-  m_menu_edit->Append( item );
-
+*/
   Append(m_menu_edit, _T("&Edit"));
 
   // diagram menu
-  m_menu_diagram = new wxMenu;
+  m_menu_specification = new wxMenu;
 
-  item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, _T("Add &Architecture diagram"), _T("Add Architecture diagram") );
+  item = new wxMenuItem( m_menu_specification, GRAPE_MENU_DATATYPESPEC, _T("Edit data type specification"), _T("Edit data type specification"), wxITEM_CHECK );
+  m_menu_specification->Append( item );
+
+  item = new wxMenuItem( m_menu_specification, GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, _T("Add &Architecture diagram"), _T("Add Architecture diagram") );
   item->SetBitmap( g_icons[ _T("newarch") ] );
-  m_menu_diagram->Append( item );
+  m_menu_specification->Append( item );
 
-  item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_ADD_PROCESS_DIAGRAM, _T("Add &Process diagram"), _T("Add Process diagram") );
+  item = new wxMenuItem( m_menu_specification, GRAPE_MENU_ADD_PROCESS_DIAGRAM, _T("Add &Process diagram"), _T("Add Process diagram") );
   item->SetBitmap( g_icons[ _T("newproc") ] );
-  m_menu_diagram->Append( item );
+  m_menu_specification->Append( item );
 
-  item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_RENAME_DIAGRAM, _T("Re&name"), _T("Rename current diagram...") );
-  m_menu_diagram->Append( item );
+  m_menu_specification->AppendSeparator();
 
-  item = new wxMenuItem(m_menu_diagram, GRAPE_MENU_VALIDATE_DIAGRAM, _T("&Validate\tF5"), _T("Validate current diagram"));
+  item = new wxMenuItem(m_menu_specification, GRAPE_MENU_VALIDATE, _T("&Validate\tF5"), _T("Validate"));
   item->SetBitmap( g_icons[ _T("validate") ] );
-  m_menu_diagram->Append(item);
+  m_menu_specification->Append(item);
 
-  item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_EXPORTMCRL2, _T("Export to &mCRL2...\tCtrl-E"), _T("Export to mCRL2") );
+  item = new wxMenuItem( m_menu_specification, GRAPE_MENU_EXPORTMCRL2, _T("Export to &mCRL2...\tCtrl-E"), _T("Export to mCRL2") );
   item->SetBitmap( g_icons[ _T("export") ] );
-  m_menu_diagram->Append( item );
+  m_menu_specification->Append( item );
 
-  item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_EXPORTIMAGE, _T("Export to &image...\tCtrl-I"), _T("Export current diagram to image") );
+  m_menu_specification->AppendSeparator();
+
+  item = new wxMenuItem( m_menu_specification, GRAPE_MENU_EXPORTIMAGE, _T("Export diagram to &image...\tCtrl-I"), _T("Export current diagram to image") );
   item->SetBitmap( g_icons[ _T("image") ] );
-  m_menu_diagram->Append( item );
+  m_menu_specification->Append( item );
 
-  m_menu_diagram->AppendSeparator();
+  item = new wxMenuItem( m_menu_specification, GRAPE_MENU_RENAME_DIAGRAM, _T("Re&name diagram"), _T("Rename current diagram...") );
+  m_menu_specification->Append( item );
 
-  item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_REMOVE_DIAGRAM, _T("&Remove"), _T("Remove current diagram") );
+  item = new wxMenuItem( m_menu_specification, GRAPE_MENU_REMOVE_DIAGRAM, _T("&Remove diagram"), _T("Remove current diagram") );
   item->SetBitmap( g_icons[ _T("del") ] );
-  m_menu_diagram->Append( item );
+  m_menu_specification->Append( item );
 
-  Append(m_menu_diagram, _T("&Diagram"));
+  Append(m_menu_specification, _T("&Specification"));
 
   // tools menu
   m_menu_tools = new wxMenu;
 
   item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_SELECT, _T("Selection"), _T("Select objects in current diagram") );
   item->SetBitmap( g_icons[ _T("toolselect") ] );
-  m_menu_tools->Append( item );
-
-//  item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_ATTACH, _T("Attach objects"), _T("Attach objects to eachother") );
-//  item->SetBitmap( g_icons[ _T("attach") ] );
-//  m_menu_tools->Append( item );
-
-  item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_DETACH, _T("Detach objects"), _T("Detach objects from eachother") );
-  item->SetBitmap( g_icons[ _T("detach") ] );
   m_menu_tools->Append( item );
 
   m_menu_tools->AppendSeparator();
@@ -246,6 +223,16 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
 grape_menubar::~grape_menubar()
 {
+  for (unsigned int i = GetMenuCount(); !GetMenuCount(); --i)
+  {
+    wxMenu* menu = Remove(i);
+    if (menu == m_menu_file) delete m_menu_file;
+    if (menu == m_menu_edit) delete m_menu_edit;
+    if (menu == m_menu_specification) delete m_menu_specification;
+    if (menu == m_menu_tools) delete m_menu_tools;
+    if (menu == m_menu_help) delete m_menu_help;
+    delete menu;
+  }
 }
 
 wxMenu* grape_menubar::get_menu( grape_main_menu p_which )
@@ -254,7 +241,7 @@ wxMenu* grape_menubar::get_menu( grape_main_menu p_which )
   {
     case GRAPE_MENU_FILE: return m_menu_file;
     case GRAPE_MENU_EDIT: return m_menu_edit;
-    case GRAPE_MENU_DIAGRAM: return m_menu_diagram;
+    case GRAPE_MENU_SPECIFICATION: return m_menu_specification;
     case GRAPE_MENU_TOOLS: return m_menu_tools;
     case GRAPE_MENU_HELP: return m_menu_help;
     default: break; // should never happen!
@@ -269,39 +256,33 @@ void grape_menubar::set_mode( int p_mode )
   bool in_diagram = (p_mode & ( GRAPE_MENUMODE_ARCH + GRAPE_MENUMODE_PROC )) != 0;
 
   // update menubar
-  Enable(wxID_CLOSE, in_spec);
+  Enable(wxID_SAVE, in_spec);
   Enable(wxID_SAVEAS, in_spec);
-  Enable(GRAPE_MENU_VALIDATE, in_diagram);
-  Enable(GRAPE_MENU_EXPORTTEXT, in_spec);
-// Low prioritiy, not implemented; disabled
-  Enable(wxID_PRINT, false );
   Enable(GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, in_spec);
   Enable(GRAPE_MENU_ADD_PROCESS_DIAGRAM, in_spec);
 
 // Low priority, not implemented; disabled
-  Enable(wxID_CUT, false );
+ // Enable(wxID_CUT, false );
 // Low priority, not implemented; disabled
-  Enable(wxID_COPY, false );
+ // Enable(wxID_COPY, false );
 // Low priority, not implemented; disabled
-  Enable(wxID_PASTE, false );
+ // Enable(wxID_PASTE, false );
 
   Enable(wxID_DELETE, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   Enable(GRAPE_MENU_PROPERTIES, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
-  // Enable(GRAPE_MENU_SELECT_ALL, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
-  Enable(GRAPE_MENU_SELECT_ALL, false );
-  Enable(GRAPE_MENU_DESELECT_ALL, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
+// Low priority, not implemented; disabled
+ // Enable(GRAPE_MENU_SELECT_ALL, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
+// Low priority, not implemented; disabled
+ // Enable(GRAPE_MENU_SELECT_ALL, false );
+// Low priority, not implemented; disabled
+ // Enable(GRAPE_MENU_DESELECT_ALL, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   Enable(GRAPE_MENU_DATATYPESPEC, in_spec );
 
   Enable(GRAPE_TOOL_SELECT, in_diagram );
-//  Enable(GRAPE_TOOL_ATTACH, in_diagram );
-//  Enable(GRAPE_TOOL_DETACH, in_diagram );
-  Enable(GRAPE_TOOL_DETACH, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
   Enable(GRAPE_TOOL_ADD_COMMENT, in_diagram );
 
   Enable(GRAPE_MENU_RENAME_DIAGRAM, in_diagram );
   Enable(GRAPE_MENU_REMOVE_DIAGRAM, in_diagram );
-  Enable(GRAPE_MENU_VALIDATE_DIAGRAM, in_diagram);
-  Enable(GRAPE_MENU_EXPORTMCRL2, in_diagram);
   Enable(GRAPE_MENU_EXPORTIMAGE, in_diagram);
 
   // architecture diagram specific items

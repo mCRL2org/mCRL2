@@ -13,13 +13,14 @@
 
 #include <string>
 #include <limits>
+#include <memory>
 
-#include <boost/bind.hpp>
+#include "boost/bind.hpp"
+#include "boost/cstdint.hpp"
 
-#include <aterm2.h>
+#include "aterm2.h"
 #include "lts.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/rewrite.h"
 #include "mcrl2/lts/lts.h"
 
 #include "workarounds.h"
@@ -29,7 +30,12 @@
 #define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB
 #define DEFAULT_INIT_TSIZE 10000UL
 
-enum exploration_strategy { es_none, es_breadth, es_depth, es_random };
+enum exploration_strategy { es_none, 
+                            es_breadth, 
+                            es_depth, 
+                            es_random, 
+                            es_value_prioritized, 
+                            es_value_random_prioritized };
 
 struct lts_generation_options {
   lts_generation_options();
@@ -38,57 +44,64 @@ struct lts_generation_options {
   boost::function< std::string (std::string const&, std::string const&) >
                                                    generate_filename_for_trace;
   /* Method for status display */
-  boost::function< void (unsigned long, unsigned long long,
-                         unsigned long long, unsigned long long,
-                         unsigned long long) > display_status;
+  boost::function< void (unsigned long, boost::uint64_t,
+                         boost::uint64_t, boost::uint64_t,
+                         boost::uint64_t) > display_status;
 
   /* Default function for generate_filename_for_trace */
   std::string generate_trace_file_name(std::string const& info, std::string const& extension);
 
   /* Default function for status display */
-  void update_status_display(unsigned long, unsigned long long,
-                             unsigned long long, unsigned long long const,
-                             unsigned long long) {
+  void update_status_display(unsigned long, boost::uint64_t,
+                             boost::uint64_t, boost::uint64_t const,
+                             boost::uint64_t) {
   }
 
-  RewriteStrategy strat;
+  mcrl2::data::rewriter::strategy strat;
   bool usedummies;
   bool removeunused;
   int stateformat;
   mcrl2::lts::lts_type outformat;
   bool outinfo;
-  unsigned long long max_states;
+  bool suppress_progress_messages;
+  boost::uint64_t max_states;
   std::string priority_action;
   bool trace;
   int num_trace_actions;
   ATermAppl *trace_actions;
   unsigned long max_traces;
   bool detect_deadlock;
+  bool detect_divergence;
   bool detect_action;
   bool save_error_trace;
   bool error_trace_saved;
   exploration_strategy expl_strat;
   bool bithashing;
-  unsigned long long bithashsize;
+  boost::uint64_t bithashsize;
   unsigned long todo_max;
   unsigned long initial_table_size;
-  std::string specification;
+  std::auto_ptr< mcrl2::data::rewriter > m_rewriter;
+  std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > > m_enumerator_factory;
+  mcrl2::lps::specification specification;
+  std::string filename;
   std::string lts;
 };
 
 inline lts_generation_options::lts_generation_options() :
-    strat(GS_REWR_JITTY),
+    strat(mcrl2::data::rewriter::jitty),
     usedummies(true),
     removeunused(true),
     stateformat(GS_STATE_VECTOR),
     outformat(mcrl2::lts::lts_none),
     outinfo(true),
+    suppress_progress_messages(false),
     max_states(DEFAULT_MAX_STATES),
     trace(false),
     num_trace_actions(0),
     trace_actions(NULL),
     max_traces(DEFAULT_MAX_TRACES),
     detect_deadlock(false),
+    detect_divergence(false),
     detect_action(false),
     save_error_trace(false),
     error_trace_saved(false),
@@ -110,5 +123,6 @@ const char *expl_strat_to_str(exploration_strategy es);
 bool initialise_lts_generation(lts_generation_options *opts);
 bool generate_lts();
 bool finalise_lts_generation();
+void finalise_lts_generation_when_interrupted(int param);
 
 #endif

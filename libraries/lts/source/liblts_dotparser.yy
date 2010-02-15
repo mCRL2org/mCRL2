@@ -8,6 +8,7 @@
 
 %{
 #include <vector>
+#include <cstring>
 #include "mcrl2/lts/lts.h"
 #include "liblts_dotparser.h"
 #include "liblts_dotlexer.h"
@@ -35,6 +36,9 @@ int dotyylex(void);
   ATermAppl aterm;
   ATermList atermlist;
 }
+
+//more verbose and specific error messages
+%error-verbose
 
 //set name prefix
 %name-prefix="dotyy"

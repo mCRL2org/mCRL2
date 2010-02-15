@@ -60,7 +60,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
         local library-name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
 
         if ! $(library-name) in $(library-targets) {
-          lib $(library-name)
+          searched-lib $(library-name)
               :
               : <name>$(library-name) $(library_search_paths)
               :
@@ -92,7 +92,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
           library_search_paths += <search>$(search_path) ;
         }
         else if ! [ MATCH "-.*" : $(part) ] {
-          lib $(name)$(part)
+          searched-lib $(name)$(part)
               :
               : <name>$(part) $(library_search_paths)
               :
@@ -109,20 +109,20 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
 }
 
 # OpenGL configuration
-lib GLU : : <target-os>windows <name>glu32 ;
-lib GLU : : <target-os>cygwin <name>glu32 ;
-lib GLU : : <target-os>solaris <name>GLU ;
+searched-lib GLU : : <target-os>windows <name>glu32 ;
+searched-lib GLU : : <target-os>cygwin <name>glu32 ;
+searched-lib GLU : : <target-os>solaris <name>GLU ;
 
-lib GL : : <name>GL <link>shared ;
+searched-lib GL : : <name>GL <link>shared ;
 
 alias opengl : GL
              : <target-os>solaris:<source>GLU
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
-lib opengl   : GLU
+searched-lib opengl   : GLU
              : <target-os>windows
                <name>"opengl32"
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
-lib opengl   : GLU
+searched-lib opengl   : GLU
              : <target-os>cygwin
                <name>"opengl32"
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
@@ -131,7 +131,6 @@ alias opengl : : <target-os>darwin : : <framework>OpenGL ;
 if ! $(BOOST_LIBRARY_PATH) {
   use-project /boost : ../3rd-party/boost ;
 }
-#use-project /boost : ../3rd-party/boost ;
 
 local boost-requirements =
                <include>$(BOOST_ROOT)
@@ -143,8 +142,7 @@ local boost-requirements =
 
 cpp-pch boost.pch
             : precompile/boost.hpp
-            : <include>./precompile
-              $(boost-requirements)
+            : $(boost-requirements)
               <link>shared:<define>BOOST_SYSTEM_DYN_LINK=1
               <link>shared:<define>BOOST_FILESYSTEM_DYN_LINK=1
               <link>shared:<define>BOOST_THREAD_USE_DLL=1
@@ -165,9 +163,19 @@ cpp-pch boost.pch
               <library>boost_system
             ;
 
+rule use-precompiled-headers ( properties * ) {
+  local targets ;
+
+  if <pch>on in $(properties) {
+    targets = <source>boost.pch ;
+  }
+
+  return $(targets) ;
+}
+
 alias boost : : : :
               $(boost-requirements)
-              <pch>on:<source>boost.pch
+              <conditional>@use-precompiled-headers
               <toolset>msvc:<cxxflags>/FIboost.hpp
               <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp ;
 
@@ -186,7 +194,7 @@ local rule boost-library ( name link ? : requirements * : usage-requirements * :
                         : $(requirements) <threading>multi : : $(requirements) $(usage-requirements) ;
   }
   else if $(BOOST_INCLUDE_PATH) {
-    lib boost_$(name)
+    searched-lib boost_$(name)
            :
            : <library-path>"$(BOOST_LIBRARY_PATH)"
              <name>"boost_$(name)-mt"
@@ -208,27 +216,27 @@ boost-library test : <toolset>msvc:<asynch-exceptions>on : <use>boost ;
 boost-library system : ;
 
 if $(DL) {
-  lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
+  searched-lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
 }
 else {
   alias dl : : : : <define>NO_DYNLOAD ;
 }
 
-lib   m  : : <name>"m" ;
+searched-lib   m  : : <name>"m" ;
 alias m  : : <target-os>windows ;
-lib   z  : : <name>"z" ;
+searched-lib   z  : : <name>"z" ;
 
 alias dynamic_loading : : <target-os>windows <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
 alias dynamic_loading : : <target-os>freebsd ;
 alias dynamic_loading : dl ;
 
 # Socket library on SunOS/Solaris system
-lib nsl : : <name>nsl ;
-lib ws2 : : <name>"ws2_32" ;
+searched-lib nsl : : <name>nsl ;
+searched-lib ws2 : : <name>"ws2_32" ;
 
 alias socket ;
-lib   socket : : <target-os>solaris <name>socket : : <library>nsl ;
-lib   socket :
+searched-lib   socket : : <target-os>solaris <name>socket : : <library>nsl ;
+searched-lib   socket :
              : <target-os>windows
                <name>wsock32
              :
@@ -237,7 +245,7 @@ lib   socket :
                <library>ws2
              ;
 
-lib   socket :
+searched-lib   socket :
              : <target-os>cygwin
                <name>wsock32
              :
@@ -247,8 +255,8 @@ lib   socket :
              ;
 
 if $(CADP_HEADERS) {
-  lib bcg : : <name>BCG <search>"$(CADP_LIBRARIES)" ;
-  lib bcg_io : : <name>BCG_IO <search>"$(CADP_LIBRARIES)" ;
+  searched-lib bcg : : <name>BCG <search>"$(CADP_LIBRARIES)" ;
+  searched-lib bcg_io : : <name>BCG_IO <search>"$(CADP_LIBRARIES)" ;
 
   alias BCG : bcg bcg_io : : : <include>"$(CADP_HEADERS)" <define>USE_BCG ;
 }
@@ -257,9 +265,9 @@ else {
 }
 
 if $(USE_CVC) {
-  lib gmp : : <name>gmp ;
+  searched-lib gmp : : <name>gmp ;
 
-  lib cvc
+  searched-lib cvc
       : gmp
       : <name>cvc3
         <search>"$(USE_CVC)/lib"
@@ -283,16 +291,13 @@ if $(WX_CPPFLAGS) {
 
   cpp-pch wx.pch
            : precompile/wx.hpp
-           : <include>./precompile
-             $(wx-requirements)
-             <link>shared:<use>boost.pch/<link>shared
-             <link>static:<use>boost.pch/<link>static
+           : $(wx-requirements)
+            <use>boost.pch
            :
-           : <toolset>msvc:<cxxflags>/FIwx.hpp
+           : <define>BOOST_THREAD_POSIX
+             <toolset>msvc:<cxxflags>/FIwx.hpp
+             <use>boost.pch
              <target-os>windows,<include>intel:<cxxflags>/FIwx.hpp
-             <link>shared:<use>boost.pch/<link>shared
-             <link>static:<use>boost.pch/<link>static
-             <define>BOOST_THREAD_POSIX
            ;
 
   libraries-from-string wx_base
@@ -306,7 +311,7 @@ if $(WX_CPPFLAGS) {
           : $(WX_GL_LDFLAGS)
           :
           :
-          : <library>opengl $(wx-requirements)
+          : $(wx-requirements)
           ;
 }
 

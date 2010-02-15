@@ -1,0 +1,23 @@
+% This is a small example showing various uses of structured sorts.
+% Collected from some earlier examples by Jeroen Keiren, 8/9/2009.
+
+% A simple structured sort with a single element e1
+sort E = struct e1;
+
+% A structured sort recursively depending on natural numbers,
+% with elements of the form d1(n) and d2(n), where n is an arbitrary
+% natural number. Furthermore, arg2(d2(n)) = n, is_d1(d1(n)) = true,
+% is_d1(d2(n)) = false, and analougly for is_d2.
+sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;
+
+% Two mutually dependent sorts A and APos, whereas APos also
+% depends on positive natural numbers.
+sort A = struct a?is_a;
+sort APos = struct ca(a:A)?is_ca | cpos(p:Pos)?is_cpos;
+
+% In addition, structured sorts can be used inline, as is shown in the
+% following mapping.
+map f : struct c(p: Pos);
+
+init delta;
+

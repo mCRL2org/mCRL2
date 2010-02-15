@@ -29,8 +29,6 @@ namespace grape
     {
       IDLE = 0,
       SELECT,
-      ATTACH,
-      DETACH,
       ADD_TERMINATING_TRANSITION,
       ADD_NONTERMINATING_TRANSITION,
       ADD_INITIAL_DESIGNATOR,
@@ -40,7 +38,7 @@ namespace grape
       ADD_ARCHITECTURE_REFERENCE,
       ADD_CHANNEL,
       ADD_CHANNEL_COMMUNICATION,
-      ADD_COMMENT,
+      ADD_COMMENT
     };
 
     /**
@@ -76,8 +74,8 @@ namespace grape
         grape_direction m_touched_click_location; /**< When a border of a visual is clicked, it is stored which border was clicked. This is needed for grape_event_drag to determine to which direction to resize. */
         bool            m_dragging;              /**< Whether the touched object was dragged. */
         bool            m_mousedown;             /**< Shall contain @c true when the left mouse button is pressed. */
-
-        DECLARE_EVENT_TABLE();        /**< The event table of this canvas. */
+        bool            m_multiple_selection;    /**< Shall contain true when we are selecting objects. */
+        DECLARE_EVENT_TABLE()        /**< The event table of this canvas. */
 
 
         /**
@@ -140,11 +138,11 @@ namespace grape
          */
         ~grape_glcanvas(void);
 
-		/**
-		 * Reset function
-		 * Resets the scrollbars
-		 */
-		void reset();
+        /**
+         * Reset function
+         * Resets the scrollbars
+         */
+        void reset();
         /**
          * Drawing function.
          * (Re-)draws the canvas.

@@ -16,17 +16,18 @@
 #include <boost/lexical_cast.hpp>
 
 #include "aterm2.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/exception.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
-//Temporary workaround for the passing of the determinism
-
+using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+
+//Temporary workaround for the passing of the determinism
 
 static const std::set<mcrl2::lts::lts_equivalence> &initialise_allowed_eqs()
 {
@@ -34,6 +35,7 @@ static const std::set<mcrl2::lts::lts_equivalence> &initialise_allowed_eqs()
   static std::set<lts_equivalence> s;
   s.insert(lts_eq_bisim);
   s.insert(lts_eq_branching_bisim);
+  s.insert(lts_eq_divergence_preserving_branching_bisim);
   s.insert(lts_eq_isomorph);
   return s;
 }
@@ -43,16 +45,9 @@ static const std::set<mcrl2::lts::lts_equivalence> &allowed_eqs()
   return s;
 }
 
-// Squadt protocol interface and utility pseudo-library
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
-#endif
-
-class info_tool
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-                : public mcrl2::utilities::squadt::mcrl2_tool_interface
-#endif
-                {
+typedef squadt_tool< input_tool > ltsinfo_base;
+class ltsinfo_tool : public ltsinfo_base
+{
 
   private:
 
@@ -62,49 +57,31 @@ class info_tool
 
   public:
 
-    info_tool() :
-                         intype(mcrl2::lts::lts_none),
-                         determinism_equivalence(mcrl2::lts::lts_eq_isomorph) {
-    }
-
-    int execute(int argc, char** argv) {
-      try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-        if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
-          return EXIT_SUCCESS;
-        }
-#endif
-
-        if (parse_command_line(argc, argv)) {
-          process();
-        }
-
-        return EXIT_SUCCESS;
-      }
-      catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
-      }
-
-      return EXIT_FAILURE;
-    }
-
-    bool parse_command_line(int argc, char** argv) {
-      using namespace mcrl2::lts;
-      using mcrl2::lts::lts;
-
-      interface_description clinterface(argv[0], NAME, AUTHOR,
+    ltsinfo_tool() :
+      ltsinfo_base(NAME,AUTHOR,
         "display basic information about an LTS",
-        "[OPTION]... [INFILE]\n",
         "Print information about the labelled transition system (LTS) in INFILE. "
         "If INFILE is not supplied, stdin is used.\n"
         "\n"
         "The format of INFILE is determined by its contents. "
         "The option --in can be used to force the format for INFILE. "
         "The supported formats are:\n"
-        +lts::supported_lts_formats_text()
-      );
+        +mcrl2::lts::lts::supported_lts_formats_text()
+      ),
+      intype(mcrl2::lts::lts_none),
+      determinism_equivalence(mcrl2::lts::lts_eq_isomorph)
+    {
+    }
 
-      clinterface.
+  private:
+
+    void add_options(interface_description &desc)
+    {
+      using namespace mcrl2::lts;
+
+      ltsinfo_base::add_options(desc);
+
+      desc.
         add_option("equivalence", make_mandatory_argument("NAME"),
           "use equivalence NAME for deterministic check:\n"
           "  '" + lts::string_for_equivalence(lts_eq_isomorph) + "' for "
@@ -113,48 +90,53 @@ class info_tool
                 + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
           "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
                 + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
+          "  '" + lts::string_for_equivalence(lts_eq_divergence_preserving_branching_bisim) + "' for "
+                + lts::name_of_equivalence(lts_eq_divergence_preserving_branching_bisim) + ", or\n"
           "  'none' for not performing the check at all",
           'e').
         add_option("in", make_mandatory_argument("FORMAT"),
           "use FORMAT as the input format", 'i');
+    }
 
-      command_line_parser parser(clinterface, argc, argv);
+    void parse_options(const command_line_parser &parser)
+    {
+      using namespace mcrl2::lts;
 
-      if (parser.continue_execution()) {
-        if (parser.options.count("equivalence")) {
-          determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
-          if (allowed_eqs().count(determinism_equivalence) == 0 &&
-              parser.option_argument("equivalence") != "none")
-          {
-            parser.error("option -e/--equivalence has illegal argument '" +
-                parser.option_argument("equivalence") + "'");
-          }
-        }
+      ltsinfo_base::parse_options(parser);
 
-        if (0 < parser.arguments.size()) {
-          infilename = parser.arguments[0];
-        }
-        if (1 < parser.arguments.size()) {
-          parser.error("too many file arguments");
-        }
-
-        if (parser.options.count("in")) {
-          if (1 < parser.options.count("in")) {
-            parser.error("multiple input formats specified; can only use one");
-          }
-
-          intype = lts::parse_format(parser.option_argument("in"));
-          if (intype == lts_none || intype == lts_dot)  {
-            parser.error("option -i/--in has illegal argument '" +
-              parser.option_argument("in") + "'");
-          }
+      if (parser.options.count("equivalence")) {
+        determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
+        if (allowed_eqs().count(determinism_equivalence) == 0 &&
+            parser.option_argument("equivalence") != "none")
+        {
+          parser.error("option -e/--equivalence has illegal argument '" +
+              parser.option_argument("equivalence") + "'");
         }
       }
 
-      return parser.continue_execution();
+      if (0 < parser.arguments.size()) {
+        infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        parser.error("too many file arguments");
+      }
+
+      if (parser.options.count("in")) {
+        if (1 < parser.options.count("in")) {
+          parser.error("multiple input formats specified; can only use one");
+        }
+
+        intype = lts::parse_format(parser.option_argument("in"));
+        if (intype == lts_none || intype == lts_dot)  {
+          parser.error("option -i/--in has illegal argument '" +
+            parser.option_argument("in") + "'");
+        }
+      }
     }
 
-    void process() {
+  public:
+
+    bool run() {
       using namespace mcrl2::lts;
 
       mcrl2::lts::lts l;
@@ -215,6 +197,8 @@ class info_tool
           std::cout << "LTS is not deterministic (modulo " << lts::name_of_equivalence(determinism_equivalence) << ")" << std::endl;
         }
       }
+
+      return true;
     }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -248,7 +232,8 @@ class info_tool
             append(determinism_selector.associate(mcrl2::lts::lts_eq_none, "None")).
             append(determinism_selector.associate(mcrl2::lts::lts_eq_isomorph, "Isomorphism", true)).
             append(determinism_selector.associate(mcrl2::lts::lts_eq_bisim, "Strong bisimilarity")).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_branching_bisim, "Branching bisimilarity")));
+            append(determinism_selector.associate(mcrl2::lts::lts_eq_branching_bisim, "Branching bisimilarity")).
+            append(determinism_selector.associate(mcrl2::lts::lts_eq_divergence_preserving_branching_bisim, "Divergence preserving branching bisimilarity")));
 
       // Add okay button
       button& okay_button = d.create< button >().set_label("OK");
@@ -362,9 +347,7 @@ class info_tool
 
 int main(int argc, char **argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  info_tool tool;
-
-  return tool.execute(argc, argv);
+  return ltsinfo_tool().execute(argc, argv);
 }

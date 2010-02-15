@@ -20,7 +20,6 @@
 
 #include <boost/config.hpp> // Platform specific workarounds
 #include <boost/any.hpp>
-#include <boost/assert.hpp>
 #include <boost/integer_traits.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_enum.hpp>
@@ -292,14 +291,20 @@ namespace tipi {
 
         /** \brief Converts from the underlying implementation type */
         inline std::string specialised_convert(boost::any const& v) const {
-          BOOST_ASSERT(!get_single_instance().m_values.empty());
+          if(get_single_instance().m_values.empty())
+          {
+             throw std::runtime_error("m_values is empty in specialised_convert");
+          }
 
           return get_single_instance().convert(static_cast< size_t >(boost::any_cast< C >(v)));
         }
 
         /** \brief Returns an iterator over the values of the enumerated type */
         inline basic_enumeration::const_iterator_range values() const {
-          BOOST_ASSERT(!get_single_instance().m_values.empty());
+          if(get_single_instance().m_values.empty())
+          {
+             throw std::runtime_error("m_values is empty in values");
+          }
 
           return get_single_instance().values();
         }
@@ -309,7 +314,10 @@ namespace tipi {
          * \return the string representation of the value of the enumerated type
          **/
         inline std::string convert(C const& s) const {
-          BOOST_ASSERT(!get_single_instance().m_values.empty());
+          if(get_single_instance().m_values.empty())
+          {
+             throw std::runtime_error("m_values is empty in convert");
+          }
 
           return get_single_instance().convert(static_cast< const size_t > (s));
         }
@@ -318,7 +326,10 @@ namespace tipi {
          * \param[in] s the string to evaluate
          **/
         inline C evaluate(std::string const& s) const {
-          BOOST_ASSERT(!get_single_instance().m_values.empty());
+          if(get_single_instance().m_values.empty())
+          {
+             throw std::runtime_error("m_values is empty in evaluate");
+          }
 
           return static_cast< C >(get_single_instance().evaluate(s));
         }
@@ -435,7 +446,9 @@ namespace tipi {
          * \param[in] maximum the maximum value that specifies the range
          **/
         inline integer_range(C minimum = boost::integer_traits< C >::const_min, C maximum = boost::integer_traits< C >::const_max) : m_minimum(minimum), m_maximum(maximum) {
-          assert(m_minimum < m_maximum);
+          if(!(m_minimum < m_maximum)){
+            throw std::runtime_error( "m_minimum < m_maximum" );
+          }
         }
 
         /** \brief Establishes whether value is valid for an element of this type
@@ -599,7 +612,9 @@ namespace tipi {
          **/
         inline real_range(C minimum = (std::numeric_limits< C >::min)(), C maximum = (std::numeric_limits< C >::max)())
                                                                          : m_minimum(minimum), m_maximum(maximum) {
-          assert(m_minimum < m_maximum);
+          if(!(m_minimum < m_maximum)){
+            throw std::runtime_error( "m_minimum < m_maximum" );
+          }
         }
 
         /** \brief Establishes whether value is valid for an element of this type
@@ -707,7 +722,9 @@ namespace tipi {
         /** \brief Constructor */
         inline string(size_t minimum = 0, size_t maximum = boost::integer_traits< size_t >::const_max) :
                                                 m_minimum_length(minimum), m_maximum_length(maximum) {
-          assert(m_minimum_length < m_maximum_length);
+          if(!(m_minimum_length < m_maximum_length)){
+            throw std::runtime_error( "m_minimum < m_maximum" );
+          }
         }
 
         /** \brief Establishes whether value is valid for an element of this type */

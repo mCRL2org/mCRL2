@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50352 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : fixed sized mapping with specified invalid value
 // ***************************************************************************

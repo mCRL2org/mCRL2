@@ -13,10 +13,11 @@
 #define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
 #include "mcrl2/modal_formula/state_formula_builder.h"
+#include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
 
-namespace modal {
+namespace state_formulas {
 
 /// \cond INTERNAL_DOCS
 //
@@ -34,7 +35,7 @@ struct state_variable_negation
   /// \return The result of the function
   atermpp::aterm_appl operator()(atermpp::aterm_appl t) const
   {
-    if (state_frm::is_var(t) && (state_frm::name(t) == X))
+    if (state_frm::is_variable(t) && (state_frm::name(t) == X))
     {
       return state_frm::not_(t);
     }
@@ -59,7 +60,7 @@ state_formula normalize(state_formula f)
   {
     f = arg(f); // remove the not
     if (is_data(f)) {
-      return data::data_expr::not_(f);
+      return data::sort_bool::not_(f);
     } else if (is_true(f)) {
       return false_();
     } else if (is_false(f)) {
@@ -73,9 +74,9 @@ state_formula normalize(state_formula f)
     } else if (is_imp(f)) {
       return and_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_forall(f)) {
-      return exists(var(f), normalize(not_(arg(f))));
+      return state_frm::exists(var(f), normalize(not_(arg(f))));
     } else if (is_exists(f)) {
-      return forall(var(f), normalize(not_(arg(f))));
+      return state_frm::forall(var(f), normalize(not_(arg(f))));
     } else if (is_must(f)) {
       return may(act(f), normalize(not_(arg(f))));
     } else if (is_may(f)) {
@@ -88,7 +89,7 @@ state_formula normalize(state_formula f)
       return yaled_timed(time(f));
     } else if (is_delay(f)) {
       return yaled();
-    } else if (is_var(f)) {
+    } else if (is_variable(f)) {
       throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
     } else if (is_mu(f)) {
       return nu(name(f), ass(f), arg(normalize(not_(f.substitute(state_variable_negation(name(f)))))));
@@ -113,9 +114,9 @@ state_formula normalize(state_formula f)
     } else if (is_imp(f)) {
       return or_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_forall(f)) {
-      return forall(var(f), normalize(arg(f)));
+      return state_frm::forall(var(f), normalize(arg(f)));
     } else if (is_exists(f)) {
-      return exists(var(f), normalize(arg(f)));
+      return state_frm::exists(var(f), normalize(arg(f)));
     } else if (is_must(f)) {
       return must(act(f), normalize(arg(f)));
     } else if (is_may(f)) {
@@ -128,7 +129,7 @@ state_formula normalize(state_formula f)
       return f;
     } else if (is_delay(f)) {
       return f;
-    } else if (is_var(f)) {
+    } else if (is_variable(f)) {
       return f;
     } else if (is_mu(f)) {
       return mu(name(f), ass(f), normalize(arg(f)));
@@ -140,7 +141,7 @@ state_formula normalize(state_formula f)
   return state_formula();
 }
 
-} // namespace modal
+} // namespace state_formulas
 
 } // namespace mcrl2
 

@@ -23,7 +23,8 @@
 #include <aterm2.h>
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -85,6 +86,9 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //generate a GLR parser
 %glr-parser
 
+//more verbose and specific error messages
+%error-verbose
+
 //set name prefix
 %name-prefix="mcrl2yy"
 
@@ -105,10 +109,10 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %token <appl> ELSE
 %token <appl> SLASH STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK
 %token <appl> EXCLAM AT HASH BAR
-%token <appl> LPAR RPAR PBRACK LBRACK RBRACK LANG RANG PBRACE LBRACE RBRACE
-%token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWPROC KWPBES KWINIT
+%token <appl> LPAR RPAR LBRACK RBRACK LANG RANG LBRACE RBRACE
+%token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWGLOB KWPROC KWPBES KWINIT
 %token <appl> KWSTRUCT BOOL POS NAT INT REAL LIST SET BAG
-%token <appl> CTRUE CFALSE DIV MOD IN LAMBDA FORALL EXISTS WHR END
+%token <appl> CTRUE CFALSE IF DIV MOD IN LAMBDA FORALL EXISTS WHR END
 %token <appl> DELTA TAU SUM BLOCK ALLOW HIDE RENAME COMM
 %token <appl> VAL MU NU DELAY YALED NIL
 %token <appl> ID NUMBER
@@ -124,13 +128,20 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> struct_constructor recogniser struct_projection sort_expr_primary
 %type <appl> sort_constant sort_constructor
 //data expressions
-%type <appl> data_expr data_expr_whr id_init data_expr_quant data_expr_imp
-%type <appl> data_expr_imp_rhs data_expr_and data_expr_and_rhs data_expr_eq
-%type <appl> data_expr_eq_rhs data_expr_rel data_expr_cons data_expr_snoc
-%type <appl> data_expr_concat data_expr_add data_expr_div data_expr_mult
-%type <appl> data_expr_prefix data_expr_quant_prefix data_expr_postfix
-%type <appl> data_expr_primary data_constant data_enumeration
-%type <appl> data_comprehension data_var_decl
+%type <appl> data_expr
+%type <appl> data_expr_whr id_init
+%type <appl> data_expr_quant
+%type <appl> data_expr_imp data_expr_imp_rhs
+%type <appl> data_expr_and data_expr_and_rhs
+%type <appl> data_expr_eq data_expr_eq_rhs
+%type <appl> data_expr_rel
+%type <appl> data_expr_cons data_expr_snoc data_expr_concat
+%type <appl> data_expr_add data_expr_div data_expr_mult
+%type <appl> data_expr_prefix data_expr_quant_prefix
+%type <appl> data_expr_postfix
+%type <appl> data_expr_primary
+%type <appl> data_constant data_enumeration data_comprehension
+%type <appl> data_var_decl
 //data specifications
 %type <appl> data_spec data_spec_elt sort_spec cons_spec map_spec
 %type <appl> data_eqn_spec data_eqn_decl
@@ -147,8 +158,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> id_assignment proc_quant ren_expr comm_expr comm_expr_lhs
 %type <appl> mult_act_name
 //process specifications
-%type <appl> proc_spec proc_spec_elt act_spec proc_eqn_spec proc_eqn_decl
-%type <appl> proc_init
+%type <appl> proc_spec proc_spec_elt act_spec glob_var_spec proc_eqn_spec
+%type <appl> proc_eqn_decl proc_init
 //state formulas
 %type <appl> state_frm state_frm_quant state_frm_imp state_frm_imp_rhs
 %type <appl> state_frm_and state_frm_and_rhs state_frm_prefix
@@ -167,7 +178,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> pb_expr pb_expr_quant pb_expr_imp pb_expr_imp_rhs pb_expr_and
 %type <appl> pb_expr_and_rhs pb_expr_not pb_expr_quant_not pb_expr_primary
 //PBES's
-%type <appl> pbes_spec pbes_spec_elt pb_eqn_spec pb_eqn_decl fixpoint pb_init
+%type <appl> pbes_spec pbes_spec_elt pb_eqn_spec pb_eqn_decl
+%type <appl> fixpoint pb_init
 
 //sort expressions
 %type <list> domain_no_arrow domain_no_arrow_elts_hs struct_constructors_bs
@@ -452,15 +464,15 @@ sort_constant:
 sort_constructor:
   LIST LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortExprList($3));
+      safe_assign($$, mcrl2::data::sort_list::list(mcrl2::data::sort_expression($3)));
     }
   | SET LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortExprSet($3));
+      safe_assign($$, mcrl2::data::sort_set::set_(mcrl2::data::sort_expression($3)));
     }
   | BAG LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortExprBag($3));
+      safe_assign($$, mcrl2::data::sort_bag::bag(mcrl2::data::sort_expression($3)));
     }
   ;
 
@@ -872,8 +884,14 @@ data_expr_postfix:
   | data_expr_postfix LPAR data_exprs_cs RPAR
     {
       safe_assign($$, gsMakeDataAppl($1, ATreverse($3)));
-      gsDebugMsg("parsed postfix data expression\n  %T\n", $$);
+      gsDebugMsg("parsed postfix data expression (function application)\n  %T\n", $$);
     }
+/*  | data_expr_postfix LBRACK data_expr ARROW data_expr RBRACK
+    {
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId(gsMakeOpIdNameFuncUpdate()), ATmakeList3((ATerm) $1, (ATerm) $3, (ATerm) $5)));
+      gsDebugMsg("parsed postfix data expression (function update)\n  %T\n", $$);
+    } */
   ;
 
 //one or more data expressions, separated by comma's
@@ -927,19 +945,24 @@ data_constant:
       safe_assign($$, gsMakeId($1));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
+  | IF
+    {
+      safe_assign($$, gsMakeId($1));
+      gsDebugMsg("parsed data constant\n  %T\n", $$);
+    }
   | NUMBER
     {
       safe_assign($$, gsMakeId($1));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
-  | PBRACK
+  | LBRACK RBRACK
     {
-      safe_assign($$, gsMakeId($1));
+      safe_assign($$, gsMakeId(mcrl2::data::sort_list::nil_name()));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
-  | PBRACE
+  | LBRACE RBRACE
     {
-      safe_assign($$, gsMakeId($1));
+      safe_assign($$, gsMakeId(mcrl2::data::sort_set::emptyset_name()));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   ;
@@ -948,17 +971,17 @@ data_constant:
 data_enumeration:
   LBRACK data_exprs_cs RBRACK
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId(gsMakeOpIdNameListEnum()), ATreverse($2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_list::list_enumeration_name()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE data_exprs_cs RBRACE
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId(gsMakeOpIdNameSetEnum()), ATreverse($2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_set::set_enumeration_name()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE bag_enum_elts_cs RBRACE
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId(gsMakeOpIdNameBagEnum()), ATreverse($2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_bag::bag_enumeration_name()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   ;
@@ -1217,7 +1240,7 @@ data_eqn_decls_scs:
 data_eqn_decl:
   data_expr EQUALS data_expr
     {
-      safe_assign($$, gsMakeDataEqn(ATmakeList0(), gsMakeNil(), $1, $3));
+      safe_assign($$, gsMakeDataEqn(ATmakeList0(), mcrl2::data::sort_bool::true_(), $1, $3));
       gsDebugMsg("parsed data equation declaration\n  %T\n", $$);
     }
   | data_expr ARROW data_expr EQUALS data_expr
@@ -1648,7 +1671,7 @@ proc_quant:
 
 //set of action names
 act_names_set:
-  PBRACE
+  LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
       gsDebugMsg("parsed action name set\n  %T\n", $$);
@@ -1662,7 +1685,7 @@ act_names_set:
 
 //set of renaming expressions
 ren_expr_set:
-  PBRACE
+  LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
       gsDebugMsg("parsed renaming expression set\n  %T\n", $$);
@@ -1699,7 +1722,7 @@ ren_expr:
 
 //set of communication expressions
 comm_expr_set:
-  PBRACE
+  LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
       gsDebugMsg("parsed communication expression set\n  %T\n", $$);
@@ -1769,7 +1792,7 @@ ids_bs:
 
 //set of multi action names
 mult_act_names_set:
-  PBRACE
+  LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
       gsDebugMsg("parsed multi action name set\n  %T\n", $$);
@@ -1842,6 +1865,11 @@ proc_spec_elt:
       safe_assign($$, $1);
       gsDebugMsg("parsed process specification element\n  %T\n", $$);
     }
+  | glob_var_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
+    }
   | proc_eqn_spec
     {
       safe_assign($$, $1);
@@ -1900,6 +1928,15 @@ acts_decl:
     }
   ;
 
+//global variable specification
+glob_var_spec:
+  KWGLOB data_vars_decls_scs
+    {
+      safe_assign($$, gsMakeGlobVarSpec($2));
+      gsDebugMsg("parsed global variables\n  %T\n", $$);
+    }
+  ;
+
 //process equation specification
 proc_eqn_spec:
   KWPROC proc_eqn_decls_scs
@@ -1928,7 +1965,7 @@ proc_eqn_decl:
   ID EQUALS proc_expr
     {
       safe_assign($$, gsMakeProcEqn(
-        ATmakeList0(), gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3));
+        gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3));
       gsDebugMsg("parsed process equation declaration\n  %T\n", $$);
     }
   | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
@@ -1939,7 +1976,7 @@ proc_eqn_decl:
         SortExprs = ATinsert(SortExprs, ATgetArgument(ATAelementAt($3, i), 1));
       }
       safe_assign($$, gsMakeProcEqn(
-        ATmakeList0(), gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6));
+        gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6));
       gsDebugMsg("parsed process equation declaration\n  %T\n", $$);
     }
   ;
@@ -1948,7 +1985,7 @@ proc_eqn_decl:
 proc_init:
   KWINIT proc_expr SEMICOLON
     {
-      safe_assign($$, gsMakeProcessInit(ATmakeList0(), $2));
+      safe_assign($$, gsMakeProcessInit($2));
       gsDebugMsg("parsed initialisation\n  %T\n", $$);
     }
   ;
@@ -2583,7 +2620,7 @@ action_rename_rule_sect:
       int n = ATgetLength($4);
       for (int i = 0; i < n; i++) {
         ATermAppl ActionRenameRule = ATAelementAt($4, i);
-	safe_assign($$, ATinsert($$,
+  safe_assign($$, ATinsert($$,
           (ATerm) gsMakeActionRenameRule($2,
             ATAgetArgument(ActionRenameRule, 1),
             ATAgetArgument(ActionRenameRule, 2),
@@ -2616,7 +2653,7 @@ action_rename_rule:
     }
   | param_id IMP action_rename_rule_rhs
     {
-      safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), gsMakeNil(), $1, $3));
+      safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), mcrl2::data::sort_bool::true_(), $1, $3));
       gsDebugMsg("parsed action rename rule\n %T\n", $$);
     }
   ;
@@ -2825,6 +2862,11 @@ pbes_spec_elt:
       safe_assign($$, $1);
      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
     }
+  | glob_var_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+    }
   | pb_eqn_spec
     {
       safe_assign($$, $1);
@@ -2841,12 +2883,7 @@ pbes_spec_elt:
 pb_eqn_spec:
   KWPBES pb_eqn_decls_scs
     {
-      safe_assign($$, gsMakePBEqnSpec(ATmakeList0(), ATreverse($2)));
-      gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", $$);
-    }
-  | KWVAR data_vars_decls_scs KWPBES pb_eqn_decls_scs
-    {
-      safe_assign($$, gsMakePBEqnSpec($2, ATreverse($4)));
+      safe_assign($$, gsMakePBEqnSpec(ATreverse($2)));
       gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", $$);
     }
   ;
@@ -2899,14 +2936,8 @@ fixpoint:
 pb_init:
   KWINIT param_id SEMICOLON
     {
-      safe_assign($$, gsMakePBInit(ATmakeList0(),
-        gsMakePropVarInst(ATAgetArgument($2, 0), ATLgetArgument($2, 1))));
-      gsDebugMsg("parsed initialisation\n  %T\n", $$);
-    }
-  | KWVAR data_vars_decls_scs KWINIT param_id SEMICOLON
-    {
-      safe_assign($$, gsMakePBInit($2,
-        gsMakePropVarInst(ATAgetArgument($4, 0), ATLgetArgument($4, 1))));
+      safe_assign($$,
+        gsMakePBInit(gsMakePropVarInst(ATAgetArgument($2, 0), ATLgetArgument($2, 1))));
       gsDebugMsg("parsed initialisation\n  %T\n", $$);
     }
   ;
@@ -2962,6 +2993,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
   ATermList ConsDecls = ATmakeList0();
   ATermList MapDecls = ATmakeList0();
   ATermList DataEqnDecls = ATmakeList0();
+  ATermList GlobVars = ATmakeList0();
   ATermList ActDecls = ATmakeList0();
   ATermList ProcEqnDecls = ATmakeList0();
   ATermAppl ProcInit = NULL;
@@ -2978,7 +3010,9 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
       }
     } else {
       ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
-      if (gsIsSortSpec(SpecElt)) {
+      if (gsIsGlobVarSpec(SpecElt)) {
+        GlobVars = ATconcat(GlobVars, SpecEltArg0);
+      } else if (gsIsSortSpec(SpecElt)) {
         SortDecls = ATconcat(SortDecls, SpecEltArg0);
       } else if (gsIsConsSpec(SpecElt)) {
         ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
@@ -3006,6 +3040,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
       gsMakeDataEqnSpec(DataEqnDecls)
     ),
     gsMakeActSpec(ActDecls),
+    gsMakeGlobVarSpec(GlobVars),
     gsMakeProcEqnSpec(ProcEqnDecls),
     ProcInit
   );
@@ -3024,6 +3059,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
   ATermList ConsDecls = ATmakeList0();
   ATermList MapDecls = ATmakeList0();
   ATermList DataEqnDecls = ATmakeList0();
+  ATermList GlobVars = ATmakeList0();
   ATermAppl PBEqnSpec = NULL;
   ATermAppl PBInit = NULL;
   int n = ATgetLength(SpecElts);
@@ -3047,7 +3083,9 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
       }
     } else {
       ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
-      if (gsIsSortSpec(SpecElt)) {
+      if (gsIsGlobVarSpec(SpecElt)) {
+        GlobVars = ATconcat(GlobVars, SpecEltArg0);
+      } else if (gsIsSortSpec(SpecElt)) {
         SortDecls = ATconcat(SortDecls, SpecEltArg0);
       } else if (gsIsConsSpec(SpecElt)) {
         ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
@@ -3075,6 +3113,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
       gsMakeMapSpec(MapDecls),
       gsMakeDataEqnSpec(DataEqnDecls)
     ),
+    gsMakeGlobVarSpec(GlobVars),
     PBEqnSpec,
     PBInit
   );

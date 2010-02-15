@@ -6,14 +6,18 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/enum/standard.h
+/// \file mcrl2/data/detail/enum/standard.h
 
 #ifndef _ENUM_STANDARD_H
 #define _ENUM_STANDARD_H
 
 #include <aterm2.h>
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/enum.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/detail/enum/enumerator.h"
+
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
 
 typedef struct {
 	ATermList vars;
@@ -42,7 +46,7 @@ typedef struct {
 class EnumeratorStandard : public Enumerator
 {
 	public:
-		EnumeratorStandard(ATermAppl data_spec, Rewriter *r, bool clean_up_rewriter = false);
+		EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter *r, bool clean_up_rewriter = false);
 		~EnumeratorStandard();
 
 		ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);
@@ -51,11 +55,12 @@ class EnumeratorStandard : public Enumerator
 		EnumeratorSolutions *findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions *old = NULL);
 
 		Rewriter *getRewriter();
+                enumstd_info& getInfo() {
+                  return info;
+                }
 
 	private:
 		bool clean_up_rewr_obj;
-
-		ATermAppl current_spec;
 
 		enumstd_info info;
 
@@ -65,11 +70,18 @@ class EnumeratorStandard : public Enumerator
 class EnumeratorSolutionsStandard : public EnumeratorSolutions
 {
 	public:
+		EnumeratorSolutionsStandard(enumstd_info &Info) : info(Info), enum_vars(0), enum_expr(0), fs_stack(0), fs_stack_size(0), ss_stack(0), ss_stack_size(0)
+                {
+                  ATprotectList(&enum_vars);
+                  ATprotect(&enum_expr);
+                }
+
+		EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const&other);
 		EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info &Info);
 		~EnumeratorSolutionsStandard();
 
 		bool next(ATermList *solution);
-		bool errorOccurred();
+		// bool errorOccurred();
 
 		void reset(ATermList Vars, ATerm Expr, bool true_only);
 
@@ -79,12 +91,12 @@ class EnumeratorSolutionsStandard : public EnumeratorSolutions
 		ATerm build_solution_aux_inner3(ATerm t, ATermList substs);
 	private:
 		enumstd_info info;
-		bool check_true;
 
 		ATermList enum_vars;
 		ATerm enum_expr;
 
-		bool error;
+		bool check_true;
+		// bool error;
 
 		int used_vars;
 
@@ -112,5 +124,8 @@ class EnumeratorSolutionsStandard : public EnumeratorSolutions
 		ATermList build_solution2(ATermList vars, ATermList substs);
 		ATermList build_solution(ATermList vars, ATermList substs);
 };
+    }
+  }
+}
 
 #endif

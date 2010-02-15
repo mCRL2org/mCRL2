@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -128,7 +128,7 @@ bool ExporterLatex::export_to(wxString filename)
 
 void ExporterLatex::drawBezier(Transition* tr)
 {
-  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%5%} controls (%3%pt, %4%pt) .. (state%2%);\n");
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%6%} controls (%3%pt, %4%pt) .. (state%2%);\n");
 
   State* from = tr->getFrom();
   State* to = tr->getTo();
@@ -136,9 +136,9 @@ void ExporterLatex::drawBezier(Transition* tr)
   size_t fromState = from->getValue();
   size_t toState = to->getValue();
 
-  double controlX, controlY;
+  double controlX, controlY, controlZ;
   double aspect = owner->getAspectRatio();
-  tr->getControl(controlX, controlY);
+  tr->getControl(controlX, controlY, controlZ);
   controlX /= 10.0;
   controlX = controlX * aspect;
   controlY /= 10.0;
@@ -165,7 +165,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   double xVirtual,  yVirtual;
   double xControl1, yControl1;
   double xControl2, yControl2;
-  double alpha = tr->getControlAlpha();
+  double alpha = tr->getControlBeta();
   double dist = tr->getControlDist();
 
   xState = s->getX() / 10.0;
@@ -177,7 +177,6 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   double gamma = alpha + beta;
   double delta = alpha - beta;
 
-  double xFactor, yFactor;
   double cosGamma = cos(gamma);
   double sinGamma = sin(gamma);
   double cosDelta = cos(delta);
@@ -185,7 +184,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
 
   if(fabs(cosGamma + cosDelta) > 0.01)
   {
-    xFactor = (8 * (xVirtual - xState)) / (3 * (cosGamma + cosDelta));
+    double xFactor = (8 * (xVirtual - xState)) / (3 * (cosGamma + cosDelta));
     xControl1 = xState + xFactor * cosGamma;
     xControl2 = xState + xFactor * cosDelta;
   }
@@ -198,7 +197,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   }
   else
   {
-    yFactor = (8 *  (yVirtual - yState)) / (3  * sinGamma + sinDelta);
+    double yFactor = (8 *  (yVirtual - yState)) / (3  * sinGamma + sinDelta);
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
 

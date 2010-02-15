@@ -21,6 +21,7 @@
 #include <boost/asio/detail/push_options.hpp>
 #include <cstddef>
 #include <climits>
+#include <memory>
 #include <boost/config.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
@@ -100,8 +101,8 @@ private:
     Handler handler_;
     void handler_impl(const boost::system::error_code& error, size_t size)
     {
+      std::auto_ptr<io_handler<Stream, Handler> > this_ptr(this);
       handler_(error, size);
-      delete this;
     }
   };  // class io_handler 
 
@@ -124,8 +125,8 @@ private:
     Handler handler_;
     void handler_impl(const boost::system::error_code& error, size_t)
     {
+      std::auto_ptr<handshake_handler<Stream, Handler> > this_ptr(this);
       handler_(error);
-      delete this;
     }
 
   };  // class handshake_handler
@@ -149,8 +150,8 @@ private:
     Handler handler_;
     void handler_impl(const boost::system::error_code& error, size_t)
     {
+      std::auto_ptr<shutdown_handler<Stream, Handler> > this_ptr(this);
       handler_(error);
-      delete this;
     }
   };  // class shutdown_handler
 
@@ -183,7 +184,7 @@ public:
 
   // Create a new stream implementation.
   template <typename Stream, typename Context_Service>
-  void create(impl_type& impl, Stream& next_layer,
+  void create(impl_type& impl, Stream& /*next_layer*/,
       basic_context<Context_Service>& context)
   {
     impl = new impl_struct;
@@ -198,7 +199,7 @@ public:
 
   // Destroy a stream implementation.
   template <typename Stream>
-  void destroy(impl_type& impl, Stream& next_layer)
+  void destroy(impl_type& impl, Stream& /*next_layer*/)
   {
     if (impl != 0)
     {
@@ -474,8 +475,8 @@ public:
 
   // Peek at the incoming data on the stream.
   template <typename Stream, typename Mutable_Buffers>
-  std::size_t peek(impl_type& impl, Stream& next_layer,
-      const Mutable_Buffers& buffers, boost::system::error_code& ec)
+  std::size_t peek(impl_type& /*impl*/, Stream& /*next_layer*/,
+      const Mutable_Buffers& /*buffers*/, boost::system::error_code& ec)
   {
     ec = boost::system::error_code();
     return 0;
@@ -483,7 +484,7 @@ public:
 
   // Determine the amount of data that may be read without blocking.
   template <typename Stream>
-  std::size_t in_avail(impl_type& impl, Stream& next_layer,
+  std::size_t in_avail(impl_type& /*impl*/, Stream& /*next_layer*/,
       boost::system::error_code& ec)
   {
     ec = boost::system::error_code();

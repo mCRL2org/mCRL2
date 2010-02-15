@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50673 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : facilities for named function parameters support
 // ***************************************************************************
@@ -66,7 +66,7 @@ report_access_to_invalid_parameter()
 
 struct nil {
     template<typename T>
-#if defined(__GNUC__) || defined(__HP_aCC) || defined(__EDG__)
+#if defined(__GNUC__) || defined(__HP_aCC) || defined(__EDG__) || defined(__SUNPRO_CC)
     operator T() const
 #else
     operator T const&() const
@@ -187,8 +187,8 @@ struct named_parameter
     {}
 
     // Access methods
-    ref_type        operator[]( keyword<unique_id,true> ) const     { return m_erased ? nil_t::inst().any_cast<ref_type>() :  m_value; }
-    ref_type        operator[]( keyword<unique_id,false> ) const    { return m_erased ? nil_t::inst().any_cast<ref_type>() :  m_value; }
+    ref_type        operator[]( keyword<unique_id,true> ) const     { return m_erased ? nil_t::inst().template any_cast<ref_type>() :  m_value; }
+    ref_type        operator[]( keyword<unique_id,false> ) const    { return m_erased ? nil_t::inst().template any_cast<ref_type>() :  m_value; }
     template<typename UnknownId>
     nil_t           operator[]( keyword<UnknownId,false> ) const    { return nil_t::inst(); }
 
@@ -304,7 +304,7 @@ optionally_assign( T& target, Source const& src )
 {
     using namespace unit_test;
 
-    assign_op( target, src, (int)0 );
+    assign_op( target, src, static_cast<int>(0) );
 }
 
 //____________________________________________________________________________//

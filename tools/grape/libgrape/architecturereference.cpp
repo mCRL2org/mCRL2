@@ -8,6 +8,10 @@
 //
 // Implements the architecture_reference class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "architecturereference.h"
 #include "architecturediagram.h"
 
@@ -50,4 +54,4 @@ void architecture_reference::set_relationship_refers_to( architecture_diagram* p
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(arr_architecture_reference);
+WX_DEFINE_OBJARRAY(arr_architecture_reference)

@@ -15,9 +15,12 @@
 #include <cstdlib>
 #include <string>
 #include <stdexcept>
-#include "mcrl2/core/messaging.h"
+
+#ifndef MCRL2_TOOL_CLASSES_NO_CORE
+# include "mcrl2/core/messaging.h"
+#endif
+
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
 
 namespace mcrl2 {
 
@@ -31,20 +34,20 @@ namespace tools {
   class tool
   {
     protected:
-      /// \brief The name of the tool
+      /// The name of the tool
       std::string m_name;
 
-      /// \brief The name of the developer(s)
+      /// The name of the developer(s)
       std::string m_author;
 
-      /// \brief One-line "what is" description of the tool
+      /// One-line "what is" description of the tool
       std::string m_what_is;
 
-      /// \brief The description of the tool
-      std::string m_description;
+      /// The description of the tool
+      std::string m_tool_description;
 
-      /// \brief The synopsis of the tool
-      std::string m_synopsis;
+      /// Known issues of the tool
+      std::string m_known_issues;
 
       /// \brief Add options to an interface description.
       /// \param desc An interface description
@@ -54,104 +57,71 @@ namespace tools {
       /// \brief Parse non-standard options
       /// \param parser A command line parser
       virtual void parse_options(const command_line_parser& parser)
+      { }
+
+      /// \brief Executed only if run would be executed and invoked before run.
+      /// \return Whether run should still be executed
+      virtual bool pre_run()
       {
+        return true;
+      }
+
+      /// \brief Parse standard options
+      /// \param parser A command line parser
+      virtual void check_standard_options(const command_line_parser& parser)
+      {
+        if (parser.options.count("quiet")) {
+          if (parser.options.count("debug")) {
+            parser.error("options -q/--quiet and -d/--debug cannot be used together\n");
+          }
+          if (parser.options.count("verbose")) {
+            parser.error("options -q/--quiet and -v/--verbose cannot be used together\n");
+          }
+        }
+#ifndef MCRL2_TOOL_CLASSES_NO_CORE
+        if (parser.options.count("quiet")) {
+          mcrl2::core::gsSetQuietMsg();
+        }
+        if (parser.options.count("verbose")) {
+          mcrl2::core::gsSetVerboseMsg();
+        }
+        if (parser.options.count("debug")) {
+          mcrl2::core::gsSetDebugMsg();
+        }
+#endif
       }
 
       /// \brief Checks if the number of positional options is OK.
-      /// By default this function does nothing.
+      /// By default this function handles standart options: -v, -d and -q
       /// \param parser A command line parser
       virtual void check_positional_options(const command_line_parser& parser)
-      {}
+      { }
+
+      /// \brief Returns the synopsis of the tool
+      /// \return The string "[OPTION]...\n"
+      virtual std::string synopsis() const
+      {
+        return "[OPTION]...\n";
+      }
 
     public:
       /// \brief Constructor.
       tool(const std::string& name,
-           const std::string& author,
-           const std::string& what_is,
-           const std::string& description,
-           std::string synopsis = "[OPTION]...\n"
-          )
-        : m_name       (name),
-          m_author     (author),
-          m_what_is    (what_is),
-          m_description(description),
-          m_synopsis   (synopsis)
-      {
-      }
+                  const std::string& author,
+                  const std::string& what_is,
+                  const std::string& tool_description,
+                  std::string known_issues = ""
+                 )
+        : m_name            (name),
+          m_author          (author),
+          m_what_is         (what_is),
+          m_tool_description(tool_description),
+          m_known_issues    (known_issues)
+      {}
 
       /// \brief Destructor.
       virtual ~tool()
       {}
-
-      /// \brief Returns the name of the tool
-      /// \return The name of the tool
-      const std::string& name() const
-      {
-        return m_name;
-      }
-
-      /// \brief Returns the name of the tool
-      /// \return A reference to the name of the tool
-      std::string& name()
-      {
-        return m_name;
-      }
-
-      /// \brief Returns the author(s) of the tool
-      /// \return The author(s) of the tool
-      const std::string& author() const
-      {
-        return m_author;
-      }
-
-      /// \brief Returns the author(s) of the tool
-      /// \return A reference to the author(s) of the tool
-      std::string& author()
-      {
-        return m_author;
-      }
-
-      /// \brief Returns a one-line description of the tool
-      /// \return The 'what-is' description of the tool
-      const std::string& what_is() const
-      {
-        return m_what_is;
-      }
-
-      /// \brief Returns a one-line description of the tool
-      /// \return A reference to the 'what-is' description of the tool
-      std::string& what_is()
-      {
-        return m_what_is;
-      }
-
-      /// \brief Returns the description of the tool
-      /// \return The description of the tool
-      const std::string& description() const
-      {
-        return m_description;
-      }
-
-      /// \brief Returns the description of the tool
-      /// \return A reference to the description of the tool
-      std::string& description()
-      {
-        return m_description;
-      }
-
-      /// \brief Returns the synopsis of the tool
-      /// \return The synopsis of the tool
-      const std::string& synopsis() const
-      {
-        return m_synopsis;
-      }
-
-      /// \brief Returns the synopsis of the tool
-      /// \return A reference to the synopsis of the tool
-      std::string& synopsis()
-      {
-        return m_synopsis;
-      }
 
       /// \brief Run the tool. The options must be set manually.
       /// \return True if the tool execution was successful.
@@ -164,23 +134,26 @@ namespace tools {
       int execute(int argc, char* argv[])
       {
         try {
-          interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_description);
+          interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description, m_known_issues);
           add_options(clinterface);
           command_line_parser parser(clinterface, argc, argv);
-          check_positional_options(parser);
-          parse_options(parser);
-	        if (!parser.continue_execution())
-	        {
-	          return EXIT_SUCCESS;
+          check_standard_options(parser);
+           
+	  if (parser.continue_execution())
+	  {
+            check_positional_options(parser);
+            parse_options(parser);
+
+            if (!pre_run() || !run())
+            {
+              return EXIT_FAILURE;
+            }
           }
+
+	  return EXIT_SUCCESS;
         }
         catch (std::exception& e) {
           std::cerr << e.what() << std::endl;
-          return EXIT_FAILURE;
-        }
-        if (run())
-        {
-          return EXIT_SUCCESS;
         }
         return EXIT_FAILURE;
       }

@@ -9,14 +9,13 @@
 /// \file source/invariant_eliminator.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
-#include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/lps/invariant_eliminator.h"
 
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -25,7 +24,7 @@ using namespace mcrl2::core::detail;
 
     ATermAppl Invariant_Eliminator::simplify_summand(ATermAppl a_summand, ATermAppl a_invariant, int a_summand_number) {
       ATermAppl v_condition = ATAgetArgument(a_summand, 1);
-      ATermAppl v_formula = gsMakeDataExprAnd(a_invariant, v_condition);
+      ATermAppl v_formula = sort_bool::and_(data_expression(a_invariant), data_expression(v_condition));
 
       f_bdd_prover.set_formula(v_formula);
       if (f_bdd_prover.is_contradiction() == answer_yes) {
@@ -42,12 +41,13 @@ using namespace mcrl2::core::detail;
   // Class Invariant_Eliminator - Functions declared public ---------------------------------------
 
     Invariant_Eliminator::Invariant_Eliminator(
-      ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      mcrl2::lps::specification const& a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_simplify_all
     ):
-      f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps, 0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
-      f_lps = a_lps;
+      // FIXME
+      f_lps = specification_to_aterm(a_lps);
       f_simplify_all = a_simplify_all;
     }
 
@@ -60,7 +60,7 @@ using namespace mcrl2::core::detail;
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Invariant_Eliminator::simplify(ATermAppl a_invariant, int a_summand_number) {
-      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 2), 2);
+      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 3), 1);
       ATermAppl v_summand;
       ATermList v_simplified_summands = ATmakeList0();
       int v_summand_number = 1;
@@ -80,8 +80,8 @@ using namespace mcrl2::core::detail;
         v_summand_number++;
       }
       v_simplified_summands = ATreverse(v_simplified_summands);
-      ATermAppl v_process_equations = ATAgetArgument(f_lps, 2);
-      v_process_equations = ATsetArgument(v_process_equations, (ATerm) v_simplified_summands, 2);
-      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equations, 2);
+      ATermAppl v_process_equations = ATAgetArgument(f_lps, 3);
+      v_process_equations = ATsetArgument(v_process_equations, (ATerm) v_simplified_summands, 1);
+      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equations, 3);
       return v_lps;
     }

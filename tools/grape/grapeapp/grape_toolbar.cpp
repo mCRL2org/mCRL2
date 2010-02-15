@@ -8,6 +8,8 @@
 //
 // Implements the toolbar used by the main frame.
 
+#include "wx.hpp" // precompiled headers
+
 #include "grape_toolbar.h"
 #include "grape_ids.h"
 #include "grape_icons.h"
@@ -38,7 +40,7 @@ grape_toolbar::grape_toolbar(wxWindow *p_parent) : wxToolBar(p_parent, wxID_ANY,
   AddSeparator();
   AddTool(GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, _T("Add Architecture diagram"), g_icons[ _T("newarch") ], wxNullBitmap, wxITEM_NORMAL, _T("Add Architecture diagram"), _T("Add Architecture diagram"));
   AddTool(GRAPE_MENU_ADD_PROCESS_DIAGRAM, _T("Add Process diagram"), g_icons[ _T("newproc") ], wxNullBitmap, wxITEM_NORMAL, _T("Add Process diagram"), _T("Add Process diagram"));
-  Realize();
+  AddTool(GRAPE_MENU_VALIDATE, _T("Validate"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate"), _T("Validate"));
 }
 
 grape_toolbar::~grape_toolbar(void)
@@ -55,7 +57,6 @@ void grape_toolbar::set_mode( int p_mode )
 
   // actions for both process and arch diagrams
 // Needed for cut, copy paste. Low priority, cut copy paste not implemented; outcommented.
-//  bool in_diagram = p_mode & ( GRAPE_TOOLMODE_ARCH + GRAPE_TOOLMODE_PROC );
 
 // Low priority, not implemented; disabled.
   EnableTool(wxID_CUT, false );
@@ -78,16 +79,11 @@ grape_arch_toolbar::grape_arch_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
 {
   AddSeparator();
   AddRadioTool(GRAPE_TOOL_SELECT, _T("Select objects in current diagram"), g_icons[ _T("toolselect") ], wxNullBitmap, _T("Select objects in current diagram"), _T("Select objects in current diagram"));
-//  AddRadioTool(GRAPE_TOOL_ATTACH, _T("Attach objects"), g_icons[ _T("attach") ], wxNullBitmap, _T("Attach objects to eachother"), _T("Attach objects to eachother"));
-  AddRadioTool(GRAPE_TOOL_DETACH, _T("Detach objects"), g_icons[ _T("detach") ], wxNullBitmap, _T("Detach objects from eachother"), _T("Detach objects from eachother"));
   AddRadioTool(GRAPE_TOOL_ADD_ARCHITECTURE_REFERENCE, _T("Add Architecture reference"), g_icons[ _T("archref") ], wxNullBitmap, _T("Add Architecture reference"), _T("Add Architecture reference"));
   AddRadioTool(GRAPE_TOOL_ADD_PROCESS_REFERENCE, _T("Add Process reference"), g_icons[ _T("procref") ], wxNullBitmap, _T("Add Process reference"), _T("Add Process reference"));
   AddRadioTool(GRAPE_TOOL_ADD_CHANNEL, _T("Add Channel"), g_icons[ _T("channel") ], wxNullBitmap, _T("Add Channel"), _T("Add Channel"));
   AddRadioTool(GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION, _T("Add Channel communication"), g_icons[ _T("chancomm") ], wxNullBitmap, _T("Add Channel communication"), _T("Add Channel communication"));
   AddRadioTool(GRAPE_TOOL_ADD_COMMENT, _T("Add Comment"), g_icons[ _T("comment") ], wxNullBitmap, _T("Add Comment"), _T("Add Comment"));
-  AddTool(GRAPE_MENU_VALIDATE_DIAGRAM, _T("Validate current diagram"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate current diagram"), _T("Validate current diagram"));
-
-  Realize();
 }
 
 grape_proc_toolbar::grape_proc_toolbar( void ) : grape_toolbar()
@@ -103,15 +99,10 @@ grape_proc_toolbar::grape_proc_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
 {
   AddSeparator();
   AddRadioTool(GRAPE_TOOL_SELECT, _T("Select"), g_icons[ _T("toolselect") ], wxNullBitmap, _T("Select items"), _T("Select items"));
-//  AddRadioTool(GRAPE_TOOL_ATTACH, _T("Attach objects"), g_icons[ _T("attach") ], wxNullBitmap, _T("Attach objects to eachother"), _T("Attach objects to eachother"));
-//  AddRadioTool(GRAPE_TOOL_DETACH, _T("Detach objects"), g_icons[ _T("detach") ], wxNullBitmap, _T("Detach objects from eachother"), _T("Detach objects from eachother"));
   AddRadioTool(GRAPE_TOOL_ADD_STATE, _T("Add State"), g_icons[ _T("state") ], wxNullBitmap, _T("Add State"), _T("Add State"));
   AddRadioTool(GRAPE_TOOL_ADD_REFERENCE_STATE, _T("Add Process reference"), g_icons[ _T("procref") ], wxNullBitmap, _T("Add Process reference"), _T("Add Process reference"));
   AddRadioTool(GRAPE_TOOL_ADD_NONTERMINATING_TRANSITION, _T("Add Transition"), g_icons[ _T("transition") ], wxNullBitmap, _T("Add Transition"), _T("Add Transition"));
   AddRadioTool(GRAPE_TOOL_ADD_INITIAL_DESIGNATOR, _T("Add Initial designator"), g_icons[ _T("initdes") ], wxNullBitmap, _T("Add Initial designator"), _T("Add Initial designator"));
   AddRadioTool(GRAPE_TOOL_ADD_TERMINATING_TRANSITION, _T("Add Terminating transition"), g_icons[ _T("termtransition") ], wxNullBitmap, _T("Add Terminating transition"), _T("Add Terminating transition"));
   AddRadioTool(GRAPE_TOOL_ADD_COMMENT, _T("Add Comment"), g_icons[ _T("comment") ], wxNullBitmap, _T("Add Comment"), _T("Add Comment"));
-  AddTool(GRAPE_MENU_VALIDATE_DIAGRAM, _T("Validate current diagram"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate current diagram"), _T("Validate current diagram"));
-
-  Realize();
 }

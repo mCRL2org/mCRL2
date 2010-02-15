@@ -191,7 +191,7 @@ class Distance
   private:
     Point3D viewpoint;
   public:
-    explicit Distance(const Point3D vp) : viewpoint(vp) {}
+    explicit Distance(const Point3D& vp) : viewpoint(vp) {}
     bool operator()(const VisObject* o1,const VisObject* o2) const;
 };
 

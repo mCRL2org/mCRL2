@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -47,6 +47,7 @@ bool ExporterXML::export_to(wxString _filename)
       state->SetAttribute("isInitial", s->isInitialState());
       state->SetAttribute("x", s->getX());
       state->SetAttribute("y", s->getY());
+	  state->SetAttribute("z", s->getZ());
       state->SetAttribute("red", (int)c.Red());
       state->SetAttribute("green", (int)c.Green());
       state->SetAttribute("blue", (int)c.Blue());
@@ -75,10 +76,11 @@ bool ExporterXML::export_to(wxString _filename)
         transition->SetAttribute("to", toVal);
         transition->SetAttribute("label", t->getLabel());
 
-        double x, y;
-        t->getControl(x, y);
+        double x, y, z;
+        t->getControl(x, y, z);
         transition->SetAttribute("x", x);
         transition->SetAttribute("y", y);
+		transition->SetAttribute("z", z);
 
         graphEl->LinkEndChild(transition);
       }
@@ -92,10 +94,11 @@ bool ExporterXML::export_to(wxString _filename)
         transition->SetAttribute("to", fromVal);
         transition->SetAttribute("label", t->getLabel());
 
-        double x, y;
-        t->getControl(x, y);
+        double x, y, z;
+        t->getControl(x, y, z);
         transition->SetAttribute("x", x);
         transition->SetAttribute("y", y);
+        transition->SetAttribute("z", z);
 
         graphEl->LinkEndChild(transition);
       }

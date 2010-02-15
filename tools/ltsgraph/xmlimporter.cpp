@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -47,6 +47,9 @@ Graph* XMLImporter::importFile(std::string filename)
         double y;
         state->GetAttribute("y", &y);
 
+		double z;
+		state->GetAttribute("z", &z);
+
         int red;
         state->GetAttribute("red", &red);
 
@@ -77,6 +80,7 @@ Graph* XMLImporter::importFile(std::string filename)
         State* s = new State(value, isInitial);
         s->setX(x);
         s->setY(y);
+		s->setZ(z);
         s->setColour(colour);
         s->setParameters(parameters);
         g->addState(s);
@@ -92,15 +96,16 @@ Graph* XMLImporter::importFile(std::string filename)
         transition->GetAttribute("to", &to);
 
         std::string label = transition->GetAttribute("label");
-        double x, y;
+        double x, y, z;
         transition->GetAttribute("x", &x);
         transition->GetAttribute("y", &y);
+		transition->GetAttribute("z", &z);
 
         if(from == to)
         {
           State* s = g->getState(from);
           Transition* t = new Transition(s, s, label);
-          t->setControl(x, y);
+          t->setControl(x, y, z);
           s->addSelfLoop(t);
         }
         else{
@@ -111,7 +116,7 @@ Graph* XMLImporter::importFile(std::string filename)
           fromState->addOutTransition(t);
           // Now set the transitions control, as the state's add method can
           // change this.
-          t->setControl(x,y);
+          t->setControl(x,y,z);
           toState->addInTransition(t);
         }
       }

@@ -15,10 +15,12 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/data/parser.h"
-#include "mcrl2/data/data_expression_with_variables.h"
-#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
@@ -64,6 +66,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_boolean_operators();
+  core::garbage_collect();
 
   return 0;
 }

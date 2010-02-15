@@ -9,7 +9,7 @@
 #include <boost/test/minimal.hpp>
 
 #include <aterm2.h>
-#include <mcrl2/atermpp/atermpp.h>
+#include <mcrl2/atermpp/aterm_init.h>
 #include <mcrl2/lts/lts.h>
 
 using namespace mcrl2::lts;
@@ -78,8 +78,9 @@ int test_main(int argc, char **argv)
   l4.add_transition(1,1,2);
   l4.add_transition(1,1,3);
 
-
+  std::cerr << "Hier\n";
   BOOST_CHECK( l1.compare(l2,lts_eq_trace) );
+  std::cerr << "Hier\n";
   BOOST_CHECK( l2.compare(l1,lts_eq_trace) );
 
   BOOST_CHECK( ! l1.compare(l3,lts_eq_trace) );

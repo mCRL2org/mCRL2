@@ -33,6 +33,13 @@
 namespace mcrl2 {
   namespace utilities {
 
+    template <typename Iter>
+    std::string substring(const std::string& s, Iter first, Iter last)
+    {
+      assert(last <= s.end());
+      return s.substr(first - s.begin(), last - first);
+    }
+
     /// \cond INTERNAL
     /**
      * Inserts newline characters while reading the input from left to right.
@@ -60,14 +67,14 @@ namespace mcrl2 {
       while (i != input.end()) {
         if (space_left - (i - word_start) < 1) { // line too long
 
-          out << std::endl << indent << variable_indent << std::string(word_start, i);
+          out << std::endl << indent << variable_indent << substring(input, word_start, i);
 
           space_left = width - (i - word_start) - variable_indent.size();
           word_start = i;
         }
         else if (*i == '\n') {
           if (word_start != i) {
-            out << std::string(word_start, i);
+            out << substring(input, word_start, i);
           }
 
           ++i;
@@ -91,7 +98,7 @@ namespace mcrl2 {
           word_start = i;
         }
         else if (1 < space_left && (*i == ' ' || *i == '\t')) {
-          out << std::string(word_start, ++i);
+          out << substring(input, word_start, ++i);
 
           space_left -= i - word_start;
           word_start  = i;
@@ -101,7 +108,7 @@ namespace mcrl2 {
         }
       }
 
-      out << std::string(word_start, input.end());
+      out << substring(input, word_start, input.end());
 
       return out.str();
     }
@@ -240,90 +247,24 @@ namespace mcrl2 {
     }
     /// \endcond
 
-    /**
-     * Creates an object that specifies an option with an optional argument.
-     * The default value is automatically substituted when the user specifies
-     * the option but does not specify an option argument.
-     *
-     * \param[in] name a placeholder for referencing the argument in textual descriptions
-     * \param[in] default_value the default value
-     * \return a basic_argument derived object that represents an untyped optional option argument
-     *
-     * The following example demonstrates the effect of an option with optional argument:
-     * \code
-     *  add_option("recursive", make_optional_argument("DEPTH", "2"),
-     *                         "stop at recursion level DEPTH (default 2)", 'r');
-     * \endcode
-     * The result is a command line interface with parsing behaviour:
-     * \verbatim
-       tool                     (effect: options("recursive").count() == 0)
-       tool --recursive         (effect: options("recursive").count() == 1 && option_argument("recursive") == 2)
-       tool -r                  (effect: options("recursive").count() == 1 && option_argument("recursive") == 2)
-       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
-       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
-     **/
+    interface_description::mandatory_argument< std::string >
+         make_mandatory_argument(std::string const& name, std::string const& default_value) {
+
+      return interface_description::mandatory_argument< std::string >(name, default_value);
+    }
+
+    interface_description::mandatory_argument< std::string >
+      make_mandatory_argument(std::string const& name) {
+
+      return interface_description::mandatory_argument< std::string >(name);
+    }
+
     interface_description::optional_argument< std::string >
          make_optional_argument(std::string const& name, std::string const& default_value) {
 
       return interface_description::optional_argument< std::string >(name, default_value);
     }
 
-    /**
-     * Creates an object that specifies an option with a mandatory argument.
-     * Specifying the option in a command also requires specification of an
-     * option argument.
-     *
-     * \param[in] name a placeholder for referencing the argument in textual descriptions
-     * \return a basic_argument derived object that represents an untyped mandatory option argument
-     *
-     * The following example demonstrates the effect of an option with optional argument:
-     * \code
-     *  add_option("recursive", make_mandatory_argument("DEPTH"),
-     *                         "stop at recursion level DEPTH", 'r');
-     * \endcode
-     * The result is a command line interface with parsing behaviour:
-     * \verbatim
-       tool                     (effect: options("recursive").count() == 0)
-       tool --recursive         (effect: parsing fails)
-       tool -r                  (effect: parsing fails)
-       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
-       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
-     **/
-    interface_description::mandatory_argument< std::string >
-         make_mandatory_argument(std::string const& name) {
-
-      return interface_description::mandatory_argument< std::string >(name);
-    }
-
-    /**
-     * Creates an object that specifies an option with a mandatory argument.
-     * Specifying the option in a command also requires specification of an
-     * option argument. The default value is substituted by the
-     * option_argument() and option_argument_as() methods when the option is
-     * not part of the parsed command.
-     *
-     * \param[in] name a placeholder for referencing the argument in textual descriptions
-     * \return a basic_argument derived object that represents an untyped mandatory option argument
-     *
-     * The following example demonstrates the effect of an option with optional argument:
-     * \code
-     *  add_option("recursive", make_mandatory_argument("DEPTH", "2"),
-     *                         "stop at recursion level DEPTH (default 2)", 'r');
-     * \endcode
-     * The result is a command line interface with parsing behaviour:
-     * \verbatim
-       tool                     (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
-       tool --recursive         (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
-       tool -r                  (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
-       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
-       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
-     *
-     **/
-    interface_description::mandatory_argument< std::string >
-         make_mandatory_argument(std::string const& name, std::string const& default_value) {
-
-      return interface_description::mandatory_argument< std::string >(name, default_value);
-    }
 
     interface_description& interface_description::get_standard_description() {
       static interface_description d;
@@ -361,52 +302,6 @@ namespace mcrl2 {
     std::string interface_description::version_information() const {
       return m_name + " mCRL2 toolset " + version_tag() + " (revision " + revision() + ")\n" +
          copyright_message() + "\nWritten by " + m_authors + ".\n";
-    }
-
-    inline void interface_description::add_hidden_option(
-                std::string const& long_identifier,
-                basic_argument const& argument_specification,
-                std::string const& description, char const short_identifier) {
-
-      add_option(long_identifier, argument_specification, description, short_identifier);
-
-      m_options.find(long_identifier)->second.m_show = false;
-    }
-
-    inline void interface_description::add_hidden_option(
-                std::string const& long_identifier,
-                std::string const& description,
-                char const short_identifier) {
-
-      add_option(long_identifier, description, short_identifier);
-
-      m_options.find(long_identifier)->second.m_show = false;
-    }
-
-    interface_description& interface_description::add_option(std::string const& l, std::string const& d, const char s) {
-      if (m_options.find(l) != m_options.end()) {
-        throw std::logic_error("Duplicate long option (--" + l + "); this is a serious program error!");
-      }
-
-      if (s != '\0') {
-        if (m_short_to_long.find(s) != m_short_to_long.end()) {
-          throw std::logic_error("Duplicate short option (-" + std::string(1, s) + "); this is a serious program error!");
-        }
-
-        m_short_to_long[s] = l;
-      }
-
-      m_options.insert(std::make_pair(l, option_descriptor(l, d, s)));
-
-      return *this;
-    }
-
-    interface_description& interface_description::add_option(std::string const& l, basic_argument const& a, std::string const& d, char const s) {
-      add_option(l, d, s);
-
-      m_options.find(l)->second.set_argument(a.clone());
-
-      return *this;
     }
 
     std::string interface_description::textual_description() const {
@@ -476,7 +371,7 @@ namespace mcrl2 {
 
       s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
         << std::endl
-        << "See also the manual at <http://www.mcrl2.org/wiki/index.php/User_manual/" << m_name << ">.\n";
+        << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
 
       return s.str();
     }
@@ -577,7 +472,7 @@ namespace mcrl2 {
            "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
            "There is NO WARRANTY, to the extent permitted by law.\n";
       s << ".SH \"SEE ALSO\"" << std::endl
-        << "See also the manual at <http://www.mcrl2.org/wiki/index.php/User_manual/" << m_name << ">.\n";
+        << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
 
       return s.str();
     }

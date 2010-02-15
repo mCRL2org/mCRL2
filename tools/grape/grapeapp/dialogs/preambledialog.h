@@ -31,21 +31,20 @@ namespace grape
     class grape_preamble_dialog : public wxDialog
     {
       private:
-        //wxTextCtrl *m_parameters; /**< A text control containing the parameter initializations.*/
-        //wxTextCtrl *m_localvars; /** A text control containing the local variable declarations. */
         wxGrid        *m_parameter_grid; /**< Grid shown in the dialog, used for parameter declarations.*/
         wxGrid        *m_localvar_grid; /**< Grid shown in the dialog, used for localvar declarations.*/
 
         /** Default constructor. */
         grape_preamble_dialog();
 
-        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
       public:
         /**
         * Constructor.
         * @param p_preamble A pointer to the preamble which is being editted.
+        * @param p_edit_parameter Editing mode indicator.
         */
-        grape_preamble_dialog( preamble *p_preamble );
+        grape_preamble_dialog( preamble *p_preamble, bool p_edit_parameter );
 
         /** Destructor. */
         ~grape_preamble_dialog();
@@ -56,12 +55,17 @@ namespace grape
         /** @return The value of the local variable declaration input box. */
         wxString get_local_variable_declarations() const;
 
-
         /**
-         * Check wether the text is valid.
+         * Check wether the parameter name is valid.
          * If not, the OK button is disabled
          */
-        void check_text();
+        void check_parameter_text();
+
+        /**
+         * Check wether the local variable name is valid.
+         * If not, the OK button is disabled
+         */
+        void check_local_variable_text();
 
         /**
          * Change parameter grid event handler.

@@ -18,7 +18,7 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 
 namespace mcrl2 {
 

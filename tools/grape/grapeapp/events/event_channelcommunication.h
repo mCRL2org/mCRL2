@@ -38,6 +38,9 @@ namespace grape
         channel_type                  m_channel_type_1; /**< Channel type of the first clicked channel. */
         channel_type                  m_channel_type_2; /**< Channel type of the second clicked channel. */
         unsigned int                  m_in_diagram; /**< Identifier of the diagram the channel communication is added to. */
+        arr_event_detach_channel_communication  m_detached_comm_1; /**< Array of detached channel communications from channel 1. */
+        arr_event_detach_channel_communication  m_detached_comm_2; /**< Array of detached channel communications from channel 2. */
+
       public:
 
         /**
@@ -79,12 +82,14 @@ namespace grape
         coordinate                      m_coordinate;   /**< Backup of the coordinate of the channel communication. */
         float                           m_width;        /**< Backup of the width of the channel communication. */
         float                           m_height;       /**< Backup of the height of the channel communicatione. */
-        wxString                        m_rename;       /**< Rename of the channel communication. */
+        wxString                        m_name;       /**< Name of the channel communication. */
         wxArrayLong                     m_comments;     /**< Identifiers of the list of comments attached to the channel communication. */
         unsigned int                            m_in_diagram;  /**< Identifier of the diagram from which the channel was deleted. */
         wxArrayLong                     m_channels;     /**< Identifiers of the channels the channel communication was attached to. */
         channel_communication_type      m_channel_communication_type;   /**< Backup of the channel communication type. */
-      public:
+        int                             m_communication_selected; /**< Backup of the communication id of which the communication was selected. */
+        int                             m_communication_channel; /**< Backup of the channel id of which the communication was selected. */
+    public:
 
         /**
          * Initializes the event.
@@ -123,7 +128,8 @@ namespace grape
         unsigned int      m_channel_communication; /**< The channel communication to which a channel is added. */
         unsigned int      m_channel; /**< The channel that is added to the channel communication. */
         unsigned int      m_diagram; /**< Identifier of the diagram in which the change was made. */
-      public:
+        arr_event_detach_channel_communication  m_detached_comm; /**< The channel communication array of the channels that are detached, if applicable */
+    public:
 
         /**
          * Initialization constructor.
@@ -203,7 +209,7 @@ namespace grape
         unsigned int        m_channel_communication; /**< A pointer to the channel communication of which the name is to be changed. */        
         channel_communication             m_old_channel_communication; /**< Containing the previous channel communication. */
         channel_communication             m_new_channel_communication; /**< Containing the new channel communication. */
-        bool                m_pressed_ok; /**< A boolean indicating whether the user confirmed the rename action. */
+        bool                m_pressed_ok; /**< A boolean indicating whether the user confirmed the name action. */
       public:
 
         /**

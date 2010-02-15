@@ -17,13 +17,14 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2 {
 
-namespace modal {
+namespace regular_formulas {
 
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula
@@ -70,7 +71,7 @@ class regular_formula: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of regular expressions
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 
-} // namespace modal
+} // namespace regular_formulas
 
 } // namespace mcrl2
 

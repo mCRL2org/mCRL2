@@ -12,9 +12,8 @@
 
 #include "frame.h"
 #include "figures.xpm"
-#include <mcrl2/lts/lts.h>
+#include "mcrl2/lts/lts.h"
 
-#include <iostream>
 using namespace std;
 
 // For compatibility with older wxWidgets versions (pre 2.8)
@@ -31,11 +30,11 @@ using namespace std;
 Frame::Frame(
     Mediator* m,
     wxString title )
-    : Colleague( m ),
-      wxFrame(
+    : wxFrame(
         NULL,
         wxID_ANY,
-        wxString( title ) )
+        wxString( title ) ),
+      Colleague( m )
 // ------------------------
 {
 	SetAutoLayout(true);

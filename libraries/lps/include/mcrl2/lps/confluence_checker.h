@@ -15,12 +15,14 @@
 #ifndef CONFLUENCE_CHECKER_H
 #define CONFLUENCE_CHECKER_H
 
+#include <string>
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/utilities/bdd2dot.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/data/detail/prover/bdd2dot.h"
 
     /** \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.
         \brief The tau actions of all confluent tau-summands are renamed to ctau.
@@ -133,13 +135,13 @@ class Confluence_Checker {
     Invariant_Checker f_invariant_checker;
 
     /// \brief BDD based prover.
-    BDD_Prover f_bdd_prover;
+    mcrl2::data::detail::BDD_Prover f_bdd_prover;
 
     /// \brief Class that prints BDDs in dot format.
     BDD2Dot f_bdd2dot;
 
     /// \brief A linear process specification.
-    ATermAppl f_lps;
+    const mcrl2::lps::specification &f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
     bool f_no_marking;
@@ -152,7 +154,7 @@ class Confluence_Checker {
     bool f_counter_example;
 
     /// \brief The prefix for the names of the files written in dot format.
-    char* f_dot_file_name;
+    std::string f_dot_file_name;
 
     /// \brief Flag indicating whether or not invariants are generated and checked each time a
     /// \brief summand is encountered that is not confluent with the tau summand at hand.
@@ -182,17 +184,17 @@ class Confluence_Checker {
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Confluence_Checker(
-      ATermAppl a_lps,
-      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      mcrl2::lps::specification const& a_lps,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      SMT_Solver_Type a_solver_type = solver_type_ario,
+      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
       bool a_apply_induction = false,
       bool a_no_marking = false,
       bool a_check_all = false,
       bool a_counter_example = false,
       bool a_generate_invariants = false,
-      char* a_dot_file_name = 0
+      std::string const& a_dot_file_name = std::string()
     );
 
     /// \brief Destructor that frees the memory used by Confluence_Checker::f_dot_file_name.

@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -14,7 +14,7 @@
 
 #include <wx/glcanvas.h>
 
-#ifndef LTSGRAPH_H
+#ifndef LTSGRAPH3D_H
   #include "ltsgraph.h"
 #else
   class LTSGraph;
@@ -54,21 +54,45 @@ class GLCanvas : public wxGLCanvas
     void onMouseMove(wxMouseEvent& event);
     void onMouseLftUp(wxMouseEvent& event);
     void onMouseRgtUp(wxMouseEvent& event);
+    void onMouseWhl(wxMouseEvent& event);
+    void onMouseDblClck(wxMouseEvent& event);
+	void onMouseMidUp(wxMouseEvent& event);
+	void onMouseMidDown(wxMouseEvent& event);
 
-
-    double getPixelSize();
+    void getSize(double & width, double & height, double & depth);
+	void ResetAll();
+	void ResetPan();
+	void ResetRot();
+	void setMode(int tool);
+	void changeDrawMode();
+	void showSystem();
+	double getPixelSize();
     double getAspectRatio() const;
+	double getMaxDepth() const;
+	void getMdlvwMtrx(double * mtrx);
+	void getCamPos(double & x, double & y, double & z);
+	bool get3D();
+
   private:
     LTSGraph* owner;
     Visualizer* visualizer;
     bool displayAllowed;
-    double scaleFactor;
+	bool panning;
+	bool dispSystem;
+	bool usingTool;
+    double scaleFactor, maxDepth;
     int oldX, oldY;
+	float lookX, lookY, lookZ, rotX, rotY;
+	double currentModelviewMatrix[16];
+	int currentTool;
+	bool calcRot;
+	bool drawIn3D;
 
-    void getSize(double & width, double & height);
-
-    void pickObjects(int x, int y, wxMouseEvent const&);
+	void normalizeMatrix();
+    bool pickObjects3d(int x, int y, wxMouseEvent const&);
+	void pickObjects(int x, int y, wxMouseEvent const&);
     void processHits(const GLint hits, GLuint * buffer, wxMouseEvent const&);
+	void setMouseCursor(int theTool);
 
   DECLARE_EVENT_TABLE()
 };

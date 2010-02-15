@@ -6,22 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #include <algorithm>
 #include <functional>
 
-#include <boost/asio/ip/address.hpp>
-#include <boost/bind.hpp>
-#include <boost/ref.hpp>
-#include <boost/foreach.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include "boost/asio/ip/address.hpp"
+#include "boost/bind.hpp"
+#include "boost/ref.hpp"
+#include "boost/foreach.hpp"
+#include "boost/thread/recursive_mutex.hpp"
 
-#include <tipi/detail/transport/detail/transporter.ipp>
-#include <tipi/detail/transport/detail/transceiver.ipp>
-#include <tipi/detail/transport/detail/socket_listener.hpp>
-#include <tipi/detail/transport/detail/direct_transceiver.hpp>
-#include <tipi/detail/transport/detail/socket_transceiver.hpp>
+#include "tipi/detail/transport/detail/transporter.ipp"
+#include "tipi/detail/transport/detail/transceiver.ipp"
+#include "tipi/detail/transport/detail/socket_listener.hpp"
+#include "tipi/detail/transport/detail/direct_transceiver.hpp"
+#include "tipi/detail/transport/detail/socket_transceiver.hpp"
 
 namespace transport {
 
@@ -52,7 +50,9 @@ namespace transport {
    * \param[in] c the transceiver that represents the local end point of the connection
    **/
   void transporter_impl::relay_connection(transporter* t, basic_transceiver* c) {
-    assert(t != 0);
+    if(!(t != 0)){
+      throw  std::runtime_error("No transporter to relay a connection");
+    }
 
     boost::recursive_mutex::scoped_lock l(lock);
     boost::recursive_mutex::scoped_lock tl(t->impl->lock);
@@ -116,7 +116,10 @@ namespace transport {
    * \param[in] t the connection to associate with this transporter
    **/
   void transporter_impl::associate(boost::shared_ptr < transporter_impl > const& c, const basic_transceiver::ptr& t) {
-    assert(c.get() == this);
+    
+    if(!(c.get() == this)){ 
+      throw std::runtime_error( "Using incorrect transporter" );
+    }
 
     boost::recursive_mutex::scoped_lock l(lock);
 
@@ -142,7 +145,9 @@ namespace transport {
     boost::recursive_mutex::scoped_lock l(lock);
 
     if (t->owner.lock().get() != 0) {
-      assert(t->owner.lock().get() == this);
+      if(!(t->owner.lock().get() == this)){
+        throw std::runtime_error( "Locking incorrect transceiver");
+      };
 
       for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
         if (i->get() == t) {
@@ -167,11 +172,17 @@ namespace transport {
    * \pre t->owner != 0 && t->owner != this
    **/
   void transporter_impl::associate(boost::shared_ptr < transporter_impl > const& c, basic_transceiver* t) {
-    assert(c.get() == this);
+
+    if(!(c.get() == this)){ 
+      throw std::runtime_error( "Using incorrect transporter" );
+    }
 
     boost::shared_ptr < transporter_impl > cc(t->owner.lock());
 
-    assert(cc.get() != 0);
+    if(!(c.get() != 0)){ 
+      throw std::runtime_error( "Using incorrect transporter, value equals 0" );
+    }
+
 
     if (t->owner.lock().get() != this) {
       boost::recursive_mutex::scoped_lock l(lock);
@@ -275,7 +286,9 @@ namespace transport {
    * \param[in] n the number of the listener that is to be removed
    **/
   void transporter_impl::remove_listener(size_t n) {
-    assert(n < listeners.size());
+    if(!(n < listeners.size())){ 
+      throw std::runtime_error( "Trying to remove more listeners than are available\n" );
+    }
 
     listener_list::iterator i = listeners.begin();
 

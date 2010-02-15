@@ -1,0 +1,1 @@
+[true*](<enter_p>true => mu X . ([enter_q]false && (<leave_p>true || [!leave_p]X)))

@@ -2,7 +2,6 @@ project toolset/mcrl22lps ;
 
 tool mcrl22lps
        : mcrl22lps.cpp
-         /libraries//utilities
          /libraries//lps
        : <squadt-connectivity>implemented
        ;

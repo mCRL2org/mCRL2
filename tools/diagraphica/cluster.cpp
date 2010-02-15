@@ -10,6 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
+#include "mcrl2/exception.h"
 #include "cluster.h"
 
 // -- constructors and destructors ----------------------------------
@@ -240,7 +241,7 @@ Cluster* Cluster::getChild( const int &idx )
     if ( 0 <= idx && static_cast <size_t> (idx) < children.size() )
         return children[idx];
     else
-        throw new string( "Error retrieving cluster child." );
+        throw mcrl2::runtime_error( "Error retrieving cluster child." );
 }
 
 
@@ -262,7 +263,7 @@ Node* Cluster::getNode( const int &idx )
     if ( 0 <= idx && static_cast <size_t> (idx) < nodes.size() )
         return nodes[idx];
     else
-        throw new string( "Error retrieving cluster node." );
+        throw mcrl2::runtime_error( "Error retrieving cluster node." );
 }
 
 
@@ -307,7 +308,7 @@ Bundle* Cluster::getInBundle( const int &idx )
 	if ( 0 <= idx && static_cast <size_t> (idx) < inBundles.size() )
 		return inBundles[idx];
 	else
-        throw new string( "Error retrieving cluster incoming bundle." );
+        throw mcrl2::runtime_error( "Error retrieving cluster incoming bundle." );
 }
 
 
@@ -326,7 +327,7 @@ Bundle* Cluster::getOutBundle( const int &idx )
 	if ( 0 <= idx && static_cast <size_t> (idx) < outBundles.size() )
 		return outBundles[idx];
 	else
-        throw new string( "Error retrieving cluster outgoing bundle." );
+        throw mcrl2::runtime_error( "Error retrieving cluster outgoing bundle." );
 }
 
 

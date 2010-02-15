@@ -14,8 +14,8 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_translate.h"
@@ -24,14 +24,15 @@
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
-using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-using namespace mcrl2::modal;
-using namespace mcrl2::modal::detail;
+using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
@@ -92,8 +93,8 @@ const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
 void test_parelm()
 {
-  specification spec    = mcrl22lps(ABP_SPECIFICATION);
-  state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
+  specification spec    = linearise(ABP_SPECIFICATION);
+  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   pbes_parelm_algorithm algorithm;
@@ -106,6 +107,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_parelm();
+  core::garbage_collect();
 
   return 0;
 }

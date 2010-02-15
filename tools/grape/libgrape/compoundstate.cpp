@@ -8,6 +8,10 @@
 //
 // Implements the compound_state class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "compoundstate.h"
 
 using namespace grape::libgrape;
@@ -85,6 +89,8 @@ wxString compound_state::get_name( void )
 void compound_state::set_name( const wxString &p_name )
 {
   m_name = p_name;
+  m_name.Trim(true);
+  m_name.Trim(false);
 }
 
 void compound_state::attach_transition_beginstate( transition* p_transition )

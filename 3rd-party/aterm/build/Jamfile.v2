@@ -4,10 +4,10 @@ project aterm
 
 mcrl2-library aterm
        : [ glob source/*.c ]
-         source/protaterm.cpp
        : <include>../include/aterm
          <address-model>64:<define>AT_64BIT
        :
        : <include>../include/aterm
-         <address-model>64:<define>AT_64BIT
+# The following should no longer be necessary
+         #<address-model>64:<define>AT_64BIT
        ;

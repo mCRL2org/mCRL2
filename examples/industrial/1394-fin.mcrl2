@@ -402,15 +402,21 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
  %%%      SPECIFICATION OF n LINK LAYERS CONNECTED BY A BUS      %%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+act
+  cPDreq,cPDind : Nat#SIGNAL;
+  cPAreq : Nat#PAR;
+  cPAcon : Nat#PAC;
+  cPCind : Nat;
+
 proc LINK(n:Nat,i:Nat)=Link0(n,i,void);
 
      BUS(n:Nat)=BusIdle(n, inita(n));
 
      P1394(n:Nat)=
         allow({LDreq,LDcon,LDind,LDres},
-           hide({arbresgap,losesignal,internal},
-              comm({rPDind|sPDind,rPDreq|sPDreq,rPAcon|sPAcon,
-                    rPAreq|sPAreq,rPCind|sPCind},
+           hide({arbresgap,losesignal,internal,cPDind,cPDreq,cPAcon,cPAreq,cPCind},
+              comm({rPDind|sPDind->cPDind,rPDreq|sPDreq->cPDreq,rPAcon|sPAcon->cPAcon,
+                    rPAreq|sPAreq->cPAreq,rPCind|sPCind->cPCind},
                   allow({LDreq,LDcon,LDind,LDres,arbresgap,losesignal,internal,
                               rPDind|sPDind,rPDreq|sPDreq,rPAcon|sPAcon,
                     rPAreq|sPAreq,rPCind|sPCind},

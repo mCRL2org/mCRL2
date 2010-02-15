@@ -1652,6 +1652,12 @@ void Shape::clearDOF()
         delete opaDOF;
         opaDOF = NULL;
     }
+
+    if ( textDOF != NULL )
+    {
+        delete textDOF;
+        textDOF = NULL;
+    }
 }
 
 

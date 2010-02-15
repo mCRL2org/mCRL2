@@ -131,22 +131,18 @@ void DistrPlot::visualize( const bool &inSelectMode )
 void DistrPlot::drawAxes( const bool &inSelectMode )
 // -------------------------------------------------
 {
-    double w, h;
-    double xLft, xRgt;
-    double yBot, yMid, yTop;
-    double pix;
-
     // get size of sides
+    double w, h;
     canvas->getSize( w, h );
     // get size of 1 pixel
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
 
     // calc size of bounding box
-    xLft = -0.5*w+20*pix;
-    xRgt =  0.5*w-10*pix;
-    yTop =  0.5*h-10*pix;
-    yBot = -0.5*h+20*pix;
-    yMid =  0.5*( yTop+yBot );
+    double xLft = -0.5*w+20*pix;
+    double xRgt =  0.5*w-10*pix;
+    double yTop =  0.5*h-10*pix;
+    double yBot = -0.5*h+20*pix;
+    double yMid =  0.5*( yTop+yBot );
 
     // rendering mode
     if ( inSelectMode != true )
@@ -169,42 +165,36 @@ void DistrPlot::drawAxes( const bool &inSelectMode )
 void DistrPlot::drawLabels( const bool &inSelectMode )
 // ---------------------------------------------------
 {
-    double w, h;
-    double x, y;
-    double pix;
-    double scaling;
-    string xLabel;
-    string min, max;
-
     // get size of sides
+    double w, h;
     canvas->getSize( w, h );
     // get size of 1 pixel
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
     // calc scaling to use
-    scaling = ( 12*pix )/(double)CHARHEIGHT;
+    double scaling = ( 12*pix )/(double)CHARHEIGHT;
 
     // color
     VisUtils::setColorBlack();
 
     // y-axis labels
-    x = -0.5*w+9*pix;
-    y =  0;
+    double x = -0.5*w+9*pix;
+    double y =  0;
     VisUtils::drawLabelVertCenter( texCharId, x, y, scaling, "Number" );
 
     if ( number.size() > 0 )
     {
         // x-axis label
-        xLabel = graph->getAttribute( attrIdx )->getName();
+        string xLabel = graph->getAttribute( attrIdx )->getName();
         x =  0.0;
         y = -0.5*h+9*pix;
         VisUtils::drawLabelCenter( texCharId, x, y, scaling, xLabel );
 
-        max = Utils::intToStr( maxNumber );
+        string max = Utils::intToStr( maxNumber );
         x = -0.5*w+13*pix;
         y =  0.5*h-10*pix;
         VisUtils::drawLabelVertBelow( texCharId, x, y, scaling, max );
 
-        min = "0";
+        string min = "0";
         y = -0.5*h+20*pix;
         VisUtils::drawLabelVertAbove( texCharId, x, y, scaling, min );
     }
@@ -215,26 +205,21 @@ void DistrPlot::drawLabels( const bool &inSelectMode )
 void DistrPlot::drawPlot( const bool &inSelectMode )
 // -------------------------------------------------
 {
-    int    sizePositions;
-    double hCanv;
-    double xLft, xRgt, yTop, yBot;
-    double pix;
-    ColorRGB col;
 
-    hCanv = canvas->getHeight();
-    pix = canvas->getPixelSize();
-    sizePositions = positions.size();
+    double hCanv = canvas->getHeight();
+    double pix = canvas->getPixelSize();
+    int sizePositions = positions.size();
 
+    double yBot = -0.5*hCanv + 20*pix;
     // selection mode
     if ( inSelectMode == true )
     {
-        yBot = -0.5*hCanv + 20*pix;
 
         for( int i = 0; i < sizePositions; ++i )
         {
-            xLft = positions[i].x - 0.5*width;
-            xRgt = positions[i].x + 0.5*width;
-            yTop = positions[i].y;
+            double xLft = positions[i].x - 0.5*width;
+            double xRgt = positions[i].x + 0.5*width;
+            double yTop = positions[i].y;
 
             glPushName( i );
             VisUtils::fillRect( xLft, xRgt, yTop, yBot );
@@ -244,13 +229,12 @@ void DistrPlot::drawPlot( const bool &inSelectMode )
     // rendering mode
     else
     {
-        yBot = -0.5*hCanv + 20*pix;
-
         for( int i = 0; i < sizePositions; ++i )
         {
-            xLft = positions[i].x - 0.5*width;
-            xRgt = positions[i].x + 0.5*width;
-            yTop = positions[i].y;
+            double xLft = positions[i].x - 0.5*width;
+            double xRgt = positions[i].x + 0.5*width;
+            double yTop = positions[i].y;
+            ColorRGB col;
 
             VisUtils::mapColorCoolGreen( col );
             col.a = 0.7;
@@ -456,33 +440,24 @@ void DistrPlot::calcPositions()
     // calc positions
     if ( number.size() > 0 )
     {
-        // calc positions
-        double w, h, pix;
-        double xLft, xRgt, yBot,  yTop;
-        double numX, numY;
-        double fracX;
-        double x, y;
-        double ratio;
-
         // get size of sides & 1 pixel
+        double w,h;
         canvas->getSize( w, h );
-        pix = canvas->getPixelSize();
+        double pix = canvas->getPixelSize();
 
         // calc size of bounding box
-        xLft = -0.5*w+20*pix;
-        xRgt =  0.5*w-10*pix;
-        yTop =  0.5*h-10*pix;
-        yBot = -0.5*h+20*pix;
+        double xLft = -0.5*w+20*pix;
+        double xRgt =  0.5*w-10*pix;
+        double yTop =  0.5*h-10*pix;
+        double yBot = -0.5*h+20*pix;
 
         // get number of values per axis
-        numX = graph->getAttribute( attrIdx )->getSizeCurValues();
-        numY = number.size();
+        double numX = graph->getAttribute( attrIdx )->getSizeCurValues();
 
         // get intervals for x-axis
+        double fracX = 1.0;
         if ( numX > 1 )
             fracX = ( 1.0 / (double)numX )*( xRgt-xLft );
-        else
-            fracX = 1.0;
 
         // calc width
         if ( fracX < maxWthHintPx*pix )
@@ -495,11 +470,11 @@ void DistrPlot::calcPositions()
         for ( size_t i = 0; i < number.size(); ++i )
         {
             // calc ratio
-            ratio = (double)number[i]/(double)maxNumber;
+            double ratio = (double)number[i]/(double)maxNumber;
 
             // center, top
-            x = xLft + 0.5*fracX + i*fracX;
-            y = yBot + ratio*( yTop-yBot );
+            double x = xLft + 0.5*fracX + i*fracX;
+            double y = yBot + ratio*( yTop-yBot );
             if ( y-yBot < pix*minHgtHintPx )
                 y += pix*minHgtHintPx;
 
@@ -534,9 +509,6 @@ void DistrPlot::processHits(
 // -------------------------
 {
     GLuint *ptr;
-    int    number;
-    int    name;
-
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )
@@ -546,7 +518,7 @@ void DistrPlot::processHits(
         {
             for ( int i = 0; i < ( hits-1 ); ++i )
             {
-                number = *ptr;
+                int number = *ptr;
                 ++ptr; // number;
                 ++ptr; // z1
                 ++ptr; // z2
@@ -556,12 +528,11 @@ void DistrPlot::processHits(
         }
 
         // last hit
-        number = *ptr;
         ++ptr; // number
         ++ptr; // z1
         ++ptr; // z2
 
-        name = *ptr;
+        int name = *ptr;
 
         displTooltip( name );
     }

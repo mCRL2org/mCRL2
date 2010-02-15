@@ -1,4 +1,4 @@
-// Author(s): F.P.M. (Frank) Stappers
+// Author(s): Frank Stappers, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -10,226 +10,85 @@
 
 /*include "boost.hpp" // precompiled headers*/
 
-#define NAME "lpsinfo"
-#define AUTHOR "Frank Stappers"
+#define TOOLNAME "lpsinfo"
+#define AUTHOR "Wieger Wesselink and Frank Stappers"
 
-//C++
-#include <exception>
-#include <cstdio>
-#include <set>
-#include <algorithm>
-#include <sstream>
-
-//mCRL2
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/lps/linear_process.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/lps/detail/specification_property_map.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
-//LPS framework
-#include "mcrl2/lps/specification.h"
-
-using namespace std;
-using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
+using namespace mcrl2::utilities::tools;
 
-template <class T>
-inline std::string to_string (const T& t)
+class lpsinfo_tool: public squadt_tool<input_tool>
 {
-  std::stringstream ss;
-  ss << t;
-  return ss.str();
-}
+  protected:
+    typedef squadt_tool< input_tool> super;
 
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-# include <mcrl2/utilities/mcrl2_squadt_interface.h>
-#endif
+  public:
+    lpsinfo_tool()
+      : super(
+          TOOLNAME,
+          AUTHOR,
+          "display basic information about an LPS",
+          "Print basic information on the linear process specification (LPS) in INFILE.")
+     {}
 
-/* "is_tau_summand" taken from ../libraries/prover/source/confluence_checker.cpp */
-static inline bool is_tau_summand(ATermAppl a_summand) {
-  ATermAppl v_multi_action_or_delta = ATAgetArgument(a_summand, 2);
-  if (mcrl2::core::detail::gsIsMultAct(v_multi_action_or_delta)) {
-    return ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
-  }
-
-  return false;
-}
-
-static inline int get_number_of_tau_summands(linear_process lps) {
-  int numOfTau = 0;
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){
-	if ( is_tau_summand(*currentSummand)){
-		++numOfTau;
-	}
-  }
-  return numOfTau;
-}
-
-static inline std::set<action_label > get_used_actions(linear_process lps){
-  std::set<action_label > actionSet;
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){
-	for(action_list::iterator currentAction = currentSummand->actions().begin();
-        currentAction != currentSummand->actions().end();
-        ++currentAction)
-    {
-		actionSet.insert(currentAction->label());
-	}
-  }
-  return actionSet;
-}
-
-static inline std::set<action_list > used_multiactions(linear_process lps){
-  std::set<action_list > multiActionSet;
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){
-    if (currentSummand->actions().size() > 1)
-    {
-    		multiActionSet.insert(currentSummand->actions());
+  private:
+    void parse_options(const command_line_parser& parser)
+    { super::parse_options(parser);
     }
-  }
-  return multiActionSet;
-}
 
-static inline std::set<action_label > get_unused_actions(specification lps_specification ){
-  action_label_list action_list =lps_specification.action_labels();
-  std::set<action_label > actionSet;
-  for(action_label_list::iterator i = action_list.begin(); i != action_list.end(); ++i )
-  {
-    actionSet.insert(*i);
-  }
-
-  linear_process lps = lps_specification.process();
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){
-	for(action_list::iterator currentAction = currentSummand->actions().begin();
-        currentAction != currentSummand->actions().end();
-        ++currentAction)
-    {
-		  actionSet.erase(currentAction->label());
-	}
-  }
-  return actionSet;
-}
-
-class info_tool
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-                : public mcrl2::utilities::squadt::mcrl2_tool_interface
-#endif
-                {
-  private:
-
-    /* Name of the file to read input from (or standard input if empty) */
-    std::string input_file_name;
-
-  private:
-
-    bool parse_command_line(int ac, char** av) {
-      interface_description clinterface(av[0], NAME, AUTHOR,
-                           "display basic information about an LPS",
-                           "[OPTION]... [INFILE]\n",
-                           "Print basic information on the linear process specification (LPS) in INFILE.");
-
-      command_line_parser parser(clinterface, ac, av);
-
-      if (parser.continue_execution()) {
-        if (0 < parser.arguments.size()) {
-          input_file_name = parser.arguments[0];
-        }
-        if (1 < parser.arguments.size()) {
-          parser.error("too many file arguments");
-        }
-      }
-
-      return parser.continue_execution();
+    void add_options(interface_description& desc)
+    { super::add_options(desc);
     }
 
   public:
 
-    int execute(int argc, char** argv) {
-      try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-        if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
-          return EXIT_SUCCESS;
-        }
-#endif
-        if (parse_command_line(argc,argv)) {
-          specification lps_specification;
-
-          lps_specification.load(input_file_name);
-          linear_process lps = lps_specification.process();
-
-          std::set<action_label > action_labels = get_used_actions(lps);
-          std::set<action_label > unused_action_labels = get_unused_actions(lps_specification);
-
-          cout << "Input read from " << (input_file_name.empty()?"stdin":("'" + input_file_name + "'")) << endl;
-          cout << endl;
-          cout << "Number of summands                : " << lps.summands().size() << endl;
-          cout << "Number of tau-summands            : " << get_number_of_tau_summands(lps) << endl;
-          cout << "Number of free variables          : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
-          cout << "Number of process parameters      : " << lps.process_parameters().size() << endl;
-          cout << "Number of declared actions        : " << lps_specification.action_labels().size() << endl;
-          cout << "Number of used actions            : " << action_labels.size() << endl;
-          if(  unused_action_labels.size() > 0 )
-          {
-            cout << "Labels of unused actions : " ;
-            for(std::set<action_label >::iterator i = unused_action_labels.begin();
-                                             i != unused_action_labels.end();
-                                             ++i)
-            {
-              if( i != unused_action_labels.begin() )
-              {
-                cout << ", ";
-              }
-              cout << pp(*i) ;
-            }
-            cout << endl;
-          }
-          cout << "Number of used multi-actions      : " << used_multiactions(lps).size() << endl;
-          cout << "Number of declared sorts          : " << lps_specification.data().sorts().size() << endl;
-        }
-
-        return EXIT_SUCCESS;
-      }
-      catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
-      }
-
-      return EXIT_FAILURE;
+    bool run()
+    {
+      specification spec;
+      spec.load(input_filename());
+      lps::detail::specification_property_map info(spec);
+      std::cout << input_file_message() << "\n\n";
+      std::cout << info.info();
+      return true;
     }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      c.add_input_configuration("lps_in", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
+    void set_capabilities(tipi::tool::capabilities& c) const
+    { c.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&) {
-    }
+    void user_interactive_configuration(tipi::configuration&)
+    {}
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const {
-      return c.input_exists("lps_in");
+    bool check_configuration(tipi::configuration const& c) const
+    {
+      return c.input_exists("main-input");
     }
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) {
+    bool perform_task(tipi::configuration& c)
+    {
       using namespace tipi;
       using namespace tipi::layout;
       using namespace tipi::layout::elements;
 
-      specification lps_specification;
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
 
-      lps_specification.load(c.get_input(input_file_name).location());
-
-      linear_process lps = lps_specification.process();
-
-      std::set<action_label > action_labels = get_used_actions(lps);
-      std::set<action_label > unused_action_labels = get_unused_actions(lps_specification);
+      specification spec;
+      spec.load(c.get_input("main-input").location());
+      lps::detail::specification_property_map info(spec);
 
       /* Create display */
       tipi::tool_display d;
@@ -245,20 +104,20 @@ class info_tool
                 append(d.create< label >().set_text("Process parameters (#):")).
                 append(d.create< label >().set_text("Action labels (#):")).
                 append(d.create< label >().set_text("Used actions: (#):")).
-                append(d.create< label >().set_text("Multi-actions: (#):")).
-                append(d.create< label >().set_text("Sorts (#):")));
+                append(d.create< label >().set_text("Multi-actions: (#):"))
+               );
 
       /* Second column */
       m.append(d.create< vertical_box >().set_default_alignment(layout::left).
-                append(d.create< label >().set_text(c.get_input(input_file_name).location())).
-                append(d.create< label >().set_text(to_string(lps.summands().size()))).
-                append(d.create< label >().set_text(to_string(get_number_of_tau_summands(lps)))).
-                append(d.create< label >().set_text(to_string((lps_specification.initial_process().free_variables().size() + lps.free_variables().size())))).
-                append(d.create< label >().set_text(to_string(lps.process_parameters().size()))).
-                append(d.create< label >().set_text(to_string(lps_specification.action_labels().size()))).
-                append(d.create< label >().set_text(to_string(get_used_actions(lps).size()))).
-                append(d.create< label >().set_text(to_string(used_multiactions(lps).size()))).
-                append(d.create< label >().set_text(to_string(lps_specification.data().sorts().size()))));
+                append(d.create< label >().set_text(c.get_input("main-input").location())).
+                append(d.create< label >().set_text(info["summand_count"               ])).
+                append(d.create< label >().set_text(info["tau_summand_count"           ])).
+                append(d.create< label >().set_text(info["declared_free_variable_count"])).
+                append(d.create< label >().set_text(info["process_parameter_count"     ])).
+                append(d.create< label >().set_text(info["declared_action_label_count" ])).
+                append(d.create< label >().set_text(info["used_action_label_count"     ])).
+                append(d.create< label >().set_text(info["used_multi_action_count"     ]))
+               );
 
       send_display_layout(d.manager(m));
 
@@ -269,9 +128,6 @@ class info_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
-
-  info_tool tool;
-
-  return tool.execute(argc, argv);
+  MCRL2_ATERMPP_INIT(argc, argv)
+  return lpsinfo_tool().execute(argc, argv);
 }

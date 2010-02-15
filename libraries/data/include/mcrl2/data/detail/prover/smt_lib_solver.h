@@ -16,9 +16,15 @@
 
 #include "aterm2.h"
 #include "mcrl2/data/detail/prover/smt_solver.h"
-#include "mcrl2/utilities/expression_info.h"
-#include "mcrl2/utilities/sort_info.h"
+#include "mcrl2/data/detail/prover/expression_info.h"
 
+#ifdef HAVE_CVC
+#include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
+#endif
+
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
   /// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format
   /// [Silvio Ranise and Cesare Tinelli. The SMT-LIB Standard: Version 1.1. Technical Report, Department of Computer
   /// Science, The University of Iowa, 2005. (Available at http://goedel.cs.uiowa.edu/smtlib)]. It inherits from the class
@@ -30,7 +36,6 @@
 class SMT_LIB_Solver: public SMT_Solver {
   private:
     Expression_Info f_expression_info;
-    Sort_Info f_sort_info;
     std::string f_sorts_notes;
     std::string f_operators_notes;
     std::string f_predicates_notes;
@@ -98,55 +103,45 @@ class SMT_LIB_Solver: public SMT_Solver {
     virtual ~SMT_LIB_Solver();
 };
 
-namespace mcrl2 {
-  namespace data {
-    namespace prover {
+      namespace prover {
 
-      /**
-       * Template class for SMT provers that come as an external binary and use the
-       * SMT-lib format. Input to the tool is specified on standard input,
-       * output is read from standard output and matches one of the strings:
-       * "sat", "unsat", "unknown".
-       *
-       * Parameter T follows the curiously recurring template pattern (CRTP). Type T
-       * is required to have the name and exec methods as in the example below.
-       *
-       *  \code
-       *  class cvc_smt_solver : public binary_smt_solver< cvc_smt_solver > {
-       *    inline static char* name() {
-       *      return "CVC3";
-       *    }
-       *
-       *    inline static void exec() {
-       *      ::execlp("cvc", "cvc3", "-lang smt-lib", 0);
-       *    }
-       *  };
-       *  \endcode
-       **/
-      template < typename T >
-      class binary_smt_solver {
+        /**
+         * Template class for SMT provers that come as an external binary and use the
+         * SMT-lib format. Input to the tool is specified on standard input,
+         * output is read from standard output and matches one of the strings:
+         * "sat", "unsat", "unknown".
+         *
+         * Parameter T follows the curiously recurring template pattern (CRTP). Type T
+         * is required to have the name and exec methods as in the example below.
+         *
+         *  \code
+         *  class cvc_smt_solver : public binary_smt_solver< cvc_smt_solver > {
+         *    inline static char* name() {
+         *      return "CVC3";
+         *    }
+         *
+         *    inline static void exec() {
+         *      ::execlp("cvc", "cvc3", "-lang smt-lib", 0);
+         *    }
+         *  };
+         *  \endcode
+         **/
+        template < typename T >
+        class binary_smt_solver {
 
-        protected:
+          protected:
 
-          // \brief Calls one of the exec functions
-          static bool execute(std::string const& benchmark);
+            // \brief Calls one of the exec functions
+            static bool execute(std::string const& benchmark);
 
-        public:
+          public:
 
-          // \brief Checks the availability/usability of the prover
-          static bool usable();
-      };
-    }
-  }
-}
+            // \brief Checks the availability/usability of the prover
+            static bool usable();
+        };
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 # include "mcrl2/core/messaging.h"
 # include <unistd.h>
-
-namespace mcrl2 {
-  namespace data {
-    namespace prover {
-
       /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
       /// CVC / (http://www.cs.nyu.edu/acsys/cvcl/) to determine the satisfiability
       /// of propositional formulas. To use the solver CVC / the directory containing
@@ -213,9 +208,11 @@ namespace mcrl2 {
             return execute(f_benchmark);
           }
       };
-    }
-  }
-}
 #endif
+     } // prover
+
+    } // detail
+  } // data
+} // mcrl2
 
 #endif

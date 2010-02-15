@@ -19,8 +19,9 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/real.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
@@ -32,11 +33,12 @@ namespace detail {
 
 /// \brief Adds a time parameter t to s if needed and returns the result. The time t
 /// is chosen such that it doesn't appear in context.
+template <typename IdentifierGenerator>
 struct make_timed_lps_summand
 {
-  data::fresh_variable_generator& m_generator;
+  IdentifierGenerator& m_generator;
 
-  make_timed_lps_summand(data::fresh_variable_generator& generator)
+  make_timed_lps_summand(IdentifierGenerator& generator)
     : m_generator(generator)
   {}
 
@@ -47,9 +49,11 @@ struct make_timed_lps_summand
   {
     if (!summand_.has_time())
     {
-      data::data_variable v = m_generator();
+      data::variable v(m_generator("T"), data::sort_real::real_());
       summand_ = set_time(summand_, data::data_expression(v));
-      summand_ = set_summation_variables(summand_, summand_.summation_variables() + v);
+      data::variable_list V(summand_.summation_variables());
+      V = push_front(V, v);
+      summand_ = set_summation_variables(summand_, V);
     }
     return summand_;
   }
@@ -61,22 +65,24 @@ struct make_timed_lps_summand
 /// \param context A term
 /// \return A timed linear process
 inline
-linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
+linear_process make_timed_lps(const linear_process& lps, atermpp::aterm context)
 {
-  data::fresh_variable_generator generator(context);
-  summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand(generator));
-  return set_summands(lps, new_summands);
+  data::set_identifier_generator generator(context);
+  summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand<data::set_identifier_generator>(generator));
+  linear_process result = lps;
+  result.set_summands(new_summands);
+  return result;
 }
 
 /// \brief Function object that can be used by the partial_replace algorithm
 /// to replace data variables in an arbitrary term.
 template <typename SrcList, typename DestList>
-struct data_variable_replacer
+struct variable_replacer
 {
   const SrcList& src_;
   const DestList& dest_;
 
-  data_variable_replacer(const SrcList& src, const DestList& dest)
+  variable_replacer(const SrcList& src, const DestList& dest)
     : src_(src), dest_(dest)
   {
     assert(src_.size() == dest_.size());
@@ -87,7 +93,7 @@ struct data_variable_replacer
   /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (!data::is_data_variable(t))
+    if (!data::data_expression(t).is_variable())
     {
       return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
@@ -104,25 +110,25 @@ struct data_variable_replacer
   }
 };
 
-/// \brief Utility function for creating a data_variable_replacer.
+/// \brief Utility function for creating a variable_replacer.
 /// \param t1 A term
 /// \param t2 A term
-/// \return A data_variable_replacer
+/// \return A variable_replacer
 template <typename T1, typename T2>
-data_variable_replacer<T1, T2> make_data_variable_replacer(const T1& t1, const T2& t2)
+variable_replacer<T1, T2> make_variable_replacer(const T1& t1, const T2& t2)
 {
-  return data_variable_replacer<T1, T2>(t1, t2);
+  return variable_replacer<T1, T2>(t1, t2);
 }
 
 /// \brief Function object that can be used by the partial_replace algorithm
 /// to replace the names of data variables in an arbitrary term.
 template <typename SrcList, typename DestList>
-struct data_variable_name_replacer
+struct variable_name_replacer
 {
   const SrcList& src_;
   const DestList& dest_;
 
-  data_variable_name_replacer(const SrcList& src, const DestList& dest)
+  variable_name_replacer(const SrcList& src, const DestList& dest)
     : src_(src), dest_(dest)
   {
     assert(src_.size() == dest_.size());
@@ -133,32 +139,32 @@ struct data_variable_name_replacer
   /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (!data::is_data_variable(t))
+    if (!data::data_expression(t).is_variable())
     {
       return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
-    data::data_variable v(t);
+    data::variable v(t);
     typename SrcList::const_iterator i = src_.begin();
     typename DestList::const_iterator j = dest_.begin();
     for (; i != src_.end(); ++i, ++j)
     {
       if (v.name() == *i)
       {
-        return std::pair<atermpp::aterm_appl, bool>(data::data_variable(*j, v.sort()), false); // don't continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(data::variable(*j, v.sort()), false); // don't continue the recursion
       }
     }
     return std::pair<atermpp::aterm_appl, bool>(t, false); // don't continue the recursion
   }
 };
 
-/// \brief Utility function for creating a data_variable_name_replacer.
+/// \brief Utility function for creating a variable_name_replacer.
 /// \param t1 A term
 /// \param t2 A term
-/// \return A data_variable_replacer
+/// \return A variable_replacer
 template <typename T1, typename T2>
-data_variable_name_replacer<T1, T2> make_data_variable_name_replacer(const T1& t1, const T2& t2)
+variable_name_replacer<T1, T2> make_variable_name_replacer(const T1& t1, const T2& t2)
 {
-  return data_variable_name_replacer<T1, T2>(t1, t2);
+  return variable_name_replacer<T1, T2>(t1, t2);
 }
 
 } // namespace detail

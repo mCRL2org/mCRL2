@@ -4,7 +4,6 @@ project core
 
 mcrl2-library core
        : source/mcrl2parser.cpp/<include>../include/mcrl2/core/detail
-         source/struct.cpp
          source/struct_core.cpp
          source/mcrl2lexer.cpp
          source/parse.cpp
@@ -13,14 +12,12 @@ mcrl2-library core
          source/print.cpp
          source/print_c.cpp
          source/messaging.cpp
-         source/data_implementation_concrete.cpp
-         source/data_common.cpp
-         source/data_reconstruct.cpp
-         source/alpha.cpp
          source/aterm_ext.cpp
-         source/numeric_string.cpp
+         source/text_utility.cpp
        : <library>/libraries//atermpp
+         <use>/libraries/utilities//exception
          <include>../include
+         <include>../../data/include # in order to get rid of struct.cpp
        :
        : <toolset>gcc,<link>static:<linkflags>-export-dynamic
          <include>../include

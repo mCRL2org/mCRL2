@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 47154 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : defines simple text based progress monitor
 // ***************************************************************************

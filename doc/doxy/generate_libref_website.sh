@@ -48,6 +48,7 @@ Data:data:libraries/data
 LPS:lps:libraries/lps
 LTS:lts:libraries/lts
 PBES:pbes:libraries/pbes
+Process:process:libraries/process
 Trace:trace:libraries/trace
 Utilities:utilities:libraries/utilities
 TIPi:tipi:tools/squadt/libraries/tipi"

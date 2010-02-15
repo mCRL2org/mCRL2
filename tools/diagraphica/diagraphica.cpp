@@ -13,15 +13,16 @@
 #define NAME "diagraphica"
 #define AUTHOR "A. Johannes Pretorius"
 
-#include <string>
 #include <wx/wx.h>
 #include <wx/sysopt.h>
 #include <wx/clrpicker.h>
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/exception.h"
+#include "diagraph.h"
 
-#include "mcrl2/lts/lts.h"
 // windows debug libraries
 #ifdef _MSC_VER
   #define _CRTDBG_MAP_ALLOC
@@ -31,145 +32,57 @@
 
 using namespace std;
 
-std::string lts_file_argument;
-std::string parse_error;
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+// Configures tool capabilities.
+void DiaGraph::set_capabilities(tipi::tool::capabilities& c) const {
+  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
 
-// SQuADT protocol interface
-# include <mcrl2/utilities/mcrl2_squadt_interface.h>
-using namespace mcrl2::utilities::squadt;
-using namespace mcrl2::lts;
-const char* lts_file_for_input  = "lts_in";
+  for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
+    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
+  }
+}
 
-class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
+// Queries the user via SQuADt if needed to obtain configuration information
+void DiaGraph::user_interactive_configuration(tipi::configuration&) { }
 
-  public:
-    // Configures tool capabilities.
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
-
-      for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-        c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
-      }
+// Check an existing configuration object to see if it is usable
+bool DiaGraph::check_configuration(tipi::configuration const& c) const {
+  if (c.input_exists("main-input")) {
+    /* The input object is present, verify whether the specified format is supported */
+    if (mcrl2::lts::lts::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
+      send_error("Invalid configuration: unsupported type `" +
+          c.get_input("main-input").type().sub_type() + "' for main input");
     }
-
-    // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(tipi::configuration&) { }
-
-    // Check an existing configuration object to see if it is usable
-    bool check_configuration(tipi::configuration const& c) const {
-      if (c.input_exists(lts_file_for_input)) {
-        /* The input object is present, verify whether the specified format is supported */
-        if (lts::parse_format(c.get_input(lts_file_for_input).type().sub_type().c_str()) == lts_none) {
-          send_error("Invalid configuration: unsupported type `" +
-              c.get_input(lts_file_for_input).type().sub_type() + "' for main input");
-        }
-        else {
-          return true;
-        }
-      }
-
-      return false;
+    else {
+      return true;
     }
-
-    // Performs the task specified by a configuration
-    bool perform_task(tipi::configuration& c) {
-      lts_file_argument = c.get_input(lts_file_for_input).location();
-
-      return mcrl2_wx_tool_interface::perform_task(c);
-    }
-};
-#endif
-
-#include "diagraph.h"
-
-#ifndef ENABLE_SQUADT_CONNECTIVITY
-// implement wxApp
-IMPLEMENT_APP( DiaGraph )
-#else
-IMPLEMENT_APP_NO_MAIN( DiaGraph )
-
-# ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,
-                                  HINSTANCE hPrevInstance,
-                                  wxCmdLineArgType lpCmdLine,
-                                  int nCmdShow) {
-
-  MCRL2_ATERM_INIT(0, lpCmdLine)
-
-  if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
-    return EXIT_SUCCESS;
   }
 
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+  return false;
 }
-# else
-int main(int argc, char **argv) {
 
-  MCRL2_ATERM_INIT(argc, argv)
+bool DiaGraph::perform_task(tipi::configuration& c) {
+  m_input_filename = c.get_input("main-input").location();
 
-  if(interactor< squadt_interactor >::free_activation(argc, argv)) {
-    return EXIT_SUCCESS;
-  }
-
-  return wxEntry(argc, argv);
+  return run_and_wait();
 }
-# endif
 #endif
-// -- * -------------------------------------------------------------
 
-
-// -- command line --------------------------------------------------
-
-// parse command line
-bool DiaGraph::parse_command_line(int argc, wxChar** argv) {
-
-  using namespace ::mcrl2::utilities;
-
-  interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
-      NAME, AUTHOR,
-      "interactive visual analysis of an LTS",
-      "[OPTION]... [INFILE]\n",
+DiaGraph::DiaGraph() : super("DiaGraph",
+      "interactive visual analysis of an LTS", // what-is
+      "You are free to use images produced with DiaGraphica.\n" // gui-specific description
+      "In this case, image credits would be much appreciated.\n" 
+      "\n" 
+      "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and \n" 
+      "uses the TinyXML parser (tinyxml.sourceforge.net). \n" 
+      "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
       "Multivariate state visualisation and simulation analysis for labelled "
       "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
-      "DiaGraphica is started without opening an LTS.");
+      "DiaGraphica is started without opening an LTS.",
+    std::vector< std::string >(1, "Hannes Pretorius")), graph(0)
+{ }
 
-  command_line_parser parser(clinterface, argc, argv);
-
-  // needed as guard for clearColleagues() in OnExit()
-  graph = 0;
-
-  if (parser.continue_execution()) {
-    if (0 < parser.arguments.size()) {
-      lts_file_argument = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-  }
-
-  return parser.continue_execution();
-}
-// -- * -------------------------------------------------------------
-
-// -------------------------
-DiaGraph::DiaGraph() : mcrl2::utilities::wx::tool< DiaGraph >("DiaGraphica",
-    "You are free to use images produced with DiaGraphica.\n"
-    "In this case, image credits would be much appreciated.\n"
-    "\n"
-    "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and \n"
-    "uses the TinyXML parser (tinyxml.sourceforge.net). \n"
-    "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
-                std::vector< std::string >(1, "Johannes Pretorius")) {
-// -------------------------
-}
-
-// -- functions inherited from wxApp --------------------------------
-
-// --------------------
-bool DiaGraph::DoInit()
-// --------------------
+bool DiaGraph::run()
 {
     // windows debugging
     #ifdef _MSC_VER
@@ -191,13 +104,39 @@ bool DiaGraph::DoInit()
     clustered = false;
     critSect = false;
 
-    if (!lts_file_argument.empty()) {
-      openFile(lts_file_argument);
+    if (!input_filename().empty())
+    {
+      openFile(input_filename().c_str());
     }
 
     // start event loop
     return true;
 }
+
+IMPLEMENT_APP_NO_MAIN( DiaGraph )
+IMPLEMENT_WX_THEME_SUPPORT
+
+#ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
+                                  int nCmdShow) {
+
+  MCRL2_ATERMPP_INIT(0, lpCmdLine)
+
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+}
+#else
+int main(int argc, char **argv)
+{
+  MCRL2_ATERMPP_INIT(argc, argv)
+
+  return wxEntry(argc, argv);
+}
+#endif
+// -- * -------------------------------------------------------------
+
+// -- functions inherited from wxApp --------------------------------
 
 // -------------------
 int DiaGraph::OnExit()
@@ -217,19 +156,19 @@ int DiaGraph::OnExit()
 
 
 // ------------------------------------------
-void DiaGraph::openFile( const string &path )
+void DiaGraph::openFile( const std::string &path )
 // ------------------------------------------
 {
     Parser* parser   = NULL;
-    string fileName  = "";
-    string delims    = "\\/";
-    string::size_type begIdx;
-    string::size_type endIdx;
+    std::string fileName  = "";
+    std::string delims    = "\\/";
+    std::string::size_type begIdx;
+    std::string::size_type endIdx;
     int    fileSize  = 0;
 
     // get filename
     begIdx = path.find_last_of( delims );
-    if ( begIdx == string::npos )
+    if ( begIdx == std::string::npos )
         begIdx = 0;
     else
         begIdx += 1;
@@ -243,11 +182,9 @@ void DiaGraph::openFile( const string &path )
         // get file size
         fileSize = parser->getFileSize( path );
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     try
@@ -366,14 +303,12 @@ void DiaGraph::openFile( const string &path )
 
         critSect = false;
     }
-    catch ( const string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
         delete progressDialog;
         progressDialog = NULL;
 
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
 
         critSect = false;
     }
@@ -391,7 +326,7 @@ void DiaGraph::openFile( const string &path )
 
 
 // ------------------------------------------
-void DiaGraph::saveFile( const string &path )
+void DiaGraph::saveFile( const std::string &path )
 // ------------------------------------------
 {
     // init parser
@@ -404,11 +339,9 @@ void DiaGraph::saveFile( const string &path )
             path,
             graph );
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -418,7 +351,7 @@ void DiaGraph::saveFile( const string &path )
 
 
 // ------------------------------------------------------
-void DiaGraph::handleLoadAttrConfig( const string &path )
+void DiaGraph::handleLoadAttrConfig( const std::string &path )
 // ------------------------------------------------------
 {
     // init parser
@@ -428,7 +361,7 @@ void DiaGraph::handleLoadAttrConfig( const string &path )
     try
     {
         map< int, int > attrIdxFrTo;
-        map< int, vector< string > > attrCurDomains;
+        map< int, vector< std::string > > attrCurDomains;
         map< int, map< int, int  > > attrOrigToCurDomains;
 
         parser->parseAttrConfig(
@@ -448,11 +381,9 @@ void DiaGraph::handleLoadAttrConfig( const string &path )
         ! also need to close any other vis windows e.g. corrlplot... !
         */
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -462,7 +393,7 @@ void DiaGraph::handleLoadAttrConfig( const string &path )
 
 
 // ------------------------------------------------------
-void DiaGraph::handleSaveAttrConfig( const string &path )
+void DiaGraph::handleSaveAttrConfig( const std::string &path )
 // ------------------------------------------------------
 {
     // init parser
@@ -475,11 +406,9 @@ void DiaGraph::handleSaveAttrConfig( const string &path )
             path,
             graph );
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -489,7 +418,7 @@ void DiaGraph::handleSaveAttrConfig( const string &path )
 
 
 // ---------------------------------------------------
-void DiaGraph::handleLoadDiagram( const string &path )
+void DiaGraph::handleLoadDiagram( const std::string &path )
 // ---------------------------------------------------
 {
     // init parser
@@ -534,14 +463,12 @@ void DiaGraph::handleLoadDiagram( const string &path )
         }
 
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
         delete dgrmNew;
         dgrmNew = NULL;
 
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -554,7 +481,7 @@ void DiaGraph::handleLoadDiagram( const string &path )
 
 
 // ---------------------------------------------------
-void DiaGraph::handleSaveDiagram( const string &path )
+void DiaGraph::handleSaveDiagram( const std::string &path )
 // ---------------------------------------------------
 {
     // init parser
@@ -568,11 +495,9 @@ void DiaGraph::handleSaveDiagram( const string &path )
             graph,
             editor->getDiagram() );
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -586,8 +511,8 @@ void DiaGraph::handleSaveDiagram( const string &path )
 
 // -------------------------
 void DiaGraph::initProgress(
-    const string &title,
-    const string &msg,
+    const std::string &title,
+    const std::string &msg,
     const int &max )
 // -------------------------
 {
@@ -632,7 +557,7 @@ void DiaGraph::closeProgress()
 
 
 // ----------------------------------------------
-void DiaGraph::setOutputText( const string &msg )
+void DiaGraph::setOutputText( const std::string &msg )
 // ----------------------------------------------
 // ------------------------------------------------------------------
 // Clear existing text output and display 'msg'.
@@ -649,13 +574,13 @@ void DiaGraph::setOutputText( const int &val )
 // Clear existing text output and display 'val'.
 // ------------------------------------------------------------------
 {
-    string msg = Utils::intToStr( val );
+  std::string msg = Utils::intToStr( val );
     frame->appOutputText( msg );
 }
 
 
 // ----------------------------------------------
-void DiaGraph::appOutputText( const string &msg )
+void DiaGraph::appOutputText( const std::string &msg )
 // ----------------------------------------------
 // ------------------------------------------------------------------
 // Append 'msg' to the current text output without clearing it first.
@@ -672,7 +597,7 @@ void DiaGraph::appOutputText( const int &val )
 // Append 'val' to the current text output without clearing it first.
 // ------------------------------------------------------------------
 {
-    string msg = Utils::intToStr( val );
+  std::string msg = Utils::intToStr( val );
     frame->appOutputText( msg );
 }
 
@@ -682,12 +607,11 @@ void DiaGraph::getColor( ColorRGB &col )
 {
     wxColourData   data;
     wxColourDialog dialog( frame, &data );
-    wxColour       colTmp;
 
     if ( dialog.ShowModal() == wxID_OK )
     {
         data   = dialog.GetColourData();
-        colTmp = data.GetColour();
+        wxColour colTmp = data.GetColour();
 
         col.r = colTmp.Red()/255.0;
         col.g = colTmp.Green()/255.0;
@@ -881,7 +805,7 @@ void DiaGraph::handleAttributeDelete( const int &idx )
 // ----------------------------------
 void DiaGraph::handleAttributeRename(
         const int &idx,
-        const string &name )
+        const std::string &name )
 // ----------------------------------
 {
     if ( 0 <= idx && idx < graph->getSizeAttributes() )
@@ -1170,7 +1094,7 @@ void DiaGraph::handleMoveDomVal(
 void DiaGraph::handleDomainGroup(
     const int &attrIdx,
     const vector< int > domIndcs,
-    const string &newValue )
+    const std::string &newValue )
 // ------------------------------
 {
     Attribute *attr;
@@ -1297,7 +1221,7 @@ void DiaGraph::handleAttributePlot(
     }
 
     vector< int > indices;
-    vector< string > vals1;
+    vector< std::string > vals1;
     vector< vector< int > > corrlMap;
     vector< vector< int > > number;
 
@@ -1369,7 +1293,7 @@ void DiaGraph::handleAttributePlot( const vector< int > &indcs )
     }
     else
     {
-        string msg;
+    std::string msg;
         msg.append( "More than 2048 combinations. " );
         msg.append( "Please select fewer attributes " );
         msg.append( "or group their domains." );
@@ -1420,7 +1344,7 @@ void DiaGraph::handleClustFrameDisplay()
 // -------------------------------------
 {
     vector< int >    attrIdcs;
-    vector< string > attrNames;
+    vector< std::string > attrNames;
 
     for ( int i = 0; i < graph->getSizeAttributes(); ++i )
     {
@@ -1475,7 +1399,7 @@ void DiaGraph::handleClustPlotFrameDisplay(
     }
 
     vector< int > indices;
-    vector< string > vals1;
+    vector< std::string > vals1;
     vector< vector< int > > corrlMap;
     vector< vector< int > > number;
 
@@ -1652,7 +1576,7 @@ void* DiaGraph::getGraph()
 
 
 // ----------------------------------
-void DiaGraph::handleNote( const int &shapeId, const string &msg )
+void DiaGraph::handleNote( const int &shapeId, const std::string &msg )
 // ----------------------------------
 {
     frame->handleNote( shapeId, msg );
@@ -1818,7 +1742,7 @@ void DiaGraph::handleEditShape(
 
 // ----------------------------
 void DiaGraph::handleShowVariable(
-    			const string &variable,
+    			const std::string &variable,
     			const int    &variableId)
 // ----------------------------
 {
@@ -1828,7 +1752,7 @@ void DiaGraph::handleShowVariable(
 
 
 // ----------------------------
-void DiaGraph::handleShowNote( const string &variable, const int &shapeId)
+void DiaGraph::handleShowNote( const std::string &variable, const int &shapeId)
 // ----------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -1837,7 +1761,7 @@ void DiaGraph::handleShowNote( const string &variable, const int &shapeId)
 
 
 // ----------------------------
-void DiaGraph::handleAddText( string &variable, int &shapeId)
+void DiaGraph::handleAddText( std::string &variable, int &shapeId)
 // ----------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -1970,13 +1894,13 @@ void DiaGraph::handleCheckedVariable( const int &idDOF, const int &variableId )
 // ------------------------------------
 void DiaGraph::handleEditDOF(
     const vector< int > &degsOfFrdmIds,
-    const vector< string > &degsOfFrdm,
+    const vector< std::string > &degsOfFrdm,
     const vector< int > &attrIndcs,
     const int &selIdx )
 // ------------------------------------
 {
     // init attrIndcs
-    vector< string > attributes;
+    vector< std::string > attributes;
     {
     for ( size_t i = 0; i < attrIndcs.size(); ++i )
     {
@@ -3460,7 +3384,7 @@ void DiaGraph::handleKeyUpEvent(
 
 
 // -------------------------------------------
-void DiaGraph::operator<<( const string &msg )
+void DiaGraph::operator<<( const std::string &msg )
 // -------------------------------------------
 {
     this->appOutputText( msg );
@@ -3630,10 +3554,10 @@ void DiaGraph::displAttributes()
 {
     Attribute*       attr;
     vector< int >    indcs;
-    vector< string > names;
-    vector< string > types;
+    vector< std::string > names;
+    vector< std::string > types;
     vector< int >    cards;
-    vector< string > range;
+    vector< std::string > range;
     for ( int i = 0; i < graph->getSizeAttributes(); ++i )
     {
         attr = graph->getAttribute( i );
@@ -3647,7 +3571,7 @@ void DiaGraph::displAttributes()
             range.push_back( "" );
         else
         {
-            string rge = "[";
+        std::string rge = "[";
             rge += Utils::dblToStr( attr->getLowerBound() );
             rge += ", ";
             rge += Utils::dblToStr( attr->getUpperBound() );
@@ -3660,7 +3584,7 @@ void DiaGraph::displAttributes()
             range.push_back( "" );
         else
         {
-            string rge = "[";
+          std::string rge = "[";
             rge += Utils::dblToStr( attr->getLowerBound() );
             rge += ", ";
             rge += Utils::dblToStr( attr->getUpperBound() );
@@ -3681,10 +3605,10 @@ void DiaGraph::displAttributes( const int &selAttrIdx )
 {
     Attribute*       attr;
     vector< int >    indcs;
-    vector< string > names;
-    vector< string > types;
+    vector< std::string > names;
+    vector< std::string > types;
     vector< int >    cards;
-    vector< string > range;
+    vector< std::string > range;
     for ( int i = 0; i < graph->getSizeAttributes(); ++i )
     {
         attr = graph->getAttribute( i );
@@ -3698,7 +3622,7 @@ void DiaGraph::displAttributes( const int &selAttrIdx )
             range.push_back( "" );
         else
         {
-            string rge = "[";
+        std::string rge = "[";
             rge += Utils::dblToStr( attr->getLowerBound() );
             rge += ", ";
             rge += Utils::dblToStr( attr->getUpperBound() );
@@ -3711,7 +3635,7 @@ void DiaGraph::displAttributes( const int &selAttrIdx )
             range.push_back( "" );
         else
         {
-            string rge = "[";
+          std::string rge = "[";
             rge += Utils::dblToStr( attr->getLowerBound() );
             rge += ", ";
             rge += Utils::dblToStr( attr->getUpperBound() );
@@ -3734,7 +3658,7 @@ void DiaGraph::displAttrDomain( const int &attrIdx )
     int        numValues;
     int        numNodes;
     vector< int >    indices;
-    vector< string > values;
+    vector< std::string > values;
     vector< int >    number;
     vector< double>  perc;
 

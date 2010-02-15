@@ -6,12 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewrite/jittyc.h
+/// \file mcrl2/data/detail/rewrite/jittyc.h
 
 #ifndef __REWR_JITTYC_H
 #define __REWR_JITTYC_H
 
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/data_specification.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE
 
@@ -19,12 +20,16 @@
 #include <utility>
 #include <string>
 
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
+
 typedef unsigned int* nfs_array;
 
 class RewriterCompilingJitty: public Rewriter
 {
 	public:
-		RewriterCompilingJitty(mcrl2::data::data_specification DataSpec);
+		RewriterCompilingJitty(const data_specification &DataSpec);
 		~RewriterCompilingJitty();
 
 		RewriteStrategy getStrategy();
@@ -40,8 +45,16 @@ class RewriterCompilingJitty: public Rewriter
 		ATerm getSubstitutionInternal(ATermAppl Var);
 		void clearSubstitution(ATermAppl Var);
 		void clearSubstitutions();
+		using Rewriter::clearSubstitutions;
+		
+                bool addRewriteRule(ATermAppl Rule);
+                bool removeRewriteRule(ATermAppl Rule);
 
 	private:
+                ATermTable tmp_eqns, subst_store;
+                bool need_rebuild;
+                bool made_files;
+
 		int num_opids;
 
 		int true_num;
@@ -60,11 +73,13 @@ class RewriterCompilingJitty: public Rewriter
 		bool calc_ar(ATermAppl expr);
 		void fill_always_rewrite_array();
 
-		char *file_c;
-		char *file_o;
-		char *file_so;
+		std::string file_c;
+		std::string file_o;
+		std::string file_so;
 
+		void *so_handle;
 		void (*so_rewr_init)();
+		void (*so_rewr_cleanup)();
 		ATermAppl (*so_rewr)(ATermAppl);
 		void (*so_set_subst)(ATermAppl, ATerm);
 		ATerm (*so_get_subst)(ATermAppl);
@@ -89,7 +104,9 @@ class RewriterCompilingJitty: public Rewriter
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
 		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, unsigned int nf_args);
-		void CompileRewriteSystem(mcrl2::data::data_specification DataSpec);
+		void CompileRewriteSystem(const data_specification &DataSpec);
+		void CleanupRewriteSystem();
+		void BuildRewriteSystem();
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);
@@ -97,5 +114,8 @@ class RewriterCompilingJitty: public Rewriter
 };
 
 #endif
+    }
+  }
+}
 
 #endif

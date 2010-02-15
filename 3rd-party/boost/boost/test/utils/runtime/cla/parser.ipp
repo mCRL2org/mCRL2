@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50475 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : implements parser - public interface for CLA parsing and accessing
 // ***************************************************************************
@@ -102,7 +102,7 @@ parser::parse( int& argc, char_type** argv )
         m_program_name.assign( argv[0] );
         dstring::size_type pos = m_program_name.find_last_of( BOOST_RT_PARAM_LITERAL( "/\\" ) );
 
-        if( pos != (dstring::size_type)cstring::npos )
+        if( pos != static_cast<dstring::size_type>(cstring::npos) )
             m_program_name.erase( 0, pos+1 );
     }
 

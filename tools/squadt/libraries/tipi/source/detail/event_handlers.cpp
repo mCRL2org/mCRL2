@@ -7,8 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 // \file event_handlers.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <map>
 #include <deque>
 #include <utility>

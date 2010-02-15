@@ -8,6 +8,8 @@
 //
 // Implements the visualcomment class.
 
+#include "wx.hpp" // precompiled headers
+
 #include <algorithm>
 #include <string>
 #include <cmath>
@@ -204,7 +206,7 @@ bool grape::grapeapp::is_inside(coordinate p_poly[], int p_count, const coordina
   return inside;
 }
 
-void grape::grapeapp::set_color(const color p_color, bool p_selected)
+void grape::grapeapp::set_color(const color &p_color, bool p_selected)
 {
   if (p_selected)
   {
@@ -530,11 +532,18 @@ coordinate grape::grapeapp::move_to_border_rectangle( const coordinate &p_rect_c
   return result;
 }
 
-void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color )
+void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color &p_color, const bool is_dashed )
 {
   // set color of line
   set_color( p_color, p_selected );
 
+  if (is_dashed)
+  {
+    //enable dashed line
+    glLineStipple(1, 0x3F07);
+    glEnable(GL_LINE_STIPPLE);
+  }
+   
   // draw line
   glBegin(GL_LINE_STRIP);
     glVertex3f( p_begin.m_x, p_begin.m_y, 0.0f);
@@ -542,6 +551,12 @@ void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_
     glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
     glVertex3f( p_begin.m_x, p_begin.m_y, 0.0f);
   glEnd();
+  
+  if (is_dashed)
+  {
+    //disable dashed line
+    glDisable(GL_LINE_STIPPLE);
+  }
 }
 
 void grape::grapeapp::draw_designator( const coordinate &p_begin, float p_width, float p_height, bool p_selected )
@@ -654,29 +669,32 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   float distance_begin_to_control = sqrt( pow( p_control.m_y - p_begin.m_y, 2 ) + pow( p_control.m_x - p_begin.m_x, 2 ) );
   float distance_control_to_end = sqrt( pow( p_end.m_y - p_control.m_y, 2 ) + pow( p_end.m_x - p_control.m_x, 2 ) );
   float strength = distance_begin_to_control/(distance_begin_to_control + distance_control_to_end);
-  float distance_min;
-  if (distance_begin_to_control < distance_control_to_end) distance_min = distance_begin_to_control; else distance_min = distance_control_to_end;
+  float distance_left = distance_begin_to_control * 0.5;
+  float distance_right = distance_control_to_end * 0.5;
 
   coordinate p_right = {(1-strength)*p_begin.m_x + strength*p_control.m_x, (1-strength)*p_begin.m_y + strength*p_control.m_y};
   coordinate p_left = {(1-strength)*p_control.m_x + strength*p_end.m_x, (1-strength)*p_control.m_y + strength*p_end.m_y};
   float angle_control = atan2(( p_left.m_x - p_right.m_x), ( p_left.m_y - p_right.m_y));
 
-  coordinate p_control_left = {p_control.m_x + distance_min * sin( angle_control - M_PI ), p_control.m_y + distance_min * cos( angle_control - M_PI )};
-  coordinate p_control_right = {p_control.m_x + distance_min * sin( angle_control - M_PI*2 ), p_control.m_y + distance_min * cos( angle_control - M_PI*2 )};
+  coordinate p_control_left = {p_control.m_x + distance_left * sin( angle_control - M_PI ), p_control.m_y + distance_left * cos( angle_control - M_PI )};
+  coordinate p_control_right = {p_control.m_x + distance_right * sin( angle_control - M_PI*2 ), p_control.m_y + distance_right * cos( angle_control - M_PI*2 )};
 
   //draw bezier
   coordinate pre_pnt;
   coordinate pnt = p_begin;
+  float angle_middle;
   for(unsigned int i=1;i<=40;++i)
   {
     pre_pnt = pnt;
     if (i <= 20)
     {
-      pnt = get_coordinate_from_controlpoints(p_begin, p_control_left, p_control, float(i*0.05));
+      pnt = get_coordinate_from_controlpoints(p_begin, p_control_left, p_control, float(i*0.05f));  
     }
     else
     {
-      pnt = get_coordinate_from_controlpoints(p_control, p_control_right, p_end, float((i-20)*0.05));
+      pnt = get_coordinate_from_controlpoints(p_control, p_control_right, p_end, float((i-20)*0.05f));
+      // calculate angle of midpoint
+      if (i == 21) angle_middle = atan2((pre_pnt.m_y-pnt.m_y), (pre_pnt.m_x-pnt.m_x)) + M_PI*0.5f;
     };
     draw_line(pre_pnt, pnt, p_selected, g_color_black);
   }
@@ -685,11 +703,11 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   float angle_arrow = atan2((pre_pnt.m_y-pnt.m_y), (pre_pnt.m_x-pnt.m_x));
 
   // draw arrow head based on calculated angle
-  float one_side_x = pnt.m_x + 0.03 * cos( angle_arrow - M_PI/4 );
-  float one_side_y = pnt.m_y + 0.03 * sin( angle_arrow - M_PI/4 );
-  float other_side_x = pnt.m_x + 0.03 * cos( angle_arrow + M_PI/4 );
-  float other_side_y = pnt.m_y + 0.03 * sin( angle_arrow + M_PI/4 );
-
+  float one_side_x = pnt.m_x + 0.03f * cos( angle_arrow - M_PI/4 );
+  float one_side_y = pnt.m_y + 0.03f * sin( angle_arrow - M_PI/4 );
+  float other_side_x = pnt.m_x + 0.03f * cos( angle_arrow + M_PI/4 );
+  float other_side_y = pnt.m_y + 0.03f * sin( angle_arrow + M_PI/4 );
+    
   // draw transition arrow
   glBegin(GL_TRIANGLES);
     glVertex3f( pnt.m_x, pnt.m_y, 0.0f);
@@ -697,78 +715,36 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
     glVertex3f( other_side_x, other_side_y, 0.0f);
   glEnd();
 
-  // draw text
-  // calculate midpoint
-  coordinate midpoint;
-  midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
-  midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
+  // keep angle between 0..pi
+  while (angle_middle < 0.0f) angle_middle += static_cast<float> ( M_PI );
+  while (angle_middle >= M_PI) angle_middle -= static_cast<float> ( M_PI );
+  
+  // align text
+  Alignment align_horizontal = al_center;
+  Alignment align_vertical = al_center;
 
+  if ((angle_middle >= 0.0f*M_PI) && (angle_middle < 0.25f*M_PI)) align_horizontal = al_right;   
+  if ((angle_middle >= 0.75f*M_PI) && (angle_middle < 1.25f*M_PI)) align_horizontal = al_left;    
+    
+  if ((angle_middle >= 0.25f*M_PI) && (angle_middle < 0.75f*M_PI)) align_vertical = al_top;
+    
   set_color(g_color_black, true);
-  // render text based on the calculated angle
-  if ( ( angle_arrow < M_PI_2 ) || ( angle_arrow > M_PI && angle_arrow < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x - 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-  else // text should be rendered to the right of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x + 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-
+  // draw text 
+  grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x + 0.05f*cos(angle_middle), p_control.m_y + 0.025f + 0.05f*sin(angle_middle), 0.0015f, align_horizontal, align_vertical );
+ 
   //draw control point
   if (p_selected)
   {
-    draw_line_rectangle(p_control, static_cast<float>(0.03), static_cast<float>(0.03), false, g_color_black);
+    draw_line_rectangle(p_control, 0.03f, 0.03f, false, g_color_black);
   }
   else
   {
-    draw_filled_rectangle(p_control, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+    draw_filled_rectangle(p_control, 0.015f, 0.015f, false, g_color_black);
   };
 
-  draw_filled_rectangle(p_begin, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
-  draw_filled_rectangle(p_end, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+  draw_filled_rectangle(p_begin, 0.015f, 0.015f, false, g_color_black);
+  draw_filled_rectangle(p_end, 0.015f, 0.015f, false, g_color_black);
 }
-
-void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
-{
-  draw_line( p_begin, p_end, p_selected, g_color_black );
-
-  // calculate rotation of arrow
-  // correction + get_coordinate not necessary as this results in 0
-  float angle = atan2(( p_begin.m_y - p_end.m_y), ( p_begin.m_x - p_end.m_x));
-
-  // draw arrow head based on calculated angle
-  float one_side_x = p_end.m_x + 0.03 * cos( angle - M_PI/4 );
-  float one_side_y = p_end.m_y + 0.03 * sin( angle - M_PI/4 );
-  float other_side_x = p_end.m_x + 0.03 * cos( angle + M_PI/4 );
-  float other_side_y = p_end.m_y + 0.03 * sin( angle + M_PI/4 );
-
-  // draw transition arrow
-  glBegin(GL_TRIANGLES);
-    glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
-    glVertex3f( one_side_x, one_side_y, 0.0f);
-    glVertex3f( other_side_x, other_side_y, 0.0f);
-  glEnd();
-
-  // draw text
-  // calculate midpoint
-  coordinate midpoint;
-  midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
-  midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
-
-  set_color(g_color_black, true);
-  // render text based on the calculated angle
-  if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-  else // text should be rendered to the right of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-
-  // do not draw the bounding box, this is already done in visualnonterminating transition
-}
-
 
 void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
 {
@@ -795,23 +771,28 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
     glVertex3f( other_side_x, other_side_y, 0.0f);
   glEnd();
 
-  // draw text
   // calculate midpoint
   coordinate midpoint;
   midpoint.m_x = ( end_coord.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( end_coord.m_y + p_begin.m_y ) * 0.5;
+    
+  angle += static_cast<float> ( M_PI*0.5f );
+  while (angle < 0.0f) angle += static_cast<float> ( 2.0f*M_PI );
+  while (angle >= 2.0f*M_PI) angle -= static_cast<float> ( 2.0f*M_PI );
+  
+  // align text
+  Alignment align_horizontal = al_right;
+  Alignment align_vertical = al_center;
 
+  if ((angle >= 0.5f*M_PI) && (angle < 1.5f*M_PI)) align_horizontal = al_left;    
+    
+  if ((angle >= 0.25f*M_PI) && (angle < 0.75f*M_PI)) align_vertical = al_top;
+  if ((angle >= 1.25f*M_PI) && (angle < 1.75f*M_PI)) align_vertical = al_bottom;
+    
   set_color(g_color_black, true);
-  // render text based on the calculated angle
-  if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-  else // text should be rendered to the right of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-
+  // draw text 
+  grape_glcanvas::get_font_renderer()->draw_text(std::string(p_label_text.fn_str()), midpoint.m_x + 0.05f*cos(angle), midpoint.m_y + 0.025f + 0.05f*sin(angle), 0.0015f, align_horizontal, align_vertical);   
+  
   // do not draw the bounding box, this is already done in visualnonterminating transition
 }
 
@@ -860,7 +841,7 @@ void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, 
   draw_channel( p_center, p_radius, p_selected, p_channel_type );
 }
 
-void grape::grapeapp::draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color )
+void grape::grapeapp::draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color &p_color )
 {
   glPushMatrix();
 
@@ -889,7 +870,7 @@ void grape::grapeapp::draw_filled_rectangle( const coordinate &p_center, float p
   glPopMatrix();
 }
 
-void grape::grapeapp::draw_line_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color )
+void grape::grapeapp::draw_line_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color &p_color )
 {
   glPushMatrix();
 
@@ -954,7 +935,7 @@ void grape::grapeapp::draw_reference(const coordinate &p_center, float p_width, 
 
   coordinate points[36];
 
-    // top right corner
+  // top right corner
   for (unsigned int i=0; i < 90; i+=10)
   {
     float degInRad = i * DEG2RAD;

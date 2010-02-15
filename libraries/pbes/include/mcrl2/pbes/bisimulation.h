@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/rename.h
+/// \file mcrl2/pbes/bisimulation.h
 /// \brief Bisimulation algorithms.
 
 #ifndef MCRL2_PBES_BISIMULATION_H
@@ -19,23 +19,25 @@
 #include <sstream>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/data_operators.h"
+#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/data/detail/find.h"
+#include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/rename.h"
+#include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/detail/algorithm.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
+using atermpp::detail::operator+;
 using namespace data;
 using namespace lps;
 
@@ -44,20 +46,20 @@ class bisimulation_algorithm
 {
   public:
     /// \brief The iterator type for non-delta summands
-    typedef non_delta_summand_list::iterator my_iterator;
+    typedef lps::action_summand_vector::const_iterator my_iterator;
 
   protected:
     /// \brief A map type for mapping summands to strings.
-    typedef std::map<ATermAppl, std::string> name_map;
+    typedef std::map<const lps::action_summand*, std::string> name_map;
 
     /// \brief Maps summands to strings.
     name_map summand_names;
 
-    /// \brief Store the ATerm of the model.
-    ATermAppl model_ptr;
+    /// \brief Store the address of the model.
+    const lps::linear_process* model_ptr;
 
-    /// \brief Store a ATerm of the specification.
-    ATermAppl spec_ptr;
+    /// \brief Store the address of the specification.
+    const lps::linear_process* spec_ptr;
 
     /// \brief Generates a name for an action_list.
     /// \param l A sequence of actions
@@ -82,7 +84,7 @@ class bisimulation_algorithm
     /// \return The name of the summand referred to by \p i
     std::string summand_name(my_iterator i) const
     {
-      ATermAppl t = *i;
+      const lps::action_summand* t = &(*i);
       name_map::const_iterator j = summand_names.find(t);
       assert(j != summand_names.end());
       return j->second;
@@ -93,7 +95,7 @@ class bisimulation_algorithm
     /// \return True if p is the linear process of the model.
     bool is_from_model(const linear_process& p) const
     {
-      return ATermAppl(p) == model_ptr;
+      return &p == model_ptr;
     }
 
     /// \brief Returns a name of a linear process.
@@ -116,37 +118,11 @@ class bisimulation_algorithm
     void set_summand_names(const linear_process& p)
     {
       set_identifier_generator generator;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
+      for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
-        std::string name = generator(action_list_name(i->actions()));
-        ATermAppl t = *i;
+        std::string name = generator(action_list_name(i->multi_action().actions()));
+        const lps::action_summand* t = &(*i);
         summand_names[t] = name;
-      }
-    }
-
-  private:
-    /// \brief Check function used for debugging.
-    /// \param expr A PBES expression
-    /// \param p A linear process
-    /// \param q A linear process
-    /// \param msg A string
-    void check_expression(pbes_expression expr, const linear_process& p, const linear_process& q, std::string msg) const
-    {
-      detail::free_variable_visitor<pbes_expression> visitor;
-      visitor.bound_variables = p.process_parameters() + q.process_parameters();
-      visitor.visit(expr);
-      std::set<data_variable> w = visitor.result;
-
-      std::set<data_variable> free_variables;
-      free_variables.insert(p.free_variables().begin(), p.free_variables().end());
-      free_variables.insert(q.free_variables().begin(), q.free_variables().end());
-
-      for (std::set<data_variable>::iterator i = w.begin(); i != w.end(); ++i)
-      {
-        if (free_variables.find(*i) == free_variables.end())
-        {
-          std::cerr << "error: " << msg << mcrl2::core::pp(*i) << " is free! " << mcrl2::core::pp(expr) << std::endl;
-        }
       }
     }
 
@@ -172,7 +148,7 @@ public:
     }
 
     /// \brief Creates a name for the propositional variable Ypqi
-    /// \pre The iterator i must be in p.non_delta_summands().
+    /// \pre The iterator i must be in p.action_summands().
     /// \param p A linear process
     /// \param q A linear process
     /// \param i A summand iterator
@@ -184,7 +160,7 @@ public:
     }
 
     /// \brief Creates a name for the propositional variable Y1pqi
-    /// \pre The iterator i must be in p.non_delta_summands().
+    /// \pre The iterator i must be in p.action_summands().
     /// \param p A linear process
     /// \param q A linear process
     /// \param i A summand iterator
@@ -196,7 +172,7 @@ public:
     }
 
     /// \brief Creates a name for the propositional variable Y2pqi
-    /// \pre The iterator i must be in p.non_delta_summands().
+    /// \pre The iterator i must be in p.action_summands().
     /// \param p A linear process
     /// \param q A linear process
     /// \param i A summand iterator
@@ -211,16 +187,16 @@ public:
     /// \param name A
     /// \param parameters A sequence of data variables
     /// \return The created propositional variable
-    propositional_variable_instantiation var(core::identifier_string name, data_variable_list parameters) const
+    propositional_variable_instantiation var(core::identifier_string name, variable_list const& parameters) const
     {
-      return propositional_variable_instantiation(name, make_data_expression_list(parameters));
+      return propositional_variable_instantiation(name, data_expression_list(parameters));
     }
 
     /// \brief Creates a propositional variable.
     /// \param name A
     /// \param parameters A sequence of data expressions
     /// \return The created propositional variable
-    propositional_variable_instantiation var(core::identifier_string name, data_expression_list parameters) const
+    propositional_variable_instantiation var(core::identifier_string name, data_expression_list const& parameters) const
     {
       return propositional_variable_instantiation(name, parameters);
     }
@@ -248,29 +224,56 @@ public:
       return fixpoint_symbol::nu();
     }
 
-    /// \brief Renames variables in q such that there are no name clashes.
-    /// \param p A linear process
-    /// \param q A linear process
-    /// \return The process q after renaming.
-    linear_process resolve_name_clashes(const linear_process& p, const linear_process& q)
+    /// \brief Returns a substitution of variables in q such that there are no name clashes
+    /// between p and q.
+    /// \param p A linear process specification
+    /// \param q A linear process specification
+    /// \return A substitution that should be applied to q to remove name clashes between p and q.
+    /// \detail After this substitution the following holds:
+    /// \f[ ((param(p)\cup glob(p))\cap ((param(q)\cup glob(q))=\emptyset \f]
+    /// where param(p) denotes p.process().process_parameters() and glob(p) denotes p.global_variables().
+    data::mutable_map_substitution<> resolve_name_clashes(const specification& p, const specification& q) const
     {
-      std::set<core::identifier_string> used_names;
-      used_names.insert(boost::make_transform_iterator(p.process_parameters().begin(), data::detail::data_variable_name()),
-                        boost::make_transform_iterator(p.process_parameters().end()  , data::detail::data_variable_name())
-                       );
-      used_names.insert(boost::make_transform_iterator(p.free_variables().begin(), data::detail::data_variable_name()),
-                        boost::make_transform_iterator(p.free_variables().end()  , data::detail::data_variable_name())
-                       );
-      for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+      std::set<data::variable> pvars;
+      pvars.insert(p.global_variables().begin(), p.global_variables().end());
+      pvars.insert(p.process().process_parameters().begin(), p.process().process_parameters().end());
+
+      std::set<data::variable> qvars;
+      qvars.insert(q.global_variables().begin(), q.global_variables().end());
+      qvars.insert(q.process().process_parameters().begin(), q.process().process_parameters().end());
+      
+      // compute name clashes between pvars and qvars
+      std::set<core::identifier_string> pnames;
+      for (std::set<data::variable>::iterator i = pvars.begin(); i != pvars.end(); ++i)
       {
-        used_names.insert(boost::make_transform_iterator(i->summation_variables().begin(), data::detail::data_variable_name()),
-                          boost::make_transform_iterator(i->summation_variables().end()  , data::detail::data_variable_name())
-                         );
+        pnames.insert(i->name());
       }
-      linear_process result = q;
-      result = rename_process_parameters (result, used_names, "_S");
-      result = rename_free_variables     (result, used_names, "_S");
-      result = rename_summation_variables(result, used_names, "_S");
+      std::set<data::variable> name_clashes;
+      for (std::set<data::variable>::iterator i = qvars.begin(); i != qvars.end(); ++i)
+      {
+        if (pnames.find(i->name()) != pnames.end())
+        {
+          name_clashes.insert(*i);
+        }
+      }
+
+      // collect the variables appearing in p and q and put store them in an identifier generator
+      data::set_identifier_generator generator;
+      std::set<data::variable> pqvars;
+      lps::traverse_variables(p, std::inserter(pqvars, pqvars.end()));
+      lps::traverse_variables(q, std::inserter(pqvars, pqvars.end()));
+      for (std::set<data::variable>::iterator i = pqvars.begin(); i != pqvars.end(); ++i)
+      {
+        generator.add_identifier(i->name());
+      }     
+        
+      // give the clashing variables new values that do not appear in pqvars
+      data::mutable_map_substitution<> result;
+      for (std::set<data::variable>::iterator i = name_clashes.begin(); i != name_clashes.end(); ++i)
+      {
+        result[*i] = data::variable(generator(i->name()), i->sort());
+      }
+      
       return result;
     }
 
@@ -282,8 +285,8 @@ public:
       summand_names.clear();
       set_summand_names(model);
       set_summand_names(spec);
-      model_ptr = ATermAppl(model);
-      spec_ptr  = ATermAppl(spec);
+      model_ptr = &model;
+      spec_ptr  = &spec;
       assert(is_from_model(model));
       assert(!is_from_model(spec));
     }
@@ -327,13 +330,13 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> result;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
+      for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
-        const data_expression&    ci = i->condition();
-        const data_variable_list& d  = p.process_parameters();
-        const data_variable_list& e  = i->summation_variables();
-        const data_variable_list& d1 = q.process_parameters();
-        pbes_expression expr = forall(e, imp(ci, var(Y(p, q, i), d + d1 + e)));
+        data_expression    ci = i->condition();
+        const variable_list& d  = p.process_parameters();
+        variable_list e  = i->summation_variables();
+        const variable_list& d1 = q.process_parameters();
+        pbes_expression expr = pbes_expr::forall(e, imp(ci, var(Y(p, q, i), d + d1 + e)));
         result.push_back(expr);
       }
       return join_and(result.begin(), result.end());
@@ -347,21 +350,21 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       using namespace pbes_expr_optimized;
-      const data_variable_list& d1 = q.process_parameters();
+      const variable_list& d1 = q.process_parameters();
       data_expression_list gi = i->next_state(p.process_parameters());
       if (i->is_tau())
       {
         std::vector<pbes_expression> v;
-        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+        for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
           if (!j->is_tau())
           {
             continue;
           }
-          const data_expression&    cj = j->condition();
-          const data_variable_list& e1 = j->summation_variables();
-          data_expression_list      gj = j->next_state(q.process_parameters());
-          pbes_expression expr = exists(e1, and_(cj, var(X(p, q), gi + gj)));
+          data_expression      cj = j->condition();
+          variable_list        e1 = j->summation_variables();
+          data_expression_list gj = j->next_state(q.process_parameters());
+          pbes_expression      expr = pbes_expr::exists(e1, and_(cj, var(X(p, q), gi + gj)));
           v.push_back(expr);
         }
         return or_(join_or(v.begin(), v.end()), var(X(p, q), gi + d1));
@@ -369,14 +372,14 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       else
       {
         std::vector<pbes_expression> v;
-        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+        for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
-          const data_expression&    cj = j->condition();
-          const data_variable_list& e1 = j->summation_variables();
-          data_expression_list      gj = j->next_state(q.process_parameters());
-          multi_action              ai = i->multi_action();
-          multi_action              aj = j->multi_action();
-          pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
+          data_expression      cj = j->condition();
+          variable_list        e1 = j->summation_variables();
+          data_expression_list gj = j->next_state(q.process_parameters());
+          multi_action         ai = i->multi_action();
+          multi_action         aj = j->multi_action();
+          pbes_expression expr = pbes_expr::exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
           v.push_back(expr);
         }
         return join_or(v.begin(), v.end());
@@ -392,19 +395,19 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> v;
-      const data_variable_list& d  = p.process_parameters();
-      const data_variable_list& d1 = q.process_parameters();
-      const data_variable_list& e  = i->summation_variables();
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+      const variable_list& d  = p.process_parameters();
+      const variable_list& d1 = q.process_parameters();
+      variable_list e  = i->summation_variables();
+      for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         if (!j->is_tau())
         {
           continue;
         }
-        const data_expression&    cj = j->condition();
-        const data_variable_list& e1 = j->summation_variables();
-        data_expression_list        gj = j->next_state(q.process_parameters());
-        pbes_expression expr = exists(e1, and_(cj, var(Y(p, q, i), d + gj + e)));
+        data_expression       cj = j->condition();
+        variable_list         e1 = j->summation_variables();
+        data_expression_list  gj = j->next_state(q.process_parameters());
+        pbes_expression       expr = pbes_expr::exists(e1, and_(cj, var(Y(p, q, i), d + gj + e)));
         v.push_back(expr);
       }
       return or_(join_or(v.begin(), v.end()), and_(var(X(p, q), d + d1), step(p, q, i)));
@@ -419,12 +422,16 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     pbes<> run(const specification& model, const specification& spec)
     {
       using namespace pbes_expr_optimized;
+
+      data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
+      specification spec1 = spec;
+      lps::substitute(spec1, sigma, true);
       const linear_process& m = model.process();
-      linear_process s = resolve_name_clashes(m, spec.process());
+      const linear_process& s = spec1.process();
       init(m, s);
 
-      const data_variable_list& d  = m.process_parameters();
-      const data_variable_list& d1 = s.process_parameters();
+      const variable_list& d  = m.process_parameters();
+      const variable_list& d1 = s.process_parameters();
       atermpp::vector<pbes_equation> equations;
 
 
@@ -433,20 +440,20 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
 
       // E2
-      for (my_iterator i = m.non_delta_summands().begin(); i != m.non_delta_summands().end(); ++i)
+      for (my_iterator i = m.action_summands().begin(); i != m.action_summands().end(); ++i)
       {
-        const data_variable_list& e  = i->summation_variables();
+        variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(m, s, i), d + d1 + e), close(m, s, i));
         equations.push_back(e1);
       }
-      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      for (my_iterator i = s.action_summands().begin(); i != s.action_summands().end(); ++i)
       {
-        const data_variable_list& e  = i->summation_variables();
+        variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(s, m, i), d1 + d + e), close(s, m, i));
         equations.push_back(e1);
       }
 
-      return build_pbes(equations, model, set_lps(spec, s));
+      return build_pbes(equations, model, spec1);
     }
 };
 
@@ -475,11 +482,11 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> result;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
+      for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
-        const data_expression&    ci = i->condition();
-        const data_variable_list& e  = i->summation_variables();
-        pbes_expression expr = forall(e, imp(ci, step(p, q, i)));
+        data_expression  ci = i->condition();
+        variable_list    e  = i->summation_variables();
+        pbes_expression  expr = pbes_expr::forall(e, imp(ci, step(p, q, i)));
         result.push_back(expr);
       }
       return join_and(result.begin(), result.end());
@@ -496,14 +503,14 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       data_expression_list gi = i->next_state(p.process_parameters());
 
       std::vector<pbes_expression> result;
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+      for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
-        const data_expression&    cj = j->condition();
-        const data_variable_list& e1 = j->summation_variables();
-        data_expression_list      gj = j->next_state(q.process_parameters());
-        multi_action              ai = i->multi_action();
-        multi_action              aj = j->multi_action();
-        pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
+        data_expression       cj = j->condition();
+        variable_list         e1 = j->summation_variables();
+        data_expression_list  gj = j->next_state(q.process_parameters());
+        multi_action          ai = i->multi_action();
+        multi_action          aj = j->multi_action();
+        pbes_expression       expr = pbes_expr::exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
         result.push_back(expr);
       }
       return join_or(result.begin(), result.end());
@@ -516,12 +523,15 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     pbes<> run(const specification& model, const specification& spec)
     {
       using namespace pbes_expr_optimized;
+      data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
+      specification spec1 = spec;
+      lps::substitute(spec1, sigma, true);
       const linear_process& m = model.process();
-      linear_process s = resolve_name_clashes(m, spec.process());
+      const linear_process& s = spec1.process();
       init(m, s);
 
-      const data_variable_list& d  = m.process_parameters();
-      const data_variable_list& d1 = s.process_parameters();
+      const variable_list& d  = m.process_parameters();
+      const variable_list& d1 = s.process_parameters();
       atermpp::vector<pbes_equation> equations;
 
 
@@ -529,7 +539,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       equations.push_back(pbes_equation(nu(), propositional_variable(X(m, s), d + d1), and_(match(m, s), match(s, m))));
       equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
 
-      return build_pbes(equations, model, set_lps(spec, s));
+      return build_pbes(equations, model, spec1);
     }
 };
 
@@ -558,13 +568,13 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> result;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
+      for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
-        const data_expression&    ci = i->condition();
-        const data_variable_list& d  = p.process_parameters();
-        const data_variable_list& e  = i->summation_variables();
-        const data_variable_list& d1 = q.process_parameters();
-        pbes_expression expr = forall(e, imp(ci, var(Y1(p, q, i), d + d1 + e)));
+        data_expression    ci = i->condition();
+        const variable_list& d  = p.process_parameters();
+        variable_list e  = i->summation_variables();
+        const variable_list& d1 = q.process_parameters();
+        pbes_expression expr = pbes_expr::forall(e, imp(ci, var(Y1(p, q, i), d + d1 + e)));
         result.push_back(expr);
       }
       return join_and(result.begin(), result.end());
@@ -578,23 +588,23 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       using namespace pbes_expr_optimized;
-      const data_variable_list& d1 = q.process_parameters();
+      const variable_list& d1 = q.process_parameters();
       data_expression_list      gi = i->next_state(p.process_parameters());
-      multi_action              ai = i->actions();
+      multi_action              ai = i->multi_action().actions();
       if (i->is_tau())
       {
-        return close2(p, q, i, gi, make_data_expression_list(d1));
+        return close2(p, q, i, gi, data_expression_list(d1.begin(), d1.end()));
       }
       else
       {
         std::vector<pbes_expression> v;
-        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+        for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
-          const data_expression&    cj = j->condition();
-          const data_variable_list& e1 = j->summation_variables();
-          data_expression_list      gj = j->next_state(q.process_parameters());
-          multi_action              aj = j->actions();
-          pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), close2(p, q, i, gi, gj)));
+          data_expression      cj = j->condition();
+          variable_list        e1 = j->summation_variables();
+          data_expression_list gj = j->next_state(q.process_parameters());
+          multi_action         aj = j->multi_action().actions();
+          pbes_expression      expr = pbes_expr::exists(e1, and_(and_(cj, equals(ai, aj)), close2(p, q, i, gi, gj)));
           v.push_back(expr);
         }
         return join_or(v.begin(), v.end());
@@ -610,17 +620,19 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> v;
-      const data_variable_list& d1 = q.process_parameters();
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+      variable_list e = i->summation_variables();
+      const variable_list& d = p.process_parameters();
+      const variable_list& d1 = q.process_parameters();
+      for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         if (!j->is_tau())
         {
           continue;
         }
-        const data_expression&    cj = j->condition();
-        const data_variable_list& e1 = j->summation_variables();
-        data_expression_list        gj = j->next_state(q.process_parameters());
-        pbes_expression expr = exists(e1, and_(cj, var(Y1(p, q, i), d1 + gj + e1)));
+        data_expression      cj = j->condition();
+        variable_list        e1 = j->summation_variables();
+        data_expression_list gj = j->next_state(d1);
+        pbes_expression      expr = pbes_expr::exists(e1, and_(cj, var(Y1(p, q, i), d + gj + e)));
         v.push_back(expr);
       }
       return or_(join_or(v.begin(), v.end()), step(p, q, i));
@@ -633,16 +645,16 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     /// \param d A sequence of data expressions
     /// \param d1 A sequence of data expressions
     /// \return The function result
-    pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i, data_expression_list d, data_expression_list d1) const
+    pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i, data_expression_list const& d, data_expression_list const& d1) const
     {
       using namespace pbes_expr_optimized;
 
-      //const data_variable_list& d  = p.process_parameters();
-      //const data_variable_list& d1 = q.process_parameters();
+      //const variable_list& d  = p.process_parameters();
+      //const variable_list& d1 = q.process_parameters();
       data_expression_list        gi = i->next_state(p.process_parameters());
-      const action_list         ai = i->actions();
+      action_list                 ai = i->multi_action().actions();
       std::vector<pbes_expression> v;
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+      for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         if (!j->is_tau())
         {
@@ -650,24 +662,25 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
         // d' == q.process_parameters()
         // e' == j->summand_variables()
-        data_expression    cj  = j->condition();                        // cj == cj(d',e')
+        data_expression      cj  = j->condition();                        // cj == cj(d',e')
         data_expression_list gj  = j->next_state(q.process_parameters()); // gj == gj(d',e')
-        data_variable_list e1  = j->summation_variables();              // e1 == e'
+        variable_list        e1  = j->summation_variables();              // e1 == e'
+        const variable_list& parameters = q.process_parameters();
 
         // replace d' by d1 (if needed)
-        if (d1 != make_data_expression_list(q.process_parameters()))
+        if (d1 != data_expression_list(parameters.begin(), parameters.end()))
         {
-          cj = cj.substitute(make_list_substitution(q.process_parameters(), d1));
-          gj = gj.substitute(make_list_substitution(q.process_parameters(), d1));
+          cj = mcrl2::data::make_double_sequence_substitution_adaptor(q.process_parameters(), d1)(cj);
+          gj = mcrl2::data::make_double_sequence_substitution_adaptor(q.process_parameters(), d1)(gj);
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<std::string> used_names = mcrl2::data::detail::find_variable_name_strings(atermpp::make_list(p, q));
-        data_variable_list e1_new = fresh_variables(e1, used_names);
-        data_expression    cj_new = cj.substitute(make_list_substitution(e1, e1_new));
-        data_expression_list gj_new = gj.substitute(make_list_substitution(e1, e1_new));
+        std::set<std::string> used_names = mcrl2::data::detail::find_variable_name_strings(atermpp::make_list(lps::linear_process_to_aterm(p), lps::linear_process_to_aterm(q)));
+        variable_list e1_new = data::convert< variable_list >(fresh_variables(e1, used_names));
+        data_expression    cj_new = mcrl2::data::make_double_sequence_substitution_adaptor(e1, e1_new)(cj);
+        data_expression_list gj_new = mcrl2::data::make_double_sequence_substitution_adaptor(e1, e1_new)(gj);
 
-        pbes_expression expr = exists(e1_new, and_(cj_new, var(Y2(p, q, i), d + gj_new)));
+        pbes_expression expr = pbes_expr::exists(e1_new, and_(cj_new, var(Y2(p, q, i), d + gj_new)));
         v.push_back(expr);
       }
       return or_(var(X(p, q), d + d1), join_or(v.begin(), v.end()));
@@ -680,38 +693,40 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     pbes<> run(const specification& model, const specification& spec)
     {
       using namespace pbes_expr_optimized;
+      data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
+      specification spec1 = spec;
+      lps::substitute(spec1, sigma, true);
       const linear_process& m = model.process();
-      linear_process s = resolve_name_clashes(m, spec.process());
+      const linear_process& s = spec1.process();
       init(m, s);
 
-      const data_variable_list& d  = m.process_parameters();
-      const data_variable_list& d1 = s.process_parameters();
+      variable_list const& d  = m.process_parameters();
+      variable_list const& d1 = s.process_parameters();
       atermpp::vector<pbes_equation> equations;
-
 
       // E1
       equations.push_back(pbes_equation(nu(), propositional_variable(X(m, s), d + d1), and_(match(m, s), match(s, m))));
       equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
 
       // E2
-      for (my_iterator i = m.non_delta_summands().begin(); i != m.non_delta_summands().end(); ++i)
+      for (my_iterator i = m.action_summands().begin(); i != m.action_summands().end(); ++i)
       {
-        const data_variable_list& e  = i->summation_variables();
+        variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y1(m, s, i), d + d1 + e), close1(m, s, i));
-        pbes_equation e2(mu(), propositional_variable(Y2(m, s, i), d + d1), close2(m, s, i, make_data_expression_list(d), make_data_expression_list(d1)));
+        pbes_equation e2(mu(), propositional_variable(Y2(m, s, i), d + d1), close2(m, s, i, data_expression_list(d.begin(), d.end()), data_expression_list(d1.begin(), d1.end())));
         equations.push_back(e1);
         equations.push_back(e2);
       }
-      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      for (my_iterator i = s.action_summands().begin(); i != s.action_summands().end(); ++i)
       {
-        const data_variable_list& e  = i->summation_variables();
+        variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y1(s, m, i), d1 + d + e), close1(s, m, i));
-        pbes_equation e2(mu(), propositional_variable(Y2(s, m, i), d1 + d), close2(s, m, i, make_data_expression_list(d1), make_data_expression_list(d)));
+        pbes_equation e2(mu(), propositional_variable(Y2(s, m, i), d1 + d), close2(s, m, i, data_expression_list(d1.begin(), d1.end()), data_expression_list(d.begin(), d.end())));
         equations.push_back(e1);
         equations.push_back(e2);
       }
 
-      return build_pbes(equations, model, set_lps(spec, s));
+      return build_pbes(equations, model, spec1);
     }
 };
 
@@ -739,12 +754,15 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
     pbes<> run(const specification& model, const specification& spec)
     {
       using namespace pbes_expr_optimized;
+      data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
+      specification spec1 = spec;
+      lps::substitute(spec1, sigma, true);
       const linear_process& m = model.process();
-      linear_process s = resolve_name_clashes(m, spec.process());
+      const linear_process& s = spec1.process();
       init(m, s);
 
-      const data_variable_list& d  = m.process_parameters();
-      const data_variable_list& d1 = s.process_parameters();
+      variable_list const& d  = m.process_parameters();
+      variable_list const& d1 = s.process_parameters();
       atermpp::vector<pbes_equation> equations;
 
 
@@ -753,20 +771,20 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
       equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
 
       // E2
-      for (my_iterator i = m.non_delta_summands().begin(); i != m.non_delta_summands().end(); ++i)
+      for (my_iterator i = m.action_summands().begin(); i != m.action_summands().end(); ++i)
       {
-        const data_variable_list& e  = i->summation_variables();
+        variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(m, s, i), d + d1 + e), close(m, s, i));
         equations.push_back(e1);
       }
-      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      for (my_iterator i = s.action_summands().begin(); i != s.action_summands().end(); ++i)
       {
-        const data_variable_list& e  = i->summation_variables();
+        variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(s, m, i), d1 + d + e), close(s, m, i));
         equations.push_back(e1);
       }
 
-      return build_pbes(equations, model, set_lps(spec, s));
+      return build_pbes(equations, model, spec1);
     }
 };
 

@@ -12,6 +12,8 @@
 #ifndef MCRL2_UTILITIES_INPUT_OUTPUT_TOOL_H
 #define MCRL2_UTILITIES_INPUT_OUTPUT_TOOL_H
 
+#include <sstream>
+//#include "mcrl2/core/text_utility.h"
 #include "mcrl2/utilities/input_tool.h"
 
 namespace mcrl2 {
@@ -38,15 +40,37 @@ namespace tools {
         }
       }
 
+      /// \brief Returns the synopsis of the tool.
+      /// \return The string "[OPTION]... [INFILE [OUTFILE]]\n"
+      std::string synopsis() const
+      {
+        return "[OPTION]... [INFILE [OUTFILE]]\n";
+      }
+
       /// \brief Parse non-standard options
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
       {
-      	input_tool::parse_options(parser);
+        input_tool::parse_options(parser);
         if (1 < parser.arguments.size())
         {
           m_output_filename = parser.arguments[1];
         }
+      }
+
+      /// \brief Returns a message about the output filename
+      std::string output_file_message() const
+      {
+        std::ostringstream out;
+        out << "Output written to " << ((m_output_filename.empty())? "standard output" : ("'" + m_output_filename + "'"));
+        return out.str();
+      }
+
+      /// \brief Adds a message about input and output files to the given description.
+      std::string make_tool_description(const std::string& description) const
+      {
+        // return core::word_wrap_text(description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.");
+        return description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.";
       }
 
     public:
@@ -55,9 +79,9 @@ namespace tools {
                  const std::string& author,
                  const std::string& what_is,
                  const std::string& tool_description,
-                 std::string synopsis = "[OPTION]... [INFILE [OUTFILE]]\n"
+                 std::string known_issues = ""
                 )
-        : input_tool(name, author, what_is, tool_description, synopsis)
+        : input_tool(name, author, what_is, tool_description, known_issues)
       {
       }
 

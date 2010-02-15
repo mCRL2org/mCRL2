@@ -8,6 +8,10 @@
 //
 // Implements the ReferenceState class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include <wx/tokenzr.h>
 
 #include "referencestate.h"
@@ -118,4 +122,4 @@ wxString reference_state::get_text() const
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_reference_state );
+WX_DEFINE_OBJARRAY( arr_reference_state )

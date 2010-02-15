@@ -11,8 +11,8 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id$
-// $Date: 2008-10-10 12:48:48 +0200 (Fri, 10 Oct 2008) $
-// $Revision: 49246 $
+// $Date: 2009-05-22 22:07:55 +0200 (Fri, 22 May 2009) $
+// $Revision: 53189 $
 
 #if !defined(BOOST_MPL_CFG_COMPILER_DIR)
 
@@ -35,7 +35,7 @@
 #   elif BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x610))
 #       if !defined(BOOST_MPL_CFG_NO_DEFAULT_PARAMETERS_IN_NESTED_TEMPLATES)
 #           define BOOST_MPL_CFG_COMPILER_DIR bcc551
-#       elseif BOOST_WORKAROUND(__BORLANDC__, >= 0x590)
+#       elif BOOST_WORKAROUND(__BORLANDC__, >= 0x590)
 #           define BOOST_MPL_CFG_COMPILER_DIR bcc
 #       else
 #           define BOOST_MPL_CFG_COMPILER_DIR bcc_pre590

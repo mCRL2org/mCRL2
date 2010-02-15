@@ -12,6 +12,9 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/aterm_make.h"
 
 using namespace std;
 using namespace atermpp;

@@ -91,7 +91,7 @@ namespace tipi {
             }
 
             /** \brief Gets the category */
-            inline tipi::tool::category get_category() const {
+            inline tipi::tool::category const& get_category() const {
               return m_category;
             }
 

@@ -6,7 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "colorbutton.h"
+#include "wx.hpp" // precompiled headers
+
+#include "mcrl2/utilities/colorbutton.h"
 
 namespace mcrl2 {
   namespace utilities {

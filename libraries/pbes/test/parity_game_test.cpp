@@ -11,10 +11,11 @@
 /// testing is done. Instead graph representations are produced
 /// in a format that can be read by a python script.
 
-// #define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-
-// #define MCRL2_PARITY_GAME_DEBUG
-// #define MCRL2_PARITY_GAME_CREATE_FILES
+//#define MCRL2_PARITY_GAME_DEBUG
+//#define MCRL2_PARITY_GAME_CREATE_FILES
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
 #include <fstream>
 #include <string>
@@ -22,7 +23,8 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
-#include "gc.h" // ATerm Library garbage collector
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
@@ -107,11 +109,70 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
     to << text << std::endl;
 #endif
   }
+  core::garbage_collect();
 }
 
-// This test fails on several platforms (in debug mode). It looks like
-// a garbage collection issue.
-void test_parity_game_generator()
+std::string PBES1 =
+  "pbes mu X(m: Nat) =                          \n"
+  "       forall n: Nat. val(!(n < 3)) && X(n); \n"
+  "                                             \n"
+  "init X(0);                                   \n"
+  ;
+
+std::string PBES2 =
+  "pbes                                                 \n"
+  "mu X(m:Nat) = !(exists n:Nat.(val(n < 3) || !X(n))); \n"
+  "                                                     \n"
+  "init X(0);                                           \n"
+  ;
+
+std::string PBES3 =
+  "pbes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          \n"
+  "nu X0 = ((!(forall m:Nat.((val(m < 3)) && (!X2(m + 1, 0))))) || (((forall k:Nat.((val(k < 3)) && (val(k < 2)))) || (exists n:Nat.((val(n < 3)) || (val(n < 2))))) || ((val(true)) => (exists k:Nat.((val(k < 3)) || (exists m:Nat.((val(m < 3)) || (forall k:Nat.((val(k < 3)) && (X4(1, m + 1))))))))))) && ((!(exists n:Nat.((val(n < 3)) || (exists k:Nat.((val(k < 3)) || (val(false))))))) || (forall n:Nat.((val(n < 3)) && (exists n:Nat.((val(n < 3)) || (forall m:Nat.((val(m < 3)) && (exists k:Nat.((val(k < 3)) || (X3)))))))))); \n"
+  "mu X1(b:Bool) = ((exists m:Nat.((val(m < 3)) || (val(b)))) => ((val(false)) || (X3))) && (forall k:Nat.((val(k < 3)) && ((((val(k > 1)) => (X1(k > 1))) && (val(false))) && (exists k:Nat.((val(k < 3)) || (X4(k + 1, k + 1)))))));                                                                                                                                                                                                                                                                                                           \n"
+  "mu X2(n:Nat, m:Nat) = ((exists k:Nat.((val(k < 3)) || (!(val(n < 2))))) && ((X3) || ((forall k:Nat.((val(k < 3)) && (!((val(m < 3)) || (val(m == k)))))) || (!((X0) => (!X4(n + 1, 1))))))) && (exists n:Nat.((val(n < 3)) || (forall m:Nat.((val(m < 3)) && (exists k:Nat.((val(k < 3)) || (val(k < 3))))))));                                                                                                                                                                                                                               \n"
+  "mu X3 = ((val(true)) || (X3)) || (!((forall n:Nat.((val(n < 3)) && (!((val(true)) || ((!(val(n > 1))) && ((X1(n < 3)) || (val(n > 1)))))))) && (forall n:Nat.((val(n < 3)) && (exists m:Nat.((val(m < 3)) || (!X0)))))));                                                                                                                                                                                                                                                                                                                     \n"
+  "mu X4(n:Nat, m:Nat) = ((((forall m:Nat.((val(m < 3)) && ((val(m < 2)) || (val(n < 2))))) => (X1(true))) || (forall m:Nat.((val(m < 3)) && (exists m:Nat.((val(m < 3)) || (val(n > 0))))))) || (forall n:Nat.((val(n < 3)) && ((!(forall n:Nat.((val(n < 3)) && (!X4(0, 1))))) || (forall k:Nat.((val(k < 3)) && (val(true)))))))) || (exists m:Nat.((val(m < 3)) || (forall n:Nat.((val(n < 3)) && (!(!X0))))));                                                                                                                              \n"
+  "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              \n"
+  "init X0;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \n"
+  ;
+
+// mimick the way parity_game_generator is used in parity game solver from Twente
+void test_pbespgsolve(std::string pbes_spec)
+{
+  pbes_system::pbes<> p = pbes_system::txt2pbes(pbes_spec);
+  pbes_system::parity_game_generator pgg(p, true, true);
+  unsigned int begin = 0;
+  unsigned int end = 3;
+  for (unsigned int v = begin; v < end; ++v)
+  {
+    std::set<unsigned> deps = pgg.get_dependencies(v);
+    for (std::set<unsigned>::const_iterator it = deps.begin(); it != deps.end(); ++it )
+    {
+      unsigned int w = *it;
+      assert(w >= begin);
+      if (w >= end)
+      {
+      	end = w + 1;
+      }
+      // edges.push_back(std::make_pair(v - begin, w - begin));
+    }
+
+    int max_prio = 0;                                                        
+    for (unsigned int v = begin; v < end; ++v)                                      
+    {                                                                        
+      max_prio = (std::max)(max_prio, (int)pgg.get_priority(v));             
+    }                                                                        
+                                                                             
+    for (unsigned int v = begin; v < end; ++v)                                      
+    {                                                                        
+      bool and_op = pgg.get_operation(v) == mcrl2::pbes_system::parity_game_generator::PGAME_AND;
+      pgg.get_priority(v);                   
+    }                                                                        
+  }
+}
+
+void test_one_bit_sliding_window()
 {
   std::string spec_text =
     "% This file describes the onebit sliding window protocol as documented     \n"
@@ -176,7 +237,7 @@ void test_parity_game_generator()
     "                 Tim||                                                     \n"
     "                 C(frame(d1,e0,e0) ,read)))))));                           \n"
     ;
-  
+
   std::string formula_text = "nu X. <true>true && [true]X";
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec_text, formula_text, timed);
@@ -194,10 +255,17 @@ void test_bes_examples()
   test_bes(BES6, "parity_game_test_bes6.pg", true);
   test_bes(BES7, "parity_game_test_bes7.pg", false);
   test_bes(BES8, "parity_game_test_bes8.pg", true);
+  //test_bes(PBES1, "parity_game_test_bes8.pg", true);
 }
 
-// Another test example from Maks Verver that triggers a garbage collection problem.
-void test_parity_game_generator2()
+void test_pbespgsolve()
+{
+  test_pbespgsolve(PBES1);
+  test_pbespgsolve(PBES2);
+  test_pbespgsolve(PBES3);
+}
+
+void test_abp()
 {
   using namespace pbes_system;
 
@@ -240,48 +308,49 @@ void test_parity_game_generator2()
     "    )                                                                      \n"
     "  );                                                                       \n"
     ;
-    
+
   std::string NODEADLOCK = "[true*]<true>true";
 
-  pbes<> pbes = lps2pbes(ABP, NODEADLOCK, true);
-                                                                                
+  bool timed = false;
+  pbes<> pbes = lps2pbes(ABP, NODEADLOCK, timed);
+
   // Generate min-priority parity game
   mcrl2::pbes_system::parity_game_generator pgg(pbes, true, true);
 
   // Build the edge list
-  typedef unsigned int verti;
-  verti num_vertices = 1 + *pgg.get_initial_values().rbegin();
-  for (verti v = 0; v < num_vertices; ++v)
+  unsigned int num_vertices = 1 + *pgg.get_initial_values().rbegin();
+  for (unsigned int v = 0; v < num_vertices; ++v)
   {
       std::set<unsigned> deps = pgg.get_dependencies(v);
       for ( std::set<unsigned>::const_iterator it = deps.begin();
             it != deps.end(); ++it )
       {
-          verti w = (verti)*it;
+          unsigned int w = (unsigned int)*it;
           if (w >= num_vertices) num_vertices = w + 1;
           printf("%6d -> %6d\n", v, w);
       }
   }
 
-AT_collect();
-
   // Find vertex properties
-  for (verti v = 0; v < num_vertices; ++v)
+  for (unsigned int v = 0; v < num_vertices; ++v)
   {
       bool and_op = pgg.get_operation(v) ==
                     mcrl2::pbes_system::parity_game_generator::PGAME_AND;
       int priority = pgg.get_priority(v);
       printf("%6d: player=%d priority=%d\n", v, and_op, priority);
   }
+  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_parity_game_generator2();
-  // test_parity_game_generator();
+  pbes_system::set_parity_game_generator_log_level(2);
   test_bes_examples();
+  test_pbespgsolve();
+  // test_one_bit_sliding_window();
+  test_abp();
 
   return 0;
 }

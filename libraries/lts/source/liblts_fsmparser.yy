@@ -8,6 +8,8 @@
 
 %{
 #include <vector>
+#include <sstream>
+#include <cstring>
 #include "mcrl2/lts/lts.h"
 #include "liblts_fsmparser.h"
 #include "liblts_fsmlexer.h"
@@ -32,6 +34,9 @@ char* intToCString(int i);
   ATermAppl aterm;
   int number;
 }
+
+//more verbose and specific error messages
+%error-verbose
 
 //set name prefix
 %name-prefix="fsmyy"

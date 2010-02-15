@@ -2,15 +2,18 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
 
 void rewrite1()
 {
-  rewriter r = default_data_rewriter();
+  data_specification data_spec;
+  data_spec.add_context_sort(sort_nat::nat());
+  rewriter r(data_spec);
 
   // Rewrite two data expressions, and check if they are the same
   data_expression d1 = parse_data_expression("2+7");
@@ -21,14 +24,16 @@ void rewrite1()
 
 void rewrite2()
 {
-  rewriter r = default_data_rewriter();
+  data_specification data_spec;
+  data_spec.add_context_sort(sort_nat::nat());
+  rewriter r(data_spec);
 
   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
   std::string var_decl = "m, n: Pos;\n";
-  atermpp::map<data_variable, data_expression> substitutions;
+  atermpp::map<variable, data_expression> substitutions;
   substitutions[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
   substitutions[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
-  map_substitution<atermpp::map<data_variable, data_expression> > sigma(substitutions);
+  map_substitution<atermpp::map<variable, data_expression> > sigma(substitutions);
 
   // Rewrite two data expressions, and check if they are the same
   data::data_expression d1 = parse_data_expression("m+n", var_decl);
@@ -45,37 +50,3 @@ int main(int argc, char* argv[])
 
   return 0;
 }
-
-/*--- unfortunately this doesn't work yet ---
-struct substitution_function
-{
-  const std::map<data::data_variable, data::data_expression>& s;
-
-  substitution_function(const std::map<data::data_variable, data::data_expression>& s_)
-    : s(s_)
-  {}
-
-  data::data_expression operator()(data::data_variable v) const
-  {
-    std::map<data::data_variable, data::data_expression>::const_iterator i = s.find(v);
-    return i == s.end() ? v : i->second;
-  }
-};
-
-void rewrite2()
-{
-  rewriter r = default_data_rewriter();
-
-  // Create a substitution function sigma
-  std::string var_decl = "var m, n: Pos;\n";
-  std::map<data::data_variable, data::data_expression> m;
-  m[parse_data_expression("m", var_decl)] = parse_data_expression("3");
-  m[parse_data_expression("n", var_decl)] = parse_data_expression("4");
-  substitution_function sigma(m);
-
-  // Rewrite two data expressions, and check if they are the same
-  data::data_expression d1 = r(parse_data_expression("m+n", var_decl), sigma);
-  data::data_expression d2 = r(parse_data_expression("7", var_decl), sigma);
-  assert(r(d1) == r(d2));
-}
-*/

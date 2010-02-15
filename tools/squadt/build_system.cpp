@@ -40,11 +40,50 @@ inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
  **/
 namespace squadt {
   void build_system::default_tool_collection(tool_manager& m) const {
-    static char const* default_tools[] = { "chi2mcrl2", "diagraphica.app",
-      "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst", "lpsrewr",
-      "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm",
-      "ltsconvert", "ltsinfo", "ltsgraph.app", "ltsview.app", "mcrl22lps",
-      "pbes2bool", "pnml2mcrl2", "xsim.app", 0 };
+    static char const* default_tools[] = {
+      // The following lists all release tools, in which the ones without
+      // squadt interface have been commented out.
+      // (Last update: 13/2/2010)
+      "chi2mcrl2",
+      "diagraphica.app",
+      //"formulacheck",
+      //"grape",
+      "lps2lts",
+      "lps2pbes",
+      //"lps2torx",
+      "lpsactionrename",
+      "lpsbinary",
+      //"lpsconfcheck",
+      "lpsconstelm",
+      "lpsinfo",
+      //"lpsinvelm",
+      "lpsparelm",
+      //"lpsparunfold",
+      //"lpspp",
+      "lpsrewr",
+      "lpssumelm",
+      "lpssuminst",
+      "lpsuntime",
+      //"ltscompare",
+      "ltsconvert",
+      "ltsgraph.app",
+      "ltsinfo",
+      "ltsview.app",
+      //"lysa2mcrl2",
+      "mcrl22lps",
+      //"mcrl2i",
+      "pbes2bool",
+      "pbesconstelm",
+      "pbesparelm",
+      //"pbespp",
+      "pbesrewr",
+      "pnml2mcrl2",
+      //"tbf2lps",
+      //"tracepp",
+      //"txt2lps",
+      //"txt2pbes",
+      "xsim.app",
+      0 };
 
     using boost::filesystem::basename;
     using boost::filesystem::path;

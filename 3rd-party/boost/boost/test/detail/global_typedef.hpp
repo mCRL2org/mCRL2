@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50358 $
+//  Version     : $Revision: 54633 $
 //
 //  Description : some trivial global typedefs
 // ***************************************************************************

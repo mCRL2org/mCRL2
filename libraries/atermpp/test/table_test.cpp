@@ -16,7 +16,8 @@
 #include <boost/test/minimal.hpp>
 
 #include <map>
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/atermpp/indexed_set.h"
 

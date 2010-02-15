@@ -1,6 +1,8 @@
 #include <cassert>
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::data;
 
@@ -8,7 +10,9 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  rewriter r = default_data_rewriter();
+  data_specification data_spec;
+  data_spec.add_context_sort(sort_nat::nat());
+  rewriter r(data_spec);
 
   // Rewrite two data expressions, and check if they are the same
   data_expression d1 = parse_data_expression("2+7");

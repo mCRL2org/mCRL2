@@ -13,7 +13,7 @@
 #ifndef BOOST_TWO_BIT_COLOR_MAP_HPP
 #define BOOST_TWO_BIT_COLOR_MAP_HPP
 
-#include <boost/property_map.hpp>
+#include <boost/property_map/property_map.hpp>
 #include <boost/shared_array.hpp>
 #include <algorithm>
 
@@ -91,3 +91,7 @@ make_two_bit_color_map(std::size_t n, const IndexMap& index_map)
 } // end namespace boost
 
 #endif // BOOST_TWO_BIT_COLOR_MAP_HPP
+
+#ifdef BOOST_GRAPH_USE_MPI
+#  include <boost/graph/distributed/two_bit_color_map.hpp>
+#endif

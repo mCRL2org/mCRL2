@@ -22,6 +22,7 @@
 #include "boost/algorithm/string.hpp"
 #include "boost/type_traits/is_pod.hpp"
 #include "boost/shared_ptr.hpp"
+#include "mcrl2/utilities/toolset_revision.h"
 
 namespace mcrl2 {
   namespace utilities {
@@ -43,9 +44,6 @@ namespace mcrl2 {
     namespace detail {
       template < typename T >
       struct initialiser;
-
-      void register_rewriting_options(interface_description&);
-      void register_proving_options(interface_description&);
 
       /// Helper class to prevent uninitialised variable warnings
       template < typename T, bool = boost::is_pod< T >::value >
@@ -107,8 +105,6 @@ namespace mcrl2 {
      *   add_option("timeout", make_optional_argument("SEC", "2"), "option with optional argument (default 2)").
      *   add_option("tool", make_mandatory_argument("FOO"), "option with mandatory argument").
      *   add_option("language", make_mandatory_argument("LANG", "english"), "option with mandatory argument (default english)").
-     *   add_rewriting_options().
-     *   add_prover_options();
      * \endcode
      *
      * Printing an interface description.
@@ -139,7 +135,7 @@ namespace mcrl2 {
 
         Report bugs at <http://www.mcrl2.org/issuetracker>.
 
-        See also the manual at <http://www.mcrl2.org/wiki/index.php/demo-tool>.
+        See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/demo-tool>.
        \endverbatim
      * Printing version information.
      *
@@ -348,6 +344,13 @@ namespace mcrl2 {
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&, std::string const&);
 
+      template < typename ArgumentType >
+      friend optional_argument< ArgumentType >  make_optional_argument(std::string const&, std::string const&);
+      template < typename ArgumentType >
+      friend mandatory_argument< ArgumentType > make_mandatory_argument(std::string const&);
+      template < typename ArgumentType >
+      friend mandatory_argument< ArgumentType > make_mandatory_argument(std::string const&, std::string const&);
+
         typedef std::map< std::string, option_descriptor > option_map;
 
         typedef std::map< const char,  std::string, option_identifier_less > short_to_long_map;
@@ -402,24 +405,6 @@ namespace mcrl2 {
 
         option_descriptor const& find_option(std::string const& long_identifier) const;
 
-        /**
-         * \brief adds a hidden option
-         * \see add_option(std::string const&, basic_argument const& std::string const&, char const)
-         **/
-        void add_hidden_option(
-                        std::string const& long_identifier,
-                        basic_argument const& argument_specification,
-                        std::string const& description,
-                        char const short_identifier = '\0');
-
-        /**
-         * \brief adds a hidden option
-         * \see add_option(std::string const&, std::string const&, char const)
-         **/
-        void add_hidden_option(std::string const& long_identifier,
-                               std::string const& description,
-                               char const short_identifier = '\0');
-
         /// \brief Stores a sequence of actions that automatically add options (used in constructor)
         static interface_description& get_standard_description();
 
@@ -439,13 +424,6 @@ namespace mcrl2 {
         /// \brief Internal use only
         inline interface_description() {
         }
-
-        /**
-         * \brief Returns the text of a wiki page
-         * \param[in] revision the revision tag used in the heading of the man page
-         * \return string containing a man page description of the interface
-         **/
-        std::string wiki_page() const;
 
       public:
 
@@ -502,12 +480,15 @@ namespace mcrl2 {
          * Adds an option identified by a long-identifier with an argument to
          * the interface. The argument to the option is either optional, or
          * mandatory. In the former case a default value is assumed when the
-         * option is found on a command line command.
+         * option is found on a command line command. Method parameters:
          *
          * \param[in] long_identifier the long option representation of the option
          * \param[in] argument_specification a mandatory or optional argument to the option
          * \param[in] description description of the option
          * \param[in] short_identifier an optional single-character short representation of the option
+         *
+         * the type parameter T represents is type of the argument. That is the
+         * argument to the option must be convertible (using <<) to T. 
          *
          * The argument_specification parameter is an object of a class derived
          * from basic_argument. Appropriate argument specification objects can
@@ -551,10 +532,18 @@ namespace mcrl2 {
              -tSEC, --timeout=SEC        timeout occurs after SEC number of seconds
              -rDEPTH, --recursive=[DEPTH]  stop at recursion level DEPTH (default 2) \endverbatim
          **/
+        template < typename T >
         interface_description& add_option(std::string const& long_identifier,
-                                          basic_argument const& argument_specification,
+                                          typed_argument< T > const& argument_specification,
                                           std::string const& description,
-                                          char const short_identifier = '\0');
+                                          char const short_identifier = '\0') {
+
+          add_option(long_identifier, description, short_identifier);
+
+          m_options.find(long_identifier)->second.set_argument(argument_specification.clone());
+
+          return *this;
+        }
 
         /**
          * \brief Adds an option identified by a long-identifier to the interface
@@ -589,28 +578,58 @@ namespace mcrl2 {
          **/
         interface_description& add_option(std::string const& long_identifier,
                                           std::string const& description,
-                                          char const short_identifier = '\0');
+                                          char const short_identifier = '\0') {
 
-        /**
-         * \brief Adds options for the rewriter
-         * Adds a single option called `rewrite' with a mandatory argument.
-         * \return *this
-         **/
-        interface_description& add_rewriting_options() {
-          detail::register_rewriting_options(*this);
+          if (m_options.find(long_identifier) != m_options.end()) {
+            throw std::logic_error("Duplicate long option (--" + long_identifier + "); this is a serious program error!");
+          }
+
+          if (short_identifier != '\0') {
+            if (m_short_to_long.find(short_identifier) != m_short_to_long.end()) {
+              throw std::logic_error("Duplicate short option (-" + std::string(1, short_identifier) + "); this is a serious program error!");
+            }
+
+            m_short_to_long[short_identifier] = long_identifier;
+          }
+
+          m_options.insert(std::make_pair(long_identifier, option_descriptor(long_identifier, description, short_identifier)));
 
           return *this;
         }
 
         /**
-         * \brief Adds options for the prover
-         * Adds a single option called `smt-solver' with a mandatory argument.
-         * \return *this
+         * \brief adds a hidden option
+         *
+         * A hidden option is not advertised as being part of the interface.
+         * As a consequence the result of class methods such as textual_description,
+         * man_page and wiki_page will not contain information about these options.
+         *
+         * \see add_option(std::string const&, basic_argument const& std::string const&, char const)
          **/
-        interface_description& add_prover_options() {
-          detail::register_proving_options(*this);
+        template < typename T >
+        void add_hidden_option(
+                        std::string const& long_identifier,
+                        typed_argument< T > const& argument_specification,
+                        std::string const& description,
+                        char const short_identifier = '\0') {
 
-          return *this;
+          add_option(long_identifier, argument_specification, description, short_identifier);
+
+          m_options.find(long_identifier)->second.m_show = false;
+       }
+
+        /**
+         * \brief adds a hidden option
+         * \see add_hidden_option(std::string const&, basic_argument const& std::string const&, char const)
+         * \see add_option(std::string const&, std::string const&, char const)
+         **/
+        void add_hidden_option(std::string const& long_identifier,
+                               std::string const& description,
+                               char const short_identifier = '\0') {
+
+          add_option(long_identifier, description, short_identifier);
+
+          m_options.find(long_identifier)->second.m_show = false;
         }
 
         /**
@@ -624,6 +643,13 @@ namespace mcrl2 {
          * \return string containing a man page description of the interface
          **/
         std::string man_page() const;
+
+        /**
+         * \brief Returns the text of a wiki page
+         * \param[in] revision the revision tag used in the heading of the man page
+         * \return string containing a man page description of the interface
+         **/
+        std::string wiki_page() const;
     };
 
     /**
@@ -854,14 +880,102 @@ namespace mcrl2 {
     };
 
     /// Creates an optional option argument specification object
+    template < typename ArgumentType >
+    interface_description::optional_argument< ArgumentType > make_optional_argument(std::string const& name, std::string const& default_value) {
+      return interface_description::optional_argument< ArgumentType >(name, default_value);
+    }
+
+    /** \brief Creates an optional option argument specification object
+     *
+     * Creates an object that specifies an option with an optional typed argument.
+     * The default value is automatically substituted when the user specifies
+     * the option but does not specify an option argument.
+     *
+     * \param[in] name a placeholder for referencing the argument in textual descriptions
+     * \param[in] default_value the default value
+     * \return a basic_argument derived object that represents an untyped optional option argument
+     *
+     * The following example demonstrates the effect of an option with optional argument:
+     * \code
+     *  add_option("recursive", make_optional_argument("DEPTH", "2"),
+     *                         "stop at recursion level DEPTH (default 2)", 'r');
+     * \endcode
+     * The result is a command line interface with parsing behaviour:
+     * \verbatim
+       tool                     (effect: options("recursive").count() == 0)
+       tool --recursive         (effect: options("recursive").count() == 1 && option_argument("recursive") == 2)
+       tool -r                  (effect: options("recursive").count() == 1 && option_argument("recursive") == 2)
+       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+     */
     interface_description::optional_argument< std::string > make_optional_argument(std::string const& name, std::string const& default_value);
 
     /// Creates a mandatory option argument specification object
-    interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name);
+    template < typename ArgumentType >
+    interface_description::mandatory_argument< ArgumentType > make_mandatory_argument(std::string const& name) {
+      return interface_description::mandatory_argument< ArgumentType >(name);
+    }
 
-    /// Creates a mandatory option argument specification object
-    interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name, std::string const& standard_value);
+    /**
+     * Creates an object that specifies an option with a mandatory argument.
+     * Specifying the option in a command also requires specification of an
+     * option argument.
+     *
+     * \param[in] name a placeholder for referencing the argument in textual descriptions
+     * \return a basic_argument derived object that represents an untyped mandatory option argument
+     *
+     * The following example demonstrates the effect of an option with optional argument:
+     * \code
+     *  add_option("recursive", make_mandatory_argument("DEPTH"),
+     *                         "stop at recursion level DEPTH", 'r');
+     * \endcode
+     * The result is a command line interface with parsing behaviour:
+     * \verbatim
+       tool                     (effect: options("recursive").count() == 0)
+       tool --recursive         (effect: parsing fails)
+       tool -r                  (effect: parsing fails)
+       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+     **/
+    interface_description::mandatory_argument< std::string >
+         make_mandatory_argument(std::string const& name);
 
+    /** \brief Creates a mandatory typed option argument specification object
+     *
+     * \see make_mandatory_argument(std::string const&)
+     **/
+    template < typename ArgumentType >
+    interface_description::mandatory_argument< ArgumentType >
+    make_mandatory_argument(std::string const& name, std::string const& standard_value) {
+      return interface_description::mandatory_argument< ArgumentType >(name, standard_value);
+    }
+
+    /**
+     * Creates an object that specifies an option with a mandatory argument.
+     * Specifying the option in a command also requires specification of an
+     * option argument. The default value is substituted by the
+     * option_argument() and option_argument_as() methods when the option is
+     * not part of the parsed command.
+     *
+     * \param[in] name a placeholder for referencing the argument in textual descriptions
+     * \return a basic_argument derived object that represents an untyped mandatory option argument
+     *
+     * The following example demonstrates the effect of an option with optional argument:
+     * \code
+     *  add_option("recursive", make_mandatory_argument("DEPTH", "2"),
+     *                         "stop at recursion level DEPTH (default 2)", 'r');
+     * \endcode
+     * The result is a command line interface with parsing behaviour:
+     * \verbatim
+       tool                     (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
+       tool --recursive         (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
+       tool -r                  (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
+       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+     *
+     **/
+    interface_description::mandatory_argument< std::string >
+      make_mandatory_argument(std::string const& name, std::string const& standard_value);
     /// \cond INTERNAL
 
     /**
@@ -1015,7 +1129,7 @@ namespace mcrl2 {
         }
       };
 
-      static bool initialised = initialiser< void >::set_revision(MCRL2_REVISION);
+      static bool initialised = initialiser< void >::set_revision(get_toolset_revision());
     }
 
     template <>

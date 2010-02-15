@@ -12,18 +12,23 @@
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
@@ -70,7 +75,7 @@ struct compare_variable
 {
   aterm d;
 
-  compare_variable(data_variable d_)
+  compare_variable(variable d_)
     : d(d_)
   {}
 
@@ -80,61 +85,76 @@ struct compare_variable
   }
 };
 
-bool occurs_in(data_expression d, data_variable v)
+bool occurs_in(data_expression d, variable v)
 {
   return find_if(aterm_appl(d), compare_variable(v)) != aterm_appl();
 }
 
-inline
-bool is_variable(aterm t)
-{
-  return t.type() == AT_APPL && is_data_variable(aterm_appl(t));
-};
-
 /// Search for a data variable in the term t. Precondition: t must contain
 /// at least one variable.
 template <typename Term>
-data_variable find_variable(Term t)
+variable find_variable(Term t)
 {
-  aterm_appl result = atermpp::find_if(t, is_variable);
+  aterm_appl result = atermpp::find_if(t, data::is_variable);
   assert((result)); // check if a variable has been found
   return result;
 }
 
 void test_find_variable()
 {
-  data_variable d("d:D");
-  data_variable e("e:E");
-  data_expression d_e = and_(d, e);
-  data_variable v = find_variable(d_e);
+  variable d("d", basic_sort("D"));
+  variable e("e", basic_sort("E"));
+  data_expression d_e = sort_bool::and_(d, e);
+  variable v = find_variable(d_e);
   BOOST_CHECK(v == d);
+}
+
+// insert elements of a container of type D into a container of type C
+template < typename C, typename D >
+void insert(C& c, D const& d) {
+  c.insert(d.begin(), d.end());
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  struct local {
+    static bool is_exists(atermpp::aterm_appl const& p) {
+      return data::is_abstraction(p) && mcrl2::data::abstraction(p).is_exists();
+    }
+  };
+
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test_find_variable();
+  core::garbage_collect();
 
-  specification spec = mcrl22lps(SPECIFICATION);
+  specification spec = linearise(SPECIFICATION);
   linear_process lps = spec.process();
 
   // find all action labels in lps
   std::set<action_label> labels;
-  find_all_if(lps, is_action_label, inserter(labels, labels.end()));
+  find_all_if(linear_process_to_aterm(lps), is_action_label, inserter(labels, labels.end()));
+
+  core::garbage_collect();
 
   // find all data variables in lps
-  std::set<data_variable> variables;
-  find_all_if(lps, is_data_variable, inserter(variables, variables.end()));
+  std::set<variable> variables;
+  find_all_if(linear_process_to_aterm(lps), data::is_variable, inserter(variables, variables.end()));
+
+  core::garbage_collect();
 
   // find all functions in spec
-  std::set<data_operation> functions;
-  find_all_if(spec.data().constructors(), is_data_operation, std::inserter(functions, functions.end()));
-  find_all_if(spec.data().mappings(), is_data_operation, std::inserter(functions, functions.end()));
+  std::set< mcrl2::data::function_symbol > functions;
+  insert(functions, spec.data().constructors());
+  insert(functions, spec.data().mappings());
+
+  core::garbage_collect();
 
   // find all existential quantifications in lps
   std::set<data_expression> existential_quantifications;
-  find_all_if(lps, is_exists, inserter(existential_quantifications, existential_quantifications.end()));
+  find_all_if(linear_process_to_aterm(lps), local::is_exists, inserter(existential_quantifications, existential_quantifications.end()));
+
+  core::garbage_collect();
 
   return 0;
 }

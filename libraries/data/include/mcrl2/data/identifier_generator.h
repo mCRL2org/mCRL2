@@ -15,14 +15,46 @@
 #include <set>
 #include <string>
 #include <sstream>
-#include <boost/format.hpp>
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/core/find.h"
+#include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
 
 namespace data {
+
+/// \brief Identifier generator that generates names with a postfix consisting of a number.
+class number_postfix_generator
+{
+  protected:
+    /// \brief A prefix.
+    std::string m_prefix;
+
+    /// \brief An index.
+    unsigned int m_index;
+  
+  public:
+    /// \brief Constructor.
+    number_postfix_generator()
+      : m_prefix("x"), m_index(0)
+    {}
+
+    /// \brief Constructor.
+    /// \param prefix A string
+    /// \param index A positive integer
+    number_postfix_generator(const std::string& prefix, unsigned int index = 0)
+     : m_prefix(prefix), m_index(index)
+    {}
+
+    /// \brief Generates a fresh identifier that doesn't appear in the context.
+    /// \return A fresh identifier.
+    core::identifier_string operator()()
+    {
+      std::ostringstream out;
+      out << m_prefix << m_index++;
+      return core::identifier_string(out.str());
+    }
+};
 
 /// \brief Abstract base class for identifier generators.
 /// Identifier generators generate fresh names that do not appear in a
@@ -30,6 +62,7 @@ namespace data {
 /// A context is maintained containing already used identifiers.
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers are generated that do not appear in the context.
+template < typename Generator = number_postfix_generator >
 class identifier_generator
 {
   public:
@@ -56,12 +89,23 @@ class identifier_generator
     /// \brief Adds identifiers of term t to the context.
     /// \param t A term
     template <typename Term>
-    void add_to_context(Term t)
+    void add_to_context(Term t, typename detail::disable_if_container< Term >::type* = 0)
     {
-      std::set<core::identifier_string> s = find_identifiers(t);
+      std::set<core::identifier_string> s = core::find_identifiers(t);
       for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
       {
         add_identifier(*i);
+      }
+    }
+
+    /// \brief Adds identifiers of term t to the context.
+    /// \param t A container with terms
+    template < typename Container >
+    void add_to_context(Container const& c, typename detail::enable_if_container< Container >::type* = 0)
+    {
+      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+      {
+        add_to_context(*i);
       }
     }
 
@@ -81,7 +125,7 @@ class identifier_generator
     template <typename Term>
     void remove_from_context(Term t)
     {
-      std::set<core::identifier_string> s = find_identifiers(t);
+      std::set<core::identifier_string> s = core::find_identifiers(t);
       for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
       {
         remove_identifier(*i);
@@ -92,7 +136,7 @@ class identifier_generator
     /// \param s An identifier.
     /// \return True if the identifier appears in the context.
     virtual bool has_identifier(core::identifier_string s) const = 0;
-
+   
     /// \brief Returns a fresh identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
     /// \param hint A string
@@ -100,51 +144,19 @@ class identifier_generator
     virtual core::identifier_string operator()(const std::string& hint)
     {
       core::identifier_string id(hint);
-      int index = 0;
-      while (has_identifier(id))
+
+      if (has_identifier(id))
       {
-        std::ostringstream out;
-        out << hint << index++;
-        std::string name = out.str();
-// TODO: why doesn't this work???
-//        std::string name = str(boost::format(hint + "%02d") % index++);
-        id = core::identifier_string(name);
+        Generator generator(hint);
+
+        while (has_identifier(id))
+        {
+          id = core::identifier_string(generator());
+        }
       }
+
       add_to_context(id);
       return id;
-    }
-};
-
-/// \brief Identifier generator that generates names with a postfix consisting of a number.
-class number_postfix_generator
-{
-  protected:
-    /// \brief A prefix.
-    std::string m_prefix;
-
-    /// \brief An index.
-    unsigned int m_index;
-
-  public:
-    /// \brief Constructor.
-    number_postfix_generator()
-      : m_prefix("x"), m_index(0)
-    {}
-
-    /// \brief Constructor.
-    /// \param prefix A string
-    /// \param index A positive integer
-    number_postfix_generator(const std::string& prefix, unsigned int index = 0)
-     : m_prefix(prefix), m_index(index)
-    {}
-
-    /// \brief Generates a fresh identifier that doesn't appear in the context.
-    /// \return A fresh identifier.
-    core::identifier_string operator()()
-    {
-      std::ostringstream out;
-      out << m_prefix << m_index++;
-      return core::identifier_string(out.str());
     }
 };
 

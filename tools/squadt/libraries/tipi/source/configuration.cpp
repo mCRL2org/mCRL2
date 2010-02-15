@@ -6,11 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
-#include <boost/bind.hpp>
-#include <boost/foreach.hpp>
-#include <boost/filesystem/convenience.hpp>
+#include "boost/bind.hpp"
+#include "boost/filesystem/convenience.hpp"
 
 #include "tipi/configuration.hpp"
 #include "tipi/detail/visitors.hpp"
@@ -147,7 +144,9 @@ namespace tipi {
    * \param r whether or not to replace an existing option with the same id
    **/
   configuration::option& configuration::add_option(std::string const& id, bool r) {
-    assert(m_parameter_by_id.count(id) == 0 || r);
+    if(!(m_parameter_by_id.count(id) == 0 || r)){
+      throw std::runtime_error("Cannot replace an existing option with the same ID");
+    };
 
     if ((m_parameter_by_id.count(id) == 0)) {
       boost::shared_ptr < option > new_option(new option);
@@ -171,7 +170,9 @@ namespace tipi {
    * \param r whether or not to replace an existing option with the same id
    **/
   configuration::option& configuration::add_option(std::string const& id, boost::shared_ptr < option >& o, bool r) {
-    assert(m_parameter_by_id.count(id) == 0 || r);
+    if(!(m_parameter_by_id.count(id) == 0 || r)){
+      throw std::runtime_error("Cannot replace an existing option with the same ID");
+    };
 
     if (m_parameter_by_id.count(id) == 0) {
       m_parameter_by_id[id] = m_positions.size();
@@ -206,7 +207,9 @@ namespace tipi {
    * \pre no object or option is known by this identifier
    **/
   configuration::object& configuration::add_output(std::string const& id, boost::shared_ptr < object >& o) {
-    assert(m_parameter_by_id.count(id) == 0);
+    if(!(m_parameter_by_id.count(id) == 0)){
+      throw std::runtime_error("Empty configuration");
+    };
 
     if (m_parameter_by_id.count(id) == 0) {
       m_parameter_by_id[id] = m_positions.size();
@@ -260,7 +263,7 @@ namespace tipi {
    * \param[in] p the p-th input in the list of positions
    **/
   void configuration::remove_input(size_t p) {
-    for (position_list::iterator i = m_positions.begin(); i != m_positions.end(); ++i) {
+    for (position_list::iterator i = m_positions.begin(), j = i; j++ != m_positions.end(); i = j) {
       if (m_input_objects.count((*i).get()) != 0) {
         if (--p == 0) {
           size_t position = i - m_positions.begin();
@@ -273,9 +276,9 @@ namespace tipi {
 
           m_positions.erase(i);
 
-          for (id_parameter_map::iterator j = m_parameter_by_id.begin(); j != m_parameter_by_id.end(); ++j) {
-            if (position < j->second) {
-              --(j->second);
+          for (id_parameter_map::iterator k = m_parameter_by_id.begin(); k != m_parameter_by_id.end(); ++k) {
+            if (position < k->second) {
+              --(k->second);
             }
           }
         }
@@ -306,7 +309,7 @@ namespace tipi {
    * \param[in] p position in the list of output objects
    **/
   void configuration::remove_output(size_t p) {
-    for (position_list::iterator i = m_positions.begin(); i != m_positions.end(); ++i) {
+    for (position_list::iterator i = m_positions.begin(), j = i; j++ != m_positions.end(); i = j) {
       if (m_output_objects.count((*i).get()) != 0) {
         if (--p == 0) {
           size_t position = i - m_positions.begin();
@@ -319,9 +322,9 @@ namespace tipi {
 
           m_positions.erase(i);
 
-          for (id_parameter_map::iterator j = m_parameter_by_id.begin(); j != m_parameter_by_id.end(); ++j) {
-            if (position < j->second) {
-              --(j->second);
+          for (id_parameter_map::iterator k = m_parameter_by_id.begin(); k != m_parameter_by_id.end(); ++k) {
+            if (position < k->second) {
+              --(k->second);
             }
           }
         }

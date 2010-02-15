@@ -44,7 +44,7 @@ DOF::DOF( const DOF &dof )
 // Copy constructor.
 // ------------------------------------------------------------------
 {
-	index = dof.index;    // index in attribute
+    index = dof.index;    // index in attribute
     label = dof.label;
     /*
     min   = dof.min;
@@ -53,6 +53,7 @@ DOF::DOF( const DOF &dof )
     values = dof.values;
     dir   = dof.dir;
     attr  = dof.attr;
+    textStatus = dof.textStatus;
 }
 
 

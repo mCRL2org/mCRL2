@@ -8,6 +8,10 @@
 //
 // Implements the Channel class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "channel.h"
 #include "compoundreference.h"
 #include "channelcommunication.h"
@@ -142,7 +146,7 @@ void channel::set_enabled( bool p_enabled )
 {
   m_enabled_channel = p_enabled;
 }
-       
+
 channel_type channel::get_channel_type( void ) const
 {
   return m_channel_type;
@@ -155,4 +159,4 @@ void channel::set_channel_type( const channel_type &p_channel_type )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_channel );
+WX_DEFINE_OBJARRAY( arr_channel )

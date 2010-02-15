@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg; adapted by Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -8,102 +8,61 @@
 //
 /// \file mcrl2i.cpp
 
+
 #include "boost.hpp" // precompiled headers
 
-#define NAME "mcrl2i"
-#define AUTHOR "Muck van Weerdenburg"
+#define TOOLNAME "mcrl2i"
+#define AUTHORS "Muck van Weerdenburg; Jan Friso Groote"
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <cctype>
 
+#include "boost/utility.hpp"
+#include "boost/lexical_cast.hpp"
+
 #include <cstdio>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <aterm2.h>
 
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/enum.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator_factory.h"
+#include "mcrl2/data/map_substitution.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
-#include <mcrl2/core/data_implementation.h>
-#include <mcrl2/core/data_reconstruct.h>
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/atermpp/aterm_init.h"
+
 
 using namespace std;
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
+using mcrl2::core::gsDebug;
+using namespace mcrl2::utilities::tools;
+using mcrl2::utilities::tools::rewriter_tool;
 
-char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be "
-                      "rewritten to normal form and printed. Also, one can assign values to declared "
-                      "variables by writing x := v, for variable x and value v. These variables can "
-                      "then be used in expressions. Besides this, the prompt accepts the following "
-                      "commands (where VARLIST is of the form x,y,...: S; v,w,...: T):\n"
-                      "  :h[elp]                         print this help message\n"
-                      "  :q[uit]                         quit\n"
-                      "  :t[ype] EXPRESSION              print type of EXPRESSION\n"
-                      "  :v[ar] VARLIST                  declare variables in VARLIST\n"
-                      "  :r[ewriter] STRATEGY            use STRATEGY for rewriting\n"
-                      "  :s[solve] <VARLIST> EXPRESSION  give all valuations of the variables in\n"
-                      "                                  VARLIST that satisfy EXPRESSION\n";
 
-static Rewriter *rewr;
-static Enumerator *e;
-static ATermTable variables;
-static ATermTable assignments;
-
-static void updated_specification(data_specification spec)
-{
-  gsVerboseMsg("reinitialising rewriter and enumerator...\n");
-  RewriteStrategy strat = rewr->getStrategy();
-  delete e;
-  delete rewr;
-  rewr = createRewriter(spec, strat);
-  e = createEnumerator(spec,rewr);
-}
-
-static bool refresh_specification(data_specification old_spec, data_specification new_spec)
-{
-  if ( old_spec == new_spec )
-  {
-    return false;
+static bool check_whether_variable_string_is_in_use(
+                   const std::string &s,
+                   const atermpp::set < variable > &varset)
+{ for(atermpp::set < variable >::const_iterator i=varset.begin();
+          i!=varset.end(); ++i)
+  { if (i->name()==s)
+    { return true;
+    }
   }
-
-  updated_specification(new_spec);
-
-  return true;
-}
-
-static void clear_rewr_substs(ATermList vars)
-{
-  if ( vars == NULL )
-  {
-    vars = ATtableKeys(assignments);
-  }
-  rewr->clearSubstitutions(vars);
-}
-
-static void reset_rewr_substs()
-{
-  ATermList vars = ATtableKeys(assignments);
-  for (; !ATisEmpty(vars); vars=ATgetNext(vars))
-  {
-    ATermAppl var = ATAgetFirst(vars);
-    rewr->setSubstitutionInternal(var,ATtableGet(assignments,(ATerm) var));
-  }
+  return false;
 }
 
 static string trim_spaces(const string &str)
@@ -123,244 +82,111 @@ static string trim_spaces(const string &str)
   return s;
 }
 
-static bool parse_var_decl(string decl, ATermList *varlist, data_specification &spec)
-{
-    string::size_type semi_pos = decl.find(':');
-    if ( semi_pos == string::npos )
-    {
-      gsErrorMsg("invalid type declaration '%s'\n",decl.c_str());
-      return false;
-    }
+static data_expression parse_term(const string &term_string,
+                                  const data_specification &spec,
+                                  atermpp::set < variable > context_variables,
+                                  const atermpp::set < variable > &local_variables = atermpp::set < variable >())
+{ context_variables.insert(local_variables.begin(),local_variables.end());
+  return parse_data_expression(term_string,context_variables.begin(),context_variables.end(),spec);
+}
 
-    stringstream ss(decl.substr(semi_pos+1));
+static void declare_variables(
+                   const string &vars,
+                   atermpp::set <variable> &context_variables,
+                   data_specification &spec)
+{ parse_variables(vars + ";",std::inserter(context_variables,context_variables.begin()),
+                              context_variables.begin(), context_variables.end(),spec);
+}
 
-    ATermAppl sort = parse_sort_expr(ss);
-    if ( sort == NULL )
-      return false;
-
-    gsDebugMsg("parsed: %T\n",sort);
-
-    ATermAppl reconstructed_spec = reconstruct_spec(spec);
-    sort = type_check_sort_expr(sort,reconstructed_spec);
-    if ( sort == NULL )
-      return false;
-
-    gsDebugMsg("type checked: %T\n",sort);
-
-    sort = implement_data_sort_expr(sort,reconstructed_spec);
-    if ( sort == NULL )
-      return false;
-
-    if ( refresh_specification(spec,data_specification(reconstructed_spec)) )
-    {
-      spec = data_specification(reconstructed_spec);
-    }
-
-    gsDebugMsg("data implemented: %T\n",sort);
-
-    string names = decl.substr(0,semi_pos) + ',';
-    string::size_type i;
-    while ( ( i = names.find(',') ) != string::npos )
-    {
-      *varlist = ATinsert(*varlist,(ATerm) gsMakeDataVarId(gsString2ATermAppl(trim_spaces(names.substr(0,i)).c_str()),sort));
-      names = names.substr(i+1);
-    }
-
+// Match beginning of string s with match. Return true
+// iff it does. If a match is found, remove match from the beginning
+// of s.
+static bool match_and_remove(string &s, const string &match)
+{ if (s.substr(0,match.size())==match)
+  { s=s.substr(match.size());
     return true;
+  }
+  return false;
 }
 
-static bool parse_var_decl_list(string decl_list, ATermList *varlist, data_specification &spec)
+static const std::string help_text=
+          "The following commands are available to manipulate mcrl2 data expressions. "
+          "Essentially, there are commands to rewrite and type expressions, as well as generating "
+          "the solutions for a boolean expression. The expressions can contain assigned or "
+          "unassigned variables. Note that there are no bounds on the number of steps to evaluate "
+          "or solve an expression, nor is the number of solutions bounded. Hence, the assign, eval "
+          "solve commands can give rise to infinite loops.\n"
+          "  h[elp]                         print this help message.\n"
+          "  q[uit]                         quit.\n"
+          "  t[ype] EXPRESSION              print type of EXPRESSION.\n"
+          "  a[ssign] VAR=EXPRESSION        evaluate the expression and assign it to the variable.\n"
+          "  e[val] EXPRESSION              rewrite EXPRESSION and print result.\n"
+          "  v[ar] VARLIST                  declare variables in VARLIST.\n"
+          "  r[ewriter] STRATEGY            use STRATEGY for rewriting.\n"
+          "  s[solve] VARLIST. EXPRESSION   give all valuations of the variables in\n"
+          "                                      VARLIST that satisfy EXPRESSION.\n"
+          "VARLIST is of the form x,y,...: S; ... v,w,...: T.\n";
+
+
+class mcrl2i_tool: public rewriter_tool<input_tool>
 {
-  decl_list += ';';
-  string::size_type pos;
-  while ( (pos = decl_list.find(';')) != string::npos )
-  {
-    string decl(decl_list.substr(0,pos));
-    decl_list = decl_list.substr(pos+1);
+  public:
+    /// Constructor.
+    mcrl2i_tool()
+      : rewriter_tool<input_tool>(
+          TOOLNAME,
+          AUTHORS,
+          "Interpreter for the mCRL2 data language",
+          "Evaluate mCRL2 data expressions via a text-based interface. "
+          "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used. "
+          "If no input file is given, only the standard numeric datatypes are available. Stdin is ignored."
+          + help_text
+        )
+    {}
 
-    if ( !parse_var_decl(decl,varlist,spec) )
-      return false;
-  }
-
-  return true;
-}
-
-static ATermList parse_varlist_from_string(string &s, data_specification &spec)
-{
-  string::size_type start = s.find('<');
-  if ( start == string::npos )
-  {
-    gsErrorMsg("opening bracket for variable list not found\n");
-    return NULL;
-  }
-  string::size_type end = s.find('>',start);
-  if ( end == string::npos )
-  {
-    gsErrorMsg("closing bracket for variable list not found\n");
-    return NULL;
-  }
-  string varlist = s.substr(start+1,end-start-1);
-  s = s.substr(end+1);
-
-  ATermList result = ATmakeList0();
-  if ( !parse_var_decl_list(varlist,&result,spec) )
-    return NULL;
-
-  gsDebugMsg("variable list: %T\n",result);
-
-  return result;
-}
-
-static ATermAppl parse_term(string &term_string, data_specification &spec, ATermList vars = NULL)
-{
-  stringstream ss(term_string);
-
-  ATermAppl term = parse_data_expr(ss);
-  if ( term == NULL )
-    return NULL;
-
-  gsDebugMsg("parsed: %T\n",term);
-
-  ATermList save_assignments = ATmakeList0();
-  if ( vars != NULL )
-  {
-    for (ATermList l=vars; !ATisEmpty(l); l=ATgetNext(l))
+    /// Runs the algorithm.
+    bool run()
     {
-      ATermAppl var = ATAgetFirst(l);
-      if ( ATtableGet(variables,ATgetArgument(var,0)) != NULL )
-      {
-        ATerm old_val = rewr->getSubstitutionInternal(var);
-        rewr->clearSubstitution(var);
-        save_assignments = ATinsert(save_assignments,(ATerm) gsMakeSubst((ATerm) var,old_val));
+      data_specification spec;
+      if (!input_filename().empty())
+      { try
+        { // Try to read a linear specification
+          mcrl2::lps::specification p;
+          p.load(input_filename());
+          spec=p.data();
+        }
+        catch (mcrl2::runtime_error e)
+        { try
+          { // Try to read a pbes.
+            mcrl2::pbes_system::pbes <> p;
+            p.load(input_filename());
+            spec=p.data();
+          }
+          catch (mcrl2::runtime_error &e)
+          { std::cout << "Could not read " << input_filename() << " as an LPS or a PBES. " << e.what() <<
+                    "\nUsing standard data types only;\n";
+            spec=data_specification();
+          }
+        }
       }
-      ATtablePut(variables,ATgetArgument(var,0),ATgetArgument(var,1));
-    }
-  }
 
-  // type checking and data implementation of a data expression use a
-  // specification before data implementation.
-  ATermAppl reconstructed_spec = reconstruct_spec(spec);
-  term = type_check_data_expr(term,NULL,reconstructed_spec,variables);
-  if ( vars != NULL )
-  {
-    for (ATermList l=vars; !ATisEmpty(l); l=ATgetNext(l))
-    {
-      ATtableRemove(variables,ATgetArgument(ATAgetFirst(l),0));
-    }
-    for (; !ATisEmpty(save_assignments); save_assignments=ATgetNext(save_assignments))
-    {
-      ATermAppl subst = ATAgetFirst(save_assignments);
-      ATermAppl var = ATAgetArgument(subst,0);
-      rewr->setSubstitutionInternal(var,ATgetArgument(subst,1));
-      ATtablePut(variables,ATgetArgument(var,0),ATgetArgument(var,1));
-    }
-  }
-  if ( term == NULL )
-    return NULL;
+      // Import all standard data types should be available even if they are
+      // not port of the loaded lps or pbes.
+      spec.add_context_sort(sort_real::real_());
 
-  gsDebugMsg("type checked: %T\n",term);
+      std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
-  term = implement_data_data_expr(term,reconstructed_spec);
-  if ( refresh_specification(spec,data_specification(reconstructed_spec)) )
-  {
-    spec = data_specification(reconstructed_spec);
-  }
-  if ( term == NULL )
-    return NULL;
+      rewriter rewr(spec,m_rewrite_strategy);
+      enumerator_factory < classic_enumerator<> > e(spec,rewr);
+      atermpp::set < variable > context_variables;
+      atermpp::map < variable, data_expression > assignments;
 
-  gsDebugMsg("data implemented: %T\n",term);
-
-  return term;
-}
-
-static void declare_variables(string &vars, data_specification &spec)
-{
-  ATermList varlist = ATmakeList0();
-  if ( ! parse_var_decl_list(vars,&varlist,spec) )
-    return;
-
-  for (; !ATisEmpty(varlist); varlist=ATgetNext(varlist))
-  {
-    ATermAppl var = ATAgetFirst(varlist);
-    ATtablePut(variables,ATgetArgument(var,0),ATgetArgument(var,1));
-  }
-}
-
-static data_specification load_specification(const string &infilename)
-{
-  ATermAppl raw_specification;
-  if (infilename.empty()) {
-    //use empty data specification
-    raw_specification = implement_data_data_spec(gsMakeEmptyDataSpec());
-  } else {
-    //load data specification from file infilename
-    gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
-    raw_specification = (ATermAppl) mcrl2::core::detail::load_aterm(infilename);
-    if (!gsIsLinProcSpec(raw_specification) && !gsIsPBES(raw_specification)) {
-      throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS or PBES");
-    }
-    raw_specification = ATAgetArgument(raw_specification, 0);
-  }
-  data_specification spec(raw_specification);
-  return spec;
-}
-
-struct tool_options_type {
-  std::string     infilename;
-  RewriteStrategy strategy;
-};
-
-static bool parse_command_line(int ac, char** av, tool_options_type& options) {
-  interface_description clinterface(av[0], NAME, AUTHOR,
-    "interpreter for the mCRL2 data language",
-    "[OPTION]... [INFILE]\n",
-    "Evaluate mCRL2 data expressions via a text-based interface. "
-    "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used."
-    "\n\n"
-    + std::string(help_message));
-
-  clinterface.add_rewriting_options();
-
-  command_line_parser parser(clinterface, ac, av);
-
-  if (parser.continue_execution()) {
-    options.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
-
-    if (0 < parser.arguments.size()) {
-      options.infilename = parser.arguments[0];
-    }
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-  }
-
-  return parser.continue_execution();
-}
-
-int main(int argc, char **argv)
-{
-  MCRL2_ATERM_INIT(argc, argv)
-
-  try {
-    tool_options_type options;
-
-    if (parse_command_line(argc, argv, options)) {
-      data_specification spec = load_specification(options.infilename);
-
-      gsMessage("mCRL2 interpreter (type :h for help)\n");
-
-      rewr = createRewriter(spec, options.strategy);
-      e = createEnumerator(spec,rewr);
-      variables = ATtableCreate(50,50);
-      assignments = ATtableCreate(50,50);
-
-      bool notdone = true;
-      while ( notdone )
+      bool done = false;
+      while ( !done )
       {
-        while ( true )
+        try
         {
           string s;
-
           (cout << "? ").flush();
           getline(cin, s);
           if ( (s.length() > 0) && (s[s.length()-1] == '\r') )
@@ -368,136 +194,104 @@ int main(int argc, char **argv)
             s.resize(s.length()-1);
           }
 
-          if ( cin.eof() )
-          {
-            cout << endl;
-            notdone = false;
-            break;
+          if (cin.eof())
+          { cout << endl;
+            done = true;
           }
 
-          if ( s.substr(0,1) == ":" )
+          if (match_and_remove(s,"q") || match_and_remove(s,"quit"))
+          { if ( cin.eof() ) cout << endl;
+            done = true;
+          }
+          else if (match_and_remove(s,"h") || match_and_remove(s,"help"))
+          { cout << help_text;
+          }
+          else if (match_and_remove(s,"r ") || match_and_remove(s,"rewriter "))
           {
-            s = s.substr(1);
-            if ( (s == "q") || (s == "quit") )
-            {
-              if ( cin.eof() )
-                cout << endl;
-              notdone = false;
-              break;
-            } else if ( (s == "h") || (s == "help") )
-            {
-              cout << help_message;
-            } else if ( (s.substr(0,2) == "r ") || (s.substr(0,9) == "rewriter ") )
-            {
-              if ( s.substr(0,2) == "r " )
-                s = s.substr(2);
-              else
-                s = s.substr(9);
-              options.strategy = RewriteStrategyFromString(s.c_str());
-              if ( options.strategy == GS_REWR_INVALID )
-              {
-                gsErrorMsg("invalid rewrite strategy '%s', ignoring command\n",s.c_str());
-              } else {
-                updated_specification(spec);
+            try
+            { rewriter::strategy new_strategy = boost::lexical_cast< rewriter::strategy >(s);
+              if (new_strategy!=m_rewrite_strategy)
+              { m_rewrite_strategy=new_strategy;
+                rewr=rewriter(spec,m_rewrite_strategy);
               }
-            } else if ( (s.substr(0,2) == "t ") || (s.substr(0,5) == "type ") )
-            {
-              if ( s.substr(0,2) == "t " )
-                s = s.substr(2);
-              else
-                s = s.substr(5);
-              ATermAppl term = parse_term(s,spec);
-              if ( term != NULL )
-              {
-                gsprintf("%P\n",gsGetSort(term));
-              }
-            } else if ( (s.substr(0,2) == "v ") || (s.substr(0,4) == "var ") )
-            {
-              if ( s.substr(0,2) == "v " )
-                s = s.substr(2);
-              else
-                s = s.substr(4);
-              declare_variables(s,spec);
-            } else if ( (s.substr(0,2) == "s ") || (s.substr(0,6) == "solve ") )
-            {
-              if ( s.substr(0,2) == "s " )
-                s = s.substr(2);
-              else
-                s = s.substr(6);
-              ATermList vars = parse_varlist_from_string(s,spec);
-              if ( vars == NULL )
-                break;
-              ATermAppl term = parse_term(s,spec,vars);
-              if ( term != NULL )
-              {
-                if ( gsGetSort(term) != gsMakeSortExprBool() )
-                {
-                  gsErrorMsg("expression is not of sort Bool\n");
-                  break;
-                }
-                static EnumeratorSolutions *sols = NULL;
-                clear_rewr_substs(vars);
-                sols = e->findSolutions(vars,rewr->toRewriteFormat(term),false,sols);
-                ATermList sol;
-                while ( sols->next(&sol) )
-                {
-                  gsprintf("[");
-                  for (; !ATisEmpty(sol); sol=ATgetNext(sol))
-                  {
-                    ATermAppl subst = ATAgetFirst(sol);
-                    rewr->setSubstitutionInternal(ATAgetArgument(subst,0),ATgetArgument(subst,1));
-                    gsprintf("%P := %P",ATAgetArgument(subst,0),rewr->fromRewriteFormat(ATgetArgument(subst,1)));
-                    if ( !ATisEmpty(ATgetNext(sol)) )
-                    {
-                      gsprintf(", ");
-                    }
-                  }
-                  gsprintf("] gives %P\n",rewr->rewrite(term));
-                }
-                rewr->clearSubstitutions(vars);
-                reset_rewr_substs();
-              }
-            } else {
-              cout << "unknown command (try ':h' for help)" << endl;
             }
-          } else {
-            string::size_type assign_pos = s.find(":=");
-            ATermAppl var = NULL;
-            if ( assign_pos != string::npos )
-            {
-              ATermAppl var_name = gsString2ATermAppl(trim_spaces(s.substr(0,assign_pos)).c_str());
-              ATermAppl var_sort;
-              if ( (var_sort = (ATermAppl) ATtableGet(variables,(ATerm) var_name)) == NULL )
-              {
-                gsErrorMsg("variable '%T' is not declared\n",var_name);
-                break;
-              }
-              var = gsMakeDataVarId(var_name,var_sort);
-              s = s.substr(assign_pos+2);
-            }
-            ATermAppl term = parse_term(s,spec);
-            if ( term != NULL )
-            {
-              term = rewr->rewrite(term);
-              if ( var == NULL )
-              {
-                gsprintf("%P\n",term);
-              } else {
-                rewr->setSubstitution(var,term);
-                ATtablePut(assignments,(ATerm) var,rewr->toRewriteFormat(term));
-              }
+            catch (boost::bad_lexical_cast &)
+            { throw mcrl2::runtime_error("The string " + s + " does not describe a rewrite strategy.");
             }
           }
+          else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))
+          { data_expression term = parse_term(s,spec,context_variables);
+            cout << pp(term.sort()) << endl;
+          }
+          else if (match_and_remove(s,"v ") || match_and_remove(s,"var "))
+          { declare_variables(s,context_variables,spec);
+          }
+          else if (match_and_remove(s,"e ") || match_and_remove(s,"eval "))
+          { data_expression term = parse_term(s,spec,context_variables);
+            cout << pp(rewr(term,make_map_substitution_adapter(assignments))) << "\n";
+          }
+          else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
+          {
+            atermpp::set <variable> vars;
+            string::size_type dotpos=s.find(".");
+            if (dotpos==string::npos)
+            { throw mcrl2::runtime_error("Expect a `.' in the input.");
+            }
+            parse_variables(s.substr(0,dotpos)+";",std::inserter(vars,vars.begin()),spec);
+            data_expression term = parse_term(s.substr(dotpos+1),spec,context_variables,vars);
+            if ( term.sort()!=sort_bool::bool_())
+            { throw mcrl2::runtime_error("expression is not of sort Bool.");
+            }
+            term=rewr(term);
+            for (classic_enumerator< > i =
+                 e.make(data::convert < std::set <variable > >(vars),rewr,term);
+                                                          i != classic_enumerator<>() ; ++i)
+            {
+              cout << "[";
+              for ( atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v )
+              { cout << pp(*v) << " := " << pp((*i)(*v));
+                if ( boost::next(v)!=vars.end() )
+                { cout << ", ";
+                }
+              }
+              cout << "] evaluates to "<< pp(rewr(term,*i)) << "\n";
+            }
+          }
+          else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))
+          {
+            string::size_type assign_pos = s.find("=");
+            if (assign_pos==string::npos)
+            { throw mcrl2::runtime_error("Missing symbol = in assignment.");
+            }
+            string varname=trim_spaces(s.substr(0,assign_pos)).c_str();
+
+            if (check_whether_variable_string_is_in_use(varname,context_variables))
+            { throw mcrl2::runtime_error("Variable " + varname + " already in use.");
+            }
+            s = s.substr(assign_pos+1);
+            data_expression term = parse_term(s,spec,context_variables);
+            variable var(varname,term.sort());
+            term = rewr(term,make_map_substitution_adapter(assignments));
+            cout << pp(term) << "\n";
+            assignments[var]=term;
+            context_variables.insert(var);
+          }
+          else
+          { throw mcrl2::runtime_error("unknown command (try 'h' for help).");
+          }
+        }
+        catch (mcrl2::runtime_error &e)  // Catch errors in the input.
+        { cout << e.what() << endl;
         }
       }
 
-      delete rewr;
+      return true;
     }
-  }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
+};
 
-  return EXIT_SUCCESS;
+int main(int argc, char** argv)
+{
+  MCRL2_ATERMPP_INIT(argc, argv)
+  return mcrl2i_tool().execute(argc, argv);
 }
+

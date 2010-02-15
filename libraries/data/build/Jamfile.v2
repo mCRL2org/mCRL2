@@ -3,19 +3,17 @@ project data
        ;
 
 mcrl2-library data
-       : source/data_elimination.cpp
-         source/enum.cpp
-         source/enum_standard.cpp
-         source/formula_checker.cpp
-         [ glob source/rewrite/*.cpp ]
-         [ glob source/prover/*.cpp ]
+       : source/implementations.cpp 
+         [ glob source/detail/rewrite/*.cpp ]
        : <library>/libraries//core
-         <library>/libraries//atermpp
-         <library>/libraries//utilities
+         <use>/site-config//boost
+         <use>/libraries/utilities//exception
+         <include>../include
          <library>/site-config//cvc
          <library>/site-config//m               # for rewrite
          <library>/site-config//dynamic_loading # for rewrite
-         <include>../include
        :
-       : <include>../include
+       : <toolset>gcc,<link>static:<linkflags>-export-dynamic
+         <use>/libraries/utilities//exception
+         <include>../include
        ;

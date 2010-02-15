@@ -12,11 +12,15 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include <mcrl2/lps/specification.h>
-#include <mcrl2/lps/sumelm.h>
-#include <mcrl2/lps/mcrl22lps.h>
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/sumelm.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
@@ -26,6 +30,7 @@ using namespace mcrl2::lps;
  */
 void test_case_1()
 {
+  std::clog << "Test case 1" << std::endl;
   const std::string text(
     "sort S = struct s1 | s2;\n"
     "map f : S -> Bool;\n"
@@ -34,28 +39,32 @@ void test_case_1()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_data_variables(i->condition()).empty());
-    BOOST_CHECK(find_all_data_variables(i->actions()).empty());
+    BOOST_CHECK(data::find_variables(i->condition()).empty());
+    BOOST_CHECK(lps::find_variables(i->actions()).empty());
   }
 }
 
 /// Sum variable y does not occur in the summand, and therefore must be removed.
 void test_case_2()
 {
+  std::clog << "Test case 2" << std::endl;
   const std::string text(
     "act a,b;\n"
-    "proc P = sum y:Int . a . b . P;\n"
-    "init P;\n"
+    "proc P(s3_P: Pos) = sum y_P: Int. (s3_P == 1) -> a . P(2)\n"
+    "                  + (s3_P == 2) -> b . P(1);\n"
+    "init P(1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -71,19 +80,21 @@ void test_case_2()
  */
 void test_case_3()
 {
+  std::clog << "Test case 3" << std::endl;
   const std::string text(
     "act a;\n"
     "proc P = sum y:Int . (4 == y) -> a . P;\n"
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_data_variables(i->condition()).empty());
+    BOOST_CHECK(data::find_variables(i->condition()).empty());
   }
 }
 
@@ -92,19 +103,21 @@ void test_case_3()
  */
 void test_case_4()
 {
+  std::clog << "Test case 4" << std::endl;
   const std::string text(
     "act a;\n"
     "proc P = sum y:Int . (y == 4) -> a . P;\n"
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_data_variables(i->condition()).empty());
+    BOOST_CHECK(data::find_variables(i->condition()).empty());
   }
 }
 
@@ -113,24 +126,28 @@ void test_case_4()
  */
 void test_case_5()
 {
+  std::clog << "Test case 5" << std::endl;
   const std::string text(
     "act a,b:Int;\n"
     "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  // FIXME, this test case requires the parser to allow parsing of free
+  // variables.
+  specification s0 = linearise(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
-  std::set<data_variable> parameters = find_all_data_variables(s1.process().process_parameters());
+  std::set<variable> parameters = mcrl2::data::find_variables(s1.process().process_parameters());
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
 
     // Check that the only data variables in the condition and time
     // are process parameters
-    std::set<data_variable> condition_vars = find_all_data_variables(i->condition());
-    for (std::set<data_variable>::iterator j = condition_vars.begin()
+    std::set<variable> condition_vars = data::find_variables(i->condition());
+    for (std::set<variable>::iterator j = condition_vars.begin()
         ; j != condition_vars.end()
         ; ++j)
     {
@@ -139,8 +156,8 @@ void test_case_5()
 
     if (i->has_time())
     {
-      std::set<data_variable> time_vars = find_all_data_variables(i->time());
-      for (std::set<data_variable>::iterator j = time_vars.begin()
+      std::set<variable> time_vars = data::find_variables(i->time());
+      for (std::set<variable>::iterator j = time_vars.begin()
           ; j != time_vars.end()
           ; ++j)
       {
@@ -148,6 +165,7 @@ void test_case_5()
       }
     }
   }
+  std::clog << lps::pp(s1) << std::endl;
 }
 
 /*
@@ -156,14 +174,16 @@ void test_case_5()
  */
 void test_case_6()
 {
+  std::clog << "Test case 6" << std::endl;
   const std::string text(
     "act a;\n"
     "proc P = sum y:Int . (y == y + 1) -> a . P;\n"
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -175,6 +195,11 @@ void test_case_6()
   }
   BOOST_CHECK(sumvar_count == 1);
   BOOST_CHECK(s0 == s1);
+
+  if (!(s0 == s1) || sumvar_count != 1) {
+    std::clog << "Input specification  : " << lps::pp(s0) << std::endl
+              << "Output specification : " << lps::pp(s1) << std::endl;
+  }
 }
 
 /*
@@ -194,6 +219,7 @@ void test_case_6()
  */
 void test_case_7()
 {
+  std::clog << "Test case 7" << std::endl;
   const std::string text(
     "sort D = struct d1 | d2 | d3;\n"
     "map g : D -> D;\n"
@@ -202,8 +228,9 @@ void test_case_7()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -224,6 +251,7 @@ void test_case_7()
  */
 void test_case_8()
 {
+  std::clog << "Test case 8" << std::endl;
   const std::string text(
     "sort D = struct d1 | d2 | d3;\n"
     "act a;\n"
@@ -231,8 +259,9 @@ void test_case_8()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -240,7 +269,7 @@ void test_case_8()
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
-      BOOST_CHECK(find_all_data_variables(i->condition()).empty());
+      BOOST_CHECK(data::find_variables(i->condition()).empty());
     }
   }
   BOOST_CHECK(sumvar_count == 1);
@@ -252,13 +281,15 @@ void test_case_8()
  */
 void test_case_9()
 {
+  std::clog << "Test case 9" << std::endl;
   const std::string text(
-    "proc P = sum y:Bool . y -> delta . P;\n"
+    "proc P = sum y:Bool . y -> delta;\n"
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -274,41 +305,58 @@ void test_case_9()
 ///Test case for issue #380
 void test_case_10()
 {
+  std::clog << "Test case 10" << std::endl;
   const std::string text(
   "act a:Nat;\n"
   "proc P(n0: Nat) = sum n: Nat. (n == n0 && n == 1) -> a(n0) . P(n);\n"
   "init P(0);\n"
   );
 
-  specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
-    BOOST_CHECK(i->condition() != data_expr::true_());
+    BOOST_CHECK(i->condition() != sort_bool::true_());
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
     }
   }
   BOOST_CHECK(sumvar_count == 0);
+
+  if (!(s0 == s1)) {
+    std::clog << "Input specification  : " << lps::pp(s0) << std::endl
+              << "Output specification : " << lps::pp(s1) << std::endl;
+  }
 }
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERM_INIT(ac, av)
+  MCRL2_ATERMPP_INIT(ac, av)
 
   test_case_1();
+  core::garbage_collect();
   test_case_2();
+  core::garbage_collect();
   test_case_3();
+  core::garbage_collect();
   test_case_4();
+  core::garbage_collect();
   test_case_5();
+  core::garbage_collect();
   test_case_6();
+  core::garbage_collect();
   test_case_7();
+  core::garbage_collect();
   test_case_8();
+  core::garbage_collect();
   test_case_9();
+  core::garbage_collect();
   test_case_10();
+  core::garbage_collect();
 
   return 0;
 }

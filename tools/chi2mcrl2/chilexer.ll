@@ -13,7 +13,7 @@
 #include <vector>
 #include "libstruct_core.h"
 #include "mcrl2/core/messaging.h"
-#include "chiparser.hpp"
+#include "chiparser.h"
 #include <map>
 #include <set>
 #include <utility>

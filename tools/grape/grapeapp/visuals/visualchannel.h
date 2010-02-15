@@ -67,7 +67,7 @@ namespace grape
          * @param p_coord test coordinate
          * @return Returns whether the specified coordinate on the border of a drawn object.
          */
-        grape_direction is_on_border( libgrape::coordinate &p_coord );
+        grape_direction is_on_border( libgrape::coordinate &p_coord );        
     };
   } // namespace grapeapp
 } // namespace grape

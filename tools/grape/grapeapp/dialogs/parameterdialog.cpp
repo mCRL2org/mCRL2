@@ -8,6 +8,8 @@
 //
 // Defines a parameter initialisation dialog.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
@@ -28,7 +30,7 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
   wxStaticText *text = new wxStaticText( panel, wxID_ANY, _T( "Parameter:" ) );
   grid->Add( text, 0 );
-  vsizer->Add(grid);
+  vsizer->Add(grid, 0, wxALL, 5);
 
   // create grid
   m_grid = new wxGrid( panel, GRAPE_GRID_PARAM, wxDefaultPosition, wxSize(400, 300));
@@ -36,7 +38,12 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   for ( unsigned int i = 0; i < p_parameter_declarations.GetCount(); ++i )
   {
     // fill cells
+    decl_init decl;
+    decl.set_name(p_parameter_declarations[i].get_name());
+    decl.set_type(p_parameter_declarations[i].get_type());
+    m_init.Add(decl);
     m_grid->SetCellValue(i, 0, p_parameter_declarations[i].get_name());
+    m_grid->SetReadOnly(i, 0);
     m_grid->SetCellValue(i, 1, _T(""));
   }
 
@@ -44,7 +51,7 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   m_grid->SetColSize( 1, 100 );
   m_grid->SetColLabelValue(0, _T("Name"));
   m_grid->SetColLabelValue(1, _T("Value"));
-  m_grid->SetRowLabelSize(30);
+  m_grid->SetRowLabelSize(0);
 
   vsizer->Add(m_grid, 1, wxEXPAND );
  
@@ -52,14 +59,14 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
 
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
-  wnd_sizer->AddSpacer( 3 );
   wnd_sizer->Add(panel, 1, wxEXPAND, 0 );
-  wnd_sizer->AddSpacer( 3 );
+
+  wnd_sizer->AddSpacer ( 5 );
 
   // create buttons
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
-  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT, 0);
+  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1);
 
   // realize sizers
   SetSizer(wnd_sizer);
@@ -69,6 +76,7 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   m_grid->SetFocus();
   
   check_parameters();
+  CentreOnParent();
 }
 
 grape_parameter_dialog::grape_parameter_dialog()
@@ -79,6 +87,7 @@ grape_parameter_dialog::grape_parameter_dialog()
 
 grape_parameter_dialog::~grape_parameter_dialog()
 {
+  delete m_grid;
 }
 
 bool grape_parameter_dialog::show_modal()

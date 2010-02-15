@@ -10,10 +10,10 @@
 
 #include <cstring>
 #include <fstream>
-#include <aterm2.h>
-#include <mcrl2/lps/specification.h>
+#include "mcrl2/lps/specification.h"
+#include "aterm2.h"
 #include "svc/svc.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "lps2lts.h"
 #include "lts.h"
@@ -28,7 +28,7 @@ using namespace mcrl2::lts;
 static lts_options lts_opts;
 static ATermAppl term_nil;
 static AFun afun_pair;
-static unsigned long long initial_state;
+static boost::uint64_t initial_state;
 static ofstream aut;
 static SVCfile svcf;
 static SVCfile *svc = &svcf;
@@ -88,7 +88,7 @@ void open_lts(const char *filename, lts_options &opts)
   }
 }
 
-void save_initial_state(unsigned long long idx, ATerm state)
+void save_initial_state(boost::uint64_t idx, ATerm state)
 {
   initial_state = idx;
   switch ( lts_opts.outformat )
@@ -123,7 +123,7 @@ void save_initial_state(unsigned long long idx, ATerm state)
   }
 }
 
-void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, unsigned long long idx_to, ATerm to)
+void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to)
 {
   switch ( lts_opts.outformat )
   {
@@ -189,7 +189,7 @@ void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, 
   }
 }
 
-void close_lts(unsigned long long num_states, unsigned long long num_trans)
+void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans)
 {
   switch ( lts_opts.outformat )
   {
@@ -205,28 +205,26 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         {
           gsErrorMsg("svcerror: %s\n",SVCerror(e));
         }
-        add_extra_mcrl2_svc_data(lts_filename,(ATermAppl) ATgetArgument(lts_opts.spec,0),(ATermList) ATgetArgument((ATermAppl) ATgetArgument(lts_opts.spec,2),1),(ATermAppl) ATgetArgument(lts_opts.spec,1));
+        add_extra_mcrl2_svc_data(lts_filename, mcrl2::data::detail::data_specification_to_aterm_data_spec(lts_opts.spec->data()),
+                     lts_opts.spec->process().process_parameters(), lts_opts.spec->action_labels());
       }
       break;
     case lts_none:
       break;
     default:
       {
-        mcrl2::lps::specification s;
         lts_extra ext;
-        lts_dot_options extdot;
-        string fn;
         if ( !lts_opts.outinfo )
         {
           generic_lts->remove_state_values();
         }
         if ( lts_opts.outformat == lts_fsm )
         {
-          s = mcrl2::lps::specification(lts_opts.spec);
-          ext = lts_extra(&s);
+          ext = lts_extra(*lts_opts.spec);
         } else if ( lts_opts.outformat == lts_dot )
         {
-          fn = lts_filename;
+          string fn = lts_filename;
+          lts_dot_options extdot;
           extdot.name = &fn;
           extdot.print_states = lts_opts.outinfo;
           ext = lts_extra(extdot);
@@ -241,6 +239,9 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         break;
       }
   }
+
+  // Avoid static initialisation/descruction fiasco
+  lts_opts.spec.reset();
 }
 
 void remove_lts()
@@ -269,3 +270,4 @@ void remove_lts()
   }
   remove(lts_filename);
 }
+

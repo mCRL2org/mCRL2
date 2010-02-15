@@ -8,6 +8,10 @@
 //
 // Implements the architecture_diagram class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "architecturediagram.h"
 
 using namespace grape::libgrape;
@@ -222,9 +226,13 @@ channel* architecture_diagram::add_channel( unsigned int p_id, coordinate &p_coo
   new_channel->set_width( p_def_width );
   new_channel->set_height( p_def_height );
   new_channel->set_diagram( this );
-  wxString name;
-  name.Printf( _T("Channel%d" ), p_id );
-  new_channel->set_name( name );
+  int index = 0;
+  wxString name = _T("c");
+  while ( exists_channel( name, index ) )
+  {
+    ++index;
+  }
+  new_channel->set_name( name + wxString::Format( _T( "%d" ), index ) );
   select_object( new_channel );
 
   // Establish relationships
@@ -286,6 +294,22 @@ arr_channel* architecture_diagram::get_channel_list( void )
 {
   return &m_channels;
 }
+
+bool architecture_diagram::exists_channel( const wxString &p_name, int p_index )
+{
+  int count = m_channels.GetCount();
+  for ( int j = 0; j < count; ++j )
+  {
+    channel* channel_ptr = & ( m_channels.Item( j ) );
+    wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
+    if ( channel_ptr->get_name() == concat_name )
+    {
+      return true;
+    } // end if
+  } // end for
+  return false;
+}
+
 
 channel_communication* architecture_diagram::add_channel_communication( unsigned int p_id, coordinate &p_coord, channel* p_channel_1, channel* p_channel_2 )
 {
@@ -475,4 +499,4 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uns
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_architecture_diagram );
+WX_DEFINE_OBJARRAY( arr_architecture_diagram )

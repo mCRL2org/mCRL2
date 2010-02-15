@@ -86,7 +86,7 @@ namespace lysa
 			return "p_"+r;
 		}
 	public:
-    Converter(lysa_options& options) : templates(options.fmt_file_name), contains_attacker(false), proc_count(0), options(options) {};
+    Converter(lysa_options& options) : templates(options.strategy->getFormatTemplate()), contains_attacker(false), proc_count(0), options(options) {};
 		static string to_mcrl2(E_ptr expr) 
 		{ 
 			Converter conv(expr->process_info->options); 

@@ -13,16 +13,20 @@
 #include <string>
 #include <algorithm>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/lps_rewrite.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/lps/detail/specification_property_map.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
@@ -82,7 +86,7 @@ const std::string SPECIFICATION1 =
 
 void test1()
 {
-  specification spec = mcrl22lps(SPECIFICATION1);
+  specification spec = parse_linear_process_specification(SPECIFICATION1);
   rewriter r(spec.data());
 
   data_expression n1    = find_mapping(spec.data(), "_1");
@@ -96,11 +100,15 @@ void test1()
   data_expression n9    = find_mapping(spec.data(), "_9");
   data_expression plus  = find_mapping(spec.data(), "plus");
 
-  // cout << mcrl2::core::pp(data_application(plus, make_list(n4, n5))) << endl;
-  BOOST_CHECK(r(data_application(plus, make_list(n4, n5))) == r(data_application(plus, make_list(n2, n7))));
-  specification spec1=rewrite_lps(spec,r);
-  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
-  BOOST_CHECK(spec1.process().summands().size()==1);
+  // cout << mcrl2::core::pp(application(plus, make_list(n4, n5))) << endl;
+  BOOST_CHECK(r(application(plus, n4, n5)) == r(application(plus, n2, n7)));
+
+  specification spec1 = spec;
+  lps::rewrite(spec1, r);
+  lps::detail::specification_property_map info(spec);
+  lps::detail::specification_property_map info1(spec1);
+  BOOST_CHECK(info.to_string() == info1.to_string());
+
   // test destructor
   rewriter r1 = r;
 }
@@ -111,26 +119,87 @@ const std::string SPECIFICATION2=
 "init P(1+1,2+2);                         \n";
 
 void test2()
-{ specification spec = mcrl22lps(SPECIFICATION2);
+{
+  specification spec = parse_linear_process_specification(SPECIFICATION2);
   rewriter r(spec.data());
-  specification spec1=rewrite_lps(spec,r);
-  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
-  BOOST_CHECK(spec1.process().summands().size()==1);
+
+  specification spec1 = spec;
+  lps::rewrite(spec1, r);
+
+  specification spec2 = spec1;
+  lps::rewrite(spec2, r);
+
+  lps::detail::specification_property_map info1(spec1);
+  lps::detail::specification_property_map info2(spec2);
+  BOOST_CHECK(info1.to_string() == info2.to_string());
+  BOOST_CHECK(spec1.process().summand_count() == 1);
 }
 
-const std::string SPECIFICATION3=
+const std::string SPECIFICATION3 =
 "act  c:Pos#Nat;                          \n"
 "proc P(a:Pos,b:Nat)=tau.P(a+1,b+1+2)+    \n"
 "                    tau.P(a+1,pred(a))+  \n"
 "                    c(a,0).P(a,b);       \n"
 "init P(1+1,0);                           \n";
-
 void test3()
-{ specification spec = mcrl22lps(SPECIFICATION3);
+{
+  specification spec = parse_linear_process_specification(SPECIFICATION3);
   rewriter r(spec.data());
-  specification spec1=rewrite_lps(spec,r);
-  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
-  BOOST_CHECK(spec1.process().summands().size()==2);
+
+  specification spec1 = spec;
+  lps::rewrite(spec1, r);
+
+  specification spec2 = spec1;
+  lps::rewrite(spec2, r);
+
+  lps::detail::specification_property_map info1(spec1);
+  lps::detail::specification_property_map info2(spec2);
+  BOOST_CHECK(info1.to_string() == info2.to_string());
+  BOOST_CHECK(spec1.process().summand_count() == 3);
+}
+
+// N.B. This test doesn't work due to the different representations of numbers
+// that are used before and after rewriting :-(
+// Checks if rewriting the specification src with the substitutions sigma
+// results in the specification dest.
+void test_lps_rewriter(std::string src_text, std::string dest_text, std::string sigma_text)
+{
+  lps::specification src  = parse_linear_process_specification(src_text);
+  lps::specification dest = parse_linear_process_specification(dest_text);
+
+  // rewrite the specification src                                         
+  data::rewriter R(src.data());
+  data::mutable_map_substitution< > sigma;
+  data::detail::parse_substitutions(sigma_text, src.data(), sigma);
+  data::rewriter_adapter<data::rewriter, data::mutable_map_substitution< > > Rsigma(R, sigma);
+  lps::detail::make_lps_rewriter(Rsigma).rewrite(src);                   
+
+  if (src != dest)
+  {
+    std::cerr << "--- test failed ---" << std::endl;
+    std::cerr << pp(src.process().summands()) << std::endl;
+    std::cerr << pp(src.initial_process()) << std::endl;
+    std::cerr << "-------------------" << std::endl;
+    std::cerr << pp(dest.process().summands()) << std::endl;
+    std::cerr << pp(dest.initial_process()) << std::endl;
+  }
+  BOOST_CHECK(src == dest);
+  core::garbage_collect();
+}
+                    
+void test_lps_rewriter()
+{
+  std::string src =
+    "act  c:Pos#Nat;                          \n"
+    "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+1+2); \n"
+    "init P(1+1,2+2);                         \n";
+
+  std::string dest =
+    "act  c:Pos#Nat;                          \n"
+    "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+3);   \n"
+    "init P(2,4);                             \n";
+    
+  test_lps_rewriter(src, dest, "");
 }
 
 int test_main(int argc, char* argv[])
@@ -140,6 +209,7 @@ int test_main(int argc, char* argv[])
   test1();
   test2();
   test3();
+  //test_lps_rewriter();
 
   return 0;
 }

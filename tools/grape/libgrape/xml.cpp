@@ -8,6 +8,10 @@
 //
 // Implements XML generating functions.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "xml.h"
 
 using namespace grape::libgrape;
@@ -120,7 +124,7 @@ void grape::libgrape::add_process_diagram_list( wxXmlNode* p_root, arr_process_d
 
       } // end offspring xml_preamble_declarations
 
-      write_name( xml_process_diagram, p_dia.get_name() );
+      write_name_to( xml_process_diagram, p_dia.get_name() );
 
       write_id (xml_process_diagram, p_dia.get_id() );
 
@@ -249,7 +253,7 @@ void grape::libgrape::add_reference_state_list( wxXmlNode* p_objectlist, process
       }
       new wxXmlNode( xml_reference_state_prop, wxXML_TEXT_NODE, _T( "value" ), ref_state_prop );
 
-      write_name( xml_reference_state, ref_state_ptr->get_name() );
+      write_name_to( xml_reference_state, ref_state_ptr->get_name() );
 
       /* Inherited */
       write_object_attributes( xml_reference_state, ref_state_ptr );
@@ -274,7 +278,7 @@ void grape::libgrape::add_state_list( wxXmlNode* p_objectlist, process_diagram* 
                                           _T( "state" ) );
       state* state_ptr = p_proc_dia->get_state( i );
 
-      write_name( xml_state, state_ptr->get_name() );
+      write_name_to( xml_state, state_ptr->get_name() );
 
       /* Inherited */
       write_object_attributes( xml_state, state_ptr );
@@ -340,7 +344,6 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
         /* node <action> */
         wxXmlNode* xml_terminating_trans_label_action = new wxXmlNode( xml_terminating_trans_label_actions, wxXML_ELEMENT_NODE, _T( "action" ) );
 
-        wxString tt_label_action_params_text;
         list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
         if (tt_label_action_params.GetCount() > 0)
         {
@@ -471,7 +474,6 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
         /* node <action> */
         wxXmlNode* xml_nonterminating_trans_label_action = new wxXmlNode( xml_nonterminating_trans_label_actions, wxXML_ELEMENT_NODE, _T( "action" ) );
 
-        wxString tt_label_action_params_text;
         list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
         if (tt_label_action_params.GetCount() > 0)
         {
@@ -580,8 +582,6 @@ void grape::libgrape::add_architecture_diagram_list( wxXmlNode* p_root, arr_arch
       { // children of xml_objectlist
 
         add_comment_list( xml_objectlist, &arch_dia );
-//        add_blocked_list( xml_objectlist, &arch_dia );
-//        add_visible_list( xml_objectlist, &arch_dia );
         add_channel_communication_list( xml_objectlist, &arch_dia );
         add_channel_list( xml_objectlist, &arch_dia );
         add_architecture_reference_list( xml_objectlist, &arch_dia );
@@ -589,7 +589,7 @@ void grape::libgrape::add_architecture_diagram_list( wxXmlNode* p_root, arr_arch
 
       } // end children xml_objectlist
 
-      write_name( xml_architecture_diagram, arch_dia.get_name() );
+      write_name_to( xml_architecture_diagram, arch_dia.get_name() );
 
       /* node <id> */
       write_id( xml_architecture_diagram, arch_dia.get_id() ) ;
@@ -634,7 +634,7 @@ void grape::libgrape::add_channel_communication_list( wxXmlNode* p_objectlist, a
 
       }
       
-      write_rename_to( xml_channel_communication, c_comm_ptr->get_rename_to() );     
+      write_name_to( xml_channel_communication, c_comm_ptr->get_name_to() );     
       
       write_channel_communication_type( xml_channel_communication, c_comm_ptr->get_channel_communication_type() );      
 
@@ -679,17 +679,6 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
         new wxXmlNode( xml_channel_connected, wxXML_TEXT_NODE, _T( "value" ), text_connected );
 
       }
-      /* node <onchannelcommunication> */
-/*      wxXmlNode* xml_channel_comm = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onchannelcommunication" ) );
-
-      channel_communication* chan_comm_ptr = channel_ptr->get_channel_communication();
-
-      if ( chan_comm_ptr != 0 )
-      {
-        wxString comm = wxString::Format( _T( "%u" ), chan_comm_ptr->get_id() );
-        new wxXmlNode( xml_channel_comm, wxXML_TEXT_NODE, _T( "value" ), comm );
-      }
-*/
       /* node <onreference> */
       wxXmlNode* xml_channel_prop = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onreference" ) );
 
@@ -697,7 +686,7 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
 
       new wxXmlNode( xml_channel_prop, wxXML_TEXT_NODE, _T( "value" ), prop );
 
-      write_name( xml_channel, channel_ptr->get_name() );
+      write_name_to( xml_channel, channel_ptr->get_name() );
       
       write_rename_to( xml_channel, channel_ptr->get_rename_to() );      
 
@@ -755,7 +744,7 @@ void grape::libgrape::add_architecture_reference_list( wxXmlNode* p_objectlist, 
       new wxXmlNode( xml_architecture_reference_prop, wxXML_TEXT_NODE, _T( "value" ), arch_ref_prop );
 
       /* node <name> */
-      write_name( xml_architecture_reference, arch_ref_ptr->get_name() );
+      write_name_to( xml_architecture_reference, arch_ref_ptr->get_name() );
 
       /* Inherited */
       write_object_attributes( xml_architecture_reference, arch_ref_ptr );
@@ -823,7 +812,7 @@ void grape::libgrape::add_process_reference_list( wxXmlNode* p_objectlist, archi
       new wxXmlNode( xml_process_reference_prop, wxXML_TEXT_NODE, _T( "value" ), proc_ref_prop );
 
       /* node <name> */
-      write_name( xml_process_reference, proc_ref_ptr->get_name() );
+      write_name_to( xml_process_reference, proc_ref_ptr->get_name() );
 
       /* Inherited */
       write_object_attributes( xml_process_reference, proc_ref_ptr );
@@ -894,7 +883,7 @@ void grape::libgrape::write_id( wxXmlNode *p_parent, unsigned int p_id )
   new wxXmlNode( xml_comment_id, wxXML_TEXT_NODE, _T( "value" ), id );
 }
 
-void grape::libgrape::write_name( wxXmlNode *p_parent, const wxString &p_name )
+void grape::libgrape::write_name_to( wxXmlNode *p_parent, const wxString &p_name )
 {
   /* node <name> */
   wxXmlNode* xml_name = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "name" ) );
@@ -966,4 +955,4 @@ void grape::libgrape::write_channel_communication_type( wxXmlNode *p_parent, cha
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_wxXmlNode );
+WX_DEFINE_OBJARRAY( arr_wxXmlNode )
