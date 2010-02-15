@@ -161,7 +161,7 @@ void test_pbespgsolve(std::string pbes_spec)
     int max_prio = 0;                                                        
     for (unsigned int v = begin; v < end; ++v)                                      
     {                                                                        
-      max_prio = std::max(max_prio, (int)pgg.get_priority(v));             
+      max_prio = (std::max)(max_prio, (int)pgg.get_priority(v));             
     }                                                                        
                                                                              
     for (unsigned int v = begin; v < end; ++v)                                      
