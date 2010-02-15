@@ -956,8 +956,8 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   ds.add_equation(data_equation(  // negate(equal)=equal;
                      vector <variable>(),
                      sort_bool::true_(),
-                     application(negate_function_symbol(c.sort()),c.smaller()),
-                     c.larger()));
+                     application(negate_function_symbol(c.sort()),c.equal()),
+                     c.equal()));
   variable v("x",c.sort());
   vector <variable> vars;
   vars.push_back(v);
