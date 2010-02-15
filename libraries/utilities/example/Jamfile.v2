@@ -4,6 +4,7 @@ project libraries/utilities/example
        <source>/libraries//core
        <source>/libraries//data
        <source>/libraries//utilities
+       <source>/libraries/utilities//command_line_interface
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
