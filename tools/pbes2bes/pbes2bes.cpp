@@ -228,7 +228,16 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       if (m_strategy == ts_lazy)
       {
-        pbes2bes_algorithm algorithm(p.data(), rewrite_strategy());
+        unsigned int log_level = 0;
+        if (mcrl2::core::gsVerbose)
+        {
+          log_level = 1;
+        }
+        if (mcrl2::core::gsDebug)
+        {
+          log_level = 2;
+        }     	
+        pbes2bes_algorithm algorithm(p.data(), rewrite_strategy(), false, false, log_level);
         algorithm.run(p);
         p = algorithm.get_result();
       }

@@ -13,6 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/core/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbes2bes_rewriter.h"
@@ -64,14 +65,14 @@ namespace pbes_system {
   }
 
   /// \brief Algorithm class for the pbes2bes instantiation algorithm.
-  class pbes2bes_algorithm
+  class pbes2bes_algorithm: public core::algorithm
   {
     protected:
       /// \brief The rewriter.
       pbes2bes_rewriter R;
 
       /// \brief The number of generated equations.
-      int equation_count;
+      int m_equation_count;
 
       /// \brief Propositional variable instantiations that need to be handled.
       atermpp::set<propositional_variable_instantiation> todo;
@@ -92,6 +93,18 @@ namespace pbes_system {
       /// \brief Print the equations to standard out.
       bool m_print_equations;
 
+      /// \brief Prints a log message for every 1000-th equation
+      void LOG_EQUATION_COUNT(unsigned int level, unsigned int size) const
+      {
+        if (check_log_level(level))
+        {
+          if (size > 0 && size % 1000 == 0)
+          {
+            std::cout << "Generated " << size << " BES equations" << std::endl;
+          }
+        }
+      }
+
     public:
 
       /// \brief Constructor.
@@ -99,8 +112,12 @@ namespace pbes_system {
       /// \param rewriter_strategy A strategy for the data rewriter
       /// \param print_equations If true, the generated equations are printed
       /// \param print_rewriter_output If true, invocations of the rewriter are printed
-      pbes2bes_algorithm(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
-        : R(data_spec, rewriter_strategy, print_rewriter_output), equation_count(0), m_print_equations(print_equations)
+      pbes2bes_algorithm(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false, unsigned int log_level = 0)
+        : core::algorithm(log_level),
+        	R(data_spec, rewriter_strategy, print_rewriter_output),
+        	m_equation_count(0),
+        	m_print_equations(print_equations)
+        	
       {}
 
       /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
@@ -144,10 +161,7 @@ namespace pbes_system {
             std::cerr << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;
           }
           E[index].push_back(new_eqn);
-          if (++equation_count % 1000 == 0)
-          {
-            core::gsVerboseMsg("At equation %d\n", equation_count);
-          }
+          LOG_EQUATION_COUNT(1, ++m_equation_count);
         }
       }
 
