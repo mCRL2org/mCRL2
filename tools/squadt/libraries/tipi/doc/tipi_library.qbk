@@ -1,7 +1,7 @@
 [library TIPi Library
     [quickbook 1.4]
     [authors [Wulp, Jeroen van der]]
-    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [Copyright 2005-2010 Technische Universiteit Eindhoven]
     [category string-text]
     [purpose
        fill in the purpose here

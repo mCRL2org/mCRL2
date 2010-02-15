@@ -32,12 +32,12 @@ namespace mcrl2 {
 
     /** \brief toolset version tag */
     inline std::string version_tag() {
-      return "June 2009 (development)";
+      return "January 2010 (release)";
     }
 
     /** \brief toolset copyright period description */
     inline std::string copyright_period() {
-      return "2009";
+      return "2010";
     }
 
     // \cond INTERNAL
