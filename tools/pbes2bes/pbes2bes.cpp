@@ -129,6 +129,12 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       {
         set_transformation_strategy("lazy");
       }
+
+      if (parser.options.count("equation_limit") > 0)
+      {
+      	int limit = parser.option_argument_as<int>("equation_limit");
+      	pbes_system::detail::set_bes_equation_limit(limit);
+      }
     }
 
     void add_options(interface_description& desc)
@@ -149,6 +155,10 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
           "  'internal' for the internal textual format, or\n"
           "  'cwi' for the format used by the CWI to solve a BES.",
           'o');
+      desc.add_hidden_option("equation_limit",
+         make_optional_argument("NAME", "-1"),
+         "Set a limit to the number of generated BES equations",
+         'l');
     }
 
     /// \return A string representation of the transformation strategy.
