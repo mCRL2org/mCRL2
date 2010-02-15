@@ -1,7 +1,7 @@
 [library Trace Library
     [quickbook 1.4]
     [authors [Weerdenburg, Muck van], [Groote, Jan Friso]]
-    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [Copyright 2005-2010 Technische Universiteit Eindhoven]
     [category string-text]
 ]
 

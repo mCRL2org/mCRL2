@@ -1,7 +1,7 @@
 [library Process Library
     [quickbook 1.4]
     [authors [Wesselink, Wieger]]
-    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [Copyright 2005-2010 Technische Universiteit Eindhoven]
     [category string-text]
 ]
 
