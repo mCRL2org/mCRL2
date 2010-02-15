@@ -37,12 +37,7 @@ int main(int argc, char* argv[])
     boost::program_options::options_description bessolve_options(
       "Usage: bessolve [OPTION]... INFILE\n"
       "\n"
-      "Reads a pbes from INFILE, applies pbes2bes to it, and solves the\n"
-      "resulting bes using Gauss elimination\n"
-      "\n"
-      "Two variants of pbes2bes are supported:\n"
-      "  0 : lazy algorithm\n"
-      "  1 : finite algorithm\n"
+      "Reads a bes from INFILE, and solves it using Gauss elimination\n"
       "\n"
       "Options"
     );
@@ -81,26 +76,7 @@ int main(int argc, char* argv[])
     }
 
     p.load(infile);
-    pbes<> q;
-
-    // data rewriter
-    my_data_rewriter datar(p.data());
-
-    // identifier generator for data enumerator
-    number_postfix_generator name_generator;
-
-    // data enumerator
-    my_enumerator datae(p.data(), datar, name_generator);
-
-    // pbes rewriter
-    my_pbes_rewriter pbesr(datar, datae);
-
-    // apply pbes2bes
-    pbes2bes_algorithm algorithm(p.data());
-    algorithm.run(p);
-    q = algorithm.get_result();
-
-    int result = gauss_elimination(q);
+    int result = gauss_elimination(p);
 
     std::string result_string;    
     if (result == 0)

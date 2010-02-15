@@ -11,6 +11,7 @@ project libraries/pbes/example
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
+exe pbesnormalize : pbesnormalize.cpp : ;
 exe paritygame   : paritygame.cpp : ;
 exe bes_bisimulation : bes_bisimulation.cpp : ;
 exe bes2besformat : bes2besformat.cpp : ;
@@ -26,6 +27,7 @@ exe pbes2bes     : pbes2bes.cpp : ;
 
 install dist
    :
+     pbesnormalize
      paritygame
      bes_bisimulation
      bes2besformat
