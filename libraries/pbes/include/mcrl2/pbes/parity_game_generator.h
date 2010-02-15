@@ -122,6 +122,18 @@ namespace pbes_system {
       /// \brief True if it is a min-parity game.
       bool m_is_min_parity;
 
+      /// \brief Prints a log message for every 1000-th equation
+      void LOG_EQUATION_COUNT(unsigned int level, unsigned int size) const
+      {
+        if (check_log_level(level))
+        {
+          if (size > 0 && size % 1000 == 0)
+          {
+            std::cout << "Generated " << size << " BES equations" << std::endl;
+          }
+        }
+      }
+
       /// \brief Adds a BES equation for a given PBES expression, if it not already exists.
       /// \param t A PBES expression
       /// \param priority A positive integer
@@ -140,6 +152,7 @@ namespace pbes_system {
           unsigned int p = m_pbes_expression_index.size();
           m_pbes_expression_index[t] = p;
           m_bes.push_back(std::make_pair(t, priority));
+          LOG_EQUATION_COUNT(1, m_bes.size());
           return p;
         }
       }
