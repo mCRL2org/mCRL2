@@ -26,6 +26,7 @@
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
 
 namespace atermpp {
   /// \cond INTERNAL_DOCS
@@ -152,6 +153,7 @@ namespace pbes_system {
           unsigned int p = m_pbes_expression_index.size();
           m_pbes_expression_index[t] = p;
           m_bes.push_back(std::make_pair(t, priority));
+          detail::check_bes_equation_limit(m_bes.size());
           LOG_EQUATION_COUNT(1, m_bes.size());
           return p;
         }

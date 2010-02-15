@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbes2bes_rewriter.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
 
 #ifdef PBES2BES_FINITE_ALGORITHM
 #include "mcrl2/pbes/detail/pbes2bes_finite_builder.h"
@@ -162,6 +163,7 @@ namespace pbes_system {
           }
           E[index].push_back(new_eqn);
           LOG_EQUATION_COUNT(1, ++m_equation_count);
+          detail::check_bes_equation_limit(m_equation_count);
         }
       }
 
