@@ -192,7 +192,7 @@ namespace pbes_system {
         {
           const std::pair<pbes_expression, unsigned int>& eqn = m_bes[index];
           const unsigned int priority = eqn.second;
-          std::clog << (priority % 2 == 0 ? "mu Y" : "nu Y") << index << " = ";
+          std::clog << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
           std::string op =  (get_operation(index) == PGAME_AND ? " && " : " || ");
           for (std::set<unsigned int>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
           {
