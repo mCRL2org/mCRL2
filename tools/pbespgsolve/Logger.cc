@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 
-Logger::Severity Logger::severity_ = myFATAL;
+Logger::Severity Logger::severity_ = FATAL;
 #ifdef USE_TIMER
 Timer Logger::timer_;
 #endif
@@ -25,9 +25,9 @@ void Logger::print_message(Severity severity, const char *fmt, va_list ap)
 #endif
     switch (severity)
     {
-    case myWARN:  fprintf(stderr, "WARNING: "); break;
-    case myERROR: fprintf(stderr, "ERROR: "); break;
-    case myFATAL: fprintf(stderr, "FATAL ERROR: "); break;
+    case WARN:  fprintf(stderr, "WARNING: "); break;
+    case ERROR: fprintf(stderr, "ERROR: "); break;
+    case FATAL: fprintf(stderr, "FATAL ERROR: "); break;
     default:    break;
     }
     vfprintf(stderr, fmt, ap);

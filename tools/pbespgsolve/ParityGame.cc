@@ -13,9 +13,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <assert.h>
-#include <tr1/unordered_map>
 
-typedef std::tr1::unordered_map<verti, verti> vertex_map_t;
+typedef HASH_MAP(verti, verti) vertex_map_t;
 
 ParityGame::ParityGame()
     : d_(0), vertex_(NULL), cardinality_(NULL)

@@ -12,7 +12,6 @@
 
 #include <assert.h>
 #include <memory>
-#include <tr1/unordered_set>
 
 ComponentSolver::ComponentSolver( const ParityGame &game,
                                   ParityGameSolverFactory &pgsf )
@@ -105,7 +104,7 @@ int ComponentSolver::operator()(const verti *vertices, size_t num_vertices)
         info("(ComponentSolver) Building attractor sets for winning regions...");
 
         // Extract winning sets from subgame:
-        std::tr1::unordered_set<verti> winning[2];
+        HASH_SET(verti) winning[2];
         for (size_t n = 0; n < unsolved.size(); ++n)
         {
             winning[subgame.winner(substrat, n)].insert(unsolved[n]);
@@ -118,7 +117,7 @@ int ComponentSolver::operator()(const verti *vertices, size_t num_vertices)
                                 winning[player], &strategy_ );
 
             // Mark vertices in winning + attractor set as solved:
-            for (std::tr1::unordered_set<verti>::const_iterator it =
+            for (HASH_SET(verti)::const_iterator it =
                     winning[player].begin(); it != winning[player].end(); ++it)
             {
                 solved_[*it] = true;
