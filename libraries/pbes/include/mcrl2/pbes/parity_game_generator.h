@@ -152,6 +152,10 @@ namespace pbes_system {
         {
           unsigned int p = m_pbes_expression_index.size();
           m_pbes_expression_index[t] = p;
+          if (tr::is_prop_var(t))
+          {
+          	priority = m_priorities[tr::name(t)];
+          }
           m_bes.push_back(std::make_pair(t, priority));
           detail::check_bes_equation_limit(m_bes.size());
           LOG_EQUATION_COUNT(1, m_bes.size());
@@ -198,7 +202,7 @@ namespace pbes_system {
           {
             std::clog << (i == rhs.begin() ? "" : op) << "Y" << *i;
           }
-          std::clog << std::endl;
+          std::clog <<  " (priority = " << priority << ")" << std::endl;
         }
       }
 
