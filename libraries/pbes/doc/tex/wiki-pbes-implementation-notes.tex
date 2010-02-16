@@ -964,15 +964,15 @@ Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\ldots \mathcal{%
 (\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES with initial state $%
 X_{init}(e_{init})$, and let $R:PbesTerm\rightarrow PbesTerm$ be a rewriter.
 The PBES must be in normal form, i.e. it may not contain negations or
-implications. The following algorithm computes a BES. The generated equations
-are in a restricted format, such that the BES can be taken as input for a parity
-game solver.%
+implications. The following algorithm computes a BES. The generated
+equations are in a restricted format, such that the BES can be taken as
+input for a parity game solver.
 
-\begin{small}
+{\small
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{GenerateBES(}}\mathcal{E}\text{, }X_{init}(e_{init})%
-\text{, }R\text{\textsc{)}} \\
+\text{\textsc{GenerateBES(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
+\text{\textsc{)}} \\
 \text{result}:=\{(\nu Y_{\top }=Y_{\top }),(\mu Y_{\bot }=Y_{\bot })\} \\
 \text{visited}:=\{R(X_{init}(e_{init}))\} \\
 \text{explored}:=\{\top ,\bot \} \\
@@ -989,23 +989,25 @@ game solver.%
 \qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
 }=Y_{\xi }) \\
 \qquad \qquad \sigma _{\xi }:=\sigma _{k} \\
-\qquad \qquad \text{visited}:=\text{visited}\cup \{Y_{\xi }\} \\
+\qquad \qquad \text{visited}:=\text{visited}\cup \{\xi \} \\
 \qquad \text{\textbf{else if} }\{\xi =\dbigwedge_{j\in J}\phi _{j}\}\text{
 \textbf{then}} \\
 \qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
 }=\dbigwedge_{j\in J}Y_{\phi _{j}}) \\
-\qquad \qquad \text{\textbf{for} }j\in J\text{ \textbf{do} }\sigma _{\phi
+\qquad \qquad \text{\textbf{for} }j\in J\text{ \textbf{do}} \\
+\qquad \qquad \qquad \text{\textbf{if} }\{\xi =X_{k}(e)\}\text{ \textbf{then}
+}\sigma _{\phi _{j}}:=\sigma _{k}\text{ \textbf{else} }\sigma _{\phi
 _{j}}:=\sigma _{\psi } \\
-\qquad \qquad \text{visited}:=\text{visited}\cup \{Y_{\phi _{j}}\}_{j\in J}
-\\
+\qquad \qquad \text{visited}:=\text{visited}\cup \{\phi _{j}\}_{j\in J} \\
 \qquad \text{\textbf{else if} }\{\xi =\dbigvee_{j\in J}\phi _{j}\}\text{
 \textbf{then}} \\
 \qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
 }=\dbigvee_{j\in J}Y_{\phi _{j}}) \\
-\qquad \qquad \text{\textbf{for} }j\in J\text{ \textbf{do} }\sigma _{\phi
+\qquad \qquad \text{\textbf{for} }j\in J\text{ \textbf{do}} \\
+\qquad \qquad \qquad \text{\textbf{if} }\{\xi =X_{k}(e)\}\text{ \textbf{then}
+}\sigma _{\phi _{j}}:=\sigma _{k}\text{ \textbf{else} }\sigma _{\phi
 _{j}}:=\sigma _{\psi } \\
-\qquad \qquad \text{visited}:=\text{visited}\cup \{Y_{\phi _{j}}\}_{j\in J}
-\\
+\qquad \qquad \text{visited}:=\text{visited}\cup \{\phi _{j}\}_{j\in J} \\
 \qquad \text{\textbf{else if} }\{\xi =\top \}\text{ \textbf{then}} \\
 \qquad \qquad \text{result}:=\text{ result}\cup (\sigma _{\psi }Y_{\psi
 }=Y_{\top }) \\
@@ -1015,7 +1017,7 @@ _{j}}:=\sigma _{\psi } \\
 \text{\textbf{return }result}%
 \end{array}%
 \end{equation*}%
-\end{small}
+}
 
 In every step of the while loop the equation for $Y_{\psi }$ is computed. If
 the right hand side of the equation for $Y_{\psi }$ is a propositional
@@ -1025,8 +1027,8 @@ conjunction by introducing new BES variables. The rewriter $R$ is expected
 to eliminate all quantifiers, so the while loop does not contain cases for
 handling them. The order of the equations in the BES is significant.
 Therefore in the implementation instead of fixpoint symbols $\sigma _{\psi }$
-priority values are used. The BES variables $Y_{\psi }$ are
-represented by integers.
+priority values are used. The BES variables $Y_{\psi }$ are represented by
+integers.
 
 An alternative for inserting the equations $(\nu Y_{\top }=Y_{\top })$ and $%
 (\mu Y_{\bot }=Y_{\bot })$ at the beginning of the resulting BES is to
@@ -1035,8 +1037,8 @@ replace $\mu Y_{\psi }=\top $ and $\nu Y_{\psi }=\top $ by $\nu Y_{\psi
 by $\mu Y_{\psi }=Y_{\psi }$. This eliminates the need to introduce special
 equations for true and false.
 
-This algorithm is implemented in the class \tt{parity\_game\_generator}.
-The choice for $\psi$ in the while loop is left to the user of the class.
+This algorithm is implemented in the class \texttt{{parity\_game\_generator}}%
+. The choice for $\psi$ in the while loop is left to the user of the class.
 
 \pagebreak
 
