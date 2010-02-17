@@ -63,6 +63,14 @@ if( MONO_LIB )
     tr
     gl2ps
   )
+
+  # ######### required for squadt connectivity ##########
+  if(SQUADT_CONNECTIVITY)
+    add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
+    include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
+  endif(SQUADT_CONNECTIVITY)
+  # #####################################################
+
 else( MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
