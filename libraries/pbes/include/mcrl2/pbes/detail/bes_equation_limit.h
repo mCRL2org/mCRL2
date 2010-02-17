@@ -27,11 +27,11 @@ namespace detail {
   struct bes_equation_limit
   {
   	// -1 means unlimited
-    static unsigned int max_bes_equations;
+    static int max_bes_equations;
   };
 
   template <class T>
-  unsigned int bes_equation_limit<T>::max_bes_equations = -1;
+  int bes_equation_limit<T>::max_bes_equations = -1;
 
   inline
   void set_bes_equation_limit(int size)

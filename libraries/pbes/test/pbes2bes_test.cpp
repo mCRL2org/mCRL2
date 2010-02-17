@@ -142,6 +142,28 @@ std::string test8 =
   "init X(true);                                                                     \n"
   ;
 
+std::string test9 =
+  "pbes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        \n"
+  "nu X0(c:Bool, n:Nat) = (forall n:Nat.((val(n < 3)) && (((val(n < 3)) || (exists m:Nat.((val(m < 3)) || (X3(m + 1, m > 0))))) && ((forall m:Nat.((val(m < 3)) && (!X2(m + 1, 1)))) => ((val(c)) || (val(n < 3))))))) || ((val(false)) || (X0(false, n + 1)));                                                                                                                                                                                                                                                \n"
+  "nu X1(b:Bool) = (!(!(forall k:Nat.((val(k < 3)) && ((forall k:Nat.((val(k < 3)) && ((X2(1, k + 1)) && (val(false))))) || ((X4(k > 0, k + 1)) && (X1(k > 1)))))))) && (!(forall m:Nat.((val(m < 3)) && (((val(m < 2)) && (val(m > 0))) && (val(true))))));                                                                                                                                                                                                                                                   \n"
+  "mu X2(m:Nat, n:Nat) = (((val(m < 2)) && (X4(m == n, n + 1))) || ((val(false)) || ((val(true)) => (X0(n == m, 0))))) || (forall k:Nat.((val(k < 3)) && (exists m:Nat.((val(m < 3)) || ((val(n < 2)) && (X2(m + 1, m + 1)))))));                                                                                                                                                                                                                                                                              \n"
+  "nu X3(n:Nat, c:Bool) = ((forall k:Nat.((val(k < 3)) && (!((forall m:Nat.((val(m < 3)) && (val(n > 0)))) => (val(c)))))) && ((X3(0, n < 3)) && (exists m:Nat.((val(m < 3)) || ((!(exists n:Nat.((val(n < 3)) || (val(m < 2))))) && (X2(n + 1, m + 1))))))) || ((!(!X1(n > 0))) || (val(false)));                                                                                                                                                                                                             \n"
+  "nu X4(c:Bool, n:Nat) = (((exists m:Nat.((val(m < 3)) || (val(m > 0)))) && ((!(!X0(n < 3, 0))) || (!((val(n > 0)) => (!X2(0, 0)))))) => (forall k:Nat.((val(k < 3)) && (!(forall n:Nat.((val(n < 3)) && (val(n < 2)))))))) => (!(forall m:Nat.((val(m < 3)) && ((val(c)) && (forall m:Nat.((val(m < 3)) && (!X3(n + 1, false))))))));                                                                                                                                                                        \n"
+  "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            \n"
+  "init X0(true, 0);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \n"
+  ;
+
+std::string test10 =
+  "pbes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        \n"
+  "mu X0(m:Nat, b:Bool) = (X0(m + 1, m > 0)) && (((forall m:Nat.((val(m < 3)) && (forall k:Nat.((val(k < 3)) && (!((val(k > 1)) && (val(false)))))))) && (exists n:Nat.((val(n < 3)) || (!(!(val(n > 1))))))) || (exists n:Nat.((val(n < 3)) || (forall n:Nat.((val(n < 3)) && (exists n:Nat.((val(n < 3)) || (((forall m:Nat.((val(m < 3)) && (val(m == n)))) => (X3(0, n > 1))) && (!(!X2(n == m)))))))))));                                                                                                 \n"
+  "mu X1(c:Bool, b:Bool) = (((!X1(c, true)) || ((!X2(b)) || (val(b)))) && (forall k:Nat.((val(k < 3)) && (((val(c)) => (X4(c, 1))) => (val(true)))))) => (val(true));                                                                                                                                                                                                                                                                                                                                          \n"
+  "nu X2(b:Bool) = (!(!(((exists m:Nat.((val(m < 3)) || (val(m < 3)))) => ((X0(1, true)) => (!(val(false))))) && ((!((!X1(b, true)) && (!X3(0, false)))) => (val(false)))))) => (exists m:Nat.((val(m < 3)) || (forall k:Nat.((val(k < 3)) && (exists n:Nat.((val(n < 3)) || (forall n:Nat.((val(n < 3)) && (exists n:Nat.((val(n < 3)) || (forall n:Nat.((val(n < 3)) && (val(false))))))))))))));                                                                                                            \n"
+  "mu X3(m:Nat, c:Bool) = (exists m:Nat.((val(m < 3)) || ((!(val(c))) && (forall k:Nat.((val(k < 3)) && (exists m:Nat.((val(m < 3)) || (forall k:Nat.((val(k < 3)) && (val(false))))))))))) || (exists m:Nat.((val(m < 3)) || (exists n:Nat.((val(n < 3)) || ((!((exists k:Nat.((val(k < 3)) || (!X4(false, k + 1)))) && ((!X1(m > 0, n < 2)) || ((val(n > 0)) || (val(c)))))) && (exists k:Nat.((val(k < 3)) || (exists n:Nat.((val(n < 3)) || (exists k:Nat.((val(k < 3)) || (X3(k + 1, k == n))))))))))))); \n"
+  "nu X4(b:Bool, n:Nat) = (exists m:Nat.((val(m < 3)) || ((val(b)) || ((val(n > 1)) && ((X1(m > 1, n == m)) || (val(m > 0))))))) && ((exists k:Nat.((val(k < 3)) || (!(!((!X3(1, n > 0)) && (!(val(k == n)))))))) => (forall n:Nat.((val(n < 3)) && (exists k:Nat.((val(k < 3)) || (!(!(X4(n > 1, 0)))))))));                                                                                                                                                                                                  \n"
+  "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            \n"
+  "init X0(0, true);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \n"
+  ;
+
 void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
 {
   core::gsSetNormalMsg();
@@ -206,11 +228,14 @@ void test_pbes2bes()
   test_pbes(test6, true, true);
   test_pbes(test7, true, true);
   test_pbes(test8, true, true);
+  test_pbes(test9, false, true);
+  test_pbes(test10, false, true);
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+	pbes_system::detail::set_bes_equation_limit(100000);
   test_pbes2bes();
   core::garbage_collect();
 
