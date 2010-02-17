@@ -11,6 +11,7 @@ tool grape
         <include>.
         <wx>gl
         <install-dependency>manual
+        <toolset>gcc:<linkflags>-lGLU        
       ;
 
 install-data manual : grapeapp/help/grapehelp.zip : <data-sub-location>grape ;
