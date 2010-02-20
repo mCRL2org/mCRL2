@@ -608,7 +608,6 @@ namespace bes
                       std::deque < counter_example > &counter_example_queue=bes_global_variables<int>::COUNTER_EXAMPLE_NULL_QUEUE)
   { assert(is_true(b_subst)||is_false(b_subst));
 
-    // std::cerr << "Substitute true/false " << v << " with " << b_subst << "  " << "\n";
     if (is_true(b)||is_false(b)||is_dummy(b))
     { return b;
     }
@@ -1055,7 +1054,6 @@ namespace bes
                         std::deque <variable_type> &todo=bes_global_variables<int>::TODO_NULL_QUEUE)
       { assert(rank>0);  // rank must be positive.
         assert(v>0);     // variables are represented by numbers >0.
-        // std::cerr << "Add equation " << v << " with rank " << rank << std::endl;
 
         check_vector_sizes(v);
         // the vector at position v is now guaranteed to exist.
@@ -1153,7 +1151,6 @@ namespace bes
         }
         if (is_if(b))
         { assert(get_variable(condition(b))>0);
-          // std::cerr << "ADD " << v << " TO SET " << get_variable(condition(b)) << std::endl;
           variable_type w=get_variable(condition(b));
           check_vector_sizes(w);
           variable_occurrence_sets[w].insert(v);
@@ -1414,25 +1411,23 @@ namespace bes
              std::map < variable_type,bool > &visited_variables,
              bool is_mu)
       {
-        // std::cerr << "find " << v << "  " << b << "\n";
         if (is_false(b) || is_true(b) || is_dummy(b))
         {
-          // std::cerr << "false1  " << b << "\n";
           return false;
         }
 
         if (is_variable(b))
         { variable_type w=get_variable(b);
           if (w==v)
-          { // std::cerr << "true" << b << "\n";
+          { 
             return true;
           }
           if (get_rank(w)!=rankv)
           {
-            // std::cerr << "false2  " << b << "Rankv " << rankv << "Rankw " << get_rank(w) << "\n";
             return false;
           }
-          if (visited_variables.find(w)!=visited_variables.end())                                            { return visited_variables[w];
+          if (visited_variables.find(w)!=visited_variables.end())                                            
+          { return visited_variables[w];
           }
 
           visited_variables.insert(std::make_pair(w,false));
@@ -1474,7 +1469,6 @@ namespace bes
             }
             return find_mu_nu_loop_rec(then_branch(b),v,rankv,visited_variables,is_mu);
           }
-          // std::cerr << "false3  " << b << "\n";
           return false;
         }
 
@@ -1488,14 +1482,7 @@ namespace bes
              variable_type v,
              unsigned long rankv)
       { std::map < variable_type, bool > visited_variables;
-        // std::cerr << "SEARCHING FOR A MU LOOP  " << v << "\n";
         bool result=find_mu_nu_loop_rec(b,v,rankv,visited_variables,true);
-        if (result)
-        { // std::cerr << "MULOOP GEVONDEN " << v << "\n";
-        }
-        else
-        { // std::cerr << "JAMMER " << v << "\n";
-        }
         return result;
       }
 
@@ -1814,11 +1801,12 @@ namespace bes
       }
       
       if (opt_precompile_pbes)
-      { throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
+      { 
+        throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
                      pp(rewriter->fromRewriteFormat((ATerm)(ATermAppl)p)) + "\n");
       }
       else
-      {
+      { 
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " + 
                      pp(p) + "\n");
       }
@@ -3068,7 +3056,6 @@ bool solve_bes(bes::boolean_equation_system &bes_equations,
     {
       if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
       {
-        // std::cerr << "Evaluate variable" << v << "\n";
         bes_expression t=evaluate_bex(
                              bes_equations.get_rhs(v),
                              approximation,
@@ -3170,7 +3157,6 @@ bool solve_bes(bes::boolean_equation_system &bes_equations,
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
     { if (bes_equations.is_relevant(v))
       {
-        // std::cerr << "Substitute values in lower rank" << v << "\n";
         if (bes_equations.get_rank(v)==current_rank)
         {
           if (opt_construct_counter_example)
