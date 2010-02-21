@@ -720,6 +720,17 @@ const std::string various_case_32 =
   "init P([Empty]);\n"
   ;
 
+/* This test case is a test to check whether constant elimination in the
+   linearizer goes well. This testcase is inspired by an example by Chilo
+   van Best. The problem is that the constant x:Nat below may not be
+   recorded in the assignment list of process P, and therefore forgotten */
+const std::string various_case_33 =
+  "act  a:Nat; "
+  "proc P(x:Nat,b:Bool,r:Real) = a(x).P(x,!b,r); "
+  "     P(x:Nat) = P(x,true,1); "
+  "init P(1); "
+  ;
+
 
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
@@ -826,6 +837,8 @@ void test_various_aux(t_lin_options &options)
   spec = linearise(various_case_LR2par, options);
   std::cerr << "Testcase 32\n";
   spec = linearise(various_case_32, options);
+  std::cerr << "Testcase 33\n";
+  spec = linearise(various_case_33, options);
 }
 
 std::string print_rewrite_strategy(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
