@@ -18,16 +18,20 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: lz.c,v 1.3 2008/09/30 08:22:51 bertl Exp $ */
+   $Id: lz.c,v 1.2 2005/11/10 16:11:47 bertl Exp $ */
+
+/* Bert Lisser: scratch buffer changed from fixed data array into reallocable 
+   array on the heap. Added function "int add2scratch(int last, char *c)" */
 
 #include <string.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <svc/lz.h>
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char *strdup(const char *s);
 #endif
+
+
 
 static int compress(BitStream *bs, LZbuffer *buffer, char *string);
 static int decompress(BitStream *bs, LZbuffer *buffer, char **str);
@@ -36,8 +40,9 @@ static void LZsplitToken(char *c, unsigned int *offset, unsigned int *length, LZ
 static void LZwriteToken(BitStream *bs, LZtoken token);
 static int LZreadToken(BitStream *bs, LZtoken token);
 
-#define SCRATCH_BUFFER_LENGTH 2048000     // Buffer did turn out to be too small at times.
-static char scratch[SCRATCH_BUFFER_LENGTH];
+#define STEPSCRATCHSIZE 102400;
+static char *scratch = NULL;
+static int scratchSize = 0;
 static int count=0;
 
 
@@ -217,71 +222,62 @@ static int compress(BitStream *bs, LZbuffer *buffer, char *string){
       }
 
       buffer->search[(buffer->last+length)%SEARCHBUF_SIZE]=string[i+length-1];
-/*
-if(offset==0L && length>0L){
-   fprintf(stderr, "STRING %s %s %s %ld %ld\n", string, tmp, buffer->search,
-buffer->last);
-}
-fprintf(stderr, "OUT(%d, %d, %c)\n", offset, length,c);
-*/
       LZmakeToken(c,  offset, length, token);
       LZwriteToken(bs, token);
 
       buffer->last=(buffer->last+length)%SEARCHBUF_SIZE;
 
       i+=length;
-/*
-      buffer->read+=length;
-      buffer->written+=(token[0]&0x80?2:1);
-*/
-
    } while (string[i-1]!='\0');
 
    return 1;
 }
 
-static int decompress(BitStream *bs, LZbuffer *buffer, char **str)
+static int add2scratch(int last, char ch) 
 {
+  if (last>=scratchSize) 
+  { if (scratchSize==0)
+    { scratchSize=STEPSCRATCHSIZE;
+    }
+    else
+    { scratchSize=2*scratchSize;
+    }
+    scratch = realloc(scratch, scratchSize);
+    if (scratch==NULL)
+    { fprintf(stderr,"Cannot realloc scratchbuffer in lz.c (svc library)\n");
+      exit(1);
+    }
+  }
+  scratch[last++] = ch; 
+  return last;
+}
+
+static int decompress(BitStream *bs, LZbuffer *buffer, char **str){
    unsigned int offset, length, i, last;
    LZtoken token;
    char c;
 
-   *str=scratch;
+   // *str=scratch;
    last=0;
 count++;
    while(LZreadToken(bs,token)){
 
       LZsplitToken(&c, &offset, &length, token);
-/*
-if(offset<=1023){
-   fprintf(stderr,"Last %d\n", buffer->last);
-   fprintf(stderr,"LENGTH %d\n", length);
-   fprintf(stderr,"OFFSET %d\n", offset);
-   fprintf(stderr,"CHAR   %c\n", c     );
-   fprintf(stderr, "BUFFER=");
-      for(i=0;i<1024;i++){
-if(i%80==0)fprintf(stderr,"\n");
-fprintf(stderr,"%c", buffer->search[i]=='\0'?':':buffer->search[i]);
-}
-      fprintf(stderr,"\n");
-}
-*/
-
 
       if (length==0){
          buffer->last=(buffer->last+1)%SEARCHBUF_SIZE;
          buffer->search[buffer->last]=c;
-         assert(last<SCRATCH_BUFFER_LENGTH);
-         scratch[last++]=c;
+         last = add2scratch(last, c);
+         // scratch[last++]=c;
       } else {
          for(i=0;i<length;i++){
             buffer->last=(buffer->last+1)%SEARCHBUF_SIZE;
             buffer->search[buffer->last]=buffer->search[(buffer->last-offset-1+SEARCHBUF_SIZE)%SEARCHBUF_SIZE];
-            assert(last<SCRATCH_BUFFER_LENGTH);
-            scratch[last++]=buffer->search[buffer->last];
+            last = add2scratch(last,buffer->search[buffer->last]);
+           // scratch[last++]=buffer->search[buffer->last];
          }
       }
-
+      *str=scratch;
       if (scratch[last-1]=='\0'){
          return 1;
       }
