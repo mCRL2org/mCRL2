@@ -97,7 +97,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// \param instantiate_global_variables If true, the algorithm is allowed to instantiate free variables
     /// as a side effect
     void run(bool instantiate_global_variables = false, bool ignore_conditions = false)
-    {
+    { 
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
       data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state());
@@ -122,11 +122,12 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
-      for (data::variable_list::iterator i = d.begin(); i != d.end(); ++i, ++e_i)
-      {
-        sigma[*i] = *e_i;
+      const data::assignment_list assignments=m_spec.initial_process().assignments();
+      for(data::assignment_list::const_iterator i = assignments.begin();
+                   i!=assignments.end(); ++i)
+      { sigma[i->lhs()] = i->rhs();
       }
-
+      
       // undo contains undo information of instantiations of free variables
       std::map<data::variable, std::set<data::variable> > undo;
 
