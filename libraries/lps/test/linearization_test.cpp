@@ -731,6 +731,19 @@ const std::string various_case_33 =
   "init P(1); "
   ;
 
+/* The test case below checks whether the alphabet conversion does not accidentally
+ * reverse the order of hide and sum operators. If this happens the linearizer will
+ * not be able to linearize this process */
+
+const std::string various_case_34 =
+  "act a; "
+
+  "proc X = a.X;"
+  "proc Y = sum n:Nat. X;"
+
+  "init hide({a}, sum n:Nat. X);"
+  ;
+
 
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
@@ -839,6 +852,8 @@ void test_various_aux(t_lin_options &options)
   spec = linearise(various_case_32, options);
   std::cerr << "Testcase 33\n";
   spec = linearise(various_case_33, options);
+  std::cerr << "Testcase 34\n";
+  spec = linearise(various_case_34, options);
 }
 
 std::string print_rewrite_strategy(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
