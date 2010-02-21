@@ -159,6 +159,11 @@ if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
     add_definitions( -pipe ) 
   endif( CXX_ACCEPTS_PIPE )
 
+  check_cxx_compiler_flag(-Wl,-as-needed CXX_ACCEPTS_AS_NEEDED )
+  if( CXX_ACCEPTS_AS_NEEDED )
+    add_definitions( -Wl,-as-needed ) 
+  endif( CXX_ACCEPTS_AS_NEEDED )
+
   # Display include dependencies
   # check_cxx_compiler_flag(-H CXX_ACCEPTS_H )
   # if( CXX_ACCEPTS_H )
