@@ -14,7 +14,7 @@ project (MCRL2)
 
 option(BUILD_IN_SOURCE "Enable/Disable in-soucre tree development" OFF)
 if(NOT BUILD_IN_SOURCE)
-  if(${CMAKE_CURRENT_BINARY_DIR} MATCHES ${CMAKE_SOURCE_DIR})
+  if(${CMAKE_CURRENT_BINARY_DIR} EQUAL ${CMAKE_SOURCE_DIR})
     message(STATUS "=================================================================")
     message(STATUS "== WARNING: Do not upload the \"Makefile\" to the svn repository ==")
     message(STATUS "=================================================================")
@@ -22,7 +22,7 @@ if(NOT BUILD_IN_SOURCE)
     message(STATUS "To build in-source, set BUILD_IN_SOURCE=ON")
     message(STATUS "")
     message(FATAL_ERROR)
-  endif(${CMAKE_CURRENT_BINARY_DIR} MATCHES ${CMAKE_SOURCE_DIR})
+  endif(${CMAKE_CURRENT_BINARY_DIR} EQUAL ${CMAKE_SOURCE_DIR})
 endif(NOT BUILD_IN_SOURCE)
 
 # Commonly used options
