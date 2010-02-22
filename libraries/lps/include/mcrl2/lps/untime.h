@@ -53,8 +53,8 @@ namespace mcrl2 {
             std::cerr << "For untiming to function optimally, it is assumed that the input lps is rewritten to normal form" << std::endl;
           }
 
-          for(data::data_expression_list::const_iterator k = m_spec.initial_process().state().begin();
-                      k != m_spec.initial_process().state().end(); ++j, ++k)
+          for(data::data_expression_list::const_iterator k = m_spec.initial_process().state(m_spec.process().process_parameters()).begin();
+                      k != m_spec.initial_process().state(m_spec.process().process_parameters()).end(); ++j, ++k)
           {
             if (*k != real_zero)
             {

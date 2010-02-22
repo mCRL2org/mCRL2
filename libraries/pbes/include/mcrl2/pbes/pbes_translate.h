@@ -659,7 +659,7 @@ std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
       assert(is_mu(f) || is_nu(f));
       core::identifier_string Xf = name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
-      data::data_expression_list pi = spec.initial_process().state();
+      data::data_expression_list pi = spec.initial_process().state(spec.process().process_parameters());
       propositional_variable_instantiation init(Xe, data::sort_real::real_(0) + fi + pi + Par(Xf, data::variable_list(), f));
 
       // add sort real to data_spec (if needed)
@@ -1054,7 +1054,7 @@ std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
       assert(is_mu(f) || is_nu(f));
       core::identifier_string Xf = name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
-      data::data_expression_list pi = spec.initial_process().state();
+      data::data_expression_list pi = spec.initial_process().state(spec.process().process_parameters());
       propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, data::variable_list(), f));
 
       pbes<> result = pbes<>(spec.data(), e, spec.global_variables(), init);

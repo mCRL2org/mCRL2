@@ -306,7 +306,7 @@ public:
 
       // TODO: the data of the two specification needs to be merged!
       data_specification data = M.data();
-      propositional_variable_instantiation init(X(m, s), M.initial_process().state() + S.initial_process().state());
+      propositional_variable_instantiation init(X(m, s), M.initial_process().state(M.process().process_parameters()) + S.initial_process().state(S.process().process_parameters()));
 
       pbes<> result(data, equations, init);
       assert(result.is_closed());

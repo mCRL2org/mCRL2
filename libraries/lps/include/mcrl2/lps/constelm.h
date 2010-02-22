@@ -100,7 +100,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     { 
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
-      data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state());
+      data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state(m_spec.process().process_parameters()));
 
       // optimization: rewrite the initial state vector e
       lps::rewrite(e, R);

@@ -21,7 +21,8 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
-#include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
+#include "mcrl2/data/assignment_list_substitution.h"
+#include "mcrl2/data/detail/convert.h"
 
 namespace mcrl2 {
 
@@ -65,10 +66,17 @@ class process_initializer: public atermpp::aterm_appl
     }
 
     /// \brief Returns the initial state of the LPS.
+    /// \param process_parameters The parameters of the correponding linear process
     /// \return The initial state of the LPS.
-    data::data_expression_list state() const
+    data::data_expression_list state(data::variable_list process_parameters) const
     {
-      return detail::compute_initial_state(m_assignments);
+    	data::assignment_list_substitution sigma(m_assignments);
+    	std::vector<data::data_expression> result;
+    	for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+      {
+      	result.push_back(sigma(*i));
+      }
+      return data::convert<data::data_expression_list>(result);
     }
 };
 
