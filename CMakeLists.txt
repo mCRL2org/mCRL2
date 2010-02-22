@@ -630,6 +630,8 @@ endif(ENABLE_DEPRECATED)
 ##--------------------------------------------------- 
 
 IF( UNIX )
+FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/libraries/utilities/include/mcrl2/setup.h)
+
 set(CC  ${CMAKE_C_COMPILER})
 set(CXX ${CMAKE_CXX_COMPILER})
 
