@@ -56,10 +56,10 @@ class Rule:
                 result.append(f)
         return result
 
-    def to_string(self):
+    def __repr__(self):
         text = self.name() + '\n'
         for f in self.rhs:
-            text = text + '  ' + f.name + '\n'
+            text = text + '  %s\n' % f.name()
         return text
 
     def terminals(self, non_terminal_list):

@@ -63,7 +63,8 @@ PROCESS_ADDITIONAL_CLASSES = '''
 ActId | lps::action_label(const core::identifier_string& name, const data::sort_expression_list& sorts) | An action label
 '''
 
-#make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, 'process_expression', PROCESS_EXPRESSION_CLASSES)
-#make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES)
-#make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
-make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/traverser.inc.h', STATE_FORMULA_CLASSES)
+if __name__ = "__main__":
+    #make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, 'process_expression', PROCESS_EXPRESSION_CLASSES)
+    #make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES)
+    #make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/traverser.inc.h', STATE_FORMULA_CLASSES)

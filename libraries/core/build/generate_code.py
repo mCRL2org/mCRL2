@@ -350,7 +350,6 @@ def postprocess_libstruct(filename):
   assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
 '''
     text = path(filename).text()
-    #src = 'gsMakeProcess'
     text = re.sub(re.compile(src, re.M), dest, text)
     path(filename).write_text(text)
 
