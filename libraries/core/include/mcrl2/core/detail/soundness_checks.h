@@ -82,7 +82,7 @@ bool check_rule_NumberString(Term t)
   return true;
 }
 
-//--- begin generated code
+//--- start generated code
 template <typename Term> bool check_rule_SortExpr(Term t);
 template <typename Term> bool check_rule_SortId(Term t);
 template <typename Term> bool check_rule_SortConsType(Term t);

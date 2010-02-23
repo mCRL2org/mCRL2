@@ -26,7 +26,7 @@ namespace mcrl2 {
 
 //Global precondition: the ATerm library has been initialised
 
-//--- begin generated code
+//--- start  generated code
 // ActAnd
 inline
 AFun initAFunActAnd(AFun& f)
@@ -3420,6 +3420,14 @@ ATermAppl gsMakeProcVarId(ATermAppl String_0, ATermList SortExpr_1)
 inline
 ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 {
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
   // Check whether lengths of process type and its arguments match.
   // Could be replaced by at test for equal types.
 

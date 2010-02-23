@@ -43,7 +43,7 @@ ATermList constructList()
   return ATmakeList0();
 }
 
-//--- begin generated code
+//--- start  generated code
 ATermAppl constructBooleanOr();
 ATermAppl constructStateOr();
 ATermAppl constructHide();
