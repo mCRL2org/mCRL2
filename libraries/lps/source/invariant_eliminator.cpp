@@ -22,20 +22,34 @@ using namespace mcrl2::core::detail;
 // Class Invariant_Eliminator ---------------------------------------------------------------------
   // Class Invariant_Eliminator - Functions declared private --------------------------------------
 
-    ATermAppl Invariant_Eliminator::simplify_summand(ATermAppl a_summand, ATermAppl a_invariant, int a_summand_number) {
+    ATermAppl Invariant_Eliminator::simplify_summand(
+              ATermAppl a_summand, 
+              ATermAppl a_invariant, 
+              const bool a_no_elimination, 
+              int a_summand_number) 
+    {
       ATermAppl v_condition = ATAgetArgument(a_summand, 1);
       ATermAppl v_formula = sort_bool::and_(data_expression(a_invariant), data_expression(v_condition));
 
+      if (a_no_elimination)
+      { a_summand = ATsetArgument(a_summand, (ATerm)v_formula, 1);
+        return a_summand;
+      }
+      
       f_bdd_prover.set_formula(v_formula);
-      if (f_bdd_prover.is_contradiction() == answer_yes) {
+      if (f_bdd_prover.is_contradiction() == answer_yes) 
+      {
         return 0;
-      } else {
-        if (f_simplify_all) {
+      } 
+      else 
+      {
+        if (f_simplify_all) 
+        {
           a_summand = ATsetArgument(a_summand, (ATerm) f_bdd_prover.get_bdd(), 1);
           gsMessage("Summand number %d is simplified.\n", a_summand_number);
         }
         return a_summand;
-       }
+      }
     }
 
   // Class Invariant_Eliminator - Functions declared public ---------------------------------------
@@ -59,7 +73,7 @@ using namespace mcrl2::core::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    ATermAppl Invariant_Eliminator::simplify(ATermAppl a_invariant, int a_summand_number) {
+    ATermAppl Invariant_Eliminator::simplify(ATermAppl a_invariant, const bool a_no_elimination, int a_summand_number) {
       ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 3), 1);
       ATermAppl v_summand;
       ATermList v_simplified_summands = ATmakeList0();
@@ -67,11 +81,14 @@ using namespace mcrl2::core::detail;
 
       while (!ATisEmpty(v_summands)) {
         v_summand = ATAgetFirst(v_summands);
-        if ((a_summand_number == v_summand_number) || (a_summand_number == 0)) {
-          v_summand = simplify_summand(v_summand, a_invariant, v_summand_number);
+        if ((a_summand_number == v_summand_number) || (a_summand_number == 0)) 
+        { if (a_no_elimination)
+          v_summand = simplify_summand(v_summand, a_invariant, a_no_elimination, v_summand_number);
         }
-        if (v_summand != 0) {
-          gsVerboseMsg("Summand number %d could not be eliminated.\n", v_summand_number);
+        if (v_summand != 0) 
+        { if (!a_no_elimination)
+          { gsVerboseMsg("Summand number %d could not be eliminated.\n", v_summand_number);
+          }
           v_simplified_summands = ATinsert(v_simplified_summands, (ATerm) v_summand);
         } else {
           gsMessage("Summand number %d is eliminated.\n", v_summand_number);

@@ -234,7 +234,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
           specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), m_apply_induction, m_simplify_all
         );
 
-        mcrl2::lps::specification(v_invariant_eliminator.simplify(m_invariant, m_summand_number)).save(m_output_filename);
+        mcrl2::lps::specification(v_invariant_eliminator.simplify(m_invariant, m_no_elimination, m_summand_number)).save(m_output_filename);
       }
 
       return true;
