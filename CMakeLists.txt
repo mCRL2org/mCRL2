@@ -291,7 +291,9 @@ set(CMAKE_SKIP_BUILD_RPATH false)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH false)
 
 # the RPATH to be used when installing (non-OSX, use CMAKE_INSTALL_NAME_DIR instead)
-set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/mcrl2")
+if(NOT CMAKE_INSTALL_RPATH)
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/mcrl2")
+endif(NOT CMAKE_INSTALL_RPATH)
 
 # Mac OSX directory name for installed targets
 set(CMAKE_INSTALL_NAME_DIR "@executable_path/../lib/mcrl2")
