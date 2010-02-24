@@ -46,7 +46,7 @@ int compat_strcasecmp(const char *s1, const char *s2);
 int compat_strncasecmp(const char *s1, const char *s2, size_t n);
 
 /* Figure out which hashtable implementation to use: */
-#if (__cplusplus > 199711L)  /* C++ TR1 supported (GCC 4) */
+#if (__cplusplus > 199711L || __GNUC__ >= 4)  /* C++ TR1 supported (GCC 4) */
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
 #define HASH_SET(k) std::tr1::unordered_set<k>
@@ -66,6 +66,15 @@ int compat_strncasecmp(const char *s1, const char *s2, size_t n);
 #include <set>
 #define HASH_SET(k) std::set<k>
 #define HASH_MAP(k,v) std::map<k, v>
+#endif
+
+/* <windows.h> introduces min and max as macros, which conflicts with the use
+   of std::min and std::max from <algorithm>, so let's undefine them */
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
 #endif
 
 #endif /* ndef COMPATIBILITY_H_INCLUDED */
