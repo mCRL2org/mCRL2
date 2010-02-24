@@ -175,7 +175,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   }
 
   if ( lgopts->detect_deadlock && gsVerbose)
-  { cerr << "Detect deadlocks.";
+  { cerr << "Detect deadlocks.\n" ;
   }
 
   if ( lgopts->detect_divergence && gsVerbose)
@@ -462,7 +462,7 @@ static void check_deadlocktrace(ATerm state)
     } 
     else  
     {
-      cerr << "deadlock-detect: deadlock found (state index: " << ATindexedSetGetIndex(states,state) <<  ").";
+      cerr << "deadlock-detect: deadlock found (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
     }
   }
 }
