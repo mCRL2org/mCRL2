@@ -36,4 +36,58 @@ other types:
 
 [endsect]
 
+[section: Static polymorphism]
+
+For the traversal functions in the mCRL2 a technique called static
+polymorphism is used, see also [@ http://en.wikipedia.org/wiki/Template_metaprogramming#Static_polymorphism].
+
+Below an example is given how static polymorphism can in principle be
+used to implement find functions in the mCRL2 Library.
+In this case, A models data::detail::traverser, B models lps::detail::traverser
+and C models data::detail::find_helper.
+  
+  #include <iostream>
+  
+  // base class
+  template <typename Derived>
+  struct A
+  {
+    void a()
+    {
+      std::cout << "A::a()" << std::endl;
+    }
+  };
+  
+  // extended class
+  template <typename Derived>
+  struct B: public A<Derived>
+  {
+    void b()
+    {
+      std::cout << "B::b()" << std::endl;
+      static_cast<Derived&>(*this).a();
+    } 
+  };
+  
+  // override the a() function
+  template <template <class> class T>
+  struct override: public T<override<T> >
+  {
+    void a()
+    {
+      std::cout << "override::a()" << std::endl;
+    }
+  };
+  
+  int main()
+  { 
+    override<B> f;
+    f.a();
+    f.b();
+  
+    return 0;
+  }
+
+[endsect]
+
 [include concepts.qbk]

@@ -50,7 +50,101 @@ Core Library and the Utilities Library. May be they should be merged.
 
 Each library is organized as a set of libraries, located in the directory
 <MCRL2ROOT>/libraries. Each library has the following directory structure:
-...
+
+[table Directory structure of libraries
+    [ [Directory]                     [Content]          ]
+    [ [build] [ build scripts, code generation scripts ] ]
+    [ [doc] [ documentation ] ]
+    [ [doc/html] [ html documentation ] ]
+    [ [doc/tex] [ tex documentation (for the wiki) ] ]
+    [ [example] [ example programs ] ]
+    [ [include] [ include files ] ]
+    [ [source] [ source files ] ]
+    [ [test] [ test files ] ]
+]
 
 [endsect]
 
+[section: Code generation]
+
+A significant part of the code in the mCRL2 toolset is generated using scripts.
+The following table gives an overview of the scripts and what they do.
+
+[table Code generation scripts
+    [ [Script]                     [Purpose]          ]
+    [ [libraries/core/build/generate_classes.py            ] [ Generates classes from the tables in libraries/core/build/mcrl2_classes.py ] ]
+    [ [libraries/core/build/generate_expression_visitors.py] [ Generates expression visitors from the tables in libraries/core/build/mcrl2_classes.py ] ]
+    [ [libraries/core/build/generate_traversers.py         ] [ Generates traversal classes from the tables in libraries/core/build/mcrl2_classes.py ] ]
+    [ [libraries/core/build/generate_term_functions.py     ] [ Generates low level term functions from doc/specs/mcrl2.internal.txt ] ]
+    [ [libraries/data/build/generate_data_types.py     ] [ Generates rewrite rules ] ]
+    [ [lts/source/liblts_dotlexer.ll] [ lex file for lts dot grammar ] ]
+    [ [lts/source/liblts_dotlexer.yy] [ yacc file for lts dot grammar ] ]
+    [ [lts/source/liblts_fsmlexer.ll] [ lex file for lts fsm grammar ] ]
+    [ [lts/source/liblts_fsmlexer.yy] [ yacc file for lts fsm grammar ] ]
+    [ [core/source/mcrl2lexer.ll    ] [ lex file for mcrl2 grammar ] ]
+    [ [core/source/mcrl2lexer.yy    ] [ yacc file for mcrl2 grammar ] ]
+]
+
+The following commands can be executed to run these scripts:
+
+[pre
+cd libraries/core/build
+python generate_term_functions.py -s -l -c
+python generate_classes.py
+python generate_traversers.py
+python generate_expression_visitors.py
+]
+
+[pre
+cd libraries/data/build
+python generate_data_types.py
+]
+
+* The script =generate_expression_visitors.py= needs to be modified such that the visitors
+  are built on top of the traverser framework.
+
+* The script generate_term_functions.py generates functions for construction of term classes and for validity checking of terms.
+  In a future version of the scripts these functions can be integrated in the generated classes.
+
+The file =libraries/core/build/mcrl2_classes.py= contains lines like this:
+
+[pre
+Process | process_instance(const process_identifier identifier, const data::data_expression_list& actual_parameters) | A process
+]
+
+Each line corresponds with an ATerm. The first column =Process= is the name of the ATerm, in this case =Process=. This ATerm
+is defined in the file =doc/specs/mcrl2.internal.txt= as =Process(<ProcVarId>, <DataExpr>*)=, indicating that a Process term
+has two arguments: a process variable and a list of data expressions. The second column contains the constructor of
+the corresponding class `process_instance`. This class is generated from this line by the script =libraries/core/build/generate_classes.py=.
+It is a wrapper around the ATerm, and it contains member functions for accessing the attributes. The names of the member
+functions correspond with the names of the arguments of the constructor. This is the resulting class:
+
+  /// \brief A process
+  class process_instance: public process_expression
+  {
+    public:
+      /// \brief Constructor.
+      /// \param term A term
+      process_instance(atermpp::aterm_appl term)
+        : process_expression(term)
+      {
+        assert(core::detail::check_term_Process(m_term));
+      }
+  
+      /// \brief Constructor.
+      process_instance(const process_identifier identifier, const data::data_expression_list& actual_parameters)
+        : process_expression(core::detail::gsMakeProcess(identifier, actual_parameters))
+      {}
+  
+      process_identifier identifier() const
+      {
+        return atermpp::arg1(*this);
+      }
+  
+      data::data_expression_list actual_parameters() const
+      {
+        return atermpp::list_arg2(*this);
+      }
+  };
+
+[endsect]
