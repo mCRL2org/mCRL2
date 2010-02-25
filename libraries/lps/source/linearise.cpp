@@ -338,11 +338,6 @@ class specification_basic_type:public boost::noncopyable
     { return stringTable.count(str)>0;
     }
 
-    void insertalias(const alias& a)
-    {
-      data.add_alias(a);
-    }
-
     void insertsort(const sort_expression sortterm)
     {
       data.add_sort(sortterm);
@@ -1740,7 +1735,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression distributeActionOverConditions(
-                          const action act,
+                          const process_expression act, // This is a multi-action, actually.
                           const data_expression condition,
                           const process_expression restterm,
                           const variable_list freevars)
@@ -1965,7 +1960,6 @@ class specification_basic_type:public boost::noncopyable
 
 
             const data_expression c(if_then_else(body2).condition());
-
             const process_expression r= choice(
                            distributeActionOverConditions(body1,c,if_then_else(body2).then_case(),freevars),
                            distributeActionOverConditions(body1,lazy::not_(c),if_then_else(body2).else_case(),freevars));
@@ -2946,7 +2940,7 @@ class specification_basic_type:public boost::noncopyable
            structured_sort_constructor_vector constructors(1,sc_push);
            constructors.push_back(sc_emptystack);
            //add data declarations for structured sort
-           spec.insertalias(alias(stack_sort_alias,structured_sort(constructors)));
+           spec.data.add_alias(alias(stack_sort_alias,structured_sort(constructors)));
            stacksort=spec.data.normalise_sorts(stack_sort_alias);
            push=sc_push.constructor_function(stack_sort_alias);
            emptystack=sc_emptystack.constructor_function(stack_sort_alias);
@@ -3107,7 +3101,7 @@ class specification_basic_type:public boost::noncopyable
                          int i,
                          const data_expression_list t1,
                          const stacklisttype &stack)
-    { data_expression_list t(t1);
+    { data_expression_list t(t1); 
       if (!options.newstate)
       { return push_front(t,sort_pos::pos(i));
       }
@@ -3162,7 +3156,8 @@ class specification_basic_type:public boost::noncopyable
                         must be declared */
       { create_enumeratedtype(stack.no_of_states);
         if (regular)
-        { return equal_to(stack.stackvar,
+        { 
+          return equal_to(stack.stackvar,
                           processencoding(i,data_expression_list(),stack).front());
         }
         return equal_to(
@@ -3843,11 +3838,11 @@ class specification_basic_type:public boost::noncopyable
             structured_sort sort_struct(struct_conss);
 
             //add declaration of standard functions
-            spec.insertalias(alias(sort_id, sort_struct));
+            spec.data.add_alias(alias(sort_id, sort_struct));
 
             //store new declarations in return value w
             sortId = sort_id;
-            elementnames = data::convert< data::function_symbol_list >(sort_struct.constructor_functions());
+            elementnames = data::convert< data::function_symbol_list >(spec.data.constructors(sort_id)); 
           }
         }
 
@@ -6353,7 +6348,7 @@ class specification_basic_type:public boost::noncopyable
 
           specification temporary_spec(data,acts,global_variables,lps,initializer);
 
-          constelm_algorithm < rewriter > alg(temporary_spec,rewr);
+          constelm_algorithm < rewriter > alg(temporary_spec,rewr,gsVerbose);
           alg.run(true); // Remove constants from the specification, where global variables are
                          // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification
