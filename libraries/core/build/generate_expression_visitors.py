@@ -348,7 +348,7 @@ def make_is_functions(filename, text):
         rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, aterm)
     insert_text_in_file(filename, rtext, 'generated is-functions')
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     make_expression_visitor('../../process/include/mcrl2/process/process_expression_visitor.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
     make_expression_builder('../../process/include/mcrl2/process/process_expression_builder.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
     make_is_functions(      '../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES)
