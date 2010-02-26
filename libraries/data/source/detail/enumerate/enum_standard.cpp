@@ -390,7 +390,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
       }
                         if ( ATisEmpty(l) )
                         { fs_reset();
-                          throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + "as it does not have constructor functions");
+                          throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + " as it does not have constructor functions");
                                 // error = true;
                         }
 
