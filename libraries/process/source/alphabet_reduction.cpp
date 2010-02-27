@@ -314,7 +314,7 @@ namespace mcrl2 {
       }
       
       static ATermList merge_list(ATermList l, ATermList m)
-      { ATfprintf(stderr,"LENGTH %d  %d  ",ATgetLength(l),ATgetLength(m));
+      { // ATfprintf(stderr,"LENGTH %d  %d  ",ATgetLength(l),ATgetLength(m));
         ATermIndexedSet r=ATindexedSetCreate(128,50);
         for (; !ATisEmpty(m); m=ATgetNext(m))
         { ATbool isnew;
@@ -328,7 +328,7 @@ namespace mcrl2 {
         }
 
         ATermList result=ATindexedSetElements(r);
-        ATfprintf(stderr," EQUALS %d\n",ATgetLength(result));
+        // ATfprintf(stderr," EQUALS %d\n",ATgetLength(result));
         ATindexedSetDestroy(r);
         return result;
       }
