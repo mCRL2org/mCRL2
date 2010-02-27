@@ -226,7 +226,8 @@ namespace mcrl2 {
         return ATreverse(r);
       }
       
-      static ATermList sync_mact(ATermList a, ATermList b){
+      static ATermList sync_mact(ATermList a, ATermList b)
+      {
       /*   ATermList c = ATmakeList0(); */
       /*   while ( !(ATisEmpty(a) || ATisEmpty(b)) ){ */
       /*     ATermAppl aa=ATAgetFirst(a); */
@@ -285,8 +286,8 @@ namespace mcrl2 {
       
         assert(a && b);
       
-        if(ATisEmpty(a)) return b;
-        if(ATisEmpty(b)) return a;
+        if (ATisEmpty(a)) return b;
+        if (ATisEmpty(b)) return a;
       
         ATermList c = sGet(a,b);
         if(c) return c;
@@ -294,7 +295,8 @@ namespace mcrl2 {
         ATermAppl aa=ATAgetFirst(a);
         ATermAppl bb=ATAgetFirst(b);
       
-        if ( ATcompare((ATerm)aa,(ATerm)bb) > 0 ) {
+        if ( ATcompare((ATerm)aa,(ATerm)bb) > 0 ) 
+        {
           ATermList t=a; a=b; b=t; //swap a and b
           aa=bb; //no need for bb
         }
@@ -311,19 +313,24 @@ namespace mcrl2 {
         return c;
       }
       
-      static ATermList merge_list(ATermList l, ATermList m){
-        ATermList r=ATmakeList0();
-        for (; !ATisEmpty(m); m=ATgetNext(m)){
+      static ATermList merge_list(ATermList l, ATermList m)
+      { ATfprintf(stderr,"LENGTH %d  %d  ",ATgetLength(l),ATgetLength(m));
+        ATermIndexedSet r=ATindexedSetCreate(128,50);
+        for (; !ATisEmpty(m); m=ATgetNext(m))
+        { ATbool isnew;
           ATerm el=ATgetFirst(m);
-          if(ATindexOf(l,el,0) < 0 ){
-            r = ATinsert(r,el);
-          }
+          ATindexedSetPut(r,el,&isnew);
         }
-      
-        //gsDebugMsg("l: %T, m:%T\n\n",l,m);
-      
-      
-        return ATconcat(l,ATreverse(r));
+        for (; !ATisEmpty(l); l=ATgetNext(l))
+        { ATbool isnew;
+          ATerm el=ATgetFirst(l);
+          ATindexedSetPut(r,el,&isnew);
+        }
+
+        ATermList result=ATindexedSetElements(r);
+        ATfprintf(stderr," EQUALS %d\n",ATgetLength(result));
+        ATindexedSetDestroy(r);
+        return result;
       }
       
       static ATermList list_minus(ATermList l, ATermList m){
@@ -503,25 +510,37 @@ namespace mcrl2 {
         return true;
       }
       
-      static ATermList sync_list(ATermList l, ATermList m, unsigned length=0, ATermList allowed=ATmakeList0()){
-        //gsWarningMsg("sync_list: l: %T, m: %T,length: %d, allowed: %T\n\n",l,m,length,allowed);
-        ATermList n = ATmakeList0();
-        for (; !ATisEmpty(l); l=ATgetNext(l)){
+      static ATermList sync_list(ATermList l, ATermList m, unsigned length=0, ATermList allowed=ATmakeList0())
+      {
+        // gsWarningMsg("sync_list: l: %T, m: %T,length: %d, allowed: %T\n\n",l,m,length,allowed);
+        ATermIndexedSet n=ATindexedSetCreate(128,50);
+        // ATermList n = ATmakeList0();
+        for (; !ATisEmpty(l); l=ATgetNext(l))
+        {
           ATermList ll=ATLgetFirst(l);
-          for (ATermList o=m; !ATisEmpty(o); o=ATgetNext(o)){
+          for (ATermList o=m; !ATisEmpty(o); o=ATgetNext(o))
+          {
             ATermList oo=ATLgetFirst(o);
             ATermList ma=sync_mact(ll,oo);
-            if(!length || unsigned(ATgetLength(ma))<=length){
+            if(!length || unsigned(ATgetLength(ma))<=length)
+            {
               ATermList ma=sync_mact(ll,oo);
-              if(ATisEqual(allowed,ATmakeList0()) || sub_multiaction_list(untypeMA(ma),allowed)){
-      	  if(ATindexOf(n,(ATerm)ma,0)<0)
-      	     n = ATinsert(n,(ATerm)ma);
+              if(ATisEqual(allowed,ATmakeList0()) || sub_multiaction_list(untypeMA(ma),allowed))
+              {
+      	        /* if(ATindexOf(n,(ATerm)ma,0)<0)
+      	           n = ATinsert(n,(ATerm)ma);
+                */
+                ATbool is_new;
+                ATindexedSetPut(n,(ATerm)ma,&is_new);
               }
             }
           }
         }
-        //gsWarningMsg("sync_list: l: %T\n, m: %T\n,length: %d\n, allowed: %T\n, result: %T\n\n",l,m,length,allowed,ATreverse(n));
-        return ATreverse(n);
+        // gsWarningMsg("sync_list out: l: %T\n, m: %T\n,length: %d\n, allowed: %T\n, result: %T\n\n",l,m,length,allowed,ATindexedSetElements(n));
+        // return ATreverse(n);
+        ATermList result=ATindexedSetElements(n);
+        ATindexedSetDestroy(n);
+        return result;
       }
       
       static void sync_list_ht(ATermIndexedSet m, ATermList l1, ATermList l2, unsigned length=0){
