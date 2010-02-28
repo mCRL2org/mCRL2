@@ -8,32 +8,6 @@ import re
 import string
 from mcrl2_utility import *
 
-TOKEN_PREFIX = r'''%%}
-Id         [a-zA-Z\\_][a-zA-Z0-9\\_']*
-Number     "0"|([1-9][0-9]*)
-
-%%option c++
-%%option prefix="mcrl2yy"
-%%option nounput
-
-%%%%
-
-[ \\t]      { col_nr += YYLeng(); /* whitespace */ }
-
-\\r?\\n      { line_nr++; col_nr = 1; /* newline */ }
-
-"%%".*      { col_nr += YYLeng(); /* comment */ }
-
-'''
-
-TOKEN_POSTFIX = '''.          {
-             col_nr += YYLeng(); yyerror("unknown character");
-             /* remaining characters */
-     }
-
-%%%%
-'''
-
 TAGS = '''
 identifier
 sort_expr
@@ -140,7 +114,6 @@ start
 NONTERMINAL_FUNCTION_APPLICATIONS = '''
 sort_expr
 sort_expr_arrow
-domain_no_arrow_elt
 sort_expr_struct
 struct_constructor
 recogniser
@@ -269,45 +242,21 @@ pb_init
 
 NONTERMINAL_LISTS = '''
 domain_no_arrow
-domain_no_arrow_elts_hs
-struct_constructors_bs
-struct_projections_cs
 bag_enum_elt
-id_inits_cs
-data_exprs_cs
-bag_enum_elts_cs
-data_vars_decls_cs
 data_vars_decl
-data_spec_elts
-ids_cs
-sorts_decls_scs
 sorts_decl
+struct_projection_list
 domain
-ops_decls_scs
 ops_decl
 data_eqn_sect
-data_eqn_decls_scs
-data_vars_decls_scs
 act_names_set
 ren_expr_set
-ren_exprs_cs
 comm_expr_set
-comm_exprs_cs
 mult_act_names_set
-mult_act_names_cs
-ids_bs
-param_ids_bs
-proc_spec_elts
-acts_decls_scs
 acts_decl
-proc_eqn_decls_scs
 fixpoint_params
-data_var_decl_inits_cs
-action_rename_spec_elts
-action_rename_rules_scs
 action_rename_rule_sect
 pbes_spec_elts
-pb_eqn_decls_scs
 '''
 
 START_GRAMMAR = '''
@@ -322,7 +271,7 @@ start:
   | TAG_STATE_FRM state_frm
   | TAG_ACTION_RENAME action_rename_spec
   | TAG_PBES_SPEC pbes_spec
-  | TAG_DATA_VARS data_vars_decls_scs
+  | TAG_DATA_VARS (data_vars_decl SEMICOLON)+
   ;
 '''
 
@@ -337,41 +286,24 @@ sort_expr_arrow:
   ;
 
 domain_no_arrow:
-  domain_no_arrow_elts_hs
-  ;
-
-domain_no_arrow_elts_hs:
-    domain_no_arrow_elt
-  | domain_no_arrow_elts_hs HASH domain_no_arrow_elt
-  ;
-
-domain_no_arrow_elt:
-  sort_expr_struct
+  sort_expr_struct % HASH
   ;
 
 sort_expr_struct:
     sort_expr_primary
-  | KWSTRUCT struct_constructors_bs
-  ;
-
-struct_constructors_bs:
-    struct_constructor
-  | struct_constructors_bs BAR struct_constructor
+  | KWSTRUCT (struct_constructor % BAR)
   ;
 
 struct_constructor:
-    ID recogniser
-  | ID LPAR struct_projections_cs RPAR recogniser
+  ID struct_projection_list? recogniser?
+  ;
+
+struct_projection_list:
+  LPAR (struct_projection % COMMA) RPAR
   ;
 
 recogniser:
-    /* empty */
-  | QMARK ID
-  ;
-
-struct_projections_cs:
-    struct_projection
-  | struct_projections_cs COMMA struct_projection
+  QMARK ID
   ;
 
 struct_projection:
@@ -408,12 +340,7 @@ data_expr:
 
 data_expr_whr:
     data_expr_quant
-  | data_expr_whr WHR id_inits_cs END
-  ;
-
-id_inits_cs:
-    id_init
-  | id_inits_cs COMMA id_init
+  | data_expr_whr WHR (id_init % COMMA) END
   ;
 
 id_init:
@@ -422,18 +349,13 @@ id_init:
 
 data_expr_quant:
     data_expr_imp
-  | LAMBDA data_vars_decls_cs DOT data_expr_quant
-  | FORALL data_vars_decls_cs DOT data_expr_quant
-  | EXISTS data_vars_decls_cs DOT data_expr_quant
-  ;
-
-data_vars_decls_cs:
-    data_vars_decl
-  | data_vars_decls_cs COMMA data_vars_decl
+  | LAMBDA (data_vars_decl % COMMA) DOT data_expr_quant
+  | FORALL (data_vars_decl % COMMA) DOT data_expr_quant
+  | EXISTS (data_vars_decl % COMMA) DOT data_expr_quant
   ;
 
 data_vars_decl:
-  ids_cs COLON sort_expr
+  (ID % COMMA) COLON sort_expr
   ;
 
 data_expr_imp:
@@ -443,8 +365,8 @@ data_expr_imp:
 
 data_expr_imp_rhs:
     data_expr_imp
-  | FORALL data_vars_decls_cs DOT data_expr_imp_rhs
-  | EXISTS data_vars_decls_cs DOT data_expr_imp_rhs
+  | FORALL (data_vars_decl % COMMA) DOT data_expr_imp_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT data_expr_imp_rhs
   ;
 
 data_expr_and:
@@ -455,8 +377,8 @@ data_expr_and:
 
 data_expr_and_rhs:
     data_expr_and
-  | FORALL data_vars_decls_cs DOT data_expr_and_rhs
-  | EXISTS data_vars_decls_cs DOT data_expr_and_rhs
+  | FORALL (data_vars_decl % COMMA) DOT data_expr_and_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT data_expr_and_rhs
   ;
 
 data_expr_eq:
@@ -467,9 +389,9 @@ data_expr_eq:
 
 data_expr_eq_rhs:
     data_expr_eq
-  | LAMBDA data_vars_decls_cs DOT data_expr_eq_rhs
-  | FORALL data_vars_decls_cs DOT data_expr_eq_rhs
-  | EXISTS data_vars_decls_cs DOT data_expr_eq_rhs
+  | LAMBDA (data_vars_decl % COMMA) DOT data_expr_eq_rhs
+  | FORALL (data_vars_decl % COMMA) DOT data_expr_eq_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT data_expr_eq_rhs
   ;
 
 data_expr_rel:
@@ -524,18 +446,13 @@ data_expr_prefix:
 
 data_expr_quant_prefix:
     data_expr_prefix
-  | FORALL data_vars_decls_cs DOT data_expr_quant_prefix
-  | EXISTS data_vars_decls_cs DOT data_expr_quant_prefix
+  | FORALL (data_vars_decl % COMMA) DOT data_expr_quant_prefix
+  | EXISTS (data_vars_decl % COMMA) DOT data_expr_quant_prefix
   ;
 
 data_expr_postfix:
     data_expr_primary
-  | data_expr_postfix LPAR data_exprs_cs RPAR
-  ;
-
-data_exprs_cs:
-    data_expr
-  | data_exprs_cs COMMA data_expr
+  | data_expr_postfix LPAR (data_expr % COMMA) RPAR
   ;
 
 data_expr_primary:
@@ -556,14 +473,9 @@ data_constant:
   ;
 
 data_enumeration:
-    LBRACK data_exprs_cs RBRACK
-  | LBRACE data_exprs_cs RBRACE
-  | LBRACE bag_enum_elts_cs RBRACE
-  ;
-
-bag_enum_elts_cs:
-    bag_enum_elt
-  | bag_enum_elts_cs COMMA bag_enum_elt
+    LBRACK (data_expr % COMMA) RBRACK
+  | LBRACE (data_expr % COMMA) RBRACE
+  | LBRACE (bag_enum_elt % COMMA) RBRACE
   ;
 
 bag_enum_elt:
@@ -581,13 +493,8 @@ data_var_decl:
 
 DATA_SPECIFICATION_GRAMMAR = '''
 data_spec:
-  data_spec_elts
+  data_spec_elt+
   ;
-
-data_spec_elts:
-    data_spec_elt
-   | data_spec_elts data_spec_elt
-   ;
 
 data_spec_elt:
     sort_spec
@@ -597,44 +504,28 @@ data_spec_elt:
   ;
 
 sort_spec:
-  KWSORT sorts_decls_scs
-  ;
-
-sorts_decls_scs:
-    sorts_decl SEMICOLON
-  | sorts_decls_scs sorts_decl SEMICOLON
+  KWSORT (sorts_decl SEMICOLON)+
   ;
 
 sorts_decl:
-    ids_cs
+    (ID % COMMA)
   | ID EQUALS sort_expr
   ;
 
-ids_cs:
-    ID
-  | ids_cs COMMA ID
-  ;
-
 domain:
-    domain_no_arrow
-  | domain_no_arrow ARROW sort_expr
+    domain_no_arrow (ARROW sort_expr)?
   ;
 
 cons_spec:
-  KWCONS ops_decls_scs
+  KWCONS (ops_decl SEMICOLON)+
   ;
 
 map_spec:
-  KWMAP ops_decls_scs
-  ;
-
-ops_decls_scs:
-    ops_decl SEMICOLON
-  | ops_decls_scs ops_decl SEMICOLON
+  KWMAP (ops_decl SEMICOLON)+
   ;
 
 ops_decl:
-  ids_cs COLON sort_expr
+  (ID % COMMA) COLON sort_expr
   ;
 
 data_eqn_spec:
@@ -642,40 +533,25 @@ data_eqn_spec:
   ;
 
 data_eqn_sect:
-    KWEQN data_eqn_decls_scs
-  | KWVAR data_vars_decls_scs KWEQN data_eqn_decls_scs
-  ;
-
-data_eqn_decls_scs:
-    data_eqn_decl SEMICOLON
-  | data_eqn_decls_scs data_eqn_decl SEMICOLON
+    KWEQN (data_eqn_decl SEMICOLON)+
+  | KWVAR (data_vars_decl SEMICOLON)+ KWEQN (data_eqn_decl SEMICOLON)+
   ;
 
 data_eqn_decl:
     data_expr EQUALS data_expr
   | data_expr ARROW data_expr EQUALS data_expr
   ;
-
-data_vars_decls_scs:
-    data_vars_decl SEMICOLON
-  | data_vars_decls_scs data_vars_decl SEMICOLON
-  ;
 '''
 
 MULTI_ACTION_GRAMMAR = '''
 mult_act:
-    param_ids_bs
+    (param_id % BAR)
   | TAU
-  ;
-
-param_ids_bs:
-    param_id
-  | param_ids_bs BAR param_id
   ;
 
 param_id:
     ID
-  | ID LPAR data_exprs_cs RPAR
+  | ID LPAR (data_expr % COMMA) RPAR
   ;
 '''
 
@@ -691,7 +567,7 @@ proc_expr_choice:
 
 proc_expr_sum:
     proc_expr_merge
-  | SUM data_vars_decls_cs DOT proc_expr_sum
+  | SUM (data_vars_decl % COMMA) DOT proc_expr_sum
   ;
 
 proc_expr_merge:
@@ -702,7 +578,7 @@ proc_expr_merge:
 
 proc_expr_merge_rhs:
     proc_expr_merge
-  | SUM data_vars_decls_cs DOT proc_expr_merge_rhs
+  | SUM (data_vars_decl % COMMA) DOT proc_expr_merge_rhs
   ;
 
 proc_expr_binit:
@@ -712,7 +588,7 @@ proc_expr_binit:
 
 proc_expr_binit_rhs:
     proc_expr_cond   
-  | SUM data_vars_decls_cs DOT proc_expr_binit_rhs
+  | SUM (data_vars_decl % COMMA) DOT proc_expr_binit_rhs
   ;
 
 proc_expr_cond:
@@ -723,7 +599,7 @@ proc_expr_cond:
 
 proc_expr_cond_la:
     proc_expr_cond
-  | SUM data_vars_decls_cs DOT proc_expr_cond_la
+  | SUM (data_vars_decl % COMMA) DOT proc_expr_cond_la
   ;
 
 proc_expr_seq:
@@ -738,14 +614,14 @@ proc_expr_seq_wo_cond:
 
 proc_expr_seq_rhs:
     proc_expr_seq
-  | SUM data_vars_decls_cs DOT proc_expr_seq_rhs
+  | SUM (data_vars_decl % COMMA) DOT proc_expr_seq_rhs
   | data_expr_prefix ARROW proc_expr_seq_rhs
   | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond ELSE proc_expr_seq_rhs
   ;
 
 proc_expr_seq_rhs_wo_cond:
     proc_expr_seq_wo_cond
-  | SUM data_vars_decls_cs DOT proc_expr_seq_rhs_wo_cond
+  | SUM (data_vars_decl % COMMA) DOT proc_expr_seq_rhs_wo_cond
   ;
 
 proc_expr_at:
@@ -770,14 +646,14 @@ proc_expr_sync_wo_cond:
 
 proc_expr_sync_rhs:
     proc_expr_sync
-  | SUM data_vars_decls_cs DOT proc_expr_sync_rhs
+  | SUM (data_vars_decl % COMMA) DOT proc_expr_sync_rhs
   | data_expr_prefix ARROW proc_expr_sync_rhs
   | data_expr_prefix ARROW proc_expr_sync_rhs_wo_cond ELSE proc_expr_sync_rhs
   ;
 
 proc_expr_sync_rhs_wo_cond:
     proc_expr_sync_wo_cond
-  | SUM data_vars_decls_cs DOT proc_expr_sync_rhs_wo_cond
+  | SUM (data_vars_decl % COMMA) DOT proc_expr_sync_rhs_wo_cond
   ;
 
 proc_expr_primary:
@@ -795,7 +671,7 @@ proc_constant:
 
 id_assignment:
     ID LPAR RPAR
-  | ID LPAR id_inits_cs RPAR
+  | ID LPAR (id_init % COMMA) RPAR
   ;
 
 proc_quant:
@@ -808,17 +684,12 @@ proc_quant:
 
 act_names_set:
     LBRACE RBRACE
-  | LBRACE ids_cs RBRACE
+  | LBRACE (ID % COMMA) RBRACE
   ;
 
 ren_expr_set:
     LBRACE RBRACE
-  | LBRACE ren_exprs_cs RBRACE
-  ;
-
-ren_exprs_cs:
-    ren_expr
-  | ren_exprs_cs COMMA ren_expr
+  | LBRACE (ren_expr % COMMA) RBRACE
   ;
 
 ren_expr:
@@ -827,12 +698,7 @@ ren_expr:
 
 comm_expr_set:
     LBRACE RBRACE
-  | LBRACE comm_exprs_cs RBRACE
-  ;
-
-comm_exprs_cs:
-    comm_expr
-  | comm_exprs_cs COMMA comm_expr
+  | LBRACE (comm_expr % COMMA) RBRACE
   ;
 
 comm_expr:
@@ -842,38 +708,23 @@ comm_expr:
   ;
 
 comm_expr_lhs:
-  ID BAR ids_bs
-  ;
-
-ids_bs:
-    ID
-  | ids_bs BAR ID
+  ID BAR (ID % BAR)
   ;
 
 mult_act_names_set:
     LBRACE RBRACE
-  | LBRACE mult_act_names_cs RBRACE
-  ;
-
-mult_act_names_cs:
-    mult_act_name
-  | mult_act_names_cs COMMA mult_act_name
+  | LBRACE (mult_act_name % COMMA) RBRACE
   ;
 
 mult_act_name:
-  ids_bs
+  (ID % BAR)
   ;
 '''
 
 PROCESS_SPECIFICATION_GRAMMAR = '''
 proc_spec:
-  proc_spec_elts
+  proc_spec_elt+
   ;
-
-proc_spec_elts:
-     proc_spec_elt
-   | proc_spec_elts proc_spec_elt
-   ;
 
 proc_spec_elt:
     data_spec_elt
@@ -884,35 +735,25 @@ proc_spec_elt:
   ;
 
 act_spec:
-  KWACT acts_decls_scs
-  ;
-
-acts_decls_scs:
-    acts_decl SEMICOLON
-  | acts_decls_scs acts_decl SEMICOLON
+  KWACT (acts_decl SEMICOLON)+
   ;
 
 acts_decl:
-    ids_cs
-  | ids_cs COLON domain
+    (ID % COMMA)
+  | (ID % COMMA) COLON domain
   ;
 
 glob_var_spec:
-  KWGLOB data_vars_decls_scs
+  KWGLOB (data_vars_decl SEMICOLON)+
   ;
 
 proc_eqn_spec:
-  KWPROC proc_eqn_decls_scs
-  ;
-
-proc_eqn_decls_scs:
-    proc_eqn_decl SEMICOLON
-  | proc_eqn_decls_scs proc_eqn_decl SEMICOLON
+  KWPROC (proc_eqn_decl SEMICOLON)+
   ;
 
 proc_eqn_decl:
     ID EQUALS proc_expr
-  | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
+  | ID LPAR (data_vars_decl % COMMA) RPAR EQUALS proc_expr
   ;
 
 proc_init:
@@ -927,20 +768,15 @@ state_frm:
 
 state_frm_quant:
     state_frm_imp
-  | FORALL data_vars_decls_cs DOT state_frm_quant
-  | EXISTS data_vars_decls_cs DOT state_frm_quant
+  | FORALL (data_vars_decl % COMMA) DOT state_frm_quant
+  | EXISTS (data_vars_decl % COMMA) DOT state_frm_quant
   | NU ID fixpoint_params DOT state_frm_quant
   | MU ID fixpoint_params DOT state_frm_quant
   ;
 
 fixpoint_params:
     /* empty */
-  | LPAR data_var_decl_inits_cs RPAR
-  ;
-
-data_var_decl_inits_cs:
-    data_var_decl_init
-  | data_var_decl_inits_cs COMMA data_var_decl_init
+  | LPAR (data_var_decl_init % COMMA) RPAR
   ;
 
 data_var_decl_init:
@@ -954,8 +790,8 @@ state_frm_imp:
 
 state_frm_imp_rhs:
     state_frm_imp
-  | FORALL data_vars_decls_cs DOT state_frm_imp_rhs
-  | EXISTS data_vars_decls_cs DOT state_frm_imp_rhs
+  | FORALL (data_vars_decl % COMMA) DOT state_frm_imp_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT state_frm_imp_rhs
   | NU ID fixpoint_params DOT state_frm_imp_rhs
   | MU ID fixpoint_params DOT state_frm_imp_rhs
   ;
@@ -968,8 +804,8 @@ state_frm_and:
 
 state_frm_and_rhs:
     state_frm_and
-  | FORALL data_vars_decls_cs DOT state_frm_and_rhs
-  | EXISTS data_vars_decls_cs DOT state_frm_and_rhs
+  | FORALL (data_vars_decl % COMMA) DOT state_frm_and_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT state_frm_and_rhs
   | NU ID fixpoint_params DOT state_frm_and_rhs
   | MU ID fixpoint_params DOT state_frm_and_rhs
   ;
@@ -985,8 +821,8 @@ state_frm_prefix:
 
 state_frm_quant_prefix:
     state_frm_prefix
-  | FORALL data_vars_decls_cs DOT state_frm_quant_prefix
-  | EXISTS data_vars_decls_cs DOT state_frm_quant_prefix
+  | FORALL (data_vars_decl % COMMA) DOT state_frm_quant_prefix
+  | EXISTS (data_vars_decl % COMMA) DOT state_frm_quant_prefix
   | NU ID fixpoint_params DOT state_frm_quant_prefix
   | MU ID fixpoint_params DOT state_frm_quant_prefix
   ;
@@ -1055,8 +891,8 @@ act_frm:
 
 act_frm_quant:
     act_frm_imp
-  | FORALL data_vars_decls_cs DOT act_frm_quant
-  | EXISTS data_vars_decls_cs DOT act_frm_quant
+  | FORALL (data_vars_decl % COMMA) DOT act_frm_quant
+  | EXISTS (data_vars_decl % COMMA) DOT act_frm_quant
   ;
 
 act_frm_imp:
@@ -1066,8 +902,8 @@ act_frm_imp:
 
 act_frm_imp_rhs:
     act_frm_imp
-  | FORALL data_vars_decls_cs DOT act_frm_imp_rhs
-  | EXISTS data_vars_decls_cs DOT act_frm_imp_rhs
+  | FORALL (data_vars_decl % COMMA) DOT act_frm_imp_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT act_frm_imp_rhs
   ;
 
 act_frm_and:
@@ -1078,8 +914,8 @@ act_frm_and:
 
 act_frm_and_rhs:
     act_frm_and
-  | FORALL data_vars_decls_cs DOT act_frm_and_rhs
-  | EXISTS data_vars_decls_cs DOT act_frm_and_rhs
+  | FORALL (data_vars_decl % COMMA) DOT act_frm_and_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT act_frm_and_rhs
   ;
 
 act_frm_at:
@@ -1094,8 +930,8 @@ act_frm_prefix:
 
 act_frm_quant_prefix:
     act_frm_prefix
-  | FORALL data_vars_decls_cs DOT act_frm_quant_prefix
-  | EXISTS data_vars_decls_cs DOT act_frm_quant_prefix
+  | FORALL (data_vars_decl % COMMA) DOT act_frm_quant_prefix
+  | EXISTS (data_vars_decl % COMMA) DOT act_frm_quant_prefix
   ;
 
 act_frm_primary:
@@ -1109,13 +945,8 @@ act_frm_primary:
 
 ACTION_RENAME_GRAMMAR = '''
 action_rename_spec:
-  action_rename_spec_elts
+  action_rename_spec_elt+
   ;
-
-action_rename_spec_elts:
-     action_rename_spec_elt
-   | action_rename_spec_elts action_rename_spec_elt
-   ;
 
 action_rename_spec_elt:
     data_spec_elt
@@ -1128,14 +959,9 @@ action_rename_rule_spec:
   ;
 
 action_rename_rule_sect:
-    RENAME action_rename_rules_scs
-  | KWVAR data_vars_decls_scs RENAME action_rename_rules_scs
+    RENAME (action_rename_rule SEMICOLON)+
+  | KWVAR (data_vars_decl SEMICOLON)+ RENAME (action_rename_rule SEMICOLON)+
 
-
-action_rename_rules_scs:
-    action_rename_rule SEMICOLON
-  | action_rename_rules_scs action_rename_rule SEMICOLON
-  ;
 
 action_rename_rule:
     data_expr ARROW param_id IMP action_rename_rule_rhs
@@ -1155,8 +981,8 @@ pb_expr:
 
 pb_expr_quant:
     pb_expr_imp
-  | FORALL data_vars_decls_cs DOT pb_expr_quant
-  | EXISTS data_vars_decls_cs DOT pb_expr_quant
+  | FORALL (data_vars_decl % COMMA) DOT pb_expr_quant
+  | EXISTS (data_vars_decl % COMMA) DOT pb_expr_quant
   ;
 
 pb_expr_imp:
@@ -1166,8 +992,8 @@ pb_expr_imp:
 
 pb_expr_imp_rhs:
     pb_expr_imp
-  | FORALL data_vars_decls_cs DOT pb_expr_imp_rhs
-  | EXISTS data_vars_decls_cs DOT pb_expr_imp_rhs
+  | FORALL (data_vars_decl % COMMA) DOT pb_expr_imp_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT pb_expr_imp_rhs
   ;
 
 pb_expr_and:
@@ -1178,8 +1004,8 @@ pb_expr_and:
 
 pb_expr_and_rhs:
     pb_expr_and
-  | FORALL data_vars_decls_cs DOT pb_expr_and_rhs
-  | EXISTS data_vars_decls_cs DOT pb_expr_and_rhs
+  | FORALL (data_vars_decl % COMMA) DOT pb_expr_and_rhs
+  | EXISTS (data_vars_decl % COMMA) DOT pb_expr_and_rhs
   ;
 
 pb_expr_not:
@@ -1189,8 +1015,8 @@ pb_expr_not:
 
 pb_expr_quant_not:
     pb_expr_not
-  | FORALL data_vars_decls_cs DOT pb_expr_quant_not
-  | EXISTS data_vars_decls_cs DOT pb_expr_quant_not
+  | FORALL (data_vars_decl % COMMA) DOT pb_expr_quant_not
+  | EXISTS (data_vars_decl % COMMA) DOT pb_expr_quant_not
   ;
 
 pb_expr_primary:
@@ -1204,13 +1030,8 @@ pb_expr_primary:
 
 PBES_SPECIFICATION_GRAMMAR = '''
 pbes_spec:
-  pbes_spec_elts
+  pbes_spec_elt+
   ;
-
-pbes_spec_elts:
-     pbes_spec_elt
-   | pbes_spec_elts pbes_spec_elt
-   ;
 
 pbes_spec_elt:
     data_spec_elt
@@ -1220,17 +1041,12 @@ pbes_spec_elt:
   ;
 
 pb_eqn_spec:
-  KWPBES pb_eqn_decls_scs
-  ;
-
-pb_eqn_decls_scs:
-    pb_eqn_decl SEMICOLON
-  | pb_eqn_decls_scs pb_eqn_decl SEMICOLON
+  KWPBES (pb_eqn_decl SEMICOLON)+
   ;
 
 pb_eqn_decl:
     fixpoint ID EQUALS pb_expr
-  | fixpoint ID LPAR data_vars_decls_cs RPAR EQUALS pb_expr
+  | fixpoint ID LPAR (data_vars_decl % COMMA) RPAR EQUALS pb_expr
   ;
 
 fixpoint:
@@ -1286,7 +1102,6 @@ def make_parser(lexfile, yaccfile, tag_text, token_text, grammar_text):
     text = ''
     for t in tokens:
         text = text + '%-20s { process_string(); return %s; }\n' % (t[0], t[1])
-    text = TOKEN_PREFIX + text + TOKEN_POSTFIX
     insert_text_in_file(lexfile, text, 'generated tokens')
 
     #--------------------------------------------------------#
@@ -1297,7 +1112,6 @@ def make_parser(lexfile, yaccfile, tag_text, token_text, grammar_text):
     text = ''
     for t in tokens:
         text = text + '%%%%token <appl> %s\n' % t[1]
-    print text
     insert_text_in_file(yaccfile, text, 'generated terminals')
 
     # generate non-terminals
@@ -1321,6 +1135,6 @@ GRAMMAR = SORT_EXPRESSION_GRAMMAR        + \
 make_parser('../../lps/example/mcrl2lexer.ll', '../../lps/example/mcrl2parser.yy', TAGS, TOKENS, GRAMMAR)
 os.chdir('../../lps/example')
 os.system('flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll')
-os.system('bison -p mcrl2 --defines=../../core/include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy')
+os.system('bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy')
 os.system('sed -i \'s+#include "mcrl2parser.h"+#include "mcrl2/core/detail/mcrl2parser.h"+\' mcrl2parser.cpp')
 os.system("sed -i '/isatty/d' mcrl2lexer.cpp")
