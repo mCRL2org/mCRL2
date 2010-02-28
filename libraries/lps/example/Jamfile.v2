@@ -1,6 +1,7 @@
 project libraries/lps/example
    : requirements
        <use>/site-config//boost
+       <source>/libraries//atermpp
        <source>/libraries//core
        <source>/libraries//lps
        <source>/libraries/utilities//command_line_interface
@@ -8,28 +9,12 @@ project libraries/lps/example
        <source>/site-config//boost_filesystem
    ;
 
+exe lpsparse        : lpsparse.cpp mcrl2parser.cpp mcrl2lexer.cpp : ;
 exe lpsrewr         : lpsrewr.cpp : <squadt-connectivity>implemented ;
-exe lpsparelm       : lpsparelm.cpp : ;
-exe lpsconstelm     : lpsconstelm.cpp : ;
-exe parelm          : parelm.cpp : ;
-exe constructors    : constructors.cpp : ;
-exe spec            : spec.cpp : ;
-exe find            : find.cpp : ;
-exe term_replace    : term_replace.cpp : ;
-exe mcrl22lps       : mcrl22lps.cpp : ;
-exe utility1        : utility1.cpp : ;
 
 install dist
    :
+     lpsparse
      lpsrewr
-     lpsparelm
-     lpsconstelm
-     parelm
-     term_replace
-     constructors
-     spec
-     find
-     mcrl22lps
-     utility1
    :
    ;
