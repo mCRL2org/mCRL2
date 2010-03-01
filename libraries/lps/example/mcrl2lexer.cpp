@@ -20,7 +20,7 @@
      * We will address this in a future release of flex, or omit the C++ scanner
      * altogether.
      */
-    #define yyFlexLexer mcrl2yyFlexLexer
+    #define yyFlexLexer mcrl3yyFlexLexer
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
 
@@ -275,9 +275,9 @@ struct yy_buffer_state
  */
 #define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-void *mcrl2yyalloc (yy_size_t  );
-void *mcrl2yyrealloc (void *,yy_size_t  );
-void mcrl2yyfree (void *  );
+void *mcrl3yyalloc (yy_size_t  );
+void *mcrl3yyrealloc (void *,yy_size_t  );
+void mcrl3yyfree (void *  );
 
 #define yy_new_buffer yy_create_buffer
 
@@ -605,24 +605,24 @@ using namespace mcrl2::core;
 //Global precondition: the ATerm library has been initialised
 
 //external declarations
-int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
-extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
-extern int mcrl2yydebug;         /* declared in mcrl2parser.cpp */
+int mcrl3yyparse(void);          /* declared in mcrl2parser.cpp */
+extern YYSTYPE mcrl3yylval;      /* declared in mcrl2parser.cpp */
+extern int mcrl3yydebug;         /* declared in mcrl2parser.cpp */
 
 //global declarations, used by mcrl2parser.cpp
-int  mcrl2yylex(void);           /* lexer function */
-void mcrl2yyerror(const char *s);/* error function */
-ATerm mcrl2_spec_tree = NULL;      /* the parse tree */
-ATermIndexedSet mcrl2_parser_protect_table = NULL; /* table to protect parsed ATerms */
+int  mcrl3yylex(void);           /* lexer function */
+void mcrl3yyerror(const char *s);/* error function */
+ATerm mcrl3_spec_tree = NULL;      /* the parse tree */
+ATermIndexedSet mcrl3_parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
-class mcrl2_lexer : public mcrl2yyFlexLexer {
+class mcrl3_lexer : public mcrl3yyFlexLexer {
 public:
-  mcrl2_lexer(bool print_parse_errors); /* constructor */
+  mcrl3_lexer(bool print_parse_errors); /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
   int yywrap(void);              /* wrap function */
-  ATerm parse_streams(std::vector<std::istream*> &streams);
+  ATerm parse_streams_new(std::vector<std::istream*> &streams);
 protected:
   std::vector<std::istream*> *cur_streams;/* current input streams */
   int cur_index;                 /* current index in current streams */
@@ -632,12 +632,12 @@ protected:
   void process_string(void);     /* update position, provide token to parser */
 };
 
-//implement yylex in mcrl2_lexer instead of mcrl2yyFlexLexer
+//implement yylex in mcrl3_lexer instead of mcrl3yyFlexLexer
 //(this gets rid of global variables but is ugly in its own right)
-#define YY_DECL int mcrl2_lexer::yylex()
-int mcrl2yyFlexLexer::yylex(void) { return 1; }
+#define YY_DECL int mcrl3_lexer::yylex()
+int mcrl3yyFlexLexer::yylex(void) { return 1; }
 
-mcrl2_lexer *an_mcrl2_lexer = NULL;       /* lexer object, used by parse_streams */
+mcrl3_lexer *an_mcrl3_lexer = NULL;       /* lexer object, used by parse_streams_new */
 
 //--- start generated tokens ---//
 #line 644 "mcrl2lexer.cpp"
@@ -1488,9 +1488,9 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 yyFlexLexer::~yyFlexLexer()
 {
 	delete [] yy_state_buf;
-	mcrl2yyfree(yy_start_stack  );
+	mcrl3yyfree(yy_start_stack  );
 	yy_delete_buffer( YY_CURRENT_BUFFER );
-	mcrl2yyfree(yy_buffer_stack  );
+	mcrl3yyfree(yy_buffer_stack  );
 }
 
 /* The contents of this function are C++ specific, so the () macro is not used.
@@ -1618,7 +1618,7 @@ int yyFlexLexer::yy_get_next_buffer()
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					mcrl2yyrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
+					mcrl3yyrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1667,7 +1667,7 @@ int yyFlexLexer::yy_get_next_buffer()
 	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
 		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) mcrl2yyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) mcrl3yyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
 	}
@@ -1913,7 +1913,7 @@ int yyFlexLexer::yy_get_next_buffer()
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) mcrl2yyalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) mcrl3yyalloc(sizeof( struct yy_buffer_state )  );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
@@ -1922,7 +1922,7 @@ int yyFlexLexer::yy_get_next_buffer()
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) mcrl2yyalloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) mcrl3yyalloc(b->yy_buf_size + 2  );
 	if ( ! b->yy_ch_buf )
 		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
@@ -1947,9 +1947,9 @@ int yyFlexLexer::yy_get_next_buffer()
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		mcrl2yyfree((void *) b->yy_ch_buf  );
+		mcrl3yyfree((void *) b->yy_ch_buf  );
 
-	mcrl2yyfree((void *) b  );
+	mcrl3yyfree((void *) b  );
 }
 
 
@@ -2073,7 +2073,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		 * immediate realloc on the next call.
          */
 		num_to_alloc = 1;
-		(yy_buffer_stack) = (struct yy_buffer_state**)mcrl2yyalloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)mcrl3yyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
@@ -2092,7 +2092,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		int grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)mcrl2yyrealloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)mcrl3yyrealloc
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
@@ -2115,10 +2115,10 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		new_size = (yy_start_stack_depth) * sizeof( int );
 
 		if ( ! (yy_start_stack) )
-			(yy_start_stack) = (int *) mcrl2yyalloc(new_size  );
+			(yy_start_stack) = (int *) mcrl3yyalloc(new_size  );
 
 		else
-			(yy_start_stack) = (int *) mcrl2yyrealloc((void *) (yy_start_stack),new_size  );
+			(yy_start_stack) = (int *) mcrl3yyrealloc((void *) (yy_start_stack),new_size  );
 
 		if ( ! (yy_start_stack) )
 			YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
@@ -2195,12 +2195,12 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *mcrl2yyalloc (yy_size_t  size )
+void *mcrl3yyalloc (yy_size_t  size )
 {
 	return (void *) malloc( size );
 }
 
-void *mcrl2yyrealloc  (void * ptr, yy_size_t  size )
+void *mcrl3yyrealloc  (void * ptr, yy_size_t  size )
 {
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
@@ -2212,9 +2212,9 @@ void *mcrl2yyrealloc  (void * ptr, yy_size_t  size )
 	return (void *) realloc( (char *) ptr, size );
 }
 
-void mcrl2yyfree (void * ptr )
+void mcrl3yyfree (void * ptr )
 {
-	free( (char *) ptr );	/* see mcrl2yyrealloc() for (char *) cast */
+	free( (char *) ptr );	/* see mcrl3yyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
@@ -2224,34 +2224,34 @@ void mcrl2yyfree (void * ptr )
 
 //--- end generated tokens ---//
 
-//Implementation of parse_streams
+//Implementation of parse_streams_new
 
-ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors) {
-  an_mcrl2_lexer = new mcrl2_lexer(print_parse_errors);
-  ATerm result = an_mcrl2_lexer->parse_streams(streams);
-  delete an_mcrl2_lexer;
+ATerm parse_streams_new(std::vector<std::istream*> &streams, bool print_parse_errors) {
+  an_mcrl3_lexer = new mcrl3_lexer(print_parse_errors);
+  ATerm result = an_mcrl3_lexer->parse_streams_new(streams);
+  delete an_mcrl3_lexer;
   return result;
 }
 
 
 //Implementation of global functions
 
-int mcrl2yylex(void) {
-  return an_mcrl2_lexer->yylex();
+int mcrl3yylex(void) {
+  return an_mcrl3_lexer->yylex();
 }
 
-void mcrl2yyerror(const char *s) {
-  return an_mcrl2_lexer->yyerror(s);
+void mcrl3yyerror(const char *s) {
+  return an_mcrl3_lexer->yyerror(s);
 }
 
-int mcrl2yyFlexLexer::yywrap(void) {
+int mcrl3yyFlexLexer::yywrap(void) {
   return 1;
 }
 
 
-//Implementation of mcrl2_lexer
+//Implementation of mcrl3_lexer
 
-mcrl2_lexer::mcrl2_lexer(bool print_parse_errors) : mcrl2yyFlexLexer(NULL, NULL) {
+mcrl3_lexer::mcrl3_lexer(bool print_parse_errors) : mcrl3yyFlexLexer(NULL, NULL) {
   line_nr = 1;
   col_nr = 1;
   cur_streams = NULL;
@@ -2259,7 +2259,7 @@ mcrl2_lexer::mcrl2_lexer(bool print_parse_errors) : mcrl2yyFlexLexer(NULL, NULL)
   show_errors = print_parse_errors;
 }
 
-void mcrl2_lexer::yyerror(const char *s) {
+void mcrl3_lexer::yyerror(const char *s) {
   if ( show_errors )
   {
     int oldcol_nr = col_nr - YYLeng();
@@ -2273,7 +2273,7 @@ void mcrl2_lexer::yyerror(const char *s) {
   }
 }
 
-int mcrl2_lexer::yywrap(void) {
+int mcrl3_lexer::yywrap(void) {
   if (cur_streams == NULL) {
     return 1;
   }
@@ -2289,36 +2289,36 @@ int mcrl2_lexer::yywrap(void) {
   return 0;
 }
 
-void mcrl2_lexer::process_string(void) {
+void mcrl3_lexer::process_string(void) {
   col_nr += YYLeng();
-  mcrl2yylval.appl = gsString2ATermAppl(YYText());
+  mcrl3yylval.appl = gsString2ATermAppl(YYText());
 }
 
-ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
+ATerm mcrl3_lexer::parse_streams_new(std::vector<std::istream*> &streams) {
   //uncomment the line below to let bison generate debug information
-  //mcrl2yydebug = 1;
+  //mcrl3yydebug = 1;
   ATerm result = NULL;
   if (streams.size() == 0) {
     return result;
   }
   //streams.size() > 0
-  mcrl2_spec_tree = NULL;
-  ATprotect(&mcrl2_spec_tree);
-  mcrl2_parser_protect_table = ATindexedSetCreate(10000, 50);
+  mcrl3_spec_tree = NULL;
+  ATprotect(&mcrl3_spec_tree);
+  mcrl3_parser_protect_table = ATindexedSetCreate(10000, 50);
   line_nr = 1;
   col_nr = 1;
   cur_index = 0;
   cur_streams = &streams;
   switch_streams((*cur_streams)[0], NULL);
-  if (mcrl2yyparse() != 0) {
+  if (mcrl3yyparse() != 0) {
     result = NULL;
   } else {
-    //mcrl2_spec_tree contains the parsed specification
-    result = mcrl2_spec_tree;
-    mcrl2_spec_tree = NULL;
+    //mcrl3_spec_tree contains the parsed specification
+    result = mcrl3_spec_tree;
+    mcrl3_spec_tree = NULL;
   }
-  ATindexedSetDestroy(mcrl2_parser_protect_table);
-  ATunprotect(&mcrl2_spec_tree);
+  ATindexedSetDestroy(mcrl3_parser_protect_table);
+  ATunprotect(&mcrl3_spec_tree);
   return result;
 }
 

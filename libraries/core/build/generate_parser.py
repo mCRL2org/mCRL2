@@ -13,7 +13,7 @@ Id         [a-zA-Z\\_][a-zA-Z0-9\\_']*
 Number     "0"|([1-9][0-9]*)
 
 %%option c++
-%%option prefix="mcrl2yy"
+%%option prefix="mcrl3yy"
 %%option nounput
 
 %%%%
@@ -1320,7 +1320,7 @@ GRAMMAR = SORT_EXPRESSION_GRAMMAR        + \
 
 make_parser('../../lps/example/mcrl2lexer.ll', '../../lps/example/mcrl2parser.yy', TAGS, TOKENS, GRAMMAR)
 os.chdir('../../lps/example')
-os.system('flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll')
-os.system('bison -p mcrl2 --defines=../../core/include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy')
+os.system('flex -Pmcrl3 -omcrl2lexer.cpp mcrl2lexer.ll')
+os.system('bison -p mcrl3 --defines=mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy')
 os.system('sed -i \'s+#include "mcrl2parser.h"+#include "mcrl2/core/detail/mcrl2parser.h"+\' mcrl2parser.cpp')
 os.system("sed -i '/isatty/d' mcrl2lexer.cpp")

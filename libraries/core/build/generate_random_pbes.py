@@ -327,8 +327,8 @@ def test_pbes(filename, equation_count, atom_count = 5, propvar_count = 3):
     os.system('txt2pbes %s %s' % (txtfile, pbesfile))
 
     # pbes2bool
-    #os.system('pbes2bool %s >& %s' % (pbesfile, answerfile))
-    #answer1 = last_word(path(answerfile).text())
+    os.system('pbes2bool %s >& %s' % (pbesfile, answerfile))
+    answer1 = last_word(path(answerfile).text())
 
     # pbespgsolve
     os.system('pbespgsolve -l1000 -d %s >& %s' % (pbesfile, answerfile))
@@ -342,12 +342,12 @@ def test_pbes(filename, equation_count, atom_count = 5, propvar_count = 3):
         os.system('bessolve %s >& %s' % (besfile, answerfile))
         answer3 = last_word(path(answerfile).text())
 
-    #print 'FILE', filename, answer1, answer2, answer3
-    #if answer1 != answer2 or (answer3 != 'unknown' and answer1 != answer3):
-
-    print 'FILE', filename, answer2, answer3
-    if answer2 != answer3:
+    print 'FILE', filename, answer1, answer2, answer3
+    if answer1 != answer2 or (answer3 != 'unknown' and answer1 != answer3):
+    #print 'FILE', filename, answer2, answer3
+    #if answer2 != answer3:
         print 'ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        path('error.txt').write_text('error in %s\n' % filename, append=True)
 
 for i in range(10000):
     test_pbes('%02d' % i, 5, 4, 3)

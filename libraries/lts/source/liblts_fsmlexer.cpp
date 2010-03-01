@@ -94,6 +94,7 @@ typedef unsigned int flex_uint32_t;
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 /* end standard C++ headers. */
@@ -481,7 +482,7 @@ extern void fsmyyerror(const char* s);
 void processId();
 void processQuoted();
 void processNumber();
-#line 485 "liblts_fsmlexer.cpp"
+#line 486 "liblts_fsmlexer.cpp"
 
 #define INITIAL 0
 
@@ -584,7 +585,7 @@ YY_DECL
 #line 77 "liblts_fsmlexer.ll"
 
 
-#line 588 "liblts_fsmlexer.cpp"
+#line 589 "liblts_fsmlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -724,7 +725,7 @@ YY_RULE_SETUP
 #line 90 "liblts_fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 728 "liblts_fsmlexer.cpp"
+#line 729 "liblts_fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

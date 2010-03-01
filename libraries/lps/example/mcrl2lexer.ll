@@ -28,24 +28,24 @@ using namespace mcrl2::core;
 //Global precondition: the ATerm library has been initialised
 
 //external declarations
-int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
-extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
-extern int mcrl2yydebug;         /* declared in mcrl2parser.cpp */
+int mcrl3yyparse(void);          /* declared in mcrl2parser.cpp */
+extern YYSTYPE mcrl3yylval;      /* declared in mcrl2parser.cpp */
+extern int mcrl3yydebug;         /* declared in mcrl2parser.cpp */
 
 //global declarations, used by mcrl2parser.cpp
-int  mcrl2yylex(void);           /* lexer function */
-void mcrl2yyerror(const char *s);/* error function */
-ATerm mcrl2_spec_tree = NULL;      /* the parse tree */
-ATermIndexedSet mcrl2_parser_protect_table = NULL; /* table to protect parsed ATerms */
+int  mcrl3yylex(void);           /* lexer function */
+void mcrl3yyerror(const char *s);/* error function */
+ATerm mcrl3_spec_tree = NULL;      /* the parse tree */
+ATermIndexedSet mcrl3_parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
-class mcrl2_lexer : public mcrl2yyFlexLexer {
+class mcrl3_lexer : public mcrl3yyFlexLexer {
 public:
-  mcrl2_lexer(bool print_parse_errors); /* constructor */
+  mcrl3_lexer(bool print_parse_errors); /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
   int yywrap(void);              /* wrap function */
-  ATerm parse_streams(std::vector<std::istream*> &streams);
+  ATerm parse_streams_new(std::vector<std::istream*> &streams);
 protected:
   std::vector<std::istream*> *cur_streams;/* current input streams */
   int cur_index;                 /* current index in current streams */
@@ -55,12 +55,12 @@ protected:
   void process_string(void);     /* update position, provide token to parser */
 };
 
-//implement yylex in mcrl2_lexer instead of mcrl2yyFlexLexer
+//implement yylex in mcrl3_lexer instead of mcrl3yyFlexLexer
 //(this gets rid of global variables but is ugly in its own right)
-#define YY_DECL int mcrl2_lexer::yylex()
-int mcrl2yyFlexLexer::yylex(void) { return 1; }
+#define YY_DECL int mcrl3_lexer::yylex()
+int mcrl3yyFlexLexer::yylex(void) { return 1; }
 
-mcrl2_lexer *an_mcrl2_lexer = NULL;       /* lexer object, used by parse_streams */
+mcrl3_lexer *an_mcrl3_lexer = NULL;       /* lexer object, used by parse_streams_new */
 
 //--- start generated tokens ---//
 %}
@@ -68,7 +68,7 @@ Id         [a-zA-Z\_][a-zA-Z0-9\_']*
 Number     "0"|([1-9][0-9]*)
 
 %option c++
-%option prefix="mcrl2yy"
+%option prefix="mcrl3yy"
 %option nounput
 
 %%
@@ -180,34 +180,34 @@ nil                  { process_string(); return NIL; }
 %%
 //--- end generated tokens ---//
 
-//Implementation of parse_streams
+//Implementation of parse_streams_new
 
-ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors) {
-  an_mcrl2_lexer = new mcrl2_lexer(print_parse_errors);
-  ATerm result = an_mcrl2_lexer->parse_streams(streams);
-  delete an_mcrl2_lexer;
+ATerm parse_streams_new(std::vector<std::istream*> &streams, bool print_parse_errors) {
+  an_mcrl3_lexer = new mcrl3_lexer(print_parse_errors);
+  ATerm result = an_mcrl3_lexer->parse_streams_new(streams);
+  delete an_mcrl3_lexer;
   return result;
 }
 
 
 //Implementation of global functions
 
-int mcrl2yylex(void) {
-  return an_mcrl2_lexer->yylex();
+int mcrl3yylex(void) {
+  return an_mcrl3_lexer->yylex();
 }
 
-void mcrl2yyerror(const char *s) {
-  return an_mcrl2_lexer->yyerror(s);
+void mcrl3yyerror(const char *s) {
+  return an_mcrl3_lexer->yyerror(s);
 }
 
-int mcrl2yyFlexLexer::yywrap(void) {
+int mcrl3yyFlexLexer::yywrap(void) {
   return 1;
 }
 
 
-//Implementation of mcrl2_lexer
+//Implementation of mcrl3_lexer
 
-mcrl2_lexer::mcrl2_lexer(bool print_parse_errors) : mcrl2yyFlexLexer(NULL, NULL) {
+mcrl3_lexer::mcrl3_lexer(bool print_parse_errors) : mcrl3yyFlexLexer(NULL, NULL) {
   line_nr = 1;
   col_nr = 1;
   cur_streams = NULL;
@@ -215,7 +215,7 @@ mcrl2_lexer::mcrl2_lexer(bool print_parse_errors) : mcrl2yyFlexLexer(NULL, NULL)
   show_errors = print_parse_errors;
 }
 
-void mcrl2_lexer::yyerror(const char *s) {
+void mcrl3_lexer::yyerror(const char *s) {
   if ( show_errors )
   {
     int oldcol_nr = col_nr - YYLeng();
@@ -229,7 +229,7 @@ void mcrl2_lexer::yyerror(const char *s) {
   }
 }
 
-int mcrl2_lexer::yywrap(void) {
+int mcrl3_lexer::yywrap(void) {
   if (cur_streams == NULL) {
     return 1;
   }
@@ -245,35 +245,35 @@ int mcrl2_lexer::yywrap(void) {
   return 0;
 }
 
-void mcrl2_lexer::process_string(void) {
+void mcrl3_lexer::process_string(void) {
   col_nr += YYLeng();
-  mcrl2yylval.appl = gsString2ATermAppl(YYText());
+  mcrl3yylval.appl = gsString2ATermAppl(YYText());
 }
 
-ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
+ATerm mcrl3_lexer::parse_streams_new(std::vector<std::istream*> &streams) {
   //uncomment the line below to let bison generate debug information
-  //mcrl2yydebug = 1;
+  //mcrl3yydebug = 1;
   ATerm result = NULL;
   if (streams.size() == 0) {
     return result;
   }
   //streams.size() > 0
-  mcrl2_spec_tree = NULL;
-  ATprotect(&mcrl2_spec_tree);
-  mcrl2_parser_protect_table = ATindexedSetCreate(10000, 50);
+  mcrl3_spec_tree = NULL;
+  ATprotect(&mcrl3_spec_tree);
+  mcrl3_parser_protect_table = ATindexedSetCreate(10000, 50);
   line_nr = 1;
   col_nr = 1;
   cur_index = 0;
   cur_streams = &streams;
   switch_streams((*cur_streams)[0], NULL);
-  if (mcrl2yyparse() != 0) {
+  if (mcrl3yyparse() != 0) {
     result = NULL;
   } else {
-    //mcrl2_spec_tree contains the parsed specification
-    result = mcrl2_spec_tree;
-    mcrl2_spec_tree = NULL;
+    //mcrl3_spec_tree contains the parsed specification
+    result = mcrl3_spec_tree;
+    mcrl3_spec_tree = NULL;
   }
-  ATindexedSetDestroy(mcrl2_parser_protect_table);
-  ATunprotect(&mcrl2_spec_tree);
+  ATindexedSetDestroy(mcrl3_parser_protect_table);
+  ATunprotect(&mcrl3_spec_tree);
   return result;
 }

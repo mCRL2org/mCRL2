@@ -94,6 +94,7 @@ typedef unsigned int flex_uint32_t;
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 /* end standard C++ headers. */
@@ -616,7 +617,7 @@ lysaLexer *lexer = NULL;
 
 
 
-#line 620 "lysalexer.cpp"
+#line 621 "lysalexer.cpp"
 
 #define INITIAL 0
 #define INIT 1
@@ -721,7 +722,7 @@ YY_DECL
     
 #line 107 "lysalexer.ll"
 
-#line 725 "lysalexer.cpp"
+#line 726 "lysalexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -1106,7 +1107,7 @@ YY_RULE_SETUP
 #line 193 "lysalexer.ll"
 ECHO;
 	YY_BREAK
-#line 1110 "lysalexer.cpp"
+#line 1111 "lysalexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(INIT):
 case YY_STATE_EOF(COMMENT):
