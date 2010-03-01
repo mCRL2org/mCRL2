@@ -206,13 +206,14 @@ class linear_inequality
            throw mcrl2::runtime_error("Encountered a variable in a real expression which is not of sort real: " + pp(e) + "\n");
       }
       else if (is_closed_real_number(rewrite_with_memory(e,r)))
-      { if (factor==real_one())
+      { // std::cerr << "CONST EXPRESSION " << pp(e) << " FACTOR " << pp(factor) << " NEG " << negate << "\n";
+        if (factor==real_one())
         { set_rhs(negate?rewrite_with_memory(sort_real::plus(rhs(),e),r)
                       :rewrite_with_memory(sort_real::minus(rhs(),sort_real::times(factor,e)),r));
         }
         else
-        { set_rhs(negate?rewrite_with_memory(sort_real::plus(rhs(),e),r)
-                      :rewrite_with_memory(sort_real::minus(rhs(),sort_real::times(factor,e)),r));
+        { set_rhs(negate?rewrite_with_memory(sort_real::plus(rhs(), sort_real::times(factor,e)),r)
+                        :rewrite_with_memory(sort_real::minus(rhs(),sort_real::times(factor,e)),r));
         }
       }
       else throw mcrl2::runtime_error("Expect linear expression over reals: " + pp(e) + "\n");
