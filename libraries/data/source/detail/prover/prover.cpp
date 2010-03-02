@@ -34,7 +34,6 @@ namespace mcrl2 {
       int a_time_limit
     ) {
       f_time_limit = a_time_limit;
-      gsDebugMsg("Flag:\n  Time limit: %d, \n", f_time_limit);
       f_processed = false;
 
       switch (a_rewrite_strategy) {
@@ -42,51 +41,43 @@ namespace mcrl2 {
           f_rewriter = createRewriter(data_spec, GS_REWR_INNER);
           f_info = new AI_Inner(f_rewriter);
           f_manipulator = new AM_Inner(f_rewriter, f_info);
-          gsDebugMsg(
-            "Using innermost rewrite strategy.\n"
-            "Rewriter, ATerm_Info and ATerm_Manipulator have been initialized.\n"
-          );
           break;
         }
         case (mcrl2::data::rewriter::jitty): {
           f_rewriter = createRewriter(data_spec, GS_REWR_JITTY);
           f_info = new AI_Jitty(f_rewriter);
           f_manipulator = new AM_Jitty(f_rewriter, f_info);
-          gsDebugMsg(
-            "Using jitty rewrite strategy.\n"
-            "Rewriter, ATerm_Info and ATerm_Manipulator have been initialized.\n"
-          );
           break;
         }
 #ifdef MCRL2_INNERC_AVAILABLE
         case (mcrl2::data::rewriter::innermost_compiling): {
-          throw mcrl2::runtime_error("The compiled innermost rewriter is not supported by the prover.");
+          throw mcrl2::runtime_error("The compiled innermost rewriter is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #endif
         case (mcrl2::data::rewriter::innermost_prover): {
-          throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover.");
+          throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #ifdef MCRL2_INNERC_AVAILABLE
         case (mcrl2::data::rewriter::innermost_compiling_prover): {
-          throw mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover.");
+          throw mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
         case (mcrl2::data::rewriter::jitty_compiling): {
-          throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover.");
+          throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #endif
         case (mcrl2::data::rewriter::jitty_prover): {
-          throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover.");
+          throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #ifdef MCRL2_JITTYC_AVAILABLE
         case (mcrl2::data::rewriter::jitty_compiling_prover): {
-          throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover.");
+          throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #endif

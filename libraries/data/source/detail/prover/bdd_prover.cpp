@@ -252,10 +252,10 @@ namespace mcrl2 {
             v_result = 0;
           } else {
             data_expression v_term = sort_bool::not_(data_expression(v_guard));
-            v_result = sort_bool::and_(data_expression(v_branch), v_term);
+            v_result = lazy::and_(data_expression(v_branch), v_term);
           }
         } else {
-          v_result = sort_bool::and_(data_expression(v_branch), data_expression(v_guard));
+          v_result = lazy::and_(data_expression(v_branch), data_expression(v_guard));
         }
       } else {
         if ((f_bdd_info.is_true(a_bdd) && a_polarity) || (f_bdd_info.is_false(a_bdd) && !a_polarity)) {
