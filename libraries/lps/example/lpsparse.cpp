@@ -20,10 +20,10 @@
 using namespace mcrl2;
 using mcrl2::utilities::tools::input_tool;
 
-// copy some code from core library
-
+// defined in mcrl2lexer.cpp
 ATerm parse_streams_new(std::vector<std::istream*> &streams, bool print_parse_errors);
 
+// copy some code from core library
 ATerm parse_tagged_stream_new(const std::string &tag, std::istream &stream) {
   std::vector<std::istream*> *streams = new std::vector<std::istream*>();
   std::istringstream *tag_stream = new std::istringstream(tag);

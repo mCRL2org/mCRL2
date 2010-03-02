@@ -100,6 +100,16 @@ cd libraries/data/build
 python generate_data_types.py
 ]
 
+The parsers can be generated on unix systems using [^make parsers]. This results in commands like these:
+
+[pre
+cd libraries/core/source
+flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll
+bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy
+sed -i 's+#include "mcrl2parser.h"+#include "mcrl2/core/detail/mcrl2parser.h"+' mcrl2parser.cpp
+sed -i '/isatty/d' mcrl2lexer.cpp
+]
+
 * The script =generate_expression_visitors.py= needs to be modified such that the visitors
   are built on top of the traverser framework.
 
