@@ -489,7 +489,7 @@ namespace tipi {
    **/
   inline configuration::object const& configuration::get_output(std::string const& id) const {
     if (m_parameter_by_id.count(id) == 0) {
-      throw std::runtime_error("A tipi-input-configuration for \"" + id + "\" does not exist");
+      throw std::runtime_error("A tipi-output-configuration for \"" + id + "\" does not exist");
     }
 
     return (*boost::static_pointer_cast< const object >(m_positions[(*m_parameter_by_id.find(id)).second]));
@@ -503,7 +503,7 @@ namespace tipi {
    **/
   inline configuration::object& configuration::get_output(std::string const& id) {
     if (m_parameter_by_id.count(id) == 0) {
-      throw std::runtime_error("A tipi-input-configuration for \"" + id + "\" does not exist");
+      throw std::runtime_error("A tipi-output-configuration for \"" + id + "\" does not exist");
     }
 
     return (*boost::static_pointer_cast< object >(m_positions[m_parameter_by_id[id]]));
