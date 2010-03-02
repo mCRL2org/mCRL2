@@ -73,30 +73,37 @@
 class Invariant_Eliminator {
   private:
     mcrl2::data::detail::BDD_Prover f_bdd_prover;
-    ATermAppl f_lps;
+    const mcrl2::lps::specification f_lps;
     bool f_simplify_all;
-    ATermAppl simplify_summand(ATermAppl a_invariant, ATermAppl a_summand, const bool a_no_eliminatino, int a_summand_number);
+    mcrl2::lps::summand simplify_summand(
+          const mcrl2::lps::summand a_summand, 
+          const mcrl2::data::data_expression a_invariant, 
+          const bool a_no_elimination, 
+          const int a_summand_number);
   public:
     /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Invariant_Eliminator(
-      mcrl2::lps::specification const& a_lps,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
-      int a_time_limit = 0,
-      bool a_path_eliminator = false,
-      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
-      bool a_apply_induction = false,
-      bool a_simplify_all = false
+      const mcrl2::lps::specification & a_lps,
+      const mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
+      const int a_time_limit = 0,
+      const bool a_path_eliminator = false,
+      const mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
+      const bool a_apply_induction = false,
+      const bool a_simplify_all = false
     );
     ~Invariant_Eliminator();
 
     /// precondition: the argument passed as parameter a_invariant is a valid expression of sort Bool in internal mCRL2
     /// format
-    /// precondtition: the argument passed as parameter a_summand_number is greater than or equal to 0. If the argument is
+    /// precondition: the argument passed as parameter a_summand_number is greater than or equal to 0. If the argument is
     /// equal to 0, all summands are checked to see whether they can be simplified or eliminated. If the argument is greater
     /// than the number of summands, no summand will be simplified or eliminated
-    ATermAppl simplify(ATermAppl a_invariant, const bool a_no_elimination, int a_summand_number);
+    mcrl2::lps::specification simplify(
+              const mcrl2::data::data_expression a_invariant, 
+              const bool a_no_elimination, 
+              const int a_summand_number);
 };
 
 #endif

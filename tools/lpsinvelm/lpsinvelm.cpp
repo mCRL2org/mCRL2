@@ -222,7 +222,8 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
       else
       {
         Invariant_Checker v_invariant_checker(
-          specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), m_apply_induction, m_counter_example, m_all_violations, m_dot_file_name
+          specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), 
+          m_apply_induction, m_counter_example, m_all_violations, m_dot_file_name
         );
 
         invariance_result = v_invariant_checker.check_invariant(m_invariant);
