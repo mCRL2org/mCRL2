@@ -61,7 +61,7 @@ using namespace ::bes;
 //------------------------------------------
 
 using namespace mcrl2;
-using utilities::tools::input_tool;
+using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
@@ -70,8 +70,9 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 {
   protected:
     // Tool options.
+    /// The output file name
+    std::string m_output_filename;
     std::string opt_outputformat;              // The output format
-    std::string m_output_filename;             // For storing output file. Warning! Variable should be removed if the tool is made input/output!
     ::bes::transformation_strategy opt_strategy; // The strategy
     bool opt_use_hashtables;                   // The hashtable option
     bool opt_construct_counter_example;        // The counter example option
@@ -83,6 +84,31 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 
     std::string default_rewriter() const
     { return "quantifier-all";
+    }
+
+    /// \brief Checks if the number of positional options is OK.
+    /// \param parser A command line parser
+    void check_positional_options(const command_line_parser& parser)
+    {
+      if (2 < parser.arguments.size())
+      {
+        parser.error("too many file arguments");
+      }
+    }
+
+    /// \brief Returns a message about the output filename
+    std::string output_file_message() const
+    {
+      std::ostringstream out;
+      out << "Output written to " << ((m_output_filename.empty())? "standard output" : ("'" + m_output_filename + "'"));
+      return out.str();
+    }
+
+    /// \brief Adds a message about input and output files to the given description.
+    std::string make_tool_description(const std::string& description) const
+    {
+      // return core::word_wrap_text(description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.");
+      return description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.";
     }
 
     // Overload synopsis to cope with optional OUTFILE
@@ -108,9 +134,27 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
         opt_counter_example_file("")
     {}
 
+    /// \brief Returns a const reference to the output filename.
+    const std::string& output_filename() const
+    {
+      return m_output_filename;
+    }
+
+    /// \brief Returns a reference to the output filename.
+    std::string& output_filename()
+    {
+      return m_output_filename;
+    }
+
   private:
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
+
+      input_tool::parse_options(parser);
+      if (1 < parser.arguments.size())
+      {
+        m_output_filename = parser.arguments[1];
+      }
 
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
       opt_construct_counter_example = 0 < parser.options.count("counter");
@@ -426,6 +470,9 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       using namespace mcrl2;
 
       // Let squadt_tool update configuration for rewriter and add output file configuration
+      if (c.output_exists("main-output")) {
+        m_output_filename = c.get_output("main-output").location();
+      } 
       synchronise_with_configuration(c);
 
       /* if (!c.option_exists(option_precompile)) {
@@ -538,6 +585,11 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 
       send_clear_display();
 
+      if(c.output_exists("main-output"))
+      {
+        m_output_filename = c.get_output("main-output").location();
+      }
+
       update_configuration(c);
     }
 
@@ -557,7 +609,12 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       // static std::string strategies[] = { "lazy", "fly" };
       static std::string formats[]    = { "none", "vasy", "cwi", "pbes" };
 
-      // Let squadt_tool update configuration for rewriter and add output file configuration
+      // Let squadt_tool update configuration for rewriter and add output file
+      // configuration
+      if (c.output_exists("main-output")) {
+          m_output_filename = c.get_output("main-output").location();
+      }
+
       synchronise_with_configuration(c);
 
       opt_construct_counter_example = c.get_option_argument< bool >(option_counter);
