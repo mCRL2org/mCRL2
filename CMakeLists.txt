@@ -950,6 +950,17 @@ SET(CPACK_PACKAGE_VENDOR "TUe")
 set(CPACK_CREATE_DESKTOP_LINKS squadt)
 set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grape;grape" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "xsim;xsim")
 
+  IF(APPLE)
+    SET(CPACK_SET_DESTDIR TRUE)
+
+    configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+
+    SET(CMAKE_POSTFLIGHT_SCRIPT
+      ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+    SET(CPACK_POSTUPGRADE_SCRIPT
+      ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+  ENDIF(APPLE)
+
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
