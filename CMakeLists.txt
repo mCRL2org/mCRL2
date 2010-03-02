@@ -736,9 +736,7 @@ option(ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
 message(STATUS "ENABLE_TEST_TARGETS: ${ENABLE_TEST_TARGETS}" )
 
 ENABLE_TESTING()
-set(CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS "500" )
-set(CTEST_CUSTOM_MAXIMUM_NUMBER_OF_ERRORS   "200" )
-
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/CTestCustom.cmake" )
 
 if( ENABLE_TEST_TARGETS )
    add_subdirectory( libraries/lps/test)
