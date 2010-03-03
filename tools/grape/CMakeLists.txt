@@ -15,6 +15,11 @@ if ( MCRL2_BUILD_GUI_TOOLS )
 add_definitions(-DTIXML_USE_TICPP)
 
 # ######### General setup ##########
+file(COPY
+  ${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/help/grapehelp.zip
+ DESTINATION
+  ${CMAKE_CURRENT_BINARY_DIR}
+) 
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   grapeapp/grape_clipboard.cpp
@@ -105,11 +110,6 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
 
   mcrl2gen/mcrl2gen.cpp
   mcrl2gen/mcrl2gen_validate.cpp
-)
-
-#Add GRAPE_HELP_DIR define
-set_source_files_properties(grapeapp/grape_frame.cpp
-  PROPERTIES COMPILE_DEFINITIONS GRAPE_HELP_DIR="${CMAKE_INSTALL_PREFIX}/share/mcrl2/grape"
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/tools/grape)

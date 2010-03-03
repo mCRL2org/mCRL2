@@ -157,12 +157,79 @@ grape_frame::grape_frame( const wxString &p_filename )
   wxFileSystem::AddHandler(new wxArchiveFSHandler);
   m_help_controller = new wxHtmlHelpController(wxHF_DEFAULT_STYLE, this);
   wxString filename = wxEmptyString;
+
+
+
  
  //GRAPE_HELP_DIR
  //
-#ifdef _WIN32
-    std::string win32_install_grape_help_dir;
-		HKEY hKey = 0;
+
+  std::string path;
+  #ifdef __linux
+    path = "";
+    pid_t pid = getpid();
+    char buf[10];
+    sprintf(buf,"%d",pid);
+    std::string _link = "/proc/";
+    _link.append( buf );
+    _link.append( "/exe");
+    char proc[512];
+    int ch = readlink(_link.c_str(),proc,512);
+    if (ch != -1) {
+      proc[ch] = 0;
+      path = proc;
+      std::string::size_type t = path.find_last_of("/");
+      path = path.substr(0,t);
+    }
+  #endif
+
+  #ifdef __APPLE__
+    path = "./";
+    ProcessSerialNumber PSN;
+    ProcessInfoRec pinfo;
+    FSSpec pspec;
+    FSRef fsr;
+    OSStatus err;
+
+    /* set up process serial number */
+    PSN.highLongOfPSN = 0;
+    PSN.lowLongOfPSN = kCurrentProcess;
+
+    /* set up info block */
+    pinfo.processInfoLength = sizeof(pinfo);
+    pinfo.processName = NULL;
+    pinfo.processAppSpec = &pspec;
+
+    /* grab the vrefnum and directory */
+    err = GetProcessInformation(&PSN, &pinfo);
+    if (! err ) {
+      char c_path[2048];
+      FSSpec fss2;
+      int tocopy;
+      err = FSMakeFSSpec(pspec.vRefNum, pspec.parID, 0, &fss2);
+      if ( ! err ) 
+      {
+        err = FSpMakeFSRef(&fss2, &fsr);
+        if ( ! err ) 
+        {
+          char c_path[2049];
+          err = (OSErr)FSRefMakePath(&fsr, (UInt8*)c_path, 2048);
+          if (! err ) 
+          {
+            path = c_path;
+          }
+        }
+      }
+    }
+  #endif
+
+  #ifdef _WIN32
+    char buffer[MAX_PATH];//always use MAX_PATH for filepaths
+    GetModuleFileName(NULL,buffer,sizeof(buffer));
+    path = buffer;
+    std::string install_path;
+
+    HKEY hKey = 0;
     char buf[255] = {0};
     DWORD dwBufSize = sizeof(buf);
     DWORD dwType;
@@ -177,8 +244,7 @@ grape_frame::grape_frame( const wxString &p_filename )
       dwType = REG_SZ;
       if( RegQueryValueEx(hKey,"",0, &dwType, (BYTE*)buf, &dwBufSize) == ERROR_SUCCESS)
       {
-							win32_install_grape_help_dir = buf;
-							win32_install_grape_help_dir.append("/share/mcrl2/grape");
+							install_path = buf;
       }
 	    std::cerr << "Cannot find default value for key: HKEY_LOCAL_MACHINE\\SOFTWARE\\TUe\\mCRL2 \n" ;
 	  }
@@ -186,28 +252,57 @@ grape_frame::grape_frame( const wxString &p_filename )
     { 
   	  std::cerr << "Cannot find key for HKEY_LOCAL_MACHINE\\SOFTWARE\\TUe\\mCRL2 \n" ;
     }
-#endif
 
-  if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") )
-#ifdef _WIN32
-		|| fs.FindFileInPath( &filename, _T( win32_install_grape_help_dir.c_str() ), _T("grapehelp.zip") )		
-#endif
-			)
-  {
-    // file found
-    m_help_controller->AddBook( wxFileName( filename ) );
-  }
-  else
-  {
-		wxString info;
-                info << wxT("Help file \"grapehelp.zip\" could not be found in:\n- ");
-		info << wxT(GRAPE_HELP_DIR) ;
-#ifdef _WIN32
-    info << wxT("\n- ");
-    info << win32_install_grape_help_dir ;
-#endif
-    wxMessageBox(  info  , _T("Warning"), wxOK | wxICON_EXCLAMATION);
-  }
+  #endif
+
+    bool found = false;
+    // binary in build tree
+    if( fs.FindFileInPath( &filename, _T( path.c_str() ), _T("/grapehelp.zip") ) )
+      {
+        m_help_controller->AddBook( wxFileName( filename ) );
+        found = true;
+      }
+    // binary in install/distribution
+    if( fs.FindFileInPath( &filename, _T( path.c_str() ), _T("../share/mcrl2/grapehelp.zip") ) )
+      {
+        m_help_controller->AddBook( wxFileName( filename ) );
+        found = true;
+      }
+  #ifdef _WIN32
+    if(!install_path.empty())
+    {
+      if( fs.FindFileInPath( &filename, _T( install_path.c_str() ), _T("/grapehelp.zip") ) )
+        {
+          m_help_controller->AddBook( wxFileName( filename ) );
+          found = true;
+        }
+      // binary in install/distribution
+      if( fs.FindFileInPath( &filename, _T( install_path.c_str() ), _T("../share/mcrl2/grapehelp.zip") ) )
+        {
+          m_help_controller->AddBook( wxFileName( filename ) );
+          found = true;
+        }
+      }
+  #endif
+
+    if( !found )
+    {
+      wxString info;
+      info << wxT("Help file \"grapehelp.zip\" could not be found in:\n- ");
+      info << path << wxT("/grapeapp/help/grapehelp.zip") ;
+      info << wxT("\n- ");
+      info << path << wxT("../share/mcrl2/grapehelp.zip"); 
+  #ifdef _WIN32
+    if(!install_path.empty())
+    {
+      info << wxT("\n- ");
+      info << install_path << wxT("/grapeapp/help/grapehelp.zip") ;
+      info << wxT("\n- ");
+      info << install_path << wxT("../share/mcrl2/grapehelp.zip");
+    }
+  #endif 
+      wxMessageBox(  info  , _T("Warning"), wxOK | wxICON_EXCLAMATION);
+    }
 
   // show frame
   Show();
