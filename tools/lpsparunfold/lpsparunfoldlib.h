@@ -214,16 +214,12 @@ class lpsparunfold
         mcrl2::data::function_symbol_vector pi);
 
     /** \brief substitute unfold process parameter in the initialization of the linear process
-      * \param  case_function the case function
-      * \param  k vector of affected constructors 
       * \param  determine_function the determine function
       * \param  parameter_at_index the parameter index
       * \param  pi the projection functions 
       * \return a new initialization for the linear process in which the process parameter at given index is unfolded
     **/
     mcrl2::lps::process_initializer update_linear_process_initialization(
-        mcrl2::data::function_symbol case_function, 
-        mcrl2::data::function_symbol_vector k, 
         mcrl2::data::function_symbol determine_function, 
         int parameter_at_index, 
         mcrl2::data::function_symbol_vector pi);

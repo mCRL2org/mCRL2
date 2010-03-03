@@ -559,7 +559,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   return new_lps;
 }
 
-mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initialization(function_symbol case_function , function_symbol_vector AffectedConstructors, function_symbol determine_function, int parameter_at_index, function_symbol_vector pi)
+mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initialization(function_symbol determine_function, int parameter_at_index, function_symbol_vector pi)
 {
   //
   //update inital process  
@@ -897,7 +897,7 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
   
      /*----------------*/
      new_lps = update_linear_process(case_function, k, determine_function, parameter_at_index, projection_functions);
-     new_init = update_linear_process_initialization(case_function, k, determine_function, parameter_at_index, projection_functions);
+     new_init = update_linear_process_initialization( determine_function, parameter_at_index, projection_functions);
   
     //Reconstruct data specification
     m_data_specification.add_sort( fresh_basic_sort );

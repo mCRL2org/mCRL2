@@ -78,12 +78,12 @@ namespace detail {
         return core::pp(a);
       }
 
-      std::string print(const deadlock& d) const
+      std::string print(const deadlock&) const
       {
         return "<pp(deadlock) Not yet implemented>";
       }
 
-      std::string print(const multi_action& m) const
+      std::string print(const multi_action&) const
       {
         return "<pp(multi_action) Not yet implemented>";
       }

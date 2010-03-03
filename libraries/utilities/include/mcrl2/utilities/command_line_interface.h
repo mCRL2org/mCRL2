@@ -1011,7 +1011,7 @@ namespace mcrl2 {
      * a string so the implementation is trivial.
      **/
     template < >
-    inline bool interface_description::typed_argument< std::string >::validate(std::string const& s) const {
+    inline bool interface_description::typed_argument< std::string >::validate(std::string const& ) const {
       return true;
     }
 

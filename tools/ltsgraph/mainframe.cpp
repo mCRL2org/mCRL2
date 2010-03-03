@@ -296,13 +296,13 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   }
 }
 
-void MainFrame::onQuit(wxCommandEvent& e)
+void MainFrame::onQuit(wxCommandEvent&)
 {
   app->getAlgorithm(0)->stop();
   Close(true);
 }
 
-void MainFrame::onClose(wxCloseEvent& e)
+void MainFrame::onClose(wxCloseEvent&)
 {
   app->getAlgorithm(0)->stop();
   Destroy();

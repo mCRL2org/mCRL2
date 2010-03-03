@@ -51,12 +51,12 @@ namespace tools {
 
       /// \brief Add options to an interface description.
       /// \param desc An interface description
-      virtual void add_options(interface_description& desc)
+      virtual void add_options(interface_description&)
       {}
 
       /// \brief Parse non-standard options
       /// \param parser A command line parser
-      virtual void parse_options(const command_line_parser& parser)
+      virtual void parse_options(const command_line_parser&)
       { }
 
       /// \brief Executed only if run would be executed and invoked before run.
@@ -94,7 +94,7 @@ namespace tools {
       /// \brief Checks if the number of positional options is OK.
       /// By default this function handles standart options: -v, -d and -q
       /// \param parser A command line parser
-      virtual void check_positional_options(const command_line_parser& parser)
+      virtual void check_positional_options(const command_line_parser& )
       { }
 
       /// \brief Returns the synopsis of the tool
