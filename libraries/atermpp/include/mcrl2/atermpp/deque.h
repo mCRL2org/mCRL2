@@ -26,6 +26,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     deque()
+     : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -33,7 +34,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param a An allocator.
     explicit deque(const Allocator& a)
-      : std::deque<T, Allocator>(a)
+      : std::deque<T, Allocator>(a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -41,7 +43,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param count A positive number.
     explicit deque(typename std::deque<T,Allocator>::size_type count)
-      : std::deque<T, Allocator>(count)
+      : std::deque<T, Allocator>(count),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -50,7 +53,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \param count A positive number.
     /// \param val A value.
     deque(typename std::deque<T,Allocator>::size_type count, const T& val)
-      : std::deque<T, Allocator>(count, val)
+      : std::deque<T, Allocator>(count, val),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -60,7 +64,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \param val A value.
     /// \param a An allocator.
     deque(typename std::deque<T,Allocator>::size_type count, const T& val, const Allocator& a)
-      : std::deque<T, Allocator>(count, val, a)
+      : std::deque<T, Allocator>(count, val, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -68,7 +73,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param right A deque.
     deque(const deque& right)
-      : std::deque<T, Allocator>(right)
+      : std::deque<T, Allocator>(right),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -78,7 +84,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
         /// \param last The end of a range of elements.
     template<class InIt>
         deque(InIt first, InIt last)
-      : std::deque<T, Allocator>(first, last)
+      : std::deque<T, Allocator>(first, last),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -89,7 +96,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
         /// \param a An allocator.
     template<class InIt>
         deque(InIt first, InIt last, const Allocator& a)
-      : std::deque<T, Allocator>(first, last, a)
+      : std::deque<T, Allocator>(first, last, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }

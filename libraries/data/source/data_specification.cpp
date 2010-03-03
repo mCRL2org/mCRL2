@@ -54,7 +54,7 @@ namespace mcrl2 {
        * here for compatibility with the old parser, type checker and pretty
        * print implementations.
        **/
-      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s, bool compatible)
+      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
       { using namespace core::detail;
 
         return gsMakeDataSpec(

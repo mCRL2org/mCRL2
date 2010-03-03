@@ -1781,9 +1781,9 @@ void lts::set_data_specification(data::data_specification const& spec)
 
   if ( extra_data == NULL )
   {
-    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec, false), (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
+    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec), (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
   } else {
-    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec, false),0);
+    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec),0);
   }
 }
 

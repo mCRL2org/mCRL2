@@ -66,7 +66,7 @@ namespace mcrl2 {
 
       // The typechecker replaces untyped identifiers by typed identifiers (when typechecking 
       // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
-      t = core::type_check_data_expr(t, 0, mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true), variables);
+      t = core::type_check_data_expr(t, 0, mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
       if (t == 0)
       {
         throw mcrl2::runtime_error("error type checking data expression");

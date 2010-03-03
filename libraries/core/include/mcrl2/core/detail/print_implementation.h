@@ -397,6 +397,7 @@ inline static void PRINT_FUNC(fprints)(PRINT_OUTTYPE OutStream,
 
 inline static void PRINT_FUNC(dbg_prints)(const char *Value)
 {
+static_cast<void>(Value); // Harmless
 //Pre:  Value is not NULL
 //Post: Value is written to stderr in C/C++ style if gsDebug is true
 #if (defined(PRINT_C) == defined(PRINT_CXX))

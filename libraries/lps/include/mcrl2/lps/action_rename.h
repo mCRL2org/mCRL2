@@ -222,7 +222,7 @@ namespace lps {
       {
           m_term = reinterpret_cast<ATerm>(
           core::detail::gsMakeActionRenameSpec(
-            data::detail::data_specification_to_aterm_data_spec(data, true),
+            data::detail::data_specification_to_aterm_data_spec(data),
             core::detail::gsMakeActSpec(action_labels),
             core::detail::gsMakeActionRenameRules(rules)
           )

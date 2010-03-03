@@ -123,6 +123,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     multiset()
+     : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -130,7 +131,8 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit multiset(const Compare& comp)
-      : std::multiset<T, Compare, Allocator>(comp)
+      : std::multiset<T, Compare, Allocator>(comp),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -139,7 +141,8 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// \param comp A compare function.
     /// \param a An allocator.
     multiset(const Compare& comp, const Allocator& a)
-      : std::multiset<T, Compare, Allocator>(comp, a)
+      : std::multiset<T, Compare, Allocator>(comp, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -147,7 +150,8 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param right A multiset.
     multiset(const multiset& right)
-      : std::multiset<T, Compare, Allocator>(right)
+      : std::multiset<T, Compare, Allocator>(right),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -157,7 +161,8 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// \param last The end of a range of multiset elements.
     template<class InIt>
     multiset(InIt first, InIt last)
-      : std::multiset<T, Compare, Allocator>(first, last)
+      : std::multiset<T, Compare, Allocator>(first, last),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -168,7 +173,8 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// \param comp A compare function.
     template<class InIt>
     multiset(InIt first, InIt last, const Compare& comp)
-      : std::multiset<T, Compare, Allocator>(first, last, comp)
+      : std::multiset<T, Compare, Allocator>(first, last, comp),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -180,7 +186,8 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     /// \param a An allocator.
     template<class InIt>
     multiset(InIt first, InIt last, const Compare& comp, const Allocator& a)
-      : std::multiset<T, Compare, Allocator>(first, last, comp, a)
+      : std::multiset<T, Compare, Allocator>(first, last, comp, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }

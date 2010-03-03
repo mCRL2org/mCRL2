@@ -291,7 +291,7 @@ inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compatible)
 {
   return core::detail::gsMakeLinProcSpec(
-      data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
+      data::detail::data_specification_to_aterm_data_spec(spec.data()),
       core::detail::gsMakeActSpec(spec.action_labels()),
       core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
       linear_process_to_aterm(spec.process()),

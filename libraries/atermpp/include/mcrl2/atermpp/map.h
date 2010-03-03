@@ -27,6 +27,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     map()
+     : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -34,7 +35,8 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit map(const Compare& comp)
-      : std::map<Key, T, Compare, Allocator>(comp)
+      : std::map<Key, T, Compare, Allocator>(comp),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -43,7 +45,8 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     /// \param comp A compare function.
     /// \param a An allocator.
     map(const Compare& comp, const Allocator& a)
-      : std::map<Key, T, Compare, Allocator>(comp, a)
+      : std::map<Key, T, Compare, Allocator>(comp, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -51,7 +54,8 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param right A map.
     map(const map& right)
-      : std::map<Key, T, Compare, Allocator>(right)
+      : std::map<Key, T, Compare, Allocator>(right),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -61,7 +65,8 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     /// \param last The end of a range of map elements.
     template<class InIt>
     map(InIt first, InIt last)
-      : std::map<Key, T, Compare, Allocator>(first, last)
+      : std::map<Key, T, Compare, Allocator>(first, last),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -72,7 +77,8 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     /// \param comp A compare function.
     template<class InIt>
     map(InIt first, InIt last, const Compare& comp)
-      : std::map<Key, T, Compare, Allocator>(first, last, comp)
+      : std::map<Key, T, Compare, Allocator>(first, last, comp),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -84,7 +90,8 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     /// \param a An allocator.
     template<class InIt>
     map(InIt first, InIt last, const Compare& comp, const Allocator& a)
-      : std::map<Key, T, Compare, Allocator>(first, last, comp, a)
+      : std::map<Key, T, Compare, Allocator>(first, last, comp, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -116,6 +123,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
   public:
     /// \brief Constructor.
     multimap()
+     : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -123,7 +131,8 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit multimap(const Compare& comp)
-      : std::multimap<Key, T, Compare, Allocator>(comp)
+      : std::multimap<Key, T, Compare, Allocator>(comp),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -132,7 +141,8 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     /// \param comp A compare function.
     /// \param a An allocator.
     multimap(const Compare& comp, const Allocator& a)
-      : std::multimap<Key, T, Compare, Allocator>(comp, a)
+      : std::multimap<Key, T, Compare, Allocator>(comp, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -140,7 +150,8 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     /// \brief Constructor.
     /// \param right A map.
     multimap(const multimap& right)
-      : std::multimap<Key, T, Compare, Allocator>(right)
+      : std::multimap<Key, T, Compare, Allocator>(right),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -150,7 +161,8 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     /// \param last The end of a range of map elements.
     template<class InIt>
     multimap(InIt first, InIt last)
-      : std::multimap<Key, T, Compare, Allocator>(first, last)
+      : std::multimap<Key, T, Compare, Allocator>(first, last),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -161,7 +173,8 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     /// \param comp A compare function.
     template<class InIt>
     multimap(InIt first, InIt last, const Compare& comp)
-      : std::multimap<Key, T, Compare, Allocator>(first, last, comp)
+      : std::multimap<Key, T, Compare, Allocator>(first, last, comp),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -173,7 +186,8 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     /// \param a An allocator.
     template<class InIt>
     multimap(InIt first, InIt last, const Compare& comp, const Allocator& a)
-      : std::multimap<Key, T, Compare, Allocator>(first, last, comp, a)
+      : std::multimap<Key, T, Compare, Allocator>(first, last, comp, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }

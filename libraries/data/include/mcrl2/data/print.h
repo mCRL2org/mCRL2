@@ -35,7 +35,7 @@ namespace mcrl2 {
     /// \param[in] specification a data specification
     inline std::string pp(data_specification const& specification)
     {
-      return core::pp(detail::data_specification_to_aterm_data_spec(specification, true));
+      return core::pp(detail::data_specification_to_aterm_data_spec(specification));
     }
 
     /// \brief Pretty prints the contents of a container

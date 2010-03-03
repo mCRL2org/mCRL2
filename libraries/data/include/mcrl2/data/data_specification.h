@@ -47,7 +47,7 @@ namespace mcrl2 {
     /// \cond INTERNAL_DOCS
     namespace detail 
     {
-      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&, bool = false);
+      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&);
     }
     /// \endcond
 
@@ -131,7 +131,7 @@ namespace mcrl2 {
 
       private:
 
-        friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&, bool);
+        friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&);
 
         ///\brief Adds system defined sorts and standard mappings for all internally used sorts
 

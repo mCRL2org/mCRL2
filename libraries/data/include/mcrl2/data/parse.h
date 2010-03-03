@@ -132,7 +132,7 @@ namespace data {
     // Type check the variable list.
     /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                         mcrl2::data::remove_all_system_defined(data_spec), true); */
-    atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true);
+    atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec);
 
     data_vars = core::type_check_data_vars(data_vars, d);
 

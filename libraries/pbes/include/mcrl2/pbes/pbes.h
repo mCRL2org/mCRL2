@@ -712,7 +712,7 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
   else */
   {
     result = core::detail::gsMakePBES(
-      data::detail::data_specification_to_aterm_data_spec(p.data(), compatible),
+      data::detail::data_specification_to_aterm_data_spec(p.data()),
       global_variables,
       equations,
       initial_state

@@ -341,7 +341,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
 
     if ( applied_conversion )
     {
-      data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(spec.data(), false);
+      data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(spec.data());
       act_spec = spec.action_labels();
     } else {
       data_spec = ATAgetArgument((ATermAppl) extra_data,0);

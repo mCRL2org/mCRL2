@@ -50,7 +50,7 @@ namespace tipi {
         boost::shared_ptr < configuration >  m_configuration;
 
         /** \brief Wakes waiters if no connections remain */
-        void on_disconnect(messaging::basic_messenger_impl< tipi::message >::end_point o) {
+        void on_disconnect(messaging::basic_messenger_impl< tipi::message >::end_point) {
         }
 
       public:
