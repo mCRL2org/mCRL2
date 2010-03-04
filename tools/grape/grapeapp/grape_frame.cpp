@@ -227,8 +227,10 @@ grape_frame::grape_frame( const wxString &p_filename )
     char buffer[MAX_PATH];//always use MAX_PATH for filepaths
     GetModuleFileName(NULL,buffer,sizeof(buffer));
     path = buffer;
-    std::string install_path;
+    std::string::size_type t = path.find_last_of("\\");
+    path = path.substr(0,t);
 
+    std::string install_path;
     HKEY hKey = 0;
     char buf[255] = {0};
     DWORD dwBufSize = sizeof(buf);
@@ -263,21 +265,23 @@ grape_frame::grape_frame( const wxString &p_filename )
         found = true;
       }
     // binary in install/distribution
-    if( fs.FindFileInPath( &filename, _T( path.c_str() ), _T("../share/mcrl2/grapehelp.zip") ) )
+    if( fs.FindFileInPath( &filename, _T( path.c_str() ), _T("/../share/mcrl2/ggrapehelp.zip") ) )
       {
         m_help_controller->AddBook( wxFileName( filename ) );
         found = true;
       }
   #ifdef _WIN32
+    // Multi-Configuration
+    if( fs.FindFileInPath( &filename, _T( path.c_str() ), _T("/../grapehelp.zip") ) )
+      {
+        m_help_controller->AddBook( wxFileName( filename ) );
+        found = true;
+      }
+
     if(!install_path.empty())
     {
-      if( fs.FindFileInPath( &filename, _T( install_path.c_str() ), _T("/grapehelp.zip") ) )
-        {
-          m_help_controller->AddBook( wxFileName( filename ) );
-          found = true;
-        }
       // binary in install/distribution
-      if( fs.FindFileInPath( &filename, _T( install_path.c_str() ), _T("../share/mcrl2/grapehelp.zip") ) )
+      if( fs.FindFileInPath( &filename, _T( install_path.c_str() ), _T("/share/mcrl2/grape/grapehelp.zip") ) )
         {
           m_help_controller->AddBook( wxFileName( filename ) );
           found = true;
@@ -289,16 +293,17 @@ grape_frame::grape_frame( const wxString &p_filename )
     {
       wxString info;
       info << wxT("Help file \"grapehelp.zip\" could not be found in:\n- ");
-      info << path << wxT("/grapeapp/help/grapehelp.zip") ;
+      info << wxT(path) << wxT("/grapehelp.zip") ;
       info << wxT("\n- ");
-      info << path << wxT("../share/mcrl2/grapehelp.zip"); 
+      std::string::size_type t = path.find_last_of("\\");
+      info << wxT(path.substr(0,t)) << wxT("/share/mcrl2/grapehelp.zip"); 
   #ifdef _WIN32
     if(!install_path.empty())
     {
       info << wxT("\n- ");
-      info << install_path << wxT("/grapeapp/help/grapehelp.zip") ;
+      info << wxT(path.substr(0,t)) << wxT("/grapehelp.zip"); 
       info << wxT("\n- ");
-      info << install_path << wxT("../share/mcrl2/grapehelp.zip");
+      info << wxT(install_path) << wxT("\\share\\mcrl2\\grape\\grapehelp.zip");
     }
   #endif 
       wxMessageBox(  info  , _T("Warning"), wxOK | wxICON_EXCLAMATION);
