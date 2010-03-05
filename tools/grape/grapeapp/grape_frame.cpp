@@ -259,29 +259,32 @@ grape_frame::grape_frame( const wxString &p_filename )
 
     bool found = false;
     // binary in build tree
-    if( fs.FindFileInPath( &filename, _T( path.c_str() ), _T("/grapehelp.zip") ) )
+    wxString wxpath(path.c_str(), wxConvUTF8);
+  
+    if( fs.FindFileInPath( &filename, wxpath , _T("/grapehelp.zip") ) )
       {
         m_help_controller->AddBook( wxFileName( filename ) );
         found = true;
       }
     // binary in install/distribution
-    if( fs.FindFileInPath( &filename, _T( path.c_str() ), _T("/../share/mcrl2/ggrapehelp.zip") ) )
+    if( fs.FindFileInPath( &filename, wxpath , _T("/../share/mcrl2/ggrapehelp.zip") ) )
       {
         m_help_controller->AddBook( wxFileName( filename ) );
         found = true;
       }
   #ifdef _WIN32
     // Multi-Configuration
-    if( fs.FindFileInPath( &filename, _T( path.c_str() ), _T("/../grapehelp.zip") ) )
+    if( fs.FindFileInPath( &filename, wxpath , _T("/../grapehelp.zip") ) )
       {
         m_help_controller->AddBook( wxFileName( filename ) );
         found = true;
       }
 
+    wxString wxinstall_path(install_path.c_str(), wxConvUTF8);
     if(!install_path.empty())
     {
       // binary in install/distribution
-      if( fs.FindFileInPath( &filename, _T( install_path.c_str() ), _T("/share/mcrl2/grape/grapehelp.zip") ) )
+      if( fs.FindFileInPath( &filename, wxinstall_path , _T("/share/mcrl2/grape/grapehelp.zip") ) )
         {
           m_help_controller->AddBook( wxFileName( filename ) );
           found = true;
@@ -293,17 +296,18 @@ grape_frame::grape_frame( const wxString &p_filename )
     {
       wxString info;
       info << wxT("Help file \"grapehelp.zip\" could not be found in:\n- ");
-      info << wxT(path) << wxT("/grapehelp.zip") ;
+      info << wxpath << wxT("/grapehelp.zip") ;
       info << wxT("\n- ");
       std::string::size_type t = path.find_last_of("\\");
-      info << wxT(path.substr(0,t)) << wxT("/share/mcrl2/grapehelp.zip"); 
+      wxString wxsubpath(path.substr(0,t).c_str(), wxConvUTF8);
+      info << wxsubpath << wxT("/share/mcrl2/grapehelp.zip"); 
   #ifdef _WIN32
     if(!install_path.empty())
     {
       info << wxT("\n- ");
-      info << wxT(path.substr(0,t)) << wxT("/grapehelp.zip"); 
+      info << wxsubpath << wxT("/grapehelp.zip"); 
       info << wxT("\n- ");
-      info << wxT(install_path) << wxT("\\share\\mcrl2\\grape\\grapehelp.zip");
+      info << wxinstall_path << wxT("\\share\\mcrl2\\grape\\grapehelp.zip");
     }
   #endif 
       wxMessageBox(  info  , _T("Warning"), wxOK | wxICON_EXCLAMATION);
@@ -784,7 +788,7 @@ void grape_frame::update_menubar( void )
   }
 }
 
-void grape_frame::update_statusbar( wxCommandEvent& p_event )
+void grape_frame::update_statusbar( wxCommandEvent& )
 {
   if ( m_mode == GRAPE_MODE_DATASPEC )
   {
