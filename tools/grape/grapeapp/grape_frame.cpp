@@ -221,6 +221,12 @@ grape_frame::grape_frame( const wxString &p_filename )
         }
       }
     }
+    std::string::size_type t = path.size();
+    for( int i = 0; i < 3; ++i)
+    {
+      t = path.find_last_of("/", t-1);
+    }
+    path = path.substr(0,t);
   #endif
 
   #ifdef _WIN32
