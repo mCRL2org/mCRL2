@@ -267,7 +267,7 @@ grape_frame::grape_frame( const wxString &p_filename )
         found = true;
       }
     // binary in install/distribution
-    if( fs.FindFileInPath( &filename, wxpath , _T("/../share/mcrl2/ggrapehelp.zip") ) )
+    if( fs.FindFileInPath( &filename, wxpath , _T("/../share/mcrl2/grape/grapehelp.zip") ) )
       {
         m_help_controller->AddBook( wxFileName( filename ) );
         found = true;
@@ -300,7 +300,7 @@ grape_frame::grape_frame( const wxString &p_filename )
       info << wxT("\n- ");
       std::string::size_type t = path.find_last_of("\\");
       wxString wxsubpath(path.substr(0,t).c_str(), wxConvUTF8);
-      info << wxsubpath << wxT("/share/mcrl2/grapehelp.zip"); 
+      info << wxsubpath << wxT("/share/mcrl2/grape/grapehelp.zip"); 
   #ifdef _WIN32
     if(!install_path.empty())
     {
