@@ -33,6 +33,7 @@ else( MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   mcrl2_trace
   mcrl2_core
+  mcrl2_data
   mcrl2_utilities_command_line
 )
 endif( MONO_LIB )
