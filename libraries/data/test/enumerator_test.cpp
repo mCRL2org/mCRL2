@@ -50,43 +50,6 @@ const std::string DATA_SPEC1 =
 // sort S5 = A # A -> B -> C;
 
 
-/*
-enumerator make_enumerator(rewriter& datar, const data_specification& data_spec)
-{
-  enumerator result(datar, data_spec);
-  return result;
-}
-
-void test_enumerator()
-{
-  using namespace data_expr;
-
-  data_specification data = parse_data_specification(DATA_SPEC1);
-  rewriter datar(data);
-  enumerator e(datar, data);
-  sort_expression s1 = sort_bool::bool_();
-  atermpp::vector<data_expression> v = e.enumerate_finite_sort(s1);
-
-  variable d1(core::identifier_string("d1"), sort_bool::bool_());
-  variable d2(core::identifier_string("d2"), sort_bool::bool_());
-  variable d3(core::identifier_string("d3"), sort_bool::bool_());
-  std::vector<variable> vars;
-  vars.push_back(d1);
-  vars.push_back(d2);
-  data_expression t = and_(data_expr::equal_to(d1, d2), data_expr::not_equal_to(d1,d3));
-  atermpp::set<data_expression> w = e.enumerate_expression_values(t, vars.begin(), vars.end());
-  std::cout << "<variables>" << pp(data_expression_list(w.begin(), w.end())) << std::endl;
-
-  // copy an enumerator
-  enumerator e1 = e;
-  w = e1.enumerate_expression_values(t, vars.begin(), vars.end());
-
-  // enumerator as return value
-  enumerator e2 = make_enumerator(datar, data);
-  w = e2.enumerate_expression_values(t, vars.begin(), vars.end());
-}
-*/
-
 void test_data_enumerator()
 {
   try
@@ -120,6 +83,7 @@ void test_data_enumerator()
     return;
   }
   BOOST_CHECK(false); // this point should not be reached
+  core::garbage_collect();
 }
 
 void test_data_enumerator2()
@@ -146,6 +110,7 @@ void test_data_enumerator2()
     return;
   }
   BOOST_CHECK(false); // this point should not be reached
+  core::garbage_collect();
 }
 
 class A: public data_expression
@@ -180,6 +145,7 @@ void test2()
   A a = n;
   f(a);
   std::cout << "a = " << mcrl2::core::pp(a) << std::endl;
+  core::garbage_collect();
 }
 
 void test3()
@@ -192,6 +158,7 @@ void test3()
   variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");
   data_expression_with_variables x(c, make_vector(n));
+  core::garbage_collect();
 }
 
 void test4()
@@ -203,6 +170,7 @@ void test4()
   variable y = parse_data_expression("n", "n: Nat;\n");
   atermpp::vector<data_expression_with_variables> z = datae.enumerate(y);
   BOOST_CHECK(z.size() > 0);
+  core::garbage_collect();
 }
 
 // This test verifies that the enumerator is able to find all terms n
@@ -247,6 +215,38 @@ void test5()
   }
 
   BOOST_CHECK(result.size() == 4);
+  core::garbage_collect();
+}
+
+/// \brief Computes the range of values that a finite sort can take
+/// \param s A sort expression
+/// \return A sequence of all values that s can take
+/// \pre The sort expression s is finite, and s is not a function sort
+atermpp::vector<data::data_expression> value_range(data::sort_expression s, const data::data_specification& data_spec, const data::rewriter& rewr)
+{
+  std::cout << "s = " << core::pp(s) << std::endl;
+  data::variable v("dummy", s);
+  std::cout << "v = " << core::pp(v) << std::endl;
+  atermpp::vector<data::data_expression> result;
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<data::number_postfix_generator> e(data_spec, rewr, generator);
+  atermpp::vector<data::data_expression_with_variables> values = e.enumerate(v);
+  for (atermpp::vector<data::data_expression_with_variables>::iterator i = values.begin(); i != values.end(); ++i)
+  {
+    result.push_back(*i);
+  }
+  return result;
+}
+
+void test6()
+{
+  data_specification data_spec;
+  rewriter rewr(data_spec);
+  atermpp::vector<data_expression> values = value_range(sort_bool::bool_(), data_spec, rewr);
+  for (atermpp::vector<data_expression>::const_iterator i = values.begin(); i != values.end(); ++i)
+  {
+    std::cout << mcrl2::core::pp(*i) << std::endl;
+  }
 }
 
 int test_main(int argc, char* argv[])
@@ -254,22 +254,12 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_data_enumerator();
-  core::garbage_collect();
-
   test_data_enumerator2();
-  core::garbage_collect();
-
   test2();
-  core::garbage_collect();
-
   test3();
-  core::garbage_collect();
-
   test4();
-  core::garbage_collect();
-
   test5();
-  core::garbage_collect();
+  test6();
 
   return 0;
 }
