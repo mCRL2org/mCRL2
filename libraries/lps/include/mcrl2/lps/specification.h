@@ -50,7 +50,7 @@ template <typename Container>
 std::set<data::variable> find_free_variables(Container const& container);
 
 class specification;
-atermpp::aterm_appl specification_to_aterm(const specification&, bool compatible = true);
+atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
 
 /// \brief Linear process specification.
@@ -179,7 +179,7 @@ class specification
       assert(is_well_typed(*this));
       specification tmp(*this);
       // tmp.data() = data::remove_all_system_defined(tmp.data());
-      core::detail::save_aterm(specification_to_aterm(tmp, false), filename, binary);
+      core::detail::save_aterm(specification_to_aterm(tmp), filename, binary);
     }
 
     /// \brief Returns the linear process of the specification.
@@ -288,7 +288,7 @@ void complete_data_specification(lps::specification& spec)
 /// \brief Conversion to ATermAppl.
 /// \return The specification converted to ATerm format.
 inline
-atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compatible)
+atermpp::aterm_appl specification_to_aterm(const specification& spec)
 {
   return core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(spec.data()),
@@ -303,13 +303,7 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compa
 inline
 std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
 {
-  /* if (pp_format == core::ppDefault || pp_format == core::ppInternal)
-  {
-    spec.data() = data::remove_all_system_defined(spec.data());
-  } */
-  
-  // return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
-  return core::pp(specification_to_aterm(spec, false), pp_format);
+  return core::pp(specification_to_aterm(spec), pp_format);
 }
 
 /// \brief Equality operator

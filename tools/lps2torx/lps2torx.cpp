@@ -169,7 +169,7 @@ class lps2torx_tool : public lps2torx_base
   
       data::rewriter rewriter = ( removeunused ) ?
             data::rewriter(lps_specification.data(),
-		mcrl2::data::used_data_equation_selector(lps_specification.data(), mcrl2::lps::specification_to_aterm(lps_specification, false)), strategy) :
+		mcrl2::data::used_data_equation_selector(lps_specification.data(), mcrl2::lps::specification_to_aterm(lps_specification)), strategy) :
             data::rewriter(lps_specification.data(), strategy);
       mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), rewriter);
   

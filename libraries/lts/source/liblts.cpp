@@ -111,7 +111,7 @@ lts_extra::lts_extra(ATerm t)
 lts_extra::lts_extra(lps::specification const& spec)
 {
   type = le_mcrl2;
-  content.mcrl2_spec = lps::specification_to_aterm(spec, false);
+  content.mcrl2_spec = lps::specification_to_aterm(spec);
 }
 
 lts_extra::lts_extra(lts_dot_options opts)

@@ -153,7 +153,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
 
     lgopts->m_rewriter.reset(
       new mcrl2::data::rewriter(lgopts->specification.data(), 
-		mcrl2::data::used_data_equation_selector(lgopts->specification.data(), mcrl2::lps::specification_to_aterm(lgopts->specification, false)), lgopts->strat));
+		mcrl2::data::used_data_equation_selector(lgopts->specification.data(), mcrl2::lps::specification_to_aterm(lgopts->specification)), lgopts->strat));
   }
   else {
     lgopts->m_rewriter.reset(new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
