@@ -16,7 +16,7 @@ TRAVERSE_FUNCTION = r'''void operator()(const QUALIFIED_NODE& x)
 
 def make_traverser_inc_file(filename, text, expression_class = None, expression_text = None):
     result = []
-    classes = parse_classes(text)
+    classes = parse_classes(text, False)
     for c in classes:
         (aterm, constructor, description) = c
         f = FunctionDeclaration(constructor)
@@ -40,7 +40,7 @@ def make_traverser_inc_file(filename, text, expression_class = None, expression_
     if expression_class != None:
         ctext = TRAVERSE_FUNCTION
         ctext = re.sub('QUALIFIED_NODE', expression_class, ctext)
-        classes = parse_classes(expression_text)
+        classes = parse_classes(expression_text, False)
         visit_functions = []
         for c in classes:
             (aterm, constructor, description) = c

@@ -2,6 +2,14 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+# This file contains tables that are used to generate classes and traversal functions
+# for these classes. A prerequisite is that each class has a corresponding ATerm
+# representation (the first column of each table). The second column contains the
+# constructor of the classes. If the name of the class has a postfix between brackets
+# like variable[_base] then the generated class will be called variable_base, but the
+# traversal will use variable. This is done to enable the user of the class to add
+# additional behavior to the base class.
+
 import re
 import string
 
@@ -234,14 +242,26 @@ class FunctionDeclaration:
 # ActTrue   | true_()  | The value true for action formulas  
 # ActFalse  | false_() | The value false for action formulas 
 #
-# each line is split w.r.t. the '|' character; the words of the line
+# Each line is split w.r.t. the '|' character; the words of the line
 # are put in a tuple, and the sequence of tuples is returned
-def parse_classes(text):
+#
+# If the name of a function contains a postfix between brackets (like variable[_base]),
+# then the parameter use_base_class determines whether it is used or not.
+def parse_classes(text, use_base_class = False):
     result = []
     lines = text.rsplit('\n')
     for line in lines:
         words = map(string.strip, line.split('|'))
         if len(words) < 2:
             continue
+        
+        # modify the function name according to the setting of use_base_class
+        name = re.sub('\(.*', '', words[1])
+        if use_base_class:
+            name = re.sub('\[|\]', '', name)
+        else:
+            name = re.sub('\[[^]]*\]', '', name)           
+        words[1] = re.sub('.*\(', name + '(', words[1])
+
         result.append(words)
     return result

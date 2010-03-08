@@ -73,7 +73,7 @@ class CLASSNAME
 # returns a sequence of class definitions
 def generate_classes(text, superclass = None):
     result = []
-    classes = parse_classes(text)
+    classes = parse_classes(text, True)
     for c in classes:
         (aterm, constructor, description) = c
         f = FunctionDeclaration(constructor)
@@ -128,7 +128,7 @@ def make_is_functions(filename, text):
 '''
 
     rtext = ''
-    classes = parse_classes(text)
+    classes = parse_classes(text, False)
     for c in classes:
         (aterm, constructor, description) = c
         f = FunctionDeclaration(constructor)
