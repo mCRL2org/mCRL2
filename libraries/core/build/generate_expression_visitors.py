@@ -169,7 +169,7 @@ struct MYEXPRESSION_builder<void>
 EXPRESSION_VISITOR_NODE_TEXT = r'''
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual bool visit_NODE(const QUALIFIED_NODE& xEXTRA_ARG)
+  virtual bool visit_NODE(const QUALIFIED_NODE& /* x */ EXTRA_ARG)
   {
     return continue_recursion;
   }
@@ -182,7 +182,7 @@ EXPRESSION_VISITOR_NODE_TEXT = r'''
 EXPRESSION_BUILDER_NODE_TEXT = r'''              
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual MYEXPRESSION visit_NODE(const QUALIFIED_NODE& xEXTRA_ARG)
+  virtual MYEXPRESSION visit_NODE(const QUALIFIED_NODE& /* x */ EXTRA_ARG)
   {
     return MYEXPRESSION();
   }
@@ -240,7 +240,6 @@ def make_expression_visitor(filename, expression, text):
             text = text + '  if (result) {\n'
             for i in range(len(types)):
                 if extract_type(types[i]) == expression:
-                    #text = text + '    visit(%sEXTRA_ARG);\n' % names[i]
                     text = text + '    visit(%s(x).%s()EXTRA_ARG);\n' % (node, names[i])
             text = text + '  }\n'
         text = text + '  leave_%s();\n' % node

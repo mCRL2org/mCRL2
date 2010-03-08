@@ -50,140 +50,140 @@ struct process_expression_builder
               
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual process_expression visit_action(const lps::action& x, Arg& /* a */)
+  virtual process_expression visit_action(const lps::action& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_instance(const process_instance& x, Arg& /* a */)
+  virtual process_expression visit_process_instance(const process_instance& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_instance_assignment(const process_instance_assignment& x, Arg& /* a */)
+  virtual process_expression visit_process_instance_assignment(const process_instance_assignment& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  virtual process_expression visit_delta(const delta& x, Arg& /* a */)
+  virtual process_expression visit_delta(const delta& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  virtual process_expression visit_tau(const tau& x, Arg& /* a */)
+  virtual process_expression visit_tau(const tau& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual process_expression visit_sum(const sum& x, Arg& /* a */)
+  virtual process_expression visit_sum(const sum& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit block node
   /// \return The result of visiting the node
-  virtual process_expression visit_block(const block& x, Arg& /* a */)
+  virtual process_expression visit_block(const block& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  virtual process_expression visit_hide(const hide& x, Arg& /* a */)
+  virtual process_expression visit_hide(const hide& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  virtual process_expression visit_rename(const rename& x, Arg& /* a */)
+  virtual process_expression visit_rename(const rename& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  virtual process_expression visit_comm(const comm& x, Arg& /* a */)
+  virtual process_expression visit_comm(const comm& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual process_expression visit_allow(const allow& x, Arg& /* a */)
+  virtual process_expression visit_allow(const allow& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  virtual process_expression visit_sync(const sync& x, Arg& /* a */)
+  virtual process_expression visit_sync(const sync& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual process_expression visit_at(const at& x, Arg& /* a */)
+  virtual process_expression visit_at(const at& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  virtual process_expression visit_seq(const seq& x, Arg& /* a */)
+  virtual process_expression visit_seq(const seq& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then(const if_then& x, Arg& /* a */)
+  virtual process_expression visit_if_then(const if_then& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then_else(const if_then_else& x, Arg& /* a */)
+  virtual process_expression visit_if_then_else(const if_then_else& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual process_expression visit_bounded_init(const bounded_init& x, Arg& /* a */)
+  virtual process_expression visit_bounded_init(const bounded_init& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_merge(const merge& x, Arg& /* a */)
+  virtual process_expression visit_merge(const merge& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_left_merge(const left_merge& x, Arg& /* a */)
+  virtual process_expression visit_left_merge(const left_merge& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  virtual process_expression visit_choice(const choice& x, Arg& /* a */)
+  virtual process_expression visit_choice(const choice& /* x */ , Arg& /* a */)
   {
     return process_expression();
   }
@@ -394,140 +394,140 @@ struct process_expression_builder<void>
               
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual process_expression visit_action(const lps::action& x)
+  virtual process_expression visit_action(const lps::action& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_instance(const process_instance& x)
+  virtual process_expression visit_process_instance(const process_instance& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_instance_assignment(const process_instance_assignment& x)
+  virtual process_expression visit_process_instance_assignment(const process_instance_assignment& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  virtual process_expression visit_delta(const delta& x)
+  virtual process_expression visit_delta(const delta& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  virtual process_expression visit_tau(const tau& x)
+  virtual process_expression visit_tau(const tau& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual process_expression visit_sum(const sum& x)
+  virtual process_expression visit_sum(const sum& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit block node
   /// \return The result of visiting the node
-  virtual process_expression visit_block(const block& x)
+  virtual process_expression visit_block(const block& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  virtual process_expression visit_hide(const hide& x)
+  virtual process_expression visit_hide(const hide& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  virtual process_expression visit_rename(const rename& x)
+  virtual process_expression visit_rename(const rename& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  virtual process_expression visit_comm(const comm& x)
+  virtual process_expression visit_comm(const comm& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual process_expression visit_allow(const allow& x)
+  virtual process_expression visit_allow(const allow& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  virtual process_expression visit_sync(const sync& x)
+  virtual process_expression visit_sync(const sync& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual process_expression visit_at(const at& x)
+  virtual process_expression visit_at(const at& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  virtual process_expression visit_seq(const seq& x)
+  virtual process_expression visit_seq(const seq& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then(const if_then& x)
+  virtual process_expression visit_if_then(const if_then& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then_else(const if_then_else& x)
+  virtual process_expression visit_if_then_else(const if_then_else& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual process_expression visit_bounded_init(const bounded_init& x)
+  virtual process_expression visit_bounded_init(const bounded_init& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_merge(const merge& x)
+  virtual process_expression visit_merge(const merge& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_left_merge(const left_merge& x)
+  virtual process_expression visit_left_merge(const left_merge& /* x */ )
   {
     return process_expression();
   }
               
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  virtual process_expression visit_choice(const choice& x)
+  virtual process_expression visit_choice(const choice& /* x */ )
   {
     return process_expression();
   }

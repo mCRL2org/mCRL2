@@ -48,7 +48,7 @@ struct process_expression_visitor
 
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual bool visit_action(const lps::action& x, Arg& /* a */)
+  virtual bool visit_action(const lps::action& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -59,7 +59,7 @@ struct process_expression_visitor
 
   /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual bool visit_process_instance(const process_instance& x, Arg& /* a */)
+  virtual bool visit_process_instance(const process_instance& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -70,7 +70,7 @@ struct process_expression_visitor
 
   /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual bool visit_process_instance_assignment(const process_instance_assignment& x, Arg& /* a */)
+  virtual bool visit_process_instance_assignment(const process_instance_assignment& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -81,7 +81,7 @@ struct process_expression_visitor
 
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  virtual bool visit_delta(const delta& x, Arg& /* a */)
+  virtual bool visit_delta(const delta& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -92,7 +92,7 @@ struct process_expression_visitor
 
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  virtual bool visit_tau(const tau& x, Arg& /* a */)
+  virtual bool visit_tau(const tau& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -103,7 +103,7 @@ struct process_expression_visitor
 
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual bool visit_sum(const sum& x, Arg& /* a */)
+  virtual bool visit_sum(const sum& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -114,7 +114,7 @@ struct process_expression_visitor
 
   /// \brief Visit block node
   /// \return The result of visiting the node
-  virtual bool visit_block(const block& x, Arg& /* a */)
+  virtual bool visit_block(const block& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -125,7 +125,7 @@ struct process_expression_visitor
 
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  virtual bool visit_hide(const hide& x, Arg& /* a */)
+  virtual bool visit_hide(const hide& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -136,7 +136,7 @@ struct process_expression_visitor
 
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  virtual bool visit_rename(const rename& x, Arg& /* a */)
+  virtual bool visit_rename(const rename& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -147,7 +147,7 @@ struct process_expression_visitor
 
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  virtual bool visit_comm(const comm& x, Arg& /* a */)
+  virtual bool visit_comm(const comm& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -158,7 +158,7 @@ struct process_expression_visitor
 
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual bool visit_allow(const allow& x, Arg& /* a */)
+  virtual bool visit_allow(const allow& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -169,7 +169,7 @@ struct process_expression_visitor
 
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  virtual bool visit_sync(const sync& x, Arg& /* a */)
+  virtual bool visit_sync(const sync& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -180,7 +180,7 @@ struct process_expression_visitor
 
   /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual bool visit_at(const at& x, Arg& /* a */)
+  virtual bool visit_at(const at& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -191,7 +191,7 @@ struct process_expression_visitor
 
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  virtual bool visit_seq(const seq& x, Arg& /* a */)
+  virtual bool visit_seq(const seq& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -202,7 +202,7 @@ struct process_expression_visitor
 
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual bool visit_if_then(const if_then& x, Arg& /* a */)
+  virtual bool visit_if_then(const if_then& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -213,7 +213,7 @@ struct process_expression_visitor
 
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual bool visit_if_then_else(const if_then_else& x, Arg& /* a */)
+  virtual bool visit_if_then_else(const if_then_else& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -224,7 +224,7 @@ struct process_expression_visitor
 
   /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual bool visit_bounded_init(const bounded_init& x, Arg& /* a */)
+  virtual bool visit_bounded_init(const bounded_init& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -235,7 +235,7 @@ struct process_expression_visitor
 
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  virtual bool visit_merge(const merge& x, Arg& /* a */)
+  virtual bool visit_merge(const merge& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -246,7 +246,7 @@ struct process_expression_visitor
 
   /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual bool visit_left_merge(const left_merge& x, Arg& /* a */)
+  virtual bool visit_left_merge(const left_merge& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -257,7 +257,7 @@ struct process_expression_visitor
 
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  virtual bool visit_choice(const choice& x, Arg& /* a */)
+  virtual bool visit_choice(const choice& /* x */ , Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -453,7 +453,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual bool visit_action(const lps::action& x)
+  virtual bool visit_action(const lps::action& /* x */ )
   {
     return continue_recursion;
   }
@@ -464,7 +464,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual bool visit_process_instance(const process_instance& x)
+  virtual bool visit_process_instance(const process_instance& /* x */ )
   {
     return continue_recursion;
   }
@@ -475,7 +475,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual bool visit_process_instance_assignment(const process_instance_assignment& x)
+  virtual bool visit_process_instance_assignment(const process_instance_assignment& /* x */ )
   {
     return continue_recursion;
   }
@@ -486,7 +486,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  virtual bool visit_delta(const delta& x)
+  virtual bool visit_delta(const delta& /* x */ )
   {
     return continue_recursion;
   }
@@ -497,7 +497,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  virtual bool visit_tau(const tau& x)
+  virtual bool visit_tau(const tau& /* x */ )
   {
     return continue_recursion;
   }
@@ -508,7 +508,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual bool visit_sum(const sum& x)
+  virtual bool visit_sum(const sum& /* x */ )
   {
     return continue_recursion;
   }
@@ -519,7 +519,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit block node
   /// \return The result of visiting the node
-  virtual bool visit_block(const block& x)
+  virtual bool visit_block(const block& /* x */ )
   {
     return continue_recursion;
   }
@@ -530,7 +530,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  virtual bool visit_hide(const hide& x)
+  virtual bool visit_hide(const hide& /* x */ )
   {
     return continue_recursion;
   }
@@ -541,7 +541,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  virtual bool visit_rename(const rename& x)
+  virtual bool visit_rename(const rename& /* x */ )
   {
     return continue_recursion;
   }
@@ -552,7 +552,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  virtual bool visit_comm(const comm& x)
+  virtual bool visit_comm(const comm& /* x */ )
   {
     return continue_recursion;
   }
@@ -563,7 +563,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual bool visit_allow(const allow& x)
+  virtual bool visit_allow(const allow& /* x */ )
   {
     return continue_recursion;
   }
@@ -574,7 +574,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  virtual bool visit_sync(const sync& x)
+  virtual bool visit_sync(const sync& /* x */ )
   {
     return continue_recursion;
   }
@@ -585,7 +585,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual bool visit_at(const at& x)
+  virtual bool visit_at(const at& /* x */ )
   {
     return continue_recursion;
   }
@@ -596,7 +596,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  virtual bool visit_seq(const seq& x)
+  virtual bool visit_seq(const seq& /* x */ )
   {
     return continue_recursion;
   }
@@ -607,7 +607,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual bool visit_if_then(const if_then& x)
+  virtual bool visit_if_then(const if_then& /* x */ )
   {
     return continue_recursion;
   }
@@ -618,7 +618,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual bool visit_if_then_else(const if_then_else& x)
+  virtual bool visit_if_then_else(const if_then_else& /* x */ )
   {
     return continue_recursion;
   }
@@ -629,7 +629,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual bool visit_bounded_init(const bounded_init& x)
+  virtual bool visit_bounded_init(const bounded_init& /* x */ )
   {
     return continue_recursion;
   }
@@ -640,7 +640,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  virtual bool visit_merge(const merge& x)
+  virtual bool visit_merge(const merge& /* x */ )
   {
     return continue_recursion;
   }
@@ -651,7 +651,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual bool visit_left_merge(const left_merge& x)
+  virtual bool visit_left_merge(const left_merge& /* x */ )
   {
     return continue_recursion;
   }
@@ -662,7 +662,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  virtual bool visit_choice(const choice& x)
+  virtual bool visit_choice(const choice& /* x */ )
   {
     return continue_recursion;
   }
