@@ -61,7 +61,7 @@ using namespace ::bes;
 //------------------------------------------
 
 using namespace mcrl2;
-using utilities::tools::input_output_tool;
+using utilities::tools::input_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
