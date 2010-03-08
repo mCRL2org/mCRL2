@@ -82,8 +82,33 @@ namespace mcrl2 {
 
         private:
 
-          template < class >
-          struct squadt_initialisation_wrapper;
+          template < class Tool >
+          class squadt_initialisation_wrapper {
+
+            public:
+              static bool run_method(tool< Derived, ToolBase >& w) {
+                return w.run();
+              }
+
+              static int initialise(wx::tool< Derived, ToolBase >& w, int& argc, char* argv[])
+              {
+                return static_cast< ToolBase& >(w).execute(argc, argv);
+              }
+          };
+
+          template < class Tool >
+          class squadt_initialisation_wrapper< tools::squadt_tool< Tool > > {
+
+            public:
+              static bool run_method(tool< Derived, ToolBase >& w) {
+                return w.squadt_specific_run();
+              }
+
+              static int initialise(wx::tool< Derived, tools::squadt_tool< Tool > >& w, int& argc, char* argv[])
+              {
+                return w.squadt_specific_initialisation(argc, argv);
+              }
+          };
 
           bool squadt_specific_run()
           {
@@ -298,35 +323,6 @@ namespace mcrl2 {
           }
       };
 
-      /// \cond INTERNAL_DOCS
-      template < typename Derived, typename ToolBase >
-      template < typename Tool >
-      struct tool< Derived, ToolBase >::squadt_initialisation_wrapper {
-
-        static bool run_method(tool< Derived, ToolBase >& w) {
-          return w.run();
-        }
-
-        static int initialise(wx::tool< Derived, ToolBase >& w, int& argc, char* argv[])
-        {
-          return static_cast< ToolBase& >(w).execute(argc, argv);
-        }
-      };
-
-      template < typename Derived, typename ToolBase >
-      template < typename Tool >
-      struct tool< Derived, ToolBase >::squadt_initialisation_wrapper< tools::squadt_tool< Tool > > {
-
-        static bool run_method(tool< Derived, ToolBase >& w) {
-          return w.squadt_specific_run();
-        }
-
-        static int initialise(wx::tool< Derived, tools::squadt_tool< Tool > >& w, int& argc, char* argv[])
-        {
-          return w.squadt_specific_initialisation(argc, argv);
-        }
-      };
-      /// \endcond
     }
   }
 }
