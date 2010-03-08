@@ -37,7 +37,7 @@ struct pbes_sort_expression_visitor: public pbes_expression_visitor<Term>
   /// \param e A term
   /// \param d A data term
   /// \return The result of visiting the node
-  bool visit_data_expression(const term_type& e, const data_term_type& d)
+  bool visit_data_expression(const term_type& /* e */, const data_term_type& d)
   {
     data::find_sort_expressions(d, std::inserter(result, result.end()));
     return true;
@@ -46,7 +46,7 @@ struct pbes_sort_expression_visitor: public pbes_expression_visitor<Term>
   /// \brief Visit propositional_variable node
   /// \param e A term
   /// \return The result of visiting the node
-  bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v)
+  bool visit_propositional_variable(const term_type& /* e */, const propositional_variable_type& v)
   {
     data::data_expression_list l = v.parameters();
     for (data::data_expression_list::iterator i = l.begin(); i != l.end(); ++i)

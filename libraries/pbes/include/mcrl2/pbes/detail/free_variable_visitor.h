@@ -79,7 +79,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   /// \param e A term
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_forall(const term_type& e, const data::variable_list& v, const term_type&)
+  bool visit_forall(const term_type& /* e */, const data::variable_list& v, const term_type&)
   {
     push(v);
     return true;
@@ -95,7 +95,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   /// \param e A term
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_exists(const term_type& e, const data::variable_list& v, const term_type&)
+  bool visit_exists(const term_type& /* e */, const data::variable_list& v, const term_type&)
   {
     push(v);
     return true;
@@ -111,7 +111,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   /// \param e A term
   /// \param v A propositional variable instantiation
   /// \return The result of visiting the node
-  bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v)
+  bool visit_propositional_variable(const term_type& /* e */, const propositional_variable_type& v)
   {
     if (search_propositional_variables)
     {
@@ -131,7 +131,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   /// \param e A term
   /// \param d A data term
   /// \return The result of visiting the node
-  bool visit_data_expression(const term_type& e, const data_term_type& d)
+  bool visit_data_expression(const term_type& /* e */, const data_term_type& d)
   {
     std::set<data::variable> variables = data::find_free_variables(d);
     for (std::set<data::variable>::iterator i = variables.begin(); i != variables.end(); ++i)

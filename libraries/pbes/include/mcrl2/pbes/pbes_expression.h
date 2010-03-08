@@ -1190,7 +1190,7 @@ namespace core {
     /// \param t A term
     /// \return True if the term is constant
     static inline
-    bool is_constant(term_type t) { return false; }
+    bool is_constant(term_type /* t */) { return false; }
 
     /// \brief Pretty print function
     /// \param t A term

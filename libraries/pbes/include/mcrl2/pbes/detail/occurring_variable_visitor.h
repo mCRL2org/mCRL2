@@ -31,7 +31,7 @@ struct occurring_variable_visitor: public pbes_expression_visitor<pbes_expressio
   /// \param e A PBES expression
   /// \param v A propositional variable instantiation
   /// \return The result of visiting the node
-  bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
+  bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
   {
     variables.insert(v);
     return stop_recursion;
