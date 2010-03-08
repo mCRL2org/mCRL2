@@ -70,9 +70,10 @@ class CLASSNAME
 # ActTrue   | true_()  | The value true for action formulas  
 # ActFalse  | false_() | The value false for action formulas 
 #
-# returns a sequence of class definitions
+# returns a sequence of class definitions and a sequence of class names
 def generate_classes(text, superclass = None):
-    result = []
+    class_definitions = []
+    class_names = []
     classes = parse_classes(text, True)
     for c in classes:
         (aterm, constructor, description) = c
@@ -102,18 +103,37 @@ def generate_classes(text, superclass = None):
         if superclass != None:
             ctext = re.sub('SUPERCLASS'      , superclass , ctext)
         ctext = re.sub('MEMBER_FUNCTIONS', mtext, ctext)
-        result.append(ctext)
-    return result
-                                                                                          
-def make_expression_classes(filename, class_text, class_name):
-    classes = generate_classes(class_text, class_name)
-    ctext = '\n\n'.join(classes) + '\n'
-    insert_text_in_file(filename, ctext, 'generated expression classes')
+        class_definitions.append(ctext)
+        class_names.append(classname)
+    return class_definitions, class_names
 
-def make_classes(filename, class_text):
-    classes = generate_classes(class_text)
-    ctext = '\n\n'.join(classes) + '\n'
-    insert_text_in_file(filename, ctext, 'generated classes')
+# Generates expression classes from class_text and inserts them in
+# the file filename. If filename is a directory, then each of the
+# classes is inserted in a separate file.
+def make_expression_classes(filename, class_text, superclass):
+    class_definitions, class_names = generate_classes(class_text, superclass)
+    if path(filename).isdir():
+        for i in range(len(class_definitions)):
+            fname = path(filename).normcase() / ('%s.h' % class_names[i])
+            text = class_definitions[i]
+            insert_text_in_file(fname, text, 'generated expression class')
+    else:
+        ctext = '\n\n'.join(class_definitions) + '\n'
+        insert_text_in_file(filename, ctext, 'generated expression classes')
+
+# Generates expression classes from class_text and inserts them in
+# the file filename. If filename is a directory, then each of the
+# classes is inserted in a separate file.
+def make_classes(filename):
+    class_definitions, class_names = generate_classes(class_text)
+    if path(filename).isdir():
+        for i in range(len(class_definitions)):
+            fname = path(filename).normcase() / ('%s.h' % class_names[i])
+            text = class_definitions[i]
+            insert_text_in_file(fname, text, 'generated class')
+    else:
+        ctext = '\n\n'.join(class_definitions) + '\n'
+        insert_text_in_file(filename, ctext, 'generated classes')
 
 def make_is_functions(filename, text):
     TERM_TRAITS_TEXT = r'''
