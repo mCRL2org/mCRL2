@@ -9,7 +9,7 @@ import string
 from mcrl2_utility import *
 
 TOKEN_PREFIX = r'''%%}
-Id         [a-zA-Z\\_][a-zA-Z0-9\\_']*
+String     [a-zA-Z\\_][a-zA-Z0-9\\_']*
 Number     "0"|([1-9][0-9]*)
 
 %%option c++
@@ -129,7 +129,7 @@ nu       | NU
 delay    | DELAY
 yaled    | YALED
 nil      | NIL
-{Id}     | ID
+{String} | STRING
 {Number} | NUMBER
 '''
 
@@ -146,7 +146,7 @@ sort_expr_arrow
 domain_no_arrow_elt
 sort_expr_struct
 StructCons
-recogniser
+StructLabel
 StructProj
 StructProjLabel
 sort_expr_primary
@@ -321,7 +321,7 @@ MCRL2_GRAMMAR = '''
 
 //start
 start:
-  TAG_IDENTIFIER ID
+  TAG_IDENTIFIER STRING
     {
       safe_assign($$, (ATerm) $2);
       mcrl3_spec_tree = $$;
@@ -467,9 +467,9 @@ StructCons_list_bar_separated:
   ;
 
 //structured sort constructor
-//<StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrNil>)
+//<StructCons>   ::= StructCons(<STRING>, <StructProj>*, <StringOrNil>)
 StructCons:
-  ID StructProj_list recogniser
+  STRING StructProj_list StructLabel
     {
       safe_assign($$, gsMakeStructCons($1, $2, $3));
     }
@@ -486,13 +486,13 @@ StructProj_list:
     }
   ;
   
-//recogniser
-recogniser:
+//StructLabel
+StructLabel:
   /* empty */
     {
       safe_assign($$, gsMakeNil());
     }
-  | QMARK ID
+  | QMARK STRING
     {
       safe_assign($$, $2);
     }
@@ -522,15 +522,15 @@ StructProj:
     }  
 
 StructProjLabel:
-    ID COLON
+    STRING COLON
     {
       safe_assign($$, $1);
     }
     ;
 
-// SortId(<String>)
+// SortId(<STRING>)
 SortId:
-    ID
+    STRING
     {
       safe_assign($$, gsMakeSortId($1));
     }
@@ -633,7 +633,7 @@ id_inits_cs:
 
 //identifier initialisation
 id_init:
-  ID EQUALS data_expr
+  STRING EQUALS data_expr
     {
       safe_assign($$, gsMakeIdInit($1, $3));
     }
@@ -983,7 +983,7 @@ data_exprs_cs:
 
 //primary data expression
 data_expr_primary:
-  ID
+  STRING
     {
       safe_assign($$, gsMakeId($1));
     }
@@ -1079,7 +1079,7 @@ data_comprehension:
 
 //declaration of a data variable
 data_var_decl:
-  ID COLON SortExpr
+  STRING COLON SortExpr
     {
       safe_assign($$, gsMakeDataVarId($1, $3));
     }
@@ -1158,7 +1158,7 @@ sorts_decl:
         safe_assign($$, ATinsert($$, (ATerm) gsMakeSortId(ATAelementAt($1, i))));
       }
     }
-  | ID EQUALS SortExpr
+  | STRING EQUALS SortExpr
     {
       safe_assign($$, ATmakeList1((ATerm) gsMakeSortRef($1, $3)));
     }
@@ -1166,11 +1166,11 @@ sorts_decl:
 
 //one or more identifiers, separated by comma's
 ids_cs:
-  ID
+  STRING
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
     }
-  | ids_cs COMMA ID
+  | ids_cs COMMA STRING
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
     }
@@ -1322,11 +1322,11 @@ param_ids_bs:
 
 //parameterised id
 param_id:
-  ID
+  STRING
     {
       safe_assign($$, gsMakeParamId($1, ATmakeList0()));
     }
-  | ID LPAR data_exprs_cs RPAR
+  | STRING LPAR data_exprs_cs RPAR
     {
       safe_assign($$, gsMakeParamId($1, ATreverse($3)));
     }
@@ -1623,11 +1623,11 @@ proc_constant:
 
 //identifier assignment
 id_assignment:
-  ID LPAR RPAR
+  STRING LPAR RPAR
     {
       safe_assign($$, gsMakeIdAssignment($1, ATmakeList0()));
     }
-  | ID LPAR id_inits_cs RPAR
+  | STRING LPAR id_inits_cs RPAR
     {
       safe_assign($$, gsMakeIdAssignment($1, ATreverse($3)));
     }
@@ -1695,7 +1695,7 @@ ren_exprs_cs:
 
 //renaming expression
 ren_expr:
-  ID ARROW ID
+  STRING ARROW STRING
     {
       safe_assign($$, gsMakeRenameExpr($1, $3));
     }
@@ -1735,7 +1735,7 @@ comm_expr:
     {
       safe_assign($$, gsMakeCommExpr($1, gsMakeNil()));
     }
-  | comm_expr_lhs ARROW ID
+  | comm_expr_lhs ARROW STRING
     {
       safe_assign($$, gsMakeCommExpr($1, $3));
     }
@@ -1743,7 +1743,7 @@ comm_expr:
 
 //left-hand side of a communication expression
 comm_expr_lhs:
-  ID BAR ids_bs
+  STRING BAR ids_bs
     {
       safe_assign($$, gsMakeMultActName(ATinsert(ATreverse($3), (ATerm) $1)));
     }
@@ -1751,11 +1751,11 @@ comm_expr_lhs:
 
 //one or more id's, separated by bars
 ids_bs:
-  ID
+  STRING
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
     }
-  | ids_bs BAR ID
+  | ids_bs BAR STRING
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
     }
@@ -1911,12 +1911,12 @@ proc_eqn_decls_scs:
 
 //process equation declaration
 proc_eqn_decl:
-  ID EQUALS proc_expr
+  STRING EQUALS proc_expr
     {
       safe_assign($$, gsMakeProcEqn(
         gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3));
     }
-  | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
+  | STRING LPAR data_vars_decls_cs RPAR EQUALS proc_expr
     {
       ATermList SortExprs = ATmakeList0();
       int n = ATgetLength($3);
@@ -1961,11 +1961,11 @@ state_frm_quant:
     {
       safe_assign($$, gsMakeStateExists($2, $4));
     }
-  | NU ID fixpoint_params DOT state_frm_quant
+  | NU STRING fixpoint_params DOT state_frm_quant
     {
       safe_assign($$, gsMakeStateNu($2, $3, $5));
     }
-  | MU ID fixpoint_params DOT state_frm_quant
+  | MU STRING fixpoint_params DOT state_frm_quant
     {
       safe_assign($$, gsMakeStateMu($2, $3, $5));
     }
@@ -1998,7 +1998,7 @@ data_var_decl_inits_cs:
 
 //data variable declaration and initialisation
 data_var_decl_init:
-  ID COLON SortExpr EQUALS data_expr
+  STRING COLON SortExpr EQUALS data_expr
     {
       safe_assign($$, gsMakeDataVarIdInit(gsMakeDataVarId($1, $3), $5));
     }
@@ -2030,11 +2030,11 @@ state_frm_imp_rhs:
     {
       safe_assign($$, gsMakeStateExists($2, $4));
     }
-  | NU ID fixpoint_params DOT state_frm_imp_rhs
+  | NU STRING fixpoint_params DOT state_frm_imp_rhs
     {
       safe_assign($$, gsMakeStateNu($2, $3, $5));
     }
-  | MU ID fixpoint_params DOT state_frm_imp_rhs
+  | MU STRING fixpoint_params DOT state_frm_imp_rhs
     {
       safe_assign($$, gsMakeStateMu($2, $3, $5));
     }
@@ -2070,11 +2070,11 @@ state_frm_and_rhs:
     {
       safe_assign($$, gsMakeStateExists($2, $4));
     }
-  | NU ID fixpoint_params DOT state_frm_and_rhs
+  | NU STRING fixpoint_params DOT state_frm_and_rhs
     {
       safe_assign($$, gsMakeStateNu($2, $3, $5));
     }
-  | MU ID fixpoint_params DOT state_frm_and_rhs
+  | MU STRING fixpoint_params DOT state_frm_and_rhs
     {
       safe_assign($$, gsMakeStateMu($2, $3, $5));
     }
@@ -2122,11 +2122,11 @@ state_frm_quant_prefix:
     {
       safe_assign($$, gsMakeStateExists($2, $4));
     }
-  | NU ID fixpoint_params DOT state_frm_quant_prefix
+  | NU STRING fixpoint_params DOT state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateNu($2, $3, $5));
     }
-  | MU ID fixpoint_params DOT state_frm_quant_prefix
+  | MU STRING fixpoint_params DOT state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateMu($2, $3, $5));
     }
@@ -2741,12 +2741,12 @@ pb_eqn_decls_scs:
 
 //parameterised boolean equation declaration
 pb_eqn_decl:
-  fixpoint ID EQUALS pb_expr
+  fixpoint STRING EQUALS pb_expr
     {
       safe_assign($$,
         gsMakePBEqn($1, gsMakePropVarDecl($2, ATmakeList0()), $4));
     }
-  | fixpoint ID LPAR data_vars_decls_cs RPAR EQUALS pb_expr
+  | fixpoint STRING LPAR data_vars_decls_cs RPAR EQUALS pb_expr
     {
       safe_assign($$,
         gsMakePBEqn($1, gsMakePropVarDecl($2, $4), $7));
@@ -2777,7 +2777,7 @@ pb_init:
 
 START_GRAMMAR = '''
 start:
-    TAG_IDENTIFIER ID
+    TAG_IDENTIFIER STRING
   | TAG_SORT_EXPR sort_expr
   | TAG_DATA_EXPR data_expr
   | TAG_DATA_SPEC data_spec
@@ -2825,13 +2825,13 @@ StructCons_list_bar_separated:
   ;
 
 StructCons:
-    ID recogniser
-  | ID LPAR StructProj_list_comma_separated RPAR recogniser
+    STRING StructLabel
+  | STRING LPAR StructProj_list_comma_separated RPAR StructLabel
   ;
 
-recogniser:
+StructLabel:
     /* empty */
-  | QMARK ID
+  | QMARK STRING
   ;
 
 StructProj_list_comma_separated:
@@ -2841,11 +2841,11 @@ StructProj_list_comma_separated:
 
 StructProj:
     sort_expr
-  | ID COLON sort_expr
+  | STRING COLON sort_expr
   ;
 
 sort_expr_primary:
-    ID
+    STRING
   | sort_constant
   | sort_constructor
   | LPAR sort_expr RPAR
@@ -2882,7 +2882,7 @@ id_inits_cs:
   ;
 
 id_init:
-  ID EQUALS data_expr
+  STRING EQUALS data_expr
   ;
 
 data_expr_quant:
@@ -3004,7 +3004,7 @@ data_exprs_cs:
   ;
 
 data_expr_primary:
-    ID
+    STRING
   | data_constant
   | data_enumeration
   | data_comprehension
@@ -3040,7 +3040,7 @@ data_comprehension:
   ;
 
 data_var_decl:
-  ID COLON sort_expr
+  STRING COLON sort_expr
   ;
 '''
 
@@ -3072,12 +3072,12 @@ sorts_decls_scs:
 
 sorts_decl:
     ids_cs
-  | ID EQUALS sort_expr
+  | STRING EQUALS sort_expr
   ;
 
 ids_cs:
-    ID
-  | ids_cs COMMA ID
+    STRING
+  | ids_cs COMMA STRING
   ;
 
 domain:
@@ -3139,8 +3139,8 @@ param_ids_bs:
   ;
 
 param_id:
-    ID
-  | ID LPAR data_exprs_cs RPAR
+    STRING
+  | STRING LPAR data_exprs_cs RPAR
   ;
 '''
 
@@ -3259,8 +3259,8 @@ proc_constant:
   ;
 
 id_assignment:
-    ID LPAR RPAR
-  | ID LPAR id_inits_cs RPAR
+    STRING LPAR RPAR
+  | STRING LPAR id_inits_cs RPAR
   ;
 
 proc_quant:
@@ -3287,7 +3287,7 @@ ren_exprs_cs:
   ;
 
 ren_expr:
-  ID ARROW ID
+  STRING ARROW STRING
   ;
 
 comm_expr_set:
@@ -3303,16 +3303,16 @@ comm_exprs_cs:
 comm_expr:
     comm_expr_lhs
   | comm_expr_lhs ARROW TAU
-  | comm_expr_lhs ARROW ID
+  | comm_expr_lhs ARROW STRING
   ;
 
 comm_expr_lhs:
-  ID BAR ids_bs
+  STRING BAR ids_bs
   ;
 
 ids_bs:
-    ID
-  | ids_bs BAR ID
+    STRING
+  | ids_bs BAR STRING
   ;
 
 mult_act_names_set:
@@ -3376,8 +3376,8 @@ proc_eqn_decls_scs:
   ;
 
 proc_eqn_decl:
-    ID EQUALS proc_expr
-  | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
+    STRING EQUALS proc_expr
+  | STRING LPAR data_vars_decls_cs RPAR EQUALS proc_expr
   ;
 
 proc_init:
@@ -3394,8 +3394,8 @@ state_frm_quant:
     state_frm_imp
   | FORALL data_vars_decls_cs DOT state_frm_quant
   | EXISTS data_vars_decls_cs DOT state_frm_quant
-  | NU ID fixpoint_params DOT state_frm_quant
-  | MU ID fixpoint_params DOT state_frm_quant
+  | NU STRING fixpoint_params DOT state_frm_quant
+  | MU STRING fixpoint_params DOT state_frm_quant
   ;
 
 fixpoint_params:
@@ -3409,7 +3409,7 @@ data_var_decl_inits_cs:
   ;
 
 data_var_decl_init:
-  ID COLON sort_expr EQUALS data_expr
+  STRING COLON sort_expr EQUALS data_expr
   ;
 
 state_frm_imp:
@@ -3421,8 +3421,8 @@ state_frm_imp_rhs:
     state_frm_imp
   | FORALL data_vars_decls_cs DOT state_frm_imp_rhs
   | EXISTS data_vars_decls_cs DOT state_frm_imp_rhs
-  | NU ID fixpoint_params DOT state_frm_imp_rhs
-  | MU ID fixpoint_params DOT state_frm_imp_rhs
+  | NU STRING fixpoint_params DOT state_frm_imp_rhs
+  | MU STRING fixpoint_params DOT state_frm_imp_rhs
   ;
 
 state_frm_and:
@@ -3435,8 +3435,8 @@ state_frm_and_rhs:
     state_frm_and
   | FORALL data_vars_decls_cs DOT state_frm_and_rhs
   | EXISTS data_vars_decls_cs DOT state_frm_and_rhs
-  | NU ID fixpoint_params DOT state_frm_and_rhs
-  | MU ID fixpoint_params DOT state_frm_and_rhs
+  | NU STRING fixpoint_params DOT state_frm_and_rhs
+  | MU STRING fixpoint_params DOT state_frm_and_rhs
   ;
 
 state_frm_prefix:
@@ -3452,8 +3452,8 @@ state_frm_quant_prefix:
     state_frm_prefix
   | FORALL data_vars_decls_cs DOT state_frm_quant_prefix
   | EXISTS data_vars_decls_cs DOT state_frm_quant_prefix
-  | NU ID fixpoint_params DOT state_frm_quant_prefix
-  | MU ID fixpoint_params DOT state_frm_quant_prefix
+  | NU STRING fixpoint_params DOT state_frm_quant_prefix
+  | MU STRING fixpoint_params DOT state_frm_quant_prefix
   ;
 
 state_frm_primary:
@@ -3694,8 +3694,8 @@ pb_eqn_decls_scs:
   ;
 
 pb_eqn_decl:
-    fixpoint ID EQUALS pb_expr
-  | fixpoint ID LPAR data_vars_decls_cs RPAR EQUALS pb_expr
+    fixpoint STRING EQUALS pb_expr
+  | fixpoint STRING LPAR data_vars_decls_cs RPAR EQUALS pb_expr
   ;
 
 fixpoint:
@@ -3786,6 +3786,6 @@ GRAMMAR = SORT_EXPRESSION_GRAMMAR        + \
 make_parser('../../lps/example/mcrl2lexer.ll', '../../lps/example/mcrl2parser.yy', TAGS, TOKENS, GRAMMAR)
 os.chdir('../../lps/example')
 os.system('flex -Pmcrl3 -omcrl2lexer.cpp mcrl2lexer.ll')
-os.system('bison -p mcrl3 --defines=mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy')
-os.system('sed -i \'s+#include "mcrl2parser.h"+#include "mcrl2/core/detail/mcrl2parser.h"+\' mcrl2parser.cpp')
+os.system('bison -p mcrl3 --defines=../../core/include/mcrl2/core/detail/mcrl3parser.h -o mcrl2parser.cpp mcrl2parser.yy')
+os.system('sed -i \'s+#include "mcrl3parser.h"+#include "mcrl2/core/detail/mcrl3parser.h"+\' mcrl2parser.cpp')
 os.system("sed -i '/isatty/d' mcrl2lexer.cpp")

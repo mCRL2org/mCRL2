@@ -101,7 +101,7 @@ extern ATermIndexedSet mcrl3_parser_protect_table;
 
 
 
-#include "mcrl2/core/detail/mcrl2parser.h"
+#include "mcrl2/core/detail/mcrl3parser.h"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -548,11 +548,11 @@ static const char *const yytname[] =
   "KWINIT", "KWSTRUCT", "BOOL", "POS", "NAT", "INT", "REAL", "LIST", "SET",
   "BAG", "CTRUE", "CFALSE", "IF", "DIV", "MOD", "IN", "LAMBDA", "FORALL",
   "EXISTS", "WHR", "END", "DELTA", "TAU", "SUM", "BLOCK", "ALLOW", "HIDE",
-  "RENAME", "COMM", "VAL", "MU", "NU", "DELAY", "YALED", "NIL", "ID",
+  "RENAME", "COMM", "VAL", "MU", "NU", "DELAY", "YALED", "NIL", "STRING",
   "NUMBER", "$accept", "start", "SortExpr", "SortArrow", "sort_expr_arrow",
   "domain_no_arrow", "domain_no_arrow_elts_hs", "domain_no_arrow_elt",
   "SortStruct", "sort_expr_struct", "StructCons_list_bar_separated",
-  "StructCons", "StructProj_list", "recogniser",
+  "StructCons", "StructProj_list", "StructLabel",
   "StructProj_list_comma_separated", "StructProj", "StructProjLabel",
   "SortId", "sort_expr_primary", "sort_constant", "sort_constructor",
   "data_expr", "data_expr_whr", "id_inits_cs", "id_init",
