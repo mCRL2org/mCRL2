@@ -525,13 +525,6 @@ namespace mcrl2 {
      }
     }
 
-    /* template <typename Object> Object data_specification::normalise_sorts(const Object& o) const
-    { normalise_specification_if_required();
-      std::cerr << "Object " << o << "\n";
-      substitution < Object, sort_expression, Object > sigma(m_normalised_aliases);
-      return sigma(o);
-    } */
-
     sort_expression data_specification::normalise_sorts_helper(const sort_expression & e) const
     { // Check whether e has already a normalised sort
       // If yes return it.
@@ -607,9 +600,6 @@ namespace mcrl2 {
       if (e.is_function_symbol())
       { return function_symbol(function_symbol(e).name(),normalise_sorts(e.sort()));
       }
-      /* if (e.is_list_expression())
-      { return COMMENTARIEER UIT
-      }*/
       if (e.is_variable())
       { return variable(variable(e).name(),normalise_sorts(e.sort()));
       }

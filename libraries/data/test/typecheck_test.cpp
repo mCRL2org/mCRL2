@@ -253,6 +253,31 @@ BOOST_AUTO_TEST_CASE(test_lambda_aliasing)
   test_data_expression("lambda f: Nat. lambda f: Nat -> Bool. f(f)", false);
 }
 
+BOOST_AUTO_TEST_CASE(test_forall_structs_compare)
+{
+  test_data_expression("forall x,y: struct t. x == y", true, "Bool");
+}
+
+BOOST_AUTO_TEST_CASE(test_forall_simple)
+{
+  test_data_expression("forall n: Nat. n >= 0", true, "Bool");
+}
+
+BOOST_AUTO_TEST_CASE(test_forall_simple_nat_vs_int)
+{
+  test_data_expression("forall n: Nat. n > -1", true, "Bool");
+}
+
+BOOST_AUTO_TEST_CASE(test_exists_structs_compare)
+{
+  test_data_expression("exists x,y: struct t. x == y", true, "Bool");
+}
+
+BOOST_AUTO_TEST_CASE(test_exists_simple)
+{
+  test_data_expression("exists n: Nat. n > 481", true, "Bool");
+}
+
 BOOST_AUTO_TEST_CASE(test_equal_context)
 {
   data::variable_vector v;

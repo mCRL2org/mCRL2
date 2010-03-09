@@ -629,7 +629,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermAppl GlobVarSpec = ATAgetArgument(Part, 2);
     bool GlobVarSpecEmpty = ATisEmpty(ATLgetArgument(GlobVarSpec, 0));
     ATermAppl ProcEqnSpec = ATAgetArgument(Part, 3);
-    bool ProcEqnSpecEmpty = gsIsProcSpec(Part)?ATisEmpty(ATLgetArgument(ProcEqnSpec, 0)):false;
+    bool ProcEqnSpecEmpty = gsIsProcSpec(Part)?(bool)ATisEmpty(ATLgetArgument(ProcEqnSpec, 0)):false;
     ATermAppl ProcInit = ATAgetArgument(Part, 4);
     PRINT_FUNC(PrintPart_Appl)(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
     if (!ActSpecEmpty && !DataSpecEmpty) {

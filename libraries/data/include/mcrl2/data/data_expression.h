@@ -35,9 +35,27 @@ namespace mcrl2 {
       return core::detail::gsIsDataExpr(t);
     }
 
-    /// \brief Returns true if the term t is a function symbol
+    /// \brief Returns true if the term t is an abstraction
     inline bool is_abstraction(atermpp::aterm_appl p) {
       return core::detail::gsIsBinder(p);
+    }
+
+    /// \brief Returns true if the term t is a lambda abstraction
+    inline bool is_lambda(atermpp::aterm_appl p) {
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsLambda(atermpp::arg1(p));
+    }
+
+    /// \brief Returns true if the term t is a universal quantification
+    inline bool is_forall(atermpp::aterm_appl p) {
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsForall(atermpp::arg1(p));
+    }
+
+    /// \brief Returns true if the term t is an existential quantification
+    inline bool is_exists(atermpp::aterm_appl p) {
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsExists(atermpp::arg1(p));
     }
 
     /// \brief Returns true if the term t is a function symbol
@@ -117,13 +135,22 @@ namespace mcrl2 {
           }
           else if (is_abstraction())
           {
-            atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
-            sort_expression_vector s;
-            for(atermpp::term_list<data_expression>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
+            if (is_forall(*this) || is_exists(*this))
             {
-              s.push_back(i->sort());
+              // Workaround for the unavailability of sort_bool::bool_()
+              // (because of cyclic dependencies).
+              result = data_expression(atermpp::arg3(*this)).sort();
             }
-            result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
+            else
+            {
+              atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
+              sort_expression_vector s;
+              for(atermpp::term_list<data_expression>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
+              {
+                s.push_back(i->sort());
+              }
+              result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
+            }
           }
           else if (is_application())
           {
