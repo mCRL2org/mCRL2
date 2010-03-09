@@ -276,13 +276,13 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
         result = p::or_(sat_top(a, left(b)), sat_top(a, right(b)));
       } else if (is_imp(b)) {
         result = p::imp(sat_top(a, left(b)), sat_top(a, right(b)));
-      } else if (is_forall(b)) {
+      } else if (p::is_forall(b)) {
         data::variable_list x = var(b);
         assert(x.size() > 0);
         action_formulas::action_formula alpha = arg(b);
         data::variable_list y = data::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b))));
         result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
-      } else if (is_exists(b)) {
+      } else if (p::is_exists(b)) {
         data::variable_list x = var(b);
         assert(x.size() > 0);
         action_formulas::action_formula alpha = arg(b);
@@ -543,9 +543,9 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           result = E(f0, left(f), lps, T) + E(f0, right(f), lps, T);
         } else if (is_imp(f)) {
           result = E(f0, not_(left(f)), lps, T) + E(f0, right(f), lps, T);
-        } else if (is_forall(f)) {
+        } else if (state_formulas::state_frm::is_forall(f)) {
           result = E(f0, arg(f), lps, T);
-        } else if (is_exists(f)) {
+        } else if (state_formulas::state_frm::is_exists(f)) {
           result = E(f0, arg(f), lps, T);
         } else if (is_must(f)) {
           result = E(f0, arg(f), lps, T);
@@ -589,9 +589,9 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           result = E(f0, not_(left(f)), lps, T) + E(f0, not_(right(f)), lps, T);
         } else if (is_imp(f)) {
           result = E(f0, left(f), lps, T) + E(f0, not_(right(f)), lps, T);
-        } else if (is_forall(f)) {
+        } else if (state_formulas::state_frm::is_forall(f)) {
           result = E(f0, not_(arg(f)), lps, T);
-        } else if (is_exists(f)) {
+        } else if (state_formulas::state_frm::is_exists(f)) {
           result = E(f0, not_(arg(f)), lps, T);
         } else if (is_must(f)) {
           result = E(f0, not_(arg(f)), lps, T);
@@ -945,9 +945,9 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           result = E(f0, left(f), lps) + E(f0, right(f), lps);
         } else if (is_imp(f)) {
           result = E(f0, not_(left(f)), lps) + E(f0, right(f), lps);
-        } else if (is_forall(f)) {
+        } else if (state_formulas::state_frm::is_forall(f)) {
           result = E(f0, arg(f), lps);
-        } else if (is_exists(f)) {
+        } else if (state_formulas::state_frm::is_exists(f)) {
           result = E(f0, arg(f), lps);
         } else if (is_must(f)) {
           result = E(f0, arg(f), lps);
@@ -991,9 +991,9 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           result = E(f0, not_(left(f)), lps) + E(f0, not_(right(f)), lps);
         } else if (is_imp(f)) {
           result = E(f0, left(f), lps) + E(f0, not_(right(f)), lps);
-        } else if (is_forall(f)) {
+        } else if (state_formulas::state_frm::is_forall(f)) {
           result = E(f0, not_(arg(f)), lps);
-        } else if (is_exists(f)) {
+        } else if (state_formulas::state_frm::is_exists(f)) {
           result = E(f0, not_(arg(f)), lps);
         } else if (is_must(f)) {
           result = E(f0, not_(arg(f)), lps);
