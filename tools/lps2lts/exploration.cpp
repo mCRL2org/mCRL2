@@ -205,7 +205,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
 void finalise_lts_generation_when_interrupted(int param)
 { 
   finalise_lts_generation();
-  cerr << "Warning: tate space generation was aborted prematurely. \n";
+  cerr << "Warning: state space generation was aborted prematurely. \n";
   exit(1);
 }
 
