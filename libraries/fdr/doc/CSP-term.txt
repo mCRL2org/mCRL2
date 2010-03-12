@@ -1,0 +1,232 @@
+// Author(s):   Jonathan Nelisse
+// 11 March 2010
+//
+// This document describes the internal format of the CSP language:
+// - <Name> is an arbitrary non-empty string excluding the keywords:
+//     head tail if then else length card true false and or not
+//     null elem member empty concat union inter diff Union Inter
+//     set Set Seq extensions productions let within Int Bool
+//     nametype datatype subtype channel Events STOP SKIP CHAOS
+//     external transparant normal sbsim tau_loop_factor diamond
+//     model_compress explicate assert deterministic deadlock free
+//     divergence free T F FD print attribute embed module
+// - <Number> is a string of the format '"0"|([1-9][0-9]*)'
+// - the alphabetical strings within angular brackets are non-terminals
+//   that represent all possible branches of their productions
+// - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
+// - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
+//   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
+
+
+// FDRSpec
+//-------------
+
+// FDR specification
+<FDRSpec>   ::= FDRSpec(<Defn>*)
+
+// Definition
+<Defn>      ::= Assign(<Any>, <Any>)
+              | <Channel>
+              | NameType(<Name>, <Type>)
+              | DataType(<Name>, <VarType>+)
+              | SubType(<Name>, <VarType>+)
+              | External(<Name>+)
+              | Transparent(<TrName>+)
+              | Assert(<Check>)
+              | Print(<Expr>)
+              | Include(<FileName>)
+
+// Channel
+<Channel>   ::= Channel(<Name>+, <Type>)
+              | SimpleChannel(<Name>+)
+
+// Types
+<VarType>   ::= SimpleBranch(<Name>)
+              | Branch(<Name>, <Type>)
+
+<Type>      ::= TypeProduct(<Type>, <Type>)
+              | TypeTyple(<Type>+)
+              | TypeExpr(<Expr>)
+              | SimpleTypeName(<Name>)
+              | TypeName(<Name>, <Type>+)
+
+// Assertions
+<Check>     ::= BCheck(<Bool>)
+              | RCheck(<Proc>, <Proc>, <Refined>)
+              | TCheck(<Proc>, <Test>)
+
+<Refined>   ::= Model(<Model>)
+
+<Model>     ::= Nil
+              | T
+              | <FailureModel>
+
+<FailureModel>  ::= F
+                  | FD
+
+<Test>      ::= <TestType>
+              | Test(<TestType>, <FailureModel>)
+              | divergence_free
+
+<TestType>  ::= deterministic
+              | deadlock_free
+              | livelock_free
+
+// Transparent
+<TrName>    ::= normal
+              | normalise
+              | normalize
+              | sbsim
+              | tau_loop_factor
+              | diamond
+              | model_compress
+              | explicate
+
+// Include
+<FileName>  ::= FileName(<Name>+)
+
+// Any expression or process
+<Any>       ::= Expr(<Expr>)
+              | Proc(<Proc>)
+
+
+// Expressions
+//-------------
+
+// Expression
+<Expr>      ::= Numb(<Numb>)
+              | Bool(<Bool>)
+              | Set(<Set>)
+              | Seq(<Seq>)
+              | Tuple(<Tuple>)
+              | Dotted(<Dotted>)
+              | Lambda(<Lambda>)
+
+// Numeric expression
+<Numb>      ::= Common(<Common>)
+              | Number(<Number>)
+              | Card(<Set>)
+              | Length(<Seq>)
+              | Plus(<Numb>, <Numb>)
+              | Minus(<Numb>, <Numb>)
+              | Times(<Numb>, <Numb>)
+              | Div(<Numb>, <Numb>)
+              | Mod(<Numb>, <Numb>)
+              | Min(<Numb>)
+
+// Boolean expression
+<Bool>      ::= Common(<Common>)
+              | true
+              | false
+              | And(<Bool>, <Bool>)
+              | Or(<Bool>, <Bool>)
+              | Not(<Bool>)
+              | Null(<Seq>)
+              | Elem(<Expr>, <Seq>)
+              | Member(<Expr>, <Set>)
+              | Empty(<Set>)
+              | Equal(<Expr>, <Expr>)
+              | NotEqual(<Expr>, <Expr>)
+              | Less(<Expr>, <Expr>)
+              | LessOrEqual(<Expr>, <Expr>)
+              | Greater(<Expr>, <Expr>)
+              | GreaterOrEqual(<Expr>, <Expr>)
+
+// Set expression
+<Set>       ::= Common(<Common>)
+              | Targ(<Targ>)
+              | TargGens(<Targ>, <Gen>+)
+              | Targ0(<Targ>)
+              | TargGens0(<Targ>, <Gen>+)
+              | union(<Set>, <Set>)
+              | inter(<Set>, <Set>)
+              | diff(<Set>, <Set>)
+              | Union(<Set>)
+              | Inter(<Set>)
+              | set(<Seq>)
+              | Set(<Set>)
+              | Seq(<Seq>)
+              | extensions(<Expr>)
+              | productions(<Expr>)
+
+// Sequence expression
+<Seq>       ::= Common(<Common>)
+              | Targ(<Targ>)
+              | TargGens(<Targ>, <Gen>+)
+              | Cat(<Seq>, <Seq>)
+              | Concat(<Seq>)
+
+// Set/Sequence arguments
+<Targ>      ::= Nil
+              | Exprs(<Expr>+)
+              | ClosedRange(<Numb>, <Numb>)
+              | OpenRange(<Numb>)
+
+// Generator
+<Gen>       ::= Bool(<Bool>)
+              | Gen(<Expr>, <Expr>)
+
+// Tuple expression
+<Tuple>     ::= Common(<Common>)
+              | Exprs(<Expr>+)
+
+// Dotted expression
+<Dotted>    ::= Common(<Common>)
+              | Dot(<Expr>, <Expr>)
+
+// Lambda expression
+<Lambda>    ::= Common(<Common>)
+              | LambdaExpr(<Expr>+, <Any>)
+
+// Common expression
+<Common>    ::= Conditional(<Bool>, <Any>, <Any>)
+              | Name(<Name>)
+              | LambdaAppl(<Lambda>, <Expr>+)
+              | LocalDef(<Defn>+, <Any>)
+
+
+// Processes
+//-------------
+
+// Process expression
+<Proc>      ::= Common(<Common>)
+              | STOP
+              | SKIP
+              | CHAOS(<Set>)
+              | Prefix(<Dotted>, <Field>*, <Proc>)
+              | ExternalChoice(<Proc>, <Proc>)
+              | InternalChoice(<Proc>, <Proc>)
+              | SequentialComposition(<Proc>, <Proc>)
+              | Interrupt(<Proc>, <Proc>)
+              | Hiding(<Proc>, <Expr>)
+              | Rename(<Proc>, <Renaming>)
+              | Interleave(<Proc>, <Proc>)
+              | Sharing(<Proc>, <Proc>, <Set>)
+              | AlphaParallel(<Proc>, <Proc>, <Set>, <Set>)
+              | RepExternalChoice(<Gen>+, <Proc>)
+              | RepInternalChoice(<Gen>+, <Proc>)
+              | RepSequentialComposition(<Gen>+, <Proc>)
+              | RepInterleave(<Gen>+, <Proc>)
+              | RepSharing(<Gen>+, <Proc>, <Set>)
+              | RepAlphaParallel(<Gen>+, <Proc>, <Set>)
+              | UntimedTimeOut(<Proc>, <Proc>)
+              | BoolGuard(<Bool>, <Proc>)
+              | LinkedParallel(<Proc>, <Proc>, <LinkPar>)
+              | RepLinkedParallel(<Gen>+, <Proc>, <LinkPar>)
+
+// Input/Output field
+<Field>     ::= SimpleInput(<Expr>)
+              | Input(<Expr>, <Expr>)
+              | Output(<Expr>)
+
+// Renaming
+<Renaming>  ::= Maps(<Map>+)
+              | MapsGens(<Map>+, <Gen>+)
+
+<Map>       ::= Map(<Dotted>, <Dotted>)
+
+// Linking
+<LinkPar>   ::= Links(<Link>+)
+              | LinksGens(<Link>+, <Gen>+)
+
+<Link>      ::= Link(<Dotted>, <Dotted>)

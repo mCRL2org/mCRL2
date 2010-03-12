@@ -37,12 +37,12 @@ class CLASSNAME: public SUPERCLASS
     CLASSNAME(atermpp::aterm_appl term)
       : SUPERCLASS(term)
     {
-      assert(core::detail::check_term_ATERM(m_term));
+      assert(NAMESPACE::detail::check_term_ATERM(m_term));
     }
 
     /// \\brief Constructor.
     CONSTRUCTOR
-      : SUPERCLASS(core::detail::gsMakeATERM(PARAMETERS))
+      : SUPERCLASS(NAMESPACE::detail::gsMakeATERM(PARAMETERS))
     {}MEMBER_FUNCTIONS
 };'''
 
@@ -54,7 +54,7 @@ class CLASSNAME
     /// \\param term A term
     CLASSNAME(atermpp::aterm_appl term)
     {
-      assert(core::detail::check_term_ATERM(m_term));
+      assert(NAMESPACE::detail::check_term_ATERM(m_term));
     }
 
     /// \\brief Constructor.
@@ -71,7 +71,7 @@ class CLASSNAME
 # ActFalse  | false_() | The value false for action formulas 
 #
 # returns a sequence of class definitions and a sequence of class names
-def generate_classes(text, superclass = None):
+def generate_classes(text, superclass = None, namespace = 'core'):
     class_definitions = []
     class_names = []
     classes = parse_classes(text, True)
@@ -100,6 +100,7 @@ def generate_classes(text, superclass = None):
         ctext = re.sub('ATERM'           , aterm      , ctext)
         ctext = re.sub('CONSTRUCTOR'     , constructor, ctext)
         ctext = re.sub('PARAMETERS'      , ptext      , ctext)
+        ctext = re.sub('NAMESPACE'       , namespace  , ctext)
         if superclass != None:
             ctext = re.sub('SUPERCLASS'      , superclass , ctext)
         ctext = re.sub('MEMBER_FUNCTIONS', mtext, ctext)
@@ -110,8 +111,8 @@ def generate_classes(text, superclass = None):
 # Generates expression classes from class_text and inserts them in
 # the file filename. If filename is a directory, then each of the
 # classes is inserted in a separate file.
-def make_expression_classes(filename, class_text, superclass):
-    class_definitions, class_names = generate_classes(class_text, superclass)
+def make_expression_classes(filename, class_text, superclass, namespace = 'core'):
+    class_definitions, class_names = generate_classes(class_text, superclass, namespace)
     if path(filename).isdir():
         for i in range(len(class_definitions)):
             fname = path(filename).normcase() / ('%s.h' % class_names[i])
@@ -124,8 +125,8 @@ def make_expression_classes(filename, class_text, superclass):
 # Generates expression classes from class_text and inserts them in
 # the file filename. If filename is a directory, then each of the
 # classes is inserted in a separate file.
-def make_classes(filename):
-    class_definitions, class_names = generate_classes(class_text)
+def make_classes(filename, namespace = 'core'):
+    class_definitions, class_names = generate_classes(class_text, namespace = namespace)
     if path(filename).isdir():
         for i in range(len(class_definitions)):
             fname = path(filename).normcase() / ('%s.h' % class_names[i])
@@ -135,15 +136,15 @@ def make_classes(filename):
         ctext = '\n\n'.join(class_definitions) + '\n'
         insert_text_in_file(filename, ctext, 'generated classes')
 
-def make_is_functions(filename, text):
+def make_is_functions(filename, text, classname, namespace = 'core'):
     TERM_TRAITS_TEXT = r'''
     /// \\brief Test for a %s expression
     /// \\param t A term
     /// \\return True if it is a %s expression
     inline
-    bool is_%s(const process_expression& t)
+    bool is_%s(const %s& t)
     {
-      return core::detail::gsIs%s(t);
+      return %s::detail::gsIs%s(t);
     }
 '''
 
@@ -153,7 +154,7 @@ def make_is_functions(filename, text):
         (aterm, constructor, description) = c
         f = FunctionDeclaration(constructor)
         name = f.name()
-        rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, aterm)
+        rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, classname, namespace, aterm)
     insert_text_in_file(filename, rtext, 'generated is-functions')
 
 if __name__ == "__main__":
@@ -161,4 +162,4 @@ if __name__ == "__main__":
     make_expression_classes('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula')
     make_expression_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
     make_expression_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
-    make_is_functions(      '../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES)
+    make_is_functions('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
