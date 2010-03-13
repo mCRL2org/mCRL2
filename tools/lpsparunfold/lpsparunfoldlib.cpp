@@ -37,27 +37,11 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec, bool add_distributio
 
   for (data_specification::sorts_const_range::const_iterator i =  m_data_specification.sorts().begin();
                                                              i != m_data_specification.sorts().end();
-                                                             ++i){
-    bool processed = false;
-    if (i->is_basic_sort()) {
-      gsDebugMsg("- Found Basic Sort: %s\n", std::string(basic_sort( *i ).name()).c_str() );
+                                                             ++i)
+  {
+    if (i->is_basic_sort()) 
+    {
       sort_names.insert( (basic_sort(*i)).name() );
-      processed = true;
-    }
-
-    if (i->is_structured_sort()){
-      gsDebugMsg("- Found Structured Sort: %s\n", pp(structured_sort( *i )).c_str() );
-      processed = true;
-    }
-
-    if (i->is_container_sort()){
-      gsDebugMsg("- Found Container Sort: %s\n", pp(container_sort( *i )).c_str() );
-      processed = true;
-    }
-    
-    if (!processed){
-      cerr << "Failed to pre-process sort: "<< *i << endl;
-      abort(); 
     }
   };
 
