@@ -234,6 +234,106 @@ class FunctionDeclaration:
             index = index + 1
         return result
 
+DERIVED_CLASS_DEFINITION = r'''/// \\brief DESCRIPTION
+class CLASSNAME: public SUPERCLASS
+{
+  public:
+    /// \\brief Constructor.
+    /// \\param term A term
+    CLASSNAME(atermpp::aterm_appl term)
+      : SUPERCLASS(term)
+    {
+      assert(NAMESPACE::detail::check_term_ATERM(m_term));
+    }
+
+    /// \\brief Constructor.
+    CONSTRUCTOR
+      : SUPERCLASS(NAMESPACE::detail::gsMakeATERM(PARAMETERS))
+    {}MEMBER_FUNCTIONS
+};'''
+
+CLASS_DEFINITION = r'''/// \\brief DESCRIPTION
+class CLASSNAME
+{
+  public:
+    /// \\brief Constructor.
+    /// \\param term A term
+    CLASSNAME(atermpp::aterm_appl term)
+    {
+      assert(NAMESPACE::detail::check_term_ATERM(m_term));
+    }
+
+    /// \\brief Constructor.
+    CONSTRUCTOR
+    {}MEMBER_FUNCTIONS
+};'''
+
+# Represents a class definition
+#
+# it can be initialized with a string like this:
+#
+# ActTrue   | true_()  | The value true for action formulas  
+#
+# self.aterm:       the name of the corresponding ATerm
+# self.constructor: the constructor of the class
+# self.description: a string description of the class
+class Class:
+    def __init__(self, aterm, constructor, description):
+        self.aterm = aterm
+        self.description = description
+        name = re.sub('\(.*', '', constructor)
+        self.classname = re.sub('\[|\]', '', name)
+        self.base_classname = re.sub('\[[^]]*\]', '', name)           
+        self.function_declaration = FunctionDeclaration(constructor)
+        self.constructor_arguments = re.sub('.*\(', '(', constructor)
+
+    # Returns the name of the class including a namespace qualification, if available
+    #
+    def qualified_name(self):
+        return self.function_declaration.qualified_name()
+
+    # Returns the namespace qualifier of the class (or '' if not available)
+    def qualifier(self):
+        return self.function_declaration.qualifier()
+
+    # Returns the name of the class without namespace qualification
+    #
+    def name(self):
+        return self.function_declaration.name()
+
+    # Returns the class definition
+    def class_definition(self, superclass = None, namespace = 'core', use_base_class_name = True):
+        f = self.function_declaration
+        if use_base_class_name:
+            classname = self.base_classname
+        else:
+            classname = self.classname
+        constructor = classname + self.constructor_arguments
+        print 'generating class', classname
+
+        member_functions = f.class_member_functions()
+        mtext = '\n\n'.join(member_functions)
+        if mtext != '':
+            mtext = '\n\n' + mtext
+
+        parameters = [p.name() for p in f.parameters()]
+        ptext = ', '.join(parameters)
+
+        if superclass == None:
+            text = CLASS_DEFINITION
+        else:
+            text = DERIVED_CLASS_DEFINITION
+        text = re.sub('DESCRIPTION'     , self.description, text)
+        text = re.sub('CLASSNAME'       , classname, text)
+        text = re.sub('ATERM'           , self.aterm, text)
+        text = re.sub('CONSTRUCTOR'     , constructor, text)
+        text = re.sub('PARAMETERS'      , ptext      , text)
+        text = re.sub('NAMESPACE'       , namespace  , text)
+        if superclass != None:
+            text = re.sub('SUPERCLASS'      , superclass , text)
+        text = re.sub('MEMBER_FUNCTIONS', mtext, text)
+        return text     
+
 # parses lines that contain entries separated by '|'
 # empty lines are removed
 #
@@ -247,21 +347,13 @@ class FunctionDeclaration:
 #
 # If the name of a function contains a postfix between brackets (like variable[_base]),
 # then the parameter use_base_class determines whether it is used or not.
-def parse_classes(text, use_base_class = False):
+def parse_classes(text):
     result = []
     lines = text.rsplit('\n')
     for line in lines:
         words = map(string.strip, line.split('|'))
-        if len(words) < 2:
+        if len(words) < 3:
             continue
-        
-        # modify the function name according to the setting of use_base_class
-        name = re.sub('\(.*', '', words[1])
-        if use_base_class:
-            name = re.sub('\[|\]', '', name)
-        else:
-            name = re.sub('\[[^]]*\]', '', name)           
-        words[1] = re.sub('.*\(', name + '(', words[1])
-
-        result.append(words)
+        aterm, constructor, description = words
+        result.append(Class(aterm, constructor, description))
     return result

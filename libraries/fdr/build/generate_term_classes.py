@@ -11,5 +11,5 @@ if __name__ == "__main__":
     generate_soundness_check_functions(rules, '../include/mcrl2/fdr/detail/syntax_checks.h')
     generate_libstruct_functions(rules, '../include/mcrl2/fdr/detail/term_functions.h')
     generate_constructor_functions(rules, '../include/mcrl2/fdr/detail/constructors.h')
-    make_expression_classes('../include/mcrl2/fdr/numeric_expression.h', NUMERIC_EXPRESSION_CLASSES, 'numeric_expression', 'fdr')
+    make_classes('../include/mcrl2/fdr/numeric_expression.h', NUMERIC_EXPRESSION_CLASSES, 'numeric_expression', 'fdr')
     make_is_functions('../include/mcrl2/fdr/numeric_expression.h', NUMERIC_EXPRESSION_CLASSES, 'numeric_expression', 'fdr')
