@@ -19,7 +19,7 @@ def make_traverser_inc_file(filename, class_text, expression_class = None, expre
     classes = parse_classes(class_text)
     for c in classes:
         print 'generating traverse functions for class', c.name()
-        f = c.function_declaration
+        f = c.constructor
         visit_functions = []       
         for p in f.parameters():
             #----------------------------------------------------------------------------------------#
@@ -42,7 +42,7 @@ def make_traverser_inc_file(filename, class_text, expression_class = None, expre
         classes = parse_classes(expression_text)
         visit_functions = []
         for c in classes:
-            f = c.function_declaration
+            f = c.constructor
             visit_functions.append('if (%sis_%s(x)) { static_cast<Derived&>(*this)(%s(x)); }' % (f.qualifier(), f.name(), f.qualified_name()))
         vtext = '\n  ' + '\n  else '.join(visit_functions)
         ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)

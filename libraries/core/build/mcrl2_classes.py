@@ -169,6 +169,9 @@ class VariableDeclaration:
 class FunctionDeclaration:
     def __init__(self, text):
         self.text = text.strip()
+
+    def __repr__(self):
+        return self.text
     
     # returns the name of the function including a namespace qualification, if available
     #
@@ -250,7 +253,8 @@ class CLASSNAME: public SUPERCLASS
     CONSTRUCTOR
       : SUPERCLASS(NAMESPACE::detail::gsMakeATERM(PARAMETERS))
     {}MEMBER_FUNCTIONS
-};'''
+};
+'''
 
 CLASS_DEFINITION = r'''/// \\brief DESCRIPTION
 class CLASSNAME
@@ -266,7 +270,8 @@ class CLASSNAME
     /// \\brief Constructor.
     CONSTRUCTOR
     {}MEMBER_FUNCTIONS
-};'''
+};
+'''
 
 # Represents a class definition
 #
@@ -282,33 +287,39 @@ class Class:
         self.aterm = aterm
         self.description = description
         name = re.sub('\(.*', '', constructor)
-        self.classname = re.sub('\[|\]', '', name)
-        self.base_classname = re.sub('\[[^]]*\]', '', name)           
-        self.function_declaration = FunctionDeclaration(constructor)
-        self.constructor_arguments = re.sub('.*\(', '(', constructor)
+        arguments = re.sub('.*\(', '(', constructor)
+        self.classname = re.sub('\[[^]]*\]', '', name)
+        self.base_classname = re.sub('\[|\]', '', name)
+        self.constructor = FunctionDeclaration(self.classname + arguments)
+        self.base_class_constructor = FunctionDeclaration(self.base_classname + arguments)
 
     # Returns the name of the class including a namespace qualification, if available
     #
     def qualified_name(self):
-        return self.function_declaration.qualified_name()
+        return self.constructor.qualified_name()
 
     # Returns the namespace qualifier of the class (or '' if not available)
     def qualifier(self):
-        return self.function_declaration.qualifier()
+        return self.constructor.qualifier()
 
     # Returns the name of the class without namespace qualification
     #
-    def name(self):
-        return self.function_declaration.name()
+    def name(self, use_base_class_name = False):
+        if use_base_class_name:
+            return self.base_class_constructor.name()
+        else:
+            return self.constructor.name()
 
     # Returns the class definition
     def class_definition(self, superclass = None, namespace = 'core', use_base_class_name = True):
-        f = self.function_declaration
+        f = self.constructor
         if use_base_class_name:
             classname = self.base_classname
+            constructor = str(self.base_class_constructor)
         else:
             classname = self.classname
-        constructor = classname + self.constructor_arguments
+            constructor = str(self.constructor)
+
         print 'generating class', classname
 
         member_functions = f.class_member_functions()

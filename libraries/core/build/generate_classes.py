@@ -26,7 +26,7 @@ def make_classes(filename, class_text, superclass = None, namespace = 'core'):
             text = class_definitions[i]
             insert_text_in_file(fname, text, 'generated class')
     else:
-        ctext = '\n\n'.join(class_definitions) + '\n'
+        ctext = '\n'.join(class_definitions)
         insert_text_in_file(filename, ctext, 'generated classes')
 
 def make_is_functions(filename, class_text, classname, namespace = 'core'):
