@@ -94,7 +94,7 @@ class pbes_expression: public atermpp::aterm_appl
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
 namespace traversal {
-//--- start generated expression classes ---//
+//--- start generated classes ---//
 /// \brief The value true for pbes expressions
 class true_: public pbes_expression
 {
@@ -293,7 +293,7 @@ class exists: public pbes_expression
       return atermpp::arg2(*this);
     }
 };
-//--- end generated expression classes ---//
+//--- end generated classes ---//
 } // namespace traversal
 
 /// \brief The namespace for predicates on pbes expressions.

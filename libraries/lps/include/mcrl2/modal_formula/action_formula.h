@@ -82,7 +82,7 @@ class action_formula: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<action_formula> action_formula_list;
 
-//--- start generated expression classes ---//
+//--- start generated classes ---//
 /// \brief The value true for action formulas
 class true_: public action_formula
 {
@@ -309,7 +309,7 @@ class at: public action_formula
       return atermpp::arg2(*this);
     }
 };
-//--- end generated expression classes ---//
+//--- end generated classes ---//
 
 /// Accessor functions and predicates for action formulas.
 namespace act_frm

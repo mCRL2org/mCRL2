@@ -100,7 +100,7 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 
 // TODO: use these classes instead of the functions in the namespace state_frm
 namespace temp {
-//--- start generated expression classes ---//
+//--- start generated classes ---//
 /// \brief The value true for state formulas
 class true_: public state_formula
 {
@@ -531,7 +531,7 @@ class mu: public state_formula
       return atermpp::arg3(*this);
     }
 };
-//--- end generated expression classes ---//
+//--- end generated classes ---//
 } // namespace temp
 
 /// Accessor functions and predicates for state formulas.

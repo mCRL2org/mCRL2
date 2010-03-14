@@ -39,7 +39,7 @@ namespace fdr {
       }
   };
 
-//--- start generated expression classes ---//
+//--- start generated classes ---//
 /// \brief A common
 class common: public numeric_expression
 {
@@ -294,7 +294,7 @@ class min: public numeric_expression
       return atermpp::arg1(*this);
     }
 };
-//--- end generated expression classes ---//
+//--- end generated classes ---//
 
 //--- start generated is-functions ---//
 

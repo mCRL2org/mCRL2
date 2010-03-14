@@ -71,7 +71,7 @@ using lps::action;
       }
   };
 
-//--- start generated expression classes ---//
+//--- start generated classes ---//
 /// \brief A process
 class process_instance: public process_expression
 {
@@ -588,7 +588,7 @@ class choice: public process_expression
       return atermpp::arg2(*this);
     }
 };
-//--- end generated expression classes ---//
+//--- end generated classes ---//
 
 //--- start generated is-functions ---//
 

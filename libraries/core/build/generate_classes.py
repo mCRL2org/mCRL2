@@ -24,10 +24,10 @@ def make_classes(filename, class_text, superclass = None, namespace = 'core'):
         for i in range(len(class_definitions)):
             fname = path(filename).normcase() / ('%s.h' % classes[i].name())
             text = class_definitions[i]
-            insert_text_in_file(fname, text, 'generated expression class')
+            insert_text_in_file(fname, text, 'generated class')
     else:
         ctext = '\n\n'.join(class_definitions) + '\n'
-        insert_text_in_file(filename, ctext, 'generated expression classes')
+        insert_text_in_file(filename, ctext, 'generated classes')
 
 def make_is_functions(filename, class_text, classname, namespace = 'core'):
     TERM_TRAITS_TEXT = r'''
