@@ -1808,12 +1808,14 @@ namespace mcrl2 {
           }
           ATtablePut(alphas,(ATerm)a,(ATerm)l); //for this full action
         }
-        else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
+        else if ( gsIsProcess(a) || gsIsProcessAssignment(a))
+        {
           ATermAppl pn=ATAgetArgument(a,0);
           ATermList l=ATLtableGet(alphas,(ATerm)pn); // for this particular process term
       
           // if this process is not recursive we apply the alphabeth reductions to it
-          if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm)){
+          if (ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm))
+          {
             //if this is a mCRL process.
             //we apply the alphabeth reductions to its body and then we know the alphabet
             ATermAppl new_p=gsApplyAlpha(ATAtableGet(procs,(ATerm)pn));
@@ -1821,7 +1823,9 @@ namespace mcrl2 {
             ATtablePut(alphas,(ATerm)pn,(ATerm)ATLtableGet(alphas,(ATerm)new_p));
             if(!l) l=ATLtableGet(alphas,(ATerm)pn);
           }
-          assert(l);
+          if (!l)
+          { return NULL;
+          }
           ATtablePut(alphas,(ATerm)a,(ATerm)l); //for this full process call
         }
         else if ( gsIsBlock(a) ){
