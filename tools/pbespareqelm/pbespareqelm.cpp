@@ -39,13 +39,13 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
   protected:
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
-    /// \brief If true, the computation is started from the initial state.
+    /// \brief If true, the initial state is ignored.
     bool m_ignore_initial_state;
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_ignore_initial_state = parser.options.count("use-initial-state") > 0;
+      m_ignore_initial_state = parser.options.count("ignore-initial-state") > 0;
     }
 
     void add_options(interface_description& desc)
