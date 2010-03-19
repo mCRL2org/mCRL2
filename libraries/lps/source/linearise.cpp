@@ -3279,8 +3279,8 @@ class specification_basic_type:public boost::noncopyable
     { return adapt_multiaction_to_stack_rec(multiAction,stack,vars);
     }
 
-    data_expression representative_generator_internal(const sort_expression s)
-    { if (!options.noglobalvars)
+    data_expression representative_generator_internal(const sort_expression s, const bool allow_dont_care_var=true)
+    { if ((!options.noglobalvars) && allow_dont_care_var)
       { const variable newVariable(fresh_name("dc"),s);
         insertvariable(newVariable,true);
         global_variables.insert(newVariable);
@@ -4117,7 +4117,7 @@ class specification_basic_type:public boost::noncopyable
     data_expression_list extend_conditions(
                          const variable var,
                          const data_expression_list conditionlist)
-    { const data_expression unique=representative_generator_internal(var.sort());
+    { const data_expression unique=representative_generator_internal(var.sort(),true);
       const data_expression newcondition=equal_to(var,unique);
       return extend(newcondition,conditionlist);
     }
@@ -4128,7 +4128,7 @@ class specification_basic_type:public boost::noncopyable
          return sort_bool::true_();
 
       const variable var=matchinglist.front();
-      data_expression unique=representative_generator_internal(var.sort());
+      data_expression unique=representative_generator_internal(var.sort(),false);
       return lazy::and_(
                    transform_matching_list(pop_front(matchinglist)),
                    equal_to(data_expression(var),unique));
@@ -4182,7 +4182,8 @@ class specification_basic_type:public boost::noncopyable
                         atermpp::vector < variable_list> &renamings_pars,
                         atermpp::vector < data_expression_list> &renamings_args,
                         data_expression_list &conditionlist)
-    { data_expression_list renamingargs;
+    { 
+      data_expression_list renamingargs;
       variable_list renamingpars;
       variable_list matchinglist=v2;
 
@@ -4374,7 +4375,6 @@ class specification_basic_type:public boost::noncopyable
       for(summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
       { const summand smmnd=*walker;
         const data_expression condition=smmnd.condition();
-
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
         const variable_list auxpars= *auxrename_list_pars;
