@@ -25,6 +25,8 @@
 #include "executor.hpp"
 #include "tool.hpp"
 
+#include "mcrl2/utilities/basename.h"
+
 inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
 #if (103500 < BOOST_VERSION)
   return p.parent_path();
@@ -40,81 +42,6 @@ inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
  **/
 namespace squadt {
   void build_system::default_tool_collection(tool_manager& m) const {
-    static char const* default_tools[] = {
-      // The following lists all release tools, in which the ones without
-      // squadt interface have been commented out.
-      // (Last update: 13/2/2010)
-      "chi2mcrl2",
-      "diagraphica.app",
-      //"formulacheck",
-      //"grape",
-      "lps2lts",
-      "lps2pbes",
-      //"lps2torx",
-      "lpsactionrename",
-      "lpsbinary",
-      //"lpsconfcheck",
-      "lpsconstelm",
-      "lpsinfo",
-      //"lpsinvelm",
-      "lpsparelm",
-      //"lpsparunfold",
-      //"lpspp",
-      "lpsrewr",
-      "lpssumelm",
-      "lpssuminst",
-      "lpsuntime",
-      //"ltscompare",
-      "ltsconvert",
-      "ltsgraph.app",
-      "ltsinfo",
-      "ltsview.app",
-      //"lysa2mcrl2",
-      "mcrl22lps",
-      //"mcrl2i",
-      "pbes2bool",
-      "pbesconstelm",
-      //"pbesinfo",
-      "pbesparelm",
-      //"pbespp",
-      "pbesrewr",
-      "pnml2mcrl2",
-      //"sim",
-      //"squadt",
-      //"tbf2lps",
-      //"tracepp",
-      //"txt2lps",
-      //"txt2pbes",
-      "xsim.app",
-      0 };
-
-    using boost::filesystem::basename;
-    using boost::filesystem::path;
-
-    const path default_path(m_settings_manager->path_to_default_binaries());
-
-    for (char const** t = default_tools; *t != 0; ++t) {
-#if (BOOST_WINDOWS)
-      path path_to_binary(std::string(basename(path(*t))).append(".exe"));
-
-      path_to_binary = default_path / path_to_binary;
-#elif defined(__APPLE__)
-      path path_to_binary(*t);
-
-      if (extension(path_to_binary).empty()) {
-        path_to_binary = default_path / path_to_binary;
-      }
-      else {
-        path_to_binary = parent_path(default_path) / path_to_binary;
-      }
-#else
-      path path_to_binary(basename(*t));
-
-      path_to_binary = default_path / path_to_binary;
-#endif
-
-      m.add_tool(basename(*t), path_to_binary);
-    }
   }
 
   build_system global_build_system;
@@ -226,35 +153,29 @@ namespace squadt {
 
     const boost::filesystem::path miscellaneous_file_name(
                 m_settings_manager->path_to_user_settings("preferences"));
-    const boost::filesystem::path tool_manager_file_name(
-                m_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name));
 
-    if (!boost::filesystem::exists(tool_manager_file_name)) { // set default tool collection
-      tool_manager dummy;
 
-      default_tool_collection(dummy);
+    mcrl2::utilities::basename  basename;
+    const boost::filesystem::path tool_manager_file_name( basename.get_toolset_basename() + "/share/squadt/" + settings_manager::tool_catalog_base_name);
 
-      visitors::store(dummy, tool_manager_file_name);
-    }
-
-    visitors::restore(*m_tool_manager, tool_manager_file_name);
+    visitors::restore(*m_tool_manager, tool_manager_file_name); 
 
     if (boost::filesystem::exists(miscellaneous_file_name)) {
       restore_visitor preferences(miscellaneous_file_name);
 
       preferences.restore(*m_executor);
       preferences.restore(*m_type_registry);
-    }
+    } 
   }
 
   void build_system::store() {
 
     const boost::filesystem::path miscellaneous_file_name(
                 m_settings_manager->path_to_user_settings("preferences"));
-    const boost::filesystem::path tool_manager_file_name(
+/*    const boost::filesystem::path tool_manager_file_name(
                 m_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name));
 
-    visitors::store(*m_tool_manager, tool_manager_file_name);
+    visitors::store(*m_tool_manager, tool_manager_file_name); */
 
     store_visitor preferences(miscellaneous_file_name);
 

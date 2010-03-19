@@ -133,41 +133,42 @@ namespace utility {
   /**
    * \param[in] t the tool object to store
    **/
-  template <>
+/*  template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(tool const& t) {
     out << "<tool name=\"" << t.get_name()
-                    << "\" location=\"" << t.get_location() << "\"/>\n";
-  }
+                   // << "\" location=\"" << t.get_location() 
+		    << "\"/>\n";
+  }*/
 
   /**
    * \param[in] t the tool manager to store
    **/
-  template <>
+  /*template <>
   template <>
   void visitor< squadt::store_visitor_impl >::visit(tool_manager const& t) {
     do_visit(*t.impl);
-  }
+  } */
 
   /// \cond INTERNAL_DOCS
   /**
    * \param[in] t the tool manager object to store
    **/
+  /* template <>
   template <>
-  template <>
-  void visitor< squadt::store_visitor_impl >::visit(tool_manager_impl const& tm) {
+  void visitor< squadt::store_visitor_impl >::visit(tool_manager_impl const& tm) { */
     /* Write header */
-    out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+/*    out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                     << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
                     << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
 
     BOOST_FOREACH(tool_manager::tool_list::value_type t, tm.get_tools()) {
       do_visit(*t);
-    }
+    } */
 
     /* Write footer */
-    out << "</tool-catalog>\n";
-  }
+/*    out << "</tool-catalog>\n";
+  } */
   /// \endcond
 
   /**
@@ -330,9 +331,9 @@ namespace utility {
 
   template <>
   bool visitor< squadt::store_visitor_impl >::initialise() {
-    register_visit_method< const tool >();
-    register_visit_method< const tool_manager >();
-    register_visit_method< const tool_manager_impl >();
+//    register_visit_method< const tool >();
+//    register_visit_method< const tool_manager >();
+//    register_visit_method< const tool_manager_impl >();
     register_visit_method< const executor >();
     register_visit_method< const executor_impl >();
     register_visit_method< const type_registry >();

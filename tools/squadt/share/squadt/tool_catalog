@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
+<tool name="chi2mcrl2" />
+<tool name="diagraphica" />
+<tool name="lps2lts" />
+<tool name="lps2pbes" />
+<tool name="lpsactionrename" />
+<tool name="lpsbinary" />
+<tool name="lpsconstelm" />
+<tool name="lpsinfo" />
+<tool name="lpsparelm" />
+<tool name="lpsrewr" />
+<tool name="lpssumelm" />
+<tool name="lpssuminst" />
+<tool name="lpsuntime" />
+<tool name="ltsconvert" />
+<tool name="ltsgraph" />
+<tool name="ltsinfo" />
+<tool name="ltsview" />
+<tool name="mcrl22lps" />
+<tool name="pbes2bool" />
+<tool name="pbesconstelm" />
+<tool name="pbesparelm" />
+<tool name="pbesrewr" />
+<tool name="pnml2mcrl2" />
+<tool name="xsim" />
+</tool-catalog>

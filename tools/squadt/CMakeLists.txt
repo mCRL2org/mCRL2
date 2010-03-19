@@ -16,6 +16,8 @@ add_definitions(-DTIXML_USE_TICPP)
 
 # ######### General setup ##########
 
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/squadt/tool_catalog" "${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog" COPYONLY )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog DESTINATION share/squadt)
 
 # ########## mcrl2_tools_squadt executable ##########
 
@@ -46,9 +48,9 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
 )
 
 #Add PREFIX define
-set_source_files_properties(settings_manager.cpp
-  PROPERTIES COMPILE_DEFINITIONS PREFIX="${CMAKE_INSTALL_PREFIX}"
-)
+#set_source_files_properties(settings_manager.cpp
+#  PROPERTIES COMPILE_DEFINITIONS PREFIX="${CMAKE_INSTALL_PREFIX}"
+#)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)

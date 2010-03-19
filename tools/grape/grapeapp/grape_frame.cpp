@@ -165,7 +165,8 @@ grape_frame::grape_frame( const wxString &p_filename )
  
  //GRAPE_HELP_DIR
  //
-  std::string path  = mcrl2::utilities::get_executable_basename();
+  mcrl2::utilities::basename basename;
+  std::string path  = basename.get_executable_basename();
 
     bool found = false;
     // binary in build tree

@@ -196,8 +196,8 @@ bool SQuADt::run() {
     }
     catch (std::exception& e) {
       wxMessageDialog(0, wxT("Initialisation error!\n\n") + wxString(e.what(), wxConvLocal), wxT("Fatal"), wxOK|wxICON_ERROR).ShowModal();
-
-      return false;
+ 
+      exit(EXIT_FAILURE);
     }
 
     splash_window->set_category("Querying tools", global_build_system.get_tool_manager().number_of_tools());
@@ -218,52 +218,22 @@ bool SQuADt::run() {
     while (!finished);
 
     if (!retry_list.empty()) {
-      wxMessageDialog retry(0, wxT("Initialisation of some tools failed.\n"
-              "Do you want to retry initialisation of these tools interactively?"),
-              wxT("Initialisation failure!"), wxYES_NO|wxICON_WARNING);
 
-      if (retry.ShowModal() == wxID_YES) {
-        struct tester {
-          inline static bool query_with_path(squadt::tool& t, boost::filesystem::path const& p) {
-            boost::shared_ptr< squadt::tool > dummy(new squadt::tool(t));
-
-            dummy->set_location(p);
-
-            if (squadt::global_build_system.get_tool_manager().query_tool(dummy)) {
-              t.set_location(dummy->get_location());
-              t.set_capabilities(dummy->get_capabilities());
-
-              return true;
-            }
-
-            return false;
-          }
-        };
-
-        boost::filesystem::path path_to_try(parent_path(retry_list[0]->get_location()));
-
-        // Perform initialisation
-        for (std::vector< boost::shared_ptr< squadt::tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
-          splash_window->set_operation("", (*t)->get_name());
-          splash_window->update();
-
-          if (!boost::filesystem::exists((*t)->get_location()) &&
-                   (!path_to_try.empty() &&
-		 !tester::query_with_path(**t, path_to_try / (*t)->get_location().leaf()))) {
-
-            wxFileDialog file_picker(0, wxT("Choose the file to use for `") +
-                      wxString((*t)->get_name().c_str(), wxConvLocal) + wxT("'"),
-                              wxString(path_to_try.string().c_str(), wxConvLocal), wxT(""), wxT("*"), wxFD_DEFAULT_STYLE|wxFD_FILE_MUST_EXIST|wxFD_OPEN);
-
-            if (file_picker.ShowModal() == wxID_OK) {
-              path_to_try = parent_path(boost::filesystem::path(
-                              std::string(file_picker.GetPath().fn_str())));
-
-              tester::query_with_path(**t, std::string(file_picker.GetPath().fn_str()));
-            }
-          }
-        }
+      std::string s;
+      for(std::vector< boost::shared_ptr < squadt::tool > >::iterator i = retry_list.begin(); i != retry_list.end(); ++i)
+      {
+	s.append("\t- ");
+        s.append((*i)->get_name().c_str());
+	s.append("\n");
       }
+      
+
+      wxMessageDialog retry(0, wxT("Cannot initialize the following tools:\n"+ 
+              wxString(s.c_str(), wxConvLocal) ),
+              wxT("Initialisation failure!"), wxOK|wxICON_WARNING);
+
+      retry.ShowModal();
+
     }
 
     splash_window->set_category("Initialising components");
