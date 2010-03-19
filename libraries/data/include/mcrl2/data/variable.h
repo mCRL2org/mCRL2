@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 
@@ -26,64 +27,69 @@ namespace mcrl2 {
 
   namespace data {
 
+    namespace detail {
+
+//--- start generated class ---//
+/// \brief A data variable
+class variable_base: public data_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    variable_base(atermpp::aterm_appl term)
+      : data_expression(term)
+    {
+      assert(core::detail::check_term_DataVarId(m_term));
+    }
+
+    /// \brief Constructor.
+    variable_base(const core::identifier_string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeDataVarId(name, sort))
+    {}
+
+    core::identifier_string name() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    sort_expression sort() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+//--- end generated class ---//
+
+    } // namespace detail
+
     /// \brief data variable.
     ///
-    class variable: public data_expression
+    class variable: public detail::variable_base
     {
       public:
 
         /// \brief Constructor.
         ///
         variable()
-          : data_expression(core::detail::constructDataVarId())
+          : detail::variable_base(core::detail::constructDataVarId())
         {}
 
-        /// \brief Constructor.
-        ///
-        /// \param[in] d A term expression.
-        /// \pre d is a variable.
-        variable(const atermpp::aterm_appl& d)
-          : data_expression(d)
-        {
-          assert(data_expression(d).is_variable());
-        }
+        ///\overload
+        variable(atermpp::aterm_appl term)
+          : detail::variable_base(term)
+        {}
 
-        /// \brief Constructor.
-        ///
-        /// \param[in] d A data expression.
-        /// \pre d is a variable.
-        variable(const data_expression& d)
-          : data_expression(d)
-        {
-          assert(d.is_variable());
-        }
+        ///\overload
+        variable(const core::identifier_string& name, const sort_expression& sort)
+          : detail::variable_base(name, sort)
+        {}
 
         /// \brief Constructor.
         ///
         /// \param[in] name The name of the variable.
         /// \param[in] sort The sort of the variable.
         variable(const std::string& name, const sort_expression& sort)
-          : data_expression(core::detail::gsMakeDataVarId(atermpp::aterm_string(name), sort))
-        {
-          assert(name != "");
-        }
-
-        /// \brief Constructor.
-        ///
-        /// \param[in] name The name of the variable.
-        /// \param[in] sort The sort of the variable.
-        variable(const core::identifier_string& name, const sort_expression& sort)
-          : data_expression(core::detail::gsMakeDataVarId(name, sort))
-        {
-          assert(name != core::identifier_string(""));
-        }
-
-        /// \brief Returns the name of the variable.
-        inline
-        core::identifier_string name() const
-        {
-          return atermpp::aterm_string(atermpp::arg1(*this));
-        }
+          : detail::variable_base(atermpp::aterm_string(name), sort)
+        {}
 
         /// \brief Returns the application of this variable to an argument.
         /// \pre this->sort() is a function sort.
@@ -93,16 +99,6 @@ namespace mcrl2 {
           assert(this->sort().is_function_sort());
           return application(*this, e);
         }
-
-        /* Should be enabled when the implementation in data_expression is
-         * removed
-        /// \overload
-        inline
-        sort_expression sort() const
-        {
-          return atermpp::arg2(*this);
-        }
-        */
 
     }; // class variable
 

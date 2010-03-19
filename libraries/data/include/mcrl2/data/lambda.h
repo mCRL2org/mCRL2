@@ -34,7 +34,7 @@ namespace mcrl2 {
           : abstraction(d)
         {
           assert(d.is_abstraction());
-          assert(static_cast<abstraction>(d).binding_operator() == abstraction::lambda());
+          assert(static_cast<abstraction>(d).binding_operator() == lambda_binder());
         }
 
         /// Constructor.
@@ -44,7 +44,7 @@ namespace mcrl2 {
         /// \pre variables is not empty.
         lambda(const variable& variable,
                const data_expression& body)
-          : abstraction(abstraction::lambda(), convert< variable_list >(make_list(variable)), body)
+          : abstraction(lambda_binder(), convert< variable_list >(make_list(variable)), body)
         {
         }
 
@@ -57,7 +57,7 @@ namespace mcrl2 {
         lambda(const Container& variables,
                const data_expression& body,
                typename detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(abstraction::lambda(), variables, body)
+          : abstraction(lambda_binder(), variables, body)
         {
           assert(!variables.empty());
         }
@@ -70,16 +70,6 @@ namespace mcrl2 {
           assert(this->sort().is_function_sort());
           return application(*this, e);
         }
-
-        /*  Should be enabled when the implementation in data_expression is
-         * removed
-        /// \overload
-        inline
-        sort_expression sort() const
-        {
-          return function_sort(sorts_of_data_expressions(boost::make_iterator_range(m_variables.begin(), m_variables.end())), body().sort());
-        }
-        */
 
     }; // class lambda
 

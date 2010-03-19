@@ -17,21 +17,54 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2 {
 
   namespace data {
+
+    namespace detail {
+//--- start generated class ---//
+/// \brief An application of a data expression to a number of arguments
+class application_base: public data_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    application_base(atermpp::aterm_appl term)
+      : data_expression(term)
+    {
+      assert(core::detail::check_term_DataAppl(m_term));
+    }
+
+    /// \brief Constructor.
+    application_base(const data_expression& head, data_expression_list const& arguments)
+      : data_expression(core::detail::gsMakeDataAppl(head, arguments))
+    {}
+
+    data_expression head() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    data_expression_list const arguments() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+};
+//--- end generated class ---//
+
+    } // namespace detail
 
     /// \brief application a data expression of a function sort to a number
     ///        of arguments.
     ///
     /// An example of an application is f(x,y), where f is the head of the
     /// application, and x,y are the arguments.
-    class application: public data_expression
+    class application: public detail::application_base
     {
 
       public:
-
         /// \brief Iterator over arguments
         typedef atermpp::term_list< data_expression >::const_iterator  argument_iterator;
 
@@ -47,19 +80,18 @@ namespace mcrl2 {
         ///        a valid data expression.
         ///
         application()
-          : data_expression(core::detail::constructDataAppl())
+          : detail::application_base(core::detail::constructDataAppl())
         {}
 
-        /// \brief Construct an application from a data expression.
-        ///
-        /// \param[in] d A data expression.
-        /// \pre d has the internal structure of an application, i.e.
-        ///      d.is_application().
-        application(const data_expression& d)
-          : data_expression(d)
-        {
-          assert(d.is_application());
-        }
+        ///\overload
+        application(atermpp::aterm_appl term)
+          : detail::application_base(term)
+        {}
+
+        ///\overload
+        application(const data_expression& head, data_expression_list const& arguments)
+          : detail::application_base(head, arguments)
+        {}
 
         /// \brief Constructor for an application with an abitrary number of
         ///        arguments.
@@ -72,7 +104,7 @@ namespace mcrl2 {
         application(const data_expression& head,
                     const Container& arguments,
                     typename detail::enable_if_container< Container, data_expression >::type* = 0)
-          : data_expression(core::detail::gsMakeDataAppl(head, convert< data_expression_list >(arguments)))
+          : detail::application_base(head, convert< data_expression_list >(arguments))
         {
           assert(head.sort().is_function_sort());
           assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));
@@ -86,7 +118,7 @@ namespace mcrl2 {
         /// \post *this represents head(arg1)
         application(const data_expression& head,
                     const data_expression& arg1)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1)))
+          : detail::application_base(head, atermpp::make_list(arg1))
         {
           assert(head.sort().is_function_sort());
           assert(function_sort(head.sort()).domain().size() == 1);
@@ -101,7 +133,7 @@ namespace mcrl2 {
         application(const data_expression& head,
                     const data_expression& arg1,
                     const data_expression& arg2)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2)))
+          : detail::application_base(head, atermpp::make_list(arg1, arg2))
         {
           assert(head.sort().is_function_sort());
           assert(function_sort(head.sort()).domain().size() == 2);
@@ -118,7 +150,7 @@ namespace mcrl2 {
                     const data_expression& arg1,
                     const data_expression& arg2,
                     const data_expression& arg3)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2, arg3)))
+          : detail::application_base(head, atermpp::make_list(arg1, arg2, arg3))
         {
           assert(head.sort().is_function_sort());
           assert(function_sort(head.sort()).domain().size() == 3);
@@ -137,7 +169,7 @@ namespace mcrl2 {
                     const data_expression& arg2,
                     const data_expression& arg3,
                     const data_expression& arg4)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2, arg3, arg4)))
+          : detail::application_base(head, atermpp::make_list(arg1, arg2, arg3, arg4))
         {
           assert(head.sort().is_function_sort());
           assert(function_sort(head.sort()).domain().size() == 4);
@@ -150,20 +182,6 @@ namespace mcrl2 {
         {
           assert(this->sort().is_function_sort());
           return application(*this, e);
-        }
-
-        /// \brief Returns the head of the application
-        inline
-        data_expression head() const
-        {
-          return atermpp::arg1(*this);
-        }
-
-        /// \brief Returns the arguments of the application
-        inline
-        arguments_const_range arguments() const
-        {
-          return atermpp::list_arg2(appl());
         }
 
         /// \brief Returns the first argument of the application
@@ -203,9 +221,9 @@ namespace mcrl2 {
     {
       assert(!application(e).arguments().empty());
 
-      boost::iterator_range< application::arguments_const_range::const_iterator > r(application(e).arguments());
+      data_expression_list r(application(e).arguments());
 
-      for (application::arguments_const_range::const_iterator i = r.begin(), j = i; i != r.end(); i = j++)
+      for (data_expression_list::const_iterator i = r.begin(), j = i; i != r.end(); i = j++)
       {
         if (j == r.end())
         {

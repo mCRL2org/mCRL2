@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
@@ -26,6 +27,89 @@
 namespace mcrl2 {
 
   namespace data {
+
+    class assignment_expression: public atermpp::aterm_appl,
+                                 public core::substitution_function<variable, data_expression>
+    {
+      public:
+
+        assignment_expression()
+         : atermpp::aterm_appl(core::detail::constructWhrDecl())
+        {}
+
+        assignment_expression(atermpp::aterm_appl term)
+         : atermpp::aterm_appl(term)
+        {
+          assert(core::detail::check_rule_WhrDecl(term));
+        }
+    };
+
+    /// \brief list of assignment expressions
+    typedef atermpp::term_list<assignment_expression> assignment_expression_list;
+    /// \brief vector of assignment expressions
+    typedef atermpp::vector<assignment_expression>    assignment_expression_vector;
+
+    namespace detail {
+
+//--- start generated classes ---//
+/// \brief Assignment of a data expression to a variable)
+class assignment_base: public assignment_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    assignment_base(atermpp::aterm_appl term)
+      : assignment_expression(term)
+    {
+      assert(core::detail::check_term_DataVarIdInit(m_term));
+    }
+
+    /// \brief Constructor.
+    assignment_base(const variable& lhs, const data_expression& rhs)
+      : assignment_expression(core::detail::gsMakeDataVarIdInit(lhs, rhs))
+    {}
+
+    variable lhs() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    data_expression rhs() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief Assignment of a data expression to a string
+class identifier_assignment_base: public assignment_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    identifier_assignment_base(atermpp::aterm_appl term)
+      : assignment_expression(term)
+    {
+      assert(core::detail::check_term_IdInit(m_term));
+    }
+
+    /// \brief Constructor.
+    identifier_assignment_base(const core::identifier_string& lhs, const data_expression& rhs)
+      : assignment_expression(core::detail::gsMakeIdInit(lhs, rhs))
+    {}
+
+    core::identifier_string lhs() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    data_expression rhs() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+//--- end generated classes ---//
+
+    } // namespace detail
 
     // forward declaration for application operation of assignment
     template <typename Container, typename Substitution >
@@ -35,7 +119,7 @@ namespace mcrl2 {
     ///
     /// An example of an assignment is x := e, where x is a variable and e an
     /// expression.
-    class assignment: public atermpp::aterm_appl, public core::substitution_function<variable, data_expression>
+    class assignment: public detail::assignment_base
     {
       public:
 
@@ -43,41 +127,18 @@ namespace mcrl2 {
         ///        assignment.
         ///
         assignment()
-          : atermpp::aterm_appl(core::detail::constructDataVarIdInit())
+          : detail::assignment_base(core::detail::constructDataVarIdInit())
         {}
 
-        /// \brief Constructor for assignment from a term.
-        ///
-        /// \param[in] a A term adhering to the internal format.
-        /// \pre a is an expression adhering to the format of an assignment.
-        assignment(const atermpp::aterm_appl& a)
-          : atermpp::aterm_appl(a)
-        {
-//          assert(is_assignment(a));
-          assert(core::detail::gsIsDataVarIdInit(a));
-        }
+        /// \overload
+        assignment(atermpp::aterm_appl term)
+          : assignment_base(term)
+        {}
 
-        /// \brief Constructor
-        ///
-        /// \param[in] lhs The left hand side of the assignment.
-        /// \param[in] rhs The right hand side of the assignment.
+        /// \overload
         assignment(const variable& lhs, const data_expression& rhs)
-          : atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(lhs, rhs))
+          : assignment_base(lhs, rhs)
         {}
-
-        /// \brief Returns the left hand side of the assignment, i.e. the
-        ///        variable that gets assigned a value.
-        variable lhs() const
-        {
-          return variable(atermpp::arg1(*this));
-        }
-
-        /// \brief Returns the right hand side of the assignment, i.e. the
-        ///        value that is assigned.
-        data_expression rhs() const
-        {
-          return atermpp::arg2(*this);
-        }
 
         /// \brief Applies the assignment to a variable
         /// \param[in] x A variable
@@ -98,20 +159,54 @@ namespace mcrl2 {
 
     }; // class assignment
 
+    /// \brief identifier_assignment.
+    ///
+    /// An example of an identifier_assignment is x := e, where x is a string and e an
+    /// expression.
+    class identifier_assignment: public detail::identifier_assignment_base
+    {
+      public:
+
+        /// \brief Default constructor. Note that this does not entail a valid
+        ///        identifier_assignment.
+        ///
+        identifier_assignment()
+          : detail::identifier_assignment_base(core::detail::constructIdInit())
+        {}
+
+        /// \overload
+        identifier_assignment(atermpp::aterm_appl term)
+          : detail::identifier_assignment_base(term)
+        {}
+
+        /// \overload
+        identifier_assignment(const variable& lhs, const data_expression& rhs)
+          : detail::identifier_assignment_base(lhs, rhs)
+        {}
+
+        /// \brief Applies the assignment to a variable
+        /// \param[in] x An identifier string
+        /// \return The value <tt>x[lhs() := rhs()]</tt>.
+        data_expression operator()(const identifier& x) const
+        {
+          return x == lhs() ? rhs() : data_expression(x);
+        }
+
+        /// \brief Applies the assignment to a term
+        /// \param[in] x A term
+        /// \return The value <tt>x[lhs() := rhs()]</tt>.
+        template < typename Expression >
+        data_expression operator()(const Expression& x) const
+        {
+          return data::replace_free_variables< Expression, assignment const& >(x, *this);
+        }
+
+    }; // class assignment
+
     /// \brief list of assignments
     typedef atermpp::term_list<assignment> assignment_list;
     /// \brief vector of assignments
     typedef atermpp::vector<assignment>    assignment_vector;
-
-/*
-    /// \brief recogniser for an assignment
-    /// \param[in] a a term
-    /// \return true iff a is an assignment
-    bool is_assignment(const atermpp::aterm_appl& a)
-    {
-      return core::detail::gsIsDataVarIdInit(a);
-    }
-*/
 
     /// \brief Selects the right-hand side of an assignment
     struct left_hand_side : public std::unary_function< const assignment, variable >
@@ -201,6 +296,27 @@ namespace mcrl2 {
     inline assignment_list make_assignment_vector(Container const& container, typename detail::enable_if_container< Container, assignment >::type* = 0) {
       return convert< assignment_vector >(container);
     }
+
+    //--- start generated is-functions ---//
+
+        /// \brief Test for a assignment_base expression
+        /// \param t A term
+        /// \return True if it is a assignment_base expression
+        inline
+        bool is_assignment(const assignment_expression& t)
+        {
+          return core::detail::gsIsDataVarIdInit(t);
+        }
+
+        /// \brief Test for a identifier_assignment_base expression
+        /// \param t A term
+        /// \return True if it is a identifier_assignment_base expression
+        inline
+        bool is_identifier_assignment(const assignment_expression& t)
+        {
+          return core::detail::gsIsIdInit(t);
+        }
+    //--- end generated is-functions ---//
 
   } // namespace data
 

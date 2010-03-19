@@ -13,6 +13,51 @@
 import re
 import string
 
+CONTAINER_TYPES = r'''
+SortList 	| list_container() | Container type for lists
+SortSet		| set_container() | Container type for sets
+SortBag		| bag_container() | Container type for bags
+SortFSet	| finite_set_container() | Container type for finite sets
+SortFBag	| finite_bag_container() | Container type for finite bags
+'''
+
+STRUCTURED_SORT_ELEMENTS = r'''
+StructCons	| structured_sort_constructor_base(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) | A constructor for a structured sort
+StructProj	| structured_sort_constructor_argument_base(const core::identifier_string& name, const sort_expression& sort) | An argument of a constructor of a structured sort
+'''
+
+SORT_EXPRESSION_CLASSES = r'''
+SortId		| basic_sort_base(const core::identifier_string& name) | A basic sort
+SortCons	| container_sort_base(const container_type& container_name, const sort_expression& s) | A container sort
+SortStruct	| structured_sort_base(const structured_sort_constructor_list& constructors) | A structured sort
+SortArrow	| function_sort_base(const sort_expression_list& domain, const sort_expression& codomain) | A function sort
+SortUnknown	| unknown_sort_base() | Unknown sort expression
+SortsPossible	| multiple_possible_sorts_base(const sort_expression_list& sorts) | Multiple possible sorts
+'''
+
+BINDER_TYPES = r'''
+SetBagComp 	| set_or_bag_comprehension_binder() | Binder for set or bag comprehension
+SetComp		| set_comprehension_binder()	| Binder for set comprehension
+BagComp		| bag_comprehension_binder()	| Binder for bag comprehension
+Forall		| forall_binder()		| Binder for universal quantification
+Exists		| exists_binder()		| Binder for existential quantification
+Lambda		| lambda_binder()		| Binder for lambda abstraction
+'''
+
+ASSIGNMENT_EXPRESSION_CLASSES = r'''
+DataVarIdInit	| assignment_base(const variable& lhs, const data_expression& rhs) | Assignment of a data expression to a variable)
+IdInit		| identifier_assignment_base(const core::identifier_string& lhs, const data_expression& rhs) | Assignment of a data expression to a string
+'''
+
+DATA_EXPRESSION_CLASSES = r'''
+Id		| identifier[_base](const core::identifier_string& name) | An identifier
+DataVarId	| variable[_base](const core::identifier_string& name, const sort_expression& sort)	| A data variable
+OpId		| function_symbol[_base](const core::identifier_string& name, const sort_expression& sort) | A function symbol
+DataAppl	| application[_base](const data_expression& head, data_expression_list const& arguments) | An application of a data expression to a number of arguments
+Binder		| abstraction[_base](const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
+Whr		| where_clause[_base](const data_expression& body, const assignment_expression_list& declarations) | A where expression
+'''
+
 STATE_FORMULA_CLASSES = r'''
 StateTrue       | true_()                                                                                                         | The value true for state formulas
 StateFalse      | false_()                                                                                                        | The value false for state formulas

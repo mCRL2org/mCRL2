@@ -23,34 +23,60 @@ namespace mcrl2 {
 
   namespace data {
 
+    namespace detail {
+//--- start generated class ---//
+/// \brief A function symbol
+class function_symbol_base: public data_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    function_symbol_base(atermpp::aterm_appl term)
+      : data_expression(term)
+    {
+      assert(core::detail::check_term_OpId(m_term));
+    }
+
+    /// \brief Constructor.
+    function_symbol_base(const core::identifier_string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeOpId(name, sort))
+    {}
+
+    core::identifier_string name() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    sort_expression sort() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+//--- end generated class ---//
+
+    } // namespace detail
+
     /// \brief function symbol.
     ///
-    class function_symbol: public data_expression
+    class function_symbol: public detail::function_symbol_base
     {
       public:
 
         /// \brief Constructor.
         ///
         function_symbol()
-          : data_expression(core::detail::constructOpId())
+          : detail::function_symbol_base(core::detail::constructOpId())
         {}
 
-        /// \brief Constructor.
-        ///
-        /// \param[in] a a term adhering to the internal format.
-        function_symbol(const atermpp::aterm_appl& a)
-          : data_expression(a)
+        /// \overload
+        function_symbol(atermpp::aterm_appl term)
+         : function_symbol_base(term)
         {}
 
-        /// \brief Constructor.
-        ///
-        /// \param[in] d A data expression.
-        /// \pre d is a function symbol.
-        function_symbol(const data_expression& d)
-          : data_expression(d)
-        {
-          assert(d.is_function_symbol());
-        }
+        /// \overload
+        function_symbol(const core::identifier_string& name, const sort_expression& sort)
+         : function_symbol_base(name, sort)
+        {}
 
         /// \brief Constructor.
         ///
@@ -58,20 +84,8 @@ namespace mcrl2 {
         /// \param[in] sort The sort of the function.
         function_symbol(const std::string& name,
                         const sort_expression& sort)
-          : data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(name), sort))
+          : detail::function_symbol_base(name, sort)
         {
-          assert(name != "");
-        }
-
-        /// \brief Constructur.
-        ///
-        /// \param[in] name The name of the function.
-        /// \param[in] sort The sort of the function.
-        function_symbol(const core::identifier_string& name,
-                        const sort_expression& sort)
-          : data_expression(core::detail::gsMakeOpId(name, sort))
-        {
-          assert(name != core::identifier_string(""));
         }
 
         /// \brief Returns the application of this function symbol to an argument.
@@ -81,12 +95,6 @@ namespace mcrl2 {
         {
           assert(this->sort().is_function_sort());
           return application(*this, e);
-        }
-
-        /// \brief Returns the name of the symbol.
-        core::identifier_string name() const
-        {
-          return atermpp::aterm_string(atermpp::arg1(*this));
         }
 
     }; // class function_symbol

@@ -161,8 +161,8 @@ void abstraction_test()
   variable x("x", s);
   variable_vector xl = make_vector(x);
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
-  abstraction I(abstraction::lambda(), xl_range, x);
-  BOOST_CHECK(I.binding_operator() == abstraction::lambda());
+  abstraction I(lambda_binder(), xl_range, x);
+  BOOST_CHECK(I.binding_operator() == lambda_binder());
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
 
@@ -182,7 +182,7 @@ void lambda_test()
   variable_vector xl = make_vector(x);
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   lambda I(xl_range, x);
-  BOOST_CHECK(I.binding_operator() == abstraction::lambda());
+  BOOST_CHECK(I.binding_operator() == lambda_binder());
   BOOST_CHECK(I.is_lambda());
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
@@ -199,7 +199,7 @@ void lambda_test()
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_e_.variables() == I.variables());
   BOOST_CHECK(I_e_.body() == I.body());
-  abstraction I_(abstraction::lambda(), xl_range, x);
+  abstraction I_(lambda_binder(), xl_range, x);
   BOOST_CHECK(I_ == I);
   BOOST_CHECK(I_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_.variables() == I.variables());
@@ -214,7 +214,7 @@ void forall_test()
   variable_vector xl = make_vector(x);
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   forall I(xl_range, x);
-  BOOST_CHECK(I.binding_operator() == abstraction::forall());
+  BOOST_CHECK(I.binding_operator() == forall_binder());
   BOOST_CHECK(I.is_forall());
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
@@ -229,7 +229,7 @@ void forall_test()
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_e_.variables() == I.variables());
   BOOST_CHECK(I_e_.body() == I.body());
-  abstraction I_(abstraction::forall(), xl_range, x);
+  abstraction I_(forall_binder(), xl_range, x);
   BOOST_CHECK(I_ == I);
   BOOST_CHECK(I_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_.variables() == I.variables());
@@ -244,7 +244,7 @@ void exists_test()
   variable_vector xl = make_vector(x);
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   exists I(xl_range, x);
-  BOOST_CHECK(I.binding_operator() == abstraction::exists());
+  BOOST_CHECK(I.binding_operator() == exists_binder());
   BOOST_CHECK(I.is_exists());
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
@@ -259,7 +259,7 @@ void exists_test()
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_e_.variables() == I.variables());
   BOOST_CHECK(I_e_.body() == I.body());
-  abstraction I_(abstraction::exists(), xl_range, x);
+  abstraction I_(exists_binder(), xl_range, x);
   BOOST_CHECK(I_ == I);
   BOOST_CHECK(I_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_.variables() == I.variables());

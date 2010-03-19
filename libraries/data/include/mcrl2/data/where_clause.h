@@ -20,9 +20,43 @@ namespace mcrl2 {
 
   namespace data {
 
+    namespace detail {
+
+//--- start generated class ---//
+/// \brief A where expression
+class where_clause_base: public data_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    where_clause_base(atermpp::aterm_appl term)
+      : data_expression(term)
+    {
+      assert(core::detail::check_term_Whr(m_term));
+    }
+
+    /// \brief Constructor.
+    where_clause_base(const data_expression& body, const assignment_expression_list& declarations)
+      : data_expression(core::detail::gsMakeWhr(body, declarations))
+    {}
+
+    data_expression body() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    assignment_expression_list declarations() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+};
+//--- end generated class ---//
+
+    } // namespace detail
+
     /// \brief function symbol.
     ///
-    class where_clause: public data_expression
+    class where_clause: public detail::where_clause_base
     {
       public:
 
@@ -37,56 +71,30 @@ namespace mcrl2 {
         /// Constructor.
         ///
         where_clause()
-          : data_expression(core::detail::constructWhr())
+          : detail::where_clause_base(core::detail::constructWhr())
         {}
 
-        /// Constructor.
-        ///
-        /// \param[in] d A data expression
-        /// \pre d has the internal structure of a where clause.
-        where_clause(const data_expression& d)
-          : data_expression(d)
-        {
-          assert(core::detail::gsIsWhr(d));
-        }
+        /// \overload
+        where_clause(atermpp::aterm_appl term)
+          : where_clause_base(term)
+        {}
+
+        /// \overload
+        where_clause(const data_expression& body, const assignment_expression_list& declarations)
+          : where_clause_base(body, declarations)
+        {}
 
         /// Constructor.
         ///
         /// \param[in] body The body of the where_clause.
         /// \param[in] declarations The variable declarations of the where
-        ///            clause (objects of type assignment).
+        ///            clause (objects of type assignment_expression).
         template < typename Container >
         where_clause(const data_expression& body,
                      const Container& declarations,
-                     typename detail::enable_if_container< Container, assignment >::type* = 0)
-          : data_expression(core::detail::gsMakeWhr(body, convert< assignment_list >(declarations)))
-        {
-          assert(!declarations.empty());
-        }
-
-        /*  Should be enabled when the implementation in data_expression is
-         * removed
-        /// \overload
-        inline
-        sort_expression sort() const
-        {
-          return function_sort(sorts_of_data_expressions(boost::make_iterator_range(m_variables.begin(), m_variables.end())), body().sort());
-        }
-        */
-
-        /// \brief Returns the declarations of the where_clause
-        inline
-        declarations_const_range declarations() const
-        {
-          return atermpp::list_arg2(*this);
-        }
-
-        /// \brief Returns the body of the where_clause
-        inline
-        data_expression body() const
-        {
-          return atermpp::arg1(*this);
-        }
+                     typename detail::enable_if_container< Container, assignment_expression >::type* = 0)
+          : detail::where_clause_base(body, convert< assignment_expression_list >(declarations))
+        {}
 
     }; // class where_clause
 

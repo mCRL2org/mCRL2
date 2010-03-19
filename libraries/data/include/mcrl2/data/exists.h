@@ -34,7 +34,7 @@ namespace mcrl2 {
           : abstraction(d)
         {
           assert(d.is_abstraction());
-          assert(static_cast<abstraction>(d).binding_operator() == abstraction::exists());
+          assert(static_cast<abstraction>(d).binding_operator() == exists_binder());
         }
 
         /// Constructor.
@@ -46,20 +46,10 @@ namespace mcrl2 {
         exists(const Container& variables,
                const data_expression& body,
                typename detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(abstraction::exists(), variables, body)
+          : abstraction(exists_binder(), variables, body)
         {
           assert(!variables.empty());
         }
-
-        /*  Should be enabled when the implementation in data_expression is
-         * removed
-        /// \overload
-        inline
-        sort_expression sort() const
-        {
-          return function_sort(sorts_of_data_expressions(boost::make_iterator_range(m_variables.begin(), m_variables.end())), body().sort());
-        }
-        */
 
     }; // class exists
 

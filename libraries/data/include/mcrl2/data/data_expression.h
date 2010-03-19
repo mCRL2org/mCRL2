@@ -258,6 +258,66 @@ namespace mcrl2 {
       return convert< data_expression_list >(r);
     }
 
+    /*
+//--- start generated is-functions ---//
+
+    /// \brief Test for a identifier expression
+    /// \param t A term
+    /// \return True if it is a identifier expression
+    inline
+    bool is_identifier(const data_expression& t)
+    {
+      return core::detail::gsIsId(t);
+    }
+
+    /// \brief Test for a variable expression
+    /// \param t A term
+    /// \return True if it is a variable expression
+    inline
+    bool is_variable(const data_expression& t)
+    {
+      return core::detail::gsIsDataVarId(t);
+    }
+
+    /// \brief Test for a function_symbol expression
+    /// \param t A term
+    /// \return True if it is a function_symbol expression
+    inline
+    bool is_function_symbol(const data_expression& t)
+    {
+      return core::detail::gsIsOpId(t);
+    }
+
+    /// \brief Test for a application expression
+    /// \param t A term
+    /// \return True if it is a application expression
+    inline
+    bool is_application(const data_expression& t)
+    {
+      return core::detail::gsIsDataAppl(t);
+    }
+
+    /// \brief Test for a abstraction expression
+    /// \param t A term
+    /// \return True if it is a abstraction expression
+    inline
+    bool is_abstraction(const data_expression& t)
+    {
+      return core::detail::gsIsBinder(t);
+    }
+
+    /// \brief Test for a where_clause expression
+    /// \param t A term
+    /// \return True if it is a where_clause expression
+    inline
+    bool is_where_clause(const data_expression& t)
+    {
+      return core::detail::gsIsWhr(t);
+    }
+//--- end generated is-functions ---//
+    */
+
+
   } // namespace data
 
 } // namespace mcrl2

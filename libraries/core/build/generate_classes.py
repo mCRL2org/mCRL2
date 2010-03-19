@@ -55,3 +55,8 @@ if __name__ == "__main__":
     make_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
     make_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
     make_is_functions('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
+    make_classes('../../data/include/mcrl2/data/', DATA_EXPRESSION_CLASSES, 'data_expression')
+    make_is_functions('../../data/include/mcrl2/data/data_expression.h', DATA_EXPRESSION_CLASSES, 'data_expression')
+    make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression')
+    make_is_functions('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression')
+    make_classes('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type')
