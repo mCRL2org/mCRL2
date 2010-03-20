@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#define NAME   "grape"
+#define NAME   "grapemcrl2"
 #define AUTHOR "Remco Blewanus, Thorstin Crijns, Diana Koenraadt, Bas Luksenburg, Jonathan Nelisse, Hans Poppelaars and Bram Schoenmakers"
 
 /**
@@ -51,7 +51,7 @@ class grape_app: public mcrl2::utilities::wx::tool< grape_app, input_tool >
     }
 
   public:
-    grape_app() : mcrl2::utilities::wx::tool< grape_app, input_tool >("GraPE",    
+    grape_app() : mcrl2::utilities::wx::tool< grape_app, input_tool >("GraPEmCRL2",    
                   "graphical editing environment for mCRL2 process specifications",
                   "Graphical Process Editor for mCRL2.",
                   "Graphical editing environment for mCRL2 process specifications. "

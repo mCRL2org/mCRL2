@@ -560,7 +560,7 @@ add_subdirectory ( 3rd-party/ticpp )
   add_subdirectory ( tools/chi2mcrl2 )
   add_subdirectory ( tools/diagraphica )
   add_subdirectory ( tools/formulacheck )
-  add_subdirectory ( tools/grape )
+  add_subdirectory ( tools/grapemcrl2 )
   add_subdirectory ( tools/lps2lts )
   add_subdirectory ( tools/lps2pbes )
   add_subdirectory ( tools/lps2torx )
@@ -800,8 +800,8 @@ endif( ENABLE_TEST_TARGETS )
   # add_test(ltsgraph_abp ${ltsgraph_BINARY_DIR}/ltsgraph ${testdir}/abp_celm_pelm_sinst.aut )
   # set_tests_properties(ltsgraph_abp PROPERTIES TIMEOUT 15 )
 
-  # add_test(grape_smoke ${grape_BINARY_DIR}/grape)
-  # set_tests_properties(grape_smoke PROPERTIES TIMEOUT 15 )
+  # add_test(grapemcrl2_smoke ${grapemcrl2_BINARY_DIR}/grapemcrl2)
+  # set_tests_properties(grapemcrl2_smoke PROPERTIES TIMEOUT 15 )
 
   #-------------
   # squadt 
@@ -948,7 +948,7 @@ SET(CPACK_PACKAGE_VENDOR "TUe")
 
 # Create Desktop link to squadt
 set(CPACK_CREATE_DESKTOP_LINKS squadt)
-set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grape;grape" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "xsim;xsim")
+set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grapemcrl2;grape" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "xsim;xsim")
 
   IF(APPLE)
     SET(CPACK_SET_DESTDIR TRUE)

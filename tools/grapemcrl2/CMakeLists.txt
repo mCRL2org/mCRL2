@@ -7,7 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(grape)
+project(grapemcrl2)
 cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_BUILD_GUI_TOOLS )
@@ -112,13 +112,13 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   mcrl2gen/mcrl2gen_validate.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/tools/grape)
-include_directories(${CMAKE_SOURCE_DIR}/tools/grape/grapeapp)
-include_directories(${CMAKE_SOURCE_DIR}/tools/grape/grapeapp/events)
-include_directories(${CMAKE_SOURCE_DIR}/tools/grape/grapeapp/visuals)
-include_directories(${CMAKE_SOURCE_DIR}/tools/grape/grapeapp/dialogs)
-include_directories(${CMAKE_SOURCE_DIR}/tools/grape/libgrape)
-include_directories(${CMAKE_SOURCE_DIR}/tools/grape/mcrl2gen)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/grapeapp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/events)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/visuals)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/dialogs)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libgrape)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/mcrl2gen)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)

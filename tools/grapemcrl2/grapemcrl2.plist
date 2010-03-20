@@ -13,7 +13,7 @@
 	<key>CFBundleIconFile</key>
 	<string>grape.icns</string>
 	<key>CFBundleName</key>
-	<string>GraPE</string>
+	<string>GraPEmCRL2</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>

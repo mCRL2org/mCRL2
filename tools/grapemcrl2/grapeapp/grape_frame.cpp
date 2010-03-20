@@ -42,7 +42,7 @@ using namespace grape::grapeapp;
 using namespace grape::libgrape;
 
 grape_frame::grape_frame( const wxString &p_filename )
-: wxFrame( NULL, wxID_ANY, _T("GraPE"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("GraPE") )
+: wxFrame( NULL, wxID_ANY, _T("GraPEmCRL2"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("GraPEmCRL2") )
 , m_modified( false )
 , m_specification( 0 )
 , m_mode( GRAPE_MODE_NONE )
@@ -542,7 +542,7 @@ void grape_frame::set_title()
     title += _T(" - ");
   }
 
-  title += _T("GraPE");
+  title += _T("GraPEmCRL2");
 
   SetTitle( title );
 }

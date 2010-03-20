@@ -1,11 +1,10 @@
-project toolset/grape ;
+project toolset/grapemcrl2 ;
 
-tool grape
+tool grapemcrl2
       : [ glob-tree *.cpp : .svn ]
         /libraries//lps
         /libraries/utilities//font_renderer
-      : <define>GRAPE_HELP_DIR=\"\\\"$(INSTALL_ROOT)/share/mcrl2/grape\\\"\"
-        <include>libgrape
+      : <include>libgrape
         <include>grapeapp
         <include>mcrl2gen
         <include>.
@@ -14,4 +13,4 @@ tool grape
         <toolset>gcc:<linkflags>-lGLU        
       ;
 
-install-data manual : grapeapp/help/grapehelp.zip : <data-sub-location>grape ;
+install-data manual : grapeapp/help/grapehelp.zip : <data-sub-location>grapemcrl2 ;
