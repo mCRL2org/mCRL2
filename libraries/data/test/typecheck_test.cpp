@@ -474,6 +474,39 @@ BOOST_AUTO_TEST_CASE(test_data_specification_nested_struct)
   );
 }
 
+
+BOOST_AUTO_TEST_CASE(test_multiple_variables)
+{
+  test_data_specification(
+    "sort S;\n\n"
+    "var  x: Nat;\n"
+    "     x: S;\n"
+    "eqn  x == x + 1  =  true;\n",
+    false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_multiple_variables_reversed)
+{
+  test_data_specification(
+    "sort S;\n\n"
+    "var  x: S;\n"
+    "     x: Nat;\n"
+    "eqn  x == x + 1  =  true;\n",
+    false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_sort_as_variable)
+{
+  test_data_specification(
+    "sort S;\n\n"
+    "map  S: S -> Bool;\n\n"
+    "var  S: S;\n"
+    "eqn  S(S)  =  S == S;\n"
+  );
+}
+
 template <typename VariableIterator>
 void test_data_expression_in_specification_context(const std::string &de_in,
                           const std::string& ds_in,
