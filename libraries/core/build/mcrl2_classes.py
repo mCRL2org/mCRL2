@@ -109,7 +109,7 @@ ProcVarId   | process_identifier(const core::identifier_string& name, const data
 ProcEqn     | process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression) | A process equation
 RenameExpr  | rename_expression(core::identifier_string source, core::identifier_string target) | A rename expression
 CommExpr    | communication_expression(const action_name_multiset& action_name, const core::identifier_string& name) | A communication expression
-MultActName | action_name_multiset(const &core::identifier_string_list& names) | A multi-action
+MultActName | action_name_multiset(const core::identifier_string_list& names) | A multi-action
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
@@ -156,8 +156,8 @@ PBESExists        | exists(const data::variable_list& variables, const pbes_expr
 
 # removes 'const' and '&' from a type
 def extract_type(text):
-    text = re.sub('^const\s*', '', text)
-    text = re.sub('\s*&$', '', text)
+    text = re.sub(r'\bconst\b', '', text)
+    text = re.sub(r'\s*&$', '', text)
     return text
 
 #indents the text with the given prefix
@@ -178,6 +178,7 @@ def member_function(arg, n):
     type = extract_type(p[0].strip())
     name = p[2].strip()
     arg = 'arg' + str(n)
+    # TODO: this check for a list is unsafe; the ATerm grammar should be used to make it precise
     if type.endswith('list'):
         arg = 'list_' + arg
     text = MEMBER_FUNCTION
@@ -282,40 +283,60 @@ class FunctionDeclaration:
             index = index + 1
         return result
 
-DERIVED_CLASS_DEFINITION = r'''/// \\brief DESCRIPTION
-class CLASSNAME: public SUPERCLASS
+DERIVED_CLASS_CONSTRUCTOR = r'''    /// \\brief Constructor.
+    <CONSTRUCTOR>
+      : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+    {}
+'''
+
+DERIVED_CLASS_DEFINITION = r'''/// \\brief <DESCRIPTION>
+class <CLASSNAME>: public <SUPERCLASS>
 {
   public:
-    /// \\brief Constructor.
-    /// \\param term A term
-    CLASSNAME(atermpp::aterm_appl term)
-      : SUPERCLASS(term)
-    {
-      assert(NAMESPACE::detail::check_term_ATERM(m_term));
-    }
+    /// \\brief Default constructor.
+    <CLASSNAME>()
+      : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
+    {}
 
     /// \\brief Constructor.
-    CONSTRUCTOR
-      : SUPERCLASS(NAMESPACE::detail::gsMakeATERM(PARAMETERS))
-    {}MEMBER_FUNCTIONS
+    /// \\param term A term
+    <CLASSNAME>(atermpp::aterm_appl term)
+      : <SUPERCLASS>(term)
+    {
+      assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
+    }<CONSTRUCTOR><MEMBER_FUNCTIONS>
 };
 '''
 
-CLASS_DEFINITION = r'''/// \\brief DESCRIPTION
-class CLASSNAME
+CLASS_CONSTRUCTOR = '''
+    /// \\brief Constructor.
+    <CONSTRUCTOR>
+    {}
+'''
+
+CLASS_DEFINITION = r'''/// \\brief <DESCRIPTION>
+class <CLASSNAME>
 {
   public:
-    /// \\brief Constructor.
-    /// \\param term A term
-    CLASSNAME(atermpp::aterm_appl term)
-    {
-      assert(NAMESPACE::detail::check_term_ATERM(m_term));
-    }
+    /// \\brief Default constructor.
+    <CLASSNAME>()
+      : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
+    {}
 
     /// \\brief Constructor.
-    CONSTRUCTOR
-    {}MEMBER_FUNCTIONS
+    /// \\param term A term
+    <CLASSNAME>(atermpp::aterm_appl term)
+    {
+      assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
+    }<CONSTRUCTOR><MEMBER_FUNCTIONS>
 };
+'''
+
+CONTAINER_TYPEDEFS = r'''/// \\brief list of CLASSNAMEs
+    typedef atermpp::term_list<<CLASSNAME>> CLASSNAME_list;
+
+    /// \\brief vector of CLASSNAMEs
+    typedef atermpp::vector<<CLASSNAME>>    CLASSNAME_vector;
 '''
 
 # Represents a class definition
@@ -356,7 +377,7 @@ class Class:
             return self.constructor.name()
 
     # Returns the class definition
-    def class_definition(self, superclass = None, namespace = 'core', use_base_class_name = True):
+    def class_definition(self, superclass = None, namespace = 'core', use_base_class_name = True, add_container_typedefs = True):
         f = self.constructor
         if use_base_class_name:
             classname = self.base_classname
@@ -376,19 +397,33 @@ class Class:
         ptext = ', '.join(parameters)
 
         if superclass == None:
-            text = CLASS_DEFINITION
+            if len(self.constructor.parameters()) > 0:
+                ctext = CLASS_CONSTRUCTOR
+            else:
+                ctext = ''
+            text = re.sub('<CONSTRUCTOR>', ctext, CLASS_DEFINITION)
         else:
-            text = DERIVED_CLASS_DEFINITION
-        text = re.sub('DESCRIPTION'     , self.description, text)
-        text = re.sub('CLASSNAME'       , classname, text)
-        text = re.sub('ATERM'           , self.aterm, text)
-        text = re.sub('CONSTRUCTOR'     , constructor, text)
-        text = re.sub('PARAMETERS'      , ptext      , text)
-        text = re.sub('NAMESPACE'       , namespace  , text)
+            if len(self.constructor.parameters()) > 0:
+                ctext = DERIVED_CLASS_CONSTRUCTOR
+            else:
+                ctext = ''
+            text = re.sub('<CONSTRUCTOR>', ctext, DERIVED_CLASS_DEFINITION)
+
+        text = re.sub('<DESCRIPTION>'     , self.description, text)
+        text = re.sub('<CLASSNAME>'       , classname, text)
+        text = re.sub('<ATERM>'           , self.aterm, text)
+        text = re.sub('<CONSTRUCTOR>'     , constructor, text)
+        text = re.sub('<PARAMETERS>'      , ptext      , text)
+        text = re.sub('<NAMESPACE>'       , namespace  , text)
         if superclass != None:
-            text = re.sub('SUPERCLASS'      , superclass , text)
-        text = re.sub('MEMBER_FUNCTIONS', mtext, text)
-        return text     
+            text = re.sub('<SUPERCLASS>'      , superclass , text)
+        text = re.sub('<MEMBER_FUNCTIONS>', mtext, text)
+        if add_container_typedefs and (superclass == None):
+            atext = re.sub('<CLASSNAME>', classname, CONTAINER_TYPEDEFS)
+            if use_base_class_name and (self.classname != self.base_classname):
+                atext = 'class %s;\n\n' % classname + atext
+            text = text + atext
+        return text
 
 # parses lines that contain entries separated by '|'
 # empty lines are removed
