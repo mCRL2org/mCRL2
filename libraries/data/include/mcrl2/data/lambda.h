@@ -62,15 +62,6 @@ namespace mcrl2 {
           assert(!variables.empty());
         }
 
-        /// \brief Returns the application of this lambda abstraction to an argument.
-        /// \pre this->sort() is a function sort.
-        /// \param[in] e The data expression to which the function symbol is applied
-        application operator()(const data_expression& e) const
-        {
-          assert(this->sort().is_function_sort());
-          return application(*this, e);
-        }
-
     }; // class lambda
 
   } // namespace data

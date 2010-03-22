@@ -46,7 +46,7 @@ Lambda		| lambda_binder()		| Binder for lambda abstraction
 
 ASSIGNMENT_EXPRESSION_CLASSES = r'''
 DataVarIdInit	| assignment_base(const variable& lhs, const data_expression& rhs) | Assignment of a data expression to a variable)
-IdInit		| identifier_assignment_base(const core::identifier_string& lhs, const data_expression& rhs) | Assignment of a data expression to a string
+IdInit		| identifier_assignment_base(const identifier& lhs, const data_expression& rhs) | Assignment of a data expression to a string
 '''
 
 DATA_EXPRESSION_CLASSES = r'''

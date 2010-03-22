@@ -18,6 +18,7 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
@@ -83,6 +84,8 @@ namespace mcrl2 {
       return core::detail::gsIsId(p);
     }
 
+    class application; // prototype
+
     /// \brief data expression.
     ///
     /// A data expression can be any of:
@@ -114,6 +117,8 @@ namespace mcrl2 {
           // should be removed.
           assert(is_data_expression(t) || core::detail::gsIsNil(t));
         }
+
+        application operator()(const data_expression& e) const;
 
         /// \brief Returns the sort of the data expression
         inline
@@ -214,32 +219,6 @@ namespace mcrl2 {
 
     }; // class data_expression
 
-    /// \brief identifier
-    /// \details This class should only be used up to and including
-    ///          the type checking phase, as it yields an untyped,
-    ///          unstructured data expression!
-    class identifier : public data_expression
-    {
-      /// \brief Default constructor for identifier. This does not yield
-      ///        a valid expression.
-      identifier()
-        : data_expression()
-      {}
-
-      /// \brief Constructor for an identifier with name s
-      /// \param s A string
-      identifier(const mcrl2::core::identifier_string& s)
-        : data_expression(mcrl2::core::detail::gsMakeId(s))
-      {}
-
-      /// \brief Constructor for an identifier with name s
-      /// \param s A string
-      identifier(const std::string& s)
-        : data_expression(mcrl2::core::detail::gsMakeId(mcrl2::core::identifier_string(s)))
-      {}
-
-    }; // class identifier
-
     /// \brief list of data expressions
     ///
     typedef atermpp::term_list<data_expression> data_expression_list;
@@ -317,10 +296,33 @@ namespace mcrl2 {
 //--- end generated is-functions ---//
     */
 
-
   } // namespace data
 
 } // namespace mcrl2
+
+// The trick of including application.h only at this point is needed to break
+// the circular dependencies between application and data_expression. This
+// dependency was introduced to allow the application operator to be defined for
+// all data expression types.
+#ifndef MCRL2_DATA_APPLICATION_H
+#include "mcrl2/data/application.h"
+#endif
+
+namespace mcrl2 {
+  namespace data {
+
+    /// \brief Returns the application of this application to an argument.
+    /// \pre this->sort() is a function sort.
+    /// \param[in] e The data expression to which the application is applied
+    inline
+    application data_expression::operator()(const data_expression& e) const
+    {
+      assert(this->sort().is_function_sort());
+      return application(*this, e);
+    }
+
+  }
+}
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_H
 

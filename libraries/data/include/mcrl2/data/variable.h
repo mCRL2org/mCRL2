@@ -91,15 +91,6 @@ class variable_base: public data_expression
           : detail::variable_base(atermpp::aterm_string(name), sort)
         {}
 
-        /// \brief Returns the application of this variable to an argument.
-        /// \pre this->sort() is a function sort.
-        /// \param[in] e The data expression to which the variable is applied
-        application operator()(const data_expression& e)
-        {
-          assert(this->sort().is_function_sort());
-          return application(*this, e);
-        }
-
     }; // class variable
 
     /// \brief list of variables

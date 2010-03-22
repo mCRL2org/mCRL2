@@ -22,6 +22,7 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/identifier.h"
 #include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
@@ -93,11 +94,11 @@ class identifier_assignment_base: public assignment_expression
     }
 
     /// \brief Constructor.
-    identifier_assignment_base(const core::identifier_string& lhs, const data_expression& rhs)
+    identifier_assignment_base(const identifier& lhs, const data_expression& rhs)
       : assignment_expression(core::detail::gsMakeIdInit(lhs, rhs))
     {}
 
-    core::identifier_string lhs() const
+    identifier lhs() const
     {
       return atermpp::arg1(*this);
     }
@@ -180,7 +181,7 @@ class identifier_assignment_base: public assignment_expression
         {}
 
         /// \overload
-        identifier_assignment(const variable& lhs, const data_expression& rhs)
+        identifier_assignment(const identifier& lhs, const data_expression& rhs)
           : detail::identifier_assignment_base(lhs, rhs)
         {}
 
@@ -299,24 +300,24 @@ class identifier_assignment_base: public assignment_expression
 
     //--- start generated is-functions ---//
 
-        /// \brief Test for a assignment_base expression
-        /// \param t A term
-        /// \return True if it is a assignment_base expression
-        inline
-        bool is_assignment(const assignment_expression& t)
-        {
-          return core::detail::gsIsDataVarIdInit(t);
-        }
+    /// \brief Test for a assignment_base expression
+    /// \param t A term
+    /// \return True if it is a assignment_base expression
+    inline
+    bool is_assignment_base(const assignment_expression& t)
+    {
+      return core::detail::gsIsDataVarIdInit(t);
+    }
 
-        /// \brief Test for a identifier_assignment_base expression
-        /// \param t A term
-        /// \return True if it is a identifier_assignment_base expression
-        inline
-        bool is_identifier_assignment(const assignment_expression& t)
-        {
-          return core::detail::gsIsIdInit(t);
-        }
-    //--- end generated is-functions ---//
+    /// \brief Test for a identifier_assignment_base expression
+    /// \param t A term
+    /// \return True if it is a identifier_assignment_base expression
+    inline
+    bool is_identifier_assignment_base(const assignment_expression& t)
+    {
+      return core::detail::gsIsIdInit(t);
+    }
+//--- end generated is-functions ---//
 
   } // namespace data
 

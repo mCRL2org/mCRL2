@@ -16,8 +16,6 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/binder_type.h"
-#include "mcrl2/data/detail/construction_utility.h"
-#include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 

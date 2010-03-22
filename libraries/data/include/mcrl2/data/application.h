@@ -14,10 +14,8 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2 {
 
@@ -173,15 +171,6 @@ class application_base: public data_expression
         {
           assert(head.sort().is_function_sort());
           assert(function_sort(head.sort()).domain().size() == 4);
-        }
-
-        /// \brief Returns the application of this application to an argument.
-        /// \pre this->sort() is a function sort.
-        /// \param[in] e The data expression to which the application is applied
-        application operator()(const data_expression& e) const
-        {
-          assert(this->sort().is_function_sort());
-          return application(*this, e);
         }
 
         /// \brief Returns the first argument of the application

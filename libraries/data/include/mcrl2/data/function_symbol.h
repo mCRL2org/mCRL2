@@ -88,15 +88,6 @@ class function_symbol_base: public data_expression
         {
         }
 
-        /// \brief Returns the application of this function symbol to an argument.
-        /// \pre this->sort() is a function sort.
-        /// \param[in] e The data expression to which the function symbol is applied
-        application operator()(const data_expression& e) const
-        {
-          assert(this->sort().is_function_sort());
-          return application(*this, e);
-        }
-
     }; // class function_symbol
 
     /// \brief list of function symbols
