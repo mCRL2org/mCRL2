@@ -113,7 +113,7 @@ namespace mcrl2 {
       inline
       application setconstructor(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setconstructor(s),arg0, arg1);
+        return setconstructor(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@set
@@ -203,7 +203,7 @@ namespace mcrl2 {
       inline
       application setfset(const sort_expression& s, const data_expression& arg0)
       {
-        return application(setfset(s),arg0);
+        return setfset(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@setfset
@@ -260,7 +260,7 @@ namespace mcrl2 {
       inline
       application setcomprehension(const sort_expression& s, const data_expression& arg0)
       {
-        return application(setcomprehension(s),arg0);
+        return setcomprehension(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@setcomp
@@ -318,7 +318,7 @@ namespace mcrl2 {
       inline
       application setin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setin(s),arg0, arg1);
+        return setin(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -375,7 +375,7 @@ namespace mcrl2 {
       inline
       application setcomplement(const sort_expression& s, const data_expression& arg0)
       {
-        return application(setcomplement(s),arg0);
+        return setcomplement(s)(arg0);
       }
 
       /// \brief Recogniser for application of !
@@ -433,7 +433,7 @@ namespace mcrl2 {
       inline
       application setunion_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setunion_(s),arg0, arg1);
+        return setunion_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -491,7 +491,7 @@ namespace mcrl2 {
       inline
       application setintersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setintersection(s),arg0, arg1);
+        return setintersection(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -549,7 +549,7 @@ namespace mcrl2 {
       inline
       application setdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setdifference(s),arg0, arg1);
+        return setdifference(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -606,7 +606,7 @@ namespace mcrl2 {
       inline
       application false_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(false_function(s),arg0);
+        return false_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@false_
@@ -663,7 +663,7 @@ namespace mcrl2 {
       inline
       application true_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(true_function(s),arg0);
+        return true_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@true_
@@ -720,7 +720,7 @@ namespace mcrl2 {
       inline
       application not_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(not_function(s),arg0);
+        return not_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@not_
@@ -778,7 +778,7 @@ namespace mcrl2 {
       inline
       application and_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(and_function(s),arg0, arg1);
+        return and_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@and_
@@ -836,7 +836,7 @@ namespace mcrl2 {
       inline
       application or_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(or_function(s),arg0, arg1);
+        return or_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@or_

@@ -382,7 +382,7 @@ void ArcDiagram::unmarkLeaves()
 void ArcDiagram::markBundle( const size_t &idx )
 // ------------------------------------------
 {
-    if ( 0 <= idx && idx < markBundles.size() )
+    if ( idx < markBundles.size() )
         markBundles[idx] = true;
 }
 
@@ -2106,7 +2106,7 @@ void ArcDiagram::clearSettingsDiagram()
 
 
 // ----------------------------------------
-void ArcDiagram::onTimer( wxTimerEvent &e )
+void ArcDiagram::onTimer( wxTimerEvent &/*e*/ )
 // ----------------------------------------
 {
     if ( timerAnim->GetInterval() != itvAnim )

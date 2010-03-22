@@ -55,8 +55,7 @@ class identifier : public detail::identifier_base
     : identifier_base(term)
   {}
 
-  /// \brief Constructor for an identifier with name s
-  /// \param s A string
+  /// \overload
   identifier(const mcrl2::core::identifier_string& s)
     : detail::identifier_base(s)
   {}

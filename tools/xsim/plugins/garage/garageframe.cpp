@@ -236,9 +236,9 @@ ATermAppl GarageFrame::MakeFloorPos( int row,
   function_symbol tCol("c" + intToString(col), sCol);
   if (has_part) {
     function_symbol tPart((part == 0)?"pa":"pb", sPart);
-    return application(oPos, tCol, tPart);
+    return make_application(oPos, tCol, tPart);
   } else {
-    return application(oPos, tCol);
+    return make_application(oPos, tCol);
   }
 }
 
@@ -325,7 +325,7 @@ void GarageFrame::UpdateState( ATerm State )
         for (int j = 1; j <= 10; ++j) {
           for (int k = 0; k <= 1; ++k) {
             ATermAppl fp = MakeFloorPos(i, j, i == 1, k);
-            ATermAppl state = rewriter(application(data_expression(fs), data_expression(fp)));
+            ATermAppl state = rewriter(make_application(data_expression(fs), data_expression(fp)));
             if (ATisEqual(state, tFree)) {
               floorState[i-1][(j-1)*2+k] = 0;
             } else if (ATisEqual(state, tOccupied)) {
@@ -353,7 +353,7 @@ void GarageFrame::UpdateState( ATerm State )
       for (int i = 1; i <= 3; ++i) {
         for (int j = 0; j <= 1; ++j) {
           ATermAppl sp = MakeShuttlePos(i, j);
-          ATermAppl lstate = rewriter(application(data_expression(shs), data_expression(sp), data_expression(tLowered)));
+          ATermAppl lstate = rewriter(make_application(data_expression(shs), data_expression(sp), data_expression(tLowered)));
           if (ATisEqual(lstate, tNAvail)) {
             floorState[i-1][j*18]   = -1;
             floorState[i-1][j*18+1] = -1;
@@ -366,7 +366,7 @@ void GarageFrame::UpdateState( ATerm State )
               << " cannot be rewritten to normal form"
               << std::endl;
           }
-          ATermAppl tstate = rewriter(application(data_expression(shs), data_expression(sp), data_expression(tTilted)));
+          ATermAppl tstate = rewriter(make_application(data_expression(shs), data_expression(sp), data_expression(tTilted)));
           if (ATisEqual(tstate, tAvail)) {
             shuttleState[i-1][j] = 1;
           } else if (ATisEqual(tstate, tNAvail)) {

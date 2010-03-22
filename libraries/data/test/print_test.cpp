@@ -52,9 +52,9 @@ void test_application_print() {
   function_symbol f("f", function_sort(bool_(), bool_()));
   function_symbol g("g", function_sort(bool_(), nat(), bool_()));
 
-  PRINT_CHECK(application(f, true_()), "f(true)");
-  PRINT_CHECK(application(g, false_(), sort_nat::nat(10)), "g(false, 10)");
-  PRINT_CHECK(application(g, application(f, true_()), sort_nat::nat(10)), "g(f(true), 10)");
+  PRINT_CHECK(f(true_()), "f(true)");
+  PRINT_CHECK(g(false_(), sort_nat::nat(10)), "g(false, 10)");
+  PRINT_CHECK(g(f(true_()), sort_nat::nat(10)), "g(f(true), 10)");
 }
 
 void test_abstraction_print() {

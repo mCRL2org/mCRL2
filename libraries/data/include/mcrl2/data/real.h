@@ -113,7 +113,7 @@ namespace mcrl2 {
       inline
       application creal(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(creal(),arg0, arg1);
+        return creal()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@cReal
@@ -168,7 +168,7 @@ namespace mcrl2 {
       inline
       application pos2real(const data_expression& arg0)
       {
-        return application(pos2real(),arg0);
+        return pos2real()(arg0);
       }
 
       /// \brief Recogniser for application of Pos2Real
@@ -223,7 +223,7 @@ namespace mcrl2 {
       inline
       application nat2real(const data_expression& arg0)
       {
-        return application(nat2real(),arg0);
+        return nat2real()(arg0);
       }
 
       /// \brief Recogniser for application of Nat2Real
@@ -278,7 +278,7 @@ namespace mcrl2 {
       inline
       application int2real(const data_expression& arg0)
       {
-        return application(int2real(),arg0);
+        return int2real()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Real
@@ -333,7 +333,7 @@ namespace mcrl2 {
       inline
       application real2pos(const data_expression& arg0)
       {
-        return application(real2pos(),arg0);
+        return real2pos()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Pos
@@ -388,7 +388,7 @@ namespace mcrl2 {
       inline
       application real2nat(const data_expression& arg0)
       {
-        return application(real2nat(),arg0);
+        return real2nat()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Nat
@@ -443,7 +443,7 @@ namespace mcrl2 {
       inline
       application real2int(const data_expression& arg0)
       {
-        return application(real2int(),arg0);
+        return real2int()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Int
@@ -495,7 +495,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol minimum(minimum_name(), function_sort(s0, s1, target_sort));
@@ -523,7 +523,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(minimum(arg0.sort(), arg1.sort()),arg0, arg1);
+        return minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -599,7 +599,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol maximum(maximum_name(), function_sort(s0, s1, target_sort));
@@ -627,7 +627,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(maximum(arg0.sort(), arg1.sort()),arg0, arg1);
+        return maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -678,7 +678,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts " + s0.to_string());
         }
 
         function_symbol abs(abs_name(), function_sort(s0, target_sort));
@@ -705,7 +705,7 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        return application(abs(arg0.sort()),arg0);
+        return abs(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of abs
@@ -756,7 +756,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for negate with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for negate with domain sorts " + s0.to_string());
         }
 
         function_symbol negate(negate_name(), function_sort(s0, target_sort));
@@ -783,7 +783,7 @@ namespace mcrl2 {
       inline
       application negate(const data_expression& arg0)
       {
-        return application(negate(arg0.sort()),arg0);
+        return negate(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of -
@@ -834,7 +834,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + s0.to_string());
         }
 
         function_symbol succ(succ_name(), function_sort(s0, target_sort));
@@ -861,7 +861,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return application(succ(arg0.sort()),arg0);
+        return succ(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -912,7 +912,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + s0.to_string());
         }
 
         function_symbol pred(pred_name(), function_sort(s0, target_sort));
@@ -939,7 +939,7 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        return application(pred(arg0.sort()),arg0);
+        return pred(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of pred
@@ -999,7 +999,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol plus(plus_name(), function_sort(s0, s1, target_sort));
@@ -1027,7 +1027,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(plus(arg0.sort(), arg1.sort()),arg0, arg1);
+        return plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -1079,7 +1079,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for minus with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for minus with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol minus(minus_name(), function_sort(s0, s1, target_sort));
@@ -1107,7 +1107,7 @@ namespace mcrl2 {
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(minus(arg0.sort(), arg1.sort()),arg0, arg1);
+        return minus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -1159,7 +1159,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol times(times_name(), function_sort(s0, s1, target_sort));
@@ -1187,7 +1187,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(times(arg0.sort(), arg1.sort()),arg0, arg1);
+        return times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -1239,7 +1239,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol exp(exp_name(), function_sort(s0, s1, target_sort));
@@ -1267,7 +1267,7 @@ namespace mcrl2 {
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(exp(arg0.sort(), arg1.sort()),arg0, arg1);
+        return exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of exp
@@ -1327,7 +1327,7 @@ namespace mcrl2 {
       inline
       application divides(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(divides(arg0.sort(), arg1.sort()),arg0, arg1);
+        return divides(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of /
@@ -1382,7 +1382,7 @@ namespace mcrl2 {
       inline
       application floor(const data_expression& arg0)
       {
-        return application(floor(),arg0);
+        return floor()(arg0);
       }
 
       /// \brief Recogniser for application of floor
@@ -1437,7 +1437,7 @@ namespace mcrl2 {
       inline
       application ceil(const data_expression& arg0)
       {
-        return application(ceil(),arg0);
+        return ceil()(arg0);
       }
 
       /// \brief Recogniser for application of ceil
@@ -1492,7 +1492,7 @@ namespace mcrl2 {
       inline
       application round(const data_expression& arg0)
       {
-        return application(round(),arg0);
+        return round()(arg0);
       }
 
       /// \brief Recogniser for application of round
@@ -1548,7 +1548,7 @@ namespace mcrl2 {
       inline
       application redfrac(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(redfrac(),arg0, arg1);
+        return redfrac()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@redfrac
@@ -1605,7 +1605,7 @@ namespace mcrl2 {
       inline
       application redfracwhr(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(redfracwhr(),arg0, arg1, arg2);
+        return redfracwhr()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@redfracwhr
@@ -1661,7 +1661,7 @@ namespace mcrl2 {
       inline
       application redfrachlp(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(redfrachlp(),arg0, arg1);
+        return redfrachlp()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@redfrachlp

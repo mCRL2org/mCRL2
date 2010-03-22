@@ -115,7 +115,7 @@ namespace mcrl2 {
       inline
       application bagconstructor(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(bagconstructor(s),arg0, arg1);
+        return bagconstructor(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@bag
@@ -205,7 +205,7 @@ namespace mcrl2 {
       inline
       application bagfbag(const sort_expression& s, const data_expression& arg0)
       {
-        return application(bagfbag(s),arg0);
+        return bagfbag(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@bagfbag
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       application bagcomprehension(const sort_expression& s, const data_expression& arg0)
       {
-        return application(bagcomprehension(s),arg0);
+        return bagcomprehension(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@bagcomp
@@ -320,7 +320,7 @@ namespace mcrl2 {
       inline
       application bagcount(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(bagcount(s),arg0, arg1);
+        return bagcount(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of count
@@ -378,7 +378,7 @@ namespace mcrl2 {
       inline
       application bagin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(bagin(s),arg0, arg1);
+        return bagin(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -436,7 +436,7 @@ namespace mcrl2 {
       inline
       application bagjoin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(bagjoin(s),arg0, arg1);
+        return bagjoin(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -494,7 +494,7 @@ namespace mcrl2 {
       inline
       application bagintersect(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(bagintersect(s),arg0, arg1);
+        return bagintersect(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -552,7 +552,7 @@ namespace mcrl2 {
       inline
       application bagdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(bagdifference(s),arg0, arg1);
+        return bagdifference(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -609,7 +609,7 @@ namespace mcrl2 {
       inline
       application bag2set(const sort_expression& s, const data_expression& arg0)
       {
-        return application(bag2set(s),arg0);
+        return bag2set(s)(arg0);
       }
 
       /// \brief Recogniser for application of Bag2Set
@@ -666,7 +666,7 @@ namespace mcrl2 {
       inline
       application set2bag(const sort_expression& s, const data_expression& arg0)
       {
-        return application(set2bag(s),arg0);
+        return set2bag(s)(arg0);
       }
 
       /// \brief Recogniser for application of Set2Bag
@@ -723,7 +723,7 @@ namespace mcrl2 {
       inline
       application zero_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(zero_function(s),arg0);
+        return zero_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@zero_
@@ -780,7 +780,7 @@ namespace mcrl2 {
       inline
       application one_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(one_function(s),arg0);
+        return one_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@one_
@@ -838,7 +838,7 @@ namespace mcrl2 {
       inline
       application add_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(add_function(s),arg0, arg1);
+        return add_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@add_
@@ -896,7 +896,7 @@ namespace mcrl2 {
       inline
       application min_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(min_function(s),arg0, arg1);
+        return min_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@min_
@@ -954,7 +954,7 @@ namespace mcrl2 {
       inline
       application monus_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(monus_function(s),arg0, arg1);
+        return monus_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@monus_
@@ -1011,7 +1011,7 @@ namespace mcrl2 {
       inline
       application nat2bool_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(nat2bool_function(s),arg0);
+        return nat2bool_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@Nat2Bool_
@@ -1068,7 +1068,7 @@ namespace mcrl2 {
       inline
       application bool2nat_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(bool2nat_function(s),arg0);
+        return bool2nat_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@Bool2Nat_

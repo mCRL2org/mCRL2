@@ -154,7 +154,7 @@ namespace mcrl2 {
       inline
       application fbag_cons(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(fbag_cons(s),arg0, arg1, arg2);
+        return fbag_cons(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_cons
@@ -225,7 +225,7 @@ namespace mcrl2 {
       inline
       application fbaginsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(fbaginsert(s),arg0, arg1, arg2);
+        return fbaginsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_insert
@@ -284,7 +284,7 @@ namespace mcrl2 {
       inline
       application fbagcinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(fbagcinsert(s),arg0, arg1, arg2);
+        return fbagcinsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_cinsert
@@ -342,7 +342,7 @@ namespace mcrl2 {
       inline
       application fbagcount(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fbagcount(s),arg0, arg1);
+        return fbagcount(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag_count
@@ -400,7 +400,7 @@ namespace mcrl2 {
       inline
       application fbagin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fbagin(s),arg0, arg1);
+        return fbagin(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag_in
@@ -459,7 +459,7 @@ namespace mcrl2 {
       inline
       application fbaglte(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(fbaglte(s),arg0, arg1, arg2);
+        return fbaglte(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fbag_lte
@@ -519,7 +519,7 @@ namespace mcrl2 {
       inline
       application fbagjoin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return application(fbagjoin(s),arg0, arg1, arg2, arg3);
+        return fbagjoin(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_join
@@ -579,7 +579,7 @@ namespace mcrl2 {
       inline
       application fbagintersect(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return application(fbagintersect(s),arg0, arg1, arg2, arg3);
+        return fbagintersect(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_inter
@@ -639,7 +639,7 @@ namespace mcrl2 {
       inline
       application fbagdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return application(fbagdifference(s),arg0, arg1, arg2, arg3);
+        return fbagdifference(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fbag_diff
@@ -697,7 +697,7 @@ namespace mcrl2 {
       inline
       application fbag2fset(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fbag2fset(s),arg0, arg1);
+        return fbag2fset(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fbag2fset
@@ -754,7 +754,7 @@ namespace mcrl2 {
       inline
       application fset2fbag(const sort_expression& s, const data_expression& arg0)
       {
-        return application(fset2fbag(s),arg0);
+        return fset2fbag(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@fset2fbag

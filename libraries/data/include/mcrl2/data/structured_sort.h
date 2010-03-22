@@ -590,8 +590,8 @@ namespace mcrl2 {
               for (structured_sort_constructor::arguments_const_range::const_iterator j(arguments.begin()); j != arguments.end(); ++j, ++v)
               {
                 if (j->name() != no_identifier()) {
-                  application lhs(function_symbol(j->name(), function_sort(s, j->sort())),
-                        application(i.front().constructor_function(s), variables));
+                  application lhs(function_symbol(j->name(), function_sort(s, j->sort()))
+                        (application(i.front().constructor_function(s), variables)));
 
                   result.push_back(data_equation(variables, lhs, *v));
                 }
@@ -618,8 +618,7 @@ namespace mcrl2 {
 
                 if (i->argument_sorts().empty())
                 {
-                  result.push_back(data_equation(application(j->recogniser_function(s),
-                    i->constructor_function(s)), right));
+                  result.push_back(data_equation(j->recogniser_function(s)(i->constructor_function(s)), right));
                 }
                 else
                 {
@@ -637,7 +636,7 @@ namespace mcrl2 {
                     variables.push_back(variable(generator(), k->sort()));
                   }
 
-                  result.push_back(data_equation(variables, application(j->recogniser_function(s),
+                  result.push_back(data_equation(variables, j->recogniser_function(s)(
                     application(i->constructor_function(s), variables)), right));
                 }
               }

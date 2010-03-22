@@ -150,7 +150,7 @@ namespace mcrl2 {
       inline
       application fset_cons(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fset_cons(s),arg0, arg1);
+        return fset_cons(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_cons
@@ -220,7 +220,7 @@ namespace mcrl2 {
       inline
       application fsetinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fsetinsert(s),arg0, arg1);
+        return fsetinsert(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_insert
@@ -279,7 +279,7 @@ namespace mcrl2 {
       inline
       application fsetcinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(fsetcinsert(s),arg0, arg1, arg2);
+        return fsetcinsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fset_cinsert
@@ -337,7 +337,7 @@ namespace mcrl2 {
       inline
       application fsetin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fsetin(s),arg0, arg1);
+        return fsetin(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_in
@@ -396,7 +396,7 @@ namespace mcrl2 {
       inline
       application fsetlte(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(fsetlte(s),arg0, arg1, arg2);
+        return fsetlte(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fset_lte
@@ -456,7 +456,7 @@ namespace mcrl2 {
       inline
       application fsetunion(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return application(fsetunion(s),arg0, arg1, arg2, arg3);
+        return fsetunion(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_union
@@ -516,7 +516,7 @@ namespace mcrl2 {
       inline
       application fsetintersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return application(fsetintersection(s),arg0, arg1, arg2, arg3);
+        return fsetintersection(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_inter

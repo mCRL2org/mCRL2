@@ -109,70 +109,6 @@ class application_base: public data_expression
           assert(!arguments.empty());
         }
 
-        /// \brief Convenience constructor for application with one argument
-        ///
-        /// \param[in] head The data expression that is applied
-        /// \param[in] arg1 The argument head is applied to
-        /// \post *this represents head(arg1)
-        application(const data_expression& head,
-                    const data_expression& arg1)
-          : detail::application_base(head, atermpp::make_list(arg1))
-        {
-          assert(head.sort().is_function_sort());
-          assert(function_sort(head.sort()).domain().size() == 1);
-        }
-
-        /// \brief Convenience constructor for application with two arguments
-        ///
-        /// \param[in] head The data expression that is applied
-        /// \param[in] arg1 The first argument head is applied to
-        /// \param[in] arg2 The second argument head is applied to
-        /// \post *this represents head(arg1, arg2)
-        application(const data_expression& head,
-                    const data_expression& arg1,
-                    const data_expression& arg2)
-          : detail::application_base(head, atermpp::make_list(arg1, arg2))
-        {
-          assert(head.sort().is_function_sort());
-          assert(function_sort(head.sort()).domain().size() == 2);
-        }
-
-        /// \brief Convenience constructor for application with three arguments
-        ///
-        /// \param[in] head The data expression that is applied
-        /// \param[in] arg1 The first argument head is applied to
-        /// \param[in] arg2 The second argument head is applied to
-        /// \param[in] arg3 The third argument head is applied to
-        /// \post *this represents head(arg1, arg2, arg3)
-        application(const data_expression& head,
-                    const data_expression& arg1,
-                    const data_expression& arg2,
-                    const data_expression& arg3)
-          : detail::application_base(head, atermpp::make_list(arg1, arg2, arg3))
-        {
-          assert(head.sort().is_function_sort());
-          assert(function_sort(head.sort()).domain().size() == 3);
-        }
-
-        /// \brief Convenience constructor for application with three arguments
-        ///
-        /// \param[in] head The data expression that is applied
-        /// \param[in] arg1 The first argument head is applied to
-        /// \param[in] arg2 The second argument head is applied to
-        /// \param[in] arg3 The third argument head is applied to
-        /// \param[in] arg4 The fourth argument head is applied to
-        /// \post *this represents head(arg1, arg2, arg3, arg4)
-        application(const data_expression& head,
-                    const data_expression& arg1,
-                    const data_expression& arg2,
-                    const data_expression& arg3,
-                    const data_expression& arg4)
-          : detail::application_base(head, atermpp::make_list(arg1, arg2, arg3, arg4))
-        {
-          assert(head.sort().is_function_sort());
-          assert(function_sort(head.sort()).domain().size() == 4);
-        }
-
         /// \brief Returns the first argument of the application
         /// \pre head() is a binary operator
         /// \return arguments()[0]
@@ -221,6 +157,48 @@ class application_base: public data_expression
       }
 
       return *r.begin();
+    }
+
+    /// \brief Apply data expression to a data expression
+    inline application make_application(data_expression const& head,
+                                        data_expression const& e0)
+    {
+      assert(head.sort().is_function_sort());
+      assert(function_sort(head.sort()).domain().size() == 1);
+      return application(head, atermpp::make_list(e0));
+    }
+
+    /// \brief Apply data expression to two data expression
+    inline application make_application(data_expression const& head,
+                                        data_expression const& e0,
+                                        data_expression const& e1)
+    {
+      assert(head.sort().is_function_sort());
+      assert(function_sort(head.sort()).domain().size() == 2);
+      return application(head, atermpp::make_list(e0, e1));
+    }
+
+    /// \brief Apply data expression to three data expression
+    inline application make_application(data_expression const& head,
+                                        data_expression const& e0,
+                                        data_expression const& e1,
+                                        data_expression const& e2)
+    {
+      assert(head.sort().is_function_sort());
+      assert(function_sort(head.sort()).domain().size() == 3);
+      return application(head, atermpp::make_list(e0, e1, e2));
+    }
+
+    /// \brief Apply data expression to four data expression
+    inline application make_application(data_expression const& head,
+                                        data_expression const& e0,
+                                        data_expression const& e1,
+                                        data_expression const& e2,
+                                        data_expression const& e3)
+    {
+      assert(head.sort().is_function_sort());
+      assert(function_sort(head.sort()).domain().size() == 4);
+      return application(head, atermpp::make_list(e0, e1, e2, e3));
     }
 
   } // namespace data

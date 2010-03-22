@@ -120,7 +120,7 @@ namespace mcrl2 {
     inline application equal_to(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(equal_to(arg0.sort()),arg0, arg1);
+      return equal_to(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of ==
@@ -157,7 +157,7 @@ namespace mcrl2 {
     inline application not_equal_to(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(not_equal_to(arg0.sort()),arg0, arg1);
+      return not_equal_to(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of !=
@@ -197,7 +197,7 @@ namespace mcrl2 {
       assert(sort_bool::is_bool(arg0.sort()));
       assert(arg1.sort() == arg2.sort());
 
-      return application(if_(arg1.sort()), arg0, arg1, arg2);
+      return if_(arg1.sort())(arg0, arg1, arg2);
     }
 
     /// \brief Recogniser for application of if
@@ -234,7 +234,7 @@ namespace mcrl2 {
     inline application less(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(less(arg0.sort()),arg0, arg1);
+      return less(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of <
@@ -271,7 +271,7 @@ namespace mcrl2 {
     inline application less_equal(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(less_equal(arg0.sort()),arg0, arg1);
+      return less_equal(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of <=
@@ -308,7 +308,7 @@ namespace mcrl2 {
     inline application greater(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(greater(arg0.sort()),arg0, arg1);
+      return greater(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of >
@@ -345,7 +345,7 @@ namespace mcrl2 {
     inline application greater_equal(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(greater_equal(arg0.sort()),arg0, arg1);
+      return greater_equal(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of >=

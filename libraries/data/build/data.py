@@ -421,7 +421,7 @@ class function_declaration_list():
         code += "      inline\n"
         code += "      application %s(%s%s%s)\n" % (name, formsortparams, comma, formparams)
         code += "      {\n"
-        code += "        return application(%s(%s),%s);\n" % (name, actsortparams, actparams)
+        code += "        return %s(%s)(%s);\n" % (name, actsortparams, actparams)
         code += "      }\n"
         return code
 

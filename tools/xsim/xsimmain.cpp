@@ -417,15 +417,15 @@ void XSimMain::Reset(ATerm State)
 {
 }
 
-void XSimMain::Undo(unsigned int Count)
+void XSimMain::Undo(unsigned int /* Count */)
 {
 }
 
-void XSimMain::Redo(unsigned int Count)
+void XSimMain::Redo(unsigned int /* Count */)
 {
 }
 
-void XSimMain::TracePosChanged(ATermAppl Transition, ATerm State, unsigned int Index)
+void XSimMain::TracePosChanged(ATermAppl Transition, ATerm State, unsigned int /* Index */)
 {
 }
 

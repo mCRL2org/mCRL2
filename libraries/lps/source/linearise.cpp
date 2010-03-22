@@ -3088,7 +3088,7 @@ class specification_basic_type:public boost::noncopyable
       for(variable_list::const_iterator walker=stack.parameters.begin() ;
                    walker!=stack.parameters.end() ; ++walker,++getmappings)
       { if (*walker==var)
-        { return application(*getmappings,stack.stackvar);
+        { return make_application(*getmappings,stack.stackvar);
         }
         assert(getmappings!=stack.opns->get.end());
       }
@@ -3148,7 +3148,7 @@ class specification_basic_type:public boost::noncopyable
         { return equal_to(stack.stackvar, data_expression(processencoding(i,data_expression_list(),stack).front()));
         }
         return equal_to(
-                 application(stack.opns->getstate,stack.stackvar),
+                 make_application(stack.opns->getstate,stack.stackvar),
                      processencoding(i,data_expression_list(),stack).front());
       }
 
@@ -3161,7 +3161,7 @@ class specification_basic_type:public boost::noncopyable
                           processencoding(i,data_expression_list(),stack).front());
         }
         return equal_to(
-                 application(stack.opns->getstate, stack.stackvar),
+                 make_application(stack.opns->getstate, stack.stackvar),
                  processencoding(i,data_expression_list(),stack).front());
       }
 
@@ -3413,7 +3413,7 @@ class specification_basic_type:public boost::noncopyable
         { const data_expression_list t3=push(procId,
                   t1,
                   push_front(data_expression_list(),
-                            data_expression(application(stack.opns->pop,stack.stackvar))),
+                            data_expression(make_application(stack.opns->pop,stack.stackvar))),
                   stack,
                   pcrlprcs,
                   vars,
@@ -3715,7 +3715,7 @@ class specification_basic_type:public boost::noncopyable
       */
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
-      procargs=push_front(data_expression_list(),data_expression(application(stack.opns->pop,stack.stackvar)));
+      procargs=push_front(data_expression_list(),data_expression(make_application(stack.opns->pop,stack.stackvar)));
 
       sumlist=insert_summand(
                         sumlist,
@@ -4259,7 +4259,7 @@ class specification_basic_type:public boost::noncopyable
       if (t==t1)
       { return t;
       }
-      return application(find_case_function(e.enumeratedtype_index, termsort), casevar, t, t1);
+      return make_application(find_case_function(e.enumeratedtype_index, termsort), casevar, t, t1);
     }
 
     data_expression construct_binary_case_tree(

@@ -71,14 +71,14 @@ void test_representative_generator()
   // BOOST_CHECK(default_expression_generator(basic_sort("E")) ==
   //    application(boost::next(constructors.begin(), 1)->constructor_function(specification.normalise_sorts(basic_sort("E"))), default_expression_generator(sort_nat::nat())));
   BOOST_CHECK(default_expression_generator(basic_sort("E")) ==
-      application(boost::next(constructors.begin(), 1)->constructor_function(basic_sort("E")), default_expression_generator(sort_nat::nat())));
+      boost::next(constructors.begin(), 1)->constructor_function(basic_sort("E"))(default_expression_generator(sort_nat::nat())));
 
   // Should be d(e(0)), since constants are preferred to other constructors or mappings
   std::cerr << "Wat is het dan3: " << default_expression_generator(basic_sort("D")) << "\n";
   // BOOST_CHECK(default_expression_generator(basic_sort("D")) ==
   //      application(boost::next(constructors.begin(), 0)->constructor_function(specification.normalise_sorts(basic_sort("D"))), default_expression_generator(basic_sort("E"))));
   BOOST_CHECK(default_expression_generator(basic_sort("D")) ==
-       application(boost::next(constructors.begin(), 0)->constructor_function(basic_sort("D")), default_expression_generator(basic_sort("E"))));
+       boost::next(constructors.begin(), 0)->constructor_function(basic_sort("D"))(default_expression_generator(basic_sort("E"))));
 }
 
 int test_main(int argc, char** argv)

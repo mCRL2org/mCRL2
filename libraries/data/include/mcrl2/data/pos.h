@@ -134,7 +134,7 @@ namespace mcrl2 {
       inline
       application cdub(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(cdub(),arg0, arg1);
+        return cdub()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@cDub
@@ -201,7 +201,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(maximum(),arg0, arg1);
+        return maximum()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -257,7 +257,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(minimum(),arg0, arg1);
+        return minimum()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -312,7 +312,7 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        return application(abs(),arg0);
+        return abs()(arg0);
       }
 
       /// \brief Recogniser for application of abs
@@ -367,7 +367,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return application(succ(),arg0);
+        return succ()(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -423,7 +423,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(plus(),arg0, arg1);
+        return plus()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -480,7 +480,7 @@ namespace mcrl2 {
       inline
       application add_with_carry(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(add_with_carry(),arg0, arg1, arg2);
+        return add_with_carry()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@addc
@@ -536,7 +536,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(times(),arg0, arg1);
+        return times()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -594,7 +594,7 @@ namespace mcrl2 {
       inline
       application multir(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return application(multir(),arg0, arg1, arg2, arg3);
+        return multir()(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@multir

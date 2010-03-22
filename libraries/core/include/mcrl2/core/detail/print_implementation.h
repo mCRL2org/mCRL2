@@ -1402,11 +1402,11 @@ reconstruct_container_expression(ATermAppl Part)
       ATermAppl body;
       if (data::sort_fset::is_fset_empty_function_symbol(sort_set::right(expr)))
       {
-        body = data::application(sort_set::left(expr), data::variable(var));
+        body = sort_set::left(expr)(data::variable(var));
       }
       else
       {
-        data_expression lhs(data::application(sort_set::left(expr), data::variable(var)));
+        data_expression lhs(sort_set::left(expr)(data::variable(var)));
         data_expression rhs(setin(element_sort, data_expression(var), setfset(element_sort, sort_set::right(expr))));
         body = static_cast<ATermAppl>(data::not_equal_to(lhs,rhs));
       }
@@ -1487,7 +1487,7 @@ reconstruct_container_expression(ATermAppl Part)
       }
       else
       {
-        body = application(sort_bag::left(expr), var);
+        body = sort_bag::left(expr)(var);
       }
       if(!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(expr)))
       {

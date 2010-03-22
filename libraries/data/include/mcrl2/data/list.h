@@ -135,7 +135,7 @@ namespace mcrl2 {
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(cons_(s),arg0, arg1);
+        return cons_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of |>
@@ -205,7 +205,7 @@ namespace mcrl2 {
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(in(s),arg0, arg1);
+        return in(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       application count(const sort_expression& s, const data_expression& arg0)
       {
-        return application(count(s),arg0);
+        return count(s)(arg0);
       }
 
       /// \brief Recogniser for application of #
@@ -320,7 +320,7 @@ namespace mcrl2 {
       inline
       application snoc(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(snoc(s),arg0, arg1);
+        return snoc(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of <|
@@ -378,7 +378,7 @@ namespace mcrl2 {
       inline
       application concat(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(concat(s),arg0, arg1);
+        return concat(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of ++
@@ -436,7 +436,7 @@ namespace mcrl2 {
       inline
       application element_at(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(element_at(s),arg0, arg1);
+        return element_at(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of .
@@ -493,7 +493,7 @@ namespace mcrl2 {
       inline
       application head(const sort_expression& s, const data_expression& arg0)
       {
-        return application(head(s),arg0);
+        return head(s)(arg0);
       }
 
       /// \brief Recogniser for application of head
@@ -550,7 +550,7 @@ namespace mcrl2 {
       inline
       application tail(const sort_expression& s, const data_expression& arg0)
       {
-        return application(tail(s),arg0);
+        return tail(s)(arg0);
       }
 
       /// \brief Recogniser for application of tail
@@ -607,7 +607,7 @@ namespace mcrl2 {
       inline
       application rhead(const sort_expression& s, const data_expression& arg0)
       {
-        return application(rhead(s),arg0);
+        return rhead(s)(arg0);
       }
 
       /// \brief Recogniser for application of rhead
@@ -664,7 +664,7 @@ namespace mcrl2 {
       inline
       application rtail(const sort_expression& s, const data_expression& arg0)
       {
-        return application(rtail(s),arg0);
+        return rtail(s)(arg0);
       }
 
       /// \brief Recogniser for application of rtail

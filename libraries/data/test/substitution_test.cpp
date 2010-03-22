@@ -79,7 +79,7 @@ void test_basic()
 //  BOOST_CHECK(st(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
   st[y] = x;
   BOOST_CHECK(st(lambda(y,y)) == lambda(x,x));
-  BOOST_CHECK(st(application(lambda(y,y),x) + y) == application(lambda(x,x), x) + x);
+  BOOST_CHECK(st(lambda(y,y)(x) + y) == lambda(x,x)(x) + x);
 
   // Replacing free variables only
   mutable_map_substitution< atermpp::map< variable, data_expression >, structural_substitution > sb;
@@ -87,7 +87,7 @@ void test_basic()
   sb[y] = c;
 
   BOOST_CHECK(sb(lambda(y,y)) == lambda(y,y));
-  BOOST_CHECK(sb(application(lambda(y,y),x) + y) == application(lambda(y,y), x) + c);
+  BOOST_CHECK(sb(lambda(y,y)(x) + y) == lambda(y,y)(x) + c);
 }
 
 void test_assignment_list_substitution()

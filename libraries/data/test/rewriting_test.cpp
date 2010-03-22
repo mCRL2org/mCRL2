@@ -451,33 +451,33 @@ void structured_sort_rewrite_test() {
 
   data_expression c0(constructors[0].constructor_function(ls));
   data_expression c1(constructors[1].constructor_function(ls));
-  data_expression a(application(constructors[2].constructor_function(ls), true_()));
-  data_expression b(application(constructors[3].constructor_function(ls), false_()));
+  data_expression a(constructors[2].constructor_function(ls)(true_()));
+  data_expression b(constructors[3].constructor_function(ls)(false_()));
   data_expression n0(nat("0"));
   data_expression n1(nat("1"));
-  data_expression c(application(constructors[4].constructor_function(ls), n0, n1));
+  data_expression c(constructors[4].constructor_function(ls)(n0, n1));
 
   // recogniser tests
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), c0)), false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), c0)), false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), c0)), false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), c1)), true_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), c1)), false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), c1)), false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), a)),  false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), a)),  false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), a)),  false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), b)),  false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), b)),  true_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), b)),  false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), c)),  false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), c)),  false_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), c)),  true_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), c0)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), c0)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), c0)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), c1)), true_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), c1)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), c1)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), a)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), a)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), a)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), b)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), b)),  true_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), b)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), c)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), c)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), c)),  true_());
 
   // projection tests
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[2].projection_functions(ls)[0], a)),  true_());
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].projection_functions(ls)[0], c)),  R(n0));
-  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].projection_functions(ls)[1], c)),  R(n1));
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[2].projection_functions(ls)[0], a)),  true_());
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].projection_functions(ls)[0], c)),  R(n0));
+  data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].projection_functions(ls)[1], c)),  R(n1));
 }
 
 int test_main(int argc, char** argv)

@@ -232,7 +232,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
 
     if( i -> sort().is_basic_sort() )
     {
-      data_expression lhs = application( determine_function, *i );
+      data_expression lhs = make_application( determine_function, *i );
       gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, elements_of_new_sorts[e] )).c_str());
       set< variable > svars = find_variables( lhs );
       set< variable > tmp_var = find_variables( elements_of_new_sorts[e] );
@@ -259,7 +259,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
            sort_index[*j] = sort_index[*j]+1;
            dal.push_back(y);
       }
-      data_expression lhs = application( determine_function , mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() ) ) );
+      data_expression lhs = make_application( determine_function , application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() ) ) );
       gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, elements_of_new_sorts[e] )).c_str());
       set< variable > svars = find_variables( lhs );
       set< variable > tmp_var = find_variables( elements_of_new_sorts[e] );
@@ -270,7 +270,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       int f = 0;
    
       while (!pi.empty() && f < std::distance(dal.begin(), dal.end()) ){
-          data_expression lhs = application( pi.front(), mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() )));
+          data_expression lhs = make_application( pi.front(), application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() )));
           gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, dal[f] )).c_str());
           set< variable > vars = find_variables( lhs );
           set< variable > tmp_var = find_variables( dal[f] );
@@ -309,7 +309,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     if(i -> sort().is_structured_sort())
     {
 
-      data_expression lhs = application( determine_function , *i );
+      data_expression lhs = make_application( determine_function , *i );
       gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, elements_of_new_sorts[e] )).c_str());
       set< variable > vars = find_variables( lhs );
       set< variable > tmp_var = find_variables( elements_of_new_sorts[e] );
@@ -335,7 +335,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       data_expression lhs, rhs;
       if( cs.is_list_sort() )
       {
-        lhs = application( determine_function , sort_list::nil( element_sort ) );
+        lhs = make_application( determine_function , sort_list::nil( element_sort ) );
       } else {
         cerr << "ACCESSING UNIMPLEMENTED CONTAINER SORT" << endl;
       }
@@ -685,11 +685,11 @@ mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor( data_expre
       data_expression_vector new_ass;
 
       /* Det function */
-      new_ass.push_back( mcrl2::data::application( determine_function, de ) ) ;
+      new_ass.push_back( make_application( determine_function, de ) ) ;
 
       for(function_symbol_vector::iterator i = pi.begin(); i != pi.end(); ++i )
       {
-         new_ass.push_back( mcrl2::data::application( *i, de ) ) ;
+         new_ass.push_back( make_application( *i, de ) ) ;
       }
 
       result = new_ass;
@@ -773,7 +773,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
     variables_used.push_back( v );
   }
 
-  data_expression lhs( application( function_for_distribution, application( case_function, variables_used ) ) );
+  data_expression lhs( make_application( function_for_distribution, application( case_function, variables_used ) ) );
   data_expression_vector rw_data_expressions;
   sort_expression_vector rw_sort_expressions;
   for(variable_vector::iterator i = variables_used.begin();
@@ -785,7 +785,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
       rw_data_expressions.push_back( *i );
       rw_sort_expressions.push_back( i->sort() );
     } else {
-      rw_data_expressions.push_back( application( function_for_distribution, *i ) );
+      rw_data_expressions.push_back( make_application( function_for_distribution, *i ) );
       rw_sort_expressions.push_back( function_sort(function_for_distribution.sort()).codomain() );
     }
   }

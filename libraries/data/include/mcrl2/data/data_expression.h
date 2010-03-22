@@ -120,6 +120,18 @@ namespace mcrl2 {
 
         application operator()(const data_expression& e) const;
 
+        application operator()(const data_expression& e1,
+                               const data_expression& e2) const;
+
+        application operator()(const data_expression& e1,
+                               const data_expression& e2,
+                               const data_expression& e3) const;
+
+        application operator()(const data_expression& e1,
+                               const data_expression& e2,
+                               const data_expression& e3,
+                               const data_expression& e4) const;
+
         /// \brief Returns the sort of the data expression
         inline
         sort_expression sort() const
@@ -311,14 +323,32 @@ namespace mcrl2 {
 namespace mcrl2 {
   namespace data {
 
-    /// \brief Returns the application of this application to an argument.
-    /// \pre this->sort() is a function sort.
-    /// \param[in] e The data expression to which the application is applied
+    /// \brief Apply data expression to a data expression
     inline
     application data_expression::operator()(const data_expression& e) const
     {
-      assert(this->sort().is_function_sort());
-      return application(*this, e);
+      return make_application(*this, e);
+    }
+
+    /// \brief Apply data expression to two data expressions
+    inline
+    application data_expression::operator()(const data_expression& e1, const data_expression& e2) const
+    {
+      return make_application(*this, e1, e2);
+    }
+
+    /// \brief Apply data expression to three data expressions
+    inline
+    application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3) const
+    {
+      return make_application(*this, e1, e2, e3);
+    }
+
+    /// \brief Apply data expression to four data expressions
+    inline
+    application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4) const
+    {
+      return make_application(*this, e1, e2, e3, e4);
     }
 
   }

@@ -175,7 +175,7 @@ namespace mcrl2 {
       inline
       application not_(const data_expression& arg0)
       {
-        return application(not_(),arg0);
+        return not_()(arg0);
       }
 
       /// \brief Recogniser for application of !
@@ -231,7 +231,7 @@ namespace mcrl2 {
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(and_(),arg0, arg1);
+        return and_()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of &&
@@ -287,7 +287,7 @@ namespace mcrl2 {
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(or_(),arg0, arg1);
+        return or_()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of ||
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(implies(),arg0, arg1);
+        return implies()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of =>
