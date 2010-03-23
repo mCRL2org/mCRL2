@@ -66,7 +66,7 @@ public:
 
     static XSim* instance;
 
-    XSim() : super("XSim",
+    XSim() : super("LPSXSim",
       "graphical simulation of an LPS", // what-is
       "Simulator for linear process specifications.", // GUI specific description
       "Simulate LPSs in a graphical environment. If INFILE is supplied it will be "
@@ -77,7 +77,7 @@ public:
     // Graphical subsystem needs to be initialised first, run() is the entry point
     bool run()
     {
-      XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
+      XSimMain *frame = new XSimMain( 0, -1, wxT("LPSXSim"), wxPoint(-1,-1), wxSize(500,400) );
       frame->simulator->use_dummies = dummies;
       frame->simulator->rewr_strat  = rewrite_strategy();
       frame->Show(true);
@@ -136,7 +136,7 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
 
   if ( XSim::instance == NULL )
   {
-    std::cerr << msg << "this message was brought to you by XSim (all rights reserved)" << std::endl;
+    std::cerr << msg << "this message was brought to you by LPSXSim (all rights reserved)" << std::endl;
   } else {
     const char *msg_end = msg+std::strlen(msg)-1;
     while ( (msg <= msg_end) && ((*msg == '\r') || (*msg == '\n')) )

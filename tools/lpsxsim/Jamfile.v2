@@ -1,4 +1,4 @@
-project toolset/xsim ;
+project toolset/lpsxsim ;
 
 alias sim_shared
        : [ obj simbase.o   : simbase.cpp   : <use>/libraries//lps <use>/libraries//trace ]
@@ -13,7 +13,7 @@ for plugin in $(plugins) {
   alias $(plugin) : plugins/$(plugin)//xsim_$(plugin)_view ;
 }
 
-tool xsim
+tool lpsxsim
        : xsim.cpp
          simulatorgui.cpp
          xsimmain.cpp
@@ -25,15 +25,15 @@ tool xsim
          <wx>gl
          <define>PLUGINDIR=\"\\\"$(PLUGIN_ROOT)\\\"\"
          <install-plugin>$(plugins)
-         <install-rule>xsim-install
+         <install-rule>lpsxsim-install
        ;
 
-tool sim
+tool lpssim
        : sim.cpp
          sim_shared
          /libraries//lps
          /libraries//trace
-       : <install-rule>sim-install
+       : <install-rule>lpssim-install
        ;
 
-alias install : xsim-install sim-install ;
+alias install : lpsxsim-install lpssim-install ;

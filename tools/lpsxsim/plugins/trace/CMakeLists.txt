@@ -17,18 +17,18 @@ add_library(${PROJECT_NAME}
   xsimtracedll.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/tools/xsim)
+include_directories(${CMAKE_SOURCE_DIR}/tools/lpsxsim)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 
 if (MONO_LIB)
   target_link_libraries(${PROJECT_NAME}
-    xsim 
+    lpsxsim 
     ${wxWidgets_LIBRARIES}
     mcrl2_monolib
   )
 else (MONO_LIB)
   target_link_libraries(${PROJECT_NAME}
-    xsim 
+    lpsxsim 
     ${wxWidgets_LIBRARIES}
     mcrl2_core
     mcrl2_simulator_gui

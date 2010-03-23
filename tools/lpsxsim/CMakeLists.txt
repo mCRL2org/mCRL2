@@ -44,11 +44,11 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 endif( NOT MONO_LIB )
 
 
-# #################################
-# ########## Project sim ##########
-# #################################
+# ####################################
+# ########## Project lpssim ##########
+# ####################################
 
-project(sim)
+project(lpssim)
 
 add_executable(${PROJECT_NAME}
   sim.cpp
@@ -64,7 +64,7 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-include_directories(${CMAKE_SOURCE_DIR}/tools/xsim)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if( MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
@@ -128,13 +128,13 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 endif (MCRL2_BUILD_GUI_TOOLS AND NOT MONO_LIB)
 
 
-# ##################################
-# ########## Project xsim ##########
-# ##################################
+# #####################################
+# ########## Project lpsxsim ##########
+# #####################################
 
 if (MCRL2_BUILD_GUI_TOOLS)
 
-project(xsim)
+project(lpsxsim)
 
 # ######### General setup ##########
 
@@ -153,7 +153,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/tools/xsim)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)

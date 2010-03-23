@@ -10,7 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "sim"
+#define NAME "lpssim"
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <iostream>
@@ -85,7 +85,7 @@ class sim_tool : public rewriter_tool< input_tool > {
 
     sim_tool()
         : super(
-            "sim",
+            "lpssim",
             "Muck van Weerdenburg",
             "command-line simulation of an LPS",
             "Simulate the LPS in INFILE via a text-based interface."
