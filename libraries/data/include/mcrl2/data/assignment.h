@@ -304,7 +304,7 @@ class identifier_assignment_base: public assignment_expression
     /// \param t A term
     /// \return True if it is a assignment_base expression
     inline
-    bool is_assignment_base(const assignment_expression& t)
+    bool is_assignment(const assignment_expression& t)
     {
       return core::detail::gsIsDataVarIdInit(t);
     }
@@ -313,7 +313,7 @@ class identifier_assignment_base: public assignment_expression
     /// \param t A term
     /// \return True if it is a identifier_assignment_base expression
     inline
-    bool is_identifier_assignment_base(const assignment_expression& t)
+    bool is_identifier_assignment(const assignment_expression& t)
     {
       return core::detail::gsIsIdInit(t);
     }

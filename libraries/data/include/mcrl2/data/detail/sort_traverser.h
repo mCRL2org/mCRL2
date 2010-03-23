@@ -137,7 +137,24 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).leave(e);
           }
 
+          void operator()(assignment_expression const& a)
+          {
+            if(is_assignment(a))
+            {
+              return static_cast< Derived& >(*this)(assignment(a));
+            }
+            else if(is_identifier_assignment(a))
+            {
+              return static_cast< Derived& >(*this)(identifier_assignment(a));
+            }
+          }
+
           void operator()(assignment const& a)
+          {
+            static_cast< super& >(*this)(a);
+          }
+
+          void operator()(identifier_assignment const& a)
           {
             static_cast< super& >(*this)(a);
           }

@@ -93,6 +93,15 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
           }
 
+          void operator()(identifier const& e)
+          {
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this)(e.name());
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
+          }
+
           void operator()(variable const& e)
           {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
@@ -182,13 +191,39 @@ namespace mcrl2 {
             {
               static_cast< Derived& >(*this)(variable(e));
             }
+            else if (e.is_identifier())
+            {
+              static_cast< Derived& >(*this)(identifier(e));
+            }
             else if (e.is_function_symbol())
             {
               static_cast< Derived& >(*this)(function_symbol(e));
             }
           }
 
+          void operator()(assignment_expression const& a)
+          {
+            if (is_assignment(a))
+            {
+              static_cast< Derived& >(*this)(assignment(a));
+            }
+            else if (is_identifier_assignment(a))
+            {
+              static_cast< Derived& >(*this)(identifier_assignment(a));
+            }
+          }
+
           void operator()(assignment const& a)
+          {
+            static_cast< Derived& >(*this).enter(a);
+
+            static_cast< Derived& >(*this)(a.lhs());
+            static_cast< Derived& >(*this)(a.rhs());
+
+            static_cast< Derived& >(*this).leave(a);
+          }
+
+          void operator()(identifier_assignment const& a)
           {
             static_cast< Derived& >(*this).enter(a);
 

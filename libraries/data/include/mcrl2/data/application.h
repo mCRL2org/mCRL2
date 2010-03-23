@@ -128,7 +128,6 @@ class application_base: public data_expression
           assert(arguments().size() == 2);
           return *(++(arguments().begin()));
         }
-
     }; // class application
 
     /// \brief get first argument
