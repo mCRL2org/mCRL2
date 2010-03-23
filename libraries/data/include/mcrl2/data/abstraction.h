@@ -30,6 +30,11 @@ namespace mcrl2 {
 class abstraction_base: public data_expression
 {
   public:
+    /// \brief Default constructor.
+    abstraction_base()
+      : data_expression(core::detail::constructBinder())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     abstraction_base(atermpp::aterm_appl term)

@@ -27,6 +27,11 @@ namespace mcrl2 {
 class application_base: public data_expression
 {
   public:
+    /// \brief Default constructor.
+    application_base()
+      : data_expression(core::detail::constructDataAppl())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     application_base(atermpp::aterm_appl term)
@@ -45,7 +50,7 @@ class application_base: public data_expression
       return atermpp::arg1(*this);
     }
 
-    data_expression_list const arguments() const
+    data_expression_list arguments() const
     {
       return atermpp::list_arg2(*this);
     }

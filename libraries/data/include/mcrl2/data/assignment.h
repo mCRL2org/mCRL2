@@ -57,6 +57,11 @@ namespace mcrl2 {
 class assignment_base: public assignment_expression
 {
   public:
+    /// \brief Default constructor.
+    assignment_base()
+      : assignment_expression(core::detail::constructDataVarIdInit())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     assignment_base(atermpp::aterm_appl term)
@@ -85,6 +90,11 @@ class assignment_base: public assignment_expression
 class identifier_assignment_base: public assignment_expression
 {
   public:
+    /// \brief Default constructor.
+    identifier_assignment_base()
+      : assignment_expression(core::detail::constructIdInit())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     identifier_assignment_base(atermpp::aterm_appl term)
@@ -298,20 +308,20 @@ class identifier_assignment_base: public assignment_expression
       return convert< assignment_vector >(container);
     }
 
-    //--- start generated is-functions ---//
+//--- start generated is-functions ---//
 
-    /// \brief Test for a assignment_base expression
+    /// \brief Test for a assignment expression
     /// \param t A term
-    /// \return True if it is a assignment_base expression
+    /// \return True if it is a assignment expression
     inline
     bool is_assignment(const assignment_expression& t)
     {
       return core::detail::gsIsDataVarIdInit(t);
     }
 
-    /// \brief Test for a identifier_assignment_base expression
+    /// \brief Test for a identifier_assignment expression
     /// \param t A term
-    /// \return True if it is a identifier_assignment_base expression
+    /// \return True if it is a identifier_assignment expression
     inline
     bool is_identifier_assignment(const assignment_expression& t)
     {

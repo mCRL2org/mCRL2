@@ -27,6 +27,11 @@ namespace mcrl2 {
 class where_clause_base: public data_expression
 {
   public:
+    /// \brief Default constructor.
+    where_clause_base()
+      : data_expression(core::detail::constructWhr())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     where_clause_base(atermpp::aterm_appl term)

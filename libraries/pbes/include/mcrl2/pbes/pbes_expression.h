@@ -99,6 +99,11 @@ namespace traversal {
 class true_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    true_()
+      : pbes_expression(core::detail::constructPBESTrue())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     true_(atermpp::aterm_appl term)
@@ -106,17 +111,17 @@ class true_: public pbes_expression
     {
       assert(core::detail::check_term_PBESTrue(m_term));
     }
-
-    /// \brief Constructor.
-    true_()
-      : pbes_expression(core::detail::gsMakePBESTrue())
-    {}
 };
 
 /// \brief The value false for pbes expressions
 class false_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    false_()
+      : pbes_expression(core::detail::constructPBESFalse())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     false_(atermpp::aterm_appl term)
@@ -124,17 +129,17 @@ class false_: public pbes_expression
     {
       assert(core::detail::check_term_PBESFalse(m_term));
     }
-
-    /// \brief Constructor.
-    false_()
-      : pbes_expression(core::detail::gsMakePBESFalse())
-    {}
 };
 
 /// \brief The not operator for pbes expressions
 class not_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    not_()
+      : pbes_expression(core::detail::constructPBESNot())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     not_(atermpp::aterm_appl term)
@@ -158,6 +163,11 @@ class not_: public pbes_expression
 class and_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    and_()
+      : pbes_expression(core::detail::constructPBESAnd())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     and_(atermpp::aterm_appl term)
@@ -186,6 +196,11 @@ class and_: public pbes_expression
 class or_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    or_()
+      : pbes_expression(core::detail::constructPBESOr())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     or_(atermpp::aterm_appl term)
@@ -214,6 +229,11 @@ class or_: public pbes_expression
 class imp: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    imp()
+      : pbes_expression(core::detail::constructPBESImp())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     imp(atermpp::aterm_appl term)
@@ -242,6 +262,11 @@ class imp: public pbes_expression
 class forall: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    forall()
+      : pbes_expression(core::detail::constructPBESForall())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     forall(atermpp::aterm_appl term)
@@ -270,6 +295,11 @@ class forall: public pbes_expression
 class exists: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    exists()
+      : pbes_expression(core::detail::constructPBESExists())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     exists(atermpp::aterm_appl term)

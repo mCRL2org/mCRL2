@@ -39,6 +39,11 @@ namespace mcrl2 {
 class set_or_bag_comprehension_binder: public binder_type
 {
   public:
+    /// \brief Default constructor.
+    set_or_bag_comprehension_binder()
+      : binder_type(core::detail::constructSetBagComp())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     set_or_bag_comprehension_binder(atermpp::aterm_appl term)
@@ -46,17 +51,17 @@ class set_or_bag_comprehension_binder: public binder_type
     {
       assert(core::detail::check_term_SetBagComp(m_term));
     }
-
-    /// \brief Constructor.
-    set_or_bag_comprehension_binder()
-      : binder_type(core::detail::gsMakeSetBagComp())
-    {}
 };
 
 /// \brief Binder for set comprehension
 class set_comprehension_binder: public binder_type
 {
   public:
+    /// \brief Default constructor.
+    set_comprehension_binder()
+      : binder_type(core::detail::constructSetComp())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     set_comprehension_binder(atermpp::aterm_appl term)
@@ -64,17 +69,17 @@ class set_comprehension_binder: public binder_type
     {
       assert(core::detail::check_term_SetComp(m_term));
     }
-
-    /// \brief Constructor.
-    set_comprehension_binder()
-      : binder_type(core::detail::gsMakeSetComp())
-    {}
 };
 
 /// \brief Binder for bag comprehension
 class bag_comprehension_binder: public binder_type
 {
   public:
+    /// \brief Default constructor.
+    bag_comprehension_binder()
+      : binder_type(core::detail::constructBagComp())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     bag_comprehension_binder(atermpp::aterm_appl term)
@@ -82,17 +87,17 @@ class bag_comprehension_binder: public binder_type
     {
       assert(core::detail::check_term_BagComp(m_term));
     }
-
-    /// \brief Constructor.
-    bag_comprehension_binder()
-      : binder_type(core::detail::gsMakeBagComp())
-    {}
 };
 
 /// \brief Binder for universal quantification
 class forall_binder: public binder_type
 {
   public:
+    /// \brief Default constructor.
+    forall_binder()
+      : binder_type(core::detail::constructForall())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     forall_binder(atermpp::aterm_appl term)
@@ -100,17 +105,17 @@ class forall_binder: public binder_type
     {
       assert(core::detail::check_term_Forall(m_term));
     }
-
-    /// \brief Constructor.
-    forall_binder()
-      : binder_type(core::detail::gsMakeForall())
-    {}
 };
 
 /// \brief Binder for existential quantification
 class exists_binder: public binder_type
 {
   public:
+    /// \brief Default constructor.
+    exists_binder()
+      : binder_type(core::detail::constructExists())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     exists_binder(atermpp::aterm_appl term)
@@ -118,17 +123,17 @@ class exists_binder: public binder_type
     {
       assert(core::detail::check_term_Exists(m_term));
     }
-
-    /// \brief Constructor.
-    exists_binder()
-      : binder_type(core::detail::gsMakeExists())
-    {}
 };
 
 /// \brief Binder for lambda abstraction
 class lambda_binder: public binder_type
 {
   public:
+    /// \brief Default constructor.
+    lambda_binder()
+      : binder_type(core::detail::constructLambda())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     lambda_binder(atermpp::aterm_appl term)
@@ -136,11 +141,6 @@ class lambda_binder: public binder_type
     {
       assert(core::detail::check_term_Lambda(m_term));
     }
-
-    /// \brief Constructor.
-    lambda_binder()
-      : binder_type(core::detail::gsMakeLambda())
-    {}
 };
 //--- end generated classes ---//
 

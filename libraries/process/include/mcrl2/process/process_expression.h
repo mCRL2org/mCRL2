@@ -76,6 +76,11 @@ using lps::action;
 class process_instance: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    process_instance()
+      : process_expression(core::detail::constructProcess())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     process_instance(atermpp::aterm_appl term)
@@ -104,6 +109,11 @@ class process_instance: public process_expression
 class process_instance_assignment: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    process_instance_assignment()
+      : process_expression(core::detail::constructProcessAssignment())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     process_instance_assignment(atermpp::aterm_appl term)
@@ -132,6 +142,11 @@ class process_instance_assignment: public process_expression
 class delta: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    delta()
+      : process_expression(core::detail::constructDelta())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     delta(atermpp::aterm_appl term)
@@ -139,17 +154,17 @@ class delta: public process_expression
     {
       assert(core::detail::check_term_Delta(m_term));
     }
-
-    /// \brief Constructor.
-    delta()
-      : process_expression(core::detail::gsMakeDelta())
-    {}
 };
 
 /// \brief The value tau
 class tau: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    tau()
+      : process_expression(core::detail::constructTau())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     tau(atermpp::aterm_appl term)
@@ -157,17 +172,17 @@ class tau: public process_expression
     {
       assert(core::detail::check_term_Tau(m_term));
     }
-
-    /// \brief Constructor.
-    tau()
-      : process_expression(core::detail::gsMakeTau())
-    {}
 };
 
 /// \brief The sum operator
 class sum: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    sum()
+      : process_expression(core::detail::constructSum())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     sum(atermpp::aterm_appl term)
@@ -196,6 +211,11 @@ class sum: public process_expression
 class block: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    block()
+      : process_expression(core::detail::constructBlock())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     block(atermpp::aterm_appl term)
@@ -224,6 +244,11 @@ class block: public process_expression
 class hide: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    hide()
+      : process_expression(core::detail::constructHide())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     hide(atermpp::aterm_appl term)
@@ -252,6 +277,11 @@ class hide: public process_expression
 class rename: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    rename()
+      : process_expression(core::detail::constructRename())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     rename(atermpp::aterm_appl term)
@@ -280,6 +310,11 @@ class rename: public process_expression
 class comm: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    comm()
+      : process_expression(core::detail::constructComm())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     comm(atermpp::aterm_appl term)
@@ -308,6 +343,11 @@ class comm: public process_expression
 class allow: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    allow()
+      : process_expression(core::detail::constructAllow())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     allow(atermpp::aterm_appl term)
@@ -336,6 +376,11 @@ class allow: public process_expression
 class sync: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    sync()
+      : process_expression(core::detail::constructSync())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     sync(atermpp::aterm_appl term)
@@ -364,6 +409,11 @@ class sync: public process_expression
 class at: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    at()
+      : process_expression(core::detail::constructAtTime())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     at(atermpp::aterm_appl term)
@@ -392,6 +442,11 @@ class at: public process_expression
 class seq: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    seq()
+      : process_expression(core::detail::constructSeq())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     seq(atermpp::aterm_appl term)
@@ -420,6 +475,11 @@ class seq: public process_expression
 class if_then: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    if_then()
+      : process_expression(core::detail::constructIfThen())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     if_then(atermpp::aterm_appl term)
@@ -448,6 +508,11 @@ class if_then: public process_expression
 class if_then_else: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    if_then_else()
+      : process_expression(core::detail::constructIfThenElse())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     if_then_else(atermpp::aterm_appl term)
@@ -481,6 +546,11 @@ class if_then_else: public process_expression
 class bounded_init: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    bounded_init()
+      : process_expression(core::detail::constructBInit())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     bounded_init(atermpp::aterm_appl term)
@@ -509,6 +579,11 @@ class bounded_init: public process_expression
 class merge: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    merge()
+      : process_expression(core::detail::constructMerge())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     merge(atermpp::aterm_appl term)
@@ -537,6 +612,11 @@ class merge: public process_expression
 class left_merge: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    left_merge()
+      : process_expression(core::detail::constructLMerge())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     left_merge(atermpp::aterm_appl term)
@@ -565,6 +645,11 @@ class left_merge: public process_expression
 class choice: public process_expression
 {
   public:
+    /// \brief Default constructor.
+    choice()
+      : process_expression(core::detail::constructChoice())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     choice(atermpp::aterm_appl term)

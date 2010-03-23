@@ -14,6 +14,11 @@ namespace mcrl2 {
 class identifier_base: public data_expression
 {
   public:
+    /// \brief Default constructor.
+    identifier_base()
+      : data_expression(core::detail::constructId())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     identifier_base(atermpp::aterm_appl term)

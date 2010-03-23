@@ -29,6 +29,11 @@ namespace mcrl2 {
 class function_symbol_base: public data_expression
 {
   public:
+    /// \brief Default constructor.
+    function_symbol_base()
+      : data_expression(core::detail::constructOpId())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     function_symbol_base(atermpp::aterm_appl term)

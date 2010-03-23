@@ -87,6 +87,11 @@ typedef atermpp::term_list<action_formula> action_formula_list;
 class true_: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    true_()
+      : action_formula(core::detail::constructActTrue())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     true_(atermpp::aterm_appl term)
@@ -94,17 +99,17 @@ class true_: public action_formula
     {
       assert(core::detail::check_term_ActTrue(m_term));
     }
-
-    /// \brief Constructor.
-    true_()
-      : action_formula(core::detail::gsMakeActTrue())
-    {}
 };
 
 /// \brief The value false for action formulas
 class false_: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    false_()
+      : action_formula(core::detail::constructActFalse())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     false_(atermpp::aterm_appl term)
@@ -112,17 +117,17 @@ class false_: public action_formula
     {
       assert(core::detail::check_term_ActFalse(m_term));
     }
-
-    /// \brief Constructor.
-    false_()
-      : action_formula(core::detail::gsMakeActFalse())
-    {}
 };
 
 /// \brief The not operator for action formulas
 class not_: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    not_()
+      : action_formula(core::detail::constructActNot())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     not_(atermpp::aterm_appl term)
@@ -146,6 +151,11 @@ class not_: public action_formula
 class and_: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    and_()
+      : action_formula(core::detail::constructActAnd())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     and_(atermpp::aterm_appl term)
@@ -174,6 +184,11 @@ class and_: public action_formula
 class or_: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    or_()
+      : action_formula(core::detail::constructActOr())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     or_(atermpp::aterm_appl term)
@@ -202,6 +217,11 @@ class or_: public action_formula
 class imp: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    imp()
+      : action_formula(core::detail::constructActImp())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     imp(atermpp::aterm_appl term)
@@ -230,6 +250,11 @@ class imp: public action_formula
 class forall: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    forall()
+      : action_formula(core::detail::constructActForall())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     forall(atermpp::aterm_appl term)
@@ -258,6 +283,11 @@ class forall: public action_formula
 class exists: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    exists()
+      : action_formula(core::detail::constructActExists())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     exists(atermpp::aterm_appl term)
@@ -286,6 +316,11 @@ class exists: public action_formula
 class at: public action_formula
 {
   public:
+    /// \brief Default constructor.
+    at()
+      : action_formula(core::detail::constructActAt())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     at(atermpp::aterm_appl term)

@@ -34,6 +34,11 @@ namespace mcrl2 {
 class variable_base: public data_expression
 {
   public:
+    /// \brief Default constructor.
+    variable_base()
+      : data_expression(core::detail::constructDataVarId())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     variable_base(atermpp::aterm_appl term)
