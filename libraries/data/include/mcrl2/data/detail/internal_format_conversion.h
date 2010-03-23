@@ -58,6 +58,11 @@ namespace mcrl2 {
             return m_data_specification.normalise_sorts(s);
           }
 
+		  identifier operator()(identifier const& i)
+		  {
+			return i;
+		  }
+
           variable operator()(variable const& v)
           {
             return variable(v.name(), m_data_specification.normalise_sorts(v.sort()));
