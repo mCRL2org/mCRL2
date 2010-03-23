@@ -158,6 +158,7 @@ PBESExists        | exists(const data::variable_list& variables, const pbes_expr
 def extract_type(text):
     text = re.sub(r'\bconst\b', '', text)
     text = re.sub(r'\s*&$', '', text)
+    text = text.strip()
     return text
 
 #indents the text with the given prefix
@@ -283,7 +284,9 @@ class FunctionDeclaration:
             index = index + 1
         return result
 
-DERIVED_CLASS_CONSTRUCTOR = r'''    /// \\brief Constructor.
+DERIVED_CLASS_CONSTRUCTOR = r'''
+
+    /// \\\\brief Constructor.
     <CONSTRUCTOR>
       : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
     {}
@@ -309,7 +312,8 @@ class <CLASSNAME>: public <SUPERCLASS>
 '''
 
 CLASS_CONSTRUCTOR = '''
-    /// \\brief Constructor.
+
+    /// \\\\brief Constructor.
     <CONSTRUCTOR>
     {}
 '''
@@ -391,7 +395,7 @@ class Class:
         member_functions = f.class_member_functions()
         mtext = '\n\n'.join(member_functions)
         if mtext != '':
-            mtext = '\n\n' + mtext
+            mtext = '\n' + mtext
 
         parameters = [p.name() for p in f.parameters()]
         ptext = ', '.join(parameters)
