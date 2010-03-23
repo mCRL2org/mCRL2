@@ -191,7 +191,7 @@ grape_frame::grape_frame( const wxString &p_filename )
         found = true;
       }
 
-    std::string install_win32_path = mcrl2::utilities::get_win32_install_path();
+    std::string install_win32_path = basename.get_win32_install_path();
     wxString wxinstall_path(install_win32_path.c_str(), wxConvUTF8);
     if(!install_win32_path.empty())
     {
