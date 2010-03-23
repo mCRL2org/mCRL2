@@ -40,10 +40,15 @@ namespace fdr {
   };
 
 //--- start generated classes ---//
-/// \brief A common
+/// \brief A common expression
 class common: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    common()
+      : numeric_expression(fdr::detail::constructCommon())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     common(atermpp::aterm_appl term)
@@ -67,6 +72,11 @@ class common: public numeric_expression
 class number: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    number()
+      : numeric_expression(fdr::detail::constructNumber())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     number(atermpp::aterm_appl term)
@@ -86,10 +96,15 @@ class number: public numeric_expression
     }
 };
 
-/// \brief A card
+/// \brief The cardinality of a set
 class card: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    card()
+      : numeric_expression(fdr::detail::constructCard())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     card(atermpp::aterm_appl term)
@@ -99,20 +114,25 @@ class card: public numeric_expression
     }
 
     /// \brief Constructor.
-    card(const set& set)
+    card(const set_expression& set)
       : numeric_expression(fdr::detail::gsMakeCard(set))
     {}
 
-    set set() const
+    set_expression set() const
     {
       return atermpp::arg1(*this);
     }
 };
 
-/// \brief A length
+/// \brief The length of a sequence
 class length: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    length()
+      : numeric_expression(fdr::detail::constructLength())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     length(atermpp::aterm_appl term)
@@ -122,11 +142,11 @@ class length: public numeric_expression
     }
 
     /// \brief Constructor.
-    length(const seq& seq)
+    length(const seq_expression& seq)
       : numeric_expression(fdr::detail::gsMakeLength(seq))
     {}
 
-    seq seq() const
+    seq_expression seq() const
     {
       return atermpp::arg1(*this);
     }
@@ -136,6 +156,11 @@ class length: public numeric_expression
 class plus: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    plus()
+      : numeric_expression(fdr::detail::constructPlus())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     plus(atermpp::aterm_appl term)
@@ -164,6 +189,11 @@ class plus: public numeric_expression
 class minus: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    minus()
+      : numeric_expression(fdr::detail::constructMinus())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     minus(atermpp::aterm_appl term)
@@ -192,6 +222,11 @@ class minus: public numeric_expression
 class times: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    times()
+      : numeric_expression(fdr::detail::constructTimes())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     times(atermpp::aterm_appl term)
@@ -220,6 +255,11 @@ class times: public numeric_expression
 class div: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    div()
+      : numeric_expression(fdr::detail::constructDiv())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     div(atermpp::aterm_appl term)
@@ -248,6 +288,11 @@ class div: public numeric_expression
 class mod: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    mod()
+      : numeric_expression(fdr::detail::constructMod())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     mod(atermpp::aterm_appl term)
@@ -272,10 +317,15 @@ class mod: public numeric_expression
     }
 };
 
-/// \brief A minimum?
+/// \brief A negative number
 class min: public numeric_expression
 {
   public:
+    /// \brief Default constructor.
+    min()
+      : numeric_expression(fdr::detail::constructMin())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     min(atermpp::aterm_appl term)

@@ -1,0 +1,105 @@
+// Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/process/failuremodel.h
+/// \brief add your file description here.
+
+#ifndef MCRL2_FDR_FAILUREMODEL_H
+#define MCRL2_FDR_FAILUREMODEL_H
+
+#include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/fdr/detail/term_functions.h"
+#include "mcrl2/fdr/detail/constructors.h"
+
+namespace mcrl2 {
+
+namespace fdr {
+
+  /// \brief Failure Model
+  class failuremodel: public atermpp::aterm_appl
+  {
+    public:
+      /// \brief Constructor.
+      failuremodel()
+        : atermpp::aterm_appl(fdr::detail::constructFailureModel())
+      {}
+
+      /// \brief Constructor.
+      /// \param term A term
+      failuremodel(atermpp::aterm_appl term)
+        : atermpp::aterm_appl(term)
+      {
+        assert(fdr::detail::check_rule_FailureModel(m_term));
+      }
+  };
+
+//--- start generated classes ---//
+/// \brief A failures
+class f: public failuremodel
+{
+  public:
+    /// \brief Default constructor.
+    f()
+      : failuremodel(fdr::detail::constructF())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    f(atermpp::aterm_appl term)
+      : failuremodel(term)
+    {
+      assert(fdr::detail::check_term_F(m_term));
+    }
+};
+
+/// \brief A faulures/divergences
+class fd: public failuremodel
+{
+  public:
+    /// \brief Default constructor.
+    fd()
+      : failuremodel(fdr::detail::constructFD())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    fd(atermpp::aterm_appl term)
+      : failuremodel(term)
+    {
+      assert(fdr::detail::check_term_FD(m_term));
+    }
+};
+//--- end generated classes ---//
+
+//--- start generated is-functions ---//
+
+    /// \brief Test for a f expression
+    /// \param t A term
+    /// \return True if it is a f expression
+    inline
+    bool is_f(const failuremodel& t)
+    {
+      return fdr::detail::gsIsF(t);
+    }
+
+    /// \brief Test for a fd expression
+    /// \param t A term
+    /// \return True if it is a fd expression
+    inline
+    bool is_fd(const failuremodel& t)
+    {
+      return fdr::detail::gsIsFD(t);
+    }
+//--- end generated is-functions ---//
+
+} // namespace fdr
+
+} // namespace mcrl2
+
+#endif // MCRL2_FDR_FAILUREMODEL_H

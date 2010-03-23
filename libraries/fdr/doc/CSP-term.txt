@@ -2,7 +2,8 @@
 // 11 March 2010
 //
 // This document describes the internal format of the CSP language:
-// - <Name> is an arbitrary non-empty string excluding the keywords:
+// - <Name> is an arbitrary non-empty string [a-zA-Z][a-zA-Z0-9_]*'*
+//   excluding the keywords:
 //     head tail if then else length card true false and or not
 //     null elem member empty concat union inter diff Union Inter
 //     set Set Seq extensions productions let within Int Bool
@@ -45,7 +46,7 @@
               | Branch(<Name>, <Type>)
 
 <Type>      ::= TypeProduct(<Type>, <Type>)
-              | TypeTyple(<Type>+)
+              | TypeTuple(<Type>+)
               | TypeExpr(<Expr>)
               | SimpleTypeName(<Name>)
               | TypeName(<Name>, <Type>+)
@@ -155,6 +156,8 @@
               | TargGens(<Targ>, <Gen>+)
               | Cat(<Seq>, <Seq>)
               | Concat(<Seq>)
+              | Head(<Seq>)
+              | Tail(<Seq>)
 
 // Set/Sequence arguments
 <Targ>      ::= Nil
@@ -183,6 +186,7 @@
               | Name(<Name>)
               | LambdaAppl(<Lambda>, <Expr>+)
               | LocalDef(<Defn>+, <Any>)
+              | Bracketed(<Any>)
 
 
 // Processes
@@ -198,7 +202,7 @@
               | InternalChoice(<Proc>, <Proc>)
               | SequentialComposition(<Proc>, <Proc>)
               | Interrupt(<Proc>, <Proc>)
-              | Hiding(<Proc>, <Expr>)
+              | Hiding(<Proc>, <Set>)
               | Rename(<Proc>, <Renaming>)
               | Interleave(<Proc>, <Proc>)
               | Sharing(<Proc>, <Proc>, <Set>)

@@ -38,7 +38,6 @@ ATermAppl constructFDRSpec();
 ATermAppl constructOr();
 ATermAppl constructTypeName();
 ATermAppl constructNumb();
-ATermAppl constructTypeTyple();
 ATermAppl constructNot();
 ATermAppl constructMod();
 ATermAppl constructLessOrEqual();
@@ -65,11 +64,13 @@ ATermAppl constructTypeExpr();
 ATermAppl constructNotEqual();
 ATermAppl constructset();
 ATermAppl constructLinkedParallel();
+ATermAppl constructTail();
 ATermAppl constructproductions();
 ATermAppl constructInput();
 ATermAppl constructPrint();
 ATermAppl constructTargGens0();
 ATermAppl constructChannel();
+ATermAppl constructHead();
 ATermAppl constructOpenRange();
 ATermAppl constructExternalChoice();
 ATermAppl constructBoolGuard();
@@ -85,6 +86,7 @@ ATermAppl constructSimpleChannel();
 ATermAppl constructGreater();
 ATermAppl constructRename();
 ATermAppl constructmodel_compress();
+ATermAppl constructBracketed();
 ATermAppl constructInterleave();
 ATermAppl constructClosedRange();
 ATermAppl constructRepSharing();
@@ -145,6 +147,7 @@ ATermAppl constructName();
 ATermAppl constructnormal();
 ATermAppl constructExpr();
 ATermAppl constructEqual();
+ATermAppl constructTypeTuple();
 ATermAppl constructCommon();
 ATermAppl constructOutput();
 ATermAppl constructModel();
@@ -434,22 +437,6 @@ inline
 ATermAppl constructNumb()
 {
   static ATermAppl t = initConstructNumb(t);
-  return t;
-}
-
-// TypeTyple
-inline
-ATermAppl initConstructTypeTyple(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunTypeTyple(), reinterpret_cast<ATerm>(constructList()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructTypeTyple()
-{
-  static ATermAppl t = initConstructTypeTyple(t);
   return t;
 }
 
@@ -869,6 +856,22 @@ ATermAppl constructLinkedParallel()
   return t;
 }
 
+// Tail
+inline
+ATermAppl initConstructTail(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunTail(), reinterpret_cast<ATerm>(constructSeq()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructTail()
+{
+  static ATermAppl t = initConstructTail(t);
+  return t;
+}
+
 // productions
 inline
 ATermAppl initConstructproductions(ATermAppl& t)
@@ -946,6 +949,22 @@ inline
 ATermAppl constructChannel()
 {
   static ATermAppl t = initConstructChannel(t);
+  return t;
+}
+
+// Head
+inline
+ATermAppl initConstructHead(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunHead(), reinterpret_cast<ATerm>(constructSeq()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructHead()
+{
+  static ATermAppl t = initConstructHead(t);
   return t;
 }
 
@@ -1186,6 +1205,22 @@ inline
 ATermAppl constructmodel_compress()
 {
   static ATermAppl t = initConstructmodel_compress(t);
+  return t;
+}
+
+// Bracketed
+inline
+ATermAppl initConstructBracketed(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunBracketed(), reinterpret_cast<ATerm>(constructAny()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBracketed()
+{
+  static ATermAppl t = initConstructBracketed(t);
   return t;
 }
 
@@ -1833,7 +1868,7 @@ ATermAppl constructConcat()
 inline
 ATermAppl initConstructHiding(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunHiding(), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructExpr()));
+  t = ATmakeAppl2(gsAFunHiding(), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructSet()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -2146,6 +2181,22 @@ inline
 ATermAppl constructEqual()
 {
   static ATermAppl t = initConstructEqual(t);
+  return t;
+}
+
+// TypeTuple
+inline
+ATermAppl initConstructTypeTuple(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunTypeTuple(), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructTypeTuple()
+{
+  static ATermAppl t = initConstructTypeTuple(t);
   return t;
 }
 
