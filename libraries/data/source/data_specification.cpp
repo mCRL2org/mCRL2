@@ -247,7 +247,7 @@ namespace mcrl2 {
             data_equation_vector e(sort_list::list_generate_equations_code(element_sort));
             std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
           }
-          else if (sort_set::is_set(sort))
+          else if (sort_set::is_set(sort)||sort_fset::is_fset(sort))
           {
             // Add a set to the specification.
             add_system_defined_sort(sort);
@@ -267,7 +267,7 @@ namespace mcrl2 {
             e = sort_fset::fset_generate_equations_code(element_sort);
             std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
           }
-          else if (sort_bag::is_bag(sort))
+          else if (sort_bag::is_bag(sort)||sort_fbag::is_fbag(sort))
           { import_system_defined_sort(sort_nat::nat()); // Required for bags.
             import_system_defined_sort(sort_set::set_(element_sort));
             // Add a bag to the specification.
