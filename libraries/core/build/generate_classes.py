@@ -14,12 +14,13 @@ from mcrl2_utility import *
 # If superclass is defined, it will be the base class of the generated
 # classes. Otherwise atermpp::aterm_appl will be taken as the base class.
 def make_classes(filename, class_text, superclass = None, namespace = 'core'):
-    classes = parse_classes(class_text)
+    classes = parse_classes(class_text, superclass, use_base_class_name = True)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
     classes = [c for c in classes if c.qualifier() == '']
 
-    class_definitions = [c.class_definition(superclass, namespace, True) for c in classes]
+    class_definitions = [c.class_definition(namespace, True) for c in classes]
+
     if path(filename).isdir():
         for i in range(len(class_definitions)):
             fname = path(filename).normcase() / ('%s.h' % classes[i].name())

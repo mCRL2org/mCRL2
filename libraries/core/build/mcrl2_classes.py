@@ -114,7 +114,7 @@ MultActName | action_name_multiset(const core::identifier_string_list& names) | 
 
 PROCESS_EXPRESSION_CLASSES = r'''
 Action            | lps::action(const lps::action_label& label, const data::data_expression_list& arguments)                                       | An action
-Process           | process_instance(const process_identifier identifier, const data::data_expression_list& actual_parameters)                     | A process
+Process           | process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)                    | A process
 ProcessAssignment | process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)                    | A process assignment
 Delta             | delta()                                                                                                                        | The value delta
 Tau               | tau()                                                                                                                          | The value tau
@@ -188,24 +188,51 @@ def member_function(arg, n):
     text = re.sub('ARG', arg, text)
     return text
 
-# Represents a variable declaration like the following;
+# Represents a function parameter like the following;
 #
 # const core::identifier_string& name
-class VariableDeclaration:
-    def __init__(self, text):
-        self.text = text.strip()
+#
+# self.modifiers: ['const', '&', '*'] etc.
+# self.aterm: The corresponding ATerm (default: None)
+class Parameter:
+    def __init__(self, name, type, modifiers):
+        self.name_ = name
+        self.type_ = type
+        self.modifiers_ = modifiers
+        self.aterm_ = None
 
-    # returns the type of the variable
+    # Returns true if the type is a list
+    #
+    def is_list(self):
+        return self.type.endswith('_list')
+
+    # Returns the type of the parameter
     #
     # 'const core::identifier_string&'
-    def type(self):
-        return re.sub(r'\s+\S+$', '', self.text)
+    def type(self, include_modifiers = True):
+        if include_modifiers:
+            if 'const' in self.modifiers_:
+                prefix = 'const '
+            else:
+                prefix = ''
+            if '*' in self.modifiers_:
+                postfix = '*'
+            elif '&' in self.modifiers_:
+                postfix = '&'
+            else:
+                postfix = '*'
+            return '%s%s%s' % (prefix, self.type_, postfix)
+        return self.type_
 
-    # returns the name of the variable
+    # Returns the name of the parameter
     #
-    # 'name'
     def name(self):
-        return self.text.split(' ')[-1]
+        return self.name_
+
+    # Returns the corresponding ATerm of the parameter, or None if no such term exists
+    #
+    def aterm(self):
+        return self.aterm_
 
     def __repr__(self):
         return '%s %s' % (self.type(), self.name())
@@ -216,6 +243,40 @@ class VariableDeclaration:
 class FunctionDeclaration:
     def __init__(self, text):
         self.text = text.strip()
+
+        # compute argument text
+        text = self.text
+        text = re.sub('.*\(', '', text)
+        text = re.sub('\).*', '', text)
+        self.argument_text_ = text
+
+        # compute parameters
+        parameters = []
+        words = map(string.strip, text.split(','))
+        for word in words:
+            if word == '':
+                continue
+            modifiers = []
+            if re.search(r'\*', word) != None:
+                modifiers.append('*')
+            if re.search(r'&', word) != None:
+                modifiers.append('&')
+            if re.search(r'\bconst\b', word) != None:
+                modifiers.append('const')
+            word = re.sub('\*|&|(const)', '', word).strip()
+            w = word.split()
+            type = w[0]
+            name = w[1]
+            parameters.append(Parameter(name, type, modifiers))          
+        self.parameters_ = parameters
+
+        # compute template arguments
+        self.template_arguments_ = []
+        m = re.search('<(.*)>', self.name())
+        if m != None:
+            text = m.group(1)
+            text = re.sub(r',', '', text)
+            self.template_arguments_ = text.rsplit(r'\s')
 
     def __repr__(self):
         return self.text
@@ -246,29 +307,17 @@ class FunctionDeclaration:
     # returns the template arguments of the function
     #
     def template_arguments(self):
-        m = re.search('<(.*)>', self.name())
-        if m == None:
-            return []
-        text = m.group(1)
-        text = re.sub(r',', '', text)
-        return text.rsplit(r'\s')
+        return self.template_arguments_
 
     # returns the argument text of the function
     #
     # 'const core::identifier_string& name, const data::data_expression_list& arguments'
     def argument_text(self):
-        text = self.text
-        text = re.sub('.*\(', '', text)
-        text = re.sub('\).*', '', text)
-        return text
+        return self.argument_text_
 
     # returns the parameters of the function as a sequence of VariableDeclarations
     def parameters(self):
-        text = self.argument_text()
-        words = map(string.strip, text.split(','))
-        if len(words) == 1 and words[0] == '':
-            words = []
-        return map(VariableDeclaration, words)
+        return self.parameters_
 
     # generates class member functions for the parameters like this:
     #
@@ -284,63 +333,36 @@ class FunctionDeclaration:
             index = index + 1
         return result
 
-DERIVED_CLASS_CONSTRUCTOR = r'''
-
-    /// \\\\brief Constructor.
-    <CONSTRUCTOR>
-      : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
-    {}
-'''
-
-DERIVED_CLASS_DEFINITION = r'''/// \\brief <DESCRIPTION>
-class <CLASSNAME>: public <SUPERCLASS>
-{
-  public:
-    /// \\brief Default constructor.
+DEFAULT_CONSTRUCTOR = r'''    /// \\\\brief Default constructor.
     <CLASSNAME>()
       : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
-    {}
+    {}'''
 
-    /// \\brief Constructor.
+CONSTRUCTOR = r'''    /// \\\\brief Constructor.
+    <CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+    {}'''
+
+ATERM_CONSTRUCTOR = r'''    /// \\\\brief Constructor.
     /// \\param term A term
     <CLASSNAME>(atermpp::aterm_appl term)
       : <SUPERCLASS>(term)
     {
       assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
-    }<CONSTRUCTOR><MEMBER_FUNCTIONS>
-};
-'''
-
-CLASS_CONSTRUCTOR = '''
-
-    /// \\\\brief Constructor.
-    <CONSTRUCTOR>
-    {}
-'''
+    }'''
 
 CLASS_DEFINITION = r'''/// \\brief <DESCRIPTION>
-class <CLASSNAME>
+class <CLASSNAME><SUPERCLASS_DECLARATION>
 {
   public:
-    /// \\brief Default constructor.
-    <CLASSNAME>()
-      : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
-    {}
+<CONSTRUCTORS><MEMBER_FUNCTIONS>
+};'''
 
-    /// \\brief Constructor.
-    /// \\param term A term
-    <CLASSNAME>(atermpp::aterm_appl term)
-    {
-      assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
-    }<CONSTRUCTOR><MEMBER_FUNCTIONS>
-};
-'''
+CONTAINER_TYPEDEFS = r'''/// \\brief list of <CLASSNAME>s
+    typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
 
-CONTAINER_TYPEDEFS = r'''/// \\brief list of CLASSNAMEs
-    typedef atermpp::term_list<<CLASSNAME>> CLASSNAME_list;
-
-    /// \\brief vector of CLASSNAMEs
-    typedef atermpp::vector<<CLASSNAME>>    CLASSNAME_vector;
+    /// \\brief vector of <CLASSNAME>s
+    typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
 '''
 
 # Represents a class definition
@@ -353,15 +375,38 @@ CONTAINER_TYPEDEFS = r'''/// \\brief list of CLASSNAMEs
 # self.constructor: the constructor of the class
 # self.description: a string description of the class
 class Class:
-    def __init__(self, aterm, constructor, description):
+    def __init__(self, aterm, constructor, description, superclass = None, use_base_class_name = False):
         self.aterm = aterm
         self.description = description
         name = re.sub('\(.*', '', constructor)
         arguments = re.sub('.*\(', '(', constructor)
-        self.classname = re.sub('\[[^]]*\]', '', name)
-        self.base_classname = re.sub('\[|\]', '', name)
-        self.constructor = FunctionDeclaration(self.classname + arguments)
-        self.base_class_constructor = FunctionDeclaration(self.base_classname + arguments)
+        self.classname_ = re.sub('\[[^]]*\]', '', name)
+        self.base_classname_ = re.sub('\[|\]', '', name)
+        self.constructor = FunctionDeclaration(self.classname_ + arguments)
+        self.base_class_constructor = FunctionDeclaration(self.base_classname_ + arguments)
+        self.use_base_class_name_ = use_base_class_name
+        self.superclass_ = superclass
+
+    # Returns the name of the class
+    #
+    def classname(self):
+        if self.use_base_class_name_:
+            return self.base_classname_
+        else:
+            return self.classname_
+
+    # Returns the name of the class without namespace qualification
+    #
+    def name(self, use_base_class_name = False):
+        if use_base_class_name:
+            return self.base_class_constructor.name()
+        else:
+            return self.constructor.name()
+
+    # Returns the superclass of the class, or None if no superclass exists
+    #
+    def superclass(self):
+        return self.superclass_
 
     # Returns the name of the class including a namespace qualification, if available
     #
@@ -372,51 +417,56 @@ class Class:
     def qualifier(self):
         return self.constructor.qualifier()
 
-    # Returns the name of the class without namespace qualification
-    #
-    def name(self, use_base_class_name = False):
-        if use_base_class_name:
-            return self.base_class_constructor.name()
+    # Returns the definitions of the constructors
+    def constructor_definitions(self, namespace):
+        classname = self.classname()
+        arguments = self.constructor.argument_text()
+        superclass = self.superclass()
+        parameters = ', '.join([p.name() for p in self.constructor.parameters()])
+        aterm = self.aterm
+        if len(self.constructor.parameters()) == 0:
+            text = '\n\n'.join([DEFAULT_CONSTRUCTOR, ATERM_CONSTRUCTOR])
         else:
-            return self.constructor.name()
+            text = '\n\n'.join([DEFAULT_CONSTRUCTOR, ATERM_CONSTRUCTOR, CONSTRUCTOR])       
+        if superclass == None:
+            superclass = 'atermpp::aterm_appl'
+        text = re.sub('<CLASSNAME>'       , classname, text)
+        text = re.sub('<ARGUMENTS>'       , arguments, text)              
+        text = re.sub('<SUPERCLASS>'      , superclass, text)
+        text = re.sub('<NAMESPACE>'       , namespace, text)
+        text = re.sub('<ATERM>'           , aterm, text)
+        text = re.sub('<PARAMETERS>'      , parameters, text)
+        return text
 
     # Returns the class definition
-    def class_definition(self, superclass = None, namespace = 'core', use_base_class_name = True, add_container_typedefs = True):
+    def class_definition(self, namespace = 'core', add_container_typedefs = True):
+        classname = self.classname()
+        superclass = self.superclass()
         f = self.constructor
-        if use_base_class_name:
-            classname = self.base_classname
-            constructor = str(self.base_class_constructor)
-        else:
-            classname = self.classname
-            constructor = str(self.constructor)
 
         print 'generating class', classname
 
         member_functions = f.class_member_functions()
         mtext = '\n\n'.join(member_functions)
         if mtext != '':
-            mtext = '\n' + mtext
+            mtext = '\n\n' + mtext
 
         parameters = [p.name() for p in f.parameters()]
         ptext = ', '.join(parameters)
 
-        if superclass == None:
-            if len(self.constructor.parameters()) > 0:
-                ctext = CLASS_CONSTRUCTOR
-            else:
-                ctext = ''
-            text = re.sub('<CONSTRUCTOR>', ctext, CLASS_DEFINITION)
-        else:
-            if len(self.constructor.parameters()) > 0:
-                ctext = DERIVED_CLASS_CONSTRUCTOR
-            else:
-                ctext = ''
-            text = re.sub('<CONSTRUCTOR>', ctext, DERIVED_CLASS_DEFINITION)
+        ctext = self.constructor_definitions(namespace)
+        text = CLASS_DEFINITION
 
+        if superclass == None:
+            superclass_declaration = ''
+        else:
+            superclass_declaration = ': public %s' % superclass
+
+        text = re.sub('<SUPERCLASS_DECLARATION>', superclass_declaration, text)
         text = re.sub('<DESCRIPTION>'     , self.description, text)
         text = re.sub('<CLASSNAME>'       , classname, text)
         text = re.sub('<ATERM>'           , self.aterm, text)
-        text = re.sub('<CONSTRUCTOR>'     , constructor, text)
+        text = re.sub('<CONSTRUCTORS>'    , ctext, text)
         text = re.sub('<PARAMETERS>'      , ptext      , text)
         text = re.sub('<NAMESPACE>'       , namespace  , text)
         if superclass != None:
@@ -427,7 +477,7 @@ class Class:
             if use_base_class_name and (self.classname != self.base_classname):
                 atext = 'class %s;\n\n' % classname + atext
             text = text + atext
-        return text
+        return text + '\n'
 
 # parses lines that contain entries separated by '|'
 # empty lines are removed
@@ -442,7 +492,7 @@ class Class:
 #
 # If the name of a function contains a postfix between brackets (like variable[_base]),
 # then the parameter use_base_class determines whether it is used or not.
-def parse_classes(text):
+def parse_classes(text, superclass = None, use_base_class_name = False):
     result = []
     lines = text.rsplit('\n')
     for line in lines:
@@ -450,5 +500,5 @@ def parse_classes(text):
         if len(words) < 3:
             continue
         aterm, constructor, description = words
-        result.append(Class(aterm, constructor, description))
+        result.append(Class(aterm, constructor, description, superclass, use_base_class_name))
     return result
