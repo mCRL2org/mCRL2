@@ -15,11 +15,7 @@ if ( MCRL2_BUILD_GUI_TOOLS )
 add_definitions(-DTIXML_USE_TICPP)
 
 # ######### General setup ##########
-file(COPY
-  ${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/help/grapehelp.zip
- DESTINATION
-  ${CMAKE_CURRENT_BINARY_DIR}
-) 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/help/grapehelp.zip" "${CMAKE_CURRENT_BINARY_DIR}/grapehelp.zip" COPYONLY)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   grapeapp/grape_clipboard.cpp
