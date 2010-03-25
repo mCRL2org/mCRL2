@@ -32,6 +32,7 @@ void test_data_expression(const std::string& s, variable_vector v, Predicate p, 
 {
   std::cerr << "testing data expression " << s << std::endl;
   data_expression e = parse_data_expression(s, v.begin(), v.end());
+  std::cerr << "parsed expression " << pp(e) << "   " << e << "\n";
   BOOST_CHECK(p(e));
   BOOST_CHECK(!q(e));
 }
@@ -60,7 +61,7 @@ void bag_expression_test()
   BOOST_CHECK(is_bag(bag(sort_nat::nat())));
   BOOST_CHECK(!is_bag(sort_nat::nat()));
 
-  test_data_expression("{x : Nat | x}", v, is_bagcomprehension_application, is_bagin_application);
+  test_data_expression("{x : Nat | x}", v, is_bagconstructor_application, is_bagin_application);
   test_data_expression("1 in b", v, is_bagin_application, is_bagjoin_application);
   test_data_expression("{} + b", v, is_bagjoin_application, is_bagintersect_application);
   test_data_expression("(({} + b) - {20:1}) * {40:5}", v, is_bagintersect_application, is_less_application<data_expression>);

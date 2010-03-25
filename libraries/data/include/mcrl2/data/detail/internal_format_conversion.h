@@ -99,14 +99,13 @@ namespace mcrl2 {
             if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "SetComp")
             {
               sort_expression element_sort((*this)(expression.variables().begin()->sort()));
-
-              return setcomprehension(set_(element_sort), lambda(bound_variables, (*this)(expression.body())));
+              return setconstructor(element_sort, lambda(bound_variables, (*this)(expression.body())),sort_fset::fset_empty(element_sort));
             }
             else if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "BagComp")
             {
               sort_expression element_sort((*this)(expression.variables().begin()->sort()));
 
-              return bagcomprehension(bag(element_sort), lambda(bound_variables, (*this)(expression.body())));
+              return bagconstructor(element_sort, lambda(bound_variables, (*this)(expression.body())), sort_fbag::fbag_empty(element_sort));
             }
 
             return abstraction(expression.binding_operator(), bound_variables, (*this)(expression.body()));
@@ -182,7 +181,7 @@ namespace mcrl2 {
 
       inline
       void internal_format_conversion(data_specification& specification)
-      {
+      { 
         internal_format_conversion_helper converter(specification);
 
         converter(specification);
@@ -190,7 +189,7 @@ namespace mcrl2 {
 
       inline
       data_specification internal_format_conversion(data_specification const& specification)
-      {
+      { 
         data_specification                copy(specification);
         internal_format_conversion_helper converter(specification);
 
@@ -203,7 +202,7 @@ namespace mcrl2 {
       /// \param[in] term sort or data expression
       inline
       atermpp::aterm_appl internal_format_conversion(data_specification const& specification, atermpp::aterm_appl term)
-      {
+      { 
         internal_format_conversion_helper converter(specification);
 
         return atermpp::replace(term, converter);
