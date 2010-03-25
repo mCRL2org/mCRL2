@@ -20,6 +20,10 @@
   #ifdef _WIN32
     #include <windows.h>
   #endif //_WIN32
+
+  #ifdef __APPLE__                                                                                                             
+    #include <Carbon/Carbon.h>                                                                                                 
+  #endif           
   
   namespace mcrl2 {
   
