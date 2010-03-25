@@ -13,13 +13,13 @@ from mcrl2_utility import *
 #
 # If superclass is defined, it will be the base class of the generated
 # classes. Otherwise atermpp::aterm_appl will be taken as the base class.
-def make_classes(filename, class_text, superclass = None, namespace = 'core'):
+def make_classes(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False):
     classes = parse_classes(class_text, superclass, use_base_class_name = True)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
     classes = [c for c in classes if c.qualifier() == '']
 
-    class_definitions = [c.class_definition(namespace, True) for c in classes]
+    class_definitions = [c.class_definition(namespace, True, add_constructor_overloads) for c in classes]
 
     if path(filename).isdir():
         for i in range(len(class_definitions)):
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     make_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
     make_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
     make_is_functions('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
-    make_classes('../../data/include/mcrl2/data/', DATA_EXPRESSION_CLASSES, 'data_expression')
+    make_classes('../../data/include/mcrl2/data/', DATA_EXPRESSION_CLASSES, 'data_expression', add_constructor_overloads = True)
     make_is_functions('../../data/include/mcrl2/data/data_expression.h', DATA_EXPRESSION_CLASSES, 'data_expression')
-    make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression')
+    make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression', add_constructor_overloads = True)
     make_is_functions('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression')
-    make_classes('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type')
+    make_classes('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type', add_constructor_overloads = True)

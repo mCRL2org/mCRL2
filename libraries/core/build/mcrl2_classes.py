@@ -14,48 +14,48 @@ import re
 import string
 
 CONTAINER_TYPES = r'''
-SortList 	| list_container() | Container type for lists
-SortSet		| set_container() | Container type for sets
-SortBag		| bag_container() | Container type for bags
-SortFSet	| finite_set_container() | Container type for finite sets
-SortFBag	| finite_bag_container() | Container type for finite bags
+SortList  | list_container() | Container type for lists
+SortSet   | set_container() | Container type for sets
+SortBag   | bag_container() | Container type for bags
+SortFSet  | finite_set_container() | Container type for finite sets
+SortFBag  | finite_bag_container() | Container type for finite bags
 '''
 
 STRUCTURED_SORT_ELEMENTS = r'''
-StructCons	| structured_sort_constructor_base(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) | A constructor for a structured sort
-StructProj	| structured_sort_constructor_argument_base(const core::identifier_string& name, const sort_expression& sort) | An argument of a constructor of a structured sort
+StructCons  | structured_sort_constructor_base(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) | A constructor for a structured sort
+StructProj  | structured_sort_constructor_argument_base(const core::identifier_string& name, const sort_expression& sort) | An argument of a constructor of a structured sort
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-SortId		| basic_sort_base(const core::identifier_string& name) | A basic sort
-SortCons	| container_sort_base(const container_type& container_name, const sort_expression& s) | A container sort
-SortStruct	| structured_sort_base(const structured_sort_constructor_list& constructors) | A structured sort
-SortArrow	| function_sort_base(const sort_expression_list& domain, const sort_expression& codomain) | A function sort
-SortUnknown	| unknown_sort_base() | Unknown sort expression
-SortsPossible	| multiple_possible_sorts_base(const sort_expression_list& sorts) | Multiple possible sorts
+SortId    | basic_sort_base(const core::identifier_string& name) | A basic sort
+SortCons  | container_sort_base(const container_type& container_name, const sort_expression& s) | A container sort
+SortStruct  | structured_sort_base(const structured_sort_constructor_list& constructors) | A structured sort
+SortArrow | function_sort_base(const sort_expression_list& domain, const sort_expression& codomain) | A function sort
+SortUnknown | unknown_sort_base() | Unknown sort expression
+SortsPossible | multiple_possible_sorts_base(const sort_expression_list& sorts) | Multiple possible sorts
 '''
 
 BINDER_TYPES = r'''
-SetBagComp 	| set_or_bag_comprehension_binder() | Binder for set or bag comprehension
-SetComp		| set_comprehension_binder()	| Binder for set comprehension
-BagComp		| bag_comprehension_binder()	| Binder for bag comprehension
-Forall		| forall_binder()		| Binder for universal quantification
-Exists		| exists_binder()		| Binder for existential quantification
-Lambda		| lambda_binder()		| Binder for lambda abstraction
+SetBagComp  | set_or_bag_comprehension_binder() | Binder for set or bag comprehension
+SetComp   | set_comprehension_binder()  | Binder for set comprehension
+BagComp   | bag_comprehension_binder()  | Binder for bag comprehension
+Forall    | forall_binder()   | Binder for universal quantification
+Exists    | exists_binder()   | Binder for existential quantification
+Lambda    | lambda_binder()   | Binder for lambda abstraction
 '''
 
 ASSIGNMENT_EXPRESSION_CLASSES = r'''
-DataVarIdInit	| assignment[_base](const variable& lhs, const data_expression& rhs) | Assignment of a data expression to a variable)
-IdInit		| identifier_assignment[_base](const identifier& lhs, const data_expression& rhs) | Assignment of a data expression to a string
+DataVarIdInit | assignment[_base](const variable& lhs, const data_expression& rhs) | Assignment of a data expression to a variable)
+IdInit    | identifier_assignment[_base](const identifier& lhs, const data_expression& rhs) | Assignment of a data expression to a string
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-Id		| identifier[_base](const core::identifier_string& name) | An identifier
-DataVarId	| variable[_base](const core::identifier_string& name, const sort_expression& sort)	| A data variable
-OpId		| function_symbol[_base](const core::identifier_string& name, const sort_expression& sort) | A function symbol
-DataAppl	| application[_base](const data_expression& head, data_expression_list const& arguments) | An application of a data expression to a number of arguments
-Binder		| abstraction[_base](const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
-Whr		| where_clause[_base](const data_expression& body, const assignment_expression_list& declarations) | A where expression
+Id    | identifier[_base](const core::identifier_string& name) | An identifier
+DataVarId | variable[_base](const core::identifier_string& name, const sort_expression& sort) | A data variable
+OpId    | function_symbol[_base](const core::identifier_string& name, const sort_expression& sort) | A function symbol
+DataAppl  | application[_base](const data_expression& head, data_expression_list const& arguments) | An application of a data expression to a number of arguments
+Binder    | abstraction[_base](const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
+Whr   | where_clause[_base](const data_expression& body, const assignment_expression_list& declarations) | A where expression
 '''
 
 STATE_FORMULA_CLASSES = r'''
@@ -71,24 +71,24 @@ StateMust       | must(const regular_formulas::regular_formula& formula, const s
 StateMay        | may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             | The may operator for state formulas
 StateYaled      | yaled()                                                                                                         | The yaled operator for state formulas
 StateYaledTimed | yaled_timed(const data::data_expression& time_stamp)                                                            | The timed yaled operator for state formulas
-StateDelay      | delay()                                                                                                         | The delay operator for state formulas      
+StateDelay      | delay()                                                                                                         | The delay operator for state formulas
 StateDelayTimed | delay_timed(const data::data_expression& time_stamp)                                                            | The timed delay operator for state formulas
 StateVar        | variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      | The state formula variable
 StateNu         | nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) | The nu operator for state formulas
 StateMu         | mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) | The mu operator for state formulas
-'''                                                                                                                                 
-                                                                                                                                    
-ACTION_FORMULA_CLASSES = r'''                                                                                                       
-ActTrue   | true_()                                                                     | The value true for action formulas  
-ActFalse  | false_()                                                                    | The value false for action formulas 
+'''
+
+ACTION_FORMULA_CLASSES = r'''
+ActTrue   | true_()                                                                     | The value true for action formulas
+ActFalse  | false_()                                                                    | The value false for action formulas
 ActNot    | not_(const action_formula& operand)                                         | The not operator for action formulas
 ActAnd    | and_(const action_formula& left, const action_formula& right)               | The and operator for action formulas
-ActOr     | or_(const action_formula& left, const action_formula& right)                | The or operator for action formulas 
-ActImp    | imp(const action_formula& left, const action_formula& right)                | The implication operator for action formulas               
-ActForall | forall(const data::variable_list& variables, const action_formula& operand) | The universal quantification operator for action formulas  
+ActOr     | or_(const action_formula& left, const action_formula& right)                | The or operator for action formulas
+ActImp    | imp(const action_formula& left, const action_formula& right)                | The implication operator for action formulas
+ActForall | forall(const data::variable_list& variables, const action_formula& operand) | The universal quantification operator for action formulas
 ActExists | exists(const data::variable_list& variables, const action_formula& operand) | The existential quantification operator for action formulas
 ActAt     | at(const action_formula& operand, const data::data_expression& time_stamp)  | The at operator for action formulas
-'''                                                                                       
+'''
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
@@ -144,13 +144,13 @@ PBES        | pbes<Container>(const data::data_specification& data, const Contai
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
-PBESTrue          | true_()                                                                   | The value true for pbes expressions                         
-PBESFalse         | false_()                                                                  | The value false for pbes expressions                        
-PBESNot           | not_(const pbes_expression& operand)                                      | The not operator for pbes expressions                       
-PBESAnd           | and_(const pbes_expression& left, const pbes_expression& right)           | The and operator for pbes expressions                       
-PBESOr            | or_(const pbes_expression& left, const pbes_expression& right)            | The or operator for pbes expressions                        
-PBESImp           | imp(const pbes_expression& left, const pbes_expression& right)            | The implication operator for pbes expressions               
-PBESForall        | forall(const data::variable_list& variables, const pbes_expression& body) | The universal quantification operator for pbes expressions  
+PBESTrue          | true_()                                                                   | The value true for pbes expressions
+PBESFalse         | false_()                                                                  | The value false for pbes expressions
+PBESNot           | not_(const pbes_expression& operand)                                      | The not operator for pbes expressions
+PBESAnd           | and_(const pbes_expression& left, const pbes_expression& right)           | The and operator for pbes expressions
+PBESOr            | or_(const pbes_expression& left, const pbes_expression& right)            | The or operator for pbes expressions
+PBESImp           | imp(const pbes_expression& left, const pbes_expression& right)            | The implication operator for pbes expressions
+PBESForall        | forall(const data::variable_list& variables, const pbes_expression& body) | The universal quantification operator for pbes expressions
 PBESExists        | exists(const data::variable_list& variables, const pbes_expression& body) | The existential quantification operator for pbes expressions
 '''
 
@@ -203,8 +203,9 @@ class Parameter:
 
     # Returns true if the type is a list
     #
+    # TODO: make this test accurate using the ATerm grammar
     def is_list(self):
-        return self.type.endswith('_list')
+        return self.type(False).endswith('_list')
 
     # Returns the type of the parameter
     #
@@ -267,20 +268,20 @@ class FunctionDeclaration:
             w = word.split()
             type = w[0]
             name = w[1]
-            parameters.append(Parameter(name, type, modifiers))          
+            parameters.append(Parameter(name, type, modifiers))
         self.parameters_ = parameters
 
         # compute template arguments
-        self.template_arguments_ = []
+        self.template_parameters_ = []
         m = re.search('<(.*)>', self.name())
         if m != None:
             text = m.group(1)
             text = re.sub(r',', '', text)
-            self.template_arguments_ = text.rsplit(r'\s')
+            self.template_parameters_ = text.rsplit(r'\s')
 
     def __repr__(self):
         return self.text
-    
+
     # returns the name of the function including a namespace qualification, if available
     #
     # 'name'
@@ -306,8 +307,8 @@ class FunctionDeclaration:
 
     # returns the template arguments of the function
     #
-    def template_arguments(self):
-        return self.template_arguments_
+    def template_parameters(self):
+        return self.template_parameters_
 
     # returns the argument text of the function
     #
@@ -324,7 +325,7 @@ class FunctionDeclaration:
     #    core::identifier_string name() const
     #    {
     #      return atermpp::arg1(*this);
-    #    }    
+    #    }
     def class_member_functions(self):
         result = []
         index = 1
@@ -341,6 +342,11 @@ DEFAULT_CONSTRUCTOR = r'''    /// \\\\brief Default constructor.
 CONSTRUCTOR = r'''    /// \\\\brief Constructor.
     <CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+    {}'''
+
+OVERLOADED_CONSTRUCTOR = r'''    /// \\\\brief Constructor.
+    <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS1>)
+      : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS1>))
     {}'''
 
 ATERM_CONSTRUCTOR = r'''    /// \\\\brief Constructor.
@@ -369,7 +375,7 @@ CONTAINER_TYPEDEFS = r'''/// \\brief list of <CLASSNAME>s
 #
 # it can be initialized with a string like this:
 #
-# ActTrue   | true_()  | The value true for action formulas  
+# ActTrue   | true_()  | The value true for action formulas
 #
 # self.aterm:       the name of the corresponding ATerm
 # self.constructor: the constructor of the class
@@ -418,28 +424,75 @@ class Class:
         return self.constructor.qualifier()
 
     # Returns the definitions of the constructors
-    def constructor_definitions(self, namespace):
+    def constructor_definitions(self, namespace, add_constructor_overloads = False):
+        add_string_overload_constructor = add_constructor_overloads,
+        add_container_overload_constructor = add_constructor_overloads
         classname = self.classname()
         arguments = self.constructor.argument_text()
         superclass = self.superclass()
-        parameters = ', '.join([p.name() for p in self.constructor.parameters()])
         aterm = self.aterm
-        if len(self.constructor.parameters()) == 0:
-            text = '\n\n'.join([DEFAULT_CONSTRUCTOR, ATERM_CONSTRUCTOR])
+
+        # for constructor
+        parameters = []
+        arguments = []
+
+        # for overloaded constructor
+        parameters1 = []
+        arguments1 = []
+        arguments2 = []
+        template_parameters = []
+
+        for i, p in enumerate(self.constructor.parameters()):
+            parameters.append(p.name())
+            arguments.append('%s %s' % (p.type(), p.name()))
+            if p.type(False) == 'core::identifier_string' and add_string_overload_constructor:
+                parameters1.append('core::identifier_string(%s)' % p.name())
+                arguments1.append('const std::string& %s' % p.name())
+            elif p.is_list() and add_container_overload_constructor:
+                if len(template_parameters) > 0:
+                    template_parameter = 'Container%d' % (i+1)
+                else:
+                    template_parameter = 'Container'
+                template_parameters.append(template_parameter)
+                arguments1.append('const %s& %s' % (template_parameter, p.name()))
+                arguments2.append('typename detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)))
+                parameters1.append('convert<%s>(%s)' % (p.type(), p.name()))
+            else:
+                parameters1.append(p.name())
+                arguments1.append('%s %s' % (p.type(), p.name()))
+
+        parameters  = ', '.join(parameters)
+        arguments   = ', '.join(arguments)
+
+        if len(template_parameters) > 0:
+            template_parameters = 'template <typename %s>\n    ' % ', typename'.join(template_parameters)
         else:
-            text = '\n\n'.join([DEFAULT_CONSTRUCTOR, ATERM_CONSTRUCTOR, CONSTRUCTOR])       
+            template_parameters = ''
+        parameters1 = ', '.join(parameters1)
+        arguments1  = ', '.join(arguments1 + arguments2)
+
+        constructors = [DEFAULT_CONSTRUCTOR, ATERM_CONSTRUCTOR]
+        if len(self.constructor.parameters()) > 0:
+            constructors.append(CONSTRUCTOR)
+        if len(self.constructor.parameters()) > 0 and (add_string_overload_constructor or add_container_overload_constructor) and (parameters != parameters1):
+            constructors.append(OVERLOADED_CONSTRUCTOR)
+
+        text = '\n\n'.join(constructors)
         if superclass == None:
             superclass = 'atermpp::aterm_appl'
         text = re.sub('<CLASSNAME>'       , classname, text)
-        text = re.sub('<ARGUMENTS>'       , arguments, text)              
+        text = re.sub('<ARGUMENTS>'       , arguments, text)
+        text = re.sub('<ARGUMENTS1>'      , arguments1, text)
         text = re.sub('<SUPERCLASS>'      , superclass, text)
         text = re.sub('<NAMESPACE>'       , namespace, text)
         text = re.sub('<ATERM>'           , aterm, text)
         text = re.sub('<PARAMETERS>'      , parameters, text)
+        text = re.sub('<PARAMETERS1>'     , parameters1, text)
+        text = re.sub('<TEMPLATE_PARAMETERS>', template_parameters, text)
         return text
 
     # Returns the class definition
-    def class_definition(self, namespace = 'core', add_container_typedefs = True):
+    def class_definition(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
         classname = self.classname()
         superclass = self.superclass()
         f = self.constructor
@@ -454,7 +507,7 @@ class Class:
         parameters = [p.name() for p in f.parameters()]
         ptext = ', '.join(parameters)
 
-        ctext = self.constructor_definitions(namespace)
+        ctext = self.constructor_definitions(namespace, add_constructor_overloads)
         text = CLASS_DEFINITION
 
         if superclass == None:
@@ -484,8 +537,8 @@ class Class:
 #
 # example input:
 #
-# ActTrue   | true_()  | The value true for action formulas  
-# ActFalse  | false_() | The value false for action formulas 
+# ActTrue   | true_()  | The value true for action formulas
+# ActFalse  | false_() | The value false for action formulas
 #
 # Each line is split w.r.t. the '|' character; the words of the line
 # are put in a tuple, and the sequence of tuples is returned
