@@ -799,10 +799,10 @@ namespace mcrl2 {
       {
         data_expression fbag_expression(sort_fbag::fbag_empty(s));
 
-        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i, ++i) {
+        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i, ++i) 
+        {
           BOOST_ASSERT(is_convertible(i->sort(), s));
-
-          fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, *boost::next(i, 1));
+          fbag_expression = sort_fbag::fbagcinsert(s, *i, *boost::next(i, 1), fbag_expression);
         }
 
         return static_cast< application >(fbag_expression);

@@ -126,13 +126,13 @@ namespace mcrl2 {
               { // convert to finite set
                 sort_expression element_sort((*this)(*function_sort(head.sort()).domain().begin()));
 
-                return m_data_specification.normalise_sorts(sort_set::setfset(element_sort, sort_fset::fset(element_sort, (*this)(expression.arguments()))));
+                return sort_set::setfset(element_sort, sort_fset::fset(element_sort, (*this)(expression.arguments())));
               }
               else if (head.name() == "@BagEnum")
               { // convert to finite bag
+                using namespace sort_bag;
                 sort_expression element_sort((*this)(*function_sort(head.sort()).domain().begin()));
-
-                return m_data_specification.normalise_sorts(sort_bag::bagfbag(element_sort, sort_fbag::fbag(element_sort, (*this)(expression.arguments()))));
+                return sort_bag::bagfbag(element_sort, sort_fbag::fbag(element_sort, (*this)(expression.arguments())));
               }
             }
 
