@@ -80,7 +80,7 @@ namespace squadt {
       static boost::shared_ptr < project_manager > create(const boost::filesystem::path&, bool);
 
       /** \brief Checks whether or not a path points to a directory that can be recognised as a project store */
-      bool is_project_store(boost::filesystem::path const&);
+      //bool is_project_store(boost::filesystem::path const&);
 
       /** \brief Get the name of the project */
       std::string get_name() const;
