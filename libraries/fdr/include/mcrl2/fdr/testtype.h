@@ -16,28 +16,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Test type
-  class testtype: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      testtype()
-        : atermpp::aterm_appl(fdr::detail::constructTestType())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      testtype(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_TestType(m_term));
-      }
-  };
 
 //--- start generated classes ---//
 /// \brief A deterministic

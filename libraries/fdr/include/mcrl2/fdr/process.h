@@ -16,28 +16,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Process
-  class process: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      process()
-        : atermpp::aterm_appl(fdr::detail::constructProcess())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      process(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Process(m_term));
-      }
-  };
 
 //--- start generated classes ---//
 /// \brief A common expression

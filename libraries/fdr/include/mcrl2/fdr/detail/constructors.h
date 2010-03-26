@@ -35,7 +35,7 @@ ATermAppl constructTargGens();
 ATermAppl constructdeterministic();
 ATermAppl constructTarg0();
 ATermAppl constructFDRSpec();
-ATermAppl constructOr();
+ATermAppl constructMinus();
 ATermAppl constructTypeName();
 ATermAppl constructNumb();
 ATermAppl constructNot();
@@ -50,7 +50,7 @@ ATermAppl constructLength();
 ATermAppl constructPlus();
 ATermAppl constructT();
 ATermAppl constructDiv();
-ATermAppl constructMinus();
+ATermAppl constructOr();
 ATermAppl constructRepInterleave();
 ATermAppl constructLinks();
 ATermAppl constructLess();
@@ -60,13 +60,13 @@ ATermAppl constructConditional();
 ATermAppl constructFileName();
 ATermAppl constructBool();
 ATermAppl constructinter();
-ATermAppl constructTypeExpr();
+ATermAppl constructRepSharing();
 ATermAppl constructNotEqual();
 ATermAppl constructset();
 ATermAppl constructLinkedParallel();
 ATermAppl constructTail();
 ATermAppl constructproductions();
-ATermAppl constructInput();
+ATermAppl constructNotCheck();
 ATermAppl constructPrint();
 ATermAppl constructTargGens0();
 ATermAppl constructChannel();
@@ -74,10 +74,12 @@ ATermAppl constructHead();
 ATermAppl constructOpenRange();
 ATermAppl constructExternalChoice();
 ATermAppl constructBoolGuard();
+ATermAppl constructTypeSet();
 ATermAppl constructSubType();
 ATermAppl constructLink();
 ATermAppl constructExternal();
 ATermAppl constructSKIP();
+ATermAppl constructInput();
 ATermAppl constructlivelock_free();
 ATermAppl constructSimpleBranch();
 ATermAppl constructTimes();
@@ -89,7 +91,6 @@ ATermAppl constructmodel_compress();
 ATermAppl constructBracketed();
 ATermAppl constructInterleave();
 ATermAppl constructClosedRange();
-ATermAppl constructRepSharing();
 ATermAppl constructextensions();
 ATermAppl constructexplicate();
 ATermAppl constructNull();
@@ -134,6 +135,7 @@ ATermAppl constructMin();
 ATermAppl constructSimpleInput();
 ATermAppl constructSimpleTypeName();
 ATermAppl constructTypeProduct();
+ATermAppl constructBGen();
 ATermAppl constructnormalize();
 ATermAppl constructMap();
 ATermAppl constructsbsim();
@@ -392,19 +394,19 @@ ATermAppl constructFDRSpec()
   return t;
 }
 
-// Or
+// Minus
 inline
-ATermAppl initConstructOr(ATermAppl& t)
+ATermAppl initConstructMinus(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunOr(), reinterpret_cast<ATerm>(constructBool()), reinterpret_cast<ATerm>(constructBool()));
+  t = ATmakeAppl2(gsAFunMinus(), reinterpret_cast<ATerm>(constructNumb()), reinterpret_cast<ATerm>(constructNumb()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructOr()
+ATermAppl constructMinus()
 {
-  static ATermAppl t = initConstructOr(t);
+  static ATermAppl t = initConstructMinus(t);
   return t;
 }
 
@@ -632,19 +634,19 @@ ATermAppl constructDiv()
   return t;
 }
 
-// Minus
+// Or
 inline
-ATermAppl initConstructMinus(ATermAppl& t)
+ATermAppl initConstructOr(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunMinus(), reinterpret_cast<ATerm>(constructNumb()), reinterpret_cast<ATerm>(constructNumb()));
+  t = ATmakeAppl2(gsAFunOr(), reinterpret_cast<ATerm>(constructBool()), reinterpret_cast<ATerm>(constructBool()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructMinus()
+ATermAppl constructOr()
 {
-  static ATermAppl t = initConstructMinus(t);
+  static ATermAppl t = initConstructOr(t);
   return t;
 }
 
@@ -792,19 +794,19 @@ ATermAppl constructinter()
   return t;
 }
 
-// TypeExpr
+// RepSharing
 inline
-ATermAppl initConstructTypeExpr(ATermAppl& t)
+ATermAppl initConstructRepSharing(ATermAppl& t)
 {
-  t = ATmakeAppl1(gsAFunTypeExpr(), reinterpret_cast<ATerm>(constructExpr()));
+  t = ATmakeAppl3(gsAFunRepSharing(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructSet()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructTypeExpr()
+ATermAppl constructRepSharing()
 {
-  static ATermAppl t = initConstructTypeExpr(t);
+  static ATermAppl t = initConstructRepSharing(t);
   return t;
 }
 
@@ -888,19 +890,19 @@ ATermAppl constructproductions()
   return t;
 }
 
-// Input
+// NotCheck
 inline
-ATermAppl initConstructInput(ATermAppl& t)
+ATermAppl initConstructNotCheck(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunInput(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  t = ATmakeAppl1(gsAFunNotCheck(), reinterpret_cast<ATerm>(constructCheck()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructInput()
+ATermAppl constructNotCheck()
 {
-  static ATermAppl t = initConstructInput(t);
+  static ATermAppl t = initConstructNotCheck(t);
   return t;
 }
 
@@ -1016,6 +1018,22 @@ ATermAppl constructBoolGuard()
   return t;
 }
 
+// TypeSet
+inline
+ATermAppl initConstructTypeSet(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunTypeSet(), reinterpret_cast<ATerm>(constructSet()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructTypeSet()
+{
+  static ATermAppl t = initConstructTypeSet(t);
+  return t;
+}
+
 // SubType
 inline
 ATermAppl initConstructSubType(ATermAppl& t)
@@ -1077,6 +1095,22 @@ inline
 ATermAppl constructSKIP()
 {
   static ATermAppl t = initConstructSKIP(t);
+  return t;
+}
+
+// Input
+inline
+ATermAppl initConstructInput(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunInput(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructSet()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructInput()
+{
+  static ATermAppl t = initConstructInput(t);
   return t;
 }
 
@@ -1253,22 +1287,6 @@ inline
 ATermAppl constructClosedRange()
 {
   static ATermAppl t = initConstructClosedRange(t);
-  return t;
-}
-
-// RepSharing
-inline
-ATermAppl initConstructRepSharing(ATermAppl& t)
-{
-  t = ATmakeAppl3(gsAFunRepSharing(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructSet()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructRepSharing()
-{
-  static ATermAppl t = initConstructRepSharing(t);
   return t;
 }
 
@@ -1973,6 +1991,22 @@ inline
 ATermAppl constructTypeProduct()
 {
   static ATermAppl t = initConstructTypeProduct(t);
+  return t;
+}
+
+// BGen
+inline
+ATermAppl initConstructBGen(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunBGen(), reinterpret_cast<ATerm>(constructBool()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBGen()
+{
+  static ATermAppl t = initConstructBGen(t);
   return t;
 }
 

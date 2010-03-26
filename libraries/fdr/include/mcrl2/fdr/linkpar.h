@@ -16,28 +16,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Linkpar
-  class linkpar: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      linkpar()
-        : atermpp::aterm_appl(fdr::detail::constructLinkPar())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      linkpar(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_LinkPar(m_term));
-      }
-  };
 
 //--- start generated classes ---//
 /// \brief A link list

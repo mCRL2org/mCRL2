@@ -16,61 +16,44 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
 
-  /// \brief Generator
-  class generator: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      generator()
-        : atermpp::aterm_appl(fdr::detail::constructGen())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      generator(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Gen(m_term));
-      }
-  };
-
 //--- start generated classes ---//
 /// \brief A boolean
-class bool_
+class bgen
 {
   public:
     /// \brief Default constructor.
-    bool_()
-      : atermpp::aterm_appl(fdr::detail::constructBool())
+    bgen()
+      : atermpp::aterm_appl(fdr::detail::constructBGen())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    bool_(atermpp::aterm_appl term)
+    bgen(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(fdr::detail::check_term_Bool(m_term));
+      assert(fdr::detail::check_term_BGen(m_term));
     }
 
     /// \brief Constructor.
-    bool_(const boolean_expression& operand)
-      : atermpp::aterm_appl(fdr::detail::gsMakeBool(operand))
+    bgen(const boolean_expression& operand)
+      : atermpp::aterm_appl(fdr::detail::gsMakeBGen(operand))
     {}
 
     boolean_expression operand() const
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of bool_s
-    typedef atermpp::term_list<bool_> bool__list;
+};/// \brief list of bgens
+    typedef atermpp::term_list<bgen> bgen_list;
 
-    /// \brief vector of bool_s
-    typedef atermpp::vector<bool_>    bool__vector;
+    /// \brief vector of bgens
+    typedef atermpp::vector<bgen>    bgen_vector;
 
 
 /// \brief A generator

@@ -16,28 +16,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Check
-  class check: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      check()
-        : atermpp::aterm_appl(fdr::detail::constructCheck())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      check(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Check(m_term));
-      }
-  };
 
 //--- start generated classes ---//
 /// \brief A boolean check
@@ -152,6 +135,39 @@ class tcheck
 
     /// \brief vector of tchecks
     typedef atermpp::vector<tcheck>    tcheck_vector;
+
+
+/// \brief A negated check
+class notcheck
+{
+  public:
+    /// \brief Default constructor.
+    notcheck()
+      : atermpp::aterm_appl(fdr::detail::constructNotCheck())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    notcheck(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_term_NotCheck(m_term));
+    }
+
+    /// \brief Constructor.
+    notcheck(const check& check)
+      : atermpp::aterm_appl(fdr::detail::gsMakeNotCheck(check))
+    {}
+
+    check check() const
+    {
+      return atermpp::arg1(*this);
+    }
+};/// \brief list of notchecks
+    typedef atermpp::term_list<notcheck> notcheck_list;
+
+    /// \brief vector of notchecks
+    typedef atermpp::vector<notcheck>    notcheck_vector;
 
 //--- end generated classes ---//
 

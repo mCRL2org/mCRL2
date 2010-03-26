@@ -133,7 +133,7 @@ Branch			| branch(const name& name, const type& type)								| A branch
 TYPE_CLASSES = r'''
 TypeProduct		| typeproduct(const type& left, const type& right)							| A type product
 TypeTuple		| typetuple(const type_list& types)											| A type tuple
-TypeExpr		| typeexpr(const expression& expr)											| A type expression
+TypeSet			| typeset(const set_expression& set)										| A type set
 SympleTypeName	| simpletypename(const name& name)											| A simple type name
 TypeName		| typename(const name& name, const type& type)								| A type name
 '''
@@ -142,6 +142,7 @@ CHECK_CLASSES = r'''
 BCheck			| bcheck(const boolean_expression& expr)									| A boolean check
 RCheck			| rcheck(const process& left, const process& right, const refined& refined)	| A refinement check
 TCheck			| tcheck(const process& process, const test& test)							| A test
+NotCheck		| notcheck(const check& check)												| A negated check
 '''
 
 REFINED_CLASSES = r'''
@@ -196,7 +197,7 @@ OpenRange		| openrange(const numeric_expression& begin)									| An open range
 '''
 
 GEN_CLASSES = r'''
-Bool			| bool_(const boolean_expression& operand)									| A boolean
+BGen			| bgen(const boolean_expression& operand)									| A boolean
 Gen				| gen(const expression& left, const expression& right)						| A generator
 '''
 
@@ -229,7 +230,7 @@ RepLinkedParallel	| replinkedparallel(const generator_list& gens, const process&
 
 FIELD_CLASSES = r'''
 SimpleInput		| simpleinput(const expression& expr)										| A simple input
-Input			| input(const expression& expr, const expression& restriction)				| An input
+Input			| input(const expression& expr, const set_expression& restriction)			| An input
 Output			| output(const expression& expr)											| An output
 '''
 

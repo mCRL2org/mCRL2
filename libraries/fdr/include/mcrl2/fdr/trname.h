@@ -16,28 +16,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Transparent name
-  class trname: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      trname()
-        : atermpp::aterm_appl(fdr::detail::constructTrName())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      trname(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_TrName(m_term));
-      }
-  };
 
 //--- start generated classes ---//
 /// \brief A normal

@@ -131,6 +131,28 @@ bool gsIsBCheck(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunBCheck();
 }
 
+// BGen
+inline
+AFun initAFunBGen(AFun& f)
+{
+  f = ATmakeAFun("BGen", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBGen()
+{
+  static AFun AFunBGen = initAFunBGen(AFunBGen);
+  return AFunBGen;
+}
+
+inline
+bool gsIsBGen(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBGen();
+}
+
 // Bool
 inline
 AFun initAFunBool(AFun& f)
@@ -1451,6 +1473,28 @@ bool gsIsNot(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunNot();
 }
 
+// NotCheck
+inline
+AFun initAFunNotCheck(AFun& f)
+{
+  f = ATmakeAFun("NotCheck", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunNotCheck()
+{
+  static AFun AFunNotCheck = initAFunNotCheck(AFunNotCheck);
+  return AFunNotCheck;
+}
+
+inline
+bool gsIsNotCheck(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunNotCheck();
+}
+
 // NotEqual
 inline
 AFun initAFunNotEqual(AFun& f)
@@ -2375,28 +2419,6 @@ bool gsIsTuple(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunTuple();
 }
 
-// TypeExpr
-inline
-AFun initAFunTypeExpr(AFun& f)
-{
-  f = ATmakeAFun("TypeExpr", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunTypeExpr()
-{
-  static AFun AFunTypeExpr = initAFunTypeExpr(AFunTypeExpr);
-  return AFunTypeExpr;
-}
-
-inline
-bool gsIsTypeExpr(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunTypeExpr();
-}
-
 // TypeName
 inline
 AFun initAFunTypeName(AFun& f)
@@ -2439,6 +2461,28 @@ inline
 bool gsIsTypeProduct(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunTypeProduct();
+}
+
+// TypeSet
+inline
+AFun initAFunTypeSet(AFun& f)
+{
+  f = ATmakeAFun("TypeSet", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunTypeSet()
+{
+  static AFun AFunTypeSet = initAFunTypeSet(AFunTypeSet);
+  return AFunTypeSet;
+}
+
+inline
+bool gsIsTypeSet(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunTypeSet();
 }
 
 // TypeTuple
@@ -2978,6 +3022,12 @@ ATermAppl gsMakeBCheck(ATermAppl Bool_0)
 }
 
 inline
+ATermAppl gsMakeBGen(ATermAppl Bool_0)
+{
+  return ATmakeAppl1(gsAFunBGen(), (ATerm) Bool_0);
+}
+
+inline
 ATermAppl gsMakeBool(ATermAppl Bool_0)
 {
   return ATmakeAppl1(gsAFunBool(), (ATerm) Bool_0);
@@ -3170,9 +3220,9 @@ ATermAppl gsMakeInclude(ATermAppl FileName_0)
 }
 
 inline
-ATermAppl gsMakeInput(ATermAppl Expr_0, ATermAppl Expr_1)
+ATermAppl gsMakeInput(ATermAppl Expr_0, ATermAppl Set_1)
 {
-  return ATmakeAppl2(gsAFunInput(), (ATerm) Expr_0, (ATerm) Expr_1);
+  return ATmakeAppl2(gsAFunInput(), (ATerm) Expr_0, (ATerm) Set_1);
 }
 
 inline
@@ -3335,6 +3385,12 @@ inline
 ATermAppl gsMakeNot(ATermAppl Bool_0)
 {
   return ATmakeAppl1(gsAFunNot(), (ATerm) Bool_0);
+}
+
+inline
+ATermAppl gsMakeNotCheck(ATermAppl Check_0)
+{
+  return ATmakeAppl1(gsAFunNotCheck(), (ATerm) Check_0);
 }
 
 inline
@@ -3590,12 +3646,6 @@ ATermAppl gsMakeTuple(ATermAppl Tuple_0)
 }
 
 inline
-ATermAppl gsMakeTypeExpr(ATermAppl Expr_0)
-{
-  return ATmakeAppl1(gsAFunTypeExpr(), (ATerm) Expr_0);
-}
-
-inline
 ATermAppl gsMakeTypeName(ATermAppl Name_0, ATermList Type_1)
 {
   return ATmakeAppl2(gsAFunTypeName(), (ATerm) Name_0, (ATerm) Type_1);
@@ -3605,6 +3655,12 @@ inline
 ATermAppl gsMakeTypeProduct(ATermAppl Type_0, ATermAppl Type_1)
 {
   return ATmakeAppl2(gsAFunTypeProduct(), (ATerm) Type_0, (ATerm) Type_1);
+}
+
+inline
+ATermAppl gsMakeTypeSet(ATermAppl Set_0)
+{
+  return ATmakeAppl1(gsAFunTypeSet(), (ATerm) Set_0);
 }
 
 inline

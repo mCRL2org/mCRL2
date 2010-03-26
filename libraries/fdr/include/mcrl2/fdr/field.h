@@ -16,28 +16,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief FIELD
-  class field: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      field()
-        : atermpp::aterm_appl(fdr::detail::constructField())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      field(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Field(m_term));
-      }
-  };
 
 //--- start generated classes ---//
 /// \brief A simple input
@@ -91,7 +74,7 @@ class input
     }
 
     /// \brief Constructor.
-    input(const expression& expr, const expression& restriction)
+    input(const expression& expr, const set_expression& restriction)
       : atermpp::aterm_appl(fdr::detail::gsMakeInput(expr, restriction))
     {}
 
@@ -100,7 +83,7 @@ class input
       return atermpp::arg1(*this);
     }
 
-    expression restriction() const
+    set_expression restriction() const
     {
       return atermpp::arg2(*this);
     }

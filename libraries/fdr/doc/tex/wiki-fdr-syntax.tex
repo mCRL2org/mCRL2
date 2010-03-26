@@ -329,7 +329,7 @@ $Types$ & ::= & $Type$\\
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $Type$ & ::= & $Type$\verb"."$Type$\\
  & $|$ & \verb"("$Types$\verb")"\\
- & $|$ & $Expr$\\
+ & $|$ & $Set$\\
  & $|$ & $Name$\\
  & $|$ & $Name$\verb"("$Types$\verb")"
 \end{tabular}
@@ -424,7 +424,7 @@ $Fields$ & ::= & $\epsilon$\verb""\\
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $Field$ & ::= & \verb"?"$Expr$\\
- & $|$ & \verb"?"$Expr$\verb":"$Expr$\\
+ & $|$ & \verb"?"$Expr$\verb":"$Set$\\
  & $|$ & \verb"!"$Expr$
 \end{tabular}
 \end{center}
@@ -466,7 +466,8 @@ $Link$ & ::= & $Dotted$\verb"<->"$Dotted$
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $Check$ & ::= & $Bool$\\
  & $|$ & $Proc$ $Refined$ $Proc$\\
- & $|$ & $Proc$ \verb": [" $Test$ \verb"]"
+ & $|$ & $Proc$ \verb": [" $Test$ \verb"]"\\
+ & $|$ & \verb"not" $Check$
 \end{tabular}
 \end{center}
 \begin{center}

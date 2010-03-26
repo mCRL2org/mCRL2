@@ -16,28 +16,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Test
-  class test: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      test()
-        : atermpp::aterm_appl(fdr::detail::constructTest())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      test(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Test(m_term));
-      }
-  };
 
 //--- start generated classes ---//
 /// \brief A divergence free

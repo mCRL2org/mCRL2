@@ -16,28 +16,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Type
-  class type: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      type()
-        : atermpp::aterm_appl(fdr::detail::constructType())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      type(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Type(m_term));
-      }
-  };
 
 //--- start generated classes ---//
 /// \brief A type product
@@ -111,37 +94,37 @@ class typetuple
     typedef atermpp::vector<typetuple>    typetuple_vector;
 
 
-/// \brief A type expression
-class typeexpr
+/// \brief A type set
+class typeset
 {
   public:
     /// \brief Default constructor.
-    typeexpr()
-      : atermpp::aterm_appl(fdr::detail::constructTypeExpr())
+    typeset()
+      : atermpp::aterm_appl(fdr::detail::constructTypeSet())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    typeexpr(atermpp::aterm_appl term)
+    typeset(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(fdr::detail::check_term_TypeExpr(m_term));
+      assert(fdr::detail::check_term_TypeSet(m_term));
     }
 
     /// \brief Constructor.
-    typeexpr(const expression& expr)
-      : atermpp::aterm_appl(fdr::detail::gsMakeTypeExpr(expr))
+    typeset(const set_expression& set)
+      : atermpp::aterm_appl(fdr::detail::gsMakeTypeSet(set))
     {}
 
-    expression expr() const
+    set_expression set() const
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of typeexprs
-    typedef atermpp::term_list<typeexpr> typeexpr_list;
+};/// \brief list of typesets
+    typedef atermpp::term_list<typeset> typeset_list;
 
-    /// \brief vector of typeexprs
-    typedef atermpp::vector<typeexpr>    typeexpr_vector;
+    /// \brief vector of typesets
+    typedef atermpp::vector<typeset>    typeset_vector;
 
 
 /// \brief A simple type name

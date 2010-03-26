@@ -47,7 +47,7 @@
 
 <Type>      ::= TypeProduct(<Type>, <Type>)
               | TypeTuple(<Type>+)
-              | TypeExpr(<Expr>)
+              | TypeSet(<Set>)
               | SimpleTypeName(<Name>)
               | TypeName(<Name>, <Type>+)
 
@@ -55,6 +55,7 @@
 <Check>     ::= BCheck(<Bool>)
               | RCheck(<Proc>, <Proc>, <Refined>)
               | TCheck(<Proc>, <Test>)
+              | NotCheck(<Check>)
 
 <Refined>   ::= Model(<Model>)
 
@@ -166,7 +167,7 @@
               | OpenRange(<Numb>)
 
 // Generator
-<Gen>       ::= Bool(<Bool>)
+<Gen>       ::= BGen(<Bool>)
               | Gen(<Expr>, <Expr>)
 
 // Tuple expression
@@ -220,7 +221,7 @@
 
 // Input/Output field
 <Field>     ::= SimpleInput(<Expr>)
-              | Input(<Expr>, <Expr>)
+              | Input(<Expr>, <Set>)
               | Output(<Expr>)
 
 // Renaming
