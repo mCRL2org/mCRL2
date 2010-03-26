@@ -69,17 +69,17 @@ class common: public boolean_expression
 };
 
 /// \brief The true value
-class true: public boolean_expression
+class true_: public boolean_expression
 {
   public:
     /// \brief Default constructor.
-    true()
+    true_()
       : boolean_expression(fdr::detail::constructtrue())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    true(atermpp::aterm_appl term)
+    true_(atermpp::aterm_appl term)
       : boolean_expression(term)
     {
       assert(fdr::detail::check_term_true(m_term));
@@ -87,17 +87,17 @@ class true: public boolean_expression
 };
 
 /// \brief The false value
-class false: public boolean_expression
+class false_: public boolean_expression
 {
   public:
     /// \brief Default constructor.
-    false()
+    false_()
       : boolean_expression(fdr::detail::constructfalse())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    false(atermpp::aterm_appl term)
+    false_(atermpp::aterm_appl term)
       : boolean_expression(term)
     {
       assert(fdr::detail::check_term_false(m_term));
@@ -105,24 +105,24 @@ class false: public boolean_expression
 };
 
 /// \brief An and
-class and: public boolean_expression
+class and_: public boolean_expression
 {
   public:
     /// \brief Default constructor.
-    and()
+    and_()
       : boolean_expression(fdr::detail::constructAnd())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    and(atermpp::aterm_appl term)
+    and_(atermpp::aterm_appl term)
       : boolean_expression(term)
     {
       assert(fdr::detail::check_term_And(m_term));
     }
 
     /// \brief Constructor.
-    and(const boolean_expression& left, const boolean_expression& right)
+    and_(const boolean_expression& left, const boolean_expression& right)
       : boolean_expression(fdr::detail::gsMakeAnd(left, right))
     {}
 
@@ -138,24 +138,24 @@ class and: public boolean_expression
 };
 
 /// \brief An or
-class or: public boolean_expression
+class or_: public boolean_expression
 {
   public:
     /// \brief Default constructor.
-    or()
+    or_()
       : boolean_expression(fdr::detail::constructOr())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    or(atermpp::aterm_appl term)
+    or_(atermpp::aterm_appl term)
       : boolean_expression(term)
     {
       assert(fdr::detail::check_term_Or(m_term));
     }
 
     /// \brief Constructor.
-    or(const boolean_expression& left, const boolean_expression& right)
+    or_(const boolean_expression& left, const boolean_expression& right)
       : boolean_expression(fdr::detail::gsMakeOr(left, right))
     {}
 
@@ -530,38 +530,38 @@ class greaterorequal: public boolean_expression
       return fdr::detail::gsIsCommon(t);
     }
 
-    /// \brief Test for a true expression
+    /// \brief Test for a true_ expression
     /// \param t A term
-    /// \return True if it is a true expression
+    /// \return True if it is a true_ expression
     inline
-    bool is_true(const boolean_expression& t)
+    bool is_true_(const boolean_expression& t)
     {
       return fdr::detail::gsIstrue(t);
     }
 
-    /// \brief Test for a false expression
+    /// \brief Test for a false_ expression
     /// \param t A term
-    /// \return True if it is a false expression
+    /// \return True if it is a false_ expression
     inline
-    bool is_false(const boolean_expression& t)
+    bool is_false_(const boolean_expression& t)
     {
       return fdr::detail::gsIsfalse(t);
     }
 
-    /// \brief Test for a and expression
+    /// \brief Test for a and_ expression
     /// \param t A term
-    /// \return True if it is a and expression
+    /// \return True if it is a and_ expression
     inline
-    bool is_and(const boolean_expression& t)
+    bool is_and_(const boolean_expression& t)
     {
       return fdr::detail::gsIsAnd(t);
     }
 
-    /// \brief Test for a or expression
+    /// \brief Test for a or_ expression
     /// \param t A term
-    /// \return True if it is a or expression
+    /// \return True if it is a or_ expression
     inline
-    bool is_or(const boolean_expression& t)
+    bool is_or_(const boolean_expression& t)
     {
       return fdr::detail::gsIsOr(t);
     }

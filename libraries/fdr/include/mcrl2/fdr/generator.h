@@ -41,24 +41,24 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A boolean
-class bool
+class bool_
 {
   public:
     /// \brief Default constructor.
-    bool()
+    bool_()
       : atermpp::aterm_appl(fdr::detail::constructBool())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    bool(atermpp::aterm_appl term)
+    bool_(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Bool(m_term));
     }
 
     /// \brief Constructor.
-    bool(const boolean_expression& operand)
+    bool_(const boolean_expression& operand)
       : atermpp::aterm_appl(fdr::detail::gsMakeBool(operand))
     {}
 
@@ -66,11 +66,11 @@ class bool
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of bools
-    typedef atermpp::term_list<bool> bool_list;
+};/// \brief list of bool_s
+    typedef atermpp::term_list<bool_> bool__list;
 
-    /// \brief vector of bools
-    typedef atermpp::vector<bool>    bool_vector;
+    /// \brief vector of bool_s
+    typedef atermpp::vector<bool_>    bool__vector;
 
 
 /// \brief A generator

@@ -330,24 +330,24 @@ class transparent
 
 
 /// \brief An assertion
-class assert
+class assert_
 {
   public:
     /// \brief Default constructor.
-    assert()
+    assert_()
       : atermpp::aterm_appl(fdr::detail::constructAssert())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    assert(atermpp::aterm_appl term)
+    assert_(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Assert(m_term));
     }
 
     /// \brief Constructor.
-    assert(const check& check)
+    assert_(const check& check)
       : atermpp::aterm_appl(fdr::detail::gsMakeAssert(check))
     {}
 
@@ -355,11 +355,11 @@ class assert
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of asserts
-    typedef atermpp::term_list<assert> assert_list;
+};/// \brief list of assert_s
+    typedef atermpp::term_list<assert_> assert__list;
 
-    /// \brief vector of asserts
-    typedef atermpp::vector<assert>    assert_vector;
+    /// \brief vector of assert_s
+    typedef atermpp::vector<assert_>    assert__vector;
 
 
 /// \brief A print

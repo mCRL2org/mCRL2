@@ -28,10 +28,10 @@ Min             | min(const numeric_expression& operand)                        
 
 BOOLEAN_EXPRESSION_CLASSES = r'''
 Common			| common(const common_expression& operand)								  | A common expression
-true            | true()							 									  | The true value
-false           | false()																  | The false value
-And				| and(const boolean_expression& left, const boolean_expression& right)	  | An and
-Or				| or(const boolean_expression& left, const boolean_expression& right)	  | An or
+true            | true_()							 									  | The true value
+false           | false_()																  | The false value
+And				| and_(const boolean_expression& left, const boolean_expression& right)	  | An and
+Or				| or_(const boolean_expression& left, const boolean_expression& right)	  | An or
 Not             | not(const boolean_expression& operand)								  | An not
 Null			| null(const seq_expression& seq)										  | The empty sequence test
 Elem			| elem(const expression& expr, const seq_expression& seq)				  | The membership of a sequence test
@@ -98,7 +98,7 @@ Bracketed		| bracketed(const any& operand)												| A bracketed process or e
 
 EXPRESSION_CLASSES = r'''
 Numb			| numb(const numeric_expression& operand)									| A numeric expression
-Bool			| bool(const boolean_expression& operand)									| A boolean expression
+Bool			| bool_(const boolean_expression& operand)									| A boolean expression
 Set				| set(const set_expression& operand)										| A set expression
 Seq				| seq(const seq_expression& operand)										| A seq expression
 Tuple			| tuple(const tuple_expression& operand)									| A tuple expression
@@ -120,7 +120,7 @@ DataType		| datatype(const name& name, const vartype_list& vartypes)					| A dat
 SubType			| subtype(const name& name, const vartype_list& vartypes)					| A subtype
 External		| external(const name_list& names)											| An external
 Transparent		| transparent(const trname_list& trnames)									| A transparent
-Assert			| assert(const check& check)												| An assertion
+Assert			| assert_(const check& check)												| An assertion
 Print			| print(const expression& expr)												| A print
 Include			| include(const filename& filename)											| An include
 '''
@@ -196,7 +196,7 @@ OpenRange		| openrange(const numeric_expression& begin)									| An open range
 '''
 
 GEN_CLASSES = r'''
-Bool			| bool(const boolean_expression& operand)									| A boolean
+Bool			| bool_(const boolean_expression& operand)									| A boolean
 Gen				| gen(const expression& left, const expression& right)						| A generator
 '''
 

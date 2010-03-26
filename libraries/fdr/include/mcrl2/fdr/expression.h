@@ -69,24 +69,24 @@ class numb: public expression
 };
 
 /// \brief A boolean expression
-class bool: public expression
+class bool_: public expression
 {
   public:
     /// \brief Default constructor.
-    bool()
+    bool_()
       : expression(fdr::detail::constructBool())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    bool(atermpp::aterm_appl term)
+    bool_(atermpp::aterm_appl term)
       : expression(term)
     {
       assert(fdr::detail::check_term_Bool(m_term));
     }
 
     /// \brief Constructor.
-    bool(const boolean_expression& operand)
+    bool_(const boolean_expression& operand)
       : expression(fdr::detail::gsMakeBool(operand))
     {}
 
@@ -248,11 +248,11 @@ class lambda: public expression
       return fdr::detail::gsIsNumb(t);
     }
 
-    /// \brief Test for a bool expression
+    /// \brief Test for a bool_ expression
     /// \param t A term
-    /// \return True if it is a bool expression
+    /// \return True if it is a bool_ expression
     inline
-    bool is_bool(const expression& t)
+    bool is_bool_(const expression& t)
     {
       return fdr::detail::gsIsBool(t);
     }
