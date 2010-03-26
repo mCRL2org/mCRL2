@@ -153,11 +153,25 @@ namespace squadt {
     }
 
     void main::project_open() {
-      dialog::open_project dialog(this);
+
+	wxFileDialog* OpenDialog = new wxFileDialog(
+		this, _("Choose a file to open"), wxEmptyString, wxEmptyString, 
+		wxT("Squadt XML (*.xml)|*.xml"),
+		wxFD_OPEN, wxDefaultPosition);
+
+    	if (OpenDialog->ShowModal() == wxID_OK) // if the user click "Open" instead of "Cancel"
+    	{
+            project_open( std::string(OpenDialog->GetDirectory().fn_str() ) );
+	}
+ 
+	// Clean up after ourselves
+	OpenDialog->Destroy();
+	    
+      /*dialog::open_project dialog(this);
 
       if (dialog.ShowModal() == wxOK) {
         project_open(dialog.get_location());
-      }
+      } */
     }
 
     /**
