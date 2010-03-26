@@ -21,6 +21,8 @@
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
 
+#include <boost/filesystem/path.hpp>
+
 #include <wx/menu.h>
 #include <wx/utils.h>
 
@@ -129,19 +131,32 @@ namespace squadt {
 
     void main::project_new() {
 
-      dialog::new_project dialog(this);
+	wxDirDialog OpenDialog(
+		this, _("Select a directory for storing a Squadt project"));
 
-      switch (dialog.ShowModal()) {
-        case 1:
-          /* Create the new project */
-          project_new(dialog.get_location(), dialog.get_description());
-          break;
-        case 2:
-          project_open(dialog.get_location());
-          break;
-        default: /* Cancelled by user */
-          break;
-      }
+    	if (OpenDialog.ShowModal() == wxID_OK) // if the user click "Open" instead of "Cancel"
+    	{
+          boost::filesystem::path project_file = boost::filesystem::path( std::string(OpenDialog.GetPath().fn_str()) / boost::filesystem::path(settings_manager::project_definition_base_name) );
+          if ( boost::filesystem::exists( project_file ) )
+          {
+             wxMessageDialog OverWrite( this , _("The selected directory contains a project file \"project.xml\".\n\nSelect an option.\nYes \t= Remove project file and create a new project file\nNo \t= Open existing project file"), _("Project exists"), wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_QUESTION);	           
+             switch ( OverWrite.ShowModal()) {
+               case wxID_YES:
+                 /* Create the new project */
+                 project_new( std::string(OpenDialog.GetPath().fn_str() ) );
+                 break;
+               case wxID_NO:
+                 project_open(std::string(OpenDialog.GetPath().fn_str() ) );
+                 break;
+               default: /* Cancelled by user */
+                 break;
+  
+             }
+          } else {
+            project_new( std::string(OpenDialog.GetPath().fn_str() ) );
+          }
+	}
+	OpenDialog.Destroy();
     }
 
     /**
@@ -153,25 +168,17 @@ namespace squadt {
     }
 
     void main::project_open() {
+	    
+	wxDirDialog OpenDialog(
+		this, _("Select a directory that stores a Squadt project"));
 
-	wxFileDialog* OpenDialog = new wxFileDialog(
-		this, _("Choose a file to open"), wxEmptyString, wxEmptyString, 
-		wxT("Squadt XML (*.xml)|*.xml"),
-		wxFD_OPEN, wxDefaultPosition);
-
-    	if (OpenDialog->ShowModal() == wxID_OK) // if the user click "Open" instead of "Cancel"
+    	if (OpenDialog.ShowModal() == wxID_OK) // if the user click "Open" instead of "Cancel"
     	{
-            project_open( std::string(OpenDialog->GetDirectory().fn_str() ) );
+            project_open( std::string(OpenDialog.GetPath().fn_str() ) );
 	}
  
 	// Clean up after ourselves
-	OpenDialog->Destroy();
-	    
-      /*dialog::open_project dialog(this);
-
-      if (dialog.ShowModal() == wxOK) {
-        project_open(dialog.get_location());
-      } */
+	OpenDialog.Destroy();
     }
 
     /**
@@ -181,9 +188,10 @@ namespace squadt {
       try {
         add_project_view(new GUI::project(this, boost::filesystem::path(s)));
       }
-      catch (...) {
-        wxMessageDialog(0, wxT("Unable to load project possible reasons are corruption or an incompatible description file."),
-                                  wxT("Fatal: project file corrupt"), wxOK).ShowModal();
+      catch (std::exception const& e) {
+	std::stringstream s;
+	s << "Error:\n"<< e.what();
+        wxMessageDialog(0, wxString(s.str().c_str(), wxConvUTF8) , wxT("Fatal: project file corrupt"), wxOK).ShowModal();
       }
     }
 
