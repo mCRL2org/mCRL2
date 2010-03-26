@@ -207,7 +207,6 @@ template <typename Term> bool check_term_normal(Term t);
 template <typename Term> bool check_term_Expr(Term t);
 template <typename Term> bool check_term_Equal(Term t);
 template <typename Term> bool check_term_TypeTuple(Term t);
-template <typename Term> bool check_term_Common(Term t);
 template <typename Term> bool check_term_Output(Term t);
 template <typename Term> bool check_term_Model(Term t);
 template <typename Term> bool check_term_Dot(Term t);
@@ -407,7 +406,7 @@ template <typename Term>
 bool check_rule_Numb(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Common(t)
+  return    check_rule_Common(t)
          || check_term_Number(t)
          || check_term_Card(t)
          || check_term_Length(t)
@@ -426,7 +425,7 @@ template <typename Term>
 bool check_rule_Bool(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Common(t)
+  return    check_rule_Common(t)
          || check_term_true(t)
          || check_term_false(t)
          || check_term_And(t)
@@ -451,7 +450,7 @@ template <typename Term>
 bool check_rule_Set(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Common(t)
+  return    check_rule_Common(t)
          || check_term_Targ(t)
          || check_term_TargGens(t)
          || check_term_Targ0(t)
@@ -475,7 +474,7 @@ template <typename Term>
 bool check_rule_Seq(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Common(t)
+  return    check_rule_Common(t)
          || check_term_Targ(t)
          || check_term_TargGens(t)
          || check_term_Cat(t)
@@ -515,7 +514,7 @@ template <typename Term>
 bool check_rule_Tuple(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Common(t)
+  return    check_rule_Common(t)
          || check_term_Exprs(t);
 #else
   return true;
@@ -526,7 +525,7 @@ template <typename Term>
 bool check_rule_Dotted(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Common(t)
+  return    check_rule_Common(t)
          || check_term_Dot(t);
 #else
   return true;
@@ -537,7 +536,7 @@ template <typename Term>
 bool check_rule_Lambda(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Common(t)
+  return    check_rule_Common(t)
          || check_term_LambdaExpr(t);
 #else
   return true;
@@ -562,7 +561,7 @@ template <typename Term>
 bool check_rule_Proc(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Common(t)
+  return    check_rule_Common(t)
          || check_term_STOP(t)
          || check_term_SKIP(t)
          || check_term_CHAOS(t)
@@ -4403,34 +4402,6 @@ bool check_term_TypeTuple(Term t)
   if (!check_list_argument(a(0), check_rule_Type<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_Type" << std::endl;
-      return false;
-    }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Common(Common)
-template <typename Term>
-bool check_term_Common(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  atermpp::aterm_appl a(term);
-  if (!gsIsCommon(a))
-    return false;
-
-  // check the children
-  if (a.size() != 1)
-    return false;
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_Common<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_Common" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

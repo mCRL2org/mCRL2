@@ -329,28 +329,6 @@ bool gsIsClosedRange(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunClosedRange();
 }
 
-// Common
-inline
-AFun initAFunCommon(AFun& f)
-{
-  f = ATmakeAFun("Common", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunCommon()
-{
-  static AFun AFunCommon = initAFunCommon(AFunCommon);
-  return AFunCommon;
-}
-
-inline
-bool gsIsCommon(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunCommon();
-}
-
 // Concat
 inline
 AFun initAFunConcat(AFun& f)
@@ -3051,12 +3029,6 @@ inline
 ATermAppl gsMakeClosedRange(ATermAppl Numb_0, ATermAppl Numb_1)
 {
   return ATmakeAppl2(gsAFunClosedRange(), (ATerm) Numb_0, (ATerm) Numb_1);
-}
-
-inline
-ATermAppl gsMakeCommon(ATermAppl Common_0)
-{
-  return ATmakeAppl1(gsAFunCommon(), (ATerm) Common_0);
 }
 
 inline

@@ -148,7 +148,6 @@ ATermAppl constructnormal();
 ATermAppl constructExpr();
 ATermAppl constructEqual();
 ATermAppl constructTypeTuple();
-ATermAppl constructCommon();
 ATermAppl constructOutput();
 ATermAppl constructModel();
 ATermAppl constructDot();
@@ -164,6 +163,7 @@ ATermAppl constructFailureModel();
 ATermAppl constructTestType();
 ATermAppl constructTrName();
 ATermAppl constructAny();
+ATermAppl constructCommon();
 ATermAppl constructField();
 ATermAppl constructRenaming();
 ATermAppl constructLinkPar();
@@ -2200,22 +2200,6 @@ ATermAppl constructTypeTuple()
   return t;
 }
 
-// Common
-inline
-ATermAppl initConstructCommon(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunCommon(), reinterpret_cast<ATerm>(constructCommon()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructCommon()
-{
-  static ATermAppl t = initConstructCommon(t);
-  return t;
-}
-
 // Output
 inline
 ATermAppl initConstructOutput(ATermAppl& t)
@@ -2373,6 +2357,13 @@ inline
 ATermAppl constructAny()
 {
   return constructExpr();
+}
+
+// Common
+inline
+ATermAppl constructCommon()
+{
+  return constructConditional();
 }
 
 // Field

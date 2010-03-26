@@ -104,7 +104,7 @@
               | Lambda(<Lambda>)
 
 // Numeric expression
-<Numb>      ::= Common(<Common>)
+<Numb>      ::= <Common>
               | Number(<Number>)
               | Card(<Set>)
               | Length(<Seq>)
@@ -116,7 +116,7 @@
               | Min(<Numb>)
 
 // Boolean expression
-<Bool>      ::= Common(<Common>)
+<Bool>      ::= <Common>
               | true
               | false
               | And(<Bool>, <Bool>)
@@ -134,7 +134,7 @@
               | GreaterOrEqual(<Expr>, <Expr>)
 
 // Set expression
-<Set>       ::= Common(<Common>)
+<Set>       ::= <Common>
               | Targ(<Targ>)
               | TargGens(<Targ>, <Gen>+)
               | Targ0(<Targ>)
@@ -151,7 +151,7 @@
               | productions(<Expr>)
 
 // Sequence expression
-<Seq>       ::= Common(<Common>)
+<Seq>       ::= <Common>
               | Targ(<Targ>)
               | TargGens(<Targ>, <Gen>+)
               | Cat(<Seq>, <Seq>)
@@ -170,15 +170,15 @@
               | Gen(<Expr>, <Expr>)
 
 // Tuple expression
-<Tuple>     ::= Common(<Common>)
+<Tuple>     ::= <Common>
               | Exprs(<Expr>+)
 
 // Dotted expression
-<Dotted>    ::= Common(<Common>)
+<Dotted>    ::= <Common>
               | Dot(<Expr>, <Expr>)
 
 // Lambda expression
-<Lambda>    ::= Common(<Common>)
+<Lambda>    ::= <Common>
               | LambdaExpr(<Expr>+, <Any>)
 
 // Common expression
@@ -193,7 +193,7 @@
 //-------------
 
 // Process expression
-<Proc>      ::= Common(<Common>)
+<Proc>      ::= <Common>
               | STOP
               | SKIP
               | CHAOS(<Set>)
