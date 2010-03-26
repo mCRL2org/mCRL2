@@ -455,8 +455,8 @@ class Class:
                     template_parameter = 'Container'
                 template_parameters.append(template_parameter)
                 arguments1.append('const %s& %s' % (template_parameter, p.name()))
-                arguments2.append('typename detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)))
-                parameters1.append('convert<%s>(%s)' % (p.type(), p.name()))
+                arguments2.append('typename detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
+                parameters1.append('convert<%s>(%s)' % (re.sub('&', '', p.type()), p.name()))
             else:
                 parameters1.append(p.name())
                 arguments1.append('%s %s' % (p.type(), p.name()))
