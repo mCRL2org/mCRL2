@@ -41,53 +41,58 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A boolean
-class bool: public generator
+class bool
 {
   public:
     /// \brief Default constructor.
     bool()
-      : generator(fdr::detail::constructBool())
+      : atermpp::aterm_appl(fdr::detail::constructBool())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     bool(atermpp::aterm_appl term)
-      : generator(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Bool(m_term));
     }
 
     /// \brief Constructor.
     bool(const boolean_expression& operand)
-      : generator(fdr::detail::gsMakeBool(operand))
+      : atermpp::aterm_appl(fdr::detail::gsMakeBool(operand))
     {}
 
     boolean_expression operand() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of bools
+    typedef atermpp::term_list<bool> bool_list;
+
+    /// \brief vector of bools
+    typedef atermpp::vector<bool>    bool_vector;
+
 
 /// \brief A generator
-class gen: public generator
+class gen
 {
   public:
     /// \brief Default constructor.
     gen()
-      : generator(fdr::detail::constructGen())
+      : atermpp::aterm_appl(fdr::detail::constructGen())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     gen(atermpp::aterm_appl term)
-      : generator(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Gen(m_term));
     }
 
     /// \brief Constructor.
     gen(const expression& left, const expression& right)
-      : generator(fdr::detail::gsMakeGen(left, right))
+      : atermpp::aterm_appl(fdr::detail::gsMakeGen(left, right))
     {}
 
     expression left() const
@@ -99,7 +104,12 @@ class gen: public generator
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of gens
+    typedef atermpp::term_list<gen> gen_list;
+
+    /// \brief vector of gens
+    typedef atermpp::vector<gen>    gen_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

@@ -12,12 +12,15 @@
 #ifndef MCRL2_FDR_DETAIL_UTILITY_H
 #define MCRL2_FDR_DETAIL_UTILITY_H
 
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include <aterm2.h>
 #include <cassert>
 
 namespace mcrl2 {
 
-namespace core {
+namespace fdr {
 
 namespace detail {
 
@@ -26,14 +29,7 @@ namespace detail {
 inline
 ATermAppl gsString2ATermAppl(const char *s)
 {
-  if (s != NULL)
-  {
-    return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
-  }
-  else
-  {
-    return gsMakeNil();
-  }
+  return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
 }
 
 // checks
@@ -62,30 +58,6 @@ bool check_list_argument(Term t, CheckFunction f, unsigned int minimum_size)
     if (!f(*i))
       return false;
   }
-  return true;
-}
-
-template <typename Term>
-bool check_rule_String(Term t)
-{
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  atermpp::aterm_appl a(term);
-  if (a.size() > 0)
-    return false;
-  return true;
-}
-
-template <typename Term>
-bool check_rule_NumberString(Term t)
-{
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  atermpp::aterm_appl a(term);
-  if (a.size() > 0)
-    return false;
   return true;
 }
 

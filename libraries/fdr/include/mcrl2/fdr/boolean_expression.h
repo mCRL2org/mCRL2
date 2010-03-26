@@ -525,7 +525,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a common expression
     inline
-    bool is_common(const boolean_expresseion& t)
+    bool is_common(const boolean_expression& t)
     {
       return fdr::detail::gsIsCommon(t);
     }
@@ -534,7 +534,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a true expression
     inline
-    bool is_true(const boolean_expresseion& t)
+    bool is_true(const boolean_expression& t)
     {
       return fdr::detail::gsIstrue(t);
     }
@@ -543,7 +543,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a false expression
     inline
-    bool is_false(const boolean_expresseion& t)
+    bool is_false(const boolean_expression& t)
     {
       return fdr::detail::gsIsfalse(t);
     }
@@ -552,7 +552,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a and expression
     inline
-    bool is_and(const boolean_expresseion& t)
+    bool is_and(const boolean_expression& t)
     {
       return fdr::detail::gsIsAnd(t);
     }
@@ -561,7 +561,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a or expression
     inline
-    bool is_or(const boolean_expresseion& t)
+    bool is_or(const boolean_expression& t)
     {
       return fdr::detail::gsIsOr(t);
     }
@@ -570,7 +570,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a not expression
     inline
-    bool is_not(const boolean_expresseion& t)
+    bool is_not(const boolean_expression& t)
     {
       return fdr::detail::gsIsNot(t);
     }
@@ -579,7 +579,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a null expression
     inline
-    bool is_null(const boolean_expresseion& t)
+    bool is_null(const boolean_expression& t)
     {
       return fdr::detail::gsIsNull(t);
     }
@@ -588,7 +588,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a elem expression
     inline
-    bool is_elem(const boolean_expresseion& t)
+    bool is_elem(const boolean_expression& t)
     {
       return fdr::detail::gsIsElem(t);
     }
@@ -597,7 +597,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a member expression
     inline
-    bool is_member(const boolean_expresseion& t)
+    bool is_member(const boolean_expression& t)
     {
       return fdr::detail::gsIsMember(t);
     }
@@ -606,7 +606,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a empty expression
     inline
-    bool is_empty(const boolean_expresseion& t)
+    bool is_empty(const boolean_expression& t)
     {
       return fdr::detail::gsIsEmpty(t);
     }
@@ -615,7 +615,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a equal expression
     inline
-    bool is_equal(const boolean_expresseion& t)
+    bool is_equal(const boolean_expression& t)
     {
       return fdr::detail::gsIsEqual(t);
     }
@@ -624,7 +624,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a notequal expression
     inline
-    bool is_notequal(const boolean_expresseion& t)
+    bool is_notequal(const boolean_expression& t)
     {
       return fdr::detail::gsIsNotEqual(t);
     }
@@ -633,7 +633,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a less expression
     inline
-    bool is_less(const boolean_expresseion& t)
+    bool is_less(const boolean_expression& t)
     {
       return fdr::detail::gsIsLess(t);
     }
@@ -642,7 +642,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a lessorequal expression
     inline
-    bool is_lessorequal(const boolean_expresseion& t)
+    bool is_lessorequal(const boolean_expression& t)
     {
       return fdr::detail::gsIsLessOrEqual(t);
     }
@@ -651,7 +651,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a greater expression
     inline
-    bool is_greater(const boolean_expresseion& t)
+    bool is_greater(const boolean_expression& t)
     {
       return fdr::detail::gsIsGreater(t);
     }
@@ -660,7 +660,7 @@ class greaterorequal: public boolean_expression
     /// \param t A term
     /// \return True if it is a greaterorequal expression
     inline
-    bool is_greaterorequal(const boolean_expresseion& t)
+    bool is_greaterorequal(const boolean_expression& t)
     {
       return fdr::detail::gsIsGreaterOrEqual(t);
     }

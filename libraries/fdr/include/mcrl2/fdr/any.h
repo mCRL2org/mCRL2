@@ -41,60 +41,70 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An expression
-class expr: public any
+class expr
 {
   public:
     /// \brief Default constructor.
     expr()
-      : any(fdr::detail::constructExpr())
+      : atermpp::aterm_appl(fdr::detail::constructExpr())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     expr(atermpp::aterm_appl term)
-      : any(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Expr(m_term));
     }
 
     /// \brief Constructor.
     expr(const expression& operand)
-      : any(fdr::detail::gsMakeExpr(operand))
+      : atermpp::aterm_appl(fdr::detail::gsMakeExpr(operand))
     {}
 
     expression operand() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of exprs
+    typedef atermpp::term_list<expr> expr_list;
+
+    /// \brief vector of exprs
+    typedef atermpp::vector<expr>    expr_vector;
+
 
 /// \brief A process
-class proc: public any
+class proc
 {
   public:
     /// \brief Default constructor.
     proc()
-      : any(fdr::detail::constructProc())
+      : atermpp::aterm_appl(fdr::detail::constructProc())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     proc(atermpp::aterm_appl term)
-      : any(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Proc(m_term));
     }
 
     /// \brief Constructor.
     proc(const process& operand)
-      : any(fdr::detail::gsMakeProc(operand))
+      : atermpp::aterm_appl(fdr::detail::gsMakeProc(operand))
     {}
 
     process operand() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of procs
+    typedef atermpp::term_list<proc> proc_list;
+
+    /// \brief vector of procs
+    typedef atermpp::vector<proc>    proc_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

@@ -41,76 +41,50 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An empty
-class nil: public model
+class nil
 {
   public:
     /// \brief Default constructor.
     nil()
-      : model(fdr::detail::constructNil())
+      : atermpp::aterm_appl(fdr::detail::constructNil())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     nil(atermpp::aterm_appl term)
-      : model(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Nil(m_term));
     }
-};
+};/// \brief list of nils
+    typedef atermpp::term_list<nil> nil_list;
+
+    /// \brief vector of nils
+    typedef atermpp::vector<nil>    nil_vector;
+
 
 /// \brief A traces
-class t: public model
+class t
 {
   public:
     /// \brief Default constructor.
     t()
-      : model(fdr::detail::constructT())
+      : atermpp::aterm_appl(fdr::detail::constructT())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     t(atermpp::aterm_appl term)
-      : model(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_T(m_term));
     }
-};
+};/// \brief list of ts
+    typedef atermpp::term_list<t> t_list;
 
-/// \brief A failures
-class f: public model
-{
-  public:
-    /// \brief Default constructor.
-    f()
-      : model(fdr::detail::constructF())
-    {}
+    /// \brief vector of ts
+    typedef atermpp::vector<t>    t_vector;
 
-    /// \brief Constructor.
-    /// \param term A term
-    f(atermpp::aterm_appl term)
-      : model(term)
-    {
-      assert(fdr::detail::check_term_F(m_term));
-    }
-};
-
-/// \brief A failures/divergences
-class fd: public model
-{
-  public:
-    /// \brief Default constructor.
-    fd()
-      : model(fdr::detail::constructFD())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    fd(atermpp::aterm_appl term)
-      : model(term)
-    {
-      assert(fdr::detail::check_term_FD(m_term));
-    }
-};
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

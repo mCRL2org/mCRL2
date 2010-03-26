@@ -41,25 +41,25 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A link
-class link: public link
+class link
 {
   public:
     /// \brief Default constructor.
     link()
-      : link(fdr::detail::constructLink())
+      : atermpp::aterm_appl(fdr::detail::constructLink())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     link(atermpp::aterm_appl term)
-      : link(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Link(m_term));
     }
 
     /// \brief Constructor.
     link(const dotted_expression& left, const dotted_expression& right)
-      : link(fdr::detail::gsMakeLink(left, right))
+      : atermpp::aterm_appl(fdr::detail::gsMakeLink(left, right))
     {}
 
     dotted_expression left() const
@@ -71,7 +71,12 @@ class link: public link
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of links
+    typedef atermpp::term_list<link> link_list;
+
+    /// \brief vector of links
+    typedef atermpp::vector<link>    link_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

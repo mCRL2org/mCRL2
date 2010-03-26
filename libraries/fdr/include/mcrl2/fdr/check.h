@@ -41,53 +41,58 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A boolean check
-class bcheck: public check
+class bcheck
 {
   public:
     /// \brief Default constructor.
     bcheck()
-      : check(fdr::detail::constructBCheck())
+      : atermpp::aterm_appl(fdr::detail::constructBCheck())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     bcheck(atermpp::aterm_appl term)
-      : check(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_BCheck(m_term));
     }
 
     /// \brief Constructor.
     bcheck(const boolean_expression& expr)
-      : check(fdr::detail::gsMakeBCheck(expr))
+      : atermpp::aterm_appl(fdr::detail::gsMakeBCheck(expr))
     {}
 
     boolean_expression expr() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of bchecks
+    typedef atermpp::term_list<bcheck> bcheck_list;
+
+    /// \brief vector of bchecks
+    typedef atermpp::vector<bcheck>    bcheck_vector;
+
 
 /// \brief A refinement check
-class rcheck: public check
+class rcheck
 {
   public:
     /// \brief Default constructor.
     rcheck()
-      : check(fdr::detail::constructRCheck())
+      : atermpp::aterm_appl(fdr::detail::constructRCheck())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     rcheck(atermpp::aterm_appl term)
-      : check(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_RCheck(m_term));
     }
 
     /// \brief Constructor.
     rcheck(const process& left, const process& right, const refined& refined)
-      : check(fdr::detail::gsMakeRCheck(left, right, refined))
+      : atermpp::aterm_appl(fdr::detail::gsMakeRCheck(left, right, refined))
     {}
 
     process left() const
@@ -104,28 +109,33 @@ class rcheck: public check
     {
       return atermpp::arg3(*this);
     }
-};
+};/// \brief list of rchecks
+    typedef atermpp::term_list<rcheck> rcheck_list;
+
+    /// \brief vector of rchecks
+    typedef atermpp::vector<rcheck>    rcheck_vector;
+
 
 /// \brief A test
-class tcheck: public check
+class tcheck
 {
   public:
     /// \brief Default constructor.
     tcheck()
-      : check(fdr::detail::constructTCheck())
+      : atermpp::aterm_appl(fdr::detail::constructTCheck())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     tcheck(atermpp::aterm_appl term)
-      : check(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_TCheck(m_term));
     }
 
     /// \brief Constructor.
     tcheck(const process& process, const test& test)
-      : check(fdr::detail::gsMakeTCheck(process, test))
+      : atermpp::aterm_appl(fdr::detail::gsMakeTCheck(process, test))
     {}
 
     process process() const
@@ -137,7 +147,12 @@ class tcheck: public check
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of tchecks
+    typedef atermpp::term_list<tcheck> tcheck_list;
+
+    /// \brief vector of tchecks
+    typedef atermpp::vector<tcheck>    tcheck_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

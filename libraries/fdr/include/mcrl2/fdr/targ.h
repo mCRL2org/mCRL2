@@ -41,71 +41,81 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An empty
-class nil: public targ
+class nil
 {
   public:
     /// \brief Default constructor.
     nil()
-      : targ(fdr::detail::constructNil())
+      : atermpp::aterm_appl(fdr::detail::constructNil())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     nil(atermpp::aterm_appl term)
-      : targ(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Nil(m_term));
     }
-};
+};/// \brief list of nils
+    typedef atermpp::term_list<nil> nil_list;
+
+    /// \brief vector of nils
+    typedef atermpp::vector<nil>    nil_vector;
+
 
 /// \brief An expression list
-class exprs: public targ
+class exprs
 {
   public:
     /// \brief Default constructor.
     exprs()
-      : targ(fdr::detail::constructExprs())
+      : atermpp::aterm_appl(fdr::detail::constructExprs())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     exprs(atermpp::aterm_appl term)
-      : targ(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Exprs(m_term));
     }
 
     /// \brief Constructor.
     exprs(const expression_list& exprs)
-      : targ(fdr::detail::gsMakeExprs(exprs))
+      : atermpp::aterm_appl(fdr::detail::gsMakeExprs(exprs))
     {}
 
     expression_list exprs() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of exprss
+    typedef atermpp::term_list<exprs> exprs_list;
+
+    /// \brief vector of exprss
+    typedef atermpp::vector<exprs>    exprs_vector;
+
 
 /// \brief A closed range
-class closedrange: public targ
+class closedrange
 {
   public:
     /// \brief Default constructor.
     closedrange()
-      : targ(fdr::detail::constructClosedRange())
+      : atermpp::aterm_appl(fdr::detail::constructClosedRange())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     closedrange(atermpp::aterm_appl term)
-      : targ(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_ClosedRange(m_term));
     }
 
     /// \brief Constructor.
     closedrange(const numeric_expression& begin, const numeric_expression& end)
-      : targ(fdr::detail::gsMakeClosedRange(begin, end))
+      : atermpp::aterm_appl(fdr::detail::gsMakeClosedRange(begin, end))
     {}
 
     numeric_expression begin() const
@@ -117,35 +127,45 @@ class closedrange: public targ
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of closedranges
+    typedef atermpp::term_list<closedrange> closedrange_list;
+
+    /// \brief vector of closedranges
+    typedef atermpp::vector<closedrange>    closedrange_vector;
+
 
 /// \brief An open range
-class openrange: public targ
+class openrange
 {
   public:
     /// \brief Default constructor.
     openrange()
-      : targ(fdr::detail::constructOpenRange())
+      : atermpp::aterm_appl(fdr::detail::constructOpenRange())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     openrange(atermpp::aterm_appl term)
-      : targ(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_OpenRange(m_term));
     }
 
     /// \brief Constructor.
     openrange(const numeric_expression& begin)
-      : targ(fdr::detail::gsMakeOpenRange(begin))
+      : atermpp::aterm_appl(fdr::detail::gsMakeOpenRange(begin))
     {}
 
     numeric_expression begin() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of openranges
+    typedef atermpp::term_list<openrange> openrange_list;
+
+    /// \brief vector of openranges
+    typedef atermpp::vector<openrange>    openrange_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

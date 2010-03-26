@@ -151,8 +151,6 @@ Model			| model(const model& model)													| A model
 MODEL_CLASSES = r'''
 Nil				| nil()																		| An empty
 T				| t()																		| A traces
-F				| f()																		| A failures
-FD				| fd()																		| A failures/divergences
 '''
 
 FAILUREMODEL_CLASSES = r'''
@@ -161,9 +159,6 @@ FD				| fd()																		| A faulures/divergences
 '''
 
 TEST_CLASSES = r'''
-deterministic	| deterministic()															| A deterministic
-deadlock_free	| deadlock_free()															| A deadlock free
-livelock_free	| livelock_free()															| A livelock free
 divergence_free	| divergence_free()															| A divergence free
 Test			| test(const testtype& testtype, const failuremodel& failuremodel)			| A complex test
 '''

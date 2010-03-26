@@ -41,53 +41,58 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A simple input
-class simpleinput: public field
+class simpleinput
 {
   public:
     /// \brief Default constructor.
     simpleinput()
-      : field(fdr::detail::constructSimpleInput())
+      : atermpp::aterm_appl(fdr::detail::constructSimpleInput())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     simpleinput(atermpp::aterm_appl term)
-      : field(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_SimpleInput(m_term));
     }
 
     /// \brief Constructor.
     simpleinput(const expression& expr)
-      : field(fdr::detail::gsMakeSimpleInput(expr))
+      : atermpp::aterm_appl(fdr::detail::gsMakeSimpleInput(expr))
     {}
 
     expression expr() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of simpleinputs
+    typedef atermpp::term_list<simpleinput> simpleinput_list;
+
+    /// \brief vector of simpleinputs
+    typedef atermpp::vector<simpleinput>    simpleinput_vector;
+
 
 /// \brief An input
-class input: public field
+class input
 {
   public:
     /// \brief Default constructor.
     input()
-      : field(fdr::detail::constructInput())
+      : atermpp::aterm_appl(fdr::detail::constructInput())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     input(atermpp::aterm_appl term)
-      : field(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Input(m_term));
     }
 
     /// \brief Constructor.
     input(const expression& expr, const expression& restriction)
-      : field(fdr::detail::gsMakeInput(expr, restriction))
+      : atermpp::aterm_appl(fdr::detail::gsMakeInput(expr, restriction))
     {}
 
     expression expr() const
@@ -99,35 +104,45 @@ class input: public field
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of inputs
+    typedef atermpp::term_list<input> input_list;
+
+    /// \brief vector of inputs
+    typedef atermpp::vector<input>    input_vector;
+
 
 /// \brief An output
-class output: public field
+class output
 {
   public:
     /// \brief Default constructor.
     output()
-      : field(fdr::detail::constructOutput())
+      : atermpp::aterm_appl(fdr::detail::constructOutput())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     output(atermpp::aterm_appl term)
-      : field(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Output(m_term));
     }
 
     /// \brief Constructor.
     output(const expression& expr)
-      : field(fdr::detail::gsMakeOutput(expr))
+      : atermpp::aterm_appl(fdr::detail::gsMakeOutput(expr))
     {}
 
     expression expr() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of outputs
+    typedef atermpp::term_list<output> output_list;
+
+    /// \brief vector of outputs
+    typedef atermpp::vector<output>    output_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

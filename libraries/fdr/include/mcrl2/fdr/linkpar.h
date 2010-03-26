@@ -41,53 +41,58 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A link list
-class links: public linkpar
+class links
 {
   public:
     /// \brief Default constructor.
     links()
-      : linkpar(fdr::detail::constructLinks())
+      : atermpp::aterm_appl(fdr::detail::constructLinks())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     links(atermpp::aterm_appl term)
-      : linkpar(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Links(m_term));
     }
 
     /// \brief Constructor.
     links(const link_list& links)
-      : linkpar(fdr::detail::gsMakeLinks(links))
+      : atermpp::aterm_appl(fdr::detail::gsMakeLinks(links))
     {}
 
     link_list links() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of linkss
+    typedef atermpp::term_list<links> links_list;
+
+    /// \brief vector of linkss
+    typedef atermpp::vector<links>    links_vector;
+
 
 /// \brief A link/generator list
-class linksgens: public linkpar
+class linksgens
 {
   public:
     /// \brief Default constructor.
     linksgens()
-      : linkpar(fdr::detail::constructLinksGens())
+      : atermpp::aterm_appl(fdr::detail::constructLinksGens())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     linksgens(atermpp::aterm_appl term)
-      : linkpar(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_LinksGens(m_term));
     }
 
     /// \brief Constructor.
     linksgens(const link_list& links, const generator_list& gens)
-      : linkpar(fdr::detail::gsMakeLinksGens(links, gens))
+      : atermpp::aterm_appl(fdr::detail::gsMakeLinksGens(links, gens))
     {}
 
     link_list links() const
@@ -99,7 +104,12 @@ class linksgens: public linkpar
     {
       return atermpp::list_arg2(*this);
     }
-};
+};/// \brief list of linksgenss
+    typedef atermpp::term_list<linksgens> linksgens_list;
+
+    /// \brief vector of linksgenss
+    typedef atermpp::vector<linksgens>    linksgens_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

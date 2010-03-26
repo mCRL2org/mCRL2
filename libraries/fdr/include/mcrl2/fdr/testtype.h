@@ -41,58 +41,73 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A deterministic
-class deterministic: public testtype
+class deterministic
 {
   public:
     /// \brief Default constructor.
     deterministic()
-      : testtype(fdr::detail::constructdeterministic())
+      : atermpp::aterm_appl(fdr::detail::constructdeterministic())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     deterministic(atermpp::aterm_appl term)
-      : testtype(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_deterministic(m_term));
     }
-};
+};/// \brief list of deterministics
+    typedef atermpp::term_list<deterministic> deterministic_list;
+
+    /// \brief vector of deterministics
+    typedef atermpp::vector<deterministic>    deterministic_vector;
+
 
 /// \brief A deadlock free
-class deadlock_free: public testtype
+class deadlock_free
 {
   public:
     /// \brief Default constructor.
     deadlock_free()
-      : testtype(fdr::detail::constructdeadlock_free())
+      : atermpp::aterm_appl(fdr::detail::constructdeadlock_free())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     deadlock_free(atermpp::aterm_appl term)
-      : testtype(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_deadlock_free(m_term));
     }
-};
+};/// \brief list of deadlock_frees
+    typedef atermpp::term_list<deadlock_free> deadlock_free_list;
+
+    /// \brief vector of deadlock_frees
+    typedef atermpp::vector<deadlock_free>    deadlock_free_vector;
+
 
 /// \brief A livelock free
-class livelock_free: public testtype
+class livelock_free
 {
   public:
     /// \brief Default constructor.
     livelock_free()
-      : testtype(fdr::detail::constructlivelock_free())
+      : atermpp::aterm_appl(fdr::detail::constructlivelock_free())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     livelock_free(atermpp::aterm_appl term)
-      : testtype(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_livelock_free(m_term));
     }
-};
+};/// \brief list of livelock_frees
+    typedef atermpp::term_list<livelock_free> livelock_free_list;
+
+    /// \brief vector of livelock_frees
+    typedef atermpp::vector<livelock_free>    livelock_free_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

@@ -41,53 +41,58 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A simple branch
-class simplebranch: public vartype
+class simplebranch
 {
   public:
     /// \brief Default constructor.
     simplebranch()
-      : vartype(fdr::detail::constructSimpleBranch())
+      : atermpp::aterm_appl(fdr::detail::constructSimpleBranch())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     simplebranch(atermpp::aterm_appl term)
-      : vartype(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_SimpleBranch(m_term));
     }
 
     /// \brief Constructor.
     simplebranch(const name& name)
-      : vartype(fdr::detail::gsMakeSimpleBranch(name))
+      : atermpp::aterm_appl(fdr::detail::gsMakeSimpleBranch(name))
     {}
 
     name name() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of simplebranchs
+    typedef atermpp::term_list<simplebranch> simplebranch_list;
+
+    /// \brief vector of simplebranchs
+    typedef atermpp::vector<simplebranch>    simplebranch_vector;
+
 
 /// \brief A branch
-class branch: public vartype
+class branch
 {
   public:
     /// \brief Default constructor.
     branch()
-      : vartype(fdr::detail::constructBranch())
+      : atermpp::aterm_appl(fdr::detail::constructBranch())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     branch(atermpp::aterm_appl term)
-      : vartype(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Branch(m_term));
     }
 
     /// \brief Constructor.
     branch(const name& name, const type& type)
-      : vartype(fdr::detail::gsMakeBranch(name, type))
+      : atermpp::aterm_appl(fdr::detail::gsMakeBranch(name, type))
     {}
 
     name name() const
@@ -99,7 +104,12 @@ class branch: public vartype
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of branchs
+    typedef atermpp::term_list<branch> branch_list;
+
+    /// \brief vector of branchs
+    typedef atermpp::vector<branch>    branch_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

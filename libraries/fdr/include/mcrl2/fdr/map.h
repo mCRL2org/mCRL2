@@ -16,50 +16,33 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
 
 namespace mcrl2 {
 
 namespace fdr {
 
-  /// \brief Map
-  class map: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      map()
-        : atermpp::aterm_appl(fdr::detail::constructMap())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      map(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Map(m_term));
-      }
-  };
-
 //--- start generated classes ---//
 /// \brief A map
-class map: public map
+class map
 {
   public:
     /// \brief Default constructor.
     map()
-      : map(fdr::detail::constructMap())
+      : atermpp::aterm_appl(fdr::detail::constructMap())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     map(atermpp::aterm_appl term)
-      : map(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Map(m_term));
     }
 
     /// \brief Constructor.
     map(const dotted_expression& left, const dotted_expression& right)
-      : map(fdr::detail::gsMakeMap(left, right))
+      : atermpp::aterm_appl(fdr::detail::gsMakeMap(left, right))
     {}
 
     dotted_expression left() const
@@ -71,7 +54,12 @@ class map: public map
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of maps
+    typedef atermpp::term_list<map> map_list;
+
+    /// \brief vector of maps
+    typedef atermpp::vector<map>    map_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

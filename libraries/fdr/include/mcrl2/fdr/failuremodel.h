@@ -41,40 +41,50 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A failures
-class f: public failuremodel
+class f
 {
   public:
     /// \brief Default constructor.
     f()
-      : failuremodel(fdr::detail::constructF())
+      : atermpp::aterm_appl(fdr::detail::constructF())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     f(atermpp::aterm_appl term)
-      : failuremodel(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_F(m_term));
     }
-};
+};/// \brief list of fs
+    typedef atermpp::term_list<f> f_list;
+
+    /// \brief vector of fs
+    typedef atermpp::vector<f>    f_vector;
+
 
 /// \brief A faulures/divergences
-class fd: public failuremodel
+class fd
 {
   public:
     /// \brief Default constructor.
     fd()
-      : failuremodel(fdr::detail::constructFD())
+      : atermpp::aterm_appl(fdr::detail::constructFD())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     fd(atermpp::aterm_appl term)
-      : failuremodel(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_FD(m_term));
     }
-};
+};/// \brief list of fds
+    typedef atermpp::term_list<fd> fd_list;
+
+    /// \brief vector of fds
+    typedef atermpp::vector<fd>    fd_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

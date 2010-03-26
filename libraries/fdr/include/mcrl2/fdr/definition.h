@@ -41,25 +41,25 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An assignment
-class assign: public definition
+class assign
 {
   public:
     /// \brief Default constructor.
     assign()
-      : definition(fdr::detail::constructAssign())
+      : atermpp::aterm_appl(fdr::detail::constructAssign())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     assign(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Assign(m_term));
     }
 
     /// \brief Constructor.
     assign(const any& left, const any& right)
-      : definition(fdr::detail::gsMakeAssign(left, right))
+      : atermpp::aterm_appl(fdr::detail::gsMakeAssign(left, right))
     {}
 
     any left() const
@@ -71,28 +71,33 @@ class assign: public definition
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of assigns
+    typedef atermpp::term_list<assign> assign_list;
+
+    /// \brief vector of assigns
+    typedef atermpp::vector<assign>    assign_vector;
+
 
 /// \brief A channel
-class channel: public definition
+class channel
 {
   public:
     /// \brief Default constructor.
     channel()
-      : definition(fdr::detail::constructChannel())
+      : atermpp::aterm_appl(fdr::detail::constructChannel())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     channel(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Channel(m_term));
     }
 
     /// \brief Constructor.
     channel(const name_list& names, const type& type)
-      : definition(fdr::detail::gsMakeChannel(names, type))
+      : atermpp::aterm_appl(fdr::detail::gsMakeChannel(names, type))
     {}
 
     name_list names() const
@@ -104,56 +109,66 @@ class channel: public definition
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of channels
+    typedef atermpp::term_list<channel> channel_list;
+
+    /// \brief vector of channels
+    typedef atermpp::vector<channel>    channel_vector;
+
 
 /// \brief A simple channel
-class channel: public definition
+class channel
 {
   public:
     /// \brief Default constructor.
     channel()
-      : definition(fdr::detail::constructSimpleChannel())
+      : atermpp::aterm_appl(fdr::detail::constructSimpleChannel())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     channel(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_SimpleChannel(m_term));
     }
 
     /// \brief Constructor.
     channel(const name_list& names)
-      : definition(fdr::detail::gsMakeSimpleChannel(names))
+      : atermpp::aterm_appl(fdr::detail::gsMakeSimpleChannel(names))
     {}
 
     name_list names() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of channels
+    typedef atermpp::term_list<channel> channel_list;
+
+    /// \brief vector of channels
+    typedef atermpp::vector<channel>    channel_vector;
+
 
 /// \brief A nametype
-class nametype: public definition
+class nametype
 {
   public:
     /// \brief Default constructor.
     nametype()
-      : definition(fdr::detail::constructNameType())
+      : atermpp::aterm_appl(fdr::detail::constructNameType())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     nametype(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_NameType(m_term));
     }
 
     /// \brief Constructor.
     nametype(const name& name, const type& type)
-      : definition(fdr::detail::gsMakeNameType(name, type))
+      : atermpp::aterm_appl(fdr::detail::gsMakeNameType(name, type))
     {}
 
     name name() const
@@ -165,28 +180,33 @@ class nametype: public definition
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of nametypes
+    typedef atermpp::term_list<nametype> nametype_list;
+
+    /// \brief vector of nametypes
+    typedef atermpp::vector<nametype>    nametype_vector;
+
 
 /// \brief A datatype
-class datatype: public definition
+class datatype
 {
   public:
     /// \brief Default constructor.
     datatype()
-      : definition(fdr::detail::constructDataType())
+      : atermpp::aterm_appl(fdr::detail::constructDataType())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     datatype(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_DataType(m_term));
     }
 
     /// \brief Constructor.
     datatype(const name& name, const vartype_list& vartypes)
-      : definition(fdr::detail::gsMakeDataType(name, vartypes))
+      : atermpp::aterm_appl(fdr::detail::gsMakeDataType(name, vartypes))
     {}
 
     name name() const
@@ -198,28 +218,33 @@ class datatype: public definition
     {
       return atermpp::list_arg2(*this);
     }
-};
+};/// \brief list of datatypes
+    typedef atermpp::term_list<datatype> datatype_list;
+
+    /// \brief vector of datatypes
+    typedef atermpp::vector<datatype>    datatype_vector;
+
 
 /// \brief A subtype
-class subtype: public definition
+class subtype
 {
   public:
     /// \brief Default constructor.
     subtype()
-      : definition(fdr::detail::constructSubType())
+      : atermpp::aterm_appl(fdr::detail::constructSubType())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     subtype(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_SubType(m_term));
     }
 
     /// \brief Constructor.
     subtype(const name& name, const vartype_list& vartypes)
-      : definition(fdr::detail::gsMakeSubType(name, vartypes))
+      : atermpp::aterm_appl(fdr::detail::gsMakeSubType(name, vartypes))
     {}
 
     name name() const
@@ -231,147 +256,177 @@ class subtype: public definition
     {
       return atermpp::list_arg2(*this);
     }
-};
+};/// \brief list of subtypes
+    typedef atermpp::term_list<subtype> subtype_list;
+
+    /// \brief vector of subtypes
+    typedef atermpp::vector<subtype>    subtype_vector;
+
 
 /// \brief An external
-class external: public definition
+class external
 {
   public:
     /// \brief Default constructor.
     external()
-      : definition(fdr::detail::constructExternal())
+      : atermpp::aterm_appl(fdr::detail::constructExternal())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     external(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_External(m_term));
     }
 
     /// \brief Constructor.
     external(const name_list& names)
-      : definition(fdr::detail::gsMakeExternal(names))
+      : atermpp::aterm_appl(fdr::detail::gsMakeExternal(names))
     {}
 
     name_list names() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of externals
+    typedef atermpp::term_list<external> external_list;
+
+    /// \brief vector of externals
+    typedef atermpp::vector<external>    external_vector;
+
 
 /// \brief A transparent
-class transparent: public definition
+class transparent
 {
   public:
     /// \brief Default constructor.
     transparent()
-      : definition(fdr::detail::constructTransparent())
+      : atermpp::aterm_appl(fdr::detail::constructTransparent())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     transparent(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Transparent(m_term));
     }
 
     /// \brief Constructor.
     transparent(const trname_list& trnames)
-      : definition(fdr::detail::gsMakeTransparent(trnames))
+      : atermpp::aterm_appl(fdr::detail::gsMakeTransparent(trnames))
     {}
 
     trname_list trnames() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of transparents
+    typedef atermpp::term_list<transparent> transparent_list;
+
+    /// \brief vector of transparents
+    typedef atermpp::vector<transparent>    transparent_vector;
+
 
 /// \brief An assertion
-class assert: public definition
+class assert
 {
   public:
     /// \brief Default constructor.
     assert()
-      : definition(fdr::detail::constructAssert())
+      : atermpp::aterm_appl(fdr::detail::constructAssert())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     assert(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Assert(m_term));
     }
 
     /// \brief Constructor.
     assert(const check& check)
-      : definition(fdr::detail::gsMakeAssert(check))
+      : atermpp::aterm_appl(fdr::detail::gsMakeAssert(check))
     {}
 
     check check() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of asserts
+    typedef atermpp::term_list<assert> assert_list;
+
+    /// \brief vector of asserts
+    typedef atermpp::vector<assert>    assert_vector;
+
 
 /// \brief A print
-class print: public definition
+class print
 {
   public:
     /// \brief Default constructor.
     print()
-      : definition(fdr::detail::constructPrint())
+      : atermpp::aterm_appl(fdr::detail::constructPrint())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     print(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Print(m_term));
     }
 
     /// \brief Constructor.
     print(const expression& expr)
-      : definition(fdr::detail::gsMakePrint(expr))
+      : atermpp::aterm_appl(fdr::detail::gsMakePrint(expr))
     {}
 
     expression expr() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of prints
+    typedef atermpp::term_list<print> print_list;
+
+    /// \brief vector of prints
+    typedef atermpp::vector<print>    print_vector;
+
 
 /// \brief An include
-class include: public definition
+class include
 {
   public:
     /// \brief Default constructor.
     include()
-      : definition(fdr::detail::constructInclude())
+      : atermpp::aterm_appl(fdr::detail::constructInclude())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     include(atermpp::aterm_appl term)
-      : definition(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Include(m_term));
     }
 
     /// \brief Constructor.
     include(const filename& filename)
-      : definition(fdr::detail::gsMakeInclude(filename))
+      : atermpp::aterm_appl(fdr::detail::gsMakeInclude(filename))
     {}
 
     filename filename() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of includes
+    typedef atermpp::term_list<include> include_list;
+
+    /// \brief vector of includes
+    typedef atermpp::vector<include>    include_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

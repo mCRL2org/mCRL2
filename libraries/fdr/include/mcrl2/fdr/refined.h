@@ -41,32 +41,37 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A model
-class model: public refined
+class model
 {
   public:
     /// \brief Default constructor.
     model()
-      : refined(fdr::detail::constructModel())
+      : atermpp::aterm_appl(fdr::detail::constructModel())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     model(atermpp::aterm_appl term)
-      : refined(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Model(m_term));
     }
 
     /// \brief Constructor.
     model(const model& model)
-      : refined(fdr::detail::gsMakeModel(model))
+      : atermpp::aterm_appl(fdr::detail::gsMakeModel(model))
     {}
 
     model model() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of models
+    typedef atermpp::term_list<model> model_list;
+
+    /// \brief vector of models
+    typedef atermpp::vector<model>    model_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

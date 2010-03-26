@@ -40,98 +40,49 @@ namespace fdr {
   };
 
 //--- start generated classes ---//
-/// \brief A deterministic
-class deterministic: public test
-{
-  public:
-    /// \brief Default constructor.
-    deterministic()
-      : test(fdr::detail::constructdeterministic())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    deterministic(atermpp::aterm_appl term)
-      : test(term)
-    {
-      assert(fdr::detail::check_term_deterministic(m_term));
-    }
-};
-
-/// \brief A deadlock free
-class deadlock_free: public test
-{
-  public:
-    /// \brief Default constructor.
-    deadlock_free()
-      : test(fdr::detail::constructdeadlock_free())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    deadlock_free(atermpp::aterm_appl term)
-      : test(term)
-    {
-      assert(fdr::detail::check_term_deadlock_free(m_term));
-    }
-};
-
-/// \brief A livelock free
-class livelock_free: public test
-{
-  public:
-    /// \brief Default constructor.
-    livelock_free()
-      : test(fdr::detail::constructlivelock_free())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    livelock_free(atermpp::aterm_appl term)
-      : test(term)
-    {
-      assert(fdr::detail::check_term_livelock_free(m_term));
-    }
-};
-
 /// \brief A divergence free
-class divergence_free: public test
+class divergence_free
 {
   public:
     /// \brief Default constructor.
     divergence_free()
-      : test(fdr::detail::constructdivergence_free())
+      : atermpp::aterm_appl(fdr::detail::constructdivergence_free())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     divergence_free(atermpp::aterm_appl term)
-      : test(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_divergence_free(m_term));
     }
-};
+};/// \brief list of divergence_frees
+    typedef atermpp::term_list<divergence_free> divergence_free_list;
+
+    /// \brief vector of divergence_frees
+    typedef atermpp::vector<divergence_free>    divergence_free_vector;
+
 
 /// \brief A complex test
-class test: public test
+class test
 {
   public:
     /// \brief Default constructor.
     test()
-      : test(fdr::detail::constructTest())
+      : atermpp::aterm_appl(fdr::detail::constructTest())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     test(atermpp::aterm_appl term)
-      : test(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Test(m_term));
     }
 
     /// \brief Constructor.
     test(const testtype& testtype, const failuremodel& failuremodel)
-      : test(fdr::detail::gsMakeTest(testtype, failuremodel))
+      : atermpp::aterm_appl(fdr::detail::gsMakeTest(testtype, failuremodel))
     {}
 
     testtype testtype() const
@@ -143,7 +94,12 @@ class test: public test
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of tests
+    typedef atermpp::term_list<test> test_list;
+
+    /// \brief vector of tests
+    typedef atermpp::vector<test>    test_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

@@ -41,32 +41,37 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An FDR specification
-class fdrspec: public fdrspec
+class fdrspec
 {
   public:
     /// \brief Default constructor.
     fdrspec()
-      : fdrspec(fdr::detail::constructFDRSpec())
+      : atermpp::aterm_appl(fdr::detail::constructFDRSpec())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     fdrspec(atermpp::aterm_appl term)
-      : fdrspec(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_FDRSpec(m_term));
     }
 
     /// \brief Constructor.
     fdrspec(const definition_list& defs)
-      : fdrspec(fdr::detail::gsMakeFDRSpec(defs))
+      : atermpp::aterm_appl(fdr::detail::gsMakeFDRSpec(defs))
     {}
 
     definition_list defs() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of fdrspecs
+    typedef atermpp::term_list<fdrspec> fdrspec_list;
+
+    /// \brief vector of fdrspecs
+    typedef atermpp::vector<fdrspec>    fdrspec_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

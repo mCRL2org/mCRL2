@@ -41,32 +41,37 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A filename
-class filename: public filename
+class filename
 {
   public:
     /// \brief Default constructor.
     filename()
-      : filename(fdr::detail::constructFileName())
+      : atermpp::aterm_appl(fdr::detail::constructFileName())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     filename(atermpp::aterm_appl term)
-      : filename(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_FileName(m_term));
     }
 
     /// \brief Constructor.
     filename(const name_list& names)
-      : filename(fdr::detail::gsMakeFileName(names))
+      : atermpp::aterm_appl(fdr::detail::gsMakeFileName(names))
     {}
 
     name_list names() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of filenames
+    typedef atermpp::term_list<filename> filename_list;
+
+    /// \brief vector of filenames
+    typedef atermpp::vector<filename>    filename_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

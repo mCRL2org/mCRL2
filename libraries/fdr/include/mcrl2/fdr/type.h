@@ -41,25 +41,25 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A type product
-class typeproduct: public type
+class typeproduct
 {
   public:
     /// \brief Default constructor.
     typeproduct()
-      : type(fdr::detail::constructTypeProduct())
+      : atermpp::aterm_appl(fdr::detail::constructTypeProduct())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     typeproduct(atermpp::aterm_appl term)
-      : type(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_TypeProduct(m_term));
     }
 
     /// \brief Constructor.
     typeproduct(const type& left, const type& right)
-      : type(fdr::detail::gsMakeTypeProduct(left, right))
+      : atermpp::aterm_appl(fdr::detail::gsMakeTypeProduct(left, right))
     {}
 
     type left() const
@@ -71,112 +71,132 @@ class typeproduct: public type
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of typeproducts
+    typedef atermpp::term_list<typeproduct> typeproduct_list;
+
+    /// \brief vector of typeproducts
+    typedef atermpp::vector<typeproduct>    typeproduct_vector;
+
 
 /// \brief A type tuple
-class typetuple: public type
+class typetuple
 {
   public:
     /// \brief Default constructor.
     typetuple()
-      : type(fdr::detail::constructTypeTuple())
+      : atermpp::aterm_appl(fdr::detail::constructTypeTuple())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     typetuple(atermpp::aterm_appl term)
-      : type(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_TypeTuple(m_term));
     }
 
     /// \brief Constructor.
     typetuple(const type_list& types)
-      : type(fdr::detail::gsMakeTypeTuple(types))
+      : atermpp::aterm_appl(fdr::detail::gsMakeTypeTuple(types))
     {}
 
     type_list types() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of typetuples
+    typedef atermpp::term_list<typetuple> typetuple_list;
+
+    /// \brief vector of typetuples
+    typedef atermpp::vector<typetuple>    typetuple_vector;
+
 
 /// \brief A type expression
-class typeexpr: public type
+class typeexpr
 {
   public:
     /// \brief Default constructor.
     typeexpr()
-      : type(fdr::detail::constructTypeExpr())
+      : atermpp::aterm_appl(fdr::detail::constructTypeExpr())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     typeexpr(atermpp::aterm_appl term)
-      : type(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_TypeExpr(m_term));
     }
 
     /// \brief Constructor.
     typeexpr(const expression& expr)
-      : type(fdr::detail::gsMakeTypeExpr(expr))
+      : atermpp::aterm_appl(fdr::detail::gsMakeTypeExpr(expr))
     {}
 
     expression expr() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of typeexprs
+    typedef atermpp::term_list<typeexpr> typeexpr_list;
+
+    /// \brief vector of typeexprs
+    typedef atermpp::vector<typeexpr>    typeexpr_vector;
+
 
 /// \brief A simple type name
-class simpletypename: public type
+class simpletypename
 {
   public:
     /// \brief Default constructor.
     simpletypename()
-      : type(fdr::detail::constructSympleTypeName())
+      : atermpp::aterm_appl(fdr::detail::constructSympleTypeName())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     simpletypename(atermpp::aterm_appl term)
-      : type(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_SympleTypeName(m_term));
     }
 
     /// \brief Constructor.
     simpletypename(const name& name)
-      : type(fdr::detail::gsMakeSympleTypeName(name))
+      : atermpp::aterm_appl(fdr::detail::gsMakeSympleTypeName(name))
     {}
 
     name name() const
     {
       return atermpp::arg1(*this);
     }
-};
+};/// \brief list of simpletypenames
+    typedef atermpp::term_list<simpletypename> simpletypename_list;
+
+    /// \brief vector of simpletypenames
+    typedef atermpp::vector<simpletypename>    simpletypename_vector;
+
 
 /// \brief A type name
-class typename: public type
+class typename
 {
   public:
     /// \brief Default constructor.
     typename()
-      : type(fdr::detail::constructTypeName())
+      : atermpp::aterm_appl(fdr::detail::constructTypeName())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     typename(atermpp::aterm_appl term)
-      : type(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_TypeName(m_term));
     }
 
     /// \brief Constructor.
     typename(const name& name, const type& type)
-      : type(fdr::detail::gsMakeTypeName(name, type))
+      : atermpp::aterm_appl(fdr::detail::gsMakeTypeName(name, type))
     {}
 
     name name() const
@@ -188,7 +208,12 @@ class typename: public type
     {
       return atermpp::arg2(*this);
     }
-};
+};/// \brief list of typenames
+    typedef atermpp::term_list<typename> typename_list;
+
+    /// \brief vector of typenames
+    typedef atermpp::vector<typename>    typename_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

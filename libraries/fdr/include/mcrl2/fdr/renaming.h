@@ -41,53 +41,58 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A map list
-class maps: public renaming
+class maps
 {
   public:
     /// \brief Default constructor.
     maps()
-      : renaming(fdr::detail::constructMaps())
+      : atermpp::aterm_appl(fdr::detail::constructMaps())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     maps(atermpp::aterm_appl term)
-      : renaming(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Maps(m_term));
     }
 
     /// \brief Constructor.
     maps(const map_list& maps)
-      : renaming(fdr::detail::gsMakeMaps(maps))
+      : atermpp::aterm_appl(fdr::detail::gsMakeMaps(maps))
     {}
 
     map_list maps() const
     {
       return atermpp::list_arg1(*this);
     }
-};
+};/// \brief list of mapss
+    typedef atermpp::term_list<maps> maps_list;
+
+    /// \brief vector of mapss
+    typedef atermpp::vector<maps>    maps_vector;
+
 
 /// \brief A map/generator list
-class mapsgens: public renaming
+class mapsgens
 {
   public:
     /// \brief Default constructor.
     mapsgens()
-      : renaming(fdr::detail::constructMapsGens())
+      : atermpp::aterm_appl(fdr::detail::constructMapsGens())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     mapsgens(atermpp::aterm_appl term)
-      : renaming(term)
+      : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_MapsGens(m_term));
     }
 
     /// \brief Constructor.
     mapsgens(const map_list& maps, const generator_list& gens)
-      : renaming(fdr::detail::gsMakeMapsGens(maps, gens))
+      : atermpp::aterm_appl(fdr::detail::gsMakeMapsGens(maps, gens))
     {}
 
     map_list maps() const
@@ -99,7 +104,12 @@ class mapsgens: public renaming
     {
       return atermpp::list_arg2(*this);
     }
-};
+};/// \brief list of mapsgenss
+    typedef atermpp::term_list<mapsgens> mapsgens_list;
+
+    /// \brief vector of mapsgenss
+    typedef atermpp::vector<mapsgens>    mapsgens_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

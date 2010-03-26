@@ -24,6 +24,30 @@ namespace fdr {
 
 namespace detail {
 
+template <typename Term>
+bool check_rule_Name(Term t)
+{
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (a.size() > 0)
+    return false;
+  return true;
+}
+
+template <typename Term>
+bool check_rule_Number(Term t)
+{
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (a.size() > 0)
+    return false;
+  return true;
+}
+
 //--- start generated code ---//
 template <typename Term> bool check_rule_FDRSpec(Term t);
 template <typename Term> bool check_rule_Defn(Term t);
