@@ -16,6 +16,10 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/common_expression.h"
+#include "mcrl2/fdr/seq_expression.h"
+#include "mcrl2/fdr/set_expression.h"
+#include "mcrl2/fdr/expression.h"
 
 namespace mcrl2 {
 
