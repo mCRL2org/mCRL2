@@ -175,7 +175,8 @@ void nat_rewrite_test() {
   data_rewrite_test(R, greater_equal(variable("n", nat()), p0), sort_bool::true_());
 }
 
-void int_rewrite_test() {
+void int_rewrite_test() 
+{
   using namespace mcrl2::data::sort_int;
   std::cerr << "int_rewrite_test\n";
 
@@ -319,7 +320,8 @@ void list_rewrite_test()
   data_rewrite_test(R, tail(bool_(), head_true), empty);
 }
 
-void set_rewrite_test() {
+void set_rewrite_test() 
+{
   using namespace mcrl2::data::sort_set;
   using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_nat;
@@ -330,6 +332,7 @@ void set_rewrite_test() {
   );
 
   specification.add_context_sort(set_(nat()));
+  specification.add_context_sort(set_(bool_()));
 
   data::rewriter R(specification);
 
@@ -361,9 +364,19 @@ void set_rewrite_test() {
   data_rewrite_test(R, specification.normalise_sorts(setdifference(nat(), s, s2)), s1);
 
   data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p0, setcomplement(nat(), s))), true_());
+  // extra tests by Jan Friso
+  data::data_expression x = data::parse_data_expression("1 in {n:Nat|n<5}",specification);
+  data_rewrite_test(R, x, true_());
+  x = data::parse_data_expression("7 in {n:Nat|n<5}",specification);
+  data_rewrite_test(R, x, false_());
+  x = data::parse_data_expression("true in {n:Bool|n || !n}",specification);
+  data_rewrite_test(R, x, true_());
+  x = data::parse_data_expression("false in {n:Bool|n && !n}",specification);
+  data_rewrite_test(R, x, false_());
 }
 
-void bag_rewrite_test() {
+void bag_rewrite_test() 
+{
   using namespace mcrl2::data::sort_bag;
   using namespace mcrl2::data::sort_fbag;
   using namespace mcrl2::data::sort_nat;
@@ -375,6 +388,7 @@ void bag_rewrite_test() {
   );
 
   specification.add_context_sort(bag(nat()));
+  specification.add_context_sort(bag(pos()));
 
   data::rewriter R(specification);
 
@@ -408,6 +422,14 @@ void bag_rewrite_test() {
   data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, empty)), s);
   data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, s1)), s2);
   data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, s2)), s1);
+
+  // extra tests by Jan Friso
+  data::data_expression x = data::parse_data_expression("count(1,{ 1:1,2:2})==1",specification);
+  data_rewrite_test(R, x, true_());
+  x = data::parse_data_expression("count(2,{ 1:1,2:2})==2",specification);
+  data_rewrite_test(R, x, true_());
+  x = data::parse_data_expression("count(2,{ 1:1,2:2})==1",specification);
+  data_rewrite_test(R, x, false_());
 }
 
 void structured_sort_rewrite_test() {
