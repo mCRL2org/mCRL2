@@ -527,7 +527,7 @@ class Class:
         text = re.sub('<MEMBER_FUNCTIONS>', mtext, text)
         if add_container_typedefs and (superclass == None):
             atext = re.sub('<CLASSNAME>', classname, CONTAINER_TYPEDEFS)
-            if use_base_class_name and (self.classname != self.base_classname):
+            if self.use_base_class_name_ and (self.classname_ != self.base_classname_):
                 atext = 'class %s;\n\n' % classname + atext
             text = text + atext
         return text + '\n'
