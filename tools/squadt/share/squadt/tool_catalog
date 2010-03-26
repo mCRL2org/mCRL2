@@ -23,5 +23,5 @@
 <tool name="pbesparelm" />
 <tool name="pbesrewr" />
 <tool name="pnml2mcrl2" />
-<tool name="xsim" />
+<tool name="lpsxsim" />
 </tool-catalog>
