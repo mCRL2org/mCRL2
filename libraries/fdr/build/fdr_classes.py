@@ -14,7 +14,6 @@ import re
 import string
 
 NUMERIC_EXPRESSION_CLASSES = r'''
-Common          | common(const common_expression& operand)                                | A common expression
 Number          | number(const number_expression& number)                                 | A number
 Card            | card(const set_expression& set)                                         | The cardinality of a set
 Length          | length(const seq_expression& seq)                                       | The length of a sequence
@@ -27,7 +26,6 @@ Min             | min(const numeric_expression& operand)                        
 '''                                                                                                                                 
 
 BOOLEAN_EXPRESSION_CLASSES = r'''
-Common			| common(const common_expression& operand)								  | A common expression
 true            | true_()							 									  | The true value
 false           | false_()																  | The false value
 And				| and_(const boolean_expression& left, const boolean_expression& right)	  | An and
@@ -46,7 +44,6 @@ GreaterOrEqual	| greaterorequal(const expression& left, const expression& right)
 '''
 
 SET_EXPRESSION_CLASSES = r'''
-Common			| common(const common_expression& operand)									| A common expression
 Targ			| targ(const targ& targ)													| A simple argument
 TargGens		| targgens(const targ& targ, const generator_list& gens)					| A complex argument
 Targ0			| targ0(const targ& targ)													| A simple argument (for channels)
@@ -64,7 +61,6 @@ productions		| productions(const expression& expr)										| The production set
 '''
 
 SEQ_EXPRESSION_CLASSES = r'''
-Common			| common(const common_expression& operand)									| A common expression
 Targ			| targ(const targ& targ)													| A simple argument
 TargGens		| targgens(const targ& targ, const generator_list& gens)					| A complex argument
 Cat				| cat(const seq_expression& left, const seq_expression& right)				| The concatenation of two sequences
@@ -74,17 +70,14 @@ Tail			| tail(const seq_expression& seq)											| The tail of a non-empty seq
 '''
 
 TUPLE_EXPRESSION_CLASSES = r'''
-Common			| common(const common_expression& operand)									| A common expression
 Exprs			| exprs(const expression_list& exprs)										| A tuple expression
 '''
 
 DOTTED_EXPRESSION_CLASSES = r'''
-Common			| common(const common_expression& operand)									| A common expression
 Dot				| dot(const expression& left, expression& right)							| A dotted expression
 '''
 
 LAMBDA_EXPRESSION_CLASSES = r'''
-Common			| common(const common_expression& operand)									| A common expression
 LambdaExpr		| lambdaexpr(const expression_list& exprs, const any& any)					| A lambda expression
 '''
 
@@ -202,7 +195,6 @@ Gen				| gen(const expression& left, const expression& right)						| A generator
 '''
 
 PROCESS_CLASSES = r'''
-Common			| common(const common_expression& operand)									| A common expression
 STOP			| stop()																	| A stop
 SKIP			| skip()																	| A skip
 CHAOS			| chaos(const set_expression& set)											| A chaos

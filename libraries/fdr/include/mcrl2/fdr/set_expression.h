@@ -41,34 +41,6 @@ namespace fdr {
   };
 
 //--- start generated classes ---//
-/// \brief A common expression
-class common: public set_expression
-{
-  public:
-    /// \brief Default constructor.
-    common()
-      : set_expression(fdr::detail::constructCommon())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    common(atermpp::aterm_appl term)
-      : set_expression(term)
-    {
-      assert(fdr::detail::check_term_Common(m_term));
-    }
-
-    /// \brief Constructor.
-    common(const common_expression& operand)
-      : set_expression(fdr::detail::gsMakeCommon(operand))
-    {}
-
-    common_expression operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-};
-
 /// \brief A simple argument
 class targ: public set_expression
 {
@@ -488,15 +460,6 @@ class productions: public set_expression
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a common expression
-    /// \param t A term
-    /// \return True if it is a common expression
-    inline
-    bool is_common(const set_expression& t)
-    {
-      return fdr::detail::gsIsCommon(t);
-    }
 
     /// \brief Test for a targ expression
     /// \param t A term

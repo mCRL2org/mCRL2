@@ -23,39 +23,6 @@ namespace mcrl2 {
 namespace fdr {
 
 //--- start generated classes ---//
-/// \brief A common expression
-class common
-{
-  public:
-    /// \brief Default constructor.
-    common()
-      : atermpp::aterm_appl(fdr::detail::constructCommon())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    common(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Common(m_term));
-    }
-
-    /// \brief Constructor.
-    common(const common_expression& operand)
-      : atermpp::aterm_appl(fdr::detail::gsMakeCommon(operand))
-    {}
-
-    common_expression operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-};/// \brief list of commons
-    typedef atermpp::term_list<common> common_list;
-
-    /// \brief vector of commons
-    typedef atermpp::vector<common>    common_vector;
-
-
 /// \brief A stop
 class stop
 {

@@ -41,34 +41,6 @@ namespace fdr {
   };
 
 //--- start generated classes ---//
-/// \brief A common expression
-class common: public numeric_expression
-{
-  public:
-    /// \brief Default constructor.
-    common()
-      : numeric_expression(fdr::detail::constructCommon())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    common(atermpp::aterm_appl term)
-      : numeric_expression(term)
-    {
-      assert(fdr::detail::check_term_Common(m_term));
-    }
-
-    /// \brief Constructor.
-    common(const common_expression& operand)
-      : numeric_expression(fdr::detail::gsMakeCommon(operand))
-    {}
-
-    common_expression operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-};
-
 /// \brief A number
 class number: public numeric_expression
 {
@@ -348,15 +320,6 @@ class min: public numeric_expression
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a common expression
-    /// \param t A term
-    /// \return True if it is a common expression
-    inline
-    bool is_common(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsCommon(t);
-    }
 
     /// \brief Test for a number expression
     /// \param t A term
