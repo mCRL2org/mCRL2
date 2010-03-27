@@ -784,11 +784,11 @@ endif( ENABLE_TEST_TARGETS )
   add_test(pbes2bool_abp ${pbes2bool_BINARY_DIR}/pbes2bool -v ${testdir}/abp_celm_pelm_sinst.pbes)
 
   # Simulation tools
-  # add_test(sim_abp ${sim_BINARY_DIR}/sim ${testdir}/abp_celm_pelm_sinst.lps )
-  # set_tests_properties(sim_abp PROPERTIES TIMEOUT 15 )
+  # add_test(lpssim_abp ${lpssim_BINARY_DIR}/lpssim ${testdir}/abp_celm_pelm_sinst.lps )
+  # set_tests_properties(lpssim_abp PROPERTIES TIMEOUT 15 )
 
-  # add_test(xsim_abp ${xsim_BINARY_DIR}/xsim ${testdir}/abp_celm_pelm_sinst.lps )
-  # set_tests_properties(xsim_abp PROPERTIES TIMEOUT 15 )
+  # add_test(lpsxsim_abp ${lpsxsim_BINARY_DIR}/lpsxsim ${testdir}/abp_celm_pelm_sinst.lps )
+  # set_tests_properties(lpsxsim_abp PROPERTIES TIMEOUT 15 )
 
   # Graphical tools
   # add_test(diagraphica_abp ${diagraphica_BINARY_DIR}/diagraphica ${testdir}/abp_celm_pelm_sinst.aut )
@@ -948,7 +948,7 @@ SET(CPACK_PACKAGE_VENDOR "TUe")
 
 # Create Desktop link to squadt
 set(CPACK_CREATE_DESKTOP_LINKS squadt)
-set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grapemcrl2;grape" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "xsim;xsim")
+set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim")
 
   IF(APPLE)
     SET(CPACK_SET_DESTDIR TRUE)
