@@ -23,28 +23,32 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
 //--- start generated class ---//
 /// \brief A function symbol
-class function_symbol_base: public data_expression
+class function_symbol: public data_expression
 {
   public:
     /// \brief Default constructor.
-    function_symbol_base()
+    function_symbol()
       : data_expression(core::detail::constructOpId())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    function_symbol_base(atermpp::aterm_appl term)
+    function_symbol(atermpp::aterm_appl term)
       : data_expression(term)
     {
       assert(core::detail::check_term_OpId(m_term));
     }
 
     /// \brief Constructor.
-    function_symbol_base(const core::identifier_string& name, const sort_expression& sort)
+    function_symbol(const core::identifier_string& name, const sort_expression& sort)
       : data_expression(core::detail::gsMakeOpId(name, sort))
+    {}
+
+    /// \brief Constructor.
+    function_symbol(const std::string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort))
     {}
 
     core::identifier_string name() const
@@ -58,42 +62,6 @@ class function_symbol_base: public data_expression
     }
 };
 //--- end generated class ---//
-
-    } // namespace detail
-
-    /// \brief function symbol.
-    ///
-    class function_symbol: public detail::function_symbol_base
-    {
-      public:
-
-        /// \brief Constructor.
-        ///
-        function_symbol()
-          : detail::function_symbol_base(core::detail::constructOpId())
-        {}
-
-        /// \overload
-        function_symbol(atermpp::aterm_appl term)
-         : function_symbol_base(term)
-        {}
-
-        /// \overload
-        function_symbol(const core::identifier_string& name, const sort_expression& sort)
-         : function_symbol_base(name, sort)
-        {}
-
-        /// \brief Constructor.
-        ///
-        /// \param[in] name The name of the function.
-        /// \param[in] sort The sort of the function.
-        function_symbol(const std::string& name,
-                        const sort_expression& sort)
-          : detail::function_symbol_base(name, sort)
-        {
-        }
-
-    }; // class function_symbol
 
     /// \brief list of function symbols
     typedef atermpp::term_list< function_symbol > function_symbol_list;

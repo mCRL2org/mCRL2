@@ -510,6 +510,11 @@ class variable: public state_formula
       : state_formula(core::detail::gsMakeStateVar(name, arguments))
     {}
 
+    /// \brief Constructor.
+    variable(const std::string& name, const data::data_expression_list& arguments)
+      : state_formula(core::detail::gsMakeStateVar(core::identifier_string(name), arguments))
+    {}
+
     core::identifier_string name() const
     {
       return atermpp::arg1(*this);
@@ -541,6 +546,11 @@ class nu: public state_formula
     /// \brief Constructor.
     nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateNu(name, assignments, operand))
+    {}
+
+    /// \brief Constructor.
+    nu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
+      : state_formula(core::detail::gsMakeStateNu(core::identifier_string(name), assignments, operand))
     {}
 
     core::identifier_string name() const
@@ -579,6 +589,11 @@ class mu: public state_formula
     /// \brief Constructor.
     mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateMu(name, assignments, operand))
+    {}
+
+    /// \brief Constructor.
+    mu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
+      : state_formula(core::detail::gsMakeStateMu(core::identifier_string(name), assignments, operand))
     {}
 
     core::identifier_string name() const

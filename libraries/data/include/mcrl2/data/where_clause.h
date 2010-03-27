@@ -45,6 +45,12 @@ class where_clause_base: public data_expression
       : data_expression(core::detail::gsMakeWhr(body, declarations))
     {}
 
+    /// \brief Constructor.
+    template <typename Container>
+    where_clause_base(const data_expression& body, const Container& declarations, typename detail::enable_if_container<Container, assignment_expression>::type* = 0)
+      : data_expression(core::detail::gsMakeWhr(body, convert<const assignment_expression_list>(declarations)))
+    {}
+
     data_expression body() const
     {
       return atermpp::arg1(*this);

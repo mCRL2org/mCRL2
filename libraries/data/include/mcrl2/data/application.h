@@ -41,8 +41,14 @@ class application_base: public data_expression
     }
 
     /// \brief Constructor.
-    application_base(const data_expression& head, data_expression_list const& arguments)
+    application_base(const data_expression& head, const data_expression_list& arguments)
       : data_expression(core::detail::gsMakeDataAppl(head, arguments))
+    {}
+
+    /// \brief Constructor.
+    template <typename Container>
+    application_base(const data_expression& head, const Container& arguments, typename detail::enable_if_container<Container, data_expression>::type* = 0)
+      : data_expression(core::detail::gsMakeDataAppl(head, convert<const data_expression_list>(arguments)))
     {}
 
     data_expression head() const
@@ -96,18 +102,12 @@ class application_base: public data_expression
           : detail::application_base(head, arguments)
         {}
 
-        /// \brief Constructor for an application with an abitrary number of
-        ///        arguments.
-        ///
-        /// \param[in] head The data expression that is applied.
-        /// \param[in] arguments The data expressions that head is applied to (objects of type data_expression or derived).
-        /// \pre head.sort() is a function sort.
-        /// \pre arguments is not empty.
+        ///\overload
         template < typename Container >
         application(const data_expression& head,
                     const Container& arguments,
                     typename detail::enable_if_container< Container, data_expression >::type* = 0)
-          : detail::application_base(head, convert< data_expression_list >(arguments))
+          : detail::application_base(head, arguments)
         {
           assert(head.sort().is_function_sort());
           assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));

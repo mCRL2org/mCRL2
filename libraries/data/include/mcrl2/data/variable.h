@@ -27,29 +27,32 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
-
 //--- start generated class ---//
 /// \brief A data variable
-class variable_base: public data_expression
+class variable: public data_expression
 {
   public:
     /// \brief Default constructor.
-    variable_base()
+    variable()
       : data_expression(core::detail::constructDataVarId())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    variable_base(atermpp::aterm_appl term)
+    variable(atermpp::aterm_appl term)
       : data_expression(term)
     {
       assert(core::detail::check_term_DataVarId(m_term));
     }
 
     /// \brief Constructor.
-    variable_base(const core::identifier_string& name, const sort_expression& sort)
+    variable(const core::identifier_string& name, const sort_expression& sort)
       : data_expression(core::detail::gsMakeDataVarId(name, sort))
+    {}
+
+    /// \brief Constructor.
+    variable(const std::string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeDataVarId(core::identifier_string(name), sort))
     {}
 
     core::identifier_string name() const
@@ -63,40 +66,6 @@ class variable_base: public data_expression
     }
 };
 //--- end generated class ---//
-
-    } // namespace detail
-
-    /// \brief data variable.
-    ///
-    class variable: public detail::variable_base
-    {
-      public:
-
-        /// \brief Constructor.
-        ///
-        variable()
-          : detail::variable_base(core::detail::constructDataVarId())
-        {}
-
-        ///\overload
-        variable(atermpp::aterm_appl term)
-          : detail::variable_base(term)
-        {}
-
-        ///\overload
-        variable(const core::identifier_string& name, const sort_expression& sort)
-          : detail::variable_base(name, sort)
-        {}
-
-        /// \brief Constructor.
-        ///
-        /// \param[in] name The name of the variable.
-        /// \param[in] sort The sort of the variable.
-        variable(const std::string& name, const sort_expression& sort)
-          : detail::variable_base(atermpp::aterm_string(name), sort)
-        {}
-
-    }; // class variable
 
     /// \brief list of variables
     typedef atermpp::term_list< variable >                         variable_list;

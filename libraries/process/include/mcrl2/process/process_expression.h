@@ -90,7 +90,7 @@ class process_instance: public process_expression
     }
 
     /// \brief Constructor.
-    process_instance(const process_identifier identifier, const data::data_expression_list& actual_parameters)
+    process_instance(const process_identifier& identifier, const data::data_expression_list& actual_parameters)
       : process_expression(core::detail::gsMakeProcess(identifier, actual_parameters))
     {}
 

@@ -48,6 +48,12 @@ class abstraction_base: public data_expression
       : data_expression(core::detail::gsMakeBinder(binding_operator, variables, body))
     {}
 
+    /// \brief Constructor.
+    template <typename Container>
+    abstraction_base(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename detail::enable_if_container<Container, variable>::type* = 0)
+      : data_expression(core::detail::gsMakeBinder(binding_operator, convert<const variable_list>(variables), body))
+    {}
+
     binder_type binding_operator() const
     {
       return atermpp::arg1(*this);
@@ -93,59 +99,20 @@ class abstraction_base: public data_expression
           : abstraction_base(term)
         {}
 
-        /// Construct abstraction from a data expression.
-        /// \param[in] d a data expression
-        /// \pre d.is_abstraction()
-        abstraction(const data_expression& d)
-          : detail::abstraction_base(d)
-        {
-          assert(d.is_abstraction());
-        }
-
         /// \overload
         abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
           : abstraction_base(binding_operator, variables, body)
         {}
 
-        /// Constructor.
-        ///
-        /// \param[in] binding_operator The binding operator of the abstraction.
-        ///              This may be one of "lambda", "forall",
-        ///              "exists", "setcomprehension", "bagcomprehension".
-        /// \param[in] variables A nonempty list of binding variables (objects of type variable)
-        /// \param[in] body The body of the abstraction.
-        /// \pre binding_operator is one of "lambda", "forall", "exists",
-        ///      "setcomprehension" or "bagcomprehension".
-        /// \pre variables is not empty.
+        /// \overload
         template < typename Container >
         abstraction(const binder_type& binding_operator,
                     const Container& variables,
                     const data_expression& body,
                     typename detail::enable_if_container< Container, variable >::type* = 0)
-          : detail::abstraction_base(binding_operator, convert< variable_list >(variables), body)
+          : detail::abstraction_base(binding_operator, variables, body)
         {
           assert(!variables.empty());
-        }
-
-        /// \brief Returns the binding operator of the abstraction
-        inline
-        binder_type binding_operator() const
-        {
-          return atermpp::arg1(*this);
-        }
-
-        /// \brief Returns the variables of the abstraction
-        inline
-        variables_const_range variables() const
-        {
-          return atermpp::list_arg2(*this);
-        }
-
-        /// \brief Returns the body of the abstraction
-        inline
-        data_expression body() const
-        {
-          return atermpp::arg3(*this);
         }
 
         /// \brief Returns true iff the binding operator is "lambda"

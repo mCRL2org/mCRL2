@@ -50,9 +50,9 @@ IdInit    | identifier_assignment[_base](const identifier& lhs, const data_expre
 '''
 
 DATA_EXPRESSION_CLASSES = r'''
-Id    | identifier[_base](const core::identifier_string& name) | An identifier
-DataVarId | variable[_base](const core::identifier_string& name, const sort_expression& sort) | A data variable
-OpId    | function_symbol[_base](const core::identifier_string& name, const sort_expression& sort) | A function symbol
+Id    | identifier(const core::identifier_string& name) | An identifier
+DataVarId | variable(const core::identifier_string& name, const sort_expression& sort) | A data variable
+OpId    | function_symbol(const core::identifier_string& name, const sort_expression& sort) | A function symbol
 DataAppl  | application[_base](const data_expression& head, data_expression_list const& arguments) | An application of a data expression to a number of arguments
 Binder    | abstraction[_base](const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
 Whr   | where_clause[_base](const data_expression& body, const assignment_expression_list& declarations) | A where expression

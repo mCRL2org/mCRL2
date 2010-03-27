@@ -7,29 +7,32 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
-
 //--- start generated class ---//
 /// \brief An identifier
-class identifier_base: public data_expression
+class identifier: public data_expression
 {
   public:
     /// \brief Default constructor.
-    identifier_base()
+    identifier()
       : data_expression(core::detail::constructId())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    identifier_base(atermpp::aterm_appl term)
+    identifier(atermpp::aterm_appl term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Id(m_term));
     }
 
     /// \brief Constructor.
-    identifier_base(const core::identifier_string& name)
+    identifier(const core::identifier_string& name)
       : data_expression(core::detail::gsMakeId(name))
+    {}
+
+    /// \brief Constructor.
+    identifier(const std::string& name)
+      : data_expression(core::detail::gsMakeId(core::identifier_string(name)))
     {}
 
     core::identifier_string name() const
@@ -39,39 +42,11 @@ class identifier_base: public data_expression
 };
 //--- end generated class ---//
 
-    } // namespace detail
+    /// \brief list of identifiers
+    typedef atermpp::term_list< identifier > identifier_list;
+    /// \brief vector of identifiers
+    typedef atermpp::vector< identifier > identifier_vector;
 
-/// \brief identifier
-/// \details This class should only be used up to and including
-///          the type checking phase, as it yields an untyped,
-///          unstructured data expression!
-class identifier : public detail::identifier_base
-{
-  public:
-
-  /// \brief Default constructor for identifier. This does not yield
-  ///        a valid expression.
-  identifier()
-    : detail::identifier_base(atermpp::aterm_appl(core::detail::constructId()))
-  {}
-
-  /// \overload
-  identifier(atermpp::aterm_appl term)
-    : identifier_base(term)
-  {}
-
-  /// \overload
-  identifier(const mcrl2::core::identifier_string& s)
-    : detail::identifier_base(s)
-  {}
-
-  /// \brief Constructor for an identifier with name s
-  /// \param s A string
-  identifier(const std::string& s)
-    : detail::identifier_base(mcrl2::core::identifier_string(s))
-  {}
-
-}; // class identifier
 
   } // namespace data
 } // namespace mcrl2
