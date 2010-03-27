@@ -48,51 +48,6 @@ namespace squadt {
           virtual ~project() = 0;
       };
 
-      /** \brief Creates a dialog window to gather information about an existing project */
-      class add_to_project : public project {
-
-        private:
-
-          /** \brief Control to select a project store */
-          wxGenericDirCtrl* file_selector;
-
-          /** \brief Text field that contains the name of the new project */
-          wxTextCtrl*       name;
-
-          /** \brief Warning that a file with the same name is part of the project */
-          wxSizer*          cannot_add;
-
-        private:
-
-          /** \brief Helper function that places the widgets */
-          void build(std::string const&);
-
-          /** \brief Handler for the event that one of the buttons is clicked */
-          void on_button_clicked(wxCommandEvent&);
-
-          /** \brief Handler for the event that a directory is selected */
-          void on_selection_changed(wxTreeEvent&);
-
-          /** \brief Handler for the event that the name changes */
-          void on_name_updated(wxCommandEvent&);
-
-        public:
-
-          /** \brief Constructor */
-          add_to_project(wxWindow*, std::string const&);
-
-          /** \brief Gets the name of the project */
-          std::string get_name() const;
-
-          /** \brief Gets the name of the project */
-          std::string get_source() const;
-
-          /** \brief Gets the name of the project */
-          std::string get_destination() const;
-
-          /** \brief Destructor */
-          ~add_to_project();
-      };
     }
   }
 }
