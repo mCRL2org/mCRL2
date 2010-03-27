@@ -48,7 +48,7 @@ endif(SQUADT_CONNECTIVITY)
 
 if(MCRL2_BUILD_GUI_TOOLS)
   set(MCRL2_SIMULATOR_GUI
-    ${CMAKE_SOURCE_DIR}/tools/xsim/simulatorgui.cpp
+    ${CMAKE_SOURCE_DIR}/tools/lpsxsim/simulatorgui.cpp
   )
 endif(MCRL2_BUILD_GUI_TOOLS)
 
@@ -63,8 +63,8 @@ add_library( ${PROJECT_NAME}
   ${mcrl2_process_src}
   ${squadt_tipi_src}
   ${mcrl2_utilities_command_line_src}
-  ${CMAKE_SOURCE_DIR}/tools/xsim/simulator.cpp
-  ${CMAKE_SOURCE_DIR}/tools/xsim/simbase.cpp
+  ${CMAKE_SOURCE_DIR}/tools/lpsxsim/simulator.cpp
+  ${CMAKE_SOURCE_DIR}/tools/lpsxsim/simbase.cpp
   ${MCRL2_SIMULATOR_GUI}
 )
 
