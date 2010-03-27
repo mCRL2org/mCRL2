@@ -102,10 +102,8 @@ namespace squadt {
       project_menu->Append(cmID_UPDATE, wxT("&Update...\tCTRL-u"))->Enable(false);
       project_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
       project_menu->AppendSeparator();
-      wxMenu* data_source_menu = new wxMenu();
-      data_source_menu->Append(cmID_ADD_EXISTING_FILE, wxT("&Existing File..."));
-      data_source_menu->Append(cmID_ADD_NEW_FILE, wxT("&New File"));
-      project_menu->Append(cmID_NEW_DATA_SOURCE, wxT("New &Model..."), data_source_menu)->Enable(false);
+      project_menu->Append(cmID_ADD_NEW_FILE, wxT("&Add New File"))->Enable(false);
+      project_menu->Append(cmID_ADD_EXISTING_FILE, wxT("Add &Existing File..."))->Enable(false);
       project_menu->AppendSeparator();
       project_menu->Append(wxID_EXIT, wxT("&Quit"));
       menu->Append(project_menu, wxT("&Project"));
@@ -244,6 +242,8 @@ namespace squadt {
       menu_bar.Enable(cmID_UPDATE, true);
       menu_bar.Enable(wxID_CLOSE, true);
       menu_bar.Enable(cmID_NEW_DATA_SOURCE, true);
+      menu_bar.Enable(cmID_ADD_NEW_FILE, true);
+      menu_bar.Enable(cmID_ADD_EXISTING_FILE, true);
     }
 
     /**
@@ -279,6 +279,8 @@ namespace squadt {
         menu_bar.Enable(cmID_UPDATE, false);
         menu_bar.Enable(wxID_CLOSE, false);
         menu_bar.Enable(cmID_NEW_DATA_SOURCE, false);
+        menu_bar.Enable(cmID_ADD_NEW_FILE, false);
+        menu_bar.Enable(cmID_ADD_EXISTING_FILE, false);
       }
     }
 

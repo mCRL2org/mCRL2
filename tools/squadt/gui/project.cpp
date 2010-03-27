@@ -373,30 +373,32 @@ namespace squadt {
     }
 
     void project::add_existing_file() {
-      dialog::add_to_project dialog(this, manager->get_project_store().string());
+	wxFileDialog OpenDialog(
+		this, _("Choose a file to add"), wxEmptyString, wxEmptyString, 
+		_("All files (*.*)|*.*"),
+		wxFD_OPEN, wxDefaultPosition);
+        if (OpenDialog.ShowModal()) {
+          try {
+           processor& p(*manager->import_file(
+                                  boost::filesystem::path(std::string(OpenDialog.GetPath().mb_str(wxConvUTF8))),
+                                  std::string(OpenDialog.GetFilename().mb_str(wxConvUTF8))));
+            /* Add to the new project */
+            wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(),
+                    OpenDialog.GetFilename(), processor::object_descriptor::original);
 
-      if (dialog.ShowModal()) {
-        try {
-          /* File does not exist in project directory */
-          processor& p(*manager->import_file(
-                                boost::filesystem::path(dialog.get_source()),
-                                boost::filesystem::path(dialog.get_destination()).leaf()));
+	    object_view->SetItemData(i, new tool_data(*this, *p.get_output_iterators().begin()));
+            object_view->EnsureVisible(i);
+  
+            manager->store();
+          }
+          catch (std::exception& e) {
+            wxMessageDialog(0, wxT("Failed to add `") + OpenDialog.GetFilename() +
+                  wxT("' to project:\n\n") +
+                  wxString(e.what(), wxConvLocal) + wxT("."), wxT("Error")).ShowModal();
 
-          /* Add to the new project */
-          wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(),
-                  wxString(dialog.get_name().c_str(), wxConvLocal), processor::object_descriptor::original);
+	}
 
-          object_view->SetItemData(i, new tool_data(*this, *p.get_output_iterators().begin()));
-          object_view->EnsureVisible(i);
-
-          manager->store();
         }
-        catch (std::exception& e) {
-          wxMessageDialog(0, wxT("Failed to add `") + wxString(dialog.get_name().c_str(), wxConvLocal) +
-                wxT("' to project, please try again.\n\n Details: ") +
-                wxString(e.what(), wxConvLocal) + wxT("."), wxT("Error")).ShowModal();
-        }
-      }
     }
 
     void project::add_new_file() {
