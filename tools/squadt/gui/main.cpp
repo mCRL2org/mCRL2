@@ -16,7 +16,6 @@
 #include "gui/main.hpp"
 #include "gui/project.hpp"
 #include "gui/resources.hpp"
-#include "gui/dialog/project_settings.hpp"
 #include "gui/dialog/preferences.hpp"
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"

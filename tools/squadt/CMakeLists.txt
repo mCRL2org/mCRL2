@@ -44,13 +44,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   gui/dialog/base.cpp
   gui/dialog/preferences.cpp
   gui/dialog/processor_settings.cpp
-  gui/dialog/project_settings.cpp
 )
-
-#Add PREFIX define
-#set_source_files_properties(settings_manager.cpp
-#  PROPERTIES COMPILE_DEFINITIONS PREFIX="${CMAKE_INSTALL_PREFIX}"
-#)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)

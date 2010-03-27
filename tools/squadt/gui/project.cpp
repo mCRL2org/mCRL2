@@ -28,7 +28,6 @@
 #include "gui/resources.hpp"
 #include "gui/tool_display.hpp"
 #include "gui/dialog/base.hpp"
-#include "gui/dialog/project_settings.hpp"
 #include "gui/dialog/processor_settings.hpp"
 #include "project_manager.hpp"
 #include "tool_manager.hpp"
