@@ -29,7 +29,7 @@ class stop
   public:
     /// \brief Default constructor.
     stop()
-      : atermpp::aterm_appl(fdr::detail::constructSTOP())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSTOP())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class skip
   public:
     /// \brief Default constructor.
     skip()
-      : atermpp::aterm_appl(fdr::detail::constructSKIP())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSKIP())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class chaos
   public:
     /// \brief Default constructor.
     chaos()
-      : atermpp::aterm_appl(fdr::detail::constructCHAOS())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructCHAOS())
     {}
 
     /// \brief Constructor.
@@ -108,7 +108,7 @@ class prefix
   public:
     /// \brief Default constructor.
     prefix()
-      : atermpp::aterm_appl(fdr::detail::constructPrefix())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructPrefix())
     {}
 
     /// \brief Constructor.
@@ -151,7 +151,7 @@ class externalchoice
   public:
     /// \brief Default constructor.
     externalchoice()
-      : atermpp::aterm_appl(fdr::detail::constructExternalChoice())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructExternalChoice())
     {}
 
     /// \brief Constructor.
@@ -189,7 +189,7 @@ class internalchoice
   public:
     /// \brief Default constructor.
     internalchoice()
-      : atermpp::aterm_appl(fdr::detail::constructInternalChoice())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructInternalChoice())
     {}
 
     /// \brief Constructor.
@@ -227,7 +227,7 @@ class sequentialcomposition
   public:
     /// \brief Default constructor.
     sequentialcomposition()
-      : atermpp::aterm_appl(fdr::detail::constructSequentialComposition())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSequentialComposition())
     {}
 
     /// \brief Constructor.
@@ -265,7 +265,7 @@ class interrupt
   public:
     /// \brief Default constructor.
     interrupt()
-      : atermpp::aterm_appl(fdr::detail::constructInterrupt())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructInterrupt())
     {}
 
     /// \brief Constructor.
@@ -303,7 +303,7 @@ class hiding
   public:
     /// \brief Default constructor.
     hiding()
-      : atermpp::aterm_appl(fdr::detail::constructHiding())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructHiding())
     {}
 
     /// \brief Constructor.
@@ -341,7 +341,7 @@ class rename
   public:
     /// \brief Default constructor.
     rename()
-      : atermpp::aterm_appl(fdr::detail::constructRename())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRename())
     {}
 
     /// \brief Constructor.
@@ -379,7 +379,7 @@ class interleave
   public:
     /// \brief Default constructor.
     interleave()
-      : atermpp::aterm_appl(fdr::detail::constructInterleave())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructInterleave())
     {}
 
     /// \brief Constructor.
@@ -417,7 +417,7 @@ class sharing
   public:
     /// \brief Default constructor.
     sharing()
-      : atermpp::aterm_appl(fdr::detail::constructSharing())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSharing())
     {}
 
     /// \brief Constructor.
@@ -460,7 +460,7 @@ class alphaparallel
   public:
     /// \brief Default constructor.
     alphaparallel()
-      : atermpp::aterm_appl(fdr::detail::constructAlphaParallel())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructAlphaParallel())
     {}
 
     /// \brief Constructor.
@@ -508,7 +508,7 @@ class repexternalchoice
   public:
     /// \brief Default constructor.
     repexternalchoice()
-      : atermpp::aterm_appl(fdr::detail::constructRepExternalChoice())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepExternalChoice())
     {}
 
     /// \brief Constructor.
@@ -546,7 +546,7 @@ class repinternalchoice
   public:
     /// \brief Default constructor.
     repinternalchoice()
-      : atermpp::aterm_appl(fdr::detail::constructRepInternalChoice())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepInternalChoice())
     {}
 
     /// \brief Constructor.
@@ -584,7 +584,7 @@ class repsequentialcomposition
   public:
     /// \brief Default constructor.
     repsequentialcomposition()
-      : atermpp::aterm_appl(fdr::detail::constructRepSequentialComposition())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepSequentialComposition())
     {}
 
     /// \brief Constructor.
@@ -622,7 +622,7 @@ class repinterleave
   public:
     /// \brief Default constructor.
     repinterleave()
-      : atermpp::aterm_appl(fdr::detail::constructRepInterleave())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepInterleave())
     {}
 
     /// \brief Constructor.
@@ -660,7 +660,7 @@ class repsharing
   public:
     /// \brief Default constructor.
     repsharing()
-      : atermpp::aterm_appl(fdr::detail::constructRepSharing())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepSharing())
     {}
 
     /// \brief Constructor.
@@ -703,7 +703,7 @@ class repalphaparallel
   public:
     /// \brief Default constructor.
     repalphaparallel()
-      : atermpp::aterm_appl(fdr::detail::constructRepAlphaParallel())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepAlphaParallel())
     {}
 
     /// \brief Constructor.
@@ -746,7 +746,7 @@ class untimedtimeout
   public:
     /// \brief Default constructor.
     untimedtimeout()
-      : atermpp::aterm_appl(fdr::detail::constructUntimedTimeOut())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructUntimedTimeOut())
     {}
 
     /// \brief Constructor.
@@ -784,7 +784,7 @@ class boolguard
   public:
     /// \brief Default constructor.
     boolguard()
-      : atermpp::aterm_appl(fdr::detail::constructBoolGuard())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructBoolGuard())
     {}
 
     /// \brief Constructor.
@@ -822,7 +822,7 @@ class linkedparallel
   public:
     /// \brief Default constructor.
     linkedparallel()
-      : atermpp::aterm_appl(fdr::detail::constructLinkedParallel())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructLinkedParallel())
     {}
 
     /// \brief Constructor.
@@ -865,7 +865,7 @@ class replinkedparallel
   public:
     /// \brief Default constructor.
     replinkedparallel()
-      : atermpp::aterm_appl(fdr::detail::constructRepLinkedParallel())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepLinkedParallel())
     {}
 
     /// \brief Constructor.

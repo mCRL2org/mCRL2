@@ -167,7 +167,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
       m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args));
     }\
 
-    return application(function_symbol(t2,sort_expression(find_type(t,m))), convert<data_expression_list>(atermpp::aterm_list(m)));
+    return application(function_symbol(t2,sort_expression(find_type(t,m))), atermpp::convert<data_expression_list>(atermpp::aterm_list(m)));
   }
 }
 
@@ -294,7 +294,7 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids, bool funcs_are_c
     }
     if ( !ATisEmpty(sorts) )
     {
-      sort = mcrl2::data::function_sort(mcrl2::data::convert<mcrl2::data::sort_expression_list>(sorts), mcrl2::data::sort_expression(sort));
+      sort = mcrl2::data::function_sort(atermpp::convert<mcrl2::data::sort_expression_list>(sorts), mcrl2::data::sort_expression(sort));
     }
 
     ATerm f = (ATerm) static_cast<ATermAppl>(mcrl2::data::function_symbol(ATAgetArgument(ATAgetFirst(funcs),0),mcrl2::data::sort_expression(sort)));

@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       template()
-        : atermpp::aterm_appl(fdr::detail::constructTemplate())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructTemplate())
       {}
 
       /// \brief Constructor.

@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       tuple_expression()
-        : atermpp::aterm_appl(fdr::detail::constructTuple())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructTuple())
       {}
 
       /// \brief Constructor.
@@ -47,7 +47,7 @@ class exprs: public tuple_expression
   public:
     /// \brief Default constructor.
     exprs()
-      : tuple_expression(fdr::detail::constructExprs())
+      : tuple_expression(fdr::atermpp::detail::constructExprs())
     {}
 
     /// \brief Constructor.

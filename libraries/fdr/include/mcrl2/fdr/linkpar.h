@@ -29,7 +29,7 @@ class links
   public:
     /// \brief Default constructor.
     links()
-      : atermpp::aterm_appl(fdr::detail::constructLinks())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructLinks())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class linksgens
   public:
     /// \brief Default constructor.
     linksgens()
-      : atermpp::aterm_appl(fdr::detail::constructLinksGens())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructLinksGens())
     {}
 
     /// \brief Constructor.

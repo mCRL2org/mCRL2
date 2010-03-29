@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       set_expression()
-        : atermpp::aterm_appl(fdr::detail::constructSet())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructSet())
       {}
 
       /// \brief Constructor.
@@ -47,7 +47,7 @@ class targ: public set_expression
   public:
     /// \brief Default constructor.
     targ()
-      : set_expression(fdr::detail::constructTarg())
+      : set_expression(fdr::atermpp::detail::constructTarg())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class targgens: public set_expression
   public:
     /// \brief Default constructor.
     targgens()
-      : set_expression(fdr::detail::constructTargGens())
+      : set_expression(fdr::atermpp::detail::constructTargGens())
     {}
 
     /// \brief Constructor.
@@ -108,7 +108,7 @@ class targ0: public set_expression
   public:
     /// \brief Default constructor.
     targ0()
-      : set_expression(fdr::detail::constructTarg0())
+      : set_expression(fdr::atermpp::detail::constructTarg0())
     {}
 
     /// \brief Constructor.
@@ -136,7 +136,7 @@ class targgens0: public set_expression
   public:
     /// \brief Default constructor.
     targgens0()
-      : set_expression(fdr::detail::constructTargGens0())
+      : set_expression(fdr::atermpp::detail::constructTargGens0())
     {}
 
     /// \brief Constructor.
@@ -169,7 +169,7 @@ class union: public set_expression
   public:
     /// \brief Default constructor.
     union()
-      : set_expression(fdr::detail::constructunion())
+      : set_expression(fdr::atermpp::detail::constructunion())
     {}
 
     /// \brief Constructor.
@@ -202,7 +202,7 @@ class inter: public set_expression
   public:
     /// \brief Default constructor.
     inter()
-      : set_expression(fdr::detail::constructinter())
+      : set_expression(fdr::atermpp::detail::constructinter())
     {}
 
     /// \brief Constructor.
@@ -235,7 +235,7 @@ class diff: public set_expression
   public:
     /// \brief Default constructor.
     diff()
-      : set_expression(fdr::detail::constructdiff())
+      : set_expression(fdr::atermpp::detail::constructdiff())
     {}
 
     /// \brief Constructor.
@@ -268,7 +268,7 @@ class union: public set_expression
   public:
     /// \brief Default constructor.
     union()
-      : set_expression(fdr::detail::constructUnion())
+      : set_expression(fdr::atermpp::detail::constructUnion())
     {}
 
     /// \brief Constructor.
@@ -296,7 +296,7 @@ class inter: public set_expression
   public:
     /// \brief Default constructor.
     inter()
-      : set_expression(fdr::detail::constructInter())
+      : set_expression(fdr::atermpp::detail::constructInter())
     {}
 
     /// \brief Constructor.
@@ -324,7 +324,7 @@ class set: public set_expression
   public:
     /// \brief Default constructor.
     set()
-      : set_expression(fdr::detail::constructset())
+      : set_expression(fdr::atermpp::detail::constructset())
     {}
 
     /// \brief Constructor.
@@ -352,7 +352,7 @@ class set: public set_expression
   public:
     /// \brief Default constructor.
     set()
-      : set_expression(fdr::detail::constructSet())
+      : set_expression(fdr::atermpp::detail::constructSet())
     {}
 
     /// \brief Constructor.
@@ -380,7 +380,7 @@ class seq: public set_expression
   public:
     /// \brief Default constructor.
     seq()
-      : set_expression(fdr::detail::constructSeq())
+      : set_expression(fdr::atermpp::detail::constructSeq())
     {}
 
     /// \brief Constructor.
@@ -408,7 +408,7 @@ class extensions: public set_expression
   public:
     /// \brief Default constructor.
     extensions()
-      : set_expression(fdr::detail::constructextensions())
+      : set_expression(fdr::atermpp::detail::constructextensions())
     {}
 
     /// \brief Constructor.
@@ -436,7 +436,7 @@ class productions: public set_expression
   public:
     /// \brief Default constructor.
     productions()
-      : set_expression(fdr::detail::constructproductions())
+      : set_expression(fdr::atermpp::detail::constructproductions())
     {}
 
     /// \brief Constructor.

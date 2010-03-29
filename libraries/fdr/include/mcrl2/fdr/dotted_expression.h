@@ -29,7 +29,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       dotted_expression()
-        : atermpp::aterm_appl(fdr::detail::constructDotted())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructDotted())
       {}
 
       /// \brief Constructor.
@@ -48,7 +48,7 @@ class dot: public dotted_expression
   public:
     /// \brief Default constructor.
     dot()
-      : dotted_expression(fdr::detail::constructDot())
+      : dotted_expression(fdr::atermpp::detail::constructDot())
     {}
 
     /// \brief Constructor.

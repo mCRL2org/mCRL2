@@ -21,7 +21,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/remove.h"
@@ -100,13 +100,13 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     { 
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
-      data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state(m_spec.process().process_parameters()));
+      data::data_expression_vector e = atermpp::convert<data::data_expression_vector>(m_spec.initial_process().state(m_spec.process().process_parameters()));
 
       // optimization: rewrite the initial state vector e
       lps::rewrite(e, R);
  
       linear_process& p = m_spec.process();
-      data::variable_list V = data::convert<data::variable_list>(m_spec.global_variables());
+      data::variable_list V = atermpp::convert<data::variable_list>(m_spec.global_variables());
       const data::variable_list& d = p.process_parameters();
 
       // initialize m_index_of

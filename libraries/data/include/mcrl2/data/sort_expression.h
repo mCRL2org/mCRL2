@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 
 namespace mcrl2 {
 
@@ -168,21 +168,21 @@ namespace mcrl2 {
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename ForwardTraversalIterator >
     inline sort_expression_list make_sort_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return convert< sort_expression_list >(r);
+      return atermpp::convert< sort_expression_list >(r);
     }
 
     /// \brief Converts an iterator range to sort_expression_list
     /// \param r A range of sort expressions.
     template < typename ForwardTraversalIterator >
     inline sort_expression_vector make_sort_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return convert< sort_expression_vector >(r);
+      return atermpp::convert< sort_expression_vector >(r);
     }
 
     /// \brief Converts a vector to a sort_expression_list
     /// \param r A range of sort expressions.
     template < typename Expression >
     inline sort_expression_list make_sort_expresion_list(atermpp::vector< Expression >const& r) {
-      return convert< sort_expression_list >(r);
+      return atermpp::convert< sort_expression_list >(r);
     }
 
     /// \brief Unknown sort.
@@ -215,7 +215,7 @@ namespace mcrl2 {
          /// \param s A container of possible sorts.
          template <typename Container>
          multiple_possible_sorts(Container const& s)
-           : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(convert<atermpp::aterm_list>(s)))
+           : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(atermpp::convert<atermpp::aterm_list>(s)))
          {}
      };
 

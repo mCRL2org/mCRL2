@@ -29,7 +29,7 @@ class expr
   public:
     /// \brief Default constructor.
     expr()
-      : atermpp::aterm_appl(fdr::detail::constructExpr())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructExpr())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class proc
   public:
     /// \brief Default constructor.
     proc()
-      : atermpp::aterm_appl(fdr::detail::constructProc())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructProc())
     {}
 
     /// \brief Constructor.

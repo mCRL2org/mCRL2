@@ -29,7 +29,7 @@ class nil
   public:
     /// \brief Default constructor.
     nil()
-      : atermpp::aterm_appl(fdr::detail::constructNil())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructNil())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class t
   public:
     /// \brief Default constructor.
     t()
-      : atermpp::aterm_appl(fdr::detail::constructT())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructT())
     {}
 
     /// \brief Constructor.

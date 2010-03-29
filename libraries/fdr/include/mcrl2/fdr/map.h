@@ -30,7 +30,7 @@ class map
   public:
     /// \brief Default constructor.
     map()
-      : atermpp::aterm_appl(fdr::detail::constructMap())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructMap())
     {}
 
     /// \brief Constructor.

@@ -21,8 +21,8 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/detail/convert.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/convert.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
@@ -64,8 +64,8 @@ namespace mcrl2 {
         template < typename Container >
         function_sort(const Container& domain,
                       const sort_expression& codomain,
-                      typename detail::enable_if_container< Container, sort_expression >::type* = 0)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(convert< sort_expression_list >(domain), codomain))
+                      typename atermpp::detail::enable_if_container< Container, sort_expression >::type* = 0)
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::convert< sort_expression_list >(domain), codomain))
         {
           assert(!domain.empty());
         }

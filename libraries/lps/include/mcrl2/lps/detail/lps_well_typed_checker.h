@@ -333,9 +333,9 @@ namespace detail {
       }
 
       // check 3)
-      if (!mcrl2::data::detail::unique_names(data::convert<data::variable_list>(spec.global_variables())))
+      if (!mcrl2::data::detail::unique_names(atermpp::convert<data::variable_list>(spec.global_variables())))
       {
-        std::cerr << "is_well_typed(specification) failed: global variables " << data::pp(data::convert<data::variable_list>(spec.global_variables())) << " don't have unique names." << std::endl;
+        std::cerr << "is_well_typed(specification) failed: global variables " << data::pp(atermpp::convert<data::variable_list>(spec.global_variables())) << " don't have unique names." << std::endl;
         return false;
       }
       

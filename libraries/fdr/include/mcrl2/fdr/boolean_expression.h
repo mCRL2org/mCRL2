@@ -32,7 +32,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       boolean_expression()
-        : atermpp::aterm_appl(fdr::detail::constructBool())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructBool())
       {}
 
       /// \brief Constructor.
@@ -51,7 +51,7 @@ class true_: public boolean_expression
   public:
     /// \brief Default constructor.
     true_()
-      : boolean_expression(fdr::detail::constructtrue())
+      : boolean_expression(fdr::atermpp::detail::constructtrue())
     {}
 
     /// \brief Constructor.
@@ -69,7 +69,7 @@ class false_: public boolean_expression
   public:
     /// \brief Default constructor.
     false_()
-      : boolean_expression(fdr::detail::constructfalse())
+      : boolean_expression(fdr::atermpp::detail::constructfalse())
     {}
 
     /// \brief Constructor.
@@ -87,7 +87,7 @@ class and_: public boolean_expression
   public:
     /// \brief Default constructor.
     and_()
-      : boolean_expression(fdr::detail::constructAnd())
+      : boolean_expression(fdr::atermpp::detail::constructAnd())
     {}
 
     /// \brief Constructor.
@@ -120,7 +120,7 @@ class or_: public boolean_expression
   public:
     /// \brief Default constructor.
     or_()
-      : boolean_expression(fdr::detail::constructOr())
+      : boolean_expression(fdr::atermpp::detail::constructOr())
     {}
 
     /// \brief Constructor.
@@ -153,7 +153,7 @@ class not: public boolean_expression
   public:
     /// \brief Default constructor.
     not()
-      : boolean_expression(fdr::detail::constructNot())
+      : boolean_expression(fdr::atermpp::detail::constructNot())
     {}
 
     /// \brief Constructor.
@@ -181,7 +181,7 @@ class null: public boolean_expression
   public:
     /// \brief Default constructor.
     null()
-      : boolean_expression(fdr::detail::constructNull())
+      : boolean_expression(fdr::atermpp::detail::constructNull())
     {}
 
     /// \brief Constructor.
@@ -209,7 +209,7 @@ class elem: public boolean_expression
   public:
     /// \brief Default constructor.
     elem()
-      : boolean_expression(fdr::detail::constructElem())
+      : boolean_expression(fdr::atermpp::detail::constructElem())
     {}
 
     /// \brief Constructor.
@@ -242,7 +242,7 @@ class member: public boolean_expression
   public:
     /// \brief Default constructor.
     member()
-      : boolean_expression(fdr::detail::constructMember())
+      : boolean_expression(fdr::atermpp::detail::constructMember())
     {}
 
     /// \brief Constructor.
@@ -275,7 +275,7 @@ class empty: public boolean_expression
   public:
     /// \brief Default constructor.
     empty()
-      : boolean_expression(fdr::detail::constructEmpty())
+      : boolean_expression(fdr::atermpp::detail::constructEmpty())
     {}
 
     /// \brief Constructor.
@@ -303,7 +303,7 @@ class equal: public boolean_expression
   public:
     /// \brief Default constructor.
     equal()
-      : boolean_expression(fdr::detail::constructEqual())
+      : boolean_expression(fdr::atermpp::detail::constructEqual())
     {}
 
     /// \brief Constructor.
@@ -336,7 +336,7 @@ class notequal: public boolean_expression
   public:
     /// \brief Default constructor.
     notequal()
-      : boolean_expression(fdr::detail::constructNotEqual())
+      : boolean_expression(fdr::atermpp::detail::constructNotEqual())
     {}
 
     /// \brief Constructor.
@@ -369,7 +369,7 @@ class less: public boolean_expression
   public:
     /// \brief Default constructor.
     less()
-      : boolean_expression(fdr::detail::constructLess())
+      : boolean_expression(fdr::atermpp::detail::constructLess())
     {}
 
     /// \brief Constructor.
@@ -402,7 +402,7 @@ class lessorequal: public boolean_expression
   public:
     /// \brief Default constructor.
     lessorequal()
-      : boolean_expression(fdr::detail::constructLessOrEqual())
+      : boolean_expression(fdr::atermpp::detail::constructLessOrEqual())
     {}
 
     /// \brief Constructor.
@@ -435,7 +435,7 @@ class greater: public boolean_expression
   public:
     /// \brief Default constructor.
     greater()
-      : boolean_expression(fdr::detail::constructGreater())
+      : boolean_expression(fdr::atermpp::detail::constructGreater())
     {}
 
     /// \brief Constructor.
@@ -468,7 +468,7 @@ class greaterorequal: public boolean_expression
   public:
     /// \brief Default constructor.
     greaterorequal()
-      : boolean_expression(fdr::detail::constructGreaterOrEqual())
+      : boolean_expression(fdr::atermpp::detail::constructGreaterOrEqual())
     {}
 
     /// \brief Constructor.

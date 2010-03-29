@@ -68,7 +68,7 @@ propositional_variable make_X()
 { 
   atermpp::vector<data::variable> v;
   v.push_back(nat("d"));
-  data::variable_list d = data::convert<data::variable_list>(v);
+  data::variable_list d = atermpp::convert<data::variable_list>(v);
   return propositional_variable(core::identifier_string("X"), d);
 }
 
@@ -77,7 +77,7 @@ propositional_variable make_Y()
 { 
   atermpp::vector<data::variable> v;
   v.push_back(bool_("b"));
-  data::variable_list d = data::convert<data::variable_list>(v);
+  data::variable_list d = atermpp::convert<data::variable_list>(v);
   return propositional_variable(core::identifier_string("Y"), d);
 }
 
@@ -85,7 +85,7 @@ inline
 propositional_variable make_Z()
 { 
   atermpp::vector<data::variable> v;
-  data::variable_list d = data::convert<data::variable_list>(v);
+  data::variable_list d = atermpp::convert<data::variable_list>(v);
   return propositional_variable(core::identifier_string("Z"), d);
 }
 

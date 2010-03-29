@@ -13,7 +13,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/alias.h"
@@ -150,13 +150,13 @@ void structured_sort_test()
   BOOST_CHECK(s_e_ == s);
   BOOST_CHECK(s_e_.struct_constructors() == s.struct_constructors());
 
-  structured_sort_constructor_argument_vector nv(make_vector(structured_sort_constructor_argument(sort_nat::nat())));
-  structured_sort_constructor_argument_vector bv(make_vector(structured_sort_constructor_argument(sort_bool::bool_())));
+  structured_sort_constructor_argument_vector nv(atermpp::make_vector(structured_sort_constructor_argument(sort_nat::nat())));
+  structured_sort_constructor_argument_vector bv(atermpp::make_vector(structured_sort_constructor_argument(sort_bool::bool_())));
   structured_sort_constructor b("B", boost::make_iterator_range(nv));
   structured_sort_constructor c("C", boost::make_iterator_range(bv));
-  structured_sort bc(make_vector(b,c));
+  structured_sort bc(atermpp::make_vector(b,c));
 
-  BOOST_CHECK(bc.struct_constructors() == make_vector(b,c));
+  BOOST_CHECK(bc.struct_constructors() == atermpp::make_vector(b,c));
   structured_sort_constructor_vector bc_constructors(bc.struct_constructors().begin(), bc.struct_constructors().end());
   BOOST_CHECK(bc_constructors[0] == b);
   BOOST_CHECK(bc_constructors[1] == c);

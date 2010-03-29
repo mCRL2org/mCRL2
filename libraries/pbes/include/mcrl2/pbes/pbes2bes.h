@@ -306,7 +306,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
           data::variable x("x", current_sort);
 
           // data::data_expression_list enumerations_from_sort = data::detail::enumerate_constructors (data.constructors(), current_sort);
-          sort_enumerations.put(current_sort, data::convert< data::data_expression_list >(make_enumeration_sequence(x, data::make_simple_classic_enumerator< >(data, x))));
+          sort_enumerations.put(current_sort, atermpp::convert< data::data_expression_list >(make_enumeration_sequence(x, data::make_simple_classic_enumerator< >(data, x))));
         }
       }
     }

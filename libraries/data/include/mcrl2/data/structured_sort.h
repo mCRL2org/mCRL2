@@ -29,7 +29,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/identifier_generator.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
@@ -191,7 +191,7 @@ namespace mcrl2 {
         typedef boost::iterator_range< arguments_iterator >                                 arguments_const_range;
 
         /// \brief iterator range over list of structured sort constructors
-        typedef detail::transform_iterator< get_argument_sort, arguments_iterator >         argument_sorts_iterator;
+        typedef atermpp::detail::transform_iterator< get_argument_sort, arguments_iterator >         argument_sorts_iterator;
         /// \brief iterator range over list of structured sort constructors
         typedef boost::iterator_range< argument_sorts_iterator >                            argument_sorts_range;
         /// \brief iterator range over constant list of structured sort constructors
@@ -233,8 +233,8 @@ namespace mcrl2 {
         structured_sort_constructor(const core::identifier_string& name,
                                     const Container& arguments,
                                     const core::identifier_string& recogniser = no_identifier(),
-                                    typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
-          : atermpp::aterm_appl(make_constructor(name, convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), recogniser))
+                                    typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+          : atermpp::aterm_appl(make_constructor(name, atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), recogniser))
         { }
 
         /// \brief Constructor
@@ -244,9 +244,9 @@ namespace mcrl2 {
         structured_sort_constructor(const std::string& name,
                                     const Container& arguments,
                                     const std::string& recogniser,
-                                    typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+                                    typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
           : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
-               convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), detail::make_identifier(recogniser)))
+               atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), detail::make_identifier(recogniser)))
         { }
 
         /// \brief Constructor
@@ -256,9 +256,9 @@ namespace mcrl2 {
         structured_sort_constructor(const char (&name)[S],
                                     const Container& arguments,
                                     const char (&recogniser)[S0],
-                                    typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+                                    typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
           : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
-               convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), detail::make_identifier(recogniser)))
+               atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), detail::make_identifier(recogniser)))
         { }
 
         /// \brief Constructor
@@ -267,9 +267,9 @@ namespace mcrl2 {
         template < typename Container >
         structured_sort_constructor(const std::string& name,
                                     const Container& arguments,
-                                    typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+                                    typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
           : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
-               convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), no_identifier()))
+               atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), no_identifier()))
         { }
 
         /// \brief Constructor
@@ -690,8 +690,8 @@ namespace mcrl2 {
         /// \param[in] constructors A container with constructors (of type structured_sort_constructor)
         /// \pre !constructors.empty()
         template < typename Container >
-        structured_sort(const Container& constructors, typename detail::enable_if_container< Container, structured_sort_constructor >::type* = 0)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(convert< atermpp::term_list<structured_sort_constructor> >(constructors)))
+        structured_sort(const Container& constructors, typename atermpp::detail::enable_if_container< Container, structured_sort_constructor >::type* = 0)
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::convert< atermpp::term_list<structured_sort_constructor> >(constructors)))
         {
           assert(!constructors.empty());
         }

@@ -51,7 +51,7 @@ namespace state_formulas {
   /// \return All data variables that occur in the term t
   template <typename Container, typename OutputIterator>
   void find_free_variables(Container const& container, OutputIterator o,
-  		           typename data::detail::disable_if_container<OutputIterator>::type* = 0)
+  		           typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
   {
     data::detail::make_free_variable_find_helper<state_formulas::detail::binding_aware_traverser>(o)(container);
   }
@@ -87,7 +87,7 @@ namespace state_formulas {
   /// TODO prevent copy of Sequence
   template <typename Container, typename Sequence>
   std::set<data::variable> find_free_variables(Container const& container, Sequence const& bound,
-                                          typename data::detail::enable_if_container<Sequence, data::variable>::type* = 0)
+                                          typename atermpp::detail::enable_if_container<Sequence, data::variable>::type* = 0)
   {
     std::set<data::variable> result;
     state_formulas::find_free_variables(container, std::inserter(result, result.end()), bound);

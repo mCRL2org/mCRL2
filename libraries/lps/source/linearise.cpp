@@ -3237,7 +3237,7 @@ class specification_basic_type:public boost::noncopyable
       for(application::arguments_range::const_iterator i = tl.begin(); i!=tl.end(); ++i)
       { result.push_back(adapt_term_to_stack(*i,stack,vars));
       }
-      return convert< data_expression_list >(result);
+      return atermpp::convert< data_expression_list >(result);
     }
 
     data_expression_list adapt_termlist_to_stack(
@@ -3249,7 +3249,7 @@ class specification_basic_type:public boost::noncopyable
       for(data_expression_list::const_iterator i = tl.begin(); i!=tl.end(); ++i)
       { result.push_back(adapt_term_to_stack(*i,stack,vars));
       }
-      return convert< data_expression_list >(result);
+      return atermpp::convert< data_expression_list >(result);
     }
 */
 
@@ -3266,7 +3266,7 @@ class specification_basic_type:public boost::noncopyable
       return push_front(
                 adapt_multiaction_to_stack_rec(pop_front(multiAction),stack,vars),
                 action(act.label(),
-                       convert<data_expression_list>(adapt_termlist_to_stack(
+                       atermpp::convert<data_expression_list>(adapt_termlist_to_stack(
                                act.arguments(),
                                stack,
                                vars))));
@@ -3842,7 +3842,7 @@ class specification_basic_type:public boost::noncopyable
 
             //store new declarations in return value w
             sortId = sort_id;
-            elementnames = data::convert< data::function_symbol_list >(spec.data.constructors(sort_id)); 
+            elementnames = atermpp::convert< data::function_symbol_list >(spec.data.constructors(sort_id)); 
           }
         }
 
@@ -7249,7 +7249,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
 
   specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
-                                action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),
+                                action_label_list(atermpp::convert<data::variable_list>(type_checked_spec.global_variables())),
                                 data_spec,
                                 type_checked_spec.global_variables(),
                                 lin_options);

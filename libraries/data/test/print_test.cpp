@@ -61,9 +61,9 @@ void test_abstraction_print() {
   using namespace sort_pos;
   using namespace sort_nat;
 
-  variable_vector x(make_vector(variable("x", sort_nat::nat())));
-  variable_vector y(make_vector(variable("y", sort_pos::pos())));
-  variable_vector xy(make_vector(x[0], y[0]));
+  variable_vector x(atermpp::make_vector(variable("x", sort_nat::nat())));
+  variable_vector y(atermpp::make_vector(variable("y", sort_pos::pos())));
+  variable_vector xy(atermpp::make_vector(x[0], y[0]));
 
   PRINT_CHECK(lambda(x, equal_to(x[0], nat(10))), "lambda x: Nat. x == 10");
   PRINT_CHECK(lambda(xy, equal_to(xy[0], pos2nat(xy[1]))), "lambda x: Nat, y: Pos. x == y");

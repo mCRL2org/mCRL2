@@ -94,7 +94,7 @@ namespace mcrl2 {
             using namespace sort_set;
             using namespace sort_bag;
 
-            variable_list bound_variables = convert< variable_list >((*this)(expression.variables()));
+            variable_list bound_variables = atermpp::convert< variable_list >((*this)(expression.variables()));
 
             if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "SetComp")
             {

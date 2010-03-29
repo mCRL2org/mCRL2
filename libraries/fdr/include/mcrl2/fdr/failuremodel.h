@@ -29,7 +29,7 @@ class f
   public:
     /// \brief Default constructor.
     f()
-      : atermpp::aterm_appl(fdr::detail::constructF())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructF())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class fd
   public:
     /// \brief Default constructor.
     fd()
-      : atermpp::aterm_appl(fdr::detail::constructFD())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructFD())
     {}
 
     /// \brief Constructor.

@@ -25,7 +25,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
@@ -258,7 +258,7 @@ namespace mcrl2 {
 #ifndef NO_TERM_TRAVERSAL
           // \deprecated exists only for backwards compatibility
           template < typename Expression >
-          void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          void operator()(Expression const& e, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           {
             (*this)(static_cast< atermpp::aterm const& >(e));
           }
@@ -302,7 +302,7 @@ namespace mcrl2 {
 #endif // NO_TERM_TRAVERSAL
 
           template < typename Container >
-          void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          void operator()(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
             for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
             {
@@ -375,13 +375,13 @@ namespace mcrl2 {
         public:
 
           template < typename Expression >
-          void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          void operator()(Expression const& e, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           {
             forward_call(e);
           }
 
           template < typename Container >
-          void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          void operator()(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
             for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
             {

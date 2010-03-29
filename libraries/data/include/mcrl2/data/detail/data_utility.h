@@ -22,7 +22,7 @@
 #include "boost/range/iterator_range.hpp"
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/container_sort.h"

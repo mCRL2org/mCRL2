@@ -29,7 +29,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       seq_expression()
-        : atermpp::aterm_appl(fdr::detail::constructSeq())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructSeq())
       {}
 
       /// \brief Constructor.
@@ -48,7 +48,7 @@ class targ: public seq_expression
   public:
     /// \brief Default constructor.
     targ()
-      : seq_expression(fdr::detail::constructTarg())
+      : seq_expression(fdr::atermpp::detail::constructTarg())
     {}
 
     /// \brief Constructor.
@@ -76,7 +76,7 @@ class targgens: public seq_expression
   public:
     /// \brief Default constructor.
     targgens()
-      : seq_expression(fdr::detail::constructTargGens())
+      : seq_expression(fdr::atermpp::detail::constructTargGens())
     {}
 
     /// \brief Constructor.
@@ -109,7 +109,7 @@ class cat: public seq_expression
   public:
     /// \brief Default constructor.
     cat()
-      : seq_expression(fdr::detail::constructCat())
+      : seq_expression(fdr::atermpp::detail::constructCat())
     {}
 
     /// \brief Constructor.
@@ -142,7 +142,7 @@ class concat: public seq_expression
   public:
     /// \brief Default constructor.
     concat()
-      : seq_expression(fdr::detail::constructConcat())
+      : seq_expression(fdr::atermpp::detail::constructConcat())
     {}
 
     /// \brief Constructor.
@@ -170,7 +170,7 @@ class head: public seq_expression
   public:
     /// \brief Default constructor.
     head()
-      : seq_expression(fdr::detail::constructHead())
+      : seq_expression(fdr::atermpp::detail::constructHead())
     {}
 
     /// \brief Constructor.
@@ -198,7 +198,7 @@ class tail: public seq_expression
   public:
     /// \brief Default constructor.
     tail()
-      : seq_expression(fdr::detail::constructTail())
+      : seq_expression(fdr::atermpp::detail::constructTail())
     {}
 
     /// \brief Constructor.

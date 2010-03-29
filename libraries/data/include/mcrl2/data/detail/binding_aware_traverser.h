@@ -31,7 +31,7 @@ namespace mcrl2 {
           std::multiset< variable > m_bound;
 
           template < typename Container >
-          void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+          void increase_bind_count(const Container& variables, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
           {
             for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
             {
@@ -40,7 +40,7 @@ namespace mcrl2 {
           }
 
           template < typename Container >
-          void decrease_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+          void decrease_bind_count(const Container& variables, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
           {
             for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
             {
@@ -100,7 +100,7 @@ namespace mcrl2 {
 
           template < typename Container >
           binding_aware_traverser(Container const& bound_by_context,
-                                    typename detail::enable_if_container< Container, variable >::type* = 0) :
+                                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) :
                               m_bound(bound_by_context.begin(), bound_by_context.end())
           { }
 

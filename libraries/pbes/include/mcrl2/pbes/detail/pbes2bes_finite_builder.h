@@ -82,12 +82,12 @@ struct pbes2bes_finite_builder: public pbes_expression_builder<pbes_expression, 
   template <typename ExpressionContainer, typename Substitution1>
   data::data_expression_list rewrite(const ExpressionContainer& e, const Substitution1& sigma) const
   {
-    std::vector<data::data_expression> result = data::convert<std::vector<data::data_expression> >(e);
+    std::vector<data::data_expression> result = atermpp::convert<std::vector<data::data_expression> >(e);
     for (std::vector<data::data_expression>::iterator i = e.begin(); i != e.end(); ++i)
     {
       *i = m_rewriter(*i, sigma);
     }
-    return data::convert<data::data_expression_list>(result);
+    return atermpp::convert<data::data_expression_list>(result);
   }
 
   /// \brief Visit data_expression node

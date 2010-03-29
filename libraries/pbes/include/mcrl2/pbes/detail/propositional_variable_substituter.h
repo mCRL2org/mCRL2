@@ -112,7 +112,7 @@ namespace detail {
       if (replace_propositional_variables)
       {
         propositional_variable_instantiation w = sigma(v);
-        data::variable_list params = data::convert<data::variable_list>(w.parameters());
+        data::variable_list params = atermpp::convert<data::variable_list>(w.parameters());
         v = propositional_variable(w.name(), params);
       }
     } 

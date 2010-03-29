@@ -244,9 +244,9 @@ namespace mcrl2 {
     /// \note This function uses implementation details of the iterator type
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename Container >
-    inline data_expression_list make_data_expression_list(Container const& r, typename detail::enable_if_container< Container, data_expression >::type* = 0)
+    inline data_expression_list make_data_expression_list(Container const& r, typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
     {
-      return convert< data_expression_list >(r);
+      return atermpp::convert< data_expression_list >(r);
     }
 
     /*

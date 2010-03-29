@@ -16,7 +16,7 @@
 #include <iterator>
 
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/fresh_variable_generator.h"
@@ -172,7 +172,7 @@ namespace mcrl2 {
           {
             std::cerr << "New process parameter(s): " << pp(new_parameters) << std::endl;
           }
-          m_spec.process().process_parameters() = data::convert<data::variable_list>(new_parameters);
+          m_spec.process().process_parameters() = atermpp::convert<data::variable_list>(new_parameters);
         }
 
         /// \brief Replace assignments in v that are of a finite sort with a
@@ -236,7 +236,7 @@ namespace mcrl2 {
             std::cerr << "Replaced assignment(s) " << pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
           }
 
-          return data::convert<data::assignment_list>(result);
+          return atermpp::convert<data::assignment_list>(result);
         }
 
         /// \brief Update an action summand with the new Boolean parameters

@@ -29,7 +29,7 @@ class divergence_free
   public:
     /// \brief Default constructor.
     divergence_free()
-      : atermpp::aterm_appl(fdr::detail::constructdivergence_free())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructdivergence_free())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class test
   public:
     /// \brief Default constructor.
     test()
-      : atermpp::aterm_appl(fdr::detail::constructTest())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructTest())
     {}
 
     /// \brief Constructor.

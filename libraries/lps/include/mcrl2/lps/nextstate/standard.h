@@ -239,10 +239,10 @@ namespace mcrl2 {
       template < >
       template < typename Container >
       bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
-                  legacy_rewriter, legacy_selector >::initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type*) 
+                  legacy_rewriter, legacy_selector >::initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type*) 
       { // assert(0);
 
-        m_shared_context->m_enumerator.findSolutions(data::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
+        m_shared_context->m_enumerator.findSolutions(atermpp::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
 
         return increment();
       }

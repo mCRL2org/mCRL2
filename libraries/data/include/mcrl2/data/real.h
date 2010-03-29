@@ -23,7 +23,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -1824,40 +1824,40 @@ namespace mcrl2 {
         variable vs("s",real_());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vr), less(vr, vr), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vr), less_equal(vr, vr), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vn), nat2real(vn), creal(sort_int::cint(vn), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp), pos2real(vp), creal(sort_int::cint(sort_nat::cnat(vp)), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vx), real2int(creal(vx, sort_pos::c1())), vx));
-        result.push_back(data_equation(make_vector(vx), real2nat(creal(vx, sort_pos::c1())), sort_int::int2nat(vx)));
-        result.push_back(data_equation(make_vector(vx), real2pos(creal(vx, sort_pos::c1())), sort_int::int2pos(vx)));
-        result.push_back(data_equation(make_vector(vr, vs), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
-        result.push_back(data_equation(make_vector(vr, vs), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
-        result.push_back(data_equation(make_vector(vr), abs(vr), if_(less(vr, creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
-        result.push_back(data_equation(make_vector(vp, vx), negate(creal(vx, vp)), creal(negate(vx), vp)));
-        result.push_back(data_equation(make_vector(vp, vx), succ(creal(vx, vp)), creal(plus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
-        result.push_back(data_equation(make_vector(vp, vx), pred(creal(vx, vp)), creal(minus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vp, vq), divides(vp, vq), redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq)))));
-        result.push_back(data_equation(make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int::cint(vm), sort_int::cint(vn))));
-        result.push_back(data_equation(make_vector(vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
-        result.push_back(data_equation(make_vector(vn, vp, vx), exp(creal(vx, vp), sort_int::cint(vn)), redfrac(exp(vx, vn), sort_int::cint(sort_nat::cnat(exp(vp, vn))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx), not_equal_to(vx, sort_int::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int::cneg(vq)), redfrac(sort_int::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
-        result.push_back(data_equation(make_vector(vp, vx), floor(creal(vx, vp)), sort_int::div(vx, vp)));
-        result.push_back(data_equation(make_vector(vr), ceil(vr), negate(floor(negate(vr)))));
-        result.push_back(data_equation(make_vector(vr), round(vr), floor(plus(vr, creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))))));
-        result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int::cneg(vp)), redfrac(negate(vx), sort_int::cint(sort_nat::cnat(vp)))));
-        result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int::cint(sort_nat::cnat(vp))), redfracwhr(vp, sort_int::div(vx, vp), sort_int::mod(vx, vp))));
-        result.push_back(data_equation(make_vector(vp, vx), redfracwhr(vp, vx, sort_nat::c0()), creal(vx, sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp, vq, vx), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq))), vx)));
-        result.push_back(data_equation(make_vector(vp, vx, vy), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int::int2pos(vx))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(atermpp::make_vector(vr), less(vr, vr), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(atermpp::make_vector(vr), less_equal(vr, vr), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(atermpp::make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(atermpp::make_vector(vn), nat2real(vn), creal(sort_int::cint(vn), sort_pos::c1())));
+        result.push_back(data_equation(atermpp::make_vector(vp), pos2real(vp), creal(sort_int::cint(sort_nat::cnat(vp)), sort_pos::c1())));
+        result.push_back(data_equation(atermpp::make_vector(vx), real2int(creal(vx, sort_pos::c1())), vx));
+        result.push_back(data_equation(atermpp::make_vector(vx), real2nat(creal(vx, sort_pos::c1())), sort_int::int2nat(vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx), real2pos(creal(vx, sort_pos::c1())), sort_int::int2pos(vx)));
+        result.push_back(data_equation(atermpp::make_vector(vr, vs), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
+        result.push_back(data_equation(atermpp::make_vector(vr, vs), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
+        result.push_back(data_equation(atermpp::make_vector(vr), abs(vr), if_(less(vr, creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), negate(creal(vx, vp)), creal(negate(vx), vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), succ(creal(vx, vp)), creal(plus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), pred(creal(vx, vp)), creal(minus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), divides(vp, vq), redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq)))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int::cint(vm), sort_int::cint(vn))));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp, vx), exp(creal(vx, vp), sort_int::cint(vn)), redfrac(exp(vx, vn), sort_int::cint(sort_nat::cnat(exp(vp, vn))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx), not_equal_to(vx, sort_int::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int::cneg(vq)), redfrac(sort_int::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), floor(creal(vx, vp)), sort_int::div(vx, vp)));
+        result.push_back(data_equation(atermpp::make_vector(vr), ceil(vr), negate(floor(negate(vr)))));
+        result.push_back(data_equation(atermpp::make_vector(vr), round(vr), floor(plus(vr, creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), redfrac(vx, sort_int::cneg(vp)), redfrac(negate(vx), sort_int::cint(sort_nat::cnat(vp)))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), redfrac(vx, sort_int::cint(sort_nat::cnat(vp))), redfracwhr(vp, sort_int::div(vx, vp), sort_int::mod(vx, vp))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), redfracwhr(vp, vx, sort_nat::c0()), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq))), vx)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx, vy), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int::int2pos(vx))));
         return result;
       }
 

@@ -232,7 +232,7 @@ namespace mcrl2 {
         template < typename Container >
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              Container const& variables, expression_type const& condition,
-             substitution_type const& substitution, Evaluator const& evaluator, typename detail::enable_if_container< Container, variable >::type* = 0) {
+             substitution_type const& substitution, Evaluator const& evaluator, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) {
 
           implementation_type::create(m_impl, context, variables, condition, evaluator, substitution);
         }
@@ -286,7 +286,7 @@ namespace mcrl2 {
         classic_enumerator(data_specification const& specification,
             Container const& variables, Evaluator const& evaluator,
             expression_type const& condition = sort_bool::true_(),
-            typename detail::enable_if_container< Container, variable >::type* = 0) {
+            typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) {
 
           implementation_type::create(m_impl, specification, variables, condition, evaluator);
         }
@@ -305,7 +305,7 @@ namespace mcrl2 {
             Evaluator const& evaluator,
             expression_type const& condition,
             substitution_type const& substitution,
-            typename detail::enable_if_container< Container, variable >::type* = 0) {
+            typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) {
           implementation_type::create(m_impl, specification, variables, condition, evaluator, substitution);
         }
 
@@ -400,7 +400,7 @@ namespace mcrl2 {
         template < typename Container >
         classic_enumerator(data_specification const& specification,
             Container const& variables,
-            typename detail::enable_if_container< Container, variable >::type* = 0) :
+            typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) :
                    super(get_shared_context(), variables, sort_bool::true_(), substitution_type(), get_shared_evaluator())
         { }
 
@@ -429,11 +429,11 @@ namespace mcrl2 {
     * \param[in] variables the set of variables for which to find valuatations
     **/
     template < typename Enumerator >
-    boost::iterator_range< detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >,
+    boost::iterator_range< atermpp::detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >,
 									 Enumerator, typename Enumerator::expression_type > >
     make_enumeration_sequence(typename Enumerator::expression_type const& base_expression, Enumerator const& enumerator)
     {
-      typedef detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >, Enumerator, typename Enumerator::expression_type > iterator_type;
+      typedef atermpp::detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >, Enumerator, typename Enumerator::expression_type > iterator_type;
 
       return boost::make_iterator_range(
         iterator_type(enumerator, apply_to_expression< typename Enumerator::expression_type >(base_expression)),

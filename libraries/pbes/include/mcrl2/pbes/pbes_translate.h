@@ -26,7 +26,7 @@
 #include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/detail/data_utility.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
@@ -106,7 +106,7 @@ namespace detail {
     {
       l.push_back(pbes_equation_to_aterm(*i));
     }
-    return core::pp(data::convert<atermpp::aterm_list>(l));
+    return core::pp(atermpp::convert<atermpp::aterm_list>(l));
   }
 
 } // namespace detail
@@ -280,13 +280,13 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
         data::variable_list x = var(b);
         assert(x.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        data::variable_list y = data::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b))));
+        data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b))));
         result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       } else if (is_exists(b)) {
         data::variable_list x = var(b);
         assert(x.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        data::variable_list y = data::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b))));
+        data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b))));
         result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       } else {
         throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
@@ -359,7 +359,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
-            data::variable_list y = data::convert< data::variable_list >(fresh_variables(yi, context));
+            data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
             ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
             ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
             gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
@@ -394,7 +394,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
-            data::variable_list y = data::convert< data::variable_list >(fresh_variables(yi, context));
+            data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
             ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
             ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
             gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
@@ -716,7 +716,7 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
         action_formulas::action_formula alpha = arg(b);
         if (x.size() > 0)
         {
-          data::variable_list y = data::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b))));
+          data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b))));
           result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
         }
         else
@@ -726,7 +726,7 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
         action_formulas::action_formula alpha = arg(b);
         if (x.size() > 0)
         {
-          data::variable_list y = data::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b))));
+          data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b))));
           result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
         }
         else
@@ -800,7 +800,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             pbes_expression rhs = RHS(f0, phi, lps, context);
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
-            data::variable_list y = data::convert< data::variable_list >(fresh_variables(yi, context));
+            data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
             ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
             ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
             gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
@@ -829,7 +829,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             pbes_expression rhs = RHS(f0, phi, lps, context);
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
-            data::variable_list y = data::convert< data::variable_list >(fresh_variables(yi, context));
+            data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
             ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
             ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
             gi = make_double_sequence_substitution_adaptor(yi, y)(gi);

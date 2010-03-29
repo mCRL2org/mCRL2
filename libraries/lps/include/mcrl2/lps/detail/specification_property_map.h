@@ -25,7 +25,7 @@
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/lps/specification.h"
 
@@ -193,8 +193,8 @@ namespace detail {
         unsigned int                           delta_summand_count     = spec.process().deadlock_summands().size();
         std::set<data::variable>               declared_free_variables = spec.global_variables();
         std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);
-        std::set<data::variable>               process_parameters      = data::convert<std::set<data::variable> >(spec.process().process_parameters());
-        std::set<action_label>                 declared_action_labels  = data::convert<std::set<action_label> >(spec.action_labels());
+        std::set<data::variable>               process_parameters      = atermpp::convert<std::set<data::variable> >(spec.process().process_parameters());
+        std::set<action_label>                 declared_action_labels  = atermpp::convert<std::set<action_label> >(spec.action_labels());
         std::set<action_label>                 used_action_labels      = compute_used_action_labels(spec);
         std::set<std::multiset<action_label> > used_multi_actions      = compute_used_multi_actions(spec);
 

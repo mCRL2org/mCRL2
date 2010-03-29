@@ -132,7 +132,7 @@ class pbes
       m_data = atermpp::aterm_appl(*i++);
 
       data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
+      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
 
       atermpp::aterm_appl eqn_spec = *i++;
       atermpp::aterm_list eqn = eqn_spec(0);
@@ -676,7 +676,7 @@ class pbes
 template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
 {
-  ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(p.global_variables()));
+  ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(p.global_variables()));
 
   atermpp::aterm_list eqn_list;
   const Container& eqn = p.equations();

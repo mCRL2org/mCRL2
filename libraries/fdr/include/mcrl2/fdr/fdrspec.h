@@ -29,7 +29,7 @@ class fdrspec
   public:
     /// \brief Default constructor.
     fdrspec()
-      : atermpp::aterm_appl(fdr::detail::constructFDRSpec())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructFDRSpec())
     {}
 
     /// \brief Constructor.

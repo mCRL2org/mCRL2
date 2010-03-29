@@ -18,7 +18,7 @@
 #include "boost/scoped_ptr.hpp"
 
 #include "mcrl2/data/detail/enum/standard.h"
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
 
@@ -130,7 +130,7 @@ namespace mcrl2 {
         private:
 
           template < typename Container >
-          atermpp::term_list< variable_type > convert(Container const& v, typename detail::enable_if_container< Container, variable >::type* = 0) {
+          atermpp::term_list< variable_type > convert(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) {
             // Apply translation (effectively type normalisation) to variables
             atermpp::vector< variable_type > variables;
 
@@ -138,7 +138,7 @@ namespace mcrl2 {
               variables.push_back(static_cast< variable_type >(m_evaluator.convert_to(*i)));
             }
 
-            return data::convert< atermpp::term_list< variable_type > >(variables);
+            return atermpp::convert< atermpp::term_list< variable_type > >(variables);
           }
 
           // do not use directly, use the create method
@@ -152,7 +152,7 @@ namespace mcrl2 {
 
           /// \param[in] v iterator range of the enumeration variables
           template < typename Container >
-          bool initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type* = 0) 
+          bool initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) 
           { 
             m_condition=(data_expression)(m_evaluator.get_rewriter()).rewrite((ATermAppl)m_condition);
             // Changed one but last argument into true JFG 7/12/2009. And changed it back to false on 8/12/2009. 
@@ -222,7 +222,7 @@ namespace mcrl2 {
               boost::shared_ptr< shared_context_type > const& context,
                                Container const& v, expression_type const& c,
                                Evaluator const& e, substitution_type const& s = substitution_type(),
-                    typename detail::enable_if_container< Container, variable >::type* = 0) 
+                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) 
           {
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
@@ -237,7 +237,7 @@ namespace mcrl2 {
           static void create(boost::scoped_ptr< classic_enumerator_impl >& target,
               data_specification const& specification, Container const& v,
               expression_type const& c, Evaluator const& e, substitution_type const& s = substitution_type(),
-                    typename detail::enable_if_container< Container, variable >::type* = 0) {
+                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) {
 
             create(target, boost::shared_ptr< shared_context_type >(new shared_context_type(specification, const_cast< Evaluator& >(e))), v, c, e, s);
           }

@@ -29,7 +29,7 @@ class deterministic
   public:
     /// \brief Default constructor.
     deterministic()
-      : atermpp::aterm_appl(fdr::detail::constructdeterministic())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructdeterministic())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class deadlock_free
   public:
     /// \brief Default constructor.
     deadlock_free()
-      : atermpp::aterm_appl(fdr::detail::constructdeadlock_free())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructdeadlock_free())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class livelock_free
   public:
     /// \brief Default constructor.
     livelock_free()
-      : atermpp::aterm_appl(fdr::detail::constructlivelock_free())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructlivelock_free())
     {}
 
     /// \brief Constructor.

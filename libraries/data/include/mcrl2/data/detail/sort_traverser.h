@@ -191,7 +191,7 @@ namespace mcrl2 {
           }
 
           template < typename Expression >
-          void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          void operator()(Expression const& e, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           {
             static_cast< super& >(*this)(e);
           }

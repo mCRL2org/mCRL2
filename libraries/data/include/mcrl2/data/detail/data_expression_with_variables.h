@@ -55,7 +55,7 @@ namespace data {
       /// \param variables A sequence of data variables
       template < typename Container >
       data_expression_with_variables(data_expression expression, const Container& variables)
-        : data_expression(expression), m_variables(convert< variable_list >(variables))
+        : data_expression(expression), m_variables(atermpp::convert< variable_list >(variables))
       {}
 
       /// \brief Return the variables.

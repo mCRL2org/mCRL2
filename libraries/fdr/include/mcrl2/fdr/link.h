@@ -29,7 +29,7 @@ class link
   public:
     /// \brief Default constructor.
     link()
-      : atermpp::aterm_appl(fdr::detail::constructLink())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructLink())
     {}
 
     /// \brief Constructor.

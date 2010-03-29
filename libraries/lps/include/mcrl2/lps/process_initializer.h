@@ -22,7 +22,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/assignment_list_substitution.h"
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 
 namespace mcrl2 {
 
@@ -76,7 +76,7 @@ class process_initializer: public atermpp::aterm_appl
       {
       	result.push_back(sigma(*i));
       }
-      return data::convert<data::data_expression_list>(result);
+      return atermpp::convert<data::data_expression_list>(result);
     }
 };
 

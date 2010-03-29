@@ -67,7 +67,7 @@ bool search_variable(Container const& container, const variable& v)
 /// \return All data variables that occur in the term t
 template < typename Container, typename OutputIterator >
 void find_free_variables(Container const& container, OutputIterator o,
-		           typename detail::disable_if_container< OutputIterator >::type* = 0)
+		           typename atermpp::detail::disable_if_container< OutputIterator >::type* = 0)
 {
   detail::make_free_variable_find_helper< detail::binding_aware_traverser >(o)(container);
 }
@@ -103,7 +103,7 @@ std::set< variable > find_free_variables(Container const& container)
 /// TODO prevent copy of Sequence
 template < typename Container, typename Sequence >
 std::set< variable > find_free_variables(Container const& container, Sequence const& bound,
-                                        typename detail::enable_if_container< Sequence, variable >::type* = 0)
+                                        typename atermpp::detail::enable_if_container< Sequence, variable >::type* = 0)
 {
   std::set< variable > result;
   find_free_variables(container, std::inserter(result, result.end()), bound);

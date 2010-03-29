@@ -384,15 +384,15 @@ namespace mcrl2 {
       variable b("b", sort_bool::bool_());
       variable x("x", s);
       variable y("y", s);
-      result.push_back(data_equation(make_vector(x), equal_to(x, x), sort_bool::true_()));
-      result.push_back(data_equation(make_vector(x, y), not_equal_to(x, y), sort_bool::not_(equal_to(x, y))));
-      result.push_back(data_equation(make_vector(x, y), if_(sort_bool::true_(), x, y), x));
-      result.push_back(data_equation(make_vector(x, y), if_(sort_bool::false_(), x, y), y));
-      result.push_back(data_equation(make_vector(b, x), if_(b, x, x), x));
-      result.push_back(data_equation(make_vector(x), less(x,x), sort_bool::false_()));
-      result.push_back(data_equation(make_vector(x), less_equal(x,x), sort_bool::true_()));
-      result.push_back(data_equation(make_vector(x, y), greater_equal(x,y), less_equal(y,x)));
-      result.push_back(data_equation(make_vector(x, y), greater(x,y), less(y,x)));
+      result.push_back(data_equation(atermpp::make_vector(x), equal_to(x, x), sort_bool::true_()));
+      result.push_back(data_equation(atermpp::make_vector(x, y), not_equal_to(x, y), sort_bool::not_(equal_to(x, y))));
+      result.push_back(data_equation(atermpp::make_vector(x, y), if_(sort_bool::true_(), x, y), x));
+      result.push_back(data_equation(atermpp::make_vector(x, y), if_(sort_bool::false_(), x, y), y));
+      result.push_back(data_equation(atermpp::make_vector(b, x), if_(b, x, x), x));
+      result.push_back(data_equation(atermpp::make_vector(x), less(x,x), sort_bool::false_()));
+      result.push_back(data_equation(atermpp::make_vector(x), less_equal(x,x), sort_bool::true_()));
+      result.push_back(data_equation(atermpp::make_vector(x, y), greater_equal(x,y), less_equal(y,x)));
+      result.push_back(data_equation(atermpp::make_vector(x, y), greater(x,y), less(y,x)));
 
       return result;
     }

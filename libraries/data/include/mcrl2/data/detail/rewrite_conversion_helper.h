@@ -140,12 +140,12 @@ namespace mcrl2 {
 
             if (i == m_implementation_context.end())
             { // implementation with previously generated function
-              atermpp::term_list< variable > bound_variables = convert< atermpp::term_list< variable > >(implement(expression.variables()));
+              atermpp::term_list< variable > bound_variables = atermpp::convert< atermpp::term_list< variable > >(implement(expression.variables()));
 
               if (!bound_variables.empty())
               { // function with non-empty domain
                 data_expression body(implement(expression.body()));
-                atermpp::term_list< variable > free_variables = convert< atermpp::term_list< variable > >(implement(find_free_variables(expression, bound_variables)));
+                atermpp::term_list< variable > free_variables = atermpp::convert< atermpp::term_list< variable > >(implement(find_free_variables(expression, bound_variables)));
 
                 function_sort   new_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
 
@@ -216,10 +216,10 @@ namespace mcrl2 {
           }
 
           template < typename Container >
-          boost::iterator_range< detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > >
-          implement(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          boost::iterator_range< atermpp::detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > >
+          implement(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
-            typedef detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > iterator_type;
+            typedef atermpp::detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > iterator_type;
 
             return boost::make_iterator_range(iterator_type(container.begin(), implementor(*this)),
                                               iterator_type(container.end(), implementor(*this)));
@@ -268,10 +268,10 @@ namespace mcrl2 {
           }
 
           template < typename Container >
-          boost::iterator_range< detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > >
-          reconstruct(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          boost::iterator_range< atermpp::detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > >
+          reconstruct(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
-            typedef detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > iterator_type;
+            typedef atermpp::detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > iterator_type;
 
             return boost::make_iterator_range(iterator_type(container.begin(), reconstructor(*this)),
                                               iterator_type(container.end(), reconstructor(*this)));
@@ -347,7 +347,7 @@ namespace mcrl2 {
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {
-            initialise(make_filter_iterator_range< EquationSelector& >(specification.equations(), selector));
+            initialise(atermpp::detail::make_filter_iterator_range< EquationSelector& >(specification.equations(), selector));
           }
 
           template < typename EquationSelector >
@@ -356,7 +356,7 @@ namespace mcrl2 {
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {
-            initialise(make_filter_iterator_range< EquationSelector const& >(specification.equations(), selector));
+            initialise(atermpp::detail::make_filter_iterator_range< EquationSelector const& >(specification.equations(), selector));
           }
       };
     } // namespace detail

@@ -434,7 +434,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         info.nil = gsMakeNil();
         ATprotectAppl(&info.nil);
 
-        free_vars = data::convert< variable_list >(spec.global_variables());
+        free_vars = atermpp::convert< variable_list >(spec.global_variables());
 
         pars = spec.process().process_parameters();
         ATprotectList(&pars);

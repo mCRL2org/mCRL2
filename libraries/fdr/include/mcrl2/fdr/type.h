@@ -29,7 +29,7 @@ class typeproduct
   public:
     /// \brief Default constructor.
     typeproduct()
-      : atermpp::aterm_appl(fdr::detail::constructTypeProduct())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructTypeProduct())
     {}
 
     /// \brief Constructor.
@@ -67,7 +67,7 @@ class typetuple
   public:
     /// \brief Default constructor.
     typetuple()
-      : atermpp::aterm_appl(fdr::detail::constructTypeTuple())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructTypeTuple())
     {}
 
     /// \brief Constructor.
@@ -100,7 +100,7 @@ class typeset
   public:
     /// \brief Default constructor.
     typeset()
-      : atermpp::aterm_appl(fdr::detail::constructTypeSet())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructTypeSet())
     {}
 
     /// \brief Constructor.
@@ -133,7 +133,7 @@ class simpletypename
   public:
     /// \brief Default constructor.
     simpletypename()
-      : atermpp::aterm_appl(fdr::detail::constructSympleTypeName())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSympleTypeName())
     {}
 
     /// \brief Constructor.
@@ -166,7 +166,7 @@ class typename
   public:
     /// \brief Default constructor.
     typename()
-      : atermpp::aterm_appl(fdr::detail::constructTypeName())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructTypeName())
     {}
 
     /// \brief Constructor.

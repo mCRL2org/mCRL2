@@ -66,12 +66,12 @@ namespace detail {
         std::set<data::variable> occurring_vars;
         sumelm_find_variables(summand_, std::inserter(occurring_vars, occurring_vars.end()));
     
-        std::set<data::variable> summation_variables(data::convert<std::set<data::variable> >(summand_.summation_variables()));
+        std::set<data::variable> summation_variables(atermpp::convert<std::set<data::variable> >(summand_.summation_variables()));
         std::set_intersection(summation_variables.begin(), summation_variables.end(),
                             occurring_vars.begin(), occurring_vars.end(),
                             std::inserter(new_summation_variables, new_summation_variables.end()));
     
-        summand_.summation_variables() = data::convert<data::variable_list>(new_summation_variables);
+        summand_.summation_variables() = atermpp::convert<data::variable_list>(new_summation_variables);
       }
 
     public:

@@ -77,9 +77,9 @@ class variable: public data_expression
     /// \note This function uses implementation details of the iterator type
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename Container >
-    inline variable_list make_variable_list(Container const& r, typename detail::enable_if_container< Container, variable >::type* = 0)
+    inline variable_list make_variable_list(Container const& r, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
     {
-      return convert< variable_list >(r);
+      return atermpp::convert< variable_list >(r);
     }
 
   } // namespace data

@@ -29,7 +29,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       common_expression()
-        : atermpp::aterm_appl(fdr::detail::constructCommon())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructCommon())
       {}
 
       /// \brief Constructor.
@@ -48,7 +48,7 @@ class conditional: public common_expression
   public:
     /// \brief Default constructor.
     conditional()
-      : common_expression(fdr::detail::constructConditional())
+      : common_expression(fdr::atermpp::detail::constructConditional())
     {}
 
     /// \brief Constructor.
@@ -86,7 +86,7 @@ class name: public common_expression
   public:
     /// \brief Default constructor.
     name()
-      : common_expression(fdr::detail::constructName())
+      : common_expression(fdr::atermpp::detail::constructName())
     {}
 
     /// \brief Constructor.
@@ -114,7 +114,7 @@ class lambdaappl: public common_expression
   public:
     /// \brief Default constructor.
     lambdaappl()
-      : common_expression(fdr::detail::constructLambdaAppl())
+      : common_expression(fdr::atermpp::detail::constructLambdaAppl())
     {}
 
     /// \brief Constructor.
@@ -147,7 +147,7 @@ class localdef: public common_expression
   public:
     /// \brief Default constructor.
     localdef()
-      : common_expression(fdr::detail::constructLocalDef())
+      : common_expression(fdr::atermpp::detail::constructLocalDef())
     {}
 
     /// \brief Constructor.
@@ -180,7 +180,7 @@ class bracketed: public common_expression
   public:
     /// \brief Default constructor.
     bracketed()
-      : common_expression(fdr::detail::constructBracketed())
+      : common_expression(fdr::atermpp::detail::constructBracketed())
     {}
 
     /// \brief Constructor.

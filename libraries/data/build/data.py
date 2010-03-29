@@ -639,7 +639,7 @@ class equation_declaration():
     if len(variables_code) == 0:
       variables_string = "variable_list()"
     else:
-      variables_string = "make_vector(%s)" % (string.join(sorted(variables_code), ", "))
+      variables_string = "atermpp::make_vector(%s)" % (string.join(sorted(variables_code), ", "))
 
     if self.condition == None:
       code = "data_equation(%s, %s, %s)" % (variables_string, self.lhs.code(sort_spec, function_spec, variable_spec), self.rhs.code(sort_spec, function_spec, variable_spec))
@@ -906,7 +906,7 @@ class lambda_abstraction(data_expression):
     return "lambda(%s, %s)" % (self.variable_declaration.to_string(), self.expression.to_string())
 
   def code(self, sort_spec, function_spec, variable_spec):
-    return "lambda(make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(sort_spec, function_spec, variable_spec), self.expression.code(sort_spec, function_spec, variable_spec))
+    return "lambda(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(sort_spec, function_spec, variable_spec), self.expression.code(sort_spec, function_spec, variable_spec))
 
 class forall(data_expression):
   def __init__(self, var_declaration, expression):
@@ -942,7 +942,7 @@ class forall(data_expression):
     return "forall(%s, %s)" % (self.variable_declaration.to_string(), self.expression.to_string())
 
   def code(self, sort_spec, function_spec, variable_spec):
-    return "forall(make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(sort_spec, function_spec, variable_spec), self.expression.code(sort_spec, function_spec, variable_spec))
+    return "forall(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(sort_spec, function_spec, variable_spec), self.expression.code(sort_spec, function_spec, variable_spec))
 
 class exists(data_expression):
   def __init__(self, var_declaration, expression):
@@ -978,7 +978,7 @@ class exists(data_expression):
     return "exists(%s, %s)" % (self.variable_declaration.to_string(), self.expression.to_string())
 
   def code(self, sort_spec, function_spec, variable_spec):
-    return "exists(make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(sort_spec, function_spec, variable_spec), self.expression.code(sort_spec, function_spec, variable_spec))
+    return "exists(atermpp::make_vector(%s), %s)" % (data_variable(self.variable_declaration.id).code(sort_spec, function_spec, variable_spec), self.expression.code(sort_spec, function_spec, variable_spec))
 
 class data_expression_list():
   def __init__(self, elements):
@@ -1070,7 +1070,7 @@ class sort_expression_list():
     return s
 
   def code(self):
-    s = "make_vector("
+    s = "atermpp::make_vector("
     args = []
     for e in self.elements:
       args += [e.code()]
@@ -1292,7 +1292,7 @@ class structured_sort_declaration():
     code = []
     for a in self.arguments.elements:
       code += ["structured_sort_constructor_argument(%s, \"%s\")" % (a[0].code(sort_spec), a[1].to_string())]
-    return "make_vector(%s)" % (string.join(code, ", "))
+    return "atermpp::make_vector(%s)" % (string.join(code, ", "))
 
   def code(self, sort_spec):
     if self.arguments == None:
@@ -1917,7 +1917,7 @@ class specification():
     code += "#include \"mcrl2/data/function_symbol.h\"\n"
     code += "#include \"mcrl2/data/application.h\"\n"
     code += "#include \"mcrl2/data/data_equation.h\"\n"
-    code += "#include \"mcrl2/data/detail/container_utility.h\"\n"
+    code += "#include \"mcrl2/atermpp/container_utility.h\"\n"
     code += "#include \"mcrl2/data/standard.h\"\n"
 #    code += "#include \"mcrl2/data/data_specification.h\"\n"
     if self.has_lambda():

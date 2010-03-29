@@ -29,7 +29,7 @@ class simpleinput
   public:
     /// \brief Default constructor.
     simpleinput()
-      : atermpp::aterm_appl(fdr::detail::constructSimpleInput())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSimpleInput())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class input
   public:
     /// \brief Default constructor.
     input()
-      : atermpp::aterm_appl(fdr::detail::constructInput())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructInput())
     {}
 
     /// \brief Constructor.
@@ -100,7 +100,7 @@ class output
   public:
     /// \brief Default constructor.
     output()
-      : atermpp::aterm_appl(fdr::detail::constructOutput())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructOutput())
     {}
 
     /// \brief Constructor.

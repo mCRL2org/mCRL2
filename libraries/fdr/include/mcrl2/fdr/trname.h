@@ -29,7 +29,7 @@ class normal
   public:
     /// \brief Default constructor.
     normal()
-      : atermpp::aterm_appl(fdr::detail::constructnormal())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructnormal())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class normalise
   public:
     /// \brief Default constructor.
     normalise()
-      : atermpp::aterm_appl(fdr::detail::constructnormalise())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructnormalise())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class normalize
   public:
     /// \brief Default constructor.
     normalize()
-      : atermpp::aterm_appl(fdr::detail::constructnormalize())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructnormalize())
     {}
 
     /// \brief Constructor.
@@ -98,7 +98,7 @@ class sbsim
   public:
     /// \brief Default constructor.
     sbsim()
-      : atermpp::aterm_appl(fdr::detail::constructsbsim())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructsbsim())
     {}
 
     /// \brief Constructor.
@@ -121,7 +121,7 @@ class tau_loop_factor
   public:
     /// \brief Default constructor.
     tau_loop_factor()
-      : atermpp::aterm_appl(fdr::detail::constructtau_loop_factor())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructtau_loop_factor())
     {}
 
     /// \brief Constructor.
@@ -144,7 +144,7 @@ class diamond
   public:
     /// \brief Default constructor.
     diamond()
-      : atermpp::aterm_appl(fdr::detail::constructdiamond())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructdiamond())
     {}
 
     /// \brief Constructor.
@@ -167,7 +167,7 @@ class model_compress
   public:
     /// \brief Default constructor.
     model_compress()
-      : atermpp::aterm_appl(fdr::detail::constructmodel_compress())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructmodel_compress())
     {}
 
     /// \brief Constructor.
@@ -190,7 +190,7 @@ class explicate
   public:
     /// \brief Default constructor.
     explicate()
-      : atermpp::aterm_appl(fdr::detail::constructexplicate())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructexplicate())
     {}
 
     /// \brief Constructor.

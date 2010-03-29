@@ -36,7 +36,7 @@
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/standard.h"
 
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
@@ -558,7 +558,7 @@ namespace mcrl2 {
       /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
       /// the necessary constructors, mappings and equations are added to the data type.
       template <typename Container>
-      void add_context_sorts(const Container &c, typename detail::enable_if_container<Container>::type* = 0) const
+      void add_context_sorts(const Container &c, typename atermpp::detail::enable_if_container<Container>::type* = 0) const
       {
         std::for_each(c.begin(), c.end(),
             boost::bind(&data_specification::add_context_sort, this, _1));

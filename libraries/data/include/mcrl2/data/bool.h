@@ -23,7 +23,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 
 namespace mcrl2 {
@@ -418,23 +418,23 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(variable_list(), not_(true_()), false_()));
         result.push_back(data_equation(variable_list(), not_(false_()), true_()));
-        result.push_back(data_equation(make_vector(vb), not_(not_(vb)), vb));
-        result.push_back(data_equation(make_vector(vb), and_(vb, true_()), vb));
-        result.push_back(data_equation(make_vector(vb), and_(vb, false_()), false_()));
-        result.push_back(data_equation(make_vector(vb), and_(true_(), vb), vb));
-        result.push_back(data_equation(make_vector(vb), and_(false_(), vb), false_()));
-        result.push_back(data_equation(make_vector(vb), or_(vb, true_()), true_()));
-        result.push_back(data_equation(make_vector(vb), or_(vb, false_()), vb));
-        result.push_back(data_equation(make_vector(vb), or_(true_(), vb), true_()));
-        result.push_back(data_equation(make_vector(vb), or_(false_(), vb), vb));
-        result.push_back(data_equation(make_vector(vb), implies(vb, true_()), true_()));
-        result.push_back(data_equation(make_vector(vb), implies(vb, false_()), not_(vb)));
-        result.push_back(data_equation(make_vector(vb), implies(true_(), vb), vb));
-        result.push_back(data_equation(make_vector(vb), implies(false_(), vb), true_()));
-        result.push_back(data_equation(make_vector(vb), equal_to(true_(), vb), vb));
-        result.push_back(data_equation(make_vector(vb), equal_to(false_(), vb), not_(vb)));
-        result.push_back(data_equation(make_vector(vb), equal_to(vb, true_()), vb));
-        result.push_back(data_equation(make_vector(vb), equal_to(vb, false_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), not_(not_(vb)), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), and_(vb, true_()), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), and_(vb, false_()), false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), and_(true_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), and_(false_(), vb), false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), or_(vb, true_()), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), or_(vb, false_()), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), or_(true_(), vb), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), or_(false_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), implies(vb, true_()), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), implies(vb, false_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), implies(true_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), implies(false_(), vb), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), equal_to(true_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), equal_to(false_(), vb), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), equal_to(vb, true_()), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), equal_to(vb, false_()), not_(vb)));
         return result;
       }
 

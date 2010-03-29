@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       lambda_expression()
-        : atermpp::aterm_appl(fdr::detail::constructLambda())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructLambda())
       {}
 
       /// \brief Constructor.
@@ -47,7 +47,7 @@ class lambdaexpr: public lambda_expression
   public:
     /// \brief Default constructor.
     lambdaexpr()
-      : lambda_expression(fdr::detail::constructLambdaExpr())
+      : lambda_expression(fdr::atermpp::detail::constructLambdaExpr())
     {}
 
     /// \brief Constructor.

@@ -29,7 +29,7 @@ class simplebranch
   public:
     /// \brief Default constructor.
     simplebranch()
-      : atermpp::aterm_appl(fdr::detail::constructSimpleBranch())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSimpleBranch())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class branch
   public:
     /// \brief Default constructor.
     branch()
-      : atermpp::aterm_appl(fdr::detail::constructBranch())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructBranch())
     {}
 
     /// \brief Constructor.

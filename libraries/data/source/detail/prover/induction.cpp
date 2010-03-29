@@ -115,7 +115,7 @@ namespace mcrl2 {
       f_lists_to_sorts = ATtableCreate(50, 75);
 
       // f_constructors = reinterpret_cast< ATermList >(static_cast< ATermAppl >(atermpp::arg2(a_data_spec)));
-      f_constructors=convert< atermpp::aterm_list > (a_data_spec.constructors());
+      f_constructors=atermpp::convert< atermpp::aterm_list > (a_data_spec.constructors());
       f_cons_name = sort_list::cons_name();
     }
 

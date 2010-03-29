@@ -24,8 +24,20 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/find.h"
+
+namespace atermpp {
+  namespace detail {
+
+    // This is here to make the std::list container work with the pp container ovarload.
+    template < typename T >
+    struct is_container_impl< std::list< T > > {
+      typedef boost::true_type type;
+    };
+
+  } // namespace detail
+} // namespace atermpp
 
 namespace mcrl2 {
 
@@ -41,7 +53,7 @@ namespace mcrl2 {
     /// \brief Pretty prints the contents of a container
     /// \param[in] c a container with data or sort expressions
     template < typename Container >
-    inline std::string pp(Container const& c, typename detail::enable_if_container< Container >::type* = 0)
+    inline std::string pp(Container const& c, typename atermpp::detail::enable_if_container< Container >::type* = 0)
     {
       std::string result;
 
@@ -85,12 +97,6 @@ namespace mcrl2 {
       //  - system defined types as sort expressions are recognisable outside
       //    specification context; meaning that in a context where A =
       //    List(Bool), then sort A will not be recognised as list sort.
-
-      // This is here to make the std::list container work with the pp container ovarload.
-      template < typename T >
-      struct is_container_impl< std::list< T > > {
-        typedef boost::true_type type;
-      };
 
       // Type that is used internally to signal that an expression is an
       // expression built with the constructors/mappings of the list sort
@@ -183,7 +189,7 @@ namespace mcrl2 {
       };
 
       template < typename Expression >
-      void pretty_print(std::ostream& o, Expression const& expression, typename detail::disable_if_container< Expression >::type* = 0)
+      void pretty_print(std::ostream& o, Expression const& expression, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
       {
         if (list_expression::is_list_expression(expression))
         {
@@ -197,7 +203,7 @@ namespace mcrl2 {
      
       // Temprary measure for testing purposes; print entry point for recursive printing
       template < typename Expression >
-      std::string pretty_print(Expression const& expression, typename detail::disable_if_container< Expression >::type* = 0)
+      std::string pretty_print(Expression const& expression, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
       {
         std::ostringstream s;
 
@@ -207,7 +213,7 @@ namespace mcrl2 {
       }
 
       template < typename Container >
-      void pretty_print(std::ostream& o, Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+      void pretty_print(std::ostream& o, Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
       {
         if (container.begin() != container.end())
         {
@@ -221,7 +227,7 @@ namespace mcrl2 {
       }
 
       template < typename Container >
-      std::string pretty_print(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+      std::string pretty_print(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
       {
         std::ostringstream s;
 

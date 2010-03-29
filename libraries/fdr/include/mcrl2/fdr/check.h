@@ -29,7 +29,7 @@ class bcheck
   public:
     /// \brief Default constructor.
     bcheck()
-      : atermpp::aterm_appl(fdr::detail::constructBCheck())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructBCheck())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class rcheck
   public:
     /// \brief Default constructor.
     rcheck()
-      : atermpp::aterm_appl(fdr::detail::constructRCheck())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructRCheck())
     {}
 
     /// \brief Constructor.
@@ -105,7 +105,7 @@ class tcheck
   public:
     /// \brief Default constructor.
     tcheck()
-      : atermpp::aterm_appl(fdr::detail::constructTCheck())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructTCheck())
     {}
 
     /// \brief Constructor.
@@ -143,7 +143,7 @@ class notcheck
   public:
     /// \brief Default constructor.
     notcheck()
-      : atermpp::aterm_appl(fdr::detail::constructNotCheck())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructNotCheck())
     {}
 
     /// \brief Constructor.

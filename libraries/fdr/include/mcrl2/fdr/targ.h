@@ -29,7 +29,7 @@ class nil
   public:
     /// \brief Default constructor.
     nil()
-      : atermpp::aterm_appl(fdr::detail::constructNil())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructNil())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class exprs
   public:
     /// \brief Default constructor.
     exprs()
-      : atermpp::aterm_appl(fdr::detail::constructExprs())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructExprs())
     {}
 
     /// \brief Constructor.
@@ -85,7 +85,7 @@ class closedrange
   public:
     /// \brief Default constructor.
     closedrange()
-      : atermpp::aterm_appl(fdr::detail::constructClosedRange())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructClosedRange())
     {}
 
     /// \brief Constructor.
@@ -123,7 +123,7 @@ class openrange
   public:
     /// \brief Default constructor.
     openrange()
-      : atermpp::aterm_appl(fdr::detail::constructOpenRange())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructOpenRange())
     {}
 
     /// \brief Constructor.

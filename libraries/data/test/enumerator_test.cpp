@@ -66,7 +66,7 @@ void test_data_enumerator()
       std::cout << mcrl2::core::pp(*i) << " " << mcrl2::data::pp(i->variables()) << std::endl;
     }
 
-    data_expression_with_variables expr(x, make_vector(x));
+    data_expression_with_variables expr(x, atermpp::make_vector(x));
     atermpp::vector<data_expression_with_variables> y = e.enumerate(x);
     for (atermpp::vector<data_expression_with_variables>::const_iterator i = y.begin(); i != y.end(); ++i)
     {
@@ -157,7 +157,7 @@ void test3()
 
   variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");
-  data_expression_with_variables x(c, make_vector(n));
+  data_expression_with_variables x(c, atermpp::make_vector(n));
   core::garbage_collect();
 }
 

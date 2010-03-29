@@ -94,7 +94,7 @@ class specification
       m_data             = atermpp::aterm_appl(*i++);
       m_action_labels    = atermpp::aterm_appl(*i++)(0);
       data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
+      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
       m_process          = atermpp::aterm_appl(*i++);
       m_initial_process  = atermpp::aterm_appl(*i);
     }
@@ -293,7 +293,7 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec)
   return core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(spec.data()),
       core::detail::gsMakeActSpec(spec.action_labels()),
-      core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
+      core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
       linear_process_to_aterm(spec.process()),
       spec.initial_process()
   );

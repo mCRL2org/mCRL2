@@ -81,11 +81,11 @@ void test_fresh_variable_generator()
 
 void test_fresh_variables()
 {
-  variable_vector w = make_vector(variable("d", basic_sort("D")), variable("e", basic_sort("E")), variable("f", basic_sort("F")));
+  variable_vector w = atermpp::make_vector(variable("d", basic_sort("D")), variable("e", basic_sort("E")), variable("f", basic_sort("F")));
   std::set<std::string> context;
   context.insert("e");
   context.insert("f_00");
-  variable_vector w1 = convert< variable_vector >(fresh_variables(w, context));
+  variable_vector w1 = atermpp::convert< variable_vector >(fresh_variables(w, context));
   std::cout << "w1 = " << mcrl2::data::pp(w1) << std::endl;
   //BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d1", basic_sort("D"))) != w1.end());
   //BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e1", basic_sort("E"))) != w1.end());

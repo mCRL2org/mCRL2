@@ -23,7 +23,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/structured_sort.h"
@@ -73,7 +73,7 @@ namespace mcrl2 {
         {
           structured_sort_constructor_vector constructors;
           constructors.push_back(structured_sort_constructor("@fbag_empty", "fbag_empty"));
-          constructors.push_back(structured_sort_constructor("@fbag_cons", make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(sort_pos::pos(), "headcount"), structured_sort_constructor_argument(fbag(s), "tail")), "fbag_cons"));
+          constructors.push_back(structured_sort_constructor("@fbag_cons", atermpp::make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(sort_pos::pos(), "headcount"), structured_sort_constructor_argument(fbag(s), "tail")), "fbag_cons"));
           return structured_sort(constructors);
         }
 
@@ -929,45 +929,45 @@ namespace mcrl2 {
         data_equation_vector result;
         data_equation_vector fbag_equations = detail::fbag_struct(s).constructor_equations(fbag(s));
         result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
-        result.push_back(data_equation(make_vector(vd, vp), fbaginsert(s, vd, vp, fbag_empty(s)), fbag_cons(s, vd, vp, fbag_empty(s))));
-        result.push_back(data_equation(make_vector(vb, vd, vp, vq), fbaginsert(s, vd, vp, fbag_cons(s, vd, vq, vb)), fbag_cons(s, vd, sort_nat::plus(vp, vq), vb)));
-        result.push_back(data_equation(make_vector(vb, vd, ve, vp, vq), less(vd, ve), fbaginsert(s, vd, vp, fbag_cons(s, ve, vq, vb)), fbag_cons(s, vd, vp, fbag_cons(s, ve, vq, vb))));
-        result.push_back(data_equation(make_vector(vb, vd, ve, vp, vq), less(ve, vd), fbaginsert(s, vd, vp, fbag_cons(s, ve, vq, vb)), fbag_cons(s, ve, vq, fbaginsert(s, vd, vp, vb))));
-        result.push_back(data_equation(make_vector(vb, vd), fbagcinsert(s, vd, sort_nat::c0(), vb), vb));
-        result.push_back(data_equation(make_vector(vb, vd, vp), fbagcinsert(s, vd, sort_nat::cnat(vp), vb), fbaginsert(s, vd, vp, vb)));
-        result.push_back(data_equation(make_vector(vd), fbagcount(s, vd, fbag_empty(s)), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(vb, vd, vp), fbagcount(s, vd, fbag_cons(s, vd, vp, vb)), sort_nat::cnat(vp)));
-        result.push_back(data_equation(make_vector(vb, vd, ve, vp), less(vd, ve), fbagcount(s, vd, fbag_cons(s, ve, vp, vb)), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(vb, vd, ve, vp), less(ve, vd), fbagcount(s, vd, fbag_cons(s, ve, vp, vb)), fbagcount(s, vd, vb)));
-        result.push_back(data_equation(make_vector(vb, vd), fbagin(s, vd, vb), greater(fbagcount(s, vd, vb), sort_nat::c0())));
-        result.push_back(data_equation(make_vector(vf), fbaglte(s, vf, fbag_empty(s), fbag_empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(vb, vd, vf, vp), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), fbag_empty(s)), sort_bool::and_(sort_nat::swap_zero_lte(vf(vd), sort_nat::cnat(vp), sort_nat::c0()), fbaglte(s, vf, vb, fbag_empty(s)))));
-        result.push_back(data_equation(make_vector(vc, ve, vf, vq), fbaglte(s, vf, fbag_empty(s), fbag_cons(s, ve, vq, vc)), sort_bool::and_(sort_nat::swap_zero_lte(vf(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbaglte(s, vf, fbag_empty(s), vc))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, vf, vp, vq), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), fbag_cons(s, vd, vq, vc)), sort_bool::and_(sort_nat::swap_zero_lte(vf(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbaglte(s, vf, vb, vc))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, ve, vf, vp, vq), less(vd, ve), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), sort_bool::and_(sort_nat::swap_zero_lte(vf(vd), sort_nat::cnat(vp), sort_nat::c0()), fbaglte(s, vf, vb, fbag_cons(s, ve, vq, vc)))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, ve, vf, vp, vq), less(ve, vd), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), sort_bool::and_(sort_nat::swap_zero_lte(vf(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), vc))));
-        result.push_back(data_equation(make_vector(vf, vg), fbagjoin(s, vf, vg, fbag_empty(s), fbag_empty(s)), fbag_empty(s)));
-        result.push_back(data_equation(make_vector(vb, vd, vf, vg, vp), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_empty(s)), fbagcinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagjoin(s, vf, vg, vb, fbag_empty(s)))));
-        result.push_back(data_equation(make_vector(vc, ve, vf, vg, vq), fbagjoin(s, vf, vg, fbag_empty(s), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagjoin(s, vf, vg, fbag_empty(s), vc))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, vf, vg, vp, vq), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, vd, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbagjoin(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(vd, ve), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagjoin(s, vf, vg, vb, fbag_cons(s, ve, vq, vc)))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(ve, vd), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), vc))));
-        result.push_back(data_equation(make_vector(vf, vg), fbagintersect(s, vf, vg, fbag_empty(s), fbag_empty(s)), fbag_empty(s)));
-        result.push_back(data_equation(make_vector(vb, vd, vf, vg, vp), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_empty(s)), fbagcinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagintersect(s, vf, vg, vb, fbag_empty(s)))));
-        result.push_back(data_equation(make_vector(vc, ve, vf, vg, vq), fbagintersect(s, vf, vg, fbag_empty(s), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagintersect(s, vf, vg, fbag_empty(s), vc))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, vf, vg, vp, vq), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, vd, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbagintersect(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(vd, ve), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagintersect(s, vf, vg, vb, fbag_cons(s, ve, vq, vc)))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(ve, vd), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), vc))));
-        result.push_back(data_equation(make_vector(vf, vg), fbagdifference(s, vf, vg, fbag_empty(s), fbag_empty(s)), fbag_empty(s)));
-        result.push_back(data_equation(make_vector(vb, vd, vf, vg, vp), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_empty(s)), fbagcinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagdifference(s, vf, vg, vb, fbag_empty(s)))));
-        result.push_back(data_equation(make_vector(vc, ve, vf, vg, vq), fbagdifference(s, vf, vg, fbag_empty(s), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagdifference(s, vf, vg, fbag_empty(s), vc))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, vf, vg, vp, vq), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, vd, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbagdifference(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(vd, ve), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagdifference(s, vf, vg, vb, fbag_cons(s, ve, vq, vc)))));
-        result.push_back(data_equation(make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(ve, vd), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), vc))));
-        result.push_back(data_equation(make_vector(vf), fbag2fset(s, vf, fbag_empty(s)), sort_fset::fset_empty(s)));
-        result.push_back(data_equation(make_vector(vb, vd, vf, vp), fbag2fset(s, vf, fbag_cons(s, vd, vp, vb)), sort_fset::fsetcinsert(s, vd, equal_to(equal_to(vf(vd), sort_nat::cnat(vp)), greater(vf(vd), sort_nat::c0())), fbag2fset(s, vf, vb))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vp), fbaginsert(s, vd, vp, fbag_empty(s)), fbag_cons(s, vd, vp, fbag_empty(s))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp, vq), fbaginsert(s, vd, vp, fbag_cons(s, vd, vq, vb)), fbag_cons(s, vd, sort_nat::plus(vp, vq), vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp, vq), less(vd, ve), fbaginsert(s, vd, vp, fbag_cons(s, ve, vq, vb)), fbag_cons(s, vd, vp, fbag_cons(s, ve, vq, vb))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp, vq), less(ve, vd), fbaginsert(s, vd, vp, fbag_cons(s, ve, vq, vb)), fbag_cons(s, ve, vq, fbaginsert(s, vd, vp, vb))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd), fbagcinsert(s, vd, sort_nat::c0(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), fbagcinsert(s, vd, sort_nat::cnat(vp), vb), fbaginsert(s, vd, vp, vb)));
+        result.push_back(data_equation(atermpp::make_vector(vd), fbagcount(s, vd, fbag_empty(s)), sort_nat::c0()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), fbagcount(s, vd, fbag_cons(s, vd, vp, vb)), sort_nat::cnat(vp)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp), less(vd, ve), fbagcount(s, vd, fbag_cons(s, ve, vp, vb)), sort_nat::c0()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp), less(ve, vd), fbagcount(s, vd, fbag_cons(s, ve, vp, vb)), fbagcount(s, vd, vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd), fbagin(s, vd, vb), greater(fbagcount(s, vd, vb), sort_nat::c0())));
+        result.push_back(data_equation(atermpp::make_vector(vf), fbaglte(s, vf, fbag_empty(s), fbag_empty(s)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vf, vp), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), fbag_empty(s)), sort_bool::and_(sort_nat::swap_zero_lte(vf(vd), sort_nat::cnat(vp), sort_nat::c0()), fbaglte(s, vf, vb, fbag_empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(vc, ve, vf, vq), fbaglte(s, vf, fbag_empty(s), fbag_cons(s, ve, vq, vc)), sort_bool::and_(sort_nat::swap_zero_lte(vf(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbaglte(s, vf, fbag_empty(s), vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vf, vp, vq), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), fbag_cons(s, vd, vq, vc)), sort_bool::and_(sort_nat::swap_zero_lte(vf(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbaglte(s, vf, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vf, vp, vq), less(vd, ve), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), sort_bool::and_(sort_nat::swap_zero_lte(vf(vd), sort_nat::cnat(vp), sort_nat::c0()), fbaglte(s, vf, vb, fbag_cons(s, ve, vq, vc)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vf, vp, vq), less(ve, vd), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), sort_bool::and_(sort_nat::swap_zero_lte(vf(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbaglte(s, vf, fbag_cons(s, vd, vp, vb), vc))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg), fbagjoin(s, vf, vg, fbag_empty(s), fbag_empty(s)), fbag_empty(s)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vf, vg, vp), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_empty(s)), fbagcinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagjoin(s, vf, vg, vb, fbag_empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(vc, ve, vf, vg, vq), fbagjoin(s, vf, vg, fbag_empty(s), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagjoin(s, vf, vg, fbag_empty(s), vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vf, vg, vp, vq), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, vd, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbagjoin(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(vd, ve), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_add(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagjoin(s, vf, vg, vb, fbag_cons(s, ve, vq, vc)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(ve, vd), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_add(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagjoin(s, vf, vg, fbag_cons(s, vd, vp, vb), vc))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg), fbagintersect(s, vf, vg, fbag_empty(s), fbag_empty(s)), fbag_empty(s)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vf, vg, vp), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_empty(s)), fbagcinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagintersect(s, vf, vg, vb, fbag_empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(vc, ve, vf, vg, vq), fbagintersect(s, vf, vg, fbag_empty(s), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagintersect(s, vf, vg, fbag_empty(s), vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vf, vg, vp, vq), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, vd, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbagintersect(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(vd, ve), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_min(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagintersect(s, vf, vg, vb, fbag_cons(s, ve, vq, vc)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(ve, vd), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_min(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagintersect(s, vf, vg, fbag_cons(s, vd, vp, vb), vc))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg), fbagdifference(s, vf, vg, fbag_empty(s), fbag_empty(s)), fbag_empty(s)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vf, vg, vp), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_empty(s)), fbagcinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagdifference(s, vf, vg, vb, fbag_empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(vc, ve, vf, vg, vq), fbagdifference(s, vf, vg, fbag_empty(s), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagdifference(s, vf, vg, fbag_empty(s), vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vf, vg, vp, vq), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, vd, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::cnat(vq)), fbagdifference(s, vf, vg, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(vd, ve), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, vd, sort_nat::swap_zero_monus(vf(vd), vg(vd), sort_nat::cnat(vp), sort_nat::c0()), fbagdifference(s, vf, vg, vb, fbag_cons(s, ve, vq, vc)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vf, vg, vp, vq), less(ve, vd), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), fbag_cons(s, ve, vq, vc)), fbagcinsert(s, ve, sort_nat::swap_zero_monus(vf(ve), vg(ve), sort_nat::c0(), sort_nat::cnat(vq)), fbagdifference(s, vf, vg, fbag_cons(s, vd, vp, vb), vc))));
+        result.push_back(data_equation(atermpp::make_vector(vf), fbag2fset(s, vf, fbag_empty(s)), sort_fset::fset_empty(s)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vf, vp), fbag2fset(s, vf, fbag_cons(s, vd, vp, vb)), sort_fset::fsetcinsert(s, vd, equal_to(equal_to(vf(vd), sort_nat::cnat(vp)), greater(vf(vd), sort_nat::c0())), fbag2fset(s, vf, vb))));
         result.push_back(data_equation(variable_list(), fset2fbag(s, sort_fset::fset_empty(s)), fbag_empty(s)));
-        result.push_back(data_equation(make_vector(vd, vs), fset2fbag(s, sort_fset::fset_cons(s, vd, vs)), fbagcinsert(s, vd, sort_nat::cnat(sort_pos::c1()), fset2fbag(s, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), fset2fbag(s, sort_fset::fset_cons(s, vd, vs)), fbagcinsert(s, vd, sort_nat::cnat(sort_pos::c1()), fset2fbag(s, vs))));
         return result;
       }
 

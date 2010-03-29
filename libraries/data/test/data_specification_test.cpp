@@ -89,7 +89,7 @@ void test_sorts()
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   basic_sort s2("S2");
-  sort_expression_vector s2l(make_vector(reinterpret_cast<sort_expression&>(s2)));
+  sort_expression_vector s2l(atermpp::make_vector(reinterpret_cast<sort_expression&>(s2)));
   boost::iterator_range<sort_expression_vector::const_iterator> s2l_range(s2l);
   spec.add_context_sort(s2);
   //std::for_each(s2l_range.begin(), s2l_range.end(),
@@ -136,13 +136,13 @@ void test_constructors()
 
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s(make_vector(sort_expression(s0)),s);
+  function_sort s0s(atermpp::make_vector(sort_expression(s0)),s);
   function_symbol f("f", s);
   function_symbol g("g", s0s);
   function_symbol h("h", s0);
-  function_symbol_vector fgl(make_vector(f,g));
-  function_symbol_vector hl(make_vector(h));
-  function_symbol_vector fghl(make_vector(f,g,h));
+  function_symbol_vector fgl(atermpp::make_vector(f,g));
+  function_symbol_vector hl(atermpp::make_vector(h));
+  function_symbol_vector fghl(atermpp::make_vector(f,g,h));
   boost::iterator_range<function_symbol_vector::const_iterator> fgl_range(boost::make_iterator_range(fgl));
   boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
   boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
@@ -177,7 +177,7 @@ void test_constructors()
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   spec.add_constructor(i);
-  function_symbol_vector il(make_vector(i));
+  function_symbol_vector il(atermpp::make_vector(i));
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::add_constructor, &spec1, _1));
   BOOST_CHECK(compare_for_equality(spec, spec1));
@@ -201,14 +201,14 @@ void test_functions()
 
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s(make_vector(sort_expression(s0)), s);
+  function_sort s0s(atermpp::make_vector(sort_expression(s0)), s);
   function_symbol f("f", s);
   function_symbol g("g", s0s);
   function_symbol h("h", s0);
 
-  function_symbol_vector fgl(make_vector(f,g));
-  function_symbol_vector hl(make_vector(h));
-  function_symbol_vector fghl(make_vector(f,g,h));
+  function_symbol_vector fgl(atermpp::make_vector(f,g));
+  function_symbol_vector hl(atermpp::make_vector(h));
+  function_symbol_vector fghl(atermpp::make_vector(f,g,h));
   boost::iterator_range<function_symbol_vector::const_iterator> fgl_range(boost::make_iterator_range(fgl));
   boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
   boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
@@ -242,7 +242,7 @@ void test_functions()
 
   function_symbol i("i", s0);
   spec.add_mapping(i);
-  function_symbol_vector il(make_vector(i));
+  function_symbol_vector il(atermpp::make_vector(i));
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
   compare_for_equality(spec, spec1);
@@ -265,12 +265,12 @@ void test_equations()
   std::clog << "test_equations" << std::endl;
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s(make_vector(reinterpret_cast<sort_expression&>(s0)), s);
+  function_sort s0s(atermpp::make_vector(reinterpret_cast<sort_expression&>(s0)), s);
   function_symbol f("f", s0s);
   variable x("x", s0);
-  data_expression_vector xel(make_vector(reinterpret_cast<data_expression&>(x)));
+  data_expression_vector xel(atermpp::make_vector(reinterpret_cast<data_expression&>(x)));
   application fx(f, boost::make_iterator_range(xel));
-  variable_vector xl(make_vector(x));
+  variable_vector xl(atermpp::make_vector(x));
   boost::iterator_range<variable_vector::const_iterator> x_range(xl);
   data_equation fxx(x_range, x, fx, x);
 
@@ -282,14 +282,14 @@ void test_equations()
   spec1 = spec;
   BOOST_CHECK(compare_for_equality(spec, spec1));
   spec.add_equation(fxx);
-  data_equation_vector fxxl(make_vector(fxx));
+  data_equation_vector fxxl(atermpp::make_vector(fxx));
   boost::iterator_range<data_equation_vector::const_iterator> fxxl_range(fxxl);
   std::for_each(fxxl_range.begin(), fxxl_range.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   data_equation fxf(x_range, x, fx, f);
-  data_equation_vector fxfl(make_vector(fxf));
+  data_equation_vector fxfl(atermpp::make_vector(fxf));
   boost::iterator_range<data_equation_vector::const_iterator> fxfl_range(fxfl);
   spec.add_equation(fxf);
   std::for_each(fxfl_range.begin(), fxfl_range.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
@@ -314,11 +314,11 @@ void test_is_certainly_finite()
   std::clog << "test_is_certainly_finite" << std::endl;
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s0(make_vector(static_cast<sort_expression&>(s0)), s0);
+  function_sort s0s0(atermpp::make_vector(static_cast<sort_expression&>(s0)), s0);
   function_symbol f("f", s);
   function_symbol g("g", s0s0);
   variable x("x", s0);
-  application gx(g, boost::make_iterator_range(make_vector(static_cast<data_expression&>(x))));
+  application gx(g, boost::make_iterator_range(atermpp::make_vector(static_cast<data_expression&>(x))));
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
@@ -485,7 +485,7 @@ void test_utility_functionality()
   basic_sort s("S");
   basic_sort s0("S0");
   basic_sort a("a");
-  function_sort s0s(make_vector(sort_expression(s0)), s);
+  function_sort s0s(atermpp::make_vector(sort_expression(s0)), s);
   function_symbol f("f", s);
 
   function_symbol g("g", s0s);

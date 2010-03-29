@@ -6,19 +6,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/convert.h
+/// \file mcrl2/atermpp/convert.h
 /// \brief Conversion utilities for converting between the containers with
 ///    expressions and term lists that contain expressions
 
-#ifndef MCRL2_DATA_DETAIL_CONVERT_H
-#define MCRL2_DATA_DETAIL_CONVERT_H
+#ifndef MCRL2_ATERMPP_CONVERT_H
+#define MCRL2_ATERMPP_CONVERT_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
-namespace mcrl2 {
-
-  namespace data {
+namespace atermpp {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
@@ -89,9 +87,7 @@ namespace mcrl2 {
       return detail::converter< TargetContainer, SourceContainer >::convert(c);
     }
 
-  } // namespace data
+} // namespace atermpp
 
-} // namespace mcrl2
-
-#endif //MCRL2_DATA_DETAIL_CONVERT_H
+#endif // MCRL2_ATERMPP_CONVERT_H
 

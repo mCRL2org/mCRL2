@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
@@ -47,8 +47,8 @@ class application_base: public data_expression
 
     /// \brief Constructor.
     template <typename Container>
-    application_base(const data_expression& head, const Container& arguments, typename detail::enable_if_container<Container, data_expression>::type* = 0)
-      : data_expression(core::detail::gsMakeDataAppl(head, convert<data_expression_list>(arguments)))
+    application_base(const data_expression& head, const Container& arguments, typename atermpp::detail::enable_if_container<Container, data_expression>::type* = 0)
+      : data_expression(core::detail::gsMakeDataAppl(head, atermpp::convert<data_expression_list>(arguments)))
     {}
 
     data_expression head() const
@@ -106,7 +106,7 @@ class application_base: public data_expression
         template < typename Container >
         application(const data_expression& head,
                     const Container& arguments,
-                    typename detail::enable_if_container< Container, data_expression >::type* = 0)
+                    typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
           : detail::application_base(head, arguments)
         {
           assert(head.sort().is_function_sort());

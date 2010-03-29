@@ -126,7 +126,7 @@ namespace mcrl2 {
 
           template < typename Sequence >
           void add(const Sequence& s, bool assume_self_dependence = false,
-                       typename detail::enable_if_container< Sequence >::type* = 0)
+                       typename atermpp::detail::enable_if_container< Sequence >::type* = 0)
           { for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
             {
               add(*i, assume_self_dependence);
@@ -153,7 +153,7 @@ namespace mcrl2 {
           }
 
           template < typename Expression >
-          void add(Expression const& s, bool assume_self_dependence = false, typename detail::disable_if_container< Expression >::type* = 0)
+          void add(Expression const& s, bool assume_self_dependence = false, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           { (*this)(s);
           }
       };

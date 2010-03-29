@@ -32,7 +32,7 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
@@ -450,7 +450,7 @@ namespace mcrl2 {
       inline
       application list(const sort_expression& s,
                        Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                       typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression                list_expression(nil(s));
         std::vector< data_expression > elements(range.begin(), range.end());
@@ -507,7 +507,7 @@ namespace mcrl2 {
       inline
       data_expression list_enumeration(const sort_expression& s,
                                        Sequence const& range,
-                                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                       typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -599,7 +599,7 @@ namespace mcrl2 {
       inline
       data_expression set_enumeration(const sort_expression& s,
                                       Sequence const& range,
-                                      typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                      typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -660,7 +660,7 @@ namespace mcrl2 {
       inline
       application fset(const sort_expression& s,
                        Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                       typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression fset_expression(sort_fset::fset_empty(s));
 
@@ -718,7 +718,7 @@ namespace mcrl2 {
       inline
       data_expression bag_enumeration(const sort_expression& s,
                                       Sequence const& range,
-                                      typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                      typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -795,7 +795,7 @@ namespace mcrl2 {
       template < typename Sequence >
       inline
       application fbag(const sort_expression& s, Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                       typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression fbag_expression(sort_fbag::fbag_empty(s));
 

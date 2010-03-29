@@ -234,7 +234,7 @@ namespace core {
       {
         v.insert(i->variables().begin(), i->variables().end());
       }
-      return term_type(tr::prop_var(name, first, last), data::convert< variable_sequence_type >(v));
+      return term_type(tr::prop_var(name, first, last), atermpp::convert< variable_sequence_type >(v));
     }
 
     /// \brief Test for value true

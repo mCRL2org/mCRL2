@@ -58,11 +58,11 @@ namespace mcrl2 {
       { using namespace core::detail;
 
         return gsMakeDataSpec(
-             gsMakeSortSpec(convert< atermpp::aterm_list >(s.m_sorts) +
-                            convert< atermpp::aterm_list >(data_specification::aliases_const_range(s.m_aliases))),
-             gsMakeConsSpec(convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_constructors))),
-             gsMakeMapSpec(convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_mappings))),
-             gsMakeDataEqnSpec(convert< atermpp::aterm_list >(s.m_equations)));
+             gsMakeSortSpec(atermpp::convert< atermpp::aterm_list >(s.m_sorts) +
+                            atermpp::convert< atermpp::aterm_list >(data_specification::aliases_const_range(s.m_aliases))),
+             gsMakeConsSpec(atermpp::convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_constructors))),
+             gsMakeMapSpec(atermpp::convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_mappings))),
+             gsMakeDataEqnSpec(atermpp::convert< atermpp::aterm_list >(s.m_equations)));
       }
     } // namespace detail
     /// \endcond

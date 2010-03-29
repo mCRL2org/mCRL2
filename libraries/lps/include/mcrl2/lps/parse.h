@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_PARSE_H
 #define MCRL2_LPS_PARSE_H
 
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/parse.h"

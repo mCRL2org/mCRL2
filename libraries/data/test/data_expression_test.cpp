@@ -15,7 +15,7 @@
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/data_expression.h"
@@ -136,7 +136,7 @@ void application_test()
   function_symbol f("f", s01s);
   data_expression x(variable("x", s0));
   data_expression y(variable("y", s1));
-  data_expression_vector xy = make_vector(x,y);
+  data_expression_vector xy = atermpp::make_vector(x,y);
   boost::iterator_range<data_expression_vector::const_iterator> xy_range(xy.begin(), xy.end());
   application fxy(f, xy_range);
   BOOST_CHECK(fxy.sort() == s);
@@ -159,7 +159,7 @@ void abstraction_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_vector xl = make_vector(x);
+  variable_vector xl = atermpp::make_vector(x);
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   abstraction I(lambda_binder(), xl_range, x);
   BOOST_CHECK(I.binding_operator() == lambda_binder());
@@ -179,7 +179,7 @@ void lambda_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_vector xl = make_vector(x);
+  variable_vector xl = atermpp::make_vector(x);
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   lambda I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == lambda_binder());
@@ -187,7 +187,7 @@ void lambda_test()
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
-  sort_expression_vector s_l(make_vector(s_));
+  sort_expression_vector s_l(atermpp::make_vector(s_));
   BOOST_CHECK(!s_l.empty());
   boost::iterator_range<sort_expression_vector::const_iterator> s_l_range(s_l);
   function_sort fs(s_l_range, s);
@@ -211,7 +211,7 @@ void forall_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_vector xl = make_vector(x);
+  variable_vector xl = atermpp::make_vector(x);
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   forall I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == forall_binder());
@@ -219,7 +219,7 @@ void forall_test()
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
-  sort_expression_vector s_l(make_vector(s_));
+  sort_expression_vector s_l(atermpp::make_vector(s_));
 
   // TODO Check sort
 
@@ -241,7 +241,7 @@ void exists_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_vector xl = make_vector(x);
+  variable_vector xl = atermpp::make_vector(x);
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   exists I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == exists_binder());
@@ -249,7 +249,7 @@ void exists_test()
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
-  sort_expression_vector s_l(make_vector(s_));
+  sort_expression_vector s_l(atermpp::make_vector(s_));
 
   // TODO Check sort
 
@@ -273,7 +273,7 @@ void where_declaration_test()
   variable y("y", s);
   
   assignment xy(x,y);
-  assignment_vector xyl(make_vector(xy));
+  assignment_vector xyl(atermpp::make_vector(xy));
   boost::iterator_range<assignment_vector::const_iterator> xy_range(xyl);
   where_clause wxy(x, xy_range);
   BOOST_CHECK(wxy.body() == x);

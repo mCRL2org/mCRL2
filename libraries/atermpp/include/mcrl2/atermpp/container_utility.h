@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/container_utility.h
+/// \file mcrl2/atermpp/container_utility.h
 /// \brief Provides utilities for working with container.
 
-#ifndef MCRL2_DATA_DETAIL_CONTAINER_UTILITY_H
-#define MCRL2_DATA_DETAIL_CONTAINER_UTILITY_H
+#ifndef MCRL2_ATERMPP_CONTAINER_UTILITY_H
+#define MCRL2_ATERMPP_CONTAINER_UTILITY_H
 
 #include <algorithm>
 #include <set>
@@ -32,9 +32,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list_iterator.h"
 
-namespace mcrl2 {
-
-  namespace data {
+namespace atermpp {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
@@ -118,7 +116,7 @@ namespace mcrl2 {
       /// \pre V is void or T::value_type convertible to V
       template < typename T, typename V = void >
       struct enable_if_container : public
-        boost::enable_if< typename detail::is_container< T, V >::type >
+        boost::enable_if< typename atermpp::detail::is_container< T, V >::type >
       {};
 
       /// type condition for use with boost::enable_if
@@ -126,7 +124,7 @@ namespace mcrl2 {
       /// \pre V is void or T::value_type convertible to V
       template < typename T, typename V = void >
       struct disable_if_container : public
-        boost::disable_if< typename detail::is_container< T, V >::type >
+        boost::disable_if< typename atermpp::detail::is_container< T, V >::type >
       {};
 
       template < typename T >
@@ -162,7 +160,7 @@ namespace mcrl2 {
       // \note the dereference operation returns (re-)evaluates the function
       template < typename AdaptableUnaryFunction, typename Iterator, typename Value = typename AdaptableUnaryFunction::result_type >
       class transform_iterator : public boost::iterator_adaptor<
-                 data::detail::transform_iterator< AdaptableUnaryFunction, Iterator, Value >,
+                 atermpp::detail::transform_iterator< AdaptableUnaryFunction, Iterator, Value >,
                                                         Iterator, Value, boost::use_default, Value > {
 
         friend class boost::iterator_core_access;
@@ -188,7 +186,7 @@ namespace mcrl2 {
 
       template < typename AdaptableUnaryFunction, typename ForwardTraversalIterator1, typename ForwardTraversalIterator2 >
       class combine_iterator : public boost::iterator_facade<
-                 data::detail::combine_iterator< AdaptableUnaryFunction, ForwardTraversalIterator1, ForwardTraversalIterator2 >,
+                 atermpp::detail::combine_iterator< AdaptableUnaryFunction, ForwardTraversalIterator1, ForwardTraversalIterator2 >,
                          typename boost::remove_reference< AdaptableUnaryFunction >::type::result_type, boost::forward_traversal_tag,
                          typename boost::remove_reference< AdaptableUnaryFunction >::type::result_type > {
 
@@ -296,7 +294,7 @@ namespace mcrl2 {
 
       template < typename Iterator, typename AdaptableUnaryPredicate >
       class filter_iterator : public boost::iterator_adaptor<
-                 data::detail::filter_iterator< Iterator, AdaptableUnaryPredicate >, Iterator > {
+                 atermpp::detail::filter_iterator< Iterator, AdaptableUnaryPredicate >, Iterator > {
 
         friend class boost::iterator_core_access;
 
@@ -504,8 +502,6 @@ namespace mcrl2 {
       return v;
     }
 
-  } // namespace data
+} // namespace atermpp
 
-} // namespace mcrl2
-
-#endif //MCRL2_DATA_UTILITY_H
+#endif // MCRL2_ATERMPP_CONTAINER_UTILITY_H

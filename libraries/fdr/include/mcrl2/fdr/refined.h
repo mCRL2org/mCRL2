@@ -29,7 +29,7 @@ class model
   public:
     /// \brief Default constructor.
     model()
-      : atermpp::aterm_appl(fdr::detail::constructModel())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructModel())
     {}
 
     /// \brief Constructor.

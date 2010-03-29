@@ -1460,7 +1460,7 @@ reconstruct_container_expression(ATermAppl Part)
     }
 
     body = data::application(body, variables);
-    Part = gsMakeBinder(gsMakeSetComp(), convert<data_expression_list>(variables), body);
+    Part = gsMakeBinder(gsMakeSetComp(), atermpp::convert<data_expression_list>(variables), body);
   }
 
   else if (sort_bag::is_bagconstructor_application(expr))
@@ -1551,7 +1551,7 @@ reconstruct_container_expression(ATermAppl Part)
     }
 
     body = data::application(body, variables);
-    Part = gsMakeBinder(gsMakeBagComp(), convert<data_expression_list>(variables), body);
+    Part = gsMakeBinder(gsMakeBagComp(), atermpp::convert<data_expression_list>(variables), body);
   }
   return Part;
 }

@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       expression()
-        : atermpp::aterm_appl(fdr::detail::constructExpression())
+        : atermpp::aterm_appl(fdr::atermpp::detail::constructExpression())
       {}
 
       /// \brief Constructor.
@@ -47,7 +47,7 @@ class numb: public expression
   public:
     /// \brief Default constructor.
     numb()
-      : expression(fdr::detail::constructNumb())
+      : expression(fdr::atermpp::detail::constructNumb())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class bool_: public expression
   public:
     /// \brief Default constructor.
     bool_()
-      : expression(fdr::detail::constructBool())
+      : expression(fdr::atermpp::detail::constructBool())
     {}
 
     /// \brief Constructor.
@@ -103,7 +103,7 @@ class set: public expression
   public:
     /// \brief Default constructor.
     set()
-      : expression(fdr::detail::constructSet())
+      : expression(fdr::atermpp::detail::constructSet())
     {}
 
     /// \brief Constructor.
@@ -131,7 +131,7 @@ class seq: public expression
   public:
     /// \brief Default constructor.
     seq()
-      : expression(fdr::detail::constructSeq())
+      : expression(fdr::atermpp::detail::constructSeq())
     {}
 
     /// \brief Constructor.
@@ -159,7 +159,7 @@ class tuple: public expression
   public:
     /// \brief Default constructor.
     tuple()
-      : expression(fdr::detail::constructTuple())
+      : expression(fdr::atermpp::detail::constructTuple())
     {}
 
     /// \brief Constructor.
@@ -187,7 +187,7 @@ class dotted: public expression
   public:
     /// \brief Default constructor.
     dotted()
-      : expression(fdr::detail::constructDotted())
+      : expression(fdr::atermpp::detail::constructDotted())
     {}
 
     /// \brief Constructor.
@@ -215,7 +215,7 @@ class lambda: public expression
   public:
     /// \brief Default constructor.
     lambda()
-      : expression(fdr::detail::constructLambda())
+      : expression(fdr::atermpp::detail::constructLambda())
     {}
 
     /// \brief Constructor.

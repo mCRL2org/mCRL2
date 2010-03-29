@@ -24,7 +24,7 @@
 
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
@@ -91,7 +91,7 @@ namespace mcrl2 {
     /// \note Behaviour is lazy, no intermediate containers are constructed
     template < typename Container >
     typename detail::sort_range< Container >::type
-    make_sort_range(Container const& container, typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0)
+    make_sort_range(Container const& container, typename boost::enable_if< typename atermpp::detail::is_container< Container >::type >::type* = 0)
     {
       return typename detail::sort_range< Container >::type(container);
     }
@@ -107,7 +107,7 @@ namespace mcrl2 {
     template < typename Container, typename Context >
     inline
     typename detail::fresh_variable_range< Container, detail::rename_with_unique_common_suffix >::type
-    fresh_variables(Container const& container, const Context& context, typename boost::enable_if< typename detail::is_container< Container, variable >::type >::type* = 0)
+    fresh_variables(Container const& container, const Context& context, typename boost::enable_if< typename atermpp::detail::is_container< Container, variable >::type >::type* = 0)
     {
       typedef boost::transform_iterator< detail::rename_with_unique_common_suffix, typename Container::const_iterator > iterator_type;
 

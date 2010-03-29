@@ -244,7 +244,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             }
             term=rewr(term);
             for (classic_enumerator< > i =
-                 e.make(data::convert < std::set <variable > >(vars),rewr,term);
+                 e.make(atermpp::convert < std::set <variable > >(vars),rewr,term);
                                                           i != classic_enumerator<>() ; ++i)
             {
               cout << "[";

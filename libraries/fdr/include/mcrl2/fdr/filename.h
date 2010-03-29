@@ -29,7 +29,7 @@ class filename
   public:
     /// \brief Default constructor.
     filename()
-      : atermpp::aterm_appl(fdr::detail::constructFileName())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructFileName())
     {}
 
     /// \brief Constructor.

@@ -29,7 +29,7 @@ class bgen
   public:
     /// \brief Default constructor.
     bgen()
-      : atermpp::aterm_appl(fdr::detail::constructBGen())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructBGen())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class gen
   public:
     /// \brief Default constructor.
     gen()
-      : atermpp::aterm_appl(fdr::detail::constructGen())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructGen())
     {}
 
     /// \brief Constructor.

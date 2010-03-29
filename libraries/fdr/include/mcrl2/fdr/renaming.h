@@ -29,7 +29,7 @@ class maps
   public:
     /// \brief Default constructor.
     maps()
-      : atermpp::aterm_appl(fdr::detail::constructMaps())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructMaps())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class mapsgens
   public:
     /// \brief Default constructor.
     mapsgens()
-      : atermpp::aterm_appl(fdr::detail::constructMapsGens())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructMapsGens())
     {}
 
     /// \brief Constructor.

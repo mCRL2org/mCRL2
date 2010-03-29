@@ -121,7 +121,7 @@ namespace mcrl2 {
          **/
         template < typename Container >
         enumerator_type make(Container const& variables, expression_type const& condition = expression_traits< expression_type >::true_(),
-                         substitution_type const& substitution = substitution_type(), typename detail::enable_if_container< Container, variable >::type* = 0) const {
+                         substitution_type const& substitution = substitution_type(), typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) const {
 
           return enumerator_type(m_enumeration_context, variables, condition, substitution, *m_evaluator);
         }
@@ -136,7 +136,7 @@ namespace mcrl2 {
         template < typename Container >
         enumerator_type make(Container const& variables, Evaluator const& evaluator,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
-                         substitution_type const& substitution = substitution_type(), typename detail::enable_if_container< Container, variable >::type* = 0) const {
+                         substitution_type const& substitution = substitution_type(), typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) const {
 
           return enumerator_type(m_enumeration_context, variables, condition, substitution, evaluator);
         }
@@ -152,7 +152,7 @@ namespace mcrl2 {
         classic_enumerator< substitution_type, AlternativeEvaluator, selector_type >
           make(AlternativeEvaluator const& evaluator, Container const& variables,
              expression_type const& condition = expression_traits< expression_type >::true_(),
-             substitution_type const& substitution = substitution_type(), typename detail::enable_if_container< Container, variable >::type* = 0) const {
+             substitution_type const& substitution = substitution_type(), typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) const {
 
           return classic_enumerator<
                        substitution_type, AlternativeEvaluator, selector_type >
@@ -189,7 +189,7 @@ namespace mcrl2 {
           make(AlternativeEvaluator const& evaluator, Container const& variables,
              expression_type const& condition = sort_bool::true_(),
              substitution_type const& substitution = substitution_type(),
-             typename detail::enable_if_container< Container, variable >::type* = 0) const {
+             typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) const {
 
           return classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
                    (m_enumeration_context, variables, condition, substitution, evaluator);

@@ -29,7 +29,7 @@ class assign
   public:
     /// \brief Default constructor.
     assign()
-      : atermpp::aterm_appl(fdr::detail::constructAssign())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructAssign())
     {}
 
     /// \brief Constructor.
@@ -67,7 +67,7 @@ class channel
   public:
     /// \brief Default constructor.
     channel()
-      : atermpp::aterm_appl(fdr::detail::constructChannel())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructChannel())
     {}
 
     /// \brief Constructor.
@@ -105,7 +105,7 @@ class channel
   public:
     /// \brief Default constructor.
     channel()
-      : atermpp::aterm_appl(fdr::detail::constructSimpleChannel())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSimpleChannel())
     {}
 
     /// \brief Constructor.
@@ -138,7 +138,7 @@ class nametype
   public:
     /// \brief Default constructor.
     nametype()
-      : atermpp::aterm_appl(fdr::detail::constructNameType())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructNameType())
     {}
 
     /// \brief Constructor.
@@ -176,7 +176,7 @@ class datatype
   public:
     /// \brief Default constructor.
     datatype()
-      : atermpp::aterm_appl(fdr::detail::constructDataType())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructDataType())
     {}
 
     /// \brief Constructor.
@@ -214,7 +214,7 @@ class subtype
   public:
     /// \brief Default constructor.
     subtype()
-      : atermpp::aterm_appl(fdr::detail::constructSubType())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructSubType())
     {}
 
     /// \brief Constructor.
@@ -252,7 +252,7 @@ class external
   public:
     /// \brief Default constructor.
     external()
-      : atermpp::aterm_appl(fdr::detail::constructExternal())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructExternal())
     {}
 
     /// \brief Constructor.
@@ -285,7 +285,7 @@ class transparent
   public:
     /// \brief Default constructor.
     transparent()
-      : atermpp::aterm_appl(fdr::detail::constructTransparent())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructTransparent())
     {}
 
     /// \brief Constructor.
@@ -318,7 +318,7 @@ class assert_
   public:
     /// \brief Default constructor.
     assert_()
-      : atermpp::aterm_appl(fdr::detail::constructAssert())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructAssert())
     {}
 
     /// \brief Constructor.
@@ -351,7 +351,7 @@ class print
   public:
     /// \brief Default constructor.
     print()
-      : atermpp::aterm_appl(fdr::detail::constructPrint())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructPrint())
     {}
 
     /// \brief Constructor.
@@ -384,7 +384,7 @@ class include
   public:
     /// \brief Default constructor.
     include()
-      : atermpp::aterm_appl(fdr::detail::constructInclude())
+      : atermpp::aterm_appl(fdr::atermpp::detail::constructInclude())
     {}
 
     /// \brief Constructor.
