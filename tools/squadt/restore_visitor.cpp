@@ -165,6 +165,9 @@ namespace utility {
     }
     catch(...){
       location = basename.get_executable_basename() + "/"+  t.m_name;
+#ifdef _WIN32
+      location.append(".exe");
+#endif
     }
 
     t.set_location(location);

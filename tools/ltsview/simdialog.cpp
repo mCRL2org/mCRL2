@@ -135,15 +135,15 @@ SimDialog::SimDialog(wxWindow* parent, Mediator* owner)
 }
 
 // Simulation event handlers implementations
-void SimDialog::onSimStartButton(wxCommandEvent& event) {
+void SimDialog::onSimStartButton(wxCommandEvent& ) {
   mediator->startSim();
 }
 
-void SimDialog::onSimResetButton(wxCommandEvent& event) {
+void SimDialog::onSimResetButton(wxCommandEvent& ) {
   sim->resetSim();
 }
 
-void SimDialog::onSimStopButton(wxCommandEvent& event) {
+void SimDialog::onSimStopButton(wxCommandEvent& ) {
   sim->stop();
 }
 
@@ -173,15 +173,15 @@ void SimDialog::onKeyDown(wxKeyEvent& event)
   }
 }
 
-void SimDialog::onSimTriggerButton(wxCommandEvent& event) {
+void SimDialog::onSimTriggerButton(wxCommandEvent& ) {
   sim->followTrans();
 }
 
-void SimDialog::onSimUndoButton(wxCommandEvent& event) {
+void SimDialog::onSimUndoButton(wxCommandEvent& ) {
   sim->undoStep();
 }
 
-void SimDialog::onGenerateBackTraceButton(wxCommandEvent& event)
+void SimDialog::onGenerateBackTraceButton(wxCommandEvent& )
 {
   mediator->generateBackTrace();
 }

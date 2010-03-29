@@ -156,7 +156,7 @@ namespace squadt {
 
 
     mcrl2::utilities::basename  basename;
-    const boost::filesystem::path tool_manager_file_name( basename.get_toolset_basename() + "/share/squadt/" + settings_manager::tool_catalog_base_name);
+    const boost::filesystem::path tool_manager_file_name( basename.get_toolset_basename() + "/../share/squadt/" + settings_manager::tool_catalog_base_name);
 
     visitors::restore(*m_tool_manager, tool_manager_file_name); 
 

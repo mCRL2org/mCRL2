@@ -197,7 +197,7 @@ namespace lysa
                 push_back(s);
         }
         //version for splitting every character into a separate index
-        Indices::Indices(E_ptr s, bool isShort)
+        Indices::Indices(E_ptr s, bool)
         {
                 BOOST_FOREACH(char c, static_pointer_cast<String>(s)->s)
                 {
