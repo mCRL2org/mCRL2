@@ -461,7 +461,7 @@ void P_ObliqueCone::draw() {
   glCallList(disp_list);
 }
 
-void P_ObliqueCone::reshape(int ,float ,float ) {
+void P_ObliqueCone::reshape(int N,float *coss,float *sins) {
 }
 
 void P_ObliqueCone::reshape(int N,float *coss,float *sins,float obt) {
