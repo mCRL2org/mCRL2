@@ -43,6 +43,16 @@ namespace mcrl2 {
         {
           assert(core::detail::check_rule_WhrDecl(term));
         }
+
+        atermpp::aterm_appl lhs() const
+        {
+          return atermpp::arg1(*this);
+        }
+
+        data_expression rhs() const
+        {
+          return atermpp::arg2(*this);
+        }
     };
 
     /// \brief list of assignment expressions

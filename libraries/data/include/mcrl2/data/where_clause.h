@@ -69,13 +69,6 @@ class where_clause_base: public data_expression
     ///
     class where_clause: public detail::where_clause_base
     {
-      public:
-
-        /// \brief Iterator range over list of declarations
-        typedef atermpp::term_list< assignment >  declarations_range;
-
-        /// \brief Iterator range over constant list of declarations
-        typedef atermpp::term_list< assignment >  declarations_const_range;
 
       public:
 

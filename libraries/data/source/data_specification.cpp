@@ -589,9 +589,9 @@ namespace mcrl2 {
       }
       if (e.is_application())
       { const application a(e);
-        const application::arguments_const_range args=a.arguments();
+        const data_expression_list args=a.arguments();
         data_expression_vector normalised_arguments;
-        for(application::arguments_const_range::const_iterator i=args.begin();
+        for(data_expression_list::const_iterator i=args.begin();
             i!=args.end(); ++i)
         { normalised_arguments.push_back(normalise_sorts(*i));
         }
@@ -605,7 +605,7 @@ namespace mcrl2 {
       }
       assert(e.is_where_clause());
       const where_clause w(e);
-      const where_clause::declarations_const_range decls=w.declarations();
+      const assignment_list decls=w.declarations();
       assignment_vector normalised_assignments;
       for(atermpp::term_list <assignment>::const_iterator i=decls.begin();
              i!=decls.end(); ++i)
