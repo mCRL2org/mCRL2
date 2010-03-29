@@ -48,7 +48,7 @@ class application_base: public data_expression
     /// \brief Constructor.
     template <typename Container>
     application_base(const data_expression& head, const Container& arguments, typename detail::enable_if_container<Container, data_expression>::type* = 0)
-      : data_expression(core::detail::gsMakeDataAppl(head, convert<const data_expression_list>(arguments)))
+      : data_expression(core::detail::gsMakeDataAppl(head, convert<data_expression_list>(arguments)))
     {}
 
     data_expression head() const

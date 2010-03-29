@@ -51,7 +51,7 @@ class abstraction_base: public data_expression
     /// \brief Constructor.
     template <typename Container>
     abstraction_base(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename detail::enable_if_container<Container, variable>::type* = 0)
-      : data_expression(core::detail::gsMakeBinder(binding_operator, convert<const variable_list>(variables), body))
+      : data_expression(core::detail::gsMakeBinder(binding_operator, convert<variable_list>(variables), body))
     {}
 
     binder_type binding_operator() const
