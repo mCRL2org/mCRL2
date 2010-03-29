@@ -55,7 +55,7 @@ DataVarId | variable(const core::identifier_string& name, const sort_expression&
 OpId    | function_symbol(const core::identifier_string& name, const sort_expression& sort) | A function symbol
 DataAppl  | application[_base](const data_expression& head, data_expression_list const& arguments) | An application of a data expression to a number of arguments
 Binder    | abstraction[_base](const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
-Whr   | where_clause[_base](const data_expression& body, const assignment_expression_list& declarations) | A where expression
+Whr   | where_clause(const data_expression& body, const assignment_expression_list& declarations) | A where expression
 '''
 
 STATE_FORMULA_CLASSES = r'''

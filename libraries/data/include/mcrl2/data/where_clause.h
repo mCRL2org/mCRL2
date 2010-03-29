@@ -20,35 +20,33 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
-
 //--- start generated class ---//
 /// \brief A where expression
-class where_clause_base: public data_expression
+class where_clause: public data_expression
 {
   public:
     /// \brief Default constructor.
-    where_clause_base()
+    where_clause()
       : data_expression(core::detail::constructWhr())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    where_clause_base(atermpp::aterm_appl term)
+    where_clause(atermpp::aterm_appl term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Whr(m_term));
     }
 
     /// \brief Constructor.
-    where_clause_base(const data_expression& body, const assignment_expression_list& declarations)
+    where_clause(const data_expression& body, const assignment_expression_list& declarations)
       : data_expression(core::detail::gsMakeWhr(body, declarations))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    where_clause_base(const data_expression& body, const Container& declarations, typename detail::enable_if_container<Container, assignment_expression>::type* = 0)
-      : data_expression(core::detail::gsMakeWhr(body, convert<const assignment_expression_list>(declarations)))
+    where_clause(const data_expression& body, const Container& declarations, typename detail::enable_if_container<Container, assignment_expression>::type* = 0)
+      : data_expression(core::detail::gsMakeWhr(body, convert<assignment_expression_list>(declarations)))
     {}
 
     data_expression body() const
@@ -62,45 +60,6 @@ class where_clause_base: public data_expression
     }
 };
 //--- end generated class ---//
-
-    } // namespace detail
-
-    /// \brief function symbol.
-    ///
-    class where_clause: public detail::where_clause_base
-    {
-
-      public:
-
-        /// Constructor.
-        ///
-        where_clause()
-          : detail::where_clause_base(core::detail::constructWhr())
-        {}
-
-        /// \overload
-        where_clause(atermpp::aterm_appl term)
-          : where_clause_base(term)
-        {}
-
-        /// \overload
-        where_clause(const data_expression& body, const assignment_expression_list& declarations)
-          : where_clause_base(body, declarations)
-        {}
-
-        /// Constructor.
-        ///
-        /// \param[in] body The body of the where_clause.
-        /// \param[in] declarations The variable declarations of the where
-        ///            clause (objects of type assignment_expression).
-        template < typename Container >
-        where_clause(const data_expression& body,
-                     const Container& declarations,
-                     typename detail::enable_if_container< Container, assignment_expression >::type* = 0)
-          : detail::where_clause_base(body, convert< assignment_expression_list >(declarations))
-        {}
-
-    }; // class where_clause
 
   } // namespace data
 
