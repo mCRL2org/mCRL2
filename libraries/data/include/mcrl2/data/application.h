@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
@@ -72,17 +72,6 @@ class application_base: public data_expression
     /// application, and x,y are the arguments.
     class application: public detail::application_base
     {
-
-      public:
-        /// \brief Iterator over arguments
-        typedef atermpp::term_list< data_expression >::const_iterator  argument_iterator;
-
-        /// \brief Iterator range over constant arguments
-        typedef atermpp::term_list< data_expression >                  arguments_const_range;
-
-        /// \brief Iterator range over arguments
-        typedef atermpp::term_list< data_expression >                  arguments_range;
-
       public:
 
         /// \brief Default constructor for an application, note that this is not

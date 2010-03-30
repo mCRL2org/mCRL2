@@ -578,9 +578,9 @@ namespace mcrl2 {
     { normalise_specification_if_required();
       if (e.is_abstraction())
       { const abstraction a(e);
-        const abstraction::variables_const_range variables=a.variables();
+        const variable_list variables=a.variables();
         variable_vector normalised_variables;
-        for(abstraction::variables_const_range::const_iterator i=variables.begin();
+        for(variable_list::const_iterator i=variables.begin();
               i!=variables.end(); ++i)
         { normalised_variables.push_back(variable(i->name(),normalise_sorts(i->sort())));
         }

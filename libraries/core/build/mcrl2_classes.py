@@ -54,7 +54,7 @@ Id    | identifier(const core::identifier_string& name) | An identifier
 DataVarId | variable(const core::identifier_string& name, const sort_expression& sort) | A data variable
 OpId    | function_symbol(const core::identifier_string& name, const sort_expression& sort) | A function symbol
 DataAppl  | application[_base](const data_expression& head, data_expression_list const& arguments) | An application of a data expression to a number of arguments
-Binder    | abstraction[_base](const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
+Binder    | abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
 Whr   | where_clause(const data_expression& body, const assignment_expression_list& declarations) | A where expression
 '''
 
@@ -455,8 +455,8 @@ class Class:
                     template_parameter = 'Container'
                 template_parameters.append(template_parameter)
                 arguments1.append('const %s& %s' % (template_parameter, p.name()))
-                arguments2.append('typename detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
-                parameters1.append('convert<%s>(%s)' % (p.type(False), p.name()))
+                arguments2.append('typename atermpp::detail::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
+                parameters1.append('atermpp::convert<%s>(%s)' % (p.type(False), p.name()))
             else:
                 parameters1.append(p.name())
                 arguments1.append('%s %s' % (p.type(), p.name()))

@@ -23,34 +23,32 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
-
 //--- start generated class ---//
 /// \brief An abstraction expression.
-class abstraction_base: public data_expression
+class abstraction: public data_expression
 {
   public:
     /// \brief Default constructor.
-    abstraction_base()
+    abstraction()
       : data_expression(core::detail::constructBinder())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    abstraction_base(atermpp::aterm_appl term)
+    abstraction(atermpp::aterm_appl term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Binder(m_term));
     }
 
     /// \brief Constructor.
-    abstraction_base(const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
+    abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
       : data_expression(core::detail::gsMakeBinder(binding_operator, variables, body))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    abstraction_base(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
+    abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
       : data_expression(core::detail::gsMakeBinder(binding_operator, atermpp::convert<variable_list>(variables), body))
     {}
 
@@ -71,74 +69,7 @@ class abstraction_base: public data_expression
 };
 //--- end generated class ---//
 
-    } // namespace detail
-
-    /// \brief Expression for abstraction, i.e. an expression binding a
-    ///        number of variables.
-    ///
-    /// An example of an abstraction is lambda x,y:Pos . f(x,y),
-    /// where lambda is the binding operator, x,y are the variables,
-    /// and f(x,y) is the body of the abstraction.
-    ///
-    class abstraction: public detail::abstraction_base
-    {
-      public:
-
-        /// \brief Iterator range over bound variables
-        typedef atermpp::term_list< variable > variables_const_range;
-
-        /// Default constructor for abstraction (does not entail a
-        /// valid data expression.
-        ///
-        abstraction()
-          : detail::abstraction_base(core::detail::constructBinder())
-        {}
-
-        /// \overload
-        abstraction(atermpp::aterm_appl term)
-          : abstraction_base(term)
-        {}
-
-        /// \overload
-        abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
-          : abstraction_base(binding_operator, variables, body)
-        {}
-
-        /// \overload
-        template < typename Container >
-        abstraction(const binder_type& binding_operator,
-                    const Container& variables,
-                    const data_expression& body,
-                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-          : detail::abstraction_base(binding_operator, variables, body)
-        {
-          assert(!variables.empty());
-        }
-
-        /// \brief Returns true iff the binding operator is "lambda"
-        inline
-        bool is_lambda() const
-        {
-          return binding_operator() == lambda_binder();
-        }
-
-        /// \brief Returns true iff the binding operator is "forall"
-        inline
-        bool is_forall() const
-        {
-          return binding_operator() == forall_binder();
-        }
-
-        /// \brief Returns true iff the binding operator is "exists"
-        inline
-        bool is_exists() const
-        {
-          return binding_operator() == exists_binder();
-        }
-
-    }; // class abstraction
-
-  } // namespace data
+   } // namespace data
 
 } // namespace mcrl2
 

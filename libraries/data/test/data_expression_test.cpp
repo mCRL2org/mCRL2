@@ -183,7 +183,7 @@ void lambda_test()
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   lambda I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == lambda_binder());
-  BOOST_CHECK(I.is_lambda());
+  BOOST_CHECK(is_lambda(I));
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
@@ -215,7 +215,7 @@ void forall_test()
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   forall I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == forall_binder());
-  BOOST_CHECK(I.is_forall());
+  BOOST_CHECK(is_forall(I));
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
@@ -245,7 +245,7 @@ void exists_test()
   boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   exists I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == exists_binder());
-  BOOST_CHECK(I.is_exists());
+  BOOST_CHECK(is_exists(I));
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);

@@ -119,7 +119,7 @@ int test_main(int argc, char** argv)
 {
   struct local {
     static bool is_exists(atermpp::aterm_appl const& p) {
-      return data::is_abstraction(p) && mcrl2::data::abstraction(p).is_exists();
+      return data::is_abstraction(p) && data::is_exists(data::abstraction(p));
     }
   };
 

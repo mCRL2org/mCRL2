@@ -195,7 +195,7 @@ namespace core {
     bool is_forall(term_type t)
     {
       data::data_expression e(t);
-      return e.is_abstraction() && data::abstraction(e).is_forall();
+      return data::is_forall(e);
     }
 
     /// \brief Test for existential quantification
@@ -205,7 +205,7 @@ namespace core {
     bool is_exists(term_type t)
     {
       data::data_expression e(t);
-      return e.is_abstraction() && data::abstraction(e).is_exists();
+      return data::is_exists(e);
     }
 
     /// \brief Conversion from variable to term

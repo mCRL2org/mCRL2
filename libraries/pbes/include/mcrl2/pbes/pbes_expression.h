@@ -1143,7 +1143,7 @@ namespace core {
     {
       // Forall and exists are not fully supported by the data library
       assert(!data::is_data_expression(t) || (!data::data_expression(t).is_abstraction()
-		 || (!static_cast<data::abstraction>(t).is_forall() && !static_cast<data::abstraction>(t).is_exists())));
+		 || (!data::is_forall(data::abstraction(t)) && !data::is_exists(data::abstraction(t)))));
       assert(is_exists(t) || is_forall(t));
 
       return variable_sequence_type(atermpp::list_arg1(t));

@@ -34,7 +34,7 @@ namespace mcrl2 {
           : abstraction(d)
         {
           assert(d.is_abstraction());
-          assert(static_cast<abstraction>(d).binding_operator() == exists_binder());
+          assert(abstraction(d).binding_operator() == exists_binder());
         }
 
         /// Constructor.

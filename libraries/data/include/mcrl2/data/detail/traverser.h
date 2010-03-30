@@ -128,15 +128,15 @@ namespace mcrl2 {
 
           void operator()(abstraction const& e)
           {
-            if (e.is_lambda())
+            if (is_lambda(e))
             {
               static_cast< Derived& >(*this)(lambda(e));
             }
-            else if (e.is_exists())
+            else if (is_exists(e))
             {
               static_cast< Derived& >(*this)(exists(e));
             }
-            else if (e.is_forall())
+            else if (is_forall(e))
             {
               static_cast< Derived& >(*this)(forall(e));
             }

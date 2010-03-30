@@ -183,7 +183,7 @@ namespace mcrl2 {
             using namespace mcrl2::data::sort_set;
             using namespace mcrl2::data::sort_bag;
 
-            if (!expression.is_lambda())
+            if (!is_lambda(expression))
             {
               data_expression abstract_body(implement(lambda(expression.variables(), expression.body())));
 
@@ -195,11 +195,11 @@ namespace mcrl2 {
               {
                 return bagcomprehension(bag(expression.variables().begin()->sort()), abstract_body);
               }
-              else if (expression.is_exists())
+              else if (is_exists(expression))
               {
                 return function_symbol("exists", function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
               }
-              else if (expression.is_forall())
+              else if (is_forall(expression))
               {
                 return function_symbol("forall", function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
               }
