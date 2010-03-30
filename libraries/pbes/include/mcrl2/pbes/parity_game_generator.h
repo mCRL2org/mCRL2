@@ -180,15 +180,6 @@ namespace pbes_system {
         return sigma;
       }
 
-      // very simplistic log function
-      void LOG(unsigned int level, const std::string& s) const
-      {
-        if (check_log_level(level))
-        {
-          std::clog << s << std::flush;
-        }
-      }
-
       // prints the BES equation with left hand side 'index' and right hand side 'rhs'
       void LOG_BES_EQUATION(unsigned int level, unsigned int index, const std::set<unsigned int>& rhs) const
       {

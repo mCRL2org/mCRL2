@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/core/algorithm.h"
 
 namespace mcrl2 {
 
@@ -35,7 +36,7 @@ namespace pbes_system {
 
   /// \brief Algorithm class for the eqelm algorithm
   template <typename Term, typename DataRewriter, typename PbesRewriter>
-  class pbes_eqelm_algorithm
+  class pbes_eqelm_algorithm: public core::algorithm
   {
     public:
       /// \brief The term type
@@ -66,6 +67,8 @@ namespace pbes_system {
       typedef typename core::term_traits<Term> tr;
 
     protected:
+      typedef std::set<variable_type> equivalence_class;
+      
       /// \brief Compares data expressions for equality.
       DataRewriter m_data_rewriter;
 
@@ -75,7 +78,7 @@ namespace pbes_system {
       /// \brief The vertices of the grapth, i.e. the equivalence relations.
       /// It stores the equivalence sets for each propositional variable, for example
       /// X -> [ {x1, x3}, {x2, x4} ]. Equivalence sets of size 1 are not stored.
-      std::map<string_type, std::vector<std::set<variable_type> > > m_vertices;
+      std::map<string_type, std::vector<equivalence_class> > m_vertices;
 
       /// \brief The edges of the graph.
       /// It is a mapping from X to iocc(X).
@@ -85,15 +88,15 @@ namespace pbes_system {
       std::map<string_type, std::vector<variable_type> > m_parameters;
 
       /// \brief Puts all parameters of the same sort in the same equivalence set.
-      std::vector<std::set<variable_type> > compute_equivalence_sets(const propositional_variable_decl_type& X) const
+      std::vector<equivalence_class> compute_equivalence_sets(const propositional_variable_decl_type& X) const
       {
-        std::map< data::sort_expression, std::set<variable_type> > m;
+        std::map< data::sort_expression, equivalence_class> m;
         for (typename variable_sequence_type::const_iterator i = X.parameters().begin(); i != X.parameters().end(); ++i)
         {
           m[i->sort()].insert(*i);
         }
-        std::vector<std::set<variable_type> > result;
-        for (typename std::map<data::sort_expression, std::set<variable_type> >::iterator i = m.begin(); i != m.end(); ++i)
+        std::vector<equivalence_class> result;
+        for (typename std::map<data::sort_expression, equivalence_class>::iterator i = m.begin(); i != m.end(); ++i)
         {
           if (i->second.size() > 1)
           {
@@ -104,30 +107,38 @@ namespace pbes_system {
       }
 
       /// \brief Prints the vertices of the dependency graph.
-      void print_vertices() const
+      void LOG_VERTICES(unsigned int level, const std::string& msg = "") const
       {
-        for (typename std::map<string_type, std::vector<std::set<variable_type> > >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+        if (check_log_level(level))
         {
-          std::clog << core::pp(i->first) << " -> [ ";
-          const std::vector<std::set<variable_type> >& v = i->second;
-          for (typename std::vector<std::set<variable_type> >::const_iterator j = v.begin(); j != v.end(); ++j)
+          std::clog << msg;
+          for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
           {
-            if (j != v.begin())
+            std::clog << core::pp(i->first) << " -> [ ";
+            const std::vector<equivalence_class>& v = i->second;
+            for (typename std::vector<equivalence_class>::const_iterator j = v.begin(); j != v.end(); ++j)
             {
-              std::clog << ", ";
+              if (j != v.begin())
+              {
+                std::clog << ", ";
+              }
+              std::clog << core::detail::print_pp_set(*j);
             }
-            std::clog << core::detail::print_pp_set(*j);
+            std::clog << " ]" << std::endl;
           }
-          std::clog << " ]" << std::endl;
         }
       }
 
       /// \brief Prints the edges of the dependency graph.
-      void print_edges() const
+      void LOG_EDGES(unsigned int level, const std::string& msg = "") const
       {
-        for (typename std::map<string_type, atermpp::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+        if (check_log_level(level))
         {
-          std::clog << core::pp(i->first) << " -> " << core::detail::print_pp_set(i->second) << std::endl;
+          std::clog << msg;
+          for (typename std::map<string_type, atermpp::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+          {
+            std::clog << core::pp(i->first) << " -> " << core::detail::print_pp_set(i->second) << std::endl;
+          }
         }
       }
 
@@ -155,22 +166,23 @@ namespace pbes_system {
         const string_type& Y = Ye.name();
         std::vector<data_term_type> e(Ye.parameters().begin(), Ye.parameters().end());
 
-        std::vector<std::set<variable_type> >& cY = m_vertices[Y];
-        std::vector<std::set<variable_type> > cY1;
-        for (typename std::vector<std::set<variable_type> >::iterator j = cY.begin(); j != cY.end(); ++j)
+        std::vector<equivalence_class>& cY = m_vertices[Y];
+        std::vector<equivalence_class> cY1;
+        for (typename std::vector<equivalence_class>::iterator j = cY.begin(); j != cY.end(); ++j)
         {
-          std::set<variable_type>& equiv = *j; // an equivalence set              
-          atermpp::map<data_term_type, std::set<variable_type> > w;
-          for (typename std::set<variable_type>::iterator k = equiv.begin(); k != equiv.end(); ++k)
+          equivalence_class& equiv = *j; // an equivalence set              
+          atermpp::map<data_term_type, equivalence_class> w;
+          for (typename equivalence_class::iterator k = equiv.begin(); k != equiv.end(); ++k)
           {
             unsigned int p = index_of(*k, m_parameters[Y]);
-            w[m_data_rewriter(e[p], vX)].insert(*k);
+            pbes_system::data_rewriter<Term, DataRewriter> rewr(m_data_rewriter);
+            w[rewr(e[p], vX)].insert(*k);
           }
           if (w.size() > 1)
           {
             todo.insert(Y);
           }
-          for (typename std::map<data_term_type, std::set<variable_type> >::iterator i = w.begin(); i != w.end(); ++i)
+          for (typename std::map<data_term_type, equivalence_class>::iterator i = w.begin(); i != w.end(); ++i)
           {
             if (i->second.size() > 1)
             {
@@ -185,11 +197,11 @@ namespace pbes_system {
       data::mutable_map_substitution<> compute_substitution(const string_type& X)
       {
         data::mutable_map_substitution<> result;
-        const std::vector<std::set<variable_type> >& cX = m_vertices[X];
-        for (typename std::vector<std::set<variable_type> >::const_iterator i = cX.begin(); i != cX.end(); ++i)
+        const std::vector<equivalence_class>& cX = m_vertices[X];
+        for (typename std::vector<equivalence_class>::const_iterator i = cX.begin(); i != cX.end(); ++i)
         {
-          const std::set<variable_type>& s = *i;
-          for (typename std::set<variable_type>::const_iterator j = ++s.begin(); j != s.end(); ++j)
+          const equivalence_class& s = *i;
+          for (typename equivalence_class::const_iterator j = ++s.begin(); j != s.end(); ++j)
           {
             result[*j] = *s.begin();
           }
@@ -219,10 +231,10 @@ namespace pbes_system {
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           string_type X = i->variable().name();
-          const std::vector<std::set<variable_type> >& eq = m_vertices[X];
-          for (typename std::vector<std::set<variable_type> >::const_iterator j = eq.begin(); j != eq.end(); ++j)
+          const std::vector<equivalence_class>& eq = m_vertices[X];
+          for (typename std::vector<equivalence_class>::const_iterator j = eq.begin(); j != eq.end(); ++j)
           {
-            for (typename std::set<variable_type>::const_iterator k = ++j->begin(); k != j->end(); ++k)
+            for (typename equivalence_class::const_iterator k = ++j->begin(); k != j->end(); ++k)
             {  
               to_be_removed[X].push_back(index_of(*k, m_parameters[X]));
             }
@@ -232,12 +244,13 @@ namespace pbes_system {
       }
 
     public:
-
       /// \brief Constructor.
       /// \param datar A data rewriter
       /// \param pbesr A PBES rewriter
-      pbes_eqelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
-        : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
+      pbes_eqelm_algorithm(DataRewriter datar, PbesRewriter pbesr, unsigned int log_level = 0)
+        : core::algorithm(log_level),
+          m_data_rewriter(datar),
+          m_pbes_rewriter(pbesr)
       {}
 
       /// \brief Runs the eqelm algorithm
@@ -279,14 +292,8 @@ namespace pbes_system {
           }
         }
 
-        if (mcrl2::core::gsDebug)
-        {
-          std::clog << "--- vertices ---" << std::endl;
-          print_vertices();
-          std::clog << std::endl;
-          std::clog << "--- edges ---" << std::endl;
-          print_edges();
-        }
+        LOG_VERTICES(1, "--- vertices ---\n");
+        LOG_EDGES(1, "\n--- edges ---\n");
 
         // propagate constraints over the edges until the todo list is empty
         while (!todo.empty())
@@ -294,13 +301,9 @@ namespace pbes_system {
           string_type X = *todo.begin();
           todo.erase(X);
 
-          if (mcrl2::core::gsDebug)
-          {
-            std::clog << "todo element X = " << core::pp(X) << std::endl;
-            std::clog << "todo list = " << core::detail::print_pp_set(todo) << std::endl;
-            std::clog << "--- vertices ---" << std::endl;
-            print_vertices();
-          }
+          LOG(2, "todo element X = " + core::pp(X) + "\n");
+          LOG(2, "todo list = " + core::detail::print_pp_set(todo) + "\n");
+          LOG_VERTICES(1, "--- vertices ---\n");
           
           // create a substitution function that corresponds to cX
           data::mutable_map_substitution<> vX = compute_substitution(X);
@@ -316,8 +319,7 @@ namespace pbes_system {
           }
         }
         apply_equivalence_relations(p);
-        std::clog << "--- result ---" << std::endl;
-        print_vertices();
+        LOG_VERTICES(1, "\n--- result ---\n");
       }
   };
 
