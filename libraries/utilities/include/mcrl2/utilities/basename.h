@@ -155,7 +155,12 @@
     {
         std::string path = get_executable_basename();
         std::string::size_type t = path.size();
-        t = path.find_last_of("/bin", t-4);
+
+#ifdef _WIN32
+	t = path.find_last_of("\\bin", t-4);
+#else
+	t = path.find_last_of("/bin", t-4);
+#endif	
   
         if(  t + 4 == path.size() ){
           path = path.substr(0,t);
