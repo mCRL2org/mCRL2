@@ -177,6 +177,10 @@ if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
 endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
+if(MSVC)
+  add_definitions( "/EHa" ) 
+endif(MSVC)
+
 ## --------------------------------------------------
 ## Detect architecture
 ## --------------------------------------------------
