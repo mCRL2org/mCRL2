@@ -125,7 +125,7 @@ namespace mcrl2 {
           {
             if (!is_sort_of_list_operation(expression.codomain()))
             {
-              for (boost::iterator_range< function_sort::domain_const_range::iterator > r = expression.domain(); !r.empty(); r.advance_begin(1))
+              for (boost::iterator_range< sort_expression_list::iterator > r = expression.domain(); !r.empty(); r.advance_begin(1))
               {
                 if (is_sort_of_list_operation(r.front()))
                 {

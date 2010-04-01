@@ -3892,7 +3892,7 @@ class specification_basic_type:public boost::noncopyable
       for(function_symbol_list::const_iterator w=functions.begin();
                   w!=functions.end(); ++w)
       {
-        function_sort::domain_const_range domain = function_sort(w->sort()).domain();
+        sort_expression_list domain = function_sort(w->sort()).domain();
         assert(domain.size() >= 2);
         if (*(++domain.begin())==sort)
         { return *w;

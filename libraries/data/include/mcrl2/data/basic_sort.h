@@ -16,6 +16,8 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/sort_expression.h"
@@ -24,11 +26,50 @@ namespace mcrl2 {
 
   namespace data {
 
+    namespace detail {
+
+//--- start generated class ---//
+/// \brief A basic sort
+class basic_sort_base: public sort_expression
+{
+  public:
+    /// \brief Default constructor.
+    basic_sort_base()
+      : sort_expression(core::detail::constructSortId())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    basic_sort_base(atermpp::aterm_appl term)
+      : sort_expression(term)
+    {
+      assert(core::detail::check_term_SortId(m_term));
+    }
+
+    /// \brief Constructor.
+    basic_sort_base(const core::identifier_string& name)
+      : sort_expression(core::detail::gsMakeSortId(name))
+    {}
+
+    /// \brief Constructor.
+    basic_sort_base(const std::string& name)
+      : sort_expression(core::detail::gsMakeSortId(core::identifier_string(name)))
+    {}
+
+    core::identifier_string name() const
+    {
+      return atermpp::arg1(*this);
+    }
+};
+//--- end generated class ---//
+
+    } //namespace detail
+
     /// \brief basic sort.
     ///
     /// A basic sort is sort with only a name.
     /// An example is the sort S, specified in mCRL2 with sort S;
-    class basic_sort: public sort_expression
+    class basic_sort: public detail::basic_sort_base
     {
       public:
 
@@ -36,7 +77,7 @@ namespace mcrl2 {
         ///        valid sort expression.
         ///
         basic_sort()
-          : sort_expression()
+          : detail::basic_sort_base()
         {}
 
         /// \brief Construct a basic sort from a sort expression.
@@ -44,32 +85,18 @@ namespace mcrl2 {
         /// \param[in] s A sort expression.
         /// \pre s has the internal structure of a basic sort.
         basic_sort(const sort_expression& s)
-          : sort_expression(s)
-        {
-          assert(s.is_basic_sort());
-        }
+          : detail::basic_sort_base(s)
+        {}
 
-        /// \brief Construct a basic sort from a string.
-        ///
-        /// \param[in] s The name of the sort that is created.
-        /// \post This is a sort with name s.
+        /// \overload
         basic_sort(const std::string& s)
-          : sort_expression(mcrl2::core::detail::gsMakeSortId(core::identifier_string(s)))
+          : detail::basic_sort_base(s)
         {}
 
-        /// \brief Construct a basic sort from an identifier string.
-        ///
-        /// \param[in] s The name of the sort that is created.
-        /// \post This is a sort with name s.
+        /// \overload
         basic_sort(const core::identifier_string& s)
-          : sort_expression(mcrl2::core::detail::gsMakeSortId(s))
+          : detail::basic_sort_base(s)
         {}
-
-        /// \brief Returns the name of this sort.
-        core::identifier_string name() const
-        {
-          return atermpp::aterm_string(atermpp::arg1(*this));
-        }
 
     }; // class sort_expression
 

@@ -1487,7 +1487,7 @@ class sort_declaration():
     code += "      container_sort %s(const sort_expression& %s)\n" % (label.to_string(), parameter.to_string().lower())
     code += "      {\n"
 #    code += "        container_sort %s(%s_name(), %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
-    code += "        container_sort %s(container_sort::%s(), %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
+    code += "        container_sort %s(%s_container(), %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
     code += "        return %s;\n" % (label.to_string())
     code += "      }\n\n"
 
@@ -1500,7 +1500,7 @@ class sort_declaration():
     code += "      {\n"
     code += "        if (e.is_container_sort())\n"
     code += "        {\n"
-    code += "          return static_cast< container_sort >(e).container_type() == container_sort::%s();\n" % (label.to_string())
+    code += "          return static_cast< container_sort >(e).container_name() == %s_container();\n" % (label.to_string())
     code += "        }\n"
     code += "        return false;\n"
     code += "      }\n"

@@ -422,8 +422,8 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
          bool processed = false;
          if (j -> sort().is_function_sort())
          {
-           function_sort::domain_range dom = function_sort(j -> sort()).domain();
-           for(function_sort::domain_range::iterator k = dom.begin(); k != dom.end(); ++k)
+           sort_expression_list dom = function_sort(j -> sort()).domain();
+           for(sort_expression_list::iterator k = dom.begin(); k != dom.end(); ++k)
            {
              mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name, process_parameter_names ); 
              process_parameters_injection.push_back( mcrl2::data::variable( idstr ,  *k  ) );
@@ -641,10 +641,10 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfol
 
        if (m -> sort().is_function_sort())
        {
-         function_sort::domain_range dom = function_sort( m -> sort() ). domain();
+         sort_expression_list dom = function_sort( m -> sort() ). domain();
          data_expression_vector arg;
 
-         for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
+         for(sort_expression_list::iterator n = dom.begin(); n != dom.end(); ++n  )
          {
            for (mcrl2::data::variable_vector::iterator o = i->second.begin()
                                               ; o != i->second.end()

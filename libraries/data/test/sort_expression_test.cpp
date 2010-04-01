@@ -68,7 +68,7 @@ void function_sort_test()
 
   // Element wise check
   sort_expression_vector::const_iterator i = s01_range.begin();
-  function_sort::domain_const_range::iterator j = fs.domain().begin();
+  sort_expression_list::iterator j = fs.domain().begin();
   while (i != s01_range.end() && j != fs.domain().end())
   {
     BOOST_CHECK(*i == *j);
@@ -170,10 +170,10 @@ void container_sort_test()
 {
   basic_sort s0("S0");
   basic_sort s1("S1");
-  container_sort ls0(container_sort::list(), s0);
-  container_sort ls1(container_sort::list(), s1);
+  container_sort ls0(list_container(), s0);
+  container_sort ls1(list_container(), s1);
 
-  BOOST_CHECK(ls0.container_type() == container_sort::list());
+  BOOST_CHECK(ls0.container_name() == list_container());
   BOOST_CHECK(ls0.element_sort() == s0);
   BOOST_CHECK(ls1.element_sort() == s1);
   BOOST_CHECK(ls0.element_sort() != ls1.element_sort());

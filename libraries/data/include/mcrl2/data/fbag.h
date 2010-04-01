@@ -45,7 +45,7 @@ namespace mcrl2 {
       inline
       container_sort fbag(const sort_expression& s)
       {
-        container_sort fbag(container_sort::fbag(), s);
+        container_sort fbag(fbag_container(), s);
         return fbag;
       }
 
@@ -58,7 +58,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_type() == container_sort::fbag();
+          return static_cast< container_sort >(e).container_name() == fbag_container();
         }
         return false;
       }

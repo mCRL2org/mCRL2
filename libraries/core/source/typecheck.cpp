@@ -29,6 +29,8 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/multiple_possible_sorts.h"
 
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
@@ -1284,7 +1286,7 @@ namespace mcrl2 {
                            f_start_search.codomain(),end_search,visited,true))
         { return true;
         }
-        for(function_sort::domain_const_range::const_iterator i=f_start_search.domain().begin();
+        for(sort_expression_list::const_iterator i=f_start_search.domain().begin();
                i!=f_start_search.domain().end(); ++i)
         { if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                              *i,end_search,visited,true))
@@ -1302,8 +1304,8 @@ namespace mcrl2 {
                    i!=constructor_functions.end(); ++i)
         { 
           if (i->sort().is_function_sort())
-          { const function_sort::domain_const_range domain_sorts=function_sort(i->sort()).domain();
-            for(function_sort::domain_const_range::const_iterator j=domain_sorts.begin();
+          { const sort_expression_list domain_sorts=function_sort(i->sort()).domain();
+            for(sort_expression_list::const_iterator j=domain_sorts.begin();
                  j!=domain_sorts.end(); ++j)
             { if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                                *j,end_search,visited,observed_a_sort_constructor))
@@ -1544,9 +1546,9 @@ namespace mcrl2 {
               }
             }
             else
-            { function_sort::domain_const_range r=function_sort(s).domain();
+            { sort_expression_list r=function_sort(s).domain();
               bool has_a_domain_sort_possibly_empty_sorts=false;
-              for(function_sort::domain_const_range::const_iterator i=r.begin();
+              for(sort_expression_list::const_iterator i=r.begin();
                      i!=r.end(); ++i)
               { if (possibly_empty_constructor_sorts.find(mapping(*i,normalised_aliases))!=possibly_empty_constructor_sorts.end())
                 { // 
@@ -2138,7 +2140,7 @@ namespace mcrl2 {
       assert(gsIsOpId(OpId));
       ATbool Result=ATtrue;
       const function_symbol f(OpId);
-      const function_sort::domain_const_range domain=function_sort(f.sort()).domain();
+      const sort_expression_list domain=function_sort(f.sort()).domain();
       ATermAppl Name = f.name();
       ATermAppl Sort = f.sort();
 

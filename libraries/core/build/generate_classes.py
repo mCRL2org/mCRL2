@@ -61,3 +61,6 @@ if __name__ == "__main__":
     make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression', add_constructor_overloads = True)
     make_is_functions('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression')
     make_classes('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type', add_constructor_overloads = True)
+    make_classes('../../data/include/mcrl2/data/', SORT_EXPRESSION_CLASSES, 'sort_expression', add_constructor_overloads = True)
+    make_is_functions('../../data/include/mcrl2/data/sort_expression.h', SORT_EXPRESSION_CLASSES, 'sort_expression')
+    make_classes('../../data/include/mcrl2/data/container_type.h', CONTAINER_TYPES, 'container_type', add_constructor_overloads = True)

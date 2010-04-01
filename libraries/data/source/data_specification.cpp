@@ -383,7 +383,7 @@ namespace mcrl2 {
 
         bool is_finite(const function_sort& s)
         {
-          for (boost::iterator_range< function_sort::domain_const_range::iterator > i(s.domain()); !i.empty(); i.advance_begin(1))
+          for (boost::iterator_range< sort_expression_list::iterator > i(s.domain()); !i.empty(); i.advance_begin(1))
           {
             if (m_visiting.find(i.front()) == m_visiting.end() && !is_finite(i.front()))
             {
@@ -541,14 +541,14 @@ namespace mcrl2 {
       else if (e.is_function_sort())
       { 
         atermpp::vector< sort_expression > new_domain;
-        for (boost::iterator_range< function_sort::domain_const_range::iterator > r(function_sort(e).domain()); 
+        for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(e).domain());
                   !r.empty(); r.advance_begin(1))
         { new_domain.push_back(normalise_sorts_helper(r.front()));
         }
         return function_sort(new_domain, normalise_sorts_helper(function_sort(e).codomain()));
       }
       else if (e.is_container_sort())
-      { return container_sort(container_sort(e).container_type(), normalise_sorts_helper(container_sort(e).element_sort()));
+      { return container_sort(container_sort(e).container_name(), normalise_sorts_helper(container_sort(e).element_sort()));
       }
       else if (e.is_structured_sort())
       { atermpp::vector< structured_sort_constructor > new_constructors;

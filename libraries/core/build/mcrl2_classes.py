@@ -17,22 +17,22 @@ CONTAINER_TYPES = r'''
 SortList  | list_container() | Container type for lists
 SortSet   | set_container() | Container type for sets
 SortBag   | bag_container() | Container type for bags
-SortFSet  | finite_set_container() | Container type for finite sets
-SortFBag  | finite_bag_container() | Container type for finite bags
+SortFSet  | fset_container() | Container type for finite sets
+SortFBag  | fbag_container() | Container type for finite bags
 '''
 
 STRUCTURED_SORT_ELEMENTS = r'''
-StructCons  | structured_sort_constructor_base(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) | A constructor for a structured sort
-StructProj  | structured_sort_constructor_argument_base(const core::identifier_string& name, const sort_expression& sort) | An argument of a constructor of a structured sort
+StructCons  | structured_sort_constructor[_base](const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) | A constructor for a structured sort
+StructProj  | structured_sort_constructor_argument[_base](const core::identifier_string& name, const sort_expression& sort) | An argument of a constructor of a structured sort
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-SortId    | basic_sort_base(const core::identifier_string& name) | A basic sort
-SortCons  | container_sort_base(const container_type& container_name, const sort_expression& s) | A container sort
-SortStruct  | structured_sort_base(const structured_sort_constructor_list& constructors) | A structured sort
-SortArrow | function_sort_base(const sort_expression_list& domain, const sort_expression& codomain) | A function sort
-SortUnknown | unknown_sort_base() | Unknown sort expression
-SortsPossible | multiple_possible_sorts_base(const sort_expression_list& sorts) | Multiple possible sorts
+SortId    | basic_sort[_base](const core::identifier_string& name) | A basic sort
+SortCons  | container_sort[_base](const container_type& container_name, const sort_expression& element_sort) | A container sort
+SortStruct  | structured_sort[_base](const structured_sort_constructor_list& constructors) | A structured sort
+SortArrow | function_sort[_base](const sort_expression_list& domain, const sort_expression& codomain) | A function sort
+SortUnknown | unknown_sort() | Unknown sort expression
+SortsPossible | multiple_possible_sorts(const sort_expression_list& sorts) | Multiple possible sorts
 '''
 
 BINDER_TYPES = r'''

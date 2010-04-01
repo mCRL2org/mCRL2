@@ -392,6 +392,46 @@ namespace mcrl2 {
     }
     /// \endcond
 
+    namespace detail {
+/*
+//--- start generated class ---//
+/// \brief A structured sort
+class structured_sort_base: public sort_expression
+{
+  public:
+    /// \brief Default constructor.
+    structured_sort_base()
+      : sort_expression(core::detail::constructSortStruct())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    structured_sort_base(atermpp::aterm_appl term)
+      : sort_expression(term)
+    {
+      assert(core::detail::check_term_SortStruct(m_term));
+    }
+
+    /// \brief Constructor.
+    structured_sort_base(const structured_sort_ructor_list& ructors)
+      : sort_expression(core::detail::gsMakeSortStruct(ructors))
+    {}
+
+    /// \brief Constructor.
+    template <typename Container>
+    structured_sort_base(const Container& ructors, typename atermpp::detail::enable_if_container<Container, structured_sort_ructor>::type* = 0)
+      : sort_expression(core::detail::gsMakeSortStruct(atermpp::convert<structured_sort_ructor_list>(ructors)))
+    {}
+
+    structured_sort_ructor_list ructors() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+};
+//--- end generated class ---//
+*/
+    } //namespace detail
+
     /// \brief structured sort.
     ///
     /// A structured sort is a sort with the following structure:
