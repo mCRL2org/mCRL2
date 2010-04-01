@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
-<tool name="chi2mcrl2" />
-<tool name="diagraphica" />
+<tool name="chi2mcrl2"  />
+<tool name="diagraphica" macosx_bundle="true" />
 <tool name="lps2lts" />
 <tool name="lps2pbes" />
 <tool name="lpsactionrename" />
@@ -14,14 +14,14 @@
 <tool name="lpssuminst" />
 <tool name="lpsuntime" />
 <tool name="ltsconvert" />
-<tool name="ltsgraph" />
+<tool name="ltsgraph" macosx_bundle="true" />
 <tool name="ltsinfo" />
-<tool name="ltsview" />
+<tool name="ltsview" macosx_bundle="true"/>
 <tool name="mcrl22lps" />
 <tool name="pbes2bool" />
 <tool name="pbesconstelm" />
 <tool name="pbesparelm" />
 <tool name="pbesrewr" />
 <tool name="pnml2mcrl2" />
-<tool name="lpsxsim" />
+<tool name="lpsxsim" macosx_bundle="true"/>
 </tool-catalog>
