@@ -95,7 +95,7 @@ class container_sort_base: public sort_expression
         inline
         bool is_list_sort() const
         {
-          return container_type() == list_container();
+          return container_name() == list_container();
         }
 
         /// \brief Returns true iff container name is Set.
@@ -103,7 +103,7 @@ class container_sort_base: public sort_expression
         inline
         bool is_set_sort() const
         {
-          return container_type() == set_container();
+          return container_name() == set_container();
         }
 
         /// \brief Returns true iff container name is FSet.
@@ -111,7 +111,7 @@ class container_sort_base: public sort_expression
         inline
         bool is_fset_sort() const
         {
-          return container_type() == fset_container();
+          return container_name() == fset_container();
         }
 
         /// \brief Returns true iff container name is Bag.
@@ -119,7 +119,7 @@ class container_sort_base: public sort_expression
         inline
         bool is_bag_sort() const
         {
-          return container_type() == bag_container();
+          return container_name() == bag_container();
         }
 
         /// \brief Returns true iff container name is FBag.
@@ -127,7 +127,7 @@ class container_sort_base: public sort_expression
         inline
         bool is_fbag_sort() const
         {
-          return container_type() == fbag_container();
+          return container_name() == fbag_container();
         }
 
     }; // class container_sort

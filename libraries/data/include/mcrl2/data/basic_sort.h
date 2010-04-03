@@ -80,12 +80,9 @@ class basic_sort_base: public sort_expression
           : detail::basic_sort_base()
         {}
 
-        /// \brief Construct a basic sort from a sort expression.
-        ///
-        /// \param[in] s A sort expression.
-        /// \pre s has the internal structure of a basic sort.
-        basic_sort(const sort_expression& s)
-          : detail::basic_sort_base(s)
+        /// \overload
+        basic_sort(atermpp::aterm_appl t)
+          : detail::basic_sort_base(t)
         {}
 
         /// \overload
@@ -101,8 +98,9 @@ class basic_sort_base: public sort_expression
     }; // class sort_expression
 
     /// \brief list of basic sorts
-    ///
-    typedef atermpp::vector<basic_sort> basic_sort_list;
+    typedef atermpp::term_list<basic_sort> basic_sort_list;
+    /// \brief vector of basic sorts
+    typedef atermpp::vector<basic_sort> basic_sort_vector;
 
   } // namespace data
 

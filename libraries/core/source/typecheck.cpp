@@ -18,6 +18,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
+#include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -1330,23 +1331,23 @@ namespace mcrl2 {
       {
         ATermAppl Sort=ATAgetFirst(Sorts);
         ATermAppl SortName=ATAgetArgument(Sort,0);
-        if(sort_bool::is_bool(basic_sort(SortName))){
+        if(sort_bool::is_bool(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Bool\n");
           return ATfalse;
         }
-        if(sort_pos::is_pos(basic_sort(SortName))){
+        if(sort_pos::is_pos(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Pos\n");
           return ATfalse;
         }
-        if(sort_nat::is_nat(basic_sort(SortName))){
+        if(sort_nat::is_nat(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Nat\n");
           return ATfalse;
         }
-        if(sort_int::is_int(basic_sort(SortName))){
+        if(sort_int::is_int(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Int\n");
           return ATfalse;
         }
-        if(sort_real::is_real(basic_sort(SortName))){
+        if(sort_real::is_real(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Real\n");
           return ATfalse;
         }
@@ -1375,7 +1376,7 @@ namespace mcrl2 {
       ATermList sort_aliases=ATtableKeys(context.defined_sorts);
       for( ; sort_aliases!=ATempty ; sort_aliases=ATgetNext(sort_aliases))
       { std::set < basic_sort > visited;
-        const basic_sort s((ATermAppl)ATgetFirst(sort_aliases));
+        const basic_sort s(core::identifier_string((ATermAppl)ATgetFirst(sort_aliases)));
         if (gstc_check_for_sort_alias_loop_through_sort_container(s,s,visited,false))
         { gsErrorMsg("sort %P is recursively defined via a function sort, or a list, set or bag type container\n",ATgetFirst(sort_aliases));
           return ATfalse;
@@ -1398,20 +1399,21 @@ namespace mcrl2 {
     }
 
 
-    atermpp::map < sort_expression,basic_sort > construct_normalised_aliases() 
+    atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_aliases()
     { // This function does the same as data_specification::reconstruct_m_normalised_aliases().
       // Therefore, it should be replaced by that function, after restructuring the type checker.
       // First reset the normalised aliases and the mappings and constructors that have been
       // inherited to basic sort aliases during a previous round of sort normalisation.
-      atermpp::map < sort_expression,basic_sort > normalised_aliases; 
+      atermpp::map < data::sort_expression, data::basic_sort > normalised_aliases;
 
       // Fill normalised_aliases. Simple aliases are stored from left to 
       // right. If the right hand side is non trivial (struct, list, set or bag)
       // the alias is stored from right to left.
       for(ATermList sort_walker=ATtableKeys(context.defined_sorts);  sort_walker!=ATempty; sort_walker=ATgetNext(sort_walker))
-      { ATermAppl sort_name=ATAgetFirst(sort_walker);
-        const basic_sort first(sort_name);
-        const sort_expression second((ATermAppl)ATtableGet(context.defined_sorts,(ATerm)sort_name));
+      {
+        const core::identifier_string sort_name(ATAgetFirst(sort_walker));
+        const data::basic_sort first(sort_name);
+        const data::sort_expression second(atermpp::aterm_appl((ATermAppl)ATtableGet(context.defined_sorts,(ATerm)static_cast<ATermAppl>(sort_name))));
         if (is_structured_sort(second) ||
             is_function_sort(second) ||
             is_container_sort(second))
@@ -1430,7 +1432,6 @@ namespace mcrl2 {
         else
         { // We are dealing with a sort declaration of the shape sort A=B.
           // Every occurrence of sort A is normalised to sort B.
-          assert(is_basic_sort(first));
           normalised_aliases[first]=second;
         }
       }
@@ -1494,7 +1495,7 @@ namespace mcrl2 {
         atermpp::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
         std::set< sort_expression > all_sorts;
         for( ; defined_sorts!=ATempty; defined_sorts=ATgetNext(defined_sorts))
-        { const basic_sort s(gstcUnwindType(ATAgetFirst(defined_sorts)));
+        { const basic_sort s(core::identifier_string(gstcUnwindType(ATAgetFirst(defined_sorts))));
           ATermAppl reference=ATAtableGet(context.defined_sorts,(ATerm)static_cast<ATermAppl>(s.name()));
           // if (is_container_sort(i->first) || is_function_sort(i->first)) 
           find_sort_expressions(sort_expression(reference), std::inserter(all_sorts, all_sorts.end()));
@@ -1987,11 +1988,11 @@ namespace mcrl2 {
 
       // if (gsDebug) { std::cerr << "gstcIsSortDeclared: SortName %P\n",SortName);
 
-      if(sort_bool::is_bool(basic_sort(SortName)) ||
-         sort_pos::is_pos(basic_sort(SortName)) ||
-         sort_nat::is_nat(basic_sort(SortName)) ||
-         sort_int::is_int(basic_sort(SortName)) ||
-         sort_real::is_real(basic_sort(SortName)))
+      if(sort_bool::is_bool(basic_sort(core::identifier_string(SortName))) ||
+         sort_pos::is_pos(basic_sort(core::identifier_string(SortName))) ||
+         sort_nat::is_nat(basic_sort(core::identifier_string(SortName))) ||
+         sort_int::is_int(basic_sort(core::identifier_string(SortName))) ||
+         sort_real::is_real(basic_sort(core::identifier_string(SortName))))
       {
         return ATtrue;
       }
