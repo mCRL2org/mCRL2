@@ -396,7 +396,7 @@ namespace mcrl2 {
 
         bool is_finite(const container_sort& s)
         {
-          return (s.is_set_sort()) ? is_finite(s.element_sort()) : false;
+          return (s.container_name() == set_container()) ? is_finite(s.element_sort()) : false;
         }
 
         bool is_finite(const alias& s)

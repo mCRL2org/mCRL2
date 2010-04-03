@@ -127,7 +127,7 @@ namespace mcrl2 {
       inline
       function_symbol fbag_cons(const sort_expression& s)
       {
-        function_symbol fbag_cons(fbag_cons_name(), function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
+        function_symbol fbag_cons(fbag_cons_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
         return fbag_cons;
       }
 
@@ -198,7 +198,7 @@ namespace mcrl2 {
       inline
       function_symbol fbaginsert(const sort_expression& s)
       {
-        function_symbol fbaginsert(fbaginsert_name(), function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
+        function_symbol fbaginsert(fbaginsert_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
         return fbaginsert;
       }
 
@@ -257,7 +257,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagcinsert(const sort_expression& s)
       {
-        function_symbol fbagcinsert(fbagcinsert_name(), function_sort(s, sort_nat::nat(), fbag(s), fbag(s)));
+        function_symbol fbagcinsert(fbagcinsert_name(), make_function_sort(s, sort_nat::nat(), fbag(s), fbag(s)));
         return fbagcinsert;
       }
 
@@ -316,7 +316,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagcount(const sort_expression& s)
       {
-        function_symbol fbagcount(fbagcount_name(), function_sort(s, fbag(s), sort_nat::nat()));
+        function_symbol fbagcount(fbagcount_name(), make_function_sort(s, fbag(s), sort_nat::nat()));
         return fbagcount;
       }
 
@@ -374,7 +374,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagin(const sort_expression& s)
       {
-        function_symbol fbagin(fbagin_name(), function_sort(s, fbag(s), sort_bool::bool_()));
+        function_symbol fbagin(fbagin_name(), make_function_sort(s, fbag(s), sort_bool::bool_()));
         return fbagin;
       }
 
@@ -432,7 +432,7 @@ namespace mcrl2 {
       inline
       function_symbol fbaglte(const sort_expression& s)
       {
-        function_symbol fbaglte(fbaglte_name(), function_sort(function_sort(s, sort_nat::nat()), fbag(s), fbag(s), sort_bool::bool_()));
+        function_symbol fbaglte(fbaglte_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), fbag(s), fbag(s), sort_bool::bool_()));
         return fbaglte;
       }
 
@@ -491,7 +491,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagjoin(const sort_expression& s)
       {
-        function_symbol fbagjoin(fbagjoin_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
+        function_symbol fbagjoin(fbagjoin_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
         return fbagjoin;
       }
 
@@ -551,7 +551,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagintersect(const sort_expression& s)
       {
-        function_symbol fbagintersect(fbagintersect_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
+        function_symbol fbagintersect(fbagintersect_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
         return fbagintersect;
       }
 
@@ -611,7 +611,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagdifference(const sort_expression& s)
       {
-        function_symbol fbagdifference(fbagdifference_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
+        function_symbol fbagdifference(fbagdifference_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
         return fbagdifference;
       }
 
@@ -671,7 +671,7 @@ namespace mcrl2 {
       inline
       function_symbol fbag2fset(const sort_expression& s)
       {
-        function_symbol fbag2fset(fbag2fset_name(), function_sort(function_sort(s, sort_nat::nat()), fbag(s), sort_fset::fset(s)));
+        function_symbol fbag2fset(fbag2fset_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), fbag(s), sort_fset::fset(s)));
         return fbag2fset;
       }
 
@@ -729,7 +729,7 @@ namespace mcrl2 {
       inline
       function_symbol fset2fbag(const sort_expression& s)
       {
-        function_symbol fset2fbag(fset2fbag_name(), function_sort(sort_fset::fset(s), fbag(s)));
+        function_symbol fset2fbag(fset2fbag_name(), make_function_sort(sort_fset::fset(s), fbag(s)));
         return fset2fbag;
       }
 
@@ -923,8 +923,8 @@ namespace mcrl2 {
         variable vb("b",fbag(s));
         variable vc("c",fbag(s));
         variable vs("s",sort_fset::fset(s));
-        variable vf("f",function_sort(s, sort_nat::nat()));
-        variable vg("g",function_sort(s, sort_nat::nat()));
+        variable vf("f",make_function_sort(s, sort_nat::nat()));
+        variable vg("g",make_function_sort(s, sort_nat::nat()));
 
         data_equation_vector result;
         data_equation_vector fbag_equations = detail::fbag_struct(s).constructor_equations(fbag(s));

@@ -542,7 +542,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
       const char *sort_name = ATgetName(ATgetAFun(ATAgetArgument(s,0)));
       substs = ATinsert(substs,(ATerm) gsMakeSubst(
             (ATerm) static_cast<ATermAppl>(mcrl2::data::function_symbol(std::string("eq#")+sort_name+"#"+sort_name,
-                                                 mcrl2::data::function_sort(s,s,s_bool))),
+                                                 mcrl2::data::make_function_sort(s,s,s_bool))),
             (ATerm) static_cast<ATermAppl>(mcrl2::data::equal_to(s))
             ));
     }

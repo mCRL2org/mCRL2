@@ -118,7 +118,7 @@ namespace mcrl2 {
 
           static bool is_sort_of_list_operation(container_sort const& expression)
           {
-            return expression.is_list_sort();
+            return expression.container_name() == list_container();
           }
 
           static bool is_sort_of_list_operation(function_sort const& expression)

@@ -355,7 +355,7 @@ namespace mcrl2 {
           for(arguments_const_range i(arguments()); !i.empty(); i.advance_begin(1))
           {
             if (i.front().name() != no_identifier()) {
-              result.push_back(function_symbol(i.front().name(), function_sort(s, i.front().sort())));
+              result.push_back(function_symbol(i.front().name(), make_function_sort(s, i.front().sort())));
             }
           }
           return result;
@@ -367,7 +367,7 @@ namespace mcrl2 {
         /// corresponds to is treated internally.
         function_symbol recogniser_function(const sort_expression& s) const
         {
-          return function_symbol(recogniser(), function_sort(s, sort_bool::bool_()));
+          return function_symbol(recogniser(), make_function_sort(s, sort_bool::bool_()));
         }
 
     }; // class structured_sort_constructor
@@ -630,7 +630,7 @@ class structured_sort_base: public sort_expression
               for (structured_sort_constructor::arguments_const_range::const_iterator j(arguments.begin()); j != arguments.end(); ++j, ++v)
               {
                 if (j->name() != no_identifier()) {
-                  application lhs(function_symbol(j->name(), function_sort(s, j->sort()))
+                  application lhs(function_symbol(j->name(), make_function_sort(s, j->sort()))
                         (application(i.front().constructor_function(s), variables)));
 
                   result.push_back(data_equation(variables, lhs, *v));

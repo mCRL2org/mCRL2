@@ -26,33 +26,31 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
-
 //--- start generated class ---//
 /// \brief A basic sort
-class basic_sort_base: public sort_expression
+class basic_sort: public sort_expression
 {
   public:
     /// \brief Default constructor.
-    basic_sort_base()
+    basic_sort()
       : sort_expression(core::detail::constructSortId())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    basic_sort_base(atermpp::aterm_appl term)
+    basic_sort(atermpp::aterm_appl term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortId(m_term));
     }
 
     /// \brief Constructor.
-    basic_sort_base(const core::identifier_string& name)
+    basic_sort(const core::identifier_string& name)
       : sort_expression(core::detail::gsMakeSortId(name))
     {}
 
     /// \brief Constructor.
-    basic_sort_base(const std::string& name)
+    basic_sort(const std::string& name)
       : sort_expression(core::detail::gsMakeSortId(core::identifier_string(name)))
     {}
 
@@ -62,40 +60,6 @@ class basic_sort_base: public sort_expression
     }
 };
 //--- end generated class ---//
-
-    } //namespace detail
-
-    /// \brief basic sort.
-    ///
-    /// A basic sort is sort with only a name.
-    /// An example is the sort S, specified in mCRL2 with sort S;
-    class basic_sort: public detail::basic_sort_base
-    {
-      public:
-
-        /// \brief Default constructor. Note that this does not entail a
-        ///        valid sort expression.
-        ///
-        basic_sort()
-          : detail::basic_sort_base()
-        {}
-
-        /// \overload
-        basic_sort(atermpp::aterm_appl t)
-          : detail::basic_sort_base(t)
-        {}
-
-        /// \overload
-        basic_sort(const std::string& s)
-          : detail::basic_sort_base(s)
-        {}
-
-        /// \overload
-        basic_sort(const core::identifier_string& s)
-          : detail::basic_sort_base(s)
-        {}
-
-    }; // class sort_expression
 
     /// \brief list of basic sorts
     typedef atermpp::term_list<basic_sort> basic_sort_list;

@@ -151,7 +151,7 @@ namespace mcrl2 {
       inline
       function_symbol const& not_()
       {
-        static function_symbol not_ = data::detail::initialise_static_expression(not_, function_symbol(not_name(), function_sort(bool_(), bool_())));
+        static function_symbol not_ = data::detail::initialise_static_expression(not_, function_symbol(not_name(), make_function_sort(bool_(), bool_())));
         return not_;
       }
 
@@ -206,7 +206,7 @@ namespace mcrl2 {
       inline
       function_symbol const& and_()
       {
-        static function_symbol and_ = data::detail::initialise_static_expression(and_, function_symbol(and_name(), function_sort(bool_(), bool_(), bool_())));
+        static function_symbol and_ = data::detail::initialise_static_expression(and_, function_symbol(and_name(), make_function_sort(bool_(), bool_(), bool_())));
         return and_;
       }
 
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       function_symbol const& or_()
       {
-        static function_symbol or_ = data::detail::initialise_static_expression(or_, function_symbol(or_name(), function_sort(bool_(), bool_(), bool_())));
+        static function_symbol or_ = data::detail::initialise_static_expression(or_, function_symbol(or_name(), make_function_sort(bool_(), bool_(), bool_())));
         return or_;
       }
 
@@ -318,7 +318,7 @@ namespace mcrl2 {
       inline
       function_symbol const& implies()
       {
-        static function_symbol implies = data::detail::initialise_static_expression(implies, function_symbol(implies_name(), function_sort(bool_(), bool_(), bool_())));
+        static function_symbol implies = data::detail::initialise_static_expression(implies, function_symbol(implies_name(), make_function_sort(bool_(), bool_(), bool_())));
         return implies;
       }
 

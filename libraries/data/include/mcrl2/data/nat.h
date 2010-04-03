@@ -139,7 +139,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cnat()
       {
-        static function_symbol cnat = data::detail::initialise_static_expression(cnat, function_symbol(cnat_name(), function_sort(sort_pos::pos(), nat())));
+        static function_symbol cnat = data::detail::initialise_static_expression(cnat, function_symbol(cnat_name(), make_function_sort(sort_pos::pos(), nat())));
         return cnat;
       }
 
@@ -194,7 +194,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cpair()
       {
-        static function_symbol cpair = data::detail::initialise_static_expression(cpair, function_symbol(cpair_name(), function_sort(nat(), nat(), natpair())));
+        static function_symbol cpair = data::detail::initialise_static_expression(cpair, function_symbol(cpair_name(), make_function_sort(nat(), nat(), natpair())));
         return cpair;
       }
 
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       function_symbol const& pos2nat()
       {
-        static function_symbol pos2nat = data::detail::initialise_static_expression(pos2nat, function_symbol(pos2nat_name(), function_sort(sort_pos::pos(), nat())));
+        static function_symbol pos2nat = data::detail::initialise_static_expression(pos2nat, function_symbol(pos2nat_name(), make_function_sort(sort_pos::pos(), nat())));
         return pos2nat;
       }
 
@@ -317,7 +317,7 @@ namespace mcrl2 {
       inline
       function_symbol const& nat2pos()
       {
-        static function_symbol nat2pos = data::detail::initialise_static_expression(nat2pos, function_symbol(nat2pos_name(), function_sort(nat(), sort_pos::pos())));
+        static function_symbol nat2pos = data::detail::initialise_static_expression(nat2pos, function_symbol(nat2pos_name(), make_function_sort(nat(), sort_pos::pos())));
         return nat2pos;
       }
 
@@ -396,7 +396,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol maximum(maximum_name(), function_sort(s0, s1, target_sort));
+        function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
         return maximum;
       }
 
@@ -468,7 +468,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol minimum(minimum_name(), function_sort(s0, s1, target_sort));
+        function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
         return minimum;
       }
 
@@ -539,7 +539,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts " + s0.to_string());
         }
 
-        function_symbol abs(abs_name(), function_sort(s0, target_sort));
+        function_symbol abs(abs_name(), make_function_sort(s0, target_sort));
         return abs;
       }
 
@@ -597,7 +597,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(sort_pos::pos());
 
-        function_symbol succ(succ_name(), function_sort(s0, target_sort));
+        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
         return succ;
       }
 
@@ -652,7 +652,7 @@ namespace mcrl2 {
       inline
       function_symbol const& pred()
       {
-        static function_symbol pred = data::detail::initialise_static_expression(pred, function_symbol(pred_name(), function_sort(sort_pos::pos(), nat())));
+        static function_symbol pred = data::detail::initialise_static_expression(pred, function_symbol(pred_name(), make_function_sort(sort_pos::pos(), nat())));
         return pred;
       }
 
@@ -707,7 +707,7 @@ namespace mcrl2 {
       inline
       function_symbol const& dub()
       {
-        static function_symbol dub = data::detail::initialise_static_expression(dub, function_symbol(dub_name(), function_sort(sort_bool::bool_(), nat(), nat())));
+        static function_symbol dub = data::detail::initialise_static_expression(dub, function_symbol(dub_name(), make_function_sort(sort_bool::bool_(), nat(), nat())));
         return dub;
       }
 
@@ -787,7 +787,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol plus(plus_name(), function_sort(s0, s1, target_sort));
+        function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
         return plus;
       }
 
@@ -847,7 +847,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(nat());
 
-        function_symbol gtesubt(gtesubt_name(), function_sort(s0, s1, target_sort));
+        function_symbol gtesubt(gtesubt_name(), make_function_sort(s0, s1, target_sort));
         return gtesubt;
       }
 
@@ -903,7 +903,7 @@ namespace mcrl2 {
       inline
       function_symbol const& gtesubtb()
       {
-        static function_symbol gtesubtb = data::detail::initialise_static_expression(gtesubtb, function_symbol(gtesubtb_name(), function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat())));
+        static function_symbol gtesubtb = data::detail::initialise_static_expression(gtesubtb, function_symbol(gtesubtb_name(), make_function_sort(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat())));
         return gtesubtb;
       }
 
@@ -976,7 +976,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol times(times_name(), function_sort(s0, s1, target_sort));
+        function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
         return times;
       }
 
@@ -1036,7 +1036,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(nat());
 
-        function_symbol div(div_name(), function_sort(s0, s1, target_sort));
+        function_symbol div(div_name(), make_function_sort(s0, s1, target_sort));
         return div;
       }
 
@@ -1096,7 +1096,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(nat());
 
-        function_symbol mod(mod_name(), function_sort(s0, s1, target_sort));
+        function_symbol mod(mod_name(), make_function_sort(s0, s1, target_sort));
         return mod;
       }
 
@@ -1168,7 +1168,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol exp(exp_name(), function_sort(s0, s1, target_sort));
+        function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));
         return exp;
       }
 
@@ -1224,7 +1224,7 @@ namespace mcrl2 {
       inline
       function_symbol const& even()
       {
-        static function_symbol even = data::detail::initialise_static_expression(even, function_symbol(even_name(), function_sort(nat(), sort_bool::bool_())));
+        static function_symbol even = data::detail::initialise_static_expression(even, function_symbol(even_name(), make_function_sort(nat(), sort_bool::bool_())));
         return even;
       }
 
@@ -1279,7 +1279,7 @@ namespace mcrl2 {
       inline
       function_symbol const& monus()
       {
-        static function_symbol monus = data::detail::initialise_static_expression(monus, function_symbol(monus_name(), function_sort(nat(), nat(), nat())));
+        static function_symbol monus = data::detail::initialise_static_expression(monus, function_symbol(monus_name(), make_function_sort(nat(), nat(), nat())));
         return monus;
       }
 
@@ -1335,7 +1335,7 @@ namespace mcrl2 {
       inline
       function_symbol const& swap_zero()
       {
-        static function_symbol swap_zero = data::detail::initialise_static_expression(swap_zero, function_symbol(swap_zero_name(), function_sort(nat(), nat(), nat())));
+        static function_symbol swap_zero = data::detail::initialise_static_expression(swap_zero, function_symbol(swap_zero_name(), make_function_sort(nat(), nat(), nat())));
         return swap_zero;
       }
 
@@ -1391,7 +1391,7 @@ namespace mcrl2 {
       inline
       function_symbol const& swap_zero_add()
       {
-        static function_symbol swap_zero_add = data::detail::initialise_static_expression(swap_zero_add, function_symbol(swap_zero_add_name(), function_sort(nat(), nat(), nat(), nat(), nat())));
+        static function_symbol swap_zero_add = data::detail::initialise_static_expression(swap_zero_add, function_symbol(swap_zero_add_name(), make_function_sort(nat(), nat(), nat(), nat(), nat())));
         return swap_zero_add;
       }
 
@@ -1449,7 +1449,7 @@ namespace mcrl2 {
       inline
       function_symbol const& swap_zero_min()
       {
-        static function_symbol swap_zero_min = data::detail::initialise_static_expression(swap_zero_min, function_symbol(swap_zero_min_name(), function_sort(nat(), nat(), nat(), nat(), nat())));
+        static function_symbol swap_zero_min = data::detail::initialise_static_expression(swap_zero_min, function_symbol(swap_zero_min_name(), make_function_sort(nat(), nat(), nat(), nat(), nat())));
         return swap_zero_min;
       }
 
@@ -1507,7 +1507,7 @@ namespace mcrl2 {
       inline
       function_symbol const& swap_zero_monus()
       {
-        static function_symbol swap_zero_monus = data::detail::initialise_static_expression(swap_zero_monus, function_symbol(swap_zero_monus_name(), function_sort(nat(), nat(), nat(), nat(), nat())));
+        static function_symbol swap_zero_monus = data::detail::initialise_static_expression(swap_zero_monus, function_symbol(swap_zero_monus_name(), make_function_sort(nat(), nat(), nat(), nat(), nat())));
         return swap_zero_monus;
       }
 
@@ -1565,7 +1565,7 @@ namespace mcrl2 {
       inline
       function_symbol const& swap_zero_lte()
       {
-        static function_symbol swap_zero_lte = data::detail::initialise_static_expression(swap_zero_lte, function_symbol(swap_zero_lte_name(), function_sort(nat(), nat(), nat(), sort_bool::bool_())));
+        static function_symbol swap_zero_lte = data::detail::initialise_static_expression(swap_zero_lte, function_symbol(swap_zero_lte_name(), make_function_sort(nat(), nat(), nat(), sort_bool::bool_())));
         return swap_zero_lte;
       }
 
@@ -1622,7 +1622,7 @@ namespace mcrl2 {
       inline
       function_symbol const& first()
       {
-        static function_symbol first = data::detail::initialise_static_expression(first, function_symbol(first_name(), function_sort(natpair(), nat())));
+        static function_symbol first = data::detail::initialise_static_expression(first, function_symbol(first_name(), make_function_sort(natpair(), nat())));
         return first;
       }
 
@@ -1677,7 +1677,7 @@ namespace mcrl2 {
       inline
       function_symbol const& last()
       {
-        static function_symbol last = data::detail::initialise_static_expression(last, function_symbol(last_name(), function_sort(natpair(), nat())));
+        static function_symbol last = data::detail::initialise_static_expression(last, function_symbol(last_name(), make_function_sort(natpair(), nat())));
         return last;
       }
 
@@ -1732,7 +1732,7 @@ namespace mcrl2 {
       inline
       function_symbol const& divmod()
       {
-        static function_symbol divmod = data::detail::initialise_static_expression(divmod, function_symbol(divmod_name(), function_sort(sort_pos::pos(), sort_pos::pos(), natpair())));
+        static function_symbol divmod = data::detail::initialise_static_expression(divmod, function_symbol(divmod_name(), make_function_sort(sort_pos::pos(), sort_pos::pos(), natpair())));
         return divmod;
       }
 
@@ -1788,7 +1788,7 @@ namespace mcrl2 {
       inline
       function_symbol const& gdivmod()
       {
-        static function_symbol gdivmod = data::detail::initialise_static_expression(gdivmod, function_symbol(gdivmod_name(), function_sort(natpair(), sort_bool::bool_(), sort_pos::pos(), natpair())));
+        static function_symbol gdivmod = data::detail::initialise_static_expression(gdivmod, function_symbol(gdivmod_name(), make_function_sort(natpair(), sort_bool::bool_(), sort_pos::pos(), natpair())));
         return gdivmod;
       }
 
@@ -1845,7 +1845,7 @@ namespace mcrl2 {
       inline
       function_symbol const& ggdivmod()
       {
-        static function_symbol ggdivmod = data::detail::initialise_static_expression(ggdivmod, function_symbol(ggdivmod_name(), function_sort(nat(), nat(), sort_pos::pos(), natpair())));
+        static function_symbol ggdivmod = data::detail::initialise_static_expression(ggdivmod, function_symbol(ggdivmod_name(), make_function_sort(nat(), nat(), sort_pos::pos(), natpair())));
         return ggdivmod;
       }
 

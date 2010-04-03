@@ -197,11 +197,11 @@ namespace mcrl2 {
               }
               else if (is_exists(expression))
               {
-                return function_symbol("exists", function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
+                return function_symbol("exists", make_function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
               }
               else if (is_forall(expression))
               {
-                return function_symbol("forall", function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
+                return function_symbol("forall", make_function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
               }
             }
              

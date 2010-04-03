@@ -337,8 +337,8 @@ void test_is_certainly_finite()
 
   basic_sort s1("S1");
   basic_sort s2("S2");
-  spec.add_constructor(function_symbol("h", function_sort(s1, s2)));
-  spec.add_constructor(function_symbol("i", function_sort(s2, s1)));
+  spec.add_constructor(function_symbol("h", make_function_sort(s1, s2)));
+  spec.add_constructor(function_symbol("i", make_function_sort(s2, s1)));
 
   spec.add_alias(alias(basic_sort("a"), s));
   spec.add_alias(alias(basic_sort("a0"), s0));
@@ -362,9 +362,9 @@ void test_is_certainly_finite()
 
   BOOST_CHECK(!spec.is_certainly_finite(bag(s)));
   BOOST_CHECK(!spec.is_certainly_finite(bag(s0)));
-  BOOST_CHECK(spec.is_certainly_finite(function_sort(s,s)));
-  BOOST_CHECK(!spec.is_certainly_finite(function_sort(s,s0)));
-  BOOST_CHECK(!spec.is_certainly_finite(function_sort(s0,s)));
+  BOOST_CHECK(spec.is_certainly_finite(make_function_sort(s,s)));
+  BOOST_CHECK(!spec.is_certainly_finite(make_function_sort(s,s0)));
+  BOOST_CHECK(!spec.is_certainly_finite(make_function_sort(s0,s)));
 
   // structured sort
   atermpp::vector< data::structured_sort_constructor_argument > arguments;
@@ -459,11 +459,11 @@ void test_system_defined()
   BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy)), specification));
 
   // Check for the non presence of function sort
-  BOOST_CHECK(specification.mappings(function_sort(basic_sort("D"), sort_bool::bool_())).empty());
+  BOOST_CHECK(specification.mappings(make_function_sort(basic_sort("D"), sort_bool::bool_())).empty());
 
-  specification.add_mapping(function_symbol("f", function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())));
+  specification.add_mapping(function_symbol("f", make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())));
 
-  BOOST_CHECK(!specification.mappings(function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())).empty());
+  BOOST_CHECK(!specification.mappings(make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())).empty());
 
   // Manually structured sort
   atermpp::vector< data::structured_sort_constructor_argument > arguments;

@@ -27,10 +27,10 @@ StructProj  | structured_sort_constructor_argument[_base](const core::identifier
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-SortId    | basic_sort[_base](const core::identifier_string& name) | A basic sort
-SortCons  | container_sort[_base](const container_type& container_name, const sort_expression& element_sort) | A container sort
+SortId    | basic_sort(const core::identifier_string& name) | A basic sort
+SortCons  | container_sort(const container_type& container_name, const sort_expression& element_sort) | A container sort
 SortStruct  | structured_sort[_base](const structured_sort_constructor_list& constructors) | A structured sort
-SortArrow | function_sort[_base](const sort_expression_list& domain, const sort_expression& codomain) | A function sort
+SortArrow | function_sort(const sort_expression_list& domain, const sort_expression& codomain) | A function sort
 SortUnknown | unknown_sort() | Unknown sort expression
 SortsPossible | multiple_possible_sorts(const sort_expression_list& sorts) | Multiple possible sorts
 '''

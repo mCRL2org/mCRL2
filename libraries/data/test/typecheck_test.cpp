@@ -596,7 +596,7 @@ BOOST_AUTO_TEST_CASE(test_data_expressions_struct)
 BOOST_AUTO_TEST_CASE(test_lambda_variable_aliasing)
 {
   data::variable_vector v;
-  data::function_sort s(data::basic_sort("S"), data::basic_sort("T"));
+  data::function_sort s = make_function_sort(data::basic_sort("S"), data::basic_sort("T"));
   v.push_back(data::variable("x", s));
   test_data_expression_in_specification_context(
     "lambda x: S. x(x)",

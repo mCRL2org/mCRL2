@@ -30,34 +30,32 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
-
 //--- start generated class ---//
 /// \brief A function sort
-class function_sort_base: public sort_expression
+class function_sort: public sort_expression
 {
   public:
     /// \brief Default constructor.
-    function_sort_base()
+    function_sort()
       : sort_expression(core::detail::constructSortArrow())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    function_sort_base(atermpp::aterm_appl term)
+    function_sort(atermpp::aterm_appl term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortArrow(m_term));
     }
 
     /// \brief Constructor.
-    function_sort_base(const sort_expression_list& domain, const sort_expression& codomain)
+    function_sort(const sort_expression_list& domain, const sort_expression& codomain)
       : sort_expression(core::detail::gsMakeSortArrow(domain, codomain))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    function_sort_base(const Container& domain, const sort_expression& codomain, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
+    function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::detail::enable_if_container<Container, sort_expression>::type* = 0)
       : sort_expression(core::detail::gsMakeSortArrow(atermpp::convert<sort_expression_list>(domain), codomain))
     {}
 
@@ -73,107 +71,66 @@ class function_sort_base: public sort_expression
 };
 //--- end generated class ---//
 
-    } //namespace detail
-
-    /// \brief function sort..
-    ///
-    class function_sort: public detail::function_sort_base
-    {
-      public:
-
-        /// \brief Constructor
-        ///
-        function_sort()
-          : detail::function_sort_base()
-        {}
-
-        /// \overload
-        function_sort(const atermpp::aterm_appl& s)
-          : detail::function_sort_base(s)
-        {}
-
-        /// \overload
-        template < typename Container >
-        function_sort(const Container& domain,
-                      const sort_expression& codomain,
-                      typename atermpp::detail::enable_if_container< Container, sort_expression >::type* = 0)
-          : detail::function_sort_base(domain, codomain)
-        {}
-
-        /// \brief Convenience constructor for function sort with domain size 1
-        ///
-        /// \param[in] dom1 The first sort of the domain.
-        /// \param[in] codomain The codomain of the sort.
-        /// \post *this represents dom1 -> codomain
-        function_sort(const sort_expression& dom1,
-                      const sort_expression& codomain)
-          : detail::function_sort_base(atermpp::make_list(dom1), codomain)
-        {}
-
-        /// \brief Convenience constructor for function sort with domain size 2
-        ///
-        /// \param[in] dom1 The first sort of the domain.
-        /// \param[in] dom2 The second sort of the domain.
-        /// \param[in] codomain The codomain of the sort.
-        /// \post *this represents dom1 # dom2 -> codomain
-        function_sort(const sort_expression& dom1,
-                      const sort_expression& dom2,
-                      const sort_expression& codomain)
-          : detail::function_sort_base(atermpp::make_list(dom1, dom2), codomain)
-        {}
-
-        /// \brief Convenience constructor for function sort with domain size 3
-        ///
-        /// \param[in] dom1 The first sort of the domain.
-        /// \param[in] dom2 The second sort of the domain.
-        /// \param[in] dom3 The third sort of the domain.
-        /// \param[in] codomain The codomain of the sort.
-        /// \post *this represents dom1 # dom2 # dom3 -> codomain
-        function_sort(const sort_expression& dom1,
-                      const sort_expression& dom2,
-                      const sort_expression& dom3,
-                      const sort_expression& codomain)
-          : detail::function_sort_base(atermpp::make_list(dom1, dom2, dom3), codomain)
-        {}
-
-        /// \brief Convenience constructor for function sort with domain size 3
-        ///
-        /// \param[in] dom1 The first sort of the domain.
-        /// \param[in] dom2 The second sort of the domain.
-        /// \param[in] dom3 The third sort of the domain.
-        /// \param[in] dom4 The fourth sort of the domain.
-        /// \param[in] codomain The codomain of the sort.
-        /// \post *this represents dom1 # dom2 # dom3 # dom4 -> codomain
-        function_sort(const sort_expression& dom1,
-                      const sort_expression& dom2,
-                      const sort_expression& dom3,
-                      const sort_expression& dom4,
-                      const sort_expression& codomain)
-          : detail::function_sort_base(atermpp::make_list(dom1, dom2, dom3, dom4), codomain)
-        {}
-
-        /// \brief Returns the domain of the sort.
-        ///
-        inline
-        sort_expression_list domain() const
-        {
-          return atermpp::list_arg1(*this);
-        }
-
-        /// \brief Returns the codomain of the sort.
-        ///
-        inline
-        sort_expression codomain() const
-        {
-          return atermpp::arg2(*this);
-        }
-
-    }; // class function_sort
-
     /// \brief list of function sorts
     typedef atermpp::term_list<function_sort> function_sort_list;
     /// \brief vector of function sorts
     typedef atermpp::vector<function_sort> function_sort_vector;
+
+    /// \brief Convenience constructor for function sort with domain size 1
+    ///
+    /// \param[in] dom1 The first sort of the domain.
+    /// \param[in] codomain The codomain of the sort.
+    /// \post *this represents dom1 -> codomain
+    inline function_sort make_function_sort(const sort_expression& dom1,
+                  const sort_expression& codomain)
+    {
+      return function_sort(atermpp::make_list(dom1), codomain);
+    }
+
+    /// \brief Convenience constructor for function sort with domain size 2
+    ///
+    /// \param[in] dom1 The first sort of the domain.
+    /// \param[in] dom2 The second sort of the domain.
+    /// \param[in] codomain The codomain of the sort.
+    /// \post *this represents dom1 # dom2 -> codomain
+    inline function_sort make_function_sort(const sort_expression& dom1,
+                  const sort_expression& dom2,
+                  const sort_expression& codomain)
+    {
+      return function_sort(atermpp::make_list(dom1, dom2), codomain);
+    }
+
+    /// \brief Convenience constructor for function sort with domain size 3
+    ///
+    /// \param[in] dom1 The first sort of the domain.
+    /// \param[in] dom2 The second sort of the domain.
+    /// \param[in] dom3 The third sort of the domain.
+    /// \param[in] codomain The codomain of the sort.
+    /// \post *this represents dom1 # dom2 # dom3 -> codomain
+    inline function_sort make_function_sort(const sort_expression& dom1,
+                  const sort_expression& dom2,
+                  const sort_expression& dom3,
+                  const sort_expression& codomain)
+    {
+      return function_sort(atermpp::make_list(dom1, dom2, dom3), codomain);
+    }
+
+    /// \brief Convenience constructor for function sort with domain size 3
+    ///
+    /// \param[in] dom1 The first sort of the domain.
+    /// \param[in] dom2 The second sort of the domain.
+    /// \param[in] dom3 The third sort of the domain.
+    /// \param[in] dom4 The fourth sort of the domain.
+    /// \param[in] codomain The codomain of the sort.
+    /// \post *this represents dom1 # dom2 # dom3 # dom4 -> codomain
+    inline function_sort make_function_sort(const sort_expression& dom1,
+                  const sort_expression& dom2,
+                  const sort_expression& dom3,
+                  const sort_expression& dom4,
+                  const sort_expression& codomain)
+    {
+      return function_sort(atermpp::make_list(dom1, dom2, dom3, dom4), codomain);
+    }
 
   } // namespace data
 

@@ -109,7 +109,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cdub()
       {
-        static function_symbol cdub = data::detail::initialise_static_expression(cdub, function_symbol(cdub_name(), function_sort(sort_bool::bool_(), pos(), pos())));
+        static function_symbol cdub = data::detail::initialise_static_expression(cdub, function_symbol(cdub_name(), make_function_sort(sort_bool::bool_(), pos(), pos())));
         return cdub;
       }
 
@@ -176,7 +176,7 @@ namespace mcrl2 {
       inline
       function_symbol const& maximum()
       {
-        static function_symbol maximum = data::detail::initialise_static_expression(maximum, function_symbol(maximum_name(), function_sort(pos(), pos(), pos())));
+        static function_symbol maximum = data::detail::initialise_static_expression(maximum, function_symbol(maximum_name(), make_function_sort(pos(), pos(), pos())));
         return maximum;
       }
 
@@ -232,7 +232,7 @@ namespace mcrl2 {
       inline
       function_symbol const& minimum()
       {
-        static function_symbol minimum = data::detail::initialise_static_expression(minimum, function_symbol(minimum_name(), function_sort(pos(), pos(), pos())));
+        static function_symbol minimum = data::detail::initialise_static_expression(minimum, function_symbol(minimum_name(), make_function_sort(pos(), pos(), pos())));
         return minimum;
       }
 
@@ -288,7 +288,7 @@ namespace mcrl2 {
       inline
       function_symbol const& abs()
       {
-        static function_symbol abs = data::detail::initialise_static_expression(abs, function_symbol(abs_name(), function_sort(pos(), pos())));
+        static function_symbol abs = data::detail::initialise_static_expression(abs, function_symbol(abs_name(), make_function_sort(pos(), pos())));
         return abs;
       }
 
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       function_symbol const& succ()
       {
-        static function_symbol succ = data::detail::initialise_static_expression(succ, function_symbol(succ_name(), function_sort(pos(), pos())));
+        static function_symbol succ = data::detail::initialise_static_expression(succ, function_symbol(succ_name(), make_function_sort(pos(), pos())));
         return succ;
       }
 
@@ -398,7 +398,7 @@ namespace mcrl2 {
       inline
       function_symbol const& plus()
       {
-        static function_symbol plus = data::detail::initialise_static_expression(plus, function_symbol(plus_name(), function_sort(pos(), pos(), pos())));
+        static function_symbol plus = data::detail::initialise_static_expression(plus, function_symbol(plus_name(), make_function_sort(pos(), pos(), pos())));
         return plus;
       }
 
@@ -454,7 +454,7 @@ namespace mcrl2 {
       inline
       function_symbol const& add_with_carry()
       {
-        static function_symbol add_with_carry = data::detail::initialise_static_expression(add_with_carry, function_symbol(add_with_carry_name(), function_sort(sort_bool::bool_(), pos(), pos(), pos())));
+        static function_symbol add_with_carry = data::detail::initialise_static_expression(add_with_carry, function_symbol(add_with_carry_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), pos())));
         return add_with_carry;
       }
 
@@ -511,7 +511,7 @@ namespace mcrl2 {
       inline
       function_symbol const& times()
       {
-        static function_symbol times = data::detail::initialise_static_expression(times, function_symbol(times_name(), function_sort(pos(), pos(), pos())));
+        static function_symbol times = data::detail::initialise_static_expression(times, function_symbol(times_name(), make_function_sort(pos(), pos(), pos())));
         return times;
       }
 
@@ -567,7 +567,7 @@ namespace mcrl2 {
       inline
       function_symbol const& multir()
       {
-        static function_symbol multir = data::detail::initialise_static_expression(multir, function_symbol(multir_name(), function_sort(sort_bool::bool_(), pos(), pos(), pos(), pos())));
+        static function_symbol multir = data::detail::initialise_static_expression(multir, function_symbol(multir_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), pos(), pos())));
         return multir;
       }
 

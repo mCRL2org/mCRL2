@@ -89,7 +89,7 @@ namespace mcrl2 {
       inline
       function_symbol bagconstructor(const sort_expression& s)
       {
-        function_symbol bagconstructor(bagconstructor_name(), function_sort(function_sort(s, sort_nat::nat()), sort_fbag::fbag(s), bag(s)));
+        function_symbol bagconstructor(bagconstructor_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), sort_fbag::fbag(s), bag(s)));
         return bagconstructor;
       }
 
@@ -180,7 +180,7 @@ namespace mcrl2 {
       inline
       function_symbol bagfbag(const sort_expression& s)
       {
-        function_symbol bagfbag(bagfbag_name(), function_sort(sort_fbag::fbag(s), bag(s)));
+        function_symbol bagfbag(bagfbag_name(), make_function_sort(sort_fbag::fbag(s), bag(s)));
         return bagfbag;
       }
 
@@ -237,7 +237,7 @@ namespace mcrl2 {
       inline
       function_symbol bagcomprehension(const sort_expression& s)
       {
-        function_symbol bagcomprehension(bagcomprehension_name(), function_sort(function_sort(s, sort_nat::nat()), bag(s)));
+        function_symbol bagcomprehension(bagcomprehension_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), bag(s)));
         return bagcomprehension;
       }
 
@@ -294,7 +294,7 @@ namespace mcrl2 {
       inline
       function_symbol bagcount(const sort_expression& s)
       {
-        function_symbol bagcount(bagcount_name(), function_sort(s, bag(s), sort_nat::nat()));
+        function_symbol bagcount(bagcount_name(), make_function_sort(s, bag(s), sort_nat::nat()));
         return bagcount;
       }
 
@@ -352,7 +352,7 @@ namespace mcrl2 {
       inline
       function_symbol bagin(const sort_expression& s)
       {
-        function_symbol bagin(bagin_name(), function_sort(s, bag(s), sort_bool::bool_()));
+        function_symbol bagin(bagin_name(), make_function_sort(s, bag(s), sort_bool::bool_()));
         return bagin;
       }
 
@@ -410,7 +410,7 @@ namespace mcrl2 {
       inline
       function_symbol bagjoin(const sort_expression& s)
       {
-        function_symbol bagjoin(bagjoin_name(), function_sort(bag(s), bag(s), bag(s)));
+        function_symbol bagjoin(bagjoin_name(), make_function_sort(bag(s), bag(s), bag(s)));
         return bagjoin;
       }
 
@@ -468,7 +468,7 @@ namespace mcrl2 {
       inline
       function_symbol bagintersect(const sort_expression& s)
       {
-        function_symbol bagintersect(bagintersect_name(), function_sort(bag(s), bag(s), bag(s)));
+        function_symbol bagintersect(bagintersect_name(), make_function_sort(bag(s), bag(s), bag(s)));
         return bagintersect;
       }
 
@@ -526,7 +526,7 @@ namespace mcrl2 {
       inline
       function_symbol bagdifference(const sort_expression& s)
       {
-        function_symbol bagdifference(bagdifference_name(), function_sort(bag(s), bag(s), bag(s)));
+        function_symbol bagdifference(bagdifference_name(), make_function_sort(bag(s), bag(s), bag(s)));
         return bagdifference;
       }
 
@@ -584,7 +584,7 @@ namespace mcrl2 {
       inline
       function_symbol bag2set(const sort_expression& s)
       {
-        function_symbol bag2set(bag2set_name(), function_sort(bag(s), sort_set::set_(s)));
+        function_symbol bag2set(bag2set_name(), make_function_sort(bag(s), sort_set::set_(s)));
         return bag2set;
       }
 
@@ -641,7 +641,7 @@ namespace mcrl2 {
       inline
       function_symbol set2bag(const sort_expression& s)
       {
-        function_symbol set2bag(set2bag_name(), function_sort(sort_set::set_(s), bag(s)));
+        function_symbol set2bag(set2bag_name(), make_function_sort(sort_set::set_(s), bag(s)));
         return set2bag;
       }
 
@@ -698,7 +698,7 @@ namespace mcrl2 {
       inline
       function_symbol zero_function(const sort_expression& s)
       {
-        function_symbol zero_function(zero_function_name(), function_sort(s, sort_nat::nat()));
+        function_symbol zero_function(zero_function_name(), make_function_sort(s, sort_nat::nat()));
         return zero_function;
       }
 
@@ -755,7 +755,7 @@ namespace mcrl2 {
       inline
       function_symbol one_function(const sort_expression& s)
       {
-        function_symbol one_function(one_function_name(), function_sort(s, sort_nat::nat()));
+        function_symbol one_function(one_function_name(), make_function_sort(s, sort_nat::nat()));
         return one_function;
       }
 
@@ -812,7 +812,7 @@ namespace mcrl2 {
       inline
       function_symbol add_function(const sort_expression& s)
       {
-        function_symbol add_function(add_function_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat())));
+        function_symbol add_function(add_function_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat())));
         return add_function;
       }
 
@@ -870,7 +870,7 @@ namespace mcrl2 {
       inline
       function_symbol min_function(const sort_expression& s)
       {
-        function_symbol min_function(min_function_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat())));
+        function_symbol min_function(min_function_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat())));
         return min_function;
       }
 
@@ -928,7 +928,7 @@ namespace mcrl2 {
       inline
       function_symbol monus_function(const sort_expression& s)
       {
-        function_symbol monus_function(monus_function_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat())));
+        function_symbol monus_function(monus_function_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_nat::nat())));
         return monus_function;
       }
 
@@ -986,7 +986,7 @@ namespace mcrl2 {
       inline
       function_symbol nat2bool_function(const sort_expression& s)
       {
-        function_symbol nat2bool_function(nat2bool_function_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_bool::bool_())));
+        function_symbol nat2bool_function(nat2bool_function_name(), make_function_sort(make_function_sort(s, sort_nat::nat()), make_function_sort(s, sort_bool::bool_())));
         return nat2bool_function;
       }
 
@@ -1043,7 +1043,7 @@ namespace mcrl2 {
       inline
       function_symbol bool2nat_function(const sort_expression& s)
       {
-        function_symbol bool2nat_function(bool2nat_function_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_nat::nat())));
+        function_symbol bool2nat_function(bool2nat_function_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_nat::nat())));
         return bool2nat_function;
       }
 
@@ -1157,9 +1157,9 @@ namespace mcrl2 {
         variable vb("b",sort_fbag::fbag(s));
         variable vc("c",sort_fbag::fbag(s));
         variable ve("e",s);
-        variable vf("f",function_sort(s, sort_nat::nat()));
-        variable vg("g",function_sort(s, sort_nat::nat()));
-        variable vh("h",function_sort(s, sort_bool::bool_()));
+        variable vf("f",make_function_sort(s, sort_nat::nat()));
+        variable vg("g",make_function_sort(s, sort_nat::nat()));
+        variable vh("h",make_function_sort(s, sort_bool::bool_()));
         variable vs("s",sort_fset::fset(s));
         variable vx("x",bag(s));
         variable vy("y",bag(s));

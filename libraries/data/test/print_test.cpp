@@ -49,8 +49,8 @@ void test_function_symbol_print() {
 }
 
 void test_application_print() {
-  function_symbol f("f", function_sort(bool_(), bool_()));
-  function_symbol g("g", function_sort(bool_(), nat(), bool_()));
+  function_symbol f("f", make_function_sort(bool_(), bool_()));
+  function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
 
   PRINT_CHECK(f(true_()), "f(true)");
   PRINT_CHECK(g(false_(), sort_nat::nat(10)), "g(false, 10)");

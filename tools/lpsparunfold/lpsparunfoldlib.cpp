@@ -156,7 +156,7 @@ mcrl2::data::function_symbol lpsparunfold::create_determine_function()
   str.append( string(fresh_basic_sort.name()).append("_") );
   mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name( str );
   mcrl2::data::sort_expression_list fsl;
-  fs = function_symbol( idstr , mcrl2::data::function_sort( m_unfold_process_parameter , fresh_basic_sort ));
+  fs = function_symbol( idstr , mcrl2::data::make_function_sort( m_unfold_process_parameter , fresh_basic_sort ));
   gsDebugMsg("\t%s\n", fs.to_string().c_str());
 
   return fs;
@@ -178,7 +178,7 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
       for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++ )
       {
           mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name( str );
-          sfs.push_back(function_symbol( idstr , mcrl2::data::function_sort( m_unfold_process_parameter , *j )));
+          sfs.push_back(function_symbol( idstr , mcrl2::data::make_function_sort( m_unfold_process_parameter , *j )));
           processed.insert( *j );
       }
     }
@@ -285,7 +285,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
             */
             basic_sort bool_sort("Bool");
             sort_expression if_arg_sort(function_sort(pi.front().sort()).domain().front());
-            function_symbol if_function_symbol( "if", function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
+            function_symbol if_function_symbol( "if", make_function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
             del.push_back( create_distribution_law_over_case( pi.front(), if_function_symbol ) );
             /* Add additional distribution laws for pi over case
 
@@ -333,7 +333,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       sort_index[ element_sort ] = sort_index[ element_sort ]+1;
 
       data_expression lhs, rhs;
-      if( cs.is_list_sort() )
+      if( cs.container_name() == list_container() )
       {
         lhs = make_application( determine_function , sort_list::nil( element_sort ) );
       } else {
@@ -358,7 +358,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     */
     basic_sort bool_sort("Bool");
     sort_expression if_arg_sort(function_sort(determine_function.sort()).domain().front());
-    function_symbol if_function_symbol( "if", function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
+    function_symbol if_function_symbol( "if", make_function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
     del.push_back( create_distribution_law_over_case( determine_function, if_function_symbol ) );
     
     /*  Add additional distribution laws for Det over case 

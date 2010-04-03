@@ -24,28 +24,26 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
-
 //--- start generated class ---//
 /// \brief A container sort
-class container_sort_base: public sort_expression
+class container_sort: public sort_expression
 {
   public:
     /// \brief Default constructor.
-    container_sort_base()
+    container_sort()
       : sort_expression(core::detail::constructSortCons())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    container_sort_base(atermpp::aterm_appl term)
+    container_sort(atermpp::aterm_appl term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortCons(m_term));
     }
 
     /// \brief Constructor.
-    container_sort_base(const container_type& container_name, const sort_expression& element_sort)
+    container_sort(const container_type& container_name, const sort_expression& element_sort)
       : sort_expression(core::detail::gsMakeSortCons(container_name, element_sort))
     {}
 
@@ -60,77 +58,6 @@ class container_sort_base: public sort_expression
     }
 };
 //--- end generated class ---//
-
-    } //namespace detail
-
-    /// \brief container sort.
-    ///
-    /// Container sorts are sorts with a name and an element sort.
-    /// An example of a container sort is List(S), where List is the name of
-    /// the container, and S is the element sort.
-    /// Currently only the containers List, Set, FSet, Bag and FBag are
-    /// supported.
-    class container_sort: public detail::container_sort_base
-    {
-      public:
-
-        /// \overload
-        container_sort()
-          : detail::container_sort_base()
-        {}
-
-        /// \overload
-        container_sort(const atermpp::aterm_appl& s)
-          : detail::container_sort_base(s)
-        {}
-
-        /// \overlaod
-        container_sort(const container_type& container_name,
-                       const sort_expression& element_sort)
-          : detail::container_sort_base(container_name, element_sort)
-        {}
-
-        /// \brief Returns true iff container name is List.
-        ///
-        inline
-        bool is_list_sort() const
-        {
-          return container_name() == list_container();
-        }
-
-        /// \brief Returns true iff container name is Set.
-        ///
-        inline
-        bool is_set_sort() const
-        {
-          return container_name() == set_container();
-        }
-
-        /// \brief Returns true iff container name is FSet.
-        ///
-        inline
-        bool is_fset_sort() const
-        {
-          return container_name() == fset_container();
-        }
-
-        /// \brief Returns true iff container name is Bag.
-        ///
-        inline
-        bool is_bag_sort() const
-        {
-          return container_name() == bag_container();
-        }
-
-        /// \brief Returns true iff container name is FBag.
-        ///
-        inline
-        bool is_fbag_sort() const
-        {
-          return container_name() == fbag_container();
-        }
-
-    }; // class container_sort
 
     /// \brief list of function sorts
     ///

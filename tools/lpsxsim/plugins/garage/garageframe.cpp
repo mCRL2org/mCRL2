@@ -228,9 +228,9 @@ ATermAppl GarageFrame::MakeFloorPos( int row,
   basic_sort sPart("FloorPosPart");
   function_sort fpSort;
   if (has_part) {
-    fpSort = function_sort(sCol, sPart, basic_sort("FloorPos"));
+    fpSort = make_function_sort(sCol, sPart, basic_sort("FloorPos"));
   } else {
-    fpSort = function_sort(sCol, basic_sort("FloorPos"));
+    fpSort = make_function_sort(sCol, basic_sort("FloorPos"));
   }
   function_symbol oPos("pos_r" + intToString(row), fpSort);
   function_symbol tCol("c" + intToString(col), sCol);
