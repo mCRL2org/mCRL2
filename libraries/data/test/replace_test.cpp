@@ -40,7 +40,7 @@ struct add_zero
 {
   aterm_appl operator()(aterm_appl t) const
   {
-    if (is_data_expression(t) && data_expression(t).is_variable())
+    if (is_data_expression(t) && is_variable(t))
     {
       variable d(t);
       return variable(std::string(d.name()) + "0", d.sort());

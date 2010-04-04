@@ -33,7 +33,7 @@ namespace mcrl2 {
         exists(const data_expression& d)
           : abstraction(d)
         {
-          assert(d.is_abstraction());
+          assert(is_abstraction(d));
           assert(abstraction(d).binding_operator() == exists_binder());
         }
 

@@ -159,7 +159,7 @@ namespace core {
     static inline
     bool is_variable(term_type t)
     {
-      return t.is_variable();
+      return data::is_variable(t);
     }
 
     /// \brief Returns the free variables of a term
@@ -224,12 +224,12 @@ namespace data {
 
     static bool is_application(data_expression const& e)
     {
-      return e.is_application();
+      return data::is_application(e);
     }
 
     static bool is_abstraction(data_expression const& e)
     {
-      return e.is_abstraction();
+      return data::is_abstraction(e);
     }
 
     static data_expression head(data_expression const& e)

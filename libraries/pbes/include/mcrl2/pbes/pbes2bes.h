@@ -111,12 +111,12 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
   {
     for (data::data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)
     {
-      if (del_i->is_function_symbol())
+      if (is_function_symbol(*del_i))
       { //If p is a OpId
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
       }
-      else if (del_i->is_application())
+      else if (is_application(*del_i))
       { // If p is a data application
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
@@ -145,11 +145,11 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
   {
     if (enumerated_sorts->get(p->sort()) != NULL)
     { //sort is finite
-      if (p->is_function_symbol())
+      if (is_function_symbol(*p))
       { // If p is a correct data operation
         finite_expression = push_back(finite_expression, *p);
       }
-      else if (p->is_variable())
+      else if (is_variable(*p))
       { // If p is a freevar
         throw mcrl2::runtime_error(
           "The propositional variable contains a variable of finite sort.\n"

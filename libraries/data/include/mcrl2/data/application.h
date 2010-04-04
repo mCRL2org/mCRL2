@@ -125,7 +125,7 @@ class application_base: public data_expression
     }; // class application
 
     /// \brief get first argument
-    /// \pre  e.is_application() && !application(e).arguments().empty()
+    /// \pre  is_application(e) && !application(e).arguments().empty()
     inline data_expression first_argument(data_expression const& e)
     {
       assert(!application(e).arguments().empty());
@@ -134,7 +134,7 @@ class application_base: public data_expression
     }
 
     /// \brief get last argument
-    /// \pre  e.is_application() && !application(e).arguments().empty()
+    /// \pre  is_application(e) && !application(e).arguments().empty()
     inline data_expression last_argument(data_expression const& e)
     {
       assert(!application(e).arguments().empty());

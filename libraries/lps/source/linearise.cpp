@@ -423,7 +423,7 @@ class specification_basic_type:public boost::noncopyable
            processes to one linear process where variable names are joined. If this
            is not being done (as happened before 4/1/2008) very long lists of parameters
            can occur when linearising using regular2 */
-           if ((l1->is_variable()) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
+           if (is_variable(*l1) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
            { const variable v=*l1;
              result=push_front(result,v);
              occurs_set.insert(v);
@@ -1096,7 +1096,7 @@ class specification_basic_type:public boost::noncopyable
                         const data_expression t,
                         const atermpp::set < variable > &vars_set,
                         atermpp::set < variable > &vars_result_set)
-    { if (t.is_variable())
+    { if (is_variable(t))
       {
         if (vars_set.find(variable(t))!=vars_set.end())
         { vars_result_set.insert(t);
@@ -1104,21 +1104,21 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      if (t.is_function_symbol())
+      if (is_function_symbol(t))
       { return;
       }
 
-      if (t.is_abstraction())
+      if (is_abstraction(t))
       { fprintf(stderr,"Warning: filtering of variables expression with binders\n");
         return;
       }
 
-      if (t.is_where_clause())
+      if (is_where_clause(t))
       { fprintf(stderr,"Warning: filtering of variables expression with where clause\n");
         return;
       }
 
-      assert(t.is_application());
+      assert(is_application(t));
 
       filter_vars_by_term(application(t).head(),vars_set,vars_result_set);
       filter_vars_by_termlist(application(t).arguments(),vars_set,vars_result_set);
@@ -2826,7 +2826,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (vl.empty()) return false;
       const variable var1=vl.front();
-      assert(var1.is_variable());
+      assert(is_variable(var1));
 
       /* The variable with correct type is present: */
       if (var==var1)
@@ -2865,7 +2865,7 @@ class specification_basic_type:public boost::noncopyable
     { if (par2.empty()) return par1;
 
       variable var2=par2.front();
-      assert(var2.is_variable());
+      assert(is_variable(var2));
 
       if (alreadypresent(var2,par1,n))
       { return joinparameters(par1,pop_front(par2),n);
@@ -3191,8 +3191,8 @@ class specification_basic_type:public boost::noncopyable
                      const data_expression t,
                      const stacklisttype &stack,
                      const variable_list vars)
-    { if (t.is_function_symbol()) return t;
-      if (t.is_variable())
+    { if (is_function_symbol(t)) return t;
+      if (is_variable(t))
       { if (std::find(vars.begin(),vars.end(),t)!=vars.end())
         { /* t occurs in vars, so, t does not have to be reconstructed
              from the stack */
@@ -3201,7 +3201,7 @@ class specification_basic_type:public boost::noncopyable
         else return getvar(t,stack);
       }
 
-      if (t.is_application())
+      if (is_application(t))
       { return application(
                 adapt_term_to_stack(application(t).head(),stack,vars),
                 adapt_termlist_to_stack(application(t).arguments(),stack,vars));
@@ -5828,7 +5828,7 @@ class specification_basic_type:public boost::noncopyable
          of the form t1 +...+ tn, where one of the
          ti is a variable in sumvars that does not occur in condition */
 
-      if (actiontime.is_variable())
+      if (is_variable(actiontime))
       { if (occursintermlist(actiontime,data_expression_list(sumvars)) && !occursinterm(actiontime,condition))
         { return true;
         }
@@ -5981,7 +5981,7 @@ class specification_basic_type:public boost::noncopyable
       if (var_list.empty()) return var_list;
 
       variable v=var_list.front();
-      assert(v.is_variable());
+      assert(is_variable(v));
       variable new_variable=get_fresh_variable(std::string(v.name()) + ((hint.empty())?"":"_") + hint,
                                   v.sort());
       return push_front(

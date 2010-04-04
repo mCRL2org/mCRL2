@@ -576,7 +576,7 @@ namespace mcrl2 {
 
     data_expression data_specification::normalise_sorts(data_expression const& e) const
     { normalise_specification_if_required();
-      if (e.is_abstraction())
+      if (is_abstraction(e))
       { const abstraction a(e);
         const variable_list variables=a.variables();
         variable_vector normalised_variables;
@@ -587,7 +587,7 @@ namespace mcrl2 {
         
         return abstraction(a.binding_operator(),normalised_variables,normalise_sorts(a.body()));
       }
-      if (e.is_application())
+      if (is_application(e))
       { const application a(e);
         const data_expression_list args=a.arguments();
         data_expression_vector normalised_arguments;
@@ -597,13 +597,13 @@ namespace mcrl2 {
         }
         return application(normalise_sorts(a.head()),normalised_arguments);
       }
-      if (e.is_function_symbol())
+      if (is_function_symbol(e))
       { return function_symbol(function_symbol(e).name(),normalise_sorts(e.sort()));
       }
-      if (e.is_variable())
+      if (is_variable(e))
       { return variable(variable(e).name(),normalise_sorts(e.sort()));
       }
-      assert(e.is_where_clause());
+      assert(is_where_clause(e));
       const where_clause w(e);
       const assignment_list decls=w.declarations();
       assignment_vector normalised_assignments;

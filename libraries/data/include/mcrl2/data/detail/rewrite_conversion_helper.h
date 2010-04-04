@@ -232,14 +232,14 @@ namespace mcrl2 {
 
           data_expression reconstruct(application const& expression)
           {
-            if (expression.head().is_function_symbol())
+            if (is_function_symbol(expression.head()))
             {
               function_symbol head(expression.head());
 
               if (head.name() == "exists")
               {
                 data_expression argument_expression(reconstruct(*expression.arguments().begin()));
-                if(!argument_expression.is_abstraction())
+                if(!is_abstraction(argument_expression))
                 {
                   throw mcrl2::runtime_error("Unexpected expression occurred in transforming existential quantification from rewriter format. "
                                              "This is caused by the lack of proper support for abstraction in the rewriters.");
@@ -252,7 +252,7 @@ namespace mcrl2 {
               else if (head.name() == "forall")
               {
                 data_expression argument_expression(reconstruct(*expression.arguments().begin()));
-                if(!argument_expression.is_abstraction())
+                if(!is_abstraction(argument_expression))
                 {
                   throw mcrl2::runtime_error("Unexpected expression occurred in transforming universal quantification from rewriter format. "
                                              "This is caused by the lack of proper support for abstraction in the rewriters.");
@@ -279,7 +279,7 @@ namespace mcrl2 {
 
           data_expression reconstruct(data_expression const& expression)
           {
-            if (expression.is_function_symbol())
+            if (is_function_symbol(expression))
             {
               atermpp::map< data_expression, data_expression >::const_iterator i(m_reconstruction_context.find(expression));
 
@@ -288,7 +288,7 @@ namespace mcrl2 {
                 return i->second;
               }
             }
-            else if (expression.is_application())
+            else if (is_application(expression))
             {
               return reconstruct(application(expression));
             }
@@ -308,23 +308,23 @@ namespace mcrl2 {
 
           data_expression implement(data_expression const& expression)
           {
-            if (expression.is_application())
+            if (is_application(expression))
             {
               return implement(application(expression));
             }
-            else if (expression.is_variable())
+            else if (is_variable(expression))
             {
               return implement(variable(expression));
             }
-            else if (expression.is_function_symbol())
+            else if (is_function_symbol(expression))
             {
               return implement(function_symbol(expression));
             }
-            else if (expression.is_abstraction())
+            else if (is_abstraction(expression))
             {
               return implement(abstraction(expression));
             }
-            else if (expression.is_where_clause())
+            else if (is_where_clause(expression))
             {
               return implement(where_clause(expression));
             }

@@ -113,7 +113,7 @@ namespace mcrl2 {
 
           application operator()(application const& expression)
           {
-            if (expression.head().is_function_symbol()) {
+            if (is_function_symbol(expression.head())) {
               function_symbol head(expression.head());
 
               if (head.name() == "@ListEnum")

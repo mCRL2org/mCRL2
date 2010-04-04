@@ -300,14 +300,14 @@ data_equation_vector find_equations(data_specification const& specification, con
     {
       result.push_back(*i);
     }
-    else if(i->lhs().is_application())
+    else if(is_application(i->lhs()))
     {
       if(static_cast<application>(i->lhs()).head() == d)
       {
         result.push_back(*i);
       }
     }
-    else if (i->rhs().is_application())
+    else if (is_application(i->rhs()))
     {
       if(static_cast<application>(i->rhs()).head() == d)
       {

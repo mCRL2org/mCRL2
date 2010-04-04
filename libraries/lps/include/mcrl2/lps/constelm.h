@@ -48,7 +48,7 @@ struct default_global_variable_solver
     {
       data::mutable_map_substitution<> result;
       data::data_expression r = R(g, sigma);
-      if (r.is_variable())
+      if (is_variable(r))
       {
         data::variable v = r;
         if (std::find(V.begin(), V.end(), v) != V.end())

@@ -175,27 +175,27 @@ namespace mcrl2 {
           // Default, no traversal of sort expressions
           void operator()(data_expression const& e)
           {
-            if (e.is_application())
+            if (is_application(e))
             {
               static_cast< Derived& >(*this)(application(e));
             }
-            else if (e.is_where_clause())
+            else if (is_where_clause(e))
             {
               static_cast< Derived& >(*this)(where_clause(e));
             }
-            else if (e.is_abstraction())
+            else if (is_abstraction(e))
             {
               static_cast< Derived& >(*this)(abstraction(e));
             }
-            else if (e.is_variable())
+            else if (is_variable(e))
             {
               static_cast< Derived& >(*this)(variable(e));
             }
-            else if (e.is_identifier())
+            else if (is_identifier(e))
             {
               static_cast< Derived& >(*this)(identifier(e));
             }
-            else if (e.is_function_symbol())
+            else if (is_function_symbol(e))
             {
               static_cast< Derived& >(*this)(function_symbol(e));
             }

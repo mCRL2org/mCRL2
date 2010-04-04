@@ -167,10 +167,10 @@ namespace mcrl2 {
 
           static bool is_list_expression(data_expression const& expression)
           {
-            if (expression.is_function_symbol()) {
+            if (is_function_symbol(expression)) {
               return is_list_expression(function_symbol(expression));
             }
-            else if (expression.is_application()) {
+            else if (is_application(expression)) {
               return is_list_expression(application(expression));
             }
 

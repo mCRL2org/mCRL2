@@ -39,7 +39,7 @@ namespace mcrl2 {
       struct symbol : public detail::singleton_identifier< Derived > {
         static bool is_application(data_expression const& e)
         {
-          return e.is_application() ? is_application(application(e)) : false;
+          return data::is_application(e) ? is_application(application(e)) : false;
         }
 
         static bool is_application(application const& e)
@@ -49,7 +49,7 @@ namespace mcrl2 {
 
         static bool is_function_symbol(data_expression const& e)
         {
-          return (e.is_function_symbol()) ? is_function_symbol(function_symbol(e)) : false;
+          return data::is_function_symbol(e) ? is_function_symbol(function_symbol(e)) : false;
         }
 
         static bool is_function_symbol(function_symbol const& e)

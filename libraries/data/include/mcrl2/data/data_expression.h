@@ -142,15 +142,15 @@ namespace mcrl2 {
           // is no elegant solution of distributing the implementation of the
           // derived classes (as we need to support requesting the sort of a
           // data_expression we do need to provide an implementation here).
-          if (is_variable())
+          if (is_variable(*this))
           {
             result = atermpp::arg2(*this);
           }
-          else if (is_function_symbol())
+          else if (is_function_symbol(*this))
           {
             result = atermpp::arg2(*this);
           }
-          else if (is_abstraction())
+          else if (is_abstraction(*this))
           {
             if (is_forall(*this) || is_exists(*this))
             {
@@ -169,13 +169,13 @@ namespace mcrl2 {
               result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
             }
           }
-          else if (is_application())
+          else if (is_application(*this))
           {
             sort_expression s(data_expression(atermpp::arg1(*this)).sort());
             assert(s.is_function_sort());
             result = atermpp::arg2(s);
           }
-          else if (is_where_clause())
+          else if (is_where_clause(*this))
           {
             result = data_expression(atermpp::arg1(*this)).sort();
           }
@@ -185,48 +185,6 @@ namespace mcrl2 {
           }
 
           return result;
-        }
-
-        /// \brief Returns true iff the expression is variable
-        inline
-        bool is_variable() const
-        {
-          return data::is_variable(*this);
-        }
-
-        /// \brief Returns true iff the expression is a function symbol
-        inline
-        bool is_function_symbol() const
-        {
-          return data::is_function_symbol(*this);
-        }
-
-        /// \brief Returns true iff the expression is an abstraction
-        inline
-        bool is_abstraction() const
-        {
-          return data::is_abstraction(*this);
-        }
-
-        /// \brief Returns true iff the expression is an application
-        inline
-        bool is_application() const
-        {
-          return data::is_application(*this);
-        }
-
-        /// \brief Returns true iff the expression is a where clause
-        inline
-        bool is_where_clause() const
-        {
-          return data::is_where_clause(*this);
-        }
-
-        /// \brief Returns true iff the expression is an identifier
-        inline
-        bool is_identifier() const
-        {
-          return data::is_identifier(*this);
         }
 
     }; // class data_expression

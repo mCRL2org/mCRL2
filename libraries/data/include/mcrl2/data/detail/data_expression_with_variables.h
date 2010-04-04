@@ -223,7 +223,7 @@ namespace core {
     static inline
     bool is_variable(term_type t)
     {
-      return data::data_expression(t).is_variable();
+      return data::is_variable(t);
     }
 
     /// \brief Returns the free variables of a term

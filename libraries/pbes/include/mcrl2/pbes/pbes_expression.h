@@ -1142,7 +1142,7 @@ namespace core {
     variable_sequence_type var(term_type t)
     {
       // Forall and exists are not fully supported by the data library
-      assert(!data::is_data_expression(t) || (!data::data_expression(t).is_abstraction()
+      assert(!data::is_data_expression(t) || (!data::is_abstraction(t)
 		 || (!data::is_forall(data::abstraction(t)) && !data::is_exists(data::abstraction(t)))));
       assert(is_exists(t) || is_forall(t));
 
@@ -1184,7 +1184,7 @@ namespace core {
     static inline
     bool is_variable(term_type t)
     {
-      return data::data_expression(t).is_variable();
+      return data::is_variable(t);
     }
 
     /// \brief Returns the free variables of a term

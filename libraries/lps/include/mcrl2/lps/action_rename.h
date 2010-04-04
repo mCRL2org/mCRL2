@@ -443,7 +443,7 @@ lps::specification action_rename(
                        rule_old_argument_i = rule_old_action.arguments().begin();
                        rule_old_argument_i != rule_old_action.arguments().end();
                        rule_old_argument_i++)
-    { if ((!rule_old_argument_i->is_variable()) &&
+    { if (!is_variable(*rule_old_argument_i) &&
           (!(data::find_variables(*rule_old_argument_i).empty())))
       { throw mcrl2::runtime_error("The arguments of the lhs " + core::pp(rule_old_action) +
                           " are not variables or closed expressions");
@@ -472,7 +472,7 @@ lps::specification action_rename(
     // is empty at the end.
     for(data_expression_list::iterator i=rule_old_action.arguments().begin() ;
                      i!=rule_old_action.arguments().end() ; i++)
-    { if (i->is_variable())
+    { if (is_variable(*i))
       { if (variables_in_old_rule.find(*i)==variables_in_old_rule.end())
         { throw mcrl2::runtime_error("Variable " + core::pp(*i) + " occurs more than once in lhs " +
                        core::pp(rule_old_action) + " of an action rename rule");
@@ -543,7 +543,7 @@ lps::specification action_rename(
                        rule_old_argument_i = renamed_rule_old_action.arguments().begin();
                        rule_old_argument_i != renamed_rule_old_action.arguments().end();
                        rule_old_argument_i++)
-          { if (rule_old_argument_i->is_variable())
+          { if (is_variable(*rule_old_argument_i))
             {
               new_equalities_condition=lazy::and_(new_equalities_condition,
                                data::equal_to(*rule_old_argument_i, *lps_old_argument_i));

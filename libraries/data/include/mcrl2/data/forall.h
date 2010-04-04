@@ -33,7 +33,7 @@ namespace mcrl2 {
         forall(const data_expression& d)
           : abstraction(d)
         {
-          assert(d.is_abstraction());
+          assert(is_abstraction(d));
           assert(static_cast<abstraction>(d).binding_operator() == forall_binder());
         }
 

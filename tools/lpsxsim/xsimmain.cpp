@@ -736,13 +736,13 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
     ATermAppl oldval = nextstate->getStateArgument(old,i);
     ATermAppl newval = nextstate->getStateArgument(state,i);
 
-    if ( mcrl2::data::data_expression(newval).is_variable() )
+    if ( mcrl2::data::is_variable(newval) )
     {
       stateview->SetItem(i,1,wxT("_"));
     } else {
       stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppDefault).c_str()));
     }
-    if ( showchange && !(ATisEqual(oldval,newval) || (mcrl2::data::data_expression(oldval).is_variable() && mcrl2::data::data_expression(newval).is_variable()) ) )
+    if ( showchange && !(ATisEqual(oldval,newval) || (mcrl2::data::is_variable(oldval) && mcrl2::data::is_variable(newval)) ) )
     {
       wxColour col(255,255,210);
       stateview->SetItemBackgroundColour(i,col);
@@ -870,7 +870,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
       ATermAppl oldval = nextstate->getStateArgument(m,i);
       ATermAppl newval = nextstate->getStateArgument(n,i);
 
-      if ( !ATisEqual(oldval,newval) && (!mcrl2::data::data_expression(newval).is_variable() || showdc->IsChecked()) )
+      if ( !ATisEqual(oldval,newval) && (!mcrl2::data::is_variable(newval) || showdc->IsChecked()) )
       {
         if ( comma )
         {
@@ -880,7 +880,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
         }
         PrintPart_CXX(ss, ATgetFirst(o), ppDefault);
         ss << " := ";
-        if ( mcrl2::data::data_expression(newval).is_variable() )
+        if ( mcrl2::data::is_variable(newval) )
         {
           ss << "_";
         } else {

@@ -307,7 +307,7 @@ void GarageFrame::UpdateState( ATerm State )
     //get value of variable gs_hal
     NextState* nextState = simulator->GetNextState();
     ATermAppl gs_hal = nextState->getStateArgument(State, stateIndex);
-    if (mcrl2::data::data_expression(gs_hal).is_variable()) {
+    if (mcrl2::data::is_variable(gs_hal)) {
       //gs_hal has a dummy value
       canvas->InitialiseCanvas();
     } else {

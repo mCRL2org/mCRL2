@@ -93,7 +93,7 @@ struct variable_replacer
   /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (!data::data_expression(t).is_variable())
+    if (!data::is_variable(t))
     {
       return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
@@ -139,7 +139,7 @@ struct variable_name_replacer
   /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (!data::data_expression(t).is_variable())
+    if (!data::is_variable(t))
     {
       return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }

@@ -188,7 +188,7 @@ class linear_inequality
         }
         else throw mcrl2::runtime_error("Expect constant multiplies expression: " + pp(e) + "\n");
       }
-      else if (e.is_variable())
+      else if (is_variable(e))
       { if (e.sort() == sort_real::real_())
         {
           if(m_lhs.find(e) == m_lhs.end())
