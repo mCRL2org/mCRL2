@@ -9,7 +9,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>grape</string>
+	<string>grapemcrl2</string>
 	<key>CFBundleIconFile</key>
 	<string>grape.icns</string>
 	<key>CFBundleName</key>

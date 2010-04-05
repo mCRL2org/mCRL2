@@ -9,7 +9,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>xsim</string>
+	<string>lpsxsim</string>
 	<key>CFBundleIconFile</key>
 	<string>xsim.icns</string>
 	<key>CFBundleName</key>
