@@ -264,7 +264,7 @@ class FunctionDeclaration:
                 modifiers.append('&')
             if re.search(r'\bconst\b', word) != None:
                 modifiers.append('const')
-            word = re.sub('\*|&|(const)', '', word).strip()
+            word = re.sub(r'\*|&|(\bconst\b)', '', word).strip()
             w = word.split()
             type = w[0]
             name = w[1]
