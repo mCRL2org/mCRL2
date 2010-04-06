@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A simple input
-class simpleinput
+class simpleinput: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,15 +49,17 @@ class simpleinput
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of simpleinputs
-    typedef atermpp::term_list<simpleinput> simpleinput_list;
+};
 
-    /// \brief vector of simpleinputs
-    typedef atermpp::vector<simpleinput>    simpleinput_vector;
+/// \brief list of simpleinputs
+typedef atermpp::term_list<simpleinput> simpleinput_list;
+
+/// \brief vector of simpleinputs
+typedef atermpp::vector<simpleinput>    simpleinput_vector;
 
 
 /// \brief An input
-class input
+class input: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -87,15 +89,17 @@ class input
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of inputs
-    typedef atermpp::term_list<input> input_list;
+};
 
-    /// \brief vector of inputs
-    typedef atermpp::vector<input>    input_vector;
+/// \brief list of inputs
+typedef atermpp::term_list<input> input_list;
+
+/// \brief vector of inputs
+typedef atermpp::vector<input>    input_vector;
 
 
 /// \brief An output
-class output
+class output: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -120,11 +124,13 @@ class output
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of outputs
-    typedef atermpp::term_list<output> output_list;
+};
 
-    /// \brief vector of outputs
-    typedef atermpp::vector<output>    output_vector;
+/// \brief list of outputs
+typedef atermpp::term_list<output> output_list;
+
+/// \brief vector of outputs
+typedef atermpp::vector<output>    output_vector;
 
 //--- end generated classes ---//
 

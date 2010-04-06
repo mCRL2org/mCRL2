@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A map list
-class maps
+class maps: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,15 +49,17 @@ class maps
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of mapss
-    typedef atermpp::term_list<maps> maps_list;
+};
 
-    /// \brief vector of mapss
-    typedef atermpp::vector<maps>    maps_vector;
+/// \brief list of mapss
+typedef atermpp::term_list<maps> maps_list;
+
+/// \brief vector of mapss
+typedef atermpp::vector<maps>    maps_vector;
 
 
 /// \brief A map/generator list
-class mapsgens
+class mapsgens: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -87,11 +89,13 @@ class mapsgens
     {
       return atermpp::list_arg2(*this);
     }
-};/// \brief list of mapsgenss
-    typedef atermpp::term_list<mapsgens> mapsgens_list;
+};
 
-    /// \brief vector of mapsgenss
-    typedef atermpp::vector<mapsgens>    mapsgens_vector;
+/// \brief list of mapsgenss
+typedef atermpp::term_list<mapsgens> mapsgens_list;
+
+/// \brief vector of mapsgenss
+typedef atermpp::vector<mapsgens>    mapsgens_vector;
 
 //--- end generated classes ---//
 

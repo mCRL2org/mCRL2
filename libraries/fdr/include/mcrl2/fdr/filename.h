@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A filename
-class filename
+class filename: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,11 +49,13 @@ class filename
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of filenames
-    typedef atermpp::term_list<filename> filename_list;
+};
 
-    /// \brief vector of filenames
-    typedef atermpp::vector<filename>    filename_vector;
+/// \brief list of filenames
+typedef atermpp::term_list<filename> filename_list;
+
+/// \brief vector of filenames
+typedef atermpp::vector<filename>    filename_vector;
 
 //--- end generated classes ---//
 

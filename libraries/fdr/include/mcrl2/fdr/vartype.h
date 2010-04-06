@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A simple branch
-class simplebranch
+class simplebranch: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,15 +49,17 @@ class simplebranch
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of simplebranchs
-    typedef atermpp::term_list<simplebranch> simplebranch_list;
+};
 
-    /// \brief vector of simplebranchs
-    typedef atermpp::vector<simplebranch>    simplebranch_vector;
+/// \brief list of simplebranchs
+typedef atermpp::term_list<simplebranch> simplebranch_list;
+
+/// \brief vector of simplebranchs
+typedef atermpp::vector<simplebranch>    simplebranch_vector;
 
 
 /// \brief A branch
-class branch
+class branch: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -87,11 +89,13 @@ class branch
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of branchs
-    typedef atermpp::term_list<branch> branch_list;
+};
 
-    /// \brief vector of branchs
-    typedef atermpp::vector<branch>    branch_vector;
+/// \brief list of branchs
+typedef atermpp::term_list<branch> branch_list;
+
+/// \brief vector of branchs
+typedef atermpp::vector<branch>    branch_vector;
 
 //--- end generated classes ---//
 

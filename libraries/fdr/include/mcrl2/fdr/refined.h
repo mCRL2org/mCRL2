@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
@@ -24,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A model
-class model
+class model: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,11 +50,13 @@ class model
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of models
-    typedef atermpp::term_list<model> model_list;
+};
 
-    /// \brief vector of models
-    typedef atermpp::vector<model>    model_vector;
+/// \brief list of models
+typedef atermpp::term_list<model> model_list;
+
+/// \brief vector of models
+typedef atermpp::vector<model>    model_vector;
 
 //--- end generated classes ---//
 

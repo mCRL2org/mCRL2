@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A divergence free
-class divergence_free
+class divergence_free: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -39,15 +39,17 @@ class divergence_free
     {
       assert(fdr::detail::check_term_divergence_free(m_term));
     }
-};/// \brief list of divergence_frees
-    typedef atermpp::term_list<divergence_free> divergence_free_list;
+};
 
-    /// \brief vector of divergence_frees
-    typedef atermpp::vector<divergence_free>    divergence_free_vector;
+/// \brief list of divergence_frees
+typedef atermpp::term_list<divergence_free> divergence_free_list;
+
+/// \brief vector of divergence_frees
+typedef atermpp::vector<divergence_free>    divergence_free_vector;
 
 
 /// \brief A complex test
-class test
+class test: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -77,11 +79,13 @@ class test
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of tests
-    typedef atermpp::term_list<test> test_list;
+};
 
-    /// \brief vector of tests
-    typedef atermpp::vector<test>    test_vector;
+/// \brief list of tests
+typedef atermpp::term_list<test> test_list;
+
+/// \brief vector of tests
+typedef atermpp::vector<test>    test_vector;
 
 //--- end generated classes ---//
 

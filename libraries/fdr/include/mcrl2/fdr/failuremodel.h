@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
@@ -24,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A failures
-class f
+class f: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -39,15 +40,17 @@ class f
     {
       assert(fdr::detail::check_term_F(m_term));
     }
-};/// \brief list of fs
-    typedef atermpp::term_list<f> f_list;
+};
 
-    /// \brief vector of fs
-    typedef atermpp::vector<f>    f_vector;
+/// \brief list of fs
+typedef atermpp::term_list<f> f_list;
+
+/// \brief vector of fs
+typedef atermpp::vector<f>    f_vector;
 
 
 /// \brief A faulures/divergences
-class fd
+class fd: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -62,11 +65,13 @@ class fd
     {
       assert(fdr::detail::check_term_FD(m_term));
     }
-};/// \brief list of fds
-    typedef atermpp::term_list<fd> fd_list;
+};
 
-    /// \brief vector of fds
-    typedef atermpp::vector<fd>    fd_vector;
+/// \brief list of fds
+typedef atermpp::term_list<fd> fd_list;
+
+/// \brief vector of fds
+typedef atermpp::vector<fd>    fd_vector;
 
 //--- end generated classes ---//
 

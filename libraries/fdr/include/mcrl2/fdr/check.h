@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A boolean check
-class bcheck
+class bcheck: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,15 +49,17 @@ class bcheck
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of bchecks
-    typedef atermpp::term_list<bcheck> bcheck_list;
+};
 
-    /// \brief vector of bchecks
-    typedef atermpp::vector<bcheck>    bcheck_vector;
+/// \brief list of bchecks
+typedef atermpp::term_list<bcheck> bcheck_list;
+
+/// \brief vector of bchecks
+typedef atermpp::vector<bcheck>    bcheck_vector;
 
 
 /// \brief A refinement check
-class rcheck
+class rcheck: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -92,15 +94,17 @@ class rcheck
     {
       return atermpp::arg3(*this);
     }
-};/// \brief list of rchecks
-    typedef atermpp::term_list<rcheck> rcheck_list;
+};
 
-    /// \brief vector of rchecks
-    typedef atermpp::vector<rcheck>    rcheck_vector;
+/// \brief list of rchecks
+typedef atermpp::term_list<rcheck> rcheck_list;
+
+/// \brief vector of rchecks
+typedef atermpp::vector<rcheck>    rcheck_vector;
 
 
 /// \brief A test
-class tcheck
+class tcheck: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -130,15 +134,17 @@ class tcheck
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of tchecks
-    typedef atermpp::term_list<tcheck> tcheck_list;
+};
 
-    /// \brief vector of tchecks
-    typedef atermpp::vector<tcheck>    tcheck_vector;
+/// \brief list of tchecks
+typedef atermpp::term_list<tcheck> tcheck_list;
+
+/// \brief vector of tchecks
+typedef atermpp::vector<tcheck>    tcheck_vector;
 
 
 /// \brief A negated check
-class notcheck
+class notcheck: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -163,11 +169,13 @@ class notcheck
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of notchecks
-    typedef atermpp::term_list<notcheck> notcheck_list;
+};
 
-    /// \brief vector of notchecks
-    typedef atermpp::vector<notcheck>    notcheck_vector;
+/// \brief list of notchecks
+typedef atermpp::term_list<notcheck> notcheck_list;
+
+/// \brief vector of notchecks
+typedef atermpp::vector<notcheck>    notcheck_vector;
 
 //--- end generated classes ---//
 

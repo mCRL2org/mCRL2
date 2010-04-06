@@ -143,7 +143,7 @@ template <typename Term> bool check_term_SimpleBranch(Term t);
 template <typename Term> bool check_term_Times(Term t);
 template <typename Term> bool check_term_Exprs(Term t);
 template <typename Term> bool check_term_SimpleChannel(Term t);
-template <typename Term> bool check_term_ChanSet(Term t);
+template <typename Term> bool check_term_Greater(Term t);
 template <typename Term> bool check_term_Rename(Term t);
 template <typename Term> bool check_term_model_compress(Term t);
 template <typename Term> bool check_term_Bracketed(Term t);
@@ -168,6 +168,7 @@ template <typename Term> bool check_term_NameType(Term t);
 template <typename Term> bool check_term_FD(Term t);
 template <typename Term> bool check_term_Tuple(Term t);
 template <typename Term> bool check_term_union(Term t);
+template <typename Term> bool check_term_ChanSet(Term t);
 template <typename Term> bool check_term_Transparent(Term t);
 template <typename Term> bool check_term_Card(Term t);
 template <typename Term> bool check_term_diamond(Term t);
@@ -199,7 +200,7 @@ template <typename Term> bool check_term_Map(Term t);
 template <typename Term> bool check_term_sbsim(Term t);
 template <typename Term> bool check_term_Nil(Term t);
 template <typename Term> bool check_term_TCheck(Term t);
-template <typename Term> bool check_term_Greater(Term t);
+template <typename Term> bool check_term_RepLinkedParallel(Term t);
 template <typename Term> bool check_term_Assert(Term t);
 template <typename Term> bool check_term_LocalDef(Term t);
 template <typename Term> bool check_term_tau_loop_factor(Term t);
@@ -212,7 +213,6 @@ template <typename Term> bool check_term_Output(Term t);
 template <typename Term> bool check_term_Model(Term t);
 template <typename Term> bool check_term_Dot(Term t);
 template <typename Term> bool check_term_MapsGens(Term t);
-template <typename Term> bool check_term_RepLinkedParallel(Term t);
 template <typename Term> bool check_term_DataType(Term t);
 template <typename Term> bool check_term_UntimedTimeOut(Term t);
 
@@ -2538,9 +2538,9 @@ bool check_term_SimpleChannel(Term t)
   return true;
 }
 
-// ChanSet(TargGens)
+// Greater(Expr, Expr)
 template <typename Term>
-bool check_term_ChanSet(Term t)
+bool check_term_Greater(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
@@ -2548,16 +2548,21 @@ bool check_term_ChanSet(Term t)
   if (term.type() != AT_APPL)
     return false;
   atermpp::aterm_appl a(term);
-  if (!gsIsChanSet(a))
+  if (!gsIsGreater(a))
     return false;
 
   // check the children
-  if (a.size() != 1)
+  if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_TargGens<atermpp::aterm>))
+  if (!check_term_argument(a(0), check_rule_Expr<atermpp::aterm>))
     {
-      std::cerr << "check_rule_TargGens" << std::endl;
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_Expr<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3257,6 +3262,34 @@ bool check_term_union(Term t)
   if (!check_term_argument(a(1), check_rule_Set<atermpp::aterm>))
     {
       std::cerr << "check_rule_Set" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ChanSet(TargGens)
+template <typename Term>
+bool check_term_ChanSet(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsChanSet(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_TargGens<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_TargGens" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4159,9 +4192,9 @@ bool check_term_TCheck(Term t)
   return true;
 }
 
-// Greater(Expr, Expr)
+// RepLinkedParallel(Gen+, Proc, LinkPar)
 template <typename Term>
-bool check_term_Greater(Term t)
+bool check_term_RepLinkedParallel(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
@@ -4169,21 +4202,26 @@ bool check_term_Greater(Term t)
   if (term.type() != AT_APPL)
     return false;
   atermpp::aterm_appl a(term);
-  if (!gsIsGreater(a))
+  if (!gsIsRepLinkedParallel(a))
     return false;
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 3)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_Expr<atermpp::aterm>))
+  if (!check_list_argument(a(0), check_rule_Gen<atermpp::aterm>, 1))
     {
-      std::cerr << "check_rule_Expr" << std::endl;
+      std::cerr << "check_rule_Gen" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_Expr<atermpp::aterm>))
+  if (!check_term_argument(a(1), check_rule_Proc<atermpp::aterm>))
     {
-      std::cerr << "check_rule_Expr" << std::endl;
+      std::cerr << "check_rule_Proc" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_LinkPar<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_LinkPar" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4526,44 +4564,6 @@ bool check_term_MapsGens(Term t)
   if (!check_list_argument(a(1), check_rule_Gen<atermpp::aterm>, 1))
     {
       std::cerr << "check_rule_Gen" << std::endl;
-      return false;
-    }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// RepLinkedParallel(Gen+, Proc, LinkPar)
-template <typename Term>
-bool check_term_RepLinkedParallel(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  atermpp::aterm_appl a(term);
-  if (!gsIsRepLinkedParallel(a))
-    return false;
-
-  // check the children
-  if (a.size() != 3)
-    return false;
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_Gen<atermpp::aterm>, 1))
-    {
-      std::cerr << "check_rule_Gen" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(1), check_rule_Proc<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_Proc" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(2), check_rule_LinkPar<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_LinkPar" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

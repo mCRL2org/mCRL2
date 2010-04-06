@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An assignment
-class assign
+class assign: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -54,15 +54,17 @@ class assign
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of assigns
-    typedef atermpp::term_list<assign> assign_list;
+};
 
-    /// \brief vector of assigns
-    typedef atermpp::vector<assign>    assign_vector;
+/// \brief list of assigns
+typedef atermpp::term_list<assign> assign_list;
+
+/// \brief vector of assigns
+typedef atermpp::vector<assign>    assign_vector;
 
 
 /// \brief A channel
-class channel
+class channel: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -92,15 +94,17 @@ class channel
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of channels
-    typedef atermpp::term_list<channel> channel_list;
+};
 
-    /// \brief vector of channels
-    typedef atermpp::vector<channel>    channel_vector;
+/// \brief list of channels
+typedef atermpp::term_list<channel> channel_list;
+
+/// \brief vector of channels
+typedef atermpp::vector<channel>    channel_vector;
 
 
 /// \brief A simple channel
-class channel
+class channel: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -125,15 +129,17 @@ class channel
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of channels
-    typedef atermpp::term_list<channel> channel_list;
+};
 
-    /// \brief vector of channels
-    typedef atermpp::vector<channel>    channel_vector;
+/// \brief list of channels
+typedef atermpp::term_list<channel> channel_list;
+
+/// \brief vector of channels
+typedef atermpp::vector<channel>    channel_vector;
 
 
 /// \brief A nametype
-class nametype
+class nametype: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -163,15 +169,17 @@ class nametype
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of nametypes
-    typedef atermpp::term_list<nametype> nametype_list;
+};
 
-    /// \brief vector of nametypes
-    typedef atermpp::vector<nametype>    nametype_vector;
+/// \brief list of nametypes
+typedef atermpp::term_list<nametype> nametype_list;
+
+/// \brief vector of nametypes
+typedef atermpp::vector<nametype>    nametype_vector;
 
 
 /// \brief A datatype
-class datatype
+class datatype: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -201,15 +209,17 @@ class datatype
     {
       return atermpp::list_arg2(*this);
     }
-};/// \brief list of datatypes
-    typedef atermpp::term_list<datatype> datatype_list;
+};
 
-    /// \brief vector of datatypes
-    typedef atermpp::vector<datatype>    datatype_vector;
+/// \brief list of datatypes
+typedef atermpp::term_list<datatype> datatype_list;
+
+/// \brief vector of datatypes
+typedef atermpp::vector<datatype>    datatype_vector;
 
 
 /// \brief A subtype
-class subtype
+class subtype: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -239,15 +249,17 @@ class subtype
     {
       return atermpp::list_arg2(*this);
     }
-};/// \brief list of subtypes
-    typedef atermpp::term_list<subtype> subtype_list;
+};
 
-    /// \brief vector of subtypes
-    typedef atermpp::vector<subtype>    subtype_vector;
+/// \brief list of subtypes
+typedef atermpp::term_list<subtype> subtype_list;
+
+/// \brief vector of subtypes
+typedef atermpp::vector<subtype>    subtype_vector;
 
 
 /// \brief An external
-class external
+class external: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -272,15 +284,17 @@ class external
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of externals
-    typedef atermpp::term_list<external> external_list;
+};
 
-    /// \brief vector of externals
-    typedef atermpp::vector<external>    external_vector;
+/// \brief list of externals
+typedef atermpp::term_list<external> external_list;
+
+/// \brief vector of externals
+typedef atermpp::vector<external>    external_vector;
 
 
 /// \brief A transparent
-class transparent
+class transparent: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -305,15 +319,17 @@ class transparent
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of transparents
-    typedef atermpp::term_list<transparent> transparent_list;
+};
 
-    /// \brief vector of transparents
-    typedef atermpp::vector<transparent>    transparent_vector;
+/// \brief list of transparents
+typedef atermpp::term_list<transparent> transparent_list;
+
+/// \brief vector of transparents
+typedef atermpp::vector<transparent>    transparent_vector;
 
 
 /// \brief An assertion
-class assert_
+class assert_: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -338,15 +354,17 @@ class assert_
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of assert_s
-    typedef atermpp::term_list<assert_> assert__list;
+};
 
-    /// \brief vector of assert_s
-    typedef atermpp::vector<assert_>    assert__vector;
+/// \brief list of assert_s
+typedef atermpp::term_list<assert_> assert__list;
+
+/// \brief vector of assert_s
+typedef atermpp::vector<assert_>    assert__vector;
 
 
 /// \brief A print
-class print
+class print: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -371,15 +389,17 @@ class print
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of prints
-    typedef atermpp::term_list<print> print_list;
+};
 
-    /// \brief vector of prints
-    typedef atermpp::vector<print>    print_vector;
+/// \brief list of prints
+typedef atermpp::term_list<print> print_list;
+
+/// \brief vector of prints
+typedef atermpp::vector<print>    print_vector;
 
 
 /// \brief An include
-class include
+class include: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -404,11 +424,13 @@ class include
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of includes
-    typedef atermpp::term_list<include> include_list;
+};
 
-    /// \brief vector of includes
-    typedef atermpp::vector<include>    include_vector;
+/// \brief list of includes
+typedef atermpp::term_list<include> include_list;
+
+/// \brief vector of includes
+typedef atermpp::vector<include>    include_vector;
 
 //--- end generated classes ---//
 

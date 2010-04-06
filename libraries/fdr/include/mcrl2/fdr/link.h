@@ -17,6 +17,7 @@
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
+#include "mcrl2/fdr/dotted_expression.h"
 
 namespace mcrl2 {
 
@@ -24,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A link
-class link
+class link: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -54,11 +55,13 @@ class link
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of links
-    typedef atermpp::term_list<link> link_list;
+};
 
-    /// \brief vector of links
-    typedef atermpp::vector<link>    link_vector;
+/// \brief list of links
+typedef atermpp::term_list<link> link_list;
+
+/// \brief vector of links
+typedef atermpp::vector<link>    link_vector;
 
 //--- end generated classes ---//
 

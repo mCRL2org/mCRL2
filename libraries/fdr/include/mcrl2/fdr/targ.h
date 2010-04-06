@@ -14,9 +14,11 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
+#include "mcrl2/fdr/numeric_expression.h"
 
 namespace mcrl2 {
 
@@ -24,7 +26,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An empty
-class nil
+class nil: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -39,15 +41,17 @@ class nil
     {
       assert(fdr::detail::check_term_Nil(m_term));
     }
-};/// \brief list of nils
-    typedef atermpp::term_list<nil> nil_list;
+};
 
-    /// \brief vector of nils
-    typedef atermpp::vector<nil>    nil_vector;
+/// \brief list of nils
+typedef atermpp::term_list<nil> nil_list;
+
+/// \brief vector of nils
+typedef atermpp::vector<nil>    nil_vector;
 
 
 /// \brief An expression list
-class exprs
+class exprs: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -72,15 +76,17 @@ class exprs
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of exprss
-    typedef atermpp::term_list<exprs> exprs_list;
+};
 
-    /// \brief vector of exprss
-    typedef atermpp::vector<exprs>    exprs_vector;
+/// \brief list of exprss
+typedef atermpp::term_list<exprs> exprs_list;
+
+/// \brief vector of exprss
+typedef atermpp::vector<exprs>    exprs_vector;
 
 
 /// \brief A closed range
-class closedrange
+class closedrange: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -110,15 +116,17 @@ class closedrange
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of closedranges
-    typedef atermpp::term_list<closedrange> closedrange_list;
+};
 
-    /// \brief vector of closedranges
-    typedef atermpp::vector<closedrange>    closedrange_vector;
+/// \brief list of closedranges
+typedef atermpp::term_list<closedrange> closedrange_list;
+
+/// \brief vector of closedranges
+typedef atermpp::vector<closedrange>    closedrange_vector;
 
 
 /// \brief An open range
-class openrange
+class openrange: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -143,11 +151,13 @@ class openrange
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of openranges
-    typedef atermpp::term_list<openrange> openrange_list;
+};
 
-    /// \brief vector of openranges
-    typedef atermpp::vector<openrange>    openrange_vector;
+/// \brief list of openranges
+typedef atermpp::term_list<openrange> openrange_list;
+
+/// \brief vector of openranges
+typedef atermpp::vector<openrange>    openrange_vector;
 
 //--- end generated classes ---//
 

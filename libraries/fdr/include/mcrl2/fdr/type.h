@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
@@ -24,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A type product
-class typeproduct
+class typeproduct: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -54,15 +55,17 @@ class typeproduct
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of typeproducts
-    typedef atermpp::term_list<typeproduct> typeproduct_list;
+};
 
-    /// \brief vector of typeproducts
-    typedef atermpp::vector<typeproduct>    typeproduct_vector;
+/// \brief list of typeproducts
+typedef atermpp::term_list<typeproduct> typeproduct_list;
+
+/// \brief vector of typeproducts
+typedef atermpp::vector<typeproduct>    typeproduct_vector;
 
 
 /// \brief A type tuple
-class typetuple
+class typetuple: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -87,15 +90,17 @@ class typetuple
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of typetuples
-    typedef atermpp::term_list<typetuple> typetuple_list;
+};
 
-    /// \brief vector of typetuples
-    typedef atermpp::vector<typetuple>    typetuple_vector;
+/// \brief list of typetuples
+typedef atermpp::term_list<typetuple> typetuple_list;
+
+/// \brief vector of typetuples
+typedef atermpp::vector<typetuple>    typetuple_vector;
 
 
 /// \brief A type set
-class typeset
+class typeset: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -120,15 +125,17 @@ class typeset
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of typesets
-    typedef atermpp::term_list<typeset> typeset_list;
+};
 
-    /// \brief vector of typesets
-    typedef atermpp::vector<typeset>    typeset_vector;
+/// \brief list of typesets
+typedef atermpp::term_list<typeset> typeset_list;
+
+/// \brief vector of typesets
+typedef atermpp::vector<typeset>    typeset_vector;
 
 
 /// \brief A simple type name
-class simpletypename
+class simpletypename: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -153,15 +160,17 @@ class simpletypename
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of simpletypenames
-    typedef atermpp::term_list<simpletypename> simpletypename_list;
+};
 
-    /// \brief vector of simpletypenames
-    typedef atermpp::vector<simpletypename>    simpletypename_vector;
+/// \brief list of simpletypenames
+typedef atermpp::term_list<simpletypename> simpletypename_list;
+
+/// \brief vector of simpletypenames
+typedef atermpp::vector<simpletypename>    simpletypename_vector;
 
 
 /// \brief A type name
-class typename
+class typename: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -191,11 +200,13 @@ class typename
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of typenames
-    typedef atermpp::term_list<typename> typename_list;
+};
 
-    /// \brief vector of typenames
-    typedef atermpp::vector<typename>    typename_vector;
+/// \brief list of typenames
+typedef atermpp::term_list<typename> typename_list;
+
+/// \brief vector of typenames
+typedef atermpp::vector<typename>    typename_vector;
 
 //--- end generated classes ---//
 

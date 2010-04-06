@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A boolean
-class bgen
+class bgen: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,15 +49,17 @@ class bgen
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of bgens
-    typedef atermpp::term_list<bgen> bgen_list;
+};
 
-    /// \brief vector of bgens
-    typedef atermpp::vector<bgen>    bgen_vector;
+/// \brief list of bgens
+typedef atermpp::term_list<bgen> bgen_list;
+
+/// \brief vector of bgens
+typedef atermpp::vector<bgen>    bgen_vector;
 
 
 /// \brief A generator
-class gen
+class gen: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -87,11 +89,13 @@ class gen
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of gens
-    typedef atermpp::term_list<gen> gen_list;
+};
 
-    /// \brief vector of gens
-    typedef atermpp::vector<gen>    gen_vector;
+/// \brief list of gens
+typedef atermpp::term_list<gen> gen_list;
+
+/// \brief vector of gens
+typedef atermpp::vector<gen>    gen_vector;
 
 //--- end generated classes ---//
 

@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An expression
-class expr
+class expr: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,15 +49,17 @@ class expr
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of exprs
-    typedef atermpp::term_list<expr> expr_list;
+};
 
-    /// \brief vector of exprs
-    typedef atermpp::vector<expr>    expr_vector;
+/// \brief list of exprs
+typedef atermpp::term_list<expr> expr_list;
+
+/// \brief vector of exprs
+typedef atermpp::vector<expr>    expr_vector;
 
 
 /// \brief A process
-class proc
+class proc: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -82,11 +84,13 @@ class proc
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of procs
-    typedef atermpp::term_list<proc> proc_list;
+};
 
-    /// \brief vector of procs
-    typedef atermpp::vector<proc>    proc_vector;
+/// \brief list of procs
+typedef atermpp::term_list<proc> proc_list;
+
+/// \brief vector of procs
+typedef atermpp::vector<proc>    proc_vector;
 
 //--- end generated classes ---//
 

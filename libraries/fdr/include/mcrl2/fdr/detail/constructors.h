@@ -83,7 +83,7 @@ ATermAppl constructSimpleBranch();
 ATermAppl constructTimes();
 ATermAppl constructExprs();
 ATermAppl constructSimpleChannel();
-ATermAppl constructChanSet();
+ATermAppl constructGreater();
 ATermAppl constructRename();
 ATermAppl constructmodel_compress();
 ATermAppl constructBracketed();
@@ -108,6 +108,7 @@ ATermAppl constructNameType();
 ATermAppl constructFD();
 ATermAppl constructTuple();
 ATermAppl constructunion();
+ATermAppl constructChanSet();
 ATermAppl constructTransparent();
 ATermAppl constructCard();
 ATermAppl constructdiamond();
@@ -139,7 +140,7 @@ ATermAppl constructMap();
 ATermAppl constructsbsim();
 ATermAppl constructNil();
 ATermAppl constructTCheck();
-ATermAppl constructGreater();
+ATermAppl constructRepLinkedParallel();
 ATermAppl constructAssert();
 ATermAppl constructLocalDef();
 ATermAppl constructtau_loop_factor();
@@ -152,7 +153,6 @@ ATermAppl constructOutput();
 ATermAppl constructModel();
 ATermAppl constructDot();
 ATermAppl constructMapsGens();
-ATermAppl constructRepLinkedParallel();
 ATermAppl constructDataType();
 ATermAppl constructUntimedTimeOut();
 ATermAppl constructDefn();
@@ -1162,19 +1162,19 @@ ATermAppl constructSimpleChannel()
   return t;
 }
 
-// ChanSet
+// Greater
 inline
-ATermAppl initConstructChanSet(ATermAppl& t)
+ATermAppl initConstructGreater(ATermAppl& t)
 {
-  t = ATmakeAppl1(gsAFunChanSet(), reinterpret_cast<ATerm>(constructTargGens()));
+  t = ATmakeAppl2(gsAFunGreater(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructChanSet()
+ATermAppl constructGreater()
 {
-  static ATermAppl t = initConstructChanSet(t);
+  static ATermAppl t = initConstructGreater(t);
   return t;
 }
 
@@ -1559,6 +1559,22 @@ inline
 ATermAppl constructunion()
 {
   static ATermAppl t = initConstructunion(t);
+  return t;
+}
+
+// ChanSet
+inline
+ATermAppl initConstructChanSet(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunChanSet(), reinterpret_cast<ATerm>(constructTargGens()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructChanSet()
+{
+  static ATermAppl t = initConstructChanSet(t);
   return t;
 }
 
@@ -2058,19 +2074,19 @@ ATermAppl constructTCheck()
   return t;
 }
 
-// Greater
+// RepLinkedParallel
 inline
-ATermAppl initConstructGreater(ATermAppl& t)
+ATermAppl initConstructRepLinkedParallel(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunGreater(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  t = ATmakeAppl3(gsAFunRepLinkedParallel(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructLinkPar()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructGreater()
+ATermAppl constructRepLinkedParallel()
 {
-  static ATermAppl t = initConstructGreater(t);
+  static ATermAppl t = initConstructRepLinkedParallel(t);
   return t;
 }
 
@@ -2263,22 +2279,6 @@ inline
 ATermAppl constructMapsGens()
 {
   static ATermAppl t = initConstructMapsGens(t);
-  return t;
-}
-
-// RepLinkedParallel
-inline
-ATermAppl initConstructRepLinkedParallel(ATermAppl& t)
-{
-  t = ATmakeAppl3(gsAFunRepLinkedParallel(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructLinkPar()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructRepLinkedParallel()
-{
-  static ATermAppl t = initConstructRepLinkedParallel(t);
   return t;
 }
 

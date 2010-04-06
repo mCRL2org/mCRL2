@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An empty
-class nil
+class nil: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -39,15 +39,17 @@ class nil
     {
       assert(fdr::detail::check_term_Nil(m_term));
     }
-};/// \brief list of nils
-    typedef atermpp::term_list<nil> nil_list;
+};
 
-    /// \brief vector of nils
-    typedef atermpp::vector<nil>    nil_vector;
+/// \brief list of nils
+typedef atermpp::term_list<nil> nil_list;
+
+/// \brief vector of nils
+typedef atermpp::vector<nil>    nil_vector;
 
 
 /// \brief A traces
-class t
+class t: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -62,11 +64,13 @@ class t
     {
       assert(fdr::detail::check_term_T(m_term));
     }
-};/// \brief list of ts
-    typedef atermpp::term_list<t> t_list;
+};
 
-    /// \brief vector of ts
-    typedef atermpp::vector<t>    t_vector;
+/// \brief list of ts
+typedef atermpp::term_list<t> t_list;
+
+/// \brief vector of ts
+typedef atermpp::vector<t>    t_vector;
 
 //--- end generated classes ---//
 

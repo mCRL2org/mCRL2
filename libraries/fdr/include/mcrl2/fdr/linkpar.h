@@ -14,9 +14,11 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
+#include "mcrl2/fdr/link.h"
 
 namespace mcrl2 {
 
@@ -24,7 +26,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A link list
-class links
+class links: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,15 +51,17 @@ class links
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of linkss
-    typedef atermpp::term_list<links> links_list;
+};
 
-    /// \brief vector of linkss
-    typedef atermpp::vector<links>    links_vector;
+/// \brief list of linkss
+typedef atermpp::term_list<links> links_list;
+
+/// \brief vector of linkss
+typedef atermpp::vector<links>    links_vector;
 
 
 /// \brief A link/generator list
-class linksgens
+class linksgens: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -87,11 +91,13 @@ class linksgens
     {
       return atermpp::list_arg2(*this);
     }
-};/// \brief list of linksgenss
-    typedef atermpp::term_list<linksgens> linksgens_list;
+};
 
-    /// \brief vector of linksgenss
-    typedef atermpp::vector<linksgens>    linksgens_vector;
+/// \brief list of linksgenss
+typedef atermpp::term_list<linksgens> linksgens_list;
+
+/// \brief vector of linksgenss
+typedef atermpp::vector<linksgens>    linksgens_vector;
 
 //--- end generated classes ---//
 

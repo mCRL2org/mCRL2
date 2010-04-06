@@ -365,10 +365,10 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 };'''
 
 CONTAINER_TYPEDEFS = r'''/// \\brief list of <CLASSNAME>s
-    typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
+typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
 
-    /// \\brief vector of <CLASSNAME>s
-    typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
+/// \\brief vector of <CLASSNAME>s
+typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
 '''
 
 # Represents a class definition
@@ -511,7 +511,7 @@ class Class:
         text = CLASS_DEFINITION
 
         if superclass == None:
-            superclass_declaration = ''
+            superclass_declaration = ': atermpp::aterm_appl'
         else:
             superclass_declaration = ': public %s' % superclass
 
@@ -529,7 +529,7 @@ class Class:
             atext = re.sub('<CLASSNAME>', classname, CONTAINER_TYPEDEFS)
             if self.use_base_class_name_ and (self.classname_ != self.base_classname_):
                 atext = 'class %s;\n\n' % classname + atext
-            text = text + atext
+            text = text + '\n\n' + atext
         return text + '\n'
 
 # parses lines that contain entries separated by '|'

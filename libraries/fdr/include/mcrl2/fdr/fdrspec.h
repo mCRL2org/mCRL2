@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An FDR specification
-class fdrspec
+class fdrspec: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,11 +49,13 @@ class fdrspec
     {
       return atermpp::list_arg1(*this);
     }
-};/// \brief list of fdrspecs
-    typedef atermpp::term_list<fdrspec> fdrspec_list;
+};
 
-    /// \brief vector of fdrspecs
-    typedef atermpp::vector<fdrspec>    fdrspec_vector;
+/// \brief list of fdrspecs
+typedef atermpp::term_list<fdrspec> fdrspec_list;
+
+/// \brief vector of fdrspecs
+typedef atermpp::vector<fdrspec>    fdrspec_vector;
 
 //--- end generated classes ---//
 

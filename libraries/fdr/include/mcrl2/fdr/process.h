@@ -14,9 +14,11 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
+#include "mcrl2/fdr/set_expression.h"
 
 namespace mcrl2 {
 
@@ -24,7 +26,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A stop
-class stop
+class stop: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -39,15 +41,17 @@ class stop
     {
       assert(fdr::detail::check_term_STOP(m_term));
     }
-};/// \brief list of stops
-    typedef atermpp::term_list<stop> stop_list;
+};
 
-    /// \brief vector of stops
-    typedef atermpp::vector<stop>    stop_vector;
+/// \brief list of stops
+typedef atermpp::term_list<stop> stop_list;
+
+/// \brief vector of stops
+typedef atermpp::vector<stop>    stop_vector;
 
 
 /// \brief A skip
-class skip
+class skip: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -62,15 +66,17 @@ class skip
     {
       assert(fdr::detail::check_term_SKIP(m_term));
     }
-};/// \brief list of skips
-    typedef atermpp::term_list<skip> skip_list;
+};
 
-    /// \brief vector of skips
-    typedef atermpp::vector<skip>    skip_vector;
+/// \brief list of skips
+typedef atermpp::term_list<skip> skip_list;
+
+/// \brief vector of skips
+typedef atermpp::vector<skip>    skip_vector;
 
 
 /// \brief A chaos
-class chaos
+class chaos: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -95,15 +101,17 @@ class chaos
     {
       return atermpp::arg1(*this);
     }
-};/// \brief list of chaoss
-    typedef atermpp::term_list<chaos> chaos_list;
+};
 
-    /// \brief vector of chaoss
-    typedef atermpp::vector<chaos>    chaos_vector;
+/// \brief list of chaoss
+typedef atermpp::term_list<chaos> chaos_list;
+
+/// \brief vector of chaoss
+typedef atermpp::vector<chaos>    chaos_vector;
 
 
 /// \brief A prefix
-class prefix
+class prefix: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -138,15 +146,17 @@ class prefix
     {
       return atermpp::arg3(*this);
     }
-};/// \brief list of prefixs
-    typedef atermpp::term_list<prefix> prefix_list;
+};
 
-    /// \brief vector of prefixs
-    typedef atermpp::vector<prefix>    prefix_vector;
+/// \brief list of prefixs
+typedef atermpp::term_list<prefix> prefix_list;
+
+/// \brief vector of prefixs
+typedef atermpp::vector<prefix>    prefix_vector;
 
 
 /// \brief An external choice
-class externalchoice
+class externalchoice: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -176,15 +186,17 @@ class externalchoice
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of externalchoices
-    typedef atermpp::term_list<externalchoice> externalchoice_list;
+};
 
-    /// \brief vector of externalchoices
-    typedef atermpp::vector<externalchoice>    externalchoice_vector;
+/// \brief list of externalchoices
+typedef atermpp::term_list<externalchoice> externalchoice_list;
+
+/// \brief vector of externalchoices
+typedef atermpp::vector<externalchoice>    externalchoice_vector;
 
 
 /// \brief An internal choice
-class internalchoice
+class internalchoice: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -214,15 +226,17 @@ class internalchoice
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of internalchoices
-    typedef atermpp::term_list<internalchoice> internalchoice_list;
+};
 
-    /// \brief vector of internalchoices
-    typedef atermpp::vector<internalchoice>    internalchoice_vector;
+/// \brief list of internalchoices
+typedef atermpp::term_list<internalchoice> internalchoice_list;
+
+/// \brief vector of internalchoices
+typedef atermpp::vector<internalchoice>    internalchoice_vector;
 
 
 /// \brief A sequential composition
-class sequentialcomposition
+class sequentialcomposition: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -252,15 +266,17 @@ class sequentialcomposition
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of sequentialcompositions
-    typedef atermpp::term_list<sequentialcomposition> sequentialcomposition_list;
+};
 
-    /// \brief vector of sequentialcompositions
-    typedef atermpp::vector<sequentialcomposition>    sequentialcomposition_vector;
+/// \brief list of sequentialcompositions
+typedef atermpp::term_list<sequentialcomposition> sequentialcomposition_list;
+
+/// \brief vector of sequentialcompositions
+typedef atermpp::vector<sequentialcomposition>    sequentialcomposition_vector;
 
 
 /// \brief An interrupt
-class interrupt
+class interrupt: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -290,15 +306,17 @@ class interrupt
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of interrupts
-    typedef atermpp::term_list<interrupt> interrupt_list;
+};
 
-    /// \brief vector of interrupts
-    typedef atermpp::vector<interrupt>    interrupt_vector;
+/// \brief list of interrupts
+typedef atermpp::term_list<interrupt> interrupt_list;
+
+/// \brief vector of interrupts
+typedef atermpp::vector<interrupt>    interrupt_vector;
 
 
 /// \brief An hiding
-class hiding
+class hiding: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -328,15 +346,17 @@ class hiding
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of hidings
-    typedef atermpp::term_list<hiding> hiding_list;
+};
 
-    /// \brief vector of hidings
-    typedef atermpp::vector<hiding>    hiding_vector;
+/// \brief list of hidings
+typedef atermpp::term_list<hiding> hiding_list;
+
+/// \brief vector of hidings
+typedef atermpp::vector<hiding>    hiding_vector;
 
 
 /// \brief A renaming
-class rename
+class rename: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -366,15 +386,17 @@ class rename
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of renames
-    typedef atermpp::term_list<rename> rename_list;
+};
 
-    /// \brief vector of renames
-    typedef atermpp::vector<rename>    rename_vector;
+/// \brief list of renames
+typedef atermpp::term_list<rename> rename_list;
+
+/// \brief vector of renames
+typedef atermpp::vector<rename>    rename_vector;
 
 
 /// \brief An interleave
-class interleave
+class interleave: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -404,15 +426,17 @@ class interleave
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of interleaves
-    typedef atermpp::term_list<interleave> interleave_list;
+};
 
-    /// \brief vector of interleaves
-    typedef atermpp::vector<interleave>    interleave_vector;
+/// \brief list of interleaves
+typedef atermpp::term_list<interleave> interleave_list;
+
+/// \brief vector of interleaves
+typedef atermpp::vector<interleave>    interleave_vector;
 
 
 /// \brief A sharing
-class sharing
+class sharing: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -447,15 +471,17 @@ class sharing
     {
       return atermpp::arg3(*this);
     }
-};/// \brief list of sharings
-    typedef atermpp::term_list<sharing> sharing_list;
+};
 
-    /// \brief vector of sharings
-    typedef atermpp::vector<sharing>    sharing_vector;
+/// \brief list of sharings
+typedef atermpp::term_list<sharing> sharing_list;
+
+/// \brief vector of sharings
+typedef atermpp::vector<sharing>    sharing_vector;
 
 
 /// \brief An alpha parallel
-class alphaparallel
+class alphaparallel: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -495,15 +521,17 @@ class alphaparallel
     {
       return atermpp::arg4(*this);
     }
-};/// \brief list of alphaparallels
-    typedef atermpp::term_list<alphaparallel> alphaparallel_list;
+};
 
-    /// \brief vector of alphaparallels
-    typedef atermpp::vector<alphaparallel>    alphaparallel_vector;
+/// \brief list of alphaparallels
+typedef atermpp::term_list<alphaparallel> alphaparallel_list;
+
+/// \brief vector of alphaparallels
+typedef atermpp::vector<alphaparallel>    alphaparallel_vector;
 
 
 /// \brief A replicated external choice
-class repexternalchoice
+class repexternalchoice: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -533,15 +561,17 @@ class repexternalchoice
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of repexternalchoices
-    typedef atermpp::term_list<repexternalchoice> repexternalchoice_list;
+};
 
-    /// \brief vector of repexternalchoices
-    typedef atermpp::vector<repexternalchoice>    repexternalchoice_vector;
+/// \brief list of repexternalchoices
+typedef atermpp::term_list<repexternalchoice> repexternalchoice_list;
+
+/// \brief vector of repexternalchoices
+typedef atermpp::vector<repexternalchoice>    repexternalchoice_vector;
 
 
 /// \brief A replicated internal choice
-class repinternalchoice
+class repinternalchoice: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -571,15 +601,17 @@ class repinternalchoice
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of repinternalchoices
-    typedef atermpp::term_list<repinternalchoice> repinternalchoice_list;
+};
 
-    /// \brief vector of repinternalchoices
-    typedef atermpp::vector<repinternalchoice>    repinternalchoice_vector;
+/// \brief list of repinternalchoices
+typedef atermpp::term_list<repinternalchoice> repinternalchoice_list;
+
+/// \brief vector of repinternalchoices
+typedef atermpp::vector<repinternalchoice>    repinternalchoice_vector;
 
 
 /// \brief A replicated sequential composition
-class repsequentialcomposition
+class repsequentialcomposition: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -609,15 +641,17 @@ class repsequentialcomposition
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of repsequentialcompositions
-    typedef atermpp::term_list<repsequentialcomposition> repsequentialcomposition_list;
+};
 
-    /// \brief vector of repsequentialcompositions
-    typedef atermpp::vector<repsequentialcomposition>    repsequentialcomposition_vector;
+/// \brief list of repsequentialcompositions
+typedef atermpp::term_list<repsequentialcomposition> repsequentialcomposition_list;
+
+/// \brief vector of repsequentialcompositions
+typedef atermpp::vector<repsequentialcomposition>    repsequentialcomposition_vector;
 
 
 /// \brief A replicated interleave
-class repinterleave
+class repinterleave: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -647,15 +681,17 @@ class repinterleave
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of repinterleaves
-    typedef atermpp::term_list<repinterleave> repinterleave_list;
+};
 
-    /// \brief vector of repinterleaves
-    typedef atermpp::vector<repinterleave>    repinterleave_vector;
+/// \brief list of repinterleaves
+typedef atermpp::term_list<repinterleave> repinterleave_list;
+
+/// \brief vector of repinterleaves
+typedef atermpp::vector<repinterleave>    repinterleave_vector;
 
 
 /// \brief A replicated sharing
-class repsharing
+class repsharing: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -690,15 +726,17 @@ class repsharing
     {
       return atermpp::arg3(*this);
     }
-};/// \brief list of repsharings
-    typedef atermpp::term_list<repsharing> repsharing_list;
+};
 
-    /// \brief vector of repsharings
-    typedef atermpp::vector<repsharing>    repsharing_vector;
+/// \brief list of repsharings
+typedef atermpp::term_list<repsharing> repsharing_list;
+
+/// \brief vector of repsharings
+typedef atermpp::vector<repsharing>    repsharing_vector;
 
 
 /// \brief A replicated alpha parallel
-class repalphaparallel
+class repalphaparallel: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -733,15 +771,17 @@ class repalphaparallel
     {
       return atermpp::arg3(*this);
     }
-};/// \brief list of repalphaparallels
-    typedef atermpp::term_list<repalphaparallel> repalphaparallel_list;
+};
 
-    /// \brief vector of repalphaparallels
-    typedef atermpp::vector<repalphaparallel>    repalphaparallel_vector;
+/// \brief list of repalphaparallels
+typedef atermpp::term_list<repalphaparallel> repalphaparallel_list;
+
+/// \brief vector of repalphaparallels
+typedef atermpp::vector<repalphaparallel>    repalphaparallel_vector;
 
 
 /// \brief An untimed time-out
-class untimedtimeout
+class untimedtimeout: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -771,15 +811,17 @@ class untimedtimeout
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of untimedtimeouts
-    typedef atermpp::term_list<untimedtimeout> untimedtimeout_list;
+};
 
-    /// \brief vector of untimedtimeouts
-    typedef atermpp::vector<untimedtimeout>    untimedtimeout_vector;
+/// \brief list of untimedtimeouts
+typedef atermpp::term_list<untimedtimeout> untimedtimeout_list;
+
+/// \brief vector of untimedtimeouts
+typedef atermpp::vector<untimedtimeout>    untimedtimeout_vector;
 
 
 /// \brief A boolean guard
-class boolguard
+class boolguard: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -809,15 +851,17 @@ class boolguard
     {
       return atermpp::arg2(*this);
     }
-};/// \brief list of boolguards
-    typedef atermpp::term_list<boolguard> boolguard_list;
+};
 
-    /// \brief vector of boolguards
-    typedef atermpp::vector<boolguard>    boolguard_vector;
+/// \brief list of boolguards
+typedef atermpp::term_list<boolguard> boolguard_list;
+
+/// \brief vector of boolguards
+typedef atermpp::vector<boolguard>    boolguard_vector;
 
 
 /// \brief A linked parallel
-class linkedparallel
+class linkedparallel: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -852,15 +896,17 @@ class linkedparallel
     {
       return atermpp::arg3(*this);
     }
-};/// \brief list of linkedparallels
-    typedef atermpp::term_list<linkedparallel> linkedparallel_list;
+};
 
-    /// \brief vector of linkedparallels
-    typedef atermpp::vector<linkedparallel>    linkedparallel_vector;
+/// \brief list of linkedparallels
+typedef atermpp::term_list<linkedparallel> linkedparallel_list;
+
+/// \brief vector of linkedparallels
+typedef atermpp::vector<linkedparallel>    linkedparallel_vector;
 
 
 /// \brief A replicated linked parallel
-class replinkedparallel
+class replinkedparallel: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -895,11 +941,13 @@ class replinkedparallel
     {
       return atermpp::arg3(*this);
     }
-};/// \brief list of replinkedparallels
-    typedef atermpp::term_list<replinkedparallel> replinkedparallel_list;
+};
 
-    /// \brief vector of replinkedparallels
-    typedef atermpp::vector<replinkedparallel>    replinkedparallel_vector;
+/// \brief list of replinkedparallels
+typedef atermpp::term_list<replinkedparallel> replinkedparallel_list;
+
+/// \brief vector of replinkedparallels
+typedef atermpp::vector<replinkedparallel>    replinkedparallel_vector;
 
 //--- end generated classes ---//
 

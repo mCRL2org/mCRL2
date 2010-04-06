@@ -14,9 +14,11 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
+#include "mcrl2/fdr/targ.h"
 
 namespace mcrl2 {
 
@@ -24,7 +26,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A complex targ
-class targgens
+class targgens: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -54,11 +56,13 @@ class targgens
     {
       return atermpp::list_arg2(*this);
     }
-};/// \brief list of targgenss
-    typedef atermpp::term_list<targgens> targgens_list;
+};
 
-    /// \brief vector of targgenss
-    typedef atermpp::vector<targgens>    targgens_vector;
+/// \brief list of targgenss
+typedef atermpp::term_list<targgens> targgens_list;
+
+/// \brief vector of targgenss
+typedef atermpp::vector<targgens>    targgens_vector;
 
 //--- end generated classes ---//
 
