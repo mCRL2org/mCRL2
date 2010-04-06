@@ -82,6 +82,7 @@ Name			| identifier(const name& id)													| A name
 LambdaAppl		| lambdaappl(const lambda_expression& lambda, const expression_list& exprs)	| A lambda application
 LocalDef		| localdef(const definition_list& defs, const any& within)						| A local definition
 Bracketed		| bracketed(const any& operand)												| A bracketed process or expression
+Pattern         | pattern(const any& left, const any& right)                                | A combination of two patterns
 '''
 
 EXPRESSION_CLASSES = r'''

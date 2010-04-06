@@ -201,6 +201,39 @@ class bracketed: public common_expression
       return atermpp::arg1(*this);
     }
 };
+
+/// \brief A combination of two patterns
+class pattern: public common_expression
+{
+  public:
+    /// \brief Default constructor.
+    pattern()
+      : common_expression(fdr::detail::constructPattern())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    pattern(atermpp::aterm_appl term)
+      : common_expression(term)
+    {
+      assert(fdr::detail::check_term_Pattern(m_term));
+    }
+
+    /// \brief Constructor.
+    pattern(const any& left, const any& right)
+      : common_expression(fdr::detail::gsMakePattern(left, right))
+    {}
+
+    any left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    any right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
@@ -248,6 +281,15 @@ class bracketed: public common_expression
     bool is_bracketed(const common_expression& t)
     {
       return fdr::detail::gsIsBracketed(t);
+    }
+
+    /// \brief Test for a pattern expression
+    /// \param t A term
+    /// \return True if it is a pattern expression
+    inline
+    bool is_pattern(const common_expression& t)
+    {
+      return fdr::detail::gsIsPattern(t);
     }
 //--- end generated is-functions ---//
 

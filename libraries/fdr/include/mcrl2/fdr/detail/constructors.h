@@ -61,6 +61,7 @@ ATermAppl constructinter();
 ATermAppl constructRepSharing();
 ATermAppl constructNotEqual();
 ATermAppl constructset();
+ATermAppl constructPattern();
 ATermAppl constructLinkedParallel();
 ATermAppl constructTail();
 ATermAppl constructproductions();
@@ -806,6 +807,22 @@ inline
 ATermAppl constructset()
 {
   static ATermAppl t = initConstructset(t);
+  return t;
+}
+
+// Pattern
+inline
+ATermAppl initConstructPattern(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunPattern(), reinterpret_cast<ATerm>(constructAny()), reinterpret_cast<ATerm>(constructAny()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructPattern()
+{
+  static ATermAppl t = initConstructPattern(t);
   return t;
 }
 

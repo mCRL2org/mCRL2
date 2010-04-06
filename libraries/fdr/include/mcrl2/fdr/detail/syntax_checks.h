@@ -121,6 +121,7 @@ template <typename Term> bool check_term_inter(Term t);
 template <typename Term> bool check_term_RepSharing(Term t);
 template <typename Term> bool check_term_NotEqual(Term t);
 template <typename Term> bool check_term_set(Term t);
+template <typename Term> bool check_term_Pattern(Term t);
 template <typename Term> bool check_term_LinkedParallel(Term t);
 template <typename Term> bool check_term_Tail(Term t);
 template <typename Term> bool check_term_productions(Term t);
@@ -561,7 +562,8 @@ bool check_rule_Common(Term t)
          || check_term_Name(t)
          || check_term_LambdaAppl(t)
          || check_term_LocalDef(t)
-         || check_term_Bracketed(t);
+         || check_term_Bracketed(t)
+         || check_term_Pattern(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -1876,6 +1878,39 @@ bool check_term_set(Term t)
   if (!check_term_argument(a(0), check_rule_Seq<atermpp::aterm>))
     {
       std::cerr << "check_rule_Seq" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Pattern(Any, Any)
+template <typename Term>
+bool check_term_Pattern(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsPattern(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_Any<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_Any" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_Any<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_Any" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

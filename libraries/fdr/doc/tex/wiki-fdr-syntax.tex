@@ -188,10 +188,8 @@ $B4$ & ::= & $Expr$\verb"=="$Expr$\\
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $Set$ & ::= & $Common$\\
- & $|$ & \verb"{"$Targ$\verb"}"\\
- & $|$ & \verb"{"$Targ$\verb"|"$Gens$\verb"}"\\
- & $|$ & \verb"{|"$Targ$\verb"|}"\\
- & $|$ & \verb"{|"$Targ$\verb"|"$Gens$\verb"|}"\\
+ & $|$ & \verb"{"$TargGens$\verb"}"\\
+ & $|$ & \verb"{|"$TargGens$\verb"|}"\\
  & $|$ & \verb"union"($Set$\verb"," $Set$\verb")"\\
  & $|$ & \verb"inter"($Set$\verb"," $Set$\verb")"\\
  & $|$ & \verb"diff"($Set$\verb"," $Set$\verb")"\\
@@ -208,11 +206,10 @@ Without priorities
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $Seq$ & ::= & $Common$\\
- & $|$ & \verb"<"$Targ$\verb">"\\
- & $|$ & \verb"<"$Targ$\verb"|"$Gens$\verb">"\\
+ & $|$ & \verb"<"$TargGens$\verb">"\\
  & $|$ & $Seq$\verb"^"$Seq$\\
- & $|$ & \verb"concat("$Seq$\verb")"
- & $|$ & \verb"head("$Seq$\verb")"
+ & $|$ & \verb"concat("$Seq$\verb")"\\
+ & $|$ & \verb"head("$Seq$\verb")"\\
  & $|$ & \verb"tail("$Seq$\verb")"
 \end{tabular}
 \end{center}
@@ -225,8 +222,7 @@ $Seq$ & ::= & $Seq1$\verb"^"$Seq$\\
 $Seq1$ & ::= & \verb"head("$Seq1$\verb")"\\
  & $|$ & \verb"tail("$Seq1$\verb")"\\
  & $|$ & $Seq2$\\
-$Seq2$ & ::= & \verb"<"$Targ$\verb">"\\
- & $|$ & \verb"<"$Targ$\verb"|"$Gens$\verb">"\\
+$Seq2$ & ::= & \verb"<"$TargGens$\verb">"\\
  & $|$ & $Common$\\
 \end{tabular}
 \end{center}
@@ -256,8 +252,15 @@ $Common$ & ::= & \verb"(" $Any$ \verb")"\\
  & $|$ & $Name$\\
  & $|$ & $Lambda$\verb"("$Exprs$\verb")"\\
  & $|$ & \verb"let" $Defns$ \verb"within" $Any$\\
+ & $|$ & $Any$\verb"@@"$Any$
 % $Common$ & ::= & $Name$\\
 % & $|$ & $Expr$\verb"("$Exprs$\verb")"
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
+$TargGens$ & ::= & $Targ$\\
+ & $|$ & $Targ$\verb"|"$Gens$
 \end{tabular}
 \end{center}
 \begin{center}
@@ -356,14 +359,16 @@ $Proc$ & ::= & $Common$\\
  & $|$ & $Proc$\verb"[["$Rename$\verb"]]"\\
  & $|$ & $Proc$ \verb"|||" $Proc$\\
  & $|$ & $Proc$\verb"[|"$Set$\verb"|]"$Proc$\\
+ & $|$ & $Proc$\verb"|["$Set$\verb"]|"$Proc$\\
  & $|$ & $Proc$\verb"["$Set$\verb"||"$Set$\verb"]"$Proc$\\
  & $|$ & \verb"[]"$Gens$\verb"@"$Proc$\\
  & $|$ & \verb"|~|"$Gens$\verb"@"$Proc$\\
  & $|$ & \verb";"$Gens$\verb"@"$Proc$\\
  & $|$ & \verb"|||"$Gens$\verb"@"$Proc$\\
  & $|$ & \verb"[|"$Set$\verb"|]"$Gens$\verb"@"$Proc$\\
+ & $|$ & \verb"|["$Set$\verb"]|"$Gens$\verb"@"$Proc$\\
  & $|$ & \verb"||"$Gens$\verb"@["$Set$\verb"]"$Proc$\\
- & $|$ & $Proc$\verb"|>"$Proc$\\
+ & $|$ & $Proc$\verb"[>"$Proc$\\
  & $|$ & $Bool$\verb"&"$Proc$\\
  & $|$ & $Proc$\verb"["$LinkPar$\verb"]"$Proc$\\
  & $|$ & \verb"["$LinkPar$\verb"]"$Gens$\verb"@"$Proc$
@@ -392,6 +397,7 @@ $P6$ & ::= & $P7$ \verb"|||" $P6$\\
 $P7$ & ::= & $P8$\verb"["$LinkPar$\verb"]"$P7$\\
  & $|$ & $P8$\verb"["$Set$\verb"||"$Set$\verb"]"$P7$\\
  & $|$ & $P8$\verb"[|"$Set$\verb"|]"$P7$\\
+ & $|$ & $P8$\verb"|["$Set$\verb"]|"$P7$\\
  & $|$ & $P8$\\
 $P8$ & ::= & $P9$ \verb"|~|" $P8$\\
  & $|$ & $P9$\\
@@ -399,7 +405,7 @@ $P9$ & ::= & $P10$ \verb"[]" $P9$\\
  & $|$ & $P10$\\
 $P10$ & ::= & $P11$ \verb"/\" $P10$\\
  & $|$ & $P11$\\
-$P11$ & ::= & $P12$\verb"|>"$P11$\\
+$P11$ & ::= & $P12$\verb"[>"$P11$\\
  & $|$ & $P12$\\
 $P12$ & ::= & $P13$ \verb";" $P12$\\
  & $|$ & $P13$\\

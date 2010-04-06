@@ -1671,6 +1671,28 @@ bool gsIsOutput(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunOutput();
 }
 
+// Pattern
+inline
+AFun initAFunPattern(AFun& f)
+{
+  f = ATmakeAFun("Pattern", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunPattern()
+{
+  static AFun AFunPattern = initAFunPattern(AFunPattern);
+  return AFunPattern;
+}
+
+inline
+bool gsIsPattern(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunPattern();
+}
+
 // Plus
 inline
 AFun initAFunPlus(AFun& f)
@@ -3395,6 +3417,12 @@ inline
 ATermAppl gsMakeOutput(ATermAppl Expr_0)
 {
   return ATmakeAppl1(gsAFunOutput(), (ATerm) Expr_0);
+}
+
+inline
+ATermAppl gsMakePattern(ATermAppl Any_0, ATermAppl Any_1)
+{
+  return ATmakeAppl2(gsAFunPattern(), (ATerm) Any_0, (ATerm) Any_1);
 }
 
 inline

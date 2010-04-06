@@ -188,6 +188,7 @@
               | LambdaAppl(<Lambda>, <Expr>+)
               | LocalDef(<Defn>+, <Any>)
               | Bracketed(<Any>)
+              | Pattern(<Any>, <Any>)
 
 
 // Processes
