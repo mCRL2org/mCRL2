@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/failuremodel.h
+/// \file mcrl2/fdr/failuremodel.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_FAILUREMODEL_H
@@ -29,7 +29,7 @@ class f
   public:
     /// \brief Default constructor.
     f()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructF())
+      : atermpp::aterm_appl(fdr::detail::constructF())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class fd
   public:
     /// \brief Default constructor.
     fd()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructFD())
+      : atermpp::aterm_appl(fdr::detail::constructFD())
     {}
 
     /// \brief Constructor.
@@ -71,24 +71,6 @@ class fd
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a f expression
-    /// \param t A term
-    /// \return True if it is a f expression
-    inline
-    bool is_f(const failuremodel& t)
-    {
-      return fdr::detail::gsIsF(t);
-    }
-
-    /// \brief Test for a fd expression
-    /// \param t A term
-    /// \return True if it is a fd expression
-    inline
-    bool is_fd(const failuremodel& t)
-    {
-      return fdr::detail::gsIsFD(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

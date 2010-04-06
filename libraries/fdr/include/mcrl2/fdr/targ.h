@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/targ.h
+/// \file mcrl2/fdr/targ.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_TARG_H
@@ -29,7 +29,7 @@ class nil
   public:
     /// \brief Default constructor.
     nil()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructNil())
+      : atermpp::aterm_appl(fdr::detail::constructNil())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class exprs
   public:
     /// \brief Default constructor.
     exprs()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructExprs())
+      : atermpp::aterm_appl(fdr::detail::constructExprs())
     {}
 
     /// \brief Constructor.
@@ -85,7 +85,7 @@ class closedrange
   public:
     /// \brief Default constructor.
     closedrange()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructClosedRange())
+      : atermpp::aterm_appl(fdr::detail::constructClosedRange())
     {}
 
     /// \brief Constructor.
@@ -123,7 +123,7 @@ class openrange
   public:
     /// \brief Default constructor.
     openrange()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructOpenRange())
+      : atermpp::aterm_appl(fdr::detail::constructOpenRange())
     {}
 
     /// \brief Constructor.
@@ -152,42 +152,6 @@ class openrange
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a nil expression
-    /// \param t A term
-    /// \return True if it is a nil expression
-    inline
-    bool is_nil(const targ& t)
-    {
-      return fdr::detail::gsIsNil(t);
-    }
-
-    /// \brief Test for a exprs expression
-    /// \param t A term
-    /// \return True if it is a exprs expression
-    inline
-    bool is_exprs(const targ& t)
-    {
-      return fdr::detail::gsIsExprs(t);
-    }
-
-    /// \brief Test for a closedrange expression
-    /// \param t A term
-    /// \return True if it is a closedrange expression
-    inline
-    bool is_closedrange(const targ& t)
-    {
-      return fdr::detail::gsIsClosedRange(t);
-    }
-
-    /// \brief Test for a openrange expression
-    /// \param t A term
-    /// \return True if it is a openrange expression
-    inline
-    bool is_openrange(const targ& t)
-    {
-      return fdr::detail::gsIsOpenRange(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

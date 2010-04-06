@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/set_expression.h
+/// \file mcrl2/fdr/set_expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_SET_EXPRESSION_H
@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       set_expression()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructSet())
+        : atermpp::aterm_appl(fdr::detail::constructSet())
       {}
 
       /// \brief Constructor.
@@ -41,125 +41,31 @@ namespace fdr {
   };
 
 //--- start generated classes ---//
-/// \brief A simple argument
-class targ: public set_expression
-{
-  public:
-    /// \brief Default constructor.
-    targ()
-      : set_expression(fdr::atermpp::detail::constructTarg())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    targ(atermpp::aterm_appl term)
-      : set_expression(term)
-    {
-      assert(fdr::detail::check_term_Targ(m_term));
-    }
-
-    /// \brief Constructor.
-    targ(const targ& targ)
-      : set_expression(fdr::detail::gsMakeTarg(targ))
-    {}
-
-    targ targ() const
-    {
-      return atermpp::arg1(*this);
-    }
-};
-
-/// \brief A complex argument
-class targgens: public set_expression
-{
-  public:
-    /// \brief Default constructor.
-    targgens()
-      : set_expression(fdr::atermpp::detail::constructTargGens())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    targgens(atermpp::aterm_appl term)
-      : set_expression(term)
-    {
-      assert(fdr::detail::check_term_TargGens(m_term));
-    }
-
-    /// \brief Constructor.
-    targgens(const targ& targ, const generator_list& gens)
-      : set_expression(fdr::detail::gsMakeTargGens(targ, gens))
-    {}
-
-    targ targ() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    generator_list gens() const
-    {
-      return atermpp::list_arg2(*this);
-    }
-};
-
 /// \brief A simple argument (for channels)
-class targ0: public set_expression
+class chanset: public set_expression
 {
   public:
     /// \brief Default constructor.
-    targ0()
-      : set_expression(fdr::atermpp::detail::constructTarg0())
+    chanset()
+      : set_expression(fdr::detail::constructChanSet())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    targ0(atermpp::aterm_appl term)
+    chanset(atermpp::aterm_appl term)
       : set_expression(term)
     {
-      assert(fdr::detail::check_term_Targ0(m_term));
+      assert(fdr::detail::check_term_ChanSet(m_term));
     }
 
     /// \brief Constructor.
-    targ0(const targ& targ)
-      : set_expression(fdr::detail::gsMakeTarg0(targ))
+    chanset(const targgens& argument)
+      : set_expression(fdr::detail::gsMakeChanSet(argument))
     {}
 
-    targ targ() const
+    targgens argument() const
     {
       return atermpp::arg1(*this);
-    }
-};
-
-/// \brief A complex argument (for channels)
-class targgens0: public set_expression
-{
-  public:
-    /// \brief Default constructor.
-    targgens0()
-      : set_expression(fdr::atermpp::detail::constructTargGens0())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    targgens0(atermpp::aterm_appl term)
-      : set_expression(term)
-    {
-      assert(fdr::detail::check_term_TargGens0(m_term));
-    }
-
-    /// \brief Constructor.
-    targgens0(const targ& targ, const generator_list& gens)
-      : set_expression(fdr::detail::gsMakeTargGens0(targ, gens))
-    {}
-
-    targ targ() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    generator_list gens() const
-    {
-      return atermpp::list_arg2(*this);
     }
 };
 
@@ -169,7 +75,7 @@ class union: public set_expression
   public:
     /// \brief Default constructor.
     union()
-      : set_expression(fdr::atermpp::detail::constructunion())
+      : set_expression(fdr::detail::constructunion())
     {}
 
     /// \brief Constructor.
@@ -202,7 +108,7 @@ class inter: public set_expression
   public:
     /// \brief Default constructor.
     inter()
-      : set_expression(fdr::atermpp::detail::constructinter())
+      : set_expression(fdr::detail::constructinter())
     {}
 
     /// \brief Constructor.
@@ -235,7 +141,7 @@ class diff: public set_expression
   public:
     /// \brief Default constructor.
     diff()
-      : set_expression(fdr::atermpp::detail::constructdiff())
+      : set_expression(fdr::detail::constructdiff())
     {}
 
     /// \brief Constructor.
@@ -268,7 +174,7 @@ class union: public set_expression
   public:
     /// \brief Default constructor.
     union()
-      : set_expression(fdr::atermpp::detail::constructUnion())
+      : set_expression(fdr::detail::constructUnion())
     {}
 
     /// \brief Constructor.
@@ -296,7 +202,7 @@ class inter: public set_expression
   public:
     /// \brief Default constructor.
     inter()
-      : set_expression(fdr::atermpp::detail::constructInter())
+      : set_expression(fdr::detail::constructInter())
     {}
 
     /// \brief Constructor.
@@ -324,7 +230,7 @@ class set: public set_expression
   public:
     /// \brief Default constructor.
     set()
-      : set_expression(fdr::atermpp::detail::constructset())
+      : set_expression(fdr::detail::constructset())
     {}
 
     /// \brief Constructor.
@@ -352,7 +258,7 @@ class set: public set_expression
   public:
     /// \brief Default constructor.
     set()
-      : set_expression(fdr::atermpp::detail::constructSet())
+      : set_expression(fdr::detail::constructSet())
     {}
 
     /// \brief Constructor.
@@ -380,7 +286,7 @@ class seq: public set_expression
   public:
     /// \brief Default constructor.
     seq()
-      : set_expression(fdr::atermpp::detail::constructSeq())
+      : set_expression(fdr::detail::constructSeq())
     {}
 
     /// \brief Constructor.
@@ -408,7 +314,7 @@ class extensions: public set_expression
   public:
     /// \brief Default constructor.
     extensions()
-      : set_expression(fdr::atermpp::detail::constructextensions())
+      : set_expression(fdr::detail::constructextensions())
     {}
 
     /// \brief Constructor.
@@ -436,7 +342,7 @@ class productions: public set_expression
   public:
     /// \brief Default constructor.
     productions()
-      : set_expression(fdr::atermpp::detail::constructproductions())
+      : set_expression(fdr::detail::constructproductions())
     {}
 
     /// \brief Constructor.
@@ -461,40 +367,13 @@ class productions: public set_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a targ expression
+    /// \brief Test for a chanset expression
     /// \param t A term
-    /// \return True if it is a targ expression
+    /// \return True if it is a chanset expression
     inline
-    bool is_targ(const set_expression& t)
+    bool is_chanset(const set_expression& t)
     {
-      return fdr::detail::gsIsTarg(t);
-    }
-
-    /// \brief Test for a targgens expression
-    /// \param t A term
-    /// \return True if it is a targgens expression
-    inline
-    bool is_targgens(const set_expression& t)
-    {
-      return fdr::detail::gsIsTargGens(t);
-    }
-
-    /// \brief Test for a targ0 expression
-    /// \param t A term
-    /// \return True if it is a targ0 expression
-    inline
-    bool is_targ0(const set_expression& t)
-    {
-      return fdr::detail::gsIsTarg0(t);
-    }
-
-    /// \brief Test for a targgens0 expression
-    /// \param t A term
-    /// \return True if it is a targgens0 expression
-    inline
-    bool is_targgens0(const set_expression& t)
-    {
-      return fdr::detail::gsIsTargGens0(t);
+      return fdr::detail::gsIsChanSet(t);
     }
 
     /// \brief Test for a union expression

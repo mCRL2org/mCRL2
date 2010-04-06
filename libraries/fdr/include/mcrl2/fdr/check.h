@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/check.h
+/// \file mcrl2/fdr/check.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_CHECK_H
@@ -29,7 +29,7 @@ class bcheck
   public:
     /// \brief Default constructor.
     bcheck()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructBCheck())
+      : atermpp::aterm_appl(fdr::detail::constructBCheck())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class rcheck
   public:
     /// \brief Default constructor.
     rcheck()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRCheck())
+      : atermpp::aterm_appl(fdr::detail::constructRCheck())
     {}
 
     /// \brief Constructor.
@@ -74,8 +74,8 @@ class rcheck
     }
 
     /// \brief Constructor.
-    rcheck(const process& left, const process& right, const refined& refined)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRCheck(left, right, refined))
+    rcheck(const process& left, const process& right, const refined& refinement)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRCheck(left, right, refinement))
     {}
 
     process left() const
@@ -88,7 +88,7 @@ class rcheck
       return atermpp::arg2(*this);
     }
 
-    refined refined() const
+    refined refinement() const
     {
       return atermpp::arg3(*this);
     }
@@ -105,7 +105,7 @@ class tcheck
   public:
     /// \brief Default constructor.
     tcheck()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructTCheck())
+      : atermpp::aterm_appl(fdr::detail::constructTCheck())
     {}
 
     /// \brief Constructor.
@@ -117,16 +117,16 @@ class tcheck
     }
 
     /// \brief Constructor.
-    tcheck(const process& process, const test& test)
-      : atermpp::aterm_appl(fdr::detail::gsMakeTCheck(process, test))
+    tcheck(const process& proc, const test& operand)
+      : atermpp::aterm_appl(fdr::detail::gsMakeTCheck(proc, operand))
     {}
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg1(*this);
     }
 
-    test test() const
+    test operand() const
     {
       return atermpp::arg2(*this);
     }
@@ -143,7 +143,7 @@ class notcheck
   public:
     /// \brief Default constructor.
     notcheck()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructNotCheck())
+      : atermpp::aterm_appl(fdr::detail::constructNotCheck())
     {}
 
     /// \brief Constructor.
@@ -155,11 +155,11 @@ class notcheck
     }
 
     /// \brief Constructor.
-    notcheck(const check& check)
-      : atermpp::aterm_appl(fdr::detail::gsMakeNotCheck(check))
+    notcheck(const check& chk)
+      : atermpp::aterm_appl(fdr::detail::gsMakeNotCheck(chk))
     {}
 
-    check check() const
+    check chk() const
     {
       return atermpp::arg1(*this);
     }
@@ -172,33 +172,6 @@ class notcheck
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a bcheck expression
-    /// \param t A term
-    /// \return True if it is a bcheck expression
-    inline
-    bool is_bcheck(const check& t)
-    {
-      return fdr::detail::gsIsBCheck(t);
-    }
-
-    /// \brief Test for a rcheck expression
-    /// \param t A term
-    /// \return True if it is a rcheck expression
-    inline
-    bool is_rcheck(const check& t)
-    {
-      return fdr::detail::gsIsRCheck(t);
-    }
-
-    /// \brief Test for a tcheck expression
-    /// \param t A term
-    /// \return True if it is a tcheck expression
-    inline
-    bool is_tcheck(const check& t)
-    {
-      return fdr::detail::gsIsTCheck(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

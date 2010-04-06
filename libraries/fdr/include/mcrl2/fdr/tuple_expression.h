@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/tuple_expression.h
+/// \file mcrl2/fdr/tuple_expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_TUPLE_EXPRESSION_H
@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       tuple_expression()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructTuple())
+        : atermpp::aterm_appl(fdr::detail::constructTuple())
       {}
 
       /// \brief Constructor.
@@ -47,7 +47,7 @@ class exprs: public tuple_expression
   public:
     /// \brief Default constructor.
     exprs()
-      : tuple_expression(fdr::atermpp::detail::constructExprs())
+      : tuple_expression(fdr::detail::constructExprs())
     {}
 
     /// \brief Constructor.
@@ -59,11 +59,11 @@ class exprs: public tuple_expression
     }
 
     /// \brief Constructor.
-    exprs(const expression_list& exprs)
-      : tuple_expression(fdr::detail::gsMakeExprs(exprs))
+    exprs(const expression_list& elements)
+      : tuple_expression(fdr::detail::gsMakeExprs(elements))
     {}
 
-    expression_list exprs() const
+    expression_list elements() const
     {
       return atermpp::list_arg1(*this);
     }

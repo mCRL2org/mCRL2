@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/test.h
+/// \file mcrl2/fdr/test.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_TEST_H
@@ -29,7 +29,7 @@ class divergence_free
   public:
     /// \brief Default constructor.
     divergence_free()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructdivergence_free())
+      : atermpp::aterm_appl(fdr::detail::constructdivergence_free())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class test
   public:
     /// \brief Default constructor.
     test()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructTest())
+      : atermpp::aterm_appl(fdr::detail::constructTest())
     {}
 
     /// \brief Constructor.
@@ -64,16 +64,16 @@ class test
     }
 
     /// \brief Constructor.
-    test(const testtype& testtype, const failuremodel& failuremodel)
-      : atermpp::aterm_appl(fdr::detail::gsMakeTest(testtype, failuremodel))
+    test(const testtype& tt, const failuremodel& fm)
+      : atermpp::aterm_appl(fdr::detail::gsMakeTest(tt, fm))
     {}
 
-    testtype testtype() const
+    testtype tt() const
     {
       return atermpp::arg1(*this);
     }
 
-    failuremodel failuremodel() const
+    failuremodel fm() const
     {
       return atermpp::arg2(*this);
     }
@@ -86,51 +86,6 @@ class test
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a deterministic expression
-    /// \param t A term
-    /// \return True if it is a deterministic expression
-    inline
-    bool is_deterministic(const test& t)
-    {
-      return fdr::detail::gsIsdeterministic(t);
-    }
-
-    /// \brief Test for a deadlock_free expression
-    /// \param t A term
-    /// \return True if it is a deadlock_free expression
-    inline
-    bool is_deadlock_free(const test& t)
-    {
-      return fdr::detail::gsIsdeadlock_free(t);
-    }
-
-    /// \brief Test for a livelock_free expression
-    /// \param t A term
-    /// \return True if it is a livelock_free expression
-    inline
-    bool is_livelock_free(const test& t)
-    {
-      return fdr::detail::gsIslivelock_free(t);
-    }
-
-    /// \brief Test for a divergence_free expression
-    /// \param t A term
-    /// \return True if it is a divergence_free expression
-    inline
-    bool is_divergence_free(const test& t)
-    {
-      return fdr::detail::gsIsdivergence_free(t);
-    }
-
-    /// \brief Test for a test expression
-    /// \param t A term
-    /// \return True if it is a test expression
-    inline
-    bool is_test(const test& t)
-    {
-      return fdr::detail::gsIsTest(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

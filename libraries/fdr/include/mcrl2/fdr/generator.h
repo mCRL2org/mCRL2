@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/generator.h
+/// \file mcrl2/fdr/generator.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_GENERATOR_H
@@ -29,7 +29,7 @@ class bgen
   public:
     /// \brief Default constructor.
     bgen()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructBGen())
+      : atermpp::aterm_appl(fdr::detail::constructBGen())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class gen
   public:
     /// \brief Default constructor.
     gen()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructGen())
+      : atermpp::aterm_appl(fdr::detail::constructGen())
     {}
 
     /// \brief Constructor.
@@ -96,24 +96,6 @@ class gen
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a bool expression
-    /// \param t A term
-    /// \return True if it is a bool expression
-    inline
-    bool is_bool(const generator& t)
-    {
-      return fdr::detail::gsIsBool(t);
-    }
-
-    /// \brief Test for a gen expression
-    /// \param t A term
-    /// \return True if it is a gen expression
-    inline
-    bool is_gen(const generator& t)
-    {
-      return fdr::detail::gsIsGen(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

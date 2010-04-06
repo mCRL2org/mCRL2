@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/lambda_expression.h
+/// \file mcrl2/fdr/lambda_expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_LAMBDA_EXPRESSION_H
@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       lambda_expression()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructLambda())
+        : atermpp::aterm_appl(fdr::detail::constructLambda())
       {}
 
       /// \brief Constructor.
@@ -47,7 +47,7 @@ class lambdaexpr: public lambda_expression
   public:
     /// \brief Default constructor.
     lambdaexpr()
-      : lambda_expression(fdr::atermpp::detail::constructLambdaExpr())
+      : lambda_expression(fdr::detail::constructLambdaExpr())
     {}
 
     /// \brief Constructor.
@@ -59,8 +59,8 @@ class lambdaexpr: public lambda_expression
     }
 
     /// \brief Constructor.
-    lambdaexpr(const expression_list& exprs, const any& any)
-      : lambda_expression(fdr::detail::gsMakeLambdaExpr(exprs, any))
+    lambdaexpr(const expression_list& exprs, const any& function)
+      : lambda_expression(fdr::detail::gsMakeLambdaExpr(exprs, function))
     {}
 
     expression_list exprs() const
@@ -68,7 +68,7 @@ class lambdaexpr: public lambda_expression
       return atermpp::list_arg1(*this);
     }
 
-    any any() const
+    any function() const
     {
       return atermpp::arg2(*this);
     }

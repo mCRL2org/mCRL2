@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/template.h
+/// \file mcrl2/fdr/template.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_TEMPLATE_H
@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       template()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructTemplate())
+        : atermpp::aterm_appl(fdr::detail::constructTemplate())
       {}
 
       /// \brief Constructor.

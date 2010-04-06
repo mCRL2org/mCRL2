@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/map.h
+/// \file mcrl2/fdr/map.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_MAP_H
@@ -30,7 +30,7 @@ class map
   public:
     /// \brief Default constructor.
     map()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructMap())
+      : atermpp::aterm_appl(fdr::detail::constructMap())
     {}
 
     /// \brief Constructor.
@@ -64,15 +64,6 @@ class map
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a map expression
-    /// \param t A term
-    /// \return True if it is a map expression
-    inline
-    bool is_map(const map& t)
-    {
-      return fdr::detail::gsIsMap(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

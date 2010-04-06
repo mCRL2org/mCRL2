@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/fdr/filename.h
+/// \file mcrl2/fdr/targgens.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_FDR_FILENAME_H
-#define MCRL2_FDR_FILENAME_H
+#ifndef MCRL2_FDR_TARGGENS_H
+#define MCRL2_FDR_TARGGENS_H
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -23,37 +23,42 @@ namespace mcrl2 {
 namespace fdr {
 
 //--- start generated classes ---//
-/// \brief A filename
-class filename
+/// \brief A complex targ
+class targgens
 {
   public:
     /// \brief Default constructor.
-    filename()
-      : atermpp::aterm_appl(fdr::detail::constructFileName())
+    targgens()
+      : atermpp::aterm_appl(fdr::detail::constructTargGens())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    filename(atermpp::aterm_appl term)
+    targgens(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(fdr::detail::check_term_FileName(m_term));
+      assert(fdr::detail::check_term_TargGens(m_term));
     }
 
     /// \brief Constructor.
-    filename(const name_list& names)
-      : atermpp::aterm_appl(fdr::detail::gsMakeFileName(names))
+    targgens(const targ& argument, const generator_list& gens)
+      : atermpp::aterm_appl(fdr::detail::gsMakeTargGens(argument, gens))
     {}
 
-    name_list names() const
+    targ argument() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::arg1(*this);
     }
-};/// \brief list of filenames
-    typedef atermpp::term_list<filename> filename_list;
 
-    /// \brief vector of filenames
-    typedef atermpp::vector<filename>    filename_vector;
+    generator_list gens() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+};/// \brief list of targgenss
+    typedef atermpp::term_list<targgens> targgens_list;
+
+    /// \brief vector of targgenss
+    typedef atermpp::vector<targgens>    targgens_vector;
 
 //--- end generated classes ---//
 
@@ -64,4 +69,4 @@ class filename
 
 } // namespace mcrl2
 
-#endif // MCRL2_FDR_FILENAME_H
+#endif // MCRL2_FDR_TARGGENS_H

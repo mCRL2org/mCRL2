@@ -47,6 +47,7 @@ if __name__ == "__main__":
     make_classes('../include/mcrl2/fdr/filename.h', FILENAME_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/fdrspec.h', FDRSPEC_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/targ.h', TARG_CLASSES, None, 'fdr')
+    make_classes('../include/mcrl2/fdr/targgens.h', TARGGENS_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/generator.h', GEN_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/process.h', PROCESS_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/field.h', FIELD_CLASSES, None, 'fdr')

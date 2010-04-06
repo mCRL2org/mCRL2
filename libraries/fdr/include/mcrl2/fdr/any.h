@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/any.h
+/// \file mcrl2/fdr/any.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_ANY_H
@@ -29,7 +29,7 @@ class expr
   public:
     /// \brief Default constructor.
     expr()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructExpr())
+      : atermpp::aterm_appl(fdr::detail::constructExpr())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class proc
   public:
     /// \brief Default constructor.
     proc()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructProc())
+      : atermpp::aterm_appl(fdr::detail::constructProc())
     {}
 
     /// \brief Constructor.
@@ -91,24 +91,6 @@ class proc
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a expr expression
-    /// \param t A term
-    /// \return True if it is a expr expression
-    inline
-    bool is_expr(const any& t)
-    {
-      return fdr::detail::gsIsExpr(t);
-    }
-
-    /// \brief Test for a proc expression
-    /// \param t A term
-    /// \return True if it is a proc expression
-    inline
-    bool is_proc(const any& t)
-    {
-      return fdr::detail::gsIsProc(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

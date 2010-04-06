@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/vartype.h
+/// \file mcrl2/fdr/vartype.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_VARTYPE_H
@@ -29,7 +29,7 @@ class simplebranch
   public:
     /// \brief Default constructor.
     simplebranch()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSimpleBranch())
+      : atermpp::aterm_appl(fdr::detail::constructSimpleBranch())
     {}
 
     /// \brief Constructor.
@@ -41,11 +41,11 @@ class simplebranch
     }
 
     /// \brief Constructor.
-    simplebranch(const name& name)
-      : atermpp::aterm_appl(fdr::detail::gsMakeSimpleBranch(name))
+    simplebranch(const name& id)
+      : atermpp::aterm_appl(fdr::detail::gsMakeSimpleBranch(id))
     {}
 
-    name name() const
+    name id() const
     {
       return atermpp::arg1(*this);
     }
@@ -62,7 +62,7 @@ class branch
   public:
     /// \brief Default constructor.
     branch()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructBranch())
+      : atermpp::aterm_appl(fdr::detail::constructBranch())
     {}
 
     /// \brief Constructor.
@@ -74,16 +74,16 @@ class branch
     }
 
     /// \brief Constructor.
-    branch(const name& name, const type& type)
-      : atermpp::aterm_appl(fdr::detail::gsMakeBranch(name, type))
+    branch(const name& id, const type& type_name)
+      : atermpp::aterm_appl(fdr::detail::gsMakeBranch(id, type_name))
     {}
 
-    name name() const
+    name id() const
     {
       return atermpp::arg1(*this);
     }
 
-    type type() const
+    type type_name() const
     {
       return atermpp::arg2(*this);
     }
@@ -96,24 +96,6 @@ class branch
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a simplebranch expression
-    /// \param t A term
-    /// \return True if it is a simplebranch expression
-    inline
-    bool is_simplebranch(const vartype& t)
-    {
-      return fdr::detail::gsIsSimpleBranch(t);
-    }
-
-    /// \brief Test for a branch expression
-    /// \param t A term
-    /// \return True if it is a branch expression
-    inline
-    bool is_branch(const vartype& t)
-    {
-      return fdr::detail::gsIsBranch(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/dotted_expression.h
+/// \file mcrl2/fdr/dotted_expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_DOTTED_EXPRESSION_H
@@ -29,7 +29,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       dotted_expression()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructDotted())
+        : atermpp::aterm_appl(fdr::detail::constructDotted())
       {}
 
       /// \brief Constructor.
@@ -48,7 +48,7 @@ class dot: public dotted_expression
   public:
     /// \brief Default constructor.
     dot()
-      : dotted_expression(fdr::atermpp::detail::constructDot())
+      : dotted_expression(fdr::detail::constructDot())
     {}
 
     /// \brief Constructor.

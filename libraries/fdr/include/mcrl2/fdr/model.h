@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/model.h
+/// \file mcrl2/fdr/model.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_MODEL_H
@@ -29,7 +29,7 @@ class nil
   public:
     /// \brief Default constructor.
     nil()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructNil())
+      : atermpp::aterm_appl(fdr::detail::constructNil())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class t
   public:
     /// \brief Default constructor.
     t()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructT())
+      : atermpp::aterm_appl(fdr::detail::constructT())
     {}
 
     /// \brief Constructor.
@@ -71,42 +71,6 @@ class t
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a nil expression
-    /// \param t A term
-    /// \return True if it is a nil expression
-    inline
-    bool is_nil(const model& t)
-    {
-      return fdr::detail::gsIsNil(t);
-    }
-
-    /// \brief Test for a t expression
-    /// \param t A term
-    /// \return True if it is a t expression
-    inline
-    bool is_t(const model& t)
-    {
-      return fdr::detail::gsIsT(t);
-    }
-
-    /// \brief Test for a f expression
-    /// \param t A term
-    /// \return True if it is a f expression
-    inline
-    bool is_f(const model& t)
-    {
-      return fdr::detail::gsIsF(t);
-    }
-
-    /// \brief Test for a fd expression
-    /// \param t A term
-    /// \return True if it is a fd expression
-    inline
-    bool is_fd(const model& t)
-    {
-      return fdr::detail::gsIsFD(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

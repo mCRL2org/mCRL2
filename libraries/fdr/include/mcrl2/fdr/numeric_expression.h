@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/numeric_expression.h
+/// \file mcrl2/fdr/numeric_expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_NUMERIC_EXPRESSION_H
@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       numeric_expression()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructNumb())
+        : atermpp::aterm_appl(fdr::detail::constructNumb())
       {}
 
       /// \brief Constructor.
@@ -47,7 +47,7 @@ class number: public numeric_expression
   public:
     /// \brief Default constructor.
     number()
-      : numeric_expression(fdr::atermpp::detail::constructNumber())
+      : numeric_expression(fdr::detail::constructNumber())
     {}
 
     /// \brief Constructor.
@@ -59,11 +59,11 @@ class number: public numeric_expression
     }
 
     /// \brief Constructor.
-    number(const number_expression& number)
-      : numeric_expression(fdr::detail::gsMakeNumber(number))
+    number(const number& operand)
+      : numeric_expression(fdr::detail::gsMakeNumber(operand))
     {}
 
-    number_expression number() const
+    number operand() const
     {
       return atermpp::arg1(*this);
     }
@@ -75,7 +75,7 @@ class card: public numeric_expression
   public:
     /// \brief Default constructor.
     card()
-      : numeric_expression(fdr::atermpp::detail::constructCard())
+      : numeric_expression(fdr::detail::constructCard())
     {}
 
     /// \brief Constructor.
@@ -103,7 +103,7 @@ class length: public numeric_expression
   public:
     /// \brief Default constructor.
     length()
-      : numeric_expression(fdr::atermpp::detail::constructLength())
+      : numeric_expression(fdr::detail::constructLength())
     {}
 
     /// \brief Constructor.
@@ -131,7 +131,7 @@ class plus: public numeric_expression
   public:
     /// \brief Default constructor.
     plus()
-      : numeric_expression(fdr::atermpp::detail::constructPlus())
+      : numeric_expression(fdr::detail::constructPlus())
     {}
 
     /// \brief Constructor.
@@ -164,7 +164,7 @@ class minus: public numeric_expression
   public:
     /// \brief Default constructor.
     minus()
-      : numeric_expression(fdr::atermpp::detail::constructMinus())
+      : numeric_expression(fdr::detail::constructMinus())
     {}
 
     /// \brief Constructor.
@@ -197,7 +197,7 @@ class times: public numeric_expression
   public:
     /// \brief Default constructor.
     times()
-      : numeric_expression(fdr::atermpp::detail::constructTimes())
+      : numeric_expression(fdr::detail::constructTimes())
     {}
 
     /// \brief Constructor.
@@ -230,7 +230,7 @@ class div: public numeric_expression
   public:
     /// \brief Default constructor.
     div()
-      : numeric_expression(fdr::atermpp::detail::constructDiv())
+      : numeric_expression(fdr::detail::constructDiv())
     {}
 
     /// \brief Constructor.
@@ -263,7 +263,7 @@ class mod: public numeric_expression
   public:
     /// \brief Default constructor.
     mod()
-      : numeric_expression(fdr::atermpp::detail::constructMod())
+      : numeric_expression(fdr::detail::constructMod())
     {}
 
     /// \brief Constructor.
@@ -296,7 +296,7 @@ class min: public numeric_expression
   public:
     /// \brief Default constructor.
     min()
-      : numeric_expression(fdr::atermpp::detail::constructMin())
+      : numeric_expression(fdr::detail::constructMin())
     {}
 
     /// \brief Constructor.

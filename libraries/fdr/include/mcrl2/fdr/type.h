@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/type.h
+/// \file mcrl2/fdr/type.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_TYPE_H
@@ -29,7 +29,7 @@ class typeproduct
   public:
     /// \brief Default constructor.
     typeproduct()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructTypeProduct())
+      : atermpp::aterm_appl(fdr::detail::constructTypeProduct())
     {}
 
     /// \brief Constructor.
@@ -67,7 +67,7 @@ class typetuple
   public:
     /// \brief Default constructor.
     typetuple()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructTypeTuple())
+      : atermpp::aterm_appl(fdr::detail::constructTypeTuple())
     {}
 
     /// \brief Constructor.
@@ -100,7 +100,7 @@ class typeset
   public:
     /// \brief Default constructor.
     typeset()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructTypeSet())
+      : atermpp::aterm_appl(fdr::detail::constructTypeSet())
     {}
 
     /// \brief Constructor.
@@ -133,7 +133,7 @@ class simpletypename
   public:
     /// \brief Default constructor.
     simpletypename()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSympleTypeName())
+      : atermpp::aterm_appl(fdr::detail::constructSympleTypeName())
     {}
 
     /// \brief Constructor.
@@ -145,11 +145,11 @@ class simpletypename
     }
 
     /// \brief Constructor.
-    simpletypename(const name& name)
-      : atermpp::aterm_appl(fdr::detail::gsMakeSympleTypeName(name))
+    simpletypename(const name& id)
+      : atermpp::aterm_appl(fdr::detail::gsMakeSympleTypeName(id))
     {}
 
-    name name() const
+    name id() const
     {
       return atermpp::arg1(*this);
     }
@@ -166,7 +166,7 @@ class typename
   public:
     /// \brief Default constructor.
     typename()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructTypeName())
+      : atermpp::aterm_appl(fdr::detail::constructTypeName())
     {}
 
     /// \brief Constructor.
@@ -178,16 +178,16 @@ class typename
     }
 
     /// \brief Constructor.
-    typename(const name& name, const type& type)
-      : atermpp::aterm_appl(fdr::detail::gsMakeTypeName(name, type))
+    typename(const name& id, const type& type_name)
+      : atermpp::aterm_appl(fdr::detail::gsMakeTypeName(id, type_name))
     {}
 
-    name name() const
+    name id() const
     {
       return atermpp::arg1(*this);
     }
 
-    type type() const
+    type type_name() const
     {
       return atermpp::arg2(*this);
     }
@@ -200,51 +200,6 @@ class typename
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a typeproduct expression
-    /// \param t A term
-    /// \return True if it is a typeproduct expression
-    inline
-    bool is_typeproduct(const type& t)
-    {
-      return fdr::detail::gsIsTypeProduct(t);
-    }
-
-    /// \brief Test for a typetuple expression
-    /// \param t A term
-    /// \return True if it is a typetuple expression
-    inline
-    bool is_typetuple(const type& t)
-    {
-      return fdr::detail::gsIsTypeTuple(t);
-    }
-
-    /// \brief Test for a typeexpr expression
-    /// \param t A term
-    /// \return True if it is a typeexpr expression
-    inline
-    bool is_typeexpr(const type& t)
-    {
-      return fdr::detail::gsIsTypeExpr(t);
-    }
-
-    /// \brief Test for a simpletypename expression
-    /// \param t A term
-    /// \return True if it is a simpletypename expression
-    inline
-    bool is_simpletypename(const type& t)
-    {
-      return fdr::detail::gsIsSympleTypeName(t);
-    }
-
-    /// \brief Test for a typename expression
-    /// \param t A term
-    /// \return True if it is a typename expression
-    inline
-    bool is_typename(const type& t)
-    {
-      return fdr::detail::gsIsTypeName(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/seq_expression.h
+/// \file mcrl2/fdr/seq_expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_SEQ_EXPRESSION_H
@@ -29,7 +29,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       seq_expression()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructSeq())
+        : atermpp::aterm_appl(fdr::detail::constructSeq())
       {}
 
       /// \brief Constructor.
@@ -42,74 +42,13 @@ namespace fdr {
   };
 
 //--- start generated classes ---//
-/// \brief A simple argument
-class targ: public seq_expression
-{
-  public:
-    /// \brief Default constructor.
-    targ()
-      : seq_expression(fdr::atermpp::detail::constructTarg())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    targ(atermpp::aterm_appl term)
-      : seq_expression(term)
-    {
-      assert(fdr::detail::check_term_Targ(m_term));
-    }
-
-    /// \brief Constructor.
-    targ(const targ& targ)
-      : seq_expression(fdr::detail::gsMakeTarg(targ))
-    {}
-
-    targ targ() const
-    {
-      return atermpp::arg1(*this);
-    }
-};
-
-/// \brief A complex argument
-class targgens: public seq_expression
-{
-  public:
-    /// \brief Default constructor.
-    targgens()
-      : seq_expression(fdr::atermpp::detail::constructTargGens())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    targgens(atermpp::aterm_appl term)
-      : seq_expression(term)
-    {
-      assert(fdr::detail::check_term_TargGens(m_term));
-    }
-
-    /// \brief Constructor.
-    targgens(const targ& targ, const generator_list& gens)
-      : seq_expression(fdr::detail::gsMakeTargGens(targ, gens))
-    {}
-
-    targ targ() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    generator_list gens() const
-    {
-      return atermpp::list_arg2(*this);
-    }
-};
-
 /// \brief The concatenation of two sequences
 class cat: public seq_expression
 {
   public:
     /// \brief Default constructor.
     cat()
-      : seq_expression(fdr::atermpp::detail::constructCat())
+      : seq_expression(fdr::detail::constructCat())
     {}
 
     /// \brief Constructor.
@@ -142,7 +81,7 @@ class concat: public seq_expression
   public:
     /// \brief Default constructor.
     concat()
-      : seq_expression(fdr::atermpp::detail::constructConcat())
+      : seq_expression(fdr::detail::constructConcat())
     {}
 
     /// \brief Constructor.
@@ -170,7 +109,7 @@ class head: public seq_expression
   public:
     /// \brief Default constructor.
     head()
-      : seq_expression(fdr::atermpp::detail::constructHead())
+      : seq_expression(fdr::detail::constructHead())
     {}
 
     /// \brief Constructor.
@@ -198,7 +137,7 @@ class tail: public seq_expression
   public:
     /// \brief Default constructor.
     tail()
-      : seq_expression(fdr::atermpp::detail::constructTail())
+      : seq_expression(fdr::detail::constructTail())
     {}
 
     /// \brief Constructor.
@@ -222,24 +161,6 @@ class tail: public seq_expression
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a targ expression
-    /// \param t A term
-    /// \return True if it is a targ expression
-    inline
-    bool is_targ(const seq_expression& t)
-    {
-      return fdr::detail::gsIsTarg(t);
-    }
-
-    /// \brief Test for a targgens expression
-    /// \param t A term
-    /// \return True if it is a targgens expression
-    inline
-    bool is_targgens(const seq_expression& t)
-    {
-      return fdr::detail::gsIsTargGens(t);
-    }
 
     /// \brief Test for a cat expression
     /// \param t A term

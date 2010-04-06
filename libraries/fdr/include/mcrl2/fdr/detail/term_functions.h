@@ -307,6 +307,28 @@ bool gsIsCat(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunCat();
 }
 
+// ChanSet
+inline
+AFun initAFunChanSet(AFun& f)
+{
+  f = ATmakeAFun("ChanSet", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunChanSet()
+{
+  static AFun AFunChanSet = initAFunChanSet(AFunChanSet);
+  return AFunChanSet;
+}
+
+inline
+bool gsIsChanSet(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunChanSet();
+}
+
 // Channel
 inline
 AFun initAFunChannel(AFun& f)
@@ -2243,50 +2265,6 @@ bool gsIsTail(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunTail();
 }
 
-// Targ
-inline
-AFun initAFunTarg(AFun& f)
-{
-  f = ATmakeAFun("Targ", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunTarg()
-{
-  static AFun AFunTarg = initAFunTarg(AFunTarg);
-  return AFunTarg;
-}
-
-inline
-bool gsIsTarg(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunTarg();
-}
-
-// Targ0
-inline
-AFun initAFunTarg0(AFun& f)
-{
-  f = ATmakeAFun("Targ0", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunTarg0()
-{
-  static AFun AFunTarg0 = initAFunTarg0(AFunTarg0);
-  return AFunTarg0;
-}
-
-inline
-bool gsIsTarg0(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunTarg0();
-}
-
 // TargGens
 inline
 AFun initAFunTargGens(AFun& f)
@@ -2307,28 +2285,6 @@ inline
 bool gsIsTargGens(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunTargGens();
-}
-
-// TargGens0
-inline
-AFun initAFunTargGens0(AFun& f)
-{
-  f = ATmakeAFun("TargGens0", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunTargGens0()
-{
-  static AFun AFunTargGens0 = initAFunTargGens0(AFunTargGens0);
-  return AFunTargGens0;
-}
-
-inline
-bool gsIsTargGens0(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunTargGens0();
 }
 
 // Test
@@ -3070,6 +3026,12 @@ ATermAppl gsMakeCat(ATermAppl Seq_0, ATermAppl Seq_1)
 }
 
 inline
+ATermAppl gsMakeChanSet(ATermAppl TargGens_0)
+{
+  return ATmakeAppl1(gsAFunChanSet(), (ATerm) TargGens_0);
+}
+
+inline
 ATermAppl gsMakeChannel(ATermList Name_0, ATermAppl Type_1)
 {
   return ATmakeAppl2(gsAFunChannel(), (ATerm) Name_0, (ATerm) Type_1);
@@ -3598,27 +3560,9 @@ ATermAppl gsMakeTail(ATermAppl Seq_0)
 }
 
 inline
-ATermAppl gsMakeTarg(ATermAppl Targ_0)
-{
-  return ATmakeAppl1(gsAFunTarg(), (ATerm) Targ_0);
-}
-
-inline
-ATermAppl gsMakeTarg0(ATermAppl Targ_0)
-{
-  return ATmakeAppl1(gsAFunTarg0(), (ATerm) Targ_0);
-}
-
-inline
 ATermAppl gsMakeTargGens(ATermAppl Targ_0, ATermList Gen_1)
 {
   return ATmakeAppl2(gsAFunTargGens(), (ATerm) Targ_0, (ATerm) Gen_1);
-}
-
-inline
-ATermAppl gsMakeTargGens0(ATermAppl Targ_0, ATermList Gen_1)
-{
-  return ATmakeAppl2(gsAFunTargGens0(), (ATerm) Targ_0, (ATerm) Gen_1);
 }
 
 inline

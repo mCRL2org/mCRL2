@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/renaming.h
+/// \file mcrl2/fdr/renaming.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_RENAMING_H
@@ -29,7 +29,7 @@ class maps
   public:
     /// \brief Default constructor.
     maps()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructMaps())
+      : atermpp::aterm_appl(fdr::detail::constructMaps())
     {}
 
     /// \brief Constructor.
@@ -41,11 +41,11 @@ class maps
     }
 
     /// \brief Constructor.
-    maps(const map_list& maps)
-      : atermpp::aterm_appl(fdr::detail::gsMakeMaps(maps))
+    maps(const map_list& renamings)
+      : atermpp::aterm_appl(fdr::detail::gsMakeMaps(renamings))
     {}
 
-    map_list maps() const
+    map_list renamings() const
     {
       return atermpp::list_arg1(*this);
     }
@@ -62,7 +62,7 @@ class mapsgens
   public:
     /// \brief Default constructor.
     mapsgens()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructMapsGens())
+      : atermpp::aterm_appl(fdr::detail::constructMapsGens())
     {}
 
     /// \brief Constructor.
@@ -74,11 +74,11 @@ class mapsgens
     }
 
     /// \brief Constructor.
-    mapsgens(const map_list& maps, const generator_list& gens)
-      : atermpp::aterm_appl(fdr::detail::gsMakeMapsGens(maps, gens))
+    mapsgens(const map_list& renamings, const generator_list& gens)
+      : atermpp::aterm_appl(fdr::detail::gsMakeMapsGens(renamings, gens))
     {}
 
-    map_list maps() const
+    map_list renamings() const
     {
       return atermpp::list_arg1(*this);
     }
@@ -96,24 +96,6 @@ class mapsgens
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a maps expression
-    /// \param t A term
-    /// \return True if it is a maps expression
-    inline
-    bool is_maps(const renaming& t)
-    {
-      return fdr::detail::gsIsMaps(t);
-    }
-
-    /// \brief Test for a mapsgens expression
-    /// \param t A term
-    /// \return True if it is a mapsgens expression
-    inline
-    bool is_mapsgens(const renaming& t)
-    {
-      return fdr::detail::gsIsMapsGens(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

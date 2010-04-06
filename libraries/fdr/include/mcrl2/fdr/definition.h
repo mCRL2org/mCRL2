@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/definition.h
+/// \file mcrl2/fdr/definition.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_DEFINITION_H
@@ -29,7 +29,7 @@ class assign
   public:
     /// \brief Default constructor.
     assign()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructAssign())
+      : atermpp::aterm_appl(fdr::detail::constructAssign())
     {}
 
     /// \brief Constructor.
@@ -67,7 +67,7 @@ class channel
   public:
     /// \brief Default constructor.
     channel()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructChannel())
+      : atermpp::aterm_appl(fdr::detail::constructChannel())
     {}
 
     /// \brief Constructor.
@@ -79,8 +79,8 @@ class channel
     }
 
     /// \brief Constructor.
-    channel(const name_list& names, const type& type)
-      : atermpp::aterm_appl(fdr::detail::gsMakeChannel(names, type))
+    channel(const name_list& names, const type& type_name)
+      : atermpp::aterm_appl(fdr::detail::gsMakeChannel(names, type_name))
     {}
 
     name_list names() const
@@ -88,7 +88,7 @@ class channel
       return atermpp::list_arg1(*this);
     }
 
-    type type() const
+    type type_name() const
     {
       return atermpp::arg2(*this);
     }
@@ -105,7 +105,7 @@ class channel
   public:
     /// \brief Default constructor.
     channel()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSimpleChannel())
+      : atermpp::aterm_appl(fdr::detail::constructSimpleChannel())
     {}
 
     /// \brief Constructor.
@@ -138,7 +138,7 @@ class nametype
   public:
     /// \brief Default constructor.
     nametype()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructNameType())
+      : atermpp::aterm_appl(fdr::detail::constructNameType())
     {}
 
     /// \brief Constructor.
@@ -150,16 +150,16 @@ class nametype
     }
 
     /// \brief Constructor.
-    nametype(const name& name, const type& type)
-      : atermpp::aterm_appl(fdr::detail::gsMakeNameType(name, type))
+    nametype(const name& id, const type& type_name)
+      : atermpp::aterm_appl(fdr::detail::gsMakeNameType(id, type_name))
     {}
 
-    name name() const
+    name id() const
     {
       return atermpp::arg1(*this);
     }
 
-    type type() const
+    type type_name() const
     {
       return atermpp::arg2(*this);
     }
@@ -176,7 +176,7 @@ class datatype
   public:
     /// \brief Default constructor.
     datatype()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructDataType())
+      : atermpp::aterm_appl(fdr::detail::constructDataType())
     {}
 
     /// \brief Constructor.
@@ -188,11 +188,11 @@ class datatype
     }
 
     /// \brief Constructor.
-    datatype(const name& name, const vartype_list& vartypes)
-      : atermpp::aterm_appl(fdr::detail::gsMakeDataType(name, vartypes))
+    datatype(const name& id, const vartype_list& vartypes)
+      : atermpp::aterm_appl(fdr::detail::gsMakeDataType(id, vartypes))
     {}
 
-    name name() const
+    name id() const
     {
       return atermpp::arg1(*this);
     }
@@ -214,7 +214,7 @@ class subtype
   public:
     /// \brief Default constructor.
     subtype()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSubType())
+      : atermpp::aterm_appl(fdr::detail::constructSubType())
     {}
 
     /// \brief Constructor.
@@ -226,11 +226,11 @@ class subtype
     }
 
     /// \brief Constructor.
-    subtype(const name& name, const vartype_list& vartypes)
-      : atermpp::aterm_appl(fdr::detail::gsMakeSubType(name, vartypes))
+    subtype(const name& id, const vartype_list& vartypes)
+      : atermpp::aterm_appl(fdr::detail::gsMakeSubType(id, vartypes))
     {}
 
-    name name() const
+    name id() const
     {
       return atermpp::arg1(*this);
     }
@@ -252,7 +252,7 @@ class external
   public:
     /// \brief Default constructor.
     external()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructExternal())
+      : atermpp::aterm_appl(fdr::detail::constructExternal())
     {}
 
     /// \brief Constructor.
@@ -285,7 +285,7 @@ class transparent
   public:
     /// \brief Default constructor.
     transparent()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructTransparent())
+      : atermpp::aterm_appl(fdr::detail::constructTransparent())
     {}
 
     /// \brief Constructor.
@@ -318,7 +318,7 @@ class assert_
   public:
     /// \brief Default constructor.
     assert_()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructAssert())
+      : atermpp::aterm_appl(fdr::detail::constructAssert())
     {}
 
     /// \brief Constructor.
@@ -330,11 +330,11 @@ class assert_
     }
 
     /// \brief Constructor.
-    assert_(const check& check)
-      : atermpp::aterm_appl(fdr::detail::gsMakeAssert(check))
+    assert_(const check& chk)
+      : atermpp::aterm_appl(fdr::detail::gsMakeAssert(chk))
     {}
 
-    check check() const
+    check chk() const
     {
       return atermpp::arg1(*this);
     }
@@ -351,7 +351,7 @@ class print
   public:
     /// \brief Default constructor.
     print()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructPrint())
+      : atermpp::aterm_appl(fdr::detail::constructPrint())
     {}
 
     /// \brief Constructor.
@@ -384,7 +384,7 @@ class include
   public:
     /// \brief Default constructor.
     include()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructInclude())
+      : atermpp::aterm_appl(fdr::detail::constructInclude())
     {}
 
     /// \brief Constructor.
@@ -396,11 +396,11 @@ class include
     }
 
     /// \brief Constructor.
-    include(const filename& filename)
-      : atermpp::aterm_appl(fdr::detail::gsMakeInclude(filename))
+    include(const filename& file)
+      : atermpp::aterm_appl(fdr::detail::gsMakeInclude(file))
     {}
 
-    filename filename() const
+    filename file() const
     {
       return atermpp::arg1(*this);
     }
@@ -413,105 +413,6 @@ class include
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a assign expression
-    /// \param t A term
-    /// \return True if it is a assign expression
-    inline
-    bool is_assign(const definition& t)
-    {
-      return fdr::detail::gsIsAssign(t);
-    }
-
-    /// \brief Test for a channel expression
-    /// \param t A term
-    /// \return True if it is a channel expression
-    inline
-    bool is_channel(const definition& t)
-    {
-      return fdr::detail::gsIsChannel(t);
-    }
-
-    /// \brief Test for a channel expression
-    /// \param t A term
-    /// \return True if it is a channel expression
-    inline
-    bool is_channel(const definition& t)
-    {
-      return fdr::detail::gsIsSimpleChannel(t);
-    }
-
-    /// \brief Test for a nametype expression
-    /// \param t A term
-    /// \return True if it is a nametype expression
-    inline
-    bool is_nametype(const definition& t)
-    {
-      return fdr::detail::gsIsNameType(t);
-    }
-
-    /// \brief Test for a datatype expression
-    /// \param t A term
-    /// \return True if it is a datatype expression
-    inline
-    bool is_datatype(const definition& t)
-    {
-      return fdr::detail::gsIsDataType(t);
-    }
-
-    /// \brief Test for a subtype expression
-    /// \param t A term
-    /// \return True if it is a subtype expression
-    inline
-    bool is_subtype(const definition& t)
-    {
-      return fdr::detail::gsIsSubType(t);
-    }
-
-    /// \brief Test for a external expression
-    /// \param t A term
-    /// \return True if it is a external expression
-    inline
-    bool is_external(const definition& t)
-    {
-      return fdr::detail::gsIsExternal(t);
-    }
-
-    /// \brief Test for a transparent expression
-    /// \param t A term
-    /// \return True if it is a transparent expression
-    inline
-    bool is_transparent(const definition& t)
-    {
-      return fdr::detail::gsIsTransparent(t);
-    }
-
-    /// \brief Test for a assert expression
-    /// \param t A term
-    /// \return True if it is a assert expression
-    inline
-    bool is_assert(const definition& t)
-    {
-      return fdr::detail::gsIsAssert(t);
-    }
-
-    /// \brief Test for a print expression
-    /// \param t A term
-    /// \return True if it is a print expression
-    inline
-    bool is_print(const definition& t)
-    {
-      return fdr::detail::gsIsPrint(t);
-    }
-
-    /// \brief Test for a include expression
-    /// \param t A term
-    /// \return True if it is a include expression
-    inline
-    bool is_include(const definition& t)
-    {
-      return fdr::detail::gsIsInclude(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

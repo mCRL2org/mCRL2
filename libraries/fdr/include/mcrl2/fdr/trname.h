@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/trname.h
+/// \file mcrl2/fdr/trname.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_TRNAME_H
@@ -29,7 +29,7 @@ class normal
   public:
     /// \brief Default constructor.
     normal()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructnormal())
+      : atermpp::aterm_appl(fdr::detail::constructnormal())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class normalise
   public:
     /// \brief Default constructor.
     normalise()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructnormalise())
+      : atermpp::aterm_appl(fdr::detail::constructnormalise())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class normalize
   public:
     /// \brief Default constructor.
     normalize()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructnormalize())
+      : atermpp::aterm_appl(fdr::detail::constructnormalize())
     {}
 
     /// \brief Constructor.
@@ -98,7 +98,7 @@ class sbsim
   public:
     /// \brief Default constructor.
     sbsim()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructsbsim())
+      : atermpp::aterm_appl(fdr::detail::constructsbsim())
     {}
 
     /// \brief Constructor.
@@ -121,7 +121,7 @@ class tau_loop_factor
   public:
     /// \brief Default constructor.
     tau_loop_factor()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructtau_loop_factor())
+      : atermpp::aterm_appl(fdr::detail::constructtau_loop_factor())
     {}
 
     /// \brief Constructor.
@@ -144,7 +144,7 @@ class diamond
   public:
     /// \brief Default constructor.
     diamond()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructdiamond())
+      : atermpp::aterm_appl(fdr::detail::constructdiamond())
     {}
 
     /// \brief Constructor.
@@ -167,7 +167,7 @@ class model_compress
   public:
     /// \brief Default constructor.
     model_compress()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructmodel_compress())
+      : atermpp::aterm_appl(fdr::detail::constructmodel_compress())
     {}
 
     /// \brief Constructor.
@@ -190,7 +190,7 @@ class explicate
   public:
     /// \brief Default constructor.
     explicate()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructexplicate())
+      : atermpp::aterm_appl(fdr::detail::constructexplicate())
     {}
 
     /// \brief Constructor.
@@ -209,78 +209,6 @@ class explicate
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a normal expression
-    /// \param t A term
-    /// \return True if it is a normal expression
-    inline
-    bool is_normal(const trname& t)
-    {
-      return fdr::detail::gsIsnormal(t);
-    }
-
-    /// \brief Test for a normalise expression
-    /// \param t A term
-    /// \return True if it is a normalise expression
-    inline
-    bool is_normalise(const trname& t)
-    {
-      return fdr::detail::gsIsnormalise(t);
-    }
-
-    /// \brief Test for a normalize expression
-    /// \param t A term
-    /// \return True if it is a normalize expression
-    inline
-    bool is_normalize(const trname& t)
-    {
-      return fdr::detail::gsIsnormalize(t);
-    }
-
-    /// \brief Test for a sbsim expression
-    /// \param t A term
-    /// \return True if it is a sbsim expression
-    inline
-    bool is_sbsim(const trname& t)
-    {
-      return fdr::detail::gsIssbsim(t);
-    }
-
-    /// \brief Test for a tau_loop_factor expression
-    /// \param t A term
-    /// \return True if it is a tau_loop_factor expression
-    inline
-    bool is_tau_loop_factor(const trname& t)
-    {
-      return fdr::detail::gsIstau_loop_factor(t);
-    }
-
-    /// \brief Test for a diamond expression
-    /// \param t A term
-    /// \return True if it is a diamond expression
-    inline
-    bool is_diamond(const trname& t)
-    {
-      return fdr::detail::gsIsdiamond(t);
-    }
-
-    /// \brief Test for a model_compress expression
-    /// \param t A term
-    /// \return True if it is a model_compress expression
-    inline
-    bool is_model_compress(const trname& t)
-    {
-      return fdr::detail::gsIsmodel_compress(t);
-    }
-
-    /// \brief Test for a explicate expression
-    /// \param t A term
-    /// \return True if it is a explicate expression
-    inline
-    bool is_explicate(const trname& t)
-    {
-      return fdr::detail::gsIsexplicate(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/refined.h
+/// \file mcrl2/fdr/refined.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_REFINED_H
@@ -29,7 +29,7 @@ class model
   public:
     /// \brief Default constructor.
     model()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructModel())
+      : atermpp::aterm_appl(fdr::detail::constructModel())
     {}
 
     /// \brief Constructor.
@@ -41,11 +41,11 @@ class model
     }
 
     /// \brief Constructor.
-    model(const model& model)
-      : atermpp::aterm_appl(fdr::detail::gsMakeModel(model))
+    model(const model& m)
+      : atermpp::aterm_appl(fdr::detail::gsMakeModel(m))
     {}
 
-    model model() const
+    model m() const
     {
       return atermpp::arg1(*this);
     }
@@ -58,15 +58,6 @@ class model
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a model expression
-    /// \param t A term
-    /// \return True if it is a model expression
-    inline
-    bool is_model(const refine& t)
-    {
-      return fdr::detail::gsIsModel(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

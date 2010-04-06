@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/field.h
+/// \file mcrl2/fdr/field.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_FIELD_H
@@ -29,7 +29,7 @@ class simpleinput
   public:
     /// \brief Default constructor.
     simpleinput()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSimpleInput())
+      : atermpp::aterm_appl(fdr::detail::constructSimpleInput())
     {}
 
     /// \brief Constructor.
@@ -62,7 +62,7 @@ class input
   public:
     /// \brief Default constructor.
     input()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructInput())
+      : atermpp::aterm_appl(fdr::detail::constructInput())
     {}
 
     /// \brief Constructor.
@@ -100,7 +100,7 @@ class output
   public:
     /// \brief Default constructor.
     output()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructOutput())
+      : atermpp::aterm_appl(fdr::detail::constructOutput())
     {}
 
     /// \brief Constructor.
@@ -129,33 +129,6 @@ class output
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a simpleinput expression
-    /// \param t A term
-    /// \return True if it is a simpleinput expression
-    inline
-    bool is_simpleinput(const field& t)
-    {
-      return fdr::detail::gsIsSimpleInput(t);
-    }
-
-    /// \brief Test for a input expression
-    /// \param t A term
-    /// \return True if it is a input expression
-    inline
-    bool is_input(const field& t)
-    {
-      return fdr::detail::gsIsInput(t);
-    }
-
-    /// \brief Test for a output expression
-    /// \param t A term
-    /// \return True if it is a output expression
-    inline
-    bool is_output(const field& t)
-    {
-      return fdr::detail::gsIsOutput(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

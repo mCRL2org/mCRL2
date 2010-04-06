@@ -14,7 +14,7 @@ import re
 import string
 
 NUMERIC_EXPRESSION_CLASSES = r'''
-Number          | number(const number_expression& number)                                 | A number
+Number          | number(const number& operand)                                 | A number
 Card            | card(const set_expression& set)                                         | The cardinality of a set
 Length          | length(const seq_expression& seq)                                       | The length of a sequence
 Plus            | plus(const numeric_expression& left, const numeric_expression& right)   | An addition
@@ -44,10 +44,7 @@ GreaterOrEqual	| greaterorequal(const expression& left, const expression& right)
 '''
 
 SET_EXPRESSION_CLASSES = r'''
-Targ			| targ(const targ& targ)													| A simple argument
-TargGens		| targgens(const targ& targ, const generator_list& gens)					| A complex argument
-Targ0			| targ0(const targ& targ)													| A simple argument (for channels)
-TargGens0		| targgens0(const targ& targ, const generator_list& gens)					| A complex argument (for channels)
+ChanSet			| chanset(const targgens& argument)													| A simple argument (for channels)
 union			| union(const set_expression& left, const set_expression& right)			| A union
 inter			| inter(const set_expression& left, const set_expression& right)			| An intersection
 diff			| diff(const set_expression& left, const set_expression& right)				| A difference
@@ -61,8 +58,6 @@ productions		| productions(const expression& expr)										| The production set
 '''
 
 SEQ_EXPRESSION_CLASSES = r'''
-Targ			| targ(const targ& targ)													| A simple argument
-TargGens		| targgens(const targ& targ, const generator_list& gens)					| A complex argument
 Cat				| cat(const seq_expression& left, const seq_expression& right)				| The concatenation of two sequences
 Concat			| concat(const seq_expression& seq)											| The concatenation of a sequence of sequences
 Head			| head(const seq_expression& seq)											| The head of a non-empty sequence
@@ -70,7 +65,7 @@ Tail			| tail(const seq_expression& seq)											| The tail of a non-empty seq
 '''
 
 TUPLE_EXPRESSION_CLASSES = r'''
-Exprs			| exprs(const expression_list& exprs)										| A tuple expression
+Exprs			| exprs(const expression_list& elements)										| A tuple expression
 '''
 
 DOTTED_EXPRESSION_CLASSES = r'''
@@ -78,14 +73,14 @@ Dot				| dot(const expression& left, expression& right)							| A dotted express
 '''
 
 LAMBDA_EXPRESSION_CLASSES = r'''
-LambdaExpr		| lambdaexpr(const expression_list& exprs, const any& any)					| A lambda expression
+LambdaExpr		| lambdaexpr(const expression_list& exprs, const any& function)					| A lambda expression
 '''
 
 COMMON_EXPRESSION_CLASSES = r'''
 Conditional		| conditional(const boolean_expression& guard, const any& thenpart, const any& elsepart)	| A conditional
-Name			| name(const name& name)													| A name
+Name			| identifier(const name& id)													| A name
 LambdaAppl		| lambdaappl(const lambda_expression& lambda, const expression_list& exprs)	| A lambda application
-LocalDef		| localdef(const definition_list& defs, const any& any)						| A local definition
+LocalDef		| localdef(const definition_list& defs, const any& within)						| A local definition
 Bracketed		| bracketed(const any& operand)												| A bracketed process or expression
 '''
 
@@ -106,40 +101,40 @@ Proc			| proc(const process& operand)												| A process
 
 DEFINITION_CLASSES = r'''
 Assign			| assign(const any& left, const any& right)									| An assignment
-Channel			| channel(const name_list& names, const type& type)							| A channel
+Channel			| channel(const name_list& names, const type& type_name)							| A channel
 SimpleChannel	| channel(const name_list& names)											| A simple channel
-NameType		| nametype(const name& name, const type& type)								| A nametype
-DataType		| datatype(const name& name, const vartype_list& vartypes)					| A datatype
-SubType			| subtype(const name& name, const vartype_list& vartypes)					| A subtype
+NameType		| nametype(const name& id, const type& type_name)								| A nametype
+DataType		| datatype(const name& id, const vartype_list& vartypes)					| A datatype
+SubType			| subtype(const name& id, const vartype_list& vartypes)					| A subtype
 External		| external(const name_list& names)											| An external
 Transparent		| transparent(const trname_list& trnames)									| A transparent
-Assert			| assert_(const check& check)												| An assertion
+Assert			| assert_(const check& chk)												| An assertion
 Print			| print(const expression& expr)												| A print
-Include			| include(const filename& filename)											| An include
+Include			| include(const filename& file)											| An include
 '''
 
 VARTYPE_CLASSES = r'''
-SimpleBranch	| simplebranch(const name& name)											| A simple branch
-Branch			| branch(const name& name, const type& type)								| A branch
+SimpleBranch	| simplebranch(const name& id)											| A simple branch
+Branch			| branch(const name& id, const type& type_name)								| A branch
 '''
 
 TYPE_CLASSES = r'''
 TypeProduct		| typeproduct(const type& left, const type& right)							| A type product
 TypeTuple		| typetuple(const type_list& types)											| A type tuple
 TypeSet			| typeset(const set_expression& set)										| A type set
-SympleTypeName	| simpletypename(const name& name)											| A simple type name
-TypeName		| typename(const name& name, const type& type)								| A type name
+SympleTypeName	| simpletypename(const name& id)											| A simple type name
+TypeName		| typename(const name& id, const type& type_name)								| A type name
 '''
 
 CHECK_CLASSES = r'''
 BCheck			| bcheck(const boolean_expression& expr)									| A boolean check
-RCheck			| rcheck(const process& left, const process& right, const refined& refined)	| A refinement check
-TCheck			| tcheck(const process& process, const test& test)							| A test
-NotCheck		| notcheck(const check& check)												| A negated check
+RCheck			| rcheck(const process& left, const process& right, const refined& refinement)	| A refinement check
+TCheck			| tcheck(const process& proc, const test& operand)							| A test
+NotCheck		| notcheck(const check& chk)												| A negated check
 '''
 
 REFINED_CLASSES = r'''
-Model			| model(const model& model)													| A model
+Model			| model(const model& m)													| A model
 '''
 
 MODEL_CLASSES = r'''
@@ -154,7 +149,7 @@ FD				| fd()																		| A faulures/divergences
 
 TEST_CLASSES = r'''
 divergence_free	| divergence_free()															| A divergence free
-Test			| test(const testtype& testtype, const failuremodel& failuremodel)			| A complex test
+Test			| test(const testtype& tt, const failuremodel& fm)			| A complex test
 '''
 
 TESTTYPE_CLASSES = r'''
@@ -182,6 +177,10 @@ FDRSPEC_CLASSES = r'''
 FDRSpec			| fdrspec(const definition_list& defs)										| An FDR specification
 '''
 
+TARGGENS_CLASSES = r'''
+TargGens		| targgens(const targ& argument, const generator_list& gens)							| A complex targ
+'''
+
 TARG_CLASSES = r'''
 Nil				| nil()																		| An empty
 Exprs			| exprs(const expression_list& exprs)										| An expression list
@@ -198,26 +197,26 @@ PROCESS_CLASSES = r'''
 STOP			| stop()																	| A stop
 SKIP			| skip()																	| A skip
 CHAOS			| chaos(const set_expression& set)											| A chaos
-Prefix			| prefix(const dotted_expression& dotted, const field_list& fields, const process& process)	| A prefix
+Prefix			| prefix(const dotted_expression& dotted, const field_list& fields, const process& proc)	| A prefix
 ExternalChoice	| externalchoice(const process& left, const process& right)					| An external choice
 InternalChoice	| internalchoice(const process& left, const process& right)					| An internal choice
 SequentialComposition	| sequentialcomposition(const process& left, const process& right)	| A sequential composition
 Interrupt		| interrupt(const process& left, const process& right)						| An interrupt
-Hiding			| hiding(const process& process, const set_expression& set)					| An hiding
-Rename			| rename(const process& process, const renaming& renaming)					| A renaming
+Hiding			| hiding(const process& proc, const set_expression& set)					| An hiding
+Rename			| rename(const process& proc, const renaming& rename)					| A renaming
 Interleave		| interleave(const process& left, const process& right)						| An interleave
 Sharing			| sharing(const process& left, const process& right, const set_expression& set)	| A sharing
 AlphaParallel	| alphaparallel(const process& left, const process& right, const set_expression& left_set, const set_expression& right_set)	| An alpha parallel
-RepExternalChoice	| repexternalchoice(const generator_list& gens, const process& process)	| A replicated external choice
-RepInternalChoice	| repinternalchoice(const generator_list& gens, const process& process)	| A replicated internal choice
-RepSequentialComposition	| repsequentialcomposition(const generator_list& gens, const process& process)	| A replicated sequential composition
-RepInterleave	| repinterleave(const generator_list& gens, const process& process)			| A replicated interleave
-RepSharing		| repsharing(const generator_list& gens, const process& process, const set_expression& set)	| A replicated sharing
-RepAlphaParallel	| repalphaparallel(const generator_list& gens, const process& process, const set_expression& set)	| A replicated alpha parallel
+RepExternalChoice	| repexternalchoice(const generator_list& gens, const process& proc)	| A replicated external choice
+RepInternalChoice	| repinternalchoice(const generator_list& gens, const process& proc)	| A replicated internal choice
+RepSequentialComposition	| repsequentialcomposition(const generator_list& gens, const process& proc)	| A replicated sequential composition
+RepInterleave	| repinterleave(const generator_list& gens, const process& proc)			| A replicated interleave
+RepSharing		| repsharing(const generator_list& gens, const process& proc, const set_expression& set)	| A replicated sharing
+RepAlphaParallel	| repalphaparallel(const generator_list& gens, const process& proc, const set_expression& set)	| A replicated alpha parallel
 UntimedTimeOut	| untimedtimeout(const process& left, const process& right)					| An untimed time-out
-BoolGuard		| boolguard(const boolean_expression& guard, const process& process)		| A boolean guard
-LinkedParallel	| linkedparallel(const process& left, const process& right, const linkpar& linkpar)	| A linked parallel
-RepLinkedParallel	| replinkedparallel(const generator_list& gens, const process& process, const linkpar& linkpar)	| A replicated linked parallel
+BoolGuard		| boolguard(const boolean_expression& guard, const process& proc)		| A boolean guard
+LinkedParallel	| linkedparallel(const process& left, const process& right, const linkpar& linked)	| A linked parallel
+RepLinkedParallel	| replinkedparallel(const generator_list& gens, const process& proc, const linkpar& linked)	| A replicated linked parallel
 '''
 
 FIELD_CLASSES = r'''
@@ -227,8 +226,8 @@ Output			| output(const expression& expr)											| An output
 '''
 
 RENAMING_CLASSES = r'''
-Maps			| maps(const map_list& maps)												| A map list
-MapsGens		| mapsgens(const map_list& maps, const generator_list& gens)				| A map/generator list
+Maps			| maps(const map_list& renamings)												| A map list
+MapsGens		| mapsgens(const map_list& renamings, const generator_list& gens)				| A map/generator list
 '''
 
 MAP_CLASSES = r'''
@@ -236,8 +235,8 @@ Map				| map(const dotted_expression& left, const dotted_expression& right)		| A
 '''
 
 LINKPAR_CLASSES = r'''
-Links			| links(const link_list& links)												| A link list
-LinksGens		| linksgens(const link_list& links, const generator_list& gens)				| A link/generator list
+Links			| links(const link_list& linkpars)												| A link list
+LinksGens		| linksgens(const link_list& linkpars, const generator_list& gens)				| A link/generator list
 '''
 
 LINK_CLASSES = r'''

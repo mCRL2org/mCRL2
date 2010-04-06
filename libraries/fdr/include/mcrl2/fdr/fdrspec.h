@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/fdrspec.h
+/// \file mcrl2/fdr/fdrspec.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_FDRSPEC_H
@@ -29,7 +29,7 @@ class fdrspec
   public:
     /// \brief Default constructor.
     fdrspec()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructFDRSpec())
+      : atermpp::aterm_appl(fdr::detail::constructFDRSpec())
     {}
 
     /// \brief Constructor.
@@ -58,15 +58,6 @@ class fdrspec
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a fdrspec expression
-    /// \param t A term
-    /// \return True if it is a fdrspec expression
-    inline
-    bool is_fdrspec(const fdrspec& t)
-    {
-      return fdr::detail::gsIsFDRSpec(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

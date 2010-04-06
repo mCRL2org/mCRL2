@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/link.h
+/// \file mcrl2/fdr/link.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_LINK_H
@@ -29,7 +29,7 @@ class link
   public:
     /// \brief Default constructor.
     link()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructLink())
+      : atermpp::aterm_appl(fdr::detail::constructLink())
     {}
 
     /// \brief Constructor.
@@ -63,15 +63,6 @@ class link
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a link expression
-    /// \param t A term
-    /// \return True if it is a link expression
-    inline
-    bool is_link(const link& t)
-    {
-      return fdr::detail::gsIsLink(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

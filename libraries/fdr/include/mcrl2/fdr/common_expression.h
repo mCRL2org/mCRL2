@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/common_expression.h
+/// \file mcrl2/fdr/common_expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_COMMON_EXPRESSION_H
@@ -29,7 +29,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       common_expression()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructCommon())
+        : atermpp::aterm_appl(fdr::detail::constructCommon())
       {}
 
       /// \brief Constructor.
@@ -48,7 +48,7 @@ class conditional: public common_expression
   public:
     /// \brief Default constructor.
     conditional()
-      : common_expression(fdr::atermpp::detail::constructConditional())
+      : common_expression(fdr::detail::constructConditional())
     {}
 
     /// \brief Constructor.
@@ -81,28 +81,28 @@ class conditional: public common_expression
 };
 
 /// \brief A name
-class name: public common_expression
+class identifier: public common_expression
 {
   public:
     /// \brief Default constructor.
-    name()
-      : common_expression(fdr::atermpp::detail::constructName())
+    identifier()
+      : common_expression(fdr::detail::constructName())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    name(atermpp::aterm_appl term)
+    identifier(atermpp::aterm_appl term)
       : common_expression(term)
     {
       assert(fdr::detail::check_term_Name(m_term));
     }
 
     /// \brief Constructor.
-    name(const name& name)
-      : common_expression(fdr::detail::gsMakeName(name))
+    identifier(const name& id)
+      : common_expression(fdr::detail::gsMakeName(id))
     {}
 
-    name name() const
+    name id() const
     {
       return atermpp::arg1(*this);
     }
@@ -114,7 +114,7 @@ class lambdaappl: public common_expression
   public:
     /// \brief Default constructor.
     lambdaappl()
-      : common_expression(fdr::atermpp::detail::constructLambdaAppl())
+      : common_expression(fdr::detail::constructLambdaAppl())
     {}
 
     /// \brief Constructor.
@@ -147,7 +147,7 @@ class localdef: public common_expression
   public:
     /// \brief Default constructor.
     localdef()
-      : common_expression(fdr::atermpp::detail::constructLocalDef())
+      : common_expression(fdr::detail::constructLocalDef())
     {}
 
     /// \brief Constructor.
@@ -159,8 +159,8 @@ class localdef: public common_expression
     }
 
     /// \brief Constructor.
-    localdef(const definition_list& defs, const any& any)
-      : common_expression(fdr::detail::gsMakeLocalDef(defs, any))
+    localdef(const definition_list& defs, const any& within)
+      : common_expression(fdr::detail::gsMakeLocalDef(defs, within))
     {}
 
     definition_list defs() const
@@ -168,7 +168,7 @@ class localdef: public common_expression
       return atermpp::list_arg1(*this);
     }
 
-    any any() const
+    any within() const
     {
       return atermpp::arg2(*this);
     }
@@ -180,7 +180,7 @@ class bracketed: public common_expression
   public:
     /// \brief Default constructor.
     bracketed()
-      : common_expression(fdr::atermpp::detail::constructBracketed())
+      : common_expression(fdr::detail::constructBracketed())
     {}
 
     /// \brief Constructor.
@@ -214,11 +214,11 @@ class bracketed: public common_expression
       return fdr::detail::gsIsConditional(t);
     }
 
-    /// \brief Test for a name expression
+    /// \brief Test for a identifier expression
     /// \param t A term
-    /// \return True if it is a name expression
+    /// \return True if it is a identifier expression
     inline
-    bool is_name(const common_expression& t)
+    bool is_identifier(const common_expression& t)
     {
       return fdr::detail::gsIsName(t);
     }

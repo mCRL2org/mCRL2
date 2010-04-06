@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/testtype.h
+/// \file mcrl2/fdr/testtype.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_TESTTYPE_H
@@ -29,7 +29,7 @@ class deterministic
   public:
     /// \brief Default constructor.
     deterministic()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructdeterministic())
+      : atermpp::aterm_appl(fdr::detail::constructdeterministic())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class deadlock_free
   public:
     /// \brief Default constructor.
     deadlock_free()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructdeadlock_free())
+      : atermpp::aterm_appl(fdr::detail::constructdeadlock_free())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class livelock_free
   public:
     /// \brief Default constructor.
     livelock_free()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructlivelock_free())
+      : atermpp::aterm_appl(fdr::detail::constructlivelock_free())
     {}
 
     /// \brief Constructor.
@@ -94,33 +94,6 @@ class livelock_free
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a deterministic expression
-    /// \param t A term
-    /// \return True if it is a deterministic expression
-    inline
-    bool is_deterministic(const testtype& t)
-    {
-      return fdr::detail::gsIsdeterministic(t);
-    }
-
-    /// \brief Test for a deadlock_free expression
-    /// \param t A term
-    /// \return True if it is a deadlock_free expression
-    inline
-    bool is_deadlock_free(const testtype& t)
-    {
-      return fdr::detail::gsIsdeadlock_free(t);
-    }
-
-    /// \brief Test for a livelock_free expression
-    /// \param t A term
-    /// \return True if it is a livelock_free expression
-    inline
-    bool is_livelock_free(const testtype& t)
-    {
-      return fdr::detail::gsIslivelock_free(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

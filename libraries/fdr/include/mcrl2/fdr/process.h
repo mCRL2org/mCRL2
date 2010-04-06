@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/process.h
+/// \file mcrl2/fdr/process.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_PROCESS_H
@@ -29,7 +29,7 @@ class stop
   public:
     /// \brief Default constructor.
     stop()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSTOP())
+      : atermpp::aterm_appl(fdr::detail::constructSTOP())
     {}
 
     /// \brief Constructor.
@@ -52,7 +52,7 @@ class skip
   public:
     /// \brief Default constructor.
     skip()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSKIP())
+      : atermpp::aterm_appl(fdr::detail::constructSKIP())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class chaos
   public:
     /// \brief Default constructor.
     chaos()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructCHAOS())
+      : atermpp::aterm_appl(fdr::detail::constructCHAOS())
     {}
 
     /// \brief Constructor.
@@ -108,7 +108,7 @@ class prefix
   public:
     /// \brief Default constructor.
     prefix()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructPrefix())
+      : atermpp::aterm_appl(fdr::detail::constructPrefix())
     {}
 
     /// \brief Constructor.
@@ -120,8 +120,8 @@ class prefix
     }
 
     /// \brief Constructor.
-    prefix(const dotted_expression& dotted, const field_list& fields, const process& process)
-      : atermpp::aterm_appl(fdr::detail::gsMakePrefix(dotted, fields, process))
+    prefix(const dotted_expression& dotted, const field_list& fields, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakePrefix(dotted, fields, proc))
     {}
 
     dotted_expression dotted() const
@@ -134,7 +134,7 @@ class prefix
       return atermpp::list_arg2(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg3(*this);
     }
@@ -151,7 +151,7 @@ class externalchoice
   public:
     /// \brief Default constructor.
     externalchoice()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructExternalChoice())
+      : atermpp::aterm_appl(fdr::detail::constructExternalChoice())
     {}
 
     /// \brief Constructor.
@@ -189,7 +189,7 @@ class internalchoice
   public:
     /// \brief Default constructor.
     internalchoice()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructInternalChoice())
+      : atermpp::aterm_appl(fdr::detail::constructInternalChoice())
     {}
 
     /// \brief Constructor.
@@ -227,7 +227,7 @@ class sequentialcomposition
   public:
     /// \brief Default constructor.
     sequentialcomposition()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSequentialComposition())
+      : atermpp::aterm_appl(fdr::detail::constructSequentialComposition())
     {}
 
     /// \brief Constructor.
@@ -265,7 +265,7 @@ class interrupt
   public:
     /// \brief Default constructor.
     interrupt()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructInterrupt())
+      : atermpp::aterm_appl(fdr::detail::constructInterrupt())
     {}
 
     /// \brief Constructor.
@@ -303,7 +303,7 @@ class hiding
   public:
     /// \brief Default constructor.
     hiding()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructHiding())
+      : atermpp::aterm_appl(fdr::detail::constructHiding())
     {}
 
     /// \brief Constructor.
@@ -315,11 +315,11 @@ class hiding
     }
 
     /// \brief Constructor.
-    hiding(const process& process, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeHiding(process, set))
+    hiding(const process& proc, const set_expression& set)
+      : atermpp::aterm_appl(fdr::detail::gsMakeHiding(proc, set))
     {}
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg1(*this);
     }
@@ -341,7 +341,7 @@ class rename
   public:
     /// \brief Default constructor.
     rename()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRename())
+      : atermpp::aterm_appl(fdr::detail::constructRename())
     {}
 
     /// \brief Constructor.
@@ -353,16 +353,16 @@ class rename
     }
 
     /// \brief Constructor.
-    rename(const process& process, const renaming& renaming)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRename(process, renaming))
+    rename(const process& proc, const renaming& rename)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRename(proc, rename))
     {}
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg1(*this);
     }
 
-    renaming renaming() const
+    renaming rename() const
     {
       return atermpp::arg2(*this);
     }
@@ -379,7 +379,7 @@ class interleave
   public:
     /// \brief Default constructor.
     interleave()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructInterleave())
+      : atermpp::aterm_appl(fdr::detail::constructInterleave())
     {}
 
     /// \brief Constructor.
@@ -417,7 +417,7 @@ class sharing
   public:
     /// \brief Default constructor.
     sharing()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructSharing())
+      : atermpp::aterm_appl(fdr::detail::constructSharing())
     {}
 
     /// \brief Constructor.
@@ -460,7 +460,7 @@ class alphaparallel
   public:
     /// \brief Default constructor.
     alphaparallel()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructAlphaParallel())
+      : atermpp::aterm_appl(fdr::detail::constructAlphaParallel())
     {}
 
     /// \brief Constructor.
@@ -508,7 +508,7 @@ class repexternalchoice
   public:
     /// \brief Default constructor.
     repexternalchoice()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepExternalChoice())
+      : atermpp::aterm_appl(fdr::detail::constructRepExternalChoice())
     {}
 
     /// \brief Constructor.
@@ -520,8 +520,8 @@ class repexternalchoice
     }
 
     /// \brief Constructor.
-    repexternalchoice(const generator_list& gens, const process& process)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepExternalChoice(gens, process))
+    repexternalchoice(const generator_list& gens, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepExternalChoice(gens, proc))
     {}
 
     generator_list gens() const
@@ -529,7 +529,7 @@ class repexternalchoice
       return atermpp::list_arg1(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -546,7 +546,7 @@ class repinternalchoice
   public:
     /// \brief Default constructor.
     repinternalchoice()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepInternalChoice())
+      : atermpp::aterm_appl(fdr::detail::constructRepInternalChoice())
     {}
 
     /// \brief Constructor.
@@ -558,8 +558,8 @@ class repinternalchoice
     }
 
     /// \brief Constructor.
-    repinternalchoice(const generator_list& gens, const process& process)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepInternalChoice(gens, process))
+    repinternalchoice(const generator_list& gens, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepInternalChoice(gens, proc))
     {}
 
     generator_list gens() const
@@ -567,7 +567,7 @@ class repinternalchoice
       return atermpp::list_arg1(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -584,7 +584,7 @@ class repsequentialcomposition
   public:
     /// \brief Default constructor.
     repsequentialcomposition()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepSequentialComposition())
+      : atermpp::aterm_appl(fdr::detail::constructRepSequentialComposition())
     {}
 
     /// \brief Constructor.
@@ -596,8 +596,8 @@ class repsequentialcomposition
     }
 
     /// \brief Constructor.
-    repsequentialcomposition(const generator_list& gens, const process& process)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepSequentialComposition(gens, process))
+    repsequentialcomposition(const generator_list& gens, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepSequentialComposition(gens, proc))
     {}
 
     generator_list gens() const
@@ -605,7 +605,7 @@ class repsequentialcomposition
       return atermpp::list_arg1(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -622,7 +622,7 @@ class repinterleave
   public:
     /// \brief Default constructor.
     repinterleave()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepInterleave())
+      : atermpp::aterm_appl(fdr::detail::constructRepInterleave())
     {}
 
     /// \brief Constructor.
@@ -634,8 +634,8 @@ class repinterleave
     }
 
     /// \brief Constructor.
-    repinterleave(const generator_list& gens, const process& process)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepInterleave(gens, process))
+    repinterleave(const generator_list& gens, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepInterleave(gens, proc))
     {}
 
     generator_list gens() const
@@ -643,7 +643,7 @@ class repinterleave
       return atermpp::list_arg1(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -660,7 +660,7 @@ class repsharing
   public:
     /// \brief Default constructor.
     repsharing()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepSharing())
+      : atermpp::aterm_appl(fdr::detail::constructRepSharing())
     {}
 
     /// \brief Constructor.
@@ -672,8 +672,8 @@ class repsharing
     }
 
     /// \brief Constructor.
-    repsharing(const generator_list& gens, const process& process, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepSharing(gens, process, set))
+    repsharing(const generator_list& gens, const process& proc, const set_expression& set)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepSharing(gens, proc, set))
     {}
 
     generator_list gens() const
@@ -681,7 +681,7 @@ class repsharing
       return atermpp::list_arg1(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -703,7 +703,7 @@ class repalphaparallel
   public:
     /// \brief Default constructor.
     repalphaparallel()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepAlphaParallel())
+      : atermpp::aterm_appl(fdr::detail::constructRepAlphaParallel())
     {}
 
     /// \brief Constructor.
@@ -715,8 +715,8 @@ class repalphaparallel
     }
 
     /// \brief Constructor.
-    repalphaparallel(const generator_list& gens, const process& process, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepAlphaParallel(gens, process, set))
+    repalphaparallel(const generator_list& gens, const process& proc, const set_expression& set)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepAlphaParallel(gens, proc, set))
     {}
 
     generator_list gens() const
@@ -724,7 +724,7 @@ class repalphaparallel
       return atermpp::list_arg1(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -746,7 +746,7 @@ class untimedtimeout
   public:
     /// \brief Default constructor.
     untimedtimeout()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructUntimedTimeOut())
+      : atermpp::aterm_appl(fdr::detail::constructUntimedTimeOut())
     {}
 
     /// \brief Constructor.
@@ -784,7 +784,7 @@ class boolguard
   public:
     /// \brief Default constructor.
     boolguard()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructBoolGuard())
+      : atermpp::aterm_appl(fdr::detail::constructBoolGuard())
     {}
 
     /// \brief Constructor.
@@ -796,8 +796,8 @@ class boolguard
     }
 
     /// \brief Constructor.
-    boolguard(const boolean_expression& guard, const process& process)
-      : atermpp::aterm_appl(fdr::detail::gsMakeBoolGuard(guard, process))
+    boolguard(const boolean_expression& guard, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeBoolGuard(guard, proc))
     {}
 
     boolean_expression guard() const
@@ -805,7 +805,7 @@ class boolguard
       return atermpp::arg1(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -822,7 +822,7 @@ class linkedparallel
   public:
     /// \brief Default constructor.
     linkedparallel()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructLinkedParallel())
+      : atermpp::aterm_appl(fdr::detail::constructLinkedParallel())
     {}
 
     /// \brief Constructor.
@@ -834,8 +834,8 @@ class linkedparallel
     }
 
     /// \brief Constructor.
-    linkedparallel(const process& left, const process& right, const linkpar& linkpar)
-      : atermpp::aterm_appl(fdr::detail::gsMakeLinkedParallel(left, right, linkpar))
+    linkedparallel(const process& left, const process& right, const linkpar& linked)
+      : atermpp::aterm_appl(fdr::detail::gsMakeLinkedParallel(left, right, linked))
     {}
 
     process left() const
@@ -848,7 +848,7 @@ class linkedparallel
       return atermpp::arg2(*this);
     }
 
-    linkpar linkpar() const
+    linkpar linked() const
     {
       return atermpp::arg3(*this);
     }
@@ -865,7 +865,7 @@ class replinkedparallel
   public:
     /// \brief Default constructor.
     replinkedparallel()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructRepLinkedParallel())
+      : atermpp::aterm_appl(fdr::detail::constructRepLinkedParallel())
     {}
 
     /// \brief Constructor.
@@ -877,8 +877,8 @@ class replinkedparallel
     }
 
     /// \brief Constructor.
-    replinkedparallel(const generator_list& gens, const process& process, const linkpar& linkpar)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepLinkedParallel(gens, process, linkpar))
+    replinkedparallel(const generator_list& gens, const process& proc, const linkpar& linked)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepLinkedParallel(gens, proc, linked))
     {}
 
     generator_list gens() const
@@ -886,12 +886,12 @@ class replinkedparallel
       return atermpp::list_arg1(*this);
     }
 
-    process process() const
+    process proc() const
     {
       return atermpp::arg2(*this);
     }
 
-    linkpar linkpar() const
+    linkpar linked() const
     {
       return atermpp::arg3(*this);
     }
@@ -904,222 +904,6 @@ class replinkedparallel
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a common expression
-    /// \param t A term
-    /// \return True if it is a common expression
-    inline
-    bool is_common(const process& t)
-    {
-      return fdr::detail::gsIsCommon(t);
-    }
-
-    /// \brief Test for a stop expression
-    /// \param t A term
-    /// \return True if it is a stop expression
-    inline
-    bool is_stop(const process& t)
-    {
-      return fdr::detail::gsIsSTOP(t);
-    }
-
-    /// \brief Test for a skip expression
-    /// \param t A term
-    /// \return True if it is a skip expression
-    inline
-    bool is_skip(const process& t)
-    {
-      return fdr::detail::gsIsSKIP(t);
-    }
-
-    /// \brief Test for a chaos expression
-    /// \param t A term
-    /// \return True if it is a chaos expression
-    inline
-    bool is_chaos(const process& t)
-    {
-      return fdr::detail::gsIsCHAOS(t);
-    }
-
-    /// \brief Test for a prefix expression
-    /// \param t A term
-    /// \return True if it is a prefix expression
-    inline
-    bool is_prefix(const process& t)
-    {
-      return fdr::detail::gsIsPrefix(t);
-    }
-
-    /// \brief Test for a externalchoice expression
-    /// \param t A term
-    /// \return True if it is a externalchoice expression
-    inline
-    bool is_externalchoice(const process& t)
-    {
-      return fdr::detail::gsIsExternalChoice(t);
-    }
-
-    /// \brief Test for a internalchoice expression
-    /// \param t A term
-    /// \return True if it is a internalchoice expression
-    inline
-    bool is_internalchoice(const process& t)
-    {
-      return fdr::detail::gsIsInternalChoice(t);
-    }
-
-    /// \brief Test for a sequentialcomposition expression
-    /// \param t A term
-    /// \return True if it is a sequentialcomposition expression
-    inline
-    bool is_sequentialcomposition(const process& t)
-    {
-      return fdr::detail::gsIsSequentialComposition(t);
-    }
-
-    /// \brief Test for a interrupt expression
-    /// \param t A term
-    /// \return True if it is a interrupt expression
-    inline
-    bool is_interrupt(const process& t)
-    {
-      return fdr::detail::gsIsInterrupt(t);
-    }
-
-    /// \brief Test for a hiding expression
-    /// \param t A term
-    /// \return True if it is a hiding expression
-    inline
-    bool is_hiding(const process& t)
-    {
-      return fdr::detail::gsIsHiding(t);
-    }
-
-    /// \brief Test for a rename expression
-    /// \param t A term
-    /// \return True if it is a rename expression
-    inline
-    bool is_rename(const process& t)
-    {
-      return fdr::detail::gsIsRename(t);
-    }
-
-    /// \brief Test for a interleave expression
-    /// \param t A term
-    /// \return True if it is a interleave expression
-    inline
-    bool is_interleave(const process& t)
-    {
-      return fdr::detail::gsIsInterleave(t);
-    }
-
-    /// \brief Test for a sharing expression
-    /// \param t A term
-    /// \return True if it is a sharing expression
-    inline
-    bool is_sharing(const process& t)
-    {
-      return fdr::detail::gsIsSharing(t);
-    }
-
-    /// \brief Test for a alphaparallel expression
-    /// \param t A term
-    /// \return True if it is a alphaparallel expression
-    inline
-    bool is_alphaparallel(const process& t)
-    {
-      return fdr::detail::gsIsAlphaParallel(t);
-    }
-
-    /// \brief Test for a repexternalchoice expression
-    /// \param t A term
-    /// \return True if it is a repexternalchoice expression
-    inline
-    bool is_repexternalchoice(const process& t)
-    {
-      return fdr::detail::gsIsRepExternalChoice(t);
-    }
-
-    /// \brief Test for a repinternalchoice expression
-    /// \param t A term
-    /// \return True if it is a repinternalchoice expression
-    inline
-    bool is_repinternalchoice(const process& t)
-    {
-      return fdr::detail::gsIsRepInternalChoice(t);
-    }
-
-    /// \brief Test for a repsequentialcomposition expression
-    /// \param t A term
-    /// \return True if it is a repsequentialcomposition expression
-    inline
-    bool is_repsequentialcomposition(const process& t)
-    {
-      return fdr::detail::gsIsRepSequentialComposition(t);
-    }
-
-    /// \brief Test for a repinterleave expression
-    /// \param t A term
-    /// \return True if it is a repinterleave expression
-    inline
-    bool is_repinterleave(const process& t)
-    {
-      return fdr::detail::gsIsRepInterleave(t);
-    }
-
-    /// \brief Test for a repsharing expression
-    /// \param t A term
-    /// \return True if it is a repsharing expression
-    inline
-    bool is_repsharing(const process& t)
-    {
-      return fdr::detail::gsIsRepSharing(t);
-    }
-
-    /// \brief Test for a repalphaparallel expression
-    /// \param t A term
-    /// \return True if it is a repalphaparallel expression
-    inline
-    bool is_repalphaparallel(const process& t)
-    {
-      return fdr::detail::gsIsRepAlphaParallel(t);
-    }
-
-    /// \brief Test for a untimedtimeout expression
-    /// \param t A term
-    /// \return True if it is a untimedtimeout expression
-    inline
-    bool is_untimedtimeout(const process& t)
-    {
-      return fdr::detail::gsIsUntimedTimeOut(t);
-    }
-
-    /// \brief Test for a boolguard expression
-    /// \param t A term
-    /// \return True if it is a boolguard expression
-    inline
-    bool is_boolguard(const process& t)
-    {
-      return fdr::detail::gsIsBoolGuard(t);
-    }
-
-    /// \brief Test for a linkedparallel expression
-    /// \param t A term
-    /// \return True if it is a linkedparallel expression
-    inline
-    bool is_linkedparallel(const process& t)
-    {
-      return fdr::detail::gsIsLinkedParallel(t);
-    }
-
-    /// \brief Test for a replinkedparallel expression
-    /// \param t A term
-    /// \return True if it is a replinkedparallel expression
-    inline
-    bool is_replinkedparallel(const process& t)
-    {
-      return fdr::detail::gsIsRepLinkedParallel(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

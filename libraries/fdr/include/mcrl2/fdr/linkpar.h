@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/linkpar.h
+/// \file mcrl2/fdr/linkpar.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_LINKPAR_H
@@ -29,7 +29,7 @@ class links
   public:
     /// \brief Default constructor.
     links()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructLinks())
+      : atermpp::aterm_appl(fdr::detail::constructLinks())
     {}
 
     /// \brief Constructor.
@@ -41,11 +41,11 @@ class links
     }
 
     /// \brief Constructor.
-    links(const link_list& links)
-      : atermpp::aterm_appl(fdr::detail::gsMakeLinks(links))
+    links(const link_list& linkpars)
+      : atermpp::aterm_appl(fdr::detail::gsMakeLinks(linkpars))
     {}
 
-    link_list links() const
+    link_list linkpars() const
     {
       return atermpp::list_arg1(*this);
     }
@@ -62,7 +62,7 @@ class linksgens
   public:
     /// \brief Default constructor.
     linksgens()
-      : atermpp::aterm_appl(fdr::atermpp::detail::constructLinksGens())
+      : atermpp::aterm_appl(fdr::detail::constructLinksGens())
     {}
 
     /// \brief Constructor.
@@ -74,11 +74,11 @@ class linksgens
     }
 
     /// \brief Constructor.
-    linksgens(const link_list& links, const generator_list& gens)
-      : atermpp::aterm_appl(fdr::detail::gsMakeLinksGens(links, gens))
+    linksgens(const link_list& linkpars, const generator_list& gens)
+      : atermpp::aterm_appl(fdr::detail::gsMakeLinksGens(linkpars, gens))
     {}
 
-    link_list links() const
+    link_list linkpars() const
     {
       return atermpp::list_arg1(*this);
     }
@@ -96,24 +96,6 @@ class linksgens
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
-
-    /// \brief Test for a links expression
-    /// \param t A term
-    /// \return True if it is a links expression
-    inline
-    bool is_links(const linkpar& t)
-    {
-      return fdr::detail::gsIsLinks(t);
-    }
-
-    /// \brief Test for a linksgens expression
-    /// \param t A term
-    /// \return True if it is a linksgens expression
-    inline
-    bool is_linksgens(const linkpar& t)
-    {
-      return fdr::detail::gsIsLinksGens(t);
-    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

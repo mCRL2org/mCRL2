@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/expression.h
+/// \file mcrl2/fdr/expression.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_FDR_EXPRESSION_H
@@ -28,7 +28,7 @@ namespace fdr {
     public:
       /// \brief Constructor.
       expression()
-        : atermpp::aterm_appl(fdr::atermpp::detail::constructExpression())
+        : atermpp::aterm_appl(fdr::detail::constructExpression())
       {}
 
       /// \brief Constructor.
@@ -47,7 +47,7 @@ class numb: public expression
   public:
     /// \brief Default constructor.
     numb()
-      : expression(fdr::atermpp::detail::constructNumb())
+      : expression(fdr::detail::constructNumb())
     {}
 
     /// \brief Constructor.
@@ -75,7 +75,7 @@ class bool_: public expression
   public:
     /// \brief Default constructor.
     bool_()
-      : expression(fdr::atermpp::detail::constructBool())
+      : expression(fdr::detail::constructBool())
     {}
 
     /// \brief Constructor.
@@ -103,7 +103,7 @@ class set: public expression
   public:
     /// \brief Default constructor.
     set()
-      : expression(fdr::atermpp::detail::constructSet())
+      : expression(fdr::detail::constructSet())
     {}
 
     /// \brief Constructor.
@@ -131,7 +131,7 @@ class seq: public expression
   public:
     /// \brief Default constructor.
     seq()
-      : expression(fdr::atermpp::detail::constructSeq())
+      : expression(fdr::detail::constructSeq())
     {}
 
     /// \brief Constructor.
@@ -159,7 +159,7 @@ class tuple: public expression
   public:
     /// \brief Default constructor.
     tuple()
-      : expression(fdr::atermpp::detail::constructTuple())
+      : expression(fdr::detail::constructTuple())
     {}
 
     /// \brief Constructor.
@@ -187,7 +187,7 @@ class dotted: public expression
   public:
     /// \brief Default constructor.
     dotted()
-      : expression(fdr::atermpp::detail::constructDotted())
+      : expression(fdr::detail::constructDotted())
     {}
 
     /// \brief Constructor.
@@ -215,7 +215,7 @@ class lambda: public expression
   public:
     /// \brief Default constructor.
     lambda()
-      : expression(fdr::atermpp::detail::constructLambda())
+      : expression(fdr::detail::constructLambda())
     {}
 
     /// \brief Constructor.

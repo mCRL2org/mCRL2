@@ -136,10 +136,8 @@
 
 // Set expression
 <Set>       ::= <Common>
-              | Targ(<Targ>)
-              | TargGens(<Targ>, <Gen>+)
-              | Targ0(<Targ>)
-              | TargGens0(<Targ>, <Gen>+)
+              | <TargGens>
+              | ChanSet(<TargGens>)
               | union(<Set>, <Set>)
               | inter(<Set>, <Set>)
               | diff(<Set>, <Set>)
@@ -153,14 +151,16 @@
 
 // Sequence expression
 <Seq>       ::= <Common>
-              | Targ(<Targ>)
-              | TargGens(<Targ>, <Gen>+)
+              | <TargGens>
               | Cat(<Seq>, <Seq>)
               | Concat(<Seq>)
               | Head(<Seq>)
               | Tail(<Seq>)
 
 // Set/Sequence arguments
+<TargGens> ::= <Targ>
+             | TargGens(<Targ>, <Gen>+)
+
 <Targ>      ::= Nil
               | Exprs(<Expr>+)
               | ClosedRange(<Numb>, <Numb>)
