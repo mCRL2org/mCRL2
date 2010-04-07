@@ -125,10 +125,10 @@ void structured_sort_test()
   structured_sort_constructor c1("c1", a1, "is_c1");
   structured_sort_constructor c2("c2", a2);
   BOOST_CHECK(c1.name() == "c1");
-  BOOST_CHECK(c1.arguments() == a1);
+  BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c1.arguments()) == a1);
   BOOST_CHECK(c1.recogniser() == "is_c1");
   BOOST_CHECK(c2.name() == "c2");
-  BOOST_CHECK(c2.arguments() == a2);
+  BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c2.arguments()) == a2);
   BOOST_CHECK(c2.recogniser() == data::no_identifier());
 
   structured_sort_constructor_vector cs;
@@ -150,8 +150,8 @@ void structured_sort_test()
   BOOST_CHECK(s_e_ == s);
   BOOST_CHECK(s_e_.struct_constructors() == s.struct_constructors());
 
-  structured_sort_constructor_argument_vector nv(atermpp::make_vector(structured_sort_constructor_argument(sort_nat::nat())));
-  structured_sort_constructor_argument_vector bv(atermpp::make_vector(structured_sort_constructor_argument(sort_bool::bool_())));
+  structured_sort_constructor_argument_vector nv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_nat::nat()))));
+  structured_sort_constructor_argument_vector bv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_bool::bool_()))));
   structured_sort_constructor b("B", boost::make_iterator_range(nv));
   structured_sort_constructor c("C", boost::make_iterator_range(bv));
   structured_sort bc(atermpp::make_vector(b,c));

@@ -22,8 +22,8 @@ SortFBag  | fbag_container() | Container type for finite bags
 '''
 
 STRUCTURED_SORT_ELEMENTS = r'''
-StructCons  | structured_sort_constructor[_base](const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) | A constructor for a structured sort
 StructProj  | structured_sort_constructor_argument[_base](const core::identifier_string& name, const sort_expression& sort) | An argument of a constructor of a structured sort
+StructCons  | structured_sort_constructor[_base](const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) | A constructor for a structured sort
 '''
 
 SORT_EXPRESSION_CLASSES = r'''

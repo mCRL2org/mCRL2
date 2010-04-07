@@ -29,354 +29,12 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/structured_sort_constructor.h"
 #include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
   namespace data {
-
-    class structured_sort;
-
-    /// \brief Special identifier string that is used to specify the absence of an identifier
-    inline
-    static core::identifier_string const& no_identifier()
-    {
-      static core::identifier_string dummy;
-
-      return dummy;
-    }
-
-    /// \cond INTERNAL_DOCS
-    namespace detail {
-      /// \brief Convert a string to an identifier, or no_identifier() in case of the empty string
-      inline
-      static core::identifier_string make_identifier(std::string const& name)
-      {
-        return (name.empty()) ? no_identifier() : core::identifier_string(name);
-      }
-
-      inline
-      static core::identifier_string make_identifier(atermpp::aterm_appl const& a)
-      {
-        return (a == atermpp::aterm_appl(core::detail::gsMakeNil())) ? no_identifier() : core::identifier_string(a);
-      }
-    }
-    /// \endcond
-
-    /// \brief Argument of a structured sort constructor.
-    ///
-    /// This comprises an optional name and a mandatory sort.
-    class structured_sort_constructor_argument: public atermpp::aterm_appl
-    {
-      protected:
-
-        atermpp::aterm_appl make_argument(const sort_expression& sort, const core::identifier_string& name = no_identifier())
-        {
-          return core::detail::gsMakeStructProj((name == no_identifier()) ?
-                   atermpp::aterm_appl(core::detail::gsMakeNil()) : atermpp::aterm_appl(name), sort);
-        }
-
-      public:
-
-        /// \brief Constructor
-        ///
-        structured_sort_constructor_argument()
-          : atermpp::aterm_appl(core::detail::constructStructProj())
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] a A term.
-        /// \pre a has the internal format of a constructor argument of a
-        ///        structured sort.
-        structured_sort_constructor_argument(const atermpp::aterm_appl& a)
-          : atermpp::aterm_appl(a)
-        {
-          assert(core::detail::gsIsStructProj(a));
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] sort The sort of the argument.
-        /// \param[in] name The name of the argument.
-        /// The default name, the empty string, signifies that there is no name.
-        structured_sort_constructor_argument(const sort_expression& sort, const core::identifier_string& name = no_identifier())
-          : atermpp::aterm_appl(make_argument(sort, name))
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] sort The sort of the argument.
-        /// \param[in] name The name of the argument.
-        /// The default name, the empty string, signifies that there is no name.
-        structured_sort_constructor_argument(const sort_expression& sort, const std::string& name)
-          : atermpp::aterm_appl(make_argument(sort, detail::make_identifier(name)))
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
-        template < size_t S >
-        structured_sort_constructor_argument(const sort_expression& sort, const char (&name)[S])
-          : atermpp::aterm_appl(make_argument(sort, detail::make_identifier(name)))
-        {}
-
-        /// \brief Returns the name of the constructor argument.
-        ///
-        inline
-        core::identifier_string name() const
-        {
-          return detail::make_identifier(atermpp::arg1(*this));
-        }
-
-        /// \brief Returns the sort of the constructor argument.
-        ///
-        inline
-        sort_expression sort() const
-        {
-          return atermpp::arg2(*this);
-        }
-
-    }; // class structured_sort_constructor_argument
-
-    /// \brief List of structured_sort_constructor_argument
-    typedef atermpp::term_list< structured_sort_constructor_argument > structured_sort_constructor_argument_list;
-    /// \brief Vector of structured_sort_constructor_argument
-    typedef atermpp::vector< structured_sort_constructor_argument >    structured_sort_constructor_argument_vector;
-
-    /// \brief A structured sort constructor.
-    ///
-    /// A structured sort constructor has a mandatory name, a mandatory,
-    /// non-empty list of arguments and and optional recogniser name.
-    class structured_sort_constructor: public atermpp::aterm_appl
-    {
-      friend class structured_sort;
-
-      private:
-
-        struct get_argument_sort : public
-          std::unary_function< structured_sort_constructor_argument const&, sort_expression > {
-
-          sort_expression operator()(structured_sort_constructor_argument const& s) const {
-            return s.sort();
-          }
-        };
-
-      protected:
-
-        inline
-        static atermpp::aterm_appl make_constructor(core::identifier_string const& name,
-			  atermpp::term_list<structured_sort_constructor_argument> arguments,
-                          core::identifier_string const& recogniser)
-        {
-          assert(name != no_identifier());
-
-          return atermpp::aterm_appl(core::detail::gsMakeStructCons(name, arguments,
-                  (recogniser == no_identifier()) ? core::detail::gsMakeNil() : static_cast< ATermAppl >(recogniser)));
-        }
-
-        inline
-        static atermpp::aterm_appl make_constructor(core::identifier_string const& name, core::identifier_string const& recogniser)
-        {
-          return make_constructor(name, atermpp::term_list< structured_sort_constructor_argument >(), recogniser);
-        }
-
-      public:
-
-        /// \brief iterator range over list of structured sort constructors
-        typedef atermpp::term_list< structured_sort_constructor_argument >::const_iterator  arguments_iterator;
-        /// \brief iterator range over list of structured sort constructors
-        typedef boost::iterator_range< arguments_iterator >                                 arguments_range;
-        /// \brief iterator range over constant list of structured sort constructors
-        typedef boost::iterator_range< arguments_iterator >                                 arguments_const_range;
-
-        /// \brief iterator range over list of structured sort constructors
-        typedef atermpp::detail::transform_iterator< get_argument_sort, arguments_iterator >         argument_sorts_iterator;
-        /// \brief iterator range over list of structured sort constructors
-        typedef boost::iterator_range< argument_sorts_iterator >                            argument_sorts_range;
-        /// \brief iterator range over constant list of structured sort constructors
-        typedef boost::iterator_range< argument_sorts_iterator >                            argument_sorts_const_range;
-
-      public:
-
-        /// \brief Constructor
-        structured_sort_constructor()
-          : atermpp::aterm_appl(core::detail::constructStructCons())
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] c A term
-        /// \pre c has the internal format of a constructor of a structured
-        ///      sort.
-        structured_sort_constructor(const atermpp::aterm_appl c)
-          : atermpp::aterm_appl(c)
-        {
-          assert(core::detail::gsIsStructCons(c));
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] c is a structured sort constructor.
-        structured_sort_constructor(const structured_sort_constructor& c)
-          : atermpp::aterm_appl(c)
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] name The name of the constructor.
-        /// \param[in] arguments a container of constructor arguments (of type structured_sort_constructor_argument)
-        /// \param[in] recogniser The name of the recogniser.
-        /// \pre name is not empty.
-        /// \pre recogniser is not empty.
-        template < typename Container >
-        structured_sort_constructor(const core::identifier_string& name,
-                                    const Container& arguments,
-                                    const core::identifier_string& recogniser = no_identifier(),
-                                    typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
-          : atermpp::aterm_appl(make_constructor(name, atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), recogniser))
-        { }
-
-        /// \brief Constructor
-        ///
-        /// \overload
-        template < typename Container >
-        structured_sort_constructor(const std::string& name,
-                                    const Container& arguments,
-                                    const std::string& recogniser,
-                                    typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
-          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
-               atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), detail::make_identifier(recogniser)))
-        { }
-
-        /// \brief Constructor
-        ///
-        /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
-        template < typename Container, size_t S, size_t S0 >
-        structured_sort_constructor(const char (&name)[S],
-                                    const Container& arguments,
-                                    const char (&recogniser)[S0],
-                                    typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
-          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
-               atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), detail::make_identifier(recogniser)))
-        { }
-
-        /// \brief Constructor
-        ///
-        /// \overload
-        template < typename Container >
-        structured_sort_constructor(const std::string& name,
-                                    const Container& arguments,
-                                    typename atermpp::detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
-          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
-               atermpp::convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), no_identifier()))
-        { }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] name The name of the constructor.
-        /// \param[in] recogniser The name of the recogniser.
-        /// \pre name is not empty.
-        /// \pre recogniser is not empty.
-        structured_sort_constructor(const core::identifier_string& name, const core::identifier_string& recogniser = no_identifier())
-          : atermpp::aterm_appl(make_constructor(name, recogniser))
-        { }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] name The name of the constructor.
-        /// \param[in] recogniser The name of the recogniser.
-        /// \pre name is not empty.
-        /// \pre recogniser is not empty.
-        structured_sort_constructor(const std::string& name, const std::string& recogniser = "")
-          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name), detail::make_identifier(recogniser)))
-        { }
-
-        /// \brief Constructor
-        ///
-        /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
-        template < size_t S, size_t S0 >
-        structured_sort_constructor(const char (&name)[S], const char (&recogniser)[S0])
-          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name), detail::make_identifier(recogniser)))
-        { }
-
-        /// \brief Returns the name of the constructor.
-        ///
-        core::identifier_string name() const
-        {
-          return atermpp::aterm_string(atermpp::arg1(*this));
-        }
-
-        /// \brief Returns the arguments of the constructor.
-        ///
-        arguments_const_range arguments() const
-        {
-          return boost::make_iterator_range(atermpp::term_list< structured_sort_constructor_argument >(atermpp::list_arg2(appl())));
-        }
-
-        /// \brief Returns the sorts of the arguments.
-        ///
-        argument_sorts_const_range argument_sorts() const
-        {
-          return boost::iterator_range< argument_sorts_iterator >(arguments());
-        }
-
-        /// \brief Returns the arguments of the constructor, without the
-        ///        projection names
-        /// \brief Returns the name of the recogniser of the constructor.
-        core::identifier_string recogniser() const
-        {
-          return detail::make_identifier(arg3(*this));
-        }
-
-        /// \brief Returns the constructor function for this constructor,
-        ///        assuming it is internally represented with sort s.
-        /// \param s Sort expression this sort is internally represented as.
-        ///
-        /// In general, constructor_function is used with s the structured
-        /// sort of which this constructor is a part.
-        /// Consider for example struct c|d, be a structured sort, where
-        /// this constructor is c, then this.constructor_function(struct c|d)
-        /// returns the fuction symbol c : struct c|d, i.e. the function c of
-        /// sort struct c|d.
-        function_symbol constructor_function(const sort_expression& s) const
-        {
-          argument_sorts_const_range arguments(argument_sorts());
-
-          return function_symbol(name(), (arguments.empty()) ? s : function_sort(arguments, s));
-        }
-
-        /// \brief Returns the projection functions for this constructor.
-        /// \param s The sort as which the structured sort this constructor corresponds
-        ///          to is treated internally.
-        function_symbol_vector projection_functions(const sort_expression& s) const
-        {
-          function_symbol_vector result;
-          for(arguments_const_range i(arguments()); !i.empty(); i.advance_begin(1))
-          {
-            if (i.front().name() != no_identifier()) {
-              result.push_back(function_symbol(i.front().name(), make_function_sort(s, i.front().sort())));
-            }
-          }
-          return result;
-        }
-
-        /// \brief Returns the function corresponding to the recogniser of this
-        /// constructor, such that it is usable in the rewriter.
-        /// \param s The sort as which the structured sort this constructor
-        /// corresponds to is treated internally.
-        function_symbol recogniser_function(const sort_expression& s) const
-        {
-          return function_symbol(recogniser(), make_function_sort(s, sort_bool::bool_()));
-        }
-
-    }; // class structured_sort_constructor
-
-    /// \brief List of structured_sort_constructor.
-    typedef atermpp::term_list< structured_sort_constructor > structured_sort_constructor_list;
-
-    /// \brief List of structured_sort_constructor.
-    typedef atermpp::vector< structured_sort_constructor >    structured_sort_constructor_vector;
 
     /// \cond INTERNAL_DOCS
     // declare for friendship
@@ -393,7 +51,7 @@ namespace mcrl2 {
     /// \endcond
 
     namespace detail {
-/*
+
 //--- start generated class ---//
 /// \brief A structured sort
 class structured_sort_base: public sort_expression
@@ -413,23 +71,23 @@ class structured_sort_base: public sort_expression
     }
 
     /// \brief Constructor.
-    structured_sort_base(const structured_sort_ructor_list& ructors)
-      : sort_expression(core::detail::gsMakeSortStruct(ructors))
+    structured_sort_base(const structured_sort_constructor_list& constructors)
+      : sort_expression(core::detail::gsMakeSortStruct(constructors))
     {}
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort_base(const Container& ructors, typename atermpp::detail::enable_if_container<Container, structured_sort_ructor>::type* = 0)
-      : sort_expression(core::detail::gsMakeSortStruct(atermpp::convert<structured_sort_ructor_list>(ructors)))
+    structured_sort_base(const Container& constructors, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor>::type* = 0)
+      : sort_expression(core::detail::gsMakeSortStruct(atermpp::convert<structured_sort_constructor_list>(constructors)))
     {}
 
-    structured_sort_ructor_list ructors() const
+    structured_sort_constructor_list constructors() const
     {
       return atermpp::list_arg1(*this);
     }
 };
 //--- end generated class ---//
-*/
+
     } //namespace detail
 
     /// \brief structured sort.
@@ -442,7 +100,7 @@ class structured_sort_base: public sort_expression
     /// * c1, ..., cn are called constructors.
     /// * pri,j are the projection functions (or constructor arguments).
     /// * is_ci are the recognisers.
-    class structured_sort: public sort_expression
+    class structured_sort: public detail::structured_sort_base
     {
       friend class data_specification;
 
@@ -710,31 +368,26 @@ class structured_sort_base: public sort_expression
 
       public:
 
-        /// \brief Constructor
+        /// \overload
         structured_sort()
-          : sort_expression(core::detail::constructSortStruct())
+          : detail::structured_sort_base()
         {}
 
-        /// \brief Constructor
-        ///
-        /// \param[in] s A sort expression.
-        /// \pre s is a structured sort.
-        structured_sort(const sort_expression& s)
-          : sort_expression(s)
-        {
-          assert(s.is_structured_sort());
-        }
+        /// \overload
+        structured_sort(atermpp::aterm_appl term)
+          : detail::structured_sort_base(term)
+        {}
 
-        /// \brief Constructor
-        ///
-        /// \param[in] constructors A container with constructors (of type structured_sort_constructor)
-        /// \pre !constructors.empty()
-        template < typename Container >
-        structured_sort(const Container& constructors, typename atermpp::detail::enable_if_container< Container, structured_sort_constructor >::type* = 0)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::convert< atermpp::term_list<structured_sort_constructor> >(constructors)))
-        {
-          assert(!constructors.empty());
-        }
+        /// \overload
+        structured_sort(const structured_sort_constructor_list& constructors)
+          : detail::structured_sort_base(constructors)
+        {}
+
+        /// \overload
+        template <typename Container>
+        structured_sort(const Container& constructors, typename atermpp::detail::enable_if_container<Container, structured_sort_constructor>::type* = 0)
+          : detail::structured_sort_base(constructors)
+        {}
 
         /// \brief Returns the struct constructors of this sort
         ///

@@ -64,3 +64,4 @@ if __name__ == "__main__":
     make_classes('../../data/include/mcrl2/data/', SORT_EXPRESSION_CLASSES, 'sort_expression', add_constructor_overloads = True)
     make_is_functions('../../data/include/mcrl2/data/sort_expression.h', SORT_EXPRESSION_CLASSES, 'sort_expression')
     make_classes('../../data/include/mcrl2/data/container_type.h', CONTAINER_TYPES, 'container_type', add_constructor_overloads = True)
+    make_classes('../../data/include/mcrl2/data/', STRUCTURED_SORT_ELEMENTS, 'atermpp::aterm_appl', add_constructor_overloads = True)
