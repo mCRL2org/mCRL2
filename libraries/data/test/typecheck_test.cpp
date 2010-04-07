@@ -49,17 +49,25 @@ data::data_expression parse_data_expression(const std::string& de_in)
   return data::data_expression(de_aterm);
 }
 
-data::data_specification parse_data_specification(const std::string& ds_in)
+data::data_specification parse_data_specification(const std::string& ds_in, bool expect_success = true)
 {
   std::istringstream ds_in_stream(ds_in);
   ATermAppl ds_aterm = core::parse_data_spec(ds_in_stream);
-  BOOST_REQUIRE(ds_aterm != NULL);
+  if(expect_success)
+  {
+    BOOST_REQUIRE(ds_aterm != NULL);
+  }
 
-  std::string ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
-  // std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
-  BOOST_CHECK_EQUAL(ds_in, ds_out);
+  if(ds_aterm != NULL) // If term is successfully parsed, always check that the printed result is equal!
+  {
+    std::string ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
+    // std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
+    BOOST_CHECK_EQUAL(ds_in, ds_out);
 
-  return data::data_specification(ds_aterm);
+    return data::data_specification(ds_aterm);
+  }
+
+  return data::data_specification();
 }
 
 template <typename VariableIterator>
@@ -388,7 +396,7 @@ void test_data_specification(const std::string &ds_in,
                              bool expect_success = true,
                              bool test_type_checker = true)
 {
-  data::data_specification ds(parse_data_specification(ds_in));
+  data::data_specification ds(parse_data_specification(ds_in, expect_success));
 
   if (test_type_checker) {
 
@@ -504,6 +512,55 @@ BOOST_AUTO_TEST_CASE(test_sort_as_variable)
     "map  S: S -> Bool;\n\n"
     "var  S: S;\n"
     "eqn  S(S)  =  S == S;\n"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_predefined_aliases)
+{
+  test_data_specification(
+    "sort Nat = Int;\n",
+    false, // parse error
+    false  // so do not test type checker
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_conflicting_aliases)
+{
+  test_data_specification(
+    "sort S = Nat;\n"
+    "     S = T;\n"
+    "     T = Int;\n",
+    false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_conflicting_aliases_predefined_left)
+{
+  test_data_specification(
+    "sort Nat = S;\n"
+    "     S = T;\n"
+    "     T = Int;\n",
+    false, // parse error
+    false  // so do not test type checker
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_cyclic_aliases)
+{
+  test_data_specification(
+    "sort S = U;\n"
+    "     U = S;\n",
+    false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_cyclic_aliases_indirect)
+{
+  test_data_specification(
+    "sort S = U;\n"
+    "     U = T;\n"
+    "     T = S;\n",
+    false
   );
 }
 
@@ -928,6 +985,148 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_int_variable)
     "sort S = struct c(Nat);\n",
     v.begin(), v.end(),
     false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function)
+{
+  test_data_expression_in_specification_context(
+    "f",
+    "sort U;\n"
+    "     S;\n"
+    "     T;\n\n"
+    "map  f: Pos;\n"
+    "     f: Pos # Nat -> U;\n"
+    "     f: Pos # Pos -> S;\n"
+    "     f: Nat # Pos -> T;\n",
+    true,
+    "Pos"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application1)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(data::variable("y", data::sort_nat::nat()));
+
+  test_data_expression_in_specification_context(
+    "f(x, x)",
+    "sort U;\n"
+    "     S;\n"
+    "     T;\n\n"
+    "map  f: Pos;\n"
+    "     f: Pos # Nat -> U;\n"
+    "     f: Pos # Pos -> S;\n"
+    "     f: Nat # Pos -> T;\n",
+    v.begin(), v.end(),
+    true,
+    "S"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application2)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(data::variable("y", data::sort_nat::nat()));
+
+  test_data_expression_in_specification_context(
+    "f(x, y)",
+    "sort U;\n"
+    "     S;\n"
+    "     T;\n\n"
+    "map  f: Pos;\n"
+    "     f: Pos # Nat -> U;\n"
+    "     f: Pos # Pos -> S;\n"
+    "     f: Nat # Pos -> T;\n",
+    v.begin(), v.end(),
+    true,
+    "U"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application3)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(data::variable("y", data::sort_nat::nat()));
+
+  test_data_expression_in_specification_context(
+    "f(y, x)",
+    "sort U;\n"
+    "     S;\n"
+    "     T;\n\n"
+    "map  f: Pos;\n"
+    "     f: Pos # Nat -> U;\n"
+    "     f: Pos # Pos -> S;\n"
+    "     f: Nat # Pos -> T;\n",
+    v.begin(), v.end(),
+    true,
+    "T"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(data::variable("y", data::sort_nat::nat()));
+
+  test_data_expression_in_specification_context(
+    "f(x, x)",
+    "sort S;\n"
+    "     T;\n"
+    "     U;\n\n"
+    "map  f: Pos;\n"
+    "     f: Pos # Nat -> U;\n"
+    "     f: Nat # Nat -> S;\n"
+    "     f: Nat # Pos -> T;\n",
+    v.begin(), v.end(),
+    true,
+    "U"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4a)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(data::variable("y", data::sort_nat::nat()));
+
+  test_data_expression_in_specification_context(
+    "f(x, x)",
+    "sort U;\n"
+    "     S;\n"
+    "     T;\n\n"
+    "map  f: Pos;\n"
+    "     f: Pos # Nat -> U;\n"
+    "     f: Nat # Nat -> S;\n"
+    "     f: Nat # Pos -> T;\n",
+    v.begin(), v.end(),
+    true,
+    "U"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application5)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  v.push_back(data::variable("y", data::sort_nat::nat()));
+
+  test_data_expression_in_specification_context(
+    "f(x, x)",
+    "sort S;\n"
+    "     T;\n"
+    "     U;\n\n"
+    "map  f: Pos;\n"
+    "     f: Nat # Pos -> T;\n"
+    "     f: Pos # Nat -> U;\n"
+    "     f: Nat # Nat -> S;\n",
+    v.begin(), v.end(),
+    true,
+    "U"
   );
 }
 
