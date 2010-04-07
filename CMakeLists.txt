@@ -731,7 +731,7 @@ endif( INSTALL_BOOST_HEADERS )
 
 install(
   DIRECTORY examples/
-  DESTINATION share/mcrl2/examples
+  DESTINATION share/doc/mcrl2/examples
   PATTERN ".svn" EXCLUDE
 )
 

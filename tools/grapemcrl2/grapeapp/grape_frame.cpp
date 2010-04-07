@@ -178,7 +178,7 @@ grape_frame::grape_frame( const wxString &p_filename )
         found = true;
       }
     // binary in install/distribution
-    if( fs.FindFileInPath( &filename, wxpath , _T("/../share/mcrl2/grape/grapehelp.zip") ) )
+    if( fs.FindFileInPath( &filename, wxpath , _T("/../share/doc/mcrl2/grape/grapehelp.zip") ) )
       {
         m_help_controller->AddBook( wxFileName( filename ) );
         found = true;
@@ -196,7 +196,7 @@ grape_frame::grape_frame( const wxString &p_filename )
     if(!install_win32_path.empty())
     {
       // binary in install/distribution
-      if( fs.FindFileInPath( &filename, wxinstall_path , _T("/share/mcrl2/grape/grapehelp.zip") ) )
+      if( fs.FindFileInPath( &filename, wxinstall_path , _T("/share/doc/mcrl2/grape/grapehelp.zip") ) )
         {
           m_help_controller->AddBook( wxFileName( filename ) );
           found = true;

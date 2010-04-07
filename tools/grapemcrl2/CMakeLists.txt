@@ -143,7 +143,7 @@ endif( MONO_LIB )
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-install(FILES grapeapp/help/grapehelp.zip DESTINATION share/mcrl2/grape)
+install(FILES grapeapp/help/grapehelp.zip DESTINATION share/doc/mcrl2/grape)
 
 # install documentation
 if (MAN_PAGES)
