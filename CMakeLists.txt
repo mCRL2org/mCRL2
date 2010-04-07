@@ -159,10 +159,14 @@ if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
     add_definitions( -pipe ) 
   endif( CXX_ACCEPTS_PIPE )
 
-  check_cxx_compiler_flag(-Wl,-as-needed CXX_ACCEPTS_AS_NEEDED )
-  if( CXX_ACCEPTS_AS_NEEDED )
-    add_definitions( -Wl,-as-needed ) 
-  endif( CXX_ACCEPTS_AS_NEEDED )
+  # Following flag will cause warning on MacOSX, if enabled:
+  #686-apple-darwin9-g++-4.0.1: -as-needed: linker input file unused because linking not done
+  if( NOT APPLE)
+    check_cxx_compiler_flag(-Wl,-as-needed CXX_ACCEPTS_AS_NEEDED )
+    if( CXX_ACCEPTS_AS_NEEDED )
+      add_definitions( -Wl,-as-needed ) 
+    endif( CXX_ACCEPTS_AS_NEEDED )
+  endif( NOT APPLE )
 
   # Display include dependencies
   # check_cxx_compiler_flag(-H CXX_ACCEPTS_H )
@@ -281,7 +285,6 @@ message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
 option(MONO_LIB "Enable/disable creation of a monolithic library" OFF)
 message(STATUS "MONO_LIB: ${MONO_LIB}")
-
 
 ##-----------------------------------------------------
 ## Set runtime path variable RPATH for install targets 
