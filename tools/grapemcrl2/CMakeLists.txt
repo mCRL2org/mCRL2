@@ -140,21 +140,17 @@ target_link_libraries(${PROJECT_NAME}
 
 endif( MONO_LIB )
 
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
+# install grape help file
 install(FILES grapeapp/help/grapehelp.zip DESTINATION share/doc/mcrl2/grape)
 
-# install documentation
-if (MAN_PAGES)
-  add_custom_command(
-    OUTPUT ${PROJECT_NAME}.1
-    COMMAND ${PROJECT_NAME} --generate-man-page > ${PROJECT_NAME}.1
-    DEPENDS ${PROJECT_NAME}
-    COMMENT "Generating man page for ${PROJECT_NAME}"
-  )
-  add_custom_target(${PROJECT_NAME}_man_page ALL DEPENDS ${PROJECT_NAME}.1)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.1 DESTINATION share/man/man1)
-endif (MAN_PAGES)
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 endif ( MCRL2_BUILD_GUI_TOOLS )
+

@@ -81,17 +81,8 @@ endif( MONO_LIB )
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-# install documentation
-if (MAN_PAGES)
-  add_custom_command(
-    OUTPUT ${PROJECT_NAME}.1
-    COMMAND ${PROJECT_NAME} --generate-man-page > ${PROJECT_NAME}.1
-    DEPENDS ${PROJECT_NAME}
-    COMMENT "Generating man page for ${PROJECT_NAME}"
-  )
-  add_custom_target(${PROJECT_NAME}_man_page ALL DEPENDS ${PROJECT_NAME}.1)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.1 DESTINATION share/man/man1)
-endif (MAN_PAGES)
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 # ######################################
 # ######## mcrl2_simulator_gui #########
@@ -123,7 +114,11 @@ target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
 )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 endif (MCRL2_BUILD_GUI_TOOLS AND NOT MONO_LIB)
 
@@ -185,32 +180,19 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities_command_line
 )
 
-# ######### required for squadt connectivity ##########
-if(SQUADT_CONNECTIVITY)
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
-  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_utilities_squadt
-  )
-endif(SQUADT_CONNECTIVITY)
-# #####################################################
+  #Add Squadt Connectivity when required
+  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
+
 endif( MONO_LIB )
 
-
-# add install target:
+# install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-# install documentation
-if (MAN_PAGES)
-  add_custom_command(
-    OUTPUT ${PROJECT_NAME}.1
-    COMMAND ${PROJECT_NAME} --generate-man-page > ${PROJECT_NAME}.1
-    DEPENDS ${PROJECT_NAME}
-    COMMENT "Generating man page for ${PROJECT_NAME}"
-  )
-  add_custom_target(${PROJECT_NAME}_man_page ALL DEPENDS ${PROJECT_NAME}.1)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.1 DESTINATION share/man/man1)
-endif (MAN_PAGES)
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 if( NOT WIN32 )
   add_subdirectory ( plugins/garage )

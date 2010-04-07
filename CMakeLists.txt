@@ -303,7 +303,8 @@ if(NOT CMAKE_INSTALL_RPATH)
 endif(NOT CMAKE_INSTALL_RPATH)
 
 # Mac OSX directory name for installed targets
-set(CMAKE_INSTALL_NAME_DIR "@executable_path/../lib/mcrl2")
+# Installing prerequisite shared libraries is dealt with in "RelocateInstallTree.cmake"
+set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib/mcrl2")
 
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
@@ -838,12 +839,6 @@ include(CTest)
 ##--------------------------------------------------- 
 
 ##---------------------------------------------------
-## Target doc
-##---------------------------------------------------
-
-#add_custom_target(doc)
-
-##---------------------------------------------------
 ## Target tags (useful editing with Vim)
 ##--------------------------------------------------- 
 
@@ -928,15 +923,6 @@ if(UNIX)
   add_dependencies(parsers mcrl2parser chiparser lysaparser liblts_fsmparser liblts_dotparser)
 
 endif(UNIX)
-
-# --------------------------------------
-# Targets that should always be executed
-# --------------------------------------
-
-# The following target executes a local CMake script:
-# add_custom_target(halleeej ALL
-#   ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/halleeej.cmake
-# )
 
 ##---------------------------------------------------
 ## CPack configuration 
