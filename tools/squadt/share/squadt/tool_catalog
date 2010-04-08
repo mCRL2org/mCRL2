@@ -23,5 +23,6 @@
 <tool name="pbesparelm" />
 <tool name="pbesrewr" />
 <tool name="pnml2mcrl2" />
+<tool name="txt2pbes" />
 <tool name="lpsxsim" macosx_bundle="true"/>
 </tool-catalog>
