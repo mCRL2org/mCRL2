@@ -38,9 +38,6 @@ target_link_libraries(${PROJECT_NAME}
 )
 endif( MONO_LIB )
 
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
