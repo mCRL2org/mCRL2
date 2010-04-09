@@ -20,6 +20,7 @@
 <tool name="mcrl22lps" />
 <tool name="pbes2bool" />
 <tool name="pbesconstelm" />
+<tool name="pbesinfo" />
 <tool name="pbesparelm" />
 <tool name="pbesrewr" />
 <tool name="pnml2mcrl2" />
