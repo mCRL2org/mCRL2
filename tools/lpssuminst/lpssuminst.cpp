@@ -150,8 +150,8 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     /** \brief check an existing configuration object to see if it is usable */
     bool check_configuration(tipi::configuration const& configuration) const
     {
-      return configuration.input_exists("main-input") ||
-             configuration.input_exists("main-output") ||
+      return configuration.input_exists("main-input") &&
+             configuration.output_exists("main-output") &&
              configuration.option_exists("rewrite-strategy");
     }
 
