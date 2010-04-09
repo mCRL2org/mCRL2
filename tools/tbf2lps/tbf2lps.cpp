@@ -180,7 +180,7 @@ class tbf2lps_tool: public squadt_tool<input_output_tool>
     /** \brief check an existing configuration object to see if it is usable */
     bool check_configuration(tipi::configuration const& configuration) const
     {
-      return configuration.input_exists("main-input") ||
+      return configuration.input_exists("main-input") &&
              configuration.input_exists("main-output");
     }
 
