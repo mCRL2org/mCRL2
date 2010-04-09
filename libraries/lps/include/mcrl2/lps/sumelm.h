@@ -156,7 +156,7 @@ namespace mcrl2 {
             (*this)(*i);
           }
 
-          if(m_verbose)
+          if(verbose())
           {
             std::cerr << "Removed " << m_removed << " summation variables" << std::endl;
           }

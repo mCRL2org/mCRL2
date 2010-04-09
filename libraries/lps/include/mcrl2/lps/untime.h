@@ -48,7 +48,7 @@ namespace mcrl2 {
           // for the elements in the vector is true, it is a candidate time variable.
           std::vector <bool> time_variable_candidates(m_spec.process().process_parameters().size(),true);
           std::vector <bool>::iterator j=time_variable_candidates.begin() ;
-          if (m_verbose)
+          if (verbose())
           {
             std::cerr << "For untiming to function optimally, it is assumed that the input lps is rewritten to normal form" << std::endl;
           }
@@ -99,7 +99,7 @@ namespace mcrl2 {
             }
           }
           assert(j==time_variable_candidates.end());
-          if (m_verbose)
+          if (verbose())
           {
             std::cerr << "Time invariant " << pp(time_invariant) << std::endl;
           }
@@ -156,7 +156,7 @@ namespace mcrl2 {
 
           if (m_spec.process().has_time())
           {
-            if(m_verbose)
+            if(verbose())
             {
               std::cerr << "Untiming " << m_spec.process().summand_count() << " summands" << std::endl;
             }
@@ -164,7 +164,7 @@ namespace mcrl2 {
             // Create extra parameter m_last_action_time and add it to the list of process parameters,
             // m_last_action_time is used later on in the code
             m_last_action_time = data::variable(m_identifier_generator("last_action_time"), data::sort_real::real_());
-            if(m_verbose)
+            if(verbose())
             {
               std::cerr << "Introduced variable " << pp(m_last_action_time) << " to denote time of last action" << std::endl;
             }

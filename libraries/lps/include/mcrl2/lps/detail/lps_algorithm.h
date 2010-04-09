@@ -18,6 +18,7 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/algorithm.h"  
 #include "mcrl2/data/find.h"  
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitution.h"
@@ -34,15 +35,12 @@ namespace lps {
 namespace detail {
 
   /// \brief Algorithm class for algorithms on linear process specifications.
-  class lps_algorithm
+  class lps_algorithm: public core::algorithm
   {
     protected:
       /// \brief The specification that is processed by the algorithm
       specification& m_spec;
      
-      /// \brief If true, verbose output is written
-      bool m_verbose;
-
       template <typename OutIter>
       void sumelm_find_variables(const action_summand& s, OutIter result) const
       {
@@ -77,9 +75,23 @@ namespace detail {
     public:
       /// \brief Constructor
       lps_algorithm(specification& spec, bool verbose = false)
-        : m_spec(spec),
-          m_verbose(verbose)
+        : 
+          core::algorithm(verbose ? 1 : 0),
+          m_spec(spec)
       {}
+
+      /// \brief Constructor
+      lps_algorithm(specification& spec, unsigned int loglevel)
+        : 
+          core::algorithm(loglevel),
+          m_spec(spec)
+      {}
+
+      /// \brief Flag for verbose output
+      bool verbose() const
+      {
+        return verbose_level() >= 1;
+      }
 
       /// \brief Applies the next state substitution to the variable v.
       data::data_expression next_state(const summand& s, const data::variable& v) const

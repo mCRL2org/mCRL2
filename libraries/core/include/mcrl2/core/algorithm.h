@@ -12,6 +12,8 @@
 #ifndef MCRL2_CORE_ALGORITHM_H
 #define MCRL2_CORE_ALGORITHM_H
 
+#include <iostream>
+
 namespace mcrl2 {
 
   namespace core {
