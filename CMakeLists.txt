@@ -835,6 +835,13 @@ endif( ENABLE_TEST_TARGETS )
 include(CTest)
 
 ##---------------------------------------------------
+## Header tests 
+##--------------------------------------------------- 
+option(MCRL2_TRYCOMPILE_HEADER_TESTS "Enable/disable try_compile of library headers" OFF)
+message(STATUS "MCRL2_TRYCOMPILE_HEADER_TESTS: ${MCRL2_TRYCOMPILE_HEADER_TESTS}" )
+include( scripts/HeaderTests.cmake )
+
+##---------------------------------------------------
 ## Additional make targets
 ##--------------------------------------------------- 
 
