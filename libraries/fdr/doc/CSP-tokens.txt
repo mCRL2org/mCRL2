@@ -153,11 +153,11 @@ _               UNDERSCORE
             <Expr> LESS <Expr> | <Expr> LESS_OR_EQUAL <Expr> | <Expr> GREATER <Expr> | <Expr> GREATER_OR_EQUAL <Expr> | <Bool4>
 <Bool4> ::= <Expr> EQUAL <Expr> | <Expr> NOT_EQUAL <Expr> | <Common>
 
-<Set> ::= <Common> | LBRACE <Targ> RBRACE | LBRACE <Targ> BAR <Gens> RBRACE | LBRACEBAR <Targ> RBRACEBAR | LBRACEBAR <Targ> BAR <Gens> RBRACEBAR | BIN_UNION LPARENTHESIS <Set> COMMA <Set> RPARENTHESIS | BIN_INTER LPARENTHESIS <Set> COMMA <Set> RPARENTHESIS | DIFF LPARENTHESIS <Set> COMMA <Set> RPARENTHESIS | UNION LPARENTHESIS <Set> RPARENTHESIS | INTER LPARENTHESIS <Set> RPARENTHESIS | SEQ_TO_SET LPARENTHESIS <Seq> RPARENTHESIS | SET_TO_SET LPARENTHESIS <Set> RPARENTHESIS | SEQ_TO_SEQSET LPARENTHESIS <Seq> RPARENTHESIS | EXTENSIONS LPARENTHESIS <Expr> RPARENTHESIS | PRODUCTIONS LPARENTHESIS <Expr> RPARENTHESIS
+<Set> ::= <Common> | LBRACE <Targ> RBRACE | LBRACEBAR <Targ> RBRACEBAR | BIN_UNION LPARENTHESIS <Set> COMMA <Set> RPARENTHESIS | BIN_INTER LPARENTHESIS <Set> COMMA <Set> RPARENTHESIS | DIFF LPARENTHESIS <Set> COMMA <Set> RPARENTHESIS | UNION LPARENTHESIS <Set> RPARENTHESIS | INTER LPARENTHESIS <Set> RPARENTHESIS | SEQ_TO_SET LPARENTHESIS <Seq> RPARENTHESIS | SET_TO_SET LPARENTHESIS <Set> RPARENTHESIS | SEQ_TO_SEQSET LPARENTHESIS <Seq> RPARENTHESIS | EXTENSIONS LPARENTHESIS <Expr> RPARENTHESIS | PRODUCTIONS LPARENTHESIS <Expr> RPARENTHESIS
 
 <Seq> ::= <Seq1> CAT <Seq> | CONCAT LPARENTHESIS <Seq1> RPARENTHESIS | <Seq1>
 <Seq1> ::= HEAD LPARENTHESIS <Seq2> RPARENTHESIS | TAIL LPARENTHESIS <Seq2> RPARENTHESIS | <Seq2>
-<Seq2> ::= LESS <TargGens> GREATER | <Common>
+<Seq2> ::= LESS <Targ> GREATER | <Common>
 
 <Tuple> ::= <Common> | LPARENTHESIS <Exprs> RPARENTHESIS
 
@@ -167,13 +167,15 @@ _               UNDERSCORE
 
 <Common> ::= IF <Bool> THEN <Any> ELSE <Any> | <Name> | <Lambda> LPARENTHESIS <Exprs> RPARENTHESIS | LET <Defns> WITHIN <Any> | LPARENTHESIS <Any> RPARENTHESIS | <Any> ATAT <Any>
 
-<TargGens> ::= <Targ> | <Targ> BAR <Gens>
+<Targ> ::= Follow(<Targ>) | <Exprs> | <Numb> DOTDOT <Numb> | <Numb> DOTDOT | <Expr> BAR <Comprehensions>
 
-<Targ> ::= Follow(<Targ>) | <Exprs> | <Numb> DOTDOT <Numb> | <Numb> DOTDOT
+<Comprehensions> ::= <Comprehension> | <Comprehension> COMMA <Comprehensions>
 
-<Gens> ::= <Gen> | <Gen> COMMA <Gens>
+<Comprehension> ::= Follow(<Comprehension>) | <Bool> | <Expr> MAP <Expr>
 
-<Gen> ::= <Bool> | <Expr> MAP <Expr>
+<SetGen> ::= <Expr> COLON <Set>
+
+<SeqGen> ::= <Expr> COLON <Seq>
 
 <Defns> ::= <Defn> | <Defn> <Defns>
 
@@ -191,11 +193,11 @@ _               UNDERSCORE
 
 <Names> ::= <Name> | <Name> COMMA <Names>
 
-<Proc> ::= INTERLEAVE <Gens> AT <Proc1> | <Proc1>
-<Proc1> ::= LBRACKET <LinkPar> RBRACKET <Gens> AT <Proc2> | BARBAR <Gens> AT LSQUAREBRACKET <Set> RSQUAREBRACKET <Proc2> | LSQUAREBRACKETBAR <Set> RSQUAREBRACKETBAR <Gens> AT <Proc2> | LBARSQUAREBRACKET <Set> RBARSQUAREBRACKET <Gens> AT <Proc2> | <Proc2>
-<Proc2> ::= INTERNAL_CHOICE <Gens> AT <Proc3> | <Proc3>
-<Proc3> ::= EXTERNAL_CHOICE <Gens> AT <Proc4> | <Proc4>
-<Proc4> ::= SEMICOLON <Gens> AT <Proc5> | <Proc5>
+<Proc> ::= INTERLEAVE <SetGen> AT <Proc1> | <Proc1>
+<Proc1> ::= LBRACKET <LinkPar> RBRACKET <SeqGen> AT <Proc2> | BARBAR <SetGen> AT LSQUAREBRACKET <Set> RSQUAREBRACKET <Proc2> | LSQUAREBRACKETBAR <Set> RSQUAREBRACKETBAR <SetGen> AT <Proc2> | LBARSQUAREBRACKET <Set> RBARSQUAREBRACKET <SetGen> AT <Proc2> | <Proc2>
+<Proc2> ::= INTERNAL_CHOICE <SetGen> AT <Proc3> | <Proc3>
+<Proc3> ::= EXTERNAL_CHOICE <SetGen> AT <Proc4> | <Proc4>
+<Proc4> ::= SEMICOLON <SeqGen> AT <Proc5> | <Proc5>
 <Proc5> ::= <Proc6> BACKSLASH <Set> | <Proc6>
 <Proc6> ::= <Proc7> INTERLEAVE <Proc6> | <Proc7>
 <Proc7> ::= <Proc8> LBRACKET <LinkPar> RBRACKET <Proc7> | <Proc8> LSQUAREBRACKET <Set> BARBAR <Set> RSQUAREBRACKET <Proc7> | <Proc8> LSQUAREBRACKETBAR <Set> RSQUAREBRACKETBAR <Proc7> | <Proc8> LBARSQUAREBRACKET <Set> RBARSQUAREBRACKET <Proc7> | <Proc8>
@@ -212,13 +214,13 @@ _               UNDERSCORE
 
 <Field> ::= QUESTION_MARK <Expr> | QUESTION_MARK <Expr> COLON <Expr> | EXCLAMATION_MARK <Expr>
 
-<Rename> ::= <Maps> | <Maps> BAR <Gens>
+<Rename> ::= <Maps> | <Maps> BAR <Comprehensions>
 
 <Maps> ::= <Map> | <Map> COMMA <Maps>
 
 <Map> ::= <Dotted> MAP <Dotted>
 
-<LinkPar> ::= <Links> | <Links> BAR <Gens>
+<LinkPar> ::= <Links> | <Links> BAR <Comprehensions>
 
 <Links> ::= <Link> | <Link>COMMA <Links>
 

@@ -23,79 +23,84 @@ namespace mcrl2 {
 namespace fdr {
 
 //--- start generated classes ---//
-/// \brief A boolean
-class bgen: atermpp::aterm_appl
+/// \brief A set generator
+class setgen: atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
-    bgen()
-      : atermpp::aterm_appl(fdr::detail::constructBGen())
+    setgen()
+      : atermpp::aterm_appl(fdr::detail::constructSetGen())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    bgen(atermpp::aterm_appl term)
+    setgen(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(fdr::detail::check_term_BGen(m_term));
+      assert(fdr::detail::check_term_SetGen(m_term));
     }
 
     /// \brief Constructor.
-    bgen(const boolean_expression& operand)
-      : atermpp::aterm_appl(fdr::detail::gsMakeBGen(operand))
+    setgen(const expression& expr, const set_expression& set)
+      : atermpp::aterm_appl(fdr::detail::gsMakeSetGen(expr, set))
     {}
 
-    boolean_expression operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-};
-
-/// \brief list of bgens
-typedef atermpp::term_list<bgen> bgen_list;
-
-/// \brief vector of bgens
-typedef atermpp::vector<bgen>    bgen_vector;
-
-
-/// \brief A generator
-class gen: atermpp::aterm_appl
-{
-  public:
-    /// \brief Default constructor.
-    gen()
-      : atermpp::aterm_appl(fdr::detail::constructGen())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    gen(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Gen(m_term));
-    }
-
-    /// \brief Constructor.
-    gen(const expression& left, const expression& right)
-      : atermpp::aterm_appl(fdr::detail::gsMakeGen(left, right))
-    {}
-
-    expression left() const
+    expression expr() const
     {
       return atermpp::arg1(*this);
     }
 
-    expression right() const
+    set_expression set() const
     {
       return atermpp::arg2(*this);
     }
 };
 
-/// \brief list of gens
-typedef atermpp::term_list<gen> gen_list;
+/// \brief list of setgens
+typedef atermpp::term_list<setgen> setgen_list;
 
-/// \brief vector of gens
-typedef atermpp::vector<gen>    gen_vector;
+/// \brief vector of setgens
+typedef atermpp::vector<setgen>    setgen_vector;
+
+
+/// \brief A seq generator
+class seqgen: atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    seqgen()
+      : atermpp::aterm_appl(fdr::detail::constructSeqGen())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    seqgen(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_term_SeqGen(m_term));
+    }
+
+    /// \brief Constructor.
+    seqgen(const expression& expr, const seq_expression& seq)
+      : atermpp::aterm_appl(fdr::detail::gsMakeSeqGen(expr, seq))
+    {}
+
+    expression expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    seq_expression seq() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief list of seqgens
+typedef atermpp::term_list<seqgen> seqgen_list;
+
+/// \brief vector of seqgens
+typedef atermpp::vector<seqgen>    seqgen_vector;
 
 //--- end generated classes ---//
 

@@ -30,7 +30,6 @@ ATermAppl constructTest();
 ATermAppl constructInclude();
 ATermAppl constructSharing();
 ATermAppl constructdeadlock_free();
-ATermAppl constructTargGens();
 ATermAppl constructdeterministic();
 ATermAppl constructFDRSpec();
 ATermAppl constructMinus();
@@ -73,25 +72,29 @@ ATermAppl constructOpenRange();
 ATermAppl constructExternalChoice();
 ATermAppl constructBoolGuard();
 ATermAppl constructTypeSet();
+ATermAppl constructCompr();
 ATermAppl constructSubType();
 ATermAppl constructLink();
 ATermAppl constructExternal();
 ATermAppl constructSKIP();
 ATermAppl constructInput();
 ATermAppl constructlivelock_free();
+ATermAppl constructBComprehension();
 ATermAppl constructSimpleBranch();
 ATermAppl constructTimes();
 ATermAppl constructExprs();
 ATermAppl constructSimpleChannel();
-ATermAppl constructGreater();
+ATermAppl constructChanSet();
 ATermAppl constructRename();
 ATermAppl constructmodel_compress();
 ATermAppl constructBracketed();
 ATermAppl constructInterleave();
 ATermAppl constructClosedRange();
 ATermAppl constructextensions();
+ATermAppl constructComprehension();
 ATermAppl constructexplicate();
 ATermAppl constructNull();
+ATermAppl constructSeqGen();
 ATermAppl constructDotted();
 ATermAppl constructSTOP();
 ATermAppl constructCHAOS();
@@ -108,7 +111,6 @@ ATermAppl constructNameType();
 ATermAppl constructFD();
 ATermAppl constructTuple();
 ATermAppl constructunion();
-ATermAppl constructChanSet();
 ATermAppl constructTransparent();
 ATermAppl constructCard();
 ATermAppl constructdiamond();
@@ -124,7 +126,6 @@ ATermAppl constructAnd();
 ATermAppl constructSet();
 ATermAppl constructSeq();
 ATermAppl constructNumber();
-ATermAppl constructGen();
 ATermAppl constructPrefix();
 ATermAppl constructConcat();
 ATermAppl constructHiding();
@@ -134,13 +135,12 @@ ATermAppl constructMin();
 ATermAppl constructSimpleInput();
 ATermAppl constructSimpleTypeName();
 ATermAppl constructTypeProduct();
-ATermAppl constructBGen();
 ATermAppl constructnormalize();
 ATermAppl constructMap();
 ATermAppl constructsbsim();
 ATermAppl constructNil();
 ATermAppl constructTCheck();
-ATermAppl constructRepLinkedParallel();
+ATermAppl constructGreater();
 ATermAppl constructAssert();
 ATermAppl constructLocalDef();
 ATermAppl constructtau_loop_factor();
@@ -149,10 +149,12 @@ ATermAppl constructnormal();
 ATermAppl constructExpr();
 ATermAppl constructEqual();
 ATermAppl constructTypeTuple();
+ATermAppl constructSetGen();
 ATermAppl constructOutput();
 ATermAppl constructModel();
 ATermAppl constructDot();
 ATermAppl constructMapsGens();
+ATermAppl constructRepLinkedParallel();
 ATermAppl constructDataType();
 ATermAppl constructUntimedTimeOut();
 ATermAppl constructDefn();
@@ -174,7 +176,7 @@ ATermAppl constructLinkPar();
 inline
 ATermAppl initConstructRepInternalChoice(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunRepInternalChoice(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()));
+  t = ATmakeAppl2(gsAFunRepInternalChoice(), reinterpret_cast<ATerm>(constructSetGen()), reinterpret_cast<ATerm>(constructProc()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -311,22 +313,6 @@ inline
 ATermAppl constructdeadlock_free()
 {
   static ATermAppl t = initConstructdeadlock_free(t);
-  return t;
-}
-
-// TargGens
-inline
-ATermAppl initConstructTargGens(ATermAppl& t)
-{
-  t = ATmakeAppl2(gsAFunTargGens(), reinterpret_cast<ATerm>(constructTarg()), reinterpret_cast<ATerm>(constructList()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructTargGens()
-{
-  static ATermAppl t = initConstructTargGens(t);
   return t;
 }
 
@@ -526,7 +512,7 @@ ATermAppl constructCat()
 inline
 ATermAppl initConstructRepExternalChoice(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunRepExternalChoice(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()));
+  t = ATmakeAppl2(gsAFunRepExternalChoice(), reinterpret_cast<ATerm>(constructSetGen()), reinterpret_cast<ATerm>(constructProc()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -622,7 +608,7 @@ ATermAppl constructOr()
 inline
 ATermAppl initConstructRepInterleave(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunRepInterleave(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()));
+  t = ATmakeAppl2(gsAFunRepInterleave(), reinterpret_cast<ATerm>(constructSetGen()), reinterpret_cast<ATerm>(constructProc()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -766,7 +752,7 @@ ATermAppl constructinter()
 inline
 ATermAppl initConstructRepSharing(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunRepSharing(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructSet()));
+  t = ATmakeAppl3(gsAFunRepSharing(), reinterpret_cast<ATerm>(constructSetGen()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructSet()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1002,6 +988,22 @@ ATermAppl constructTypeSet()
   return t;
 }
 
+// Compr
+inline
+ATermAppl initConstructCompr(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunCompr(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructCompr()
+{
+  static ATermAppl t = initConstructCompr(t);
+  return t;
+}
+
 // SubType
 inline
 ATermAppl initConstructSubType(ATermAppl& t)
@@ -1098,6 +1100,22 @@ ATermAppl constructlivelock_free()
   return t;
 }
 
+// BComprehension
+inline
+ATermAppl initConstructBComprehension(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunBComprehension(), reinterpret_cast<ATerm>(constructBool()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBComprehension()
+{
+  static ATermAppl t = initConstructBComprehension(t);
+  return t;
+}
+
 // SimpleBranch
 inline
 ATermAppl initConstructSimpleBranch(ATermAppl& t)
@@ -1162,19 +1180,19 @@ ATermAppl constructSimpleChannel()
   return t;
 }
 
-// Greater
+// ChanSet
 inline
-ATermAppl initConstructGreater(ATermAppl& t)
+ATermAppl initConstructChanSet(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunGreater(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  t = ATmakeAppl1(gsAFunChanSet(), reinterpret_cast<ATerm>(constructTarg()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructGreater()
+ATermAppl constructChanSet()
 {
-  static ATermAppl t = initConstructGreater(t);
+  static ATermAppl t = initConstructChanSet(t);
   return t;
 }
 
@@ -1274,6 +1292,22 @@ ATermAppl constructextensions()
   return t;
 }
 
+// Comprehension
+inline
+ATermAppl initConstructComprehension(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunComprehension(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructComprehension()
+{
+  static ATermAppl t = initConstructComprehension(t);
+  return t;
+}
+
 // explicate
 inline
 ATermAppl initConstructexplicate(ATermAppl& t)
@@ -1303,6 +1337,22 @@ inline
 ATermAppl constructNull()
 {
   static ATermAppl t = initConstructNull(t);
+  return t;
+}
+
+// SeqGen
+inline
+ATermAppl initConstructSeqGen(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunSeqGen(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructSeq()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSeqGen()
+{
+  static ATermAppl t = initConstructSeqGen(t);
   return t;
 }
 
@@ -1422,7 +1472,7 @@ ATermAppl constructBCheck()
 inline
 ATermAppl initConstructRepAlphaParallel(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunRepAlphaParallel(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructSet()));
+  t = ATmakeAppl3(gsAFunRepAlphaParallel(), reinterpret_cast<ATerm>(constructSetGen()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructSet()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1454,7 +1504,7 @@ ATermAppl constructdiff()
 inline
 ATermAppl initConstructRepSequentialComposition(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunRepSequentialComposition(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()));
+  t = ATmakeAppl2(gsAFunRepSequentialComposition(), reinterpret_cast<ATerm>(constructSeqGen()), reinterpret_cast<ATerm>(constructProc()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1559,22 +1609,6 @@ inline
 ATermAppl constructunion()
 {
   static ATermAppl t = initConstructunion(t);
-  return t;
-}
-
-// ChanSet
-inline
-ATermAppl initConstructChanSet(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunChanSet(), reinterpret_cast<ATerm>(constructTargGens()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructChanSet()
-{
-  static ATermAppl t = initConstructChanSet(t);
   return t;
 }
 
@@ -1818,22 +1852,6 @@ ATermAppl constructNumber()
   return t;
 }
 
-// Gen
-inline
-ATermAppl initConstructGen(ATermAppl& t)
-{
-  t = ATmakeAppl2(gsAFunGen(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructGen()
-{
-  static ATermAppl t = initConstructGen(t);
-  return t;
-}
-
 // Prefix
 inline
 ATermAppl initConstructPrefix(ATermAppl& t)
@@ -1978,22 +1996,6 @@ ATermAppl constructTypeProduct()
   return t;
 }
 
-// BGen
-inline
-ATermAppl initConstructBGen(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunBGen(), reinterpret_cast<ATerm>(constructBool()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructBGen()
-{
-  static ATermAppl t = initConstructBGen(t);
-  return t;
-}
-
 // normalize
 inline
 ATermAppl initConstructnormalize(ATermAppl& t)
@@ -2074,19 +2076,19 @@ ATermAppl constructTCheck()
   return t;
 }
 
-// RepLinkedParallel
+// Greater
 inline
-ATermAppl initConstructRepLinkedParallel(ATermAppl& t)
+ATermAppl initConstructGreater(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunRepLinkedParallel(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructLinkPar()));
+  t = ATmakeAppl2(gsAFunGreater(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructRepLinkedParallel()
+ATermAppl constructGreater()
 {
-  static ATermAppl t = initConstructRepLinkedParallel(t);
+  static ATermAppl t = initConstructGreater(t);
   return t;
 }
 
@@ -2218,6 +2220,22 @@ ATermAppl constructTypeTuple()
   return t;
 }
 
+// SetGen
+inline
+ATermAppl initConstructSetGen(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunSetGen(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructSet()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSetGen()
+{
+  static ATermAppl t = initConstructSetGen(t);
+  return t;
+}
+
 // Output
 inline
 ATermAppl initConstructOutput(ATermAppl& t)
@@ -2279,6 +2297,22 @@ inline
 ATermAppl constructMapsGens()
 {
   static ATermAppl t = initConstructMapsGens(t);
+  return t;
+}
+
+// RepLinkedParallel
+inline
+ATermAppl initConstructRepLinkedParallel(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunRepLinkedParallel(), reinterpret_cast<ATerm>(constructSeqGen()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructLinkPar()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructRepLinkedParallel()
+{
+  static ATermAppl t = initConstructRepLinkedParallel(t);
   return t;
 }
 

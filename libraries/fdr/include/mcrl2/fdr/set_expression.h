@@ -60,11 +60,11 @@ class chanset: public set_expression
     }
 
     /// \brief Constructor.
-    chanset(const targgens& argument)
+    chanset(const targ& argument)
       : set_expression(fdr::detail::gsMakeChanSet(argument))
     {}
 
-    targgens argument() const
+    targ argument() const
     {
       return atermpp::arg1(*this);
     }

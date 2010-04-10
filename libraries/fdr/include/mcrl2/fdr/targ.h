@@ -159,6 +159,46 @@ typedef atermpp::term_list<openrange> openrange_list;
 /// \brief vector of openranges
 typedef atermpp::vector<openrange>    openrange_vector;
 
+
+/// \brief A comprehension
+class compr: atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    compr()
+      : atermpp::aterm_appl(fdr::detail::constructCompr())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    compr(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_term_Compr(m_term));
+    }
+
+    /// \brief Constructor.
+    compr(const expression& expr, const comprehension_list& comprs)
+      : atermpp::aterm_appl(fdr::detail::gsMakeCompr(expr, comprs))
+    {}
+
+    expression expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    comprehension_list comprs() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+};
+
+/// \brief list of comprs
+typedef atermpp::term_list<compr> compr_list;
+
+/// \brief vector of comprs
+typedef atermpp::vector<compr>    compr_vector;
+
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

@@ -131,26 +131,26 @@ bool gsIsBCheck(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunBCheck();
 }
 
-// BGen
+// BComprehension
 inline
-AFun initAFunBGen(AFun& f)
+AFun initAFunBComprehension(AFun& f)
 {
-  f = ATmakeAFun("BGen", 1, ATfalse);
+  f = ATmakeAFun("BComprehension", 1, ATfalse);
   ATprotectAFun(f);
   return f;
 }
 
 inline
-AFun gsAFunBGen()
+AFun gsAFunBComprehension()
 {
-  static AFun AFunBGen = initAFunBGen(AFunBGen);
-  return AFunBGen;
+  static AFun AFunBComprehension = initAFunBComprehension(AFunBComprehension);
+  return AFunBComprehension;
 }
 
 inline
-bool gsIsBGen(ATermAppl Term)
+bool gsIsBComprehension(ATermAppl Term)
 {
-  return ATgetAFun(Term) == gsAFunBGen();
+  return ATgetAFun(Term) == gsAFunBComprehension();
 }
 
 // Bool
@@ -371,6 +371,50 @@ inline
 bool gsIsClosedRange(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunClosedRange();
+}
+
+// Compr
+inline
+AFun initAFunCompr(AFun& f)
+{
+  f = ATmakeAFun("Compr", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunCompr()
+{
+  static AFun AFunCompr = initAFunCompr(AFunCompr);
+  return AFunCompr;
+}
+
+inline
+bool gsIsCompr(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunCompr();
+}
+
+// Comprehension
+inline
+AFun initAFunComprehension(AFun& f)
+{
+  f = ATmakeAFun("Comprehension", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunComprehension()
+{
+  static AFun AFunComprehension = initAFunComprehension(AFunComprehension);
+  return AFunComprehension;
+}
+
+inline
+bool gsIsComprehension(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunComprehension();
 }
 
 // Concat
@@ -745,28 +789,6 @@ inline
 bool gsIsFileName(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunFileName();
-}
-
-// Gen
-inline
-AFun initAFunGen(AFun& f)
-{
-  f = ATmakeAFun("Gen", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunGen()
-{
-  static AFun AFunGen = initAFunGen(AFunGen);
-  return AFunGen;
-}
-
-inline
-bool gsIsGen(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunGen();
 }
 
 // Greater
@@ -2045,6 +2067,28 @@ bool gsIsSeq(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSeq();
 }
 
+// SeqGen
+inline
+AFun initAFunSeqGen(AFun& f)
+{
+  f = ATmakeAFun("SeqGen", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSeqGen()
+{
+  static AFun AFunSeqGen = initAFunSeqGen(AFunSeqGen);
+  return AFunSeqGen;
+}
+
+inline
+bool gsIsSeqGen(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSeqGen();
+}
+
 // SequentialComposition
 inline
 AFun initAFunSequentialComposition(AFun& f)
@@ -2087,6 +2131,28 @@ inline
 bool gsIsSet(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunSet();
+}
+
+// SetGen
+inline
+AFun initAFunSetGen(AFun& f)
+{
+  f = ATmakeAFun("SetGen", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSetGen()
+{
+  static AFun AFunSetGen = initAFunSetGen(AFunSetGen);
+  return AFunSetGen;
+}
+
+inline
+bool gsIsSetGen(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSetGen();
 }
 
 // Sharing
@@ -2285,28 +2351,6 @@ inline
 bool gsIsTail(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunTail();
-}
-
-// TargGens
-inline
-AFun initAFunTargGens(AFun& f)
-{
-  f = ATmakeAFun("TargGens", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunTargGens()
-{
-  static AFun AFunTargGens = initAFunTargGens(AFunTargGens);
-  return AFunTargGens;
-}
-
-inline
-bool gsIsTargGens(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunTargGens();
 }
 
 // Test
@@ -3000,9 +3044,9 @@ ATermAppl gsMakeBCheck(ATermAppl Bool_0)
 }
 
 inline
-ATermAppl gsMakeBGen(ATermAppl Bool_0)
+ATermAppl gsMakeBComprehension(ATermAppl Bool_0)
 {
-  return ATmakeAppl1(gsAFunBGen(), (ATerm) Bool_0);
+  return ATmakeAppl1(gsAFunBComprehension(), (ATerm) Bool_0);
 }
 
 inline
@@ -3048,9 +3092,9 @@ ATermAppl gsMakeCat(ATermAppl Seq_0, ATermAppl Seq_1)
 }
 
 inline
-ATermAppl gsMakeChanSet(ATermAppl TargGens_0)
+ATermAppl gsMakeChanSet(ATermAppl Targ_0)
 {
-  return ATmakeAppl1(gsAFunChanSet(), (ATerm) TargGens_0);
+  return ATmakeAppl1(gsAFunChanSet(), (ATerm) Targ_0);
 }
 
 inline
@@ -3063,6 +3107,18 @@ inline
 ATermAppl gsMakeClosedRange(ATermAppl Numb_0, ATermAppl Numb_1)
 {
   return ATmakeAppl2(gsAFunClosedRange(), (ATerm) Numb_0, (ATerm) Numb_1);
+}
+
+inline
+ATermAppl gsMakeCompr(ATermAppl Expr_0, ATermList Comprehension_1)
+{
+  return ATmakeAppl2(gsAFunCompr(), (ATerm) Expr_0, (ATerm) Comprehension_1);
+}
+
+inline
+ATermAppl gsMakeComprehension(ATermAppl Expr_0, ATermAppl Expr_1)
+{
+  return ATmakeAppl2(gsAFunComprehension(), (ATerm) Expr_0, (ATerm) Expr_1);
 }
 
 inline
@@ -3165,12 +3221,6 @@ inline
 ATermAppl gsMakeFileName(ATermList Name_0)
 {
   return ATmakeAppl1(gsAFunFileName(), (ATerm) Name_0);
-}
-
-inline
-ATermAppl gsMakeGen(ATermAppl Expr_0, ATermAppl Expr_1)
-{
-  return ATmakeAppl2(gsAFunGen(), (ATerm) Expr_0, (ATerm) Expr_1);
 }
 
 inline
@@ -3288,9 +3338,9 @@ ATermAppl gsMakeLinks(ATermList Link_0)
 }
 
 inline
-ATermAppl gsMakeLinksGens(ATermList Link_0, ATermList Gen_1)
+ATermAppl gsMakeLinksGens(ATermList Link_0, ATermList Comprehension_1)
 {
-  return ATmakeAppl2(gsAFunLinksGens(), (ATerm) Link_0, (ATerm) Gen_1);
+  return ATmakeAppl2(gsAFunLinksGens(), (ATerm) Link_0, (ATerm) Comprehension_1);
 }
 
 inline
@@ -3312,9 +3362,9 @@ ATermAppl gsMakeMaps(ATermList Map_0)
 }
 
 inline
-ATermAppl gsMakeMapsGens(ATermList Map_0, ATermList Gen_1)
+ATermAppl gsMakeMapsGens(ATermList Map_0, ATermList Comprehension_1)
 {
-  return ATmakeAppl2(gsAFunMapsGens(), (ATerm) Map_0, (ATerm) Gen_1);
+  return ATmakeAppl2(gsAFunMapsGens(), (ATerm) Map_0, (ATerm) Comprehension_1);
 }
 
 inline
@@ -3462,45 +3512,45 @@ ATermAppl gsMakeRename(ATermAppl Proc_0, ATermAppl Renaming_1)
 }
 
 inline
-ATermAppl gsMakeRepAlphaParallel(ATermList Gen_0, ATermAppl Proc_1, ATermAppl Set_2)
+ATermAppl gsMakeRepAlphaParallel(ATermAppl SetGen_0, ATermAppl Proc_1, ATermAppl Set_2)
 {
-  return ATmakeAppl3(gsAFunRepAlphaParallel(), (ATerm) Gen_0, (ATerm) Proc_1, (ATerm) Set_2);
+  return ATmakeAppl3(gsAFunRepAlphaParallel(), (ATerm) SetGen_0, (ATerm) Proc_1, (ATerm) Set_2);
 }
 
 inline
-ATermAppl gsMakeRepExternalChoice(ATermList Gen_0, ATermAppl Proc_1)
+ATermAppl gsMakeRepExternalChoice(ATermAppl SetGen_0, ATermAppl Proc_1)
 {
-  return ATmakeAppl2(gsAFunRepExternalChoice(), (ATerm) Gen_0, (ATerm) Proc_1);
+  return ATmakeAppl2(gsAFunRepExternalChoice(), (ATerm) SetGen_0, (ATerm) Proc_1);
 }
 
 inline
-ATermAppl gsMakeRepInterleave(ATermList Gen_0, ATermAppl Proc_1)
+ATermAppl gsMakeRepInterleave(ATermAppl SetGen_0, ATermAppl Proc_1)
 {
-  return ATmakeAppl2(gsAFunRepInterleave(), (ATerm) Gen_0, (ATerm) Proc_1);
+  return ATmakeAppl2(gsAFunRepInterleave(), (ATerm) SetGen_0, (ATerm) Proc_1);
 }
 
 inline
-ATermAppl gsMakeRepInternalChoice(ATermList Gen_0, ATermAppl Proc_1)
+ATermAppl gsMakeRepInternalChoice(ATermAppl SetGen_0, ATermAppl Proc_1)
 {
-  return ATmakeAppl2(gsAFunRepInternalChoice(), (ATerm) Gen_0, (ATerm) Proc_1);
+  return ATmakeAppl2(gsAFunRepInternalChoice(), (ATerm) SetGen_0, (ATerm) Proc_1);
 }
 
 inline
-ATermAppl gsMakeRepLinkedParallel(ATermList Gen_0, ATermAppl Proc_1, ATermAppl LinkPar_2)
+ATermAppl gsMakeRepLinkedParallel(ATermAppl SeqGen_0, ATermAppl Proc_1, ATermAppl LinkPar_2)
 {
-  return ATmakeAppl3(gsAFunRepLinkedParallel(), (ATerm) Gen_0, (ATerm) Proc_1, (ATerm) LinkPar_2);
+  return ATmakeAppl3(gsAFunRepLinkedParallel(), (ATerm) SeqGen_0, (ATerm) Proc_1, (ATerm) LinkPar_2);
 }
 
 inline
-ATermAppl gsMakeRepSequentialComposition(ATermList Gen_0, ATermAppl Proc_1)
+ATermAppl gsMakeRepSequentialComposition(ATermAppl SeqGen_0, ATermAppl Proc_1)
 {
-  return ATmakeAppl2(gsAFunRepSequentialComposition(), (ATerm) Gen_0, (ATerm) Proc_1);
+  return ATmakeAppl2(gsAFunRepSequentialComposition(), (ATerm) SeqGen_0, (ATerm) Proc_1);
 }
 
 inline
-ATermAppl gsMakeRepSharing(ATermList Gen_0, ATermAppl Proc_1, ATermAppl Set_2)
+ATermAppl gsMakeRepSharing(ATermAppl SetGen_0, ATermAppl Proc_1, ATermAppl Set_2)
 {
-  return ATmakeAppl3(gsAFunRepSharing(), (ATerm) Gen_0, (ATerm) Proc_1, (ATerm) Set_2);
+  return ATmakeAppl3(gsAFunRepSharing(), (ATerm) SetGen_0, (ATerm) Proc_1, (ATerm) Set_2);
 }
 
 inline
@@ -3522,6 +3572,12 @@ ATermAppl gsMakeSeq(ATermAppl Seq_0)
 }
 
 inline
+ATermAppl gsMakeSeqGen(ATermAppl Expr_0, ATermAppl Seq_1)
+{
+  return ATmakeAppl2(gsAFunSeqGen(), (ATerm) Expr_0, (ATerm) Seq_1);
+}
+
+inline
 ATermAppl gsMakeSequentialComposition(ATermAppl Proc_0, ATermAppl Proc_1)
 {
   return ATmakeAppl2(gsAFunSequentialComposition(), (ATerm) Proc_0, (ATerm) Proc_1);
@@ -3531,6 +3587,12 @@ inline
 ATermAppl gsMakeSet(ATermAppl Set_0)
 {
   return ATmakeAppl1(gsAFunSet(), (ATerm) Set_0);
+}
+
+inline
+ATermAppl gsMakeSetGen(ATermAppl Expr_0, ATermAppl Set_1)
+{
+  return ATmakeAppl2(gsAFunSetGen(), (ATerm) Expr_0, (ATerm) Set_1);
 }
 
 inline
@@ -3585,12 +3647,6 @@ inline
 ATermAppl gsMakeTail(ATermAppl Seq_0)
 {
   return ATmakeAppl1(gsAFunTail(), (ATerm) Seq_0);
-}
-
-inline
-ATermAppl gsMakeTargGens(ATermAppl Targ_0, ATermList Gen_1)
-{
-  return ATmakeAppl2(gsAFunTargGens(), (ATerm) Targ_0, (ATerm) Gen_1);
 }
 
 inline

@@ -188,8 +188,8 @@ $B4$ & ::= & $Expr$\verb"=="$Expr$\\
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $Set$ & ::= & $Common$\\
- & $|$ & \verb"{"$TargGens$\verb"}"\\
- & $|$ & \verb"{|"$TargGens$\verb"|}"\\
+ & $|$ & \verb"{"$Targ$\verb"}"\\
+ & $|$ & \verb"{|"$Targ$\verb"|}"\\
  & $|$ & \verb"union"($Set$\verb"," $Set$\verb")"\\
  & $|$ & \verb"inter"($Set$\verb"," $Set$\verb")"\\
  & $|$ & \verb"diff"($Set$\verb"," $Set$\verb")"\\
@@ -206,7 +206,7 @@ Without priorities
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $Seq$ & ::= & $Common$\\
- & $|$ & \verb"<"$TargGens$\verb">"\\
+ & $|$ & \verb"<"$Targ$\verb">"\\
  & $|$ & $Seq$\verb"^"$Seq$\\
  & $|$ & \verb"concat("$Seq$\verb")"\\
  & $|$ & \verb"head("$Seq$\verb")"\\
@@ -222,7 +222,7 @@ $Seq$ & ::= & $Seq1$\verb"^"$Seq$\\
 $Seq1$ & ::= & \verb"head("$Seq1$\verb")"\\
  & $|$ & \verb"tail("$Seq1$\verb")"\\
  & $|$ & $Seq2$\\
-$Seq2$ & ::= & \verb"<"$TargGens$\verb">"\\
+$Seq2$ & ::= & \verb"<"$Targ$\verb">"\\
  & $|$ & $Common$\\
 \end{tabular}
 \end{center}
@@ -259,28 +259,34 @@ $Common$ & ::= & \verb"(" $Any$ \verb")"\\
 \end{center}
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
-$TargGens$ & ::= & $Targ$\\
- & $|$ & $Targ$\verb"|"$Gens$
-\end{tabular}
-\end{center}
-\begin{center}
-\begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
-$Targ$ & ::= & $\epsilon$\verb""\\
- & $|$ & $Exprs$\\
+$Targ$ & ::= & $\epsilon$\\
  & $|$ & $Numb$\verb".."$Numb$\\
- & $|$ & $Numb$\verb".."
+ & $|$ & $Numb$\verb".."\\
+ & $|$ & $Exprs$\\
+ & $|$ & $Expr$\verb"|"$Comprehensions$
 \end{tabular}
 \end{center}
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
-$Gens$ & ::= & $Gen$\\
- & $|$ & $Gen$\verb"," $Gens$
+$Comprehensions$ & ::= & $Comprehension$\\
+ & $|$ & $Comprehension$\verb"," $Comprehensions$
 \end{tabular}
 \end{center}
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
-$Gen$ & ::= & $Bool$\\
+$Comprehension$ & ::= & $\epsilon$\\
+ & $|$ & $Bool$\\
  & $|$ & $Expr$\verb"<-"$Expr$
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
+$SetGen$ & ::= & $Expr$\verb":"$Set$
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
+$SeqGen$ & ::= & $Expr$\verb":"$Seq$
 \end{tabular}
 \end{center}
 \begin{center}
@@ -361,34 +367,34 @@ $Proc$ & ::= & $Common$\\
  & $|$ & $Proc$\verb"[|"$Set$\verb"|]"$Proc$\\
  & $|$ & $Proc$\verb"|["$Set$\verb"]|"$Proc$\\
  & $|$ & $Proc$\verb"["$Set$\verb"||"$Set$\verb"]"$Proc$\\
- & $|$ & \verb"[]"$Gens$\verb"@"$Proc$\\
- & $|$ & \verb"|~|"$Gens$\verb"@"$Proc$\\
- & $|$ & \verb";"$Gens$\verb"@"$Proc$\\
- & $|$ & \verb"|||"$Gens$\verb"@"$Proc$\\
- & $|$ & \verb"[|"$Set$\verb"|]"$Gens$\verb"@"$Proc$\\
- & $|$ & \verb"|["$Set$\verb"]|"$Gens$\verb"@"$Proc$\\
- & $|$ & \verb"||"$Gens$\verb"@["$Set$\verb"]"$Proc$\\
+ & $|$ & \verb"[]"$SetGen$\verb"@"$Proc$\\
+ & $|$ & \verb"|~|"$SetGen$\verb"@"$Proc$\\
+ & $|$ & \verb";"$SeqGen$\verb"@"$Proc$\\
+ & $|$ & \verb"|||"$SetGen$\verb"@"$Proc$\\
+ & $|$ & \verb"[|"$Set$\verb"|]"$SetGen$\verb"@"$Proc$\\
+ & $|$ & \verb"|["$Set$\verb"]|"$SetGen$\verb"@"$Proc$\\
+ & $|$ & \verb"||"$SetGen$\verb"@["$Set$\verb"]"$Proc$\\
  & $|$ & $Proc$\verb"[>"$Proc$\\
  & $|$ & $Bool$\verb"&"$Proc$\\
  & $|$ & $Proc$\verb"["$LinkPar$\verb"]"$Proc$\\
- & $|$ & \verb"["$LinkPar$\verb"]"$Gens$\verb"@"$Proc$
+ & $|$ & \verb"["$LinkPar$\verb"]"$SeqGen$\verb"@"$Proc$
 \end{tabular}
 \end{center}
 With priorities
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
-$P$ & ::= & \verb"|||"$Gens$\verb"@"$P1$\\
+$P$ & ::= & \verb"|||"$SetGen$\verb"@"$P1$\\
  & $|$ & $P1$\\
-$P1$ & ::= & \verb"["$LinkPar$\verb"]"$Gens$\verb"@"$P2$\\
- & $|$ & \verb"||"$Gens$\verb"@["$Set$\verb"]"$P2$\\
- & $|$ & \verb"[|"$Set$\verb"|]"$Gens$\verb"@"$P2$\\
- & $|$ & \verb"|["$Set$\verb"]|"$Gens$\verb"@"$P2$\\
+$P1$ & ::= & \verb"["$LinkPar$\verb"]"$SeqGen$\verb"@"$P2$\\
+ & $|$ & \verb"||"$SetGen$\verb"@["$Set$\verb"]"$P2$\\
+ & $|$ & \verb"[|"$Set$\verb"|]"$SetGen$\verb"@"$P2$\\
+ & $|$ & \verb"|["$Set$\verb"]|"$SetGen$\verb"@"$P2$\\
  & $|$ & $P2$\\
-$P2$ & ::= & \verb"|~|"$Gens$\verb"@"$P3$\\
+$P2$ & ::= & \verb"|~|"$SetGen$\verb"@"$P3$\\
  & $|$ & $P3$\\
-$P3$ & ::= & \verb"[]"$Gens$\verb"@"$P4$\\
+$P3$ & ::= & \verb"[]"$SetGen$\verb"@"$P4$\\
  & $|$ & $P4$\\
-$P4$ & ::= & \verb";"$Gens$\verb"@"$P5$\\
+$P4$ & ::= & \verb";"$SeqGen$\verb"@"$P5$\\
  & $|$ & $P5$\\
 $P5$ & ::= & $P6$ \verb"\" $Set$\\
  & $|$ & $P6$\\
@@ -423,7 +429,7 @@ $P15$ & ::= & \verb"STOP"\\
 
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
-$Fields$ & ::= & $\epsilon$\verb""\\
+$Fields$ & ::= & $\epsilon$\\
  & $|$ & $Field$\verb"," $Fields$
 \end{tabular}
 \end{center}
@@ -437,7 +443,7 @@ $Field$ & ::= & \verb"?"$Expr$\\
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $Rename$ & ::= & $Maps$\\
- & $|$ & $Maps$\verb"|"$Gens$
+ & $|$ & $Maps$\verb"|"$Comprehensions$
 \end{tabular}
 \end{center}
 \begin{center}
@@ -454,7 +460,7 @@ $Map$ & ::= & $Dotted$\verb"<-"$Dotted$
 \begin{center}
 \begin{tabular}{p{2,5cm}p{1cm}p{11cm}}
 $LinkPar$ & ::= & $Links$\\
- & $|$ & $Links$\verb"|"$Gens$
+ & $|$ & $Links$\verb"|"$Comprehensions$
 \end{tabular}
 \end{center}
 \begin{center}

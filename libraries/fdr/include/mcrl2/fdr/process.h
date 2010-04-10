@@ -548,13 +548,13 @@ class repexternalchoice: atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    repexternalchoice(const generator_list& gens, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepExternalChoice(gens, proc))
+    repexternalchoice(const setgen& gen, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepExternalChoice(gen, proc))
     {}
 
-    generator_list gens() const
+    setgen gen() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     process proc() const
@@ -588,13 +588,13 @@ class repinternalchoice: atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    repinternalchoice(const generator_list& gens, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepInternalChoice(gens, proc))
+    repinternalchoice(const setgen& gen, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepInternalChoice(gen, proc))
     {}
 
-    generator_list gens() const
+    setgen gen() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     process proc() const
@@ -628,13 +628,13 @@ class repsequentialcomposition: atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    repsequentialcomposition(const generator_list& gens, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepSequentialComposition(gens, proc))
+    repsequentialcomposition(const seqgen& gen, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepSequentialComposition(gen, proc))
     {}
 
-    generator_list gens() const
+    seqgen gen() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     process proc() const
@@ -668,13 +668,13 @@ class repinterleave: atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    repinterleave(const generator_list& gens, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepInterleave(gens, proc))
+    repinterleave(const setgen& gen, const process& proc)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepInterleave(gen, proc))
     {}
 
-    generator_list gens() const
+    setgen gen() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     process proc() const
@@ -708,13 +708,13 @@ class repsharing: atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    repsharing(const generator_list& gens, const process& proc, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepSharing(gens, proc, set))
+    repsharing(const setgen& gen, const process& proc, const set_expression& set)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepSharing(gen, proc, set))
     {}
 
-    generator_list gens() const
+    setgen gen() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     process proc() const
@@ -753,13 +753,13 @@ class repalphaparallel: atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    repalphaparallel(const generator_list& gens, const process& proc, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepAlphaParallel(gens, proc, set))
+    repalphaparallel(const setgen& gen, const process& proc, const set_expression& set)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepAlphaParallel(gen, proc, set))
     {}
 
-    generator_list gens() const
+    setgen gen() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     process proc() const
@@ -923,13 +923,13 @@ class replinkedparallel: atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    replinkedparallel(const generator_list& gens, const process& proc, const linkpar& linked)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepLinkedParallel(gens, proc, linked))
+    replinkedparallel(const seqgen& gen, const process& proc, const linkpar& linked)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRepLinkedParallel(gen, proc, linked))
     {}
 
-    generator_list gens() const
+    seqgen gen() const
     {
-      return atermpp::list_arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     process proc() const

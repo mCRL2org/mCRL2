@@ -136,8 +136,8 @@
 
 // Set expression
 <Set>       ::= <Common>
-              | <TargGens>
-              | ChanSet(<TargGens>)
+              | <Targ>
+              | ChanSet(<Targ>)
               | union(<Set>, <Set>)
               | inter(<Set>, <Set>)
               | diff(<Set>, <Set>)
@@ -151,24 +151,23 @@
 
 // Sequence expression
 <Seq>       ::= <Common>
-              | <TargGens>
+              | <Targ>
               | Cat(<Seq>, <Seq>)
               | Concat(<Seq>)
               | Head(<Seq>)
               | Tail(<Seq>)
 
 // Set/Sequence arguments
-<TargGens> ::= <Targ>
-             | TargGens(<Targ>, <Gen>+)
+<Targ> ::= Nil
+             | Exprs(<Expr>+)
+             | ClosedRange(<Numb>, <Numb>)
+             | OpenRange(<Numb>)
+             | Compr(<Expr>, <Comprehension>+)
 
-<Targ>      ::= Nil
-              | Exprs(<Expr>+)
-              | ClosedRange(<Numb>, <Numb>)
-              | OpenRange(<Numb>)
-
-// Generator
-<Gen>       ::= BGen(<Bool>)
-              | Gen(<Expr>, <Expr>)
+// Comprehension
+<Comprehension> ::= Nil
+                  | BComprehension(<Bool>)
+                  | Comprehension(<Expr>, <Expr>)
 
 // Tuple expression
 <Tuple>     ::= <Common>
@@ -209,30 +208,35 @@
               | Interleave(<Proc>, <Proc>)
               | Sharing(<Proc>, <Proc>, <Set>)
               | AlphaParallel(<Proc>, <Proc>, <Set>, <Set>)
-              | RepExternalChoice(<Gen>+, <Proc>)
-              | RepInternalChoice(<Gen>+, <Proc>)
-              | RepSequentialComposition(<Gen>+, <Proc>)
-              | RepInterleave(<Gen>+, <Proc>)
-              | RepSharing(<Gen>+, <Proc>, <Set>)
-              | RepAlphaParallel(<Gen>+, <Proc>, <Set>)
+              | RepExternalChoice(<SetGen>, <Proc>)
+              | RepInternalChoice(<SetGen>, <Proc>)
+              | RepSequentialComposition(<SeqGen>, <Proc>)
+              | RepInterleave(<SetGen>, <Proc>)
+              | RepSharing(<SetGen>, <Proc>, <Set>)
+              | RepAlphaParallel(<SetGen>, <Proc>, <Set>)
               | UntimedTimeOut(<Proc>, <Proc>)
               | BoolGuard(<Bool>, <Proc>)
               | LinkedParallel(<Proc>, <Proc>, <LinkPar>)
-              | RepLinkedParallel(<Gen>+, <Proc>, <LinkPar>)
+              | RepLinkedParallel(<SeqGen>, <Proc>, <LinkPar>)
 
 // Input/Output field
 <Field>     ::= SimpleInput(<Expr>)
               | Input(<Expr>, <Set>)
               | Output(<Expr>)
 
+// Generators
+<SetGen> ::= SetGen(<Expr>, <Set>)
+
+<SeqGen> ::= SeqGen(<Expr>, <Seq>)
+
 // Renaming
 <Renaming>  ::= Maps(<Map>+)
-              | MapsGens(<Map>+, <Gen>+)
+              | MapsGens(<Map>+, <Comprehension>+)
 
 <Map>       ::= Map(<Dotted>, <Dotted>)
 
 // Linking
 <LinkPar>   ::= Links(<Link>+)
-              | LinksGens(<Link>+, <Gen>+)
+              | LinksGens(<Link>+, <Comprehension>+)
 
 <Link>      ::= Link(<Dotted>, <Dotted>)

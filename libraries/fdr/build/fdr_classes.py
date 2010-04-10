@@ -44,7 +44,7 @@ GreaterOrEqual	| greaterorequal(const expression& left, const expression& right)
 '''
 
 SET_EXPRESSION_CLASSES = r'''
-ChanSet			| chanset(const targgens& argument)													| A simple argument (for channels)
+ChanSet			| chanset(const targ& argument)													| A simple argument (for channels)
 union			| union(const set_expression& left, const set_expression& right)			| A union
 inter			| inter(const set_expression& left, const set_expression& right)			| An intersection
 diff			| diff(const set_expression& left, const set_expression& right)				| A difference
@@ -178,20 +178,23 @@ FDRSPEC_CLASSES = r'''
 FDRSpec			| fdrspec(const definition_list& defs)										| An FDR specification
 '''
 
-TARGGENS_CLASSES = r'''
-TargGens		| targgens(const targ& argument, const generator_list& gens)							| A complex targ
-'''
-
 TARG_CLASSES = r'''
 Nil				| nil()																		| An empty
 Exprs			| exprs(const expression_list& exprs)										| An expression list
 ClosedRange		| closedrange(const numeric_expression& begin, const numeric_expression& end)	| A closed range
 OpenRange		| openrange(const numeric_expression& begin)									| An open range
+Compr           | compr(const expression& expr, const comprehension_list& comprs)           | A comprehension
+'''
+
+COMPREHENSION_CLASSES = r'''
+Nil             | nil()                                                                             | An empty
+BComprehension	| bcomprehension(const boolean_expression& operand)									| A boolean
+EComprehension	| ecomprehension(const expression& left, const expression& right)					| A comprehension
 '''
 
 GEN_CLASSES = r'''
-BGen			| bgen(const boolean_expression& operand)									| A boolean
-Gen				| gen(const expression& left, const expression& right)						| A generator
+SetGen          | setgen(const expression& expr, const set_expression& set)                 | A set generator
+SeqGen          | seqgen(const expression& expr, const seq_expression& seq)                 | A seq generator
 '''
 
 PROCESS_CLASSES = r'''
@@ -208,16 +211,16 @@ Rename			| rename(const process& proc, const renaming& rename)					| A renaming
 Interleave		| interleave(const process& left, const process& right)						| An interleave
 Sharing			| sharing(const process& left, const process& right, const set_expression& set)	| A sharing
 AlphaParallel	| alphaparallel(const process& left, const process& right, const set_expression& left_set, const set_expression& right_set)	| An alpha parallel
-RepExternalChoice	| repexternalchoice(const generator_list& gens, const process& proc)	| A replicated external choice
-RepInternalChoice	| repinternalchoice(const generator_list& gens, const process& proc)	| A replicated internal choice
-RepSequentialComposition	| repsequentialcomposition(const generator_list& gens, const process& proc)	| A replicated sequential composition
-RepInterleave	| repinterleave(const generator_list& gens, const process& proc)			| A replicated interleave
-RepSharing		| repsharing(const generator_list& gens, const process& proc, const set_expression& set)	| A replicated sharing
-RepAlphaParallel	| repalphaparallel(const generator_list& gens, const process& proc, const set_expression& set)	| A replicated alpha parallel
+RepExternalChoice	| repexternalchoice(const setgen& gen, const process& proc)	| A replicated external choice
+RepInternalChoice	| repinternalchoice(const setgen& gen, const process& proc)	| A replicated internal choice
+RepSequentialComposition	| repsequentialcomposition(const seqgen& gen, const process& proc)	| A replicated sequential composition
+RepInterleave	| repinterleave(const setgen& gen, const process& proc)			| A replicated interleave
+RepSharing		| repsharing(const setgen& gen, const process& proc, const set_expression& set)	| A replicated sharing
+RepAlphaParallel	| repalphaparallel(const setgen& gen, const process& proc, const set_expression& set)	| A replicated alpha parallel
 UntimedTimeOut	| untimedtimeout(const process& left, const process& right)					| An untimed time-out
 BoolGuard		| boolguard(const boolean_expression& guard, const process& proc)		| A boolean guard
 LinkedParallel	| linkedparallel(const process& left, const process& right, const linkpar& linked)	| A linked parallel
-RepLinkedParallel	| replinkedparallel(const generator_list& gens, const process& proc, const linkpar& linked)	| A replicated linked parallel
+RepLinkedParallel	| replinkedparallel(const seqgen& gen, const process& proc, const linkpar& linked)	| A replicated linked parallel
 '''
 
 FIELD_CLASSES = r'''
@@ -228,7 +231,7 @@ Output			| output(const expression& expr)											| An output
 
 RENAMING_CLASSES = r'''
 Maps			| maps(const map_list& renamings)												| A map list
-MapsGens		| mapsgens(const map_list& renamings, const generator_list& gens)				| A map/generator list
+MapsGens		| mapsgens(const map_list& renamings, const comprehension_list& comprs)				| A map/generator list
 '''
 
 MAP_CLASSES = r'''
@@ -237,7 +240,7 @@ Map				| map(const dotted_expression& left, const dotted_expression& right)		| A
 
 LINKPAR_CLASSES = r'''
 Links			| links(const link_list& linkpars)												| A link list
-LinksGens		| linksgens(const link_list& linkpars, const generator_list& gens)				| A link/generator list
+LinksGens		| linksgens(const link_list& linkpars, const comprehension_list& comprs)				| A link/generator list
 '''
 
 LINK_CLASSES = r'''
