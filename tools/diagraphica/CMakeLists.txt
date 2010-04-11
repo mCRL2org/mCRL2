@@ -13,6 +13,8 @@ cmake_minimum_required(VERSION 2.6)
 if ( MCRL2_BUILD_GUI_TOOLS )
 add_definitions(-DTIXML_USE_TICPP)
 
+SET(MACOSX_BUNDLE_ICON_FILE diagraphica.icns)
+
 # ######### General setup ##########
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
@@ -51,7 +53,13 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   value.cpp
   visualizer.cpp
   visutils.cpp
+
+  ${MACOSX_BUNDLE_ICON_FILE}
 )
+
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)

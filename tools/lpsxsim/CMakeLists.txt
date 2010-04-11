@@ -115,10 +115,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
-# Relocate install tree
-include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 endif (MCRL2_BUILD_GUI_TOOLS AND NOT MONO_LIB)
 
@@ -132,13 +129,19 @@ if (MCRL2_BUILD_GUI_TOOLS)
 project(lpsxsim)
 
 # ######### General setup ##########
+set(MACOSX_BUNDLE_ICON_FILE lpsxsim.icns)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   xsim.cpp
   xsimmain.cpp
   xsimtrace.cpp
+
+  ${MACOSX_BUNDLE_ICON_FILE}
 )
 
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)

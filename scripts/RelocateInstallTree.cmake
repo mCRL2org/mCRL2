@@ -12,11 +12,15 @@
 # CMake 2.6 only supports relocating libraries for the Mac OSX.
 # CMake 2.8 support also relocation libraries for windows.
 # Since we support version 2.6 and up, we can only facilitate
-# relocation of shared libraries only for the Mac OSX. 
+# relocation of shared libraries only for  Mac OSX. 
 
-if( APPLE )
+if( APPLE AND BUILD_SHARED_LIBS )
+
+if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
 install(CODE "
-    include(BundleUtilities) 
-    fixup_bundle(\"${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}${CMAKE_EXECUTABLE_SUFFIX}\" \"\" \"${CMAKE_INSTALL_PREFIX}/lib\")
+    include(${CMAKE_SOURCE_DIR}/scripts/MCRL2BundleUtilities.cmake) 
+    fixup_bundle(\"${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.app\" \"\" \"${MCRL2_LIB_DIR}\")
     " COMPONENT Runtime)
-endif( APPLE )
+endif(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
+
+endif( APPLE AND BUILD_SHARED_LIBS )

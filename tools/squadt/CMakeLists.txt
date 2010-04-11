@@ -16,6 +16,8 @@ add_definitions(-DTIXML_USE_TICPP)
 
 # ######### General setup ##########
 
+set(MACOSX_BUNDLE_ICON_FILE squadt.icns)
+
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/squadt/tool_catalog" "${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog" COPYONLY )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog DESTINATION share/squadt)
 
@@ -44,7 +46,13 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   gui/dialog/base.cpp
   gui/dialog/preferences.cpp
   gui/dialog/processor_settings.cpp
+
+  ${MACOSX_BUNDLE_ICON_FILE}
 )
+
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
