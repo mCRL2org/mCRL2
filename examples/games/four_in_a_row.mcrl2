@@ -9,6 +9,7 @@
 % red wins the game is the following:
 %
 %        . . . . . . .
+%        . . . . . . .
 %        . . . R . . .
 %        . . R R . . .        R is red
 %        . R R Y . . .        Y is yellow
@@ -32,7 +33,7 @@
 sort Piece = struct Red | Yellow | None;
 map N,M,R:Pos;
 eqn N=7;     %Number of columns (default 7)
-    M=5;     %Number of rows (default 5)
+    M=6;     %Number of rows (default 6)
     R=4;     %Length of a winning sequence of the same color (default 4)
 
 sort Row=List(Piece);
@@ -165,17 +166,18 @@ proc FourInaRow(b:Board,WhoMoves:Piece)=
 
        (WhoMoves==Yellow && Four_in_a_row(Red,b)) ->
              RedWins.
-                FourInaRow(b,None)+
+                FourInaRow(initial_board,None)+
 
        (WhoMoves==Red && Four_in_a_row(Yellow,b)) ->
              YellowWins.
-                FourInaRow(b,None);
+                FourInaRow(initial_board,None);
                   
+map initial_board:Board;
+eqn initial_board= [[None,None,None,None,None,None,None],
+                    [None,None,None,None,None,None,None],
+                    [None,None,None,None,None,None,None],
+                    [None,None,None,None,None,None,None],
+                    [None,None,None,None,None,None,None]];
 
 
-
-init FourInaRow([[None,None,None,None,None,None,None],
-                 [None,None,None,None,None,None,None],
-                 [None,None,None,None,None,None,None],
-                 [None,None,None,None,None,None,None],
-                 [None,None,None,None,None,None,None]],Red);
+init FourInaRow(initial_board,Red);

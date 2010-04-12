@@ -2617,9 +2617,13 @@ class specification_basic_type:public boost::noncopyable
         process_identifier t=process_instance(body).identifier();
 
         if (v==later)
-        { if ((!regular)||(mode=mCRL))
+        { if (regular)
+          { mode=mCRL;
+          }
+          todo.push_back(t);
+          /* if ((!regular)||(mode=mCRL))
               todo.push_back(t);
-                /* single = in `mode=mCRL' is important, otherwise crash
+                / * single = in `mode=mCRL' is important, otherwise crash
                    I do not understand the reason for this at this moment
                    JFG (9/5/2000) */
           return body;

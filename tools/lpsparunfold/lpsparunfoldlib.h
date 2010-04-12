@@ -228,7 +228,8 @@ class lpsparunfold
     **/
     mcrl2::data::data_equation create_distribution_law_over_case( 
         mcrl2::data::function_symbol distribution_function,
-        mcrl2::data::function_symbol case_function); 
+        mcrl2::data::function_symbol case_function,
+        const bool add_case_function_to_data_type); 
 
     mcrl2::data::data_equation_vector generate_case_functions(
         mcrl2::data::function_symbol_vector elements_of_new_sorts, 

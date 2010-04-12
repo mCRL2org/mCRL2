@@ -286,12 +286,12 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
             basic_sort bool_sort("Bool");
             sort_expression if_arg_sort(function_sort(pi.front().sort()).domain().front());
             function_symbol if_function_symbol( "if", make_function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
-            del.push_back( create_distribution_law_over_case( pi.front(), if_function_symbol ) );
+            del.push_back( create_distribution_law_over_case( pi.front(), if_function_symbol, false ) );
             /* Add additional distribution laws for pi over case
 
                pi(C(e,x1,x2,...))=C(e,pi(x1),pi(x2),...);
             */
-            del.push_back( create_distribution_law_over_case( pi.front(), case_function ) );
+            del.push_back( create_distribution_law_over_case( pi.front(), case_function, true ) );
 
             /* Create additional case function */
 
@@ -359,13 +359,13 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     basic_sort bool_sort("Bool");
     sort_expression if_arg_sort(function_sort(determine_function.sort()).domain().front());
     function_symbol if_function_symbol( "if", make_function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
-    del.push_back( create_distribution_law_over_case( determine_function, if_function_symbol ) );
+    del.push_back( create_distribution_law_over_case( determine_function, if_function_symbol, false ) );
     
     /*  Add additional distribution laws for Det over case 
 
         Det(C(e,x1,x2,...))=C(e,Det(x1),Det(x2),...);
     */
-    del.push_back( create_distribution_law_over_case( determine_function, case_function ) );
+    del.push_back( create_distribution_law_over_case( determine_function, case_function, true ) );
   } 
   return del;
 }
@@ -750,7 +750,8 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
 
 mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case( 
    mcrl2::data::function_symbol function_for_distribution, 
-   mcrl2::data::function_symbol case_function)
+   mcrl2::data::function_symbol case_function,
+   const bool add_case_function_to_data_type)
 {
   assert( function_sort(case_function.sort()).codomain() == function_sort(function_for_distribution.sort()).domain().front() );
 
@@ -791,7 +792,9 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
   }
  
   mcrl2::data::function_symbol new_case_function = function_symbol( case_function.name(), function_sort(rw_sort_expressions,function_sort(function_for_distribution.sort()).codomain() ));
-  m_additional_mappings.push_back( new_case_function );
+  if (add_case_function_to_data_type)
+  { m_additional_mappings.push_back( new_case_function );
+  }
 
   /* Generate new case functions for laws */
   application rhs ( new_case_function , rw_data_expressions);
