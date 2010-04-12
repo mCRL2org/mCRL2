@@ -1,0 +1,59 @@
+# Authors: Frank Stappers and Aad Mathijssen
+# Copyright: see the accompanying file COPYING or copy at
+# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+# ########## Project setup ##########
+project(examples_atermpp_)
+cmake_minimum_required(VERSION 2.6)
+
+# ######### General setup ##########
+set(PREFIX "example_atermpp")
+
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+
+##---------------------------------------------------
+## Example std_container 
+##--------------------------------------------------- 
+
+set(PROJECT_NAME "${PREFIX}_std_container")
+project( ${PROJECT_NAME} )
+
+add_executable("${PROJECT_NAME}" 
+      std_container.cpp
+)
+
+if( MONO_LIB )
+  target_link_libraries(${PROJECT_NAME}
+    mcrl2_monolib
+  )
+else( MONO_LIB )  
+target_link_libraries(${PROJECT_NAME}
+   aterm 
+)
+endif( MONO_LIB )
+
+##---------------------------------------------------
+## Example algorithm 
+##--------------------------------------------------- 
+
+set(PROJECT_NAME "${PREFIX}_algorithm")
+project( ${PROJECT_NAME} )
+
+add_executable("${PROJECT_NAME}" 
+      algorithm.cpp 
+)
+
+if( MONO_LIB )
+  target_link_libraries(${PROJECT_NAME}
+    mcrl2_monolib
+  )
+else( MONO_LIB )  
+target_link_libraries(${PROJECT_NAME}
+   aterm 
+)
+endif( MONO_LIB )
