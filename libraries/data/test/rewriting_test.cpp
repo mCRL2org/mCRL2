@@ -336,6 +336,7 @@ void set_rewrite_test()
 
   data::rewriter R(specification);
 
+  /*
   sort_expression set_nat(set_(nat()));
 
   data_expression empty(R(specification.normalise_sorts(emptyset(nat()))));
@@ -373,10 +374,10 @@ void set_rewrite_test()
   data_rewrite_test(R, x, true_());
   x = data::parse_data_expression("false in {n:Bool|n && !n}",specification);
   data_rewrite_test(R, x, false_());
-
+*/
   // test for a variation on bug #721,
   // see also set_bool_rewrite_test()
-  x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+  data::data_expression x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
   x = specification.normalise_sorts(x);
   data_rewrite_test(R, x, false_());
 }
@@ -560,6 +561,46 @@ void set_bool_rewrite_test()
   data_rewrite_test(R, e, false_());
 }
 
+void finite_set_nat_rewrite_test() 
+{
+  using namespace mcrl2::data::sort_set;
+  using namespace mcrl2::data::sort_fset;
+  using namespace mcrl2::data::sort_nat;
+  using namespace mcrl2::data::sort_bool;
+  std::cerr << "finite_set_nat_rewrite_test\n";
+  data_specification specification = parse_data_specification(
+    "sort A = Set(Nat);"
+  );
+
+  specification.add_context_sort(set_(nat()));
+  specification.add_context_sort(set_(bool_()));
+
+  data::rewriter R(specification);
+
+  data::data_expression x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+  x = specification.normalise_sorts(x);
+  data_rewrite_test(R, x, false_());
+}
+
+void finite_set_nat_rewrite_test_without_alias() 
+{
+  using namespace mcrl2::data::sort_set;
+  using namespace mcrl2::data::sort_fset;
+  using namespace mcrl2::data::sort_nat;
+  using namespace mcrl2::data::sort_bool;
+  std::cerr << "finite_set_nat_rewrite_test_without_alias\n";
+  data_specification specification;
+
+  specification.add_context_sort(set_(nat()));
+  specification.add_context_sort(set_(bool_()));
+
+  data::rewriter R(specification);
+
+  data::data_expression x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+  x = specification.normalise_sorts(x);
+  data_rewrite_test(R, x, false_());
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -594,7 +635,13 @@ int test_main(int argc, char** argv)
   structured_sort_rewrite_test();
   core::garbage_collect();
 
-  set_bool_rewrite_test();
+  //set_bool_rewrite_test();
+  //core::garbage_collect();
+
+  finite_set_nat_rewrite_test();
+  core::garbage_collect();
+
+  finite_set_nat_rewrite_test_without_alias();
   core::garbage_collect();
 
   return 0;
