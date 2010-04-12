@@ -336,7 +336,7 @@ void set_rewrite_test()
 
   data::rewriter R(specification);
 
-  sort_expression set_nat(sort_set::set_(nat()));
+  sort_expression set_nat(set_(nat()));
 
   data_expression empty(R(specification.normalise_sorts(emptyset(nat()))));
 
@@ -372,6 +372,12 @@ void set_rewrite_test()
   x = data::parse_data_expression("true in {n:Bool|n || !n}",specification);
   data_rewrite_test(R, x, true_());
   x = data::parse_data_expression("false in {n:Bool|n && !n}",specification);
+  data_rewrite_test(R, x, false_());
+
+  // test for a variation on bug #721,
+  // see also set_bool_rewrite_test()
+  x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+  x = specification.normalise_sorts(x);
   data_rewrite_test(R, x, false_());
 }
 
@@ -502,6 +508,58 @@ void structured_sort_rewrite_test() {
   data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].projection_functions(ls)[1], c)),  R(n1));
 }
 
+// Test for bug #721
+void set_bool_rewrite_test()
+{
+  using namespace sort_bool;
+  using namespace sort_nat;
+  using namespace sort_set;
+  using namespace sort_fset;
+
+  data_specification specification;
+
+  // Rewrite without sort alias
+  specification.add_context_sort(set_(bool_()));
+  specification.add_context_sort(fset(bool_()));
+
+  data_expression e(not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_()))))));
+  e = specification.normalise_sorts(e);
+  data::rewriter R(specification);
+  data_rewrite_test(R, e, false_());
+
+  // Rewrite with sort alias
+  specification = parse_data_specification("sort S = Set(Bool);\n");
+  specification.add_context_sort(set_(bool_()));
+  specification.add_context_sort(fset(bool_()));
+  e = not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_())))));
+  e = specification.normalise_sorts(e);
+  R = data::rewriter(specification);
+
+/*
+  std::clog << std::endl << std::endl << "Equations present in specification: " << std::endl;
+  for(data_specification::equations_const_range::const_iterator i = specification.equations().begin(); i != specification.equations().end(); ++i)
+  {
+    std::clog << "  " << *i << std::endl;
+  }
+*/
+
+  data_rewrite_test(R, e, false_());
+
+  // Rewrite with parsing
+  e = parse_data_expression("true in {true, false}", specification);
+  data_rewrite_test(R, e, false_());
+
+
+  specification = data_specification();
+  specification.add_context_sort(set_(nat()));
+  R = data::rewriter(specification);
+
+  // test for a variation on bug #721
+  e = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+  e = specification.normalise_sorts(e);
+  data_rewrite_test(R, e, false_());
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -509,7 +567,6 @@ int test_main(int argc, char** argv)
 //  std::string expr1("struct ");
 //  std::string expr1("exists b: Bool, c: Bool. if(b, c, b)");
 //  std::string expr1("forall b: Bool, c: Bool. if(b, c, b)");
-
   bool_rewrite_test();
   core::garbage_collect();
 
@@ -535,6 +592,9 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   structured_sort_rewrite_test();
+  core::garbage_collect();
+
+  set_bool_rewrite_test();
   core::garbage_collect();
 
   return 0;
