@@ -85,11 +85,21 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
+      unsigned int loglevel = 0;
+      if (mcrl2::core::gsVerbose)
+      {
+        loglevel = 1;
+      }
+      if (mcrl2::core::gsDebug)
+      {
+        loglevel = 2;
+      }     	
+
       lps::specification spec;
       spec.load(m_input_filename);
       mcrl2::data::rewriter R = create_rewriter(spec.data() );
 
-      lps::constelm_algorithm<data::rewriter> algorithm(spec, R, mcrl2::core::gsVerbose);
+      lps::constelm_algorithm<data::rewriter> algorithm(spec, R, loglevel);
 
       // preprocess: remove single element sorts
       if (m_remove_singleton_sorts)

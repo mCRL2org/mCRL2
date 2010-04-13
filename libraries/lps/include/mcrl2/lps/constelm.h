@@ -79,12 +79,71 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// \brief The rewriter used by the constelm algorithm.
     const DataRewriter& R;
 
+    void LOG_CONSTANT_PARAMETERS(unsigned int level,
+                                 const data::mutable_map_substitution<>& sigma,
+                                 const std::string& msg = "")
+    {
+      if (check_log_level(level))
+      {
+        std::clog << msg;
+        for (data::mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+        {
+          std::clog << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
+        }
+      }
+    }
+
+    void LOG_PARAMETER_CHANGE(unsigned int level,
+                              const data::data_expression& d_j,
+                              const data::data_expression& Rd_j,
+                              const data::data_expression& Rg_ij,
+                              const data::mutable_map_substitution<>& sigma,
+                              const std::string& msg = ""
+                             )
+    {
+      if (check_log_level(level))
+      {
+        std::clog << msg
+                  << pp(d_j) << "\n"
+                  << "      value before: " << pp(Rd_j) << "\n"
+                  << "      value after:  " << pp(Rg_ij) << "\n"
+                  << "      replacements: " << data::to_string(sigma) << std::endl;
+      }
+    }
+
+    void LOG_CONDITION(unsigned int level,
+                       const data::data_expression& cond,
+                       const data::data_expression& c_i,
+                       const data::mutable_map_substitution<>& sigma,
+                       const std::string& msg = ""
+                      )
+                       
+    {
+      if (check_log_level(level))
+      {
+        std::clog << msg
+                  << pp(cond)
+                  << data::to_string(sigma)
+                  << " -> "
+                  << pp(c_i) << std::endl;
+      }
+    }
+
   public:
 
     /// \brief Constructor
     constelm_algorithm(specification& spec, const DataRewriter& R_, bool verbose = false)
       : 
         lps::detail::lps_algorithm(spec, verbose),
+        m_instantiate_global_variables(false),
+        m_ignore_conditions(false),
+        R(R_)
+    {}
+
+    /// \brief Constructor
+    constelm_algorithm(specification& spec, const DataRewriter& R_, unsigned int loglevel)
+      : 
+        lps::detail::lps_algorithm(spec, loglevel),
         m_instantiate_global_variables(false),
         m_ignore_conditions(false),
         R(R_)
@@ -152,12 +211,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
               if (R(g_ij, sigma) != R(d_j, sigma))
               {
-#ifdef MCRL2_LPSCONSTELM_DEBUG
-            std::clog << "POSSIBLE CHANGE FOR PARAMETER " << pp(d_j) << "\n"
-                      << "      value before: " << pp(R(d_j, sigma)) << "\n"
-                      << "      value after:  " << pp(R(g_ij, sigma)) << "\n"
-                      << "      replacements: " << data::to_string(sigma) << std::endl;
-#endif
+                LOG_PARAMETER_CHANGE(2, d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "POSSIBLE CHANGE FOR PARAMETER ");
                 data::mutable_map_substitution<> W = default_global_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
                 if (!W.empty())
                 {
@@ -179,23 +233,16 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                   undo[d_j].clear();
                 }
               }
-#ifdef MCRL2_LPSCONSTELM_DEBUG
               else
               {
-                std::clog << "NO CHANGE FOR PARAMETER " << pp(d_j) << "\n"
-                      << "      value before: " << pp(R(d_j, sigma)) << "\n"
-                      << "      value after:  " << pp(R(g_ij, sigma)) << "\n"
-                      << "      replacements: " << data::to_string(sigma) << std::endl;
+                LOG_PARAMETER_CHANGE(2, d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "NO CHANGE FOR PARAMETER ");
               }
-#endif
             }
           }
-#ifdef MCRL2_LPSCONSTELM_DEBUG
           else
           {
-            std::clog << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(R(c_i, sigma)) << std::endl;
+            LOG_CONDITION(2, i->condition(), R(c_i, sigma), sigma, "CONDITION IS FALSE: ");
           }
-#endif
         }
         for (std::set<data::variable>::iterator k = dG.begin(); k != dG.end(); ++k)
         {
@@ -203,15 +250,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
         }
       } while (!dG.empty());
 
-      // report the results
-      if (verbose())
-      {
-        std::clog << "Removing the following constant parameters:" << std::endl;
-        for (data::mutable_map_substitution<>::iterator i = sigma.begin(); i != sigma.end(); ++i)
-        {
-          std::clog << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
-        }
-      }
+      LOG_CONSTANT_PARAMETERS(1, sigma, "Removing the following constant parameters:\n");
 
       // N.B. The order of removing constant parameters and rewriting has been reversed
       // as requested by Jan Friso Groote. This may lead to some gain in performance (13%
