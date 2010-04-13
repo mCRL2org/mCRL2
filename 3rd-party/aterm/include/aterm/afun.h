@@ -3,6 +3,7 @@
 
 #include "atypes.h"
 #include "encoding.h"
+#include "stdio.h"
 
 #ifdef __cplusplus
 extern "C"
