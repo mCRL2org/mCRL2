@@ -13,6 +13,7 @@
 #define MCRL2_CORE_ALGORITHM_H
 
 #include <iostream>
+#include <string>
 
 namespace mcrl2 {
 
