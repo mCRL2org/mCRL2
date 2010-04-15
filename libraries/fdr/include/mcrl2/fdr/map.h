@@ -25,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A map
-class map: atermpp::aterm_appl
+class map: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

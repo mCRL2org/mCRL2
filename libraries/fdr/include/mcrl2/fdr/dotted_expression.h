@@ -12,69 +12,12 @@
 #ifndef MCRL2_FDR_DOTTED_EXPRESSION_H
 #define MCRL2_FDR_DOTTED_EXPRESSION_H
 
-#include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/fdr/detail/term_functions.h"
-#include "mcrl2/fdr/detail/constructors.h"
-#include "mcrl2/fdr/detail/syntax_checks.h"
-#include "mcrl2/fdr/expression.h"
-
+#include "mcrl2/fdr/dotted_expression_decl.h"
+#include "mcrl2/fdr/dotted_expression_impl.h"
+                                      
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Dotted expression
-  class dotted_expression: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      dotted_expression()
-        : atermpp::aterm_appl(fdr::detail::constructDotted())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      dotted_expression(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Dotted(m_term));
-      }
-  };
-
-//--- start generated classes ---//
-/// \brief A dotted expression
-class dot: public dotted_expression
-{
-  public:
-    /// \brief Default constructor.
-    dot()
-      : dotted_expression(fdr::detail::constructDot())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    dot(atermpp::aterm_appl term)
-      : dotted_expression(term)
-    {
-      assert(fdr::detail::check_term_Dot(m_term));
-    }
-
-    /// \brief Constructor.
-    dot(const expression& left, expression& right)
-      : dotted_expression(fdr::detail::gsMakeDot(left, right))
-    {}
-
-    expression left() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    expression right() const
-    {
-      return atermpp::arg2(*this);
-    }
-};
-//--- end generated classes ---//
 
 //--- start generated is-functions ---//
 

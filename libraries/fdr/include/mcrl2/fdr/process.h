@@ -26,7 +26,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A stop
-class stop: atermpp::aterm_appl
+class stop: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -51,7 +51,7 @@ typedef atermpp::vector<stop>    stop_vector;
 
 
 /// \brief A skip
-class skip: atermpp::aterm_appl
+class skip: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -76,7 +76,7 @@ typedef atermpp::vector<skip>    skip_vector;
 
 
 /// \brief A chaos
-class chaos: atermpp::aterm_appl
+class chaos: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -111,7 +111,7 @@ typedef atermpp::vector<chaos>    chaos_vector;
 
 
 /// \brief A prefix
-class prefix: atermpp::aterm_appl
+class prefix: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -156,7 +156,7 @@ typedef atermpp::vector<prefix>    prefix_vector;
 
 
 /// \brief An external choice
-class externalchoice: atermpp::aterm_appl
+class externalchoice: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -196,7 +196,7 @@ typedef atermpp::vector<externalchoice>    externalchoice_vector;
 
 
 /// \brief An internal choice
-class internalchoice: atermpp::aterm_appl
+class internalchoice: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -236,7 +236,7 @@ typedef atermpp::vector<internalchoice>    internalchoice_vector;
 
 
 /// \brief A sequential composition
-class sequentialcomposition: atermpp::aterm_appl
+class sequentialcomposition: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -276,7 +276,7 @@ typedef atermpp::vector<sequentialcomposition>    sequentialcomposition_vector;
 
 
 /// \brief An interrupt
-class interrupt: atermpp::aterm_appl
+class interrupt: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -316,7 +316,7 @@ typedef atermpp::vector<interrupt>    interrupt_vector;
 
 
 /// \brief An hiding
-class hiding: atermpp::aterm_appl
+class hiding: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -356,7 +356,7 @@ typedef atermpp::vector<hiding>    hiding_vector;
 
 
 /// \brief A renaming
-class rename: atermpp::aterm_appl
+class rename: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -396,7 +396,7 @@ typedef atermpp::vector<rename>    rename_vector;
 
 
 /// \brief An interleave
-class interleave: atermpp::aterm_appl
+class interleave: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -436,7 +436,7 @@ typedef atermpp::vector<interleave>    interleave_vector;
 
 
 /// \brief A sharing
-class sharing: atermpp::aterm_appl
+class sharing: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -481,7 +481,7 @@ typedef atermpp::vector<sharing>    sharing_vector;
 
 
 /// \brief An alpha parallel
-class alphaparallel: atermpp::aterm_appl
+class alphaparallel: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -531,7 +531,7 @@ typedef atermpp::vector<alphaparallel>    alphaparallel_vector;
 
 
 /// \brief A replicated external choice
-class repexternalchoice: atermpp::aterm_appl
+class repexternalchoice: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -571,7 +571,7 @@ typedef atermpp::vector<repexternalchoice>    repexternalchoice_vector;
 
 
 /// \brief A replicated internal choice
-class repinternalchoice: atermpp::aterm_appl
+class repinternalchoice: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -611,7 +611,7 @@ typedef atermpp::vector<repinternalchoice>    repinternalchoice_vector;
 
 
 /// \brief A replicated sequential composition
-class repsequentialcomposition: atermpp::aterm_appl
+class repsequentialcomposition: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -651,7 +651,7 @@ typedef atermpp::vector<repsequentialcomposition>    repsequentialcomposition_ve
 
 
 /// \brief A replicated interleave
-class repinterleave: atermpp::aterm_appl
+class repinterleave: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -691,7 +691,7 @@ typedef atermpp::vector<repinterleave>    repinterleave_vector;
 
 
 /// \brief A replicated sharing
-class repsharing: atermpp::aterm_appl
+class repsharing: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -736,7 +736,7 @@ typedef atermpp::vector<repsharing>    repsharing_vector;
 
 
 /// \brief A replicated alpha parallel
-class repalphaparallel: atermpp::aterm_appl
+class repalphaparallel: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -781,7 +781,7 @@ typedef atermpp::vector<repalphaparallel>    repalphaparallel_vector;
 
 
 /// \brief An untimed time-out
-class untimedtimeout: atermpp::aterm_appl
+class untimedtimeout: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -821,7 +821,7 @@ typedef atermpp::vector<untimedtimeout>    untimedtimeout_vector;
 
 
 /// \brief A boolean guard
-class boolguard: atermpp::aterm_appl
+class boolguard: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -861,7 +861,7 @@ typedef atermpp::vector<boolguard>    boolguard_vector;
 
 
 /// \brief A linked parallel
-class linkedparallel: atermpp::aterm_appl
+class linkedparallel: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -906,7 +906,7 @@ typedef atermpp::vector<linkedparallel>    linkedparallel_vector;
 
 
 /// \brief A replicated linked parallel
-class replinkedparallel: atermpp::aterm_appl
+class replinkedparallel: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

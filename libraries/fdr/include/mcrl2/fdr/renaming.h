@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A map list
-class maps: atermpp::aterm_appl
+class maps: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -59,7 +59,7 @@ typedef atermpp::vector<maps>    maps_vector;
 
 
 /// \brief A map/generator list
-class mapsgens: atermpp::aterm_appl
+class mapsgens: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

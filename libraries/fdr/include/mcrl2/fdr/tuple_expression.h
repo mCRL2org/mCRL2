@@ -12,63 +12,12 @@
 #ifndef MCRL2_FDR_TUPLE_EXPRESSION_H
 #define MCRL2_FDR_TUPLE_EXPRESSION_H
 
-#include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/fdr/detail/term_functions.h"
-#include "mcrl2/fdr/detail/constructors.h"
-#include "mcrl2/fdr/detail/syntax_checks.h"
+#include "mcrl2/fdr/tuple_expression_decl.h"
+#include "mcrl2/fdr/tuple_expression_impl.h"
 
 namespace mcrl2 {
 
 namespace fdr {
-
-  /// \brief Tuple expression
-  class tuple_expression: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      tuple_expression()
-        : atermpp::aterm_appl(fdr::detail::constructTuple())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      tuple_expression(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(fdr::detail::check_rule_Tuple(m_term));
-      }
-  };
-
-//--- start generated classes ---//
-/// \brief A tuple expression
-class exprs: public tuple_expression
-{
-  public:
-    /// \brief Default constructor.
-    exprs()
-      : tuple_expression(fdr::detail::constructExprs())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    exprs(atermpp::aterm_appl term)
-      : tuple_expression(term)
-    {
-      assert(fdr::detail::check_term_Exprs(m_term));
-    }
-
-    /// \brief Constructor.
-    exprs(const expression_list& elements)
-      : tuple_expression(fdr::detail::gsMakeExprs(elements))
-    {}
-
-    expression_list elements() const
-    {
-      return atermpp::list_arg1(*this);
-    }
-};
-//--- end generated classes ---//
 
 //--- start generated is-functions ---//
 

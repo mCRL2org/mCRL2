@@ -17,6 +17,7 @@
 #include "mcrl2/fdr/detail/term_functions.h"
 #include "mcrl2/fdr/detail/constructors.h"
 #include "mcrl2/fdr/detail/syntax_checks.h"
+#include "mcrl2/fdr/expression.h"
 
 namespace mcrl2 {
 
@@ -24,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An expression
-class expr: atermpp::aterm_appl
+class expr: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -59,7 +60,7 @@ typedef atermpp::vector<expr>    expr_vector;
 
 
 /// \brief A process
-class proc: atermpp::aterm_appl
+class proc: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

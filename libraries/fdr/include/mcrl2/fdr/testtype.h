@@ -25,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A deterministic
-class deterministic: atermpp::aterm_appl
+class deterministic: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -50,7 +50,7 @@ typedef atermpp::vector<deterministic>    deterministic_vector;
 
 
 /// \brief A deadlock free
-class deadlock_free: atermpp::aterm_appl
+class deadlock_free: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -75,7 +75,7 @@ typedef atermpp::vector<deadlock_free>    deadlock_free_vector;
 
 
 /// \brief A livelock free
-class livelock_free: atermpp::aterm_appl
+class livelock_free: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

@@ -26,7 +26,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A link list
-class links: atermpp::aterm_appl
+class links: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -61,7 +61,7 @@ typedef atermpp::vector<links>    links_vector;
 
 
 /// \brief A link/generator list
-class linksgens: atermpp::aterm_appl
+class linksgens: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

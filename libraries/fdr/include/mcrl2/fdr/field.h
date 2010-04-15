@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A simple input
-class simpleinput: atermpp::aterm_appl
+class simpleinput: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -59,7 +59,7 @@ typedef atermpp::vector<simpleinput>    simpleinput_vector;
 
 
 /// \brief An input
-class input: atermpp::aterm_appl
+class input: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -99,7 +99,7 @@ typedef atermpp::vector<input>    input_vector;
 
 
 /// \brief An output
-class output: atermpp::aterm_appl
+class output: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

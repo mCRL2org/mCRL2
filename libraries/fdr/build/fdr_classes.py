@@ -30,7 +30,7 @@ true            | true_()							 									  | The true value
 false           | false_()																  | The false value
 And				| and_(const boolean_expression& left, const boolean_expression& right)	  | An and
 Or				| or_(const boolean_expression& left, const boolean_expression& right)	  | An or
-Not             | not(const boolean_expression& operand)								  | An not
+Not             | not_(const boolean_expression& operand)								  | An not
 Null			| null(const seq_expression& seq)										  | The empty sequence test
 Elem			| elem(const expression& expr, const seq_expression& seq)				  | The membership of a sequence test
 Member			| member(const expression& expr, set_expression& set)					  | The membership of a set test

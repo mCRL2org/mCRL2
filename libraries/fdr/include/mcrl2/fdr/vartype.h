@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A simple branch
-class simplebranch: atermpp::aterm_appl
+class simplebranch: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -59,7 +59,7 @@ typedef atermpp::vector<simplebranch>    simplebranch_vector;
 
 
 /// \brief A branch
-class branch: atermpp::aterm_appl
+class branch: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

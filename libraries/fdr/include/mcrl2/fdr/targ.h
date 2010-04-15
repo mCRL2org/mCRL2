@@ -26,7 +26,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An empty
-class nil: atermpp::aterm_appl
+class nil: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -51,7 +51,7 @@ typedef atermpp::vector<nil>    nil_vector;
 
 
 /// \brief An expression list
-class exprs: atermpp::aterm_appl
+class exprs: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -86,7 +86,7 @@ typedef atermpp::vector<exprs>    exprs_vector;
 
 
 /// \brief A closed range
-class closedrange: atermpp::aterm_appl
+class closedrange: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -126,7 +126,7 @@ typedef atermpp::vector<closedrange>    closedrange_vector;
 
 
 /// \brief An open range
-class openrange: atermpp::aterm_appl
+class openrange: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -161,7 +161,7 @@ typedef atermpp::vector<openrange>    openrange_vector;
 
 
 /// \brief A comprehension
-class compr: atermpp::aterm_appl
+class compr: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

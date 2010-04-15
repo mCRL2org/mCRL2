@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A set generator
-class setgen: atermpp::aterm_appl
+class setgen: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -64,7 +64,7 @@ typedef atermpp::vector<setgen>    setgen_vector;
 
 
 /// \brief A seq generator
-class seqgen: atermpp::aterm_appl
+class seqgen: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

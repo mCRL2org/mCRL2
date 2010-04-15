@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A boolean check
-class bcheck: atermpp::aterm_appl
+class bcheck: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -59,7 +59,7 @@ typedef atermpp::vector<bcheck>    bcheck_vector;
 
 
 /// \brief A refinement check
-class rcheck: atermpp::aterm_appl
+class rcheck: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -104,7 +104,7 @@ typedef atermpp::vector<rcheck>    rcheck_vector;
 
 
 /// \brief A test
-class tcheck: atermpp::aterm_appl
+class tcheck: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -144,7 +144,7 @@ typedef atermpp::vector<tcheck>    tcheck_vector;
 
 
 /// \brief A negated check
-class notcheck: atermpp::aterm_appl
+class notcheck: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

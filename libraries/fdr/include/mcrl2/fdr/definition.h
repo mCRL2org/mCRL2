@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An assignment
-class assign: atermpp::aterm_appl
+class assign: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -64,7 +64,7 @@ typedef atermpp::vector<assign>    assign_vector;
 
 
 /// \brief A channel
-class channel: atermpp::aterm_appl
+class channel: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -104,7 +104,7 @@ typedef atermpp::vector<channel>    channel_vector;
 
 
 /// \brief A simple channel
-class channel: atermpp::aterm_appl
+class channel: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -139,7 +139,7 @@ typedef atermpp::vector<channel>    channel_vector;
 
 
 /// \brief A nametype
-class nametype: atermpp::aterm_appl
+class nametype: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -179,7 +179,7 @@ typedef atermpp::vector<nametype>    nametype_vector;
 
 
 /// \brief A datatype
-class datatype: atermpp::aterm_appl
+class datatype: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -219,7 +219,7 @@ typedef atermpp::vector<datatype>    datatype_vector;
 
 
 /// \brief A subtype
-class subtype: atermpp::aterm_appl
+class subtype: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -259,7 +259,7 @@ typedef atermpp::vector<subtype>    subtype_vector;
 
 
 /// \brief An external
-class external: atermpp::aterm_appl
+class external: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -294,7 +294,7 @@ typedef atermpp::vector<external>    external_vector;
 
 
 /// \brief A transparent
-class transparent: atermpp::aterm_appl
+class transparent: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -329,7 +329,7 @@ typedef atermpp::vector<transparent>    transparent_vector;
 
 
 /// \brief An assertion
-class assert_: atermpp::aterm_appl
+class assert_: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -364,7 +364,7 @@ typedef atermpp::vector<assert_>    assert__vector;
 
 
 /// \brief A print
-class print: atermpp::aterm_appl
+class print: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -399,7 +399,7 @@ typedef atermpp::vector<print>    print_vector;
 
 
 /// \brief An include
-class include: atermpp::aterm_appl
+class include: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

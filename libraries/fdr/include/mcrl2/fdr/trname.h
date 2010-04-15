@@ -25,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A normal
-class normal: atermpp::aterm_appl
+class normal: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -50,7 +50,7 @@ typedef atermpp::vector<normal>    normal_vector;
 
 
 /// \brief A normal
-class normalise: atermpp::aterm_appl
+class normalise: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -75,7 +75,7 @@ typedef atermpp::vector<normalise>    normalise_vector;
 
 
 /// \brief A normal
-class normalize: atermpp::aterm_appl
+class normalize: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -100,7 +100,7 @@ typedef atermpp::vector<normalize>    normalize_vector;
 
 
 /// \brief A sbsim
-class sbsim: atermpp::aterm_appl
+class sbsim: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -125,7 +125,7 @@ typedef atermpp::vector<sbsim>    sbsim_vector;
 
 
 /// \brief A tau_loop_factor
-class tau_loop_factor: atermpp::aterm_appl
+class tau_loop_factor: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -150,7 +150,7 @@ typedef atermpp::vector<tau_loop_factor>    tau_loop_factor_vector;
 
 
 /// \brief A diamond
-class diamond: atermpp::aterm_appl
+class diamond: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -175,7 +175,7 @@ typedef atermpp::vector<diamond>    diamond_vector;
 
 
 /// \brief A model compress
-class model_compress: atermpp::aterm_appl
+class model_compress: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -200,7 +200,7 @@ typedef atermpp::vector<model_compress>    model_compress_vector;
 
 
 /// \brief An explicate
-class explicate: atermpp::aterm_appl
+class explicate: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

@@ -25,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An empty
-class nil: atermpp::aterm_appl
+class nil: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -50,7 +50,7 @@ typedef atermpp::vector<nil>    nil_vector;
 
 
 /// \brief A boolean
-class bcomprehension: atermpp::aterm_appl
+class bcomprehension: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -85,7 +85,7 @@ typedef atermpp::vector<bcomprehension>    bcomprehension_vector;
 
 
 /// \brief A comprehension
-class ecomprehension: atermpp::aterm_appl
+class ecomprehension: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

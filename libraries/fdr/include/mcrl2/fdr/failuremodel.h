@@ -25,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A failures
-class f: atermpp::aterm_appl
+class f: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -50,7 +50,7 @@ typedef atermpp::vector<f>    f_vector;
 
 
 /// \brief A faulures/divergences
-class fd: atermpp::aterm_appl
+class fd: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

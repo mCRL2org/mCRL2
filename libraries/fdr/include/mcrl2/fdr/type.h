@@ -25,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A type product
-class typeproduct: atermpp::aterm_appl
+class typeproduct: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -65,7 +65,7 @@ typedef atermpp::vector<typeproduct>    typeproduct_vector;
 
 
 /// \brief A type tuple
-class typetuple: atermpp::aterm_appl
+class typetuple: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -100,7 +100,7 @@ typedef atermpp::vector<typetuple>    typetuple_vector;
 
 
 /// \brief A type set
-class typeset: atermpp::aterm_appl
+class typeset: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -135,7 +135,7 @@ typedef atermpp::vector<typeset>    typeset_vector;
 
 
 /// \brief A simple type name
-class simpletypename: atermpp::aterm_appl
+class simpletypename: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -170,7 +170,7 @@ typedef atermpp::vector<simpletypename>    simpletypename_vector;
 
 
 /// \brief A type name
-class typename: atermpp::aterm_appl
+class typename: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

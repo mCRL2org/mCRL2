@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A divergence free
-class divergence_free: atermpp::aterm_appl
+class divergence_free: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,7 +49,7 @@ typedef atermpp::vector<divergence_free>    divergence_free_vector;
 
 
 /// \brief A complex test
-class test: atermpp::aterm_appl
+class test: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

@@ -24,7 +24,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief An empty
-class nil: atermpp::aterm_appl
+class nil: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
@@ -49,7 +49,7 @@ typedef atermpp::vector<nil>    nil_vector;
 
 
 /// \brief A traces
-class t: atermpp::aterm_appl
+class t: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.

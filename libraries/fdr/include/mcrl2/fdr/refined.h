@@ -25,7 +25,7 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A model
-class model: atermpp::aterm_appl
+class model: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
