@@ -24,7 +24,7 @@ namespace mcrl2 {
 
     namespace detail {
 
-//--- start generated class ---//
+//--- start generated class structured_sort_constructor_argument ---//
 /// \brief An argument of a constructor of a structured sort
 class structured_sort_constructor_argument_base: public atermpp::aterm_appl
 {
@@ -62,7 +62,7 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
       return atermpp::arg2(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class structured_sort_constructor_argument ---//
 
     } // namespace detail
 

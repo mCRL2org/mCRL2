@@ -18,7 +18,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class multiple_possible_sorts ---//
 /// \brief Multiple possible sorts
 class multiple_possible_sorts: public sort_expression
 {
@@ -52,7 +52,7 @@ class multiple_possible_sorts: public sort_expression
       return atermpp::list_arg1(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class multiple_possible_sorts ---//
 
   } // namespace data
 

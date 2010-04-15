@@ -52,7 +52,7 @@ namespace mcrl2 {
 
     namespace detail {
 
-//--- start generated class ---//
+//--- start generated class structured_sort ---//
 /// \brief A structured sort
 class structured_sort_base: public sort_expression
 {
@@ -86,7 +86,7 @@ class structured_sort_base: public sort_expression
       return atermpp::list_arg1(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class structured_sort ---//
 
     } //namespace detail
 

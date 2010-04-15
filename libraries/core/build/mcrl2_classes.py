@@ -302,19 +302,33 @@ class FunctionDeclaration:
 
 # Represents a class member function
 class MemberFunction:
-    def __init__(self, type, name, arg):
-        self.type = type
+    def __init__(self, classname, return_type, name, arg):
+        self.classname = classname
+        self.return_type = return_type
         self.name = name
         self.arg  = arg 
 
     def expand_text(self, text):
-        text = re.sub('<TYPE>', self.type, text)
+        text = re.sub('<CLASSNAME>'          , self.classname          , text)
+        text = re.sub('<RETURN_TYPE>', self.return_type, text)
         text = re.sub('<NAME>', self.name, text)
         text = re.sub('<ARG>',  self.arg , text)
         return text
 
     def inline_definition(self):
-        text = '''    <TYPE> <NAME>() const
+        text = '''    <RETURN_TYPE> <NAME>() const
+    {
+      return atermpp::<ARG>(*this);
+    }'''
+        return self.expand_text(text)
+
+    def declaration(self):
+        text = '''    <RETURN_TYPE> <NAME>() const;'''
+        return self.expand_text(text)
+
+    def definition(self):
+        text = '''    inline
+    <RETURN_TYPE> <CLASSNAME>::<NAME>() const
     {
       return atermpp::<ARG>(*this);
     }'''
@@ -348,6 +362,19 @@ class Constructor:
     {}'''
         return self.expand_text(text)
 
+    def declaration(self):
+        text = r'''    /// \\\\brief Constructor.
+    <CLASSNAME>(<ARGUMENTS>);'''
+        return self.expand_text(text)
+
+    def definition(self):
+        text = r'''    /// \\\\brief Constructor.
+    inline
+    <CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+    {}'''
+        return self.expand_text(text)
+
 # Represents a default class constructor
 class DefaultConstructor(Constructor):
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
@@ -362,6 +389,19 @@ class DefaultConstructor(Constructor):
     def inline_definition(self):
         text = r'''    /// \\\\brief Default constructor.
     <CLASSNAME>()
+      : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
+    {}'''
+        return self.expand_text(text)
+
+    def declaration(self):
+        text = r'''    /// \\\\brief Default constructor.
+    <CLASSNAME>();'''
+        return self.expand_text(text)
+
+    def definition(self):
+        text = r'''    /// \\\\brief Default constructor.
+    inline
+    <CLASSNAME>::<CLASSNAME>()
       : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
     {}'''
         return self.expand_text(text)
@@ -384,6 +424,23 @@ class OverloadedConstructor(Constructor):
     {}'''
         return self.expand_text(text)
 
+    def declaration(self):
+        text = r'''    /// \\\\brief Constructor.
+    <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>);'''
+        return self.expand_text(text)
+
+    def definition(self):
+        text = r'''    /// \\\\brief Constructor.
+    <TEMPLATE_PARAMETERS><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+    {}'''
+        if len(self.template_parameters) > 0:
+            inline = ''
+        else:
+            inline = 'inline'
+        text = re.sub('<INLINE>', inline, text)
+        return self.expand_text(text)
+
 # Represents a class constructor taking an ATerm as argument
 class ATermConstructor(Constructor):
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
@@ -399,6 +456,23 @@ class ATermConstructor(Constructor):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
     <CLASSNAME>(atermpp::aterm_appl term)
+      : <SUPERCLASS>(term)
+    {
+      assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
+    }'''
+        return self.expand_text(text)
+
+    def declaration(self):
+        text = r'''    /// \\\\brief Constructor.
+    /// \\param term A term
+    <CLASSNAME>(atermpp::aterm_appl term);'''
+        return self.expand_text(text)
+
+    def definition(self):
+        text = r'''    /// \\\\brief Constructor.
+    /// \\param term A term
+    inline
+    <CLASSNAME>::<CLASSNAME>(atermpp::aterm_appl term)
       : <SUPERCLASS>(term)
     {
       assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
@@ -545,13 +619,13 @@ class Class:
             arg, n = str(p), index
             index = index + 1
             p = arg.rpartition(' ')
-            type = extract_type(p[0].strip())
+            return_type = extract_type(p[0].strip())
             name = p[2].strip()
             arg = 'arg' + str(n)
             # TODO: this check for a list is unsafe; the ATerm grammar should be used to make it precise
-            if type.endswith('list'):
+            if return_type.endswith('list'):
                 arg = 'list_' + arg
-            result.append(MemberFunction(type, name, arg))
+            result.append(MemberFunction(self.classname(), return_type, name, arg))
         return result
 
     # Returns the member functions of the class
@@ -562,7 +636,7 @@ class Class:
         return text
 
     # Returns the class definition
-    def class_definition(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
+    def class_inline_definition(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
         classname = self.classname()
         superclass = self.superclass()
         f = self.constructor

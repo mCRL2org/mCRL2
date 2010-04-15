@@ -19,13 +19,13 @@ def make_classes(filename, class_text, superclass = None, namespace = 'core', ad
     # skip the classes with a namespace qualifier (they are defined elsewhere)
     classes = [c for c in classes if c.qualifier() == '']
 
-    class_definitions = [c.class_definition(namespace, True, add_constructor_overloads) for c in classes]
+    class_definitions = [c.class_inline_definition(namespace, True, add_constructor_overloads) for c in classes]
 
     if path(filename).isdir():
         for i in range(len(class_definitions)):
             fname = path(filename).normcase() / ('%s.h' % classes[i].name())
             text = class_definitions[i]
-            insert_text_in_file(fname, text, 'generated class')
+            insert_text_in_file(fname, text, 'generated class %s' % classes[i].name())
     else:
         ctext = '\n'.join(class_definitions)
         insert_text_in_file(filename, ctext, 'generated classes')

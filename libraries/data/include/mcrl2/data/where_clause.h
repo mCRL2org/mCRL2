@@ -20,7 +20,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class where_clause ---//
 /// \brief A where expression
 class where_clause: public data_expression
 {
@@ -59,7 +59,7 @@ class where_clause: public data_expression
       return atermpp::list_arg2(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class where_clause ---//
 
   } // namespace data
 

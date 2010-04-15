@@ -7,7 +7,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class identifier ---//
 /// \brief An identifier
 class identifier: public data_expression
 {
@@ -40,7 +40,7 @@ class identifier: public data_expression
       return atermpp::arg1(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class identifier ---//
 
     /// \brief list of identifiers
     typedef atermpp::term_list< identifier > identifier_list;

@@ -16,7 +16,10 @@ def insert_text_in_file(filename, text, label):
         old_text = path(filename).text()
         new_text = re.compile(src, re.S).sub(dest, old_text)
         if old_text == new_text:
-            print 'Warning: nothing has changed in file %s' % filename
+            if re.search(src, old_text, re.S) == None:
+                print "Error: label '//--- start %s ---//' not found in file %s" % (label, filename)
+            else:
+                print 'Warning: nothing has changed in file %s' % filename
         else:
                 path(filename).write_text(new_text)
                 print 'Updated file %s' % filename

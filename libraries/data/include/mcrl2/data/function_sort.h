@@ -30,7 +30,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class function_sort ---//
 /// \brief A function sort
 class function_sort: public sort_expression
 {
@@ -69,7 +69,7 @@ class function_sort: public sort_expression
       return atermpp::arg2(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class function_sort ---//
 
     /// \brief list of function sorts
     typedef atermpp::term_list<function_sort> function_sort_list;

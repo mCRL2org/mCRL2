@@ -24,7 +24,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class container_sort ---//
 /// \brief A container sort
 class container_sort: public sort_expression
 {
@@ -57,7 +57,7 @@ class container_sort: public sort_expression
       return atermpp::arg2(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class container_sort ---//
 
     /// \brief list of function sorts
     ///

@@ -23,7 +23,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class function_symbol ---//
 /// \brief A function symbol
 class function_symbol: public data_expression
 {
@@ -61,7 +61,7 @@ class function_symbol: public data_expression
       return atermpp::arg2(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class function_symbol ---//
 
     /// \brief list of function symbols
     typedef atermpp::term_list< function_symbol > function_symbol_list;

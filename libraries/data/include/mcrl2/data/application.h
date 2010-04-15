@@ -22,7 +22,7 @@ namespace mcrl2 {
   namespace data {
 
     namespace detail {
-//--- start generated class ---//
+//--- start generated class application ---//
 /// \brief An application of a data expression to a number of arguments
 class application_base: public data_expression
 {
@@ -61,7 +61,7 @@ class application_base: public data_expression
       return atermpp::list_arg2(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class application ---//
 
     } // namespace detail
 

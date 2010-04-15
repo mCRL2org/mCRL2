@@ -18,7 +18,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class unknown_sort ---//
 /// \brief Unknown sort expression
 class unknown_sort: public sort_expression
 {
@@ -36,7 +36,7 @@ class unknown_sort: public sort_expression
       assert(core::detail::check_term_SortUnknown(m_term));
     }
 };
-//--- end generated class ---//
+//--- end generated class unknown_sort ---//
 
   } // namespace data
 

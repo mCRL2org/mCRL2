@@ -26,7 +26,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class basic_sort ---//
 /// \brief A basic sort
 class basic_sort: public sort_expression
 {
@@ -59,7 +59,7 @@ class basic_sort: public sort_expression
       return atermpp::arg1(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class basic_sort ---//
 
     /// \brief list of basic sorts
     typedef atermpp::term_list<basic_sort> basic_sort_list;

@@ -27,7 +27,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class variable ---//
 /// \brief A data variable
 class variable: public data_expression
 {
@@ -65,7 +65,7 @@ class variable: public data_expression
       return atermpp::arg2(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class variable ---//
 
     /// \brief list of variables
     typedef atermpp::term_list< variable >                         variable_list;

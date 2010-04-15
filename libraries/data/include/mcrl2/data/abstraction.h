@@ -23,7 +23,7 @@ namespace mcrl2 {
 
   namespace data {
 
-//--- start generated class ---//
+//--- start generated class abstraction ---//
 /// \brief An abstraction expression.
 class abstraction: public data_expression
 {
@@ -67,7 +67,7 @@ class abstraction: public data_expression
       return atermpp::arg3(*this);
     }
 };
-//--- end generated class ---//
+//--- end generated class abstraction ---//
 
    } // namespace data
 
