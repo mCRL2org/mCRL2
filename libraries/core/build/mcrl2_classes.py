@@ -479,20 +479,6 @@ class ATermConstructor(Constructor):
     }'''
         return self.expand_text(text)
 
-CLASS_DEFINITION = r'''/// \\brief <DESCRIPTION>
-class <CLASSNAME><SUPERCLASS_DECLARATION>
-{
-  public:
-<CONSTRUCTORS><MEMBER_FUNCTIONS>
-};'''
-
-CONTAINER_TYPEDEFS = r'''/// \\brief list of <CLASSNAME>s
-typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
-
-/// \\brief vector of <CLASSNAME>s
-typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
-'''
-
 # Represents a class definition
 #
 # it can be initialized with a string like this:
@@ -605,12 +591,6 @@ class Class:
             constructors.append(OverloadedConstructor(classname, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
         return constructors
 
-    # Returns the inline definitions of the constructors
-    def constructor_definitions(self, namespace, add_constructor_overloads = False):
-        constructors = self.constructors(namespace, add_constructor_overloads)
-        text = '\n\n'.join([x.inline_definition() for x in constructors])
-        return text
-
     # Returns the member functions of the class
     def member_functions(self):
         result = []
@@ -628,29 +608,8 @@ class Class:
             result.append(MemberFunction(self.classname(), return_type, name, arg))
         return result
 
-    # Returns the member functions of the class
-    def member_function_definitions(self):
-        text = '\n\n'.join([x.inline_definition() for x in self.member_functions()])
-        if text != '':
-            text = '\n\n' + text
-        return text
-
-    # Returns the class definition
-    def class_inline_definition(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
-        classname = self.classname()
+    def expand_text(self, text, parameters, constructors, member_functions, namespace):
         superclass = self.superclass()
-        f = self.constructor
-
-        print 'generating class', classname
-
-        mtext = self.member_function_definitions()
-
-        parameters = [p.name() for p in f.parameters()]
-        ptext = ', '.join(parameters)
-
-        ctext = self.constructor_definitions(namespace, add_constructor_overloads)
-        text = CLASS_DEFINITION
-
         if superclass == None:
             superclass_declaration = ': atermpp::aterm_appl'
         else:
@@ -658,19 +617,77 @@ class Class:
 
         text = re.sub('<SUPERCLASS_DECLARATION>', superclass_declaration, text)
         text = re.sub('<DESCRIPTION>'     , self.description, text)
-        text = re.sub('<CLASSNAME>'       , classname, text)
+        text = re.sub('<CLASSNAME>'       , self.classname(), text)
         text = re.sub('<ATERM>'           , self.aterm, text)
-        text = re.sub('<CONSTRUCTORS>'    , ctext, text)
-        text = re.sub('<PARAMETERS>'      , ptext      , text)
-        text = re.sub('<NAMESPACE>'       , namespace  , text)
+        text = re.sub('<CONSTRUCTORS>'    , constructors, text)
+        text = re.sub('<PARAMETERS>'      , parameters, text)
+        text = re.sub('<NAMESPACE>'       , namespace, text)
         if superclass != None:
-            text = re.sub('<SUPERCLASS>'      , superclass , text)
-        text = re.sub('<MEMBER_FUNCTIONS>', mtext, text)
-        if add_container_typedefs and (superclass == None):
-            atext = re.sub('<CLASSNAME>', classname, CONTAINER_TYPEDEFS)
-            if self.use_base_class_name_ and (self.classname_ != self.base_classname_):
-                atext = 'class %s;\n\n' % classname + atext
-            text = text + '\n\n' + atext
+            text = re.sub('<SUPERCLASS>'  , superclass, text)
+        text = re.sub('<MEMBER_FUNCTIONS>', member_functions, text)
+        return text
+
+    # Returns typedefs for term lists and term vectors.
+    def container_typedefs(self):
+        text = r'''/// \\brief list of <CLASSNAME>s
+typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
+
+/// \\brief vector of <CLASSNAME>s
+typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
+'''
+        text = re.sub('<CLASSNAME>', self.classname(), text)
+        if self.use_base_class_name_ and (self.classname_ != self.base_classname_):
+            text = 'class %s;\n\n' % self.classname() + text
+        return text
+
+    # Returns the class definition
+    def class_inline_definition(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
+        print 'generating class', self.classname()
+
+        ptext = ', '.join([p.name() for p in self.constructor.parameters()])
+        ctext = '\n\n'.join([x.inline_definition() for x in self.constructors(namespace, add_constructor_overloads)])
+        mtext = ''.join(['\n\n' + x.inline_definition() for x in self.member_functions()])
+
+        text = r'''/// \\brief <DESCRIPTION>
+class <CLASSNAME><SUPERCLASS_DECLARATION>
+{
+  public:
+<CONSTRUCTORS><MEMBER_FUNCTIONS>
+};'''
+        text = self.expand_text(text, ptext, ctext, mtext, namespace)
+
+        if add_container_typedefs and (self.superclass() == None):
+            text = text + '\n\n' + self.container_typedefs()
+        return text + '\n'
+
+    # Returns the class declaration
+    def class_declaration(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
+        print 'generating class', self.classname()
+
+        ptext = ', '.join([p.name() for p in self.constructor.parameters()])
+        ctext = '\n\n'.join([x.declaration() for x in self.constructors(namespace, add_constructor_overloads)])
+        mtext = ''.join(['\n\n' + x.declaration() for x in self.member_functions()])
+
+        text = r'''/// \\brief <DESCRIPTION>
+class <CLASSNAME><SUPERCLASS_DECLARATION>
+{
+  public:
+<CONSTRUCTORS><MEMBER_FUNCTIONS>
+};'''
+        text = self.expand_text(text, ptext, ctext, mtext, namespace)
+
+        if add_container_typedefs and (self.superclass() == None):
+            text = text + '\n\n' + self.container_typedefs()
+        return text + '\n'
+
+    # Returns the member function definitions
+    def class_member_function_definitions(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
+        ptext = ', '.join([p.name() for p in self.constructor.parameters()])
+        ctext = '\n\n'.join([x.definition() for x in self.constructors(namespace, add_constructor_overloads)])
+        mtext = ''.join(['\n\n' + x.definition() for x in self.member_functions()])
+
+        text = r'''<CONSTRUCTORS><MEMBER_FUNCTIONS>'''
+        text = self.expand_text(text, ptext, ctext, mtext, namespace)
         return text + '\n'
 
 # parses lines that contain entries separated by '|'
