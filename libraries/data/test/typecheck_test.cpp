@@ -27,9 +27,11 @@ using namespace mcrl2;
 
 // Expected failures, these are not going to be fixed in the current
 // implementation of the type checker
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_list_pos_nat, 1)
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables, 1)
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables_reversed, 1)
-
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_matching_ambiguous, 1)
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1) // Fails because of silly reordering in type checker
 
 // Parse functions that do not change any context (i.e. do not typecheck and
 // normalise sorts).
@@ -176,6 +178,14 @@ BOOST_AUTO_TEST_CASE(test_list_one_two) {
 
 BOOST_AUTO_TEST_CASE(test_list_zero_concat_one_two) {
   test_data_expression("[0] ++ [1, 2]", true, "List(Nat)");
+}
+
+BOOST_AUTO_TEST_CASE(test_list_nat_pos) {
+  test_data_expression("[0, 1, 2]", true, "List(Nat)");
+}
+
+BOOST_AUTO_TEST_CASE(test_list_pos_nat) {
+  test_data_expression("[1, 0, 2]", true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_nat_concat_one_two) {
@@ -566,6 +576,55 @@ BOOST_AUTO_TEST_CASE(test_cyclic_aliases_indirect)
     "sort S = U;\n"
     "     U = T;\n"
     "     T = S;\n",
+    false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_matching)
+{
+  test_data_specification(
+    "map  f: Pos # Nat -> Bool;\n\n"
+    "var  x: Pos;\n"
+    "     y: Nat;\n"
+    "eqn  f(x, y)  =  true;\n",
+    true
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_matching_non_strict)
+{
+  test_data_specification(
+    "map  f: Pos # Nat -> Bool;\n\n"
+    "var  x: Pos;\n"
+    "     y: Nat;\n"
+    "eqn  f(x, x)  =  true;\n",
+    true
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_matching_ambiguous)
+{
+  test_data_specification(
+    "map  f: Pos # Nat -> Bool;\n"
+    "     f: Nat # Nat -> Bool;\n\n"
+    "var  x: Pos;\n"
+    "     y: Nat;\n"
+    "eqn  f(x, y)  =  false;\n\n"
+    "var  x: Pos;\n"
+    "     y: Nat;\n"
+    "eqn  f(y, y)  =  true;\n",
+    true
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_matching_ambiguous_rhs)
+{
+  test_data_specification(
+    "map  f: Int;\n\n"
+    "var  x: Pos;\n"
+    "eqn  f(x)  =  -5;\n\n"
+    "var  x: Pos;\n"
+    "eqn  f(x)  =  3;\n",
     false
   );
 }
@@ -1090,7 +1149,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4)
     "     f: Nat # Pos -> T;\n",
     v.begin(), v.end(),
     true,
-    "U"
+    "S"
   );
 }
 
@@ -1111,7 +1170,7 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application4a)
     "     f: Nat # Pos -> T;\n",
     v.begin(), v.end(),
     true,
-    "U"
+    "S"
   );
 }
 
@@ -1127,12 +1186,56 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application5)
     "     T;\n"
     "     U;\n\n"
     "map  f: Pos;\n"
+    "     f: Nat # Nat -> S;\n"
     "     f: Nat # Pos -> T;\n"
-    "     f: Pos # Nat -> U;\n"
-    "     f: Nat # Nat -> S;\n",
+    "     f: Pos # Nat -> U;\n",
     v.begin(), v.end(),
     true,
-    "U"
+    "S"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  test_data_expression_in_specification_context(
+    "g(f(x))",
+    "map  g: Int -> Bool;\n"
+    "     f: Pos -> Nat;\n"
+    "     f: Pos -> Int;\n",
+    v.begin(), v.end(),
+    true,
+    "Bool"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive2)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  test_data_expression_in_specification_context(
+    "g(f(x))",
+    "map  g: Int -> Bool;\n"
+    "     f: Pos -> Nat;\n"
+    "     f: Pos -> Int;\n"
+    "     g: Int -> Int;\n",
+    v.begin(), v.end(),
+    false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive3)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  test_data_expression_in_specification_context(
+    "g(f(x))",
+    "map  g: Int -> Bool;\n"
+    "     f: Pos -> Nat;\n"
+    "     f,g: Int -> Int;\n",
+    v.begin(), v.end(),
+    false
   );
 }
 
