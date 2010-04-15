@@ -435,6 +435,14 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb), equal_to(false_(), vb), not_(vb)));
         result.push_back(data_equation(atermpp::make_vector(vb), equal_to(vb, true_()), vb));
         result.push_back(data_equation(atermpp::make_vector(vb), equal_to(vb, false_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), less(false_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), less(true_(), vb), false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), less(vb, false_()), false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), less(vb, true_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), less_equal(false_(), vb), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), less_equal(true_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), less_equal(vb, false_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), less_equal(vb, true_()), true_()));
         return result;
       }
 

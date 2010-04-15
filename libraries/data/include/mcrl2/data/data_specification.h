@@ -32,6 +32,7 @@
 
 // sorts
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/standard.h"
@@ -548,6 +549,10 @@ namespace mcrl2 {
       {
         if (m_sorts_in_context.insert(s).second)
         {
+          if(is_container_sort(s))
+          {
+            add_context_sort(container_sort(s).element_sort());
+          }
           data_is_not_necessarily_normalised_anymore();
         }
       }

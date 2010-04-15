@@ -38,4 +38,13 @@ eqn !(true) = false;
     ==(false,b) = !(b);
     ==(b,true) = b;
     ==(b,false) = !(b);
+    <(false,b) = b;
+    <(true,b) = false;
+    <(b,false) = false;
+    <(b,true) = !(b);
+    <=(false,b) = true;
+    <=(true,b) = b;
+    <=(b,false) = !(b);
+    <=(b,true) = true;
+
 

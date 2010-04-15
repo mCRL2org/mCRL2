@@ -336,7 +336,6 @@ void set_rewrite_test()
 
   data::rewriter R(specification);
 
-  /*
   sort_expression set_nat(set_(nat()));
 
   data_expression empty(R(specification.normalise_sorts(emptyset(nat()))));
@@ -374,10 +373,10 @@ void set_rewrite_test()
   data_rewrite_test(R, x, true_());
   x = data::parse_data_expression("false in {n:Bool|n && !n}",specification);
   data_rewrite_test(R, x, false_());
-*/
+
   // test for a variation on bug #721,
   // see also set_bool_rewrite_test()
-  data::data_expression x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+  x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
   x = specification.normalise_sorts(x);
   data_rewrite_test(R, x, false_());
 }
@@ -548,7 +547,7 @@ void set_bool_rewrite_test()
 
   // Rewrite with parsing
   e = parse_data_expression("true in {true, false}", specification);
-  data_rewrite_test(R, e, false_());
+  data_rewrite_test(R, e, true_());
 
 
   specification = data_specification();
@@ -592,11 +591,31 @@ void finite_set_nat_rewrite_test_without_alias()
   data_specification specification;
 
   specification.add_context_sort(set_(nat()));
-  specification.add_context_sort(set_(bool_()));
 
   data::rewriter R(specification);
+  data::data_expression x;
 
-  data::data_expression x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
+  x = less(cnat(sort_pos::c1()), c0());
+  x = specification.normalise_sorts(x);
+  data_rewrite_test(R, x, false_());
+
+  x = less(c0(), cnat(sort_pos::c1()));
+  x = specification.normalise_sorts(x);
+  data_rewrite_test(R, x, true_());
+
+  x = fsetin(nat(), c0(), fset_cons(nat(), c0(), fset_empty(nat())));
+  x = specification.normalise_sorts(x);
+  data_rewrite_test(R, x, true_());
+
+  x = fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())));
+  x = specification.normalise_sorts(x);
+  data_rewrite_test(R, x, fset_cons(nat(), c0(), fset_cons(nat(), cnat(sort_pos::c1()), fset_empty(nat()))));
+
+  x = fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat()))));
+  x = specification.normalise_sorts(x);
+  data_rewrite_test(R, x, true_());
+
+  x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
   x = specification.normalise_sorts(x);
   data_rewrite_test(R, x, false_());
 }
@@ -635,8 +654,8 @@ int test_main(int argc, char** argv)
   structured_sort_rewrite_test();
   core::garbage_collect();
 
-  //set_bool_rewrite_test();
-  //core::garbage_collect();
+  set_bool_rewrite_test();
+  core::garbage_collect();
 
   finite_set_nat_rewrite_test();
   core::garbage_collect();
