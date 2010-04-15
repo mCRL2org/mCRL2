@@ -35,7 +35,7 @@ def make_classes(filename, class_text, superclass = None, namespace = 'core', ad
 #
 # If superclass is defined, it will be the base class of the generated
 # classes. Otherwise atermpp::aterm_appl will be taken as the base class.
-def make_class_declarations(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False):
+def make_class_declarations(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, superclass_aterm = None):
     classes = parse_classes(class_text, superclass, use_base_class_name = True)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
@@ -43,6 +43,10 @@ def make_class_declarations(filename, class_text, superclass = None, namespace =
 
     class_declarations = [c.class_declaration(namespace, True, add_constructor_overloads) for c in classes]
     ctext = '\n'.join(class_declarations)
+
+    if superclass != None and superclass_aterm != None:
+        ctext = Class(superclass_aterm, '%s()' % superclass, 'class %s' % superclass, superclass = None, use_base_class_name = False).class_inline_definition(namespace, True, add_constructor_overloads) + ctext
+
     insert_text_in_file(filename, ctext, 'generated class declarations')
 
 # Generates class member function definitions from class_text and inserts them in the file
@@ -76,6 +80,8 @@ def make_is_functions(filename, class_text, classname, namespace = 'core'):
     classes = parse_classes(class_text)
     for c in classes:
         name = c.name()
+        if name[-1] == '_':
+            name = name[:-1]
         aterm = c.aterm
         rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, classname, namespace, aterm)
     insert_text_in_file(filename, rtext, 'generated is-functions')

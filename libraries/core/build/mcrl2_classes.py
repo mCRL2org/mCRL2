@@ -611,7 +611,7 @@ class Class:
     def expand_text(self, text, parameters, constructors, member_functions, namespace):
         superclass = self.superclass()
         if superclass == None:
-            superclass_declaration = ': atermpp::aterm_appl'
+            superclass_declaration = ': public atermpp::aterm_appl'
         else:
             superclass_declaration = ': public %s' % superclass
 
