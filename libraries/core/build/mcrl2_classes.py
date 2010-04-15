@@ -168,26 +168,6 @@ def indent_text(text, indent):
         lines.append(indent + line)
     return string.join(lines, '\n')
 
-# Generates a member function of a class, by substituting values in a template
-def member_function(arg, n):
-    MEMBER_FUNCTION = '''    TYPE NAME() const
-    {
-      return atermpp::ARG(*this);
-    }'''
-
-    p = arg.rpartition(' ')
-    type = extract_type(p[0].strip())
-    name = p[2].strip()
-    arg = 'arg' + str(n)
-    # TODO: this check for a list is unsafe; the ATerm grammar should be used to make it precise
-    if type.endswith('list'):
-        arg = 'list_' + arg
-    text = MEMBER_FUNCTION
-    text = re.sub('TYPE', type, text)
-    text = re.sub('NAME', name, text)
-    text = re.sub('ARG', arg, text)
-    return text
-
 # Represents a function parameter like the following;
 #
 # const core::identifier_string& name
@@ -320,42 +300,110 @@ class FunctionDeclaration:
     def parameters(self):
         return self.parameters_
 
-    # generates class member functions for the parameters like this:
-    #
-    #    core::identifier_string name() const
-    #    {
-    #      return atermpp::arg1(*this);
-    #    }
-    def class_member_functions(self):
-        result = []
-        index = 1
-        for p in self.parameters():
-            result.append(member_function(str(p), index))
-            index = index + 1
-        return result
+# Represents a class member function
+class MemberFunction:
+    def __init__(self, type, name, arg):
+        self.type = type
+        self.name = name
+        self.arg  = arg 
 
-DEFAULT_CONSTRUCTOR = r'''    /// \\\\brief Default constructor.
-    <CLASSNAME>()
-      : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
-    {}'''
+    def expand_text(self, text):
+        text = re.sub('<TYPE>', self.type, text)
+        text = re.sub('<NAME>', self.name, text)
+        text = re.sub('<ARG>',  self.arg , text)
+        return text
 
-CONSTRUCTOR = r'''    /// \\\\brief Constructor.
+    def inline_definition(self):
+        text = '''    <TYPE> <NAME>() const
+    {
+      return atermpp::<ARG>(*this);
+    }'''
+        return self.expand_text(text)
+
+# Represents a class constructor
+class Constructor:
+    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+        self.classname           = classname          
+        self.arguments           = arguments          
+        self.superclass          = superclass         
+        self.namespace           = namespace          
+        self.aterm               = aterm              
+        self.parameters          = parameters         
+        self.template_parameters = template_parameters
+
+    def expand_text(self, text):
+        text = re.sub('<CLASSNAME>'          , self.classname          , text)
+        text = re.sub('<ARGUMENTS>'          , self.arguments          , text)
+        text = re.sub('<SUPERCLASS>'         , self.superclass         , text)
+        text = re.sub('<NAMESPACE>'          , self.namespace          , text)
+        text = re.sub('<ATERM>'              , self.aterm              , text)
+        text = re.sub('<PARAMETERS>'         , self.parameters         , text)
+        text = re.sub('<TEMPLATE_PARAMETERS>', self.template_parameters, text)
+        return text
+
+    def inline_definition(self):
+        text = r'''    /// \\\\brief Constructor.
     <CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
     {}'''
+        return self.expand_text(text)
 
-OVERLOADED_CONSTRUCTOR = r'''    /// \\\\brief Constructor.
-    <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS1>)
-      : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS1>))
+# Represents a default class constructor
+class DefaultConstructor(Constructor):
+    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+        self.classname           = classname          
+        self.arguments           = arguments          
+        self.superclass          = superclass         
+        self.namespace           = namespace          
+        self.aterm               = aterm              
+        self.parameters          = parameters         
+        self.template_parameters = template_parameters
+
+    def inline_definition(self):
+        text = r'''    /// \\\\brief Default constructor.
+    <CLASSNAME>()
+      : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
     {}'''
+        return self.expand_text(text)
 
-ATERM_CONSTRUCTOR = r'''    /// \\\\brief Constructor.
+# Represents an overloaded class constructor
+class OverloadedConstructor(Constructor):
+    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+        self.classname           = classname          
+        self.arguments           = arguments          
+        self.superclass          = superclass         
+        self.namespace           = namespace          
+        self.aterm               = aterm              
+        self.parameters          = parameters         
+        self.template_parameters = template_parameters
+
+    def inline_definition(self):
+        text = r'''    /// \\\\brief Constructor.
+    <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>)
+      : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
+    {}'''
+        return self.expand_text(text)
+
+# Represents a class constructor taking an ATerm as argument
+class ATermConstructor(Constructor):
+    def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
+        self.classname           = classname          
+        self.arguments           = arguments          
+        self.superclass          = superclass         
+        self.namespace           = namespace          
+        self.aterm               = aterm              
+        self.parameters          = parameters         
+        self.template_parameters = template_parameters
+
+    def inline_definition(self):
+        text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
     <CLASSNAME>(atermpp::aterm_appl term)
       : <SUPERCLASS>(term)
     {
       assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
     }'''
+        return self.expand_text(text)
 
 CLASS_DEFINITION = r'''/// \\brief <DESCRIPTION>
 class <CLASSNAME><SUPERCLASS_DECLARATION>
@@ -423,8 +471,8 @@ class Class:
     def qualifier(self):
         return self.constructor.qualifier()
 
-    # Returns the definitions of the constructors
-    def constructor_definitions(self, namespace, add_constructor_overloads = False):
+    # Returns the constructors of the class
+    def constructors(self, namespace, add_constructor_overloads = False):
         add_string_overload_constructor = add_constructor_overloads,
         add_container_overload_constructor = add_constructor_overloads
         classname = self.classname()
@@ -471,24 +519,46 @@ class Class:
         parameters1 = ', '.join(parameters1)
         arguments1  = ', '.join(arguments1 + arguments2)
 
-        constructors = [DEFAULT_CONSTRUCTOR, ATERM_CONSTRUCTOR]
-        if len(self.constructor.parameters()) > 0:
-            constructors.append(CONSTRUCTOR)
-        if len(self.constructor.parameters()) > 0 and (add_string_overload_constructor or add_container_overload_constructor) and (parameters != parameters1):
-            constructors.append(OVERLOADED_CONSTRUCTOR)
-
-        text = '\n\n'.join(constructors)
         if superclass == None:
             superclass = 'atermpp::aterm_appl'
-        text = re.sub('<CLASSNAME>'       , classname, text)
-        text = re.sub('<ARGUMENTS>'       , arguments, text)
-        text = re.sub('<ARGUMENTS1>'      , arguments1, text)
-        text = re.sub('<SUPERCLASS>'      , superclass, text)
-        text = re.sub('<NAMESPACE>'       , namespace, text)
-        text = re.sub('<ATERM>'           , aterm, text)
-        text = re.sub('<PARAMETERS>'      , parameters, text)
-        text = re.sub('<PARAMETERS1>'     , parameters1, text)
-        text = re.sub('<TEMPLATE_PARAMETERS>', template_parameters, text)
+
+        constructors = []
+        constructors.append(DefaultConstructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
+        constructors.append(ATermConstructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
+        if len(self.constructor.parameters()) > 0:
+            constructors.append(Constructor(classname, arguments, superclass, namespace, aterm, parameters, template_parameters))
+        if len(self.constructor.parameters()) > 0 and (add_string_overload_constructor or add_container_overload_constructor) and (parameters != parameters1):
+            constructors.append(OverloadedConstructor(classname, arguments1, superclass, namespace, aterm, parameters1, template_parameters))
+        return constructors
+
+    # Returns the inline definitions of the constructors
+    def constructor_definitions(self, namespace, add_constructor_overloads = False):
+        constructors = self.constructors(namespace, add_constructor_overloads)
+        text = '\n\n'.join([x.inline_definition() for x in constructors])
+        return text
+
+    # Returns the member functions of the class
+    def member_functions(self):
+        result = []
+        index = 1
+        for p in self.constructor.parameters():
+            arg, n = str(p), index
+            index = index + 1
+            p = arg.rpartition(' ')
+            type = extract_type(p[0].strip())
+            name = p[2].strip()
+            arg = 'arg' + str(n)
+            # TODO: this check for a list is unsafe; the ATerm grammar should be used to make it precise
+            if type.endswith('list'):
+                arg = 'list_' + arg
+            result.append(MemberFunction(type, name, arg))
+        return result
+
+    # Returns the member functions of the class
+    def member_function_definitions(self):
+        text = '\n\n'.join([x.inline_definition() for x in self.member_functions()])
+        if text != '':
+            text = '\n\n' + text
         return text
 
     # Returns the class definition
@@ -499,10 +569,7 @@ class Class:
 
         print 'generating class', classname
 
-        member_functions = f.class_member_functions()
-        mtext = '\n\n'.join(member_functions)
-        if mtext != '':
-            mtext = '\n\n' + mtext
+        mtext = self.member_function_definitions()
 
         parameters = [p.name() for p in f.parameters()]
         ptext = ', '.join(parameters)
