@@ -478,7 +478,7 @@ namespace mcrl2 {
 
       /// \brief Return the user defined context sorts of the current specification.
       /// \details Time complexity is constant.
-      sorts_const_range context_sorts()
+      sorts_const_range context_sorts() const
       {
         return m_sorts_in_context;
       }
