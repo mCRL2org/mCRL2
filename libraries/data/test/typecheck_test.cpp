@@ -39,34 +39,50 @@ data::sort_expression parse_sort_expression(const std::string& se_in)
 {
   std::istringstream se_in_stream(se_in);
   atermpp::aterm_appl se_aterm = core::parse_sort_expr(se_in_stream);
-  BOOST_REQUIRE(se_aterm != NULL);
+  bool test = se_aterm != NULL;
+  BOOST_CHECK(se_aterm != NULL);
 
-  return data::sort_expression(se_aterm);
+  if (test)
+  {
+    return data::sort_expression(se_aterm);
+  }
+
+  return data::sort_expression();
 }
 
 data::data_expression parse_data_expression(const std::string& de_in)
 {
   std::istringstream de_in_stream(de_in);
   ATermAppl de_aterm = core::parse_data_expr(de_in_stream);
-  BOOST_REQUIRE(de_aterm != NULL);
+  bool test = de_aterm != NULL;
+  BOOST_CHECK(de_aterm != NULL);
 
-  std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
-  //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-  BOOST_CHECK_EQUAL(de_in, de_out);
+  if (test)
+  {
+    std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
+    //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+    BOOST_CHECK_EQUAL(de_in, de_out);
 
-  return data::data_expression(de_aterm);
+    return data::data_expression(de_aterm);
+  }
+  else
+  {
+    return data::data_expression();
+  }
 }
 
 data::data_specification parse_data_specification(const std::string& ds_in, bool expect_success = true)
 {
   std::istringstream ds_in_stream(ds_in);
   ATermAppl ds_aterm = core::parse_data_spec(ds_in_stream);
-  if(expect_success)
+  bool test = ds_aterm != NULL;
+
+  if (expect_success)
   {
-    BOOST_REQUIRE(ds_aterm != NULL);
+    BOOST_CHECK(ds_aterm != NULL);
   }
 
-  if(ds_aterm != NULL) // If term is successfully parsed, always check that the printed result is equal!
+  if(test) // If term is successfully parsed, always check that the printed result is equal!
   {
     std::string ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
     // std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
@@ -224,6 +240,22 @@ BOOST_AUTO_TEST_CASE(test_list_is_list_nat) {
   v.push_back(data::variable("x", data::sort_list::list(data::sort_pos::pos())));
   v.push_back(data::variable("y", data::sort_list::list(data::sort_nat::nat())));
   test_data_expression("x == y", v.begin(), v.end(), false);
+}
+
+BOOST_AUTO_TEST_CASE(test_emptyset) {
+  test_data_expression("{}", false);
+}
+
+BOOST_AUTO_TEST_CASE(test_emptyset_complement) {
+  test_data_expression("!{}", false);
+}
+
+BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset) {
+  test_data_expression("!{} <= {}", true, "Bool");
+}
+
+BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset_reverse) {
+  test_data_expression("{} <= !{}", true, "Bool");
 }
 
 BOOST_AUTO_TEST_CASE(test_set_true_false) {
