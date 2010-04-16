@@ -143,6 +143,34 @@ namespace pbes_system {
         }
       }
 
+      /// \brief Prints the equivalence classes
+      void LOG_EQUIVALENCE_CLASSES(unsigned int level, const std::string& msg = "") const
+      {       
+        if (check_log_level(level))
+        {
+          std::clog << msg;
+          for (std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+          {
+            std::clog << "  vertex " << core::pp(i->first) << ": ";
+            for (std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+            {
+              std::clog << core::detail::print_pp_set(*j) << " ";
+            }
+            std::clog << std::endl;
+          }
+        }
+      }
+
+      /// \brief Prints the todo list
+      void LOG_TODO_LIST(unsigned int level, const std::set<string_type>& todo, const std::string& msg = "") const
+      {       
+        if (check_log_level(level))
+        {
+          std::clog << msg;
+          std::clog << core::detail::print_pp_set(todo) << "\n";
+        }
+      }
+
       /// \brief Returns true if the vertex X should propagate its values to Y
       bool evaluate_guard(const string_type& X, const propositional_variable_type& Y)
       {
@@ -166,22 +194,18 @@ namespace pbes_system {
       {
         const string_type& Y = Ye.name();
         std::vector<data_term_type> e(Ye.parameters().begin(), Ye.parameters().end());
-
+          
         std::vector<equivalence_class>& cY = m_vertices[Y];
         std::vector<equivalence_class> cY1;
         for (typename std::vector<equivalence_class>::iterator j = cY.begin(); j != cY.end(); ++j)
         {
-          equivalence_class& equiv = *j; // an equivalence set              
+          equivalence_class& equiv = *j;
           atermpp::map<data_term_type, equivalence_class> w;
           for (typename equivalence_class::iterator k = equiv.begin(); k != equiv.end(); ++k)
           {
             unsigned int p = index_of(*k, m_parameters[Y]);
             pbes_system::data_rewriter<Term, DataRewriter> rewr(m_data_rewriter);
             w[rewr(e[p], vX)].insert(*k);
-          }
-          if (w.size() > 1)
-          {
-            todo.insert(Y);
           }
           for (typename std::map<data_term_type, equivalence_class>::iterator i = w.begin(); i != w.end(); ++i)
           {
@@ -191,7 +215,11 @@ namespace pbes_system {
             }
           }
         }
-        cY = cY1;
+        if (cY != cY1)
+        {
+          todo.insert(Y);
+          cY = cY1;
+        }
       }
 
       /// \brief Computes a substitution that corresponds to the equivalence relations in X
@@ -288,13 +316,17 @@ namespace pbes_system {
             const propositional_variable_type& Ye = *i;
             if (evaluate_guard(X, Ye))
             {
+              todo.insert(Ye.name());
               update_equivalence_classes(X, Ye, vX, todo);
+              LOG_EQUIVALENCE_CLASSES(2, "update equivalence classes\n");
             }
           }
         }
 
         LOG_VERTICES(1, "--- vertices ---\n");
         LOG_EDGES(1, "\n--- edges ---\n");
+        LOG_EQUIVALENCE_CLASSES(2, "initial equivalence classes\n");
+        LOG_TODO_LIST(2, todo, "initial todo list: ");
 
         // propagate constraints over the edges until the todo list is empty
         while (!todo.empty())
@@ -316,6 +348,7 @@ namespace pbes_system {
             if (evaluate_guard(X, Ye))
             {
               update_equivalence_classes(X, Ye, vX, todo);
+              LOG_EQUIVALENCE_CLASSES(2, "updated equivalence classes\n");
             }
           }
         }

@@ -27,17 +27,31 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 
+// Example provided by Frank Stappers
 std::string t1 =
-  "% Example provided by Frank Stappers          \n"
-  "                                              \n"
-  "pbes nu X(n0,n_P: Nat) =                      \n"
-  "        val(n_P == n0) && X(n0 + 1, n_P + 1); \n"
-  "                                              \n"
-  " init X(0, 0);                                \n"
+  "pbes nu X(m, n: Nat) =                  \n"
+  "        val(n == m) && X(m + 1, n + 1); \n"
+  "                                        \n"
+  " init X(0, 0);                          \n"
   ;
-std::string x1 = "binding_variables = X(n_P: Nat)";
+std::string x1 = "binding_variables = X(n: Nat)";
 
-void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
+// Example provided by Tim Willemse.
+// The parameters n and m are not equivalent, and thus should not
+// be removed.
+std::string t2 =
+  "pbes nu X(n,m: Nat) =          \n"
+  "       forall p: Nat. X(m, p); \n"
+  "                               \n"
+  "init X(0, 0);                  \n"
+  ;
+std::string x2 = "binding_variables = X(n,m: Nat)";
+
+void test_pbes(const std::string& pbes_spec,
+               std::string expected_result,
+               bool compute_conditions,
+               bool remove_equations = true,
+               std::string msg = "")
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
 
@@ -51,7 +65,8 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+  unsigned int log_level = 2;
+  pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
 
   // run the algorithm
   algorithm.run(q); 
@@ -66,7 +81,7 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   std::string diff = info1.compare(info2);
   if (!diff.empty())
   {
-    std::cerr << "\n------ FAILED TEST ------" << std::endl;
+    std::cerr << "\n------ FAILED TEST ------ " << msg << std::endl;
     std::cerr << "--- expected result" << std::endl;
     std::cerr << expected_result << std::endl;
     std::cerr << "--- found result" << std::endl;
@@ -83,7 +98,10 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_pbes(t1 , x1 , false);
+  bool compute_conditions = false;
+  bool remove_equations = true;
+  test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");
+  test_pbes(t2 , x2, compute_conditions, remove_equations, "test 2");
 
   return 0;
 }
