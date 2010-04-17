@@ -1021,7 +1021,7 @@ bool generate_lts()
     {
       srand((unsigned)time(NULL)+getpid());
       NextStateGenerator *nsgen = NULL;
-      while ( current_state < lgopts->max_states )
+      while (( current_state < lgopts->max_states ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
       {
         ATermList tmp_trans = ATmakeList0();
         ATermList tmp_states = ATmakeList0();
@@ -1095,7 +1095,7 @@ bool generate_lts()
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator *nsgen = NULL;
       srand((unsigned)time(NULL)+getpid());
-      while ( current_state < num_states )
+      while (( current_state < num_states ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
       // while ( current_state < lgopts->max_states )
       {
         ATermList tmp_trans = ATmakeList0();
@@ -1261,7 +1261,7 @@ bool generate_lts()
       srand((unsigned)time(NULL)+getpid());
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator *nsgen = NULL;
-      while ( current_state < lgopts->max_states )
+      while (( current_state < lgopts->max_states ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
       {
         ATermList tmp_trans = ATmakeList0();
         ATermList tmp_states = ATmakeList0();
@@ -1444,7 +1444,7 @@ bool generate_lts()
       // bithashing: S = { h | get_bithash(h) }, E = S \ "items left in queues"
       //
       // both:       |E| <= limit
-      while ( current_state < endoflevelat )
+      while (( current_state < endoflevelat ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
       {
         if ( lgopts->bithashing )
         {
@@ -1574,7 +1574,7 @@ bool generate_lts()
       // trans_seen(s) := we have seen a transition from state s
       // inv:  forall i : 0 <= i < nsgens_num-1 : trans_seen(nsgens[i]->get_state())
       //       nsgens_num > 0  ->  top_trans_seen == trans_seen(nsgens[nsgens_num-1])
-      while ( nsgens_num > 0 )
+      while (( nsgens_num > 0 ) && ( ! lgopts->trace || (tracecnt < lgopts->max_traces) ))
       {
         NextStateGenerator *nsgen = nsgens[nsgens_num-1];
         state = nsgen->get_state();

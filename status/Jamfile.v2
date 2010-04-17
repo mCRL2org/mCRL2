@@ -51,8 +51,8 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
     $(>[2]) $(>[1]) $(<)
   }
 
-  make test.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp.mcrl2 : @generate-lps ;
-  make test2.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp.mcrl2 : @generate-lps ;
+  make test.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp/abp.mcrl2 : @generate-lps ;
+  make test2.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp/abp.mcrl2 : @generate-lps ;
   make test.pbes : /tools/lps2pbes//lps2pbes $(TOP)/examples/modal-formulas/nodeadlock.mcf test.lps : @generate-pbes ;
   make test.lts : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
   make test2.lts : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
