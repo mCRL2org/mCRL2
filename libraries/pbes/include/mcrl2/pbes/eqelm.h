@@ -149,10 +149,10 @@ namespace pbes_system {
         if (check_log_level(level))
         {
           std::clog << msg;
-          for (std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+          for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
           {
             std::clog << "  vertex " << core::pp(i->first) << ": ";
-            for (std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+            for (typename std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
             {
               std::clog << core::detail::print_pp_set(*j) << " ";
             }
