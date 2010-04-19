@@ -731,11 +731,12 @@ namespace bes {
   std::string pp(const boolean_equation_system<Container>& p)
   {
     std::ostringstream out;
+    out << "pbes\n";
     BOOST_FOREACH(const boolean_equation& eq, p.equations())
     {
-      out << pp(eq) << std::endl;
+      out << "    " << pp(eq) << ";" << std::endl;
     }
-    out << "\ninit " << pp(p.initial_state()) << std::endl;
+    out << "\ninit " << pp(p.initial_state()) << ";" << std::endl;
     return out.str();
   }
 

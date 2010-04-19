@@ -35,6 +35,14 @@ void test_parse_bes()
   boolean_equation_system<> b;
   std::stringstream from(bes1);
   from >> b;
+  std::cout << "b = \n" << pp(b) << std::endl;
+  
+  // check if the pretty printed BES can be parsed again  
+  std::string bes2 = pp(b);
+  std::stringstream from2(bes1);
+  from2 >> b;
+
+  core::garbage_collect();
 }
 
 void test_bes()
