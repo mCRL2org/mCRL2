@@ -105,6 +105,12 @@ class pbes_equation
     /// \brief The expression type of the equation.
     typedef pbes_expression term_type;
 
+    /// \brief The variable type of the equation.
+    typedef propositional_variable variable_type;
+
+    /// \brief The symbol type of the equation.
+    typedef fixpoint_symbol symbol_type;
+
     /// \brief Constructor.
     pbes_equation()
     {}

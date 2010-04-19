@@ -816,6 +816,9 @@ namespace pbes_expr_optimized {
     else if(is_pbes_or(t)) {
       return is_bes(left(t)) && is_bes(right(t));
     }
+    else if(is_pbes_imp(t)) {
+      return is_bes(left(t)) && is_bes(right(t));
+    }
     else if(is_pbes_forall(t)) {
       return false;
     }

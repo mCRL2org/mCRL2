@@ -363,6 +363,10 @@ class pbes
         if (!i->is_bes())
           return false;
       }
+      if (m_initial_state.parameters().size() > 0)
+      {
+        return false;
+      }     
       return true;
     }
 
