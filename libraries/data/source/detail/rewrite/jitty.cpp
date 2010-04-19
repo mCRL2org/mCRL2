@@ -227,10 +227,10 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
 {
   ATermAppl a;
 
-// ATfprintf(stderr,"in: %t\n\n",Term);
+// gsMessage("in: %T\n\n",Term);
   if ( gsIsDataVarId(Term) )
   {
-// ATfprintf(stderr,"out: %t\n\n",Term);
+// gsMessage("out: %T\n\n",Term);
     return Term;
   }
 
@@ -264,7 +264,7 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
                 }
         }
 
-// ATfprintf(stderr,"to_out: %t\n\n",a);
+// gsMessage("to_out: %T\n\n",a);
 
         return a;
 }
@@ -740,14 +740,14 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, unsigned
 ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("  rewrite(%t)\n",fromInner(Term));
-gsMessage("  rewrite(  %P  )\n",fromInner(Term));
+gsMessage("    rewrite(%T)\n",fromInner(Term));
+gsMessage("    rewrite(  %P  )\n",fromInner(Term));
 #endif
   if ( gsIsDataVarId(Term) )
   {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("    return %t\n",fromInner(Term));
-gsMessage("    return1  %P\n",fromInner((ATermAppl) lookupSubstitution(Term)));
+gsMessage("      return %T\n",fromInner(Term));
+gsMessage("      return1  %P\n",fromInner((ATermAppl) lookupSubstitution(Term)));
 #endif
     return (ATermAppl) lookupSubstitution(Term);
   } else {
@@ -792,12 +792,12 @@ gsMessage("    return1  %P\n",fromInner((ATermAppl) lookupSubstitution(Term)));
     if ( ATisInt(op) && ((strat = jitty_strat[ATgetInt((ATermInt) op)]) != NULL) )
     {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("    strat: %T\n",strat);
+gsMessage("      strat: %T\n",strat);
 #endif
       for (; !ATisEmpty(strat); strat=ATgetNext(strat))
       {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("    strat action: %T\n",ATgetFirst(strat));
+gsMessage("        strat action: %T\n",ATgetFirst(strat));
 #endif
         if ( ATisInt(ATgetFirst(strat)) )
         {
@@ -836,7 +836,7 @@ gsMessage("    strat action: %T\n",ATgetFirst(strat));
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
 if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
 {
-  gsMessage("    %T --> %T (%T)\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true);
+  gsMessage("        %T --> %T (%T)\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true);
 }
 #endif
           if ( matches && /*(gsIsNil(ATAelementAt(rule,1)) || */ATisEqual(rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true)/*)*/ ) // JK 15/10/2009 Condition is always a data expression
@@ -905,12 +905,12 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
               for (unsigned int j=1; j<rhs_arity; j++)
               {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("      pre %T\n",ATgetArgument(rhs,i));
+gsMessage("          pre %T\n",ATgetArgument(rhs,i));
 #endif
                 newargs[i] = subst_values(vars.data(),vals.data(),len,ATgetArgument(rhs,j));
                 i++;
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("      post %T\n",args[i]);
+gsMessage("          post %T\n",args[i]);
 #endif
               }
             }
@@ -925,8 +925,8 @@ gsMessage("      post %T\n",args[i]);
 
             ATermAppl aa = rewrite_aux(a);
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("    return %t\n",fromInner(aa));
-gsMessage("    return2  %P\n",fromInner(aa));
+gsMessage("        return %T\n",fromInner(aa));
+gsMessage("        return2  %P\n",fromInner(aa));
 #endif
             return aa;
           }
@@ -935,7 +935,7 @@ gsMessage("    return2  %P\n",fromInner(aa));
       }
     }
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("    done with strat\n");
+gsMessage("      done with strat\n");
 #endif
 
     rewritten[0] = op;
@@ -950,8 +950,8 @@ gsMessage("    done with strat\n");
     ATermAppl a = ATmakeApplArray(ATgetAFun(Term),rewritten.data());
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-gsMessage("    return %T\n",a);
-gsMessage("    return3  %P\n",fromInner(a));
+gsMessage("      return %T\n",a);
+gsMessage("      return3  %P\n",fromInner(a));
 #endif
     return a;
   }
@@ -1016,9 +1016,13 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
     }
     need_rebuild = false;
   }
- // ATfprintf(stderr,"rewrite(%t)\n",fromInner((ATermAppl)Term));
+#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+gsMessage("  rewrite(%T)\n",fromInner((ATermAppl)Term));
+#endif
   ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
- // ATfprintf(stderr,"return(%t)\n",fromInner((ATermAppl)aaa));
+#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+gsMessage("  return(%T)\n",fromInner((ATermAppl)aaa));
+#endif
   return aaa;
   // return (ATerm) rewrite_aux((ATermAppl) Term);
 }

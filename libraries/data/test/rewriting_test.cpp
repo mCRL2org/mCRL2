@@ -327,10 +327,11 @@ void set_rewrite_test()
   using namespace mcrl2::data::sort_nat;
   using namespace mcrl2::data::sort_bool;
   std::cerr << "set_rewrite_test\n";
-  data_specification specification = parse_data_specification(
-    "sort A = Set(Nat);"
-  );
+//  data_specification specification = parse_data_specification(
+//    "sort A = Set(Nat);"
+//  );
 
+  data_specification specification;
   specification.add_context_sort(set_(nat()));
   specification.add_context_sort(set_(bool_()));
 
@@ -344,12 +345,17 @@ void set_rewrite_test()
   data_expression p1(nat(1));
   data_expression p2(nat(2));
 
+  data_rewrite_test(R, specification.normalise_sorts(equal_to(true_function(nat()), true_function(nat()))), true_());
+  data_rewrite_test(R, specification.normalise_sorts(equal_to(false_function(nat()), false_function(nat()))), true_());
+  data_rewrite_test(R, specification.normalise_sorts(equal_to(true_function(nat()), false_function(nat()))), false_());
+  data_rewrite_test(R, specification.normalise_sorts(equal_to(false_function(nat()), true_function(nat()))), false_());
+
   data_expression s1(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p1, fset_empty(nat()))))));
   data_expression s2(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p2, fset_empty(nat()))))));
   data_expression s(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p1, fsetinsert(nat(), p2, fset_empty(nat())))))));
 
-  data_expression empty_complement(R(specification.normalise_sorts(setcomplement(nat(),emptyset(nat())))));
-  data_expression intersection(R(specification.normalise_sorts(setintersection(nat(),setcomplement(nat(),emptyset(nat())),emptyset(nat())))));
+  data_expression empty_complement(specification.normalise_sorts(setcomplement(nat(),emptyset(nat()))));
+  data_expression intersection(specification.normalise_sorts(setintersection(nat(),setcomplement(nat(),emptyset(nat())),emptyset(nat()))));
   data_rewrite_test(R, specification.normalise_sorts(less_equal(empty_complement,empty)), false_());
   data_rewrite_test(R, specification.normalise_sorts(less_equal(empty,empty_complement)), true_());
   data_rewrite_test(R, specification.normalise_sorts(equal_to(intersection, empty_complement)), true_());
@@ -634,6 +640,7 @@ int test_main(int argc, char** argv)
 //  std::string expr1("struct ");
 //  std::string expr1("exists b: Bool, c: Bool. if(b, c, b)");
 //  std::string expr1("forall b: Bool, c: Bool. if(b, c, b)");
+
   bool_rewrite_test();
   core::garbage_collect();
 
