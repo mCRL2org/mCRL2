@@ -285,6 +285,12 @@ namespace core {
     static inline
     bool is_variable(term_type t) { return core::detail::gsIsBooleanVariable(t); }
 
+    /// \brief Test for propositional variable
+    /// \param t A term
+    /// \return True if the term is a propositional variable
+    static inline
+    bool is_prop_var(term_type t) { return is_variable(t); }
+
     /// \brief Returns the argument of a term of type not
     /// \param t A term
     /// \return The requested argument
@@ -431,6 +437,12 @@ class boolean_equation: public atermpp::aterm_appl
   public:
     /// \brief The expression type of the equation.
     typedef boolean_expression term_type;
+
+    /// \brief The variable type of the equation.
+    typedef boolean_variable variable_type;
+
+    /// \brief The symbol type of the equation.
+    typedef fixpoint_symbol symbol_type;
 
     /// \brief Constructor.
     boolean_equation()

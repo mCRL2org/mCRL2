@@ -54,6 +54,7 @@ namespace bes {
     
     boolean_expression init = pbes_expression2boolean_expression(p.initial_state());
     b = boolean_equation_system<Container>(Container(equations.begin(), equations.end()), init);
+    return from;
   }
 
 } // namespace bes

@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/bes.h"
 #include "mcrl2/pbes/bes_parse.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -25,7 +26,7 @@ std::string bes1 =
   "pbes              \n"
   "                  \n"
   "nu X1 = X2 && X1; \n"
-  "mu X2 = X1 => X2; \n"
+  "mu X2 = X1 || X2; \n"
   "                  \n"
   "init X1;          \n"
   ;
@@ -47,13 +48,23 @@ void test_parse_bes()
 
 void test_bes()
 {
+  boolean_equation_system<> b;
+  std::stringstream bes_stream(bes1);
+  bes_stream >> b;
+
   std::stringstream out;
-  //bes2cwi(Iter first, Iter last, std::ostream& out)
+  pbes_system::bes2cwi(b.equations().begin(), b.equations().end(), out);
   core::garbage_collect();
 }
 
 void test_pbes()
 {
+  pbes_system::pbes<> b;
+  std::stringstream bes_stream(bes1);
+  bes_stream >> b;
+
+  std::stringstream out;
+  pbes_system::bes2cwi(b.equations().begin(), b.equations().end(), out); 
   core::garbage_collect();
 }
 

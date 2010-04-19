@@ -14,9 +14,9 @@
 
 #include <cstdio>
 #include <exception>
-#include <iostream>
 #include <fstream>
-#include <string>
+#include <iostream>
+#include <map>
 #include <utility>
 #include <sstream>
 #include <string>
@@ -192,6 +192,79 @@ void save_pbes(const pbes<>& pbes_spec, std::string outfilename, std::string out
   else
   {
     throw mcrl2::runtime_error(std::string("unknown output format ") + outputformat);
+  }
+}
+
+/// \brief Convert a BES expression to cwi format.
+template <typename Expression, typename VariableMap>
+std::string bes_expression2cwi(const Expression& p, const VariableMap& variables)
+{
+  typedef typename core::term_traits<Expression> tr;
+  
+  std::string result;
+  if (tr::is_true(p))
+  {
+    result = "T";
+  }
+  else if (tr::is_false(p))
+  {
+    result = "F";
+  }
+  else if (tr::is_and(p))
+  {
+    std::string left = bes_expression2cwi(tr::left(p), variables);
+    std::string right = bes_expression2cwi(tr::right(p), variables);
+    result = "(" + left + " & " + right + ")";
+  }
+  else if (tr::is_or(p))
+  {
+    std::string left = bes_expression2cwi(tr::left(p), variables);
+    std::string right = bes_expression2cwi(tr::right(p), variables);
+    result = "(" + left + " | " + right + ")";
+  }
+  else if (tr::is_prop_var(p))
+  {
+    typename VariableMap::const_iterator i = variables.find(tr::name(p));
+    if (i == variables.end())
+    {
+      throw mcrl2::runtime_error("Found undeclared variable in bes_expression2cwi: " + tr::pp(p));
+    }
+    std::stringstream out;
+    out << i->second;
+    result = out.str();
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Unknown expression encountered in bes_expression2cwi: " + tr::pp(p));
+  }
+  return result;
+}
+
+/// \brief Save a sequence of BES equations in CWI format to a stream.
+template <typename Iter>
+void bes2cwi(Iter first, Iter last, std::ostream& out)
+{
+  typedef typename std::iterator_traits<Iter>::value_type equation_type;
+  typedef typename equation_type::term_type term_type;
+  typedef typename core::term_traits<term_type> tr;
+  typedef typename tr::string_type string_type;
+
+  // Number the variables of the equations 0, 1, ... and put them in the map variables.
+  std::map<string_type, int> variables;
+  int index = 0;
+  for (Iter i = first; i != last; ++i)
+  {
+    variables[i->variable().name()] = index++;
+  }
+
+  for (Iter i = first; i != last; ++i)
+  {
+    out << (i->symbol().is_mu() ? "min" : "max")
+        << " "
+        << variables[i->variable().name()]
+        << " = "
+        << bes_expression2cwi(i->formula(), variables)
+        << "\n";
   }
 }
 
