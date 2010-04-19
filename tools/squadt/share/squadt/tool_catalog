@@ -9,6 +9,7 @@
 <tool name="lpsconstelm" />
 <tool name="lpsinfo" />
 <tool name="lpsparelm" />
+<tool name="lpspp" />
 <tool name="lpsrewr" />
 <tool name="lpssumelm" />
 <tool name="lpssuminst" />
@@ -22,6 +23,7 @@
 <tool name="pbesconstelm" />
 <tool name="pbesinfo" />
 <tool name="pbesparelm" />
+<tool name="pbespp" />
 <tool name="pbesrewr" />
 <tool name="pnml2mcrl2" />
 <tool name="tbf2lps" />

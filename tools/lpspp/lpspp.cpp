@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/lps/specification.h"
 
 using namespace mcrl2::utilities::tools;
@@ -27,11 +28,15 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
 
-class lpspp_tool: public input_output_tool
+class lpspp_tool: public squadt_tool< input_output_tool >
 {
+  private:
+
+    typedef squadt_tool< input_output_tool > super;
+
   public:
     lpspp_tool()
-      : input_output_tool(NAME, AUTHOR,
+      : super(NAME, AUTHOR,
           "pretty print an LPS",
           "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
           "is not present, stdout is used. If INFILE is not present, stdin is used."
@@ -50,7 +55,7 @@ class lpspp_tool: public input_output_tool
 
     void add_options(interface_description& desc)
     {
-      input_output_tool::add_options(desc);
+      super::add_options(desc);
       desc.add_option("format", make_mandatory_argument("FORMAT"),
         "print the LPS in the specified FORMAT:\n"
         "  'default' for a process specification (default),\n"
@@ -106,6 +111,103 @@ class lpspp_tool: public input_output_tool
       }
     }
 
+//Squadt connectivity
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    protected:
+
+# define option_print_format         "print_format"
+
+      static bool initialise_types()
+      {
+        tipi::datatype::enumeration< t_pp_format > pp_format_enumeration;
+
+        pp_format_enumeration.
+          add(ppDefault, "default").
+          add(ppInternal, "internal").
+          add(ppInternalDebug, "internal-debug").
+          add(ppDebug, "debug");
+
+        return true;
+      }
+
+      /** \brief configures tool capabilities */
+      void set_capabilities(tipi::tool::capabilities& capabilities) const
+      {
+        static bool initialised = initialise_types();
+
+        static_cast< void > (initialised); // harmless, and prevents unused variable warnings
+
+        // The tool has only one main input combination
+        capabilities.add_input_configuration("main-input",
+            tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+      }
+
+      /** \brief queries the user via SQuADT if needed to obtain configuration information */
+      void user_interactive_configuration(tipi::configuration& configuration)
+      {
+        using namespace tipi;
+        using namespace tipi::layout;
+        using namespace tipi::layout::elements;
+
+        // Let squadt_tool update configuration for rewriter and add output file configuration
+        synchronise_with_configuration(configuration);
+
+        if (!configuration.output_exists("main-output")) {
+          configuration.add_output("main-output", tipi::mime_type("mcrl2", tipi::mime_type::text), configuration.get_output_name(".mcrl2"));
+        }
+
+        if (!configuration.option_exists(option_print_format)) {
+          configuration.add_option(option_print_format).set_argument_value< 0 >(ppDefault);
+        }
+
+        /* Create display */
+        tipi::tool_display d;
+
+        // Helper for format selection
+        mcrl2::utilities::squadt::radio_button_helper < t_pp_format > format_selector(d);
+
+        tipi::layout::vertical_box& m = d.create< vertical_box >();
+        m.append(d.create< label >().set_text("Output format : ")).
+          append(d.create< horizontal_box >().
+            append(format_selector.associate(ppDefault, "default")).
+            append(format_selector.associate(ppInternal, "internal")).
+            append(format_selector.associate(ppInternalDebug, "internal-debug")).
+            append(format_selector.associate(ppDebug, "debug")));
+
+        format_selector.set_selection(ppDefault);
+
+        button& okay_button = d.create< button >().set_label("OK");
+        m.append(d.create< label >().set_text(" ")).
+          append(okay_button, layout::right);
+
+        send_display_layout(d.manager(m));
+
+        okay_button.await_change();
+
+        // let squadt_tool update configuration for rewriter and input/output files
+        update_configuration(configuration);
+
+        configuration.get_option(option_print_format).set_argument_value< 0 >(format_selector.get_selection());
+      }
+
+      /** \brief check an existing configuration object to see if it is usable */
+      bool check_configuration(tipi::configuration const& configuration) const
+      {
+        // Check if everything present
+        return configuration.input_exists("main-input") &&
+               configuration.output_exists("main-output") &&
+               configuration.option_exists(option_print_format);
+      }
+
+      /** \brief performs the task specified by a configuration */
+      bool perform_task(tipi::configuration& configuration)
+      {
+        // Let squadt_tool update configuration for rewriter and add output file configuration
+        synchronise_with_configuration(configuration);
+
+        return run();
+      }
+#endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
 int main(int argc, char* argv[])

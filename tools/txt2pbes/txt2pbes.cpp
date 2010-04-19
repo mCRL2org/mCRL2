@@ -84,7 +84,7 @@ class txt2pbes_tool: public squadt_tool<input_output_tool>
     {
       // The tool has only one main input combination
       capabilities.add_input_configuration("main-input",
-                 tipi::mime_type("txt", tipi::mime_type::application), tipi::tool::category::transformation);
+                 tipi::mime_type("txt", tipi::mime_type::text), tipi::tool::category::transformation);
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
@@ -110,7 +110,7 @@ class txt2pbes_tool: public squadt_tool<input_output_tool>
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(configuration);
 
-      return run() == 0;
+      return run();
     }
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
