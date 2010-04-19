@@ -23,81 +23,84 @@ namespace mcrl2 {
 
 namespace fdr {
 
+/// \brief class testtype
+class testtype: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    testtype()
+      : atermpp::aterm_appl(fdr::detail::constructTestType())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    testtype(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_term_TestType(m_term));
+    }
+};
+
+/// \brief list of testtypes
+typedef atermpp::term_list<testtype> testtype_list;
+
+/// \brief vector of testtypes
+typedef atermpp::vector<testtype>    testtype_vector;
+
 //--- start generated classes ---//
 /// \brief A deterministic
-class deterministic: public atermpp::aterm_appl
+class deterministic: public testtype
 {
   public:
     /// \brief Default constructor.
     deterministic()
-      : atermpp::aterm_appl(fdr::detail::constructdeterministic())
+      : testtype(fdr::detail::constructdeterministic())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     deterministic(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
+      : testtype(term)
     {
       assert(fdr::detail::check_term_deterministic(m_term));
     }
 };
 
-/// \brief list of deterministics
-typedef atermpp::term_list<deterministic> deterministic_list;
-
-/// \brief vector of deterministics
-typedef atermpp::vector<deterministic>    deterministic_vector;
-
-
 /// \brief A deadlock free
-class deadlock_free: public atermpp::aterm_appl
+class deadlock_free: public testtype
 {
   public:
     /// \brief Default constructor.
     deadlock_free()
-      : atermpp::aterm_appl(fdr::detail::constructdeadlock_free())
+      : testtype(fdr::detail::constructdeadlock_free())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     deadlock_free(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
+      : testtype(term)
     {
       assert(fdr::detail::check_term_deadlock_free(m_term));
     }
 };
 
-/// \brief list of deadlock_frees
-typedef atermpp::term_list<deadlock_free> deadlock_free_list;
-
-/// \brief vector of deadlock_frees
-typedef atermpp::vector<deadlock_free>    deadlock_free_vector;
-
-
 /// \brief A livelock free
-class livelock_free: public atermpp::aterm_appl
+class livelock_free: public testtype
 {
   public:
     /// \brief Default constructor.
     livelock_free()
-      : atermpp::aterm_appl(fdr::detail::constructlivelock_free())
+      : testtype(fdr::detail::constructlivelock_free())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     livelock_free(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
+      : testtype(term)
     {
       assert(fdr::detail::check_term_livelock_free(m_term));
     }
 };
-
-/// \brief list of livelock_frees
-typedef atermpp::term_list<livelock_free> livelock_free_list;
-
-/// \brief vector of livelock_frees
-typedef atermpp::vector<livelock_free>    livelock_free_vector;
-
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//

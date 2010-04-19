@@ -23,56 +23,66 @@ namespace mcrl2 {
 
 namespace fdr {
 
+/// \brief class failuremodel
+class failuremodel: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    failuremodel()
+      : atermpp::aterm_appl(fdr::detail::constructFailureModel())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    failuremodel(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_term_FailureModel(m_term));
+    }
+};
+
+/// \brief list of failuremodels
+typedef atermpp::term_list<failuremodel> failuremodel_list;
+
+/// \brief vector of failuremodels
+typedef atermpp::vector<failuremodel>    failuremodel_vector;
+
 //--- start generated classes ---//
 /// \brief A failures
-class f: public atermpp::aterm_appl
+class f: public failuremodel
 {
   public:
     /// \brief Default constructor.
     f()
-      : atermpp::aterm_appl(fdr::detail::constructF())
+      : failuremodel(fdr::detail::constructF())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     f(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
+      : failuremodel(term)
     {
       assert(fdr::detail::check_term_F(m_term));
     }
 };
 
-/// \brief list of fs
-typedef atermpp::term_list<f> f_list;
-
-/// \brief vector of fs
-typedef atermpp::vector<f>    f_vector;
-
-
 /// \brief A faulures/divergences
-class fd: public atermpp::aterm_appl
+class fd: public failuremodel
 {
   public:
     /// \brief Default constructor.
     fd()
-      : atermpp::aterm_appl(fdr::detail::constructFD())
+      : failuremodel(fdr::detail::constructFD())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     fd(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
+      : failuremodel(term)
     {
       assert(fdr::detail::check_term_FD(m_term));
     }
 };
-
-/// \brief list of fds
-typedef atermpp::term_list<fd> fd_list;
-
-/// \brief vector of fds
-typedef atermpp::vector<fd>    fd_vector;
-
 //--- end generated classes ---//
 
 //--- start generated is-functions ---//
