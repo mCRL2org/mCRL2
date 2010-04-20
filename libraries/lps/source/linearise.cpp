@@ -1118,6 +1118,10 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
+      if (!is_application(t))
+      { std::cerr << "Error: term of unexpected type " << t << "\n";
+      }
+
       assert(is_application(t));
 
       filter_vars_by_term(application(t).head(),vars_set,vars_result_set);

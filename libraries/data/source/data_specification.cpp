@@ -163,7 +163,10 @@ namespace mcrl2 {
       }
     }
 
-    /// \pre sort.is_system_defined()
+    /// The function normalise_sorts imports for the given sort_expression sort all sorts, constructors,
+    /// mappings and equations that belong to this sort to the `normalised' sets in this
+    /// data type. E.g. for the sort Nat of natural numbers, it is required that Pos 
+    /// (positive numbers) are defined. 
     void data_specification::import_system_defined_sort(sort_expression const& sort) const
     { 
       const sort_expression normalised_sort=normalise_sorts(sort);
@@ -231,9 +234,16 @@ namespace mcrl2 {
         data_equation_vector e(sort_pos::pos_generate_equations_code());
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       }
+      else if (sort.is_function_sort())
+      { import_system_defined_sort(function_sort(sort).codomain());
+        const sort_expression_list &l=function_sort(sort).domain();
+        std::for_each(l.begin(),l.end(),boost::bind(&mcrl2::data::data_specification::import_system_defined_sort,this,_1));
+      }
       else
       { if (sort.is_container_sort())
         { sort_expression element_sort(container_sort(sort).element_sort());
+          // Import the element sort (which may be a complex sort also).
+          import_system_defined_sort(element_sort);
           if (sort_list::is_list(sort))
           { import_system_defined_sort(sort_nat::nat()); // Required for lists.
                
@@ -248,7 +258,11 @@ namespace mcrl2 {
             std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
           }
           else if (sort_set::is_set(sort)||sort_fset::is_fset(sort))
-          {
+          { 
+            // Add the function sort element_sort->Bool to the specification
+            // const sort_expression_list l(element_sort);
+            import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_bool::bool_()));
+            
             // Add a set to the specification.
             add_system_defined_sort(sort);
             function_symbol_vector f(sort_set::set_generate_constructors_code(element_sort));
@@ -268,8 +282,14 @@ namespace mcrl2 {
             std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
           }
           else if (sort_bag::is_bag(sort)||sort_fbag::is_fbag(sort))
-          { import_system_defined_sort(sort_nat::nat()); // Required for bags.
+          { 
+            // Add the sorts Nat and set_(element_sort) to the specification.
+            import_system_defined_sort(sort_nat::nat()); // Required for bags.
             import_system_defined_sort(sort_set::set_(element_sort));
+            
+            // Add the function sort element_sort->Nat to the specification
+            import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_nat::nat()));
+            
             // Add a bag to the specification.
             add_system_defined_sort(sort_fbag::fbag(element_sort));
             function_symbol_vector f(sort_bag::bag_generate_constructors_code(element_sort));
