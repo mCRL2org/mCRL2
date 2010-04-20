@@ -36,7 +36,7 @@ namespace mcrl2 {
     {
       assert(s.domain().size() == 1);
       return function_symbol(function_update_name(),
-                             function_sort(s, *(s.domain().begin()), s.codomain(), s));
+                             make_function_sort(s, *(s.domain().begin()), s.codomain(), s));
     }
 
     /// \brief Recogniser for the function function_update
@@ -63,8 +63,8 @@ namespace mcrl2 {
     application function_update(const data_expression& e, const data_expression& arg0, const data_expression& arg1)
     {
       assert(is_function_sort(e.sort()));
-      assert(arg0().sort() == *(e.sort().domain()));
-      assert(arg1().sort() == e.sort().codomain());
+      assert(arg0.sort() == *(e.sort().domain()));
+      assert(arg1.sort() == e.sort().codomain());
       return function_update(e.sort())(e, arg0, arg1);
     }
 
