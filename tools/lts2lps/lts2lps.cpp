@@ -51,7 +51,8 @@ class lts2lps_tool : public input_output_tool
       super::add_options(desc);
 
       desc.add_option("data", make_mandatory_argument("FILE"),
-          "use FILE as the data specification from which the input LTS was generated.", 'D');
+          "use FILE as the data specification from which the input LTS was generated. "
+          "Note that FILE must contain the pretty printed version of a data specification.", 'D');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -168,7 +169,7 @@ class lts2lps_tool : public input_output_tool
 
       lps << "\t;" << std::endl << std::endl <<"init P(" << l.initial_state() << ");" << std::endl; 
 
-      gsVerboseMsg("%s", lps.str().c_str() );
+      gsDebugMsg("%s", lps.str().c_str() );
 
       lps::specification spec = lps::parse_linear_process_specification(lps.str());
       spec.save(output_filename());
