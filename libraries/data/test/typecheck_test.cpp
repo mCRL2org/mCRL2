@@ -1271,6 +1271,21 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive3)
   );
 }
 
+BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive4)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("x", data::sort_pos::pos()));
+  test_data_expression_in_specification_context(
+    "g(f(x))",
+    "map  g: Int -> Bool;\n"
+    "     f: Pos -> Nat;\n"
+    "     f: Pos -> Int;\n"
+    "     g: Nat -> Int;\n",
+    v.begin(), v.end(),
+    false
+  );
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
