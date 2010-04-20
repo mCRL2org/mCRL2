@@ -36,6 +36,9 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_utilities_command_line
 )
+
+  #Add Squadt Connectivity when required
+  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
 endif( MONO_LIB )
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
