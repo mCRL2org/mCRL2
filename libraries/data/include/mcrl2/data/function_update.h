@@ -63,8 +63,8 @@ namespace mcrl2 {
     application function_update(const data_expression& e, const data_expression& arg0, const data_expression& arg1)
     {
       assert(is_function_sort(e.sort()));
-      assert(arg0.sort() == *(e.sort().domain()));
-      assert(arg1.sort() == e.sort().codomain());
+      assert(arg0.sort() == *(function_sort(e.sort()).domain()));
+      assert(arg1.sort() == function_sort(e.sort()).codomain());
       return function_update(e.sort())(e, arg0, arg1);
     }
 
