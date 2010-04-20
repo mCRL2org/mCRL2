@@ -88,7 +88,6 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
       if (parser.options.count("time-limit")) {
         f_time_limit = parser.option_argument_as< size_t >("time-limit");
       }
-
       if (parser.options.count("smt-solver")) {
         f_path_eliminator = true;
       }
@@ -114,6 +113,31 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
         add_option("time-limit", make_mandatory_argument("LIMIT"),
           "spend at most LIMIT seconds on proving a single formula", 't').
         add_option("induction", "apply induction on lists", 'o');
+    }
+
+    /// \brief Load formula from the file mentioned in infilename, if infilename
+    ///        is empty, use std::cin.
+    /// \param infilename The name of the input file
+    /// \return The formula stored in infilename
+    data_expression load_formula(const std::string& infilename, data_specification& specification)
+    {
+      if(infilename.empty())
+      {
+        return parse_data_expression(std::cin, specification);
+      }
+      else
+      {
+        std::ifstream instream(infilename.c_str());
+        if (!instream.is_open())
+        {
+          throw mcrl2::runtime_error("cannot open input file '" + m_input_filename + "'");
+        }
+
+        data_expression formula = parse_data_expression(instream, specification);
+        instream.close();
+
+        return formula;
+      }
     }
 
     /// \brief Load a data specification from file.
@@ -172,16 +196,13 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
     bool run()
     {
       data_specification specification = load_specification(f_spec_file_name);
-
-      std::ifstream instream(m_input_filename.c_str());
-      if (!instream.is_open())
+      data_expression formula = load_formula(m_input_filename, specification);
+      
+      if (formula == data_expression())
       {
-        throw mcrl2::runtime_error("cannot open input file '" + m_input_filename + "'");
+        throw mcrl2::runtime_error("no formula in input");
       }
 
-      data_expression formula = parse_data_expression(instream, specification);
-      instream.close();
-      
       std::set<data::sort_expression> s;
       traverse_sort_expressions(formula, std::inserter(s, s.end()));
       specification.add_context_sorts(s);
