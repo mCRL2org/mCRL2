@@ -13,7 +13,10 @@
 #ifndef MCRL2_DATA_FUNCTION_UPDATE_H
 #define MCRL2_DATA_FUNCTION_UPDATE_H
 
+#include "mcrl2/data/detail/construction_utility.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
+#include "mcrl2/data/function_symbol.h"
 
 namespace mcrl2 {
 
@@ -35,7 +38,7 @@ namespace mcrl2 {
     function_symbol function_update(const function_sort& s)
     {
       assert(s.domain().size() == 1);
-      return function_symbol(function_update_name(),
+      return data::function_symbol(function_update_name(),
                              make_function_sort(s, *(s.domain().begin()), s.codomain(), s));
     }
 
@@ -47,7 +50,7 @@ namespace mcrl2 {
     {
       if (is_function_symbol(e))
       {
-        return function_symbol(e).name() == function_update_name();
+        return data::function_symbol(e).name() == function_update_name();
       }
       return false;
     }
@@ -60,10 +63,12 @@ namespace mcrl2 {
     /// \pre |e.sort().domain()| == 1, arg0.sort() == e.sort().domain()[0], arg1.sort() == e.sort().codomain()
     /// \ret The expression e[arg0 -> arg1]
     inline
-    application function_update(const data_expression& e, const data_expression& arg0, const data_expression& arg1)
+    application function_update(const data_expression& e,
+                                const data_expression& arg0,
+                                const data_expression& arg1)
     {
       assert(is_function_sort(e.sort()));
-      assert(arg0.sort() == *(function_sort(e.sort()).domain()));
+      assert(arg0.sort() == *(function_sort(e.sort()).domain().begin()));
       assert(arg1.sort() == function_sort(e.sort()).codomain());
       return function_update(e.sort())(e, arg0, arg1);
     }
