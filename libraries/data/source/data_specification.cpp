@@ -607,7 +607,7 @@ namespace mcrl2 {
         
         return abstraction(a.binding_operator(),normalised_variables,normalise_sorts(a.body()));
       }
-      if (is_application(e))
+      else if (is_application(e))
       { const application a(e);
         const data_expression_list args=a.arguments();
         data_expression_vector normalised_arguments;
@@ -617,24 +617,30 @@ namespace mcrl2 {
         }
         return application(normalise_sorts(a.head()),normalised_arguments);
       }
-      if (is_function_symbol(e))
+      else if (is_function_symbol(e))
       { return function_symbol(function_symbol(e).name(),normalise_sorts(e.sort()));
       }
-      if (is_variable(e))
+      else if (is_variable(e))
       { return variable(variable(e).name(),normalise_sorts(e.sort()));
       }
-      assert(is_where_clause(e));
-      const where_clause w(e);
-      const assignment_list decls=w.declarations();
-      assignment_vector normalised_assignments;
-      for(atermpp::term_list <assignment>::const_iterator i=decls.begin();
-             i!=decls.end(); ++i)
-      { const variable v=i->lhs();
-        const data_expression exp=i->rhs();
-        normalised_assignments.push_back(assignment(normalise_sorts(v),normalise_sorts(exp)));
+      else if (is_where_clause(e))
+      {
+        const where_clause w(e);
+        const assignment_list decls=w.declarations();
+        assignment_vector normalised_assignments;
+        for(atermpp::term_list <assignment>::const_iterator i=decls.begin();
+               i!=decls.end(); ++i)
+        { const variable v=i->lhs();
+          const data_expression exp=i->rhs();
+          normalised_assignments.push_back(assignment(normalise_sorts(v),normalise_sorts(exp)));
+        }
+
+        return where_clause(normalise_sorts(w.body()),normalised_assignments);
       }
-      
-      return where_clause(normalise_sorts(w.body()),normalised_assignments);
+      else
+      {
+        throw mcrl2::runtime_error("normalise_sorts: unexpected expression " + e.to_string() + " occurred.");
+      }
     } 
     /// \endcond
 
@@ -642,7 +648,7 @@ namespace mcrl2 {
     ///  - the bare specification that does not contain constructor, mappings
     ///    and equations for system defined sorts
     ///  - specification that includes all system defined information (legacy)
-    /// The last type must eventually dissapear but is unfortunately still in
+    /// The last type must eventually disappear but is unfortunately still in
     /// use in a substantial amount of source code.
     /// Note, all sorts with name prefix @legacy_ are eliminated
     void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
