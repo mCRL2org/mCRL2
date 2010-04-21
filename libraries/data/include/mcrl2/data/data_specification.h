@@ -205,7 +205,12 @@ namespace mcrl2 {
         /// \post is_system_defined(s) = true
         /// \note this operation does not invalidate iterators of sorts_const_range
         void add_system_defined_sort(const sort_expression& s) const
-        { m_normalised_sorts.insert(normalise_sorts(s));
+        {
+          sort_expression normalised(normalise_sorts(s));
+          if(!is_function_sort(normalised))
+          {
+            m_normalised_sorts.insert(normalised);
+          }
         }
   
         /// \brief Adds a constructor to this specification, and marks it as

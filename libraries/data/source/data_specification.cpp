@@ -82,7 +82,7 @@ namespace mcrl2 {
       reconstruct_m_normalised_aliases();
       for(atermpp::set< sort_expression >::const_iterator i=m_sorts.begin();
            i!=m_sorts.end(); ++i)
-      { m_normalised_sorts.insert(normalise_sorts(*i));
+      { add_system_defined_sort(*i);
         import_system_defined_sort(*i);
       }
 
@@ -115,15 +115,15 @@ namespace mcrl2 {
 
       for(atermpp::set< sort_expression >::const_iterator i=dependent_sorts.begin();
            i!=dependent_sorts.end(); ++i)
-      { m_normalised_sorts.insert(normalise_sorts(*i));
+      { add_system_defined_sort(*i);
         import_system_defined_sort(*i);
       }
 
 
       for(ltr_aliases_map ::const_iterator i=m_aliases.begin();  
            i!=m_aliases.end(); ++i)
-      { m_normalised_sorts.insert(normalise_sorts(i->first));
-        m_normalised_sorts.insert(normalise_sorts(i->second));
+      { add_system_defined_sort(i->first);
+        add_system_defined_sort(i->second);
         import_system_defined_sort(i->first);
         import_system_defined_sort(i->second);
       }
@@ -139,7 +139,7 @@ namespace mcrl2 {
         { m_normalised_constructors.insert(std::pair<sort_expression, function_symbol>
                      (normalised_sort,normalised_constructor));
         }
-        m_normalised_sorts.insert(normalised_sort);
+        add_system_defined_sort(normalised_sort);
       }
 
       // Normalise the sorts of the mappings.
@@ -153,7 +153,7 @@ namespace mcrl2 {
         { m_normalised_mappings.insert((std::pair<sort_expression, function_symbol>
                       (normalised_sort,normalised_mapping)));
         }
-        m_normalised_sorts.insert(normalised_sort);
+        add_system_defined_sort(normalised_sort);
       }
      
       // Normalise the sorts of the expressions and variables in equations.
@@ -235,83 +235,85 @@ namespace mcrl2 {
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       }
       else if (is_function_sort(sort))
-      { import_system_defined_sort(function_sort(sort).codomain());
+      {
+        import_system_defined_sort(function_sort(sort).codomain());
         const sort_expression_list &l=function_sort(sort).domain();
         std::for_each(l.begin(),l.end(),boost::bind(&mcrl2::data::data_specification::import_system_defined_sort,this,_1));
       }
-      else
-      { if (is_container_sort(sort))
-        { sort_expression element_sort(container_sort(sort).element_sort());
-          // Import the element sort (which may be a complex sort also).
-          import_system_defined_sort(element_sort);
-          if (sort_list::is_list(sort))
-          { import_system_defined_sort(sort_nat::nat()); // Required for lists.
-               
-            // Add a list to the specification.
-            add_system_defined_sort(sort);
+      else if (is_container_sort(sort))
+      {
+        sort_expression element_sort(container_sort(sort).element_sort());
+        // Import the element sort (which may be a complex sort also).
+        import_system_defined_sort(element_sort);
+        if (sort_list::is_list(sort))
+        {
+          import_system_defined_sort(sort_nat::nat()); // Required for lists.
 
-            function_symbol_vector f(sort_list::list_generate_constructors_code(element_sort));
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
-            f = sort_list::list_generate_functions_code(element_sort);
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
-            data_equation_vector e(sort_list::list_generate_equations_code(element_sort));
-            std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
-          }
-          else if (sort_set::is_set(sort)||sort_fset::is_fset(sort))
-          { 
-            // Add the function sort element_sort->Bool to the specification
-            // const sort_expression_list l(element_sort);
-            import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_bool::bool_()));
-            
-            // Add a set to the specification.
-            add_system_defined_sort(sort);
-            function_symbol_vector f(sort_set::set_generate_constructors_code(element_sort));
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
-            f = sort_set::set_generate_functions_code(element_sort);
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
-            data_equation_vector e(sort_set::set_generate_equations_code(element_sort));
-            std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+          // Add a list to the specification.
+          add_system_defined_sort(sort);
 
-            // Add also the finite set specification.
-            add_system_defined_sort(sort);
-            f = sort_fset::fset_generate_constructors_code(element_sort);
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
-            f = sort_fset::fset_generate_functions_code(element_sort);
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
-            e = sort_fset::fset_generate_equations_code(element_sort);
-            std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
-          }
-          else if (sort_bag::is_bag(sort)||sort_fbag::is_fbag(sort))
-          { 
-            // Add the sorts Nat and set_(element_sort) to the specification.
-            import_system_defined_sort(sort_nat::nat()); // Required for bags.
-            import_system_defined_sort(sort_set::set_(element_sort));
-            
-            // Add the function sort element_sort->Nat to the specification
-            import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_nat::nat()));
-            
-            // Add a bag to the specification.
-            add_system_defined_sort(sort_fbag::fbag(element_sort));
-            function_symbol_vector f(sort_bag::bag_generate_constructors_code(element_sort));
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
-            f = sort_bag::bag_generate_functions_code(element_sort);
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
-            data_equation_vector e(sort_bag::bag_generate_equations_code(element_sort));
-            std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
-
-            // Also add a finite bag to the specification
-            add_system_defined_sort(sort);
-            f = sort_fbag::fbag_generate_constructors_code(element_sort);
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
-            f = sort_fbag::fbag_generate_functions_code(element_sort);
-            std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
-            e = sort_fbag::fbag_generate_equations_code(element_sort);
-            std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
-           }
+          function_symbol_vector f(sort_list::list_generate_constructors_code(element_sort));
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
+          f = sort_list::list_generate_functions_code(element_sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+          data_equation_vector e(sort_list::list_generate_equations_code(element_sort));
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }
-        else if (is_structured_sort(sort))
-        { insert_mappings_constructors_for_structured_sort(sort);
+        else if (sort_set::is_set(sort)||sort_fset::is_fset(sort))
+        {
+          // Add the function sort element_sort->Bool to the specification
+          // const sort_expression_list l(element_sort);
+          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_bool::bool_()));
+
+          // Add a set to the specification.
+          add_system_defined_sort(sort_set::set_(element_sort));
+          function_symbol_vector f(sort_set::set_generate_constructors_code(element_sort));
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
+          f = sort_set::set_generate_functions_code(element_sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+          data_equation_vector e(sort_set::set_generate_equations_code(element_sort));
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+
+          // Add also the finite set specification.
+          add_system_defined_sort(sort_fset::fset(element_sort));
+          f = sort_fset::fset_generate_constructors_code(element_sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
+          f = sort_fset::fset_generate_functions_code(element_sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+          e = sort_fset::fset_generate_equations_code(element_sort);
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
         }
+        else if (sort_bag::is_bag(sort)||sort_fbag::is_fbag(sort))
+        {
+          // Add the sorts Nat and set_(element_sort) to the specification.
+          import_system_defined_sort(sort_nat::nat()); // Required for bags.
+          import_system_defined_sort(sort_set::set_(element_sort));
+
+          // Add the function sort element_sort->Nat to the specification
+          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_nat::nat()));
+
+          // Add a bag to the specification.
+          add_system_defined_sort(sort_bag::bag(element_sort));
+          function_symbol_vector f(sort_bag::bag_generate_constructors_code(element_sort));
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
+          f = sort_bag::bag_generate_functions_code(element_sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+          data_equation_vector e(sort_bag::bag_generate_equations_code(element_sort));
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+
+          // Also add a finite bag to the specification
+          add_system_defined_sort(sort_fbag::fbag(element_sort));
+          f = sort_fbag::fbag_generate_constructors_code(element_sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_constructor, this, _1));
+          f = sort_fbag::fbag_generate_functions_code(element_sort);
+          std::for_each(f.begin(), f.end(), boost::bind(&data_specification::add_system_defined_mapping, this, _1));
+          e = sort_fbag::fbag_generate_equations_code(element_sort);
+          std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+        }
+      }
+      else if (is_structured_sort(sort))
+      {
+        insert_mappings_constructors_for_structured_sort(sort);
       }
       add_standard_mappings_and_equations(normalised_sort);
     }
