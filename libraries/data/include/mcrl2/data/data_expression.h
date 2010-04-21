@@ -172,7 +172,7 @@ namespace mcrl2 {
           else if (is_application(*this))
           {
             sort_expression s(data_expression(atermpp::arg1(*this)).sort());
-            assert(s.is_function_sort());
+            assert(is_function_sort(s));
             result = atermpp::arg2(s);
           }
           else if (is_where_clause(*this))

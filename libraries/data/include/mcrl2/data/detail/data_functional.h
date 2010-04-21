@@ -130,7 +130,7 @@ struct sort_has_name
   /// \return The function result
   bool operator()(sort_expression s) const
   {
-    return s.is_basic_sort() && std::string(basic_sort(s).name()) == m_name;
+    return is_basic_sort(s) && std::string(basic_sort(s).name()) == m_name;
   }
 };
 

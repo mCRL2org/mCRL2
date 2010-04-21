@@ -99,7 +99,7 @@ static void add_id(ATermList *ids, ATermAppl id)
 
 static ATbool is_domain(ATermList args, ATermAppl sort)
 {
-  if ( !mcrl2::data::sort_expression(sort).is_basic_sort() )
+  if ( !is_basic_sort(mcrl2::data::sort_expression(sort)) )
   {
     ATermList dom = ATLgetArgument(sort,0);
     if ( ATgetLength(args) != ATgetLength(dom) )

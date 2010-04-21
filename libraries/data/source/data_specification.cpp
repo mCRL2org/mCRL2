@@ -234,13 +234,13 @@ namespace mcrl2 {
         data_equation_vector e(sort_pos::pos_generate_equations_code());
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       }
-      else if (sort.is_function_sort())
+      else if (is_function_sort(sort))
       { import_system_defined_sort(function_sort(sort).codomain());
         const sort_expression_list &l=function_sort(sort).domain();
         std::for_each(l.begin(),l.end(),boost::bind(&mcrl2::data::data_specification::import_system_defined_sort,this,_1));
       }
       else
-      { if (sort.is_container_sort())
+      { if (is_container_sort(sort))
         { sort_expression element_sort(container_sort(sort).element_sort());
           // Import the element sort (which may be a complex sort also).
           import_system_defined_sort(element_sort);
@@ -309,7 +309,7 @@ namespace mcrl2 {
             std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
            }
         }
-        else if (sort.is_structured_sort())
+        else if (is_structured_sort(sort))
         { insert_mappings_constructors_for_structured_sort(sort);
         }
       }
@@ -346,19 +346,19 @@ namespace mcrl2 {
 
         bool is_finite(const sort_expression& s)
         {
-          if (s.is_basic_sort())
+          if (is_basic_sort(s))
           {
             return is_finite(basic_sort(s));
           }
-          else if (s.is_container_sort())
+          else if (is_container_sort(s))
           {
             return is_finite(container_sort(s));
           }
-          else if (s.is_function_sort())
+          else if (is_function_sort(s))
           {
             return is_finite(function_sort(s));
           }
-          else if (s.is_structured_sort())
+          else if (is_structured_sort(s))
           {
             return is_finite(structured_sort(s));
           }
@@ -380,11 +380,11 @@ namespace mcrl2 {
 
             for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
             {
-              if (r.front().sort().is_function_sort())
+              if (is_function_sort(r.front().sort()))
               {
                 for (boost::iterator_range< dependent_sort_set::const_iterator > c(dependent_sorts(r.front().sort())); !c.empty(); c.advance_begin(1))
                 {
-                  if (!c.front().is_function_sort())
+                  if (!is_function_sort(c.front()))
                   {
                     if ((c.front() == s) || (m_visiting.find(c.front()) == m_visiting.end() && !is_finite(c.front())))
                     {
@@ -554,11 +554,11 @@ namespace mcrl2 {
         return i->second;
       }
 
-      if (e.is_basic_sort())
+      if (is_basic_sort(e))
       { // Apparently, e is already a normalised sort.
         return e;
       }
-      else if (e.is_function_sort())
+      else if (is_function_sort(e))
       { 
         atermpp::vector< sort_expression > new_domain;
         for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(e).domain());
@@ -567,10 +567,10 @@ namespace mcrl2 {
         }
         return function_sort(new_domain, normalise_sorts_helper(function_sort(e).codomain()));
       }
-      else if (e.is_container_sort())
+      else if (is_container_sort(e))
       { return container_sort(container_sort(e).container_name(), normalise_sorts_helper(container_sort(e).element_sort()));
       }
-      else if (e.is_structured_sort())
+      else if (is_structured_sort(e))
       { atermpp::vector< structured_sort_constructor > new_constructors;
         for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
         { atermpp::vector< structured_sort_constructor_argument > new_arguments;

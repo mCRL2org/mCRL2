@@ -1264,7 +1264,7 @@ namespace mcrl2 {
                    std::set < basic_sort > &visited,
                    const bool observed_a_sort_constructor)
     { 
-      if (sort_expression_start_search.is_basic_sort())
+      if (is_basic_sort(sort_expression_start_search))
       { const basic_sort start_search(sort_expression_start_search);
         if (end_search==start_search)
         { return observed_a_sort_constructor;
@@ -1275,13 +1275,13 @@ namespace mcrl2 {
         }
       }
 
-      if (sort_expression_start_search.is_container_sort())
+      if (is_container_sort(sort_expression_start_search))
       { const container_sort start_search_container(sort_expression_start_search);
         return gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                            start_search_container.element_sort(),end_search,visited,true);
       }
 
-      if (sort_expression_start_search.is_function_sort())
+      if (is_function_sort(sort_expression_start_search))
       { const function_sort f_start_search(sort_expression_start_search);
         if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                            f_start_search.codomain(),end_search,visited,true))
@@ -1298,13 +1298,13 @@ namespace mcrl2 {
         return false;
       }
 
-      if (sort_expression_start_search.is_structured_sort())
+      if (is_structured_sort(sort_expression_start_search))
       { const structured_sort struct_start_search(sort_expression_start_search);
         const function_symbol_vector constructor_functions=struct_start_search.constructor_functions();
         for(function_symbol_vector::const_iterator i=constructor_functions.begin();
                    i!=constructor_functions.end(); ++i)
         { 
-          if (i->sort().is_function_sort())
+          if (is_function_sort(i->sort()))
           { const sort_expression_list domain_sorts=function_sort(i->sort()).domain();
             for(sort_expression_list::const_iterator j=domain_sorts.begin();
                  j!=domain_sorts.end(); ++j)
@@ -1502,7 +1502,7 @@ namespace mcrl2 {
         }
 
         for(std::set< sort_expression > ::const_iterator i=all_sorts.begin(); i!=all_sorts.end();++i) 
-        { if (i->is_structured_sort())
+        { if (is_structured_sort(*i))
           { 
             const function_symbol_vector r=structured_sort(*i).constructor_functions();
             for(function_symbol_vector::const_iterator j=r.begin();
@@ -1511,7 +1511,7 @@ namespace mcrl2 {
             }
           }
           
-          if (i->is_structured_sort())
+          if (is_structured_sort(*i))
           { 
             const function_symbol_vector r=structured_sort(*i).constructor_functions();
             for(function_symbol_vector::const_iterator i=r.begin();
@@ -1526,7 +1526,7 @@ namespace mcrl2 {
         for(ATermList constructor_list_walker=constructor_list; 
                   constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))
         { const sort_expression s=function_symbol(ATgetFirst(constructor_list_walker)).sort();
-          if (s.is_function_sort())
+          if (is_function_sort(s))
           { 
             // if s is a constant sort, nothing needs to be added.
             possibly_empty_constructor_sorts.insert(mapping(function_sort(s).codomain(),normalised_aliases)); 
@@ -1540,7 +1540,7 @@ namespace mcrl2 {
           for(ATermList constructor_list_walker=constructor_list;
                   constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))      
           { const sort_expression s=function_symbol(ATgetFirst(constructor_list_walker)).sort();
-            if (!s.is_function_sort())        
+            if (!is_function_sort(s))
             { 
               if (possibly_empty_constructor_sorts.erase(mapping(s,normalised_aliases))==1) // True if one element has been removed.
               { stable=false;

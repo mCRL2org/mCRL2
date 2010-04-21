@@ -35,14 +35,14 @@ namespace mcrl2 {
 
         bool operator()(data_expression const& e)
         {
-          return e.sort().is_function_sort() && function_sort(e.sort()).target_sort() == m_sort;
+          return is_function_sort(e.sort()) && function_sort(e.sort()).target_sort() == m_sort;
         }
       };
 
       struct has_non_function_sort : public std::unary_function< data_expression const&, bool >
       {
         bool operator()(data_expression const& e)
-        { return !e.sort().is_function_sort();
+        { return !is_function_sort(e.sort());
         }
       };
     }
@@ -107,7 +107,7 @@ namespace mcrl2 {
         /// \pre symbol.sort() is of type function_sort
         data_expression find_representative(function_symbol const& symbol, const unsigned int maximum_depth)
         {
-          assert(symbol.sort().is_function_sort());
+          assert(is_function_sort(symbol.sort()));
 
           data_expression_vector arguments;
 
@@ -136,7 +136,7 @@ namespace mcrl2 {
           data_specification::mappings_const_range     local_mappings(m_specification.mappings());
           // std::cerr << "COnstructors length " << local_constructors.size() << "\n";
 
-          if (sort.is_function_sort())
+          if (is_function_sort(sort))
           { // s is a function sort. We search for a constructor of mapping of this sort
             // Although in principle possible, we do not do a lot of effort to construct
             // a term of this sort. We just look whether a term of exactly this sort is

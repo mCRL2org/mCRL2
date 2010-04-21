@@ -55,7 +55,7 @@ namespace mcrl2 {
       inline
       bool is_bool(const sort_expression& e)
       {
-        if (e.is_basic_sort())
+        if (is_basic_sort(e))
         {
           return static_cast< basic_sort >(e) == bool_();
         }

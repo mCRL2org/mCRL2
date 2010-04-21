@@ -109,19 +109,19 @@ namespace mcrl2 {
 
           void operator()(sort_expression const& e)
           {
-            if (e.is_basic_sort())
+            if (is_basic_sort(e))
             {
               static_cast< Derived& >(*this)(basic_sort(e));
             }
-            else if (e.is_container_sort())
+            else if (is_container_sort(e))
             {
               static_cast< Derived& >(*this)(container_sort(e));
             }
-            else if (e.is_structured_sort())
+            else if (is_structured_sort(e))
             {
               static_cast< Derived& >(*this)(structured_sort(e));
             }
-            else if (e.is_function_sort())
+            else if (is_function_sort(e))
             {
               static_cast< Derived& >(*this)(function_sort(e));
             }

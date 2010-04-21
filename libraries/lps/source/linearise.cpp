@@ -342,7 +342,7 @@ class specification_basic_type:public boost::noncopyable
     {
       data.add_sort(sortterm);
 
-      if (sortterm.is_basic_sort())
+      if (is_basic_sort(sortterm))
       {
         long n=0;
         const basic_sort sort(sortterm);
@@ -366,7 +366,7 @@ class specification_basic_type:public boost::noncopyable
         objectdata[n].constructor=0;
         return;
       }
-      if (sortterm.is_function_sort())
+      if (is_function_sort(sortterm))
       { return;
       }
       throw mcrl2::runtime_error("expected a sortterm (2): " + pp(sortterm));
@@ -3994,7 +3994,7 @@ class specification_basic_type:public boost::noncopyable
       const function_sort newsort(newsortlist,sort);
       const function_symbol casefunction(
                           fresh_name(str(boost::format("C%d_%s") % n % (
-                                         !newsort.is_basic_sort()?"":std::string(basic_sort(sort).name())))),
+                                         !is_basic_sort(newsort)?"":std::string(basic_sort(sort).name())))),
                           newsort);
       // insertmapping(casefunction,true);
       data.add_mapping(casefunction);

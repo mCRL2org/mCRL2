@@ -88,7 +88,7 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
   {
     if (sorts.find(*i) == sorts.end()) {
       // sort *i is not well-typed, a system defined sort or an alias 
-      if (!(i->is_system_defined()) && is_alias(*i)) {
+      if (!(is_system_defined(*i)) && is_alias(*i)) {
         alias sort_alias(*i);
 
         if (sorts.find(sort_alias.name()) == sorts.end()) {
@@ -97,10 +97,10 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
 
           if (sorts.find(sort_reference) == sorts.end()) {
             // sort_reference is structured or container sort
-            if (sort_reference.is_structured_sort()) {
+            if (is_structured_sort(sort_reference)) {
               assert(false);
             }
-            else if (sort_reference.is_container_sort()) {
+            else if (is_container_sort(sort_reference)) {
               if (sorts.find(container_sort(sort_reference).element_sort()) == sorts.end()) {
                 return false;
               }

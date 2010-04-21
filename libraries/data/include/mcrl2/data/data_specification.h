@@ -767,7 +767,7 @@ namespace mcrl2 {
       {
         normalise_specification_if_required();
         const sort_expression normalised_sort=normalise_sorts(s);
-        return !normalised_sort.is_function_sort() && !constructors(normalised_sort).empty();
+        return !is_function_sort(normalised_sort) && !constructors(normalised_sort).empty();
       }
 
       /// \brief Returns true if

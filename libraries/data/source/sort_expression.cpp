@@ -19,11 +19,11 @@
 namespace mcrl2 {
   namespace data {
 
-    bool sort_expression::is_system_defined() const
+    bool is_system_defined(const sort_expression& s)
     {
-      return sort_bool::is_bool(*this) || sort_real::is_real(*this) ||
-             sort_int::is_int(*this) || sort_nat::is_nat(*this) ||
-             sort_pos::is_pos(*this) || is_container_sort() || is_structured_sort();
+      return sort_bool::is_bool(s) || sort_real::is_real(s) ||
+             sort_int::is_int(s) || sort_nat::is_nat(s) ||
+             sort_pos::is_pos(s) || is_container_sort(s) || is_structured_sort(s);
     }
 
   } // namespace data

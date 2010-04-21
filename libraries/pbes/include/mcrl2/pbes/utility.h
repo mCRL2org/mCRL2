@@ -421,14 +421,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   data::sort_expression_list dsorts;
 
                   // boost::iterator_range< data::sort_expression_list::const_iterator > dsorts;
-                  if (rf.front().sort().is_function_sort())
+                  if (is_function_sort(rf.front().sort()))
                   {
                     data::function_sort sa=rf.front().sort();
                     // In case the function f has a sort A->(B->C),
                     // then the function below does not work correctly.
                     // This code must be replaced by enumerator code,
                     // developed by Wieger.
-                    if (sa.codomain().is_function_sort())
+                    if (is_function_sort(sa.codomain()))
                     { throw mcrl2::runtime_error("Cannot deal with constructors of type (A->(B->C)): " + 
                                         pp(rf.front()) + ":" + pp(rf.front().sort()));
                     }
@@ -555,14 +555,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 for (data::data_specification::constructors_const_range rf(data.constructors(i->sort())); !rf.empty(); rf.advance_begin(1))
                 {
                   data::sort_expression_list dsorts;
-                  if (rf.front().sort().is_function_sort())
+                  if (is_function_sort(rf.front().sort()))
                   {
                     data::function_sort sa=rf.front().sort();
                     // In case the function f has a sort A->(B->C),
                     // then the function below does not work correctly.
                     // This code must be replaced by enumerator code,
                     // developed by Wieger.
-                    if (sa.codomain().is_function_sort())
+                    if (is_function_sort(sa.codomain()))
                     { throw mcrl2::runtime_error("Cannot deal with constructors of type (A->(B->C)): " + 
                                         pp(rf.front()) + ":" + pp(rf.front().sort()));
                     }

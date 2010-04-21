@@ -141,11 +141,11 @@ namespace mcrl2 {
 
           static bool is_sort_of_list_operation(sort_expression const& expression)
           {
-            if (expression.is_container_sort())
+            if (is_container_sort(expression))
             {
               return is_sort_of_list_operation(container_sort(expression));
             }
-            else if (expression.is_function_sort())
+            else if (is_function_sort(expression))
             {
               return is_sort_of_list_operation(function_sort(expression));
             }

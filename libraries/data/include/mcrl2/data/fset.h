@@ -53,7 +53,7 @@ namespace mcrl2 {
       inline
       bool is_fset(const sort_expression& e)
       {
-        if (e.is_container_sort())
+        if (is_container_sort(e))
         {
           return static_cast< container_sort >(e).container_name() == fset_container();
         }

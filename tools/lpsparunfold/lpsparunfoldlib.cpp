@@ -171,7 +171,7 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
   std::set<mcrl2::data::sort_expression> processed;
   for( function_symbol_vector::iterator i = k.begin() ; i != k.end(); ++i )
   {
-    if ( i->sort().is_function_sort() )
+    if ( is_function_sort(i->sort()) )
     {
       function_sort fs = function_sort( i->sort() );
       boost::iterator_range<sort_expression_list::const_iterator> sel  = fs.domain();
@@ -230,7 +230,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   {
     sort_index.clear();
 
-    if( i -> sort().is_basic_sort() )
+    if( is_basic_sort(i -> sort()) )
     {
       data_expression lhs = make_application( determine_function, *i );
       gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, elements_of_new_sorts[e] )).c_str());
@@ -241,7 +241,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     }
 
     //cout << "i: " << *i << endl;
-    if( i -> sort().is_function_sort() )
+    if( is_function_sort(i -> sort()) )
     {
       function_sort fs = function_sort( i -> sort() );
       boost::iterator_range<sort_expression_list::const_iterator> sel = fs.domain();
@@ -306,7 +306,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       }
     }
 
-    if(i -> sort().is_structured_sort())
+    if(is_structured_sort(i -> sort()))
     {
 
       data_expression lhs = make_application( determine_function , *i );
@@ -318,7 +318,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
 
     }
  
-    if(i -> sort().is_container_sort())
+    if(is_container_sort(i -> sort()))
     {
       container_sort cs = container_sort( i -> sort() );
       sort_expression element_sort = cs.element_sort();
@@ -420,7 +420,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
          //cout << *j << endl;  
 
          bool processed = false;
-         if (j -> sort().is_function_sort())
+         if (is_function_sort(j -> sort()))
          {
            sort_expression_list dom = function_sort(j -> sort()).domain();
            for(sort_expression_list::iterator k = dom.begin(); k != dom.end(); ++k)
@@ -432,18 +432,18 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
            processed = true;
          }
 
-         if (j -> sort().is_basic_sort())
+         if (is_basic_sort(j -> sort()))
          {
            gsDebugMsg("- No processed parameter are injected for basic sort: %s\n", j->to_string().c_str() );
            processed = true;
          }
 
-         if (j -> sort().is_structured_sort())
+         if (is_structured_sort(j -> sort()))
          {
            processed = true;
          }
 
-         if (j -> sort().is_container_sort())
+         if (is_container_sort(j -> sort()))
          {
             processed = true;
          }
@@ -629,17 +629,17 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfol
                                                     ; m != k.end()
                                                     ; ++m )
      {
-       if (m -> sort().is_basic_sort())
+       if (is_basic_sort(m -> sort()))
        {
          dev.push_back( *m );
        }
 
-       if (m -> sort().is_structured_sort())
+       if (is_structured_sort(m -> sort()))
        {
          dev.push_back( *m );
        }
 
-       if (m -> sort().is_function_sort())
+       if (is_function_sort(m -> sort()))
        {
          sort_expression_list dom = function_sort( m -> sort() ). domain();
          data_expression_vector arg;
@@ -661,7 +661,7 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfol
          dev.push_back( mcrl2::data::application( *m, arg ) );
        }
 
-       if (m -> sort().is_container_sort())
+       if (is_container_sort(m -> sort()))
        {
          dev.push_back( *m );
        }
@@ -711,13 +711,13 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
     abort();
   }
 
-  if(lps_proc_pars[parameter_at_index].sort().is_basic_sort())
+  if(is_basic_sort(lps_proc_pars[parameter_at_index].sort()))
   {
     unfold_parameter_name = basic_sort(lps_proc_pars[parameter_at_index].sort()).name();
     generated_name = true;
   }
 
-  if(lps_proc_pars[parameter_at_index].sort().is_structured_sort())
+  if(is_structured_sort(lps_proc_pars[parameter_at_index].sort()))
   {
     mcrl2::data::postfix_identifier_generator generator("");
     mcrl2::core::identifier_string nstr;
@@ -728,12 +728,12 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
     generated_name = true;
   }
 
-  if(lps_proc_pars[parameter_at_index].sort().is_function_sort())
+  if(is_function_sort(lps_proc_pars[parameter_at_index].sort()))
   {
     generated_name = true;
   }
 
-  if(lps_proc_pars[parameter_at_index].sort().is_container_sort())
+  if(is_container_sort(lps_proc_pars[parameter_at_index].sort()))
   {
     mcrl2::data::postfix_identifier_generator generator("");
     mcrl2::core::identifier_string nstr;

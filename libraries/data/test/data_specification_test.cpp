@@ -181,14 +181,6 @@ void test_constructors()
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::add_constructor, &spec1, _1));
   BOOST_CHECK(compare_for_equality(spec, spec1));
-  /* BOOST_CHECK(spec.is_system_defined(i));
-  BOOST_CHECK(!spec.is_system_defined(f));
-  BOOST_CHECK(!spec.is_system_defined(g));
-  BOOST_CHECK(!spec.is_system_defined(h));
-  BOOST_CHECK(spec1.is_system_defined(i));
-  BOOST_CHECK(!spec1.is_system_defined(f));
-  BOOST_CHECK(!spec1.is_system_defined(g));
-  BOOST_CHECK(!spec1.is_system_defined(h)); */
 
   spec.remove_constructor(i);
   std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::remove_constructor, &spec1, _1));
@@ -246,14 +238,6 @@ void test_functions()
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
   compare_for_equality(spec, spec1);
-  /* BOOST_CHECK(spec.is_system_defined(i));
-  BOOST_CHECK(!spec.is_system_defined(f));
-  BOOST_CHECK(!spec.is_system_defined(g));
-  BOOST_CHECK(!spec.is_system_defined(h));
-  BOOST_CHECK(spec1.is_system_defined(i));
-  BOOST_CHECK(!spec1.is_system_defined(f));
-  BOOST_CHECK(!spec1.is_system_defined(g));
-  BOOST_CHECK(!spec1.is_system_defined(h)); */
 
   std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::remove_mapping, &spec, _1));
   spec1.remove_mapping(i);
@@ -295,10 +279,6 @@ void test_equations()
   std::for_each(fxfl_range.begin(), fxfl_range.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
-  /* BOOST_CHECK(spec.is_system_defined(fxf));
-  BOOST_CHECK(!spec.is_system_defined(fxx));
-  BOOST_CHECK(spec1.is_system_defined(fxf));
-  BOOST_CHECK(!spec1.is_system_defined(fxx)); */
 
   data_equation_vector result = find_equations(spec, f);
   BOOST_CHECK(result.size() == 2);

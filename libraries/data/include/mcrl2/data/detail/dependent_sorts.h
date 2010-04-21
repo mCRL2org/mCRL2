@@ -62,11 +62,11 @@ namespace mcrl2 {
           {
             for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
             {
-              if (r.front().sort().is_function_sort())
+              if (is_function_sort(r.front().sort()))
               {
                 for (boost::iterator_range< sort_expression_list::iterator > i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
                 {
-                  if (i.front() != s && (!i.front().is_basic_sort() || m_specification.normalise_sorts(i.front()) != s))
+                  if (i.front() != s && (!is_basic_sort(i.front()) || m_specification.normalise_sorts(i.front()) != s))
                   {
                     static_cast< super& >(*this)(i.front());
                   }

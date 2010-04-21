@@ -1469,7 +1469,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      bool is_%s(const sort_expression& e)\n" % (label.to_string())
     code += "      {\n"
-    code += "        if (e.is_basic_sort())\n"
+    code += "        if (is_basic_sort(e))\n"
     code += "        {\n"
     code += "          return static_cast< basic_sort >(e) == %s();\n" % (label.to_string())
     code += "        }\n"
@@ -1498,7 +1498,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      bool is_%s(const sort_expression& e)\n" % (label.to_string())
     code += "      {\n"
-    code += "        if (e.is_container_sort())\n"
+    code += "        if (is_container_sort(e))\n"
     code += "        {\n"
     code += "          return static_cast< container_sort >(e).container_name() == %s_container();\n" % (label.to_string())
     code += "        }\n"

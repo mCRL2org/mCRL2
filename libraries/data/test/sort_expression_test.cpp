@@ -29,11 +29,11 @@ using namespace mcrl2::data;
 void basic_sort_test()
 {
   basic_sort s("S");
-  BOOST_CHECK(s.is_basic_sort());
-  BOOST_CHECK(!s.is_function_sort());
+  BOOST_CHECK(is_basic_sort(s));
+  BOOST_CHECK(!is_function_sort(s));
   BOOST_CHECK(!is_alias(s));
-  BOOST_CHECK(!s.is_structured_sort());
-  BOOST_CHECK(!s.is_container_sort());
+  BOOST_CHECK(!is_structured_sort(s));
+  BOOST_CHECK(!is_container_sort(s));
   BOOST_CHECK(s.name() == "S");
   BOOST_CHECK(s == s);
 
@@ -58,11 +58,11 @@ void function_sort_test()
   s01.push_back(s1);
   boost::iterator_range<sort_expression_vector::const_iterator> s01_range = boost::make_iterator_range(s01);
   function_sort fs(s01_range, s);
-  BOOST_CHECK(!fs.is_basic_sort());
-  BOOST_CHECK(fs.is_function_sort());
+  BOOST_CHECK(!is_basic_sort(fs));
+  BOOST_CHECK(is_function_sort(fs));
   BOOST_CHECK(!is_alias(fs));
-  BOOST_CHECK(!fs.is_structured_sort());
-  BOOST_CHECK(!fs.is_container_sort());
+  BOOST_CHECK(!is_structured_sort(fs));
+  BOOST_CHECK(!is_container_sort(fs));
   BOOST_CHECK(fs == fs);
   BOOST_CHECK(fs.domain().size() == static_cast< size_t >(s01_range.size()));
 
@@ -137,11 +137,11 @@ void structured_sort_test()
 
   structured_sort s(cs);
 
-  BOOST_CHECK(!s.is_basic_sort());
-  BOOST_CHECK(!s.is_function_sort());
+  BOOST_CHECK(!is_basic_sort(s));
+  BOOST_CHECK(!is_function_sort(s));
   BOOST_CHECK(!is_alias(s));
-  BOOST_CHECK(s.is_structured_sort());
-  BOOST_CHECK(!s.is_container_sort());
+  BOOST_CHECK(is_structured_sort(s));
+  BOOST_CHECK(!is_container_sort(s));
 
   BOOST_CHECK(s.struct_constructors() == cs);
 

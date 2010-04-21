@@ -171,7 +171,7 @@ class data_enumerator
       }
       for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
       {
-        if (i->sort().is_function_sort()) {
+        if (is_function_sort(i->sort())) {
           std::vector<variable> variables;
 
           for (boost::iterator_range< sort_expression_list::iterator > j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
