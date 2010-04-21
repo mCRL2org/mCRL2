@@ -82,7 +82,7 @@ bool check_rule_NumberString(Term t)
   return true;
 }
 
-//--- start generated code
+//--- start generated code ---//
 template <typename Term> bool check_rule_SortExpr(Term t);
 template <typename Term> bool check_rule_SortId(Term t);
 template <typename Term> bool check_rule_SortConsType(Term t);
@@ -4998,7 +4998,7 @@ bool check_term_Id(Term t)
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
 }
-//--- end generated code
+//--- end generated code ---//
 
 } // namespace detail
 

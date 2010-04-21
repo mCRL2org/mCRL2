@@ -26,7 +26,7 @@ namespace mcrl2 {
 
 //Global precondition: the ATerm library has been initialised
 
-//--- start  generated code
+//--- start generated code ---//
 // ActAnd
 inline
 AFun initAFunActAnd(AFun& f)
@@ -3746,7 +3746,7 @@ ATermAppl gsMakeWhr(ATermAppl DataExpr_0, ATermList WhrDecl_1)
 {
   return ATmakeAppl2(gsAFunWhr(), (ATerm) DataExpr_0, (ATerm) WhrDecl_1);
 }
-//--- end generated code
+//--- end generated code ---//
 
 //Conversion between strings and quoted ATermAppl's
 //-------------------------------------------------

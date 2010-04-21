@@ -43,7 +43,7 @@ ATermList constructList()
   return ATmakeList0();
 }
 
-//--- start  generated code
+//--- start generated code ---//
 ATermAppl constructBooleanOr();
 ATermAppl constructStateOr();
 ATermAppl constructHide();
@@ -2440,7 +2440,7 @@ ATermAppl constructBooleanExpression()
 {
   return constructBooleanTrue();
 }
-//--- end generated code
+//--- end generated code ---//
 
 
 } // namespace detail
