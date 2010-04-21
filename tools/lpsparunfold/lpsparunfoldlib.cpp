@@ -39,7 +39,7 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec, bool add_distributio
                                                              i != m_data_specification.sorts().end();
                                                              ++i)
   {
-    if (i->is_basic_sort()) 
+    if (is_basic_sort(*i))
     {
       sort_names.insert( (basic_sort(*i)).name() );
     }
