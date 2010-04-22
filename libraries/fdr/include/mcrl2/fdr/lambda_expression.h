@@ -12,12 +12,62 @@
 #ifndef MCRL2_FDR_LAMBDA_EXPRESSION_H
 #define MCRL2_FDR_LAMBDA_EXPRESSION_H
 
-#include "mcrl2/fdr/lambda_expression_decl.h"
-#include "mcrl2/fdr/lambda_expression_impl.h"
+#include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/fdr/detail/term_functions.h"
+#include "mcrl2/fdr/detail/constructors.h"
+#include "mcrl2/fdr/detail/syntax_checks.h"
+
+#include "mcrl2/fdr/expression.h"
                                       
 namespace mcrl2 {
 
 namespace fdr {
+
+//--- start generated lambda expression class declarations ---//
+/// \brief class lambda_expression
+class lambda_expression: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    lambda_expression()
+      : atermpp::aterm_appl(fdr::detail::constructLambda())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    lambda_expression(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_rule_Lambda(m_term));
+    }
+};
+
+/// \brief list of lambda_expressions
+typedef atermpp::term_list<lambda_expression> lambda_expression_list;
+
+/// \brief vector of lambda_expressions
+typedef atermpp::vector<lambda_expression>    lambda_expression_vector;
+
+/// \brief A lambda expression
+class lambdaexpr: public lambda_expression
+{
+  public:
+    /// \brief Default constructor.
+    lambdaexpr();
+
+    /// \brief Constructor.
+    /// \param term A term
+    lambdaexpr(atermpp::aterm_appl term);
+
+    /// \brief Constructor.
+    lambdaexpr(const expression_list& exprs, const any& function);
+
+    expression_list exprs() const;
+
+    any function() const;
+};
+//--- end generated lambda expression class declarations ---//
 
 //--- start generated is-functions ---//
 

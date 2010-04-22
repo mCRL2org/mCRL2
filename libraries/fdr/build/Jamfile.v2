@@ -1,0 +1,15 @@
+project fdr
+       : source-location ..
+       ;
+
+mcrl2-library fdr
+       : source/term_functions.cpp 
+       : <library>/libraries//core
+         <use>/site-config//boost
+         <use>/libraries/utilities//exception
+         <include>../include
+       :
+       : <toolset>gcc,<link>static:<linkflags>-export-dynamic
+         <use>/libraries/utilities//exception
+         <include>../include
+       ;

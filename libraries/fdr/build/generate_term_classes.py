@@ -13,40 +13,40 @@ if __name__ == "__main__":
     generate_constructor_functions(rules, '../include/mcrl2/fdr/detail/constructors.h')
 
     # expression classes (classes that have a given expression class as super class)
-    make_class_declarations('../include/mcrl2/fdr/numeric_expression_decl.h', NUMERIC_EXPRESSION_CLASSES, 'numeric_expression', 'fdr', superclass_aterm = 'NumericExpression')
-    make_class_definitions('../include/mcrl2/fdr/numeric_expression_impl.h', NUMERIC_EXPRESSION_CLASSES, 'numeric_expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/numeric_expression.h', NUMERIC_EXPRESSION_CLASSES, 'numeric_expression', 'fdr', superclass_aterm = 'Number', label = 'numeric expression')
+    make_class_definitions('../source/term_functions.cpp', NUMERIC_EXPRESSION_CLASSES, 'numeric_expression', 'fdr', label = 'numeric expression')
     make_is_functions('../include/mcrl2/fdr/numeric_expression.h', NUMERIC_EXPRESSION_CLASSES, 'numeric_expression', 'fdr')
 
-    make_class_declarations('../include/mcrl2/fdr/boolean_expression_decl.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression', 'fdr', superclass_aterm = 'BooleanExpression')
-    make_class_definitions('../include/mcrl2/fdr/boolean_expression_impl.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/boolean_expression.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression', 'fdr', superclass_aterm = 'Bool', label = 'boolean expression')
+    make_class_definitions('../source/term_functions.cpp', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression', 'fdr', label = 'boolean expression')
     make_is_functions('../include/mcrl2/fdr/boolean_expression.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression', 'fdr')
 
-    make_class_declarations('../include/mcrl2/fdr/set_expression_decl.h', SET_EXPRESSION_CLASSES, 'set_expression', 'fdr', superclass_aterm = 'SetExpression')
-    make_class_definitions('../include/mcrl2/fdr/set_expression_impl.h', SET_EXPRESSION_CLASSES, 'set_expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/set_expression.h', SET_EXPRESSION_CLASSES, 'set_expression', 'fdr', superclass_aterm = 'Set', label = 'set expression')
+    make_class_definitions('../source/term_functions.cpp', SET_EXPRESSION_CLASSES, 'set_expression', 'fdr', label = 'set expression')
     make_is_functions('../include/mcrl2/fdr/set_expression.h', SET_EXPRESSION_CLASSES, 'set_expression', 'fdr')
 
-    make_class_declarations('../include/mcrl2/fdr/seq_expression_decl.h', SEQ_EXPRESSION_CLASSES, 'seq_expression', 'fdr', superclass_aterm = 'SeqExpression')
-    make_class_definitions('../include/mcrl2/fdr/seq_expression_impl.h', SEQ_EXPRESSION_CLASSES, 'seq_expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/seq_expression.h', SEQ_EXPRESSION_CLASSES, 'seq_expression', 'fdr', superclass_aterm = 'Seq', label = 'seq expression')
+    make_class_definitions('../source/term_functions.cpp', SEQ_EXPRESSION_CLASSES, 'seq_expression', 'fdr', label = 'seq expression')
     make_is_functions('../include/mcrl2/fdr/seq_expression.h', SEQ_EXPRESSION_CLASSES, 'seq_expression', 'fdr')
 
-    make_class_declarations('../include/mcrl2/fdr/tuple_expression_decl.h', TUPLE_EXPRESSION_CLASSES, 'tuple_expression', 'fdr', superclass_aterm = 'TupleExpression')
-    make_class_definitions('../include/mcrl2/fdr/tuple_expression_impl.h', TUPLE_EXPRESSION_CLASSES, 'tuple_expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/tuple_expression.h', TUPLE_EXPRESSION_CLASSES, 'tuple_expression', 'fdr', superclass_aterm = 'Tuple', label = 'tuple expression')
+    make_class_definitions('../source/term_functions.cpp', TUPLE_EXPRESSION_CLASSES, 'tuple_expression', 'fdr', label = 'tuple expression')
     make_is_functions('../include/mcrl2/fdr/tuple_expression.h', TUPLE_EXPRESSION_CLASSES, 'tuple_expression', 'fdr')
 
-    make_class_declarations('../include/mcrl2/fdr/dotted_expression_decl.h', DOTTED_EXPRESSION_CLASSES, 'dotted_expression', 'fdr', superclass_aterm = 'DottedExpression')
-    make_class_definitions('../include/mcrl2/fdr/dotted_expression_impl.h', DOTTED_EXPRESSION_CLASSES, 'dotted_expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/dotted_expression.h', DOTTED_EXPRESSION_CLASSES, 'dotted_expression', 'fdr', superclass_aterm = 'Dotted', label = 'dotted expression')
+    make_class_definitions('../source/term_functions.cpp', DOTTED_EXPRESSION_CLASSES, 'dotted_expression', 'fdr', label = 'dotted expression')
     make_is_functions('../include/mcrl2/fdr/dotted_expression.h', DOTTED_EXPRESSION_CLASSES, 'dotted_expression', 'fdr')
 
-    make_class_declarations('../include/mcrl2/fdr/lambda_expression_decl.h', LAMBDA_EXPRESSION_CLASSES, 'lambda_expression', 'fdr', superclass_aterm = 'LambdaExpression')
-    make_class_definitions('../include/mcrl2/fdr/lambda_expression_impl.h', LAMBDA_EXPRESSION_CLASSES, 'lambda_expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/lambda_expression.h', LAMBDA_EXPRESSION_CLASSES, 'lambda_expression', 'fdr', superclass_aterm = 'Lambda', label = 'lambda expression')
+    make_class_definitions('../source/term_functions.cpp', LAMBDA_EXPRESSION_CLASSES, 'lambda_expression', 'fdr', label = 'lambda expression')
     make_is_functions('../include/mcrl2/fdr/lambda_expression.h', LAMBDA_EXPRESSION_CLASSES, 'lambda_expression', 'fdr')
 
-    make_class_declarations('../include/mcrl2/fdr/common_expression_decl.h', COMMON_EXPRESSION_CLASSES, 'common_expression', 'fdr', superclass_aterm = 'CommonExpression')
-    make_class_definitions('../include/mcrl2/fdr/common_expression_impl.h', COMMON_EXPRESSION_CLASSES, 'common_expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/common_expression.h', COMMON_EXPRESSION_CLASSES, 'common_expression', 'fdr', superclass_aterm = 'Common', label = 'common expression')
+    make_class_definitions('../source/term_functions.cpp', COMMON_EXPRESSION_CLASSES, 'common_expression', 'fdr', label = 'common expression')
     make_is_functions('../include/mcrl2/fdr/common_expression.h', COMMON_EXPRESSION_CLASSES, 'common_expression', 'fdr')
 
-    make_class_declarations('../include/mcrl2/fdr/expression_decl.h', EXPRESSION_CLASSES, 'expression', 'fdr', superclass_aterm = 'Expression')
-    make_class_definitions('../include/mcrl2/fdr/expression_impl.h', EXPRESSION_CLASSES, 'expression', 'fdr')
+    make_class_declarations('../include/mcrl2/fdr/expression.h', EXPRESSION_CLASSES, 'expression', 'fdr', superclass_aterm = 'Expr', label = 'expression')
+    make_class_definitions('../source/term_functions.cpp', EXPRESSION_CLASSES, 'expression', 'fdr', label = 'expression')
     make_is_functions('../include/mcrl2/fdr/expression.h', EXPRESSION_CLASSES, 'expression', 'fdr')
 
     # other classes

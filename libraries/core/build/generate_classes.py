@@ -35,7 +35,7 @@ def make_classes(filename, class_text, superclass = None, namespace = 'core', ad
 #
 # If superclass is defined, it will be the base class of the generated
 # classes. Otherwise atermpp::aterm_appl will be taken as the base class.
-def make_class_declarations(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, superclass_aterm = None):
+def make_class_declarations(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, superclass_aterm = None, label = ''):
     classes = parse_classes(class_text, superclass, use_base_class_name = True)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
@@ -49,15 +49,16 @@ def make_class_declarations(filename, class_text, superclass = None, namespace =
         # TODO: this code should be generated in a cleaner way
         text = re.sub('check_term', 'check_rule', text)
         ctext = text + ctext
-
-    insert_text_in_file(filename, ctext, 'generated class declarations')
+    if label != '':
+        label = label + ' '
+    insert_text_in_file(filename, ctext, 'generated %sclass declarations' % label)
 
 # Generates class member function definitions from class_text and inserts them in the file
 # filename.
 #
 # If superclass is defined, it will be the base class of the generated
 # classes. Otherwise atermpp::aterm_appl will be taken as the base class.
-def make_class_definitions(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False):
+def make_class_definitions(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, label = ''):
     classes = parse_classes(class_text, superclass, use_base_class_name = True)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
@@ -65,7 +66,9 @@ def make_class_definitions(filename, class_text, superclass = None, namespace = 
 
     class_definitions = [c.class_member_function_definitions(namespace, True, add_constructor_overloads) for c in classes]
     ctext = '\n'.join(class_definitions)
-    insert_text_in_file(filename, ctext, 'generated class definitions')
+    if label != '':
+        label = label + ' '
+    insert_text_in_file(filename, ctext, 'generated %sclass definitions' % label)
 
 def make_is_functions(filename, class_text, classname, namespace = 'core'):
     TERM_TRAITS_TEXT = r'''
