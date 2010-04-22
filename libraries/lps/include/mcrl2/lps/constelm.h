@@ -235,7 +235,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
               }
               else
               {
-                LOG_PARAMETER_CHANGE(2, d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "NO CHANGE FOR PARAMETER ");
+                LOG_PARAMETER_CHANGE(3, d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "NO CHANGE FOR PARAMETER ");
               }
             }
           }
