@@ -21,6 +21,7 @@
 #include "boost/filesystem/path.hpp"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/test_utility.h"
@@ -400,6 +401,69 @@ void test_equal_multi_actions()
   test_multi_actions(a12b1, a34b2);
 }
 
+const std::string MACHINE_SPECIFICATION =
+  "%% file machine.mcrl2                                             \n"
+  "                                                                  \n"
+  "act                                                               \n"
+  "                                                                  \n"
+  "  ch_tea, ch_cof, insq, insd, take_tea, take_cof, want_change,    \n"
+  "  sel_tea, sel_cof, accq, accd, put_tea, put_cof, put_change,     \n"
+  "  ok_tea, ok_coffee, quarter, dollar, tea, coffee, change ;       \n"
+  "                                                                  \n"
+  "proc                                                              \n"
+  "                                                                  \n"
+  "  User = ch_tea.UserTea + ch_cof.UserCof ;                        \n"
+  "  UserTea =                                                       \n"
+  "    insq.insq.take_tea.User  +                                    \n"
+  "    insd.take_tea.( take_tea + want_change ).User ;               \n"
+  "  UserCof = ( insq.insq.insq.insq + insd ).take_cof.User ;        \n"
+  "                                                                  \n"
+  "  Mach = sel_tea.MachTea + sel_cof.MachCof ;                      \n"
+  "  MachTea =                                                       \n"
+  "    accq.accq.put_tea.Mach +                                      \n"
+  "    accd.put_tea.( put_tea + put_change ).Mach ;                  \n"
+  "  MachCof =                                                       \n"
+  "    ( accq.accq.accq.accq + accd ).put_cof.Mach ;                 \n"
+  "                                                                  \n"
+  "init                                                              \n"
+  "                                                                  \n"
+  "  allow(                                                          \n"
+  "    { ok_tea, ok_coffee, quarter, dollar, tea, coffee, change } , \n"
+  "    comm(                                                         \n"
+  "       { ch_tea|sel_tea -> ok_tea, ch_cof|sel_cof -> ok_coffee,   \n"
+  "         insq|accq -> quarter, insd|accd -> dollar,               \n"
+  "         take_tea|put_tea -> tea, take_cof|put_cof -> coffee,     \n"
+  "         want_change|put_change -> change } ,                     \n"
+  "       User || Mach                                               \n"
+  "    ) ) ;                                                         \n"
+  ;
+
+const std::string MACHINE_FORMULA1 =
+  "%% after choice for tea and two quarter always tea (true) \n"
+  " [ true* . ok_tea . quarter . quarter . !tea ] false      \n"
+  ;
+
+const std::string MACHINE_FORMULA2 =
+  "%% always eventually action ready (true)     \n"
+  " [ true* . dollar . !(tea||coffee) ] false   \n"
+  ;
+
+const std::string MACHINE_FORMULA3 =
+  "%% after a quarter no change directly (true) \n"
+  " [ true* . quarter . change ] false          \n"
+  ;
+
+void test_lps2pbes(std::string lps_spec, std::string mcf_formula)
+{
+  using namespace pbes_system;
+
+  lps::specification spec = lps::linearise(lps_spec);
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(mcf_formula, spec);
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed);
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -411,6 +475,12 @@ int test_main(int argc, char* argv[])
   test_formulas();
   test_equal_multi_actions();
   //test_directory();
+
+#ifdef MCRL2_EXTENDED_TESTS
+  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA1);
+  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA2);
+  test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA3);
+#endif
 
   return 0;
 }
