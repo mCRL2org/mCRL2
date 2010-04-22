@@ -59,7 +59,7 @@ namespace mcrl2 {
       {
         if (is_basic_sort(e))
         {
-          return static_cast< basic_sort >(e) == nat();
+          return basic_sort(e) == nat();
         }
         return false;
       }
@@ -88,7 +88,7 @@ namespace mcrl2 {
       {
         if (is_basic_sort(e))
         {
-          return static_cast< basic_sort >(e) == natpair();
+          return basic_sort(e) == natpair();
         }
         return false;
       }
@@ -175,7 +175,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_cnat_function_symbol(static_cast< application >(e).head());
+          return is_cnat_function_symbol(application(e).head());
         }
         return false;
       }
@@ -231,7 +231,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_cpair_function_symbol(static_cast< application >(e).head());
+          return is_cpair_function_symbol(application(e).head());
         }
         return false;
       }
@@ -298,7 +298,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_pos2nat_function_symbol(static_cast< application >(e).head());
+          return is_pos2nat_function_symbol(application(e).head());
         }
         return false;
       }
@@ -353,7 +353,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_nat2pos_function_symbol(static_cast< application >(e).head());
+          return is_nat2pos_function_symbol(application(e).head());
         }
         return false;
       }
@@ -433,7 +433,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_maximum_function_symbol(static_cast< application >(e).head());
+          return is_maximum_function_symbol(application(e).head());
         }
         return false;
       }
@@ -505,7 +505,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_minimum_function_symbol(static_cast< application >(e).head());
+          return is_minimum_function_symbol(application(e).head());
         }
         return false;
       }
@@ -575,7 +575,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_abs_function_symbol(static_cast< application >(e).head());
+          return is_abs_function_symbol(application(e).head());
         }
         return false;
       }
@@ -633,7 +633,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_succ_function_symbol(static_cast< application >(e).head());
+          return is_succ_function_symbol(application(e).head());
         }
         return false;
       }
@@ -688,7 +688,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_pred_function_symbol(static_cast< application >(e).head());
+          return is_pred_function_symbol(application(e).head());
         }
         return false;
       }
@@ -744,7 +744,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_dub_function_symbol(static_cast< application >(e).head());
+          return is_dub_function_symbol(application(e).head());
         }
         return false;
       }
@@ -824,7 +824,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_plus_function_symbol(static_cast< application >(e).head());
+          return is_plus_function_symbol(application(e).head());
         }
         return false;
       }
@@ -884,7 +884,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_gtesubt_function_symbol(static_cast< application >(e).head());
+          return is_gtesubt_function_symbol(application(e).head());
         }
         return false;
       }
@@ -941,7 +941,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_gtesubtb_function_symbol(static_cast< application >(e).head());
+          return is_gtesubtb_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1013,7 +1013,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_times_function_symbol(static_cast< application >(e).head());
+          return is_times_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1073,7 +1073,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_div_function_symbol(static_cast< application >(e).head());
+          return is_div_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1133,7 +1133,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_mod_function_symbol(static_cast< application >(e).head());
+          return is_mod_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1205,7 +1205,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_exp_function_symbol(static_cast< application >(e).head());
+          return is_exp_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1260,7 +1260,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_even_function_symbol(static_cast< application >(e).head());
+          return is_even_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1316,7 +1316,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_monus_function_symbol(static_cast< application >(e).head());
+          return is_monus_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1372,7 +1372,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_swap_zero_function_symbol(static_cast< application >(e).head());
+          return is_swap_zero_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1430,7 +1430,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_swap_zero_add_function_symbol(static_cast< application >(e).head());
+          return is_swap_zero_add_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1488,7 +1488,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_swap_zero_min_function_symbol(static_cast< application >(e).head());
+          return is_swap_zero_min_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1546,7 +1546,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_swap_zero_monus_function_symbol(static_cast< application >(e).head());
+          return is_swap_zero_monus_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1603,7 +1603,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_swap_zero_lte_function_symbol(static_cast< application >(e).head());
+          return is_swap_zero_lte_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1658,7 +1658,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_first_function_symbol(static_cast< application >(e).head());
+          return is_first_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1713,7 +1713,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_last_function_symbol(static_cast< application >(e).head());
+          return is_last_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1769,7 +1769,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_divmod_function_symbol(static_cast< application >(e).head());
+          return is_divmod_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1826,7 +1826,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_gdivmod_function_symbol(static_cast< application >(e).head());
+          return is_gdivmod_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1883,7 +1883,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_ggdivmod_function_symbol(static_cast< application >(e).head());
+          return is_ggdivmod_function_symbol(application(e).head());
         }
         return false;
       }

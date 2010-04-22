@@ -58,7 +58,7 @@ namespace mcrl2 {
       {
         if (is_basic_sort(e))
         {
-          return static_cast< basic_sort >(e) == pos();
+          return basic_sort(e) == pos();
         }
         return false;
       }
@@ -146,7 +146,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_cdub_function_symbol(static_cast< application >(e).head());
+          return is_cdub_function_symbol(application(e).head());
         }
         return false;
       }
@@ -213,7 +213,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_maximum_function_symbol(static_cast< application >(e).head());
+          return is_maximum_function_symbol(application(e).head());
         }
         return false;
       }
@@ -269,7 +269,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_minimum_function_symbol(static_cast< application >(e).head());
+          return is_minimum_function_symbol(application(e).head());
         }
         return false;
       }
@@ -324,7 +324,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_abs_function_symbol(static_cast< application >(e).head());
+          return is_abs_function_symbol(application(e).head());
         }
         return false;
       }
@@ -379,7 +379,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_succ_function_symbol(static_cast< application >(e).head());
+          return is_succ_function_symbol(application(e).head());
         }
         return false;
       }
@@ -435,7 +435,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_plus_function_symbol(static_cast< application >(e).head());
+          return is_plus_function_symbol(application(e).head());
         }
         return false;
       }
@@ -492,7 +492,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_add_with_carry_function_symbol(static_cast< application >(e).head());
+          return is_add_with_carry_function_symbol(application(e).head());
         }
         return false;
       }
@@ -548,7 +548,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_times_function_symbol(static_cast< application >(e).head());
+          return is_times_function_symbol(application(e).head());
         }
         return false;
       }
@@ -606,7 +606,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_multir_function_symbol(static_cast< application >(e).head());
+          return is_multir_function_symbol(application(e).head());
         }
         return false;
       }

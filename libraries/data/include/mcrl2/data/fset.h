@@ -55,7 +55,7 @@ namespace mcrl2 {
       {
         if (is_container_sort(e))
         {
-          return static_cast< container_sort >(e).container_name() == fset_container();
+          return container_sort(e).container_name() == fset_container();
         }
         return false;
       }
@@ -162,7 +162,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fset_cons_function_symbol(static_cast< application >(e).head());
+          return is_fset_cons_function_symbol(application(e).head());
         }
         return false;
       }
@@ -232,7 +232,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetinsert_function_symbol(static_cast< application >(e).head());
+          return is_fsetinsert_function_symbol(application(e).head());
         }
         return false;
       }
@@ -291,7 +291,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetcinsert_function_symbol(static_cast< application >(e).head());
+          return is_fsetcinsert_function_symbol(application(e).head());
         }
         return false;
       }
@@ -349,7 +349,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetin_function_symbol(static_cast< application >(e).head());
+          return is_fsetin_function_symbol(application(e).head());
         }
         return false;
       }
@@ -408,7 +408,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetlte_function_symbol(static_cast< application >(e).head());
+          return is_fsetlte_function_symbol(application(e).head());
         }
         return false;
       }
@@ -468,7 +468,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetunion_function_symbol(static_cast< application >(e).head());
+          return is_fsetunion_function_symbol(application(e).head());
         }
         return false;
       }
@@ -528,7 +528,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetintersection_function_symbol(static_cast< application >(e).head());
+          return is_fsetintersection_function_symbol(application(e).head());
         }
         return false;
       }

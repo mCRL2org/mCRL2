@@ -57,7 +57,7 @@ namespace mcrl2 {
       {
         if (is_basic_sort(e))
         {
-          return static_cast< basic_sort >(e) == bool_();
+          return basic_sort(e) == bool_();
         }
         return false;
       }
@@ -187,7 +187,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_not_function_symbol(static_cast< application >(e).head());
+          return is_not_function_symbol(application(e).head());
         }
         return false;
       }
@@ -243,7 +243,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_and_function_symbol(static_cast< application >(e).head());
+          return is_and_function_symbol(application(e).head());
         }
         return false;
       }
@@ -299,7 +299,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_or_function_symbol(static_cast< application >(e).head());
+          return is_or_function_symbol(application(e).head());
         }
         return false;
       }
@@ -355,7 +355,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_implies_function_symbol(static_cast< application >(e).head());
+          return is_implies_function_symbol(application(e).head());
         }
         return false;
       }

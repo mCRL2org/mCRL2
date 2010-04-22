@@ -436,7 +436,7 @@ class function_declaration_list():
         code += "      {\n"
         code += "        if (is_application(e))\n"
         code += "        {\n"
-        code += "          return is_%s_function_symbol(static_cast< application >(e).head());\n" % (name)
+        code += "          return is_%s_function_symbol(application(e).head());\n" % (name)
         code += "        }\n"
         code += "        return false;\n"
         code += "      }\n"
@@ -1471,7 +1471,7 @@ class sort_declaration():
     code += "      {\n"
     code += "        if (is_basic_sort(e))\n"
     code += "        {\n"
-    code += "          return static_cast< basic_sort >(e) == %s();\n" % (label.to_string())
+    code += "          return basic_sort(e) == %s();\n" % (label.to_string())
     code += "        }\n"
     code += "        return false;\n"
     code += "      }\n"
@@ -1500,7 +1500,7 @@ class sort_declaration():
     code += "      {\n"
     code += "        if (is_container_sort(e))\n"
     code += "        {\n"
-    code += "          return static_cast< container_sort >(e).container_name() == %s_container();\n" % (label.to_string())
+    code += "          return container_sort(e).container_name() == %s_container();\n" % (label.to_string())
     code += "        }\n"
     code += "        return false;\n"
     code += "      }\n"

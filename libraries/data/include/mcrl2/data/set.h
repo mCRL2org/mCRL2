@@ -57,7 +57,7 @@ namespace mcrl2 {
       {
         if (is_container_sort(e))
         {
-          return static_cast< container_sort >(e).container_name() == set_container();
+          return container_sort(e).container_name() == set_container();
         }
         return false;
       }
@@ -125,7 +125,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setconstructor_function_symbol(static_cast< application >(e).head());
+          return is_setconstructor_function_symbol(application(e).head());
         }
         return false;
       }
@@ -215,7 +215,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setfset_function_symbol(static_cast< application >(e).head());
+          return is_setfset_function_symbol(application(e).head());
         }
         return false;
       }
@@ -272,7 +272,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setcomprehension_function_symbol(static_cast< application >(e).head());
+          return is_setcomprehension_function_symbol(application(e).head());
         }
         return false;
       }
@@ -330,7 +330,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setin_function_symbol(static_cast< application >(e).head());
+          return is_setin_function_symbol(application(e).head());
         }
         return false;
       }
@@ -387,7 +387,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setcomplement_function_symbol(static_cast< application >(e).head());
+          return is_setcomplement_function_symbol(application(e).head());
         }
         return false;
       }
@@ -445,7 +445,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setunion_function_symbol(static_cast< application >(e).head());
+          return is_setunion_function_symbol(application(e).head());
         }
         return false;
       }
@@ -503,7 +503,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setintersection_function_symbol(static_cast< application >(e).head());
+          return is_setintersection_function_symbol(application(e).head());
         }
         return false;
       }
@@ -561,7 +561,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setdifference_function_symbol(static_cast< application >(e).head());
+          return is_setdifference_function_symbol(application(e).head());
         }
         return false;
       }
@@ -618,7 +618,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_false_function_function_symbol(static_cast< application >(e).head());
+          return is_false_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -675,7 +675,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_true_function_function_symbol(static_cast< application >(e).head());
+          return is_true_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -732,7 +732,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_not_function_function_symbol(static_cast< application >(e).head());
+          return is_not_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -790,7 +790,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_and_function_function_symbol(static_cast< application >(e).head());
+          return is_and_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -848,7 +848,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_or_function_function_symbol(static_cast< application >(e).head());
+          return is_or_function_function_symbol(application(e).head());
         }
         return false;
       }
