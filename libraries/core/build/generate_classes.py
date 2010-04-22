@@ -45,7 +45,10 @@ def make_class_declarations(filename, class_text, superclass = None, namespace =
     ctext = '\n'.join(class_declarations)
 
     if superclass != None and superclass_aterm != None:
-        ctext = Class(superclass_aterm, '%s()' % superclass, 'class %s' % superclass, superclass = None, use_base_class_name = False).class_inline_definition(namespace, True, add_constructor_overloads) + ctext
+        text = Class(superclass_aterm, '%s()' % superclass, 'class %s' % superclass, superclass = None, use_base_class_name = False).class_inline_definition(namespace, True, add_constructor_overloads)
+        # TODO: this code should be generated in a cleaner way
+        text = re.sub('check_term', 'check_rule', text)
+        ctext = text + ctext
 
     insert_text_in_file(filename, ctext, 'generated class declarations')
 
