@@ -13,6 +13,8 @@
 #define MCRL2_FDR_COMPREHENSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/expression.h"
+#include "mcrl2/fdr/boolean_expression.h"
 
 namespace mcrl2 {
 
@@ -85,7 +87,7 @@ class ecomprehension: public atermpp::aterm_appl
   public:
     /// \brief Default constructor.
     ecomprehension()
-      : atermpp::aterm_appl(fdr::detail::constructEComprehension())
+      : atermpp::aterm_appl(fdr::detail::constructComprehension())
     {}
 
     /// \brief Constructor.
@@ -93,12 +95,12 @@ class ecomprehension: public atermpp::aterm_appl
     ecomprehension(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(fdr::detail::check_term_EComprehension(m_term));
+      assert(fdr::detail::check_term_Comprehension(m_term));
     }
 
     /// \brief Constructor.
     ecomprehension(const expression& left, const expression& right)
-      : atermpp::aterm_appl(fdr::detail::gsMakeEComprehension(left, right))
+      : atermpp::aterm_appl(fdr::detail::gsMakeComprehension(left, right))
     {}
 
     expression left() const

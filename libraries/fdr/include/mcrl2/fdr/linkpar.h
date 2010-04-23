@@ -13,6 +13,7 @@
 #define MCRL2_FDR_LINKPAR_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/comprehension.h"
 #include "mcrl2/fdr/link.h"
 
 namespace mcrl2 {

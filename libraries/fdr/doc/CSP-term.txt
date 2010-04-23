@@ -27,7 +27,8 @@
 
 // Definition
 <Defn>      ::= Assign(<Any>, <Any>)
-              | <Channel>
+              | Channel(<Name>+, <Type>)
+              | SimpleChannel(<Name>+)
               | NameType(<Name>, <Type>)
               | DataType(<Name>, <VarType>+)
               | SubType(<Name>, <VarType>+)
@@ -36,10 +37,6 @@
               | Assert(<Check>)
               | Print(<Expr>)
               | Include(<FileName>)
-
-// Channel
-<Channel>   ::= Channel(<Name>+, <Type>)
-              | SimpleChannel(<Name>+)
 
 // Types
 <VarType>   ::= SimpleBranch(<Name>)

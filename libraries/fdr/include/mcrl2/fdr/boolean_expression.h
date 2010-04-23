@@ -16,11 +16,12 @@
 #include "mcrl2/fdr/common_expression.h"
 #include "mcrl2/fdr/seq_expression.h"
 #include "mcrl2/fdr/set_expression.h"
-#include "mcrl2/fdr/expression.h"
 
 namespace mcrl2 {
 
 namespace fdr {
+
+class expression;
 
 //--- start generated boolean expression class declarations ---//
 /// \brief class boolean_expression

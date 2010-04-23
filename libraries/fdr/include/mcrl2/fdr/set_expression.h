@@ -13,12 +13,13 @@
 #define MCRL2_FDR_SET_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
-#include "mcrl2/fdr/expression.h"
-#include "mcrl2/fdr/targ.h"
                                       
 namespace mcrl2 {
 
 namespace fdr {
+
+class expression;
+class targ;
 
 //--- start generated set expression class declarations ---//
 /// \brief class set_expression

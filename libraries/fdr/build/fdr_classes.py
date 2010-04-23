@@ -80,7 +80,7 @@ COMMON_EXPRESSION_CLASSES = r'''
 Conditional		| conditional(const boolean_expression& guard, const any& thenpart, const any& elsepart)	| A conditional
 Name			| identifier(const name& id)													| A name
 LambdaAppl		| lambdaappl(const lambda_expression& lambda, const expression_list& exprs)	| A lambda application
-LocalDef		| localdef(const definition_list& defs, const any& within)						| A local definition
+LocalDef		| localdef(const definition_expression_list& defs, const any& within)						| A local definition
 Bracketed		| bracketed(const any& operand)												| A bracketed process or expression
 Pattern         | pattern(const any& left, const any& right)                                | A combination of two patterns
 '''
@@ -95,12 +95,12 @@ Dotted			| dotted(const dotted_expression& operand)									| A dotted expressio
 Lambda			| lambda(const lambda_expression& operand)									| A lambda expression
 '''
 
-ANY_CLASSES = r'''
+ANY_EXPRESSION_CLASSES = r'''
 Expr			| expr(const expression& operand)											| An expression
 Proc			| proc(const process& operand)												| A process
 '''
 
-DEFINITION_CLASSES = r'''
+DEFINITION_EXPRESSION_CLASSES = r'''
 Assign			| assign(const any& left, const any& right)									| An assignment
 Channel			| channel(const name_list& names, const type& type_name)							| A channel
 SimpleChannel	| channel(const name_list& names)											| A simple channel
@@ -114,12 +114,12 @@ Print			| print(const expression& expr)												| A print
 Include			| include(const filename& file)											| An include
 '''
 
-VARTYPE_CLASSES = r'''
+VARTYPE_EXPRESSION_CLASSES = r'''
 SimpleBranch	| simplebranch(const name& id)											| A simple branch
 Branch			| branch(const name& id, const type& type_name)								| A branch
 '''
 
-TYPE_CLASSES = r'''
+TYPE_EXPRESSION_CLASSES = r'''
 TypeProduct		| typeproduct(const type& left, const type& right)							| A type product
 TypeTuple		| typetuple(const type_list& types)											| A type tuple
 TypeSet			| typeset(const set_expression& set)										| A type set
@@ -127,7 +127,7 @@ SympleTypeName	| simpletypename(const name& id)											| A simple type name
 TypeName		| typename(const name& id, const type& type_name)								| A type name
 '''
 
-CHECK_CLASSES = r'''
+CHECK_EXPRESSION_CLASSES = r'''
 BCheck			| bcheck(const boolean_expression& expr)									| A boolean check
 RCheck			| rcheck(const process& left, const process& right, const refined& refinement)	| A refinement check
 TCheck			| tcheck(const process& proc, const test& operand)							| A test
@@ -138,28 +138,28 @@ REFINED_CLASSES = r'''
 Model			| model(const model& m)													| A model
 '''
 
-MODEL_CLASSES = r'''
+MODEL_EXPRESSION_CLASSES = r'''
 Nil				| nil()																		| An empty
 T				| t()																		| A traces
 '''
 
-FAILUREMODEL_CLASSES = r'''
+FAILUREMODEL_EXPRESSION_CLASSES = r'''
 F				| f()																		| A failures
 FD				| fd()																		| A faulures/divergences
 '''
 
-TEST_CLASSES = r'''
+TEST_EXPRESSION_CLASSES = r'''
 divergence_free	| divergence_free()															| A divergence free
-Test			| test(const testtype& tt, const failuremodel& fm)			| A complex test
+Test			| test(const testtype_expression& tt, const failuremodel& fm)			| A complex test
 '''
 
-TESTTYPE_CLASSES = r'''
+TESTTYPE_EXPRESSION_CLASSES = r'''
 deterministic	| deterministic()															| A deterministic
 deadlock_free	| deadlock_free()															| A deadlock free
 livelock_free	| livelock_free()															| A livelock free
 '''
 
-TRNAME_CLASSES = r'''
+TRNAME_EXPRESSION_CLASSES = r'''
 normal			| normal()																	| A normal
 normalise		| normalise()																| A normal
 normalize		| normalize()																| A normal
@@ -175,7 +175,7 @@ FileName		| filename(const name_list& names)											| A filename
 '''
 
 FDRSPEC_CLASSES = r'''
-FDRSpec			| fdrspec(const definition_list& defs)										| An FDR specification
+FDRSpec			| fdrspec(const definition_expression_list& defs)										| An FDR specification
 '''
 
 TARG_CLASSES = r'''
@@ -189,7 +189,7 @@ Compr           | compr(const expression& expr, const comprehension_list& comprs
 COMPREHENSION_CLASSES = r'''
 Nil             | nil()                                                                             | An empty
 BComprehension	| bcomprehension(const boolean_expression& operand)									| A boolean
-EComprehension	| ecomprehension(const expression& left, const expression& right)					| A comprehension
+Comprehension	| ecomprehension(const expression& left, const expression& right)					| A comprehension
 '''
 
 GEN_CLASSES = r'''

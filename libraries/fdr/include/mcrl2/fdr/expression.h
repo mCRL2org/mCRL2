@@ -13,17 +13,18 @@
 #define MCRL2_FDR_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
-#include "mcrl2/fdr/boolean_expression.h"
-#include "mcrl2/fdr/dotted_expression.h"
-#include "mcrl2/fdr/lambda_expression.h"
-#include "mcrl2/fdr/numeric_expression.h"
-#include "mcrl2/fdr/seq_expression.h"
-#include "mcrl2/fdr/set_expression.h"
-#include "mcrl2/fdr/tuple_expression.h"
 
 namespace mcrl2 {
 
 namespace fdr {
+
+class boolean_expression ;
+class dotted_expression  ;
+class lambda_expression  ;
+class numeric_expression ;
+class seq_expression     ;
+class set_expression     ;
+class tuple_expression   ;
 
 //--- start generated expression class declarations ---//
 /// \brief class expression

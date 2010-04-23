@@ -13,11 +13,12 @@
 #define MCRL2_FDR_DOTTED_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
-#include "mcrl2/fdr/expression.h"
                                       
 namespace mcrl2 {
 
 namespace fdr {
+
+class expression;
 
 //--- start generated dotted expression class declarations ---//
 /// \brief class dotted_expression

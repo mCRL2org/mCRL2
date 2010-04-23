@@ -13,12 +13,15 @@
 #define MCRL2_FDR_COMMON_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
-#include "mcrl2/fdr/any.h"
-#include "mcrl2/fdr/boolean_expression.h"
+#include "mcrl2/fdr/definition.h"
+#include "mcrl2/fdr/name.h"
                                       
 namespace mcrl2 {
 
 namespace fdr {
+
+class any;
+class boolean_expression;
 
 //--- start generated common expression class declarations ---//
 /// \brief class common_expression

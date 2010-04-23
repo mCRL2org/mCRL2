@@ -13,11 +13,14 @@
 #define MCRL2_FDR_LAMBDA_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
-#include "mcrl2/fdr/expression.h"
+#include "mcrl2/fdr/any.h"
                                       
 namespace mcrl2 {
 
 namespace fdr {
+
+class expression;
+typedef atermpp::term_list<expression> expression_list;
 
 //--- start generated lambda expression class declarations ---//
 /// \brief class lambda_expression

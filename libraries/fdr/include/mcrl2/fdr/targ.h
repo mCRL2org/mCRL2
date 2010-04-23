@@ -13,12 +13,13 @@
 #define MCRL2_FDR_TARG_H
 
 #include "mcrl2/fdr/term_include_files.h"
-#include "mcrl2/fdr/expression.h"
-#include "mcrl2/fdr/numeric_expression.h"
 
 namespace mcrl2 {
 
 namespace fdr {
+
+class expression;
+class numeric_expression;
 
 //--- start generated classes ---//
 /// \brief class targ
