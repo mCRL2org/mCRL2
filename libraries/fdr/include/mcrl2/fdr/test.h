@@ -12,13 +12,7 @@
 #ifndef MCRL2_FDR_TEST_H
 #define MCRL2_FDR_TEST_H
 
-#include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/vector.h"
-#include "mcrl2/fdr/detail/term_functions.h"
-#include "mcrl2/fdr/detail/constructors.h"
-#include "mcrl2/fdr/detail/syntax_checks.h"
-
+#include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/failuremodel.h"
 #include "mcrl2/fdr/testtype.h"
 

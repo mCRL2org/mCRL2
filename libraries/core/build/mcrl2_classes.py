@@ -306,7 +306,7 @@ class MemberFunction:
         self.classname = classname
         self.return_type = return_type
         self.name = name
-        self.arg  = arg 
+        self.arg  = arg
 
     def expand_text(self, text):
         text = re.sub('<CLASSNAME>'          , self.classname          , text)
@@ -326,12 +326,15 @@ class MemberFunction:
         text = '''    <RETURN_TYPE> <NAME>() const;'''
         return self.expand_text(text)
 
-    def definition(self):
-        text = '''    inline
-    <RETURN_TYPE> <CLASSNAME>::<NAME>() const
+    def definition(self, inline = False):
+        text = '''    <INLINE><RETURN_TYPE> <CLASSNAME>::<NAME>() const
     {
       return atermpp::<ARG>(*this);
     }'''
+        if inline:
+            text = re.sub('<INLINE>',  'inline\n    ', text)
+        else:
+            text = re.sub('<INLINE>',  '', text)
         return self.expand_text(text)
 
 # Represents a class constructor
@@ -367,12 +370,15 @@ class Constructor:
     <CLASSNAME>(<ARGUMENTS>);'''
         return self.expand_text(text)
 
-    def definition(self):
+    def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
-    inline
-    <CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
+    <INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
     {}'''
+        if inline:
+            text = re.sub('<INLINE>',  'inline\n    ', text)
+        else:
+            text = re.sub('<INLINE>',  '', text)
         return self.expand_text(text)
 
 # Represents a default class constructor
@@ -398,12 +404,15 @@ class DefaultConstructor(Constructor):
     <CLASSNAME>();'''
         return self.expand_text(text)
 
-    def definition(self):
+    def definition(self, inline = False):
         text = r'''    /// \\\\brief Default constructor.
-    inline
-    <CLASSNAME>::<CLASSNAME>()
+    <INLINE><CLASSNAME>::<CLASSNAME>()
       : <SUPERCLASS>(<NAMESPACE>::detail::construct<ATERM>())
     {}'''
+        if inline:
+            text = re.sub('<INLINE>',  'inline\n    ', text)
+        else:
+            text = re.sub('<INLINE>',  '', text)
         return self.expand_text(text)
 
 # Represents an overloaded class constructor
@@ -429,16 +438,15 @@ class OverloadedConstructor(Constructor):
     <TEMPLATE_PARAMETERS><CLASSNAME>(<ARGUMENTS>);'''
         return self.expand_text(text)
 
-    def definition(self):
+    def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
     <TEMPLATE_PARAMETERS><INLINE><CLASSNAME>::<CLASSNAME>(<ARGUMENTS>)
       : <SUPERCLASS>(<NAMESPACE>::detail::gsMake<ATERM>(<PARAMETERS>))
     {}'''
-        if len(self.template_parameters) > 0:
-            inline = ''
+        if inline and len(self.template_parameters) == 0:
+            text = re.sub('<INLINE>', 'inline', text)
         else:
-            inline = 'inline'
-        text = re.sub('<INLINE>', inline, text)
+            text = re.sub('<INLINE>', '', text)
         return self.expand_text(text)
 
 # Represents a class constructor taking an ATerm as argument
@@ -468,15 +476,18 @@ class ATermConstructor(Constructor):
     <CLASSNAME>(atermpp::aterm_appl term);'''
         return self.expand_text(text)
 
-    def definition(self):
+    def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    inline
-    <CLASSNAME>::<CLASSNAME>(atermpp::aterm_appl term)
+    INLINE<CLASSNAME>::<CLASSNAME>(atermpp::aterm_appl term)
       : <SUPERCLASS>(term)
     {
       assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
     }'''
+        if inline:
+            text = re.sub('<INLINE>',  'inline\n    ', text)
+        else:
+            text = re.sub('<INLINE>',  '', text)
         return self.expand_text(text)
 
 # Represents a class definition

@@ -12,12 +12,7 @@
 #ifndef MCRL2_FDR_NUMERIC_EXPRESSION_H
 #define MCRL2_FDR_NUMERIC_EXPRESSION_H
 
-#include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/fdr/detail/term_functions.h"
-#include "mcrl2/fdr/detail/constructors.h"
-#include "mcrl2/fdr/detail/syntax_checks.h"
-
+#include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/set_expression.h"
                                       
 namespace mcrl2 {
