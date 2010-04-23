@@ -13,12 +13,14 @@
 #define MCRL2_FDR_TARG_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/expression.h"
 #include "mcrl2/fdr/numeric_expression.h"
 
 namespace mcrl2 {
 
 namespace fdr {
 
+//--- start generated classes ---//
 /// \brief class targ
 class targ: public atermpp::aterm_appl
 {
@@ -33,7 +35,7 @@ class targ: public atermpp::aterm_appl
     targ(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(fdr::detail::check_term_Targ(m_term));
+      assert(fdr::detail::check_rule_Targ(m_term));
     }
 };
 
@@ -43,7 +45,6 @@ typedef atermpp::term_list<targ> targ_list;
 /// \brief vector of targs
 typedef atermpp::vector<targ>    targ_vector;
 
-//--- start generated classes ---//
 /// \brief An empty
 class nil: public targ
 {
@@ -59,34 +60,6 @@ class nil: public targ
       : targ(term)
     {
       assert(fdr::detail::check_term_Nil(m_term));
-    }
-};
-
-/// \brief An expression list
-class exprs: public targ
-{
-  public:
-    /// \brief Default constructor.
-    exprs()
-      : targ(fdr::detail::constructExprs())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    exprs(atermpp::aterm_appl term)
-      : targ(term)
-    {
-      assert(fdr::detail::check_term_Exprs(m_term));
-    }
-
-    /// \brief Constructor.
-    exprs(const expression_list& exprs)
-      : targ(fdr::detail::gsMakeExprs(exprs))
-    {}
-
-    expression_list exprs() const
-    {
-      return atermpp::list_arg1(*this);
     }
 };
 

@@ -144,8 +144,6 @@
               | Union(<Set>)
               | Inter(<Set>)
               | set(<Seq>)
-              | Set(<Set>)
-              | Seq(<Seq>)
               | extensions(<Expr>)
               | productions(<Expr>)
 

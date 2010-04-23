@@ -13,6 +13,7 @@
 #define MCRL2_FDR_SET_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/expression.h"
 #include "mcrl2/fdr/targ.h"
                                       
 namespace mcrl2 {
@@ -62,18 +63,18 @@ class chanset: public set_expression
 };
 
 /// \brief A union
-class union: public set_expression
+class union_: public set_expression
 {
   public:
     /// \brief Default constructor.
-    union();
+    union_();
 
     /// \brief Constructor.
     /// \param term A term
-    union(atermpp::aterm_appl term);
+    union_(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    union(const set_expression& left, const set_expression& right);
+    union_(const set_expression& left, const set_expression& right);
 
     set_expression left() const;
 
@@ -119,35 +120,35 @@ class diff: public set_expression
 };
 
 /// \brief A set union
-class union: public set_expression
+class Union: public set_expression
 {
   public:
     /// \brief Default constructor.
-    union();
+    Union();
 
     /// \brief Constructor.
     /// \param term A term
-    union(atermpp::aterm_appl term);
+    Union(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    union(const set_expression& set);
+    Union(const set_expression& set);
 
     set_expression set() const;
 };
 
 /// \brief A set intersection
-class inter: public set_expression
+class Inter: public set_expression
 {
   public:
     /// \brief Default constructor.
-    inter();
+    Inter();
 
     /// \brief Constructor.
     /// \param term A term
-    inter(atermpp::aterm_appl term);
+    Inter(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    inter(const set_expression& set);
+    Inter(const set_expression& set);
 
     set_expression set() const;
 };
@@ -165,40 +166,6 @@ class set: public set_expression
 
     /// \brief Constructor.
     set(const seq_expression& seq);
-
-    seq_expression seq() const;
-};
-
-/// \brief The set of sets of a set
-class set: public set_expression
-{
-  public:
-    /// \brief Default constructor.
-    set();
-
-    /// \brief Constructor.
-    /// \param term A term
-    set(atermpp::aterm_appl term);
-
-    /// \brief Constructor.
-    set(const set_expression& set);
-
-    set_expression set() const;
-};
-
-/// \brief The set of sequences of a sequence
-class seq: public set_expression
-{
-  public:
-    /// \brief Default constructor.
-    seq();
-
-    /// \brief Constructor.
-    /// \param term A term
-    seq(atermpp::aterm_appl term);
-
-    /// \brief Constructor.
-    seq(const seq_expression& seq);
 
     seq_expression seq() const;
 };
@@ -276,20 +243,20 @@ class productions: public set_expression
       return fdr::detail::gsIsdiff(t);
     }
 
-    /// \brief Test for a union expression
+    /// \brief Test for a Union expression
     /// \param t A term
-    /// \return True if it is a union expression
+    /// \return True if it is a Union expression
     inline
-    bool is_union(const set_expression& t)
+    bool is_Union(const set_expression& t)
     {
       return fdr::detail::gsIsUnion(t);
     }
 
-    /// \brief Test for a inter expression
+    /// \brief Test for a Inter expression
     /// \param t A term
-    /// \return True if it is a inter expression
+    /// \return True if it is a Inter expression
     inline
-    bool is_inter(const set_expression& t)
+    bool is_Inter(const set_expression& t)
     {
       return fdr::detail::gsIsInter(t);
     }
@@ -301,24 +268,6 @@ class productions: public set_expression
     bool is_set(const set_expression& t)
     {
       return fdr::detail::gsIsset(t);
-    }
-
-    /// \brief Test for a set expression
-    /// \param t A term
-    /// \return True if it is a set expression
-    inline
-    bool is_set(const set_expression& t)
-    {
-      return fdr::detail::gsIsSet(t);
-    }
-
-    /// \brief Test for a seq expression
-    /// \param t A term
-    /// \return True if it is a seq expression
-    inline
-    bool is_seq(const set_expression& t)
-    {
-      return fdr::detail::gsIsSeq(t);
     }
 
     /// \brief Test for a extensions expression

@@ -465,8 +465,6 @@ bool check_rule_Set(Term t)
          || check_term_Union(t)
          || check_term_Inter(t)
          || check_term_set(t)
-         || check_term_Set(t)
-         || check_term_Seq(t)
          || check_term_extensions(t)
          || check_term_productions(t);
 #else

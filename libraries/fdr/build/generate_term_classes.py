@@ -49,6 +49,14 @@ if __name__ == "__main__":
     make_class_definitions('../source/term_functions.cpp', EXPRESSION_CLASSES, 'expression', 'fdr', label = 'expression')
     make_is_functions('../include/mcrl2/fdr/expression.h', EXPRESSION_CLASSES, 'expression', 'fdr')
 
+    make_class_declarations('../include/mcrl2/fdr/process.h', PROCESS_CLASSES, 'process', 'fdr', superclass_aterm = 'Proc', label = 'process expression')
+    make_class_definitions('../source/term_functions.cpp', PROCESS_CLASSES, 'process', 'fdr', label = 'process expression')
+    make_is_functions('../include/mcrl2/fdr/process.h', PROCESS_CLASSES, 'process', 'fdr')
+
+    make_classes('../include/mcrl2/fdr/failuremodel.h', FAILUREMODEL_CLASSES, 'failuremodel', 'fdr')
+    make_classes('../include/mcrl2/fdr/targ.h', TARG_CLASSES, 'targ', 'fdr', superclass_aterm = 'Targ')
+    make_classes('../include/mcrl2/fdr/testtype.h', TESTTYPE_CLASSES, 'testtype', 'fdr')
+
     # other classes
     make_classes('../include/mcrl2/fdr/any.h', ANY_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/definition.h', DEFINITION_CLASSES, None, 'fdr')
@@ -57,16 +65,12 @@ if __name__ == "__main__":
     make_classes('../include/mcrl2/fdr/check.h', CHECK_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/refined.h', REFINED_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/model.h', MODEL_CLASSES, None, 'fdr')
-    make_classes('../include/mcrl2/fdr/failuremodel.h', FAILUREMODEL_CLASSES, 'failuremodel', 'fdr')
     make_classes('../include/mcrl2/fdr/test.h', TEST_CLASSES, None, 'fdr')
-    make_classes('../include/mcrl2/fdr/testtype.h', TESTTYPE_CLASSES, 'testtype', 'fdr')
     make_classes('../include/mcrl2/fdr/trname.h', TRNAME_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/filename.h', FILENAME_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/fdrspec.h', FDRSPEC_CLASSES, None, 'fdr')
-    make_classes('../include/mcrl2/fdr/targ.h', TARG_CLASSES, 'targ', 'fdr')
     make_classes('../include/mcrl2/fdr/comprehension.h', COMPREHENSION_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/generator.h', GEN_CLASSES, None, 'fdr')
-    make_classes('../include/mcrl2/fdr/process.h', PROCESS_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/field.h', FIELD_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/renaming.h', RENAMING_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/map.h', MAP_CLASSES, None, 'fdr')

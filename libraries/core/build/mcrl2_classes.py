@@ -479,7 +479,7 @@ class ATermConstructor(Constructor):
     def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    INLINE<CLASSNAME>::<CLASSNAME>(atermpp::aterm_appl term)
+    <INLINE><CLASSNAME>::<CLASSNAME>(atermpp::aterm_appl term)
       : <SUPERCLASS>(term)
     {
       assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
@@ -653,7 +653,7 @@ typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
 
     # Returns the class definition
     def class_inline_definition(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
-        print 'generating class', self.classname()
+        #print 'generating class', self.classname()
 
         ptext = ', '.join([p.name() for p in self.constructor.parameters()])
         ctext = '\n\n'.join([x.inline_definition() for x in self.constructors(namespace, add_constructor_overloads)])
@@ -673,7 +673,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
     # Returns the class declaration
     def class_declaration(self, namespace = 'core', add_container_typedefs = True, add_constructor_overloads = False):
-        print 'generating class', self.classname()
+        #print 'generating class', self.classname()
 
         ptext = ', '.join([p.name() for p in self.constructor.parameters()])
         ctext = '\n\n'.join([x.declaration() for x in self.constructors(namespace, add_constructor_overloads)])
@@ -718,6 +718,8 @@ def parse_classes(text, superclass = None, use_base_class_name = False):
     result = []
     lines = text.rsplit('\n')
     for line in lines:
+        if line.startswith('%'):
+            continue
         words = map(string.strip, line.split('|'))
         if len(words) < 3:
             continue

@@ -51,8 +51,8 @@ diff			| diff(const set_expression& left, const set_expression& right)				| A di
 Union			| Union(const set_expression& set)											| A set union
 Inter			| Inter(const set_expression& set)											| A set intersection
 set				| set(const seq_expression& seq)											| The set of a sequence
-Set				| Set(const set_expression& set)											| The set of sets of a set
-Seq				| Seq(const seq_expression& seq)											| The set of sequences of a sequence
+%Set				| Set(const set_expression& set)											| The set of sets of a set
+%Seq				| Seq(const seq_expression& seq)											| The set of sequences of a sequence
 extensions		| extensions(const expression& expr)										| The extension set
 productions		| productions(const expression& expr)										| The production set
 '''
@@ -88,8 +88,8 @@ Pattern         | pattern(const any& left, const any& right)                    
 EXPRESSION_CLASSES = r'''
 Numb			| numb(const numeric_expression& operand)									| A numeric expression
 Bool			| bool_(const boolean_expression& operand)									| A boolean expression
-Set				| set(const set_expression& operand)										| A set expression
-Seq				| seq(const seq_expression& operand)										| A seq expression
+Set				| Set(const set_expression& operand)										| A set expression
+Seq				| Seq(const seq_expression& operand)										| A seq expression
 Tuple			| tuple(const tuple_expression& operand)									| A tuple expression
 Dotted			| dotted(const dotted_expression& operand)									| A dotted expression
 Lambda			| lambda(const lambda_expression& operand)									| A lambda expression
@@ -180,7 +180,7 @@ FDRSpec			| fdrspec(const definition_list& defs)										| An FDR specification
 
 TARG_CLASSES = r'''
 Nil				| nil()																		| An empty
-Exprs			| exprs(const expression_list& exprs)										| An expression list
+%Exprs			| exprs(const expression_list& exprs)										| An expression list
 ClosedRange		| closedrange(const numeric_expression& begin, const numeric_expression& end)	| A closed range
 OpenRange		| openrange(const numeric_expression& begin)									| An open range
 Compr           | compr(const expression& expr, const comprehension_list& comprs)           | A comprehension
@@ -207,7 +207,7 @@ InternalChoice	| internalchoice(const process& left, const process& right)					|
 SequentialComposition	| sequentialcomposition(const process& left, const process& right)	| A sequential composition
 Interrupt		| interrupt(const process& left, const process& right)						| An interrupt
 Hiding			| hiding(const process& proc, const set_expression& set)					| An hiding
-Rename			| rename(const process& proc, const renaming& rename)					| A renaming
+%Rename			| rename(const process& proc, const renaming& rename)					| A renaming
 Interleave		| interleave(const process& left, const process& right)						| An interleave
 Sharing			| sharing(const process& left, const process& right, const set_expression& set)	| A sharing
 AlphaParallel	| alphaparallel(const process& left, const process& right, const set_expression& left_set, const set_expression& right_set)	| An alpha parallel

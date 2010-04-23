@@ -13,7 +13,7 @@ from mcrl2_utility import *
 #
 # If superclass is defined, it will be the base class of the generated
 # classes. Otherwise atermpp::aterm_appl will be taken as the base class.
-def make_classes(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False):
+def make_classes(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, superclass_aterm = None):
     classes = parse_classes(class_text, superclass, use_base_class_name = True)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
@@ -28,6 +28,11 @@ def make_classes(filename, class_text, superclass = None, namespace = 'core', ad
             insert_text_in_file(fname, text, 'generated class %s' % classes[i].name())
     else:
         ctext = '\n'.join(class_definitions)
+        if superclass != None and superclass_aterm != None:
+            text = Class(superclass_aterm, '%s()' % superclass, 'class %s' % superclass, superclass = None, use_base_class_name = False).class_inline_definition(namespace, True, add_constructor_overloads)
+            # TODO: this code should be generated in a cleaner way
+            text = re.sub('check_term', 'check_rule', text)
+            ctext = text + ctext
         insert_text_in_file(filename, ctext, 'generated classes')
 
 # Generates class declarations from class_text and inserts them in the file

@@ -13,940 +13,658 @@
 #define MCRL2_FDR_PROCESS_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/dotted_expression.h"
+#include "mcrl2/fdr/field.h"
+#include "mcrl2/fdr/linkpar.h"
 #include "mcrl2/fdr/set_expression.h"
 
 namespace mcrl2 {
 
 namespace fdr {
 
-//--- start generated classes ---//
-/// \brief A stop
-class stop: public atermpp::aterm_appl
+//--- start generated process expression class declarations ---//
+/// \brief class process
+class process: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
-    stop()
-      : atermpp::aterm_appl(fdr::detail::constructSTOP())
+    process()
+      : atermpp::aterm_appl(fdr::detail::constructProc())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    stop(atermpp::aterm_appl term)
+    process(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
-      assert(fdr::detail::check_term_STOP(m_term));
+      assert(fdr::detail::check_rule_Proc(m_term));
     }
 };
 
-/// \brief list of stops
-typedef atermpp::term_list<stop> stop_list;
+/// \brief list of processs
+typedef atermpp::term_list<process> process_list;
 
-/// \brief vector of stops
-typedef atermpp::vector<stop>    stop_vector;
+/// \brief vector of processs
+typedef atermpp::vector<process>    process_vector;
 
+/// \brief A stop
+class stop: public process
+{
+  public:
+    /// \brief Default constructor.
+    stop();
+
+    /// \brief Constructor.
+    /// \param term A term
+    stop(atermpp::aterm_appl term);
+};
 
 /// \brief A skip
-class skip: public atermpp::aterm_appl
+class skip: public process
 {
   public:
     /// \brief Default constructor.
-    skip()
-      : atermpp::aterm_appl(fdr::detail::constructSKIP())
-    {}
+    skip();
 
     /// \brief Constructor.
     /// \param term A term
-    skip(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_SKIP(m_term));
-    }
+    skip(atermpp::aterm_appl term);
 };
-
-/// \brief list of skips
-typedef atermpp::term_list<skip> skip_list;
-
-/// \brief vector of skips
-typedef atermpp::vector<skip>    skip_vector;
-
 
 /// \brief A chaos
-class chaos: public atermpp::aterm_appl
+class chaos: public process
 {
   public:
     /// \brief Default constructor.
-    chaos()
-      : atermpp::aterm_appl(fdr::detail::constructCHAOS())
-    {}
+    chaos();
 
     /// \brief Constructor.
     /// \param term A term
-    chaos(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_CHAOS(m_term));
-    }
+    chaos(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    chaos(const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeCHAOS(set))
-    {}
+    chaos(const set_expression& set);
 
-    set_expression set() const
-    {
-      return atermpp::arg1(*this);
-    }
+    set_expression set() const;
 };
-
-/// \brief list of chaoss
-typedef atermpp::term_list<chaos> chaos_list;
-
-/// \brief vector of chaoss
-typedef atermpp::vector<chaos>    chaos_vector;
-
 
 /// \brief A prefix
-class prefix: public atermpp::aterm_appl
+class prefix: public process
 {
   public:
     /// \brief Default constructor.
-    prefix()
-      : atermpp::aterm_appl(fdr::detail::constructPrefix())
-    {}
+    prefix();
 
     /// \brief Constructor.
     /// \param term A term
-    prefix(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Prefix(m_term));
-    }
+    prefix(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    prefix(const dotted_expression& dotted, const field_list& fields, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakePrefix(dotted, fields, proc))
-    {}
+    prefix(const dotted_expression& dotted, const field_list& fields, const process& proc);
 
-    dotted_expression dotted() const
-    {
-      return atermpp::arg1(*this);
-    }
+    dotted_expression dotted() const;
 
-    field_list fields() const
-    {
-      return atermpp::list_arg2(*this);
-    }
+    field_list fields() const;
 
-    process proc() const
-    {
-      return atermpp::arg3(*this);
-    }
+    process proc() const;
 };
-
-/// \brief list of prefixs
-typedef atermpp::term_list<prefix> prefix_list;
-
-/// \brief vector of prefixs
-typedef atermpp::vector<prefix>    prefix_vector;
-
 
 /// \brief An external choice
-class externalchoice: public atermpp::aterm_appl
+class externalchoice: public process
 {
   public:
     /// \brief Default constructor.
-    externalchoice()
-      : atermpp::aterm_appl(fdr::detail::constructExternalChoice())
-    {}
+    externalchoice();
 
     /// \brief Constructor.
     /// \param term A term
-    externalchoice(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_ExternalChoice(m_term));
-    }
+    externalchoice(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    externalchoice(const process& left, const process& right)
-      : atermpp::aterm_appl(fdr::detail::gsMakeExternalChoice(left, right))
-    {}
+    externalchoice(const process& left, const process& right);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 };
-
-/// \brief list of externalchoices
-typedef atermpp::term_list<externalchoice> externalchoice_list;
-
-/// \brief vector of externalchoices
-typedef atermpp::vector<externalchoice>    externalchoice_vector;
-
 
 /// \brief An internal choice
-class internalchoice: public atermpp::aterm_appl
+class internalchoice: public process
 {
   public:
     /// \brief Default constructor.
-    internalchoice()
-      : atermpp::aterm_appl(fdr::detail::constructInternalChoice())
-    {}
+    internalchoice();
 
     /// \brief Constructor.
     /// \param term A term
-    internalchoice(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_InternalChoice(m_term));
-    }
+    internalchoice(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    internalchoice(const process& left, const process& right)
-      : atermpp::aterm_appl(fdr::detail::gsMakeInternalChoice(left, right))
-    {}
+    internalchoice(const process& left, const process& right);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 };
-
-/// \brief list of internalchoices
-typedef atermpp::term_list<internalchoice> internalchoice_list;
-
-/// \brief vector of internalchoices
-typedef atermpp::vector<internalchoice>    internalchoice_vector;
-
 
 /// \brief A sequential composition
-class sequentialcomposition: public atermpp::aterm_appl
+class sequentialcomposition: public process
 {
   public:
     /// \brief Default constructor.
-    sequentialcomposition()
-      : atermpp::aterm_appl(fdr::detail::constructSequentialComposition())
-    {}
+    sequentialcomposition();
 
     /// \brief Constructor.
     /// \param term A term
-    sequentialcomposition(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_SequentialComposition(m_term));
-    }
+    sequentialcomposition(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    sequentialcomposition(const process& left, const process& right)
-      : atermpp::aterm_appl(fdr::detail::gsMakeSequentialComposition(left, right))
-    {}
+    sequentialcomposition(const process& left, const process& right);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 };
-
-/// \brief list of sequentialcompositions
-typedef atermpp::term_list<sequentialcomposition> sequentialcomposition_list;
-
-/// \brief vector of sequentialcompositions
-typedef atermpp::vector<sequentialcomposition>    sequentialcomposition_vector;
-
 
 /// \brief An interrupt
-class interrupt: public atermpp::aterm_appl
+class interrupt: public process
 {
   public:
     /// \brief Default constructor.
-    interrupt()
-      : atermpp::aterm_appl(fdr::detail::constructInterrupt())
-    {}
+    interrupt();
 
     /// \brief Constructor.
     /// \param term A term
-    interrupt(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Interrupt(m_term));
-    }
+    interrupt(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    interrupt(const process& left, const process& right)
-      : atermpp::aterm_appl(fdr::detail::gsMakeInterrupt(left, right))
-    {}
+    interrupt(const process& left, const process& right);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 };
-
-/// \brief list of interrupts
-typedef atermpp::term_list<interrupt> interrupt_list;
-
-/// \brief vector of interrupts
-typedef atermpp::vector<interrupt>    interrupt_vector;
-
 
 /// \brief An hiding
-class hiding: public atermpp::aterm_appl
+class hiding: public process
 {
   public:
     /// \brief Default constructor.
-    hiding()
-      : atermpp::aterm_appl(fdr::detail::constructHiding())
-    {}
+    hiding();
 
     /// \brief Constructor.
     /// \param term A term
-    hiding(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Hiding(m_term));
-    }
+    hiding(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    hiding(const process& proc, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeHiding(proc, set))
-    {}
+    hiding(const process& proc, const set_expression& set);
 
-    process proc() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process proc() const;
 
-    set_expression set() const
-    {
-      return atermpp::arg2(*this);
-    }
+    set_expression set() const;
 };
-
-/// \brief list of hidings
-typedef atermpp::term_list<hiding> hiding_list;
-
-/// \brief vector of hidings
-typedef atermpp::vector<hiding>    hiding_vector;
-
-
-/// \brief A renaming
-class rename: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Default constructor.
-    rename()
-      : atermpp::aterm_appl(fdr::detail::constructRename())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    rename(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Rename(m_term));
-    }
-
-    /// \brief Constructor.
-    rename(const process& proc, const renaming& rename)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRename(proc, rename))
-    {}
-
-    process proc() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    renaming rename() const
-    {
-      return atermpp::arg2(*this);
-    }
-};
-
-/// \brief list of renames
-typedef atermpp::term_list<rename> rename_list;
-
-/// \brief vector of renames
-typedef atermpp::vector<rename>    rename_vector;
-
 
 /// \brief An interleave
-class interleave: public atermpp::aterm_appl
+class interleave: public process
 {
   public:
     /// \brief Default constructor.
-    interleave()
-      : atermpp::aterm_appl(fdr::detail::constructInterleave())
-    {}
+    interleave();
 
     /// \brief Constructor.
     /// \param term A term
-    interleave(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Interleave(m_term));
-    }
+    interleave(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    interleave(const process& left, const process& right)
-      : atermpp::aterm_appl(fdr::detail::gsMakeInterleave(left, right))
-    {}
+    interleave(const process& left, const process& right);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 };
-
-/// \brief list of interleaves
-typedef atermpp::term_list<interleave> interleave_list;
-
-/// \brief vector of interleaves
-typedef atermpp::vector<interleave>    interleave_vector;
-
 
 /// \brief A sharing
-class sharing: public atermpp::aterm_appl
+class sharing: public process
 {
   public:
     /// \brief Default constructor.
-    sharing()
-      : atermpp::aterm_appl(fdr::detail::constructSharing())
-    {}
+    sharing();
 
     /// \brief Constructor.
     /// \param term A term
-    sharing(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Sharing(m_term));
-    }
+    sharing(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    sharing(const process& left, const process& right, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeSharing(left, right, set))
-    {}
+    sharing(const process& left, const process& right, const set_expression& set);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 
-    set_expression set() const
-    {
-      return atermpp::arg3(*this);
-    }
+    set_expression set() const;
 };
-
-/// \brief list of sharings
-typedef atermpp::term_list<sharing> sharing_list;
-
-/// \brief vector of sharings
-typedef atermpp::vector<sharing>    sharing_vector;
-
 
 /// \brief An alpha parallel
-class alphaparallel: public atermpp::aterm_appl
+class alphaparallel: public process
 {
   public:
     /// \brief Default constructor.
-    alphaparallel()
-      : atermpp::aterm_appl(fdr::detail::constructAlphaParallel())
-    {}
+    alphaparallel();
 
     /// \brief Constructor.
     /// \param term A term
-    alphaparallel(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_AlphaParallel(m_term));
-    }
+    alphaparallel(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    alphaparallel(const process& left, const process& right, const set_expression& left_set, const set_expression& right_set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeAlphaParallel(left, right, left_set, right_set))
-    {}
+    alphaparallel(const process& left, const process& right, const set_expression& left_set, const set_expression& right_set);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 
-    set_expression left_set() const
-    {
-      return atermpp::arg3(*this);
-    }
+    set_expression left_set() const;
 
-    set_expression right_set() const
-    {
-      return atermpp::arg4(*this);
-    }
+    set_expression right_set() const;
 };
-
-/// \brief list of alphaparallels
-typedef atermpp::term_list<alphaparallel> alphaparallel_list;
-
-/// \brief vector of alphaparallels
-typedef atermpp::vector<alphaparallel>    alphaparallel_vector;
-
 
 /// \brief A replicated external choice
-class repexternalchoice: public atermpp::aterm_appl
+class repexternalchoice: public process
 {
   public:
     /// \brief Default constructor.
-    repexternalchoice()
-      : atermpp::aterm_appl(fdr::detail::constructRepExternalChoice())
-    {}
+    repexternalchoice();
 
     /// \brief Constructor.
     /// \param term A term
-    repexternalchoice(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_RepExternalChoice(m_term));
-    }
+    repexternalchoice(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    repexternalchoice(const setgen& gen, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepExternalChoice(gen, proc))
-    {}
+    repexternalchoice(const setgen& gen, const process& proc);
 
-    setgen gen() const
-    {
-      return atermpp::arg1(*this);
-    }
+    setgen gen() const;
 
-    process proc() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process proc() const;
 };
-
-/// \brief list of repexternalchoices
-typedef atermpp::term_list<repexternalchoice> repexternalchoice_list;
-
-/// \brief vector of repexternalchoices
-typedef atermpp::vector<repexternalchoice>    repexternalchoice_vector;
-
 
 /// \brief A replicated internal choice
-class repinternalchoice: public atermpp::aterm_appl
+class repinternalchoice: public process
 {
   public:
     /// \brief Default constructor.
-    repinternalchoice()
-      : atermpp::aterm_appl(fdr::detail::constructRepInternalChoice())
-    {}
+    repinternalchoice();
 
     /// \brief Constructor.
     /// \param term A term
-    repinternalchoice(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_RepInternalChoice(m_term));
-    }
+    repinternalchoice(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    repinternalchoice(const setgen& gen, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepInternalChoice(gen, proc))
-    {}
+    repinternalchoice(const setgen& gen, const process& proc);
 
-    setgen gen() const
-    {
-      return atermpp::arg1(*this);
-    }
+    setgen gen() const;
 
-    process proc() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process proc() const;
 };
-
-/// \brief list of repinternalchoices
-typedef atermpp::term_list<repinternalchoice> repinternalchoice_list;
-
-/// \brief vector of repinternalchoices
-typedef atermpp::vector<repinternalchoice>    repinternalchoice_vector;
-
 
 /// \brief A replicated sequential composition
-class repsequentialcomposition: public atermpp::aterm_appl
+class repsequentialcomposition: public process
 {
   public:
     /// \brief Default constructor.
-    repsequentialcomposition()
-      : atermpp::aterm_appl(fdr::detail::constructRepSequentialComposition())
-    {}
+    repsequentialcomposition();
 
     /// \brief Constructor.
     /// \param term A term
-    repsequentialcomposition(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_RepSequentialComposition(m_term));
-    }
+    repsequentialcomposition(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    repsequentialcomposition(const seqgen& gen, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepSequentialComposition(gen, proc))
-    {}
+    repsequentialcomposition(const seqgen& gen, const process& proc);
 
-    seqgen gen() const
-    {
-      return atermpp::arg1(*this);
-    }
+    seqgen gen() const;
 
-    process proc() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process proc() const;
 };
-
-/// \brief list of repsequentialcompositions
-typedef atermpp::term_list<repsequentialcomposition> repsequentialcomposition_list;
-
-/// \brief vector of repsequentialcompositions
-typedef atermpp::vector<repsequentialcomposition>    repsequentialcomposition_vector;
-
 
 /// \brief A replicated interleave
-class repinterleave: public atermpp::aterm_appl
+class repinterleave: public process
 {
   public:
     /// \brief Default constructor.
-    repinterleave()
-      : atermpp::aterm_appl(fdr::detail::constructRepInterleave())
-    {}
+    repinterleave();
 
     /// \brief Constructor.
     /// \param term A term
-    repinterleave(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_RepInterleave(m_term));
-    }
+    repinterleave(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    repinterleave(const setgen& gen, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepInterleave(gen, proc))
-    {}
+    repinterleave(const setgen& gen, const process& proc);
 
-    setgen gen() const
-    {
-      return atermpp::arg1(*this);
-    }
+    setgen gen() const;
 
-    process proc() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process proc() const;
 };
-
-/// \brief list of repinterleaves
-typedef atermpp::term_list<repinterleave> repinterleave_list;
-
-/// \brief vector of repinterleaves
-typedef atermpp::vector<repinterleave>    repinterleave_vector;
-
 
 /// \brief A replicated sharing
-class repsharing: public atermpp::aterm_appl
+class repsharing: public process
 {
   public:
     /// \brief Default constructor.
-    repsharing()
-      : atermpp::aterm_appl(fdr::detail::constructRepSharing())
-    {}
+    repsharing();
 
     /// \brief Constructor.
     /// \param term A term
-    repsharing(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_RepSharing(m_term));
-    }
+    repsharing(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    repsharing(const setgen& gen, const process& proc, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepSharing(gen, proc, set))
-    {}
+    repsharing(const setgen& gen, const process& proc, const set_expression& set);
 
-    setgen gen() const
-    {
-      return atermpp::arg1(*this);
-    }
+    setgen gen() const;
 
-    process proc() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process proc() const;
 
-    set_expression set() const
-    {
-      return atermpp::arg3(*this);
-    }
+    set_expression set() const;
 };
-
-/// \brief list of repsharings
-typedef atermpp::term_list<repsharing> repsharing_list;
-
-/// \brief vector of repsharings
-typedef atermpp::vector<repsharing>    repsharing_vector;
-
 
 /// \brief A replicated alpha parallel
-class repalphaparallel: public atermpp::aterm_appl
+class repalphaparallel: public process
 {
   public:
     /// \brief Default constructor.
-    repalphaparallel()
-      : atermpp::aterm_appl(fdr::detail::constructRepAlphaParallel())
-    {}
+    repalphaparallel();
 
     /// \brief Constructor.
     /// \param term A term
-    repalphaparallel(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_RepAlphaParallel(m_term));
-    }
+    repalphaparallel(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    repalphaparallel(const setgen& gen, const process& proc, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepAlphaParallel(gen, proc, set))
-    {}
+    repalphaparallel(const setgen& gen, const process& proc, const set_expression& set);
 
-    setgen gen() const
-    {
-      return atermpp::arg1(*this);
-    }
+    setgen gen() const;
 
-    process proc() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process proc() const;
 
-    set_expression set() const
-    {
-      return atermpp::arg3(*this);
-    }
+    set_expression set() const;
 };
-
-/// \brief list of repalphaparallels
-typedef atermpp::term_list<repalphaparallel> repalphaparallel_list;
-
-/// \brief vector of repalphaparallels
-typedef atermpp::vector<repalphaparallel>    repalphaparallel_vector;
-
 
 /// \brief An untimed time-out
-class untimedtimeout: public atermpp::aterm_appl
+class untimedtimeout: public process
 {
   public:
     /// \brief Default constructor.
-    untimedtimeout()
-      : atermpp::aterm_appl(fdr::detail::constructUntimedTimeOut())
-    {}
+    untimedtimeout();
 
     /// \brief Constructor.
     /// \param term A term
-    untimedtimeout(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_UntimedTimeOut(m_term));
-    }
+    untimedtimeout(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    untimedtimeout(const process& left, const process& right)
-      : atermpp::aterm_appl(fdr::detail::gsMakeUntimedTimeOut(left, right))
-    {}
+    untimedtimeout(const process& left, const process& right);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 };
-
-/// \brief list of untimedtimeouts
-typedef atermpp::term_list<untimedtimeout> untimedtimeout_list;
-
-/// \brief vector of untimedtimeouts
-typedef atermpp::vector<untimedtimeout>    untimedtimeout_vector;
-
 
 /// \brief A boolean guard
-class boolguard: public atermpp::aterm_appl
+class boolguard: public process
 {
   public:
     /// \brief Default constructor.
-    boolguard()
-      : atermpp::aterm_appl(fdr::detail::constructBoolGuard())
-    {}
+    boolguard();
 
     /// \brief Constructor.
     /// \param term A term
-    boolguard(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_BoolGuard(m_term));
-    }
+    boolguard(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    boolguard(const boolean_expression& guard, const process& proc)
-      : atermpp::aterm_appl(fdr::detail::gsMakeBoolGuard(guard, proc))
-    {}
+    boolguard(const boolean_expression& guard, const process& proc);
 
-    boolean_expression guard() const
-    {
-      return atermpp::arg1(*this);
-    }
+    boolean_expression guard() const;
 
-    process proc() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process proc() const;
 };
-
-/// \brief list of boolguards
-typedef atermpp::term_list<boolguard> boolguard_list;
-
-/// \brief vector of boolguards
-typedef atermpp::vector<boolguard>    boolguard_vector;
-
 
 /// \brief A linked parallel
-class linkedparallel: public atermpp::aterm_appl
+class linkedparallel: public process
 {
   public:
     /// \brief Default constructor.
-    linkedparallel()
-      : atermpp::aterm_appl(fdr::detail::constructLinkedParallel())
-    {}
+    linkedparallel();
 
     /// \brief Constructor.
     /// \param term A term
-    linkedparallel(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_LinkedParallel(m_term));
-    }
+    linkedparallel(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    linkedparallel(const process& left, const process& right, const linkpar& linked)
-      : atermpp::aterm_appl(fdr::detail::gsMakeLinkedParallel(left, right, linked))
-    {}
+    linkedparallel(const process& left, const process& right, const linkpar& linked);
 
-    process left() const
-    {
-      return atermpp::arg1(*this);
-    }
+    process left() const;
 
-    process right() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process right() const;
 
-    linkpar linked() const
-    {
-      return atermpp::arg3(*this);
-    }
+    linkpar linked() const;
 };
-
-/// \brief list of linkedparallels
-typedef atermpp::term_list<linkedparallel> linkedparallel_list;
-
-/// \brief vector of linkedparallels
-typedef atermpp::vector<linkedparallel>    linkedparallel_vector;
-
 
 /// \brief A replicated linked parallel
-class replinkedparallel: public atermpp::aterm_appl
+class replinkedparallel: public process
 {
   public:
     /// \brief Default constructor.
-    replinkedparallel()
-      : atermpp::aterm_appl(fdr::detail::constructRepLinkedParallel())
-    {}
+    replinkedparallel();
 
     /// \brief Constructor.
     /// \param term A term
-    replinkedparallel(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_RepLinkedParallel(m_term));
-    }
+    replinkedparallel(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    replinkedparallel(const seqgen& gen, const process& proc, const linkpar& linked)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRepLinkedParallel(gen, proc, linked))
-    {}
+    replinkedparallel(const seqgen& gen, const process& proc, const linkpar& linked);
 
-    seqgen gen() const
-    {
-      return atermpp::arg1(*this);
-    }
+    seqgen gen() const;
 
-    process proc() const
-    {
-      return atermpp::arg2(*this);
-    }
+    process proc() const;
 
-    linkpar linked() const
-    {
-      return atermpp::arg3(*this);
-    }
+    linkpar linked() const;
 };
-
-/// \brief list of replinkedparallels
-typedef atermpp::term_list<replinkedparallel> replinkedparallel_list;
-
-/// \brief vector of replinkedparallels
-typedef atermpp::vector<replinkedparallel>    replinkedparallel_vector;
-
-//--- end generated classes ---//
+//--- end generated process expression class declarations ---//
 
 //--- start generated is-functions ---//
+
+    /// \brief Test for a stop expression
+    /// \param t A term
+    /// \return True if it is a stop expression
+    inline
+    bool is_stop(const process& t)
+    {
+      return fdr::detail::gsIsSTOP(t);
+    }
+
+    /// \brief Test for a skip expression
+    /// \param t A term
+    /// \return True if it is a skip expression
+    inline
+    bool is_skip(const process& t)
+    {
+      return fdr::detail::gsIsSKIP(t);
+    }
+
+    /// \brief Test for a chaos expression
+    /// \param t A term
+    /// \return True if it is a chaos expression
+    inline
+    bool is_chaos(const process& t)
+    {
+      return fdr::detail::gsIsCHAOS(t);
+    }
+
+    /// \brief Test for a prefix expression
+    /// \param t A term
+    /// \return True if it is a prefix expression
+    inline
+    bool is_prefix(const process& t)
+    {
+      return fdr::detail::gsIsPrefix(t);
+    }
+
+    /// \brief Test for a externalchoice expression
+    /// \param t A term
+    /// \return True if it is a externalchoice expression
+    inline
+    bool is_externalchoice(const process& t)
+    {
+      return fdr::detail::gsIsExternalChoice(t);
+    }
+
+    /// \brief Test for a internalchoice expression
+    /// \param t A term
+    /// \return True if it is a internalchoice expression
+    inline
+    bool is_internalchoice(const process& t)
+    {
+      return fdr::detail::gsIsInternalChoice(t);
+    }
+
+    /// \brief Test for a sequentialcomposition expression
+    /// \param t A term
+    /// \return True if it is a sequentialcomposition expression
+    inline
+    bool is_sequentialcomposition(const process& t)
+    {
+      return fdr::detail::gsIsSequentialComposition(t);
+    }
+
+    /// \brief Test for a interrupt expression
+    /// \param t A term
+    /// \return True if it is a interrupt expression
+    inline
+    bool is_interrupt(const process& t)
+    {
+      return fdr::detail::gsIsInterrupt(t);
+    }
+
+    /// \brief Test for a hiding expression
+    /// \param t A term
+    /// \return True if it is a hiding expression
+    inline
+    bool is_hiding(const process& t)
+    {
+      return fdr::detail::gsIsHiding(t);
+    }
+
+    /// \brief Test for a interleave expression
+    /// \param t A term
+    /// \return True if it is a interleave expression
+    inline
+    bool is_interleave(const process& t)
+    {
+      return fdr::detail::gsIsInterleave(t);
+    }
+
+    /// \brief Test for a sharing expression
+    /// \param t A term
+    /// \return True if it is a sharing expression
+    inline
+    bool is_sharing(const process& t)
+    {
+      return fdr::detail::gsIsSharing(t);
+    }
+
+    /// \brief Test for a alphaparallel expression
+    /// \param t A term
+    /// \return True if it is a alphaparallel expression
+    inline
+    bool is_alphaparallel(const process& t)
+    {
+      return fdr::detail::gsIsAlphaParallel(t);
+    }
+
+    /// \brief Test for a repexternalchoice expression
+    /// \param t A term
+    /// \return True if it is a repexternalchoice expression
+    inline
+    bool is_repexternalchoice(const process& t)
+    {
+      return fdr::detail::gsIsRepExternalChoice(t);
+    }
+
+    /// \brief Test for a repinternalchoice expression
+    /// \param t A term
+    /// \return True if it is a repinternalchoice expression
+    inline
+    bool is_repinternalchoice(const process& t)
+    {
+      return fdr::detail::gsIsRepInternalChoice(t);
+    }
+
+    /// \brief Test for a repsequentialcomposition expression
+    /// \param t A term
+    /// \return True if it is a repsequentialcomposition expression
+    inline
+    bool is_repsequentialcomposition(const process& t)
+    {
+      return fdr::detail::gsIsRepSequentialComposition(t);
+    }
+
+    /// \brief Test for a repinterleave expression
+    /// \param t A term
+    /// \return True if it is a repinterleave expression
+    inline
+    bool is_repinterleave(const process& t)
+    {
+      return fdr::detail::gsIsRepInterleave(t);
+    }
+
+    /// \brief Test for a repsharing expression
+    /// \param t A term
+    /// \return True if it is a repsharing expression
+    inline
+    bool is_repsharing(const process& t)
+    {
+      return fdr::detail::gsIsRepSharing(t);
+    }
+
+    /// \brief Test for a repalphaparallel expression
+    /// \param t A term
+    /// \return True if it is a repalphaparallel expression
+    inline
+    bool is_repalphaparallel(const process& t)
+    {
+      return fdr::detail::gsIsRepAlphaParallel(t);
+    }
+
+    /// \brief Test for a untimedtimeout expression
+    /// \param t A term
+    /// \return True if it is a untimedtimeout expression
+    inline
+    bool is_untimedtimeout(const process& t)
+    {
+      return fdr::detail::gsIsUntimedTimeOut(t);
+    }
+
+    /// \brief Test for a boolguard expression
+    /// \param t A term
+    /// \return True if it is a boolguard expression
+    inline
+    bool is_boolguard(const process& t)
+    {
+      return fdr::detail::gsIsBoolGuard(t);
+    }
+
+    /// \brief Test for a linkedparallel expression
+    /// \param t A term
+    /// \return True if it is a linkedparallel expression
+    inline
+    bool is_linkedparallel(const process& t)
+    {
+      return fdr::detail::gsIsLinkedParallel(t);
+    }
+
+    /// \brief Test for a replinkedparallel expression
+    /// \param t A term
+    /// \return True if it is a replinkedparallel expression
+    inline
+    bool is_replinkedparallel(const process& t)
+    {
+      return fdr::detail::gsIsRepLinkedParallel(t);
+    }
 //--- end generated is-functions ---//
 
 } // namespace fdr

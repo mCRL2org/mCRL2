@@ -14,6 +14,7 @@
 
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/expression.h"
+#include "mcrl2/fdr/process.h"
 
 namespace mcrl2 {
 

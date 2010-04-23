@@ -13,7 +13,13 @@
 #define MCRL2_FDR_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/boolean_expression.h"
+#include "mcrl2/fdr/dotted_expression.h"
+#include "mcrl2/fdr/lambda_expression.h"
 #include "mcrl2/fdr/numeric_expression.h"
+#include "mcrl2/fdr/seq_expression.h"
+#include "mcrl2/fdr/set_expression.h"
+#include "mcrl2/fdr/tuple_expression.h"
 
 namespace mcrl2 {
 
@@ -79,35 +85,35 @@ class bool_: public expression
 };
 
 /// \brief A set expression
-class set: public expression
+class Set: public expression
 {
   public:
     /// \brief Default constructor.
-    set();
+    Set();
 
     /// \brief Constructor.
     /// \param term A term
-    set(atermpp::aterm_appl term);
+    Set(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    set(const set_expression& operand);
+    Set(const set_expression& operand);
 
     set_expression operand() const;
 };
 
 /// \brief A seq expression
-class seq: public expression
+class Seq: public expression
 {
   public:
     /// \brief Default constructor.
-    seq();
+    Seq();
 
     /// \brief Constructor.
     /// \param term A term
-    seq(atermpp::aterm_appl term);
+    Seq(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    seq(const seq_expression& operand);
+    Seq(const seq_expression& operand);
 
     seq_expression operand() const;
 };
@@ -184,20 +190,20 @@ class lambda: public expression
       return fdr::detail::gsIsBool(t);
     }
 
-    /// \brief Test for a set expression
+    /// \brief Test for a Set expression
     /// \param t A term
-    /// \return True if it is a set expression
+    /// \return True if it is a Set expression
     inline
-    bool is_set(const expression& t)
+    bool is_Set(const expression& t)
     {
       return fdr::detail::gsIsSet(t);
     }
 
-    /// \brief Test for a seq expression
+    /// \brief Test for a Seq expression
     /// \param t A term
-    /// \return True if it is a seq expression
+    /// \return True if it is a Seq expression
     inline
-    bool is_seq(const expression& t)
+    bool is_Seq(const expression& t)
     {
       return fdr::detail::gsIsSeq(t);
     }
