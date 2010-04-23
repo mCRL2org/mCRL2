@@ -45,14 +45,14 @@ GreaterOrEqual	| greaterorequal(const expression& left, const expression& right)
 
 SET_EXPRESSION_CLASSES = r'''
 ChanSet			| chanset(const targ& argument)													| A simple argument (for channels)
-union			| union(const set_expression& left, const set_expression& right)			| A union
+union			| union_(const set_expression& left, const set_expression& right)			| A union
 inter			| inter(const set_expression& left, const set_expression& right)			| An intersection
 diff			| diff(const set_expression& left, const set_expression& right)				| A difference
-Union			| union(const set_expression& set)											| A set union
-Inter			| inter(const set_expression& set)											| A set intersection
+Union			| Union(const set_expression& set)											| A set union
+Inter			| Inter(const set_expression& set)											| A set intersection
 set				| set(const seq_expression& seq)											| The set of a sequence
-Set				| set(const set_expression& set)											| The set of sets of a set
-Seq				| seq(const seq_expression& seq)											| The set of sequences of a sequence
+Set				| Set(const set_expression& set)											| The set of sets of a set
+Seq				| Seq(const seq_expression& seq)											| The set of sequences of a sequence
 extensions		| extensions(const expression& expr)										| The extension set
 productions		| productions(const expression& expr)										| The production set
 '''
