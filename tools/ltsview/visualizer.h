@@ -11,9 +11,11 @@
 
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
+
+#include <string>
 #include <vector>
+#include "enums.h"
 #include "settings.h"
-#include "utils.h"
 
 class Mediator;
 class PrimitiveFactory;
@@ -22,8 +24,10 @@ class VisObjectFactory;
 class State;
 class Cluster;
 class Transition;
+class Vector3D;
 
-class Visualizer: public Subscriber {
+class Visualizer: public Subscriber
+{
   private:
     float cos_obt;
     float sin_obt;
@@ -32,7 +36,7 @@ class Visualizer: public Subscriber {
     Mediator* mediator;
     PrimitiveFactory *primitiveFactory;
     Settings* settings;
-    Utils::VisStyle visStyle;
+    VisStyle visStyle;
     bool create_objects;
     bool update_colors;
     bool update_matrices;
@@ -51,6 +55,7 @@ class Visualizer: public Subscriber {
     void traverseTree(bool co);
     void traverseTreeC(Cluster *root, bool topClosed, int rot);
     void traverseTreeT(Cluster *root, bool topClosed, int rot);
+    float truncate_float(float f); // truncates all digits after the 4th decimal digit of f
     void updateColors();
     float compute_cone_scale_x(float phi,float r,float x);
     void computeForces(Cluster* root);
@@ -67,24 +72,23 @@ class Visualizer: public Subscriber {
 
     void computeBoundsInfo(float &bcw,float &bch);
     float getHalfStructureHeight() const;
-    Utils::VisStyle getVisStyle() const;
+    VisStyle getVisStyle() const;
     void notify(SettingID s);
     void setLTS(LTS *l,bool compute_ratio);
     void notifyMarkStyleChanged();
-    void setVisStyle(Utils::VisStyle vs);
+    void setVisStyle(VisStyle vs);
 
     void drawStates(bool simulating);
-    void drawSimStates(std::vector<State*> historicStates, State* currState,
-                       Transition* chosenTrans);
+    void drawSimStates(std::vector<State*> historicStates, State*
+        currState, Transition* chosenTrans);
 
     void drawTransitions(bool draw_fp,bool draw_bp);
     void drawSimTransitions(bool draw_fp, bool draw_bp,
-                            std::vector<Transition*> historicTrans,
-                            std::vector<Transition*> posTrans,
-                            Transition* chosenTrans);
+        std::vector<Transition*> historicTrans, std::vector<Transition*>
+        posTrans, Transition* chosenTrans);
 
     void drawStructure();
-    void sortClusters(Utils::Point3D viewpoint);
+    void sortClusters(Vector3D viewpoint);
     void forceDirectedInit();
     void forceDirectedStep();
     void resetStatePositions();

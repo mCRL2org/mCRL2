@@ -18,6 +18,7 @@ set(MACOSX_BUNDLE_ICON_FILE ltsview.icns )
 # Sources:
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   cluster.cpp
+  color_interpolator.cpp
   conedb.cpp
   glcanvas.cpp
   infodialog.cpp
@@ -27,8 +28,10 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   markdialog.cpp
   markmanager.cpp
   markstateruledialog.cpp
+  mathutils.cpp
   primitivefactory.cpp
   primitives.cpp
+  rgb_color.cpp
   savepicdialog.cpp
   savevecdialog.cpp
   settings.cpp
@@ -38,7 +41,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   simulation.cpp
   state.cpp
   transition.cpp
-  utils.cpp
+  vectors.cpp
   visobjectfactory.cpp
   visualizer.cpp
 

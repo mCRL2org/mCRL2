@@ -9,14 +9,14 @@
 /// \file cluster.cpp
 /// \brief Implementation of the Cluster class
 
-#include "cluster.h"
 #include <algorithm>
 #include <math.h>
+#include "cluster.h"
+#include "mathutils.h"
 #include "state.h"
-#include "utils.h"
 
 using namespace std;
-using namespace Utils;
+using namespace MathUtils;
 
 bool Comp_BCRadius::operator()(const Cluster* c1,const Cluster* c2) const
 {

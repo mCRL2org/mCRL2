@@ -11,6 +11,7 @@
 
 #ifndef CLUSTER_H
 #define CLUSTER_H
+
 #include <vector>
 #include <map>
 #include <set>
@@ -21,20 +22,24 @@ class State;
 class Cluster;
 
 // class for cluster comparison based on cluster radii
-class Comp_BCRadius {
+class Comp_BCRadius
+{
   public:
     bool operator()(const Cluster*,const Cluster*) const;
 };
 
 // class for cluster comparison based on cluster volumes
-class Comp_BCVolume {
+class Comp_BCVolume
+{
   public:
     bool operator()(const Cluster*,const Cluster*) const;
 };
 
-class Cluster {
-
+class Cluster
+{
   public:
+    static const unsigned int NUM_RINGS = 2;
+
     // Constructor & destructor.
     Cluster(int r);
     ~Cluster();

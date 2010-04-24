@@ -11,21 +11,24 @@
 
 #include "wx.hpp" // precompiled headers
 
-#include "lts.h"
-#include "cluster.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/print.h"
+
+#include "lts.h"
+#include "cluster.h"
+#include "mathutils.h"
 #include "mediator.h"
 #include "simulation.h"
 #include "state.h"
 #include "transition.h"
+#include "vectors.h"
 
-using namespace Utils;
 using namespace std;
 using namespace mcrl2::trace;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
+using namespace MathUtils;
 
 /**************************** Cluster_iterator ********************************/
 
@@ -566,7 +569,7 @@ void LTS::clearRanksAndClusters()
   clustersInRank.swap(temp2);
 }
 
-void LTS::rankStates(Utils::RankStyle rs)
+void LTS::rankStates(RankStyle rs)
 {
   clearRanksAndClusters();
   int rankNumber = 0;
@@ -614,7 +617,7 @@ void LTS::rankStates(Utils::RankStyle rs)
   }
 }
 
-void LTS::clusterStates(Utils::RankStyle rs)
+void LTS::clusterStates(RankStyle rs)
 {
   Cluster *d = new Cluster(0);
   vector< Cluster* > cs;
@@ -892,7 +895,7 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
             }
             else
             {
-              Vect v = {0,0};
+              Vector2D v = Vector2D(0, 0);
               for (t = 0; t < currState->getNumOutTransitions(); ++t)
               {
                 succ = currState->getOutTransition(t)->getEndState();
@@ -900,14 +903,15 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
                     && !succ->isCentered())
                 {
                   // convert subordinate position to a vector and add
-                  v = v + succ->getPositionRadius() *
-                    deg_to_vec(succ->getPositionAngle());
+                  v = v + (Vector2D(succ->getPositionAngle() *
+                      succ->getPositionRadius()));
                 }
               }
 
-              unsigned int ring = round_to_int(vec_length(v) * float(NUM_RINGS-1) /
+              unsigned int ring = round_to_int(v.length() *
+                  float(Cluster::NUM_RINGS-1) /
                   currCluster->getTopRadius());
-              ring = min(ring,NUM_RINGS-1);
+              ring = min(ring,Cluster::NUM_RINGS-1);
 
               if (ring == 0)
               {
@@ -918,10 +922,10 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
               else
               {
                 // Transform v into an angle, assign it to state position.
-                float angle = vec_to_deg(v);
+                float angle = v.toDegrees();
                 currState->setPositionAngle(angle);
                 currState->setPositionRadius(currCluster->getTopRadius() *
-                    float(ring) / float(NUM_RINGS-1));
+                    float(ring) / float(Cluster::NUM_RINGS-1));
                 currCluster->occupySlot(ring,angle,currState);
               }
             }
@@ -931,7 +935,7 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
           {
             // Case two: More than one descendant cluster.
             // Iterate over subordinates, calculating sum of vectors.
-            Vect v = {0,0};
+            Vector2D v = Vector2D(0, 0);
             for (t = 0; t < currState->getNumOutTransitions(); ++t)
             {
               succ = currState->getOutTransition(t)->getEndState();
@@ -941,27 +945,27 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
                 {
                   if (!succ->isCentered())
                   {
-                    v = v + succ->getPositionRadius() *
-                      deg_to_vec(succ->getPositionAngle());
+                    v = v + (Vector2D(succ->getPositionAngle() *
+                        succ->getPositionRadius()));
                   }
                 }
                 else
                 {
-                  v = v + currCluster->getBaseRadius() *
-                    deg_to_vec(succ->getCluster()->getPosition());
+                  v = v + (Vector2D(succ->getCluster()->getPosition() *
+                        currCluster->getBaseRadius()));
                   if (!succ->isCentered())
                   {
-                    v = v + succ->getPositionRadius() *
-                      deg_to_vec(succ->getPositionAngle() +
-                          succ->getCluster()->getPosition());
+                    v = v + (Vector2D(succ->getPositionAngle() +
+                          succ->getCluster()->getPosition()) *
+                        succ->getPositionRadius());
                   }
                 }
               }
             }
 
-            unsigned int ring = round_to_int(vec_length(v) *
-                float(NUM_RINGS-1) / currCluster->getTopRadius());
-            ring = min(ring,NUM_RINGS-1);
+            unsigned int ring = round_to_int(v.length() *
+                float(Cluster::NUM_RINGS-1) / currCluster->getTopRadius());
+            ring = min(ring,Cluster::NUM_RINGS-1);
 
             if (ring == 0)
             {
@@ -972,10 +976,10 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
             else
             {
               // Transform v into an angle, assign it to state position.
-              float angle = vec_to_deg(v);
+              float angle = v.toDegrees();
               currState->setPositionAngle(angle);
               currState->setPositionRadius(currCluster->getTopRadius() *
-                  float(ring) / float(NUM_RINGS-1));
+                  float(ring) / float(Cluster::NUM_RINGS-1));
               currCluster->occupySlot(ring,angle,currState);
             }
             break;
@@ -1035,21 +1039,21 @@ void LTS::edgeLengthTopDown(vector< State* > &ss)
     }
     else
     {
-      Vect v = {0,0};
+      Vector2D v = Vector2D(0, 0);
       for (t = 0; t < (**state_it).getNumInTransitions(); ++t)
       {
         pred = (**state_it).getInTransition(t)->getBeginState();
         if ((**state_it).getRank()-1 == pred->getRank()
             && !pred->isCentered())
         {
-          v = v + pred->getPositionRadius() *
-            deg_to_vec(pred->getPositionAngle());
+          v = v + (Vector2D(pred->getPositionAngle() *
+                pred->getPositionRadius()));
         }
       }
 
-      unsigned int ring = round_to_int(vec_length(v) * float(NUM_RINGS-1) /
+      unsigned int ring = round_to_int(v.length() * float(Cluster::NUM_RINGS-1) /
           currCluster->getTopRadius());
-      ring = min(ring,NUM_RINGS-1);
+      ring = min(ring,Cluster::NUM_RINGS-1);
 
       if (ring == 0)
       {
@@ -1060,10 +1064,10 @@ void LTS::edgeLengthTopDown(vector< State* > &ss)
       else
       {
         // Transform v into an angle, assign it to state position.
-        float angle = vec_to_deg(v);
+        float angle = v.toDegrees();
         (*state_it)->setPositionAngle(angle);
         (*state_it)->setPositionRadius(currCluster->getTopRadius() * float(ring)
-            / float(NUM_RINGS-1));
+            / float(Cluster::NUM_RINGS-1));
         currCluster->occupySlot(ring,angle,*state_it);
       }
     }

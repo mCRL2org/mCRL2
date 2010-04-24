@@ -36,8 +36,8 @@
 #endif
 
 using namespace std;
-using namespace Utils;
 using namespace IDs;
+
 // Event table
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (wxID_OPEN, MainFrame::onOpen)

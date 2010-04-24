@@ -11,22 +11,25 @@
 
 #ifndef LTSVIEW_H
 #define LTSVIEW_H
+
 #include <wx/wx.h>
-#include <string>
-#include "mediator.h"
-
 #include <wx/app.h>
+#include <string>
 
-#include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/wx_tool.h"
 
-class MainFrame;
+#include "enums.h"
+#include "mediator.h"
+
 class GLCanvas;
 class LTS;
-class Visualizer;
+class MainFrame;
 class MarkManager;
+class RGB_Color;
 class Settings;
+class Visualizer;
 
 class LTSView :
   public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >,
@@ -43,7 +46,7 @@ class LTSView :
     Settings *settings;
     Visualizer *visualizer;
     MarkManager *markManager;
-    Utils::RankStyle rankStyle;
+    RankStyle rankStyle;
     bool fsmStyle;
     void applyMarkStyle();
 
@@ -63,24 +66,24 @@ class LTSView :
     void addMarkRule();
     void editMarkRule(int index);
     void exportToText(std::string filename);
-    Utils::MarkStyle getMarkStyle();
-    Utils::MatchStyle getMatchStyle();
+    MarkStyle getMarkStyle();
+    MatchStyle getMatchStyle();
     bool isMarked(State *s);
     bool isMarked(Cluster *s);
     bool isMarked(Transition *t);
-    Utils::RGB_Color getMarkRuleColor(int mr);
-    Utils::RGB_Color getNewRuleColour();
+    RGB_Color getMarkRuleColor(int mr);
+    RGB_Color getNewRuleColour();
     std::string getVersionString();
     void notifyRenderingFinished();
     void notifyRenderingStarted();
     void openFile(std::string fileName);
     void removeMarkRule(int mr);
     void setActionMark(int l,bool b);
-    void setMarkStyle(Utils::MarkStyle ms);
-    void setMatchStyle(Utils::MatchStyle ms);
-    void setMatchStyleClusters(Utils::MatchStyle ms);
-    void setRankStyle(Utils::RankStyle rs);
-    void setVisStyle(Utils::VisStyle vs);
+    void setMarkStyle(MarkStyle ms);
+    void setMatchStyle(MatchStyle ms);
+    void setMatchStyleClusters(MatchStyle ms);
+    void setRankStyle(RankStyle rs);
+    void setVisStyle(VisStyle vs);
     void setFSMStyle(bool b);
     void startSim();
     int getNumberOfParams() const;

@@ -11,44 +11,49 @@
 
 #ifndef MARKMANAGER_H
 #define MARKMANAGER_H
+
 #include <vector>
-#include "utils.h"
+
 #include "mcrl2/atermpp/set.h"
 
-struct MarkRule;
-class LTS;
-class State;
+#include "enums.h"
+
 class Cluster;
+class LTS;
+struct MarkRule;
+class RGB_Color;
+class State;
 class Transition;
 
-class MarkManager {
+class MarkManager
+{
   public:
     MarkManager();
     ~MarkManager();
 
     /* Mark rules */
-    int createMarkRule(int param,bool neg,Utils::RGB_Color col,
+    int createMarkRule(int param,bool neg,RGB_Color col,
         atermpp::set<ATerm> vals);
     void removeMarkRule(int mr);
     int getMarkRuleParam(int mr);
     bool getMarkRuleActivated(int mr);
     bool getMarkRuleNegated(int mr);
-    Utils::RGB_Color getMarkRuleColor(int mr);
+    RGB_Color getMarkRuleColor(int mr);
     atermpp::set<ATerm> getMarkRuleValues(int mr);
-    void setMarkRuleData(int mr,int param,bool neg,Utils::RGB_Color col,
+    void setMarkRuleData(int mr,int param,bool neg,RGB_Color col,
         atermpp::set<ATerm> vals);
     void setMarkRuleActivated(int mr,bool act);
 
-    void setMatchStyle(Utils::MatchStyle ms);
-    Utils::MatchStyle getMatchStyle();
-    void setMatchStyleClusters(Utils::MatchStyle ms);
-    Utils::MatchStyle getMatchStyleClusters();
+    void setMatchStyle(MatchStyle ms);
+    MatchStyle getMatchStyle();
+    void setMatchStyleClusters(MatchStyle ms);
+    MatchStyle getMatchStyleClusters();
 
     int getNumMarkedStates();
     int getNumMarkedTransitions();
     void setLTS(LTS *l,bool need_reset);
-    void setMarkStyle(Utils::MarkStyle ms);
-    Utils::MarkStyle getMarkStyle();
+    void setMarkStyle(MarkStyle ms);
+    MarkStyle getMarkStyle();
     void setActionMark(int l,bool b);
     void markClusters();
 
@@ -60,9 +65,9 @@ class MarkManager {
     std::vector< MarkRule* > mark_rules;
     std::vector< bool* > label_marks;
     std::vector< MarkRule* >::iterator first_free_mark_rule;
-    Utils::MatchStyle match_style;
-    Utils::MatchStyle match_style_clusters;
-    Utils::MarkStyle mark_style;
+    MatchStyle match_style;
+    MatchStyle match_style_clusters;
+    MarkStyle mark_style;
     int num_marked_states_any;
     int num_marked_states_all;
     int num_marked_transitions;

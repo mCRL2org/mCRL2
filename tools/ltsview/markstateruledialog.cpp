@@ -18,11 +18,10 @@
 #include "ids.h"
 #include "lts.h"
 #include "mediator.h"
-#include "utils.h"
+#include "rgb_color.h"
 
 using namespace std;
 using namespace IDs;
-using namespace Utils;
 
 BEGIN_EVENT_TABLE(MarkStateRuleDialog,wxDialog)
   EVT_LISTBOX(myID_PARAMETER_CHOICE,MarkStateRuleDialog::onParameterChoice)
@@ -32,8 +31,8 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
     Mediator* owner, LTS *alts)
  : wxDialog(parent,wxID_ANY,wxT("Add mark state rule"),
      wxDefaultPosition,wxDefaultSize,wxDEFAULT_DIALOG_STYLE |
-     wxRESIZE_BORDER) {
-
+     wxRESIZE_BORDER)
+{
   mediator = owner;
   lts = alts;
 
@@ -96,8 +95,8 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
 
   ruleClrButton = new mcrl2::utilities::wx::wxColorButton(
       this,this,wxID_ANY,wxDefaultPosition,wxSize(25,25));
-  ruleClrButton->SetBackgroundColour(RGB_to_wxC(
-    mediator->getNewRuleColour()));
+  ruleClrButton->SetBackgroundColour(
+      mediator->getNewRuleColour().toWxColour());
 
   wxBoxSizer* colSizer = new wxBoxSizer(wxHORIZONTAL);
   colSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Rule Colour:")),0,f,b);
@@ -153,7 +152,7 @@ void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,
   parameterListBox->SetStringSelection(paramName);
   loadValues(paramName);
 
-  ruleClrButton->SetBackgroundColour(RGB_to_wxC(col));
+  ruleClrButton->SetBackgroundColour(col.toWxColour());
 
   relationListBox->SetSelection(neg ? 1 : 0);
 
@@ -193,8 +192,8 @@ atermpp::set<ATerm> MarkStateRuleDialog::getValues()
   return vals;
 }
 
-Utils::RGB_Color MarkStateRuleDialog::getColor() {
-  return wxC_to_RGB(ruleClrButton->GetBackgroundColour());
+RGB_Color MarkStateRuleDialog::getColor() {
+  return RGB_Color(ruleClrButton->GetBackgroundColour());
 }
 
 wxString MarkStateRuleDialog::getMarkRuleString() {

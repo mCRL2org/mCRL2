@@ -14,12 +14,13 @@
 
 #include <vector>
 #include <set>
-#include "utils.h"
+#include "vectors.h"
 
 class Transition;
 class Cluster;
 
-class State {
+class State
+{
   public:
     State(int aid);
     ~State();
@@ -40,11 +41,11 @@ class State {
 
     float getPositionAngle() const;
     float getPositionRadius() const;
-    Utils::Point3D getPositionAbs() const;
-    Utils::Point3D getOutgoingControl() const;
-    Utils::Point3D getIncomingControl() const;
-    Utils::Point3D getLoopControl1() const;
-    Utils::Point3D getLoopControl2() const;
+    Vector3D getPositionAbs() const;
+    Vector3D getOutgoingControl() const;
+    Vector3D getIncomingControl() const;
+    Vector3D getLoopControl1() const;
+    Vector3D getLoopControl2() const;
     int getRank() const;
     bool isSimulated() const;
     bool isCentered() const;
@@ -56,26 +57,16 @@ class State {
     bool removeMatchedRule(int mr);
     void getMatchedRules(std::vector< int > &mrs);
     int getNumMatchedRules();
-    //unsigned int getNumMatchedRules() const;
-    //bool isMarked() const;
-    //void setMarking(bool b);
-    //void setMarkAllEmpty(bool b);
-    // Adds mr to the rules matched by this state, and returns the total number
-    // of rules matched.
-    //int mark(Utils::MarkRule* mr);
-    // Removes mr from the rules matched by this state (if any) and returns the
-    // total number of rules matched.
-    //int unmark(Utils::MarkRule* mr);
 
     void select();
     void setCluster(Cluster* c);
     void setPositionAngle(float a);
     void setPositionRadius(float r);
-    void setPositionAbs(Utils::Point3D &p);
-    void setOutgoingControl(Utils::Point3D &p);
-    void setIncomingControl(Utils::Point3D &p);
-    void setLoopControl1(Utils::Point3D &p);
-    void setLoopControl2(Utils::Point3D &p);
+    void setPositionAbs(Vector3D p);
+    void setOutgoingControl(Vector3D p);
+    void setIncomingControl(Vector3D p);
+    void setLoopControl1(Vector3D p);
+    void setLoopControl2(Vector3D p);
     void setID(int id);
     void setRank(int r);
     void setSimulated(bool simulated);
@@ -83,12 +74,12 @@ class State {
     void setZoomLevel(const int i);
     int getZoomLevel() const;
 
-    void addForce(Utils::Point3D f);
-    Utils::Point3D getForce();
+    void addForce(Vector3D f);
+    Vector3D getForce();
     void resetForce();
-    Utils::Vect getVelocity();
+    Vector2D getVelocity();
     void resetVelocity();
-    void setVelocity(Utils::Vect v);
+    void setVelocity(Vector2D v);
 
   private:
     Cluster* cluster;
@@ -98,23 +89,18 @@ class State {
     std::vector< Transition* > loops;
     std::vector< Transition* > outTransitions;
     std::set< int > matchedRules;
-    /*
-    std::vector< Utils::MarkRule* > rulesMatched;
-    bool marked;
-    bool markAllEmpty;*/
-
     float positionAngle;
     float positionRadius;
-    Utils::Point3D positionAbs;
-    Utils::Point3D outgoingControl;
-    Utils::Point3D incomingControl;
-    Utils::Point3D loopControl1;
-    Utils::Point3D loopControl2;
+    Vector3D positionAbs;
+    Vector3D outgoingControl;
+    Vector3D incomingControl;
+    Vector3D loopControl1;
+    Vector3D loopControl2;
     int rank;
     bool simulated;
     bool selected;
-    Utils::Point3D force;
-    Utils::Vect velocity;
+    Vector3D force;
+    Vector2D velocity;
 };
 
 #endif //STATE_H

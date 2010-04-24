@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <cstdlib>
 #include "primitivefactory.h"
+#include "rgb_color.h"
+#include "vectors.h"
 
 extern "C" {
 #ifdef __APPLE__
@@ -31,7 +33,6 @@ extern "C" {
 }
 
 using namespace std;
-using namespace Utils;
 
 class VisObject
 {
@@ -40,10 +41,10 @@ class VisObject
     ~VisObject();
     float* getMatrixP() const;
     RGB_Color getColor() const; //TODO This doesn't seem to be used;
-    Point3D getCoordinates() const;
+    Vector3D getCoordinates() const;
     int getPrimitive() const;
-    void setColor(Utils::RGB_Color c);
-    void setTextureColours(std::vector<Utils::RGB_Color>& colours);
+    void setColor(RGB_Color c);
+    void setTextureColours(std::vector<RGB_Color>& colours);
     void setPrimitive(int p);
     void draw(PrimitiveFactory *pf,unsigned char alpha);
     void drawWithTexture(PrimitiveFactory *pf, unsigned char alpha);
@@ -60,9 +61,7 @@ class VisObject
 VisObject::VisObject()
 {
   matrix = (float*)malloc(16*sizeof(float));
-  color.r = 150;
-  color.g = 150;
-  color.b = 150;
+  color = RGB_Color(150, 150, 150);
   numColours = 0;
   primitive = 0;
 
@@ -91,10 +90,9 @@ int VisObject::getPrimitive() const
   return primitive;
 }
 
-Point3D VisObject::getCoordinates() const
+Vector3D VisObject::getCoordinates() const
 {
-  Point3D result = { matrix[12],matrix[13],matrix[14] };
-  return result;
+  return Vector3D( matrix[12], matrix[13], matrix[14] );
 }
 
 void VisObject::setColor(RGB_Color c)
@@ -102,7 +100,7 @@ void VisObject::setColor(RGB_Color c)
   color = c;
 }
 
-void VisObject::setTextureColours(vector<Utils::RGB_Color>& colours)
+void VisObject::setTextureColours(vector<RGB_Color>& colours)
 {
   if (colours.size() > 0)
   {
@@ -119,9 +117,9 @@ void VisObject::setTextureColours(vector<Utils::RGB_Color>& colours)
     for(int i = 0; i < numColours; ++i)
     {
       int j = i % colours.size();
-      texture[4*i]   = colours[j].r;
-      texture[4*i+1] = colours[j].g;
-      texture[4*i+2] = colours[j].b;
+      texture[4*i]   = colours[j].red();
+      texture[4*i+1] = colours[j].green();
+      texture[4*i+2] = colours[j].blue();
       texture[4*i+3] = 255; // alpha value
     }
 
@@ -148,7 +146,7 @@ void VisObject::setPrimitive(int p)
 
 void VisObject::draw(PrimitiveFactory *pf,unsigned char alpha)
 {
-  glColor4ub(color.r,color.g,color.b,alpha);
+  glColor4ub(color.red(), color.green(), color.blue(), alpha);
   glPushMatrix();
   glMultMatrixf(matrix);
   for(size_t i = 0; i < identifiers.size(); ++i)
@@ -160,7 +158,7 @@ void VisObject::draw(PrimitiveFactory *pf,unsigned char alpha)
   {
     glPopName();
   }
-	glPopMatrix();
+  glPopMatrix();
 }
 
 void VisObject::drawWithTexture(PrimitiveFactory *pf, unsigned char alpha)
@@ -189,17 +187,17 @@ void VisObject::addIdentifier(int id)
 class Distance
 {
   private:
-    Point3D viewpoint;
+    Vector3D viewpoint;
   public:
-    explicit Distance(const Point3D& vp) : viewpoint(vp) {}
+    explicit Distance(const Vector3D& vp) : viewpoint(vp) {}
     bool operator()(const VisObject* o1,const VisObject* o2) const;
 };
 
 bool Distance::operator()(const VisObject *o1, const VisObject *o2) const
 {
-  Point3D d1 = o1->getCoordinates() - viewpoint;
-  Point3D d2 = o2->getCoordinates() - viewpoint;
-  return (dot_product(d1,d1) > dot_product(d2,d2));
+  Vector3D d1 = o1->getCoordinates() - viewpoint;
+  Vector3D d2 = o2->getCoordinates() - viewpoint;
+  return (d1.dot_product(d1) > d2.dot_product(d2));
 }
 
 /* -------------------- VisObjectFactory ------------------------------------ */
@@ -212,7 +210,7 @@ VisObjectFactory::~VisObjectFactory()
   clear();
 }
 
-void VisObjectFactory::sortObjects(Point3D viewpoint)
+void VisObjectFactory::sortObjects(Vector3D viewpoint)
 {
   stable_sort(objects_sorted.begin(),objects_sorted.end(),Distance(viewpoint));
 }

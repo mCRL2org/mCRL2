@@ -13,6 +13,7 @@
 
 #include "glcanvas.h"
 #include <wx/image.h>
+#include "tr/tr.h"
 #include "ids.h"
 #include "icons/zoom_cursor.xpm"
 #include "icons/zoom_cursor_mask.xpm"
@@ -23,10 +24,9 @@
 #include "mediator.h"
 #include "settings.h"
 #include "visualizer.h"
-#include "tr/tr.h"
 
-using namespace Utils;
 using namespace IDs;
+
 BEGIN_EVENT_TABLE(GLCanvas,wxGLCanvas)
     EVT_MOTION(GLCanvas::onMouseMove)
     EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
@@ -45,8 +45,9 @@ END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
     const wxSize &size,int* attribList)
-	: wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
-		     wxT(""),attribList), simReader(NULL) {
+  : wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
+         wxT(""),attribList), simReader(NULL)
+{
   mediator = owner;
   settings = ss;
   settings->subscribe(BackgroundColor,this);
@@ -54,22 +55,18 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
   collectingData = false;
   angleX = 0.0f;
   angleY = 0.0f;
-  moveVector.x = 0.0f;
-  moveVector.y = 0.0f;
-  moveVector.z = 0.0f;
+  moveVector = Vector3D(0.0f, 0.0f, 0.0f);
   startPosZ = 0.0f;
   farPlane = 0.0f;
   nearPlane = 1.0f;
   lightRenderMode = false;
-  simulating      = false;
+  simulating = false;
   setActiveTool(myID_SELECT);
   selectedType = PICKNONE;
 }
 
-GLCanvas::~GLCanvas() {
-}
-
-void GLCanvas::initialize() {
+void GLCanvas::initialize()
+{
   SetCurrent();
 
   glDepthFunc(GL_LEQUAL);
@@ -96,27 +93,29 @@ void GLCanvas::initialize() {
   glCullFace(GL_BACK);
 
   RGB_Color c = settings->getRGB(BackgroundColor);
-  glClearColor(c.r/255.0f,c.g/255.0f,c.b/255.0f,1.0f);
+  glClearColor(c.red() / 255.0f, c.green() / 255.0f, c.blue() / 255.0f,
+      1.0f);
   glClearDepth(1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   SwapBuffers();
   displayAllowed = true;
 }
 
-void GLCanvas::getMaxViewportDims(int *w,int* h) {
+void GLCanvas::getMaxViewportDims(int *w,int* h)
+{
   GLint dims[2];
   glGetIntegerv(GL_MAX_VIEWPORT_DIMS,dims);
   *w = int(dims[0]);
   *h = int(dims[1]);
 }
 
-void GLCanvas::resetView() {
+void GLCanvas::resetView()
+{
   angleX = 0.0f;
   angleY = 0.0f;
-  moveVector.x = 0.0f;
-  moveVector.y = 0.0f;
-  moveVector.z = 0.0f;
-  if (visualizer != NULL) {
+  moveVector = Vector3D(0.0f, 0.0f, 0.0f);
+  if (visualizer != NULL)
+  {
     float sw,sh;
     visualizer->computeBoundsInfo(sw,sh);
     startPosZ = 0.866f*sh + sw + nearPlane;
@@ -126,22 +125,28 @@ void GLCanvas::resetView() {
   display();
 }
 
-void GLCanvas::setVisualizer(Visualizer *vis) {
+void GLCanvas::setVisualizer(Visualizer *vis)
+{
   visualizer = vis;
 }
 
-void GLCanvas::disableDisplay() {
+void GLCanvas::disableDisplay()
+{
   displayAllowed = false;
 }
 
-void GLCanvas::enableDisplay() {
+void GLCanvas::enableDisplay()
+{
   displayAllowed = true;
 }
 
-void GLCanvas::notify(SettingID s) {
-  if (s == BackgroundColor) {
+void GLCanvas::notify(SettingID s)
+{
+  if (s == BackgroundColor)
+  {
     RGB_Color c = settings->getRGB(BackgroundColor);
-    glClearColor(c.r/255.0f,c.g/255.0f,c.b/255.0f,1.0f);
+    glClearColor(c.red() / 255.0f, c.green() / 255.0f, c.blue() /
+        255.0f, 1.0f);
   }
 }
 
@@ -182,30 +187,39 @@ void GLCanvas::display(bool coll_caller, bool selecting)
     glPushMatrix();
       glLoadIdentity();
 
-      if (!lightRenderMode || settings->getBool(NavLighting)) {
+      if (!lightRenderMode || settings->getBool(NavLighting))
+      {
         glEnable(GL_NORMALIZE);
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
-      } else {
+      }
+      else
+      {
         glDisable(GL_NORMALIZE);
         glDisable(GL_LIGHTING);
         glDisable(GL_LIGHT0);
       }
 
-      if (!lightRenderMode || settings->getBool(NavSmoothShading)) {
+      if (!lightRenderMode || settings->getBool(NavSmoothShading))
+      {
         glShadeModel(GL_SMOOTH);
-      } else {
+      }
+      else
+      {
         glShadeModel(GL_FLAT);
       }
 
-      if (settings->getBool(DisplayWireframe)) {
+      if (settings->getBool(DisplayWireframe))
+      {
         glPolygonMode(GL_FRONT,GL_LINE);
-      } else {
+      }
+      else
+      {
         glPolygonMode(GL_FRONT,GL_FILL);
       }
 
       // apply panning, zooming and rotating transformations
-      glTranslatef(moveVector.x,moveVector.y,moveVector.z - startPosZ);
+      glTranslatef(moveVector.x(), moveVector.y(), moveVector.z() - startPosZ);
       glRotatef(angleY,1.0f,0.0f,0.0f);
       glRotatef(angleX,0.0f,1.0f,0.0f);
 
@@ -218,13 +232,16 @@ void GLCanvas::display(bool coll_caller, bool selecting)
       float halfHeight = visualizer->getHalfStructureHeight();
       glTranslatef(0.0f,0.0f,-halfHeight);
 
-      if (simulating) {
+      if (simulating)
+      {
         visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState(),
           sim->getChosenTrans());
       }
-      if (!lightRenderMode || settings->getBool(NavShowStates)) {
+      if (!lightRenderMode || settings->getBool(NavShowStates))
+      {
 
-        if (settings->getBool(DisplayStates)) {
+        if (settings->getBool(DisplayStates))
+        {
           // Identify that we are drawing states
           glPushName(STATE);
           visualizer->drawStates(simulating);
@@ -256,13 +273,15 @@ void GLCanvas::display(bool coll_caller, bool selecting)
       }
 
       // Enable lighting again, if required
-      if (!lightRenderMode || settings->getBool(NavLighting)) {
+      if (!lightRenderMode || settings->getBool(NavLighting))
+      {
         glEnable(GL_NORMALIZE);
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
       }
 
-      if (!lightRenderMode || settings->getBool(NavTransparency)) {
+      if (!lightRenderMode || settings->getBool(NavTransparency))
+      {
         // determine current viewpoint in world coordinates
         glPushMatrix();
           glLoadIdentity();
@@ -270,10 +289,10 @@ void GLCanvas::display(bool coll_caller, bool selecting)
           glRotatef(-90.0f ,1.0f,0.0f,0.0f);
           glRotatef(-angleX,0.0f,1.0f,0.0f);
           glRotatef(-angleY,1.0f,0.0f,0.0f);
-          glTranslatef(-moveVector.x,-moveVector.y,-moveVector.z + startPosZ);
+          glTranslatef(-moveVector.x(),-moveVector.y(),-moveVector.z() + startPosZ);
           GLfloat M[16];
           glGetFloatv(GL_MODELVIEW_MATRIX,M);
-          Point3D viewpoint = { M[12],M[13],M[14] };
+          Vector3D viewpoint = Vector3D(M[12],M[13],M[14]);
         glPopMatrix();
         // sort clusters on distance to viewpoint
         visualizer->sortClusters(viewpoint);
@@ -291,20 +310,24 @@ void GLCanvas::display(bool coll_caller, bool selecting)
       glDisable(GL_BLEND);
 
       // do not show the picture in the canvas if we are collecting data
-      if (!collectingData && !selecting) {
+      if (!collectingData && !selecting)
+      {
         SwapBuffers();
       }
     glPopMatrix();
 
-    if (!collectingData) {
+    if (!collectingData)
+    {
       mediator->notifyRenderingFinished();
     }
     displayAllowed = true;
   }
 }
 
-void GLCanvas::reshape() {
-  if (GetContext()) {
+void GLCanvas::reshape()
+{
+  if (GetContext())
+  {
     int width,height;
     GetClientSize(&width,&height);
     SetCurrent();
@@ -316,38 +339,47 @@ void GLCanvas::reshape() {
   }
 }
 
-void GLCanvas::onPaint(wxPaintEvent& /*event*/) {
+void GLCanvas::onPaint(wxPaintEvent& /*event*/)
+{
   wxPaintDC dc(this);
   display();
 }
 
-void GLCanvas::onSize(wxSizeEvent& /*event*/) {
+void GLCanvas::onSize(wxSizeEvent& /*event*/)
+{
   reshape();
 }
 
-void GLCanvas::OnEraseBackground(wxEraseEvent& /*event*/) {
+void GLCanvas::OnEraseBackground(wxEraseEvent& /*event*/)
+{
 }
 
 // Mouse event handlers
 
-void GLCanvas::determineCurrentTool(wxMouseEvent& event) {
-  if (event.MiddleIsDown() || (event.LeftIsDown() && event.RightIsDown())) {
+void GLCanvas::determineCurrentTool(wxMouseEvent& event)
+{
+  if (event.MiddleIsDown() || (event.LeftIsDown() && event.RightIsDown()))
+  {
     currentTool = myID_ZOOM;
   }
-  else if (event.RightIsDown()) {
+  else if (event.RightIsDown())
+  {
     currentTool = myID_ROTATE;
   }
-  else {
+  else
+  {
     currentTool = activeTool;
   }
   setMouseCursor();
 }
 
-void GLCanvas::setMouseCursor() {
+void GLCanvas::setMouseCursor()
+{
   wxCursor cursor;
   wxImage img;
   bool ok = true;
-  switch (currentTool) {
+  switch (currentTool)
+  {
     case myID_SELECT:
       cursor = wxNullCursor;
       break;
@@ -371,27 +403,32 @@ void GLCanvas::setMouseCursor() {
       break;
   }
 
-  if (ok) {
+  if (ok)
+  {
     SetCursor(cursor);
   }
 }
 
-void GLCanvas::onMouseEnter(wxMouseEvent& /*event*/) {
+void GLCanvas::onMouseEnter(wxMouseEvent& /*event*/)
+{
   this->SetFocus();
 }
 
-void GLCanvas::onMouseDown(wxMouseEvent& event) {
+void GLCanvas::onMouseDown(wxMouseEvent& event)
+{
 
   lightRenderMode = true;
 
   determineCurrentTool(event);
   if (currentTool==myID_ZOOM || currentTool==myID_PAN ||
-      currentTool==myID_ROTATE) {
+      currentTool==myID_ROTATE)
+  {
     // Movement tools
     oldMouseX = event.GetX();
     oldMouseY = event.GetY();
   }
-  else if (event.LeftDown()) {
+  else if (event.LeftDown())
+  {
     // currentTool == myID_SELECT, selection tool
     // Delegate x and y coordinates to picking function.
     pickObjects(event.GetX(), event.GetY(), false);
@@ -399,13 +436,15 @@ void GLCanvas::onMouseDown(wxMouseEvent& event) {
   display();
 }
 
-void GLCanvas::onMouseUp(wxMouseEvent& event) {
+void GLCanvas::onMouseUp(wxMouseEvent& event)
+{
   lightRenderMode = false;
   determineCurrentTool(event);
   display();
 }
 
-void GLCanvas::onMouseDClick(wxMouseEvent& event) {
+void GLCanvas::onMouseDClick(wxMouseEvent& event)
+{
   lightRenderMode = true;
   if (currentTool == myID_SELECT)
   {
@@ -414,48 +453,60 @@ void GLCanvas::onMouseDClick(wxMouseEvent& event) {
   display();
 }
 
-void GLCanvas::onMouseMove(wxMouseEvent& event) {
-  if (event.Dragging()) {
+void GLCanvas::onMouseMove(wxMouseEvent& event)
+{
+  if (event.Dragging())
+  {
     // mouse is moving with some button(s) pressed
     int newMouseX = (int)event.GetX();
     int newMouseY = (int)event.GetY();
-    switch (currentTool) {
+    Vector3D delta;
+    switch (currentTool)
+    {
       case myID_ZOOM :
-	      moveVector.z += 0.01f*(startPosZ-moveVector.z)*(oldMouseY-newMouseY);
-	      oldMouseY = newMouseY;
+        delta = Vector3D(0.0f, 0.0f, 0.01f * (startPosZ -
+              moveVector.z()) * (oldMouseY - newMouseY));
+        moveVector = moveVector + delta;
+        oldMouseY = newMouseY;
         display();
-	      break;
+        break;
 
       case myID_PAN :
-	      moveVector.x -= 0.0015f*(startPosZ-moveVector.z)*(oldMouseX-newMouseX);
-	      moveVector.y += 0.0015f*(startPosZ-moveVector.z)*(oldMouseY-newMouseY);
-	      oldMouseX = newMouseX;
-	      oldMouseY = newMouseY;
-	      display();
-	      break;
+        delta = Vector3D(-0.0015f * (startPosZ - moveVector.z()) *
+            (oldMouseX - newMouseX), 0.0015f * (startPosZ -
+              moveVector.z()) * (oldMouseY - newMouseY), 0.0f);
+        moveVector = moveVector + delta;
+        oldMouseX = newMouseX;
+        oldMouseY = newMouseY;
+        display();
+        break;
 
       case myID_ROTATE :
-	      angleX -= 0.5f*(oldMouseX-newMouseX);
-	      angleY -= 0.5f*(oldMouseY-newMouseY);
-	      if (angleX >= 360.0f) angleX -= 360.0f;
-	      if (angleY >= 360.0f) angleY -= 360.0f;
-      	if (angleX < 0.0f) angleX += 360.0f;
-      	if (angleY < 0.0f) angleY += 360.0f;
-	      oldMouseX = newMouseX;
-	      oldMouseY = newMouseY;
-	      display();
-	      break;
+        angleX -= 0.5f*(oldMouseX-newMouseX);
+        angleY -= 0.5f*(oldMouseY-newMouseY);
+        if (angleX >= 360.0f) angleX -= 360.0f;
+        if (angleY >= 360.0f) angleY -= 360.0f;
+        if (angleX < 0.0f) angleX += 360.0f;
+        if (angleY < 0.0f) angleY += 360.0f;
+        oldMouseX = newMouseX;
+        oldMouseY = newMouseY;
+        display();
+        break;
 
       default : break;
     }
   }
-  else {
+  else
+  {
     event.Skip();
   }
 }
 
-void GLCanvas::onMouseWheel(wxMouseEvent& event) {
-  moveVector.z += 0.001f*(startPosZ-moveVector.z)*event.GetWheelRotation();
+void GLCanvas::onMouseWheel(wxMouseEvent& event)
+{
+  Vector3D delta = Vector3D(0.0f, 0.0f,
+      0.001f * (startPosZ - moveVector.z()) * event.GetWheelRotation());
+  moveVector = moveVector + delta;
   display();
 }
 
@@ -504,9 +555,12 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res)
 }
 
 // Implementation of simulation header
-void GLCanvas::refresh() {
-  if (sim != NULL) {
-    if (sim->getStarted()) {
+void GLCanvas::refresh()
+{
+  if (sim != NULL)
+  {
+    if (sim->getStarted())
+    {
 
       if (selectedType != SIMSTATE)
       {
@@ -517,7 +571,8 @@ void GLCanvas::refresh() {
       simulating = true;
       display();
     }
-    else {
+    else
+    {
       if (selectedType == SIMSTATE)
       {
         // Remove selections made in simulation
@@ -530,13 +585,17 @@ void GLCanvas::refresh() {
   }
 }
 
-void GLCanvas::selChange() {
-  if (sim != NULL) {
-    if (sim->getStarted()) {
+void GLCanvas::selChange()
+{
+  if (sim != NULL)
+  {
+    if (sim->getStarted())
+    {
       simulating = true;
       display();
     }
-    else {
+    else
+    {
       simulating = false;
       display();
     }
@@ -544,7 +603,8 @@ void GLCanvas::selChange() {
 }
 
 
-void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC) {
+void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC)
+{
   // This method selects the object clicked.
   //
   // The buffer content per hit is encoded as follows:
@@ -552,7 +612,7 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC) {
   // buffer[1]: The minimal depth of the object hit
   // buffer[2]: The maximal depth of the object. We are certainly not interested
   //            in this.
-  // buffer[3]: The type of the object picked, as defined in utils.h
+  // buffer[3]: The type of the object picked
   // buffer[4]: The first identifier of the object picked.
   // (buffer[5]: The second identifier of the object picked.)
 
@@ -601,7 +661,8 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC) {
   selectedType = static_cast<PickState>(selectedObject[0]);
 
   mediator->deselect();
-  switch (selectedType) {
+  switch (selectedType)
+  {
     case STATE:
       mediator->selectStateByID(selectedObject[1]);
       break;
@@ -626,7 +687,8 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC) {
 }
 
 
-void GLCanvas::pickObjects(int x, int y, bool doubleC) {
+void GLCanvas::pickObjects(int x, int y, bool doubleC)
+{
   // In the worst case, all the objects in the frame are hit. These objects are
   // given by the mediator. For each hit, the following needs to be recorded:
   // * The number of names on the stack
@@ -635,7 +697,8 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
   // * The identifier of the type of object clicked
   // * Up to two numbers indicating the object selected
   GLsizei bufsize = mediator->getNumberOfObjects() * 6;
-  if(GetContext()) {
+  if(GetContext())
+  {
     GLuint *selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
     GLint  hits;
     GLint viewport[4];
@@ -677,38 +740,29 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
   }
 }
 
-void GLCanvas::startForceDirected() {
+void GLCanvas::startForceDirected()
+{
   stop_force_directed = false;
   visualizer->forceDirectedInit();
-  while (!stop_force_directed) {
-    if (GetContext()) {
+  while (!stop_force_directed)
+  {
+    if (GetContext())
+    {
       SetCurrent();
     }
     visualizer->forceDirectedStep();
     display();
     wxTheApp->Yield(true);
   }
-  /*
-  int n = 0;
-  while (n < 10) {
-    if (GetContext()) {
-      SetCurrent();
-    }
-    #include <iostream>
-    using namespace std;
-    cerr << "------- Iteration " << n << " ---------" << endl;
-    ++n;
-    visualizer->forceDirectedStep();
-    display();
-    wxTheApp->Yield(true);
-  }*/
 }
 
-void GLCanvas::stopForceDirected() {
+void GLCanvas::stopForceDirected()
+{
   stop_force_directed = true;
 }
 
-void GLCanvas::resetStatePositions() {
+void GLCanvas::resetStatePositions()
+{
   visualizer->resetStatePositions();
   display();
 }

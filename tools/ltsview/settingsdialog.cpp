@@ -18,13 +18,13 @@
 #include "mcrl2/utilities/colorbutton.h"
 #include "glcanvas.h"
 #include "settings.h"
+#include "mathutils.h"
 #include "ids.h"
-#include "utils.h"
+#include "rgb_color.h"
 
 using mcrl2::utilities::wx::wxColorButton;
 
 using namespace IDs;
-using namespace Utils;
 
 BEGIN_EVENT_TABLE(SettingsDialog,wxDialog)
   EVT_BUTTON(myID_BACKGROUND_CLR,SettingsDialog::onBackgroundClrButton)
@@ -173,42 +173,42 @@ void SettingsDialog::setupClrPanel(wxPanel* panel)
 
   wxSpinCtrl *trSpin = new wxSpinCtrl(panel,myID_TRANSPARENCY,wxEmptyString,
       wxDefaultPosition,spinSize,spinStyle,0,100,
-      static_cast<int>((255-settings->getUByte(Alpha))/2.55f));
+      static_cast<int>((255-settings->getInt(Alpha))/2.55f));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transparency:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(trSpin,0,rf,bd);
 
   wxColorButton *bgButton = new wxColorButton(panel,this,myID_BACKGROUND_CLR,
       wxDefaultPosition,btnSize);
-  bgButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(BackgroundColor)));
+  bgButton->SetBackgroundColour(settings->getRGB(BackgroundColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Background:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(bgButton,0,rf,bd);
 
   wxColorButton *ndButton = new wxColorButton(panel,this,myID_STATE_CLR,
       wxDefaultPosition,btnSize);
-  ndButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(StateColor)));
+  ndButton->SetBackgroundColour(settings->getRGB(StateColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(ndButton,0,rf,bd);
 
   wxColorButton *deButton = new wxColorButton(panel,this,myID_DOWN_EDGE_CLR,
       wxDefaultPosition,btnSize);
-  deButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(DownEdgeColor)));
+  deButton->SetBackgroundColour(settings->getRGB(DownEdgeColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(deButton,0,rf,bd);
 
   wxColorButton *ueButton = new wxColorButton(panel,this,myID_UP_EDGE_CLR,
       wxDefaultPosition,btnSize);
-  ueButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(UpEdgeColor)));
+  ueButton->SetBackgroundColour(settings->getRGB(UpEdgeColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Backpointer:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(ueButton,0,rf,bd);
 
   wxColorButton *mkButton = new wxColorButton(panel,this,myID_MARK_CLR,
       wxDefaultPosition,btnSize);
-  mkButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(MarkedColor)));
+  mkButton->SetBackgroundColour(settings->getRGB(MarkedColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Mark:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(mkButton,0,rf,bd);
@@ -217,8 +217,8 @@ void SettingsDialog::setupClrPanel(wxPanel* panel)
       wxDefaultPosition,btnSize);
   wxColorButton *i2Btn = new wxColorButton(panel,this,myID_INTERPOLATE_CLR_2,
       wxDefaultPosition,btnSize);
-  i1Btn->SetBackgroundColour(RGB_to_wxC(settings->getRGB(InterpolateColor1)));
-  i2Btn->SetBackgroundColour(RGB_to_wxC(settings->getRGB(InterpolateColor2)));
+  i1Btn->SetBackgroundColour(settings->getRGB(InterpolateColor1).toWxColour());
+  i2Btn->SetBackgroundColour(settings->getRGB(InterpolateColor2).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Interpolate:")),0,lf,bd);
   sizer->Add(i1Btn,0,rf,bd);
   sizer->Add(i2Btn,0,rf,bd);
@@ -248,27 +248,27 @@ void SettingsDialog::setupSimPanel(wxPanel* panel)
 
   wxColorButton *shButton = new wxColorButton(panel,this,myID_SIM_PREV_CLR,
       wxDefaultPosition,btnSize);
-  shButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPrevColor)));
+  shButton->SetBackgroundColour(settings->getRGB(SimPrevColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,
         wxT("Previous states/transitions:")),0,lf,bd);
   sizer->Add(shButton,0,rf,bd);
 
   wxColorButton *scButton = new wxColorButton(panel,this,myID_SIM_CURR_CLR,
       wxDefaultPosition,btnSize);
-  scButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimCurrColor)));
+  scButton->SetBackgroundColour(settings->getRGB(SimCurrColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Current state:")),0,lf,bd);
   sizer->Add(scButton,0,rf,bd);
 
   wxColorButton *ssButton = new wxColorButton(panel,this,myID_SIM_SEL_CLR,
       wxDefaultPosition,btnSize);
-  ssButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimSelColor)));
+  ssButton->SetBackgroundColour(settings->getRGB(SimSelColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Selected state/transition:")),
       0,lf,bd);
   sizer->Add(ssButton,0,rf,bd);
 
   wxColorButton *spButton = new wxColorButton(panel,this,myID_SIM_POS_CLR,
       wxDefaultPosition,btnSize);
-  spButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPosColor)));
+  spButton->SetBackgroundColour(settings->getRGB(SimPosColor).toWxColour());
   sizer->Add(new wxStaticText(panel,wxID_ANY,
         wxT("Possible states/transitions:")),0,lf,bd);
   sizer->Add(spButton,0,rf,bd);
@@ -313,7 +313,7 @@ void SettingsDialog::setupPfmPanel(wxPanel* panel)
   sizer->Add(nliCheck,0,lf,bd);
 
   wxCheckBox *ntrCheck = new wxCheckBox(panel,myID_NAV_TRANSPARENCY,
-			wxT("Render transparent objects correctly"));
+      wxT("Render transparent objects correctly"));
   ntrCheck->SetValue(settings->getBool(NavTransparency));
   sizer->Add(ntrCheck,0,lf,bd);
 
@@ -330,7 +330,7 @@ void SettingsDialog::notify(SettingID s)
       {
       wxSpinCtrl* chSpin = static_cast<wxSpinCtrl*>(
           FindWindowById(myID_CLUSTER_HEIGHT,this));
-      chSpin->SetValue(Utils::round_to_int(10*settings->getFloat(ClusterHeight)));
+      chSpin->SetValue(MathUtils::round_to_int(10*settings->getFloat(ClusterHeight)));
       break;
       }
     default:
@@ -341,77 +341,77 @@ void SettingsDialog::notify(SettingID s)
 void SettingsDialog::onBackgroundClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(BackgroundColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(BackgroundColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onDownEdgeClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(DownEdgeColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(DownEdgeColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onInterpolateClr1Button(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(InterpolateColor1,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(InterpolateColor1, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onInterpolateClr2Button(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(InterpolateColor2,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(InterpolateColor2, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onMarkClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(MarkedColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(MarkedColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onStateClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(StateColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(StateColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onUpEdgeClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(UpEdgeColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(UpEdgeColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onSimCurrClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(SimCurrColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(SimCurrColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onSimPosClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(SimPosColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(SimPosColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onSimSelClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(SimSelColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(SimSelColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
 void SettingsDialog::onSimPrevClrButton(wxCommandEvent& event)
 {
   wxColorButton *btn = (wxColorButton*)event.GetEventObject();
-  settings->setRGB(SimPrevColor,wxC_to_RGB(btn->GetBackgroundColour()));
+  settings->setRGB(SimPrevColor, RGB_Color(btn->GetBackgroundColour()));
   glCanvas->display();
 }
 
@@ -498,8 +498,8 @@ void SettingsDialog::onStateRepulsionSlider(wxScrollEvent& event)
 
 void SettingsDialog::onTransparencySpin(wxSpinEvent& event)
 {
-  settings->setUByte(Alpha,
-      static_cast<unsigned char>((100-event.GetPosition())*2.55f));
+  settings->setInt(Alpha,
+      static_cast<int>((100-event.GetPosition())*2.55f));
   glCanvas->display();
 }
 

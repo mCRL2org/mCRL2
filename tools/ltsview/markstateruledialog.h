@@ -11,28 +11,31 @@
 
 #ifndef MARKSTATERULEDIALOG_H
 #define MARKSTATERULEDIALOG_H
+
 #include <map>
 #include <vector>
 #include <wx/wx.h>
-#include "utils.h"
-#include "mcrl2/utilities/colorbutton.h"
+
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/utilities/colorbutton.h"
 
 class LTS;
-class wxCheckListBox;
 class Mediator;
+class RGB_Color;
+class wxCheckListBox;
 
-class MarkStateRuleDialog : public wxDialog {
+class MarkStateRuleDialog : public wxDialog
+{
   public:
     MarkStateRuleDialog(wxWindow* parent,Mediator* owner,LTS* alts);
     ~MarkStateRuleDialog();
     int getParamIndex();
     bool getNegated();
     atermpp::set<ATerm> getValues();
-    Utils::RGB_Color getColor();
+    RGB_Color getColor();
     wxString getMarkRuleString();
-    void setData(int p,Utils::RGB_Color col,bool neg,
+    void setData(int p,RGB_Color col,bool neg,
         atermpp::set<ATerm> vals);
     void onParameterChoice(wxCommandEvent& event);
   private:

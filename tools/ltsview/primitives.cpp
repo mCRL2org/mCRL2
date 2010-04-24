@@ -10,10 +10,13 @@
 /// \brief Source file for primitive classes
 
 #include "primitives.h"
-#include "utils.h"
-#include <cmath>
 
-using namespace Utils;
+#include <cmath>
+#include <stdlib.h>
+#include <string.h>
+#include "mathutils.h"
+
+using namespace MathUtils;
 
 /* -------- P_Sphere -------------------------------------------------------- */
 

@@ -11,10 +11,13 @@
 
 #ifndef SETTINGS_H
 #define SETTINGS_H
-#include <vector>
-#include "utils.h"
 
-enum SettingID {
+#include <map>
+
+class RGB_Color;
+
+enum SettingID
+{
   StateSize,
   BranchRotation,
   ClusterHeight,
@@ -46,22 +49,23 @@ enum SettingID {
   BackgroundColor,
   TransitionAttraction,
   TransitionLength,
-  StateRepulsion,
-  NUM_OF_SETTINGID /* should always be last! */
+  StateRepulsion
 };
 
 /* abstract base class for subscribers */
-class Subscriber {
+class Subscriber
+{
   public:
     virtual ~Subscriber() {}
     virtual void notify(SettingID s) = 0;
 };
 
-class Setting; /* forward declaration */
+class AbsSetting;
 
-class Settings {
+class Settings
+{
   private:
-    std::vector< Setting* > settings;
+    std::map< SettingID, AbsSetting* > settings;
   public:
     Settings();
     ~Settings();
@@ -69,12 +73,11 @@ class Settings {
     int  getInt(SettingID s);
     bool getBool(SettingID s);
     float getFloat(SettingID s);
-    unsigned char getUByte(SettingID s);
-    Utils::RGB_Color getRGB(SettingID s);
+    RGB_Color getRGB(SettingID s);
+		void loadDefaults();
     void setInt(SettingID s,int v);
     void setBool(SettingID s,bool v);
     void setFloat(SettingID s,float v);
-    void setUByte(SettingID s,unsigned char v);
-    void setRGB(SettingID s,Utils::RGB_Color v);
+    void setRGB(SettingID s, RGB_Color v);
 };
 #endif

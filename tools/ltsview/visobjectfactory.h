@@ -12,10 +12,12 @@
 #ifndef VISOBJECTFACTORY_H
 #define VISOBJECTFACTORY_H
 #include <vector>
-#include "utils.h"
 
-class PrimitiveFactory; /* forward declaration */
-class VisObject; /* forward declaration */
+
+class PrimitiveFactory;
+class RGB_Color;
+class Vector3D;
+class VisObject;
 
 class VisObjectFactory
 {
@@ -24,10 +26,10 @@ class VisObjectFactory
     ~VisObjectFactory();
     void clear();
     void drawObjects(PrimitiveFactory *pf,unsigned char alpha,bool texture);
-    int  makeObject(int primitive, std::vector<int> &ids);
-    void sortObjects(Utils::Point3D viewpoint);
-    void updateObjectColor(int obj,Utils::RGB_Color color);
-    void updateObjectTexture(int obj,std::vector<Utils::RGB_Color> &texColours);
+    int makeObject(int primitive, std::vector<int> &ids);
+    void sortObjects(Vector3D viewpoint);
+    void updateObjectColor(int obj, RGB_Color color);
+    void updateObjectTexture(int obj, std::vector<RGB_Color> &texColours);
     void updateObjectMatrix(int obj);
   private:
     std::vector<VisObject*> objects;

@@ -11,12 +11,15 @@
 
 #ifndef LTS_H
 #define LTS_H
+
 #include <string>
 #include <vector>
 #include <map>
-#include "utils.h"
+
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/lts/lts.h"
+
+#include "enums.h"
 
 class LTS;
 class Mediator;
@@ -63,7 +66,7 @@ class LTS
     void addCluster(Cluster* c);
     void addClusterAndBelow(Cluster* c);
     void clearStatePositions();
-    void clusterStates(Utils::RankStyle rs);
+    void clusterStates(RankStyle rs);
     void computeClusterInfo();
     void getActionLabels(std::vector<std::string> &ls) const;
     State* getInitialState() const;
@@ -93,7 +96,7 @@ class LTS
     void deselect();
     void positionClusters(bool fsmstyle);
     void positionStates();
-    void rankStates(Utils::RankStyle rs);
+    void rankStates(RankStyle rs);
 
     bool readFromFile(std::string filename);
 

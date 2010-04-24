@@ -13,12 +13,12 @@
 #define SETTINGSDIALOG_H
 #include <wx/wx.h>
 #include "settings.h"
-#include "utils.h"
 
 class GLCanvas;
 class wxSpinEvent;
 
-class SettingsDialog: public wxDialog, public Subscriber {
+class SettingsDialog: public wxDialog, public Subscriber
+{
   public:
     SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss);
     void notify(SettingID s);
