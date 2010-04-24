@@ -8,6 +8,7 @@
 %
 % Specification of the Set data sort.
 
+#using S
 #include bool.spec
 #include fset.spec
 

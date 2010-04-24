@@ -8,6 +8,7 @@
 %
 % Specification of the List data sort.
 
+#using S
 #include bool.spec
 #include pos.spec
 #include nat.spec

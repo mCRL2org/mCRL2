@@ -7,7 +7,7 @@
 % http://www.boost.org/LICENSE_1_0.txt)
 %
 % Specification of the Bag data sort.
-
+#using S
 #include nat.spec
 #include fbag.spec
 #include fset.spec
