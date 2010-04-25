@@ -10,19 +10,17 @@
 /// \brief Source file of LTS class
 
 #include "wx.hpp" // precompiled headers
-
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/print.h"
-
-#include "lts.h"
 #include "cluster.h"
+#include "fsm_state_positioner.h"
+#include "lts.h"
 #include "mathutils.h"
 #include "mediator.h"
 #include "simulation.h"
 #include "state.h"
 #include "transition.h"
-#include "vectors.h"
 
 using namespace std;
 using namespace mcrl2::trace;
@@ -30,29 +28,17 @@ using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace MathUtils;
 
-/**************************** Cluster_iterator ********************************/
+/**************************** Cluster iterators *******************************/
 
-Cluster_iterator::Cluster_iterator(LTS *l,bool rev)
+Cluster_iterator::Cluster_iterator(LTS *l)
 {
-  reverse = rev;
   lts = l;
-  if (reverse)
-  {
-    rank = lts->getMaxRanks()-1;
-  }
-  else
-  {
-    rank = 0;
-  }
+  rank = 0;
   cluster = 0;
-  while (!is_end() && !is_ok())
+  while (!is_end() && !is_valid())
   {
     next();
   }
-}
-
-Cluster_iterator::~Cluster_iterator()
-{
 }
 
 void Cluster_iterator::operator++()
@@ -60,7 +46,7 @@ void Cluster_iterator::operator++()
   if (!is_end())
   {
     next();
-    while (!is_end() && !is_ok())
+    while (!is_end() && !is_valid())
     {
       next();
     }
@@ -72,7 +58,7 @@ Cluster* Cluster_iterator::operator*()
   return lts->clustersInRank[rank][cluster];
 }
 
-bool Cluster_iterator::is_ok()
+bool Cluster_iterator::is_valid()
 {
   return (lts->clustersInRank[rank].size() > 0)
       && (lts->clustersInRank[rank][cluster] != NULL);
@@ -80,14 +66,7 @@ bool Cluster_iterator::is_ok()
 
 bool Cluster_iterator::is_end()
 {
-  if (reverse)
-  {
-    return (rank == -1);
-  }
-  else
-  {
-    return (rank == lts->getMaxRanks());
-  }
+  return (rank == lts->getMaxRanks());
 }
 
 void Cluster_iterator::next()
@@ -96,22 +75,36 @@ void Cluster_iterator::next()
   if (cluster >= lts->clustersInRank[rank].size())
   {
     cluster = 0;
-    if (reverse)
-    {
-      --rank;
-      while (rank >= 0 && lts->clustersInRank[rank].size() == 0)
-      {
-        --rank;
-      }
-    }
-    else
+    ++rank;
+    while (rank < lts->getMaxRanks() &&
+        lts->clustersInRank[rank].size() == 0)
     {
       ++rank;
-      while (rank < lts->getMaxRanks() &&
-          lts->clustersInRank[rank].size() == 0)
-      {
-        ++rank;
-      }
+    }
+  }
+}
+
+Reverse_cluster_iterator::Reverse_cluster_iterator(LTS* l)
+  : Cluster_iterator(l)
+{
+  rank = lts->getMaxRanks() - 1;
+}
+
+bool Reverse_cluster_iterator::is_end()
+{
+  return (rank == -1);
+}
+
+void Reverse_cluster_iterator::next()
+{
+  ++cluster;
+  if (cluster >= lts->clustersInRank[rank].size())
+  {
+    cluster = 0;
+    --rank;
+    while (rank >= 0 && lts->clustersInRank[rank].size() == 0)
+    {
+      --rank;
     }
   }
 }
@@ -248,9 +241,14 @@ LTS::~LTS()
   }
 }
 
-Cluster_iterator LTS::getClusterIterator(bool reverse)
+Cluster_iterator LTS::getClusterIterator()
 {
-  return Cluster_iterator(this,reverse);
+  return Cluster_iterator(this);
+}
+
+Reverse_cluster_iterator LTS::getReverseClusterIterator()
+{
+  return Reverse_cluster_iterator(this);
 }
 
 State_iterator LTS::getStateIterator()
@@ -776,23 +774,13 @@ void LTS::positionClusters(bool fsmstyle)
   initialState->getCluster()->center();
 }
 
-void LTS::positionStates()
-{
-  vector< State* > undecided;
-  edgeLengthBottomUp(undecided);
-  edgeLengthTopDown(undecided);
-  resolveClusterSlots();
-}
-
 void LTS::clearStatePositions()
 {
-  int i;
-  Cluster *c;
   for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci)
   {
-    c = *ci;
+    Cluster* c = *ci;
     // center all states
-    for (i = 0; i < c->getNumStates(); ++i)
+    for (int i = 0; i < c->getNumStates(); ++i)
     {
       c->getState(i)->center();
     }
@@ -801,287 +789,10 @@ void LTS::clearStatePositions()
   }
 }
 
-void LTS::edgeLengthBottomUp(vector< State* > &undecided)
+void LTS::positionStates()
 {
-  //Phase 1: Processes states bottom-up, keeping edges as short as possible.
-  //Pre:  clustersInRank is correctly sorted by rank.
-  //Post: states are positioned bottom up, keeping edges as
-  //      short as possible, if enough information is available.
-  //Ret:  states that could not be placed in this phase, sorted bottom-up
-  //
-  // The details of this algorithm can be found in  Frank van Ham's master's
-  // thesis, pp. 21-29
-
-  int s,t;
-  State *succ, *currState;
-  Cluster* currCluster;
-  // Iterate over the ranks in reverse order (bottom-up):
-  // we create a *reverse* cluster iterator
-  for (Cluster_iterator ci = getClusterIterator(true); !ci.is_end(); ++ci)
-  {
-    currCluster = *ci;
-    // Iterate over the states in this cluster
-    for (s = 0; s < currCluster->getNumStates(); ++s)
-    {
-      currState = currCluster->getState(s);
-      // Compute the position of the state, based on number and position of
-      // descendants of its cluster.
-      if (currCluster->getNumStates() == 1)
-      {
-        currState->center();
-        currCluster->occupyCenterSlot(currState);
-      }
-      else
-      {
-        switch (currCluster->getNumDescendants())
-        {
-          case 0:
-          {
-            // Case three: No descendant clusters.
-            // Center the state and mark it as undecided
-            currState->center();
-
-            // if the cluster is centered, this state has to be processed in the
-            // second pass, otherwise it will skip the second pass and be
-            // processed in the third pass.
-            if (currCluster->isCentered())
-            {
-              undecided.push_back(currState);
-            }
-            else
-            {
-              currCluster->addUndecidedState(currState);
-            }
-            break;
-          }
-          case 1:
-          {
-            // Case one: One descendant cluster.
-            // We know the states in this cluster have a pseudo-correct position
-            // (as determined in this pass), since we process the system bottom-up
-
-            // Get the subordinate states. These are all in one cluster, and we
-            // can calculate the position of the current state directly from them.
-
-            // Variable that keeps track of whether or not the children are all
-            // centered.
-            bool allcentered = true;
-            t = 0;
-            while (allcentered && t < currState->getNumOutTransitions())
-            {
-              succ = currState->getOutTransition(t)->getEndState();
-              if (currState->getRank()+1 == succ->getRank())
-              {
-                allcentered = succ->isCentered();
-              }
-              ++t;
-            }
-
-            if (allcentered)
-            {
-              // Center the state and mark it as undecided
-              currState->center();
-              // if the cluster is centered, this state has to be processed in the
-              // second pass, otherwise it will skip the second pass and be
-              // processed in the third pass.
-              if (currCluster->isCentered())
-              {
-                undecided.push_back(currState);
-              }
-              else
-              {
-                currCluster->addUndecidedState(currState);
-              }
-            }
-            else
-            {
-              Vector2D v = Vector2D(0, 0);
-              for (t = 0; t < currState->getNumOutTransitions(); ++t)
-              {
-                succ = currState->getOutTransition(t)->getEndState();
-                if (currState->getRank()+1 == succ->getRank()
-                    && !succ->isCentered())
-                {
-                  // convert subordinate position to a vector and add
-                  v = v + (Vector2D(succ->getPositionAngle() *
-                      succ->getPositionRadius()));
-                }
-              }
-
-              unsigned int ring = round_to_int(v.length() *
-                  float(Cluster::NUM_RINGS-1) /
-                  currCluster->getTopRadius());
-              ring = min(ring,Cluster::NUM_RINGS-1);
-
-              if (ring == 0)
-              {
-                // v is sufficiently small, center the state.
-                currState->center();
-                currCluster->occupyCenterSlot(currState);
-              }
-              else
-              {
-                // Transform v into an angle, assign it to state position.
-                float angle = v.toDegrees();
-                currState->setPositionAngle(angle);
-                currState->setPositionRadius(currCluster->getTopRadius() *
-                    float(ring) / float(Cluster::NUM_RINGS-1));
-                currCluster->occupySlot(ring,angle,currState);
-              }
-            }
-            break;
-          }
-          default:
-          {
-            // Case two: More than one descendant cluster.
-            // Iterate over subordinates, calculating sum of vectors.
-            Vector2D v = Vector2D(0, 0);
-            for (t = 0; t < currState->getNumOutTransitions(); ++t)
-            {
-              succ = currState->getOutTransition(t)->getEndState();
-              if (currState->getRank()+1 == succ->getRank())
-              {
-                if (succ->getCluster()->isCentered())
-                {
-                  if (!succ->isCentered())
-                  {
-                    v = v + (Vector2D(succ->getPositionAngle() *
-                        succ->getPositionRadius()));
-                  }
-                }
-                else
-                {
-                  v = v + (Vector2D(succ->getCluster()->getPosition() *
-                        currCluster->getBaseRadius()));
-                  if (!succ->isCentered())
-                  {
-                    v = v + (Vector2D(succ->getPositionAngle() +
-                          succ->getCluster()->getPosition()) *
-                        succ->getPositionRadius());
-                  }
-                }
-              }
-            }
-
-            unsigned int ring = round_to_int(v.length() *
-                float(Cluster::NUM_RINGS-1) / currCluster->getTopRadius());
-            ring = min(ring,Cluster::NUM_RINGS-1);
-
-            if (ring == 0)
-            {
-              // v is sufficiently small, center the state.
-              currState->center();
-              currCluster->occupyCenterSlot(currState);
-            }
-            else
-            {
-              // Transform v into an angle, assign it to state position.
-              float angle = v.toDegrees();
-              currState->setPositionAngle(angle);
-              currState->setPositionRadius(currCluster->getTopRadius() *
-                  float(ring) / float(Cluster::NUM_RINGS-1));
-              currCluster->occupySlot(ring,angle,currState);
-            }
-            break;
-          }
-        }
-      }
-    }
-  }
-}
-
-void LTS::edgeLengthTopDown(vector< State* > &ss)
-{
-  /* Phase 2: Process states top-down, keeping edges as short as
-   * possible.
-   * Pre:  ss is correctly sorted by rank, bottom-up.
-   * Post: ss contains the states that could not be placed by this
-   *       phase, sorted top-down.
-   */
-  Cluster* currCluster;
-  State* pred;
-  int t;
-  bool allcentered;
-
-  // Iterate over the states in reverse order (top-down)
-  for (vector<State*>::reverse_iterator state_it = ss.rbegin(); state_it !=
-      ss.rend(); ++state_it)
-  {
-
-    // We know that this state is already centered after the previous pass
-    //
-    // Get the cluster belonging to this state
-    currCluster = (*state_it)->getCluster();
-
-    // We know there is only one ancestor cluster and that the current cluster
-    // is centered below it.
-    // We know the states in the above cluster have pseudo-correct
-    // positions, as determined in this and the previous pass, so we can
-    // proceed placing the states based on this information.
-    // The ancestor states are all in one cluster, and we can calculate the
-    // position of the current state directly from them.
-
-    // Calculate the sum of the vectors gained from all subordinate angles
-    allcentered = true;
-    t = 0;
-    while (allcentered && t < (**state_it).getNumInTransitions())
-    {
-      pred = (**state_it).getInTransition(t)->getBeginState();
-      if ((**state_it).getRank()-1 == pred->getRank())
-      {
-        allcentered = pred->isCentered();
-      }
-      ++t;
-    }
-    if (allcentered)
-    {
-      currCluster->addUndecidedState(*state_it);
-    }
-    else
-    {
-      Vector2D v = Vector2D(0, 0);
-      for (t = 0; t < (**state_it).getNumInTransitions(); ++t)
-      {
-        pred = (**state_it).getInTransition(t)->getBeginState();
-        if ((**state_it).getRank()-1 == pred->getRank()
-            && !pred->isCentered())
-        {
-          v = v + (Vector2D(pred->getPositionAngle() *
-                pred->getPositionRadius()));
-        }
-      }
-
-      unsigned int ring = round_to_int(v.length() * float(Cluster::NUM_RINGS-1) /
-          currCluster->getTopRadius());
-      ring = min(ring,Cluster::NUM_RINGS-1);
-
-      if (ring == 0)
-      {
-        // v is sufficiently small, center the state.
-        (*state_it)->center();
-        currCluster->occupyCenterSlot(*state_it);
-      }
-      else
-      {
-        // Transform v into an angle, assign it to state position.
-        float angle = v.toDegrees();
-        (*state_it)->setPositionAngle(angle);
-        (*state_it)->setPositionRadius(currCluster->getTopRadius() * float(ring)
-            / float(Cluster::NUM_RINGS-1));
-        currCluster->occupySlot(ring,angle,*state_it);
-      }
-    }
-  }
-}
-
-void LTS::resolveClusterSlots()
-{
-  //Resolves the slots of each cluster, positioning the states within each slot
-  //in such a way that they do not overlap.
-  for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci)
-  {
-    (**ci).resolveSlots();
-  }
+  FSMStatePositioner state_positioner(this);
+  state_positioner.positionStates();
 }
 
 LTS* LTS::zoomIntoAbove()

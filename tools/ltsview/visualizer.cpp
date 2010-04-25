@@ -1543,7 +1543,7 @@ void Visualizer::exportToText(std::string filename)
   std::map< Cluster*, unsigned int > clus_id;
   unsigned int N = 0;
   float ch = settings->getFloat(ClusterHeight);
-  Cluster_iterator ci(lts,false);
+  Cluster_iterator ci(lts);
   std::ofstream file(filename.c_str());
   if (!file)
   {

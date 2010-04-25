@@ -35,6 +35,13 @@ float Vector2D::length()
   return sqrt(_x * _x + _y * _y);
 }
 
+Vector2D Vector2D::operator+=(Vector2D v)
+{
+  _x += v.x();
+  _y += v.y();
+  return *this;
+}
+
 Vector2D Vector2D::operator+(Vector2D v)
 {
   return Vector2D(_x + v.x(), _y + v.y());

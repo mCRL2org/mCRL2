@@ -30,18 +30,27 @@ class Simulation;
 class Cluster_iterator
 {
   public:
-    Cluster_iterator(LTS *l,bool rev=false);
-    ~Cluster_iterator();
+    Cluster_iterator(LTS *l);
+    virtual ~Cluster_iterator() {}
     void operator++();
     Cluster* operator*();
-    bool is_end();
-  private:
-    bool reverse;
+    virtual bool is_end();
+  protected:
     int rank;
     unsigned int cluster;
     LTS *lts;
+    bool is_valid();
+    virtual void next();
+};
+
+class Reverse_cluster_iterator: public Cluster_iterator
+{
+  public:
+    Reverse_cluster_iterator(LTS *l);
+    ~Reverse_cluster_iterator() {}
+    bool is_end();
+  protected:
     void next();
-    bool is_ok();
 };
 
 class State_iterator
@@ -72,7 +81,8 @@ class LTS
     State* getInitialState() const;
     mcrl2::lts::lts* getmCRL2LTS();
     std::string getLabel(int labindex);
-    Cluster_iterator getClusterIterator(bool reverse=false);
+    Cluster_iterator getClusterIterator();
+    Reverse_cluster_iterator getReverseClusterIterator();
     State_iterator getStateIterator();
     int getNumClusters() const;
     int getNumDeadlocks();
@@ -156,15 +166,10 @@ class LTS
     void clearRanksAndClusters();
     void clusterTree(State* s,Cluster *c,bool cyclic);
 
-    // Methods for positioning states based on Frank van Ham's
-    // heuristics
-    void edgeLengthBottomUp(std::vector< State* > &undecided);
-    void edgeLengthTopDown(std::vector< State* > &ss);
-
-    void resolveClusterSlots();
     void visit(State* s);
 
     friend class Cluster_iterator;
+    friend class Reverse_cluster_iterator;
     friend class State_iterator;
 };
 

@@ -29,6 +29,7 @@ class Vector2D
     float length();
     float toDegrees();
 
+    Vector2D operator+=(Vector2D v);
     Vector2D operator+(Vector2D v);
     Vector2D operator*(float s);
 };
