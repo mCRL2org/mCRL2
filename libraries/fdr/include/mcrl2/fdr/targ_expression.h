@@ -13,9 +13,9 @@
 #define MCRL2_FDR_TARG_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/comprehension_expression_fwd.h"
 #include "mcrl2/fdr/expression_fwd.h"
 #include "mcrl2/fdr/numeric_expression_fwd.h"
-#include "mcrl2/fdr/comprehension.h"
 
 namespace mcrl2 {
 
@@ -106,11 +106,11 @@ class compr: public targ_expression
     compr(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    compr(const expression& expr, const comprehension_list& comprs);
+    compr(const expression& expr, const comprehension_expression_list& comprs);
 
     expression expr() const;
 
-    comprehension_list comprs() const;
+    comprehension_expression_list comprs() const;
 };
 //--- end generated targ expression class declarations ---//
 

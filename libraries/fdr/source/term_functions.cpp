@@ -9,6 +9,7 @@
 #include "mcrl2/fdr/failuremodel_expression.h"
 #include "mcrl2/fdr/field_expression.h"
 #include "mcrl2/fdr/lambda_expression.h"
+#include "mcrl2/fdr/linkpar_expression.h"
 #include "mcrl2/fdr/model_expression.h"
 #include "mcrl2/fdr/numeric_expression.h"
 #include "mcrl2/fdr/process_expression.h"
@@ -856,6 +857,59 @@ namespace fdr {
       return atermpp::arg2(*this);
     }
 //--- end generated lambda expression class definitions ---//
+
+//--- start generated linkpar expression class definitions ---//
+    /// \brief Default constructor.
+    links::links()
+      : linkpar_expression(fdr::detail::constructLinks())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    links::links(atermpp::aterm_appl term)
+      : linkpar_expression(term)
+    {
+      assert(fdr::detail::check_term_Links(m_term));
+    }
+
+    /// \brief Constructor.
+    links::links(const link_list& linkpars)
+      : linkpar_expression(fdr::detail::gsMakeLinks(linkpars))
+    {}
+
+    link_list links::linkpars() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    linksgens::linksgens()
+      : linkpar_expression(fdr::detail::constructLinksGens())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    linksgens::linksgens(atermpp::aterm_appl term)
+      : linkpar_expression(term)
+    {
+      assert(fdr::detail::check_term_LinksGens(m_term));
+    }
+
+    /// \brief Constructor.
+    linksgens::linksgens(const link_list& linkpars, const comprehension_expression_list& comprs)
+      : linkpar_expression(fdr::detail::gsMakeLinksGens(linkpars, comprs))
+    {}
+
+    link_list linksgens::linkpars() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    comprehension_expression_list linksgens::comprs() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+//--- end generated linkpar expression class definitions ---//
 
 //--- start generated numeric expression class definitions ---//
     /// \brief Default constructor.
@@ -2449,7 +2503,7 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    compr::compr(const expression& expr, const comprehension_list& comprs)
+    compr::compr(const expression& expr, const comprehension_expression_list& comprs)
       : targ_expression(fdr::detail::gsMakeCompr(expr, comprs))
     {}
 
@@ -2458,7 +2512,7 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    comprehension_list compr::comprs() const
+    comprehension_expression_list compr::comprs() const
     {
       return atermpp::list_arg2(*this);
     }

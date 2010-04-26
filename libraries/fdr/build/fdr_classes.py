@@ -180,7 +180,7 @@ TARG_EXPRESSION_CLASSES = r'''
 Nil				| nil()																		| An empty
 ClosedRange		| closedrange(const numeric_expression& begin, const numeric_expression& end)	| A closed range
 OpenRange		| openrange(const numeric_expression& begin)									| An open range
-Compr           | compr(const expression& expr, const comprehension_list& comprs)           | A comprehension
+Compr           | compr(const expression& expr, const comprehension_expression_list& comprs)           | A comprehension
 '''
 
 COMPREHENSION_EXPRESSION_CLASSES = r'''
@@ -227,16 +227,16 @@ Output			| output(const expression& expr)											| An output
 
 RENAMING_CLASSES = r'''
 Maps			| maps(const map_list& renamings)												| A map list
-MapsGens		| mapsgens(const map_list& renamings, const comprehension_list& comprs)				| A map/generator list
+MapsGens		| mapsgens(const map_list& renamings, const comprehension_expression_list& comprs)				| A map/generator list
 '''
 
 MAP_CLASSES = r'''
 Map				| map(const dotted_expression& left, const dotted_expression& right)		| A map
 '''
 
-LINKPAR_CLASSES = r'''
+LINKPAR_EXPRESSION_CLASSES = r'''
 Links			| links(const link_list& linkpars)												| A link list
-LinksGens		| linksgens(const link_list& linkpars, const comprehension_list& comprs)				| A link/generator list
+LinksGens		| linksgens(const link_list& linkpars, const comprehension_expression_list& comprs)				| A link/generator list
 '''
 
 LINK_CLASSES = r'''

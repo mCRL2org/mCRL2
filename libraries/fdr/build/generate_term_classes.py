@@ -84,6 +84,7 @@ if __name__ == "__main__":
     do_classes('test', 'Test')
     do_classes('trname', 'TrName')
     do_classes('any', 'Any')
+    do_classes('linkpar', 'LinkPar')
 
     # generate other classes
     make_classes('../include/mcrl2/fdr/refined.h', REFINED_CLASSES, None, 'fdr')
@@ -92,5 +93,4 @@ if __name__ == "__main__":
     make_classes('../include/mcrl2/fdr/generator.h', GEN_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/renaming.h', RENAMING_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/map.h', MAP_CLASSES, None, 'fdr')
-    make_classes('../include/mcrl2/fdr/linkpar.h', LINKPAR_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/link.h', LINK_CLASSES, None, 'fdr')

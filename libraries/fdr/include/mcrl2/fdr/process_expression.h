@@ -13,9 +13,11 @@
 #define MCRL2_FDR_PROCESS_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/generator.h"
+#include "mcrl2/fdr/linkpar.h"
+#include "mcrl2/fdr/boolean_expression_fwd.h"
 #include "mcrl2/fdr/dotted_expression_fwd.h"
 #include "mcrl2/fdr/field_expression_fwd.h"
-#include "mcrl2/fdr/linkpar.h"
 #include "mcrl2/fdr/set_expression_fwd.h"
 
 namespace mcrl2 {

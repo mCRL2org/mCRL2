@@ -72,7 +72,7 @@ class mapsgens: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    mapsgens(const map_list& renamings, const comprehension_list& comprs)
+    mapsgens(const map_list& renamings, const comprehension_expression_list& comprs)
       : atermpp::aterm_appl(fdr::detail::gsMakeMapsGens(renamings, comprs))
     {}
 
@@ -81,7 +81,7 @@ class mapsgens: public atermpp::aterm_appl
       return atermpp::list_arg1(*this);
     }
 
-    comprehension_list comprs() const
+    comprehension_expression_list comprs() const
     {
       return atermpp::list_arg2(*this);
     }
