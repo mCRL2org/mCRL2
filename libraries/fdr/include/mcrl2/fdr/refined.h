@@ -20,24 +20,24 @@ namespace fdr {
 
 //--- start generated classes ---//
 /// \brief A model
-class Refined: public atermpp::aterm_appl
+class refined: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
-    Refined()
+    refined()
       : atermpp::aterm_appl(fdr::detail::constructRefined())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    Refined(atermpp::aterm_appl term)
+    refined(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
       assert(fdr::detail::check_term_Refined(m_term));
     }
 
     /// \brief Constructor.
-    Refined(const model_expression& m)
+    refined(const model_expression& m)
       : atermpp::aterm_appl(fdr::detail::gsMakeRefined(m))
     {}
 
@@ -47,11 +47,11 @@ class Refined: public atermpp::aterm_appl
     }
 };
 
-/// \brief list of Refineds
-typedef atermpp::term_list<Refined> Refined_list;
+/// \brief list of refineds
+typedef atermpp::term_list<refined> refined_list;
 
-/// \brief vector of Refineds
-typedef atermpp::vector<Refined>    Refined_vector;
+/// \brief vector of refineds
+typedef atermpp::vector<refined>    refined_vector;
 
 //--- end generated classes ---//
 
