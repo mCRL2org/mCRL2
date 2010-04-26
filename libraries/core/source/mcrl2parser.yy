@@ -26,6 +26,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/lexer.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/function_update.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -857,12 +858,12 @@ data_expr_postfix:
       safe_assign($$, gsMakeDataAppl($1, ATreverse($3)));
       gsDebugMsg("parsed postfix data expression (function application)\n  %T\n", $$);
     }
-/*  | data_expr_postfix LBRACK data_expr ARROW data_expr RBRACK
+    | data_expr_postfix LBRACK data_expr ARROW data_expr RBRACK
     {
       safe_assign($$,
-        gsMakeDataAppl(gsMakeId(gsMakeOpIdNameFuncUpdate()), ATmakeList3((ATerm) $1, (ATerm) $3, (ATerm) $5)));
+        gsMakeDataAppl(gsMakeId(mcrl2::data::function_update_name()), ATmakeList3((ATerm) $1, (ATerm) $3, (ATerm) $5)));
       gsDebugMsg("parsed postfix data expression (function update)\n  %T\n", $$);
-    } */
+    } 
   ;
 
 //one or more data expressions, separated by comma's

@@ -277,11 +277,10 @@ BOOST_AUTO_TEST_CASE(test_bag_numbers) {
 BOOST_AUTO_TEST_CASE(test_function_updates)
 {
   //test function updates
-  /*
-  test_data_expression("(lambda x: Bool. x)[true -> false]", false);
-  test_data_expression("(lambda x: Bool. x)[true -> false][false -> true]", false);
-  test_data_expression("(lambda n: Nat. n mod 2 == 0)[0 -> false]", false);
-  */
+  test_data_expression("(lambda x: Bool. x)[true -> false]", true);
+  test_data_expression("(lambda x: Bool. x)[0 -> false]", false);
+  test_data_expression("(lambda x: Bool. x)[true -> false][false -> true]", true);
+  test_data_expression("(lambda n: Nat. n mod 2 == 0)[0 -> false]", true);
 }
 
 BOOST_AUTO_TEST_CASE(test_inline_struct_recogniser)

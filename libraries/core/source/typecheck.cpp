@@ -32,6 +32,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/multiple_possible_sorts.h"
+#include "mcrl2/data/function_update.h"
 
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
@@ -176,7 +177,7 @@ namespace mcrl2 {
     static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
     static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
     static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
-//    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
+    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
 
 
     static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes);
@@ -1202,8 +1203,8 @@ namespace mcrl2 {
       gstcAddSystemFunction(sort_bag::bagdifference(data::unknown_sort()));
       gstcAddSystemFunction(sort_bag::bagintersect(data::unknown_sort()));
 
-      //function update
-//      gstcAddSystemFunction(gsMakeOpIdFuncUpdate(data::unknown_sort(),data::unknown_sort()));
+      // function update
+      gstcAddSystemFunction(data::function_update(data::unknown_sort(),data::unknown_sort()));
     }
 
     void gstcDataDestroy(void){
@@ -3730,19 +3731,22 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-/*
-          if(ATisEqual(gsMakeOpIdNameFuncUpdate(),ATAgetArgument(*DataTerm,0)))
+
+          if(ATisEqual(static_cast<ATermAppl>(data::function_update_name()),ATAgetArgument(*DataTerm,0)))
           {
-            if (gsDebug) { std::cerr << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
+            if (gsDebug) 
+            { 
+              std::cerr << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; 
+            }
             ATermAppl NewType=gstcMatchFuncUpdate(Type);
             if(!NewType)
             {
-              gsErrorMsg("the function FuncUpdate has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+              gsErrorMsg("function update has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
               return NULL;
             }
             Type=NewType;
           }
-*/
+
 
           *DataTerm=gsMakeOpId(Name,Type);
           if(variable) *DataTerm=gsMakeDataVarId(Name,Type);
@@ -4746,8 +4750,9 @@ namespace mcrl2 {
       return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)static_cast<ATermAppl>(sort_bag::bag(sort_expression(Arg)))),sort_nat::nat());
     }
 
-/*
-    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type){
+
+    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type)
+    {
       //tries to sort out the types of FuncUpdate ((A->B)xAxB->(A->B))
       //If some of the parameters are Pos,Nat, or Int do upcasting.
 
@@ -4777,7 +4782,6 @@ namespace mcrl2 {
 
       return gsMakeSortArrow(ATmakeList3((ATerm)Arg1,(ATerm)A,(ATerm)B),Arg1);
     }
-*/
 
     static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes){
       //prints more information about impossible cast.
