@@ -2,27 +2,31 @@ project toolset/ltsview ;
 
 tool ltsview
       : cluster.cpp
+        color_interpolator.cpp
         conedb.cpp
+        fsm_state_positioner.cpp
         glcanvas.cpp
         infodialog.cpp
         lts.cpp
         ltsview.cpp
         mainframe.cpp
-        markmanager.cpp
         markdialog.cpp
+        markmanager.cpp
         markstateruledialog.cpp
+        mathutils.cpp
         primitivefactory.cpp
         primitives.cpp
+        rgb_color.cpp
         savepicdialog.cpp
         savevecdialog.cpp
         settings.cpp
         settingsdialog.cpp
-        simulation.cpp
-        simreader.cpp
         simdialog.cpp
+        simreader.cpp
+        simulation.cpp
         state.cpp
         transition.cpp
-        utils.cpp
+        vectors.cpp
         visobjectfactory.cpp
         visualizer.cpp
         /libraries//tr
