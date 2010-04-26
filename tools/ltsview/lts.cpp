@@ -368,13 +368,13 @@ bool LTS::readFromFile(std::string filename)
 
 State* LTS::selectStateByID(int id)
 {
-  State *s = states[id];
-  if (s)
+  State *state = states[id];
+  if (state)
   {
-    s->select();
+    state->select();
     // For fast deselection
     selectedCluster = NULL;
-    selectedState = s;
+    selectedState = state;
 
     // If we are simulating, see if this is a state we can select.
     if ((simulation != NULL) && (simulation->getStarted()))
@@ -425,11 +425,11 @@ int LTS::getNumLabels()
 
 unsigned int LTS::getNumParameters() const
 {
-  if (!mcrl2_lts->has_state_parameters())
+  if (mcrl2_lts->has_state_parameters())
   {
-    return 0;
+    return mcrl2_lts->num_state_parameters();
   }
-  return mcrl2_lts->num_state_parameters();
+  return 0;
 }
 
 string LTS::getLabel(int labindex)
@@ -437,10 +437,10 @@ string LTS::getLabel(int labindex)
   return mcrl2_lts->label_value_str(labindex);
 }
 
-void LTS::addCluster(Cluster* c)
+void LTS::addCluster(Cluster* cluster)
 {
-  unsigned int rank = c->getRank();
-  unsigned int pos = c->getPositionInRank();
+  unsigned int rank = cluster->getRank();
+  unsigned int pos = cluster->getPositionInRank();
 
   // Check to see if there is already a rank for this cluster
   if (clustersInRank.size() <= rank)
@@ -453,31 +453,31 @@ void LTS::addCluster(Cluster* c)
     clustersInRank[rank].resize(pos + 1);
   }
 
-  clustersInRank[rank][pos] = c;
+  clustersInRank[rank][pos] = cluster;
 
-  for (int i = 0; i < c->getNumStates(); ++i)
+  for (int i = 0; i < cluster->getNumStates(); ++i)
   {
-    State* s = c->getState(i);
-    unsigned int sid = s->getID();
-    if (states.size() <= sid)
+    State* state = cluster->getState(i);
+    unsigned int state_id = state->getID();
+    if (states.size() <= state_id)
     {
-      states.resize(sid + 1);
+      states.resize(state_id + 1);
     }
 
-    states[sid] = s;
-    s->setZoomLevel(zoomLevel);
+    states[state_id] = state;
+    state->setZoomLevel(zoomLevel);
   }
 }
 
-void LTS::addClusterAndBelow(Cluster* c)
+void LTS::addClusterAndBelow(Cluster* cluster)
 {
-  if (c != NULL)
+  if (cluster != NULL)
   {
-    addCluster(c);
+    addCluster(cluster);
 
-    for (int i = 0; i < c->getNumDescendants(); ++i)
+    for (int i = 0; i < cluster->getNumDescendants(); ++i)
     {
-      addClusterAndBelow(c->getDescendant(i));
+      addClusterAndBelow(cluster->getDescendant(i));
     }
   }
 }
@@ -776,16 +776,10 @@ void LTS::positionClusters(bool fsmstyle)
 
 void LTS::clearStatePositions()
 {
-  for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci)
+  for (State_iterator state_it = getStateIterator(); !state_it.is_end();
+      ++state_it)
   {
-    Cluster* c = *ci;
-    // center all states
-    for (int i = 0; i < c->getNumStates(); ++i)
-    {
-      c->getState(i)->center();
-    }
-    // clear the slots and undecided states
-    c->clearSlots();
+    (**state_it).center();
   }
 }
 
