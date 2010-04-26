@@ -13,6 +13,8 @@
 #define MCRL2_FDR_TYPE_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/name.h"
+#include "mcrl2/fdr/set_expression_fwd.h"
 
 namespace mcrl2 {
 
@@ -114,18 +116,18 @@ class simpletypename: public type_expression
 };
 
 /// \brief A type name
-class typename: public type_expression
+class typename_: public type_expression
 {
   public:
     /// \brief Default constructor.
-    typename();
+    typename_();
 
     /// \brief Constructor.
     /// \param term A term
-    typename(atermpp::aterm_appl term);
+    typename_(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    typename(const name& id, const type_expression& type_name);
+    typename_(const name& id, const type_expression& type_name);
 
     name id() const;
 
@@ -168,7 +170,7 @@ class typename: public type_expression
     inline
     bool is_simpletypename(const type_expression& t)
     {
-      return fdr::detail::gsIsSympleTypeName(t);
+      return fdr::detail::gsIsSimpleTypeName(t);
     }
 
     /// \brief Test for a typename expression

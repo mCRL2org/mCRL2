@@ -13,6 +13,7 @@
 #define MCRL2_FDR_CHECK_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/refined.h"
 #include "mcrl2/fdr/boolean_expression_fwd.h"
 #include "mcrl2/fdr/process_expression_fwd.h"
 #include "mcrl2/fdr/test_expression_fwd.h"

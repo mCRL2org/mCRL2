@@ -14,10 +14,10 @@
 
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/generator.h"
-#include "mcrl2/fdr/linkpar.h"
 #include "mcrl2/fdr/boolean_expression_fwd.h"
 #include "mcrl2/fdr/dotted_expression_fwd.h"
 #include "mcrl2/fdr/field_expression_fwd.h"
+#include "mcrl2/fdr/linkpar_expression_fwd.h"
 #include "mcrl2/fdr/set_expression_fwd.h"
 
 namespace mcrl2 {
@@ -437,13 +437,13 @@ class linkedparallel: public process_expression
     linkedparallel(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    linkedparallel(const process_expression& left, const process_expression& right, const linkpar& linked);
+    linkedparallel(const process_expression& left, const process_expression& right, const linkpar_expression& linked);
 
     process_expression left() const;
 
     process_expression right() const;
 
-    linkpar linked() const;
+    linkpar_expression linked() const;
 };
 
 /// \brief A replicated linked parallel
@@ -458,13 +458,13 @@ class replinkedparallel: public process_expression
     replinkedparallel(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar& linked);
+    replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar_expression& linked);
 
     seqgen gen() const;
 
     process_expression proc() const;
 
-    linkpar linked() const;
+    linkpar_expression linked() const;
 };
 //--- end generated process expression class declarations ---//
 

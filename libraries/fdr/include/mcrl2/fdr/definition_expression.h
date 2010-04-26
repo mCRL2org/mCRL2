@@ -13,8 +13,14 @@
 #define MCRL2_FDR_DEFINITION_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
-#include "mcrl2/fdr/any_expression_fwd.h";
-#include "mcrl2/fdr/type_expression_fwd.h";
+#include "mcrl2/fdr/filename.h"
+#include "mcrl2/fdr/name.h"
+#include "mcrl2/fdr/any_expression_fwd.h"
+#include "mcrl2/fdr/check_expression_fwd.h"
+#include "mcrl2/fdr/expression_fwd.h"
+#include "mcrl2/fdr/trname_expression_fwd.h"
+#include "mcrl2/fdr/type_expression_fwd.h"
+#include "mcrl2/fdr/vartype_expression_fwd.h"
 
 namespace mcrl2 {
 
@@ -84,18 +90,18 @@ class channel: public definition_expression
 };
 
 /// \brief A simple channel
-class channel: public definition_expression
+class simple_channel: public definition_expression
 {
   public:
     /// \brief Default constructor.
-    channel();
+    simple_channel();
 
     /// \brief Constructor.
     /// \param term A term
-    channel(atermpp::aterm_appl term);
+    simple_channel(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    channel(const name_list& names);
+    simple_channel(const name_list& names);
 
     name_list names() const;
 };
@@ -263,11 +269,11 @@ class include: public definition_expression
       return fdr::detail::gsIsChannel(t);
     }
 
-    /// \brief Test for a channel expression
+    /// \brief Test for a simple_channel expression
     /// \param t A term
-    /// \return True if it is a channel expression
+    /// \return True if it is a simple_channel expression
     inline
-    bool is_channel(const definition_expression& t)
+    bool is_simple_channel(const definition_expression& t)
     {
       return fdr::detail::gsIsSimpleChannel(t);
     }

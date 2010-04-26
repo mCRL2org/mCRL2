@@ -13,6 +13,7 @@
 #define MCRL2_FDR_DETAIL_CONSTRUCTORS_H
 
 #include "mcrl2/fdr/detail/utility.h"
+#include "mcrl2/fdr/detail/term_functions.h"
 
 namespace mcrl2 {
 

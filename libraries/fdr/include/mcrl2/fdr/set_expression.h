@@ -14,6 +14,7 @@
 
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/expression_fwd.h"
+#include "mcrl2/fdr/seq_expression_fwd.h"
 #include "mcrl2/fdr/targ_expression_fwd.h"
                                       
 namespace mcrl2 {

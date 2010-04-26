@@ -21,38 +21,24 @@ namespace mcrl2 {
 
 namespace fdr {
 
-//--- start generated classes ---//
+//--- start generated generator class declarations ---//
 /// \brief A set generator
 class setgen: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
-    setgen()
-      : atermpp::aterm_appl(fdr::detail::constructSetGen())
-    {}
+    setgen();
 
     /// \brief Constructor.
     /// \param term A term
-    setgen(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_SetGen(m_term));
-    }
+    setgen(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    setgen(const expression& expr, const set_expression& set)
-      : atermpp::aterm_appl(fdr::detail::gsMakeSetGen(expr, set))
-    {}
+    setgen(const expression& expr, const set_expression& set);
 
-    expression expr() const
-    {
-      return atermpp::arg1(*this);
-    }
+    expression expr() const;
 
-    set_expression set() const
-    {
-      return atermpp::arg2(*this);
-    }
+    set_expression set() const;
 };
 
 /// \brief list of setgens
@@ -67,32 +53,18 @@ class seqgen: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
-    seqgen()
-      : atermpp::aterm_appl(fdr::detail::constructSeqGen())
-    {}
+    seqgen();
 
     /// \brief Constructor.
     /// \param term A term
-    seqgen(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_SeqGen(m_term));
-    }
+    seqgen(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    seqgen(const expression& expr, const seq_expression& seq)
-      : atermpp::aterm_appl(fdr::detail::gsMakeSeqGen(expr, seq))
-    {}
+    seqgen(const expression& expr, const seq_expression& seq);
 
-    expression expr() const
-    {
-      return atermpp::arg1(*this);
-    }
+    expression expr() const;
 
-    seq_expression seq() const
-    {
-      return atermpp::arg2(*this);
-    }
+    seq_expression seq() const;
 };
 
 /// \brief list of seqgens
@@ -101,7 +73,7 @@ typedef atermpp::term_list<seqgen> seqgen_list;
 /// \brief vector of seqgens
 typedef atermpp::vector<seqgen>    seqgen_vector;
 
-//--- end generated classes ---//
+//--- end generated generator class declarations ---//
 
 //--- start generated is-functions ---//
 //--- end generated is-functions ---//

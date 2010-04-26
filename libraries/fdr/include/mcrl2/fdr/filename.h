@@ -13,6 +13,7 @@
 #define MCRL2_FDR_FILENAME_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/name.h"
 
 namespace mcrl2 {
 

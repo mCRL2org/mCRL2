@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/fdr/detail/utility.h"
+#include "mcrl2/fdr/detail/term_functions.h"
 
 namespace mcrl2 {
 

@@ -13,6 +13,7 @@
 #define MCRL2_FDR_FDRSPEC_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/definition_expression_fwd.h"
 
 namespace mcrl2 {
 

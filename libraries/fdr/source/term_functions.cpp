@@ -23,6 +23,9 @@
 #include "mcrl2/fdr/type_expression.h"
 #include "mcrl2/fdr/vartype_expression.h"
 
+#include "mcrl2/fdr/generator.h"
+#include "mcrl2/fdr/refined.h"
+
 namespace mcrl2 {
 
 namespace fdr {
@@ -2063,7 +2066,7 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    linkedparallel::linkedparallel(const process_expression& left, const process_expression& right, const linkpar& linked)
+    linkedparallel::linkedparallel(const process_expression& left, const process_expression& right, const linkpar_expression& linked)
       : process_expression(fdr::detail::gsMakeLinkedParallel(left, right, linked))
     {}
 
@@ -2077,7 +2080,7 @@ namespace fdr {
       return atermpp::arg2(*this);
     }
 
-    linkpar linkedparallel::linked() const
+    linkpar_expression linkedparallel::linked() const
     {
       return atermpp::arg3(*this);
     }
@@ -2096,7 +2099,7 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    replinkedparallel::replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar& linked)
+    replinkedparallel::replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar_expression& linked)
       : process_expression(fdr::detail::gsMakeRepLinkedParallel(gen, proc, linked))
     {}
 
@@ -2110,7 +2113,7 @@ namespace fdr {
       return atermpp::arg2(*this);
     }
 
-    linkpar replinkedparallel::linked() const
+    linkpar_expression replinkedparallel::linked() const
     {
       return atermpp::arg3(*this);
     }
@@ -2174,24 +2177,24 @@ namespace fdr {
     }
 
     /// \brief Default constructor.
-    channel::channel()
+    simple_channel::simple_channel()
       : definition_expression(fdr::detail::constructSimpleChannel())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    channel::channel(atermpp::aterm_appl term)
+    simple_channel::simple_channel(atermpp::aterm_appl term)
       : definition_expression(term)
     {
       assert(fdr::detail::check_term_SimpleChannel(m_term));
     }
 
     /// \brief Constructor.
-    channel::channel(const name_list& names)
+    simple_channel::simple_channel(const name_list& names)
       : definition_expression(fdr::detail::gsMakeSimpleChannel(names))
     {}
 
-    name_list channel::names() const
+    name_list simple_channel::names() const
     {
       return atermpp::list_arg1(*this);
     }
@@ -2765,7 +2768,7 @@ namespace fdr {
 
     /// \brief Default constructor.
     simpletypename::simpletypename()
-      : type_expression(fdr::detail::constructSympleTypeName())
+      : type_expression(fdr::detail::constructSimpleTypeName())
     {}
 
     /// \brief Constructor.
@@ -2773,12 +2776,12 @@ namespace fdr {
     simpletypename::simpletypename(atermpp::aterm_appl term)
       : type_expression(term)
     {
-      assert(fdr::detail::check_term_SympleTypeName(m_term));
+      assert(fdr::detail::check_term_SimpleTypeName(m_term));
     }
 
     /// \brief Constructor.
     simpletypename::simpletypename(const name& id)
-      : type_expression(fdr::detail::gsMakeSympleTypeName(id))
+      : type_expression(fdr::detail::gsMakeSimpleTypeName(id))
     {}
 
     name simpletypename::id() const
@@ -2787,29 +2790,29 @@ namespace fdr {
     }
 
     /// \brief Default constructor.
-    typename::typename()
+    typename_::typename_()
       : type_expression(fdr::detail::constructTypeName())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    typename::typename(atermpp::aterm_appl term)
+    typename_::typename_(atermpp::aterm_appl term)
       : type_expression(term)
     {
       assert(fdr::detail::check_term_TypeName(m_term));
     }
 
     /// \brief Constructor.
-    typename::typename(const name& id, const type_expression& type_name)
+    typename_::typename_(const name& id, const type_expression& type_name)
       : type_expression(fdr::detail::gsMakeTypeName(id, type_name))
     {}
 
-    name typename::id() const
+    name typename_::id() const
     {
       return atermpp::arg1(*this);
     }
 
-    type_expression typename::type_name() const
+    type_expression typename_::type_name() const
     {
       return atermpp::arg2(*this);
     }
@@ -3148,6 +3151,89 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 //--- end generated any expression class definitions ---//
+
+//--- start generated generator class definitions ---//
+    /// \brief Default constructor.
+    setgen::setgen()
+      : atermpp::aterm_appl(fdr::detail::constructSetGen())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    setgen::setgen(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_term_SetGen(m_term));
+    }
+
+    /// \brief Constructor.
+    setgen::setgen(const expression& expr, const set_expression& set)
+      : atermpp::aterm_appl(fdr::detail::gsMakeSetGen(expr, set))
+    {}
+
+    expression setgen::expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    set_expression setgen::set() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    seqgen::seqgen()
+      : atermpp::aterm_appl(fdr::detail::constructSeqGen())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    seqgen::seqgen(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_term_SeqGen(m_term));
+    }
+
+    /// \brief Constructor.
+    seqgen::seqgen(const expression& expr, const seq_expression& seq)
+      : atermpp::aterm_appl(fdr::detail::gsMakeSeqGen(expr, seq))
+    {}
+
+    expression seqgen::expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    seq_expression seqgen::seq() const
+    {
+      return atermpp::arg2(*this);
+    }
+//--- end generated generator class definitions ---//
+
+//--- start generated refined class definitions ---//
+    /// \brief Default constructor.
+    refined::refined()
+      : atermpp::aterm_appl(fdr::detail::constructRefined())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    refined::refined(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(fdr::detail::check_term_Refined(m_term));
+    }
+
+    /// \brief Constructor.
+    refined::refined(const model_expression& m)
+      : atermpp::aterm_appl(fdr::detail::gsMakeRefined(m))
+    {}
+
+    model_expression refined::m() const
+    {
+      return atermpp::arg1(*this);
+    }
+//--- end generated refined class definitions ---//
 
 } // namespace fdr
 

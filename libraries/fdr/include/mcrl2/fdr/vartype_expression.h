@@ -14,6 +14,7 @@
 
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/name.h"
+#include "mcrl2/fdr/type_expression_fwd.h"
 
 namespace mcrl2 {
 

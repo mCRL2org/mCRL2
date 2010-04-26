@@ -101,7 +101,7 @@ Proc			| proc(const process_expression& operand)												| A process
 DEFINITION_EXPRESSION_CLASSES = r'''
 Assign			| assign(const any_expression& left, const any_expression& right)									| An assignment
 Channel			| channel(const name_list& names, const type_expression& type_name)							| A channel
-SimpleChannel	| channel(const name_list& names)											| A simple channel
+SimpleChannel	| simple_channel(const name_list& names)											| A simple channel
 NameType		| nametype(const name& id, const type_expression& type_name)								| A nametype
 DataType		| datatype(const name& id, const vartype_expression_list& vartypes)					| A datatype
 SubType			| subtype(const name& id, const vartype_expression_list& vartypes)					| A subtype
@@ -121,8 +121,8 @@ TYPE_EXPRESSION_CLASSES = r'''
 TypeProduct		| typeproduct(const type_expression& left, const type_expression& right)							| A type product
 TypeTuple		| typetuple(const type_expression_list& types)											| A type tuple
 TypeSet			| typeset(const set_expression& set)										| A type set
-SympleTypeName	| simpletypename(const name& id)											| A simple type name
-TypeName		| typename(const name& id, const type_expression& type_name)								| A type name
+SimpleTypeName	| simpletypename(const name& id)											| A simple type name
+TypeName		| typename_(const name& id, const type_expression& type_name)								| A type name
 '''
 
 CHECK_EXPRESSION_CLASSES = r'''
@@ -133,7 +133,7 @@ NotCheck		| notcheck(const check_expression& chk)												| A negated check
 '''
 
 REFINED_CLASSES = r'''
-Refined	| Refined(const model_expression& m)													| A model
+Refined	| refined(const model_expression& m)													| A model
 '''
 
 MODEL_EXPRESSION_CLASSES = r'''
@@ -215,8 +215,8 @@ RepSharing		| repsharing(const setgen& gen, const process_expression& proc, cons
 RepAlphaParallel	| repalphaparallel(const setgen& gen, const process_expression& proc, const set_expression& set)	| A replicated alpha parallel
 UntimedTimeOut	| untimedtimeout(const process_expression& left, const process_expression& right)					| An untimed time-out
 BoolGuard		| boolguard(const boolean_expression& guard, const process_expression& proc)		| A boolean guard
-LinkedParallel	| linkedparallel(const process_expression& left, const process_expression& right, const linkpar& linked)	| A linked parallel
-RepLinkedParallel	| replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar& linked)	| A replicated linked parallel
+LinkedParallel	| linkedparallel(const process_expression& left, const process_expression& right, const linkpar_expression& linked)	| A linked parallel
+RepLinkedParallel	| replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar_expression& linked)	| A replicated linked parallel
 '''
 
 FIELD_EXPRESSION_CLASSES = r'''

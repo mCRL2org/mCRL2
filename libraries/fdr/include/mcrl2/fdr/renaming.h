@@ -13,6 +13,8 @@
 #define MCRL2_FDR_RENAMING_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/comprehension_expression_fwd.h"
+#include "mcrl2/fdr/map.h"
 
 namespace mcrl2 {
 

@@ -13,47 +13,37 @@
 #define MCRL2_FDR_REFINED_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/model_expression_fwd.h"
 
 namespace mcrl2 {
 
 namespace fdr {
 
-//--- start generated classes ---//
+//--- start generated refined class declarations ---//
 /// \brief A model
-class Refined: public atermpp::aterm_appl
+class refined: public atermpp::aterm_appl
 {
   public:
     /// \brief Default constructor.
-    Refined()
-      : atermpp::aterm_appl(fdr::detail::constructRefined())
-    {}
+    refined();
 
     /// \brief Constructor.
     /// \param term A term
-    Refined(atermpp::aterm_appl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(fdr::detail::check_term_Refined(m_term));
-    }
+    refined(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    Refined(const model_expression& m)
-      : atermpp::aterm_appl(fdr::detail::gsMakeRefined(m))
-    {}
+    refined(const model_expression& m);
 
-    model_expression m() const
-    {
-      return atermpp::arg1(*this);
-    }
+    model_expression m() const;
 };
 
-/// \brief list of Refineds
-typedef atermpp::term_list<Refined> Refined_list;
+/// \brief list of refineds
+typedef atermpp::term_list<refined> refined_list;
 
-/// \brief vector of Refineds
-typedef atermpp::vector<Refined>    Refined_vector;
+/// \brief vector of refineds
+typedef atermpp::vector<refined>    refined_vector;
 
-//--- end generated classes ---//
+//--- end generated refined class declarations ---//
 
 //--- start generated is-functions ---//
 //--- end generated is-functions ---//
