@@ -183,10 +183,10 @@ OpenRange		| openrange(const numeric_expression& begin)									| An open range
 Compr           | compr(const expression& expr, const comprehension_list& comprs)           | A comprehension
 '''
 
-COMPREHENSION_CLASSES = r'''
+COMPREHENSION_EXPRESSION_CLASSES = r'''
 Nil             | nil()                                                                             | An empty
 BComprehension	| bcomprehension(const boolean_expression& operand)									| A boolean
-Comprehension	| ecomprehension(const expression& left, const expression& right)					| A comprehension
+EComprehension	| ecomprehension(const expression& left, const expression& right)					| A comprehension
 '''
 
 GEN_CLASSES = r'''

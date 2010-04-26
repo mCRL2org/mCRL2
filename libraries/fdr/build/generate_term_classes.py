@@ -61,6 +61,7 @@ if __name__ == "__main__":
     generate_constructor_functions(rules, '../include/mcrl2/fdr/detail/constructors.h')
 
     # generate expression classes (classes that have a given expression class as super class)
+    do_classes('comprehension', 'Comprehension')
     do_classes('numeric', 'Number')
     do_classes('boolean', 'Bool')
     do_classes('set', 'Set')
@@ -88,7 +89,6 @@ if __name__ == "__main__":
     make_classes('../include/mcrl2/fdr/refined.h', REFINED_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/filename.h', FILENAME_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/fdrspec.h', FDRSPEC_CLASSES, None, 'fdr')
-    make_classes('../include/mcrl2/fdr/comprehension.h', COMPREHENSION_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/generator.h', GEN_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/renaming.h', RENAMING_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/map.h', MAP_CLASSES, None, 'fdr')

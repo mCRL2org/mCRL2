@@ -84,6 +84,7 @@ template <typename Term> bool check_rule_Link(Term t);
 template <typename Term> bool check_term_RepInternalChoice(Term t);
 template <typename Term> bool check_term_RCheck(Term t);
 template <typename Term> bool check_term_Union(Term t);
+template <typename Term> bool check_term_EComprehension(Term t);
 template <typename Term> bool check_term_GreaterOrEqual(Term t);
 template <typename Term> bool check_term_Branch(Term t);
 template <typename Term> bool check_term_Test(Term t);
@@ -151,7 +152,6 @@ template <typename Term> bool check_term_Bracketed(Term t);
 template <typename Term> bool check_term_Interleave(Term t);
 template <typename Term> bool check_term_ClosedRange(Term t);
 template <typename Term> bool check_term_extensions(Term t);
-template <typename Term> bool check_term_Comprehension(Term t);
 template <typename Term> bool check_term_explicate(Term t);
 template <typename Term> bool check_term_Null(Term t);
 template <typename Term> bool check_term_SeqGen(Term t);
@@ -496,7 +496,7 @@ bool check_rule_Comprehension(Term t)
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return    check_term_Nil(t)
          || check_term_BComprehension(t)
-         || check_term_Comprehension(t);
+         || check_term_EComprehension(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -748,6 +748,39 @@ bool check_term_Union(Term t)
   if (!check_term_argument(a(0), check_rule_Set<atermpp::aterm>))
     {
       std::cerr << "check_rule_Set" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// EComprehension(Expr, Expr)
+template <typename Term>
+bool check_term_EComprehension(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsEComprehension(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_Expr<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_Expr<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_Expr" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2761,39 +2794,6 @@ bool check_term_extensions(Term t)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_Expr<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_Expr" << std::endl;
-      return false;
-    }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
-// Comprehension(Expr, Expr)
-template <typename Term>
-bool check_term_Comprehension(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  atermpp::aterm_appl a(term);
-  if (!gsIsComprehension(a))
-    return false;
-
-  // check the children
-  if (a.size() != 2)
-    return false;
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_Expr<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_Expr" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(1), check_rule_Expr<atermpp::aterm>))
     {
       std::cerr << "check_rule_Expr" << std::endl;
       return false;

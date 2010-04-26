@@ -162,7 +162,7 @@
 // Comprehension
 <Comprehension> ::= Nil
                   | BComprehension(<Bool>)
-                  | Comprehension(<Expr>, <Expr>)
+                  | EComprehension(<Expr>, <Expr>)
 
 // Tuple expression
 <Tuple>     ::= <Common>

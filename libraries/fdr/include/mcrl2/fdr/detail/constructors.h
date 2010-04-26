@@ -24,6 +24,7 @@ namespace detail {
 ATermAppl constructRepInternalChoice();
 ATermAppl constructRCheck();
 ATermAppl constructUnion();
+ATermAppl constructEComprehension();
 ATermAppl constructGreaterOrEqual();
 ATermAppl constructBranch();
 ATermAppl constructTest();
@@ -91,7 +92,6 @@ ATermAppl constructBracketed();
 ATermAppl constructInterleave();
 ATermAppl constructClosedRange();
 ATermAppl constructextensions();
-ATermAppl constructComprehension();
 ATermAppl constructexplicate();
 ATermAppl constructNull();
 ATermAppl constructSeqGen();
@@ -167,6 +167,7 @@ ATermAppl constructTestType();
 ATermAppl constructTrName();
 ATermAppl constructAny();
 ATermAppl constructTarg();
+ATermAppl constructComprehension();
 ATermAppl constructCommon();
 ATermAppl constructField();
 ATermAppl constructRenaming();
@@ -217,6 +218,22 @@ inline
 ATermAppl constructUnion()
 {
   static ATermAppl t = initConstructUnion(t);
+  return t;
+}
+
+// EComprehension
+inline
+ATermAppl initConstructEComprehension(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunEComprehension(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructEComprehension()
+{
+  static ATermAppl t = initConstructEComprehension(t);
   return t;
 }
 
@@ -1289,22 +1306,6 @@ inline
 ATermAppl constructextensions()
 {
   static ATermAppl t = initConstructextensions(t);
-  return t;
-}
-
-// Comprehension
-inline
-ATermAppl initConstructComprehension(ATermAppl& t)
-{
-  t = ATmakeAppl2(gsAFunComprehension(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructComprehension()
-{
-  static ATermAppl t = initConstructComprehension(t);
   return t;
 }
 
@@ -2414,6 +2415,13 @@ ATermAppl constructAny()
 // Targ
 inline
 ATermAppl constructTarg()
+{
+  return constructNil();
+}
+
+// Comprehension
+inline
+ATermAppl constructComprehension()
 {
   return constructNil();
 }

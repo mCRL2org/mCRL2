@@ -395,28 +395,6 @@ bool gsIsCompr(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunCompr();
 }
 
-// Comprehension
-inline
-AFun initAFunComprehension(AFun& f)
-{
-  f = ATmakeAFun("Comprehension", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunComprehension()
-{
-  static AFun AFunComprehension = initAFunComprehension(AFunComprehension);
-  return AFunComprehension;
-}
-
-inline
-bool gsIsComprehension(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunComprehension();
-}
-
 // Concat
 inline
 AFun initAFunConcat(AFun& f)
@@ -547,6 +525,28 @@ inline
 bool gsIsDotted(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunDotted();
+}
+
+// EComprehension
+inline
+AFun initAFunEComprehension(AFun& f)
+{
+  f = ATmakeAFun("EComprehension", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunEComprehension()
+{
+  static AFun AFunEComprehension = initAFunEComprehension(AFunEComprehension);
+  return AFunEComprehension;
+}
+
+inline
+bool gsIsEComprehension(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunEComprehension();
 }
 
 // Elem
@@ -3116,12 +3116,6 @@ ATermAppl gsMakeCompr(ATermAppl Expr_0, ATermList Comprehension_1)
 }
 
 inline
-ATermAppl gsMakeComprehension(ATermAppl Expr_0, ATermAppl Expr_1)
-{
-  return ATmakeAppl2(gsAFunComprehension(), (ATerm) Expr_0, (ATerm) Expr_1);
-}
-
-inline
 ATermAppl gsMakeConcat(ATermAppl Seq_0)
 {
   return ATmakeAppl1(gsAFunConcat(), (ATerm) Seq_0);
@@ -3155,6 +3149,12 @@ inline
 ATermAppl gsMakeDotted(ATermAppl Dotted_0)
 {
   return ATmakeAppl1(gsAFunDotted(), (ATerm) Dotted_0);
+}
+
+inline
+ATermAppl gsMakeEComprehension(ATermAppl Expr_0, ATermAppl Expr_1)
+{
+  return ATmakeAppl2(gsAFunEComprehension(), (ATerm) Expr_0, (ATerm) Expr_1);
 }
 
 inline

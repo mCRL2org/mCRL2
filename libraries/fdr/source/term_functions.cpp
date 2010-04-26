@@ -2,6 +2,7 @@
 #include "mcrl2/fdr/boolean_expression.h"
 #include "mcrl2/fdr/check_expression.h"
 #include "mcrl2/fdr/common_expression.h"
+#include "mcrl2/fdr/comprehension_expression.h"
 #include "mcrl2/fdr/definition_expression.h"
 #include "mcrl2/fdr/dotted_expression.h"
 #include "mcrl2/fdr/expression.h"
@@ -567,6 +568,72 @@ namespace fdr {
     }
 //--- end generated common expression class definitions ---//
 
+//--- start generated comprehension expression class definitions ---//
+    /// \brief Default constructor.
+    nil::nil()
+      : comprehension_expression(fdr::detail::constructNil())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    nil::nil(atermpp::aterm_appl term)
+      : comprehension_expression(term)
+    {
+      assert(fdr::detail::check_term_Nil(m_term));
+    }
+
+    /// \brief Default constructor.
+    bcomprehension::bcomprehension()
+      : comprehension_expression(fdr::detail::constructBComprehension())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    bcomprehension::bcomprehension(atermpp::aterm_appl term)
+      : comprehension_expression(term)
+    {
+      assert(fdr::detail::check_term_BComprehension(m_term));
+    }
+
+    /// \brief Constructor.
+    bcomprehension::bcomprehension(const boolean_expression& operand)
+      : comprehension_expression(fdr::detail::gsMakeBComprehension(operand))
+    {}
+
+    boolean_expression bcomprehension::operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    ecomprehension::ecomprehension()
+      : comprehension_expression(fdr::detail::constructEComprehension())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    ecomprehension::ecomprehension(atermpp::aterm_appl term)
+      : comprehension_expression(term)
+    {
+      assert(fdr::detail::check_term_EComprehension(m_term));
+    }
+
+    /// \brief Constructor.
+    ecomprehension::ecomprehension(const expression& left, const expression& right)
+      : comprehension_expression(fdr::detail::gsMakeEComprehension(left, right))
+    {}
+
+    expression ecomprehension::left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    expression ecomprehension::right() const
+    {
+      return atermpp::arg2(*this);
+    }
+//--- end generated comprehension expression class definitions ---//
+
 //--- start generated dotted expression class definitions ---//
     /// \brief Default constructor.
     dot::dot()
@@ -597,7 +664,7 @@ namespace fdr {
     }
 //--- end generated dotted expression class definitions ---//
 
-//--- start generated expression class definitions ---//
+//--- start generated  expression class definitions ---//
     /// \brief Default constructor.
     numb::numb()
       : expression(fdr::detail::constructNumb())
@@ -758,7 +825,7 @@ namespace fdr {
     {
       return atermpp::arg1(*this);
     }
-//--- end generated expression class definitions ---//
+//--- end generated  expression class definitions ---//
 
 //--- start generated lambda expression class definitions ---//
     /// \brief Default constructor.
