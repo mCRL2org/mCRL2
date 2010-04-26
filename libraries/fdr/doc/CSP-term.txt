@@ -54,7 +54,7 @@
               | TCheck(<Proc>, <Test>)
               | NotCheck(<Check>)
 
-<Refined>   ::= Model(<Model>)
+<Refined>   ::= Refined(<Model>)
 
 <Model>     ::= Nil
               | T

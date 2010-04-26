@@ -1407,28 +1407,6 @@ bool gsIsMod(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunMod();
 }
 
-// Model
-inline
-AFun initAFunModel(AFun& f)
-{
-  f = ATmakeAFun("Model", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunModel()
-{
-  static AFun AFunModel = initAFunModel(AFunModel);
-  return AFunModel;
-}
-
-inline
-bool gsIsModel(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunModel();
-}
-
 // Name
 inline
 AFun initAFunName(AFun& f)
@@ -1823,6 +1801,28 @@ inline
 bool gsIsRCheck(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunRCheck();
+}
+
+// Refined
+inline
+AFun initAFunRefined(AFun& f)
+{
+  f = ATmakeAFun("Refined", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunRefined()
+{
+  static AFun AFunRefined = initAFunRefined(AFunRefined);
+  return AFunRefined;
+}
+
+inline
+bool gsIsRefined(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunRefined();
 }
 
 // Rename
@@ -3392,12 +3392,6 @@ ATermAppl gsMakeMod(ATermAppl Numb_0, ATermAppl Numb_1)
 }
 
 inline
-ATermAppl gsMakeModel(ATermAppl Model_0)
-{
-  return ATmakeAppl1(gsAFunModel(), (ATerm) Model_0);
-}
-
-inline
 ATermAppl gsMakeName(ATermAppl Name_0)
 {
   return ATmakeAppl1(gsAFunName(), (ATerm) Name_0);
@@ -3503,6 +3497,12 @@ inline
 ATermAppl gsMakeRCheck(ATermAppl Proc_0, ATermAppl Proc_1, ATermAppl Refined_2)
 {
   return ATmakeAppl3(gsAFunRCheck(), (ATerm) Proc_0, (ATerm) Proc_1, (ATerm) Refined_2);
+}
+
+inline
+ATermAppl gsMakeRefined(ATermAppl Model_0)
+{
+  return ATmakeAppl1(gsAFunRefined(), (ATerm) Model_0);
 }
 
 inline

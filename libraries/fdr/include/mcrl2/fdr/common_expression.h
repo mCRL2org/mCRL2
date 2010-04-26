@@ -13,7 +13,10 @@
 #define MCRL2_FDR_COMMON_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
-#include "mcrl2/fdr/definition.h"
+#include "mcrl2/fdr/any_expression_fwd.h"
+#include "mcrl2/fdr/definition_expression_fwd.h"
+#include "mcrl2/fdr/expression_fwd.h"
+#include "mcrl2/fdr/lambda_expression_fwd.h"
 #include "mcrl2/fdr/name.h"
                                       
 namespace mcrl2 {
@@ -60,13 +63,13 @@ class conditional: public common_expression
     conditional(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    conditional(const boolean_expression& guard, const any& thenpart, const any& elsepart);
+    conditional(const boolean_expression& guard, const any_expression& thenpart, const any_expression& elsepart);
 
     boolean_expression guard() const;
 
-    any thenpart() const;
+    any_expression thenpart() const;
 
-    any elsepart() const;
+    any_expression elsepart() const;
 };
 
 /// \brief A name
@@ -117,11 +120,11 @@ class localdef: public common_expression
     localdef(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    localdef(const definition_list& defs, const any& within);
+    localdef(const definition_expression_list& defs, const any_expression& within);
 
-    definition_list defs() const;
+    definition_expression_list defs() const;
 
-    any within() const;
+    any_expression within() const;
 };
 
 /// \brief A bracketed process or expression
@@ -136,9 +139,9 @@ class bracketed: public common_expression
     bracketed(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    bracketed(const any& operand);
+    bracketed(const any_expression& operand);
 
-    any operand() const;
+    any_expression operand() const;
 };
 
 /// \brief A combination of two patterns
@@ -153,11 +156,11 @@ class pattern: public common_expression
     pattern(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    pattern(const any& left, const any& right);
+    pattern(const any_expression& left, const any_expression& right);
 
-    any left() const;
+    any_expression left() const;
 
-    any right() const;
+    any_expression right() const;
 };
 //--- end generated common expression class declarations ---//
 

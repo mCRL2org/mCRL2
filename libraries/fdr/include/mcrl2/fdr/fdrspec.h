@@ -37,11 +37,11 @@ class fdrspec: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    fdrspec(const definition_list& defs)
+    fdrspec(const definition_expression_list& defs)
       : atermpp::aterm_appl(fdr::detail::gsMakeFDRSpec(defs))
     {}
 
-    definition_list defs() const
+    definition_expression_list defs() const
     {
       return atermpp::list_arg1(*this);
     }

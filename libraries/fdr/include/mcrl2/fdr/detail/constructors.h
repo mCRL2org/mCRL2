@@ -151,17 +151,17 @@ ATermAppl constructEqual();
 ATermAppl constructTypeTuple();
 ATermAppl constructSetGen();
 ATermAppl constructOutput();
-ATermAppl constructModel();
 ATermAppl constructDot();
 ATermAppl constructMapsGens();
 ATermAppl constructRepLinkedParallel();
 ATermAppl constructDataType();
 ATermAppl constructUntimedTimeOut();
+ATermAppl constructRefined();
 ATermAppl constructDefn();
 ATermAppl constructVarType();
 ATermAppl constructType();
 ATermAppl constructCheck();
-ATermAppl constructRefined();
+ATermAppl constructModel();
 ATermAppl constructFailureModel();
 ATermAppl constructTestType();
 ATermAppl constructTrName();
@@ -2252,22 +2252,6 @@ ATermAppl constructOutput()
   return t;
 }
 
-// Model
-inline
-ATermAppl initConstructModel(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunModel(), reinterpret_cast<ATerm>(constructModel()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructModel()
-{
-  static ATermAppl t = initConstructModel(t);
-  return t;
-}
-
 // Dot
 inline
 ATermAppl initConstructDot(ATermAppl& t)
@@ -2348,6 +2332,22 @@ ATermAppl constructUntimedTimeOut()
   return t;
 }
 
+// Refined
+inline
+ATermAppl initConstructRefined(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunRefined(), reinterpret_cast<ATerm>(constructModel()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructRefined()
+{
+  static ATermAppl t = initConstructRefined(t);
+  return t;
+}
+
 // Defn
 inline
 ATermAppl constructDefn()
@@ -2376,11 +2376,11 @@ ATermAppl constructCheck()
   return constructBCheck();
 }
 
-// Refined
+// Model
 inline
-ATermAppl constructRefined()
+ATermAppl constructModel()
 {
-  return constructModel();
+  return constructNil();
 }
 
 // FailureModel

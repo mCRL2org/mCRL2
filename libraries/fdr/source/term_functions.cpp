@@ -1,13 +1,25 @@
+#include "mcrl2/fdr/any_expression.h"
 #include "mcrl2/fdr/boolean_expression.h"
+#include "mcrl2/fdr/check_expression.h"
 #include "mcrl2/fdr/common_expression.h"
+#include "mcrl2/fdr/definition_expression.h"
 #include "mcrl2/fdr/dotted_expression.h"
 #include "mcrl2/fdr/expression.h"
+#include "mcrl2/fdr/failuremodel_expression.h"
+#include "mcrl2/fdr/field_expression.h"
 #include "mcrl2/fdr/lambda_expression.h"
+#include "mcrl2/fdr/model_expression.h"
 #include "mcrl2/fdr/numeric_expression.h"
-#include "mcrl2/fdr/process.h"
+#include "mcrl2/fdr/process_expression.h"
 #include "mcrl2/fdr/seq_expression.h"
 #include "mcrl2/fdr/set_expression.h"
+#include "mcrl2/fdr/targ_expression.h"
+#include "mcrl2/fdr/test_expression.h"
+#include "mcrl2/fdr/testtype_expression.h"
+#include "mcrl2/fdr/trname_expression.h"
 #include "mcrl2/fdr/tuple_expression.h"
+#include "mcrl2/fdr/type_expression.h"
+#include "mcrl2/fdr/vartype_expression.h"
 
 namespace mcrl2 {
 
@@ -405,7 +417,7 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    conditional::conditional(const boolean_expression& guard, const any& thenpart, const any& elsepart)
+    conditional::conditional(const boolean_expression& guard, const any_expression& thenpart, const any_expression& elsepart)
       : common_expression(fdr::detail::gsMakeConditional(guard, thenpart, elsepart))
     {}
 
@@ -414,12 +426,12 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    any conditional::thenpart() const
+    any_expression conditional::thenpart() const
     {
       return atermpp::arg2(*this);
     }
 
-    any conditional::elsepart() const
+    any_expression conditional::elsepart() const
     {
       return atermpp::arg3(*this);
     }
@@ -489,16 +501,16 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    localdef::localdef(const definition_list& defs, const any& within)
+    localdef::localdef(const definition_expression_list& defs, const any_expression& within)
       : common_expression(fdr::detail::gsMakeLocalDef(defs, within))
     {}
 
-    definition_list localdef::defs() const
+    definition_expression_list localdef::defs() const
     {
       return atermpp::list_arg1(*this);
     }
 
-    any localdef::within() const
+    any_expression localdef::within() const
     {
       return atermpp::arg2(*this);
     }
@@ -517,11 +529,11 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    bracketed::bracketed(const any& operand)
+    bracketed::bracketed(const any_expression& operand)
       : common_expression(fdr::detail::gsMakeBracketed(operand))
     {}
 
-    any bracketed::operand() const
+    any_expression bracketed::operand() const
     {
       return atermpp::arg1(*this);
     }
@@ -540,16 +552,16 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    pattern::pattern(const any& left, const any& right)
+    pattern::pattern(const any_expression& left, const any_expression& right)
       : common_expression(fdr::detail::gsMakePattern(left, right))
     {}
 
-    any pattern::left() const
+    any_expression pattern::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    any pattern::right() const
+    any_expression pattern::right() const
     {
       return atermpp::arg2(*this);
     }
@@ -763,7 +775,7 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    lambdaexpr::lambdaexpr(const expression_list& exprs, const any& function)
+    lambdaexpr::lambdaexpr(const expression_list& exprs, const any_expression& function)
       : lambda_expression(fdr::detail::gsMakeLambdaExpr(exprs, function))
     {}
 
@@ -772,7 +784,7 @@ namespace fdr {
       return atermpp::list_arg1(*this);
     }
 
-    any lambdaexpr::function() const
+    any_expression lambdaexpr::function() const
     {
       return atermpp::arg2(*this);
     }
@@ -1126,11 +1138,11 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    chanset::chanset(const targ& argument)
+    chanset::chanset(const targ_expression& argument)
       : set_expression(fdr::detail::gsMakeChanSet(argument))
     {}
 
-    targ chanset::argument() const
+    targ_expression chanset::argument() const
     {
       return atermpp::arg1(*this);
     }
@@ -1363,46 +1375,46 @@ namespace fdr {
 //--- start generated process expression class definitions ---//
     /// \brief Default constructor.
     stop::stop()
-      : process(fdr::detail::constructSTOP())
+      : process_expression(fdr::detail::constructSTOP())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     stop::stop(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_STOP(m_term));
     }
 
     /// \brief Default constructor.
     skip::skip()
-      : process(fdr::detail::constructSKIP())
+      : process_expression(fdr::detail::constructSKIP())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     skip::skip(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_SKIP(m_term));
     }
 
     /// \brief Default constructor.
     chaos::chaos()
-      : process(fdr::detail::constructCHAOS())
+      : process_expression(fdr::detail::constructCHAOS())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     chaos::chaos(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_CHAOS(m_term));
     }
 
     /// \brief Constructor.
     chaos::chaos(const set_expression& set)
-      : process(fdr::detail::gsMakeCHAOS(set))
+      : process_expression(fdr::detail::gsMakeCHAOS(set))
     {}
 
     set_expression chaos::set() const
@@ -1412,20 +1424,20 @@ namespace fdr {
 
     /// \brief Default constructor.
     prefix::prefix()
-      : process(fdr::detail::constructPrefix())
+      : process_expression(fdr::detail::constructPrefix())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     prefix::prefix(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_Prefix(m_term));
     }
 
     /// \brief Constructor.
-    prefix::prefix(const dotted_expression& dotted, const field_list& fields, const process& proc)
-      : process(fdr::detail::gsMakePrefix(dotted, fields, proc))
+    prefix::prefix(const dotted_expression& dotted, const field_expression_list& fields, const process_expression& proc)
+      : process_expression(fdr::detail::gsMakePrefix(dotted, fields, proc))
     {}
 
     dotted_expression prefix::dotted() const
@@ -1433,147 +1445,147 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    field_list prefix::fields() const
+    field_expression_list prefix::fields() const
     {
       return atermpp::list_arg2(*this);
     }
 
-    process prefix::proc() const
+    process_expression prefix::proc() const
     {
       return atermpp::arg3(*this);
     }
 
     /// \brief Default constructor.
     externalchoice::externalchoice()
-      : process(fdr::detail::constructExternalChoice())
+      : process_expression(fdr::detail::constructExternalChoice())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     externalchoice::externalchoice(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_ExternalChoice(m_term));
     }
 
     /// \brief Constructor.
-    externalchoice::externalchoice(const process& left, const process& right)
-      : process(fdr::detail::gsMakeExternalChoice(left, right))
+    externalchoice::externalchoice(const process_expression& left, const process_expression& right)
+      : process_expression(fdr::detail::gsMakeExternalChoice(left, right))
     {}
 
-    process externalchoice::left() const
+    process_expression externalchoice::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process externalchoice::right() const
+    process_expression externalchoice::right() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     internalchoice::internalchoice()
-      : process(fdr::detail::constructInternalChoice())
+      : process_expression(fdr::detail::constructInternalChoice())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     internalchoice::internalchoice(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_InternalChoice(m_term));
     }
 
     /// \brief Constructor.
-    internalchoice::internalchoice(const process& left, const process& right)
-      : process(fdr::detail::gsMakeInternalChoice(left, right))
+    internalchoice::internalchoice(const process_expression& left, const process_expression& right)
+      : process_expression(fdr::detail::gsMakeInternalChoice(left, right))
     {}
 
-    process internalchoice::left() const
+    process_expression internalchoice::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process internalchoice::right() const
+    process_expression internalchoice::right() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     sequentialcomposition::sequentialcomposition()
-      : process(fdr::detail::constructSequentialComposition())
+      : process_expression(fdr::detail::constructSequentialComposition())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     sequentialcomposition::sequentialcomposition(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_SequentialComposition(m_term));
     }
 
     /// \brief Constructor.
-    sequentialcomposition::sequentialcomposition(const process& left, const process& right)
-      : process(fdr::detail::gsMakeSequentialComposition(left, right))
+    sequentialcomposition::sequentialcomposition(const process_expression& left, const process_expression& right)
+      : process_expression(fdr::detail::gsMakeSequentialComposition(left, right))
     {}
 
-    process sequentialcomposition::left() const
+    process_expression sequentialcomposition::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process sequentialcomposition::right() const
+    process_expression sequentialcomposition::right() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     interrupt::interrupt()
-      : process(fdr::detail::constructInterrupt())
+      : process_expression(fdr::detail::constructInterrupt())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     interrupt::interrupt(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_Interrupt(m_term));
     }
 
     /// \brief Constructor.
-    interrupt::interrupt(const process& left, const process& right)
-      : process(fdr::detail::gsMakeInterrupt(left, right))
+    interrupt::interrupt(const process_expression& left, const process_expression& right)
+      : process_expression(fdr::detail::gsMakeInterrupt(left, right))
     {}
 
-    process interrupt::left() const
+    process_expression interrupt::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process interrupt::right() const
+    process_expression interrupt::right() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     hiding::hiding()
-      : process(fdr::detail::constructHiding())
+      : process_expression(fdr::detail::constructHiding())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     hiding::hiding(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_Hiding(m_term));
     }
 
     /// \brief Constructor.
-    hiding::hiding(const process& proc, const set_expression& set)
-      : process(fdr::detail::gsMakeHiding(proc, set))
+    hiding::hiding(const process_expression& proc, const set_expression& set)
+      : process_expression(fdr::detail::gsMakeHiding(proc, set))
     {}
 
-    process hiding::proc() const
+    process_expression hiding::proc() const
     {
       return atermpp::arg1(*this);
     }
@@ -1585,56 +1597,56 @@ namespace fdr {
 
     /// \brief Default constructor.
     interleave::interleave()
-      : process(fdr::detail::constructInterleave())
+      : process_expression(fdr::detail::constructInterleave())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     interleave::interleave(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_Interleave(m_term));
     }
 
     /// \brief Constructor.
-    interleave::interleave(const process& left, const process& right)
-      : process(fdr::detail::gsMakeInterleave(left, right))
+    interleave::interleave(const process_expression& left, const process_expression& right)
+      : process_expression(fdr::detail::gsMakeInterleave(left, right))
     {}
 
-    process interleave::left() const
+    process_expression interleave::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process interleave::right() const
+    process_expression interleave::right() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     sharing::sharing()
-      : process(fdr::detail::constructSharing())
+      : process_expression(fdr::detail::constructSharing())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     sharing::sharing(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_Sharing(m_term));
     }
 
     /// \brief Constructor.
-    sharing::sharing(const process& left, const process& right, const set_expression& set)
-      : process(fdr::detail::gsMakeSharing(left, right, set))
+    sharing::sharing(const process_expression& left, const process_expression& right, const set_expression& set)
+      : process_expression(fdr::detail::gsMakeSharing(left, right, set))
     {}
 
-    process sharing::left() const
+    process_expression sharing::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process sharing::right() const
+    process_expression sharing::right() const
     {
       return atermpp::arg2(*this);
     }
@@ -1646,28 +1658,28 @@ namespace fdr {
 
     /// \brief Default constructor.
     alphaparallel::alphaparallel()
-      : process(fdr::detail::constructAlphaParallel())
+      : process_expression(fdr::detail::constructAlphaParallel())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     alphaparallel::alphaparallel(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_AlphaParallel(m_term));
     }
 
     /// \brief Constructor.
-    alphaparallel::alphaparallel(const process& left, const process& right, const set_expression& left_set, const set_expression& right_set)
-      : process(fdr::detail::gsMakeAlphaParallel(left, right, left_set, right_set))
+    alphaparallel::alphaparallel(const process_expression& left, const process_expression& right, const set_expression& left_set, const set_expression& right_set)
+      : process_expression(fdr::detail::gsMakeAlphaParallel(left, right, left_set, right_set))
     {}
 
-    process alphaparallel::left() const
+    process_expression alphaparallel::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process alphaparallel::right() const
+    process_expression alphaparallel::right() const
     {
       return atermpp::arg2(*this);
     }
@@ -1684,20 +1696,20 @@ namespace fdr {
 
     /// \brief Default constructor.
     repexternalchoice::repexternalchoice()
-      : process(fdr::detail::constructRepExternalChoice())
+      : process_expression(fdr::detail::constructRepExternalChoice())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     repexternalchoice::repexternalchoice(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_RepExternalChoice(m_term));
     }
 
     /// \brief Constructor.
-    repexternalchoice::repexternalchoice(const setgen& gen, const process& proc)
-      : process(fdr::detail::gsMakeRepExternalChoice(gen, proc))
+    repexternalchoice::repexternalchoice(const setgen& gen, const process_expression& proc)
+      : process_expression(fdr::detail::gsMakeRepExternalChoice(gen, proc))
     {}
 
     setgen repexternalchoice::gen() const
@@ -1705,27 +1717,27 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    process repexternalchoice::proc() const
+    process_expression repexternalchoice::proc() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     repinternalchoice::repinternalchoice()
-      : process(fdr::detail::constructRepInternalChoice())
+      : process_expression(fdr::detail::constructRepInternalChoice())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     repinternalchoice::repinternalchoice(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_RepInternalChoice(m_term));
     }
 
     /// \brief Constructor.
-    repinternalchoice::repinternalchoice(const setgen& gen, const process& proc)
-      : process(fdr::detail::gsMakeRepInternalChoice(gen, proc))
+    repinternalchoice::repinternalchoice(const setgen& gen, const process_expression& proc)
+      : process_expression(fdr::detail::gsMakeRepInternalChoice(gen, proc))
     {}
 
     setgen repinternalchoice::gen() const
@@ -1733,27 +1745,27 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    process repinternalchoice::proc() const
+    process_expression repinternalchoice::proc() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     repsequentialcomposition::repsequentialcomposition()
-      : process(fdr::detail::constructRepSequentialComposition())
+      : process_expression(fdr::detail::constructRepSequentialComposition())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     repsequentialcomposition::repsequentialcomposition(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_RepSequentialComposition(m_term));
     }
 
     /// \brief Constructor.
-    repsequentialcomposition::repsequentialcomposition(const seqgen& gen, const process& proc)
-      : process(fdr::detail::gsMakeRepSequentialComposition(gen, proc))
+    repsequentialcomposition::repsequentialcomposition(const seqgen& gen, const process_expression& proc)
+      : process_expression(fdr::detail::gsMakeRepSequentialComposition(gen, proc))
     {}
 
     seqgen repsequentialcomposition::gen() const
@@ -1761,27 +1773,27 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    process repsequentialcomposition::proc() const
+    process_expression repsequentialcomposition::proc() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     repinterleave::repinterleave()
-      : process(fdr::detail::constructRepInterleave())
+      : process_expression(fdr::detail::constructRepInterleave())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     repinterleave::repinterleave(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_RepInterleave(m_term));
     }
 
     /// \brief Constructor.
-    repinterleave::repinterleave(const setgen& gen, const process& proc)
-      : process(fdr::detail::gsMakeRepInterleave(gen, proc))
+    repinterleave::repinterleave(const setgen& gen, const process_expression& proc)
+      : process_expression(fdr::detail::gsMakeRepInterleave(gen, proc))
     {}
 
     setgen repinterleave::gen() const
@@ -1789,27 +1801,27 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    process repinterleave::proc() const
+    process_expression repinterleave::proc() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     repsharing::repsharing()
-      : process(fdr::detail::constructRepSharing())
+      : process_expression(fdr::detail::constructRepSharing())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     repsharing::repsharing(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_RepSharing(m_term));
     }
 
     /// \brief Constructor.
-    repsharing::repsharing(const setgen& gen, const process& proc, const set_expression& set)
-      : process(fdr::detail::gsMakeRepSharing(gen, proc, set))
+    repsharing::repsharing(const setgen& gen, const process_expression& proc, const set_expression& set)
+      : process_expression(fdr::detail::gsMakeRepSharing(gen, proc, set))
     {}
 
     setgen repsharing::gen() const
@@ -1817,7 +1829,7 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    process repsharing::proc() const
+    process_expression repsharing::proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -1829,20 +1841,20 @@ namespace fdr {
 
     /// \brief Default constructor.
     repalphaparallel::repalphaparallel()
-      : process(fdr::detail::constructRepAlphaParallel())
+      : process_expression(fdr::detail::constructRepAlphaParallel())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     repalphaparallel::repalphaparallel(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_RepAlphaParallel(m_term));
     }
 
     /// \brief Constructor.
-    repalphaparallel::repalphaparallel(const setgen& gen, const process& proc, const set_expression& set)
-      : process(fdr::detail::gsMakeRepAlphaParallel(gen, proc, set))
+    repalphaparallel::repalphaparallel(const setgen& gen, const process_expression& proc, const set_expression& set)
+      : process_expression(fdr::detail::gsMakeRepAlphaParallel(gen, proc, set))
     {}
 
     setgen repalphaparallel::gen() const
@@ -1850,7 +1862,7 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    process repalphaparallel::proc() const
+    process_expression repalphaparallel::proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -1862,48 +1874,48 @@ namespace fdr {
 
     /// \brief Default constructor.
     untimedtimeout::untimedtimeout()
-      : process(fdr::detail::constructUntimedTimeOut())
+      : process_expression(fdr::detail::constructUntimedTimeOut())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     untimedtimeout::untimedtimeout(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_UntimedTimeOut(m_term));
     }
 
     /// \brief Constructor.
-    untimedtimeout::untimedtimeout(const process& left, const process& right)
-      : process(fdr::detail::gsMakeUntimedTimeOut(left, right))
+    untimedtimeout::untimedtimeout(const process_expression& left, const process_expression& right)
+      : process_expression(fdr::detail::gsMakeUntimedTimeOut(left, right))
     {}
 
-    process untimedtimeout::left() const
+    process_expression untimedtimeout::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process untimedtimeout::right() const
+    process_expression untimedtimeout::right() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     boolguard::boolguard()
-      : process(fdr::detail::constructBoolGuard())
+      : process_expression(fdr::detail::constructBoolGuard())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     boolguard::boolguard(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_BoolGuard(m_term));
     }
 
     /// \brief Constructor.
-    boolguard::boolguard(const boolean_expression& guard, const process& proc)
-      : process(fdr::detail::gsMakeBoolGuard(guard, proc))
+    boolguard::boolguard(const boolean_expression& guard, const process_expression& proc)
+      : process_expression(fdr::detail::gsMakeBoolGuard(guard, proc))
     {}
 
     boolean_expression boolguard::guard() const
@@ -1911,35 +1923,35 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    process boolguard::proc() const
+    process_expression boolguard::proc() const
     {
       return atermpp::arg2(*this);
     }
 
     /// \brief Default constructor.
     linkedparallel::linkedparallel()
-      : process(fdr::detail::constructLinkedParallel())
+      : process_expression(fdr::detail::constructLinkedParallel())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     linkedparallel::linkedparallel(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_LinkedParallel(m_term));
     }
 
     /// \brief Constructor.
-    linkedparallel::linkedparallel(const process& left, const process& right, const linkpar& linked)
-      : process(fdr::detail::gsMakeLinkedParallel(left, right, linked))
+    linkedparallel::linkedparallel(const process_expression& left, const process_expression& right, const linkpar& linked)
+      : process_expression(fdr::detail::gsMakeLinkedParallel(left, right, linked))
     {}
 
-    process linkedparallel::left() const
+    process_expression linkedparallel::left() const
     {
       return atermpp::arg1(*this);
     }
 
-    process linkedparallel::right() const
+    process_expression linkedparallel::right() const
     {
       return atermpp::arg2(*this);
     }
@@ -1951,20 +1963,20 @@ namespace fdr {
 
     /// \brief Default constructor.
     replinkedparallel::replinkedparallel()
-      : process(fdr::detail::constructRepLinkedParallel())
+      : process_expression(fdr::detail::constructRepLinkedParallel())
     {}
 
     /// \brief Constructor.
     /// \param term A term
     replinkedparallel::replinkedparallel(atermpp::aterm_appl term)
-      : process(term)
+      : process_expression(term)
     {
       assert(fdr::detail::check_term_RepLinkedParallel(m_term));
     }
 
     /// \brief Constructor.
-    replinkedparallel::replinkedparallel(const seqgen& gen, const process& proc, const linkpar& linked)
-      : process(fdr::detail::gsMakeRepLinkedParallel(gen, proc, linked))
+    replinkedparallel::replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar& linked)
+      : process_expression(fdr::detail::gsMakeRepLinkedParallel(gen, proc, linked))
     {}
 
     seqgen replinkedparallel::gen() const
@@ -1972,7 +1984,7 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    process replinkedparallel::proc() const
+    process_expression replinkedparallel::proc() const
     {
       return atermpp::arg2(*this);
     }
@@ -1982,6 +1994,1039 @@ namespace fdr {
       return atermpp::arg3(*this);
     }
 //--- end generated process expression class definitions ---//
+
+//--- start generated definition expression class definitions ---//
+    /// \brief Default constructor.
+    assign::assign()
+      : definition_expression(fdr::detail::constructAssign())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    assign::assign(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_Assign(m_term));
+    }
+
+    /// \brief Constructor.
+    assign::assign(const any_expression& left, const any_expression& right)
+      : definition_expression(fdr::detail::gsMakeAssign(left, right))
+    {}
+
+    any_expression assign::left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    any_expression assign::right() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    channel::channel()
+      : definition_expression(fdr::detail::constructChannel())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    channel::channel(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_Channel(m_term));
+    }
+
+    /// \brief Constructor.
+    channel::channel(const name_list& names, const type_expression& type_name)
+      : definition_expression(fdr::detail::gsMakeChannel(names, type_name))
+    {}
+
+    name_list channel::names() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    type_expression channel::type_name() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    channel::channel()
+      : definition_expression(fdr::detail::constructSimpleChannel())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    channel::channel(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_SimpleChannel(m_term));
+    }
+
+    /// \brief Constructor.
+    channel::channel(const name_list& names)
+      : definition_expression(fdr::detail::gsMakeSimpleChannel(names))
+    {}
+
+    name_list channel::names() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    nametype::nametype()
+      : definition_expression(fdr::detail::constructNameType())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    nametype::nametype(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_NameType(m_term));
+    }
+
+    /// \brief Constructor.
+    nametype::nametype(const name& id, const type_expression& type_name)
+      : definition_expression(fdr::detail::gsMakeNameType(id, type_name))
+    {}
+
+    name nametype::id() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    type_expression nametype::type_name() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    datatype::datatype()
+      : definition_expression(fdr::detail::constructDataType())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    datatype::datatype(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_DataType(m_term));
+    }
+
+    /// \brief Constructor.
+    datatype::datatype(const name& id, const vartype_expression_list& vartypes)
+      : definition_expression(fdr::detail::gsMakeDataType(id, vartypes))
+    {}
+
+    name datatype::id() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    vartype_expression_list datatype::vartypes() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    subtype::subtype()
+      : definition_expression(fdr::detail::constructSubType())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    subtype::subtype(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_SubType(m_term));
+    }
+
+    /// \brief Constructor.
+    subtype::subtype(const name& id, const vartype_expression_list& vartypes)
+      : definition_expression(fdr::detail::gsMakeSubType(id, vartypes))
+    {}
+
+    name subtype::id() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    vartype_expression_list subtype::vartypes() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    external::external()
+      : definition_expression(fdr::detail::constructExternal())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    external::external(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_External(m_term));
+    }
+
+    /// \brief Constructor.
+    external::external(const name_list& names)
+      : definition_expression(fdr::detail::gsMakeExternal(names))
+    {}
+
+    name_list external::names() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    transparent::transparent()
+      : definition_expression(fdr::detail::constructTransparent())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    transparent::transparent(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_Transparent(m_term));
+    }
+
+    /// \brief Constructor.
+    transparent::transparent(const trname_expression_list& trnames)
+      : definition_expression(fdr::detail::gsMakeTransparent(trnames))
+    {}
+
+    trname_expression_list transparent::trnames() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    assert_::assert_()
+      : definition_expression(fdr::detail::constructAssert())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    assert_::assert_(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_Assert(m_term));
+    }
+
+    /// \brief Constructor.
+    assert_::assert_(const check_expression& chk)
+      : definition_expression(fdr::detail::gsMakeAssert(chk))
+    {}
+
+    check_expression assert_::chk() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    print::print()
+      : definition_expression(fdr::detail::constructPrint())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    print::print(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_Print(m_term));
+    }
+
+    /// \brief Constructor.
+    print::print(const expression& expr)
+      : definition_expression(fdr::detail::gsMakePrint(expr))
+    {}
+
+    expression print::expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    include::include()
+      : definition_expression(fdr::detail::constructInclude())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    include::include(atermpp::aterm_appl term)
+      : definition_expression(term)
+    {
+      assert(fdr::detail::check_term_Include(m_term));
+    }
+
+    /// \brief Constructor.
+    include::include(const filename& file)
+      : definition_expression(fdr::detail::gsMakeInclude(file))
+    {}
+
+    filename include::file() const
+    {
+      return atermpp::arg1(*this);
+    }
+//--- end generated definition expression class definitions ---//
+
+//--- start generated failuremodel expression class definitions ---//
+    /// \brief Default constructor.
+    f::f()
+      : failuremodel_expression(fdr::detail::constructF())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    f::f(atermpp::aterm_appl term)
+      : failuremodel_expression(term)
+    {
+      assert(fdr::detail::check_term_F(m_term));
+    }
+
+    /// \brief Default constructor.
+    fd::fd()
+      : failuremodel_expression(fdr::detail::constructFD())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    fd::fd(atermpp::aterm_appl term)
+      : failuremodel_expression(term)
+    {
+      assert(fdr::detail::check_term_FD(m_term));
+    }
+//--- end generated failuremodel expression class definitions ---//
+
+//--- start generated targ expression class definitions ---//
+    /// \brief Default constructor.
+    nil::nil()
+      : targ_expression(fdr::detail::constructNil())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    nil::nil(atermpp::aterm_appl term)
+      : targ_expression(term)
+    {
+      assert(fdr::detail::check_term_Nil(m_term));
+    }
+
+    /// \brief Default constructor.
+    closedrange::closedrange()
+      : targ_expression(fdr::detail::constructClosedRange())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    closedrange::closedrange(atermpp::aterm_appl term)
+      : targ_expression(term)
+    {
+      assert(fdr::detail::check_term_ClosedRange(m_term));
+    }
+
+    /// \brief Constructor.
+    closedrange::closedrange(const numeric_expression& begin, const numeric_expression& end)
+      : targ_expression(fdr::detail::gsMakeClosedRange(begin, end))
+    {}
+
+    numeric_expression closedrange::begin() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    numeric_expression closedrange::end() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    openrange::openrange()
+      : targ_expression(fdr::detail::constructOpenRange())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    openrange::openrange(atermpp::aterm_appl term)
+      : targ_expression(term)
+    {
+      assert(fdr::detail::check_term_OpenRange(m_term));
+    }
+
+    /// \brief Constructor.
+    openrange::openrange(const numeric_expression& begin)
+      : targ_expression(fdr::detail::gsMakeOpenRange(begin))
+    {}
+
+    numeric_expression openrange::begin() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    compr::compr()
+      : targ_expression(fdr::detail::constructCompr())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    compr::compr(atermpp::aterm_appl term)
+      : targ_expression(term)
+    {
+      assert(fdr::detail::check_term_Compr(m_term));
+    }
+
+    /// \brief Constructor.
+    compr::compr(const expression& expr, const comprehension_list& comprs)
+      : targ_expression(fdr::detail::gsMakeCompr(expr, comprs))
+    {}
+
+    expression compr::expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    comprehension_list compr::comprs() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+//--- end generated targ expression class definitions ---//
+
+//--- start generated field expression class definitions ---//
+    /// \brief Default constructor.
+    simpleinput::simpleinput()
+      : field_expression(fdr::detail::constructSimpleInput())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    simpleinput::simpleinput(atermpp::aterm_appl term)
+      : field_expression(term)
+    {
+      assert(fdr::detail::check_term_SimpleInput(m_term));
+    }
+
+    /// \brief Constructor.
+    simpleinput::simpleinput(const expression& expr)
+      : field_expression(fdr::detail::gsMakeSimpleInput(expr))
+    {}
+
+    expression simpleinput::expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    input::input()
+      : field_expression(fdr::detail::constructInput())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    input::input(atermpp::aterm_appl term)
+      : field_expression(term)
+    {
+      assert(fdr::detail::check_term_Input(m_term));
+    }
+
+    /// \brief Constructor.
+    input::input(const expression& expr, const set_expression& restriction)
+      : field_expression(fdr::detail::gsMakeInput(expr, restriction))
+    {}
+
+    expression input::expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    set_expression input::restriction() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    output::output()
+      : field_expression(fdr::detail::constructOutput())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    output::output(atermpp::aterm_appl term)
+      : field_expression(term)
+    {
+      assert(fdr::detail::check_term_Output(m_term));
+    }
+
+    /// \brief Constructor.
+    output::output(const expression& expr)
+      : field_expression(fdr::detail::gsMakeOutput(expr))
+    {}
+
+    expression output::expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+//--- end generated field expression class definitions ---//
+
+//--- start generated testtype expression class definitions ---//
+    /// \brief Default constructor.
+    deterministic::deterministic()
+      : testtype_expression(fdr::detail::constructdeterministic())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    deterministic::deterministic(atermpp::aterm_appl term)
+      : testtype_expression(term)
+    {
+      assert(fdr::detail::check_term_deterministic(m_term));
+    }
+
+    /// \brief Default constructor.
+    deadlock_free::deadlock_free()
+      : testtype_expression(fdr::detail::constructdeadlock_free())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    deadlock_free::deadlock_free(atermpp::aterm_appl term)
+      : testtype_expression(term)
+    {
+      assert(fdr::detail::check_term_deadlock_free(m_term));
+    }
+
+    /// \brief Default constructor.
+    livelock_free::livelock_free()
+      : testtype_expression(fdr::detail::constructlivelock_free())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    livelock_free::livelock_free(atermpp::aterm_appl term)
+      : testtype_expression(term)
+    {
+      assert(fdr::detail::check_term_livelock_free(m_term));
+    }
+//--- end generated testtype expression class definitions ---//
+
+//--- start generated vartype expression class definitions ---//
+    /// \brief Default constructor.
+    simplebranch::simplebranch()
+      : vartype_expression(fdr::detail::constructSimpleBranch())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    simplebranch::simplebranch(atermpp::aterm_appl term)
+      : vartype_expression(term)
+    {
+      assert(fdr::detail::check_term_SimpleBranch(m_term));
+    }
+
+    /// \brief Constructor.
+    simplebranch::simplebranch(const name& id)
+      : vartype_expression(fdr::detail::gsMakeSimpleBranch(id))
+    {}
+
+    name simplebranch::id() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    branch::branch()
+      : vartype_expression(fdr::detail::constructBranch())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    branch::branch(atermpp::aterm_appl term)
+      : vartype_expression(term)
+    {
+      assert(fdr::detail::check_term_Branch(m_term));
+    }
+
+    /// \brief Constructor.
+    branch::branch(const name& id, const type_expression& type_name)
+      : vartype_expression(fdr::detail::gsMakeBranch(id, type_name))
+    {}
+
+    name branch::id() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    type_expression branch::type_name() const
+    {
+      return atermpp::arg2(*this);
+    }
+//--- end generated vartype expression class definitions ---//
+
+//--- start generated type expression class definitions ---//
+    /// \brief Default constructor.
+    typeproduct::typeproduct()
+      : type_expression(fdr::detail::constructTypeProduct())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    typeproduct::typeproduct(atermpp::aterm_appl term)
+      : type_expression(term)
+    {
+      assert(fdr::detail::check_term_TypeProduct(m_term));
+    }
+
+    /// \brief Constructor.
+    typeproduct::typeproduct(const type_expression& left, const type_expression& right)
+      : type_expression(fdr::detail::gsMakeTypeProduct(left, right))
+    {}
+
+    type_expression typeproduct::left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    type_expression typeproduct::right() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    typetuple::typetuple()
+      : type_expression(fdr::detail::constructTypeTuple())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    typetuple::typetuple(atermpp::aterm_appl term)
+      : type_expression(term)
+    {
+      assert(fdr::detail::check_term_TypeTuple(m_term));
+    }
+
+    /// \brief Constructor.
+    typetuple::typetuple(const type_expression_list& types)
+      : type_expression(fdr::detail::gsMakeTypeTuple(types))
+    {}
+
+    type_expression_list typetuple::types() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    typeset::typeset()
+      : type_expression(fdr::detail::constructTypeSet())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    typeset::typeset(atermpp::aterm_appl term)
+      : type_expression(term)
+    {
+      assert(fdr::detail::check_term_TypeSet(m_term));
+    }
+
+    /// \brief Constructor.
+    typeset::typeset(const set_expression& set)
+      : type_expression(fdr::detail::gsMakeTypeSet(set))
+    {}
+
+    set_expression typeset::set() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    simpletypename::simpletypename()
+      : type_expression(fdr::detail::constructSympleTypeName())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    simpletypename::simpletypename(atermpp::aterm_appl term)
+      : type_expression(term)
+    {
+      assert(fdr::detail::check_term_SympleTypeName(m_term));
+    }
+
+    /// \brief Constructor.
+    simpletypename::simpletypename(const name& id)
+      : type_expression(fdr::detail::gsMakeSympleTypeName(id))
+    {}
+
+    name simpletypename::id() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    typename::typename()
+      : type_expression(fdr::detail::constructTypeName())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    typename::typename(atermpp::aterm_appl term)
+      : type_expression(term)
+    {
+      assert(fdr::detail::check_term_TypeName(m_term));
+    }
+
+    /// \brief Constructor.
+    typename::typename(const name& id, const type_expression& type_name)
+      : type_expression(fdr::detail::gsMakeTypeName(id, type_name))
+    {}
+
+    name typename::id() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    type_expression typename::type_name() const
+    {
+      return atermpp::arg2(*this);
+    }
+//--- end generated type expression class definitions ---//
+
+//--- start generated check expression class definitions ---//
+    /// \brief Default constructor.
+    bcheck::bcheck()
+      : check_expression(fdr::detail::constructBCheck())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    bcheck::bcheck(atermpp::aterm_appl term)
+      : check_expression(term)
+    {
+      assert(fdr::detail::check_term_BCheck(m_term));
+    }
+
+    /// \brief Constructor.
+    bcheck::bcheck(const boolean_expression& expr)
+      : check_expression(fdr::detail::gsMakeBCheck(expr))
+    {}
+
+    boolean_expression bcheck::expr() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    rcheck::rcheck()
+      : check_expression(fdr::detail::constructRCheck())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    rcheck::rcheck(atermpp::aterm_appl term)
+      : check_expression(term)
+    {
+      assert(fdr::detail::check_term_RCheck(m_term));
+    }
+
+    /// \brief Constructor.
+    rcheck::rcheck(const process_expression& left, const process_expression& right, const refined& refinement)
+      : check_expression(fdr::detail::gsMakeRCheck(left, right, refinement))
+    {}
+
+    process_expression rcheck::left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    process_expression rcheck::right() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    refined rcheck::refinement() const
+    {
+      return atermpp::arg3(*this);
+    }
+
+    /// \brief Default constructor.
+    tcheck::tcheck()
+      : check_expression(fdr::detail::constructTCheck())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    tcheck::tcheck(atermpp::aterm_appl term)
+      : check_expression(term)
+    {
+      assert(fdr::detail::check_term_TCheck(m_term));
+    }
+
+    /// \brief Constructor.
+    tcheck::tcheck(const process_expression& proc, const test_expression& operand)
+      : check_expression(fdr::detail::gsMakeTCheck(proc, operand))
+    {}
+
+    process_expression tcheck::proc() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    test_expression tcheck::operand() const
+    {
+      return atermpp::arg2(*this);
+    }
+
+    /// \brief Default constructor.
+    notcheck::notcheck()
+      : check_expression(fdr::detail::constructNotCheck())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    notcheck::notcheck(atermpp::aterm_appl term)
+      : check_expression(term)
+    {
+      assert(fdr::detail::check_term_NotCheck(m_term));
+    }
+
+    /// \brief Constructor.
+    notcheck::notcheck(const check_expression& chk)
+      : check_expression(fdr::detail::gsMakeNotCheck(chk))
+    {}
+
+    check_expression notcheck::chk() const
+    {
+      return atermpp::arg1(*this);
+    }
+//--- end generated check expression class definitions ---//
+
+//--- start generated model expression class definitions ---//
+    /// \brief Default constructor.
+    nil::nil()
+      : model_expression(fdr::detail::constructNil())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    nil::nil(atermpp::aterm_appl term)
+      : model_expression(term)
+    {
+      assert(fdr::detail::check_term_Nil(m_term));
+    }
+
+    /// \brief Default constructor.
+    t::t()
+      : model_expression(fdr::detail::constructT())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    t::t(atermpp::aterm_appl term)
+      : model_expression(term)
+    {
+      assert(fdr::detail::check_term_T(m_term));
+    }
+//--- end generated model expression class definitions ---//
+
+//--- start generated test expression class definitions ---//
+    /// \brief Default constructor.
+    divergence_free::divergence_free()
+      : test_expression(fdr::detail::constructdivergence_free())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    divergence_free::divergence_free(atermpp::aterm_appl term)
+      : test_expression(term)
+    {
+      assert(fdr::detail::check_term_divergence_free(m_term));
+    }
+
+    /// \brief Default constructor.
+    test::test()
+      : test_expression(fdr::detail::constructTest())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    test::test(atermpp::aterm_appl term)
+      : test_expression(term)
+    {
+      assert(fdr::detail::check_term_Test(m_term));
+    }
+
+    /// \brief Constructor.
+    test::test(const testtype_expression& tt, const failuremodel_expression& fm)
+      : test_expression(fdr::detail::gsMakeTest(tt, fm))
+    {}
+
+    testtype_expression test::tt() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    failuremodel_expression test::fm() const
+    {
+      return atermpp::arg2(*this);
+    }
+//--- end generated test expression class definitions ---//
+
+//--- start generated trname expression class definitions ---//
+    /// \brief Default constructor.
+    normal::normal()
+      : trname_expression(fdr::detail::constructnormal())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    normal::normal(atermpp::aterm_appl term)
+      : trname_expression(term)
+    {
+      assert(fdr::detail::check_term_normal(m_term));
+    }
+
+    /// \brief Default constructor.
+    normalise::normalise()
+      : trname_expression(fdr::detail::constructnormalise())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    normalise::normalise(atermpp::aterm_appl term)
+      : trname_expression(term)
+    {
+      assert(fdr::detail::check_term_normalise(m_term));
+    }
+
+    /// \brief Default constructor.
+    normalize::normalize()
+      : trname_expression(fdr::detail::constructnormalize())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    normalize::normalize(atermpp::aterm_appl term)
+      : trname_expression(term)
+    {
+      assert(fdr::detail::check_term_normalize(m_term));
+    }
+
+    /// \brief Default constructor.
+    sbsim::sbsim()
+      : trname_expression(fdr::detail::constructsbsim())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    sbsim::sbsim(atermpp::aterm_appl term)
+      : trname_expression(term)
+    {
+      assert(fdr::detail::check_term_sbsim(m_term));
+    }
+
+    /// \brief Default constructor.
+    tau_loop_factor::tau_loop_factor()
+      : trname_expression(fdr::detail::constructtau_loop_factor())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    tau_loop_factor::tau_loop_factor(atermpp::aterm_appl term)
+      : trname_expression(term)
+    {
+      assert(fdr::detail::check_term_tau_loop_factor(m_term));
+    }
+
+    /// \brief Default constructor.
+    diamond::diamond()
+      : trname_expression(fdr::detail::constructdiamond())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    diamond::diamond(atermpp::aterm_appl term)
+      : trname_expression(term)
+    {
+      assert(fdr::detail::check_term_diamond(m_term));
+    }
+
+    /// \brief Default constructor.
+    model_compress::model_compress()
+      : trname_expression(fdr::detail::constructmodel_compress())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    model_compress::model_compress(atermpp::aterm_appl term)
+      : trname_expression(term)
+    {
+      assert(fdr::detail::check_term_model_compress(m_term));
+    }
+
+    /// \brief Default constructor.
+    explicate::explicate()
+      : trname_expression(fdr::detail::constructexplicate())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicate::explicate(atermpp::aterm_appl term)
+      : trname_expression(term)
+    {
+      assert(fdr::detail::check_term_explicate(m_term));
+    }
+//--- end generated trname expression class definitions ---//
+
+//--- start generated any expression class definitions ---//
+    /// \brief Default constructor.
+    expr::expr()
+      : any_expression(fdr::detail::constructExpr())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    expr::expr(atermpp::aterm_appl term)
+      : any_expression(term)
+    {
+      assert(fdr::detail::check_term_Expr(m_term));
+    }
+
+    /// \brief Constructor.
+    expr::expr(const expression& operand)
+      : any_expression(fdr::detail::gsMakeExpr(operand))
+    {}
+
+    expression expr::operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    proc::proc()
+      : any_expression(fdr::detail::constructProc())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    proc::proc(atermpp::aterm_appl term)
+      : any_expression(term)
+    {
+      assert(fdr::detail::check_term_Proc(m_term));
+    }
+
+    /// \brief Constructor.
+    proc::proc(const process_expression& operand)
+      : any_expression(fdr::detail::gsMakeProc(operand))
+    {}
+
+    process_expression proc::operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+//--- end generated any expression class definitions ---//
 
 } // namespace fdr
 

@@ -59,11 +59,11 @@ class lambdaexpr: public lambda_expression
     lambdaexpr(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    lambdaexpr(const expression_list& exprs, const any& function);
+    lambdaexpr(const expression_list& exprs, const any_expression& function);
 
     expression_list exprs() const;
 
-    any function() const;
+    any_expression function() const;
 };
 //--- end generated lambda expression class declarations ---//
 

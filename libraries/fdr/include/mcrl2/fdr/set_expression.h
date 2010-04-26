@@ -13,13 +13,12 @@
 #define MCRL2_FDR_SET_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/expression_fwd.h"
+#include "mcrl2/fdr/targ_expression_fwd.h"
                                       
 namespace mcrl2 {
 
 namespace fdr {
-
-class expression;
-class targ;
 
 //--- start generated set expression class declarations ---//
 /// \brief class set_expression
@@ -58,9 +57,9 @@ class chanset: public set_expression
     chanset(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    chanset(const targ& argument);
+    chanset(const targ_expression& argument);
 
-    targ argument() const;
+    targ_expression argument() const;
 };
 
 /// \brief A union

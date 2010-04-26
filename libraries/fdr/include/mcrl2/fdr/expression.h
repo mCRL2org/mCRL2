@@ -13,20 +13,19 @@
 #define MCRL2_FDR_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
+#include "mcrl2/fdr/boolean_expression_fwd.h"
+#include "mcrl2/fdr/dotted_expression_fwd.h"
+#include "mcrl2/fdr/lambda_expression_fwd.h"
+#include "mcrl2/fdr/seq_expression_fwd.h"
+#include "mcrl2/fdr/set_expression_fwd.h"
+#include "mcrl2/fdr/numeric_expression_fwd.h"
+#include "mcrl2/fdr/tuple_expression_fwd.h"
 
 namespace mcrl2 {
 
 namespace fdr {
 
-class boolean_expression ;
-class dotted_expression  ;
-class lambda_expression  ;
-class numeric_expression ;
-class seq_expression     ;
-class set_expression     ;
-class tuple_expression   ;
-
-//--- start generated expression class declarations ---//
+//--- start generated  expression class declarations ---//
 /// \brief class expression
 class expression: public atermpp::aterm_appl
 {
@@ -169,7 +168,7 @@ class lambda: public expression
 
     lambda_expression operand() const;
 };
-//--- end generated expression class declarations ---//
+//--- end generated  expression class declarations ---//
 
 //--- start generated is-functions ---//
 

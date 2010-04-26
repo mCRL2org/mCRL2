@@ -44,15 +44,13 @@ GreaterOrEqual	| greaterorequal(const expression& left, const expression& right)
 '''
 
 SET_EXPRESSION_CLASSES = r'''
-ChanSet			| chanset(const targ& argument)													| A simple argument (for channels)
+ChanSet			| chanset(const targ_expression& argument)													| A simple argument (for channels)
 union			| union_(const set_expression& left, const set_expression& right)			| A union
 inter			| inter(const set_expression& left, const set_expression& right)			| An intersection
 diff			| diff(const set_expression& left, const set_expression& right)				| A difference
 Union			| Union(const set_expression& set)											| A set union
 Inter			| Inter(const set_expression& set)											| A set intersection
 set				| set(const seq_expression& seq)											| The set of a sequence
-%Set				| Set(const set_expression& set)											| The set of sets of a set
-%Seq				| Seq(const seq_expression& seq)											| The set of sequences of a sequence
 extensions		| extensions(const expression& expr)										| The extension set
 productions		| productions(const expression& expr)										| The production set
 '''
@@ -73,16 +71,16 @@ Dot				| dot(const expression& left, expression& right)							| A dotted express
 '''
 
 LAMBDA_EXPRESSION_CLASSES = r'''
-LambdaExpr		| lambdaexpr(const expression_list& exprs, const any& function)					| A lambda expression
+LambdaExpr		| lambdaexpr(const expression_list& exprs, const any_expression& function)					| A lambda expression
 '''
 
 COMMON_EXPRESSION_CLASSES = r'''
-Conditional		| conditional(const boolean_expression& guard, const any& thenpart, const any& elsepart)	| A conditional
+Conditional		| conditional(const boolean_expression& guard, const any_expression& thenpart, const any_expression& elsepart)	| A conditional
 Name			| identifier(const name& id)													| A name
 LambdaAppl		| lambdaappl(const lambda_expression& lambda, const expression_list& exprs)	| A lambda application
-LocalDef		| localdef(const definition_expression_list& defs, const any& within)						| A local definition
-Bracketed		| bracketed(const any& operand)												| A bracketed process or expression
-Pattern         | pattern(const any& left, const any& right)                                | A combination of two patterns
+LocalDef		| localdef(const definition_expression_list& defs, const any_expression& within)						| A local definition
+Bracketed		| bracketed(const any_expression& operand)												| A bracketed process or expression
+Pattern         | pattern(const any_expression& left, const any_expression& right)                                | A combination of two patterns
 '''
 
 EXPRESSION_CLASSES = r'''
@@ -97,45 +95,45 @@ Lambda			| lambda(const lambda_expression& operand)									| A lambda expressio
 
 ANY_EXPRESSION_CLASSES = r'''
 Expr			| expr(const expression& operand)											| An expression
-Proc			| proc(const process& operand)												| A process
+Proc			| proc(const process_expression& operand)												| A process
 '''
 
 DEFINITION_EXPRESSION_CLASSES = r'''
-Assign			| assign(const any& left, const any& right)									| An assignment
-Channel			| channel(const name_list& names, const type& type_name)							| A channel
+Assign			| assign(const any_expression& left, const any_expression& right)									| An assignment
+Channel			| channel(const name_list& names, const type_expression& type_name)							| A channel
 SimpleChannel	| channel(const name_list& names)											| A simple channel
-NameType		| nametype(const name& id, const type& type_name)								| A nametype
-DataType		| datatype(const name& id, const vartype_list& vartypes)					| A datatype
-SubType			| subtype(const name& id, const vartype_list& vartypes)					| A subtype
+NameType		| nametype(const name& id, const type_expression& type_name)								| A nametype
+DataType		| datatype(const name& id, const vartype_expression_list& vartypes)					| A datatype
+SubType			| subtype(const name& id, const vartype_expression_list& vartypes)					| A subtype
 External		| external(const name_list& names)											| An external
-Transparent		| transparent(const trname_list& trnames)									| A transparent
-Assert			| assert_(const check& chk)												| An assertion
+Transparent		| transparent(const trname_expression_list& trnames)									| A transparent
+Assert			| assert_(const check_expression& chk)												| An assertion
 Print			| print(const expression& expr)												| A print
 Include			| include(const filename& file)											| An include
 '''
 
 VARTYPE_EXPRESSION_CLASSES = r'''
 SimpleBranch	| simplebranch(const name& id)											| A simple branch
-Branch			| branch(const name& id, const type& type_name)								| A branch
+Branch			| branch(const name& id, const type_expression& type_name)								| A branch
 '''
 
 TYPE_EXPRESSION_CLASSES = r'''
-TypeProduct		| typeproduct(const type& left, const type& right)							| A type product
-TypeTuple		| typetuple(const type_list& types)											| A type tuple
+TypeProduct		| typeproduct(const type_expression& left, const type_expression& right)							| A type product
+TypeTuple		| typetuple(const type_expression_list& types)											| A type tuple
 TypeSet			| typeset(const set_expression& set)										| A type set
 SympleTypeName	| simpletypename(const name& id)											| A simple type name
-TypeName		| typename(const name& id, const type& type_name)								| A type name
+TypeName		| typename(const name& id, const type_expression& type_name)								| A type name
 '''
 
 CHECK_EXPRESSION_CLASSES = r'''
 BCheck			| bcheck(const boolean_expression& expr)									| A boolean check
-RCheck			| rcheck(const process& left, const process& right, const refined& refinement)	| A refinement check
-TCheck			| tcheck(const process& proc, const test& operand)							| A test
-NotCheck		| notcheck(const check& chk)												| A negated check
+RCheck			| rcheck(const process_expression& left, const process_expression& right, const refined& refinement)	| A refinement check
+TCheck			| tcheck(const process_expression& proc, const test_expression& operand)							| A test
+NotCheck		| notcheck(const check_expression& chk)												| A negated check
 '''
 
 REFINED_CLASSES = r'''
-Model			| model(const model& m)													| A model
+Refined	| Refined(const model_expression& m)													| A model
 '''
 
 MODEL_EXPRESSION_CLASSES = r'''
@@ -150,7 +148,7 @@ FD				| fd()																		| A faulures/divergences
 
 TEST_EXPRESSION_CLASSES = r'''
 divergence_free	| divergence_free()															| A divergence free
-Test			| test(const testtype_expression& tt, const failuremodel& fm)			| A complex test
+Test			| test(const testtype_expression& tt, const failuremodel_expression& fm)			| A complex test
 '''
 
 TESTTYPE_EXPRESSION_CLASSES = r'''
@@ -178,9 +176,8 @@ FDRSPEC_CLASSES = r'''
 FDRSpec			| fdrspec(const definition_expression_list& defs)										| An FDR specification
 '''
 
-TARG_CLASSES = r'''
+TARG_EXPRESSION_CLASSES = r'''
 Nil				| nil()																		| An empty
-%Exprs			| exprs(const expression_list& exprs)										| An expression list
 ClosedRange		| closedrange(const numeric_expression& begin, const numeric_expression& end)	| A closed range
 OpenRange		| openrange(const numeric_expression& begin)									| An open range
 Compr           | compr(const expression& expr, const comprehension_list& comprs)           | A comprehension
@@ -197,33 +194,32 @@ SetGen          | setgen(const expression& expr, const set_expression& set)     
 SeqGen          | seqgen(const expression& expr, const seq_expression& seq)                 | A seq generator
 '''
 
-PROCESS_CLASSES = r'''
+PROCESS_EXPRESSION_CLASSES = r'''
 STOP			| stop()																	| A stop
 SKIP			| skip()																	| A skip
 CHAOS			| chaos(const set_expression& set)											| A chaos
-Prefix			| prefix(const dotted_expression& dotted, const field_list& fields, const process& proc)	| A prefix
-ExternalChoice	| externalchoice(const process& left, const process& right)					| An external choice
-InternalChoice	| internalchoice(const process& left, const process& right)					| An internal choice
-SequentialComposition	| sequentialcomposition(const process& left, const process& right)	| A sequential composition
-Interrupt		| interrupt(const process& left, const process& right)						| An interrupt
-Hiding			| hiding(const process& proc, const set_expression& set)					| An hiding
-%Rename			| rename(const process& proc, const renaming& rename)					| A renaming
-Interleave		| interleave(const process& left, const process& right)						| An interleave
-Sharing			| sharing(const process& left, const process& right, const set_expression& set)	| A sharing
-AlphaParallel	| alphaparallel(const process& left, const process& right, const set_expression& left_set, const set_expression& right_set)	| An alpha parallel
-RepExternalChoice	| repexternalchoice(const setgen& gen, const process& proc)	| A replicated external choice
-RepInternalChoice	| repinternalchoice(const setgen& gen, const process& proc)	| A replicated internal choice
-RepSequentialComposition	| repsequentialcomposition(const seqgen& gen, const process& proc)	| A replicated sequential composition
-RepInterleave	| repinterleave(const setgen& gen, const process& proc)			| A replicated interleave
-RepSharing		| repsharing(const setgen& gen, const process& proc, const set_expression& set)	| A replicated sharing
-RepAlphaParallel	| repalphaparallel(const setgen& gen, const process& proc, const set_expression& set)	| A replicated alpha parallel
-UntimedTimeOut	| untimedtimeout(const process& left, const process& right)					| An untimed time-out
-BoolGuard		| boolguard(const boolean_expression& guard, const process& proc)		| A boolean guard
-LinkedParallel	| linkedparallel(const process& left, const process& right, const linkpar& linked)	| A linked parallel
-RepLinkedParallel	| replinkedparallel(const seqgen& gen, const process& proc, const linkpar& linked)	| A replicated linked parallel
+Prefix			| prefix(const dotted_expression& dotted, const field_expression_list& fields, const process_expression& proc)	| A prefix
+ExternalChoice	| externalchoice(const process_expression& left, const process_expression& right)					| An external choice
+InternalChoice	| internalchoice(const process_expression& left, const process_expression& right)					| An internal choice
+SequentialComposition	| sequentialcomposition(const process_expression& left, const process_expression& right)	| A sequential composition
+Interrupt		| interrupt(const process_expression& left, const process_expression& right)						| An interrupt
+Hiding			| hiding(const process_expression& proc, const set_expression& set)					| An hiding
+Interleave		| interleave(const process_expression& left, const process_expression& right)						| An interleave
+Sharing			| sharing(const process_expression& left, const process_expression& right, const set_expression& set)	| A sharing
+AlphaParallel	| alphaparallel(const process_expression& left, const process_expression& right, const set_expression& left_set, const set_expression& right_set)	| An alpha parallel
+RepExternalChoice	| repexternalchoice(const setgen& gen, const process_expression& proc)	| A replicated external choice
+RepInternalChoice	| repinternalchoice(const setgen& gen, const process_expression& proc)	| A replicated internal choice
+RepSequentialComposition	| repsequentialcomposition(const seqgen& gen, const process_expression& proc)	| A replicated sequential composition
+RepInterleave	| repinterleave(const setgen& gen, const process_expression& proc)			| A replicated interleave
+RepSharing		| repsharing(const setgen& gen, const process_expression& proc, const set_expression& set)	| A replicated sharing
+RepAlphaParallel	| repalphaparallel(const setgen& gen, const process_expression& proc, const set_expression& set)	| A replicated alpha parallel
+UntimedTimeOut	| untimedtimeout(const process_expression& left, const process_expression& right)					| An untimed time-out
+BoolGuard		| boolguard(const boolean_expression& guard, const process_expression& proc)		| A boolean guard
+LinkedParallel	| linkedparallel(const process_expression& left, const process_expression& right, const linkpar& linked)	| A linked parallel
+RepLinkedParallel	| replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar& linked)	| A replicated linked parallel
 '''
 
-FIELD_CLASSES = r'''
+FIELD_EXPRESSION_CLASSES = r'''
 SimpleInput		| simpleinput(const expression& expr)										| A simple input
 Input			| input(const expression& expr, const set_expression& restriction)			| An input
 Output			| output(const expression& expr)											| An output

@@ -51,7 +51,6 @@ bool check_rule_Number(Term t)
 //--- start generated code ---//
 template <typename Term> bool check_rule_FDRSpec(Term t);
 template <typename Term> bool check_rule_Defn(Term t);
-template <typename Term> bool check_rule_Channel(Term t);
 template <typename Term> bool check_rule_VarType(Term t);
 template <typename Term> bool check_rule_Type(Term t);
 template <typename Term> bool check_rule_Check(Term t);
@@ -212,12 +211,12 @@ template <typename Term> bool check_term_Equal(Term t);
 template <typename Term> bool check_term_TypeTuple(Term t);
 template <typename Term> bool check_term_SetGen(Term t);
 template <typename Term> bool check_term_Output(Term t);
-template <typename Term> bool check_term_Model(Term t);
 template <typename Term> bool check_term_Dot(Term t);
 template <typename Term> bool check_term_MapsGens(Term t);
 template <typename Term> bool check_term_RepLinkedParallel(Term t);
 template <typename Term> bool check_term_DataType(Term t);
 template <typename Term> bool check_term_UntimedTimeOut(Term t);
+template <typename Term> bool check_term_Refined(Term t);
 
 template <typename Term>
 bool check_rule_FDRSpec(Term t)
@@ -234,7 +233,8 @@ bool check_rule_Defn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return    check_term_Assign(t)
-         || check_rule_Channel(t)
+         || check_term_Channel(t)
+         || check_term_SimpleChannel(t)
          || check_term_NameType(t)
          || check_term_DataType(t)
          || check_term_SubType(t)
@@ -243,17 +243,6 @@ bool check_rule_Defn(Term t)
          || check_term_Assert(t)
          || check_term_Print(t)
          || check_term_Include(t);
-#else
-  return true;
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-}
-
-template <typename Term>
-bool check_rule_Channel(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Channel(t)
-         || check_term_SimpleChannel(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -301,7 +290,7 @@ template <typename Term>
 bool check_rule_Refined(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Model(t);
+  return    check_term_Refined(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -4518,34 +4507,6 @@ bool check_term_Output(Term t)
   return true;
 }
 
-// Model(Model)
-template <typename Term>
-bool check_term_Model(Term t)
-{
-#ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  // check the type of the term
-  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
-  if (term.type() != AT_APPL)
-    return false;
-  atermpp::aterm_appl a(term);
-  if (!gsIsModel(a))
-    return false;
-
-  // check the children
-  if (a.size() != 1)
-    return false;
-#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_Model<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_Model" << std::endl;
-      return false;
-    }
-#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-
-#endif // MCRL2_NO_SOUNDNESS_CHECKS
-  return true;
-}
-
 // Dot(Expr, Expr)
 template <typename Term>
 bool check_term_Dot(Term t)
@@ -4708,6 +4669,34 @@ bool check_term_UntimedTimeOut(Term t)
   if (!check_term_argument(a(1), check_rule_Proc<atermpp::aterm>))
     {
       std::cerr << "check_rule_Proc" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// Refined(Model)
+template <typename Term>
+bool check_term_Refined(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsRefined(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_Model<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_Model" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
