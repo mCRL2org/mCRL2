@@ -22,6 +22,7 @@
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/detail/sort_traverser.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -152,6 +153,10 @@ void test_set_print() {
   BOOST_CHECK(print_check(setintersection(bool_(), set_false, set_true), "{false} * {true}"));
   BOOST_CHECK(print_check(setdifference(bool_(), set_false, set_true), "{false} - {true}"));
   BOOST_CHECK(print_check(setcomplement(bool_(), set_false), "!{false}"));
+
+  // Some parsed expressions
+  BOOST_CHECK(print_check(parse_data_expression("{true}"), "{true}"));
+  BOOST_CHECK(print_check(parse_data_expression("{true, false}"), "{true, false}"));
 }
 
 void test_bag_print() {
@@ -175,6 +180,10 @@ void test_bag_print() {
   BOOST_CHECK(print_check(bagjoin(bool_(), bag_false, bag_true), "{false: 1} + {true: 1}"));
   BOOST_CHECK(print_check(bagintersect(bool_(), bag_false, bag_true), "{false: 1} * {true: 1}"));
   BOOST_CHECK(print_check(bagdifference(bool_(), bag_false, bag_true), "{false: 1} - {true: 1}"));
+
+  // Some parsed expressions
+  BOOST_CHECK(print_check(parse_data_expression("{true: 2}"), "{true: 2}"));
+  BOOST_CHECK(print_check(parse_data_expression("{false: 3, true: 1}"), "{false: 3, true: 1}"));
 }
 
 int test_main(int argc, char** argv) {

@@ -649,13 +649,13 @@ namespace mcrl2 {
     }
 
     namespace sort_fset {
+
       /// \brief Constructs a finite set expression from a range of expressions
       //
       /// Type Sequence must be a model of the Forward Traversal Iterator concept;
       /// with value_type convertible to data_expression.
       /// \param[in] s the sort of list elements
-      /// \param[in] begin iterator that marks the start of a range of elements of sort s
-      /// \param[in] end the past-end iterator for a range of elements of sort s
+      /// \param[in] range a sequence of elements
       template < typename Sequence >
       inline
       application fset(const sort_expression& s,
@@ -664,7 +664,9 @@ namespace mcrl2 {
       {
         data_expression fset_expression(sort_fset::fset_empty(s));
 
-        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i) {
+        // We process the elements in reverse order to have a resulting enumeration
+        // in the same order as the input
+        for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i) {
           BOOST_ASSERT(is_convertible(i->sort(), s));
 
           fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
@@ -672,6 +674,18 @@ namespace mcrl2 {
 
         return static_cast< application >(fset_expression);
       }
+
+      /// \brief Constructs a finite set expression from a list of expressions
+      //
+      /// \param[in] s the sort of list elements
+      /// \param[in] range a sequence of elements
+      inline
+      application fset(const sort_expression& s,
+                       data_expression_list const& range)
+      {
+        return fset(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
+      }
+
     }
 
     namespace sort_bag {
@@ -787,11 +801,11 @@ namespace mcrl2 {
 
     namespace sort_fbag {
       /// \brief Constructs a finite bag expression from a range of expressions
-      /// Type I must be a model of the Forward Traversal Iterator concept;
+      /// Type Sequence must be a model of the Forward Traversal Iterator concept;
       /// with value_type convertible to data_expression.
+      /// \pre range must contain element, count, element, count, ...
       /// \param[in] s the sort of list elements
-      /// \param[in] begin iterator that marks the start of a range of elements of sort s
-      /// \param[in] end the past-end iterator for a range of elements of sort s
+      /// \param[in] range a range of elements of sort s.
       template < typename Sequence >
       inline
       application fbag(const sort_expression& s, Sequence const& range,
@@ -799,13 +813,27 @@ namespace mcrl2 {
       {
         data_expression fbag_expression(sort_fbag::fbag_empty(s));
 
-        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i, ++i) 
+        // The sequence contains element, count, ...
+        // As we process the list in reverse, we have count, element, ...
+        // We process the elements in reverse order to have a resulting enumeration
+        // in the same order as the input
+        for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i, ++i)
         {
-          BOOST_ASSERT(is_convertible(i->sort(), s));
-          fbag_expression = sort_fbag::fbagcinsert(s, *i, *boost::next(i, 1), fbag_expression);
+          BOOST_ASSERT(is_convertible(boost::next(i, 1)->sort(), s));
+          fbag_expression = sort_fbag::fbagcinsert(s, *boost::next(i, 1), *i, fbag_expression);
         }
 
         return static_cast< application >(fbag_expression);
+      }
+
+      /// \brief Constructs a finite bag expression from a list of expressions
+      /// \pre range must contain element, count, element, count, ...
+      /// \param[in] s the sort of list elements
+      /// \param[in] range a range of elements of sort s.
+      inline
+      application fbag(const sort_expression& s, data_expression_list const& range)
+      {
+        return fbag(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
       }
     }
 

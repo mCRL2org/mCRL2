@@ -1344,7 +1344,7 @@ reconstruct_container_expression(ATermAppl Part)
   using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_bag;
 
-  if(!gsIsDataAppl(Part))
+  if(!gsIsDataAppl(Part) && !gsIsOpId(Part))
   {
     return Part;
   }
@@ -1417,6 +1417,19 @@ reconstruct_container_expression(ATermAppl Part)
     //gsDebugMsg("Reconstructing SetFSet\n");
     //try to reconstruct Part as the empty set or as a set enumeration
     data_expression de_fset(sort_set::arg(expr));
+    data_expression result(reconstruct_container_expression(de_fset));
+    if(sort_set::is_set_enumeration_application(result) || sort_set::is_set_enumeration_function_symbol(result))
+    {
+      Part = static_cast<ATermAppl>(result);
+    }
+  }
+  else if (sort_fset::is_fset_empty_function_symbol(expr))
+  {
+    Part = static_cast<ATermAppl>(sort_set::set_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
+  }
+  else if (sort_fset::is_fset_cons_application(expr) || sort_fset::is_fsetinsert_application(expr))
+  {
+    data_expression de_fset(expr);
     bool elts_is_consistent = true;
     data_expression_vector elements;
     while (!sort_fset::is_fset_empty_function_symbol(de_fset) && elts_is_consistent)
@@ -1428,8 +1441,8 @@ reconstruct_container_expression(ATermAppl Part)
       }
       else if (sort_fset::is_fsetinsert_application(de_fset))
       {
-        elements.push_back(sort_fset::right(de_fset));
-        de_fset = sort_fset::left(de_fset);
+        elements.push_back(sort_fset::left(de_fset));
+        de_fset = sort_fset::right(de_fset);
       }
       else
       {
@@ -1497,9 +1510,22 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_bag::is_bagfbag_application(expr))
   {
-    //gsMessage("BagFBag\n");
-    //try to reconstruct Part as the empty set or as a set enumeration
+    //gsDebugMsg("Reconstructing BagFBag\n");
+    //try to reconstruct Part as the empty bag or as a bag enumeration
     data_expression de_fbag(sort_bag::arg(expr));
+    data_expression result(reconstruct_container_expression(de_fbag));
+    if(sort_bag::is_bag_enumeration_application(result) || sort_bag::is_bag_enumeration_function_symbol(result))
+    {
+      Part = static_cast<ATermAppl>(result);
+    }
+  }
+  else if (sort_fbag::is_fbag_empty_function_symbol(expr))
+  {
+    Part = static_cast<ATermAppl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
+  }
+  else if (sort_fbag::is_fbag_cons_application(expr) || sort_fbag::is_fbaginsert_application(expr) || sort_fbag::is_fbagcinsert_application(expr))
+  {
+    data_expression de_fbag(expr);
     bool elts_is_consistent = true;
     data_expression_vector elements;
     while (!sort_fbag::is_fbag_empty_function_symbol(de_fbag) && elts_is_consistent)
