@@ -74,20 +74,6 @@ void test_abstraction_print() {
   PRINT_CHECK(forall(x, exists(y, not_equal_to(xy[0], pos2nat(xy[1])))), "forall x: Nat. exists y: Pos. x != y");
 }
 
-bool stream_print_test(data_expression const& input, std::string const& expected_output) {
-  std::ostringstream o;
-
-  detail::pretty_print< data_expression >(o, input);
-
-  if (o.str() != expected_output) {
-    std::clog << "Expected " << expected_output << " got " << o.str() << " instead" << std::endl;
-
-    return false;
-  }
-
-  return true;
-}
-
 void test_list_print() {
   using namespace sort_bool;
   using namespace sort_list;
@@ -95,37 +81,43 @@ void test_list_print() {
   data_expression empty(nil(bool_()));
 
   // Using all operations
-  BOOST_CHECK(stream_print_test(nil(bool_()), "[]"));
-  BOOST_CHECK(stream_print_test(cons_(bool_(), true_(), empty), "[true]"));
-  BOOST_CHECK(stream_print_test(cons_(bool_(), false_(), cons_(bool_(), true_(), empty)), "[false, true]"));
-  BOOST_CHECK(stream_print_test(snoc(bool_(), false_(), cons_(bool_(), true_(), empty)), "[true, false]"));
-  BOOST_CHECK(stream_print_test(snoc(bool_(), false_(), snoc(bool_(), true_(), empty)), "[true, false]"));
-  BOOST_CHECK(stream_print_test(cons_(bool_(), in(bool_(), false_(), cons_(bool_(), true_(), empty)), empty), "[false in [true]]"));
-  BOOST_CHECK(stream_print_test(snoc(bool_(), true_(), cons_(bool_(), false_(), snoc(bool_(), true_(), empty))), "[false, true, true]"));
-  BOOST_CHECK(stream_print_test(in(bool_(), true_(), cons_(bool_(), false_(), snoc(bool_(), true_(), empty))), "true in [false, true]"));
-  BOOST_CHECK(stream_print_test(count(bool_(), cons_(bool_(), false_(), snoc(bool_(), true_(), empty))), "#[false, true]"));
-  BOOST_CHECK(stream_print_test(concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), snoc(bool_(), true_(), empty))), "[true] ++ [false, true]"));
-  BOOST_CHECK(stream_print_test(element_at(bool_(), sort_nat::nat(1), cons_(bool_(), false_(), snoc(bool_(), true_(), empty))), "[false, true].1"));
-  BOOST_CHECK(stream_print_test(head(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty))), "head([false, true])"));
-  BOOST_CHECK(stream_print_test(tail(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty))), "tail([false, true])"));
-  BOOST_CHECK(stream_print_test(rhead(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty))), "rhead([false, true])"));
-  BOOST_CHECK(stream_print_test(rtail(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty))), "rtail([false, true])"));
-  BOOST_CHECK(stream_print_test(cons_(bool_(), true_(), concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), empty))), "true |> [true] ++ [false]"));
-  BOOST_CHECK(stream_print_test(snoc(bool_(), true_(), concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), empty))), "[true] ++ [false] <| true"));
-  BOOST_CHECK(stream_print_test(cons_(bool_(), false_(), snoc(bool_(), true_(), concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), empty)))), "false |> [true] ++ [false] <| true"));
+  BOOST_CHECK(print_check(nil(bool_()), "[]"));
+  BOOST_CHECK(print_check(cons_(bool_(), true_(), empty), "[true]"));
+  BOOST_CHECK(print_check(cons_(bool_(), false_(), cons_(bool_(), true_(), empty)), "[false, true]"));
+  //BOOST_CHECK(print_check(snoc(bool_(), cons_(bool_(), true_(), empty), false_()), "[true, false]"));
+  BOOST_CHECK(print_check(snoc(bool_(), cons_(bool_(), true_(), empty), false_()), "[true] <| false"));
+  BOOST_CHECK(print_check(snoc(bool_(), snoc(bool_(), empty, true_()), false_()), "[true, false]"));
+  BOOST_CHECK(print_check(cons_(bool_(), in(bool_(), false_(), cons_(bool_(), true_(), empty)), empty), "[false in [true]]"));
+  //BOOST_CHECK(print_check(snoc(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_())), true_()), "[false, true, true]"));
+  BOOST_CHECK(print_check(snoc(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_())), true_()), "(false |> [true]) <| true"));
+  //BOOST_CHECK(print_check(in(bool_(), true_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "true in [false, true]"));
+  BOOST_CHECK(print_check(in(bool_(), true_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "true in false |> [true]"));
+  //BOOST_CHECK(print_check(count(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "#[false, true]"));
+  BOOST_CHECK(print_check(count(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "#(false |> [true])"));
+  //BOOST_CHECK(print_check(concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "[true] ++ [false, true]"));
+  BOOST_CHECK(print_check(concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "[true] ++ (false |> [true])"));
+  //BOOST_CHECK(print_check(element_at(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_())), sort_nat::nat(1)), "[false, true].1"));
+  BOOST_CHECK(print_check(element_at(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_())), sort_nat::nat(1)), "(false |> [true]) . 1"));
+  BOOST_CHECK(print_check(head(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty))), "head([false, true])"));
+  BOOST_CHECK(print_check(tail(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty))), "tail([false, true])"));
+  BOOST_CHECK(print_check(rhead(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty))), "rhead([false, true])"));
+  BOOST_CHECK(print_check(rtail(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty))), "rtail([false, true])"));
+  BOOST_CHECK(print_check(cons_(bool_(), true_(), concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), empty))), "true |> [true] ++ [false]"));
+  BOOST_CHECK(print_check(snoc(bool_(), concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), empty)), true_()), "[true] ++ [false] <| true"));
+  BOOST_CHECK(print_check(cons_(bool_(), false_(), snoc(bool_(), concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), empty)), true_())), "false |> [true] ++ [false] <| true"));
 
   // lists of lists
   data_expression list_empty = nil(list(bool_()));
   data_expression list_true = cons_(bool_(), true_(), empty);
   data_expression list_false_true = cons_(bool_(), false_(), cons_(bool_(), true_(), empty));
 
-  BOOST_CHECK(stream_print_test(nil(list(bool_())), "[]"));
-  BOOST_CHECK(stream_print_test(list_true, "[true]"));
-  BOOST_CHECK(stream_print_test(cons_(list(bool_()), list_true, list_empty), "[[true]]"));
-  BOOST_CHECK(stream_print_test(cons_(list(bool_()), list_true, cons_(list(bool_()), list_false_true, list_empty)), "[[true], [false, true]]"));
-  BOOST_CHECK(stream_print_test(snoc(list(bool_()), list_true, cons_(list(bool_()), list_false_true, list_empty)), "[[false, true], [true]]"));
-  BOOST_CHECK(stream_print_test(in(list(bool_()), list_true, cons_(list(bool_()), list_true, list_empty)), "[true] in [[true]]"));
-  BOOST_CHECK(stream_print_test(in(list(bool_()), list_true, cons_(list(bool_()), list_true, list_empty)), "[true] in [[true]]"));
+  BOOST_CHECK(print_check(nil(list(bool_())), "[]"));
+  BOOST_CHECK(print_check(list_true, "[true]"));
+  BOOST_CHECK(print_check(cons_(list(bool_()), list_true, list_empty), "[[true]]"));
+  BOOST_CHECK(print_check(cons_(list(bool_()), list_true, cons_(list(bool_()), list_false_true, list_empty)), "[[true], [false, true]]"));
+  BOOST_CHECK(print_check(snoc(list(bool_()), cons_(list(bool_()), list_false_true, list_empty), list_true), "[[false, true]] <| [true]"));
+  BOOST_CHECK(print_check(in(list(bool_()), list_true, cons_(list(bool_()), list_true, list_empty)), "[true] in [[true]]"));
+  BOOST_CHECK(print_check(in(list(bool_()), list_true, cons_(list(bool_()), list_true, list_empty)), "[true] in [[true]]"));
 
   // List enumeration
   data_expression_vector v;
@@ -134,10 +126,10 @@ void test_list_print() {
   v.push_back(sort_bool::true_());
   v.push_back(sort_bool::true_());
   data_expression l1(list_enumeration(list(sort_bool::bool_()), v));
-  BOOST_CHECK(stream_print_test(l1, "[true, false, true, true]"));
+  BOOST_CHECK(print_check(l1, "[true, false, true, true]"));
 
   data_expression l2(sort_list::list(sort_bool::bool_(), v));
-  BOOST_CHECK(stream_print_test(l2, "[true, false, true, true]"));
+  BOOST_CHECK(print_check(l2, "[true, false, true, true]"));
 
   
 }
@@ -152,14 +144,14 @@ void test_set_print() {
   data_expression set_true = setfset(bool_(), fset_cons(bool_(), true_(), fset_empty(bool_())));
 
   // Using all operations
-  BOOST_CHECK(stream_print_test(emptyset(bool_()), "{}"));
-  BOOST_CHECK(stream_print_test(setfset(bool_(), fset_empty(bool_())), "{}"));
-  BOOST_CHECK(stream_print_test(setconstructor(bool_(), false_function(bool_()), fset_empty(bool_())), "{}"));
-  BOOST_CHECK(stream_print_test(setin(bool_(), false_(), set_empty), "false in {}"));
-  BOOST_CHECK(stream_print_test(setunion_(bool_(), set_false, set_true), "{false} + {true}"));
-  BOOST_CHECK(stream_print_test(setintersection(bool_(), set_false, set_true), "{false} * {true}"));
-  BOOST_CHECK(stream_print_test(setdifference(bool_(), set_false, set_true), "{false} - {true}"));
-  BOOST_CHECK(stream_print_test(setcomplement(bool_(), set_false), "!{false}"));
+  BOOST_CHECK(print_check(emptyset(bool_()), "{}"));
+  BOOST_CHECK(print_check(setfset(bool_(), fset_empty(bool_())), "{}"));
+  BOOST_CHECK(print_check(setconstructor(bool_(), false_function(bool_()), fset_empty(bool_())), "{}"));
+  BOOST_CHECK(print_check(setin(bool_(), false_(), set_empty), "false in {}"));
+  BOOST_CHECK(print_check(setunion_(bool_(), set_false, set_true), "{false} + {true}"));
+  BOOST_CHECK(print_check(setintersection(bool_(), set_false, set_true), "{false} * {true}"));
+  BOOST_CHECK(print_check(setdifference(bool_(), set_false, set_true), "{false} - {true}"));
+  BOOST_CHECK(print_check(setcomplement(bool_(), set_false), "!{false}"));
 }
 
 void test_bag_print() {
@@ -174,65 +166,15 @@ void test_bag_print() {
   data_expression bag_true = bagfbag(bool_(), fbag_cons(bool_(), true_(), number(sort_pos::pos(), "1"), fbag_empty_));
 
   // Using all operations
-  BOOST_CHECK(stream_print_test(bag_empty, "{}"));
-  BOOST_CHECK(stream_print_test(bagfbag(bool_(), fbag_empty(bool_())), "{}"));
-  BOOST_CHECK(stream_print_test(bagconstructor(bool_(), zero_function(bool_()), fbag_empty_), "{}"));
-  BOOST_CHECK(stream_print_test(bagin(bool_(), false_(), bag_empty), "false in {}"));
-  BOOST_CHECK(stream_print_test(bagin(bool_(), false_(), bag_false), "false in {false: 1}"));
-  BOOST_CHECK(stream_print_test(bagcount(bool_(), false_(), bag_true), "count(false, {true: 1})"));
-  BOOST_CHECK(stream_print_test(bagjoin(bool_(), bag_false, bag_true), "{false: 1} + {true: 1}"));
-  BOOST_CHECK(stream_print_test(bagintersect(bool_(), bag_false, bag_true), "{false: 1} * {true: 1}"));
-  BOOST_CHECK(stream_print_test(bagdifference(bool_(), bag_false, bag_true), "{false: 1} - {true: 1}"));
-}
-
-void test_structured_sort_print() {
-}
-
-template < typename Derived >
-class printer : public mcrl2::data::detail::sort_traverser< Derived >
-{
-  protected:
-    unsigned int                m_inside_quantifier;
-    std::set< sort_expression > m_result;
-
-  public:
-
-    printer() : m_inside_quantifier(0) {
-    }
-
-    void enter(sort_expression const& s)
-    {
-      if (0 < m_inside_quantifier)
-      {
-        m_result.insert(s);
-      }
-    }
-
-    void enter(forall const& e) {
-      ++m_inside_quantifier;
-    }
-
-    void leave(forall const& e) {
-      --m_inside_quantifier;
-    }
-};
-
-class forall_printer : public printer< forall_printer >
-{};
-class exists_printer : public printer< exists_printer >
-{
-  public:
-
-    void enter(exists const& e) {
-      ++m_inside_quantifier;
-    }
-
-    void leave(exists const& e) {
-      --m_inside_quantifier;
-    }
-};
-
-void test_traversal() {
+  BOOST_CHECK(print_check(bag_empty, "{}"));
+  BOOST_CHECK(print_check(bagfbag(bool_(), fbag_empty(bool_())), "{}"));
+  BOOST_CHECK(print_check(bagconstructor(bool_(), zero_function(bool_()), fbag_empty_), "{}"));
+  BOOST_CHECK(print_check(bagin(bool_(), false_(), bag_empty), "false in {}"));
+  BOOST_CHECK(print_check(bagin(bool_(), false_(), bag_false), "false in {false: 1}"));
+  BOOST_CHECK(print_check(bagcount(bool_(), false_(), bag_true), "count(false, {true: 1})"));
+  BOOST_CHECK(print_check(bagjoin(bool_(), bag_false, bag_true), "{false: 1} + {true: 1}"));
+  BOOST_CHECK(print_check(bagintersect(bool_(), bag_false, bag_true), "{false: 1} * {true: 1}"));
+  BOOST_CHECK(print_check(bagdifference(bool_(), bag_false, bag_true), "{false: 1} - {true: 1}"));
 }
 
 int test_main(int argc, char** argv) {
@@ -244,7 +186,6 @@ int test_main(int argc, char** argv) {
   test_list_print();
   test_set_print();
   test_bag_print();
-  test_structured_sort_print();
 
   return EXIT_SUCCESS;
 }
