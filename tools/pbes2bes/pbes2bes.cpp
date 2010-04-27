@@ -34,6 +34,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_optional_argument;
@@ -47,18 +48,10 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
   protected:
     typedef squadt_tool< rewriter_tool<input_output_tool> > super;
 
-    /// The output formats of the tool.
-    enum pbes_output_format {
-      of_pbes,
-      of_internal,
-      of_cwi
-    };
-
     /// The transformation strategies of the tool.
     enum transformation_strategy {
       ts_lazy,
-      ts_finite,
-      ts_oldlazy
+      ts_finite
     };
 
     transformation_strategy m_strategy;
@@ -68,11 +61,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     /// \param s A transformation strategy.
     void set_transformation_strategy(const std::string& s)
     {
-      if (s == "oldlazy")
-      {
-        m_strategy = ts_oldlazy;
-      }
-      else if (s == "finite")
+      if (s == "finite")
       {
         m_strategy = ts_finite;
       }
@@ -92,15 +81,15 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     {
       if (format == "pbes")
       {
-        m_output_format = of_pbes;
+        m_output_format = pbes_output_pbes;
       }
       else if (format == "internal")
       {
-        m_output_format = of_internal;
+        m_output_format = pbes_output_internal;
       }
       else if (format == "cwi")
       {
-        m_output_format = of_cwi;
+        m_output_format = pbes_output_cwi;
       }
       else
       {
@@ -145,8 +134,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
           make_optional_argument("NAME", "lazy"),
           "compute the BES using strategy NAME:\n"
           "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
-          "  'finite' for computing all possible boolean equations, or\n"
-          "  'oldlazy' for the previous version of the lazy algorithm.",
+          "  'finite' for computing all possible boolean equations.",
           's').
         add_option("output",
           make_optional_argument("NAME", "pbes"),
@@ -164,11 +152,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     /// \return A string representation of the transformation strategy.
     std::string strategy_string() const
     {
-      if (m_strategy == ts_oldlazy)
-      {
-        return "oldlazy";
-      }
-      else if (m_strategy == ts_finite)
+      if (m_strategy == ts_finite)
       {
         return "finite";
       }
@@ -182,15 +166,15 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     /// \return A string representation of the output format.
     std::string output_format_string() const
     {
-      if (m_output_format == of_pbes)
+      if (m_output_format == pbes_output_pbes)
       {
         return "pbes";
       }
-      else if (m_output_format == of_cwi)
+      else if (m_output_format == pbes_output_cwi)
       {
         return "cwi";
       }
-      else if (m_output_format == of_internal)
+      else if (m_output_format == pbes_output_internal)
       {
         return "internal";
       }
@@ -209,7 +193,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
           "standard output is used."
         ),
         m_strategy(ts_lazy),
-        m_output_format(of_pbes)
+        m_output_format(pbes_output_pbes)
     {}
 
     /// Runs the algorithm.
@@ -251,7 +235,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         algorithm.run(p);
         p = algorithm.get_result();
       }
-      else
+      else if (m_strategy == ts_finite)
       {
         // data rewriter
         data::rewriter datar = create_rewriter(p.data());
@@ -267,18 +251,11 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         data::rewriter_with_variables datarv(datar);
         pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, false);
 
-        if (m_strategy == ts_finite)
-        {
-          p = do_finite_algorithm(p, pbesr);
-        }
-        else if (m_strategy == ts_oldlazy)
-        {
-          p = do_lazy_algorithm(p, pbesr);
-        }
+        p = do_finite_algorithm(p, pbesr);
       }
 
       // save the result
-      save_pbes(p, m_output_filename, output_format_string());
+      save_pbes(p, m_output_filename, m_output_format);
 
       return true;
     }
@@ -294,15 +271,15 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
 
       transformation_strategy_enumeration.
-        add(ts_oldlazy, "oldlazy").
+        add(ts_lazy, "lazy").
         add(ts_finite, "finite");
 
       tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;
 
       output_format_enumeration.
-        add(of_pbes, "pbes").
-        add(of_internal, "internal").
-        add(of_cwi, "cwi");
+        add(pbes_output_pbes, "pbes").
+        add(pbes_output_internal, "internal").
+        add(pbes_output_cwi, "cwi");
 
       return true;
     }
@@ -345,9 +322,9 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       m.append(d.create< label >().set_text("Output format : ")).
         append(d.create< horizontal_box >().
-                    append(format_selector.associate(of_pbes, "pbes")).
-                    append(format_selector.associate(of_internal, "internal")).
-                    append(format_selector.associate(of_cwi, "cwi")),
+                    append(format_selector.associate(pbes_output_pbes, "pbes")).
+                    append(format_selector.associate(pbes_output_internal, "internal")).
+                    append(format_selector.associate(pbes_output_cwi, "cwi")),
               margins(0,5,0,5)).
         append(d.create< label >().set_text("Transformation strategy : ")).
         append(strategy_selector.associate(ts_lazy, "lazy: only boolean equations reachable from the initial state")).
