@@ -78,6 +78,14 @@ void bool_rewrite_test() {
 
   data_rewrite_test(R, implies(true_(), false_()), false_());
   data_rewrite_test(R, implies(false_(), true_()), true_());
+
+  data::variable_vector v;
+  v.push_back(data::variable("b", bool_()));
+  v.push_back(data::variable("c", bool_()));
+  data::data_expression e(parse_data_expression("b&&(b&&c)", v.begin(), v.end()));
+  data_rewrite_test(R, e, e);
+
+
 }
 
 void pos_rewrite_test() {
