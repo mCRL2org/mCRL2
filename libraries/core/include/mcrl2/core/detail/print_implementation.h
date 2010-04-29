@@ -1638,15 +1638,21 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       } else if (gsIsIdFuncUpdate(Head)) {
         //print function update
         PRINT_FUNC(dbg_prints)("printing function update\n");
-        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, gsPrecIdPrefix());
-        PRINT_FUNC(fprints)(OutStream, "[");
-        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 1),
-          pp_format, ShowSorts, 0);
-        PRINT_FUNC(fprints)(OutStream, " -> ");
-        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 2),
-          pp_format, ShowSorts, 0);
-        PRINT_FUNC(fprints)(OutStream, "]");
+        if (Args==ATempty) // In this case we deal with an isolated function update symbol
+        { PRINT_FUNC(fprints)(OutStream, "@func_update");
+        }
+        else
+        { assert(ATgetLength(Args)==3);
+          PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
+             pp_format, ShowSorts, gsPrecIdPrefix());
+          PRINT_FUNC(fprints)(OutStream, "[");
+          PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 1),
+            pp_format, ShowSorts, 0);
+          PRINT_FUNC(fprints)(OutStream, " -> ");
+          PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 2),
+            pp_format, ShowSorts, 0);
+          PRINT_FUNC(fprints)(OutStream, "]");
+        }
       } else if (gsIsIdPrefix(Head, ArgsLength)) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");

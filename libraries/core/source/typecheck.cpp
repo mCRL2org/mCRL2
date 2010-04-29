@@ -2929,7 +2929,7 @@ namespace mcrl2 {
       }
 
       if(gsIsDataAppl(*DataTerm))
-      {
+      { 
         //arguments
         ATermList Arguments=ATLgetArgument(*DataTerm,1);
         unsigned int nArguments=ATgetLength(Arguments);
@@ -3070,7 +3070,8 @@ namespace mcrl2 {
 
             //Second time to do the real work.
             ATermList NewArguments=ATmakeList0();
-            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
+            {
               ATermAppl Argument0=ATAgetFirst(Arguments);
               Arguments=ATgetNext(Arguments);
               ATermAppl Argument1=ATAgetFirst(Arguments);
@@ -3106,11 +3107,12 @@ namespace mcrl2 {
         //function
         ATermAppl Data=ATAgetArgument(*DataTerm,0);
         ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-                                                    &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,FreeVars,false,nArguments,warn_upcasting);
-
+                                                    &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,
+                                                    FreeVars,false,nArguments,warn_upcasting);
         if (gsDebug) { std::cerr << "Result of gstcTraverseVarConsTypeD: DataTerm " << pp(Data) << "\n"; }
 
-        if(!NewType) {
+        if(!NewType) 
+        {
           if(was_ambiguous) was_ambiguous=false;
           else if(gsIsOpId(Data)||gsIsDataVarId(Data)) gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
           gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
@@ -3369,11 +3371,13 @@ namespace mcrl2 {
                      const bool strict_ambiguous, 
                      const int nFactPars, 
                      const bool warn_upcasting)
-    {
+    { 
       // -1 for nFactPars means the number of arguments is not known.
       if (gsDebug) 
-      { std::cerr << "gstcTraverseVarConsTypeDN: DataTerm " << pp(*DataTerm) << " with PosType " << pp(PosType) << 
-                  ", nFactPars " << nFactPars << "\n";
+      { 
+        std::cerr << "gstcTraverseVarConsTypeDN: DataTerm ";
+        ATfprintf(stderr,"%t",*DataTerm);
+        std::cerr << " with PosType " << pp(PosType) << ", nFactPars " << nFactPars << "\n";
       }
       if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
       { 
@@ -3740,7 +3744,8 @@ namespace mcrl2 {
             }
             ATermAppl NewType=gstcMatchFuncUpdate(Type);
             if(!NewType)
-            {
+            { ATfprintf(stderr,"AAAA %t\n",Type);
+              ATfprintf(stderr,"BBBB %t\n",*DataTerm);
               gsErrorMsg("function update has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
               return NULL;
             }
