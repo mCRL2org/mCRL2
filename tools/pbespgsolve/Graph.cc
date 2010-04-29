@@ -136,7 +136,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
         /* Sort edges by predecessor first, successor second */
-        if (!is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
+        if (!::is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
         {
             std::sort(edges.begin(), edges.end(), edge_cmp_forward);
         }
