@@ -33,6 +33,7 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/function_update.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/find.h"
@@ -235,10 +236,14 @@ namespace mcrl2 {
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       }
       else if (is_function_sort(sort))
-      {
-        import_system_defined_sort(function_sort(sort).codomain());
+      { const sort_expression t=function_sort(sort).codomain();
+        import_system_defined_sort(t);
         const sort_expression_list &l=function_sort(sort).domain();
         std::for_each(l.begin(),l.end(),boost::bind(&mcrl2::data::data_specification::import_system_defined_sort,this,_1));
+        if (l.size()==1)
+        {  data_equation_vector e(function_update_generate_equations_code(l.front(),t));
+           std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
+        }
       }
       else if (is_container_sort(sort))
       {
