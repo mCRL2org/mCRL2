@@ -21,6 +21,7 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
+#include "mcrl2/data/function_update.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/detail/sort_traverser.h"
@@ -186,6 +187,14 @@ void test_bag_print() {
   BOOST_CHECK(print_check(parse_data_expression("{false: 3, true: 1}"), "{false: 3, true: 1}"));
 }
 
+void test_function_update_print()
+{
+  PRINT_CHECK(function_update(sort_nat::nat(), sort_bool::bool_()), "@func_update");
+  PRINT_CHECK(parse_data_expression("(lambda x: Bool. x)[true -> false]"), "(lambda x: Bool. x)[true -> false]");
+  PRINT_CHECK(parse_data_expression("(lambda x: Bool. x)[true -> false][false -> true]"), "(lambda x: Bool. x)[true -> false][false -> true]");
+  PRINT_CHECK(parse_data_expression("(lambda n: Nat. n mod 2 == 0)[0 -> false]"), "(lambda n: Nat. n mod 2 == 0)[0 -> false]");
+}
+
 int test_main(int argc, char** argv) {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv);
 
@@ -195,6 +204,7 @@ int test_main(int argc, char** argv) {
   test_list_print();
   test_set_print();
   test_bag_print();
+  test_function_update_print();
 
   return EXIT_SUCCESS;
 }
