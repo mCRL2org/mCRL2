@@ -153,28 +153,6 @@ bool gsIsBComprehension(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunBComprehension();
 }
 
-// Bool
-inline
-AFun initAFunBool(AFun& f)
-{
-  f = ATmakeAFun("Bool", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunBool()
-{
-  static AFun AFunBool = initAFunBool(AFunBool);
-  return AFunBool;
-}
-
-inline
-bool gsIsBool(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunBool();
-}
-
 // BoolGuard
 inline
 AFun initAFunBoolGuard(AFun& f)
@@ -503,28 +481,6 @@ inline
 bool gsIsDot(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunDot();
-}
-
-// Dotted
-inline
-AFun initAFunDotted(AFun& f)
-{
-  f = ATmakeAFun("Dotted", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunDotted()
-{
-  static AFun AFunDotted = initAFunDotted(AFunDotted);
-  return AFunDotted;
-}
-
-inline
-bool gsIsDotted(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunDotted();
 }
 
 // EComprehension
@@ -1009,28 +965,6 @@ inline
 bool gsIsInterrupt(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunInterrupt();
-}
-
-// Lambda
-inline
-AFun initAFunLambda(AFun& f)
-{
-  f = ATmakeAFun("Lambda", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunLambda()
-{
-  static AFun AFunLambda = initAFunLambda(AFunLambda);
-  return AFunLambda;
-}
-
-inline
-bool gsIsLambda(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunLambda();
 }
 
 // LambdaAppl
@@ -1559,28 +1493,6 @@ inline
 bool gsIsNull(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunNull();
-}
-
-// Numb
-inline
-AFun initAFunNumb(AFun& f)
-{
-  f = ATmakeAFun("Numb", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunNumb()
-{
-  static AFun AFunNumb = initAFunNumb(AFunNumb);
-  return AFunNumb;
-}
-
-inline
-bool gsIsNumb(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunNumb();
 }
 
 // Number
@@ -2419,28 +2331,6 @@ bool gsIsTransparent(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunTransparent();
 }
 
-// Tuple
-inline
-AFun initAFunTuple(AFun& f)
-{
-  f = ATmakeAFun("Tuple", 1, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunTuple()
-{
-  static AFun AFunTuple = initAFunTuple(AFunTuple);
-  return AFunTuple;
-}
-
-inline
-bool gsIsTuple(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunTuple();
-}
-
 // TypeName
 inline
 AFun initAFunTypeName(AFun& f)
@@ -3050,12 +2940,6 @@ ATermAppl gsMakeBComprehension(ATermAppl Bool_0)
 }
 
 inline
-ATermAppl gsMakeBool(ATermAppl Bool_0)
-{
-  return ATmakeAppl1(gsAFunBool(), (ATerm) Bool_0);
-}
-
-inline
 ATermAppl gsMakeBoolGuard(ATermAppl Bool_0, ATermAppl Proc_1)
 {
   return ATmakeAppl2(gsAFunBoolGuard(), (ATerm) Bool_0, (ATerm) Proc_1);
@@ -3143,12 +3027,6 @@ inline
 ATermAppl gsMakeDot(ATermAppl Expr_0, ATermAppl Expr_1)
 {
   return ATmakeAppl2(gsAFunDot(), (ATerm) Expr_0, (ATerm) Expr_1);
-}
-
-inline
-ATermAppl gsMakeDotted(ATermAppl Dotted_0)
-{
-  return ATmakeAppl1(gsAFunDotted(), (ATerm) Dotted_0);
 }
 
 inline
@@ -3281,12 +3159,6 @@ inline
 ATermAppl gsMakeInterrupt(ATermAppl Proc_0, ATermAppl Proc_1)
 {
   return ATmakeAppl2(gsAFunInterrupt(), (ATerm) Proc_0, (ATerm) Proc_1);
-}
-
-inline
-ATermAppl gsMakeLambda(ATermAppl Lambda_0)
-{
-  return ATmakeAppl1(gsAFunLambda(), (ATerm) Lambda_0);
 }
 
 inline
@@ -3434,12 +3306,6 @@ ATermAppl gsMakeNull(ATermAppl Seq_0)
 }
 
 inline
-ATermAppl gsMakeNumb(ATermAppl Numb_0)
-{
-  return ATmakeAppl1(gsAFunNumb(), (ATerm) Numb_0);
-}
-
-inline
 ATermAppl gsMakeNumber(ATermAppl Number_0)
 {
   return ATmakeAppl1(gsAFunNumber(), (ATerm) Number_0);
@@ -3566,9 +3432,9 @@ ATermAppl gsMakeSTOP()
 }
 
 inline
-ATermAppl gsMakeSeq(ATermAppl Seq_0)
+ATermAppl gsMakeSeq(ATermAppl Set_0)
 {
-  return ATmakeAppl1(gsAFunSeq(), (ATerm) Seq_0);
+  return ATmakeAppl1(gsAFunSeq(), (ATerm) Set_0);
 }
 
 inline
@@ -3665,12 +3531,6 @@ inline
 ATermAppl gsMakeTransparent(ATermList TrName_0)
 {
   return ATmakeAppl1(gsAFunTransparent(), (ATerm) TrName_0);
-}
-
-inline
-ATermAppl gsMakeTuple(ATermAppl Tuple_0)
-{
-  return ATmakeAppl1(gsAFunTuple(), (ATerm) Tuple_0);
 }
 
 inline

@@ -85,11 +85,9 @@ if __name__ == "__main__":
     do_expression_classes('trname', 'TrName')
     do_expression_classes('any', 'Any')
     do_expression_classes('linkpar', 'LinkPar')
+    do_expression_classes('renaming', 'Renaming')
 
     # generate other classes
-    #make_classes('../include/mcrl2/fdr/refined.h', REFINED_CLASSES, None, 'fdr')
-    #make_classes('../include/mcrl2/fdr/generator.h', GEN_CLASSES, None, 'fdr')
-
     make_class_declarations('../include/mcrl2/fdr/refined.h', REFINED_CLASSES, None, 'fdr', label = 'refined')
     make_class_definitions('../source/term_functions.cpp', REFINED_CLASSES, None, 'fdr', label = 'refined')
     make_class_declarations('../include/mcrl2/fdr/generator.h', GEN_CLASSES, None, 'fdr', label = 'generator')
@@ -97,6 +95,5 @@ if __name__ == "__main__":
 
     make_classes('../include/mcrl2/fdr/filename.h', FILENAME_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/fdrspec.h', FDRSPEC_CLASSES, None, 'fdr')
-    make_classes('../include/mcrl2/fdr/renaming.h', RENAMING_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/map.h', MAP_CLASSES, None, 'fdr')
     make_classes('../include/mcrl2/fdr/link.h', LINK_CLASSES, None, 'fdr')

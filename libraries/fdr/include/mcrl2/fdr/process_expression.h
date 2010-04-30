@@ -466,6 +466,25 @@ class replinkedparallel: public process_expression
 
     linkpar_expression linked() const;
 };
+
+/// \brief A renaming
+class rename: public process_expression
+{
+  public:
+    /// \brief Default constructor.
+    rename();
+
+    /// \brief Constructor.
+    /// \param term A term
+    rename(atermpp::aterm_appl term);
+
+    /// \brief Constructor.
+    rename(const process_expression& proc, const renaming& rename);
+
+    process_expression proc() const;
+
+    renaming rename() const;
+};
 //--- end generated process expression class declarations ---//
 
 //--- start generated is-functions ---//
@@ -666,6 +685,15 @@ class replinkedparallel: public process_expression
     bool is_replinkedparallel(const process_expression& t)
     {
       return fdr::detail::gsIsRepLinkedParallel(t);
+    }
+
+    /// \brief Test for a rename expression
+    /// \param t A term
+    /// \return True if it is a rename expression
+    inline
+    bool is_rename(const process_expression& t)
+    {
+      return fdr::detail::gsIsRename(t);
     }
 //--- end generated is-functions ---//
 

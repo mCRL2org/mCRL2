@@ -36,7 +36,6 @@ ATermAppl constructdeterministic();
 ATermAppl constructFDRSpec();
 ATermAppl constructMinus();
 ATermAppl constructTypeName();
-ATermAppl constructNumb();
 ATermAppl constructNot();
 ATermAppl constructMod();
 ATermAppl constructLessOrEqual();
@@ -57,7 +56,7 @@ ATermAppl constructInternalChoice();
 ATermAppl constructLambdaExpr();
 ATermAppl constructConditional();
 ATermAppl constructFileName();
-ATermAppl constructBool();
+ATermAppl constructFD();
 ATermAppl constructinter();
 ATermAppl constructRepSharing();
 ATermAppl constructNotEqual();
@@ -86,7 +85,7 @@ ATermAppl constructSimpleBranch();
 ATermAppl constructTimes();
 ATermAppl constructExprs();
 ATermAppl constructSimpleChannel();
-ATermAppl constructChanSet();
+ATermAppl constructGreater();
 ATermAppl constructRename();
 ATermAppl constructmodel_compress();
 ATermAppl constructBracketed();
@@ -96,7 +95,6 @@ ATermAppl constructextensions();
 ATermAppl constructexplicate();
 ATermAppl constructNull();
 ATermAppl constructSeqGen();
-ATermAppl constructDotted();
 ATermAppl constructSTOP();
 ATermAppl constructCHAOS();
 ATermAppl constructMember();
@@ -109,9 +107,8 @@ ATermAppl constructRepSequentialComposition();
 ATermAppl constructProc();
 ATermAppl constructEmpty();
 ATermAppl constructNameType();
-ATermAppl constructFD();
-ATermAppl constructTuple();
 ATermAppl constructunion();
+ATermAppl constructChanSet();
 ATermAppl constructTransparent();
 ATermAppl constructCard();
 ATermAppl constructdiamond();
@@ -122,7 +119,6 @@ ATermAppl constructInterrupt();
 ATermAppl constructInter();
 ATermAppl constructtrue();
 ATermAppl constructAssign();
-ATermAppl constructLambda();
 ATermAppl constructAnd();
 ATermAppl constructSet();
 ATermAppl constructSeq();
@@ -141,7 +137,7 @@ ATermAppl constructMap();
 ATermAppl constructsbsim();
 ATermAppl constructNil();
 ATermAppl constructTCheck();
-ATermAppl constructGreater();
+ATermAppl constructRepLinkedParallel();
 ATermAppl constructAssert();
 ATermAppl constructLocalDef();
 ATermAppl constructtau_loop_factor();
@@ -154,7 +150,6 @@ ATermAppl constructSetGen();
 ATermAppl constructOutput();
 ATermAppl constructDot();
 ATermAppl constructMapsGens();
-ATermAppl constructRepLinkedParallel();
 ATermAppl constructDataType();
 ATermAppl constructUntimedTimeOut();
 ATermAppl constructRefined();
@@ -167,8 +162,13 @@ ATermAppl constructFailureModel();
 ATermAppl constructTestType();
 ATermAppl constructTrName();
 ATermAppl constructAny();
+ATermAppl constructNumb();
+ATermAppl constructBool();
 ATermAppl constructTarg();
 ATermAppl constructComprehension();
+ATermAppl constructTuple();
+ATermAppl constructDotted();
+ATermAppl constructLambda();
 ATermAppl constructCommon();
 ATermAppl constructField();
 ATermAppl constructRenaming();
@@ -395,22 +395,6 @@ inline
 ATermAppl constructTypeName()
 {
   static ATermAppl t = initConstructTypeName(t);
-  return t;
-}
-
-// Numb
-inline
-ATermAppl initConstructNumb(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunNumb(), reinterpret_cast<ATerm>(constructNumb()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructNumb()
-{
-  static ATermAppl t = initConstructNumb(t);
   return t;
 }
 
@@ -734,19 +718,19 @@ ATermAppl constructFileName()
   return t;
 }
 
-// Bool
+// FD
 inline
-ATermAppl initConstructBool(ATermAppl& t)
+ATermAppl initConstructFD(ATermAppl& t)
 {
-  t = ATmakeAppl1(gsAFunBool(), reinterpret_cast<ATerm>(constructBool()));
+  t = ATmakeAppl0(gsAFunFD());
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructBool()
+ATermAppl constructFD()
 {
-  static ATermAppl t = initConstructBool(t);
+  static ATermAppl t = initConstructFD(t);
   return t;
 }
 
@@ -1198,19 +1182,19 @@ ATermAppl constructSimpleChannel()
   return t;
 }
 
-// ChanSet
+// Greater
 inline
-ATermAppl initConstructChanSet(ATermAppl& t)
+ATermAppl initConstructGreater(ATermAppl& t)
 {
-  t = ATmakeAppl1(gsAFunChanSet(), reinterpret_cast<ATerm>(constructTarg()));
+  t = ATmakeAppl2(gsAFunGreater(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructChanSet()
+ATermAppl constructGreater()
 {
-  static ATermAppl t = initConstructChanSet(t);
+  static ATermAppl t = initConstructGreater(t);
   return t;
 }
 
@@ -1355,22 +1339,6 @@ inline
 ATermAppl constructSeqGen()
 {
   static ATermAppl t = initConstructSeqGen(t);
-  return t;
-}
-
-// Dotted
-inline
-ATermAppl initConstructDotted(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunDotted(), reinterpret_cast<ATerm>(constructDotted()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructDotted()
-{
-  static ATermAppl t = initConstructDotted(t);
   return t;
 }
 
@@ -1566,38 +1534,6 @@ ATermAppl constructNameType()
   return t;
 }
 
-// FD
-inline
-ATermAppl initConstructFD(ATermAppl& t)
-{
-  t = ATmakeAppl0(gsAFunFD());
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructFD()
-{
-  static ATermAppl t = initConstructFD(t);
-  return t;
-}
-
-// Tuple
-inline
-ATermAppl initConstructTuple(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunTuple(), reinterpret_cast<ATerm>(constructTuple()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructTuple()
-{
-  static ATermAppl t = initConstructTuple(t);
-  return t;
-}
-
 // union
 inline
 ATermAppl initConstructunion(ATermAppl& t)
@@ -1611,6 +1547,22 @@ inline
 ATermAppl constructunion()
 {
   static ATermAppl t = initConstructunion(t);
+  return t;
+}
+
+// ChanSet
+inline
+ATermAppl initConstructChanSet(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunChanSet(), reinterpret_cast<ATerm>(constructTarg()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructChanSet()
+{
+  static ATermAppl t = initConstructChanSet(t);
   return t;
 }
 
@@ -1774,22 +1726,6 @@ ATermAppl constructAssign()
   return t;
 }
 
-// Lambda
-inline
-ATermAppl initConstructLambda(ATermAppl& t)
-{
-  t = ATmakeAppl1(gsAFunLambda(), reinterpret_cast<ATerm>(constructLambda()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructLambda()
-{
-  static ATermAppl t = initConstructLambda(t);
-  return t;
-}
-
 // And
 inline
 ATermAppl initConstructAnd(ATermAppl& t)
@@ -1826,7 +1762,7 @@ ATermAppl constructSet()
 inline
 ATermAppl initConstructSeq(ATermAppl& t)
 {
-  t = ATmakeAppl1(gsAFunSeq(), reinterpret_cast<ATerm>(constructSeq()));
+  t = ATmakeAppl1(gsAFunSeq(), reinterpret_cast<ATerm>(constructSet()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -2078,19 +2014,19 @@ ATermAppl constructTCheck()
   return t;
 }
 
-// Greater
+// RepLinkedParallel
 inline
-ATermAppl initConstructGreater(ATermAppl& t)
+ATermAppl initConstructRepLinkedParallel(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunGreater(), reinterpret_cast<ATerm>(constructExpr()), reinterpret_cast<ATerm>(constructExpr()));
+  t = ATmakeAppl3(gsAFunRepLinkedParallel(), reinterpret_cast<ATerm>(constructSeqGen()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructLinkPar()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructGreater()
+ATermAppl constructRepLinkedParallel()
 {
-  static ATermAppl t = initConstructGreater(t);
+  static ATermAppl t = initConstructRepLinkedParallel(t);
   return t;
 }
 
@@ -2286,22 +2222,6 @@ ATermAppl constructMapsGens()
   return t;
 }
 
-// RepLinkedParallel
-inline
-ATermAppl initConstructRepLinkedParallel(ATermAppl& t)
-{
-  t = ATmakeAppl3(gsAFunRepLinkedParallel(), reinterpret_cast<ATerm>(constructSeqGen()), reinterpret_cast<ATerm>(constructProc()), reinterpret_cast<ATerm>(constructLinkPar()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructRepLinkedParallel()
-{
-  static ATermAppl t = initConstructRepLinkedParallel(t);
-  return t;
-}
-
 // DataType
 inline
 ATermAppl initConstructDataType(ATermAppl& t)
@@ -2413,6 +2333,20 @@ ATermAppl constructAny()
   return constructExpr();
 }
 
+// Numb
+inline
+ATermAppl constructNumb()
+{
+  return constructCommon();
+}
+
+// Bool
+inline
+ATermAppl constructBool()
+{
+  return constructCommon();
+}
+
 // Targ
 inline
 ATermAppl constructTarg()
@@ -2425,6 +2359,27 @@ inline
 ATermAppl constructComprehension()
 {
   return constructNil();
+}
+
+// Tuple
+inline
+ATermAppl constructTuple()
+{
+  return constructCommon();
+}
+
+// Dotted
+inline
+ATermAppl constructDotted()
+{
+  return constructCommon();
+}
+
+// Lambda
+inline
+ATermAppl constructLambda()
+{
+  return constructCommon();
 }
 
 // Common

@@ -84,13 +84,6 @@ Pattern         | pattern(const any_expression& left, const any_expression& righ
 '''
 
 EXPRESSION_CLASSES = r'''
-Numb			| numb(const numeric_expression& operand)									| A numeric expression
-Bool			| bool_(const boolean_expression& operand)									| A boolean expression
-Set				| Set(const set_expression& operand)										| A set expression
-Seq				| Seq(const seq_expression& operand)										| A seq expression
-Tuple			| tuple(const tuple_expression& operand)									| A tuple expression
-Dotted			| dotted(const dotted_expression& operand)									| A dotted expression
-Lambda			| lambda(const lambda_expression& operand)									| A lambda expression
 '''
 
 ANY_EXPRESSION_CLASSES = r'''
@@ -217,6 +210,7 @@ UntimedTimeOut	| untimedtimeout(const process_expression& left, const process_ex
 BoolGuard		| boolguard(const boolean_expression& guard, const process_expression& proc)		| A boolean guard
 LinkedParallel	| linkedparallel(const process_expression& left, const process_expression& right, const linkpar_expression& linked)	| A linked parallel
 RepLinkedParallel	| replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar_expression& linked)	| A replicated linked parallel
+Rename	|	rename(const process_expression& proc, const renaming& rename)	|	A renaming
 '''
 
 FIELD_EXPRESSION_CLASSES = r'''
@@ -225,7 +219,7 @@ Input			| input(const expression& expr, const set_expression& restriction)			| A
 Output			| output(const expression& expr)											| An output
 '''
 
-RENAMING_CLASSES = r'''
+RENAMING_EXPRESSION_CLASSES = r'''
 Maps			| maps(const map_list& renamings)												| A map list
 MapsGens		| mapsgens(const map_list& renamings, const comprehension_expression_list& comprs)				| A map/generator list
 '''

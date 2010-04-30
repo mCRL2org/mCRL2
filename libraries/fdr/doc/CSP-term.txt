@@ -93,13 +93,13 @@
 //-------------
 
 // Expression
-<Expr>      ::= Numb(<Numb>)
-              | Bool(<Bool>)
-              | Set(<Set>)
-              | Seq(<Seq>)
-              | Tuple(<Tuple>)
-              | Dotted(<Dotted>)
-              | Lambda(<Lambda>)
+<Expr>      ::= <Numb>
+              | <Bool>
+              | <Set>
+              | <Seq>
+              | <Tuple>
+              | <Dotted>
+              | <Lambda>
 
 // Numeric expression
 <Numb>      ::= <Common>
@@ -141,6 +141,8 @@
               | Union(<Set>)
               | Inter(<Set>)
               | set(<Seq>)
+              | Seq(<Set>)
+              | Set(<Set>)
               | extensions(<Expr>)
               | productions(<Expr>)
 
@@ -152,9 +154,12 @@
               | Head(<Seq>)
               | Tail(<Seq>)
 
+// Expression list
+<Exprs> ::= Exprs(<Expr>+)
+
 // Set/Sequence arguments
 <Targ> ::= Nil
-             | Exprs(<Expr>+)
+             | <Exprs>
              | ClosedRange(<Numb>, <Numb>)
              | OpenRange(<Numb>)
              | Compr(<Expr>, <Comprehension>+)
@@ -166,7 +171,7 @@
 
 // Tuple expression
 <Tuple>     ::= <Common>
-              | Exprs(<Expr>+)
+              | <Exprs>
 
 // Dotted expression
 <Dotted>    ::= <Common>

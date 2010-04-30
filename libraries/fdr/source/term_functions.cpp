@@ -13,6 +13,7 @@
 #include "mcrl2/fdr/model_expression.h"
 #include "mcrl2/fdr/numeric_expression.h"
 #include "mcrl2/fdr/process_expression.h"
+#include "mcrl2/fdr/renaming_expression.h"
 #include "mcrl2/fdr/seq_expression.h"
 #include "mcrl2/fdr/set_expression.h"
 #include "mcrl2/fdr/targ_expression.h"
@@ -669,166 +670,6 @@ namespace fdr {
 //--- end generated dotted expression class definitions ---//
 
 //--- start generated  expression class definitions ---//
-    /// \brief Default constructor.
-    numb::numb()
-      : expression(fdr::detail::constructNumb())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    numb::numb(atermpp::aterm_appl term)
-      : expression(term)
-    {
-      assert(fdr::detail::check_term_Numb(m_term));
-    }
-
-    /// \brief Constructor.
-    numb::numb(const numeric_expression& operand)
-      : expression(fdr::detail::gsMakeNumb(operand))
-    {}
-
-    numeric_expression numb::operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    /// \brief Default constructor.
-    bool_::bool_()
-      : expression(fdr::detail::constructBool())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    bool_::bool_(atermpp::aterm_appl term)
-      : expression(term)
-    {
-      assert(fdr::detail::check_term_Bool(m_term));
-    }
-
-    /// \brief Constructor.
-    bool_::bool_(const boolean_expression& operand)
-      : expression(fdr::detail::gsMakeBool(operand))
-    {}
-
-    boolean_expression bool_::operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    /// \brief Default constructor.
-    Set::Set()
-      : expression(fdr::detail::constructSet())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    Set::Set(atermpp::aterm_appl term)
-      : expression(term)
-    {
-      assert(fdr::detail::check_term_Set(m_term));
-    }
-
-    /// \brief Constructor.
-    Set::Set(const set_expression& operand)
-      : expression(fdr::detail::gsMakeSet(operand))
-    {}
-
-    set_expression Set::operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    /// \brief Default constructor.
-    Seq::Seq()
-      : expression(fdr::detail::constructSeq())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    Seq::Seq(atermpp::aterm_appl term)
-      : expression(term)
-    {
-      assert(fdr::detail::check_term_Seq(m_term));
-    }
-
-    /// \brief Constructor.
-    Seq::Seq(const seq_expression& operand)
-      : expression(fdr::detail::gsMakeSeq(operand))
-    {}
-
-    seq_expression Seq::operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    /// \brief Default constructor.
-    tuple::tuple()
-      : expression(fdr::detail::constructTuple())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    tuple::tuple(atermpp::aterm_appl term)
-      : expression(term)
-    {
-      assert(fdr::detail::check_term_Tuple(m_term));
-    }
-
-    /// \brief Constructor.
-    tuple::tuple(const tuple_expression& operand)
-      : expression(fdr::detail::gsMakeTuple(operand))
-    {}
-
-    tuple_expression tuple::operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    /// \brief Default constructor.
-    dotted::dotted()
-      : expression(fdr::detail::constructDotted())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    dotted::dotted(atermpp::aterm_appl term)
-      : expression(term)
-    {
-      assert(fdr::detail::check_term_Dotted(m_term));
-    }
-
-    /// \brief Constructor.
-    dotted::dotted(const dotted_expression& operand)
-      : expression(fdr::detail::gsMakeDotted(operand))
-    {}
-
-    dotted_expression dotted::operand() const
-    {
-      return atermpp::arg1(*this);
-    }
-
-    /// \brief Default constructor.
-    lambda::lambda()
-      : expression(fdr::detail::constructLambda())
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    lambda::lambda(atermpp::aterm_appl term)
-      : expression(term)
-    {
-      assert(fdr::detail::check_term_Lambda(m_term));
-    }
-
-    /// \brief Constructor.
-    lambda::lambda(const lambda_expression& operand)
-      : expression(fdr::detail::gsMakeLambda(operand))
-    {}
-
-    lambda_expression lambda::operand() const
-    {
-      return atermpp::arg1(*this);
-    }
 //--- end generated  expression class definitions ---//
 
 //--- start generated lambda expression class definitions ---//
@@ -1147,6 +988,59 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 //--- end generated numeric expression class definitions ---//
+
+//--- start generated renaming expression class definitions ---//
+    /// \brief Default constructor.
+    maps::maps()
+      : renaming_expression(fdr::detail::constructMaps())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    maps::maps(atermpp::aterm_appl term)
+      : renaming_expression(term)
+    {
+      assert(fdr::detail::check_term_Maps(m_term));
+    }
+
+    /// \brief Constructor.
+    maps::maps(const map_list& renamings)
+      : renaming_expression(fdr::detail::gsMakeMaps(renamings))
+    {}
+
+    map_list maps::renamings() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    /// \brief Default constructor.
+    mapsgens::mapsgens()
+      : renaming_expression(fdr::detail::constructMapsGens())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    mapsgens::mapsgens(atermpp::aterm_appl term)
+      : renaming_expression(term)
+    {
+      assert(fdr::detail::check_term_MapsGens(m_term));
+    }
+
+    /// \brief Constructor.
+    mapsgens::mapsgens(const map_list& renamings, const comprehension_expression_list& comprs)
+      : renaming_expression(fdr::detail::gsMakeMapsGens(renamings, comprs))
+    {}
+
+    map_list mapsgens::renamings() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    comprehension_expression_list mapsgens::comprs() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+//--- end generated renaming expression class definitions ---//
 
 //--- start generated seq expression class definitions ---//
     /// \brief Default constructor.
@@ -2116,6 +2010,34 @@ namespace fdr {
     linkpar_expression replinkedparallel::linked() const
     {
       return atermpp::arg3(*this);
+    }
+
+    /// \brief Default constructor.
+    rename::rename()
+      : process_expression(fdr::detail::constructRename())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    rename::rename(atermpp::aterm_appl term)
+      : process_expression(term)
+    {
+      assert(fdr::detail::check_term_Rename(m_term));
+    }
+
+    /// \brief Constructor.
+    rename::rename(const process_expression& proc, const renaming& rename)
+      : process_expression(fdr::detail::gsMakeRename(proc, rename))
+    {}
+
+    process_expression rename::proc() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    renaming rename::rename() const
+    {
+      return atermpp::arg2(*this);
     }
 //--- end generated process expression class definitions ---//
 
