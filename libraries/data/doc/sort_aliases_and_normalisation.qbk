@@ -6,31 +6,12 @@ expression. Typical examples are (expressed in MCRL2):
     sort Time=Nat;
          L=List(List(Bool));
          Tree=struct leaf(Nat) | node(Tree,Tree);
+         F=Nat->List(Nat);
 
 Sort aliases are used to give alternative names or shorthands for existing
 sorts. Moreover, they allow to define recursive structured sorts. Note that
 at the left of a sort alias there is a `basic_ sort`, and at the right there
 is a `sort_expression`.
-
-An important consequence of the use of aliases is that different sort
-expressions can denote the same sort. In the example above, Time and
-Nat denote the same sort. So, the variables x:Time and x:Nat are the
-same object. It is time consuming to continuously calculate whether sorts are 
-the same, which is undesirable if it comes to verification. Therefore, we
-require that all sorts in expressions that are equal modulo sort aliases
-are represented by a unique sort expression. More concretely, for every
-sort expression 
-
-    sort A=B;
-
-where B is a basic sort, the unique sort is represented by B, whereas for
-each alias with a more complex right hand side the unique sort is represented by
-its left hand side. The process that is used to replace all sorts by their
-unique representation is called sort normalisation.
-
-Except for the untyped identifiers, all expressions in the Data Library
-are typed. There are many different kinds of sorts in the mCRL2 language, all
-of which can be represented in the data library.
 
 An alias is declared as follows:
 
@@ -47,6 +28,67 @@ An alias is declared as follows:
       alias a(b,c);
 
       std::cout << "Alias name: " << a.name() << " Alias rhs: " << pp(a.reference()) << "\n";
+    }
+
+An important consequence of the use of aliases is that different sort
+expressions can denote the same sort. In the example above, Time and
+Nat denote the same sort. So, the variables x:Time and x:Nat are the
+same object. It is time consuming to continuously calculate whether sorts are 
+the same, which is undesirable if it comes to verification. Therefore, we
+require that all sorts in expressions that are equal modulo sort aliases
+are represented by a unique sort expression. More concretely, for every
+sort expression 
+
+    sort A=B;
+
+where B is a basic sort or a function sort, the unique sort is represented by B, whereas for
+each alias with a structured sort, or a sort container (List, Bag, Set) 
+in its right hand side, the unique sort is represented by
+its left hand side. In case there are more aliases referring to the same sort, as in the
+example below there are more options for the unique sort.
+
+    sort A1=List(B);
+         A2=List(B);
+
+In this case either A1, or A2 is chosen as the representant.
+The process that is used to replace all sorts by their
+unique representation is called sort normalisation. When sort aliases are added to
+a data specification, all objects in that specification are automatically 
+normalised with respect to this alias, i.e. this means that every sort is
+replaced by its unique representant. 
+
+However, this is not automatically the case for objects outside the data specification.
+These must be normalized explicitly. Normalisation functions exist for all types
+that derive from terms, such as data_expressions, assignments, sort_expressions, data_equations, etc.,
+as well as for lists of these types.
+
+    #include mcrl2/data/data_specification.h
+    #include "mcrl2/data/alias.h"
+    #include "mcrl2/data/function_symbol.h"
+
+    using namespace mcrl2::data;
+
+    void normalise_sort_demo()
+    {
+      data_specification spec;
+      const basic_sort a("A");
+      const basic_sort b("B");
+      spec.add_alias(alias(a,b));
+   
+      const function_symbol f("f",b));
+
+      // An example of normalising a function symbol explicitly. 
+      std::cout << "Not normalised: " << pp(f) << " has sort " << pp(f.sort()) << "\n";
+      const function_symbol normalised_f=spec.normalise(f);
+      std::cout << "Normalised: " << pp(normalised_f) << " has sort " << pp(normalised_f.sort()) << "\n";
+   
+      spec.add_mapping(function_symbol);
+
+      // Get the mapping and the sorts, which are normalised. So, f:A is replaced by f:B.
+      mappings_const_range m=mappings();
+      for(function_symbol::const_iterator i=m.begin(); i!=m.end(); ++i)
+      { std::cout << "Function symbol " << pp(*i) << " has sort " << pp(i->sort()) << "\n";
+      }
     }
 
 [endsect] [/ Sort aliases and sort normalisation]
