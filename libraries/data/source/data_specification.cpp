@@ -493,17 +493,21 @@ namespace mcrl2 {
      m_normalised_aliases.clear(); 
 
      // Copy m_normalised_aliases. Simple aliases are stored from left to 
-     // right. If the right hand side is non trivial (struct, list, set or bag)
-     // the alias is stored from right to left.
+     // right. If the right hand side is possibly recursive, which is only a struct, as
+     // well as structured sorts, the alias is stored from right to left.
+     // In case of function sorts, this is not done, because the toolset checks
+     // that function have function sorts, and uses the arity of such functions.
+     // E.g. If one defines sort S=A->B; then it is not possible to recognize
+     // from sort S that it actually represents a function of arity 1.
      for(ltr_aliases_map::const_iterator i=m_aliases.begin();
                i!=m_aliases.end(); ++i)
      { assert(m_normalised_aliases.count(i->first)==0); // sort aliases have a unique left hand side.
        if (is_structured_sort(i->second) ||
-           is_function_sort(i->second) ||
+          //  is_function_sort(i->second) ||
            is_container_sort(i->second))
-       { // We deal here with a declaration of the shape sort A=ComplexType.
-         // Rewrite every occurrence of ComplexType to A. Suppose that there are
-         // two declarations of the shape sort A=ComplexType; B=ComplexType then
+       { // We deal here with a declaration of the shape sort A=Struct
+         // Rewrite every occurrence of Struct to A. Suppose that there are
+         // two declarations of the shape sort A=Struct; B=Struct then
          // ComplexType is rewritten to A and B is also rewritten to A.
          const atermpp::map< sort_expression, sort_expression >::const_iterator j=m_normalised_aliases.find(i->second);
          if (j!=m_normalised_aliases.end())
@@ -514,9 +518,10 @@ namespace mcrl2 {
          }
        }
        else
-       { // We are dealing with a sort declaration of the shape sort A=B.
+       { // We are dealing with a sort declaration of the shape sort A=B, 
+         // where B is a basic sort, or a function sort
          // Every occurrence of sort A is normalised to sort B.
-         assert(is_basic_sort(i->first));
+         assert(is_basic_sort(i->first)&&(is_basic_sort(i->second)||is_function_sort(i->second)));
          m_normalised_aliases[i->first]=i->second;
        }
      }
