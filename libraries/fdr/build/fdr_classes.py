@@ -210,7 +210,7 @@ UntimedTimeOut	| untimedtimeout(const process_expression& left, const process_ex
 BoolGuard		| boolguard(const boolean_expression& guard, const process_expression& proc)		| A boolean guard
 LinkedParallel	| linkedparallel(const process_expression& left, const process_expression& right, const linkpar_expression& linked)	| A linked parallel
 RepLinkedParallel	| replinkedparallel(const seqgen& gen, const process_expression& proc, const linkpar_expression& linked)	| A replicated linked parallel
-Rename	|	rename(const process_expression& proc, const renaming& rename)	|	A renaming
+Rename	|	rename(const process_expression& proc, const renaming_expression& renaming)	|	A renaming
 '''
 
 FIELD_EXPRESSION_CLASSES = r'''

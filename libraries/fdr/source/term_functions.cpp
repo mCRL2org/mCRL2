@@ -2026,8 +2026,8 @@ namespace fdr {
     }
 
     /// \brief Constructor.
-    rename::rename(const process_expression& proc, const renaming& rename)
-      : process_expression(fdr::detail::gsMakeRename(proc, rename))
+    rename::rename(const process_expression& proc, const renaming_expression& renaming)
+      : process_expression(fdr::detail::gsMakeRename(proc, renaming))
     {}
 
     process_expression rename::proc() const
@@ -2035,7 +2035,7 @@ namespace fdr {
       return atermpp::arg1(*this);
     }
 
-    renaming rename::rename() const
+    renaming_expression rename::renaming() const
     {
       return atermpp::arg2(*this);
     }

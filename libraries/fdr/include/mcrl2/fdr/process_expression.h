@@ -18,6 +18,7 @@
 #include "mcrl2/fdr/dotted_expression_fwd.h"
 #include "mcrl2/fdr/field_expression_fwd.h"
 #include "mcrl2/fdr/linkpar_expression_fwd.h"
+#include "mcrl2/fdr/renaming_expression_fwd.h"
 #include "mcrl2/fdr/set_expression_fwd.h"
 
 namespace mcrl2 {
@@ -479,11 +480,11 @@ class rename: public process_expression
     rename(atermpp::aterm_appl term);
 
     /// \brief Constructor.
-    rename(const process_expression& proc, const renaming& rename);
+    rename(const process_expression& proc, const renaming_expression& renaming);
 
     process_expression proc() const;
 
-    renaming rename() const;
+    renaming_expression renaming() const;
 };
 //--- end generated process expression class declarations ---//
 
