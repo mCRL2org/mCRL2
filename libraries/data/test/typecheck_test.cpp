@@ -1285,6 +1285,21 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_function_application_recursive4)
   );
 }
 
+BOOST_AUTO_TEST_CASE(test_aliases)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("f", data::basic_sort("A")));
+  v.push_back(data::variable("g", data::sort_list::list(data::basic_sort("C"))));
+  test_data_expression_in_specification_context(
+    "f == g",
+    "sort A = List(List(B));\n"
+    "     C = List(B);\n"
+    "     B;\n",
+    v.begin(), v.end(),
+    true
+  );
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
