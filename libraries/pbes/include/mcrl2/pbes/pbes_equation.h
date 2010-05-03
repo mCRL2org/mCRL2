@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_PBES_EQUATION_H
 #define MCRL2_PBES_PBES_EQUATION_H
 
+#include <string>
+#include <sstream>
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -263,6 +265,18 @@ inline
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 {
   return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
+}
+
+inline
+std::string pp(const pbes_equation& eqn)
+{
+  std::ostringstream out;
+  out << core::pp(eqn.symbol())
+      << '.'
+      << core::pp(eqn.variable())
+      << " = "
+      << core::pp(eqn.formula());
+  return out.str();
 }
 
 } // namespace pbes_system

@@ -27,29 +27,28 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
+#include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 inline
-pbes<> pbes2bes(pbes<>& p, bool finite = true)
+pbes<> pbes2bes_lazy(const pbes<>& p)
 {
-  data::rewriter datar(p.data());
-  data::rewriter_with_variables datarv(p.data());
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<> datae(p.data(), datar, generator);
-  enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae);
-  pbes<> result = (finite ? do_finite_algorithm(p, pbesr) : do_lazy_algorithm(p, pbesr));
-  return result;
+  pbes<> q = p;
+  pbes2bes_algorithm algorithm(q.data());
+  algorithm.run(q);
+  return algorithm.get_result();
 }
 
 inline
-pbes<> pbes2bes_new(pbes<>& p)
+pbes<> pbes2bes_finite(const pbes<>& p)
 {
-  pbes2bes_algorithm algorithm(p.data());
-  algorithm.run(p);
-  return algorithm.get_result();
+  pbes<> q = p;
+  pbes2bes_finite_algorithm algorithm(data::rewriter::jitty, 2);
+  algorithm.run(q);
+  return q;
 }
 
 std::string test1 =
@@ -169,7 +168,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
 {
   core::gsSetNormalMsg();
   pbes<> p = txt2pbes(pbes_spec);
-  std::cout << "------------------------------\n" << core::pp(p) << std::endl;
+  std::cout << "------------------------------\n" << pbes_system::pp(p) << std::endl;
   if (!p.is_closed())
   {
     std::cout << "ERROR: the pbes is not closed!" << std::endl;
@@ -181,8 +180,8 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
     std::cout << "FINITE" << std::endl;
     try
     {
-      pbes<> q1 = pbes2bes(p, true);
-      core::gsSetVerboseMsg();
+      using namespace pbes_system;
+      pbes<> q1 = pbes2bes_finite(p);
       std::cout << core::pp(q1) << std::endl;
     }
     catch (mcrl2::runtime_error e)
@@ -196,20 +195,8 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
     std::cout << "LAZY" << std::endl;
     try
     {
-      pbes<> q1 = pbes2bes(p, false);
-      core::gsSetVerboseMsg();
-      std::cout << core::pp(q1) << std::endl;
-    }
-    catch (mcrl2::runtime_error e)
-    {
-      std::cout << "pbes2bes failed: " << e.what() << std::endl;
-    }
-
-    std::cout << "NEWLAZY" << std::endl;
-    try
-    {
       using namespace pbes_system;
-      pbes<> q1 = pbes2bes_new(p);
+      pbes<> q1 = pbes2bes_lazy(p);
       std::cout << core::pp(q1) << std::endl;
     }
     catch (mcrl2::runtime_error e)

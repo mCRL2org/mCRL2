@@ -40,6 +40,9 @@ class propositional_variable: public atermpp::aterm_appl
     data::variable_list m_parameters;
 
   public:
+    /// \brief Type of the parameters.
+    typedef data::variable parameter_type;
+    
     /// \brief Constructor.
     propositional_variable()
       : atermpp::aterm_appl(core::detail::constructPropVarDecl())
@@ -115,6 +118,9 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     data::data_expression_list m_parameters;
 
   public:
+    /// \brief Type of the parameters.
+    typedef data::data_expression parameter_type;
+
     /// \brief Constructor.
     propositional_variable_instantiation()
       : atermpp::aterm_appl(core::detail::constructPropVarInst())
