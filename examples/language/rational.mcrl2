@@ -1,0 +1,31 @@
+% This is an mCRL2 process specification which can be used for testing
+% operations on rational numbers.
+
+% Tests for unary operations floor, ceil, round, succ, pred, -, abs, succ, pred
+act  unary_operations : Real # Int # Int # Int # Real # Real # Real # Real;
+proc Test_unary_operations =
+       sum x: Int, p: Pos, r: Real. (x >= -5 && x <= 5 && p <= 10 && r == x/p)
+       -> unary_operations(r, floor(r), ceil(r), round(r), abs(r), -r, succ(r), pred(r))
+       <> delta;
+
+% Tests for binary operations <, <=, >=, >, max, min, +, -, *, /
+act  binary_operations: Real # Real # Bool # Bool # Bool # Bool # Real # Real # Real # Real # Real # Real;
+     left_operand: Real;
+proc Test_binary_operations =
+       sum x: Int, p: Pos, r: Real. (x >= -5 && x <= 5 && p <= 10 && r == x/p) ->
+         left_operand(r) .
+         (sum y: Int, q: Pos, s: Real. (y >= -5 && y <= 5 && q <= 10 && s == y/q)
+         -> binary_operations(r, s, r < s, r <= s, r >= s, r > s, min(r, s), max(r, s), r + s, r - s, r * s, r / s)
+         <> delta
+         )
+       <> delta;
+
+% Tests for exponentation
+act  base: Real;
+     exponent: Real # Int # Real;
+proc Test_exponentation =
+       sum x: Int, p: Pos, r: Real. (x >= -5 && x <= 5 && p <= 10 && r == x/p)
+       -> (base(r) . (sum y: Int. (y >= -5 && y <= 5) -> exponent(r, y, exp(r, y)) <> delta))
+       <> delta;
+
+init Test_unary_operations + Test_binary_operations + Test_exponentation;

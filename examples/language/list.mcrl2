@@ -1,0 +1,5 @@
+proc P(l: List(Nat)) = (1 in l) -> tau . P(10 |> l ++ [#l] <| 100)
+                     + (l.1 == 30) -> tau . P(tail(l))
+                     + (head(l) == 20) -> tau . P([rhead(l)] ++ rtail(l));
+
+init P([20, 30, 40]);

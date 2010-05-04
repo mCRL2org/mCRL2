@@ -1,0 +1,17 @@
+% This is a simple test case for lambda expressions
+map f: Pos -> Bool;
+    g: Pos # Pos -> Bool;
+    h: Pos # Pos # Pos -> Bool;
+    j: Pos -> Pos # Pos -> Bool;
+
+eqn f = lambda x:Pos . x > 0;
+    g = lambda x,y:Pos . if(x>y, true, false);
+    h = lambda x,y,z:Pos . x > y && y > z;
+    j = lambda x:Pos . lambda y,z:Pos . true;
+
+proc P = (f(1)) -> tau . P
+       + (g(1,2)) -> tau . P
+       + (h(3,2,1)) -> tau . P
+       + (j(3)(2,1)) -> tau . P;
+
+init P;

@@ -1,0 +1,7 @@
+% This is a simple test case for universal quantificiation
+proc P = (forall x:Pos . true) -> tau . P
+       + (forall x,y:Pos . true) -> tau . P
+       + (forall x,y,z:Pos . true) -> tau . P
+       + (forall x,y:Pos . x+y > 0) -> tau . P;
+
+init P;
