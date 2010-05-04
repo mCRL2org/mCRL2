@@ -128,7 +128,7 @@ bool ExporterLatex::export_to(wxString filename)
 
 void ExporterLatex::drawBezier(Transition* tr)
 {
-  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%6%} controls (%3%pt, %4%pt) .. (state%2%);\n");
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%5%} controls (%3%pt, %4%pt) .. (state%2%);\n");
 
   State* from = tr->getFrom();
   State* to = tr->getTo();
