@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/parse.h"
 
 using namespace mcrl2;
@@ -23,9 +24,11 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
-void test_nextstate(specification const& s, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels)
+void test_nextstate(specification s, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels, bool per_summand = false)
 {
-  rewriter R(s.data(),
+  s.process().deadlock_summands().clear(); // It is important to clear the deadlock summands if per_summand = false
+
+  legacy_rewriter R(s.data(),
            mcrl2::data::used_data_equation_selector(s.data(), lps::specification_to_aterm(s)));
 
   mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > E(s.data(), R);
@@ -46,20 +49,46 @@ void test_nextstate(specification const& s, size_t expected_states, size_t expec
   while(!q.empty())
   {
     visited.insert(q.front());
-    std::auto_ptr< NextStateGenerator > generator(nstate->getNextStates(q.front()));
 
-    ATerm     state;
-    ATermAppl transition;
-    while(generator->next(&transition, &state))
+    if(per_summand)
     {
-      atermpp::aterm s(state);
-      atermpp::aterm_appl t(transition);
-      transition_labels.insert(t);
-      ++transitions;
-      if(seen.find(s) == seen.end())
+      for(size_t i = 0; i < s.process().summand_count(); ++i)
       {
-        q.push(s);
-        seen.insert(s);
+        std::auto_ptr< NextStateGenerator > generator(nstate->getNextStates(q.front(), i));
+
+        ATerm     state;
+        ATermAppl transition;
+        while(generator->next(&transition, &state))
+        {
+          atermpp::aterm s(state);
+          atermpp::aterm_appl t(transition);
+          transition_labels.insert(t);
+          ++transitions;
+          if(seen.find(s) == seen.end())
+          {
+            q.push(s);
+            seen.insert(s);
+          }
+        }
+      }
+    }
+    else
+    {
+      std::auto_ptr< NextStateGenerator > generator(nstate->getNextStates(q.front()));
+
+      ATerm     state;
+      ATermAppl transition;
+      while(generator->next(&transition, &state))
+      {
+        atermpp::aterm s(state);
+        atermpp::aterm_appl t(transition);
+        transition_labels.insert(t);
+        ++transitions;
+        if(seen.find(s) == seen.end())
+        {
+          q.push(s);
+          seen.insert(s);
+        }
       }
     }
 
@@ -87,6 +116,7 @@ BOOST_AUTO_TEST_CASE(single_state_test)
     "init P(1);\n"
   );
   test_nextstate(parse_linear_process_specification(spec), 2, 1, 1);
+  test_nextstate(parse_linear_process_specification(spec), 2, 1, 1, true);
 }
 
 BOOST_AUTO_TEST_CASE(test_abp)
@@ -145,6 +175,7 @@ BOOST_AUTO_TEST_CASE(test_abp)
   );
 
   test_nextstate(parse_linear_process_specification(spec), 74, 92, 19);
+  test_nextstate(parse_linear_process_specification(spec), 74, 92, 19, true);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
