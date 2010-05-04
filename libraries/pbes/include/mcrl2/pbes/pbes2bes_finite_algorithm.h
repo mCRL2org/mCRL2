@@ -85,10 +85,10 @@ namespace detail {
   }
 
   /// \brief Visitor that applies a propositional variable substitution to a pbes expression.
-  template <typename DataRewriter, typename RenameFunction>
-  struct pbes2bes_finite_builder: public pbes_system::detail::data_rewrite_builder<pbes_expression, DataRewriter>
+  template <typename DataRewriter, typename RenameFunction, typename Substitution>
+  struct pbes2bes_finite_builder: public pbes_system::detail::data_rewrite_builder<pbes_expression, DataRewriter, Substitution>
   {
-    typedef typename pbes_system::detail::data_rewrite_builder<pbes_expression, DataRewriter> super;
+    typedef typename pbes_system::detail::data_rewrite_builder<pbes_expression, DataRewriter, Substitution> super;
     typedef core::term_traits<pbes_expression> tr;
     
     const RenameFunction& m_rename;
@@ -128,7 +128,7 @@ namespace detail {
     /// \brief Visit propositional_variable node
     /// \param x A term
     /// \return The result of visiting the node
-    pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, no_substitution&)
+    pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, Substitution& sigma)
     {
       std::vector<data::data_expression> finite_parameters_vector;
       std::vector<data::data_expression> infinite_parameters_vector;
@@ -259,7 +259,9 @@ namespace detail {
         compute_index_map(p.equations(), variable_map, index_map);
 
         data::rewriter rewr(p.data(), m_rewriter_strategy);
-        detail::pbes2bes_finite_builder<data::rewriter, pbes2bes_finite_rename> visitor(rewr, pbes2bes_finite_rename(), p.data(), index_map, variable_map);
+          
+        typedef data::classic_enumerator<>::substitution_type substitution_type;
+        detail::pbes2bes_finite_builder<data::rewriter, pbes2bes_finite_rename, substitution_type> visitor(rewr, pbes2bes_finite_rename(), p.data(), index_map, variable_map);
 
         // compute new equations
         atermpp::vector<pbes_equation> equations;
@@ -271,21 +273,23 @@ namespace detail {
           data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
 
           for (data::classic_enumerator<> j(p.data(), finite_parameters, rewr); j != data::classic_enumerator<>(); ++j)
-          {           
+          {
+            //LOG(3, "sigma = " + data::to_string(*j) + "\n");
             // apply the substitution *j
             // TODO: use a generic substitution routine (does that already exist in the data library?)
             std::vector<data::data_expression> finite;
             for (std::vector<data::variable>::iterator k = finite_parameters.begin(); k != finite_parameters.end(); ++k)
             {
+              //LOG(3, "sigma(" + core::pp(*k) + ") = " + core::pp((*j)(*k)) + "\n");
               finite.push_back((*j)(*k));
             }
             core::identifier_string name = pbes2bes_finite_rename()(i->variable().name(), finite);
             propositional_variable X(name, infinite);
-            pbes_expression formula = visitor(i->formula());
+            pbes_expression formula = visitor(i->formula(), *j);
             pbes_equation eqn(i->symbol(), X, formula);
             equations.push_back(eqn);
             LOG_EQUATION_COUNT(1, ++m_equation_count);           
-            LOG(2, "Added equation " + pbes_system::pp(eqn));
+            LOG(2, "Added equation " + pbes_system::pp(eqn) + "\n");
           }
         }
 
