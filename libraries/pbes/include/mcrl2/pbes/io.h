@@ -149,12 +149,12 @@ void save_pbes(const pbes<>& pbes_spec, std::string outfilename, pbes_output_for
     case pbes_output_pbes:
     {
       core::gsVerboseMsg("Saving result in PBES format...\n");
-      pbes_spec.save(outfilename, true);
+      pbes_spec.save(outfilename, false);
     }
     case pbes_output_internal:
     {
       core::gsVerboseMsg("Saving result in internal format...\n");
-      pbes_spec.save(outfilename, false);
+      pbes_spec.save(outfilename, true);
       break;
     }
     case pbes_output_cwi:

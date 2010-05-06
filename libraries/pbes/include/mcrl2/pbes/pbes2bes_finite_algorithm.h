@@ -52,6 +52,33 @@ namespace pbes_system {
 
 namespace detail {
 
+  template <typename Function1, typename Function2>
+  struct compose
+  {
+    typedef typename Function1::result_type result_type;
+    typedef typename Function1::argument_type argument_type;
+    typedef typename Function1::variable_type variable_type;
+    typedef typename Function1::expression_type expression_type;   
+    
+    const Function1& f1_;
+    const Function2& f2_;
+
+    compose(const Function1& f1, const Function2& f2)
+      : f1_(f1), f2_(f2)
+    {}
+    
+    result_type operator()(const argument_type& x)
+    {
+      return f1_(f2_(x));
+    }
+  };
+
+  template <typename Function1, typename Function2>
+  compose<Function1, Function2> make_compose(const Function1& f1, const Function2& f2)
+  {
+    return compose<Function1, Function2>(f1, f2);
+  }
+
   /// \brief Computes the subset with variables of finite sort and infinite.
   /// \param X A propositional variable instantiation
   /// \param finite A sequence of data expressions
@@ -72,7 +99,7 @@ namespace detail {
     std::vector<unsigned int>::const_iterator j = v.begin();
     for (; i != X.parameters().end(); ++i, ++index)
     {
-      if (index == *j)
+      if (j != v.end() && index == *j)
       {
         finite.push_back(*i);
         ++j;
@@ -114,10 +141,16 @@ namespace detail {
     data::data_expression make_condition(const VariableContainer& variables, const ExpressionContainer& expressions) const
     {
       using namespace data::sort_bool;
-      data::data_expression result = true_();
       assert(variables.size() == expressions.size());
+      if (variables.empty())
+      {
+        return true_();
+      }
       typename VariableContainer::const_iterator vi = variables.begin();
       typename ExpressionContainer::const_iterator ei = expressions.begin();
+      data::data_expression result = equal_to(*vi, *ei);
+      ++vi;
+      ++ei;
       for (; vi != variables.end(); ++vi, ++ei)
       {
         result = and_(result, equal_to(*vi, *ei));
@@ -130,31 +163,51 @@ namespace detail {
     /// \return The result of visiting the node
     pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, Substitution& sigma)
     {
-      std::vector<data::data_expression> finite_parameters_vector;
-      std::vector<data::data_expression> infinite_parameters_vector;
-      split_parameters(v, m_index_map, finite_parameters_vector, infinite_parameters_vector);
-      data::data_expression_list finite_parameters = atermpp::convert<data::data_expression_list>(finite_parameters_vector);
-      data::data_expression_list infinite_parameters = atermpp::convert<data::data_expression_list>(infinite_parameters_vector);
+//std::clog << "<visit>" << core::pp(x) << std::endl;
+      // TODO: this code contains too much conversion between vectors and ATerm lists
 
-      data::detail::rewrite_container(infinite_parameters, super::m_data_rewriter);
+      std::vector<data::data_expression> finite_parameters;
+      std::vector<data::data_expression> infinite_parameters;
+      split_parameters(v, m_index_map, finite_parameters, infinite_parameters);
+      data::data_expression_list d = atermpp::convert<data::data_expression_list>(finite_parameters);
+      data::data_expression_list e = atermpp::convert<data::data_expression_list>(infinite_parameters);
+      core::identifier_string Xi = v.name();     
+      // v = Xi(d,e)
 
-      pbes2bes_variable_map::const_iterator vi = m_variable_map.find(v.name());
-      assert(vi != m_variable_map.end());
-      const std::vector<data::variable>& finite_variables = vi->second;
-      data::data_expression condition = make_condition(finite_variables, finite_parameters);
-  
-      atermpp::set<pbes_expression> result;
-      for (data::classic_enumerator<> i(m_data_spec, finite_variables, super::m_data_rewriter, condition); i != data::classic_enumerator<>(); ++i)
+      pbes2bes_variable_map::const_iterator vi = m_variable_map.find(Xi);
+      std::vector<data::variable> di;
+      if (vi != m_variable_map.end())
       {
-        data::data_expression_list finite = finite_parameters;
-        data::detail::rewrite_container(finite, super::m_data_rewriter, *i);
+        di = vi->second;
+      }
+      data::data_expression condition = make_condition(di, d);
+//std::clog << "condition = " << core::pp(condition) << std::endl;
 
-        data::data_expression c = (*i)(condition);
-        core::identifier_string Y = m_rename(v.name(), finite);
-        result.insert(tr::and_(c, propositional_variable_instantiation(Y, infinite_parameters)));
+      atermpp::set<pbes_expression> result;
+      for (data::classic_enumerator<> i(m_data_spec, di, super::m_data_rewriter); i != data::classic_enumerator<>(); ++i)
+      {
+//std::clog << "sigma = " << data::to_string(sigma) << std::endl;
+//std::clog << "*i    = " << data::to_string(*i) << std::endl;
+        data::data_expression_list d_copy = d;
+        data::detail::rewrite_container(d_copy, super::m_data_rewriter, detail::make_compose(sigma, *i));
+//        data::detail::rewrite_container(d_copy, super::m_data_rewriter, *i);
+        data::data_expression_list e_copy = e;
+        data::detail::rewrite_container(e_copy, super::m_data_rewriter, detail::make_compose(sigma, *i));
+//        data::detail::rewrite_container(e_copy, super::m_data_rewriter, *i);
+
+        data::data_expression c = super::m_data_rewriter(condition, detail::make_compose(sigma, *i));
+//        data::data_expression c = super::m_data_rewriter(condition, *i);
+//std::clog << "c = " << core::pp(c) << std::endl;
+        data::data_expression_list di_copy = atermpp::convert<data::data_expression_list>(di);
+        data::detail::rewrite_container(di_copy, super::m_data_rewriter, detail::make_compose(sigma, *i));
+//        data::detail::rewrite_container(di_copy, super::m_data_rewriter, *i);
+        core::identifier_string Y = m_rename(Xi, di_copy);
+        result.insert(tr::and_(c, propositional_variable_instantiation(Y, e_copy)));
       }
       
-      return pbes_expr::join_or(result.begin(), result.end());
+      pbes_expression result1 = pbes_expr::join_or(result.begin(), result.end());
+//std::clog << "result1 = " << core::pp(result1) << std::endl;
+      return result1;
     }
 
     /// \return Visits the initial state
@@ -274,18 +327,20 @@ namespace detail {
 
           for (data::classic_enumerator<> j(p.data(), finite_parameters, rewr); j != data::classic_enumerator<>(); ++j)
           {
-            //LOG(3, "sigma = " + data::to_string(*j) + "\n");
             // apply the substitution *j
             // TODO: use a generic substitution routine (does that already exist in the data library?)
             std::vector<data::data_expression> finite;
             for (std::vector<data::variable>::iterator k = finite_parameters.begin(); k != finite_parameters.end(); ++k)
             {
-              //LOG(3, "sigma(" + core::pp(*k) + ") = " + core::pp((*j)(*k)) + "\n");
+              //LOG(2, "sigma(" + core::pp(*k) + ") = " + core::pp((*j)(*k)) + "\n");
               finite.push_back((*j)(*k));
             }
             core::identifier_string name = pbes2bes_finite_rename()(i->variable().name(), finite);
             propositional_variable X(name, infinite);
+            //LOG(2, "formula before = " + core::pp(i->formula()) + "\n");
+            //LOG(2, "sigma = " + data::to_string(*j) + "\n");
             pbes_expression formula = visitor(i->formula(), *j);
+            //LOG(2, "formula after  = " + core::pp(formula) + "\n");
             pbes_equation eqn(i->symbol(), X, formula);
             equations.push_back(eqn);
             LOG_EQUATION_COUNT(1, ++m_equation_count);           

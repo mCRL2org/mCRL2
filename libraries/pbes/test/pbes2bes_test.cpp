@@ -141,7 +141,8 @@ std::string test8 =
   "init X(true);                                                                     \n"
   ;
 
-std::string test9 =
+// This pbes triggered a garbage collection problem, that has been solved.
+std::string random1 =
   "pbes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        \n"
   "nu X0(c:Bool, n:Nat) = (forall n:Nat.((val(n < 3)) && (((val(n < 3)) || (exists m:Nat.((val(m < 3)) || (X3(m + 1, m > 0))))) && ((forall m:Nat.((val(m < 3)) && (!X2(m + 1, 1)))) => ((val(c)) || (val(n < 3))))))) || ((val(false)) || (X0(false, n + 1)));                                                                                                                                                                                                                                                \n"
   "nu X1(b:Bool) = (!(!(forall k:Nat.((val(k < 3)) && ((forall k:Nat.((val(k < 3)) && ((X2(1, k + 1)) && (val(false))))) || ((X4(k > 0, k + 1)) && (X1(k > 1)))))))) && (!(forall m:Nat.((val(m < 3)) && (((val(m < 2)) && (val(m > 0))) && (val(true))))));                                                                                                                                                                                                                                                   \n"
@@ -153,7 +154,7 @@ std::string test9 =
   ;
 
 // This pbes triggered a garbage collection problem, that has been solved.
-std::string test10 =
+std::string random2 =
   "pbes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        \n"
   "mu X0(m:Nat, b:Bool) = (X0(m + 1, m > 0)) && (((forall m:Nat.((val(m < 3)) && (forall k:Nat.((val(k < 3)) && (!((val(k > 1)) && (val(false)))))))) && (exists n:Nat.((val(n < 3)) || (!(!(val(n > 1))))))) || (exists n:Nat.((val(n < 3)) || (forall n:Nat.((val(n < 3)) && (exists n:Nat.((val(n < 3)) || (((forall m:Nat.((val(m < 3)) && (val(m == n)))) => (X3(0, n > 1))) && (!(!X2(n == m)))))))))));                                                                                                 \n"
   "mu X1(c:Bool, b:Bool) = (((!X1(c, true)) || ((!X2(b)) || (val(b)))) && (forall k:Nat.((val(k < 3)) && (((val(c)) => (X4(c, 1))) => (val(true)))))) => (val(true));                                                                                                                                                                                                                                                                                                                                          \n"
@@ -162,6 +163,18 @@ std::string test10 =
   "nu X4(b:Bool, n:Nat) = (exists m:Nat.((val(m < 3)) || ((val(b)) || ((val(n > 1)) && ((X1(m > 1, n == m)) || (val(m > 0))))))) && ((exists k:Nat.((val(k < 3)) || (!(!((!X3(1, n > 0)) && (!(val(k == n)))))))) => (forall n:Nat.((val(n < 3)) && (exists k:Nat.((val(k < 3)) || (!(!(X4(n > 1, 0)))))))));                                                                                                                                                                                                  \n"
   "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            \n"
   "init X0(0, true);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \n"
+  ;
+
+// This pbes triggered an error with pbes2bes finite
+std::string random3 =
+  "pbes                                                                                                                                                                                                                                                                                                                                                              \n"
+  "mu X0(n:Nat, c:Bool) = ((!(((val(n < 2)) && (!X1)) && (exists k:Nat.((val(k < 3)) || (val(c)))))) && (((forall n:Nat.((val(n < 3)) && (!X4(n > 1)))) || (!(val(n > 1)))) => (val(true)))) && (exists n:Nat.((val(n < 3)) || (exists k:Nat.((val(k < 3)) || (forall m:Nat.((val(m < 3)) && (X0(k + 1, n < 3))))))));                                               \n"
+  "mu X1 = (((!((val(true)) => (X2))) => (!(!(!(!X1))))) && (((val(false)) || (X3(1))) && (forall n:Nat.((val(n < 3)) && (val(true)))))) || (forall k:Nat.((val(k < 3)) && (!(forall k:Nat.((val(k < 3)) && (exists m:Nat.((val(m < 3)) || (val(k < 2)))))))));                                                                                                      \n"
+  "mu X2 = ((exists k:Nat.((val(k < 3)) || (exists k:Nat.((val(k < 3)) || (exists m:Nat.((val(m < 3)) || ((val(m == k)) => (X1)))))))) => (((val(true)) => (!X2)) || (exists k:Nat.((val(k < 3)) || (val(false)))))) => (!((val(false)) => (!(X3(0)))));                                                                                                             \n"
+  "mu X3(n:Nat) = ((exists n:Nat.((val(n < 3)) || (exists n:Nat.((val(n < 3)) || (forall n:Nat.((val(n < 3)) && (val(false)))))))) && (forall m:Nat.((val(m < 3)) && (((forall m:Nat.((val(m < 3)) && (exists m:Nat.((val(m < 3)) || (exists m:Nat.((val(m < 3)) || (!(val(n > 0))))))))) && ((!X4(m > 1)) || (!X2))) || (val(n < 2)))))) => ((val(n < 2)) => (X1)); \n"
+  "nu X4(b:Bool) = ((val(true)) => ((forall m:Nat.((val(m < 3)) && (val(false)))) => ((X1) || ((!X3(0)) => (forall n:Nat.((val(n < 3)) && (val(n > 1)))))))) && (forall m:Nat.((val(m < 3)) && (forall n:Nat.((val(n < 3)) && ((X2) && (val(false)))))));                                                                                                            \n"
+  "                                                                                                                                                                                                                                                                                                                                                                  \n"
+  "init X0(0, true);                                                                                                                                                                                                                                                                                                                                                 \n"
   ;
 
 void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
@@ -218,8 +231,8 @@ void test_pbes2bes()
   test_pbes(test7, true, true);
   test_pbes(test8, true, true);
 #ifdef MCRL2_EXTENDED_TESTS
-  test_pbes(test9, false, true);
-  test_pbes(test10, false, true);
+  test_pbes(random1, false, true);
+  test_pbes(random2, false, true);
 #endif
 }
 
@@ -443,11 +456,20 @@ void test_balancing_plat()
   pbes<> q = algorithm.get_result();
 }
 
+void test_pbes2bes_finite()
+{
+  pbes<> p = txt2pbes(random3);
+  pbes<> q = pbes2bes_finite(p);
+  std::cerr << pbes_system::pp(q) << std::endl;
+  BOOST_CHECK(false);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 	pbes_system::detail::set_bes_equation_limit(100000);
   test_pbes2bes();
+  test_pbes2bes_finite();
 
 #ifdef MCRL2_EXTENDED_TESTS
   test_cabp();
