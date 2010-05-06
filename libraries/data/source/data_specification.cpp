@@ -80,16 +80,17 @@ namespace mcrl2 {
       m_normalised_constructors.clear();
       m_normalised_mappings.clear();
       m_normalised_equations.clear();
+      std::set < sort_expression > sorts_already_added_to_m_normalised_sorts;
       reconstruct_m_normalised_aliases();
       for(atermpp::set< sort_expression >::const_iterator i=m_sorts.begin();
            i!=m_sorts.end(); ++i)
       { add_system_defined_sort(*i);
-        import_system_defined_sort(*i);
+        import_system_defined_sort(*i,sorts_already_added_to_m_normalised_sorts);
       }
 
       for(atermpp::set< sort_expression >::const_iterator i=m_sorts_in_context.begin();
            i!=m_sorts_in_context.end(); ++i)
-      { import_system_defined_sort(*i);
+      { import_system_defined_sort(*i,sorts_already_added_to_m_normalised_sorts);
       }
 
       std::set< sort_expression > dependent_sorts;
@@ -117,7 +118,7 @@ namespace mcrl2 {
       for(atermpp::set< sort_expression >::const_iterator i=dependent_sorts.begin();
            i!=dependent_sorts.end(); ++i)
       { add_system_defined_sort(*i);
-        import_system_defined_sort(*i);
+        import_system_defined_sort(*i,sorts_already_added_to_m_normalised_sorts);
       }
 
 
@@ -125,8 +126,8 @@ namespace mcrl2 {
            i!=m_aliases.end(); ++i)
       { add_system_defined_sort(i->first);
         add_system_defined_sort(i->second);
-        import_system_defined_sort(i->first);
-        import_system_defined_sort(i->second);
+        import_system_defined_sort(i->first,sorts_already_added_to_m_normalised_sorts);
+        import_system_defined_sort(i->second,sorts_already_added_to_m_normalised_sorts);
       }
 
       // sort_to_symbol_map new_constructors;
@@ -168,8 +169,14 @@ namespace mcrl2 {
     /// mappings and equations that belong to this sort to the `normalised' sets in this
     /// data type. E.g. for the sort Nat of natural numbers, it is required that Pos 
     /// (positive numbers) are defined. 
-    void data_specification::import_system_defined_sort(sort_expression const& sort) const
+    void data_specification::import_system_defined_sort(
+                                      sort_expression const& sort,
+                                      std::set <sort_expression> &sorts_already_added_to_m_normalised_sorts) const
     { 
+      // First check whether sort has already been added. If yes, we can skip this step.
+      if (sorts_already_added_to_m_normalised_sorts.count(sort)>0) return;
+      sorts_already_added_to_m_normalised_sorts.insert(sort);
+
       // add sorts, constructors, mappings and equations
       if (sort == sort_bool::bool_())
       { // Add bool to the specification 
@@ -193,7 +200,8 @@ namespace mcrl2 {
         data_equation_vector e(sort_real::real_generate_equations_code());
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
  
-        import_system_defined_sort(sort_int::int_()); // A full definition of Int is required
+        import_system_defined_sort(sort_int::int_(),sorts_already_added_to_m_normalised_sorts); 
+                                                      // A full definition of Int is required
                                                       // as the rewrite rules of Real rely on it.
       }
       else if (sort == sort_int::int_())
@@ -207,7 +215,8 @@ namespace mcrl2 {
         data_equation_vector e(sort_int::int_generate_equations_code());
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
 
-        import_system_defined_sort(sort_nat::nat());  // See above, Int requires Nat.
+        import_system_defined_sort(sort_nat::nat(),sorts_already_added_to_m_normalised_sorts);  
+                                                       // See above, Int requires Nat.
       }
       else if (sort == sort_nat::nat())
       { // Add Nat to the specification
@@ -221,7 +230,7 @@ namespace mcrl2 {
         data_equation_vector e(sort_nat::nat_generate_equations_code());
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
 
-        import_system_defined_sort(sort_pos::pos());  // See above, Nat requires Pos.
+        import_system_defined_sort(sort_pos::pos(),sorts_already_added_to_m_normalised_sorts);  // See above, Nat requires Pos.
       }
       else if (sort == sort_pos::pos())
       { // Add Pos to the specification
@@ -236,9 +245,12 @@ namespace mcrl2 {
       }
       else if (is_function_sort(sort))
       { const sort_expression t=function_sort(sort).codomain();
-        import_system_defined_sort(t);
+        import_system_defined_sort(t,sorts_already_added_to_m_normalised_sorts);
         const sort_expression_list &l=function_sort(sort).domain();
-        std::for_each(l.begin(),l.end(),boost::bind(&mcrl2::data::data_specification::import_system_defined_sort,this,_1));
+        for(sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+        {
+          import_system_defined_sort(*i,sorts_already_added_to_m_normalised_sorts);
+        }
         if (l.size()==1)
         {  data_equation_vector e(function_update_generate_equations_code(l.front(),t));
            std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
@@ -248,10 +260,10 @@ namespace mcrl2 {
       {
         sort_expression element_sort(container_sort(sort).element_sort());
         // Import the element sort (which may be a complex sort also).
-        import_system_defined_sort(element_sort);
+        import_system_defined_sort(element_sort,sorts_already_added_to_m_normalised_sorts);
         if (sort_list::is_list(sort))
         {
-          import_system_defined_sort(sort_nat::nat()); // Required for lists.
+          import_system_defined_sort(sort_nat::nat(),sorts_already_added_to_m_normalised_sorts); // Required for lists.
 
           // Add a list to the specification.
           add_system_defined_sort(sort);
@@ -267,7 +279,8 @@ namespace mcrl2 {
         {
           // Add the function sort element_sort->Bool to the specification
           // const sort_expression_list l(element_sort);
-          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_bool::bool_()));
+          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_bool::bool_()),
+                                           sorts_already_added_to_m_normalised_sorts);
 
           // Add a set to the specification.
           add_system_defined_sort(sort_set::set_(element_sort));
@@ -290,11 +303,12 @@ namespace mcrl2 {
         else if (sort_bag::is_bag(sort)||sort_fbag::is_fbag(sort))
         {
           // Add the sorts Nat and set_(element_sort) to the specification.
-          import_system_defined_sort(sort_nat::nat()); // Required for bags.
-          import_system_defined_sort(sort_set::set_(element_sort));
+          import_system_defined_sort(sort_nat::nat(),sorts_already_added_to_m_normalised_sorts); // Required for bags.
+          import_system_defined_sort(sort_set::set_(element_sort),sorts_already_added_to_m_normalised_sorts);
 
           // Add the function sort element_sort->Nat to the specification
-          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_nat::nat()));
+          import_system_defined_sort(function_sort(push_front(sort_expression_list(),element_sort),sort_nat::nat()),
+                                                    sorts_already_added_to_m_normalised_sorts);
 
           // Add a bag to the specification.
           add_system_defined_sort(sort_bag::bag(element_sort));
