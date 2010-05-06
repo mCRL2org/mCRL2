@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_PBES_EXPRESSION2BOOLEAN_EXPRESSION_VISITOR_H
 
 #include "mcrl2/pbes/bes.h"
+#include "mcrl2/pbes/pbes_expression_visitor.h"
 
 namespace mcrl2 {
 

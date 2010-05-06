@@ -16,15 +16,15 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
-//C++
 #include <stdexcept>
 #include <iostream>
 #include <string>
 #include <utility>
 
-//MCRL2-specific
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/pbes/detail/pbes2bes_variable_map_parser.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
@@ -58,6 +58,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
     transformation_strategy m_strategy;
     pbes_output_format m_output_format;
+    std::string m_finite_parameter_selection;
 
     /// Sets the transformation strategy.
     /// \param s A transformation strategy.
@@ -121,6 +122,12 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         set_transformation_strategy("lazy");
       }
 
+      if (parser.options.count("select") > 0)
+      {
+      	m_finite_parameter_selection = parser.option_argument("select");
+      	boost::trim(m_finite_parameter_selection);
+      }
+
       if (parser.options.count("equation_limit") > 0)
       {
       	int limit = parser.option_argument_as<int>("equation_limit");
@@ -144,7 +151,13 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
           "  'pbes' for the internal binary format (default),\n"
           "  'internal' for the internal textual format, or\n"
           "  'cwi' for the format used by the CWI to solve a BES.",
-          'o');
+          'o').
+        add_option("select",
+          make_optional_argument("NAME", ""),
+          "select finite parameters that need to be expanded\n"
+          "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
+          "            *(*:Bool)\n",
+          'f');
       desc.add_hidden_option("equation_limit",
          make_optional_argument("NAME", "-1"),
          "Set a limit to the number of generated BES equations",
@@ -241,7 +254,8 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       else if (m_strategy == ts_finite)
       {
         pbes2bes_finite_algorithm algorithm(rewrite_strategy(), log_level);
-        algorithm.run(p);
+        pbes2bes_variable_map variable_map = detail::parse_variable_map(p, m_finite_parameter_selection);
+        algorithm.run(p, variable_map);
       }
 
       // save the result

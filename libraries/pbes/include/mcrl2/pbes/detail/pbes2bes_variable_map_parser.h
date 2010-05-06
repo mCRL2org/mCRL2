@@ -14,6 +14,8 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+#include <set>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
@@ -29,51 +31,55 @@ namespace pbes_system {
 
 namespace detail {
 
-/*
     /// \brief Returns true if the declaration text matches with the variable d.
     inline
-    bool match_type(const std::string& text, const data::variable& d, const data::data_specification& data_spec)
+    bool match_declaration(const std::string& text, const data::variable& d, const data::data_specification& data_spec)
     {
-      
+      std::vector<std::string> words = core::split(text, ":");
+      if (words.size() != 2)
+      {
+        throw mcrl2::runtime_error("invalid parameter declaration: '" + text + "'");
+      }
+      std::string name = boost::trim_copy(words[0]);
+      std::string type = boost::trim_copy(words[1]);
+      if (name != "*" && core::identifier_string(name) != d.name())
+      {
+      	return false;
+      }
+      if (type != "*" && data::parse_sort_expression(type) != d.sort())
+      {
+      	return false;
+      }
+      return true;
     }
 
     /// \brief Find parameter declarations that match a given string.
-    /// This string can for example be 'a' (match the name 'a'), 'b:Bool' (match the name and the given type),
-    /// '*' (match any name) and '*:Bool' (match for any name and the given type)
     inline
-    std::set<data::variable> find_matching_parameters(const pbes<>& p, const std::string& name, const std::string& text)
+    std::vector<data::variable> find_matching_parameters(const pbes<>& p, const std::string& name, const std::set<std::string>& declarations)
     {
-      std::vector<std::string> words = core::split(text, ":");
-      if (words.size() > 2)
-      {
-        throw mcrl2::runtime_error("too many colons in parameter declaration: '" + text + "'");
-      }
-      std::string left = words[0];
-      boost::trim(left);
-      std::string right;
-      if (words.size() == 2)
-      {
-        right = words[1];
-        boost::trim(right);
-      }
-
-      std::set<data::variable> result;
-      
+      std::set<data::variable> result;     
       for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         propositional_variable X = i->variable();       
-        if (name == "*" || (std::string(X.name()) == name))
+        if (name == "*" || (name == std::string(X.name())))
         {
           data::variable_list v = X.parameters();
-          for (data::variable_list::cont_iterator j = v.begin(); j != v.end(); ++j)
+          for (data::variable_list::const_iterator j = v.begin(); j != v.end(); ++j)
           {
+          	// find a declaration *k that accepts the variable *j
+          	for (std::set<std::string>::const_iterator k = declarations.begin(); k != declarations.end(); ++k)
+            {
+          	  if (match_declaration(*k, *j, p.data()))
+          	  {
+          	  	result.insert(*j);
+          	  	break;
+          	  }
+          	}
           }
         }
       }
-      throw mcrl2::runtime_error("could not find parameter matching the declaration '" + name + "(" + parameter + ")'");
-      return result;
+      return std::vector<data::variable>(result.begin(), result.end());
     }
-*/
 
     /// \brief Parses parameter selection for finite pbes2bes algorithm
     inline
@@ -98,7 +104,7 @@ namespace detail {
         {
           continue;
         }
-        sregex sre = sregex::compile("(\\w*)\\(([:,#\\s\\w]*)\\)\\s*", regex_constants::icase);
+        sregex sre = sregex::compile("(\\*|\\w*)\\(([:,#*\\s\\w]*)\\)\\s*", regex_constants::icase);
         match_results<std::string::const_iterator> what;
         if (!regex_match(line, what, sre))
         {
@@ -115,9 +121,25 @@ namespace detail {
           parameter_declarations[X].insert(*j);
         }
       }
+
+      // expand the name "*"
+      name_map::iterator q = parameter_declarations.find("*");
+      if (q != parameter_declarations.end())
+      {
+      	std::set<std::string> v = q->second;
+        parameter_declarations.erase(q);
+        for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+        	std::string name = i->variable().name();
+        	parameter_declarations[name].insert(v.begin(), v.end());
+        }
+      }
+
       for (name_map::const_iterator k = parameter_declarations.begin(); k != parameter_declarations.end(); ++k)
       {
-        std::cout << k->first << " -> " << core::detail::print_set(k->second) << std::endl;
+        std::vector<data::variable> variables = find_matching_parameters(p, k->first, k->second);
+        core::identifier_string name(k->first);
+        result[name] = variables;
       }
       return result;
     }
