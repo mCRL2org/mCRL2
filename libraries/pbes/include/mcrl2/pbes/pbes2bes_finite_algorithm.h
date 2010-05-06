@@ -21,6 +21,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
 
 namespace mcrl2 {
@@ -163,7 +164,7 @@ namespace detail {
     /// \return The result of visiting the node
     pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, Substitution& sigma)
     {
-//std::clog << "<visit>" << core::pp(x) << std::endl;
+//std::clog << "visit " << core::pp(x) << std::endl;
       // TODO: this code contains too much conversion between vectors and ATerm lists
 
       std::vector<data::data_expression> finite_parameters;
@@ -189,18 +190,16 @@ namespace detail {
 //std::clog << "sigma = " << data::to_string(sigma) << std::endl;
 //std::clog << "*i    = " << data::to_string(*i) << std::endl;
         data::data_expression_list d_copy = d;
-        data::detail::rewrite_container(d_copy, super::m_data_rewriter, detail::make_compose(sigma, *i));
-//        data::detail::rewrite_container(d_copy, super::m_data_rewriter, *i);
+        data::detail::rewrite_container(d_copy, super::m_data_rewriter, sigma);
         data::data_expression_list e_copy = e;
-        data::detail::rewrite_container(e_copy, super::m_data_rewriter, detail::make_compose(sigma, *i));
-//        data::detail::rewrite_container(e_copy, super::m_data_rewriter, *i);
+        data::detail::rewrite_container(e_copy, super::m_data_rewriter, sigma);
 
-        data::data_expression c = super::m_data_rewriter(condition, detail::make_compose(sigma, *i));
-//        data::data_expression c = super::m_data_rewriter(condition, *i);
-//std::clog << "c = " << core::pp(c) << std::endl;
         data::data_expression_list di_copy = atermpp::convert<data::data_expression_list>(di);
-        data::detail::rewrite_container(di_copy, super::m_data_rewriter, detail::make_compose(sigma, *i));
-//        data::detail::rewrite_container(di_copy, super::m_data_rewriter, *i);
+        pbes_system::substitute(di_copy, *i);
+
+        data::data_expression c = make_condition(di_copy, d_copy);
+//std::clog << "c = " << core::pp(c) << std::endl;
+
         core::identifier_string Y = m_rename(Xi, di_copy);
         result.insert(tr::and_(c, propositional_variable_instantiation(Y, e_copy)));
       }

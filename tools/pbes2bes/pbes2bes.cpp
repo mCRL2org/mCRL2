@@ -11,6 +11,7 @@
 
 #include "boost.hpp" // precompiled headers
 
+//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
@@ -27,6 +28,7 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
+#include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -220,38 +222,26 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         return false;
       }
 
+      unsigned int log_level = 0;
+      if (mcrl2::core::gsVerbose)
+      {
+        log_level = 1;
+      }
+      if (mcrl2::core::gsDebug)
+      {
+        log_level = 2;
+      }     	
+
       if (m_strategy == ts_lazy)
       {
-        unsigned int log_level = 0;
-        if (mcrl2::core::gsVerbose)
-        {
-          log_level = 1;
-        }
-        if (mcrl2::core::gsDebug)
-        {
-          log_level = 2;
-        }     	
         pbes2bes_algorithm algorithm(p.data(), rewrite_strategy(), false, false, log_level);
         algorithm.run(p);
         p = algorithm.get_result();
       }
       else if (m_strategy == ts_finite)
       {
-        // data rewriter
-        data::rewriter datar = create_rewriter(p.data());
-
-        // name generator
-        std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
-        data::number_postfix_generator name_generator(prefix);
-
-        // data enumerator
-        data::data_enumerator<data::number_postfix_generator> datae(p.data(), datar, name_generator);
-
-        // pbes rewriter
-        data::rewriter_with_variables datarv(datar);
-        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, false);
-
-        p = do_finite_algorithm(p, pbesr);
+        pbes2bes_finite_algorithm algorithm(rewrite_strategy(), log_level);
+        algorithm.run(p);
       }
 
       // save the result

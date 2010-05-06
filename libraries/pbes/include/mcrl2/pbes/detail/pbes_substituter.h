@@ -172,6 +172,12 @@ namespace detail {
     {
       substitute(t);
     }
+
+    template <typename Term>
+    void operator()(atermpp::term_list<Term>& l) const
+    {
+      substitute_list(l);
+    }
   };
 
   /// \brief Utility function to create an pbes_substituter.
