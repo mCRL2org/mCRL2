@@ -537,9 +537,9 @@ namespace mcrl2 {
     static basic_sort find_normal_form(
                     const basic_sort &e, 
                     const atermpp::multimap< sort_expression, basic_sort >  &map1,
-                    const atermpp::multimap< sort_expression, basic_sort >  &map2,
+                    const atermpp::multimap< sort_expression, basic_sort >  &map2
 #ifndef NDEBUG
-                    std::set < basic_sort > sorts_already_seen = std::set < basic_sort >()
+                    , std::set < basic_sort > sorts_already_seen = std::set < basic_sort >()
 #endif
       )
     { 
