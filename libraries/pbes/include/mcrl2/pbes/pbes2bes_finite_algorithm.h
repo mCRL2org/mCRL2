@@ -17,6 +17,7 @@
 #include <set>
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/core/algorithm.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
@@ -195,7 +196,7 @@ namespace detail {
         data::detail::rewrite_container(e_copy, super::m_data_rewriter, sigma);
 
         data::data_expression_list di_copy = atermpp::convert<data::data_expression_list>(di);
-        pbes_system::substitute(di_copy, *i);
+        pbes_system::substitute_gcc_workaround(di_copy, *i);
 
         data::data_expression c = make_condition(di_copy, d_copy);
 //std::clog << "c = " << core::pp(c) << std::endl;
