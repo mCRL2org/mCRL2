@@ -657,13 +657,16 @@ namespace mcrl2 {
 
       }
       // Copy resulting_normalized_sort_aliases into m_normalised_aliases, i.e. from multimap to map.
-      // If there are rules with equal left hand side, only one is arbitrarily chosen.
+      // If there are rules with equal left hand side, only one is arbitrarily chosen. Rewrite the
+      // right hand side to normal form.
       
+      const atermpp::multimap< sort_expression, basic_sort > empty_multimap;
       for(atermpp::multimap< sort_expression, basic_sort >::const_iterator 
                  i=resulting_normalized_sort_aliases.begin();
                  i!=resulting_normalized_sort_aliases.end(); ++i)
       { 
-        m_normalised_aliases.insert(*i);
+        m_normalised_aliases.insert(std::pair< sort_expression,sort_expression>(i->first,
+                  find_normal_form(i->second,resulting_normalized_sort_aliases,empty_multimap)));
         assert(i->first!=i->second);
       }
     }
@@ -671,15 +674,19 @@ namespace mcrl2 {
     sort_expression data_specification::normalise_sorts_helper(const sort_expression & e) const
     { // This routine takes the map m_normalised_aliases which contains pairs of sort expressions
       // <A,B> and takes all these pairs as rewrite rules, which are applied to e using an innermost
-      // strategy.
+      // strategy. Note that it is assumed that m_normalised_aliases contain rewrite rules <A,B>, such
+      // that B is a normal form. This allows to check that if e matches A, then we can return B.
 
-      sort_expression new_sort; // This will be a placeholder for the sort of which all
-                                // arguments will be normalised.
-      if (is_basic_sort(e))
-      { 
-        new_sort=e;
+      const atermpp::map< sort_expression, sort_expression >::const_iterator i1=m_normalised_aliases.find(e);
+      if (i1!=m_normalised_aliases.end())
+      { return i1->second;
       }
-      else if (is_function_sort(e))
+
+      sort_expression new_sort=e; // This will be a placeholder for the sort of which all
+                                  // arguments will be normalised.
+                                  
+      // We do not have to do anything if e is a basic sort, as new_sort=e.
+      if (is_function_sort(e))
       { // Rewrite the arguments into normal form.
         atermpp::vector< sort_expression > new_domain;
         for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(e).domain());
@@ -715,16 +722,13 @@ namespace mcrl2 {
 
       // The arguments of new_sort are now in normal form.
       // Rewrite it to normal form.
-      const atermpp::map< sort_expression, sort_expression >::const_iterator i=m_normalised_aliases.find(new_sort);
-      if (i==m_normalised_aliases.end())
+      const atermpp::map< sort_expression, sort_expression >::const_iterator i2=m_normalised_aliases.find(new_sort);
+      if (i2!=m_normalised_aliases.end())
       {
-        return new_sort; // e is a normal form.
+        new_sort=normalise_sorts_helper(i2->second); // rewrite the result until normal form.
       }
-      else
-      {
-        return normalise_sorts_helper(i->second); // rewrite the result until normal form.
-      }
-      return e;
+      m_normalised_aliases[e]=new_sort; // recall for later use. Note that e==new_sort is a possibility.
+      return new_sort;
     } 
 
     sort_expression data_specification::normalise_sorts(const sort_expression & e) const
