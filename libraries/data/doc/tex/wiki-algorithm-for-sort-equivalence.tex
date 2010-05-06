@@ -37,14 +37,27 @@
 
 \title{An algorithm to find a representant for sorts in the context of sort aliases and
 recursive sorts}
-\author{Jan Friso Groote and Jeroen van der Wulp}
-\date{September 6, 2009}
+\author{Jan Friso Groote}
+\date{May 4, 2010}
 \begin{document}
 \maketitle
 %\section{Type equivalence}
 \noindent%
-In mCRL2 it is possible to define structured sorts, sort aliases and 
-recursive sorts.
+In mCRL2 it is possible to define sort aliases, which have the form
+$A=B$. This means that sort $A$ and sort $B$ are considered the same,
+and are completely exchangeable. 
+
+Typical examples of sort aliases are
+\begin{mcrl2}
+sort&{\it Time}=\Nat;\\
+    &F=C\rightarrow D;\\
+    &L=List(C);\\
+    &{\it Complex}={\it Bag}(A{\rightarrow}{\it Set}(B)); 
+\end{mcrl2}
+It is also possible to define
+structured sorts that can be recursive (contrary to function sorts, lists, sets, 
+and bags above, which cannot be recursive). 
+
 A structured sort has the shape:
 \begin{mcrl2}
 sort & A={\bf struct}
@@ -71,14 +84,6 @@ sort& {\it Tree}=
 {\it is\_leave};
 \end{mcrl2}
 
-Using sort aliases it is possible to declare that certain sorts are equal. E.g.,
-in order to use the sortname ${\it Time}$ to refer to $\Nat$, one can write
-\begin{mcrl2}
-sort &{\it Time}=\Nat;
-\end{mcrl2}
-From this point on, the sorts ${\it Time}$ and $\Nat$ can be used interchangeably.
-They are considered as the same sorts.
-
 By combining aliases and structured sorts, 
 it is possible to have very different looking sort expressions that denote
 the same sorts. Two such expressions are equal if by folding and unfolding the definitions in
@@ -86,81 +91,79 @@ sort aliases and in structured sorts,
 the sort expressions can be rewritten to each other. 
 When manipulating terms it is inconvenient
 to be forced to perform folding and unfolding to determine equivalences of sorts. Therefore, it
-is useful to replace all equivalent sorts by a single unique representant, reducing the check
+is useful to replace all equivalent sorts by a single unique representation, reducing the check
 for equivalency of sorts to checking whether the sorts are syntactically equal. This process
-is called normalisation. Note that normalisation depends on a data specification.
-Adding one sort alias or one structured sort can change the outcome of the normalisation procedure. Below we give an algorithm to perform normalisation, yielding the
-most compact sort expression as the representant of a set of equivalent sort expressions.
+is called {\it sort normalisation}. Note that normalisation depends on a data specification.
+Adding one sort alias or one structured sort can change the outcome of the 
+normalisation procedure. 
 
-The algorithm is performed in two steps. First a set of rules for structured sorts and    aliases
-is normalized, subsequently sort expressions are reduced using this normalized set of rules.
-First consider a set of rules defining sorts.
-\begin{enumerate}
-\item
-Replace for every sort alias where $B$ is a single sortname
-\begin{mcrl2}
-sort&A=B;
-\end{mcrl2}
-the sort $A$ by $B$ in the right hand sides of sort aliases in this set of rules. 
-Afterwards, $A$ does not occur anymore, except in this rule.
-Whenever in this process a sort alias occurs of the form ${\bf sort}~A=A$ there was
-a loop in the definition of sort aliases, which is not allowed. If no alias is applicable anymore, proceed to step 2.
-\item
-For all aliases with equal structured sorts in the right hand side, 
-remove one of the definitions
-and introduce a sort alias expressing that the left hand sides are equal. Concretely,
-sort definitions
-\begin{mcrl2}
-sort &A={\bf struct}~{\rm sort~definition};\\
-     &B={\bf struct}~{\rm sort~definition};
-\end{mcrl2}
-are replaced by
-\begin{mcrl2}
-sort &A={\bf struct}~{\rm sort~definition};\\
-     &B=A;
-\end{mcrl2}
-If a sort alias is introduced, go back to step 1. Otherwise proceed to the phase below
-where concrete sorts are reduced.
-\end{enumerate}
+
+Below we give an algorithm to perform normalisation which is used in the mCRL2 tool suite.
+
+The algorithm is performed in three steps.
+First, the set of aliases is checked for recursive definitions
+in all sorts except the structured sorts. This can be done using 
+a simple depth first algorithm.
+ 
+Second, the set of aliases is stored from left to
+right in a map $\it sort\_aliases\_to\_be\_investigated$.
+So, if $A=B$ is declared, then ${\it sort\_aliases\_to\_be\_investigated}(B)=A$.
+The name of this map uses the word `{\it investigated}' because it
+must be investigated whether these rewrite rules are confluent.
+
+As a third step the sort aliases are taken as rewrite rules, and 
+a form of Knuth-Bendix completion is applied to them, to transform them
+into a confluent term rewriting system, guaranteeing unique representations.
+
+So, if there are two overlapping left hand sides in the rewrite system, this
+means that one term is a subterm of the other. So, we have a rule 
+$f(g(t))\rightarrow u_1$ and a term $g(t)\rightarrow u_2$. So, the term
+$f(g(t))$ can rewrite to both $u_1$ and $f(u_2)$. In this case we simply add
+a rewrite rule $f(u_2)\rightarrow N(u_1)$ where $N(u_1)$ is the normal form
+of $u_1$. Note that the terms at the left and
+the right hand side do not become more complex. Therefore, given that there
+are a finite number of sorts, there is an upperbound on the number of equations,
+and this procedure is guaranteed to terminate.
+
+In more detail, we have two sets of rewrite rules. One that is definitive
+${\it m\_normalised\_sort\_aliases}$ and $\it sort\_aliases\_to\_be\_investigated$ 
+that contains sort rewrite rules
+still to be investigated. Initially, all rules are in 
+$\it sort\_aliases\_to\_be\_investigated$. Each rewrite rule $t_1\rightarrow u_1$
+in $\it sort\_aliases\_to\_be\_investigated$ is checked with
+each rule $t_2\rightarrow u_2$ in ${\it m\_normalised\_sort\_aliases}$.
+If $t_1$ is a subterm of $t_2$ (i.e.\ $t_2=f(t_1)$) and 
+$N(u_2)$ and $f(u_1)$ do not have the same normal forms, then a rule $f(u_1)\rightarrow
+N(u_2)$ is added to $\it sort\_aliases\_to\_be\_investigated$ where $N(u_2)$ is
+the normal form of $u_2$ under application of $\it sort\_aliases\_to\_be\_investigated$ and
+${\it m\_normalised\_sort\_aliases}$.
+If $t_2$ is a subterm of $t_1$ a symmetric sequence of steps is done.
+After all rewrite rules $t_1\rightarrow u_1$ in ${\it m\_normalised\_sort\_aliases}$
+have been investigated, $t_2\rightarrow u_2$ is added to 
+${\it m\_normalised\_sort\_aliases}$.
+
+The resulting rewrite system is terminating, provided that the original rewrite system
+was terminating. Each new rule that is added has the shape $C = a$, where $C$ is
+a basic or complex type, and $a$ is a basic type, which is a normal form in the
+rewrite system. The only way that there is non termination, is when there
+is an infinite sequence of basic sorts $a_1$, $a_2,\ldots$, such that $a_i$ rewrites
+to $a_{i+1}$. This loop came into existence by adding some rewrite rule $a=a'$ at
+some moment in time, where $a'$ was not a normal form. But this cannot happen,
+because by construction $a'$ is a normal form.
+
 Normalisation of concrete sorts is now very simple. Every sort which equals a
 left hand side of a sort alias is replaced by the right hand side. This is repeated
-until no such substitution can be applied. Afterwards, every
-sort expression that matches the right hand side of a structured sort definition, is
-replaced by its left hand side until no more of such substitutions can be performed
-either. For correctness it is not even required that the alias definitions are applied
-first.
+until no such substitution can be applied. This can be done using a simple 
+innermost rewriting procedure. This rewriter has been implemented in 
+{\it normalise\_sorts\_helper}.
 
-The correctness of our procedure is formulated as follows. Whenever two sort expressions
-can be transformed to each other by folding and unfolding definitions of sort aliases and structured
-sorts, then both expressions have the same normal form.
-
-The proof follows from the observation that if one folding or unfolding step is
-performed, both sides have the same normal form.
-
-First note that the normalisation procedure is terminating as sort aliases
-are removed and expressions are shortened in each step. Furthermore, the normalisation
-procedure is confluent, as there are no critical pairs. So, normalisation yields exactly
-one representant for each sort expression.
-
-Consider two sort expressions $t_1$ and $t_2$ where $t_1$ is applied by replacing a sort $A$
-by a sort $B$ because the data specification contains a sort alias definition $A=B$. This means
-that the normalized specification either has a sort alias $A=B$, or it has sort aliases
-$A=C$ and $B=C$ for some sort name $C$. In both cases we see that $t_1$ and $t_2$ can be rewritten
-to an equal sort expression using these rules, and hence they have the same representant.
-
-Now consider two sort expressions $t_1$ and $t_2$ where $t_1$ is obtained by replacing
-a sort $A$ by a structured sort expression $e$ in $t_2$ as the data specification contains
-a sort expression $A=e$. During normalisation the sort expression $e$ has been replaced by
-sort aliases to become $e'$. So, there is either a sort definition $A=e'$ in the normalized
-specification, or there is a sort definition $B=e'$ and an alias $A=B$. As we can normalize
-the sort expression $e$ in $t_1$ to $e'$ and then replace it by $B$, (or $A$ in the first case),
-and we can replace  $A$ by $B$ in $t_2$ normalisation can make these expressions equal, and
-hence they have the same representant.
-
-As a consequence, all expressions that can be transformed to each other
-by folding and unfolding definitions of sort aliases and structured sorts have the
-same representant.
-
-
-
+As a side note, we mention that after sort normalisation, it is not possible
+anymore to recognize the structure of a sort by direct investigation. With the following
+alias
+\begin{mcrl2}
+sort&F=A\rightarrow B;
+\end{mcrl2}
+then it can become non obvious that the sort $F$ represents a function. 
+So, in this case the aliases must be unfolded to find the sort expression
+that it represents. The utility function {\it unalias} is provided for this.
 \end{document}

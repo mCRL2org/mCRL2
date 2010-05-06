@@ -97,9 +97,11 @@ class application_base: public data_expression
                     const Container& arguments,
                     typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
           : detail::application_base(head, arguments)
-        {
-          assert(is_function_sort(head.sort()));
-          assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));
+        { // Due to sort aliasing, it is possible that the sort of a function symbol is
+          // not a function sort, but an alias of function sort. Therefore, the asserts below are
+          // not always valid.
+          // assert(is_function_sort(head.sort()));
+          // assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));
           assert(!arguments.empty());
         }
 
@@ -155,9 +157,10 @@ class application_base: public data_expression
     /// \brief Apply data expression to a data expression
     inline application make_application(data_expression const& head,
                                         data_expression const& e0)
-    {
-      assert(is_function_sort(head.sort()));
-      assert(function_sort(head.sort()).domain().size() == 1);
+    { // Due to sort aliasing, the asserts below are not necessarily
+      // valid anymore.
+      // assert(is_function_sort(head.sort()));
+      // assert(function_sort(head.sort()).domain().size() == 1);
       return application(head, atermpp::make_list(e0));
     }
 
@@ -165,9 +168,9 @@ class application_base: public data_expression
     inline application make_application(data_expression const& head,
                                         data_expression const& e0,
                                         data_expression const& e1)
-    {
-      assert(is_function_sort(head.sort()));
-      assert(function_sort(head.sort()).domain().size() == 2);
+    { // See above for the reason to outcomment the asserts below
+      // assert(is_function_sort(head.sort()));
+      // assert(function_sort(head.sort()).domain().size() == 2);
       return application(head, atermpp::make_list(e0, e1));
     }
 
@@ -176,9 +179,9 @@ class application_base: public data_expression
                                         data_expression const& e0,
                                         data_expression const& e1,
                                         data_expression const& e2)
-    {
-      assert(is_function_sort(head.sort()));
-      assert(function_sort(head.sort()).domain().size() == 3);
+    { // See above for the reason to outcomment the asserts below
+      // assert(is_function_sort(head.sort()));
+      // assert(function_sort(head.sort()).domain().size() == 3);
       return application(head, atermpp::make_list(e0, e1, e2));
     }
 
@@ -188,9 +191,9 @@ class application_base: public data_expression
                                         data_expression const& e1,
                                         data_expression const& e2,
                                         data_expression const& e3)
-    {
-      assert(is_function_sort(head.sort()));
-      assert(function_sort(head.sort()).domain().size() == 4);
+    { // See above for the reason to outcomment the asserts below
+      // assert(is_function_sort(head.sort()));
+      // assert(function_sort(head.sort()).domain().size() == 4);
       return application(head, atermpp::make_list(e0, e1, e2, e3));
     }
 

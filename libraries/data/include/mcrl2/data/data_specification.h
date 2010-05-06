@@ -312,6 +312,10 @@ namespace mcrl2 {
           }
         }
 
+        void check_for_alias_loop(
+                 const sort_expression s,
+                 std::set < sort_expression > sorts_already_seen) const;
+
     public:
 
       ///\brief Default constructor. Generate a data specification that contains
@@ -597,6 +601,26 @@ namespace mcrl2 {
       void import_system_defined_sort(sort_expression const&) const;
 
    public:
+
+      /// \brief returns a sort expression that is represented by an alias.
+      /// \details For a sort expression e, it is figured out which sort
+      /// it represents. Concretely: if e is no alias, e is returned. If
+      /// e=f is an alias and f is a basic sort, then the sort expression represented by e is
+      /// returned. If e=C where C is a container sort, function sort or structured sort
+      /// C is returned. The aliases in C are not unfolded.
+
+      sort_expression unalias(const basic_sort &e) const
+      { const ltr_aliases_map::const_iterator i=m_aliases.find(e); 
+        if (i==m_aliases.end())  // Not found
+        {
+          return e;
+        }
+        if (is_basic_sort(i->second))
+        { return unalias(i->second);
+        }
+        // *i is a more complex type;
+        return i->second;
+      }
 
       /// \brief Normalises a sort expression by replacing sorts by a unique representative sort.
       /// \details Sort aliases and structured sorts have as effect that different sort names

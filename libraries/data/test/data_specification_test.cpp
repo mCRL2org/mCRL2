@@ -69,7 +69,7 @@ void test_sorts()
 
   basic_sort s("S");
   basic_sort s0("S0");
-  alias s1(basic_sort("S1"), s);
+  alias s1(s,basic_sort("S1"));
 
   atermpp::set< sort_expression > sl;
   sl.insert(s);
@@ -500,7 +500,7 @@ void test_utility_functionality()
   spec.add_mapping(h);
 
   spec.add_sort(s);
-  spec.add_alias(alias(basic_sort("a"), s));
+  spec.add_alias(alias(s,basic_sort("a")));
 
   data_specification::sorts_const_range sorts (spec.sorts());
   data_specification::constructors_const_range constructors(spec.constructors());

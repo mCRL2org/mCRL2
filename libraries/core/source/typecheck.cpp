@@ -3744,8 +3744,7 @@ namespace mcrl2 {
             }
             ATermAppl NewType=gstcMatchFuncUpdate(Type);
             if(!NewType)
-            { ATfprintf(stderr,"AAAA %t\n",Type);
-              ATfprintf(stderr,"BBBB %t\n",*DataTerm);
+            { 
               gsErrorMsg("function update has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
               return NULL;
             }

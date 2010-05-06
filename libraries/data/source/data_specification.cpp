@@ -170,9 +170,8 @@ namespace mcrl2 {
     /// (positive numbers) are defined. 
     void data_specification::import_system_defined_sort(sort_expression const& sort) const
     { 
-      const sort_expression normalised_sort=normalise_sorts(sort);
       // add sorts, constructors, mappings and equations
-      if (normalised_sort == sort_bool::bool_())
+      if (sort == sort_bool::bool_())
       { // Add bool to the specification 
         add_system_defined_sort(sort_bool::bool_());
 
@@ -183,7 +182,7 @@ namespace mcrl2 {
         data_equation_vector e(sort_bool::bool_generate_equations_code());
         std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
       }
-      else if (normalised_sort == sort_real::real_())
+      else if (sort == sort_real::real_())
       { // Add Real to the specification
         add_system_defined_sort(sort_real::real_());
 
@@ -197,7 +196,7 @@ namespace mcrl2 {
         import_system_defined_sort(sort_int::int_()); // A full definition of Int is required
                                                       // as the rewrite rules of Real rely on it.
       }
-      else if (normalised_sort == sort_int::int_())
+      else if (sort == sort_int::int_())
       { // Add Int to the specification 
         add_system_defined_sort(sort_int::int_()); 
 
@@ -210,7 +209,7 @@ namespace mcrl2 {
 
         import_system_defined_sort(sort_nat::nat());  // See above, Int requires Nat.
       }
-      else if (normalised_sort == sort_nat::nat())
+      else if (sort == sort_nat::nat())
       { // Add Nat to the specification
         add_system_defined_sort(sort_nat::natpair());
         add_system_defined_sort(sort_nat::nat());
@@ -224,7 +223,7 @@ namespace mcrl2 {
 
         import_system_defined_sort(sort_pos::pos());  // See above, Nat requires Pos.
       }
-      else if (normalised_sort == sort_pos::pos())
+      else if (sort == sort_pos::pos())
       { // Add Pos to the specification
         add_system_defined_sort(sort_pos::pos());
 
@@ -320,6 +319,7 @@ namespace mcrl2 {
       {
         insert_mappings_constructors_for_structured_sort(sort);
       }
+      const sort_expression normalised_sort=normalise_sorts(sort);
       add_standard_mappings_and_equations(normalised_sort);
     }
 
@@ -486,112 +486,229 @@ namespace mcrl2 {
                 /*                                       */
                 /*****************************************/
 
+    // The function below checks whether there is an alias loop, e.g. aliases
+    // of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops
+    // through structured sorts are allowed. If a loop is detected, an exception
+    // is thrown. 
+    void data_specification::check_for_alias_loop(
+                 const sort_expression s, 
+                 std::set < sort_expression > sorts_already_seen) const
+    { 
+      if (is_basic_sort(s))
+      { 
+        if (sorts_already_seen.count(s)>0)
+        { 
+          throw mcrl2::runtime_error("Sort alias " + pp(s) + " is defined in terms of itself.");
+        }
+        const ltr_aliases_map::const_iterator i=m_aliases.find(s);
+        if (i!=m_aliases.end())  // s is in m_aliases
+        { 
+          sorts_already_seen.insert(s);
+          check_for_alias_loop(i->second,sorts_already_seen);
+          sorts_already_seen.erase(s);
+        }
+        return;
+      }
+    
+      if (is_container_sort(s))
+      { check_for_alias_loop(container_sort(s).element_sort(),sorts_already_seen);
+        return;
+      }
+      
+      if (is_function_sort(s))
+      { for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(s).domain());
+                  !r.empty(); r.advance_begin(1))
+        { 
+          check_for_alias_loop(r.front(),sorts_already_seen);
+        }
+
+        check_for_alias_loop(function_sort(s).codomain(),sorts_already_seen);
+        return;
+      }
+      
+      assert(is_structured_sort(s)); // In this case we do not need to carry out a check.
+
+    }
+    
+    // This function returns the normal form of e, under the two maps map1 and map2.
+    // This normal form is obtained by repeatedly applying map1 and map2, until this
+    // is not possible anymore. It is assumed that this procedure terminates. There is
+    // no check for loops. 
+    static basic_sort find_normal_form(
+                    const basic_sort &e, 
+                    const atermpp::multimap< sort_expression, basic_sort >  &map1,
+                    const atermpp::multimap< sort_expression, basic_sort >  &map2,
+#ifndef NDEBUG
+                    std::set < basic_sort > sorts_already_seen = std::set < basic_sort >()
+#endif
+      )
+    { 
+      assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
+      const atermpp::multimap< sort_expression, basic_sort >::const_iterator i1=map1.find(e);
+      if (i1!=map1.end()) // found
+      { 
+#ifndef NDEBUG
+        sorts_already_seen.insert(i1->second);
+#endif
+        return find_normal_form(i1->second,map1,map2
+#ifndef NDEBUG
+                               ,sorts_already_seen
+#endif
+                               );
+      }
+      const atermpp::multimap< sort_expression, basic_sort >::const_iterator i2=map2.find(e);
+      if (i2!=map2.end()) // found
+      { 
+#ifndef NDEBUG
+        sorts_already_seen.insert(i2->second);
+#endif
+        return find_normal_form(i2->second,map1,map2
+#ifndef NDEBUG
+                               ,sorts_already_seen
+#endif
+                               );
+      }
+      return e;
+    }
+
+    // The function below recalculates m_normalised_aliases, such that 
+    // it forms a confluent terminating rewriting system using which
+    // sorts can be normalised. 
     void data_specification::reconstruct_m_normalised_aliases() const
     { 
-     // First reset the normalised aliases and the mappings and constructors that have been
-     // inherited to basic sort aliases during a previous round of sort normalisation.
-     m_normalised_aliases.clear(); 
+      // First reset the normalised aliases and the mappings and constructors that have been
+      // inherited to basic sort aliases during a previous round of sort normalisation.
+      m_normalised_aliases.clear(); 
 
-     // Copy m_normalised_aliases. Simple aliases are stored from left to 
-     // right. If the right hand side is possibly recursive, which is only a struct, as
-     // well as structured sorts, the alias is stored from right to left.
-     // In case of function sorts, this is not done, because the toolset checks
-     // that function have function sorts, and uses the arity of such functions.
-     // E.g. If one defines sort S=A->B; then it is not possible to recognize
-     // from sort S that it actually represents a function of arity 1.
-     for(ltr_aliases_map::const_iterator i=m_aliases.begin();
-               i!=m_aliases.end(); ++i)
-     { assert(m_normalised_aliases.count(i->first)==0); // sort aliases have a unique left hand side.
-       if (is_structured_sort(i->second) ||
-          //  is_function_sort(i->second) ||
-           is_container_sort(i->second))
-       { // We deal here with a declaration of the shape sort A=Struct
-         // Rewrite every occurrence of Struct to A. Suppose that there are
-         // two declarations of the shape sort A=Struct; B=Struct then
-         // ComplexType is rewritten to A and B is also rewritten to A.
-         const atermpp::map< sort_expression, sort_expression >::const_iterator j=m_normalised_aliases.find(i->second);
-         if (j!=m_normalised_aliases.end())
-         { m_normalised_aliases[i->first]=j->second;
-         }
-         else 
-         { m_normalised_aliases[i->second]=i->first;
-         }
-       }
-       else
-       { // We are dealing with a sort declaration of the shape sort A=B, 
-         // where B is a basic sort, or a function sort
-         // Every occurrence of sort A is normalised to sort B.
-         assert(is_basic_sort(i->first)&&(is_basic_sort(i->second)||is_function_sort(i->second)));
-         m_normalised_aliases[i->first]=i->second;
-       }
-     }
+      // Check for loops in the aliases. The type checker should already have done this,
+      // but we check it again here.
+      for(ltr_aliases_map::const_iterator i=m_aliases.begin();
+                i!=m_aliases.end(); ++i)
+      { 
+        std::set < sort_expression > sorts_already_seen; // Empty set.
+        check_for_alias_loop(i->first,sorts_already_seen); 
+      }
 
-     // Close the mapping m_normalised_aliases under itself. If a rewriting
-     // loop is detected, throw a runtime error.
+      // Copy m_normalised_aliases. All aliases are stored from right to left,
+      // assuming that the alias is introduced with a reason. 
+      atermpp::multimap< sort_expression, basic_sort > sort_aliases_to_be_investigated;
+      for(ltr_aliases_map::const_iterator i=m_aliases.begin();
+                i!=m_aliases.end(); ++i)
+      { 
+        sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort>(i->second,i->first));
+      }
 
-     for(atermpp::map< sort_expression, sort_expression >::iterator i=m_normalised_aliases.begin();
-              i!=m_normalised_aliases.end(); i++)
-     { std::set < sort_expression > sort_already_seen;
-       sort_expression result_sort=i->second;
+      // Apply Knuth-Bendix completion on the rules in m_normalised_aliases.
 
-       std::set< sort_expression > all_sorts;
-       if (is_container_sort(i->first) || is_function_sort(i->first))
-       { find_sort_expressions(i->first, std::inserter(all_sorts, all_sorts.end()));
-       }
-       while (m_normalised_aliases.count(result_sort)>0)
-       { sort_already_seen.insert(result_sort);
-         result_sort= m_normalised_aliases.find(result_sort)->second;
-         if (sort_already_seen.count(result_sort))
-         { throw mcrl2::runtime_error("Sort alias " + pp(result_sort) + " is defined in terms of itself.");
-         }
+      atermpp::multimap< sort_expression, basic_sort > resulting_normalized_sort_aliases;
 
-         for (std::set< sort_expression >::const_iterator j = all_sorts.begin(); j != all_sorts.end(); ++j)
-         { if (*j==result_sort)
-           { throw mcrl2::runtime_error("Sort alias " + pp(i->first) + " depends on sort" +
-                                           pp(result_sort) + ", which is circularly defined.\n");
-           }
-         }
-       }
-       // So the normalised sort of i->first is result_sort. 
-       i->second=result_sort;
-     }
+      for( ; !sort_aliases_to_be_investigated.empty() ; )
+      { 
+        const atermpp::multimap< sort_expression, basic_sort >::iterator p=sort_aliases_to_be_investigated.begin();
+        sort_aliases_to_be_investigated.erase(p);
+        const sort_expression lhs=p->first;
+        const sort_expression rhs=p->second;
+     
+        for(atermpp::multimap< sort_expression, basic_sort >::const_iterator 
+                 i=resulting_normalized_sort_aliases.begin();
+                 i!=resulting_normalized_sort_aliases.end(); ++i)
+        { 
+          const sort_expression s1=replace(lhs,i->first,i->second);
+          if (s1!=lhs)
+          { 
+            assert(is_basic_sort(rhs));
+            const basic_sort e1=find_normal_form(rhs,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
+            if (e1!=s1)
+            {
+              sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort > (s1,e1));
+            }
+          }
+          else 
+          { 
+            const sort_expression s2=replace(i->first,lhs,rhs);
+            if (s2!=i->first)
+            { 
+              assert(is_basic_sort(i->second));
+              const basic_sort e2=find_normal_form(i->second,resulting_normalized_sort_aliases,
+                                                             sort_aliases_to_be_investigated);
+              if (e2!=s2)
+              { 
+                sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort > (s2,e2));
+              }
+            } 
+          }
+        }
+        assert(lhs!=rhs);
+        resulting_normalized_sort_aliases.insert(std::pair<sort_expression,basic_sort >(lhs,rhs));
+
+      }
+      // Copy resulting_normalized_sort_aliases into m_normalised_aliases, i.e. from multimap to map.
+      // If there are rules with equal left hand side, only one is arbitrarily chosen.
+      
+      for(atermpp::multimap< sort_expression, basic_sort >::const_iterator 
+                 i=resulting_normalized_sort_aliases.begin();
+                 i!=resulting_normalized_sort_aliases.end(); ++i)
+      { 
+        m_normalised_aliases.insert(*i);
+        assert(i->first!=i->second);
+      }
     }
 
     sort_expression data_specification::normalise_sorts_helper(const sort_expression & e) const
-    { // Check whether e has already a normalised sort
-      // If yes return it.
-      const atermpp::map< sort_expression, sort_expression >::const_iterator i=m_normalised_aliases.find(e);
-      if (i!=m_normalised_aliases.end())
-      { 
-        return i->second;
-      }
+    { // This routine takes the map m_normalised_aliases which contains pairs of sort expressions
+      // <A,B> and takes all these pairs as rewrite rules, which are applied to e using an innermost
+      // strategy.
 
+      sort_expression new_sort; // This will be a placeholder for the sort of which all
+                                // arguments will be normalised.
       if (is_basic_sort(e))
-      { // Apparently, e is already a normalised sort.
-        return e;
+      { 
+        new_sort=e;
       }
       else if (is_function_sort(e))
-      { 
+      { // Rewrite the arguments into normal form.
         atermpp::vector< sort_expression > new_domain;
         for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(e).domain());
                   !r.empty(); r.advance_begin(1))
         { new_domain.push_back(normalise_sorts_helper(r.front()));
         }
-        return function_sort(new_domain, normalise_sorts_helper(function_sort(e).codomain()));
+        new_sort=function_sort(new_domain, normalise_sorts_helper(function_sort(e).codomain()));
       }
       else if (is_container_sort(e))
-      { return container_sort(container_sort(e).container_name(), normalise_sorts_helper(container_sort(e).element_sort()));
+      { // Rewrite the argument of the container sort to normal form.
+        new_sort=container_sort(
+                          container_sort(e).container_name(), 
+                          normalise_sorts_helper(container_sort(e).element_sort()));
+        
       }
       else if (is_structured_sort(e))
-      { atermpp::vector< structured_sort_constructor > new_constructors;
-        for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
-        { atermpp::vector< structured_sort_constructor_argument > new_arguments;
-          for (structured_sort_constructor::arguments_const_range ra(r.front().arguments()); !ra.empty(); ra.advance_begin(1))
-          { new_arguments.push_back(structured_sort_constructor_argument(normalise_sorts_helper(ra.front().sort()), ra.front().name()));
+      { // Rewrite the argument sorts to normal form.
+        atermpp::vector< structured_sort_constructor > new_constructors;
+        for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); 
+                        !r.empty(); r.advance_begin(1))
+        { 
+          atermpp::vector< structured_sort_constructor_argument > new_arguments;
+          for (structured_sort_constructor::arguments_const_range ra(r.front().arguments()); 
+                    !ra.empty(); ra.advance_begin(1))
+          { 
+            new_arguments.push_back(structured_sort_constructor_argument(
+                         normalise_sorts_helper(ra.front().sort()), ra.front().name()));
           }
           new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
         }
-        return structured_sort(new_constructors);
+        new_sort=structured_sort(new_constructors);
+      }
+
+      // The arguments of new_sort are now in normal form.
+      // Rewrite it to normal form.
+      const atermpp::map< sort_expression, sort_expression >::const_iterator i=m_normalised_aliases.find(new_sort);
+      if (i==m_normalised_aliases.end())
+      {
+        return new_sort; // e is a normal form.
+      }
+      else
+      {
+        return normalise_sorts_helper(i->second); // rewrite the result until normal form.
       }
       return e;
     } 

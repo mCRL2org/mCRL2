@@ -24,20 +24,20 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 
 template < typename Rewriter >
-void representation_check(Rewriter& R, data_expression const& input, data_expression const& expected) {
-  data_expression output(R(input));
+void representation_check(Rewriter& R, data_expression const& input, data_expression const& expected, const data_specification &spec) {
+  data_expression output(R(spec.normalise_sorts(input)));
 
-  BOOST_CHECK(expected == output);
+  BOOST_CHECK(spec.normalise_sorts(expected) == output);
 
-  if (output != expected) {
+  if (output != spec.normalise_sorts(expected)) {
     std::clog << "--- test failed --- " << core::pp(input) << " ->* " << core::pp(expected) << std::endl
               << "input    " << core::pp(input) << std::endl
               << "expected " << core::pp(expected) << std::endl
               << "R(input) " << core::pp(output) << std::endl
               << " -- term representations -- " << std::endl
               << "input    " << input << std::endl
-              << "expected " << expected<< std::endl
-              << "R(input) " << output << std::endl;
+              << "expected " << spec.normalise_sorts(expected)<< std::endl
+              << "R(input) " << spec.normalise_sorts(output) << std::endl;
   }
 }
 
@@ -89,21 +89,21 @@ void number_test() {
 
   mcrl2::data::rewriter R(specification);
 
-  representation_check(R, number(sort_pos::pos(), "1"), sort_pos::c1());
-  representation_check(R, number(sort_nat::nat(), "1"), R(pos2nat(sort_pos::c1())));
-  representation_check(R, number(sort_int::int_(), "-1"), R(cneg(sort_pos::c1())));
-  representation_check(R, number(sort_real::real_(), "1"), R(pos2real(sort_pos::c1())));
+  representation_check(R, number(sort_pos::pos(), "1"), sort_pos::c1(),specification);
+  representation_check(R, number(sort_nat::nat(), "1"), R(specification.normalise_sorts(pos2nat(sort_pos::c1()))),specification);
+  representation_check(R, number(sort_int::int_(), "-1"), R(cneg(sort_pos::c1())),specification);
+  representation_check(R, specification.normalise_sorts(number(sort_real::real_(), "1")), R(specification.normalise_sorts(pos2real(sort_pos::c1()))),specification);
 
-  representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))));
-  representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))));
-  representation_check(R, nat("18"), R(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1())))))));
-  representation_check(R, nat(12), R(pos2nat(cdub(false_(), cdub(false_(), cdub(true_(), c1()))))));
-  representation_check(R, int_("0"), R(nat2int(c0())));
-  representation_check(R, int_("-1"), cneg(c1()));
-  representation_check(R, int_(-2), cneg(cdub(false_(), c1())));
-  representation_check(R, real_("0"), R(nat2real(c0())));
-  representation_check(R, real_("-1"), R(int2real(cneg(c1()))));
-  representation_check(R, real_(-2), R(int2real(cneg(cdub(false_(), c1())))));
+  representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))),specification);
+  representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))),specification);
+  representation_check(R, nat("18"), R(specification.normalise_sorts(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1()))))))),specification);
+  representation_check(R, nat(12), R(specification.normalise_sorts(pos2nat(cdub(false_(), cdub(false_(), cdub(true_(), c1())))))),specification);
+  representation_check(R, int_("0"), R(nat2int(c0())),specification);
+  representation_check(R, int_("-1"), cneg(c1()),specification);
+  representation_check(R, int_(-2), cneg(cdub(false_(), c1())),specification);
+  representation_check(R, real_("0"), R(specification.normalise_sorts(nat2real(c0()))),specification);
+  representation_check(R, real_("-1"), R(specification.normalise_sorts(int2real(cneg(c1())))),specification);
+  representation_check(R, real_(-2), R(specification.normalise_sorts(int2real(cneg(cdub(false_(), c1()))))),specification);
 
 }
 
@@ -124,7 +124,7 @@ void list_construction_test() {
 
   representation_check(R, sort_list::list(bool_(), boost::make_iterator_range(expressions)),
                        R(cons_(bool_(), expressions[0], cons_(bool_(), expressions[1],
-                             cons_(bool_(), expressions[2], cons_(bool_(), expressions[3], nil(bool_())))))));
+                             cons_(bool_(), expressions[2], cons_(bool_(), expressions[3], nil(bool_())))))),specification);
 }
 
 void convert_test() {
