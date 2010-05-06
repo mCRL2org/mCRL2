@@ -599,7 +599,7 @@ namespace mcrl2 {
       ///\brief Adds the system defined sorts in a sequence.
       ///       The second argument is used to check which sorts are added, to prevent
       ///       useless repetitions of additions of sorts.
-      void data_specification::import_system_defined_sort(
+      void import_system_defined_sort(
                                       sort_expression const& sort,
                                       std::set <sort_expression> &sorts_already_added_to_m_normalised_sorts) const;
 
