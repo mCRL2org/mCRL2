@@ -854,6 +854,8 @@ include(CTest)
 ##--------------------------------------------------- 
 option(MCRL2_TRYCOMPILE_HEADER_TESTS "Enable/disable try_compile of library headers" OFF)
 message(STATUS "MCRL2_TRYCOMPILE_HEADER_TESTS: ${MCRL2_TRYCOMPILE_HEADER_TESTS}" )
+set(MCRL2_HEADER_TESTS_OUTPUT CACHE FILEPATH "FilePath to store header test results (Empty for stdout)." )
+message(STATUS "MCRL2_HEADER_TESTS_OUTPUT: ${MCRL2_HEADER_TESTS_OUTPUT}" )
 include( scripts/HeaderTests.cmake )
 
 ##---------------------------------------------------

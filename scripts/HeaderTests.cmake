@@ -17,12 +17,13 @@
 
 if(MCRL2_TRYCOMPILE_HEADER_TESTS)
 
-SET(MRCL2_HEADERTESTS_LOG ${CMAKE_BINARY_DIR}/header_test.log )
+if( NOT MCRL2_HEADER_TESTS_OUTPUT STREQUAL "" )
+  SET(MRCL2_HEADERTESTS_LOG ${MCRL2_HEADER_TESTS_OUTPUT} )
+  file(REMOVE ${MRCL2_HEADERTESTS_LOG} )
+endif( NOT MCRL2_HEADER_TESTS_OUTPUT STREQUAL "" )
 
 SET(MCRL2_HEADERTEST_DIR "${CMAKE_BINARY_DIR}/Testing" )
 file(GLOB_RECURSE TERM_OBJS "libraries/*.h")
-
-file(REMOVE ${MRCL2_HEADERTESTS_LOG} )
 
 set(MRCL2_HEADERTESTS_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/
@@ -66,7 +67,19 @@ foreach( OBJ ${TERM_OBJS} )
   MESSAGE( STATUS "TryCompile: ${OBJ} - ${RESULT_VAR} ")
 
   if( NOT RESULT_VAR )
-    file(APPEND ${MRCL2_HEADERTESTS_LOG} "${OBJ} ${var}" )
+    if( NOT MCRL2_HEADER_TESTS_OUTPUT STREQUAL "" )
+      file(APPEND ${MRCL2_HEADERTESTS_LOG} "=============================================\n")
+      file(APPEND ${MRCL2_HEADERTESTS_LOG}  "TryCompile: ${OBJ} - ${RESULT_VAR} \n")
+      file(APPEND ${MRCL2_HEADERTESTS_LOG} "---------------------------------------------\n")
+      file(APPEND ${MRCL2_HEADERTESTS_LOG} "${OBJ}\n${var}\n" )
+      file(APPEND ${MRCL2_HEADERTESTS_LOG} "=============================================\n\n")
+    else( NOT MCRL2_HEADER_TESTS_OUTPUT STREQUAL "" )
+      message(${MRCL2_HEADERTESTS_LOG} "=============================================")
+      message(${MRCL2_HEADERTESTS_LOG}  "TryCompile: ${OBJ} - ${RESULT_VAR} ")
+      message(${MRCL2_HEADERTESTS_LOG} "---------------------------------------------")
+      message(${MRCL2_HEADERTESTS_LOG} "${OBJ}\n${var}\n" )
+      message(${MRCL2_HEADERTESTS_LOG} "=============================================\n")
+    endif( NOT MCRL2_HEADER_TESTS_OUTPUT STREQUAL "" )
   endif( NOT RESULT_VAR )
 
 endforeach( OBJ )    
