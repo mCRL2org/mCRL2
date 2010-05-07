@@ -151,11 +151,20 @@ to $a_{i+1}$. This loop came into existence by adding some rewrite rule $a=a'$ a
 some moment in time, where $a'$ was not a normal form. But this cannot happen,
 because by construction $a'$ is a normal form.
 
+After constructing the normal forms, the content of ${\it m\_normalised\_sort\_aliases}$
+is copied into {\it m\_normalised\_aliases}, where every right hand side is normalised,
+to speed up rewriting when applied to concrete sorts.
+
 Normalisation of concrete sorts is now very simple. Every sort which equals a
 left hand side of a sort alias is replaced by the right hand side. This is repeated
 until no such substitution can be applied. This can be done using a simple 
 innermost rewriting procedure. This rewriter has been implemented in 
-{\it normalise\_sorts\_helper}.
+{\it normalise\_sorts\_helper}. Actually, because very often the same sorts must
+be rewritten, for every sort $t$ that is rewritten to a sort $u$, a rewrite
+rule $t=u$  is added to {\it m\_normalised\_aliases}. As we know that {\it m\_normalised\_aliases}
+only contains normal forms at the right hand side, it allows to first see
+whether {\it m\_normalised\_aliases} defines a normal form for a term, before starting
+with relatively time consuming innermost rewriting.
 
 As a side note, we mention that after sort normalisation, it is not possible
 anymore to recognize the structure of a sort by direct investigation. With the following
