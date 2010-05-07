@@ -46,7 +46,7 @@ namespace detail {
       {
       	return false;
       }
-      if (type != "*" && data::parse_sort_expression(type) != d.sort())
+      if (type != "*" && data::parse_sort_expression(type, data_spec) != d.sort())
       {
       	return false;
       }

@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
+#include "mcrl2/pbes/detail/pbes2bes_variable_map_parser.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -461,6 +462,21 @@ void test_pbes2bes_finite()
   pbes<> p = txt2pbes(random3);
   pbes<> q = pbes2bes_finite(p);
   std::cerr << pbes_system::pp(q) << std::endl;
+
+  std::string text =
+    "sort D = struct d1 | d2;                                        \n"
+    "                                                                \n"
+    "pbes                                                            \n"
+    "                                                                \n"
+    "nu X(d:D) = (val(d == d1) && X(d2)) || (val(d == d2) && X(d1)); \n"
+    "                                                                \n"
+    "init X(d1);                                                     \n"
+    ;
+  unsigned int log_level = 2;
+  pbes<> p1 = txt2pbes(text);
+  pbes2bes_finite_algorithm algorithm(data::rewriter::jitty, log_level);
+  pbes2bes_variable_map variable_map = detail::parse_variable_map(p1, "X(*:D)");
+  algorithm.run(p1, variable_map);        
 }
 
 int test_main(int argc, char** argv)
