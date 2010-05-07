@@ -562,7 +562,7 @@ namespace mcrl2 {
       if (i1!=map1.end()) // found
       { 
 #ifndef NDEBUG
-        sorts_already_seen.insert(i1->second);
+        sorts_already_seen.insert(e);
 #endif
         return find_normal_form(i1->second,map1,map2
 #ifndef NDEBUG
@@ -574,7 +574,7 @@ namespace mcrl2 {
       if (i2!=map2.end()) // found
       { 
 #ifndef NDEBUG
-        sorts_already_seen.insert(i2->second);
+        sorts_already_seen.insert(e);
 #endif
         return find_normal_form(i2->second,map1,map2
 #ifndef NDEBUG
