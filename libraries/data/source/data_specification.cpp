@@ -604,12 +604,21 @@ namespace mcrl2 {
       }
 
       // Copy m_normalised_aliases. All aliases are stored from right to left,
-      // assuming that the alias is introduced with a reason. 
+      // assuming that the alias is introduced with a reason. There is one
+      // exception, aliases for Bool, Pos, Nat, Int and Real are stored from left to right.
       atermpp::multimap< sort_expression, basic_sort > sort_aliases_to_be_investigated;
       for(ltr_aliases_map::const_iterator i=m_aliases.begin();
                 i!=m_aliases.end(); ++i)
-      { 
-        sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort>(i->second,i->first));
+      { if (i->second==sort_bool::bool_() ||
+            i->second==sort_pos::pos() ||
+            i->second==sort_nat::nat() ||
+            i->second==sort_int::int_() ||
+            i->second==sort_real::real_())
+        { sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort>(i->first,i->second));
+        }
+        else
+        { sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort>(i->second,i->first));
+        }
       }
 
       // Apply Knuth-Bendix completion on the rules in m_normalised_aliases.
