@@ -461,7 +461,6 @@ void test_pbes2bes_finite()
   pbes<> p = txt2pbes(random3);
   pbes<> q = pbes2bes_finite(p);
   std::cerr << pbes_system::pp(q) << std::endl;
-  BOOST_CHECK(false);
 }
 
 int test_main(int argc, char** argv)
