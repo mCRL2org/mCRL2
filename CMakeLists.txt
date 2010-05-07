@@ -755,13 +755,13 @@ install(
 ## Make tests 
 ##--------------------------------------------------- 
 
-option(ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
-message(STATUS "ENABLE_TEST_TARGETS: ${ENABLE_TEST_TARGETS}" )
+option(MCRL2_ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
+message(STATUS "MCRL2_ENABLE_TEST_TARGETS: ${MCRL2_ENABLE_TEST_TARGETS}" )
 
 ENABLE_TESTING()
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/CTestCustom.cmake" )
 
-if( ENABLE_TEST_TARGETS )
+if( MCRL2_ENABLE_TEST_TARGETS )
    add_subdirectory( libraries/lps/test)
    add_subdirectory( libraries/pbes/test)
    add_subdirectory( libraries/lts/test)
@@ -773,7 +773,7 @@ if( ENABLE_TEST_TARGETS )
    add_subdirectory( libraries/trace/test )
    add_subdirectory( tools/lpsparunfold/test )
    add_subdirectory( tools/squadt/libraries/tipi/test )
-endif( ENABLE_TEST_TARGETS )
+endif( MCRL2_ENABLE_TEST_TARGETS )
 
 ##---------------------------------------
 ## Tool tests
