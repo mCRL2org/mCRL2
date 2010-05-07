@@ -10,7 +10,7 @@ expression. Typical examples are (expressed in MCRL2):
 
 Sort aliases are used to give alternative names or shorthands for existing
 sorts. Moreover, they allow to define recursive structured sorts. Note that
-at the left of a sort alias there is a `basic_ sort`, and at the right there
+at the left of a sort alias there is a `basic_sort`, and at the right there
 is a `sort_expression`.
 
 An alias is declared as follows:
@@ -36,29 +36,37 @@ Nat denote the same sort. So, the variables x:Time and x:Nat are the
 same object. It is time consuming to continuously calculate whether sorts are 
 the same, which is undesirable if it comes to verification. Therefore, we
 require that all sorts in expressions that are equal modulo sort aliases
-are represented by a unique sort expression. More concretely, for every
-sort expression 
+are represented by a unique sort expression. This process is called sort
+normalisation. Note that sort normalisation is dependent on a particular
+specification; the sorts in one expression can be normalised differently
+for two different data specifications.  
+
+More concretely, for a sort alias
 
     sort A=B;
 
-where B is a basic sort or a function sort, the unique sort is represented by B, whereas for
-each alias with a structured sort, or a sort container (List, Bag, Set) 
-in its right hand side, the unique sort is represented by
-its left hand side. In case there are more aliases referring to the same sort, as in the
+sort A and B are equal. Sort normalisation will rewrite each sort B to A, except
+if B is a Bool, Pos, Nat, Int or Real.  
+In case there are more aliases referring to the same sort, as in the
 example below there are more options for the unique sort.
 
     sort A1=List(B);
          A2=List(B);
 
-In this case either A1, or A2 is chosen as the representant.
-The process that is used to replace all sorts by their
-unique representation is called sort normalisation. When sort aliases are added to
-a data specification, all objects in that specification are automatically 
-normalised with respect to this alias, i.e. this means that every sort is
-replaced by its unique representant. 
+In this case either A1, or A2 is chosen as the representation for List(B).
 
-However, this is not automatically the case for objects outside the data specification.
-These must be normalized explicitly. Normalisation functions exist for all types
+Sort normalisation takes place automatically inside a data specification.
+Functions, sorts, equations, etc. that are added using for instance
+add_equation are automatically normalised. Aliases that
+are added are also automatically applied to all elements in the data type.
+If the elements of a data type are requested, e.g. the sorts, constructors,
+mappings and equations of a data type, then these are provided with 
+normalised sorts. The functions user_defined_aliases, user_defined_sorts, etc.
+are provided to extract the aliases, sorts, mappings, constructors and equations
+in exactly the form they were added to the specification using the add_.... functions.
+
+However, objects outside the data specification are not automatically normalised.
+These must be normalized explicitly. Normalisation functions, normalise_sort, exist for all types
 that derive from terms, such as data_expressions, assignments, sort_expressions, data_equations, etc.,
 as well as for lists of these types.
 
@@ -90,5 +98,13 @@ as well as for lists of these types.
       { std::cout << "Function symbol " << pp(*i) << " has sort " << pp(i->sort()) << "\n";
       }
     }
+
+Given a particular sort, it is sometimes useful to find the sort it represents. E.g.
+suppose that sort F is defined by F=A->B. Then from sort F alone it cannot be seen
+that F is actually a function sort. The function unalias yields the structure of an 
+alias. So, in this particular case data_spec.unalias(F) yields A->B. As aliases may be
+recursive, as in sort E=struct nil | insert(Nat,E), unalias will only unfold an alias
+until it cannot be unfolded further, or until a type with a type constructing operator
+occurs. 
 
 [endsect] [/ Sort aliases and sort normalisation]

@@ -105,11 +105,15 @@ First, the set of aliases is checked for recursive definitions
 in all sorts except the structured sorts. This can be done using 
 a simple depth first algorithm.
  
-Second, the set of aliases is stored from left to
-right in a map $\it sort\_aliases\_to\_be\_investigated$.
+Second, the set of aliases is stored from right to
+left in a map $\it sort\_aliases\_to\_be\_investigated$.
 So, if $A=B$ is declared, then ${\it sort\_aliases\_to\_be\_investigated}(B)=A$.
 The name of this map uses the word `{\it investigated}' because it
 must be investigated whether these rewrite rules are confluent.
+There is one exception, namely, if in an alias $A=B$ the sort $B$ equals
+$\Bool$, $\Pos$, $\Nat$, $\Int$ or $\Real$ the rule is stored from left
+to right. This has as a consequence that the basic sorts cannot
+be normalized to other sorts.
 
 As a third step the sort aliases are taken as rewrite rules, and 
 a form of Knuth-Bendix completion is applied to them, to transform them
