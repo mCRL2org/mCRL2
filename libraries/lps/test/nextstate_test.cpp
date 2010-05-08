@@ -24,6 +24,20 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
+std::string print_state(atermpp::aterm_appl s, legacy_rewriter& R)
+{
+  std::string result("state(");
+  int index = 0;
+  for(atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
+  {
+    if(index++ != 0) { result.append(", "); }
+
+    result.append(core::pp(atermpp::aterm(R.translate(static_cast<ATerm>(*i)))));
+  }
+  result.append(")");
+  return result;
+}
+
 void test_nextstate(specification s, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels, bool per_summand = false)
 {
   s.process().deadlock_summands().clear(); // It is important to clear the deadlock summands if per_summand = false
@@ -99,9 +113,6 @@ void test_nextstate(specification s, size_t expected_states, size_t expected_tra
   BOOST_CHECK(seen.size() == expected_states);
   BOOST_CHECK(transitions == expected_transitions);
   BOOST_CHECK(transition_labels.size() == expected_transition_labels);
-
-  std::cerr << "Seen " << seen.size() << " states and " << transitions << " transitions, with " << transition_labels.size() << " labels" << std::endl;
-  std::cerr << "Expected " << expected_states << " states and " << expected_transitions << " transitions, with " << expected_transition_labels << " labels" << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(single_state_test)

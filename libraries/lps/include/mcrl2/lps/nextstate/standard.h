@@ -213,15 +213,12 @@ namespace mcrl2 {
       // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
       template < >
       inline
-      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
                   legacy_rewriter, legacy_selector >::increment() {
 
         ATermList assignment_list;
 
         while (m_generator.next(&assignment_list)) {
-          /*if (m_generator.errorOccurred()) {
-            throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
-          }*/
 
           for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                              i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
@@ -233,16 +230,16 @@ namespace mcrl2 {
           }
         }
 
+
         return false;
       }
 
       // Specialisation of classic_enumerator_impl to circumvent data implementation trick
       template < >
       template < typename Container >
-      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
                   legacy_rewriter, legacy_selector >::initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type*) 
-      { // assert(0);
-
+      { 
         m_shared_context->m_enumerator.findSolutions(atermpp::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
 
         return increment();
@@ -280,7 +277,7 @@ struct ns_info
 
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator<
-      mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
+      mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
       legacy_rewriter, legacy_selector > enumerator_type;
 
   typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
@@ -304,11 +301,13 @@ struct ns_info
     return m_enumerator_factory->make(v, c);
   }
 
-  ATermAppl export_term(ATerm term) {
+  ATermAppl export_term(ATerm term) const
+  {
     return m_rewriter.translate(term);
   }
 
-  ATerm import_term(ATermAppl term) {
+  ATerm import_term(ATermAppl term) const
+  {
     return m_rewriter.translate(term);
   }
 
@@ -327,7 +326,7 @@ struct ns_info
 class NextStateGeneratorStandard : public NextStateGenerator
 {
   public:
-    NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand = false);
+    NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand = false, int SingleSummandIndex = 0);
     ~NextStateGeneratorStandard();
 
     bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
@@ -353,7 +352,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
     ATerm *stateargs;
 
-                ns_info::enumerator_type valuations;
+    ns_info::enumerator_type valuations;
 
     void set_substitutions();
 
