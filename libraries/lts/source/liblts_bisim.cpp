@@ -33,7 +33,8 @@ namespace detail
   { assert( branching || !preserve_divergence); 
     if (core::gsVerbose)
     { std::cerr << (preserve_divergence?"Divergence preserving b)":"B") <<
-                   (branching?"ranching b":"") << "isimulation partitioner created for " << l.num_states() << " states and " << 
+                   (branching?"ranching b":"") << "isimulation partitioner created for " 
+                          << l.num_states() << " states and " << 
              l.num_transitions() << " transitions\n";
     }
     create_initial_partition(branching,preserve_divergence);
@@ -134,11 +135,12 @@ namespace detail
 
   // Put the labelled transition system into the basic data structure for the
   // bisimulation algorithm where all states are put in one block.
-  void bisim_partitioner::create_initial_partition(const bool branching, const bool preserve_divergences)
+  void bisim_partitioner::create_initial_partition(const bool branching, 
+                                                   const bool preserve_divergences)
   { 
     blocks.reserve(aut.num_states()); // Reserving blocks is done to avoid
-                                      // messing around with blocks in memory.
-                                      // This can be very time consuming, esp. for lists.
+                                      // messing around with blocks in memory,
+                                      // which can be very time consuming.
     to_be_processed.clear();
     
     block initial_partition;
@@ -151,7 +153,8 @@ namespace detail
     bool bottom_state=true;
     std::vector < state_type > current_inert_transitions;
     for( ; i.more(); ++i)
-    { if (branching && aut.is_tau(i.label()))
+    { 
+      if (branching && aut.is_tau(i.label()))
       { if (preserve_divergences && i.from()==i.to()) 
         { 
           initial_partition.non_inert_transitions.push_back(transition(i.from(),tau_label,i.to()));
@@ -572,61 +575,65 @@ namespace detail
   }
 
 #endif // not NDEBUG
-} // namespace detail
-
-  void lts::bisimulation_reduce(const bool branching /*=false */,
-                                const bool preserve_divergences /*=false */)
+  void bisimulation_reduce(lts &l,
+                           const bool branching /*=false */,
+                           const bool preserve_divergences /*=false */)
   { // First remove tau loops in case of branching bisimulation.
     if (branching)
-    { detail::scc_partitioner scc_part(*this);
+    { 
+      detail::scc_partitioner scc_part(l);
       scc_part.replace_transitions(preserve_divergences);
-      nstates=scc_part.num_eq_classes();
-      init_state = scc_part.get_eq_class(init_state);
+      l.set_num_states(scc_part.num_eq_classes());
+      l.set_initial_state(scc_part.get_eq_class(l.initial_state()));
     }
 
     // Second apply the branching bisimulation reduction algorithm. If there are no tau's,
     // this will automatically yield strong bisimulation.
-    
-    detail::bisim_partitioner bisim_part(*this, branching, preserve_divergences);
+    detail::bisim_partitioner bisim_part(l, branching, preserve_divergences);
   
-    // Clear this LTS, but keep the labels
-    clear_type();
-    clear_states();
+    // Clear LTS l, but keep the labels
+    l.clear_type();
+    l.clear_states();
     
     // Assign the reduced LTS
-    nstates = bisim_part.num_eq_classes();
-    init_state = bisim_part.get_eq_class(init_state);
+    l.set_num_states(bisim_part.num_eq_classes());
+    l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
     bisim_part.replace_transitions(branching,preserve_divergences);
   }
   
-  bool lts::bisimulation_compare(
-              const lts &l, 
-              const bool branching /* =false*/, 
-              const bool preserve_divergences /*=false*/) const
-  { lts this_copy(*this);
-    lts l_copy(l);
-    return this_copy.destructive_bisimulation_compare(l_copy,branching,preserve_divergences);
-  }
-
-  bool lts::destructive_bisimulation_compare(
-              lts &l, 
+  bool bisimulation_compare(
+              const lts &l1,
+              const lts &l2, 
               const bool branching /* =false*/, 
               const bool preserve_divergences /*=false*/)
-  { unsigned int init_l = l.initial_state() + nstates;
-    merge(&l);
-    l.clear(); // No use for l anymore.
+  { lts l1_copy(l1);
+    lts l2_copy(l2);
+    return destructive_bisimulation_compare(l1_copy,l2_copy,branching,preserve_divergences);
+  }
+
+  bool destructive_bisimulation_compare(
+              lts &l1, 
+              lts &l2,
+              const bool branching /* =false*/, 
+              const bool preserve_divergences /*=false*/)
+  { unsigned int init_l2 = l2.initial_state() + l1.num_states();
+    l1.merge(l2);
+    
+    l2.clear(); // No use for l2 anymore.
 
     // First remove tau loops in case of branching bisimulation.
     if (branching)
-    { detail::scc_partitioner scc_part(*this);
+    { detail::scc_partitioner scc_part(l1);
       scc_part.replace_transitions(preserve_divergences);
-      nstates=scc_part.num_eq_classes();
-      init_state = scc_part.get_eq_class(init_state);
-      init_l = scc_part.get_eq_class(init_l);
+      l1.set_num_states(scc_part.num_eq_classes());
+      l1.set_initial_state(scc_part.get_eq_class(l1.initial_state()));
+      init_l2 = scc_part.get_eq_class(init_l2);
     }
     
-    detail::bisim_partitioner bisim_part(*this, branching, preserve_divergences);
-    return bisim_part.in_same_class(init_state,init_l);
+    detail::bisim_partitioner bisim_part(l1, branching, preserve_divergences);
+    return bisim_part.in_same_class(l1.initial_state(),init_l2);
   }
+
+} // namespace detail
 }
 }

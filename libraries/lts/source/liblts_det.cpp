@@ -12,10 +12,9 @@
 #include <vector>
 #include <boost/scoped_array.hpp>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/lts/detail/tree_set.h"
-//#include "mcrl2/lts/detail/liblts_private.h"
 
 using namespace std;
 using namespace mcrl2::core;
@@ -25,28 +24,29 @@ namespace mcrl2
 namespace lts
 {
 
-bool lts::is_deterministic()
-{
-  p_sort_transitions();
-  unsigned int *trans_lut = p_get_transition_indices();
-  boost::scoped_array< bool > seen(new bool[nlabels]);
+bool is_deterministic(const lts &l1)   
+{ 
+  lts l(l1);       // TODO: Note that making a copy of the lts is too expensive, and should be replaced.
+  l.sort_transitions();
+  unsigned int *trans_lut = l.get_transition_indices();
+  boost::scoped_array< bool > seen(new bool[l.num_labels()]);
 
-  for (unsigned int state = 0; state < nstates; state++)
+  for (unsigned int state = 0; state < l.num_states(); state++)
   {
-    for (unsigned int l = 0; l < nlabels; l++)
+    for (unsigned int i = 0; i < l.num_labels(); i++)
     {
-      seen[l] = false;
+      seen[i] = false;
     }
 
     unsigned t = trans_lut[state];
     while ( t < trans_lut[state+1] )
     {
-      if ( seen[transitions[t].label] )
+      if ( seen[l.transitions[t].label] )
       {
         free(trans_lut);
         return false;
       }
-      seen[transitions[t].label] = true;
+      seen[l.transitions[t].label] = true;
       t++;
     }
   }
@@ -58,7 +58,8 @@ bool lts::is_deterministic()
 
 
 // class for comparison of two transitions of an LTS l
-class comp_trans_lds {
+class comp_trans_lds 
+{
   private:
     lts *l;
   public:
@@ -90,19 +91,20 @@ static void get_trans(unsigned int *begin,tree_set_store *tss,unsigned int d,
   }
 }
 
-void lts::determinise() {
+void determinise(lts &l) 
+{
   tree_set_store *tss = new tree_set_store();
 
   vector<unsigned int> d_transs;
   vector<unsigned int> d_states;
 
   // create the initial state of the DLTS
-  d_states.push_back(initial_state());
+  d_states.push_back(l.initial_state());
   unsigned int d_id = tss->set_set_tag(tss->create_set(d_states));
   d_states.clear();
 
-  sort_transitions();
-  unsigned int *begin = get_transition_indices();
+  l.sort_transitions();
+  unsigned int *begin = l.get_transition_indices();
   unsigned int d_ntransitions = 0;
   unsigned int d_trans_size = 10000;
   transition *d_transitions = (transition*)malloc(d_trans_size*
@@ -117,20 +119,20 @@ void lts::determinise() {
     get_trans(begin,tss,tss->get_set(d_id),d_transs);
 
     // sort d_transs by label and (if labels are equal) by destination
-    sort(d_transs.begin(),d_transs.end(),comp_trans_lds(this));
+    sort(d_transs.begin(),d_transs.end(),comp_trans_lds(&l));
 
     n_t = d_transs.size();
     i = 0;
-    for (lbl = 0; lbl < num_labels(); ++lbl) {
+    for (lbl = 0; lbl < l.num_labels(); ++lbl) {
       // compute the destination of the transition with label lbl
-      while (i < n_t && transition_label(d_transs[i]) < lbl) {
+      while (i < n_t && l.transition_label(d_transs[i]) < lbl) {
         ++i;
       }
-      while (i < n_t && transition_label(d_transs[i]) == lbl) {
-        to = transition_to(d_transs[i]);
+      while (i < n_t && l.transition_label(d_transs[i]) == lbl) {
+        to = l.transition_to(d_transs[i]);
         d_states.push_back(to);
-        while (i < n_t && transition_label(d_transs[i]) == lbl &&
-            transition_to(d_transs[i]) == to) {
+        while (i < n_t && l.transition_label(d_transs[i]) == lbl &&
+            l.transition_to(d_transs[i]) == to) {
           ++i;
         }
       }
@@ -163,15 +165,15 @@ void lts::determinise() {
   }
 
   delete tss;
-  remove_state_values();
+  l.remove_state_values();
   free(begin);
-  free(transitions);
-  states_size = 0;
-  nstates = d_id;
-  set_initial_state(0);
-  transitions = d_transitions;
-  transitions_size = d_trans_size;
-  ntransitions = d_ntransitions;
+  free(l.transitions);
+  l.states_size = 0;
+  l.set_num_states(d_id);
+  l.set_initial_state(0);
+  l.transitions = d_transitions;
+  l.transitions_size = d_trans_size;
+  l.set_num_transitions(d_ntransitions);
 }
 }
 }

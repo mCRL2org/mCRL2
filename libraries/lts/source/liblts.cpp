@@ -15,8 +15,8 @@
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
-#include <algorithm>
-#include <boost/bind.hpp>
+// #include <algorithm>
+// #include <boost/bind.hpp>
 #include "aterm2.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -44,7 +44,7 @@ namespace mcrl2
 namespace lts
 {
 
-lps::specification const& p_lts::empty_specification() {
+lps::specification const& lts::empty_specification() {
   static lps::specification dummy;
 
   return dummy;
@@ -145,37 +145,38 @@ lts_dot_options lts_extra::get_dot_options()
 
 lts_extra lts_no_extra = lts_extra();
 
-p_lts::p_lts(lts *l)
-{
-  lts_object = l;
-}
 
-lts::lts(bool state_info, bool label_info) : p_lts(this)
-{
+lts::lts(bool state_info, bool label_info) 
+{ 
+  lts_object=this;
   init(state_info,label_info);
 }
 
-lts::lts(string &filename, lts_type type) : p_lts(this)
+lts::lts(string &filename, lts_type type) 
 {
+  lts_object=this;
   init();
   read_from(filename,type);
 }
 
-lts::lts(istream &is, lts_type type) : p_lts(this)
+lts::lts(istream &is, lts_type type) 
 {
+  lts_object=this;
   init();
   read_from(is,type);
 }
 
-lts::lts(const std::string &s) : p_lts(this)
+lts::lts(const std::string &s) 
 {
+  lts_object=this;
   init();
   std::istringstream is(s);
   read_from(is,lts_aut);
 }
 
-lts::lts(lts const &l) : p_lts(this)
+lts::lts(lts const &l) 
 {
+  lts_object=this;
   init(l);
 }
 
@@ -202,7 +203,7 @@ void lts::reset(bool state_info, bool label_info)
   clear(state_info,label_info);
 }
 
-void p_lts::init(bool state_info, bool label_info)
+void lts::init(bool state_info, bool label_info)
 { 
   states_size = 0;
   nstates = 0;
@@ -225,7 +226,7 @@ void p_lts::init(bool state_info, bool label_info)
   this->label_info = label_info;
 }
 
-void p_lts::init(p_lts const &l)
+void lts::init(lts const &l)
 {
   init_state = l.init_state;
 
@@ -288,7 +289,7 @@ void p_lts::init(p_lts const &l)
   creator = l.creator;
 }
 
-void p_lts::clear(bool state_info, bool label_info)
+void lts::clear(bool state_info, bool label_info)
 {
   clear_states();
   clear_labels();
@@ -300,14 +301,14 @@ void p_lts::clear(bool state_info, bool label_info)
   this->label_info = label_info;
 }
 
-void p_lts::clear_states()
-{
-  p_remove_state_values();
-  states_size = 0;
-  nstates = 0;
-}
+  void lts::clear_states()
+  {
+    remove_state_values();
+    states_size = 0;
+    nstates = 0;
+  }
 
-void p_lts::clear_labels()
+void lts::clear_labels()
 {
   if ( taus != NULL )
   {
@@ -325,7 +326,7 @@ void p_lts::clear_labels()
   nlabels = 0;
 }
 
-void p_lts::clear_transitions()
+void lts::clear_transitions()
 {
   if (transitions != NULL)
   {
@@ -351,14 +352,16 @@ void p_lts::clear_transitions()
 // Therefore, state i of L will be numbered |N_K| + i in the resulting
 // LTS M and state i of K will be numbered i in M. This yields:
 //   States_M = { 0, ..., N_K + N_L - 1 }.
-void p_lts::merge(lts *l)
+void lts::merge(const lts &l)
 {
-  unsigned int new_nstates = nstates + l->num_states();
-  unsigned int new_ntransitions = ntransitions + l->num_transitions();
+  unsigned int new_nstates = nstates + l.num_states();
+  std::cerr << "PRfferf " << nstates << "  " << l.num_states() << "\n";
+  unsigned int new_ntransitions = ntransitions + l.num_transitions();
+  std::cerr << "Merge nstat " << new_nstates << " ntrans " << new_ntransitions << " nlab " << nlabels << "\n";
 
   // The resulting LTS will have state information only if BOTH LTSs
   // currently have state information.
-  if ( state_info && l->has_state_info() )
+  if ( state_info && l.has_state_info() )
   {
     if ( state_values != NULL )
     {
@@ -370,16 +373,16 @@ void p_lts::merge(lts *l)
     {
       throw mcrl2::runtime_error("Insufficient memory.");
     }
-    for (state_iterator i = l->get_states(); i.more(); ++i)
+    for (const_state_iterator i = l.get_states(); i.more(); ++i)
     {
-      state_values[nstates + *i] = l->state_value(*i);
+      state_values[nstates + *i] = l.state_value(*i);
     }
     ATprotectArray(state_values,states_size);
   }
   else
   {
     // remove state information from this LTS, if any
-    p_remove_state_values();
+    remove_state_values();
   }
 
   // Resize the transitions array so l's transitions can be added
@@ -394,7 +397,7 @@ void p_lts::merge(lts *l)
   // The labels will be added below, depending on whether there is label
   // information in both LTSs.
   unsigned int j = ntransitions;
-  for (transition_iterator i = l->get_transitions(); i.more(); ++i)
+  for (const_transition_iterator i = l.get_transitions(); i.more(); ++i)
   {
     transitions[j].from  = i.from() + nstates;
     transitions[j].to    = i.to() + nstates;
@@ -402,12 +405,12 @@ void p_lts::merge(lts *l)
   }
 
   unsigned new_nlabels = 0;
-  if (label_info && l->has_label_info())
+  if (label_info && l.has_label_info())
   {
     // Before we can set the label data in the realloc'ed transitions
     // array, we first have to collect the labels of both LTSs in an
     // indexed set.
-    ATermIndexedSet labs = ATindexedSetCreate(nlabels + l->num_labels(),75);
+    ATermIndexedSet labs = ATindexedSetCreate(nlabels + l.num_labels(),75);
     ATbool b;
 
     // Add the labels of this LTS and count the number of labels that
@@ -421,9 +424,9 @@ void p_lts::merge(lts *l)
       }
     }
     // Same for LTS l
-    for (label_iterator i = l->get_labels(); i.more(); ++i)
+    for (const_label_iterator i = l.get_labels(); i.more(); ++i)
     {
-      ATindexedSetPut(labs,l->label_value(*i),&b);
+      ATindexedSetPut(labs,l.label_value(*i),&b);
       if ( b )
       {
         ++new_nlabels;
@@ -440,10 +443,10 @@ void p_lts::merge(lts *l)
     {
       new_taus[ATindexedSetGetIndex(labs,label_values[i])] = taus[i];
     }
-    for (unsigned int i = 0; i < l->num_labels(); ++i)
+    for (unsigned int i = 0; i < l.num_labels(); ++i)
     {
-      new_taus[ATindexedSetGetIndex(labs,l->label_value(i))] =
-        l->is_tau(i);
+      new_taus[ATindexedSetGetIndex(labs,l.label_value(i))] =
+        l.is_tau(i);
     }
     free(taus);
     taus = new_taus;
@@ -458,10 +461,10 @@ void p_lts::merge(lts *l)
     }
     // Now add the transition labels of LTS l
     j = ntransitions;
-    for (transition_iterator i = l->get_transitions(); i.more(); ++i)
+    for (const_transition_iterator i = l.get_transitions(); i.more(); ++i)
     {
       transitions[j].label =
-        ATindexedSetGetIndex(labs,l->label_value(i.label()));
+        ATindexedSetGetIndex(labs,l.label_value(i.label()));
       ++j;
     }
 
@@ -486,11 +489,11 @@ void p_lts::merge(lts *l)
     // One of the LTSs does not have label info, so the resulting LTS
     // will not have label info either. Moreover, we consider the sets
     // of labels of the LTSs to be disjoint
-    new_nlabels = nlabels + l->num_labels();
+    new_nlabels = nlabels + l.num_labels();
 
     // Add the transition labels of LTS l
     j = ntransitions;
-    for (transition_iterator i = l->get_transitions(); i.more(); ++i)
+    for (const_transition_iterator i = l.get_transitions(); i.more(); ++i)
     {
       transitions[j].label = nlabels + i.label();
       ++j;
@@ -502,9 +505,9 @@ void p_lts::merge(lts *l)
     {
       throw mcrl2::runtime_error("Insufficient memory.");
     }
-    for (unsigned int i = 0; i < l->num_labels(); ++i)
+    for (unsigned int i = 0; i < l.num_labels(); ++i)
     {
-      taus[nlabels + i] = l->is_tau(i);
+      taus[nlabels + i] = l.is_tau(i);
     }
 
     // Remove label info from this LTS, if any
@@ -521,14 +524,15 @@ void p_lts::merge(lts *l)
   nstates      = new_nstates;
   ntransitions = new_ntransitions;
   nlabels      = new_nlabels;
+  std::cerr << "Merge nstat " << nstates << " ntrans " << ntransitions << " nlab " << nlabels << "\n";
 }
 
-void p_lts::clear_type()
-{
-  type = lts_none;
-}
+  void lts::clear_type()
+  {
+    type = lts_none;
+  }
 
-lts_type p_lts::detect_type(string const& filename)
+lts_type lts::detect_type(string const& filename)
 {
   ifstream is(filename.c_str(),ifstream::in|ifstream::binary);
   if ( !is.is_open() )
@@ -699,7 +703,7 @@ class svc_buffer
     }
 };
 
-lts_type p_lts::detect_type(istream &is)
+lts_type lts::detect_type(istream &is)
 {
   if ( is == cin ) // XXX better test to see if is is seekable?
   {
@@ -1110,11 +1114,6 @@ void lts::set_initial_state(unsigned int state)
 
 unsigned int lts::add_state(ATerm value)
 {
-  return p_add_state(value);
-}
-
-unsigned int p_lts::p_add_state(ATerm value)
-{
   if ( nstates == states_size )
   {
     unsigned int new_states_size = states_size*2;
@@ -1160,15 +1159,10 @@ unsigned int p_lts::p_add_state(ATerm value)
 
 unsigned int lts::add_label(bool is_tau)
 {
-  return p_add_label(NULL, is_tau);
+  return add_label(NULL, is_tau);
 }
 
 unsigned int lts::add_label(ATerm value, bool is_tau)
-{
-  return p_add_label(value, is_tau);
-}
-
-unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
 {
   if ( nlabels == labels_size )
   {
@@ -1223,13 +1217,6 @@ unsigned int lts::add_transition(unsigned int from,
                                  unsigned int label,
                                  unsigned int to)
 {
-  return p_add_transition(from,label,to);
-}
-
-unsigned int p_lts::p_add_transition(unsigned int from,
-                                 unsigned int label,
-                                 unsigned int to)
-{
   assert(ntransitions <= transitions_size);
   if ( ntransitions == transitions_size )
   {
@@ -1257,7 +1244,7 @@ unsigned int p_lts::p_add_transition(unsigned int from,
   return ntransitions++;
 }
 
-void p_lts::p_sort_transitions(transition_sort_style ts) {
+void lts::sort_transitions(transition_sort_style ts) {
   switch (ts)
   {
     case lbl_tgt_src:
@@ -1270,7 +1257,7 @@ void p_lts::p_sort_transitions(transition_sort_style ts) {
   }
 }
 
-unsigned int* p_lts::p_get_transition_indices() {
+unsigned int* lts::get_transition_indices() {
   unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
   if (A == NULL) {
     throw mcrl2::runtime_error("Out of memory.");
@@ -1286,7 +1273,7 @@ unsigned int* p_lts::p_get_transition_indices() {
   return A;
 }
 
-unsigned int** p_lts::p_get_transition_pre_table()
+unsigned int** lts::get_transition_pre_table()
 {
   unsigned int **A = (unsigned int**)malloc(nlabels*sizeof(unsigned int*));
   if (A == NULL)
@@ -1331,13 +1318,13 @@ void lts::set_label(unsigned int label, ATerm value, bool is_tau)
   taus[label] = is_tau;
 }
 
-ATerm lts::state_value(unsigned int state)
+ATerm lts::state_value(unsigned int state) const
 {
   assert(state_info && (state < nstates));
   return state_values[state];
 }
 
-string p_lts::p_state_value_str(unsigned int state)
+string lts::state_value_str(unsigned int state) const
 {
   assert(state < nstates);
   string s;
@@ -1377,18 +1364,13 @@ string p_lts::p_state_value_str(unsigned int state)
   return s;
 }
 
-string lts::state_value_str(unsigned int state)
-{
-  return p_state_value_str(state);
-}
-
-ATerm lts::label_value(unsigned int label)
+ATerm lts::label_value(unsigned int label) const
 {
   assert(label_info && (label < nlabels));
   return label_values[label];
 }
 
-string p_lts::p_label_value_str(unsigned int label)
+string lts::label_value_str(unsigned int label)
 {
   assert(label < nlabels);
   string s;
@@ -1414,11 +1396,6 @@ string p_lts::p_label_value_str(unsigned int label)
     s = ss.str();
   }
   return s;
-}
-
-string lts::label_value_str(unsigned int label)
-{
-  return p_label_value_str(label);
 }
 
 unsigned int lts::transition_from(unsigned int transition)
@@ -1458,22 +1435,37 @@ void lts::set_transition_to(const unsigned int transition, const unsigned int to
 }
 
 
-state_iterator lts::get_states()
+state_iterator lts::get_states() 
 {
-  return state_iterator(this);
+  return state_iterator(*this);
 }
 
-label_iterator lts::get_labels()
+const_state_iterator lts::get_states() const
 {
-  return label_iterator(this);
+  return const_state_iterator(*this);
 }
 
-transition_iterator lts::get_transitions()
+label_iterator lts::get_labels() 
 {
-  return transition_iterator(this);
+  return label_iterator(*this);
 }
 
-bool lts::is_tau(unsigned int label)
+const_label_iterator lts::get_labels() const
+{
+  return const_label_iterator(*this);
+}
+
+transition_iterator lts::get_transitions() 
+{
+  return transition_iterator(*this);
+}
+
+const_transition_iterator lts::get_transitions() const
+{
+  return const_transition_iterator(*this);
+}
+
+bool lts::is_tau(unsigned int label) const
 {
   assert(label < nlabels);
   return taus[label];
@@ -1500,27 +1492,22 @@ void lts::set_creator(string creator)
   this->creator = creator;
 }
 
-lts_type lts::get_type()
+lts_type lts::get_type() const
 {
   return type;
 }
 
-bool lts::has_state_info()
+bool lts::has_state_info() const
 {
   return state_info;
 }
 
-bool lts::has_label_info()
+bool lts::has_label_info() const
 {
   return label_info;
 }
 
-void lts::remove_state_values()
-{
-  p_remove_state_values();
-}
-
-bool lts::has_state_parameters()
+bool lts::has_state_parameters() const
 {
   return state_info && ( ( type == lts_mcrl2 ) ||
                          ( type == lts_mcrl ) ||
@@ -1528,7 +1515,7 @@ bool lts::has_state_parameters()
                          ( type == lts_fsm ) );
 }
 
-unsigned int lts::num_state_parameters()
+unsigned int lts::num_state_parameters() const
 {
   if ( type == lts_mcrl2 )
   {
@@ -1547,7 +1534,7 @@ unsigned int lts::num_state_parameters()
   return 0;
 }
 
-ATerm lts::state_parameter_name(unsigned int idx)
+ATerm lts::state_parameter_name(unsigned int idx) const
 {
   if ( type == lts_mcrl2 )
   {
@@ -1573,7 +1560,7 @@ ATerm lts::state_parameter_name(unsigned int idx)
   return NULL;
 }
 
-std::string lts::state_parameter_name_str(unsigned int idx)
+std::string lts::state_parameter_name_str(unsigned int idx) const
 {
   if ( type == lts_mcrl2 || type == lts_mcrl )
   {
@@ -1594,7 +1581,7 @@ std::string lts::state_parameter_name_str(unsigned int idx)
   return "";
 }
 
-ATerm lts::state_parameter_sort(unsigned int idx)
+ATerm lts::state_parameter_sort(unsigned int idx) const
 {
   if ( type == lts_mcrl2 )
   {
@@ -1613,7 +1600,7 @@ ATerm lts::state_parameter_sort(unsigned int idx)
   return NULL;
 }
 
-std::string lts::state_parameter_sort_str(unsigned int idx)
+std::string lts::state_parameter_sort_str(unsigned int idx) const
 {
   if ( type == lts_mcrl2 )
   {
@@ -1632,7 +1619,7 @@ std::string lts::state_parameter_sort_str(unsigned int idx)
   return "";
 }
 
-ATerm lts::get_state_parameter_value(unsigned int state, unsigned int idx)
+ATerm lts::get_state_parameter_value(unsigned int state, unsigned int idx) const
 {
   if ( type == lts_mcrl2 )
   {
@@ -1649,7 +1636,7 @@ ATerm lts::get_state_parameter_value(unsigned int state, unsigned int idx)
   return NULL;
 }
 
-std::string lts::get_state_parameter_value_str(unsigned int state, unsigned int idx)
+std::string lts::get_state_parameter_value_str(unsigned int state, unsigned int idx) const
 {
   if ( type == lts_mcrl2 )
   {
@@ -1667,7 +1654,7 @@ std::string lts::get_state_parameter_value_str(unsigned int state, unsigned int 
   return "";
 }
 
-atermpp::set<ATerm> lts::get_label_values()
+atermpp::set<ATerm> lts::get_label_values() const
 {
   atermpp::set<ATerm> r;
 
@@ -1679,7 +1666,7 @@ atermpp::set<ATerm> lts::get_label_values()
   return r;
 }
 
-atermpp::set<ATerm> lts::get_state_values()
+atermpp::set<ATerm> lts::get_state_values() const
 {
   atermpp::set<ATerm> r;
 
@@ -1717,7 +1704,7 @@ std::string lts::pretty_print_label_value(ATerm value)
   return ATwriteToString(value);
 }
 
-std::string lts::pretty_print_state_value(ATerm value)
+std::string lts::pretty_print_state_value(ATerm value) const
 {
   if ( type == lts_mcrl2 )
   {
@@ -1787,7 +1774,7 @@ void lts::set_data_specification(data::data_specification const& spec)
   }
 }
 
-void p_lts::p_remove_state_values()
+void lts::remove_state_values()
 {
   state_info = false;
   if ( state_values != NULL )
@@ -1802,19 +1789,7 @@ void p_lts::p_remove_state_values()
   }
 }
 
-void lts::sort_transitions(transition_sort_style ts) {
-  p_sort_transitions(ts);
-}
-
-unsigned int* lts::get_transition_indices() {
-  return p_get_transition_indices();
-}
-
-unsigned int** lts::get_transition_pre_table() {
-  return p_get_transition_pre_table();
-}
-
-bool lts::reachability_check(bool remove_unreachable)
+bool reachability_check(lts &l, bool remove_unreachable)
 {
   // We use two algorithms here. One is O(nstates*ntransitions) and needs
   // nstates bits of memory. The other is O(ntransitions), but needs an
@@ -1827,7 +1802,7 @@ bool lts::reachability_check(bool remove_unreachable)
 
   // bit array to represent the set of visited states
   #define visited_bpi (8*sizeof(unsigned int)) // bits per (unsigned) int
-  unsigned int visited_size = ((nstates-1)/visited_bpi)+1;
+  unsigned int visited_size = ((l.num_states()-1)/visited_bpi)+1;
                                 // nstates/visited_bpi rounded upwards
   unsigned int *visited = (unsigned int *) malloc(visited_size*sizeof(unsigned int));
   #define add_visited(s) (visited[s/visited_bpi] |= 1 << (s % visited_bpi))
@@ -1841,8 +1816,8 @@ bool lts::reachability_check(bool remove_unreachable)
   // allocate both needed arrays at once.
   // Note that we also just (todo_stack != NULL) as a general check to see
   // which algorithm we will use.
-  unsigned int *todo_stack = (unsigned int *) malloc(2*nstates*sizeof(unsigned int));
-  unsigned int *state2trans = &todo_stack[nstates];
+  unsigned int *todo_stack = (unsigned int *) malloc(2*l.num_states()*sizeof(unsigned int));
+  unsigned int *state2trans = &todo_stack[l.num_states()];
   if ( todo_stack != NULL ) // Do we have enough memory for fast algorithm?
   {
     // XXX sort transitions array? Allows us to always use the fast algorithm
@@ -1867,14 +1842,14 @@ bool lts::reachability_check(bool remove_unreachable)
     }
     // initialise state2trans; we use ntransitions as default because we know
     // it exists and no actual transitions have such a high index
-    for (unsigned int i=0; i<nstates; i++)
+    for (unsigned int i=0; i<l.num_states(); i++)
     {
-      state2trans[i] = ntransitions;
+      state2trans[i] = l.num_transitions();
     }
 
-    unsigned int current_state = nstates;
+    unsigned int current_state = l.num_states();
     bool is_sorted = true;
-    // (We just a ghost transitions[-1] with transitions[-1].from == nstates)
+    // (We just a ghost transitions[-1] with transitions[-1].from == l.num_states())
     // inv: !is_sorted || ( P(i) && transitions[i-1].from == current_state )
     //       where P(j) = for all states s that occur as source in
     //                    transitions[-1..j) we have that all transitions in
@@ -1882,11 +1857,11 @@ bool lts::reachability_check(bool remove_unreachable)
     //                    consecutively starting at state2trans[i]
     //                    and for all other states s we have that
     //                    state2trans[i] == ntransitions
-    for (unsigned int i=0; i<ntransitions; i++)
+    for (unsigned int i=0; i<l.num_transitions(); i++)
     {
-      if ( transitions[i].from != current_state )
+      if ( l.transitions[i].from != current_state )
       {
-        current_state = transitions[i].from;
+        current_state = l.transitions[i].from;
         if ( in_visited(current_state) )
         {
           // We already saw this state are source in another block; the
@@ -1926,17 +1901,17 @@ bool lts::reachability_check(bool remove_unreachable)
     // target states from transitions that have a source that we have already
     // reached.
 
-    add_visited(init_state);
+    add_visited(l.initial_state());
 
     bool notdone = true;
     while ( notdone )
     {
       notdone = false;
-      for (unsigned int i=0; i<ntransitions; i++)
+      for (unsigned int i=0; i<l.num_transitions(); i++)
       {
-        if ( in_visited(transitions[i].from) && !in_visited(transitions[i].to) )
+        if ( in_visited(l.transitions[i].from) && !in_visited(l.transitions[i].to) )
         {
-          add_visited(transitions[i].to);
+          add_visited(l.transitions[i].to);
           notdone = true;
         }
       }
@@ -1954,8 +1929,8 @@ bool lts::reachability_check(bool remove_unreachable)
 
     // the nitial state is always reachable and will be the initial contents of
     // the todo list
-    add_visited(init_state);
-    todo_stack[0] = init_state;
+    add_visited(l.initial_state());
+    todo_stack[0] = l.initial_state();
     unsigned int todo_stack_num = 1; // number of elements on the stack
 
     while ( todo_stack_num > 0 )
@@ -1966,13 +1941,13 @@ bool lts::reachability_check(bool remove_unreachable)
                                                    // source
 
       // iterate over all transitions with current_state as source
-      while ( (i < ntransitions) && (transitions[i].from == current_state) )
+      while ( (i < l.num_transitions()) && (l.transitions[i].from == current_state) )
       {
-        if ( !in_visited(transitions[i].to) )
+        if ( !in_visited(l.transitions[i].to) )
         {
           // we haven't seen transitions[i].to before; add it to the todo list
-          add_visited(transitions[i].to);
-          todo_stack[todo_stack_num++] = transitions[i].to;
+          add_visited(l.transitions[i].to);
+          todo_stack[todo_stack_num++] = l.transitions[i].to;
         }
         i++;
       }
@@ -2001,7 +1976,7 @@ bool lts::reachability_check(bool remove_unreachable)
   {
     // the states in the last element have a index in
     // [(visited_size-1)*visited_bpi..nstates)
-    for (unsigned int i=(visited_size-1)*visited_bpi; i<nstates; i++)
+    for (unsigned int i=(visited_size-1)*visited_bpi; i<l.num_states(); i++)
     {
       if ( !in_visited(i) )
       {
@@ -2015,8 +1990,8 @@ bool lts::reachability_check(bool remove_unreachable)
   {
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
-    unsigned int *state_map = (unsigned int *) malloc(nstates*sizeof(unsigned int));
-    unsigned int *label_map = (unsigned int *) malloc(nlabels*sizeof(unsigned int));
+    unsigned int *state_map = (unsigned int *) malloc(l.num_states()*sizeof(unsigned int));
+    unsigned int *label_map = (unsigned int *) malloc(l.num_labels()*sizeof(unsigned int));
     if ( (state_map == NULL) || (label_map == NULL) )
     {
       free(state_map);
@@ -2025,60 +2000,60 @@ bool lts::reachability_check(bool remove_unreachable)
     }
 
     unsigned int new_nstates = 0;
-    for (unsigned int i=0; i<nstates; i++)
+    for (unsigned int i=0; i<l.num_states(); i++)
     {
       if ( in_visited(i) )
       {
         state_map[i] = new_nstates;
-        if ( state_info )
+        if ( l.state_info )
         {
-          state_values[new_nstates] = state_values[i];
+          l.state_values[new_nstates] = l.state_values[i];
         }
         new_nstates++;
       }
     }
 
-    for (unsigned int i=0; i<nlabels; i++)
+    for (unsigned int i=0; i<l.num_labels(); i++)
     {
       label_map[i] = 0;
     }
 
     unsigned int new_ntransitions = 0;
-    for (unsigned int i=0; i<ntransitions; i++)
+    for (unsigned int i=0; i<l.num_transitions(); i++)
     {
-      if ( in_visited(transitions[i].from) )
+      if ( in_visited(l.transitions[i].from) )
       {
-        label_map[transitions[i].label] = 1;
-        transitions[new_ntransitions].from = state_map[transitions[i].from];
-        transitions[new_ntransitions].label = transitions[i].label;
-        transitions[new_ntransitions].to = state_map[transitions[i].to];
+        label_map[l.transitions[i].label] = 1;
+        l.transitions[new_ntransitions].from = state_map[l.transitions[i].from];
+        l.transitions[new_ntransitions].label = l.transitions[i].label;
+        l.transitions[new_ntransitions].to = state_map[l.transitions[i].to];
         new_ntransitions++;
       }
     }
 
     unsigned int new_nlabels = 0;
-    for (unsigned int i=0; i<nlabels; i++)
+    for (unsigned int i=0; i<l.num_labels(); i++)
     {
       if ( label_map[i] )
       {
         label_map[i] = new_nlabels;
-        taus[new_nlabels] = taus[i];
-        if ( label_info )
+        l.taus[new_nlabels] = l.taus[i];
+        if ( l.label_info )
         {
-          label_values[new_nlabels] = label_values[i];
+          l.label_values[new_nlabels] = l.label_values[i];
         }
         new_nlabels++;
       }
     }
     for (unsigned int i=0; i<new_ntransitions; i++)
     {
-      transitions[i].label = label_map[transitions[i].label];
+      l.transitions[i].label = label_map[l.transitions[i].label];
     }
 
-    init_state = state_map[init_state];
-    nstates = new_nstates;
-    ntransitions = new_ntransitions;
-    nlabels = new_nlabels;
+    l.set_initial_state(state_map[l.initial_state()]);
+    l.set_num_states(new_nstates);
+    l.set_num_transitions(new_ntransitions);
+    l.set_num_labels(new_nlabels);
 
     // XXX realloc tables?
 
@@ -2090,19 +2065,30 @@ bool lts::reachability_check(bool remove_unreachable)
   return r;
 }
 
-state_iterator::state_iterator(lts *l)
+state_iterator::state_iterator(const lts &l):l(l),pos(0),max(l.num_states())
 {
-  this->l = l;
-  pos = 0;
-  max = l->nstates;
 }
 
-bool state_iterator::more()
+const_state_iterator::const_state_iterator(const lts &l):l(l),pos(0),max(l.num_states())
 {
-  return (pos < l->nstates);
 }
 
-unsigned int state_iterator::operator *()
+bool state_iterator::more() const
+{
+  return (pos < l.num_states());
+}
+
+bool const_state_iterator::more() const
+{
+  return (pos < l.num_states());
+}
+
+unsigned int state_iterator::operator *() const
+{
+  return pos;
+}
+
+unsigned int const_state_iterator::operator *() const
 {
   return pos;
 }
@@ -2112,20 +2098,35 @@ void state_iterator::operator ++()
   pos++;
 }
 
-
-label_iterator::label_iterator(lts *l)
+void const_state_iterator::operator ++()
 {
-  this->l = l;
-  pos = 0;
-  max = l->nlabels;
+  pos++;
 }
 
-bool label_iterator::more()
+label_iterator::label_iterator(const lts &l):l(l),pos(0),max(l.num_labels())
 {
-  return (pos < l->nlabels);
 }
 
-unsigned int label_iterator::operator *()
+const_label_iterator::const_label_iterator(const lts &l):l(l),pos(0),max(l.num_labels())
+{
+}
+
+bool label_iterator::more() const
+{
+  return (pos < l.num_labels());
+}
+
+bool const_label_iterator::more() const
+{
+  return (pos < l.num_labels());
+}
+
+unsigned int label_iterator::operator *() const
+{
+  return pos;
+}
+
+unsigned int const_label_iterator::operator *() const
 {
   return pos;
 }
@@ -2135,7 +2136,16 @@ void label_iterator::operator ++()
   pos++;
 }
 
+void const_label_iterator::operator ++()
+{
+  pos++;
+}
+
 bool label_iterator::operator ==(const label_iterator &i) const
+{ return pos==i.pos;
+}
+  
+bool const_label_iterator::operator ==(const const_label_iterator &i) const
 { return pos==i.pos;
 }
   
@@ -2143,31 +2153,56 @@ bool label_iterator::operator !=(const label_iterator &i) const
 { return pos!=i.pos;
 }
 
-transition_iterator::transition_iterator(lts *l)
-{
-  this->l = l;
-  pos = 0;
-  max = l->ntransitions;
+bool const_label_iterator::operator !=(const const_label_iterator &i) const
+{ return pos!=i.pos;
 }
 
-bool transition_iterator::more()
-{
-  return (pos < l->ntransitions);
+transition_iterator::transition_iterator(const lts &l1):l(l1),pos(0),max(l1.num_transitions())
+{ 
 }
 
-unsigned int transition_iterator::from()
+const_transition_iterator::const_transition_iterator(const lts &l):l(l),pos(0),max(l.num_transitions())
 {
-  return l->transitions[pos].from;
 }
 
-unsigned int transition_iterator::label()
+bool transition_iterator::more() const
 {
-  return l->transitions[pos].label;
+  return (pos < l.num_transitions());
 }
 
-unsigned int transition_iterator::to()
+bool const_transition_iterator::more() const
 {
-  return l->transitions[pos].to;
+  return (pos < l.num_transitions());
+}
+
+unsigned int transition_iterator::from() const
+{
+  return l.transitions[pos].from;
+}
+
+unsigned int const_transition_iterator::from() const
+{
+  return l.transitions[pos].from;
+}
+
+unsigned int transition_iterator::label() const
+{
+  return l.transitions[pos].label;
+}
+
+unsigned int const_transition_iterator::label() const
+{
+  return l.transitions[pos].label;
+}
+
+unsigned int transition_iterator::to() const
+{
+  return l.transitions[pos].to;
+}
+
+unsigned int const_transition_iterator::to() const
+{
+  return l.transitions[pos].to;
 }
 
 void transition_iterator::operator ++()
@@ -2175,7 +2210,16 @@ void transition_iterator::operator ++()
   pos++;
 }
 
-unsigned int transition_iterator::operator *()
+void const_transition_iterator::operator ++()
+{
+  pos++;
+}
+
+unsigned int transition_iterator::operator *() const
+{ return pos;
+}
+
+unsigned int const_transition_iterator::operator *() const
 { return pos;
 }
 
@@ -2286,103 +2330,6 @@ std::string lts::mime_type_for_type(const lts_type type) {
   return (mime_type_strings[type]);
 }
 
-lts_equivalence lts::parse_equivalence(std::string const& s)
-{
-  if ( s == "bisim" )
-  {
-    return lts_eq_bisim;
-  } else if ( s == "branching-bisim" )
-  {
-    return lts_eq_branching_bisim;
-  } else if ( s == "dpbranching-bisim" )
-  {
-    return lts_eq_divergence_preserving_branching_bisim;
-  } else if ( s == "sim" )
-  {
-    return lts_eq_sim;
-  } else if ( s == "trace" )
-  {
-    return lts_eq_trace;
-  } else if ( s == "weak-trace" )
-  {
-    return lts_eq_weak_trace;
-  } else if ( s == "isomorph" )
-  {
-    return lts_eq_isomorph;
-  } else {
-    return lts_eq_none;
-  }
-}
-
-static std::string equivalence_strings[] = {
-  "unknown",
-  "bisim",
-  "branching-bisim",
-  "dpbranching-bisim",
-  "sim",
-  "trace",
-  "weak-trace",
-  "isomorph"
-};
-
-static std::string equivalence_desc_strings[] = {
-  "unknown equivalence",
-  "strong bisimilarity",
-  "branching bisimilarity",
-  "divergence preserving branching bisimilarity",
-  "strong simulation equivalence",
-  "strong trace equivalence",
-  "weak trace equivalence",
-  "isomorphism"
-};
-
-std::string lts::string_for_equivalence(const lts_equivalence eq)
-{
-  return equivalence_strings[eq];
-}
-
-std::string lts::name_of_equivalence(const lts_equivalence eq)
-{
-  return equivalence_desc_strings[eq];
-}
-
-lts_preorder lts::parse_preorder(std::string const& s)
-{
-  if ( s == "sim" )
-  {
-    return lts_pre_sim;
-  } else if ( s == "trace" ) {
-    return lts_pre_trace;
-  } else if ( s == "weak-trace" ) {
-    return lts_pre_weak_trace;
-  } else {
-    return lts_pre_none;
-  }
-}
-
-static std::string preorder_strings[] = {
-  "unknown",
-  "sim",
-  "trace",
-  "weak-trace"
-};
-
-static std::string preorder_desc_strings[] = {
-  "unknown preorder",
-  "strong simulation preorder",
-  "strong trace preorder",
-  "weak trace preorder"
-};
-
-std::string lts::string_for_preorder(const lts_preorder pre)
-{
-  return preorder_strings[pre];
-}
-
-std::string lts::name_of_preorder(const lts_preorder pre)
-{
-  return preorder_desc_strings[pre];
-}
 
 void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermList act_labels)
 {
@@ -2450,48 +2397,6 @@ const std::set<lts_type> &lts::supported_lts_formats()
   return s;
 }
 
-static const std::set<lts_equivalence> &initialise_supported_lts_equivalences()
-{
-  static std::set<lts_equivalence> s;
-  for (unsigned int i = lts_equivalence_min; i<1+(unsigned int)lts_equivalence_max; ++i)
-  {
-    if ( lts_eq_none != (lts_equivalence) i )
-    {
-      s.insert((lts_equivalence) i);
-    }
-  }
-  return s;
-}
-const std::set<lts_equivalence> &lts::supported_lts_equivalences()
-{
-  static const std::set<lts_equivalence> &s = initialise_supported_lts_equivalences();
-  return s;
-}
-
-static const std::set<lts_preorder> &initialise_supported_lts_preorders()
-{
-  static std::set<lts_preorder> s;
-  for (unsigned int i = lts_preorder_min; i<1+(unsigned int)lts_preorder_max; ++i)
-  {
-    if ( lts_pre_none != (lts_preorder) i )
-    {
-      s.insert((lts_preorder) i);
-    }
-  }
-  return s;
-}
-const std::set<lts_preorder> &lts::supported_lts_preorders()
-{
-  static const std::set<lts_preorder> &s = initialise_supported_lts_preorders();
-  return s;
-}
-
-template<typename T>
-static bool lts_named_cmp(std::string N[], T a, T b)
-{
-  return N[a] < N[b];
-}
-
 std::string lts::supported_lts_formats_text(lts_type default_format, const std::set<lts_type> &supported)
 {
   vector<lts_type> types(supported.begin(),supported.end());
@@ -2556,72 +2461,6 @@ std::string lts::lts_extensions_as_string(const std::set<lts_type> &supported)
   return lts_extensions_as_string(",",supported);
 }
 
-std::string lts::supported_lts_equivalences_text(lts_equivalence default_equivalence, const std::set<lts_equivalence> &supported)
-{
-  vector<lts_equivalence> types(supported.begin(),supported.end());
-  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_equivalence>,equivalence_strings,_1,_2));
-
-  string r;
-  for (vector<lts_equivalence>::iterator i=types.begin(); i!=types.end(); i++)
-  {
-    r += "  '" + equivalence_strings[*i] + "' for " + equivalence_desc_strings[*i];
-
-    if ( *i == default_equivalence )
-    {
-      r += " (default)";
-    }
-
-
-    if ( i+2 == types.end() )
-    {
-      r += ", or\n";
-    } else if ( i+1 != types.end() )
-    {
-      r += ",\n";
-    }
-  }
-
-  return r;
-}
-
-std::string lts::supported_lts_equivalences_text(const std::set<lts_equivalence> &supported)
-{
-  return supported_lts_equivalences_text(lts_eq_none,supported);
-}
-
-std::string lts::supported_lts_preorders_text(lts_preorder default_preorder, const std::set<lts_preorder> &supported)
-{
-  vector<lts_preorder> types(supported.begin(),supported.end());
-  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_preorder>,preorder_strings,_1,_2));
-
-  string r;
-  for (vector<lts_preorder>::iterator i=types.begin(); i!=types.end(); i++)
-  {
-    r += "  '" + preorder_strings[*i] + "' for " + preorder_desc_strings[*i];
-
-    if ( *i == default_preorder )
-    {
-      r += " (default)";
-    }
-
-
-    if ( i+2 == types.end() )
-    {
-      r += ", or\n";
-    } else if ( i+1 == types.end() )
-    {
-      r += ",\n";
-    }
-  }
-
-  return r;
-}
-
-std::string lts::supported_lts_preorders_text(const std::set<lts_preorder> &supported)
-{
-  return supported_lts_preorders_text(lts_pre_none,supported);
-}
-
 ATermList sorted_insert(ATermList l,ATermAppl t)
 { 
   if (l==ATempty)
@@ -2657,7 +2496,7 @@ bool lts::hide_actions(const std::vector<std::string> &tau_actions)
 
   for(label_iterator i=get_labels(); i.more(); ++i)
   { 
-    string s=p_label_value_str(*i);
+    string s=label_value_str(*i);
     stringstream ss(s); 
     ATermAppl t=parse_mult_act(ss);
     

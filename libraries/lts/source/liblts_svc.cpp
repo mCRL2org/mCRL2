@@ -36,7 +36,7 @@ namespace mcrl2
 namespace lts
 {
 
-bool p_lts::read_from_svc(string const& filename, lts_type type)
+bool lts::read_from_svc(string const& filename, lts_type type)
 {
   SVCfile f;
   SVCbool b;
@@ -88,9 +88,9 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
   init_state = (unsigned int) SVCgetInitialState(&f);
   if ( state_info )
   {
-    p_add_state(SVCstate2ATerm(&f,(SVCstateIndex) init_state));
+    add_state(SVCstate2ATerm(&f,(SVCstateIndex) init_state));
   } else {
-    p_add_state();
+    add_state();
   }
 
   SVCstateIndex from, to;
@@ -103,9 +103,9 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
     {
       if ( state_info )
       {
-        p_add_state(SVCstate2ATerm(&f,(SVCstateIndex) i));
+        add_state(SVCstate2ATerm(&f,(SVCstateIndex) i));
       } else {
-        p_add_state();
+        add_state();
       }
     }
 
@@ -114,7 +114,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
       if ( type == lts_mcrl )
       {
         ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
-        p_add_label((ATerm) lab,!strcmp(ATgetName(ATgetAFun(lab)),"tau"));
+        add_label((ATerm) lab,!strcmp(ATgetName(ATgetAFun(lab)),"tau"));
       } else if ( type == lts_mcrl2 )
       {
         ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
@@ -122,13 +122,13 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
         {
           lab = ATAgetArgument(lab,0);
         }
-        p_add_label((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
+        add_label((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
       } else {
-        p_add_label(SVClabel2ATerm(&f,(SVClabelIndex) i));
+        add_label(SVClabel2ATerm(&f,(SVClabelIndex) i));
       }
     }
 
-    p_add_transition((unsigned int) from,
+    add_transition((unsigned int) from,
                      (unsigned int) label,
                      (unsigned int) to);
   }
@@ -179,7 +179,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
   return true;
 }
 
-bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specification const& spec)
+bool lts::write_to_svc(string const& filename, lts_type type, lps::specification const& spec)
 {
   bool applied_conversion = false;
 
@@ -210,7 +210,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
         if ( ATisAppl(label_values[i]) && (gsIsMultAct((ATermAppl) label_values[i]) || is_timed_pair((ATermAppl) label_values[i])) )
         {
           no_convert = false;
-          label_values[i] = (ATerm) ATmakeAppl0(ATmakeAFun(p_label_value_str(i).c_str(),0,ATtrue));
+          label_values[i] = (ATerm) ATmakeAppl0(ATmakeAFun(label_value_str(i).c_str(),0,ATtrue));
           applied_conversion = true;
         }
         if ( no_convert )
@@ -246,7 +246,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
         bool no_convert = true;
         if ( (&spec != &empty_specification()) )
         {
-          stringstream ss(p_label_value_str(i));
+          stringstream ss(label_value_str(i));
           ATermAppl t = parse_mult_act(ss);
           if ( t == NULL )
           {

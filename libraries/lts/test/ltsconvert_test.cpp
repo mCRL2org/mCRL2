@@ -15,7 +15,7 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -128,87 +128,88 @@ const std::string test11=
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 { 
   lts t1(test1);
-  t1.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t1,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t1.num_states()==1 && t1.num_transitions()==1);
 
   lts t2(test2);
-  t2.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t2,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t2.num_states()==2 && t2.num_transitions()==2);
 
   lts t3(test3);
-  t3.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t3,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t3.num_states()==2 && t3.num_transitions()==3);
-  t3.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t3,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t3.num_states()==1 && t3.num_transitions()==1);
 
+  //Divergence preserving branching bisimulation reduction
   lts t3a(test3);
-  t3a.bisimulation_reduce(true,true); //Divergence preserving branching bisimulation reduction
+  reduce(t3a,lts_eq_divergence_preserving_branching_bisim); 
   BOOST_CHECK(t3a.num_states()==1 && t3a.num_transitions()==2);
 
   lts t4(test4);
-  t4.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t4,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t4.num_states()==4 && t4.num_transitions()==5);
-  t4.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t4,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
   
   lts t5(test5);
-  t5.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t5,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
-  t5.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t5,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
 
   lts t6(test6);
-  t6.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t6,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
-  t6.bisimulation_reduce(true,true); //Divergence preserving branching bisimulation reduction
+  reduce(t6,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
-  t6.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t6,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
   
   lts t7(test7);
-  t7.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t7,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t7.num_states()==7 && t7.num_transitions()==7);
-  t7.bisimulation_reduce(true,true); //Divergence preserving branching bisimulation reduction
+  reduce(t7,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
-  t7.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t7,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   
   lts t8(test8);
-  t8.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t8,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
-  t8.bisimulation_reduce(true,true); //Divergence preserving branching bisimulation reduction
+  reduce(t8,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
-  t8.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t8,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
   
   lts t9(test9);
-  t9.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t9,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
   lts t9a(test9);
-  t9a.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t9a,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t9a.num_states()==2 && t9a.num_transitions()==1);
   lts t9b(test9);
-  t9b.bisimulation_reduce(true,true); //Divergence preserving bisimulation reduction
+  reduce(t9b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t9b.num_states()==2 && t9b.num_transitions()==2);
   
   lts t10(test10);
-  t10.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t10,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t10.num_states()==5 && t10.num_transitions()==7);
   lts t10a(test10);
-  t10a.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t10a,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t10a.num_states()==4 && t10a.num_transitions()==5);
   lts t10b(test10);
-  t10b.bisimulation_reduce(true,true); //Divergence preserving bisimulation reduction
+  reduce(t10b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t10b.num_states()==4 && t10b.num_transitions()==5);
   
   lts t11(test11);
-  t11.bisimulation_reduce(); //Strong bisimulation reduction
+  reduce(t11,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t11.num_states()==4 && t11.num_transitions()==5);
   lts t11a(test11);
-  t11a.bisimulation_reduce(true); //Branching bisimulation reduction
+  reduce(t11a,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t11a.num_states()==2 && t11a.num_transitions()==2);
   lts t11b(test11);
-  t11b.bisimulation_reduce(true,true); //Divergence preserving bisimulation reduction
+  reduce(t11b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t11b.num_states()==2 && t11b.num_transitions()==2);
   // BOOST_CHECK_THROW(linearise(various_case_22), mcrl2::runtime_error);
 }

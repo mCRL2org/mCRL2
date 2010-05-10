@@ -151,7 +151,7 @@ class t_tool_options
       if ( check_reach ) {
         gsVerboseMsg("checking reachability of input LTS...\n");
 
-        if ( !l.reachability_check(true) ) {
+        if ( !reachability_check(l,true) ) {
           gsWarningMsg("not all states of the input LTS are reachable from the initial state; removed unreachable states to ensure correct behaviour in LTS tools (including this one)!\n");
         }
       }
@@ -237,9 +237,9 @@ class ltsconvert_tool : public ltsconvert_base
 
       if ( tool_options.equivalence != lts_eq_none )
       {
-        gsVerboseMsg("reducing LTS (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence).c_str());
+        gsVerboseMsg("reducing LTS (modulo %s)...\n", name_of_equivalence(tool_options.equivalence).c_str());
         gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
-        l.reduce(tool_options.equivalence, tool_options.eq_opts);
+        reduce(l,tool_options.equivalence, tool_options.eq_opts);
         gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       }
 
@@ -247,7 +247,7 @@ class ltsconvert_tool : public ltsconvert_base
       {
         gsVerboseMsg("determinising LTS...\n");
         gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-        l.determinise();
+        determinise(l);
         gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       }
 
@@ -276,7 +276,7 @@ class ltsconvert_tool : public ltsconvert_base
           "use FORMAT as the output format", 'o');
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
           "generate an equivalent LTS, preserving equivalence NAME:\n"
-          +lts::supported_lts_equivalences_text(allowed_eqs())
+          +supported_lts_equivalences_text(allowed_eqs())
           , 'e');
       desc.add_option("add",
           "do not minimise but save a copy of the original LTS extended with a "
@@ -335,7 +335,7 @@ class ltsconvert_tool : public ltsconvert_base
 
       if (parser.options.count("equivalence")) {
 
-        tool_options.equivalence = lts::parse_equivalence(
+        tool_options.equivalence = parse_equivalence(
             parser.option_argument("equivalence"));
 
         if ( allowed_eqs().count(tool_options.equivalence) == 0 )
@@ -479,7 +479,7 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
     append(transformation_selector.associate(lts_eq_sim, "reduction modulo strong simulation equivalence")).
     append(transformation_selector.associate(lts_eq_trace, "determinisation and reduction modulo trace equivalence")).
     append(transformation_selector.associate(lts_eq_weak_trace, "determinisation and reduction modulo weak trace equivalence")).
-    append(transformation_selector.associate(lts_eq_isomorph, "determinisation")); // abusing lts_eq_isomorph for determinisation
+    append(transformation_selector.associate(lts_red_determinisation, "determinisation")); 
 
   checkbox&   bisimulation_add_eq_classes = d.create< checkbox >();
   text_field& tau_field                   = d.create< text_field >();
@@ -634,7 +634,7 @@ bool ltsconvert_tool::perform_task(tipi::configuration& c) {
 
     tool_options.equivalence = method;
 
-    if (method == mcrl2::lts::lts_eq_isomorph) {
+    if (method == mcrl2::lts::lts_red_determinisation) {
       tool_options.determinise = true;
     }
 

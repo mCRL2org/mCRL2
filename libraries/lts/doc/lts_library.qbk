@@ -55,10 +55,7 @@ The other classes, lts_dot_options, lts_eq_options and lts_extra, are used to
 store options for certain operations. 
 [endsect]
 
-[section: Tutorial]
-We perform two typical programming tasks to illustrate the use of the LTS
-library. Before we do so, however, we describe the common parts.
-
+[section: Starting up]
 First of all we must include the appropriate header to use the LTS library.
 
   #include <mcrl2/lts/liblts.h>
@@ -71,6 +68,8 @@ of the LTS library.
 In the rest of the tutorial we assume that this is specified. If one does not
 wish to use this, one will have to prepend mcrl2::lts:: to all references to
 entities in the LTS library.
+
+[endsect]
 
 [section: Creating an LTS]
 
@@ -122,7 +121,7 @@ filename and the type of the output (lts_aut in this case).
 }
 [endsect]
 
-[section: Read, reduce and print]
+[section: Read and print]
 
 Now we have created an LTS file, we describe how to read it in again, apply
 some reduction and print its contents. There are two ways to read an LTS from a
@@ -177,8 +176,77 @@ Note that the initial state is 1. To verify this one could also print
 l.initial_state(). 
 [endsect]
 
-[endsect]
+[section: Reducing and comparing labelled transition systems]
 
+It is possible to reduce an lts modulo different equivalencies. 
+The transition system will be replaced by another transition system
+that is generally smaller in such a way that the initial state is
+still equivalent to the old initial state. The equivalencies that
+have been implemented are:
+
+    lts_eq_none:             No reduction
+    lts_eq_bisim:            Strong bisimulation equivalence 
+    lts_eq_branching_bisim:  Branching bisimulation equivalence
+    lts_eq_divergence_preserving_branching_bisim:
+                             Divergence preserving branching bisimulation equivalence 
+    lts_eq_sim:              Strong simulation equivalence 
+    lts_eq_trace:            Strong trace equivalence
+    lts_eq_weak_trace:       Weak trace equivalence
+    lts_eq_isomorph:         Isomorphism.
+
+Application of the reduction of an lts is pretty simple. Note that the
+lts is replaced by the reduced lts. The original lts will be destroyed.
+
+    lts l("an_lts.aut");
+    if (l.reduce(lts_eq_branching_bisim))
+    { cout << "Transition system is succesfully reduced modulo branching bisimulation";
+    }
+    else 
+    { cout << "Reduction failed";
+    }
+
+It is also possible to compare an lts to another lts. This can be done
+using the equivalence options mentioned above. But it is also possible to
+use the following preorders. 
+
+    lts_pre_none:             No preorder 
+    lts_pre_sim:              Strong simulation preorder 
+    lts_pre_trace:            Strong trace preorder 
+    lts_pre_weak_trace:       Weak trace preorder 
+
+Comparing labelled transition systems is done using the reduction algorithms.
+This means that the transition systems are destroyed when the comparison is
+calculated. To avoid destruction a copy is made of the transition system. But as
+transition systems can be extremely large, this is not always desired. Therefore,
+we provide a compare function that makes copies of the transition system to 
+avoid that they get damaged and a destructive_compare which may change both
+transition systems. 
+
+    lts l1("lts1.aut");
+    lts l2("lts2.aut");
+
+    if (l1.compare(l2,lts_eq_bisim))    // Non destructive compare.
+    { cout << "Transition systems are bisimilar\n";
+    }
+    else
+    { cout << "Transitions systems are not bisimilar";
+    }
+    
+    if (l1.destructive_compare(l2,lts_pre_sim))  // Destructive compare.
+    { cout << "Transitions system l1 is strongly simulated by l2";
+    }
+    else
+    { cout << "Lts l1 is not strongly simulated by l2";
+    }
+
+[endsect]
+[section: Some utility functions]
+Explain:
+   
+   determinise(l);
+   reachability_check(l,remove_unreachable);
+   is_deterministic(l);
+   scc_reduce(l, preserve_divergence_loops);
 [section: References]
 # [@http://www.mcrl2.org/libref/lts/ LTS reference manual]
 

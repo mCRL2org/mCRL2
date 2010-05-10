@@ -25,7 +25,7 @@ namespace mcrl2
 namespace lts
 {
 
-bool p_lts::read_from_aut(string const& filename)
+bool lts::read_from_aut(string const& filename)
 {
   ifstream is(filename.c_str());
 
@@ -202,7 +202,7 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   return true;
 }
 
-bool p_lts::read_from_aut(istream &is)
+bool lts::read_from_aut(istream &is)
 {
   unsigned int ntrans,nstate;
   #define READ_FROM_AUT_BUF_SIZE 8196
@@ -223,7 +223,7 @@ bool p_lts::read_from_aut(istream &is)
 
   for (unsigned int i=0; i<nstate; i++)
   {
-    p_add_state();
+    add_state();
   }
   assert(nstate == nstates);
 
@@ -268,10 +268,10 @@ bool p_lts::read_from_aut(istream &is)
     {
       ATbool b;
       label = ATindexedSetPut(labs,t,&b);
-      p_add_label(t,!strcmp(s,"tau"));
+      add_label(t,!strcmp(s,"tau"));
     }
 
-    p_add_transition(from,(unsigned int) label,to);
+    add_transition(from,(unsigned int) label,to);
   }
   ATtableDestroy(labs);
   if ( ntrans != ntransitions )
@@ -285,7 +285,7 @@ bool p_lts::read_from_aut(istream &is)
   return true;
 }
 
-bool p_lts::write_to_aut(string const& filename)
+bool lts::write_to_aut(string const& filename)
 {
   ofstream os(filename.c_str());
 
@@ -302,7 +302,7 @@ bool p_lts::write_to_aut(string const& filename)
   return true;
 }
 
-bool p_lts::write_to_aut(ostream &os)
+bool lts::write_to_aut(ostream &os)
 {
   os << "des (0," << ntransitions << "," << nstates << ")" << endl;
 
@@ -327,7 +327,7 @@ bool p_lts::write_to_aut(ostream &os)
       to = 0;
     }
     os << "(" << from << ",\""
-       << p_label_value_str(transitions[i].label)
+       << label_value_str(transitions[i].label)
        << "\"," << to << ")" << endl;
   }
 

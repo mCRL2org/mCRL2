@@ -10,7 +10,7 @@
 
 #include <aterm2.h>
 #include <mcrl2/atermpp/aterm_init.h>
-#include <mcrl2/lts/lts.h>
+#include <mcrl2/lts/lts_algorithm.h>
 
 using namespace mcrl2::lts;
 
@@ -78,22 +78,20 @@ int test_main(int argc, char **argv)
   l4.add_transition(1,1,2);
   l4.add_transition(1,1,3);
 
-  std::cerr << "Hier\n";
-  BOOST_CHECK( l1.compare(l2,lts_eq_trace) );
-  std::cerr << "Hier\n";
-  BOOST_CHECK( l2.compare(l1,lts_eq_trace) );
+  BOOST_CHECK( compare(l1,l2,lts_eq_trace) );
+  BOOST_CHECK( compare(l2,l1,lts_eq_trace) );
 
-  BOOST_CHECK( ! l1.compare(l3,lts_eq_trace) );
-  BOOST_CHECK( ! l3.compare(l1,lts_eq_trace) );
+  BOOST_CHECK( ! compare(l1,l3,lts_eq_trace) );
+  BOOST_CHECK( ! compare(l3,l1,lts_eq_trace) );
 
-  BOOST_CHECK( ! l1.compare(l4,lts_eq_trace) );
-  BOOST_CHECK( ! l4.compare(l1,lts_eq_trace) );
+  BOOST_CHECK( ! compare(l1,l4,lts_eq_trace) );
+  BOOST_CHECK( ! compare(l4,l1,lts_eq_trace) );
 
-  BOOST_CHECK( l2.compare(l3,lts_eq_weak_trace) );
-  BOOST_CHECK( l3.compare(l2,lts_eq_weak_trace) );
+  BOOST_CHECK( compare(l2,l3,lts_eq_weak_trace) );
+  BOOST_CHECK( compare(l3,l2,lts_eq_weak_trace) );
 
-  BOOST_CHECK( ! l3.compare(l4,lts_eq_weak_trace) );
-  BOOST_CHECK( ! l4.compare(l3,lts_eq_weak_trace) );
+  BOOST_CHECK( ! compare(l3,l4,lts_eq_weak_trace) );
+  BOOST_CHECK( ! compare(l4,l3,lts_eq_weak_trace) );
 
   return 0;
 }

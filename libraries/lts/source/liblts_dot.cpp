@@ -30,7 +30,7 @@ namespace mcrl2
 namespace lts
 {
 
-bool p_lts::read_from_dot(string const& filename)
+bool lts::read_from_dot(string const& filename)
 {
   ifstream is(filename.c_str());
 
@@ -47,7 +47,7 @@ bool p_lts::read_from_dot(string const& filename)
   return r;
 }
 
-bool p_lts::read_from_dot(istream &is)
+bool lts::read_from_dot(istream &is)
 {
   if ( parse_dot(is,*lts_object) )
   {
@@ -113,7 +113,7 @@ bool p_lts::read_from_dot(istream &is)
 }
 
 
-bool p_lts::write_to_dot(string const& filename, lts_dot_options opts)
+bool lts::write_to_dot(string const& filename, lts_dot_options opts)
 {
   ofstream os(filename.c_str());
   if ( !os.is_open() )
@@ -129,7 +129,7 @@ bool p_lts::write_to_dot(string const& filename, lts_dot_options opts)
   return r;
 }
 
-bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
+bool lts::write_to_dot(ostream &os, lts_dot_options opts)
 {
   os << "digraph \"" << *opts.name << "\" {" << endl; // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
   // os << "size=\"7,10.5\";" << endl;
@@ -155,7 +155,7 @@ bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
           os << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[i]),0));
           os << " [ label=\"" << ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(ATgetNext((ATermList) state_values[i])),0))) << "\" ];" << endl;
         } else {
-          os << i << " [ label=\"" << p_state_value_str(i) << "\" ];" << endl;
+          os << i << " [ label=\"" << state_value_str(i) << "\" ];" << endl;
         }
       }
     }
@@ -166,9 +166,9 @@ bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
     {
       os << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[transitions[i].from]),0));
       os << " -> " << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[transitions[i].to]),0));
-      os << " [ label=\"" << p_label_value_str(transitions[i].label) << "\" ];" << endl;
+      os << " [ label=\"" << label_value_str(transitions[i].label) << "\" ];" << endl;
     } else {
-      os << transitions[i].from << "->" << transitions[i].to << "[label=\"" << p_label_value_str(transitions[i].label) << "\"];" << endl;
+      os << transitions[i].from << "->" << transitions[i].to << "[label=\"" << label_value_str(transitions[i].label) << "\"];" << endl;
     }
   }
 

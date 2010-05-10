@@ -10,7 +10,7 @@
 
 #include <cstdlib> // free
 #include "boost/scoped_array.hpp"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 
 using namespace std;
@@ -23,32 +23,30 @@ namespace lts
 namespace detail
 {
   enum t_reach { unknown, reached, explored };
-}
-/// \endcond
 
-void p_lts::tau_star_reduce()
+void tau_star_reduce(lts &l)
   // This method assumes there are not tau loops!
 {
-  p_sort_transitions();
-  unsigned int *trans_lut = p_get_transition_indices();
-  boost::scoped_array< unsigned int > new_trans_lut(new unsigned int[nstates + 1]);
+  l.sort_transitions();
+  unsigned int *trans_lut = l.get_transition_indices();
+  boost::scoped_array< unsigned int > new_trans_lut(new unsigned int[l.num_states() + 1]);
 
-  new_trans_lut[0] = ntransitions;
-  for (unsigned int state = 0; state < nstates; state++)
+  new_trans_lut[0] = l.num_transitions();
+  for (unsigned int state = 0; state < l.num_states(); state++)
   {
     unsigned int t = trans_lut[state];
     while ( t < trans_lut[state+1] )
     {
-      if ( taus[transitions[t].label] &&
-          (transitions[t].from != transitions[t].to) )
+      if ( l.taus[l.transitions[t].label] &&
+          (l.transitions[t].from != l.transitions[t].to) )
       {
-        unsigned int to = transitions[t].to;
+        unsigned int to = l.transitions[t].to;
         unsigned int u = trans_lut[to];
         while ( u < trans_lut[to+1] )
         {
-          if ( !( (to < state) && taus[transitions[u].label] ) )
+          if ( !( (to < state) && l.taus[l.transitions[u].label] ) )
           {
-            p_add_transition(state,transitions[u].label,transitions[u].to);
+            l.add_transition(state,l.transitions[u].label,l.transitions[u].to);
           }
           u++;
         }
@@ -57,9 +55,9 @@ void p_lts::tau_star_reduce()
           u = new_trans_lut[to];
           while ( u < new_trans_lut[to+1] )
           {
-            if ( !taus[transitions[u].label] )
+            if ( !l.taus[l.transitions[u].label] )
             {
-              p_add_transition(state,transitions[u].label,transitions[u].to);
+              l.add_transition(state,l.transitions[u].label,l.transitions[u].to);
             }
             u++;
           }
@@ -68,18 +66,18 @@ void p_lts::tau_star_reduce()
       t++;
     }
     t = new_trans_lut[state];
-    while ( t < ntransitions )
+    while ( t < l.num_transitions() )
     {
-      if ( taus[transitions[t].label] &&
-          (transitions[t].from != transitions[t].to) )
+      if ( l.taus[l.transitions[t].label] &&
+          (l.transitions[t].from != l.transitions[t].to) )
       {
-        unsigned int to = transitions[t].to;
+        unsigned int to = l.transitions[t].to;
         unsigned int u = trans_lut[to];
         while ( u < trans_lut[to+1] )
         {
-          if ( !( (to < state) && taus[transitions[u].label] ) )
+          if ( !( (to < state) && l.taus[l.transitions[u].label] ) )
           {
-            p_add_transition(state,transitions[u].label,transitions[u].to);
+            l.add_transition(state,l.transitions[u].label,l.transitions[u].to);
           }
           u++;
         }
@@ -88,9 +86,9 @@ void p_lts::tau_star_reduce()
           u = new_trans_lut[to];
           while ( u < new_trans_lut[to+1] )
           {
-            if ( !taus[transitions[u].label] )
+            if ( !l.taus[l.transitions[u].label] )
             {
-              p_add_transition(state,transitions[u].label,transitions[u].to);
+              l.add_transition(state,l.transitions[u].label,l.transitions[u].to);
             }
             u++;
           }
@@ -98,32 +96,32 @@ void p_lts::tau_star_reduce()
       }
       t++;
     }
-    new_trans_lut[state+1] = ntransitions;
+    new_trans_lut[state+1] = l.num_transitions();
   }
 
   using namespace mcrl2::lts::detail;
 
-  boost::scoped_array< t_reach > reachable(new t_reach[nstates]);
-  for (unsigned int i=0; i<nstates; i++)
+  boost::scoped_array< t_reach > reachable(new t_reach[l.num_states()]);
+  for (unsigned int i=0; i<l.num_states(); i++)
   {
     reachable[i] = unknown;
   }
-  reachable[init_state] = reached;
+  reachable[l.initial_state()] = reached;
   bool notdone = true;
   while ( notdone )
   {
     notdone = false;
-    for (unsigned int i=0; i<nstates; i++)
+    for (unsigned int i=0; i<l.num_states(); i++)
     {
       if ( reachable[i] == reached )
       {
         unsigned int t = trans_lut[i];
         while ( t < trans_lut[i+1] )
         {
-          if ( reachable[transitions[t].to] == unknown )
+          if ( reachable[l.transitions[t].to] == unknown )
           {
-            reachable[transitions[t].to] = reached;
-            if ( transitions[t].to < i )
+            reachable[l.transitions[t].to] = reached;
+            if ( l.transitions[t].to < i )
             {
               notdone = true;
             }
@@ -133,10 +131,10 @@ void p_lts::tau_star_reduce()
         t = new_trans_lut[i];
         while ( t < new_trans_lut[i+1] )
         {
-          if ( reachable[transitions[t].to] == unknown )
+          if ( reachable[l.transitions[t].to] == unknown )
           {
-            reachable[transitions[t].to] = reached;
-            if ( transitions[t].to < i )
+            reachable[l.transitions[t].to] = reached;
+            if ( l.transitions[t].to < i )
             {
               notdone = true;
             }
@@ -150,60 +148,62 @@ void p_lts::tau_star_reduce()
 
   free(trans_lut);
 
-  boost::scoped_array< unsigned int > state_map(new unsigned int[nstates]);
+  boost::scoped_array< unsigned int > state_map(new unsigned int[l.num_states()]);
   unsigned int new_nstates = 0;
-  for (unsigned int i=0; i < nstates; i++)
+  for (unsigned int i=0; i < l.num_states(); i++)
   {
     if ( reachable[i] != unknown )
     {
       state_map[i] = new_nstates;
-      if ( state_info )
+      if ( l.state_info )
       {
-        state_values[new_nstates] = state_values[i];
+        l.state_values[new_nstates] = l.state_values[i];
       }
       new_nstates++;
     }
   }
 
-  boost::scoped_array< unsigned int > label_map(new unsigned int[nlabels]);
+  boost::scoped_array< unsigned int > label_map(new unsigned int[l.num_labels()]);
   unsigned int new_nlabels = 0;
-  for (unsigned int i=0; i < nlabels; i++)
+  for (unsigned int i=0; i < l.num_labels(); i++)
   {
-    if ( !taus[i] )
+    if ( !l.taus[i] )
     {
       label_map[i] = new_nlabels;
-      if ( label_info )
+      if ( l.label_info )
       {
-        label_values[new_nlabels] = label_values[i];
+        l.label_values[new_nlabels] = l.label_values[i];
       }
       new_nlabels++;
     }
   }
 
   unsigned int new_ntransitions = 0;
-  for (unsigned int i=0; i < ntransitions; i++)
+  for (unsigned int i=0; i < l.num_transitions(); i++)
   {
-    if ( (reachable[transitions[i].from] != unknown) &&
-         !taus[transitions[i].label] )
+    if ( (reachable[l.transitions[i].from] != unknown) &&
+         !l.taus[l.transitions[i].label] )
     {
-      transition t = transitions[i];
+      transition t = l.transitions[i];
       t.from = state_map[t.from];
       t.label = label_map[t.label];
       t.to = state_map[t.to];
-      transitions[new_ntransitions] = t;
+      l.transitions[new_ntransitions] = t;
       new_ntransitions++;
     }
   }
 
-  for ( unsigned int i=0; i < nlabels; i++)
+  for ( unsigned int i=0; i < l.num_labels(); i++)
   {
-    taus[i] = false;
+    l.taus[i] = false;
   }
 
-  nstates = new_nstates;
-  nlabels = new_nlabels;
-  ntransitions = new_ntransitions;
+  l.set_num_states(new_nstates);
+  l.set_num_labels(new_nlabels);
+  l.set_num_transitions(new_ntransitions);
 }
 
+}
+/// \endcond
 }
 }

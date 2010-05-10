@@ -36,7 +36,7 @@ namespace mcrl2
 namespace lts
 {
 
-bool p_lts::read_from_bcg(string const& filename)
+bool lts::read_from_bcg(string const& filename)
 {
   string::size_type pos = filename.rfind('.');
   if ( (pos == string::npos) || (filename.substr(pos+1) != "bcg") )
@@ -89,7 +89,7 @@ bool p_lts::read_from_bcg(string const& filename)
   return true;
 }
 
-bool p_lts::write_to_bcg(string const& filename)
+bool lts::write_to_bcg(string const& filename)
 {
   BCG_IO_WRITE_BCG_SURVIVE(BCG_TRUE);
   BCG_TYPE_BOOLEAN b = BCG_IO_WRITE_BCG_BEGIN(

@@ -22,7 +22,7 @@ class sim_partitioner
   public:
     /** Creates a partitioner for an LTS.
      * \param[in] l Pointer to the LTS. */
-    sim_partitioner(mcrl2::lts::lts *l);
+    sim_partitioner(mcrl2::lts::lts &l);
 
     /** Destroys this partitioner. */
     ~sim_partitioner();
@@ -86,7 +86,7 @@ class sim_partitioner
       int prev;
     };
 
-    mcrl2::lts::lts *aut;
+    mcrl2::lts::lts &aut;
     uint **trans_index;
     uint s_Sigma;
     uint s_Pi;

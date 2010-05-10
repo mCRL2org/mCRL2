@@ -13,7 +13,7 @@
 
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/exception.h"
@@ -145,9 +145,9 @@ class ltscompare_tool : public ltscompare_base
       if ( tool_options.equivalence != lts_eq_none )
       {
         gsVerboseMsg("comparing LTSs using %s...\n",
-            lts::name_of_equivalence(tool_options.equivalence).c_str());
+            name_of_equivalence(tool_options.equivalence).c_str());
 
-        result = l1.compare(l2,tool_options.equivalence,tool_options.eq_opts);
+        result = compare(l1,l2,tool_options.equivalence,tool_options.eq_opts);
 
         gsMessage("LTSs are %s%s\n",
             ((result) ? "" : "not "),
@@ -157,9 +157,9 @@ class ltscompare_tool : public ltscompare_base
       if ( tool_options.preorder != lts_pre_none )
       {
         gsVerboseMsg("comparing LTSs using %s...\n",
-            lts::name_of_preorder(tool_options.preorder).c_str());
+            name_of_preorder(tool_options.preorder).c_str());
 
-        result = l1.compare(l2,tool_options.preorder,tool_options.eq_opts);
+        result = compare(l1,l2,tool_options.preorder,tool_options.eq_opts);
 
         gsMessage("LTS in %s is %s%s LTS in %s\n",
             tool_options.name_for_first.c_str(),
@@ -210,12 +210,12 @@ class ltscompare_tool : public ltscompare_base
           "use FORMAT as the format for INFILE2", 'j').
         add_option("equivalence", make_mandatory_argument("NAME"),
           "use equivalence NAME:\n"
-          +lts::supported_lts_equivalences_text(allowed_eqs())+"\n"
+          +supported_lts_equivalences_text(allowed_eqs())+"\n"
           "(not allowed in combination with -p/--preorder)"
           , 'e').
         add_option("preorder", make_mandatory_argument("NAME"),
           "use preorder NAME:\n"
-          +lts::supported_lts_preorders_text()+"\n"
+          +supported_lts_preorders_text()+"\n"
           "(not allowed in combination with -e/--equivalence)"
           , 'p').
         add_option("tau", make_mandatory_argument("ACTNAMES"),
@@ -252,7 +252,7 @@ class ltscompare_tool : public ltscompare_base
   
       if (parser.options.count("equivalence")) {
   
-        tool_options.equivalence = lts::parse_equivalence(
+        tool_options.equivalence = parse_equivalence(
             parser.option_argument("equivalence"));
   
         if ( allowed_eqs().count(tool_options.equivalence) == 0 )
@@ -266,7 +266,7 @@ class ltscompare_tool : public ltscompare_base
   
       if (parser.options.count("preorder")) {
   
-        tool_options.preorder = lts::parse_preorder(
+        tool_options.preorder = parse_preorder(
             parser.option_argument("preorder"));
   
         if (tool_options.preorder == lts_pre_none)

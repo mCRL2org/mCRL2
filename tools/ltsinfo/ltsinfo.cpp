@@ -36,7 +36,7 @@ static const std::set<mcrl2::lts::lts_equivalence> &initialise_allowed_eqs()
   s.insert(lts_eq_bisim);
   s.insert(lts_eq_branching_bisim);
   s.insert(lts_eq_divergence_preserving_branching_bisim);
-  s.insert(lts_eq_isomorph);
+  s.insert(lts_red_determinisation);
   return s;
 }
 static const std::set<mcrl2::lts::lts_equivalence> &allowed_eqs()
@@ -69,7 +69,7 @@ class ltsinfo_tool : public ltsinfo_base
         +mcrl2::lts::lts::supported_lts_formats_text()
       ),
       intype(mcrl2::lts::lts_none),
-      determinism_equivalence(mcrl2::lts::lts_eq_isomorph)
+      determinism_equivalence(mcrl2::lts::lts_red_determinisation)
     {
     }
 
@@ -84,14 +84,14 @@ class ltsinfo_tool : public ltsinfo_base
       desc.
         add_option("equivalence", make_mandatory_argument("NAME"),
           "use equivalence NAME for deterministic check:\n"
-          "  '" + lts::string_for_equivalence(lts_eq_isomorph) + "' for "
-                + lts::name_of_equivalence(lts_eq_isomorph) + " (default),\n"
-          "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
-                + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
-          "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
-                + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
-          "  '" + lts::string_for_equivalence(lts_eq_divergence_preserving_branching_bisim) + "' for "
-                + lts::name_of_equivalence(lts_eq_divergence_preserving_branching_bisim) + ", or\n"
+          "  '" + string_for_equivalence(lts_red_determinisation) + "' for "
+                + name_of_equivalence(lts_red_determinisation) + " (default),\n"
+          "  '" + string_for_equivalence(lts_eq_bisim) + "' for "
+                + name_of_equivalence(lts_eq_bisim) + ",\n"
+          "  '" + string_for_equivalence(lts_eq_branching_bisim) + "' for "
+                + name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
+          "  '" + string_for_equivalence(lts_eq_divergence_preserving_branching_bisim) + "' for "
+                + name_of_equivalence(lts_eq_divergence_preserving_branching_bisim) + ", or\n"
           "  'none' for not performing the check at all",
           'e').
         add_option("in", make_mandatory_argument("FORMAT"),
@@ -105,7 +105,7 @@ class ltsinfo_tool : public ltsinfo_base
       ltsinfo_base::parse_options(parser);
 
       if (parser.options.count("equivalence")) {
-        determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
+        determinism_equivalence = parse_equivalence(parser.option_argument("equivalence"));
         if (allowed_eqs().count(determinism_equivalence) == 0 &&
             parser.option_argument("equivalence") != "none")
         {
@@ -179,22 +179,22 @@ class ltsinfo_tool : public ltsinfo_base
         std::cout << "Created by: " << l.get_creator() << std::endl;
       }
       gsVerboseMsg("checking reachability...\n");
-      if ( !l.reachability_check() )
+      if ( !reachability_check(l) )
       {
         std::cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
       }
       if ( determinism_equivalence != lts_eq_none )
       {
-        gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",lts::name_of_equivalence(determinism_equivalence).c_str());
+        gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",name_of_equivalence(determinism_equivalence).c_str());
         gsVerboseMsg("minimisation...\n");
 
-        l.reduce(determinism_equivalence);
+        reduce(l,determinism_equivalence);
         gsVerboseMsg("deterministic check...\n");
-        if ( l.is_deterministic() )
+        if ( is_deterministic(l) )
         {
-          std::cout << "LTS is deterministic (modulo " << lts::name_of_equivalence(determinism_equivalence) << ")" << std::endl;
+          std::cout << "LTS is deterministic (modulo " << name_of_equivalence(determinism_equivalence) << ")" << std::endl;
         } else {
-          std::cout << "LTS is not deterministic (modulo " << lts::name_of_equivalence(determinism_equivalence) << ")" << std::endl;
+          std::cout << "LTS is not deterministic (modulo " << name_of_equivalence(determinism_equivalence) << ")" << std::endl;
         }
       }
 
@@ -230,7 +230,7 @@ class ltsinfo_tool : public ltsinfo_base
       m.append(d.create< label >().set_text("Deterministic check:")).
         append(d.create< horizontal_box >().
             append(determinism_selector.associate(mcrl2::lts::lts_eq_none, "None")).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_isomorph, "Isomorphism", true)).
+            append(determinism_selector.associate(mcrl2::lts::lts_red_determinisation, "Isomorphism", true)).
             append(determinism_selector.associate(mcrl2::lts::lts_eq_bisim, "Strong bisimilarity")).
             append(determinism_selector.associate(mcrl2::lts::lts_eq_branching_bisim, "Branching bisimilarity")).
             append(determinism_selector.associate(mcrl2::lts::lts_eq_divergence_preserving_branching_bisim, "Divergence preserving branching bisimilarity")));
@@ -287,10 +287,10 @@ class ltsinfo_tool : public ltsinfo_base
         std::string deterministic("-");
 
         if(determinism_equivalence != mcrl2::lts::lts_eq_none) {
-          l.reduce(determinism_equivalence);
+          reduce(l,determinism_equivalence);
 
-          deterministic = std::string(l.is_deterministic() ? "yes" : "no") + ", modulo " +
-                                 lts::name_of_equivalence(determinism_equivalence);
+          deterministic = std::string(is_deterministic(l) ? "yes" : "no") + ", modulo " +
+                                 name_of_equivalence(determinism_equivalence);
         }
 
         m.append(d.create< vertical_box >().set_default_alignment(layout::left).
@@ -326,7 +326,7 @@ class ltsinfo_tool : public ltsinfo_base
                         margins(5,0,5,20));
 
         gsVerboseMsg("checking reachability...\n");
-        if (!l.reachability_check()) {
+        if (!reachability_check(l)) {
             n.append(d.create< label >().set_text("Warning: some states are not reachable from the initial state!")).
               append(d.create< label >().set_text("(This might result in unspecified behaviour of LTS tools.)"));
         }

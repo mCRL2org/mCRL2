@@ -153,17 +153,17 @@ namespace detail
 
 } // namespace detail
 
-  void lts::scc_reduce(const bool preserve_divergence_loops /* = false */)
+  void scc_reduce(lts &l,const bool preserve_divergence_loops /* = false */)
   { 
-    detail::scc_partitioner scc_part(*this);
+    detail::scc_partitioner scc_part(l);
   
     // Clear this LTS, but keep the labels
-    clear_type();
-    clear_states();
+    l.clear_type();
+    l.clear_states();
     
     // Set the resulting number of states and transitions.
-    nstates = scc_part.num_eq_classes();
-    init_state = scc_part.get_eq_class(init_state);
+    l.set_num_states(scc_part.num_eq_classes());
+    l.set_initial_state(scc_part.get_eq_class(l.initial_state()));
 
     scc_part.replace_transitions(preserve_divergence_loops);
   }

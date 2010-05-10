@@ -109,7 +109,7 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification const& spec)
   return r;
 }
 
-bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification const& spec)
+bool lts::read_from_fsm(std::istream &is, lts_type type, lps::specification const& spec)
 {
   if ( parse_fsm(is,*lts_object) )
   {
@@ -125,7 +125,7 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification co
       }
       if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )
       {
-        p_remove_state_values();
+        remove_state_values();
       } else {
         for (unsigned int i=0; i<nstates; i++)
         {
@@ -144,7 +144,7 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification co
     } else if ( type == lts_mcrl ) {
       if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )
       {
-        p_remove_state_values();
+        remove_state_values();
       } else {
         for (unsigned int i=0; i<nstates; i++)
         {
@@ -167,7 +167,7 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification co
   }
 }
 
-bool p_lts::read_from_fsm(std::string const &filename, lts_type type, lps::specification const& spec)
+bool lts::read_from_fsm(std::string const &filename, lts_type type, lps::specification const& spec)
 {
   std::ifstream is(filename.c_str());
 
@@ -180,7 +180,7 @@ bool p_lts::read_from_fsm(std::string const &filename, lts_type type, lps::speci
   return read_from_fsm(is,type,spec);
 }
 
-bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
+bool lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
 {
   // determine number of state parameters
   unsigned int num_params;
@@ -360,7 +360,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     }
     // correct state numbering
     os << from+1 << " " << to+1 << " \"";
-    os << p_label_value_str(transitions[i].label);
+    os << label_value_str(transitions[i].label);
     os << "\"" << std::endl;
   }
 
@@ -377,7 +377,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
   return true;
 }
 
-bool p_lts::write_to_fsm(std::string const& filename, lts_type type, ATermList params)
+bool lts::write_to_fsm(std::string const& filename, lts_type type, ATermList params)
 {
   std::ofstream os(filename.c_str());
 
@@ -492,7 +492,7 @@ static bool isFSMState(ATerm a)
   return false;
 }
 
-lts_type p_lts::fsm_get_lts_type()
+lts_type lts::fsm_get_lts_type()
 {
   if ( label_info )
   {
@@ -631,7 +631,7 @@ static bool check_type(lts_type type, lps::specification const&/*spec*/)
   return (type == lts_mcrl2);
 }
 
-bool p_lts::read_from_fsm(std::string const& filename, ATerm lps)
+bool lts::read_from_fsm(std::string const& filename, ATerm lps)
 {
   lts_type tmp = get_lps_type(lps);
   if ( tmp == lts_mcrl2 )
@@ -643,12 +643,12 @@ bool p_lts::read_from_fsm(std::string const& filename, ATerm lps)
   }
 }
 
-bool p_lts::read_from_fsm(std::string const& filename, lps::specification const& spec)
+bool lts::read_from_fsm(std::string const& filename, lps::specification const& spec)
 {
   return (&spec == &empty_specification()) ? read_from_fsm(filename, lts_none) : read_from_fsm(filename,lts_mcrl2,spec);
 }
 
-bool p_lts::read_from_fsm(std::istream &is, ATerm lps)
+bool lts::read_from_fsm(std::istream &is, ATerm lps)
 {
   lts_type tmp = get_lps_type(lps);
   if ( tmp == lts_mcrl2 )
@@ -660,12 +660,12 @@ bool p_lts::read_from_fsm(std::istream &is, ATerm lps)
   }
 }
 
-bool p_lts::read_from_fsm(std::istream &is, lps::specification const& spec)
+bool lts::read_from_fsm(std::istream &is, lps::specification const& spec)
 {
   return (&spec == &empty_specification()) ? read_from_fsm(is, lts_none) : read_from_fsm(is,lts_mcrl2,spec);
 }
 
-bool p_lts::write_to_fsm(std::string const& filename, ATerm lps)
+bool lts::write_to_fsm(std::string const& filename, ATerm lps)
 {
   lts_type tmp = fsm_get_lts_type();
   if ( (lps != NULL) && !check_type(tmp,lps) )
@@ -677,7 +677,7 @@ bool p_lts::write_to_fsm(std::string const& filename, ATerm lps)
   }
 }
 
-bool p_lts::write_to_fsm(std::string const& filename, lps::specification const& spec)
+bool lts::write_to_fsm(std::string const& filename, lps::specification const& spec)
 {
   lts_type tmp = fsm_get_lts_type();
   if ( !check_type(tmp, spec) )
@@ -689,7 +689,7 @@ bool p_lts::write_to_fsm(std::string const& filename, lps::specification const& 
   }
 }
 
-bool p_lts::write_to_fsm(std::ostream &os, ATerm lps)
+bool lts::write_to_fsm(std::ostream &os, ATerm lps)
 {
   lts_type tmp = fsm_get_lts_type();
   if ( (lps != NULL) && !check_type(tmp,lps) )
@@ -701,7 +701,7 @@ bool p_lts::write_to_fsm(std::ostream &os, ATerm lps)
   }
 }
 
-bool p_lts::write_to_fsm(std::ostream &os, lps::specification const& spec)
+bool lts::write_to_fsm(std::ostream &os, lps::specification const& spec)
 {
   lts_type tmp = fsm_get_lts_type();
   if ( !check_type(tmp, spec) )

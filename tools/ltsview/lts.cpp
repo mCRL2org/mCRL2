@@ -10,7 +10,7 @@
 /// \brief Source file of LTS class
 
 #include "wx.hpp" // precompiled headers
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/print.h"
 #include "cluster.h"
@@ -335,7 +335,8 @@ bool LTS::readFromFile(std::string filename)
   }
 
   // remove unreachable states
-  mcrl2_lts->reachability_check(true);
+  
+  reachability_check(*mcrl2_lts,true);
 
   states.clear();
   states.reserve(mcrl2_lts->num_states());
