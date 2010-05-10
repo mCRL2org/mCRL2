@@ -25,6 +25,16 @@
 
 using namespace mcrl2;
 
+// Garbage collect after each case.
+struct collect_after_test_case {
+  ~collect_after_test_case()
+  {
+    core::garbage_collect();
+  }
+};
+
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+
 // Expected failures, these are not going to be fixed in the current
 // implementation of the type checker
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_list_pos_nat, 1)

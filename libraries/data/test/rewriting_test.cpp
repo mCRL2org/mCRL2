@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>
 #include <set>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/core/text_utility.h"
@@ -40,6 +40,16 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 
+// Garbage collect after each case.
+struct collect_after_test_case {
+  ~collect_after_test_case()
+  {
+    mcrl2::core::garbage_collect();
+  }
+};
+
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+
 template <typename Rewriter>
 void data_rewrite_test(Rewriter& R, data_expression const& input, data_expression const& expected_output) 
 { data_expression output = R(input);
@@ -58,7 +68,7 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
   }
 }
 
-void bool_rewrite_test() {
+BOOST_AUTO_TEST_CASE(bool_rewrite_test) {
   using namespace mcrl2::data::sort_bool;
 
   data_specification specification;
@@ -88,7 +98,7 @@ void bool_rewrite_test() {
 
 }
 
-void pos_rewrite_test() {
+BOOST_AUTO_TEST_CASE(pos_rewrite_test) {
   using namespace mcrl2::data::sort_pos;
   std::cerr << "pos_rewrite_test\n";
 
@@ -119,7 +129,7 @@ void pos_rewrite_test() {
   data_rewrite_test(R, sort_pos::abs(p4), p4);
 }
 
-void nat_rewrite_test() {
+BOOST_AUTO_TEST_CASE(nat_rewrite_test) {
   using namespace mcrl2::data::sort_nat;
   std::cerr << "nat_rewrite_test\n";
 
@@ -183,7 +193,7 @@ void nat_rewrite_test() {
   data_rewrite_test(R, greater_equal(variable("n", nat()), p0), sort_bool::true_());
 }
 
-void int_rewrite_test() 
+BOOST_AUTO_TEST_CASE(int_rewrite_test)
 {
   using namespace mcrl2::data::sort_int;
   std::cerr << "int_rewrite_test\n";
@@ -243,7 +253,7 @@ void int_rewrite_test()
   data_rewrite_test(R, exp(p2, int2nat(p2)), p4);
 }
 
-void real_rewrite_test() 
+BOOST_AUTO_TEST_CASE(real_rewrite_test)
 { using namespace mcrl2::data::sort_real;
   std::cerr << "real_rewrite_test\n";
 
@@ -303,7 +313,7 @@ void real_rewrite_test()
   data_rewrite_test(R, int2real(round(real_(24, 10))), p2);
 }
 
-void list_rewrite_test() 
+BOOST_AUTO_TEST_CASE(list_rewrite_test)
 { using namespace mcrl2::data::sort_bool;
   using namespace mcrl2::data::sort_list;
   std::cerr << "list_rewrite_test\n";
@@ -328,7 +338,7 @@ void list_rewrite_test()
   data_rewrite_test(R, tail(bool_(), head_true), empty);
 }
 
-void set_rewrite_test() 
+BOOST_AUTO_TEST_CASE(set_rewrite_test)
 {
   using namespace mcrl2::data::sort_set;
   using namespace mcrl2::data::sort_fset;
@@ -402,7 +412,7 @@ void set_rewrite_test()
   data_rewrite_test(R, x, false_());
 }
 
-void bag_rewrite_test() 
+BOOST_AUTO_TEST_CASE(bag_rewrite_test)
 {
   using namespace mcrl2::data::sort_bag;
   using namespace mcrl2::data::sort_fbag;
@@ -459,7 +469,7 @@ void bag_rewrite_test()
   data_rewrite_test(R, x, false_());
 }
 
-void structured_sort_rewrite_test() {
+BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test) {
   using namespace sort_bool;
   using namespace sort_nat;
 
@@ -530,7 +540,7 @@ void structured_sort_rewrite_test() {
 }
 
 // Test for bug #721
-void set_bool_rewrite_test()
+BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
 {
   using namespace sort_bool;
   using namespace sort_nat;
@@ -581,7 +591,7 @@ void set_bool_rewrite_test()
   data_rewrite_test(R, e, false_());
 }
 
-void finite_set_nat_rewrite_test() 
+BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test)
 {
   using namespace mcrl2::data::sort_set;
   using namespace mcrl2::data::sort_fset;
@@ -602,7 +612,7 @@ void finite_set_nat_rewrite_test()
   data_rewrite_test(R, x, false_());
 }
 
-void finite_set_nat_rewrite_test_without_alias() 
+BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
 {
   using namespace mcrl2::data::sort_set;
   using namespace mcrl2::data::sort_fset;
@@ -641,49 +651,33 @@ void finite_set_nat_rewrite_test_without_alias()
   data_rewrite_test(R, x, false_());
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(regression_test_bug_723)
+{
+  std::string s(
+    //"sort BL = List(Bool);\n"
+    "map initial: Nat -> BL;\n"
+    //"    all_false: BL -> Bool;\n"
+    "    all_false: List(Bool) -> Bool;\n"
+    "var b0: Bool;\n"
+    //"    bl: BL;\n"
+    "    bl: List(Bool);\n"
+    "    n: Nat;\n"
+    "eqn initial (1) = [];\n"
+    "    n > 1 -> initial (n) = false |> initial(Int2Nat(n-1));\n"
+    "    all_false ([]) = true;\n"
+    "    all_false (b0 |> bl) = !b0 && all_false(bl);\n"
+  );
+  data_specification specification(parse_data_specification(s));
+
+  data::rewriter R(specification);
+
+  data::data_expression e(parse_data_expression("all_false(initial(1))", specification));
+  data_rewrite_test(R, e, sort_bool::true_());
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
-//  std::string expr1("struct ");
-//  std::string expr1("exists b: Bool, c: Bool. if(b, c, b)");
-//  std::string expr1("forall b: Bool, c: Bool. if(b, c, b)");
-
-  bool_rewrite_test();
-  core::garbage_collect();
-
-  pos_rewrite_test();
-  core::garbage_collect();
-
-  nat_rewrite_test();
-  core::garbage_collect();
-
-  int_rewrite_test();
-  core::garbage_collect();
-
-  real_rewrite_test();
-  core::garbage_collect();
-
-  list_rewrite_test();
-  core::garbage_collect();
-
-  set_rewrite_test();
-  core::garbage_collect();
-
-  bag_rewrite_test();
-  core::garbage_collect();
-
-  structured_sort_rewrite_test();
-  core::garbage_collect();
-
-  set_bool_rewrite_test();
-  core::garbage_collect();
-
-  finite_set_nat_rewrite_test();
-  core::garbage_collect();
-
-  finite_set_nat_rewrite_test_without_alias();
-  core::garbage_collect();
 
   return 0;
 }

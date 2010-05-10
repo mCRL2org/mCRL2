@@ -22,6 +22,7 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
+// Garbage collect after each case.
 struct collect_after_test_case {
   ~collect_after_test_case()
   {
