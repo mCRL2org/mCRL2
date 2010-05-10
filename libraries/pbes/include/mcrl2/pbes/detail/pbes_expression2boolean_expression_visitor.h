@@ -106,7 +106,7 @@ namespace detail {
     /// \brief Visit imp node
     /// \param e A term
     /// \return The result of visiting the node
-    bool leave_imp(const term_type& e, const term_type& /* left */, const term_type& /* right */)
+    void leave_imp()
     {
       // join the two expressions on top of the stack
       bes::boolean_expression right = expression_stack.back();
