@@ -213,7 +213,7 @@ namespace mcrl2 {
       // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
       template < >
       inline
-      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
                   legacy_rewriter, legacy_selector >::increment() {
 
         ATermList assignment_list;
@@ -237,7 +237,7 @@ namespace mcrl2 {
       // Specialisation of classic_enumerator_impl to circumvent data implementation trick
       template < >
       template < typename Container >
-      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
                   legacy_rewriter, legacy_selector >::initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type*) 
       { 
         m_shared_context->m_enumerator.findSolutions(atermpp::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
@@ -277,7 +277,7 @@ struct ns_info
 
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator<
-      mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
+      mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
       legacy_rewriter, legacy_selector > enumerator_type;
 
   typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;

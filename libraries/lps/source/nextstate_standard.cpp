@@ -34,6 +34,8 @@ using namespace mcrl2::core::detail;
 
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 
+#ifdef MCRL2_NEXTSTATE_DEBUG
+
 static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
 {
   std::string result("state(");
@@ -66,6 +68,7 @@ static std::string print_assignments(atermpp::aterm_list a, ns_info const& info)
   res = atermpp::reverse(res);
   return core::pp(res);
 }
+#endif // MCRL2_NEXTSTATE_DEBUG
 
 /* Explanation of the tree building algorithm.
  *
@@ -920,26 +923,6 @@ void NextStateGeneratorStandard::reset(ATerm State, size_t SummandIndex)
           valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
                                      ATgetArgument(info.summands[SummandIndex],1));
         }
-
-        /*
-        // FIXME: JK 9/12/2009 This is an extremely ugly workaround for not
-        //        generating the correct solutions
-        //        when calling the nextstate generator for
-        //        a specific summand. See also bug #154 of
-        //        the LTSmin toolset (http://fmt.cs.utwente.nl/redmine/issues/show/154)
-        //        The workaround was inspired by the tools working correctly
-        //        when printing all valuations at this point in the code.
-        if(single_summand)
-        {
-          if(valuations != ns_info::enumerator_type())
-          {
-            ++valuations;
-          }
-
-          valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
-                                     ATgetArgument(info.summands[SummandIndex],1));
-        }
-        */
 
         sum_idx = SummandIndex + 1;
 }
