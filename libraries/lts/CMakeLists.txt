@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 
 set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_scc.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_liblts_tau_star.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_tau_star.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_sim.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_aut.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_det.cpp
