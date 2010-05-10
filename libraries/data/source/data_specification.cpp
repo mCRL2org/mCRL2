@@ -628,9 +628,9 @@ namespace mcrl2 {
       for( ; !sort_aliases_to_be_investigated.empty() ; )
       { 
         const atermpp::multimap< sort_expression, basic_sort >::iterator p=sort_aliases_to_be_investigated.begin();
-        sort_aliases_to_be_investigated.erase(p);
         const sort_expression lhs=p->first;
         const sort_expression rhs=p->second;
+        sort_aliases_to_be_investigated.erase(p);
      
         for(atermpp::multimap< sort_expression, basic_sort >::const_iterator 
                  i=resulting_normalized_sort_aliases.begin();
