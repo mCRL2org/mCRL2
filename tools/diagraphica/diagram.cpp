@@ -61,7 +61,7 @@ void Diagram::addShape( Shape *s )
 void Diagram::moveShapeToFront( const size_t &idx )
 // ---------------------------------------------
 {
-    if ( 0 <= idx && idx < shapes.size() )
+    if ( idx < shapes.size() )
     {
         Shape* tmp = shapes[idx];
         for ( size_t i = idx; i > 0; --i )
@@ -80,7 +80,7 @@ void Diagram::moveShapeToFront( const size_t &idx )
 void Diagram::moveShapeToBack( const size_t &idx )
 // --------------------------------------------
 {
-    if ( 0 <= idx && idx < shapes.size() )
+    if ( idx < shapes.size() )
     {
         Shape* tmp = shapes[idx];
         for ( size_t i = idx; i < shapes.size()-1; ++i )
@@ -118,7 +118,7 @@ void Diagram::moveShapeForward( const size_t &idx )
 void Diagram::moveShapeBackward( const size_t &idx )
 // ----------------------------------------------
 {
-    if ( 0 <= idx && idx < shapes.size()-1 )
+    if ( idx < shapes.size()-1 )
     {
         Shape* tmp = shapes[idx];
 
@@ -165,7 +165,7 @@ Shape* Diagram::getShape( const size_t &idx )
 // ---------------------------------------
 {
     Shape* result = NULL;
-    if ( 0 <= idx && idx < shapes.size() )
+    if ( idx < shapes.size() )
 	result = shapes[idx];
     return result;
 }
@@ -224,7 +224,7 @@ void Diagram::getGridCoordinates( double &xLeft, double &xRight, double &yTop, d
 void Diagram::deleteShape( const size_t &idx )
 // ----------------------------------------
 {
-    if ( 0 <= idx && idx < shapes.size() )
+    if ( idx < shapes.size() )
     {
         // delete shape
         Shape* s = shapes[idx];

@@ -64,7 +64,7 @@ template <typename Container>
 std::set<data::variable> find_free_variables(Container const& container);
 
 template <typename Container>
-atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible = true);
+atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
 
 template <typename Object, typename OutIter>
 void traverse_sort_expressions(const Object& o, OutIter dest);
@@ -408,7 +408,7 @@ class pbes
 
       pbes<Container> tmp(*this);
       // tmp.data() = data::remove_all_system_defined(tmp.data());
-      atermpp::aterm_appl t = pbes_to_aterm(tmp, false);
+      atermpp::aterm_appl t = pbes_to_aterm(tmp);
       core::detail::save_aterm(t, filename, binary);
     }
 
@@ -678,7 +678,7 @@ class pbes
 /// \brief Conversion to ATermAppl.
 /// \return The PBES converted to ATerm format.
 template <typename Container>
-atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
+atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
 {
   ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(p.global_variables()));
 

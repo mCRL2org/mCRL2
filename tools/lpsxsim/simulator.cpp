@@ -97,7 +97,7 @@ void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
     Reset(initial_state);
 }
 
-void StandardSimulator::LoadView(const std::string &filename)
+void StandardSimulator::LoadView(const std::string& /*filename*/)
 {
   gsErrorMsg("cannot open DLLs without wxWidgets\n");
 }

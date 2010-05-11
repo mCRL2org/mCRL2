@@ -3570,7 +3570,7 @@ class specification_basic_type:public boost::noncopyable
                    const atermpp::vector < process_identifier> &pCRLprocs,
                    const variable_list parameters,
                    const stacklisttype &stack,
-                   const bool canterminate,
+                   //const bool canterminate,
                    const bool regular,
                    const bool singlestate)
     { data_expression atTime;
@@ -3761,7 +3761,7 @@ class specification_basic_type:public boost::noncopyable
                      const process_expression body,
                      const variable_list pars,
                      const stacklisttype &stack,
-                     const bool canterminate,
+                     //const bool canterminate,
                      const bool regular,
                      const bool singlestate,
                      const atermpp::vector < process_identifier> &pCRLprocs)
@@ -3771,14 +3771,14 @@ class specification_basic_type:public boost::noncopyable
         const process_expression t2=choice(body).right();
 
         collectsumlistterm(procId,sumlist,t1,pars,stack,
-                     canterminate,regular,singlestate,pCRLprocs);
+                     /*canterminate,*/regular,singlestate,pCRLprocs);
         collectsumlistterm(procId,sumlist,t2,pars,stack,
-                     canterminate,regular,singlestate,pCRLprocs);
+                     /*canterminate,*/regular,singlestate,pCRLprocs);
         return;
       }
       else
       { add_summands(procId,sumlist,body,pCRLprocs,pars,stack,
-                     canterminate,regular,singlestate);
+                     /*canterminate,*/regular,singlestate);
       }
     }
 
@@ -3786,7 +3786,7 @@ class specification_basic_type:public boost::noncopyable
                      const atermpp::vector < process_identifier> &pCRLprocs,
                      const variable_list pars,
                      const stacklisttype &stack,
-                     bool canterminate,
+                     /*bool canterminate,*/
                      bool regular,
                      bool singlestate)
     { summand_list sumlist;
@@ -3799,7 +3799,7 @@ class specification_basic_type:public boost::noncopyable
                   objectdata[objectIndex(procId)].processbody,
                   pars,
                   stack,
-                  (canterminate&&objectdata[objectIndex(procId)].canterminate),
+                  /*(canterminate&&objectdata[objectIndex(procId)].canterminate),*/
                   regular,
                   singlestate,
                   pCRLprocs);
@@ -4730,7 +4730,7 @@ class specification_basic_type:public boost::noncopyable
        a LPE assuming the pCRL term under consideration is regular */
 
     summand_list generateLPEpCRL(const process_identifier procId,
-                                        const bool canterminate,
+                                        /*const bool canterminate,*/
                                         const bool containstime,
                                         const bool regular,
                                         variable_list &parameters,
@@ -4786,7 +4786,7 @@ class specification_basic_type:public boost::noncopyable
                                   regular,singlecontrolstate,parameters);
 
       summand_list sums=collectsumlist(pCRLprocs,parameters,stack,
-               (canterminate&&objectdata[n].canterminate),regular,
+               /*(canterminate&&objectdata[n].canterminate),*/regular,
                    singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
@@ -6316,14 +6316,14 @@ class specification_basic_type:public boost::noncopyable
 
     summand_list generateLPEmCRLterm(
                        const process_expression t,
-                       const bool canterminate,
+                       /*const bool canterminate,*/
                        const bool regular,
                        const bool rename_variables,
                        variable_list &pars,
                        assignment_list &init)
     { if (is_process_instance(t))
       {
-        summand_list t3=generateLPEmCRL(process_instance(t).identifier(),canterminate,regular,pars,init);
+        summand_list t3=generateLPEmCRL(process_instance(t).identifier(),/*canterminate,*/regular,pars,init);
         long n=objectIndex(process_instance(t).identifier());
         data_expression_list args=process_instance(t).actual_parameters();
         init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
@@ -6410,40 +6410,40 @@ class specification_basic_type:public boost::noncopyable
       if (is_merge(t))
       { variable_list pars1,pars2;
         assignment_list init1,init2;
-        const summand_list t1=generateLPEmCRLterm(process::merge(t).left(),canterminate,
+        const summand_list t1=generateLPEmCRLterm(process::merge(t).left(),/*canterminate,*/
                               regular,rename_variables,pars1,init1);
-        const summand_list t2=generateLPEmCRLterm(process::merge(t).right(),canterminate,
+        const summand_list t2=generateLPEmCRLterm(process::merge(t).right(),/*canterminate,*/
                               regular,true,pars2,init2);
         summand_list t3=parallelcomposition(t1,pars1,init1,t2,pars2,init2,pars,init);
         return t3;
       }
 
       if (is_hide(t))
-      {  const summand_list t2=generateLPEmCRLterm(hide(t).operand(),canterminate,
+      {  const summand_list t2=generateLPEmCRLterm(hide(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
          return hidecomposition(hide(t).hide_set(),t2);
       }
 
       if (is_allow(t))
-      { const summand_list t2=generateLPEmCRLterm(allow(t).operand(),canterminate,
+      { const summand_list t2=generateLPEmCRLterm(allow(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return allowblockcomposition(allow(t).allow_set(),t2,true);
       }
 
       if (is_block(t))
-      { const summand_list t2=generateLPEmCRLterm(block(t).operand(),canterminate,
+      { const summand_list t2=generateLPEmCRLterm(block(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return allowblockcomposition(block(t).block_set(),t2,false);
       }
 
       if (is_rename(t))
-      { const summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),canterminate,
+      { const summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return renamecomposition(process::rename(t).rename_set(),t2);
       }
 
       if (is_comm(t))
-      { const summand_list t1=generateLPEmCRLterm(comm(t).operand(),canterminate,
+      { const summand_list t1=generateLPEmCRLterm(comm(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return communicationcomposition(comm(t).comm_set(),t1);
       }
@@ -6456,7 +6456,7 @@ class specification_basic_type:public boost::noncopyable
 
     summand_list generateLPEmCRL(
                            const process_identifier procIdDecl,
-                           const bool canterminate,
+                           /*const bool canterminate,*/
                            const bool regular,
                            variable_list &pars,
                            assignment_list &init)
@@ -6470,7 +6470,7 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==GNFalpha)||
           (objectdata[n].processstatus==multiAction))
       {
-        return generateLPEpCRL(procIdDecl,(canterminate&&objectdata[n].canterminate),
+        return generateLPEpCRL(procIdDecl,/*(canterminate&&objectdata[n].canterminate),*/
                                          objectdata[n].containstime,regular,pars,init);
       }
       /* process is a mCRLdone */
@@ -6479,7 +6479,7 @@ class specification_basic_type:public boost::noncopyable
                   (objectdata[n].processstatus==mCRL))
       { objectdata[n].processstatus=mCRLlin;
         return generateLPEmCRLterm(objectdata[n].processbody,
-                        (canterminate&&objectdata[n].canterminate),
+                        /*(canterminate&&objectdata[n].canterminate),*/
                          regular,false,pars,init);
       }
 
@@ -7178,7 +7178,7 @@ class specification_basic_type:public boost::noncopyable
          first variable in a sequence is always an actionvariable */
       procstorealGNF(init1,options.lin_method!=lmStack);
 
-      summand_list t3=generateLPEmCRL(init1,objectdata[objectIndex(init1)].canterminate,
+      summand_list t3=generateLPEmCRL(init1,/*objectdata[objectIndex(init1)].canterminate,*/
                                  options.lin_method!=lmStack,parameters,initial_state);
       t3=allowblockcomposition(action_name_multiset_list(),t3,false); // This removes superfluous delta summands.
       if (options.final_cluster)

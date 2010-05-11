@@ -371,7 +371,7 @@ void DistrPlot::setScalingTransf()
 void DistrPlot::displTooltip( const size_t &posIdx )
 // ----------------------------------------------
 {
-    if ( 0 <= posIdx && posIdx < number.size() )
+    if ( posIdx < number.size() )
     {
         Attribute* attr = graph->getAttribute( attrIdx );
         string xLabel   = attr->getName();

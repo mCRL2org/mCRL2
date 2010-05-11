@@ -489,8 +489,7 @@ void CombnPlot::drawMousePos( const bool &inSelectMode )
     // rendering mode
     if ( inSelectMode != true )
     {
-        if ( 0 <= mouseCombnIdx &&
-             mouseCombnIdx < combinations.size() )
+        if ( mouseCombnIdx < combinations.size() )
         {
             // x-coords
             double xLft = posLftTop[mouseCombnIdx][0].x;
@@ -654,7 +653,7 @@ void CombnPlot::setScalingTransf()
 void CombnPlot::displTooltip( const size_t &posIdx )
 // ----------------------------------------------
 {
-    if ( 0 <= posIdx && posIdx < combinations.size() )
+    if ( posIdx < combinations.size() )
     {
         Attribute* attr = NULL;
         Value* val      = NULL;

@@ -286,9 +286,9 @@ struct ns_info
   boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
   legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
 
-  int num_summands;
+  unsigned int num_summands;
   ATermAppl *summands;
-  int num_prioritised;
+  unsigned int num_prioritised;
   ATermList procvars;
   int stateformat;
   ATermAppl nil;
@@ -333,7 +333,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
     // bool errorOccurred();
 
-    void reset(ATerm State, size_t SummandIndex = 0);
+    void reset(ATerm State, unsigned int SummandIndex = 0);
 
     ATerm get_state() const;
 
@@ -341,10 +341,9 @@ class NextStateGeneratorStandard : public NextStateGenerator
     ns_info info;
     unsigned int id;
 
-    // bool error;
     bool single_summand;
 
-    int sum_idx;
+    unsigned int sum_idx;
 
     ATerm cur_state;
     ATerm cur_act;
@@ -374,7 +373,7 @@ class NextStateStandard : public NextState
 
     ATerm getInitialState();
     NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);
-    NextStateGenerator *getNextStates(ATerm state, int group, NextStateGenerator *old = NULL);
+    NextStateGenerator *getNextStates(ATerm state, unsigned int group, NextStateGenerator *old = NULL);
 
                 void gatherGroupInformation();
 

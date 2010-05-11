@@ -35,7 +35,7 @@ namespace detail {
     /// \brief Visit propositional_variable node
     /// \param e A term
     /// \return The result of visiting the node
-    bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
+    bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& /* v */)
     {
       throw found_propositional_variable();
       return true;

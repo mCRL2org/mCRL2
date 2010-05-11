@@ -123,6 +123,6 @@ const char *expl_strat_to_str(exploration_strategy es);
 bool initialise_lts_generation(lts_generation_options *opts);
 bool generate_lts();
 bool finalise_lts_generation();
-void finalise_lts_generation_when_interrupted(int param);
+void finalise_lts_generation_when_interrupted(int);
 
 #endif

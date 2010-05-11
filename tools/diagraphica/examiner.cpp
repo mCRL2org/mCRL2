@@ -125,7 +125,7 @@ int Examiner::getIdxClstSel()
 // --------------------------
 {
     size_t result = -1;
-    if ( 0 <= focusFrameIdx && focusFrameIdx < framesHist.size() )
+    if ( focusFrameIdx < framesHist.size() )
         result = framesHist[focusFrameIdx]->getNode(0)->getCluster()->getIndex();
     return result;
 }
@@ -201,7 +201,7 @@ void Examiner::clrFrame()
 
     VisUtils::mapColorMdGray( colFrm );
 
-    if ( 0 <= focusFrameIdx && focusFrameIdx < framesHist.size() )
+    if ( focusFrameIdx < framesHist.size() )
     {
         ColorRGB col;
         VisUtils::mapColorCoolRed( col );
@@ -261,7 +261,7 @@ void Examiner::clrFrameHistCur()
     // update flag
     dataChanged = true;
 
-    if ( 0 <= focusFrameIdx && focusFrameIdx < framesHist.size() )
+    if ( focusFrameIdx < framesHist.size() )
     {
         // composition
         delete framesHist[focusFrameIdx];
@@ -755,23 +755,15 @@ void Examiner::handleIconRwnd()
 {
     if ( framesHist.size() > 0 )
     {
-        if ( focusFrameIdx >= 0 )
-        {
-            focusFrameIdx = 0;
-            offset        = 0;
-            geomChanged   = true;
+        focusFrameIdx = 0;
+        offset        = 0;
+        geomChanged   = true;
 
-            ColorRGB col;
-            VisUtils::mapColorCoolRed( col );
-            setFrame( framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col );
+        ColorRGB col;
+        VisUtils::mapColorCoolRed( col );
+        setFrame( framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col );
 
-            mediator->handleMarkFrameClust( this );
-        }
-        else
-        {
-            offset      = 0;
-            geomChanged = true;
-        }
+        mediator->handleMarkFrameClust( this );
     }
     else
     {
@@ -792,7 +784,7 @@ void Examiner::handleIconLft()
 
     if ( framesHist.size() > 0 )
     {
-        if ( focusFrameIdx >= 0  && focusFrameIdx < framesHist.size() )
+        if ( focusFrameIdx < framesHist.size() )
         {
             if ( focusFrameIdx != 0 )
                 focusFrameIdx -= 1;
@@ -838,7 +830,7 @@ void Examiner::handleIconRgt()
 
     if ( framesHist.size() > 0 )
     {
-        if ( focusFrameIdx >= 0 && focusFrameIdx < framesHist.size() )
+        if ( focusFrameIdx < framesHist.size() )
         {
             if ( focusFrameIdx < framesHist.size()-1 )
                 focusFrameIdx += 1;
@@ -946,12 +938,9 @@ void Examiner::drawFrame( const bool &inSelectMode )
 
         glPushName( ID_FRAME );
         VisUtils::fillRect( - 1.0, 1.0, 1.0, -1.0 );
-        if ( focusFrameIdx >= 0 )
-        {
-            glPushName( ID_ICON_MORE );
-            VisUtils::fillRect( -0.98, -0.98+14*pix, -0.98+14*pix, -0.98 );
-            glPopName();
-        }
+        glPushName( ID_ICON_MORE );
+        VisUtils::fillRect( -0.98, -0.98+14*pix, -0.98+14*pix, -0.98 );
+        glPopName();
         glPopName();
 
         glPopMatrix();
@@ -998,15 +987,12 @@ void Examiner::drawFrame( const bool &inSelectMode )
             attributes,
             valsFrame );
 
-        if ( focusFrameIdx >= 0 )
-        {
-            VisUtils::enableLineAntiAlias();
-            VisUtils::setColor( colFrm );
-            VisUtils::fillMoreIcon( -0.98, -0.98+14*pix, -0.98+14*pix, -0.98 );
-            VisUtils::setColorLtLtGray();
-            VisUtils::drawMoreIcon( -0.98, -0.98+14*pix, -0.98+14*pix, -0.98 );
-            VisUtils::disableLineAntiAlias();
-        }
+        VisUtils::enableLineAntiAlias();
+        VisUtils::setColor( colFrm );
+        VisUtils::fillMoreIcon( -0.98, -0.98+14*pix, -0.98+14*pix, -0.98 );
+        VisUtils::setColorLtLtGray();
+        VisUtils::drawMoreIcon( -0.98, -0.98+14*pix, -0.98+14*pix, -0.98 );
+        VisUtils::disableLineAntiAlias();
 
         glPopMatrix();
     }
@@ -1201,7 +1187,7 @@ void Examiner::drawControls( const bool &inSelectMode )
             if ( 0 < focusFrameIdx && focusFrameIdx < posFramesHist.size() )
                 dLft = 1;
 
-            if ( 0 <= focusFrameIdx && focusFrameIdx < posFramesHist.size()-1 )
+            if ( focusFrameIdx < posFramesHist.size()-1 )
                 dRgt = 1;
         }
 

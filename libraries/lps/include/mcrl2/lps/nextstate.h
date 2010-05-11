@@ -182,7 +182,7 @@ class NextState
 		 **/
 		virtual NextStateGenerator *getNextStates(
 					ATerm state,
-                                        int index,
+          unsigned int index,
 					NextStateGenerator *old = NULL
 					) = 0;
 

@@ -517,7 +517,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         info.num_summands = ATgetLength(sums);
         info.num_prioritised = 0;
         info.summands = (ATermAppl *) malloc(info.num_summands*sizeof(ATermAppl));
-        for (int i=0; i<info.num_summands; i++)
+        for (unsigned int i=0; i<info.num_summands; i++)
         {
                 info.summands[i] = NULL;
         }
@@ -624,8 +624,8 @@ void NextStateStandard::prioritise(const char *action)
         // XXX this function invalidates currently used generators!
         // perhaps
         bool is_tau = !strcmp(action,"tau");
-        int pos = 0;
-        int rest = 0;
+        unsigned int pos = 0;
+        unsigned int rest = 0;
 
         while ( pos < info.num_summands )
         {
@@ -677,7 +677,7 @@ class NextStateGeneratorSummand : public NextStateGeneratorStandard {
 
   public:
 
-    NextStateGeneratorSummand(int summand, ATerm state, ns_info& info, unsigned int identifier)
+    NextStateGeneratorSummand(unsigned int summand, ATerm state, ns_info& info, unsigned int identifier)
                           : NextStateGeneratorStandard(state, info, identifier, true, summand) {
 
 #ifdef MCRL2_NEXTSTATE_DEBUG
@@ -691,7 +691,7 @@ class NextStateGeneratorSummand : public NextStateGeneratorStandard {
     }
 };
 
-NextStateGenerator *NextStateStandard::getNextStates(ATerm state, int index, NextStateGenerator *old)
+NextStateGenerator *NextStateStandard::getNextStates(ATerm state, unsigned int index, NextStateGenerator *old)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
         std::clog << "NextStateStandard::getNextStates(state, index, old) called, with " <<
@@ -888,7 +888,7 @@ void NextStateGeneratorStandard::set_substitutions()
         *info.current_id = id;
 }
 
-void NextStateGeneratorStandard::reset(ATerm State, size_t SummandIndex)
+void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
         std::clog << "NextStateGeneratorStandard::reset(State, SummandIndex) called with:" << std::endl <<

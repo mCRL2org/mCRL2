@@ -940,7 +940,7 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     wxString dat_spec = datatype_specification_mcrl2(doc_root);
     wxXmlNode *diagram = get_diagram(doc_root, p_diagram_id);
     wxString exp_diagram_name = get_child_value(diagram, _T("name"));
-    wxString init_spec = process_diagram_mcrl2_init(doc_root, exp_diagram_name, p_parameters_init, datatype_spec);
+    wxString init_spec = process_diagram_mcrl2_init(doc_root, exp_diagram_name, p_parameters_init);
     if(p_verbose)
     {
       cerr << "initial process specification:" << endl << " "
@@ -2081,7 +2081,9 @@ wxString grape::mcrl2gen::initial_designator_mcrl2(wxXmlNode *p_process_diagram)
   return des_name;
 }
 
-wxString grape::mcrl2gen::process_diagram_mcrl2_init(wxXmlNode *p_doc_root, wxString &p_diagram_name, list_of_decl_init &p_parameter_init, ATermAppl &datatype_spec)
+wxString grape::mcrl2gen::process_diagram_mcrl2_init(wxXmlNode *p_doc_root,
+    wxString &p_diagram_name,
+    list_of_decl_init &p_parameter_init)
 {
   wxString init_decl = wxEmptyString;
   init_decl += _T("init ");

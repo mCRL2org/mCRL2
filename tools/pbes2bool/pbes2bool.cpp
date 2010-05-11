@@ -282,7 +282,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       { std::cerr << "AKAKAKAKAKAK " << *i << "\n";
       } */
       data::rewriter datar= (opt_data_elm) ?
-            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p, false)), rewrite_strategy()) :
+            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p)), rewrite_strategy()) :
             data::rewriter(p.data(), rewrite_strategy());
 
       ::bes::boolean_equation_system bes_equations=

@@ -342,12 +342,13 @@ namespace grape
      * @param p_doc_root The root of a valid XML specification.
      * @param p_diagram_name The name of the exported process diagram.
      * @param p_parameter_init The parameter initialisation for the exported process diagram.
-     * @param datatype_spec The datatype specification.
      * @return The initial process specification for the exported process diagram.
      * @pre p_doc_root is a valid pointer to an XML specification, p_diagram_name is a valid reference to a process diagram and p_parameter init is a valid reference to a parameter initialisation.
      * @post The initial process specification is returned or error messages are produced.
      */
-    wxString process_diagram_mcrl2_init(wxXmlNode *p_doc_root, wxString &p_diagram_name, list_of_decl_init &p_parameter_init, ATermAppl &datatype_spec);
+    wxString process_diagram_mcrl2_init(wxXmlNode *p_doc_root,
+        wxString &p_diagram_name,
+        list_of_decl_init &p_parameter_init);
 
     /**
      * Architecture diagram to mCRL2 possible actions convertor function.

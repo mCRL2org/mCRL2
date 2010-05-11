@@ -202,7 +202,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::boolean const& e, std::string const& s) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::boolean const& /*e*/, std::string const& s) {
     out << "<boolean";
 
     if (s.compare("true") == 0) {

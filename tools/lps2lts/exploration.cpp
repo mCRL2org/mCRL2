@@ -202,7 +202,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   return true;
 }
 
-void finalise_lts_generation_when_interrupted(int param)
+void finalise_lts_generation_when_interrupted(int)
 { 
   finalise_lts_generation();
   cerr << "Warning: state space generation was aborted prematurely. \n";

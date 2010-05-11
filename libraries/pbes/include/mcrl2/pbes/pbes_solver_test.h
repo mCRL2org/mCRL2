@@ -47,7 +47,7 @@ template < typename Container >
 bool pbes2_bool_test(pbes< Container > &pbes_spec)
 { // Generate an enumerator, a data rewriter and a pbes rewriter.
   data::rewriter datar(pbes_spec.data(), 
-                       mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_to_aterm(pbes_spec, false)),
+                       mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_to_aterm(pbes_spec)),
                        mcrl2::data::rewriter::jitty);
             // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
   data::number_postfix_generator generator("UNIQUE_PREFIX");

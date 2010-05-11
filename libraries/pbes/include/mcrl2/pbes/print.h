@@ -29,7 +29,7 @@ namespace pbes_system {
       //pbes_spec.data() = mcrl2::data::remove_all_system_defined(pbes_spec.data());
     }
 
-    return core::pp(pbes_to_aterm(pbes_spec, pp_format != core::ppInternal), pp_format);
+    return core::pp(pbes_to_aterm(pbes_spec), pp_format);
   }
 
 } // namespace pbes
