@@ -654,13 +654,11 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
 BOOST_AUTO_TEST_CASE(regression_test_bug_723)
 {
   std::string s(
-    //"sort BL = List(Bool);\n"
+    "sort BL = List(Bool);\n"
     "map initial: Nat -> BL;\n"
-    //"    all_false: BL -> Bool;\n"
-    "    all_false: List(Bool) -> Bool;\n"
+    "    all_false: BL -> Bool;\n"
     "var b0: Bool;\n"
-    //"    bl: BL;\n"
-    "    bl: List(Bool);\n"
+    "    bl: BL;\n"
     "    n: Nat;\n"
     "eqn initial (1) = [];\n"
     "    n > 1 -> initial (n) = false |> initial(Int2Nat(n-1));\n"

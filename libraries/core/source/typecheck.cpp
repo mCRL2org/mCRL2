@@ -1095,14 +1095,17 @@ namespace mcrl2 {
       gstcAddSystemFunction(greater(data::unknown_sort()));
       //Numbers
       gstcAddSystemFunction(sort_nat::pos2nat());
+      gstcAddSystemFunction(sort_nat::cnat());
       gstcAddSystemFunction(sort_int::pos2int());
       gstcAddSystemFunction(sort_real::pos2real());
       gstcAddSystemFunction(sort_nat::nat2pos());
       gstcAddSystemFunction(sort_int::nat2int());
+      gstcAddSystemFunction(sort_int::cint());
       gstcAddSystemFunction(sort_real::nat2real());
       gstcAddSystemFunction(sort_int::int2pos());
       gstcAddSystemFunction(sort_int::int2nat());
       gstcAddSystemFunction(sort_real::int2real());
+      gstcAddSystemFunction(sort_real::creal());
       gstcAddSystemFunction(sort_real::real2pos());
       gstcAddSystemFunction(sort_real::real2nat());
       gstcAddSystemFunction(sort_real::real2int());
@@ -3844,7 +3847,7 @@ namespace mcrl2 {
       if(gstcTypeMatchA(NeededType,sort_nat::nat())){
         if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_nat::pos2nat(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_nat::cnat(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting){ was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Nat by applying Pos2Nat to it.\n",OldPar);}
           return sort_nat::nat();
         }
@@ -3855,13 +3858,13 @@ namespace mcrl2 {
       if(gstcTypeMatchA(NeededType,sort_int::int_())){
         if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_int::pos2int(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_int::cint(),ATmakeList1((ATerm)gsMakeDataAppl(sort_nat::cnat(),ATmakeList1((ATerm)*Par))));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Int by applying Pos2Int to it.\n",OldPar);}
           return sort_int::int_();
         }
         if(gstcTypeMatchA(Type,sort_nat::nat())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_int::nat2int(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_int::cint(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Int by applying Nat2Int to it.\n",OldPar);}
           return sort_int::int_();
         }
@@ -3872,19 +3875,22 @@ namespace mcrl2 {
       if(gstcTypeMatchA(NeededType,sort_real::real_())){
         if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_real::pos2real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)gsMakeDataAppl(sort_int::cint(),
+                                    ATmakeList1((ATerm)gsMakeDataAppl(sort_nat::cnat(),ATmakeList1((ATerm)*Par)))),
+                                           (ATerm)(ATermAppl)sort_pos::c1()));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Pos2Real to it.\n",OldPar);}
           return sort_real::real_();
         }
         if(gstcTypeMatchA(Type,sort_nat::nat())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_real::nat2real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)gsMakeDataAppl(sort_int::cint(),ATmakeList1((ATerm)*Par)),
+                                    (ATerm)(ATermAppl)(sort_pos::c1())));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Nat2Real to it.",OldPar);}
           return sort_real::real_();
         }
         if(gstcTypeMatchA(Type,sort_int::int_())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_real::int2real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)*Par,(ATerm)(ATermAppl)data_expression(sort_pos::c1())));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Int2Real to it.\n",OldPar);}
           return sort_real::real_();
         }
