@@ -275,8 +275,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
           append(cb_confluence.set_label("confluence reduction with confluent tau:")).
           append(cb_max_states.set_label("maximum number of states")).
           append(cb_bithashing.set_label("bit hashing; number of states")).
-          append(d.create< label >().set_text("initial hash table size:"))).
+          append(d.create< label >().set_text("\tinitial hash table size:"))).
       append(d.create< vertical_box >().set_default_alignment(layout::right).
+          append(d.create< checkbox >(), layout::hidden).
           append(d.create< checkbox >(), layout::hidden).
           append(tf_actions).
           append(tf_max_traces).
