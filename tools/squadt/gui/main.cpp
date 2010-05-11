@@ -24,6 +24,9 @@
 
 #include <wx/menu.h>
 #include <wx/utils.h>
+#include <wx/statline.h>
+#include <wx/hyperlink.h>
+
 
 /* Some custom identifiers for use with event handlers */
 #define cmID_UPDATE             (wxID_HIGHEST)
@@ -45,10 +48,47 @@ namespace squadt {
 
       /* Default size is the minimum size */
       SetMinSize(wxDefaultSize);
+ 
+      wxFont font(10, wxDEFAULT, wxNORMAL, wxBOLD);
+      wxStaticText *heading = new wxStaticText(this, wxID_ANY, wxT("Instructions"), 
+        wxPoint(30, 15));
+      heading->SetFont(font);
+
+       new wxStaticLine(this, wxID_ANY, wxPoint(25, 50), 
+        wxSize(300,1));
+
+       new wxStaticText(this, wxID_ANY, wxT("Welcome to SQuADT. SQuADT is a graphical user interface, providing an interactive integration among mCRL2 software tools. "), 
+        wxPoint(25, 80));
+
+       new wxStaticText(this, wxID_ANY, wxT("To use this interactive environment either, perform one of the following actions:"), 
+        wxPoint(25, 130));
+
+       new wxStaticText(this, wxID_ANY, wxT("1. Open an existing project: Goto \"Project\" -> \"Open\" and browse to a directory that contains a valid XML \"Project\""), 
+        wxPoint(25, 160));
+
+       new wxStaticText(this, wxID_ANY, wxT("2. Create a new project: Goto \"Project\" -> \"New\" and browse to a directory to store the XML \"Project\"."), 
+        wxPoint(25, 190));
+
+       new wxStaticText(this, wxID_ANY, wxT("After creating a new project perform one of the following actions: "), 
+        wxPoint(40, 210));
+
+       new wxStaticText(this, wxID_ANY, wxT("1. Create a new file via \"Project\"->\"Add New File\", or "), 
+        wxPoint(40, 240));
+
+       new wxStaticText(this, wxID_ANY, wxT("2. Add an existing mCRL2 compatible file via \"Project\"->\"Add Existing File\""), 
+        wxPoint(40, 260));
+
+       new wxStaticLine(this, wxID_ANY, wxPoint(25, 300), 
+        wxSize(310,1));
+
+       new wxStaticText(this, wxID_ANY, wxT("Information on mCRL2 compatible file formats, as well as additional documentation can be found at:"), 
+        wxPoint(25, 330));
+
+      wxHyperlinkCtrl *hl1 = new wxHyperlinkCtrl(this, wxID_ANY, wxT("  www.mcrl2.org  "), wxT("http://www.mcrl2.org"), wxPoint(240, 360));
+      hl1->SetFont(font);
 
       /* Reposition the window */
       CentreOnScreen();
-
       Show(true);
     }
 
