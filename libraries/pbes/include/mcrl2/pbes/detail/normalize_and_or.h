@@ -27,7 +27,7 @@ namespace detail {
   // Simplifying PBES rewriter.
   struct normalize_and_or_builder: public pbes_expression_builder<pbes_expression>
   {
-    typedef pbes_expression_builder<pbes_expression>                           super;
+    typedef pbes_expression_builder<pbes_expression>                  super;
     typedef super::term_type                                          term_type;
     typedef core::term_traits<term_type>::data_term_type              data_term_type;
     typedef core::term_traits<term_type>::data_term_sequence_type     data_term_sequence_type;
@@ -65,16 +65,16 @@ namespace detail {
 
     pbes_expression normalize(const pbes_expression& x)
     {
-    	typedef core::term_traits<pbes_expression> tr;
-    	if (tr::is_and(x))
+      typedef core::term_traits<pbes_expression> tr;
+      if (tr::is_and(x))
       {
-      	atermpp::multiset<pbes_expression> s = split_and(x);
-      	return pbes_expr::join_and(s.begin(), s.end());
+        atermpp::multiset<pbes_expression> s = split_and(x);
+        return pbes_expr::join_and(s.begin(), s.end());
       }
-    	else if (tr::is_or(x))
+      else if (tr::is_or(x))
       {
-      	atermpp::multiset<pbes_expression> s = split_or(x);
-      	return pbes_expr::join_or(s.begin(), s.end());
+        atermpp::multiset<pbes_expression> s = split_or(x);
+        return pbes_expr::join_or(s.begin(), s.end());
       }
       return x;
     }
@@ -87,8 +87,8 @@ namespace detail {
     /// \return The result of visiting the node
     term_type visit_not(const term_type& x, const term_type& n)
     {
-      term_type t = normalize(visit(t));
-    	return tr::not_(t);
+      term_type t = normalize(visit(n));
+      return tr::not_(t);
     }
 
     /// \brief Visit and node
@@ -171,8 +171,8 @@ namespace detail {
   inline
   pbes_expression normalize_and_or(const pbes_expression& x)
   {
-  	normalize_and_or_builder builder;
-  	return builder(x);
+    normalize_and_or_builder builder;
+    return builder(x);
   }
 
 } // namespace detail
