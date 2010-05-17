@@ -23,6 +23,7 @@ test-suite lps
       [ run linearization_test.cpp ]
       [ run lps_algorithm_test.cpp ]
       [ run nextstate_test.cpp ]
+      [ run next_state_generator_test.cpp ]
       [ run parelm_test.cpp ]
       [ run pp_test.cpp ]
       [ run remove_parameters_test.cpp ]
