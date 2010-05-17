@@ -153,7 +153,7 @@ endif( MONO_LIB )
 install(FILES grapeapp/help/grapehelp.zip DESTINATION share/doc/mcrl2/grape)
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)

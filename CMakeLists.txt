@@ -203,6 +203,16 @@ if (UNIX AND NOT WIN32)
   endif (CMAKE_SIZEOF_VOID_P MATCHES "4")
 endif (UNIX AND NOT WIN32)
 
+##---------------------------------------------------
+## Remove "install_tools"
+## install_tools contains the tools marked for symlink export 
+##--------------------------------------------------- 
+if(APPLE)
+  if(EXISTS "${CMAKE_BINARY_DIR}/install_tools" )
+    FILE(REMOVE ${CMAKE_BINARY_DIR}/install_tools )
+  endif(EXISTS "${CMAKE_BINARY_DIR}/install_tools" )
+endif(APPLE)
+
 
 ##---------------------------------------------------
 ## Print CMake install prefix (if any)
@@ -217,7 +227,24 @@ message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" ON)
 
-set(MCRL2_LIB_DIR "lib/mcrl2")
+## SET mCRL2 Library Directory
+# Unix 
+if(UNIX)
+  set(MCRL2_LIB_DIR "lib/mcrl2")
+endif(UNIX)
+
+# Override MCRL2_LIB_DIR such that libraries are stored in
+# bin directory, such that they can be found after an install
+if(WIN32)
+  set(MCRL2_LIB_DIR "bin")
+endif(WIN32)
+
+if(APPLE AND MCRL2_SINGLE_BUNDLE)
+  set(MCRL2_BIN_DIR "MacOS")
+else(APPLE AND MCRL2_SINGLE_BUNDLE)
+  set(MCRL2_BIN_DIR "bin")
+endif(APPLE AND MCRL2_SINGLE_BUNDLE)
+
 
 if(BUILD_SHARED_LIBS)
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) 
@@ -231,11 +258,6 @@ if(BUILD_SHARED_LIBS)
   endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
   if(WIN32)
-    # Override MCRL2_LIB_DIR such that libraries are stored in
-    # bin directory, such that they can be found after an install
-    # 
-    set(MCRL2_LIB_DIR "bin")
-
     if(MINGW OR MSYS)
       get_filename_component( MINGW_LIB_DIR ${CMAKE_CXX_COMPILER} PATH )
 
@@ -244,7 +266,7 @@ if(BUILD_SHARED_LIBS)
 	FILES
         ${MINGW_LIB_DIR}/libgcc_s_dw2-1.dll
 	${MINGW_LIB_DIR}/mingwm10.dll
-        DESTINATION bin 
+        DESTINATION ${MCRL2_BIN_DIR} 
       )
 
       if  (ENABLE_GUI_TOOLS)
@@ -257,7 +279,7 @@ if(BUILD_SHARED_LIBS)
 
         if( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
           get_filename_component(MINGW_wxWidgets_LIB_DIR ${wxWidgets_CONFIG_EXECUTABLE} PATH )
-          STRING(REPLACE "bin" "lib" MINGW_wxWidgets_LIB_DIR "${MINGW_wxWidgets_LIB_DIR}" )
+          STRING(REPLACE "${MCRL2_BIN_DIR}" "lib" MINGW_wxWidgets_LIB_DIR "${MINGW_wxWidgets_LIB_DIR}" )
         endif( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
 
     	# Copy wxWidgets files on install
@@ -265,7 +287,7 @@ if(BUILD_SHARED_LIBS)
 	      install(
              DIRECTORY
                    ${MINGW_wxWidgets_LIB_DIR}/
-	           DESTINATION bin
+	           DESTINATION ${MCRL2_BIN_DIR}
 	           PATTERN "dll"
              )
           else(MINGW_wxWidgets_LIB_DIR)
@@ -299,12 +321,12 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH false)
 
 # the RPATH to be used when installing (non-OSX, use CMAKE_INSTALL_NAME_DIR instead)
 if(NOT CMAKE_INSTALL_RPATH)
-  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/mcrl2")
+  set(CMAKE_INSTALL_RPATH "$ORIGIN/../${MCRL2_LIB_DIR}")
 endif(NOT CMAKE_INSTALL_RPATH)
 
 # Mac OSX directory name for installed targets
 # Installing prerequisite shared libraries is dealt with in "RelocateInstallTree.cmake"
-set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib/mcrl2")
+set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}")
 
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
@@ -692,7 +714,7 @@ set(R_SCXXFLAGS ${BUILD_SHARED_LIBS_OPTION})
 set(R_SLDFLAGS "-shared")
 
 set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/include/aterm\\\"")
-set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/lib\\\" -lATerm")
+set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lATerm")
 
 if(NOT DEFINED USE_BCG )
   set( USE_BCG "//" )
@@ -945,8 +967,47 @@ if(UNIX)
   )
   
   add_dependencies(parsers mcrl2parser chiparser lysaparser liblts_fsmparser liblts_dotparser)
-
 endif(UNIX)
+
+
+##---------------------------------------------------
+## mCRL2 Sigle Bundle for MacOSX 
+##--------------------------------------------------- 
+
+option(MCRL2_SINGLE_BUNDLE "Enable/disable creation of a single mCRL2.app" OFF)
+IF(APPLE AND MCRL2_SINGLE_BUNDLE)
+  if(BUILD_SHARED_LIBS)
+    message( FATAL_ERROR "BUILD_SHARED_LIBS requires to be FALSE when compiling with MCRL2_SINGLE_BUNDLE set to TRUE" )
+  endif(BUILD_SHARED_LIBS)
+
+  if(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+    message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This will create an installer, which is non-standard." ) 
+  endif(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+
+  SET(CMAKE_BUNDLE_NAME "mCRL2")
+
+  SET(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
+  # make sure CMAKE_INSTALL_PREFIX ends in /
+  STRING(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
+  MATH(EXPR LEN "${LEN} -1" )
+  STRING(SUBSTRING "${CMAKE_INSTALL_PREFIX}" ${LEN} 1 ENDCH)
+  IF(NOT "${ENDCH}" STREQUAL "/")
+    SET(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
+  ENDIF(NOT "${ENDCH}" STREQUAL "/")
+  SET(CMAKE_INSTALL_PREFIX 
+    "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
+
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/build/macosx)
+
+  # Install "install_tools" in share/installer
+  # install_tools contains the tools marked for symlink export 
+  install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
+  #Install Info.plist for single application bundle
+  install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist DESTINATION . )
+  #Install mcrl2-logo for single application bundle
+  install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/mcrl2-logo.icns DESTINATION Resources )
+
+ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
 
 ##---------------------------------------------------
 ## CPack configuration 
@@ -967,7 +1028,7 @@ SET(CPACK_PACKAGE_VENDOR "TUe")
 set(CPACK_CREATE_DESKTOP_LINKS squadt)
 set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim")
 
-  IF(APPLE)
+  IF(APPLE AND MCRL2_SINGLE_BUNDLE)
     SET(CPACK_SET_DESTDIR TRUE)
 
     configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
@@ -976,7 +1037,7 @@ set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grapemcrl2;grapemcrl2" "ltsgraph;
       ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
     SET(CPACK_POSTUPGRADE_SCRIPT
       ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-  ENDIF(APPLE)
+  ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
 
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
@@ -984,7 +1045,7 @@ SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
 SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\doc\\\\images\\\\mcrl2-install-logo.bmp")
 
 #Extend PATH variable with mCRL2_INSTALL_DIR/bin if CPACK_NSIS_MODIFY_PATH = ON 
-SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}/bin")
+SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}/${MCRL2_BIN_DIR}")
 SET(CPACK_NSIS_MODIFY_PATH ON)
 
 # README and COPYING require a .txt extention when be used with MacOSX's PackageMaker

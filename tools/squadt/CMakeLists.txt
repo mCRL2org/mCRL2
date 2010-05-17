@@ -19,7 +19,11 @@ add_definitions(-DTIXML_USE_TICPP)
 set(MACOSX_BUNDLE_ICON_FILE squadt.icns)
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/squadt/tool_catalog" "${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog" COPYONLY )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog DESTINATION share/squadt)
+if(MCRL2_SINGLE_BUNDLE)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog DESTINATION MacOS/share/squadt)
+else(MCRL2_SINGLE_BUNDLE)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog DESTINATION share/squadt)
+endif(MCRL2_SINGLE_BUNDLE)
 
 # ########## mcrl2_tools_squadt executable ##########
 
@@ -77,7 +81,7 @@ target_link_libraries(${PROJECT_NAME}
 endif( MONO_LIB )
 
 # install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 
 # Relocate install tree
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)

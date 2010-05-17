@@ -14,7 +14,7 @@
 # Since we support version 2.6 and up, we can only facilitate
 # relocation of shared libraries only for  Mac OSX. 
 
-if( APPLE AND BUILD_SHARED_LIBS )
+if( APPLE AND BUILD_SHARED_LIBS AND NOT MCRL2_SINGLE_BUNDLE )
 
 if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
 install(CODE "
@@ -23,4 +23,12 @@ install(CODE "
     " COMPONENT Runtime)
 endif(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
 
-endif( APPLE AND BUILD_SHARED_LIBS )
+endif( APPLE AND BUILD_SHARED_LIBS AND NOT MCRL2_SINGLE_BUNDLE )
+
+if( APPLE AND MCRL2_SINGLE_BUNDLE )
+  if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
+    FILE(APPEND ${CMAKE_BINARY_DIR}/install_tools "${PROJECT_NAME}.app\n" )
+  else(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
+    FILE(APPEND ${CMAKE_BINARY_DIR}/install_tools "${PROJECT_NAME}\n" )
+  endif(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app" )
+endif( APPLE AND MCRL2_SINGLE_BUNDLE )
