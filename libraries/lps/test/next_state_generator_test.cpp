@@ -9,8 +9,10 @@
 /// \file next_state_generator_test.cpp
 /// \brief Test for next_state_generator class.
 
-#include <boost/test/minimal.hpp>
+#include <queue>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/parse.h"
@@ -21,19 +23,60 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
-void test_next_state_generator(const specification& lps_spec)
+void test_initial_state_successors(const specification& lps_spec)
 {
   next_state_generator generator(lps_spec);
   next_state_generator::iterator first = generator.begin();
   next_state_generator::iterator last;
-  while (first != last)
+  while (++first != last)
   {
-    std::cout << generator.print_state(*first++) << std::endl;
+    std::cout << generator.print_state(*first) << std::endl;
   }
   core::garbage_collect();
 }
 
-void test_next_state_generator()
+void test_next_state_generator(const specification& lps_spec, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels, bool per_summand = false)
+{
+  next_state_generator generator(lps_spec);
+
+  atermpp::aterm initial_state = generator.initial_state();
+
+  atermpp::set<atermpp::aterm> visited;
+  atermpp::set<atermpp::aterm> seen;
+  atermpp::set<atermpp::aterm_appl> transition_labels;
+  size_t transitions = 0;
+
+  std::queue<atermpp::aterm, atermpp::deque<atermpp::aterm> > q;
+  q.push(initial_state);
+  seen.insert(initial_state);
+
+  while(!q.empty())
+  {
+    visited.insert(q.front());
+
+    next_state_generator::iterator first = generator.begin(q.front());
+    next_state_generator::iterator last;
+    while (++first != last)
+    {
+      const next_state_generator::state_type& s = *first;
+      transition_labels.insert(s.transition);
+      ++transitions;
+      if(seen.find(s.state) == seen.end())
+      {
+        q.push(s.state);
+        seen.insert(s.state);
+      }
+    }
+    q.pop();
+  }
+
+  BOOST_CHECK(seen.size() == visited.size());
+  BOOST_CHECK(seen.size() == expected_states);
+  BOOST_CHECK(transitions == expected_transitions);
+  BOOST_CHECK(transition_labels.size() == expected_transition_labels);
+}
+
+BOOST_AUTO_TEST_CASE(test_abp)
 {
   std::string text(
     "sort Error = struct e;\n"
@@ -93,14 +136,13 @@ void test_next_state_generator()
   // The current next state generator requires this...
   spec.process().deadlock_summands().clear();
 
-  test_next_state_generator(spec);
+  test_initial_state_successors(spec);
+//  test_next_state_generator(spec, 74, 92, 19);
 }
 
-int test_main(int argc, char* argv[])
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
-  test_next_state_generator();
 
   return 0;
 }

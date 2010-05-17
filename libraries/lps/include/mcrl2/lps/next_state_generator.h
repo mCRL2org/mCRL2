@@ -132,16 +132,12 @@ namespace lps {
           /// is thrown if the specification contains deadlock summands.
           iterator(const specification& lps_spec,
                    mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
-                   const state_type& state
+                   const atermpp::aterm& state
                   )
             : m_next_state(createNextState(lps_spec, enumerator, false)),
-              m_generator(m_next_state->getNextStates(state.state)),
-              m_state(state)
+              m_generator(m_next_state->getNextStates(state))
           {
-            if (!lps_spec.process().deadlock_summands().empty())
-            {
-              throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
-            }
+            m_state.state = state;
           }
 
        private:
@@ -159,7 +155,6 @@ namespace lps {
           /// \return The value that the iterator references
           const state_type& dereference() const
           {
-            assert(m_next_state.get() != 0);
             return m_state;
           }
 
@@ -179,12 +174,33 @@ namespace lps {
         : m_specification(lps_spec),
           m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), find_function_symbols(lps_spec))),
           m_enumerator(lps_spec.data(), m_rewriter)
-      {}
+      {
+        if (!lps_spec.process().deadlock_summands().empty())
+        {
+          throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
+        }
+      }
 
       /// \brief Returns an iterator for generating the successors of the initial state.
       iterator begin()
       {
         return iterator(m_specification, m_enumerator);
+      }
+
+      /// \brief Returns an iterator for generating the successors of the given state.
+      iterator begin(const atermpp::aterm& state)
+      {
+        return iterator(m_specification, m_enumerator, state);
+      }
+
+      /// \brief Returns the initial state of the specification.
+      // TODO: this function should be const, but cannot because of the createNextState interface
+      atermpp::aterm initial_state()
+      {
+        NextState* nstate = createNextState(m_specification, m_enumerator, false);
+        atermpp::aterm result = nstate->getInitialState();
+        delete nstate;
+        return result;
       }
 
       /// \brief Returns a string representation of the given state.
