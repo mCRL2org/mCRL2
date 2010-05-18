@@ -17,6 +17,7 @@
 #include "mcrl2/core/print.h"
 #include "lps2lts.h"
 #include "lts.h"
+#include "mcrl2/lts/lts_io.h"
 
 #include "mcrl2/core/messaging.h"
 
@@ -24,6 +25,7 @@ using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::lts;
+using namespace mcrl2::lts::detail;
 
 static lts_options lts_opts;
 static ATermAppl term_nil;
@@ -80,7 +82,8 @@ void open_lts(const char *filename, lts_options &opts)
       gsVerboseMsg("not saving state space.\n");
       break;
     default:
-      gsVerboseMsg("writing state space in %s format to '%s'.\n",lts::string_for_type(lts_opts.outformat).c_str(),filename);
+      gsVerboseMsg("writing state space in %s format to '%s'.\n",
+                  mcrl2::lts::detail::string_for_type(lts_opts.outformat).c_str(),filename);
       generic_lts = new lts();
       aterm2state = ATtableCreate(10000,50);
       aterm2label = ATtableCreate(100,50);
@@ -183,7 +186,7 @@ void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boo
           ATtablePut(aterm2state,(ATerm) action,t);
         }
         label = ATgetInt((ATermInt) t);
-        generic_lts->add_transition(from_state,label,to_state);
+        generic_lts->add_transition(transition(from_state,label,to_state));
       }
       break;
   }
@@ -205,7 +208,7 @@ void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans)
         {
           gsErrorMsg("svcerror: %s\n",SVCerror(e));
         }
-        add_extra_mcrl2_svc_data(lts_filename, mcrl2::data::detail::data_specification_to_aterm_data_spec(lts_opts.spec->data()),
+        mcrl2::lts::detail::add_extra_mcrl2_svc_data(lts_filename, mcrl2::data::detail::data_specification_to_aterm_data_spec(lts_opts.spec->data()),
                      lts_opts.spec->process().process_parameters(), lts_opts.spec->action_labels());
       }
       break;
@@ -229,10 +232,8 @@ void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans)
           extdot.print_states = lts_opts.outinfo;
           ext = lts_extra(extdot);
         }
-        if ( !generic_lts->write_to(lts_filename,lts_opts.outformat,ext) )
-        {
-          gsErrorMsg("failed to write state space to file\n");
-        }
+        generic_lts->write_to(lts_filename,lts_opts.outformat,ext);
+        
         ATtableDestroy(aterm2label);
         ATtableDestroy(aterm2state);
         delete generic_lts;

@@ -1782,14 +1782,17 @@ void concrete_dot_lexer::processQuoted()
 
 //Implementation of parse_dot
 
-bool parse_dot(std::istream &stream, lts &l) {
+void parse_dot(std::istream &stream, lts &l) 
+{
   clexer = new concrete_dot_lexer();
   dot_lexer_obj = clexer;
   bool result = clexer->parse_stream(stream,l);
   delete clexer;
   dot_lexer_obj = NULL;
   clexer = NULL;
-  return result;
+  if (!result)
+  { throw mcrl2::runtime_error("fail to parse dot input file.");
+  }
 }
 
 

@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -22,11 +22,19 @@
 #include <vector>
 #include <set>
 #include <iostream>
-#include "aterm2.h"
-#include "mcrl2/atermpp/set.h"
-
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "boost/iterator/transform_iterator.hpp"
+
+#include "aterm2.h"
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/vector.h"
+#include "mcrl2/atermpp/container_utility.h"
+
+#include "mcrl2/lts/transition.h"
+#include "mcrl2/exception.h"
+
 
 #ifdef USE_BCG
 #include <bcg_user.h>
@@ -57,6 +65,7 @@ namespace lts
   /** \brief LTS file types/formats.
    * \details This enumerated type defines the various formats in which an LTS
    * can be stored. */
+  
   enum lts_type
   {
     lts_none,  /**< unknown or no format */
@@ -77,17 +86,7 @@ namespace lts
 #else
     lts_type_max = lts_dot
 #endif
-  };
-
-  /** \brief Transition sort styles.
-   * \details This enumerated type defines sort styles for transitions.
-   * They can be used to sort the transitions of an LTS based on various
-   * criteria. */
-  enum transition_sort_style
-  {
-    src_lbl_tgt, /**< Sort first on source state, then on label, then on target state */
-    lbl_tgt_src  /**< Sort first on label, then on target state, then on source state*/
-  };
+  }; 
 
   /** \brief Types of additional information for LTS operations.
    * \details This enumerated type defines types for additional information for
@@ -101,6 +100,8 @@ namespace lts
     le_dot      /**< Dot format (GraphViz) */
   };
 
+  namespace detail
+  {
   /** \brief Options for the Dot format.
    * \details This struct stores options for the Dot format of the GraphViz
    * package. */
@@ -117,6 +118,7 @@ namespace lts
      * If \a false, the states are not labelled. */
     bool print_states;
   };
+  } // namespace details
 
   /** \brief Checks whether an action is a timed mCRL2 action.
    * \param[in] t The action for which the check has to be performed.
@@ -154,7 +156,7 @@ namespace lts
       union {
         ATerm mcrl1_spec;
         ATermAppl mcrl2_spec;
-	lts_dot_options dot_options;
+	detail::lts_dot_options dot_options;
       } content;
 
     public:
@@ -168,7 +170,7 @@ namespace lts
       lts_extra(lps::specification const& spec);
       /** \brief Creates an object containing options for the Dot format.
        * \param[in] opts The options that will be stored in the object. */
-      lts_extra(lts_dot_options opts);
+      lts_extra(detail::lts_dot_options opts);
 
       /** \brief Gets the type of information that is stored in this object.
        * \retval le_nothing if this object contains no information;
@@ -187,264 +189,11 @@ namespace lts
       /** \brief Gets the Dot format options stored in this object.
        * \pre This object contains options for the Dot format.
        * \return The Dot format options stored in this object.*/
-      lts_dot_options get_dot_options();
+      detail::lts_dot_options get_dot_options();
   };
 
   /** \brief An empty lts_extra object. */
   extern lts_extra lts_no_extra;
-
-  struct transition
-  {
-    unsigned int from;
-    unsigned int label;
-    unsigned int to;
-
-    transition():from(0),label(0),to(0)
-    {}
-
-    transition(const unsigned int f, 
-               const unsigned int l,
-               const unsigned int t):from(f),label(l),to(t)
-    {}
-    
-     bool operator <(const transition &t) const
-     { return from < t.from ||
-              (from==t.from && (label<t.label ||
-                   (label==t.label && to<t.to)));
-     }
-
-  };
-
-  class lts;
-
-  /** \brief Iterator over states of an LTS.
-   * \details This class defines an iterator type for iterating over the states
-   * of an LTS. */
-  class state_iterator 
-  {
-    private:
-      const lts &l;
-      unsigned int pos;
-      unsigned int max;
-
-    public:
-      /** \brief Creates a state iterator for an LTS.
-       * \details The created iterator will point to the first state of
-       * the LTS.
-       * \param[in] l The LTS for which the state iterator will be created. */
-      state_iterator(const lts &l);
-
-      /** \brief Checks whether there are more states to iterate over.
-       * \retval true if there are more states to iterate over;
-       * \retval false otherwise. */
-      bool more() const;
-
-      /** \brief Dereferences the iterator.
-       * \return The state to which this iterator points.*/
-      unsigned int operator *() const;
-      /** \brief Increments the iterator.
-       * \details Makes this iterator point to the next state of the LTS. */
-      void operator ++();
-  };
-
-
-  /** \brief Const iterator over states of an LTS.
-   * \details This class defines an iterator type for iterating over the states
-   * of an LTS. */
-  class const_state_iterator 
-  {
-    private:
-      const lts &l;
-      unsigned int pos;
-      unsigned int max;
-
-    public:
-      /** \brief Creates a state iterator for an LTS.
-       * \details The created iterator will point to the first state of
-       * the LTS.
-       * \param[in] l The LTS for which the state iterator will be created. */
-      const_state_iterator(const lts &l);
-
-      /** \brief Checks whether there are more states to iterate over.
-       * \retval true if there are more states to iterate over;
-       * \retval false otherwise. */
-      bool more() const;
-
-      /** \brief Dereferences the iterator.
-       * \return The state to which this iterator points.*/
-      unsigned int operator *() const;
-
-      /** \brief Increments the iterator.
-       * \details Makes this iterator point to the next state of the LTS. */
-      void operator ++();
-  };
-
-
-  /** \brief Iterator over transition labels of an LTS.
-   * \details This class defines an iterator type for iterating over the
-   * transition labels of an LTS. */
-  class label_iterator 
-  {
-    private:
-      const lts &l;
-      unsigned int pos;
-      unsigned int max;
-
-    public:
-      /** \brief Creates a transition label iterator for an LTS.
-       * \details The created iterator will point to the first label of
-       * the LTS.
-       * \param[in] l The LTS for which the transition label iterator will be
-       * created. */
-      label_iterator(const lts &l);
-
-      /** \brief Checks whether there are more transition labels to iterate over.
-       * \retval true if there are more labels to iterate over;
-       * \retval false otherwise. */
-      bool more() const;
-
-      /** \brief Dereferences the iterator.
-       * \return The transition label to which this iterator points.*/
-      unsigned int operator *() const;
-
-      /** \brief Increments the iterator.
-       * \details Makes this iterator point to the next label of the LTS. */
-      void operator ++();
-
-      /** \brief Equality on label iterators
-       * \details Indicates whether the current iterator is equal to the argument. */
-      bool operator ==(const label_iterator &i) const;
-  
-      /** \brief Inequality on label iterators
-       * \details Indicates whether the current iterator is equal to the argument. */
-      bool operator !=(const label_iterator &i) const;
-  };
-
-  /** \brief Const iterator over transition labels of an LTS.
-   * \details This class defines an iterator type for iterating over the
-   * transition labels of an LTS. */
-  class const_label_iterator 
-  {
-    private:
-      const lts &l;
-      unsigned int pos;
-      unsigned int max;
-
-    public:
-      /** \brief Creates a transition label iterator for an LTS.
-       * \details The created iterator will point to the first label of
-       * the LTS.
-       * \param[in] l The LTS for which the transition label iterator will be
-       * created. */
-      const_label_iterator(const lts &l);
-
-      /** \brief Checks whether there are more transition labels to iterate over.
-       * \retval true if there are more labels to iterate over;
-       * \retval false otherwise. */
-      bool more() const;
-
-      /** \brief Dereferences the iterator.
-       * \return The transition label to which this iterator points.*/
-      unsigned int operator *() const;
-
-      /** \brief Increments the iterator.
-       * \details Makes this iterator point to the next label of the LTS. */
-      void operator ++();
-
-      /** \brief Equality on label iterators
-       * \details Indicates whether the current iterator is equal to the argument. */
-      bool operator ==(const const_label_iterator &i) const;
-  
-      /** \brief Inequality on label iterators
-       * \details Indicates whether the current iterator is equal to the argument. */
-      bool operator !=(const const_label_iterator &i) const;
-  };
-
-  /** \brief Iterator over transitions of an LTS.
-   * \details This class defines an iterator type for iterating over the
-   * transitions of an LTS. */
-  class transition_iterator 
-  {
-    private:
-      const lts &l;
-      unsigned int pos;
-      unsigned int max;
-
-    public:
-      /** \brief Creates a transition iterator for an LTS.
-       * \details The created iterator will point to the first
-       * transition of the LTS.
-       * \param[in] l The LTS for which the transition iterator will be created.
-       */
-      transition_iterator(const lts &l);
-
-      /** \brief Checks whether there are more transitions to iterate over.
-       * \retval true if there are more transitions to iterate over;
-       * \retval false otherwise. */
-      bool more() const;
-
-      /** \brief Gets the transition's source state.
-       * \return The source state of the transition to which this iterator points.*/
-      unsigned int from() const;
-      /** \brief Gets the transition's label.
-       * \return The label of the transition to which this iterator points.*/
-      unsigned int label() const;
-      /** \brief Gets the transition's target state.
-       * \return The target state of the transition to which this iterator points.*/
-      unsigned int to() const;
-
-      /** \brief Increments the iterator.
-       * \details Makes this iterator point to the next transition of the LTS. */
-      void operator ++();
-
-      /** \brief Dereferences the iterator.
-       * \return The state to which this iterator points.*/
-      unsigned int operator *() const;
-
-  };
-
-  /** \brief Iterator over transitions of an LTS.
-   * \details This class defines an iterator type for iterating over the
-   * transitions of an LTS. */
-  class const_transition_iterator 
-  {
-    private:
-      const lts &l;
-      unsigned int pos;
-      unsigned int max;
-
-    public:
-      /** \brief Creates a transition iterator for an LTS.
-       * \details The created iterator will point to the first
-       * transition of the LTS.
-       * \param[in] l The LTS for which the transition iterator will be created.
-       */
-      const_transition_iterator(const lts &l);
-
-      /** \brief Checks whether there are more transitions to iterate over.
-       * \retval true if there are more transitions to iterate over;
-       * \retval false otherwise. */
-      bool more() const;
-
-      /** \brief Gets the transition's source state.
-       * \return The source state of the transition to which this iterator points.*/
-      unsigned int from() const; 
-      /** \brief Gets the transition's label.
-       * \return The label of the transition to which this iterator points.*/
-      unsigned int label() const;
-      /** \brief Gets the transition's target state.
-       * \return The target state of the transition to which this iterator points.*/
-      unsigned int to() const;
-
-      /** \brief Increments the iterator.
-       * \details Makes this iterator point to the next transition of the LTS. */
-      void operator ++();
-
-      /** \brief Dereferences the iterator.
-       * \return The state to which this iterator points.*/
-      unsigned int operator *() const;
-
-  };
 
 
   /** \brief Class for labelled transition systems.
@@ -453,165 +202,32 @@ namespace lts
   class lts 
   {
     private:
-      lts *lts_object;
       lts_type type;
       std::string creator;
-      unsigned int labels_size;
-      // unsigned int transitions_size;
+
       unsigned int nstates;
       unsigned int nlabels;
-      unsigned int ntransitions;
       unsigned int init_state;
+      std::vector<transition> transitions;
+      atermpp::vector < ATerm > state_values;
+      atermpp::vector < ATerm > label_values;
+      std::vector < bool > taus; // A vector indicating which labels are to be viewed as tau's.
+
       ATerm extra_data;
 
-      lts_type detect_type(std::string const& filename);
-      lts_type detect_type(std::istream &is);
-
-      void clear_labels();
-
-      bool read_from_aut(std::string const& filename);
-      bool read_from_aut(std::istream &is);
-      bool write_to_aut(std::string const& filename);
-      bool write_to_aut(std::ostream& os);
-
-      static lps::specification const& empty_specification();
-
-      bool read_from_svc(std::string const& filename, lts_type type);
-      bool write_to_svc(std::string const& filename, lts_type type, lps::specification const& spec = empty_specification());
-
-      lts_type fsm_get_lts_type();
-      bool read_from_fsm(std::string const& filename, lts_type type, lps::specification const& spec = empty_specification());
-      bool read_from_fsm(std::string const& filename, ATerm lps);
-      bool read_from_fsm(std::string const& filename, lps::specification const& spec = empty_specification());
-      bool read_from_fsm(std::istream& is, lts_type type, lps::specification const& spec = empty_specification());
-      bool read_from_fsm(std::istream& is, ATerm lps);
-      bool read_from_fsm(std::istream& is, lps::specification const& spec = empty_specification());
-      bool write_to_fsm(std::string const& filename, lts_type type, ATermList params);
-      bool write_to_fsm(std::string const& filename, ATerm lps);
-      bool write_to_fsm(std::string const& filename, lps::specification const& spec = empty_specification());
-      bool write_to_fsm(std::ostream& os, lts_type type, ATermList params);
-      bool write_to_fsm(std::ostream& os, ATerm lps);
-      bool write_to_fsm(std::ostream& os, lps::specification const& spec = empty_specification());
-
-      bool read_from_dot(std::string const& filename);
-      bool read_from_dot(std::istream &is);
-      bool write_to_dot(std::ostream& os, lts_dot_options opts);
-      bool write_to_dot(std::string const& filename, lts_dot_options opts);
-
-#ifdef USE_BCG
-      bool read_from_bcg(std::string const& filename);
-      bool write_to_bcg(std::string const& filename);
-#endif
+      void init();
 
     public: // The items below are public, to allow restructuring of the code of the lts library.
-      
+
       void clear_type();
-      void clear_transitions();
       void clear_states();
-      unsigned int transitions_size;
-      void merge(const lts &l);
-      void clear(bool state_info = true, bool label_info = true);
-      void init(bool state_info = true, bool label_info = true);
-      void init(lts const &l);
-      transition *transitions;
-      bool state_info;
-      ATerm *state_values;
-      bool *taus;
-      ATerm *label_values;
-      bool label_info;
-      unsigned int states_size;
-
-    public:
-      /** \brief Determines the LTS format from a filename by its extension.
-       * \param[in] s The name of the file of which the format will be
-       * determined.
-       * \return The LTS format based on the extension of \a s.
-       * If the extension is \p svc then the mCRL2 SVC format is assumed and
-       * \a lts_mcrl2 is returned.
-       * If no supported format can be determined from the extension then \a
-       * lts_none is returned.  */
-      static lts_type guess_format(std::string const& s);
-
-      /** \brief Determines the LTS format from a format specification string.
-       * \details This can be any of the following strings:
-       * \li "aut" for the Ald&eacute;baran format;
-       * \li "mcrl" or "svc+mcrl" for the muCRL SVC format;
-       * \li "mcrl2" or "svc+mcrl2" for the mCRL2 SVC format;
-       * \li "svc" for the SVC format;
-       * \li "fsm" for the FSM format;
-       * \li "dot" for the GraphViz format;
-       * \li "bcg" for the BCG format (only available if the LTS library is built
-       * with BCG support).
-       *
-       * \param[in] s The format specification string.
-       * \return The LTS format based on the value of \a s.
-       * If no supported format can be determined then \a lts_none is returned.
-       */
-      static lts_type parse_format(std::string const& s);
-
-      /** \brief Gives a string representation of an LTS format.
-       * \details This is the "inverse" of \ref parse_format.
-       * \param[in] type The LTS format.
-       * \return The name of the LTS format specified by \a type. */
-      static std::string string_for_type(const lts_type type);
-
-      /** \brief Gives the filename extension associated with an LTS format.
-       * \param[in] type The LTS format.
-       * \return The filename extension of the LTS format specified by \a type.
-       */
-      static std::string extension_for_type(const lts_type type);
-
-      /** \brief Gives the MIME type associated with an LTS format.
-       * \param[in] type The LTS format.
-       * \return The MIME type of the LTS format specified by \a type.
-       */
-      static std::string mime_type_for_type(const lts_type type);
-
-      /** \brief Gives the set of all supported LTS formats.
-       * \return The set of all supported LTS formats. */
-      static const std::set<lts_type> &supported_lts_formats();
-
-      /** \brief Gives a textual list describing supported LTS formats.
-       * \param[in] default_format The format that should be marked as default
-       *                           (or \a lts_none for no default).
-       * \param[in] supported      The formats that should be considered
-       *                           supported.
-       * \return                   A string containing lines of the form
-       *                           "  'name' for the ... format". Every line
-       *                           except the last is terminated with '\n'. */
-      static std::string supported_lts_formats_text(lts_type default_format = lts_none, const std::set<lts_type> &supported = supported_lts_formats());
-
-      /** \brief Gives a textual list describing supported LTS formats.
-       * \param[in] supported      The formats that should be considered
-       *                           supported.
-       * \return                   A string containing lines of the form
-       *                           "  'name' for the ... format". Every line
-       *                           except the last is terminated with '\n'. */
-      static std::string supported_lts_formats_text(const std::set<lts_type> &supported);
-
-      /** \brief Gives a list of extensions for supported LTS formats.
-       * \param[in] sep       The separator to use between each extension.
-       * \param[in] supported The formats that should be considered supported.
-       * \return              A string containing a list of extensions of the
-       *                      formats in \a supported, separated by \a sep.
-       *                      E.g. "*.aut,*.lts" */
-      static std::string lts_extensions_as_string(const std::string &sep = ",", const std::set<lts_type> &supported = supported_lts_formats());
-
-      /** \brief Gives a list of extensions for supported LTS formats.
-       * \param[in] supported The formats that should be considered supported.
-       * \return              A string containing a list of extensions of the
-       *                      formats in \a supported, separated by \a ','.
-       *                      E.g. "*.aut,*.lts" */
-      static std::string lts_extensions_as_string(const std::set<lts_type> &supported);
+      void clear();
 
     public:
 
       /** \brief Creates an empty LTS.
-       * \param[in] state_info Indicates whether state parameter information
-       * will be present.
-       * \param[in] label_info Indicates whether label information will be
-       * present. */
-      lts(bool state_info = true, bool label_info = true);
+       */
+      lts();
 
       /** \brief Creates an LTS and reads its data from a file.
        * \param[in] filename The name of the file from which the data will be
@@ -619,14 +235,14 @@ namespace lts
        * \param[in] type The format of the file. If \a lts_none is passed then
        * an attempt is made to determine the format from the contents of the
        * file. */
-      lts(std::string &filename, lts_type type = lts_none);
+      lts(std::string &filename, lts_type type = lts_none, lts_extra extra= lts_no_extra);
 
       /** \brief Creates an LTS and reads its data from an input stream.
        * \param[in] is The input stream from which the data will be read.
        * \param[in] type The format of the data. If \a lts_none is passed then
        * an attempt is made to determine the format from the contents of the
        * stream. */
-      lts(std::istream &is, lts_type type = lts_none);
+      lts(std::istream &is, lts_type type = lts_none, lts_extra extra= lts_no_extra);
 
       /** \brief Creates an LTS from a string in aut format.
        * \param[in] is The input stream from which the data will be read.
@@ -641,34 +257,9 @@ namespace lts
       /** \brief Frees the memory occupied by this LTS. */
       ~lts();
 
-      /** \brief Clears the LTS data.
-       * \param[in] state_info Indicates whether state parameter information
-       * will be present.
-       * \param[in] label_info Indicates whether label information will be
-       * present. */
-      void reset(bool state_info = true, bool label_info = true);
-
-      /** \brief Reads LTS data from a file.
-       * \details This is not supported for Dot files.
-       * \param[in] filename The name of the file from which data will be read.
-       * \param[in] type The format of the file. If \a lts_none is passed then
-       * an attempt is made to determine the format from the contents of the
-       * file.
-       * \param[in] extra Additional data to be stored with the LTS.
-       * \retval true if the read operation succeeded;
-       * \retval false otherwise.*/
-      bool read_from(std::string const& filename, lts_type type = lts_none, lts_extra extra = lts_no_extra);
-
-      /** \brief Reads LTS data from an input stream.
-       * \details This is not supported for SVC, Dot, and BCG files.
-       * \param[in] is The input stream from which data will be read.
-       * \param[in] type The format of the file. If \a lts_none is passed then
-       * an attempt is made to determine the format from the contents of the
-       * stream.
-       * \param[in] extra Additional data to be stored with the LTS.
-       * \retval true if the read operation succeeded;
-       * \retval false otherwise.*/
-      bool read_from(std::istream &is, lts_type type = lts_none, lts_extra extra = lts_no_extra);
+      /** \brief Swap this lts with the supplied supplied LTS.
+       * \param[in] l The LTS to swap. */
+      void swap(lts &l);
 
       /** \brief Writes LTS data to a file.
        * \param[in] filename The name of the file to which data will be written.
@@ -676,7 +267,7 @@ namespace lts
        * \param[in] extra Additional information for the output.
        * \retval true if the write operation succeeded;
        * \retval false otherwise.*/
-      bool write_to(std::string const& filename, lts_type type = lts_mcrl2, lts_extra extra = lts_no_extra);
+      void write_to(std::string const& filename, lts_type type = lts_mcrl2, lts_extra extra = lts_no_extra) const;
 
       /** \brief Writes LTS data to an output stream.
        * \details This is not supported for SVC and BCG files.
@@ -685,87 +276,155 @@ namespace lts
        * \param[in] extra Additional information for the output.
        * \retval true if the write operation succeeded;
        * \retval false otherwise.*/
-      bool write_to(std::ostream &os, lts_type type = lts_mcrl2, lts_extra extra = lts_no_extra);
+      void write_to(std::ostream &os, lts_type type = lts_mcrl2, lts_extra extra = lts_no_extra) const;
 
       /** \brief Gets the number of states of this LTS.
        * \return The number of states of this LTS. */
-      unsigned int num_states() const;
+      unsigned int num_states() const
+      {
+        return nstates;
+      }
 
       /** \brief Sets the number of states of this LTS.
        * \param[in] n The number of states of this LTS. */
-      void set_num_states(const unsigned int n)
-      { nstates=n;
+      void set_num_states(const unsigned int n, const bool has_state_values=true)
+      { 
+        nstates=n;
+        if (has_state_values)
+        {
+          if (state_values.size()>0)
+          { state_values.resize(n);
+          }
+          else
+          { 
+            state_values=atermpp::vector <ATerm>();
+          }
+        }
+        else
+        { 
+          state_values=atermpp::vector <ATerm>();
+        }
       }
 
       /** \brief Gets the number of transitions of this LTS.
        * \return The number of transitions of this LTS. */
-      unsigned int num_transitions() const;
-
-      /** \brief Sets the number of transitions of this LTS.
-       */
-      void set_num_transitions(unsigned int n) 
-      { ntransitions=n;
+      unsigned int num_transitions() const
+      { return transitions.size();
       }
 
       /** \brief Gets the number of labels of this LTS.
        * \return The number of labels of this LTS. */
-      unsigned int num_labels() const;
+      unsigned int num_labels() const
+      { return nlabels;
+      }
 
       /** \brief Sets the number of labels of this LTS.
+       *  \param [in] n The new number of labels.
+       *  \param [in] has_label_info An optional boolean indicating whether the lts
+       *              has label values.
        */
-      void set_num_labels(unsigned int n)
+      void set_num_labels(unsigned int n, bool has_label_info=true)
       { nlabels=n;
-      }
+        taus.resize(n,false);
+        if (has_label_info)
+        { label_values.resize(n);
+        }
+        else
+        {
+          label_values=atermpp::vector < ATerm >();
+        }
+      } 
 
       /** \brief Gets the initial state number of this LTS.
        * \return The number of the initial state of this LTS. */
-      unsigned int initial_state() const;
+      unsigned int initial_state() const
+      { return init_state;
+      }
 
       /** \brief Sets the initial state number of this LTS.
        * \param[in] state The number of the state that will become the initial
        * state. */
-      void set_initial_state(unsigned int state);
+      void set_initial_state(unsigned int state)
+      { assert(state<nstates);
+        init_state=state;
+      }
 
       /** \brief Adds a state to this LTS.
-       * \param[in] value The value of the state.
+       * \param[in] value The value of the state. If value is NULL, only the state, and
+       *                  no state value is added. This is only allowed, if there are no
+       *                  state_values.
        * \return The number of the added state. */
-      unsigned int add_state(ATerm value = NULL);
+      unsigned int add_state(const ATerm value = NULL)
+      { if (value!=NULL)
+        { assert(nstates==state_values.size());
+          state_values.push_back(value);
+        }
+        return nstates++;
+      }
 
       /** \brief Adds a label to this LTS.
        * \param[in] value The value of the label.
        * \param[in] is_tau Indicates whether the label is a tau action.
        * \return The number of the added label. */
-      unsigned int add_label(ATerm value = NULL, bool is_tau = false);
+      unsigned int add_label(ATerm value = NULL, bool is_tau = false)
+      { 
+        // ATfprintf(stderr,"Add label %t %d %d\n",value,is_tau,nlabels);
+        
+        assert(nlabels==taus.size());
+        taus.push_back(is_tau);
+        
+        if ( value!=NULL )
+        { // std::cerr << "nlabels: " << nlabels << "  label_values size " << label_values.size() << "\n";
+          assert(nlabels==label_values.size());
+          label_values.push_back(value);
+        }
+        else
+        { assert(label_values.size()==0);
+        }
+        return nlabels++;
+      }
+
 
       /** \brief Adds a label to this LTS.
        * \param[in] is_tau Indicates whether the label is a tau action.
        * \return The number of the added label. */
-      unsigned int add_label(bool is_tau);
-
-      /** \brief Adds a transition to this LTS.
-       * \param[in] from The number of the transition's source state.
-       * \param[in] label The number of the transition's label.
-       * \param[in] to The number of the transition's target state.
-       * \return The number of the added transition. */
-      unsigned int add_transition(unsigned int from,
-                                  unsigned int label,
-                                  unsigned int to);
+      unsigned int add_label(bool is_tau)
+      { 
+        return  add_label(NULL,is_tau);
+      }
 
       /** \brief Sets the value of a state.
        * \param[in] state The number of the state.
        * \param[in] value The value that will be assigned to the state. */
-      void set_state(unsigned int state, ATerm value);
+      void set_state_value(unsigned int state, ATerm value)
+      { 
+        assert(state<nstates);
+        assert(nstates==state_values.size());
+        state_values[state]=value;
+      }
 
       /** \brief Sets the value of a label.
        * \param[in] label The number of the label.
        * \param[in] value The value that will be assigned to the label.
        * \param[in] is_tau Indicates whether the label is a tau action. */
-      void set_label(unsigned int label, ATerm value, bool is_tau = false);
+      void set_label_value(unsigned int label, ATerm value, bool is_tau = false)
+      { // ATfprintf(stderr,"Set label %t %d %d %d\n",value,is_tau,label,nlabels);
+        assert(label<nlabels);
+        assert(nlabels==label_values.size());
+        label_values[label]=value;
+        assert(nlabels==taus.size());
+        taus[label]=is_tau;
+      };
 
       /** \brief Gets the value of a state.
        * \param[in] state The number of the state.
        * \return The value of the state. */
-      ATerm state_value(unsigned int state) const;
+      ATerm state_value(unsigned int state) const
+      { 
+        assert(state<nstates);
+        assert(nstates==state_values.size());
+        return state_values[state];
+      }
 
       /** \brief Gets the value of a label.
        * \param[in] label The number of the label.
@@ -780,103 +439,83 @@ namespace lts
       /** \brief Gets the value of a label as a string.
        * \param[in] label The number of the label.
        * \return A string representation of the value of the label. */
-      std::string label_value_str(unsigned int label);
+      std::string label_value_str(unsigned int label) const;
 
-      /** \brief Gets the source state of a transition.
-       * \param[in] transition The number of the transition.
-       * \return The number of the transition's source state. */
-      unsigned int transition_from(unsigned int transition);
+      /** \brief Clear the transitions of an lts.
+       * \details This resets the transition vector in an lts, but
+       *          leaves other related items, such as state or 
+       *          action labels untouched. */
+      void clear_transitions()
+      { transitions=std::vector<transition>();
+      }
 
-      /** \brief Gets the label of a transition.
-       * \param[in] transition The number of the transition.
-       * \return The number of the transition's label. */
-      unsigned int transition_label(unsigned int transition);
+      /** \brief Clear the labels of an lts.
+       * \details This resets the labels of an lts, but
+       *          leaves the number of labels untouched.
+       *          it also does not change the information 
+       *          regarding to what actions are tau */
+      void clear_labels()
+      { // std::cerr << "Clear labels\n";
+        label_values = atermpp::vector<ATerm>();
+        taus = std::vector < bool >();
+        nlabels = 0;
+      }
 
-      /** \brief Gets the target state of a transition.
-       * \param[in] transition The number of the transition.
-       * \return The number of the transition's target state. */
-      unsigned int transition_to(unsigned int transition);
+      /** \brief Gets an iterator range to the transitions of this LTS.
+       * \return A const iterator range to the transitions of this LTS. */
+      transition_const_range get_transitions() const
+      { return transition_const_range(transitions);
+      }
 
-      /** \brief Sets the source state of a transition.
-       * \param[in] transition The number of the transition.
-       * \param[in] from An index of the new from state */
-      void set_transition_from(const unsigned int transition, const unsigned int from);
+      /** \brief Gets an iterator range to the transitions of this LTS.
+       * \return An iterator range to the transitions of this LTS. 
+       *         The transitions can be altered. */
+      transition_range get_transitions() 
+      { return transition_range(transitions);
+      }
 
-      /** \brief Sets the label of a transition.
-       * \param[in] transition The number of the transition.
-       * \param[in] label An index of the new label */
-      void set_transition_label(const unsigned int transition, const unsigned int label);
-
-      /** \brief Sets the target state of a transition.
-       * \param[in] transition The number of the transition.
-       * \param[in] to An index of the new to state. */
-      void set_transition_to(const unsigned int transition, const unsigned int to);
-
-      /** \brief Gets an iterator to the states of this LTS.
-       * \return An iterator to the states of this LTS. */
-      state_iterator get_states();
-
-      /** \brief Gets an iterator to the states of this LTS.
-       * \return An iterator to the states of this LTS. */
-      const_state_iterator get_states() const;
-
-      /** \brief Gets an iterator to the labels of this LTS.
-       * \return An iterator to the labels of this LTS. */
-      label_iterator get_labels();
-
-      /** \brief Gets an iterator to the labels of this LTS.
-       * \return An iterator to the labels of this LTS. */
-      const_label_iterator get_labels() const;
-
-      /** \brief Gets an iterator to the transitions of this LTS.
-       * \return An iterator to the transitions of this LTS. */
-      transition_iterator get_transitions();
-
-      /** \brief Gets an iterator to the transitions of this LTS.
-       * \return An iterator to the transitions of this LTS. */
-      const_transition_iterator get_transitions() const;
-
-      /** \brief Sets the transitions to t malloced array of transitions t.
-       *  The existing transitions are freed if necessary. If t is NULL the
-       *  transitions are set to NULL. ntransitions and transition_size are
-       *  set to new_number_of_transitions and new_transitions_size respectively */
-      void set_transitions(transition *t, const unsigned int new_number_of_transitions, const unsigned int new_transitions_size)
-      { if (transitions!=NULL)
-        { free(transitions);
-        }
-        transitions=t;
-        ntransitions=new_number_of_transitions;
-        transitions_size=new_transitions_size;
+      /** \brief Add a transition to the lts. 
+      */
+      void add_transition(const transition &t)     
+      { // std::cerr << "Add transition " << t.from() << "-" << t.label() << "->" << t.to() << "  #S " <<
+        //       nstates << "#L " << nlabels << "\n";
+        assert(t.from()<nstates && t.label()<nlabels && t.to()<nstates);
+        transitions.push_back(t);
       }
 
       /** \brief Checks whether a label is a tau action.
        * \param[in] label The number of the label.
        * \retval true if the label is a tau action;
        * \retval false otherwise.  */
-      bool is_tau(unsigned int label) const;
-
+      bool is_tau(unsigned int label) const
+      { assert(label<taus.size());
+        return taus[label];
+      }
 
       /** \brief Sets the tau attribute of a label.
        * \param[in] label The number of the label.
        * \param[in] is_tau Indicates whether the label should become a tau action. */
-      void set_tau(unsigned int label, bool is_tau = true);
+      void set_tau(unsigned int label, bool is_tau = true)
+      { assert(label<taus.size());
+        taus[label]=is_tau;
+      }
 
       /** \brief Sets all labels with string that occurs in tau_actions to tau.
        *  \param[tau_actions] Vector with strings indicating which labels must be
        *       considered to be equal to tau's */
       bool hide_actions(const std::vector<std::string> &tau_actions);
 
-      /** \brief Checks whether this LTS has a creator.
-       * \retval true if the label has a creator;
-       * \retval false otherwise.  */
+      // /** \brief Checks whether this LTS has a creator.
+      //  * \retval true if the label has a creator;
+      //  * \retval false otherwise.  */
       bool has_creator();
 
-      /** \brief Gets the creator of this LTS.
-       * \return The creator string.*/
+      // /** \brief Gets the creator of this LTS.
+      //  * \return The creator string.*/
       std::string get_creator();
 
-      /** \brief Sets the creator of this LTS.
-       * \param[in] creator The creator string.*/
+      // /** \brief Sets the creator of this LTS.
+      //  * \param[in] creator The creator string.*/
       void set_creator(std::string creator);
 
       /** \brief Gets the file type of the last successful call to load.
@@ -885,15 +524,25 @@ namespace lts
        * \return The format of this LTS. */
       lts_type get_type() const;
 
+      /** \brief Sets the file type of this lts.
+       * \param[in] t The format of this LTS. */
+      void set_type(const lts_type t)
+      { type=t;
+      }
+
       /** \brief Checks whether this LTS has state values associated with its states.
        * \retval true if the LTS has state information;
        * \retval false otherwise.  */
-      bool has_state_info() const;
+      bool has_state_info() const
+      { return state_values.size()>0;
+      }
 
       /** \brief Checks whether this LTS has label values associated with its labels.
        * \retval true if the LTS has label information;
        * \retval false otherwise.  */
-      bool has_label_info() const;
+      bool has_label_info() const
+      { return label_values.size()>0;
+      }
 
       /** \brief Removes the state values from all states. */
       void remove_state_values();
@@ -1043,13 +692,7 @@ namespace lts
        * are all <em>l</em>-labelled transitions of which \e t is the target state. */
       unsigned int** get_transition_pre_table();
 
-      friend class state_iterator;
-
-      friend class label_iterator;
-
-      friend class transition_iterator;
   };
-
 }
 }
 

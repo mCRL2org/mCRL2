@@ -16,20 +16,11 @@
 using namespace mcrl2::core;
 
 sim_partitioner::sim_partitioner(mcrl2::lts::lts &l)
-  : aut(l), trans_index(NULL)
+  : aut(l)
 { }
 
 sim_partitioner::~sim_partitioner()
 {
-  if (trans_index != NULL)
-  {
-    for (unsigned int l = 0; l < aut.num_labels(); ++l)
-    {
-      free(trans_index[l]);
-    }
-  }
-  free(trans_index);
-  aut = NULL;
   delete match;
   delete exists;
   delete forall;
@@ -100,7 +91,8 @@ void sim_partitioner::partitioning_algorithm()
 void sim_partitioner::initialise_datastructures()
 {
   aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
-  trans_index = aut.get_transition_pre_table();
+  // trans_index = aut.get_transition_pre_table();
+  trans_index=transitions_per_outgoing_state_action_pair(aut.get_transitions());
 
   uint N = aut.num_states();
 
@@ -156,7 +148,7 @@ void sim_partitioner::initialise_datastructures()
 
 void sim_partitioner::initialise_Pi(uint gamma,uint l)
 {
-  uint alpha, a, c, t, t_last;
+  uint alpha, a, c;
   std::vector<uint>::iterator ci, last;
 
   contents.clear();
@@ -175,10 +167,12 @@ void sim_partitioner::initialise_Pi(uint gamma,uint l)
   {
     c = *ci;
     /* iterate over the incoming l-transitions of c */
-    t_last = trans_index[l][c+1];
-    for (t = trans_index[l][c]; t < t_last; ++t)
+    using namespace mcrl2::lts;
+    for(std::map < std::pair < transition::size_type, transition::size_type >, transition::size_type >::const_iterator 
+          t=trans_index.lower_bound(std::pair < transition::size_type, transition::size_type >(l,c));
+          t!=trans_index.upper_bound(std::pair < transition::size_type, transition::size_type >(l,c)); ++t)
     {
-      a = aut.transition_from(t);
+      a = t->first.first; 
       if (!state_touched[a])
       {
         alpha = block_Pi[a];
@@ -628,21 +622,15 @@ void sim_partitioner::cleanup(uint alpha,uint beta)
 
 /* ----------------- FOR POST-PROCESSING ---------------------------- */
 
-
-mcrl2::lts::transition* sim_partitioner::get_transitions(uint& nt,uint& size) const
+std::vector < mcrl2::lts::transition> sim_partitioner::get_transitions() const
 {
   using namespace mcrl2::lts;
 
-  size = forall->get_num_elements();
-  transition* ts = (transition*)malloc(size*sizeof(transition));
-  if (ts == NULL)
-  {
-    throw mcrl2::runtime_error("out of memory");
-  }
+  std::vector < mcrl2::lts::transition> ts;
+  ts.reserve(forall->get_num_elements());
 
-  nt = 0;
   std::vector<bool> pre_sim;
-  uint l,beta,gamma;
+  transition::size_type l,beta,gamma;
   hash_table3_iterator alphai(exists);
   hash_table3_iterator gammai(forall);
   for (beta = 0; beta < s_Pi; ++beta)
@@ -675,10 +663,7 @@ mcrl2::lts::transition* sim_partitioner::get_transitions(uint& nt,uint& size) co
         if (!pre_sim[gamma])
         {
           // add the transition gamma -l-> beta
-          ts[nt].from = gamma;
-          ts[nt].label = l;
-          ts[nt].to = beta;
-          ++nt;
+          ts.push_back(transition(gamma,l,beta));
         }
       }
     }

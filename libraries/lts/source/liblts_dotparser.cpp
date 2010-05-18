@@ -1845,7 +1845,7 @@ static void dot_add_transition(int from, ATermAppl label, int to)
   }
 
   set_has_incoming(to);
-  dot_lexer_obj->dot_lts->add_transition(from,idx,to);
+  dot_lexer_obj->dot_lts->add_transition(mcrl2::lts::transition(from,idx,to));
 }
 
 static void dot_add_transitions(ATermList states, ATermAppl label)
@@ -1873,7 +1873,7 @@ static int dot_state(ATermAppl id, ATermAppl label)
   if ( label != NULL )
   {
     ATermAppl oldval = (ATermAppl) dot_lexer_obj->dot_lts->state_value(idx);
-    dot_lexer_obj->dot_lts->set_state(idx,(ATerm) ATsetArgument(oldval,(ATerm) label,1));
+    dot_lexer_obj->dot_lts->set_state_value(idx,(ATerm) ATsetArgument(oldval,(ATerm) label,1));
   }
 
   return idx;
@@ -1884,7 +1884,7 @@ static void set_has_incoming(int state)
   ATermAppl oldval = (ATermAppl) dot_lexer_obj->dot_lts->state_value(state);
   if ( ATisEqualAFun(no_incoming_fun,ATgetAFun(oldval)) )
   {
-    dot_lexer_obj->dot_lts->set_state(state,(ATerm) ATmakeAppl2(has_incoming_fun,ATgetArgument(oldval,0),ATgetArgument(oldval,1)));
+    dot_lexer_obj->dot_lts->set_state_value(state,(ATerm) ATmakeAppl2(has_incoming_fun,ATgetArgument(oldval,0),ATgetArgument(oldval,1)));
   }
 }
 

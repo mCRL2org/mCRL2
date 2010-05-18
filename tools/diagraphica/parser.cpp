@@ -12,7 +12,7 @@
 
 #include "parser.h"
 
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/exception.h"
 
@@ -107,11 +107,7 @@ using namespace mcrl2::lts;
 
       ////////////////////////////////////////////////////
     mcrl2::lts::lts l;
-
-    if (!l.read_from(path , lts_none)) {
-      throw mcrl2::runtime_error(
-            "Error opening file for parsing." );
-    }
+    mcrl2::lts::detail::read_from(l,path,lts_none);
 
     if(l.has_state_parameters ())
     {
@@ -142,8 +138,7 @@ using namespace mcrl2::lts;
       }
     }
 
-    state_iterator si = l.get_states();
-    while(si.more())
+    for(unsigned int si= 0; si<l.num_states(); ++si)
     {
       line.clear();
       if(l.has_state_parameters ())
@@ -159,7 +154,7 @@ using namespace mcrl2::lts;
           atermpp::set< ATerm > tmp = l.get_state_parameter_values(i);
           for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
           {
-            if (*z == l.get_state_parameter_value( *si, i ))
+            if (*z == l.get_state_parameter_value( si, i ))
             {
               line.append(to_string(c));
             }
@@ -167,23 +162,19 @@ using namespace mcrl2::lts;
           }
         }
       }
-  //    cout << line << endl;
-      parseStates(
-         line,
-         graph );
-      ++si;
+      parseStates( line, graph );
     }
 
-    for(transition_iterator ti = l.get_transitions(); ti.more(); ++ti)
+    for(transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1))
     {
-       line.clear();
-       line.append(to_string(ti.from()+1));
-       line.append(" ");
-       line.append(to_string(ti.to()+1));
-       line.append(" \"");
-       line.append(l.label_value_str(ti.label() ) );
-       line.append("\"");
-//       cout << line << endl;
+      const transition ti=r.front();
+      line.clear();
+      line.append(to_string(ti.from()+1));
+      line.append(" ");
+      line.append(to_string(ti.to()+1));
+      line.append(" \"");
+      line.append(l.label_value_str(ti.label() ) );
+      line.append("\"");
                         parseTransitions(
                             line,
                             graph );

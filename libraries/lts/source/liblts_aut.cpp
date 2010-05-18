@@ -11,11 +11,18 @@
 #include <cstring>
 #include <string>
 #include <cstdlib>
+#include <sstream>
 #include <fstream>
 #include <assert.h>
 #include <aterm2.h>
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
+
+static std::string c(const unsigned int n)  // Awkward trick, should be a better way to do this. Please replace....
+{ std::stringstream out;
+  out << n;
+  return out.str();
+}
 
 using namespace mcrl2::core;
 using namespace std;
@@ -24,38 +31,40 @@ namespace mcrl2
 {
 namespace lts
 {
+namespace detail
+{
 
-bool lts::read_from_aut(string const& filename)
+void read_from_aut(lts &l, string const& filename)
 {
   ifstream is(filename.c_str());
 
   if ( !is.is_open() )
   {
-    gsVerboseMsg("cannot open AUT file '%s' for reading\n",filename.c_str());
-    return false;
+    throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for reading.");
   }
 
-  bool r = read_from_aut(is);
-
+  read_from_aut(l,is);
   is.close();
-
-  return r;
 }
 
-static bool read_aut_header(char *s, char **initial_state, char **transitions, char **states)
+static void read_aut_header(char *s, char **initial_state, char **transitions, char **states)
 {
   while ( *s == ' ' )
     s++;
 
   if ( strncmp(s,"des",3) )
-    return false;
+  {
+    throw mcrl2::runtime_error("Expext a .aut file to start with 'des'.");
+  }  
   s += 3;
 
   while ( *s == ' ' )
     s++;
 
   if ( *s != '(' )
-    return false;
+  {
+    throw mcrl2::runtime_error("Expect an opening bracket '(' after 'des' in the first line of a .aut file.");
+  }  
   s++;
 
   while ( *s == ' ' )
@@ -70,7 +79,9 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
     s++;
 
   if ( *s != ',' )
-    return false;
+  {
+    throw mcrl2::runtime_error("Expect a comma after the first number in the first line of a .aut file.");
+  }  
   s++;
 
   while ( *s == ' ' )
@@ -85,7 +96,9 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
     s++;
 
   if ( *s != ',' )
-    return false;
+  {
+    throw mcrl2::runtime_error("Expect a comma after the second number in the first line of a .aut file.");
+  }  
   s++;
 
   while ( *s == ' ' )
@@ -100,7 +113,9 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
     s++;
 
   if ( *s != ')' )
-    return false;
+  {
+    throw mcrl2::runtime_error("Expect a closing bracket ')' after the third number in the first line of a .aut file.");
+  }  
   s++;
 
   while ( *s == ' ' )
@@ -110,22 +125,23 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
     s++;
 
   if ( *s != '\0' )
-    return false;
+  {
+    throw mcrl2::runtime_error("Expect a newline after the header des(...,...,...) in a .aut file.");
+  }  
 
   *end_initial_state = '\0';
   *end_transitions = '\0';
   *end_states = '\0';
-
-  return true;
 }
 
-static bool read_aut_transition(char *s, char **from, char **label, char **to)
+static void read_aut_transition(char *s, char **from, char **label, char **to, const unsigned int lineno)
 {
   while ( *s == ' ' )
     s++;
 
   if ( *s != '(' )
-    return false;
+  { throw mcrl2::runtime_error("Expect opening bracket at line " + c(lineno) + ".");
+  }  
   s++;
 
   while ( *s == ' ' )
@@ -140,7 +156,8 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
     s++;
 
   if ( *s != ',' )
-    return false;
+  { throw mcrl2::runtime_error("Expect that the first number is followed by a comma at line " + c(lineno) + ".");
+  }  
   s++;
 
   while ( *s == ' ' )
@@ -155,9 +172,12 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
       s++;
     end_label = s;
     if ( *s != '"' )
-      return false;
+    { throw mcrl2::runtime_error("Expect that the second item is a quoted label (using \") at line " + c(lineno) + ".");
+    }
     s++;
-  } else {
+  } 
+  else 
+  {
     *label = s;
     while ( (*s != ',') && ( *s != '\0') )
       s++;
@@ -168,7 +188,8 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
     s++;
 
   if ( *s != ',' )
-    return false;
+  { throw mcrl2::runtime_error("Expect a comma after the quoted label at line " + c(lineno) + ".");
+  }  
   s++;
 
   while ( *s == ' ' )
@@ -183,7 +204,8 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
     s++;
 
   if ( *s != ')' )
-    return false;
+  { throw mcrl2::runtime_error("Expect a closing bracket at the end of the transition at line " + c(lineno) + ".");
+  }  
   s++;
 
   while ( *s == ' ' )
@@ -193,16 +215,16 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
     s++;
 
   if ( *s != '\0' )
-    return false;
+  { throw mcrl2::runtime_error("Expect a newline after the transition at line " + c(lineno) + ".");
+  }  
 
   *end_from = '\0';
   *end_label = '\0';
   *end_to = '\0';
 
-  return true;
 }
 
-bool lts::read_from_aut(istream &is)
+void read_from_aut(lts &l, istream &is)
 {
   unsigned int ntrans,nstate;
   #define READ_FROM_AUT_BUF_SIZE 8196
@@ -211,21 +233,13 @@ bool lts::read_from_aut(istream &is)
   unsigned int line_no = 1;
 
   is.getline(buf,READ_FROM_AUT_BUF_SIZE);
-  if ( read_aut_header(buf,&s1,&s2,&s3) )
-  {
-    init_state = strtoul(s1,NULL,10);
-    ntrans = strtoul(s2,NULL,10);
-    nstate = strtoul(s3,NULL,10);
-  } else {
-    gsErrorMsg("cannot parse AUT input (invalid header)\n");
-    return false;
-  }
+  read_aut_header(buf,&s1,&s2,&s3);
+  ntrans = strtoul(s2,NULL,10);
+  nstate = strtoul(s3,NULL,10);
 
-  for (unsigned int i=0; i<nstate; i++)
-  {
-    add_state();
-  }
-  assert(nstate == nstates);
+  l.set_num_states(nstate,false);
+  l.set_initial_state(strtoul(s1,NULL,10));
+  assert(nstate == l.num_states());
 
   ATermIndexedSet labs = ATindexedSetCreate(100,50);
   while ( !is.eof() )
@@ -239,27 +253,23 @@ bool lts::read_from_aut(istream &is)
     {
       break;
     }
-    if ( read_aut_transition((char *)buf,&s1,&s2,&s3) )
+    read_aut_transition((char *)buf,&s1,&s2,&s3,line_no);
+    
+    from = strtoul(s1,NULL,10);
+    s = s2;
+    to = strtoul(s3,NULL,10);
+    if ( from >= l.num_states() )
     {
-      from = strtoul(s1,NULL,10);
-      s = s2;
-      to = strtoul(s3,NULL,10);
-      if ( from >= nstates )
-      {
-        gsErrorMsg("cannot parse AUT input (invalid transition at line %d; state index (%u) higher than maximum (%u) given by header)\n",line_no,from,nstates);
-        ATtableDestroy(labs);
-        return false;
-      }
-      if ( to >= nstates )
-      {
-        gsErrorMsg("cannot parse AUT input (invalid transition at line %d; state index (%u) higher than maximum (%u) given by header)\n",line_no,to,nstates);
-        ATtableDestroy(labs);
-        return false;
-      }
-    } else {
-      gsErrorMsg("cannot parse AUT input (invalid transition at line %d)\n",line_no);
       ATtableDestroy(labs);
-      return false;
+      throw mcrl2::runtime_error("cannot parse AUT input (invalid transition at line " + 
+              c(line_no) + "; state index (" + c(from) + ") higher than maximum (" +
+                  c(l.num_states()) + ") given by header).");
+    }
+    if ( to >= l.num_states() )
+    {
+      ATtableDestroy(labs);
+      throw mcrl2::runtime_error("cannot parse AUT input (invalid transition at line " + c(line_no) + 
+              "; state index (" + c(to) + ") higher than maximum (" + c(l.num_states()) + ") given by header).");
     }
 
     int label;
@@ -268,71 +278,67 @@ bool lts::read_from_aut(istream &is)
     {
       ATbool b;
       label = ATindexedSetPut(labs,t,&b);
-      add_label(t,!strcmp(s,"tau"));
+      l.add_label(t,!strcmp(s,"tau"));
     }
 
-    add_transition(from,(unsigned int) label,to);
+    l.add_transition(transition(from,(unsigned int) label,to));
   }
   ATtableDestroy(labs);
-  if ( ntrans != ntransitions )
+  if ( ntrans != l.num_transitions() )
   {
-    gsErrorMsg("number of transitions read (%u) does not correspond to the number of transition given in the header (%u)\n",ntransitions,ntrans);
-    return false;
+    throw mcrl2::runtime_error("number of transitions read (" + c(l.num_transitions()) + 
+              ") does not correspond to the number of transition given in the header (" + c(ntrans) + ").");
   }
 
-  this->type = lts_aut;
+  l.set_type(lts_aut);
 
-  return true;
 }
 
-bool lts::write_to_aut(string const& filename)
+void write_to_aut(const lts &l, string const& filename)
 {
   ofstream os(filename.c_str());
 
   if ( !os.is_open() )
   {
-    gsVerboseMsg("cannot open AUT file '%s' for writing\n",filename.c_str());
-    return false;
+    throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for writing.");
+    return;
   }
 
-  write_to_aut(os);
-
+  write_to_aut(l,os);
   os.close();
-
-  return true;
 }
 
-bool lts::write_to_aut(ostream &os)
+void write_to_aut(const lts &l, ostream &os)
 {
-  os << "des (0," << ntransitions << "," << nstates << ")" << endl;
+  os << "des (0," << l.num_transitions() << "," << l.num_states() << ")" << endl;
 
-  for (unsigned int i=0; i<ntransitions; i++)
+  for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
-    unsigned int from = transitions[i].from;
-    unsigned int to = transitions[i].to;
+    transition::size_type from = t.front().from();
+    transition::size_type to = t.front().to();
     // AUT files need the initial state to be 0, so we will swap state 0 and
     // the initial state
     if ( from == 0 )
     {
-      from = init_state;
-    } else if ( from == init_state )
+      from = l.initial_state();
+    } else if ( from == l.initial_state() )
     {
       from = 0;
     }
     if ( to == 0 )
     {
-      to = init_state;
-    } else if ( to == init_state )
+      to = l.initial_state();
+    } else if ( to == l.initial_state() )
     {
       to = 0;
     }
     os << "(" << from << ",\""
-       << label_value_str(transitions[i].label)
+       << l.label_value_str(t.front().label())
        << "\"," << to << ")" << endl;
   }
 
-  return true;
 }
 
+}
 }
 }

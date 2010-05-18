@@ -28,10 +28,11 @@ namespace detail
     }
     // read and store tau transitions.
     std::map < state_type, std::vector < state_type > > src_tgt;
-    for(transition_iterator i=aut.get_transitions(); i.more(); ++i)
+    for(transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
     { 
-      if (aut.is_tau(i.label()))
-      { src_tgt[i.from()].push_back(i.to());
+      const transition t=r.front();
+      if (aut.is_tau(t.label()))
+      { src_tgt[t.from()].push_back(t.to());
       }
     }
     // Initialise the data structures
@@ -43,9 +44,11 @@ namespace detail
     src_tgt.clear();
 
     std::map < state_type, std::vector < state_type > > tgt_src;
-    for(transition_iterator i=aut.get_transitions(); i.more(); ++i)
-    { if (aut.is_tau(i.label()))
-      { tgt_src[i.to()].push_back(i.from());
+    for(transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+    { 
+      const transition t=r.front();
+      if (aut.is_tau(t.label()))
+      { tgt_src[t.to()].push_back(t.from());
       }
     }
     equivalence_class_index=0;
@@ -69,32 +72,28 @@ namespace detail
     // loop. Such transitions only exist in case divergence preserving branching bisimulation is
     // used. A set is used to remove double occurrences of transitions. 
     std::set < transition > resulting_transitions;
-    for(transition_iterator i=aut.get_transitions(); i.more(); ++i)
+    for(transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
     { 
-      if (!aut.is_tau(i.label()) || 
+      const transition t=r.front();
+      if (!aut.is_tau(t.label()) || 
           preserve_divergence_loops ||
-          block_index_of_a_state[i.from()]!=block_index_of_a_state[i.to()])
+          block_index_of_a_state[t.from()]!=block_index_of_a_state[t.to()])
       { 
         resulting_transitions.insert(
                    transition(
-                         block_index_of_a_state[i.from()],
-                         i.label(),
-                         block_index_of_a_state[i.to()]));
+                         block_index_of_a_state[t.from()],
+                         t.label(),
+                         block_index_of_a_state[t.to()]));
       }
     }
 
-    aut.set_transitions(NULL,0,0);
-    // Copy the transitions from the set into a malloced block of memory, as the lts library
-    // currently requires it in that form.
-    transition* new_transitions=(transition *)malloc(sizeof(transition)*resulting_transitions.size());
-    unsigned int counter=0;
+    aut.clear_transitions();
+    // Copy the transitions from the set into the transition system.
+
     for(std::set < transition >::const_iterator i=resulting_transitions.begin();
           i!=resulting_transitions.end(); ++i)
-    { 
-      new_transitions[counter++]=transition(i->from,i->label,i->to);
+    { aut.add_transition(transition(i->from(),i->label(),i->to()));
     }
-
-    aut.set_transitions(new_transitions,resulting_transitions.size(),resulting_transitions.size());
   }
 
   unsigned int scc_partitioner::num_eq_classes() const

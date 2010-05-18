@@ -16,8 +16,7 @@
 #include <wx/filedlg.h>
 #include <wx/notebook.h>
 #include <wx/progdlg.h>
-#include <mcrl2/lts/lts.h>
-//#include <time.h>
+#include "mcrl2/lts/lts_io.h"
 #include "glcanvas.h"
 #include "icons/main_window.xpm"
 #include "ids.h"
@@ -232,11 +231,12 @@ void MainFrame::onIdle(wxIdleEvent &event) {
 }
 */
 
-void MainFrame::onOpen(wxCommandEvent& /*event*/) {
+void MainFrame::onOpen(wxCommandEvent& /*event*/) 
+{
   wxString filemask = wxString(("All supported files (" +
-        mcrl2::lts::lts::lts_extensions_as_string() +
+        mcrl2::lts::detail::lts_extensions_as_string() +
         ")|" +
-        mcrl2::lts::lts::lts_extensions_as_string(";") +
+        mcrl2::lts::detail::lts_extensions_as_string(";") +
         "|All files (*.*)|*.*").c_str(),
         wxConvLocal);
   wxFileDialog dialog(this,wxT("Open LTS"),

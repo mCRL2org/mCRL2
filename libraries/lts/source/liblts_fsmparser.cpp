@@ -1574,8 +1574,8 @@ yyreduce:
         label = (ATerm) ATmakeInt(i);
         ATtablePut(fsm_lexer_obj->labelTable,(ATerm)(yyvsp[(3) - (3)].aterm),label);
       }
-      fsm_lexer_obj->fsm_lts->add_transition( frState,
-          ATgetInt((ATermInt)label), toState );
+      fsm_lexer_obj->fsm_lts->add_transition(mcrl2::lts::transition(frState,
+          ATgetInt((ATermInt)label), toState ));
     ;}
     break;
 

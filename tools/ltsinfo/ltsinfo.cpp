@@ -16,7 +16,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "aterm2.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
@@ -66,7 +66,7 @@ class ltsinfo_tool : public ltsinfo_base
         "The format of INFILE is determined by its contents. "
         "The option --in can be used to force the format for INFILE. "
         "The supported formats are:\n"
-        +mcrl2::lts::lts::supported_lts_formats_text()
+        +mcrl2::lts::detail::supported_lts_formats_text()
       ),
       intype(mcrl2::lts::lts_none),
       determinism_equivalence(mcrl2::lts::lts_red_determinisation)
@@ -126,7 +126,7 @@ class ltsinfo_tool : public ltsinfo_base
           parser.error("multiple input formats specified; can only use one");
         }
 
-        intype = lts::parse_format(parser.option_argument("in"));
+        intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
         if (intype == lts_none || intype == lts_dot)  {
           parser.error("option -i/--in has illegal argument '" +
             parser.option_argument("in") + "'");
@@ -136,28 +136,43 @@ class ltsinfo_tool : public ltsinfo_base
 
   public:
 
-    bool run() {
+    bool run() 
+    {
       using namespace mcrl2::lts;
+      using namespace mcrl2::lts::detail;
 
       mcrl2::lts::lts l;
-
-      if (infilename.empty()) {
+      if (infilename.empty()) 
+      {
         gsVerboseMsg("reading LTS from stdin...\n");
 
-        if ( !l.read_from(std::cin, intype) ) {
-          throw mcrl2::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
+        try 
+        { mcrl2::lts::lts l_temp(std::cin, intype);
+          l.swap(l_temp);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string("cannot read LTS from stdin\nretry with -v/--verbose for more information.\n") +
+                                      e.what());
         }
       }
-      else {
+      else 
+      {
         gsVerboseMsg("reading LTS from '%s'...\n",infilename.c_str());
 
-        if (!l.read_from(infilename,intype)) {
-          throw mcrl2::runtime_error("cannot read LTS from file '" + infilename +
-                                             "'\nretry with -v/--verbose for more information");
+        try 
+        { mcrl2::lts::lts l_temp(infilename,intype);
+          l.swap(l_temp);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string("cannot read LTS from file '") + infilename +
+                                             "'\nretry with -v/--verbose for more information.\n" +
+                                             e.what());
         }
       }
 
-      std::cout << "LTS format: " << lts::string_for_type(l.get_type()) << std::endl
+      std::cout << "LTS format: " << string_for_type(l.get_type()) << std::endl
            << "Number of states: " << l.num_states() << std::endl
            << "Number of labels: " << l.num_labels() << std::endl
            << "Number of transitions: " << l.num_transitions() << std::endl;
@@ -203,11 +218,12 @@ class ltsinfo_tool : public ltsinfo_base
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+    void set_capabilities(tipi::tool::capabilities& c) const 
+    {
+      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
 
       for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-        c.add_input_configuration("lts_in", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::reporting);
+        c.add_input_configuration("lts_in", tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(*i)), tipi::tool::category::reporting);
       }
     }
 
@@ -264,8 +280,9 @@ class ltsinfo_tool : public ltsinfo_base
     }
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) {
-      using mcrl2::lts::lts;
+    bool perform_task(tipi::configuration& c) 
+    {
+      using namespace mcrl2::lts;
       using namespace tipi;
       using namespace tipi::layout;
       using namespace tipi::layout::elements;
@@ -273,12 +290,14 @@ class ltsinfo_tool : public ltsinfo_base
       tipi::configuration::object& input_object = c.get_input("lts_in");
 
       lts l;
-      mcrl2::lts::lts_type t = lts::parse_format(input_object.type().sub_type());
+      mcrl2::lts::lts_type t = mcrl2::lts::detail::parse_format(input_object.type().sub_type());
 
       // Extract configuration
       determinism_equivalence = c.get_option_argument< mcrl2::lts::lts_equivalence >("determinism_equivalence", 0);
 
-      if (l.read_from(input_object.location(), t)) {
+      try
+      {
+        mcrl2::lts::detail::read_from(l,input_object.location(), t);
         /* Create and add the top layout manager */
         tipi::tool_display d;
 
@@ -322,7 +341,7 @@ class ltsinfo_tool : public ltsinfo_base
 
         n.append(m).
             append(d.create< label >().
-                 set_text("Input read from " + input_object.location() + " (" + lts::string_for_type(t) + " format)"),
+                 set_text("Input read from " + input_object.location() + " (" + mcrl2::lts::detail::string_for_type(t) + " format)"),
                         margins(5,0,5,20));
 
         gsVerboseMsg("checking reachability...\n");
@@ -333,9 +352,10 @@ class ltsinfo_tool : public ltsinfo_base
 
         send_display_layout(d.manager(n));
       }
-      else {
-        send_error("Could not read `" + c.get_input("lts_in").location() + "', corruption or incorrect format?\n");
-
+      catch (mcrl2::runtime_error &e)
+      {
+        send_error("Could not read `" + c.get_input("lts_in").location() + "', corruption or incorrect format?\n" +
+                          e.what());
         return (false);
       }
 

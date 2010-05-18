@@ -220,8 +220,8 @@ transition:
         label = (ATerm) ATmakeInt(i);
         ATtablePut(fsm_lexer_obj->labelTable,(ATerm)$3,label);
       }
-      fsm_lexer_obj->fsm_lts->add_transition( frState,
-          ATgetInt((ATermInt)label), toState );
+      fsm_lexer_obj->fsm_lts->add_transition(mcrl2::lts::transition(frState,
+          ATgetInt((ATermInt)label), toState ));
     }
   ;
 

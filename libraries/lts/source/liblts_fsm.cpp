@@ -22,6 +22,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lps/specification.h"
 #include "liblts_fsmparser.h"
 
@@ -37,6 +38,8 @@ namespace mcrl2
 {
 namespace lts
 {
+namespace detail
+{
 
 static ATerm parse_mcrl2_action(ATerm label, lps::specification const& spec)
 {
@@ -45,14 +48,14 @@ static ATerm parse_mcrl2_action(ATerm label, lps::specification const& spec)
   ATermAppl t = parse_mult_act(ss);
   if ( t == NULL )
   {
-    gsVerboseMsg("cannot parse action as mCRL2\n");
+    throw mcrl2::runtime_error("cannot parse action as mCRL2.");
   } 
   else 
   {
     t = type_check_mult_act(t,specification_to_aterm(spec));
     if ( t == NULL )
     {
-      gsVerboseMsg("error type checking action\n");
+      throw mcrl2::runtime_error("error type checking action");
     }
   }
 
@@ -78,28 +81,24 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification const& spec)
     sort = parse_sort_expr(sort_ss);
     if ( sort == NULL )
     {
-      gsVerboseMsg("error parsing state argument sort\n");
-      return NULL;
+      throw mcrl2::runtime_error("error parsing state argument sort\n");
     }
     sort = type_check_sort_expr(sort,spec_for_type_check);
     if ( sort == NULL )
     {
-      gsVerboseMsg("error type checking state argument sort\n");
-      return NULL;
+      throw mcrl2::runtime_error("error type checking state argument sort\n");
     }
 
     std::stringstream expr_ss(ATgetName(ATgetAFun(expr)));
     expr = parse_data_expr(expr_ss);
     if ( expr == NULL )
     {
-      gsVerboseMsg("error parsing state argument\n");
-      return NULL;
+      throw mcrl2::runtime_error("error parsing state argument\n");
     }
     expr = type_check_data_expr(expr,sort,spec_for_type_check);
     if ( expr == NULL )
     {
-      gsVerboseMsg("error type checking state argument\n");
-      return NULL;
+      throw mcrl2::runtime_error("error type checking state argument\n");
     }
 
     state_args[i] = (ATerm) expr;
@@ -109,88 +108,84 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification const& spec)
   return r;
 }
 
-bool lts::read_from_fsm(std::istream &is, lts_type type, lps::specification const& spec)
+void read_from_fsm(lts &l, std::istream &is, lts_type type, lps::specification const& spec)
 {
-  if ( parse_fsm(is,*lts_object) )
+  parse_fsm(is,l);
+
+  if ( l.get_type() == lts_mcrl2 )
   {
-    if ( type == lts_mcrl2 )
+    for (unsigned int i=0; i<l.num_labels(); i++)
     {
-      for (unsigned int i=0; i<nlabels; i++)
-      {
-        label_values[i] = parse_mcrl2_action(label_values[i],spec);
-        if ( label_values[i] == NULL )
-        {
-          return false;
-        }
-      }
-      if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )
-      {
-        remove_state_values();
-      } else {
-        for (unsigned int i=0; i<nstates; i++)
-        {
-          state_values[i] = parse_mcrl2_state(state_values[i],spec);
-          if ( state_values[i] == NULL )
-          {
-            return false;
-          }
-        }
-      }
-      extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),
-              (ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec.data()),
-              (ATerm) ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) static_cast< ATermList >(spec.process().process_parameters())),
-              ATgetArgument(specification_to_aterm(spec),1));
-      this->type = lts_mcrl2;
-    } else if ( type == lts_mcrl ) {
-      if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )
-      {
-        remove_state_values();
-      } else {
-        for (unsigned int i=0; i<nstates; i++)
-        {
-          ATermList m = ATmakeList0();
-          for (ATermList l=ATreverse((ATermList) state_values[i]); !ATisEmpty(l); l=ATgetNext(l))
-          {
-            ATerm a = ATmake(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
-            m = ATinsert(m,a);
-          }
-          state_values[i] = (ATerm) m;
-        }
-      }
-      this->type = lts_mcrl;
-    } else {
-      this->type = lts_fsm;
+      l.set_label_value(i,parse_mcrl2_action(l.label_value(i),spec));
     }
-    return true;
-  } else {
-    return false;
+    if ( l.num_states() > 0 && ATgetLength((ATermList) l.state_value(0)) == 0 )
+    {
+      l.remove_state_values();
+    } 
+    else 
+    {
+      for (unsigned int i=0; i<l.num_states(); i++)
+      {
+        l.set_state_value(i,parse_mcrl2_state(l.state_value(i),spec));
+      }
+    }
+    l.set_extra_data((ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),
+            (ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec.data()),
+            (ATerm) ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) static_cast< ATermList >(spec.process().process_parameters())),
+            ATgetArgument(specification_to_aterm(spec),1)));
+    l.set_type(lts_mcrl2);
+  } 
+  else if ( type == lts_mcrl ) 
+  {
+    if ( l.num_states() > 0 && ATgetLength((ATermList) l.state_value(0)) == 0 )
+    {
+      l.remove_state_values();
+    } 
+    else 
+    {
+      for (unsigned int i=0; i<l.num_states(); i++)
+      {
+        ATermList m = ATmakeList0();
+        for (ATermList lit=ATreverse((ATermList) l.state_value(i)); !ATisEmpty(lit); lit=ATgetNext(lit))
+        {
+          ATerm a = ATmake(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(lit),0))));
+          m = ATinsert(m,a);
+        }
+        l.set_state_value(i,(ATerm) m);
+      }
+    }
+    l.set_type(lts_mcrl);
+  } 
+  else 
+  {
+    l.set_type(lts_fsm);
   }
 }
 
-bool lts::read_from_fsm(std::string const &filename, lts_type type, lps::specification const& spec)
+void read_from_fsm(lts &l, std::string const &filename, lts_type type, lps::specification const& spec)
 {
   std::ifstream is(filename.c_str());
 
   if ( !is.is_open() )
   {
-    gsVerboseMsg("cannot open FSM file '%s' for reading\n",filename.c_str());
-    return false;
+    throw mcrl2::runtime_error("cannot open FSM file '" + filename + "' for reading.");
+    return;
   }
 
-  return read_from_fsm(is,type,spec);
+  read_from_fsm(l,is,type,spec);
 }
 
-bool lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
+void write_to_fsm(const lts &l, std::ostream &os, lts_type type, ATermList params)
 {
   // determine number of state parameters
   unsigned int num_params;
-  if ( (type != lts_none) && state_info && (nstates > 0) )
+  if ( (type != lts_none) && l.has_state_info() && (l.num_states() > 0) )
   {
     if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
     {
-      num_params = ATgetLength((ATermList) state_values[0]);
+      num_params = ATgetLength((ATermList) l.state_value(0));
     } else { // type == lts_mcrl2
-      num_params = ATgetArity(ATgetAFun((ATermAppl) state_values[0]));
+      num_params = ATgetArity(ATgetAFun((ATermAppl) l.state_value(0)));
     }
   } else {
     num_params = 0;
@@ -203,20 +198,20 @@ bool lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
   {
     throw mcrl2::runtime_error("malloc failed");
   }
-  if ( (type != lts_none) && state_info )
+  if ( (type != lts_none) && l.has_state_info() )
   {
     for (unsigned int i=0; i<num_params; i++)
     {
       set[i] = ATindexedSetCreate(30,50);
     }
-    for (unsigned int i=0; i<nstates; i++)
+    for (unsigned int i=0; i<l.num_states(); i++)
     {
       ATermList state_pars;
       if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
       {
-        state_pars = (ATermList) state_values[i];
+        state_pars = (ATermList) l.state_value(i);
       } else { // type == mcrl2
-        state_pars = ATgetArguments((ATermAppl) state_values[i]);
+        state_pars = ATgetArguments((ATermAppl) l.state_value(i));
       }
 
       assert( ((unsigned int) ATgetLength(state_pars)) >= num_params );
@@ -300,27 +295,31 @@ bool lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
   // print states
   gsVerboseMsg("writing states...\n");
   os << "---" << std::endl;
-  for(unsigned int i=0; i<nstates; i++)
+  for(unsigned int i=0; i<l.num_states(); i++)
   {
     unsigned int idx = i;
     // make sure initial state is first
     if ( i == 0 )
     {
-      idx = init_state;
-    } else if ( i == init_state )
+      idx = l.initial_state();
+    } 
+    else 
+    if ( i == l.initial_state() )
     {
       idx = 0;
     }
     ATermList state_pars;
-    if ( (type == lts_none) || !state_info )
+    if ( (type == lts_none) || !l.has_state_info() )
     {
       state_pars = ATmakeList0();
-    } else {
+    } 
+    else 
+    {
       if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
       {
-        state_pars = (ATermList) state_values[idx];
+        state_pars = (ATermList) l.state_value(idx);
       } else { // type == lts_mcrl2
-        state_pars = ATgetArguments((ATermAppl) state_values[idx]);
+        state_pars = ATgetArguments((ATermAppl) l.state_value(idx));
       }
     }
 
@@ -339,33 +338,33 @@ bool lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
   // print transitions
   gsVerboseMsg("writing transitions...\n");
   os << "---" << std::endl;
-  for (unsigned int i=0; i<ntransitions; i++)
+  for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
-    unsigned int from = transitions[i].from;
+    transition::size_type from = t.front().from();
     // correct state numbering
     if ( from == 0 )
     {
-      from = init_state;
-    } else if ( from == init_state )
+      from = l.initial_state();
+    } else if ( from == l.initial_state() )
     {
       from = 0;
     }
-    unsigned int to = transitions[i].to;
+    transition::size_type to = t.front().to();
     if ( to == 0 )
     {
-      to = init_state;
-    } else if ( to == init_state )
+      to = l.initial_state();
+    } else if ( to == l.initial_state() )
     {
       to = 0;
     }
     // correct state numbering
     os << from+1 << " " << to+1 << " \"";
-    os << label_value_str(transitions[i].label);
+    os << l.label_value_str(t.front().label());
     os << "\"" << std::endl;
   }
 
   // clean up
-  if ( (type != lts_none) && state_info )
+  if ( (type != lts_none) && l.has_state_info() )
   {
     for (unsigned int i=0; i<num_params; i++)
     {
@@ -373,21 +372,18 @@ bool lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     }
   }
   free(set);
-
-  return true;
 }
 
-bool lts::write_to_fsm(std::string const& filename, lts_type type, ATermList params)
+void write_to_fsm(const lts &l, std::string const& filename, lts_type type, ATermList params)
 {
   std::ofstream os(filename.c_str());
 
   if ( !os.is_open() )
   {
-    gsVerboseMsg("cannot open FSM file '%s' for writing\n",filename.c_str());
-    return false;
+    throw mcrl2::runtime_error("cannot open FSM file '" + filename + "' for writing.");
   }
 
-  return write_to_fsm(os,type,params);
+  write_to_fsm(l, os,type,params);
 }
 
 static ATermList get_lps_params(ATerm lps)
@@ -492,14 +488,14 @@ static bool isFSMState(ATerm a)
   return false;
 }
 
-lts_type lts::fsm_get_lts_type()
+lts_type fsm_get_lts_type(const lts &l)
 {
-  if ( label_info )
+  if ( l.has_label_info() )
   {
     lts_type type = lts_fsm;
-    if ( nlabels > 0 )
+    if ( l.num_labels() > 0 )
     {
-      ATerm label = label_values[0];
+      ATerm label = l.label_value(0);
       if ( ismCRL2Action(label) )
       {
         type = lts_mcrl2;
@@ -508,9 +504,9 @@ lts_type lts::fsm_get_lts_type()
         return lts_none;
       }
     }
-    if ( (type == lts_fsm) && state_info && (nstates > 0) )
+    if ( (type == lts_fsm) && l.has_state_info() && (l.num_states() > 0) )
     {
-      ATerm state = state_values[0];
+      ATerm state = l.state_value(0);
       // XXX better checks!
       if ( ismCRL2State(state) )
       {
@@ -528,18 +524,18 @@ lts_type lts::fsm_get_lts_type()
 
     if ( type == lts_mcrl )
     {
-      for (unsigned int i=0; i<nlabels; i++)
+      for (unsigned int i=0; i<l.num_labels(); i++)
       {
-        if ( !isATermString(label_values[i]) )
+        if ( !isATermString(l.label_value(i)) )
         {
           return lts_none;
         }
       }
-      if ( state_info )
+      if ( l.has_state_info() )
       {
-        for (unsigned int i=0; i<nstates; i++)
+        for (unsigned int i=0; i<l.num_states(); i++)
         {
-          if ( !ismuCRLState(state_values[i]) )
+          if ( !ismuCRLState(l.state_value(i)) )
           {
             return lts_none;
           }
@@ -547,36 +543,36 @@ lts_type lts::fsm_get_lts_type()
       }
     } else if ( type == lts_mcrl2 )
     {
-      for (unsigned int i=0; i<nlabels; i++)
+      for (unsigned int i=0; i<l.num_labels(); i++)
       {
-        if ( !ismCRL2Action(label_values[i]) )
+        if ( !ismCRL2Action(l.label_value(i)) )
         {
           return lts_none;
         }
       }
-      if ( state_info )
+      if ( l.has_state_info() )
       {
-        for (unsigned int i=0; i<nstates; i++)
+        for (unsigned int i=0; i<l.num_states(); i++)
         {
-          if ( !ismCRL2State(state_values[i]) )
+          if ( !ismCRL2State(l.state_value(i)) )
           {
             return lts_none;
           }
         }
       }
     } else { // type == lts_fsm
-      for (unsigned int i=0; i<nlabels; i++)
+      for (unsigned int i=0; i<l.num_labels(); i++)
       {
-        if ( !isATermString(label_values[i]) )
+        if ( !isATermString(l.label_value(i)) )
         {
           return lts_none;
         }
       }
-      if ( state_info )
+      if ( l.has_state_info() )
       {
-        for (unsigned int i=0; i<nstates; i++)
+        for (unsigned int i=0; i<l.num_states(); i++)
         {
-          if ( !isFSMState(state_values[i]) )
+          if ( !isFSMState(l.state_value(i)) )
           {
             return lts_none;
           }
@@ -631,87 +627,100 @@ static bool check_type(lts_type type, lps::specification const&/*spec*/)
   return (type == lts_mcrl2);
 }
 
-bool lts::read_from_fsm(std::string const& filename, ATerm lps)
+void read_from_fsm(lts &l,std::string const& filename, ATerm lps)
 {
   lts_type tmp = get_lps_type(lps);
   if ( tmp == lts_mcrl2 )
   {
     lps::specification spec(lps);
-    return read_from_fsm(filename,tmp,spec);
-  } else {
-    return read_from_fsm(filename,tmp);
+    read_from_fsm(l,filename,tmp,spec);
+  } 
+  else 
+  {
+    read_from_fsm(l,filename,tmp);
   }
 }
 
-bool lts::read_from_fsm(std::string const& filename, lps::specification const& spec)
+void read_from_fsm(lts &l,std::string const& filename, lps::specification const& spec)
 {
-  return (&spec == &empty_specification()) ? read_from_fsm(filename, lts_none) : read_from_fsm(filename,lts_mcrl2,spec);
+  (&spec == &empty_specification()) ? read_from_fsm(l,filename, lts_none) : read_from_fsm(l,filename,lts_mcrl2,spec);
 }
 
-bool lts::read_from_fsm(std::istream &is, ATerm lps)
+void read_from_fsm(lts &l,std::istream &is, ATerm lps)
 {
   lts_type tmp = get_lps_type(lps);
   if ( tmp == lts_mcrl2 )
   {
     lps::specification spec(lps);
-    return read_from_fsm(is,tmp,spec);
-  } else {
-    return read_from_fsm(is,tmp);
+    read_from_fsm(l,is,tmp,spec);
+  } 
+  else 
+  {
+    read_from_fsm(l,is,tmp);
   }
 }
 
-bool lts::read_from_fsm(std::istream &is, lps::specification const& spec)
+void read_from_fsm(lts &l, std::istream &is, lps::specification const& spec)
 {
-  return (&spec == &empty_specification()) ? read_from_fsm(is, lts_none) : read_from_fsm(is,lts_mcrl2,spec);
+  (&spec == &empty_specification()) ? read_from_fsm(l,is, lts_none) : read_from_fsm(l,is,lts_mcrl2,spec);
 }
 
-bool lts::write_to_fsm(std::string const& filename, ATerm lps)
+void write_to_fsm(const lts &l,std::string const& filename, ATerm lps)
 {
-  lts_type tmp = fsm_get_lts_type();
+  lts_type tmp = fsm_get_lts_type(l);
   if ( (lps != NULL) && !check_type(tmp,lps) )
   {
     gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
-    return write_to_fsm(filename,tmp,NULL);
-  } else {
-    return write_to_fsm(filename,tmp,get_lps_params(lps));
+    return write_to_fsm(l,filename,tmp,NULL);
+  } 
+  else 
+  {
+    write_to_fsm(l,filename,tmp,get_lps_params(lps));
   }
 }
 
-bool lts::write_to_fsm(std::string const& filename, lps::specification const& spec)
+void write_to_fsm(const lts &l, std::string const& filename, lps::specification const& spec)
 {
-  lts_type tmp = fsm_get_lts_type();
+  lts_type tmp = fsm_get_lts_type(l);
   if ( !check_type(tmp, spec) )
   {
     gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
-    return write_to_fsm(filename,tmp,NULL);
-  } else {
-    return write_to_fsm(filename,tmp,get_lps_params(spec));
+    write_to_fsm(l,filename,tmp,NULL);
+  } 
+  else 
+  {
+    write_to_fsm(l,filename,tmp,get_lps_params(spec));
   }
 }
 
-bool lts::write_to_fsm(std::ostream &os, ATerm lps)
+void write_to_fsm(const lts &l, std::ostream &os, ATerm lps)
 {
-  lts_type tmp = fsm_get_lts_type();
+  lts_type tmp = fsm_get_lts_type(l);
   if ( (lps != NULL) && !check_type(tmp,lps) )
   {
     gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
-    return write_to_fsm(os,tmp,NULL);
-  } else {
-    return write_to_fsm(os,tmp,get_lps_params(lps));
+    write_to_fsm(l,os,tmp,NULL);
+  } 
+  else 
+  {
+    write_to_fsm(l,os,tmp,get_lps_params(lps));
   }
 }
 
-bool lts::write_to_fsm(std::ostream &os, lps::specification const& spec)
+void write_to_fsm(const lts &l, std::ostream &os, lps::specification const& spec)
 {
-  lts_type tmp = fsm_get_lts_type();
+  lts_type tmp = fsm_get_lts_type(l);
   if ( !check_type(tmp, spec) )
   {
     gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
-    return write_to_fsm(os,tmp,NULL);
-  } else {
-    return write_to_fsm(os,tmp,get_lps_params(spec));
+    write_to_fsm(l,os,tmp,NULL);
+  } 
+  else  
+  {
+    write_to_fsm(l,os,tmp,get_lps_params(spec));
   }
 }
 
+}
 }
 }

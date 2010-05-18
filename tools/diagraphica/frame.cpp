@@ -12,7 +12,7 @@
 
 #include "frame.h"
 #include "figures.xpm"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 
 using namespace std;
 
@@ -2672,9 +2672,9 @@ void Frame::onMenuBar( wxCommandEvent &e )
         wxString filePath = wxT( "" );
         wxString caption  = wxString( wxT( "Choose a file" ) );
         wxString wildcard = wxString(("All supported files (" +
-	    mcrl2::lts::lts::lts_extensions_as_string() +
+	    mcrl2::lts::detail::lts_extensions_as_string() +
 	    ")|" +
-	    mcrl2::lts::lts::lts_extensions_as_string(";") +
+	    mcrl2::lts::detail::lts_extensions_as_string(";") +
 	    "|All files (*.*)|*.*").c_str(),
 	    wxConvLocal);
 

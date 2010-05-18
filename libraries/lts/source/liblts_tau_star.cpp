@@ -28,6 +28,17 @@ void tau_star_reduce(lts &l)
   // This method assumes there are not tau loops!
 {
   l.sort_transitions();
+
+  // Copy the transitions into a local set of transitions, to which we 
+  // have access. 
+
+  const transition_const_range r=l.get_transitions();
+  std::vector < transition > local_transitions(r.begin(),r.end());
+  // for(transition_const_range r=get_transitions(); !r.empty(); r.advance_begin(1))
+  // { local_transitions.push_back(r.front());
+  // }
+
+
   unsigned int *trans_lut = l.get_transition_indices();
   boost::scoped_array< unsigned int > new_trans_lut(new unsigned int[l.num_states() + 1]);
 
@@ -37,16 +48,16 @@ void tau_star_reduce(lts &l)
     unsigned int t = trans_lut[state];
     while ( t < trans_lut[state+1] )
     {
-      if ( l.taus[l.transitions[t].label] &&
-          (l.transitions[t].from != l.transitions[t].to) )
+      if ( l.is_tau(local_transitions[t].label()) &&
+          (local_transitions[t].from() != local_transitions[t].to()) )
       {
-        unsigned int to = l.transitions[t].to;
+        unsigned int to = local_transitions[t].to();
         unsigned int u = trans_lut[to];
         while ( u < trans_lut[to+1] )
         {
-          if ( !( (to < state) && l.taus[l.transitions[u].label] ) )
+          if ( !( (to < state) && l.is_tau(local_transitions[u].label()) ) )
           {
-            l.add_transition(state,l.transitions[u].label,l.transitions[u].to);
+            local_transitions.push_back(transition(state,local_transitions[u].label(),local_transitions[u].to()));
           }
           u++;
         }
@@ -55,9 +66,9 @@ void tau_star_reduce(lts &l)
           u = new_trans_lut[to];
           while ( u < new_trans_lut[to+1] )
           {
-            if ( !l.taus[l.transitions[u].label] )
+            if ( !l.is_tau(local_transitions[u].label()) )
             {
-              l.add_transition(state,l.transitions[u].label,l.transitions[u].to);
+              local_transitions.push_back(transition(state,local_transitions[u].label(),local_transitions[u].to()));
             }
             u++;
           }
@@ -66,18 +77,18 @@ void tau_star_reduce(lts &l)
       t++;
     }
     t = new_trans_lut[state];
-    while ( t < l.num_transitions() )
+    while ( t < local_transitions.size() )
     {
-      if ( l.taus[l.transitions[t].label] &&
-          (l.transitions[t].from != l.transitions[t].to) )
+      if ( l.is_tau(local_transitions[t].label()) &&
+          (local_transitions[t].from() != local_transitions[t].to()) )
       {
-        unsigned int to = l.transitions[t].to;
+        unsigned int to = local_transitions[t].to();
         unsigned int u = trans_lut[to];
         while ( u < trans_lut[to+1] )
         {
-          if ( !( (to < state) && l.taus[l.transitions[u].label] ) )
+          if ( !( (to < state) && l.is_tau(local_transitions[u].label()) ) )
           {
-            l.add_transition(state,l.transitions[u].label,l.transitions[u].to);
+            local_transitions.push_back(transition(state,local_transitions[u].label(),local_transitions[u].to()));
           }
           u++;
         }
@@ -86,9 +97,9 @@ void tau_star_reduce(lts &l)
           u = new_trans_lut[to];
           while ( u < new_trans_lut[to+1] )
           {
-            if ( !l.taus[l.transitions[u].label] )
+            if ( !l.is_tau(local_transitions[u].label()) )
             {
-              l.add_transition(state,l.transitions[u].label,l.transitions[u].to);
+              local_transitions.push_back(transition(state,local_transitions[u].label(),local_transitions[u].to()));
             }
             u++;
           }
@@ -96,7 +107,7 @@ void tau_star_reduce(lts &l)
       }
       t++;
     }
-    new_trans_lut[state+1] = l.num_transitions();
+    new_trans_lut[state+1] = local_transitions.size();
   }
 
   using namespace mcrl2::lts::detail;
@@ -118,10 +129,10 @@ void tau_star_reduce(lts &l)
         unsigned int t = trans_lut[i];
         while ( t < trans_lut[i+1] )
         {
-          if ( reachable[l.transitions[t].to] == unknown )
+          if ( reachable[local_transitions[t].to()] == unknown )
           {
-            reachable[l.transitions[t].to] = reached;
-            if ( l.transitions[t].to < i )
+            reachable[local_transitions[t].to()] = reached;
+            if ( local_transitions[t].to() < i )
             {
               notdone = true;
             }
@@ -131,10 +142,10 @@ void tau_star_reduce(lts &l)
         t = new_trans_lut[i];
         while ( t < new_trans_lut[i+1] )
         {
-          if ( reachable[l.transitions[t].to] == unknown )
+          if ( reachable[local_transitions[t].to()] == unknown )
           {
-            reachable[l.transitions[t].to] = reached;
-            if ( l.transitions[t].to < i )
+            reachable[local_transitions[t].to()] = reached;
+            if ( local_transitions[t].to() < i )
             {
               notdone = true;
             }
@@ -155,9 +166,9 @@ void tau_star_reduce(lts &l)
     if ( reachable[i] != unknown )
     {
       state_map[i] = new_nstates;
-      if ( l.state_info )
+      if ( l.has_state_info() )
       {
-        l.state_values[new_nstates] = l.state_values[i];
+        l.set_state_value(new_nstates,l.state_value(i));
       }
       new_nstates++;
     }
@@ -167,40 +178,40 @@ void tau_star_reduce(lts &l)
   unsigned int new_nlabels = 0;
   for (unsigned int i=0; i < l.num_labels(); i++)
   {
-    if ( !l.taus[i] )
+    if ( !l.is_tau(i) )
     {
       label_map[i] = new_nlabels;
-      if ( l.label_info )
+      if ( l.has_label_info() )
       {
-        l.label_values[new_nlabels] = l.label_values[i];
+        l.set_label_value(new_nlabels,l.label_value(i));
       }
       new_nlabels++;
     }
   }
 
-  unsigned int new_ntransitions = 0;
-  for (unsigned int i=0; i < l.num_transitions(); i++)
-  {
-    if ( (reachable[l.transitions[i].from] != unknown) &&
-         !l.taus[l.transitions[i].label] )
+  std::set < transition > new_transitions;
+  for (std::vector < transition >::const_iterator i=local_transitions.begin(); i!=local_transitions.end(); ++i)
+  { const transition t=*i;
+    if ( (reachable[t.from()] != unknown) &&
+         !l.is_tau(t.label()) )
     {
-      transition t = l.transitions[i];
-      t.from = state_map[t.from];
-      t.label = label_map[t.label];
-      t.to = state_map[t.to];
-      l.transitions[new_ntransitions] = t;
-      new_ntransitions++;
+      new_transitions.insert(transition(state_map[t.from()],label_map[t.label()],state_map[t.to()]));
     }
+  }
+
+  l.clear_transitions();
+  for(std::set < transition >::const_iterator i=new_transitions.begin();
+       i!=new_transitions.end(); ++i)
+  { l.add_transition(*i);
   }
 
   for ( unsigned int i=0; i < l.num_labels(); i++)
   {
-    l.taus[i] = false;
+    l.set_tau(i,false);
   }
 
   l.set_num_states(new_nstates);
   l.set_num_labels(new_nlabels);
-  l.set_num_transitions(new_ntransitions);
 }
 
 }

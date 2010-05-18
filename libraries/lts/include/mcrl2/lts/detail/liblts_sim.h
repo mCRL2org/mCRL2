@@ -13,6 +13,7 @@
 #define LIBLTS_SIM_H
 #include <vector>
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/sim_hashtable.h"
 
 typedef unsigned int uint;
@@ -39,12 +40,9 @@ class sim_partitioner
      * numbers which range from 0 upto (and excluding) \ref num_eq_classes().
      *
      * \pre The simulation equivalence classes have been computed.
-     * \param[out] nt Used to store the number of transitions between the
-     * simulation equivalence classes.
-     * \param[out] size Used to store the length of the returned array.
-     * \return An array containing the transitions between the
+     * \return A vector containing the transitions between the
      * simulation equivalence classes. */
-    mcrl2::lts::transition* get_transitions(uint& nt,uint& size) const;
+    std::vector < mcrl2::lts::transition> get_transitions() const;
 
     /** Gives the number of simulation equivalence classes of the LTS.
      * \pre The simulation equivalence classes have been computed.
@@ -87,7 +85,7 @@ class sim_partitioner
     };
 
     mcrl2::lts::lts &aut;
-    uint **trans_index;
+    mcrl2::lts::outgoing_transitions_per_state_action_t trans_index;
     uint s_Sigma;
     uint s_Pi;
     std::vector<bool> state_touched;

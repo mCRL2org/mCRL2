@@ -12,6 +12,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
+#include "mcrl2/lts/lts_algorithm.h"
 
 using namespace mcrl2::core;
 using namespace std;
@@ -52,8 +53,9 @@ namespace detail
     // used. A set is used to remove double occurrences of transitions. 
     std::set < transition > resulting_transitions;
 
-    for(transition_iterator i=aut.get_transitions(); i.more(); ++i)
-    { if (!branching ||
+    for(transition_const_range t=aut.get_transitions(); !t.empty(); t.advance_begin(1))
+    { const transition i=t.front();
+      if (!branching ||
           !aut.is_tau(i.label()) || 
           block_index_of_a_state[i.from()]!=block_index_of_a_state[i.to()] || 
           (preserve_divergences && i.from()==i.to()))
@@ -65,20 +67,15 @@ namespace detail
       }
     }
     // Remove the old transitions
-    aut.set_transitions(NULL,0,0);
+    aut.clear_transitions();
 
     // Copy the transitions from the set into a malloced block of memory, as the lts library
     // currently requires it in that form.
-    transition* new_transitions=(transition *)malloc(sizeof(transition)*resulting_transitions.size());
-    unsigned int counter=0;
     for(std::set < transition >::const_iterator i=resulting_transitions.begin();
           i!=resulting_transitions.end(); ++i)
-    { new_transitions[counter]=transition(i->from,i->label,i->to);
-      counter++;
+    { aut.add_transition(transition(i->from(),i->label(),i->to()));
     }
 
-    // Set the resulting number of states and transitions.
-    aut.set_transitions(new_transitions,resulting_transitions.size(),resulting_transitions.size());
   }
 
   unsigned int bisim_partitioner::num_eq_classes() const
@@ -147,40 +144,40 @@ namespace detail
 
     // First store the bottom and non bottom states.
     aut.sort_transitions(mcrl2::lts::src_lbl_tgt);
-    transition_iterator i=aut.get_transitions();
 
     state_type last_non_stored_state_number=0;
     bool bottom_state=true;
     std::vector < state_type > current_inert_transitions;
-    for( ; i.more(); ++i)
-    { 
-      if (branching && aut.is_tau(i.label()))
-      { if (preserve_divergences && i.from()==i.to()) 
+    for(transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+    { const transition t=r.front();
+
+      if (branching && aut.is_tau(t.label()))
+      { if (preserve_divergences && t.from()==t.to()) 
         { 
-          initial_partition.non_inert_transitions.push_back(transition(i.from(),tau_label,i.to()));
+          initial_partition.non_inert_transitions.push_back(transition(t.from(),tau_label,t.to()));
         } 
         else
-        { current_inert_transitions.push_back(i.to());
+        { current_inert_transitions.push_back(t.to());
           bottom_state=false;
         }
       }
-      transition_iterator next_i=i;
-      ++next_i;
-      if (!next_i.more() || i.from()!=next_i.from())
+      transition_const_range next_i=r;
+      next_i.advance_begin(1);
+      if (next_i.empty() || t.from()!=next_i.front().from())
       { // store the current from state
-        for( ; last_non_stored_state_number<i.from(); ++last_non_stored_state_number)
+        for( ; last_non_stored_state_number<t.from(); ++last_non_stored_state_number)
         { initial_partition.bottom_states.push_back(last_non_stored_state_number);
         } 
 
         if (bottom_state)
-        { initial_partition.bottom_states.push_back(i.from());
+        { initial_partition.bottom_states.push_back(t.from());
         }
         else
-        { initial_partition.non_bottom_states.push_back(non_bottom_state(i.from()));
+        { initial_partition.non_bottom_states.push_back(non_bottom_state(t.from()));
           current_inert_transitions.swap(initial_partition.non_bottom_states.back().inert_transitions);
           bottom_state=true;
         }
-        assert(last_non_stored_state_number==i.from());
+        assert(last_non_stored_state_number==t.from());
         last_non_stored_state_number++;
       }
     }
@@ -196,10 +193,12 @@ namespace detail
 
     // Store the non-inert transitions (i.e. the non tau transitions)
     aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
-    for(transition_iterator i=aut.get_transitions(); i.more(); ++i)
-    { if (!branching || !aut.is_tau(i.label()))
+    for(transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+    { 
+      const transition t=r.front();
+      if (!branching || !aut.is_tau(t.label()))
       { // Note that by sorting the transitions first, the non_inert_transitions are grouped per label.
-          initial_partition.non_inert_transitions.push_back(transition(i.from(),i.label(),i.to()));
+          initial_partition.non_inert_transitions.push_back(transition(t.from(),t.label(),t.to()));
       }
     }
     
@@ -338,11 +337,11 @@ namespace detail
         std::vector < transition > &i1_non_inert_transitions=blocks[*i1].non_inert_transitions;
         for(std::vector < transition >::iterator k=i1_non_inert_transitions.begin();
                  k!=i1_non_inert_transitions.end(); ++k )
-        { if (block_index_of_a_state[k->to]==blocks.size()-1)
+        { if (block_index_of_a_state[k->to()]==blocks.size()-1)
           { non_flagged_non_inert_transitions.push_back(*k);
           }
           else
-          { assert(block_index_of_a_state[k->to]==*i1);
+          { assert(block_index_of_a_state[k->to()]==*i1);
             flagged_non_inert_transitions.push_back(*k);
           }
         }
@@ -410,8 +409,8 @@ namespace detail
 
         const std::vector < transition > &i_non_inert_transitions=blocks[splitter_index].non_inert_transitions;
         
-        state_flags[i->from]=true;
-        const block_index_type marked_block_index=block_index_of_a_state[i->from];
+        state_flags[i->from()]=true;
+        const block_index_type marked_block_index=block_index_of_a_state[i->from()];
         if (block_flags[marked_block_index]==false)
         { block_flags[marked_block_index]=true;
           BL.push_back(marked_block_index);
@@ -421,7 +420,7 @@ namespace detail
         std::vector <transition>::const_iterator i_next=i;
         i_next++;
         if (i_next==i_non_inert_transitions.end() || 
-                        i->label!=i_next->label)
+                        i->label()!=i_next->label())
         { // We consider BL which contains references to all blocks from which a state from splitter
           // can be reached. If not all flags of the non bottom states in a block in BL are set, the
           // non flagged non bottom states are moved to a new block.
@@ -509,24 +508,24 @@ namespace detail
       for(std::vector < transition >::const_iterator j=i_non_inert_transitions.begin();
               j!=i_non_inert_transitions.end(); ++j)
       { total_number_of_transitions++;
-        assert(j->to<aut.num_states());
-        assert(j->from<aut.num_states());
+        assert(j->to()<aut.num_states());
+        assert(j->from()<aut.num_states());
         
         // Check proper grouping of action labels.
         std::vector < transition >::const_iterator j_next=j;
         j_next++;
-        if (j_next==i_non_inert_transitions.end() || (j->label!=j_next->label))
-        { assert(observed_action_labels.count(j->label)==0);
-          observed_action_labels.insert(j->label);
+        if (j_next==i_non_inert_transitions.end() || (j->label()!=j_next->label()))
+        { assert(observed_action_labels.count(j->label())==0);
+          observed_action_labels.insert(j->label());
         }
 
         // Check whether tau transition in non inert transition vector is inert.
-        if (!preserve_divergence && j->label==tau_label)
-        { assert(j->to!=j->from);
+        if (!preserve_divergence && j->label()==tau_label)
+        { assert(j->to()!=j->from());
         }
 
         // Check whether the target state of the transition is in the current block.
-        assert(block_index_of_a_state[j->to]==i->block_index);
+        assert(block_index_of_a_state[j->to()]==i->block_index);
       }
     }
 
@@ -617,8 +616,7 @@ namespace detail
               const bool branching /* =false*/, 
               const bool preserve_divergences /*=false*/)
   { unsigned int init_l2 = l2.initial_state() + l1.num_states();
-    l1.merge(l2);
-    
+    merge(l1,l2);
     l2.clear(); // No use for l2 anymore.
 
     // First remove tau loops in case of branching bisimulation.

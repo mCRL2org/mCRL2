@@ -14,6 +14,7 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lts/lts_algorithm.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/exception.h"
@@ -104,7 +105,7 @@ class ltscompare_tool : public ltscompare_base
         "The input formats are determined by the contents of INFILE1 and INFILE2. "
         "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
         "The supported formats are:\n"
-        +lts::supported_lts_formats_text()
+        + mcrl2::lts::detail::supported_lts_formats_text()
       )
     {
     }
@@ -113,24 +114,44 @@ class ltscompare_tool : public ltscompare_base
     {
       lts l1,l2;
 
-      if ( tool_options.name_for_first.empty() ) {
+      if ( tool_options.name_for_first.empty() ) 
+      {
         gsVerboseMsg("reading first LTS from stdin...\n");
-
-        if ( !l1.read_from(std::cin, tool_options.format_for_first) ) {
-          throw mcrl2::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
+        try
+        {
+           mcrl2::lts::detail::read_from(l1,std::cin, tool_options.format_for_first);
         }
-      } else {
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string("cannot read LTS from stdin\nretry with -v/--verbose for more information.\n")
+                                        + e.what());
+        }
+      } 
+      else 
+      {
         gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
 
-        if ( !l1.read_from(tool_options.name_for_first, tool_options.format_for_first) ) {
-          throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
+        try
+        { 
+           mcrl2::lts::detail::read_from(l1,tool_options.name_for_first, tool_options.format_for_first);
+        }
+        catch (mcrl2::runtime_error &e)
+        { 
+          throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + 
+                   "'\nretry with -v/--verbose for more information.\n" + e.what());
         }
       }
 
       gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
 
-      if ( !l2.read_from(tool_options.name_for_second, tool_options.format_for_second) ) {
-        throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
+      try
+      {
+         mcrl2::lts::detail::read_from(l2,tool_options.name_for_second, tool_options.format_for_second);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + 
+                     "'\nretry with -v/--verbose for more information.\n" + e.what());
       }
 
       if (!l1.hide_actions(tool_options.tau_actions))
@@ -292,7 +313,7 @@ class ltscompare_tool : public ltscompare_base
           std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
         }
   
-        tool_options.format_for_first = lts::parse_format(parser.option_argument("in1"));
+        tool_options.format_for_first = mcrl2::lts::detail::parse_format(parser.option_argument("in1"));
   
         if (tool_options.format_for_first == lts_none) {
           std::cerr << "warning: format '" << parser.option_argument("in1") <<
@@ -300,7 +321,7 @@ class ltscompare_tool : public ltscompare_base
         }
       }
       else if (!tool_options.name_for_first.empty()) {
-        tool_options.format_for_first = lts::guess_format(tool_options.name_for_first);
+        tool_options.format_for_first = mcrl2::lts::detail::guess_format(tool_options.name_for_first);
       } else {
         gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
         tool_options.format_for_first = lts_aut;
@@ -310,7 +331,7 @@ class ltscompare_tool : public ltscompare_base
           std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
         }
   
-        tool_options.format_for_second = lts::parse_format(parser.option_argument("in2"));
+        tool_options.format_for_second = mcrl2::lts::detail::parse_format(parser.option_argument("in2"));
   
         if (tool_options.format_for_second == lts_none) {
           std::cerr << "warning: format '" << parser.option_argument("in2") <<
@@ -318,7 +339,7 @@ class ltscompare_tool : public ltscompare_base
         }
       }
       else {
-        tool_options.format_for_second = lts::guess_format(tool_options.name_for_second);
+        tool_options.format_for_second = mcrl2::lts::detail::guess_format(tool_options.name_for_second);
       }
     }
 };

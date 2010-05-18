@@ -18,10 +18,10 @@ int test_main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc,argv);
 
-  lts l1(false,true);
-  lts l2(false,true);
-  lts l3(false,true);
-  lts l4(false,true);
+  lts l1;
+  lts l2;
+  lts l3;
+  lts l4;
   ATerm lab_a = (ATerm) ATmakeAppl0(ATmakeAFun("a",0,ATfalse));
   ATerm lab_b = (ATerm) ATmakeAppl0(ATmakeAFun("b",0,ATfalse));
   ATerm lab_c = (ATerm) ATmakeAppl0(ATmakeAFun("c",0,ATfalse));
@@ -57,26 +57,26 @@ int test_main(int argc, char **argv)
   l4.add_label(lab_tau,true);
 
   // a.(b+c)
-  l1.add_transition(0,0,1);
-  l1.add_transition(1,1,2);
-  l1.add_transition(1,2,3);
+  l1.add_transition(transition(0,0,1));
+  l1.add_transition(transition(1,1,2));
+  l1.add_transition(transition(1,2,3));
 
   // a.b+a.c
-  l2.add_transition(0,0,1);
-  l2.add_transition(0,0,2);
-  l2.add_transition(1,1,3);
-  l2.add_transition(2,2,4);
+  l2.add_transition(transition(0,0,1));
+  l2.add_transition(transition(0,0,2));
+  l2.add_transition(transition(1,1,3));
+  l2.add_transition(transition(2,2,4));
 
   // a.tau.(b+c)
-  l3.add_transition(0,0,1);
-  l3.add_transition(1,3,2);
-  l3.add_transition(2,1,3);
-  l3.add_transition(2,2,4);
+  l3.add_transition(transition(0,0,1));
+  l3.add_transition(transition(1,3,2));
+  l3.add_transition(transition(2,1,3));
+  l3.add_transition(transition(2,2,4));
 
   // a.(b+b)
-  l4.add_transition(0,0,1);
-  l4.add_transition(1,1,2);
-  l4.add_transition(1,1,3);
+  l4.add_transition(transition(0,0,1));
+  l4.add_transition(transition(1,1,2));
+  l4.add_transition(transition(1,1,3));
 
   BOOST_CHECK( compare(l1,l2,lts_eq_trace) );
   BOOST_CHECK( compare(l2,l1,lts_eq_trace) );

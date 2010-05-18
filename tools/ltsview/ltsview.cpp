@@ -25,6 +25,7 @@
 #include "cluster.h"
 #include "glcanvas.h"
 #include "lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mainframe.h"
 #include "markmanager.h"
 #include "markstateruledialog.h"
@@ -38,10 +39,10 @@ using namespace std;
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // Configures tool capabilities.
 void LTSView::set_capabilities(tipi::tool::capabilities& c) const {
-  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
 
   for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
+    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(*i)), tipi::tool::category::visualisation);
   }
 }
 
@@ -52,7 +53,7 @@ void LTSView::user_interactive_configuration(tipi::configuration&) { }
 bool LTSView::check_configuration(tipi::configuration const& c) const {
   if (c.input_exists("main-input")) {
     /* The input object is present, verify whether the specified format is supported */
-    if (mcrl2::lts::lts::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
+    if (mcrl2::lts::detail::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
       send_error("Invalid configuration: unsupported type `" +
           c.get_input("main-input").type().sub_type() + "' for main input");
     }

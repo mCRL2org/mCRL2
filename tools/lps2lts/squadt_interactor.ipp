@@ -15,7 +15,7 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/lexical_cast.hpp"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/exception.h"
 #include "lps2lts.h"
 #include "exploration.h"
@@ -131,8 +131,8 @@ class squadt_interactor::storage_configuration {
 
       /* Add output file to the configuration */
       std::string     output_name(c.get_output_name("." +
-          lts::extension_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
-      tipi::mime_type output_type(tipi::mime_type(lts::mime_type_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
+          mcrl2::lts::detail::extension_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
+      tipi::mime_type output_type(tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
 
       if (c.output_exists(lts_file_for_output)) {
         tipi::configuration::object& output_file = c.get_output(lts_file_for_output);

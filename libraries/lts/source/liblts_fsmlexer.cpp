@@ -1650,14 +1650,17 @@ void concrete_fsm_lexer::processNumber()
 
 //Implementation of parse_fsm
 
-bool parse_fsm(std::istream &stream, lts &l) {
+void parse_fsm(std::istream &stream, lts &l) 
+{
   clexer = new concrete_fsm_lexer();
   fsm_lexer_obj = clexer;
   bool result = clexer->parse_stream(stream,l);
   delete clexer;
   fsm_lexer_obj = NULL;
   clexer = NULL;
-  return result;
+  if (!result)
+  { throw mcrl2::runtime_error("Parsing of fsm file failed");
+  }
 }
 
 

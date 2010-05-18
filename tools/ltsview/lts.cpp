@@ -323,16 +323,7 @@ mcrl2::lts::lts* LTS::getmCRL2LTS()
 
 bool LTS::readFromFile(std::string filename)
 {
-  mcrl2_lts = new mcrl2::lts::lts();
-
-  // try to read the file
-  if (!mcrl2_lts->read_from(filename,lts_none))
-  {
-    // bullocks, this file is no good...
-    delete mcrl2_lts;
-    mcrl2_lts = NULL;
-    return false;
-  }
+  mcrl2_lts = new mcrl2::lts::lts(filename,lts_none);
 
   // remove unreachable states
   
@@ -348,9 +339,8 @@ bool LTS::readFromFile(std::string filename)
   initialState = states[mcrl2_lts->initial_state()];
   simulation->setInitialState(initialState);
 
-  transition_iterator ti(mcrl2_lts);
-  for ( ; ti.more(); ++ti)
-  {
+  for (transition_const_range r=mcrl2_lts->get_transitions() ; !r.empty(); r.advance_begin(1))
+  { const transition ti=r.front();
     State *s1 = states[ti.from()];
     State *s2 = states[ti.to()];
     Transition* t = new Transition(s1,s2,ti.label());

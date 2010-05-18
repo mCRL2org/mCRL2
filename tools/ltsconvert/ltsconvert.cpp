@@ -14,7 +14,7 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
@@ -22,6 +22,7 @@
 #include "mcrl2/exception.h"
 
 using namespace mcrl2::lts;
+using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -131,21 +132,29 @@ class t_tool_options
       }
     }
 
-    void read_lts(lts& l) const {
+    void read_lts(lts& l) const 
+    {
       gsVerboseMsg("reading LTS from %s...\n", source_string().c_str());
 
       lts_extra extra = get_extra(intype);
 
-      bool success = false;
-      if (infilename.empty()) {
-        success = l.read_from(std::cin,intype,extra);
+      try
+      { 
+        if (infilename.empty()) 
+        {
+          lts l_temp(std::cin,intype,extra);
+          l_temp.swap(l);
+        }
+        else 
+        {
+          mcrl2::lts::detail::read_from(l,infilename,intype,extra);
+        }
       }
-      else {
-        success = l.read_from(infilename,intype,extra);
-      }
-      if (!success) {
+      catch (mcrl2::runtime_error &e)
+      {
         throw mcrl2::runtime_error("cannot read LTS from " + source_string() +
-                                               "\nretry with -v/--verbose for more information");
+                                   ".\nretry with -v/--verbose for more information.\n" +
+                                   e.what());
       }
 
       if ( check_reach ) {
@@ -168,7 +177,7 @@ class t_tool_options
       if ( outtype == lts_none ) {
         gsVerboseMsg("trying to detect output format by extension...\n");
 
-        outtype = lts::guess_format(outfilename);
+        outtype = mcrl2::lts::detail::guess_format(outfilename);
 
         if ( outtype == lts_none ) {
           if ( !lpsfile.empty() ) {
@@ -182,21 +191,26 @@ class t_tool_options
       }
     }
 
-    void write_lts(lts& l) const {
-      bool success = false;
-
+    void write_lts(lts& l) const 
+    {
       gsVerboseMsg("writing LTS to %s...\n", target_string().c_str());
 
-      if (outfilename.empty()) {
-        success = l.write_to(std::cout,outtype,get_extra(outtype, "stdout"));
+      try
+      {
+        if (outfilename.empty()) 
+        {
+          l.write_to(std::cout,outtype,get_extra(outtype, "stdout"));
+        }
+        else 
+        {
+          l.write_to(outfilename, outtype, get_extra(outtype, get_base(outfilename)));
+        }
       }
-      else {
-        success = l.write_to(outfilename, outtype, get_extra(outtype, get_base(outfilename)));
-      }
-
-      if (!success) {
+      catch (mcrl2::runtime_error &e)
+      {
         throw mcrl2::runtime_error("cannot write LTS to " + target_string() +
-                                               "\nretry with -v/--verbose for more information");
+                                        "\nretry with -v/--verbose for more information.\n" + 
+                                        e.what());
       }
     }
 };
@@ -221,7 +235,7 @@ class ltsconvert_tool : public ltsconvert_base
         "The output format is determined by the extension of OUTFILE, whereas the input\n"
         "format is determined by the content of INFILE. Options --in and --out can be\n"
         "used to force the input and output formats. The supported formats are:\n"
-        + lts::supported_lts_formats_text(lts_mcrl2)
+        + mcrl2::lts::detail::supported_lts_formats_text(lts_mcrl2)
       )
     {
     }
@@ -313,7 +327,7 @@ class ltsconvert_tool : public ltsconvert_base
           std::cerr << "warning: multiple input formats specified; can only use one\n";
         }
 
-        tool_options.intype = lts::parse_format(parser.option_argument("in"));
+        tool_options.intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
 
         if (tool_options.intype == lts_none) {
           std::cerr << "warning: format '" << parser.option_argument("in") <<
@@ -325,7 +339,7 @@ class ltsconvert_tool : public ltsconvert_base
           std::cerr << "warning: multiple output formats specified; can only use one\n";
         }
 
-        tool_options.outtype = lts::parse_format(parser.option_argument("out"));
+        tool_options.outtype = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
         if (tool_options.outtype == lts_none) {
           std::cerr << "warning: format '" << parser.option_argument("out") <<
@@ -421,10 +435,11 @@ static const char* option_tau_actions                        = "tau_actions";   
 static const char* option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 specific]
 
 void ltsconvert_tool::set_capabilities(tipi::tool::capabilities& c) const {
-  std::set< lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+  std::set< lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
 
-  for (std::set< lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-    c.add_input_configuration(lts_file_for_input, tipi::mime_type(lts::mime_type_for_type(*i)), tipi::tool::category::conversion);
+  for (std::set< lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) 
+  {
+    c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(*i)), tipi::tool::category::conversion);
   }
 }
 
@@ -533,8 +548,8 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
 
   /* Add output file to the configuration */
   std::string     output_name(c.get_output_name("." +
-                    lts::extension_for_type(format_selector.get_selection())));
-  tipi::mime_type output_type(tipi::mime_type(lts::mime_type_for_type(format_selector.get_selection())));
+                    mcrl2::lts::detail::extension_for_type(format_selector.get_selection())));
+  tipi::mime_type output_type(tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(format_selector.get_selection())));
 
   if (c.output_exists(lts_file_for_output)) {
     tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
@@ -624,8 +639,8 @@ bool ltsconvert_tool::perform_task(tipi::configuration& c) {
     tool_options.check_reach = !(c.get_option_argument< bool >(option_no_reachability_check));
   }
 
-  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_input).type().sub_type());
-  tool_options.outtype = lts::parse_format(c.get_output(lts_file_for_output).type().sub_type());
+  tool_options.intype  = mcrl2::lts::detail::parse_format(c.get_output(lts_file_for_input).type().sub_type());
+  tool_options.outtype = mcrl2::lts::detail::parse_format(c.get_output(lts_file_for_output).type().sub_type());
   tool_options.set_source(c.get_input(lts_file_for_input).location());
   tool_options.set_target(c.get_output(lts_file_for_output).location());
 

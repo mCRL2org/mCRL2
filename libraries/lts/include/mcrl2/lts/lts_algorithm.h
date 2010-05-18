@@ -57,7 +57,7 @@ namespace lts
     lts_eq_weak_trace,       /**< Weak trace equivalence */
     lts_red_determinisation, /**< Used for a determinisation reduction */
     lts_equivalence_min = lts_eq_none,
-    lts_equivalence_max = lts_red_determinisation,
+    lts_equivalence_max = lts_red_determinisation
   };
 
   /** \brief LTS preorder relations.
@@ -303,194 +303,198 @@ namespace lts
   *                                except the last is terminated with '\n'.
   */
 
- inline std::string supported_lts_equivalences_text(
-                       lts_equivalence default_equivalence = lts_eq_none, 
-                       const std::set<lts_equivalence> &supported = supported_lts_equivalences())
-  {
-    std::vector<lts_equivalence> types(supported.begin(),supported.end());
-    std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_equivalence>,equivalence_strings,_1,_2));
-  
-    std::string r;
-    for (std::vector<lts_equivalence>::iterator i=types.begin(); i!=types.end(); i++)
-    {
-      r += "  '" + equivalence_strings[*i] + "' for " + equivalence_desc_strings[*i];
-  
-      if ( *i == default_equivalence )
-      {
-        r += " (default)";
-      }
-  
-  
-      if ( i+2 == types.end() )
-      {
-        r += ", or\n";
-      } else if ( i+1 != types.end() )
-      {
-        r += ",\n";
-      }
-    }
-  
-    return r;
-  }
+  inline std::string supported_lts_equivalences_text(
+                        lts_equivalence default_equivalence = lts_eq_none, 
+                        const std::set<lts_equivalence> &supported = supported_lts_equivalences())
+   {
+     std::vector<lts_equivalence> types(supported.begin(),supported.end());
+     std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_equivalence>,equivalence_strings,_1,_2));
+   
+     std::string r;
+     for (std::vector<lts_equivalence>::iterator i=types.begin(); i!=types.end(); i++)
+     {
+       r += "  '" + equivalence_strings[*i] + "' for " + equivalence_desc_strings[*i];
+   
+       if ( *i == default_equivalence )
+       {
+         r += " (default)";
+       }
+   
+   
+       if ( i+2 == types.end() )
+       {
+         r += ", or\n";
+       } else if ( i+1 != types.end() )
+       {
+         r += ",\n";
+       }
+     }
+   
+     return r;
+   }
+ 
+  /** \brief Gives a textual list describing supported equivalences on LTSs.
+   * \param[in] supported           The equivalences that should be
+   *                                considered supported.
+   * \return                        A string containing lines of the form
+   *                                "  'name' for <equivalence>". Every line
+   *                                except the last is terminated with '\n'.
+   */
+  inline std::string supported_lts_equivalences_text(const std::set<lts_equivalence> &supported)
+   {
+     return supported_lts_equivalences_text(lts_eq_none,supported);
+   }
+   
+ 
+  /** \brief Gives a textual list describing supported preorders on LTSs.
+   * \param[in] default_preorder    The preorder that should be marked
+   *                                as default (or \a lts_pre_none for no
+   *                                default).
+   * \param[in] supported           The preorders that should be
+   *                                considered supported.
+   * \return                        A string containing lines of the form
+   *                                "  'name' for <preorder>". Every line
+   *                                except the last is terminated with '\n'.
+   */
+  inline std::string supported_lts_preorders_text(
+                      lts_preorder default_preorder = lts_pre_none, 
+                      const std::set<lts_preorder> &supported = supported_lts_preorders())
+   {
+     std::vector<lts_preorder> types(supported.begin(),supported.end());
+     std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_preorder>,preorder_strings,_1,_2));
+   
+     std::string r;
+     for (std::vector<lts_preorder>::iterator i=types.begin(); i!=types.end(); i++)
+     {
+       r += "  '" + preorder_strings[*i] + "' for " + preorder_desc_strings[*i];
+   
+       if ( *i == default_preorder )
+       {
+         r += " (default)";
+       }
+   
+   
+       if ( i+2 == types.end() )
+       {
+         r += ", or\n";
+       } else if ( i+1 == types.end() )
+       {
+         r += ",\n";
+       }
+     }
+   
+     return r;
+   }
+   
+  /** \brief Gives a textual list describing supported preorders on LTSs.
+   * \param[in] supported           The preorders that should be
+   *                                considered supported.
+   * \return                        A string containing lines of the form
+   *                                "  'name' for <preorder>". Every line
+   *                                except the last is terminated with '\n'.
+   */
+   inline std::string supported_lts_preorders_text(const std::set<lts_preorder> &supported)
+   {
+     return supported_lts_preorders_text(lts_pre_none,supported);
+   } 
+ 
+ 
+  /** \brief Applies a reduction algorithm to this LTS.
+   * \param[in] eq The equivalence with respect to which the LTS will be
+   * reduced.
+   * \param[in] opts The options that will be used for the reduction.
+   **/
+  void reduce(lts &l, lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+ 
+  /** \brief Checks whether this LTS is equivalent to another LTS.
+   * \param[in] l The LTS to which this LTS will be compared.
+   * \param[in] eq The equivalence with respect to which the LTSs will be
+   * compared.
+   * \param[in] opts The options that will be used for the comparison.
+   * \retval true if the LTSs are found to be equivalent.
+   * \retval false otherwise.
+   * \warning This function alters the internal data structure of
+   * both LTSs for efficiency reasons. After comparison, this LTS is
+   * equivalent to the original LTS by equivalence \a eq, and
+   * similarly for the LTS \a l.
+   */
+  bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+ 
+  /** \brief Checks whether this LTS is equivalent to another LTS.
+   * \details The input labelled transition systems are duplicated in memory to carry
+   *          out the comparison. When space efficiency is a concern, one can consider
+   *          to use destructive_compare.
+   * \param[in] l The LTS to which this LTS will be compared.
+   * \param[in] eq The equivalence with respect to which the LTSs will be
+   * compared.
+   * \param[in] opts The options that will be used for the comparison.
+   * \retval true if the LTSs are found to be equivalent.
+   * \retval false otherwise.
+   */
+  bool compare(const lts &l1, const lts &l2, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+ 
+  /** \brief Checks whether this LTS is smaller than another LTS according
+   * to a preorder. 
+   * \param[in] l The LTS to which this LTS will be compared.
+   * \param[in] pre The preorder with respect to which the LTSs will be
+   * compared.
+   * \param[in] opts The options that will be used for the comparison.
+   * \retval true if this LTS is smaller than LTS \a l according to
+   * preorder \a pre.
+   * \retval false otherwise.
+   * \warning This function alters the internal data structure of
+   * both LTSs for efficiency reasons. After comparison, this LTS is
+   * equivalent to the original LTS by equivalence \a eq, and
+   * similarly for the LTS \a l, where \a eq is the equivalence
+   * induced by the preorder \a pre (i.e. \f$eq = pre \cap
+   * pre^{-1}\f$).
+   */
+  bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options);
+ 
+  /** \brief Checks whether this LTS is smaller than another LTS according
+   * to a preorder.
+   * \param[in] l The LTS to which this LTS will be compared.
+   * \param[in] pre The preorder with respect to which the LTSs will be
+   * compared.
+   * \param[in] opts The options that will be used for the comparison.
+   * \retval true if this LTS is smaller than LTS \a l according to
+   * preorder \a pre.
+   * \retval false otherwise.
+   */
+  bool compare(const lts &l1, const lts &l2, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options);
+ 
+  /** \brief Determinises this LTS. */
+  void determinise(lts &l);
+ 
+  /** \brief Checks whether all states in this LTS are reachable
+   * from the initial state.
+   * \details Runs in O(\ref num_states * \ref num_transitions) time.
+   * \param[in] remove_unreachable Indicates whether all unreachable states
+   *            should be removed from the LTS. This option does not
+   *            influence the return value; the return value is with
+   *            respect to the original LTS.
+   * \retval true if all states are reachable from the initial state;
+   * \retval false otherwise. */
+  bool reachability_check(lts &l, bool remove_unreachable = false);
+ 
+  /** \brief Checks whether this LTS is deterministic.
+   * \retval true if this LTS is deterministic;
+   * \retval false otherwise. */
+  bool is_deterministic(const lts &l);
+ 
+  /** \brief Removes tau cycles by mapping all the states on a cycle to one state.
+   *  \details This routine is linear in the number of states and transitions.
+   *  \param[in] l Transition system to be reduced.
+   *  \param[in] preserve_divergence_loops If true leave a self loop on states that resided on a tau
+   *            cycle in the original transition system. 
+   */
+  void scc_reduce(lts &l,const bool preserve_divergence_loops=false);
 
- /** \brief Gives a textual list describing supported equivalences on LTSs.
-  * \param[in] supported           The equivalences that should be
-  *                                considered supported.
-  * \return                        A string containing lines of the form
-  *                                "  'name' for <equivalence>". Every line
-  *                                except the last is terminated with '\n'.
-  */
- inline std::string supported_lts_equivalences_text(const std::set<lts_equivalence> &supported)
-  {
-    return supported_lts_equivalences_text(lts_eq_none,supported);
-  }
-  
-
- /** \brief Gives a textual list describing supported preorders on LTSs.
-  * \param[in] default_preorder    The preorder that should be marked
-  *                                as default (or \a lts_pre_none for no
-  *                                default).
-  * \param[in] supported           The preorders that should be
-  *                                considered supported.
-  * \return                        A string containing lines of the form
-  *                                "  'name' for <preorder>". Every line
-  *                                except the last is terminated with '\n'.
-  */
- inline std::string supported_lts_preorders_text(
-                     lts_preorder default_preorder = lts_pre_none, 
-                     const std::set<lts_preorder> &supported = supported_lts_preorders())
-  {
-    std::vector<lts_preorder> types(supported.begin(),supported.end());
-    std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_preorder>,preorder_strings,_1,_2));
-  
-    std::string r;
-    for (std::vector<lts_preorder>::iterator i=types.begin(); i!=types.end(); i++)
-    {
-      r += "  '" + preorder_strings[*i] + "' for " + preorder_desc_strings[*i];
-  
-      if ( *i == default_preorder )
-      {
-        r += " (default)";
-      }
-  
-  
-      if ( i+2 == types.end() )
-      {
-        r += ", or\n";
-      } else if ( i+1 == types.end() )
-      {
-        r += ",\n";
-      }
-    }
-  
-    return r;
-  }
-  
- /** \brief Gives a textual list describing supported preorders on LTSs.
-  * \param[in] supported           The preorders that should be
-  *                                considered supported.
-  * \return                        A string containing lines of the form
-  *                                "  'name' for <preorder>". Every line
-  *                                except the last is terminated with '\n'.
-  */
-  inline std::string supported_lts_preorders_text(const std::set<lts_preorder> &supported)
-  {
-    return supported_lts_preorders_text(lts_pre_none,supported);
-  } 
-
-
- /** \brief Applies a reduction algorithm to this LTS.
-  * \param[in] eq The equivalence with respect to which the LTS will be
-  * reduced.
-  * \param[in] opts The options that will be used for the reduction.
-  * \retval true if the reduction succeeded;
-  * \retval false otherwise. */
- bool reduce(lts &l, lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
-
- /** \brief Checks whether this LTS is equivalent to another LTS.
-  * \param[in] l The LTS to which this LTS will be compared.
-  * \param[in] eq The equivalence with respect to which the LTSs will be
-  * compared.
-  * \param[in] opts The options that will be used for the comparison.
-  * \retval true if the LTSs are found to be equivalent.
-  * \retval false otherwise.
-  * \warning This function alters the internal data structure of
-  * both LTSs for efficiency reasons. After comparison, this LTS is
-  * equivalent to the original LTS by equivalence \a eq, and
-  * similarly for the LTS \a l.
-  */
- bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
-
- /** \brief Checks whether this LTS is equivalent to another LTS.
-  * \details The input labelled transition systems are duplicated in memory to carry
-  *          out the comparison. When space efficiency is a concern, one can consider
-  *          to use destructive_compare.
-  * \param[in] l The LTS to which this LTS will be compared.
-  * \param[in] eq The equivalence with respect to which the LTSs will be
-  * compared.
-  * \param[in] opts The options that will be used for the comparison.
-  * \retval true if the LTSs are found to be equivalent.
-  * \retval false otherwise.
-  */
- bool compare(const lts &l1, const lts &l2, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
-
- /** \brief Checks whether this LTS is smaller than another LTS according
-  * to a preorder. 
-  * \param[in] l The LTS to which this LTS will be compared.
-  * \param[in] pre The preorder with respect to which the LTSs will be
-  * compared.
-  * \param[in] opts The options that will be used for the comparison.
-  * \retval true if this LTS is smaller than LTS \a l according to
-  * preorder \a pre.
-  * \retval false otherwise.
-  * \warning This function alters the internal data structure of
-  * both LTSs for efficiency reasons. After comparison, this LTS is
-  * equivalent to the original LTS by equivalence \a eq, and
-  * similarly for the LTS \a l, where \a eq is the equivalence
-  * induced by the preorder \a pre (i.e. \f$eq = pre \cap
-  * pre^{-1}\f$).
-  */
- bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options);
-
- /** \brief Checks whether this LTS is smaller than another LTS according
-  * to a preorder.
-  * \param[in] l The LTS to which this LTS will be compared.
-  * \param[in] pre The preorder with respect to which the LTSs will be
-  * compared.
-  * \param[in] opts The options that will be used for the comparison.
-  * \retval true if this LTS is smaller than LTS \a l according to
-  * preorder \a pre.
-  * \retval false otherwise.
-  */
- bool compare(const lts &l1, const lts &l2, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options);
-
- /** \brief Determinises this LTS. */
- void determinise(lts &l);
-
- /** \brief Checks whether all states in this LTS are reachable
-  * from the initial state.
-  * \details Runs in O(\ref num_states * \ref num_transitions) time.
-  * \param[in] remove_unreachable Indicates whether all unreachable states
-  *            should be removed from the LTS. This option does not
-  *            influence the return value; the return value is with
-  *            respect to the original LTS.
-  * \retval true if all states are reachable from the initial state;
-  * \retval false otherwise. */
- bool reachability_check(lts &l, bool remove_unreachable = false);
-
- /** \brief Checks whether this LTS is deterministic.
-  * \retval true if this LTS is deterministic;
-  * \retval false otherwise. */
- bool is_deterministic(const lts &l);
-
- /** \brief Removes tau cycles by mapping all the states on a cycle to one state.
-  *  \details This routine is linear in the number of states and transitions.
-  *  \param[in] l Transition system to be reduced.
-  *  \param[in] preserve_divergence_loops If true leave a self loop on states that resided on a tau
-  *            cycle in the original transition system. 
-  */
- void scc_reduce(lts &l,const bool preserve_divergence_loops=false);
-
+  /** \brief Merge the second lts into the first lts.
+      \param[in/out] l1 The transition system in which l2 is merged.
+      \param[in] l2 The second transition system, which remains unchanged
+   */
+  void merge(lts &l1, const lts &l);
 }
 }
 

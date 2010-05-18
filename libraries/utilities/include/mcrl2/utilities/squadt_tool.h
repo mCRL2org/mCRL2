@@ -110,10 +110,10 @@ namespace mcrl2 {
 
             tipi::datatype::enumeration< mcrl2::lts::lts_type > storage_types;
 
-            std::set< mcrl2::lts::lts_type > const& formats(mcrl2::lts::lts::supported_lts_formats());
+            std::set< mcrl2::lts::lts_type > const& formats(mcrl2::lts::detail::supported_lts_formats());
 
             for (std::set< mcrl2::lts::lts_type >::const_iterator i = formats.begin(); i != formats.end(); ++i) {
-              storage_types.add(*i, mcrl2::lts::lts::string_for_type(*i));
+              storage_types.add(*i, mcrl2::lts::detail::string_for_type(*i));
             }
 #endif
 

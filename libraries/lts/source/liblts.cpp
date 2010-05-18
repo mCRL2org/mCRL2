@@ -10,19 +10,22 @@
 
 #include <string>
 #include <set>
+#include <stack>
+#include <bitset>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
-// #include <algorithm>
+#include <algorithm>
 // #include <boost/bind.hpp>
 #include "aterm2.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_utilities.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data_specification.h"
@@ -43,11 +46,13 @@ namespace mcrl2
 {
 namespace lts
 {
-
-lps::specification const& lts::empty_specification() {
+namespace detail
+{
+lps::specification const& empty_specification() {
   static lps::specification dummy;
 
   return dummy;
+}
 }
 
 AFun timed_pair;
@@ -76,23 +81,35 @@ ATermAppl make_timed_pair(ATermAppl action, ATermAppl time)
   return ATmakeAppl2(timed_pair,(ATerm) action,(ATerm) time);
 }
 
-static int compare_transitions_slt(const void *t1, const void *t2) {
-  if (((transition*)t1)->from != ((transition*)t2)->from) {
-    return int(((transition*)t1)->from) - int(((transition*)t2)->from);
-  } else if (((transition*)t1)->label != ((transition*)t2)->label) {
-    return int(((transition*)t1)->label) - int(((transition*)t2)->label);
-  } else  {
-    return int(((transition*)t1)->to) - int(((transition*)t2)->to);
+static bool compare_transitions_slt(const transition t1, const transition t2) 
+{
+  if (t1.from() != t2.from()) 
+  {
+    return t1.from() < t2.from();
+  } 
+  else if (t1.label() != t2.label()) 
+  {
+    return t1.label() < t2.label();
+  } 
+  else  
+  {
+    return t1.to() < t2.to();
   }
 }
 
-static int compare_transitions_lts(const void *t1, const void *t2) {
-  if (((transition*)t1)->label != ((transition*)t2)->label) {
-    return int(((transition*)t1)->label) - int(((transition*)t2)->label);
-  } else if (((transition*)t1)->to != ((transition*)t2)->to) {
-    return int(((transition*)t1)->to) - int(((transition*)t2)->to);
-  } else {
-    return int(((transition*)t1)->from) - int(((transition*)t2)->from);
+static bool compare_transitions_lts(const transition t1, const transition t2) 
+{
+  if (t1.label() != t2.label()) 
+  {
+    return t1.label() < t2.label();
+  } 
+  else if (t1.to() != t2.to()) 
+  {
+    return t1.to() < t2.to();
+  } 
+  else 
+  {
+    return t1.from() < t2.from();
   }
 }
 
@@ -114,7 +131,7 @@ lts_extra::lts_extra(lps::specification const& spec)
   content.mcrl2_spec = lps::specification_to_aterm(spec);
 }
 
-lts_extra::lts_extra(lts_dot_options opts)
+lts_extra::lts_extra(detail::lts_dot_options opts)
 {
   type = le_dot;
   content.dot_options = opts;
@@ -137,7 +154,7 @@ lps::specification lts_extra::get_mcrl2_spec()
   return lps::specification(content.mcrl2_spec);
 }
 
-lts_dot_options lts_extra::get_dot_options()
+detail::lts_dot_options lts_extra::get_dot_options()
 {
   assert( type == le_dot );
   return content.dot_options;
@@ -146,150 +163,89 @@ lts_dot_options lts_extra::get_dot_options()
 lts_extra lts_no_extra = lts_extra();
 
 
-lts::lts(bool state_info, bool label_info) 
+void lts::init()
 { 
-  lts_object=this;
-  init(state_info,label_info);
-}
-
-lts::lts(string &filename, lts_type type) 
-{
-  lts_object=this;
-  init();
-  read_from(filename,type);
-}
-
-lts::lts(istream &is, lts_type type) 
-{
-  lts_object=this;
-  init();
-  read_from(is,type);
-}
-
-lts::lts(const std::string &s) 
-{
-  lts_object=this;
-  init();
-  std::istringstream is(s);
-  read_from(is,lts_aut);
-}
-
-lts::lts(lts const &l) 
-{
-  lts_object=this;
-  init(l);
-}
-
-lts::~lts()
-{ 
-  if ( state_values != NULL )
-  {
-    ATunprotectArray(state_values);
-  }
-  if ( label_values != NULL )
-  {
-    ATunprotectArray(label_values);
-  }
-  ATunprotect(&extra_data);
-
-  free(state_values);
-  free(taus);
-  free(label_values);
-  free(transitions);
-}
-
-void lts::reset(bool state_info, bool label_info)
-{
-  clear(state_info,label_info);
-}
-
-void lts::init(bool state_info, bool label_info)
-{ 
-  states_size = 0;
   nstates = 0;
-  state_values = NULL;
-
-  labels_size = 0;
   nlabels = 0;
-  taus = NULL;
-  label_values = NULL;
-
-  transitions_size = 0;
-  ntransitions = 0;
-  transitions = NULL;
 
   extra_data = NULL;
   ATprotect(&extra_data);
 
   this->type = lts_none;
-  this->state_info = state_info;
-  this->label_info = label_info;
 }
 
-void lts::init(lts const &l)
+lts::lts() 
+{ 
+  init();
+}
+
+lts::lts(string &filename, lts_type type,lts_extra extra) 
+{
+  init();
+  detail::read_from(*this,filename,type);
+}
+
+lts::lts(istream &is, lts_type type,lts_extra extra) 
+{
+  init();
+  detail::read_from(*this,is,type,extra);
+}
+
+lts::lts(const std::string &s) 
+{
+  init();
+  std::istringstream is(s);
+  detail::read_from(*this,is,lts_aut);
+}
+
+lts::~lts()
+{ 
+  ATunprotect(&extra_data);
+}
+
+lts::lts(lts const &l) 
 {
   init_state = l.init_state;
-
-  states_size = l.nstates;
   nstates = l.nstates;
-
-  labels_size = l.nlabels;
   nlabels = l.nlabels;
 
-  transitions_size = l.ntransitions;
-  ntransitions = l.ntransitions;
+  transitions = l.transitions;
 
   type = l.type;
-  state_info = l.state_info;
-  label_info = l.label_info;
 
   extra_data = l.extra_data;
   ATprotect(&extra_data);
 
-  if ( state_info )
-  {
-    state_values = (ATerm *) malloc(states_size * sizeof(ATerm));
-    if ( state_values == NULL )
-    {
-      throw mcrl2::runtime_error("could not allocate enough memory\n");
-    }
-    memcpy(state_values,l.state_values,nstates*sizeof(ATerm));
-    ATprotectArray(state_values,nstates);
-  } else {
-    state_values = NULL;
-  }
+  state_values=l.state_values;
 
-  taus = (bool *) malloc(labels_size * sizeof(bool));
-  if ( taus == NULL )
-  {
-    throw mcrl2::runtime_error("could not allocate enough memory\n");
-  }
-  memcpy(taus,l.taus,nlabels*sizeof(bool));
+  taus = l.taus;
 
-  if ( label_info )
-  {
-    label_values = (ATerm *) malloc(labels_size * sizeof(ATerm));
-    if ( label_values == NULL )
-    {
-      throw mcrl2::runtime_error("could not allocate enough memory\n");
-    }
-    memcpy(label_values,l.label_values,nlabels*sizeof(ATerm));
-    ATprotectArray(label_values,nlabels);
-  } else {
-    label_values = NULL;
-  }
-
-  transitions = (transition *) malloc(transitions_size * sizeof(transition));
-  if ( transitions == NULL )
-  {
-    throw mcrl2::runtime_error("could not allocate enough memory\n");
-  }
-  memcpy(transitions,l.transitions,ntransitions*sizeof(transition));
+  label_values = l.label_values;
 
   creator = l.creator;
 }
 
-void lts::clear(bool state_info, bool label_info)
+void lts::swap(lts &l) 
+{ 
+  { const unsigned int aux=init_state; init_state=l.init_state;   l.init_state=aux; }
+  { const unsigned int aux=nstates;    nstates=l.nstates;         l.nstates=aux; }
+  { const unsigned int aux=nlabels;    nlabels=l.nlabels;         l.nlabels=aux; }
+
+  transitions.swap(l.transitions);
+
+  { const lts_type aux=type;           type=l.type;               l.type=aux; }
+
+  { const ATerm aux=extra_data;        extra_data=l.extra_data;   l.extra_data=aux; }
+
+  state_values.swap(l.state_values);
+  taus.swap(l.taus);
+
+  label_values.swap(l.label_values);
+
+  creator.swap(l.creator);
+}
+
+void lts::clear()
 {
   clear_states();
   clear_labels();
@@ -297,45 +253,14 @@ void lts::clear(bool state_info, bool label_info)
   clear_type();
   extra_data = NULL;
 
-  this->state_info = state_info;
-  this->label_info = label_info;
 }
 
   void lts::clear_states()
   {
     remove_state_values();
-    states_size = 0;
     nstates = 0;
   }
 
-void lts::clear_labels()
-{
-  if ( taus != NULL )
-  {
-    free(taus);
-    taus = NULL;
-  }
-  if ( label_values != NULL )
-  {
-    ATunprotectArray(label_values);
-    free(label_values);
-    label_values = NULL;
-  }
-  label_info = false;
-  labels_size = 0;
-  nlabels = 0;
-}
-
-void lts::clear_transitions()
-{
-  if (transitions != NULL)
-  {
-    free(transitions);
-    transitions = NULL;
-  }
-  transitions_size = 0;
-  ntransitions = 0;
-}
 
 // Merges an LTS L with this LTS (say K) and stores the resulting LTS
 // (say M) in this LTS datastructure, effectively replacing K.
@@ -352,81 +277,50 @@ void lts::clear_transitions()
 // Therefore, state i of L will be numbered |N_K| + i in the resulting
 // LTS M and state i of K will be numbered i in M. This yields:
 //   States_M = { 0, ..., N_K + N_L - 1 }.
-void lts::merge(const lts &l)
-{
-  unsigned int new_nstates = nstates + l.num_states();
-  std::cerr << "PRfferf " << nstates << "  " << l.num_states() << "\n";
-  unsigned int new_ntransitions = ntransitions + l.num_transitions();
-  std::cerr << "Merge nstat " << new_nstates << " ntrans " << new_ntransitions << " nlab " << nlabels << "\n";
+void merge(lts &l1, const lts &l2)
+{ 
+  const unsigned int old_nstates=l1.num_states();
+  l1.set_num_states(l1.num_states() + l2.num_states());
+  
 
   // The resulting LTS will have state information only if BOTH LTSs
   // currently have state information.
-  if ( state_info && l.has_state_info() )
+  if ( l1.has_state_info() && l2.has_state_info() )
   {
-    if ( state_values != NULL )
+    for (unsigned int i=0; i<l2.num_states(); ++i)
     {
-      ATunprotectArray(state_values);
+      l1.add_state(l2.state_value(i));
     }
-    states_size = new_nstates;
-    state_values = (ATerm*)realloc(state_values,states_size*sizeof(ATerm));
-    if ( state_values == NULL )
-    {
-      throw mcrl2::runtime_error("Insufficient memory.");
-    }
-    for (const_state_iterator i = l.get_states(); i.more(); ++i)
-    {
-      state_values[nstates + *i] = l.state_value(*i);
-    }
-    ATprotectArray(state_values,states_size);
   }
   else
   {
     // remove state information from this LTS, if any
-    remove_state_values();
-  }
-
-  // Resize the transitions array so l's transitions can be added
-  transitions_size = new_ntransitions;
-  transitions = (transition*)realloc(transitions,transitions_size*sizeof(transition));
-  if ( transitions == NULL )
-  {
-    throw mcrl2::runtime_error("Insufficient memory.");
-  }
-
-  // Now add the source and target states of the transitions of LTS l.
-  // The labels will be added below, depending on whether there is label
-  // information in both LTSs.
-  unsigned int j = ntransitions;
-  for (const_transition_iterator i = l.get_transitions(); i.more(); ++i)
-  {
-    transitions[j].from  = i.from() + nstates;
-    transitions[j].to    = i.to() + nstates;
-    ++j;
+    l1.remove_state_values();
   }
 
   unsigned new_nlabels = 0;
-  if (label_info && l.has_label_info())
+  if (l1.has_label_info() && l2.has_label_info())
   {
     // Before we can set the label data in the realloc'ed transitions
     // array, we first have to collect the labels of both LTSs in an
     // indexed set.
-    ATermIndexedSet labs = ATindexedSetCreate(nlabels + l.num_labels(),75);
+    ATermIndexedSet labs = ATindexedSetCreate(l1.num_labels() + l2.num_labels(),75);
     ATbool b;
 
     // Add the labels of this LTS and count the number of labels that
     // the resulting LTS will contain
-    for (unsigned int i = 0; i < nlabels; ++i)
+    for (unsigned int i = 0; i < l1.num_labels(); ++i)
     {
-      ATindexedSetPut(labs,label_values[i],&b);
+      ATindexedSetPut(labs,l1.label_value(i),&b);
       if ( b )
       {
         ++new_nlabels;
       }
     }
-    // Same for LTS l
-    for (const_label_iterator i = l.get_labels(); i.more(); ++i)
+    // Same for LTS l2
+    for (unsigned int i=0; i<l2.num_labels(); ++i)
     {
-      ATindexedSetPut(labs,l.label_value(*i),&b);
+      ATindexedSetPut(labs,l2.label_value(i),&b);
       if ( b )
       {
         ++new_nlabels;
@@ -434,53 +328,44 @@ void lts::merge(const lts &l)
     }
 
     // Update the tau-information
-    bool* new_taus = (bool*)malloc(new_nlabels*sizeof(bool));
-    if (new_taus == NULL)
-    {
-      throw mcrl2::runtime_error("Insufficient memory.");
+    std::vector<bool> new_taus(new_nlabels,false);
+    for (unsigned int i = 0; i < l1.num_labels(); ++i)
+    { 
+      assert(ATindexedSetGetIndex(labs,l1.label_value(i))<(int)new_taus.size());
+      new_taus[ATindexedSetGetIndex(labs,l1.label_value(i))] = l1.is_tau(i);
     }
-    for (unsigned int i = 0; i < nlabels; ++i)
-    {
-      new_taus[ATindexedSetGetIndex(labs,label_values[i])] = taus[i];
+    for (unsigned int i = 0; i < l2.num_labels(); ++i)
+    { assert(ATindexedSetGetIndex(labs,l2.label_value(i))<(int)new_taus.size());
+      new_taus[ATindexedSetGetIndex(labs,l2.label_value(i))] = l2.is_tau(i);
     }
-    for (unsigned int i = 0; i < l.num_labels(); ++i)
+    
+    // Store the label values contained in the indexed set
+    l1.clear_labels(); 
+
+    for (unsigned int i = 0; i < new_nlabels; ++i)
     {
-      new_taus[ATindexedSetGetIndex(labs,l.label_value(i))] =
-        l.is_tau(i);
+      l1.add_label(ATindexedSetGetElem(labs,i),new_taus[i]);
     }
-    free(taus);
-    taus = new_taus;
-    new_taus = NULL;
 
     // Update the label numbers of all transitions of this LTS to
     // the new indices as given by the indexed set.
-    for (unsigned int i = 0; i < ntransitions; ++i)
-    {
-      transitions[i].label =
-        ATindexedSetGetIndex(labs,label_values[transitions[i].label]);
+    
+    for (transition_range r = l1.get_transitions(); !r.empty(); r.advance_begin(1))
+    { r.front().set_label(
+        ATindexedSetGetIndex(labs,l1.label_value(r.front().label())));
     }
-    // Now add the transition labels of LTS l
-    j = ntransitions;
-    for (const_transition_iterator i = l.get_transitions(); i.more(); ++i)
-    {
-      transitions[j].label =
-        ATindexedSetGetIndex(labs,l.label_value(i.label()));
-      ++j;
+    // Now add the transition labels of LTS l2
+
+    // Now add the source and target states of the transitions of LTS l2.
+    // The labels will be added below, depending on whether there is label
+    // information in both LTSs.
+    for (transition_const_range r = l2.get_transitions(); !r.empty(); r.advance_begin(1))
+    { const transition transition_to_add=r.front();
+      l1.add_transition(transition(transition_to_add.from()+old_nstates,
+                                ATindexedSetGetIndex(labs,l2.label_value(transition_to_add.label())),
+                                transition_to_add.to()+old_nstates));
     }
 
-    // Store the label values contained in the indexed set
-    labels_size = new_nlabels;
-    ATunprotectArray(label_values);
-    label_values = (ATerm*)realloc(label_values,labels_size*sizeof(ATerm));
-    if ( label_values == NULL )
-    {
-      throw mcrl2::runtime_error("Insufficient memory.");
-    }
-    for (unsigned int i = 0; i < new_nlabels; ++i)
-    {
-      label_values[i] = ATindexedSetGetElem(labs,i);
-    }
-    ATprotectArray(label_values,labels_size);
 
     ATindexedSetDestroy(labs);
   }
@@ -489,42 +374,33 @@ void lts::merge(const lts &l)
     // One of the LTSs does not have label info, so the resulting LTS
     // will not have label info either. Moreover, we consider the sets
     // of labels of the LTSs to be disjoint
-    new_nlabels = nlabels + l.num_labels();
-
-    // Add the transition labels of LTS l
-    j = ntransitions;
-    for (const_transition_iterator i = l.get_transitions(); i.more(); ++i)
-    {
-      transitions[j].label = nlabels + i.label();
-      ++j;
-    }
-
-    // Add taus from LTS l
-    taus = (bool*)realloc(taus,new_nlabels*sizeof(bool));
-    if ( taus == NULL )
-    {
-      throw mcrl2::runtime_error("Insufficient memory.");
-    }
-    for (unsigned int i = 0; i < l.num_labels(); ++i)
-    {
-      taus[nlabels + i] = l.is_tau(i);
-    }
+    const unsigned int old_nlabels=l1.num_labels();
 
     // Remove label info from this LTS, if any
-    if ( label_info )
+    if ( l1.has_label_info() )
     {
-      label_info = false;
-      free(label_values);
-      label_values = NULL;
-      labels_size = 0;
+      l1.set_num_labels(old_nlabels,false);
     }
+    // Now add the source and target states of the transitions of LTS l2.
+    // The labels will be added below, depending on whether there is label
+    // information in both LTSs.
+    
+    // Add taus from LTS l2
+    for (unsigned int i = 0; i < l2.num_labels(); ++i)
+    {
+      l1.add_label(l2.is_tau(i));
+    }
+
+    for (transition_const_range r = l2.get_transitions(); !r.empty(); r.advance_begin(1))
+    { const transition transition_to_add=r.front();
+      l1.add_transition(transition(transition_to_add.from()+old_nstates,
+                                   transition_to_add.label()+old_nlabels,
+                                   transition_to_add.to()+old_nstates));
+    }
+
   }
 
   // Update the fields that have not been updated yet
-  nstates      = new_nstates;
-  ntransitions = new_ntransitions;
-  nlabels      = new_nlabels;
-  std::cerr << "Merge nstat " << nstates << " ntrans " << ntransitions << " nlab " << nlabels << "\n";
 }
 
   void lts::clear_type()
@@ -532,7 +408,10 @@ void lts::merge(const lts &l)
     type = lts_none;
   }
 
-lts_type lts::detect_type(string const& filename)
+namespace detail
+{
+
+lts_type detect_type(string const& filename)
 {
   ifstream is(filename.c_str(),ifstream::in|ifstream::binary);
   if ( !is.is_open() )
@@ -703,7 +582,7 @@ class svc_buffer
     }
 };
 
-lts_type lts::detect_type(istream &is)
+lts_type detect_type(istream &is)
 {
   if ( is == cin ) // XXX better test to see if is is seekable?
   {
@@ -886,386 +765,247 @@ lts_type lts::detect_type(istream &is)
   return lts_none;
 }
 
-bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
-{
-  clear();
+void read_from(lts &l,string const& filename, lts_type type, lts_extra extra)
+{ 
   if ( type == lts_none )
   {
     type = detect_type(filename);
     if ( type == lts_none && (type = guess_format(filename)) == lts_none )
     {
-      if (core::gsVerbose)
-      { std::cerr << std::string("Could not determine type of input file '") + filename + "'.";
-      }
-      return false;
+      mcrl2::runtime_error("Could not determine type of input file '" + filename + "'.");
     }
   }
 
   switch ( type )
   {
     case lts_aut:
-      return read_from_aut(filename);
+      read_from_aut(l,filename);
+      return;
     case lts_mcrl:
-      return read_from_svc(filename,lts_mcrl);
+      read_from_svc(l,filename,lts_mcrl);
+      return;
     case lts_mcrl2:
-      return read_from_svc(filename,lts_mcrl2);
+      read_from_svc(l,filename,lts_mcrl2);
+      return;
     case lts_svc:
-      return read_from_svc(filename,lts_svc);
+      read_from_svc(l,filename,lts_svc);
+      return;
     case lts_fsm:
       switch ( extra.get_type() )
       {
         case le_mcrl1:
-          return read_from_fsm(filename,extra.get_mcrl1_spec());
+          read_from_fsm(l,filename,extra.get_mcrl1_spec());
+          return;
         case le_mcrl2:
-          return read_from_fsm(filename,extra.get_mcrl2_spec());
+          read_from_fsm(l,filename,extra.get_mcrl2_spec());
+          return;
         default:
-          return read_from_fsm(filename);
+          read_from_fsm(l,filename);
+          return;
       }
     case lts_dot:
-      return read_from_dot(filename);
+      read_from_dot(l,filename);
+      return;
 #ifdef USE_BCG
     case lts_bcg:
-      return read_from_bcg(filename);
+      read_from_bcg(l,filename);
+      return;
 #endif
     default:
-      assert(0);
       throw runtime_error ("Unknown source LTS type");
-      return false;
   }
 }
 
-bool lts::read_from(istream &is, lts_type type, lts_extra extra)
+void read_from(lts &l,istream &is, lts_type type, lts_extra extra)
 {
-  clear();
   if ( type == lts_none )
   {
     type = detect_type(is);
     if ( type == lts_none )
     { throw mcrl2::runtime_error("Could not determine type of input stream.");
-      return false;
     }
   }
 
   switch ( type )
   {
     case lts_aut:
-      return read_from_aut(is);
+       read_from_aut(l,is);
+       return; 
     case lts_mcrl:
     case lts_mcrl2:
     case lts_svc:
       throw mcrl2::runtime_error("Cannot read SVC based files from streams");
-      return false;
     case lts_fsm:
       switch ( extra.get_type() )
       {
         case le_mcrl1:
-          return read_from_fsm(is,extra.get_mcrl1_spec());
+           read_from_fsm(l,is,extra.get_mcrl1_spec());
+           return; 
         case le_mcrl2:
-          return read_from_fsm(is,extra.get_mcrl2_spec());
+           read_from_fsm(l,is,extra.get_mcrl2_spec());
+           return; 
         default:
-          return read_from_fsm(is);
+           read_from_fsm(l,is);
+           return; 
       }
     case lts_dot:
-      return read_from_dot(is);
+       read_from_dot(l,is);
+       return; 
 #ifdef USE_BCG
     case lts_bcg:
       throw mcrl2::runtime_error("Cannot read BCG files from streams.");
-      return false;
 #endif
     default:
-      assert(0);
       throw mcrl2::runtime_error("Unknown source LTS type.");
-      return false;
   }
 }
+} // namespace detail
 
-bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
+void lts::write_to(string const& filename, lts_type type, lts_extra extra) const
 {
   switch ( type )
   {
     case lts_aut:
-      return write_to_aut(filename);
+      detail::write_to_aut(*this,filename);
+      return;
     case lts_mcrl:
-      return write_to_svc(filename,lts_mcrl);
-      break;
+      detail::write_to_svc(*this,filename,lts_mcrl);
+      return;
     case lts_mcrl2:
       if ( extra.get_type() == le_mcrl2 )
       {
-        return write_to_svc(filename,lts_mcrl2,extra.get_mcrl2_spec());
-      } else {
-        return write_to_svc(filename,lts_mcrl2);
+         detail::write_to_svc(*this,filename,lts_mcrl2,extra.get_mcrl2_spec());
+      } 
+      else 
+      {
+         detail::write_to_svc(*this,filename,lts_mcrl2);
       }
+      return;
     case lts_svc:
-      return write_to_svc(filename,lts_svc);
+      detail::write_to_svc(*this,filename,lts_svc);
+      return;
     case lts_fsm:
       switch ( extra.get_type() )
       {
         case le_mcrl1:
-          return write_to_fsm(filename,extra.get_mcrl1_spec());
+          detail::write_to_fsm(*this,filename,extra.get_mcrl1_spec());
+          return;
         case le_mcrl2:
-          return write_to_fsm(filename,extra.get_mcrl2_spec());
+          detail::write_to_fsm(*this,filename,extra.get_mcrl2_spec());
+          return;
         default:
           if ( this->type == lts_mcrl2 && extra_data != NULL )
           {
-            return write_to_fsm(filename,lts_mcrl2,ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0));
-          } else {
-            return write_to_fsm(filename);
+            detail::write_to_fsm(*this,filename,lts_mcrl2,ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0));
+          } 
+          else 
+          {
+            detail::write_to_fsm(*this,filename);
           }
+          return;
       }
     case lts_dot:
       if ( extra.get_type() == le_dot )
       {
-        return write_to_dot(filename,extra.get_dot_options());
-      } else {
-        lts_dot_options opts;
+         detail::write_to_dot(*this,filename,extra.get_dot_options());
+      } 
+      else 
+      {
+        detail::lts_dot_options opts;
         string s("unknown");
         opts.name = &s;
         opts.print_states = false;
-        return write_to_dot(filename,opts);
+        detail::write_to_dot(*this,filename,opts);
       }
+      return;
 #ifdef USE_BCG
     case lts_bcg:
-      return write_to_bcg(filename);
+      detail::write_to_bcg(*this,filename);
+      return;
 #endif
     default:
-      assert(0);
       throw mcrl2::runtime_error("Unknown target LTS type.");
-      return false;
   }
 }
 
-bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
+void lts::write_to(ostream &os, lts_type type, lts_extra extra) const
 {
   switch ( type )
   {
     case lts_aut:
-      return write_to_aut(os);
+       detail::write_to_aut(*this,os);
+       return;
     case lts_mcrl:
     case lts_mcrl2:
     case lts_svc:
       throw mcrl2::runtime_error("Cannot write SVC based files to streams.");
-      return false;
     case lts_fsm:
       switch ( extra.get_type() )
       {
         case le_mcrl1:
-          return write_to_fsm(os,extra.get_mcrl1_spec());
+           detail::write_to_fsm(*this, os,extra.get_mcrl1_spec());
+           return;
         case le_mcrl2:
-          return write_to_fsm(os,extra.get_mcrl2_spec());
+           detail::write_to_fsm(*this,os,extra.get_mcrl2_spec());
+           return;
         default:
           if ( this->type == lts_mcrl2 && extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
           {
-            return write_to_fsm(os,lts_mcrl2,ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0));
-          } else {
-            return write_to_fsm(os);
+             detail::write_to_fsm(*this,os,lts_mcrl2,ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0));
+          } 
+          else 
+          {
+             detail::write_to_fsm(*this,os);
           }
+          return;
       }
     case lts_dot:
       if ( extra.get_type() == le_dot )
       {
-        return write_to_dot(os,extra.get_dot_options());
-      } else {
-        lts_dot_options opts;
+         detail::write_to_dot(*this,os,extra.get_dot_options());
+      } 
+      else 
+      {
+        detail::lts_dot_options opts;
         string s("unknown");
         opts.name = &s;
         opts.print_states = false;
-        return write_to_dot(os,opts);
+        detail::write_to_dot(*this,os,opts);
       }
+      return;
 #ifdef USE_BCG
     case lts_bcg:
       throw mcrl2::runtime_error("Cannot write BCG files to streams.");
-      return false;
 #endif
     default:
       throw mcrl2::runtime_error("Unknown target LTS type.");
-      assert(0);
-      return false;
   }
 }
 
-unsigned int lts::num_states() const
+void lts::sort_transitions(transition_sort_style ts) 
 {
-  return nstates;
-}
-
-unsigned int lts::num_labels() const
-{
-  return nlabels;
-}
-
-unsigned int lts::num_transitions() const
-{
-  return ntransitions;
-}
-
-unsigned int lts::initial_state() const
-{
-  return init_state;
-}
-
-void lts::set_initial_state(unsigned int state)
-{
-  assert( state < nstates );
-  if ( state < nstates )
-  {
-    init_state = state;
-  }
-}
-
-unsigned int lts::add_state(ATerm value)
-{
-  if ( nstates == states_size )
-  {
-    unsigned int new_states_size = states_size*2;
-    if ( states_size == 0 )
-    {
-      state_info = (value != NULL);
-      new_states_size = 128;
-    }
-    if ( states_size > (50*1025*1025)/sizeof(unsigned int) )
-    {
-      new_states_size = states_size + (50*1025*1025)/sizeof(unsigned int);
-    }
-
-    assert(state_info == (value != NULL));
-
-    if ( state_info )
-    {
-      if ( state_values != NULL )
-      {
-        ATunprotectArray(state_values);
-      }
-      state_values = (ATerm *) realloc(state_values,new_states_size*sizeof(ATerm));
-      if ( state_values == NULL )
-      {
-        throw mcrl2::runtime_error("Insufficient memory to store LTS.");
-      }
-      for (unsigned int i=states_size; i<new_states_size; i++)
-      {
-        state_values[i] = NULL;
-      }
-      ATprotectArray(state_values,new_states_size);
-    }
-    states_size = new_states_size;
-  }
-
-  if ( state_info )
-  {
-    state_values[nstates] = value;
-  }
-
-  return nstates++;
-}
-
-unsigned int lts::add_label(bool is_tau)
-{
-  return add_label(NULL, is_tau);
-}
-
-unsigned int lts::add_label(ATerm value, bool is_tau)
-{
-  if ( nlabels == labels_size )
-  {
-    unsigned int new_labels_size = labels_size*2;
-    if ( labels_size == 0 )
-    {
-      label_info = (value != NULL);
-      new_labels_size = 128;
-    }
-    if ( labels_size > (50*1025*1025)/sizeof(unsigned int) )
-    {
-      new_labels_size = labels_size + (50*1025*1025)/sizeof(unsigned int);
-    }
-
-    assert(label_info == (value != NULL));
-
-    taus = (bool *) realloc(taus,new_labels_size*sizeof(bool));
-    if ( taus == NULL )
-    {
-      throw mcrl2::runtime_error("Insufficient memory to store LTS.");
-    }
-    if ( label_info )
-    {
-      if ( label_values != NULL )
-      {
-        ATunprotectArray(label_values);
-      }
-      label_values = (ATerm *) realloc(label_values,new_labels_size*sizeof(ATerm));
-      if ( label_values == NULL )
-      {
-        throw mcrl2::runtime_error("Insufficient memory to store LTS.");
-      }
-      for (unsigned int i=labels_size; i<new_labels_size; i++)
-      {
-        label_values[i] = NULL;
-      }
-      ATprotectArray(label_values,new_labels_size);
-    }
-    labels_size = new_labels_size;
-  }
-
-  taus[nlabels] = is_tau;
-  if ( label_info )
-  {
-    label_values[nlabels] = value;
-  }
-
-  return nlabels++;
-}
-
-unsigned int lts::add_transition(unsigned int from,
-                                 unsigned int label,
-                                 unsigned int to)
-{
-  assert(ntransitions <= transitions_size);
-  if ( ntransitions == transitions_size )
-  {
-    unsigned int new_transitions_size = transitions_size*2;
-    if ( transitions_size == 0 )
-    {
-      new_transitions_size = 128;
-    }
-    if ( transitions_size > (50*1025*1025)/sizeof(transition) )
-    {
-      new_transitions_size = transitions_size + (50*1025*1025)/sizeof(transition);
-    }
-
-    transitions = (transition *) realloc(transitions,new_transitions_size*sizeof(transition));
-    if ( transitions == NULL )
-    {
-      throw mcrl2::runtime_error("Insufficient memory to store LTS.");
-    }
-    transitions_size = new_transitions_size;
-  }
-  transitions[ntransitions].from = from;
-  transitions[ntransitions].label = label;
-  transitions[ntransitions].to = to;
-
-  return ntransitions++;
-}
-
-void lts::sort_transitions(transition_sort_style ts) {
   switch (ts)
   {
     case lbl_tgt_src:
-      qsort(transitions,ntransitions,sizeof(transition),compare_transitions_lts);
+      sort(transitions.begin(),transitions.end(),compare_transitions_lts);
       break;
     case src_lbl_tgt:
     default:
-      qsort(transitions,ntransitions,sizeof(transition),compare_transitions_slt);
+      sort(transitions.begin(),transitions.end(),compare_transitions_slt);
       break;
   }
 }
 
 unsigned int* lts::get_transition_indices() {
   unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
-  if (A == NULL) {
+  if (A == NULL) 
+  {
     throw mcrl2::runtime_error("Out of memory.");
   }
   unsigned int t = 0;
   A[0] = 0;
   for (unsigned int s = 1; s <= nstates; ++s) {
-    while (t < ntransitions && transitions[t].from == s-1) {
+    while (t < num_transitions() && transitions[t].from() == s-1) {
       ++t;
     }
     A[s] = t;
@@ -1294,8 +1034,8 @@ unsigned int** lts::get_transition_pre_table()
     A[l][0] = t;
     for (s = 1; s <= nstates; ++s)
     {
-      while (t < ntransitions && transitions[t].label == l
-          && transitions[t].to == s-1)
+      while (t < num_transitions() && transitions[t].label() == l
+          && transitions[t].to() == s-1)
       {
         ++t;
       }
@@ -1305,30 +1045,11 @@ unsigned int** lts::get_transition_pre_table()
   return A;
 }
 
-void lts::set_state(unsigned int state, ATerm value)
-{
-  assert(state_info && (value != NULL));
-  state_values[state] = value;
-}
-
-void lts::set_label(unsigned int label, ATerm value, bool is_tau)
-{
-  assert(label_info && (value != NULL));
-  label_values[label] = value;
-  taus[label] = is_tau;
-}
-
-ATerm lts::state_value(unsigned int state) const
-{
-  assert(state_info && (state < nstates));
-  return state_values[state];
-}
-
 string lts::state_value_str(unsigned int state) const
 {
   assert(state < nstates);
   string s;
-  if ( state_info )
+  if ( has_state_info() )
   {
     ATerm value = state_values[state];
     if ( ATisAppl(value) && !strcmp(ATgetName(ATgetAFun((ATermAppl) value)),"STATE") )
@@ -1366,15 +1087,15 @@ string lts::state_value_str(unsigned int state) const
 
 ATerm lts::label_value(unsigned int label) const
 {
-  assert(label_info && (label < nlabels));
+  assert(label < label_values.size());
   return label_values[label];
 }
 
-string lts::label_value_str(unsigned int label)
+string lts::label_value_str(unsigned int label) const
 {
   assert(label < nlabels);
   string s;
-  if ( label_info )
+  if ( has_label_info() )
   {
     ATerm value = label_values[label];
     if ( ATisAppl(value) && gsIsMultAct((ATermAppl) value) )
@@ -1398,85 +1119,6 @@ string lts::label_value_str(unsigned int label)
   return s;
 }
 
-unsigned int lts::transition_from(unsigned int transition)
-{
-  assert(transition < ntransitions);
-  return transitions[transition].from;
-}
-
-unsigned int lts::transition_label(unsigned int transition)
-{
-  assert(transition < ntransitions);
-  return transitions[transition].label;
-}
-
-unsigned int lts::transition_to(unsigned int transition)
-{
-  assert(transition < ntransitions);
-  return transitions[transition].to;
-}
-
-void lts::set_transition_from(const unsigned int transition, const unsigned int from)
-{ 
-  assert(transition < ntransitions);
-  transitions[transition].from=from;
-}
-
-void lts::set_transition_label(const unsigned int transition, const unsigned int label)
-{ 
-  assert(transition < ntransitions);
-  transitions[transition].label=label;
-}
-
-void lts::set_transition_to(const unsigned int transition, const unsigned int to)
-{ 
-  assert(transition < ntransitions);
-  transitions[transition].to=to;
-}
-
-
-state_iterator lts::get_states() 
-{
-  return state_iterator(*this);
-}
-
-const_state_iterator lts::get_states() const
-{
-  return const_state_iterator(*this);
-}
-
-label_iterator lts::get_labels() 
-{
-  return label_iterator(*this);
-}
-
-const_label_iterator lts::get_labels() const
-{
-  return const_label_iterator(*this);
-}
-
-transition_iterator lts::get_transitions() 
-{
-  return transition_iterator(*this);
-}
-
-const_transition_iterator lts::get_transitions() const
-{
-  return const_transition_iterator(*this);
-}
-
-bool lts::is_tau(unsigned int label) const
-{
-  assert(label < nlabels);
-  return taus[label];
-}
-
-void lts::set_tau(unsigned int label, bool is_tau)
-{
-  assert(label < nlabels);
-  taus[label] = is_tau;
-}
-
 bool lts::has_creator()
 {
   return !creator.empty();
@@ -1497,19 +1139,9 @@ lts_type lts::get_type() const
   return type;
 }
 
-bool lts::has_state_info() const
-{
-  return state_info;
-}
-
-bool lts::has_label_info() const
-{
-  return label_info;
-}
-
 bool lts::has_state_parameters() const
 {
-  return state_info && ( ( type == lts_mcrl2 ) ||
+  return has_state_info() && ( ( type == lts_mcrl2 ) ||
                          ( type == lts_mcrl ) ||
                          ( type == lts_dot ) ||
                          ( type == lts_fsm ) );
@@ -1776,13 +1408,8 @@ void lts::set_data_specification(data::data_specification const& spec)
 
 void lts::remove_state_values()
 {
-  state_info = false;
-  if ( state_values != NULL )
-  {
-    ATunprotectArray(state_values);
-    free(state_values);
-    state_values = NULL;
-  }
+  state_values=atermpp::vector<ATerm>();
+  
   if ( type == lts_mcrl2 && extra_data != NULL )
   {
     extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm) gsMakeNil(),1);
@@ -1791,439 +1418,94 @@ void lts::remove_state_values()
 
 bool reachability_check(lts &l, bool remove_unreachable)
 {
-  // We use two algorithms here. One is O(nstates*ntransitions) and needs
-  // nstates bits of memory. The other is O(ntransitions), but needs an
-  // additional 2*nstates bytes of memory and requires the transitions to be
-  // sorted (or more precisely: grouped on the source state).
-  //
-  // We first allocate memory needed by both algorithms. Then we try to allocate
-  // memory for the faster one. If this, or the following test for sortedness,
-  // fails, then we just use the slower algorithm.
+  // First calculate which states can be reached, and store this in the array visited.
+  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
 
-  // bit array to represent the set of visited states
-  #define visited_bpi (8*sizeof(unsigned int)) // bits per (unsigned) int
-  unsigned int visited_size = ((l.num_states()-1)/visited_bpi)+1;
-                                // nstates/visited_bpi rounded upwards
-  unsigned int *visited = (unsigned int *) malloc(visited_size*sizeof(unsigned int));
-  #define add_visited(s) (visited[s/visited_bpi] |= 1 << (s % visited_bpi))
-  #define in_visited(s) (visited[s/visited_bpi] & (1 << (s % visited_bpi)))
-  if ( visited == NULL )
+  std::vector < bool > visited(l.num_states(),false);
+  visited[l.initial_state()]=true;
+  std::stack<unsigned int> todo;
+  todo.push(l.initial_state());
+
+  while (!todo.empty())
   {
-    throw mcrl2::runtime_error("cannot allocate enough memory for reachability check.");
-  }
-
-  // We try to allocate the memory for the faster algorithm. For ease we
-  // allocate both needed arrays at once.
-  // Note that we also just (todo_stack != NULL) as a general check to see
-  // which algorithm we will use.
-  unsigned int *todo_stack = (unsigned int *) malloc(2*l.num_states()*sizeof(unsigned int));
-  unsigned int *state2trans = &todo_stack[l.num_states()];
-  if ( todo_stack != NULL ) // Do we have enough memory for fast algorithm?
-  {
-    // XXX sort transitions array? Allows us to always use the fast algorithm
-    //     (if sufficient memory). However, we must make sure that the
-    //     algorithm is O(ntransitions*log(ntransitions)) in the worst case;
-    //     otherwise the other reachability algorithm might be faster than the
-    //     sorting itself. Also the memory usage should be minimal. (Heapsort
-    //     seems a obvious choice.) A downside is that you change the order of
-    //     the transitions, which might be undesirable.
-    //     (NB: Technically we only need to group the transitions on the from
-    //     field)
-
-    // We check whether or not the transitions are grouped on from field (i.e.
-    // the source state). While doing this we also store the location of these
-    // groups in state2trans (i.e. state2trans[s] will be an index to the
-    // beginning of the block of transitions from state s).
-
-    // empty visited states set
-    for (unsigned int i=0; i<visited_size; i++)
-    {
-      visited[i] = 0;
-    }
-    // initialise state2trans; we use ntransitions as default because we know
-    // it exists and no actual transitions have such a high index
-    for (unsigned int i=0; i<l.num_states(); i++)
-    {
-      state2trans[i] = l.num_transitions();
-    }
-
-    unsigned int current_state = l.num_states();
-    bool is_sorted = true;
-    // (We just a ghost transitions[-1] with transitions[-1].from == l.num_states())
-    // inv: !is_sorted || ( P(i) && transitions[i-1].from == current_state )
-    //       where P(j) = for all states s that occur as source in
-    //                    transitions[-1..j) we have that all transitions in
-    //                    this part of the array with s as source are stored
-    //                    consecutively starting at state2trans[i]
-    //                    and for all other states s we have that
-    //                    state2trans[i] == ntransitions
-    for (unsigned int i=0; i<l.num_transitions(); i++)
-    {
-      if ( l.transitions[i].from != current_state )
-      {
-        current_state = l.transitions[i].from;
-        if ( in_visited(current_state) )
-        {
-          // We already saw this state are source in another block; the
-          // transitions are not sorted.
-          is_sorted = false;
-          break;
-        }
-        add_visited(current_state); // remember we saw this state
-        state2trans[current_state] = i;
-      }
-    }
-    // post: !is_sorted || P(ntransitions)
-
-    if ( !is_sorted )
-    {
-      // transitions are not sorted; set todo_stack to NULL such that we use
-      // the slower algorithm
-      free(todo_stack);
-      todo_stack = NULL;
-    }
-  }
-
-  // empty visited states set
-  for (unsigned int i=0; i<visited_size; i++)
-  {
-    visited[i] = 0;
-  }
-
-  // choose between algorithms and execute choice; afterwards in_visited(s)
-  // must must hold for all states s reachable from the initial state
-  if ( todo_stack == NULL )
-  {
-    if (core::gsDebug)
-    { std::cerr << "Checking reachability with incremental algorithm.\n";
-    }
-    // We're doing the slower algorithm: just loop over all transitions and add
-    // target states from transitions that have a source that we have already
-    // reached.
-
-    add_visited(l.initial_state());
-
-    bool notdone = true;
-    while ( notdone )
-    {
-      notdone = false;
-      for (unsigned int i=0; i<l.num_transitions(); i++)
-      {
-        if ( in_visited(l.transitions[i].from) && !in_visited(l.transitions[i].to) )
-        {
-          add_visited(l.transitions[i].to);
-          notdone = true;
-        }
-      }
-    }
-
-  } else 
-  { if (core::gsDebug)
-    { std::cerr << "Checking reachability with todo list.\n";
-    }
-    // We're doing the faster algorithm: we know that all transitions are
-    // grouped on source state with state2trans[s] being the beginning of such
-    // a group for source s. We keep a todo list in todo_stack of states that
-    // are reachable but of which the outgoing transitions have not yet been
-    // investigated.
-
-    // the nitial state is always reachable and will be the initial contents of
-    // the todo list
-    add_visited(l.initial_state());
-    todo_stack[0] = l.initial_state();
-    unsigned int todo_stack_num = 1; // number of elements on the stack
-
-    while ( todo_stack_num > 0 )
-    {
-      unsigned int current_state = todo_stack[--todo_stack_num]; // top of stack
-      unsigned int i = state2trans[current_state]; // index of first transition
-                                                   // with current_state as
-                                                   // source
-
-      // iterate over all transitions with current_state as source
-      while ( (i < l.num_transitions()) && (l.transitions[i].from == current_state) )
-      {
-        if ( !in_visited(l.transitions[i].to) )
-        {
-          // we haven't seen transitions[i].to before; add it to the todo list
-          add_visited(l.transitions[i].to);
-          todo_stack[todo_stack_num++] = l.transitions[i].to;
-        }
-        i++;
-      }
-    }
-
-    // clean up memory needed specifically for this algorithm
-    free(todo_stack);
-  }
-  // in_visited(s) == state s is reachable from the initial state
-
-  bool r = true; // return value
-  // check to see if all states are reachable from the initial state
-  for (unsigned int i=0; i<visited_size-1; i++) // quickly check the elements
-                                                // of the visited array of
-                                                // which all bits are used
-  {
-    if ( visited[i] != (~0U) ) // all bits should be set
-    {
-      r = false;
-      break;
-    }
-  }
-  // the last element of the visited array needs special care as not all bits
-  // are necessarily used
-  if ( r && (visited_size > 0) )
-  {
-    // the states in the last element have a index in
-    // [(visited_size-1)*visited_bpi..nstates)
-    for (unsigned int i=(visited_size-1)*visited_bpi; i<l.num_states(); i++)
-    {
-      if ( !in_visited(i) )
-      {
-        r = false;
-        break;
+    unsigned int state_to_consider=todo.top();
+    todo.pop();
+    for (outgoing_transitions_per_state_t::const_iterator i=out_trans.lower_bound(state_to_consider); 
+               i!=out_trans.upper_bound(state_to_consider); ++i) 
+    { 
+      assert(from(i)<l.num_states() && to(i)<l.num_states());
+      if ( visited[from(i)] && !visited[to(i)])
+      { 
+        visited[to(i)]=true;
+        todo.push(to(i));
       }
     }
   }
+  
+  // Property: in_visited(s) == true: state s is reachable from the initial state
 
-  if ( !r && remove_unreachable )
+  // check to see if all states are reachable from the initial state, i.e. 
+  // whether all bits are set.
+  bool all_reachable = find(visited.begin(),visited.end(),false)==visited.end();
+
+  if ( !all_reachable && remove_unreachable )
   {
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
-    unsigned int *state_map = (unsigned int *) malloc(l.num_states()*sizeof(unsigned int));
-    unsigned int *label_map = (unsigned int *) malloc(l.num_labels()*sizeof(unsigned int));
-    if ( (state_map == NULL) || (label_map == NULL) )
-    {
-      free(state_map);
-      free(label_map);
-      throw mcrl2::runtime_error("Not enough memory to remove unreachable states.");
-    }
+
+    std::map < unsigned int , unsigned > state_map;
+    std::map < unsigned int , unsigned > label_map;
+    
+    lts new_lts; 
 
     unsigned int new_nstates = 0;
     for (unsigned int i=0; i<l.num_states(); i++)
     {
-      if ( in_visited(i) )
+      if ( visited[i] )
       {
         state_map[i] = new_nstates;
-        if ( l.state_info )
-        {
-          l.state_values[new_nstates] = l.state_values[i];
-        }
+        new_lts.add_state(l.has_state_info()?l.state_value(i):NULL);
         new_nstates++;
       }
     }
 
-    for (unsigned int i=0; i<l.num_labels(); i++)
-    {
-      label_map[i] = 0;
-    }
-
-    unsigned int new_ntransitions = 0;
-    for (unsigned int i=0; i<l.num_transitions(); i++)
-    {
-      if ( in_visited(l.transitions[i].from) )
-      {
-        label_map[l.transitions[i].label] = 1;
-        l.transitions[new_ntransitions].from = state_map[l.transitions[i].from];
-        l.transitions[new_ntransitions].label = l.transitions[i].label;
-        l.transitions[new_ntransitions].to = state_map[l.transitions[i].to];
-        new_ntransitions++;
+    for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1) )
+    { const transition t=r.front();
+      if ( visited[t.from()] )
+      { 
+        label_map[t.label()] = 1;
       }
     }
 
     unsigned int new_nlabels = 0;
     for (unsigned int i=0; i<l.num_labels(); i++)
     {
-      if ( label_map[i] )
-      {
+      if (label_map.count(i)>0)   // Label i is used.
+      { 
         label_map[i] = new_nlabels;
-        l.taus[new_nlabels] = l.taus[i];
-        if ( l.label_info )
-        {
-          l.label_values[new_nlabels] = l.label_values[i];
-        }
+        new_lts.add_label(l.has_label_info()?l.label_value(i):NULL,l.is_tau(i));
         new_nlabels++;
       }
     }
-    for (unsigned int i=0; i<new_ntransitions; i++)
-    {
-      l.transitions[i].label = label_map[l.transitions[i].label];
+
+    for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1) )
+    { 
+      const transition t=r.front();
+      if (visited[t.from()])
+      { new_lts.add_transition(transition(state_map[t.from()],label_map[t.label()],state_map[t.to()]));
+      }
     }
 
-    l.set_initial_state(state_map[l.initial_state()]);
-    l.set_num_states(new_nstates);
-    l.set_num_transitions(new_ntransitions);
-    l.set_num_labels(new_nlabels);
-
-    // XXX realloc tables?
-
-    free(label_map);
-    free(state_map);
+    new_lts.set_initial_state(state_map[l.initial_state()]);
+    l.swap(new_lts);
   }
 
-  free(visited);
-  return r;
+  return all_reachable;
 }
 
-state_iterator::state_iterator(const lts &l):l(l),pos(0),max(l.num_states())
+namespace detail
 {
-}
-
-const_state_iterator::const_state_iterator(const lts &l):l(l),pos(0),max(l.num_states())
-{
-}
-
-bool state_iterator::more() const
-{
-  return (pos < l.num_states());
-}
-
-bool const_state_iterator::more() const
-{
-  return (pos < l.num_states());
-}
-
-unsigned int state_iterator::operator *() const
-{
-  return pos;
-}
-
-unsigned int const_state_iterator::operator *() const
-{
-  return pos;
-}
-
-void state_iterator::operator ++()
-{
-  pos++;
-}
-
-void const_state_iterator::operator ++()
-{
-  pos++;
-}
-
-label_iterator::label_iterator(const lts &l):l(l),pos(0),max(l.num_labels())
-{
-}
-
-const_label_iterator::const_label_iterator(const lts &l):l(l),pos(0),max(l.num_labels())
-{
-}
-
-bool label_iterator::more() const
-{
-  return (pos < l.num_labels());
-}
-
-bool const_label_iterator::more() const
-{
-  return (pos < l.num_labels());
-}
-
-unsigned int label_iterator::operator *() const
-{
-  return pos;
-}
-
-unsigned int const_label_iterator::operator *() const
-{
-  return pos;
-}
-
-void label_iterator::operator ++()
-{
-  pos++;
-}
-
-void const_label_iterator::operator ++()
-{
-  pos++;
-}
-
-bool label_iterator::operator ==(const label_iterator &i) const
-{ return pos==i.pos;
-}
-  
-bool const_label_iterator::operator ==(const const_label_iterator &i) const
-{ return pos==i.pos;
-}
-  
-bool label_iterator::operator !=(const label_iterator &i) const
-{ return pos!=i.pos;
-}
-
-bool const_label_iterator::operator !=(const const_label_iterator &i) const
-{ return pos!=i.pos;
-}
-
-transition_iterator::transition_iterator(const lts &l1):l(l1),pos(0),max(l1.num_transitions())
-{ 
-}
-
-const_transition_iterator::const_transition_iterator(const lts &l):l(l),pos(0),max(l.num_transitions())
-{
-}
-
-bool transition_iterator::more() const
-{
-  return (pos < l.num_transitions());
-}
-
-bool const_transition_iterator::more() const
-{
-  return (pos < l.num_transitions());
-}
-
-unsigned int transition_iterator::from() const
-{
-  return l.transitions[pos].from;
-}
-
-unsigned int const_transition_iterator::from() const
-{
-  return l.transitions[pos].from;
-}
-
-unsigned int transition_iterator::label() const
-{
-  return l.transitions[pos].label;
-}
-
-unsigned int const_transition_iterator::label() const
-{
-  return l.transitions[pos].label;
-}
-
-unsigned int transition_iterator::to() const
-{
-  return l.transitions[pos].to;
-}
-
-unsigned int const_transition_iterator::to() const
-{
-  return l.transitions[pos].to;
-}
-
-void transition_iterator::operator ++()
-{
-  pos++;
-}
-
-void const_transition_iterator::operator ++()
-{
-  pos++;
-}
-
-unsigned int transition_iterator::operator *() const
-{ return pos;
-}
-
-unsigned int const_transition_iterator::operator *() const
-{ return pos;
-}
-
-lts_type lts::guess_format(string const& s) {
+lts_type guess_format(string const& s) {
   string::size_type pos = s.find_last_of('.');
 
   if ( pos != string::npos )
@@ -2289,7 +1571,7 @@ static std::string extension_strings[] = { "", "lts", "aut", "svc", "svc", "fsm"
 
 static std::string mime_type_strings[] = { "", "application/lts", "text/aut", "application/svc+mcrl", "application/svc", "text/fsm", "text/dot", "application/bcg" };
 
-lts_type lts::parse_format(std::string const& s) {
+lts_type parse_format(std::string const& s) {
   if ( s == "aut" )
   {
     return lts_aut;
@@ -2318,15 +1600,15 @@ lts_type lts::parse_format(std::string const& s) {
   return lts_none;
 }
 
-std::string lts::string_for_type(const lts_type type) {
+std::string string_for_type(const lts_type type) {
   return (type_strings[type]);
 }
 
-std::string lts::extension_for_type(const lts_type type) {
+std::string extension_for_type(const lts_type type) {
   return (extension_strings[type]);
 }
 
-std::string lts::mime_type_for_type(const lts_type type) {
+std::string mime_type_for_type(const lts_type type) {
   return (mime_type_strings[type]);
 }
 
@@ -2391,13 +1673,13 @@ static const std::set<lts_type> &initialise_supported_lts_formats()
   }
   return s;
 }
-const std::set<lts_type> &lts::supported_lts_formats()
+const std::set<lts_type> &supported_lts_formats()
 {
   static const std::set<lts_type> &s = initialise_supported_lts_formats();
   return s;
 }
 
-std::string lts::supported_lts_formats_text(lts_type default_format, const std::set<lts_type> &supported)
+std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type> &supported)
 {
   vector<lts_type> types(supported.begin(),supported.end());
   std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,type_strings,_1,_2));
@@ -2425,12 +1707,12 @@ std::string lts::supported_lts_formats_text(lts_type default_format, const std::
   return r;
 }
 
-std::string lts::supported_lts_formats_text(const std::set<lts_type> &supported)
+std::string supported_lts_formats_text(const std::set<lts_type> &supported)
 {
   return supported_lts_formats_text(lts_none,supported);
 }
 
-std::string lts::lts_extensions_as_string(const std::string &sep, const std::set<lts_type> &supported)
+std::string lts_extensions_as_string(const std::string &sep, const std::set<lts_type> &supported)
 {
   vector<lts_type> types(supported.begin(),supported.end());
   std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,extension_strings,_1,_2));
@@ -2456,10 +1738,11 @@ std::string lts::lts_extensions_as_string(const std::string &sep, const std::set
   return r;
 }
 
-std::string lts::lts_extensions_as_string(const std::set<lts_type> &supported)
+std::string lts_extensions_as_string(const std::set<lts_type> &supported)
 {
   return lts_extensions_as_string(",",supported);
 }
+} // namespace detail
 
 ATermList sorted_insert(ATermList l,ATermAppl t)
 { 
@@ -2494,9 +1777,9 @@ bool lts::hide_actions(const std::vector<std::string> &tau_actions)
 { 
   if (tau_actions.size()==0) return true; // Nothing needs to be hidden.
 
-  for(label_iterator i=get_labels(); i.more(); ++i)
+  for(unsigned int i=0; i< num_labels(); ++i)
   { 
-    string s=label_value_str(*i);
+    string s=label_value_str(i);
     stringstream ss(s); 
     ATermAppl t=parse_mult_act(ss);
     
@@ -2516,23 +1799,23 @@ bool lts::hide_actions(const std::vector<std::string> &tau_actions)
       }
     }
     new_multi_action=ATreverse(new_multi_action);
-    set_label(*i, (ATerm)gsMakeMultAct(new_multi_action),new_multi_action==ATempty); // indicate that label i is now a tau label
+    set_label_value(i, (ATerm)gsMakeMultAct(new_multi_action),new_multi_action==ATempty); // indicate that label i is now a tau label
   }
 
   // sort the multi-actions
-  for(label_iterator i=get_labels(); i.more(); ++i)
-  { set_label(*i, sort_multi_action(label_value(*i)),is_tau(*i));
+  for(unsigned int i=0; i<num_labels(); ++i)
+  { set_label_value(i, sort_multi_action(label_value(i)),is_tau(i));
   }
 
   // Now the labels have been adapted to the hiding operator. Check now whether labels
   // did become equal.
 
   map < unsigned int, unsigned int> map_multiaction_indices;
-  for(label_iterator i=get_labels(); i.more(); ++i)
-  { for (label_iterator j=get_labels(); j!=i; ++j)
-    { if (label_value(*i)==label_value(*j))  
-      { assert(map_multiaction_indices.count(*i)==0);
-        map_multiaction_indices.insert(pair<unsigned int, unsigned int>(*i,*j));
+  for(unsigned int i=0; i<num_labels(); ++i)
+  { for (unsigned int j=0; j!=i; ++j)
+    { if (label_value(i)==label_value(j))  
+      { assert(map_multiaction_indices.count(i)==0);
+        map_multiaction_indices.insert(pair<unsigned int, unsigned int>(i,j));
         break;
       }
     }
@@ -2542,9 +1825,11 @@ bool lts::hide_actions(const std::vector<std::string> &tau_actions)
   // system, because all behavioural reduction algorithms only compare the labels.
   if (!map_multiaction_indices.empty())
   { 
-    for (transition_iterator i=get_transitions(); i.more(); ++i)
-    { if (map_multiaction_indices.count(i.label())>0)
-      { set_transition_label(*i,map_multiaction_indices[i.label()]);
+    for (transition_range r=get_transitions(); !r.empty(); r.advance_begin(1))
+    { 
+      transition &t=r.front();
+      if (map_multiaction_indices.count(t.label())>0)
+      { t.set_label(map_multiaction_indices[t.label()]);
       }
     }
   }

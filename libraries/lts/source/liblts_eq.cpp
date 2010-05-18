@@ -35,24 +35,24 @@ lts_eq_options::lts_eq_options()
 lts_eq_options lts_eq_no_options = lts_eq_options();
 
 
-bool reduce(lts &l,lts_equivalence eq, lts_eq_options const&opts)
+void reduce(lts &l,lts_equivalence eq, lts_eq_options const&opts)
 {
 
   switch ( eq )
   {
     case lts_eq_none:
-      return true;
+      return;
     case lts_eq_bisim:
       { detail::bisimulation_reduce(l,false,false);
-        return true;
+        return;
       }
     case lts_eq_branching_bisim:
       { detail::bisimulation_reduce(l,true,false);
-        return true;
+        return;
       } 
     case lts_eq_divergence_preserving_branching_bisim:
       { detail::bisimulation_reduce(l,true,true);
-        return true;
+        return;
       }
     case lts_eq_sim:
       {
@@ -68,29 +68,40 @@ bool reduce(lts &l,lts_equivalence eq, lts_eq_options const&opts)
         // Assign the reduced LTS
         l.set_num_states(sp.num_eq_classes());
         l.set_initial_state(sp.get_eq_class(l.initial_state()));
-        unsigned int ntrans=l.num_transitions();
-        transition *trans=sp.get_transitions(ntrans,l.transitions_size);
-        l.set_transitions(trans,ntrans,l.transitions_size);
+        
+        const std::vector <transition> trans=sp.get_transitions();
+        l.clear_transitions();
+        for(std::vector <transition>::const_iterator i=trans.begin(); i!=trans.end(); ++i)
+        { 
+          l.add_transition(*i);
+        }
         // Remove unreachable parts
-        l.sort_transitions();
+        
         reachability_check(l,true);
 
-        return true;
+        return;
       }
     case lts_eq_trace:
       detail::bisimulation_reduce(l,false);
       determinise(l);
       detail::bisimulation_reduce(l,false);
-      return true;
+      return;
     case lts_eq_weak_trace:
-      detail::bisimulation_reduce(l,true,false);
-      detail::tau_star_reduce(l);
-      detail::bisimulation_reduce(l,false);
-      determinise(l);
-      detail::bisimulation_reduce(l,false);
-      return true;
+      { 
+        detail::bisimulation_reduce(l,true,false);
+        detail::tau_star_reduce(l);
+        detail::bisimulation_reduce(l,false);
+        determinise(l);
+        detail::bisimulation_reduce(l,false);
+        return;
+      }
+    case lts_red_determinisation:
+      { 
+        determinise(l);
+        return;
+      }
     default:
-      return false;
+      throw mcrl2::runtime_error("Unknown reduction method.");
   }
 }
 
@@ -121,7 +132,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const lts_e
     case lts_eq_bisim:
       { 
         unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        l1.merge(l2);
+        merge(l1,l2);
         l2.clear(); // l is not needed anymore.
         detail::bisim_partitioner bisim_part(l1);
         return bisim_part.in_same_class(l1.initial_state(),init_l2);
@@ -129,7 +140,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const lts_e
     case lts_eq_branching_bisim:
       { 
         unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        l1.merge(l2);
+        merge(l1,l2);
         l2.clear(); // l is not needed anymore.
         detail::scc_partitioner scc_part(l1);
         scc_part.replace_transitions(false);
@@ -145,7 +156,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const lts_e
     case lts_eq_divergence_preserving_branching_bisim:
       { 
         unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        l1.merge(l2);
+        merge(l1,l2);
         l2.clear(); // l is not needed anymore.
         detail::scc_partitioner scc_part(l1);
         scc_part.replace_transitions(true);
@@ -162,7 +173,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const lts_e
       {
         // Run the partitioning algorithm on this merged LTS
         unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        l1.merge(l2);
+        merge(l1,l2);
         l2.clear(); // l is not needed anymore.
         sim_partitioner sp(l1);
         sp.partitioning_algorithm();
@@ -223,7 +234,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre, lts_eq_option
         // state number i + N where N is the number of states in this
         // LTS (before the merge).
         const unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        l1.merge(l2);
+        merge(l1,l2);
 
         // We no longer need l, so clear it to save memory
         l2.clear();

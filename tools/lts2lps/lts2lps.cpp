@@ -23,7 +23,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 
 using namespace mcrl2;
 using mcrl2::utilities::tools::input_output_tool;
@@ -73,7 +73,7 @@ class lts2lps_tool : public input_output_tool
           parser.error("multiple input formats specified; can only use one");
         }
 
-        intype = mcrl2::lts::lts::parse_format(parser.option_argument("in"));
+        intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
         if (intype == lts_none || intype == lts_dot)  {
           parser.error("option -i/--in has illegal argument '" +
             parser.option_argument("in") + "'");
@@ -131,26 +131,43 @@ class lts2lps_tool : public input_output_tool
       /* Read LTS */
       mcrl2::lts::lts l;
 
-      if (m_lps2lts_options.infilename.empty()) {
+      if (m_lps2lts_options.infilename.empty()) 
+      {
         gsVerboseMsg("reading LTS from stdin...\n");
 
-        if ( !l.read_from(std::cin, intype) ) {
-          throw mcrl2::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
+        try 
+        { mcrl2::lts::lts l_temp(std::cin, intype);
+          l_temp.swap(l);
+        } 
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string("cannot read LTS from stdin.\n") + 
+                    "retry with -v/--verbose for more information.\n" +
+                    e.what());
         }
       }
-      else {
+      else 
+      {
         gsVerboseMsg("reading LTS from '%s'...\n",m_lps2lts_options.infilename.c_str());
 
-        if (!l.read_from(m_lps2lts_options.infilename,intype)) {
-          throw mcrl2::runtime_error("cannot read LTS from file '" + m_lps2lts_options.infilename +
-                                             "'\nretry with -v/--verbose for more information");
+        try 
+        { mcrl2::lts::lts l_temp(m_lps2lts_options.infilename,intype);
+          l_temp.swap(l);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string("cannot read LTS from file '") + 
+                                     m_lps2lts_options.infilename +
+                                     "'.\nretry with -v/--verbose for more information.\n" +
+                                     e.what());
         }
       }
 
       lps <<"proc P(n: Int)=";
       bool fst_el = true;
-      for(transition_iterator ti = l.get_transitions(); ti.more(); ++ti)
+      for(mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1))
       {
+        const transition ti=r.front();
         unsigned int idFrom, idTo;
         std::string label = l.label_value_str(
                               ti.label());

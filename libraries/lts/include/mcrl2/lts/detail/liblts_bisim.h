@@ -10,9 +10,9 @@
 
 #ifndef _LIBLTS_BISIM_H
 #define _LIBLTS_BISIM_H
-#include "mcrl2/lts/lts.h"
 #include <vector>
 #include <map>
+#include "mcrl2/lts/lts.h"
 
 namespace mcrl2
 {

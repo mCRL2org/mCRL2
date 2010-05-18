@@ -19,10 +19,10 @@
 #include "aterm2.h"
 #include "boost/cstdint.hpp"
 #include "boost/lexical_cast.hpp"
-#include "mcrl2/lts/lts.h"
 #include "lps2lts.h"
 #include "exploration.h"
 #include "lts.h"
+#include "mcrl2/lts/lts_io.h"
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -92,7 +92,7 @@ class lps2lts_tool : public lps2lts_base
         "\n"
         "The format of OUTFILE is determined by its extension (unless it is specified "
         "by an option). The supported formats are:\n"
-        +lts::supported_lts_formats_text()
+        +mcrl2::lts::detail::supported_lts_formats_text()
       )
     {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -244,7 +244,7 @@ class lps2lts_tool : public lps2lts_base
         }
       }
       if (parser.options.count("out")) {
-        options.outformat = lts::parse_format(parser.option_argument("out"));
+        options.outformat = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
         if (options.outformat == lts_none) {
           parser.error("format '" + parser.option_argument("out") + "' is not recognised");
@@ -280,7 +280,7 @@ class lps2lts_tool : public lps2lts_base
 
       if (!options.lts.empty()) {
         if ( options.outformat == lts_none ) {
-          options.outformat = lts::guess_format(options.lts);
+          options.outformat = mcrl2::lts::detail::guess_format(options.lts);
 
           if ( options.outformat == lts_none ) {
             gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
