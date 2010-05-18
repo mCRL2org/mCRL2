@@ -12,18 +12,18 @@ cmake_minimum_required (VERSION 2.6)
 message(STATUS "CMAKE VERSION: ${CMAKE_VERSION}")
 project (MCRL2)
 
-option(BUILD_IN_SOURCE "Enable/Disable in-soucre tree development" OFF)
-if(NOT BUILD_IN_SOURCE)
+option(MCRL2_BUILD_IN_SOURCE "Enable/Disable in-soucre tree development" OFF)
+if(NOT MCRL2_BUILD_IN_SOURCE)
   if(${CMAKE_CURRENT_BINARY_DIR} EQUAL ${CMAKE_SOURCE_DIR})
     message(STATUS "=================================================================")
     message(STATUS "== WARNING: Do not upload the \"Makefile\" to the svn repository ==")
     message(STATUS "=================================================================")
     message(STATUS "")
-    message(STATUS "To build in-source, set BUILD_IN_SOURCE=ON")
+    message(STATUS "To build in-source, set MCRL2_BUILD_IN_SOURCE=ON")
     message(STATUS "")
     message(FATAL_ERROR)
   endif(${CMAKE_CURRENT_BINARY_DIR} EQUAL ${CMAKE_SOURCE_DIR})
-endif(NOT BUILD_IN_SOURCE)
+endif(NOT MCRL2_BUILD_IN_SOURCE)
 
 # Commonly used options
 # ---------------------
@@ -33,11 +33,11 @@ endif(NOT BUILD_IN_SOURCE)
 #
 #   CMAKE_INSTALL_PREFIX = /usr/local(*) (any path can be used)
 #   CMAKE_BUILD_TYPE     = None | Debug | Release(*) | RelwithDebInfo | MinSizeRel
-#   USE_BOOST_INTERNAL   = ON(*) | OFF
+#   MCRL2_USE_BOOST_INTERNAL   = ON(*) | OFF
 #   BUILD_SHARED_LIBS    = ON    | OFF(*)
-#   SQUADT_CONNECTIVITY  = ON(*) | OFF
-#   ENABLE_EXPERIMENTAL  = ON    | OFF(*)
-#   ENABLE_DEPRECATED    = ON    | OFF(*)
+#   MCRL2_SQUADT_CONNECTIVITY  = ON(*) | OFF
+#   MCRL2_ENABLE_EXPERIMENTAL  = ON    | OFF(*)
+#   MCRL2_ENABLE_DEPRECATED    = ON    | OFF(*)
 
 
 # Note on adding definitions containing quotes (")
@@ -191,13 +191,13 @@ endif(MSVC)
 
 if (UNIX AND NOT WIN32)
   if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-    message (STATUS "64bit Unix" )
+    message (STATUS "Architecture: 64bit Unix" )
     set(ATERM_FLAGS "-m64 -DAT_64BIT")
     add_definitions("-DAT_64BIT")
     # set(ARCHITECTURE "x86_64")
   endif (CMAKE_SIZEOF_VOID_P MATCHES "8")
   if (CMAKE_SIZEOF_VOID_P MATCHES "4")
-    message (STATUS "32bit Unix" )
+    message (STATUS "Architecture: 32bit Unix" )
     set(ATERM_FLAGS "-m32")
     # set(ARCHITECTURE "i386")
   endif (CMAKE_SIZEOF_VOID_P MATCHES "4")
@@ -269,7 +269,7 @@ if(BUILD_SHARED_LIBS)
         DESTINATION ${MCRL2_BIN_DIR} 
       )
 
-      if  (ENABLE_GUI_TOOLS)
+      if  (MCRL2_ENABLE_GUI_TOOLS)
         # Install compiled wxWidgets DLLs
         # Libraries are searched for in following order:
         # 1) relative path to wxWidgets_CONFIG_EXECUTABLE
@@ -294,7 +294,7 @@ if(BUILD_SHARED_LIBS)
             message( STATUS "wxWidgets DLLs cannot be deterimed for a shared build." )
             message( STATUS "Copy DLLs manually." )
 	      endif(MINGW_wxWidgets_LIB_DIR)  
-      endif(ENABLE_GUI_TOOLS )
+      endif(MCRL2_ENABLE_GUI_TOOLS )
 
     endif(MINGW OR MSYS)
   endif(WIN32)
@@ -304,9 +304,6 @@ else(BUILD_SHARED_LIBS)
 endif(BUILD_SHARED_LIBS)
 message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
-
-option(MONO_LIB "Enable/disable creation of a monolithic library" OFF)
-message(STATUS "MONO_LIB: ${MONO_LIB}")
 
 ##-----------------------------------------------------
 ## Set runtime path variable RPATH for install targets 
@@ -354,18 +351,24 @@ endif(SVNVERSION)
 
 message(STATUS "SVN revision: ${SVN_REV}")
 
+##---------------------------------------------------
+## Detect OpenGL 
+##---------------------------------------------------
+
+include(FindOpenGL)
+message(STATUS "OpenGL: ${OPENGL_FOUND}")
 
 ##---------------------------------------------------
 ## Set Boost configuration
 ##---------------------------------------------------
 
-option(USE_BOOST_INTERNAL "Enable/disable the use of internally provided Boost libraries" ON)
-message(STATUS "USE_BOOST_INTERNAL: ${USE_BOOST_INTERNAL}")
+option(MCRL2_USE_BOOST_INTERNAL "Enable/disable the use of internally provided Boost libraries" ON)
+message(STATUS "MCRL2_USE_BOOST_INTERNAL: ${MCRL2_USE_BOOST_INTERNAL}")
  
-option( INSTALL_BOOST_HEADERS "Enable/disable installation of boost headers" OFF)
-message(STATUS "INSTALL_BOOST_HEADERS: ${INSTALL_BOOST_HEADERS}" )
+option( MCRL2_INSTALL_BOOST_HEADERS "Enable/disable installation of boost headers" OFF)
+message(STATUS "MCRL2_INSTALL_BOOST_HEADERS: ${MCRL2_INSTALL_BOOST_HEADERS}" )
 
-if(USE_BOOST_INTERNAL)
+if(MCRL2_USE_BOOST_INTERNAL)
 
   add_definitions(-DBOOST_ALL_NO_LIB=1)
   add_definitions(-DBOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1)
@@ -380,18 +383,18 @@ if(USE_BOOST_INTERNAL)
   include_directories(${CMAKE_SOURCE_DIR}/3rd-party/boost)
   add_subdirectory (3rd-party/boost)
 
-else(USE_BOOST_INTERNAL)
+else(MCRL2_USE_BOOST_INTERNAL)
 
   find_package(Boost COMPONENTS signals filesystem thread REQUIRED)
   if(NOT Boost_FOUND)
     message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.35 or higher." )
-    message( FATAL_ERROR "Use -DUSE_BOOST_INTERNAL=true to use the internal version of boost" )
+    message( FATAL_ERROR "Use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost" )
   endif(NOT Boost_FOUND)
 
   if( Boost_VERSION LESS 103500 )
     message( STATUS "Boost version v1.35 or higher required." )
     message( STATUS "Current Boost version: ${Boost_VERSION}.")
-    message( FATAL_ERROR "Use -DUSE_BOOST_INTERNAL=true to use the internal version of boost" )
+    message( FATAL_ERROR "Use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost" )
   endif( Boost_VERSION LESS 103500 )
 
   message( STATUS "Boost version: ${Boost_VERSION}" )
@@ -401,28 +404,34 @@ else(USE_BOOST_INTERNAL)
      add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
   endif (Boost_FOUND)
 
-endif(USE_BOOST_INTERNAL)
+endif(MCRL2_USE_BOOST_INTERNAL)
+
+##---------------------------------------------------
+## Determine to compile a mono library 
+##--------------------------------------------------- 
+
+option(MCRL2_MONO_LIB "Enable/disable creation of a monolithic library" OFF)
+message(STATUS "MCRL2_MONO_LIB: ${MCRL2_MONO_LIB}")
 
 ##---------------------------------------------------
 ## Determine SQuADT connectivity
 ##--------------------------------------------------- 
 
-option(SQUADT_CONNECTIVITY "Enable/disable support for SQuADT connectivity" ON)
+option(MCRL2_SQUADT_CONNECTIVITY "Enable/disable support for SQuADT connectivity" ON)
 
-message(STATUS "SQUADT_CONNECTIVITY: ${SQUADT_CONNECTIVITY}")
+message(STATUS "MCRL2_SQUADT_CONNECTIVITY: ${MCRL2_SQUADT_CONNECTIVITY}")
 
 ##---------------------------------------------------
 ## Set wxWidgets configuration
 ##--------------------------------------------------- 
-include(FindOpenGL)
-message(STATUS "OpenGL: ${OPENGL_FOUND}")
 
-option(ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
 
-if(ENABLE_GUI_TOOLS)
+option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
+
+if(MCRL2_ENABLE_GUI_TOOLS)
 # Find package for wxWidgets to work
 find_package(wxWidgets)
-endif(ENABLE_GUI_TOOLS)
+endif(MCRL2_ENABLE_GUI_TOOLS)
 
 if(wxWidgets_FOUND)
   find_package(wxWidgets COMPONENTS base core adv gl xml html REQUIRED)
@@ -460,27 +469,27 @@ else(wxWidgets_FOUND)
 
   message( STATUS "Warning: GUI tools are not built" )
   message( STATUS "The mCRL2 toolset requires the installation of wxWidgets 2.8.0 or higher")
-  set(ENABLE_GUI_TOOLS)
+  set(MCRL2_ENABLE_GUI_TOOLS)
 
 endif(wxWidgets_FOUND)
 
 if( OPENGL_FOUND AND wxWidgets_FOUND )
-  message(STATUS "ENABLE_GUI_TOOLS: ${ENABLE_GUI_TOOLS}")
+  message(STATUS "MCRL2_ENABLE_GUI_TOOLS: ${MCRL2_ENABLE_GUI_TOOLS}")
 else( OPENGL_FOUND AND wxWidgets_FOUND )
-  set(ENABLE_GUI_TOOLS false)
+  set(MCRL2_ENABLE_GUI_TOOLS false)
 endif( OPENGL_FOUND AND wxWidgets_FOUND )
 
-if(NOT ENABLE_GUI_TOOLS )
+if(NOT MCRL2_ENABLE_GUI_TOOLS )
   set(MCRL2_BUILD_GUI_TOOLS false)
   if(NOT MINGW OR NOT MSYS)
-    if( CXX_ACCEPTS_PTHREAD AND SQUADT_CONNECTIVITY )
+    if( CXX_ACCEPTS_PTHREAD AND MCRL2_SQUADT_CONNECTIVITY )
       set(CMAKE_EXE_LINKER_FLAGS "-pthread ${CMAKE_EXE_LINKER_FLAGS}")
       set(CMAKE_SHARED_LINKER_FLAGS "-pthread ${CMAKE_SHARED_LINKER_FLAGS}")
       set(CMAKE_MODULE_LINKER_FLAGS "-pthread ${CMAKE_SHARED_LINKER_FLAGS}")
-    endif( CXX_ACCEPTS_PTHREAD AND SQUADT_CONNECTIVITY )
+    endif( CXX_ACCEPTS_PTHREAD AND MCRL2_SQUADT_CONNECTIVITY )
   endif(NOT MINGW OR NOT MSYS)
 
-endif(NOT ENABLE_GUI_TOOLS  )
+endif(NOT MCRL2_ENABLE_GUI_TOOLS  )
 
 ##---------------------------------------------------
 ##  
@@ -526,26 +535,26 @@ endif (APPLE)
 ##--------------------------------------------------- 
 
 if (UNIX)
-  option(MAN_PAGES "Enable/disable creation of UNIX man pages" ON)
+  option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" ON)
 else (UNIX)
-  option(MAN_PAGES "Enable/disable creation of UNIX man pages" OFF)
+  option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" OFF)
 endif (UNIX)
 
-message(STATUS "MAN_PAGES: ${MAN_PAGES}")
+message(STATUS "MCRL2_MAN_PAGES: ${MCRL2_MAN_PAGES}")
 
 ##---------------------------------------------------
 ## Toggle profile build 
 ##--------------------------------------------------- 
 
 if( UNIX )
-  option(ENABLE_PROFILING "Enable/disable profiling support" OFF)
-  if( ENABLE_PROFILING )
+  option(MCRL2_ENABLE_PROFILING "Enable/disable profiling support" OFF)
+  if( MCRL2_ENABLE_PROFILING )
     add_definitions( -pg )
     set(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "-pg ${CMAKE_SHARED_LINKER_FLAGS}")
     set(CMAKE_MODULE_LINKER_FLAGS "-pg ${CMAKE_SHARED_LINKER_FLAGS}")
-  endif(ENABLE_PROFILING)
-  message(STATUS "ENABLE_PROFILING: ${ENABLE_PROFILING}")
+  endif(MCRL2_ENABLE_PROFILING)
+  message(STATUS "MCRL2_ENABLE_PROFILING: ${MCRL2_ENABLE_PROFILING}")
 endif( UNIX )
 
 ##---------------------------------------------------
@@ -560,11 +569,11 @@ set(MCRL2_TEST_LABEL "rev.${SVN_REV}-${CMAKE_BUILD_TYPE}")
 
 add_subdirectory ( 3rd-party/aterm )
 add_subdirectory ( 3rd-party/svc )
-if(ENABLE_GUI_TOOLS)
+if(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( 3rd-party/tr)
 
   add_subdirectory ( 3rd-party/gl2ps )
-endif(ENABLE_GUI_TOOLS)
+endif(MCRL2_ENABLE_GUI_TOOLS)
 add_subdirectory ( 3rd-party/ticpp )
 
 ##---------------------------------------------------
@@ -579,9 +588,9 @@ add_subdirectory ( 3rd-party/ticpp )
   add_subdirectory ( libraries/lts )
   add_subdirectory ( libraries/trace )
   add_subdirectory ( tools/squadt/libraries/tipi )
-  if( MONO_LIB )
+  if( MCRL2_MONO_LIB )
     add_subdirectory ( libraries/ )
-  endif( MONO_LIB)
+  endif( MCRL2_MONO_LIB)
 
 ##---------------------------------------------------
 ## Tool dependencies
@@ -633,28 +642,28 @@ add_subdirectory ( 3rd-party/ticpp )
 ## Experimental tool dependencies
 ##--------------------------------------------------- 
 
-option(ENABLE_EXPERIMENTAL "Enable/disable creation of experimental tools" OFF)
-message(STATUS "ENABLE_EXPERIMENTAL: ${ENABLE_EXPERIMENTAL}" )
+option(MCRL2_ENABLE_EXPERIMENTAL "Enable/disable creation of experimental tools" OFF)
+message(STATUS "MCRL2_ENABLE_EXPERIMENTAL: ${MCRL2_ENABLE_EXPERIMENTAL}" )
 
-if(ENABLE_EXPERIMENTAL)
+if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/lpsrealelm )
   add_subdirectory ( tools/lpsbisim2pbes )
   add_subdirectory ( tools/lts2lps )
   add_subdirectory ( tools/pbes2bes)
   add_subdirectory ( tools/pbespareqelm )
   add_subdirectory ( tools/pbespgsolve )
-endif(ENABLE_EXPERIMENTAL)
+endif(MCRL2_ENABLE_EXPERIMENTAL)
 
 ##---------------------------------------------------
 ## Deprecated tool dependencies
 ##--------------------------------------------------- 
 
-option(ENABLE_DEPRECATED "Enable/disable creation of deprecated tools" OFF)
-message(STATUS "ENABLE_DEPRECATED: ${ENABLE_DEPRECATED}" )
+option(MCRL2_ENABLE_DEPRECATED "Enable/disable creation of deprecated tools" OFF)
+message(STATUS "MCRL2_ENABLE_DEPRECATED: ${MCRL2_ENABLE_DEPRECATED}" )
 
-if(ENABLE_DEPRECATED)
+if(MCRL2_ENABLE_DEPRECATED)
   add_subdirectory ( tools/ltsmin )
-endif(ENABLE_DEPRECATED)
+endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
 ## Experimental tool dependencies
@@ -746,22 +755,22 @@ install(
   PATTERN ".svn" EXCLUDE
 )
 
-if( INSTALL_BOOST_HEADERS )
-  if ( USE_BOOST_INTERNAL )
+if( MCRL2_INSTALL_BOOST_HEADERS )
+  if ( MCRL2_USE_BOOST_INTERNAL )
     install(
       DIRECTORY
         ${CMAKE_SOURCE_DIR}/3rd-party/boost/boost
       DESTINATION include
       PATTERN ".svn" EXCLUDE
     )
-  else ( USE_BOOST_INTERNAL )
+  else ( MCRL2_USE_BOOST_INTERNAL )
     install(
       DIRECTORY
         ${Boost_INCLUDE_DIRS}/boost
       DESTINATION include
     )
-  endif( USE_BOOST_INTERNAL ) 
-endif( INSTALL_BOOST_HEADERS )
+  endif( MCRL2_USE_BOOST_INTERNAL ) 
+endif( MCRL2_INSTALL_BOOST_HEADERS )
 
 ##---------------------------------------------------
 ## Install examples 

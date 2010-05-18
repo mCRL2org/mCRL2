@@ -24,31 +24,31 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.
   PROPERTIES COMPILE_DEFINITIONS MCRL2_REVISION="${SVN_REV} - ${CMAKE_BUILD_TYPE}"
 )
 
-if( NOT MONO_LIB )
+if( NOT MCRL2_MONO_LIB )
   include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
   add_library(${PROJECT_NAME}
     ${mcrl2_utilities_command_line_src}
   )
   
-  if(USE_BOOST_INTERNAL)
+  if(MCRL2_USE_BOOST_INTERNAL)
     target_link_libraries(${PROJECT_NAME}
       boost
     ) 
-  else(USE_BOOST_INTERNAL)
+  else(MCRL2_USE_BOOST_INTERNAL)
     target_link_libraries(${PROJECT_NAME}
       ${Boost_LIBRARIES}
     )
-  endif(USE_BOOST_INTERNAL)
+  endif(MCRL2_USE_BOOST_INTERNAL)
   
   install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-endif( NOT MONO_LIB )
+endif( NOT MCRL2_MONO_LIB )
 
 # ##############################
 # ##  mcrl2_utilities_squadt  ##
 # ##############################
 
-if(SQUADT_CONNECTIVITY)
+if(MCRL2_SQUADT_CONNECTIVITY)
   
   project(mcrl2_utilities_squadt)
   cmake_minimum_required(VERSION 2.6)
@@ -59,7 +59,7 @@ if(SQUADT_CONNECTIVITY)
   
   set(mcrl2_utilities_squadt_src ${mcrl2_utilities_squadt_src} PARENT_SCOPE)  
 
-  if( NOT MONO_LIB )
+  if( NOT MCRL2_MONO_LIB )
   
     include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
     include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
@@ -68,7 +68,7 @@ if(SQUADT_CONNECTIVITY)
       ${mcrl2_utilities_squadt_src}
     )
     
-    add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
+    add_definitions("-DENABLE_MCRL2_SQUADT_CONNECTIVITY")
     
     target_link_libraries(${PROJECT_NAME}
       squadt_tipi
@@ -90,9 +90,9 @@ if(SQUADT_CONNECTIVITY)
     # add install target:
     install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
   
-  endif( NOT MONO_LIB )
+  endif( NOT MCRL2_MONO_LIB )
 
-endif(SQUADT_CONNECTIVITY)
+endif(MCRL2_SQUADT_CONNECTIVITY)
 
 
 # ##############################
@@ -112,7 +112,7 @@ set(mcrl2_utilities_wx_src
 
 set(mcrl2_utilities_wx_src ${mcrl2_utilities_wx_src} PARENT_SCOPE)
 
-if( NOT MONO_LIB )
+if( NOT MCRL2_MONO_LIB )
 
   include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
   include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
@@ -129,6 +129,6 @@ if( NOT MONO_LIB )
   # add install target:
   install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-endif( NOT MONO_LIB )
+endif( NOT MCRL2_MONO_LIB )
 
 endif(MCRL2_BUILD_GUI_TOOLS)

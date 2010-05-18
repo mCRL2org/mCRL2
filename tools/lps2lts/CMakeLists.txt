@@ -30,11 +30,11 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )
+else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_lts
@@ -45,7 +45,7 @@ target_link_libraries(${PROJECT_NAME}
   #Add Squadt Connectivity when required
   include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
 
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

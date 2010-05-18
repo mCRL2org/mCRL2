@@ -37,16 +37,16 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/boost/)
 #       mcrl2lexer.cpp
 # )
 
-# if( MONO_LIB )
+# if( MCRL2_MONO_LIB )
 #   target_link_libraries(${PROJECT_NAME}
 #     mcrl2_monolib
 #   )
-# else( MONO_LIB )  
+# else( MCRL2_MONO_LIB )  
 # target_link_libraries(${PROJECT_NAME}
 #    mcrl2_lps
 #    mcrl2_utilities_command_line
 # )
-# endif( MONO_LIB )
+# endif( MCRL2_MONO_LIB )
 
 ##---------------------------------------------------
 ## Example lpsrewr 
@@ -59,13 +59,13 @@ add_executable("${PROJECT_NAME}"
       lpsrewr.cpp 
 )
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )  
+else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    mcrl2_lps
    mcrl2_utilities_command_line
 )
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )

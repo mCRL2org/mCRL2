@@ -26,26 +26,26 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )
+else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_utilities_command_line
 )
 
 # ######### required for squadt connectivity ##########
-if(SQUADT_CONNECTIVITY)
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
+if(MCRL2_SQUADT_CONNECTIVITY)
+  add_definitions("-DENABLE_MCRL2_SQUADT_CONNECTIVITY")
   include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
   target_link_libraries(${PROJECT_NAME}
     mcrl2_utilities_squadt
   )
-endif(SQUADT_CONNECTIVITY)
+endif(MCRL2_SQUADT_CONNECTIVITY)
 # #####################################################
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

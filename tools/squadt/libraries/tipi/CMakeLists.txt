@@ -20,7 +20,7 @@ set(squadt_tipi_src
 )
 set(squadt_tipi_src ${squadt_tipi_src} PARENT_SCOPE)
 
-if (NOT MONO_LIB )
+if (NOT MCRL2_MONO_LIB )
 
   include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
   include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
@@ -41,17 +41,17 @@ if (NOT MONO_LIB )
       ws2_32)
   endif(MINGW OR CYGWIN OR MSYS)
   
-  if(USE_BOOST_INTERNAL)
+  if(MCRL2_USE_BOOST_INTERNAL)
     target_link_libraries(${PROJECT_NAME}
       boost
     ) 
-  else(USE_BOOST_INTERNAL)
+  else(MCRL2_USE_BOOST_INTERNAL)
     target_link_libraries(${PROJECT_NAME}
       ${Boost_LIBRARIES}     
     ) 
-  endif(USE_BOOST_INTERNAL)
+  endif(MCRL2_USE_BOOST_INTERNAL)
   
   # add install target:
   install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-endif(NOT MONO_LIB)
+endif(NOT MCRL2_MONO_LIB)

@@ -74,19 +74,19 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
 
   # ######### required for squadt connectivity ##########
-  if(SQUADT_CONNECTIVITY)
-    add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
+  if(MCRL2_SQUADT_CONNECTIVITY)
+    add_definitions("-DENABLE_MCRL2_SQUADT_CONNECTIVITY")
     include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  endif(SQUADT_CONNECTIVITY)
+  endif(MCRL2_SQUADT_CONNECTIVITY)
   # #####################################################
 
-else( MONO_LIB )
+else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_lts
@@ -98,7 +98,7 @@ target_link_libraries(${PROJECT_NAME}
   #Add Squadt Connectivity when required
   include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
 
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

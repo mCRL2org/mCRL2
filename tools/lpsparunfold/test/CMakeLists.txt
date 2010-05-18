@@ -31,15 +31,15 @@ foreach( OBJ ${TERM_OBJS} )
   project( "${PREFIX}_${result}" )
   add_executable("${PREFIX}_${result}" "${OBJ}" "${CMAKE_SOURCE_DIR}/tools/lpsparunfold/lpsparunfoldlib.cpp")
 
-  if( MONO_LIB )
+  if( MCRL2_MONO_LIB )
     target_link_libraries(${PREFIX}_${result}
       mcrl2_monolib
     )
-  else( MONO_LIB )  
+  else( MCRL2_MONO_LIB )  
     target_link_libraries("${PREFIX}_${result}"
       mcrl2_lps
     )
-  endif( MONO_LIB )
+  endif( MCRL2_MONO_LIB )
 
   add_test("${PREFIX}_${result}" "${lpsparunfold_test_container_BINARY_DIR}/${PREFIX}_${result}" )
   set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")

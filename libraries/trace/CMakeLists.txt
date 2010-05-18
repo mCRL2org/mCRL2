@@ -17,7 +17,7 @@ set(mcrl2_trace_src
 )
 set(mcrl2_trace_src ${mcrl2_trace_src} PARENT_SCOPE)
 
-if( NOT MONO_LIB )
+if( NOT MCRL2_MONO_LIB )
   include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
   include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
@@ -36,5 +36,5 @@ if( NOT MONO_LIB )
   
   # add install target:
   install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-endif( NOT MONO_LIB )
+endif( NOT MCRL2_MONO_LIB )
 

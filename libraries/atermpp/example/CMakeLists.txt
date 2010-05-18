@@ -27,15 +27,15 @@ add_executable("${PROJECT_NAME}"
       std_container.cpp
 )
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )  
+else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    aterm 
 )
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
 
 ##---------------------------------------------------
 ## Example algorithm 
@@ -48,12 +48,12 @@ add_executable("${PROJECT_NAME}"
       algorithm.cpp 
 )
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )  
+else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    aterm 
 )
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )

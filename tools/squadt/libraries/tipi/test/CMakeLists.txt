@@ -31,17 +31,17 @@ foreach( OBJ ${TERM_OBJS} )
   project( "${PREFIX}_${result}" )
   add_executable("${PREFIX}_${result}" "${OBJ}"  )
 
-  if( MONO_LIB )
+  if( MCRL2_MONO_LIB )
     target_link_libraries(${PREFIX}_${result}
       mcrl2_monolib
     )
-  else( MONO_LIB )  
+  else( MCRL2_MONO_LIB )  
     target_link_libraries("${PREFIX}_${result}"
       mcrl2_trace
       mcrl2_lps
       squadt_tipi
     )
-  endif( MONO_LIB )
+  endif( MCRL2_MONO_LIB )
 
   add_test("${PREFIX}_${result}" "${squadt_tipi_tests_BINARY_DIR}/${PREFIX}_${result}" )
   set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")

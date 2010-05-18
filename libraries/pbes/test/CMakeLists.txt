@@ -30,38 +30,38 @@ foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
   project( "${PREFIX}_${result}" )
 
-  if( NOT ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test")
+  if( NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test")
     message(STATUS "skipped pbes_solve_test")
-  else(NOT ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test" )
+  else(NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test" )
 
     add_executable("${PREFIX}_${result}" "${OBJ}"  )
-    if( MONO_LIB )
+    if( MCRL2_MONO_LIB )
       target_link_libraries(${PREFIX}_${result}
         mcrl2_monolib
       )
-    else( MONO_LIB )  
+    else( MCRL2_MONO_LIB )  
       target_link_libraries("${PREFIX}_${result}"
        mcrl2_lps
       )
-      if(USE_BOOST_INTERNAL)
+      if(MCRL2_USE_BOOST_INTERNAL)
         target_link_libraries(${PROJECT_NAME}
           boost
         ) 
-      else(USE_BOOST_INTERNAL)
+      else(MCRL2_USE_BOOST_INTERNAL)
         target_link_libraries(${PROJECT_NAME}
           ${Boost_LIBRARIES}     
         ) 
-      endif(USE_BOOST_INTERNAL)
-    endif( MONO_LIB )
+      endif(MCRL2_USE_BOOST_INTERNAL)
+    endif( MCRL2_MONO_LIB )
   
-    if(ENABLE_EXPERIMENTAL )
+    if(MCRL2_ENABLE_EXPERIMENTAL )
       target_link_libraries(${PROJECT_NAME}
         mcrl2_pbespgsolve
       )
-    endif(ENABLE_EXPERIMENTAL)
+    endif(MCRL2_ENABLE_EXPERIMENTAL)
     add_test("${PREFIX}_${result}" "${pbes_tests_BINARY_DIR}/${PREFIX}_${result}" )
     set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 
-  endif( NOT ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test")
+  endif( NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test")
 
 endforeach( OBJ )  

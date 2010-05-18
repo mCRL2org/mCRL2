@@ -32,16 +32,16 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
 #   ABC_lexer.cpp
 # )
 # 
-# if( MONO_LIB )
+# if( MCRL2_MONO_LIB )
 #   target_link_libraries(${PROJECT_NAME}
 #     mcrl2_monolib
 #   )
-# else( MONO_LIB )  
+# else( MCRL2_MONO_LIB )  
 # target_link_libraries(${PROJECT_NAME}
 #    mcrl2_lps
 #    mcrl2_utilities_command_line
 # )
-# endif( MONO_LIB )
+# endif( MCRL2_MONO_LIB )
 
 ##---------------------------------------------------
 ## Example enumerator 
@@ -54,16 +54,16 @@ add_executable("${PROJECT_NAME}"
       enumerator.cpp 
 )
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )  
+else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    mcrl2_data
 )
 
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
 
 ##---------------------------------------------------
 ## Example example[1..5]
@@ -80,16 +80,16 @@ foreach( OBJ ${TERM_OBJS} )
         ${OBJ} 
   )
   
-  if( MONO_LIB )
+  if( MCRL2_MONO_LIB )
     target_link_libraries(${PROJECT_NAME}
       mcrl2_monolib
     )
-  else( MONO_LIB )  
+  else( MCRL2_MONO_LIB )  
   target_link_libraries(${PROJECT_NAME}
      mcrl2_data
   )
   
-  endif( MONO_LIB )
+  endif( MCRL2_MONO_LIB )
 endforeach( OBJ )
 
 ##---------------------------------------------------
@@ -103,13 +103,13 @@ add_executable("${PROJECT_NAME}"
       parse_data.cpp 
 )
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )  
+else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    mcrl2_data
 )
 
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
