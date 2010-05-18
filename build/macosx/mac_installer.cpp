@@ -12,8 +12,6 @@
 #include "wx/wx.h" 
 #include <wx/filepicker.h>
 #include <wx/statline.h>
-#include <wx/wxprec.h>
-#include <wx/cmdline.h>
 
 #include <iostream>
 #include <fstream>
@@ -71,13 +69,19 @@ bool MacOSXInstaller::OnInit()
 } 
 
 MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint& pos)
-: wxFrame( NULL, -1, title, pos, wxSize(450, 180), wxDEFAULT_FRAME_STYLE & ~ (wxRESIZE_BORDER | wxRESIZE_BOX | wxMAXIMIZE_BOX) )
+: wxFrame( NULL, -1, title, pos, wxSize(550, 250), wxDEFAULT_FRAME_STYLE & ~ (wxRESIZE_BORDER | wxRESIZE_BOX | wxMAXIMIZE_BOX) )
 {
-    wxPanel *panel = new wxPanel(this, wxID_ANY, wxPoint(15,10), wxSize( 420  ,100), wxBORDER_SUNKEN );
+    wxPanel *panel = new wxPanel(this, wxID_ANY, wxPoint(15,10), wxSize( 520  ,160), wxBORDER_SUNKEN );
 
     wxFont font(15, wxDEFAULT, wxNORMAL, wxBOLD);
-    wxStaticText *heading = new wxStaticText(panel, wxID_ANY, wxT("Select a directory to export symbolic links for tools"), wxPoint(15, 15));
+    wxStaticText *heading = new wxStaticText(panel, wxID_ANY, wxT("Select a directory to export symbolic links for individual tools."), wxPoint(15, 15));
     heading->SetFont(font);
+
+    new wxStaticText(panel, wxID_ANY, wxT("This is necessary to use the tools outside the SquaDT environment."), wxPoint(15, 40));
+
+    new wxStaticText(panel, wxID_ANY, wxT("For command-line tools this directory should be added to the PATH variable."), wxPoint(15, 60));
+ 
+    new wxStaticText(panel, wxID_ANY, wxT("Press Cancel to skip installation of symbolic links."), wxPoint(15, 80));
 
     struct stat st;
     wxString install;
@@ -90,17 +94,17 @@ MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint&
 
     dpc = new wxDirPickerCtrl(panel, ID_DIR_CRTL,
     install, wxT("Pick a Directory"),
-    wxPoint(15,40), wxDefaultSize,
+    wxPoint(75,110), wxDefaultSize,
       wxDIRP_USE_TEXTCTRL 
     );
     dpc->SetSize( wxSize( 390 , 20 ));
 
     wxButton *okbtn = new wxButton(this, ID_Ok, wxT("Ok"), 
-      wxPoint(365, 120));
+      wxPoint(465, 190));
     okbtn -> SetDefault();
 
     new wxButton(this, ID_Quit, wxT("Cancel"), 
-      wxPoint(15, 120));
+      wxPoint(15, 190));
 
     Connect(ID_Ok, wxEVT_COMMAND_BUTTON_CLICKED, 
       wxCommandEventHandler(MacOSXInstallerFrame::OnExport));

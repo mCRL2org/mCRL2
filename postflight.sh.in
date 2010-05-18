@@ -1,3 +1,4 @@
 #!/bin/bash
+ echo $2;
  open $2@CMAKE_INSTALL_PREFIX@/MacOS/mac_installer.app;
 exit 0
