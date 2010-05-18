@@ -949,9 +949,9 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
   {
     if ( ATisEqual(build(ATgetArgument(tree,0),-1,vars.get(),vals.get(),len),trueint) )
     {
-      tree = (ATermAppl) ATgetArgument(tree,0);
+      tree = (ATermAppl) ATgetArgument(tree,1); // Was 0????  JFG This was a very odd error.
     } else {
-      tree = (ATermAppl) ATgetArgument(tree,1);
+      tree = (ATermAppl) ATgetArgument(tree,2); // Was 1????  JFG This was a very odd error.
     }
   }
 
