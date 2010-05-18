@@ -112,8 +112,6 @@ namespace lps {
           {}
 
           /// \brief Constructor.
-          /// The underlying NextStateGenerator can not handle deadlock summands, therefore an exception
-          /// is thrown if the specification contains deadlock summands.
           iterator(const specification& lps_spec,
                    mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator
                   )
@@ -128,8 +126,6 @@ namespace lps {
          }
 
           /// \brief Constructor.
-          /// The underlying NextStateGenerator can not handle deadlock summands, therefore an exception
-          /// is thrown if the specification contains deadlock summands.
           iterator(const specification& lps_spec,
                    mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
                    const atermpp::aterm& state
@@ -138,6 +134,38 @@ namespace lps {
               m_generator(m_next_state->getNextStates(state))
           {
             m_state.state = state;
+          }
+
+          /// \brief Constructor.
+          iterator(const specification& lps_spec,
+                   mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
+                   unsigned int summand_index
+                  )
+            : m_next_state(createNextState(lps_spec, enumerator, false)),
+              m_generator(m_next_state->getNextStates(m_next_state->getInitialState(), summand_index)),
+              m_state(0, m_next_state->getInitialState())
+          {
+            if (!lps_spec.process().deadlock_summands().empty())
+            {
+              throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
+            }
+         }
+
+          /// \brief Constructor.
+          iterator(const specification& lps_spec,
+                   mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
+                   const atermpp::aterm& state,
+                   unsigned int summand_index
+                  )
+            : m_next_state(createNextState(lps_spec, enumerator, false)),
+              m_generator(m_next_state->getNextStates(state, summand_index))
+          {
+            m_state.state = state;
+          }
+
+          operator bool() const
+          {
+            return m_next_state.get() != 0;
           }
 
        private:
@@ -170,6 +198,8 @@ namespace lps {
       };
 
       /// \brief Constructor.
+      /// The underlying NextStateGenerator can not handle deadlock summands, therefore an exception
+      /// is thrown if the specification contains deadlock summands.
       next_state_generator(const specification& lps_spec)
         : m_specification(lps_spec),
           m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), find_function_symbols(lps_spec))),
@@ -191,6 +221,22 @@ namespace lps {
       iterator begin(const atermpp::aterm& state)
       {
         return iterator(m_specification, m_enumerator, state);
+      }
+
+      /// \brief Returns an iterator for generating the successors of the initial state.
+      /// Only the successors with respect to the summand with the given index are
+      /// generated.
+      iterator begin(unsigned int summand_index)
+      {
+        return iterator(m_specification, m_enumerator, summand_index);
+      }
+
+      /// \brief Returns an iterator for generating the successors of the given state.
+      /// Only the successors with respect to the summand with the given index are
+      /// generated.
+      iterator begin(const atermpp::aterm& state, unsigned int summand_index)
+      {
+        return iterator(m_specification, m_enumerator, state, summand_index);
       }
 
       /// \brief Returns the initial state of the specification.

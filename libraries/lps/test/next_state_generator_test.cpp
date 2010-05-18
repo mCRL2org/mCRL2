@@ -27,8 +27,7 @@ void test_initial_state_successors(const specification& lps_spec)
 {
   next_state_generator generator(lps_spec);
   next_state_generator::iterator first = generator.begin();
-  next_state_generator::iterator last;
-  while (++first != last)
+  while (++first)
   {
     std::cout << generator.print_state(*first) << std::endl;
   }
@@ -54,17 +53,37 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
   {
     visited.insert(q.front());
 
-    next_state_generator::iterator first = generator.begin(q.front());
-    next_state_generator::iterator last;
-    while (++first != last)
+    if (per_summand)
     {
-      const next_state_generator::state_type& s = *first;
-      transition_labels.insert(s.transition);
-      ++transitions;
-      if(seen.find(s.state) == seen.end())
+      for(size_t i = 0; i < lps_spec.process().summand_count(); ++i)
       {
-        q.push(s.state);
-        seen.insert(s.state);
+        next_state_generator::iterator first = generator.begin(q.front(), i);
+        while (++first)
+        {
+          const next_state_generator::state_type& s = *first;
+          transition_labels.insert(s.transition);
+          ++transitions;
+          if(seen.find(s.state) == seen.end())
+          {
+            q.push(s.state);
+            seen.insert(s.state);
+          }
+        }
+      }
+    }
+    else
+    {
+      next_state_generator::iterator first = generator.begin(q.front());
+      while (++first)
+      {
+        const next_state_generator::state_type& s = *first;
+        transition_labels.insert(s.transition);
+        ++transitions;
+        if(seen.find(s.state) == seen.end())
+        {
+          q.push(s.state);
+          seen.insert(s.state);
+        }
       }
     }
     q.pop();
@@ -137,7 +156,8 @@ BOOST_AUTO_TEST_CASE(test_abp)
   spec.process().deadlock_summands().clear();
 
   test_initial_state_successors(spec);
-//  test_next_state_generator(spec, 74, 92, 19);
+  test_next_state_generator(spec, 74, 92, 19);
+  test_next_state_generator(spec, 74, 92, 19, true);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
