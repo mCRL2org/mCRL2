@@ -856,7 +856,7 @@ static ATermList get_used_vars(ATerm t)
   return l;
 }
 
-static ATermList create_sequence(ATermList rule, int *var_cnt)
+static ATermList create_sequence(ATermList rule, int *var_cnt, ATermInt true_inner)
 {
   ATermAppl pat = (ATermAppl) ATelementAt(rule,2);
   int pat_arity = ATgetArity(ATgetAFun(pat));
@@ -873,10 +873,14 @@ static ATermList create_sequence(ATermList rule, int *var_cnt)
     }
   }
   //ATfprintf(stderr,"rseq: %t\n",rseq);
-  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond)*/ && sort_bool::is_true_function_symbol(data_expression(cond)) ) // JK 15/10/2009 recognise true as condition
+  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond)*/ && ATisEqual(cond, true_inner)){ // JK 15/10/2009 recognise true as condition
+    ATfprintf(stderr, "Jazeker!\n");
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
+  }
   else
+  {
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl4(afunCRe,cond,rslt,(ATerm) get_used_vars(cond),(ATerm) get_used_vars(rslt)));
+  }
 
   return ATreverse(rseq);
 }
@@ -1247,9 +1251,9 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 }
 
 #ifdef _JITTYC_STORE_TREES
-ATermAppl RewriterCompilingJitty::create_tree(ATermList rules, int opid, int arity)
+ATermAppl RewriterCompilingJitty::create_tree(ATermList rules, int opid, int arity, ATermInt true_inner)
 #else
-static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/)
+static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATermInt true_inner)
 #endif
   // Create a match tree for OpId int2term[opid] and update the value of
   // *max_vars accordingly.
@@ -1273,7 +1277,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/)
   {
 //		if ( ATgetArity(ATgetAFun((ATermAppl) ATelementAt((ATermList) ATgetFirst(rules),2))) <= arity+1 )
 //		{
-      rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules),&total_rule_vars));
+      rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules),&total_rule_vars, true_inner));
 //		}
   }
 
@@ -1456,9 +1460,9 @@ static ATermList dep_vars(ATermList eqn)
 }
 
 #ifdef _JITTYC_STORE_TREES
-ATermList RewriterCompilingJitty::create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs)
+ATermList RewriterCompilingJitty::create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs, ATermInt true_inner)
 #else
-static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs)
+static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs, ATermInt true_inner)
 #endif
 {
   ATermList strat = ATmakeList0();
@@ -1595,7 +1599,7 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
     if ( !ATisEmpty(no_deps) )
     {
       //gsfprintf(stderr,"add: %T\n",no_deps);
-      strat = ATinsert(strat, (ATerm) create_tree(no_deps,opid,arity));
+      strat = ATinsert(strat, (ATerm) create_tree(no_deps,opid,arity,true_inner));
     }
 
     // Stop if there are no more rules left
@@ -1660,7 +1664,7 @@ void RewriterCompilingJitty::extend_nfs(nfs_array nfs, ATermInt opid, unsigned i
     fill_nfs_array(nfs,arity);
     return;
   }
-  ATermList strat = create_strategy(eqns,ATgetInt(opid),arity,nfs);
+  ATermList strat = create_strategy(eqns,ATgetInt(opid),arity,nfs,true_inner);
   while ( !ATisEmpty(strat) && ATisInt(ATgetFirst(strat)) )
   {
     set_nfs_array(nfs,ATgetInt((ATermInt) ATgetFirst(strat)));
@@ -2845,7 +2849,8 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification &Data
 
   num_opids = 0;
 
-  true_num = ATgetInt((ATermInt) OpId2Int(sort_bool::true_(),true));
+  true_inner = (ATermInt) OpId2Int(sort_bool::true_(),true);
+  true_num = ATgetInt(true_inner);
 
   const data_specification::equations_const_range l=DataSpec.equations();
   for (atermpp::set< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
@@ -3367,7 +3372,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         {
           set_nfs_array_value(nfs_a.get(),a,nfs);
         }
-        implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a.get()),a,1,j,nfs);
+        implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a.get(),true_inner),a,1,j,nfs);
       } else {
         boost::scoped_array< bool > used(new bool[a]);
   for (int k=0; k<a; k++)

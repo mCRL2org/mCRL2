@@ -52,6 +52,7 @@ class RewriterCompilingInnermost: public Rewriter
 		int num_opids;
                 bool need_rebuild, made_files;
 
+    ATermInt true_inner;
 		int true_num;
 
 		ATermTable term2int;

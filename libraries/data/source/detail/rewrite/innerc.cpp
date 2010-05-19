@@ -574,7 +574,7 @@ static ATermList get_used_vars(ATerm t)
   return l;
 }
 
-static ATermList create_sequence(ATermList rule, int *var_cnt)
+static ATermList create_sequence(ATermList rule, int *var_cnt, ATermInt true_inner)
 {
   ATermAppl pat = (ATermAppl) ATelementAt(rule,2);
   ATerm cond = ATelementAt(rule,1);
@@ -593,7 +593,7 @@ static ATermList create_sequence(ATermList rule, int *var_cnt)
     }
   }
   //ATfprintf(stderr,"rseq: %t\n",rseq);
-  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond)*/ && sort_bool::is_true_function_symbol(data_expression(cond)) ) // JK 15/10/2009 recognise true as condition
+  if ( ATisInt(cond)/* && gsIsNil((ATermAppl) cond)*/ && ATisEqual(cond, true_inner) ) // JK 15/10/2009 recognise true as condition
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
   else
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl4(afunCRe,cond,rslt,(ATerm) get_used_vars(cond),(ATerm) get_used_vars(rslt)));
@@ -967,9 +967,9 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 }
 
 #ifdef _INNERC_STORE_TREES
-ATermAppl RewriterCompilingInnermost::create_tree(ATermList rules, int opid, int arity)
+ATermAppl RewriterCompilingInnermost::create_tree(ATermList rules, int opid, int arity, ATermInt true_inner)
 #else
-static ATermAppl create_tree(ATermList rules, int /*opid*/, unsigned int arity)
+static ATermAppl create_tree(ATermList rules, int /*opid*/, unsigned int arity, ATermInt true_inner)
 #endif
   // Create a match tree for OpId int2term[opid] and update the value of
   // *max_vars accordingly.
@@ -993,7 +993,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, unsigned int arity)
   {
     if ( ATgetLength((ATermList) ATelementAt((ATermList) ATgetFirst(rules),2)) <= arity )
     {
-      rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules),&total_rule_vars));
+      rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules),&total_rule_vars, true_inner));
     }
   }
 
@@ -1528,7 +1528,8 @@ void RewriterCompilingInnermost::CompileRewriteSystem(const data_specification &
 
   num_opids = 0;
 
-  true_num = ATgetInt((ATermInt) OpId2Int(sort_bool::true_(),true));
+  true_inner = (ATermInt) OpId2Int(sort_bool::true_(),true);
+  true_num = ATgetInt(true_inner);
 
   // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
   const data_specification::equations_const_range l=DataSpec.equations();
@@ -1995,7 +1996,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
       // Implement tree
       if ( innerc_eqns[j] != NULL )
       {
-      implement_tree(f,create_tree(innerc_eqns[j],j,a),a,1,j);
+      implement_tree(f,create_tree(innerc_eqns[j],j,a,true_inner),a,1,j);
       }
 
 

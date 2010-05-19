@@ -57,6 +57,7 @@ class RewriterCompilingJitty: public Rewriter
 
 		int num_opids;
 
+		ATermInt true_inner;
 		int true_num;
 
 		ATermTable term2int;
@@ -89,8 +90,8 @@ class RewriterCompilingJitty: public Rewriter
 #ifdef _JITTYC_STORE_TREES
 		int write_tree(FILE *f, ATermAppl tree, int *num_states);
 		void tree2dot(ATermAppl tree, char *name, char *filename);
-		ATermAppl create_tree(ATermList rules, int opid, int arity);
-		ATermList create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs);
+		ATermAppl create_tree(ATermList rules, int opid, int arity, ATermInt true_inner_);
+		ATermList create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs, ATermInt true_inner_);
 #endif
 
 		void add_base_nfs(nfs_array a, ATermInt opid, unsigned int arity);
