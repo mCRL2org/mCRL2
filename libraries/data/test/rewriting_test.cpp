@@ -402,7 +402,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
   using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_nat;
   using namespace mcrl2::data::sort_bool;
-  std::cerr << "set_rewrite_test\n";
+  std::cerr << "set_rewrite_test" << std::endl;
 //  data_specification specification = parse_data_specification(
 //    "sort A = Set(Nat);"
 //  );
@@ -640,14 +640,14 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
   specification = parse_data_specification("sort S = Set(Bool);\n");
   specification.add_context_sort(set_(bool_()));
   specification.add_context_sort(fset(bool_()));
-  e = not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_())))));
-  e = specification.normalise_sorts(e);
 
   for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
+    e = not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_())))));
+    e = specification.normalise_sorts(e);
     data_rewrite_test(R, e, false_());
 
     // Rewrite with parsing
