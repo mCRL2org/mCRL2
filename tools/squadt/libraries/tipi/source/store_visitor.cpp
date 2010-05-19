@@ -446,6 +446,23 @@ namespace utility {
   }
 
   /**
+   * \param[in] c the tipi::layout::elements::file_control object to store
+   * \param[in] id the identifier for the file control
+   **/
+  template <>
+  template <>
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::file_control const& c, ::tipi::display::element_identifier const& id) {
+    out << "<file-control id=\"" << id << "\">"
+        << "<text><![CDATA[" << c.m_text << "]]></text>";
+
+    do_visit(*c.m_type, c.m_text);
+
+    out << "</file-control>";
+  }
+
+
+
+  /**
    * \param[in] c the tipi::layout::properties object to store
    **/
   template <>
@@ -618,6 +635,7 @@ namespace utility {
     register_visit_method< const tipi::layout::elements::progress_bar, const ::tipi::display::element_identifier >();
     register_visit_method< const tipi::layout::elements::radio_button, const ::tipi::display::element_identifier >();
     register_visit_method< const tipi::layout::elements::text_field, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::file_control, const ::tipi::display::element_identifier >();
     register_visit_method< const tipi::layout::horizontal_box, const ::tipi::display >();
     register_visit_method< const tipi::layout::vertical_box, const ::tipi::display >();
     register_visit_method< const tipi::layout::properties >();

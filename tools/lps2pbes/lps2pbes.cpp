@@ -11,12 +11,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-#include <cassert>
-#include <iostream>
-#include <fstream>
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
@@ -172,7 +166,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
             append(format_selector.associate(normal, "normal", true)).
             append(format_selector.associate(readable, "readable")));
 
-      text_field& formula_field    = d.create< text_field >();
+      file_control& formula_field  = d.create< file_control >();
       checkbox&   timed_conversion = d.create< checkbox >().set_status(c.get_option_argument< bool >("use_timed_algorithm"));
       button&     okay_button      = d.create< button >().set_label("OK");
 

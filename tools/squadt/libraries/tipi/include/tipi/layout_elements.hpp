@@ -445,6 +445,68 @@ namespace tipi {
             return m_text;
           }
       };
+
+      /**
+       * \brief A file control picker input field
+       *
+       * A data type derived from basic_datatype can be specified for validation
+       * purposes. By default any string is accepted.
+       **/
+      class file_control : public layout::element {
+        friend class layout::element;
+
+        template < typename R, typename S >
+        friend class ::utility::visitor;
+
+        private:
+
+          /** \brief The text to be displayed initially */
+          std::string                         m_text;
+
+          /** \brief Type for validation purposes */
+          boost::shared_ptr< basic_datatype > m_type;
+
+        private:
+
+          /** \brief Default constructor */
+          inline file_control() : m_text(""), m_type(new tipi::datatype::string()) {
+          }
+
+        public:
+
+          /**
+           * \brief Sets the text
+           * \param[in] s the new text
+           * \return *this
+           **/
+          inline file_control& set_text(std::string const& s) {
+            m_text = s;
+
+            activate_handlers();
+
+            return *this;
+          }
+
+          /**
+           * \brief Sets the type
+           * \param[in] t the new type to validate against
+           * \return *this
+           **/
+          inline file_control& set_type(boost::shared_ptr < basic_datatype >& t) {
+            m_type = t;
+
+            activate_handlers();
+
+            return *this;
+          }
+
+          /** \brief Get the text */
+          inline std::string get_text() const {
+            return m_text;
+          }
+      };
+
+
     }
   }
 }

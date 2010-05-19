@@ -653,6 +653,26 @@ namespace utility {
     c.m_event_handler->process(&c, false, true);
   }
 
+  /**
+   * \param[in] c a tipi::layout::elements::file_control object to restore
+   **/
+  template <>
+  template <>
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::file_control& c) {
+    if(!((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "file-control")){
+      throw std::runtime_error("Expected XML tree value \"file-control\"");
+    }
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      if (e->Value() == "text") {
+        c.m_text = e->GetText(false);
+      }
+    }
+
+    c.m_event_handler->process(&c, false, true);
+  }
+
+
   /// \cond INTERNAL_DOCS
   /** \brief Finds a member of the visibility domain for a string */
   static tipi::layout::visibility text_to_visibility(std::string const& s) {
@@ -885,6 +905,9 @@ namespace utility {
       else if (name == "text-field") {
         d.create< text_field >(c, id);
       }
+      else if (name == "file-control") {
+        d.create< file_control >(c, id);
+      }
 
       if (c.get()) {
         do_visit(*c);
@@ -986,6 +1009,7 @@ namespace utility {
     register_visit_method< tipi::layout::elements::radio_button >();
     register_visit_method< tipi::layout::elements::radio_button, ::tipi::display >();
     register_visit_method< tipi::layout::elements::text_field >();
+    register_visit_method< tipi::layout::elements::file_control >();
     register_visit_method< tipi::layout::horizontal_box, ::tipi::display >();
     register_visit_method< tipi::layout::vertical_box, ::tipi::display >();
     register_visit_method< tipi::layout::properties >();
