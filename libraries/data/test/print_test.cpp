@@ -8,8 +8,9 @@
 
 #include <sstream>
 
-#include "boost/test/minimal.hpp"
+#include <boost/test/included/unit_test_framework.hpp>
 
+#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
@@ -31,6 +32,16 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
 using namespace mcrl2::data::sort_nat;
 
+// Garbage collect after each case.
+struct collect_after_test_case {
+  ~collect_after_test_case()
+  {
+    mcrl2::core::garbage_collect();
+  }
+};
+
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+
 bool print_check(data_expression const& left, std::string const& right) {
   if (pp(left) != right)
   {
@@ -42,15 +53,27 @@ bool print_check(data_expression const& left, std::string const& right) {
   return true;
 }
 
+template <typename Container>
+bool print_container_check(Container const& c) {
+  std::string r = pp(c);
+  if(r == "")
+  {
+    std::clog << "error printing container" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 #define PRINT_CHECK(x,y) BOOST_CHECK(print_check(x,y))
 
-void test_function_symbol_print() {
+BOOST_AUTO_TEST_CASE(test_function_symbol_print) {
   function_symbol f("f", sort_bool::bool_());
 
   PRINT_CHECK(f, "f");
 }
 
-void test_application_print() {
+BOOST_AUTO_TEST_CASE(test_application_print) {
   function_symbol f("f", make_function_sort(bool_(), bool_()));
   function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
 
@@ -59,7 +82,7 @@ void test_application_print() {
   PRINT_CHECK(g(f(true_()), sort_nat::nat(10)), "g(f(true), 10)");
 }
 
-void test_abstraction_print() {
+BOOST_AUTO_TEST_CASE(test_abstraction_print) {
   using namespace sort_pos;
   using namespace sort_nat;
 
@@ -76,7 +99,7 @@ void test_abstraction_print() {
   PRINT_CHECK(forall(x, exists(y, not_equal_to(xy[0], pos2nat(xy[1])))), "forall x: Nat. exists y: Pos. x != y");
 }
 
-void test_list_print() {
+BOOST_AUTO_TEST_CASE(test_list_print) {
   using namespace sort_bool;
   using namespace sort_list;
 
@@ -136,7 +159,7 @@ void test_list_print() {
   
 }
 
-void test_set_print() {
+BOOST_AUTO_TEST_CASE(test_set_print) {
   using namespace sort_bool;
   using namespace sort_set;
   using namespace sort_fset;
@@ -160,7 +183,7 @@ void test_set_print() {
   BOOST_CHECK(print_check(parse_data_expression("{true, false}"), "{true, false}"));
 }
 
-void test_bag_print() {
+BOOST_AUTO_TEST_CASE(test_bag_print) {
   using namespace sort_bool;
   using namespace sort_bag;
   using namespace sort_fbag;
@@ -187,7 +210,7 @@ void test_bag_print() {
   BOOST_CHECK(print_check(parse_data_expression("{false: 3, true: 1}"), "{false: 3, true: 1}"));
 }
 
-void test_function_update_print()
+BOOST_AUTO_TEST_CASE(test_function_update_print)
 {
   PRINT_CHECK(function_update(sort_nat::nat(), sort_bool::bool_()), "@func_update");
   PRINT_CHECK(parse_data_expression("(lambda x: Bool. x)[true -> false]"), "(lambda x: Bool. x)[true -> false]");
@@ -195,16 +218,22 @@ void test_function_update_print()
   PRINT_CHECK(parse_data_expression("(lambda n: Nat. n mod 2 == 0)[0 -> false]"), "(lambda n: Nat. n mod 2 == 0)[0 -> false]");
 }
 
-int test_main(int argc, char** argv) {
-  MCRL2_ATERMPP_INIT_DEBUG(argc, argv);
+BOOST_AUTO_TEST_CASE(test_rewrite_rule_print)
+{
+  BOOST_CHECK(print_container_check(sort_bool::bool_generate_equations_code()));
+  BOOST_CHECK(print_container_check(sort_pos::pos_generate_equations_code()));
+  BOOST_CHECK(print_container_check(sort_nat::nat_generate_equations_code()));
+  BOOST_CHECK(print_container_check(sort_int::int_generate_equations_code()));
+  BOOST_CHECK(print_container_check(sort_real::real_generate_equations_code()));
+  BOOST_CHECK(print_container_check(sort_fset::fset_generate_equations_code(sort_bool::bool_())));
+  BOOST_CHECK(print_container_check(sort_set::set_generate_equations_code(sort_bool::bool_())));
+  BOOST_CHECK(print_container_check(sort_fbag::fbag_generate_equations_code(sort_bool::bool_())));
+  BOOST_CHECK(print_container_check(sort_bag::bag_generate_equations_code(sort_bool::bool_())));
+}
 
-  test_function_symbol_print();
-  test_application_print();
-  test_abstraction_print();
-  test_list_print();
-  test_set_print();
-  test_bag_print();
-  test_function_update_print();
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+{
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  return EXIT_SUCCESS;
+  return 0;
 }
