@@ -300,7 +300,7 @@ static ATermList get_used_vars(ATerm t)
   return l;
 }
 
-static ATermList create_sequence(ATermAppl rule, int *var_cnt)
+static ATermList create_sequence(ATermAppl rule, int *var_cnt, ATermInt trueint)
 {
   ATermAppl pat = (ATermAppl) ATgetArgument(rule,2);
   ATerm cond = ATgetArgument(rule,1);
@@ -319,7 +319,7 @@ static ATermList create_sequence(ATermAppl rule, int *var_cnt)
     }
   }
   //ATfprintf(stderr,"rseq: %t\n",rseq);
-  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond) */ && sort_bool::is_true_function_symbol(data_expression(cond))) // JK 15/10/2009 default condition is true
+  if ( ATisInt(cond)/* && gsIsNil((ATermAppl) cond) */ && ATisEqual(cond, trueint)) // JK 15/10/2009 default condition is true
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
   else
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl4(afunCRe,cond,rslt,(ATerm) get_used_vars(cond),(ATerm) get_used_vars(rslt)));
@@ -746,9 +746,9 @@ static ATermAppl optimise_tree(ATermAppl tree,int *max)
 }
 
 #ifdef _INNER_STORE_TREES
-ATermAppl RewriterInnermost::create_tree(ATermList rules, int opid, int *max_vars)
+ATermAppl RewriterInnermost::create_tree(ATermList rules, int opid, int *max_vars, ATermInt trueint)
 #else
-static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars)
+static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars, ATermInt trueint)
 #endif
   // Create a match tree for OpId int2term[opid] and update the value of
   // *max_vars accordingly.
@@ -770,7 +770,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars)
   int total_rule_vars = 0;
   for (; !ATisEmpty(rules); rules=ATgetNext(rules))
   {
-    rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermAppl) ATgetFirst(rules),&total_rule_vars));
+    rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermAppl) ATgetFirst(rules),&total_rule_vars, trueint));
   }
 
   // Generate initial parameters for built_tree
@@ -1192,7 +1192,7 @@ RewriterInnermost::RewriterInnermost(const data_specification &DataSpec)
     if ( (m = (ATermList) ATtableGet(tmp_eqns,(ATerm) i)) != NULL )
     {
       inner_eqns[ATgetInt(i)] = m;
-      inner_trees[ATgetInt(i)] = create_tree(m,ATgetInt(i),&max_vars);
+      inner_trees[ATgetInt(i)] = create_tree(m,ATgetInt(i),&max_vars, trueint);
     }
   }
 
@@ -1485,7 +1485,7 @@ ATerm RewriterInnermost::rewriteInternal(ATerm Term)
     {
       if ( (inner_trees[i] == NULL) && (inner_eqns[i] != NULL) )
       {
-        inner_trees[i] = create_tree(inner_eqns[i],i,&max_vars);
+        inner_trees[i] = create_tree(inner_eqns[i],i,&max_vars, trueint);
       }
     }
   }

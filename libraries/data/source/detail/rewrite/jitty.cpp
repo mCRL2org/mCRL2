@@ -285,7 +285,7 @@ static ATermList get_vars(ATerm a)
   }
 }
 
-static ATermList create_strategy(ATermList rules)
+static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 {
   ATermList strat = ATmakeList0();
   unsigned int arity;
@@ -315,7 +315,7 @@ static ATermList create_strategy(ATermList rules)
       {
         ATermAppl cond = ATAelementAt(ATLgetFirst(rules),1);
         /*ATermList vars = gsIsNil(cond)?ATmakeList1((ATerm) ATmakeList0()):ATmakeList1((ATerm) get_vars((ATerm) cond));*/
-        ATermList vars = ATmakeList1((ATerm) get_vars((ATerm) cond)); // JK 15/10/2009 condition is always a data expression
+        ATermList vars = (ATisEqual(cond,jitty_true))?ATmakeList1((ATerm) ATmakeList0()):ATmakeList1((ATerm) get_vars((ATerm) cond)); // JK 15/10/2009 condition is always a data expression
         ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2);
 
 //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
@@ -520,7 +520,7 @@ RewriterJitty::RewriterJitty(const data_specification &DataSpec)
       jitty_strat[ATgetInt(i)] = NULL;
     } else {
 //gsfprintf(stderr,"%T\n",ATAgetFirst(l1));
-      jitty_strat[ATgetInt(i)] = create_strategy(ATreverse(n));
+      jitty_strat[ATgetInt(i)] = create_strategy(ATreverse(n), jitty_true);
     }
   }
 }
@@ -839,7 +839,7 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
   gsMessage("        %T --> %T (%T)\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true);
 }
 #endif
-          if ( matches && /*(gsIsNil(ATAelementAt(rule,1)) || */ATisEqual(rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true)/*)*/ ) // JK 15/10/2009 Condition is always a data expression
+          if ( matches && /*(gsIsNil(ATAelementAt(rule,1)) || */ (ATisEqual(ATAelementAt(rule,1),jitty_true) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true))) // JK 15/10/2009 Condition is always a data expression
           {
             ATermAppl rhs = ATAelementAt(rule,3);
 
@@ -1011,7 +1011,7 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
       ATermInt i = (ATermInt) ATgetFirst(opids);
       if ( jitty_strat[ATgetInt(i)] == NULL )
       {
-        jitty_strat[ATgetInt(i)] = create_strategy((ATermList) ATtableGet(jitty_eqns,(ATerm) i));
+        jitty_strat[ATgetInt(i)] = create_strategy((ATermList) ATtableGet(jitty_eqns,(ATerm) i), jitty_true);
       }
     }
     need_rebuild = false;

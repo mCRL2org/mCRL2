@@ -59,7 +59,7 @@ class RewriterInnermost: public Rewriter
 #ifdef _INNER_STORE_TREES
 		int write_tree(FILE *f, ATermAppl tree, int *num_states);
 		void tree2dot(ATermAppl tree, char *name, char *filename);
-		ATermAppl create_tree(ATermList rules, int opid, int *max_vars);
+		ATermAppl create_tree(ATermList rules, int opid, int *max_vars, ATermAppl true_internal);
 #endif
 
 		ATermList tree_matcher_aux(ATerm t, ATermAppl *tree, ATermAppl *vars, ATerm *vals, int *len);
