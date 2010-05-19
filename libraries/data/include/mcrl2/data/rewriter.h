@@ -355,6 +355,49 @@ namespace data {
     }
   };
 
+  /// \brief Pretty prints a rewrite strategy
+  /// \param[in] s A rewrite strategy.
+  inline std::string pp(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
+  {
+    switch(s)
+    {
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost:
+        return "inner";
+        break;
+  #ifdef MCRL2_INNERC_AVAILABLE
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling:
+        return "innerc";
+        break;
+  #endif
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty:
+        return "jitty";
+        break;
+  #ifdef MCRL2_JITTYC_AVAILABLE
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling:
+        return "jittyc";
+        break;
+  #endif
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_prover:
+        return "innerp";
+        break;
+  #ifdef MCRL2_INNERC_AVAILABLE
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling_prover:
+        return "innercp";
+        break;
+  #endif
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_prover:
+        return "jittyp";
+        break;
+  #ifdef MCRL2_JITTYC_AVAILABLE
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling_prover:
+        return "jittycp";
+        break;
+  #endif
+      default:
+        return "unknown";
+    }
+  }
+
 } // namespace data
 
 } // namespace mcrl2

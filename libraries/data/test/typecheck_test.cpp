@@ -20,6 +20,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
+#include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
 
@@ -123,6 +124,7 @@ void test_data_expression(const std::string &de_in,
       std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
       //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
       BOOST_CHECK_EQUAL(de_in, de_out);
+      BOOST_CHECK(!search_sort_expression(x.sort(), data::unknown_sort()));
       if(expected_sort != "")
       {
         BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
@@ -133,7 +135,6 @@ void test_data_expression(const std::string &de_in,
       BOOST_CHECK_THROW(data::type_check(x), mcrl2::runtime_error);
     }
   }
-  core::garbage_collect();
 }
 
 void test_data_expression(const std::string &de_in,
@@ -188,6 +189,22 @@ BOOST_AUTO_TEST_CASE(test_one_plus_one) {
 
 BOOST_AUTO_TEST_CASE(test_one_times_two_plus_three) {
   test_data_expression("1 * 2 + 3", true, "Pos");
+}
+
+BOOST_AUTO_TEST_CASE(test_empty_list) {
+  test_data_expression("[]", true); // List unknown
+}
+
+BOOST_AUTO_TEST_CASE(test_empty_list_concat) {
+  test_data_expression("[] ++ []", true); // List unknown
+}
+
+BOOST_AUTO_TEST_CASE(test_empty_list_size) {
+  test_data_expression("#[]", true, "Nat");
+}
+
+BOOST_AUTO_TEST_CASE(test_empty_list_in) {
+  test_data_expression("true in []", true, "Bool");
 }
 
 BOOST_AUTO_TEST_CASE(test_list_true_false) {
@@ -470,7 +487,6 @@ void test_data_specification(const std::string &ds_in,
       BOOST_CHECK_THROW(data::type_check(ds), mcrl2::runtime_error);
     }
   }
-  core::garbage_collect();
 }
 
 BOOST_AUTO_TEST_CASE(test_data_specification_struct_with_projection)

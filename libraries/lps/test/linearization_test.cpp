@@ -857,47 +857,6 @@ void test_various_aux(t_lin_options &options)
   spec = linearise(various_case_34, options);
 }
 
-std::string print_rewrite_strategy(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
-{
-  switch(s)
-  {
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost:
-      return "inner";
-      break;
-#ifdef MCRL2_INNERC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling:
-      return "innerc";
-      break;
-#endif
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty:
-      return "jitty";
-      break;
-#ifdef MCRL2_JITTYC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling:
-      return "jittyc";
-      break;
-#endif
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_prover:
-      return "innerp";
-      break;
-#ifdef MCRL2_INNERC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling_prover:
-      return "innercp";
-      break;
-#endif
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_prover:
-      return "jittyp";
-      break;
-#ifdef MCRL2_JITTYC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling_prover:  
-      return "jittycp";
-      break;
-#endif          
-    default:
-      return "unknown";
-  }
-}
-
 BOOST_AUTO_TEST_CASE(test_various)
 { 
   // Set various rewrite strategies
@@ -905,19 +864,19 @@ BOOST_AUTO_TEST_CASE(test_various)
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
   #ifdef MCRL2_JITTYC_AVAILABLE
-  #ifdef TEST_COMPILERS
+  #ifdef MCRL2_TEST_COMPILERS
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
   #endif
   #endif
   #ifdef MCRL2_INNERC_AVAILABLE
-  #ifdef TEST_COMPILERS
+  #ifdef MCRL2_TEST_COMPILERS
     rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
   #endif
   #endif
 
   for(std::vector<mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy >::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {
-    std::cerr << std::endl << "Testing with rewrite strategy " << print_rewrite_strategy(*i) << std::endl;
+    std::cerr << std::endl << "Testing with rewrite strategy " << pp(*i) << std::endl;
 
     t_lin_options options;
     options.rewrite_strategy=*i;

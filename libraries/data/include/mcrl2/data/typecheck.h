@@ -15,6 +15,8 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
 
 namespace mcrl2 {
@@ -36,6 +38,7 @@ namespace mcrl2 {
       {
         throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
       }
+      assert(!search_sort_expression(t, unknown_sort()));
       sort_expr = sort_expression(t);
     }
 
@@ -71,6 +74,7 @@ namespace mcrl2 {
       {
         throw mcrl2::runtime_error("error type checking data expression");
       }
+      assert(!search_sort_expression(t, unknown_sort()));
 
       //// ???
       //detail::internal_format_conversion_helper converter(data_spec);
@@ -108,6 +112,7 @@ namespace mcrl2 {
       {
         throw mcrl2::runtime_error("could not type check data specification");
       }
+      assert(!search_sort_expression(t, unknown_sort()));
       data_spec = data_specification(t);
     }
 
