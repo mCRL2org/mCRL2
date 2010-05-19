@@ -30,7 +30,7 @@ include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include/)
 include_directories(${CMAKE_BINARY_DIR}/libraries/utilities/include)
 
 if(MCRL2_SQUADT_CONNECTIVITY)
-  add_definitions("-DENABLE_MCRL2_SQUADT_CONNECTIVITY")
+  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
 
   if(MINGW)
     target_link_libraries(${PROJECT_NAME}

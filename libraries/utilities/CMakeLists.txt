@@ -68,7 +68,7 @@ if(MCRL2_SQUADT_CONNECTIVITY)
       ${mcrl2_utilities_squadt_src}
     )
     
-    add_definitions("-DENABLE_MCRL2_SQUADT_CONNECTIVITY")
+    add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
     
     target_link_libraries(${PROJECT_NAME}
       squadt_tipi

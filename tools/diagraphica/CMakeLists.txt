@@ -81,7 +81,7 @@ if( MCRL2_MONO_LIB )
 
   # ######### required for squadt connectivity ##########
   if(MCRL2_SQUADT_CONNECTIVITY)
-    add_definitions("-DENABLE_MCRL2_SQUADT_CONNECTIVITY")
+    add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
     include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
   endif(MCRL2_SQUADT_CONNECTIVITY)
   # #####################################################
