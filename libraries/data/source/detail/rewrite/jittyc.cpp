@@ -873,8 +873,8 @@ static ATermList create_sequence(ATermList rule, int *var_cnt, ATermInt true_inn
     }
   }
   //ATfprintf(stderr,"rseq: %t\n",rseq);
-  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond)*/ && ATisEqual(cond, true_inner)){ // JK 15/10/2009 recognise true as condition
-    ATfprintf(stderr, "Jazeker!\n");
+
+  if ( ATisInt(cond)/* && gsIsNil((ATermAppl) cond)*/ && ATisEqual(cond, true_inner)){ // JK 15/10/2009 recognise true as condition
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
   }
   else
