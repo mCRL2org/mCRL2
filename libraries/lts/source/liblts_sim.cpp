@@ -168,7 +168,7 @@ void sim_partitioner::initialise_Pi(uint gamma,uint l)
     c = *ci;
     /* iterate over the incoming l-transitions of c */
     using namespace mcrl2::lts;
-    for(std::map < std::pair < transition::size_type, transition::size_type >, transition::size_type >::const_iterator 
+    for(std::map < std::pair < transition::size_type, transition::size_type >, transition::size_type >::iterator
           t=trans_index.lower_bound(std::pair < transition::size_type, transition::size_type >(l,c));
           t!=trans_index.upper_bound(std::pair < transition::size_type, transition::size_type >(l,c)); ++t)
     {
