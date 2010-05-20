@@ -469,7 +469,7 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
                 append(format_selector.associate(mcrl2::lts::lts_dot, "dot")),
            margins(0,5,0,5));
 
-  text_field& lps_file_field        = d.create< text_field >();
+  file_control& lps_file_field        = d.create< file_control >();
   checkbox&   check_reachability    = d.create< checkbox >();
   checkbox&   add_state_information = d.create< checkbox >();
 

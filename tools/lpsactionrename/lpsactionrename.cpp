@@ -212,7 +212,7 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
       /* Create and add the top layout manager */
-      text_field& rename_file_field = d.create< text_field >();
+      file_control& rename_file_field = d.create< file_control >();
       checkbox&   rewrite           = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_rewrite));
       checkbox&   sumelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_sumelm));
       button&     okay_button       = d.create< button >().set_label("OK");
