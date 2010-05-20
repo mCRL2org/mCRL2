@@ -745,6 +745,39 @@ const std::string various_case_34 =
   "init hide({a}, sum n:Nat. X);"
   ;
 
+const std::string various_philosophers =
+  "map K: Pos;\n"
+  "eqn K = 10;\n"
+  "act get,_get,__get,put,_put,__put: Pos#Pos;\n"
+  "    eat: Pos;\n"
+  "proc\n"
+  "  Phil(n:Pos) = _get(n,n)._get(n,if(n==K,1,n+1)).eat(n)._put(n,n)._put(n,if(n==K,1,n+1)).Phil(n);\n"
+  "  Fork(n:Pos) = sum m:Pos.get(m,n).put(m,n).Fork(n);\n"
+  "  ForkPhil(n:Pos) = Fork(n) || Phil(n);\n"
+  "  KForkPhil(p:Pos) =\n"
+  "    (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);\n"
+  "init allow( { __get, __put, eat },\n"
+  "       comm( { get|_get->__get, put|_put->__put },\n"
+  "         KForkPhil(K)\n"
+  "     ));\n"
+  ;
+
+const std::string various_philosophers_nat =
+  "map K: Nat;\n"
+  "eqn K = 10;\n"
+  "act get,_get,__get,put,_put,__put: Nat#Nat;\n"
+  "    eat: Nat;\n"
+  "proc\n"
+  "  Phil(n:Nat) = _get(n,n)._get(n,if(n==K,1,n+1)).eat(n)._put(n,n)._put(n,if(n==K,1,n+1)).Phil(n);\n"
+  "  Fork(n:Nat) = sum m:Nat.get(m,n).put(m,n).Fork(n);\n"
+  "  ForkPhil(n:Nat) = Fork(n) || Phil(n);\n"
+  "  KForkPhil(p:Nat) =\n"
+  "    (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);\n"
+  "init allow( { __get, __put, eat },\n"
+  "       comm( { get|_get->__get, put|_put->__put },\n"
+  "         KForkPhil(K)\n"
+  "     ));\n"
+  ;
 
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
@@ -855,6 +888,10 @@ void test_various_aux(t_lin_options &options)
   spec = linearise(various_case_33, options);
   std::cerr << "Testcase 34\n";
   spec = linearise(various_case_34, options);
+  std::cerr << "Testcase philosophers (Nat)\n";
+  spec = linearise(various_philosophers_nat, options);
+  std::cerr << "Testcase philosophers\n";
+  spec = linearise(various_philosophers, options);
 }
 
 BOOST_AUTO_TEST_CASE(test_various)
