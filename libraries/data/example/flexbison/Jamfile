@@ -1,0 +1,13 @@
+project parser
+   : requirements
+       <include>.
+   ;
+
+exe test_parser : test_parser.cpp parser.cpp scanner.cpp : ;
+
+install dist
+   :
+     test_parser
+   :
+     <location>.
+   ;
