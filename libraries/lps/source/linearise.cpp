@@ -6926,7 +6926,7 @@ class specification_basic_type:public boost::noncopyable
 
     process_identifier split_process(const process_identifier procId,
                                    atermpp::map < process_identifier,process_identifier > &visited_id,
-                                   atermpp::map < process_expression,process_identifier > &visited_proc)
+                                   atermpp::map < process_expression,process_expression > &visited_proc)
     { if (visited_id.count(procId)>0)
       { return visited_id[procId];
       }
@@ -6971,7 +6971,7 @@ class specification_basic_type:public boost::noncopyable
     process_expression split_body(
                         const process_expression t,
                         atermpp::map < process_identifier,process_identifier > &visited_id,
-                        atermpp::map < process_expression,process_identifier > &visited_proc,
+                        atermpp::map < process_expression,process_expression> &visited_proc,
                         const variable_list parameters)
     { /* Replace pCRL process terms that occur in the scope of mCRL processes
          by a process identifier. E.g. (a+b)||c is replaced by X||c and
@@ -6984,10 +6984,13 @@ class specification_basic_type:public boost::noncopyable
       process_expression result;
 
       if (visited_proc.count(t)>0)
-      return visited_proc[t];
+      { 
+        return visited_proc[t];
+      }
 
       if (is_merge(t))
-      { result=process::merge(
+      { 
+        result=process::merge(
                     split_body(process::merge(t).left(),visited_id,visited_proc,parameters),
                     split_body(process::merge(t).right(),visited_id,visited_proc,parameters));
       }
@@ -7048,12 +7051,12 @@ class specification_basic_type:public boost::noncopyable
                                  0,
                                  true);
           result=process_instance(p,objectdata[objectIndex(p)].parameters);
-          visited_proc[t]=p;
+          visited_proc[t]=result;
         }
         else
         { const process_identifier p=newprocess(parameters,t,pCRL,0,true);
           result=process_instance(p,objectdata[objectIndex(p)].parameters);
-          visited_proc[t]=p;
+          visited_proc[t]=result;
         }
       }
       else
@@ -7066,7 +7069,7 @@ class specification_basic_type:public boost::noncopyable
     process_identifier splitmCRLandpCRLprocsAndAddTerminatedAction(
                             const process_identifier procId)
     { atermpp::map < process_identifier,process_identifier> visited_id;
-      atermpp::map < process_expression,process_identifier> visited_proc;
+      atermpp::map < process_expression,process_expression> visited_proc;
       return split_process(procId,visited_id,visited_proc);
     }
 
