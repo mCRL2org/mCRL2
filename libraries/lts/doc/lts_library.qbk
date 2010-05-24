@@ -247,6 +247,7 @@ Explain:
    reachability_check(l,remove_unreachable);
    is_deterministic(l);
    scc_reduce(l, preserve_divergence_loops);
+[endsect]
 [section: References]
 # [@http://www.mcrl2.org/libref/lts/ LTS reference manual]
 
