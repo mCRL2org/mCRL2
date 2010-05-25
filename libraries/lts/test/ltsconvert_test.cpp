@@ -126,15 +126,17 @@ const std::string test11=
 
 
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
-{ 
+{ std::cerr << "Test1\n";
   lts t1(test1);
   reduce(t1,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t1.num_states()==1 && t1.num_transitions()==1);
 
+  std::cerr << "Test2\n";
   lts t2(test2);
   reduce(t2,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t2.num_states()==2 && t2.num_transitions()==2);
 
+  std::cerr << "Test3\n";
   lts t3(test3);
   reduce(t3,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t3.num_states()==2 && t3.num_transitions()==3);
@@ -146,26 +148,32 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t3a,lts_eq_divergence_preserving_branching_bisim); 
   BOOST_CHECK(t3a.num_states()==1 && t3a.num_transitions()==2);
 
+  std::cerr << "Test4\n";
   lts t4(test4);
   reduce(t4,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t4.num_states()==4 && t4.num_transitions()==5);
   reduce(t4,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
   
+  std::cerr << "Test5\n";
   lts t5(test5);
   reduce(t5,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   reduce(t5,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
 
+  std::cerr << "Test6\n";
   lts t6(test6);
   reduce(t6,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
+  std::cerr << "Test6a\n";
   reduce(t6,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
+  std::cerr << "Test6b\n";
   reduce(t6,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
   
+  std::cerr << "Test7\n";
   lts t7(test7);
   reduce(t7,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t7.num_states()==7 && t7.num_transitions()==7);
@@ -174,14 +182,18 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t7,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   
+  std::cerr << "Test8\n";
   lts t8(test8);
   reduce(t8,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
+  std::cerr << "Test8a\n";
   reduce(t8,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
+  std::cerr << "Test8b\n";
   reduce(t8,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
   
+  std::cerr << "Test9\n";
   lts t9(test9);
   reduce(t9,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
@@ -192,6 +204,7 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t9b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t9b.num_states()==2 && t9b.num_transitions()==2);
   
+  std::cerr << "Test10\n";
   lts t10(test10);
   reduce(t10,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t10.num_states()==5 && t10.num_transitions()==7);
@@ -202,6 +215,7 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   reduce(t10b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t10b.num_states()==4 && t10b.num_transitions()==5);
   
+  std::cerr << "Test11\n";
   lts t11(test11);
   reduce(t11,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t11.num_states()==4 && t11.num_transitions()==5);

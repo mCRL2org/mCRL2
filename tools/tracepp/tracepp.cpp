@@ -19,7 +19,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/trace.h"
+#include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/exception.h"

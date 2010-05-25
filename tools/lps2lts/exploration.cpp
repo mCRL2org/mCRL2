@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/trace.h"
+#include "mcrl2/trace/trace.h"
 #include "exploration.h"
 #include "lts.h"
 

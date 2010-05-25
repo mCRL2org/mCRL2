@@ -17,7 +17,7 @@
 #include <stdexcept>
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/trace.h"
+#include "mcrl2/trace/trace.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 
@@ -58,13 +58,14 @@ void Trace::init()
   }
   trace_pair_set++;
 
-  states = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
-  actions = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
-  times = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
-  buf_size = INIT_BUF_SIZE;
-  len = 0;
+  // states = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
+  // actions = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
+  // times = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
+  // buf_size = INIT_BUF_SIZE;
+  // len = 0;
   pos = 0;
-  for (unsigned int i=0; i<buf_size; i++)
+  truncate(); // Take care that pos 0 exists.
+  /* for (unsigned int i=0; i<buf_size; i++)
   {
     states[i] = NULL;
     actions[i] = NULL;
@@ -73,19 +74,19 @@ void Trace::init()
   ATprotectArray((ATerm *) states,buf_size);
   ATprotectArray((ATerm *) actions,buf_size);
   ATprotectArray((ATerm *) times,buf_size);
-
+  */
   // XXX set times[0] to gsMakeTime(0.0)?
 }
 
 void Trace::cleanup()
 {
-  ATunprotectArray((ATerm *) times);
+  /* ATunprotectArray((ATerm *) times);
   ATunprotectArray((ATerm *) actions);
   ATunprotectArray((ATerm *) states);
   free(times);
   free(actions);
   free(states);
-
+  */
   trace_pair_set--;
   if ( trace_pair_set == 0 )
   {
@@ -130,99 +131,89 @@ Trace::~Trace()
 
 void Trace::resetPosition()
 {
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
   pos = 0;
 }
 
 void Trace::setPosition(unsigned int pos)
 {
-  if ( pos <= len )
+  if ( pos <= actions.size() )
   {
     this->pos = pos;
   }
 }
 
 unsigned int Trace::getPosition()
-{
+{ 
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
   return pos;
 }
 
 unsigned int Trace::getLength()
 {
-  return len;
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+  return actions.size();
 }
 
 ATermAppl Trace::currentState()
 {
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
   return states[pos];
 }
 
 ATermAppl Trace::currentTime()
 {
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
   return times[pos];
 }
 
 ATermAppl Trace::nextAction()
 {
-  ATermAppl act = actions[pos];
-
-  if ( pos < len )
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
+  
+  if ( pos < actions.size() )
   {
     pos++;
+    return actions[pos-1];
   }
-
-  return act;
+  return NULL;
 }
 
 void Trace::truncate()
 {
-  len = pos;
-  actions[pos] = NULL;
+  actions.resize(pos);
+  states.resize(pos+1);
+  times.resize(pos+1);
 }
 
 
 void Trace::addAction(ATermAppl action, ATermAppl time)
-{
-  actions[pos] = action;
+{ 
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
   pos++;
-  len = pos;
-  if ( len == buf_size )
-  {
-    ATunprotectArray((ATerm *) states);
-    ATunprotectArray((ATerm *) actions);
-    ATunprotectArray((ATerm *) times);
-    states = (ATermAppl *) realloc(states,buf_size*2*sizeof(ATermAppl));
-    actions = (ATermAppl *) realloc(actions,buf_size*2*sizeof(ATermAppl));
-    times = (ATermAppl *) realloc(times,buf_size*2*sizeof(ATermAppl));
-    for (unsigned int i=buf_size; i<buf_size*2; i++)
-    {
-      states[i] = NULL;
-      actions[i] = NULL;
-      times[i] = NULL;
-    }
-    buf_size = buf_size * 2;
-    ATprotectArray((ATerm *) states,buf_size);
-    ATprotectArray((ATerm *) actions,buf_size);
-    ATprotectArray((ATerm *) times,buf_size);
-  } else {
-    states[pos] = NULL;
-    actions[pos] = NULL;
-  }
+  truncate();
+  actions[pos-1] = action;
+  states[pos] = NULL;
   times[pos] = time;
 }
 
 bool Trace::setState(ATermAppl state)
-{
+{ 
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
   if ( states[pos] == NULL )
   {
     states[pos] = state;
     return true;
-  } else {
+  } 
+  else 
+  {
     return false;
   }
 }
 
 bool Trace::canSetState()
-{
+{ 
+  assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
   return (states[pos] == NULL);
 }
 
@@ -420,7 +411,7 @@ void Trace::saveMcrl2(ostream &os)
   ATermList trace = ATmakeList0();
 
   bool error_shown = false;
-  unsigned int i=len+1;
+  unsigned int i=actions.size()+1;
   while ( i > 0 )
   {
     i--;
@@ -459,8 +450,8 @@ void Trace::saveMcrl2(ostream &os)
 
 void Trace::savePlain(ostream &os)
 {
-  for (unsigned int i=0; i<len; i++)
-  {
+  for (unsigned int i=0; i<actions.size(); i++)
+  { 
     if ( gsIsMultAct(actions[i]) )
     {
       PrintPart_CXX(os,(ATerm) actions[i],ppDefault);

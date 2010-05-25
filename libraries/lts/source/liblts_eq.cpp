@@ -105,7 +105,7 @@ void reduce(lts &l,lts_equivalence eq, lts_eq_options const&opts)
   }
 }
 
-bool compare(const lts &l1, const lts &l2, const lts_equivalence eq, const lts_eq_options &opts)
+bool compare(const lts &l1, const lts &l2, const lts_equivalence eq, const bool generate_counter_examples)
 { 
   switch ( eq )
   { case lts_eq_none:
@@ -113,12 +113,12 @@ bool compare(const lts &l1, const lts &l2, const lts_equivalence eq, const lts_e
     default:
       lts l1_copy(l1);
       lts l2_copy(l2);
-      return destructive_compare(l1_copy,l2_copy,eq,opts);
+      return destructive_compare(l1_copy,l2_copy,eq,generate_counter_examples);
   }
   return false;
 } 
 
-bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const lts_eq_options &opts)
+bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const bool generate_counter_examples)
 {
   // Merge this LTS and l and store the result in this LTS.
   // In the resulting LTS, the initial state i of l will have the
@@ -131,46 +131,22 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const lts_e
       return false;
     case lts_eq_bisim:
       { 
-        unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        merge(l1,l2);
-        l2.clear(); // l is not needed anymore.
-        detail::bisim_partitioner bisim_part(l1);
-        return bisim_part.in_same_class(l1.initial_state(),init_l2);
+        return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
       }
     case lts_eq_branching_bisim:
       { 
-        unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        merge(l1,l2);
-        l2.clear(); // l is not needed anymore.
-        detail::scc_partitioner scc_part(l1);
-        scc_part.replace_transitions(false);
-        l1.clear_type();
-        l1.clear_states();
-        l1.set_num_states(scc_part.num_eq_classes());
-        l1.set_initial_state(scc_part.get_eq_class(l1.initial_state()));
-        init_l2=scc_part.get_eq_class(init_l2);
-
-        detail::bisim_partitioner bisim_part(l1,true);
-        return bisim_part.in_same_class(l1.initial_state(),init_l2);
+        return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
       } 
     case lts_eq_divergence_preserving_branching_bisim:
       { 
-        unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        merge(l1,l2);
-        l2.clear(); // l is not needed anymore.
-        detail::scc_partitioner scc_part(l1);
-        scc_part.replace_transitions(true);
-        l1.clear_type();
-        l1.clear_states();
-        l1.set_num_states(scc_part.num_eq_classes());
-        l1.set_initial_state(scc_part.get_eq_class(l1.initial_state()));
-        init_l2=scc_part.get_eq_class(init_l2);
-
-        detail::bisim_partitioner bisim_part(l1,true,true);
-        return bisim_part.in_same_class(l1.initial_state(),init_l2);
+        return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
       } 
     case lts_eq_sim:
       {
+        if (generate_counter_examples)
+        { 
+          std::cerr << "Warning: cannot generate counter example traces for simulation equivalence\n";
+        }
         // Run the partitioning algorithm on this merged LTS
         unsigned int init_l2 = l2.initial_state() + l1.num_states();
         merge(l1,l2);
@@ -191,7 +167,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const lts_e
         determinise(l2);
 
         // Trace equivalence now corresponds to bisimilarity
-        return detail::destructive_bisimulation_compare(l1,l2,false);
+        return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples);
       }
     case lts_eq_weak_trace:
       {
@@ -208,7 +184,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const lts_e
         determinise(l2);
 
         // Weak trace equivalence now corresponds to bisimilarity
-        return detail::destructive_bisimulation_compare(l1,l2,false);
+        return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples);
       }
     default:
       gsErrorMsg("comparison for this equivalence is not available\n");

@@ -11,7 +11,7 @@
 
 #include "wx.hpp" // precompiled headers
 #include "mcrl2/lts/lts_algorithm.h"
-#include "mcrl2/trace.h"
+#include "mcrl2/trace/trace.h"
 #include "mcrl2/core/print.h"
 #include "cluster.h"
 #include "fsm_state_positioner.h"

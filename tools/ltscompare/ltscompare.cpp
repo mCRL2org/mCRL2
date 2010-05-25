@@ -78,15 +78,17 @@ static const std::set<lts_equivalence> &allowed_eqs()
   return s;
 }
 
-struct t_tool_options {
+struct t_tool_options 
+{
   std::string     name_for_first;
   std::string     name_for_second;
   lts_type        format_for_first;
   lts_type        format_for_second;
   lts_equivalence equivalence;
   lts_preorder    preorder;
-  lts_eq_options  eq_opts;
+  // lts_eq_options  eq_opts;
   std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
+  bool generate_counter_examples;
 };
 
 typedef tool ltscompare_base;
@@ -168,7 +170,7 @@ class ltscompare_tool : public ltscompare_base
         gsVerboseMsg("comparing LTSs using %s...\n",
             name_of_equivalence(tool_options.equivalence).c_str());
 
-        result = compare(l1,l2,tool_options.equivalence,tool_options.eq_opts);
+        result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
         gsMessage("LTSs are %s%s\n",
             ((result) ? "" : "not "),
@@ -180,7 +182,7 @@ class ltscompare_tool : public ltscompare_base
         gsVerboseMsg("comparing LTSs using %s...\n",
             name_of_preorder(tool_options.preorder).c_str());
 
-        result = compare(l1,l2,tool_options.preorder,tool_options.eq_opts);
+        result = compare(l1,l2,tool_options.preorder);
 
         gsMessage("LTS in %s is %s%s LTS in %s\n",
             tool_options.name_for_first.c_str(),
@@ -242,7 +244,9 @@ class ltscompare_tool : public ltscompare_base
         add_option("tau", make_mandatory_argument("ACTNAMES"),
           "consider actions with a name in the comma separated list ACTNAMES to "
           "be internal (tau) actions in addition to those defined as such by "
-          "the input");
+          "the input").
+        add_option("counter-example",
+          "generate counter example traces if the input lts's are not equivalent",'c');
     }
 
     void parse_options(const command_line_parser &parser)
@@ -267,6 +271,11 @@ class ltscompare_tool : public ltscompare_base
       if (parser.options.count("equivalence") + parser.options.count("preorder") < 1)
       {
         parser.error("one of the options -e/--equivalence and -p/--preorder must be used");
+      }
+
+      if (parser.options.count("counter-example")>0 && parser.options.count("equivalence")==0)
+      { 
+        parser.error("counter examples can only be used in combination with an equivalence");
       }
   
       tool_options.equivalence = lts_eq_none;
@@ -300,6 +309,8 @@ class ltscompare_tool : public ltscompare_base
       if (parser.options.count("tau")) 
       { set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
       }
+ 
+      tool_options.generate_counter_examples=parser.options.count("counter-example")>0;
   
       if (parser.arguments.size() == 1) {
         tool_options.name_for_second = parser.arguments[0];

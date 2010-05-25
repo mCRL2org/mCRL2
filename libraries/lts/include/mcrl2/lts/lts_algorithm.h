@@ -270,7 +270,8 @@ namespace lts
        */
       lts_eq_options();
 
-      struct {
+      struct 
+      {
         /** \brief Indicates whether to add equivalence class
          * information to every state.
          * \details
@@ -418,7 +419,7 @@ namespace lts
    * equivalent to the original LTS by equivalence \a eq, and
    * similarly for the LTS \a l.
    */
-  bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+  bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const bool generate_counter_examples = false);
  
   /** \brief Checks whether this LTS is equivalent to another LTS.
    * \details The input labelled transition systems are duplicated in memory to carry
@@ -427,11 +428,11 @@ namespace lts
    * \param[in] l The LTS to which this LTS will be compared.
    * \param[in] eq The equivalence with respect to which the LTSs will be
    * compared.
-   * \param[in] opts The options that will be used for the comparison.
+   * \param[in] generate_counter_example If true counter examples are written to file.
    * \retval true if the LTSs are found to be equivalent.
    * \retval false otherwise.
    */
-  bool compare(const lts &l1, const lts &l2, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+  bool compare(const lts &l1, const lts &l2, const lts_equivalence eq, const bool generate_counter_examples = false);
  
   /** \brief Checks whether this LTS is smaller than another LTS according
    * to a preorder. 

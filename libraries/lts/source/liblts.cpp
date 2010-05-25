@@ -1086,7 +1086,7 @@ string lts::state_value_str(unsigned int state) const
 }
 
 ATerm lts::label_value(unsigned int label) const
-{
+{ 
   assert(label < label_values.size());
   return label_values[label];
 }

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/trace.h
+/// \file mcrl2/trace/trace.h
 /// \brief This library allows to flexibly manipulate traces.
 /// \details This library allows to build, traverse and store traces.
 /// Traces are sequences of state-action-time triples.
@@ -22,6 +22,7 @@
 #include <aterm2.h>
 #include <iostream>
 #include <string>
+#include "mcrl2/atermpp/vector.h"
 
 namespace mcrl2 {
   /** \brief The namespace for traces.
@@ -219,12 +220,15 @@ namespace mcrl2 {
       void save(std::string const& filename, TraceFormat tf = tfMcrl2);
 
     private:
-      ATermAppl *states;
-      ATermAppl *actions;
-      ATermAppl *times;
-      unsigned int buf_size;
-      unsigned int len;
-      unsigned int pos;
+      // The number of states is always one less than the number of actions, and times.
+      // So, an invariant is actions.size()+1 == states.size() == times.size();
+      // The number of actions present is actions.size().
+      atermpp::vector < ATermAppl> states;
+      atermpp::vector < ATermAppl> actions;
+      atermpp::vector < ATermAppl> times;
+      // unsigned int buf_size;
+      // unsigned int len;
+      unsigned int pos; // pos <= actions.size(). 
 
       void init();
       void cleanup();

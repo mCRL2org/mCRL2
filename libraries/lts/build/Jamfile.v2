@@ -11,6 +11,7 @@ mcrl2-library lts
          <library>/site-config//BCG
          <library>/libraries//data
          <use>/libraries//lps
+         <use>/libraries//trace
        :
        : <include>../include
          <library>/site-config//BCG

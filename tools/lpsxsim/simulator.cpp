@@ -24,7 +24,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/trace.h"
+#include "mcrl2/trace/trace.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "simulator.h"
 

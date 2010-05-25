@@ -13,6 +13,8 @@
 #include <vector>
 #include <map>
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/lts_utilities.h"
 
 namespace mcrl2
 {
@@ -84,12 +86,24 @@ class bisim_partitioner
      *  \retval false otherwise. */
     bool in_same_class(const unsigned int s, const unsigned int t) const;
 
+    /** \brief Returns a vector of counter traces.
+     *  \details The states s and t are non bisimilar states. If they are
+     *           bisimilar an exception is raised. A counter trace of the form sigma a is
+     *           returned, which has the property that s-sigma->s'-a-> and t-sigma->t'-/a->,
+     *           or vice versa, s-sigma->s'-/a-> and t-sigma->t'-a->. A vector of such
+     *           counter traces is returned.
+     *  \param[in] s A state number.
+     *  \param[in] t A state number.
+     *  \return A vector containing counter traces. */
+    std::vector < mcrl2::trace::Trace > counter_traces(const unsigned int s, const unsigned int t);
+
   private:
 
     typedef unsigned int block_index_type;
     typedef unsigned int state_type;
     typedef unsigned int label_type;
 
+    state_type max_state_index;
     mcrl2::lts::lts &aut;
 
     struct non_bottom_state
@@ -105,7 +119,14 @@ class bisim_partitioner
     };
 
     struct block
-    { block_index_type block_index;
+    { state_type state_index;                   // The state number represented by this state;
+      block_index_type block_index;
+      block_index_type parent_block_index;      // Index of the parent block. 
+                                                // If there is no parent block, this refers to the block
+                                                // itself.
+      std::pair < label_type, block_index_type > splitter; 
+                                                // The action and block that caused this block to split.
+                                                // This information is only defined if the block has been split.
       std::vector < state_type > bottom_states; // The non bottom states must be ordered
                                                 // on tau reachability. The deepest
                                                 // states occur first in the vector.
@@ -115,9 +136,21 @@ class bisim_partitioner
       std::vector < transition > non_inert_transitions; 
 
       void swap(block &b)
-      { block_index_type block_index1=b.block_index;
+      { state_type state_index1=b.state_index;
+        b.state_index=state_index;
+        state_index=state_index1;
+
+        block_index_type block_index1=b.block_index;
         b.block_index=block_index;
         block_index=block_index1;
+
+        block_index_type parent_block_index1=b.parent_block_index;
+        b.parent_block_index=parent_block_index;
+        parent_block_index=parent_block_index1;
+
+        std::pair < label_type, block_index_type > splitter1=b.splitter;
+        b.splitter=splitter;
+        splitter=splitter1;
         bottom_states.swap(b.bottom_states);
         non_bottom_states.swap(b.non_bottom_states);
         non_inert_transitions.swap(b.non_inert_transitions);
@@ -137,18 +170,22 @@ class bisim_partitioner
 
     void create_initial_partition(const bool branching, 
                                   const bool preserve_divergences);
-    void refine_partition_until_it_becomes_stable(const bool preserve_divergence);
+    void refine_partition_until_it_becomes_stable(const bool branching, const bool preserve_divergence);
     void refine_partion_with_respect_to_divergences(void);
-    void split_the_blocks_in_BL(bool &);
+    void split_the_blocks_in_BL(bool &, const label_type, const block_index_type splitter_block);
     void order_recursively_on_tau_reachability(
                                  const state_type s,
                                  std::map < state_type, std::vector < state_type > > &inert_transition_map,
                                  std::vector < non_bottom_state > &new_non_bottom_states,
                                  std::set < state_type > &visited);
     void order_on_tau_reachability(std::vector < non_bottom_state > &non_bottom_states);
+    std::vector < mcrl2::trace::Trace > counter_traces_aux(
+                           const unsigned int s,
+                           const unsigned int t,
+                           const mcrl2::lts::outgoing_transitions_per_state_action_t &outgoing_transitions) const;
 
 #ifndef NDEBUG
-    void check_internal_consistency_of_the_partitioning_data_structure(const bool preserve_divergence) const;
+    void check_internal_consistency_of_the_partitioning_data_structure(const bool branching, const bool preserve_divergence) const;
 #endif
 
 };
@@ -178,7 +215,8 @@ class bisim_partitioner
           lts &l1,
           lts &l2, 
           const bool branching=false, 
-          const bool preserve_divergences=false);
+          const bool preserve_divergences=false,
+          const bool generate_counter_examples = false );
 
 
  /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
@@ -196,7 +234,8 @@ class bisim_partitioner
           const lts &l1,
           const lts &l2, 
           const bool branching=false, 
-          const bool preserve_divergences=false); 
+          const bool preserve_divergences=false,
+          const bool generate_counter_examples = false); 
 
 }
 }
