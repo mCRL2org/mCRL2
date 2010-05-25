@@ -843,6 +843,17 @@ namespace mcrl2 {
       return t == core::detail::gsMakeNil();
     }
 
+    /// \brief Returns true iff the expression represents a standard sort.
+    /// \param[in] s a sort expression.
+    inline
+    bool
+    is_system_defined(const sort_expression& s)
+    {
+      return sort_bool::is_bool(s) || sort_real::is_real(s)
+          || sort_int::is_int(s) || sort_nat::is_nat(s) || sort_pos::is_pos(s)
+          || is_container_sort(s) || is_structured_sort(s);
+    }
+
     /** \brief A collection of utilities for lazy expression construction
      *
      * The basic idea is to keep expressions that result from application of

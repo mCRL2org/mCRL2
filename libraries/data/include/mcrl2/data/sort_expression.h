@@ -140,9 +140,6 @@ namespace mcrl2 {
       return atermpp::convert< sort_expression_list >(r);
     }
 
-    /// \brief Returns true iff the expression represents a standard sort.
-    bool is_system_defined(const sort_expression& s);
-
   } // namespace data
 
 } // namespace mcrl2
