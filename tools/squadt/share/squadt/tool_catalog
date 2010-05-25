@@ -15,6 +15,7 @@
 <tool name="lpssuminst" />
 <tool name="lpsuntime" />
 <tool name="ltsconvert" />
+<tool name="ltscompare" />
 <tool name="ltsgraph" macosx_bundle="true" />
 <tool name="ltsinfo" />
 <tool name="ltsview" macosx_bundle="true"/>
