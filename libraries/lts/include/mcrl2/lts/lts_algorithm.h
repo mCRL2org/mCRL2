@@ -32,10 +32,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef USE_BCG
-#include <bcg_user.h>
-#endif
-
 namespace mcrl2
 {
 namespace lts

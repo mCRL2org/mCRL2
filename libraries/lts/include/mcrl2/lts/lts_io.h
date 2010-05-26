@@ -38,10 +38,6 @@
 #include "mcrl2/lts/lts.h"
 
 
-#ifdef USE_BCG
-#include <bcg_user.h>
-#endif
-
 namespace mcrl2
 {
 namespace lts
