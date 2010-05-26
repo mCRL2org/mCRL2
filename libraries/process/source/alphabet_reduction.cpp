@@ -228,62 +228,6 @@ namespace mcrl2 {
       
       static ATermList sync_mact(ATermList a, ATermList b)
       {
-      /*   ATermList c = ATmakeList0(); */
-      /*   while ( !(ATisEmpty(a) || ATisEmpty(b)) ){ */
-      /*     ATermAppl aa=ATAgetFirst(a); */
-      /*     ATermAppl bb=ATAgetFirst(b); */
-      /*     if ( ATcompare((ATerm)aa,(ATerm)bb) <=0 ) { */
-      /*       c = ATinsert(c,(ATerm)aa); */
-      /*       a = ATgetNext(a); */
-      /*     }  */
-      /*     else { */
-      /*       c = ATinsert(c,(ATerm)bb); */
-      /*       b = ATgetNext(b); */
-      /*     } */
-      /*   } */
-      /*   c=ATreverse(c); */
-      /*   if ( !ATisEmpty(a) ){ */
-      /*     c = ATconcat(c,a); */
-      /*   } else if ( !ATisEmpty(b) ) */
-      /*     { */
-      /*       c = ATconcat(c,b); */
-      /*     } */
-      /*   return c; */
-      
-      
-      
-      /*   //return gsaATsortList(ATconcat(a,b)); */
-      /*   int n = ATgetLength(a); */
-      /*   int m = ATgetLength(b); */
-      /*   ATermAppl *c = malloc((n+m+1)*sizeof(ATermAppl)); */
-      
-      /*   int i=-1; //current pos */
-      /*   while ( !(ATisEmpty(a) || ATisEmpty(b)) ){ */
-      /*     ATermAppl aa=ATAgetFirst(a); */
-      /*     ATermAppl bb=ATAgetFirst(b); */
-      /*     i++; */
-      /*     if ( ATcompare((ATerm)aa,(ATerm)bb) <=0 ) { */
-      /*       c[i] = aa; */
-      /*       a = ATgetNext(a); */
-      /*     }  */
-      /*     else { */
-      /*       c[i] = bb; */
-      /*       b = ATgetNext(b); */
-      /*     } */
-      /*   } */
-      
-      /*   if(ATisEmpty(a)) a=b; */
-      /*   while ( !ATisEmpty(a) ){ */
-      /*     i++; */
-      /*     c[i] = ATAgetFirst(a); */
-      /*     a = ATgetNext(a); */
-      /*  } */
-      /*   ATermList r=ATmakeList0(); */
-      /*   for (;i>=0;i--) */
-      /*     r=ATinsert(r,(ATerm)c[i]); */
-      /*   free(c); */
-      /*   return r; */
-      
         assert(a && b);
       
         if (ATisEmpty(a)) return b;

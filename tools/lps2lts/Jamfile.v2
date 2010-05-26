@@ -4,7 +4,6 @@ tool lps2lts
        : lps2lts.cpp
          exploration.cpp
 	 lts.cpp
-         /libraries//trace
          /libraries//data
          /libraries//lps
          /libraries//lts

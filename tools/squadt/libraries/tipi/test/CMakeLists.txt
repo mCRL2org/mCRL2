@@ -37,7 +37,6 @@ foreach( OBJ ${TERM_OBJS} )
     )
   else( MCRL2_MONO_LIB )  
     target_link_libraries("${PREFIX}_${result}"
-      mcrl2_trace
       mcrl2_lps
       squadt_tipi
     )

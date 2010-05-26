@@ -33,7 +33,6 @@ tool ltsview
         /libraries//gl2ps
         /libraries/utilities//colorbutton
         /libraries//lts
-        /libraries//trace
         /site-config//boost_signals
       : <squadt-connectivity>implemented
         <wx>gl

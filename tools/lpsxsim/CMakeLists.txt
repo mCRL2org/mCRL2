@@ -36,7 +36,6 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
-  mcrl2_trace
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})

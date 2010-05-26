@@ -59,7 +59,6 @@ add_library( ${PROJECT_NAME}
   ${mcrl2_utilities_wx_src}
   ${mcrl2_lps_src}
   ${mcrl2_lts_src}
-  ${mcrl2_trace_src}
   ${mcrl2_process_src}
   ${squadt_tipi_src}
   ${mcrl2_utilities_command_line_src}

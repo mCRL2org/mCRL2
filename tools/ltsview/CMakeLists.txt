@@ -86,7 +86,6 @@ if( MCRL2_MONO_LIB )
 else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
-  mcrl2_trace
   mcrl2_lts
   mcrl2_utilities_command_line
   mcrl2_utilities_wx

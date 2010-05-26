@@ -128,6 +128,7 @@ void test_data_expression(const std::string &de_in,
       if(expected_sort != "")
       {
         BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
+        std::clog << "x: " << x << std::endl;
       }
     }
     else
@@ -293,12 +294,20 @@ BOOST_AUTO_TEST_CASE(test_set_numbers) {
   test_data_expression("{1, 2, -7}", true, "Set(Int)");
 }
 
+BOOST_AUTO_TEST_CASE(test_set_comprehension) {
+  test_data_expression("{ x: Nat | x mod 2 == 0 }", true, "Set(Nat)");
+}
+
 BOOST_AUTO_TEST_CASE(test_bag_true_false) {
   test_data_expression("{true: 1, false: 2}", true, "Bag(Bool)");
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_numbers) {
   test_data_expression("{1: 1, 2: 2, -8: 8}", true, "Bag(Int)");
+}
+
+BOOST_AUTO_TEST_CASE(test_bag_comprehension) {
+  test_data_expression("{ x: Nat | (lambda y: Nat. y * y)(x) }", true, "Bag(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_function_updates)

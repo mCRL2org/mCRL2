@@ -1,8 +1,8 @@
 project toolset/lpsxsim ;
 
 alias sim_shared
-       : [ obj simbase.o   : simbase.cpp   : <use>/libraries//lps <use>/libraries//trace ]
-         [ obj simulator.o : simulator.cpp : <use>/libraries//lps <use>/libraries//trace ]
+       : [ obj simbase.o   : simbase.cpp   : <use>/libraries//lps ]
+         [ obj simulator.o : simulator.cpp : <use>/libraries//lps ]
        ;
 
 explicit sim_shared ;
@@ -19,7 +19,6 @@ tool lpsxsim
          xsimmain.cpp
          xsimtrace.cpp
          sim_shared
-         /libraries//trace
          /libraries//lps
        : <squadt-connectivity>implemented
          <wx>gl
@@ -32,7 +31,6 @@ tool lpssim
        : sim.cpp
          sim_shared
          /libraries//lps
-         /libraries//trace
        : <install-rule>lpssim-install
        ;
 

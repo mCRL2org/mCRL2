@@ -12,11 +12,6 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
-set(mcrl2_trace_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/trace.cpp
-)
-set(mcrl2_trace_src ${mcrl2_trace_src} PARENT_SCOPE)
-
 if( NOT MCRL2_MONO_LIB )
   include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
   include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
@@ -24,15 +19,6 @@ if( NOT MCRL2_MONO_LIB )
   include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
   
-  
-  # actual target:
-  add_library(${PROJECT_NAME}
-    ${mcrl2_trace_src}
-  )
-  
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_core
-  )
   
   # add install target:
   install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
