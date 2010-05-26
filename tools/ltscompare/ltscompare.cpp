@@ -573,7 +573,7 @@ bool ltscompare_tool::perform_task(tipi::configuration& c) {
      gsVerboseMsg("comparing LTSs using %s...\n",
          name_of_equivalence(tool_options.equivalence).c_str());
 
-     result = compare(l1,l2,tool_options.equivalence,tool_options.eq_opts);
+     result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
      gsMessage("LTSs are %s%s\n",
          ((result) ? "" : "not "),
@@ -586,7 +586,7 @@ bool ltscompare_tool::perform_task(tipi::configuration& c) {
      gsVerboseMsg("comparing LTSs using %s...\n",
          name_of_preorder(tool_options.preorder).c_str());
 
-     result = compare(l1,l2,tool_options.preorder,tool_options.eq_opts);
+     result = compare(l1,l2,tool_options.preorder);
 
    }
 
