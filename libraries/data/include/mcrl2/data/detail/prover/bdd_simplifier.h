@@ -39,7 +39,13 @@ class BDD_Simplifier {
     }
 
     /// \brief Sets the attribute BDD_Simplifier::f_deadline.
-    void set_time_limit(time_t a_time_limit);
+    void set_time_limit(time_t a_time_limit) {
+      if (a_time_limit == 0) {
+        f_deadline = 0;
+      } else {
+        f_deadline = time(0) + a_time_limit;
+      }
+    }
 
     /// \brief Returns a simplified BDD, equivalent to the bdd a_bdd.
     /// precondition: The argument passed as parameter a_bdd is a data expression in internal mCRL2 format with the

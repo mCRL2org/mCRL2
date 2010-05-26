@@ -13,6 +13,8 @@
 #define FORMULA_CHECKER_H
 
 #include "aterm2.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
@@ -59,56 +61,124 @@ namespace mcrl2 {
   /// list of formulas passed as parameter a_formulas are tautologies or contradictions. In some cases the BDD based prover
   /// may be unable to determine whether an expression is a tautology or a contradiction. If this is the case, the function
   /// Formula_Checker::check_formulas will print information to stderr indicating this fact.
+      class Formula_Checker {
+        private:
+          /// \brief BDD based prover.
+          mcrl2::data::detail::BDD_Prover f_bdd_prover;
 
-class Formula_Checker {
-  private:
-    /// \brief BDD based prover.
-    mcrl2::data::detail::BDD_Prover f_bdd_prover;
+          /// \brief Class that outputs BDDs in dot format.
+          BDD2Dot f_bdd2dot;
 
-    /// \brief Class that outputs BDDs in dot format.
-    BDD2Dot f_bdd2dot;
+          /// \brief Flag indicating whether or not counter-examples are displayed.
+          bool f_counter_example;
 
-    /// \brief Flag indicating whether or not counter-examples are displayed.
-    bool f_counter_example;
+          /// \brief Flag indicating whether or not witnesses are displayed.
+          bool f_witness;
 
-    /// \brief Flag indicating whether or not witnesses are displayed.
-    bool f_witness;
+          /// \brief Prefix for the names of the files containing BDDs in dot format.
+          std::string f_dot_file_name;
 
-    /// \brief Prefix for the names of the files containing BDDs in dot format.
-    std::string f_dot_file_name;
+          /// \brief Displays a witness.
+          void print_witness()
+          {
+            if (f_witness) {
+              ATermAppl v_witness;
 
-    /// \brief Displays a witness.
-    void print_witness();
+              v_witness = f_bdd_prover.get_witness();
+              if (v_witness == 0) {
+                throw mcrl2::runtime_error(
+                  "Cannot print witness. This is probably caused by an abrupt stop of the\n"
+                  "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
+                );
+              } else {
+                core::gsMessage("  Witness: %P\n", v_witness);
+              }
+            }
+          }
 
-    /// \brief Displays a counter-example.
-    void print_counter_example();
+          /// \brief Displays a counter-example.
+          void print_counter_example()
+          {
+            if (f_counter_example) {
+              ATermAppl v_counter_example;
 
-    /// \brief Writes the BDD corresponding to the formula with number a_formula_number to a dot file.
-    void save_dot_file(int a_formula_number);
-  public:
-    /// \brief Constructor that initializes Formula_Checker::f_counter_example, Formula_Checker::f_witness,
-    /// \brief Formula_Checker::f_bdd_prover and Formula_Checker::f_dot_file_name.
-    /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
-    /// to 0, no time limit will be enforced
-    Formula_Checker(
-      mcrl2::data::data_specification a_data_spec,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
-      int a_time_limit = 0,
-      bool a_path_eliminator = false,
-      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
-      bool a_apply_induction = false,
-      bool a_counter_example = false,
-      bool a_witness = false,
-      char const* a_dot_file_name = 0
-    );
+              v_counter_example = f_bdd_prover.get_counter_example();
+              if (v_counter_example == 0) {
+                throw mcrl2::runtime_error(
+                  "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
+                  "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.\n"
+                );
+              } else {
+                core::gsMessage("  Counter-example: %P\n", v_counter_example);
+              }
+            }
+          }
 
-    /// \brief Destructor without any specific functionality.
-    ~Formula_Checker();
+          /// \brief Writes the BDD corresponding to the formula with number a_formula_number to a dot file.
+          void save_dot_file(int a_formula_number)
+          {
+            if (!f_dot_file_name.empty()) {
+              std::ostringstream  v_file_name(f_dot_file_name);
 
-    /// \brief Checks the formulas in the list a_formulas.
-    /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
-    void check_formulas(ATermList a_formulas);
-};
+              v_file_name << "-" << a_formula_number << ".dot";
+              f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
+            }
+          }
+
+        public:
+          /// \brief Constructor that initializes Formula_Checker::f_counter_example, Formula_Checker::f_witness,
+          /// \brief Formula_Checker::f_bdd_prover and Formula_Checker::f_dot_file_name.
+          /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
+          /// to 0, no time limit will be enforced
+          Formula_Checker(
+            mcrl2::data::data_specification a_data_spec,
+            mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
+            int a_time_limit = 0,
+            bool a_path_eliminator = false,
+            mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
+            bool a_apply_induction = false,
+            bool a_counter_example = false,
+            bool a_witness = false,
+            char const* a_dot_file_name = 0
+          ):
+            f_bdd_prover(a_data_spec, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction), f_dot_file_name(a_dot_file_name)
+          {
+            f_counter_example = a_counter_example;
+            f_witness = a_witness;
+          }
+
+          /// \brief Destructor without any specific functionality.
+          ~Formula_Checker()
+            {}
+
+          /// \brief Checks the formulas in the list a_formulas.
+          /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
+          void check_formulas(ATermList a_formulas){
+            ATermAppl v_formula;
+            int v_formula_number = 1;
+
+            while (!ATisEmpty(a_formulas)) {
+              v_formula = core::ATAgetFirst(a_formulas);
+              core::gsMessage("'%P': ", v_formula);
+              f_bdd_prover.set_formula(v_formula);
+              Answer v_is_tautology = f_bdd_prover.is_tautology();
+              Answer v_is_contradiction = f_bdd_prover.is_contradiction();
+              if (v_is_tautology == answer_yes) {
+                core::gsMessage("Tautology\n");
+              } else if (v_is_contradiction == answer_yes) {
+                core::gsMessage("Contradiction\n");
+              } else {
+                core::gsMessage("Undeterminable\n");
+                print_counter_example();
+                print_witness();
+                save_dot_file(v_formula_number);
+              }
+              a_formulas = ATgetNext(a_formulas);
+              v_formula_number++;
+            }
+          }
+
+      };
 
     } // namespace detail
   } // namespace data
