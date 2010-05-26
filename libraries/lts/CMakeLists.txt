@@ -49,6 +49,7 @@ if(NOT MCRL2_MONO_LIB)
   )
   
   include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+  include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
@@ -61,6 +62,7 @@ if(NOT MCRL2_MONO_LIB)
   
   target_link_libraries(${PROJECT_NAME}
     mcrl2_data
+    mcrl2_trace
     svc
   )
   
