@@ -18,9 +18,5 @@ if( NOT MCRL2_MONO_LIB )
   include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-  
-  
-  # add install target:
-  install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 endif( NOT MCRL2_MONO_LIB )
 
