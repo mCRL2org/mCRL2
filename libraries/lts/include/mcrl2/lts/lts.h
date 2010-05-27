@@ -509,11 +509,11 @@ namespace lts
       // /** \brief Checks whether this LTS has a creator.
       //  * \retval true if the label has a creator;
       //  * \retval false otherwise.  */
-      bool has_creator();
+      bool has_creator() const;
 
       // /** \brief Gets the creator of this LTS.
       //  * \return The creator string.*/
-      std::string get_creator();
+      std::string get_creator() const;
 
       // /** \brief Sets the creator of this LTS.
       //  * \param[in] creator The creator string.*/

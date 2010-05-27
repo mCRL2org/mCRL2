@@ -1,8 +1,8 @@
 project toolset/lpsxsim ;
 
 alias sim_shared
-       : [ obj simbase.o   : simbase.cpp   : <use>/libraries//lps ]
-         [ obj simulator.o : simulator.cpp : <use>/libraries//lps ]
+       : [ obj simbase.o   : simbase.cpp   : <use>/libraries//lps <use>/libraries//trace ]
+         [ obj simulator.o : simulator.cpp : <use>/libraries//lps <use>/libraries//trace ]
        ;
 
 explicit sim_shared ;
@@ -20,6 +20,7 @@ tool lpsxsim
          xsimtrace.cpp
          sim_shared
          /libraries//lps
+	 /libraries//trace
        : <squadt-connectivity>implemented
          <wx>gl
          <define>PLUGINDIR=\"\\\"$(PLUGIN_ROOT)\\\"\"

@@ -33,6 +33,8 @@ namespace mcrl2
 {
 namespace lts
 {
+namespace detail
+{
 
 void read_from_bcg(lts &l, string const& filename)
 {
@@ -91,7 +93,7 @@ void write_to_bcg(const lts &l, string const& filename)
       const_cast< char* >(filename.c_str()),
       l.initial_state(),
       1, // XXX add check to see if this might be 2?
-      (creator != "")?const_cast< char* >(creator.c_str()):NULL,
+      (l.get_creator() != "")?const_cast< char* >(l.get_creator().c_str()):NULL,
       0
       );
   BCG_IO_WRITE_BCG_SURVIVE(BCG_FALSE);
@@ -146,6 +148,7 @@ void write_to_bcg(const lts &l, string const& filename)
 
 }
 
+}
 }
 }
 

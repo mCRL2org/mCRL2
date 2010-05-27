@@ -1119,12 +1119,12 @@ string lts::label_value_str(unsigned int label) const
   return s;
 }
 
-bool lts::has_creator()
+bool lts::has_creator() const
 {
   return !creator.empty();
 }
 
-string lts::get_creator()
+string lts::get_creator() const
 {
   return creator;
 }
