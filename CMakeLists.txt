@@ -945,32 +945,37 @@ if(UNIX)
     flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll
     COMMAND bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy
     COMMAND sed -i 's+include \"mcrl2parser.h\"+include \"mcrl2/core/detail/mcrl2parser.h\"+' mcrl2parser.cpp
+    COMMAND sed -i '/isatty/d' mcrl2lexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/core/source
   )
   
   add_custom_target(chiparser
     flex -Pchi -ochilexer.cpp chilexer.ll
     COMMAND bison -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy
+    COMMAND sed -i '/isatty/d' chilexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/chi2mcrl2
   )
   
   add_custom_target(lysaparser
     flex -Plysa -olysalexer.cpp lysalexer.ll
     COMMAND bison -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy
+    COMMAND sed -i '/isatty/d' lysalexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/lysa2mcrl2
   )
   
   add_custom_target(liblts_fsmparser
     flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll
     COMMAND bison -p fsm --defines=../include/mcrl2/lts/detail/liblts_fsmparser.h -o liblts_fsmparser.cpp liblts_fsmparser.yy
-    COMMAND sed -i 's+include \"liblts_fsmparser.h\"+include \"mcrl2/liblts_fsmparser.h\"+' liblts_fsmparser.cpp
+    COMMAND sed -i 's+include \"liblts_fsmparser.h\"+include \"mcrl2/lts/detail/liblts_fsmparser.h\"+' liblts_fsmparser.cpp
+    COMMAND sed -i '/isatty/d' liblts_fsmlexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/lts/source
   )
   
   add_custom_target(liblts_dotparser
     flex -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll
     COMMAND bison -p dot --defines=../include/mcrl2/lts/detail/liblts_dotparser.h -o liblts_dotparser.cpp liblts_dotparser.yy
-    COMMAND sed -i 's+include \"liblts_dotparser.h\"+include \"mcrl2/liblts_dotparser.h\"+' liblts_dotparser.cpp
+    COMMAND sed -i 's+include \"liblts_dotparser.h\"+include \"mcrl2/lts/detail/liblts_dotparser.h\"+' liblts_dotparser.cpp
+    COMMAND sed -i '/isatty/d' liblts_dotlexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/lts/source
   )
   
