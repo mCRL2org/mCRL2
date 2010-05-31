@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <algorithm>
+#include <limits>
 #include <queue>
 #include <vector>
 #include "cluster.h"
@@ -128,11 +129,14 @@ void FSMStatePositioner::topDownPass()
 
 void FSMStatePositioner::resolveUnpositioned()
 {
-  Vector2D position = Vector2D(0,0);
   for (vector< State* >::iterator state_it = unpositioned_states.begin();
       state_it != unpositioned_states.end(); ++state_it)
   {
-    requestStatePosition(*state_it, position);
+    State* state = *state_it;
+    ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
+    int ring, slot;
+    cs_info->findFarthestFreeSlot(ring, slot);
+    assignStateToSlot(state, ring, slot);    
   }
 }
 
@@ -249,8 +253,10 @@ void FSMStatePositioner::requestStatePosition(State* state, Vector2D& position)
   assignStateToSlot(state, ring, slot);
 }
 
-const float ClusterSlotInfo::MIN_DELTA_RING = 0.25f;
-const float ClusterSlotInfo::MIN_DELTA_SLOT = 0.25f;
+
+
+const float ClusterSlotInfo::MIN_DELTA_RING = 0.22f;
+const float ClusterSlotInfo::MIN_DELTA_SLOT = 0.22f;
 
 ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
 {
@@ -269,57 +275,61 @@ ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
   {
     float circumference = 2 * PI * ring * delta_ring;
     // max with 1 to ensure that ring 0 also has a slot
-    int num_slots = max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
-    delta_slots.push_back( circumference / static_cast<float>(num_slots) );
-    vector< bool > trues( num_slots, true );
-    slot_free.push_back( trues );
+    int slots = max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
+    num_slots.push_back(slots);
   }
 }
 
-void ClusterSlotInfo::occupySlot(int ring, int slot)
+inline void ClusterSlotInfo::occupySlot(int ring, int slot)
 {
-  slot_free[ring][slot] = false;
+  occupied_slots.insert(Slot(ring, slot));
 }
 
-int ClusterSlotInfo::getNumRings()
+inline int ClusterSlotInfo::getNumRings()
 {
-  return slot_free.size();
+  return num_slots.size();
 }
 
-int ClusterSlotInfo::getNumSlots(int ring)
+inline int ClusterSlotInfo::getNumSlots(int ring)
 {
-  return slot_free[ring].size();
+  return num_slots[ring];
 }
 
 void ClusterSlotInfo::getPolarCoordinates(int ring, int slot, float &angle,
     float &radius)
 {
   radius = delta_ring * ring;
-  angle = rad_to_deg(delta_slots[ring] * slot / radius);
+  angle = rad_to_deg(2 * PI * slot / num_slots[ring]);
+}
+
+Vector2D ClusterSlotInfo::getVector(int ring, int slot)
+{
+  float angle, radius;
+  getPolarCoordinates(ring, slot, angle, radius);
+  return Vector2D(angle) * radius;
 }
 
 void ClusterSlotInfo::findNearestSlot(Vector2D &position, int &ring, int
     &slot)
 {
-  float angle = position.toDegrees();
+  float angle_rad = deg_to_rad(position.toDegrees());
   float radius = position.length();
   ring = min(round_to_int(radius / delta_ring), getNumRings() - 1);
-  slot = round_to_int(ring * delta_ring * angle / delta_slots[ring]) %
+  slot = round_to_int(num_slots[ring] * angle_rad / (2 * PI)) %
     getNumSlots(ring);
 }
 
 void ClusterSlotInfo::findNearestFreeSlot(int &ring, int &slot)
 {
-  vector< bool > falses(getNumSlots(getNumRings() - 1), false);
-  vector< vector< bool > > slot_visited(getNumRings(), falses);
-  queue< pair< int, int > > to_visit_slots;
-  to_visit_slots.push(pair<int,int>(ring, slot));
+  SlotSet visited_slots;
+  queue< Slot > to_visit_slots;
+  to_visit_slots.push(Slot(ring, slot));
   while (! to_visit_slots.empty())
   {
-    ring = to_visit_slots.front().first;
-    slot = to_visit_slots.front().second;
-    to_visit_slots.pop();
-    if (slot_free[ring][slot])
+    Slot slot_coord = to_visit_slots.front();
+    ring = slot_coord.ring;
+    slot = slot_coord.slot;
+    if (occupied_slots.find(slot_coord) == occupied_slots.end())
     {
       return;
     }
@@ -330,9 +340,9 @@ void ClusterSlotInfo::findNearestFreeSlot(int &ring, int &slot)
       {
         next_slot += getNumSlots(ring);
       }
-      if (! slot_visited[ring][next_slot])
+      if (visited_slots.find(Slot(ring, next_slot)) == visited_slots.end())
       {
-        to_visit_slots.push(pair<int,int>(ring, next_slot));
+        to_visit_slots.push(Slot(ring, next_slot));
       }
     }
     for (int next_ring = ring - 1; next_ring < ring + 3; next_ring += 2)
@@ -346,12 +356,45 @@ void ClusterSlotInfo::findNearestFreeSlot(int &ring, int &slot)
               static_cast<float>(getNumSlots(ring)) * getNumSlots(next_ring)) %
             getNumSlots(ring);
         }
-        if (! slot_visited[next_ring][next_slot])
+        if (visited_slots.find(Slot(next_ring, next_slot)) == visited_slots.end())
         {
-          to_visit_slots.push(pair<int,int>(next_ring, next_slot));
+          to_visit_slots.push(Slot(next_ring, next_slot));
         }
       }
     }
-    slot_visited[ring][slot] = true;
+    visited_slots.insert(Slot(ring, slot));
+    to_visit_slots.pop();
+  }
+}
+
+void ClusterSlotInfo::findFarthestFreeSlot(int &ring, int &slot)
+{
+  if (occupied_slots.empty())
+  {
+    ring = getNumRings() - 1;
+    slot = 0;
+    return;
+  }
+  float max_min_distance = 0.0f;
+  for (int r = 0; r < getNumRings(); ++r)
+  {
+    for (int s = 0; s < getNumSlots(r); ++s)
+    {
+      Vector2D slot_vector = getVector(r, s);
+      float min_distance = numeric_limits< float >::max();
+      for (SlotSet::iterator occupied_slot = occupied_slots.begin();
+          occupied_slot != occupied_slots.end(); ++occupied_slot)
+      {
+        Vector2D delta_vector = slot_vector - getVector(occupied_slot->ring,
+            occupied_slot->slot);
+        min_distance = min(min_distance, delta_vector.length());
+      }
+      if (min_distance > max_min_distance)
+      {
+        max_min_distance = min_distance;
+        ring = r;
+        slot = s;
+      }
+    }
   }
 }
