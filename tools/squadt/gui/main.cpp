@@ -84,8 +84,13 @@ namespace squadt {
        new wxStaticText(this, wxID_ANY, wxT("Information on mCRL2 compatible file formats, as well as additional documentation can be found at:"), 
         wxPoint(25, 330));
 
+#ifdef _WIN32
+       wxStaticText *hl1  = new wxStaticText(this, wxID_ANY, wxT("http://www.mcrl2.org"), wxPoint(240, 360));
+#else
       wxHyperlinkCtrl *hl1 = new wxHyperlinkCtrl(this, wxID_ANY, wxT("  www.mcrl2.org  "), wxT("http://www.mcrl2.org"), wxPoint(240, 360));
+#endif
       hl1->SetFont(font);
+
 
       /* Reposition the window */
       CentreOnScreen();
