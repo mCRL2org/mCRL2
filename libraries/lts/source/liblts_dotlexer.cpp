@@ -94,9 +94,9 @@ typedef unsigned int flex_uint32_t;
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 /* end standard C++ headers. */
 
 #ifdef __cplusplus
@@ -1495,6 +1495,7 @@ int yyFlexLexer::yy_get_next_buffer()
 	dotyyfree((void *) b  );
 }
 
+extern "C" int isatty (int );
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
@@ -1782,17 +1783,14 @@ void concrete_dot_lexer::processQuoted()
 
 //Implementation of parse_dot
 
-void parse_dot(std::istream &stream, lts &l) 
-{
+bool parse_dot(std::istream &stream, lts &l) {
   clexer = new concrete_dot_lexer();
   dot_lexer_obj = clexer;
   bool result = clexer->parse_stream(stream,l);
   delete clexer;
   dot_lexer_obj = NULL;
   clexer = NULL;
-  if (!result)
-  { throw mcrl2::runtime_error("fail to parse dot input file.");
-  }
+  return result;
 }
 
 

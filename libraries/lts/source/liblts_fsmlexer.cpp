@@ -94,9 +94,9 @@ typedef unsigned int flex_uint32_t;
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 /* end standard C++ headers. */
 
 #ifdef __cplusplus
@@ -1357,6 +1357,7 @@ int yyFlexLexer::yy_get_next_buffer()
 	fsmyyfree((void *) b  );
 }
 
+extern "C" int isatty (int );
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
@@ -1650,17 +1651,14 @@ void concrete_fsm_lexer::processNumber()
 
 //Implementation of parse_fsm
 
-void parse_fsm(std::istream &stream, lts &l) 
-{
+bool parse_fsm(std::istream &stream, lts &l) {
   clexer = new concrete_fsm_lexer();
   fsm_lexer_obj = clexer;
   bool result = clexer->parse_stream(stream,l);
   delete clexer;
   fsm_lexer_obj = NULL;
   clexer = NULL;
-  if (!result)
-  { throw mcrl2::runtime_error("Parsing of fsm file failed");
-  }
+  return result;
 }
 
 
