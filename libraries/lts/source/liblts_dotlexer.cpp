@@ -1495,7 +1495,6 @@ int yyFlexLexer::yy_get_next_buffer()
 	dotyyfree((void *) b  );
 }
 
-extern "C" int isatty (int );
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,

@@ -119,7 +119,7 @@
 #include <vector>
 #include <cstring>
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/liblts_dotparser.h"
+#include "mcrl2/lts/detail/liblts_dotparser.h"
 #include "liblts_dotlexer.h"
 
 // Local variables
