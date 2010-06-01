@@ -95,6 +95,12 @@ class pbes_rewriter : public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
           pbesrewr(p, pbesr);
           break;
         }
+        case pfnf:
+        {
+          pfnf_rewriter<pbes_expression> pbesr;
+          pbesrewr(p, pbesr);
+          break;
+        }
         case prover:
         default:
         { // Just ignore.

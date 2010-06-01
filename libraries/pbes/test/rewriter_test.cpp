@@ -29,6 +29,7 @@
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/pbes/pbesrewr.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -392,9 +393,40 @@ void test_substitutions3()
   core::garbage_collect();
 }
 
+std::string PFNF1 =
+  "pbes                                                    \n"
+  "nu X(b:Bool) = (val(b) && (X(b) || (X(!b) && X(!!b)))); \n"
+  "                                                        \n"
+  "init X(true);                                           \n"
+  ;
+
+std::string PFNF2 = 
+  "pbes                                                        \n"
+  "nu X(m:Nat) = (forall n:Nat. X(n)) && (forall j:Nat. X(j)); \n"
+  "                                                            \n"
+  "init X(0);                                                  \n"
+  ;
+
+void test_pfnf(const std::string& pbes_spec)
+{
+  std::cerr << "--- test_pfnf ---" << std::endl;
+  pbes<> p = txt2pbes(pbes_spec);
+  std::cerr << "- before:" << std::endl;
+  std::cerr << pp(p) << std::endl;
+  pfnf_rewriter<pbes_expression> R;
+  pbesrewr(p, R);
+  std::cerr << "- after:" << std::endl;
+  std::cerr << pp(p) << std::endl;
+  std::cerr << "-----------------" << std::endl;
+  core::garbage_collect();
+}
+
 void test_pfnf_rewriter()
 {
   using namespace pbes_system;
+
+  test_pfnf(PFNF1);
+  test_pfnf(PFNF2);
 
   pfnf_rewriter<pbes_expression> R;
   pbes_expression x = parse_pbes_expression("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)", VARIABLE_SPECIFICATION);
