@@ -728,11 +728,13 @@ set(R_SLDFLAGS "-shared")
 set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/include/aterm\\\"")
 set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lATerm")
 
-if(NOT DEFINED USE_BCG )
-  set( USE_BCG "//" )
-else(NOT DEFINED USE_BCG )
+option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable CADP support" OFF)
+message(STATUS "MCRL2_ENABLE_CADP_SUPPORT: ${MCRL2_ENABLE_CADP_SUPPORT}" )
+if(MCRL2_ENABLE_CADP_SUPPORT )
   set(USE_BCG "")
-endif(NOT DEFINED USE_BCG )
+else(MCRL2_ENABLE_CADP_SUPPORT)
+  set( USE_BCG "//" )
+endif(MCRL2_ENABLE_CADP_SUPPORT)
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/setup.h.in" "${CMAKE_CURRENT_BINARY_DIR}/libraries/utilities/include/mcrl2/setup.h" @ONLY  )
 
