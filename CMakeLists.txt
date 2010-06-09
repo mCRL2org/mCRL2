@@ -723,7 +723,11 @@ endif(NOT BUILD_SHARED_LIBS)
 set(R_SCFLAGS ${BUILD_SHARED_LIBS_OPTION})
 set(R_SCXXFLAGS ${BUILD_SHARED_LIBS_OPTION})
 
-set(R_SLDFLAGS "-shared")
+if( NOT APPLE )
+  set(R_SLDFLAGS "-shared")
+else ( NOT APPLE )
+  set(R_SLDFLAGS "-bundle -undefined dynamic_lookup")
+endif( NOT APPLE )
 
 set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/include/aterm\\\"")
 set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lATerm")
@@ -830,7 +834,7 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   add_test(lpsparelm_abp ${lpsparelm_BINARY_DIR}/lpsparelm -v ${testdir}/abp_celm.lps ${testdir}/abp_celm_pelm.lps)
   add_test(lpssuminst_abp ${lpssuminst_BINARY_DIR}/lpssuminst -v ${testdir}/abp_celm_pelm.lps ${testdir}/abp_celm_pelm_sinst.lps)
   add_test(lps2lts_abp ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.aut  )
-  add_test(lps2lts_abp_fsm ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.fsm  )
+  add_test(lps2lts_abp_fsm ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/aVoor de toekomst kan een inschatting worden gemaakt van de personeelskosten op basis van een indexering en de beoogde personeelsomvang. Voor de inkomsten kan een inschatting gemaakt worden van de eerstegeldstroominkomsten per groep (promotiepremies en 2de/3de geldstroomtoeslag zijn variabel, andere inkomsten kunnen als vast beschouwd worden) voor de komende jaren. Al verworven 2de/3de geldstroominkomsten zijn eveneens bekend. bp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.fsm  )
   add_test(lps2lts_abp_dot ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.dot  )
   add_test(lps2lts_abp_svc ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.svc  )
   add_test(lps2lts_abp_lts ${lps2lts_BINARY_DIR}/lps2lts -v ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.lts  )
@@ -876,7 +880,7 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     lpssuminst_abp 
     lps2lts_abp 
     ltsinfo_abp 
-    pbes2bool_abp 
+    pbes2bool_abp
     lps2pbes_abp 
   PROPERTIES 
     LABELS "${MCRL2_TEST_LABEL}"
