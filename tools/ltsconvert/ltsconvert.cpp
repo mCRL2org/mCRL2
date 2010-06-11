@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
