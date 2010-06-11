@@ -17,6 +17,7 @@
 
 #include "aterm2.h"
 #include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
