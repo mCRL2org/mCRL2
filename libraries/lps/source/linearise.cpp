@@ -3895,7 +3895,6 @@ class specification_basic_type:public boost::noncopyable
 
     function_symbol find_case_function(unsigned int index, const sort_expression sort)
     {
-      // std::cerr << "Use case function " << index << " Sort: " << pp(sort) << "\n";
       const function_symbol_list functions=enumeratedtypes[index].functions;
       for(function_symbol_list::const_iterator w=functions.begin();
                   w!=functions.end(); ++w)
@@ -3918,8 +3917,6 @@ class specification_basic_type:public boost::noncopyable
     { variable_list vars;
       data_expression_list args;
       data_expression_list xxxterm;
-
-      // std::cerr << "Define case function " << index << "Sort: " << pp(sort) << "\n";
 
       const sort_expression normalised_sort=sort; // data.normalise_sorts(sort);
       const variable v1=get_fresh_variable("x",normalised_sort);
@@ -6283,7 +6280,8 @@ class specification_basic_type:public boost::noncopyable
 
       variable_list pars3;
       for(variable_list::const_iterator i=pars2.begin(); i!=pars2.end(); ++i)
-      { if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
+      { 
+        if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
         { // *i does not occur in pars1.
           pars3=push_front(pars3,*i);
         }
@@ -6321,7 +6319,8 @@ class specification_basic_type:public boost::noncopyable
                        const bool rename_variables,
                        variable_list &pars,
                        assignment_list &init)
-    { if (is_process_instance(t))
+    { 
+      if (is_process_instance(t))
       {
         summand_list t3=generateLPEmCRL(process_instance(t).identifier(),/*canterminate,*/regular,pars,init);
         long n=objectIndex(process_instance(t).identifier());
@@ -6365,13 +6364,15 @@ class specification_basic_type:public boost::noncopyable
           pars=temporary_spec.process().process_parameters();
 
           // Add all free variables in objectdata[n].parameters that are not already in the parameter list
-          // and are not global variables to pars
+          // and are not global variables to pars. This can occur when a parameter of the process is replaced
+          // by a constant, which by itself is a parameter.
 
           const std::set <variable> variable_list = data::find_free_variables(args);
           for(std::set <variable>::const_iterator i=variable_list.begin();
                  i!=variable_list.end(); ++i)
-          { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars
-                global_variables.find(*i)==global_variables.end())   // and it is neither a glabal variable
+          { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars,
+                global_variables.find(*i)==global_variables.end() && // it is neither a glabal variable
+                data::search_free_variable(lps.summands(),*i))          // and it occurs in the summands.
             { pars=push_front(pars,*i);
             }
           }
