@@ -414,6 +414,16 @@ option(MCRL2_MONO_LIB "Enable/disable creation of a monolithic library" OFF)
 message(STATUS "MCRL2_MONO_LIB: ${MCRL2_MONO_LIB}")
 
 ##---------------------------------------------------
+## Explicity Set NDebug 
+##-------------------------------------------------- 
+
+option(MCRL2_NDEBUG "Explicity set NDEBUG" OFF)
+message(STATUS "MCRL2_NDEBUG: ${MCRL2_NDEBUG}")
+if(MCRL2_NDEBUG)
+  add_definitions(-DNDEBUG)
+endif(MCRL2_NDEBUG)
+
+##---------------------------------------------------
 ## Determine SQuADT connectivity
 ##--------------------------------------------------- 
 
