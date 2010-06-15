@@ -304,7 +304,12 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
     /// \param T A data variable
     /// \param context A set of strings that may not be used for naming a fresh variable
     /// \return The function result
-    pbes_expression RHS(state_formulas::state_formula f0, state_formulas::state_formula f, lps::linear_process lps, data::variable T, std::set<std::string>& context)
+    pbes_expression RHS(
+                     state_formulas::state_formula f0, 
+                     state_formulas::state_formula f, 
+                     const lps::linear_process &lps, 
+                     data::variable T, 
+                     std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<RHS>" << pp(f) << std::flush;
@@ -566,7 +571,10 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
     /// \param lps A linear process
     /// \param T A data variable
     /// \return The function result
-    atermpp::vector<pbes_equation> E(state_formulas::state_formula f0, state_formulas::state_formula f, lps::linear_process lps, data::variable T)
+    atermpp::vector<pbes_equation> E(state_formulas::state_formula f0, 
+                                     state_formulas::state_formula f, 
+                                     const lps::linear_process &lps, 
+                                     data::variable T)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<E>" << pp(f) << std::flush;
@@ -793,7 +801,10 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
     /// \param lps A linear process
     /// \param context A set of strings that may not be used for naming a fresh variable
     /// \return The function result
-    pbes_expression RHS(state_formulas::state_formula f0, state_formulas::state_formula f, lps::linear_process lps, std::set<std::string>& context)
+    pbes_expression RHS(state_formulas::state_formula f0, 
+                        state_formulas::state_formula f, 
+                        const lps::linear_process &lps, 
+                        std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<RHS>" << pp(f) << std::flush;
@@ -970,7 +981,10 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
     /// \param f A modal formula
     /// \param lps A linear process
     /// \return The function result
-    atermpp::vector<pbes_equation> E(state_formulas::state_formula f0, state_formulas::state_formula f, lps::linear_process lps)
+    atermpp::vector<pbes_equation> E(
+                 state_formulas::state_formula f0, 
+                 state_formulas::state_formula f, 
+                 const lps::linear_process &lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<E>" << pp(f) << std::flush;
