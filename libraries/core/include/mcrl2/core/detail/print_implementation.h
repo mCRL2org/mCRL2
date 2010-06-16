@@ -41,6 +41,7 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_update.h"
+#include "mcrl2/data/lambda.h"
 
 namespace mcrl2 {
   namespace core {
@@ -1388,7 +1389,7 @@ reconstruct_container_expression(ATermAppl Part)
     {
       Part = reconstruct_container_expression(static_cast<ATermAppl>(setfset(element_sort, sort_set::right(expr))));
     }
-    else if (is_true_function_function_symbol(sort_set::right(expr)))
+    else if (is_true_function_function_symbol(sort_set::left(expr)))
     {
       Part = static_cast<ATermAppl>(setcomplement(setfset(element_sort, sort_set::right(expr))));
     }
@@ -1402,6 +1403,17 @@ reconstruct_container_expression(ATermAppl Part)
       if (data::sort_fset::is_fset_empty_function_symbol(sort_set::right(expr)))
       {
         body = sort_set::left(expr)(data::variable(var));
+
+        if(is_lambda(sort_set::left(expr)))
+        {
+          data::lambda left(sort_set::left(expr));
+          data::variable_list vars = left.variables();
+          if(vars.size() == 1)
+          {
+            var = *(vars.begin());
+            body = left.body();
+          }
+        }
       }
       else
       {
@@ -1456,7 +1468,6 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_set::is_setcomprehension_application(expr))
   {
-    //gsMessage("Setcomprehension\n");
     data_expression body(sort_set::arg(expr));
     data_expression_vector variables;
     sort_expression_list domain_of_body_sort(function_sort(body.sort()).domain());
@@ -1500,6 +1511,17 @@ reconstruct_container_expression(ATermAppl Part)
       else
       {
         body = sort_bag::left(expr)(var);
+
+        if(is_lambda(sort_bag::left(expr)))
+        {
+          data::lambda left(sort_bag::left(expr));
+          data::variable_list vars = left.variables();
+          if(vars.size() == 1)
+          {
+            var = *(vars.begin());
+            body = left.body();
+          }
+        }
       }
       if(!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(expr)))
       {
@@ -1610,7 +1632,12 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         Args = ATLgetArgument(DataExpr, 1);
       }
       int ArgsLength = ATgetLength(Args);
-      if (gsIsOpIdNumericUpCast(Head) && ArgsLength == 1) {
+      if (gsIsBinder(Head)) {
+        // A binder could be introduced by reconstructing a container expression
+        // just print recursively.
+        PRINT_FUNC(PrintDataExpr)(OutStream, Head,
+                  pp_format, ShowSorts, PrecLevel);
+      } else if (gsIsOpIdNumericUpCast(Head) && ArgsLength == 1) {
         //print upcast expression
         PRINT_FUNC(dbg_prints)("printing upcast expression\n");
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
@@ -1707,7 +1734,9 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         }
       }
     }
-  } else if (gsIsBinder(DataExpr)) {
+  }
+  else if (gsIsBinder(DataExpr))
+  {
     PRINT_FUNC(dbg_prints)("printing binder\n");
     ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
     if (gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
@@ -1723,7 +1752,8 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         pp_format, ShowSorts, 0);
       PRINT_FUNC(fprints)(OutStream, " }");
     } else if (gsIsLambda(BindingOperator) || gsIsForall(BindingOperator)
-            || gsIsExists(BindingOperator)) {
+            || gsIsExists(BindingOperator))
+    {
       //print lambda abstraction or universal/existential quantification
       PRINT_FUNC(dbg_prints)("printing lambda abstraction or universal/existential quantification\n");
       if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
