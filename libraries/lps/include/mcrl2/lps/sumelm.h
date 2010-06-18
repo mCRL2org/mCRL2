@@ -49,6 +49,12 @@ namespace mcrl2 {
           replacements[lhs] = new_rhs;
         }
 
+        /// Returns true if x is a summand variable of summand s.
+        bool is_summand_variable(const summand_base& s, const data::data_expression& x)
+        {
+          return data::is_variable(x) && data::search_variable(s.summation_variables(), x);
+        }
+
         /// Recursively apply sum elimination on a summand.
         /// We build up a list of substitutions that need to be made in substitutions
         /// the caller of this function needs to apply substitutions to the summand
@@ -80,8 +86,7 @@ namespace mcrl2 {
           {
             //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
             //is always the same.
-            if (!is_variable(application(working_condition).left()) && is_variable(application(working_condition).right()) &&
-                data::search_variable(summand_.summation_variables(), application(working_condition).right()))
+            if (!is_summand_variable(summand_, application(working_condition).left()) && is_summand_variable(summand_, application(working_condition).right()))
             {
               working_condition = data::equal_to(application(working_condition).right(), application(working_condition).left());
             }
