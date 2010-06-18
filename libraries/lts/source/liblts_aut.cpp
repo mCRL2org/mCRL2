@@ -54,7 +54,7 @@ static void read_aut_header(char *s, char **initial_state, char **transitions, c
 
   if ( strncmp(s,"des",3) )
   {
-    throw mcrl2::runtime_error("Expext a .aut file to start with 'des'.");
+    throw mcrl2::runtime_error("Expect an .aut file to start with 'des'.");
   }  
   s += 3;
 
