@@ -281,9 +281,9 @@ namespace detail
         // Move the unflagged states to the new block.
           
         if (core::gsVerbose)
-        { const unsigned int m=pow(10,floor(log10( static_cast<double>( blocks.size()))));
-          if (blocks.size() % m==0)
-          { std::cerr << "Bisimulation partitioner: create block " << blocks.size() << "\n";
+        { const unsigned int m=pow(10,floor(log10( static_cast<double>( (blocks.size()+1)/2))));
+          if ((blocks.size()+1)/2 % m==0) 
+          { std::cerr << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << "\n";
           }
         }
         // Record how block *i1 is split, to use this to generate counter examples.
