@@ -92,7 +92,7 @@ void sim_partitioner::initialise_datastructures()
 {
   aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
   // trans_index = aut.get_transition_pre_table();
-  trans_index=transitions_per_outgoing_state_action_pair(aut.get_transitions());
+  trans_index=transitions_per_outgoing_state_action_pair_reversed(aut.get_transitions());
 
   uint N = aut.num_states();
 
@@ -169,10 +169,10 @@ void sim_partitioner::initialise_Pi(uint gamma,uint l)
     /* iterate over the incoming l-transitions of c */
     using namespace mcrl2::lts;
     for(outgoing_transitions_per_state_action_t::iterator
-          t=trans_index.lower_bound(std::pair < transition::size_type, transition::size_type >(l,c));
-          t!=trans_index.upper_bound(std::pair < transition::size_type, transition::size_type >(l,c)); ++t)
-    {
-      a = t->first.first; 
+          t=trans_index.lower_bound(std::pair < transition::size_type, transition::size_type >(c,l));
+          t!=trans_index.upper_bound(std::pair < transition::size_type, transition::size_type >(c,l)); ++t)
+    { 
+      a = to(t); // As trans_index is reversed, this is actually the state from which the transition t goes.
       if (!state_touched[a])
       {
         alpha = block_Pi[a];

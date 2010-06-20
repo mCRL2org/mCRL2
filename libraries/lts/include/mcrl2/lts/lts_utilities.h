@@ -61,6 +61,20 @@ namespace lts
     return result;
   }
 
+  /// \brief Provide the transitions as a multimap accessible per outgoing state, useful
+  ///        for for instance state space exploration.
+  inline outgoing_transitions_per_state_t
+               transitions_per_outgoing_state_reversed(transition_const_range r)
+  { outgoing_transitions_per_state_t result;
+    for( ; !r.empty() ; r.advance_begin(1))
+    { 
+      const transition t=r.front();
+      result.insert(std::pair< transition::size_type, std::pair < transition::size_type, transition::size_type > >
+                (t.to(), std::pair < transition::size_type, transition::size_type >(t.label(),t.from())));
+    }
+    return result;
+  }
+
   /// \brief Type for exploring transitions per state and action. 
   typedef std::multimap < std::pair < transition::size_type, transition::size_type >, transition::size_type >
                                outgoing_transitions_per_state_action_t;
@@ -89,6 +103,19 @@ namespace lts
       const transition t=r.front();
       result.insert(std::pair < std::pair < transition::size_type, transition::size_type >, transition::size_type > 
                 (std::pair < transition::size_type, transition::size_type >(t.from(), t.label()),t.to()));
+    }
+    return result;
+  }
+
+  /// \brief Provide the transitions as a multimap accessible per from state and label, ordered backwardly.
+  inline outgoing_transitions_per_state_action_t
+       transitions_per_outgoing_state_action_pair_reversed(transition_const_range r)
+  { outgoing_transitions_per_state_action_t result;
+    for( ; !r.empty() ; r.advance_begin(1))
+    {
+      const transition t=r.front();
+      result.insert(std::pair < std::pair < transition::size_type, transition::size_type >, transition::size_type > 
+                (std::pair < transition::size_type, transition::size_type >(t.to(), t.label()),t.from()));
     }
     return result;
   }

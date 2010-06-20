@@ -159,7 +159,7 @@ void test_abp()
   test_lts("abp test divergence preserving branching bisimulation",l,expected_label_count, 6, 10);
   l=l_abp;
   reduce(l,lts::lts_eq_sim);
-  test_lts("abp test simulation",l,3, 3, 4);
+  test_lts("abp test simulation",l,expected_label_count, 24, 28);
   l=l_abp;
   reduce(l,lts::lts_eq_trace);
   test_lts("abp test trace",l,expected_label_count, 19, 24);
