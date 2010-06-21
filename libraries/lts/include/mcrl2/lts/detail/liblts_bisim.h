@@ -119,8 +119,9 @@ class bisim_partitioner
     };
 
     struct block
-    { state_type state_index;                   // The state number represented by this state;
-      block_index_type block_index;
+    { 
+      state_type state_index;                   // The state number that represent the states in this block
+      block_index_type block_index;             // The sequence number of this block.
       block_index_type parent_block_index;      // Index of the parent block. 
                                                 // If there is no parent block, this refers to the block
                                                 // itself.
@@ -136,7 +137,8 @@ class bisim_partitioner
       std::vector < transition > non_inert_transitions; 
 
       void swap(block &b)
-      { state_type state_index1=b.state_index;
+      { 
+        state_type state_index1=b.state_index;
         b.state_index=state_index;
         state_index=state_index1;
 
@@ -159,6 +161,8 @@ class bisim_partitioner
 
     std::vector < block > blocks;
 
+    std::vector < bool > block_is_active;       // Indicates whether this is still a block in the partition.
+                                                // Blocks that are split become inactive.
     std::vector < state_type > block_index_of_a_state;
     std::vector < bool > block_flags;
     std::vector < bool > block_is_in_to_be_processed;
