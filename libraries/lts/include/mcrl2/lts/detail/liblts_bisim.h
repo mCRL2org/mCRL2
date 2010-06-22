@@ -161,8 +161,8 @@ class bisim_partitioner
 
     std::vector < block > blocks;
 
-    std::vector < bool > block_is_active;       // Indicates whether this is still a block in the partition.
-                                                // Blocks that are split become inactive.
+    // std::vector < bool > block_is_active;       // Indicates whether this is still a block in the partition.
+                                                   // Blocks that are split become inactive.
     std::vector < state_type > block_index_of_a_state;
     std::vector < bool > block_flags;
     std::vector < bool > block_is_in_to_be_processed;

@@ -166,10 +166,13 @@ namespace detail
   void bisim_partitioner::create_initial_partition(const bool branching, 
                                                    const bool preserve_divergences)
   { 
-    blocks.reserve(aut.num_states()); // Reserving blocks is done to avoid
-                                      // messing around with blocks in memory,
-                                      // which can be very time consuming.
-    block_is_active.reserve(aut.num_states());
+    blocks.reserve(2*aut.num_states()); // Reserving blocks is done to avoid
+                                        // messing around with blocks in memory,
+                                        // which can be very time consuming, and will
+                                        // lead to core dumps if it happens. As the
+                                        // blocks have a tree structure, two times
+                                        // the maximal number of blocks must be reserved.
+    // block_is_active.reserve(2*aut.num_states());
     to_be_processed.clear();
     
     block initial_partition;
@@ -234,7 +237,7 @@ namespace detail
       }
     }
     
-    block_is_active.push_back(true);
+    // block_is_active.push_back(true);
     initial_partition.block_index=0;
     initial_partition.state_index=0;
     max_state_index=1;
@@ -258,7 +261,7 @@ namespace detail
     for(std::vector < block_index_type > :: const_iterator i1=BL.begin();
               i1!=BL.end(); ++i1)
     { 
-      assert(block_is_active[*i1]);
+      // assert(block_is_active[*i1]);
       block_flags[*i1]=false;
       std::vector < state_type > flagged_states;
       std::vector < state_type > non_flagged_states;
@@ -296,7 +299,7 @@ namespace detail
         // Create a first new block.
         blocks.push_back(block());
         block_index_type new_block1=blocks.size()-1;
-        block_is_active.push_back(true);
+        // block_is_active.push_back(true);
         blocks.back().state_index=max_state_index;
         max_state_index++;
         blocks.back().block_index=new_block1;
@@ -309,7 +312,7 @@ namespace detail
         // Create a second new block.
         blocks.push_back(block());
         block_index_type new_block2=blocks.size()-1;
-        block_is_active.push_back(true);
+        // block_is_active.push_back(true);
         blocks.back().state_index=blocks[*i1].state_index;
         blocks.back().block_index=new_block2;
         reset_state_flags_block=new_block2;
@@ -330,7 +333,7 @@ namespace detail
         
         // reset the flag of block *i1, which is being split.
         block_is_in_to_be_processed[*i1]=false;
-        block_is_active[*i1]=false;
+        // block_is_active[*i1]=false;
 
         // The flag fields of the new blocks is set to false;
         block_flags.push_back(false);
@@ -474,7 +477,7 @@ namespace detail
       }
 
       const block_index_type splitter_index=to_be_processed.back();
-      assert(block_is_in_to_be_processed[splitter_index]||!block_is_active[splitter_index]);
+      // assert(block_is_in_to_be_processed[splitter_index]||!block_is_active[splitter_index]);
       to_be_processed.pop_back();
       block_is_in_to_be_processed[splitter_index]=false;
      
@@ -482,7 +485,7 @@ namespace detail
       // completely anyhow at some later point.
       const std::vector <transition> &splitter_non_inert_transitions=blocks[splitter_index].non_inert_transitions;
       for(std::vector <transition>::const_iterator i=splitter_non_inert_transitions.begin(); 
-                  block_is_active[splitter_index] &&
+                  blocks[splitter_index].non_inert_transitions.size()!=0 &&
                   i!=splitter_non_inert_transitions.end(); ++i) 
       { // The flag of the starting state of *i is raised and its block is added to BL;
 
