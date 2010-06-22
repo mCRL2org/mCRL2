@@ -21,6 +21,10 @@ namespace mcrl2 {
       template < typename Tool >
       struct squadt_tool : public Tool {
         /// \brief Constructor.
+        squadt_tool()
+        {}
+
+        /// \brief Constructor.
         squadt_tool(const std::string& name,
                       const std::string& author,
                       const std::string& what_is,
@@ -168,6 +172,10 @@ namespace mcrl2 {
           void synchronise_with_configuration(tipi::configuration& c);
 
         public:
+
+          /// \brief Constructor.
+          squadt_tool()
+          {}
 
           /// \brief Constructor.
           squadt_tool(const std::string& name,
