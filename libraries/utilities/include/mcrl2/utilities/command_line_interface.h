@@ -355,6 +355,9 @@ namespace mcrl2 {
 
         typedef std::map< const char,  std::string, option_identifier_less > short_to_long_map;
 
+        /// \brief Maps long option identifiers to option descriptor objects
+        option_map        m_options;
+
       private:
 
         /// \brief Path to executable (as in the first command line argument)
@@ -378,8 +381,7 @@ namespace mcrl2 {
         /// \brief Description of known issues
         std::string       m_known_issues;
 
-        /// \brief Maps long option identifiers to option descriptor objects
-        option_map        m_options;
+
 
         /// \brief Maps a short option to its associated long option
         short_to_long_map m_short_to_long;
@@ -650,6 +652,12 @@ namespace mcrl2 {
          * \return string containing a man page description of the interface
          **/
         std::string wiki_page() const;
+
+        /**
+         * \brief Returns the available long arguments with their associated help description
+         * \return mapping consisting of strings where the key represent the long argument and the mapped value the help description
+         **/
+        std::map<std::string, std::string>  get_long_argument_with_description();
     };
 
     /**

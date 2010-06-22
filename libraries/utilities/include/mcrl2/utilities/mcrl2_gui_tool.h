@@ -26,6 +26,7 @@ namespace utilities {
     protected:
       std::map<std::string, std::string> m_gui_options;
       bool m_gui_options_selected;
+      std::map< std::string, std::string > m_get_long_argument_with_description;
 
       /// \brief Add options to an interface description. Also includes
       /// rewriter options.
@@ -36,6 +37,7 @@ namespace utilities {
         desc.add_option("mcrl2-gui",
           "outputs information about the visual representation of this option in the mCRL2 GUI")
         ;
+        m_get_long_argument_with_description = desc.get_long_argument_with_description();
       }
 
       /// \brief Parse non-standard options
@@ -50,7 +52,7 @@ namespace utilities {
       {
         for (std::map<std::string, std::string>::const_iterator i = m_gui_options.begin(); i != m_gui_options.end(); ++i)
         {
-          std::cout << i->first << " -> " << i->second << std::endl;
+          std::cout << i->first << " -> " << i->second << ": "<<  m_get_long_argument_with_description.find( i->first )->second << std::endl;
         }
       }
 
@@ -71,6 +73,7 @@ namespace utilities {
           return true;
         }
         Tool::run();
+        return true;
       }      
   };
 

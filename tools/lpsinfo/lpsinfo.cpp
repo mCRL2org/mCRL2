@@ -14,10 +14,13 @@
 #define AUTHOR "Wieger Wesselink and Frank Stappers"
 
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include "mcrl2/utilities/squadt_tool.h"
+#endif
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -25,10 +28,10 @@ using namespace mcrl2::core;
 using namespace mcrl2::lps;
 using namespace mcrl2::utilities::tools;
 
-class lpsinfo_tool: public squadt_tool<input_tool>
+class lpsinfo_tool: public input_tool
 {
   protected:
-    typedef squadt_tool< input_tool> super;
+    typedef input_tool super;
 
   public:
     lpsinfo_tool()
@@ -39,7 +42,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
           "Print basic information on the linear process specification (LPS) in INFILE.")
      {}
 
-  private:
+  protected:
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
     }
@@ -59,8 +62,24 @@ class lpsinfo_tool: public squadt_tool<input_tool>
       std::cout << info.info();
       return true;
     }
+};
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+// This is needed to prevent a linker error...
+namespace mcrl2 {
+namespace utilities {
+namespace tools {
+  template <>
+  inline void squadt_tool<lpsinfo_tool>::synchronise_with_configuration(tipi::configuration& c) {
+    input_tool::m_input_filename = c.get_input("main-input").location();
+  }
+}
+}
+}
+
+class lpsinfo_squadt_tool: public squadt_tool<lpsinfo_tool>
+{
+  public:
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& c) const
     { c.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
@@ -84,7 +103,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
       using namespace tipi::layout::elements;
 
       // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
+      squadt_tool<lpsinfo_tool>::synchronise_with_configuration(c);
 
       specification spec;
       spec.load(c.get_input("main-input").location());
@@ -123,11 +142,27 @@ class lpsinfo_tool: public squadt_tool<input_tool>
 
       return true;
     }
+};
+
 #endif
+
+class lpsinfo_gui_tool: public mcrl2_gui_tool<lpsinfo_tool>
+{
+  public:
+    lpsinfo_gui_tool()
+    {
+      // m_gui_options["abc"] = "unknown";   
+    }
 };
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return lpsinfo_tool().execute(argc, argv);
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  return lpsinfo_squadt_tool().execute(argc, argv);
+#else
+  return lpsinfo_gui_tool().execute(argc, argv);
+#endif
+
 }

@@ -477,6 +477,17 @@ namespace mcrl2 {
       return s.str();
     }
 
+    std::map<std::string, std::string> interface_description::get_long_argument_with_description() {
+    	std::map<std::string, std::string> result;
+
+        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
+            option_descriptor const& option(i->second);
+
+        	result.insert(std::pair<std::string, std::string>(option.m_long ,option.m_description));
+        }
+    	return result;
+    }
+
     std::string interface_description::wiki_page() const {
       std::ostringstream s;
 
