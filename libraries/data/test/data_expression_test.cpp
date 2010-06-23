@@ -30,6 +30,8 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/nat.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -266,6 +268,24 @@ void exists_test()
   BOOST_CHECK(I_.body() == I.body()) ;
 }
 
+void set_comprehension_test()
+{
+  basic_sort s("S");
+  variable x("x", s);
+  function_symbol f("f", make_function_sort(s, sort_bool::bool_()));
+  data_expression e(sort_set::setcomprehension(s, x));
+  BOOST_CHECK(e.sort() == sort_set::set_(s));
+}
+
+void bag_comprehension_test()
+{
+  basic_sort s("S");
+  variable x("x", s);
+  function_symbol f("f", make_function_sort(s, sort_nat::nat()));
+  data_expression e(sort_bag::bagcomprehension(s, f(x)));
+  BOOST_CHECK(e.sort() == sort_bag::bag(s));
+}
+
 void where_declaration_test()
 {
   basic_sort s("S");
@@ -326,6 +346,12 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   exists_test();
+  core::garbage_collect();
+
+  set_comprehension_test();
+  core::garbage_collect();
+
+  bag_comprehension_test();
   core::garbage_collect();
 
   where_declaration_test();
