@@ -14,68 +14,122 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace mcrl2 {
 
 namespace utilities {
 
-  /// \brief Base class for the mcrl2 gui tools.
-  template <typename Tool>
-  class mcrl2_gui_tool: public Tool
-  {
-    protected:
-      std::map<std::string, std::string> m_gui_options;
-      bool m_gui_options_selected;
-      std::map< std::string, std::string > m_get_long_argument_with_description;
+struct widget_option {
+	std::string widget;
+	std::string default_value;
+	std::vector<std::string> values;
+};
 
-      /// \brief Add options to an interface description. Also includes
-      /// rewriter options.
-      /// \param desc An interface description
-      void add_options(interface_description& desc)
-      {
-        Tool::add_options(desc);
-        desc.add_option("mcrl2-gui",
-          "outputs information about the visual representation of this option in the mCRL2 GUI")
-        ;
-        m_get_long_argument_with_description = desc.get_long_argument_with_description();
-      }
+/// \brief Base class for the mcrl2 gui tools.
+template<typename Tool>
+class mcrl2_gui_tool: public Tool {
+protected:
 
-      /// \brief Parse non-standard options
-      /// \param parser A command line parser
-      void parse_options(const command_line_parser& parser)
-      {
-        Tool::parse_options(parser);
-        m_gui_options_selected = parser.options.count("mcrl2-gui") > 0;
-      }     
+	std::map<std::string, widget_option> m_gui_options;
+	bool m_gui_options_selected;
+	std::map<std::string, std::string> m_get_long_argument_with_description;
+	std::string m_toolname;
 
-      void print_mcrl2_gui_options() const
-      {
-        for (std::map<std::string, std::string>::const_iterator i = m_gui_options.begin(); i != m_gui_options.end(); ++i)
-        {
-          std::cout << i->first << " -> " << i->second << ": "<<  m_get_long_argument_with_description.find( i->first )->second << std::endl;
-        }
-      }
+	/// \brief Add options to an interface description. Also includes
+	/// rewriter options.
+	/// \param desc An interface description
+	void add_options(interface_description& desc) {
+		Tool::add_options(desc);
+		desc.add_option(
+				"mcrl2-gui",
+				"outputs information about the visual representation of this option in the mCRL2 GUI");
+		m_get_long_argument_with_description
+				= desc.get_long_argument_with_description();
+		m_toolname = desc.get_toolname();
 
-    public:
-      mcrl2_gui_tool()
-        : m_gui_options_selected(false)
-      {
-        m_gui_options["help"]    = "unknown";
-        m_gui_options["debug"]   = "unknown";
-        m_gui_options["verbose"] = "unknown";
-      }
-      
-      bool run()
-      {
-        if (m_gui_options_selected)
-        {
-          print_mcrl2_gui_options();
-          return true;
-        }
-        Tool::run();
-        return true;
-      }      
-  };
+	}
+
+	/// \brief Parse non-standard options
+	/// \param parser A command line parser
+	void parse_options(const command_line_parser& parser) {
+		Tool::parse_options(parser);
+		m_gui_options_selected = parser.options.count("mcrl2-gui") > 0;
+	}
+
+	void print_mcrl2_gui_options() const {
+
+		std::cout << "<tool>" << std::endl;
+		std::cout << "  <name>" << m_toolname << "</name>" << std::endl;
+
+		std::cout << "  <arguments>" << std::endl;
+
+		for (std::map<std::string, widget_option>::const_iterator i =
+				m_gui_options.begin(); i != m_gui_options.end(); ++i) {
+
+			if (!i->second.widget.empty() && !i->second.values.empty() && !i->second.default_value.empty() ) {
+
+				std::cout << "    <argument>" << std::endl;
+				std::cout << "      <identifier>" << i->first << "</identifier> " << std::endl;
+				std::cout << "      <description>" << m_get_long_argument_with_description.find(i->first)->second << "</description> " << std::endl;
+				std::cout << "      <widget>" << i->second.widget << "</widget>" << std::endl;
+
+				std::cout << "      <values>" << std::endl;
+				for(std::vector< std::string >::const_iterator j = i->second.values.begin() ;
+						                                 j !=i->second.values.end();
+						                                 ++j  ){
+					std::cout << "        <value>" << *j << "</value>" << std::endl;
+				}
+				std::cout << "      </values>" << std::endl;
+
+				std::cout << "      <default_value>" << i->second.default_value << "</default_value>" << std::endl;
+				//" -> " << i->second << ": "
+				//<<
+				//<< std::endl;
+				std::cout << "    </argument>" << std::endl;
+			}
+		}
+		std::cout << "  </arguments>" << std::endl;
+		std::cout << "</tool>" << std::endl;
+	}
+
+    /**
+     * \brief Creates a checkbox widget for mcrl2-gui
+     * \param[in] default values. Whenever true, the checkbox is checked.
+     * \return struct of a widget_option containing the widget that represent a checkbox
+     **/
+	widget_option create_checkbox_widget(bool enabled=false){
+		widget_option wo;
+
+		wo.default_value = enabled? "true" : "false" ;
+		wo.widget = "checkbox";
+		std::string values[] = { "true", "false" };
+		wo.values = std::vector<std::string>(values, values + sizeof(values)
+				/ sizeof(std::string));
+		return wo;
+	}
+
+public:
+	mcrl2_gui_tool() :
+		m_gui_options_selected(false) {
+
+		m_gui_options["help"] = create_checkbox_widget();
+		m_gui_options["verbose"] = create_checkbox_widget(true);
+		m_gui_options["debug"] = create_checkbox_widget();
+
+		/* m_gui_options["debug"] = "unknown";
+		 m_gui_options["verbose"] = "unknown";*/
+	}
+
+	bool run() {
+		if (m_gui_options_selected) {
+			print_mcrl2_gui_options();
+			return true;
+		}
+		Tool::run();
+		return true;
+	}
+};
 
 } // namespace utilities
 

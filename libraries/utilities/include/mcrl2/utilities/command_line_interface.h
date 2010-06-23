@@ -658,6 +658,14 @@ namespace mcrl2 {
          * \return mapping consisting of strings where the key represent the long argument and the mapped value the help description
          **/
         std::map<std::string, std::string>  get_long_argument_with_description();
+
+        /**
+         * \brief Returns the toolname
+         * \return string containing the name of the tool
+         **/
+        std::string get_toolname(){
+        	return m_name;
+        }
     };
 
     /**
