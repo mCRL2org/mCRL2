@@ -444,7 +444,7 @@ find_package(wxWidgets)
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
 if(wxWidgets_FOUND)
-  find_package(wxWidgets COMPONENTS base core adv gl xml html REQUIRED)
+  find_package(wxWidgets COMPONENTS base core adv gl xml html aui REQUIRED)
 
   INCLUDE(${wxWidgets_USE_FILE})
 
@@ -655,6 +655,7 @@ option(MCRL2_ENABLE_EXPERIMENTAL "Enable/disable creation of experimental tools"
 message(STATUS "MCRL2_ENABLE_EXPERIMENTAL: ${MCRL2_ENABLE_EXPERIMENTAL}" )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)
+  add_subdirectory ( tools/mcrl2-gui )
   add_subdirectory ( tools/lpsrealelm )
   add_subdirectory ( tools/lpsbisim2pbes )
   add_subdirectory ( tools/lts2lps )
