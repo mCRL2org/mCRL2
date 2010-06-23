@@ -46,6 +46,7 @@ bool print_check(data_expression const& left, std::string const& right) {
   if (pp(left) != right)
   {
     std::clog << "pp(" << pp(left) << ") != " << right << std::endl;
+    std::clog << left << " != " << right << std::endl;
 
     return false;
   }
@@ -183,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_set_print) {
   BOOST_CHECK(print_check(parse_data_expression("{true, false}"), "{true, false}"));
   BOOST_CHECK(print_check(parse_data_expression("{ b: Bool | b }"), "{ b: Bool | b }"));
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | x == 0 }"), "{ x: Nat | x == 0 }"));
-  BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat . y == 0)(x) }"), "{ x: Nat | (lambda y: Nat . y == 0)(x) }"));
+  BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat. y == 0)(x) }"), "{ x: Nat | (lambda y: Nat. y == 0)(x) }"));
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_print) {
@@ -213,7 +214,7 @@ BOOST_AUTO_TEST_CASE(test_bag_print) {
   BOOST_CHECK(print_check(parse_data_expression("{false: 3, true: 1}"), "{false: 3, true: 1}"));
   BOOST_CHECK(print_check(parse_data_expression("{ b: Bool | if(b, Pos2Nat(2), Pos2Nat(3)) }"), "{ b: Bool | if(b, 2, 3) }"));
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | x * x }"), "{ x: Nat | x * x }"));
-  BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat . y * y)(x) }"), "{ x: Nat | (lambda y: Nat . y * y)(x) }"));
+  BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat. y * y)(x) }"), "{ x: Nat | (lambda y: Nat. y * y)(x) }"));
 }
 
 BOOST_AUTO_TEST_CASE(test_function_update_print)

@@ -1632,7 +1632,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         Args = ATLgetArgument(DataExpr, 1);
       }
       int ArgsLength = ATgetLength(Args);
-      if (gsIsBinder(Head)) {
+      if (gsIsBinder(Head) && Args == ATmakeList0()) {
         // A binder could be introduced by reconstructing a container expression
         // just print recursively.
         PRINT_FUNC(PrintDataExpr)(OutStream, Head,
