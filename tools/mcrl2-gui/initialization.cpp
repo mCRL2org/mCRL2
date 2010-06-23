@@ -22,6 +22,7 @@
 #include "wx/splash.h"
 #include "tinyxml.h"
 #include <wx/wx.h>
+#include <wx/file.h>
 
 #include "mcrl2/utilities/basename.h"
 
@@ -82,75 +83,137 @@ Initialization::Initialization() {
 		wxExecute(wxCmd, tool_output, tool_errors, wxEXEC_SYNC);
 
 		Tool c_tool = (*i);
-		Tool_option to;
 		vector<Tool_option> vto;
 
-		bool first = true;
-		for (size_t i = 0; i < tool_output.GetCount(); ++i) {
-			string str = string(tool_output[i].mb_str(wxConvUTF8));
+		string tool_output_string;
 
-			/* New flag found */
-			if (str.substr(0, 2).compare("--") == 0) {
-				if (first) {
-					first = false;
-				} else {
-					vto.push_back(to);
-				}
-				/* Create flag name */
-				to.m_flag = str.substr(2, str.size());
-				/* Reset fields */
-				to.m_widget = none;
-				to.m_values.clear();
-				to.m_default_value = 0;
-				to.m_help.clear();
+		for (size_t j = 0; j < tool_output.GetCount(); ++j) {
+			tool_output_string += string(tool_output[j].mb_str(wxConvUTF8));
+		}
 
-			} else {
+		ticpp::Document doc;
+		try{
+			doc.Parse(tool_output_string);
+		}
+		catch( ... ){
+			wxString error = _T("Could not parse mcrl2-gui print for:\n") +
+					wxString((*i).m_location.c_str(), wxConvUTF8)
+					;
 
-				bool is_widget = false;
-				bool is_help = false;
-				/* Widget detection */
-				if (str.compare(">checkbox") == 0) {
-					to.m_widget = checkbox;
-					is_widget = true;
-				}
-				if (str.compare(">textbox") == 0) {
-					to.m_widget = textbox;
-					is_widget = true;
-				}
-				if (str.compare(">radiobox") == 0) {
-					to.m_widget = radiobox;
-					is_widget = true;
-				}
-				if (str.compare(">filepicker") == 0) {
-					to.m_widget = filepicker;
-					is_widget = true;
-				}
+			   wxMessageDialog *dial = new wxMessageDialog(NULL,
+					   error, wxT("Error"), wxOK | wxICON_ERROR);
+			   dial->ShowModal();
 
-				if (str[0] == ':') {
-					is_widget = true;
-				}
-
-				if (str[0] == '?') {
-					to.m_help.append(str.substr(1, str.size()));
-					to.m_help.append("\n");
-					is_help = true;
-				}
-
-				/* Parse values */
-				if ((!is_widget) && (!is_help)) {
-					if (str[0] == '*') {
-						to.m_default_value = to.m_values.size();
-						to.m_values.push_back(str.substr(1, str.size()));
-					} else {
-						to.m_values.push_back(str);
-					}
-				}
-			}
+			   //cout << tool_output_string << endl;
 
 		}
 
-		/* Add tool option */
-		vto.push_back(to);
+		ticpp::Element* node = 0;
+		node = doc.FirstChildElement();
+
+
+		/*
+		 * Parse tool options
+		 */
+
+	    if(!((node->Type() == TiXmlNode::ELEMENT) && node->Value() == "tool")){
+	      cerr << "Expected XML node value \"tool\", got node value: " << node->Value() << endl;
+	    }
+
+	    for (ticpp::Element* e = node->FirstChildElement(false); e != 0; e
+				= e->NextSiblingElement(false)) {
+
+			if (((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "name")) {
+				/*
+				 * This node is only required for human readability
+				 */
+			}
+
+			if (((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "arguments")) {
+				for (ticpp::Element* f = e->FirstChildElement(false); f != 0; f
+								= f->NextSiblingElement(false)) {
+
+					if (((f->Type() == TiXmlNode::ELEMENT) && f->Value() == "argument")) {
+		   			    Tool_option to;
+
+						to.m_default_value =0;
+				    	to.m_flag = "";
+				    	to.m_values.clear();
+				    	to.m_widget = none;
+				    	to.m_help ="";
+
+				    	string str_default_value ;
+
+						for (ticpp::Element* g = f->FirstChildElement(false); g != 0; g
+								= g->NextSiblingElement(false)) {
+
+							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "identifier")) {
+								to.m_flag = g->GetText();
+							}
+
+							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "description")) {
+								/*
+								 * Store description
+								 */
+								to.m_help.append(g->GetText());
+							}
+
+							if (((g->Type() == TiXmlNode::ELEMENT)
+									&& g->Value() == "widget")) {
+
+								/*
+								 * Set widget if proper value detected
+								 */
+
+								if (g->GetText().compare("checkbox") == 0) {
+									to.m_widget = checkbox;
+								}
+								if (g->GetText().compare("textbox") == 0) {
+									to.m_widget = textbox;
+								}
+								if (g->GetText().compare("radiobox") == 0) {
+									to.m_widget = radiobox;
+								}
+								if (g->GetText().compare("filepicker") == 0) {
+									to.m_widget = filepicker;
+								}
+							}
+
+							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "default_value")) {
+								// TODO: implement post-processing
+								str_default_value = g->GetText();
+							}
+
+							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "values")) {
+							    for (ticpp::Element* h = g->FirstChildElement(false); h != 0; h
+															= h->NextSiblingElement(false)) {
+									if (((h->Type() == TiXmlNode::ELEMENT) && h->Value() == "value")) {
+										/*
+										 * Get values
+										 */
+										to.m_values.push_back(h->GetText());
+									}
+
+							    }
+							}
+					    }
+
+						for( vector< string >::iterator i = to.m_values.begin();
+								                        i != to.m_values.end();
+								                        ++i){
+							if (i->compare( str_default_value ) == 0 )
+							{
+							   to.m_default_value =	distance( to.m_values.begin(), i );
+							}
+						}
+
+						vto.push_back(to);
+
+					}
+				}
+			}
+		}
+
 		/* Add tool option vector too tool catalog */
 		c_tool.m_tool_options = vto;
 		/* Add options for tool */
@@ -174,13 +237,13 @@ vector<Tool> Initialization::Read_tools() {
 	}
 	catch( ... ){
 		wxString error = _T("Could not load tool catalog file :\n") +
-				wxString(tool_catalog_file.c_str(), wxConvUTF8) +
-				_T("\'.\n\nTool will now exit.");
+				wxString(tool_catalog_file.c_str(), wxConvUTF8)
 				;
 
 		   wxMessageDialog *dial = new wxMessageDialog(NULL,
 				   error, wxT("Error"), wxOK | wxICON_ERROR);
 		   dial->ShowModal();
+
 	}
 
 	ticpp::Element* node = 0;
@@ -224,6 +287,10 @@ vector<Tool> Initialization::Read_tools() {
         }
 
         tool.m_location = location;
+
+        if(!wxFile::Exists(wxString(location.c_str(), wxConvUTF8))){
+        	cout << "File \"" << location << "\" does not exist" << endl;
+        }
 
         try{
     	e->GetAttribute("input_format", &tool.m_input_type);

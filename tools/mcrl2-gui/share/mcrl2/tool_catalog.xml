@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
-<tool name="chi2mcrl2" 		input_format="chi" output_format="mcrl2"  />
+	<!-- <tool name="chi2mcrl2" 		input_format="chi" output_format="mcrl2"  />
 <tool name="diagraphica" 	input_format="lts" 				macosx_bundle="true" />
 <tool name="lps2lts" 		input_format="lps" output_format ="lts" />
 <tool name="lps2pbes" 		input_format="lps" output_format ="pbes" />
 <tool name="lpsactionrename" 	input_format="lps" output_format ="lps"/>
 <tool name="lpsbinary" 		input_format="lps" output_format ="lps"/>
-<tool name="lpsconstelm" 	input_format="lps" output_format ="lps"/>
+<tool name="lpsconstelm" 	input_format="lps" output_format ="lps"/> -->
 <tool name="lpsinfo" 		input_format="lps" />
+<!--
 <tool name="lpsparelm" 		input_format="lps" output_format ="lps"/>
 <tool name="lpspp" 		input_format="lps" />
 <tool name="lpsrewr" 		input_format="lps" output_format ="lps"/>
@@ -33,4 +34,5 @@
 <tool name="txt2pbes" 		input_format="txt"  output_format ="pbes"/>
 <tool name="lpsxsim" 		input_format="lps" 				macosx_bundle="true"/>
 <tool name="grapemcrl2" 		input_format="gra" 				macosx_bundle="true"/>
+-->
 </tool-catalog>
