@@ -1255,7 +1255,7 @@ void DiagramEditor::handleKeyDownEvent( const int &keyCode, const int &specialKe
 
 
 // -------------------------------------------------------
-void DiagramEditor::handleKeyUpEvent( const int &keyCode, const int &specialKey )
+void DiagramEditor::handleKeyUpEvent( const int &keyCode, const int & /*specialKey*/ )
 // -------------------------------------------------------
 {
     Visualizer::handleKeyUpEvent( keyCode );

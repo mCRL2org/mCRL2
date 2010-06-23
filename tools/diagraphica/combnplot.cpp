@@ -252,7 +252,7 @@ void CombnPlot::drawLabels( const bool &inSelectMode )
 
 
 // -----------------------------------------------------
-void CombnPlot::drawLabelsBC( const bool &inSelectMode )
+void CombnPlot::drawLabelsBC( const bool& /*inSelectMode*/ )
 // -----------------------------------------------------
 {
     // get size of sides
@@ -301,7 +301,7 @@ void CombnPlot::drawLabelsBC( const bool &inSelectMode )
 
 
 // -----------------------------------------------------
-void CombnPlot::drawLabelsCP( const bool &inSelectMode )
+void CombnPlot::drawLabelsCP( const bool& /*inSelectMode*/ )
 // -----------------------------------------------------
 {
     // get size of sides

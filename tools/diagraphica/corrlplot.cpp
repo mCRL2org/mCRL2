@@ -143,9 +143,9 @@ void CorrlPlot::visualize( const bool &inSelectMode )
 
 // --------------------------
 void CorrlPlot::drawAxes(
-    const bool &inSelectMode,
-    const string &xLbl,
-    const string &yLbl )
+    const bool& inSelectMode,
+    const string& /*xLbl*/,
+    const string& /*yLbl*/ )
 // --------------------------
 {
     // get size of sides
@@ -181,7 +181,7 @@ void CorrlPlot::drawAxes(
 
 
 // ---------------------------------------------------
-void CorrlPlot::drawLabels( const bool &inSelectMode )
+void CorrlPlot::drawLabels( const bool& /*inSelectMode*/ )
 // ---------------------------------------------------
 {
     // get size of sides

@@ -353,20 +353,6 @@ void ArcDiagram::markLeaf(
         v.push_back( col );
         markLeaves.insert( pair< int, vector< ColorRGB > >( leafIdx, v ) );
     }
-
-/*
-    for ( int i = 0; i < graph->getSizeLeaves(); ++i )
-    {
-        it = markLeaves.find( i );
-        if ( it != markLeaves.end() )
-        {
-            *mediator << i;
-            *mediator << " ";
-            *mediator << it->second.size();
-            *mediator << " ";
-        }
-    }
-*/
 }
 
 

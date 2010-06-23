@@ -414,7 +414,7 @@ void Diagram::drawBorder(
 // ---------------------------
 void Diagram::drawBorderFlush(
     const bool &inSelectMode,
-    GLCanvas* canvas )
+    GLCanvas* /*canvas*/ )
 // ---------------------------
 {
     if ( inSelectMode == true )
@@ -434,7 +434,7 @@ void Diagram::drawBorderFlush(
 // ---------------------------
 void Diagram::drawBorderFlush(
     const bool &inSelectMode,
-    GLCanvas* canvas,
+    GLCanvas* /*canvas*/,
     const double &opacity )
 // ---------------------------
 {

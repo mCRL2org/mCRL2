@@ -222,7 +222,7 @@ void grape_glcanvas::paint_coordinate( coordinate translation_coordinate )
   glFlush();
 }
 
-void grape_glcanvas::paint( wxDC &dc )
+void grape_glcanvas::paint( wxDC & /*dc*/ )
 {
   if( !GetContext() )
   {

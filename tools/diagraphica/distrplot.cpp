@@ -162,7 +162,7 @@ void DistrPlot::drawAxes( const bool &inSelectMode )
 
 
 // ---------------------------------------------------
-void DistrPlot::drawLabels( const bool &inSelectMode )
+void DistrPlot::drawLabels( const bool &/*inSelectMode*/ )
 // ---------------------------------------------------
 {
     // get size of sides

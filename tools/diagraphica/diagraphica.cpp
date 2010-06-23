@@ -2262,7 +2262,7 @@ void DiaGraph::initTimeSeries( const vector< int > attrIdcs )
 
 // ---------------------------
 void DiaGraph::markTimeSeries(
-    Colleague* sender,
+    Colleague* /*sender*/,
     Cluster* currFrame )
 // ---------------------------
 {
@@ -2282,7 +2282,7 @@ void DiaGraph::markTimeSeries(
 
 // ----------------------------------
 void DiaGraph::markTimeSeries(
-    Colleague* sender,
+    Colleague* /*sender*/,
     const vector< Cluster* > frames )
 // ----------------------------------
 {
