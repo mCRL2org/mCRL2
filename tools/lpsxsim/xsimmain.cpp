@@ -354,7 +354,14 @@ void XSimMain::LoadFile(const wxString &filename)
     ldtrcitem->Enable(true);
     svtrcitem->Enable(true);
 
-    simulator->LoadSpec(m_specification);
+    try {
+		simulator->LoadSpec(m_specification);
+	} catch (std::exception const& e) {
+		wxMessageDialog(this, wxString(e.what(), wxConvLocal), wxT("Error"),
+				wxOK | wxICON_ERROR).ShowModal();
+		return;
+	}
+
 }
 
 void XSimMain::LoadDLL(const wxString &filename)
