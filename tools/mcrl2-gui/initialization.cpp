@@ -72,17 +72,19 @@ Initialization::Initialization() {
 	std::vector<Tool> p_tools = Read_tools();
 
 	/* for each tool */
-
 	for (std::vector<Tool>::iterator i = p_tools.begin(); i != p_tools.end(); ++i) {
 		string cmd = (*i).m_location + " --mcrl2-gui";
 
 		wxArrayString tool_output;
 		wxArrayString tool_errors;
 
+		/* Execute tool */
 		wxString wxCmd(cmd.c_str(), wxConvUTF8);
 		wxExecute(wxCmd, tool_output, tool_errors, wxEXEC_SYNC);
 
 		Tool c_tool = (*i);
+
+		/* Tool option vector to store tool options */
 		vector<Tool_option> vto;
 
 		string tool_output_string;
@@ -103,14 +105,10 @@ Initialization::Initialization() {
 			   wxMessageDialog *dial = new wxMessageDialog(NULL,
 					   error, wxT("Error"), wxOK | wxICON_ERROR);
 			   dial->ShowModal();
-
-			   //cout << tool_output_string << endl;
-
 		}
 
 		ticpp::Element* node = 0;
 		node = doc.FirstChildElement();
-
 
 		/*
 		 * Parse tool options
@@ -130,6 +128,9 @@ Initialization::Initialization() {
 			}
 
 			if (((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "arguments")) {
+				/*
+				 * Iterate over arguments
+				 */
 				for (ticpp::Element* f = e->FirstChildElement(false); f != 0; f
 								= f->NextSiblingElement(false)) {
 
@@ -147,17 +148,24 @@ Initialization::Initialization() {
 						for (ticpp::Element* g = f->FirstChildElement(false); g != 0; g
 								= g->NextSiblingElement(false)) {
 
+							/*
+							 * Get long identifier flag
+							 */
+
 							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "identifier")) {
 								to.m_flag = g->GetText();
 							}
 
+							/*
+							 * Get description
+							 */
 							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "description")) {
-								/*
-								 * Store description
-								 */
 								to.m_help.append(g->GetText());
 							}
 
+							/*
+							 * Get widget
+							 */
 							if (((g->Type() == TiXmlNode::ELEMENT)
 									&& g->Value() == "widget")) {
 
@@ -179,18 +187,26 @@ Initialization::Initialization() {
 								}
 							}
 
+							/*
+							 * Get default value and store it temporary.
+							 * To determine index value that stores default value
+							 */
 							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "default_value")) {
-								// TODO: implement post-processing
 								str_default_value = g->GetText();
 							}
 
+							/*
+							 * Get values
+							 */
 							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "values")) {
-							    for (ticpp::Element* h = g->FirstChildElement(false); h != 0; h
+
+								/*
+								 * Iterate over possible values
+								 */
+
+								for (ticpp::Element* h = g->FirstChildElement(false); h != 0; h
 															= h->NextSiblingElement(false)) {
 									if (((h->Type() == TiXmlNode::ELEMENT) && h->Value() == "value")) {
-										/*
-										 * Get values
-										 */
 										to.m_values.push_back(h->GetText());
 									}
 
@@ -198,6 +214,7 @@ Initialization::Initialization() {
 							}
 					    }
 
+						/*Post Process to get default value*/
 						for( vector< string >::iterator i = to.m_values.begin();
 								                        i != to.m_values.end();
 								                        ++i){
@@ -207,8 +224,10 @@ Initialization::Initialization() {
 							}
 						}
 
+						/*
+						 *  Add tool option to vector of tool options
+						 */
 						vto.push_back(to);
-
 					}
 				}
 			}
@@ -219,7 +238,7 @@ Initialization::Initialization() {
 		/* Add options for tool */
 		m_tool_catalog.push_back(c_tool);
 
-	}
+	} /* End - for each tool */
 
 
 }

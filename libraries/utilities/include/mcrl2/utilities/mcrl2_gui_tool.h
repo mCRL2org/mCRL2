@@ -67,25 +67,24 @@ protected:
 		for (std::map<std::string, widget_option>::const_iterator i =
 				m_gui_options.begin(); i != m_gui_options.end(); ++i) {
 
-			if (!i->second.widget.empty() && !i->second.values.empty() && !i->second.default_value.empty() ) {
+			if (!i->second.widget.empty()) {
 
 				std::cout << "    <argument>" << std::endl;
 				std::cout << "      <identifier>" << i->first << "</identifier> " << std::endl;
 				std::cout << "      <description>" << m_get_long_argument_with_description.find(i->first)->second << "</description> " << std::endl;
 				std::cout << "      <widget>" << i->second.widget << "</widget>" << std::endl;
 
-				std::cout << "      <values>" << std::endl;
-				for(std::vector< std::string >::const_iterator j = i->second.values.begin() ;
-						                                 j !=i->second.values.end();
-						                                 ++j  ){
-					std::cout << "        <value>" << *j << "</value>" << std::endl;
+				if (!i->second.values.empty()) {
+					std::cout << "      <values>" << std::endl;
+					for (std::vector<std::string>::const_iterator j =
+							i->second.values.begin(); j
+							!= i->second.values.end(); ++j) {
+						std::cout << "        <value>" << *j << "</value>" << std::endl;
+					}
+					std::cout << "      </values>" << std::endl;
+					std::cout << "      <default_value>" << i->second.default_value << "</default_value>"
+							<< std::endl;
 				}
-				std::cout << "      </values>" << std::endl;
-
-				std::cout << "      <default_value>" << i->second.default_value << "</default_value>" << std::endl;
-				//" -> " << i->second << ": "
-				//<<
-				//<< std::endl;
 				std::cout << "    </argument>" << std::endl;
 			}
 		}
@@ -109,13 +108,44 @@ protected:
 		return wo;
 	}
 
+	/**
+     * \brief Creates a radiobox widget for mcrl2-gui
+     * \param[in] vector of values to choose from in the radiobox.
+     * \param[in] index that denotes the default value
+     * \return struct of a widget_option containing the widget that represent a checkbox
+     **/
+	widget_option create_radiobox_widget(std::vector<std::string> values, int index=0){
+		widget_option wo;
+		if( (0 <= index) && (index < values.size()) ){
+			wo.default_value = values[index];
+		}
+		wo.widget = "radiobox";
+		wo.values = values;
+		return wo;
+	}
+	/**
+	     * \brief Creates a textcontrol widget for mcrl2-gui
+	     * \param[in] default value for the textcontrol.
+	     * \return struct of a widget_option containing the widget that represent a textcontrol
+	     **/
+	widget_option create_textbox_widget(std::string value = ""){
+		widget_option wo;
+		wo.widget = "textbox";
+		if (!value.empty()) {
+			wo.values.push_back(value);
+			wo.default_value = value;
+		}
+		return wo;
+	}
+
+
 public:
 	mcrl2_gui_tool() :
 		m_gui_options_selected(false) {
 
 		m_gui_options["help"] = create_checkbox_widget();
 		m_gui_options["verbose"] = create_checkbox_widget(true);
-		m_gui_options["debug"] = create_checkbox_widget();
+		m_gui_options["debug"] = create_textbox_widget();
 
 		/* m_gui_options["debug"] = "unknown";
 		 m_gui_options["verbose"] = "unknown";*/

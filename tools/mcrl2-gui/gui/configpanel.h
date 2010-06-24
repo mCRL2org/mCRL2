@@ -15,7 +15,7 @@
 #include <wx/stattext.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
-#include <stdlib.h>
+
 
 #define ID_RUN_TOOL 1000
 #define ID_OUTPUT_FILE 1001
@@ -89,9 +89,10 @@ public:
 		vector<Tool_option> vto = tool.m_tool_options;
 
 		wxRadioBox *rb;
-		wxStaticText *ws;
+		wxStaticText *ws, *ws1, *ws2;
 		wxArrayString as;
 		wxCheckBox *cb;
+		wxTextCtrl *tc;
 
 		for (vector<Tool_option>::iterator i = vto.begin(); i != vto.end(); ++i) {
 			//TODO: extend with Optional/mandatory checkbox
@@ -164,6 +165,39 @@ public:
 
 				break;
 			case textbox:
+				/* display label */
+				ws1 = new wxStaticText(top, wxID_ANY, wxString(
+						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border, height));
+
+				ws1->GetSize(&v, &f);
+
+				w = v+ 2*border;
+
+				/* create text input box */
+				tc = new wxTextCtrl(top, wxID_ANY, wxT(""),
+						wxPoint(w,height));
+
+				tc->SetLabel(wxString(
+						(*i).m_flag.c_str(), wxConvUTF8));
+
+				m_textbox_ptrs.push_back(tc);
+
+				tc->GetSize(&v, &h);
+
+				w = v+ border + w;
+
+				ws2 = new wxStaticText(top, wxID_ANY, wxString(
+						(*i).m_help.c_str(), wxConvUTF8), wxPoint(w , height));
+
+				v =0 ;
+				ws1->GetSize(&w, &h);
+				v = max(h,v);
+				ws2->GetSize(&w, &h);
+				v = max(h,v);
+				tc->GetSize(&w, &h);
+				h = max(h,v);
+
+				height = height + h;
 				break;
 			case filepicker:
 				break;
@@ -209,6 +243,13 @@ public:
 			if ((*i)->GetValue())
 				run = run + wxT(" --") + (*i)->GetLabel();
 		}
+
+		for (vector<wxTextCtrl*>::iterator i = m_textbox_ptrs.begin(); i
+				!= m_textbox_ptrs.end(); ++i) {
+			if ((*i)->GetValue())
+				run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
+		}
+
 
 		wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
 		wxString output_file = wxString(m_fileIO.output_file.c_str(),
@@ -286,6 +327,7 @@ public:
 
 	vector<wxRadioBox*> m_radiobox_ptrs;
 	vector<wxCheckBox*> m_checkbox_ptrs;
+	vector<wxTextCtrl*> m_textbox_ptrs;
 
 	wxButton *m_runbutton;
 	wxButton *m_abortbutton;
