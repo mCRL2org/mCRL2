@@ -22,6 +22,8 @@
 #include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/container_sort.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 
@@ -57,6 +59,18 @@ namespace mcrl2 {
     inline bool is_exists(atermpp::aterm_appl p) {
       return core::detail::gsIsBinder(p) &&
              core::detail::gsIsExists(atermpp::arg1(p));
+    }
+
+    /// \brief Returns true if the term t is a set comprehension
+    inline bool is_set_comprehension(atermpp::aterm_appl p){
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsSetComp(atermpp::arg1(p));
+    }
+
+    /// \brief Returns true if the term t is a bag comprehension
+    inline bool is_bag_comprehension(atermpp::aterm_appl p){
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsBagComp(atermpp::arg1(p));
     }
 
     /// \brief Returns true if the term t is a function symbol
@@ -158,7 +172,7 @@ namespace mcrl2 {
               // (because of cyclic dependencies).
               result = data_expression(atermpp::arg3(*this)).sort();
             }
-            else
+            else if (is_lambda(*this))
             {
               atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
               sort_expression_vector s;
@@ -167,6 +181,28 @@ namespace mcrl2 {
                 s.push_back(i->sort());
               }
               result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
+            }
+            else if (is_set_comprehension(*this) || is_bag_comprehension(*this))
+            {
+              atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
+              if(v_variables.size() != 1)
+              {
+                throw mcrl2::runtime_error("Set or bag comprehension has multiple bound variables, but may only have 1 bound variable");
+              }
+
+              if (is_set_comprehension(*this))
+              {
+                result = container_sort(set_container(), v_variables.begin()->sort());
+              }
+              else
+              {
+                result = container_sort(bag_container(), v_variables.begin()->sort());
+              }
+
+            }
+            else
+            {
+              throw mcrl2::runtime_error("Unexpected abstraction occurred");
             }
           }
           else if (is_application(*this))
