@@ -123,14 +123,15 @@ protected:
 		wo.values = values;
 		return wo;
 	}
+
 	/**
 	     * \brief Creates a textcontrol widget for mcrl2-gui
 	     * \param[in] default value for the textcontrol.
-	     * \return struct of a widget_option containing the widget that represent a textcontrol
+	     * \return struct of a widget_option containing the widget that represents a textcontrol
 	     **/
-	widget_option create_textbox_widget(std::string value = ""){
+	widget_option create_textctrl_widget(std::string value = ""){
 		widget_option wo;
-		wo.widget = "textbox";
+		wo.widget = "textctrl";
 		if (!value.empty()) {
 			wo.values.push_back(value);
 			wo.default_value = value;
@@ -138,6 +139,20 @@ protected:
 		return wo;
 	}
 
+	/**
+	     * \brief Creates a filepicker widget for mcrl2-gui
+	     * \param[in] default pathfile for the filepicker.
+	     * \return struct of a widget_option containing the widget that represents a filepicker
+	     **/
+	widget_option create_filepicker_widget(std::string value = ""){
+		widget_option wo;
+		wo.widget = "filepicker";
+		if (!value.empty()) {
+			wo.values.push_back(value);
+			wo.default_value = value;
+		}
+		return wo;
+	}
 
 public:
 	mcrl2_gui_tool() :
@@ -145,7 +160,7 @@ public:
 
 		m_gui_options["help"] = create_checkbox_widget();
 		m_gui_options["verbose"] = create_checkbox_widget(true);
-		m_gui_options["debug"] = create_textbox_widget();
+		m_gui_options["debug"] = create_checkbox_widget();
 
 		/* m_gui_options["debug"] = "unknown";
 		 m_gui_options["verbose"] = "unknown";*/

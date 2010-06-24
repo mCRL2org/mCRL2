@@ -29,7 +29,7 @@ public:
 		//m_parent = parent;
 	}
 
-	virtual void OnTerminate(int pid, int status) {
+	virtual void OnTerminate(int /* pid */, int /* status */) {
 		// Delete object
 		delete this;
 	}

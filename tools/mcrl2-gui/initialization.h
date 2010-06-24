@@ -18,7 +18,7 @@ enum widget {
 	none,
 	checkbox,
 	radiobox,
-	textbox,
+	textctrl,
 	filepicker
 };
 

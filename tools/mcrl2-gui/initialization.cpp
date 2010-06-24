@@ -80,164 +80,169 @@ Initialization::Initialization() {
 
 		/* Execute tool */
 		wxString wxCmd(cmd.c_str(), wxConvUTF8);
-		wxExecute(wxCmd, tool_output, tool_errors, wxEXEC_SYNC);
-
-		Tool c_tool = (*i);
-
-		/* Tool option vector to store tool options */
-		vector<Tool_option> vto;
-
-		string tool_output_string;
-
-		for (size_t j = 0; j < tool_output.GetCount(); ++j) {
-			tool_output_string += string(tool_output[j].mb_str(wxConvUTF8));
+		if(wxExecute(wxCmd, tool_output, tool_errors, wxEXEC_SYNC) != 0)
+		{
+			std::cerr << "Failed to execute " << cmd << std::endl;
 		}
+		else
+		{
+			Tool c_tool = (*i);
 
-		ticpp::Document doc;
-		try{
-			doc.Parse(tool_output_string);
-		}
-		catch( ... ){
-			wxString error = _T("Could not parse mcrl2-gui print for:\n") +
-					wxString((*i).m_location.c_str(), wxConvUTF8)
-					;
+			/* Tool option vector to store tool options */
+			vector<Tool_option> vto;
 
-			   wxMessageDialog *dial = new wxMessageDialog(NULL,
-					   error, wxT("Error"), wxOK | wxICON_ERROR);
-			   dial->ShowModal();
-		}
+			string tool_output_string;
 
-		ticpp::Element* node = 0;
-		node = doc.FirstChildElement();
-
-		/*
-		 * Parse tool options
-		 */
-
-	    if(!((node->Type() == TiXmlNode::ELEMENT) && node->Value() == "tool")){
-	      cerr << "Expected XML node value \"tool\", got node value: " << node->Value() << endl;
-	    }
-
-	    for (ticpp::Element* e = node->FirstChildElement(false); e != 0; e
-				= e->NextSiblingElement(false)) {
-
-			if (((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "name")) {
-				/*
-				 * This node is only required for human readability
-				 */
+			for (size_t j = 0; j < tool_output.GetCount(); ++j) {
+				tool_output_string += string(tool_output[j].mb_str(wxConvUTF8));
 			}
 
-			if (((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "arguments")) {
-				/*
-				 * Iterate over arguments
-				 */
-				for (ticpp::Element* f = e->FirstChildElement(false); f != 0; f
-								= f->NextSiblingElement(false)) {
+			ticpp::Document doc;
+			try{
+				doc.Parse(tool_output_string);
+			}
+			catch( ... ){
+				wxString error = _T("Could not parse mcrl2-gui print for:\n") +
+						wxString((*i).m_location.c_str(), wxConvUTF8)
+						;
 
-					if (((f->Type() == TiXmlNode::ELEMENT) && f->Value() == "argument")) {
-		   			    Tool_option to;
+				   wxMessageDialog *dial = new wxMessageDialog(NULL,
+						   error, wxT("Error"), wxOK | wxICON_ERROR);
+				   dial->ShowModal();
+			}
 
-						to.m_default_value =0;
-				    	to.m_flag = "";
-				    	to.m_values.clear();
-				    	to.m_widget = none;
-				    	to.m_help ="";
+			ticpp::Element* node = 0;
+			node = doc.FirstChildElement();
 
-				    	string str_default_value ;
+			/*
+			 * Parse tool options
+			 */
 
-						for (ticpp::Element* g = f->FirstChildElement(false); g != 0; g
-								= g->NextSiblingElement(false)) {
+			if(!((node->Type() == TiXmlNode::ELEMENT) && node->Value() == "tool")){
+			  cerr << "Expected XML node value \"tool\", got node value: " << node->Value() << endl;
+			}
 
-							/*
-							 * Get long identifier flag
-							 */
+			for (ticpp::Element* e = node->FirstChildElement(false); e != 0; e
+					= e->NextSiblingElement(false)) {
 
-							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "identifier")) {
-								to.m_flag = g->GetText();
-							}
+				if (((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "name")) {
+					/*
+					 * This node is only required for human readability
+					 */
+				}
 
-							/*
-							 * Get description
-							 */
-							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "description")) {
-								to.m_help.append(g->GetText());
-							}
+				if (((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "arguments")) {
+					/*
+					 * Iterate over arguments
+					 */
+					for (ticpp::Element* f = e->FirstChildElement(false); f != 0; f
+									= f->NextSiblingElement(false)) {
 
-							/*
-							 * Get widget
-							 */
-							if (((g->Type() == TiXmlNode::ELEMENT)
-									&& g->Value() == "widget")) {
+						if (((f->Type() == TiXmlNode::ELEMENT) && f->Value() == "argument")) {
+							Tool_option to;
 
-								/*
-								 * Set widget if proper value detected
-								 */
+							to.m_default_value =0;
+							to.m_flag = "";
+							to.m_values.clear();
+							to.m_widget = none;
+							to.m_help ="";
 
-								if (g->GetText().compare("checkbox") == 0) {
-									to.m_widget = checkbox;
-								}
-								if (g->GetText().compare("textbox") == 0) {
-									to.m_widget = textbox;
-								}
-								if (g->GetText().compare("radiobox") == 0) {
-									to.m_widget = radiobox;
-								}
-								if (g->GetText().compare("filepicker") == 0) {
-									to.m_widget = filepicker;
-								}
-							}
+							string str_default_value ;
 
-							/*
-							 * Get default value and store it temporary.
-							 * To determine index value that stores default value
-							 */
-							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "default_value")) {
-								str_default_value = g->GetText();
-							}
-
-							/*
-							 * Get values
-							 */
-							if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "values")) {
+							for (ticpp::Element* g = f->FirstChildElement(false); g != 0; g
+									= g->NextSiblingElement(false)) {
 
 								/*
-								 * Iterate over possible values
+								 * Get long identifier flag
 								 */
 
-								for (ticpp::Element* h = g->FirstChildElement(false); h != 0; h
-															= h->NextSiblingElement(false)) {
-									if (((h->Type() == TiXmlNode::ELEMENT) && h->Value() == "value")) {
-										to.m_values.push_back(h->GetText());
+								if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "identifier")) {
+									to.m_flag = g->GetText();
+								}
+
+								/*
+								 * Get description
+								 */
+								if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "description")) {
+									to.m_help.append(g->GetText());
+								}
+
+								/*
+								 * Get widget
+								 */
+								if (((g->Type() == TiXmlNode::ELEMENT)
+										&& g->Value() == "widget")) {
+
+									/*
+									 * Set widget if proper value detected
+									 */
+
+									if (g->GetText().compare("checkbox") == 0) {
+										to.m_widget = checkbox;
 									}
+									if (g->GetText().compare("textctrl") == 0) {
+										to.m_widget = textctrl;
+									}
+									if (g->GetText().compare("radiobox") == 0) {
+										to.m_widget = radiobox;
+									}
+									if (g->GetText().compare("filepicker") == 0) {
+										to.m_widget = filepicker;
+									}
+								}
 
-							    }
-							}
-					    }
+								/*
+								 * Get default value and store it temporary.
+								 * To determine index value that stores default value
+								 */
+								if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "default_value")) {
+									str_default_value = g->GetText();
+								}
 
-						/*Post Process to get default value*/
-						for( vector< string >::iterator i = to.m_values.begin();
-								                        i != to.m_values.end();
-								                        ++i){
-							if (i->compare( str_default_value ) == 0 )
-							{
-							   to.m_default_value =	distance( to.m_values.begin(), i );
+								/*
+								 * Get values
+								 */
+								if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "values")) {
+
+									/*
+									 * Iterate over possible values
+									 */
+
+									for (ticpp::Element* h = g->FirstChildElement(false); h != 0; h
+																= h->NextSiblingElement(false)) {
+										if (((h->Type() == TiXmlNode::ELEMENT) && h->Value() == "value")) {
+											to.m_values.push_back(h->GetText());
+										}
+
+									}
+								}
 							}
+
+							/*Post Process to get default value*/
+							for( vector< string >::iterator i = to.m_values.begin();
+															i != to.m_values.end();
+															++i){
+								if (i->compare( str_default_value ) == 0 )
+								{
+								   to.m_default_value =	distance( to.m_values.begin(), i );
+								}
+							}
+
+							/*
+							 *  Add tool option to vector of tool options
+							 */
+							vto.push_back(to);
 						}
-
-						/*
-						 *  Add tool option to vector of tool options
-						 */
-						vto.push_back(to);
 					}
 				}
 			}
+
+			/* Add tool option vector too tool catalog */
+			c_tool.m_tool_options = vto;
+			/* Add options for tool */
+			m_tool_catalog.push_back(c_tool);
+
 		}
-
-		/* Add tool option vector too tool catalog */
-		c_tool.m_tool_options = vto;
-		/* Add options for tool */
-		m_tool_catalog.push_back(c_tool);
-
 	} /* End - for each tool */
 
 

@@ -22,8 +22,9 @@
 <tool name="ltsview" 		input_format="lts" 				macosx_bundle="true"/>
 <tool name="mcrl22lps" 		input_format="mcrl2" output_format ="lps"/>
 <tool name="pbes2bool" 		input_format="pbes" />
-<tool name="pbesconstelm" 	input_format="pbes" output_format ="pbes"/>
+<tool name="pbesconstelm" 	input_format="pbes" output_format ="pbes"/> -->
 <tool name="pbesinfo" 		input_format="pbes"/>
+<!--
 <tool name="pbesparelm" 	input_format="pbes" output_format ="pbes"/>
 <tool name="pbespp" 		input_format="pbes" />
 <tool name="pbesrewr" 		input_format="pbes" output_format ="pbes"/>

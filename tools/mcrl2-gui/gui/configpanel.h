@@ -93,6 +93,7 @@ public:
 		wxArrayString as;
 		wxCheckBox *cb;
 		wxTextCtrl *tc;
+		wxFilePickerCtrl *fp;
 
 		for (vector<Tool_option>::iterator i = vto.begin(); i != vto.end(); ++i) {
 			//TODO: extend with Optional/mandatory checkbox
@@ -164,7 +165,7 @@ public:
 				height = height + h;
 
 				break;
-			case textbox:
+			case textctrl:
 				/* display label */
 				ws1 = new wxStaticText(top, wxID_ANY, wxString(
 						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border, height));
@@ -173,6 +174,8 @@ public:
 
 				w = v+ 2*border;
 
+				// TODO: Set Default values
+
 				/* create text input box */
 				tc = new wxTextCtrl(top, wxID_ANY, wxT(""),
 						wxPoint(w,height));
@@ -180,7 +183,7 @@ public:
 				tc->SetLabel(wxString(
 						(*i).m_flag.c_str(), wxConvUTF8));
 
-				m_textbox_ptrs.push_back(tc);
+				m_textctrl_ptrs.push_back(tc);
 
 				tc->GetSize(&v, &h);
 
@@ -200,6 +203,42 @@ public:
 				height = height + h;
 				break;
 			case filepicker:
+				/* display label */
+				ws1 = new wxStaticText(top, wxID_ANY, wxString(
+						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border, height));
+
+				ws1->GetSize(&v, &f);
+
+				w = v+ 2*border;
+
+				// TODO: Set Default values
+
+				/* create text input box */
+				fp = new wxFilePickerCtrl(top, wxID_ANY,  wxT(""),
+						wxT("Select a file"), wxT("*.*"), wxPoint(w , height), wxSize(350, 25),
+						wxFLP_USE_TEXTCTRL | wxFLP_OPEN );
+
+				fp->SetLabel(wxString(
+						(*i).m_flag.c_str(), wxConvUTF8));
+
+				m_filepicker_ptrs.push_back(fp);
+
+				fp->GetSize(&v, &h);
+
+				w = v+ border + w;
+
+				ws2 = new wxStaticText(top, wxID_ANY, wxString(
+						(*i).m_help.c_str(), wxConvUTF8), wxPoint(w , height));
+
+				v =0 ;
+				ws1->GetSize(&w, &h);
+				v = max(h,v);
+				ws2->GetSize(&w, &h);
+				v = max(h,v);
+				fp->GetSize(&w, &h);
+				h = max(h,v);
+
+				height = height + h;
 				break;
 			}
 
@@ -244,10 +283,16 @@ public:
 				run = run + wxT(" --") + (*i)->GetLabel();
 		}
 
-		for (vector<wxTextCtrl*>::iterator i = m_textbox_ptrs.begin(); i
-				!= m_textbox_ptrs.end(); ++i) {
+		for (vector<wxTextCtrl*>::iterator i = m_textctrl_ptrs.begin(); i
+				!= m_textctrl_ptrs.end(); ++i) {
 			if ((*i)->GetValue())
 				run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
+		}
+
+		for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin(); i
+				!= m_filepicker_ptrs.end(); ++i) {
+			if ((*i)->GetPath() && !(*i)->GetPath().empty() )
+				run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetPath();
 		}
 
 
@@ -327,7 +372,8 @@ public:
 
 	vector<wxRadioBox*> m_radiobox_ptrs;
 	vector<wxCheckBox*> m_checkbox_ptrs;
-	vector<wxTextCtrl*> m_textbox_ptrs;
+	vector<wxTextCtrl*> m_textctrl_ptrs;
+	vector<wxFilePickerCtrl*> m_filepicker_ptrs;
 
 	wxButton *m_runbutton;
 	wxButton *m_abortbutton;

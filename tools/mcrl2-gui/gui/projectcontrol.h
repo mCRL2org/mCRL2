@@ -249,6 +249,10 @@ public:
 					};
 
 					if (wxDir::Exists(this->GetPath())) {
+						/*wxArrayString  files;
+						wxDir::GetAllFiles(this->GetPath(), &files, wxEmptyString, wxDIR_DEFAULT | wxDIR_DIRS);
+
+						wxLogError( files);*/
 						if (!wxRmdir(this->GetPath())) {
 							wxLogError(wxT("Error deleting directory"));
 							break;
