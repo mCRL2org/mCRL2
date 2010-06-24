@@ -29,6 +29,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #define __STRINGIFY(x) #x
 #define STRINGIFY(x) __STRINGIFY(x)
@@ -122,7 +123,7 @@ class lps2lts_tool : public lps2lts_base
       return true;
     }
 
-  private:
+  protected:
     void add_options(interface_description &desc)
     {
       lps2lts_base::add_options(desc);
@@ -348,9 +349,62 @@ class lps2lts_tool : public lps2lts_base
 
 #include "squadt_interactor.ipp"
 
+class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
+{
+  public:
+	lps2lts_gui_tool()
+    {
+	  std::vector<std::string> values;
+      m_gui_options["action"] = create_textctrl_widget();
+      m_gui_options["bit-hash"] = create_textctrl_widget();
+      m_gui_options["confluence"] = create_textctrl_widget();
+      m_gui_options["deadlock"] = create_checkbox_widget();
+      m_gui_options["error-trace"] = create_checkbox_widget();
+
+
+      values.clear();
+      values.push_back("vector");
+      values.push_back("tree");
+
+      m_gui_options["state-format"] = create_radiobox_widget(values);
+      m_gui_options["divergence"] = create_checkbox_widget();
+      m_gui_options["init-tsize"] = create_textctrl_widget();
+      m_gui_options["max"] = create_textctrl_widget();
+      m_gui_options["no-info"] = create_checkbox_widget();
+
+      values.clear();
+      values.push_back("jitty");
+      values.push_back("jittyp");
+      values.push_back("jittyc");
+      values.push_back("inner");
+      values.push_back("innerp");
+      values.push_back("innerc");
+      m_gui_options["rewriter"] = create_radiobox_widget(values);
+
+      values.clear();
+      values.push_back("breadth");
+      values.push_back("depth");
+      values.push_back("prioritized");
+      values.push_back("rprioritized");
+      values.push_back("random");
+      m_gui_options["strategy"] = create_radiobox_widget(values);
+      m_gui_options["suppress"] = create_checkbox_widget();
+      m_gui_options["trace"] = create_textctrl_widget();
+      m_gui_options["todo-max"] = create_textctrl_widget();
+
+      m_gui_options["unused-data"] = create_checkbox_widget();
+      m_gui_options["dummy"] = create_textctrl_widget();
+
+      // TODO:
+//      -oFORMAT, --out=FORMAT   save the output in the specified FORMAT
+
+
+    }
+};
+
 int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps2lts_tool().execute(argc,argv);
+  return lps2lts_gui_tool().execute(argc,argv);
 }

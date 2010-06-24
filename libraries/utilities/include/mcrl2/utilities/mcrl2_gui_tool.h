@@ -114,7 +114,7 @@ protected:
      * \param[in] index that denotes the default value
      * \return struct of a widget_option containing the widget that represent a checkbox
      **/
-	widget_option create_radiobox_widget(std::vector<std::string> values, int index=0){
+	widget_option create_radiobox_widget(std::vector<std::string> values, size_t index=0){
 		widget_option wo;
 		if( index < values.size() ){
 			wo.default_value = values[index];

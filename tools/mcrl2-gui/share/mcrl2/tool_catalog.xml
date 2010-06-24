@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
 <tool name="chi2mcrl2" 		input_format="chi" output_format="mcrl2"  />
-	<!-- <tool name="diagraphica" 	input_format="lts" 				macosx_bundle="true" />
+<!-- <tool name="diagraphica" 	input_format="lts" 				macosx_bundle="true" /> -->
 <tool name="lps2lts" 		input_format="lps" output_format ="lts" />
+<!--
 <tool name="lps2pbes" 		input_format="lps" output_format ="pbes" />
 <tool name="lpsactionrename" 	input_format="lps" output_format ="lps"/>
 <tool name="lpsbinary" 		input_format="lps" output_format ="lps"/>
