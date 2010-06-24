@@ -68,6 +68,6 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
-include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
+# include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 endif ( MCRL2_BUILD_GUI_TOOLS )

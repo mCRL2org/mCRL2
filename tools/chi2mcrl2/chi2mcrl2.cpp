@@ -28,6 +28,7 @@
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #define INFILEEXT ".chi"
 #define OUTFILEEXT ".mcrl2"
@@ -62,7 +63,7 @@ class chi2mcrl2_tool: public squadt_tool< input_output_tool>
           "\n\n")
     {}
 
-  private:
+  protected:
 
     t_options options;
 
@@ -180,8 +181,17 @@ ATermAppl translate_file(t_options &options)
   return result;
 }
 
+class chi2mcrl2_gui_tool: public mcrl2_gui_tool<chi2mcrl2_tool>
+{
+  public:
+	chi2mcrl2_gui_tool()
+    {
+      m_gui_options["no-state"] = create_checkbox_widget();
+    }
+};
+
 int main(int argc, char *argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return chi2mcrl2_tool().execute(argc,argv);
+  return chi2mcrl2_gui_tool().execute(argc,argv);
 }

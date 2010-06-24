@@ -116,7 +116,7 @@ protected:
      **/
 	widget_option create_radiobox_widget(std::vector<std::string> values, int index=0){
 		widget_option wo;
-		if( (0 <= index) && (index < values.size()) ){
+		if( index < values.size() ){
 			wo.default_value = values[index];
 		}
 		wo.widget = "radiobox";

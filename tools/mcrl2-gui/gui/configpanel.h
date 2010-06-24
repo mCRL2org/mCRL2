@@ -131,6 +131,7 @@ public:
 			case radiobox:
 
 				/* Prepare radio values */
+				as.Clear();
 				for (vector<string>::iterator j = (*i).m_values.begin(); j
 						!= (*i).m_values.end(); ++j) {
 					as.Add(wxString((*j).c_str(), wxConvUTF8));
