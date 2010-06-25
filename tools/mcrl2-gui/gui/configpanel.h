@@ -40,7 +40,19 @@ public:
 		int w, h, v, f;
 
 		// Top Panel
-		wxPanel *top = new wxPanel(this , wxID_ANY);
+
+		//wp: work panel for a scroll top
+		m_configpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+				wxAUI_NB_BOTTOM
+			);
+
+		m_tool_output = new OutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+		//wxPanel *wp = new wxPanel(m_configpanel);
+		m_wsw = new wxScrolledWindow(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+		m_wsw->SetScrollbars( 20, 20, 50, 50 );
+
+		/* Define size large enough for top*/
+		wxPanel *top = new wxPanel(m_wsw , wxID_ANY, wxDefaultPosition, wxSize(4096,4096));
 
 
 		if (!m_tool.m_output_type.empty()) {
@@ -94,6 +106,22 @@ public:
 		wxCheckBox *cb;
 		wxTextCtrl *tc;
 		wxFilePickerCtrl *fp;
+
+		int textctrl_width = 0;
+
+		for (vector<Tool_option>::iterator i = vto.begin(); i != vto.end(); ++i) {
+			if (((*i).m_widget == textctrl) || ((*i).m_widget == filepicker )){
+				int w, u;
+				wxStaticText *tmp = new wxStaticText(this, wxID_ANY, wxString(
+						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border, height));
+				tmp->GetSize(&w, &u);
+
+				textctrl_width = max(textctrl_width, w);
+
+				delete tmp;
+			}
+		}
+
 
 		for (vector<Tool_option>::iterator i = vto.begin(); i != vto.end(); ++i) {
 			//TODO: extend with Optional/mandatory checkbox
@@ -173,7 +201,7 @@ public:
 
 				ws1->GetSize(&v, &f);
 
-				w = v+ 2*border;
+				w = textctrl_width + 2*border;
 
 				// TODO: Set Default values
 
@@ -256,14 +284,9 @@ public:
 
 		top->Layout();
 
-		m_configpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-				wxAUI_NB_BOTTOM
-			);
-
-		m_tool_output = new OutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-
-		m_configpanel->AddPage( top , wxT("Configuration"), true);
+		m_configpanel->AddPage( m_wsw , wxT("Configuration"), true);
 		m_configpanel->AddPage( m_tool_output , wxT("Output"), false);
+
 	}
 	;
 
@@ -286,7 +309,7 @@ public:
 
 		for (vector<wxTextCtrl*>::iterator i = m_textctrl_ptrs.begin(); i
 				!= m_textctrl_ptrs.end(); ++i) {
-			if ((*i)->GetValue())
+			if ((*i)->GetValue() && !(*i)->GetValue().empty() )
 				run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
 		}
 
@@ -366,6 +389,7 @@ public:
 	wxAuiNotebook *m_configpanel;
 	OutputListBox *m_listbox_output;
 	OutputListBox *m_tool_output;
+	wxScrolledWindow *m_wsw;
 	wxString m_input_file;
 	Tool m_tool;
 
