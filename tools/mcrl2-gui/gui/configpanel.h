@@ -300,7 +300,7 @@ public:
 		wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
 		wxString output_file = wxString(m_fileIO.output_file.c_str(),
 				wxConvUTF8);
-		run = run + ' ' + input_file + ' ' + output_file;
+		run = run + wxT(' ') + input_file + wxT(' ') + output_file;
 
 		m_listbox_output->Append(run);
 
