@@ -291,7 +291,7 @@ vector<Tool> Initialization::Read_tools() {
         std::string location;
 
         try{
-        	node->GetAttribute("location", &location, true );
+        	e->GetAttribute("location", &location, true );
         }
         catch(...){
           location = m_executable_basename + "/"+  tool.m_name;
@@ -301,7 +301,7 @@ vector<Tool> Initialization::Read_tools() {
 
     #ifdef __APPLE__
           std::string app;
-          app = itemElement->GetAttribute("macosx_bundle");
+          app = e->GetAttribute("macosx_bundle");
           if (!(app.empty() || app.compare( "false" ) == 0) )
           {
         	  //TODO: add full apple path : Requires a mac for testing
