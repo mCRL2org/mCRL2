@@ -23,6 +23,7 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -74,7 +75,7 @@ class ltsinfo_tool : public ltsinfo_base
     {
     }
 
-  private:
+  protected:
 
     void add_options(interface_description &desc)
     {
@@ -365,10 +366,31 @@ class ltsinfo_tool : public ltsinfo_base
 #endif
 };
 
+class ltsinfo_gui_tool: public mcrl2_gui_tool<ltsinfo_tool> {
+public:
+	ltsinfo_gui_tool() {
+
+		std::vector<std::string> values;
+
+		m_gui_options["counter-example"] = create_checkbox_widget();
+
+		values.clear();
+		values.push_back("determinisation");
+		values.push_back("bisim");
+		values.push_back("branching-bisim");
+		values.push_back("dpbranching-bisim");
+		values.push_back("none");
+		m_gui_options["equivalence"] = create_radiobox_widget(values);
+
+
+		//-iFORMAT, --in1=FORMAT   use FORMAT as the format for INFILE1 (or stdin)
+
+	}
+};
 
 int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return ltsinfo_tool().execute(argc, argv);
+  return ltsinfo_gui_tool().execute(argc, argv);
 }

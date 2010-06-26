@@ -15,6 +15,7 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+//#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -76,6 +77,13 @@ class lps_parelm_tool : public squadt_tool< input_output_tool >
     }
 #endif
 };
+
+//class lps_parelm_gui_tool: public mcrl2_gui_tool<lps_parelm_tool>
+//{
+//  public:
+//	lps_parelm_gui_tool()
+//    {    }
+//};
 
 int main(int argc, char** argv)
 {

@@ -24,6 +24,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/exception.h"
 
 using namespace mcrl2::utilities;
@@ -221,8 +222,15 @@ class tbf2lps_tool: public squadt_tool<input_output_tool>
     }
 };
 
+class tbf2lps_gui_tool: public mcrl2_gui_tool<tbf2lps_tool> {
+public:
+	tbf2lps_gui_tool() {
+		m_gui_options["no-conv-map"] = create_checkbox_widget();
+	}
+};
+
 int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
-  return tbf2lps_tool().execute(argc, argv);
+  return tbf2lps_gui_tool().execute(argc, argv);
 }

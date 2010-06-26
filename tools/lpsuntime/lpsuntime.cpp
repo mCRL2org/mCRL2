@@ -14,9 +14,11 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
 
@@ -91,9 +93,15 @@ class untime_tool: public squadt_tool< input_output_tool >
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
+class untime_gui_tool: public mcrl2_gui_tool<untime_tool> {
+public:
+	untime_gui_tool() {
+	}
+};
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return untime_tool().execute(argc, argv);
+  return untime_gui_tool().execute(argc, argv);
 }

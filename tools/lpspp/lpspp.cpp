@@ -22,6 +22,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -210,8 +211,23 @@ class lpspp_tool: public squadt_tool< input_output_tool >
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
+class lpspp_gui_tool: public mcrl2_gui_tool<lpspp_tool> {
+public:
+	lpspp_gui_tool() {
+
+		std::vector<std::string> values;
+
+		values.clear();
+		values.push_back("default");
+		values.push_back("debug");
+		values.push_back("internal");
+		values.push_back("internal-debug");
+		m_gui_options["format"] = create_radiobox_widget(values);
+	}
+};
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return lpspp_tool().execute(argc, argv);
+  return lpspp_gui_tool().execute(argc, argv);
 }

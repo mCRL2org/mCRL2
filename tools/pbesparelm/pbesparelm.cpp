@@ -15,6 +15,7 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -125,11 +126,15 @@ class pbes_parelm_tool: public squadt_tool<input_output_tool>
 
 };
 
+class pbes_parelm_gui_tool: public mcrl2_gui_tool<pbes_parelm_tool> {
+public:
+	pbes_parelm_gui_tool() {}
+};
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  pbes_parelm_tool tool;
+  pbes_parelm_gui_tool tool;
   return tool.execute(argc, argv); /*< The function `execute` first parses the command line
                                        arguments, and then calls the function `run`. >*/
 }

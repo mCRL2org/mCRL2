@@ -15,6 +15,7 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -98,9 +99,16 @@ class sumelm_tool: public squadt_tool< input_output_tool >
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
+class sumelm_gui_tool: public mcrl2_gui_tool<sumelm_tool>
+{
+  public:
+	sumelm_gui_tool()
+    { }
+};
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return sumelm_tool().execute(argc, argv);
+  return sumelm_gui_tool().execute(argc, argv);
 }

@@ -15,6 +15,7 @@
 #include <wx/stattext.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
+#include <wx/statline.h>
 
 
 #define ID_RUN_TOOL 1000
@@ -41,14 +42,14 @@ public:
 
 		// Top Panel
 
-		//wp: work panel for a scroll top
 		m_configpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 				wxAUI_NB_BOTTOM
 			);
 
 		m_tool_output = new OutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-		//wxPanel *wp = new wxPanel(m_configpanel);
 		m_wsw = new wxScrolledWindow(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+
+		/* Creates a 1000px & 1000px virtual panel */
 		m_wsw->SetScrollbars( 20, 20, 50, 50 );
 
 		/* Define size large enough for top*/
@@ -93,7 +94,12 @@ public:
 			fpc->SetPath(wxString(file_suggestion.c_str(), wxConvUTF8));
 			m_fileIO.output_file = file_suggestion;
 			fpc->GetSize(&w, &h);
-			height = height + h + 2 * border;
+			height += h + 2 * border;
+
+		    new wxStaticLine(top, wxID_ANY, wxPoint(border, height),
+		        wxSize(4000,1));
+
+		    height += border;
 
 		}
 
@@ -273,7 +279,12 @@ public:
 
 		};
 
-		height = height + border;
+	    height += border;
+
+	    new wxStaticLine(top, wxID_ANY, wxPoint(border, height),
+	        wxSize(4000,1));
+
+	    height += border;
 
 		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"), wxPoint(
 				border, height));

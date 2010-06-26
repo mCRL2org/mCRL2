@@ -22,6 +22,7 @@
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/exception.h"
 
 using namespace std;
@@ -408,8 +409,22 @@ protected:
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
+class tracepp_gui_tool: public mcrl2_gui_tool<tracepp_tool> {
+public:
+	tracepp_gui_tool() {
+		std::vector<std::string> values;
+		values.push_back("plain");
+		values.push_back("states");
+		values.push_back("mcrl2");
+		values.push_back("aut");
+		values.push_back("dot");
+		m_gui_options["format"] = create_radiobox_widget(values);
+	}
+};
+
+
 int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return tracepp_tool().execute(argc, argv);
+  return tracepp_gui_tool().execute(argc, argv);
 }

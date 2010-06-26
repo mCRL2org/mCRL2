@@ -24,6 +24,7 @@
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -116,8 +117,14 @@ class txt2pbes_tool: public squadt_tool<input_output_tool>
 
 };
 
+class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool> {
+public:
+	txt2pbes_gui_tool() {}
+};
+
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return txt2pbes_tool().execute(argc, argv);
+  return txt2pbes_gui_tool().execute(argc, argv);
 }

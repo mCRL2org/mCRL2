@@ -37,6 +37,7 @@
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 
 using namespace mcrl2::utilities;
@@ -148,7 +149,7 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
           "With the -p option turned on, more functionality is supported.")
     {}
 
-  private:
+  protected:
 
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
@@ -2415,7 +2416,15 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     return (true);
   }
 
+  class pnml2mcrl2_gui_tool: public mcrl2_gui_tool<pnml2mcrl2_tool> {
+  public:
+	  pnml2mcrl2_gui_tool() {
 
+  		m_gui_options["error"] = create_textctrl_widget();
+  		m_gui_options["hide"] = create_checkbox_widget();
+  		m_gui_options["no-rec-par"] = create_checkbox_widget();
+  	}
+  };
 
   //==================================================
   // main
@@ -2423,7 +2432,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   int main(int argc, char **argv)
   {
     MCRL2_ATERM_INIT(argc, argv)
-    return pnml2mcrl2_tool().execute(argc,argv);
+    return pnml2mcrl2_gui_tool().execute(argc,argv);
   }
 
 // Added by Yarick: alternative generation of Places:

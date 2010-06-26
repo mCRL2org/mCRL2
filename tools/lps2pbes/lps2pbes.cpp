@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -239,9 +240,20 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
 };
 
+class lps2pbes_gui_tool: public mcrl2_gui_tool<lps2pbes_tool>
+{
+  public:
+	lps2pbes_gui_tool()
+    {
+      m_gui_options["timed"] = create_textctrl_widget();
+      m_gui_options["formula"] = create_filepicker_widget();
+    }
+};
+
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps2pbes_tool().execute(argc, argv);
+  return lps2pbes_gui_tool().execute(argc, argv);
 }

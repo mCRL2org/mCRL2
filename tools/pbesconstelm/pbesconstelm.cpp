@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
@@ -227,13 +228,39 @@ class pbes_constelm_tool: public squadt_tool<pbes_rewriter_tool<rewriter_tool<in
       return result;
     }
 #endif
+};
 
+class pbes_constelm_gui_tool: public mcrl2_gui_tool<pbes_constelm_tool> {
+public:
+	pbes_constelm_gui_tool() {
 
+		std::vector<std::string> values;
+
+		m_gui_options["compute-conditions"] = create_checkbox_widget();
+		m_gui_options["remove-equations"] = create_checkbox_widget();
+
+		values.clear();
+		values.push_back("simplify");
+		values.push_back("quantifier-all");
+		values.push_back("quantifier-finite");
+		values.push_back("pfnf");
+		m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
+
+		values.clear();
+		values.push_back("jitty");
+		values.push_back("jittyc");
+		values.push_back("jittyc");
+		values.push_back("inner");
+		values.push_back("innep");
+		values.push_back("innec");
+		m_gui_options["rewriter"] = create_radiobox_widget(values);
+
+	}
 };
 
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  pbes_constelm_tool tool;
+  pbes_constelm_gui_tool tool;
   return tool.execute(argc, argv);
 }

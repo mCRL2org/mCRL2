@@ -21,6 +21,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/pbes.h"
 
 using namespace mcrl2::utilities::tools;
@@ -211,9 +212,24 @@ class pbespp_tool: public squadt_tool< input_output_tool >
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
+class pbespp_gui_tool: public mcrl2_gui_tool<pbespp_tool> {
+public:
+	pbespp_gui_tool() {
+
+		std::vector<std::string> values;
+
+		values.clear();
+		values.push_back("default");
+		values.push_back("debug");
+		values.push_back("internal");
+		values.push_back("internal-debug");
+		m_gui_options["format"] = create_radiobox_widget(values);
+	}
+};
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return pbespp_tool().execute(argc, argv);
+  return pbespp_gui_tool().execute(argc, argv);
 }
 

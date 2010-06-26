@@ -26,6 +26,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -285,9 +286,36 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
+class action_rename_gui_tool: public mcrl2_gui_tool<action_rename_tool>
+{
+  public:
+	action_rename_gui_tool()
+    {
+      m_gui_options["renamefile"] = create_filepicker_widget();
+      m_gui_options["no-sumelm"] = create_checkbox_widget();
+      m_gui_options["no-rewrite"] = create_checkbox_widget();
+
+      std::vector<std::string> values;
+      values.clear();
+      values.push_back("pa");
+      values.push_back("tc");
+      m_gui_options["end-phase"] = create_radiobox_widget(values);
+      m_gui_options["pretty"] = create_checkbox_widget();
+
+      values.clear();
+      values.push_back("jitty");
+      values.push_back("jittyp");
+      values.push_back("jittyc");
+      values.push_back("inner");
+      values.push_back("innerp");
+      values.push_back("innerc");
+      m_gui_options["rewriter"] = create_radiobox_widget(values);
+    }
+};
+
 int main(int argc, char* argv[])
 {
    MCRL2_ATERMPP_INIT(argc, argv)
 
-   return action_rename_tool().execute(argc, argv);
+   return action_rename_gui_tool().execute(argc, argv);
 }

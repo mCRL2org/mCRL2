@@ -37,6 +37,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 //Data Framework
 #include "mcrl2/data/enumerator.h"
@@ -146,7 +147,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       return m_output_filename;
     }
 
-  private:
+  protected:
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
 
@@ -642,9 +643,53 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 #endif
 };
 
+class pbes2bool_gui_tool: public mcrl2_gui_tool<pbes2bool_tool> {
+public:
+	pbes2bool_gui_tool() {
+
+		std::vector<std::string> values;
+
+		m_gui_options["counter"] = create_checkbox_widget();
+		m_gui_options["hashtables"] = create_checkbox_widget();
+
+		values.clear();
+		values.push_back("none");
+		values.push_back("vasy");
+		values.push_back("pbes");
+		values.push_back("cwi");
+		m_gui_options["output"] = create_radiobox_widget(values);
+
+		values.clear();
+		values.push_back("simplify");
+		values.push_back("quantifier-all");
+		values.push_back("quantifier-finite");
+		values.push_back("pfnf");
+		m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
+
+		values.clear();
+		values.push_back("jitty");
+		values.push_back("jittyc");
+		values.push_back("jittyc");
+		values.push_back("inner");
+		values.push_back("innep");
+		values.push_back("innec");
+		m_gui_options["rewriter"] = create_radiobox_widget(values);
+
+		values.clear();
+		values.push_back("0");
+		values.push_back("1");
+		values.push_back("2");
+		values.push_back("3");
+		m_gui_options["strategy"] = create_radiobox_widget(values);
+
+		m_gui_options["tree"] = create_checkbox_widget();
+		m_gui_options["unused_data"] = create_checkbox_widget();
+	}
+};
+
 int main(int argc, char* argv[])
 {
    MCRL2_ATERMPP_INIT(argc, argv)
 
-   return pbes2bool_tool().execute(argc, argv);
+   return pbes2bool_gui_tool().execute(argc, argv);
 }

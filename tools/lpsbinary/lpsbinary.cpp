@@ -16,10 +16,13 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
+
 
 using namespace std;
 using namespace mcrl2;
+using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
 class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
@@ -129,6 +132,24 @@ class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       return result;
     }
 #endif //ENABLE_SQUADT_CONNECTIVITY
+};
+
+class binary_gui_tool: public mcrl2_gui_tool<binary_tool>
+{
+  public:
+	binary_gui_tool()
+    {
+      std::vector<std::string> values;
+
+      values.clear();
+      values.push_back("jitty");
+      values.push_back("jittyp");
+      values.push_back("jittyc");
+      values.push_back("inner");
+      values.push_back("innerp");
+      values.push_back("innerc");
+      m_gui_options["rewriter"] = create_radiobox_widget(values);
+    }
 };
 
 int main(int argc, char** argv)

@@ -13,9 +13,11 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::utilities;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::utilities::tools::squadt_tool;
@@ -117,10 +119,29 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
+class lps_rewriter_gui_tool: public mcrl2_gui_tool<lps_rewriter_tool>
+{
+  public:
+	lps_rewriter_gui_tool()
+    {
+      std::vector<std::string> values;
+
+      values.clear();
+      values.push_back("jitty");
+      values.push_back("jittyp");
+      values.push_back("jittyc");
+      values.push_back("inner");
+      values.push_back("innerp");
+      values.push_back("innerc");
+      m_gui_options["rewriter"] = create_radiobox_widget(values);
+
+    }
+};
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps_rewriter_tool().execute(argc, argv);
+  return lps_rewriter_gui_tool().execute(argc, argv);
 }
 
