@@ -50,6 +50,9 @@ enum {
 	Exec_AsyncExec,
 	Exec_Shell,
 	Exec_POpen,
+	Exec_NewFile,
+	Exec_RenameFile,
+	Exec_DeleteFile,
 	Exec_OpenFile,
 	Exec_OpenURL,
 	Exec_DDEExec,
@@ -87,15 +90,25 @@ public:
 
 		// create a menu bar
 		wxMenu *menuFile = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
-		menuFile->Append(Exec_Kill, wxT("&Kill process...\tCtrl-K"),
-				wxT("Kill a process by PID"));
+		menuFile->Append(Exec_NewFile, wxT("&New file \tCtrl-N"),
+				wxT("Add a new file"));
+		menuFile->AppendSeparator();
+		menuFile->Append(Exec_OpenFile, wxT("&Edit selected file \tCtrl-E"),
+						wxT("Edit selected file"));
+		menuFile->Append(Exec_RenameFile, wxT("&Rename selected file \tF2"),
+				wxT("Rename a file"));
+		menuFile->Append(Exec_DeleteFile, wxT("&Delete selected file"),
+				wxT("Delete a file"));
 		menuFile->AppendSeparator();
 		menuFile->Append(Exec_Quit, wxT("E&xit\tAlt-X"),
 				wxT("Quit the program"));
 
 		wxMenu *execMenu = new wxMenu;
-		execMenu->Append(Exec_Redirect, wxT("&Execute command...\tCtrl-E"),
+		execMenu->Append(Exec_Redirect, wxT("&Run command...\tCtrl-R"),
 				wxT("Launch a program and capture its output"));
+		execMenu->AppendSeparator();
+		execMenu->Append(Exec_Kill, wxT("&Kill process...\tCtrl-K"),
+				wxT("Kill a process by PID"));
 
 		wxMenu *helpMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
 		helpMenu->Append(Exec_About, wxT("&About\tF1"),
@@ -111,7 +124,7 @@ public:
 		// add menus to the menu bar
 		wxMenuBar *menuBar = new wxMenuBar();
 		menuBar->Append(menuFile, wxT("&File"));
-		menuBar->Append(execMenu, wxT("&Exec"));
+		menuBar->Append(execMenu, wxT("&Proces"));
 		menuBar->Append(windowMenu, wxT("&Window"));
 		menuBar->Append(helpMenu, wxT("&Help"));
 
@@ -129,11 +142,11 @@ public:
 				 wxAUI_NB_CLOSE_ON_ACTIVE_TAB |
 				 wxAUI_NB_MIDDLE_CLICK_CLOSE  );
 
-		GenericDirCtrl *left_panel = new GenericDirCtrl(this, m_tool_catalog,
+		m_left_panel = new GenericDirCtrl(this, m_tool_catalog,
 				m_extention_tool_mapping, m_lbox, this->GetNoteBookToolPanel());
 
-		left_panel->SetSize(250,-1);
-		m_mgr.AddPane(left_panel, wxLEFT, wxT("File Selector"));
+		m_left_panel->SetSize(250,-1);
+		m_mgr.AddPane(m_left_panel, wxLEFT, wxT("File Selector"));
 
 		m_lbox->SetSize(400,250);
 
@@ -258,6 +271,28 @@ public:
 	}
 	;
 
+	void OnNewFile(wxCommandEvent& event) {
+		m_left_panel->CreateNewFile();
+	}
+	;
+
+	void OnRenameFile(wxCommandEvent& event) {
+		m_left_panel->Rename();
+	}
+	;
+
+	void OnDeleteFile(wxCommandEvent& event) {
+		m_left_panel->Delete();
+	}
+	;
+
+
+
+	void OnEditFile(wxCommandEvent& event) {
+		m_left_panel->Edit();
+	}
+	;
+
 	void OnExecWithRedirect(wxCommandEvent& event) {
 		wxString cmd = wxGetTextFromUser(wxT("Enter the command: "),
 				DIALOG_TITLE, m_cmdLast);
@@ -337,10 +372,19 @@ private:
 
 	wxAuiNotebook *m_notebookpanel;
 
+	GenericDirCtrl *m_left_panel;
+
 DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-EVT_MENU(Exec_Quit, MainFrame::OnQuit) EVT_MENU(Exec_Kill, MainFrame::OnKill)
+EVT_MENU(Exec_Quit, MainFrame::OnQuit)
+EVT_MENU(Exec_Kill, MainFrame::OnKill)
+
+EVT_MENU(Exec_NewFile, MainFrame::OnNewFile)
+EVT_MENU(Exec_OpenFile, MainFrame::OnEditFile)
+EVT_MENU(Exec_RenameFile, MainFrame::OnRenameFile)
+EVT_MENU(Exec_DeleteFile, MainFrame::OnDeleteFile)
+
 EVT_MENU(Exec_ClearLog, MainFrame::OnClear)
 
 EVT_MENU(Exec_Redirect, MainFrame::OnExecWithRedirect)

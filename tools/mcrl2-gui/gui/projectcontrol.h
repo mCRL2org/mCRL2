@@ -23,6 +23,7 @@
 #include <wx/aui/auibook.h>
 #include <gui/outputlistbox.h>
 #include <gui/configpanel.h>
+#include <iostream>
 
 //To store configurations
 #include <wx/config.h>
@@ -154,31 +155,7 @@ public:
 
 				break;
 			case ID_EDIT:
-				if (!this->GetPath().empty()) {
-
-					wxString ext = this->GetPath().AfterLast(_T('.'));
-					wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
-					if (ft) {
-						wxString cmd;
-						bool ok = ft->GetOpenCommand(&cmd, wxFileType::MessageParameters(
-								this->GetPath()));
-						if (ok) {
-							wxExecute(cmd, wxEXEC_ASYNC, NULL);
-						}
-						delete ft;
-					} else {
-#ifdef __linux
-						wxLogMessage(_T("No editor defined by UNIX operating system for editing files of extension '%s'."),
-								ext.c_str());
-#endif
-#ifdef __WINDOWS__
-						wxLogMessage(_T("No editor defined by Windows operating system for editing files of extension '%s'."),
-								ext.c_str());
-#endif
-						//TODO:: Pop-Up for assigning editor to file extention
-						return;
-					}
-				}
+        Edit();
 				break;
 			case ID_DETAILS:
 				std::cout << "TODO: implement this" << std::endl;
@@ -227,6 +204,34 @@ public:
 
 		evt.Skip();
 
+	}
+
+	void Edit(){
+		if (!this->GetPath().empty()) {
+
+			wxString ext = this->GetPath().AfterLast(_T('.'));
+			wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
+			if (ft) {
+				wxString cmd;
+				bool ok = ft->GetOpenCommand(&cmd, wxFileType::MessageParameters(
+						this->GetPath()));
+				if (ok) {
+					wxExecute(cmd, wxEXEC_ASYNC, NULL);
+				}
+				delete ft;
+			} else {
+#ifdef __linux
+				wxLogMessage(_T("No editor defined by UNIX operating system for editing files of extension '%s'."),
+						ext.c_str());
+#endif
+#ifdef __WINDOWS__
+				wxLogMessage(_T("No editor defined by Windows operating system for editing files of extension '%s'."),
+						ext.c_str());
+#endif
+				//TODO:: Pop-Up for assigning editor to file extention
+				return;
+			}
+		}
 	}
 
 	void Rename() {
@@ -290,7 +295,7 @@ public:
 		wxMenu *transformation = new wxMenu();
 
 		if (!this->GetPath().empty()) {
-			mnu.Append(ID_EDIT, wxT("Edit"));
+			mnu.Append(ID_EDIT, wxT("Edit \tCtrl-E"));
 
 			for (vector<Tool>::iterator i = m_tool_catalog.begin(); i
 					!= m_tool_catalog.end(); ++i) {
