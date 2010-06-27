@@ -873,10 +873,13 @@ void NextStateGeneratorStandard::set_substitutions()
                         for (int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
                         {
                                 ATerm a = ATgetArgument((ATermAppl) cur_state,i);
-
                                 if ( !ATisEqual(a,info.nil) )
                                 {
                                         info.m_rewriter.set_internally_associated_value((ATermAppl) ATgetFirst(l), a);
+#ifdef MCRL2_NEXTSTATE_DEBUG
+                                std::cerr << "Set substitution " << pp(info.export_term(ATgetFirst(l))) << ":=" << 
+                                                     pp(info.export_term(a)) << "\n";
+#endif
                                 }
                         }
                         break;
@@ -905,7 +908,7 @@ void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
 
         if ( info.num_summands == 0 )
         {
-          valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
+          valuation = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
         }
         else
         {
@@ -920,7 +923,8 @@ void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
 
           cur_act = ATgetArgument(info.summands[SummandIndex],2);
           cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);
-          valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
+          
+          valuation = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
                                      ATgetArgument(info.summands[SummandIndex],1));
         }
 
@@ -933,9 +937,11 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
         std::clog << "NextStateGeneratorStandard::next(Transition, State, prioritised) called" << std::endl;
 #endif
 
-        while ( valuations == ns_info::enumerator_type() && (sum_idx < info.num_summands) )
+        // while ( valuation == ns_info::enumerator_type() && (sum_idx < info.num_summands) ) // valuation is empty.
+        while ( !valuation.enumerator_has_a_solution() && (sum_idx < info.num_summands) ) // valuation is empty.
         {
-          if (single_summand) {
+          if (single_summand) 
+          {
 #ifdef MCRL2_NEXTSTATE_DEBUG
         std::clog << "NextStateGeneratorStandard::next: single_summand is true, and no next state found in this summand;" << std::endl <<
                      "  sum_idx was: " << sum_idx << std::endl;
@@ -960,20 +966,22 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
                         "             " << pp(atermpp::aterm_appl(info.export_term(ATgetArgument(info.summands[sum_idx],1)))) << std::endl;
 #endif
 
-          valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
+          valuation = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
                                      ATgetArgument(info.summands[sum_idx],1));
 
           ++sum_idx;
         }
-
-        if ( valuations != ns_info::enumerator_type() )
+        
+        // if ( valuation != ns_info::enumerator_type() ) // valuation contains unprocessed valuation.
+        if ( valuation.enumerator_has_a_solution()) // valuation contains unprocessed valuation.
         {
           if ( *info.current_id != id )
-          {
+          { 
                   set_substitutions();
           }
-          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) 
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuation->begin()); i != valuation->end(); ++i) 
           { 
+                       
             info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
           }
 
@@ -985,15 +993,18 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
                   *prioritised = (sum_idx <= info.num_prioritised);
           }
 
-          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuation->begin()); i != valuation->end(); ++i) 
+          {
             info.m_rewriter.clear_internally_associated_value(i->first);
           }
-          ++valuations;
+          ++valuation;
 
           return true;
-        } else {
-                *Transition = NULL;
-                *State = NULL;
+        } 
+        else 
+        {
+          *Transition = NULL;
+          *State = NULL;
         }
 
         return false;

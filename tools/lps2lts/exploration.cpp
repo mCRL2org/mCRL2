@@ -135,7 +135,9 @@ bool initialise_lts_generation(lts_generation_options *opts)
       gsErrorMsg("cannot create bit hash table\n");
       return false;
     }
-  } else {
+  } 
+  else 
+  {
     states = ATindexedSetCreate(lgopts->initial_table_size,50);
   }
 
@@ -615,9 +617,9 @@ static ATerm get_repr(ATerm state)
   count = 0;
   bool notdone = true;
   while ( notdone )
-  {
+  { 
     if ( ATgetInt((ATermInt) ATtableGet(repr_number,v)) == 0 )
-    {
+    { 
       count++;
       ATtablePut(repr_number,v,(ATerm) ATmakeInt(count));
       ATtablePut(repr_low,v,(ATerm) ATmakeInt(count));
@@ -627,7 +629,7 @@ static ATerm get_repr(ATerm state)
       ATerm NewState;
       bool prioritised_action;
       while ( repr_nsgen->next(&Transition,&NewState,&prioritised_action) && prioritised_action )
-      {
+      { 
         ATbool b;
         ATindexedSetPut(repr_visited,NewState,&b);
         if ( b == ATtrue )
@@ -663,7 +665,9 @@ static ATerm get_repr(ATerm state)
         ATtablePut(repr_low,backv,(ATerm) ATmakeInt(b));
       }
       v = backv;
-    } else {
+    } 
+    else 
+    {
       ATerm u = ATgetFirst(nextl);
       ATtablePut(repr_next,v,(ATerm) ATgetNext(nextl));
       int nu = ATgetInt((ATermInt) ATtableGet(repr_number,u));
@@ -671,7 +675,9 @@ static ATerm get_repr(ATerm state)
       {
         ATtablePut(repr_back,u,v);
         v = u;
-      } else {
+      } 
+      else 
+      {
         if ( nu < ATgetInt((ATermInt) ATtableGet(repr_number,v)) )
         {
           int lv = ATgetInt((ATermInt) ATtableGet(repr_low,v));
@@ -801,7 +807,9 @@ static boost::uint64_t add_state(ATerm state, bool *is_new)
     *is_new = !get_bithash(i);
     set_bithash(i);
     return i;
-  } else {
+  } 
+  else 
+  {
     ATbool new_state;
     unsigned long i = ATindexedSetPut(states,state,&new_state);
     *is_new = (new_state == ATtrue);

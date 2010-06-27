@@ -100,12 +100,27 @@ namespace mcrl2 {
       };
 
       template < typename MutableSubstitution, typename Evaluator, typename Selector >
-      class classic_enumerator_impl {
+      class classic_enumerator_impl 
+      {
 
         friend class data::classic_enumerator< MutableSubstitution, Evaluator, Selector >;
 
         template < typename T >
         friend class data::enumerator_factory;
+
+      private:
+
+        bool m_enumerator_has_a_solution;  // Extension by jfg on june 27, 2010.
+
+      public:
+
+        void set_whether_enumerator_has_a_solution(const bool b)
+        { m_enumerator_has_a_solution=b;
+        }
+
+        bool enumerator_has_a_solution() const
+        { return m_enumerator_has_a_solution;
+        }
 
         private:
 
@@ -144,11 +159,13 @@ namespace mcrl2 {
           // do not use directly, use the create method
           classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
                              expression_type const& c, substitution_type const& s, Evaluator const&) :
+                m_enumerator_has_a_solution(false),
                 m_shared_context(context), 
                 m_generator(m_shared_context->m_enumerator.getInfo()), 
                 m_evaluator(context->m_evaluator), 
                 m_condition(c), m_substitution(s) 
-          {}
+          { 
+          }
 
           /// \param[in] v iterator range of the enumeration variables
           template < typename Container >
@@ -158,7 +175,7 @@ namespace mcrl2 {
             // Changed one but last argument into true JFG 7/12/2009. And changed it back to false on 8/12/2009. 
             // Tools like lpssuminst require that an enumeration is made for all elements satisfying the condition, 
             // except for those where the condition is false. 
-            // Add a rewrite command to take
+
             m_shared_context->m_enumerator.findSolutions(
                                    convert(v), 
                                    m_evaluator.convert_to(m_condition), 
@@ -172,6 +189,7 @@ namespace mcrl2 {
 
           // Copy constructor; note that copies share share state due to limitations in the underlying implementation
           classic_enumerator_impl(classic_enumerator_impl const& other) :
+                                                 m_enumerator_has_a_solution(other.m_enumerator_has_a_solution),
                                                  m_shared_context(other.m_shared_context),
                                                  m_generator(other.m_generator),
                                                  m_evaluator(other.m_evaluator),
@@ -180,7 +198,7 @@ namespace mcrl2 {
           {}
 
           bool increment() 
-          {
+          { 
 
             ATermList assignment_list;
 
@@ -192,7 +210,7 @@ namespace mcrl2 {
 
               for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                                  i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) 
-              {
+              { 
                 assert(static_cast< variable_type >((*i)(0)).sort() == m_evaluator.convert_from((*i)(1)).sort());
 
                 m_substitution[static_cast< variable_type >((*i)(0))] =
@@ -209,7 +227,7 @@ namespace mcrl2 {
           }
 
           bool equal(classic_enumerator_impl const& other) const {
-            return m_substitution == other.m_substitution;
+            return m_enumerator_has_a_solution==other.m_enumerator_has_a_solution && m_substitution == other.m_substitution;
           }
 
           MutableSubstitution const& dereference() const {
@@ -223,12 +241,18 @@ namespace mcrl2 {
                                Container const& v, expression_type const& c,
                                Evaluator const& e, substitution_type const& s = substitution_type(),
                     typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) 
-          {
+          { 
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
 
             if (!target->initialise(v)) 
-            { target.reset();
+            { 
+              // target.reset();
+              target->set_whether_enumerator_has_a_solution(false);
+            }
+            else
+            {
+              target->set_whether_enumerator_has_a_solution(true);
             }
           }
 
@@ -237,8 +261,9 @@ namespace mcrl2 {
           static void create(boost::scoped_ptr< classic_enumerator_impl >& target,
               data_specification const& specification, Container const& v,
               expression_type const& c, Evaluator const& e, substitution_type const& s = substitution_type(),
-                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) {
+                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) 
 
+          { 
             create(target, boost::shared_ptr< shared_context_type >(new shared_context_type(specification, const_cast< Evaluator& >(e))), v, c, e, s);
           }
       };

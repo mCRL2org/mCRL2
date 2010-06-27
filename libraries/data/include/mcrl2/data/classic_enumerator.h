@@ -159,10 +159,10 @@ namespace mcrl2 {
     template < typename MutableSubstitution, typename Evaluator, typename Selector >
     class classic_enumerator :
            public boost::iterator_facade< classic_enumerator< MutableSubstitution, Evaluator, Selector >,
-             const MutableSubstitution, boost::forward_traversal_tag > {
+                                          const MutableSubstitution, boost::forward_traversal_tag > 
+    {
 
       public:
-
         /// \brief The type of objects that represent substitutions
         typedef MutableSubstitution                                            substitution_type;
         /// \brief The type of objects that represent variables
@@ -191,11 +191,18 @@ namespace mcrl2 {
         // For past-end iterator: m_impl.get() == 0, for cheap iterator construction and comparison
         boost::scoped_ptr< implementation_type >  m_impl;
 
+      public:
+        bool enumerator_has_a_solution() const
+        { return m_impl->enumerator_has_a_solution();
+        }
+
       private:
 
-        void increment() {
-          if (!m_impl->increment()) {
-            m_impl.reset();
+        void increment() 
+        {
+          if (!m_impl->increment()) 
+          { m_impl->set_whether_enumerator_has_a_solution(false);
+            // m_impl.reset();
           }
         }
 
@@ -224,8 +231,8 @@ namespace mcrl2 {
 
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              variable_type const& variable, expression_type const& condition,
-             substitution_type const& substitution, Evaluator const& evaluator) {
-
+             substitution_type const& substitution, Evaluator const& evaluator) 
+        {
           implementation_type::create(m_impl, context, make_set(variable), condition, evaluator, substitution);
         }
 
@@ -380,7 +387,8 @@ namespace mcrl2 {
       public:
 
          classic_enumerator()
-         { }
+         { 
+         }
 
         /** \brief Constructs iterator representing a sequence of expressions
          *
@@ -390,7 +398,8 @@ namespace mcrl2 {
         classic_enumerator(data_specification const& specification,
             variable_type const& variable) :
                    super(get_shared_context(), make_set(variable), sort_bool::true_(), substitution_type(), get_shared_evaluator())
-        { }
+        { 
+        }
 
         /** \brief Constructs iterator representing a sequence of expressions
          *
@@ -402,7 +411,8 @@ namespace mcrl2 {
             Container const& variables,
             typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) :
                    super(get_shared_context(), variables, sort_bool::true_(), substitution_type(), get_shared_evaluator())
-        { }
+         { 
+         }
 
     };
 

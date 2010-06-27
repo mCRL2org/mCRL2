@@ -188,7 +188,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
     }
 
     Enumerator make(ATermList v, ATerm c)
-    {
+    { 
       return mcrl2::data::enumerator_factory< Enumerator >::make(atermpp::term_list< mcrl2::data::variable >(v), atermpp::aterm(c));
     }
 
@@ -278,7 +278,7 @@ struct ns_info
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator<
       mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
-      legacy_rewriter, legacy_selector > enumerator_type;
+                                             legacy_rewriter, legacy_selector > enumerator_type;
 
   typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
 
@@ -297,8 +297,11 @@ struct ns_info
   AFun stateAFun;
   unsigned int *current_id;
 
-  enumerator_type get_sols(ATermList v, ATerm c) {
-    return m_enumerator_factory->make(v, c);
+  enumerator_type get_sols(ATermList v, ATerm c) 
+  { 
+    const enumerator_type m=m_enumerator_factory->make(v, c);
+    
+    return m;
   }
 
   ATermAppl export_term(ATerm term) const
@@ -351,7 +354,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
     ATerm *stateargs;
 
-    ns_info::enumerator_type valuations;
+    ns_info::enumerator_type valuation;
 
     void set_substitutions();
 
