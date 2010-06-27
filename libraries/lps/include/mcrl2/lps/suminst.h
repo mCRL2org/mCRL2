@@ -96,7 +96,9 @@ namespace mcrl2 {
             try 
             { core::gsDebugMsg("Enumerating condition: %s\n", data::pp(s.condition()).c_str());
 
-              for (enumerator_type i(m_enumerator_factory.make(boost::make_iterator_range(variables), s.condition())); i != enumerator_type(); ++i)
+              // for (enumerator_type i(m_enumerator_factory.make(boost::make_iterator_range(variables), s.condition())); i != enumerator_type(); ++i)
+              for (enumerator_type i(m_enumerator_factory.make(boost::make_iterator_range(variables), s.condition())); 
+                              i.enumerator_has_a_solution(); ++i)
               { core::gsDebugMsg("substitutions: %s\n", to_string(*i).c_str());
 
                 SummandType t(s);

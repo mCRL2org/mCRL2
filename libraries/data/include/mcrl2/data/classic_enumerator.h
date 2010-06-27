@@ -119,7 +119,7 @@ namespace mcrl2 {
      *
      *   using namespace mcrl2::data;
      *
-     *   for (classic_enumerator< > i(d, variables, c); i != classic_enumerator< >(); ++i) {
+     *   for (classic_enumerator< > i(d, variables, c); i.enumerator_has_a_solution(); ++i) {
      *     std::cerr << mcrl2::core::pp((*i)(c)) << std::endl;
      *   }
      * }
@@ -146,7 +146,7 @@ namespace mcrl2 {
      *
      *   enumerator_type i(d, variables, c);
      *
-     *   for (enumerator_type j = i; i != enumerator_type(); ++i, ++j) {
+     *   for (enumerator_type j = i; i .enumerator_has_a_solution(); ++i, ++j) {
      *     assert(*i == *j);
      *   }
      * }
@@ -201,8 +201,9 @@ namespace mcrl2 {
         void increment() 
         {
           if (!m_impl->increment()) 
-          { m_impl->set_whether_enumerator_has_a_solution(false);
+          { // m_impl->set_whether_enumerator_has_a_solution(false);
             // m_impl.reset();
+            m_impl->set_whether_enumerator_has_a_solution(false);
           }
         }
 

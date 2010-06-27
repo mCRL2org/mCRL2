@@ -127,7 +127,8 @@ namespace mcrl2 {
               //Get all constructors for par
               data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-              for (enumerator_type j(m_enumerator_factory.make(par)); j != enumerator_type(); ++j)
+              // for (enumerator_type j(m_enumerator_factory.make(par)); j != enumerator_type(); ++j)
+              for (enumerator_type j(m_enumerator_factory.make(par)); j.enumerator_has_a_solution() ; ++j)
               {
                 enumerated_elements.push_back((*j)(par));
               }

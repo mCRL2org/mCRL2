@@ -247,6 +247,7 @@ namespace mcrl2 {
 
             if (!target->initialise(v)) 
             { 
+              // target->set_whether_enumerator_has_a_solution(false);
               // target.reset();
               target->set_whether_enumerator_has_a_solution(false);
             }
