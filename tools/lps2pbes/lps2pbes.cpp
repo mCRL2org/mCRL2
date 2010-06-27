@@ -245,7 +245,7 @@ class lps2pbes_gui_tool: public mcrl2_gui_tool<lps2pbes_tool>
   public:
 	lps2pbes_gui_tool()
     {
-      m_gui_options["timed"] = create_textctrl_widget();
+      m_gui_options["timed"] = create_checkbox_widget();
       m_gui_options["formula"] = create_filepicker_widget();
     }
 };
