@@ -204,7 +204,7 @@ namespace mcrl2 {
                   data_expression possible_representative = find_representative(*i, maximum_depth);
                   return set_representative(sort, possible_representative);
                 }
-                catch (mcrl2::runtime_error &e){}; // continue searching;
+                catch (mcrl2::runtime_error & /* e */){}; // continue searching;
                 
               }
 
@@ -217,7 +217,7 @@ namespace mcrl2 {
                 { data_expression possible_representative = find_representative(*i, maximum_depth);
                   return set_representative(sort, possible_representative);
                 }
-                catch (mcrl2::runtime_error &e){}; // continue searching;
+                catch (mcrl2::runtime_error & /* e */){}; // continue searching;
                 
               }
             }
