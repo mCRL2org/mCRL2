@@ -908,7 +908,7 @@ void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
 
         if ( info.num_summands == 0 )
         {
-          ns_info::enumerator_type valuation = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
+          valuation = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
         }
         else
         {
@@ -924,7 +924,7 @@ void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
           cur_act = ATgetArgument(info.summands[SummandIndex],2);
           cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);
           
-          ns_info::enumerator_type valuation = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
+          valuation = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
                                      ATgetArgument(info.summands[SummandIndex],1));
         }
 
@@ -936,9 +936,6 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 #ifdef MCRL2_NEXTSTATE_DEBUG
         std::clog << "NextStateGeneratorStandard::next(Transition, State, prioritised) called" << std::endl;
 #endif
-
-        // TODO: is this the correct way to declare the variable valuation?
-        ns_info::enumerator_type valuation;
 
         // while ( valuation == ns_info::enumerator_type() && (sum_idx < info.num_summands) ) // valuation is empty.
         while ( !valuation.enumerator_has_a_solution() && (sum_idx < info.num_summands) ) // valuation is empty.
@@ -969,7 +966,7 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
                         "             " << pp(atermpp::aterm_appl(info.export_term(ATgetArgument(info.summands[sum_idx],1)))) << std::endl;
 #endif
 
-          ns_info::enumerator_type valuation = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
+          valuation = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
                                      ATgetArgument(info.summands[sum_idx],1));
 
           ++sum_idx;
