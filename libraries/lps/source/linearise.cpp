@@ -41,6 +41,7 @@
 #include "mcrl2/lps/sumelm.h"
 #include <mcrl2/lps/constelm.h>
 #include "mcrl2/exception.h"
+#include "mcrl2/lps/find.h"
 
 // atermpp includes
 #include "mcrl2/atermpp/set.h"
@@ -6372,7 +6373,8 @@ class specification_basic_type:public boost::noncopyable
                  i!=variable_list.end(); ++i)
           { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars,
                 global_variables.find(*i)==global_variables.end() && // it is neither a glabal variable
-                data::search_free_variable(temporary_spec.process().summands(),*i))          // and it occurs in the summands.
+                lps::search_free_variable(temporary_spec.process().summands(),*i)
+               )          // and it occurs in the summands.
             { pars=push_front(pars,*i);
             }
           }

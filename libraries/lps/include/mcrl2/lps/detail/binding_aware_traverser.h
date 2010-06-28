@@ -46,6 +46,15 @@ namespace detail {
 
     /// \brief Traverses a summand
     /// \param s A summand
+    void operator()(const summand& s)
+    {
+      increase_bind_count(s.summation_variables());
+      super::operator()(s);
+      decrease_bind_count(s.summation_variables());
+    }
+
+    /// \brief Traverses a summand
+    /// \param s A summand
     void operator()(const action_summand& s)
     {
       increase_bind_count(s.summation_variables());
@@ -74,9 +83,9 @@ namespace detail {
 
   // Adds lps traversal functions to the data selective binding aware traverser.
   template <typename Derived, typename AdaptablePredicate>
-  class selective_binding_aware_traverser_base: public data::detail::selective_binding_aware_traverser<Derived, AdaptablePredicate>
+  class selective_binding_aware_traverser_base: public data::detail::selective_traverser<Derived, AdaptablePredicate, lps::detail::binding_aware_traverser>
   {
-    typedef data::detail::selective_binding_aware_traverser<Derived, AdaptablePredicate> super;
+    typedef data::detail::selective_traverser<Derived, AdaptablePredicate, lps::detail::binding_aware_traverser> super;
     
     public:
       using super::operator();
@@ -89,17 +98,53 @@ namespace detail {
   class selective_binding_aware_traverser: public selective_binding_aware_traverser_base<Derived, AdaptablePredicate>
   {
     typedef selective_binding_aware_traverser_base<Derived, AdaptablePredicate> super;
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
 
     public:
       using super::operator();
+      using super::increase_bind_count;
+      using super::decrease_bind_count;
 
       selective_binding_aware_traverser()
       { }
 
       selective_binding_aware_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
+
+      /// \brief Traverses a summand
+      /// \param s A summand
+      void operator()(const summand& s)
+      {
+        increase_bind_count(s.summation_variables());
+        super::operator()(s);
+        decrease_bind_count(s.summation_variables());
+      }
+      
+      /// \brief Traverses a summand
+      /// \param s A summand
+      void operator()(const action_summand& s)
+      {
+        increase_bind_count(s.summation_variables());
+        super::operator()(s);
+        decrease_bind_count(s.summation_variables());
+      }
+      
+      /// \brief Traverses a summand
+      /// \param s A summand
+      void operator()(const deadlock_summand& s)
+      {
+        increase_bind_count(s.summation_variables());
+        super::operator()(s);
+        decrease_bind_count(s.summation_variables());
+      }
+      
+      /// \brief Traverses a linear_process
+      /// \param s A linear_process
+      void operator()(const linear_process& p)
+      {
+        increase_bind_count(p.process_parameters());
+        super::operator()(p);
+        decrease_bind_count(p.process_parameters());
+      }
   };
 
 } // namespace detail

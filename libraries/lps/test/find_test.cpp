@@ -105,8 +105,9 @@ void test_search()
     "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
     "init X;\n"
   ));
-  data::variable v("x", data::sort_nat::nat());
-  lps::search_free_variable(spec.process().summands(), v);
+  data::variable d("x", data::sort_nat::nat());
+  lps::summand_list container = spec.process().summands();
+  lps::search_free_variable(container, d);
 }
 
 int test_main(int argc, char* argv[])
