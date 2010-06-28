@@ -291,7 +291,7 @@ ATerm NextStateStandard::parseStateVector(ATermAppl state, ATerm match)
                 for (int i=0; i<info.statelen; i++)
                 {
                         stateargs[i] = ATgetArgument(state,i);
-                        if ( data::data_expression((ATermAppl) stateargs[i]).sort() != data::data_expression(ATAgetFirst(l)).sort())
+                        if ( mcrl2::data::data_expression((ATermAppl) stateargs[i]).sort() != mcrl2::data::data_expression(ATAgetFirst(l)).sort())
                         {
                                 valid = false;
                                 break;
@@ -472,7 +472,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         info.nil = gsMakeNil();
         ATprotectAppl(&info.nil);
 
-        free_vars = atermpp::convert< variable_list >(spec.global_variables());
+        free_vars = atermpp::convert< mcrl2::data::variable_list >(spec.global_variables());
 
         pars = spec.process().process_parameters();
         ATprotectList(&pars);
@@ -752,7 +752,7 @@ ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
                 } else {
 
                         stateargs[i] = info.m_rewriter(a);
-                        assert(data::find_variables(atermpp::make_list(data::data_expression(info.export_term(stateargs[i])))).empty());
+                        assert(mcrl2::data::find_variables(atermpp::make_list(mcrl2::data::data_expression(info.export_term(stateargs[i])))).empty());
 //                      stateargs[i] = rewr_obj->rewriteInternal(SetVars(a));
                 }
                 l = ATgetNext(l);
