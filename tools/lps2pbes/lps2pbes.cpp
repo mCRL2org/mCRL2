@@ -60,9 +60,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (parser.options.count("formula")) {
         formfilename = parser.option_argument("formula");
       }
-      else {
-        parser.error("option -f is not specified");
-      }
     }
 
   public:
@@ -80,6 +77,11 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
     bool run()
     {
+      if (formfilename.empty())
+      {
+        throw mcrl2::runtime_error("option -f is not specified");
+      }
+     
       //load LPS
       if (input_filename().empty()) {
         gsVerboseMsg("reading LPS from stdin...\n");
