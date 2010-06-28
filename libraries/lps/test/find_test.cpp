@@ -98,12 +98,24 @@ void test_free_variables()
   core::garbage_collect();
 }
 
+void test_search()
+{
+  lps::specification spec(parse_linear_process_specification(
+    "act a : Bool;\n"
+    "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
+    "init X;\n"
+  ));
+  data::variable v("x", data::sort_nat::nat());
+  lps::search_free_variable(spec.process().summands(), v);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_find();
   test_free_variables();
+  test_search();
 
   return EXIT_SUCCESS;
 }

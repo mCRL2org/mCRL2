@@ -115,6 +115,47 @@ namespace lps {
     return result;
   }
 
+//  /// \brief Returns true if the term has a given variable as subterm.
+//  /// \param[in] container an expression or container with expressions
+//  /// \param[in] v an expression or container with expressions
+//  /// \param d A variable
+//  /// \return True if the term has a given variable as subterm.
+//  template <typename Container>
+//  bool search_variable(Container const& container, const data::variable& v)
+//  {
+//    return data::detail::make_search_helper<data::variable, lps::detail::selective_data_traverser>(data::detail::compare_variable(v)).apply(container);
+//  }
+
+  /// \brief Returns true if the term has a given variable as subterm.
+  /// \param[in] container an expression or container with expressions
+  /// \param d A data variable
+  /// \return True if the term has a given variable as subterm.
+  template <typename Container>
+  bool search_free_variable(Container container, const data::variable& d)
+  {
+    return data::detail::make_free_variable_search_helper<lps::detail::selective_binding_aware_traverser>(data::detail::compare_variable(d)).apply(container);
+  }
+  
+//  /// \brief Returns true if the term has a given sort expression as subterm.
+//  /// \param[in] container an expression or container of expressions
+//  /// \param[in] s A sort expression
+//  /// \return True if the term has a given sort expression as subterm.
+//  template <typename Container>
+//  bool search_sort_expression(Container const& container, const data::sort_expression& s)
+//  {
+//    return data::detail::make_search_helper<data::sort_expression, lps::detail::selective_sort_traverser>(data::detail::compare_sort(s)).apply(container);
+//  } 
+//
+//  /// \brief Returns true if the term has a given data expression as subterm.
+//  /// \param[in] container an expression or container of expressions
+//  /// \param[in] s A data expression
+//  /// \return True if the term has a given data expression as subterm.
+//  template <typename Container>
+//  bool search_data_expression(Container const& container, const data::data_expression& s)
+//  {
+//    return data::detail::make_search_helper<data::data_expression, lps::detail::selective_data_traverser>(data::detail::compare_term<data::data_expression>(s)).apply(container);
+//  }  
+
 } // namespace lps
 
 } // namespace mcrl2

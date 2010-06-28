@@ -77,7 +77,9 @@ namespace detail {
   class selective_binding_aware_traverser_base: public data::detail::selective_binding_aware_traverser<Derived, AdaptablePredicate>
   {
     typedef data::detail::selective_binding_aware_traverser<Derived, AdaptablePredicate> super;
-    using super::operator();
+    
+    public:
+      using super::operator();
 
 // Include file with traverse member functions. This is to avoid duplication.
 #include "mcrl2/lps/detail/traverser.inc.h"
@@ -87,11 +89,12 @@ namespace detail {
   class selective_binding_aware_traverser: public selective_binding_aware_traverser_base<Derived, AdaptablePredicate>
   {
     typedef selective_binding_aware_traverser_base<Derived, AdaptablePredicate> super;
-    using super::operator();
     using super::increase_bind_count;
     using super::decrease_bind_count;
 
     public:
+      using super::operator();
+
       selective_binding_aware_traverser()
       { }
 
