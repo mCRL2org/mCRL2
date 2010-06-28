@@ -629,5 +629,5 @@ public:
 int main(int argc, char **argv) {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return ltscompare_tool().execute(argc,argv);
+  return ltscompare_gui_tool().execute(argc,argv);
 }

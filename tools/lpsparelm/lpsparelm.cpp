@@ -15,12 +15,13 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
-//#include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::squadt_tool;
+using namespace mcrl2::utilities;
 
 class lps_parelm_tool : public squadt_tool< input_output_tool >
 {
@@ -78,17 +79,17 @@ class lps_parelm_tool : public squadt_tool< input_output_tool >
 #endif
 };
 
-//class lps_parelm_gui_tool: public mcrl2_gui_tool<lps_parelm_tool>
-//{
-//  public:
-//	lps_parelm_gui_tool()
-//    {    }
-//};
+class lps_parelm_gui_tool: public mcrl2_gui_tool<lps_parelm_tool>
+{
+  public:
+	lps_parelm_gui_tool()
+    {    }
+};
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps_parelm_tool().execute(argc, argv);
+  return lps_parelm_gui_tool().execute(argc, argv);
 }
 
