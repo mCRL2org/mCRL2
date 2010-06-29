@@ -84,13 +84,23 @@ static const std::set<lts_equivalence> &allowed_eqs()
 
 struct t_tool_options 
 {
+  // defaults
+  t_tool_options():
+    name_for_first(""),
+    name_for_second(""),
+    format_for_first(lts_none),
+    format_for_second(lts_none),
+    equivalence(lts_eq_none),
+    preorder(lts_pre_none),
+    generate_counter_examples(false)
+  {}
+
   std::string     name_for_first;
   std::string     name_for_second;
   lts_type        format_for_first;
   lts_type        format_for_second;
   lts_equivalence equivalence;
   lts_preorder    preorder;
-  // lts_eq_options  eq_opts;
   std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
   bool generate_counter_examples;
 };
@@ -100,6 +110,27 @@ class ltscompare_tool : public ltscompare_base
 {
   private:
     t_tool_options tool_options;
+
+    // Check whether preconditions w.r.t. equivalence and pre-order are satisfied.
+    // This is needed to make sure wrappers can call this tool without the --help,
+    // --equivalence or --preorder options
+    void check_preconditions()
+    {
+      if(tool_options.equivalence != lts_eq_none && tool_options.preorder != lts_pre_none)
+      {
+        throw mcrl2::runtime_error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
+      }
+
+      if (tool_options.equivalence == lts_eq_none && tool_options.preorder == lts_pre_none)
+      {
+        throw mcrl2::runtime_error("one of the options -e/--equivalence and -p/--preorder must be used");
+      }
+
+      if (tool_options.name_for_first.empty() && tool_options.name_for_second.empty())
+      {
+        throw mcrl2::runtime_error("too few file arguments");
+      }
+    }
 
   public:
     ltscompare_tool() :
@@ -118,6 +149,8 @@ class ltscompare_tool : public ltscompare_base
 
     bool run()
     {
+      check_preconditions();
+
       lts l1,l2;
 
       if ( tool_options.name_for_first.empty() ) 
@@ -209,9 +242,6 @@ class ltscompare_tool : public ltscompare_base
       if (2 < parser.arguments.size())
       {
         parser.error("too many file arguments");
-      } else if (1 > parser.arguments.size())
-      {
-        parser.error("too few file arguments");
       }
     }
 
@@ -267,16 +297,6 @@ class ltscompare_tool : public ltscompare_base
         parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
       }
   
-      if (parser.options.count("equivalence") + parser.options.count("preorder") > 1)
-      {
-        parser.error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
-      }
-  
-      if (parser.options.count("equivalence") + parser.options.count("preorder") < 1)
-      {
-        parser.error("one of the options -e/--equivalence and -p/--preorder must be used");
-      }
-
       if (parser.options.count("counter-example")>0 && parser.options.count("equivalence")==0)
       { 
         parser.error("counter examples can only be used in combination with an equivalence");
@@ -318,10 +338,10 @@ class ltscompare_tool : public ltscompare_base
   
       if (parser.arguments.size() == 1) {
         tool_options.name_for_second = parser.arguments[0];
-      } else { // if (parser.arguments.size() == 2)
+      } else if (parser.arguments.size() == 2) {
         tool_options.name_for_first  = parser.arguments[0];
         tool_options.name_for_second = parser.arguments[1];
-      }
+      } // else something strange going on, caught in check_preconditions()
   
       if (parser.options.count("in1")) {
         if (1 < parser.options.count("in1")) {
@@ -353,7 +373,7 @@ class ltscompare_tool : public ltscompare_base
                        "' is not recognised; option ignored" << std::endl;
         }
       }
-      else {
+      else if (!tool_options.name_for_first.empty()) {
         tool_options.format_for_second = mcrl2::lts::detail::guess_format(tool_options.name_for_second);
       }
     }
