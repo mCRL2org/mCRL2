@@ -304,8 +304,8 @@ vector<Tool> Initialization::Read_tools() {
           app = e->GetAttribute("macosx_bundle");
           if (!(app.empty() || app.compare( "false" ) == 0) )
           {
-        	  //TODO: add full apple path : Requires a mac for testing
-            location.append(".app");
+            //Expand to full path
+            location.append(".app/Contents/MacOS/"+ tool.m_name);
           }
     #endif
         }
