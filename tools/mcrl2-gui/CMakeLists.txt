@@ -50,6 +50,8 @@ include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+
 if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
@@ -58,6 +60,9 @@ else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   ticpp
+  mcrl2_utilities_command_line
+  mcrl2_utilities_wx
+  mcrl2_core
 )
 endif( MCRL2_MONO_LIB )
 
@@ -68,6 +73,6 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
-# include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 endif ( MCRL2_BUILD_GUI_TOOLS )
