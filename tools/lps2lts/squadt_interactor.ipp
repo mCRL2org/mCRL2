@@ -514,12 +514,13 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   lgopts.generate_filename_for_trace = boost::bind(::add_output_file, configuration, trc_file_for_output, _1, _2);
 
   bool ok = false;
-  if ( initialise_lts_generation(&lgopts) )
+  lps2lts_algorithm lps2lts;
+  if ( lps2lts.initialise_lts_generation(&lgopts) )
   {
-    ok = generate_lts();
+    ok = lps2lts.generate_lts();
     ok = ok || lgopts.error_trace_saved;
 
-    ok &= finalise_lts_generation();
+    ok &= lps2lts.finalise_lts_generation();
   }
 
   return ok;

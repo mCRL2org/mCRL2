@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 2.6)
 add_executable(${PROJECT_NAME}
   lps2lts.cpp
   exploration.cpp
-  lts.cpp     #Requires 3th-party svc
+  lts.cpp     #Requires 3rd-party svc
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)

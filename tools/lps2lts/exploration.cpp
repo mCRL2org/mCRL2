@@ -34,8 +34,6 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
 
 
-static ATerm get_repr(ATerm state);
-
 exploration_strategy str_to_expl_strat(const char *s)
 {
   if ( !strcmp(s,"b") || !strcmp(s,"breadth") )
@@ -61,7 +59,7 @@ exploration_strategy str_to_expl_strat(const char *s)
   return es_none;
 }
 
-const char *expl_strat_to_str(exploration_strategy es)
+const char * expl_strat_to_str(exploration_strategy es)
 {
   switch ( es )
   {
@@ -80,34 +78,14 @@ const char *expl_strat_to_str(exploration_strategy es)
   }
 }
 
-static lts_generation_options *lgopts;
-
-static NextState *nstate;
-
-static ATermIndexedSet states = NULL;
-static boost::uint64_t num_states;
-static boost::uint64_t trans;
-static unsigned long level;
-static boost::uint64_t num_found_same;
-static boost::uint64_t current_state;
-static boost::uint64_t initial_state;
-
-static atermpp::vector<atermpp::aterm> backpointers;
-static unsigned long *bithashtable = NULL;
-
-static bool trace_support = false;
-static unsigned long tracecnt;
-
-static std::string basefilename;
-
-static bool lg_error = false;
-
-static void initialise_representation(bool confluence_reduction);
-static void cleanup_representation();
-
-bool initialise_lts_generation(lts_generation_options *opts)
+bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *opts)
 {
   using namespace mcrl2;
+
+  if(initialised)
+  {
+    throw mcrl2::runtime_error("lps2lts algorithm class may be instantiated only once.");
+  }
 
   gsVerboseMsg("initialising...\n");
 
@@ -122,19 +100,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
 
   if ( lgopts->bithashing )
   {
-    boost::uint64_t bithashtablesize;
-    if ( lgopts->bithashsize > ULLONG_MAX-4*sizeof(unsigned long) )
-    {
-      bithashtablesize = (1ULL << (sizeof(boost::uint64_t)*8-3)) / sizeof(unsigned long);
-    } else {
-      bithashtablesize = (lgopts->bithashsize+4*sizeof(unsigned long))/(8*sizeof(unsigned long));
-    }
-    bithashtable = (unsigned long *) calloc(bithashtablesize,sizeof(unsigned long)); // sizeof(unsigned int) * lgopts->bithashsize/(8*sizeof(unsigned int))
-    if ( bithashtable == NULL )
-    {
-      gsErrorMsg("cannot create bit hash table\n");
-      return false;
-    }
+    bithash_table = bit_hash_table(lgopts->bithashsize);
   } 
   else 
   {
@@ -201,17 +167,11 @@ bool initialise_lts_generation(lts_generation_options *opts)
     gsVerboseMsg("not saving state space.\n");
   }
 
+  initialised = true;
   return true;
 }
 
-void finalise_lts_generation_when_interrupted(int)
-{ 
-  finalise_lts_generation();
-  cerr << "Warning: state space generation was aborted prematurely. \n";
-  exit(1);
-}
-
-bool finalise_lts_generation()
+bool lps2lts_algorithm::finalise_lts_generation()
 {
   if ( lg_error )
   {
@@ -272,7 +232,6 @@ bool finalise_lts_generation()
     }
   }
 
-  cleanup_representation();
   delete nstate;
   backpointers.clear();
   if ( states != NULL )
@@ -280,8 +239,8 @@ bool finalise_lts_generation()
     ATindexedSetDestroy(states);
     states = NULL;
   }
-  free(bithashtable);
-  bithashtable = NULL;
+
+  cleanup_representation();
 
   return true;
 }
@@ -290,7 +249,7 @@ bool finalise_lts_generation()
 //                              Trace functions                               //
 ////////////////////////////////////////////////////////////////////////////////
 
-static bool occurs_in(atermpp::aterm_appl const& name, atermpp::term_list< atermpp::aterm_appl > const& ma)
+bool lps2lts_algorithm::occurs_in(atermpp::aterm_appl const& name, atermpp::term_list< atermpp::aterm_appl > const& ma)
 {
   for (atermpp::term_list< atermpp::aterm_appl >::const_iterator i = ma.begin(); i != ma.end(); ++i)
   {
@@ -302,7 +261,7 @@ static bool occurs_in(atermpp::aterm_appl const& name, atermpp::term_list< aterm
   return false;
 }
 
-static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
+bool lps2lts_algorithm::savetrace(std::string const &info, ATerm state, NextState *nstate, ATerm extra_state, ATermAppl extra_transition)
 {
   ATerm s = state;
   ATerm ns;
@@ -349,7 +308,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
 
   try
   {
-    trace.save(lgopts->generate_filename_for_trace(info, "trc"));
+    trace.save(lgopts->generate_filename_for_trace(basefilename, info, "trc"));
   } catch ( ... )
   {
     return false;
@@ -358,11 +317,11 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
   return true;
 }
 
-std::string lts_generation_options::generate_trace_file_name(std::string const& info, std::string const& extension) {
+std::string lts_generation_options::generate_trace_file_name(std::string const& basefilename, std::string const& info, std::string const& extension) {
   return basefilename + std::string("_") + info + std::string(".") + extension;
 }
 
-static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewState)
+void lps2lts_algorithm::check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewState)
 {
   // if ( lgopts->detect_action )
   for (int j=0; j<lgopts->num_trace_actions; j++)
@@ -413,7 +372,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
 }
 
 
-static void save_error_trace(ATerm state)
+void lps2lts_algorithm::save_error_trace(ATerm state)
 {
   if ( lgopts->save_error_trace )
   {
@@ -436,7 +395,7 @@ static void save_error_trace(ATerm state)
 }
 
 
-static void check_deadlocktrace(ATerm state)
+void lps2lts_algorithm::check_deadlocktrace(ATerm state)
 {
   if ( lgopts->detect_deadlock )
   {
@@ -479,15 +438,7 @@ static void check_deadlocktrace(ATerm state)
 // Efficient State Space Generation, Technical Report SEN-R0123, CWI,
 // Amsterdam, 2001
 
-static bool apply_confluence_reduction;
-static ATermIndexedSet repr_visited;
-static ATermTable repr_number;
-static ATermTable repr_low;
-static ATermTable repr_next;
-static ATermTable repr_back;
-static NextStateGenerator *repr_nsgen;
-
-static void initialise_representation(bool confluence_reduction)
+void lps2lts_algorithm::initialise_representation(bool confluence_reduction)
 {
   apply_confluence_reduction = confluence_reduction;
   if ( confluence_reduction )
@@ -505,7 +456,7 @@ static void initialise_representation(bool confluence_reduction)
   }
 }
 
-static void cleanup_representation()
+void lps2lts_algorithm::cleanup_representation()
 {
   if ( apply_confluence_reduction )
   {
@@ -518,7 +469,7 @@ static void cleanup_representation()
   }
 }
 
-static bool search_divergence_recursively(
+bool lps2lts_algorithm::search_divergence_recursively(
                 const long current_state_index,
                 set < long > &on_current_depth_first_path)
 {
@@ -556,7 +507,7 @@ static bool search_divergence_recursively(
   return false;
 }
 
-static void check_divergence(ATerm state) 
+void lps2lts_algorithm::check_divergence(ATerm state) 
 { 
   if ( lgopts->detect_divergence )
   {
@@ -597,7 +548,7 @@ static void check_divergence(ATerm state)
   }
 }
 
-static ATerm get_repr(ATerm state)
+ATerm lps2lts_algorithm::get_repr(ATerm state)
 {
   if ( !apply_confluence_reduction )
   {
@@ -693,119 +644,11 @@ static ATerm get_repr(ATerm state)
   return v;
 }
 
-// 96 bit mix function of Robert Jenkins
-#define mix(a,b,c) \
-  { a -= b; a -= c; a ^= (c>>13); \
-    b -= c; b -= a; b ^= (a<<8);  \
-    c -= a; c -= b; c ^= (b>>13); \
-    a -= b; a -= c; a ^= (c>>12); \
-    b -= c; b -= a; b ^= (a<<16); \
-    c -= a; c -= b; c ^= (b>>5);  \
-    a -= b; a -= c; a ^= (c>>3);  \
-    b -= c; b -= a; b ^= (a<<10); \
-    c -= a; c -= b; c ^= (b>>15); \
-  }
-
-static unsigned long sh_a,sh_b,sh_c;
-static unsigned int sh_i;
-static void calc_hash_init()
-{
-  sh_a = 0x9e3779b9;
-  sh_b = 0x65e3083a;
-  sh_c = 0xa45f7582;
-  sh_i = 0;
-}
-static void calc_hash_add(unsigned long n)
-{
-  switch ( sh_i )
-  {
-    case 0:
-      sh_a += n;
-      sh_i = 1;
-      break;
-    case 1:
-      sh_b += n;
-      sh_i = 2;
-      break;
-    case 2:
-      sh_c += n;
-      sh_i = 0;
-      mix(sh_a,sh_b,sh_c);
-      break;
-  }
-}
-static boost::uint64_t calc_hash_finish()
-{
-  while ( sh_i != 0 )
-  {
-    calc_hash_add(0x76a34e87);
-  }
-  return (((boost::uint64_t) (sh_a & 0xffff0000)) << 24) |
-         (((boost::uint64_t) (sh_b & 0xffff0000)) << 16) |
-         (((boost::uint64_t) (sh_c & 0xffff0000))     ) |
-         ((sh_a & 0x0000ffff)^(sh_b & 0x0000ffff)^(sh_c & 0x0000ffff));
-}
-static void calc_hash_aterm(ATerm t)
-{
-  switch ( ATgetType(t) )
-  {
-    case AT_APPL:
-      calc_hash_add(0x13ad3780);
-      {
-        unsigned int len = ATgetArity(ATgetAFun((ATermAppl) t));
-        for (unsigned int i=0; i<len; i++)
-        {
-          calc_hash_aterm(ATgetArgument((ATermAppl) t, i));
-        }
-      }
-      break;
-    case AT_LIST:
-      calc_hash_add(0x7eb9cdba);
-      for (ATermList l=(ATermList) t; !ATisEmpty(l); l=ATgetNext(l))
-      {
-        calc_hash_aterm(ATgetFirst(l));
-      }
-      break;
-    case AT_INT:
-      calc_hash_add(ATgetInt((ATermInt) t));
-      break;
-    default:
-      calc_hash_add(0xaa143f06);
-      break;
-  }
-}
-static boost::uint64_t calc_hash(ATerm state)
-{
-  calc_hash_init();
-
-  calc_hash_aterm(state);
-
-  return calc_hash_finish() % lgopts->bithashsize;
-}
-
-static bool get_bithash(boost::uint64_t i)
-{
-  return (( bithashtable[i/(8*sizeof(unsigned long))] >> (i%(8*sizeof(unsigned long))) ) & 1UL) == 1UL;
-}
-
-static void set_bithash(boost::uint64_t i)
-{
-  bithashtable[i/(8*sizeof(unsigned long))] |= 1UL << (i%(8*sizeof(unsigned long)));
-}
-
-static void remove_state_from_bithash(ATerm state)
-{
-  boost::uint64_t i = calc_hash(state);
-  bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1UL << (i%(8*sizeof(unsigned long))));
-}
-
-static boost::uint64_t add_state(ATerm state, bool *is_new)
+boost::uint64_t lps2lts_algorithm::add_state(ATerm state, bool* is_new)
 {
   if ( lgopts->bithashing )
   {
-    boost::uint64_t i = calc_hash(state);
-    *is_new = !get_bithash(i);
-    set_bithash(i);
+    boost::uint64_t i = bithash_table.add_state(state, is_new);
     return i;
   } 
   else 
@@ -817,29 +660,17 @@ static boost::uint64_t add_state(ATerm state, bool *is_new)
   }
 }
 
-static boost::uint64_t state_index(ATerm state)
+boost::uint64_t lps2lts_algorithm::state_index(ATerm state)
 {
   if ( lgopts->bithashing )
   {
-    assert(get_bithash(calc_hash(state)));
-    return calc_hash(state);
+    return bithash_table.state_index(state);
   } else {
     return ATindexedSetGetIndex(states,state);
   }
 }
 
-
-static ATerm *queue_get = NULL;
-static ATerm *queue_put = NULL;
-static unsigned long queue_size = 0;
-static unsigned long queue_size_max = UINT_MAX;
-static unsigned long queue_get_pos = 0;
-static unsigned long queue_get_count = 0;
-static unsigned long queue_put_count = 0;
-static unsigned long queue_put_count_extra = 0;
-static bool queue_size_fixed = false;
-
-static ATerm add_to_full_queue(ATerm state)
+ATerm lps2lts_algorithm::add_to_full_queue(ATerm state)
 {
   /* We wish that every state has equal chance of being in the queue.
    * Let N be the size of the queue and M the number of states from which
@@ -885,7 +716,7 @@ static ATerm add_to_full_queue(ATerm state)
   return state;
 }
 
-static ATerm add_to_queue(ATerm state)
+ATerm lps2lts_algorithm::add_to_queue(ATerm state)
 {
   if ( queue_put_count == queue_size )
   {
@@ -956,7 +787,7 @@ static ATerm add_to_queue(ATerm state)
   return NULL;
 }
 
-static ATerm get_from_queue()
+ATerm lps2lts_algorithm::get_from_queue()
 {
   if ( queue_get_pos == queue_get_count )
   {
@@ -966,7 +797,7 @@ static ATerm get_from_queue()
   }
 }
 
-static void swap_queues()
+void lps2lts_algorithm::swap_queues()
 {
   ATerm *t = queue_get;
   queue_get = queue_put;
@@ -978,7 +809,7 @@ static void swap_queues()
 }
 
 
-static bool add_transition(ATerm from, ATermAppl action, ATerm to)
+bool lps2lts_algorithm::add_transition(ATerm from, ATermAppl action, ATerm to)
 {
   bool new_state;
   boost::uint64_t i;
@@ -1004,7 +835,7 @@ static bool add_transition(ATerm from, ATermAppl action, ATerm to)
   return new_state;
 }
 
-bool generate_lts()
+bool lps2lts_algorithm::generate_lts()
 {
   ATerm state = get_repr(nstate->getInitialState());
   save_initial_state(initial_state,state);
@@ -1486,7 +1317,7 @@ bool generate_lts()
                 ATerm removed_state = add_to_queue(NewState);
                 if ( removed_state != NULL )
                 {
-                  remove_state_from_bithash(removed_state);
+                  bithash_table.remove_state_from_bithash(removed_state);
                   num_states--;
                 }
               }

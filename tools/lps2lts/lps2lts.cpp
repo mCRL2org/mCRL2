@@ -40,6 +40,16 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 
+// FIXME: Workaround to be able to catch signals
+lps2lts_algorithm lps2lts;
+
+static void finalise_lts_generation_when_interrupted(int)
+{
+  lps2lts.finalise_lts_generation();
+  cerr << "Warning: state space generation was aborted prematurely." << std::endl;
+  exit(1);
+}
+
 ATermAppl *parse_action_list(const std::string& s, int *len)
 {
   *len = s.empty() ? 0 : 1;
@@ -105,7 +115,7 @@ class lps2lts_tool : public lps2lts_base
 
     bool run()
     {
-      if ( !initialise_lts_generation(&options) )
+      if ( !lps2lts.initialise_lts_generation(&options) )
       {
         return false;
       }
@@ -116,9 +126,9 @@ class lps2lts_tool : public lps2lts_base
       signal(SIGTERM,finalise_lts_generation_when_interrupted); // At ^C close files properly and
                                                                 // print a progress message.
 
-      generate_lts();
+      lps2lts.generate_lts();
 
-      finalise_lts_generation();
+      lps2lts.finalise_lts_generation();
 
       return true;
     }
