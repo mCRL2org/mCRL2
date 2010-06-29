@@ -29,6 +29,7 @@
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #ifndef __glu_h__
 #ifdef __APPLE__
@@ -113,5 +114,13 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
 	bool get3dMode();
 };
 
+class LTSGraph_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<LTSGraph>
+{
+  public:
+	LTSGraph_gui_tool()
+    {
+      //m_gui_options["no-state"] = create_checkbox_widget();
+    }
+};
 
 #endif //LTSGRAPH_H

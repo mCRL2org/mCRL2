@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/wx_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #include "enums.h"
 #include "mediator.h"
@@ -111,7 +112,15 @@ class LTSView :
     DECLARE_EVENT_TABLE()
 };
 
+  class LTSView_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<LTSView>
+  {
+    public:
+  	LTSView_gui_tool()
+      {
+        //m_gui_options["no-state"] = create_checkbox_widget();
+      }
+  };
 
-DECLARE_APP(LTSView)
+DECLARE_APP(LTSView_gui_tool)
 
 #endif

@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #include <iostream>
 
@@ -73,6 +74,15 @@ class grape_app: public mcrl2::utilities::wx::tool< grape_app, input_tool >
   }
 };
 
+class grape_app_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<grape_app>
+{
+  public:
+	grape_app_gui_tool()
+    {
+      //m_gui_options["no-state"] = create_checkbox_widget();
+    }
+};
+
 #ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   HINSTANCE hPrevInstance,
@@ -91,4 +101,4 @@ int main(int argc, char** argv)
   return wxEntry(argc, argv);
 }
 
-IMPLEMENT_APP_NO_MAIN(grape_app)
+IMPLEMENT_APP_NO_MAIN(grape_app_gui_tool)

@@ -103,7 +103,7 @@ bool LTSGraph::run() {
 	return true;
 }
 
-IMPLEMENT_APP_NO_MAIN(LTSGraph)
+IMPLEMENT_APP_NO_MAIN(LTSGraph_gui_tool)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__

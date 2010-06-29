@@ -33,6 +33,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
@@ -166,7 +167,17 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
   }
 }
 
-IMPLEMENT_APP_NO_MAIN(XSim)
+class XSim_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<XSim>
+{
+  public:
+	XSim_gui_tool()
+    {
+      //m_gui_options["no-state"] = create_checkbox_widget();
+    }
+};
+
+
+IMPLEMENT_APP_NO_MAIN(XSim_gui_tool)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__

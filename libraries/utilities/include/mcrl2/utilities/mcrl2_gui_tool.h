@@ -158,18 +158,18 @@ public:
 	mcrl2_gui_tool() :
 		m_gui_options_selected(false) {
 
-		m_gui_options["help"] = create_checkbox_widget();
+		// Help is already displayed, therefore not required as separate option
+		//m_gui_options["help"] = create_checkbox_widget();
 		m_gui_options["verbose"] = create_checkbox_widget(true);
 		m_gui_options["debug"] = create_checkbox_widget();
 
-		/* m_gui_options["debug"] = "unknown";
-		 m_gui_options["verbose"] = "unknown";*/
 	}
 
 	bool run() {
 		if (m_gui_options_selected) {
 			print_mcrl2_gui_options();
-			return true;
+			exit(EXIT_SUCCESS);
+			//return true;
 		}
 		Tool::run();
 		return true;

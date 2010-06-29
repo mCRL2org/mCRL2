@@ -106,7 +106,7 @@ LTSView::LTSView() : super("LTSView",
     developers()), lts(0)
 { }
 
-IMPLEMENT_APP_NO_MAIN(LTSView)
+IMPLEMENT_APP_NO_MAIN(LTSView_gui_tool)
 IMPLEMENT_WX_THEME_SUPPORT
 BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()

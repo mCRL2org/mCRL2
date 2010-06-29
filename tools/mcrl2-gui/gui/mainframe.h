@@ -124,7 +124,7 @@ public:
 		// add menus to the menu bar
 		wxMenuBar *menuBar = new wxMenuBar();
 		menuBar->Append(menuFile, wxT("&File"));
-		menuBar->Append(execMenu, wxT("&Proces"));
+		menuBar->Append(execMenu, wxT("&Process"));
 		menuBar->Append(windowMenu, wxT("&Window"));
 		menuBar->Append(helpMenu, wxT("&Help"));
 

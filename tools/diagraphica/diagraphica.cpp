@@ -115,7 +115,7 @@ bool DiaGraph::run()
     return true;
 }
 
-IMPLEMENT_APP_NO_MAIN( DiaGraph )
+IMPLEMENT_APP_NO_MAIN( DiaGraph_gui_tool )
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
