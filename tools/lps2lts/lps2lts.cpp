@@ -40,9 +40,12 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 
+lps2lts_algorithm lps2lts;
+
 void print_message_upon_premature_termination(int)
 {
   std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
+  lps2lts.finalise_lts_generation();
   exit(EXIT_FAILURE);
 }
 
@@ -111,7 +114,6 @@ class lps2lts_tool : public lps2lts_base
 
     bool run()
     {
-      lps2lts_algorithm lps2lts;
       if ( !lps2lts.initialise_lts_generation(&options) )
       {
         return false;

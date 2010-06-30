@@ -63,6 +63,7 @@ if(NOT MCRL2_MONO_LIB)
 
   target_link_libraries(${PROJECT_NAME}
     mcrl2_data
+    mcrl2_lps
     svc
   )
 
