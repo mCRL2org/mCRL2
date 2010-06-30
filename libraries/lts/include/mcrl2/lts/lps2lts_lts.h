@@ -6,10 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lts.h
+/// \file lps2lts_lts.h
 
-#ifndef _LTS_H
-#define _LTS_H
+#ifndef _LPS2LTS_LTS_H
+#define _LPS2LTS_LTS_H
 
 #include <memory>
 #include "boost/cstdint.hpp"
@@ -32,4 +32,4 @@ void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boo
 void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans);
 void remove_lts();
 
-#endif
+#endif // _LPS2LTS_LTS_H

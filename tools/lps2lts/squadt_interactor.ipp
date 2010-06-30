@@ -18,7 +18,7 @@
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/exception.h"
 #include "lps2lts.h"
-#include "exploration.h"
+#include "mcrl2/lts/exploration.h"
 
 #include "mcrl2/core/messaging.h"
 

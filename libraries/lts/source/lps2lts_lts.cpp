@@ -15,8 +15,7 @@
 #include "svc/svc.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
-#include "lps2lts.h"
-#include "lts.h"
+#include "mcrl2/lts/lps2lts_lts.h"
 #include "mcrl2/lts/lts_io.h"
 
 #include "mcrl2/core/messaging.h"
@@ -38,6 +37,8 @@ static SVCparameterIndex svcparam = 0;
 static const char *lts_filename;
 static lts *generic_lts;
 static ATermTable aterm2state, aterm2label;
+
+#define NAME "lps2lts"
 
 void open_lts(const char *filename, lts_options &opts)
 {

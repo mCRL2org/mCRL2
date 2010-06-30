@@ -24,8 +24,8 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/trace/trace.h"
-#include "exploration.h"
-#include "lts.h"
+#include "mcrl2/lts/exploration.h"
+#include "mcrl2/lts/lps2lts_lts.h"
 
 
 using namespace std;
@@ -1378,6 +1378,8 @@ bool lps2lts_algorithm::generate_lts()
       gsErrorMsg("unknown exploration strategy\n");
     }
   }
+
+  completely_generated = true;
 
   return !lg_error;
 }

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lps2lts.cpp
+/// \file lps2lts_lts.cpp
 
 #include "boost.hpp" // precompiled headers
 
@@ -20,8 +20,8 @@
 #include "boost/cstdint.hpp"
 #include "boost/lexical_cast.hpp"
 #include "lps2lts.h"
-#include "exploration.h"
-#include "lts.h"
+#include "mcrl2/lts/exploration.h"
+#include "mcrl2/lts/lps2lts_lts.h"
 #include "mcrl2/lts/lts_io.h"
 
 #include "mcrl2/core/messaging.h"
@@ -39,6 +39,12 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
+
+void print_message_upon_premature_termination(int)
+{
+  std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
+  exit(EXIT_FAILURE);
+}
 
 ATermAppl *parse_action_list(const std::string& s, int *len)
 {
@@ -110,6 +116,11 @@ class lps2lts_tool : public lps2lts_base
       {
         return false;
       }
+
+      signal(SIGABRT,print_message_upon_premature_termination);
+      signal(SIGSEGV,print_message_upon_premature_termination);
+      signal(SIGINT,print_message_upon_premature_termination);
+      signal(SIGTERM,print_message_upon_premature_termination); // At ^C print a message.
 
       lps2lts.generate_lts();
 

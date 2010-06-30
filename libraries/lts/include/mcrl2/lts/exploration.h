@@ -19,9 +19,9 @@
 #include "boost/cstdint.hpp"
 
 #include "aterm2.h"
-#include "lts.h"
-#include "bithashtable.h"
-#include "queue.h"
+#include "mcrl2/lts/lps2lts_lts.h"
+#include "mcrl2/lts/bithashtable.h"
+#include "mcrl2/lts/queue.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lts/lts.h"
 
@@ -129,6 +129,7 @@ class lps2lts_algorithm
     // lps2lts_algorithm may be initialised only once
     bool initialised;
     bool finalised;
+    bool completely_generated;
 
     lts_generation_options* lgopts;
     NextState* nstate;
@@ -166,6 +167,7 @@ class lps2lts_algorithm
     lps2lts_algorithm() :
       initialised(false),
       finalised(false),
+      completely_generated(false),
       states(NULL),
       bithashtable(NULL),
       bithash_table(),
@@ -178,6 +180,10 @@ class lps2lts_algorithm
       if(!finalised)
       {
         finalise_lts_generation();
+      }
+      if(!completely_generated)
+      {
+        throw mcrl2::runtime_error("Warning: state space generation was aborted prematurely");
       }
     }
 
