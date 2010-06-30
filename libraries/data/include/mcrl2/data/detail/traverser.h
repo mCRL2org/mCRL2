@@ -245,15 +245,20 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).leave(e);
           }
 
-          /* ENG. Substitutie moet plaatsvinden op interne data structuur. TODO.
+          // ENG. Substitutie moet plaatsvinden op interne data structuur. TODO.
+          // (JK: 30/6/2010) This assumes that we consider the *normalised*
+          // version of the data specification. Is this really what we want?
           void operator()(data_specification const& e)
           {
+            static_cast< Derived& >(*this).enter(e);
+
             static_cast< Derived& >(*this)(e.sorts());
             static_cast< Derived& >(*this)(e.constructors());
             static_cast< Derived& >(*this)(e.mappings());
-            // static_cast< Derived& >(*this)(e.aliases());
             static_cast< Derived& >(*this)(e.equations());
-          } */
+
+            static_cast< Derived& >(*this).leave(e);
+          }
 
 #ifndef NO_TERM_TRAVERSAL
           // \deprecated exists only for backwards compatibility

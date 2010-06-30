@@ -18,6 +18,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/formula_checker.h"
+#include "mcrl2/data/traverse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -204,7 +205,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
       }
 
       std::set<data::sort_expression> s;
-      traverse_sort_expressions(formula, std::inserter(s, s.end()));
+      data::traverse_sort_expressions(formula, std::inserter(s, s.end()));
       specification.add_context_sorts(s);
 
       //check formula

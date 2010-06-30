@@ -740,7 +740,7 @@ template <typename Container>
 void complete_data_specification(pbes<Container>& p)
 {
   std::set<data::sort_expression> s;
-  traverse_sort_expressions(p, std::inserter(s, s.end()));
+  pbes_system::traverse_sort_expressions(p, std::inserter(s, s.end()));
   p.data().add_context_sorts(s);
 }
 

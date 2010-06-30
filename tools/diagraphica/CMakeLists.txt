@@ -87,13 +87,13 @@ if( MCRL2_MONO_LIB )
   # #####################################################
 
 else( MCRL2_MONO_LIB )
-target_link_libraries(${PROJECT_NAME}
-  ${wxWidgets_LIBRARIES}
-  mcrl2_lts
-  ticpp
-  mcrl2_utilities_command_line
-  mcrl2_utilities_wx
-)
+  target_link_libraries(${PROJECT_NAME}
+    ${wxWidgets_LIBRARIES}
+    mcrl2_lts
+    mcrl2_utilities_command_line
+    mcrl2_utilities_wx
+    ticpp
+  )
 
   #Add Squadt Connectivity when required
   include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)

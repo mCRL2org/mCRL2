@@ -417,7 +417,7 @@ namespace mcrl2 {
           bool destroy_vars=(Vars == NULL);
           if(destroy_vars) Vars=ATtableCreate(63,50);
           ATermAppl data=data_expr;
-          ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr==NULL?data::unknown_sort():sort_expr);
+          ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,(sort_expr==NULL)?(ATermAppl)data::unknown_sort():sort_expr);
           if(destroy_vars) ATtableDestroy(Vars);
           if(Type && !data::is_unknown_sort(data::sort_expression(Type))) Result=data;
           else gsErrorMsg("type checking of data expression failed\n");

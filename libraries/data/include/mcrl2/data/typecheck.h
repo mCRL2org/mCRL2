@@ -38,8 +38,8 @@ namespace mcrl2 {
       {
         throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
       }
-      assert(!search_sort_expression(t, unknown_sort()));
       sort_expr = sort_expression(t);
+      assert(!search_sort_expression(sort_expr, unknown_sort()));
     }
 
     /** \brief     Type check a data expression.
@@ -74,7 +74,8 @@ namespace mcrl2 {
       {
         throw mcrl2::runtime_error("error type checking data expression");
       }
-      assert(!search_sort_expression(t, unknown_sort()));
+      data_expr = data_expression(t);
+      assert(!search_sort_expression(data_expr, unknown_sort()));
 
       //// ???
       //detail::internal_format_conversion_helper converter(data_spec);
@@ -82,7 +83,7 @@ namespace mcrl2 {
       //// replace list/set/bag enumerations, and number denotations.
       //data_expr = data_expression(converter(data_expression(t)));
       
-      data_expr = data_expression(t);
+
     }
 
     /** \brief     Type check a data expression.
@@ -112,8 +113,8 @@ namespace mcrl2 {
       {
         throw mcrl2::runtime_error("could not type check data specification");
       }
-      assert(!search_sort_expression(t, unknown_sort()));
       data_spec = data_specification(t);
+      assert(!search_sort_expression(data_spec, unknown_sort()));
     }
 
   } // namespace data
