@@ -128,6 +128,7 @@ class lps2lts_algorithm
   private:
     // lps2lts_algorithm may be initialised only once
     bool initialised;
+    bool finalised;
 
     lts_generation_options* lgopts;
     NextState* nstate;
@@ -164,6 +165,7 @@ class lps2lts_algorithm
   public:
     lps2lts_algorithm() :
       initialised(false),
+      finalised(false),
       states(NULL),
       bithashtable(NULL),
       bithash_table(),
@@ -173,6 +175,10 @@ class lps2lts_algorithm
 
     ~lps2lts_algorithm()
     {
+      if(!finalised)
+      {
+        finalise_lts_generation();
+      }
     }
 
     bool initialise_lts_generation(lts_generation_options *opts);

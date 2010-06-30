@@ -242,6 +242,7 @@ bool lps2lts_algorithm::finalise_lts_generation()
 
   cleanup_representation();
 
+  finalised = true;
   return true;
 }
 
