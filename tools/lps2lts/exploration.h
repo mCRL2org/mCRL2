@@ -19,8 +19,9 @@
 #include "boost/cstdint.hpp"
 
 #include "aterm2.h"
-#include "bithashtable.h"
 #include "lts.h"
+#include "bithashtable.h"
+#include "queue.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lts/lts.h"
 
@@ -158,15 +159,7 @@ class lps2lts_algorithm
     ATermTable repr_back;
     NextStateGenerator *repr_nsgen;
 
-    ATerm *queue_get;
-    ATerm *queue_put;
-    unsigned long queue_size;
-    unsigned long queue_size_max;
-    unsigned long queue_get_pos;
-    unsigned long queue_get_count;
-    unsigned long queue_put_count;
-    unsigned long queue_put_count_extra;
-    bool queue_size_fixed;
+    queue state_queue;
 
   public:
     lps2lts_algorithm() :
@@ -175,16 +168,7 @@ class lps2lts_algorithm
       bithashtable(NULL),
       bithash_table(),
       trace_support(false),
-      lg_error(false),
-      queue_get(NULL),
-      queue_put(NULL),
-      queue_size(0),
-      queue_size_max(UINT_MAX),
-      queue_get_pos(0),
-      queue_get_count(0),
-      queue_put_count(0),
-      queue_put_count_extra(0),
-      queue_size_fixed(false)
+      lg_error(false)
     {}
 
     ~lps2lts_algorithm()
@@ -215,12 +199,6 @@ class lps2lts_algorithm
 
     boost::uint64_t add_state(ATerm state, bool* is_new);
     boost::uint64_t state_index(ATerm state);
-
-    // Queue
-    ATerm add_to_full_queue(ATerm state);
-    ATerm add_to_queue(ATerm state);
-    ATerm get_from_queue();
-    void swap_queues();
 
     // Main routine
     bool add_transition(ATerm from, ATermAppl action, ATerm to);

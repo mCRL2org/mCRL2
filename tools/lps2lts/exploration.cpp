@@ -670,145 +670,6 @@ boost::uint64_t lps2lts_algorithm::state_index(ATerm state)
   }
 }
 
-ATerm lps2lts_algorithm::add_to_full_queue(ATerm state)
-{
-  /* We wish that every state has equal chance of being in the queue.
-   * Let N be the size of the queue and M the number of states from which
-   * we can choose. (Note that N <= M; otherwise every state is simply in
-   * the queue. We show that addition of state i, with N < i <= M, should
-   * be done with chance N/i and at random in the queue. With induction
-   * on the difference between M-N we show that doing so leads to a
-   * uniform distribution (i.e. every state has chance N/M of being in the
-   * queue):
-   *
-   * M-N = 0:   Trivial.
-   * M-N = k+1: We added the last state, M, with probability N/M, so we
-   *            need only consider the other states. Before adding state M
-   *            they are in the queue with probability N/(M-1) (by
-   *            induction) and if the last state is added, they are still
-   *            in the queue afterwards with probability 1-1/N. So:
-   *
-   *              N/(M-1) ( N/M ( 1 - 1/N ) + ( 1 - N/M ) )
-   *            =
-   *              N/(M-1) ( N/M (N-1)/N + (M-N)/M )
-   *            =
-   *              N/(M-1) ( (N-1)/M + (M-N)/M )
-   *            =
-   *              N/(M-1) (M-1)/M
-   *            =
-   *              N/M
-   *
-   *
-   * Here we have that N = queue_size and
-   * i = queue_put_count + queue_put_count_extra.
-   */
-  queue_put_count_extra++;
-  if ( (rand() % (queue_put_count+queue_put_count_extra)) < queue_size )
-  {
-    unsigned long pos = rand() % queue_size;
-    ATerm old_state = queue_put[pos];
-    if ( !ATisEqual(old_state,state) )
-    {
-      queue_put[pos] = state;
-      return old_state;
-    }
-  }
-  return state;
-}
-
-ATerm lps2lts_algorithm::add_to_queue(ATerm state)
-{
-  if ( queue_put_count == queue_size )
-  {
-    if ( queue_size_fixed )
-    {
-      return add_to_full_queue(state);
-    }
-    if ( queue_size == 0 )
-    {
-      queue_size = (queue_size_max<128)?queue_size_max:128;
-    } else {
-      if ( 2*queue_size > queue_size_max )
-      {
-        queue_size_fixed = true;
-        if ( queue_size == queue_size_max )
-        {
-          return add_to_full_queue(state);
-        } else {
-          queue_size = queue_size_max;
-        }
-      } else {
-        queue_size = queue_size * 2;
-      }
-      ATunprotectArray(queue_get);
-      ATunprotectArray(queue_put);
-    }
-    ATerm *tmp;
-    tmp = (ATerm *) realloc(queue_get, queue_size*sizeof(ATerm));
-    if ( tmp == NULL )
-    {
-      if ( queue_size != 0 )
-      {
-        gsWarningMsg("cannot store all unexplored states (more than %lu); dropping some states from now on\n",queue_put_count);
-        queue_size = queue_put_count;
-        ATprotectArray(queue_get,queue_size);
-        ATprotectArray(queue_put,queue_size);
-      }
-      queue_size_fixed = true;
-      return add_to_full_queue(state);
-    }
-    queue_get = tmp;
-    tmp = (ATerm *) realloc(queue_put, queue_size*sizeof(ATerm));
-    if ( tmp == NULL )
-    {
-      gsWarningMsg("cannot store all unexplored states (more than %lu); dropping some states from now on\n",queue_put_count);
-      tmp = (ATerm *) realloc(queue_get, queue_size*sizeof(ATerm));
-      if ( tmp != NULL )
-      {
-        queue_get = tmp;
-      }
-      queue_size = queue_put_count;
-      ATprotectArray(queue_get,queue_size);
-      ATprotectArray(queue_put,queue_size);
-      queue_size_fixed = true;
-      return add_to_full_queue(state);
-    }
-    queue_put = tmp;
-    for (unsigned long i=queue_put_count; i<queue_size; i++)
-    {
-      queue_get[i] = NULL;
-      queue_put[i] = NULL;
-    }
-    ATprotectArray(queue_get,queue_size);
-    ATprotectArray(queue_put,queue_size);
-  }
-
-  queue_put[queue_put_count++] = state;
-  return NULL;
-}
-
-ATerm lps2lts_algorithm::get_from_queue()
-{
-  if ( queue_get_pos == queue_get_count )
-  {
-    return NULL;
-  } else {
-    return queue_get[queue_get_pos++];
-  }
-}
-
-void lps2lts_algorithm::swap_queues()
-{
-  ATerm *t = queue_get;
-  queue_get = queue_put;
-  queue_put = t;
-  queue_get_pos = 0;
-  queue_get_count = queue_put_count;
-  queue_put_count = 0;
-  queue_put_count_extra = 0;
-}
-
-
 bool lps2lts_algorithm::add_transition(ATerm from, ATermAppl action, ATerm to)
 {
   bool new_state;
@@ -1271,10 +1132,10 @@ bool lps2lts_algorithm::generate_lts()
       if ( lgopts->bithashing )
       {
         lgopts->max_states = ULLONG_MAX;
-        queue_size_max = ((limit-1)>lgopts->todo_max)?lgopts->todo_max:limit-1;
+        state_queue.set_max_size(((limit-1)>lgopts->todo_max)?lgopts->todo_max:limit-1);
         srand((unsigned)time(NULL)+getpid());
-        add_to_queue(state);
-        swap_queues();
+        state_queue.add_to_queue(state);
+        state_queue.swap_queues();
       }
       // E is the set of explored states
       // S is the set of "seen" states
@@ -1287,7 +1148,7 @@ bool lps2lts_algorithm::generate_lts()
       {
         if ( lgopts->bithashing )
         {
-          state = get_from_queue();
+          state = state_queue.get_from_queue();
           assert(state != NULL);
         } 
         else 
@@ -1314,7 +1175,7 @@ bool lps2lts_algorithm::generate_lts()
               bool b = add_transition(state,Transition,NewState);
               if ( lgopts->bithashing && b )
               {
-                ATerm removed_state = add_to_queue(NewState);
+                ATerm removed_state = state_queue.add_to_queue(NewState);
                 if ( removed_state != NULL )
                 {
                   bithash_table.remove_state_from_bithash(removed_state);
@@ -1357,7 +1218,7 @@ bool lps2lts_algorithm::generate_lts()
         {
           if ( lgopts->bithashing )
           {
-            swap_queues();
+            state_queue.swap_queues();
           }
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
           if ( !lgopts->suppress_progress_messages && gsVerbose )
@@ -1376,13 +1237,9 @@ bool lps2lts_algorithm::generate_lts()
           endoflevelat = (limit>num_states)?num_states:limit;
           if ( lgopts->bithashing )
           {
-            if ( (limit - num_states) < queue_size_max )
+            if ( (limit - num_states) < state_queue.max_size() )
             {
-              queue_size_max = limit - num_states;
-              if ( queue_size > queue_size_max )
-              {
-                queue_size = queue_size_max;
-              }
+              state_queue.set_max_size(limit - num_states);
             }
           }
           current_state = nextcurrent;
@@ -1512,6 +1369,8 @@ bool lps2lts_algorithm::generate_lts()
       {
         delete nsgens[i];
       }
+
+      free(nsgens);
     } 
     else 
     {
