@@ -177,13 +177,9 @@ class lps2lts_algorithm
 
     ~lps2lts_algorithm()
     {
-      if(!finalised)
+      if(initialised && !finalised)
       {
         finalise_lts_generation();
-      }
-      if(!completely_generated)
-      {
-        throw mcrl2::runtime_error("Warning: state space generation was aborted prematurely");
       }
     }
 
