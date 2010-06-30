@@ -499,7 +499,7 @@ namespace mcrl2 {
     }
 
     ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
-    { // ATfprintf(stderr,"State formula %t\n",state_frm);
+    { 
       if (gsVerbose)
       { std::cerr << "type checking state formula...\n";
       }
@@ -1875,14 +1875,14 @@ namespace mcrl2 {
 
         ATermAppl Left=ATAgetArgument(Eqn,2);
         ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,data::unknown_sort(),FreeVars,false,true);
-        if(!LeftType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
-        if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("the previous warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
+        if(!LeftType){ b = false; gsErrorMsg("error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
+        if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
 
         ATermAppl Cond=ATAgetArgument(Eqn,1);
         if(/*!gsIsNil(Cond) && */!gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,sort_bool::bool_())){ b = false; break; } // JK 15/10/2009 Remove gsIsNil check
         ATermAppl Right=ATAgetArgument(Eqn,3);
         ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,NULL,false);
-        if(!RightType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
+        if(!RightType){ b = false; gsErrorMsg("error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
 
         //If the types are not uniquly the same now: do once more:
         if(!gstcEqTypesA(LeftType,RightType)){
@@ -1893,7 +1893,7 @@ namespace mcrl2 {
           ATtableReset(FreeVars);
           LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,Type,FreeVars,true);
           if(!LeftType){ b = false; gsErrorMsg("types of the left- and right-hand-sides of the equation %P do not match\n",Eqn); break; }
-          if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("the previous warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
+          if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
           Right=ATAgetArgument(Eqn,3);
           RightType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Right,LeftType,FreeVars);
           if(!RightType){ b = false; gsErrorMsg("types of the left- and right-hand-sides of the equation %P do not match\n",Eqn); break; }
@@ -2459,7 +2459,7 @@ namespace mcrl2 {
         // if (gsDebug) { std::cerr << "transformed into a process call without short-hand assignments %T\n\n", gsMakeParamId(Name,ActualPars));
 
         ATermAppl TypeCheckedProcTerm=gstcRewrActProc(Vars, gsMakeParamId(Name,ActualPars));
-        if(!TypeCheckedProcTerm) {ATtableDestroy(As); gsErrorMsg("the previous type error occurred while typechecking the process call with short-hand assignments %P\n", ProcTerm); return NULL; }
+        if(!TypeCheckedProcTerm) {ATtableDestroy(As); gsErrorMsg("type error occurred while typechecking the process call with short-hand assignments %P\n", ProcTerm); return NULL; }
 
         // if (gsDebug) { std::cerr << "successfully typechecked it into %T\n\n", TypeCheckedProcTerm);
 
@@ -3244,7 +3244,7 @@ namespace mcrl2 {
       }
 
       if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)||gsIsDataVarId(*DataTerm))
-      {
+      { 
         ATermAppl Name=ATAgetArgument(*DataTerm,0);
         if(gsIsNumericString(gsATermAppl2String(Name)))
         {
@@ -3263,19 +3263,21 @@ namespace mcrl2 {
         }
 
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
-        if(Type)
+        if (Type)
         {
           if (gsDebug) { std::cerr << "Recognised declared variable " << pp(Name) << ", Type: " << pp(Type) << "\n"; }
           *DataTerm=gsMakeDataVarId(Name,Type);
 
-          if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
+          if (!ATAtableGet(AllowedVars,(ATerm)Name)) 
+          {
             gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
             return NULL;
           }
 
           ATermAppl NewType=gstcTypeMatchA(Type,PosType);
           if(NewType) Type=NewType;
-          else{
+          else
+          {
             //upcasting
             ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
             if(!CastedNewType)
@@ -3312,7 +3314,7 @@ namespace mcrl2 {
         }
 
         ATermList ParList=ATLtableGet(gssystem.constants,(ATerm)Name);
-        if(ParList)
+        if (ParList)
         { ATermList NewParList=ATmakeList0();
           for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
             ATermAppl Par=ATAgetFirst(ParList);
@@ -3349,7 +3351,12 @@ namespace mcrl2 {
         {
           ATermAppl Type=ATAgetFirst(ParList);
           *DataTerm=gsMakeOpId(Name,Type);
-          return Type;
+          ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
+          if (NewType==NULL)
+          { gsErrorMsg("no constant %P with type %P\n",*DataTerm,PosType);
+            return NULL;
+          }
+          return NewType;
         }
         else
         {
@@ -4980,7 +4987,7 @@ namespace mcrl2 {
 
           ATermAppl VarType=ATAgetArgument(ATAgetArgument(o,0),1);
           if(!gstcIsSortExprDeclared(VarType)){
-            gsErrorMsg("the previous type error occurred while typechecking %P\n",StateFrm);
+            gsErrorMsg("type error occurred while typechecking %P\n",StateFrm);
             success=ATfalse;
             break;
           }
