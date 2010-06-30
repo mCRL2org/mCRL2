@@ -15,7 +15,7 @@ void enumerate(const std::set<variable>& variables, const data_expression& condi
   data_spec.add_context_sort(sort_bool::bool_());
   rewriter evaluator(data_spec);
 
-  for (classic_enumerator<> i(data_spec, variables, evaluator, condition); i.enumerator_has_a_solution(); ++i)
+  for (classic_enumerator<> i(data_spec, variables, evaluator, condition); ii!= classic_enumerator<>(); ++i)
   {
     std::cout << core::pp((*i)(condition)) << std::endl;
   }

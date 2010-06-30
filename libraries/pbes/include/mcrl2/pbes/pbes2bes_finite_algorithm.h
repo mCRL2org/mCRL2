@@ -186,7 +186,7 @@ namespace detail {
 //std::clog << "condition = " << core::pp(condition) << std::endl;
 
       atermpp::set<pbes_expression> result;
-      for (data::classic_enumerator<> i(m_data_spec, di, super::m_data_rewriter); i.enumerator_has_a_solution(); ++i)
+      for (data::classic_enumerator<> i(m_data_spec, di, super::m_data_rewriter); i != data::classic_enumerator<>(); ++i)
       {
 //std::clog << "sigma = " << data::to_string(sigma) << std::endl;
 //std::clog << "*i    = " << data::to_string(*i) << std::endl;
@@ -325,7 +325,7 @@ namespace detail {
           detail::split_parameters(i->variable(), index_map, finite_parameters, infinite_parameters);
           data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
 
-          for (data::classic_enumerator<> j(p.data(), finite_parameters, rewr); j.enumerator_has_a_solution(); ++j)
+          for (data::classic_enumerator<> j(p.data(), finite_parameters, rewr); j != data::classic_enumerator<>(); ++j)
           {
             // apply the substitution *j
             // TODO: use a generic substitution routine (does that already exist in the data library?)

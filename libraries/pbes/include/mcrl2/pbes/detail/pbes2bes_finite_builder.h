@@ -113,7 +113,7 @@ struct pbes2bes_finite_builder: public pbes_expression_builder<pbes_expression, 
 std::cerr << "<condition>" << core::pp(condition) << std::endl;
 
     atermpp::set<pbes_expression> result;
-    for (data::classic_enumerator<> i(m_dataspec, finite_variables, m_rewriter, condition); i.enumerator_has_a_solution(); ++i)
+    for (data::classic_enumerator<> i(m_dataspec, finite_variables, m_rewriter, condition); i != data::classic_enumerator<>(); ++i)
     {
       data::data_expression c = (*i)(condition);
 std::cerr << "<c>" << core::pp(c) << std::endl;

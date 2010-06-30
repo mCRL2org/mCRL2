@@ -214,22 +214,23 @@ namespace mcrl2 {
       template < >
       inline
       bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
-                  legacy_rewriter, legacy_selector >::increment() {
-
+                  legacy_rewriter, legacy_selector >::increment() 
+      {
         ATermList assignment_list;
 
         while (m_generator.next(&assignment_list)) {
 
           for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
-                             i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
+                             i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) 
+          {
             m_substitution[static_cast< variable_type >((*i)(0))] = (*i)(1);
           }
 
-          if (legacy_selector::test(m_evaluator(m_condition, m_substitution))) {
-            return true;
+          if (legacy_selector::test(m_evaluator(m_condition, m_substitution))) 
+          { 
+             return true;
           }
         }
-
 
         return false;
       }
@@ -354,7 +355,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
     ATerm *stateargs;
 
-    ns_info::enumerator_type valuation;
+    ns_info::enumerator_type valuations;
 
     void set_substitutions();
 

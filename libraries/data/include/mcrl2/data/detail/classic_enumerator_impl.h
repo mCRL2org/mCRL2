@@ -108,20 +108,6 @@ namespace mcrl2 {
         template < typename T >
         friend class data::enumerator_factory;
 
-      private:
-
-        bool m_enumerator_has_a_solution;  // Extension by jfg on june 27, 2010.
-
-      public:
-
-        void set_whether_enumerator_has_a_solution(const bool b)
-        { m_enumerator_has_a_solution=b;
-        }
-
-        bool enumerator_has_a_solution() const
-        { return m_enumerator_has_a_solution;
-        }
-
         private:
 
           typedef MutableSubstitution                               substitution_type;
@@ -159,7 +145,6 @@ namespace mcrl2 {
           // do not use directly, use the create method
           classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
                              expression_type const& c, substitution_type const& s, Evaluator const&) :
-                m_enumerator_has_a_solution(false),
                 m_shared_context(context), 
                 m_generator(m_shared_context->m_enumerator.getInfo()), 
                 m_evaluator(context->m_evaluator), 
@@ -189,17 +174,16 @@ namespace mcrl2 {
 
           // Copy constructor; note that copies share share state due to limitations in the underlying implementation
           classic_enumerator_impl(classic_enumerator_impl const& other) :
-                                                 m_enumerator_has_a_solution(other.m_enumerator_has_a_solution),
                                                  m_shared_context(other.m_shared_context),
                                                  m_generator(other.m_generator),
                                                  m_evaluator(other.m_evaluator),
                                                  m_condition(other.m_condition),
                                                  m_substitution(other.m_substitution) 
-          {}
+          { 
+          }
 
           bool increment() 
           { 
-
             ATermList assignment_list;
 
             while (m_generator.next(&assignment_list)) 
@@ -218,7 +202,7 @@ namespace mcrl2 {
               }
               // Only do filtering, termination detection is taken care of by underlying implementation
               if (Selector::test(m_evaluator(m_condition, m_substitution))) 
-              {
+              { 
                 return true;
               }
             }
@@ -226,8 +210,9 @@ namespace mcrl2 {
             return false;
           }
 
-          bool equal(classic_enumerator_impl const& other) const {
-            return m_enumerator_has_a_solution==other.m_enumerator_has_a_solution && m_substitution == other.m_substitution;
+          bool equal(classic_enumerator_impl const& other) const 
+          { 
+            return m_substitution == other.m_substitution;
           }
 
           MutableSubstitution const& dereference() const {
@@ -242,18 +227,11 @@ namespace mcrl2 {
                                Evaluator const& e, substitution_type const& s = substitution_type(),
                     typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) 
           { 
-
             target.reset(new classic_enumerator_impl(context, c, s, e));
 
             if (!target->initialise(v)) 
             { 
-              // target->set_whether_enumerator_has_a_solution(false);
-              // target.reset();
-              target->set_whether_enumerator_has_a_solution(false);
-            }
-            else
-            {
-              target->set_whether_enumerator_has_a_solution(true);
+              target.reset();
             }
           }
 

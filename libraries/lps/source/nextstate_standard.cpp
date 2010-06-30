@@ -908,7 +908,7 @@ void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
 
         if ( info.num_summands == 0 )
         {
-          valuation = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
+          valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
         }
         else
         {
@@ -924,7 +924,7 @@ void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
           cur_act = ATgetArgument(info.summands[SummandIndex],2);
           cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);
           
-          valuation = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
+          valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
                                      ATgetArgument(info.summands[SummandIndex],1));
         }
 
@@ -937,8 +937,7 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
         std::clog << "NextStateGeneratorStandard::next(Transition, State, prioritised) called" << std::endl;
 #endif
 
-        // while ( valuation == ns_info::enumerator_type() && (sum_idx < info.num_summands) ) // valuation is empty.
-        while ( !valuation.enumerator_has_a_solution() && (sum_idx < info.num_summands) ) // valuation is empty.
+        while ( valuations == ns_info::enumerator_type() && (sum_idx < info.num_summands) ) // valuations is empty.
         {
           if (single_summand) 
           {
@@ -957,7 +956,6 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
             set_substitutions();
           }
 
-          // ATfprintf(stderr,"Summand: %t\n%t\n",ATLgetArgument(info.summands[sum_idx],0),ATgetArgument(info.summands[sum_idx],1));
 #ifdef MCRL2_NEXTSTATE_DEBUG
           std::clog << "Getting solutions for summand " << sum_idx << std::endl <<
                         "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0)) << std::endl <<
@@ -966,20 +964,19 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
                         "             " << pp(atermpp::aterm_appl(info.export_term(ATgetArgument(info.summands[sum_idx],1)))) << std::endl;
 #endif
 
-          valuation = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
-                                     ATgetArgument(info.summands[sum_idx],1));
+          valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
+                                    ATgetArgument(info.summands[sum_idx],1));
 
           ++sum_idx;
         }
         
-        // if ( valuation != ns_info::enumerator_type() ) // valuation contains unprocessed valuation.
-        if ( valuation.enumerator_has_a_solution()) // valuation contains unprocessed valuation.
+        if ( valuations != ns_info::enumerator_type() ) // valuations contains unprocessed valuations.
         {
           if ( *info.current_id != id )
           { 
                   set_substitutions();
           }
-          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuation->begin()); i != valuation->end(); ++i) 
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) 
           { 
                        
             info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
@@ -993,11 +990,11 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
                   *prioritised = (sum_idx <= info.num_prioritised);
           }
 
-          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuation->begin()); i != valuation->end(); ++i) 
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) 
           {
             info.m_rewriter.clear_internally_associated_value(i->first);
           }
-          ++valuation;
+          ++valuations;
 
           return true;
         } 
