@@ -80,9 +80,7 @@ namespace mcrl2 {
       atermpp::vector < ATermAppl> states;
       atermpp::vector < ATermAppl> actions;
       atermpp::vector < ATermAppl> times;
-      // unsigned int buf_size;
-      // unsigned int len;
-      unsigned int pos; // pos <= actions.size().
+      unsigned int pos; // Invariant: pos <= actions.size().
 
       AFun trace_pair;
       int trace_pair_set;
@@ -248,10 +246,10 @@ namespace mcrl2 {
       /// \return
 
       void addAction(ATermAppl action, ATermAppl time = NULL)
-      {
+      { 
         assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
         pos++;
-        truncate();
+        truncate(); // Take care that actions, states and times have the appropriate size.
         actions[pos-1] = action;
         states[pos] = NULL;
         times[pos] = time;
@@ -591,14 +589,16 @@ namespace mcrl2 {
       void saveMcrl2(std::ostream &os)
       {
         ATermList trace = ATmakeList0();
+        assert(actions.size()+1 == states.size() && states.size() == times.size());
 
         bool error_shown = false;
         unsigned int i=actions.size()+1;
         while ( i > 0 )
         {
           i--;
-          if ( actions[i] != NULL )
-          {
+          if (i<actions.size())
+          { 
+            assert(actions[i]!=NULL);
             if ( !core::detail::gsIsMultAct(actions[i]) && !error_shown )
             {
               core::gsErrorMsg("saving trace that is not in mCRL2 format to a mCRL2 trace format\n");
@@ -637,7 +637,9 @@ namespace mcrl2 {
           if ( core::detail::gsIsMultAct(actions[i]) )
           {
             core::PrintPart_CXX(os,(ATerm) actions[i],core::ppDefault);
-          } else {
+          } 
+          else 
+          {
             os << ATwriteToString((ATerm) actions[i]);
           }
           os << std::endl;
