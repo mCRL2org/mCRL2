@@ -27,6 +27,10 @@
 
 #include "workarounds.h"
 
+namespace mcrl2
+{
+  namespace lts
+  {
 
 #define DEFAULT_MAX_STATES ULLONG_MAX
 #define DEFAULT_MAX_TRACES ULONG_MAX
@@ -68,10 +72,9 @@
         todo_max((std::numeric_limits< unsigned long >::max)()),
         initial_table_size(DEFAULT_INIT_TSIZE)
     {
-      generate_filename_for_trace = boost::bind(
-            &lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
-      display_status              = boost::bind(
-            &lts_generation_options::update_status_display, this, _1, _2, _3, _4, _5);
+      generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
+
+      display_status              = boost::bind(&lts_generation_options::update_status_display, this, _1, _2, _3, _4, _5);
     }
 
       
@@ -125,91 +128,95 @@
       std::string lts;
     };
 
-class lps2lts_algorithm
-{
-  private:
-    // lps2lts_algorithm may be initialised only once
-    bool initialised;
-    bool finalised;
-    bool completely_generated;
-
-    lts_generation_options* lgopts;
-    NextState* nstate;
-    ATermIndexedSet states;
-
-    boost::uint64_t num_states;
-    boost::uint64_t trans;
-    unsigned long level;
-    boost::uint64_t num_found_same;
-    boost::uint64_t current_state;
-    boost::uint64_t initial_state;
-    
-    atermpp::vector<atermpp::aterm> backpointers;
-    unsigned long *bithashtable;
-    bit_hash_table bithash_table;
-    
-    bool trace_support;
-    unsigned long tracecnt;
-    
-    bool lg_error;
-
-    bool apply_confluence_reduction;
-    ATermIndexedSet repr_visited;
-    ATermTable repr_number;
-    ATermTable repr_low;
-    ATermTable repr_next;
-    ATermTable repr_back;
-    NextStateGenerator *repr_nsgen;
-
-    queue state_queue;
-
-  public:
-    lps2lts_algorithm() :
-      initialised(false),
-      finalised(false),
-      completely_generated(false),
-      states(NULL),
-      bithashtable(NULL),
-      bithash_table(),
-      trace_support(false),
-      lg_error(false)
-    {}
-
-    ~lps2lts_algorithm()
+    class lps2lts_algorithm
     {
-      if(initialised && !finalised)
-      {
-        finalise_lts_generation();
-      }
-    }
+      private:
+        // lps2lts_algorithm may be initialised only once
+        bool initialised;
+        bool finalised;
+        bool completely_generated;
 
-    bool initialise_lts_generation(lts_generation_options *opts);
-    bool generate_lts();
-    bool finalise_lts_generation();
+        lts_generation_options* lgopts;
+        NextState* nstate;
+        ATermIndexedSet states;
+
+        boost::uint64_t num_states;
+        boost::uint64_t trans;
+        unsigned long level;
+        boost::uint64_t num_found_same;
+        boost::uint64_t current_state;
+        boost::uint64_t initial_state;
+
+        atermpp::vector<atermpp::aterm> backpointers;
+        unsigned long *bithashtable;
+        bit_hash_table bithash_table;
+
+        bool trace_support;
+        unsigned long tracecnt;
+
+        bool lg_error;
+
+        bool apply_confluence_reduction;
+        ATermIndexedSet repr_visited;
+        ATermTable repr_number;
+        ATermTable repr_low;
+        ATermTable repr_next;
+        ATermTable repr_back;
+        NextStateGenerator *repr_nsgen;
+
+        queue state_queue;
+
+      public:
+        lps2lts_algorithm() :
+          initialised(false),
+          finalised(false),
+          completely_generated(false),
+          states(NULL),
+          bithashtable(NULL),
+          bithash_table(),
+          trace_support(false),
+          lg_error(false)
+        {}
+
+        ~lps2lts_algorithm()
+        {
+          if(initialised && !finalised)
+          {
+            finalise_lts_generation();
+          }
+        }
+
+        bool initialise_lts_generation(lts_generation_options *opts);
+        bool generate_lts();
+        bool finalise_lts_generation();
 
 
-  private:
+      private:
+
+        void initialise_representation(bool confluence_reduction);
+        void cleanup_representation();
+        bool search_divergence_recursively(
+                    const long current_state_index,
+                    std::set < long > &on_current_depth_first_path);
+        void check_divergence(ATerm state);
+        ATerm get_repr(ATerm state);
     
-    void initialise_representation(bool confluence_reduction);
-    void cleanup_representation();
-    bool search_divergence_recursively(
-                const long current_state_index,
-                std::set < long > &on_current_depth_first_path);
-    void check_divergence(ATerm state);
-    ATerm get_repr(ATerm state);
+        // trace functions
+        bool occurs_in(atermpp::aterm_appl const& name, atermpp::term_list< atermpp::aterm_appl > const& ma);
+        bool savetrace(std::string const &info, ATerm state, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL);
+        void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewState);
+        void save_error_trace(ATerm state);
+        void check_deadlocktrace(ATerm state);
+    
+        boost::uint64_t add_state(ATerm state, bool* is_new);
+        boost::uint64_t state_index(ATerm state);
+    
+        // Main routine
+        bool add_transition(ATerm from, ATermAppl action, ATerm to);
+    };
 
-    // trace functions
-    bool occurs_in(atermpp::aterm_appl const& name, atermpp::term_list< atermpp::aterm_appl > const& ma);
-    bool savetrace(std::string const &info, ATerm state, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL);
-    void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewState);
-    void save_error_trace(ATerm state);
-    void check_deadlocktrace(ATerm state);
+  }
+}
 
-    boost::uint64_t add_state(ATerm state, bool* is_new);
-    boost::uint64_t state_index(ATerm state);
-
-    // Main routine
-    bool add_transition(ATerm from, ATermAppl action, ATerm to);
-};
 
 #endif // MCRL2_LTS_EXPLORATION_H

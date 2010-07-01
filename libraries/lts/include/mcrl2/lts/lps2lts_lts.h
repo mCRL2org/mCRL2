@@ -18,18 +18,26 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts.h"
 
-struct lts_options 
-{ mcrl2::lts::lts_type outformat;
-  bool outinfo;
-  NextState *nstate;
-  std::auto_ptr< mcrl2::lps::specification > spec;
-};
+namespace mcrl2
+{
+  namespace lts
+  {
 
-void reset();
-void open_lts(const char *filename, lts_options &opts);
-void save_initial_state(boost::uint64_t idx, ATerm state);
-void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to);
-void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans);
-void remove_lts();
+    struct lts_options
+    { mcrl2::lts::lts_type outformat;
+      bool outinfo;
+      NextState *nstate;
+      std::auto_ptr< mcrl2::lps::specification > spec;
+    };
+
+    void reset();
+    void open_lts(const char *filename, lts_options &opts);
+    void save_initial_state(boost::uint64_t idx, ATerm state);
+    void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to);
+    void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans);
+    void remove_lts();
+
+  }
+}
 
 #endif // MCRL2_LTS_LPS2LTS_LTS_H
