@@ -459,7 +459,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   // Let squadt_tool update configuration for rewriter and add output file configuration
   synchronise_with_configuration(configuration);
 
-  lgopts.filename = configuration.get_input(lps_file_for_input).location();
+  m_filename = configuration.get_input(lps_file_for_input).location();
 
   if (configuration.category() == tipi::tool::category::transformation) {
     lgopts.lts = configuration.get_output(lts_file_for_output).location();

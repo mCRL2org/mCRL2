@@ -16,8 +16,8 @@
  * \author Muck van Weerdenburg
  */
 
-#ifndef __LIBLTS_IO_H
-#define __LIBLTS_IO_H
+#ifndef MCRL2_LTS_LTS_IO_H
+#define MCRL2_LTS_LTS_IO_H
 
 #include <string>
 #include <vector>
@@ -204,4 +204,4 @@ namespace detail
 }
 }
 
-#endif
+#endif // MCRL2_LTS_LTS_IO_H

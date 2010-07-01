@@ -16,8 +16,8 @@
  * \author Jan Friso Groote, Bas Ploeger, Muck van Weerdenburg
  */
 
-#ifndef __LIBLTSALGORITHM_H
-#define __LIBLTSALGORITHM_H
+#ifndef MCRL2_LTS_LTS_ALGORITHM_H
+#define MCRL2_LTS_LTS_ALGORITHM_H
 
 #include <string>
 #include <vector>
@@ -495,7 +495,7 @@ namespace lts
 }
 }
 
-#endif
+#endif // MCRL2_LTS_LTS_ALGORITHM_H
 
 
   

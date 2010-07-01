@@ -93,10 +93,12 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *opts)
 
   lg_error = false;
 
-  lgopts->specification.load(lgopts->filename);
-  lgopts->specification.instantiate_global_variables();
+  if(lgopts->specification == lps::specification())
+  {
+    throw mcrl2::runtime_error("lps2lts algorithm class instantiated without linear process.");
+  }
 
-  basefilename = lgopts->filename.substr(0, basefilename.find_last_of('.'));
+  lgopts->specification.instantiate_global_variables();
 
   if ( lgopts->bithashing )
   {
@@ -309,17 +311,13 @@ bool lps2lts_algorithm::savetrace(std::string const &info, ATerm state, NextStat
 
   try
   {
-    trace.save(lgopts->generate_filename_for_trace(basefilename, info, "trc"));
+    trace.save(lgopts->generate_filename_for_trace(lgopts->trace_prefix, info, "trc"));
   } catch ( ... )
   {
     return false;
   }
 
   return true;
-}
-
-std::string lts_generation_options::generate_trace_file_name(std::string const& basefilename, std::string const& info, std::string const& extension) {
-  return basefilename + std::string("_") + info + std::string(".") + extension;
 }
 
 void lps2lts_algorithm::check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewState)
@@ -331,7 +329,7 @@ void lps2lts_algorithm::check_actiontrace(ATerm OldState, ATermAppl Transition, 
     {
       if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
       {
-        if ( basefilename.empty() )
+        if ( lgopts->trace_prefix.empty() )
         {
         }
         std::ostringstream ss;
@@ -345,7 +343,7 @@ void lps2lts_algorithm::check_actiontrace(ATerm OldState, ATermAppl Transition, 
           {
             gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
                            Transition,
-                           const_cast< char* >(basefilename.c_str()),
+                           const_cast< char* >(lgopts->trace_prefix.c_str()),
                            tracecnt,
                            lgopts->trace_actions[j],
                            ATindexedSetGetIndex(states,OldState));
@@ -354,7 +352,7 @@ void lps2lts_algorithm::check_actiontrace(ATerm OldState, ATermAppl Transition, 
           {
             gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
                            Transition,
-                           const_cast< char* >(basefilename.c_str()),
+                           const_cast< char* >(lgopts->trace_prefix.c_str()),
                            tracecnt,
                            lgopts->trace_actions[j],
                            ATindexedSetGetIndex(states,OldState));
@@ -383,13 +381,13 @@ void lps2lts_algorithm::save_error_trace(ATerm state)
     {
       lgopts->error_trace_saved = true;
       if (gsVerbose)
-      { cerr << "saved trace to error in '" << basefilename << "_error.trc'.\n";
+      { cerr << "saved trace to error in '" << lgopts->trace_prefix << "_error.trc'.\n";
       }
     } 
     else 
     {
       if (gsVerbose) 
-      { cerr << "trace to error could not be saved in '" << basefilename << "_error.trc'.\n";
+      { cerr << "trace to error could not be saved in '" << lgopts->trace_prefix << "_error.trc'.\n";
       }
     }
   }
@@ -411,12 +409,12 @@ void lps2lts_algorithm::check_deadlocktrace(ATerm state)
       {
         if ( saved_ok )
         {
-          cerr << "deadlock-detect: deadlock found and saved to '" << basefilename << "_dlk_" << tracecnt << ".trc' (state index: " <<
+          cerr << "deadlock-detect: deadlock found and saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt << ".trc' (state index: " <<
                    ATindexedSetGetIndex(states,state) << ").\n";
         } 
         else 
         {
-          cerr << "deadlock-detect: deadlock found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << 
+          cerr << "deadlock-detect: deadlock found, but could not be saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
                   ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
         }
       }
@@ -530,12 +528,12 @@ void lps2lts_algorithm::check_divergence(ATerm state)
         {
           if ( saved_ok )
           {
-            cerr << "divergence-detect: divergence found and saved to '" << basefilename << "_dlk_" << tracecnt << 
+            cerr << "divergence-detect: divergence found and saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
                     ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
           } 
           else 
           {
-            cerr << "divergence-detect: divergence found, but could not be saved to '" << basefilename << "_dlk_" << tracecnt << 
+            cerr << "divergence-detect: divergence found, but could not be saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
                     ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
           }
         }

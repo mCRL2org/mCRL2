@@ -6,12 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file bithashtable.h
+/// \file mcrl2/lts/bithashtable.h
 
 #include "boost.hpp" // precompiled headers
 
-#ifndef MCRL2_LPS2LTS_BITHASHTABLE_H
-#define MCRL2_LPS2LTS_BITHASHTABLE_H
+#ifndef MCRL2_LTS_BITHASHTABLE_H
+#define MCRL2_LTS_BITHASHTABLE_H
 
 // 96 bit mix function of Robert Jenkins
 #define mix(a,b,c) \
@@ -189,5 +189,5 @@ class bit_hash_table
     }
 };
 
-#endif // MCRL2_LPS2LTS_BITHASHTABLE_H
+#endif // MCRL2_LTS_BITHASHTABLE_H
 

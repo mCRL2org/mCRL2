@@ -91,6 +91,7 @@ class lps2lts_tool : public lps2lts_base
 {
   private:
     lts_generation_options options;
+    std::string m_filename;
 
   public:
     lps2lts_tool() :
@@ -114,6 +115,9 @@ class lps2lts_tool : public lps2lts_base
 
     bool run()
     {
+      options.specification.load(m_filename);
+      options.trace_prefix = m_filename.substr(0, options.trace_prefix.find_last_of('.'));
+       
       if ( !lps2lts.initialise_lts_generation(&options) )
       {
         return false;
@@ -281,7 +285,7 @@ class lps2lts_tool : public lps2lts_base
         parser.error("too many file arguments");
       }
       if (0 < parser.arguments.size()) {
-        options.filename = parser.arguments[0];
+        m_filename = parser.arguments[0];
       }
       if (1 < parser.arguments.size()) {
         options.lts = parser.arguments[1];

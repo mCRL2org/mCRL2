@@ -15,8 +15,8 @@
  * \author Jan Friso Groote
  */
 
-#ifndef __LIBLTS_UTILITIES_H
-#define __LIBLTS_UTILITIES_H
+#ifndef MCRL2_LTS_LTS_UTILITIES_H
+#define MCRL2_LTS_LTS_UTILITIES_H
 
 // #include <string>
 #include <map>
@@ -122,4 +122,4 @@ namespace lts
 }
 }
 
-#endif
+#endif // MCRL2_LTS_LTS_UTILITIES_H

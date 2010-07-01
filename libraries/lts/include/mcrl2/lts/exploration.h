@@ -8,8 +8,8 @@
 //
 /// \file exploration.h
 
-#ifndef _EXPLORATION_H
-#define _EXPLORATION_H
+#ifndef MCRL2_LTS_EXPLORATION_H
+#define MCRL2_LTS_EXPLORATION_H
 
 #include <string>
 #include <limits>
@@ -85,7 +85,9 @@
                              boost::uint64_t) > display_status;
 
       /* Default function for generate_filename_for_trace */
-      std::string generate_trace_file_name(std::string const& basefilename, std::string const& info, std::string const& extension);
+      std::string generate_trace_file_name(std::string const& basefilename, std::string const& info, std::string const& extension) {
+        return basefilename + std::string("_") + info + std::string(".") + extension;
+      }
 
       /* Default function for status display */
       void update_status_display(unsigned long, boost::uint64_t,
@@ -119,7 +121,7 @@
       std::auto_ptr< mcrl2::data::rewriter > m_rewriter;
       std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > > m_enumerator_factory;
       mcrl2::lps::specification specification;
-      std::string filename;
+      std::string trace_prefix;
       std::string lts;
     };
 
@@ -148,8 +150,6 @@ class lps2lts_algorithm
     
     bool trace_support;
     unsigned long tracecnt;
-    
-    std::string basefilename;
     
     bool lg_error;
 
@@ -212,4 +212,4 @@ class lps2lts_algorithm
     bool add_transition(ATerm from, ATermAppl action, ATerm to);
 };
 
-#endif
+#endif // MCRL2_LTS_EXPLORATION_H

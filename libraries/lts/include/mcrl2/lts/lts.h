@@ -16,8 +16,8 @@
  * \author Muck van Weerdenburg
  */
 
-#ifndef __LIBLTS_H
-#define __LIBLTS_H
+#ifndef MCRL2_LTS_LTS_H
+#define MCRL2_LTS_LTS_H
 
 #include <string>
 #include <vector>
@@ -697,4 +697,4 @@ namespace lts
 }
 }
 
-#endif
+#endif // MCRL2_LTS_LTS_H

@@ -13,8 +13,8 @@
  * \author Muck van Weerdenburg, Jan Friso Groote
  */
 
-#ifndef __LIBTRANSITION_H
-#define __LIBTRANSITION_H
+#ifndef MCRL2_LTS_TRANSITION_H
+#define MCRL2_LTS_TRANSITION_H
 
 namespace mcrl2
 {
@@ -111,4 +111,4 @@ namespace lts
 }
 }
 
-#endif
+#endif // MCRL2_LTS_TRANSITION_H
