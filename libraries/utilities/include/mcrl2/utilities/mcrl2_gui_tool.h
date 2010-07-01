@@ -15,6 +15,10 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <iterator>
+#include <algorithm>
+#include <sstream>
+#include <iostream>
 
 namespace mcrl2 {
 
@@ -71,7 +75,20 @@ protected:
 
 				std::cout << "    <argument>" << std::endl;
 				std::cout << "      <identifier>" << i->first << "</identifier> " << std::endl;
-				std::cout << "      <description>" << m_get_long_argument_with_description.find(i->first)->second << "</description> " << std::endl;
+				std::cout << "      <description>" << std::endl;
+
+				std::istringstream iss(m_get_long_argument_with_description.find(i->first)->second);
+        std::vector<std::string> tokens;
+
+        std::string temp;
+        while (std::getline(iss, temp)) {
+        tokens.push_back(temp);}
+
+				for (std::vector<std::string>::iterator j = tokens.begin(); j != tokens.end(); ++j) {
+					std::cout << "         <line>"<< (j->empty()?" ":*j) << "</line> " << std::endl;
+				}
+
+				std::cout << "      </description>" << std::endl;
 				std::cout << "      <widget>" << i->second.widget << "</widget>" << std::endl;
 
 				if (!i->second.values.empty()) {

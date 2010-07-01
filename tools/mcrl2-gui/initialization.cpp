@@ -164,7 +164,15 @@ Initialization::Initialization() {
 								 * Get description
 								 */
 								if (((g->Type() == TiXmlNode::ELEMENT) && g->Value() == "description")) {
-									to.m_help.append(g->GetText());
+									to.m_help.clear();
+
+									for (ticpp::Element* h = g->FirstChildElement(false); h != 0; h
+													= h->NextSiblingElement(false)) {
+
+										if (((h->Type() == TiXmlNode::ELEMENT) && h->Value() == "line")) {
+											to.m_help.append(h->GetText(false)+"\n");
+										}
+									}
 								}
 
 								/*
