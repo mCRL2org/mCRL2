@@ -14,8 +14,8 @@
 
 sort Set(S) <"set_">;
 
-map @set <"setconstructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
-    {} <"emptyset"> : Set(S);
+cons @set <"setconstructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
+map {} <"emptyset"> : Set(S);
     @setfset <"setfset"> : FSet(S) <"arg"> -> Set(S);
     @setcomp <"setcomprehension"> : (S -> Bool) <"arg"> -> Set(S);
     in <"setin"> : S <"left"> # Set(S) <"right"> -> Bool;

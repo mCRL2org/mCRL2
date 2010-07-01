@@ -62,16 +62,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Give all system defined constructors for set_
-      /// \param s A sort expression
-      /// \return All system defined constructors for set_
-      inline
-      function_symbol_vector set_generate_constructors_code(const sort_expression& s)
-      {
-        function_symbol_vector result;
-        static_cast< void >(s); // suppress unused variable warnings
-        return result;
-      }
       /// \brief Generate identifier \@set
       /// \return Identifier \@set
       inline
@@ -130,6 +120,17 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Give all system defined constructors for set_
+      /// \param s A sort expression
+      /// \return All system defined constructors for set_
+      inline
+      function_symbol_vector set_generate_constructors_code(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(setconstructor(s));
+
+        return result;
+      }
       /// \brief Generate identifier {}
       /// \return Identifier {}
       inline
@@ -860,7 +861,6 @@ namespace mcrl2 {
       function_symbol_vector set_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(setconstructor(s));
         result.push_back(emptyset(s));
         result.push_back(setfset(s));
         result.push_back(setcomprehension(s));

@@ -15,8 +15,8 @@
 
 sort Bag(S) <"bag">;
 
-map @bag <"bagconstructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
-    {} <"emptybag">: Bag(S);
+cons @bag <"bagconstructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
+map {} <"emptybag">: Bag(S);
     @bagfbag <"bagfbag">: FBag(S) <"arg"> -> Bag(S);
     @bagcomp <"bagcomprehension">: (S -> Nat) <"arg"> -> Bag(S);
     count <"bagcount">: S <"left"> # Bag(S) <"right"> -> Nat;

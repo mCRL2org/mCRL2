@@ -64,16 +64,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Give all system defined constructors for bag
-      /// \param s A sort expression
-      /// \return All system defined constructors for bag
-      inline
-      function_symbol_vector bag_generate_constructors_code(const sort_expression& s)
-      {
-        function_symbol_vector result;
-        static_cast< void >(s); // suppress unused variable warnings
-        return result;
-      }
       /// \brief Generate identifier \@bag
       /// \return Identifier \@bag
       inline
@@ -132,6 +122,17 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Give all system defined constructors for bag
+      /// \param s A sort expression
+      /// \return All system defined constructors for bag
+      inline
+      function_symbol_vector bag_generate_constructors_code(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(bagconstructor(s));
+
+        return result;
+      }
       /// \brief Generate identifier {}
       /// \return Identifier {}
       inline
@@ -1092,7 +1093,6 @@ namespace mcrl2 {
       function_symbol_vector bag_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(bagconstructor(s));
         result.push_back(emptybag(s));
         result.push_back(bagfbag(s));
         result.push_back(bagcomprehension(s));
