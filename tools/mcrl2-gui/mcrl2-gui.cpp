@@ -16,11 +16,10 @@
 #define AUTHOR "Frank Stappers"
 
 using namespace mcrl2::core;
-using namespace mcrl2::utilities::tools;
 
-class mCRL2_gui: public mcrl2::utilities::wx::tool< mCRL2_gui, tool >
+class mCRL2_gui: public mcrl2::utilities::wx::tool< mCRL2_gui, mcrl2::utilities::tools::tool >
 {
-  friend class mcrl2::utilities::wx::tool< mCRL2_gui, tool >;
+  typedef mcrl2::utilities::wx::tool< mCRL2_gui, mcrl2::utilities::tools::tool > super;
 
   private:
 
@@ -36,7 +35,7 @@ class mCRL2_gui: public mcrl2::utilities::wx::tool< mCRL2_gui, tool >
     }
 
   public:
-    mCRL2_gui() : mcrl2::utilities::wx::tool< mCRL2_gui, tool >("mcrl2-gui",
+    mCRL2_gui() : super("mcrl2-gui",
                   "graphical front-end for mCRL2 tools",
                   "A graphical front-end for mCRL2 tools.",
                   "A graphical front-end for mCRL2 tools",
