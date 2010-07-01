@@ -32,8 +32,9 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/messaging.h"
 
-#include "mcrl2/data/data_expression.h"
+// #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/map_substitution.h"
 
 
@@ -1847,6 +1848,16 @@ namespace bes
       // Use the classic rewriter by Muck van Weerdenburg.
       
       boost::shared_ptr<mcrl2::data::detail::Rewriter> Mucks_rewriter=data_rewriter.get_internal_rewriter();
+      // Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
+      // This can be removed if the jittyc or innerc compilers are not in use anymore.
+      for(data_specification::constructors_const_range c=pbes_spec.data().constructors(); !c.empty() ; c.advance_begin(1))
+      { Mucks_rewriter->toRewriteFormat(c.front());
+      }
+      for(data_specification::constructors_const_range c=pbes_spec.data().mappings(); !c.empty() ; c.advance_begin(1))
+      { Mucks_rewriter->toRewriteFormat(c.front());
+      }
+
+      
       // mcrl2::data::detail::Rewriter *Mucks_rewriter=static_cast<pbes2bool_rewriter>(data_rewriter).get_internal_rewriter();
 
       // Variables in which the result is stored
