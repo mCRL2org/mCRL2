@@ -13,7 +13,6 @@
 #ifndef MCRL2_LTS_BITHASHTABLE_H
 #define MCRL2_LTS_BITHASHTABLE_H
 
-
 #include <aterm2.h>
 #include "boost/cstdint.hpp"
 #include "mcrl2/exception.h"

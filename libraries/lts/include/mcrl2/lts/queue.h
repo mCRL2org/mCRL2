@@ -9,6 +9,7 @@
 /// \file queue.h
 
 #include "boost.hpp" // precompiled headers
+
 #ifndef MCRL2_LTS_QUEUE_H
 #define MCRL2_LTS_QUEUE_H
 

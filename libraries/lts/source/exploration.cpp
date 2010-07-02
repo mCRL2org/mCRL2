@@ -301,18 +301,6 @@ namespace mcrl2
         s = ns;
       }
 
-<<<<<<< HEAD
-      delete nsgen;
-=======
-  try
-  {
-    trace.save(lgopts->generate_filename_for_trace(lgopts->trace_prefix, info, "trc"));
-  } catch ( ... )
-  {
-    return false;
-  }
->>>>>>> - Remove filename and basefilename from options struct
-
       Trace trace;
       trace.setState(nstate->makeStateVector(s));
       for (; !ATisEmpty(tr); tr=ATgetNext(tr))
@@ -339,23 +327,10 @@ namespace mcrl2
       // if ( lgopts->detect_action )
       for (int j=0; j<lgopts->num_trace_actions; j++)
       {
-<<<<<<< HEAD
         if ( occurs_in(lgopts->trace_actions[j],atermpp::list_arg1(Transition)) )
-=======
-        if ( lgopts->trace_prefix.empty() )
-        {
-        }
-        std::ostringstream ss;
-        ss << "act_" << tracecnt << "_" << ATgetName(ATgetAFun(lgopts->trace_actions[j]));
-        string sss(ss.str());
-        bool saved_ok = savetrace(sss,OldState,nstate,NewState,Transition);
-
-        if ( lgopts->detect_action || gsVerbose )
->>>>>>> - Remove filename and basefilename from options struct
         {
           if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
           {
-<<<<<<< HEAD
             if ( lgopts->trace_prefix.empty() )
             {
             }
@@ -392,30 +367,12 @@ namespace mcrl2
             gsMessage("detect: action '%P' found (state index: %lu).\n",
                                Transition,
                                ATindexedSetGetIndex(states,OldState));
-=======
-            gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
-                           Transition,
-                           const_cast< char* >(lgopts->trace_prefix.c_str()),
-                           tracecnt,
-                           lgopts->trace_actions[j],
-                           ATindexedSetGetIndex(states,OldState));
-          } 
-          else 
-          {
-            gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
-                           Transition,
-                           const_cast< char* >(lgopts->trace_prefix.c_str()),
-                           tracecnt,
-                           lgopts->trace_actions[j],
-                           ATindexedSetGetIndex(states,OldState));
->>>>>>> - Remove filename and basefilename from options struct
           }
         }
       }
     }
 
 
-<<<<<<< HEAD
     void lps2lts_algorithm::save_error_trace(ATerm state)
     {
       if ( lgopts->save_error_trace )
@@ -435,19 +392,6 @@ namespace mcrl2
           { cerr << "trace to error could not be saved in '" << lgopts->trace_prefix << "_error.trc'.\n";
           }
         }
-=======
-    if ( saved_ok )
-    {
-      lgopts->error_trace_saved = true;
-      if (gsVerbose)
-      { cerr << "saved trace to error in '" << lgopts->trace_prefix << "_error.trc'.\n";
-      }
-    } 
-    else 
-    {
-      if (gsVerbose) 
-      { cerr << "trace to error could not be saved in '" << lgopts->trace_prefix << "_error.trc'.\n";
->>>>>>> - Remove filename and basefilename from options struct
       }
     }
 
@@ -458,7 +402,6 @@ namespace mcrl2
       {
         if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
         {
-<<<<<<< HEAD
           std::ostringstream ss;
           ss << "dlk_" << tracecnt;
           string sss(ss.str());
@@ -478,19 +421,10 @@ namespace mcrl2
             }
           }
           tracecnt++;
-=======
-          cerr << "deadlock-detect: deadlock found and saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt << ".trc' (state index: " <<
-                   ATindexedSetGetIndex(states,state) << ").\n";
->>>>>>> - Remove filename and basefilename from options struct
         } 
         else
         {
-<<<<<<< HEAD
           cerr << "deadlock-detect: deadlock found (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
-=======
-          cerr << "deadlock-detect: deadlock found, but could not be saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
-                  ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
->>>>>>> - Remove filename and basefilename from options struct
         }
       }
     }
@@ -587,7 +521,6 @@ namespace mcrl2
         {
           if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
           {
-<<<<<<< HEAD
             std::ostringstream ss;
             ss << "divergence_" << tracecnt;
             string sss(ss.str());
@@ -607,19 +540,10 @@ namespace mcrl2
               }
             }
             tracecnt++;
-=======
-            cerr << "divergence-detect: divergence found and saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
-                    ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
->>>>>>> - Remove filename and basefilename from options struct
           } 
           else
           {
-<<<<<<< HEAD
             cerr << "divergence-detect: divergence found (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
-=======
-            cerr << "divergence-detect: divergence found, but could not be saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
-                    ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
->>>>>>> - Remove filename and basefilename from options struct
           }
         }
       }

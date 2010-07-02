@@ -219,5 +219,4 @@ namespace mcrl2
   }
 }
 
-
 #endif // MCRL2_LTS_EXPLORATION_H
