@@ -49,6 +49,9 @@ Initialization::Initialization() {
 	m_extention_tool_mapping.insert(pair<string, string> ("tbf", "tbf"));
 	m_extention_tool_mapping.insert(pair<string, string> ("gra", "gra"));
 
+	m_extention_tool_mapping.insert(pair<string, string> ("mcf", "mcf"));
+	m_extention_tool_mapping.insert(pair<string, string> ("trc", "trc"));
+
 	mcrl2::utilities::basename basename;
 	m_executable_basename = basename.get_executable_basename();
 

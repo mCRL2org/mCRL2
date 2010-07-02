@@ -22,6 +22,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -435,8 +436,37 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
 #endif
 };
 
+class lpsconfcheck_gui_tool: public mcrl2_gui_tool<confcheck_tool>
+{
+  public:
+	lpsconfcheck_gui_tool()
+    {
+      m_gui_options["check-all"] = create_checkbox_widget();
+      m_gui_options["counter-example"] = create_checkbox_widget();
+      m_gui_options["generate-invariants"] = create_checkbox_widget();
+      m_gui_options["invariant"] = create_filepicker_widget();
+      m_gui_options["no-marking"] = create_checkbox_widget();
+      m_gui_options["no-check"] = create_checkbox_widget();
+      m_gui_options["induction"] = create_checkbox_widget();
+      m_gui_options["print-dot"] = create_textctrl_widget();
+      std::vector<std::string> values;
+      values.clear();
+      values.push_back("jitty");
+      values.push_back("jittyp");
+      values.push_back("jittyc");
+      values.push_back("inner");
+      values.push_back("innerp");
+      values.push_back("innerc");
+      m_gui_options["rewriter"] = create_radiobox_widget(values);
+      m_gui_options["summand"] = create_textctrl_widget();
+      m_gui_options["time-limit"] = create_textctrl_widget();
+      m_gui_options["smt-solver"] = create_textctrl_widget();
+    }
+};
+
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return confcheck_tool().execute(argc, argv);
+  return lpsconfcheck_gui_tool().execute(argc, argv);
 }

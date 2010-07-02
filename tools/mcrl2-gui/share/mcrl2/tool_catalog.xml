@@ -7,6 +7,7 @@
 <tool name="lpsactionrename" 	input_format="lps" output_format ="lps"/>
 <tool name="lpsbinary" 		input_format="lps" output_format ="lps"/> 
 <tool name="lpsconstelm" 	input_format="lps" output_format ="lps"/>
+<tool name="lpsconfcheck" 	input_format="lps" output_format ="lps"/>
 <tool name="lpsinfo" 		input_format="lps" />
 <tool name="lpsparelm" 		input_format="lps" output_format ="lps"/>
 <tool name="lpspp" 		input_format="lps" />
@@ -28,7 +29,7 @@
 <tool name="pbesrewr" 		input_format="pbes" output_format ="pbes"/>
 <tool name="pnml2mcrl2" 	input_format="pnml" output_format ="pbes" />
 <tool name="tbf2lps" 		input_format="tbf"  output_format ="lps" />
-<tool name="tracepp" 		input_format="trace" />
+<tool name="tracepp" 		input_format="trc" />
 <tool name="txt2lps" 		input_format="txt"  output_format ="lps" />
 <tool name="txt2pbes" 		input_format="txt"  output_format ="pbes"/>
 <tool name="lpsxsim" 		input_format="lps" 				macosx_bundle="true"/>
