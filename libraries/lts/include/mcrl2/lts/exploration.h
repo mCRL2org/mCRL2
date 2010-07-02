@@ -25,7 +25,7 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lts/lts.h"
 
-//#include "workarounds.h"
+#include "workarounds.h"
 
 namespace mcrl2
 {

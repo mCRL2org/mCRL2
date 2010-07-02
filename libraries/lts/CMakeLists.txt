@@ -12,6 +12,18 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
+
 set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.cpp
 #  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.h
@@ -48,18 +60,6 @@ if(NOT MCRL2_MONO_LIB)
   add_library(${PROJECT_NAME}
     ${mcrl2_lts_src}
   )
-
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
-  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-  include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-  include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
   target_link_libraries(${PROJECT_NAME}
     mcrl2_data

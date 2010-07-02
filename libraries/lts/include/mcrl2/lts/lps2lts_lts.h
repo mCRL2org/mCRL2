@@ -54,11 +54,6 @@ namespace mcrl2
 
         ~lps2lts_lts()
         {
-          if(term_nil != NULL)
-          {
-            ATunprotectAppl(&term_nil);
-            ATunprotectAFun(afun_pair);
-          }
           delete generic_lts;
         }
 
