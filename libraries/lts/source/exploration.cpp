@@ -162,12 +162,12 @@ namespace mcrl2
 
       if ( lgopts->lts != "" )
       {
-        lts_options lts_opts;
+        lps2lts_lts_options lts_opts;
         lts_opts.outformat = lgopts->outformat;
         lts_opts.outinfo = lgopts->outinfo;
         lts_opts.nstate = nstate;
         lts_opts.spec.reset(new mcrl2::lps::specification(lgopts->specification));
-        open_lts(lgopts->lts.c_str(),lts_opts);
+        lts.open_lts(lgopts->lts.c_str(),lts_opts);
       } else {
         lgopts->outformat = mcrl2::lts::lts_none;
         gsVerboseMsg("not saving state space.\n");
@@ -181,9 +181,9 @@ namespace mcrl2
     {
       if ( lg_error )
       {
-        remove_lts();
+        lts.remove_lts();
       } else {
-        close_lts(num_states,trans);
+        lts.close_lts(num_states,trans);
       }
 
       if ( !lg_error && gsVerbose )
@@ -693,7 +693,7 @@ namespace mcrl2
 
       check_actiontrace(from,action,to);
 
-      save_transition(state_index(from),from,action,i,to);
+      lts.save_transition(state_index(from),from,action,i,to);
       trans++;
 
       return new_state;
@@ -702,7 +702,7 @@ namespace mcrl2
     bool lps2lts_algorithm::generate_lts()
     {
       ATerm state = get_repr(nstate->getInitialState());
-      save_initial_state(initial_state,state);
+      lts.save_initial_state(initial_state,state);
 
       bool new_state;
       initial_state = add_state(state,&new_state);
@@ -1259,8 +1259,7 @@ namespace mcrl2
           NextStateGenerator **nsgens = (NextStateGenerator **) malloc(nsgens_size*sizeof(NextStateGenerator *));
           if ( nsgens == NULL )
           {
-            gsErrorMsg("cannot create state stack\n");
-            exit(1);
+            throw mcrl2::runtime_error("cannot create state stack");
           }
           nsgens[0] = nstate->getNextStates(state);
           for (unsigned long i=1; i<nsgens_size; i++)
@@ -1309,8 +1308,7 @@ namespace mcrl2
                         nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
                         if ( nsgens == NULL )
                         {
-                          gsErrorMsg("cannot enlarge state stack\n");
-                          exit(1);
+                          throw mcrl2::runtime_error("cannot enlarge state stack");
                         }
                         for (unsigned long i=nsgens_num; i<nsgens_size; i++)
                         {

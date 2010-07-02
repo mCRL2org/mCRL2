@@ -140,6 +140,7 @@ namespace mcrl2
         lts_generation_options* lgopts;
         NextState* nstate;
         ATermIndexedSet states;
+        lps2lts_lts lts;
 
         boost::uint64_t num_states;
         boost::uint64_t trans;

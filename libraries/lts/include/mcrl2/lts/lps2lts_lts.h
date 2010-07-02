@@ -12,8 +12,10 @@
 #define MCRL2_LTS_LPS2LTS_LTS_H
 
 #include <memory>
+#include <fstream>
 #include "boost/cstdint.hpp"
 #include "aterm2.h"
+#include "svc/svc.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts.h"
@@ -22,21 +24,52 @@ namespace mcrl2
 {
   namespace lts
   {
-
-    struct lts_options
+    struct lps2lts_lts_options
     { mcrl2::lts::lts_type outformat;
       bool outinfo;
       NextState *nstate;
       std::auto_ptr< mcrl2::lps::specification > spec;
     };
 
-    void reset();
-    void open_lts(const char *filename, lts_options &opts);
-    void save_initial_state(boost::uint64_t idx, ATerm state);
-    void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to);
-    void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans);
-    void remove_lts();
+    class lps2lts_lts
+    {
+      lps2lts_lts_options lts_opts;
+      ATermAppl term_nil;
+      AFun afun_pair;
+      boost::uint64_t initial_state;
+      std::ofstream aut;
+      SVCfile svcf;
+      SVCfile *svc;
+      SVCparameterIndex svcparam;
+      const char *lts_filename;
+      lts *generic_lts;
+      ATermTable aterm2state, aterm2label;
 
+      public:
+        lps2lts_lts():
+          svc(&svcf),
+          svcparam(0),
+          generic_lts(NULL)
+        {}
+
+        ~lps2lts_lts()
+        {
+          if(term_nil != NULL)
+          {
+            ATunprotectAppl(&term_nil);
+            ATunprotectAFun(afun_pair);
+          }
+          delete generic_lts;
+        }
+
+        void reset();
+        void open_lts(const char *filename, lps2lts_lts_options &opts);
+        void save_initial_state(boost::uint64_t idx, ATerm state);
+        void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to);
+        void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans);
+        void remove_lts();
+
+    };
   }
 }
 

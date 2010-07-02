@@ -9,10 +9,8 @@
 /// \file lts.cpp
 
 #include <cstring>
-#include <fstream>
 #include "mcrl2/lps/specification.h"
 #include "aterm2.h"
-#include "svc/svc.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/lps2lts_lts.h"
@@ -30,22 +28,9 @@ namespace mcrl2
 {
   namespace lts
   {
-
-    static lts_options lts_opts;
-    static ATermAppl term_nil;
-    static AFun afun_pair;
-    static boost::uint64_t initial_state;
-    static ofstream aut;
-    static SVCfile svcf;
-    static SVCfile *svc = &svcf;
-    static SVCparameterIndex svcparam = 0;
-    static const char *lts_filename;
-    static lts *generic_lts;
-    static ATermTable aterm2state, aterm2label;
-
     #define NAME "lps2lts"
 
-    void open_lts(const char *filename, lts_options &opts)
+    void lps2lts_lts::open_lts(const char *filename, lps2lts_lts_options &opts)
     {
       lts_filename = filename;
       if ( term_nil == NULL )
@@ -97,7 +82,7 @@ namespace mcrl2
       }
     }
 
-    void save_initial_state(boost::uint64_t idx, ATerm state)
+    void lps2lts_lts::save_initial_state(boost::uint64_t idx, ATerm state)
     {
       initial_state = idx;
       switch ( lts_opts.outformat )
@@ -132,7 +117,7 @@ namespace mcrl2
       }
     }
 
-    void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to)
+    void lps2lts_lts::save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to)
     {
       switch ( lts_opts.outformat )
       {
@@ -198,7 +183,7 @@ namespace mcrl2
       }
     }
 
-    void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans)
+    void lps2lts_lts::close_lts(boost::uint64_t num_states, boost::uint64_t num_trans)
     {
       switch ( lts_opts.outformat )
       {
@@ -251,7 +236,7 @@ namespace mcrl2
       lts_opts.spec.reset();
     }
 
-    void remove_lts()
+    void lps2lts_lts::remove_lts()
     {
       switch ( lts_opts.outformat )
       {

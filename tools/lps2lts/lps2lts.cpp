@@ -128,7 +128,16 @@ class lps2lts_tool : public lps2lts_base
       signal(SIGINT,print_message_upon_premature_termination);
       signal(SIGTERM,print_message_upon_premature_termination); // At ^C print a message.
 
-      lps2lts.generate_lts();
+      try
+      {
+        lps2lts.generate_lts();
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        std::cerr << e.what() << std::endl;
+        lps2lts.finalise_lts_generation();
+        return false;
+      }
 
       lps2lts.finalise_lts_generation();
 
