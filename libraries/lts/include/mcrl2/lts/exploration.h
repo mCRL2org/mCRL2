@@ -125,7 +125,6 @@ namespace mcrl2
       std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > > m_enumerator_factory;
       mcrl2::lps::specification specification;
       std::string trace_prefix;
-      std::string filename;
       std::string lts;
     };
 

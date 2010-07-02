@@ -294,12 +294,7 @@ class lps2lts_tool : public lps2lts_base
         parser.error("too many file arguments");
       }
       if (0 < parser.arguments.size()) {
-<<<<<<< HEAD
         m_filename = parser.arguments[0];
-=======
-        options.filename = parser.arguments[0];
-        m_filename = options.filename;
->>>>>>> - First step towards a cleaner lps2lts
       }
       if (1 < parser.arguments.size()) {
         options.lts = parser.arguments[1];
