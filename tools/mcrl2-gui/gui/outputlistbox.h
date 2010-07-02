@@ -23,6 +23,11 @@ public:
 			const wxValidator& validator = wxDefaultValidator,
 			const wxString& name = wxListBoxNameStr) :
 		wxListBox(parent, id, pos, size, n, choices, style, validator, name) {
+
+    wxFont font(wxNORMAL_FONT->GetPointSize(),
+    		wxMODERN, wxFONTSTYLE_NORMAL,
+    		wxLIGHT, false);
+    this->SetFont(font);
 	}
 
 	void OnPopupClick(wxCommandEvent &evt){

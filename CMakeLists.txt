@@ -646,6 +646,7 @@ add_subdirectory ( 3rd-party/ticpp )
   add_subdirectory ( tools/mcrl2i )
   add_subdirectory ( tools/pbesconstelm )
   add_subdirectory ( tools/pbesparelm )
+  add_subdirectory ( tools/mcrl2-gui )
 
 ##---------------------------------------------------
 ## Experimental tool dependencies
@@ -655,7 +656,6 @@ option(MCRL2_ENABLE_EXPERIMENTAL "Enable/disable creation of experimental tools"
 message(STATUS "MCRL2_ENABLE_EXPERIMENTAL: ${MCRL2_ENABLE_EXPERIMENTAL}" )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)
-  add_subdirectory ( tools/mcrl2-gui )
   add_subdirectory ( tools/lpsrealelm )
   add_subdirectory ( tools/lpsbisim2pbes )
   add_subdirectory ( tools/lts2lps )

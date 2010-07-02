@@ -89,7 +89,18 @@ namespace squadt {
 #else
       wxHyperlinkCtrl *hl1 = new wxHyperlinkCtrl(this, wxID_ANY, wxT("  www.mcrl2.org  "), wxT("http://www.mcrl2.org"), wxPoint(240, 360));
 #endif
+
       hl1->SetFont(font);
+
+      wxStaticText *x1 = new wxStaticText(this, wxID_ANY, wxT("A software version is planned, which makes it impossible to support this tool."),
+       wxPoint(35, 410));
+
+      x1->SetFont(font);
+
+      wxStaticText *x2 =  new wxStaticText(this, wxID_ANY, wxT("We recommend to use \"mcrl2-gui\" instead."),
+       wxPoint(35, 430));
+
+      x2->SetFont(font);
 
 
       /* Reposition the window */
