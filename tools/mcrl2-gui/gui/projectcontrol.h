@@ -39,6 +39,7 @@
 #define ID_DELETE	2005
 #define ID_NEW_FILE 2006
 #define ID_NEW_DIR 2007
+#define ID_REFRESH 2008
 
 using namespace std;
 
@@ -166,6 +167,9 @@ public:
 			case ID_DELETE:
 				Delete();
 				break;
+			case ID_REFRESH:
+				Refresh();
+				break;
 			}
 		}
 	}
@@ -196,9 +200,9 @@ public:
 		case 14: //14  == CTRL+n
 			CreateNewFile();
 			break;
-//    case 14: //14  == CTRL+n
-//			CreateNewDir();
-//			break;
+    case WXK_F5:
+    	Refresh();
+			break;
 
 		}
 
@@ -232,6 +236,13 @@ public:
 				return;
 			}
 		}
+	}
+
+	void Refresh(){
+		//std::cout<< "Refresh Tree" << std::	endl;
+		wxString selected_file = this->GetPath();
+		this->ReCreateTree();
+		this->SetPath(selected_file);
 	}
 
 	void Rename() {
@@ -346,6 +357,7 @@ public:
 		mnu.Append(ID_RENAME, wxT("Rename \tF2"));
 		mnu.Append(ID_DELETE, wxT("Delete \tDel"));
 		mnu.AppendSeparator();
+		mnu.Append(ID_REFRESH, wxT("Refresh \tF5"));
 		mnu.Append(ID_DETAILS, wxT("Details"));
 		mnu.Connect(wxEVT_COMMAND_MENU_SELECTED,
 				(wxObjectEventFunction) &GenericDirCtrl::OnPopupClick, NULL, this);
@@ -424,6 +436,6 @@ BEGIN_EVENT_TABLE(GenericDirCtrl, wxGenericDirCtrl)
 EVT_TREE_ITEM_RIGHT_CLICK( wxID_ANY, GenericDirCtrl::OnRightClick )
 //EVT_TREE_ITEM_LEFT_CLICK(GenericDirCtrl::OnLeftClick )
 EVT_TREE_KEY_DOWN		(wxID_ANY, GenericDirCtrl::onKeyDown)
-		END_EVENT_TABLE ()
+END_EVENT_TABLE ()
 
 #endif /* PROJECTCONTROL_H_ */

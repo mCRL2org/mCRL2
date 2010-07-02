@@ -53,6 +53,7 @@ enum {
 	Exec_NewFile,
 	Exec_RenameFile,
 	Exec_DeleteFile,
+	Exec_Refresh,
 	Exec_OpenFile,
 	Exec_OpenURL,
 	Exec_DDEExec,
@@ -99,6 +100,9 @@ public:
 				wxT("Rename a file"));
 		menuFile->Append(Exec_DeleteFile, wxT("&Delete selected file"),
 				wxT("Delete a file"));
+		menuFile->AppendSeparator();
+		menuFile->Append(Exec_Refresh, wxT("&Refresh directory content \tF5"),
+						wxT("Delete a file"));
 		menuFile->AppendSeparator();
 		menuFile->Append(Exec_Quit, wxT("E&xit\tAlt-X"),
 				wxT("Quit the program"));
@@ -281,12 +285,16 @@ public:
 	}
 	;
 
-	void OnDeleteFile(wxCommandEvent& event) {
-		m_left_panel->Delete();
+	void OnRefresh(wxCommandEvent& event) {
+		m_left_panel->Refresh();
 	}
 	;
 
 
+	void OnDeleteFile(wxCommandEvent& event) {
+		m_left_panel->Delete();
+	}
+	;
 
 	void OnEditFile(wxCommandEvent& event) {
 		m_left_panel->Edit();
@@ -384,6 +392,7 @@ EVT_MENU(Exec_NewFile, MainFrame::OnNewFile)
 EVT_MENU(Exec_OpenFile, MainFrame::OnEditFile)
 EVT_MENU(Exec_RenameFile, MainFrame::OnRenameFile)
 EVT_MENU(Exec_DeleteFile, MainFrame::OnDeleteFile)
+EVT_MENU(Exec_Refresh, MainFrame::OnRefresh)
 
 EVT_MENU(Exec_ClearLog, MainFrame::OnClear)
 
