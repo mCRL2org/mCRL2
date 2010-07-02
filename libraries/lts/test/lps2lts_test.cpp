@@ -36,16 +36,20 @@ struct collect_after_test_case {
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-lts::lts translate_lps_to_lts(lps::specification const& specification, lts::exploration_strategy const strategy = lts::es_breadth)
+lts::lts translate_lps_to_lts(lps::specification const& specification,
+                              lts::exploration_strategy const strategy = lts::es_breadth,
+                              mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty)
 {
   lts::lts_generation_options options;
   options.trace_prefix = "lps2lts_test";
   options.specification = specification;
 
-  char buffer [L_tmpnam];
-  int fd = mkstemp(buffer); // Get temporary filename
-  close(fd); // Just to make sure it is created, and avoid race condition in file creation.
-  options.lts = std::string(buffer);
+  char tmpname[] = "lps2lts_testXXXXXX";
+  int fd = mkstemp(tmpname);
+  BOOST_REQUIRE(fd != -1);
+  close(fd);
+  chmod(tmpname, 0660);
+  options.lts = std::string(tmpname);
   options.outformat = lts::lts_aut;
 
   lts::lps2lts_algorithm lps2lts;
@@ -55,10 +59,61 @@ lts::lts translate_lps_to_lts(lps::specification const& specification, lts::expl
 
   lts::lts result(options.lts, options.outformat);
 
-  remove(options.lts.c_str());
+  unlink(options.lts.c_str()); // Clean up after ourselves
 
   return result;
 }
+
+// Configure rewrite strategies to be used.
+typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
+typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
+
+static inline
+rewrite_strategy_vector initialise_rewrite_strategies()
+{
+  std::vector<rewrite_strategy> result;
+  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
+/*
+  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
+#ifdef MCRL2_TEST_COMPILERS
+#ifdef MCRL2_JITTYC_AVAILABLE
+  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
+#endif // MCRL2_JITTYC_AVAILABLE
+#ifdef MCRL2_INNERC_AVAILABLE
+  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
+#endif MCRL2_JITTYC_AVAILABLE
+#endif // MCRL2_TEST_COMPILERS
+*/
+  return result;
+}
+
+static inline
+rewrite_strategy_vector rewrite_strategies()
+{
+  static rewrite_strategy_vector rewrite_strategies = initialise_rewrite_strategies();
+  return rewrite_strategies;
+}
+
+// Configure exploration strategies to be tested;
+typedef std::vector< lts::exploration_strategy > exploration_strategy_vector;
+
+static inline
+exploration_strategy_vector initialise_exploration_strategies()
+{
+  exploration_strategy_vector result;
+  result.push_back(lts::es_breadth);
+  result.push_back(lts::es_depth);
+  result.push_back(lts::es_random);
+  return result;
+}
+
+static inline
+exploration_strategy_vector exploration_strategies()
+{
+  static exploration_strategy_vector exploration_strategies = initialise_exploration_strategies();
+  return exploration_strategies;
+}
+
 
 void check_lps2lts_specification(std::string const& specification,
                                  const unsigned int expected_states,
@@ -67,14 +122,22 @@ void check_lps2lts_specification(std::string const& specification,
 {
   lps::specification lps = lps::parse_linear_process_specification(specification);
 
-  lts::lts result = translate_lps_to_lts(lps);
+  rewrite_strategy_vector rstrategies(rewrite_strategies());
+  for(rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
+  {
+    exploration_strategy_vector estrategies(exploration_strategies());
+    for(exploration_strategy_vector::const_iterator expl_strategy = estrategies.begin(); expl_strategy != estrategies.end(); ++expl_strategy)
+    {
+      lts::lts result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy);
 
-  BOOST_CHECK_EQUAL(result.num_states(), expected_states);
-  BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
-  BOOST_CHECK_EQUAL(result.num_labels(), expected_labels);
+      BOOST_CHECK_EQUAL(result.num_states(), expected_states);
+      BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
+      BOOST_CHECK_EQUAL(result.num_labels(), expected_labels);
+    }
+  }
 }
 
-BOOST_AUTO_TEST_CASE(test_a) {
+BOOST_AUTO_TEST_CASE(test_a_delta) {
   std::string lps(
     "act a;\n"
     "proc P(b:Bool) = (b) -> a.P(!b)\n"
@@ -82,6 +145,65 @@ BOOST_AUTO_TEST_CASE(test_a) {
     "init P(true);\n"
   );
   check_lps2lts_specification(lps, 2, 1, 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_abp) {
+  std::string abp(
+    "sort Error = struct e;\n"
+    "     D = struct d1 | d2;\n"
+    "\n"
+    "act  i;\n"
+    "     c6,r6,s6: Error;\n"
+    "     c6,r6,s6,c5,r5,s5: Bool;\n"
+    "     c3,r3,s3: Error;\n"
+    "     c3,r3,s3,c2,r2,s2: D # Bool;\n"
+    "     s4,r1: D;\n"
+    "\n"
+    "glob dc,dc0,dc1,dc3,dc5,dc7,dc13,dc14,dc15,dc16,dc17,dc18: D;\n"
+    "     dc2,dc4,dc6,dc8,dc9,dc10,dc11,dc12: Bool;\n"
+    "\n"
+    "proc P(s30_S: Pos, d_S: D, b_S: Bool, s31_K: Pos, d_K: D, b_K: Bool, s32_L: Pos, b_L: Bool, s33_R: Pos, d_R: D, b_R: Bool) =\n"
+    "       sum d0_S: D.\n"
+    "         (s30_S == 1) ->\n"
+    "         r1(d0_S) .\n"
+    "         P(s30_S = 2, d_S = d0_S)\n"
+    "     + sum e0_K: Bool.\n"
+    "         (s31_K == 2) ->\n"
+    "         i .\n"
+    "         P(s31_K = if(e0_K, 4, 3), d_K = if(e0_K, dc3, d_K), b_K = if(e0_K, dc4, b_K))\n"
+    "     + sum e1_L: Bool.\n"
+    "         (s32_L == 2) ->\n"
+    "         i .\n"
+    "         P(s32_L = if(e1_L, 4, 3), b_L = if(e1_L, dc10, b_L))\n"
+    "     + (s33_R == 2) ->\n"
+    "         s4(d_R) .\n"
+    "         P(s33_R = 3, d_R = dc16)\n"
+    "     + sum e2_R: Bool.\n"
+    "         (s32_L == 1 && if(e2_R, s33_R == 4, s33_R == 3)) ->\n"
+    "         c5(if(e2_R, !b_R, b_R)) .\n"
+    "         P(s32_L = 2, b_L = if(e2_R, !b_R, b_R), s33_R = 1, d_R = if(e2_R, dc18, dc17), b_R = if(e2_R, b_R, !b_R))\n"
+    "     + (s31_K == 4 && s33_R == 1) ->\n"
+    "         c3(e) .\n"
+    "         P(s31_K = 1, d_K = dc7, b_K = dc8, s33_R = 4, d_R = dc15)\n"
+    "     + sum e3_R: Bool.\n"
+    "         ((s31_K == 3 && s33_R == 1) && if(e3_R, !b_R, b_R) == b_K) ->\n"
+    "         c3(d_K, if(e3_R, !b_R, b_R)) .\n"
+    "         P(s31_K = 1, d_K = dc5, b_K = dc6, s33_R = if(e3_R, 4, 2), d_R = if(e3_R, dc14, d_K))\n"
+    "     + (s30_S == 2 && s31_K == 1) ->\n"
+    "         c2(d_S, b_S) .\n"
+    "         P(s30_S = 3, s31_K = 2, d_K = d_S, b_K = b_S)\n"
+    "     + (s30_S == 3 && s32_L == 4) ->\n"
+    "         c6(e) .\n"
+    "         P(s30_S = 2, s32_L = 1, b_L = dc12)\n"
+    "     + sum e_S: Bool.\n"
+    "         ((s30_S == 3 && s32_L == 3) && if(e_S, b_S, !b_S) == b_L) ->\n"
+    "         c6(if(e_S, b_S, !b_S)) .\n"
+    "         P(s30_S = if(e_S, 1, 2), d_S = if(e_S, dc0, d_S), b_S = if(e_S, !b_S, b_S), s32_L = 1, b_L = dc11)\n"
+    "     + delta;\n"
+    "\n"
+    "init P(1, dc, true, 1, dc1, dc2, 1, dc9, 1, dc13, true);\n"
+  );
+  check_lps2lts_specification(abp, 74, 92, 19);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
