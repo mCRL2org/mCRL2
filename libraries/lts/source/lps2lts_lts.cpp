@@ -228,6 +228,7 @@ namespace mcrl2
             ATtableDestroy(aterm2label);
             ATtableDestroy(aterm2state);
             delete generic_lts;
+            generic_lts = NULL;
             break;
           }
       }
@@ -258,6 +259,7 @@ namespace mcrl2
           ATtableDestroy(aterm2label);
           ATtableDestroy(aterm2state);
           delete generic_lts;
+          generic_lts = NULL;
           break;
       }
       remove(lts_filename);
