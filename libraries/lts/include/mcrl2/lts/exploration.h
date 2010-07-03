@@ -209,7 +209,7 @@ namespace mcrl2
         void save_error_trace(ATerm state);
         void check_deadlocktrace(ATerm state);
     
-        boost::uint64_t add_state(ATerm state, bool* is_new);
+        boost::uint64_t add_state(ATerm state, bool &is_new);
         boost::uint64_t state_index(ATerm state);
     
         // Main routine

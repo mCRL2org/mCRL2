@@ -13,6 +13,8 @@
 #ifndef MCRL2_LTS_BITHASHTABLE_H
 #define MCRL2_LTS_BITHASHTABLE_H
 
+#include <vector>
+
 #include <aterm2.h>
 #include "boost/cstdint.hpp"
 #include "mcrl2/exception.h"
@@ -41,46 +43,21 @@ namespace mcrl2
       private:
         unsigned long sh_a,sh_b,sh_c;
         unsigned int sh_i;
-        boost::uint64_t bithashsize;
-        boost::uint64_t table_size;
-        unsigned long* bithashtable;
+        std::vector < bool > m_bit_hash_table;
 
       public:
         bit_hash_table() :
-          sh_a(0x9e3779b9),
-          sh_b(0x65e3083a),
-          sh_c(0xa45f7582),
-          sh_i(0),
-          bithashsize(0),
-          bithashtable(NULL)
-        {};
+          m_bit_hash_table(0,false)
+        { 
+        }; 
 
         bit_hash_table(boost::uint64_t const size) :
-          sh_a(0x9e3779b9),
-          sh_b(0x65e3083a),
-          sh_c(0xa45f7582),
-          sh_i(0),
-          bithashsize(size)
-        {
-          if ( bithashsize > ULLONG_MAX-4*sizeof(unsigned long) )
-          {
-            table_size = (1ULL << (sizeof(boost::uint64_t)*8-3)) / sizeof(unsigned long);
-          } else {
-            table_size = (bithashsize+4*sizeof(unsigned long))/(8*sizeof(unsigned long));
-          }
-          bithashtable = (unsigned long *) calloc(table_size,sizeof(unsigned long)); // sizeof(unsigned int) * lgopts->bithashsize/(8*sizeof(unsigned int))
-          if ( bithashtable == NULL )
-          {
-            throw mcrl2::runtime_error("cannot create bit hash table");
-          }
+          m_bit_hash_table(size,false)
+        { 
         };
 
         ~bit_hash_table()
         {
-          if(bithashtable != NULL)
-          {
-            free(bithashtable);
-          }
         }
 
       private:
@@ -155,42 +132,30 @@ namespace mcrl2
         }
 
         boost::uint64_t calc_hash(ATerm state)
-        {
+        { assert(m_bit_hash_table.size()>0);
           calc_hash_init();
-
           calc_hash_aterm(state);
-
-          return calc_hash_finish() % bithashsize;
-        }
-
-        bool get_bithash(boost::uint64_t i)
-        {
-          return (( bithashtable[i/(8*sizeof(unsigned long))] >> (i%(8*sizeof(unsigned long))) ) & 1UL) == 1UL;
-        }
-
-        void set_bithash(boost::uint64_t i)
-        {
-          bithashtable[i/(8*sizeof(unsigned long))] |= 1UL << (i%(8*sizeof(unsigned long)));
+          return calc_hash_finish() % m_bit_hash_table.size();
         }
 
       public:
-        void remove_state_from_bithash(ATerm state)
+        void remove_state_from_bithash(const ATerm state)
         {
           boost::uint64_t i = calc_hash(state);
-          bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1UL << (i%(8*sizeof(unsigned long))));
+          m_bit_hash_table[i] = false;
         }
 
-        boost::uint64_t add_state(ATerm state, bool *is_new)
+        boost::uint64_t add_state(ATerm state, bool &is_new)
         {
           boost::uint64_t i = calc_hash(state);
-          *is_new = !get_bithash(i);
-          set_bithash(i);
+          is_new = !m_bit_hash_table[i];
+          m_bit_hash_table[i] = true;
           return i;
         }
     
         boost::uint64_t state_index(ATerm state)
         {
-          assert(get_bithash(calc_hash(state)));
+          assert(m_bit_hash_table[calc_hash(state)]);
           return calc_hash(state);
         }
     };

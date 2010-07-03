@@ -645,7 +645,7 @@ namespace mcrl2
       return v;
     }
 
-    boost::uint64_t lps2lts_algorithm::add_state(ATerm state, bool* is_new)
+    boost::uint64_t lps2lts_algorithm::add_state(ATerm state, bool &is_new)
     {
       if ( lgopts->bithashing )
       {
@@ -656,7 +656,7 @@ namespace mcrl2
       {
         ATbool new_state;
         unsigned long i = ATindexedSetPut(states,state,&new_state);
-        *is_new = (new_state == ATtrue);
+        is_new = (new_state == ATtrue);
         return i;
       }
     }
@@ -676,7 +676,7 @@ namespace mcrl2
       bool new_state;
       boost::uint64_t i;
 
-      i = add_state(to, &new_state);
+      i = add_state(to, new_state);
 
       if ( new_state )
       {
@@ -703,7 +703,7 @@ namespace mcrl2
       lts.save_initial_state(initial_state,state);
 
       bool new_state;
-      initial_state = add_state(state,&new_state);
+      initial_state = add_state(state,new_state);
       current_state = 0;
       ++num_states;
 
