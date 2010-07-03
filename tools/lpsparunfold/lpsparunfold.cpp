@@ -35,6 +35,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 //#include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::data;
@@ -72,11 +73,11 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     {
       super::parse_options(parser);
 
-      if (((0 == parser.options.count("index")) && (0 == parser.options.count("sort"))) ||
-          ((0 < parser.options.count("index") && (0 < parser.options.count("sort")))))
-      {
-        parser.error("Use either --sort or --index to unfold process parameters.");
-      }
+//      if (((0 == parser.options.count("index")) && (0 == parser.options.count("sort"))) ||
+//          ((0 < parser.options.count("index") && (0 < parser.options.count("sort")))))
+//      {
+//        parser.error("Use either --sort or --index to unfold process parameters.");
+//      }
 
       // Parse string argument to [NUM] (a set of indices)
       if (0 < parser.options.count("index"))
@@ -147,7 +148,14 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
-      lps::specification lps_specification;
+      if( (m_set_index.empty() && m_unfoldsort.empty()) ||
+       		(!m_set_index.empty() && !m_unfoldsort.empty())
+       		){
+       	std::cout << "Specify either --sort=SORT or --index=NUM to unfold process parameters." << std::endl;
+       	return false;
+       }
+
+    	lps::specification lps_specification;
 
       lps_specification.load(m_input_filename);
 
@@ -222,9 +230,33 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
 };
 
+class lps_parunfold_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<parunfold_tool>
+{
+  public:
+	lps_parunfold_gui_tool()
+    {
+      m_gui_options["index"] = create_textctrl_widget();
+      m_gui_options["laws"] = create_checkbox_widget();
+      m_gui_options["repeat"] = create_textctrl_widget();
+
+      std::vector<std::string> values;
+      values.clear();
+      values.push_back("jitty");
+      values.push_back("jittyp");
+      values.push_back("jittyc");
+      values.push_back("inner");
+      values.push_back("innerp");
+      values.push_back("innerc");
+      m_gui_options["rewriter"] = create_radiobox_widget(values);
+      m_gui_options["sort"] = create_textctrl_widget();
+
+    }
+};
+
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return parunfold_tool().execute(argc, argv);
+  return lps_parunfold_gui_tool().execute(argc, argv);
 }

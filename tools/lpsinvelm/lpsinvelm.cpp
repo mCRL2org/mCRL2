@@ -21,6 +21,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -109,9 +110,6 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
 
       if (parser.options.count("invariant")) {
         m_invariant_file_name = parser.option_argument_as< std::string >("invariant");
-      }
-      else {
-        parser.error("a file containing an invariant must be specified using the option --invariant=INVFILE");
       }
 
       if (parser.options.count("print-dot")) {
@@ -212,6 +210,9 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
         m_invariant = parse_data_expression(instream, parameters.begin(), parameters.end(), specification.data());
 
         instream.close();
+      } else {
+        std::cerr << "A file containing an invariant must be specified using the option --invariant=INVFILE" << std::endl;
+        return false;
       }
 
       bool invariance_result = true;
@@ -242,8 +243,36 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
     }
  };
 
+class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
+{
+  public:
+	lpsinvelm_giu_tool()
+    {
+
+      m_gui_options["counter-example"] = create_checkbox_widget();
+      m_gui_options["no-elimination"] = create_checkbox_widget();
+      m_gui_options["simplify-all"] = create_filepicker_widget();
+      m_gui_options["no-check"] = create_checkbox_widget();
+      m_gui_options["induction"] = create_checkbox_widget();
+      m_gui_options["print-dot"] = create_textctrl_widget();
+      std::vector<std::string> values;
+      values.clear();
+      values.push_back("jitty");
+      values.push_back("jittyp");
+      values.push_back("jittyc");
+      values.push_back("inner");
+      values.push_back("innerp");
+      values.push_back("innerc");
+      m_gui_options["rewriter"] = create_radiobox_widget(values);
+      m_gui_options["summand"] = create_textctrl_widget();
+      m_gui_options["time-limit"] = create_textctrl_widget();
+      m_gui_options["all-violations"] = create_checkbox_widget();
+      m_gui_options["smt-solver"] = create_textctrl_widget();
+    }
+};
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERM_INIT(argc, argv)
-  return invelm_tool().execute(argc, argv);
+  return lpsinvelm_giu_tool().execute(argc, argv);
 }

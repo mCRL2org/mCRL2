@@ -4,12 +4,15 @@
 <tool name="diagraphica" 	input_format="lts" 				macosx_bundle="true" />
 <tool name="lps2lts" 		input_format="lps" output_format ="lts" />
 <tool name="lps2pbes" 		input_format="lps" output_format ="pbes" />
+<tool name="lps2torx" 		input_format="lps" />
 <tool name="lpsactionrename" 	input_format="lps" output_format ="lps"/>
 <tool name="lpsbinary" 		input_format="lps" output_format ="lps"/> 
 <tool name="lpsconstelm" 	input_format="lps" output_format ="lps"/>
 <tool name="lpsconfcheck" 	input_format="lps" output_format ="lps"/>
 <tool name="lpsinfo" 		input_format="lps" />
+<tool name="lpsinvelm" 		input_format="lps" output_format ="lps"/>
 <tool name="lpsparelm" 		input_format="lps" output_format ="lps"/>
+<tool name="lpsparunfold" 	input_format="lps" output_format ="lps"/>
 <tool name="lpspp" 		input_format="lps" />
 <tool name="lpsrewr" 		input_format="lps" output_format ="lps"/>
 <tool name="lpssumelm" 		input_format="lps" output_format ="lps"/>
@@ -20,6 +23,7 @@
 <tool name="ltsgraph" 		input_format="lts" 				macosx_bundle="true" />
 <tool name="ltsinfo" 		input_format="lts" />
 <tool name="ltsview" 		input_format="lts" 				macosx_bundle="true"/>
+<tool name="lysa2mcrl2"		input_format="lysa" output_format ="mcrl2"/>
 <tool name="mcrl22lps" 		input_format="mcrl2" output_format ="lps"/> 
 <tool name="pbes2bool" 		input_format="pbes" />
 <tool name="pbesconstelm" 	input_format="pbes" output_format ="pbes"/> 
