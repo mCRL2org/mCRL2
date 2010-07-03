@@ -406,8 +406,7 @@ void test_system_defined()
     "sort D = Set(Nat);"
     "sort E = D;"
     "sort F = E;");
-
-  BOOST_CHECK(sort_set::set_generate_constructors_code(sort_nat::nat()) == specification.constructors(basic_sort("D")));
+  BOOST_CHECK(specification.constructors(::sort_set::set_(sort_nat::nat())) == specification.constructors(basic_sort("D")));
   BOOST_CHECK(specification.constructors(specification.normalise_sorts(basic_sort("D"))) == 
                      specification.constructors(specification.normalise_sorts(basic_sort("E"))));
   BOOST_CHECK(specification.mappings(specification.normalise_sorts(basic_sort("D"))) == 
