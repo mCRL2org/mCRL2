@@ -1013,7 +1013,7 @@ unsigned int* lts::get_transition_indices() {
   return A;
 }
 
-unsigned int** lts::get_transition_pre_table()
+/* unsigned int** lts::get_transition_pre_table()
 {
   unsigned int **A = (unsigned int**)malloc(nlabels*sizeof(unsigned int*));
   if (A == NULL)
@@ -1043,7 +1043,7 @@ unsigned int** lts::get_transition_pre_table()
     }
   }
   return A;
-}
+} */
 
 string lts::state_value_str(unsigned int state) const
 {

@@ -90,7 +90,7 @@ void sim_partitioner::partitioning_algorithm()
 
 void sim_partitioner::initialise_datastructures()
 {
-  aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
+  // aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
   // trans_index = aut.get_transition_pre_table();
   trans_index=transitions_per_outgoing_state_action_pair_reversed(aut.get_transitions());
 

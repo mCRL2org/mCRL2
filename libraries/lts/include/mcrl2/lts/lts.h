@@ -740,18 +740,6 @@ namespace mcrl2
         unsigned int*
         get_transition_indices();
 
-        /** \brief Gets the predecessors of each state, per label.
-         * \details Gets a table specifying for each state and label number, the
-         * range of transitions having that label and target state.
-         * \pre The transitions are sorted first on label number, then on
-         * target state number.
-         * \return A table \e A of size \ref num_labels() * (\ref num_states()+1)
-         * such that for every label <em>l</em> and state <em>t</em>:
-         * [ \e A[\e l][\e t] .. \e A[\e l][<em>t</em>+1] )
-         * are all <em>l</em>-labelled transitions of which \e t is the target state. */
-        unsigned int**
-        get_transition_pre_table();
-
     };
   }
 }
