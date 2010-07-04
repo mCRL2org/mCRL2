@@ -57,6 +57,9 @@ public:
 	}
 
 	void OnRightClick(wxMouseEvent& evt){
+
+#ifndef __WINDOWS__
+		/* Disabled for WIN32 due to invalid cast */
 		wxMenu mnu;
 		mnu.Append(ID_CLEAR_LISTBOX, wxT("Clear"));
 		mnu.AppendSeparator();
@@ -65,6 +68,7 @@ public:
 				(wxObjectEventFunction) &OutputListBox::OnPopupClick, NULL,
 				this);
 		PopupMenu(&mnu);
+#endif
 	}
 
 DECLARE_EVENT_TABLE()

@@ -16,6 +16,8 @@
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 #include <wx/statline.h>
+#include <gui/outputlistbox.h>
+#include <wx/scrolwin.h>
 
 
 #define ID_RUN_TOOL 1000
@@ -218,6 +220,8 @@ public:
 				tc->SetLabel(wxString(
 						(*i).m_flag.c_str(), wxConvUTF8));
 
+				tc->SetValue(wxT(""));
+
 				m_textctrl_ptrs.push_back(tc);
 
 				tc->GetSize(&v, &h);
@@ -279,7 +283,7 @@ public:
 
 		};
 
-	    height += border;
+	    height += 2*border;
 
 	    new wxStaticLine(top, wxID_ANY, wxPoint(border, height),
 	        wxSize(4000,1));
