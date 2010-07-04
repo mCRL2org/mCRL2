@@ -90,9 +90,10 @@ public:
 
 			wxFilePickerCtrl *fpc = new wxFilePickerCtrl(top, ID_OUTPUT_FILE, wxT(""),
 					wxT("Select a file"), wxT("*.*"), wxPoint(w + (2
-							* border), height + border), wxSize(350, 25),
+							* border), height + border), wxDefaultSize,
 					wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
 			//FPC->Fit();
+			fpc->SetSize(wxSize(350, 25));
 			fpc->SetPath(wxString(file_suggestion.c_str(), wxConvUTF8));
 			m_fileIO.output_file = file_suggestion;
 			fpc->GetSize(&w, &h);
@@ -177,7 +178,7 @@ public:
 				rb = new wxRadioBox(top, wxID_ANY, wxString(
 						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border,
 						height), wxDefaultSize, as
-				//,1, wxRA_SPECIFY_ROWS
+						,0, wxRA_SPECIFY_ROWS
 						);
 				rb->GetSize(&w, &h);
 
@@ -191,7 +192,7 @@ public:
 				/* Display help text */
 				ws = new wxStaticText(top, wxID_ANY, wxString(
 						(*i).m_help.c_str(), wxConvUTF8), wxPoint(w + 2
-						* border, height));
+						* border+ 5, height));
 
 				ws->Wrap(800);
 
@@ -254,8 +255,10 @@ public:
 
 				/* create text input box */
 				fp = new wxFilePickerCtrl(top, wxID_ANY,  wxT(""),
-						wxT("Select a file"), wxT("*.*"), wxPoint(w , height), wxSize(350, 25),
+						wxT("Select a file"), wxT("*.*"), wxPoint(w , height), wxDefaultSize,
 						wxFLP_USE_TEXTCTRL | wxFLP_OPEN );
+
+				fp->SetSize(wxSize(350,25));
 
 				fp->SetLabel(wxString(
 						(*i).m_flag.c_str(), wxConvUTF8));

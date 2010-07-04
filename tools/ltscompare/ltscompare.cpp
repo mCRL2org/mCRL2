@@ -637,7 +637,7 @@ public:
 		values.push_back("sim");
 		values.push_back("trace");
 		values.push_back("weak-trace");
-		m_gui_options["preorder"] = create_filepicker_widget();
+		m_gui_options["preorder"] = create_radiobox_widget(values);
 		m_gui_options["tau"] = create_textctrl_widget();
 
 		//-iFORMAT, --in1=FORMAT   use FORMAT as the format for INFILE1 (or stdin)
