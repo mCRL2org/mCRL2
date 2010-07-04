@@ -1128,6 +1128,8 @@ namespace mcrl2
         }
         else if ( lgopts->expl_strat == es_breadth )
         {
+          queue state_queue;
+
           NextStateGenerator *nsgen = NULL;
           boost::uint64_t limit = lgopts->max_states;
           if ( lgopts->bithashing )

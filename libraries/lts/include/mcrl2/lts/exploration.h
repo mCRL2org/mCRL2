@@ -165,8 +165,6 @@ namespace mcrl2
         ATermTable repr_back;
         NextStateGenerator *repr_nsgen;
 
-        queue state_queue;
-
       public:
         lps2lts_algorithm() :
           initialised(false),
