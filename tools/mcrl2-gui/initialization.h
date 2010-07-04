@@ -36,6 +36,7 @@ struct Tool{
 	string m_input_type;
 	string m_output_type;
     vector< Tool_option > m_tool_options;
+	bool m_gui_tool;
 };
 
 struct FileIO {

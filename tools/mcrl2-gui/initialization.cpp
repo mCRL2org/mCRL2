@@ -293,6 +293,8 @@ vector<Tool> Initialization::Read_tools() {
     		e != 0; e = e->NextSiblingElement(false)) {
     	Tool tool;
 
+		tool.m_gui_tool = false;
+
         if(!((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "tool")){
           cerr << "Expected XML tree value \"tool\"" << endl;
         }
@@ -308,6 +310,14 @@ vector<Tool> Initialization::Read_tools() {
           location = m_executable_basename + "/"+  tool.m_name;
     #ifdef _WIN32
           location.append(".exe");
+
+		  std::string app;
+		  app = e->GetAttribute("macosx_bundle");
+          if (!(app.empty() || app.compare( "false" ) == 0) )
+          {
+            //Expand to full path
+            tool.m_gui_tool = true;
+          } 
     #endif
 
     #ifdef __APPLE__

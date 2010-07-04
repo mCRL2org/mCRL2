@@ -338,12 +338,24 @@ public:
 		wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
 		wxString output_file = wxString(m_fileIO.output_file.c_str(),
 				wxConvUTF8);
-		run = run + wxT(' ') + input_file + wxT(' ') + output_file;
+		run = run + wxT(" ") + input_file + wxT(" ") + output_file;
 
 		m_listbox_output->Append(run);
 
 		m_process = new MyPipedProcess(NULL);
-		m_pid = wxExecute(run, wxEXEC_ASYNC, m_process);
+
+		// Gui tools should be visible:
+		// Tools redirect the standard input and/or output of the process being launched by calling Redirect. 
+		// For these child processes IO is redirected. For Windows these process windows are not shown by default.
+		// To avoid that GUI tools are not shown a wxEXEC_NOHIDE flag is used to flag that the child process window
+		// are shown normally.
+
+		if ( m_tool.m_gui_tool ){
+			m_pid = wxExecute(run, wxEXEC_ASYNC | wxEXEC_NOHIDE , m_process);
+		} else{
+			m_pid = wxExecute(run, wxEXEC_ASYNC, m_process);
+		}
+
 		if (!m_pid) {
 			wxLogError(wxT("Execution of '%s' failed."), run.c_str());
 			m_pid=0;
