@@ -17,7 +17,8 @@
 #include <time.h>
 #include <iostream>
 #include <sstream>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
