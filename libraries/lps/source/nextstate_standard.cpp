@@ -752,8 +752,9 @@ ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
                 } else {
 
                         stateargs[i] = info.m_rewriter(a);
-                        assert(mcrl2::data::find_variables(atermpp::make_list(mcrl2::data::data_expression(info.export_term(stateargs[i])))).empty());
-//                      stateargs[i] = rewr_obj->rewriteInternal(SetVars(a));
+                        // The assertion below is not true if there are global variables, 
+                        // which is for instance the case for lpsxsim and lpssim.
+                        // assert(mcrl2::data::find_variables(atermpp::make_list(mcrl2::data::data_expression(info.export_term(stateargs[i])))).empty());
                 }
                 l = ATgetNext(l);
         }
