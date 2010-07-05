@@ -57,6 +57,17 @@ public:
 		/* Define size large enough for top*/
 		wxPanel *top = new wxPanel(m_wsw , wxID_ANY, wxDefaultPosition, wxSize(4096,4096));
 
+    height += 2*border;
+
+    wxStaticText *st0 = new wxStaticText(top, wxID_ANY,
+        wxT("input file: \t") + wxString( m_fileIO.input_file.c_str(), wxConvUTF8 ) , wxPoint(2*border, height));
+    st0->GetSize(&w, &h);
+    height += h + 2 * border;
+
+    new wxStaticLine(top, wxID_ANY, wxPoint(border, height),
+          wxSize(4000,1));
+
+    height += 2*border;
 
 		if (!m_tool.m_output_type.empty()) {
 			/* Suggest/Generate output file */

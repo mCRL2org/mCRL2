@@ -106,7 +106,7 @@ public:
 
 			ncp->Layout();
 
-			m_notebookpanel->AddPage(ncp, this->GetPath(), true);
+			m_notebookpanel->AddPage(ncp, wxString( m_tool_catalog[evt.GetId()].m_name.c_str(), wxConvUTF8), true);
 
 		} else {
 
