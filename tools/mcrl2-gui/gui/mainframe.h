@@ -27,6 +27,7 @@
 #include "wx/textctrl.h"
 #include "wx/listbox.h"
 #include "gui/projectcontrol.h"
+#include "gui/preferences.h"
 #include "wx/sizer.h"
 
 #include <wx/aui/aui.h>
@@ -62,6 +63,7 @@ enum {
 	Exec_Pipe,
 	Exec_About = 300,
 	Exec_PerspectiveReset,
+	Exec_Preferences,
 
 	// control ids
 	Exec_Btn_Send = 1000,
@@ -78,11 +80,10 @@ class MainFrame: public wxFrame {
 public:
 	MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
 			const std::vector<Tool>& tool_catalog, const std::multimap<
-					std::string, std::string>& extention_tool_mapping,
-					std::map<std::string, std::string>& edittool_mapping) :
+					std::string, std::string>& extention_tool_mapping) :
 		wxFrame((wxFrame *) NULL, wxID_ANY, title, pos, size), // m_timerIdleWakeUp (this),
 				m_tool_catalog(tool_catalog), m_extention_tool_mapping(
-						extention_tool_mapping), m_edittool_mapping( edittool_mapping ) {
+						extention_tool_mapping) {
 		m_pidLast = 0;
 
 #ifdef __WXMAC__
@@ -125,6 +126,9 @@ public:
 		windowMenu->AppendSeparator();
 		windowMenu->Append(Exec_PerspectiveReset, wxT("&Reset Perspective"),
 				wxT("Reset Perspective"));
+    windowMenu->AppendSeparator();
+    windowMenu->Append(Exec_Preferences, wxT("&Preferences \tCtrl-P"),
+        wxT("mCRL2-gui Preferences"));
 
 		// add menus to the menu bar
 		wxMenuBar *menuBar = new wxMenuBar();
@@ -148,7 +152,7 @@ public:
 				 wxAUI_NB_MIDDLE_CLICK_CLOSE  );
 
 		m_left_panel = new GenericDirCtrl(this, m_tool_catalog,
-				m_extention_tool_mapping, m_lbox, this->GetNoteBookToolPanel(), m_edittool_mapping);
+				m_extention_tool_mapping, m_lbox, this->GetNoteBookToolPanel());
 
 		m_left_panel->SetSize(250,-1);
 		m_left_panel->Refresh();
@@ -336,6 +340,11 @@ public:
 	}
 	;
 
+	void OnExecPreferences(wxCommandEvent& event){
+	  Preferences *p = new Preferences();
+	  p->Show(true);
+	};
+
 	void OnResetLayout(wxCommandEvent& event) {
 		 m_mgr.LoadPerspective(m_default_perspective);
 	};
@@ -368,7 +377,6 @@ private:
 
   std::vector<Tool> m_tool_catalog;
   multimap<string, string> m_extention_tool_mapping;
-  map<string, string> m_edittool_mapping;
 
 	// the PID of the last process we launched asynchronously
 	long m_pidLast;
@@ -397,6 +405,8 @@ EVT_MENU(Exec_OpenFile, MainFrame::OnEditFile)
 EVT_MENU(Exec_RenameFile, MainFrame::OnRenameFile)
 EVT_MENU(Exec_DeleteFile, MainFrame::OnDeleteFile)
 EVT_MENU(Exec_Refresh, MainFrame::OnRefresh)
+EVT_MENU(Exec_Preferences, MainFrame::OnExecPreferences)
+
 
 EVT_MENU(Exec_ClearLog, MainFrame::OnClear)
 

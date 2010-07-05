@@ -24,6 +24,7 @@
 #include <gui/outputlistbox.h>
 #include <gui/configpanel.h>
 #include <iostream>
+#include <mimemanager.h>
 
 //To store configurations
 #include <wx/config.h>
@@ -50,8 +51,6 @@ public:
 
 	multimap<string, string> m_extention_tool_mapping;
 
-	map<string,string> m_edittool_mapping;
-
 	OutputListBox *m_listbox_output;
 
 	wxAuiNotebook *m_notebookpanel;
@@ -61,7 +60,7 @@ public:
 
 	GenericDirCtrl(wxWindow *parent, const std::vector<Tool>& tool_catalog,
 			multimap<string, string> extention_tool_mapping, OutputListBox *output,
-			wxAuiNotebook *notebookpanel, map<string,string> edittool_mapping ) :
+			wxAuiNotebook *notebookpanel) :
 		wxGenericDirCtrl(parent, ID_GDC, wxDirDialogDefaultFolderStr, wxPoint(-1,
 				-1), wxSize(-1, -1), wxDIRCTRL_EDIT_LABELS | wxDIRCTRL_3D_INTERNAL
 				| wxSUNKEN_BORDER)
@@ -71,7 +70,6 @@ public:
 		m_listbox_output = output;
 		m_notebookpanel = notebookpanel;
 		m_extention_tool_mapping = extention_tool_mapping;
-		m_edittool_mapping = edittool_mapping;
 		refresh_dir = new wxTimer(this, ID_TIMER);
 		refresh_dir->Start(500);
 		this->Fit();
@@ -216,32 +214,16 @@ public:
 	void Edit(){
 		if (!this->GetPath().empty()) {
 
-			wxString ext = this->GetPath().AfterLast(_T('.'));
-			std::string sext = (std::string) ext.mb_str(wxConvUTF8);
+		  MimeManager mm;
+		  wxString cmd = mm.getCommandForExtention( this->GetPath() );
+		  wxString ext = mm.getCommandForExtention( this->GetPath() );
 
-			map<string, string>::iterator it = m_edittool_mapping.find(sext);
-        if (it != m_edittool_mapping.end())
-        {
-          wxExecute(wxString(it->second.c_str(), wxConvUTF8) + this->GetPath(), wxEXEC_ASYNC,
-              NULL);
-        }
-        else
-        {
-          wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
-          if (ft)
-          {
-            wxString cmd;
-            bool ok = ft->GetOpenCommand(&cmd, wxFileType::MessageParameters(
-                this->GetPath()));
-            if (ok)
-            {
-              wxExecute(cmd, wxEXEC_ASYNC, NULL);
-            }
-            delete ft;
-          }
-          else
-          {
-#ifdef __linux
+		  if (!cmd.empty())
+		  {
+        wxExecute(cmd, wxEXEC_ASYNC, NULL);
+		  } else {
+
+			#ifdef __linux
             wxLogMessage(_T("No editor defined by UNIX operating system for editing files of extension '%s'."),
                 ext.c_str());
 #endif
@@ -249,12 +231,9 @@ public:
             wxLogMessage(_T("No editor defined by Windows operating system for editing files of extension '%s'."),
                 ext.c_str());
 #endif
-            //TODO:: Pop-Up for assigning editor to file extention
-            return;
-          }
-        }
       }
     }
+	}
 
 	void Refresh(){
 		//std::cout<< "Refresh Tree" << std::	endl;
