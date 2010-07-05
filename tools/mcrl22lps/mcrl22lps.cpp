@@ -505,15 +505,7 @@ class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
       m_gui_options["no-cluster"] = create_checkbox_widget();
       m_gui_options["no-rewrite"] = create_checkbox_widget();
 
-      std::vector<std::string> values0;
-      values0.clear();
-      values0.push_back("jitty");
-      values0.push_back("jittyp");
-      values0.push_back("jittyc");
-      values0.push_back("inner");
-      values0.push_back("innerp");
-      values0.push_back("innerc");
-      m_gui_options["rewriter"] = create_radiobox_widget(values0);
+      add_rewriter_widget();
       m_gui_options["newstate"] = create_checkbox_widget();
       m_gui_options["no-alpha"] = create_checkbox_widget();
     }

@@ -393,14 +393,7 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
       m_gui_options["max"] = create_textctrl_widget();
       m_gui_options["no-info"] = create_checkbox_widget();
 
-      values.clear();
-      values.push_back("jitty");
-      values.push_back("jittyp");
-      values.push_back("jittyc");
-      values.push_back("inner");
-      values.push_back("innerp");
-      values.push_back("innerc");
-      m_gui_options["rewriter"] = create_radiobox_widget(values);
+      add_rewriter_widget();
 
       values.clear();
       values.push_back("breadth");

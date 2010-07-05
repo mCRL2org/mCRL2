@@ -159,19 +159,10 @@ class lpsconstelm_gui_tool: public mcrl2_gui_tool<lpsconstelm_tool>
   public:
 	lpsconstelm_gui_tool()
     {
-      std::vector<std::string> values;
-
       m_gui_options["ignore-conditions"] = create_checkbox_widget();
       m_gui_options["instantiate-free-variables"] = create_checkbox_widget();
 
-      values.clear();
-      values.push_back("jitty");
-      values.push_back("jittyp");
-      values.push_back("jittyc");
-      values.push_back("inner");
-      values.push_back("innerp");
-      values.push_back("innerc");
-      m_gui_options["rewriter"] = create_radiobox_widget(values);
+      add_rewriter_widget();
 
       m_gui_options["remove-singleton-sorts"] = create_checkbox_widget();
       m_gui_options["remove-trivial-summands"] = create_checkbox_widget();

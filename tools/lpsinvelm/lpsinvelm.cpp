@@ -255,15 +255,7 @@ class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
       m_gui_options["no-check"] = create_checkbox_widget();
       m_gui_options["induction"] = create_checkbox_widget();
       m_gui_options["print-dot"] = create_textctrl_widget();
-      std::vector<std::string> values;
-      values.clear();
-      values.push_back("jitty");
-      values.push_back("jittyp");
-      values.push_back("jittyc");
-      values.push_back("inner");
-      values.push_back("innerp");
-      values.push_back("innerc");
-      m_gui_options["rewriter"] = create_radiobox_widget(values);
+      add_rewriter_widget();
       m_gui_options["summand"] = create_textctrl_widget();
       m_gui_options["time-limit"] = create_textctrl_widget();
       m_gui_options["all-violations"] = create_checkbox_widget();

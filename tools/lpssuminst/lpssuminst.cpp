@@ -191,16 +191,7 @@ public:
 	suminst_gui_tool() {
 
 		m_gui_options["finite"] = create_checkbox_widget();
-		std::vector<std::string> values;
-
-		values.clear();
-		values.push_back("jitty");
-		values.push_back("jittyp");
-		values.push_back("jittyc");
-		values.push_back("inner");
-		values.push_back("innerp");
-		values.push_back("innerc");
-		m_gui_options["rewriter"] = create_radiobox_widget(values);
+		add_rewriter_widget();
 		m_gui_options["tau"] = create_checkbox_widget();
 	}
 };

@@ -246,14 +246,7 @@ public:
 		values.push_back("pfnf");
 		m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
 
-		values.clear();
-		values.push_back("jitty");
-		values.push_back("jittyc");
-		values.push_back("jittyc");
-		values.push_back("inner");
-		values.push_back("innep");
-		values.push_back("innec");
-		m_gui_options["rewriter"] = create_radiobox_widget(values);
+		add_rewriter_widget();
 
 	}
 };

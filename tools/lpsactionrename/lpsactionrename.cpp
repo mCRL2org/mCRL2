@@ -302,14 +302,7 @@ class action_rename_gui_tool: public mcrl2_gui_tool<action_rename_tool>
       m_gui_options["end-phase"] = create_radiobox_widget(values);
       m_gui_options["pretty"] = create_checkbox_widget();
 
-      values.clear();
-      values.push_back("jitty");
-      values.push_back("jittyp");
-      values.push_back("jittyc");
-      values.push_back("inner");
-      values.push_back("innerp");
-      values.push_back("innerc");
-      m_gui_options["rewriter"] = create_radiobox_widget(values);
+      add_rewriter_widget();
     }
 };
 
