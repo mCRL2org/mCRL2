@@ -54,10 +54,14 @@ public:
 
 	multimap<string,string> m_extention_tool_mapping;
 
+	map<string,string> m_edittool_mapping;
+
 private:
 	vector< Tool > Read_tools();
 	string m_toolset_basename;
 	string m_executable_basename;
+
+  void GetEditTools();
 };
 
 #endif /* INITIALIZATION_H_ */

@@ -78,10 +78,11 @@ class MainFrame: public wxFrame {
 public:
 	MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
 			const std::vector<Tool>& tool_catalog, const std::multimap<
-					std::string, std::string>& extention_tool_mapping) :
+					std::string, std::string>& extention_tool_mapping,
+					std::map<std::string, std::string>& edittool_mapping) :
 		wxFrame((wxFrame *) NULL, wxID_ANY, title, pos, size), // m_timerIdleWakeUp (this),
 				m_tool_catalog(tool_catalog), m_extention_tool_mapping(
-						extention_tool_mapping) {
+						extention_tool_mapping), m_edittool_mapping( edittool_mapping ) {
 		m_pidLast = 0;
 
 #ifdef __WXMAC__
@@ -147,9 +148,11 @@ public:
 				 wxAUI_NB_MIDDLE_CLICK_CLOSE  );
 
 		m_left_panel = new GenericDirCtrl(this, m_tool_catalog,
-				m_extention_tool_mapping, m_lbox, this->GetNoteBookToolPanel());
+				m_extention_tool_mapping, m_lbox, this->GetNoteBookToolPanel(), m_edittool_mapping);
 
 		m_left_panel->SetSize(250,-1);
+		m_left_panel->Refresh();
+
 		m_mgr.AddPane(m_left_panel, wxLEFT, wxT("File Selector"));
 
 		m_lbox->SetSize(400,250);
@@ -171,9 +174,6 @@ public:
 		SetMinSize(wxSize(800, 600));
 
 	}
-
-	std::vector<Tool> m_tool_catalog;
-	multimap<string, string> m_extention_tool_mapping;
 
 	// event handlers (these functions should _not_ be virtual)
 	void OnQuit(wxCommandEvent& event) {
@@ -365,6 +365,10 @@ public:
 
 
 private:
+
+  std::vector<Tool> m_tool_catalog;
+  multimap<string, string> m_extention_tool_mapping;
+  map<string, string> m_edittool_mapping;
 
 	// the PID of the last process we launched asynchronously
 	long m_pidLast;

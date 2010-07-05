@@ -50,10 +50,11 @@ class mCRL2_gui: public mcrl2::utilities::wx::tool< mCRL2_gui, mcrl2::utilities:
 
   		vector< Tool > tool_catalog = m_initialization_result->m_tool_catalog;
   		std::multimap<std::string,std::string> extention_tool_mapping = m_initialization_result->m_extention_tool_mapping;
+  		std::map<std::string,std::string> edittool_mapping = m_initialization_result->m_edittool_mapping;
 
   		// Create the main application window
   		MainFrame *frame = new MainFrame(wxT("mCRL2-gui"), wxDefaultPosition,
-  				wxSize(800, 600), tool_catalog, extention_tool_mapping
+  				wxSize(800, 600), tool_catalog, extention_tool_mapping, edittool_mapping
   		);
   		frame->Show(true);
   		SetTopWindow(frame);

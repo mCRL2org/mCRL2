@@ -23,6 +23,7 @@
 #include "tinyxml.h"
 #include <wx/wx.h>
 #include <wx/file.h>
+#include <wx/mimetype.h>
 
 #include "mcrl2/utilities/basename.h"
 
@@ -256,7 +257,7 @@ Initialization::Initialization() {
 		}
 	} /* End - for each tool */
 
-
+	GetEditTools();
 }
 
 vector<Tool> Initialization::Read_tools() {
@@ -352,3 +353,22 @@ vector<Tool> Initialization::Read_tools() {
 
 	return tools;
 }
+
+void
+Initialization::GetEditTools()
+{
+  wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(wxT("txt"));
+  if (ft)
+  {
+    wxString cmd = ft->GetOpenCommand(cmd);
+
+    if (!cmd.empty())
+    {
+      m_edittool_mapping["mcrl2"] = cmd.mb_str(wxConvUTF8);
+      m_edittool_mapping["mcf"] = cmd.mb_str(wxConvUTF8);
+      m_edittool_mapping["aut"] = cmd.mb_str(wxConvUTF8);
+    }
+  }
+}
+
+
