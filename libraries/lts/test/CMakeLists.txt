@@ -39,6 +39,15 @@ foreach( OBJ ${TERM_OBJS} )
       mcrl2_monolib
     )
   else( MCRL2_MONO_LIB )  
+    if(MCRL2_USE_BOOST_INTERNAL)
+      target_link_libraries("${PREFIX}_${result}"
+      boost
+      )
+    else(MCRL2_USE_BOOST_INTERNAL)
+      target_link_libraries("${PREFIX}_${result}"
+      ${Boost_LIBRARIES}
+      )
+    endif(MCRL2_USE_BOOST_INTERNAL)       
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_lts
   )

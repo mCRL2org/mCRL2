@@ -14,8 +14,10 @@
 #endif
 
 #include <stdio.h>
+#include <time.h>
 #include <iostream>
 #include <sstream>
+#include <boost/filesystem.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -34,6 +36,27 @@ struct collect_after_test_case {
   }
 };
 
+// Get filename based on timestamp
+// Warning: is prone to race conditions
+std::string temporary_filename(std::string const& prefix = "")
+{
+  time_t now = time(NULL);
+  std::stringstream now_s;
+  now_s << now;
+
+  std::string basename(prefix + now_s.str());
+  boost::filesystem::path result(basename);
+  int suffix = 0;
+  while (boost::filesystem::exists(result))
+  {
+    std::stringstream suffix_s;
+    suffix_s << suffix;
+    result = boost::filesystem::path(basename + suffix_s.str());
+    ++suffix;
+  }
+  return result.string();
+}
+
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 lts::lts translate_lps_to_lts(lps::specification const& specification,
@@ -44,12 +67,7 @@ lts::lts translate_lps_to_lts(lps::specification const& specification,
   options.trace_prefix = "lps2lts_test";
   options.specification = specification;
 
-  char tmpname[] = "lps2lts_testXXXXXX";
-  int fd = mkstemp(tmpname);
-  BOOST_REQUIRE(fd != -1);
-  close(fd);
-  chmod(tmpname, 0660);
-  options.lts = std::string(tmpname);
+  options.lts = temporary_filename("lps2lts_test");
   options.outformat = lts::lts_aut;
 
   lts::lps2lts_algorithm lps2lts;
@@ -59,7 +77,7 @@ lts::lts translate_lps_to_lts(lps::specification const& specification,
 
   lts::lts result(options.lts, options.outformat);
 
-  unlink(options.lts.c_str()); // Clean up after ourselves
+  boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
 
   return result;
 }
