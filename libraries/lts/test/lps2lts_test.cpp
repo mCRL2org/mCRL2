@@ -62,6 +62,7 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 lts::lts translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty,
+                              NextStateFormat = GS_STATE_VECTOR,
                               std::string priority_action = "")
 {
   lts::lts_generation_options options;
@@ -133,6 +134,24 @@ exploration_strategy_vector exploration_strategies()
   return exploration_strategies;
 }
 
+// State formats to be tested;
+typedef std::vector< NextStateFormat > nextstate_format_vector;
+
+static inline
+nextstate_format_vector initialise_nextstate_formats()
+{
+  nextstate_format_vector result;
+  result.push_back(GS_STATE_VECTOR);
+  result.push_back(GS_STATE_TREE);
+  return result;
+}
+
+static inline
+nextstate_format_vector nextstate_formats()
+{
+  static nextstate_format_vector nextstate_formats = initialise_nextstate_formats();
+  return nextstate_formats;
+}
 
 void check_lps2lts_specification(std::string const& specification,
                                  const unsigned int expected_states,
@@ -148,11 +167,15 @@ void check_lps2lts_specification(std::string const& specification,
     exploration_strategy_vector estrategies(exploration_strategies());
     for(exploration_strategy_vector::const_iterator expl_strategy = estrategies.begin(); expl_strategy != estrategies.end(); ++expl_strategy)
     {
-      lts::lts result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy, priority_action);
+      nextstate_format_vector nsformats(nextstate_formats());
+      for(nextstate_format_vector::const_iterator state_format = nsformats.begin(); state_format != nsformats.end(); ++state_format)
+      {
+        lts::lts result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-      BOOST_CHECK_EQUAL(result.num_states(), expected_states);
-      BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
-      BOOST_CHECK_EQUAL(result.num_labels(), expected_labels);
+        BOOST_CHECK_EQUAL(result.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result.num_labels(), expected_labels);
+      }
     }
   }
 }
