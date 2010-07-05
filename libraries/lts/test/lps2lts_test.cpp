@@ -61,11 +61,13 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 lts::lts translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
-                              mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty)
+                              mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty,
+                              std::string priority_action = "")
 {
   lts::lts_generation_options options;
   options.trace_prefix = "lps2lts_test";
   options.specification = specification;
+  options.priority_action = priority_action;
 
   options.lts = temporary_filename("lps2lts_test");
   options.outformat = lts::lts_aut;
@@ -91,7 +93,6 @@ rewrite_strategy_vector initialise_rewrite_strategies()
 {
   std::vector<rewrite_strategy> result;
   result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
-/*
   result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
 #ifdef MCRL2_TEST_COMPILERS
 #ifdef MCRL2_JITTYC_AVAILABLE
@@ -101,7 +102,7 @@ rewrite_strategy_vector initialise_rewrite_strategies()
   result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
 #endif MCRL2_JITTYC_AVAILABLE
 #endif // MCRL2_TEST_COMPILERS
-*/
+
   return result;
 }
 
@@ -136,7 +137,8 @@ exploration_strategy_vector exploration_strategies()
 void check_lps2lts_specification(std::string const& specification,
                                  const unsigned int expected_states,
                                  const unsigned int expected_transitions,
-                                 const unsigned int expected_labels)
+                                 const unsigned int expected_labels,
+                                 std::string priority_action = "")
 {
   lps::specification lps = lps::parse_linear_process_specification(specification);
 
@@ -146,7 +148,7 @@ void check_lps2lts_specification(std::string const& specification,
     exploration_strategy_vector estrategies(exploration_strategies());
     for(exploration_strategy_vector::const_iterator expl_strategy = estrategies.begin(); expl_strategy != estrategies.end(); ++expl_strategy)
     {
-      lts::lts result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy);
+      lts::lts result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy, priority_action);
 
       BOOST_CHECK_EQUAL(result.num_states(), expected_states);
       BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
@@ -222,6 +224,30 @@ BOOST_AUTO_TEST_CASE(test_abp) {
     "init P(1, dc, true, 1, dc1, dc2, 1, dc9, 1, dc13, true);\n"
   );
   check_lps2lts_specification(abp, 74, 92, 19);
+}
+
+BOOST_AUTO_TEST_CASE(test_confluence)
+{
+  std::string spec(
+    "sort State = struct S_FSM_UNINITIALIZED?isS_FSM_UNINITIALIZED | S_OFF?isS_OFF;\n"
+    "     IdList = List(Nat);\n"
+    "\n"
+    "act  rs: State;\n"
+    "\n"
+    "proc P(s3_P: Pos, s1_P: State, ActPhaseArgs_pp2_P: IdList) =\n"
+    "       (s3_P == 1 && ActPhaseArgs_pp2_P == []) ->\n"
+    "         tau .\n"
+    "         P(s3_P = 1, s1_P = S_FSM_UNINITIALIZED, ActPhaseArgs_pp2_P = [12, 9])\n"
+    "     + sum s11_P: State.\n"
+    "         (s3_P == 1 && !(ActPhaseArgs_pp2_P == [])) ->\n"
+    "         rs(s11_P) .\n"
+    "         P(s3_P = 2, s1_P = s11_P)\n"
+    "     + delta;\n"
+    "\n"
+    "init P(1, S_FSM_UNINITIALIZED, []);\n"
+  );
+  check_lps2lts_specification(spec, 4, 3, 3);
+  check_lps2lts_specification(spec, 3, 2, 2, "tau");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
