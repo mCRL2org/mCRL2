@@ -124,7 +124,6 @@ class lps2lts_tool : public lps2lts_base
       }
 
       signal(SIGABRT,print_message_upon_premature_termination);
-      signal(SIGSEGV,print_message_upon_premature_termination);
       signal(SIGINT,print_message_upon_premature_termination);
       signal(SIGTERM,print_message_upon_premature_termination); // At ^C print a message.
 

@@ -110,7 +110,7 @@ namespace mcrl2
       }
       else
       {
-        states = ATindexedSetCreate(lgopts->initial_table_size,50);
+        states = atermpp::indexed_set(lgopts->initial_table_size,50);
       }
 
       assert( backpointers.empty() );
@@ -240,11 +240,6 @@ namespace mcrl2
 
       delete nstate;
       backpointers.clear();
-      if ( states != NULL )
-      {
-        ATindexedSetDestroy(states);
-        states = NULL;
-      }
 
       cleanup_representation();
 
@@ -279,7 +274,7 @@ namespace mcrl2
       {
         tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
       }
-      while ( (ns = backpointers[ATindexedSetGetIndex(states,s)]) != atermpp::aterm() )
+      while ( (ns = backpointers[states.index(s)]) != atermpp::aterm() )
       {
         ATermAppl trans;
         ATerm t;
@@ -348,7 +343,7 @@ namespace mcrl2
                                const_cast< char* >(lgopts->trace_prefix.c_str()),
                                tracecnt,
                                lgopts->trace_actions[j],
-                               ATindexedSetGetIndex(states,OldState));
+                               states.index(OldState));
               }
               else
               {
@@ -357,7 +352,7 @@ namespace mcrl2
                                const_cast< char* >(lgopts->trace_prefix.c_str()),
                                tracecnt,
                                lgopts->trace_actions[j],
-                               ATindexedSetGetIndex(states,OldState));
+                               states.index(OldState));
               }
             }
             tracecnt++;
@@ -366,7 +361,7 @@ namespace mcrl2
           {
             gsMessage("detect: action '%P' found (state index: %lu).\n",
                                Transition,
-                               ATindexedSetGetIndex(states,OldState));
+                               states.index(OldState));
           }
         }
       }
@@ -412,19 +407,19 @@ namespace mcrl2
             if ( saved_ok )
             {
               cerr << "deadlock-detect: deadlock found and saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt << ".trc' (state index: " <<
-                       ATindexedSetGetIndex(states,state) << ").\n";
+                       states.index(state) << ").\n";
             }
             else
             {
               cerr << "deadlock-detect: deadlock found, but could not be saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
-                      ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
+                      ".trc' (state index: " << states.index(state) <<  ").\n";
             }
           }
           tracecnt++;
         } 
         else
         {
-          cerr << "deadlock-detect: deadlock found (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
+          cerr << "deadlock-detect: deadlock found (state index: " << states.index(state) <<  ").\n";
         }
       }
     }
@@ -531,19 +526,19 @@ namespace mcrl2
               if ( saved_ok )
               {
                 cerr << "divergence-detect: divergence found and saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
-                        ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
+                        ".trc' (state index: " << states.index(state) <<  ").\n";
               }
               else
               {
                 cerr << "divergence-detect: divergence found, but could not be saved to '" << lgopts->trace_prefix << "_dlk_" << tracecnt <<
-                        ".trc' (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
+                        ".trc' (state index: " << states.index(state) <<  ").\n";
               }
             }
             tracecnt++;
           } 
           else
           {
-            cerr << "divergence-detect: divergence found (state index: " << ATindexedSetGetIndex(states,state) <<  ").\n";
+            cerr << "divergence-detect: divergence found (state index: " << states.index(state) <<  ").\n";
           }
         }
       }
@@ -654,10 +649,10 @@ namespace mcrl2
       }
       else
       {
-        ATbool new_state;
-        unsigned long i = ATindexedSetPut(states,state,&new_state);
-        is_new = (new_state == ATtrue);
-        return i;
+        long i;
+        std::pair<long, bool> result = states.put(state);
+        is_new = result.second;
+        return result.first;
       }
     }
 
@@ -667,7 +662,7 @@ namespace mcrl2
       {
         return bithash_table.state_index(state);
       } else {
-        return ATindexedSetGetIndex(states,state);
+        return states.index(state);
       }
     }
 
@@ -803,7 +798,7 @@ namespace mcrl2
             ATermList tmp_states = ATmakeList0();
             ATermAppl Transition;
             ATerm NewState;
-            state = ATindexedSetGetElem(states,current_state);
+            state = states.get(current_state);
             check_divergence(state);
             try
             {
@@ -1156,7 +1151,7 @@ namespace mcrl2
             }
             else
             {
-              state = ATindexedSetGetElem(states,current_state);
+              state = states.get(current_state);
             }
 
             check_divergence(state);

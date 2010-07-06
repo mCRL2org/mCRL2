@@ -19,6 +19,7 @@
 #include "boost/cstdint.hpp"
 
 #include "aterm2.h"
+#include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/lts/lps2lts_lts.h"
 #include "mcrl2/lts/bithashtable.h"
 #include "mcrl2/lts/queue.h"
@@ -138,7 +139,7 @@ namespace mcrl2
 
         lts_generation_options* lgopts;
         NextState* nstate;
-        ATermIndexedSet states;
+        atermpp::indexed_set states;
         lps2lts_lts lts;
 
         boost::uint64_t num_states;
@@ -170,12 +171,13 @@ namespace mcrl2
           initialised(false),
           finalised(false),
           completely_generated(false),
-          states(NULL),
+          states(0,0), //Table of size 0 initially
           bithashtable(NULL),
           bithash_table(),
           trace_support(false),
           lg_error(false)
-        {}
+        {
+        }
 
         ~lps2lts_algorithm()
         {
