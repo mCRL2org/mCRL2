@@ -145,11 +145,7 @@ public:
 
 		// m_lbox needs to be declared before declaring left_panel for output
 		m_lbox = new OutputListBox(this, wxID_ANY, wxPoint(-1, -1), wxSize(-1, -1));
-		m_notebookpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP |
-				 wxAUI_NB_TAB_SPLIT |
-				 wxAUI_NB_TAB_MOVE |
-				 wxAUI_NB_CLOSE_ON_ACTIVE_TAB |
-				 wxAUI_NB_MIDDLE_CLICK_CLOSE  );
+		m_notebookpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_DEFAULT_STYLE );
 
 		m_left_panel = new GenericDirCtrl(this, m_tool_catalog,
 				m_extention_tool_mapping, m_lbox, this->GetNoteBookToolPanel());
