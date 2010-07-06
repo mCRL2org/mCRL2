@@ -37,7 +37,7 @@
 #define ID_EDIT		2002
 #define ID_RENAME  2003
 #define ID_DETAILS	2004
-#define ID_DELETE	2005
+#define ID_DELETE	 2005
 #define ID_NEW_FILE 2006
 #define ID_NEW_DIR 2007
 #define ID_REFRESH 2008
@@ -224,11 +224,11 @@ public:
 		  } else {
 
 			#ifdef __linux
-            wxLogMessage(_T("No editor defined by UNIX operating system for editing files of extension '%s'."),
+            wxLogMessage(_T("No editor defined by UNIX operating system for editing files of extension '%s'. An editor can be set under 'Window -> Preferences'."),
                 ext.c_str());
 #endif
 #ifdef __WINDOWS__
-            wxLogMessage(_T("No editor defined by Windows operating system for editing files of extension '%s'."),
+            wxLogMessage(_T("No editor defined by Windows operating system for editing files of extension '%s'. An editor can be set under 'Window -> Preferences'."),
                 ext.c_str());
 #endif
       }
@@ -423,16 +423,25 @@ public:
 	}
 	;
 
+	void OnActivate(wxTreeEvent& evt){
+	  Edit();
+	}
+
 	wxTimer *refresh_dir;
 protected:
 	wxWindow *m_parent;
 
 DECLARE_EVENT_TABLE()
 };
+
+
+
 BEGIN_EVENT_TABLE(GenericDirCtrl, wxGenericDirCtrl)
 EVT_TREE_ITEM_RIGHT_CLICK( wxID_ANY, GenericDirCtrl::OnRightClick )
+EVT_TREE_ITEM_MENU(wxID_ANY, GenericDirCtrl::OnRightClick)
 //EVT_TREE_ITEM_LEFT_CLICK(GenericDirCtrl::OnLeftClick )
 EVT_TREE_KEY_DOWN		(wxID_ANY, GenericDirCtrl::onKeyDown)
+EVT_TREE_ITEM_ACTIVATED(wxID_ANY, GenericDirCtrl::OnActivate )
 END_EVENT_TABLE ()
 
 #endif /* PROJECTCONTROL_H_ */

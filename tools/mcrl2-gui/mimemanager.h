@@ -93,16 +93,14 @@ class MimeManager
 
     void removeExtensionMapping(wxString str ){
       m_edittool_mapping.erase(str);
-
-      wxConfig *config = new wxConfig(wxT("mcrl2_gui"));
-      config->Write( wxT("mimes"), MappingTowxString() );
-      delete config;
     }
 
     void addExtensionMapping(wxString ext, wxString cmd){
       m_edittool_mapping[ext]=cmd;
 
-      wxString str;
+    }
+
+    void saveExtensionMapping(){
       wxConfig *config = new wxConfig(wxT("mcrl2_gui"));
       config->Write( wxT("mimes"), MappingTowxString() );
       delete config;

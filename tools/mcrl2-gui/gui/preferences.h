@@ -58,9 +58,6 @@ public:
 
         fp->SetSize(wxSize(250,10));
 
-        //fp->SetLabel(wxString(
-        //    (*i).m_flag.c_str(), wxConvUTF8));
-
         wxButton *okButton = new wxButton(this, wxID_OK, wxT("Ok"),
             wxDefaultPosition, wxSize(95, 30));
         wxButton *closeButton = new wxButton(this, wxID_CANCEL, wxT("Cancel"),
@@ -108,7 +105,12 @@ class Preferences: public wxDialog{
 
       wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
       SetSizer(sizer);
+
+      wxStaticBoxSizer* box = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Editors associated to file extensions"));
       sizer->AddSpacer(30);
+      sizer->Add(box, 1, wxEXPAND|wxLEFT|wxRIGHT, 3);
+      sizer->AddSpacer(5);
+
 
       listview = new wxListView(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                             wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
@@ -124,14 +126,27 @@ class Preferences: public wxDialog{
         listview->SetItem(distance(b, i), 1, i->second );
       }
 
-      sizer->Add(listview, 1, wxEXPAND|wxLEFT|wxRIGHT, 3);
+      box->AddSpacer(5);
+      box->Add(listview, 1, wxALIGN_LEFT|wxEXPAND, 3);
+      sizer = new wxBoxSizer(wxVERTICAL);
+      box->Add(sizer);
+      sizer->Add(new wxButton(this, wxID_NEW), 0, wxTOP, 5);
+
+      m_edit_button = new wxButton(this, wxID_EDIT);
+      m_delete_button = new wxButton(this, wxID_DELETE);
+
+      sizer->Add(m_edit_button, 0, wxTOP, 5);
+      sizer->Add(m_delete_button, 0, wxTOP, 5);
+
 
       sizer = new wxBoxSizer(wxHORIZONTAL);
-      sizer->Add(new wxButton(this, wxID_NEW), 0, wxRIGHT, 5);
-      sizer->Add(new wxButton(this, wxID_EDIT, wxT("Edit")), 0, wxRIGHT, 5);
-      sizer->Add(new wxButton(this, wxID_DELETE), 0, wxRIGHT, 5);
+      sizer->Add(new wxButton(this, wxID_SAVE), 0, wxRIGHT, 5);
+      sizer->Add(new wxButton(this, wxID_CANCEL), 0, wxRIGHT, 5);
 
-      GetSizer()->Add(sizer, 0, wxALL|wxALIGN_LEFT|wxEXPAND, 3);
+      GetSizer()->Add(sizer, 0, wxALL|wxRIGHT, 3);
+
+      m_edit_button->Enable(false);
+      m_delete_button->Enable(false);
 
       CentreOnParent();
 
@@ -180,8 +195,6 @@ class Preferences: public wxDialog{
             wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
         if (dial->ShowModal() == wxID_YES)
         {
-          cout << s.mb_str(wxConvUTF8) << endl;
-
           mm.removeExtensionMapping(s);
 
           UpdateItems();
@@ -205,9 +218,36 @@ class Preferences: public wxDialog{
       }
     }
 
+    void OnSaveClick(wxCommandEvent& evt){
+      mm.saveExtensionMapping();
+      Destroy();
+    }
+
+    void OnCancelClick(wxCommandEvent& evt){
+      Destroy();
+    }
+
+    /*void OnListBoxClick(wxListEvent& evt){
+      cout << "blaat" << endl;
+      UpdateButtons();
+    }*/
 
   private:
+
+    void OnSelect(wxListEvent& evt){
+      m_edit_button->Enable(true);
+      m_delete_button->Enable(true);
+    }
+
+    void OnDeSelect(wxListEvent& evt){
+      m_edit_button->Enable(false);
+      m_delete_button->Enable(false);
+    }
+
     wxListView *listview;
+
+    wxButton *m_edit_button;
+    wxButton *m_delete_button;
 
     MimeManager mm;
 
@@ -219,7 +259,13 @@ BEGIN_EVENT_TABLE(Preferences, wxDialog)
   EVT_BUTTON(wxID_NEW, Preferences::OnNewClick)
   EVT_BUTTON(wxID_DELETE, Preferences::OnDeleteClick)
   EVT_BUTTON(wxID_EDIT, Preferences::OnEditClick)
- END_EVENT_TABLE ()
+  EVT_BUTTON(wxID_SAVE, Preferences::OnSaveClick)
+  EVT_BUTTON(wxID_CANCEL, Preferences::OnCancelClick)
+
+  EVT_LIST_ITEM_SELECTED(wxID_ANY, Preferences::OnSelect)
+  EVT_LIST_ITEM_DESELECTED(wxID_ANY, Preferences::OnDeSelect)
+
+END_EVENT_TABLE ()
 
 
 #endif /* MCRL2_GUI_PREFERENCES_H_ */
