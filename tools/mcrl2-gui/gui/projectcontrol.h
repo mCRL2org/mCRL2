@@ -434,14 +434,10 @@ protected:
 DECLARE_EVENT_TABLE()
 };
 
-
-
 BEGIN_EVENT_TABLE(GenericDirCtrl, wxGenericDirCtrl)
-EVT_TREE_ITEM_RIGHT_CLICK( wxID_ANY, GenericDirCtrl::OnRightClick )
-EVT_TREE_ITEM_MENU(wxID_ANY, GenericDirCtrl::OnRightClick)
-//EVT_TREE_ITEM_LEFT_CLICK(GenericDirCtrl::OnLeftClick )
-EVT_TREE_KEY_DOWN		(wxID_ANY, GenericDirCtrl::onKeyDown)
-EVT_TREE_ITEM_ACTIVATED(wxID_ANY, GenericDirCtrl::OnActivate )
+  EVT_TREE_ITEM_RIGHT_CLICK( wxID_ANY, GenericDirCtrl::OnRightClick )
+  EVT_TREE_KEY_DOWN		(wxID_ANY, GenericDirCtrl::onKeyDown)
+  EVT_TREE_ITEM_ACTIVATED(wxID_ANY, GenericDirCtrl::OnActivate )
 END_EVENT_TABLE ()
 
 #endif /* PROJECTCONTROL_H_ */
