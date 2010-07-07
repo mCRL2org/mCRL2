@@ -901,7 +901,6 @@ void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
                      "  SummandIndex = " << SummandIndex << std::endl;
 #endif
         // error = false;
-        assert(SummandIndex < info.num_summands);
 
         cur_state = State;
 

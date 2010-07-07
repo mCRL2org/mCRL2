@@ -947,7 +947,7 @@ gsMessage("      done with strat\n");
       }
     }
 
-    ATermAppl a = ATmakeApplArray(ATgetAFun(Term),rewritten.data());
+    ATermAppl a = ATmakeApplArray(getAppl(arity),rewritten.data());
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
 gsMessage("      return %T\n",a);
