@@ -122,18 +122,36 @@ namespace mcrl2
         trace_support = false;
       }
 
-      if (lgopts->removeunused) {
+      if (lgopts->removeunused) 
+      {
         gsVerboseMsg("removing unused parts of the data specification.\n");
 
         lgopts->m_rewriter.reset(
-          new mcrl2::data::rewriter(lgopts->specification.data(),
-        mcrl2::data::used_data_equation_selector(lgopts->specification.data(), mcrl2::lps::specification_to_aterm(lgopts->specification)), lgopts->strat));
+                    new mcrl2::data::rewriter(lgopts->specification.data(),
+                    mcrl2::data::used_data_equation_selector(
+                           lgopts->specification.data(), 
+                           mcrl2::lps::specification_to_aterm(lgopts->specification)), 
+                    lgopts->strat));
       }
-      else {
+      else 
+      {
         lgopts->m_rewriter.reset(new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
       }
 
-      lgopts->m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(lgopts->specification.data(), *(lgopts->m_rewriter)));
+      // Declare all constructors to the rewriter to prevent unnecessary compilation.
+      // This can be removed if the jittyc or innerc compilers are not in use anymore.
+      // In certain cases it could be useful to add the mappings also, but this appears to
+      // give a substantial performance penalty, due to the addition of symbols to the
+      // rewriter that are not used. 
+      for(mcrl2::data::data_specification::constructors_const_range c=lgopts->specification.data().constructors(); 
+                    !c.empty() ; c.advance_begin(1))
+      { 
+        lgopts->m_rewriter->get_internal_rewriter()->toRewriteFormat(mcrl2::data::data_expression(c.front()));
+      }
+
+      lgopts->m_enumerator_factory.reset(
+                 new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >
+                               (lgopts->specification.data(), *(lgopts->m_rewriter)));
 
       nstate = createNextState(lgopts->specification,*(lgopts->m_enumerator_factory),!lgopts->usedummies,lgopts->stateformat);
 
@@ -149,11 +167,13 @@ namespace mcrl2
       }
 
       if ( lgopts->detect_deadlock && gsVerbose)
-      { cerr << "Detect deadlocks.\n" ;
+      { 
+        cerr << "Detect deadlocks.\n" ;
       }
 
       if ( lgopts->detect_divergence && gsVerbose)
-      { cerr << "Detect divergences with tau action is `" << lgopts->priority_action << "'.\n";
+      { 
+        cerr << "Detect divergences with tau action is `" << lgopts->priority_action << "'.\n";
       }
 
       num_states = 0;
@@ -168,7 +188,9 @@ namespace mcrl2
         lts_opts.nstate = nstate;
         lts_opts.spec.reset(new mcrl2::lps::specification(lgopts->specification));
         lts.open_lts(lgopts->lts.c_str(),lts_opts);
-      } else {
+      } 
+      else 
+      {
         lgopts->outformat = mcrl2::lts::lts_none;
         gsVerboseMsg("not saving state space.\n");
       }
@@ -650,7 +672,6 @@ namespace mcrl2
       }
       else
       {
-        long i;
         std::pair<long, bool> result = states.put(state);
         is_new = result.second;
         return result.first;
@@ -662,7 +683,9 @@ namespace mcrl2
       if ( lgopts->bithashing )
       {
         return bithash_table.state_index(state);
-      } else {
+      } 
+      else 
+      {
         return states.index(state);
       }
     }

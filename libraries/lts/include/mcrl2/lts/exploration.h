@@ -63,7 +63,8 @@ namespace mcrl2
     exploration_strategy str_to_expl_strat(const char *s);
     const char *expl_strat_to_str(exploration_strategy es);
 
-    struct lts_generation_options {
+    struct lts_generation_options 
+    {
       lts_generation_options() :
         strat(mcrl2::data::rewriter::jitty),
         usedummies(true),
@@ -87,11 +88,11 @@ namespace mcrl2
         bithashsize(DEFAULT_BITHASHSIZE),
         todo_max((std::numeric_limits< unsigned long >::max)()),
         initial_table_size(DEFAULT_INIT_TSIZE)
-    {
-      generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
-
-      display_status              = boost::bind(&lts_generation_options::update_status_display, this, _1, _2, _3, _4, _5);
-    }
+      {
+        generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
+  
+        display_status              = boost::bind(&lts_generation_options::update_status_display, this, _1, _2, _3, _4, _5);
+      }
 
       
 
@@ -104,14 +105,16 @@ namespace mcrl2
                              boost::uint64_t) > display_status;
 
       /* Default function for generate_filename_for_trace */
-      std::string generate_trace_file_name(std::string const& basefilename, std::string const& info, std::string const& extension) {
+      std::string generate_trace_file_name(std::string const& basefilename, std::string const& info, std::string const& extension) 
+      {
         return basefilename + std::string("_") + info + std::string(".") + extension;
       }
 
       /* Default function for status display */
       void update_status_display(unsigned long, boost::uint64_t,
                                  boost::uint64_t, boost::uint64_t const,
-                                 boost::uint64_t) {
+                                 boost::uint64_t) 
+      {
       }
 
       mcrl2::data::rewriter::strategy strat;
