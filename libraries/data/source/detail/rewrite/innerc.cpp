@@ -2078,7 +2078,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   { gsfprintf(f,  "  int2func[%i] = rewr_%i_nnf; // %T\n",j,j,int2term[j]);
   }
   fprintf(f,  "\n");
-  for (int i=0;i<max_arity;i++)
+  for (int i=0;i<=max_arity;i++)
   {
   fprintf(f,  "  int2func%i = (ftype%i *) malloc(%i*sizeof(ftype%i));\n",i,i,num_opids,i);
   for (j=0;j < num_opids;j++)
