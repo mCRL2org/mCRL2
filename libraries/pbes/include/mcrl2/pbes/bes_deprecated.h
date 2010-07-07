@@ -1853,9 +1853,11 @@ namespace bes
       for(data_specification::constructors_const_range c=pbes_spec.data().constructors(); !c.empty() ; c.advance_begin(1))
       { Mucks_rewriter->toRewriteFormat(c.front());
       }
-      for(data_specification::constructors_const_range c=pbes_spec.data().mappings(); !c.empty() ; c.advance_begin(1))
-      { Mucks_rewriter->toRewriteFormat(c.front());
-      }
+      // Commented out the lines below, as they appear to have a bad influence on the time that the 
+      // rewriter needs.
+      // for(data_specification::mappings_const_range c=pbes_spec.data().mappings(); !c.empty() ; c.advance_begin(1))
+      // { Mucks_rewriter->toRewriteFormat(c.front());
+      // }
 
       
       // mcrl2::data::detail::Rewriter *Mucks_rewriter=static_cast<pbes2bool_rewriter>(data_rewriter).get_internal_rewriter();
