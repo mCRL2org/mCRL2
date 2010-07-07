@@ -18,6 +18,7 @@
 #include <wx/statline.h>
 #include <gui/outputlistbox.h>
 #include <wx/scrolwin.h>
+#include <wx/gbsizer.h>
 
 
 #define ID_RUN_TOOL 1000
@@ -38,12 +39,9 @@ public:
 		m_timer = new wxTimer(this, ID_TIMER);
 		m_pid = 0;
 
-		int height = 0;
-		int border = 3;
-		int w, h, v, f;
+		int row = 0;
 
 		// Top Panel
-
 		m_configpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 				wxAUI_NB_BOTTOM
 			);
@@ -51,71 +49,38 @@ public:
 		m_tool_output = new OutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 		m_wsw = new wxScrolledWindow(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
-		/* Creates a 1000px & 1000px virtual panel */
-		m_wsw->SetScrollbars( 20, 20, 50, 50 );
-
 		/* Define size large enough for top*/
 		wxPanel *top = new wxPanel(m_wsw , wxID_ANY, wxDefaultPosition, wxSize(4096,4096));
 
-    height += 2*border;
+    wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
 
-    wxStaticText *st0 = new wxStaticText(top, wxID_ANY,
-        wxT("input file: \t") + wxString( m_fileIO.input_file.c_str(), wxConvUTF8 ) , wxPoint(2*border, height));
-    st0->GetSize(&w, &h);
-    height += h + 2 * border;
+    wxGridBagSizer *fgs = new wxGridBagSizer(5, 5);
 
-    new wxStaticLine(top, wxID_ANY, wxPoint(border, height),
-          wxSize(4000,1));
+    fgs->Add( new wxStaticText(top, wxID_ANY, wxT("input file:")) , wxGBPosition(row,0));
+    fgs->Add( new wxStaticText(top, wxID_ANY, wxString( m_fileIO.input_file.c_str(), wxConvUTF8 )), wxGBPosition(row,1),
+        wxGBSpan(1,2));
 
-    height += 2*border;
+    if (!m_tool.m_output_type.empty())
+      {
+        ++row;
 
-		if (!m_tool.m_output_type.empty()) {
-			/* Suggest/Generate output file */
+        fgs->Add(new wxStaticText(top, wxID_ANY, wxT("output file:")),
+            wxGBPosition(row, 0));
 
-			size_t found;
-			string file_suggestion = m_fileIO.input_file;
-			found = file_suggestion.find_last_of(".");
-			file_suggestion = file_suggestion.substr(0, found) + "."
-					+ tool.m_name;
+        wxString filesuggestion = GenerateOutputFileSuggestion();
 
-			struct stat stFileInfo;
-			int intStat = 0;
-			int cntr = 0;
+        wxFilePickerCtrl *fpc = new wxFilePickerCtrl(top, ID_OUTPUT_FILE,
+            wxT(""), wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
+            wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
 
-			char c[5];
-			while (intStat == 0) {
-				sprintf(c, "%02d", cntr);
-				intStat
-						= stat(
-								(file_suggestion + c + "." + tool.m_output_type).c_str(),
-								&stFileInfo);
-				++cntr;
-			}
+        fpc->SetPath(filesuggestion);
+        fpc->SetSize(wxSize(350, 25));
+        fgs->Add(fpc, wxGBPosition(row, 1), wxGBSpan(1,2));
 
-			file_suggestion = file_suggestion + c + "." + tool.m_output_type;
+      }
 
-			/* Create PathFilePicker */
-			wxStaticText *st = new wxStaticText(top, wxID_ANY,
-					wxT("output file: "), wxPoint(border, height + border));
-			st->GetSize(&w, &h);
-
-			wxFilePickerCtrl *fpc = new wxFilePickerCtrl(top, ID_OUTPUT_FILE, wxT(""),
-					wxT("Select a file"), wxT("*.*"), wxPoint(w + (2
-							* border), height + border), wxDefaultSize,
-					wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
-			//FPC->Fit();
-			fpc->SetSize(wxSize(350, 25));
-			fpc->SetPath(wxString(file_suggestion.c_str(), wxConvUTF8));
-			m_fileIO.output_file = file_suggestion;
-			fpc->GetSize(&w, &h);
-			height += h + 2 * border;
-
-		    new wxStaticLine(top, wxID_ANY, wxPoint(border, height),
-		        wxSize(4000,1));
-
-		    height += border;
-
-		}
+    ++row;
+    fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
 
 		/* Parse and display options */
 		vector<Tool_option> vto = tool.m_tool_options;
@@ -127,21 +92,6 @@ public:
 		wxTextCtrl *tc;
 		wxFilePickerCtrl *fp;
 
-		int textctrl_width = 0;
-
-		for (vector<Tool_option>::iterator i = vto.begin(); i != vto.end(); ++i) {
-			if (((*i).m_widget == textctrl) || ((*i).m_widget == filepicker )){
-				int w, u;
-				wxStaticText *tmp = new wxStaticText(this, wxID_ANY, wxString(
-						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border, height));
-				tmp->GetSize(&w, &u);
-
-				textctrl_width = max(textctrl_width, w);
-
-				delete tmp;
-			}
-		}
-
 
 		for (vector<Tool_option>::iterator i = vto.begin(); i != vto.end(); ++i) {
 			//TODO: extend with Optional/mandatory checkbox
@@ -152,9 +102,7 @@ public:
 			case checkbox:
 
 				cb = new wxCheckBox(top, wxID_ANY, wxString(
-						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border,
-						height), wxDefaultSize); //m_tool_panel, wxID_ANY,
-				cb->GetSize(&w, &h);
+						(*i).m_flag.c_str(), wxConvUTF8));
 
 				if ((*i).m_values[(*i).m_default_value].compare("true") == 0) {
 					cb->SetValue(true);
@@ -164,16 +112,13 @@ public:
 
 				/* Display help text */
 				ws = new wxStaticText(top, wxID_ANY, wxString(
-						(*i).m_help.c_str(), wxConvUTF8), wxPoint(max(w + 2
-						* border, 130), height + 4));
+						(*i).m_help.c_str(), wxConvUTF8));
 
 				ws->Wrap(800);
 
-				ws->GetSize(&v, &f);
-
-				h = max(f, h);
-
-				height = height + h;
+        row++;
+        fgs->Add(cb, wxGBPosition(row,0));
+        fgs->Add(ws, wxGBPosition(row,1), wxGBSpan(1,2));
 
 				break;
 			case radiobox:
@@ -187,47 +132,31 @@ public:
 
 				/* create radio box */
 				rb = new wxRadioBox(top, wxID_ANY, wxString(
-						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border,
-						height), wxDefaultSize, as
+						(*i).m_flag.c_str(), wxConvUTF8), wxDefaultPosition, wxDefaultSize, as
 						,0, wxRA_SPECIFY_ROWS
 						);
-				rb->GetSize(&w, &h);
 
 				m_radiobox_ptrs.push_back(rb);
 
 				/* Set default value */
-				rb->SetStringSelection(
-						wxString((*i).m_values[(*i).m_default_value].c_str(),
-								wxConvUTF8));
+				rb->SetStringSelection(wxString((*i).m_values[(*i).m_default_value].c_str(),wxConvUTF8));
 
 				/* Display help text */
-				ws = new wxStaticText(top, wxID_ANY, wxString(
-						(*i).m_help.c_str(), wxConvUTF8), wxPoint(w + 2
-						* border+ 5, height));
+				ws = new wxStaticText(top, wxID_ANY, wxString((*i).m_help.c_str(), wxConvUTF8));
 
 				ws->Wrap(800);
 
-				ws->GetSize(&v, &f);
-
-				h = max(f, h);
-
-				height = height + h;
+        row++;
+        fgs->Add(rb, wxGBPosition(row,0));
+        fgs->Add(ws, wxGBPosition(row,1), wxGBSpan(1,2));
 
 				break;
 			case textctrl:
 				/* display label */
-				ws1 = new wxStaticText(top, wxID_ANY, wxString(
-						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border, height));
-
-				ws1->GetSize(&v, &f);
-
-				w = textctrl_width + 2*border;
 
 				// TODO: Set Default values
-
 				/* create text input box */
-				tc = new wxTextCtrl(top, wxID_ANY, wxT(""),
-						wxPoint(w,height));
+				tc = new wxTextCtrl(top, wxID_ANY, wxT(""));
 
 				tc->SetLabel(wxString(
 						(*i).m_flag.c_str(), wxConvUTF8));
@@ -236,82 +165,65 @@ public:
 
 				m_textctrl_ptrs.push_back(tc);
 
-				tc->GetSize(&v, &h);
+				row++;
+        fgs->Add( new wxStaticText(top, wxID_ANY, wxString(
+            (*i).m_flag.c_str(), wxConvUTF8)),
+            wxGBPosition(row,0));
+        fgs->Add(tc, wxGBPosition(row,1));
+        fgs->Add(new wxStaticText(top, wxID_ANY, wxString(
+            (*i).m_help.c_str(), wxConvUTF8)),
+            wxGBPosition(row,2));
 
-				w = v+ border + w;
-
-				ws2 = new wxStaticText(top, wxID_ANY, wxString(
-						(*i).m_help.c_str(), wxConvUTF8), wxPoint(w , height));
-
-				v =0 ;
-				ws1->GetSize(&w, &h);
-				v = max(h,v);
-				ws2->GetSize(&w, &h);
-				v = max(h,v);
-				tc->GetSize(&w, &h);
-				h = max(h,v);
-
-				height = height + h;
 				break;
+
 			case filepicker:
 				/* display label */
 				ws1 = new wxStaticText(top, wxID_ANY, wxString(
-						(*i).m_flag.c_str(), wxConvUTF8), wxPoint(border, height));
-
-				ws1->GetSize(&v, &f);
-
-				w = v+ 2*border;
+						(*i).m_flag.c_str(), wxConvUTF8));
 
 				// TODO: Set Default values
 
 				/* create text input box */
 				fp = new wxFilePickerCtrl(top, wxID_ANY,  wxT(""),
-						wxT("Select a file"), wxT("*.*"), wxPoint(w , height), wxDefaultSize,
+						wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
 						wxFLP_USE_TEXTCTRL | wxFLP_OPEN );
-
-				fp->SetSize(wxSize(350,25));
 
 				fp->SetLabel(wxString(
 						(*i).m_flag.c_str(), wxConvUTF8));
 
 				m_filepicker_ptrs.push_back(fp);
 
-				fp->GetSize(&v, &h);
-
-				w = v+ border + w;
-
 				ws2 = new wxStaticText(top, wxID_ANY, wxString(
-						(*i).m_help.c_str(), wxConvUTF8), wxPoint(w , height));
+						(*i).m_help.c_str(), wxConvUTF8));
 
-				v =0 ;
-				ws1->GetSize(&w, &h);
-				v = max(h,v);
-				ws2->GetSize(&w, &h);
-				v = max(h,v);
-				fp->GetSize(&w, &h);
-				h = max(h,v);
+				row++;
+        fgs->Add(ws1, wxGBPosition(row,0));
+        fgs->Add(fp,  wxGBPosition(row,1), wxGBSpan(1,2));
+        fp->SetSize(wxSize(350,25));
+        fgs->Add(ws2,  wxGBPosition(row,3));
 
-				height = height + h;
 				break;
 			}
-
 		};
 
-	    height += 2*border;
+		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"));
 
-	    new wxStaticLine(top, wxID_ANY, wxPoint(border, height),
-	        wxSize(4000,1));
-
-	    height += border;
-
-		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"), wxPoint(
-				border, height));
-
-		m_abortbutton = new wxButton(top, ID_ABORT_TOOL, wxT("Abort"),
-				wxPoint(100, height));
+		m_abortbutton = new wxButton(top, ID_ABORT_TOOL, wxT("Abort"));
 		m_abortbutton->Show(false);
 
+	  ++row;
+	  fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
+		++row;
+    fgs->Add(m_runbutton, wxGBPosition(row,0));
+    fgs->Add(m_abortbutton, wxGBPosition(row,1));
+
+    hbox->Add(fgs, 1, wxALL, 15);
+    top->SetSizer(hbox);
 		top->Layout();
+
+		int w, h;
+		top->GetBestSize(&w,&h);
+    m_wsw->SetScrollbars( 20, 20, w/20 , h/20 );
 
 		m_configpanel->AddPage( m_wsw , wxT("Configuration"), true);
 		m_configpanel->AddPage( m_tool_output , wxT("Output"), false);
@@ -449,6 +361,36 @@ public:
 	long m_pid;
 
 	wxTimer *m_timer;
+
+private:
+
+	wxString
+    GenerateOutputFileSuggestion()
+    {
+      /* Suggest/Generate output file */
+
+      size_t found;
+      string file_suggestion = m_fileIO.input_file;
+      found = file_suggestion.find_last_of(".");
+      file_suggestion = file_suggestion.substr(0, found) + "." + m_tool.m_name;
+
+      struct stat stFileInfo;
+      int intStat = 0;
+      int cntr = 0;
+
+      char c[5];
+      while (intStat == 0)
+      {
+        sprintf(c, "%02d", cntr);
+        intStat = stat(
+            (file_suggestion + c + "." + m_tool.m_output_type).c_str(),
+            &stFileInfo);
+        ++cntr;
+      }
+
+      file_suggestion = file_suggestion + c + "." + m_tool.m_output_type;
+      return wxString(file_suggestion.c_str(), wxConvUTF8);
+    }
 
 DECLARE_EVENT_TABLE()
 };

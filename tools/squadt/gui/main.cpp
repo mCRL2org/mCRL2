@@ -92,7 +92,7 @@ namespace squadt {
 
       hl1->SetFont(font);
 
-      wxStaticText *x1 = new wxStaticText(this, wxID_ANY, wxT("A software version is planned, which makes it impossible to support this tool."),
+      wxStaticText *x1 = new wxStaticText(this, wxID_ANY, wxT("From summer 2010 this tool is not supported any longer."),
        wxPoint(35, 410));
 
       x1->SetFont(font);

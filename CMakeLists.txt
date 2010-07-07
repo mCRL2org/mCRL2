@@ -1058,9 +1058,9 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 SET(CPACK_PACKAGE_VENDOR "TUe")
 
-# Create Desktop link to squadt
-set(CPACK_CREATE_DESKTOP_LINKS squadt)
-set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim")
+# Create Desktop link to mcrl2-gui 
+set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
+set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui")
 
   IF(APPLE AND MCRL2_SINGLE_BUNDLE)
     SET(CPACK_SET_DESTDIR TRUE)
