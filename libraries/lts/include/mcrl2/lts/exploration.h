@@ -38,6 +38,21 @@ namespace mcrl2
 #define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB
 #define DEFAULT_INIT_TSIZE 10000UL
 
+    class exploration_aborted_error: public std::runtime_error
+    {
+
+      public:
+
+        /// \brief Constructor
+        /// \param[in] message the exception message
+        exploration_aborted_error() :
+          std::runtime_error("") {
+        }
+
+        ~exploration_aborted_error() throw () {
+        }
+    };
+
     enum exploration_strategy { es_none,
                                 es_breadth,
                                 es_depth,
@@ -190,6 +205,16 @@ namespace mcrl2
         bool initialise_lts_generation(lts_generation_options *opts);
         bool generate_lts();
         bool finalise_lts_generation();
+
+        bool premature_termination_handler()
+        {
+          std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
+          if(initialised && !finalised)
+          {
+            finalise_lts_generation();
+          }
+          throw exploration_aborted_error();
+        }
 
 
       private:

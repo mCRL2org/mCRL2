@@ -42,11 +42,9 @@ using namespace mcrl2::lts;
 
 lps2lts_algorithm lps2lts;
 
-void print_message_upon_premature_termination(int)
+void premature_termination_handler(int)
 {
-  std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
-  lps2lts.finalise_lts_generation();
-  exit(EXIT_FAILURE);
+  lps2lts.premature_termination_handler();
 }
 
 ATermAppl *parse_action_list(const std::string& s, int *len)
@@ -117,30 +115,37 @@ class lps2lts_tool : public lps2lts_base
     {
       options.specification.load(m_filename);
       options.trace_prefix = m_filename.substr(0, options.trace_prefix.find_last_of('.'));
-       
-      if ( !lps2lts.initialise_lts_generation(&options) )
-      {
-        return false;
-      }
-
-      signal(SIGABRT,print_message_upon_premature_termination);
-      signal(SIGINT,print_message_upon_premature_termination);
-      signal(SIGTERM,print_message_upon_premature_termination); // At ^C print a message.
 
       try
       {
-        lps2lts.generate_lts();
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        std::cerr << e.what() << std::endl;
+        if ( !lps2lts.initialise_lts_generation(&options) )
+        {
+          return false;
+        }
+
+        signal(SIGABRT,premature_termination_handler);
+        signal(SIGINT,premature_termination_handler);
+        signal(SIGTERM,premature_termination_handler); // At ^C print a message.
+
+        try
+        {
+          lps2lts.generate_lts();
+        }
+        catch (mcrl2::runtime_error& e)
+        {
+          std::cerr << e.what() << std::endl;
+          lps2lts.finalise_lts_generation();
+          return false;
+        }
+
         lps2lts.finalise_lts_generation();
+
+        return true;
+      }
+      catch (mcrl2::lts::exploration_aborted_error)
+      {
         return false;
       }
-
-      lps2lts.finalise_lts_generation();
-
-      return true;
     }
 
   protected:

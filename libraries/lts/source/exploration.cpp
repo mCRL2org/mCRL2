@@ -238,6 +238,7 @@ namespace mcrl2
         }
       }
 
+      states = atermpp::indexed_set(0,0);
       delete nstate;
       backpointers.clear();
 

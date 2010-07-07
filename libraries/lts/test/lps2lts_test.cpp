@@ -75,9 +75,13 @@ lts::lts translate_lps_to_lts(lps::specification const& specification,
   options.outformat = lts::lts_aut;
 
   lts::lps2lts_algorithm lps2lts;
+  core::garbage_collect();
   lps2lts.initialise_lts_generation(&options);
+  core::garbage_collect();
   lps2lts.generate_lts();
+  core::garbage_collect();
   lps2lts.finalise_lts_generation();
+  core::garbage_collect();
 
   lts::lts result(options.lts, options.outformat);
 
