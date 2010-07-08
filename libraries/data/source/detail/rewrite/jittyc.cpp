@@ -1490,7 +1490,7 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
   {
     unsigned int rule_arity = ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2)))-1;
     if ( rule_arity > arity )
-      break;
+      continue;
 
     ATerm cond = ATelementAt(ATLgetFirst(rules),1);
     ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2); // arguments of lhs
