@@ -299,6 +299,26 @@ BOOST_AUTO_TEST_CASE(test_function_updates)
   check_lps2lts_specification(spec, 4, 12, 4);
 }
 
+BOOST_AUTO_TEST_CASE(test_timed) // For bug #756
+{
+  std::string spec(
+    "act  a,Terminate;\n"
+    "\n"
+    "proc P(s3: Pos) =\n"
+    "       (s3 == 1) ->\n"
+    "         a @ 3 .\n"
+    "         P(s3 = 2)\n"
+    "     + (s3 == 2) ->\n"
+    "         Terminate .\n"
+    "         P(s3 = 3)\n"
+    "     + (s3 == 3) ->\n"
+    "         delta;\n"
+    "\n"
+    "init P(1);\n"
+  );
+  check_lps2lts_specification(spec, 3, 2, 2);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
