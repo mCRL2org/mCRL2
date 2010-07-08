@@ -292,7 +292,7 @@ vector<Tool> Initialization::Read_tools() {
     		e != 0; e = e->NextSiblingElement(false)) {
     	Tool tool;
 
-		tool.m_gui_tool = false;
+		tool.m_tool_type = shell;
 
         if(!((e->Type() == TiXmlNode::ELEMENT) && e->Value() == "tool")){
           cerr << "Expected XML tree value \"tool\"" << endl;
@@ -301,6 +301,13 @@ vector<Tool> Initialization::Read_tools() {
     	e->GetAttribute("name", &tool.m_name);
 
         std::string location;
+
+        std::string app;
+        app = e->GetAttribute("shell");
+            if (!(app.empty() || app.compare( "false" ) == 0) )
+            {
+              tool.m_tool_type = ishell;
+            }
 
         try{
         	e->GetAttribute("location", &location, true );
@@ -311,21 +318,21 @@ vector<Tool> Initialization::Read_tools() {
           location.append(".exe");
 
 		  std::string app;
-		  app = e->GetAttribute("macosx_bundle");
+		  app = e->GetAttribute("gui");
           if (!(app.empty() || app.compare( "false" ) == 0) )
           {
-            //Expand to full path
-            tool.m_gui_tool = true;
+            tool.m_tool_type = gui;
           } 
     #endif
 
     #ifdef __APPLE__
           std::string app;
-          app = e->GetAttribute("macosx_bundle");
+          app = e->GetAttribute("gui");
           if (!(app.empty() || app.compare( "false" ) == 0) )
           {
             //Expand to full path
             location.append(".app/Contents/MacOS/"+ tool.m_name);
+            tool.m_tool_type = gui;
           }
     #endif
         }

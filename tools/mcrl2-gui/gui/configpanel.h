@@ -77,6 +77,8 @@ public:
         fpc->SetSize(wxSize(350, 25));
         fgs->Add(fpc, wxGBPosition(row, 1), wxGBSpan(1,2));
 
+        m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
+
       }
 
     ++row;
@@ -262,8 +264,10 @@ public:
 
 
 		wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
+
 		wxString output_file = wxString(m_fileIO.output_file.c_str(),
 				wxConvUTF8);
+
 		run = run + wxT(" ") + input_file + wxT(" ") + output_file;
 
 		m_listbox_output->Append(run);
@@ -276,27 +280,39 @@ public:
 		// To avoid that GUI tools are not shown a wxEXEC_NOHIDE flag is used to flag that the child process window
 		// are shown normally.
 
-		if ( m_tool.m_gui_tool ){
+		switch (m_tool.m_tool_type){
+		  case shell:
+	      m_pid = wxExecute(run, wxEXEC_ASYNC, m_process);
+	      break;
+		  case gui:
 			m_pid = wxExecute(run, wxEXEC_ASYNC | wxEXEC_NOHIDE , m_process);
-		} else{
-			m_pid = wxExecute(run, wxEXEC_ASYNC, m_process);
+			break;
+		case ishell:
+		  m_pid = wxShell(run);
+		  break;
 		}
 
-		if (!m_pid) {
-			wxLogError(wxT("Execution of '%s' failed."), run.c_str());
-			m_pid=0;
+		if ((m_tool.m_tool_type == shell) || (m_tool.m_tool_type == gui))
+      {
+        if (!m_pid)
+        {
+          wxLogError(wxT("Execution of '%s' failed."), run.c_str());
+          m_pid = 0;
 
-			delete m_process;
-		} else {
-			m_process->AddAsyncProcess(m_tool_output);
-			m_runbutton->Disable();
-			m_abortbutton->Show(true);
+          delete m_process;
+        }
+        else
+        {
+          m_process->AddAsyncProcess(m_tool_output);
+          m_runbutton->Disable();
+          m_abortbutton->Show(true);
 
-			m_process->m_ext_pid = m_pid;
+          m_process->m_ext_pid = m_pid;
 
-			m_configpanel->SetSelection(m_configpanel->GetSelection()+1);
-		};
-		m_timer -> Start(150);
+          m_configpanel->SetSelection(m_configpanel->GetSelection() + 1);
+        };
+        m_timer -> Start(150);
+      }
 	}
 	;
 

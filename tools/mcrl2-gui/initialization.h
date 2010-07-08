@@ -22,6 +22,12 @@ enum widget {
 	filepicker
 };
 
+enum tool_type {
+    shell,
+    gui,
+    ishell
+};
+
 struct Tool_option{
 	string m_flag;
 	string m_help;
@@ -30,13 +36,14 @@ struct Tool_option{
 	int m_default_value;
 };
 
-struct Tool{
-	string m_name;
-	string m_location;
-	string m_input_type;
-	string m_output_type;
-    vector< Tool_option > m_tool_options;
-	bool m_gui_tool;
+struct Tool
+{
+    string m_name;
+    string m_location;
+    string m_input_type;
+    string m_output_type;
+    vector<Tool_option> m_tool_options;
+    tool_type m_tool_type;
 };
 
 struct FileIO {
