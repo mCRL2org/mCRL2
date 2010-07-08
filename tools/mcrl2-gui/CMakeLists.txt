@@ -16,7 +16,7 @@ add_definitions(-DTIXML_USE_TICPP)
 
 # ######### General setup ##########
 
-#set(MACOSX_BUNDLE_ICON_FILE mcrl2-gui.icns)
+set(MACOSX_BUNDLE_ICON_FILE mcrl2-gui.icns)
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
 if(MCRL2_SINGLE_BUNDLE)
