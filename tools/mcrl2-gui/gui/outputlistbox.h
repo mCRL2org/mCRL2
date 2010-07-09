@@ -14,6 +14,50 @@
 #define ID_CLEAR_LISTBOX	1500
 #define ID_SAVE_LISTBOX		1501
 
+class OutputListBoxMenu: public wxMenu{
+public:
+	wxListBox *p;
+
+	OutputListBoxMenu(wxListBox *parent): wxMenu(){
+		this->Append(ID_CLEAR_LISTBOX, wxT("Clear"));
+		this->AppendSeparator();
+		this->Append(ID_SAVE_LISTBOX, wxT("Save to file"));
+
+		p = parent;
+	}
+
+		void OnClear(wxCommandEvent &evt){
+			p->Clear();
+		}
+
+		void OnSave(wxCommandEvent &evt){
+
+			wxFileDialog *fd = new wxFileDialog(p, wxT("Choose a file"), wxT("") , wxT(""),  wxT("*.*"), wxSAVE | wxOVERWRITE_PROMPT,  wxDefaultPosition);
+			if (fd->ShowModal() == wxID_OK ){
+				wxString sfile = fd->GetPath();
+
+				if(wxFile::Exists(sfile)){
+					wxRemoveFile(sfile);
+				}
+
+				wxFile *f = new wxFile(sfile, wxFile::write);
+
+				for( unsigned int i = 0; i < p->GetCount(); ++i ){
+					f->Write( p->GetString(i) );
+					f->Write( wxT("\n"));
+				}
+
+			}
+		}
+	
+	DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(OutputListBoxMenu, wxMenu)
+EVT_MENU(ID_CLEAR_LISTBOX, OutputListBoxMenu::OnClear )
+EVT_MENU(ID_SAVE_LISTBOX, OutputListBoxMenu::OnSave )
+END_EVENT_TABLE ()
+
 class OutputListBox: public wxListBox {
 public:
 
@@ -30,50 +74,28 @@ public:
     this->SetFont(font);
 	}
 
-	void OnPopupClick(wxCommandEvent &evt){
-		switch (evt.GetId()) {
-		case ID_CLEAR_LISTBOX:
-			this->Clear();
-			break;
-		case ID_SAVE_LISTBOX:
-			wxFileDialog *fd = new wxFileDialog(this, wxT("Choose a file"), wxT("") , wxT(""),  wxT("*.*"), wxSAVE | wxOVERWRITE_PROMPT,  wxDefaultPosition);
-			if (fd->ShowModal() == wxID_OK ){
-				wxString sfile = fd->GetPath();
 
-				if(wxFile::Exists(sfile)){
-					wxRemoveFile(sfile);
-				}
-
-				wxFile *f = new wxFile(sfile, wxFile::write);
-
-				for( unsigned int i = 0; i < this->GetCount(); ++i ){
-					f->Write( this->GetString(i) );
-					f->Write( wxT("\n"));
-				}
-
-			}
-			break;
-		}
-	}
 
 	void OnRightClick(wxMouseEvent& evt){
 
-#ifndef __WINDOWS__
+//#ifndef __WINDOWS__
 		/* Disabled for WIN32 due to invalid cast */
-		wxMenu mnu;
-		mnu.Append(ID_CLEAR_LISTBOX, wxT("Clear"));
-		mnu.AppendSeparator();
-		mnu.Append(ID_SAVE_LISTBOX, wxT("Save to file"));
-		mnu.Connect(wxEVT_COMMAND_MENU_SELECTED,
-				(wxObjectEventFunction) &OutputListBox::OnPopupClick, NULL,
-				this);
-		PopupMenu(&mnu);
-#endif
+//		wxMenu mnu;
+//		mnu.Connect(wxEVT_COMMAND_MENU_SELECTED,
+//				(wxObjectEventFunction) &OutputListBox::OnPopupClick, NULL,
+//				this);
+//		PopupMenu(&mnu);
+//#endif
+		OutputListBoxMenu *m = new OutputListBoxMenu(this);
+		PopupMenu(m);
 	}
 
 DECLARE_EVENT_TABLE()
 };
+
 BEGIN_EVENT_TABLE(OutputListBox, wxListBox)
 EVT_RIGHT_UP( OutputListBox::OnRightClick )
 END_EVENT_TABLE ()
+
+
 #endif /* OUTPUTLISTBOX_H_ */

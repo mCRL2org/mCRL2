@@ -34,12 +34,17 @@ endif(MCRL2_SINGLE_BUNDLE)
 
 # ########## mcrl2_tools_mcrl2 executable ##########
 
+IF(WIN32)
+  SET(SRCS ${SRCS} mcrl2-gui.rc)
+ENDIF(WIN32)
+
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
-	mcrl2-gui.cpp
-    initialization.cpp
-	#gui/mainframe.cpp
+  mcrl2-gui.cpp
+  initialization.cpp
+  #gui/mainframe.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
+  ${SRCS}
 )
 
 IF (APPLE)

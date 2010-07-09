@@ -32,7 +32,7 @@ class MimeManager
       {
         ;
         wxString cmd;
-        ft->GetOpenCommand(&cmd,  wxFileType::MessageParameters( wxT("\%s"), wxT("text/plain")));
+        ft->GetOpenCommand(&cmd,  wxFileType::MessageParameters( wxT("%%s"), wxT("text/plain")));
 
         if (!cmd.empty())
         {
@@ -58,7 +58,7 @@ class MimeManager
       {
         //substitute %s by filenameWithExtention
         wxString cmd = m_edittool_mapping.find(ext)->second;
-        cmd.Replace(wxT( "\%s" ), filenameWithExtension );
+        cmd.Replace(wxT( "%%s" ), filenameWithExtension );
         return cmd;
       }
 
