@@ -29,24 +29,6 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-//Temporary workaround for the passing of the determinism
-
-static const std::set<mcrl2::lts::lts_equivalence> &initialise_allowed_eqs()
-{
-  using namespace mcrl2::lts;
-  static std::set<lts_equivalence> s;
-  s.insert(lts_eq_bisim);
-  s.insert(lts_eq_branching_bisim);
-  s.insert(lts_eq_divergence_preserving_branching_bisim);
-  s.insert(lts_red_determinisation);
-  return s;
-}
-static const std::set<mcrl2::lts::lts_equivalence> &allowed_eqs()
-{
-  static const std::set<mcrl2::lts::lts_equivalence> &s = initialise_allowed_eqs();
-  return s;
-}
-
 typedef squadt_tool< input_tool > ltsinfo_base;
 class ltsinfo_tool : public ltsinfo_base
 {
@@ -55,7 +37,6 @@ class ltsinfo_tool : public ltsinfo_base
 
     std::string                 infilename;
     mcrl2::lts::lts_type        intype;
-    mcrl2::lts::lts_equivalence determinism_equivalence;
 
   public:
 
@@ -70,8 +51,7 @@ class ltsinfo_tool : public ltsinfo_base
         "The supported formats are:\n"
         +mcrl2::lts::detail::supported_lts_formats_text()
       ),
-      intype(mcrl2::lts::lts_none),
-      determinism_equivalence(mcrl2::lts::lts_red_determinisation)
+      intype(mcrl2::lts::lts_none)
     {
     }
 
@@ -84,18 +64,6 @@ class ltsinfo_tool : public ltsinfo_base
       ltsinfo_base::add_options(desc);
 
       desc.
-        add_option("equivalence", make_mandatory_argument("NAME"),
-          "use equivalence NAME for deterministic check:\n"
-          "  '" + string_for_equivalence(lts_red_determinisation) + "' for "
-                + name_of_equivalence(lts_red_determinisation) + " (default),\n"
-          "  '" + string_for_equivalence(lts_eq_bisim) + "' for "
-                + name_of_equivalence(lts_eq_bisim) + ",\n"
-          "  '" + string_for_equivalence(lts_eq_branching_bisim) + "' for "
-                + name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
-          "  '" + string_for_equivalence(lts_eq_divergence_preserving_branching_bisim) + "' for "
-                + name_of_equivalence(lts_eq_divergence_preserving_branching_bisim) + ", or\n"
-          "  'none' for not performing the check at all",
-          'e').
         add_option("in", make_mandatory_argument("FORMAT"),
           "use FORMAT as the input format", 'i');
     }
@@ -105,16 +73,6 @@ class ltsinfo_tool : public ltsinfo_base
       using namespace mcrl2::lts;
 
       ltsinfo_base::parse_options(parser);
-
-      if (parser.options.count("equivalence")) {
-        determinism_equivalence = parse_equivalence(parser.option_argument("equivalence"));
-        if (allowed_eqs().count(determinism_equivalence) == 0 &&
-            parser.option_argument("equivalence") != "none")
-        {
-          parser.error("option -e/--equivalence has illegal argument '" +
-              parser.option_argument("equivalence") + "'");
-        }
-      }
 
       if (0 < parser.arguments.size()) {
         infilename = parser.arguments[0];
@@ -200,20 +158,14 @@ class ltsinfo_tool : public ltsinfo_base
       {
         std::cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
       }
-      if ( determinism_equivalence != lts_eq_none )
-      {
-        gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",name_of_equivalence(determinism_equivalence).c_str());
-        gsVerboseMsg("minimisation...\n");
 
-        reduce(l,determinism_equivalence);
-        gsVerboseMsg("deterministic check...\n");
-        if ( is_deterministic(l) )
-        {
-          std::cout << "LTS is deterministic (modulo " << name_of_equivalence(determinism_equivalence) << ")" << std::endl;
-        } else {
-          std::cout << "LTS is not deterministic (modulo " << name_of_equivalence(determinism_equivalence) << ")" << std::endl;
-        }
+      gsVerboseMsg("deterministic check...\n");
+      std::cout << "LTS is ";
+      if ( !is_deterministic(l) )
+      {
+        std::cout << "not ";
       }
+      std::cout << "deterministic." << std::endl;
 
       return true;
     }
@@ -245,33 +197,17 @@ class ltsinfo_tool : public ltsinfo_base
 
       layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
-      m.append(d.create< label >().set_text("Deterministic check:")).
-        append(d.create< horizontal_box >().
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_none, "None")).
-            append(determinism_selector.associate(mcrl2::lts::lts_red_determinisation, "Isomorphism", true)).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_bisim, "Strong bisimilarity")).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_branching_bisim, "Branching bisimilarity")).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_divergence_preserving_branching_bisim, "Divergence preserving branching bisimilarity")));
-
       // Add okay button
       button& okay_button = d.create< button >().set_label("OK");
 
       m.append(d.create< label >().set_text(" ")).
         append(okay_button, layout::right);
 
-      // Set default values for options if the configuration specifies them
-      if (c.option_exists("determinism_equivalence")) {
-        determinism_selector.set_selection(
-            c.get_option_argument< mcrl2::lts::lts_equivalence >("determinism_equivalence", 0));
-      }
-
       // Display
       send_display_layout(d.manager(m));
 
       /* Wait for the OK button to be pressed */
       okay_button.await_change();
-
-      c.add_option("determinism_equivalence"). set_argument_value< 0 >(determinism_selector.get_selection());
 
       send_clear_display();
     }
@@ -294,9 +230,6 @@ class ltsinfo_tool : public ltsinfo_base
       lts l;
       mcrl2::lts::lts_type t = mcrl2::lts::detail::parse_format(input_object.type().sub_type());
 
-      // Extract configuration
-      determinism_equivalence = c.get_option_argument< mcrl2::lts::lts_equivalence >("determinism_equivalence", 0);
-
       try
       {
         mcrl2::lts::detail::read_from(l,input_object.location(), t);
@@ -307,12 +240,7 @@ class ltsinfo_tool : public ltsinfo_base
 
         std::string deterministic("-");
 
-        if(determinism_equivalence != mcrl2::lts::lts_eq_none) {
-          reduce(l,determinism_equivalence);
-
-          deterministic = std::string(is_deterministic(l) ? "yes" : "no") + ", modulo " +
-                                 name_of_equivalence(determinism_equivalence);
-        }
+        deterministic = std::string(is_deterministic(l) ? "yes" : "no");
 
         m.append(d.create< vertical_box >().set_default_alignment(layout::left).
                 append(d.create< label >().set_text("States (#):")).
@@ -373,15 +301,6 @@ public:
 		std::vector<std::string> values;
 
 		m_gui_options["counter-example"] = create_checkbox_widget();
-
-		values.clear();
-		values.push_back("determinisation");
-		values.push_back("bisim");
-		values.push_back("branching-bisim");
-		values.push_back("dpbranching-bisim");
-		values.push_back("none");
-		m_gui_options["equivalence"] = create_radiobox_widget(values);
-
 
 		//-iFORMAT, --in1=FORMAT   use FORMAT as the format for INFILE1 (or stdin)
 
