@@ -135,7 +135,7 @@ void determinise(lts &l)
         d_transitions.push_back(transition(d_id,lbl,tss->set_set_tag(s)));
 
         if (d_ntransitions%10000 == 0) {
-          gsVerboseMsg(
+          gsDebugMsg(
               "generated %d states and %d transitions; explored %d states\n",
               tss->get_next_tag(),d_ntransitions,d_id);
         }

@@ -287,7 +287,7 @@ namespace detail
       { // There are flagged and non flagged states. So, the block must be split. 
         // Move the unflagged states to the new block.
           
-        if (core::gsVerbose)
+        if (core::gsDebug)
         { const unsigned int m=pow(10,floor(log10( static_cast<double>( (blocks.size()+1)/2))));
           if ((blocks.size()+1)/2 % m==0) 
           { std::cerr << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << "\n";
