@@ -12,7 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/parse.h"
@@ -20,7 +20,17 @@
 
 using namespace mcrl2;
 
-void test_process_specification(const std::string &ps_in, bool test_type_checker = true)
+// Garbage collect after each case.
+struct collect_after_test_case {
+  ~collect_after_test_case()
+  {
+    core::garbage_collect();
+  }
+};
+
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+
+void test_process_specification(const std::string &ps_in, bool const expected_result = true, bool const test_type_checker = true)
 {
   std::istringstream ps_in_stream(ps_in);
   ATermAppl ps_aterm = core::parse_proc_spec(ps_in_stream);
@@ -32,17 +42,24 @@ void test_process_specification(const std::string &ps_in, bool test_type_checker
 
   if (test_type_checker) {
     process::process_specification ps(ps_aterm);
-    process::type_check(ps);
- 
-    //ps_out = core::PrintPart_CXX((ATerm) ps_aterm);
-    ps_out = process::pp(ps);
-    //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in  << std::endl << "and" << std::endl << ps_out << std::endl;
-    BOOST_CHECK(ps_in == ps_out);
+    if(expected_result)
+    {
+      process::type_check(ps);
+
+      //ps_out = core::PrintPart_CXX((ATerm) ps_aterm);
+      ps_out = process::pp(ps);
+      //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in  << std::endl << "and" << std::endl << ps_out << std::endl;
+      BOOST_CHECK(ps_in == ps_out);
+    }
+    else
+    {
+      BOOST_CHECK_THROW(process::type_check(ps), mcrl2::runtime_error);
+    }
   }
   core::garbage_collect();
 }
 
-void test_process_specifications()
+BOOST_AUTO_TEST_CASE(test_process_reference_assignment)
 {
   //test process specification involving process reference assignments
   test_process_specification(
@@ -50,7 +67,10 @@ void test_process_specifications()
     "\n"
     "init P(b = true);\n"
   );
+}
 
+BOOST_AUTO_TEST_CASE(test_global_variables)
+{
   //test process specification involving global variables
   test_process_specification(
     "glob dc: Bool;\n"
@@ -61,11 +81,44 @@ void test_process_specifications()
   );
 }
 
-int test_main(int argc, char* argv[])
+// For bug #732
+BOOST_AUTO_TEST_CASE(test_function_condition)
+{
+  test_process_specification(
+    "map b: Nat -> Nat;\n"
+    "init b -> tau;\n",
+    false
+  );
+}
+
+// For bug #732
+BOOST_AUTO_TEST_CASE(test_function_as_set_descriptor)
+{
+  test_process_specification(
+    "map b: Bool # Pos -> Nat;\n"
+    "    s: Set(Nat);\n"
+    "eqn s = { n: Nat | b };\n"
+    "init b -> tau;\n",
+    false
+  );
+}
+
+// For bug #732
+BOOST_AUTO_TEST_CASE(test_function_as_equation_condition)
+{
+  test_process_specification(
+    "map b: Bool # Pos -> Nat;\n"
+    "    n: Nat;\n"
+    "eqn b -> n = 0;\n"
+    "act a: Nat;\n"
+    "init a(n);\n",
+    false
+  );
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
-  test_process_specifications();
 
   return 0;
 }
