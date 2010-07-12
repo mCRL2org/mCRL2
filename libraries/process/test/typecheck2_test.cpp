@@ -20,6 +20,8 @@
 
 using namespace mcrl2;
 
+#define MCRL2_WITH_GARBAGE_COLLECTION
+
 // Garbage collect after each case.
 struct collect_after_test_case {
   ~collect_after_test_case()
@@ -38,7 +40,7 @@ void test_process_specification(const std::string &ps_in, bool const expected_re
 
   std::string ps_out = core::PrintPart_CXX((ATerm) ps_aterm);
   //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in << std::endl << "and" << std::endl << ps_out << std::endl;
-  BOOST_CHECK(ps_in == ps_out);
+  BOOST_CHECK_EQUAL(ps_in, ps_out);
 
   if (test_type_checker) {
     process::process_specification ps(ps_aterm);
@@ -49,7 +51,7 @@ void test_process_specification(const std::string &ps_in, bool const expected_re
       //ps_out = core::PrintPart_CXX((ATerm) ps_aterm);
       ps_out = process::pp(ps);
       //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in  << std::endl << "and" << std::endl << ps_out << std::endl;
-      BOOST_CHECK(ps_in == ps_out);
+      BOOST_CHECK_EQUAL(ps_in, ps_out);
     }
     else
     {
@@ -85,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_global_variables)
 BOOST_AUTO_TEST_CASE(test_function_condition)
 {
   test_process_specification(
-    "map b: Nat -> Nat;\n"
+    "map  b: Nat -> Nat;\n\n"
     "init b -> tau;\n",
     false
   );
@@ -95,9 +97,9 @@ BOOST_AUTO_TEST_CASE(test_function_condition)
 BOOST_AUTO_TEST_CASE(test_function_as_set_descriptor)
 {
   test_process_specification(
-    "map b: Bool # Pos -> Nat;\n"
-    "    s: Set(Nat);\n"
-    "eqn s = { n: Nat | b };\n"
+    "map  b: Bool # Pos -> Nat;\n"
+    "     s: Set(Nat);\n\n"
+    "eqn  s  =  { n: Nat | b };\n\n"
     "init b -> tau;\n",
     false
   );
@@ -107,10 +109,10 @@ BOOST_AUTO_TEST_CASE(test_function_as_set_descriptor)
 BOOST_AUTO_TEST_CASE(test_function_as_equation_condition)
 {
   test_process_specification(
-    "map b: Bool # Pos -> Nat;\n"
-    "    n: Nat;\n"
-    "eqn b -> n = 0;\n"
-    "act a: Nat;\n"
+    "map  b: Bool # Pos -> Nat;\n"
+    "     n: Nat;\n\n"
+    "eqn  b  ->  n  =  0;\n\n"
+    "act  a: Nat;\n\n"
     "init a(n);\n",
     false
   );
