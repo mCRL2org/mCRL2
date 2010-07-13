@@ -182,7 +182,7 @@ lts::lts()
 lts::lts(string &filename, lts_type type,lts_extra extra) 
 {
   init();
-  detail::read_from(*this,filename,type);
+  detail::read_from(*this,filename,type, extra);
 }
 
 lts::lts(istream &is, lts_type type,lts_extra extra) 
