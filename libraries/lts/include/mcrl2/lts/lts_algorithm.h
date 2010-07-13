@@ -399,15 +399,15 @@ namespace mcrl2
     /** \brief Applies a reduction algorithm to this LTS.
      * \param[in] eq The equivalence with respect to which the LTS will be
      * reduced.
-     * \param[in] opts The options that will be used for the reduction.
      **/
-    void reduce(lts &l, lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+    void reduce(lts &l, lts_equivalence eq);
    
     /** \brief Checks whether this LTS is equivalent to another LTS.
-     * \param[in] l The LTS to which this LTS will be compared.
+     * \param[in] l1 The first LTS that will be compared.
+     * \param[in] l2 The second LTS that will be compared.
      * \param[in] eq The equivalence with respect to which the LTSs will be
      * compared.
-     * \param[in] opts The options that will be used for the comparison.
+     * \param[in] generate_counter_examples
      * \retval true if the LTSs are found to be equivalent.
      * \retval false otherwise.
      * \warning This function alters the internal data structure of
@@ -446,19 +446,18 @@ namespace mcrl2
      * induced by the preorder \a pre (i.e. \f$eq = pre \cap
      * pre^{-1}\f$).
      */
-    bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options);
+    bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre);
    
     /** \brief Checks whether this LTS is smaller than another LTS according
      * to a preorder.
      * \param[in] l The LTS to which this LTS will be compared.
      * \param[in] pre The preorder with respect to which the LTSs will be
      * compared.
-     * \param[in] opts The options that will be used for the comparison.
      * \retval true if this LTS is smaller than LTS \a l according to
      * preorder \a pre.
      * \retval false otherwise.
      */
-    bool compare(const lts &l1, const lts &l2, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options);
+    bool compare(const lts &l1, const lts &l2, const lts_preorder pre);
    
     /** \brief Determinises this LTS. */
     void determinise(lts &l);

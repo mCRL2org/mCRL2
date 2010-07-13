@@ -27,15 +27,7 @@ namespace mcrl2
 namespace lts
 {
 
-lts_eq_options::lts_eq_options()
-{
-  reduce.add_class_to_state = false;
-}
-
-lts_eq_options lts_eq_no_options = lts_eq_options();
-
-
-void reduce(lts &l,lts_equivalence eq, lts_eq_options const&opts)
+void reduce(lts &l,lts_equivalence eq)
 {
 
   switch ( eq )
@@ -192,14 +184,14 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const bool 
   }
 }
 
-bool compare(const lts &l1, const lts &l2, const lts_preorder pre, lts_eq_options const&opts)
+bool compare(const lts &l1, const lts &l2, const lts_preorder pre)
 { 
   lts l1_copy(l1);
   lts l2_copy(l2);
-  return destructive_compare(l1_copy,l2_copy,pre,opts); 
+  return destructive_compare(l1_copy,l2_copy,pre);
 }
 
-bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre, lts_eq_options const&opts)
+bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre)
 {
   switch ( pre )
   {

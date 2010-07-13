@@ -86,7 +86,6 @@ class t_tool_options
     lts_type        intype;
     lts_type        outtype;
     lts_equivalence equivalence;
-    lts_eq_options  eq_opts;
     std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
     bool            print_dot_state;
     bool            determinise;
@@ -94,8 +93,6 @@ class t_tool_options
 
     inline t_tool_options() : intype(lts_none), outtype(lts_none), equivalence(lts_eq_none),
                        print_dot_state(true), determinise(false), check_reach(true) {
-
-      eq_opts.reduce.add_class_to_state = false;
     }
 
     inline std::string source_string() const {
@@ -294,10 +291,6 @@ class ltsconvert_tool : public ltsconvert_base
           "generate an equivalent LTS, preserving equivalence NAME:\n"
           +supported_lts_equivalences_text(allowed_eqs())
           , 'e');
-      desc.add_option("add",
-          "do not minimise but save a copy of the original LTS extended with a "
-          "state parameter indicating the bisimulation class a state belongs to "
-          "(only for mCRL2)", 'a');
       desc.add_option("tau", make_mandatory_argument("ACTNAMES"),
           "consider actions with a name in the comma separated list ACTNAMES to "
           "be internal (tau) actions in addition to those defined as such by "
@@ -369,7 +362,6 @@ class ltsconvert_tool : public ltsconvert_base
       tool_options.determinise                       = 0 < parser.options.count("determinise");
       tool_options.check_reach                       = parser.options.count("no-reach") == 0;
       tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
-      tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
 
       if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
         parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
@@ -434,7 +426,6 @@ static const char* option_selected_output_format             = "selected_output_
 static const char* option_no_reachability_check              = "no_reachability_check";                 ///< do not check reachability of input LTS
 static const char* option_no_state_information               = "no_state_information";                  ///< dot format output specific option to not save state information
 static const char* option_tau_actions                        = "tau_actions";                           ///< the actions that should be recognised as tau
-static const char* option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 specific]
 
 void ltsconvert_tool::set_capabilities(tipi::tool::capabilities& c) const {
   std::set< lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
@@ -498,11 +489,9 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
     append(transformation_selector.associate(lts_eq_weak_trace, "determinisation and reduction modulo weak trace equivalence")).
     append(transformation_selector.associate(lts_red_determinisation, "determinisation")); 
 
-  checkbox&   bisimulation_add_eq_classes = d.create< checkbox >();
   text_field& tau_field                   = d.create< text_field >();
 
   m.append(d.create< label >()).
-    append(bisimulation_add_eq_classes.set_label("Add equivalence classes to state instead of reducing LTS")).
     append(d.create< horizontal_box >().
                 append(d.create< label >().set_text("Internal (tau) actions : ")).
                 append(tau_field.set_text("tau")));
@@ -535,9 +524,6 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
   }
   if (c.option_exists(option_no_state_information)) {
     add_state_information.set_status(c.get_option_argument< bool >(option_no_state_information));
-  }
-  if (c.option_exists(option_add_bisimulation_equivalence_class)) {
-    bisimulation_add_eq_classes.set_status(c.get_option_argument< bool >(option_add_bisimulation_equivalence_class));
   }
   if (c.option_exists(option_tau_actions)) {
     tau_field.set_text(c.get_option_argument< std::string >(option_tau_actions));
@@ -655,9 +641,6 @@ bool ltsconvert_tool::perform_task(tipi::configuration& c) {
       tool_options.determinise = true;
     }
 
-    if (c.option_exists(option_add_bisimulation_equivalence_class)) {
-      tool_options.eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
-    }
     if (c.option_exists(option_tau_actions)) {
       set_tau_actions(tool_options.tau_actions, c.get_option_argument< std::string >(option_tau_actions));
     }
@@ -677,7 +660,6 @@ public:
 
 		std::vector<std::string> values;
 
-		m_gui_options["add"] = create_checkbox_widget();
 		m_gui_options["determinise"] = create_checkbox_widget();
 
 		values.clear();
