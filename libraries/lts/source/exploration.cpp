@@ -9,11 +9,9 @@
 /// \file exploration.cpp
 
 #include <aterm2.h>
-#include <cassert>
 #include <time.h>
 #include <sstream>
 #include <set>
-#include <stack>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
