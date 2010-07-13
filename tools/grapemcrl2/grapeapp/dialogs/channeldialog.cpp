@@ -111,7 +111,7 @@ bool grape_channel_dlg::update_validation()
 //  is_valid &= (m_rename_input->GetValue().IsEmpty() || mcrl2::core::is_user_identifier(m_rename_input->GetValue().fn_str()));
   return is_valid;
 }
-void grape_channel_dlg::event_update_validation( wxCommandEvent &p_event )
+void grape_channel_dlg::event_update_validation( wxCommandEvent &/*p_event*/ )
 {
   FindWindow(GetAffirmativeId())->Enable( update_validation() );
 }

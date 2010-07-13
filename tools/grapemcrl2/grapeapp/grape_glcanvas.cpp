@@ -289,12 +289,12 @@ void grape_glcanvas::event_paint(wxPaintEvent &p_event)
   p_event.Skip();
 }
 
-void grape_glcanvas::event_erase_background(wxEraseEvent &p_event)
+void grape_glcanvas::event_erase_background(wxEraseEvent &/*p_event*/)
 {
   // do nothing to prevent flickering
 }
 
-void grape_glcanvas::event_idle(wxIdleEvent &p_event)
+void grape_glcanvas::event_idle(wxIdleEvent &/*p_event*/)
 {
   // do not redraw the canvas
 }

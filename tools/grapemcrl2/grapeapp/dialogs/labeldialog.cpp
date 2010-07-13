@@ -146,7 +146,7 @@ grape_label_dialog::~grape_label_dialog()
 {
 }
 
-void grape_label_dialog::event_change_var_decls_text( wxCommandEvent &p_event )
+void grape_label_dialog::event_change_var_decls_text( wxCommandEvent &/*p_event*/ )
 {
   // fill label with variable declarations
   m_label->set_declarations_text( m_var_decls_input->GetValue() );
@@ -156,7 +156,7 @@ void grape_label_dialog::event_change_var_decls_text( wxCommandEvent &p_event )
   update_preview();
 }
 
-void grape_label_dialog::event_change_var_updates_text( wxCommandEvent &p_event )
+void grape_label_dialog::event_change_var_updates_text( wxCommandEvent &/*p_event*/ )
 {
   // fill label with variable updates
   m_label->set_variable_updates_text( m_var_updates_input->GetValue() );
@@ -166,7 +166,7 @@ void grape_label_dialog::event_change_var_updates_text( wxCommandEvent &p_event 
   update_preview();
 }
 
-void grape_label_dialog::event_change_multiaction_text( wxCommandEvent &p_event )
+void grape_label_dialog::event_change_multiaction_text( wxCommandEvent &/*p_event*/ )
 {
   // fill label with actions  
   m_label->set_actions_text( m_multiaction_input->GetValue() );
@@ -176,7 +176,7 @@ void grape_label_dialog::event_change_multiaction_text( wxCommandEvent &p_event 
   update_preview();
 }
 
-void grape_label_dialog::event_change_condition_text( wxCommandEvent &p_event )
+void grape_label_dialog::event_change_condition_text( wxCommandEvent &/*p_event*/ )
 {
   // fill label with condition
   m_label->set_condition( m_condition_input->GetValue() );

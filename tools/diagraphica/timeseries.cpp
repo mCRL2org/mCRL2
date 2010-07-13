@@ -969,7 +969,7 @@ void TimeSeries::handleRwndDiagram( const int &dgrmIdx )
 
 
 // -----------------------------------------------------
-void TimeSeries::handlePrevDiagram( const int &dgrmIdx )
+void TimeSeries::handlePrevDiagram( const int &/*dgrmIdx*/ )
 // -----------------------------------------------------
 {
     if ( timerAnim->IsRunning() )

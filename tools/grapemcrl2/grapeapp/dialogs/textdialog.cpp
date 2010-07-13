@@ -91,7 +91,7 @@ bool grape_text_dlg::update_validation()
 //  return mcrl2::core::is_user_identifier(m_input_altered.fn_str());
 }
 
-void grape_text_dlg::event_update_validation( wxCommandEvent &p_event )
+void grape_text_dlg::event_update_validation( wxCommandEvent &/*p_event*/ )
 {
   if (m_input->IsSingleLine())
   {

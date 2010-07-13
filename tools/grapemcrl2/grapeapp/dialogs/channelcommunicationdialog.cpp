@@ -98,7 +98,7 @@ bool grape_channel_communication_dlg::update_validation()
 //  return mcr2::core::is_user_identifier(m_name_input->GetValue().fn_str());
 }
 
-void grape_channel_communication_dlg::event_update_validation( wxCommandEvent &p_event )
+void grape_channel_communication_dlg::event_update_validation( wxCommandEvent &/*p_event*/ )
 {
   FindWindow(GetAffirmativeId())->Enable( update_validation() );
 }

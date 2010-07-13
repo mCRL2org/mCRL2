@@ -35,7 +35,7 @@ void grape_listbox::event_delete( wxKeyEvent &p_event )
 }
 
 #ifndef __WINDOWS__
-void grape_listbox::event_click( wxMouseEvent &p_event )
+void grape_listbox::event_click( wxMouseEvent &/*p_event*/ )
 {
   if ( m_main_frame->get_mode() != GRAPE_MODE_DATASPEC )
   {

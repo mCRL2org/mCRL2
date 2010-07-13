@@ -297,14 +297,14 @@ void grape_frame::event_select_diagram( wxCommandEvent &p_event )
   update_bars();
 }
 
-void grape_frame::event_menu_rename_diagram( wxCommandEvent &p_event)
+void grape_frame::event_menu_rename_diagram( wxCommandEvent &/*p_event*/)
 {
   grape_event_dialog_rename_diagram *event = new grape_event_dialog_rename_diagram(this);
   m_event_handler->Submit(event, false);
   update_bars();
 }
 
-void grape_frame::event_menu_remove_diagram( wxCommandEvent &p_event )
+void grape_frame::event_menu_remove_diagram( wxCommandEvent &/*p_event*/ )
 {
   diagram* dia_ptr = get_glcanvas()->get_diagram();
 
@@ -392,7 +392,7 @@ void grape_frame::event_datatype_spec( wxCommandEvent& p_event )
   update_bars();
 }
 
-void grape_frame::grape_event_timer( wxTimerEvent &p_event )
+void grape_frame::grape_event_timer( wxTimerEvent &/*p_event*/ )
 {
   m_splitter->SetSashGravity( 1.0 );
 }
