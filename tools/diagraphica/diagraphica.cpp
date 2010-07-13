@@ -1361,7 +1361,7 @@ void DiaGraph::handleClustFrameDisplay()
 
 
 // ---------------------------------------------------------
-void DiaGraph::handleClustPlotFrameDisplay( const int &idx )
+void DiaGraph::handleClustPlotFrameDisplay( const int &/*idx*/ )
 // ---------------------------------------------------------
 {
     if ( canvasDistr == NULL )

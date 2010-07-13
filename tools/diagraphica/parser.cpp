@@ -1564,7 +1564,7 @@ void Parser::parseDiagram(
 // ------------------------
 void Parser::parseShape(
     Graph* graph,
-    Diagram* dgrmOld,
+    Diagram* /*dgrmOld*/,
     Diagram* dgrmNew,
     TiXmlElement* curNode )
 // ------------------------

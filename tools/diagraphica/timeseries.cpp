@@ -928,7 +928,7 @@ void TimeSeries::clearAttributes()
 
 
 // ----------------------------------------
-void TimeSeries::onTimer( wxTimerEvent &e )
+void TimeSeries::onTimer( wxTimerEvent& /*e*/ )
 // ----------------------------------------
 {
     ++animFrame;

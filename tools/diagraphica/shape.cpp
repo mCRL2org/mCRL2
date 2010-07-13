@@ -296,7 +296,7 @@ void Shape::clearDOFOpaYValue( const int &idx )
 
 
 // ----------------------------------
-void Shape::setType( const int &typ )
+void Shape::setType( const int &/*typ*/ )
 // ----------------------------------
 {
     if ( type == TYPE_LINE )
