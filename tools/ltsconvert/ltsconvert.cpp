@@ -252,7 +252,7 @@ class ltsconvert_tool : public ltsconvert_base
       {
         gsVerboseMsg("reducing LTS (modulo %s)...\n", name_of_equivalence(tool_options.equivalence).c_str());
         gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
-        reduce(l,tool_options.equivalence, tool_options.eq_opts);
+        reduce(l,tool_options.equivalence);
         gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       }
 
@@ -576,14 +576,6 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
     c.add_option(option_selected_transformation).set_argument_value< 0 >(selected_transformation);
   }
   c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-
-  if ((selected_transformation == lts_eq_bisim || selected_transformation == lts_eq_branching_bisim)) {
-    c.add_option(option_add_bisimulation_equivalence_class).
-        set_argument_value< 0 >(bisimulation_add_eq_classes.get_status());
-  }
-  else {
-    c.remove_option(option_add_bisimulation_equivalence_class);
-  }
 
   c.add_option(option_no_reachability_check).set_argument_value< 0 >(check_reachability.get_status());
 
