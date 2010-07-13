@@ -64,7 +64,7 @@ struct substitute_builder: public pbes_expression_builder<pbes_expression>
   /// \param e A PBES expression
   /// \param d A data expression
   /// \return The result of visiting the node
-  pbes_expression visit_data_expression(const pbes_expression& e, const data::data_expression& d)
+  pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
     return substitute_copy(d);
   }
@@ -72,7 +72,7 @@ struct substitute_builder: public pbes_expression_builder<pbes_expression>
   /// \brief Visit propositional_variable node
   /// \param x A term
   /// \return The result of visiting the node
-  pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v)
+  pbes_expression visit_propositional_variable(const pbes_expression& /* x */, const propositional_variable_instantiation& v)
   {
     return propositional_variable_instantiation(v.name(), substitute_list_copy(v.parameters()));
   }

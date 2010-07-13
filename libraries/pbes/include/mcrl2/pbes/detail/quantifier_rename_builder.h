@@ -106,7 +106,7 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \param e A PBES expression
   /// \param d A data expression
   /// \return The result of visiting the node
-  pbes_expression visit_data_expression(const pbes_expression& e, const data::data_expression& d)
+  pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
     return pbes_expression(data::make_sequence_substitution_adaptor(replacements)(d));
   }
@@ -116,7 +116,7 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \param variables A sequence of data variables
   /// \param expression A PBES expression
   /// \return The result of visiting the node
-  pbes_expression visit_forall(const pbes_expression& e, const data::variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_forall(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
   {
     unsigned int replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
@@ -130,7 +130,7 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \param variables A sequence of data variables
   /// \param expression A PBES expression
   /// \return The result of visiting the node
-  pbes_expression visit_exists(const pbes_expression& e, const data::variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_exists(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
   {
     unsigned int replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);

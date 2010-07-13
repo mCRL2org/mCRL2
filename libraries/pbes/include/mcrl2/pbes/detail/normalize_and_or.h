@@ -85,7 +85,7 @@ namespace detail {
     /// \param n A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_not(const term_type& x, const term_type& n)
+    term_type visit_not(const term_type& /* x */, const term_type& n)
     {
       term_type t = normalize(visit(n));
       return tr::not_(t);
@@ -98,7 +98,7 @@ namespace detail {
     /// \param right A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_and(const term_type& x, const term_type& left, const term_type& right)
+    term_type visit_and(const term_type& /* x */, const term_type& left, const term_type& right)
     {
       term_type l = normalize(super::visit(left));
       term_type r = normalize(super::visit(right));
@@ -112,7 +112,7 @@ namespace detail {
     /// \param right A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_or(const term_type& x, const term_type& left, const term_type& right)
+    term_type visit_or(const term_type& /* x */, const term_type& left, const term_type& right)
     {
       term_type l = normalize(super::visit(left));
       term_type r = normalize(super::visit(right));
@@ -126,7 +126,7 @@ namespace detail {
     /// \param right A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_imp(const term_type& x, const term_type& left, const term_type& right)
+    term_type visit_imp(const term_type& /* x */, const term_type& left, const term_type& right)
     {
       term_type l = normalize(super::visit(left));
       term_type r = normalize(super::visit(right));
@@ -140,7 +140,7 @@ namespace detail {
     /// \param phi A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi)
+    term_type visit_forall(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi)
     {
       term_type t = normalize(visit(phi));
       return tr::forall(variables, t);
@@ -153,7 +153,7 @@ namespace detail {
     /// \param phi A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi)
+    term_type visit_exists(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi)
     {
       term_type t = normalize(visit(phi));
       return tr::exists(variables, t);

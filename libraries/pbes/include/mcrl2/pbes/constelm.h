@@ -172,7 +172,7 @@ namespace detail {
     /// \param d A data term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_data_expression(const term_type& e, const data_term_type& d, edge_condition& ec)
+    bool visit_data_expression(const term_type& /* e */, const data_term_type& d, edge_condition& ec)
     {
       ec.TC = d;
       ec.FC = core::optimized_not(d);
@@ -183,7 +183,7 @@ namespace detail {
     /// \param e A term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_true(const term_type& e, edge_condition& ec)
+    bool visit_true(const term_type& /* e */, edge_condition& ec)
     {
       ec.TC = tr::true_();
       ec.FC = tr::false_();
@@ -194,7 +194,7 @@ namespace detail {
     /// \param e A term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_false(const term_type& e, edge_condition& ec)
+    bool visit_false(const term_type& /* e */, edge_condition& ec)
     {
       ec.TC = tr::false_();
       ec.FC = tr::true_();
@@ -206,7 +206,7 @@ namespace detail {
     /// \param arg A term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_not(const term_type& e, const term_type& arg, edge_condition& ec)
+    bool visit_not(const term_type& /* e */, const term_type& arg, edge_condition& ec)
     {
       edge_condition ec_arg;
       visit(arg, ec_arg);
@@ -222,7 +222,7 @@ namespace detail {
     /// \param right A term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_and(const term_type& e, const term_type& left, const term_type&  right, edge_condition& ec)
+    bool visit_and(const term_type& /* e */, const term_type& left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
       visit(left, ec_left);
@@ -240,7 +240,7 @@ namespace detail {
     /// \param right A term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_or(const term_type& e, const term_type&  left, const term_type&  right, edge_condition& ec)
+    bool visit_or(const term_type& /* e */, const term_type&  left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
       visit(left, ec_left);
@@ -258,7 +258,7 @@ namespace detail {
     /// \param right A term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_imp(const term_type& e, const term_type&  left, const term_type&  right, edge_condition& ec)
+    bool visit_imp(const term_type& /* e */, const term_type&  left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
       visit(left, ec_left);
@@ -276,7 +276,7 @@ namespace detail {
     /// \param expr A term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_forall(const term_type& e, const variable_sequence_type& variables, const term_type& expr, edge_condition& ec)
+    bool visit_forall(const term_type& /* e */, const variable_sequence_type& variables, const term_type& expr, edge_condition& ec)
     {
       visit(expr, ec);
       for (typename condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
@@ -293,7 +293,7 @@ namespace detail {
     /// \param expr A term
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_exists(const term_type& e, const variable_sequence_type&  variables, const term_type& expr, edge_condition& ec)
+    bool visit_exists(const term_type& /* e */, const variable_sequence_type&  variables, const term_type& expr, edge_condition& ec)
     {
       visit(expr, ec);
       for (typename condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
@@ -309,7 +309,7 @@ namespace detail {
     /// \param v A propositional variable
     /// \param ec An edge condition
     /// \return The result of visiting the node
-    bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v, edge_condition& ec)
+    bool visit_propositional_variable(const term_type& /* e */, const propositional_variable_type& v, edge_condition& ec)
     {
       ec.TC = tr::false_();
       ec.FC = tr::false_();

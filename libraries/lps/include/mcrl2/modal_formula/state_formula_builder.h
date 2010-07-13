@@ -48,7 +48,7 @@ struct state_formula_builder
   /// \brief Visit data_expression node
   /// \param d A data expression
   /// \return The result of visiting the node
-  virtual state_formula visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
+  virtual state_formula visit_data_expression(const state_formula& /* e */, const data::data_expression& /* d */)
   {
     return state_formula();
   }

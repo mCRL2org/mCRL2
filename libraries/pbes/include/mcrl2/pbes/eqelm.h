@@ -172,7 +172,7 @@ namespace pbes_system {
       }
 
       /// \brief Returns true if the vertex X should propagate its values to Y
-      bool evaluate_guard(const string_type& X, const propositional_variable_type& Y)
+      bool evaluate_guard(const string_type& /* X */, const propositional_variable_type& /* Y */)
       {
         return true;
       }
@@ -186,7 +186,7 @@ namespace pbes_system {
 
       /// \brief Propagate the equivalence relations in vertex X over the edge Ye.
       template <typename Substitution>
-      void update_equivalence_classes(const string_type& X,
+      void update_equivalence_classes(const string_type& /* X */,
                                       const propositional_variable_type& Ye,
                                       const Substitution& vX,
                                       std::set<string_type>& todo

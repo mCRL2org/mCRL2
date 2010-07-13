@@ -46,7 +46,7 @@ namespace detail {
     /// \brief Visit data_expression node
     /// \param e A term
     /// \return The result of visiting the node
-    bool visit_data_expression(const term_type& e, const data_term_type& /* d */)
+    bool visit_data_expression(const term_type& /* e */, const data_term_type& /* d */)
     {
       throw mcrl2::runtime_error("data_expression encountered in pbes_expression2boolean_expression_visitor");
       return super::continue_recursion;
@@ -55,7 +55,7 @@ namespace detail {
     /// \brief Visit true node
     /// \param e A term
     /// \return The result of visiting the node
-    bool visit_true(const term_type& e)
+    bool visit_true(const term_type& /* e */)
     {
       expression_stack.push_back(br::true_());
       return super::continue_recursion;
@@ -64,7 +64,7 @@ namespace detail {
     /// \brief Visit false node
     /// \param e A term
     /// \return The result of visiting the node
-    bool visit_false(const term_type& e)
+    bool visit_false(const term_type& /* e */)
     {
       expression_stack.push_back(br::false_());
       return super::continue_recursion;
@@ -73,7 +73,7 @@ namespace detail {
     /// \brief Visit not node
     /// \param e A term
     /// \return The result of visiting the node
-    bool visit_not(const term_type& e, const term_type& /* arg */)
+    bool visit_not(const term_type& /* e */, const term_type& /* arg */)
     {
       bes::boolean_expression b = expression_stack.back();
       expression_stack.pop_back();
@@ -120,7 +120,7 @@ namespace detail {
     /// \param e A term
     /// \param variables A sequence of variables
     /// \return The result of visiting the node
-    bool visit_forall(const term_type& e, const variable_sequence_type& variables, const term_type& /* expression */)
+    bool visit_forall(const term_type& /* e */, const variable_sequence_type& variables, const term_type& /* expression */)
     {
       throw mcrl2::runtime_error("forall encountered in pbes_expression2boolean_expression_visitor");
       return super::continue_recursion;
@@ -130,7 +130,7 @@ namespace detail {
     /// \param e A term
     /// \param variables A sequence of variables
     /// \return The result of visiting the node
-    bool visit_exists(const term_type& e, const variable_sequence_type& variables, const term_type& /* expression */)
+    bool visit_exists(const term_type& /* e */, const variable_sequence_type& variables, const term_type& /* expression */)
     {
       throw mcrl2::runtime_error("exists encountered in pbes_expression2boolean_expression_visitor");
       return super::continue_recursion;
@@ -140,7 +140,7 @@ namespace detail {
     /// \param e A term
     /// \param X A propositional variable
     /// \return The result of visiting the node
-    bool visit_propositional_variable(const term_type& e, const propositional_variable_type& X)
+    bool visit_propositional_variable(const term_type& /* e */, const propositional_variable_type& X)
     {
       if (X.parameters().size() > 0)
       {
