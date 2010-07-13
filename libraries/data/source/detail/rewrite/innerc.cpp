@@ -1514,7 +1514,7 @@ bool RewriterCompilingInnermost::addRewriteRule(ATermAppl Rule)
   return true;
 }
 
-bool RewriterCompilingInnermost::removeRewriteRule(ATermAppl Rule)
+bool RewriterCompilingInnermost::removeRewriteRule(ATermAppl /*Rule*/)
 {
   return false;
 }

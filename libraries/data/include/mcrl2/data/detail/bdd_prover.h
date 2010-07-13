@@ -150,7 +150,7 @@ class BDD_Prover: public Prover {
     {
       std::string indent;
 
-      return bdd_down(f_internal_bdd, indent);
+      return bdd_down(a_formula, indent);
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.

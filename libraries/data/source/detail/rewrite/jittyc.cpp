@@ -2834,7 +2834,7 @@ bool RewriterCompilingJitty::addRewriteRule(ATermAppl Rule)
   return true;
 }
 
-bool RewriterCompilingJitty::removeRewriteRule(ATermAppl Rule)
+bool RewriterCompilingJitty::removeRewriteRule(ATermAppl /*Rule*/)
 {
   return false;
 }
