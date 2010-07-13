@@ -142,7 +142,7 @@ bool grape_event_add_channel_communication::Undo( void )
   return true;
 }
 
-grape_event_remove_channel_communication::grape_event_remove_channel_communication(  grape_frame *p_main_frame, channel_communication *p_c_comm, architecture_diagram* p_arch_dia_ptr, bool p_normal  )
+grape_event_remove_channel_communication::grape_event_remove_channel_communication(  grape_frame *p_main_frame, channel_communication *p_c_comm, architecture_diagram* p_arch_dia_ptr, bool /*p_normal*/  )
 : grape_event_base( p_main_frame, true, _T( "remove channel" ) )
 {
   m_c_comm = p_c_comm->get_id();

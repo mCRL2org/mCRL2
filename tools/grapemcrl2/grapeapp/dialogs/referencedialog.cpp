@@ -232,7 +232,7 @@ void grape_reference_dialog::check_text()
 }
 
 
-void grape_reference_dialog::event_change_text( wxGridEvent &p_event )
+void grape_reference_dialog::event_change_text( wxGridEvent &/*p_event*/ )
 {
   check_text();
 }
@@ -274,7 +274,7 @@ void grape_reference_dialog::change_combobox()
   }
 }
 
-void grape_reference_dialog::event_change_combobox( wxCommandEvent &p_event )
+void grape_reference_dialog::event_change_combobox( wxCommandEvent &/*p_event*/ )
 {
   change_combobox();
 }

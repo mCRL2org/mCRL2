@@ -140,7 +140,7 @@ bool visualchannel_communication::is_inside( libgrape::coordinate &p_coord )
   }
 }
 
-grape_direction visualchannel_communication::is_on_border( libgrape::coordinate &p_coord )
+grape_direction visualchannel_communication::is_on_border( libgrape::coordinate &/*p_coord*/ )
 {  
   return GRAPE_DIR_NONE;
 }

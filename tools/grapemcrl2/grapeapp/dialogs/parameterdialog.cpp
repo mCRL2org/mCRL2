@@ -112,7 +112,7 @@ void grape_parameter_dialog::check_parameters()
   FindWindow(GetAffirmativeId())->Enable(valid);
 }
 
-void grape_parameter_dialog::event_change_text( wxGridEvent &p_event )
+void grape_parameter_dialog::event_change_text( wxGridEvent &/*p_event*/ )
 {
   check_parameters();
 }

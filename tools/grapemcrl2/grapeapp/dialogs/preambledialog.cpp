@@ -164,7 +164,7 @@ void grape_preamble_dialog::check_local_variable_text()
   FindWindow(GetAffirmativeId())->Enable(valid);
 }
 
-void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &p_event )
+void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &/*p_event*/ )
 {
   check_parameter_text();
   int rows_count = m_parameter_grid->GetNumberRows();
@@ -175,7 +175,7 @@ void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &p_event )
   }
 }
 
-void grape_preamble_dialog::event_change_localvar_text( wxGridEvent &p_event )
+void grape_preamble_dialog::event_change_localvar_text( wxGridEvent &/*p_event*/ )
 {
   check_local_variable_text();
   int rows_count = m_localvar_grid->GetNumberRows();

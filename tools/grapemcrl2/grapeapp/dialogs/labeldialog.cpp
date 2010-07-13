@@ -186,7 +186,7 @@ void grape_label_dialog::event_change_condition_text( wxCommandEvent &/*p_event*
   update_preview();
 }
 
-void grape_label_dialog::event_change_timestamp_text( wxCommandEvent &p_event )
+void grape_label_dialog::event_change_timestamp_text( wxCommandEvent &/*p_event*/ )
 {
   // fill label with timestamp
   m_label->set_timestamp( m_timestamp_input->GetValue() );

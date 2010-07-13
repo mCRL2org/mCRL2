@@ -365,7 +365,7 @@ bool grape::grapeapp::is_inside_designator( const coordinate &p_begin, const coo
   return is_inside_designator( p_begin, width, height, p_coord );
 }
 
-bool grape::grapeapp::is_on_border_designator( const coordinate &p_begin, const coordinate &p_end, float p_width, float p_height, const coordinate &p_coord )
+bool grape::grapeapp::is_on_border_designator( const coordinate &p_begin, const coordinate &p_end, float p_width, float /*p_height*/, const coordinate &p_coord )
 {
   coordinate begin = p_begin;
   coordinate end = p_end;

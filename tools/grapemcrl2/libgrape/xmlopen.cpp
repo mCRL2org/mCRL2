@@ -239,7 +239,7 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
   return result;
 }
 
-bool grape::libgrape::open_states( grape_specification* p_spec, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
+bool grape::libgrape::open_states( grape_specification* /*p_spec*/, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
 {
   wxString node_name = p_proc_dia_node->GetName();
   if ( node_name == _T( "processdiagram" ) )
@@ -375,7 +375,7 @@ bool grape::libgrape::open_states( grape_specification* p_spec, wxXmlNode* p_pro
   return true;
 }
 
-bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
+bool grape::libgrape::open_reference_states( grape_specification* /*p_spec*/, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
 {
   wxString node_name = p_proc_dia_node->GetName();
   if ( node_name == _T( "processdiagram" ) )
@@ -539,7 +539,7 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
   return true;
 }
 
-bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_spec, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
+bool grape::libgrape::open_nonterminating_transitions( grape_specification* /*p_spec*/, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
 {
   wxString node_name = p_proc_dia_node->GetName();
   if ( node_name == _T( "processdiagram" ) )
@@ -824,7 +824,7 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
   return true;
 }
 
-bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
+bool grape::libgrape::open_terminating_transitions( grape_specification* /*p_spec*/, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
 {
   wxString node_name = p_proc_dia_node->GetName();
   if ( node_name == _T( "processdiagram" ) )
@@ -1100,7 +1100,7 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
   return true;
 }
 
-bool grape::libgrape::open_initial_designators( grape_specification* p_spec, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
+bool grape::libgrape::open_initial_designators( grape_specification* /*p_spec*/, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
 {
   wxString node_name = p_proc_dia_node->GetName();
   if ( node_name == _T( "processdiagram" ) )
@@ -1241,7 +1241,7 @@ bool grape::libgrape::open_initial_designators( grape_specification* p_spec, wxX
   return true;
 }
 
-bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
+bool grape::libgrape::open_comments( grape_specification* /*p_spec*/, wxXmlNode* p_proc_dia_node, process_diagram* p_proc_dia_ptr )
 {
   wxString node_name = p_proc_dia_node->GetName();
   if ( node_name == _T( "processdiagram" ) )
@@ -1447,7 +1447,7 @@ bool grape::libgrape::open_architecture_diagrams( grape_specification* p_spec, w
   return result;
 }
 
-bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
+bool grape::libgrape::open_process_references( grape_specification* /*p_spec*/, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
 {
   wxString node_name = p_arch_dia_node->GetName();
   if ( node_name == _T( "architecturediagram" ) )
@@ -1611,7 +1611,7 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
   return true;
 }
 
-bool grape::libgrape::open_architecture_references( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
+bool grape::libgrape::open_architecture_references( grape_specification* /*p_spec*/, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
 {
   wxString node_name = p_arch_dia_node->GetName();
   if ( node_name == _T( "architecturediagram" ) )
@@ -1748,7 +1748,7 @@ bool grape::libgrape::open_architecture_references( grape_specification* p_spec,
   return true;
 }
 
-bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
+bool grape::libgrape::open_channels( grape_specification* /*p_spec*/, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
 {
   wxString node_name = p_arch_dia_node->GetName();
   if ( node_name == _T( "architecturediagram" ) )
@@ -1937,7 +1937,7 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
 }
 
 
-bool grape::libgrape::open_channel_communications( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
+bool grape::libgrape::open_channel_communications( grape_specification* /*p_spec*/, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
 {
   wxString node_name = p_arch_dia_node->GetName();
   if ( node_name == _T( "architecturediagram" ) )
@@ -2119,7 +2119,7 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
   return true;
 }
 
-bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
+bool grape::libgrape::open_comments( grape_specification* /*p_spec*/, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
 {
   wxString node_name = p_arch_dia_node->GetName();
   if ( node_name == _T( "architecturediagram" ) )

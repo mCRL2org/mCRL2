@@ -95,7 +95,7 @@ bool visualpreamble::is_inside( libgrape::coordinate &p_coord )
   return ( between_x_coordinates && between_y_coordinates );
 }
 
-grape_direction visualpreamble::is_on_border( libgrape::coordinate &p_coord )
+grape_direction visualpreamble::is_on_border( libgrape::coordinate &/*p_coord*/ )
 {
   // it doesn't matter for a preamble where it was clicked
   return GRAPE_DIR_NONE;
