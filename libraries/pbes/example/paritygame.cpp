@@ -114,6 +114,8 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
         run1(p, true);
       }
       run2(p, m_max_pg, m_output_filename);
+
+      return true;
     }
 };
 

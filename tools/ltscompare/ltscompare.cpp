@@ -502,7 +502,7 @@ void ltscompare_tool::user_interactive_configuration(tipi::configuration& c) {
   send_clear_display();
 }
 
-bool ltscompare_tool::check_configuration(tipi::configuration const& c) const
+bool ltscompare_tool::check_configuration(tipi::configuration const& /*c*/) const
 {
   bool result = true;
 
