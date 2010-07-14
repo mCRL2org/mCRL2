@@ -63,7 +63,7 @@ static void PrintState(stringstream &ss, ATerm state, NextState *ns)
 }
 
 template < typename T >
-static int wxCALLBACK compare_items(long a, long b, T d)
+static int wxCALLBACK compare_items(long a, long b, T /*d*/)
 {
   return a-b;
 }

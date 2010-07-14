@@ -229,8 +229,7 @@ class summand_information
     ///          the other variables xi' and substitute xi for xi'.
     void add_a_new_next_state_argument(
                          const context_type &context,
-                         const rewriter &r,
-                         const comp_struct &c)
+                         const rewriter &r)
     {
       real_representing_variable new_xi_variable=context.back();
       data_expression xi_t=new_xi_variable.get_lowerbound();

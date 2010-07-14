@@ -271,17 +271,6 @@ class lps2torx_tool : public lps2torx_base
       return "[OPTION]... INFILE";
     }
 
-    void check_positional_options(const command_line_parser &parser)
-    {
-//      if (1 < parser.arguments.size())
-//      {
-//        parser.error("too many file arguments");
-//      } else if (1 > parser.arguments.size())
-//      {
-//        parser.error("too few file arguments");
-//      }
-    }
-
     void add_options(interface_description &desc)
     {
       lps2torx_base::add_options(desc);

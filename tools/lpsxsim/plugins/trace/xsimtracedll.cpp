@@ -63,7 +63,7 @@ static void PrintState(stringstream &ss, ATerm state, NextState *ns)
         }
 }
 
-static int wxCALLBACK compare_items(long a, long b, long d)
+static int wxCALLBACK compare_items(long a, long b, long /*d*/)
 {
   return a-b;
 }

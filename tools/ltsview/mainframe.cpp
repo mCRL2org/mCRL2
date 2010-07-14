@@ -387,19 +387,19 @@ void MainFrame::onSim(wxCommandEvent& /*event*/)
   simDialog->Show();
 }
 
-void MainFrame::onZoomInBelow(wxCommandEvent& event)
+void MainFrame::onZoomInBelow(wxCommandEvent& /*event*/)
 {
   mediator->zoomInBelow();
   glCanvas->display();
 }
 
-void MainFrame::onZoomInAbove(wxCommandEvent& event)
+void MainFrame::onZoomInAbove(wxCommandEvent& /*event*/)
 {
   mediator->zoomInAbove();
   glCanvas->display();
 }
 
-void MainFrame::onZoomOut(wxCommandEvent& event)
+void MainFrame::onZoomOut(wxCommandEvent& /*event*/)
 {
   mediator->zoomOut();
   glCanvas->display();

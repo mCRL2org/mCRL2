@@ -188,7 +188,7 @@ void P_SimpleSphere::draw() {
   glCallList(disp_list);
 }
 
-void P_SimpleSphere::reshape(int N,float *coss,float *sins) {
+void P_SimpleSphere::reshape(int /*N*/,float */*coss*/,float */*sins*/) {
 }
 
 /* -------- P_Hemisphere ---------------------------------------------------- */
@@ -464,7 +464,7 @@ void P_ObliqueCone::draw() {
   glCallList(disp_list);
 }
 
-void P_ObliqueCone::reshape(int N,float *coss,float *sins) {
+void P_ObliqueCone::reshape(int /*N*/,float */*coss*/,float */*sins*/) {
 }
 
 void P_ObliqueCone::reshape(int N,float *coss,float *sins,float obt) {

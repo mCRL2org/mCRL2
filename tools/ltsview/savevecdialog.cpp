@@ -120,7 +120,7 @@ SaveVecDialog::~SaveVecDialog()
 {
 }
 
-void SaveVecDialog::onChangeFile(wxCommandEvent& event)
+void SaveVecDialog::onChangeFile(wxCommandEvent& /*event*/)
 {
   wxString new_file = wxFileSelector(wxT("Select a file"),f_name.GetPath(),
     f_name.GetFullName(),wxT(""),wxT("*.*"),wxFD_SAVE,this);

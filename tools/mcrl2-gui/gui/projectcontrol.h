@@ -175,7 +175,7 @@ public:
 		}
 	}
 
-	void OnRightClick(wxTreeEvent& evt) {
+	void OnRightClick(wxTreeEvent& /*evt*/) {
 		DisplayMenu();
 	}
 
@@ -423,7 +423,7 @@ public:
 	}
 	;
 
-	void OnActivate(wxTreeEvent& evt){
+	void OnActivate(wxTreeEvent& /*evt*/){
 	  Edit();
 	}
 

@@ -619,7 +619,7 @@ static void add_postponed_inequalities_to_context(
   
         for(std::vector < summand_information >::iterator j = summand_info.begin();
                            j != summand_info.end(); ++j)
-        { j->add_a_new_next_state_argument(context,r,c);
+        { j->add_a_new_next_state_argument(context,r);
         }
       }
     }

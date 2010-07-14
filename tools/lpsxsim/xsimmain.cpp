@@ -371,7 +371,7 @@ void XSimMain::LoadDLL(const wxString &filename)
 }
 
 
-void XSimMain::Registered(SimulatorInterface *Simulator)
+void XSimMain::Registered(SimulatorInterface */*Simulator*/)
 {
 }
 
@@ -397,7 +397,7 @@ void XSimMain::Initialise(ATermList Pars)
     current_state = NULL;
 }
 
-void XSimMain::StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates)
+void XSimMain::StateChanged(ATermAppl /*Transition*/, ATerm State, ATermList NextStates)
 {
   try
   { SetCurrentState(State);
@@ -420,7 +420,7 @@ void XSimMain::StateChanged(ATermAppl Transition, ATerm State, ATermList NextSta
   }
 }
 
-void XSimMain::Reset(ATerm State)
+void XSimMain::Reset(ATerm /*State*/)
 {
 }
 
@@ -432,7 +432,7 @@ void XSimMain::Redo(unsigned int /* Count */)
 {
 }
 
-void XSimMain::TracePosChanged(ATermAppl Transition, ATerm State, unsigned int /* Index */)
+void XSimMain::TracePosChanged(ATermAppl /*Transition*/, ATerm /*State*/, unsigned int /* Index */)
 {
 }
 

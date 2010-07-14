@@ -78,14 +78,14 @@ public:
 
     }
 
-    void OnOkClick(wxCommandEvent& evt){
+    void OnOkClick(wxCommandEvent& /*evt*/){
       m_mm->removeExtensionMapping( tc->GetLineText(0) );
       m_mm->addExtensionMapping( tc->GetLineText(0) , fp->GetTextCtrlValue() );
       EndModal(wxID_OK);
     }
     ;
 
-    void OnCancelClick(wxCommandEvent& evt){
+    void OnCancelClick(wxCommandEvent& /*evt*/){
       EndModal(wxID_CANCEL);
     }
 
@@ -169,7 +169,7 @@ class Preferences: public wxDialog{
 
     }
 
-    void OnNewClick(wxCommandEvent& evt){
+    void OnNewClick(wxCommandEvent& /*evt*/){
       long i = listview->GetFocusedItem();
       if( i != -1 ){
         map<wxString, wxString>  m = mm.getExtensionCommandMapping();
@@ -185,7 +185,7 @@ class Preferences: public wxDialog{
       }
     }
 
-    void OnDeleteClick(wxCommandEvent& evt){
+    void OnDeleteClick(wxCommandEvent& /*evt*/){
       long i = listview->GetFocusedItem();
 
       if( i != -1 ){
@@ -202,7 +202,7 @@ class Preferences: public wxDialog{
       }
     }
 
-    void OnEditClick(wxCommandEvent& evt){
+    void OnEditClick(wxCommandEvent& /*evt*/){
       long i = listview->GetFocusedItem();
       if( i != -1 ){
         map<wxString, wxString>  m = mm.getExtensionCommandMapping();
@@ -218,12 +218,12 @@ class Preferences: public wxDialog{
       }
     }
 
-    void OnSaveClick(wxCommandEvent& evt){
+    void OnSaveClick(wxCommandEvent& /*evt*/){
       mm.saveExtensionMapping();
       Destroy();
     }
 
-    void OnCancelClick(wxCommandEvent& evt){
+    void OnCancelClick(wxCommandEvent& /*evt*/){
       Destroy();
     }
 
@@ -234,12 +234,12 @@ class Preferences: public wxDialog{
 
   private:
 
-    void OnSelect(wxListEvent& evt){
+    void OnSelect(wxListEvent& /*evt*/){
       m_edit_button->Enable(true);
       m_delete_button->Enable(true);
     }
 
-    void OnDeSelect(wxListEvent& evt){
+    void OnDeSelect(wxListEvent& /*evt*/){
       m_edit_button->Enable(false);
       m_delete_button->Enable(false);
     }

@@ -26,11 +26,11 @@ public:
 		p = parent;
 	}
 
-		void OnClear(wxCommandEvent &evt){
+		void OnClear(wxCommandEvent &/*event*/){
 			p->Clear();
 		}
 
-		void OnSave(wxCommandEvent &evt){
+		void OnSave(wxCommandEvent &/*event*/){
 
 			wxFileDialog *fd = new wxFileDialog(p, wxT("Choose a file"), wxT("") , wxT(""),  wxT("*.*"), wxSAVE | wxOVERWRITE_PROMPT,  wxDefaultPosition);
 			if (fd->ShowModal() == wxID_OK ){
@@ -76,7 +76,7 @@ public:
 
 
 
-	void OnRightClick(wxMouseEvent& evt){
+	void OnRightClick(wxMouseEvent& /*event*/){
 
 //#ifndef __WINDOWS__
 		/* Disabled for WIN32 due to invalid cast */

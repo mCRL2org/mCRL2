@@ -233,7 +233,7 @@ public:
 	}
 	;
 
-	void OnRunClick(wxCommandEvent& evt) {
+	void OnRunClick(wxCommandEvent& /*event*/) {
 
 		wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
 
@@ -316,7 +316,7 @@ public:
 	}
 	;
 
-	void OnAbortClick(wxCommandEvent& evt) {
+	void OnAbortClick(wxCommandEvent& /*event*/) {
 		if(wxProcess::Exists(m_pid) && (m_pid != 0) ){
 		  wxProcess::Kill(m_pid);
 		}
@@ -325,11 +325,11 @@ public:
 		m_timer->Stop();
 	};
 
-	void OnOutputFileChange(wxFileDirPickerEvent& evt) {
-		m_fileIO.output_file = evt.GetPath().mb_str(wxConvUTF8);
+	void OnOutputFileChange(wxFileDirPickerEvent& event) {
+		m_fileIO.output_file = event.GetPath().mb_str(wxConvUTF8);
 	};
 
-	void OnTimer(wxTimerEvent& event) {
+	void OnTimer(wxTimerEvent& /*event*/) {
 		if (!wxProcess::Exists(m_pid)) {
 			m_abortbutton->Show(false);
 			m_runbutton->Enable();
@@ -350,7 +350,7 @@ public:
 	}
 	;
 
-	void OnResize(wxSizeEvent& evt){
+	void OnResize(wxSizeEvent& /*event*/){
 		m_configpanel->SetSize( this->GetSize() );
 	}
 

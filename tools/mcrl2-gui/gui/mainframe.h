@@ -176,7 +176,7 @@ public:
 	}
 
 	// event handlers (these functions should _not_ be virtual)
-	void OnQuit(wxCommandEvent& event) {
+	void OnQuit(wxCommandEvent& /*event*/) {
 		/* TODO: Kill all running processes in "running_processes" */
 
 		for(size_t i = 0  ; i < running_processes.size(); ++i)
@@ -188,7 +188,7 @@ public:
 	}
 	;
 
-	void OnKill(wxCommandEvent& event) {
+	void OnKill(wxCommandEvent& /*event*/) {
 		long pid = wxGetNumberFromUser(
 				wxT("Please specify the process to kill"),
 				wxT("Enter PID:"), wxT("Exec question"), m_pidLast,
@@ -270,38 +270,38 @@ public:
 	}
 	;
 
-	void OnClear(wxCommandEvent& event) {
+	void OnClear(wxCommandEvent& /*event*/) {
 		m_lbox->Clear();
 	}
 	;
 
-	void OnNewFile(wxCommandEvent& event) {
+	void OnNewFile(wxCommandEvent& /*event*/) {
 		m_left_panel->CreateNewFile();
 	}
 	;
 
-	void OnRenameFile(wxCommandEvent& event) {
+	void OnRenameFile(wxCommandEvent& /*event*/) {
 		m_left_panel->Rename();
 	}
 	;
 
-	void OnRefresh(wxCommandEvent& event) {
+	void OnRefresh(wxCommandEvent& /*event*/) {
 		m_left_panel->Refresh();
 	}
 	;
 
 
-	void OnDeleteFile(wxCommandEvent& event) {
+	void OnDeleteFile(wxCommandEvent& /*event*/) {
 		m_left_panel->Delete();
 	}
 	;
 
-	void OnEditFile(wxCommandEvent& event) {
+	void OnEditFile(wxCommandEvent& /*event*/) {
 		m_left_panel->Edit();
 	}
 	;
 
-	void OnExecWithRedirect(wxCommandEvent& event) {
+	void OnExecWithRedirect(wxCommandEvent& /*event*/) {
 		wxString cmd = wxGetTextFromUser(wxT("Enter the command: "),
 				DIALOG_TITLE, m_cmdLast);
 
@@ -323,25 +323,25 @@ public:
 	}
 	;
 
-	void OnAbout(wxCommandEvent& event) {
+	void OnAbout(wxCommandEvent& /*event*/) {
 		wxMessageBox(wxT("mCRL2-gui"), wxT("mCRL2-gui"), wxOK
 				| wxICON_INFORMATION, this);
 	}
 	;
 
 	// polling output of async processes
-	void OnTimer(wxTimerEvent& event) {
+	void OnTimer(wxTimerEvent& /*event*/) {
 		/* Send a system wide idle event */
 		wxWakeUpIdle();
 	}
 	;
 
-	void OnExecPreferences(wxCommandEvent& event){
+	void OnExecPreferences(wxCommandEvent& /*event*/){
 	  Preferences *p = new Preferences();
 	  p->Show(true);
 	};
 
-	void OnResetLayout(wxCommandEvent& event) {
+	void OnResetLayout(wxCommandEvent& /*event*/) {
 		 m_mgr.LoadPerspective(m_default_perspective);
 	};
 
