@@ -65,7 +65,7 @@ rewrite_strategy_vector initialise_rewrite_strategies()
 #endif // MCRL2_JITTYC_AVAILABLE
 #ifdef MCRL2_INNERC_AVAILABLE
   result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
-#endif MCRL2_JITTYC_AVAILABLE
+#endif // MCRL2_JITTYC_AVAILABLE
 #endif // MCRL2_TEST_COMPILERS
 
   return result;

@@ -70,6 +70,8 @@ lts::lts translate_lps_to_lts(lps::specification const& specification,
   options.trace_prefix = "lps2lts_test";
   options.specification = specification;
   options.priority_action = priority_action;
+  options.strat = rewrite_strategy;
+  options.expl_strat = strategy;
 
   options.lts = temporary_filename("lps2lts_test");
   options.outformat = lts::lts_aut;
@@ -106,7 +108,7 @@ rewrite_strategy_vector initialise_rewrite_strategies()
 #endif // MCRL2_JITTYC_AVAILABLE
 #ifdef MCRL2_INNERC_AVAILABLE
   result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
-#endif MCRL2_JITTYC_AVAILABLE
+#endif // MCRL2_JITTYC_AVAILABLE
 #endif // MCRL2_TEST_COMPILERS
 
   return result;

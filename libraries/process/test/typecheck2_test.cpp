@@ -20,8 +20,6 @@
 
 using namespace mcrl2;
 
-#define MCRL2_WITH_GARBAGE_COLLECTION
-
 // Garbage collect after each case.
 struct collect_after_test_case {
   ~collect_after_test_case()

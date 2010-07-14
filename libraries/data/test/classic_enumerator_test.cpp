@@ -71,7 +71,7 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
 // specialisation for data::enumerator
 template <>
 void enumerate< data_enumerator< > >(data_specification const& d,
-                                            std::set< variable > const& v,
+                                            std::set< variable > const& /*v*/,
                                               data_expression const& c, size_t t) {
   struct stack {
     std::stack< data_expression_with_variables > m_stack;
