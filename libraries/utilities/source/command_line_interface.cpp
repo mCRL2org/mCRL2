@@ -276,9 +276,10 @@ namespace mcrl2 {
           std::string const& name, std::string const& authors,
           std::string const& what_is, std::string const& synopsis,
           std::string const& description, std::string const& known_issues) :
+                          m_options(get_standard_description().m_options),
                           m_path(path), m_name(name), m_authors(authors),
                           m_what_is(what_is), m_usage(synopsis), m_description(description),
-                          m_known_issues(known_issues), m_options(get_standard_description().m_options),
+                          m_known_issues(known_issues),
                           m_short_to_long(get_standard_description().m_short_to_long) {
 
       m_usage = m_usage.substr(0, m_usage.find_last_of('\n'));
