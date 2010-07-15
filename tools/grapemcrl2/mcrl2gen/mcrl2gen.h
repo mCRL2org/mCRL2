@@ -149,12 +149,11 @@ namespace grape
      * @param p_blocked_comms The list of blocked channel communications.
      * @param p_hidden_comms The list of hidden channel communications.
      * @param p_visible_comms The list of visible channel communications.
-     * @param datatype_spec The datatype specification.
      * @return An array of channel communications in this diagram.
      * @pre p_architecture_diagram is a valid pointer to an XML architecture diagram and p_blocked_comms, p_hidden_comms and p_visible_comms are empty.
      * @post An array of channel communications in this diagram is returned and p_blocked_comms, p_hidden_comms and p_visible_comms contain the correct communications or error messages are produced.
      */
-    arr_channel_comm get_communications(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms, ATermAppl &datatype_spec);
+    arr_channel_comm get_communications(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms);
 
     /**
      * Renamed channels and channel communications inference function.

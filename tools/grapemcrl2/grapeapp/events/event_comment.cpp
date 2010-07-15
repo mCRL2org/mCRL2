@@ -97,7 +97,7 @@ bool grape_event_remove_comment::Do(  void  )
   
   if ( comm_ptr )
   {
-    visualcomment* vis_comm_ptr = static_cast<visualcomment*> (m_main_frame->get_glcanvas()->get_visual_object( comm_ptr ) );
+    //visualcomment* vis_comm_ptr = static_cast<visualcomment*> (m_main_frame->get_glcanvas()->get_visual_object( comm_ptr ) );
     
     // if there is no valid selected communication
     if (comm_ptr->get_reference_selected())

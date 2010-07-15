@@ -379,7 +379,7 @@ arr_channel_id grape::mcrl2gen::get_reference_renamed_actions(arr_channel_id &p_
   return new_ren;
 }
 
-arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode */*p_doc_root*/, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms, ATermAppl &datatype_spec)
+arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode */*p_doc_root*/, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms)
 {
   // initialize variables
   arr_channel_comm comms;
@@ -1229,7 +1229,7 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
   arr_channel_comm blocked_comms;
   arr_channel_comm hidden_comms;
   arr_channel_comm visible_comms;
-  p_channel_comms = get_communications(p_doc_root, diagram, p_refs, blocked_comms, hidden_comms, visible_comms, datatype_spec);
+  p_channel_comms = get_communications(p_doc_root, diagram, p_refs, blocked_comms, hidden_comms, visible_comms);
   if (p_verbose)
   {
     for (unsigned int i=0; i<p_channel_comms.GetCount(); ++i)
