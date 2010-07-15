@@ -49,8 +49,8 @@ std::string x2 = "binding_variables = X(n,m: Nat)";
 
 void test_pbes(const std::string& pbes_spec,
                std::string expected_result,
-               bool compute_conditions,
-               bool remove_equations = true,
+               bool /* compute_conditions */,
+               bool /* remove_equations = true */,
                std::string msg = "")
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;

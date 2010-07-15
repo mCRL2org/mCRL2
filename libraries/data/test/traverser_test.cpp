@@ -79,7 +79,7 @@ class my_traverser: public mcrl2::data::detail::traverser<my_traverser>
     my_traverser() : m_sort_count(0)
     { }
 
-    void enter(sort_expression const& s)
+    void enter(sort_expression const& /* s */)
     {
       m_sort_count++;
     }
@@ -112,7 +112,7 @@ class my_sort_traverser: public mcrl2::data::detail::sort_traverser<my_sort_trav
     my_sort_traverser() : m_sort_count(0)
     { }
 
-    void enter(sort_expression const& s)
+    void enter(sort_expression const& /* s */)
     {
       m_sort_count++;
     }

@@ -39,7 +39,7 @@ namespace detail {
     /// \brief Visit propositional_variable node
     /// \param x A term
     /// \return The result of visiting the node
-    pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v)
+    pbes_expression visit_propositional_variable(const pbes_expression& /* x */, const propositional_variable_instantiation& v)
     {
       return sigma(v);
     }

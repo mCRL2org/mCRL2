@@ -163,7 +163,7 @@ namespace detail {
     /// \brief Visit propositional_variable node
     /// \param x A term
     /// \return The result of visiting the node
-    pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, Substitution& sigma)
+    pbes_expression visit_propositional_variable(const pbes_expression& /* x */, const propositional_variable_instantiation& v, Substitution& sigma)
     {
 //std::clog << "visit " << core::pp(x) << std::endl;
       // TODO: this code contains too much conversion between vectors and ATerm lists

@@ -120,7 +120,7 @@ namespace detail {
     /// \param e A term
     /// \param variables A sequence of variables
     /// \return The result of visiting the node
-    bool visit_forall(const term_type& /* e */, const variable_sequence_type& variables, const term_type& /* expression */)
+    bool visit_forall(const term_type& /* e */, const variable_sequence_type& /* variables */, const term_type& /* expression */)
     {
       throw mcrl2::runtime_error("forall encountered in pbes_expression2boolean_expression_visitor");
       return super::continue_recursion;
@@ -130,7 +130,7 @@ namespace detail {
     /// \param e A term
     /// \param variables A sequence of variables
     /// \return The result of visiting the node
-    bool visit_exists(const term_type& /* e */, const variable_sequence_type& variables, const term_type& /* expression */)
+    bool visit_exists(const term_type& /* e */, const variable_sequence_type& /* variables */, const term_type& /* expression */)
     {
       throw mcrl2::runtime_error("exists encountered in pbes_expression2boolean_expression_visitor");
       return super::continue_recursion;
