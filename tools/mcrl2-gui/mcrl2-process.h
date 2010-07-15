@@ -106,26 +106,40 @@ public:
 			// assumption output is line buffered
 			// m_msg << m_cmd << wxT(" (stdout): ") << tis.ReadLine();
 			m_msg << tis.ReadLine();
-			if (m_listbox_output != NULL) {
-				m_listbox_output->Append(m_msg);
-			}
-			m_msg.Clear();
+			if (m_listbox_output != NULL)
+        {
+          m_listbox_output->Append(m_msg);
+
+          if (m_listbox_output == wxWindow::FindFocus())
+          {
+            // AutoScroll
+            m_listbox_output->Select(m_listbox_output->GetCount() - 1);
+            m_listbox_output->SetSelection(wxNOT_FOUND);
+          }
+        }
+        m_msg.Clear();
 
 			hasInput = true;
 		}
 
 		if (IsErrorAvailable()) {
-			wxTextInputStream tis(*GetErrorStream());
-			wxString m_msg;
-			// assumption output is line buffered
-			m_msg << wxT(" (stderr): ") << tis.ReadLine();
-			if (m_listbox_output != NULL) {
-				m_listbox_output->Append(m_msg);
-			}
-			m_msg.Clear();
-
-			hasInput = true;
-		}
+      wxTextInputStream tis(*GetErrorStream());
+      wxString m_msg;
+      // assumption output is line buffered
+      m_msg << tis.ReadLine();
+      if (m_listbox_output != NULL)
+      {
+        m_listbox_output->Append(m_msg);
+        if (m_listbox_output == wxWindow::FindFocus())
+        {
+          // AutoScroll
+          m_listbox_output->Select(m_listbox_output->GetCount() - 1);
+          m_listbox_output->SetSelection(wxNOT_FOUND);
+        }
+      }
+      m_msg.Clear();
+      hasInput = true;
+    }
 
 		return hasInput;
 	}

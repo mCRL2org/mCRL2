@@ -41,6 +41,7 @@
 #define ID_NEW_FILE 2006
 #define ID_NEW_DIR 2007
 #define ID_REFRESH 2008
+#define ID_EXPAND 2009
 
 using namespace std;
 
@@ -171,6 +172,8 @@ public:
 			case ID_REFRESH:
 				Refresh();
 				break;
+			case ID_EXPAND:
+			  this->ExpandPath(this->GetPath());
 			}
 		}
 	}
@@ -302,7 +305,7 @@ public:
 		wxMenu *reporting = new wxMenu();
 		wxMenu *transformation = new wxMenu();
 
-		if (!this->GetPath().empty()) {
+		if (wxFile::Exists(this->GetPath())) {
 			mnu.Append(ID_EDIT, wxT("Edit \tCtrl-E"));
 
 			for (vector<Tool>::iterator i = m_tool_catalog.begin(); i
@@ -325,6 +328,11 @@ public:
 					}
 				}
 			}
+		}
+
+		if (wxDir::Exists(this->GetPath())){
+		  mnu.Append(ID_EXPAND, wxT("Expand/Collapse Folder"));
+		  mnu.AppendSeparator();
 		}
 
 		if ((transformation->GetMenuItemCount() != 0)
