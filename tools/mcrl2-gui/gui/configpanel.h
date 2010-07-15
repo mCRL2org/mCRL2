@@ -27,6 +27,21 @@
 #define ID_ABORT_TOOL 1002
 #define ID_TIMER 1003
 
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_UPDATE_PROJECT_TREE, 7777)
+END_DECLARE_EVENT_TYPES()
+
+DEFINE_EVENT_TYPE(wxEVT_UPDATE_PROJECT_TREE)
+
+// it may also be convenient to define an event table macro for this event type
+#define EVT_UPDATE_PROJECT_TREE(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_UPDATE_PROJECT_TREE, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
+
+
 class ConfigPanel: public wxNotebookPage {
 public:
 
@@ -397,6 +412,20 @@ private:
 	  void OnProcessEnd(wxCommandEvent& evt){
 	     m_abortbutton->Show(false);
 	     m_runbutton->Enable();
+
+       wxCommandEvent eventCustom(wxEVT_UPDATE_PROJECT_TREE);
+	     /* Notify parents to expand to the created file*/
+
+       if (!m_fileIO.output_file.empty())
+      {
+        wxStringClientData *scd = new wxStringClientData(wxString(
+            m_fileIO.output_file.c_str(), wxConvUTF8));
+        eventCustom.SetClientData(scd);
+      } else {
+        eventCustom.SetClientData(NULL);
+      }
+
+      wxPostEvent(m_parent, eventCustom);
 	  }
 
 DECLARE_EVENT_TABLE()

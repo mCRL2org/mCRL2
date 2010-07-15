@@ -364,6 +364,22 @@ public:
 		return m_notebookpanel;
 	}
 
+	void
+	OnUpdateProjectTree(wxCommandEvent& evt)
+    {
+
+      if (evt.GetClientData())
+      {
+        wxStringClientData *p;
+        p = (wxStringClientData*) evt.GetClientData();
+        if (p)
+        {
+          m_left_panel->Refresh();
+          m_left_panel->ExpandPath(p->GetData());
+        }
+      }
+
+    }
 
 private:
 
@@ -409,6 +425,8 @@ EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
 EVT_IDLE(MainFrame::OnIdle)
 
 EVT_TIMER(wxID_ANY, MainFrame::OnTimer)
+
+EVT_UPDATE_PROJECT_TREE(wxID_ANY, MainFrame::OnUpdateProjectTree)
 
 END_EVENT_TABLE()
 
