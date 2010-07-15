@@ -152,6 +152,7 @@ namespace mcrl2
       private:
         // lps2lts_algorithm may be initialised only once
         bool initialised;
+        bool premature_termination_handler_called;
         bool finalised;
         bool completely_generated;
 
@@ -187,6 +188,7 @@ namespace mcrl2
       public:
         lps2lts_algorithm() :
           initialised(false),
+          premature_termination_handler_called(false),
           finalised(false),
           completely_generated(false),
           states(0,0), //Table of size 0 initially
@@ -209,14 +211,17 @@ namespace mcrl2
         bool generate_lts();
         bool finalise_lts_generation();
 
-        bool premature_termination_handler()
+        void premature_termination_handler()
         {
-          std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
-          if(initialised && !finalised)
+          if(!premature_termination_handler_called)
           {
-            finalise_lts_generation();
+            premature_termination_handler_called = true;
+            std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
+            if(initialised && !finalised)
+            {
+              finalise_lts_generation();
+            }
           }
-          throw exploration_aborted_error();
         }
 
 
