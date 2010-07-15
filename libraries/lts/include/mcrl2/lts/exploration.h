@@ -17,6 +17,7 @@
 
 #include "boost/bind.hpp"
 #include "boost/cstdint.hpp"
+#include "boost/function.hpp"
 
 #include "aterm2.h"
 #include "mcrl2/atermpp/indexed_set.h"
