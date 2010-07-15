@@ -15,6 +15,20 @@
 #include <wx/thread.h>
 #include <wx/listbox.h>
 
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_END, 7777)
+END_DECLARE_EVENT_TYPES()
+
+DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_END)
+
+// it may also be convenient to define an event table macro for this event type
+#define EVT_MY_PROCESS_END(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_MY_PROCESS_END, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
+
 class MyPipedProcess;
 WX_DEFINE_ARRAY_PTR(MyPipedProcess *, MyActiveProcessArray)
 ;
@@ -42,9 +56,12 @@ public:
 
 	long m_ext_pid;
 
-	MyPipedProcess(wxProcess *parent) :
-		MyProcess(parent) {
+	wxWindow *m_parent;
+
+	MyPipedProcess(wxWindow *parent) :
+		MyProcess(NULL) {
 		Redirect();
+		m_parent = parent;
 	}
 
 	void AddAsyncProcess(wxListBox *output ) {
@@ -73,6 +90,10 @@ public:
 			// Stop timer
 			m_timerIdleWakeUp.Stop();
 		}
+
+    wxCommandEvent eventCustom(wxEVT_MY_PROCESS_END);
+    wxPostEvent(m_parent, eventCustom);
+
 	}
 	;
 

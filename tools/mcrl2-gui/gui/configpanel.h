@@ -19,6 +19,7 @@
 #include <gui/outputlistbox.h>
 #include <wx/scrolwin.h>
 #include <wx/gbsizer.h>
+#include <wx/event.h>
 
 
 #define ID_RUN_TOOL 1000
@@ -36,7 +37,6 @@ public:
 		m_parent = parent;
 		m_listbox_output = listbox_output;
 		m_fileIO = fileIO;
-		m_timer = new wxTimer(this, ID_TIMER);
 		m_pid = 0;
 
 		int row = 0;
@@ -272,7 +272,7 @@ public:
 
 		m_listbox_output->Append(run);
 
-		m_process = new MyPipedProcess(NULL);
+		m_process = new MyPipedProcess(this);
 
 		// Gui tools should be visible:
 		// Tools redirect the standard input and/or output of the process being launched by calling Redirect. 
@@ -311,7 +311,6 @@ public:
 
           m_configpanel->SetSelection(m_configpanel->GetSelection() + 1);
         };
-        m_timer -> Start(150);
       }
 	}
 	;
@@ -322,30 +321,19 @@ public:
 		}
 		m_abortbutton->Show(false);
 		m_runbutton->Enable();
-		m_timer->Stop();
 	};
 
 	void OnOutputFileChange(wxFileDirPickerEvent& event) {
 		m_fileIO.output_file = event.GetPath().mb_str(wxConvUTF8);
 	};
 
-	void OnTimer(wxTimerEvent& /*event*/) {
-		if (!wxProcess::Exists(m_pid)) {
-			m_abortbutton->Show(false);
-			m_runbutton->Enable();
-			m_timer->Stop();
-		}
-	};
-
 	virtual bool Destroy() {
-		//TODO: If running, show modal dialog to ensure exit
 
+	  /* Implement Veto */
 		//Killing m_pid == 0 can terminate application
 		if (wxProcess::Exists(m_pid) && (m_pid != 0)) {
 			wxProcess::Kill(m_pid);
 		}
-		//Stop and clean up timer
-		m_timer->Stop();
 		return true;
 	}
 	;
@@ -375,8 +363,6 @@ public:
 	MyPipedProcess *m_process;
 
 	long m_pid;
-
-	wxTimer *m_timer;
 
 private:
 
@@ -408,14 +394,19 @@ private:
       return wxString(file_suggestion.c_str(), wxConvUTF8);
     }
 
+	  void OnProcessEnd(wxCommandEvent& evt){
+	     m_abortbutton->Show(false);
+	     m_runbutton->Enable();
+	  }
+
 DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
 		EVT_BUTTON(ID_RUN_TOOL, ConfigPanel::OnRunClick) EVT_BUTTON(ID_ABORT_TOOL, ConfigPanel::OnAbortClick)
 
 		EVT_FILEPICKER_CHANGED(ID_OUTPUT_FILE, ConfigPanel::OnOutputFileChange)
-		EVT_TIMER(ID_TIMER, ConfigPanel::OnTimer)
 		EVT_SIZE(ConfigPanel::OnResize)
+		EVT_MY_PROCESS_END( wxID_ANY, ConfigPanel::OnProcessEnd )
 		END_EVENT_TABLE ()
 
 #endif /* MCRL2_GUI_CONFIGPANEL_H_ */

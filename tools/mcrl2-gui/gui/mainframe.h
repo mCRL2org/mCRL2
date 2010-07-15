@@ -117,7 +117,7 @@ public:
 				wxT("Kill a process by PID"));
 
 		wxMenu *helpMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
-		helpMenu->Append(Exec_About, wxT("&About\tF1"),
+		helpMenu->Append(wxID_ABOUT, wxT("&About\tF1"),
 				wxT("Show about dialog"));
 
 		wxMenu *windowMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
@@ -133,7 +133,9 @@ public:
 		// add menus to the menu bar
 		wxMenuBar *menuBar = new wxMenuBar();
 		menuBar->Append(menuFile, wxT("&File"));
+#ifdef DEBUG
 		menuBar->Append(execMenu, wxT("&Process"));
+#endif
 		menuBar->Append(windowMenu, wxT("&Window"));
 		menuBar->Append(helpMenu, wxT("&Help"));
 
@@ -323,12 +325,6 @@ public:
 	}
 	;
 
-	void OnAbout(wxCommandEvent& /*event*/) {
-		wxMessageBox(wxT("mCRL2-gui"), wxT("mCRL2-gui"), wxOK
-				| wxICON_INFORMATION, this);
-	}
-	;
-
 	// polling output of async processes
 	void OnTimer(wxTimerEvent& /*event*/) {
 		/* Send a system wide idle event */
@@ -408,7 +404,6 @@ EVT_MENU(Exec_ClearLog, MainFrame::OnClear)
 
 EVT_MENU(Exec_Redirect, MainFrame::OnExecWithRedirect)
 
-EVT_MENU(Exec_About, MainFrame::OnAbout)
 EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
 
 EVT_IDLE(MainFrame::OnIdle)
