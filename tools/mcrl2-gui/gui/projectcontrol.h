@@ -424,7 +424,12 @@ public:
 	;
 
 	void OnActivate(wxTreeEvent& /*evt*/){
-	  Edit();
+
+	  if(!wxDir::Exists(this->GetPath())){
+	    Edit();
+	  } else{
+	    this->ExpandPath(this->GetPath());
+	  }
 	}
 
 	wxTimer *refresh_dir;
