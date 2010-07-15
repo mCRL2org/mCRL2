@@ -58,7 +58,7 @@ class MimeManager
       {
         //substitute %s by filenameWithExtention
         wxString cmd = m_edittool_mapping.find(ext)->second;
-        cmd.Replace(wxT( "%%s" ), filenameWithExtension );
+        cmd.Replace(wxT( "%s" ), filenameWithExtension );
         return cmd;
       }
 

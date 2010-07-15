@@ -105,6 +105,9 @@ public:
 
 			ncp->Layout();
 
+			/* Todo: Fix tooltip such that it appears on top the ctrl panels */
+			ncp->SetToolTip( this->GetPath() );
+
 			m_notebookpanel->AddPage(ncp, wxString( m_tool_catalog[evt.GetId()].m_name.c_str(), wxConvUTF8), true);
 
 		} else {
@@ -219,7 +222,7 @@ public:
 
 		  MimeManager mm;
 		  wxString cmd = mm.getCommandForExtention( this->GetPath() );
-		  wxString ext = mm.getCommandForExtention( this->GetPath() );
+		  wxString ext = this->GetPath().AfterLast(_T('.') );
 
 		  if (!cmd.empty())
 		  {
@@ -249,52 +252,83 @@ public:
 		this->GetTreeCtrl()->EditLabel(this->GetTreeCtrl()->GetSelection());
 	}
 
-	void Delete() {
-		wxMessageDialog
-				*dial =
-						new wxMessageDialog(
-								NULL,
-								wxT("This action will delete the file from disk.\nAre you sure to continue?"),
-								wxT("Question"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
-		if (dial->ShowModal() == wxID_YES) {
+	void
+    Delete()
+    {
 
-			if (wxFile::Exists(this->GetPath())) {
-				if (remove(this->GetPath().mb_str(wxConvUTF8)) != 0) {
-					wxLogError(wxT("Error deleting file"));
-					return;
-				}
-			};
+	  bool rm_from_disk = false;
 
-			if (wxDir::Exists(this->GetPath())) {
-				/*wxArrayString  files;
-				 wxDir::GetAllFiles(this->GetPath(), &files, wxEmptyString, wxDIR_DEFAULT | wxDIR_DIRS);
+      if (wxFile::Exists(this->GetPath()))
+      {
+        wxMessageDialog
+            *dial =
+                new wxMessageDialog(
+                    NULL,
+                    wxT("This action deletes the selected file from disk.\nAre you sure to continue?"),
+                    wxT("Question"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
+        if (dial->ShowModal() == wxID_YES)
+        {
 
-				 wxLogError( files);*/
-				if (!wxRmdir(this->GetPath())) {
-					wxLogError(wxT("Error deleting directory"));
-					return;
-				}
-			};
+          if (remove(this->GetPath().mb_str(wxConvUTF8)) != 0)
+          {
+            wxLogError(wxT("Error deleting file"));
+            return;
+          }
 
-			{
-				/* Remove from tree */
-				wxTreeItemId item_for_removal = this->GetTreeCtrl()->GetSelection();
+          rm_from_disk = true;
+        };
+      }
 
-				if (this->GetTreeCtrl()->GetNextSibling(item_for_removal).IsOk()) {
-					this->GetTreeCtrl()->SelectItem(this->GetTreeCtrl()->GetNextSibling(
-							item_for_removal));
-				} else if (this->GetTreeCtrl()->GetPrevSibling(item_for_removal).IsOk()) {
-					this->GetTreeCtrl()->SelectItem(this->GetTreeCtrl()->GetPrevSibling(
-							item_for_removal));
-				} else if (this->GetTreeCtrl()->GetPrevSibling(item_for_removal).IsOk()) {
-					this->GetTreeCtrl()->SelectItem(this->GetTreeCtrl()->GetPrevVisible(
-							item_for_removal));
-				};
+      if (wxDir::Exists(this->GetPath()))
+      {
+        wxMessageDialog
+            *dial =
+                new wxMessageDialog(
+                    NULL,
+                    wxT("This action deletes the directory from disk (if empty).\nAre you sure to continue?"),
+                    wxT("Question"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
+        if (dial->ShowModal() == wxID_YES)
+        {
+          /*wxArrayString  files;
+           wxDir::GetAllFiles(this->GetPath(), &files, wxEmptyString, wxDIR_DEFAULT | wxDIR_DIRS);
 
-				this->GetTreeCtrl()->Delete(item_for_removal);
-			}
-		}
-	}
+           wxLogError( files);*/
+          if (!wxRmdir(this->GetPath()))
+          {
+            wxLogError(wxT("Error deleting directory"));
+            return;
+          } else {
+            rm_from_disk = true;
+
+          }
+        }
+      };
+
+      if(rm_from_disk)
+      {
+        /* Remove from tree */
+        wxTreeItemId item_for_removal = this->GetTreeCtrl()->GetSelection();
+
+        if (this->GetTreeCtrl()->GetNextSibling(item_for_removal).IsOk())
+        {
+          this->GetTreeCtrl()->SelectItem(this->GetTreeCtrl()->GetNextSibling(
+              item_for_removal));
+        }
+        else if (this->GetTreeCtrl()->GetPrevSibling(item_for_removal).IsOk())
+        {
+          this->GetTreeCtrl()->SelectItem(this->GetTreeCtrl()->GetPrevSibling(
+              item_for_removal));
+        }
+        else if (this->GetTreeCtrl()->GetPrevSibling(item_for_removal).IsOk())
+        {
+          this->GetTreeCtrl()->SelectItem(this->GetTreeCtrl()->GetPrevVisible(
+              item_for_removal));
+        };
+
+        this->GetTreeCtrl()->Delete(item_for_removal);
+      }
+    }
+
 
 	void DisplayMenu() {
 		wxMenu mnu;
