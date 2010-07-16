@@ -3300,6 +3300,9 @@ static void gl2psPrintTeXFooter(void)
 
 static void gl2psPrintTeXBeginViewport(GLint viewport[4])
 {
+  // Trick to prevent compiler warnings.
+  (void)(viewport[0]);
+
   glRenderMode(GL_FEEDBACK);
   
   if(gl2ps->header){
@@ -5027,6 +5030,12 @@ static void gl2psPrintSVGPixmap(GLfloat x, GLfloat y, GL2PSimage *pixmap)
 #else
   gl2psMsg(GL2PS_WARNING, "GL2PS must be compiled with PNG support in "
            "order to embed images in SVG streams");
+  /* Harmless trick that prevents compiler warning if not GL2PS_HAVE_LIBPNG */
+  if(pixmap != NULL)
+  {
+    (void)(x);
+    (void)(y);
+  }
 #endif
 }
 
