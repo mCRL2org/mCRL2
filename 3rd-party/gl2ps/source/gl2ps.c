@@ -56,6 +56,11 @@
  *
  *********************************************************************/
 
+/* Workaround for building with bjam, should be in math.h */
+#ifndef M_PI
+# define M_PI   3.14159265358979323846  /* pi */
+#endif
+
 /* Magic numbers (assuming that the order of magnitude of window
    coordinates is 10^3) */
 
