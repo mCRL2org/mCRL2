@@ -58,20 +58,35 @@ std::string temporary_filename(std::string const& prefix = "")
   return result.string();
 }
 
+std::string nextstate_format_to_string(const NextStateFormat f)
+{
+  switch(f)
+  {
+    case GS_STATE_VECTOR:
+      return std::string("vector");
+    case GS_STATE_TREE:
+      return std::string("tree");
+    default:
+      return std::string("unknown");
+  }
+}
+
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 lts::lts translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty,
-                              NextStateFormat = GS_STATE_VECTOR,
+                              NextStateFormat format = GS_STATE_VECTOR,
                               std::string priority_action = "")
 {
+  std::clog << "Translating LPS to LTS with exploration strategy " << std::string(expl_strat_to_str(strategy)) << ", rewrite strategy " << pp(rewrite_strategy) << ", and state format " << nextstate_format_to_string(format) << "." << std::endl;
   lts::lts_generation_options options;
   options.trace_prefix = "lps2lts_test";
   options.specification = specification;
   options.priority_action = priority_action;
   options.strat = rewrite_strategy;
   options.expl_strat = strategy;
+  options.stateformat = format;
 
   options.lts = temporary_filename("lps2lts_test");
   options.outformat = lts::lts_aut;
@@ -110,7 +125,6 @@ rewrite_strategy_vector initialise_rewrite_strategies()
   result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
 #endif // MCRL2_JITTYC_AVAILABLE
 #endif // MCRL2_TEST_COMPILERS
-
   return result;
 }
 
@@ -130,7 +144,7 @@ exploration_strategy_vector initialise_exploration_strategies()
   exploration_strategy_vector result;
   result.push_back(lts::es_breadth);
   result.push_back(lts::es_depth);
-  result.push_back(lts::es_random);
+  //result.push_back(lts::es_random);
   return result;
 }
 
