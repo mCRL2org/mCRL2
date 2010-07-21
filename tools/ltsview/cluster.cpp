@@ -20,12 +20,12 @@ using namespace MathUtils;
 
 bool Comp_BCRadius::operator()(const Cluster* c1,const Cluster* c2) const
 {
-  return c1 != c2 && c1->getBCRadius() < c2->getBCRadius();
+  return (c1->getBCRadius() < c2->getBCRadius());
 }
 
 bool Comp_BCVolume::operator()(const Cluster* c1,const Cluster* c2) const
 {
-  return c1 != c2 && c1->getBCVolume() < c2->getBCVolume();
+  return (c1->getBCVolume() < c2->getBCVolume());
 }
 
 Cluster::Cluster(int r)
