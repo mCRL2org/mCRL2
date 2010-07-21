@@ -23,13 +23,7 @@ class FSMStatePositioner: public StatePositioner
     void positionStates();
 
   private:
-    static const unsigned int NUM_RINGS = 2;
-
-    std::map< Cluster*, std::vector< State* > > undecided;
-    std::map< Cluster*, std::vector< std::vector< std::vector< State* > > > > slots;
-    std::vector< State* > todo_top_down;
-    std::vector< State* > todo_resolve_slots;
-
+    std::vector< State* > unpositioned_states;
     bool allStatesCentered(std::vector< State* > &states);
     void assignStateToPosition(State* state, Vector2D &position);
     void bottomUpPass();
@@ -41,18 +35,6 @@ class FSMStatePositioner: public StatePositioner
         float rim_radius);
     Vector2D sumStateVectorsInSingleCluster(std::vector< State* > &states);
     void topDownPass();
-
-    int getTotalNumSlots(Cluster* cluster);
-    int getNumSlots(Cluster* cluster, unsigned int ring);
-    void occupySlot(Cluster* cluster, unsigned int ring,float pos,State* s);
-    void occupyCenterSlot(Cluster* cluster, State* s);
-    void resolveSlots(Cluster* cluster);
-    void clearSlots(Cluster* cluster);
-    void addUndecidedState(Cluster* cluster, State* s);
-    void slotUndecided(Cluster* cluster, unsigned int ring,unsigned int
-        from,unsigned int to);
-    void spreadSlots(Cluster* cluster, unsigned int ring);
-    void createClusterSlots(Cluster* cluster);
 };
 
 #endif
