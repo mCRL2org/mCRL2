@@ -110,7 +110,9 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification const& spec)
 
 void read_from_fsm(lts &l, std::istream &is, lts_type type, lps::specification const& spec)
 {
-  parse_fsm(is,l);
+  if (!parse_fsm(is,l))
+  { throw mcrl2::runtime_error("error parsing .fsm file");
+  }
 
   if ( l.get_type() == lts_mcrl2 )
   {

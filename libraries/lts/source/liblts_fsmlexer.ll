@@ -81,6 +81,20 @@ Number     [0]|([1-9][0-9]*)
 "---"	  { posNo += YYLeng(); return SECSEP; }
 "("	  { posNo += YYLeng(); return LPAR; }
 ")"	  { posNo += YYLeng(); return RPAR; }
+"|"	  { posNo += YYLeng(); return BAR; }
+"struct"	  { posNo += YYLeng(); return KWSTRUCT; }
+"Set"	  { posNo += YYLeng(); return SET; }
+"List"	  { posNo += YYLeng(); return LIST; }
+"Real"	  { posNo += YYLeng(); return REAL; }
+"#"	  { posNo += YYLeng(); return HASH; }
+"?"	  { posNo += YYLeng(); return QMARK; }
+":"	  { posNo += YYLeng(); return COLON; }
+","	  { posNo += YYLeng(); return COMMA; }
+"Int"	  { posNo += YYLeng(); return INT; }
+"Nat"	  { posNo += YYLeng(); return NAT; }
+"Pos"	  { posNo += YYLeng(); return POS; }
+"Bag"	  { posNo += YYLeng(); return BAG; }
+"Bool"	  { posNo += YYLeng(); return BOOL; }
 "->"	  { posNo += YYLeng(); return ARROW; }
 {Id}	  { processId(); return ID; }
 {Quoted}  { processQuoted(); return QUOTED; }

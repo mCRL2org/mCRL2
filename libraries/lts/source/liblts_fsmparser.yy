@@ -43,10 +43,10 @@ char* intToCString(int i);
 
 %start fsm_file
 
-%token EOLN SECSEP LPAR RPAR ARROW
+%token EOLN SECSEP LPAR RPAR ARROW HASH QMARK COLON COMMA BAG BAR KWSTRUCT SET LIST
 %token <number> NUMBER
-%token <aterm> ID QUOTED
-%type  <aterm> type_name type_name1 action
+%token <aterm> ID QUOTED BOOL POS NAT INT REAL
+%type  <aterm> sort_expr sort_expr_arrow domain_no_arrow sort_expr_struct domain_no_arrow_elts_hs struct_constructors_bs struct_constructor recogniser struct_projections_cs struct_projection sort_expr_primary sort_constant sort_constructor domain_no_arrow_elt action
 
 %%
 
@@ -92,7 +92,7 @@ cardinality :
   ;
 
 type_def :
-  type_name
+  sort_expr
     {
       if (!ignore_par[num_pars])
       {
@@ -111,14 +111,24 @@ type_def :
     }
   ;
 
-type_name :
-  /* empty */
-    { safe_assign($$, ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) }
-  |
-  type_name1
-    { safe_assign($$, $1) }
-  |
-  type_name ARROW type_name1
+//Sort expressions
+//----------------
+
+//sort expression
+sort_expr:
+  sort_expr_arrow
+    {
+      safe_assign($$, $1);
+    }
+  ;
+
+//arrow sort expression
+sort_expr_arrow:
+  sort_expr_struct
+    {
+      safe_assign($$, $1);
+    }
+  | domain_no_arrow ARROW sort_expr_arrow
     {
       std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
         + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
@@ -126,18 +136,186 @@ type_name :
     }
   ;
 
-type_name1 :
-  ID
-    { safe_assign($$, $1) }
-  |
-  LPAR type_name RPAR
+//domain
+domain_no_arrow:
+  domain_no_arrow_elts_hs
     {
-      std::string result = "(" + static_cast<std::string> ( ATwriteToString(
-        (ATerm)$2) ) + ")";
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ))
+      safe_assign($$, $1);
     }
   ;
 
+//one or more domain elements, separated by hashes
+domain_no_arrow_elts_hs:
+  domain_no_arrow_elt
+    {
+      safe_assign($$, $1);
+    }
+  | domain_no_arrow_elts_hs HASH domain_no_arrow_elt
+    {
+      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+        + "#" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  ;
+
+//domain element
+domain_no_arrow_elt:
+  sort_expr_struct
+    {
+      safe_assign($$, $1);
+    }
+  ;
+
+//structured sort
+sort_expr_struct:
+  sort_expr_primary
+    {
+      safe_assign($$, $1);
+    }
+  | KWSTRUCT struct_constructors_bs
+    {
+      std::string result = "struct " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  ;
+
+//one ore more structured sort constructors, separated by bars
+struct_constructors_bs:
+  struct_constructor
+    {
+      safe_assign($$, $1);
+    }
+  | struct_constructors_bs BAR struct_constructor
+    {
+      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+        + "|" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  ;
+
+//structured sort constructor
+struct_constructor:
+  ID recogniser
+    {
+      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+        + " " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  | ID LPAR struct_projections_cs RPAR recogniser
+    {
+      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+        + "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")" +
+              static_cast<std::string> ( ATwriteToString( (ATerm)$5 ) );
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  ;
+
+//recogniser
+recogniser:
+  /* empty */
+    {
+      std::string result = static_cast<std::string> ( "");
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  | QMARK ID
+    {
+      std::string result = "?" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  ;
+
+//one or more structured sort projections, separated by comma's
+struct_projections_cs:
+  struct_projection
+    {
+      safe_assign($$, $1);
+    }
+  | struct_projections_cs COMMA struct_projection
+    {
+      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+        + "," + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+
+    }
+  ;
+
+//structured sort projection
+struct_projection:
+  sort_expr
+    {
+      safe_assign($$, $1);
+    }
+  | ID COLON sort_expr
+    {
+      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+        + ":" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  ;
+
+//primary sort expression
+sort_expr_primary:
+  ID
+    {
+      safe_assign($$, $1);
+    }
+  | sort_constant
+    {
+      safe_assign($$, $1);
+    }
+  | sort_constructor
+    {
+      safe_assign($$, $1);
+    }
+  | LPAR sort_expr RPAR
+    { 
+      std::string result = "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) ) + ")";
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  ;
+
+//sort constant
+sort_constant:
+  BOOL
+    {
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Bool", 0, ATfalse ) ));
+    }
+  | POS
+    {
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Pos", 0, ATfalse ) ));
+    }
+  | NAT
+    {
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Nat", 0, ATfalse ) ));
+    }
+  | INT
+    {
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Int", 0, ATfalse ) ));
+    }
+  | REAL
+    {
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Real", 0, ATfalse ) ));
+    }
+  ;
+
+//sort constructor
+sort_constructor:
+  LIST LPAR sort_expr RPAR
+    {
+      std::string result = "List(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  | SET LPAR sort_expr RPAR
+    {
+      std::string result = "Set(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  | BAG LPAR sort_expr RPAR
+    {
+      std::string result = "Bag(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
+      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+    }
+  ;
 
 type_values :
   /* empty */
