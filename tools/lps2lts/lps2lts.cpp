@@ -44,6 +44,10 @@ lps2lts_algorithm lps2lts;
 
 void premature_termination_handler(int)
 {
+  // Reset signal handlers.
+  signal(SIGABRT,NULL);
+  signal(SIGINT,NULL);
+  signal(SIGTERM,NULL); 
   lps2lts.premature_termination_handler();
   exit(1);
 }
