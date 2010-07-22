@@ -35,7 +35,6 @@ endif(NOT MCRL2_BUILD_IN_SOURCE)
 #   CMAKE_BUILD_TYPE     = None | Debug | Release(*) | RelwithDebInfo | MinSizeRel
 #   MCRL2_USE_BOOST_INTERNAL   = ON(*) | OFF
 #   BUILD_SHARED_LIBS    = ON    | OFF(*)
-#   MCRL2_SQUADT_CONNECTIVITY  = ON(*) | OFF
 #   MCRL2_ENABLE_EXPERIMENTAL  = ON    | OFF(*)
 #   MCRL2_ENABLE_DEPRECATED    = ON    | OFF(*)
 
@@ -424,14 +423,6 @@ if(MCRL2_NDEBUG)
 endif(MCRL2_NDEBUG)
 
 ##---------------------------------------------------
-## Determine SQuADT connectivity
-##--------------------------------------------------- 
-
-option(MCRL2_SQUADT_CONNECTIVITY "Enable/disable support for SQuADT connectivity" ON)
-
-message(STATUS "MCRL2_SQUADT_CONNECTIVITY: ${MCRL2_SQUADT_CONNECTIVITY}")
-
-##---------------------------------------------------
 ## Set wxWidgets configuration
 ##--------------------------------------------------- 
 
@@ -492,11 +483,11 @@ endif( OPENGL_FOUND AND wxWidgets_FOUND )
 if(NOT MCRL2_ENABLE_GUI_TOOLS )
   set(MCRL2_BUILD_GUI_TOOLS false)
   if(NOT MINGW OR NOT MSYS)
-    if( CXX_ACCEPTS_PTHREAD AND MCRL2_SQUADT_CONNECTIVITY )
+    if( CXX_ACCEPTS_PTHREAD )
       set(CMAKE_EXE_LINKER_FLAGS "-pthread ${CMAKE_EXE_LINKER_FLAGS}")
       set(CMAKE_SHARED_LINKER_FLAGS "-pthread ${CMAKE_SHARED_LINKER_FLAGS}")
       set(CMAKE_MODULE_LINKER_FLAGS "-pthread ${CMAKE_SHARED_LINKER_FLAGS}")
-    endif( CXX_ACCEPTS_PTHREAD AND MCRL2_SQUADT_CONNECTIVITY )
+    endif( CXX_ACCEPTS_PTHREAD )
   endif(NOT MINGW OR NOT MSYS)
 
 endif(NOT MCRL2_ENABLE_GUI_TOOLS  )

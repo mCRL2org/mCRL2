@@ -29,22 +29,20 @@ include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include/)
 #The following include directory is required by out-of-source builds for finding setup.h
 include_directories(${CMAKE_BINARY_DIR}/libraries/utilities/include)
 
-if(MCRL2_SQUADT_CONNECTIVITY)
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
+add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
 
-  if(MINGW)
-    target_link_libraries(${PROJECT_NAME}
-      wsock32
-      ws2_32
-    )
-  endif(MINGW)   
-  
-  if ( APPLE)
-      set(CMAKE_EXE_LINKER_FLAGS "-framework Carbon ${CMAKE_EXE_LINKER_FLAGS}")
-      set(CMAKE_SHARED_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
-      set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
-  endif (APPLE)
-endif(MCRL2_SQUADT_CONNECTIVITY)
+if(MINGW)
+  target_link_libraries(${PROJECT_NAME}
+    wsock32
+    ws2_32
+  )
+endif(MINGW)   
+
+if ( APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS "-framework Carbon ${CMAKE_EXE_LINKER_FLAGS}")
+    set(CMAKE_SHARED_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
+    set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
+endif (APPLE)
 
 if(MCRL2_BUILD_GUI_TOOLS)
   set(MCRL2_SIMULATOR_GUI
