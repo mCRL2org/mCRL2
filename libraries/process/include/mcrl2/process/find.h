@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_FIND_H
 
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/detail/find.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/process/detail/traverser.h"
 #include "mcrl2/process/detail/sort_traverser.h"
 #include "mcrl2/process/detail/binding_aware_traverser.h"

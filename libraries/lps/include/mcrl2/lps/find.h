@@ -13,7 +13,7 @@
 #define MCRL2_LPS_FIND_H
 
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/detail/find.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/lps/detail/traverser.h"
 #include "mcrl2/lps/detail/sort_traverser.h"
 #include "mcrl2/lps/detail/binding_aware_traverser.h"

@@ -12,10 +12,9 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/binding_aware_traverser.h"
 #include "mcrl2/data/detail/sort_traverser.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -43,7 +42,7 @@ class identity_traverser: public mcrl2::data::detail::traverser<identity_travers
 class identity_sort_traverser: public mcrl2::data::detail::sort_traverser<identity_sort_traverser>
 {
   public:
-    typedef mcrl2::data::detail::traverser<identity_sort_traverser> super;
+    typedef mcrl2::data::detail::sort_traverser<identity_sort_traverser> super;
       
     using super::enter;
     using super::leave;

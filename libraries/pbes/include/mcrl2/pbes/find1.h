@@ -16,7 +16,7 @@
 #include <iterator>
 #include <functional>
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/detail/find.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/pbes/detail/traverser.h"
 #include "mcrl2/pbes/detail/sort_traverser.h"
 #include "mcrl2/pbes/detail/binding_aware_traverser.h"

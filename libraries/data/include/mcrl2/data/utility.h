@@ -25,7 +25,6 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
@@ -77,7 +76,7 @@ namespace mcrl2 {
         typedef boost::iterator_range< boost::transform_iterator<
            AdaptableUnaryFunction, typename Container::const_iterator > > type;
       };
-    }
+    } // namespace detail
     /// \endcond
 
     /// \brief Gives a sequence of sorts for a given sequence of expressions

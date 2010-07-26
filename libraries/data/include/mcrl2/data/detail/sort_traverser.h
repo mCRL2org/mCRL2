@@ -24,10 +24,10 @@ namespace mcrl2 {
     namespace detail {
 
       template < typename Derived >
-      class sort_traverser : public traverser< Derived >
+      class sort_traverser : public detail::traverser< Derived >
       {
         public:
-          typedef traverser< Derived > super;
+          typedef detail::traverser< Derived > super;
 
           template < typename Expression >
           void enter(Expression const&)
