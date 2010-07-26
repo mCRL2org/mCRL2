@@ -493,7 +493,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
         for (int i=0; i<info.statelen; i++)
         {
-                stateargs[i] = NULL;
+          stateargs[i] = NULL;
         }
         ATprotectArray(stateargs,info.statelen);
 
@@ -524,7 +524,13 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         ATprotectArray((ATerm *) info.summands,info.num_summands);
         for (int i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
         {
-                info.summands[i] = ATmakeAppl4(smndAFun,ATgetArgument(ATAgetFirst(sums),0),info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),(ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),(ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
+          info.summands[i] = 
+             ATmakeAppl4(
+                smndAFun,
+                ATgetArgument(ATAgetFirst(sums),0),
+                info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),
+                (ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),
+                (ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
         }
 
         l = pars;
@@ -532,24 +538,31 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
 
         for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
         {
-                n = m;
-                bool set = false;
-                for (; !ATisEmpty(n); n=ATgetNext(n))
-                {
-                        if ( ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)) )
-                        {
-                                stateargs[i] = info.m_rewriter(info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars)));
-                                set = true;
-                                break;
-                        }
-                }
-                if ( !set )
-                {
-                        gsErrorMsg("Parameter '%T' does not have an initial value.",ATgetArgument(ATAgetFirst(l),0));
-                        initial_state = NULL;
-                        ATprotect(&initial_state);
-                        return;
-                }
+          n = m;
+          bool set = false;
+          for (; !ATisEmpty(n); n=ATgetNext(n))
+          {
+            if ( ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)) )
+            {
+              stateargs[i] = info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars));
+              set = true;
+              break;
+            }
+          }
+          if ( !set )
+          {
+            gsErrorMsg("Parameter '%T' does not have an initial value.",ATgetArgument(ATAgetFirst(l),0));
+            initial_state = NULL;
+            ATprotect(&initial_state);
+            return;
+          }
+        }
+
+        // Rewrite the state arguments en block, as otherwise the generation of new symbols in the 
+        // rewriter is intermingled with rewriting, causing the rewriter to rewrite too often.
+        for (int i=0; i<info.statelen; i++)
+        {
+          stateargs[i] = info.m_rewriter(stateargs[i]);
         }
 
         switch ( info.stateformat )
