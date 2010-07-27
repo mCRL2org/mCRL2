@@ -73,7 +73,7 @@ namespace detail {
 
     ATerm rewriteInternal(const ATerm Term) const
     { 
-      return rewriteInternal(Term);
+      return m_rewriter->rewriteInternal(Term);
     }   
       
     void setSubstitutionInternal(const ATermAppl Var, const ATerm Expr)
