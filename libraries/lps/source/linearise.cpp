@@ -6276,19 +6276,15 @@ class specification_basic_type:public boost::noncopyable
       }
 
       // At this point the parameters of pars1 and pars2 are unique, except for
-      // those that are constant in both processes. Constant parameters do not occur
-      // in the initialisation of the processes.
+      // those that are constant in both processes. 
 
       variable_list pars3;
       for(variable_list::const_iterator i=pars2.begin(); i!=pars2.end(); ++i)
       { 
         if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
-        { // *i does not occur in pars1.
+        { 
+          // *i does not occur in pars1.
           pars3=push_front(pars3,*i);
-        }
-        else
-        { assert(!data::search_free_variable(init1,*i));
-          assert(!data::search_free_variable(init2,*i));
         }
       }
 

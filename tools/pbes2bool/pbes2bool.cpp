@@ -278,10 +278,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       p.normalize();
       p.instantiate_global_variables();
       // data rewriter
-      /* for (std::set <mcrl2::data::data_equation >::const_iterator i=p.data().equations();
-               i!=p.data().equations(); ++i)
-      { std::cerr << "AKAKAKAKAKAK " << *i << "\n";
-      } */
+      
       data::rewriter datar= (opt_data_elm) ?
             data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p)), rewrite_strategy()) :
             data::rewriter(p.data(), rewrite_strategy());
@@ -395,14 +392,9 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
                        ( result ? "true" : "false"));
 
       if (opt_construct_counter_example)
-#ifdef NDEBUG // Precompile the data terms to compiler format.
-      { bes_equations.print_counter_example(true,datar.get_internal_rewriter(),opt_store_as_tree,opt_counter_example_file);
+      { 
+        bes_equations.print_counter_example(opt_counter_example_file);
       }
-#else // Use data terms in standard format, and do not allow a tree format to store arguments, as this is not accepted
-      // by the internal consistency checks.
-      { bes_equations.print_counter_example(false,datar.get_internal_rewriter(),false,opt_counter_example_file);
-      }
-#endif
       return true;
     }
 

@@ -136,17 +136,6 @@ namespace mcrl2
         lgopts->m_rewriter.reset(new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
       }
 
-      // Declare all constructors to the rewriter to prevent unnecessary compilation.
-      // This can be removed if the jittyc or innerc compilers are not in use anymore.
-      // In certain cases it could be useful to add the mappings also, but this appears to
-      // give a substantial performance penalty, due to the addition of symbols to the
-      // rewriter that are not used. 
-      for(mcrl2::data::data_specification::constructors_const_range c=lgopts->specification.data().constructors(); 
-                    !c.empty() ; c.advance_begin(1))
-      { 
-        lgopts->m_rewriter->get_internal_rewriter()->toRewriteFormat(mcrl2::data::data_expression(c.front()));
-      }
-
       lgopts->m_enumerator_factory.reset(
                  new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >
                                (lgopts->specification.data(), *(lgopts->m_rewriter)));

@@ -472,6 +472,17 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         info.nil = gsMakeNil();
         ATprotectAppl(&info.nil);
 
+        // Declare all constructors to the rewriter to prevent unnecessary compilation.
+        // This can be removed if the jittyc or innerc compilers are not in use anymore.
+        // In certain cases it could be useful to add the mappings also, but this appears to
+        // give a substantial performance penalty, due to the addition of symbols to the
+        // rewriter that are not used. 
+        for(mcrl2::data::data_specification::constructors_const_range c=spec.data().constructors();
+                                        !c.empty() ; c.advance_begin(1))
+        {
+          info.import_term(mcrl2::data::data_expression(c.front()));
+        }
+        
         free_vars = atermpp::convert< mcrl2::data::variable_list >(spec.global_variables());
 
         pars = spec.process().process_parameters();
