@@ -120,7 +120,8 @@ void write_to_dot(const lts &l, string const& filename, lts_dot_options opts)
 
 void write_to_dot(const lts &l, ostream &os, lts_dot_options opts)
 {
-  os << "digraph \"" << *opts.name << "\" {" << endl; // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
+  std::string name(*(opts.name));
+  os << "digraph \"" << name << "\" {" << endl; // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
   // os << "size=\"7,10.5\";" << endl;
   os << "center = TRUE;" << endl;
   os << "mclimit = 10.0;" << endl;

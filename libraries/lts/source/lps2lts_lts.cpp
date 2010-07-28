@@ -32,7 +32,7 @@ namespace mcrl2
 
     void lps2lts_lts::open_lts(const char *filename, lps2lts_lts_options &opts)
     {
-      lts_filename = filename;
+      lts_filename = std::string(filename);
       if ( term_nil == NULL )
       {
         term_nil = gsMakeNil();
@@ -217,7 +217,8 @@ namespace mcrl2
               ext = lts_extra(*lts_opts.spec);
             } else if ( lts_opts.outformat == lts_dot )
             {
-              string fn = lts_filename;
+              assert(lts_filename != NULL);
+              string fn(lts_filename);
               lts_dot_options extdot;
               extdot.name = &fn;
               extdot.print_states = lts_opts.outinfo;
@@ -262,7 +263,7 @@ namespace mcrl2
           generic_lts = NULL;
           break;
       }
-      remove(lts_filename);
+      remove(lts_filename.c_str());
     }
 
   }

@@ -41,7 +41,7 @@ namespace mcrl2
       SVCfile svcf;
       SVCfile *svc;
       SVCparameterIndex svcparam;
-      const char *lts_filename;
+      std::string lts_filename;
       lts *generic_lts;
       ATermTable aterm2state, aterm2label;
 
