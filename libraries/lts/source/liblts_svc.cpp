@@ -42,6 +42,7 @@ void read_from_svc(lts &l, string const& filename, lts_type type)
 {
   SVCfile f;
   SVCbool b;
+  bool svc_file_has_state_info = false;
 
   if ( SVCopen(&f,const_cast< char* >(filename.c_str()),SVCread,&b) )
   {
@@ -57,19 +58,25 @@ void read_from_svc(lts &l, string const& filename, lts_type type)
     {
       throw mcrl2::runtime_error("SVC file '" + filename + "' is not in the mCRL format.");
     }
-    // state_info = (SVCgetIndexFlag(&f) == SVCfalse);
-  } else if ( type == lts_mcrl2 )
+    svc_file_has_state_info = (SVCgetIndexFlag(&f) == SVCfalse);
+  } 
+  else if ( type == lts_mcrl2 )
   {
     if ( svc_type == "mCRL2" )
     {
-      // state_info = false;
-    } else if ( svc_type == "mCRL2+info" )
+      svc_file_has_state_info = false; // redundant.
+    } 
+    else if ( svc_type == "mCRL2+info" )
     {
-      // state_info = true;
-    } else {
+      svc_file_has_state_info = true;
+    } 
+    else 
+    {
       throw mcrl2::runtime_error("SVC file '" + filename + "' is not in the mCRL2 format.");
     }
-  } else {
+  } 
+  else 
+  {
     if ( svc_type == "generic" )
     {
       throw mcrl2::runtime_error("SVC file '" + filename + "' is in the mCRL format.");
@@ -77,18 +84,20 @@ void read_from_svc(lts &l, string const& filename, lts_type type)
     {
       throw mcrl2::runtime_error("SVC file '" + filename + "' is in the mCRL2 format.");
     }
-    // state_info = (SVCgetIndexFlag(&f) == SVCfalse);
+    svc_file_has_state_info = (SVCgetIndexFlag(&f) == SVCfalse);
   }
 
-  // label_info = true;
-
-  if ( l.has_state_info() )
+  assert(SVCgetInitialState(&f)==0);
+  if ( svc_file_has_state_info )
   {
-    l.add_state(SVCstate2ATerm(&f,(SVCstateIndex) l.initial_state()));
-  } else {
+    l.add_state(SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f)));
+  }
+  else
+  {
     l.add_state();
   }
   l.set_initial_state((unsigned int) SVCgetInitialState(&f));
+
 
   SVCstateIndex from, to;
   SVClabelIndex label;
@@ -98,10 +107,12 @@ void read_from_svc(lts &l, string const& filename, lts_type type)
     unsigned int max = (unsigned int) ((from > to)?from:to);
     for (unsigned int i=l.num_states(); i<=max; i++)
     {
-      if ( l.has_state_info() )
+      if ( svc_file_has_state_info )
       {
         l.add_state(SVCstate2ATerm(&f,(SVCstateIndex) i));
-      } else {
+      } 
+      else 
+      {
         l.add_state();
       }
     }
@@ -112,7 +123,8 @@ void read_from_svc(lts &l, string const& filename, lts_type type)
       {
         ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
         l.add_label((ATerm) lab,!strcmp(ATgetName(ATgetAFun(lab)),"tau"));
-      } else if ( type == lts_mcrl2 )
+      } 
+      else if ( type == lts_mcrl2 )
       {
         ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
         if ( !gsIsMultAct(lab) )
@@ -120,14 +132,16 @@ void read_from_svc(lts &l, string const& filename, lts_type type)
           lab = ATAgetArgument(lab,0);
         }
         l.add_label((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
-      } else {
+      } 
+      else 
+      {
         l.add_label(SVClabel2ATerm(&f,(SVClabelIndex) i));
       }
     }
 
     l.add_transition(transition((unsigned int) from,
-                              (unsigned int) label,
-                              (unsigned int) to));
+                                (unsigned int) label,
+                                (unsigned int) to));
   }
 
   SVCclose(&f);
