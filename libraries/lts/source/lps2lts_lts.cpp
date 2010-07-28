@@ -217,7 +217,6 @@ namespace mcrl2
               ext = lts_extra(*lts_opts.spec);
             } else if ( lts_opts.outformat == lts_dot )
             {
-              assert(lts_filename != NULL);
               string fn(lts_filename);
               lts_dot_options extdot;
               extdot.name = &fn;
