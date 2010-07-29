@@ -328,11 +328,13 @@ namespace mcrl2 {
                 // Choose the normal form on the basis of a lexicographical ordering. This guarantees
                 // uniqueness of normal forms over different tools. Ordering on addresses (as used previously)
                 // proved to be unstable over different tools.
-                const basic_sort pre_normal_form=(is_basic_sort(s1) && basic_sort(s1).to_string()<=rhs.to_string()?s1:rhs);
+                const bool rhs_to_s1 = is_basic_sort(s1) && basic_sort(s1).to_string()<=rhs.to_string();
+                const sort_expression left_hand_side=(rhs_to_s1?rhs:s1);
+                const basic_sort pre_normal_form=(rhs_to_s1?s1:rhs);
                 const basic_sort e1=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
-                if (e1!=s1)
-                {
-                  sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort > (s1,e1));
+                if (e1!=left_hand_side)
+                { 
+                  sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort > (left_hand_side,e1));
                 }
               }
               else
@@ -344,12 +346,14 @@ namespace mcrl2 {
                   assert(is_basic_sort(i->second));
                   // Choose the normal form on the basis of a lexicographical ordering. This guarantees
                   // uniqueness of normal forms over different tools. 
-                  const basic_sort pre_normal_form=(is_basic_sort(s2) && basic_sort(s2).to_string()<=rhs.to_string()?s2:i->second);
+                  const bool i_second_to_s2 = is_basic_sort(s2) && basic_sort(s2).to_string()<=i->second.to_string();
+                  const sort_expression left_hand_side=(i_second_to_s2?i->second:s2);
+                  const basic_sort pre_normal_form=(i_second_to_s2?s2:i->second);
                   const basic_sort e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,
                                                                  sort_aliases_to_be_investigated);
-                  if (e2!=s2)
-                  {
-                    sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort > (s2,e2));
+                  if (e2!=left_hand_side)
+                  { 
+                    sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort > (left_hand_side,e2));
                   }
                 }
               }
