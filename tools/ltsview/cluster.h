@@ -38,9 +38,6 @@ class Comp_BCVolume
 class Cluster
 {
   public:
-    static const unsigned int NUM_RINGS = 2;
-
-    // Constructor & destructor.
     Cluster(int r);
     ~Cluster();
 
@@ -62,7 +59,6 @@ class Cluster
 
     // Methods on states
     void addState(State* s);
-    void addUndecidedState(State* s);
     State* getState(int i) const;
     int getNumStates() const;
     int getNumDeadlocks() const;
@@ -77,12 +73,6 @@ class Cluster
     void setNumMarkedStatesAny(int n);
     int getNumMarkedTransitions();
 
-    unsigned int getTotalNumSlots() const;
-    unsigned int getNumSlots(unsigned int ring) const;
-    void occupySlot(unsigned int ring,float pos,State* s);
-    void occupyCenterSlot(State* s);
-    void resolveSlots();
-    void clearSlots();
     void positionStatesSpiral();
 
     // Methods on transitions
@@ -137,15 +127,10 @@ class Cluster
     float topRadius;
     float bc_radius; // radius of the bounding cylinder that contains this cluster's subtree
     float bc_height; // height of the bounding cylinder that contains this cluster's subtree
-    std::vector< State* > undecidedStates;
-    std::vector< std::vector< std::vector< State* > > > slots;
     int visObject;
     std::vector< int > branchVisObjects;
     bool selected;
     std::set< int > matchedRules;
-
-    void slotUndecided(unsigned int ring,unsigned int from,unsigned int to);
-    void spreadSlots(unsigned int ring);
 };
 
 #endif
