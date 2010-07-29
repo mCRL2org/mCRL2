@@ -289,6 +289,7 @@ namespace mcrl2 {
           // Copy m_normalised_aliases. All aliases are stored from right to left,
           // assuming that the alias is introduced with a reason. There is one
           // exception, aliases for Bool, Pos, Nat, Int and Real are stored from left to right.
+
           atermpp::multimap< sort_expression, basic_sort > sort_aliases_to_be_investigated;
           for(ltr_aliases_map::const_iterator i=m_aliases.begin();
                     i!=m_aliases.end(); ++i)
@@ -322,8 +323,13 @@ namespace mcrl2 {
               const sort_expression s1=replace(lhs,i->first,i->second);
               if (s1!=lhs)
               {
+                // There is a conflict between the two sort rewrite rules.
                 assert(is_basic_sort(rhs));
-                const basic_sort e1=find_normal_form(rhs,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
+                // Choose the normal form on the basis of a lexicographical ordering. This guarantees
+                // uniqueness of normal forms over different tools. Ordering on addresses (as used previously)
+                // proved to be unstable over different tools.
+                const basic_sort pre_normal_form=(is_basic_sort(s1) && basic_sort(s1).to_string()<=rhs.to_string()?s1:rhs);
+                const basic_sort e1=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
                 if (e1!=s1)
                 {
                   sort_aliases_to_be_investigated.insert(std::pair<sort_expression,basic_sort > (s1,e1));
@@ -331,11 +337,15 @@ namespace mcrl2 {
               }
               else
               {
+                // There is a conflict between the two rewrite rules.
                 const sort_expression s2=replace(i->first,lhs,rhs);
                 if (s2!=i->first)
                 {
                   assert(is_basic_sort(i->second));
-                  const basic_sort e2=find_normal_form(i->second,resulting_normalized_sort_aliases,
+                  // Choose the normal form on the basis of a lexicographical ordering. This guarantees
+                  // uniqueness of normal forms over different tools. 
+                  const basic_sort pre_normal_form=(is_basic_sort(s2) && basic_sort(s2).to_string()<=rhs.to_string()?s2:i->second);
+                  const basic_sort e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,
                                                                  sort_aliases_to_be_investigated);
                   if (e2!=s2)
                   {
