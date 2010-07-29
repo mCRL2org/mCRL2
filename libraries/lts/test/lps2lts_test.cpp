@@ -335,6 +335,25 @@ BOOST_AUTO_TEST_CASE(test_timed) // For bug #756
   check_lps2lts_specification(spec, 3, 2, 2);
 }
 
+BOOST_AUTO_TEST_CASE(test_struct)
+{
+  std::string spec(
+      "sort Bits = struct b0 | b1;\n"
+      "     t_sys_regset_fsm_state = Bits;\n"
+      "     t_timer_counter_fsm_state = Bits;\n"
+      "map  timer_counter_fsm_state_idle: Bits;\n"
+      "act  a: t_sys_regset_fsm_state;\n"
+      "glob globd: t_sys_regset_fsm_state;\n"
+      "proc P(s3_P: Pos) =\n"
+      "       (s3_P == 1) ->\n"
+      "         a(globd) .\n"
+      "         P(s3_P = 2)\n"
+      "     + delta;\n"
+      "init P(1);\n"
+      );
+  check_lps2lts_specification(spec, 2, 1, 1);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

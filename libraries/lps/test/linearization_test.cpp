@@ -799,6 +799,18 @@ const std::string various_philosophers_nat =
   "     ));\n"
   ;
 
+const std::string various_sort_aliases =
+  "sort Bits = struct b0|b1;\n"
+  "     t_sys_regset_fsm_state = Bits;\n"
+  "     t_timer_counter_fsm_state = Bits;\n"
+  "map  timer_counter_fsm_state_idle: t_timer_counter_fsm_state;\n"
+  "act  a:Bits;\n"
+  "proc P(d:Bits)=a(d).delta;\n"
+  "glob globd:Bits;\n"
+  "init P(globd);\n"
+  ;
+
+
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
      debugging the translation of the linearizer to the new data
@@ -918,6 +930,8 @@ void test_various_aux(t_lin_options &options)
   std::cerr << "Testcase philosophers\n";
   spec = linearise(various_philosophers, options);
   */
+  std::cerr << "Testcase sort_aliases\n";
+  spec = linearise(various_sort_aliases, options);
 }
 
 BOOST_AUTO_TEST_CASE(test_various)
