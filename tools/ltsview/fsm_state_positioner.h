@@ -12,47 +12,52 @@
 #include "state_positioner.h"
 #include "vectors.h"
 
+class ClusterSlotInfo;
 class LTS;
 class State;
 
 class FSMStatePositioner: public StatePositioner
 {
   public:
-    FSMStatePositioner(LTS *l): StatePositioner(l) {}
-    ~FSMStatePositioner() {}
+    FSMStatePositioner(LTS *l);
+    ~FSMStatePositioner();
     void positionStates();
 
   private:
-    static const unsigned int NUM_RINGS = 2;
-
-    std::map< Cluster*, std::vector< State* > > undecided;
-    std::map< Cluster*, std::vector< std::vector< std::vector< State* > > > > slots;
-    std::vector< State* > todo_top_down;
-    std::vector< State* > todo_resolve_slots;
+    std::map< Cluster*, ClusterSlotInfo* > slot_info;
+    std::vector< State* > unpositioned_states;
 
     bool allStatesCentered(std::vector< State* > &states);
-    void assignStateToPosition(State* state, Vector2D &position);
+    void assignStateToSlot(State* state, int ring, int slot);
     void bottomUpPass();
     void getPredecessors(State* state, std::vector< State* >& predecessors);
     void getSuccessors(State* state, std::vector< State* >& successors);
-    void markStateUndecided(State* state);
-    void resolveClusterSlots();
+    void requestStatePosition(State* state, Vector2D &position);
+    void resolveUnpositioned();
     Vector2D sumStateVectorsInMultipleClusters( std::vector< State* > &states,
         float rim_radius);
     Vector2D sumStateVectorsInSingleCluster(std::vector< State* > &states);
     void topDownPass();
+};
 
-    int getTotalNumSlots(Cluster* cluster);
-    int getNumSlots(Cluster* cluster, unsigned int ring);
-    void occupySlot(Cluster* cluster, unsigned int ring,float pos,State* s);
-    void occupyCenterSlot(Cluster* cluster, State* s);
-    void resolveSlots(Cluster* cluster);
-    void clearSlots(Cluster* cluster);
-    void addUndecidedState(Cluster* cluster, State* s);
-    void slotUndecided(Cluster* cluster, unsigned int ring,unsigned int
-        from,unsigned int to);
-    void spreadSlots(Cluster* cluster, unsigned int ring);
-    void createClusterSlots(Cluster* cluster);
+class ClusterSlotInfo
+{
+  public:
+    ClusterSlotInfo(Cluster* cluster);
+    ~ClusterSlotInfo() {}
+    void findNearestSlot(Vector2D &position, int &ring, int &slot);
+    void findNearestFreeSlot(int &ring, int &slot);
+    int getNumRings();
+    int getNumSlots(int ring);
+    void getPolarCoordinates(int ring, int slot, float &angle, float &radius);
+    void occupySlot(int ring, int slot);
+
+  private:
+    static const float MIN_DELTA_RING;
+    static const float MIN_DELTA_SLOT;
+    std::vector< std::vector< bool > > slot_free;
+    std::vector< float > delta_slots;
+    float delta_ring;
 };
 
 #endif

@@ -64,34 +64,43 @@ void MarkManager::reset() {
   num_marked_transitions = 0;
 }
 
-void MarkManager::setLTS(LTS *l,bool need_reset) {
+void MarkManager::setLTS(LTS *l,bool need_reset)
+{
   lts = l;
-  if (need_reset) {
+  if (need_reset)
+  {
     reset();
     // set the label marks
     label_marks.assign(lts->getNumLabels(),static_cast<bool*>(NULL));
     State *s;
     Transition *t;
     int i;
-    for (State_iterator si = lts->getStateIterator(); !si.is_end(); ++si) {
+    for (State_iterator si = lts->getStateIterator(); !si.is_end(); ++si)
+    {
       s = *si;
-      for (i = 0; i < s->getNumOutTransitions(); ++i) {
+      for (i = 0; i < s->getNumOutTransitions(); ++i)
+      {
         t = s->getOutTransition(i);
-        if (label_marks[t->getLabel()] == NULL) {
+        if (label_marks[t->getLabel()] == NULL)
+        {
           label_marks[t->getLabel()] = new bool(false);
         }
         t->setMarkedPointer(label_marks[t->getLabel()]);
       }
-      for (i = 0; i < s->getNumLoops(); ++i) {
+      for (i = 0; i < s->getNumLoops(); ++i)
+      {
         t = s->getLoop(i);
-        if (label_marks[t->getLabel()] == NULL) {
+        if (label_marks[t->getLabel()] == NULL)
+        {
           label_marks[t->getLabel()] = new bool(false);
         }
         t->setMarkedPointer(label_marks[t->getLabel()]);
       }
     }
     markClusters();
-  } else {
+  }
+  else
+  {
     recomputeMarkedStateNumbers();
   }
 }

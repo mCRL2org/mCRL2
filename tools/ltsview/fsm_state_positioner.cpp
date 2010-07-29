@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <algorithm>
+#include <queue>
 #include <vector>
 #include "cluster.h"
 #include "fsm_state_positioner.h"
@@ -19,30 +20,119 @@
 using namespace std;
 using namespace MathUtils;
 
-void FSMStatePositioner::positionStates() 
+FSMStatePositioner::FSMStatePositioner(LTS *l)
+  : StatePositioner(l) 
 {
-  // The details of this algorithm can be found in Frank van Ham's master's
-  // thesis, pp. 21-29
   for (Cluster_iterator cluster_it = lts->getClusterIterator();
-      !cluster_it.is_end(); ++cluster_it)
+      ! cluster_it.is_end(); ++cluster_it)
   {
-    createClusterSlots(*cluster_it);
+    slot_info[*cluster_it] = new ClusterSlotInfo(*cluster_it);    
   }
-  bottomUpPass();
-  topDownPass();
-  resolveClusterSlots();
 }
 
-void FSMStatePositioner::markStateUndecided(State* state)
+FSMStatePositioner::~FSMStatePositioner()
 {
-  state->center();
-  if (state->getCluster()->isCentered())
+  for (map< Cluster*, ClusterSlotInfo* >::iterator slot_info_it =
+      slot_info.begin(); slot_info_it != slot_info.end(); ++slot_info_it)
   {
-    todo_top_down.push_back(state);
+    delete slot_info_it->second;
   }
-  else
+}
+
+void FSMStatePositioner::positionStates() 
+{
+  // This algorithm has been based on the one by Frank van Ham, and includes
+  // several improvements.
+  bottomUpPass();
+  topDownPass();
+  resolveUnpositioned();
+}
+
+void FSMStatePositioner::bottomUpPass()
+{
+  // Process states bottom-up, keeping edges as short as possible.
+  for (Reverse_cluster_iterator ci = lts->getReverseClusterIterator();
+      !ci.is_end(); ++ci)
   {
-    addUndecidedState(state->getCluster(), state);
+    Cluster* cluster = *ci;
+    for (int s = 0; s < cluster->getNumStates(); ++s)
+    {
+      State* state = cluster->getState(s);
+      if (cluster->getNumStates() == 1)
+      {
+        Vector2D position = Vector2D(0,0);
+        requestStatePosition(state, position);
+      }
+      else if (cluster->getNumDescendants() == 0)
+      {
+        state->center();
+        unpositioned_states.push_back(state);
+      }
+      else if (cluster->getNumDescendants() == 1)
+      {
+        vector< State* > successors;
+        getSuccessors(state, successors);
+        if (allStatesCentered(successors))
+        {
+          state->center();
+          unpositioned_states.push_back(state);
+        }
+        else
+        {
+          Vector2D position = sumStateVectorsInSingleCluster(successors);
+          requestStatePosition(state, position);
+        }
+      }
+      else
+      {
+        vector< State* > successors;
+        getSuccessors(state, successors);
+        Vector2D position = sumStateVectorsInMultipleClusters(
+            successors, cluster->getBaseRadius());
+        requestStatePosition(state, position);
+      }
+    }
+  }
+}
+
+void FSMStatePositioner::topDownPass()
+{
+  // Assumption: unpositioned_states is sorted bottom-up
+  vector< State* > unpositioned_temp;
+  for (vector< State* >::reverse_iterator state_it =
+      unpositioned_states.rbegin(); state_it != unpositioned_states.rend();
+      ++state_it)
+  {
+    State* state = *state_it;
+    if (state->getCluster()->isCentered())
+    {
+      vector< State* > predecessors;
+      getPredecessors(state, predecessors);
+      if (allStatesCentered(predecessors))
+      {
+        unpositioned_temp.push_back(state);
+      }
+      else
+      {
+        Vector2D position = sumStateVectorsInSingleCluster(predecessors);
+        requestStatePosition(state, position);
+      }
+    }
+    else
+    {
+      unpositioned_temp.push_back(state);
+    }
+  }
+  unpositioned_states.swap(unpositioned_temp);
+}
+
+void FSMStatePositioner::resolveUnpositioned()
+{
+  Vector2D position = Vector2D(0,0);
+  for (vector< State* >::iterator state_it = unpositioned_states.begin();
+      state_it != unpositioned_states.end(); ++state_it)
+  {
+    requestStatePosition(*state_it, position);
   }
 }
 
@@ -133,409 +223,135 @@ void FSMStatePositioner::getSuccessors(State* state, vector< State* >&
   }
 }
 
-void FSMStatePositioner::assignStateToPosition(State* state, Vector2D&
-    position)
+void FSMStatePositioner::assignStateToSlot(State* state, int ring, int slot)
 {
-  unsigned int ring = round_to_int( position.length() *
-      float(NUM_RINGS - 1) /
-      state->getCluster()->getTopRadius());
-  ring = min(ring, NUM_RINGS - 1);
+  ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
+  cs_info->occupySlot(ring, slot);
   if (ring == 0)
   {
     state->center();
-    occupyCenterSlot(state->getCluster(), state);
   }
   else
   {
-    float angle = position.toDegrees();
+    float angle, radius;
+    cs_info->getPolarCoordinates(ring, slot, angle, radius);
     state->setPositionAngle(angle);
-    state->setPositionRadius(state->getCluster()->getTopRadius() *
-        float(ring) / float(NUM_RINGS - 1));
-    occupySlot(state->getCluster(), ring, angle, state);
+    state->setPositionRadius(radius);
   }
 }
 
-void FSMStatePositioner::bottomUpPass()
+void FSMStatePositioner::requestStatePosition(State* state, Vector2D& position)
 {
-  // Phase 1: Process states bottom-up, keeping edges as short as possible.
-  for (Reverse_cluster_iterator ci = lts->getReverseClusterIterator();
-      !ci.is_end(); ++ci)
+  ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
+  int ring, slot;
+  cs_info->findNearestSlot(position, ring, slot);
+  cs_info->findNearestFreeSlot(ring, slot);
+  assignStateToSlot(state, ring, slot);
+}
+
+const float ClusterSlotInfo::MIN_DELTA_RING = 0.25f;
+const float ClusterSlotInfo::MIN_DELTA_SLOT = 0.25f;
+
+ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
+{
+  int num_rings = 1 + static_cast<int>(cluster->getTopRadius() /
+      MIN_DELTA_RING);
+  if (num_rings > 1)
   {
-    Cluster* cluster = *ci;
-    if (cluster->getNumStates() == 1)
-    {
-      State* state = cluster->getState(0);
-      state->center();
-      occupyCenterSlot(cluster, state);
-      continue;
-    }
-    if (cluster->getNumDescendants() == 0)
-    {
-      for (int s = 0; s < cluster->getNumStates(); ++s)
-      {
-        markStateUndecided(cluster->getState(s));
-      }
-    }
-    else if (cluster->getNumDescendants() == 1)
-    {
-      for (int s = 0; s < cluster->getNumStates(); ++s)
-      {
-        State* state = cluster->getState(s);
-        vector< State* > successors;
-        getSuccessors(state, successors);
-        if (allStatesCentered(successors))
-        {
-          markStateUndecided(state);
-        }
-        else
-        {
-          Vector2D position = sumStateVectorsInSingleCluster(successors);
-          assignStateToPosition(state, position);
-        }
-      }
-    }
-    else
-    {
-      for (int s = 0; s < cluster->getNumStates(); ++s)
-      {
-        State* state = cluster->getState(s);
-        vector< State* > successors;
-        getSuccessors(state, successors);
-        Vector2D position = sumStateVectorsInMultipleClusters(
-            successors, cluster->getBaseRadius());
-        assignStateToPosition(state, position);
-      }
-    }
-  }
-}
-
-void FSMStatePositioner::topDownPass()
-{
-  // Phase 2: Process states top-down, keeping edges as short as possible.
-  for (vector< State* >::reverse_iterator state_it = todo_top_down.rbegin();
-      state_it != todo_top_down.rend(); ++state_it)
-  {
-    State* state = *state_it;
-    vector< State* > predecessors;
-    getPredecessors(state, predecessors);
-    if (allStatesCentered(predecessors))
-    {
-      addUndecidedState(state->getCluster(), state);
-    }
-    else
-    {
-      Vector2D position = sumStateVectorsInSingleCluster(predecessors);
-      assignStateToPosition(state, position);
-    }
-  }
-}
-
-void FSMStatePositioner::resolveClusterSlots()
-{
-  //Resolves the slots of each cluster, positioning the states within each slot
-  //in such a way that they do not overlap.
-  for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci)
-  {
-    resolveSlots(*ci);
-  }
-}
-
-int FSMStatePositioner::getNumSlots(Cluster* cluster, unsigned int
-    ring)
-{
-  return slots[cluster][ring].size();
-}
-
-int FSMStatePositioner::getTotalNumSlots(Cluster* cluster)
-{
-  unsigned int result = 0;
-  for (unsigned int r = 0; r < NUM_RINGS; ++r)
-  {
-    result += getNumSlots(cluster, r);
-  }
-  return result;
-}
-
-void FSMStatePositioner::occupySlot(Cluster* cluster, unsigned int ring, float
-    pos, State* state)
-{
-  int slot = round_to_int(double(pos) * double(getNumSlots(cluster, ring)) /
-      360.0);
-  if (slot == getNumSlots(cluster, ring))
-  {
-    slot = 0;
-  }
-  slots[cluster][ring][slot].push_back(state);
-}
-
-void FSMStatePositioner::occupyCenterSlot(Cluster* cluster, State* state)
-{
-  slots[cluster][0][0].push_back(state);
-}
-
-void FSMStatePositioner::addUndecidedState(Cluster* cluster, State *state)
-{
-  undecided[cluster].push_back(state);
-}
-
-void FSMStatePositioner::resolveSlots(Cluster* cluster)
-{
-  unsigned int from = 0;
-  unsigned int to = 0;
-  for (unsigned int r = 0; r < NUM_RINGS; ++r)
-  {
-    to = from + round_to_int(undecided[cluster].size() * float(r) /
-        float(NUM_RINGS));
-    if (to > undecided[cluster].size() || r == NUM_RINGS - 1)
-    {
-      to = undecided[cluster].size();
-    }
-    slotUndecided(cluster, r, from, to);
-    spreadSlots(cluster, r);
-    from = to;
-  }
-  undecided[cluster].clear();
-}
-
-void FSMStatePositioner::slotUndecided(Cluster* cluster, unsigned int ring, unsigned int
-    from, unsigned int to)
-{
-  unsigned int remainingStates = to - from;
-  const int numSlots = getNumSlots(cluster, ring);
-  const float radius = cluster->getTopRadius() * float(ring) /
-    float(NUM_RINGS - 1);
-  int start = 0;
-  while (start < numSlots && slots[cluster][ring][start].size() == 0)
-  {
-    ++start;
-  }
-  float sp,diff;
-  unsigned int i;
-  if (start == numSlots)
-  {
-    // divide all undecided states over the complete ring
-    sp = 0.0f;
-    diff = 360.0f / remainingStates;
-    for (i = from; i < to; ++i)
-    {
-      undecided[cluster][i]->setPositionRadius(radius);
-      undecided[cluster][i]->setPositionAngle(sp);
-      occupySlot(cluster, ring, sp, undecided[cluster][i]);
-      sp += diff;
-    }
+    delta_ring = cluster->getTopRadius() / static_cast<float>(num_rings - 1);
   }
   else
   {
-    int gapBegin,gapEnd,gapSize,space,lGapBegin,lGapEnd,lGapSize;
-    unsigned int M,s;
-    float slotDiff = 360.0f / numSlots;
-    s = from;
-    while (remainingStates > 0)
-    {
-      // compute the total space and largest gap size
-      space = 0;
-      lGapBegin = start;
-      lGapEnd = start;
-      lGapSize = 0;
-      gapBegin = start;
-      gapEnd = (gapBegin+1) % numSlots;
-      while (gapEnd != start)
-      {
-        gapSize = 1;
-        gapEnd = (gapBegin+1) % numSlots;
-        while (slots[cluster][ring][gapEnd].size() == 0)
-        {
-          ++gapSize;
-          gapEnd = (gapEnd+1) % numSlots;
-        }
-        if (gapSize > 1)
-        {
-          space += gapSize;
-          if (gapSize > lGapSize)
-          {
-            lGapBegin = gapBegin;
-            lGapEnd = gapEnd;
-            lGapSize = gapSize;
-          }
-        }
-        gapBegin = gapEnd;
-      }
+    delta_ring = 1.0f;
+  }
 
-      M = int(1.0f + float(remainingStates) * float(lGapSize) / float(space));
-      M = min(M, remainingStates);
-      // divide M states over the largest gap found
-      sp = lGapBegin * slotDiff;
-      diff = lGapSize * slotDiff / M;
-      for (i = s; i < s+M; ++i)
-      {
-        undecided[cluster][i]->setPositionRadius(radius);
-        undecided[cluster][i]->setPositionAngle(sp);
-        occupySlot(cluster, ring, sp, undecided[cluster][i]);
-        sp += diff;
-        if (sp >= 360.0f)
-        {
-          sp -= 360.0f;
-        }
-      }
-      s += M;
-      remainingStates -= M;
-    }
+  for (int ring = 0; ring < num_rings; ++ring)
+  {
+    float circumference = 2 * PI * ring * delta_ring;
+    // max with 1 to ensure that ring 0 also has a slot
+    int num_slots = max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
+    delta_slots.push_back( circumference / static_cast<float>(num_slots) );
+    vector< bool > trues( num_slots, true );
+    slot_free.push_back( trues );
   }
 }
 
-void FSMStatePositioner::spreadSlots(Cluster* cluster, unsigned int ring)
+void ClusterSlotInfo::occupySlot(int ring, int slot)
 {
-  if (ring == 0)
-  {
-    // TODO: spread the states in the center of the cluster
-    return;
-  }
-  const unsigned int numSlots = getNumSlots(cluster, ring);
-  const float radius = cluster->getTopRadius() * float(ring) /
-    float(NUM_RINGS-1);
-  const float slot_diff = 360.0f / numSlots;
+  slot_free[ring][slot] = false;
+}
 
-  vector< float > slot_space_cw(numSlots, 0.0f);
-  vector< float > slot_space_ccw(numSlots, 0.0f);
-  unsigned int s,i;
-  // compute the amount of space available for each slot
-  for (s = 0; s < numSlots; ++s)
+int ClusterSlotInfo::getNumRings()
+{
+  return slot_free.size();
+}
+
+int ClusterSlotInfo::getNumSlots(int ring)
+{
+  return slot_free[ring].size();
+}
+
+void ClusterSlotInfo::getPolarCoordinates(int ring, int slot, float &angle,
+    float &radius)
+{
+  radius = delta_ring * ring;
+  angle = rad_to_deg(delta_slots[ring] * slot / radius);
+}
+
+void ClusterSlotInfo::findNearestSlot(Vector2D &position, int &ring, int
+    &slot)
+{
+  float angle = position.toDegrees();
+  float radius = position.length();
+  ring = min(round_to_int(radius / delta_ring), getNumRings() - 1);
+  slot = round_to_int(ring * delta_ring * angle / delta_slots[ring]) %
+    getNumSlots(ring);
+}
+
+void ClusterSlotInfo::findNearestFreeSlot(int &ring, int &slot)
+{
+  vector< bool > falses(getNumSlots(getNumRings() - 1), false);
+  vector< vector< bool > > slot_visited(getNumRings(), falses);
+  queue< pair< int, int > > to_visit_slots;
+  to_visit_slots.push(pair<int,int>(ring, slot));
+  while (! to_visit_slots.empty())
   {
-    if (slots[cluster][ring][s].size() > 1)
+    ring = to_visit_slots.front().first;
+    slot = to_visit_slots.front().second;
+    to_visit_slots.pop();
+    if (slot_free[ring][slot])
     {
-      // space in counter-clockwise direction
-      i = 1;
-      while (slots[cluster][ring][(s+i)%numSlots].size() == 0)
+      return;
+    }
+    for (int s = slot - 1; s < slot + 3; s += 2)
+    {
+      int next_slot = s % getNumSlots(ring);
+      if (s < 0)
       {
-        ++i;
+        next_slot += getNumSlots(ring);
       }
-      slot_space_ccw[s] = i * slot_diff;
-      if (slots[cluster][ring][(s+i) % numSlots].size() > 1)
+      if (! slot_visited[ring][next_slot])
       {
-        slot_space_ccw[s] *= 0.5f;
-      }
-      slot_space_ccw[s] -= rad_to_deg(0.25f / cluster->getTopRadius());
-
-      // space in clockwise direction
-      i = 1;
-      while (slots[cluster][ring][(s-i) % numSlots].size() == 0)
-      {
-        ++i;
-      }
-      slot_space_cw[s] = i * slot_diff;
-      if (slots[cluster][ring][(s-i) % numSlots].size() == 1)
-      {
-        slot_space_cw[s] -= rad_to_deg(0.25f / cluster->getTopRadius());
-      }
-      else
-      {
-        slot_space_cw[s] *= 0.5f;
+        to_visit_slots.push(pair<int,int>(ring, next_slot));
       }
     }
-  }
-
-  float r,a,slot_angle;
-  unsigned int numStates;
-  for (s = 0; s < numSlots; ++s)
-  {
-    slot_angle = s * slot_diff;
-    numStates = slots[cluster][ring][s].size();
-    if (numStates == 1)
+    for (int next_ring = ring - 1; next_ring < ring + 3; next_ring += 2)
     {
-      slots[cluster][ring][s][0]->setPositionAngle(slot_angle);
-      slots[cluster][ring][s][0]->setPositionRadius(radius);
-    }
-    if (numStates > 1)
-    {
-      i = 0;
-      r = radius;
-      while (r > 0.15f && i < numStates)
+      if (0 <= next_ring && next_ring < getNumRings())
       {
-        a = slot_angle - slot_space_cw[s];
-        while ((a < slot_angle + slot_space_ccw[s]) && i < numStates)
+        int next_slot = 0;
+        if (next_ring > 0)
         {
-          slots[cluster][ring][s][i]->setPositionAngle(a);
-          slots[cluster][ring][s][i]->setPositionRadius(r);
-          ++i;
-          a += rad_to_deg(0.25f/r);
+          next_slot = round_to_int(static_cast<float>(slot) /
+              static_cast<float>(getNumSlots(ring)) * getNumSlots(next_ring)) %
+            getNumSlots(ring);
         }
-        r -= 0.25f;
-      }
-      // if i < numStates, then there was not enough room for positioning all
-      // states in this slot, so put all of the remaining states in the slot
-      // position (this is a panic situation, that should occur very rarely)
-      while (i < numStates)
-      {
-        slots[cluster][ring][s][i]->setPositionAngle(slot_angle);
-        slots[cluster][ring][s][i]->setPositionRadius(radius);
-        ++i;
+        if (! slot_visited[next_ring][next_slot])
+        {
+          to_visit_slots.push(pair<int,int>(next_ring, next_slot));
+        }
       }
     }
-  }
-}
-
-void FSMStatePositioner::clearSlots(Cluster* cluster)
-{
-  unsigned int i,j;
-  for (i = 0; i < slots[cluster].size(); ++i)
-  {
-    for (j = 0; j < slots[cluster][i].size(); ++j)
-    {
-      slots[cluster][i][j].clear();
-    }
-  }
-  undecided[cluster].clear();
-}
-
-void FSMStatePositioner::createClusterSlots(Cluster* cluster)
-{
-  int numSlots;
-  if (cluster->getNumDescendants() == 0)
-  {
-    numSlots = cluster->getNumStates();
-  }
-  else if (cluster->getNumDescendants() == 1)
-  {
-    numSlots = min(32, 2 * getTotalNumSlots(cluster->getDescendant(0)));
-  }
-  else
-  { 
-    Cluster* centered_descendant = NULL;
-    for (int i = 0; i < cluster->getNumDescendants(); ++i)
-    {
-      if (cluster->getDescendant(i)->isCentered())
-      {
-        centered_descendant = cluster->getDescendant(i);
-        break;
-      }
-    }
-    if (centered_descendant)
-    {
-      numSlots = 2 * getTotalNumSlots(centered_descendant);
-    }
-    else
-    {
-      numSlots = 2 * cluster->getNumDescendants();
-    }
-    numSlots = min(32, numSlots);
-  }
-  int S;
-  for (unsigned int r = 0; r < NUM_RINGS; ++r)
-  {
-    if (r == 0)
-    {
-      S = 1;
-    }
-    else
-    {
-      S = round_to_int(numSlots * float(r) / float(NUM_RINGS));
-    }
-    vector< vector< State* > > slots_r;
-    for (int s = 0; s < S; ++s)
-    {
-      vector< State* > slots_rs;
-      slots_r.push_back(slots_rs);
-    }
-    slots[cluster].push_back(slots_r);
+    slot_visited[ring][slot] = true;
   }
 }
