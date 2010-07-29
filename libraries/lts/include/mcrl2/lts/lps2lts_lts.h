@@ -34,8 +34,8 @@ namespace mcrl2
     class lps2lts_lts
     {
       lps2lts_lts_options lts_opts;
-      ATermAppl term_nil;
-      AFun afun_pair;
+      atermpp::aterm_appl term_nil;
+      atermpp::function_symbol afun_pair;
       boost::uint64_t initial_state;
       std::ofstream aut;
       SVCfile svcf;
@@ -54,6 +54,11 @@ namespace mcrl2
 
         ~lps2lts_lts()
         {
+          if(term_nil != atermpp::aterm_appl())
+          {
+            term_nil.unprotect();
+            afun_pair.unprotect();
+          }
           delete generic_lts;
         }
 

@@ -33,12 +33,12 @@ namespace mcrl2
     void lps2lts_lts::open_lts(const char *filename, lps2lts_lts_options &opts)
     {
       lts_filename = std::string(filename);
-      if ( term_nil == NULL )
+      if ( term_nil == atermpp::aterm_appl() )
       {
         term_nil = gsMakeNil();
-        ATprotectAppl(&term_nil);
-        afun_pair = ATmakeAFun("pair",2,ATfalse);
-        ATprotectAFun(afun_pair);
+        term_nil.protect();
+        afun_pair = atermpp::function_symbol("pair", 2, false);
+        afun_pair.protect();
       }
       lts_opts = opts;
       switch ( lts_opts.outformat )
@@ -137,14 +137,14 @@ namespace mcrl2
             SVCbool b;
             SVCputTransition(svc,
               SVCnewState(svc,(ATerm) lts_opts.nstate->makeStateVector(from),&b),
-              SVCnewLabel(svc,(ATerm) ATmakeAppl2(afun_pair,(ATerm) action,(ATerm) term_nil),&b),
+              SVCnewLabel(svc,(ATerm) ATmakeAppl2(AFun(afun_pair),(ATerm) action,(ATerm) static_cast<ATermAppl>(term_nil)),&b),
               SVCnewState(svc,(ATerm) lts_opts.nstate->makeStateVector(to),&b),
               svcparam);
           } else {
             SVCbool b;
             SVCputTransition(svc,
               SVCnewState(svc,(ATerm) ATmakeInt(idx_from),&b),
-              SVCnewLabel(svc,(ATerm) ATmakeAppl2(afun_pair,(ATerm) action,(ATerm) term_nil),&b),
+              SVCnewLabel(svc,(ATerm) ATmakeAppl2(AFun(afun_pair),(ATerm) action,(ATerm) static_cast<ATermAppl>(term_nil)),&b),
               SVCnewState(svc,(ATerm) ATmakeInt(idx_to),&b),
               svcparam);
           }
