@@ -1,0 +1,59 @@
+# File that suppresses valgrind errors that are out of our control;
+# especially in the ATerm library.
+# This greatly reduces the amount of valgrind warnings that we get,
+# and turns it into a useful tool again!
+
+#
+# usage: valgrind --suppressions=valgrind_external.supp <arguments you like>
+#
+
+{
+  aterm-mark_memory-jump-1
+  Memcheck:Cond
+  fun:mark_memory
+}
+{
+  aterm-mark_memory-uninitialised-1
+  Memcheck:Value8
+  fun:mark_memory
+}
+{
+  aterm-AT_isInsideValidTerm-jump-1
+  Memcheck:Cond
+  fun:AT_isInsideValidTerm
+}
+{
+  aterm-AT_isInsideValidTerm-uninitialised-1
+  Memcheck:Value8
+  fun:AT_isInsideValidTerm
+}
+{
+  aterm-AT_isValidTerm-jump-1
+  Memcheck:Cond
+  fun:AT_isValidTerm
+}
+{
+  aterm-AT_isValidTerm-uninitialised-1
+  Memcheck:Value8
+  fun:AT_isValidTerm
+}
+{
+  aterm-AT_markTerm-jump-1
+  Memcheck:Cond
+  fun:AT_markTerm
+}
+{
+  aterm-AT_markTerm-uninitialised-1
+  Memcheck:Value8
+  fun:AT_markTerm
+}
+{
+  aterm-mark_phase-jump-1
+  Memcheck:Cond
+  fun:mark_phase
+}
+{
+  aterm-mark_phase-uninitialised-1
+  Memcheck:Value8
+  fun:mark_phase
+}
