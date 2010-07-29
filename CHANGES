@@ -1,4 +1,31 @@
 ===============================================================================
+Changes between toolset releases January 2010 and July 2010:
+===============================================================================
+
+ General:
+   - developed new graphical user interface mcrl2-gui. Use of this tool is
+     recommended above using squadt.
+   - move to CMake build system. The bjam build system is still included, but
+     not actively maintained. It will be removed in the January 2011 release.
+   - increase the amount of generated code.
+   - more extensive testing
+
+ New functionality:
+   - the language now supports function updates for functions of arity 1. It is
+     now allowed to write f[d -> e] for a function f: D -> E, with d in D and
+     e in E. The meaning is that (f[d -> e])(x) = e if x == d, and f(x)
+     otherwise.
+
+ Deprecated tools:
+   - squadt is deprecated. It will be removed in the January 2011 release. We
+     recommend using mcrl2-gui instead.
+
+ Known issues:
+   - ltsview and ltsgraph do not work when started from SQuADT in Windows 7 and
+     Windows Vista; if started directly they do function properly. Using
+     mcrl2-gui there are no problems.
+
+===============================================================================
 Changes between toolset releases January 2009 and January 2010:
 ===============================================================================
 
