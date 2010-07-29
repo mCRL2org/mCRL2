@@ -8,6 +8,7 @@
 
 #ifndef FSM_STATE_POSITIONER_H
 #define FSM_STATE_POSITIONER_H
+#include <set>
 #include <vector>
 #include "state_positioner.h"
 #include "vectors.h"
@@ -45,6 +46,7 @@ class ClusterSlotInfo
   public:
     ClusterSlotInfo(Cluster* cluster);
     ~ClusterSlotInfo() {}
+    void findFarthestFreeSlot(int &ring, int &slot);
     void findNearestSlot(Vector2D &position, int &ring, int &slot);
     void findNearestFreeSlot(int &ring, int &slot);
     int getNumRings();
@@ -53,11 +55,30 @@ class ClusterSlotInfo
     void occupySlot(int ring, int slot);
 
   private:
+    struct Slot
+    {
+      Slot(int r, int s): ring(r), slot(s) {}
+      int ring, slot;
+    };
+
+    struct Slot_less
+    {
+      bool operator()(const Slot &c1, const Slot &c2)
+      {
+        return (c1.ring == c2.ring) ? c1.slot < c2.slot : c1.ring < c2.ring;
+      }
+    };
+
+    typedef std::set< Slot, Slot_less > SlotSet;
+
     static const float MIN_DELTA_RING;
     static const float MIN_DELTA_SLOT;
-    std::vector< std::vector< bool > > slot_free;
-    std::vector< float > delta_slots;
+
     float delta_ring;
+    std::vector< int > num_slots;
+    SlotSet occupied_slots;
+
+    Vector2D getVector(int ring, int slot);
 };
 
 #endif
