@@ -11,7 +11,6 @@
 #include <cstring>
 #include "mcrl2/lps/specification.h"
 #include "aterm2.h"
-#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/lps2lts_lts.h"
 #include "mcrl2/lts/lts_io.h"
@@ -33,13 +32,6 @@ namespace mcrl2
     void lps2lts_lts::open_lts(const char *filename, lps2lts_lts_options &opts)
     {
       lts_filename = std::string(filename);
-      if ( term_nil == NULL )
-      {
-        term_nil = gsMakeNil();
-        ATprotectAppl(&term_nil);
-        afun_pair = ATmakeAFun("pair",2,ATfalse);
-        ATprotectAFun(afun_pair);
-      }
       lts_opts = opts;
       switch ( lts_opts.outformat )
       {

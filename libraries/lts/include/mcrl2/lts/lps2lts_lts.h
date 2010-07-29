@@ -16,6 +16,7 @@
 #include "boost/cstdint.hpp"
 #include "aterm2.h"
 #include "svc/svc.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts.h"
@@ -47,13 +48,21 @@ namespace mcrl2
 
       public:
         lps2lts_lts():
+          initial_state(0),
           svc(&svcf),
           svcparam(0),
           generic_lts(NULL)
-        {}
+        {
+          term_nil = core::detail::gsMakeNil();
+          ATprotectAppl(&term_nil);
+          afun_pair = ATmakeAFun("pair",2,ATfalse);
+          ATprotectAFun(afun_pair);
+        }
 
         ~lps2lts_lts()
         {
+          ATunprotectAFun(afun_pair);
+          ATunprotectAppl(&term_nil);
           delete generic_lts;
         }
 
