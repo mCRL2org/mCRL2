@@ -249,7 +249,7 @@ namespace squadt {
 
       wxStaticBoxSizer* known_formats = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Known formats and actions"));
 
-      current_sizer->AddSpacer(30);
+      current_sizer->AddSpacer(10);
       current_sizer->Add(known_formats, 1, wxEXPAND|wxLEFT|wxRIGHT, 3);
       current_sizer->AddSpacer(5);
 

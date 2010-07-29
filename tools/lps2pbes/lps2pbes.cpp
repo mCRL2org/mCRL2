@@ -11,12 +11,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-#include <cassert>
-#include <iostream>
-#include <fstream>
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
@@ -25,6 +19,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -65,9 +60,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (parser.options.count("formula")) {
         formfilename = parser.option_argument("formula");
       }
-      else {
-        parser.error("option -f is not specified");
-      }
     }
 
   public:
@@ -85,6 +77,11 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
     bool run()
     {
+      if (formfilename.empty())
+      {
+        throw mcrl2::runtime_error("option -f is not specified");
+      }
+     
       //load LPS
       if (input_filename().empty()) {
         gsVerboseMsg("reading LPS from stdin...\n");
@@ -172,7 +169,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
             append(format_selector.associate(normal, "normal", true)).
             append(format_selector.associate(readable, "readable")));
 
-      text_field& formula_field    = d.create< text_field >();
+      file_control& formula_field  = d.create< file_control >();
       checkbox&   timed_conversion = d.create< checkbox >().set_status(c.get_option_argument< bool >("use_timed_algorithm"));
       button&     okay_button      = d.create< button >().set_label("OK");
 
@@ -245,9 +242,20 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
 };
 
+class lps2pbes_gui_tool: public mcrl2_gui_tool<lps2pbes_tool>
+{
+  public:
+	lps2pbes_gui_tool()
+    {
+      m_gui_options["timed"] = create_checkbox_widget();
+      m_gui_options["formula"] = create_filepicker_widget();
+    }
+};
+
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps2pbes_tool().execute(argc, argv);
+  return lps2pbes_gui_tool().execute(argc, argv);
 }

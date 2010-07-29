@@ -440,7 +440,7 @@ void GLCanvas::clearToolTip()
 
 
 // ---------------------------------------------
-void GLCanvas::onEvtPaint( wxPaintEvent &event )
+void GLCanvas::onEvtPaint( wxPaintEvent& /*event*/ )
 // ---------------------------------------------
 // ------------------------------------------------------------------
 // Get the device context for that part of the screen that needs to
@@ -459,7 +459,7 @@ void GLCanvas::onEvtPaint( wxPaintEvent &event )
 
 
 // -------------------------------------------
-void GLCanvas::onEvtSize( wxSizeEvent &event )
+void GLCanvas::onEvtSize( wxSizeEvent& /*event*/ )
 // -------------------------------------------
 // ------------------------------------------------------------------
 // Ensure that the viewport is adjusted to match the canvas when it
@@ -488,7 +488,7 @@ void GLCanvas::onEvtSize( wxSizeEvent &event )
 
 
 // ----------------------------------------------------
-void GLCanvas::OnEraseBackground( wxEraseEvent &event )
+void GLCanvas::OnEraseBackground( wxEraseEvent& /*event*/ )
 // ----------------------------------------------------
 // ------------------------------------------------------------------
 // This function inherited from 'wxGLCanvas' must be overridden to
@@ -498,7 +498,7 @@ void GLCanvas::OnEraseBackground( wxEraseEvent &event )
 
 
 // -------------------------------------------------
-void GLCanvas::onLftMouseDown( wxMouseEvent &event )
+void GLCanvas::onLftMouseDown( wxMouseEvent& event )
 // -------------------------------------------------
 {
     SetCurrent();
@@ -627,7 +627,7 @@ void GLCanvas::onMouseWheel( wxMouseEvent &event )
 
 
 // ------------------------------------------------
-void GLCanvas:: onEnterMouse( wxMouseEvent &event )
+void GLCanvas:: onEnterMouse( wxMouseEvent& /*event*/ )
 // ------------------------------------------------
 // -------------------------------------------------------------------
 // This function simply sets the focus to this canvas. This allows key
@@ -644,7 +644,7 @@ void GLCanvas:: onEnterMouse( wxMouseEvent &event )
 
 
 // ------------------------------------------------
-void GLCanvas:: onLeaveMouse( wxMouseEvent &event )
+void GLCanvas:: onLeaveMouse( wxMouseEvent& /*event*/ )
 // ------------------------------------------------
 // -------------------------------------------------------------------
 // This function simply sets resets cursor to the default icon.

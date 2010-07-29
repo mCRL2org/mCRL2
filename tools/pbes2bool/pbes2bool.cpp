@@ -37,6 +37,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 //Data Framework
 #include "mcrl2/data/enumerator.h"
@@ -70,8 +71,9 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 {
   protected:
     // Tool options.
+    /// The output file name
+    std::string m_output_filename;
     std::string opt_outputformat;              // The output format
-    std::string m_output_filename;             // For storing output file. Warning! Variable should be removed if the tool is made input/output!
     ::bes::transformation_strategy opt_strategy; // The strategy
     bool opt_use_hashtables;                   // The hashtable option
     bool opt_construct_counter_example;        // The counter example option
@@ -83,6 +85,31 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 
     std::string default_rewriter() const
     { return "quantifier-all";
+    }
+
+    /// \brief Checks if the number of positional options is OK.
+    /// \param parser A command line parser
+    void check_positional_options(const command_line_parser& parser)
+    {
+      if (2 < parser.arguments.size())
+      {
+        parser.error("too many file arguments");
+      }
+    }
+
+    /// \brief Returns a message about the output filename
+    std::string output_file_message() const
+    {
+      std::ostringstream out;
+      out << "Output written to " << ((m_output_filename.empty())? "standard output" : ("'" + m_output_filename + "'"));
+      return out.str();
+    }
+
+    /// \brief Adds a message about input and output files to the given description.
+    std::string make_tool_description(const std::string& description) const
+    {
+      // return core::word_wrap_text(description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.");
+      return description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.";
     }
 
     // Overload synopsis to cope with optional OUTFILE
@@ -108,9 +135,27 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
         opt_counter_example_file("")
     {}
 
-  private:
+    /// \brief Returns a const reference to the output filename.
+    const std::string& output_filename() const
+    {
+      return m_output_filename;
+    }
+
+    /// \brief Returns a reference to the output filename.
+    std::string& output_filename()
+    {
+      return m_output_filename;
+    }
+
+  protected:
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
+
+      input_tool::parse_options(parser);
+      if (1 < parser.arguments.size())
+      {
+        m_output_filename = parser.arguments[1];
+      }
 
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
       opt_construct_counter_example = 0 < parser.options.count("counter");
@@ -233,12 +278,9 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       p.normalize();
       p.instantiate_global_variables();
       // data rewriter
-      /* for (std::set <mcrl2::data::data_equation >::const_iterator i=p.data().equations();
-               i!=p.data().equations(); ++i)
-      { std::cerr << "AKAKAKAKAKAK " << *i << "\n";
-      } */
+      
       data::rewriter datar= (opt_data_elm) ?
-            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p, false)), rewrite_strategy()) :
+            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p)), rewrite_strategy()) :
             data::rewriter(p.data(), rewrite_strategy());
 
       ::bes::boolean_equation_system bes_equations=
@@ -350,14 +392,9 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
                        ( result ? "true" : "false"));
 
       if (opt_construct_counter_example)
-#ifdef NDEBUG // Precompile the data terms to compiler format.
-      { bes_equations.print_counter_example(true,datar.get_internal_rewriter(),opt_store_as_tree,opt_counter_example_file);
+      { 
+        bes_equations.print_counter_example(opt_counter_example_file);
       }
-#else // Use data terms in standard format, and do not allow a tree format to store arguments, as this is not accepted
-      // by the internal consistency checks.
-      { bes_equations.print_counter_example(false,datar.get_internal_rewriter(),false,opt_counter_example_file);
-      }
-#endif
       return true;
     }
 
@@ -426,6 +463,9 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       using namespace mcrl2;
 
       // Let squadt_tool update configuration for rewriter and add output file configuration
+      if (c.output_exists("main-output")) {
+        m_output_filename = c.get_output("main-output").location();
+      } 
       synchronise_with_configuration(c);
 
       /* if (!c.option_exists(option_precompile)) {
@@ -538,6 +578,11 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 
       send_clear_display();
 
+      if(c.output_exists("main-output"))
+      {
+        m_output_filename = c.get_output("main-output").location();
+      }
+
       update_configuration(c);
     }
 
@@ -557,7 +602,12 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       // static std::string strategies[] = { "lazy", "fly" };
       static std::string formats[]    = { "none", "vasy", "cwi", "pbes" };
 
-      // Let squadt_tool update configuration for rewriter and add output file configuration
+      // Let squadt_tool update configuration for rewriter and add output file
+      // configuration
+      if (c.output_exists("main-output")) {
+          m_output_filename = c.get_output("main-output").location();
+      }
+
       synchronise_with_configuration(c);
 
       opt_construct_counter_example = c.get_option_argument< bool >(option_counter);
@@ -585,9 +635,46 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 #endif
 };
 
+class pbes2bool_gui_tool: public mcrl2_gui_tool<pbes2bool_tool> {
+public:
+	pbes2bool_gui_tool() {
+
+		std::vector<std::string> values;
+
+		m_gui_options["counter"] = create_checkbox_widget();
+		m_gui_options["hashtables"] = create_checkbox_widget();
+
+		values.clear();
+		values.push_back("none");
+		values.push_back("vasy");
+		values.push_back("pbes");
+		values.push_back("cwi");
+		m_gui_options["output"] = create_radiobox_widget(values);
+
+		values.clear();
+		values.push_back("simplify");
+		values.push_back("quantifier-all");
+		values.push_back("quantifier-finite");
+		values.push_back("pfnf");
+		m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
+
+		add_rewriter_widget();
+
+		values.clear();
+		values.push_back("0");
+		values.push_back("1");
+		values.push_back("2");
+		values.push_back("3");
+		m_gui_options["strategy"] = create_radiobox_widget(values);
+
+		m_gui_options["tree"] = create_checkbox_widget();
+		m_gui_options["unused_data"] = create_checkbox_widget();
+	}
+};
+
 int main(int argc, char* argv[])
 {
    MCRL2_ATERMPP_INIT(argc, argv)
 
-   return pbes2bool_tool().execute(argc, argv);
+   return pbes2bool_gui_tool().execute(argc, argv);
 }

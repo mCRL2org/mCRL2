@@ -1,12 +1,9 @@
 project libraries/trace
        : source-location ..
-       : requirements
-          <include>../include
-       : usage-requirements
        ;
 
 mcrl2-library trace
-       : source/trace.cpp
+       : 
        : <library>/libraries//data
          <use>/libraries/utilities//exception
        :

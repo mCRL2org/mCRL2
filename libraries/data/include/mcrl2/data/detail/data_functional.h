@@ -101,7 +101,7 @@ struct variable_name: public std::unary_function<variable, core::identifier_stri
   }
 };
 
-/// \brief Function object that returns the name of a data expression
+/// \brief Function object that returns the sort of a data expression
 template < typename Expression >
 struct sort_of_expression: public std::unary_function< Expression, sort_expression >
 {
@@ -114,7 +114,7 @@ struct sort_of_expression: public std::unary_function< Expression, sort_expressi
   }
 };
 
-/// \brief Function object that returns the name of a data variable
+/// \brief Function object that returns the sort of a data variable
 typedef sort_of_expression< variable > sort_of_variable;
 
 struct sort_has_name
@@ -130,7 +130,7 @@ struct sort_has_name
   /// \return The function result
   bool operator()(sort_expression s) const
   {
-    return s.is_basic_sort() && std::string(basic_sort(s).name()) == m_name;
+    return is_basic_sort(s) && std::string(basic_sort(s).name()) == m_name;
   }
 };
 

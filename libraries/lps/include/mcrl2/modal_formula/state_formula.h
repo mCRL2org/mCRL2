@@ -100,11 +100,16 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 
 // TODO: use these classes instead of the functions in the namespace state_frm
 namespace temp {
-//--- start generated expression classes ---//
+//--- start generated classes ---//
 /// \brief The value true for state formulas
 class true_: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    true_()
+      : state_formula(core::detail::constructStateTrue())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     true_(atermpp::aterm_appl term)
@@ -112,17 +117,17 @@ class true_: public state_formula
     {
       assert(core::detail::check_term_StateTrue(m_term));
     }
-
-    /// \brief Constructor.
-    true_()
-      : state_formula(core::detail::gsMakeStateTrue())
-    {}
 };
 
 /// \brief The value false for state formulas
 class false_: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    false_()
+      : state_formula(core::detail::constructStateFalse())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     false_(atermpp::aterm_appl term)
@@ -130,17 +135,17 @@ class false_: public state_formula
     {
       assert(core::detail::check_term_StateFalse(m_term));
     }
-
-    /// \brief Constructor.
-    false_()
-      : state_formula(core::detail::gsMakeStateFalse())
-    {}
 };
 
 /// \brief The not operator for state formulas
 class not_: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    not_()
+      : state_formula(core::detail::constructStateNot())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     not_(atermpp::aterm_appl term)
@@ -164,6 +169,11 @@ class not_: public state_formula
 class and_: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    and_()
+      : state_formula(core::detail::constructStateAnd())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     and_(atermpp::aterm_appl term)
@@ -192,6 +202,11 @@ class and_: public state_formula
 class or_: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    or_()
+      : state_formula(core::detail::constructStateOr())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     or_(atermpp::aterm_appl term)
@@ -220,6 +235,11 @@ class or_: public state_formula
 class imp: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    imp()
+      : state_formula(core::detail::constructStateImp())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     imp(atermpp::aterm_appl term)
@@ -248,6 +268,11 @@ class imp: public state_formula
 class forall: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    forall()
+      : state_formula(core::detail::constructStateForall())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     forall(atermpp::aterm_appl term)
@@ -276,6 +301,11 @@ class forall: public state_formula
 class exists: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    exists()
+      : state_formula(core::detail::constructStateExists())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     exists(atermpp::aterm_appl term)
@@ -304,6 +334,11 @@ class exists: public state_formula
 class must: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    must()
+      : state_formula(core::detail::constructStateMust())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     must(atermpp::aterm_appl term)
@@ -332,6 +367,11 @@ class must: public state_formula
 class may: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    may()
+      : state_formula(core::detail::constructStateMay())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     may(atermpp::aterm_appl term)
@@ -360,6 +400,11 @@ class may: public state_formula
 class yaled: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    yaled()
+      : state_formula(core::detail::constructStateYaled())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     yaled(atermpp::aterm_appl term)
@@ -367,17 +412,17 @@ class yaled: public state_formula
     {
       assert(core::detail::check_term_StateYaled(m_term));
     }
-
-    /// \brief Constructor.
-    yaled()
-      : state_formula(core::detail::gsMakeStateYaled())
-    {}
 };
 
 /// \brief The timed yaled operator for state formulas
 class yaled_timed: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    yaled_timed()
+      : state_formula(core::detail::constructStateYaledTimed())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     yaled_timed(atermpp::aterm_appl term)
@@ -401,6 +446,11 @@ class yaled_timed: public state_formula
 class delay: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    delay()
+      : state_formula(core::detail::constructStateDelay())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     delay(atermpp::aterm_appl term)
@@ -408,17 +458,17 @@ class delay: public state_formula
     {
       assert(core::detail::check_term_StateDelay(m_term));
     }
-
-    /// \brief Constructor.
-    delay()
-      : state_formula(core::detail::gsMakeStateDelay())
-    {}
 };
 
 /// \brief The timed delay operator for state formulas
 class delay_timed: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    delay_timed()
+      : state_formula(core::detail::constructStateDelayTimed())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     delay_timed(atermpp::aterm_appl term)
@@ -442,6 +492,11 @@ class delay_timed: public state_formula
 class variable: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    variable()
+      : state_formula(core::detail::constructStateVar())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     variable(atermpp::aterm_appl term)
@@ -453,6 +508,11 @@ class variable: public state_formula
     /// \brief Constructor.
     variable(const core::identifier_string& name, const data::data_expression_list& arguments)
       : state_formula(core::detail::gsMakeStateVar(name, arguments))
+    {}
+
+    /// \brief Constructor.
+    variable(const std::string& name, const data::data_expression_list& arguments)
+      : state_formula(core::detail::gsMakeStateVar(core::identifier_string(name), arguments))
     {}
 
     core::identifier_string name() const
@@ -470,6 +530,11 @@ class variable: public state_formula
 class nu: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    nu()
+      : state_formula(core::detail::constructStateNu())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     nu(atermpp::aterm_appl term)
@@ -481,6 +546,11 @@ class nu: public state_formula
     /// \brief Constructor.
     nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateNu(name, assignments, operand))
+    {}
+
+    /// \brief Constructor.
+    nu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
+      : state_formula(core::detail::gsMakeStateNu(core::identifier_string(name), assignments, operand))
     {}
 
     core::identifier_string name() const
@@ -503,6 +573,11 @@ class nu: public state_formula
 class mu: public state_formula
 {
   public:
+    /// \brief Default constructor.
+    mu()
+      : state_formula(core::detail::constructStateMu())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     mu(atermpp::aterm_appl term)
@@ -514,6 +589,11 @@ class mu: public state_formula
     /// \brief Constructor.
     mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateMu(name, assignments, operand))
+    {}
+
+    /// \brief Constructor.
+    mu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
+      : state_formula(core::detail::gsMakeStateMu(core::identifier_string(name), assignments, operand))
     {}
 
     core::identifier_string name() const
@@ -531,7 +611,7 @@ class mu: public state_formula
       return atermpp::arg3(*this);
     }
 };
-//--- end generated expression classes ---//
+//--- end generated classes ---//
 } // namespace temp
 
 /// Accessor functions and predicates for state formulas.

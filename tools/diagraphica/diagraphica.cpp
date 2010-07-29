@@ -16,7 +16,7 @@
 #include <wx/wx.h>
 #include <wx/sysopt.h>
 #include <wx/clrpicker.h>
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -34,11 +34,13 @@ using namespace std;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // Configures tool capabilities.
-void DiaGraph::set_capabilities(tipi::tool::capabilities& c) const {
-  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+void DiaGraph::set_capabilities(tipi::tool::capabilities& c) const 
+{
+  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
 
-  for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
+  for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) 
+  {
+    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(*i)), tipi::tool::category::visualisation);
   }
 }
 
@@ -49,7 +51,7 @@ void DiaGraph::user_interactive_configuration(tipi::configuration&) { }
 bool DiaGraph::check_configuration(tipi::configuration const& c) const {
   if (c.input_exists("main-input")) {
     /* The input object is present, verify whether the specified format is supported */
-    if (mcrl2::lts::lts::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
+    if (mcrl2::lts::detail::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
       send_error("Invalid configuration: unsupported type `" +
           c.get_input("main-input").type().sub_type() + "' for main input");
     }
@@ -113,7 +115,7 @@ bool DiaGraph::run()
     return true;
 }
 
-IMPLEMENT_APP_NO_MAIN( DiaGraph )
+IMPLEMENT_APP_NO_MAIN( DiaGraph_gui_tool )
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
@@ -1359,7 +1361,7 @@ void DiaGraph::handleClustFrameDisplay()
 
 
 // ---------------------------------------------------------
-void DiaGraph::handleClustPlotFrameDisplay( const int &idx )
+void DiaGraph::handleClustPlotFrameDisplay( const int &/*idx*/ )
 // ---------------------------------------------------------
 {
     if ( canvasDistr == NULL )
@@ -2260,7 +2262,7 @@ void DiaGraph::initTimeSeries( const vector< int > attrIdcs )
 
 // ---------------------------
 void DiaGraph::markTimeSeries(
-    Colleague* sender,
+    Colleague* /*sender*/,
     Cluster* currFrame )
 // ---------------------------
 {
@@ -2280,7 +2282,7 @@ void DiaGraph::markTimeSeries(
 
 // ----------------------------------
 void DiaGraph::markTimeSeries(
-    Colleague* sender,
+    Colleague* /*sender*/,
     const vector< Cluster* > frames )
 // ----------------------------------
 {

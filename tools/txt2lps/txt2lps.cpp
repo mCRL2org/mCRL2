@@ -22,9 +22,11 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
 class txt2lps_tool : public squadt_tool< input_output_tool >
@@ -70,9 +72,11 @@ class txt2lps_tool : public squadt_tool< input_output_tool >
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& capabilities) const
     {
-      // The tool has only one main input combination
+      // The tool accepts .txt and .mcrl2 input
       capabilities.add_input_configuration("main-input",
-                 tipi::mime_type("txt", tipi::mime_type::application), tipi::tool::category::transformation);
+                 tipi::mime_type("txt", tipi::mime_type::text), tipi::tool::category::transformation);
+      capabilities.add_input_configuration("main-input",
+                 tipi::mime_type("mcrl2", tipi::mime_type::text), tipi::tool::category::transformation);
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
@@ -98,15 +102,20 @@ class txt2lps_tool : public squadt_tool< input_output_tool >
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(configuration);
 
-      return run() == 0;
+      return run();
     }
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
+};
+
+class txt2lps_gui_tool: public mcrl2_gui_tool<txt2lps_tool> {
+public:
+	txt2lps_gui_tool() {}
 };
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   
-  return txt2lps_tool().execute(argc, argv);
+  return txt2lps_gui_tool().execute(argc, argv);
 }

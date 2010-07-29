@@ -40,7 +40,7 @@ namespace detail {
     /// \param x A term
     /// \param arg An additional argument for the recursion
     /// \return The result of visiting the node
-    term_type visit_true(const term_type& x, Arg& arg)
+    term_type visit_true(const term_type& /* x */, Arg& /* arg */)
     {
       return tr::true_();
     }
@@ -49,7 +49,7 @@ namespace detail {
     /// \param x A term
     /// \param arg An additional argument for the recursion
     /// \return The result of visiting the node
-    term_type visit_false(const term_type& x, Arg& arg)
+    term_type visit_false(const term_type& /* x */, Arg& /* arg */)
     {
       return tr::false_();
     }
@@ -59,7 +59,7 @@ namespace detail {
     /// \param n A term
     /// \param arg An additional argument for the recursion
     /// \return The result of visiting the node
-    term_type visit_not(const term_type& x, const term_type& n, Arg& arg)
+    term_type visit_not(const term_type& /* x */, const term_type& n, Arg& /* arg */)
     {
       if (tr::is_true(n))
       {
@@ -78,7 +78,7 @@ namespace detail {
     /// \param right A term
     /// \param arg An additional argument for the recursion
     /// \return The result of visiting the node
-    term_type visit_and(const term_type& x, const term_type& left, const term_type& right, Arg& arg)
+    term_type visit_and(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
     {
       if (tr::is_true(left))
       {
@@ -109,7 +109,7 @@ namespace detail {
     /// \param right A term
     /// \param arg An additional argument for the recursion
     /// \return The result of visiting the node
-    term_type visit_or(const term_type& x, const term_type& left, const term_type& right, Arg& arg)
+    term_type visit_or(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
     {
       if (tr::is_true(left))
       {
@@ -140,7 +140,7 @@ namespace detail {
     /// \param right A term
     /// \param arg An additional argument for the recursion
     /// \return The result of visiting the node
-    term_type visit_imp(const term_type& x, const term_type& left, const term_type& right, Arg& arg)
+    term_type visit_imp(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
     {
       if (tr::is_true(left))
       {

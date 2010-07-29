@@ -163,8 +163,8 @@ void AttrConti::moveValue(
     const size_t &idxTo )
 // -----------------------
 {
-    if ( ( 0 <= idxFr && idxFr < curValues.size() ) &&
-         ( 0 <= idxTo && idxTo < curValues.size() ) )
+    if ( ( idxFr < curValues.size() ) &&
+         ( idxTo < curValues.size() ) )
     {
         Value* temp = curValues[idxFr];
 

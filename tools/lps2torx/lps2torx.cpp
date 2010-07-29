@@ -29,6 +29,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
+
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -169,7 +171,7 @@ class lps2torx_tool : public lps2torx_base
   
       data::rewriter rewriter = ( removeunused ) ?
             data::rewriter(lps_specification.data(),
-		mcrl2::data::used_data_equation_selector(lps_specification.data(), mcrl2::lps::specification_to_aterm(lps_specification, false)), strategy) :
+		mcrl2::data::used_data_equation_selector(lps_specification.data(), mcrl2::lps::specification_to_aterm(lps_specification)), strategy) :
             data::rewriter(lps_specification.data(), strategy);
       mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), rewriter);
   
@@ -263,21 +265,10 @@ class lps2torx_tool : public lps2torx_base
       return true;
     }
 
-  private:
+  protected:
     std::string synopsis() const
     {
       return "[OPTION]... INFILE";
-    }
-
-    void check_positional_options(const command_line_parser &parser)
-    {
-      if (1 < parser.arguments.size())
-      {
-        parser.error("too many file arguments");
-      } else if (1 > parser.arguments.size())
-      {
-        parser.error("too few file arguments");
-      }
     }
 
     void add_options(interface_description &desc)
@@ -333,14 +324,31 @@ class lps2torx_tool : public lps2torx_base
         }
       }
 
-      if (parser.arguments.size() == 0) {
-        parser.error("no INFILE specified");
-      } else if (parser.arguments.size() == 1) {
-        name_for_input = parser.arguments[0];
-      } else {
-        //parser.arguments.size() > 1
-        parser.error("too many file arguments");
-      }
+//      if (parser.arguments.size() == 0) {
+//        parser.error("no INFILE specified");
+//      } else if (parser.arguments.size() == 1) {
+//        name_for_input = parser.arguments[0];
+//      } else {
+//        //parser.arguments.size() > 1
+//        parser.error("too many file arguments");
+//      }
+    }
+};
+
+class lps2torx_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lps2torx_tool>
+{
+  public:
+	lps2torx_gui_tool()
+    {
+      m_gui_options["state-format"] = create_textctrl_widget();
+      add_rewriter_widget();
+      m_gui_options["unused-data"] = create_checkbox_widget();
+      m_gui_options["dummy"] = create_textctrl_widget();
+
+      // Override default options
+      // Setting --verbose forces lps2torx to read from 'stdin'
+      m_gui_options["verbose"] = create_checkbox_widget(false);
+
     }
 };
 
@@ -348,5 +356,5 @@ int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps2torx_tool().execute(argc,argv);
+  return lps2torx_gui_tool().execute(argc,argv);
 }

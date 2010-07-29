@@ -29,26 +29,24 @@ include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include/)
 #The following include directory is required by out-of-source builds for finding setup.h
 include_directories(${CMAKE_BINARY_DIR}/libraries/utilities/include)
 
-if(SQUADT_CONNECTIVITY)
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
+add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
 
-  if(MINGW)
-    target_link_libraries(${PROJECT_NAME}
-      wsock32
-      ws2_32
-    )
-  endif(MINGW)   
-  
-  if ( APPLE)
-      set(CMAKE_EXE_LINKER_FLAGS "-framework Carbon ${CMAKE_EXE_LINKER_FLAGS}")
-      set(CMAKE_SHARED_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
-      set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
-  endif (APPLE)
-endif(SQUADT_CONNECTIVITY)
+if(MINGW)
+  target_link_libraries(${PROJECT_NAME}
+    wsock32
+    ws2_32
+  )
+endif(MINGW)   
+
+if ( APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS "-framework Carbon ${CMAKE_EXE_LINKER_FLAGS}")
+    set(CMAKE_SHARED_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
+    set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
+endif (APPLE)
 
 if(MCRL2_BUILD_GUI_TOOLS)
   set(MCRL2_SIMULATOR_GUI
-    ${CMAKE_SOURCE_DIR}/tools/xsim/simulatorgui.cpp
+    ${CMAKE_SOURCE_DIR}/tools/lpsxsim/simulatorgui.cpp
   )
 endif(MCRL2_BUILD_GUI_TOOLS)
 
@@ -59,12 +57,11 @@ add_library( ${PROJECT_NAME}
   ${mcrl2_utilities_wx_src}
   ${mcrl2_lps_src}
   ${mcrl2_lts_src}
-  ${mcrl2_trace_src}
   ${mcrl2_process_src}
   ${squadt_tipi_src}
   ${mcrl2_utilities_command_line_src}
-  ${CMAKE_SOURCE_DIR}/tools/xsim/simulator.cpp
-  ${CMAKE_SOURCE_DIR}/tools/xsim/simbase.cpp
+  ${CMAKE_SOURCE_DIR}/tools/lpsxsim/simulator.cpp
+  ${CMAKE_SOURCE_DIR}/tools/lpsxsim/simbase.cpp
   ${MCRL2_SIMULATOR_GUI}
 )
 
@@ -78,15 +75,15 @@ target_link_libraries(${PROJECT_NAME}
   aterm
 )
 
-if(USE_BOOST_INTERNAL)
+if(MCRL2_USE_BOOST_INTERNAL)
   target_link_libraries(${PROJECT_NAME}
     boost
   ) 
-else(USE_BOOST_INTERNAL)
+else(MCRL2_USE_BOOST_INTERNAL)
   target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}     
   ) 
-endif(USE_BOOST_INTERNAL)
+endif(MCRL2_USE_BOOST_INTERNAL)
 
 
 if(MCRL2_BUILD_GUI_TOOLS)

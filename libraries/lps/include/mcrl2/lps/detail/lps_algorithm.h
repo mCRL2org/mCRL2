@@ -18,6 +18,7 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/algorithm.h"  
 #include "mcrl2/data/find.h"  
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitution.h"
@@ -34,15 +35,12 @@ namespace lps {
 namespace detail {
 
   /// \brief Algorithm class for algorithms on linear process specifications.
-  class lps_algorithm
+  class lps_algorithm: public core::algorithm
   {
     protected:
       /// \brief The specification that is processed by the algorithm
       specification& m_spec;
      
-      /// \brief If true, verbose output is written
-      bool m_verbose;
-
       template <typename OutIter>
       void sumelm_find_variables(const action_summand& s, OutIter result) const
       {
@@ -66,20 +64,34 @@ namespace detail {
         std::set<data::variable> occurring_vars;
         sumelm_find_variables(summand_, std::inserter(occurring_vars, occurring_vars.end()));
     
-        std::set<data::variable> summation_variables(data::convert<std::set<data::variable> >(summand_.summation_variables()));
+        std::set<data::variable> summation_variables(atermpp::convert<std::set<data::variable> >(summand_.summation_variables()));
         std::set_intersection(summation_variables.begin(), summation_variables.end(),
                             occurring_vars.begin(), occurring_vars.end(),
                             std::inserter(new_summation_variables, new_summation_variables.end()));
     
-        summand_.summation_variables() = data::convert<data::variable_list>(new_summation_variables);
+        summand_.summation_variables() = atermpp::convert<data::variable_list>(new_summation_variables);
       }
 
     public:
       /// \brief Constructor
       lps_algorithm(specification& spec, bool verbose = false)
-        : m_spec(spec),
-          m_verbose(verbose)
+        : 
+          core::algorithm(verbose ? 1 : 0),
+          m_spec(spec)
       {}
+
+      /// \brief Constructor
+      lps_algorithm(specification& spec, unsigned int loglevel)
+        : 
+          core::algorithm(loglevel),
+          m_spec(spec)
+      {}
+
+      /// \brief Flag for verbose output
+      bool verbose() const
+      {
+        return verbose_level() >= 1;
+      }
 
       /// \brief Applies the next state substitution to the variable v.
       data::data_expression next_state(const summand& s, const data::variable& v) const

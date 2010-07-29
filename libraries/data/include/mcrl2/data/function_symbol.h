@@ -23,73 +23,45 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief function symbol.
-    ///
-    class function_symbol: public data_expression
+//--- start generated class function_symbol ---//
+/// \brief A function symbol
+class function_symbol: public data_expression
+{
+  public:
+    /// \brief Default constructor.
+    function_symbol()
+      : data_expression(core::detail::constructOpId())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    function_symbol(atermpp::aterm_appl term)
+      : data_expression(term)
     {
-      public:
+      assert(core::detail::check_term_OpId(m_term));
+    }
 
-        /// \brief Constructor.
-        ///
-        function_symbol()
-          : data_expression(core::detail::constructOpId())
-        {}
+    /// \brief Constructor.
+    function_symbol(const core::identifier_string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeOpId(name, sort))
+    {}
 
-        /// \brief Constructor.
-        ///
-        /// \param[in] a a term adhering to the internal format.
-        function_symbol(const atermpp::aterm_appl& a)
-          : data_expression(a)
-        {}
+    /// \brief Constructor.
+    function_symbol(const std::string& name, const sort_expression& sort)
+      : data_expression(core::detail::gsMakeOpId(core::identifier_string(name), sort))
+    {}
 
-        /// \brief Constructor.
-        ///
-        /// \param[in] d A data expression.
-        /// \pre d is a function symbol.
-        function_symbol(const data_expression& d)
-          : data_expression(d)
-        {
-          assert(d.is_function_symbol());
-        }
+    core::identifier_string name() const
+    {
+      return atermpp::arg1(*this);
+    }
 
-        /// \brief Constructor.
-        ///
-        /// \param[in] name The name of the function.
-        /// \param[in] sort The sort of the function.
-        function_symbol(const std::string& name,
-                        const sort_expression& sort)
-          : data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(name), sort))
-        {
-          assert(name != "");
-        }
-
-        /// \brief Constructur.
-        ///
-        /// \param[in] name The name of the function.
-        /// \param[in] sort The sort of the function.
-        function_symbol(const core::identifier_string& name,
-                        const sort_expression& sort)
-          : data_expression(core::detail::gsMakeOpId(name, sort))
-        {
-          assert(name != core::identifier_string(""));
-        }
-
-        /// \brief Returns the application of this function symbol to an argument.
-        /// \pre this->sort() is a function sort.
-        /// \param[in] e The data expression to which the function symbol is applied
-        application operator()(const data_expression& e) const
-        {
-          assert(this->sort().is_function_sort());
-          return application(*this, e);
-        }
-
-        /// \brief Returns the name of the symbol.
-        core::identifier_string name() const
-        {
-          return atermpp::aterm_string(atermpp::arg1(*this));
-        }
-
-    }; // class function_symbol
+    sort_expression sort() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+//--- end generated class function_symbol ---//
 
     /// \brief list of function symbols
     typedef atermpp::term_list< function_symbol > function_symbol_list;

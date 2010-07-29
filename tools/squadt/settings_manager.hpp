@@ -92,7 +92,7 @@ namespace squadt {
       std::string path_to_system_settings() const;
 
       /** \brief Get the path where the default executable binaries are installed */
-      std::string path_to_default_binaries() const;
+//      std::string path_to_default_binaries() const;
 
       /** \brief Get the path to image, in the directory containing the image file(s) */
       std::string path_to_images(path const&) const;

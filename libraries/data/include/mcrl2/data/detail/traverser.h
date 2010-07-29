@@ -25,7 +25,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
@@ -93,6 +93,15 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
           }
 
+          void operator()(identifier const& e)
+          {
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this)(e.name());
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
+          }
+
           void operator()(variable const& e)
           {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
@@ -119,15 +128,15 @@ namespace mcrl2 {
 
           void operator()(abstraction const& e)
           {
-            if (e.is_lambda())
+            if (is_lambda(e))
             {
               static_cast< Derived& >(*this)(lambda(e));
             }
-            else if (e.is_exists())
+            else if (is_exists(e))
             {
               static_cast< Derived& >(*this)(exists(e));
             }
-            else if (e.is_forall())
+            else if (is_forall(e))
             {
               static_cast< Derived& >(*this)(forall(e));
             }
@@ -166,29 +175,55 @@ namespace mcrl2 {
           // Default, no traversal of sort expressions
           void operator()(data_expression const& e)
           {
-            if (e.is_application())
+            if (is_application(e))
             {
               static_cast< Derived& >(*this)(application(e));
             }
-            else if (e.is_where_clause())
+            else if (is_where_clause(e))
             {
               static_cast< Derived& >(*this)(where_clause(e));
             }
-            else if (e.is_abstraction())
+            else if (is_abstraction(e))
             {
               static_cast< Derived& >(*this)(abstraction(e));
             }
-            else if (e.is_variable())
+            else if (is_variable(e))
             {
               static_cast< Derived& >(*this)(variable(e));
             }
-            else if (e.is_function_symbol())
+            else if (is_identifier(e))
+            {
+              static_cast< Derived& >(*this)(identifier(e));
+            }
+            else if (is_function_symbol(e))
             {
               static_cast< Derived& >(*this)(function_symbol(e));
             }
           }
 
+          void operator()(assignment_expression const& a)
+          {
+            if (is_assignment(a))
+            {
+              static_cast< Derived& >(*this)(assignment(a));
+            }
+            else if (is_identifier_assignment(a))
+            {
+              static_cast< Derived& >(*this)(identifier_assignment(a));
+            }
+          }
+
           void operator()(assignment const& a)
+          {
+            static_cast< Derived& >(*this).enter(a);
+
+            static_cast< Derived& >(*this)(a.lhs());
+            static_cast< Derived& >(*this)(a.rhs());
+
+            static_cast< Derived& >(*this).leave(a);
+          }
+
+          void operator()(identifier_assignment const& a)
           {
             static_cast< Derived& >(*this).enter(a);
 
@@ -210,20 +245,25 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).leave(e);
           }
 
-          /* ENG. Substitutie moet plaatsvinden op interne data structuur. TODO.
+          // ENG. Substitutie moet plaatsvinden op interne data structuur. TODO.
+          // (JK: 30/6/2010) This assumes that we consider the *normalised*
+          // version of the data specification. Is this really what we want?
           void operator()(data_specification const& e)
           {
+            static_cast< Derived& >(*this).enter(e);
+
             static_cast< Derived& >(*this)(e.sorts());
             static_cast< Derived& >(*this)(e.constructors());
             static_cast< Derived& >(*this)(e.mappings());
-            // static_cast< Derived& >(*this)(e.aliases());
             static_cast< Derived& >(*this)(e.equations());
-          } */
+
+            static_cast< Derived& >(*this).leave(e);
+          }
 
 #ifndef NO_TERM_TRAVERSAL
           // \deprecated exists only for backwards compatibility
           template < typename Expression >
-          void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          void operator()(Expression const& e, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           {
             (*this)(static_cast< atermpp::aterm const& >(e));
           }
@@ -267,7 +307,7 @@ namespace mcrl2 {
 #endif // NO_TERM_TRAVERSAL
 
           template < typename Container >
-          void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          void operator()(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
             for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
             {
@@ -340,13 +380,13 @@ namespace mcrl2 {
         public:
 
           template < typename Expression >
-          void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          void operator()(Expression const& e, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           {
             forward_call(e);
           }
 
           template < typename Container >
-          void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          void operator()(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
             for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
             {

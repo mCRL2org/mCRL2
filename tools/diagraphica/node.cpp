@@ -58,8 +58,8 @@ void Node::swapTupleVal(
     const size_t &idx2 )
 // ---------------------
 {
-    if ( ( 0 <= idx1 && idx1 < tuple.size() ) &&
-         ( 0 <= idx2 && idx2 < tuple.size() ) )
+    if ( idx1 < tuple.size() &&
+         idx2 < tuple.size() )
     {
         double temp = tuple[idx1];
         tuple[idx1] = tuple[idx2];
@@ -76,8 +76,8 @@ void Node::moveTupleVal(
     const size_t &idxTo )
 // ---------------------
 {
-    if ( ( 0 <= idxFr && idxFr < tuple.size() ) &&
-         ( 0 <= idxTo && idxTo < tuple.size() ) )
+    if ( idxFr < tuple.size() &&
+         idxTo < tuple.size() )
     {
         double temp = tuple[idxFr];
 
@@ -226,7 +226,7 @@ int Node::getSizeTuple()
 double Node::getTupleVal( const size_t &idx )
 // ------------------------------------
 {
-    if ( 0 <= idx && idx < tuple.size() )
+    if ( idx < tuple.size() )
         return tuple[idx];
     else
         throw mcrl2::runtime_error( "Error retrieving node tuple value." );
@@ -245,7 +245,7 @@ int Node::getSizeInEdges()
 Edge* Node::getInEdge( const size_t &idx )
 // ------------------------------------
 {
-	if ( 0 <= idx && idx < inEdges.size() )
+	if ( idx < inEdges.size() )
 		return inEdges[idx];
 	else
         throw mcrl2::runtime_error( "Error retrieving node incoming edge." );
@@ -264,7 +264,7 @@ int Node::getSizeOutEdges()
 Edge* Node::getOutEdge( const size_t &idx )
 // -------------------------------------
 {
-	if ( 0 <= idx && idx < outEdges.size() )
+	if ( idx < outEdges.size() )
 		return outEdges[idx];
 	else
         throw mcrl2::runtime_error( "Error retrieving node outgoing edge." );

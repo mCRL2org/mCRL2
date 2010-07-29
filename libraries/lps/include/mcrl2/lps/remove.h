@@ -49,7 +49,7 @@ namespace detail {
         return false;
       }
       data::function_symbol f = *c.begin();
-      return !f.sort().is_function_sort();
+      return !is_function_sort(f.sort());
     }
   };
 

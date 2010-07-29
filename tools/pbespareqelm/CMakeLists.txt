@@ -24,28 +24,23 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )
+else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_utilities_command_line
 )
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
 
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 
-# install documentation
-if (MAN_PAGES)
-  add_custom_command(
-    OUTPUT ${PROJECT_NAME}.1
-    COMMAND ${PROJECT_NAME} --generate-man-page > ${PROJECT_NAME}.1
-    DEPENDS ${PROJECT_NAME}
-    COMMENT "Generating man page for ${PROJECT_NAME}"
-  )
-  add_custom_target(${PROJECT_NAME}_man_page ALL DEPENDS ${PROJECT_NAME}.1)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.1 DESTINATION share/man/man1)
-endif (MAN_PAGES)
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
+

@@ -227,8 +227,8 @@ variable_list get_nonreal_variables(const variable_list& l)
 }
 
 static data::function_symbol &negate_function_symbol(const sort_expression s)
-{ static data::function_symbol f("negate",data::function_sort(s,s));
-  assert(data::function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
+{ static data::function_symbol f("negate",data::make_function_sort(s,s));
+  assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
   return f;
 }
 
@@ -619,7 +619,7 @@ static void add_postponed_inequalities_to_context(
   
         for(std::vector < summand_information >::iterator j = summand_info.begin();
                            j != summand_info.end(); ++j)
-        { j->add_a_new_next_state_argument(context,r,c);
+        { j->add_a_new_next_state_argument(context,r);
         }
       }
     }
@@ -805,7 +805,7 @@ summand generate_summand(summand_information &summand_info,
     { if ((t==c->get_lowerbound()) && (u==c->get_upperbound()))
       { if (negate)
         { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),
-                           application(negate_function_symbol(cs.sort()),c->get_variable())));
+                           make_application(negate_function_symbol(cs.sort()),c->get_variable())));
         }
         else
         { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),c->get_variable()));
@@ -946,25 +946,25 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   ds.add_equation(data_equation(  // negate(larger)=smaller;
                      vector <variable>(),
                      sort_bool::true_(),
-                     application(negate_function_symbol(c.sort()),c.larger()),
+                     make_application(negate_function_symbol(c.sort()),c.larger()),
                      c.smaller()));
   ds.add_equation(data_equation(  // negate(smaller)=larger;
                      vector <variable>(),
                      sort_bool::true_(),
-                     application(negate_function_symbol(c.sort()),c.smaller()),
+                     make_application(negate_function_symbol(c.sort()),c.smaller()),
                      c.larger()));
   ds.add_equation(data_equation(  // negate(equal)=equal;
                      vector <variable>(),
                      sort_bool::true_(),
-                     application(negate_function_symbol(c.sort()),c.smaller()),
-                     c.larger()));
+                     make_application(negate_function_symbol(c.sort()),c.equal()),
+                     c.equal()));
   variable v("x",c.sort());
   vector <variable> vars;
   vars.push_back(v);
   ds.add_equation(data_equation(  // negate(negate(x))=x;
                      vars,
                      sort_bool::true_(),
-                     application(negate_function_symbol(c.sort()),application(negate_function_symbol(c.sort()),v)),
+                     make_application(negate_function_symbol(c.sort()),make_application(negate_function_symbol(c.sort()),v)),
                      v));
   
   s.data() = ds;

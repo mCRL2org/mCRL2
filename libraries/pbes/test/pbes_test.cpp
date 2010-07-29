@@ -37,7 +37,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
-using data::make_vector;
+using atermpp::make_vector;
 using core::identifier_string;
 using data::data_expression;
 using data::variable;

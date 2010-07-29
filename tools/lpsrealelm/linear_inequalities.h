@@ -163,7 +163,7 @@ class linear_inequality
                       bool negate=false,
                       const data_expression factor=real_one())
     { 
-      // std::cerr << "EXPRESSION " << pp(e) <<  "    --    " << e << "\n";
+      // std::cerr << "EXPRESSION " << pp(e) <<  " factor: " << pp(factor) << "\n";
       if (sort_real::is_minus_application(e) && application(e).arguments().size()==2)
       { // std::cerr << "is_minus_application\n";
         parse_and_store_expression(application(e).left(),r,negate,factor);
@@ -178,7 +178,8 @@ class linear_inequality
         parse_and_store_expression(application(e).right(),r,negate,factor);
       }
       else if (sort_real::is_times_application(e))
-      { data_expression lhs=rewrite_with_memory(application(e).left(),r), rhs=rewrite_with_memory(application(e).right(),r);
+      { data_expression lhs=rewrite_with_memory(application(e).left(),r);
+        data_expression rhs=rewrite_with_memory(application(e).right(),r);
         if (is_closed_real_number(lhs))
         { parse_and_store_expression(rhs,r,negate,sort_real::times(lhs,factor));
         }
@@ -187,7 +188,7 @@ class linear_inequality
         }
         else throw mcrl2::runtime_error("Expect constant multiplies expression: " + pp(e) + "\n");
       }
-      else if (e.is_variable())
+      else if (is_variable(e))
       { if (e.sort() == sort_real::real_())
         {
           if(m_lhs.find(e) == m_lhs.end())
@@ -205,8 +206,15 @@ class linear_inequality
            throw mcrl2::runtime_error("Encountered a variable in a real expression which is not of sort real: " + pp(e) + "\n");
       }
       else if (is_closed_real_number(rewrite_with_memory(e,r)))
-      { set_rhs(negate?rewrite_with_memory(sort_real::plus(rhs(),e),r)
-                      :rewrite_with_memory(sort_real::minus(rhs(),e),r));
+      { // std::cerr << "CONST EXPRESSION " << pp(e) << " FACTOR " << pp(factor) << " NEG " << negate << "\n";
+        if (factor==real_one())
+        { set_rhs(negate?rewrite_with_memory(sort_real::plus(rhs(),e),r)
+                      :rewrite_with_memory(sort_real::minus(rhs(),sort_real::times(factor,e)),r));
+        }
+        else
+        { set_rhs(negate?rewrite_with_memory(sort_real::plus(rhs(), sort_real::times(factor,e)),r)
+                        :rewrite_with_memory(sort_real::minus(rhs(),sort_real::times(factor,e)),r));
+        }
       }
       else throw mcrl2::runtime_error("Expect linear expression over reals: " + pp(e) + "\n");
     }

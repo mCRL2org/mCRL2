@@ -94,6 +94,18 @@ std::string BES8 =
     "init X1;                                                 \n"
     ;
 
+std::string BES9 =
+    "pbes mu X = false;                                       \n"
+    "                                                         \n"
+    "init X;                                                  \n"
+    ;
+
+std::string BES10 =
+    "pbes nu X = false;                                       \n"
+    "                                                         \n"
+    "init X;                                                  \n"
+    ;
+
 void test_bes(std::string bes_spec, bool expected_result)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
@@ -126,6 +138,8 @@ void test_bes_examples()
   test_bes(BES6, true);
   test_bes(BES7, false);
   test_bes(BES8, true);
+  test_bes(BES9, false);
+  test_bes(BES10, false);
 }
 
 const std::string ABP_SPECIFICATION =

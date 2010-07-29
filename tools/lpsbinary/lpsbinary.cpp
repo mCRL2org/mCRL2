@@ -16,10 +16,13 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
+
 
 using namespace std;
 using namespace mcrl2;
+using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
 class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
@@ -131,9 +134,18 @@ class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
+class binary_gui_tool: public mcrl2_gui_tool<binary_tool>
+{
+  public:
+	binary_gui_tool()
+    {
+      add_rewriter_widget();
+    }
+};
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return binary_tool().execute(argc, argv);
+  return binary_gui_tool().execute(argc, argv);
 }

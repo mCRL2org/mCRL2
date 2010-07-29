@@ -94,11 +94,16 @@ class pbes_expression: public atermpp::aterm_appl
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
 namespace traversal {
-//--- start generated expression classes ---//
+//--- start generated classes ---//
 /// \brief The value true for pbes expressions
 class true_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    true_()
+      : pbes_expression(core::detail::constructPBESTrue())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     true_(atermpp::aterm_appl term)
@@ -106,17 +111,17 @@ class true_: public pbes_expression
     {
       assert(core::detail::check_term_PBESTrue(m_term));
     }
-
-    /// \brief Constructor.
-    true_()
-      : pbes_expression(core::detail::gsMakePBESTrue())
-    {}
 };
 
 /// \brief The value false for pbes expressions
 class false_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    false_()
+      : pbes_expression(core::detail::constructPBESFalse())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     false_(atermpp::aterm_appl term)
@@ -124,17 +129,17 @@ class false_: public pbes_expression
     {
       assert(core::detail::check_term_PBESFalse(m_term));
     }
-
-    /// \brief Constructor.
-    false_()
-      : pbes_expression(core::detail::gsMakePBESFalse())
-    {}
 };
 
 /// \brief The not operator for pbes expressions
 class not_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    not_()
+      : pbes_expression(core::detail::constructPBESNot())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     not_(atermpp::aterm_appl term)
@@ -158,6 +163,11 @@ class not_: public pbes_expression
 class and_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    and_()
+      : pbes_expression(core::detail::constructPBESAnd())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     and_(atermpp::aterm_appl term)
@@ -186,6 +196,11 @@ class and_: public pbes_expression
 class or_: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    or_()
+      : pbes_expression(core::detail::constructPBESOr())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     or_(atermpp::aterm_appl term)
@@ -214,6 +229,11 @@ class or_: public pbes_expression
 class imp: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    imp()
+      : pbes_expression(core::detail::constructPBESImp())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     imp(atermpp::aterm_appl term)
@@ -242,6 +262,11 @@ class imp: public pbes_expression
 class forall: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    forall()
+      : pbes_expression(core::detail::constructPBESForall())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     forall(atermpp::aterm_appl term)
@@ -270,6 +295,11 @@ class forall: public pbes_expression
 class exists: public pbes_expression
 {
   public:
+    /// \brief Default constructor.
+    exists()
+      : pbes_expression(core::detail::constructPBESExists())
+    {}
+
     /// \brief Constructor.
     /// \param term A term
     exists(atermpp::aterm_appl term)
@@ -293,7 +323,7 @@ class exists: public pbes_expression
       return atermpp::arg2(*this);
     }
 };
-//--- end generated expression classes ---//
+//--- end generated classes ---//
 } // namespace traversal
 
 /// \brief The namespace for predicates on pbes expressions.
@@ -786,6 +816,9 @@ namespace pbes_expr_optimized {
     else if(is_pbes_or(t)) {
       return is_bes(left(t)) && is_bes(right(t));
     }
+    else if(is_pbes_imp(t)) {
+      return is_bes(left(t)) && is_bes(right(t));
+    }
     else if(is_pbes_forall(t)) {
       return false;
     }
@@ -1112,8 +1145,8 @@ namespace core {
     variable_sequence_type var(term_type t)
     {
       // Forall and exists are not fully supported by the data library
-      assert(!data::is_data_expression(t) || (!data::data_expression(t).is_abstraction()
-		 || (!static_cast<data::abstraction>(t).is_forall() && !static_cast<data::abstraction>(t).is_exists())));
+      assert(!data::is_data_expression(t) || (!data::is_abstraction(t)
+		 || (!data::is_forall(data::abstraction(t)) && !data::is_exists(data::abstraction(t)))));
       assert(is_exists(t) || is_forall(t));
 
       return variable_sequence_type(atermpp::list_arg1(t));
@@ -1154,7 +1187,7 @@ namespace core {
     static inline
     bool is_variable(term_type t)
     {
-      return data::data_expression(t).is_variable();
+      return data::is_variable(t);
     }
 
     /// \brief Returns the free variables of a term
@@ -1190,7 +1223,7 @@ namespace core {
     /// \param t A term
     /// \return True if the term is constant
     static inline
-    bool is_constant(term_type t) { return false; }
+    bool is_constant(term_type /* t */) { return false; }
 
     /// \brief Pretty print function
     /// \param t A term

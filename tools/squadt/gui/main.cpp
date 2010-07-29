@@ -16,13 +16,17 @@
 #include "gui/main.hpp"
 #include "gui/project.hpp"
 #include "gui/resources.hpp"
-#include "gui/dialog/project_settings.hpp"
 #include "gui/dialog/preferences.hpp"
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
 
+#include <boost/filesystem/path.hpp>
+
 #include <wx/menu.h>
 #include <wx/utils.h>
+#include <wx/statline.h>
+#include <wx/hyperlink.h>
+
 
 /* Some custom identifiers for use with event handlers */
 #define cmID_UPDATE             (wxID_HIGHEST)
@@ -44,10 +48,63 @@ namespace squadt {
 
       /* Default size is the minimum size */
       SetMinSize(wxDefaultSize);
+ 
+      wxFont font(10, wxDEFAULT, wxNORMAL, wxBOLD);
+      wxStaticText *heading = new wxStaticText(this, wxID_ANY, wxT("Instructions"), 
+        wxPoint(30, 15));
+      heading->SetFont(font);
+
+       new wxStaticLine(this, wxID_ANY, wxPoint(25, 50), 
+        wxSize(300,1));
+
+       new wxStaticText(this, wxID_ANY, wxT("Welcome to SQuADT. SQuADT is a graphical user interface, providing an interactive integration among mCRL2 software tools. "), 
+        wxPoint(25, 80));
+
+       new wxStaticText(this, wxID_ANY, wxT("To use this interactive environment either, perform one of the following actions:"), 
+        wxPoint(25, 130));
+
+       new wxStaticText(this, wxID_ANY, wxT("1. Open an existing project: Goto \"Project\" -> \"Open\" and browse to a directory that contains a valid XML \"Project\""), 
+        wxPoint(25, 160));
+
+       new wxStaticText(this, wxID_ANY, wxT("2. Create a new project: Goto \"Project\" -> \"New\" and browse to a directory to store the XML \"Project\"."), 
+        wxPoint(25, 190));
+
+       new wxStaticText(this, wxID_ANY, wxT("After creating a new project perform one of the following actions: "), 
+        wxPoint(40, 210));
+
+       new wxStaticText(this, wxID_ANY, wxT("1. Create a new file via \"Project\"->\"Add New File\", or "), 
+        wxPoint(40, 240));
+
+       new wxStaticText(this, wxID_ANY, wxT("2. Add an existing mCRL2 compatible file via \"Project\"->\"Add Existing File\""), 
+        wxPoint(40, 260));
+
+       new wxStaticLine(this, wxID_ANY, wxPoint(25, 300), 
+        wxSize(310,1));
+
+       new wxStaticText(this, wxID_ANY, wxT("Information on mCRL2 compatible file formats, as well as additional documentation can be found at:"), 
+        wxPoint(25, 330));
+
+#ifdef _WIN32
+       wxStaticText *hl1  = new wxStaticText(this, wxID_ANY, wxT("http://www.mcrl2.org"), wxPoint(240, 360));
+#else
+      wxHyperlinkCtrl *hl1 = new wxHyperlinkCtrl(this, wxID_ANY, wxT("  www.mcrl2.org  "), wxT("http://www.mcrl2.org"), wxPoint(240, 360));
+#endif
+
+      hl1->SetFont(font);
+
+      wxStaticText *x1 = new wxStaticText(this, wxID_ANY, wxT("From summer 2010 this tool is not supported any longer."),
+       wxPoint(35, 410));
+
+      x1->SetFont(font);
+
+      wxStaticText *x2 =  new wxStaticText(this, wxID_ANY, wxT("We recommend to use \"mcrl2-gui\" instead."),
+       wxPoint(35, 430));
+
+      x2->SetFont(font);
+
 
       /* Reposition the window */
       CentreOnScreen();
-
       Show(true);
     }
 
@@ -100,10 +157,8 @@ namespace squadt {
       project_menu->Append(cmID_UPDATE, wxT("&Update...\tCTRL-u"))->Enable(false);
       project_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
       project_menu->AppendSeparator();
-      wxMenu* data_source_menu = new wxMenu();
-      data_source_menu->Append(cmID_ADD_EXISTING_FILE, wxT("&Existing File..."));
-      data_source_menu->Append(cmID_ADD_NEW_FILE, wxT("&New File"));
-      project_menu->Append(cmID_NEW_DATA_SOURCE, wxT("New &Model..."), data_source_menu)->Enable(false);
+      project_menu->Append(cmID_ADD_NEW_FILE, wxT("&Add New File"))->Enable(false);
+      project_menu->Append(cmID_ADD_EXISTING_FILE, wxT("Add &Existing File..."))->Enable(false);
       project_menu->AppendSeparator();
       project_menu->Append(wxID_EXIT, wxT("&Quit"));
       menu->Append(project_menu, wxT("&Project"));
@@ -129,19 +184,32 @@ namespace squadt {
 
     void main::project_new() {
 
-      dialog::new_project dialog(this);
+	wxDirDialog OpenDialog(
+		this, _("Select a directory for storing a Squadt project"));
 
-      switch (dialog.ShowModal()) {
-        case 1:
-          /* Create the new project */
-          project_new(dialog.get_location(), dialog.get_description());
-          break;
-        case 2:
-          project_open(dialog.get_location());
-          break;
-        default: /* Cancelled by user */
-          break;
-      }
+    	if (OpenDialog.ShowModal() == wxID_OK) // if the user click "Open" instead of "Cancel"
+    	{
+          boost::filesystem::path project_file = boost::filesystem::path( std::string(OpenDialog.GetPath().fn_str()) / boost::filesystem::path(settings_manager::project_definition_base_name) );
+          if ( boost::filesystem::exists( project_file ) )
+          {
+             wxMessageDialog OverWrite( this , _("The selected directory contains a project file \"project.xml\".\n\nSelect an option.\nYes \t= Remove project file and create a new project file\nNo \t= Open existing project file"), _("Project exists"), wxYES_NO | wxCANCEL | wxNO_DEFAULT | wxICON_QUESTION);	           
+             switch ( OverWrite.ShowModal()) {
+               case wxID_YES:
+                 /* Create the new project */
+                 project_new( std::string(OpenDialog.GetPath().fn_str() ) );
+                 break;
+               case wxID_NO:
+                 project_open(std::string(OpenDialog.GetPath().fn_str() ) );
+                 break;
+               default: /* Cancelled by user */
+                 break;
+  
+             }
+          } else {
+            project_new( std::string(OpenDialog.GetPath().fn_str() ) );
+          }
+	}
+	OpenDialog.Destroy();
     }
 
     /**
@@ -153,11 +221,17 @@ namespace squadt {
     }
 
     void main::project_open() {
-      dialog::open_project dialog(this);
+	    
+	wxDirDialog OpenDialog(
+		this, _("Select a directory that stores a Squadt project"));
 
-      if (dialog.ShowModal() == wxOK) {
-        project_open(dialog.get_location());
-      }
+    	if (OpenDialog.ShowModal() == wxID_OK) // if the user click "Open" instead of "Cancel"
+    	{
+            project_open( std::string(OpenDialog.GetPath().fn_str() ) );
+	}
+ 
+	// Clean up after ourselves
+	OpenDialog.Destroy();
     }
 
     /**
@@ -167,9 +241,10 @@ namespace squadt {
       try {
         add_project_view(new GUI::project(this, boost::filesystem::path(s)));
       }
-      catch (...) {
-        wxMessageDialog(0, wxT("Unable to load project possible reasons are corruption or an incompatible description file."),
-                                  wxT("Fatal: project file corrupt"), wxOK).ShowModal();
+      catch (std::exception const& e) {
+	std::stringstream s;
+	s << "Error:\n"<< e.what();
+        wxMessageDialog(0, wxString(s.str().c_str(), wxConvUTF8) , wxT("Fatal: project file corrupt"), wxOK).ShowModal();
       }
     }
 
@@ -222,6 +297,8 @@ namespace squadt {
       menu_bar.Enable(cmID_UPDATE, true);
       menu_bar.Enable(wxID_CLOSE, true);
       menu_bar.Enable(cmID_NEW_DATA_SOURCE, true);
+      menu_bar.Enable(cmID_ADD_NEW_FILE, true);
+      menu_bar.Enable(cmID_ADD_EXISTING_FILE, true);
     }
 
     /**
@@ -257,6 +334,8 @@ namespace squadt {
         menu_bar.Enable(cmID_UPDATE, false);
         menu_bar.Enable(wxID_CLOSE, false);
         menu_bar.Enable(cmID_NEW_DATA_SOURCE, false);
+        menu_bar.Enable(cmID_ADD_NEW_FILE, false);
+        menu_bar.Enable(cmID_ADD_EXISTING_FILE, false);
       }
     }
 

@@ -37,6 +37,7 @@
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 
 using namespace mcrl2::utilities;
@@ -148,7 +149,7 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
           "With the -p option turned on, more functionality is supported.")
     {}
 
-  private:
+  protected:
 
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
@@ -1303,12 +1304,12 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ATermAppl SumVar0 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("y", 0, ATtrue)), static_cast<ATermAppl>(mcrl2::data::sort_pos::pos()));
       ATermAppl SumVar1 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("z", 0, ATtrue)), static_cast<ATermAppl>(mcrl2::data::sort_pos::pos()));
       ATermList SumVars;
-      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar0, mcrl2::data::data_expression(SumVar0).is_variable());
-      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar1, mcrl2::data::data_expression(SumVar1).is_variable());
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar0, mcrl2::data::is_variable(SumVar0));
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar1, mcrl2::data::is_variable(SumVar1));
 
       // create P_pi parameter
       ProcVar = gsMakeDataVarId(pn2gsPlaceParameter(CurrentPlace),static_cast<ATermAppl>(mcrl2::data::sort_nat::nat()));
-      gsDebugMsg("Parameter %T is %d a DataVarId\n", ProcVar, mcrl2::data::data_expression(ProcVar).is_variable());
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", ProcVar, mcrl2::data::is_variable(ProcVar));
 
       // create first sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar0);
@@ -2415,7 +2416,15 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     return (true);
   }
 
+  class pnml2mcrl2_gui_tool: public mcrl2_gui_tool<pnml2mcrl2_tool> {
+  public:
+	  pnml2mcrl2_gui_tool() {
 
+  		m_gui_options["error"] = create_textctrl_widget();
+  		m_gui_options["hide"] = create_checkbox_widget();
+  		m_gui_options["no-rec-par"] = create_checkbox_widget();
+  	}
+  };
 
   //==================================================
   // main
@@ -2423,7 +2432,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   int main(int argc, char **argv)
   {
     MCRL2_ATERM_INIT(argc, argv)
-    return pnml2mcrl2_tool().execute(argc,argv);
+    return pnml2mcrl2_gui_tool().execute(argc,argv);
   }
 
 // Added by Yarick: alternative generation of Places:

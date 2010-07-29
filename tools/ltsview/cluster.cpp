@@ -9,23 +9,30 @@
 /// \file cluster.cpp
 /// \brief Implementation of the Cluster class
 
-#include "cluster.h"
 #include <algorithm>
 #include <math.h>
+#include "cluster.h"
+#include "mathutils.h"
 #include "state.h"
-#include "utils.h"
 
 using namespace std;
-using namespace Utils;
+using namespace MathUtils;
 
 bool Comp_BCRadius::operator()(const Cluster* c1,const Cluster* c2) const
 {
-  return (c1->getBCRadius() < c2->getBCRadius());
+  // The clause c1 != c2 is necessary in the following expression. If not
+  // present, this comparison operator may no longer be irreflexive, i.e. it is
+  // no longer guaranteed that Comp_BCRadius(x,x) returns false. This is due to
+  // optimizations by the gcc compiler to (arbitrarily) store a float either in
+  // memory or in a register. Depending on the architecture, these may have
+  // different precisions, resulting in rounding errors.
+  return c1 != c2 && c1->getBCRadius() < c2->getBCRadius();
 }
 
 bool Comp_BCVolume::operator()(const Cluster* c1,const Cluster* c2) const
 {
-  return (c1->getBCVolume() < c2->getBCVolume());
+  // See the explanation above on the c1 != c2 clause.
+  return c1 != c2 && c1->getBCVolume() < c2->getBCVolume();
 }
 
 Cluster::Cluster(int r)

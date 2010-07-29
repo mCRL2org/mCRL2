@@ -15,6 +15,8 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
 
 namespace mcrl2 {
@@ -37,6 +39,7 @@ namespace mcrl2 {
         throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
       }
       sort_expr = sort_expression(t);
+      assert(!search_sort_expression(sort_expr, unknown_sort()));
     }
 
     /** \brief     Type check a data expression.
@@ -66,11 +69,13 @@ namespace mcrl2 {
 
       // The typechecker replaces untyped identifiers by typed identifiers (when typechecking 
       // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
-      t = core::type_check_data_expr(t, 0, mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true), variables);
+      t = core::type_check_data_expr(t, 0, mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
       if (t == 0)
       {
         throw mcrl2::runtime_error("error type checking data expression");
       }
+      data_expr = data_expression(t);
+      assert(!search_sort_expression(data_expr, unknown_sort()));
 
       //// ???
       //detail::internal_format_conversion_helper converter(data_spec);
@@ -78,7 +83,7 @@ namespace mcrl2 {
       //// replace list/set/bag enumerations, and number denotations.
       //data_expr = data_expression(converter(data_expression(t)));
       
-      data_expr = data_expression(t);
+
     }
 
     /** \brief     Type check a data expression.
@@ -109,6 +114,7 @@ namespace mcrl2 {
         throw mcrl2::runtime_error("could not type check data specification");
       }
       data_spec = data_specification(t);
+      assert(!search_sort_expression(data_spec, unknown_sort()));
     }
 
   } // namespace data

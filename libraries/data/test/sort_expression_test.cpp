@@ -13,7 +13,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/alias.h"
@@ -29,11 +29,11 @@ using namespace mcrl2::data;
 void basic_sort_test()
 {
   basic_sort s("S");
-  BOOST_CHECK(s.is_basic_sort());
-  BOOST_CHECK(!s.is_function_sort());
+  BOOST_CHECK(is_basic_sort(s));
+  BOOST_CHECK(!is_function_sort(s));
   BOOST_CHECK(!is_alias(s));
-  BOOST_CHECK(!s.is_structured_sort());
-  BOOST_CHECK(!s.is_container_sort());
+  BOOST_CHECK(!is_structured_sort(s));
+  BOOST_CHECK(!is_container_sort(s));
   BOOST_CHECK(s.name() == "S");
   BOOST_CHECK(s == s);
 
@@ -58,17 +58,17 @@ void function_sort_test()
   s01.push_back(s1);
   boost::iterator_range<sort_expression_vector::const_iterator> s01_range = boost::make_iterator_range(s01);
   function_sort fs(s01_range, s);
-  BOOST_CHECK(!fs.is_basic_sort());
-  BOOST_CHECK(fs.is_function_sort());
+  BOOST_CHECK(!is_basic_sort(fs));
+  BOOST_CHECK(is_function_sort(fs));
   BOOST_CHECK(!is_alias(fs));
-  BOOST_CHECK(!fs.is_structured_sort());
-  BOOST_CHECK(!fs.is_container_sort());
+  BOOST_CHECK(!is_structured_sort(fs));
+  BOOST_CHECK(!is_container_sort(fs));
   BOOST_CHECK(fs == fs);
   BOOST_CHECK(fs.domain().size() == static_cast< size_t >(s01_range.size()));
 
   // Element wise check
   sort_expression_vector::const_iterator i = s01_range.begin();
-  function_sort::domain_const_range::iterator j = fs.domain().begin();
+  sort_expression_list::iterator j = fs.domain().begin();
   while (i != s01_range.end() && j != fs.domain().end())
   {
     BOOST_CHECK(*i == *j);
@@ -85,8 +85,8 @@ void function_sort_test()
   BOOST_CHECK(fs_e_.domain() == fs.domain());
   BOOST_CHECK(fs_e_.codomain() == fs.codomain());
 
-  BOOST_CHECK(fs == function_sort(s0, s1, s));
-  BOOST_CHECK(fs.domain() == function_sort(s0, s1, s).domain());
+  BOOST_CHECK(fs == make_function_sort(s0, s1, s));
+  BOOST_CHECK(fs.domain() == make_function_sort(s0, s1, s).domain());
 }
 
 void alias_test()
@@ -125,10 +125,10 @@ void structured_sort_test()
   structured_sort_constructor c1("c1", a1, "is_c1");
   structured_sort_constructor c2("c2", a2);
   BOOST_CHECK(c1.name() == "c1");
-  BOOST_CHECK(c1.arguments() == a1);
+  BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c1.arguments()) == a1);
   BOOST_CHECK(c1.recogniser() == "is_c1");
   BOOST_CHECK(c2.name() == "c2");
-  BOOST_CHECK(c2.arguments() == a2);
+  BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c2.arguments()) == a2);
   BOOST_CHECK(c2.recogniser() == data::no_identifier());
 
   structured_sort_constructor_vector cs;
@@ -137,11 +137,11 @@ void structured_sort_test()
 
   structured_sort s(cs);
 
-  BOOST_CHECK(!s.is_basic_sort());
-  BOOST_CHECK(!s.is_function_sort());
+  BOOST_CHECK(!is_basic_sort(s));
+  BOOST_CHECK(!is_function_sort(s));
   BOOST_CHECK(!is_alias(s));
-  BOOST_CHECK(s.is_structured_sort());
-  BOOST_CHECK(!s.is_container_sort());
+  BOOST_CHECK(is_structured_sort(s));
+  BOOST_CHECK(!is_container_sort(s));
 
   BOOST_CHECK(s.struct_constructors() == cs);
 
@@ -150,13 +150,13 @@ void structured_sort_test()
   BOOST_CHECK(s_e_ == s);
   BOOST_CHECK(s_e_.struct_constructors() == s.struct_constructors());
 
-  structured_sort_constructor_argument_vector nv(make_vector(structured_sort_constructor_argument(sort_nat::nat())));
-  structured_sort_constructor_argument_vector bv(make_vector(structured_sort_constructor_argument(sort_bool::bool_())));
+  structured_sort_constructor_argument_vector nv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_nat::nat()))));
+  structured_sort_constructor_argument_vector bv(atermpp::make_vector(structured_sort_constructor_argument(static_cast<sort_expression const&>(sort_bool::bool_()))));
   structured_sort_constructor b("B", boost::make_iterator_range(nv));
   structured_sort_constructor c("C", boost::make_iterator_range(bv));
-  structured_sort bc(make_vector(b,c));
+  structured_sort bc(atermpp::make_vector(b,c));
 
-  BOOST_CHECK(bc.struct_constructors() == make_vector(b,c));
+  BOOST_CHECK(bc.struct_constructors() == atermpp::make_vector(b,c));
   structured_sort_constructor_vector bc_constructors(bc.struct_constructors().begin(), bc.struct_constructors().end());
   BOOST_CHECK(bc_constructors[0] == b);
   BOOST_CHECK(bc_constructors[1] == c);
@@ -170,10 +170,10 @@ void container_sort_test()
 {
   basic_sort s0("S0");
   basic_sort s1("S1");
-  container_sort ls0(container_sort::list(), s0);
-  container_sort ls1(container_sort::list(), s1);
+  container_sort ls0(list_container(), s0);
+  container_sort ls1(list_container(), s1);
 
-  BOOST_CHECK(ls0.container_type() == container_sort::list());
+  BOOST_CHECK(ls0.container_name() == list_container());
   BOOST_CHECK(ls0.element_sort() == s0);
   BOOST_CHECK(ls1.element_sort() == s1);
   BOOST_CHECK(ls0.element_sort() != ls1.element_sort());

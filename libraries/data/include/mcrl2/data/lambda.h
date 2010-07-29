@@ -33,8 +33,8 @@ namespace mcrl2 {
         lambda(const data_expression& d)
           : abstraction(d)
         {
-          assert(d.is_abstraction());
-          assert(static_cast<abstraction>(d).binding_operator() == abstraction::lambda());
+          assert(is_abstraction(d));
+          assert(static_cast<abstraction>(d).binding_operator() == lambda_binder());
         }
 
         /// Constructor.
@@ -44,7 +44,7 @@ namespace mcrl2 {
         /// \pre variables is not empty.
         lambda(const variable& variable,
                const data_expression& body)
-          : abstraction(abstraction::lambda(), convert< variable_list >(make_list(variable)), body)
+          : abstraction(lambda_binder(), atermpp::convert< variable_list >(make_list(variable)), body)
         {
         }
 
@@ -56,30 +56,11 @@ namespace mcrl2 {
         template < typename Container >
         lambda(const Container& variables,
                const data_expression& body,
-               typename detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(abstraction::lambda(), variables, body)
+               typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+          : abstraction(lambda_binder(), variables, body)
         {
           assert(!variables.empty());
         }
-
-        /// \brief Returns the application of this lambda abstraction to an argument.
-        /// \pre this->sort() is a function sort.
-        /// \param[in] e The data expression to which the function symbol is applied
-        application operator()(const data_expression& e) const
-        {
-          assert(this->sort().is_function_sort());
-          return application(*this, e);
-        }
-
-        /*  Should be enabled when the implementation in data_expression is
-         * removed
-        /// \overload
-        inline
-        sort_expression sort() const
-        {
-          return function_sort(sorts_of_data_expressions(boost::make_iterator_range(m_variables.begin(), m_variables.end())), body().sort());
-        }
-        */
 
     }; // class lambda
 

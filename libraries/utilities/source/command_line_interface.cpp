@@ -276,9 +276,10 @@ namespace mcrl2 {
           std::string const& name, std::string const& authors,
           std::string const& what_is, std::string const& synopsis,
           std::string const& description, std::string const& known_issues) :
+                          m_options(get_standard_description().m_options),
                           m_path(path), m_name(name), m_authors(authors),
                           m_what_is(what_is), m_usage(synopsis), m_description(description),
-                          m_known_issues(known_issues), m_options(get_standard_description().m_options),
+                          m_known_issues(known_issues),
                           m_short_to_long(get_standard_description().m_short_to_long) {
 
       m_usage = m_usage.substr(0, m_usage.find_last_of('\n'));
@@ -475,6 +476,17 @@ namespace mcrl2 {
         << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
 
       return s.str();
+    }
+
+    std::map<std::string, std::string> interface_description::get_long_argument_with_description() {
+    	std::map<std::string, std::string> result;
+
+        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
+            option_descriptor const& option(i->second);
+
+        	result.insert(std::pair<std::string, std::string>(option.m_long ,option.m_description));
+        }
+    	return result;
     }
 
     std::string interface_description::wiki_page() const {

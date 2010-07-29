@@ -259,16 +259,16 @@ void Visualizer::handleMouseMotionEvent(
 
 // ---------------------------------------
 void Visualizer::handleMouseWheelIncEvent(
-    const int &x,
-    const int &y )
+    const int &/*x*/,
+    const int &/*y*/ )
 // ---------------------------------------
 {}
 
 
 // ---------------------------------------
 void Visualizer::handleMouseWheelDecEvent(
-    const int &x,
-    const int &y )
+    const int &/*x*/,
+    const int &/*y*/ )
 // ---------------------------------------
 {}
 
@@ -296,7 +296,7 @@ void Visualizer::handleKeyDownEvent( const int &keyCode )
 
 
 // ----------------------------------------------------
-void Visualizer::handleKeyUpEvent( const int &keyCode )
+void Visualizer::handleKeyUpEvent( const int & /*keyCode*/ )
 // ----------------------------------------------------
 {
     keyCodeDown = -1;
@@ -332,7 +332,7 @@ void Visualizer::initMouse()
 
 // ------------------------------
 void Visualizer::startSelectMode(
-    GLint hits,
+    GLint /*hits*/,
     GLuint selectBuf[],
     double pickWth,
     double pickHgt )

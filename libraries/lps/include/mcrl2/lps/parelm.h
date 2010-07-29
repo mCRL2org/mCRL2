@@ -59,7 +59,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
     void report_results(const std::set<data::variable>& to_be_removed) const
     {
-      if (m_verbose)
+      if (verbose())
       {
         std::clog << "parelm removed " << to_be_removed.size() << " process parameters: " <<std::endl;
         for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
@@ -75,7 +75,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #ifdef MCRL2_LPS_PARELM_DEBUG
   std::clog << "--- parelm 1 ---" << std::endl;
 #endif
-      std::set<data::variable> process_parameters = data::convert<std::set<data::variable> >(m_spec.process().process_parameters());
+      std::set<data::variable> process_parameters = atermpp::convert<std::set<data::variable> >(m_spec.process().process_parameters());
 
       // significant variables may not be removed by parelm
       std::set<data::variable> significant_variables = transition_variables();
@@ -131,7 +131,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #ifdef MCRL2_LPS_PARELM_DEBUG
   std::clog << "--- parelm 2 ---" << std::endl;
 #endif
-      std::set<data::variable> process_parameters = data::convert<std::set<data::variable> >(m_spec.process().process_parameters());
+      std::set<data::variable> process_parameters = atermpp::convert<std::set<data::variable> >(m_spec.process().process_parameters());
     
       // create a mapping m from process parameters to integers
       std::map<data::variable, int> m;

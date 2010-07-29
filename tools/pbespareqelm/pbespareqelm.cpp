@@ -39,13 +39,13 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
   protected:
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
-    /// \brief If true, the computation is started from the initial state.
+    /// \brief If true, the initial state is ignored.
     bool m_ignore_initial_state;
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_ignore_initial_state = parser.options.count("use-initial-state") > 0;
+      m_ignore_initial_state = parser.options.count("ignore-initial-state") > 0;
     }
 
     void add_options(interface_description& desc)
@@ -75,6 +75,16 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
         std::cerr << "  output file:        " << m_output_filename << std::endl;
       }
 
+      unsigned int log_level = 0;
+      if (mcrl2::core::gsVerbose)
+      {
+        log_level = 1;
+      }
+      if (mcrl2::core::gsDebug)
+      {
+        log_level = 2;
+      }     	
+
       // load the pbes
       pbes<> p;
       p.load(m_input_filename);
@@ -89,7 +99,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
         {
           typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
           my_pbes_rewriter pbesr(datar);
-          pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+          pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
           data::number_postfix_generator name_generator("UNIQUE_PREFIX");
           algorithm.run(p, m_ignore_initial_state);
           break;

@@ -50,7 +50,7 @@ namespace mcrl2 {
          static data_expression apply(Substitution const& s, data_expression const& e,
                    typename boost::enable_if< typename boost::is_same< typename Substitution::variable_type, variable >::type >::type* = 0)
          {
-           return (e.is_variable()) ? s(variable(e)) : Derived::generic_apply(s, e);
+           return (is_variable(e)) ? s(variable(e)) : Derived::generic_apply(s, e);
          }
       };
 

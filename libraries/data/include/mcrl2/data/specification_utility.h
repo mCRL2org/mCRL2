@@ -36,7 +36,7 @@ namespace mcrl2 {
 
         bool operator()(atermpp::aterm_appl p)
         {
-         if (data_expression(p).is_variable() && seen.find(p) == seen.end())
+         if (is_variable(p) && seen.find(p) == seen.end())
          {
            seen.insert(p);
 

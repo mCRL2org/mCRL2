@@ -22,6 +22,7 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
+// Garbage collect after each case.
 struct collect_after_test_case {
   ~collect_after_test_case()
   {
@@ -720,6 +721,95 @@ const std::string various_case_32 =
   "init P([Empty]);\n"
   ;
 
+/* This test case is a test to check whether constant elimination in the
+   linearizer goes well. This testcase is inspired by an example by Chilo
+   van Best. The problem is that the constant x:Nat below may not be
+   recorded in the assignment list of process P, and therefore forgotten */
+const std::string various_case_33 =
+  "act  a:Nat; "
+  "proc P(x:Nat,b:Bool,r:Real) = a(x).P(x,!b,r); "
+  "     P(x:Nat) = P(x,true,1); "
+  "init P(1); "
+  ;
+
+/* The test case below checks whether the alphabet conversion does not accidentally
+ * reverse the order of hide and sum operators. If this happens the linearizer will
+ * not be able to linearize this process */
+
+const std::string various_case_34 =
+  "act a; "
+
+  "proc X = a.X;"
+  "proc Y = sum n:Nat. X;"
+
+  "init hide({a}, sum n:Nat. X);"
+  ;
+
+const std::string various_par =
+  "act a;\n"
+  "init a || a;\n"
+  ;
+
+const std::string various_gpa_10_3 =
+  "act\n"
+  "  c,r_dup, s_dup1, s_dup2, r_inc, s_inc, r_mul1, r_mul2, s_mul: Int;\n"
+  "proc\n"
+  "  Dup = sum x:Int. r_dup(x) | s_dup1(x) | s_dup2(x) . Dup;\n"
+  "  Inc = sum x:Int. r_inc(x) | s_inc(x+1) . Inc;\n"
+  "  Mul = sum x,y:Int. r_mul1(x) | r_mul2(y) | s_mul(x*y) . Mul;\n"
+  "  Dim = allow({r_dup | s_mul},\n"
+  "          hide({c},comm({s_dup1 | r_mul1 -> c , s_dup2 | r_inc -> c, s_inc | r_mul2 ->c},\n"
+  "            Dup || Inc || Mul\n"
+  "          ))\n"
+  "        );\n"
+  "init Dim;\n"
+  ;
+
+const std::string various_philosophers =
+  "map K: Pos;\n"
+  "eqn K = 10;\n"
+  "act get,_get,__get,put,_put,__put: Pos#Pos;\n"
+  "    eat: Pos;\n"
+  "proc\n"
+  "  Phil(n:Pos) = _get(n,n)._get(n,if(n==K,1,n+1)).eat(n)._put(n,n)._put(n,if(n==K,1,n+1)).Phil(n);\n"
+  "  Fork(n:Pos) = sum m:Pos.get(m,n).put(m,n).Fork(n);\n"
+  "  ForkPhil(n:Pos) = Fork(n) || Phil(n);\n"
+  "  KForkPhil(p:Pos) =\n"
+  "    (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);\n"
+  "init allow( { __get, __put, eat },\n"
+  "       comm( { get|_get->__get, put|_put->__put },\n"
+  "         KForkPhil(K)\n"
+  "     ));\n"
+  ;
+
+const std::string various_philosophers_nat =
+  "map K: Nat;\n"
+  "eqn K = 10;\n"
+  "act get,_get,__get,put,_put,__put: Nat#Nat;\n"
+  "    eat: Nat;\n"
+  "proc\n"
+  "  Phil(n:Nat) = _get(n,n)._get(n,if(n==K,1,n+1)).eat(n)._put(n,n)._put(n,if(n==K,1,n+1)).Phil(n);\n"
+  "  Fork(n:Nat) = sum m:Nat.get(m,n).put(m,n).Fork(n);\n"
+  "  ForkPhil(n:Nat) = Fork(n) || Phil(n);\n"
+  "  KForkPhil(p:Nat) =\n"
+  "    (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);\n"
+  "init allow( { __get, __put, eat },\n"
+  "       comm( { get|_get->__get, put|_put->__put },\n"
+  "         KForkPhil(K)\n"
+  "     ));\n"
+  ;
+
+const std::string various_sort_aliases =
+  "sort Bits = struct b0|b1;\n"
+  "     t_sys_regset_fsm_state = Bits;\n"
+  "     t_timer_counter_fsm_state = Bits;\n"
+  "map  timer_counter_fsm_state_idle: t_timer_counter_fsm_state;\n"
+  "act  a:Bits;\n"
+  "proc P(d:Bits)=a(d).delta;\n"
+  "glob globd:Bits;\n"
+  "init P(globd);\n"
+  ;
+
 
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
@@ -826,47 +916,22 @@ void test_various_aux(t_lin_options &options)
   spec = linearise(various_case_LR2par, options);
   std::cerr << "Testcase 32\n";
   spec = linearise(various_case_32, options);
-}
-
-std::string print_rewrite_strategy(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
-{
-  switch(s)
-  {
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost:
-      return "inner";
-      break;
-#ifdef MCRL2_INNERC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling:
-      return "innerc";
-      break;
-#endif
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty:
-      return "jitty";
-      break;
-#ifdef MCRL2_JITTYC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling:
-      return "jittyc";
-      break;
-#endif
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_prover:
-      return "innerp";
-      break;
-#ifdef MCRL2_INNERC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling_prover:
-      return "innercp";
-      break;
-#endif
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_prover:
-      return "jittyp";
-      break;
-#ifdef MCRL2_JITTYC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling_prover:  
-      return "jittycp";
-      break;
-#endif          
-    default:
-      return "unknown";
-  }
+  std::cerr << "Testcase 33\n";
+  spec = linearise(various_case_33, options);
+  std::cerr << "Testcase 34\n";
+  spec = linearise(various_case_34, options);
+  std::cerr << "Testcase par\n";
+  spec = linearise(various_par, options);
+  std::cerr << "Testcase gpa_10_3\n";
+  spec = linearise(various_gpa_10_3, options);
+  /* Testcases below lead to exceptions.
+  std::cerr << "Testcase philosophers (Nat)\n";
+  spec = linearise(various_philosophers_nat, options);
+  std::cerr << "Testcase philosophers\n";
+  spec = linearise(various_philosophers, options);
+  */
+  std::cerr << "Testcase sort_aliases\n";
+  spec = linearise(various_sort_aliases, options);
 }
 
 BOOST_AUTO_TEST_CASE(test_various)
@@ -876,19 +941,19 @@ BOOST_AUTO_TEST_CASE(test_various)
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
   #ifdef MCRL2_JITTYC_AVAILABLE
-  #ifdef TEST_COMPILERS
+  #ifdef MCRL2_TEST_COMPILERS
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
   #endif
   #endif
   #ifdef MCRL2_INNERC_AVAILABLE
-  #ifdef TEST_COMPILERS
+  #ifdef MCRL2_TEST_COMPILERS
     rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
   #endif
   #endif
 
   for(std::vector<mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy >::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {
-    std::cerr << std::endl << "Testing with rewrite strategy " << print_rewrite_strategy(*i) << std::endl;
+    std::cerr << std::endl << "Testing with rewrite strategy " << pp(*i) << std::endl;
 
     t_lin_options options;
     options.rewrite_strategy=*i;

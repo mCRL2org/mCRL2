@@ -188,7 +188,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
     }
 
     Enumerator make(ATermList v, ATerm c)
-    {
+    { 
       return mcrl2::data::enumerator_factory< Enumerator >::make(atermpp::term_list< mcrl2::data::variable >(v), atermpp::aterm(c));
     }
 
@@ -212,23 +212,23 @@ namespace mcrl2 {
 
       // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
       template < >
+      inline
       bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
-                  legacy_rewriter, legacy_selector >::increment() {
-
+                  legacy_rewriter, legacy_selector >::increment() 
+      {
         ATermList assignment_list;
 
         while (m_generator.next(&assignment_list)) {
-          /*if (m_generator.errorOccurred()) {
-            throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
-          }*/
 
           for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
-                             i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
+                             i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) 
+          {
             m_substitution[static_cast< variable_type >((*i)(0))] = (*i)(1);
           }
 
-          if (legacy_selector::test(m_evaluator(m_condition, m_substitution))) {
-            return true;
+          if (legacy_selector::test(m_evaluator(m_condition, m_substitution))) 
+          { 
+             return true;
           }
         }
 
@@ -239,10 +239,9 @@ namespace mcrl2 {
       template < >
       template < typename Container >
       bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
-                  legacy_rewriter, legacy_selector >::initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type*) 
-      { // assert(0);
-
-        m_shared_context->m_enumerator.findSolutions(data::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
+                  legacy_rewriter, legacy_selector >::initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type*) 
+      { 
+        m_shared_context->m_enumerator.findSolutions(atermpp::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
 
         return increment();
       }
@@ -280,7 +279,7 @@ struct ns_info
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator<
       mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
-      legacy_rewriter, legacy_selector > enumerator_type;
+                                             legacy_rewriter, legacy_selector > enumerator_type;
 
   typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
 
@@ -288,9 +287,9 @@ struct ns_info
   boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
   legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
 
-  int num_summands;
+  unsigned int num_summands;
   ATermAppl *summands;
-  int num_prioritised;
+  unsigned int num_prioritised;
   ATermList procvars;
   int stateformat;
   ATermAppl nil;
@@ -299,15 +298,20 @@ struct ns_info
   AFun stateAFun;
   unsigned int *current_id;
 
-  enumerator_type get_sols(ATermList v, ATerm c) {
-    return m_enumerator_factory->make(v, c);
+  enumerator_type get_sols(ATermList v, ATerm c) 
+  { 
+    const enumerator_type m=m_enumerator_factory->make(v, c);
+    
+    return m;
   }
 
-  ATermAppl export_term(ATerm term) {
+  ATermAppl export_term(ATerm term) const
+  {
     return m_rewriter.translate(term);
   }
 
-  ATerm import_term(ATermAppl term) {
+  ATerm import_term(ATermAppl term) const
+  {
     return m_rewriter.translate(term);
   }
 
@@ -326,14 +330,14 @@ struct ns_info
 class NextStateGeneratorStandard : public NextStateGenerator
 {
   public:
-    NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand = false);
+    NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand = false, int SingleSummandIndex = 0);
     ~NextStateGeneratorStandard();
 
     bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
 
     // bool errorOccurred();
 
-    void reset(ATerm State, size_t SummandIndex = 0);
+    void reset(ATerm State, unsigned int SummandIndex = 0);
 
     ATerm get_state() const;
 
@@ -341,10 +345,9 @@ class NextStateGeneratorStandard : public NextStateGenerator
     ns_info info;
     unsigned int id;
 
-    // bool error;
     bool single_summand;
 
-    int sum_idx;
+    unsigned int sum_idx;
 
     ATerm cur_state;
     ATerm cur_act;
@@ -352,7 +355,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
     ATerm *stateargs;
 
-                ns_info::enumerator_type valuations;
+    ns_info::enumerator_type valuations;
 
     void set_substitutions();
 
@@ -374,7 +377,7 @@ class NextStateStandard : public NextState
 
     ATerm getInitialState();
     NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);
-    NextStateGenerator *getNextStates(ATerm state, int group, NextStateGenerator *old = NULL);
+    NextStateGenerator *getNextStates(ATerm state, unsigned int group, NextStateGenerator *old = NULL);
 
                 void gatherGroupInformation();
 

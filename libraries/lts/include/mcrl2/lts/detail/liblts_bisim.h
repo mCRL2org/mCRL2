@@ -10,9 +10,11 @@
 
 #ifndef _LIBLTS_BISIM_H
 #define _LIBLTS_BISIM_H
-#include "mcrl2/lts/lts.h"
 #include <vector>
 #include <map>
+#include "mcrl2/lts/lts.h"
+#include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/lts_utilities.h"
 
 namespace mcrl2
 {
@@ -84,12 +86,24 @@ class bisim_partitioner
      *  \retval false otherwise. */
     bool in_same_class(const unsigned int s, const unsigned int t) const;
 
+    /** \brief Returns a vector of counter traces.
+     *  \details The states s and t are non bisimilar states. If they are
+     *           bisimilar an exception is raised. A counter trace of the form sigma a is
+     *           returned, which has the property that s-sigma->s'-a-> and t-sigma->t'-/a->,
+     *           or vice versa, s-sigma->s'-/a-> and t-sigma->t'-a->. A vector of such
+     *           counter traces is returned.
+     *  \param[in] s A state number.
+     *  \param[in] t A state number.
+     *  \return A vector containing counter traces. */
+    std::vector < mcrl2::trace::Trace > counter_traces(const unsigned int s, const unsigned int t);
+
   private:
 
     typedef unsigned int block_index_type;
     typedef unsigned int state_type;
     typedef unsigned int label_type;
 
+    state_type max_state_index;
     mcrl2::lts::lts &aut;
 
     struct non_bottom_state
@@ -105,7 +119,15 @@ class bisim_partitioner
     };
 
     struct block
-    { block_index_type block_index;
+    { 
+      state_type state_index;                   // The state number that represent the states in this block
+      block_index_type block_index;             // The sequence number of this block.
+      block_index_type parent_block_index;      // Index of the parent block. 
+                                                // If there is no parent block, this refers to the block
+                                                // itself.
+      std::pair < label_type, block_index_type > splitter; 
+                                                // The action and block that caused this block to split.
+                                                // This information is only defined if the block has been split.
       std::vector < state_type > bottom_states; // The non bottom states must be ordered
                                                 // on tau reachability. The deepest
                                                 // states occur first in the vector.
@@ -115,9 +137,22 @@ class bisim_partitioner
       std::vector < transition > non_inert_transitions; 
 
       void swap(block &b)
-      { block_index_type block_index1=b.block_index;
+      { 
+        state_type state_index1=b.state_index;
+        b.state_index=state_index;
+        state_index=state_index1;
+
+        block_index_type block_index1=b.block_index;
         b.block_index=block_index;
         block_index=block_index1;
+
+        block_index_type parent_block_index1=b.parent_block_index;
+        b.parent_block_index=parent_block_index;
+        parent_block_index=parent_block_index1;
+
+        std::pair < label_type, block_index_type > splitter1=b.splitter;
+        b.splitter=splitter;
+        splitter=splitter1;
         bottom_states.swap(b.bottom_states);
         non_bottom_states.swap(b.non_bottom_states);
         non_inert_transitions.swap(b.non_inert_transitions);
@@ -126,6 +161,8 @@ class bisim_partitioner
 
     std::vector < block > blocks;
 
+    // std::vector < bool > block_is_active;       // Indicates whether this is still a block in the partition.
+                                                   // Blocks that are split become inactive.
     std::vector < state_type > block_index_of_a_state;
     std::vector < bool > block_flags;
     std::vector < bool > block_is_in_to_be_processed;
@@ -137,22 +174,74 @@ class bisim_partitioner
 
     void create_initial_partition(const bool branching, 
                                   const bool preserve_divergences);
-    void refine_partition_until_it_becomes_stable(const bool preserve_divergence);
+    void refine_partition_until_it_becomes_stable(const bool branching, const bool preserve_divergence);
     void refine_partion_with_respect_to_divergences(void);
-    void split_the_blocks_in_BL(bool &);
+    void split_the_blocks_in_BL(bool &, const label_type, const block_index_type splitter_block);
     void order_recursively_on_tau_reachability(
                                  const state_type s,
                                  std::map < state_type, std::vector < state_type > > &inert_transition_map,
                                  std::vector < non_bottom_state > &new_non_bottom_states,
                                  std::set < state_type > &visited);
     void order_on_tau_reachability(std::vector < non_bottom_state > &non_bottom_states);
+    std::vector < mcrl2::trace::Trace > counter_traces_aux(
+                           const unsigned int s,
+                           const unsigned int t,
+                           const mcrl2::lts::outgoing_transitions_per_state_action_t &outgoing_transitions) const;
 
 #ifndef NDEBUG
-    void check_internal_consistency_of_the_partitioning_data_structure(const bool preserve_divergence) const;
+    void check_internal_consistency_of_the_partitioning_data_structure(const bool branching, const bool preserve_divergence) const;
 #endif
 
 };
+
+
+ /** \brief Reduce transition system l with respect to strong or (divergence preserving) branching bisimulation.
+  * \param[in/out] l The transition system that is reduced.
+  * \param[in] branching If true branching bisimulation is applied, otherwise strong bisimulation.
+  * \param[in] preserve_divergences Indicates whether loops of internal actions on states must be preserved. If false
+  *            these are removed. If true these are preserved.  */
+ void bisimulation_reduce(
+            lts &l,
+            const bool branching = false,
+            const bool preserve_divergences = false);
+
+
+ /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
+  * \details This lts and the lts l2 are not usable anymore after this call.
+  *          The space consumption is O(n) and time is O(nm). It uses the branching bisimulation
+  *          algorithm by Groote and Vaandrager from 1990.
+  * \param[in/out] l1 A first transition system.
+  * \param[in/out] l2 A second transistion system.
+  * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
+  * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
+  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
+ bool destructive_bisimulation_compare(
+          lts &l1,
+          lts &l2, 
+          const bool branching=false, 
+          const bool preserve_divergences=false,
+          const bool generate_counter_examples = false );
+
+
+ /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
+  *  \details The current transitions system and the lts l2 are first duplicated and subsequently
+  *           reduced modulo bisimulation. If memory space is a concern, one could consider to
+  *           use destructive_bisimulation_compare. This routine uses the Groote-Vaandrager
+  *           branching bisimulation routine. It runs in O(mn) and uses O(n) memory where n is the
+  *           number of states and m is the number of transitions.
+  * \param[in/out] l1 A first transition system.
+  * \param[in/out] l2 A second transistion system.
+  * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
+  * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
+  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
+ bool bisimulation_compare(
+          const lts &l1,
+          const lts &l2, 
+          const bool branching=false, 
+          const bool preserve_divergences=false,
+          const bool generate_counter_examples = false); 
+
+}
+}
+}
 #endif
-}
-}
-}

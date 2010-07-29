@@ -300,7 +300,7 @@ namespace lysa
 		gsWarningMsg("Ignoring replication operator %s.\n", repl.position_in_input().c_str());
 		return to_mcrl2(repl.proc, context);
 	}	
-	string Converter::to_mcrl2(Zero& zero, Context context)
+	string Converter::to_mcrl2(Zero& /*zero*/, Context /*context*/)
 	{
     StringTemplate st = templates.get("zero");
     st["zero_action"] << options.zero_action;

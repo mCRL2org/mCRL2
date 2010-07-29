@@ -87,8 +87,8 @@ namespace mcrl2 {
         /// \param context data specification that serves as context
         /// \param hint A string
         fresh_variable_generator(data_specification const& context, std::string const& hint = "") :
-          m_identifiers(convert< atermpp::set< core::identifier_string > >(
-                core::find_identifiers(convert< atermpp::aterm_list >(context.equations())))),
+          m_identifiers(atermpp::convert< atermpp::set< core::identifier_string > >(
+                core::find_identifiers(atermpp::convert< atermpp::aterm_list >(context.equations())))),
           m_generator(hint)
         {
         }
@@ -125,7 +125,7 @@ namespace mcrl2 {
         template < typename ForwardTraversalIterator >
         void set_context(boost::iterator_range< ForwardTraversalIterator > const& context)
         {
-          m_identifiers = core::find_identifiers(convert< atermpp::aterm_list >(context));
+          m_identifiers = core::find_identifiers(atermpp::convert< atermpp::aterm_list >(context));
         }
 
         /// \brief Set a new context.

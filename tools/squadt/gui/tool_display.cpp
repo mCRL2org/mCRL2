@@ -13,6 +13,7 @@
 
 #include <deque>
 #include <utility>
+#include <iostream>
 
 #include <boost/foreach.hpp>
 
@@ -33,6 +34,7 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/datetime.h>
+#include <wx/filepicker.h>
 
 class tipi_export_visitor_impl : public tipi::layout::basic_event_handler {
 
@@ -93,6 +95,11 @@ void event_helper< tipi::layout::elements::checkbox, wxCheckBox >::export_wx_cha
 template <>
 void event_helper< tipi::layout::elements::text_field, wxTextCtrl >::export_wx_changes(wxCommandEvent& e) {
   tipi_element.set_text(std::string(wx_element.GetValue().fn_str()));
+}
+
+template <>
+void event_helper< tipi::layout::elements::file_control, wxFilePickerCtrl >::export_wx_changes(wxCommandEvent& e) {
+  tipi_element.set_text(std::string(wx_element.GetPath().fn_str()));
 }
 
 namespace utility {
@@ -403,6 +410,33 @@ namespace utility {
     return std::auto_ptr< wxObject > (text_field);
   }
 
+  /**
+   * \param[in] e the element that is associated with the new control
+   **/
+  template <>
+  template <>
+  std::auto_ptr< wxObject > visitor< tipi_export_visitor_impl, std::auto_ptr< wxObject > >::visit(tipi::layout::elements::file_control const& e) {
+    struct trampoline {
+      static void import(tipi::layout::elements::file_control const& tipi_element, wxFilePickerCtrl& wx_element) {
+        wx_element.SetLabel(wxString(tipi_element.get_text().c_str(), wxConvLocal));
+      }
+    };
+    wxFilePickerCtrl *FPC = new wxFilePickerCtrl(m_current_window, wxID_ANY, wxString(e.get_text().c_str(), wxConvLocal), wxT("Select a file"), wxT("*.*") , wxDefaultPosition, wxDefaultSize, wxFLP_USE_TEXTCTRL);
+    //FPC->SetSize( wxSize( 390 , 20 ));
+    std::auto_ptr< wxFilePickerCtrl > file_control(FPC);
+
+    // For processing updates to the display that originate at the tool side
+    tipi::layout::basic_event_handler::add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*file_control)));
+
+    event_helper< tipi::layout::elements::file_control, wxFilePickerCtrl >* l =
+            new event_helper< tipi::layout::elements::file_control, wxFilePickerCtrl >(e, *file_control);
+
+    l->connect(wxEVT_COMMAND_FILEPICKER_CHANGED);
+
+    return std::auto_ptr< wxObject > (file_control);
+  }
+
+
   template <>
   bool visitor< tipi_export_visitor_impl, std::auto_ptr< wxObject > >::initialise() {
     register_visit_method< const tipi::tool_display >();
@@ -414,7 +448,7 @@ namespace utility {
     register_visit_method< const tipi::layout::elements::progress_bar >();
     register_visit_method< const tipi::layout::elements::checkbox >();
     register_visit_method< const tipi::layout::elements::text_field >();
-
+    register_visit_method< const tipi::layout::elements::file_control >();
     return true;
   }
 }

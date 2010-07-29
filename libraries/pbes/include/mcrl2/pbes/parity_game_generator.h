@@ -26,6 +26,7 @@
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
 
 namespace atermpp {
   /// \cond INTERNAL_DOCS
@@ -122,6 +123,18 @@ namespace pbes_system {
       /// \brief True if it is a min-parity game.
       bool m_is_min_parity;
 
+      /// \brief Prints a log message for every 1000-th equation
+      void LOG_EQUATION_COUNT(unsigned int level, unsigned int size) const
+      {
+        if (check_log_level(level))
+        {
+          if (size > 0 && size % 1000 == 0)
+          {
+            std::cout << "Generated " << size << " BES equations" << std::endl;
+          }
+        }
+      }
+
       /// \brief Adds a BES equation for a given PBES expression, if it not already exists.
       /// \param t A PBES expression
       /// \param priority A positive integer
@@ -139,7 +152,13 @@ namespace pbes_system {
         {
           unsigned int p = m_pbes_expression_index.size();
           m_pbes_expression_index[t] = p;
+          if (tr::is_prop_var(t))
+          {
+          	priority = m_priorities[tr::name(t)];
+          }
           m_bes.push_back(std::make_pair(t, priority));
+          detail::check_bes_equation_limit(m_bes.size());
+          LOG_EQUATION_COUNT(1, m_bes.size());
           return p;
         }
       }
@@ -161,15 +180,6 @@ namespace pbes_system {
         return sigma;
       }
 
-      // very simplistic log function
-      void LOG(unsigned int level, const std::string& s) const
-      {
-        if (check_log_level(level))
-        {
-          std::clog << s << std::flush;
-        }
-      }
-
       // prints the BES equation with left hand side 'index' and right hand side 'rhs'
       void LOG_BES_EQUATION(unsigned int level, unsigned int index, const std::set<unsigned int>& rhs) const
       {
@@ -177,13 +187,13 @@ namespace pbes_system {
         {
           const std::pair<pbes_expression, unsigned int>& eqn = m_bes[index];
           const unsigned int priority = eqn.second;
-          std::clog << (priority % 2 == 0 ? "mu Y" : "nu Y") << index << " = ";
+          std::clog << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
           std::string op =  (get_operation(index) == PGAME_AND ? " && " : " || ");
           for (std::set<unsigned int>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
           {
             std::clog << (i == rhs.begin() ? "" : op) << "Y" << *i;
           }
-          std::clog << std::endl;
+          std::clog <<  " (priority = " << priority << ")" << std::endl;
         }
       }
 

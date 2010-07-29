@@ -33,11 +33,11 @@ void parser_test()
 
   data::data_specification spec(data::parse_data_specification(text));
 
-  std::cerr << "aaa " << boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() << "\n";
-  BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 4); // Bool, S, List(S), S->List(S).
+  std::cerr << "number of sorts " << boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() << "\n";
+  BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 6); // Bool, S, List(S), S->List(S), Nat, @NatPair.
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors(data::basic_sort("S"))).size() == 1);
-  std::cerr << "aaa " << boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() << "\n";
-  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 26);
+  std::cerr << "number of functions " << boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() << "\n";
+  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 99);
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));
@@ -46,11 +46,23 @@ void parser_test()
 //  BOOST_CHECK(data::parse_data_expression("1/2") == data::sort_real::real_(1, 2));
 }
 
+// This test triggers a sort normalization problem.
+void test_user_defined_sort()
+{
+  using namespace data;
+
+  std::string text = "sort D = struct d1 | d2;\n";
+  data_specification data_spec = parse_data_specification(text);
+  sort_expression s = parse_sort_expression("D", data_spec);
+  core::garbage_collect();
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   parser_test();
+  test_user_defined_sort();
   core::garbage_collect();
 
   return EXIT_SUCCESS;

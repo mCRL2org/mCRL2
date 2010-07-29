@@ -16,6 +16,14 @@ add_definitions(-DTIXML_USE_TICPP)
 
 # ######### General setup ##########
 
+set(MACOSX_BUNDLE_ICON_FILE squadt.icns)
+
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/squadt/tool_catalog" "${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog" COPYONLY )
+if(MCRL2_SINGLE_BUNDLE)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog DESTINATION MacOS/share/squadt)
+else(MCRL2_SINGLE_BUNDLE)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog DESTINATION share/squadt)
+endif(MCRL2_SINGLE_BUNDLE)
 
 # ########## mcrl2_tools_squadt executable ##########
 
@@ -42,13 +50,13 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   gui/dialog/base.cpp
   gui/dialog/preferences.cpp
   gui/dialog/processor_settings.cpp
-  gui/dialog/project_settings.cpp
+
+  ${MACOSX_BUNDLE_ICON_FILE}
 )
 
-#Add PREFIX define
-set_source_files_properties(settings_manager.cpp
-  PROPERTIES COMPILE_DEFINITIONS PREFIX="${CMAKE_INSTALL_PREFIX}"
-)
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
@@ -58,11 +66,11 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )
+else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_utilities_command_line
@@ -70,21 +78,15 @@ target_link_libraries(${PROJECT_NAME}
   squadt_tipi
   ticpp
 )
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
 
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 
-# install documentation
-if (MAN_PAGES)
-  add_custom_command(
-    OUTPUT ${PROJECT_NAME}.1
-    COMMAND ${PROJECT_NAME} --generate-man-page > ${PROJECT_NAME}.1
-    DEPENDS ${PROJECT_NAME}
-    COMMENT "Generating man page for ${PROJECT_NAME}"
-  )
-  add_custom_target(${PROJECT_NAME}_man_page ALL DEPENDS ${PROJECT_NAME}.1)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.1 DESTINATION share/man/man1)
-endif (MAN_PAGES)
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 endif ( MCRL2_BUILD_GUI_TOOLS )

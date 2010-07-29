@@ -57,7 +57,7 @@ struct boolean_expression_builder
   /// \brief Visit true node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_true(const term_type& x, Arg& /* arg */)
+  virtual term_type visit_true(const term_type& /* x */, Arg& /* arg */)
   {
     return term_type();
   }
@@ -65,7 +65,7 @@ struct boolean_expression_builder
   /// \brief Visit false node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_false(const term_type& x, Arg& /* arg */)
+  virtual term_type visit_false(const term_type& /* x */, Arg& /* arg */)
   {
     return term_type();
   }
@@ -73,7 +73,7 @@ struct boolean_expression_builder
   /// \brief Visit not node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_not(const term_type& x, const term_type& /* arg */, Arg& /* arg */)
+  virtual term_type visit_not(const term_type& /* x */, const term_type& /* arg */, Arg& /* arg */)
   {
     return term_type();
   }
@@ -81,7 +81,7 @@ struct boolean_expression_builder
   /// \brief Visit and node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
+  virtual term_type visit_and(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
@@ -89,7 +89,7 @@ struct boolean_expression_builder
   /// \brief Visit or node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
+  virtual term_type visit_or(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
@@ -97,7 +97,7 @@ struct boolean_expression_builder
   /// \brief Visit imp node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
+  virtual term_type visit_imp(const term_type& /* x */, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
@@ -105,7 +105,7 @@ struct boolean_expression_builder
   /// \brief Visit var node
   /// \param x A term
   /// \return The result of visiting the node
-  virtual term_type visit_var(const term_type& x, const variable_type& /* v */, Arg& /* arg */)
+  virtual term_type visit_var(const term_type& /* x */, const variable_type& /* v */, Arg& /* arg */)
   {
     return term_type();
   }

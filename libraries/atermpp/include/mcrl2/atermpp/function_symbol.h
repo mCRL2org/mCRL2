@@ -25,6 +25,10 @@ namespace atermpp
       AFun m_function;
 
     public:
+      /// \brief default constructor
+      function_symbol()
+      {}
+
       /// \brief Constructor.
       /// \param name A string
       /// \param arity The arity of the function.

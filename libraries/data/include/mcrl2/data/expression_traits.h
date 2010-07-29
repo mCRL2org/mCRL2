@@ -128,21 +128,21 @@ namespace core {
     /// \return True if the term is an universal quantification
     static inline
     bool is_forall(term_type t)
-    { return t.is_abstraction() && data::abstraction(t).is_forall(); }
+    { return data::is_forall(t); }
 
     /// \brief Test for existential quantification
     /// \param t A term
     /// \return True if the term is an existential quantification
     static inline
     bool is_exists(term_type t)
-    { return t.is_abstraction() && data::abstraction(t).is_exists(); }
+    { return data::is_exists(t); }
 
     /// \brief Test for lambda abstraction
     /// \param t A term
     /// \return True if the term is a lambda expression
     static inline
     bool is_lambda(term_type t)
-    { return t.is_abstraction() && data::abstraction(t).is_lambda(); }
+    { return data::is_lambda(t); }
 
     /// \brief Conversion from variable to term
     /// \param v A variable
@@ -159,7 +159,7 @@ namespace core {
     static inline
     bool is_variable(term_type t)
     {
-      return t.is_variable();
+      return data::is_variable(t);
     }
 
     /// \brief Returns the free variables of a term
@@ -212,10 +212,6 @@ namespace data {
     // Type of expression that represents variables
     typedef mcrl2::data::variable variable_type;
 
-    // Iterator range for arguments of function applications
-    typedef application::arguments_const_range arguments_const_range;
-    typedef abstraction::variables_const_range bound_variables_const_range;
-
     static bool is_true(data_expression const& e)
     {
       return sort_bool::is_true_function_symbol(e);
@@ -228,12 +224,12 @@ namespace data {
 
     static bool is_application(data_expression const& e)
     {
-      return e.is_application();
+      return data::is_application(e);
     }
 
     static bool is_abstraction(data_expression const& e)
     {
-      return e.is_abstraction();
+      return data::is_abstraction(e);
     }
 
     static data_expression head(data_expression const& e)
@@ -241,12 +237,12 @@ namespace data {
       return application(e).head();
     }
 
-    static arguments_const_range arguments(data_expression const& e)
+    static data_expression_list arguments(data_expression const& e)
     {
       return application(e).arguments();
     }
 
-    static bound_variables_const_range variables(data_expression const& a)
+    static data_expression_list variables(data_expression const& a)
     {
       return abstraction(a).variables();
     }

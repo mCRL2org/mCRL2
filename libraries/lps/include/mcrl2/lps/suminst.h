@@ -91,7 +91,7 @@ namespace mcrl2 {
           {
             // List of variables with the instantiated variables removed (can be done upfront, which is more efficient,
             // because we only need to calculate it once.
-            variable_list new_summation_variables = term_list_difference(s.summation_variables(), convert< variable_list >(variables));
+            variable_list new_summation_variables = term_list_difference(s.summation_variables(), atermpp::convert< variable_list >(variables));
 
             try 
             { core::gsDebugMsg("Enumerating condition: %s\n", data::pp(s.condition()).c_str());

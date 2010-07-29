@@ -39,7 +39,7 @@ namespace detail {
     /// \brief Visit propositional_variable node
     /// \param x A term
     /// \return The result of visiting the node
-    pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v)
+    pbes_expression visit_propositional_variable(const pbes_expression& /* x */, const propositional_variable_instantiation& v)
     {
       return sigma(v);
     }
@@ -112,7 +112,7 @@ namespace detail {
       if (replace_propositional_variables)
       {
         propositional_variable_instantiation w = sigma(v);
-        data::variable_list params = data::convert<data::variable_list>(w.parameters());
+        data::variable_list params = atermpp::convert<data::variable_list>(w.parameters());
         v = propositional_variable(w.name(), params);
       }
     } 

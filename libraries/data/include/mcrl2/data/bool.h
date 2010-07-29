@@ -23,7 +23,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 
 namespace mcrl2 {
@@ -55,9 +55,9 @@ namespace mcrl2 {
       inline
       bool is_bool(const sort_expression& e)
       {
-        if (e.is_basic_sort())
+        if (is_basic_sort(e))
         {
-          return static_cast< basic_sort >(e) == bool_();
+          return basic_sort(e) == bool_();
         }
         return false;
       }
@@ -151,7 +151,7 @@ namespace mcrl2 {
       inline
       function_symbol const& not_()
       {
-        static function_symbol not_ = data::detail::initialise_static_expression(not_, function_symbol(not_name(), function_sort(bool_(), bool_())));
+        static function_symbol not_ = data::detail::initialise_static_expression(not_, function_symbol(not_name(), make_function_sort(bool_(), bool_())));
         return not_;
       }
 
@@ -175,7 +175,7 @@ namespace mcrl2 {
       inline
       application not_(const data_expression& arg0)
       {
-        return application(not_(),arg0);
+        return not_()(arg0);
       }
 
       /// \brief Recogniser for application of !
@@ -187,7 +187,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_not_function_symbol(static_cast< application >(e).head());
+          return is_not_function_symbol(application(e).head());
         }
         return false;
       }
@@ -206,7 +206,7 @@ namespace mcrl2 {
       inline
       function_symbol const& and_()
       {
-        static function_symbol and_ = data::detail::initialise_static_expression(and_, function_symbol(and_name(), function_sort(bool_(), bool_(), bool_())));
+        static function_symbol and_ = data::detail::initialise_static_expression(and_, function_symbol(and_name(), make_function_sort(bool_(), bool_(), bool_())));
         return and_;
       }
 
@@ -231,7 +231,7 @@ namespace mcrl2 {
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(and_(),arg0, arg1);
+        return and_()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of &&
@@ -243,7 +243,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_and_function_symbol(static_cast< application >(e).head());
+          return is_and_function_symbol(application(e).head());
         }
         return false;
       }
@@ -262,7 +262,7 @@ namespace mcrl2 {
       inline
       function_symbol const& or_()
       {
-        static function_symbol or_ = data::detail::initialise_static_expression(or_, function_symbol(or_name(), function_sort(bool_(), bool_(), bool_())));
+        static function_symbol or_ = data::detail::initialise_static_expression(or_, function_symbol(or_name(), make_function_sort(bool_(), bool_(), bool_())));
         return or_;
       }
 
@@ -287,7 +287,7 @@ namespace mcrl2 {
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(or_(),arg0, arg1);
+        return or_()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of ||
@@ -299,7 +299,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_or_function_symbol(static_cast< application >(e).head());
+          return is_or_function_symbol(application(e).head());
         }
         return false;
       }
@@ -318,7 +318,7 @@ namespace mcrl2 {
       inline
       function_symbol const& implies()
       {
-        static function_symbol implies = data::detail::initialise_static_expression(implies, function_symbol(implies_name(), function_sort(bool_(), bool_(), bool_())));
+        static function_symbol implies = data::detail::initialise_static_expression(implies, function_symbol(implies_name(), make_function_sort(bool_(), bool_(), bool_())));
         return implies;
       }
 
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(implies(),arg0, arg1);
+        return implies()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of =>
@@ -355,7 +355,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_implies_function_symbol(static_cast< application >(e).head());
+          return is_implies_function_symbol(application(e).head());
         }
         return false;
       }
@@ -418,23 +418,31 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(variable_list(), not_(true_()), false_()));
         result.push_back(data_equation(variable_list(), not_(false_()), true_()));
-        result.push_back(data_equation(make_vector(vb), not_(not_(vb)), vb));
-        result.push_back(data_equation(make_vector(vb), and_(vb, true_()), vb));
-        result.push_back(data_equation(make_vector(vb), and_(vb, false_()), false_()));
-        result.push_back(data_equation(make_vector(vb), and_(true_(), vb), vb));
-        result.push_back(data_equation(make_vector(vb), and_(false_(), vb), false_()));
-        result.push_back(data_equation(make_vector(vb), or_(vb, true_()), true_()));
-        result.push_back(data_equation(make_vector(vb), or_(vb, false_()), vb));
-        result.push_back(data_equation(make_vector(vb), or_(true_(), vb), true_()));
-        result.push_back(data_equation(make_vector(vb), or_(false_(), vb), vb));
-        result.push_back(data_equation(make_vector(vb), implies(vb, true_()), true_()));
-        result.push_back(data_equation(make_vector(vb), implies(vb, false_()), not_(vb)));
-        result.push_back(data_equation(make_vector(vb), implies(true_(), vb), vb));
-        result.push_back(data_equation(make_vector(vb), implies(false_(), vb), true_()));
-        result.push_back(data_equation(make_vector(vb), equal_to(true_(), vb), vb));
-        result.push_back(data_equation(make_vector(vb), equal_to(false_(), vb), not_(vb)));
-        result.push_back(data_equation(make_vector(vb), equal_to(vb, true_()), vb));
-        result.push_back(data_equation(make_vector(vb), equal_to(vb, false_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), not_(not_(vb)), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), and_(vb, true_()), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), and_(vb, false_()), false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), and_(true_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), and_(false_(), vb), false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), or_(vb, true_()), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), or_(vb, false_()), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), or_(true_(), vb), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), or_(false_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), implies(vb, true_()), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), implies(vb, false_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), implies(true_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), implies(false_(), vb), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), equal_to(true_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), equal_to(false_(), vb), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), equal_to(vb, true_()), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), equal_to(vb, false_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), less(false_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), less(true_(), vb), false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), less(vb, false_()), false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), less(vb, true_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), less_equal(false_(), vb), true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb), less_equal(true_(), vb), vb));
+        result.push_back(data_equation(atermpp::make_vector(vb), less_equal(vb, false_()), not_(vb)));
+        result.push_back(data_equation(atermpp::make_vector(vb), less_equal(vb, true_()), true_()));
         return result;
       }
 

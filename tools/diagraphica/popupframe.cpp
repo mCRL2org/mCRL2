@@ -49,7 +49,7 @@ PopupFrame::~PopupFrame()
 
 
 // --------------------------------------------
-void PopupFrame::OnClose( wxCloseEvent& event )
+void PopupFrame::OnClose( wxCloseEvent& /*event*/ )
 // --------------------------------------------
 {
     mediator->handleCloseFrame( this );

@@ -72,7 +72,7 @@ namespace mcrl2 {
                       bool result = perform_task(configuration);
 
                       if (!result) {
-                        send_error("Operation failed; tool may have crashed!");
+                        send_error("Operation failed; tool has exited.");
                       }
                       else {
                         m_communicator->send_configuration(configuration);
@@ -81,7 +81,7 @@ namespace mcrl2 {
                       m_communicator->send_task_done(result);
                     }
                     else {
-                      send_error("Start signal received without valid configuration!");
+                      send_error("Start signal received without valid configuration.");
                     }
                     break;
                   case tipi::message_termination:

@@ -15,10 +15,10 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/lexical_cast.hpp"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/exception.h"
 #include "lps2lts.h"
-#include "exploration.h"
+#include "mcrl2/lts/exploration.h"
 
 #include "mcrl2/core/messaging.h"
 
@@ -131,8 +131,8 @@ class squadt_interactor::storage_configuration {
 
       /* Add output file to the configuration */
       std::string     output_name(c.get_output_name("." +
-          lts::extension_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
-      tipi::mime_type output_type(tipi::mime_type(lts::mime_type_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
+          mcrl2::lts::detail::extension_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
+      tipi::mime_type output_type(tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
 
       if (c.output_exists(lts_file_for_output)) {
         tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
@@ -275,8 +275,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
           append(cb_confluence.set_label("confluence reduction with confluent tau:")).
           append(cb_max_states.set_label("maximum number of states")).
           append(cb_bithashing.set_label("bit hashing; number of states")).
-          append(d.create< label >().set_text("initial hash table size:"))).
+          append(d.create< label >().set_text("\tinitial hash table size:"))).
       append(d.create< vertical_box >().set_default_alignment(layout::right).
+          append(d.create< checkbox >(), layout::hidden).
           append(d.create< checkbox >(), layout::hidden).
           append(tf_actions).
           append(tf_max_traces).
@@ -458,7 +459,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   // Let squadt_tool update configuration for rewriter and add output file configuration
   synchronise_with_configuration(configuration);
 
-  lgopts.filename = configuration.get_input(lps_file_for_input).location();
+  m_filename = configuration.get_input(lps_file_for_input).location();
 
   if (configuration.category() == tipi::tool::category::transformation) {
     lgopts.lts = configuration.get_output(lts_file_for_output).location();
@@ -513,12 +514,13 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   lgopts.generate_filename_for_trace = boost::bind(::add_output_file, configuration, trc_file_for_output, _1, _2);
 
   bool ok = false;
-  if ( initialise_lts_generation(&lgopts) )
+  lps2lts_algorithm lps2lts;
+  if ( lps2lts.initialise_lts_generation(&lgopts) )
   {
-    ok = generate_lts();
+    ok = lps2lts.generate_lts();
     ok = ok || lgopts.error_trace_saved;
 
-    ok &= finalise_lts_generation();
+    ok &= lps2lts.finalise_lts_generation();
   }
 
   return ok;

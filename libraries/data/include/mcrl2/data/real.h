@@ -23,7 +23,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -59,9 +59,9 @@ namespace mcrl2 {
       inline
       bool is_real(const sort_expression& e)
       {
-        if (e.is_basic_sort())
+        if (is_basic_sort(e))
         {
-          return static_cast< basic_sort >(e) == real_();
+          return basic_sort(e) == real_();
         }
         return false;
       }
@@ -88,7 +88,7 @@ namespace mcrl2 {
       inline
       function_symbol const& creal()
       {
-        static function_symbol creal = data::detail::initialise_static_expression(creal, function_symbol(creal_name(), function_sort(sort_int::int_(), sort_pos::pos(), real_())));
+        static function_symbol creal = data::detail::initialise_static_expression(creal, function_symbol(creal_name(), make_function_sort(sort_int::int_(), sort_pos::pos(), real_())));
         return creal;
       }
 
@@ -113,7 +113,7 @@ namespace mcrl2 {
       inline
       application creal(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(creal(),arg0, arg1);
+        return creal()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@cReal
@@ -125,7 +125,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_creal_function_symbol(static_cast< application >(e).head());
+          return is_creal_function_symbol(application(e).head());
         }
         return false;
       }
@@ -144,7 +144,7 @@ namespace mcrl2 {
       inline
       function_symbol const& pos2real()
       {
-        static function_symbol pos2real = data::detail::initialise_static_expression(pos2real, function_symbol(pos2real_name(), function_sort(sort_pos::pos(), real_())));
+        static function_symbol pos2real = data::detail::initialise_static_expression(pos2real, function_symbol(pos2real_name(), make_function_sort(sort_pos::pos(), real_())));
         return pos2real;
       }
 
@@ -168,7 +168,7 @@ namespace mcrl2 {
       inline
       application pos2real(const data_expression& arg0)
       {
-        return application(pos2real(),arg0);
+        return pos2real()(arg0);
       }
 
       /// \brief Recogniser for application of Pos2Real
@@ -180,7 +180,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_pos2real_function_symbol(static_cast< application >(e).head());
+          return is_pos2real_function_symbol(application(e).head());
         }
         return false;
       }
@@ -199,7 +199,7 @@ namespace mcrl2 {
       inline
       function_symbol const& nat2real()
       {
-        static function_symbol nat2real = data::detail::initialise_static_expression(nat2real, function_symbol(nat2real_name(), function_sort(sort_nat::nat(), real_())));
+        static function_symbol nat2real = data::detail::initialise_static_expression(nat2real, function_symbol(nat2real_name(), make_function_sort(sort_nat::nat(), real_())));
         return nat2real;
       }
 
@@ -223,7 +223,7 @@ namespace mcrl2 {
       inline
       application nat2real(const data_expression& arg0)
       {
-        return application(nat2real(),arg0);
+        return nat2real()(arg0);
       }
 
       /// \brief Recogniser for application of Nat2Real
@@ -235,7 +235,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_nat2real_function_symbol(static_cast< application >(e).head());
+          return is_nat2real_function_symbol(application(e).head());
         }
         return false;
       }
@@ -254,7 +254,7 @@ namespace mcrl2 {
       inline
       function_symbol const& int2real()
       {
-        static function_symbol int2real = data::detail::initialise_static_expression(int2real, function_symbol(int2real_name(), function_sort(sort_int::int_(), real_())));
+        static function_symbol int2real = data::detail::initialise_static_expression(int2real, function_symbol(int2real_name(), make_function_sort(sort_int::int_(), real_())));
         return int2real;
       }
 
@@ -278,7 +278,7 @@ namespace mcrl2 {
       inline
       application int2real(const data_expression& arg0)
       {
-        return application(int2real(),arg0);
+        return int2real()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Real
@@ -290,7 +290,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_int2real_function_symbol(static_cast< application >(e).head());
+          return is_int2real_function_symbol(application(e).head());
         }
         return false;
       }
@@ -309,7 +309,7 @@ namespace mcrl2 {
       inline
       function_symbol const& real2pos()
       {
-        static function_symbol real2pos = data::detail::initialise_static_expression(real2pos, function_symbol(real2pos_name(), function_sort(real_(), sort_pos::pos())));
+        static function_symbol real2pos = data::detail::initialise_static_expression(real2pos, function_symbol(real2pos_name(), make_function_sort(real_(), sort_pos::pos())));
         return real2pos;
       }
 
@@ -333,7 +333,7 @@ namespace mcrl2 {
       inline
       application real2pos(const data_expression& arg0)
       {
-        return application(real2pos(),arg0);
+        return real2pos()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Pos
@@ -345,7 +345,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_real2pos_function_symbol(static_cast< application >(e).head());
+          return is_real2pos_function_symbol(application(e).head());
         }
         return false;
       }
@@ -364,7 +364,7 @@ namespace mcrl2 {
       inline
       function_symbol const& real2nat()
       {
-        static function_symbol real2nat = data::detail::initialise_static_expression(real2nat, function_symbol(real2nat_name(), function_sort(real_(), sort_nat::nat())));
+        static function_symbol real2nat = data::detail::initialise_static_expression(real2nat, function_symbol(real2nat_name(), make_function_sort(real_(), sort_nat::nat())));
         return real2nat;
       }
 
@@ -388,7 +388,7 @@ namespace mcrl2 {
       inline
       application real2nat(const data_expression& arg0)
       {
-        return application(real2nat(),arg0);
+        return real2nat()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Nat
@@ -400,7 +400,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_real2nat_function_symbol(static_cast< application >(e).head());
+          return is_real2nat_function_symbol(application(e).head());
         }
         return false;
       }
@@ -419,7 +419,7 @@ namespace mcrl2 {
       inline
       function_symbol const& real2int()
       {
-        static function_symbol real2int = data::detail::initialise_static_expression(real2int, function_symbol(real2int_name(), function_sort(real_(), sort_int::int_())));
+        static function_symbol real2int = data::detail::initialise_static_expression(real2int, function_symbol(real2int_name(), make_function_sort(real_(), sort_int::int_())));
         return real2int;
       }
 
@@ -443,7 +443,7 @@ namespace mcrl2 {
       inline
       application real2int(const data_expression& arg0)
       {
-        return application(real2int(),arg0);
+        return real2int()(arg0);
       }
 
       /// \brief Recogniser for application of Real2Int
@@ -455,7 +455,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_real2int_function_symbol(static_cast< application >(e).head());
+          return is_real2int_function_symbol(application(e).head());
         }
         return false;
       }
@@ -495,10 +495,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol minimum(minimum_name(), function_sort(s0, s1, target_sort));
+        function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
         return minimum;
       }
 
@@ -523,7 +523,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(minimum(arg0.sort(), arg1.sort()),arg0, arg1);
+        return minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -535,7 +535,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_minimum_function_symbol(static_cast< application >(e).head());
+          return is_minimum_function_symbol(application(e).head());
         }
         return false;
       }
@@ -599,10 +599,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol maximum(maximum_name(), function_sort(s0, s1, target_sort));
+        function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
         return maximum;
       }
 
@@ -627,7 +627,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(maximum(arg0.sort(), arg1.sort()),arg0, arg1);
+        return maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -639,7 +639,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_maximum_function_symbol(static_cast< application >(e).head());
+          return is_maximum_function_symbol(application(e).head());
         }
         return false;
       }
@@ -678,10 +678,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts " + s0.to_string());
         }
 
-        function_symbol abs(abs_name(), function_sort(s0, target_sort));
+        function_symbol abs(abs_name(), make_function_sort(s0, target_sort));
         return abs;
       }
 
@@ -705,7 +705,7 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        return application(abs(arg0.sort()),arg0);
+        return abs(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of abs
@@ -717,7 +717,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_abs_function_symbol(static_cast< application >(e).head());
+          return is_abs_function_symbol(application(e).head());
         }
         return false;
       }
@@ -756,10 +756,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for negate with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for negate with domain sorts " + s0.to_string());
         }
 
-        function_symbol negate(negate_name(), function_sort(s0, target_sort));
+        function_symbol negate(negate_name(), make_function_sort(s0, target_sort));
         return negate;
       }
 
@@ -783,7 +783,7 @@ namespace mcrl2 {
       inline
       application negate(const data_expression& arg0)
       {
-        return application(negate(arg0.sort()),arg0);
+        return negate(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of -
@@ -795,7 +795,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_negate_function_symbol(static_cast< application >(e).head());
+          return is_negate_function_symbol(application(e).head());
         }
         return false;
       }
@@ -834,10 +834,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + s0.to_string());
         }
 
-        function_symbol succ(succ_name(), function_sort(s0, target_sort));
+        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
         return succ;
       }
 
@@ -861,7 +861,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return application(succ(arg0.sort()),arg0);
+        return succ(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -873,7 +873,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_succ_function_symbol(static_cast< application >(e).head());
+          return is_succ_function_symbol(application(e).head());
         }
         return false;
       }
@@ -912,10 +912,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + s0.to_string());
         }
 
-        function_symbol pred(pred_name(), function_sort(s0, target_sort));
+        function_symbol pred(pred_name(), make_function_sort(s0, target_sort));
         return pred;
       }
 
@@ -939,7 +939,7 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        return application(pred(arg0.sort()),arg0);
+        return pred(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of pred
@@ -951,7 +951,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_pred_function_symbol(static_cast< application >(e).head());
+          return is_pred_function_symbol(application(e).head());
         }
         return false;
       }
@@ -999,10 +999,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol plus(plus_name(), function_sort(s0, s1, target_sort));
+        function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
         return plus;
       }
 
@@ -1027,7 +1027,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(plus(arg0.sort(), arg1.sort()),arg0, arg1);
+        return plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -1039,7 +1039,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_plus_function_symbol(static_cast< application >(e).head());
+          return is_plus_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1079,10 +1079,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for minus with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for minus with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol minus(minus_name(), function_sort(s0, s1, target_sort));
+        function_symbol minus(minus_name(), make_function_sort(s0, s1, target_sort));
         return minus;
       }
 
@@ -1107,7 +1107,7 @@ namespace mcrl2 {
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(minus(arg0.sort(), arg1.sort()),arg0, arg1);
+        return minus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -1119,7 +1119,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_minus_function_symbol(static_cast< application >(e).head());
+          return is_minus_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1159,10 +1159,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol times(times_name(), function_sort(s0, s1, target_sort));
+        function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
         return times;
       }
 
@@ -1187,7 +1187,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(times(arg0.sort(), arg1.sort()),arg0, arg1);
+        return times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -1199,7 +1199,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_times_function_symbol(static_cast< application >(e).head());
+          return is_times_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1239,10 +1239,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol exp(exp_name(), function_sort(s0, s1, target_sort));
+        function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));
         return exp;
       }
 
@@ -1267,7 +1267,7 @@ namespace mcrl2 {
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(exp(arg0.sort(), arg1.sort()),arg0, arg1);
+        return exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of exp
@@ -1279,7 +1279,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_exp_function_symbol(static_cast< application >(e).head());
+          return is_exp_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1302,7 +1302,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(real_());
 
-        function_symbol divides(divides_name(), function_sort(s0, s1, target_sort));
+        function_symbol divides(divides_name(), make_function_sort(s0, s1, target_sort));
         return divides;
       }
 
@@ -1327,7 +1327,7 @@ namespace mcrl2 {
       inline
       application divides(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(divides(arg0.sort(), arg1.sort()),arg0, arg1);
+        return divides(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of /
@@ -1339,7 +1339,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_divides_function_symbol(static_cast< application >(e).head());
+          return is_divides_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1358,7 +1358,7 @@ namespace mcrl2 {
       inline
       function_symbol const& floor()
       {
-        static function_symbol floor = data::detail::initialise_static_expression(floor, function_symbol(floor_name(), function_sort(real_(), sort_int::int_())));
+        static function_symbol floor = data::detail::initialise_static_expression(floor, function_symbol(floor_name(), make_function_sort(real_(), sort_int::int_())));
         return floor;
       }
 
@@ -1382,7 +1382,7 @@ namespace mcrl2 {
       inline
       application floor(const data_expression& arg0)
       {
-        return application(floor(),arg0);
+        return floor()(arg0);
       }
 
       /// \brief Recogniser for application of floor
@@ -1394,7 +1394,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_floor_function_symbol(static_cast< application >(e).head());
+          return is_floor_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1413,7 +1413,7 @@ namespace mcrl2 {
       inline
       function_symbol const& ceil()
       {
-        static function_symbol ceil = data::detail::initialise_static_expression(ceil, function_symbol(ceil_name(), function_sort(real_(), sort_int::int_())));
+        static function_symbol ceil = data::detail::initialise_static_expression(ceil, function_symbol(ceil_name(), make_function_sort(real_(), sort_int::int_())));
         return ceil;
       }
 
@@ -1437,7 +1437,7 @@ namespace mcrl2 {
       inline
       application ceil(const data_expression& arg0)
       {
-        return application(ceil(),arg0);
+        return ceil()(arg0);
       }
 
       /// \brief Recogniser for application of ceil
@@ -1449,7 +1449,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_ceil_function_symbol(static_cast< application >(e).head());
+          return is_ceil_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1468,7 +1468,7 @@ namespace mcrl2 {
       inline
       function_symbol const& round()
       {
-        static function_symbol round = data::detail::initialise_static_expression(round, function_symbol(round_name(), function_sort(real_(), sort_int::int_())));
+        static function_symbol round = data::detail::initialise_static_expression(round, function_symbol(round_name(), make_function_sort(real_(), sort_int::int_())));
         return round;
       }
 
@@ -1492,7 +1492,7 @@ namespace mcrl2 {
       inline
       application round(const data_expression& arg0)
       {
-        return application(round(),arg0);
+        return round()(arg0);
       }
 
       /// \brief Recogniser for application of round
@@ -1504,7 +1504,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_round_function_symbol(static_cast< application >(e).head());
+          return is_round_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1523,7 +1523,7 @@ namespace mcrl2 {
       inline
       function_symbol const& redfrac()
       {
-        static function_symbol redfrac = data::detail::initialise_static_expression(redfrac, function_symbol(redfrac_name(), function_sort(sort_int::int_(), sort_int::int_(), real_())));
+        static function_symbol redfrac = data::detail::initialise_static_expression(redfrac, function_symbol(redfrac_name(), make_function_sort(sort_int::int_(), sort_int::int_(), real_())));
         return redfrac;
       }
 
@@ -1548,7 +1548,7 @@ namespace mcrl2 {
       inline
       application redfrac(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(redfrac(),arg0, arg1);
+        return redfrac()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@redfrac
@@ -1560,7 +1560,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_redfrac_function_symbol(static_cast< application >(e).head());
+          return is_redfrac_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1579,7 +1579,7 @@ namespace mcrl2 {
       inline
       function_symbol const& redfracwhr()
       {
-        static function_symbol redfracwhr = data::detail::initialise_static_expression(redfracwhr, function_symbol(redfracwhr_name(), function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_())));
+        static function_symbol redfracwhr = data::detail::initialise_static_expression(redfracwhr, function_symbol(redfracwhr_name(), make_function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_())));
         return redfracwhr;
       }
 
@@ -1605,7 +1605,7 @@ namespace mcrl2 {
       inline
       application redfracwhr(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(redfracwhr(),arg0, arg1, arg2);
+        return redfracwhr()(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@redfracwhr
@@ -1617,7 +1617,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_redfracwhr_function_symbol(static_cast< application >(e).head());
+          return is_redfracwhr_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1636,7 +1636,7 @@ namespace mcrl2 {
       inline
       function_symbol const& redfrachlp()
       {
-        static function_symbol redfrachlp = data::detail::initialise_static_expression(redfrachlp, function_symbol(redfrachlp_name(), function_sort(real_(), sort_int::int_(), real_())));
+        static function_symbol redfrachlp = data::detail::initialise_static_expression(redfrachlp, function_symbol(redfrachlp_name(), make_function_sort(real_(), sort_int::int_(), real_())));
         return redfrachlp;
       }
 
@@ -1661,7 +1661,7 @@ namespace mcrl2 {
       inline
       application redfrachlp(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(redfrachlp(),arg0, arg1);
+        return redfrachlp()(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@redfrachlp
@@ -1673,7 +1673,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_redfrachlp_function_symbol(static_cast< application >(e).head());
+          return is_redfrachlp_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1824,40 +1824,40 @@ namespace mcrl2 {
         variable vs("s",real_());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vr), less(vr, vr), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vr), less_equal(vr, vr), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vn), nat2real(vn), creal(sort_int::cint(vn), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp), pos2real(vp), creal(sort_int::cint(sort_nat::cnat(vp)), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vx), real2int(creal(vx, sort_pos::c1())), vx));
-        result.push_back(data_equation(make_vector(vx), real2nat(creal(vx, sort_pos::c1())), sort_int::int2nat(vx)));
-        result.push_back(data_equation(make_vector(vx), real2pos(creal(vx, sort_pos::c1())), sort_int::int2pos(vx)));
-        result.push_back(data_equation(make_vector(vr, vs), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
-        result.push_back(data_equation(make_vector(vr, vs), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
-        result.push_back(data_equation(make_vector(vr), abs(vr), if_(less(vr, creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
-        result.push_back(data_equation(make_vector(vp, vx), negate(creal(vx, vp)), creal(negate(vx), vp)));
-        result.push_back(data_equation(make_vector(vp, vx), succ(creal(vx, vp)), creal(plus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
-        result.push_back(data_equation(make_vector(vp, vx), pred(creal(vx, vp)), creal(minus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vp, vq), divides(vp, vq), redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq)))));
-        result.push_back(data_equation(make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int::cint(vm), sort_int::cint(vn))));
-        result.push_back(data_equation(make_vector(vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
-        result.push_back(data_equation(make_vector(vn, vp, vx), exp(creal(vx, vp), sort_int::cint(vn)), redfrac(exp(vx, vn), sort_int::cint(sort_nat::cnat(exp(vp, vn))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx), not_equal_to(vx, sort_int::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int::cneg(vq)), redfrac(sort_int::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
-        result.push_back(data_equation(make_vector(vp, vx), floor(creal(vx, vp)), sort_int::div(vx, vp)));
-        result.push_back(data_equation(make_vector(vr), ceil(vr), negate(floor(negate(vr)))));
-        result.push_back(data_equation(make_vector(vr), round(vr), floor(plus(vr, creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))))));
-        result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int::cneg(vp)), redfrac(negate(vx), sort_int::cint(sort_nat::cnat(vp)))));
-        result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int::cint(sort_nat::cnat(vp))), redfracwhr(vp, sort_int::div(vx, vp), sort_int::mod(vx, vp))));
-        result.push_back(data_equation(make_vector(vp, vx), redfracwhr(vp, vx, sort_nat::c0()), creal(vx, sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp, vq, vx), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq))), vx)));
-        result.push_back(data_equation(make_vector(vp, vx, vy), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int::int2pos(vx))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(atermpp::make_vector(vr), less(vr, vr), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(atermpp::make_vector(vr), less_equal(vr, vr), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(atermpp::make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(atermpp::make_vector(vn), nat2real(vn), creal(sort_int::cint(vn), sort_pos::c1())));
+        result.push_back(data_equation(atermpp::make_vector(vp), pos2real(vp), creal(sort_int::cint(sort_nat::cnat(vp)), sort_pos::c1())));
+        result.push_back(data_equation(atermpp::make_vector(vx), real2int(creal(vx, sort_pos::c1())), vx));
+        result.push_back(data_equation(atermpp::make_vector(vx), real2nat(creal(vx, sort_pos::c1())), sort_int::int2nat(vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx), real2pos(creal(vx, sort_pos::c1())), sort_int::int2pos(vx)));
+        result.push_back(data_equation(atermpp::make_vector(vr, vs), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
+        result.push_back(data_equation(atermpp::make_vector(vr, vs), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
+        result.push_back(data_equation(atermpp::make_vector(vr), abs(vr), if_(less(vr, creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), negate(creal(vx, vp)), creal(negate(vx), vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), succ(creal(vx, vp)), creal(plus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), pred(creal(vx, vp)), creal(minus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), divides(vp, vq), redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq)))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int::cint(vm), sort_int::cint(vn))));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp, vx), exp(creal(vx, vp), sort_int::cint(vn)), redfrac(exp(vx, vn), sort_int::cint(sort_nat::cnat(exp(vp, vn))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx), not_equal_to(vx, sort_int::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int::cneg(vq)), redfrac(sort_int::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), floor(creal(vx, vp)), sort_int::div(vx, vp)));
+        result.push_back(data_equation(atermpp::make_vector(vr), ceil(vr), negate(floor(negate(vr)))));
+        result.push_back(data_equation(atermpp::make_vector(vr), round(vr), floor(plus(vr, creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), redfrac(vx, sort_int::cneg(vp)), redfrac(negate(vx), sort_int::cint(sort_nat::cnat(vp)))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), redfrac(vx, sort_int::cint(sort_nat::cnat(vp))), redfracwhr(vp, sort_int::div(vx, vp), sort_int::mod(vx, vp))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx), redfracwhr(vp, vx, sort_nat::c0()), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq, vx), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq))), vx)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vx, vy), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int::int2pos(vx))));
         return result;
       }
 

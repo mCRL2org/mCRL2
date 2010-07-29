@@ -94,6 +94,7 @@ typedef unsigned int flex_uint32_t;
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 /* end standard C++ headers. */
@@ -594,7 +595,7 @@ int chiyyFlexLexer::yylex(void) { return 1; }
 chi_lexer *a_chi_lexer = NULL;       /* lexer object, used by parse_streams */
 
 
-#line 598 "chilexer.cpp"
+#line 599 "chilexer.cpp"
 
 #define INITIAL 0
 
@@ -696,7 +697,7 @@ YY_DECL
     
 #line 94 "chilexer.ll"
 
-#line 700 "chilexer.cpp"
+#line 701 "chilexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -1235,7 +1236,7 @@ YY_RULE_SETUP
 #line 199 "chilexer.ll"
 ECHO;
 	YY_BREAK
-#line 1239 "chilexer.cpp"
+#line 1240 "chilexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

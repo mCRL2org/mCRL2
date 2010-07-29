@@ -12,16 +12,15 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
-#include <boost/program_options.hpp>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
-namespace po = boost::program_options;
 
 // Example usage of the parity_game_generator class.
 void run1(pbes<>& p, bool min_parity_game)
@@ -63,85 +62,66 @@ void run2(pbes<>& p, bool min_parity_game, std::string outfile)
   to << text;
 }
 
+using namespace mcrl2::utilities;
+
+/// \brief Simple input/output tool that transforms a pbes to a parity game
+class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
+{
+
+  protected:
+
+    typedef tools::input_output_tool super;
+
+    bool m_max_pg;
+
+    void add_options(mcrl2::utilities::interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("max_parity_game", "generate max parity game instead of min parity game", 'm');
+    }
+
+    void parse_options(const mcrl2::utilities::command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      m_max_pg = parser.options.count("max_parity_game") > 0;
+    }
+
+  public:
+     paritygame_tool()
+      : super(
+          "paritygame",
+          "Wieger Wesselink",
+          "Reads a file containing a pbes, and generates a parity game.",
+          "Convert the PBES in INFILE to parity game and write the result to OUTFILE. If INFILE is not "
+          "present, stdin is used. If OUTFILE is not present, stdout is used. By default a min-parity game is generated."),
+        m_max_pg(false)
+    {}
+
+    bool run()
+    {
+      if (mcrl2::core::gsVerbose)
+      {
+        std::cout << "paritygame parameters:" << std::endl;
+        std::cout << "  input file:         " << m_input_filename << std::endl;
+        std::cout << "  output file:        " << m_output_filename << std::endl;
+      }
+
+      pbes_system::pbes<> p;
+      p.load(m_input_filename);
+
+      if(!m_max_pg)
+      {
+        run1(p, true);
+      }
+      run2(p, m_max_pg, m_output_filename);
+
+      return true;
+    }
+};
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  std::string infile;            // location of pbes
-  std::string outfile;           // location of result
-
-  try {
-    //--- paritygame options ---------
-    boost::program_options::options_description paritygame_options(
-      "Usage: paritygame [OPTION]... INFILE OUTFILE\n"
-      "\n"
-      "Reads a file containing a pbes, and generates a parity game.\n"
-      "By default a min-parity game is generated.\n"
-      "\n"
-      "Options"
-    );
-    paritygame_options.add_options()
-      ("help,h", "display this help")
-      ("verbose,v", "display short intermediate messages")
-      ("debug,d", "display detailed intermediate messages")
-      ("max-parity-game,m", "generate max-parity game instead of min-parity game")
-      ;
-
-    //--- hidden options ---------
-    po::options_description hidden_options;
-    hidden_options.add_options()
-      ("input-file", po::value<std::string>(&infile), "input file")
-      ("output-file", po::value<std::string>(&outfile), "output file")
-    ;
-
-    //--- positional options ---------
-    po::positional_options_description positional_options;
-    positional_options.add("input-file", 1);
-    positional_options.add("output-file", 1);
-
-    //--- command line options ---------
-    po::options_description cmdline_options;
-    cmdline_options.add(paritygame_options).add(hidden_options);
-
-    po::variables_map var_map;
-    po::store(po::command_line_parser(argc, argv).
-        options(cmdline_options).positional(positional_options).run(), var_map);
-    po::notify(var_map);
-
-    if (var_map.count("help")) {
-      std::cout << paritygame_options << "\n";
-      return 1;
-    }
-    if (var_map.count("debug")) {
-      mcrl2::core::gsSetDebugMsg();
-    }
-    if (var_map.count("verbose")) {
-      mcrl2::core::gsSetVerboseMsg();
-    }
-
-    if (mcrl2::core::gsVerbose)
-    {
-      std::cout << "paritygame parameters:" << std::endl;
-      std::cout << "  input file:         " << infile << std::endl;
-      std::cout << "  output file:        " << outfile << std::endl;
-    }
-
-    pbes_system::pbes<> p;
-    p.load(infile);
-
-    if (var_map.count("max-parity-game"))
-    {
-      run2(p, false, outfile);
-    }
-    else
-    {
-      run1(p, true);
-      run2(p, true, outfile);
-    }
-  }
-  catch(std::exception& e) {
-    std::cerr << "error: " << e.what() << "\n";
-  }
-
-  return 0;
+  return paritygame_tool().execute(argc, argv);
 }

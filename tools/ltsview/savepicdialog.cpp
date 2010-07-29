@@ -17,7 +17,7 @@
 #include <wx/statline.h>
 #include <wx/statusbr.h>
 #include "glcanvas.h"
-#include "utils.h"
+#include "mathutils.h"
 
 using namespace std;
 
@@ -169,7 +169,7 @@ void SavePicDialog::update_h_spin()
   int w,h;
   glcanvas->GetClientSize(&w,&h);
   double ar = double(h)/double(w);
-  h_spin->SetValue(Utils::round_to_int(w_spin->GetValue() * ar));
+  h_spin->SetValue(MathUtils::round_to_int(w_spin->GetValue() * ar));
 }
 
 void SavePicDialog::update_w_spin()
@@ -177,7 +177,7 @@ void SavePicDialog::update_w_spin()
   int w,h;
   glcanvas->GetClientSize(&w,&h);
   double ar = double(w)/double(h);
-  w_spin->SetValue(Utils::round_to_int(h_spin->GetValue() * ar));
+  w_spin->SetValue(MathUtils::round_to_int(h_spin->GetValue() * ar));
 }
 
 void SavePicDialog::onARCheck(wxCommandEvent &event)
@@ -204,7 +204,7 @@ void SavePicDialog::onSpin(wxSpinEvent& event)
 }
 
 
-void SavePicDialog::onChangeFile(wxCommandEvent& event)
+void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/)
 {
   wxString new_file = wxFileSelector(wxT("Select a file"),f_name.GetPath(),
     f_name.GetFullName(),wxT(""),wxT("*.*"),wxFD_SAVE,this);

@@ -17,6 +17,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 
@@ -85,11 +86,21 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
+      unsigned int loglevel = 0;
+      if (mcrl2::core::gsVerbose)
+      {
+        loglevel = 1;
+      }
+      if (mcrl2::core::gsDebug)
+      {
+        loglevel = 2;
+      }     	
+
       lps::specification spec;
       spec.load(m_input_filename);
       mcrl2::data::rewriter R = create_rewriter(spec.data() );
 
-      lps::constelm_algorithm<data::rewriter> algorithm(spec, R, mcrl2::core::gsVerbose);
+      lps::constelm_algorithm<data::rewriter> algorithm(spec, R, loglevel);
 
       // preprocess: remove single element sorts
       if (m_remove_singleton_sorts)
@@ -143,12 +154,26 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 #endif
 };
 
+class lpsconstelm_gui_tool: public mcrl2_gui_tool<lpsconstelm_tool>
+{
+  public:
+	lpsconstelm_gui_tool()
+    {
+      m_gui_options["ignore-conditions"] = create_checkbox_widget();
+      m_gui_options["instantiate-free-variables"] = create_checkbox_widget();
+
+      add_rewriter_widget();
+
+      m_gui_options["remove-singleton-sorts"] = create_checkbox_widget();
+      m_gui_options["remove-trivial-summands"] = create_checkbox_widget();
+    }
+};
 
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lpsconstelm_tool().execute(argc, argv);
+  return lpsconstelm_gui_tool().execute(argc, argv);
 }
 

@@ -29,15 +29,15 @@ struct non_aterm_traits
 
   /// \brief Protects the term t from garbage collection.
   /// \param t A term
-  static void protect(T* t)       {}
+  static void protect(T*)       {}
 
   /// \brief Unprotects the term t from garbage collection.
   /// \param t A term
-  static void unprotect(T* t)     {}
+  static void unprotect(T*)     {}
 
   /// \brief Marks t for garbage collection.
   /// \param t A term
-  static void mark(T t)           {}
+  static void mark(T)           {}
 
   /// \brief Returns the ATerm that corresponds to the term t.
   /// \param t A term

@@ -19,7 +19,8 @@
 #include "export_svg.h"
 #include "export_xml.h"
 #include "export_latex.h"
-#include <mcrl2/lts/lts.h>
+#include "mcrl2/lts/lts_io.h"
+
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -159,9 +160,9 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
     wxString(("All supported formats ("+
-             mcrl2::lts::lts::lts_extensions_as_string()+
+             mcrl2::lts::detail::lts_extensions_as_string()+
              ")|"+
-             mcrl2::lts::lts::lts_extensions_as_string(";")+
+             mcrl2::lts::detail::lts_extensions_as_string(";")+
              "|All files (*.*)|*.*").c_str(),
              wxConvLocal),
     wxFD_OPEN|wxFD_CHANGE_DIR);
@@ -296,13 +297,13 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   }
 }
 
-void MainFrame::onQuit(wxCommandEvent& e)
+void MainFrame::onQuit(wxCommandEvent&)
 {
   app->getAlgorithm(0)->stop();
   Close(true);
 }
 
-void MainFrame::onClose(wxCloseEvent& e)
+void MainFrame::onClose(wxCloseEvent&)
 {
   app->getAlgorithm(0)->stop();
   Destroy();

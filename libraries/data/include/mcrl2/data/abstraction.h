@@ -15,140 +15,61 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/detail/construction_utility.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/data/binder_type.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Expression for abstraction, i.e. an expression binding a
-    ///        number of variables.
-    ///
-    /// An example of an abstraction is lambda x,y:Pos . f(x,y),
-    /// where lambda is the binding operator, x,y are the variables,
-    /// and f(x,y) is the body of the abstraction.
-    ///
-    class abstraction: public data_expression
+//--- start generated class abstraction ---//
+/// \brief An abstraction expression.
+class abstraction: public data_expression
+{
+  public:
+    /// \brief Default constructor.
+    abstraction()
+      : data_expression(core::detail::constructBinder())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    abstraction(atermpp::aterm_appl term)
+      : data_expression(term)
     {
-      protected:
+      assert(core::detail::check_term_Binder(m_term));
+    }
 
-        /// \brief base class for abstraction types
-        struct binder_type : public atermpp::aterm_appl {
-          binder_type(atermpp::aterm_appl const& e) : atermpp::aterm_appl(e)
-          {}
-        };
+    /// \brief Constructor.
+    abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body)
+      : data_expression(core::detail::gsMakeBinder(binding_operator, variables, body))
+    {}
 
-      public:
+    /// \brief Constructor.
+    template <typename Container>
+    abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::detail::enable_if_container<Container, variable>::type* = 0)
+      : data_expression(core::detail::gsMakeBinder(binding_operator, atermpp::convert<variable_list>(variables), body))
+    {}
 
-        /// \brief Iterator range over bound variables
-        typedef atermpp::term_list< variable > variables_const_range;
+    binder_type binding_operator() const
+    {
+      return atermpp::arg1(*this);
+    }
 
-        /// \brief Type for lambda abstracions
-        struct lambda : public detail::singleton_expression< abstraction::lambda, abstraction::binder_type > {
-          static atermpp::aterm_appl initialise() {
-            return core::detail::gsMakeLambda();
-          }
-        };
+    variable_list variables() const
+    {
+      return atermpp::list_arg2(*this);
+    }
 
-        /// \brief Type for universal quantifications
-        struct forall : public detail::singleton_expression< abstraction::forall, abstraction::binder_type > {
-          static atermpp::aterm_appl initialise() {
-            return core::detail::gsMakeForall();
-          }
-        };
+    data_expression body() const
+    {
+      return atermpp::arg3(*this);
+    }
+};
+//--- end generated class abstraction ---//
 
-        /// \brief Type for existential quantifications
-        struct exists : public detail::singleton_expression< abstraction::exists, abstraction::binder_type > {
-          static atermpp::aterm_appl initialise() {
-            return core::detail::gsMakeExists();
-          }
-        };
-
-      public:
-
-        /// Default constructor for abstraction (does not entail a
-        /// valid data expression.
-        ///
-        abstraction()
-          : data_expression(core::detail::constructBinder())
-        {}
-
-        /// Construct abstraction from a data expression.
-        /// \param[in] d a data expression
-        /// \pre d.is_abstraction()
-        abstraction(const data_expression& d)
-          : data_expression(d)
-        {
-          assert(d.is_abstraction());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] binding_operator The binding operator of the abstraction.
-        ///              This may be one of "lambda", "forall",
-        ///              "exists", "setcomprehension", "bagcomprehension".
-        /// \param[in] variables A nonempty list of binding variables (objects of type variable)
-        /// \param[in] body The body of the abstraction.
-        /// \pre binding_operator is one of "lambda", "forall", "exists",
-        ///      "setcomprehension" or "bagcomprehension".
-        /// \pre variables is not empty.
-        template < typename Container >
-        abstraction(const abstraction::binder_type& binding_operator,
-                    const Container& variables,
-                    const data_expression& body,
-                    typename detail::enable_if_container< Container, variable >::type* = 0)
-          : data_expression(core::detail::gsMakeBinder(binding_operator, convert< variable_list >(variables), body))
-        {
-          assert(!variables.empty());
-        }
-
-        /// \brief Returns the binding operator of the abstraction
-        inline
-        abstraction::binder_type binding_operator() const
-        {
-          return atermpp::arg1(*this);
-        }
-
-        /// \brief Returns the variables of the abstraction
-        inline
-        variables_const_range variables() const
-        {
-          return atermpp::list_arg2(*this);
-        }
-
-        /// \brief Returns the body of the abstraction
-        inline
-        data_expression body() const
-        {
-          return atermpp::arg3(*this);
-        }
-
-        /// \brief Returns true iff the binding operator is "lambda"
-        inline
-        bool is_lambda() const
-        {
-          return binding_operator() == abstraction::lambda();
-        }
-
-        /// \brief Returns true iff the binding operator is "forall"
-        inline
-        bool is_forall() const
-        {
-          return binding_operator() == abstraction::forall();
-        }
-
-        /// \brief Returns true iff the binding operator is "exists"
-        inline
-        bool is_exists() const
-        {
-          return binding_operator() == abstraction::exists();
-        }
-
-    }; // class abstraction
-
-  } // namespace data
+   } // namespace data
 
 } // namespace mcrl2
 

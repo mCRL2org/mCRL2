@@ -731,7 +731,7 @@ namespace squadt {
   /**
    * \param[in] s a path to a project file
    **/
-  bool project_manager::is_project_store(const boost::filesystem::path& s) {
+/*  bool project_manager::is_project_store(const boost::filesystem::path& s) {
     bool return_value = false;
 
     bf::path path_to(settings_manager::path_concatenate(s, settings_manager::project_definition_base_name));
@@ -749,7 +749,7 @@ namespace squadt {
     }
 
     return (return_value);
-  }
+  } */
 
   /**
    * \param d a description for this project

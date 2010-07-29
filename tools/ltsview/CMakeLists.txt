@@ -13,11 +13,14 @@ cmake_minimum_required(VERSION 2.6)
 if ( MCRL2_BUILD_GUI_TOOLS )
 
 # ######### General setup ##########
+set(MACOSX_BUNDLE_ICON_FILE ltsview.icns )
 
 # Sources:
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   cluster.cpp
+  color_interpolator.cpp
   conedb.cpp
+  fsm_state_positioner.cpp
   glcanvas.cpp
   infodialog.cpp
   lts.cpp
@@ -26,8 +29,10 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   markdialog.cpp
   markmanager.cpp
   markstateruledialog.cpp
+  mathutils.cpp
   primitivefactory.cpp
   primitives.cpp
+  rgb_color.cpp
   savepicdialog.cpp
   savevecdialog.cpp
   settings.cpp
@@ -37,10 +42,17 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   simulation.cpp
   state.cpp
   transition.cpp
-  utils.cpp
+  vectors.cpp
   visobjectfactory.cpp
   visualizer.cpp
+
+  ${MACOSX_BUNDLE_ICON_FILE}
 )
+
+IF (APPLE)
+ SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+ENDIF (APPLE)
+
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
@@ -57,16 +69,21 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 # actual target:
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
     tr
     gl2ps
   )
-else( MONO_LIB )
+
+  # ######### required for squadt connectivity ##########
+  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
+  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
+  # #####################################################
+
+else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
-  mcrl2_trace
   mcrl2_lts
   mcrl2_utilities_command_line
   mcrl2_utilities_wx
@@ -74,31 +91,18 @@ target_link_libraries(${PROJECT_NAME}
   gl2ps
 )
 
-# ######### required for squadt connectivity ##########
-if(SQUADT_CONNECTIVITY)
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
-  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_utilities_squadt
-  )
-endif(SQUADT_CONNECTIVITY)
-# #####################################################
+  #Add Squadt Connectivity when required
+  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
 
-endif( MONO_LIB )
+endif( MCRL2_MONO_LIB )
 
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 
-# install documentation
-if (MAN_PAGES)
-  add_custom_command(
-    OUTPUT ${PROJECT_NAME}.1
-    COMMAND ${PROJECT_NAME} --generate-man-page > ${PROJECT_NAME}.1
-    DEPENDS ${PROJECT_NAME}
-    COMMENT "Generating man page for ${PROJECT_NAME}"
-  )
-  add_custom_target(${PROJECT_NAME}_man_page ALL DEPENDS ${PROJECT_NAME}.1)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.1 DESTINATION share/man/man1)
-endif (MAN_PAGES)
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 endif ( MCRL2_BUILD_GUI_TOOLS )

@@ -140,12 +140,12 @@ namespace mcrl2 {
 
             if (i == m_implementation_context.end())
             { // implementation with previously generated function
-              atermpp::term_list< variable > bound_variables = convert< atermpp::term_list< variable > >(implement(expression.variables()));
+              atermpp::term_list< variable > bound_variables = atermpp::convert< atermpp::term_list< variable > >(implement(expression.variables()));
 
               if (!bound_variables.empty())
               { // function with non-empty domain
                 data_expression body(implement(expression.body()));
-                atermpp::term_list< variable > free_variables = convert< atermpp::term_list< variable > >(implement(find_free_variables(expression, bound_variables)));
+                atermpp::term_list< variable > free_variables = atermpp::convert< atermpp::term_list< variable > >(implement(find_free_variables(expression, bound_variables)));
 
                 function_sort   new_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
 
@@ -183,7 +183,7 @@ namespace mcrl2 {
             using namespace mcrl2::data::sort_set;
             using namespace mcrl2::data::sort_bag;
 
-            if (!expression.is_lambda())
+            if (!is_lambda(expression))
             {
               data_expression abstract_body(implement(lambda(expression.variables(), expression.body())));
 
@@ -195,13 +195,13 @@ namespace mcrl2 {
               {
                 return bagcomprehension(bag(expression.variables().begin()->sort()), abstract_body);
               }
-              else if (expression.is_exists())
+              else if (is_exists(expression))
               {
-                return application(function_symbol("exists", function_sort(abstract_body.sort(), sort_bool::bool_())), abstract_body);
+                return function_symbol("exists", make_function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
               }
-              else if (expression.is_forall())
+              else if (is_forall(expression))
               {
-                return application(function_symbol("forall", function_sort(abstract_body.sort(), sort_bool::bool_())), abstract_body);
+                return function_symbol("forall", make_function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
               }
             }
              
@@ -216,10 +216,10 @@ namespace mcrl2 {
           }
 
           template < typename Container >
-          boost::iterator_range< detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > >
-          implement(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          boost::iterator_range< atermpp::detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > >
+          implement(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
-            typedef detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > iterator_type;
+            typedef atermpp::detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > iterator_type;
 
             return boost::make_iterator_range(iterator_type(container.begin(), implementor(*this)),
                                               iterator_type(container.end(), implementor(*this)));
@@ -232,16 +232,21 @@ namespace mcrl2 {
 
           data_expression reconstruct(application const& expression)
           {
-            if (expression.head().is_function_symbol())
+            if (is_function_symbol(expression.head()))
             {
+              /* The code below is outcommented. Lambda terms, if they occur in processes
+                 will be handled properly with the new rewriter. Now application terms
+                 with "forall" and "exists" as terms can remain in the result. */
+  
               function_symbol head(expression.head());
 
+/*
               if (head.name() == "exists")
               {
                 data_expression argument_expression(reconstruct(*expression.arguments().begin()));
-                if(!argument_expression.is_abstraction())
+                if(!is_abstraction(argument_expression))
                 {
-                  throw mcrl2::runtime_error("Unexpected expression occurred in transforming existential quantification from rewriter format. "
+                  throw mcrl2::runtime_error("Unexpected expression " + argument_expression.to_string() + " occurred in transforming existential quantification from rewriter format. "
                                              "This is caused by the lack of proper support for abstraction in the rewriters.");
                 }
 
@@ -252,9 +257,9 @@ namespace mcrl2 {
               else if (head.name() == "forall")
               {
                 data_expression argument_expression(reconstruct(*expression.arguments().begin()));
-                if(!argument_expression.is_abstraction())
+                if(!is_abstraction(argument_expression))
                 {
-                  throw mcrl2::runtime_error("Unexpected expression occurred in transforming universal quantification from rewriter format. "
+                  throw mcrl2::runtime_error("Unexpected expression " + argument_expression.to_string() + " occurred in transforming universal quantification from rewriter format. "
                                              "This is caused by the lack of proper support for abstraction in the rewriters.");
                 }
 
@@ -262,16 +267,21 @@ namespace mcrl2 {
 
                 return forall(argument.variables(), argument.body());
               }
-            }
+            }*/
+
+              if ((head.name() == "exists") || (head.name() == "forall"))
+              { std::cerr << "Warning: quantified terms are not properly translated back from rewrite format\n";
+              } 
+            } 
 
             return application(reconstruct(expression.head()), reconstruct(expression.arguments()));
           }
 
           template < typename Container >
-          boost::iterator_range< detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > >
-          reconstruct(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          boost::iterator_range< atermpp::detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > >
+          reconstruct(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
-            typedef detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > iterator_type;
+            typedef atermpp::detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > iterator_type;
 
             return boost::make_iterator_range(iterator_type(container.begin(), reconstructor(*this)),
                                               iterator_type(container.end(), reconstructor(*this)));
@@ -279,7 +289,7 @@ namespace mcrl2 {
 
           data_expression reconstruct(data_expression const& expression)
           {
-            if (expression.is_function_symbol())
+            if (is_function_symbol(expression))
             {
               atermpp::map< data_expression, data_expression >::const_iterator i(m_reconstruction_context.find(expression));
 
@@ -288,7 +298,7 @@ namespace mcrl2 {
                 return i->second;
               }
             }
-            else if (expression.is_application())
+            else if (is_application(expression))
             {
               return reconstruct(application(expression));
             }
@@ -308,23 +318,23 @@ namespace mcrl2 {
 
           data_expression implement(data_expression const& expression)
           {
-            if (expression.is_application())
+            if (is_application(expression))
             {
               return implement(application(expression));
             }
-            else if (expression.is_variable())
+            else if (is_variable(expression))
             {
               return implement(variable(expression));
             }
-            else if (expression.is_function_symbol())
+            else if (is_function_symbol(expression))
             {
               return implement(function_symbol(expression));
             }
-            else if (expression.is_abstraction())
+            else if (is_abstraction(expression))
             {
               return implement(abstraction(expression));
             }
-            else if (expression.is_where_clause())
+            else if (is_where_clause(expression))
             {
               return implement(where_clause(expression));
             }
@@ -347,7 +357,7 @@ namespace mcrl2 {
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {
-            initialise(make_filter_iterator_range< EquationSelector& >(specification.equations(), selector));
+            initialise(atermpp::detail::make_filter_iterator_range< EquationSelector& >(specification.equations(), selector));
           }
 
           template < typename EquationSelector >
@@ -356,7 +366,7 @@ namespace mcrl2 {
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {
-            initialise(make_filter_iterator_range< EquationSelector const& >(specification.equations(), selector));
+            initialise(atermpp::detail::make_filter_iterator_range< EquationSelector const& >(specification.equations(), selector));
           }
       };
     } // namespace detail

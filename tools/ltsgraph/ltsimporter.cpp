@@ -19,8 +19,8 @@ Graph* LTSImporter::importFile(std::string fn)
 {
   Graph* result = new Graph();
 
-  lts fileLTS;
-  if(fileLTS.read_from(fn))
+  lts fileLTS(fn);
+  // if(fileLTS.read_from(fn))
   {
     unsigned int initialState = fileLTS.initial_state();
 
@@ -34,11 +34,11 @@ Graph* LTSImporter::importFile(std::string fn)
     }
 
 
-    for(state_iterator si = fileLTS.get_states(); si.more(); ++si)
+    for(unsigned int si = 0; si< fileLTS.num_states(); ++si)
     {
       std::map<std::string, std::string> stateValues;
 
-      unsigned int stNum = *si;
+      unsigned int stNum = si;
       State* s = new State(stNum,
                         stNum == initialState);
       result->addState(s);
@@ -77,8 +77,8 @@ Graph* LTSImporter::importFile(std::string fn)
 	  s->setZ(z);
     }
 
-    for(transition_iterator ti = fileLTS.get_transitions(); ti.more(); ++ti)
-    {
+    for(mcrl2::lts::transition_const_range r = fileLTS.get_transitions(); !r.empty(); r.advance_begin(1))
+    { const transition ti=r.front();
       unsigned int idFrom, idTo;
       State *stFrom, *stTo;
 
@@ -110,10 +110,6 @@ Graph* LTSImporter::importFile(std::string fn)
     int numTrans = fileLTS.num_transitions();
 
     result->setInfo(initialState, numStates, numTrans, numLabels);
-  }
-  else
-  {
-    //(CT) TODO: Error handling
   }
 
   return result;

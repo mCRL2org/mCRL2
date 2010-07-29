@@ -13,7 +13,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/basic_sort.h"
@@ -31,7 +31,7 @@ void data_equation_test()
   function_symbol c("c", s);
   function_symbol f("f", s);
   variable x("x", s);
-  variable_vector xl(make_vector(x));
+  variable_vector xl(atermpp::make_vector(x));
   boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl));
 
   data_equation e(xl_range, c, x, f);

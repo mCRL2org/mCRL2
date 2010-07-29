@@ -17,7 +17,7 @@
 #include <sstream>
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/find.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
@@ -89,7 +89,7 @@ class identifier_generator
     /// \brief Adds identifiers of term t to the context.
     /// \param t A term
     template <typename Term>
-    void add_to_context(Term t, typename detail::disable_if_container< Term >::type* = 0)
+    void add_to_context(Term t, typename atermpp::detail::disable_if_container< Term >::type* = 0)
     {
       std::set<core::identifier_string> s = core::find_identifiers(t);
       for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
@@ -101,7 +101,7 @@ class identifier_generator
     /// \brief Adds identifiers of term t to the context.
     /// \param t A container with terms
     template < typename Container >
-    void add_to_context(Container const& c, typename detail::enable_if_container< Container >::type* = 0)
+    void add_to_context(Container const& c, typename atermpp::detail::enable_if_container< Container >::type* = 0)
     {
       for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
       {

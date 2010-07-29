@@ -22,6 +22,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -42,14 +43,11 @@ using namespace mcrl2::utilities::tools;
 /// \brief tau-summands of an LPS are confluent. The tau-actions of all confluent tau-summands can be
 /// \brief renamed to ctau, depending on the flag m_no_marking.
 
-class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_tool> > >
+class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_output_tool> > >
 {
   protected:
 
-    typedef squadt_tool< prover_tool< rewriter_tool<input_tool> > > super;
-
-    /// \brief Name of the output file name
-    std::string m_output_filename;
+    typedef squadt_tool< prover_tool< rewriter_tool<input_output_tool> > > super;
 
     /// \brief The name of a file containing an invariant that is used to check confluence.
     /// \brief If this string is 0, the constant true is used as invariant.
@@ -93,12 +91,6 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_tool
     /// \brief The invariant provided as input.
     /// \brief If no invariant was provided, the constant true is used as invariant.
     data_expression m_invariant;
-
-    // Overload synopsis to cope with optional OUTFILE
-    std::string synopsis() const
-    {
-      return "[OPTION]...[INFILE [OUTFILE]]\n";
-    }
 
     void parse_options(const command_line_parser& parser)
     {
@@ -199,6 +191,15 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_tool
 
   bool run()
   {
+
+    if (core::gsVerbose)
+    {
+      std::cerr << "lpsconfcheck parameters:" << std::endl;
+      std::cerr << "  input file:         " << m_input_filename << std::endl;
+      std::cerr << "  output file:        " << m_output_filename << std::endl;
+      std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
+    }
+
     lps::specification specification;
 
     specification.load(m_input_filename);
@@ -435,8 +436,29 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_tool
 #endif
 };
 
+class lpsconfcheck_gui_tool: public mcrl2_gui_tool<confcheck_tool>
+{
+  public:
+	lpsconfcheck_gui_tool()
+    {
+      m_gui_options["check-all"] = create_checkbox_widget();
+      m_gui_options["counter-example"] = create_checkbox_widget();
+      m_gui_options["generate-invariants"] = create_checkbox_widget();
+      m_gui_options["invariant"] = create_filepicker_widget();
+      m_gui_options["no-marking"] = create_checkbox_widget();
+      m_gui_options["no-check"] = create_checkbox_widget();
+      m_gui_options["induction"] = create_checkbox_widget();
+      m_gui_options["print-dot"] = create_textctrl_widget();
+      add_rewriter_widget();
+      m_gui_options["summand"] = create_textctrl_widget();
+      m_gui_options["time-limit"] = create_textctrl_widget();
+      m_gui_options["smt-solver"] = create_textctrl_widget();
+    }
+};
+
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return confcheck_tool().execute(argc, argv);
+  return lpsconfcheck_gui_tool().execute(argc, argv);
 }

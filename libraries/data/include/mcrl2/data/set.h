@@ -23,7 +23,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/container_sort.h"
@@ -44,7 +44,7 @@ namespace mcrl2 {
       inline
       container_sort set_(const sort_expression& s)
       {
-        container_sort set_(container_sort::set_(), s);
+        container_sort set_(set_container(), s);
         return set_;
       }
 
@@ -55,23 +55,13 @@ namespace mcrl2 {
       inline
       bool is_set(const sort_expression& e)
       {
-        if (e.is_container_sort())
+        if (is_container_sort(e))
         {
-          return static_cast< container_sort >(e).container_type() == container_sort::set_();
+          return container_sort(e).container_name() == set_container();
         }
         return false;
       }
 
-      /// \brief Give all system defined constructors for set_
-      /// \param s A sort expression
-      /// \return All system defined constructors for set_
-      inline
-      function_symbol_vector set_generate_constructors_code(const sort_expression& s)
-      {
-        function_symbol_vector result;
-        static_cast< void >(s); // suppress unused variable warnings
-        return result;
-      }
       /// \brief Generate identifier \@set
       /// \return Identifier \@set
       inline
@@ -87,7 +77,7 @@ namespace mcrl2 {
       inline
       function_symbol setconstructor(const sort_expression& s)
       {
-        function_symbol setconstructor(setconstructor_name(), function_sort(function_sort(s, sort_bool::bool_()), sort_fset::fset(s), set_(s)));
+        function_symbol setconstructor(setconstructor_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), sort_fset::fset(s), set_(s)));
         return setconstructor;
       }
 
@@ -113,7 +103,7 @@ namespace mcrl2 {
       inline
       application setconstructor(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setconstructor(s),arg0, arg1);
+        return setconstructor(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@set
@@ -125,11 +115,22 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setconstructor_function_symbol(static_cast< application >(e).head());
+          return is_setconstructor_function_symbol(application(e).head());
         }
         return false;
       }
 
+      /// \brief Give all system defined constructors for set_
+      /// \param s A sort expression
+      /// \return All system defined constructors for set_
+      inline
+      function_symbol_vector set_generate_constructors_code(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(setconstructor(s));
+
+        return result;
+      }
       /// \brief Generate identifier {}
       /// \return Identifier {}
       inline
@@ -178,7 +179,7 @@ namespace mcrl2 {
       inline
       function_symbol setfset(const sort_expression& s)
       {
-        function_symbol setfset(setfset_name(), function_sort(sort_fset::fset(s), set_(s)));
+        function_symbol setfset(setfset_name(), make_function_sort(sort_fset::fset(s), set_(s)));
         return setfset;
       }
 
@@ -203,7 +204,7 @@ namespace mcrl2 {
       inline
       application setfset(const sort_expression& s, const data_expression& arg0)
       {
-        return application(setfset(s),arg0);
+        return setfset(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@setfset
@@ -215,7 +216,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setfset_function_symbol(static_cast< application >(e).head());
+          return is_setfset_function_symbol(application(e).head());
         }
         return false;
       }
@@ -235,7 +236,7 @@ namespace mcrl2 {
       inline
       function_symbol setcomprehension(const sort_expression& s)
       {
-        function_symbol setcomprehension(setcomprehension_name(), function_sort(function_sort(s, sort_bool::bool_()), set_(s)));
+        function_symbol setcomprehension(setcomprehension_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), set_(s)));
         return setcomprehension;
       }
 
@@ -260,7 +261,7 @@ namespace mcrl2 {
       inline
       application setcomprehension(const sort_expression& s, const data_expression& arg0)
       {
-        return application(setcomprehension(s),arg0);
+        return setcomprehension(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@setcomp
@@ -272,7 +273,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setcomprehension_function_symbol(static_cast< application >(e).head());
+          return is_setcomprehension_function_symbol(application(e).head());
         }
         return false;
       }
@@ -292,7 +293,7 @@ namespace mcrl2 {
       inline
       function_symbol setin(const sort_expression& s)
       {
-        function_symbol setin(setin_name(), function_sort(s, set_(s), sort_bool::bool_()));
+        function_symbol setin(setin_name(), make_function_sort(s, set_(s), sort_bool::bool_()));
         return setin;
       }
 
@@ -318,7 +319,7 @@ namespace mcrl2 {
       inline
       application setin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setin(s),arg0, arg1);
+        return setin(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of in
@@ -330,7 +331,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setin_function_symbol(static_cast< application >(e).head());
+          return is_setin_function_symbol(application(e).head());
         }
         return false;
       }
@@ -350,7 +351,7 @@ namespace mcrl2 {
       inline
       function_symbol setcomplement(const sort_expression& s)
       {
-        function_symbol setcomplement(setcomplement_name(), function_sort(set_(s), set_(s)));
+        function_symbol setcomplement(setcomplement_name(), make_function_sort(set_(s), set_(s)));
         return setcomplement;
       }
 
@@ -375,7 +376,7 @@ namespace mcrl2 {
       inline
       application setcomplement(const sort_expression& s, const data_expression& arg0)
       {
-        return application(setcomplement(s),arg0);
+        return setcomplement(s)(arg0);
       }
 
       /// \brief Recogniser for application of !
@@ -387,7 +388,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setcomplement_function_symbol(static_cast< application >(e).head());
+          return is_setcomplement_function_symbol(application(e).head());
         }
         return false;
       }
@@ -407,7 +408,7 @@ namespace mcrl2 {
       inline
       function_symbol setunion_(const sort_expression& s)
       {
-        function_symbol setunion_(setunion_name(), function_sort(set_(s), set_(s), set_(s)));
+        function_symbol setunion_(setunion_name(), make_function_sort(set_(s), set_(s), set_(s)));
         return setunion_;
       }
 
@@ -433,7 +434,7 @@ namespace mcrl2 {
       inline
       application setunion_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setunion_(s),arg0, arg1);
+        return setunion_(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -445,7 +446,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setunion_function_symbol(static_cast< application >(e).head());
+          return is_setunion_function_symbol(application(e).head());
         }
         return false;
       }
@@ -465,7 +466,7 @@ namespace mcrl2 {
       inline
       function_symbol setintersection(const sort_expression& s)
       {
-        function_symbol setintersection(setintersection_name(), function_sort(set_(s), set_(s), set_(s)));
+        function_symbol setintersection(setintersection_name(), make_function_sort(set_(s), set_(s), set_(s)));
         return setintersection;
       }
 
@@ -491,7 +492,7 @@ namespace mcrl2 {
       inline
       application setintersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setintersection(s),arg0, arg1);
+        return setintersection(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -503,7 +504,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setintersection_function_symbol(static_cast< application >(e).head());
+          return is_setintersection_function_symbol(application(e).head());
         }
         return false;
       }
@@ -523,7 +524,7 @@ namespace mcrl2 {
       inline
       function_symbol setdifference(const sort_expression& s)
       {
-        function_symbol setdifference(setdifference_name(), function_sort(set_(s), set_(s), set_(s)));
+        function_symbol setdifference(setdifference_name(), make_function_sort(set_(s), set_(s), set_(s)));
         return setdifference;
       }
 
@@ -549,7 +550,7 @@ namespace mcrl2 {
       inline
       application setdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(setdifference(s),arg0, arg1);
+        return setdifference(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -561,7 +562,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_setdifference_function_symbol(static_cast< application >(e).head());
+          return is_setdifference_function_symbol(application(e).head());
         }
         return false;
       }
@@ -581,7 +582,7 @@ namespace mcrl2 {
       inline
       function_symbol false_function(const sort_expression& s)
       {
-        function_symbol false_function(false_function_name(), function_sort(s, sort_bool::bool_()));
+        function_symbol false_function(false_function_name(), make_function_sort(s, sort_bool::bool_()));
         return false_function;
       }
 
@@ -606,7 +607,7 @@ namespace mcrl2 {
       inline
       application false_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(false_function(s),arg0);
+        return false_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@false_
@@ -618,7 +619,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_false_function_function_symbol(static_cast< application >(e).head());
+          return is_false_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -638,7 +639,7 @@ namespace mcrl2 {
       inline
       function_symbol true_function(const sort_expression& s)
       {
-        function_symbol true_function(true_function_name(), function_sort(s, sort_bool::bool_()));
+        function_symbol true_function(true_function_name(), make_function_sort(s, sort_bool::bool_()));
         return true_function;
       }
 
@@ -663,7 +664,7 @@ namespace mcrl2 {
       inline
       application true_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(true_function(s),arg0);
+        return true_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@true_
@@ -675,7 +676,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_true_function_function_symbol(static_cast< application >(e).head());
+          return is_true_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -695,7 +696,7 @@ namespace mcrl2 {
       inline
       function_symbol not_function(const sort_expression& s)
       {
-        function_symbol not_function(not_function_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_())));
+        function_symbol not_function(not_function_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_())));
         return not_function;
       }
 
@@ -720,7 +721,7 @@ namespace mcrl2 {
       inline
       application not_function(const sort_expression& s, const data_expression& arg0)
       {
-        return application(not_function(s),arg0);
+        return not_function(s)(arg0);
       }
 
       /// \brief Recogniser for application of \@not_
@@ -732,7 +733,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_not_function_function_symbol(static_cast< application >(e).head());
+          return is_not_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -752,7 +753,7 @@ namespace mcrl2 {
       inline
       function_symbol and_function(const sort_expression& s)
       {
-        function_symbol and_function(and_function_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_())));
+        function_symbol and_function(and_function_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_())));
         return and_function;
       }
 
@@ -778,7 +779,7 @@ namespace mcrl2 {
       inline
       application and_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(and_function(s),arg0, arg1);
+        return and_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@and_
@@ -790,7 +791,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_and_function_function_symbol(static_cast< application >(e).head());
+          return is_and_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -810,7 +811,7 @@ namespace mcrl2 {
       inline
       function_symbol or_function(const sort_expression& s)
       {
-        function_symbol or_function(or_function_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_())));
+        function_symbol or_function(or_function_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_())));
         return or_function;
       }
 
@@ -836,7 +837,7 @@ namespace mcrl2 {
       inline
       application or_function(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(or_function(s),arg0, arg1);
+        return or_function(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@or_
@@ -848,7 +849,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_or_function_function_symbol(static_cast< application >(e).head());
+          return is_or_function_function_symbol(application(e).head());
         }
         return false;
       }
@@ -860,7 +861,6 @@ namespace mcrl2 {
       function_symbol_vector set_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(setconstructor(s));
         result.push_back(emptyset(s));
         result.push_back(setfset(s));
         result.push_back(setcomprehension(s));
@@ -922,45 +922,44 @@ namespace mcrl2 {
         variable vd("d",s);
         variable vs("s",sort_fset::fset(s));
         variable vt("t",sort_fset::fset(s));
-        variable vf("f",function_sort(s, sort_bool::bool_()));
-        variable vg("g",function_sort(s, sort_bool::bool_()));
+        variable vf("f",make_function_sort(s, sort_bool::bool_()));
+        variable vg("g",make_function_sort(s, sort_bool::bool_()));
         variable vx("x",set_(s));
         variable vy("y",set_(s));
         variable vc("c",s);
 
         data_equation_vector result;
         result.push_back(data_equation(variable_list(), emptyset(s), setconstructor(s, false_function(s), sort_fset::fset_empty(s))));
-        result.push_back(data_equation(make_vector(vs), setfset(s, vs), setconstructor(s, false_function(s), vs)));
-        result.push_back(data_equation(make_vector(vf), setcomprehension(s, vf), setconstructor(s, vf, sort_fset::fset_empty(s))));
-        result.push_back(data_equation(make_vector(ve, vf, vs), setin(s, ve, setconstructor(s, vf, vs)), not_equal_to(vf(ve), sort_fset::fsetin(s, ve, vs))));
-        result.push_back(data_equation(make_vector(vf, vg, vs, vt), equal_to(vf, vg), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), equal_to(vs, vt)));
-        result.push_back(data_equation(make_vector(vf, vg, vs, vt), not_equal_to(vf, vg), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), forall(make_vector(vc), equal_to(setin(s, vc, setconstructor(s, vf, vs)), setin(s, vc, setconstructor(s, vg, vt))))));
-        result.push_back(data_equation(make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
-        result.push_back(data_equation(make_vector(vf, vg, vs, vt), equal_to(vf, vg), less_equal(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), sort_fset::fsetlte(s, vf, vs, vt)));
-        result.push_back(data_equation(make_vector(vf, vg, vs, vt), not_equal_to(vf, vg), less_equal(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), forall(make_vector(vc), sort_bool::implies(setin(s, vc, setconstructor(s, vf, vs)), setin(s, vc, setconstructor(s, vg, vt))))));
-        result.push_back(data_equation(make_vector(vf, vs), setcomplement(s, setconstructor(s, vf, vs)), setconstructor(s, not_function(s, vf), vs)));
-        result.push_back(data_equation(make_vector(vf, vg, vs, vt), setunion_(s, setconstructor(s, vf, vs), setconstructor(s, vg, vt)), setconstructor(s, or_function(s, vf, vg), sort_fset::fsetunion(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(make_vector(vf, vg, vs, vt), setintersection(s, setconstructor(s, vf, vs), setconstructor(s, vg, vt)), setconstructor(s, and_function(s, vf, vg), sort_fset::fsetintersection(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(make_vector(vx, vy), setdifference(s, vx, vy), setintersection(s, vx, setcomplement(s, vy))));
-        result.push_back(data_equation(make_vector(ve), false_function(s, ve), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(ve), true_function(s, ve), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vs), setfset(s, vs), setconstructor(s, false_function(s), vs)));
+        result.push_back(data_equation(atermpp::make_vector(vf), setcomprehension(s, vf), setconstructor(s, vf, sort_fset::fset_empty(s))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vs), setin(s, ve, setconstructor(s, vf, vs)), not_equal_to(vf(ve), sort_fset::fsetin(s, ve, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), equal_to(vf, vg), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), equal_to(vs, vt)));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), not_equal_to(vf, vg), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), forall(atermpp::make_vector(vc), equal_to(setin(s, vc, setconstructor(s, vf, vs)), setin(s, vc, setconstructor(s, vg, vt))))));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(setintersection(s, vx, vy), vx)));
+        result.push_back(data_equation(atermpp::make_vector(vf, vs), setcomplement(s, setconstructor(s, vf, vs)), setconstructor(s, not_function(s, vf), vs)));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), setunion_(s, setconstructor(s, vf, vs), setconstructor(s, vg, vt)), setconstructor(s, or_function(s, vf, vg), sort_fset::fsetunion(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), setintersection(s, setconstructor(s, vf, vs), setconstructor(s, vg, vt)), setconstructor(s, and_function(s, vf, vg), sort_fset::fsetintersection(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), setdifference(s, vx, vy), setintersection(s, vx, setcomplement(s, vy))));
+        result.push_back(data_equation(atermpp::make_vector(ve), false_function(s, ve), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(ve), true_function(s, ve), sort_bool::true_()));
         result.push_back(data_equation(variable_list(), equal_to(false_function(s), true_function(s)), sort_bool::false_()));
         result.push_back(data_equation(variable_list(), equal_to(true_function(s), false_function(s)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(ve, vf), not_function(s, vf)(ve), sort_bool::not_(vf(ve))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf), not_function(s, vf)(ve), sort_bool::not_(vf(ve))));
         result.push_back(data_equation(variable_list(), not_function(s, false_function(s)), true_function(s)));
         result.push_back(data_equation(variable_list(), not_function(s, true_function(s)), false_function(s)));
-        result.push_back(data_equation(make_vector(ve, vf, vg), and_function(s, vf, vg)(ve), sort_bool::and_(vf(ve), vg(ve))));
-        result.push_back(data_equation(make_vector(vf), and_function(s, vf, vf), vf));
-        result.push_back(data_equation(make_vector(vf), and_function(s, vf, false_function(s)), false_function(s)));
-        result.push_back(data_equation(make_vector(vf), and_function(s, false_function(s), vf), false_function(s)));
-        result.push_back(data_equation(make_vector(vf), and_function(s, vf, true_function(s)), vf));
-        result.push_back(data_equation(make_vector(vf), and_function(s, true_function(s), vf), vf));
-        result.push_back(data_equation(make_vector(ve, vf, vg), or_function(s, vf, vg)(ve), sort_bool::or_(vf(ve), vg(ve))));
-        result.push_back(data_equation(make_vector(vf), or_function(s, vf, vf), vf));
-        result.push_back(data_equation(make_vector(vf), or_function(s, vf, false_function(s)), vf));
-        result.push_back(data_equation(make_vector(vf), or_function(s, false_function(s), vf), vf));
-        result.push_back(data_equation(make_vector(vf), or_function(s, vf, true_function(s)), true_function(s)));
-        result.push_back(data_equation(make_vector(vf), or_function(s, true_function(s), vf), true_function(s)));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg), and_function(s, vf, vg)(ve), sort_bool::and_(vf(ve), vg(ve))));
+        result.push_back(data_equation(atermpp::make_vector(vf), and_function(s, vf, vf), vf));
+        result.push_back(data_equation(atermpp::make_vector(vf), and_function(s, vf, false_function(s)), false_function(s)));
+        result.push_back(data_equation(atermpp::make_vector(vf), and_function(s, false_function(s), vf), false_function(s)));
+        result.push_back(data_equation(atermpp::make_vector(vf), and_function(s, vf, true_function(s)), vf));
+        result.push_back(data_equation(atermpp::make_vector(vf), and_function(s, true_function(s), vf), vf));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg), or_function(s, vf, vg)(ve), sort_bool::or_(vf(ve), vg(ve))));
+        result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, vf, vf), vf));
+        result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, vf, false_function(s)), vf));
+        result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, false_function(s), vf), vf));
+        result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, vf, true_function(s)), true_function(s)));
+        result.push_back(data_equation(atermpp::make_vector(vf), or_function(s, true_function(s), vf), true_function(s)));
         return result;
       }
 

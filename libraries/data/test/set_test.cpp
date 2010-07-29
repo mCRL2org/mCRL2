@@ -56,7 +56,7 @@ void set_expression_test()
   variable_vector v;
   v.push_back(parse_variable("s:Set(Nat)"));
 
-  test_data_expression("{x : Nat | x < 10}", v, is_setcomprehension_application);
+  test_data_expression("{x : Nat | x < 10}", v, is_setconstructor_application);
   test_data_expression("!s", v, is_setcomplement_application);
   test_data_expression("s * {1,2,3}", v, is_setintersection_application);
   test_data_expression("s - {3,1,2}", v, is_setdifference_application);

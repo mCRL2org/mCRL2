@@ -94,6 +94,7 @@ typedef unsigned int flex_uint32_t;
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 /* end standard C++ headers. */
@@ -638,7 +639,7 @@ int mcrl2yyFlexLexer::yylex(void) { return 1; }
 
 mcrl2_lexer *an_mcrl2_lexer = NULL;       /* lexer object, used by parse_streams */
 
-#line 642 "mcrl2lexer.cpp"
+#line 643 "mcrl2lexer.cpp"
 
 #define INITIAL 0
 
@@ -741,7 +742,7 @@ YY_DECL
 #line 73 "mcrl2lexer.ll"
 
 
-#line 745 "mcrl2lexer.cpp"
+#line 746 "mcrl2lexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -1318,7 +1319,7 @@ YY_RULE_SETUP
 #line 188 "mcrl2lexer.ll"
 ECHO;
 	YY_BREAK
-#line 1322 "mcrl2lexer.cpp"
+#line 1323 "mcrl2lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

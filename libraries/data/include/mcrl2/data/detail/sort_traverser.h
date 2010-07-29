@@ -24,10 +24,10 @@ namespace mcrl2 {
     namespace detail {
 
       template < typename Derived >
-      class sort_traverser : public traverser< Derived >
+      class sort_traverser : public detail::traverser< Derived >
       {
         public:
-          typedef traverser< Derived > super;
+          typedef detail::traverser< Derived > super;
 
           template < typename Expression >
           void enter(Expression const&)
@@ -109,19 +109,19 @@ namespace mcrl2 {
 
           void operator()(sort_expression const& e)
           {
-            if (e.is_basic_sort())
+            if (is_basic_sort(e))
             {
               static_cast< Derived& >(*this)(basic_sort(e));
             }
-            else if (e.is_container_sort())
+            else if (is_container_sort(e))
             {
               static_cast< Derived& >(*this)(container_sort(e));
             }
-            else if (e.is_structured_sort())
+            else if (is_structured_sort(e))
             {
               static_cast< Derived& >(*this)(structured_sort(e));
             }
-            else if (e.is_function_sort())
+            else if (is_function_sort(e))
             {
               static_cast< Derived& >(*this)(function_sort(e));
             }
@@ -137,7 +137,24 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).leave(e);
           }
 
+          void operator()(assignment_expression const& a)
+          {
+            if(is_assignment(a))
+            {
+              return static_cast< Derived& >(*this)(assignment(a));
+            }
+            else if(is_identifier_assignment(a))
+            {
+              return static_cast< Derived& >(*this)(identifier_assignment(a));
+            }
+          }
+
           void operator()(assignment const& a)
+          {
+            static_cast< super& >(*this)(a);
+          }
+
+          void operator()(identifier_assignment const& a)
           {
             static_cast< super& >(*this)(a);
           }
@@ -174,7 +191,7 @@ namespace mcrl2 {
           }
 
           template < typename Expression >
-          void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          void operator()(Expression const& e, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           {
             static_cast< super& >(*this)(e);
           }

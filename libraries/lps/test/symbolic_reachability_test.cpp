@@ -9,7 +9,7 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
@@ -118,7 +118,7 @@ void group_information::gather(mcrl2::lps::specification const& l) {
   std::set< variable > parameters = find_variables(specification.process_parameters());
 
   // the list of summands
-  std::vector< lps::summand > summands = data::convert<std::vector<lps::summand> >(specification.summands());
+  std::vector< lps::summand > summands = atermpp::convert<std::vector<lps::summand> >(specification.summands());
 
   m_group_indices.resize(summands.size());
 

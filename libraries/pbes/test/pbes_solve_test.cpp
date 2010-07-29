@@ -111,25 +111,46 @@ std::string test13 =
     "pbes mu X=exists x:Nat.val(x<3 => x==1);"
     "init X;";
 
+// Problematic case found by random pbes tests
+std::string test14 =
+  "pbes nu X0 = X2;        \n"
+  "      nu X1 = X2;       \n"
+  "      mu X2 = X3 && X1; \n"
+  "      mu X3 = X1;       \n"
+  "                        \n"
+  "init X0;                \n"
+  ;
+
+// Problematic case found by random pbes tests
+std::string test15 =
+  "pbes                                                                                                                                                                                                                                                                                                                                                                                                      \n"
+  "nu X0(m:Nat, b:Bool) = (((forall m:Nat.((val(m < 3)) && (forall n:Nat.((val(n < 3)) && (val(m < 3)))))) || ((!X2) || (val(m > 1)))) => ((!(!X1)) || (X0(m + 1, m > 1)))) && ((val(m > 1)) || (!(val(b))));                                                                                                                                                                                                \n"
+  "nu X1 = (forall n:Nat.((val(n < 3)) && ((!((forall m:Nat.((val(m < 3)) && (!(forall m:Nat.((val(m < 3)) && (val(n < 3))))))) && (val(false)))) && (!(!((forall m:Nat.((val(m < 3)) && ((forall k:Nat.((val(k < 3)) && (val(m < 2)))) => (forall k:Nat.((val(k < 3)) && (!X4)))))) && (!((!X3) => (forall k:Nat.((val(k < 3)) && (X1))))))))))) => (forall k:Nat.((val(k < 3)) && (val(false))));          \n"
+  "nu X2 = (forall n:Nat.((val(n < 3)) && (forall n:Nat.((val(n < 3)) && (val(n < 2)))))) => ((!(!((val(false)) => (X2)))) && (((!X0(0, true)) => ((val(false)) && (X1))) && (forall m:Nat.((val(m < 3)) && (val(true))))));                                                                                                                                                                                 \n"
+  "nu X3 = (forall m:Nat.((val(m < 3)) && (forall n:Nat.((val(n < 3)) && (exists n:Nat.((val(n < 3)) || ((forall k:Nat.((val(k < 3)) && (val(k < 2)))) && ((val(n > 1)) || (exists k:Nat.((val(k < 3)) || ((exists m:Nat.((val(m < 3)) || (!(val(m < 3))))) || (X4)))))))))))) || (!(!(exists n:Nat.((val(n < 3)) || (exists k:Nat.((val(k < 3)) || ((!(X0(k + 1, k < 3))) => ((X3) || (val(k < 3)))))))))); \n"
+  "nu X4 = (((val(false)) || ((X1) && (val(true)))) || (forall k:Nat.((val(k < 3)) && ((val(k > 1)) && (X2))))) || ((forall k:Nat.((val(k < 3)) && (!(X0(0, k > 1))))) => (forall m:Nat.((val(m < 3)) && (val(false)))));                                                                                                                                                                                    \n"
+  "                                                                                                                                                                                                                                                                                                                                                                                                          \n"
+  "init X0(0, true);                                                                                                                                                                                                                                                                                                                                                                                         \n"
+  ;
 
 // N.B. The test cases below should not terminate, since they correspond
 // to infinite BESs.
 // TODO: Test that no solution for these cases is found within a certain number of steps.
-std::string test14 =
-    "pbes mu X(n: Nat) = X(n + 1) \n"
-    "init X(0);                   \n"
-    ;
-
-std::string test15 =
-    "pbes mu X(n: Nat) = X(n + 1) || forall n: Nat. val(n < 3); \n"
-    "init X(0);                                                 \n"
-    ;
-
-// Test case supplied by Jan Friso
-std::string test16 =
-    "pbes mu X(n: Nat) = (n<3 && X(n + 1)) || forall n: Nat. val(n<3); \n"
-    "init X(0);                                                        \n"
-    ;
+//std::string test =
+//    "pbes mu X(n: Nat) = X(n + 1) \n"
+//    "init X(0);                   \n"
+//    ;
+//
+//std::string test =
+//    "pbes mu X(n: Nat) = X(n + 1) || forall n: Nat. val(n < 3); \n"
+//    "init X(0);                                                 \n"
+//    ;
+//
+//// Test case supplied by Jan Friso
+//std::string test =
+//    "pbes mu X(n: Nat) = (n<3 && X(n + 1)) || forall n: Nat. val(n<3); \n"
+//    "init X(0);                                                        \n"
+//    ;
 
 void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
 {
@@ -199,6 +220,8 @@ void test_all()
   test_pbes_solve(test11, true);
   test_pbes_solve(test12, false);
   test_pbes_solve(test13, true);
+  test_pbes_solve(test14, true);
+  test_pbes_solve(test15, false);
 }
 
 int test_main(int argc, char** argv)

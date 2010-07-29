@@ -1,7 +1,7 @@
 [library ATerm++ Library
     [quickbook 1.4]
     [authors [Wesselink, Wieger]]
-    [Copyright 2005-2010 Technische Universiteit Eindhoven]
+    [copyright 2005-2010 Technische Universiteit Eindhoven]
     [category string-text]
     [purpose
         A C++ layer for the ATerm Library.

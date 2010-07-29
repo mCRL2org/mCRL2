@@ -14,14 +14,13 @@ TRAVERSE_FUNCTION = r'''void operator()(const QUALIFIED_NODE& x)
 }
 '''
 
-def make_traverser_inc_file(filename, text, expression_class = None, expression_text = None):
+def make_traverser_inc_file(filename, class_text, expression_class = None, expression_text = None):
     result = []
-    classes = parse_classes(text)
+    classes = parse_classes(class_text)
     for c in classes:
-        (aterm, constructor, description) = c
-        f = FunctionDeclaration(constructor)
-        print 'generating traverse functions for class', f.name()
-        visit_functions = []
+        print 'generating traverse functions for class', c.name()
+        f = c.constructor
+        visit_functions = []       
         for p in f.parameters():
             #----------------------------------------------------------------------------------------#
             # N.B. The data traverser skips data_specification, so it needs to be done here too!
@@ -43,8 +42,7 @@ def make_traverser_inc_file(filename, text, expression_class = None, expression_
         classes = parse_classes(expression_text)
         visit_functions = []
         for c in classes:
-            (aterm, constructor, description) = c
-            f = FunctionDeclaration(constructor)
+            f = c.constructor
             visit_functions.append('if (%sis_%s(x)) { static_cast<Derived&>(*this)(%s(x)); }' % (f.qualifier(), f.name(), f.qualified_name()))
         vtext = '\n  ' + '\n  else '.join(visit_functions)
         ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
@@ -63,7 +61,8 @@ PROCESS_ADDITIONAL_CLASSES = '''
 ActId | lps::action_label(const core::identifier_string& name, const data::sort_expression_list& sorts) | An action label
 '''
 
-#make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, 'process_expression', PROCESS_EXPRESSION_CLASSES)
-#make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES)
-#make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
-make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/traverser.inc.h', STATE_FORMULA_CLASSES)
+if __name__ == "__main__":
+    make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, 'process_expression', PROCESS_EXPRESSION_CLASSES)
+    make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES)
+    make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/traverser.inc.h', STATE_FORMULA_CLASSES)

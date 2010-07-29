@@ -167,7 +167,7 @@ namespace detail {
     /// \brief Visit not node
     /// \param e A term
     /// \return The result of visiting the node
-    bool visit_not(const term_type& e, const term_type& /* arg */)
+    bool visit_not(const term_type& /* e */, const term_type& /* arg */)
     {
       throw std::runtime_error("operation not should not occur");
       return super::continue_recursion;
@@ -238,7 +238,7 @@ namespace detail {
     /// \brief Visit imp node
     /// \param e A term
     /// \return The result of visiting the node
-    bool visit_imp(const term_type& e, const term_type& /* left */, const term_type& /* right */)
+    bool visit_imp(const term_type& /* e */, const term_type& /* left */, const term_type& /* right */)
     {
       throw std::runtime_error("operation imp should not occur");
       return super::continue_recursion;
@@ -248,7 +248,7 @@ namespace detail {
     /// \param e A term
     /// \param variables A sequence of variables
     /// \return The result of visiting the node
-    bool visit_forall(const term_type& e, const variable_sequence_type& variables, const term_type& /* expression */)
+    bool visit_forall(const term_type& /* e */, const variable_sequence_type& variables, const term_type& /* expression */)
     {
       quantifier_stack.push_back(variables);
       return super::continue_recursion;
@@ -266,7 +266,7 @@ namespace detail {
     /// \param e A term
     /// \param variables A sequence of variables
     /// \return The result of visiting the node
-    bool visit_exists(const term_type& e, const variable_sequence_type& variables, const term_type& /* expression */)
+    bool visit_exists(const term_type& /* e */, const variable_sequence_type& variables, const term_type& /* expression */)
     {
       quantifier_stack.push_back(variables);
       return super::continue_recursion;
@@ -284,7 +284,7 @@ namespace detail {
     /// \param e A term
     /// \param X A propositional variable
     /// \return The result of visiting the node
-    bool visit_propositional_variable(const term_type& e, const propositional_variable_type& X)
+    bool visit_propositional_variable(const term_type& /* e */, const propositional_variable_type& X)
     {
       // push the propositional variable on the expression stack
       std::vector<quantifier> q;

@@ -8,6 +8,7 @@
 %
 % Specification of the FBag data sort, denoting finite bags.
 
+#using S
 #include bool.spec
 #include pos.spec
 #include nat.spec

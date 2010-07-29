@@ -9,8 +9,8 @@
 /// \file ./colleague.h
 
 // ------------------------------------------------------------------
-// This is the BASE CLASS from which all colleages inheret and
-// provides acces to a single Mediator. This allows for the
+// This is the BASE CLASS from which all colleagues inherit and
+// provides access to a single Mediator. This allows for the
 // implementation of a MEDIATOR design pattern where an instance of
 // Mediator serves as the mediator or controller.
 // ------------------------------------------------------------------
@@ -25,7 +25,7 @@
 class Colleague
 {
 public:
-    // -- contstructors and destructors -----------------------------
+    // -- constructors and destructors -----------------------------
     Colleague( Mediator* m );
     Colleague( const Colleague &colleague );
     virtual ~Colleague();

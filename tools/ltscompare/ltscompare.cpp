@@ -13,10 +13,15 @@
 
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_algorithm.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/exception.h"
+
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace std;
 using namespace mcrl2::lts;
@@ -77,22 +82,55 @@ static const std::set<lts_equivalence> &allowed_eqs()
   return s;
 }
 
-struct t_tool_options {
+struct t_tool_options 
+{
+  // defaults
+  t_tool_options():
+    name_for_first(""),
+    name_for_second(""),
+    format_for_first(lts_none),
+    format_for_second(lts_none),
+    equivalence(lts_eq_none),
+    preorder(lts_pre_none),
+    generate_counter_examples(false)
+  {}
+
   std::string     name_for_first;
   std::string     name_for_second;
   lts_type        format_for_first;
   lts_type        format_for_second;
   lts_equivalence equivalence;
   lts_preorder    preorder;
-  lts_eq_options  eq_opts;
   std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
+  bool generate_counter_examples;
 };
 
-typedef tool ltscompare_base;
+typedef squadt_tool< input_tool > ltscompare_base;
 class ltscompare_tool : public ltscompare_base
 {
   private:
     t_tool_options tool_options;
+
+    // Check whether preconditions w.r.t. equivalence and pre-order are satisfied.
+    // This is needed to make sure wrappers can call this tool without the --help,
+    // --equivalence or --preorder options
+    void check_preconditions()
+    {
+      if(tool_options.equivalence != lts_eq_none && tool_options.preorder != lts_pre_none)
+      {
+        throw mcrl2::runtime_error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
+      }
+
+      if (tool_options.equivalence == lts_eq_none && tool_options.preorder == lts_pre_none)
+      {
+        throw mcrl2::runtime_error("one of the options -e/--equivalence and -p/--preorder must be used");
+      }
+
+      if (tool_options.name_for_first.empty() && tool_options.name_for_second.empty())
+      {
+        throw mcrl2::runtime_error("too few file arguments");
+      }
+    }
 
   public:
     ltscompare_tool() :
@@ -104,33 +142,55 @@ class ltscompare_tool : public ltscompare_base
         "The input formats are determined by the contents of INFILE1 and INFILE2. "
         "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
         "The supported formats are:\n"
-        +lts::supported_lts_formats_text()
+        + mcrl2::lts::detail::supported_lts_formats_text()
       )
     {
     }
 
     bool run()
     {
+      check_preconditions();
+
       lts l1,l2;
 
-      if ( tool_options.name_for_first.empty() ) {
+      if ( tool_options.name_for_first.empty() ) 
+      {
         gsVerboseMsg("reading first LTS from stdin...\n");
-
-        if ( !l1.read_from(std::cin, tool_options.format_for_first) ) {
-          throw mcrl2::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
+        try
+        {
+           mcrl2::lts::detail::read_from(l1,std::cin, tool_options.format_for_first);
         }
-      } else {
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string("cannot read LTS from stdin\nretry with -v/--verbose for more information.\n")
+                                        + e.what());
+        }
+      } 
+      else 
+      {
         gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
 
-        if ( !l1.read_from(tool_options.name_for_first, tool_options.format_for_first) ) {
-          throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
+        try
+        { 
+           mcrl2::lts::detail::read_from(l1,tool_options.name_for_first, tool_options.format_for_first);
+        }
+        catch (mcrl2::runtime_error &e)
+        { 
+          throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + 
+                   "'\nretry with -v/--verbose for more information.\n" + e.what());
         }
       }
 
       gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
 
-      if ( !l2.read_from(tool_options.name_for_second, tool_options.format_for_second) ) {
-        throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
+      try
+      {
+         mcrl2::lts::detail::read_from(l2,tool_options.name_for_second, tool_options.format_for_second);
+      }
+      catch (mcrl2::runtime_error &e)
+      {
+        throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + 
+                     "'\nretry with -v/--verbose for more information.\n" + e.what());
       }
 
       if (!l1.hide_actions(tool_options.tau_actions))
@@ -145,9 +205,9 @@ class ltscompare_tool : public ltscompare_base
       if ( tool_options.equivalence != lts_eq_none )
       {
         gsVerboseMsg("comparing LTSs using %s...\n",
-            lts::name_of_equivalence(tool_options.equivalence).c_str());
+            name_of_equivalence(tool_options.equivalence).c_str());
 
-        result = l1.compare(l2,tool_options.equivalence,tool_options.eq_opts);
+        result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
         gsMessage("LTSs are %s%s\n",
             ((result) ? "" : "not "),
@@ -157,9 +217,9 @@ class ltscompare_tool : public ltscompare_base
       if ( tool_options.preorder != lts_pre_none )
       {
         gsVerboseMsg("comparing LTSs using %s...\n",
-            lts::name_of_preorder(tool_options.preorder).c_str());
+            name_of_preorder(tool_options.preorder).c_str());
 
-        result = l1.compare(l2,tool_options.preorder,tool_options.eq_opts);
+        result = compare(l1,l2,tool_options.preorder);
 
         gsMessage("LTS in %s is %s%s LTS in %s\n",
             tool_options.name_for_first.c_str(),
@@ -171,7 +231,7 @@ class ltscompare_tool : public ltscompare_base
       return result;
     }
 
-  private:
+  protected:
     std::string synopsis() const
     {
       return "[OPTION]... [INFILE1] INFILE2";
@@ -182,9 +242,6 @@ class ltscompare_tool : public ltscompare_base
       if (2 < parser.arguments.size())
       {
         parser.error("too many file arguments");
-      } else if (1 > parser.arguments.size())
-      {
-        parser.error("too few file arguments");
       }
     }
 
@@ -210,18 +267,20 @@ class ltscompare_tool : public ltscompare_base
           "use FORMAT as the format for INFILE2", 'j').
         add_option("equivalence", make_mandatory_argument("NAME"),
           "use equivalence NAME:\n"
-          +lts::supported_lts_equivalences_text(allowed_eqs())+"\n"
+          +supported_lts_equivalences_text(allowed_eqs())+"\n"
           "(not allowed in combination with -p/--preorder)"
           , 'e').
         add_option("preorder", make_mandatory_argument("NAME"),
           "use preorder NAME:\n"
-          +lts::supported_lts_preorders_text()+"\n"
+          +supported_lts_preorders_text()+"\n"
           "(not allowed in combination with -e/--equivalence)"
           , 'p').
         add_option("tau", make_mandatory_argument("ACTNAMES"),
           "consider actions with a name in the comma separated list ACTNAMES to "
           "be internal (tau) actions in addition to those defined as such by "
-          "the input");
+          "the input").
+        add_option("counter-example",
+          "generate counter example traces if the input lts's are not equivalent",'c');
     }
 
     void parse_options(const command_line_parser &parser)
@@ -238,21 +297,16 @@ class ltscompare_tool : public ltscompare_base
         parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
       }
   
-      if (parser.options.count("equivalence") + parser.options.count("preorder") > 1)
-      {
-        parser.error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
-      }
-  
-      if (parser.options.count("equivalence") + parser.options.count("preorder") < 1)
-      {
-        parser.error("one of the options -e/--equivalence and -p/--preorder must be used");
+      if (parser.options.count("counter-example")>0 && parser.options.count("equivalence")==0)
+      { 
+        parser.error("counter examples can only be used in combination with an equivalence");
       }
   
       tool_options.equivalence = lts_eq_none;
   
       if (parser.options.count("equivalence")) {
   
-        tool_options.equivalence = lts::parse_equivalence(
+        tool_options.equivalence = parse_equivalence(
             parser.option_argument("equivalence"));
   
         if ( allowed_eqs().count(tool_options.equivalence) == 0 )
@@ -266,7 +320,7 @@ class ltscompare_tool : public ltscompare_base
   
       if (parser.options.count("preorder")) {
   
-        tool_options.preorder = lts::parse_preorder(
+        tool_options.preorder = parse_preorder(
             parser.option_argument("preorder"));
   
         if (tool_options.preorder == lts_pre_none)
@@ -279,20 +333,22 @@ class ltscompare_tool : public ltscompare_base
       if (parser.options.count("tau")) 
       { set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
       }
+ 
+      tool_options.generate_counter_examples=parser.options.count("counter-example")>0;
   
       if (parser.arguments.size() == 1) {
         tool_options.name_for_second = parser.arguments[0];
-      } else { // if (parser.arguments.size() == 2)
+      } else if (parser.arguments.size() == 2) {
         tool_options.name_for_first  = parser.arguments[0];
         tool_options.name_for_second = parser.arguments[1];
-      }
+      } // else something strange going on, caught in check_preconditions()
   
       if (parser.options.count("in1")) {
         if (1 < parser.options.count("in1")) {
           std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
         }
   
-        tool_options.format_for_first = lts::parse_format(parser.option_argument("in1"));
+        tool_options.format_for_first = mcrl2::lts::detail::parse_format(parser.option_argument("in1"));
   
         if (tool_options.format_for_first == lts_none) {
           std::cerr << "warning: format '" << parser.option_argument("in1") <<
@@ -300,7 +356,7 @@ class ltscompare_tool : public ltscompare_base
         }
       }
       else if (!tool_options.name_for_first.empty()) {
-        tool_options.format_for_first = lts::guess_format(tool_options.name_for_first);
+        tool_options.format_for_first = mcrl2::lts::detail::guess_format(tool_options.name_for_first);
       } else {
         gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
         tool_options.format_for_first = lts_aut;
@@ -310,21 +366,288 @@ class ltscompare_tool : public ltscompare_base
           std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
         }
   
-        tool_options.format_for_second = lts::parse_format(parser.option_argument("in2"));
+        tool_options.format_for_second = mcrl2::lts::detail::parse_format(parser.option_argument("in2"));
   
         if (tool_options.format_for_second == lts_none) {
           std::cerr << "warning: format '" << parser.option_argument("in2") <<
                        "' is not recognised; option ignored" << std::endl;
         }
       }
-      else {
-        tool_options.format_for_second = lts::guess_format(tool_options.name_for_second);
+      else if (!tool_options.name_for_first.empty()) {
+        tool_options.format_for_second = mcrl2::lts::detail::guess_format(tool_options.name_for_second);
       }
     }
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  public:
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(tipi::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(tipi::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(tipi::configuration&);
+#endif
+};
+
+// SQuADT protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
+
+static const char* lts_file_for_input  = "lts_in";  ///< file containing an LTS that can be imported using the LTS library
+static const char* lts_file_auxiliary  = "lts_aux"; ///< LTS for comparison
+
+static const char* option_tau_actions  = "tau_actions";                           ///< the actions that should be recognised as tau
+static const char* option_equivalence_class = "add_equivalence_class";    ///< adds equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 specific]
+static const char* option_preorder_class = "add_preorder_class";    ///< adds preorder equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 specific]
+
+/* static const char* option_selected_transformation            = "selected_transformation";               ///< the selected transformation method
+static const char* option_selected_output_format             = "selected_output_format";                ///< the selected output format
+static const char* option_no_reachability_check              = "no_reachability_check";                 ///< do not check reachability of input LTS
+static const char* option_no_state_information               = "no_state_information";                  ///< dot format output specific option to not save state information
+static const char* option_tau_actions                        = "tau_actions";                           ///< the actions that should be recognised as tau
+static const char* option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 specific]
+*/
+
+void ltscompare_tool::set_capabilities(tipi::tool::capabilities& c) const {
+  std::set< lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
+
+  for (std::set< lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i)
+  {
+    c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(*i)), tipi::tool::category::reporting);
+  }
+}
+
+void ltscompare_tool::user_interactive_configuration(tipi::configuration& c) {
+  using namespace tipi;
+  using namespace tipi::layout;
+  using namespace tipi::layout::elements;
+
+  /* Create display */
+  tipi::tool_display d;
+
+  layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0, 5, 0, 5));
+
+  /* Helper for format selection */
+  mcrl2::utilities::squadt::radio_button_helper < mcrl2::lts::lts_type > format_selector(d);
+
+  file_control& lts_file_field        = d.create< file_control >();
+
+  m.append(d.create< label >()).
+    append(d.create< horizontal_box >().
+                append(d.create< label >().set_text("LTS file name to compare with : ")).
+                append(lts_file_field));
+  /* Helper for transformation selection */
+  mcrl2::utilities::squadt::radio_button_helper < lts_equivalence > equivalence_selector(d);
+
+  m.append(d.create< label >().set_text("LTS equivalence relation (preorder relation needs to be \"no preorder\"):")).
+    append(equivalence_selector.associate(lts_eq_none, "no equivalence",true)).
+    append(equivalence_selector.associate(lts_eq_bisim, "strong bisimulation equivalence")).
+    append(equivalence_selector.associate(lts_eq_branching_bisim, "branching bisimulation equivalence")).
+    append(equivalence_selector.associate(lts_eq_divergence_preserving_branching_bisim, "preserving branching bisimulation equivalence")).
+    append(equivalence_selector.associate(lts_eq_sim, "strong simulation equivalence")).
+    append(equivalence_selector.associate(lts_eq_trace, "trace equivalence")).
+    append(equivalence_selector.associate(lts_eq_weak_trace, "weak trace equivalence"));
+
+/*  mcrl2::utilities::squadt::radio_button_helper < lts_preorder > preorder_selector(d);
+
+  m.append(d.create< label >().set_text("LTS preorder relation (equivalence relation needs to be \"no equivalence\"):")).
+    append(preorder_selector.associate(lts_pre_none, "no preorder",true)).
+    append(preorder_selector.associate(lts_pre_sim, "strong simulation preorder")).
+    append(preorder_selector.associate(lts_pre_trace, "trace preorder")).
+    append(preorder_selector.associate(lts_pre_weak_trace, "weak trace preorder")); */
+
+  text_field& tau_field                   = d.create< text_field >();
+  m.append(d.create< label >()).
+    append(d.create< horizontal_box >().
+                append(d.create< label >().set_text("Internal (tau) actions : ")).
+                append(tau_field.set_text("tau")));
+
+
+  button& okay_button = d.create< button >().set_label("OK");
+
+  if (c.option_exists(option_equivalence_class)) {
+	  equivalence_selector.set_selection(c.get_option_argument< lts_equivalence >(option_equivalence_class, 0));
+  }
+  if (c.option_exists(option_tau_actions)) {
+    tau_field.set_text(c.get_option_argument< std::string >(option_tau_actions));
+  }
+/*  if (c.option_exists(option_preorder_class)) {
+	  preorder_selector.set_selection(c.get_option_argument< lts_preorder >(option_preorder_class, 0));
+  }*/
+
+  send_display_layout(d.manager(m.append(okay_button, layout::top)));
+
+  /* Wait until the ok button was pressed */
+  okay_button.await_change();
+
+  if (!lts_file_field.get_text().empty()) {
+    c.add_option(lts_file_auxiliary).set_argument_value< 0 >(lts_file_field.get_text());
+  }
+
+  if (!tau_field.get_text().empty()) {
+    c.add_option(option_tau_actions).set_argument_value< 0 >(tau_field.get_text());
+  }
+
+  // Set equivalence class
+  c.add_option(option_equivalence_class).set_argument_value< 0 >(equivalence_selector.get_selection());
+
+  //c.add_option(option_preorder_class).set_argument_value< 0 >(preorder_selector.get_selection());
+
+
+  send_clear_display();
+}
+
+bool ltscompare_tool::check_configuration(tipi::configuration const& /*c*/) const
+{
+  bool result = true;
+
+  return (result);
+}
+
+bool ltscompare_tool::perform_task(tipi::configuration& c) {
+    using namespace mcrl2::lts;
+    using namespace tipi;
+    using namespace tipi::layout;
+    using namespace tipi::layout::elements;
+
+  if (c.input_exists(lts_file_for_input)) {
+	tool_options.name_for_first = c.get_input(lts_file_for_input).location();
+    tool_options.format_for_first = mcrl2::lts::detail::guess_format(tool_options.name_for_first);
+  }
+
+  if (c.input_exists(lts_file_auxiliary)) {
+    tool_options.name_for_second = c.get_option_argument< std::string >(lts_file_auxiliary);
+    tool_options.format_for_second = mcrl2::lts::detail::guess_format(tool_options.name_for_second);
+  }
+
+  if (c.option_exists(option_equivalence_class)) {
+    tool_options.equivalence = c.get_option_argument< lts_equivalence >(option_equivalence_class);
+  }
+
+  if (c.option_exists(option_preorder_class)) {
+    tool_options.preorder = c.get_option_argument< lts_preorder >(option_preorder_class);
+  }
+
+  tipi::tool_display d;
+
+  lts l1,l2;
+
+   if ( tool_options.name_for_first.empty() )
+   {
+	   gsVerboseMsg("reading first LTS from stdin...\n");
+     try
+     {
+        mcrl2::lts::detail::read_from(l1,std::cin, tool_options.format_for_first);
+     }
+     catch (mcrl2::runtime_error &e)
+     {
+    	 send_error("cannot read LTS from stdin\nretry with -v/--verbose for more information.\n");
+    	 return (false);
+     }
+   }
+   else
+   {
+     gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
+
+     try
+     {
+        mcrl2::lts::detail::read_from(l1,tool_options.name_for_first, tool_options.format_for_first);
+     }
+     catch (mcrl2::runtime_error &e)
+     {
+       send_error("cannot read LTS from file '" + tool_options.name_for_first +
+                "'\nretry with -v/--verbose for more information.\n" + e.what());
+  	 return (false);
+     }
+   }
+
+   gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
+   try
+   {
+      mcrl2::lts::detail::read_from(l2,tool_options.name_for_second, tool_options.format_for_second);
+   }
+   catch (mcrl2::runtime_error &e)
+   {
+     send_error("cannot read LTS from file '" + tool_options.name_for_second +
+                  "'\nretry with -v/--verbose for more information.\n" + e.what());
+     return (false);
+   }
+
+   if (!l1.hide_actions(tool_options.tau_actions))
+   { send_error("Cannot hide actions in first transition system");
+     return (false);
+   }
+
+   if (!l2.hide_actions(tool_options.tau_actions))
+   { send_error("Cannot hide actions in second transition system");
+     return (false);
+   }
+
+   bool result = true;
+   if ( tool_options.equivalence != lts_eq_none )
+   {
+     gsVerboseMsg("comparing LTSs using %s...\n",
+         name_of_equivalence(tool_options.equivalence).c_str());
+
+     result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
+
+     gsMessage("LTSs are %s%s\n",
+         ((result) ? "" : "not "),
+         equivalent_string(tool_options.equivalence));
+
+   }
+
+   if ( tool_options.preorder != lts_pre_none )
+   {
+     gsVerboseMsg("comparing LTSs using %s...\n",
+         name_of_preorder(tool_options.preorder).c_str());
+
+     result = compare(l1,l2,tool_options.preorder);
+
+   }
+
+   return (true);
+ }
+
+#endif
+
+class ltscompare_gui_tool: public mcrl2_gui_tool<ltscompare_tool> {
+public:
+	ltscompare_gui_tool() {
+
+		std::vector<std::string> values;
+
+		m_gui_options["counter-example"] = create_checkbox_widget();
+
+		values.clear();
+		values.push_back("bisim");
+		values.push_back("branching-bisim");
+		values.push_back("dpbranching-bisim");
+		values.push_back("sim");
+		values.push_back("trace");
+		values.push_back("weak-trace");
+		m_gui_options["equivalence"] = create_radiobox_widget(values);
+
+		values.clear();
+		values.push_back("sim");
+		values.push_back("trace");
+		values.push_back("weak-trace");
+		m_gui_options["preorder"] = create_radiobox_widget(values);
+		m_gui_options["tau"] = create_textctrl_widget();
+
+		//-iFORMAT, --in1=FORMAT   use FORMAT as the format for INFILE1 (or stdin)
+		//-jFORMAT, --in2=FORMAT   use FORMAT as the format for INFILE2
+
+	}
 };
 
 int main(int argc, char **argv) {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return ltscompare_tool().execute(argc,argv);
+  return ltscompare_gui_tool().execute(argc,argv);
 }

@@ -15,21 +15,12 @@
 #define LIST_END (-1)
 using namespace mcrl2::core;
 
-sim_partitioner::sim_partitioner(mcrl2::lts::lts *l)
-  : aut(l), trans_index(NULL)
+sim_partitioner::sim_partitioner(mcrl2::lts::lts &l)
+  : aut(l)
 { }
 
 sim_partitioner::~sim_partitioner()
 {
-  if (trans_index != NULL)
-  {
-    for (unsigned int l = 0; l < aut->num_labels(); ++l)
-    {
-      free(trans_index[l]);
-    }
-  }
-  free(trans_index);
-  aut = NULL;
   delete match;
   delete exists;
   delete forall;
@@ -99,10 +90,11 @@ void sim_partitioner::partitioning_algorithm()
 
 void sim_partitioner::initialise_datastructures()
 {
-  aut->sort_transitions(mcrl2::lts::lbl_tgt_src);
-  trans_index = aut->get_transition_pre_table();
+  // aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
+  // trans_index = aut.get_transition_pre_table();
+  trans_index=transitions_per_outgoing_state_action_pair_reversed(aut.get_transitions());
 
-  uint N = aut->num_states();
+  uint N = aut.num_states();
 
   match  = new hash_table3(1000);
   exists = new hash_table3(1000);
@@ -156,7 +148,7 @@ void sim_partitioner::initialise_datastructures()
 
 void sim_partitioner::initialise_Pi(uint gamma,uint l)
 {
-  uint alpha, a, c, t, t_last;
+  uint alpha, a, c;
   std::vector<uint>::iterator ci, last;
 
   contents.clear();
@@ -175,10 +167,12 @@ void sim_partitioner::initialise_Pi(uint gamma,uint l)
   {
     c = *ci;
     /* iterate over the incoming l-transitions of c */
-    t_last = trans_index[l][c+1];
-    for (t = trans_index[l][c]; t < t_last; ++t)
-    {
-      a = aut->transition_from(t);
+    using namespace mcrl2::lts;
+    for(outgoing_transitions_per_state_action_t::iterator
+          t=trans_index.lower_bound(std::pair < transition::size_type, transition::size_type >(c,l));
+          t!=trans_index.upper_bound(std::pair < transition::size_type, transition::size_type >(c,l)); ++t)
+    { 
+      a = to(t); // As trans_index is reversed, this is actually the state from which the transition t goes.
       if (!state_touched[a])
       {
         alpha = block_Pi[a];
@@ -253,12 +247,12 @@ void sim_partitioner::refine(bool &change)
   int i;
 
   /* The main loop */
-  for (l = 0; l < aut->num_labels(); ++l)
+  for (l = 0; l < aut.num_labels(); ++l)
   {
     if (gsDebug)
     {
       gsMessage("---------------------------------------------------\n");
-      gsMessage("Label = \"%s\"\n", aut->label_value_str(l).c_str());
+      gsMessage("Label = \"%s\"\n", aut.label_value_str(l).c_str());
     }
 
     /* reset the stable function */
@@ -419,7 +413,7 @@ void sim_partitioner::update()
   initialise_pre_EA();
 
   /* Compute the pre_exists and pre_forall functions */
-  for (l = 0; l < aut->num_labels(); ++l)
+  for (l = 0; l < aut.num_labels(); ++l)
   {
     pre_exists[l].reserve(s_Sigma + 1);
     pre_forall[l].reserve(s_Sigma + 1);
@@ -462,7 +456,7 @@ void sim_partitioner::update()
   initialise_pre_EA();
 
   /* Compute the pre_exists and pre_forall functions */
-  for (l = 0; l < aut->num_labels(); ++l)
+  for (l = 0; l < aut.num_labels(); ++l)
   {
     pre_exists[l].reserve(s_Pi + 1);
     pre_forall[l].reserve(s_Pi + 1);
@@ -507,8 +501,8 @@ void sim_partitioner::initialise_pre_EA()
   exists->clear();
   forall->clear();
   std::vector<uint> v;
-  pre_exists.assign(aut->num_labels(),v);
-  pre_forall.assign(aut->num_labels(),v);
+  pre_exists.assign(aut.num_labels(),v);
+  pre_forall.assign(aut.num_labels(),v);
 }
 
 void sim_partitioner::induce_P_on_Pi()
@@ -540,7 +534,7 @@ void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
 
   uint alpha,beta,gamma,delta,l;
   hash_table3_iterator etrans(exists);
-  for (l = 0; l < aut->num_labels(); ++l)
+  for (l = 0; l < aut.num_labels(); ++l)
   {
     for (delta = 0; delta < S; ++delta)
     {
@@ -561,7 +555,7 @@ void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
 
   hash_table3_iterator atrans(forall);
   /* The main for loop */
-  for (l = 0; l < aut->num_labels(); ++l)
+  for (l = 0; l < aut.num_labels(); ++l)
   {
     for (gamma = 0; gamma < S; ++gamma)
     {
@@ -593,7 +587,7 @@ void sim_partitioner::cleanup(uint alpha,uint beta)
   bool match_l_beta1_alpha;
   hash_table3_iterator alpha1i(forall);
   hash_table3_iterator beta1i(exists);
-  for (l = 0; l < aut->num_labels(); ++l)
+  for (l = 0; l < aut.num_labels(); ++l)
   {
     alpha1i.set_end(pre_forall[l][alpha+1]);
     beta1i.set_end(pre_exists[l][beta+1]);
@@ -628,26 +622,20 @@ void sim_partitioner::cleanup(uint alpha,uint beta)
 
 /* ----------------- FOR POST-PROCESSING ---------------------------- */
 
-
-mcrl2::lts::transition* sim_partitioner::get_transitions(uint& nt,uint& size) const
+std::vector < mcrl2::lts::transition> sim_partitioner::get_transitions() const
 {
   using namespace mcrl2::lts;
 
-  size = forall->get_num_elements();
-  transition* ts = (transition*)malloc(size*sizeof(transition));
-  if (ts == NULL)
-  {
-    throw mcrl2::runtime_error("out of memory");
-  }
+  std::vector < mcrl2::lts::transition> ts;
+  ts.reserve(forall->get_num_elements());
 
-  nt = 0;
   std::vector<bool> pre_sim;
-  uint l,beta,gamma;
+  transition::size_type l,beta,gamma;
   hash_table3_iterator alphai(exists);
   hash_table3_iterator gammai(forall);
   for (beta = 0; beta < s_Pi; ++beta)
   {
-    for (l = 0; l < aut->num_labels(); ++l)
+    for (l = 0; l < aut.num_labels(); ++l)
     {
       // there is an l-transition from alpha to beta iff:
       // - alpha -l->A [beta]
@@ -675,10 +663,7 @@ mcrl2::lts::transition* sim_partitioner::get_transitions(uint& nt,uint& size) co
         if (!pre_sim[gamma])
         {
           // add the transition gamma -l-> beta
-          ts[nt].from = gamma;
-          ts[nt].label = l;
-          ts[nt].to = beta;
-          ++nt;
+          ts.push_back(transition(gamma,l,beta));
         }
       }
     }
@@ -719,7 +704,7 @@ void sim_partitioner::update_nfa()
   hash_table3_iterator gammai(forall);
   for (beta = 0; beta < s_Pi; ++beta)
   {
-    for (l = 0; l < aut->num_labels(); ++l)
+    for (l = 0; l < aut.num_labels(); ++l)
     {
       // there is an l-transition from alpha to beta iff:
       // - alpha -l->A [beta]
@@ -760,11 +745,11 @@ void sim_partitioner::update_nfa()
   std::vector<uint>::iterator post_it,post_last;
   std::queue<uint> todo;
   std::vector<uint> block_id(s_Pi,s_Pi);
-  todo.push(block_Pi[aut->initial_state()]);
-  block_id[block_Pi[aut->initial_state()]] = 0;
+  todo.push(block_Pi[aut.initial_state()]);
+  block_id[block_Pi[aut.initial_state()]] = 0;
   uint n_s = 1;
   uint n_f = 0;
-  if (aut->is_final(aut->initial_state()))
+  if (aut.is_final(aut.initial_state()))
   {
     final->push_back(true);
     ++n_f;
@@ -789,7 +774,7 @@ void sim_partitioner::update_nfa()
           todo.push(alpha);
           block_id[alpha] = n_s;
           ++n_s;
-          if (aut->is_final(contents_u[alpha]))
+          if (aut.is_final(contents_u[alpha]))
           {
             final->push_back(true);
             ++n_f;
@@ -807,17 +792,17 @@ void sim_partitioner::update_nfa()
   }
 
   // assign the new transition relation to aut
-  aut->clear_transition_relation();
-  aut->clear_final();
-  aut->set_num_states(n_s);
-  aut->set_num_transitions(trans->size());
-  aut->set_num_final(n_f);
-  aut->set_init(0);
-  aut->set_trans(trans);
-  aut->set_final(final);
+  aut.clear_transition_relation();
+  aut.clear_final();
+  aut.set_num_states(n_s);
+  aut.set_num_transitions(trans->size());
+  aut.set_num_final(n_f);
+  aut.set_init(0);
+  aut.set_trans(trans);
+  aut.set_final(final);
 
   // assign the simulation relation to aut
-  aut->init_simulation_relation();
+  aut.init_simulation_relation();
   for (beta = 0; beta < s_Pi; ++beta)
   {
     // only consider reachable blocks
@@ -827,7 +812,7 @@ void sim_partitioner::update_nfa()
       {
         if (block_id[gamma] < s_Pi && Q[beta][gamma])
         {
-          aut->add_simulation(block_id[beta],block_id[gamma]);
+          aut.add_simulation(block_id[beta],block_id[gamma]);
         }
       }
     }
@@ -913,7 +898,7 @@ void sim_partitioner::print_structure(hash_table3 *struc)
   for ( ; !i.is_end(); ++i)
   {
     gsMessage("(%u,%s,%u),", i.get_x(),
-        aut->label_value_str(i.get_y()).c_str(), i.get_z());
+        aut.label_value_str(i.get_y()).c_str(), i.get_z());
   }
   gsMessage("}");
 }

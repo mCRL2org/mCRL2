@@ -115,7 +115,7 @@ namespace detail {
     /// \brief Visit delta node
     /// \return The result of visiting the node
     /// \param x A process expression
-    bool visit_delta(const delta& x)
+    bool visit_delta(const delta& /* x */)
     {
       m_deadlock = lps::deadlock();
       m_deadlock_changed = true;
@@ -126,7 +126,7 @@ namespace detail {
     /// \brief Visit tau node
     /// \return The result of visiting the node
     /// \param x A process expression
-    bool visit_tau(const tau& x)
+    bool visit_tau(const tau& /* x */)
     {
       m_multi_action = lps::multi_action();
       m_multi_action_changed = true;
@@ -374,7 +374,7 @@ namespace detail {
 
     /// \brief Returns true if the process equation e is linear.
     /// \param e A process equation
-    void convert(const process_equation& e)
+    void convert(const process_equation& /* e */)
     {
       clear_summand();
       visit(m_equation.expression());

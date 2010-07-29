@@ -40,6 +40,9 @@ class propositional_variable: public atermpp::aterm_appl
     data::variable_list m_parameters;
 
   public:
+    /// \brief Type of the parameters.
+    typedef data::variable parameter_type;
+    
     /// \brief Constructor.
     propositional_variable()
       : atermpp::aterm_appl(core::detail::constructPropVarDecl())
@@ -51,7 +54,7 @@ class propositional_variable: public atermpp::aterm_appl
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       m_name      = core::identifier_string(p.first);
-      m_parameters = data::convert< data::variable_list >(p.second);
+      m_parameters = atermpp::convert< data::variable_list >(p.second);
       m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name, m_parameters));
     }
 
@@ -115,6 +118,9 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     data::data_expression_list m_parameters;
 
   public:
+    /// \brief Type of the parameters.
+    typedef data::data_expression parameter_type;
+
     /// \brief Constructor.
     propositional_variable_instantiation()
       : atermpp::aterm_appl(core::detail::constructPropVarInst())
@@ -126,7 +132,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       m_name      = core::identifier_string(p.first);
-      m_parameters = data::convert< data::variable_list >(p.second);
+      m_parameters = atermpp::convert< data::variable_list >(p.second);
       m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarInst(m_name, m_parameters));
     }
 

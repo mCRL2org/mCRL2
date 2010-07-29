@@ -23,7 +23,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
@@ -72,9 +72,9 @@ namespace mcrl2 {
                       const data_expression& condition,
                       const data_expression& lhs,
                       const data_expression& rhs,
-                      typename detail::enable_if_container< Container, variable >::type* = 0)
+                      typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  convert< variable_list >(variables), condition, lhs, rhs))
+                  atermpp::convert< variable_list >(variables), condition, lhs, rhs))
         {}
 
         /// \brief Constructor
@@ -88,9 +88,9 @@ namespace mcrl2 {
         data_equation(const Container& variables,
                       const data_expression& lhs,
                       const data_expression& rhs,
-                      typename detail::enable_if_container< Container, variable >::type* = 0)
+                      typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  convert< variable_list >(variables), sort_bool::true_(), lhs, rhs))
+                  atermpp::convert< variable_list >(variables), sort_bool::true_(), lhs, rhs))
         {}
 
         /// \brief Constructor

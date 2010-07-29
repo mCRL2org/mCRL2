@@ -89,7 +89,7 @@ namespace ticpp
 		std::ostringstream full_message;									\
 		std::string file( __FILE__ );										\
 		file = file.substr( file.find_last_of( "\\/" ) + 1 );				\
-		full_message << message << " <" << file << "@" << __LINE__ << ">";	\
+		full_message << message ;	\
 		throw Exception( full_message.str() );								\
 	}
 

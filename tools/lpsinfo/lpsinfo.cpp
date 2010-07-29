@@ -15,6 +15,7 @@
 
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -38,15 +39,6 @@ class lpsinfo_tool: public squadt_tool<input_tool>
           "display basic information about an LPS",
           "Print basic information on the linear process specification (LPS) in INFILE.")
      {}
-
-  private:
-    void parse_options(const command_line_parser& parser)
-    { super::parse_options(parser);
-    }
-
-    void add_options(interface_description& desc)
-    { super::add_options(desc);
-    }
 
   public:
 
@@ -126,8 +118,17 @@ class lpsinfo_tool: public squadt_tool<input_tool>
 #endif
 };
 
+class lpsinfo_gui_tool: public mcrl2_gui_tool<lpsinfo_tool>
+{
+  public:
+    lpsinfo_gui_tool()
+    {
+      // m_gui_options["abc"] = create_textctrl_widget();
+    }
+};
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return lpsinfo_tool().execute(argc, argv);
+  return lpsinfo_gui_tool().execute(argc, argv);
 }

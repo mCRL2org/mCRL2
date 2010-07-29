@@ -55,7 +55,7 @@ namespace data {
       /// \param variables A sequence of data variables
       template < typename Container >
       data_expression_with_variables(data_expression expression, const Container& variables)
-        : data_expression(expression), m_variables(convert< variable_list >(variables))
+        : data_expression(expression), m_variables(atermpp::convert< variable_list >(variables))
       {}
 
       /// \brief Return the variables.
@@ -195,7 +195,7 @@ namespace core {
     bool is_forall(term_type t)
     {
       data::data_expression e(t);
-      return e.is_abstraction() && data::abstraction(e).is_forall();
+      return data::is_forall(e);
     }
 
     /// \brief Test for existential quantification
@@ -205,7 +205,7 @@ namespace core {
     bool is_exists(term_type t)
     {
       data::data_expression e(t);
-      return e.is_abstraction() && data::abstraction(e).is_exists();
+      return data::is_exists(e);
     }
 
     /// \brief Conversion from variable to term
@@ -223,7 +223,7 @@ namespace core {
     static inline
     bool is_variable(term_type t)
     {
-      return data::data_expression(t).is_variable();
+      return data::is_variable(t);
     }
 
     /// \brief Returns the free variables of a term

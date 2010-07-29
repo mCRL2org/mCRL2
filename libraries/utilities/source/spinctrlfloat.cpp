@@ -39,7 +39,7 @@ namespace mcrl2 {
        **/
       wxSpinCtrlFloat::wxSpinCtrlFloat(
           wxWindow* parent,
-          wxWindowID id,
+          wxWindowID /*id*/,
           double p_Min,
           double p_Max,
           double p_Rate,

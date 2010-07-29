@@ -50,7 +50,7 @@ template <typename Container>
 std::set<data::variable> find_free_variables(Container const& container);
 
 class specification;
-atermpp::aterm_appl specification_to_aterm(const specification&, bool compatible = true);
+atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
 
 /// \brief Linear process specification.
@@ -94,7 +94,7 @@ class specification
       m_data             = atermpp::aterm_appl(*i++);
       m_action_labels    = atermpp::aterm_appl(*i++)(0);
       data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
+      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
       m_process          = atermpp::aterm_appl(*i++);
       m_initial_process  = atermpp::aterm_appl(*i);
     }
@@ -179,7 +179,7 @@ class specification
       assert(is_well_typed(*this));
       specification tmp(*this);
       // tmp.data() = data::remove_all_system_defined(tmp.data());
-      core::detail::save_aterm(specification_to_aterm(tmp, false), filename, binary);
+      core::detail::save_aterm(specification_to_aterm(tmp), filename, binary);
     }
 
     /// \brief Returns the linear process of the specification.
@@ -281,19 +281,19 @@ class specification
 inline
 void complete_data_specification(lps::specification& spec)
 { std::set<data::sort_expression> s;
-  traverse_sort_expressions(spec, std::inserter(s, s.end()));
+  lps::traverse_sort_expressions(spec, std::inserter(s, s.end()));
   spec.data().add_context_sorts(s);
 }
 
 /// \brief Conversion to ATermAppl.
 /// \return The specification converted to ATerm format.
 inline
-atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compatible)
+atermpp::aterm_appl specification_to_aterm(const specification& spec)
 {
   return core::detail::gsMakeLinProcSpec(
-      data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
+      data::detail::data_specification_to_aterm_data_spec(spec.data()),
       core::detail::gsMakeActSpec(spec.action_labels()),
-      core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
+      core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
       linear_process_to_aterm(spec.process()),
       spec.initial_process()
   );
@@ -303,13 +303,7 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compa
 inline
 std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
 {
-  /* if (pp_format == core::ppDefault || pp_format == core::ppInternal)
-  {
-    spec.data() = data::remove_all_system_defined(spec.data());
-  } */
-  
-  // return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
-  return core::pp(specification_to_aterm(spec, false), pp_format);
+  return core::pp(specification_to_aterm(spec), pp_format);
 }
 
 /// \brief Equality operator

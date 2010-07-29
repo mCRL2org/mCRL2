@@ -11,8 +11,10 @@
 
 #ifndef MEDIATOR_H
 #define MEDIATOR_H
+
 #include <string>
-#include "utils.h"
+#include "enums.h"
+#include "rgb_color.h"
 
 class State;
 class Cluster;
@@ -26,18 +28,18 @@ class Mediator {
     virtual void editMarkRule(int index) = 0;
     virtual void exportToText(std::string filename) = 0;
     virtual std::string getVersionString() = 0;
-    virtual Utils::RGB_Color getMarkRuleColor(int mr) = 0;
-    virtual Utils::RGB_Color getNewRuleColour() = 0;
+    virtual RGB_Color getMarkRuleColor(int mr) = 0;
+    virtual RGB_Color getNewRuleColour() = 0;
     virtual void setActionMark(int label,bool b) = 0;
     virtual void notifyRenderingFinished() = 0;
     virtual void notifyRenderingStarted() = 0;
     virtual void openFile(std::string fileName) = 0;
     virtual void removeMarkRule(int index) = 0;
-    virtual void setMarkStyle(Utils::MarkStyle ms) = 0;
-    virtual void setMatchStyle(Utils::MatchStyle ms) = 0;
-    virtual void setMatchStyleClusters(Utils::MatchStyle ms) = 0;
-    virtual void setRankStyle(Utils::RankStyle rs) = 0;
-    virtual void setVisStyle(Utils::VisStyle vs) = 0;
+    virtual void setMarkStyle(MarkStyle ms) = 0;
+    virtual void setMatchStyle(MatchStyle ms) = 0;
+    virtual void setMatchStyleClusters(MatchStyle ms) = 0;
+    virtual void setRankStyle(RankStyle rs) = 0;
+    virtual void setVisStyle(VisStyle vs) = 0;
     virtual void setFSMStyle(bool b) = 0;
     virtual void selectStateByID(const int id) = 0;
     virtual void selectCluster(const int rank, const int pos) = 0;
@@ -48,8 +50,8 @@ class Mediator {
     virtual void zoomOutTillTop() = 0;
     virtual void zoomOut() = 0;
 
-    virtual Utils::MatchStyle getMatchStyle() = 0;
-    virtual Utils::MarkStyle getMarkStyle() = 0;
+    virtual MatchStyle getMatchStyle() = 0;
+    virtual MarkStyle getMarkStyle() = 0;
     virtual bool isMarked(State *s) = 0;
     virtual bool isMarked(Cluster *c) = 0;
     virtual bool isMarked(Transition *t) = 0;

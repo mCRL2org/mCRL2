@@ -12,6 +12,9 @@
 #ifndef MCRL2_CORE_ALGORITHM_H
 #define MCRL2_CORE_ALGORITHM_H
 
+#include <iostream>
+#include <string>
+
 namespace mcrl2 {
 
   namespace core {
@@ -21,14 +24,6 @@ namespace mcrl2 {
     {
     protected:
       unsigned int m_verbose_level;
-
-    public:
-
-      /// \brief Constructor
-      algorithm(unsigned int verbose_level = 0)
-      : m_verbose_level(verbose_level)
-      {
-      }
 
       /// \brief Returns a reference to the verbosity level.
       /// The higher this number, the more output that will be written to clog.
@@ -49,6 +44,23 @@ namespace mcrl2 {
       {
         return m_verbose_level >= level;
       }
+      
+      /// \brief Very simplistic log function
+      void LOG(unsigned int level, const std::string& s) const
+      {
+        if (check_log_level(level))
+        {
+          std::clog << s << std::flush;
+        }
+      }
+
+    public:
+      /// \brief Constructor
+      algorithm(unsigned int verbose_level = 0)
+      : m_verbose_level(verbose_level)
+      {
+      }
+
     };
 
   } // namespace core

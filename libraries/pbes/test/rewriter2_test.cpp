@@ -171,6 +171,8 @@ void test_simplifying_rewriter()
   test_simplify(R, r, "X && val(false)"                                                 , "false");
   test_simplify(R, r, "false && X"                                                      , "false");
   test_simplify(R, r, "X && (false && X)"                                               , "false");
+  test_simplify(R, r, "X && (X0 && X)"                                                  , "X && (X0 && X)");
+  test_simplify(R, r, "X && (X && X0)"                                                  , "X && (X && X0)");
   test_simplify(R, r, "Y(1+2)"                                                          , "Y(3)");
   test_simplify(R, r, "true || true"                                                    , "true");
   test_simplify(R, r, "(true || true) || true"                                          , "true");

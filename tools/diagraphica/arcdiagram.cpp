@@ -353,20 +353,6 @@ void ArcDiagram::markLeaf(
         v.push_back( col );
         markLeaves.insert( pair< int, vector< ColorRGB > >( leafIdx, v ) );
     }
-
-/*
-    for ( int i = 0; i < graph->getSizeLeaves(); ++i )
-    {
-        it = markLeaves.find( i );
-        if ( it != markLeaves.end() )
-        {
-            *mediator << i;
-            *mediator << " ";
-            *mediator << it->second.size();
-            *mediator << " ";
-        }
-    }
-*/
 }
 
 
@@ -382,7 +368,7 @@ void ArcDiagram::unmarkLeaves()
 void ArcDiagram::markBundle( const size_t &idx )
 // ------------------------------------------
 {
-    if ( 0 <= idx && idx < markBundles.size() )
+    if ( idx < markBundles.size() )
         markBundles[idx] = true;
 }
 
@@ -2106,7 +2092,7 @@ void ArcDiagram::clearSettingsDiagram()
 
 
 // ----------------------------------------
-void ArcDiagram::onTimer( wxTimerEvent &e )
+void ArcDiagram::onTimer( wxTimerEvent &/*e*/ )
 // ----------------------------------------
 {
     if ( timerAnim->GetInterval() != itvAnim )

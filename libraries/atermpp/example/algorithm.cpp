@@ -60,8 +60,6 @@ void test_replace()
   aterm_appl a = make_term("f(f(x))");
   aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
   assert(b == make_term("f(x)"));
-  aterm_appl c = replace(a, make_term("f(x)"), make_term("x"));
-  assert(c == make_term("x"));
 }
 
 int main(int argc, char* argv[])

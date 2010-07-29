@@ -21,6 +21,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -109,9 +110,6 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
 
       if (parser.options.count("invariant")) {
         m_invariant_file_name = parser.option_argument_as< std::string >("invariant");
-      }
-      else {
-        parser.error("a file containing an invariant must be specified using the option --invariant=INVFILE");
       }
 
       if (parser.options.count("print-dot")) {
@@ -212,6 +210,9 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
         m_invariant = parse_data_expression(instream, parameters.begin(), parameters.end(), specification.data());
 
         instream.close();
+      } else {
+        std::cerr << "A file containing an invariant must be specified using the option --invariant=INVFILE" << std::endl;
+        return false;
       }
 
       bool invariance_result = true;
@@ -222,7 +223,8 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
       else
       {
         Invariant_Checker v_invariant_checker(
-          specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), m_apply_induction, m_counter_example, m_all_violations, m_dot_file_name
+          specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), 
+          m_apply_induction, m_counter_example, m_all_violations, m_dot_file_name
         );
 
         invariance_result = v_invariant_checker.check_invariant(m_invariant);
@@ -234,15 +236,35 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
           specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), m_apply_induction, m_simplify_all
         );
 
-        mcrl2::lps::specification(v_invariant_eliminator.simplify(m_invariant, m_summand_number)).save(m_output_filename);
+        mcrl2::lps::specification(v_invariant_eliminator.simplify(m_invariant, m_no_elimination, m_summand_number)).save(m_output_filename);
       }
 
       return true;
     }
  };
 
+class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
+{
+  public:
+	lpsinvelm_giu_tool()
+    {
+
+      m_gui_options["counter-example"] = create_checkbox_widget();
+      m_gui_options["no-elimination"] = create_checkbox_widget();
+      m_gui_options["simplify-all"] = create_filepicker_widget();
+      m_gui_options["no-check"] = create_checkbox_widget();
+      m_gui_options["induction"] = create_checkbox_widget();
+      m_gui_options["print-dot"] = create_textctrl_widget();
+      add_rewriter_widget();
+      m_gui_options["summand"] = create_textctrl_widget();
+      m_gui_options["time-limit"] = create_textctrl_widget();
+      m_gui_options["all-violations"] = create_checkbox_widget();
+      m_gui_options["smt-solver"] = create_textctrl_widget();
+    }
+};
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERM_INIT(argc, argv)
-  return invelm_tool().execute(argc, argv);
+  return lpsinvelm_giu_tool().execute(argc, argv);
 }

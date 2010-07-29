@@ -171,17 +171,17 @@ class data_enumerator
       }
       for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
       {
-        if (i->sort().is_function_sort()) {
-          std::vector<variable> variables;
+        if (is_function_sort(i->sort())) {
+          atermpp::vector<variable> variables;
 
-          for (boost::iterator_range< function_sort::domain_const_range::iterator > j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+          for (boost::iterator_range< sort_expression_list::iterator > j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
           {
             variables.push_back(variable((*m_generator)(), j.front()));
           }
 
-          variable_list w(convert< variable_list >(variables));
+          variable_list w(atermpp::convert< variable_list >(variables));
 
-          result.push_back(data_expression_with_variables(application(*i, convert< data_expression_list >(w)), w));
+          result.push_back(data_expression_with_variables(application(*i, atermpp::convert< data_expression_list >(w)), w));
         }
         else {
           result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));

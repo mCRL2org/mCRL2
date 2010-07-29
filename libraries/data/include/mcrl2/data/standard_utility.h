@@ -32,7 +32,7 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
@@ -450,7 +450,7 @@ namespace mcrl2 {
       inline
       application list(const sort_expression& s,
                        Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                       typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression                list_expression(nil(s));
         std::vector< data_expression > elements(range.begin(), range.end());
@@ -507,7 +507,7 @@ namespace mcrl2 {
       inline
       data_expression list_enumeration(const sort_expression& s,
                                        Sequence const& range,
-                                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                       typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -599,7 +599,7 @@ namespace mcrl2 {
       inline
       data_expression set_enumeration(const sort_expression& s,
                                       Sequence const& range,
-                                      typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                      typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -649,22 +649,24 @@ namespace mcrl2 {
     }
 
     namespace sort_fset {
+
       /// \brief Constructs a finite set expression from a range of expressions
       //
       /// Type Sequence must be a model of the Forward Traversal Iterator concept;
       /// with value_type convertible to data_expression.
       /// \param[in] s the sort of list elements
-      /// \param[in] begin iterator that marks the start of a range of elements of sort s
-      /// \param[in] end the past-end iterator for a range of elements of sort s
+      /// \param[in] range a sequence of elements
       template < typename Sequence >
       inline
       application fset(const sort_expression& s,
                        Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                       typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression fset_expression(sort_fset::fset_empty(s));
 
-        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i) {
+        // We process the elements in reverse order to have a resulting enumeration
+        // in the same order as the input
+        for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i) {
           BOOST_ASSERT(is_convertible(i->sort(), s));
 
           fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
@@ -672,6 +674,18 @@ namespace mcrl2 {
 
         return static_cast< application >(fset_expression);
       }
+
+      /// \brief Constructs a finite set expression from a list of expressions
+      //
+      /// \param[in] s the sort of list elements
+      /// \param[in] range a sequence of elements
+      inline
+      application fset(const sort_expression& s,
+                       data_expression_list const& range)
+      {
+        return fset(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
+      }
+
     }
 
     namespace sort_bag {
@@ -718,7 +732,7 @@ namespace mcrl2 {
       inline
       data_expression bag_enumeration(const sort_expression& s,
                                       Sequence const& range,
-                                      typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                                      typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         if(range.empty())
         {
@@ -787,25 +801,39 @@ namespace mcrl2 {
 
     namespace sort_fbag {
       /// \brief Constructs a finite bag expression from a range of expressions
-      /// Type I must be a model of the Forward Traversal Iterator concept;
+      /// Type Sequence must be a model of the Forward Traversal Iterator concept;
       /// with value_type convertible to data_expression.
+      /// \pre range must contain element, count, element, count, ...
       /// \param[in] s the sort of list elements
-      /// \param[in] begin iterator that marks the start of a range of elements of sort s
-      /// \param[in] end the past-end iterator for a range of elements of sort s
+      /// \param[in] range a range of elements of sort s.
       template < typename Sequence >
       inline
       application fbag(const sort_expression& s, Sequence const& range,
-                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+                       typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression fbag_expression(sort_fbag::fbag_empty(s));
 
-        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i, ++i) {
-          BOOST_ASSERT(is_convertible(i->sort(), s));
-
-          fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, *boost::next(i, 1));
+        // The sequence contains element, count, ...
+        // As we process the list in reverse, we have count, element, ...
+        // We process the elements in reverse order to have a resulting enumeration
+        // in the same order as the input
+        for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i, ++i)
+        {
+          BOOST_ASSERT(is_convertible(boost::next(i, 1)->sort(), s));
+          fbag_expression = sort_fbag::fbagcinsert(s, *boost::next(i, 1), *i, fbag_expression);
         }
 
         return static_cast< application >(fbag_expression);
+      }
+
+      /// \brief Constructs a finite bag expression from a list of expressions
+      /// \pre range must contain element, count, element, count, ...
+      /// \param[in] s the sort of list elements
+      /// \param[in] range a range of elements of sort s.
+      inline
+      application fbag(const sort_expression& s, data_expression_list const& range)
+      {
+        return fbag(s, atermpp::convert<data_expression_vector, data_expression_list>(range));
       }
     }
 
@@ -813,6 +841,17 @@ namespace mcrl2 {
     inline bool is_nil(atermpp::aterm_appl t)
     {
       return t == core::detail::gsMakeNil();
+    }
+
+    /// \brief Returns true iff the expression represents a standard sort.
+    /// \param[in] s a sort expression.
+    inline
+    bool
+    is_system_defined(const sort_expression& s)
+    {
+      return sort_bool::is_bool(s) || sort_real::is_real(s)
+          || sort_int::is_int(s) || sort_nat::is_nat(s) || sort_pos::is_pos(s)
+          || is_container_sort(s) || is_structured_sort(s);
     }
 
     /** \brief A collection of utilities for lazy expression construction

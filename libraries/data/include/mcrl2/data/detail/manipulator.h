@@ -24,7 +24,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
@@ -95,23 +95,23 @@ namespace mcrl2 {
 
           data_expression operator()(data_expression const& e)
           {
-            if (e.is_application())
+            if (is_application(e))
             {
               return static_cast< Derived& >(*this)(application(e));
             }
-            else if (e.is_variable())
+            else if (is_variable(e))
             {
               return static_cast< Derived& >(*this)(variable(e));
             }
-            else if (e.is_function_symbol())
+            else if (is_function_symbol(e))
             {
               return static_cast< Derived& >(*this)(function_symbol(e));
             }
-            else if (e.is_abstraction())
+            else if (is_abstraction(e))
             {
               return static_cast< Derived& >(*this)(abstraction(e));
             }
-            else if (e.is_where_clause())
+            else if (is_where_clause(e))
             {
               return static_cast< Derived& >(*this)(where_clause(e));
             }
@@ -119,10 +119,30 @@ namespace mcrl2 {
             return e;
           }
 
+		  assignment_expression operator()(assignment_expression const& a)
+		  {
+			if (is_assignment(a))
+			{
+			  return static_cast< Derived& >(*this)(assignment(a));
+			}
+			else if (is_identifier_assignment(a))
+			{
+			  return static_cast< Derived& >(*this)(identifier_assignment(a));
+			}
+
+			return a;
+		  }
+
           assignment operator()(assignment const& a)
           {
             return assignment(static_cast< Derived& >(*this)(a.lhs()),
                               static_cast< Derived& >(*this)(a.rhs()));
+          }
+
+		  identifier_assignment operator()(identifier_assignment const& a)
+          {
+            return identifier_assignment(static_cast< Derived& >(*this)(a.lhs()),
+                              			 static_cast< Derived& >(*this)(a.rhs()));
           }
 
           data_equation operator()(data_equation const& a)
@@ -137,7 +157,7 @@ namespace mcrl2 {
 #ifndef NO_TERM_TRAVERSAL
           // \deprecated exists only for backwards compatibility
           template < typename Expression >
-          Expression operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          Expression operator()(Expression const& e, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           {
             if (e.type() == AT_APPL)
             {
@@ -184,7 +204,7 @@ namespace mcrl2 {
               result.push_back((*this)(*i));
             }
 
-            return convert< atermpp::aterm_list >(result);
+            return atermpp::convert< atermpp::aterm_list >(result);
           }
 
           template < typename Expression, bool = boost::is_convertible< Expression, data_expression >::value >
@@ -209,7 +229,7 @@ namespace mcrl2 {
               result.push_back(static_cast< Derived& >(*this)(*i));
             }
 
-            return convert< atermpp::term_list< result_type > >(result);
+            return atermpp::convert< atermpp::term_list< result_type > >(result);
           }
 #endif // NO_TERM_TRAVERSAL
 
@@ -220,12 +240,12 @@ namespace mcrl2 {
 	  // return type, but since the current use of this component is not
 	  // that advanced it was chosen not to enhance the implement.
           template < typename Container >
-          boost::iterator_range< transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type > >
-          operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          boost::iterator_range< atermpp::detail::transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type > >
+          operator()(Container const& container, typename atermpp::detail::enable_if_container< Container >::type* = 0)
           {
             return boost::make_iterator_range(
-              transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type >(container.begin(), static_cast< Derived& >(*this)),
-              transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type >(container.end(), static_cast< Derived& >(*this)));
+              atermpp::detail::transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type >(container.begin(), static_cast< Derived& >(*this)),
+              atermpp::detail::transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type >(container.end(), static_cast< Derived& >(*this)));
           }
       };
 
@@ -239,13 +259,13 @@ namespace mcrl2 {
           std::multiset< variable > m_bound;
 
           template < typename Container >
-          void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+          void increase_bind_count(const Container& variables, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
           {
             m_bound.insert(variables.begin(), variables.end());
           }
 
           template < typename Container >
-          void decrease_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+          void decrease_bind_count(const Container& variables, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
           {
             for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
             {
@@ -312,7 +332,7 @@ namespace mcrl2 {
 
           template < typename Container >
           binding_aware_expression_manipulator(Container const& bound_by_context,
-                                    typename detail::enable_if_container< Container, variable >::type* = 0) :
+                                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) :
                               m_bound(bound_by_context.begin(), bound_by_context.end())
           { }
 

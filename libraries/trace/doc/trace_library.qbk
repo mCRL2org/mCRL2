@@ -1,7 +1,7 @@
 [library Trace Library
     [quickbook 1.4]
     [authors [Weerdenburg, Muck van], [Groote, Jan Friso]]
-    [Copyright 2005-2010 Technische Universiteit Eindhoven]
+    [copyright 2005-2010 Technische Universiteit Eindhoven]
     [category string-text]
 ]
 
@@ -49,7 +49,7 @@ position in the trace to the next position.
 
   #include <iostream>
   #include <mcrl2/atermpp/atermpp.h>
-  #include <mcrl2/trace.h>
+  #include <mcrl2/trace/trace.h>
    
   using namespace std;
   using namespace mcrl2::trace;

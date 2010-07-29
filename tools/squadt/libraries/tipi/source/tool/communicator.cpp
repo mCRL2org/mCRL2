@@ -180,7 +180,9 @@ namespace tipi {
         }
 
         static void send_display_data(boost::weak_ptr< communicator_impl > impl,
-                         tipi::utility::logger& logger, boost::shared_ptr< display > d, void const* e) {
+                         tipi::utility::logger& logger,
+                         boost::shared_ptr< display > d,
+                         void const* e) {
 
           boost::shared_ptr< communicator_impl > c(impl.lock());
 

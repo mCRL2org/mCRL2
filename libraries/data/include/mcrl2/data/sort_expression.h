@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 
 namespace mcrl2 {
 
@@ -30,38 +30,38 @@ namespace mcrl2 {
     /// \param t A term
     /// \return True if the term is a sort expression.
     inline
-    bool is_sort_expression(atermpp::aterm_appl t)
+    bool is_sort_expression(const atermpp::aterm_appl& t)
     {
       return core::detail::gsIsSortExpr(t);
     }
 
     /// \brief Returns true if the term t is a basic sort
-    inline bool is_basic_sort(atermpp::aterm_appl p) {
+    inline bool is_basic_sort(const atermpp::aterm_appl& p) {
       return core::detail::gsIsSortId(p);
     }
 
     /// \brief Returns true if the term t is a function sort
-    inline bool is_function_sort(atermpp::aterm_appl p) {
+    inline bool is_function_sort(const atermpp::aterm_appl& p) {
       return core::detail::gsIsSortArrow(p);
     }
 
     /// \brief Returns true if the term t is a container sort
-    inline bool is_container_sort(atermpp::aterm_appl p) {
+    inline bool is_container_sort(const atermpp::aterm_appl& p) {
       return core::detail::gsIsSortCons(p);
     }
 
     /// \brief Returns true if the term t is a structured sort
-    inline bool is_structured_sort(atermpp::aterm_appl p) {
+    inline bool is_structured_sort(const atermpp::aterm_appl& p) {
       return core::detail::gsIsSortStruct(p);
     }
 
     /// \brief Returns true if the term t is the unknown sort
-    inline bool is_unknown_sort(atermpp::aterm_appl p) {
+    inline bool is_unknown_sort(const atermpp::aterm_appl& p) {
       return core::detail::gsIsSortUnknown(p);
     }
 
     /// \brief Returns true if the term t is an expression for multiple possible sorts
-    inline bool is_multiple_possible_sorts(atermpp::aterm_appl p) {
+    inline bool is_multiple_possible_sorts(const atermpp::aterm_appl& p) {
       return core::detail::gsIsSortsPossible(p);
     }
 
@@ -95,57 +95,12 @@ namespace mcrl2 {
           assert(is_sort_expression(t));
         }
 
-        /// \brief Returns true iff this expression is a basic sort.
-        inline
-        bool is_basic_sort() const
-        {
-          return data::is_basic_sort(*this);
-        }
-
-        /// \brief Returns true iff this expression is a structured sort.
-        inline
-        bool is_structured_sort() const
-        {
-          return data::is_structured_sort(*this);
-        }
-
-        /// \brief Returns true iff this expression is a container sort.
-        inline
-        bool is_container_sort() const
-        {
-          return data::is_container_sort(*this);
-        }
-
-        /// \brief Returns true iff this expression is a function sort.
-        inline
-        bool is_function_sort() const
-        {
-          return data::is_function_sort(*this);
-        }
-
-        /// \brief Returns true iff this expression is an unknown sort.
-        inline
-        bool is_unknown_sort() const
-        {
-          return data::is_unknown_sort(*this);
-        }
-
-        /// \brief Returns true iff this expression is an expression representing multiple possible sorts.
-        inline
-        bool is_multiple_possible_sorts() const
-        {
-          return data::is_multiple_possible_sorts(*this);
-        }
-
-        /// \brief Returns true iff the expression represents a standard sort.
-        bool is_system_defined() const;
-
         /// \brief Returns the target sort of this expression.
         /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort.
         inline
         sort_expression target_sort() const
         {
-          if(is_function_sort())
+          if(is_function_sort(*this))
           {
             return atermpp::arg2(*this);
           }
@@ -168,56 +123,22 @@ namespace mcrl2 {
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename ForwardTraversalIterator >
     inline sort_expression_list make_sort_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return convert< sort_expression_list >(r);
+      return atermpp::convert< sort_expression_list >(r);
     }
 
     /// \brief Converts an iterator range to sort_expression_list
     /// \param r A range of sort expressions.
     template < typename ForwardTraversalIterator >
     inline sort_expression_vector make_sort_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return convert< sort_expression_vector >(r);
+      return atermpp::convert< sort_expression_vector >(r);
     }
 
     /// \brief Converts a vector to a sort_expression_list
     /// \param r A range of sort expressions.
     template < typename Expression >
-    inline sort_expression_list make_sort_expresion_list(atermpp::vector< Expression >const& r) {
-      return convert< sort_expression_list >(r);
+    inline sort_expression_list make_sort_expression_list(atermpp::vector< Expression >const& r) {
+      return atermpp::convert< sort_expression_list >(r);
     }
-
-    /// \brief Unknown sort.
-    ///
-    /// An unknown sort expresses a sort expression that represents the unknown
-    /// sort expression.
-    class unknown_sort: public sort_expression
-    {
-      /// \brief Default constructor for the unknown sort expression.
-      /// \details This should only be used before and during type checking!
-      public:
-        unknown_sort()
-          : sort_expression(mcrl2::core::detail::gsMakeSortUnknown())
-        {}
-     };
-
-     /// \brief Multiple possible sorts.
-     ///
-     /// An expression that expresses that one of multiple sorts is possible.
-     /// \details Only for use in the type checker!
-     class multiple_possible_sorts: public sort_expression
-     {
-       public:
-         /// \brief Default constructor. Denoting that no sorts are possible.
-         multiple_possible_sorts()
-          : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(sort_expression_list()))
-         {}
-
-         /// \brief Constructor that denotes that the sorts in s are possible.
-         /// \param s A container of possible sorts.
-         template <typename Container>
-         multiple_possible_sorts(Container const& s)
-           : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(convert<atermpp::aterm_list>(s)))
-         {}
-     };
 
   } // namespace data
 

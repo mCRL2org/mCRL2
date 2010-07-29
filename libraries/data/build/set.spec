@@ -8,13 +8,14 @@
 %
 % Specification of the Set data sort.
 
+#using S
 #include bool.spec
 #include fset.spec
 
 sort Set(S) <"set_">;
 
-map @set <"setconstructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
-    {} <"emptyset"> : Set(S);
+cons @set <"setconstructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
+map {} <"emptyset"> : Set(S);
     @setfset <"setfset"> : FSet(S) <"arg"> -> Set(S);
     @setcomp <"setcomprehension"> : (S -> Bool) <"arg"> -> Set(S);
     in <"setin"> : S <"left"> # Set(S) <"right"> -> Bool;
@@ -43,8 +44,7 @@ eqn {}  =  @set(@false_, @fset_empty);
     ==(f, g)  ->  ==(@set(f, s), @set(g, t))  =  ==(s, t);
     !=(f, g)  ->  ==(@set(f, s), @set(g, t))  =  forall(c:S, ==(in(c, @set(f, s)), in(c, @set(g, t))));
     <(x, y)  =  &&(<=(x, y), !=(x, y));
-    ==(f, g)  ->  <=(@set(f, s), @set(g, t))  =  @fset_lte(f, s, t);
-    !=(f, g)  ->  <=(@set(f, s), @set(g, t))  =  forall(c:S, =>(in(c, @set(f, s)), in(c, @set(g, t))));
+    <=(x,y) = ==(*(x,y),x);
     !(@set(f, s))  =  @set(@not_(f), s);
     +(@set(f, s), @set(g, t))  =  @set(@or_(f, g), @fset_union(f, g, s, t));
     *(@set(f, s), @set(g, t))  =  @set(@and_(f, g), @fset_inter(f, g, s, t));

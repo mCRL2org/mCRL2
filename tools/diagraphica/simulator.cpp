@@ -3123,7 +3123,7 @@ void Simulator::animate()
 
 
 // ---------------------------------------
-void Simulator::onTimer( wxTimerEvent &e )
+void Simulator::onTimer( wxTimerEvent &/*e*/ )
 // ---------------------------------------
 {
     if ( timeAlphaMS >= timeTotalMS )

@@ -5,13 +5,11 @@ project libraries/aterm/example
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
-exe allocator : allocator.cpp : ;
 exe std_container : std_container.cpp : ;
 exe algorithm : algorithm.cpp : ;
 
 install dist
    :
-     allocator
      std_container
      algorithm
    :

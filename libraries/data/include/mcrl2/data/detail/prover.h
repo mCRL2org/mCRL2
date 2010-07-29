@@ -12,6 +12,7 @@
 #define PROVER_H
 
 #include "aterm2.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/manipulator.h"
@@ -84,25 +85,95 @@ class Prover {
     time_t f_deadline;
   public:
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
-    Prover(
-      const data_specification &a_data_spec,
+    Prover(const data_specification &a_data_spec,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
-      int a_time_limit = 0
-    );
+      int a_time_limit = 0)
+    {
+      f_time_limit = a_time_limit;
+      f_processed = false;
+
+      switch (a_rewrite_strategy) {
+        case (mcrl2::data::rewriter::innermost): {
+          f_rewriter = createRewriter(a_data_spec, GS_REWR_INNER);
+          f_info = new AI_Inner(f_rewriter);
+          f_manipulator = new AM_Inner(f_rewriter, f_info);
+          break;
+        }
+        case (mcrl2::data::rewriter::jitty): {
+          f_rewriter = createRewriter(a_data_spec, GS_REWR_JITTY);
+          f_info = new AI_Jitty(f_rewriter);
+          f_manipulator = new AM_Jitty(f_rewriter, f_info);
+          break;
+        }
+#ifdef MCRL2_INNERC_AVAILABLE
+        case (mcrl2::data::rewriter::innermost_compiling): {
+          throw mcrl2::runtime_error("The compiled innermost rewriter is not supported by the prover (only jitty or inner are supported).");
+          break;
+        }
+#endif
+        case (mcrl2::data::rewriter::innermost_prover): {
+          throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
+          break;
+        }
+#ifdef MCRL2_INNERC_AVAILABLE
+        case (mcrl2::data::rewriter::innermost_compiling_prover): {
+          throw mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
+          break;
+        }
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
+        case (mcrl2::data::rewriter::jitty_compiling): {
+          throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover (only jitty or inner are supported).");
+          break;
+        }
+#endif
+        case (mcrl2::data::rewriter::jitty_prover): {
+          throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
+          break;
+        }
+#ifdef MCRL2_JITTYC_AVAILABLE
+        case (mcrl2::data::rewriter::jitty_compiling_prover): {
+          throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
+          break;
+        }
+#endif
+        default: {
+          throw mcrl2::runtime_error("Unknown type of rewriter.");
+          break;
+        }
+      }
+    }
 
     /// \brief Destroys Prover::f_manipulator, Prover::f_info and Prover::f_rewriter.
-    virtual ~Prover();
+    virtual ~Prover()
+    {
+      delete f_manipulator;
+      f_manipulator = 0;
+      delete f_info;
+      f_info = 0;
+      delete f_rewriter;
+      f_rewriter = 0;
+      core::gsDebugMsg("Rewriter, ATerm_Info and ATerm_Manipulator have been freed.\n");
+    }
 
     /// \brief Sets Prover::f_formula to a_formula.
     /// precondition: the argument passed as parameter a_formula is an expression of sort Bool in internal mCRL2 format
-    void set_formula(ATermAppl a_formula);
+    void set_formula(ATermAppl a_formula)
+    {
+      f_formula = a_formula;
+      f_processed = false;
+      core::gsDebugMsg("The formula has been set.\n");
+    }
 
     /// \brief Sets Prover::f_time_limit to the value a_time_limit.
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     /// precondition: the argument passed as parameter a_equations is a specification of data equations in internal mCRL2
     /// format
-    void set_time_limit(int a_time_limit);
+    void set_time_limit(int a_time_limit)
+    {
+      f_time_limit = a_time_limit;
+    }
 
     /// \brief Indicates whether or not the formula Prover::f_formula is a tautology.
     /// precondition: the method Prover::set_formula has been called
@@ -121,7 +192,10 @@ class Prover {
     virtual ATermAppl get_counter_example() = 0;
 
     /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
-    Rewriter *get_rewriter();
+    Rewriter *get_rewriter()
+    {
+      return f_rewriter;
+    }
 };
     }
   }

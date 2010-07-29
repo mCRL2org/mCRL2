@@ -16,6 +16,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
@@ -29,6 +30,7 @@ using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::utilities;
 
 class pbes_rewriter : public squadt_tool< pbes_rewriter_tool<rewriter_tool<input_output_tool> > >
 {
@@ -92,6 +94,12 @@ class pbes_rewriter : public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          pbesrewr(p, pbesr);
+          break;
+        }
+        case pfnf:
+        {
+          pfnf_rewriter<pbes_expression> pbesr;
           pbesrewr(p, pbesr);
           break;
         }
@@ -175,9 +183,25 @@ class pbes_rewriter : public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
 #endif
 };
 
+class pbes_rewriter_gui: public mcrl2_gui_tool<pbes_rewriter> {
+public:
+	pbes_rewriter_gui() {
+
+		std::vector<std::string> values;
+
+		values.clear();
+		values.push_back("simplify");
+		values.push_back("quantifier-all");
+		values.push_back("quantifier-finite");
+		values.push_back("pfnf");
+		m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
+
+                add_rewriter_widget();
+	}
+};
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return pbes_rewriter().execute(argc, argv);
+  return pbes_rewriter_gui().execute(argc, argv);
 }

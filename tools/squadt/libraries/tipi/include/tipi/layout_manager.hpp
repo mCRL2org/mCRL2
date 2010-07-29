@@ -83,7 +83,7 @@ namespace tipi {
 
       /** \brief Sets left margin */
       inline margins& set_left(const unsigned int nleft) {
-        m_left = left;
+        m_left = nleft;
 
         return *this;
       }

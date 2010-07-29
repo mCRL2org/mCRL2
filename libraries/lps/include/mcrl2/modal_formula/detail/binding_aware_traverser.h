@@ -52,7 +52,7 @@ namespace detail {
       {
         v.push_back(i->lhs());
       }
-      return data::convert<data::variable_list>(v);
+      return atermpp::convert<data::variable_list>(v);
     }
 
     /// \brief Traverses a forall quantifier

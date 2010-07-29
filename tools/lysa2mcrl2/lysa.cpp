@@ -191,21 +191,25 @@ namespace lysa
         {
                 return join(*this, ", ");
         }
-        Indices::Indices(E_ptr i)
+
+        Indices::Indices(E_ptr i, bool isShort)
         {
-                std::string s = static_pointer_cast<String>(i)->s;
-                push_back(s);
+          std::string s = static_pointer_cast<String>(i)->s;
+          if(isShort)
+          {
+            BOOST_FOREACH(char c, s)
+            {
+              string q = "";
+              q += c;
+              push_back(q);
+            }
+          }
+          else
+          {
+            push_back(s);
+          }
         }
-        //version for splitting every character into a separate index
-        Indices::Indices(E_ptr s, bool isShort)
-        {
-                BOOST_FOREACH(char c, static_pointer_cast<String>(s)->s)
-                {
-                        string q = "";
-                        q += c;
-                        push_back(q);
-                }
-        }
+
         void Indices::push_back(string s)
         {
                 string_list::push_back(process_info->options.prefix + s);

@@ -312,7 +312,7 @@ Value* AttrDiscr::mapToValue( double key )
 // ---------------------------------------
 {
     size_t idx = static_cast <size_t> (key);
-    if ( 0 <= idx && idx < curMap.size() )
+    if ( idx < curMap.size() )
         return *curMap[idx];
     else
         throw mcrl2::runtime_error(

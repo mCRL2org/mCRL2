@@ -12,10 +12,9 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/binding_aware_traverser.h"
 #include "mcrl2/data/detail/sort_traverser.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -43,7 +42,7 @@ class identity_traverser: public mcrl2::data::detail::traverser<identity_travers
 class identity_sort_traverser: public mcrl2::data::detail::sort_traverser<identity_sort_traverser>
 {
   public:
-    typedef mcrl2::data::detail::traverser<identity_sort_traverser> super;
+    typedef mcrl2::data::detail::sort_traverser<identity_sort_traverser> super;
       
     using super::enter;
     using super::leave;
@@ -79,7 +78,7 @@ class my_traverser: public mcrl2::data::detail::traverser<my_traverser>
     my_traverser() : m_sort_count(0)
     { }
 
-    void enter(sort_expression const& s)
+    void enter(sort_expression const& /* s */)
     {
       m_sort_count++;
     }
@@ -112,7 +111,7 @@ class my_sort_traverser: public mcrl2::data::detail::sort_traverser<my_sort_trav
     my_sort_traverser() : m_sort_count(0)
     { }
 
-    void enter(sort_expression const& s)
+    void enter(sort_expression const& /* s */)
     {
       m_sort_count++;
     }
@@ -213,19 +212,19 @@ class custom_sort_traverser : public mcrl2::data::detail::traverser<Derived>
 
     void operator()(sort_expression const& e)
     {
-      if (e.is_basic_sort())
+      if (is_basic_sort(e))
       {
         static_cast<Derived&>(*this)(basic_sort(e));
       }
-      else if (e.is_container_sort())
+      else if (is_container_sort(e))
       {
         static_cast<Derived&>(*this)(container_sort(e));
       }
-      else if (e.is_structured_sort())
+      else if (is_structured_sort(e))
       {
         static_cast<Derived&>(*this)(structured_sort(e));
       }
-      else if (e.is_function_sort())
+      else if (is_function_sort(e))
       {
         static_cast<Derived&>(*this)(function_sort(e));
       }

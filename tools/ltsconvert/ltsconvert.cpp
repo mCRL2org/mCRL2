@@ -14,14 +14,17 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/exception.h"
 
 using namespace mcrl2::lts;
+using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -83,7 +86,6 @@ class t_tool_options
     lts_type        intype;
     lts_type        outtype;
     lts_equivalence equivalence;
-    lts_eq_options  eq_opts;
     std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
     bool            print_dot_state;
     bool            determinise;
@@ -91,8 +93,6 @@ class t_tool_options
 
     inline t_tool_options() : intype(lts_none), outtype(lts_none), equivalence(lts_eq_none),
                        print_dot_state(true), determinise(false), check_reach(true) {
-
-      eq_opts.reduce.add_class_to_state = false;
     }
 
     inline std::string source_string() const {
@@ -131,27 +131,35 @@ class t_tool_options
       }
     }
 
-    void read_lts(lts& l) const {
+    void read_lts(lts& l) const 
+    {
       gsVerboseMsg("reading LTS from %s...\n", source_string().c_str());
 
       lts_extra extra = get_extra(intype);
 
-      bool success = false;
-      if (infilename.empty()) {
-        success = l.read_from(std::cin,intype,extra);
+      try
+      { 
+        if (infilename.empty()) 
+        {
+          lts l_temp(std::cin,intype,extra);
+          l_temp.swap(l);
+        }
+        else 
+        {
+          mcrl2::lts::detail::read_from(l,infilename,intype,extra);
+        }
       }
-      else {
-        success = l.read_from(infilename,intype,extra);
-      }
-      if (!success) {
+      catch (mcrl2::runtime_error &e)
+      {
         throw mcrl2::runtime_error("cannot read LTS from " + source_string() +
-                                               "\nretry with -v/--verbose for more information");
+                                   ".\nretry with -v/--verbose for more information.\n" +
+                                   e.what());
       }
 
       if ( check_reach ) {
         gsVerboseMsg("checking reachability of input LTS...\n");
 
-        if ( !l.reachability_check(true) ) {
+        if ( !reachability_check(l,true) ) {
           gsWarningMsg("not all states of the input LTS are reachable from the initial state; removed unreachable states to ensure correct behaviour in LTS tools (including this one)!\n");
         }
       }
@@ -168,7 +176,7 @@ class t_tool_options
       if ( outtype == lts_none ) {
         gsVerboseMsg("trying to detect output format by extension...\n");
 
-        outtype = lts::guess_format(outfilename);
+        outtype = mcrl2::lts::detail::guess_format(outfilename);
 
         if ( outtype == lts_none ) {
           if ( !lpsfile.empty() ) {
@@ -182,21 +190,26 @@ class t_tool_options
       }
     }
 
-    void write_lts(lts& l) const {
-      bool success = false;
-
+    void write_lts(lts& l) const 
+    {
       gsVerboseMsg("writing LTS to %s...\n", target_string().c_str());
 
-      if (outfilename.empty()) {
-        success = l.write_to(std::cout,outtype,get_extra(outtype, "stdout"));
+      try
+      {
+        if (outfilename.empty()) 
+        {
+          l.write_to(std::cout,outtype,get_extra(outtype, "stdout"));
+        }
+        else 
+        {
+          l.write_to(outfilename, outtype, get_extra(outtype, get_base(outfilename)));
+        }
       }
-      else {
-        success = l.write_to(outfilename, outtype, get_extra(outtype, get_base(outfilename)));
-      }
-
-      if (!success) {
+      catch (mcrl2::runtime_error &e)
+      {
         throw mcrl2::runtime_error("cannot write LTS to " + target_string() +
-                                               "\nretry with -v/--verbose for more information");
+                                        "\nretry with -v/--verbose for more information.\n" + 
+                                        e.what());
       }
     }
 };
@@ -221,7 +234,7 @@ class ltsconvert_tool : public ltsconvert_base
         "The output format is determined by the extension of OUTFILE, whereas the input\n"
         "format is determined by the content of INFILE. Options --in and --out can be\n"
         "used to force the input and output formats. The supported formats are:\n"
-        + lts::supported_lts_formats_text(lts_mcrl2)
+        + mcrl2::lts::detail::supported_lts_formats_text(lts_mcrl2)
       )
     {
     }
@@ -237,9 +250,9 @@ class ltsconvert_tool : public ltsconvert_base
 
       if ( tool_options.equivalence != lts_eq_none )
       {
-        gsVerboseMsg("reducing LTS (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence).c_str());
+        gsVerboseMsg("reducing LTS (modulo %s)...\n", name_of_equivalence(tool_options.equivalence).c_str());
         gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
-        l.reduce(tool_options.equivalence, tool_options.eq_opts);
+        reduce(l,tool_options.equivalence);
         gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       }
 
@@ -247,7 +260,7 @@ class ltsconvert_tool : public ltsconvert_base
       {
         gsVerboseMsg("determinising LTS...\n");
         gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-        l.determinise();
+        determinise(l);
         gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       }
 
@@ -256,7 +269,7 @@ class ltsconvert_tool : public ltsconvert_base
       return true;
     }
 
-  private:
+  protected:
     void add_options(interface_description &desc)
     {
       ltsconvert_base::add_options(desc);
@@ -276,12 +289,8 @@ class ltsconvert_tool : public ltsconvert_base
           "use FORMAT as the output format", 'o');
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
           "generate an equivalent LTS, preserving equivalence NAME:\n"
-          +lts::supported_lts_equivalences_text(allowed_eqs())
+          +supported_lts_equivalences_text(allowed_eqs())
           , 'e');
-      desc.add_option("add",
-          "do not minimise but save a copy of the original LTS extended with a "
-          "state parameter indicating the bisimulation class a state belongs to "
-          "(only for mCRL2)", 'a');
       desc.add_option("tau", make_mandatory_argument("ACTNAMES"),
           "consider actions with a name in the comma separated list ACTNAMES to "
           "be internal (tau) actions in addition to those defined as such by "
@@ -313,7 +322,7 @@ class ltsconvert_tool : public ltsconvert_base
           std::cerr << "warning: multiple input formats specified; can only use one\n";
         }
 
-        tool_options.intype = lts::parse_format(parser.option_argument("in"));
+        tool_options.intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
 
         if (tool_options.intype == lts_none) {
           std::cerr << "warning: format '" << parser.option_argument("in") <<
@@ -325,7 +334,7 @@ class ltsconvert_tool : public ltsconvert_base
           std::cerr << "warning: multiple output formats specified; can only use one\n";
         }
 
-        tool_options.outtype = lts::parse_format(parser.option_argument("out"));
+        tool_options.outtype = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
         if (tool_options.outtype == lts_none) {
           std::cerr << "warning: format '" << parser.option_argument("out") <<
@@ -335,7 +344,7 @@ class ltsconvert_tool : public ltsconvert_base
 
       if (parser.options.count("equivalence")) {
 
-        tool_options.equivalence = lts::parse_equivalence(
+        tool_options.equivalence = parse_equivalence(
             parser.option_argument("equivalence"));
 
         if ( allowed_eqs().count(tool_options.equivalence) == 0 )
@@ -353,7 +362,6 @@ class ltsconvert_tool : public ltsconvert_base
       tool_options.determinise                       = 0 < parser.options.count("determinise");
       tool_options.check_reach                       = parser.options.count("no-reach") == 0;
       tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
-      tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
 
       if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
         parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
@@ -418,13 +426,13 @@ static const char* option_selected_output_format             = "selected_output_
 static const char* option_no_reachability_check              = "no_reachability_check";                 ///< do not check reachability of input LTS
 static const char* option_no_state_information               = "no_state_information";                  ///< dot format output specific option to not save state information
 static const char* option_tau_actions                        = "tau_actions";                           ///< the actions that should be recognised as tau
-static const char* option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 specific]
 
 void ltsconvert_tool::set_capabilities(tipi::tool::capabilities& c) const {
-  std::set< lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+  std::set< lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
 
-  for (std::set< lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-    c.add_input_configuration(lts_file_for_input, tipi::mime_type(lts::mime_type_for_type(*i)), tipi::tool::category::conversion);
+  for (std::set< lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) 
+  {
+    c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(*i)), tipi::tool::category::conversion);
   }
 }
 
@@ -454,7 +462,7 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
                 append(format_selector.associate(mcrl2::lts::lts_dot, "dot")),
            margins(0,5,0,5));
 
-  text_field& lps_file_field        = d.create< text_field >();
+  file_control& lps_file_field        = d.create< file_control >();
   checkbox&   check_reachability    = d.create< checkbox >();
   checkbox&   add_state_information = d.create< checkbox >();
 
@@ -479,13 +487,11 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
     append(transformation_selector.associate(lts_eq_sim, "reduction modulo strong simulation equivalence")).
     append(transformation_selector.associate(lts_eq_trace, "determinisation and reduction modulo trace equivalence")).
     append(transformation_selector.associate(lts_eq_weak_trace, "determinisation and reduction modulo weak trace equivalence")).
-    append(transformation_selector.associate(lts_eq_isomorph, "determinisation")); // abusing lts_eq_isomorph for determinisation
+    append(transformation_selector.associate(lts_red_determinisation, "determinisation")); 
 
-  checkbox&   bisimulation_add_eq_classes = d.create< checkbox >();
   text_field& tau_field                   = d.create< text_field >();
 
   m.append(d.create< label >()).
-    append(bisimulation_add_eq_classes.set_label("Add equivalence classes to state instead of reducing LTS")).
     append(d.create< horizontal_box >().
                 append(d.create< label >().set_text("Internal (tau) actions : ")).
                 append(tau_field.set_text("tau")));
@@ -519,9 +525,6 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
   if (c.option_exists(option_no_state_information)) {
     add_state_information.set_status(c.get_option_argument< bool >(option_no_state_information));
   }
-  if (c.option_exists(option_add_bisimulation_equivalence_class)) {
-    bisimulation_add_eq_classes.set_status(c.get_option_argument< bool >(option_add_bisimulation_equivalence_class));
-  }
   if (c.option_exists(option_tau_actions)) {
     tau_field.set_text(c.get_option_argument< std::string >(option_tau_actions));
   }
@@ -533,8 +536,8 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
 
   /* Add output file to the configuration */
   std::string     output_name(c.get_output_name("." +
-                    lts::extension_for_type(format_selector.get_selection())));
-  tipi::mime_type output_type(tipi::mime_type(lts::mime_type_for_type(format_selector.get_selection())));
+                    mcrl2::lts::detail::extension_for_type(format_selector.get_selection())));
+  tipi::mime_type output_type(tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(format_selector.get_selection())));
 
   if (c.output_exists(lts_file_for_output)) {
     tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
@@ -573,14 +576,6 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
     c.add_option(option_selected_transformation).set_argument_value< 0 >(selected_transformation);
   }
   c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-
-  if ((selected_transformation == lts_eq_bisim || selected_transformation == lts_eq_branching_bisim)) {
-    c.add_option(option_add_bisimulation_equivalence_class).
-        set_argument_value< 0 >(bisimulation_add_eq_classes.get_status());
-  }
-  else {
-    c.remove_option(option_add_bisimulation_equivalence_class);
-  }
 
   c.add_option(option_no_reachability_check).set_argument_value< 0 >(check_reachability.get_status());
 
@@ -624,8 +619,8 @@ bool ltsconvert_tool::perform_task(tipi::configuration& c) {
     tool_options.check_reach = !(c.get_option_argument< bool >(option_no_reachability_check));
   }
 
-  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_input).type().sub_type());
-  tool_options.outtype = lts::parse_format(c.get_output(lts_file_for_output).type().sub_type());
+  tool_options.intype  = mcrl2::lts::detail::parse_format(c.get_output(lts_file_for_input).type().sub_type());
+  tool_options.outtype = mcrl2::lts::detail::parse_format(c.get_output(lts_file_for_output).type().sub_type());
   tool_options.set_source(c.get_input(lts_file_for_input).location());
   tool_options.set_target(c.get_output(lts_file_for_output).location());
 
@@ -634,13 +629,10 @@ bool ltsconvert_tool::perform_task(tipi::configuration& c) {
 
     tool_options.equivalence = method;
 
-    if (method == mcrl2::lts::lts_eq_isomorph) {
+    if (method == mcrl2::lts::lts_red_determinisation) {
       tool_options.determinise = true;
     }
 
-    if (c.option_exists(option_add_bisimulation_equivalence_class)) {
-      tool_options.eq_opts.reduce.add_class_to_state = c.get_option_argument< bool >(option_add_bisimulation_equivalence_class);
-    }
     if (c.option_exists(option_tau_actions)) {
       set_tau_actions(tool_options.tau_actions, c.get_option_argument< std::string >(option_tau_actions));
     }
@@ -654,10 +646,40 @@ bool ltsconvert_tool::perform_task(tipi::configuration& c) {
 }
 #endif
 
+class ltsconvert_gui_tool: public mcrl2_gui_tool<ltsconvert_tool> {
+public:
+	ltsconvert_gui_tool() {
+
+		std::vector<std::string> values;
+
+		m_gui_options["determinise"] = create_checkbox_widget();
+
+		values.clear();
+		values.push_back("bisim");
+		values.push_back("branching-bisim");
+		values.push_back("dpbranching-bisim");
+		values.push_back("sim");
+		values.push_back("trace");
+		values.push_back("weak-trace");
+		m_gui_options["equivalence"] = create_radiobox_widget(values);
+		m_gui_options["lps"] = create_filepicker_widget();
+		m_gui_options["no-state"] = create_checkbox_widget();
+		m_gui_options["no-reach"] = create_checkbox_widget();
+		m_gui_options["tau"] = create_textctrl_widget();
+
+		//-iFORMAT, --in=FORMAT    use FORMAT as the input format
+		//-oFORMAT, --out=FORMAT   use FORMAT as the output format
+
+	}
+};
+
+
+
+
 
 int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return ltsconvert_tool().execute(argc,argv);
+  return ltsconvert_gui_tool().execute(argc,argv);
 }

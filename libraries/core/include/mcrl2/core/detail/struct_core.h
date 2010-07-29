@@ -26,7 +26,7 @@ namespace mcrl2 {
 
 //Global precondition: the ATerm library has been initialised
 
-//--- begin generated code
+//--- start generated code ---//
 // ActAnd
 inline
 AFun initAFunActAnd(AFun& f)
@@ -3436,6 +3436,14 @@ ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
   // Could be replaced by at test for equal types.
 
   assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
   return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
 }
 
@@ -3738,7 +3746,7 @@ ATermAppl gsMakeWhr(ATermAppl DataExpr_0, ATermList WhrDecl_1)
 {
   return ATmakeAppl2(gsAFunWhr(), (ATerm) DataExpr_0, (ATerm) WhrDecl_1);
 }
-//--- end generated code
+//--- end generated code ---//
 
 //Conversion between strings and quoted ATermAppl's
 //-------------------------------------------------

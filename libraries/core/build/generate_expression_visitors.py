@@ -169,7 +169,7 @@ struct MYEXPRESSION_builder<void>
 EXPRESSION_VISITOR_NODE_TEXT = r'''
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual bool visit_NODE(const QUALIFIED_NODE& xEXTRA_ARG)
+  virtual bool visit_NODE(const QUALIFIED_NODE& /* x */ EXTRA_ARG)
   {
     return continue_recursion;
   }
@@ -182,7 +182,7 @@ EXPRESSION_VISITOR_NODE_TEXT = r'''
 EXPRESSION_BUILDER_NODE_TEXT = r'''              
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual MYEXPRESSION visit_NODE(const QUALIFIED_NODE& xEXTRA_ARG)
+  virtual MYEXPRESSION visit_NODE(const QUALIFIED_NODE& /* x */ EXTRA_ARG)
   {
     return MYEXPRESSION();
   }
@@ -240,7 +240,6 @@ def make_expression_visitor(filename, expression, text):
             text = text + '  if (result) {\n'
             for i in range(len(types)):
                 if extract_type(types[i]) == expression:
-                    #text = text + '    visit(%sEXTRA_ARG);\n' % names[i]
                     text = text + '    visit(%s(x).%s()EXTRA_ARG);\n' % (node, names[i])
             text = text + '  }\n'
         text = text + '  leave_%s();\n' % node
@@ -348,11 +347,11 @@ def make_is_functions(filename, text):
         rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, aterm)
     insert_text_in_file(filename, rtext, 'generated is-functions')
 
-make_expression_visitor('../../process/include/mcrl2/process/process_expression_visitor.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
-make_expression_builder('../../process/include/mcrl2/process/process_expression_builder.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
-make_is_functions(      '../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES)
-
-# N.B. This doesn't work, since the pbes expression visitors need to be patched for the value true
-# make_expression_visitor('../../pbes/include/mcrl2/pbes/pbes_expression_visitor.h', 'pbes_expression', PBES_EXPRESSION_CLASSES)
-# make_expression_builder('../../pbes/include/mcrl2/pbes/pbes_expression_builder.h', 'pbes_expression', PBES_EXPRESSION_CLASSES)
-# make_is_functions('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES)
+if __name__ == "__main__":
+    make_expression_visitor('../../process/include/mcrl2/process/process_expression_visitor.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
+    make_expression_builder('../../process/include/mcrl2/process/process_expression_builder.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
+    make_is_functions(      '../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES)
+    # N.B. This doesn't work, since the pbes expression visitors need to be patched for the value true
+    # make_expression_visitor('../../pbes/include/mcrl2/pbes/pbes_expression_visitor.h', 'pbes_expression', PBES_EXPRESSION_CLASSES)
+    # make_expression_builder('../../pbes/include/mcrl2/pbes/pbes_expression_builder.h', 'pbes_expression', PBES_EXPRESSION_CLASSES)
+    # make_is_functions('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES)

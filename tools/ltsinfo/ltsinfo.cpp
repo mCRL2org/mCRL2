@@ -16,34 +16,18 @@
 #include <boost/lexical_cast.hpp>
 
 #include "aterm2.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-
-//Temporary workaround for the passing of the determinism
-
-static const std::set<mcrl2::lts::lts_equivalence> &initialise_allowed_eqs()
-{
-  using namespace mcrl2::lts;
-  static std::set<lts_equivalence> s;
-  s.insert(lts_eq_bisim);
-  s.insert(lts_eq_branching_bisim);
-  s.insert(lts_eq_divergence_preserving_branching_bisim);
-  s.insert(lts_eq_isomorph);
-  return s;
-}
-static const std::set<mcrl2::lts::lts_equivalence> &allowed_eqs()
-{
-  static const std::set<mcrl2::lts::lts_equivalence> &s = initialise_allowed_eqs();
-  return s;
-}
 
 typedef squadt_tool< input_tool > ltsinfo_base;
 class ltsinfo_tool : public ltsinfo_base
@@ -53,7 +37,6 @@ class ltsinfo_tool : public ltsinfo_base
 
     std::string                 infilename;
     mcrl2::lts::lts_type        intype;
-    mcrl2::lts::lts_equivalence determinism_equivalence;
 
   public:
 
@@ -66,14 +49,13 @@ class ltsinfo_tool : public ltsinfo_base
         "The format of INFILE is determined by its contents. "
         "The option --in can be used to force the format for INFILE. "
         "The supported formats are:\n"
-        +mcrl2::lts::lts::supported_lts_formats_text()
+        +mcrl2::lts::detail::supported_lts_formats_text()
       ),
-      intype(mcrl2::lts::lts_none),
-      determinism_equivalence(mcrl2::lts::lts_eq_isomorph)
+      intype(mcrl2::lts::lts_none)
     {
     }
 
-  private:
+  protected:
 
     void add_options(interface_description &desc)
     {
@@ -82,18 +64,6 @@ class ltsinfo_tool : public ltsinfo_base
       ltsinfo_base::add_options(desc);
 
       desc.
-        add_option("equivalence", make_mandatory_argument("NAME"),
-          "use equivalence NAME for deterministic check:\n"
-          "  '" + lts::string_for_equivalence(lts_eq_isomorph) + "' for "
-                + lts::name_of_equivalence(lts_eq_isomorph) + " (default),\n"
-          "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
-                + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
-          "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
-                + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
-          "  '" + lts::string_for_equivalence(lts_eq_divergence_preserving_branching_bisim) + "' for "
-                + lts::name_of_equivalence(lts_eq_divergence_preserving_branching_bisim) + ", or\n"
-          "  'none' for not performing the check at all",
-          'e').
         add_option("in", make_mandatory_argument("FORMAT"),
           "use FORMAT as the input format", 'i');
     }
@@ -103,16 +73,6 @@ class ltsinfo_tool : public ltsinfo_base
       using namespace mcrl2::lts;
 
       ltsinfo_base::parse_options(parser);
-
-      if (parser.options.count("equivalence")) {
-        determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
-        if (allowed_eqs().count(determinism_equivalence) == 0 &&
-            parser.option_argument("equivalence") != "none")
-        {
-          parser.error("option -e/--equivalence has illegal argument '" +
-              parser.option_argument("equivalence") + "'");
-        }
-      }
 
       if (0 < parser.arguments.size()) {
         infilename = parser.arguments[0];
@@ -126,7 +86,7 @@ class ltsinfo_tool : public ltsinfo_base
           parser.error("multiple input formats specified; can only use one");
         }
 
-        intype = lts::parse_format(parser.option_argument("in"));
+        intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
         if (intype == lts_none || intype == lts_dot)  {
           parser.error("option -i/--in has illegal argument '" +
             parser.option_argument("in") + "'");
@@ -136,28 +96,43 @@ class ltsinfo_tool : public ltsinfo_base
 
   public:
 
-    bool run() {
+    bool run() 
+    {
       using namespace mcrl2::lts;
+      using namespace mcrl2::lts::detail;
 
       mcrl2::lts::lts l;
-
-      if (infilename.empty()) {
+      if (infilename.empty()) 
+      {
         gsVerboseMsg("reading LTS from stdin...\n");
 
-        if ( !l.read_from(std::cin, intype) ) {
-          throw mcrl2::runtime_error("cannot read LTS from stdin\nretry with -v/--verbose for more information");
+        try 
+        { mcrl2::lts::lts l_temp(std::cin, intype);
+          l.swap(l_temp);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string("cannot read LTS from stdin\nretry with -v/--verbose for more information.\n") +
+                                      e.what());
         }
       }
-      else {
+      else 
+      {
         gsVerboseMsg("reading LTS from '%s'...\n",infilename.c_str());
 
-        if (!l.read_from(infilename,intype)) {
-          throw mcrl2::runtime_error("cannot read LTS from file '" + infilename +
-                                             "'\nretry with -v/--verbose for more information");
+        try 
+        { mcrl2::lts::lts l_temp(infilename,intype);
+          l.swap(l_temp);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error(std::string("cannot read LTS from file '") + infilename +
+                                             "'\nretry with -v/--verbose for more information.\n" +
+                                             e.what());
         }
       }
 
-      std::cout << "LTS format: " << lts::string_for_type(l.get_type()) << std::endl
+      std::cout << "LTS format: " << string_for_type(l.get_type()) << std::endl
            << "Number of states: " << l.num_states() << std::endl
            << "Number of labels: " << l.num_labels() << std::endl
            << "Number of transitions: " << l.num_transitions() << std::endl;
@@ -179,35 +154,30 @@ class ltsinfo_tool : public ltsinfo_base
         std::cout << "Created by: " << l.get_creator() << std::endl;
       }
       gsVerboseMsg("checking reachability...\n");
-      if ( !l.reachability_check() )
+      if ( !reachability_check(l) )
       {
         std::cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
       }
-      if ( determinism_equivalence != lts_eq_none )
-      {
-        gsVerboseMsg("checking whether LTS is deterministic (modulo %s)...\n",lts::name_of_equivalence(determinism_equivalence).c_str());
-        gsVerboseMsg("minimisation...\n");
 
-        l.reduce(determinism_equivalence);
-        gsVerboseMsg("deterministic check...\n");
-        if ( l.is_deterministic() )
-        {
-          std::cout << "LTS is deterministic (modulo " << lts::name_of_equivalence(determinism_equivalence) << ")" << std::endl;
-        } else {
-          std::cout << "LTS is not deterministic (modulo " << lts::name_of_equivalence(determinism_equivalence) << ")" << std::endl;
-        }
+      gsVerboseMsg("deterministic check...\n");
+      std::cout << "LTS is ";
+      if ( !is_deterministic(l) )
+      {
+        std::cout << "not ";
       }
+      std::cout << "deterministic." << std::endl;
 
       return true;
     }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+    void set_capabilities(tipi::tool::capabilities& c) const 
+    {
+      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
 
       for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-        c.add_input_configuration("lts_in", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::reporting);
+        c.add_input_configuration("lts_in", tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(*i)), tipi::tool::category::reporting);
       }
     }
 
@@ -227,33 +197,17 @@ class ltsinfo_tool : public ltsinfo_base
 
       layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
-      m.append(d.create< label >().set_text("Deterministic check:")).
-        append(d.create< horizontal_box >().
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_none, "None")).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_isomorph, "Isomorphism", true)).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_bisim, "Strong bisimilarity")).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_branching_bisim, "Branching bisimilarity")).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_divergence_preserving_branching_bisim, "Divergence preserving branching bisimilarity")));
-
       // Add okay button
       button& okay_button = d.create< button >().set_label("OK");
 
       m.append(d.create< label >().set_text(" ")).
         append(okay_button, layout::right);
 
-      // Set default values for options if the configuration specifies them
-      if (c.option_exists("determinism_equivalence")) {
-        determinism_selector.set_selection(
-            c.get_option_argument< mcrl2::lts::lts_equivalence >("determinism_equivalence", 0));
-      }
-
       // Display
       send_display_layout(d.manager(m));
 
       /* Wait for the OK button to be pressed */
       okay_button.await_change();
-
-      c.add_option("determinism_equivalence"). set_argument_value< 0 >(determinism_selector.get_selection());
 
       send_clear_display();
     }
@@ -264,8 +218,9 @@ class ltsinfo_tool : public ltsinfo_base
     }
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) {
-      using mcrl2::lts::lts;
+    bool perform_task(tipi::configuration& c) 
+    {
+      using namespace mcrl2::lts;
       using namespace tipi;
       using namespace tipi::layout;
       using namespace tipi::layout::elements;
@@ -273,12 +228,11 @@ class ltsinfo_tool : public ltsinfo_base
       tipi::configuration::object& input_object = c.get_input("lts_in");
 
       lts l;
-      mcrl2::lts::lts_type t = lts::parse_format(input_object.type().sub_type());
+      mcrl2::lts::lts_type t = mcrl2::lts::detail::parse_format(input_object.type().sub_type());
 
-      // Extract configuration
-      determinism_equivalence = c.get_option_argument< mcrl2::lts::lts_equivalence >("determinism_equivalence", 0);
-
-      if (l.read_from(input_object.location(), t)) {
+      try
+      {
+        mcrl2::lts::detail::read_from(l,input_object.location(), t);
         /* Create and add the top layout manager */
         tipi::tool_display d;
 
@@ -286,12 +240,7 @@ class ltsinfo_tool : public ltsinfo_base
 
         std::string deterministic("-");
 
-        if(determinism_equivalence != mcrl2::lts::lts_eq_none) {
-          l.reduce(determinism_equivalence);
-
-          deterministic = std::string(l.is_deterministic() ? "yes" : "no") + ", modulo " +
-                                 lts::name_of_equivalence(determinism_equivalence);
-        }
+        deterministic = std::string(is_deterministic(l) ? "yes" : "no");
 
         m.append(d.create< vertical_box >().set_default_alignment(layout::left).
                 append(d.create< label >().set_text("States (#):")).
@@ -322,20 +271,21 @@ class ltsinfo_tool : public ltsinfo_base
 
         n.append(m).
             append(d.create< label >().
-                 set_text("Input read from " + input_object.location() + " (" + lts::string_for_type(t) + " format)"),
+                 set_text("Input read from " + input_object.location() + " (" + mcrl2::lts::detail::string_for_type(t) + " format)"),
                         margins(5,0,5,20));
 
         gsVerboseMsg("checking reachability...\n");
-        if (!l.reachability_check()) {
+        if (!reachability_check(l)) {
             n.append(d.create< label >().set_text("Warning: some states are not reachable from the initial state!")).
               append(d.create< label >().set_text("(This might result in unspecified behaviour of LTS tools.)"));
         }
 
         send_display_layout(d.manager(n));
       }
-      else {
-        send_error("Could not read `" + c.get_input("lts_in").location() + "', corruption or incorrect format?\n");
-
+      catch (mcrl2::runtime_error &e)
+      {
+        send_error("Could not read `" + c.get_input("lts_in").location() + "', corruption or incorrect format?\n" +
+                          e.what());
         return (false);
       }
 
@@ -344,10 +294,22 @@ class ltsinfo_tool : public ltsinfo_base
 #endif
 };
 
+class ltsinfo_gui_tool: public mcrl2_gui_tool<ltsinfo_tool> {
+public:
+	ltsinfo_gui_tool() {
+
+		std::vector<std::string> values;
+
+		m_gui_options["counter-example"] = create_checkbox_widget();
+
+		//-iFORMAT, --in1=FORMAT   use FORMAT as the format for INFILE1 (or stdin)
+
+	}
+};
 
 int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return ltsinfo_tool().execute(argc, argv);
+  return ltsinfo_gui_tool().execute(argc, argv);
 }

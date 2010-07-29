@@ -33,6 +33,8 @@
 
 #include "ticpp.h"
 
+#include "mcrl2/utilities/basename.h"
+
 namespace squadt {
 
   /// \cond INTERNAL_DOCS
@@ -151,24 +153,33 @@ namespace utility {
       throw std::runtime_error("Expected XML tree value \"tool\"");
     } 
 
-    std::string location;
 
     tree->GetAttribute("name", &t.m_name);
-    tree->GetAttribute("location", &location);
+
+    mcrl2::utilities::basename basename;
+     
+    std::string location;
+
+    try{    
+      tree->GetAttribute("location", &location, true );
+    }
+    catch(...){
+      location = basename.get_executable_basename() + "/"+  t.m_name;
+#ifdef _WIN32
+      location.append(".exe");
+#endif
+
+#ifdef __APPLE__
+      std::string app;
+      app = tree->GetAttribute("macosx_bundle");
+      if (!(app.empty() || app.compare( "false" ) == 0) )
+      {	     
+        location.append(".app");
+      }
+#endif
+    }
 
     t.set_location(location);
-
-    if (!tree->NoChildren()) {
-      t.m_capabilities.reset(new tipi::tool::capabilities);
-
-      try {
-        tree->FirstChildElement("capabilities");
-
-        tipi::visitors::restore(*t.m_capabilities, *tree);
-      }
-      catch (...) {
-      }
-    }
   }
 
   /**

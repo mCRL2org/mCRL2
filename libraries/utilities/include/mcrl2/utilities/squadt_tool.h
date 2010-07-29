@@ -21,6 +21,10 @@ namespace mcrl2 {
       template < typename Tool >
       struct squadt_tool : public Tool {
         /// \brief Constructor.
+        squadt_tool()
+        {}
+
+        /// \brief Constructor.
         squadt_tool(const std::string& name,
                       const std::string& author,
                       const std::string& what_is,
@@ -43,6 +47,9 @@ namespace mcrl2 {
 # include "mcrl2/utilities/squadt_interface.h"
 # include "mcrl2/utilities/input_output_tool.h"
 # include "mcrl2/utilities/tipi_ext.h"
+#ifdef __LIBLTS_H
+#include "mcrl2/lts/lts_algorithm.h"
+#endif
 
 namespace mcrl2 {
   namespace utilities {
@@ -99,18 +106,18 @@ namespace mcrl2 {
 
             tipi::datatype::enumeration< mcrl2::lts::lts_equivalence > transformation_methods;
 
-            std::set< mcrl2::lts::lts_equivalence > const& equivalences(mcrl2::lts::lts::supported_lts_equivalences());
+            std::set< mcrl2::lts::lts_equivalence > const& equivalences(mcrl2::lts::supported_lts_equivalences());
 
             for (std::set< mcrl2::lts::lts_equivalence >::const_iterator i = equivalences.begin(); i != equivalences.end(); ++i) {
-              transformation_methods.add(*i, mcrl2::lts::lts::string_for_equivalence(*i));
+              transformation_methods.add(*i, mcrl2::lts::string_for_equivalence(*i));
             }
 
             tipi::datatype::enumeration< mcrl2::lts::lts_type > storage_types;
 
-            std::set< mcrl2::lts::lts_type > const& formats(mcrl2::lts::lts::supported_lts_formats());
+            std::set< mcrl2::lts::lts_type > const& formats(mcrl2::lts::detail::supported_lts_formats());
 
             for (std::set< mcrl2::lts::lts_type >::const_iterator i = formats.begin(); i != formats.end(); ++i) {
-              storage_types.add(*i, mcrl2::lts::lts::string_for_type(*i));
+              storage_types.add(*i, mcrl2::lts::detail::string_for_type(*i));
             }
 #endif
 
@@ -165,6 +172,10 @@ namespace mcrl2 {
           void synchronise_with_configuration(tipi::configuration& c);
 
         public:
+
+          /// \brief Constructor.
+          squadt_tool()
+          {}
 
           /// \brief Constructor.
           squadt_tool(const std::string& name,

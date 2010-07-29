@@ -64,7 +64,7 @@ template <typename Container>
 std::set<data::variable> find_free_variables(Container const& container);
 
 template <typename Container>
-atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible = true);
+atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
 
 template <typename Object, typename OutIter>
 void traverse_sort_expressions(const Object& o, OutIter dest);
@@ -132,7 +132,7 @@ class pbes
       m_data = atermpp::aterm_appl(*i++);
 
       data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-      m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
+      m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
 
       atermpp::aterm_appl eqn_spec = *i++;
       atermpp::aterm_list eqn = eqn_spec(0);
@@ -363,6 +363,10 @@ class pbes
         if (!i->is_bes())
           return false;
       }
+      if (m_initial_state.parameters().size() > 0)
+      {
+        return false;
+      }     
       return true;
     }
 
@@ -404,7 +408,7 @@ class pbes
 
       pbes<Container> tmp(*this);
       // tmp.data() = data::remove_all_system_defined(tmp.data());
-      atermpp::aterm_appl t = pbes_to_aterm(tmp, false);
+      atermpp::aterm_appl t = pbes_to_aterm(tmp);
       core::detail::save_aterm(t, filename, binary);
     }
 
@@ -674,9 +678,9 @@ class pbes
 /// \brief Conversion to ATermAppl.
 /// \return The PBES converted to ATerm format.
 template <typename Container>
-atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
+atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
 {
-  ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(p.global_variables()));
+  ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(p.global_variables()));
 
   atermpp::aterm_list eqn_list;
   const Container& eqn = p.equations();
@@ -712,7 +716,7 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
   else */
   {
     result = core::detail::gsMakePBES(
-      data::detail::data_specification_to_aterm_data_spec(p.data(), compatible),
+      data::detail::data_specification_to_aterm_data_spec(p.data()),
       global_variables,
       equations,
       initial_state
@@ -736,7 +740,7 @@ template <typename Container>
 void complete_data_specification(pbes<Container>& p)
 {
   std::set<data::sort_expression> s;
-  traverse_sort_expressions(p, std::inserter(s, s.end()));
+  pbes_system::traverse_sort_expressions(p, std::inserter(s, s.end()));
   p.data().add_context_sorts(s);
 }
 

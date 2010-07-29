@@ -21,7 +21,10 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/find.h"
+#include "mcrl2/data/detail/traverser.h"
 
 namespace mcrl2 {
 
@@ -67,7 +70,7 @@ bool search_variable(Container const& container, const variable& v)
 /// \return All data variables that occur in the term t
 template < typename Container, typename OutputIterator >
 void find_free_variables(Container const& container, OutputIterator o,
-		           typename detail::disable_if_container< OutputIterator >::type* = 0)
+		           typename atermpp::detail::disable_if_container< OutputIterator >::type* = 0)
 {
   detail::make_free_variable_find_helper< detail::binding_aware_traverser >(o)(container);
 }
@@ -103,7 +106,7 @@ std::set< variable > find_free_variables(Container const& container)
 /// TODO prevent copy of Sequence
 template < typename Container, typename Sequence >
 std::set< variable > find_free_variables(Container const& container, Sequence const& bound,
-                                        typename detail::enable_if_container< Sequence, variable >::type* = 0)
+                                        typename atermpp::detail::enable_if_container< Sequence, variable >::type* = 0)
 {
   std::set< variable > result;
   find_free_variables(container, std::inserter(result, result.end()), bound);
@@ -300,14 +303,14 @@ data_equation_vector find_equations(data_specification const& specification, con
     {
       result.push_back(*i);
     }
-    else if(i->lhs().is_application())
+    else if(is_application(i->lhs()))
     {
       if(static_cast<application>(i->lhs()).head() == d)
       {
         result.push_back(*i);
       }
     }
-    else if (i->rhs().is_application())
+    else if (is_application(i->rhs()))
     {
       if(static_cast<application>(i->rhs()).head() == d)
       {

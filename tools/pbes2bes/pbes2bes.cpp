@@ -11,22 +11,24 @@
 
 #include "boost.hpp" // precompiled headers
 
+//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
-//C++
 #include <stdexcept>
 #include <iostream>
 #include <string>
 #include <utility>
 
-//MCRL2-specific
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/pbes/detail/pbes2bes_variable_map_parser.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
+#include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -34,6 +36,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_optional_argument;
@@ -47,32 +50,21 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
   protected:
     typedef squadt_tool< rewriter_tool<input_output_tool> > super;
 
-    /// The output formats of the tool.
-    enum pbes_output_format {
-      of_pbes,
-      of_internal,
-      of_cwi
-    };
-
     /// The transformation strategies of the tool.
     enum transformation_strategy {
       ts_lazy,
-      ts_finite,
-      ts_oldlazy
+      ts_finite
     };
 
     transformation_strategy m_strategy;
     pbes_output_format m_output_format;
+    std::string m_finite_parameter_selection;
 
     /// Sets the transformation strategy.
     /// \param s A transformation strategy.
     void set_transformation_strategy(const std::string& s)
     {
-      if (s == "oldlazy")
-      {
-        m_strategy = ts_oldlazy;
-      }
-      else if (s == "finite")
+      if (s == "finite")
       {
         m_strategy = ts_finite;
       }
@@ -92,15 +84,15 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     {
       if (format == "pbes")
       {
-        m_output_format = of_pbes;
+        m_output_format = pbes_output_pbes;
       }
       else if (format == "internal")
       {
-        m_output_format = of_internal;
+        m_output_format = pbes_output_internal;
       }
       else if (format == "cwi")
       {
-        m_output_format = of_cwi;
+        m_output_format = pbes_output_cwi;
       }
       else
       {
@@ -129,6 +121,18 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       {
         set_transformation_strategy("lazy");
       }
+
+      if (parser.options.count("select") > 0)
+      {
+      	m_finite_parameter_selection = parser.option_argument("select");
+      	boost::trim(m_finite_parameter_selection);
+      }
+
+      if (parser.options.count("equation_limit") > 0)
+      {
+      	int limit = parser.option_argument_as<int>("equation_limit");
+      	pbes_system::detail::set_bes_equation_limit(limit);
+      }
     }
 
     void add_options(interface_description& desc)
@@ -139,8 +143,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
           make_optional_argument("NAME", "lazy"),
           "compute the BES using strategy NAME:\n"
           "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
-          "  'finite' for computing all possible boolean equations, or\n"
-          "  'oldlazy' for the previous version of the lazy algorithm.",
+          "  'finite' for computing all possible boolean equations.",
           's').
         add_option("output",
           make_optional_argument("NAME", "pbes"),
@@ -148,17 +151,23 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
           "  'pbes' for the internal binary format (default),\n"
           "  'internal' for the internal textual format, or\n"
           "  'cwi' for the format used by the CWI to solve a BES.",
-          'o');
+          'o').
+        add_option("select",
+          make_optional_argument("NAME", ""),
+          "select finite parameters that need to be expanded\n"
+          "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
+          "            *(*:Bool)\n",
+          'f');
+      desc.add_hidden_option("equation_limit",
+         make_optional_argument("NAME", "-1"),
+         "Set a limit to the number of generated BES equations",
+         'l');
     }
 
     /// \return A string representation of the transformation strategy.
     std::string strategy_string() const
     {
-      if (m_strategy == ts_oldlazy)
-      {
-        return "oldlazy";
-      }
-      else if (m_strategy == ts_finite)
+      if (m_strategy == ts_finite)
       {
         return "finite";
       }
@@ -172,15 +181,15 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     /// \return A string representation of the output format.
     std::string output_format_string() const
     {
-      if (m_output_format == of_pbes)
+      if (m_output_format == pbes_output_pbes)
       {
         return "pbes";
       }
-      else if (m_output_format == of_cwi)
+      else if (m_output_format == pbes_output_cwi)
       {
         return "cwi";
       }
-      else if (m_output_format == of_internal)
+      else if (m_output_format == pbes_output_internal)
       {
         return "internal";
       }
@@ -199,7 +208,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
           "standard output is used."
         ),
         m_strategy(ts_lazy),
-        m_output_format(of_pbes)
+        m_output_format(pbes_output_pbes)
     {}
 
     /// Runs the algorithm.
@@ -226,40 +235,31 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         return false;
       }
 
+      unsigned int log_level = 0;
+      if (mcrl2::core::gsVerbose)
+      {
+        log_level = 1;
+      }
+      if (mcrl2::core::gsDebug)
+      {
+        log_level = 2;
+      }     	
+
       if (m_strategy == ts_lazy)
       {
-        pbes2bes_algorithm algorithm(p.data(), rewrite_strategy());
+        pbes2bes_algorithm algorithm(p.data(), rewrite_strategy(), false, false, log_level);
         algorithm.run(p);
         p = algorithm.get_result();
       }
-      else
+      else if (m_strategy == ts_finite)
       {
-        // data rewriter
-        data::rewriter datar = create_rewriter(p.data());
-
-        // name generator
-        std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
-        data::number_postfix_generator name_generator(prefix);
-
-        // data enumerator
-        data::data_enumerator<data::number_postfix_generator> datae(p.data(), datar, name_generator);
-
-        // pbes rewriter
-        data::rewriter_with_variables datarv(datar);
-        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, false);
-
-        if (m_strategy == ts_finite)
-        {
-          p = do_finite_algorithm(p, pbesr);
-        }
-        else if (m_strategy == ts_oldlazy)
-        {
-          p = do_lazy_algorithm(p, pbesr);
-        }
+        pbes2bes_finite_algorithm algorithm(rewrite_strategy(), log_level);
+        pbes2bes_variable_map variable_map = detail::parse_variable_map(p, m_finite_parameter_selection);
+        algorithm.run(p, variable_map);
       }
 
       // save the result
-      save_pbes(p, m_output_filename, output_format_string());
+      save_pbes(p, m_output_filename, m_output_format);
 
       return true;
     }
@@ -275,15 +275,15 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
 
       transformation_strategy_enumeration.
-        add(ts_oldlazy, "oldlazy").
+        add(ts_lazy, "lazy").
         add(ts_finite, "finite");
 
       tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;
 
       output_format_enumeration.
-        add(of_pbes, "pbes").
-        add(of_internal, "internal").
-        add(of_cwi, "cwi");
+        add(pbes_output_pbes, "pbes").
+        add(pbes_output_internal, "internal").
+        add(pbes_output_cwi, "cwi");
 
       return true;
     }
@@ -326,9 +326,9 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       m.append(d.create< label >().set_text("Output format : ")).
         append(d.create< horizontal_box >().
-                    append(format_selector.associate(of_pbes, "pbes")).
-                    append(format_selector.associate(of_internal, "internal")).
-                    append(format_selector.associate(of_cwi, "cwi")),
+                    append(format_selector.associate(pbes_output_pbes, "pbes")).
+                    append(format_selector.associate(pbes_output_internal, "internal")).
+                    append(format_selector.associate(pbes_output_cwi, "cwi")),
               margins(0,5,0,5)).
         append(d.create< label >().set_text("Transformation strategy : ")).
         append(strategy_selector.associate(ts_lazy, "lazy: only boolean equations reachable from the initial state")).

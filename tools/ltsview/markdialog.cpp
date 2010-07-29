@@ -11,16 +11,15 @@
 
 #include "wx.hpp" // precompiled headers
 
-#include "markdialog.h"
-#include "mediator.h"
-#include "ids.h"
-#include "utils.h"
 #include <string>
 #include <vector>
 
-using namespace IDs;
-using namespace Utils;
+#include "ids.h"
+#include "markdialog.h"
+#include "mediator.h"
+
 using namespace std;
+using namespace IDs;
 
 BEGIN_EVENT_TABLE(MarkDialog, wxDialog)
   EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MarkDialog::onMarkRadio)

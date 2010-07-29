@@ -94,6 +94,7 @@ typedef unsigned int flex_uint32_t;
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 /* end standard C++ headers. */
@@ -522,7 +523,7 @@ dot_lexer *dot_lexer_obj = NULL;    /* lexer object, used by dotparser */
 static int lineNo=1, posNo=1;
 extern void dotyyerror(const char* s);
 
-#line 526 "liblts_dotlexer.cpp"
+#line 527 "liblts_dotlexer.cpp"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -626,7 +627,7 @@ YY_DECL
 #line 74 "liblts_dotlexer.ll"
 
 
-#line 630 "liblts_dotlexer.cpp"
+#line 631 "liblts_dotlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -861,7 +862,7 @@ YY_RULE_SETUP
 #line 108 "liblts_dotlexer.ll"
 ECHO;
 	YY_BREAK
-#line 865 "liblts_dotlexer.cpp"
+#line 866 "liblts_dotlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();

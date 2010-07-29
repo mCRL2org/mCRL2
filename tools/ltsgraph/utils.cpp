@@ -99,7 +99,7 @@ void MultGLMatrices (const double lhs[16], const double rhs[16], double* ans)
 //preq: the axis is on the z = 0 plane.
 //		rotmtrx is an array of size 16
 
-void genRotArbAxs (const double angle, const double x1, const double y1, const double z1, double* rotmtrx)
+void genRotArbAxs (const double angle, const double x1, const double y1, const double /*z1*/, double* rotmtrx)
 {
 	//TODO: make rotation available around the z-axis
 	double angleRad = angle * double(3.1415926535897932384626433832795) / 180.0f;

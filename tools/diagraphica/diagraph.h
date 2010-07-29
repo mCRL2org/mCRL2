@@ -48,6 +48,7 @@
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
    mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >, public Mediator
@@ -483,8 +484,18 @@ private:
     Attribute* tempAttr;
 };
 
+
+class DiaGraph_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<DiaGraph>
+{
+  public:
+	DiaGraph_gui_tool()
+    {
+      //m_gui_options["no-state"] = create_checkbox_widget();
+    }
+};
+
 // declare wxApp
-DECLARE_APP( DiaGraph )
+DECLARE_APP( DiaGraph_gui_tool )
 
 #endif
 

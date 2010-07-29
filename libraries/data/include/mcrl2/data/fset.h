@@ -23,7 +23,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/structured_sort.h"
@@ -42,7 +42,7 @@ namespace mcrl2 {
       inline
       container_sort fset(const sort_expression& s)
       {
-        container_sort fset(container_sort::fset(), s);
+        container_sort fset(fset_container(), s);
         return fset;
       }
 
@@ -53,9 +53,9 @@ namespace mcrl2 {
       inline
       bool is_fset(const sort_expression& e)
       {
-        if (e.is_container_sort())
+        if (is_container_sort(e))
         {
-          return static_cast< container_sort >(e).container_type() == container_sort::fset();
+          return container_sort(e).container_name() == fset_container();
         }
         return false;
       }
@@ -70,7 +70,7 @@ namespace mcrl2 {
         {
           structured_sort_constructor_vector constructors;
           constructors.push_back(structured_sort_constructor("@fset_empty", "fset_empty"));
-          constructors.push_back(structured_sort_constructor("@fset_cons", make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(fset(s), "tail")), "fset_cons"));
+          constructors.push_back(structured_sort_constructor("@fset_cons", atermpp::make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(fset(s), "tail")), "fset_cons"));
           return structured_sort(constructors);
         }
 
@@ -124,7 +124,7 @@ namespace mcrl2 {
       inline
       function_symbol fset_cons(const sort_expression& s)
       {
-        function_symbol fset_cons(fset_cons_name(), function_sort(s, fset(s), fset(s)));
+        function_symbol fset_cons(fset_cons_name(), make_function_sort(s, fset(s), fset(s)));
         return fset_cons;
       }
 
@@ -150,7 +150,7 @@ namespace mcrl2 {
       inline
       application fset_cons(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fset_cons(s),arg0, arg1);
+        return fset_cons(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_cons
@@ -162,7 +162,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fset_cons_function_symbol(static_cast< application >(e).head());
+          return is_fset_cons_function_symbol(application(e).head());
         }
         return false;
       }
@@ -194,7 +194,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetinsert(const sort_expression& s)
       {
-        function_symbol fsetinsert(fsetinsert_name(), function_sort(s, fset(s), fset(s)));
+        function_symbol fsetinsert(fsetinsert_name(), make_function_sort(s, fset(s), fset(s)));
         return fsetinsert;
       }
 
@@ -220,7 +220,7 @@ namespace mcrl2 {
       inline
       application fsetinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fsetinsert(s),arg0, arg1);
+        return fsetinsert(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_insert
@@ -232,7 +232,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetinsert_function_symbol(static_cast< application >(e).head());
+          return is_fsetinsert_function_symbol(application(e).head());
         }
         return false;
       }
@@ -252,7 +252,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetcinsert(const sort_expression& s)
       {
-        function_symbol fsetcinsert(fsetcinsert_name(), function_sort(s, sort_bool::bool_(), fset(s), fset(s)));
+        function_symbol fsetcinsert(fsetcinsert_name(), make_function_sort(s, sort_bool::bool_(), fset(s), fset(s)));
         return fsetcinsert;
       }
 
@@ -279,7 +279,7 @@ namespace mcrl2 {
       inline
       application fsetcinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(fsetcinsert(s),arg0, arg1, arg2);
+        return fsetcinsert(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fset_cinsert
@@ -291,7 +291,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetcinsert_function_symbol(static_cast< application >(e).head());
+          return is_fsetcinsert_function_symbol(application(e).head());
         }
         return false;
       }
@@ -311,7 +311,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetin(const sort_expression& s)
       {
-        function_symbol fsetin(fsetin_name(), function_sort(s, fset(s), sort_bool::bool_()));
+        function_symbol fsetin(fsetin_name(), make_function_sort(s, fset(s), sort_bool::bool_()));
         return fsetin;
       }
 
@@ -337,7 +337,7 @@ namespace mcrl2 {
       inline
       application fsetin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        return application(fsetin(s),arg0, arg1);
+        return fsetin(s)(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@fset_in
@@ -349,7 +349,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetin_function_symbol(static_cast< application >(e).head());
+          return is_fsetin_function_symbol(application(e).head());
         }
         return false;
       }
@@ -369,7 +369,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetlte(const sort_expression& s)
       {
-        function_symbol fsetlte(fsetlte_name(), function_sort(function_sort(s, sort_bool::bool_()), fset(s), fset(s), sort_bool::bool_()));
+        function_symbol fsetlte(fsetlte_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), sort_bool::bool_()));
         return fsetlte;
       }
 
@@ -396,7 +396,7 @@ namespace mcrl2 {
       inline
       application fsetlte(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        return application(fsetlte(s),arg0, arg1, arg2);
+        return fsetlte(s)(arg0, arg1, arg2);
       }
 
       /// \brief Recogniser for application of \@fset_lte
@@ -408,7 +408,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetlte_function_symbol(static_cast< application >(e).head());
+          return is_fsetlte_function_symbol(application(e).head());
         }
         return false;
       }
@@ -428,7 +428,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetunion(const sort_expression& s)
       {
-        function_symbol fsetunion(fsetunion_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
+        function_symbol fsetunion(fsetunion_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
         return fsetunion;
       }
 
@@ -456,7 +456,7 @@ namespace mcrl2 {
       inline
       application fsetunion(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return application(fsetunion(s),arg0, arg1, arg2, arg3);
+        return fsetunion(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_union
@@ -468,7 +468,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetunion_function_symbol(static_cast< application >(e).head());
+          return is_fsetunion_function_symbol(application(e).head());
         }
         return false;
       }
@@ -488,7 +488,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetintersection(const sort_expression& s)
       {
-        function_symbol fsetintersection(fsetintersection_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
+        function_symbol fsetintersection(fsetintersection_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), fset(s)));
         return fsetintersection;
       }
 
@@ -516,7 +516,7 @@ namespace mcrl2 {
       inline
       application fsetintersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
-        return application(fsetintersection(s),arg0, arg1, arg2, arg3);
+        return fsetintersection(s)(arg0, arg1, arg2, arg3);
       }
 
       /// \brief Recogniser for application of \@fset_inter
@@ -528,7 +528,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_fsetintersection_function_symbol(static_cast< application >(e).head());
+          return is_fsetintersection_function_symbol(application(e).head());
         }
         return false;
       }
@@ -652,54 +652,54 @@ namespace mcrl2 {
       {
         variable vd("d",s);
         variable ve("e",s);
-        variable vf("f",function_sort(s, sort_bool::bool_()));
-        variable vg("g",function_sort(s, sort_bool::bool_()));
+        variable vf("f",make_function_sort(s, sort_bool::bool_()));
+        variable vg("g",make_function_sort(s, sort_bool::bool_()));
         variable vs("s",fset(s));
         variable vt("t",fset(s));
 
         data_equation_vector result;
         data_equation_vector fset_equations = detail::fset_struct(s).constructor_equations(fset(s));
         result.insert(result.end(), fset_equations.begin(), fset_equations.end());
-        result.push_back(data_equation(make_vector(vd), fsetinsert(s, vd, fset_empty(s)), fset_cons(s, vd, fset_empty(s))));
-        result.push_back(data_equation(make_vector(vd, vs), fsetinsert(s, vd, fset_cons(s, vd, vs)), fset_cons(s, vd, vs)));
-        result.push_back(data_equation(make_vector(vd, ve, vs), less(vd, ve), fsetinsert(s, vd, fset_cons(s, ve, vs)), fset_cons(s, vd, fset_cons(s, ve, vs))));
-        result.push_back(data_equation(make_vector(vd, ve, vs), less(ve, vd), fsetinsert(s, vd, fset_cons(s, ve, vs)), fset_cons(s, ve, fsetinsert(s, vd, vs))));
-        result.push_back(data_equation(make_vector(vd, vs), fsetcinsert(s, vd, sort_bool::false_(), vs), vs));
-        result.push_back(data_equation(make_vector(vd, vs), fsetcinsert(s, vd, sort_bool::true_(), vs), fsetinsert(s, vd, vs)));
-        result.push_back(data_equation(make_vector(vd), fsetin(s, vd, fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vd, vs), fsetin(s, vd, fset_cons(s, vd, vs)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs), less(vd, ve), fsetin(s, vd, fset_cons(s, ve, vs)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs), less(ve, vd), fsetin(s, vd, fset_cons(s, ve, vs)), fsetin(s, vd, vs)));
-        result.push_back(data_equation(make_vector(vf), fsetlte(s, vf, fset_empty(s), fset_empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(vd, vf, vs), fsetlte(s, vf, fset_cons(s, vd, vs), fset_empty(s)), sort_bool::and_(vf(vd), fsetlte(s, vf, vs, fset_empty(s)))));
-        result.push_back(data_equation(make_vector(ve, vf, vt), fsetlte(s, vf, fset_empty(s), fset_cons(s, ve, vt)), sort_bool::and_(sort_bool::not_(vf(ve)), fsetlte(s, vf, fset_empty(s), vt))));
-        result.push_back(data_equation(make_vector(vd, vf, vs, vt), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetlte(s, vf, vs, vt)));
-        result.push_back(data_equation(make_vector(vd, ve, vf, vs, vt), less(vd, ve), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), sort_bool::and_(vf(vd), fsetlte(s, vf, vs, fset_cons(s, ve, vt)))));
-        result.push_back(data_equation(make_vector(vd, ve, vf, vs, vt), less(ve, vd), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), sort_bool::and_(sort_bool::not_(vf(ve)), fsetlte(s, vf, fset_cons(s, vd, vs), vt))));
-        result.push_back(data_equation(make_vector(vf, vg), fsetunion(s, vf, vg, fset_empty(s), fset_empty(s)), fset_empty(s)));
-        result.push_back(data_equation(make_vector(vd, vf, vg, vs), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_empty(s)), fsetcinsert(s, vd, sort_bool::not_(vg(vd)), fsetunion(s, vf, vg, vs, fset_empty(s)))));
-        result.push_back(data_equation(make_vector(ve, vf, vg, vt), fsetunion(s, vf, vg, fset_empty(s), fset_cons(s, ve, vt)), fsetcinsert(s, ve, sort_bool::not_(vf(ve)), fsetunion(s, vf, vg, fset_empty(s), vt))));
-        result.push_back(data_equation(make_vector(vd, vf, vg, vs, vt), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetcinsert(s, vd, equal_to(vf(vd), vg(vd)), fsetunion(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, vd, sort_bool::not_(vg(vd)), fsetunion(s, vf, vg, vs, fset_cons(s, ve, vt)))));
-        result.push_back(data_equation(make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, ve, sort_bool::not_(vf(ve)), fsetunion(s, vf, vg, fset_cons(s, vd, vs), vt))));
-        result.push_back(data_equation(make_vector(vf, vg), fsetintersection(s, vf, vg, fset_empty(s), fset_empty(s)), fset_empty(s)));
-        result.push_back(data_equation(make_vector(vd, vf, vg, vs), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_empty(s)), fsetcinsert(s, vd, vg(vd), fsetintersection(s, vf, vg, vs, fset_empty(s)))));
-        result.push_back(data_equation(make_vector(ve, vf, vg, vt), fsetintersection(s, vf, vg, fset_empty(s), fset_cons(s, ve, vt)), fsetcinsert(s, ve, vf(ve), fsetintersection(s, vf, vg, fset_empty(s), vt))));
-        result.push_back(data_equation(make_vector(vd, vf, vg, vs, vt), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetcinsert(s, vd, equal_to(vf(vd), vg(vd)), fsetintersection(s, vf, vg, vs, vt))));
-        result.push_back(data_equation(make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, vd, vg(vd), fsetintersection(s, vf, vg, vs, fset_cons(s, ve, vt)))));
-        result.push_back(data_equation(make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, ve, vf(ve), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd), fsetinsert(s, vd, fset_empty(s)), fset_cons(s, vd, fset_empty(s))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), fsetinsert(s, vd, fset_cons(s, vd, vs)), fset_cons(s, vd, vs)));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(vd, ve), fsetinsert(s, vd, fset_cons(s, ve, vs)), fset_cons(s, vd, fset_cons(s, ve, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(ve, vd), fsetinsert(s, vd, fset_cons(s, ve, vs)), fset_cons(s, ve, fsetinsert(s, vd, vs))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), fsetcinsert(s, vd, sort_bool::false_(), vs), vs));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), fsetcinsert(s, vd, sort_bool::true_(), vs), fsetinsert(s, vd, vs)));
+        result.push_back(data_equation(atermpp::make_vector(vd), fsetin(s, vd, fset_empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), fsetin(s, vd, fset_cons(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(vd, ve), fsetin(s, vd, fset_cons(s, ve, vs)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(ve, vd), fsetin(s, vd, fset_cons(s, ve, vs)), fsetin(s, vd, vs)));
+        result.push_back(data_equation(atermpp::make_vector(vf), fsetlte(s, vf, fset_empty(s), fset_empty(s)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vs), fsetlte(s, vf, fset_cons(s, vd, vs), fset_empty(s)), sort_bool::and_(vf(vd), fsetlte(s, vf, vs, fset_empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vt), fsetlte(s, vf, fset_empty(s), fset_cons(s, ve, vt)), sort_bool::and_(sort_bool::not_(vf(ve)), fsetlte(s, vf, fset_empty(s), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vs, vt), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetlte(s, vf, vs, vt)));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vs, vt), less(vd, ve), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), sort_bool::and_(vf(vd), fsetlte(s, vf, vs, fset_cons(s, ve, vt)))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vs, vt), less(ve, vd), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), sort_bool::and_(sort_bool::not_(vf(ve)), fsetlte(s, vf, fset_cons(s, vd, vs), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg), fsetunion(s, vf, vg, fset_empty(s), fset_empty(s)), fset_empty(s)));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_empty(s)), fsetcinsert(s, vd, sort_bool::not_(vg(vd)), fsetunion(s, vf, vg, vs, fset_empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), fsetunion(s, vf, vg, fset_empty(s), fset_cons(s, ve, vt)), fsetcinsert(s, ve, sort_bool::not_(vf(ve)), fsetunion(s, vf, vg, fset_empty(s), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs, vt), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetcinsert(s, vd, equal_to(vf(vd), vg(vd)), fsetunion(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, vd, sort_bool::not_(vg(vd)), fsetunion(s, vf, vg, vs, fset_cons(s, ve, vt)))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, ve, sort_bool::not_(vf(ve)), fsetunion(s, vf, vg, fset_cons(s, vd, vs), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg), fsetintersection(s, vf, vg, fset_empty(s), fset_empty(s)), fset_empty(s)));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_empty(s)), fsetcinsert(s, vd, vg(vd), fsetintersection(s, vf, vg, vs, fset_empty(s)))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), fsetintersection(s, vf, vg, fset_empty(s), fset_cons(s, ve, vt)), fsetcinsert(s, ve, vf(ve), fsetintersection(s, vf, vg, fset_empty(s), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs, vt), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetcinsert(s, vd, equal_to(vf(vd), vg(vd)), fsetintersection(s, vf, vg, vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(vd, ve), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, vd, vg(vd), fsetintersection(s, vf, vg, vs, fset_cons(s, ve, vt)))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vg, vs, vt), less(ve, vd), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), fsetcinsert(s, ve, vf(ve), fsetintersection(s, vf, vg, fset_cons(s, vd, vs), vt))));
         result.push_back(data_equation(variable_list(), equal_to(fset_empty(s), fset_empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(ve, vs), equal_to(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(ve, vs), equal_to(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs, vt), equal_to(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::and_(equal_to(ve, vd), equal_to(vt, vs))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), equal_to(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), equal_to(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::and_(equal_to(ve, vd), equal_to(vt, vs))));
         result.push_back(data_equation(variable_list(), less(fset_empty(s), fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(ve, vs), less(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(ve, vs), less(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs, vt), less(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less(vt, vs)))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), less(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), less(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less(vt, vs)))));
         result.push_back(data_equation(variable_list(), less_equal(fset_empty(s), fset_empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(ve, vs), less_equal(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(ve, vs), less_equal(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs, vt), less_equal(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less_equal(vt, vs)))));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), less_equal(fset_empty(s), fset_cons(s, ve, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(ve, vs), less_equal(fset_cons(s, ve, vs), fset_empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(fset_cons(s, ve, vt), fset_cons(s, vd, vs)), sort_bool::or_(less(ve, vd), sort_bool::and_(equal_to(ve, vd), less_equal(vt, vs)))));
         return result;
       }
 

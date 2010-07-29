@@ -41,6 +41,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 
 using namespace std;
@@ -244,7 +245,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             }
             term=rewr(term);
             for (classic_enumerator< > i =
-                 e.make(data::convert < std::set <variable > >(vars),rewr,term);
+                 e.make(atermpp::convert < std::set <variable > >(vars),rewr,term);
                                                           i != classic_enumerator<>() ; ++i)
             {
               cout << "[";
@@ -289,9 +290,16 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     }
 };
 
+class mcrl2i_gui_tool: public mcrl2_gui_tool<mcrl2i_tool> {
+public:
+  mcrl2i_gui_tool() {
+    add_rewriter_widget();
+  }
+};
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  return mcrl2i_tool().execute(argc, argv);
+  return mcrl2i_gui_tool().execute(argc, argv);
 }
 

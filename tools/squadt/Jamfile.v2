@@ -13,7 +13,6 @@ tool squadt
       : <define>USING_WX
         <include>.
         <wx>base
-        <define>PREFIX=\"\\\"$(INSTALL_ROOT)\\\"\"
       ;
 
 exe squadt_proxy

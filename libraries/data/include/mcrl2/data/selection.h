@@ -47,6 +47,43 @@ namespace mcrl2 {
           m_used_symbols.insert(r.begin(), r.end()); 
         }
 
+      protected:
+        void add_data_specification_symbols(const data_specification& specification)
+        {
+          // Add all constructors of all sorts as they may be used when enumerating over these sorts
+          atermpp::set< sort_expression > sorts(boost::copy_range< atermpp::set< sort_expression > >(specification.sorts()));
+          for (atermpp::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
+          { add_symbols(specification.constructors(*j));
+          }
+
+          std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
+
+          std::map< data_equation, std::set< function_symbol > > symbols_for_equation;
+
+          for (std::set< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
+          {
+             std::set< function_symbol > used_symbols;
+
+             detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
+
+             symbols_for_equation[*i].swap(used_symbols);
+          }
+
+          for (std::set< data_equation >::size_type n = 0, m = equations.size(); n != m; n = m, m = equations.size())
+          {
+            for (std::set< data_equation >::iterator i = equations.begin(), j = equations.begin(); j++ != equations.end(); i = j)
+            {
+              if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
+              {
+                detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
+                detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
+
+                equations.erase(i);
+              }
+            }
+          }
+        }
+
       public:
 
         bool operator()(data_equation const& e) const
@@ -86,7 +123,16 @@ namespace mcrl2 {
           return result;  */
         }
 
+        /// \brief context is a range of function symbols
+        template <typename Range>
+        used_data_equation_selector(data_specification const& data_spec, Range const& context)
+        {
+          add_symbols(context);
+          add_data_specification_symbols(data_spec);
+        }
+
         // temporary measure: use aterm
+        /// \deprecated
         used_data_equation_selector(data_specification const& specification, atermpp::aterm_appl const& context, bool add_symbols_for_global_variables = true)
         {
           atermpp::aterm_appl::const_iterator start = ++context.begin();
@@ -108,12 +154,6 @@ namespace mcrl2 {
             }
           }
 
-          // Add all constructors of all sorts as they may be used when enumerating over these sorts
-          atermpp::set< sort_expression > sorts(boost::copy_range< atermpp::set< sort_expression > >(specification.sorts()));
-          for (atermpp::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
-          { add_symbols(specification.constructors(*j));
-          }
-
           // Trick, traverse all but the data specification
           for (atermpp::aterm_appl::const_iterator i = ++start; i != context.end(); ++i)
           {
@@ -121,37 +161,12 @@ namespace mcrl2 {
                    (std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
           }
 
-          std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
+          add_data_specification_symbols(specification);
 
-          std::map< data_equation, std::set< function_symbol > > symbols_for_equation;
-
-          for (std::set< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
-          {
-             std::set< function_symbol > used_symbols;
-
-             detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
-
-             symbols_for_equation[*i].swap(used_symbols);
-          }
-
-          for (std::set< data_equation >::size_type n = 0, m = equations.size(); n != m; n = m, m = equations.size())
-          {
-            for (std::set< data_equation >::iterator i = equations.begin(), j = equations.begin(); j++ != equations.end(); i = j)
-            {
-              if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
-              {
-                detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
-                detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
-
-                equations.erase(i);
-              }
-            }
-          }
           /* for(std::set < function_symbol > :: const_iterator i=m_used_symbols.begin();
                    i!=m_used_symbols.end(); ++i)
           { std::cerr << "SYMBOL USED: " << *i << "\n";
           } */
-
         }
     };
 

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lps2lts.cpp
+/// \file lps2lts_lts.cpp
 
 #include "boost.hpp" // precompiled headers
 
@@ -19,16 +19,17 @@
 #include "aterm2.h"
 #include "boost/cstdint.hpp"
 #include "boost/lexical_cast.hpp"
-#include "mcrl2/lts/lts.h"
 #include "lps2lts.h"
-#include "exploration.h"
-#include "lts.h"
+#include "mcrl2/lts/exploration.h"
+#include "mcrl2/lts/lps2lts_lts.h"
+#include "mcrl2/lts/lts_io.h"
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #define __STRINGIFY(x) #x
 #define STRINGIFY(x) __STRINGIFY(x)
@@ -38,6 +39,18 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
+
+lps2lts_algorithm lps2lts;
+
+void premature_termination_handler(int)
+{
+  // Reset signal handlers.
+  signal(SIGABRT,NULL);
+  signal(SIGINT,NULL);
+  signal(SIGTERM,NULL); 
+  lps2lts.premature_termination_handler();
+  exit(1);
+}
 
 ATermAppl *parse_action_list(const std::string& s, int *len)
 {
@@ -81,6 +94,7 @@ class lps2lts_tool : public lps2lts_base
 {
   private:
     lts_generation_options options;
+    std::string m_filename;
 
   public:
     lps2lts_tool() :
@@ -92,7 +106,7 @@ class lps2lts_tool : public lps2lts_base
         "\n"
         "The format of OUTFILE is determined by its extension (unless it is specified "
         "by an option). The supported formats are:\n"
-        +lts::supported_lts_formats_text()
+        +mcrl2::lts::detail::supported_lts_formats_text()
       )
     {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -104,25 +118,35 @@ class lps2lts_tool : public lps2lts_base
 
     bool run()
     {
-      if ( !initialise_lts_generation(&options) )
+      options.specification.load(m_filename);
+      options.trace_prefix = m_filename.substr(0, options.trace_prefix.find_last_of('.'));
+
+      if ( !lps2lts.initialise_lts_generation(&options) )
       {
         return false;
       }
-  
-      signal(SIGABRT,finalise_lts_generation_when_interrupted);
-      signal(SIGSEGV,finalise_lts_generation_when_interrupted);
-      signal(SIGINT,finalise_lts_generation_when_interrupted);
-      signal(SIGTERM,finalise_lts_generation_when_interrupted); // At ^C close files properly and
-                                                                // print a progress message.
 
-      generate_lts();
+      signal(SIGABRT,premature_termination_handler);
+      signal(SIGINT,premature_termination_handler);
+      signal(SIGTERM,premature_termination_handler); // At ^C print a message.
 
-      finalise_lts_generation();
+      try
+      {
+        lps2lts.generate_lts();
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        std::cerr << e.what() << std::endl;
+        lps2lts.finalise_lts_generation();
+        return false;
+      }
+
+      lps2lts.finalise_lts_generation();
 
       return true;
     }
 
-  private:
+  protected:
     void add_options(interface_description &desc)
     {
       lps2lts_base::add_options(desc);
@@ -244,7 +268,7 @@ class lps2lts_tool : public lps2lts_base
         }
       }
       if (parser.options.count("out")) {
-        options.outformat = lts::parse_format(parser.option_argument("out"));
+        options.outformat = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
         if (options.outformat == lts_none) {
           parser.error("format '" + parser.option_argument("out") + "' is not recognised");
@@ -272,7 +296,7 @@ class lps2lts_tool : public lps2lts_base
         parser.error("too many file arguments");
       }
       if (0 < parser.arguments.size()) {
-        options.filename = parser.arguments[0];
+        m_filename = parser.arguments[0];
       }
       if (1 < parser.arguments.size()) {
         options.lts = parser.arguments[1];
@@ -280,7 +304,7 @@ class lps2lts_tool : public lps2lts_base
 
       if (!options.lts.empty()) {
         if ( options.outformat == lts_none ) {
-          options.outformat = lts::guess_format(options.lts);
+          options.outformat = mcrl2::lts::detail::guess_format(options.lts);
 
           if ( options.outformat == lts_none ) {
             gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
@@ -348,9 +372,55 @@ class lps2lts_tool : public lps2lts_base
 
 #include "squadt_interactor.ipp"
 
+class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
+{
+  public:
+	lps2lts_gui_tool()
+    {
+	  std::vector<std::string> values;
+      m_gui_options["action"] = create_textctrl_widget();
+      m_gui_options["bit-hash"] = create_textctrl_widget();
+      m_gui_options["confluence"] = create_textctrl_widget();
+      m_gui_options["deadlock"] = create_checkbox_widget();
+      m_gui_options["error-trace"] = create_checkbox_widget();
+
+
+      values.clear();
+      values.push_back("vector");
+      values.push_back("tree");
+
+      m_gui_options["state-format"] = create_radiobox_widget(values);
+      m_gui_options["divergence"] = create_checkbox_widget();
+      m_gui_options["init-tsize"] = create_textctrl_widget();
+      m_gui_options["max"] = create_textctrl_widget();
+      m_gui_options["no-info"] = create_checkbox_widget();
+
+      add_rewriter_widget();
+
+      values.clear();
+      values.push_back("breadth");
+      values.push_back("depth");
+      values.push_back("prioritized");
+      values.push_back("rprioritized");
+      values.push_back("random");
+      m_gui_options["strategy"] = create_radiobox_widget(values);
+      m_gui_options["suppress"] = create_checkbox_widget();
+      m_gui_options["trace"] = create_textctrl_widget();
+      m_gui_options["todo-max"] = create_textctrl_widget();
+
+      m_gui_options["unused-data"] = create_checkbox_widget();
+      m_gui_options["dummy"] = create_textctrl_widget();
+
+      // TODO:
+//      -oFORMAT, --out=FORMAT   save the output in the specified FORMAT
+
+
+    }
+};
+
 int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps2lts_tool().execute(argc,argv);
+  return lps2lts_gui_tool().execute(argc,argv);
 }

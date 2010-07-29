@@ -17,9 +17,9 @@
 #include "state.h"
 #include "cluster.h"
 #include "transition.h"
+#include "rgb_color.h"
 
 using namespace std;
-using namespace Utils;
 
 struct MarkRule {
   int param_index;
@@ -96,7 +96,7 @@ void MarkManager::setLTS(LTS *l,bool need_reset) {
   }
 }
 
-int MarkManager::createMarkRule(int param,bool neg,Utils::RGB_Color col,
+int MarkManager::createMarkRule(int param,bool neg,RGB_Color col,
         atermpp::set<ATerm> vals) {
   MarkRule *m = new MarkRule;
   m->param_index = param;
@@ -152,7 +152,7 @@ atermpp::set<ATerm> MarkManager::getMarkRuleValues(int mr)
 }
 
 void MarkManager::setMarkRuleData(int mr,int param,bool neg,
-    Utils::RGB_Color col,atermpp::set<ATerm> vals)
+    RGB_Color col,atermpp::set<ATerm> vals)
 {
   bool changed = (param != mark_rules[mr]->param_index)
               || (neg != mark_rules[mr]->is_negated)

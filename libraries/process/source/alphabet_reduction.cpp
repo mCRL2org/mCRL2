@@ -226,67 +226,12 @@ namespace mcrl2 {
         return ATreverse(r);
       }
       
-      static ATermList sync_mact(ATermList a, ATermList b){
-      /*   ATermList c = ATmakeList0(); */
-      /*   while ( !(ATisEmpty(a) || ATisEmpty(b)) ){ */
-      /*     ATermAppl aa=ATAgetFirst(a); */
-      /*     ATermAppl bb=ATAgetFirst(b); */
-      /*     if ( ATcompare((ATerm)aa,(ATerm)bb) <=0 ) { */
-      /*       c = ATinsert(c,(ATerm)aa); */
-      /*       a = ATgetNext(a); */
-      /*     }  */
-      /*     else { */
-      /*       c = ATinsert(c,(ATerm)bb); */
-      /*       b = ATgetNext(b); */
-      /*     } */
-      /*   } */
-      /*   c=ATreverse(c); */
-      /*   if ( !ATisEmpty(a) ){ */
-      /*     c = ATconcat(c,a); */
-      /*   } else if ( !ATisEmpty(b) ) */
-      /*     { */
-      /*       c = ATconcat(c,b); */
-      /*     } */
-      /*   return c; */
-      
-      
-      
-      /*   //return gsaATsortList(ATconcat(a,b)); */
-      /*   int n = ATgetLength(a); */
-      /*   int m = ATgetLength(b); */
-      /*   ATermAppl *c = malloc((n+m+1)*sizeof(ATermAppl)); */
-      
-      /*   int i=-1; //current pos */
-      /*   while ( !(ATisEmpty(a) || ATisEmpty(b)) ){ */
-      /*     ATermAppl aa=ATAgetFirst(a); */
-      /*     ATermAppl bb=ATAgetFirst(b); */
-      /*     i++; */
-      /*     if ( ATcompare((ATerm)aa,(ATerm)bb) <=0 ) { */
-      /*       c[i] = aa; */
-      /*       a = ATgetNext(a); */
-      /*     }  */
-      /*     else { */
-      /*       c[i] = bb; */
-      /*       b = ATgetNext(b); */
-      /*     } */
-      /*   } */
-      
-      /*   if(ATisEmpty(a)) a=b; */
-      /*   while ( !ATisEmpty(a) ){ */
-      /*     i++; */
-      /*     c[i] = ATAgetFirst(a); */
-      /*     a = ATgetNext(a); */
-      /*  } */
-      /*   ATermList r=ATmakeList0(); */
-      /*   for (;i>=0;i--) */
-      /*     r=ATinsert(r,(ATerm)c[i]); */
-      /*   free(c); */
-      /*   return r; */
-      
+      static ATermList sync_mact(ATermList a, ATermList b)
+      {
         assert(a && b);
       
-        if(ATisEmpty(a)) return b;
-        if(ATisEmpty(b)) return a;
+        if (ATisEmpty(a)) return b;
+        if (ATisEmpty(b)) return a;
       
         ATermList c = sGet(a,b);
         if(c) return c;
@@ -294,7 +239,8 @@ namespace mcrl2 {
         ATermAppl aa=ATAgetFirst(a);
         ATermAppl bb=ATAgetFirst(b);
       
-        if ( ATcompare((ATerm)aa,(ATerm)bb) > 0 ) {
+        if ( ATcompare((ATerm)aa,(ATerm)bb) > 0 ) 
+        {
           ATermList t=a; a=b; b=t; //swap a and b
           aa=bb; //no need for bb
         }
@@ -311,19 +257,24 @@ namespace mcrl2 {
         return c;
       }
       
-      static ATermList merge_list(ATermList l, ATermList m){
-        ATermList r=ATmakeList0();
-        for (; !ATisEmpty(m); m=ATgetNext(m)){
+      static ATermList merge_list(ATermList l, ATermList m)
+      { // ATfprintf(stderr,"LENGTH %d  %d  ",ATgetLength(l),ATgetLength(m));
+        ATermIndexedSet r=ATindexedSetCreate(128,50);
+        for (; !ATisEmpty(m); m=ATgetNext(m))
+        { ATbool isnew;
           ATerm el=ATgetFirst(m);
-          if(ATindexOf(l,el,0) < 0 ){
-            r = ATinsert(r,el);
-          }
+          ATindexedSetPut(r,el,&isnew);
         }
-      
-        //gsDebugMsg("l: %T, m:%T\n\n",l,m);
-      
-      
-        return ATconcat(l,ATreverse(r));
+        for (; !ATisEmpty(l); l=ATgetNext(l))
+        { ATbool isnew;
+          ATerm el=ATgetFirst(l);
+          ATindexedSetPut(r,el,&isnew);
+        }
+
+        ATermList result=ATindexedSetElements(r);
+        // ATfprintf(stderr," EQUALS %d\n",ATgetLength(result));
+        ATindexedSetDestroy(r);
+        return result;
       }
       
       static ATermList list_minus(ATermList l, ATermList m){
@@ -503,25 +454,37 @@ namespace mcrl2 {
         return true;
       }
       
-      static ATermList sync_list(ATermList l, ATermList m, unsigned length=0, ATermList allowed=ATmakeList0()){
-        //gsWarningMsg("sync_list: l: %T, m: %T,length: %d, allowed: %T\n\n",l,m,length,allowed);
-        ATermList n = ATmakeList0();
-        for (; !ATisEmpty(l); l=ATgetNext(l)){
+      static ATermList sync_list(ATermList l, ATermList m, unsigned length=0, ATermList allowed=ATmakeList0())
+      {
+        // gsWarningMsg("sync_list: l: %T, m: %T,length: %d, allowed: %T\n\n",l,m,length,allowed);
+        ATermIndexedSet n=ATindexedSetCreate(128,50);
+        // ATermList n = ATmakeList0();
+        for (; !ATisEmpty(l); l=ATgetNext(l))
+        {
           ATermList ll=ATLgetFirst(l);
-          for (ATermList o=m; !ATisEmpty(o); o=ATgetNext(o)){
+          for (ATermList o=m; !ATisEmpty(o); o=ATgetNext(o))
+          {
             ATermList oo=ATLgetFirst(o);
             ATermList ma=sync_mact(ll,oo);
-            if(!length || unsigned(ATgetLength(ma))<=length){
+            if(!length || unsigned(ATgetLength(ma))<=length)
+            {
               ATermList ma=sync_mact(ll,oo);
-              if(ATisEqual(allowed,ATmakeList0()) || sub_multiaction_list(untypeMA(ma),allowed)){
-      	  if(ATindexOf(n,(ATerm)ma,0)<0)
-      	     n = ATinsert(n,(ATerm)ma);
+              if(ATisEqual(allowed,ATmakeList0()) || sub_multiaction_list(untypeMA(ma),allowed))
+              {
+      	        /* if(ATindexOf(n,(ATerm)ma,0)<0)
+      	           n = ATinsert(n,(ATerm)ma);
+                */
+                ATbool is_new;
+                ATindexedSetPut(n,(ATerm)ma,&is_new);
               }
             }
           }
         }
-        //gsWarningMsg("sync_list: l: %T\n, m: %T\n,length: %d\n, allowed: %T\n, result: %T\n\n",l,m,length,allowed,ATreverse(n));
-        return ATreverse(n);
+        // gsWarningMsg("sync_list out: l: %T\n, m: %T\n,length: %d\n, allowed: %T\n, result: %T\n\n",l,m,length,allowed,ATindexedSetElements(n));
+        // return ATreverse(n);
+        ATermList result=ATindexedSetElements(n);
+        ATindexedSetDestroy(n);
+        return result;
       }
       
       static void sync_list_ht(ATermIndexedSet m, ATermList l1, ATermList l2, unsigned length=0){
@@ -884,7 +847,8 @@ namespace mcrl2 {
         return ATreverse(m);
       }
       
-      static ATermAppl PushBlock(ATermList H, ATermAppl a){
+      static ATermAppl PushBlock(ATermList H, ATermAppl a)
+      {
         // gsDebugMsg("push block: H: %T; a: %T\n\n",H,a);
         if ( gsIsDelta(a) || gsIsTau(a) ){
           return a;
@@ -975,9 +939,15 @@ namespace mcrl2 {
           return a;
         }
         else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a)
-      	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
-          // all distributing rules together
-          short ia1=0,ia2=1,args=2;
+      	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a))
+        {
+          // Do not distribute over these operator.
+          a = gsApplyAlpha(a);
+          ATermList l = ATLtableGet(alphas,(ATerm) a);
+          a = gsMakeBlock(H,a);
+          ATtablePut(alphas,(ATerm) a,(ATerm) l);
+          return a;
+          /* short ia1=0,ia2=1,args=2;
           if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
           if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument does not matter
       
@@ -998,14 +968,15 @@ namespace mcrl2 {
       
           ATtablePut(alphas,(ATerm) a,(ATerm) l);
       
-          return a;
+          return a; */
         }
       
         assert(0);
         return NULL;
       }
       
-      static ATermAppl PushHide(ATermList I, ATermAppl a){
+      static ATermAppl PushHide(ATermList I, ATermAppl a)
+      {
         if ( gsIsDelta(a) || gsIsTau(a) ){
           return a;
         }
@@ -1058,8 +1029,16 @@ namespace mcrl2 {
           return a;
         }
         else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a)
-      	      || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
-          // all distributing rules together
+      	      || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a))
+        { // Distributing hide over these operators disallows the 
+          // linearizer to work properly.
+
+          a = gsApplyAlpha(a);
+          ATermList l = ATLtableGet(alphas,(ATerm) a);
+          a = gsMakeHide(I,a);
+          ATtablePut(alphas,(ATerm) a,(ATerm) l);
+          return a;
+          /* // all distributing rules together
           short ia1=0,ia2=1,args=2;
           if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
           if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter
@@ -1081,13 +1060,14 @@ namespace mcrl2 {
       
           ATtablePut(alphas,(ATerm) a,(ATerm) l);
       
-          return a;
+          return a; */
         }
         assert(0);
         return NULL; //to suppress warnings
       }
       
-      static ATermAppl PushAllow(ATermList V, ATermAppl a){
+      static ATermAppl PushAllow(ATermList V, ATermAppl a)
+      {
         //gsWarningMsg("push allow: V: %P; a: %P\n\n",V,a);
         V=sort_multiactions_allow(V);
         if ( gsIsDelta(a) || gsIsTau(a) ){
@@ -1169,7 +1149,8 @@ namespace mcrl2 {
       
           return a;
         }
-        else if ( gsIsBlock(a) ){
+        else if ( gsIsBlock(a) )
+        {
           ATermList H=ATLgetArgument(a,0);
           ATermAppl p=ATAgetArgument(a,1);
       
@@ -1179,7 +1160,8 @@ namespace mcrl2 {
           ATtablePut(alphas,(ATerm) a,(ATerm)filter_block_list(l,H));
           return a;
         }
-        else if ( gsIsHide(a) ){
+        else if ( gsIsHide(a) )
+        {
           ATermList I=ATLgetArgument(a,0);
           ATermAppl p=ATAgetArgument(a,1);
       
@@ -1195,7 +1177,8 @@ namespace mcrl2 {
           ATtablePut(alphas,(ATerm) a,(ATerm)filter_hide_list(l,I));
           return a;
         }
-        else if ( gsIsRename(a) ){
+        else if ( gsIsRename(a) )
+        {
           ATermList R=ATLgetArgument(a,0);
           ATermAppl p=ATAgetArgument(a,1);
       
@@ -1208,10 +1191,12 @@ namespace mcrl2 {
           ATtablePut(alphas,(ATerm) a,(ATerm)filter_rename_list(l,R));
           return a;
         }
-        else if ( gsIsAllow(a) ){
+        else if ( gsIsAllow(a) )
+        {
           return PushAllow(gsaATintersectList(V,sort_multiactions_allow(ATLgetArgument(a,0))),ATAgetArgument(a,1));
         }
-        else if ( gsIsComm(a) ){
+        else if ( gsIsComm(a) )
+        {
           ATermList C=ATLgetArgument(a,0);
           C=sort_multiactions_comm(C);
       
@@ -1261,7 +1246,8 @@ namespace mcrl2 {
           ATtablePut(alphas,(ATerm) a,(ATerm)filter_allow_list(l,V));
           return a;
         }
-        else if ( gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) ){
+        else if ( gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) )
+        {
           ATermAppl p = ATAgetArgument(a,0);
           ATermAppl q = ATAgetArgument(a,1);
       
@@ -1313,9 +1299,18 @@ namespace mcrl2 {
           return a;
         }
         else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a)
-      	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a)){
+      	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a))
+        {
+          a = gsApplyAlpha(a);
+          ATermList l = ATLtableGet(alphas,(ATerm) a);
+          a = gsMakeAllow(V,a);
+          ATtablePut(alphas,(ATerm) a,(ATerm) l);
+          return a;
           // all distributing rules together
-          short ia1=0,ia2=1,args=2;
+          // return gsMakeAllow(I,a); // Distributing hide over these operators disallows the 
+                                  // linearizer to work properly.
+               
+          /* short ia1=0,ia2=1,args=2;
           if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
           if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter
       
@@ -1336,13 +1331,14 @@ namespace mcrl2 {
       
           ATtablePut(alphas,(ATerm) a,(ATerm) l);
       
-          return a;
+          return a; */
         }
         assert(0);
         return NULL; //to suppress warnings
       }
       
-      static ATermAppl PushComm(ATermList C, ATermAppl a){
+      static ATermAppl PushComm(ATermList C, ATermAppl a)
+      {
         C=sort_multiactions_comm(C);
         // gsDebugMsg("push comm: C: %P; a:%P\n",C,a);
         if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
@@ -1496,9 +1492,10 @@ namespace mcrl2 {
           }
         }
         else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) 
-      	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a)){
+      	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a)|| gsIsSeq(a) ) 
+        {
           // all distributing rules together
-          short ia1=0,ia2=1,args=2;
+          /* short ia1=0,ia2=1,args=2;
           if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
           if(gsIsIfThen(a) || gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter
       
@@ -1521,7 +1518,8 @@ namespace mcrl2 {
       
           return a;
         }  
-        else if ( gsIsSeq(a) ){ // Yarick, 2009-05-25: do not distribute comm over seq compositions.
+        else if ( gsIsSeq(a) ) */
+        //{  Yarick, 2009-05-25: do not distribute comm over seq compositions.
           a = gsApplyAlpha(a);
           ATermList l = ATLtableGet(alphas,(ATerm) a);
           a = gsMakeComm(C,a);
@@ -1738,7 +1736,8 @@ namespace mcrl2 {
         return l;
       }
       
-      static ATermAppl gsApplyAlpha(ATermAppl a){
+      static ATermAppl gsApplyAlpha(ATermAppl a)
+      {
         // apply the alpha reductions to a.
         // makes sure that the alphabet of a is in the table alphas after the function returns its value
         //if (gsVerbose) std::cerr << "gsApplyAlpha: a: %T\n\n", a);
@@ -1754,12 +1753,14 @@ namespace mcrl2 {
           }
           ATtablePut(alphas,(ATerm)a,(ATerm)l); //for this full action
         }
-        else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
+        else if ( gsIsProcess(a) || gsIsProcessAssignment(a))
+        {
           ATermAppl pn=ATAgetArgument(a,0);
           ATermList l=ATLtableGet(alphas,(ATerm)pn); // for this particular process term
       
           // if this process is not recursive we apply the alphabeth reductions to it
-          if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm)){
+          if (ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm))
+          {
             //if this is a mCRL process.
             //we apply the alphabeth reductions to its body and then we know the alphabet
             ATermAppl new_p=gsApplyAlpha(ATAtableGet(procs,(ATerm)pn));
@@ -1767,7 +1768,9 @@ namespace mcrl2 {
             ATtablePut(alphas,(ATerm)pn,(ATerm)ATLtableGet(alphas,(ATerm)new_p));
             if(!l) l=ATLtableGet(alphas,(ATerm)pn);
           }
-          assert(l);
+          if (!l)
+          { return NULL;
+          }
           ATtablePut(alphas,(ATerm)a,(ATerm)l); //for this full process call
         }
         else if ( gsIsBlock(a) ){
@@ -1816,7 +1819,7 @@ namespace mcrl2 {
             gsaATindexedSetPutList(m,l);
             if(args==2) gsaATindexedSetPutList(m,l2);
             if(gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a))
-      	sync_list_ht(m,l,l2);
+      	       sync_list_ht(m,l,l2);
             l = ATindexedSetElements(m);
             ATindexedSetDestroy(m);
           }
@@ -1832,7 +1835,8 @@ namespace mcrl2 {
         return a;
       }
       
-      ATermList gsaGetDeps(ATermAppl a){
+      ATermList gsaGetDeps(ATermAppl a)
+      {
         //returns process names that a depends to (should be applied iteratevly).
         // gsDebugMsg("gsaGetDeps: a: %T\n",a);
         ATermList r=ATmakeList0();
@@ -1867,7 +1871,8 @@ namespace mcrl2 {
         return NULL; //to suppress warnings
       }
       
-      ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
+      ATermAppl gsaGetProp(ATermAppl a, ATermAppl context)
+      {
         //returns the type of the term.
         ATermAppl r=pCRL_aterm;
         if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
@@ -1914,7 +1919,8 @@ namespace mcrl2 {
         return r;
       }
       
-      ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
+      ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
+      {
         if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
           return a;
         }
@@ -1923,7 +1929,11 @@ namespace mcrl2 {
           ATermList l=ATLtableGet(subs_npCRL,(ATerm)pn);
           if(!l) return a; //not an npCRL process call.
       
-          if ( gsIsProcessAssignment(a) ){ gsErrorMsg("n-parallel processes in combination with short-hand assignments are not supported.\n\n",a); return NULL; }
+          if ( gsIsProcessAssignment(a) )
+          { 
+            gsErrorMsg("n-parallel processes in combination with short-hand assignments are not supported.\n\n",a); 
+            return NULL; 
+          }
       
           //determine the value of the parameter.
           ATermAppl par=ATAgetFirst(ATLgetArgument(a,1));
@@ -1986,7 +1996,8 @@ namespace mcrl2 {
         return NULL; //to suppress warnings
       }
       
-      static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true, ATermList ExtraParams=NULL){
+      static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true, ATermList ExtraParams=NULL)
+      {
         //return a || composition of n processes P
         unsigned long n=atol(ATgetName(ATgetAFun(number)));
         unsigned long i=1;
@@ -2012,7 +2023,8 @@ namespace mcrl2 {
        *             specification in the internal format after type checking.
        *  \return    Spec after applying alphabet reductions.
       **/
-      static ATermAppl gsAlpha(ATermAppl Spec){
+      static ATermAppl gsAlpha(ATermAppl Spec)
+      {
         if (gsVerbose) std::cerr << "applying alphabet reductions...\n";
         //create the tables
         afunPair=ATmakeAFun("p",2,ATfalse);
@@ -2038,7 +2050,8 @@ namespace mcrl2 {
         //we start from init and iterate on the processes init depends upon init until the system stabilises.
         deps=ATtableCreate(10000,80); //process dependencies : P(Pname,type) -> List(P(Pname,type))
         bool stable=false;
-        while(!stable){
+        while(!stable)
+        {
           //apply to each and compare with the old values.
           stable=true;
           ATermList todo=ATLtableGet(deps,(ATerm)INIT_KEY());
@@ -2120,9 +2133,11 @@ namespace mcrl2 {
         else todo=ATmakeList1((ATerm)INIT_KEY());
         ATermAppl npCRL=ATmakeAppl2(props_afun,(ATerm)mCRL_aterm,(ATerm)rec_aterm);
         ATermTable subs_npCRL=ATtableCreate(10000,80);
-        for(; !ATisEmpty(todo); todo=ATgetNext(todo)){
+        for(; !ATisEmpty(todo); todo=ATgetNext(todo))
+        {
           ATermAppl p=ATAgetFirst(todo);
-          if(ATisEqual(ATAtableGet(props,(ATerm)p),npCRL)){
+          if(ATisEqual(ATAtableGet(props,(ATerm)p),npCRL))
+          {
             //check if this is really npCRL.
             //what we currently recognize is this:
             //<nP>(p:Pos,...) = (p>1) -> <P>([p],...)||<nP>(Int2Pos(p-1),...) <> <P>([1],...)
@@ -2222,18 +2237,24 @@ namespace mcrl2 {
                  )
               ) goto nP_checked;
       
-      	good=true;
+      	      good=true;
             }
       
             nP_checked:
       
-            if(good){
-              if (gsVerbose) std::cerr << "- process " << core::pp(p) << " is a recursive parallel process in n-parallel pCRL format\n";
-      	ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm));
-      	ATtablePut(subs_npCRL,(ATerm)p,(ATerm)ATmakeList0());
+            if (good)
+            {
+              if (gsVerbose) 
+              { 
+                std::cerr << "- process " << core::pp(p) << " is a recursive parallel process in n-parallel pCRL format\n";
+              }
+      	      ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm));
+      	      ATtablePut(subs_npCRL,(ATerm)p,(ATerm)ATmakeList0());
             }
-            else{
-      	gsWarningMsg("- process %P is a recursive parallel process not in n-parallel pCRL format\n in this case alphabet reductions may not stop, or may not be performed completely\n\n", p);
+            else
+            {
+      	      throw mcrl2::runtime_error("Process " + core::pp(p) +" is a recursive parallel process not in n-parallel pCRL format.\nIn this case alphabet reductions may not stop, or may not be performed completely.");
+              
             }
           }
         }
@@ -2246,12 +2267,14 @@ namespace mcrl2 {
       
         ////First make a table of Positive constants
         ATermTable consts=ATtableCreate(10000,80);
-        for(ATermList l=ATLgetArgument(ATAgetArgument(ATAgetArgument(Spec,0),3),0);!ATisEmpty(l);l=ATgetNext(l)){
+        for(ATermList l=ATLgetArgument(ATAgetArgument(ATAgetArgument(Spec,0),3),0);!ATisEmpty(l);l=ATgetNext(l))
+        {
           ATermAppl eq=ATAgetFirst(l);
           ATermAppl left=ATAgetArgument(eq,2);
           ATermAppl right=ATAgetArgument(eq,3);
           if(gsIsOpId(left) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(left,1))) &&
-             gsIsDataExprNumber(right) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(right,1)))){
+             gsIsDataExprNumber(right) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(right,1))))
+          {
             ATtablePut(consts,(ATerm)ATAgetArgument(left,0),(ATerm)ATAgetArgument(right,0));
           }
         }
@@ -2260,18 +2283,22 @@ namespace mcrl2 {
         if(todo) todo=ATinsert(todo,(ATerm)INIT_KEY());
         else todo=ATmakeList1((ATerm)INIT_KEY());
         npCRL=ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm);
-        for(; !ATisEmpty(todo); todo=ATgetNext(todo)){
+        for(; !ATisEmpty(todo); todo=ATgetNext(todo))
+        {
           ATermAppl p=ATAgetFirst(todo);
           if(!ATisEqual(ATAtableGet(props,(ATerm)p),npCRL)){
             ATermAppl new_p=gsaSubstNP(subs_npCRL,consts,ATAtableGet(procs,(ATerm)p));
-            if(!new_p) {
-      	gsWarningMsg("could not replace all npCRL processes\n in this case alphabet reductions may not stop, or may not be performed completely\n\n", p);
-      	success=false;
-      	// no break; because we are not lasy
+            if(!new_p) 
+      	    { 
+              throw mcrl2::runtime_error("Could not replace all npCRL processes (reason: " + core::pp(p) +").\n"
+                           "In this case alphabet reductions may not stop, or may not be performed completely.");
+      	      success=false;
+      	      // no break; because we are not lazy
             }
-            else{
-      	ATtablePut(procs,(ATerm)p,(ATerm)new_p);
-      	//gsWarningMsg("new_p: %P\n\n", new_p);
+            else
+            {
+      	      ATtablePut(procs,(ATerm)p,(ATerm)new_p);
+      	      //gsWarningMsg("new_p: %P\n\n", new_p);
             }
           }
         }
@@ -2280,7 +2307,8 @@ namespace mcrl2 {
         //If success -- replace all npCRL processes with their expansions.
         //Otherwise -- just add the expansions.
         todo=ATtableKeys(subs_npCRL);
-        for(; !ATisEmpty(todo); todo=ATgetNext(todo)){
+        for(; !ATisEmpty(todo); todo=ATgetNext(todo))
+        {
           ATermAppl nP=ATAgetFirst(todo);
           ATermAppl Body=ATAtableGet(procs,(ATerm)nP);
           ATermAppl P=ATAgetArgument(ATAgetArgument(Body,2),0);
@@ -2310,7 +2338,8 @@ namespace mcrl2 {
         //rebuild dependencies
         ATtableReset(deps); //process dependencies : P(Pname,type) -> List(P(Pname,type))
         stable=false;
-        while(!stable){
+        while(!stable)
+        {
           //apply to each and compare with the old values.
           stable=true;
           ATermList todo=ATLtableGet(deps,(ATerm)INIT_KEY());
@@ -2386,35 +2415,40 @@ namespace mcrl2 {
         }
       
         //recalculate the new dependencies again
-        ATtableReset(deps); //process dependencies : P(Pname,type) -> List(P(Pname,type))
-        stable=false;
-        while(!stable){
-          //apply to each and compare with the old values.
-          stable=true;
-          ATermList todo=ATLtableGet(deps,(ATerm)INIT_KEY());
-          if(todo) todo=ATinsert(todo,(ATerm)INIT_KEY());
-          else todo=ATmakeList1((ATerm)INIT_KEY());
-      
-          for(; !ATisEmpty(todo); todo=ATgetNext(todo)){
-            ATermAppl pn=ATAgetFirst(todo);
-            ATermList old_dep=ATLtableGet(deps,(ATerm)pn);
-            if(!old_dep){
-      	old_dep=ATmakeList0();
-      	ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
-            }
-            ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
-            // gsDebugMsg("Phase 3: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
-            if(!ATisEqual(dep,old_dep)){
-      	stable=false;
-      	ATtablePut(deps,(ATerm)pn,(ATerm)dep);
+        { ATtableReset(deps); //process dependencies : P(Pname,type) -> List(P(Pname,type))
+          stable=false;
+          while(!stable)
+          {
+            //apply to each and compare with the old values.
+            stable=true;
+            ATermList todo=ATLtableGet(deps,(ATerm)INIT_KEY());
+            if(todo) todo=ATinsert(todo,(ATerm)INIT_KEY());
+            else todo=ATmakeList1((ATerm)INIT_KEY());
+        
+            for(; !ATisEmpty(todo); todo=ATgetNext(todo))
+            {
+              ATermAppl pn=ATAgetFirst(todo);
+              ATermList old_dep=ATLtableGet(deps,(ATerm)pn);
+              if(!old_dep)
+              {
+        	      old_dep=ATmakeList0();
+        	      ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
+              }
+              ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
+              // gsDebugMsg("Phase 3: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
+              if(!ATisEqual(dep,old_dep))
+              {
+        	      stable=false;
+        	      ATtablePut(deps,(ATerm)pn,(ATerm)dep);
+              }
             }
           }
-        }
-      
+        } 
         //== write out the process equations
         //first the original ones (except deleted)
         ATermList new_pr=ATmakeList0();
-        for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
+        for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr))
+        {
           ATermAppl p=ATAgetFirst(pr);
           ATermAppl pn=ATAgetArgument(p,0);
           ATermAppl res=ATAtableGet(procs,(ATerm)pn);
@@ -2425,7 +2459,8 @@ namespace mcrl2 {
         }
         //now the generated ones
         todo=ATLtableGet(deps,(ATerm)INIT_KEY());
-        for(ATermList pr=todo; !ATisEmpty(pr); pr=ATgetNext(pr)){
+        for(ATermList pr=todo; !ATisEmpty(pr); pr=ATgetNext(pr))
+        {
           ATermAppl pn=ATAgetFirst(pr);
           if(ATisEqual(pn,INIT_KEY())) continue;
           ATermAppl res=ATAtableGet(procs,(ATerm)pn);
@@ -2436,16 +2471,15 @@ namespace mcrl2 {
       
             //if generated during the alpha substitutions
             ATermAppl old_pn=ATAtableGet(subs_alpha_rev,(ATerm)pn);
-            if(old_pn){
-      	ATermList fpars1=ATLtableGet(form_pars,(ATerm)old_pn);
-      	if(fpars1) fpars = fpars1;
+            if(old_pn)
+            {
+      	      ATermList fpars1=ATLtableGet(form_pars,(ATerm)old_pn);
+      	      if(fpars1) fpars = fpars1;
             }
             new_pr=ATinsert(new_pr,(ATerm)gsMakeProcEqn(pn,fpars,ATAtableGet(procs,(ATerm)pn)));
           }
         }
         new_pr=ATreverse(new_pr);
-      
-        // gsDebugMsg("init: l:%T\n\n", ATLtableGet(alphas,(ATerm)ATAtableGet(procs,(ATerm)INIT_KEY())));
       
         Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(new_pr),3);
         Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATAtableGet(procs,(ATerm)INIT_KEY())),4);
@@ -2464,7 +2498,8 @@ namespace mcrl2 {
       }
     } // namespace detail
 
-    void apply_alphabet_reduction(process_specification& p){
+    void apply_alphabet_reduction(process_specification& p)
+    {
       ATermAppl proc = process_specification_to_aterm(p);
       proc = detail::gsAlpha(proc);
       if (proc == NULL)

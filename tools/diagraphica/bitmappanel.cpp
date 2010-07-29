@@ -61,7 +61,7 @@ BitmapPanel::~BitmapPanel()
 
 
 // ------------------------------------------------
-void BitmapPanel::onEvtPaint( wxPaintEvent& event )
+void BitmapPanel::onEvtPaint( wxPaintEvent& /*event*/ )
 // ------------------------------------------------
 {
     if ( bitmap->Ok() == true )

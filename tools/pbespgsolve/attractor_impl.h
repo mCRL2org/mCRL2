@@ -8,8 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "attractor.h"
-#include <queue>                // checkme: needed?
-#include <tr1/unordered_set>    // checkme: needed?
+#include <queue>
 
 template<class SetT>
 void make_attractor_set( const ParityGame &game, ParityGame::Player player,

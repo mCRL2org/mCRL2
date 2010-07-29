@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_DETAIL_PROCESS_SORT_TRAVERSER_H
 
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 
 #include "mcrl2/process/process_specification.h"
 
@@ -115,13 +115,13 @@ namespace detail {
     }
 
     template <typename Container>
-    void operator()(const Container& t, typename data::detail::enable_if_container<Container>::type* = 0)
+    void operator()(const Container& t, typename atermpp::detail::enable_if_container<Container>::type* = 0)
     {
       traverse_container(t);
     }
 
     template <typename Term>
-    void operator()(const Term& t, typename data::detail::disable_if_container<Term>::type* = 0)
+    void operator()(const Term& t, typename atermpp::detail::disable_if_container<Term>::type* = 0)
     {
       traverse(t);
     }

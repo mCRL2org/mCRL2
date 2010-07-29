@@ -441,32 +441,32 @@ namespace mcrl2 {
       }
 
       void font_renderer::draw_cropped_text(
-        const std::string& s,
-        const double x,
-        const double y,
-        const double xLft,
-        const double xRgt,
-        const double yTop,
-        const double yBot,
-        const double scale,
-        const Alignment& align_horizontal,
-        const Alignment& align_vertical)
+        const std::string& /*s*/,
+        const double /*x*/,
+        const double /*y*/,
+        const double /*xLft*/,
+        const double /*xRgt*/,
+        const double /*yTop*/,
+        const double /*yBot*/,
+        const double /*scale*/,
+        const Alignment& /*align_horizontal*/,
+        const Alignment& /*align_vertical*/)
       {
         // Crop text to fit into bounding box.
       }
 
 	  void font_renderer::draw_cropped_text(
-        const std::string& s,
-        const double x,
-        const double y,
-		const double z,
-        const double xLft,
-        const double xRgt,
-        const double yTop,
-        const double yBot,
-        const double scale,
-        const Alignment& align_horizontal,
-        const Alignment& align_vertical)
+        const std::string& /*s*/,
+        const double /*x*/,
+        const double /*y*/,
+		const double /*z*/,
+        const double /*xLft*/,
+        const double /*xRgt*/,
+        const double /*yTop*/,
+        const double /*yBot*/,
+        const double /*scale*/,
+        const Alignment& /*align_horizontal*/,
+        const Alignment& /*align_vertical*/)
       {
         // Crop text to fit into bounding box.
       }

@@ -15,9 +15,9 @@
 #include <algorithm>
 #include <functional>
 
-#include "boost/bind.hpp"
-
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/exception.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
 
@@ -35,16 +35,31 @@ namespace mcrl2 {
 
         bool operator()(data_expression const& e)
         {
-          return e.sort().is_function_sort() && function_sort(e.sort()).target_sort() == m_sort;
+          return is_function_sort(e.sort()) && function_sort(e.sort()).target_sort() == m_sort;
         }
       };
 
       struct has_non_function_sort : public std::unary_function< data_expression const&, bool >
       {
         bool operator()(data_expression const& e)
-        { return !e.sort().is_function_sort();
+        { return !is_function_sort(e.sort());
         }
       };
+
+      struct has_sort : public std::unary_function< data_expression const&, bool >
+      {
+        sort_expression m_sort;
+
+        has_sort(sort_expression const& sort) : m_sort(sort)
+        {
+        }
+
+        bool operator()(data_expression const& e)
+        { return e.sort()==m_sort;
+        }
+      };
+
+      
     }
     /// \endcond
 
@@ -94,7 +109,8 @@ namespace mcrl2 {
         /// \param[in] sort the sort of which to set the representative
         /// \param[in] representative the data expression that serves as representative
         data_expression set_representative(sort_expression const& sort, data_expression const& representative)
-        {
+        { 
+          assert(sort==representative.sort());
           m_representatives[sort] = representative;
 
           return representative;
@@ -107,11 +123,11 @@ namespace mcrl2 {
         /// \pre symbol.sort() is of type function_sort
         data_expression find_representative(function_symbol const& symbol, const unsigned int maximum_depth)
         {
-          assert(symbol.sort().is_function_sort());
+          assert(is_function_sort(symbol.sort()));
 
           data_expression_vector arguments;
 
-          for (boost::iterator_range< function_sort::domain_const_range::iterator > r(function_sort(symbol.sort()).domain()); !r.empty(); r.advance_begin(1))
+          for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(symbol.sort()).domain()); !r.empty(); r.advance_begin(1))
           {
             data_expression representative = find_representative(r.front(), maximum_depth - 1);
 
@@ -132,77 +148,82 @@ namespace mcrl2 {
         /// \param[in] maximum_depth the maximum depth for recursive exploration of the sort
         /// \return an element of sort sort or the default constructed data_expression object
         data_expression find_representative(sort_expression const& sort, const unsigned int maximum_depth)
-        { data_specification::constructors_const_range local_constructors(m_specification.constructors(sort));
-          data_specification::mappings_const_range     local_mappings(m_specification.mappings());
-          // std::cerr << "COnstructors length " << local_constructors.size() << "\n";
-
-          if (sort.is_function_sort())
-          { // s is a function sort. We search for a constructor of mapping of this sort
+        { 
+          if (is_function_sort(sort))
+          { 
+            // s is a function sort. We search for a constructor of mapping of this sort
             // Although in principle possible, we do not do a lot of effort to construct
             // a term of this sort. We just look whether a term of exactly this sort is
             // present.
 
             // check if there is a mapping with sort s (constructors with sort s cannot exist).
+            
+            data_specification::mappings_const_range local_mappings(m_specification.mappings(sort));
             for (data_specification::mappings_const_range::const_iterator i =
-                std::find_if(local_mappings.begin(), local_mappings.end(), detail::has_result_sort(sort));
-                                                                                         i != local_mappings.end(); )
+                std::find_if(local_mappings.begin(), local_mappings.end(), 
+                                detail::has_sort(sort)); i != local_mappings.end(); )
             {
               return set_representative(sort, *i);
             }
           }
           else
-          {
+          { 
             // s is a constant (not a function sort).
             // check if there is a constant constructor for s
+
+            data_specification::constructors_const_range local_constructors(m_specification.constructors(sort));
+
             for (data_specification::constructors_const_range::const_iterator i =
-               std::find_if(local_constructors.begin(), local_constructors.end(), detail::has_non_function_sort());
-                                                                                         i != local_constructors.end(); )
+               std::find_if(local_constructors.begin(), local_constructors.end(), detail::has_sort(sort));
+                                                   i != local_constructors.end(); )
             {
                return set_representative(sort, *i);
             }
 
             // check if there is a constant mapping for s
+            data_specification::mappings_const_range local_mappings(m_specification.mappings(sort));
+
             for (data_specification::mappings_const_range::const_iterator i =
-                 std::find_if(local_mappings.begin(), local_mappings.end(),
-                     boost::bind(std::logical_and< bool >(),
-                       boost::bind(detail::has_result_sort(sort), _1), boost::bind(detail::has_non_function_sort(), _1)));
-                                                                                         i != local_mappings.end(); )
+                 std::find_if(local_mappings.begin(), local_mappings.end(),detail::has_sort(sort));
+                                                 i != local_mappings.end(); )
             {
               return set_representative(sort, *i);
             }
-
+            
             if (maximum_depth != 0)
             {
               // recursively traverse constructor functions of the form f:s1#...#sn -> sort.
               // operators with f:s1#...#sn->G where G is a complex sort expression are ignored
-              for (data_specification::constructors_const_range::const_iterator i = local_constructors.begin();
-                                                                                         i != local_constructors.end(); ++i)
+              for (data_specification::constructors_const_range::const_iterator i = 
+                              std::find_if(local_constructors.begin(), local_constructors.end(), detail::has_result_sort(sort));
+                                        i != local_constructors.end(); ++i)
               {
                 // attempt to find representative based on constructor *i
-                data_expression possible_representative = find_representative(*i, maximum_depth);
-
-                if (possible_representative != data_expression())
-                {
+                try 
+                { 
+                  data_expression possible_representative = find_representative(*i, maximum_depth);
                   return set_representative(sort, possible_representative);
                 }
+                catch (mcrl2::runtime_error & /* e */){}; // continue searching;
+                
               }
 
               for (data_specification::mappings_const_range::const_iterator i =
-                   std::find_if(local_mappings.begin(), local_mappings.end(), detail::has_result_sort(sort));
-                                                                                         i != local_mappings.end(); ++i)
+                                    std::find_if(local_mappings.begin(), local_mappings.end(), detail::has_result_sort(sort));
+                                        i != local_mappings.end(); ++i)
               {
                 // attempt to find representative based on constructor *i
-                data_expression possible_representative = find_representative(*i, maximum_depth);
-
-                if (possible_representative != data_expression())
-                {
+                try
+                { data_expression possible_representative = find_representative(*i, maximum_depth);
                   return set_representative(sort, possible_representative);
                 }
+                catch (mcrl2::runtime_error & /* e */){}; // continue searching;
+                
               }
             }
           }
 
-          return set_representative(sort, data_expression());
+          throw mcrl2::runtime_error("Cannot find a term of sort " + pp(sort));
         }
 
       public:

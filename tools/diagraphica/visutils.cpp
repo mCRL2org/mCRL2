@@ -2963,7 +2963,7 @@ void VisUtils::setTransf(
 // ---------------------------------------------
 void VisUtils::setTransf(
     const double &xCtr,   const double &yCtr,
-    const double &xDOF,   const double &yDOF,
+    const double &/*xDOF*/,   const double &/*yDOF*/,
     const double &xHge,   const double &yHge,
     const double &aglCtr, const double &aglHge )
 // ---------------------------------------------

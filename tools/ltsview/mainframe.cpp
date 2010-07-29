@@ -16,8 +16,7 @@
 #include <wx/filedlg.h>
 #include <wx/notebook.h>
 #include <wx/progdlg.h>
-#include <mcrl2/lts/lts.h>
-//#include <time.h>
+#include "mcrl2/lts/lts_io.h"
 #include "glcanvas.h"
 #include "icons/main_window.xpm"
 #include "ids.h"
@@ -36,8 +35,8 @@
 #endif
 
 using namespace std;
-using namespace Utils;
 using namespace IDs;
+
 // Event table
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (wxID_OPEN, MainFrame::onOpen)
@@ -232,11 +231,12 @@ void MainFrame::onIdle(wxIdleEvent &event) {
 }
 */
 
-void MainFrame::onOpen(wxCommandEvent& /*event*/) {
+void MainFrame::onOpen(wxCommandEvent& /*event*/) 
+{
   wxString filemask = wxString(("All supported files (" +
-        mcrl2::lts::lts::lts_extensions_as_string() +
+        mcrl2::lts::detail::lts_extensions_as_string() +
         ")|" +
-        mcrl2::lts::lts::lts_extensions_as_string(";") +
+        mcrl2::lts::detail::lts_extensions_as_string(";") +
         "|All files (*.*)|*.*").c_str(),
         wxConvLocal);
   wxFileDialog dialog(this,wxT("Open LTS"),
@@ -387,19 +387,19 @@ void MainFrame::onSim(wxCommandEvent& /*event*/)
   simDialog->Show();
 }
 
-void MainFrame::onZoomInBelow(wxCommandEvent& event)
+void MainFrame::onZoomInBelow(wxCommandEvent& /*event*/)
 {
   mediator->zoomInBelow();
   glCanvas->display();
 }
 
-void MainFrame::onZoomInAbove(wxCommandEvent& event)
+void MainFrame::onZoomInAbove(wxCommandEvent& /*event*/)
 {
   mediator->zoomInAbove();
   glCanvas->display();
 }
 
-void MainFrame::onZoomOut(wxCommandEvent& event)
+void MainFrame::onZoomOut(wxCommandEvent& /*event*/)
 {
   mediator->zoomOut();
   glCanvas->display();

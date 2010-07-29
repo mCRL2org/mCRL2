@@ -41,6 +41,7 @@
 #include "mcrl2/lps/sumelm.h"
 #include <mcrl2/lps/constelm.h>
 #include "mcrl2/exception.h"
+#include "mcrl2/lps/find.h"
 
 // atermpp includes
 #include "mcrl2/atermpp/set.h"
@@ -338,16 +339,11 @@ class specification_basic_type:public boost::noncopyable
     { return stringTable.count(str)>0;
     }
 
-    void insertalias(const alias& a)
-    {
-      data.add_alias(a);
-    }
-
     void insertsort(const sort_expression sortterm)
     {
       data.add_sort(sortterm);
 
-      if (sortterm.is_basic_sort())
+      if (is_basic_sort(sortterm))
       {
         long n=0;
         const basic_sort sort(sortterm);
@@ -371,7 +367,7 @@ class specification_basic_type:public boost::noncopyable
         objectdata[n].constructor=0;
         return;
       }
-      if (sortterm.is_function_sort())
+      if (is_function_sort(sortterm))
       { return;
       }
       throw mcrl2::runtime_error("expected a sortterm (2): " + pp(sortterm));
@@ -428,7 +424,7 @@ class specification_basic_type:public boost::noncopyable
            processes to one linear process where variable names are joined. If this
            is not being done (as happened before 4/1/2008) very long lists of parameters
            can occur when linearising using regular2 */
-           if ((l1->is_variable()) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
+           if (is_variable(*l1) && std::find(occurs_set.begin(),occurs_set.end(),*l1)==occurs_set.end())
            { const variable v=*l1;
              result=push_front(result,v);
              occurs_set.insert(v);
@@ -1101,7 +1097,7 @@ class specification_basic_type:public boost::noncopyable
                         const data_expression t,
                         const atermpp::set < variable > &vars_set,
                         atermpp::set < variable > &vars_result_set)
-    { if (t.is_variable())
+    { if (is_variable(t))
       {
         if (vars_set.find(variable(t))!=vars_set.end())
         { vars_result_set.insert(t);
@@ -1109,21 +1105,25 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      if (t.is_function_symbol())
+      if (is_function_symbol(t))
       { return;
       }
 
-      if (t.is_abstraction())
+      if (is_abstraction(t))
       { fprintf(stderr,"Warning: filtering of variables expression with binders\n");
         return;
       }
 
-      if (t.is_where_clause())
+      if (is_where_clause(t))
       { fprintf(stderr,"Warning: filtering of variables expression with where clause\n");
         return;
       }
 
-      assert(t.is_application());
+      if (!is_application(t))
+      { std::cerr << "Error: term of unexpected type " << t << "\n";
+      }
+
+      assert(is_application(t));
 
       filter_vars_by_term(application(t).head(),vars_set,vars_result_set);
       filter_vars_by_termlist(application(t).arguments(),vars_set,vars_result_set);
@@ -1740,7 +1740,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression distributeActionOverConditions(
-                          const action act,
+                          const process_expression act, // This is a multi-action, actually.
                           const data_expression condition,
                           const process_expression restterm,
                           const variable_list freevars)
@@ -1965,7 +1965,6 @@ class specification_basic_type:public boost::noncopyable
 
 
             const data_expression c(if_then_else(body2).condition());
-
             const process_expression r= choice(
                            distributeActionOverConditions(body1,c,if_then_else(body2).then_case(),freevars),
                            distributeActionOverConditions(body1,lazy::not_(c),if_then_else(body2).else_case(),freevars));
@@ -2623,9 +2622,13 @@ class specification_basic_type:public boost::noncopyable
         process_identifier t=process_instance(body).identifier();
 
         if (v==later)
-        { if ((!regular)||(mode=mCRL))
+        { if (regular)
+          { mode=mCRL;
+          }
+          todo.push_back(t);
+          /* if ((!regular)||(mode=mCRL))
               todo.push_back(t);
-                /* single = in `mode=mCRL' is important, otherwise crash
+                / * single = in `mode=mCRL' is important, otherwise crash
                    I do not understand the reason for this at this moment
                    JFG (9/5/2000) */
           return body;
@@ -2832,7 +2835,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (vl.empty()) return false;
       const variable var1=vl.front();
-      assert(var1.is_variable());
+      assert(is_variable(var1));
 
       /* The variable with correct type is present: */
       if (var==var1)
@@ -2871,7 +2874,7 @@ class specification_basic_type:public boost::noncopyable
     { if (par2.empty()) return par1;
 
       variable var2=par2.front();
-      assert(var2.is_variable());
+      assert(is_variable(var2));
 
       if (alreadypresent(var2,par1,n))
       { return joinparameters(par1,pop_front(par2),n);
@@ -2946,7 +2949,7 @@ class specification_basic_type:public boost::noncopyable
            structured_sort_constructor_vector constructors(1,sc_push);
            constructors.push_back(sc_emptystack);
            //add data declarations for structured sort
-           spec.insertalias(alias(stack_sort_alias,structured_sort(constructors)));
+           spec.data.add_alias(alias(stack_sort_alias,structured_sort(constructors)));
            stacksort=spec.data.normalise_sorts(stack_sort_alias);
            push=sc_push.constructor_function(stack_sort_alias);
            emptystack=sc_emptystack.constructor_function(stack_sort_alias);
@@ -3094,7 +3097,7 @@ class specification_basic_type:public boost::noncopyable
       for(variable_list::const_iterator walker=stack.parameters.begin() ;
                    walker!=stack.parameters.end() ; ++walker,++getmappings)
       { if (*walker==var)
-        { return application(*getmappings,stack.stackvar);
+        { return make_application(*getmappings,stack.stackvar);
         }
         assert(getmappings!=stack.opns->get.end());
       }
@@ -3107,7 +3110,7 @@ class specification_basic_type:public boost::noncopyable
                          int i,
                          const data_expression_list t1,
                          const stacklisttype &stack)
-    { data_expression_list t(t1);
+    { data_expression_list t(t1); 
       if (!options.newstate)
       { return push_front(t,sort_pos::pos(i));
       }
@@ -3154,7 +3157,7 @@ class specification_basic_type:public boost::noncopyable
         { return equal_to(stack.stackvar, data_expression(processencoding(i,data_expression_list(),stack).front()));
         }
         return equal_to(
-                 application(stack.opns->getstate,stack.stackvar),
+                 make_application(stack.opns->getstate,stack.stackvar),
                      processencoding(i,data_expression_list(),stack).front());
       }
 
@@ -3162,11 +3165,12 @@ class specification_basic_type:public boost::noncopyable
                         must be declared */
       { create_enumeratedtype(stack.no_of_states);
         if (regular)
-        { return equal_to(stack.stackvar,
+        { 
+          return equal_to(stack.stackvar,
                           processencoding(i,data_expression_list(),stack).front());
         }
         return equal_to(
-                 application(stack.opns->getstate, stack.stackvar),
+                 make_application(stack.opns->getstate, stack.stackvar),
                  processencoding(i,data_expression_list(),stack).front());
       }
 
@@ -3196,8 +3200,8 @@ class specification_basic_type:public boost::noncopyable
                      const data_expression t,
                      const stacklisttype &stack,
                      const variable_list vars)
-    { if (t.is_function_symbol()) return t;
-      if (t.is_variable())
+    { if (is_function_symbol(t)) return t;
+      if (is_variable(t))
       { if (std::find(vars.begin(),vars.end(),t)!=vars.end())
         { /* t occurs in vars, so, t does not have to be reconstructed
              from the stack */
@@ -3206,7 +3210,7 @@ class specification_basic_type:public boost::noncopyable
         else return getvar(t,stack);
       }
 
-      if (t.is_application())
+      if (is_application(t))
       { return application(
                 adapt_term_to_stack(application(t).head(),stack,vars),
                 adapt_termlist_to_stack(application(t).arguments(),stack,vars));
@@ -3242,7 +3246,7 @@ class specification_basic_type:public boost::noncopyable
       for(application::arguments_range::const_iterator i = tl.begin(); i!=tl.end(); ++i)
       { result.push_back(adapt_term_to_stack(*i,stack,vars));
       }
-      return convert< data_expression_list >(result);
+      return atermpp::convert< data_expression_list >(result);
     }
 
     data_expression_list adapt_termlist_to_stack(
@@ -3254,7 +3258,7 @@ class specification_basic_type:public boost::noncopyable
       for(data_expression_list::const_iterator i = tl.begin(); i!=tl.end(); ++i)
       { result.push_back(adapt_term_to_stack(*i,stack,vars));
       }
-      return convert< data_expression_list >(result);
+      return atermpp::convert< data_expression_list >(result);
     }
 */
 
@@ -3271,7 +3275,7 @@ class specification_basic_type:public boost::noncopyable
       return push_front(
                 adapt_multiaction_to_stack_rec(pop_front(multiAction),stack,vars),
                 action(act.label(),
-                       convert<data_expression_list>(adapt_termlist_to_stack(
+                       atermpp::convert<data_expression_list>(adapt_termlist_to_stack(
                                act.arguments(),
                                stack,
                                vars))));
@@ -3284,8 +3288,8 @@ class specification_basic_type:public boost::noncopyable
     { return adapt_multiaction_to_stack_rec(multiAction,stack,vars);
     }
 
-    data_expression representative_generator_internal(const sort_expression s)
-    { if (!options.noglobalvars)
+    data_expression representative_generator_internal(const sort_expression s, const bool allow_dont_care_var=true)
+    { if ((!options.noglobalvars) && allow_dont_care_var)
       { const variable newVariable(fresh_name("dc"),s);
         insertvariable(newVariable,true);
         global_variables.insert(newVariable);
@@ -3418,7 +3422,7 @@ class specification_basic_type:public boost::noncopyable
         { const data_expression_list t3=push(procId,
                   t1,
                   push_front(data_expression_list(),
-                            data_expression(application(stack.opns->pop,stack.stackvar))),
+                            data_expression(make_application(stack.opns->pop,stack.stackvar))),
                   stack,
                   pcrlprcs,
                   vars,
@@ -3567,7 +3571,7 @@ class specification_basic_type:public boost::noncopyable
                    const atermpp::vector < process_identifier> &pCRLprocs,
                    const variable_list parameters,
                    const stacklisttype &stack,
-                   const bool canterminate,
+                   //const bool canterminate,
                    const bool regular,
                    const bool singlestate)
     { data_expression atTime;
@@ -3720,7 +3724,7 @@ class specification_basic_type:public boost::noncopyable
       */
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
-      procargs=push_front(data_expression_list(),data_expression(application(stack.opns->pop,stack.stackvar)));
+      procargs=push_front(data_expression_list(),data_expression(make_application(stack.opns->pop,stack.stackvar)));
 
       sumlist=insert_summand(
                         sumlist,
@@ -3758,7 +3762,7 @@ class specification_basic_type:public boost::noncopyable
                      const process_expression body,
                      const variable_list pars,
                      const stacklisttype &stack,
-                     const bool canterminate,
+                     //const bool canterminate,
                      const bool regular,
                      const bool singlestate,
                      const atermpp::vector < process_identifier> &pCRLprocs)
@@ -3768,14 +3772,14 @@ class specification_basic_type:public boost::noncopyable
         const process_expression t2=choice(body).right();
 
         collectsumlistterm(procId,sumlist,t1,pars,stack,
-                     canterminate,regular,singlestate,pCRLprocs);
+                     /*canterminate,*/regular,singlestate,pCRLprocs);
         collectsumlistterm(procId,sumlist,t2,pars,stack,
-                     canterminate,regular,singlestate,pCRLprocs);
+                     /*canterminate,*/regular,singlestate,pCRLprocs);
         return;
       }
       else
       { add_summands(procId,sumlist,body,pCRLprocs,pars,stack,
-                     canterminate,regular,singlestate);
+                     /*canterminate,*/regular,singlestate);
       }
     }
 
@@ -3783,7 +3787,7 @@ class specification_basic_type:public boost::noncopyable
                      const atermpp::vector < process_identifier> &pCRLprocs,
                      const variable_list pars,
                      const stacklisttype &stack,
-                     bool canterminate,
+                     /*bool canterminate,*/
                      bool regular,
                      bool singlestate)
     { summand_list sumlist;
@@ -3796,7 +3800,7 @@ class specification_basic_type:public boost::noncopyable
                   objectdata[objectIndex(procId)].processbody,
                   pars,
                   stack,
-                  (canterminate&&objectdata[objectIndex(procId)].canterminate),
+                  /*(canterminate&&objectdata[objectIndex(procId)].canterminate),*/
                   regular,
                   singlestate,
                   pCRLprocs);
@@ -3843,11 +3847,11 @@ class specification_basic_type:public boost::noncopyable
             structured_sort sort_struct(struct_conss);
 
             //add declaration of standard functions
-            spec.insertalias(alias(sort_id, sort_struct));
+            spec.data.add_alias(alias(sort_id, sort_struct));
 
             //store new declarations in return value w
             sortId = sort_id;
-            elementnames = data::convert< data::function_symbol_list >(sort_struct.constructor_functions());
+            elementnames = atermpp::convert< data::function_symbol_list >(spec.data.constructors(sort_id)); 
           }
         }
 
@@ -3892,12 +3896,11 @@ class specification_basic_type:public boost::noncopyable
 
     function_symbol find_case_function(unsigned int index, const sort_expression sort)
     {
-      // std::cerr << "Use case function " << index << " Sort: " << pp(sort) << "\n";
       const function_symbol_list functions=enumeratedtypes[index].functions;
       for(function_symbol_list::const_iterator w=functions.begin();
                   w!=functions.end(); ++w)
       {
-        function_sort::domain_const_range domain = function_sort(w->sort()).domain();
+        sort_expression_list domain = function_sort(w->sort()).domain();
         assert(domain.size() >= 2);
         if (*(++domain.begin())==sort)
         { return *w;
@@ -3915,8 +3918,6 @@ class specification_basic_type:public boost::noncopyable
     { variable_list vars;
       data_expression_list args;
       data_expression_list xxxterm;
-
-      // std::cerr << "Define case function " << index << "Sort: " << pp(sort) << "\n";
 
       const sort_expression normalised_sort=sort; // data.normalise_sorts(sort);
       const variable v1=get_fresh_variable("x",normalised_sort);
@@ -3991,7 +3992,7 @@ class specification_basic_type:public boost::noncopyable
       const function_sort newsort(newsortlist,sort);
       const function_symbol casefunction(
                           fresh_name(str(boost::format("C%d_%s") % n % (
-                                         !newsort.is_basic_sort()?"":std::string(basic_sort(sort).name())))),
+                                         !is_basic_sort(newsort)?"":std::string(basic_sort(sort).name())))),
                           newsort);
       // insertmapping(casefunction,true);
       data.add_mapping(casefunction);
@@ -4122,7 +4123,7 @@ class specification_basic_type:public boost::noncopyable
     data_expression_list extend_conditions(
                          const variable var,
                          const data_expression_list conditionlist)
-    { const data_expression unique=representative_generator_internal(var.sort());
+    { const data_expression unique=representative_generator_internal(var.sort(),true);
       const data_expression newcondition=equal_to(var,unique);
       return extend(newcondition,conditionlist);
     }
@@ -4133,7 +4134,7 @@ class specification_basic_type:public boost::noncopyable
          return sort_bool::true_();
 
       const variable var=matchinglist.front();
-      data_expression unique=representative_generator_internal(var.sort());
+      data_expression unique=representative_generator_internal(var.sort(),false);
       return lazy::and_(
                    transform_matching_list(pop_front(matchinglist)),
                    equal_to(data_expression(var),unique));
@@ -4187,7 +4188,8 @@ class specification_basic_type:public boost::noncopyable
                         atermpp::vector < variable_list> &renamings_pars,
                         atermpp::vector < data_expression_list> &renamings_args,
                         data_expression_list &conditionlist)
-    { data_expression_list renamingargs;
+    { 
+      data_expression_list renamingargs;
       variable_list renamingpars;
       variable_list matchinglist=v2;
 
@@ -4263,7 +4265,7 @@ class specification_basic_type:public boost::noncopyable
       if (t==t1)
       { return t;
       }
-      return application(find_case_function(e.enumeratedtype_index, termsort), casevar, t, t1);
+      return make_application(find_case_function(e.enumeratedtype_index, termsort), casevar, t, t1);
     }
 
     data_expression construct_binary_case_tree(
@@ -4379,7 +4381,6 @@ class specification_basic_type:public boost::noncopyable
       for(summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
       { const summand smmnd=*walker;
         const data_expression condition=smmnd.condition();
-
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
         const variable_list auxpars= *auxrename_list_pars;
@@ -4727,7 +4728,7 @@ class specification_basic_type:public boost::noncopyable
        a LPE assuming the pCRL term under consideration is regular */
 
     summand_list generateLPEpCRL(const process_identifier procId,
-                                        const bool canterminate,
+                                        /*const bool canterminate,*/
                                         const bool containstime,
                                         const bool regular,
                                         variable_list &parameters,
@@ -4783,7 +4784,7 @@ class specification_basic_type:public boost::noncopyable
                                   regular,singlecontrolstate,parameters);
 
       summand_list sums=collectsumlist(pCRLprocs,parameters,stack,
-               (canterminate&&objectdata[n].canterminate),regular,
+               /*(canterminate&&objectdata[n].canterminate),*/regular,
                    singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
@@ -5833,7 +5834,7 @@ class specification_basic_type:public boost::noncopyable
          of the form t1 +...+ tn, where one of the
          ti is a variable in sumvars that does not occur in condition */
 
-      if (actiontime.is_variable())
+      if (is_variable(actiontime))
       { if (occursintermlist(actiontime,data_expression_list(sumvars)) && !occursinterm(actiontime,condition))
         { return true;
         }
@@ -5986,7 +5987,7 @@ class specification_basic_type:public boost::noncopyable
       if (var_list.empty()) return var_list;
 
       variable v=var_list.front();
-      assert(v.is_variable());
+      assert(is_variable(v));
       variable new_variable=get_fresh_variable(std::string(v.name()) + ((hint.empty())?"":"_") + hint,
                                   v.sort());
       return push_front(
@@ -6275,18 +6276,15 @@ class specification_basic_type:public boost::noncopyable
       }
 
       // At this point the parameters of pars1 and pars2 are unique, except for
-      // those that are constant in both processes. Constant parameters do not occur
-      // in the initialisation of the processes.
+      // those that are constant in both processes. 
 
       variable_list pars3;
       for(variable_list::const_iterator i=pars2.begin(); i!=pars2.end(); ++i)
-      { if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
-        { // *i does not occur in pars1.
+      { 
+        if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
+        { 
+          // *i does not occur in pars1.
           pars3=push_front(pars3,*i);
-        }
-        else
-        { assert(!data::search_free_variable(init1,*i));
-          assert(!data::search_free_variable(init2,*i));
         }
       }
 
@@ -6313,14 +6311,15 @@ class specification_basic_type:public boost::noncopyable
 
     summand_list generateLPEmCRLterm(
                        const process_expression t,
-                       const bool canterminate,
+                       /*const bool canterminate,*/
                        const bool regular,
                        const bool rename_variables,
                        variable_list &pars,
                        assignment_list &init)
-    { if (is_process_instance(t))
+    { 
+      if (is_process_instance(t))
       {
-        summand_list t3=generateLPEmCRL(process_instance(t).identifier(),canterminate,regular,pars,init);
+        summand_list t3=generateLPEmCRL(process_instance(t).identifier(),/*canterminate,*/regular,pars,init);
         long n=objectIndex(process_instance(t).identifier());
         data_expression_list args=process_instance(t).actual_parameters();
         init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
@@ -6353,7 +6352,7 @@ class specification_basic_type:public boost::noncopyable
 
           specification temporary_spec(data,acts,global_variables,lps,initializer);
 
-          constelm_algorithm < rewriter > alg(temporary_spec,rewr);
+          constelm_algorithm < rewriter > alg(temporary_spec,rewr,gsVerbose);
           alg.run(true); // Remove constants from the specification, where global variables are
                          // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification
@@ -6362,13 +6361,16 @@ class specification_basic_type:public boost::noncopyable
           pars=temporary_spec.process().process_parameters();
 
           // Add all free variables in objectdata[n].parameters that are not already in the parameter list
-          // and are not global variables to pars
+          // and are not global variables to pars. This can occur when a parameter of the process is replaced
+          // by a constant, which by itself is a parameter.
 
           const std::set <variable> variable_list = data::find_free_variables(args);
           for(std::set <variable>::const_iterator i=variable_list.begin();
                  i!=variable_list.end(); ++i)
-          { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars
-                global_variables.find(*i)==global_variables.end())   // and it is neither a glabal variable
+          { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars,
+                global_variables.find(*i)==global_variables.end() && // it is neither a glabal variable
+                lps::search_free_variable(temporary_spec.process().summands(),*i)
+               )          // and it occurs in the summands.
             { pars=push_front(pars,*i);
             }
           }
@@ -6407,40 +6409,40 @@ class specification_basic_type:public boost::noncopyable
       if (is_merge(t))
       { variable_list pars1,pars2;
         assignment_list init1,init2;
-        const summand_list t1=generateLPEmCRLterm(process::merge(t).left(),canterminate,
+        const summand_list t1=generateLPEmCRLterm(process::merge(t).left(),/*canterminate,*/
                               regular,rename_variables,pars1,init1);
-        const summand_list t2=generateLPEmCRLterm(process::merge(t).right(),canterminate,
+        const summand_list t2=generateLPEmCRLterm(process::merge(t).right(),/*canterminate,*/
                               regular,true,pars2,init2);
         summand_list t3=parallelcomposition(t1,pars1,init1,t2,pars2,init2,pars,init);
         return t3;
       }
 
       if (is_hide(t))
-      {  const summand_list t2=generateLPEmCRLterm(hide(t).operand(),canterminate,
+      {  const summand_list t2=generateLPEmCRLterm(hide(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
          return hidecomposition(hide(t).hide_set(),t2);
       }
 
       if (is_allow(t))
-      { const summand_list t2=generateLPEmCRLterm(allow(t).operand(),canterminate,
+      { const summand_list t2=generateLPEmCRLterm(allow(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return allowblockcomposition(allow(t).allow_set(),t2,true);
       }
 
       if (is_block(t))
-      { const summand_list t2=generateLPEmCRLterm(block(t).operand(),canterminate,
+      { const summand_list t2=generateLPEmCRLterm(block(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return allowblockcomposition(block(t).block_set(),t2,false);
       }
 
       if (is_rename(t))
-      { const summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),canterminate,
+      { const summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return renamecomposition(process::rename(t).rename_set(),t2);
       }
 
       if (is_comm(t))
-      { const summand_list t1=generateLPEmCRLterm(comm(t).operand(),canterminate,
+      { const summand_list t1=generateLPEmCRLterm(comm(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return communicationcomposition(comm(t).comm_set(),t1);
       }
@@ -6453,7 +6455,7 @@ class specification_basic_type:public boost::noncopyable
 
     summand_list generateLPEmCRL(
                            const process_identifier procIdDecl,
-                           const bool canterminate,
+                           /*const bool canterminate,*/
                            const bool regular,
                            variable_list &pars,
                            assignment_list &init)
@@ -6467,7 +6469,7 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==GNFalpha)||
           (objectdata[n].processstatus==multiAction))
       {
-        return generateLPEpCRL(procIdDecl,(canterminate&&objectdata[n].canterminate),
+        return generateLPEpCRL(procIdDecl,/*(canterminate&&objectdata[n].canterminate),*/
                                          objectdata[n].containstime,regular,pars,init);
       }
       /* process is a mCRLdone */
@@ -6476,7 +6478,7 @@ class specification_basic_type:public boost::noncopyable
                   (objectdata[n].processstatus==mCRL))
       { objectdata[n].processstatus=mCRLlin;
         return generateLPEmCRLterm(objectdata[n].processbody,
-                        (canterminate&&objectdata[n].canterminate),
+                        /*(canterminate&&objectdata[n].canterminate),*/
                          regular,false,pars,init);
       }
 
@@ -6923,7 +6925,7 @@ class specification_basic_type:public boost::noncopyable
 
     process_identifier split_process(const process_identifier procId,
                                    atermpp::map < process_identifier,process_identifier > &visited_id,
-                                   atermpp::map < process_expression,process_identifier > &visited_proc)
+                                   atermpp::map < process_expression,process_expression > &visited_proc)
     { if (visited_id.count(procId)>0)
       { return visited_id[procId];
       }
@@ -6968,7 +6970,7 @@ class specification_basic_type:public boost::noncopyable
     process_expression split_body(
                         const process_expression t,
                         atermpp::map < process_identifier,process_identifier > &visited_id,
-                        atermpp::map < process_expression,process_identifier > &visited_proc,
+                        atermpp::map < process_expression,process_expression> &visited_proc,
                         const variable_list parameters)
     { /* Replace pCRL process terms that occur in the scope of mCRL processes
          by a process identifier. E.g. (a+b)||c is replaced by X||c and
@@ -6981,10 +6983,13 @@ class specification_basic_type:public boost::noncopyable
       process_expression result;
 
       if (visited_proc.count(t)>0)
-      return visited_proc[t];
+      { 
+        return visited_proc[t];
+      }
 
       if (is_merge(t))
-      { result=process::merge(
+      { 
+        result=process::merge(
                     split_body(process::merge(t).left(),visited_id,visited_proc,parameters),
                     split_body(process::merge(t).right(),visited_id,visited_proc,parameters));
       }
@@ -7045,12 +7050,12 @@ class specification_basic_type:public boost::noncopyable
                                  0,
                                  true);
           result=process_instance(p,objectdata[objectIndex(p)].parameters);
-          visited_proc[t]=p;
+          visited_proc[t]=result;
         }
         else
         { const process_identifier p=newprocess(parameters,t,pCRL,0,true);
           result=process_instance(p,objectdata[objectIndex(p)].parameters);
-          visited_proc[t]=p;
+          visited_proc[t]=result;
         }
       }
       else
@@ -7063,7 +7068,7 @@ class specification_basic_type:public boost::noncopyable
     process_identifier splitmCRLandpCRLprocsAndAddTerminatedAction(
                             const process_identifier procId)
     { atermpp::map < process_identifier,process_identifier> visited_id;
-      atermpp::map < process_expression,process_identifier> visited_proc;
+      atermpp::map < process_expression,process_expression> visited_proc;
       return split_process(procId,visited_id,visited_proc);
     }
 
@@ -7175,7 +7180,7 @@ class specification_basic_type:public boost::noncopyable
          first variable in a sequence is always an actionvariable */
       procstorealGNF(init1,options.lin_method!=lmStack);
 
-      summand_list t3=generateLPEmCRL(init1,objectdata[objectIndex(init1)].canterminate,
+      summand_list t3=generateLPEmCRL(init1,/*objectdata[objectIndex(init1)].canterminate,*/
                                  options.lin_method!=lmStack,parameters,initial_state);
       t3=allowblockcomposition(action_name_multiset_list(),t3,false); // This removes superfluous delta summands.
       if (options.final_cluster)
@@ -7254,7 +7259,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
 
   specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
-                                action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),
+                                action_label_list(atermpp::convert<data::variable_list>(type_checked_spec.global_variables())),
                                 data_spec,
                                 type_checked_spec.global_variables(),
                                 lin_options);

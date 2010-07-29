@@ -141,8 +141,8 @@ void Graph::swapAttributes(
     const size_t &idx2 )
 // ------------------------
 {
-    if ( ( 0 <= idx1 && idx1 < attributes.size() ) &&
-         ( 0 <= idx2 && idx2 < attributes.size() ) )
+    if ( ( idx1 < attributes.size() ) &&
+         ( idx2 < attributes.size() ) )
     {
         // swap attributes
         Attribute* temp  = attributes[idx1];
@@ -168,8 +168,8 @@ void Graph::moveAttribute(
     const size_t &idxTo )
 // -----------------------
 {
-    if ( ( 0 <= idxFr && idxFr < attributes.size() ) &&
-         ( 0 <= idxTo && idxTo < attributes.size() ) )
+    if ( idxFr < attributes.size() &&
+         idxTo < attributes.size() )
     {
         // move attributes
         Attribute* temp = attributes[idxFr];
@@ -453,7 +453,7 @@ int Graph::getSizeAttributes()
 Attribute* Graph::getAttribute( const size_t &idx )
 // ---------------------------------------------
 {
-    if ( 0 <= idx && idx < attributes.size() )
+    if ( idx < attributes.size() )
         return attributes[idx];
     else
         throw mcrl2::runtime_error( "Error retrieving attribute." );
@@ -488,7 +488,7 @@ int Graph::getSizeNodes()
 Node* Graph::getNode( const size_t &idx )
 // -----------------------------------
 {
-    if ( 0 <= idx && idx < nodes.size() )
+    if ( idx < nodes.size() )
         return nodes[idx];
     else
         throw mcrl2::runtime_error( "Error retrieving node." );
@@ -507,7 +507,7 @@ int Graph::getSizeEdges()
 Edge* Graph::getEdge( const size_t &idx )
 // -----------------------------------
 {
-    if ( 0 <= idx && idx < edges.size() )
+    if ( idx < edges.size() )
         return edges[idx];
 	else
         throw mcrl2::runtime_error( "Error retrieving edge." );
@@ -558,7 +558,7 @@ Cluster* Graph::getLeaf( const size_t &idx )
 // --------------------------------------
 {
     Cluster* result = NULL;
-    if ( 0 <= idx && idx < leaves.size() )
+    if ( idx < leaves.size() )
         result = leaves[idx];
     return result;
 }
@@ -577,7 +577,7 @@ Bundle* Graph::getBundle( const size_t &idx )
 // ---------------------------------------
 {
     Bundle* result = NULL;
-    if ( 0 <= idx && idx < bundles.size() )
+    if ( idx < bundles.size() )
         result = bundles[idx];
     return result;
 }

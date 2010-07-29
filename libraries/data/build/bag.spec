@@ -7,7 +7,7 @@
 % http://www.boost.org/LICENSE_1_0.txt)
 %
 % Specification of the Bag data sort.
-
+#using S
 #include nat.spec
 #include fbag.spec
 #include fset.spec
@@ -15,8 +15,8 @@
 
 sort Bag(S) <"bag">;
 
-map @bag <"bagconstructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
-    {} <"emptybag">: Bag(S);
+cons @bag <"bagconstructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
+map {} <"emptybag">: Bag(S);
     @bagfbag <"bagfbag">: FBag(S) <"arg"> -> Bag(S);
     @bagcomp <"bagcomprehension">: (S -> Nat) <"arg"> -> Bag(S);
     count <"bagcount">: S <"left"> # Bag(S) <"right"> -> Nat;
@@ -52,8 +52,7 @@ eqn {}  =  @bag(@zero_, @fbag_empty);
     ==(f, g)  ->  ==(@bag(f, b), @bag(g, c))  =  ==(b, c);
     !=(f, g)  ->  ==(@bag(f, b), @bag(g, c))  =  forall(d:S, ==(count(d, @bag(f,b)), count(d, @bag(g,c))));
     <(x, y)  =  &&(<=(x, y), !=(x, y));
-    ==(f, g)  ->  <=(@bag(f, b), @bag(g, c))  =  @fbag_lte(f, b, c);
-    !=(f, g)  ->  <=(@bag(f, b), @bag(g, c))  =  forall(d:S, <=(count(d, @bag(f,b)), count(d, @bag(g,c))));
+    <=(x,y) = ==(*(x,y),x);
     +(@bag(f, b), @bag(g, c))  =  @bag(@add_(f, g), @fbag_join(f, g, b, c));
     *(@bag(f, b), @bag(g, c))  =  @bag(@min_(f, g), @fbag_inter(f, g, b, c));
     -(@bag(f, b), @bag(g, c))  =  @bag(@monus_(f, g), @fbag_diff(f, g, b, c));

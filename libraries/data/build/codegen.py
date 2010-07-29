@@ -48,6 +48,7 @@ import copy
 from data import *
 
 context = None
+current_file = ""
 
 # Verbose printing of message
 def printVerbose(string, object):
@@ -103,6 +104,10 @@ class TokenRAng(Parsing.Token):
 class TokenEquals(Parsing.Token):
     "%token equals"
 
+# using token to define sort parameter
+class TokenUsing(Parsing.Token):
+    "%token using"
+
 # sort
 class TokenSort(Parsing.Token):
     "%token sort"
@@ -145,8 +150,11 @@ class TokenID(Parsing.Token):
 #===============================================================================
 # Nonterminals, with associated productions.  In traditional BNF, the following
 # productions would look something like:
-# Result ::= Spec
-#          | Includes Spec
+# Result ::= UsingSpec
+# UsingSpec ::= "using UsingList IncludesSpec
+#          | IncludesSpec
+# UsingList ::= ID
+#          | UsingSpec ID
 # IncludesSpec ::= Spec
 #          | Includes Spec
 # Includes ::= Include
@@ -202,20 +210,68 @@ class TokenID(Parsing.Token):
 # Label ::= LANG ID RANG
 
 # Result ::= Spec
-#          | Includes Spec
+#          | Using Spec
 class Result(Parsing.Nonterm):
     "%start"
-    def reduceIncludesSpec(self, result):
-        "%reduce IncludesSpec"
+    def reduceUsingSpec(self, result):
+        "%reduce UsingSpec"
         global context
+        global current_file
         self.data = result.data
         self.data.set_namespace()
+        self.data.set_origin_file(current_file)
 
         if context == None:
           context = self.data
         else:
           self.data.merge_specification(context)
           context = self.data
+
+#    def reduceIncludesSpec(self, result):
+#         "%reduce IncludesSpec"
+#         global context
+#         self.data = result.data
+#         self.data.set_namespace()
+#
+#         if context == None:
+#           context = self.data
+#         else:
+#           self.data.merge_specification(context)
+#           context = self.data
+#
+#     def reduceSpec(self, result):
+#         "%reduce Spec"
+#         global context
+#         self.data = result.data
+#         self.data.set_namespace()
+#
+#         if context == None:
+#           context = self.data
+#         else:
+#           self.data.merge_specification(context)
+#           context = self.data
+
+class UsingSpec(Parsing.Nonterm):
+    "%nonterm"
+    def reduceIncludesSpec(self, result):
+        "%reduce IncludesSpec"
+        self.data = result.data
+
+    def reduceUsing(self, usinglist, spec):
+        "%reduce UsingList IncludesSpec"
+        self.data = spec.data
+        self.data.set_using(usinglist.data)
+
+class UsingList(Parsing.Nonterm):
+    "%nonterm"
+    def reduceId(self, u, result):
+      "%reduce using id"
+      self.data = using_list([using(result.data)])
+
+    def reduceUsingList(self, usinglist, u, result):
+      "%reduce UsingList using id"
+      self.data = usinglist.data
+      self.data.push_back(using(result.data))
 
 # IncludesSpec ::= Spec
 #          | Includes Spec
@@ -258,10 +314,22 @@ class Include(Parsing.Nonterm):
 # Spec ::= SortSpec FunctionSpec VarSpec EqnSpec
 class Spec(Parsing.Nonterm):
     "%nonterm"
-    def reduce(self, sortspec, functionspec, varspec, eqnspec):
-        "%reduce SortSpec FunctionSpec VarSpec EqnSpec"
-        self.data = specification(sortspec.data, functionspec.data, varspec.data, eqnspec.data)
+    def reduce(self, sortspecfunctionspec, varspec, eqnspec):
+        "%reduce OptionalSortSpecFunctionSpec VarSpec EqnSpec"
+        self.data = specification(sortspecfunctionspec.sortspec, sortspecfunctionspec.functionspec, varspec.data, eqnspec.data)
         printVerbose("Spec", self.data)
+
+class OptionalSortSpecFunctionSpec(Parsing.Nonterm):
+    "%nonterm"
+    def reduceFunctionSpec(self, functionspec):
+      "%reduce FunctionSpec"
+      self.functionspec = functionspec.data
+      self.sortspec = sort_specification(sort_declaration_list([]))
+
+    def reduceSortSpecFunctionSpec(self, sortspec, functionspec):
+      "%reduce SortSpec FunctionSpec"
+      self.sortspec = sortspec.data
+      self.functionspec = functionspec.data
 
 # SortSpec ::= "sort" SortDecls
 class SortSpec(Parsing.Nonterm):
@@ -275,14 +343,14 @@ class SortSpec(Parsing.Nonterm):
 #                | ConsSpec MapSpec
 class FunctionSpec(Parsing.Nonterm):
     "%nonterm"
-    def reduceMapSpec(self, mapspec):
-        "%reduce MapSpec"
-        self.data = function_specification(mapspec.data, constructor_specification(function_declaration_list([])))
-        printVerbose("FunctionSpec", self.data)
-
     def reduceConsMapSpec(self, consspec, mapspec):
         "%reduce ConsSpec MapSpec"
         self.data = function_specification(mapspec.data, consspec.data)
+        printVerbose("FunctionSpec", self.data)
+
+    def reduceMapSpec(self, mapspec):
+        "%reduce MapSpec"
+        self.data = function_specification(mapspec.data, constructor_specification(function_declaration_list([])))
         printVerbose("FunctionSpec", self.data)
 
 # ConsSpec ::= "cons" OpDecls
@@ -643,9 +711,10 @@ class Parser(Parsing.Lr):
     # scanner into a separate module.
     def scan(self, input):
         syms = {"->"      : TokenArrow,
-                "#"       : TokenHash,
                 "|"       : TokenMid,
                 "#include": TokenInclude,
+                "#using"  : TokenUsing,
+                "#"       : TokenHash,
                 ":"       : TokenColon,
                 ";"       : TokenSemiColon,
                 ","       : TokenComma,
@@ -669,7 +738,7 @@ class Parser(Parsing.Lr):
         # Some parts always need to get extra whitespace
         input = re.sub('(->|[():;,])', r" \1 ", input)
         # # needs to get whitespace if it is not followed by "include"
-        input = re.sub('(#)(?!include)', r" \1 ", input)
+        input = re.sub('(#)(?!(include|using))', r" \1 ", input)
         # < needs to get whitespace if it starts a label
         input = re.sub('(<\")(?=\w)', r"\1 ", input)
         # > needs to get whitespace if it ends a label
@@ -744,8 +813,6 @@ def get_includes(input):
     for line in lines:
         if re.match('#include.*', line):
             includes.append(line.replace('#include ',''))
-        else:
-            break
     return includes
 
 #-------------------------------------------------------#
@@ -758,6 +825,7 @@ def parse_spec(infilename):
     global outputcode
     global parser
     global includes_table
+    global current_file
     input = filter_comments(infilename)
     includes = get_includes(input)
 
@@ -766,6 +834,8 @@ def parse_spec(infilename):
     for include in includes:
         if not includes_table.has_key(include):
           parse_spec(include)
+
+    current_file = infilename
 
     parser.reset()
     if input not in includes_table:

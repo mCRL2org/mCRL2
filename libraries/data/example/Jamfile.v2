@@ -3,8 +3,10 @@ project libraries/data/example
        <use>/site-config//boost
        <source>/libraries//data
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+       <include>.
    ;
 
+exe ABC : ABC.cpp ABC_parser.cpp ABC_lexer.cpp : ;
 exe enumerator : enumerator.cpp : ;
 exe example1   : example1.cpp : ;
 exe example2   : example2.cpp : ;
@@ -15,6 +17,7 @@ exe parse_data : parse_data.cpp : ;
 
 install dist
    :
+     ABC
      enumerator
      example1
      example2

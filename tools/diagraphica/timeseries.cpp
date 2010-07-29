@@ -928,7 +928,7 @@ void TimeSeries::clearAttributes()
 
 
 // ----------------------------------------
-void TimeSeries::onTimer( wxTimerEvent &e )
+void TimeSeries::onTimer( wxTimerEvent& /*e*/ )
 // ----------------------------------------
 {
     ++animFrame;
@@ -969,7 +969,7 @@ void TimeSeries::handleRwndDiagram( const int &dgrmIdx )
 
 
 // -----------------------------------------------------
-void TimeSeries::handlePrevDiagram( const int &dgrmIdx )
+void TimeSeries::handlePrevDiagram( const int &/*dgrmIdx*/ )
 // -----------------------------------------------------
 {
     if ( timerAnim->IsRunning() )

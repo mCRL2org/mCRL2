@@ -53,7 +53,7 @@ namespace tipi {
         void receive_configuration_handler(boost::shared_ptr< const tipi::message >& m);
 
         /** \brief Wakes waiters if no connections remain */
-        void on_disconnect(messaging::basic_messenger_impl< tipi::message >::end_point o) {
+        void on_disconnect(messaging::basic_messenger_impl< tipi::message >::end_point /*o*/) {
           if (number_of_connections() == 0) {
             disconnect();
 

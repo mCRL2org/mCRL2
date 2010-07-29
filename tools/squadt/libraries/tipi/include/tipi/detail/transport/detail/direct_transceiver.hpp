@@ -34,7 +34,8 @@ namespace transport {
         inline direct_transceiver(boost::shared_ptr < transporter_impl > const& o);
 
         /** Constructor for use by the transporter constructor */
-        inline direct_transceiver(boost::shared_ptr < transporter_impl > const& o, boost::shared_ptr < direct_transceiver > const& p);
+        inline direct_transceiver(boost::shared_ptr < transporter_impl > const& o,
+            boost::shared_ptr < direct_transceiver > const& p);
 
       public:
 
@@ -54,14 +55,16 @@ namespace transport {
     /**
      * @param o the transporter to associate with
      **/
-    inline direct_transceiver::direct_transceiver(boost::shared_ptr < transporter_impl > const& o) : basic_transceiver(o) {
-    }
+    inline direct_transceiver::direct_transceiver(boost::shared_ptr < transporter_impl > const& o)
+      : basic_transceiver(o)
+    { }
 
     /**
      * @param o the transporter to associate with
      * @param p the other end point
      **/
-    inline direct_transceiver::direct_transceiver(boost::shared_ptr < transporter_impl > const& o, boost::shared_ptr < direct_transceiver > const& p) : basic_transceiver(o), peer(p.get()) {
+    inline direct_transceiver::direct_transceiver(boost::shared_ptr < transporter_impl > const& o,
+        boost::shared_ptr < direct_transceiver > const& p) : basic_transceiver(o), peer(p.get()) {
       if(!(p.get() != 0)){
         throw std::runtime_error("Direct transceiver does not exists");
       }
@@ -72,7 +75,7 @@ namespace transport {
     /**
      * @param p a shared pointer to this object
      **/
-    inline void direct_transceiver::disconnect(boost::shared_ptr < basic_transceiver > const& p) {
+    inline void direct_transceiver::disconnect(boost::shared_ptr < basic_transceiver > const& /*p*/) {
       boost::weak_ptr < transporter_impl > o(owner);
 
       peer->handle_disconnect(this);

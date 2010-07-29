@@ -27,7 +27,7 @@ set(mcrl2_process_src
 
 set(mcrl2_process_src ${mcrl2_process_src} PARENT_SCOPE)
 
-if( NOT MONO_LIB)
+if( NOT MCRL2_MONO_LIB)
   # actual target:
   add_library(${PROJECT_NAME}
     ${mcrl2_process_src}
@@ -41,4 +41,4 @@ if( NOT MONO_LIB)
   # add install target:
   install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-endif( NOT MONO_LIB)
+endif( NOT MCRL2_MONO_LIB)

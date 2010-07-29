@@ -8,6 +8,7 @@
 %
 % Specification of the FSet data sort, denoting finite sets.
 
+#using S
 #include bool.spec
 
 sort FSet(S) <"fset"> = struct @fset_empty <"fset_empty"> | @fset_cons <"fset_cons"> : S <"head"> # FSet(S) <"tail">;

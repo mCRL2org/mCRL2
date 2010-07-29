@@ -107,16 +107,6 @@ namespace data {
         m_rewriter->removeRewriteRule(eq);
       }
 
-      /// \brief Yields the underlying rewriter made by Muck van Weerdenburg.
-      /// \details The underlying rewriter is for some applications much faster
-      /// than the standard rewriter. Using this function access to the underlying
-      /// rewriter is possible. However, its use is discouraged, and with time
-      /// the performance of the standard rewriter is expected to increase
-      /// and this function will become obsolete. Added by Jan Friso Groote on 
-      /// December 30, 2009.
-      boost::shared_ptr<mcrl2::data::detail::Rewriter> get_internal_rewriter()
-      { return m_rewriter;
-      }
   };
 
   /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
@@ -354,6 +344,49 @@ namespace data {
       return R_(t, sigma_);
     }
   };
+
+  /// \brief Pretty prints a rewrite strategy
+  /// \param[in] s A rewrite strategy.
+  inline std::string pp(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
+  {
+    switch(s)
+    {
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost:
+        return "inner";
+        break;
+  #ifdef MCRL2_INNERC_AVAILABLE
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling:
+        return "innerc";
+        break;
+  #endif
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty:
+        return "jitty";
+        break;
+  #ifdef MCRL2_JITTYC_AVAILABLE
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling:
+        return "jittyc";
+        break;
+  #endif
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_prover:
+        return "innerp";
+        break;
+  #ifdef MCRL2_INNERC_AVAILABLE
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling_prover:
+        return "innercp";
+        break;
+  #endif
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_prover:
+        return "jittyp";
+        break;
+  #ifdef MCRL2_JITTYC_AVAILABLE
+      case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling_prover:
+        return "jittycp";
+        break;
+  #endif
+      default:
+        return "unknown";
+    }
+  }
 
 } // namespace data
 

@@ -809,7 +809,7 @@ void Document::LoadFile( TiXmlEncoding encoding )
 {
 	if ( !m_tiXmlPointer->LoadFile( encoding ) )
 	{
-		TICPPTHROW( "Couldn't load " << m_tiXmlPointer->Value() );
+		TICPPTHROW( "Can not load value: " << m_tiXmlPointer->Value() );
 	}
 }
 
@@ -817,7 +817,7 @@ void Document::SaveFile( void ) const
 {
 	if ( !m_tiXmlPointer->SaveFile() )
 	{
-		TICPPTHROW( "Couldn't save " << m_tiXmlPointer->Value() );
+		TICPPTHROW( "Can not save value: " << m_tiXmlPointer->Value() );
 	}
 }
 
@@ -825,7 +825,7 @@ void Document::LoadFile( const std::string& filename, TiXmlEncoding encoding )
 {
 	if ( !m_tiXmlPointer->LoadFile( filename.c_str(), encoding ) )
 	{
-		TICPPTHROW( "Couldn't load " << filename );
+		TICPPTHROW( "Can not load file:\n " << filename );
 	}
 }
 
@@ -833,7 +833,7 @@ void Document::LoadFile( const char* filename, TiXmlEncoding encoding )
 {
 	if ( !m_tiXmlPointer->LoadFile( filename, encoding ) )
 	{
-		TICPPTHROW( "Couldn't load " << filename );
+		TICPPTHROW( "Can not load file:\n " << filename );
 	}
 }
 
@@ -841,7 +841,7 @@ void Document::SaveFile( const std::string& filename ) const
 {
 	if ( !m_tiXmlPointer->SaveFile( filename.c_str() ) )
 	{
-		TICPPTHROW( "Couldn't save " << filename );
+		TICPPTHROW( "Can not save file:\n " << filename );
 	}
 }
 

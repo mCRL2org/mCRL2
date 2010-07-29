@@ -32,7 +32,7 @@ set(mcrl2_data_src
 
 set(mcrl2_data_src ${mcrl2_data_src} PARENT_SCOPE)
 
-if( NOT MONO_LIB)
+if( NOT MCRL2_MONO_LIB)
 
   include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
@@ -54,5 +54,5 @@ if( NOT MONO_LIB)
 
   # add install target:
   install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-endif(NOT MONO_LIB)
+endif(NOT MCRL2_MONO_LIB)
 

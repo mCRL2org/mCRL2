@@ -31,7 +31,7 @@ struct quantifier_visitor: public pbes_expression_visitor<pbes_expression>
   /// \param e A PBES expression
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_forall(const pbes_expression& e, const data::variable_list& v, const pbes_expression&)
+  bool visit_forall(const pbes_expression& /* e */, const data::variable_list& v, const pbes_expression&)
   {
     variables.insert(v.begin(), v.end());
     return stop_recursion;
@@ -41,7 +41,7 @@ struct quantifier_visitor: public pbes_expression_visitor<pbes_expression>
   /// \param e A PBES expression
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_exists(const pbes_expression& e, const data::variable_list& v, const pbes_expression&)
+  bool visit_exists(const pbes_expression& /* e */, const data::variable_list& v, const pbes_expression&)
   {
     variables.insert(v.begin(), v.end());
     return stop_recursion;
@@ -114,7 +114,7 @@ struct quantifier_name_clash_visitor: public pbes_expression_visitor<pbes_expres
   /// \param e A PBES expression
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_forall(const pbes_expression& e, const data::variable_list& v, const pbes_expression&)
+  bool visit_forall(const pbes_expression& /* e */, const data::variable_list& v, const pbes_expression&)
   {
     push(v);
     return continue_recursion;
@@ -130,7 +130,7 @@ struct quantifier_name_clash_visitor: public pbes_expression_visitor<pbes_expres
   /// \param e A PBES expression
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_exists(const pbes_expression& e, const data::variable_list& v, const pbes_expression&)
+  bool visit_exists(const pbes_expression& /* e */, const data::variable_list& v, const pbes_expression&)
   {
     push(v);
     return continue_recursion;

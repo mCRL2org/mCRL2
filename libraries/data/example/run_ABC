@@ -1,0 +1,3 @@
+flex -PABC_ -oABC_lexer.cpp ABC.ll
+bison -pABC_ -oABC_parser.cpp --defines=ABC_parser.h ABC.yy
+sed -i '/isatty/d' ABC_lexer.cpp

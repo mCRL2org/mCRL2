@@ -11,78 +11,81 @@
 
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
+
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
+#include "enums.h"
 #include "settings.h"
 #include "simreader.h"
-#include "utils.h"
+#include "vectors.h"
 
 class Mediator;
 class Visualizer;
 
-class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
+class GLCanvas: public wxGLCanvas, public Subscriber, public simReader
+{
   public:
     GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
       const wxSize &size=wxDefaultSize, int* attribList=NULL);
-    ~GLCanvas();
-    void      display(bool coll_caller=false, bool selecting=false);
-    void      enableDisplay();
-    void      disableDisplay();
-    void      getMaxViewportDims(int *w,int *h);
+    ~GLCanvas() {}
+    void display(bool coll_caller=false, bool selecting=false);
+    void enableDisplay();
+    void disableDisplay();
+    void getMaxViewportDims(int *w,int *h);
     unsigned char* getPictureData(int res_x,int res_y);
-    void      initialize();
-    void      notify(SettingID s);
-    void      resetView();
-    void      reshape();
-    void      setActiveTool(int t);
-    void      setVisualizer(Visualizer *vis);
+    void initialize();
+    void notify(SettingID s);
+    void resetView();
+    void reshape();
+    void setActiveTool(int t);
+    void setVisualizer(Visualizer *vis);
 
-    void      onMouseDown(wxMouseEvent& event);
-    void      onMouseEnter(wxMouseEvent& event);
-    void      onMouseMove(wxMouseEvent& event);
-    void      onMouseUp(wxMouseEvent& event);
-    void      onMouseWheel(wxMouseEvent& event);
-    void      onMouseDClick(wxMouseEvent& event);
-    void      onPaint(wxPaintEvent& event);
-    void      onSize(wxSizeEvent& event);
-    void      OnEraseBackground(wxEraseEvent& event);
+    void onMouseDown(wxMouseEvent& event);
+    void onMouseEnter(wxMouseEvent& event);
+    void onMouseMove(wxMouseEvent& event);
+    void onMouseUp(wxMouseEvent& event);
+    void onMouseWheel(wxMouseEvent& event);
+    void onMouseDClick(wxMouseEvent& event);
+    void onPaint(wxPaintEvent& event);
+    void onSize(wxSizeEvent& event);
+    void OnEraseBackground(wxEraseEvent& event);
 
-    void      setCurrent();
+    void setCurrent();
 
     // Implemented for simReader interface
-    void      refresh();
-    void      selChange();
+    void refresh();
+    void selChange();
 
-    void      startForceDirected();
-    void      stopForceDirected();
-    void      resetStatePositions();
+    void startForceDirected();
+    void stopForceDirected();
+    void resetStatePositions();
 
   private:
-    int	      activeTool;
-    float     angleX;
-    float     angleY;
-    int	      currentTool;
-    float     startPosZ;
-    bool      collectingData;
-    bool      displayAllowed;
-    float     farPlane;
-    float     farPlaneDefault;
-    bool      lightRenderMode;
+    int activeTool;
+    float angleX;
+    float angleY;
+    int currentTool;
+    float startPosZ;
+    bool collectingData;
+    bool displayAllowed;
+    float farPlane;
+    float farPlaneDefault;
+    bool lightRenderMode;
     Mediator* mediator;
-    Utils::Point3D moveVector;
-    float     nearPlane;
-    int	      oldMouseX;
-    int	      oldMouseY;
-    Settings  *settings;
+    Vector3D moveVector;
+    float nearPlane;
+    int oldMouseX;
+    int oldMouseY;
+    Settings *settings;
     Visualizer *visualizer;
-    Utils::PickState selectedType;
-    bool      stop_force_directed;
+    PickState selectedType;
+    bool stop_force_directed;
 
-    void      determineCurrentTool(wxMouseEvent& event);
-    void      setMouseCursor();
+    void determineCurrentTool(wxMouseEvent& event);
+    void setMouseCursor();
 
     // Boolean determining if simulation is on.
-    bool      simulating;
+    bool simulating;
 
     // Functions for processing hits
     void processHits(const GLint hits, GLuint *buffer, bool doubleC);

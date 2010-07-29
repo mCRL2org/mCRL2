@@ -90,7 +90,7 @@ std::string BES8 =
   "init X1;                                                 \n"
   ;
 
-void test_bes(std::string bes_spec, std::string output_file, bool expected_result)
+void test_bes(std::string bes_spec, std::string /* output_file */, bool /* expected_result */)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
   pbes_system::detail::parity_game_output pgg(p);

@@ -119,7 +119,8 @@ namespace mcrl2 {
      *
      *   using namespace mcrl2::data;
      *
-     *   for (classic_enumerator< > i(d, variables, c); i != classic_enumerator< >(); ++i) {
+     *   for (classic_enumerator< > i(d, variables, c); i!=enumerator_type(); ++i) 
+     *   {
      *     std::cerr << mcrl2::core::pp((*i)(c)) << std::endl;
      *   }
      * }
@@ -146,7 +147,8 @@ namespace mcrl2 {
      *
      *   enumerator_type i(d, variables, c);
      *
-     *   for (enumerator_type j = i; i != enumerator_type(); ++i, ++j) {
+     *   for (enumerator_type j = i; i!=enumerator_type(); ++i, ++j) 
+     *   {
      *     assert(*i == *j);
      *   }
      * }
@@ -159,10 +161,10 @@ namespace mcrl2 {
     template < typename MutableSubstitution, typename Evaluator, typename Selector >
     class classic_enumerator :
            public boost::iterator_facade< classic_enumerator< MutableSubstitution, Evaluator, Selector >,
-             const MutableSubstitution, boost::forward_traversal_tag > {
+                                          const MutableSubstitution, boost::forward_traversal_tag > 
+    {
 
       public:
-
         /// \brief The type of objects that represent substitutions
         typedef MutableSubstitution                                            substitution_type;
         /// \brief The type of objects that represent variables
@@ -191,23 +193,25 @@ namespace mcrl2 {
         // For past-end iterator: m_impl.get() == 0, for cheap iterator construction and comparison
         boost::scoped_ptr< implementation_type >  m_impl;
 
-      private:
-
-        void increment() {
-          if (!m_impl->increment()) {
+        void increment() 
+        { assert(m_impl.get());
+          if (!m_impl->increment()) 
+          { 
             m_impl.reset();
           }
         }
 
-        bool equal(classic_enumerator const& other) const {
-          implementation_type* left  = m_impl.get();
-          implementation_type* right = other.m_impl.get();
+        bool equal(classic_enumerator const& other) const 
+        {
+          const implementation_type* left  = m_impl.get();
+          const implementation_type* right = other.m_impl.get();
 
           return (left == right) || (left != 0 && right != 0 && (left->dereference() == right->dereference()));
         }
 
-        substitution_type const& dereference() const {
-          BOOST_ASSERT(m_impl.get() != 0);
+        substitution_type const& dereference() const 
+        {
+          assert(m_impl.get() != 0);
 
           return m_impl->dereference();
         }
@@ -224,36 +228,45 @@ namespace mcrl2 {
 
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              variable_type const& variable, expression_type const& condition,
-             substitution_type const& substitution, Evaluator const& evaluator) {
-
+             substitution_type const& substitution, Evaluator const& evaluator) 
+        {
           implementation_type::create(m_impl, context, make_set(variable), condition, evaluator, substitution);
         }
 
         template < typename Container >
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              Container const& variables, expression_type const& condition,
-             substitution_type const& substitution, Evaluator const& evaluator, typename detail::enable_if_container< Container, variable >::type* = 0) {
+             substitution_type const& substitution, Evaluator const& evaluator, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) 
+        {
 
           implementation_type::create(m_impl, context, variables, condition, evaluator, substitution);
         }
 
+     
       public:
 
         /// \brief Constructs the past-end iterator
-        classic_enumerator() {
+        classic_enumerator() 
+        {
         }
 
         /// \brief Copy constructor
-        classic_enumerator(classic_enumerator const& other) {
+        classic_enumerator(classic_enumerator const& other) 
+        {
           if (other.m_impl) {
             m_impl.reset(new implementation_type(*other.m_impl));
           }
         }
 
-        /// \brief Copy constructor
-        classic_enumerator& operator=(classic_enumerator const& other) {
-          if (other.m_impl) {
+        /// \brief Assignment operator constructor
+        classic_enumerator& operator=(classic_enumerator const& other) 
+        {
+          if (other.m_impl) 
+          {
             m_impl.reset(new implementation_type(*other.m_impl));
+          }
+          else
+          { m_impl.reset();
           }
 
           return *this;
@@ -270,8 +283,8 @@ namespace mcrl2 {
         classic_enumerator(data_specification const& specification,
             variable_type const& variable,
             expression_type const& condition,
-            substitution_type const& substitution) {
-
+            substitution_type const& substitution) 
+        {
           implementation_type::create(m_impl, specification, make_set(variable), condition, substitution);
         }
 
@@ -286,8 +299,8 @@ namespace mcrl2 {
         classic_enumerator(data_specification const& specification,
             Container const& variables, Evaluator const& evaluator,
             expression_type const& condition = sort_bool::true_(),
-            typename detail::enable_if_container< Container, variable >::type* = 0) {
-
+            typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) 
+        {
           implementation_type::create(m_impl, specification, variables, condition, evaluator);
         }
 
@@ -305,7 +318,8 @@ namespace mcrl2 {
             Evaluator const& evaluator,
             expression_type const& condition,
             substitution_type const& substitution,
-            typename detail::enable_if_container< Container, variable >::type* = 0) {
+            typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) 
+        {
           implementation_type::create(m_impl, specification, variables, condition, evaluator, substitution);
         }
 
@@ -319,8 +333,8 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             variable_type const& variable, Evaluator const& evaluator,
-            expression_type const& condition = sort_bool::true_()) {
-
+            expression_type const& condition = sort_bool::true_()) 
+        {
           implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator);
         }
 
@@ -337,7 +351,8 @@ namespace mcrl2 {
             variable_type const& variable,
             Evaluator const& evaluator,
             expression_type const& condition,
-            substitution_type const& substitution) {
+            substitution_type const& substitution) 
+        {
           implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator, substitution);
         }
     };
@@ -380,17 +395,19 @@ namespace mcrl2 {
       public:
 
          classic_enumerator()
-         { }
+         { 
+         }
 
         /** \brief Constructs iterator representing a sequence of expressions
          *
          * \param[in] specification specification containing the definitions of sorts
          * \param[in] variables the set of variables for which to find valuatations
          **/
-        classic_enumerator(data_specification const& specification,
+        classic_enumerator(data_specification const& /* specification */,
             variable_type const& variable) :
                    super(get_shared_context(), make_set(variable), sort_bool::true_(), substitution_type(), get_shared_evaluator())
-        { }
+        { 
+        }
 
         /** \brief Constructs iterator representing a sequence of expressions
          *
@@ -400,9 +417,10 @@ namespace mcrl2 {
         template < typename Container >
         classic_enumerator(data_specification const& specification,
             Container const& variables,
-            typename detail::enable_if_container< Container, variable >::type* = 0) :
+            typename atermpp::detail::enable_if_container< Container, variable >::type* = 0) :
                    super(get_shared_context(), variables, sort_bool::true_(), substitution_type(), get_shared_evaluator())
-        { }
+        { 
+        }
 
     };
 
@@ -429,11 +447,11 @@ namespace mcrl2 {
     * \param[in] variables the set of variables for which to find valuatations
     **/
     template < typename Enumerator >
-    boost::iterator_range< detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >,
+    boost::iterator_range< atermpp::detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >,
 									 Enumerator, typename Enumerator::expression_type > >
     make_enumeration_sequence(typename Enumerator::expression_type const& base_expression, Enumerator const& enumerator)
     {
-      typedef detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >, Enumerator, typename Enumerator::expression_type > iterator_type;
+      typedef atermpp::detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >, Enumerator, typename Enumerator::expression_type > iterator_type;
 
       return boost::make_iterator_range(
         iterator_type(enumerator, apply_to_expression< typename Enumerator::expression_type >(base_expression)),

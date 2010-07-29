@@ -18,9 +18,12 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/container_sort.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 
@@ -35,9 +38,39 @@ namespace mcrl2 {
       return core::detail::gsIsDataExpr(t);
     }
 
-    /// \brief Returns true if the term t is a function symbol
+    /// \brief Returns true if the term t is an abstraction
     inline bool is_abstraction(atermpp::aterm_appl p) {
       return core::detail::gsIsBinder(p);
+    }
+
+    /// \brief Returns true if the term t is a lambda abstraction
+    inline bool is_lambda(atermpp::aterm_appl p) {
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsLambda(atermpp::arg1(p));
+    }
+
+    /// \brief Returns true if the term t is a universal quantification
+    inline bool is_forall(atermpp::aterm_appl p) {
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsForall(atermpp::arg1(p));
+    }
+
+    /// \brief Returns true if the term t is an existential quantification
+    inline bool is_exists(atermpp::aterm_appl p) {
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsExists(atermpp::arg1(p));
+    }
+
+    /// \brief Returns true if the term t is a set comprehension
+    inline bool is_set_comprehension(atermpp::aterm_appl p){
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsSetComp(atermpp::arg1(p));
+    }
+
+    /// \brief Returns true if the term t is a bag comprehension
+    inline bool is_bag_comprehension(atermpp::aterm_appl p){
+      return core::detail::gsIsBinder(p) &&
+             core::detail::gsIsBagComp(atermpp::arg1(p));
     }
 
     /// \brief Returns true if the term t is a function symbol
@@ -64,6 +97,8 @@ namespace mcrl2 {
     inline bool is_identifier(atermpp::aterm_appl p) {
       return core::detail::gsIsId(p);
     }
+
+    class application; // prototype
 
     /// \brief data expression.
     ///
@@ -97,6 +132,20 @@ namespace mcrl2 {
           assert(is_data_expression(t) || core::detail::gsIsNil(t));
         }
 
+        application operator()(const data_expression& e) const;
+
+        application operator()(const data_expression& e1,
+                               const data_expression& e2) const;
+
+        application operator()(const data_expression& e1,
+                               const data_expression& e2,
+                               const data_expression& e3) const;
+
+        application operator()(const data_expression& e1,
+                               const data_expression& e2,
+                               const data_expression& e3,
+                               const data_expression& e4) const;
+
         /// \brief Returns the sort of the data expression
         inline
         sort_expression sort() const
@@ -107,31 +156,62 @@ namespace mcrl2 {
           // is no elegant solution of distributing the implementation of the
           // derived classes (as we need to support requesting the sort of a
           // data_expression we do need to provide an implementation here).
-          if (is_variable())
+          if (is_variable(*this))
           {
             result = atermpp::arg2(*this);
           }
-          else if (is_function_symbol())
+          else if (is_function_symbol(*this))
           {
             result = atermpp::arg2(*this);
           }
-          else if (is_abstraction())
+          else if (is_abstraction(*this))
           {
-            atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
-            sort_expression_vector s;
-            for(atermpp::term_list<data_expression>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
+            if (is_forall(*this) || is_exists(*this))
             {
-              s.push_back(i->sort());
+              // Workaround for the unavailability of sort_bool::bool_()
+              // (because of cyclic dependencies).
+              result = data_expression(atermpp::arg3(*this)).sort();
             }
-            result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
+            else if (is_lambda(*this))
+            {
+              atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
+              sort_expression_vector s;
+              for(atermpp::term_list<data_expression>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
+              {
+                s.push_back(i->sort());
+              }
+              result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
+            }
+            else if (is_set_comprehension(*this) || is_bag_comprehension(*this))
+            {
+              atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
+              if(v_variables.size() != 1)
+              {
+                throw mcrl2::runtime_error("Set or bag comprehension has multiple bound variables, but may only have 1 bound variable");
+              }
+
+              if (is_set_comprehension(*this))
+              {
+                result = container_sort(set_container(), v_variables.begin()->sort());
+              }
+              else
+              {
+                result = container_sort(bag_container(), v_variables.begin()->sort());
+              }
+
+            }
+            else
+            {
+              throw mcrl2::runtime_error("Unexpected abstraction occurred");
+            }
           }
-          else if (is_application())
+          else if (is_application(*this))
           {
             sort_expression s(data_expression(atermpp::arg1(*this)).sort());
-            assert(s.is_function_sort());
+            assert(is_function_sort(s));
             result = atermpp::arg2(s);
           }
-          else if (is_where_clause())
+          else if (is_where_clause(*this))
           {
             result = data_expression(atermpp::arg1(*this)).sort();
           }
@@ -143,75 +223,7 @@ namespace mcrl2 {
           return result;
         }
 
-        /// \brief Returns true iff the expression is variable
-        inline
-        bool is_variable() const
-        {
-          return data::is_variable(*this);
-        }
-
-        /// \brief Returns true iff the expression is a function symbol
-        inline
-        bool is_function_symbol() const
-        {
-          return data::is_function_symbol(*this);
-        }
-
-        /// \brief Returns true iff the expression is an abstraction
-        inline
-        bool is_abstraction() const
-        {
-          return data::is_abstraction(*this);
-        }
-
-        /// \brief Returns true iff the expression is an application
-        inline
-        bool is_application() const
-        {
-          return data::is_application(*this);
-        }
-
-        /// \brief Returns true iff the expression is a where clause
-        inline
-        bool is_where_clause() const
-        {
-          return data::is_where_clause(*this);
-        }
-
-        /// \brief Returns true iff the expression is an identifier
-        inline
-        bool is_identifier() const
-        {
-          return data::is_identifier(*this);
-        }
-
     }; // class data_expression
-
-    /// \brief identifier
-    /// \details This class should only be used up to and including
-    ///          the type checking phase, as it yields an untyped,
-    ///          unstructured data expression!
-    class identifier : public data_expression
-    {
-      /// \brief Default constructor for identifier. This does not yield
-      ///        a valid expression.
-      identifier()
-        : data_expression()
-      {}
-
-      /// \brief Constructor for an identifier with name s
-      /// \param s A string
-      identifier(const mcrl2::core::identifier_string& s)
-        : data_expression(mcrl2::core::detail::gsMakeId(s))
-      {}
-
-      /// \brief Constructor for an identifier with name s
-      /// \param s A string
-      identifier(const std::string& s)
-        : data_expression(mcrl2::core::detail::gsMakeId(mcrl2::core::identifier_string(s)))
-      {}
-
-    }; // class identifier
 
     /// \brief list of data expressions
     ///
@@ -226,14 +238,115 @@ namespace mcrl2 {
     /// \note This function uses implementation details of the iterator type
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename Container >
-    inline data_expression_list make_data_expression_list(Container const& r, typename detail::enable_if_container< Container, data_expression >::type* = 0)
+    inline data_expression_list make_data_expression_list(Container const& r, typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
     {
-      return convert< data_expression_list >(r);
+      return atermpp::convert< data_expression_list >(r);
     }
+
+    /*
+//--- start generated is-functions ---//
+
+    /// \brief Test for a identifier expression
+    /// \param t A term
+    /// \return True if it is a identifier expression
+    inline
+    bool is_identifier(const data_expression& t)
+    {
+      return core::detail::gsIsId(t);
+    }
+
+    /// \brief Test for a variable expression
+    /// \param t A term
+    /// \return True if it is a variable expression
+    inline
+    bool is_variable(const data_expression& t)
+    {
+      return core::detail::gsIsDataVarId(t);
+    }
+
+    /// \brief Test for a function_symbol expression
+    /// \param t A term
+    /// \return True if it is a function_symbol expression
+    inline
+    bool is_function_symbol(const data_expression& t)
+    {
+      return core::detail::gsIsOpId(t);
+    }
+
+    /// \brief Test for a application expression
+    /// \param t A term
+    /// \return True if it is a application expression
+    inline
+    bool is_application(const data_expression& t)
+    {
+      return core::detail::gsIsDataAppl(t);
+    }
+
+    /// \brief Test for a abstraction expression
+    /// \param t A term
+    /// \return True if it is a abstraction expression
+    inline
+    bool is_abstraction(const data_expression& t)
+    {
+      return core::detail::gsIsBinder(t);
+    }
+
+    /// \brief Test for a where_clause expression
+    /// \param t A term
+    /// \return True if it is a where_clause expression
+    inline
+    bool is_where_clause(const data_expression& t)
+    {
+      return core::detail::gsIsWhr(t);
+    }
+//--- end generated is-functions ---//
+    */
 
   } // namespace data
 
 } // namespace mcrl2
+
+// The trick of including application.h only at this point is needed to break
+// the circular dependencies between application and data_expression. This
+// dependency was introduced to allow the application operator to be defined for
+// all data expression types.
+#ifndef MCRL2_DATA_APPLICATION_H
+#include "mcrl2/data/application.h"
+#endif
+
+namespace mcrl2 {
+  namespace data {
+
+    /// \brief Apply data expression to a data expression
+    inline
+    application data_expression::operator()(const data_expression& e) const
+    {
+      return make_application(*this, e);
+    }
+
+    /// \brief Apply data expression to two data expressions
+    inline
+    application data_expression::operator()(const data_expression& e1, const data_expression& e2) const
+    {
+      return make_application(*this, e1, e2);
+    }
+
+    /// \brief Apply data expression to three data expressions
+    inline
+    application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3) const
+    {
+      return make_application(*this, e1, e2, e3);
+    }
+
+    /// \brief Apply data expression to four data expressions
+    inline
+    application data_expression::operator()(const data_expression& e1, const data_expression& e2, const data_expression& e3, const data_expression& e4) const
+    {
+      return make_application(*this, e1, e2, e3, e4);
+    }
+
+  }
+}
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_H
 

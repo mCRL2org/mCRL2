@@ -74,7 +74,7 @@ int test_main(int argc, char* argv[])
   V.push_back(p1);
   V.push_back(n1);
 
-  sort_expression_vector domain = make_vector< sort_expression >(sort_pos::pos(), sort_bool::bool_());
+  sort_expression_vector domain = atermpp::make_vector< sort_expression >(sort_pos::pos(), sort_bool::bool_());
   sort_expression sexpr = function_sort(domain, sort_nat::nat());
   variable q1(identifier_string("q1"), sexpr);
 
@@ -145,7 +145,7 @@ int test_main(int argc, char* argv[])
   core::garbage_collect();
 
   //--- find_data_expressions ---//
-  std::set<data_expression> d = find_data_expressions(make_vector(q1, p1, n1));
+  std::set<data_expression> d = find_data_expressions(atermpp::make_vector(q1, p1, n1));
   BOOST_CHECK(std::find(d.begin(), d.end(), q1) != d.end());
   BOOST_CHECK(std::find(d.begin(), d.end(), p1) != d.end());
   BOOST_CHECK(std::find(d.begin(), d.end(), n1) != d.end());

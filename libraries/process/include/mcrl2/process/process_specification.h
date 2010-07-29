@@ -61,7 +61,7 @@ namespace process {
         m_data            = atermpp::aterm_appl(*i++);
         m_action_labels   = atermpp::aterm_appl(*i++)(0);
         data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
-        m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
+        m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
         process_equation_list l = atermpp::aterm_appl(*i++)(0);
         atermpp::aterm_appl init = atermpp::aterm_appl(*i);
         m_initial_process = atermpp::aterm_appl(init(0));
@@ -182,7 +182,7 @@ namespace process {
     return core::detail::gsMakeProcSpec(
         data::detail::data_specification_to_aterm_data_spec(spec.data()),
         core::detail::gsMakeActSpec(spec.action_labels()),
-        core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
+        core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
         core::detail::gsMakeProcEqnSpec(process_equation_list(spec.equations().begin(), spec.equations().end())),
         core::detail::gsMakeProcessInit(spec.init())
     );

@@ -30,7 +30,6 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -41,6 +40,8 @@
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/function_update.h"
+#include "mcrl2/data/lambda.h"
 
 namespace mcrl2 {
   namespace core {
@@ -350,10 +351,8 @@ static bool gsIsIdSetEnum(ATermAppl DataExpr);
 static bool gsIsIdBagEnum(ATermAppl DataExpr);
 //Ret: DataExpr is a bag enumeration identifier
 
-/*
 static bool gsIsIdFuncUpdate(ATermAppl DataExpr);
 //Ret: DataExpr is a function update identifier
-*/
 
 static bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength);
 //Ret: DataExpr is a prefix identifier and ArgsLength == 1
@@ -398,6 +397,7 @@ inline static void PRINT_FUNC(fprints)(PRINT_OUTTYPE OutStream,
 
 inline static void PRINT_FUNC(dbg_prints)(const char *Value)
 {
+static_cast<void>(Value); // Harmless
 //Pre:  Value is not NULL
 //Post: Value is written to stderr in C/C++ style if gsDebug is true
 #if (defined(PRINT_C) == defined(PRINT_CXX))
@@ -629,7 +629,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     ATermAppl GlobVarSpec = ATAgetArgument(Part, 2);
     bool GlobVarSpecEmpty = ATisEmpty(ATLgetArgument(GlobVarSpec, 0));
     ATermAppl ProcEqnSpec = ATAgetArgument(Part, 3);
-    bool ProcEqnSpecEmpty = gsIsProcSpec(Part)?ATisEmpty(ATLgetArgument(ProcEqnSpec, 0)):false;
+    bool ProcEqnSpecEmpty = gsIsProcSpec(Part)?(bool)ATisEmpty(ATLgetArgument(ProcEqnSpec, 0)):false;
     ATermAppl ProcInit = ATAgetArgument(Part, 4);
     PRINT_FUNC(PrintPart_Appl)(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
     if (!ActSpecEmpty && !DataSpecEmpty) {
@@ -1345,7 +1345,7 @@ reconstruct_container_expression(ATermAppl Part)
   using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_bag;
 
-  if(!gsIsDataAppl(Part))
+  if(!gsIsDataAppl(Part) && !gsIsOpId(Part))
   {
     return Part;
   }
@@ -1389,7 +1389,7 @@ reconstruct_container_expression(ATermAppl Part)
     {
       Part = reconstruct_container_expression(static_cast<ATermAppl>(setfset(element_sort, sort_set::right(expr))));
     }
-    else if (is_true_function_function_symbol(sort_set::right(expr)))
+    else if (is_true_function_function_symbol(sort_set::left(expr)))
     {
       Part = static_cast<ATermAppl>(setcomplement(setfset(element_sort, sort_set::right(expr))));
     }
@@ -1402,11 +1402,22 @@ reconstruct_container_expression(ATermAppl Part)
       ATermAppl body;
       if (data::sort_fset::is_fset_empty_function_symbol(sort_set::right(expr)))
       {
-        body = data::application(sort_set::left(expr), data::variable(var));
+        body = sort_set::left(expr)(data::variable(var));
+
+        if(is_lambda(sort_set::left(expr)))
+        {
+          data::lambda left(sort_set::left(expr));
+          data::variable_list vars = left.variables();
+          if(vars.size() == 1)
+          {
+            var = *(vars.begin());
+            body = left.body();
+          }
+        }
       }
       else
       {
-        data_expression lhs(data::application(sort_set::left(expr), data::variable(var)));
+        data_expression lhs(sort_set::left(expr)(data::variable(var)));
         data_expression rhs(setin(element_sort, data_expression(var), setfset(element_sort, sort_set::right(expr))));
         body = static_cast<ATermAppl>(data::not_equal_to(lhs,rhs));
       }
@@ -1418,6 +1429,19 @@ reconstruct_container_expression(ATermAppl Part)
     //gsDebugMsg("Reconstructing SetFSet\n");
     //try to reconstruct Part as the empty set or as a set enumeration
     data_expression de_fset(sort_set::arg(expr));
+    data_expression result(reconstruct_container_expression(de_fset));
+    if(sort_set::is_set_enumeration_application(result) || sort_set::is_set_enumeration_function_symbol(result))
+    {
+      Part = static_cast<ATermAppl>(result);
+    }
+  }
+  else if (sort_fset::is_fset_empty_function_symbol(expr))
+  {
+    Part = static_cast<ATermAppl>(sort_set::set_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
+  }
+  else if (sort_fset::is_fset_cons_application(expr) || sort_fset::is_fsetinsert_application(expr))
+  {
+    data_expression de_fset(expr);
     bool elts_is_consistent = true;
     data_expression_vector elements;
     while (!sort_fset::is_fset_empty_function_symbol(de_fset) && elts_is_consistent)
@@ -1429,8 +1453,8 @@ reconstruct_container_expression(ATermAppl Part)
       }
       else if (sort_fset::is_fsetinsert_application(de_fset))
       {
-        elements.push_back(sort_fset::right(de_fset));
-        de_fset = sort_fset::left(de_fset);
+        elements.push_back(sort_fset::left(de_fset));
+        de_fset = sort_fset::right(de_fset);
       }
       else
       {
@@ -1444,7 +1468,6 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_set::is_setcomprehension_application(expr))
   {
-    //gsMessage("Setcomprehension\n");
     data_expression body(sort_set::arg(expr));
     data_expression_vector variables;
     sort_expression_list domain_of_body_sort(function_sort(body.sort()).domain());
@@ -1460,7 +1483,7 @@ reconstruct_container_expression(ATermAppl Part)
     }
 
     body = data::application(body, variables);
-    Part = gsMakeBinder(gsMakeSetComp(), convert<data_expression_list>(variables), body);
+    Part = gsMakeBinder(gsMakeSetComp(), atermpp::convert<data_expression_list>(variables), body);
   }
 
   else if (sort_bag::is_bagconstructor_application(expr))
@@ -1487,7 +1510,18 @@ reconstruct_container_expression(ATermAppl Part)
       }
       else
       {
-        body = application(sort_bag::left(expr), var);
+        body = sort_bag::left(expr)(var);
+
+        if(is_lambda(sort_bag::left(expr)))
+        {
+          data::lambda left(sort_bag::left(expr));
+          data::variable_list vars = left.variables();
+          if(vars.size() == 1)
+          {
+            var = *(vars.begin());
+            body = left.body();
+          }
+        }
       }
       if(!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(expr)))
       {
@@ -1498,9 +1532,22 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_bag::is_bagfbag_application(expr))
   {
-    //gsMessage("BagFBag\n");
-    //try to reconstruct Part as the empty set or as a set enumeration
+    //gsDebugMsg("Reconstructing BagFBag\n");
+    //try to reconstruct Part as the empty bag or as a bag enumeration
     data_expression de_fbag(sort_bag::arg(expr));
+    data_expression result(reconstruct_container_expression(de_fbag));
+    if(sort_bag::is_bag_enumeration_application(result) || sort_bag::is_bag_enumeration_function_symbol(result))
+    {
+      Part = static_cast<ATermAppl>(result);
+    }
+  }
+  else if (sort_fbag::is_fbag_empty_function_symbol(expr))
+  {
+    Part = static_cast<ATermAppl>(sort_bag::bag_enumeration(container_sort(expr.sort()).element_sort(), data_expression_vector()));
+  }
+  else if (sort_fbag::is_fbag_cons_application(expr) || sort_fbag::is_fbaginsert_application(expr) || sort_fbag::is_fbagcinsert_application(expr))
+  {
+    data_expression de_fbag(expr);
     bool elts_is_consistent = true;
     data_expression_vector elements;
     while (!sort_fbag::is_fbag_empty_function_symbol(de_fbag) && elts_is_consistent)
@@ -1551,7 +1598,7 @@ reconstruct_container_expression(ATermAppl Part)
     }
 
     body = data::application(body, variables);
-    Part = gsMakeBinder(gsMakeBagComp(), convert<data_expression_list>(variables), body);
+    Part = gsMakeBinder(gsMakeBagComp(), atermpp::convert<data_expression_list>(variables), body);
   }
   return Part;
 }
@@ -1585,7 +1632,12 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         Args = ATLgetArgument(DataExpr, 1);
       }
       int ArgsLength = ATgetLength(Args);
-      if (gsIsOpIdNumericUpCast(Head) && ArgsLength == 1) {
+      if (gsIsBinder(Head) && Args == ATmakeList0()) {
+        // A binder could be introduced by reconstructing a container expression
+        // just print recursively.
+        PRINT_FUNC(PrintDataExpr)(OutStream, Head,
+                  pp_format, ShowSorts, PrecLevel);
+      } else if (gsIsOpIdNumericUpCast(Head) && ArgsLength == 1) {
         //print upcast expression
         PRINT_FUNC(dbg_prints)("printing upcast expression\n");
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
@@ -1610,12 +1662,12 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintPart_BagEnum)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "}");
-/*
-      } else if (gsIsIdFuncUpdate(Head)) {
+      } else if (gsIsIdFuncUpdate(Head) && Args != ATempty) {
         //print function update
         PRINT_FUNC(dbg_prints)("printing function update\n");
+        assert(ATgetLength(Args)==3);
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, gsPrecIdPrefix());
+           pp_format, ShowSorts, gsPrecIdPrefix());
         PRINT_FUNC(fprints)(OutStream, "[");
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 1),
           pp_format, ShowSorts, 0);
@@ -1623,7 +1675,6 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 2),
           pp_format, ShowSorts, 0);
         PRINT_FUNC(fprints)(OutStream, "]");
-*/
       } else if (gsIsIdPrefix(Head, ArgsLength)) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
@@ -1683,7 +1734,9 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         }
       }
     }
-  } else if (gsIsBinder(DataExpr)) {
+  }
+  else if (gsIsBinder(DataExpr))
+  {
     PRINT_FUNC(dbg_prints)("printing binder\n");
     ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
     if (gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
@@ -1699,7 +1752,8 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         pp_format, ShowSorts, 0);
       PRINT_FUNC(fprints)(OutStream, " }");
     } else if (gsIsLambda(BindingOperator) || gsIsForall(BindingOperator)
-            || gsIsExists(BindingOperator)) {
+            || gsIsExists(BindingOperator))
+    {
       //print lambda abstraction or universal/existential quantification
       PRINT_FUNC(dbg_prints)("printing lambda abstraction or universal/existential quantification\n");
       if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
@@ -2408,15 +2462,13 @@ bool gsIsIdBagEnum(ATermAppl DataExpr)
   return ATAgetArgument(DataExpr, 0) == data::sort_bag::bag_enumeration_name();
 }
 
-/*
 bool gsIsIdFuncUpdate(ATermAppl DataExpr)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
   }
-  return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameFuncUpdate();
+  return ATAgetArgument(DataExpr, 0) == data::function_update_name();
 }
-*/
 
 bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength)
 {

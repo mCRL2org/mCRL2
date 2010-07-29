@@ -68,7 +68,7 @@ namespace detail {
     /// \param d A data term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
+    term_type visit_data_expression(const term_type& /* x */, const data_term_type& d, SubstitutionFunction& sigma)
     {
       return tr::dataterm2term(rewrite(d, sigma));
     }
@@ -79,7 +79,7 @@ namespace detail {
     /// \param v A propositional variable
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, SubstitutionFunction& sigma)
+    term_type visit_propositional_variable(const term_type& /* x */, const propositional_variable_type& v, SubstitutionFunction& sigma)
     {
       atermpp::vector<data_term_type> d;
       data_term_sequence_type e = tr::param(v);

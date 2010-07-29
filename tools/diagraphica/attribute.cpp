@@ -77,42 +77,42 @@ void Attribute::setType( const string &typ )
 
 // ------------------------------
 void Attribute::clusterValues(
-    const vector< int > &indices,
-    const string &newValue )
+    const vector< int > & /*indices*/,
+    const string & /*newValue*/ )
 // ------------------------------
 {}
 
 
 // -----------------------
 void Attribute::moveValue(
-    const size_t &idxFr,
-    const size_t &idxTo )
+    const size_t &/*idxFr*/,
+    const size_t &/*idxTo*/ )
 // ------------------------
 {}
 
 
 // ------------------------------------
 void Attribute::configValues(
-    const vector< string > &curDomain,
-    map< int, int  > &origToCurDomain )
+    const vector< string > &/*curDomain*/,
+    map< int, int  > &/*origToCurDomain*/ )
 // ------------------------------------
 {}
 
 
 // --------------------------------------------------------
-void Attribute::classifyEqualIntervals( const int &number )
+void Attribute::classifyEqualIntervals( const int &/*number*/ )
 // --------------------------------------------------------
 {}
 
 
 // ---------------------------------------------------
-void Attribute::classifyQuantiles( const int &number )
+void Attribute::classifyQuantiles( const int &/*number*/ )
 // ---------------------------------------------------
 {}
 
 
 // ---------------------------------------------------------------
-void Attribute::classifyMeanStandardDeviation( const int &number )
+void Attribute::classifyMeanStandardDeviation( const int &/*number*/ )
 // ---------------------------------------------------------------
 {}
 
@@ -159,7 +159,7 @@ int Attribute::getSizeOrigValues()
 
 
 // --------------------------------------
-Value* Attribute::getOrigValue( int idx )
+Value* Attribute::getOrigValue( int /*idx*/ )
 // --------------------------------------
 {
     return NULL;
@@ -167,7 +167,7 @@ Value* Attribute::getOrigValue( int idx )
 
 
 // -------------------------------------
-Value* Attribute::getCurValue( int idx )
+Value* Attribute::getCurValue( int /*idx*/ )
 // -------------------------------------
 {
     return NULL;

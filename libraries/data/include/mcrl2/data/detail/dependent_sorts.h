@@ -62,11 +62,11 @@ namespace mcrl2 {
           {
             for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
             {
-              if (r.front().sort().is_function_sort())
+              if (is_function_sort(r.front().sort()))
               {
-                for (boost::iterator_range< function_sort::domain_const_range::iterator > i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
+                for (boost::iterator_range< sort_expression_list::iterator > i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
                 {
-                  if (i.front() != s && (!i.front().is_basic_sort() || m_specification.normalise_sorts(i.front()) != s))
+                  if (i.front() != s && (!is_basic_sort(i.front()) || m_specification.normalise_sorts(i.front()) != s))
                   {
                     static_cast< super& >(*this)(i.front());
                   }
@@ -126,7 +126,7 @@ namespace mcrl2 {
 
           template < typename Sequence >
           void add(const Sequence& s, bool assume_self_dependence = false,
-                       typename detail::enable_if_container< Sequence >::type* = 0)
+                       typename atermpp::detail::enable_if_container< Sequence >::type* = 0)
           { for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
             {
               add(*i, assume_self_dependence);
@@ -153,7 +153,7 @@ namespace mcrl2 {
           }
 
           template < typename Expression >
-          void add(Expression const& s, bool assume_self_dependence = false, typename detail::disable_if_container< Expression >::type* = 0)
+          void add(Expression const& s, bool assume_self_dependence = false, typename atermpp::detail::disable_if_container< Expression >::type* = 0)
           { (*this)(s);
           }
       };

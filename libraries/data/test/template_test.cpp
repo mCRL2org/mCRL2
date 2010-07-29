@@ -52,7 +52,7 @@ template <typename Derived>
 class lps_traverser2: public data_traverser<Derived>
 {};
 
-int test_main(int argc, char* argv[])
+int test_main(int /*argc*/, char** /*argv[]*/)
 {
   make_find_helper<data_traverser>().print();
   f1<data_traverser>();

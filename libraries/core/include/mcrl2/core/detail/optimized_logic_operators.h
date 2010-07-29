@@ -49,7 +49,7 @@ namespace detail {
   /// \return The value <tt>left && right</tt>
   template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
   inline
-  T1 optimized_and(T1 left, T1 right, BinaryFunction and_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
+  T1 optimized_and(T1 left, T1 right, BinaryFunction and_, T2 /* true_ */, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
       return right;
@@ -76,7 +76,7 @@ namespace detail {
   /// \return The value <tt>left || right</tt>
   template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
   inline
-  T1 optimized_or(T1 left, T1 right, BinaryFunction or_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
+  T1 optimized_or(T1 left, T1 right, BinaryFunction or_, T2 true_, UnaryPredicate is_true, T2 /* false_ */, UnaryPredicate is_false)
   {
     if(is_true(left))
       return true_;
@@ -104,7 +104,7 @@ namespace detail {
   /// \return The value <tt>left => right</tt>
   template <typename T1, typename T2, typename UnaryPredicate, typename UnaryFunction, typename BinaryFunction>
   inline
-  T1 optimized_imp(T1 left, T1 right, BinaryFunction imp, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
+  T1 optimized_imp(T1 left, T1 right, BinaryFunction imp, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 /* false_ */, UnaryPredicate is_false)
   {
     if(is_true(left))
       return right;

@@ -1,0 +1,38 @@
+# Jamfile.v2
+#
+# Copyright (c) 2007
+# Steven Watanabe
+#
+# Distributed under the Boost Software License, Version 1.0. (See
+# accomanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt
+
+import testing ;
+import path ;
+import regex ;
+
+project test :
+    requirements
+       <use>/boost//headers
+       <include>../../../atermpp/include
+       <include>../../include
+       <include>../../../core/include
+       <include>../../../../3rd-party/aterm/include
+       <include>../../../../3rd-party/aterm/include/aterm
+       <include>../../../../3rd-party/boost
+;
+
+rule setup ( )
+{
+  for local file in [ path.glob-tree ../../include : *.h ]
+  {
+    result += [ compile test.cpp : <define>BOOST_UNITS_HEADER_NAME=$(file) : [ regex.replace [ path.relative-to .. $(file) ] "/" "_" ] ] ;
+  }
+  return $(result) ;
+}
+
+import testing ;
+
+test-suite units_headers :
+  [ setup ]
+  ;

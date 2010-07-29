@@ -105,7 +105,7 @@ namespace detail {
 
     /// \brief Removes parameters from a propositional variable instantiation
     /// \param t A propositional variable instantiation
-    void remove(propositional_variable_instantiation& v) const
+    void remove(propositional_variable_instantiation& /* v */) const
     {
     } 
 

@@ -26,26 +26,27 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
-if( MONO_LIB )
+if( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     mcrl2_monolib
   )
-else( MONO_LIB )
+else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_utilities_command_line
 )
 
-# ######### required for squadt connectivity ##########
-if(SQUADT_CONNECTIVITY)
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
-  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_utilities_squadt
-  )
-endif(SQUADT_CONNECTIVITY)
-# #####################################################
-endif( MONO_LIB )
+  #Add Squadt Connectivity when required
+  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
 
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+endif( MCRL2_MONO_LIB )
+
+# install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
+
+# Relocate install tree
+include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
+
+# Generate man pages
+include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
+

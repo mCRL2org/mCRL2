@@ -21,7 +21,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/convert.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/remove.h"
@@ -48,7 +48,7 @@ struct default_global_variable_solver
     {
       data::mutable_map_substitution<> result;
       data::data_expression r = R(g, sigma);
-      if (r.is_variable())
+      if (is_variable(r))
       {
         data::variable v = r;
         if (std::find(V.begin(), V.end(), v) != V.end())
@@ -79,12 +79,71 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// \brief The rewriter used by the constelm algorithm.
     const DataRewriter& R;
 
+    void LOG_CONSTANT_PARAMETERS(unsigned int level,
+                                 const data::mutable_map_substitution<>& sigma,
+                                 const std::string& msg = "")
+    {
+      if (check_log_level(level))
+      {
+        std::clog << msg;
+        for (data::mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+        {
+          std::clog << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
+        }
+      }
+    }
+
+    void LOG_PARAMETER_CHANGE(unsigned int level,
+                              const data::data_expression& d_j,
+                              const data::data_expression& Rd_j,
+                              const data::data_expression& Rg_ij,
+                              const data::mutable_map_substitution<>& sigma,
+                              const std::string& msg = ""
+                             )
+    {
+      if (check_log_level(level))
+      {
+        std::clog << msg
+                  << pp(d_j) << "\n"
+                  << "      value before: " << pp(Rd_j) << "\n"
+                  << "      value after:  " << pp(Rg_ij) << "\n"
+                  << "      replacements: " << data::to_string(sigma) << std::endl;
+      }
+    }
+
+    void LOG_CONDITION(unsigned int level,
+                       const data::data_expression& cond,
+                       const data::data_expression& c_i,
+                       const data::mutable_map_substitution<>& sigma,
+                       const std::string& msg = ""
+                      )
+                       
+    {
+      if (check_log_level(level))
+      {
+        std::clog << msg
+                  << pp(cond)
+                  << data::to_string(sigma)
+                  << " -> "
+                  << pp(c_i) << std::endl;
+      }
+    }
+
   public:
 
     /// \brief Constructor
     constelm_algorithm(specification& spec, const DataRewriter& R_, bool verbose = false)
       : 
         lps::detail::lps_algorithm(spec, verbose),
+        m_instantiate_global_variables(false),
+        m_ignore_conditions(false),
+        R(R_)
+    {}
+
+    /// \brief Constructor
+    constelm_algorithm(specification& spec, const DataRewriter& R_, unsigned int loglevel)
+      : 
+        lps::detail::lps_algorithm(spec, loglevel),
         m_instantiate_global_variables(false),
         m_ignore_conditions(false),
         R(R_)
@@ -97,16 +156,16 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// \param instantiate_global_variables If true, the algorithm is allowed to instantiate free variables
     /// as a side effect
     void run(bool instantiate_global_variables = false, bool ignore_conditions = false)
-    {
+    { 
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
-      data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state());
+      data::data_expression_vector e = atermpp::convert<data::data_expression_vector>(m_spec.initial_process().state(m_spec.process().process_parameters()));
 
       // optimization: rewrite the initial state vector e
       lps::rewrite(e, R);
  
       linear_process& p = m_spec.process();
-      data::variable_list V = data::convert<data::variable_list>(m_spec.global_variables());
+      data::variable_list V = atermpp::convert<data::variable_list>(m_spec.global_variables());
       const data::variable_list& d = p.process_parameters();
 
       // initialize m_index_of
@@ -122,11 +181,12 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
-      for (data::variable_list::iterator i = d.begin(); i != d.end(); ++i, ++e_i)
-      {
-        sigma[*i] = *e_i;
+      const data::assignment_list assignments=m_spec.initial_process().assignments();
+      for(data::assignment_list::const_iterator i = assignments.begin();
+                   i!=assignments.end(); ++i)
+      { sigma[i->lhs()] = i->rhs();
       }
-
+      
       // undo contains undo information of instantiations of free variables
       std::map<data::variable, std::set<data::variable> > undo;
 
@@ -151,12 +211,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
               if (R(g_ij, sigma) != R(d_j, sigma))
               {
-#ifdef MCRL2_LPSCONSTELM_DEBUG
-            std::clog << "POSSIBLE CHANGE FOR PARAMETER " << pp(d_j) << "\n"
-                      << "      value before: " << pp(R(d_j, sigma)) << "\n"
-                      << "      value after:  " << pp(R(g_ij, sigma)) << "\n"
-                      << "      replacements: " << data::to_string(sigma) << std::endl;
-#endif
+                LOG_PARAMETER_CHANGE(2, d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "POSSIBLE CHANGE FOR PARAMETER ");
                 data::mutable_map_substitution<> W = default_global_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
                 if (!W.empty())
                 {
@@ -178,23 +233,16 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                   undo[d_j].clear();
                 }
               }
-#ifdef MCRL2_LPSCONSTELM_DEBUG
               else
               {
-                std::clog << "NO CHANGE FOR PARAMETER " << pp(d_j) << "\n"
-                      << "      value before: " << pp(R(d_j, sigma)) << "\n"
-                      << "      value after:  " << pp(R(g_ij, sigma)) << "\n"
-                      << "      replacements: " << data::to_string(sigma) << std::endl;
+                LOG_PARAMETER_CHANGE(3, d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "NO CHANGE FOR PARAMETER ");
               }
-#endif
             }
           }
-#ifdef MCRL2_LPSCONSTELM_DEBUG
           else
           {
-            std::clog << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(R(c_i, sigma)) << std::endl;
+            LOG_CONDITION(2, i->condition(), R(c_i, sigma), sigma, "CONDITION IS FALSE: ");
           }
-#endif
         }
         for (std::set<data::variable>::iterator k = dG.begin(); k != dG.end(); ++k)
         {
@@ -202,15 +250,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
         }
       } while (!dG.empty());
 
-      // report the results
-      if (m_verbose)
-      {
-        std::clog << "Removing the following constant parameters:" << std::endl;
-        for (data::mutable_map_substitution<>::iterator i = sigma.begin(); i != sigma.end(); ++i)
-        {
-          std::clog << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
-        }
-      }
+      LOG_CONSTANT_PARAMETERS(1, sigma, "Removing the following constant parameters:\n");
 
       // N.B. The order of removing constant parameters and rewriting has been reversed
       // as requested by Jan Friso Groote. This may lead to some gain in performance (13%

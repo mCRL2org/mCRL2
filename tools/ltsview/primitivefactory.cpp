@@ -11,12 +11,14 @@
 
 #include "wx.hpp" // precompiled headers
 
-#include "primitivefactory.h"
 #include <cmath>
+#include <stdlib.h>
+#include "primitivefactory.h"
 #include "conedb.h"
+#include "mathutils.h"
 #include "primitives.h"
 
-using namespace Utils;
+using namespace MathUtils;
 
 /* Primitive Factory -------------------------------------------------------- */
 
@@ -27,7 +29,7 @@ PrimitiveFactory::PrimitiveFactory(Settings* ss) {
   simple_sphere = -1;
   settings = ss;
   settings->subscribe(Quality,this);
-	settings->subscribe(BranchTilt,this);
+  settings->subscribe(BranchTilt,this);
 
   cos_theta = NULL;
   sin_theta = NULL;
@@ -68,7 +70,7 @@ int PrimitiveFactory::makeTruncatedCone(float r,bool topClosed,bool bottomClosed
     if (result == -1) {
       make_disc();
       P_TruncatedCone *p = new P_TruncatedCone(ring,
-					dynamic_cast<P_Disc*>(primitives[disc]),topClosed,bottomClosed);
+          dynamic_cast<P_Disc*>(primitives[disc]),topClosed,bottomClosed);
       result = primitives.size();
       coneDB->addTruncatedCone(r,topClosed,bottomClosed,result);
       primitives.push_back(p);
@@ -78,17 +80,17 @@ int PrimitiveFactory::makeTruncatedCone(float r,bool topClosed,bool bottomClosed
 }
 
 int PrimitiveFactory::makeObliqueCone(float a,float r,float s) {
-	int result = coneDB->findObliqueCone(a,r,s);
-	if (result == -1) {
-		P_ObliqueCone *p = new P_ObliqueCone(a,r,s);
-	  p->reshape(settings->getInt(Quality),cos_theta,sin_theta,
-							 deg_to_rad(float(settings->getInt(BranchTilt))));
-		result = primitives.size();
-		primitives.push_back(p);
-		oblq_cones.push_back(p);
-		coneDB->addObliqueCone(a,r,s,result);
-	}
-	return result;
+  int result = coneDB->findObliqueCone(a,r,s);
+  if (result == -1) {
+    P_ObliqueCone *p = new P_ObliqueCone(a,r,s);
+    p->reshape(settings->getInt(Quality),cos_theta,sin_theta,
+               deg_to_rad(float(settings->getInt(BranchTilt))));
+    result = primitives.size();
+    primitives.push_back(p);
+    oblq_cones.push_back(p);
+    coneDB->addObliqueCone(a,r,s,result);
+  }
+  return result;
 }
 
 int PrimitiveFactory::makeHemisphere() {
@@ -112,18 +114,18 @@ int PrimitiveFactory::makeSphere() {
 }
 
 void PrimitiveFactory::notify(SettingID s) {
-	switch (s) {
-		case Quality:
-			update_geom_tables();
-			update_primitives();
-			update_oblique_cones();
-			break;
-		case BranchTilt:
-			update_oblique_cones();
-			break;
-		default:
-			break;
-	}
+  switch (s) {
+    case Quality:
+      update_geom_tables();
+      update_primitives();
+      update_oblique_cones();
+      break;
+    case BranchTilt:
+      update_oblique_cones();
+      break;
+    default:
+      break;
+  }
 }
 
 void PrimitiveFactory::update_geom_tables() {
@@ -148,11 +150,11 @@ void PrimitiveFactory::update_primitives() {
 }
 
 void PrimitiveFactory::update_oblique_cones() {
-	int qlt = settings->getInt(Quality);
-	float obt = deg_to_rad(float(settings->getInt(BranchTilt)));
-	for (unsigned int i = 0; i < oblq_cones.size(); ++i) {
-		oblq_cones[i]->reshape(qlt,cos_theta,sin_theta,obt);
-	}
+  int qlt = settings->getInt(Quality);
+  float obt = deg_to_rad(float(settings->getInt(BranchTilt)));
+  for (unsigned int i = 0; i < oblq_cones.size(); ++i) {
+    oblq_cones[i]->reshape(qlt,cos_theta,sin_theta,obt);
+  }
 }
 
 int PrimitiveFactory::make_ring(float r) {

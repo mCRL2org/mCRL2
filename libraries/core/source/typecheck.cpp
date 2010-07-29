@@ -18,6 +18,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
+#include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -29,6 +30,9 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/multiple_possible_sorts.h"
+#include "mcrl2/data/function_update.h"
 
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
@@ -173,7 +177,7 @@ namespace mcrl2 {
     static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
     static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
     static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
-//    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
+    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
 
 
     static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes);
@@ -413,7 +417,7 @@ namespace mcrl2 {
           bool destroy_vars=(Vars == NULL);
           if(destroy_vars) Vars=ATtableCreate(63,50);
           ATermAppl data=data_expr;
-          ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr==NULL?data::unknown_sort():sort_expr);
+          ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,(sort_expr==NULL)?(ATermAppl)data::unknown_sort():sort_expr);
           if(destroy_vars) ATtableDestroy(Vars);
           if(Type && !data::is_unknown_sort(data::sort_expression(Type))) Result=data;
           else gsErrorMsg("type checking of data expression failed\n");
@@ -495,7 +499,7 @@ namespace mcrl2 {
     }
 
     ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
-    { // ATfprintf(stderr,"State formula %t\n",state_frm);
+    { 
       if (gsVerbose)
       { std::cerr << "type checking state formula...\n";
       }
@@ -1091,14 +1095,17 @@ namespace mcrl2 {
       gstcAddSystemFunction(greater(data::unknown_sort()));
       //Numbers
       gstcAddSystemFunction(sort_nat::pos2nat());
+      gstcAddSystemFunction(sort_nat::cnat());
       gstcAddSystemFunction(sort_int::pos2int());
       gstcAddSystemFunction(sort_real::pos2real());
       gstcAddSystemFunction(sort_nat::nat2pos());
       gstcAddSystemFunction(sort_int::nat2int());
+      gstcAddSystemFunction(sort_int::cint());
       gstcAddSystemFunction(sort_real::nat2real());
       gstcAddSystemFunction(sort_int::int2pos());
       gstcAddSystemFunction(sort_int::int2nat());
       gstcAddSystemFunction(sort_real::int2real());
+      gstcAddSystemFunction(sort_real::creal());
       gstcAddSystemFunction(sort_real::real2pos());
       gstcAddSystemFunction(sort_real::real2nat());
       gstcAddSystemFunction(sort_real::real2int());
@@ -1199,8 +1206,8 @@ namespace mcrl2 {
       gstcAddSystemFunction(sort_bag::bagdifference(data::unknown_sort()));
       gstcAddSystemFunction(sort_bag::bagintersect(data::unknown_sort()));
 
-      //function update
-//      gstcAddSystemFunction(gsMakeOpIdFuncUpdate(data::unknown_sort(),data::unknown_sort()));
+      // function update
+      gstcAddSystemFunction(data::function_update(data::unknown_sort(),data::unknown_sort()));
     }
 
     void gstcDataDestroy(void){
@@ -1261,7 +1268,7 @@ namespace mcrl2 {
                    std::set < basic_sort > &visited,
                    const bool observed_a_sort_constructor)
     { 
-      if (sort_expression_start_search.is_basic_sort())
+      if (is_basic_sort(sort_expression_start_search))
       { const basic_sort start_search(sort_expression_start_search);
         if (end_search==start_search)
         { return observed_a_sort_constructor;
@@ -1272,19 +1279,19 @@ namespace mcrl2 {
         }
       }
 
-      if (sort_expression_start_search.is_container_sort())
+      if (is_container_sort(sort_expression_start_search))
       { const container_sort start_search_container(sort_expression_start_search);
         return gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                            start_search_container.element_sort(),end_search,visited,true);
       }
 
-      if (sort_expression_start_search.is_function_sort())
+      if (is_function_sort(sort_expression_start_search))
       { const function_sort f_start_search(sort_expression_start_search);
         if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                            f_start_search.codomain(),end_search,visited,true))
         { return true;
         }
-        for(function_sort::domain_const_range::const_iterator i=f_start_search.domain().begin();
+        for(sort_expression_list::const_iterator i=f_start_search.domain().begin();
                i!=f_start_search.domain().end(); ++i)
         { if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                              *i,end_search,visited,true))
@@ -1295,15 +1302,15 @@ namespace mcrl2 {
         return false;
       }
 
-      if (sort_expression_start_search.is_structured_sort())
+      if (is_structured_sort(sort_expression_start_search))
       { const structured_sort struct_start_search(sort_expression_start_search);
         const function_symbol_vector constructor_functions=struct_start_search.constructor_functions();
         for(function_symbol_vector::const_iterator i=constructor_functions.begin();
                    i!=constructor_functions.end(); ++i)
         { 
-          if (i->sort().is_function_sort())
-          { const function_sort::domain_const_range domain_sorts=function_sort(i->sort()).domain();
-            for(function_sort::domain_const_range::const_iterator j=domain_sorts.begin();
+          if (is_function_sort(i->sort()))
+          { const sort_expression_list domain_sorts=function_sort(i->sort()).domain();
+            for(sort_expression_list::const_iterator j=domain_sorts.begin();
                  j!=domain_sorts.end(); ++j)
             { if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                                *j,end_search,visited,observed_a_sort_constructor))
@@ -1328,23 +1335,23 @@ namespace mcrl2 {
       {
         ATermAppl Sort=ATAgetFirst(Sorts);
         ATermAppl SortName=ATAgetArgument(Sort,0);
-        if(sort_bool::is_bool(basic_sort(SortName))){
+        if(sort_bool::is_bool(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Bool\n");
           return ATfalse;
         }
-        if(sort_pos::is_pos(basic_sort(SortName))){
+        if(sort_pos::is_pos(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Pos\n");
           return ATfalse;
         }
-        if(sort_nat::is_nat(basic_sort(SortName))){
+        if(sort_nat::is_nat(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Nat\n");
           return ATfalse;
         }
-        if(sort_int::is_int(basic_sort(SortName))){
+        if(sort_int::is_int(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Int\n");
           return ATfalse;
         }
-        if(sort_real::is_real(basic_sort(SortName))){
+        if(sort_real::is_real(basic_sort(core::identifier_string(SortName)))){
           gsErrorMsg("attempt to redeclare sort Real\n");
           return ATfalse;
         }
@@ -1373,7 +1380,7 @@ namespace mcrl2 {
       ATermList sort_aliases=ATtableKeys(context.defined_sorts);
       for( ; sort_aliases!=ATempty ; sort_aliases=ATgetNext(sort_aliases))
       { std::set < basic_sort > visited;
-        const basic_sort s((ATermAppl)ATgetFirst(sort_aliases));
+        const basic_sort s(core::identifier_string((ATermAppl)ATgetFirst(sort_aliases)));
         if (gstc_check_for_sort_alias_loop_through_sort_container(s,s,visited,false))
         { gsErrorMsg("sort %P is recursively defined via a function sort, or a list, set or bag type container\n",ATgetFirst(sort_aliases));
           return ATfalse;
@@ -1396,20 +1403,21 @@ namespace mcrl2 {
     }
 
 
-    atermpp::map < sort_expression,basic_sort > construct_normalised_aliases() 
+    atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_aliases()
     { // This function does the same as data_specification::reconstruct_m_normalised_aliases().
       // Therefore, it should be replaced by that function, after restructuring the type checker.
       // First reset the normalised aliases and the mappings and constructors that have been
       // inherited to basic sort aliases during a previous round of sort normalisation.
-      atermpp::map < sort_expression,basic_sort > normalised_aliases; 
+      atermpp::map < data::sort_expression, data::basic_sort > normalised_aliases;
 
       // Fill normalised_aliases. Simple aliases are stored from left to 
       // right. If the right hand side is non trivial (struct, list, set or bag)
       // the alias is stored from right to left.
       for(ATermList sort_walker=ATtableKeys(context.defined_sorts);  sort_walker!=ATempty; sort_walker=ATgetNext(sort_walker))
-      { ATermAppl sort_name=ATAgetFirst(sort_walker);
-        const basic_sort first(sort_name);
-        const sort_expression second((ATermAppl)ATtableGet(context.defined_sorts,(ATerm)sort_name));
+      {
+        const core::identifier_string sort_name(ATAgetFirst(sort_walker));
+        const data::basic_sort first(sort_name);
+        const data::sort_expression second(atermpp::aterm_appl((ATermAppl)ATtableGet(context.defined_sorts,(ATerm)static_cast<ATermAppl>(sort_name))));
         if (is_structured_sort(second) ||
             is_function_sort(second) ||
             is_container_sort(second))
@@ -1428,7 +1436,6 @@ namespace mcrl2 {
         else
         { // We are dealing with a sort declaration of the shape sort A=B.
           // Every occurrence of sort A is normalised to sort B.
-          assert(is_basic_sort(first));
           normalised_aliases[first]=second;
         }
       }
@@ -1492,14 +1499,14 @@ namespace mcrl2 {
         atermpp::map < sort_expression, basic_sort > normalised_aliases=construct_normalised_aliases();
         std::set< sort_expression > all_sorts;
         for( ; defined_sorts!=ATempty; defined_sorts=ATgetNext(defined_sorts))
-        { const basic_sort s(gstcUnwindType(ATAgetFirst(defined_sorts)));
+        { const basic_sort s(core::identifier_string(gstcUnwindType(ATAgetFirst(defined_sorts))));
           ATermAppl reference=ATAtableGet(context.defined_sorts,(ATerm)static_cast<ATermAppl>(s.name()));
           // if (is_container_sort(i->first) || is_function_sort(i->first)) 
           find_sort_expressions(sort_expression(reference), std::inserter(all_sorts, all_sorts.end()));
         }
 
         for(std::set< sort_expression > ::const_iterator i=all_sorts.begin(); i!=all_sorts.end();++i) 
-        { if (i->is_structured_sort())
+        { if (is_structured_sort(*i))
           { 
             const function_symbol_vector r=structured_sort(*i).constructor_functions();
             for(function_symbol_vector::const_iterator j=r.begin();
@@ -1508,7 +1515,7 @@ namespace mcrl2 {
             }
           }
           
-          if (i->is_structured_sort())
+          if (is_structured_sort(*i))
           { 
             const function_symbol_vector r=structured_sort(*i).constructor_functions();
             for(function_symbol_vector::const_iterator i=r.begin();
@@ -1523,7 +1530,7 @@ namespace mcrl2 {
         for(ATermList constructor_list_walker=constructor_list; 
                   constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))
         { const sort_expression s=function_symbol(ATgetFirst(constructor_list_walker)).sort();
-          if (s.is_function_sort())
+          if (is_function_sort(s))
           { 
             // if s is a constant sort, nothing needs to be added.
             possibly_empty_constructor_sorts.insert(mapping(function_sort(s).codomain(),normalised_aliases)); 
@@ -1537,16 +1544,16 @@ namespace mcrl2 {
           for(ATermList constructor_list_walker=constructor_list;
                   constructor_list_walker!=ATempty; constructor_list_walker=ATgetNext(constructor_list_walker))      
           { const sort_expression s=function_symbol(ATgetFirst(constructor_list_walker)).sort();
-            if (!s.is_function_sort())        
+            if (!is_function_sort(s))
             { 
               if (possibly_empty_constructor_sorts.erase(mapping(s,normalised_aliases))==1) // True if one element has been removed.
               { stable=false;
               }
             }
             else
-            { function_sort::domain_const_range r=function_sort(s).domain();
+            { sort_expression_list r=function_sort(s).domain();
               bool has_a_domain_sort_possibly_empty_sorts=false;
-              for(function_sort::domain_const_range::const_iterator i=r.begin();
+              for(sort_expression_list::const_iterator i=r.begin();
                      i!=r.end(); ++i)
               { if (possibly_empty_constructor_sorts.find(mapping(*i,normalised_aliases))!=possibly_empty_constructor_sorts.end())
                 { // 
@@ -1868,14 +1875,14 @@ namespace mcrl2 {
 
         ATermAppl Left=ATAgetArgument(Eqn,2);
         ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,data::unknown_sort(),FreeVars,false,true);
-        if(!LeftType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
-        if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("the previous warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
+        if(!LeftType){ b = false; gsErrorMsg("error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
+        if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
 
         ATermAppl Cond=ATAgetArgument(Eqn,1);
         if(/*!gsIsNil(Cond) && */!gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,sort_bool::bool_())){ b = false; break; } // JK 15/10/2009 Remove gsIsNil check
         ATermAppl Right=ATAgetArgument(Eqn,3);
         ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,NULL,false);
-        if(!RightType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
+        if(!RightType){ b = false; gsErrorMsg("error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
 
         //If the types are not uniquly the same now: do once more:
         if(!gstcEqTypesA(LeftType,RightType)){
@@ -1886,7 +1893,7 @@ namespace mcrl2 {
           ATtableReset(FreeVars);
           LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,Type,FreeVars,true);
           if(!LeftType){ b = false; gsErrorMsg("types of the left- and right-hand-sides of the equation %P do not match\n",Eqn); break; }
-          if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("the previous warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
+          if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
           Right=ATAgetArgument(Eqn,3);
           RightType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Right,LeftType,FreeVars);
           if(!RightType){ b = false; gsErrorMsg("types of the left- and right-hand-sides of the equation %P do not match\n",Eqn); break; }
@@ -1985,11 +1992,11 @@ namespace mcrl2 {
 
       // if (gsDebug) { std::cerr << "gstcIsSortDeclared: SortName %P\n",SortName);
 
-      if(sort_bool::is_bool(basic_sort(SortName)) ||
-         sort_pos::is_pos(basic_sort(SortName)) ||
-         sort_nat::is_nat(basic_sort(SortName)) ||
-         sort_int::is_int(basic_sort(SortName)) ||
-         sort_real::is_real(basic_sort(SortName)))
+      if(sort_bool::is_bool(basic_sort(core::identifier_string(SortName))) ||
+         sort_pos::is_pos(basic_sort(core::identifier_string(SortName))) ||
+         sort_nat::is_nat(basic_sort(core::identifier_string(SortName))) ||
+         sort_int::is_int(basic_sort(core::identifier_string(SortName))) ||
+         sort_real::is_real(basic_sort(core::identifier_string(SortName))))
       {
         return ATtrue;
       }
@@ -2138,7 +2145,7 @@ namespace mcrl2 {
       assert(gsIsOpId(OpId));
       ATbool Result=ATtrue;
       const function_symbol f(OpId);
-      const function_sort::domain_const_range domain=function_sort(f.sort()).domain();
+      const sort_expression_list domain=function_sort(f.sort()).domain();
       ATermAppl Name = f.name();
       ATermAppl Sort = f.sort();
 
@@ -2452,7 +2459,7 @@ namespace mcrl2 {
         // if (gsDebug) { std::cerr << "transformed into a process call without short-hand assignments %T\n\n", gsMakeParamId(Name,ActualPars));
 
         ATermAppl TypeCheckedProcTerm=gstcRewrActProc(Vars, gsMakeParamId(Name,ActualPars));
-        if(!TypeCheckedProcTerm) {ATtableDestroy(As); gsErrorMsg("the previous type error occurred while typechecking the process call with short-hand assignments %P\n", ProcTerm); return NULL; }
+        if(!TypeCheckedProcTerm) {ATtableDestroy(As); gsErrorMsg("type error occurred while typechecking the process call with short-hand assignments %P\n", ProcTerm); return NULL; }
 
         // if (gsDebug) { std::cerr << "successfully typechecked it into %T\n\n", TypeCheckedProcTerm);
 
@@ -2925,7 +2932,7 @@ namespace mcrl2 {
       }
 
       if(gsIsDataAppl(*DataTerm))
-      {
+      { 
         //arguments
         ATermList Arguments=ATLgetArgument(*DataTerm,1);
         unsigned int nArguments=ATgetLength(Arguments);
@@ -3066,7 +3073,8 @@ namespace mcrl2 {
 
             //Second time to do the real work.
             ATermList NewArguments=ATmakeList0();
-            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
+            {
               ATermAppl Argument0=ATAgetFirst(Arguments);
               Arguments=ATgetNext(Arguments);
               ATermAppl Argument1=ATAgetFirst(Arguments);
@@ -3102,11 +3110,12 @@ namespace mcrl2 {
         //function
         ATermAppl Data=ATAgetArgument(*DataTerm,0);
         ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-                                                    &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,FreeVars,false,nArguments,warn_upcasting);
-
+                                                    &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,
+                                                    FreeVars,false,nArguments,warn_upcasting);
         if (gsDebug) { std::cerr << "Result of gstcTraverseVarConsTypeD: DataTerm " << pp(Data) << "\n"; }
 
-        if(!NewType) {
+        if(!NewType) 
+        {
           if(was_ambiguous) was_ambiguous=false;
           else if(gsIsOpId(Data)||gsIsDataVarId(Data)) gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
           gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
@@ -3235,7 +3244,7 @@ namespace mcrl2 {
       }
 
       if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)||gsIsDataVarId(*DataTerm))
-      {
+      { 
         ATermAppl Name=ATAgetArgument(*DataTerm,0);
         if(gsIsNumericString(gsATermAppl2String(Name)))
         {
@@ -3254,19 +3263,21 @@ namespace mcrl2 {
         }
 
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
-        if(Type)
+        if (Type)
         {
           if (gsDebug) { std::cerr << "Recognised declared variable " << pp(Name) << ", Type: " << pp(Type) << "\n"; }
           *DataTerm=gsMakeDataVarId(Name,Type);
 
-          if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
+          if (!ATAtableGet(AllowedVars,(ATerm)Name)) 
+          {
             gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
             return NULL;
           }
 
           ATermAppl NewType=gstcTypeMatchA(Type,PosType);
           if(NewType) Type=NewType;
-          else{
+          else
+          {
             //upcasting
             ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
             if(!CastedNewType)
@@ -3303,7 +3314,7 @@ namespace mcrl2 {
         }
 
         ATermList ParList=ATLtableGet(gssystem.constants,(ATerm)Name);
-        if(ParList)
+        if (ParList)
         { ATermList NewParList=ATmakeList0();
           for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
             ATermAppl Par=ATAgetFirst(ParList);
@@ -3340,7 +3351,12 @@ namespace mcrl2 {
         {
           ATermAppl Type=ATAgetFirst(ParList);
           *DataTerm=gsMakeOpId(Name,Type);
-          return Type;
+          ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
+          if (NewType==NULL)
+          { gsErrorMsg("no constant %P with type %P\n",*DataTerm,PosType);
+            return NULL;
+          }
+          return NewType;
         }
         else
         {
@@ -3365,11 +3381,13 @@ namespace mcrl2 {
                      const bool strict_ambiguous, 
                      const int nFactPars, 
                      const bool warn_upcasting)
-    {
+    { 
       // -1 for nFactPars means the number of arguments is not known.
       if (gsDebug) 
-      { std::cerr << "gstcTraverseVarConsTypeDN: DataTerm " << pp(*DataTerm) << " with PosType " << pp(PosType) << 
-                  ", nFactPars " << nFactPars << "\n";
+      { 
+        std::cerr << "gstcTraverseVarConsTypeDN: DataTerm ";
+        ATfprintf(stderr,"%t",*DataTerm);
+        std::cerr << " with PosType " << pp(PosType) << ", nFactPars " << nFactPars << "\n";
       }
       if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
       { 
@@ -3727,19 +3745,22 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-/*
-          if(ATisEqual(gsMakeOpIdNameFuncUpdate(),ATAgetArgument(*DataTerm,0)))
+
+          if(ATisEqual(static_cast<ATermAppl>(data::function_update_name()),ATAgetArgument(*DataTerm,0)))
           {
-            if (gsDebug) { std::cerr << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
+            if (gsDebug) 
+            { 
+              std::cerr << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; 
+            }
             ATermAppl NewType=gstcMatchFuncUpdate(Type);
             if(!NewType)
-            {
-              gsErrorMsg("the function FuncUpdate has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+            { 
+              gsErrorMsg("function update has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
               return NULL;
             }
             Type=NewType;
           }
-*/
+
 
           *DataTerm=gsMakeOpId(Name,Type);
           if(variable) *DataTerm=gsMakeDataVarId(Name,Type);
@@ -3833,7 +3854,7 @@ namespace mcrl2 {
       if(gstcTypeMatchA(NeededType,sort_nat::nat())){
         if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_nat::pos2nat(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_nat::cnat(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting){ was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Nat by applying Pos2Nat to it.\n",OldPar);}
           return sort_nat::nat();
         }
@@ -3844,13 +3865,13 @@ namespace mcrl2 {
       if(gstcTypeMatchA(NeededType,sort_int::int_())){
         if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_int::pos2int(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_int::cint(),ATmakeList1((ATerm)gsMakeDataAppl(sort_nat::cnat(),ATmakeList1((ATerm)*Par))));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Int by applying Pos2Int to it.\n",OldPar);}
           return sort_int::int_();
         }
         if(gstcTypeMatchA(Type,sort_nat::nat())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_int::nat2int(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_int::cint(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Int by applying Nat2Int to it.\n",OldPar);}
           return sort_int::int_();
         }
@@ -3861,19 +3882,22 @@ namespace mcrl2 {
       if(gstcTypeMatchA(NeededType,sort_real::real_())){
         if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_real::pos2real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)gsMakeDataAppl(sort_int::cint(),
+                                    ATmakeList1((ATerm)gsMakeDataAppl(sort_nat::cnat(),ATmakeList1((ATerm)*Par)))),
+                                           (ATerm)(ATermAppl)sort_pos::c1()));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Pos2Real to it.\n",OldPar);}
           return sort_real::real_();
         }
         if(gstcTypeMatchA(Type,sort_nat::nat())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_real::nat2real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)gsMakeDataAppl(sort_int::cint(),ATmakeList1((ATerm)*Par)),
+                                    (ATerm)(ATermAppl)(sort_pos::c1())));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Nat2Real to it.",OldPar);}
           return sort_real::real_();
         }
         if(gstcTypeMatchA(Type,sort_int::int_())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_real::int2real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)*Par,(ATerm)(ATermAppl)data_expression(sort_pos::c1())));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Int2Real to it.\n",OldPar);}
           return sort_real::real_();
         }
@@ -4743,8 +4767,9 @@ namespace mcrl2 {
       return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)static_cast<ATermAppl>(sort_bag::bag(sort_expression(Arg)))),sort_nat::nat());
     }
 
-/*
-    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type){
+
+    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type)
+    {
       //tries to sort out the types of FuncUpdate ((A->B)xAxB->(A->B))
       //If some of the parameters are Pos,Nat, or Int do upcasting.
 
@@ -4774,7 +4799,6 @@ namespace mcrl2 {
 
       return gsMakeSortArrow(ATmakeList3((ATerm)Arg1,(ATerm)A,(ATerm)B),Arg1);
     }
-*/
 
     static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes){
       //prints more information about impossible cast.
@@ -4963,7 +4987,7 @@ namespace mcrl2 {
 
           ATermAppl VarType=ATAgetArgument(ATAgetArgument(o,0),1);
           if(!gstcIsSortExprDeclared(VarType)){
-            gsErrorMsg("the previous type error occurred while typechecking %P\n",StateFrm);
+            gsErrorMsg("type error occurred while typechecking %P\n",StateFrm);
             success=ATfalse;
             break;
           }

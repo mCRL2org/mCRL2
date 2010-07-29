@@ -16,7 +16,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/test_utility.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 

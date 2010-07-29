@@ -39,7 +39,7 @@ namespace mcrl2 {
       struct symbol : public detail::singleton_identifier< Derived > {
         static bool is_application(data_expression const& e)
         {
-          return e.is_application() ? is_application(application(e)) : false;
+          return data::is_application(e) ? is_application(application(e)) : false;
         }
 
         static bool is_application(application const& e)
@@ -49,7 +49,7 @@ namespace mcrl2 {
 
         static bool is_function_symbol(data_expression const& e)
         {
-          return (e.is_function_symbol()) ? is_function_symbol(function_symbol(e)) : false;
+          return data::is_function_symbol(e) ? is_function_symbol(function_symbol(e)) : false;
         }
 
         static bool is_function_symbol(function_symbol const& e)
@@ -101,7 +101,7 @@ namespace mcrl2 {
     /// \return function symbol equal_to
     inline function_symbol equal_to(const sort_expression& s)
     {
-      return function_symbol(detail::equal_symbol(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::equal_symbol(), make_function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function ==
@@ -120,7 +120,7 @@ namespace mcrl2 {
     inline application equal_to(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(equal_to(arg0.sort()),arg0, arg1);
+      return equal_to(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of ==
@@ -138,7 +138,7 @@ namespace mcrl2 {
     /// \return function symbol not_equal_to
     inline function_symbol not_equal_to(const sort_expression& s)
     {
-      return function_symbol(detail::not_equal_symbol(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::not_equal_symbol(), make_function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function !=
@@ -157,7 +157,7 @@ namespace mcrl2 {
     inline application not_equal_to(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(not_equal_to(arg0.sort()),arg0, arg1);
+      return not_equal_to(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of !=
@@ -175,7 +175,7 @@ namespace mcrl2 {
     /// \return function symbol if_
     inline function_symbol if_(const sort_expression& s)
     {
-      return function_symbol(detail::if_symbol(), function_sort(sort_bool::bool_(), s, s, s));
+      return function_symbol(detail::if_symbol(), make_function_sort(sort_bool::bool_(), s, s, s));
     }
 
     /// \brief Recogniser for function if
@@ -197,7 +197,7 @@ namespace mcrl2 {
       assert(sort_bool::is_bool(arg0.sort()));
       assert(arg1.sort() == arg2.sort());
 
-      return application(if_(arg1.sort()), arg0, arg1, arg2);
+      return if_(arg1.sort())(arg0, arg1, arg2);
     }
 
     /// \brief Recogniser for application of if
@@ -215,7 +215,7 @@ namespace mcrl2 {
     /// \return function symbol less
     inline function_symbol less(const sort_expression& s)
     {
-      return function_symbol(detail::less_symbol(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::less_symbol(), make_function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function <
@@ -234,7 +234,7 @@ namespace mcrl2 {
     inline application less(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(less(arg0.sort()),arg0, arg1);
+      return less(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of <
@@ -252,7 +252,7 @@ namespace mcrl2 {
     /// \return function symbol less_equal
     inline function_symbol less_equal(const sort_expression& s)
     {
-      return function_symbol(detail::less_equal_symbol(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::less_equal_symbol(), make_function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function <=
@@ -271,7 +271,7 @@ namespace mcrl2 {
     inline application less_equal(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(less_equal(arg0.sort()),arg0, arg1);
+      return less_equal(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of <=
@@ -289,7 +289,7 @@ namespace mcrl2 {
     /// \return function symbol greater
     inline function_symbol greater(const sort_expression& s)
     {
-      return function_symbol(detail::greater_symbol(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::greater_symbol(), make_function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function >
@@ -308,7 +308,7 @@ namespace mcrl2 {
     inline application greater(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(greater(arg0.sort()),arg0, arg1);
+      return greater(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of >
@@ -326,7 +326,7 @@ namespace mcrl2 {
     /// \return function symbol greater_equal
     inline function_symbol greater_equal(const sort_expression& s)
     {
-      return function_symbol(detail::greater_equal_symbol(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::greater_equal_symbol(), make_function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function >=
@@ -345,7 +345,7 @@ namespace mcrl2 {
     inline application greater_equal(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      return application(greater_equal(arg0.sort()),arg0, arg1);
+      return greater_equal(arg0.sort())(arg0, arg1);
     }
 
     /// \brief Recogniser for application of >=
@@ -384,15 +384,15 @@ namespace mcrl2 {
       variable b("b", sort_bool::bool_());
       variable x("x", s);
       variable y("y", s);
-      result.push_back(data_equation(make_vector(x), equal_to(x, x), sort_bool::true_()));
-      result.push_back(data_equation(make_vector(x, y), not_equal_to(x, y), sort_bool::not_(equal_to(x, y))));
-      result.push_back(data_equation(make_vector(x, y), if_(sort_bool::true_(), x, y), x));
-      result.push_back(data_equation(make_vector(x, y), if_(sort_bool::false_(), x, y), y));
-      result.push_back(data_equation(make_vector(b, x), if_(b, x, x), x));
-      result.push_back(data_equation(make_vector(x), less(x,x), sort_bool::false_()));
-      result.push_back(data_equation(make_vector(x), less_equal(x,x), sort_bool::true_()));
-      result.push_back(data_equation(make_vector(x, y), greater_equal(x,y), less_equal(y,x)));
-      result.push_back(data_equation(make_vector(x, y), greater(x,y), less(y,x)));
+      result.push_back(data_equation(atermpp::make_vector(x), equal_to(x, x), sort_bool::true_()));
+      result.push_back(data_equation(atermpp::make_vector(x, y), not_equal_to(x, y), sort_bool::not_(equal_to(x, y))));
+      result.push_back(data_equation(atermpp::make_vector(x, y), if_(sort_bool::true_(), x, y), x));
+      result.push_back(data_equation(atermpp::make_vector(x, y), if_(sort_bool::false_(), x, y), y));
+      result.push_back(data_equation(atermpp::make_vector(b, x), if_(b, x, x), x));
+      result.push_back(data_equation(atermpp::make_vector(x), less(x,x), sort_bool::false_()));
+      result.push_back(data_equation(atermpp::make_vector(x), less_equal(x,x), sort_bool::true_()));
+      result.push_back(data_equation(atermpp::make_vector(x, y), greater_equal(x,y), less_equal(y,x)));
+      result.push_back(data_equation(atermpp::make_vector(x, y), greater(x,y), less(y,x)));
 
       return result;
     }

@@ -25,24 +25,24 @@
 #include "cluster.h"
 #include "glcanvas.h"
 #include "lts.h"
+#include "mcrl2/lts/lts_io.h"
 #include "mainframe.h"
 #include "markmanager.h"
 #include "markstateruledialog.h"
+#include "rgb_color.h"
 #include "settings.h"
 #include "state.h"
-#include "utils.h"
 #include "visualizer.h"
 
 using namespace std;
-using namespace Utils;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // Configures tool capabilities.
 void LTSView::set_capabilities(tipi::tool::capabilities& c) const {
-  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::detail::supported_lts_formats());
 
   for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
+    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::detail::mime_type_for_type(*i)), tipi::tool::category::visualisation);
   }
 }
 
@@ -53,7 +53,7 @@ void LTSView::user_interactive_configuration(tipi::configuration&) { }
 bool LTSView::check_configuration(tipi::configuration const& c) const {
   if (c.input_exists("main-input")) {
     /* The input object is present, verify whether the specified format is supported */
-    if (mcrl2::lts::lts::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
+    if (mcrl2::lts::detail::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
       send_error("Invalid configuration: unsupported type `" +
           c.get_input("main-input").type().sub_type() + "' for main input");
     }
@@ -106,7 +106,7 @@ LTSView::LTSView() : super("LTSView",
     developers()), lts(0)
 { }
 
-IMPLEMENT_APP_NO_MAIN(LTSView)
+IMPLEMENT_APP_NO_MAIN(LTSView_gui_tool)
 IMPLEMENT_WX_THEME_SUPPORT
 BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()
@@ -136,6 +136,7 @@ bool LTSView::run()
   fsmStyle = false;
   colourCounter = 0;
   settings = new Settings();
+  settings->loadDefaults();
   mainFrame = new MainFrame(this,settings);
   visualizer = new Visualizer(this,settings);
   markManager = new MarkManager();
@@ -385,12 +386,12 @@ void LTSView::editMarkRule(int mr)
   }
 }
 
-Utils::MarkStyle LTSView::getMarkStyle()
+MarkStyle LTSView::getMarkStyle()
 {
   return markManager->getMarkStyle();
 }
 
-Utils::MatchStyle LTSView::getMatchStyle()
+MatchStyle LTSView::getMatchStyle()
 {
   return markManager->getMatchStyle();
 }
@@ -410,81 +411,37 @@ bool LTSView::isMarked(Transition* t)
   return markManager->isMarked(t);
 }
 
-Utils::RGB_Color LTSView::getMarkRuleColor(int mr)
+RGB_Color LTSView::getMarkRuleColor(int mr)
 {
   return markManager->getMarkRuleColor(mr);
 }
 
-Utils::RGB_Color LTSView::getNewRuleColour()
+RGB_Color LTSView::getNewRuleColour()
 {
-  // TODO implement
   colourCounter = (colourCounter + 1) % 9;
-
-  RGB_Color result;
-
   switch(colourCounter)
   {
     case 0:
-      { result.r = 228;
-        result.g = 26;
-        result.b = 28;
-        break;
-      }
+      return RGB_Color(228, 26, 28);
     case 1:
-      { result.r = 55;
-        result.g = 126;
-        result.b = 184;
-        break;
-      }
+      return RGB_Color(55, 126, 184);
     case 2:
-      { result.r = 77;
-        result.g = 175;
-        result.b = 74;
-        break;
-      }
+      return RGB_Color(77, 175, 74);
     case 3:
-      { result.r = 152;
-        result.g = 78;
-        result.b = 163;
-        break;
-      }
+      return RGB_Color(152, 78, 163);
     case 4:
-      { result.r = 255;
-        result.g = 127;
-        result.b = 0;
-        break;
-      }
+      return RGB_Color(255, 127, 0);
     case 5:
-      { result.r = 255;
-        result.g = 255;
-        result.b = 51;
-        break;
-      }
+      return RGB_Color(255, 255, 51);
     case 6:
-      { result.r = 166;
-        result.g = 86;
-        result.b = 40;
-        break;
-      }
+      return RGB_Color(166, 86, 40);
     case 7:
-     { result.r = 247;
-       result.g = 129;
-       result.b = 191;
-       break;
-     }
+      return RGB_Color(247, 129, 191);
     case 8:
-     { result.r = 153;
-       result.g = 153;
-       result.b = 153;
-       break;
-     }
-    default: //does not occur for modulo, but keep compiler happy
-    {  result.r = 0;
-       result.g = 0;
-       result.b = 0;
-    }
+      return RGB_Color(153, 153, 153);
+    default:
+      return RGB_Color(0, 0, 0);
   }
-  return result;
 }
 
 void LTSView::activateMarkRule(int mr,bool activate)
@@ -503,7 +460,7 @@ void LTSView::activateMarkRule(int mr,bool activate)
   }
 }
 
-void LTSView::setMatchStyle(Utils::MatchStyle ms)
+void LTSView::setMatchStyle(MatchStyle ms)
 {
   if (lts == NULL) return;
   markManager->setMatchStyle(ms);
@@ -517,7 +474,7 @@ void LTSView::setMatchStyle(Utils::MatchStyle ms)
   }
 }
 
-void LTSView::setMatchStyleClusters(Utils::MatchStyle ms)
+void LTSView::setMatchStyleClusters(MatchStyle ms)
 {
   if (lts == NULL) return;
   markManager->setMatchStyleClusters(ms);
@@ -530,7 +487,7 @@ void LTSView::setActionMark(int l,bool b)
   setMarkStyle(MARK_TRANSITIONS);
 }
 
-void LTSView::setMarkStyle(Utils::MarkStyle ms)
+void LTSView::setMarkStyle(MarkStyle ms)
 {
   markManager->setMarkStyle(ms);
   applyMarkStyle();

@@ -782,7 +782,7 @@ void SettingsFrame::onButton( wxCommandEvent &e )
 
 
 // ------------------------------------------------
-void SettingsFrame::onCheckBox( wxCommandEvent &e )
+void SettingsFrame::onCheckBox( wxCommandEvent &/*e*/ )
 // ------------------------------------------------
 {
     /*if ( e.GetId() == ID_CHECK_BOX_SHOW_CT )
@@ -801,7 +801,7 @@ void SettingsFrame::onCheckBox( wxCommandEvent &e )
 
 
 // ------------------------------------------------
-void SettingsFrame::onComboBox( wxCommandEvent &e )
+void SettingsFrame::onComboBox( wxCommandEvent &/*e*/ )
 // ------------------------------------------------
 {
     /*if ( e.GetId() == ID_COMBO_BOX_SIZE_TXT )
@@ -814,7 +814,7 @@ void SettingsFrame::onComboBox( wxCommandEvent &e )
 
 
 // ---------------------------------------------
-void SettingsFrame::onSpinCtrl( wxSpinEvent &e )
+void SettingsFrame::onSpinCtrl( wxSpinEvent &/*e*/ )
 // ---------------------------------------------
 {
     /*if ( e.GetId() == ID_SPIN_CTRL_ANIM_SPD )

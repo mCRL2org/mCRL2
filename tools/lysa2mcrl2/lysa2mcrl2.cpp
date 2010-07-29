@@ -27,6 +27,8 @@ bool _getch() { return true; }
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
+
 
 #include "lysa.h"
 #include "lysaparser.h"
@@ -176,9 +178,28 @@ class lysa2mcrl2_tool: public input_output_tool
     }
 };
 
+class lysa2mcrl2_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lysa2mcrl2_tool>
+{
+  public:
+	lysa2mcrl2_gui_tool()
+    {
+      m_gui_options["attacker-index"] = create_textctrl_widget();
+      m_gui_options["prefix-idents"] = create_textctrl_widget();
+      m_gui_options["lysa"] = create_checkbox_widget();
+
+      std::vector<std::string> values;
+      values.clear();
+      values.push_back("straightforward");
+      values.push_back("symbolic");
+      m_gui_options["strategy"] = create_radiobox_widget(values);
+      m_gui_options["zero-action"] = create_checkbox_widget();
+
+    }
+};
+
 int main(int argc, char *argv[])
 {
-  lysa2mcrl2_tool tool;  
+	lysa2mcrl2_gui_tool tool;
   int ret = tool.execute(argc, argv);
   if(getenv("DEBUGGER")) _getch();
   return ret;

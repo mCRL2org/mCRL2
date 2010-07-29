@@ -10,10 +10,13 @@
 /// \brief Source file for primitive classes
 
 #include "primitives.h"
-#include "utils.h"
-#include <cmath>
 
-using namespace Utils;
+#include <cmath>
+#include <stdlib.h>
+#include <string.h>
+#include "mathutils.h"
+
+using namespace MathUtils;
 
 /* -------- P_Sphere -------------------------------------------------------- */
 
@@ -185,7 +188,7 @@ void P_SimpleSphere::draw() {
   glCallList(disp_list);
 }
 
-void P_SimpleSphere::reshape(int N,float *coss,float *sins) {
+void P_SimpleSphere::reshape(int /*N*/,float */*coss*/,float */*sins*/) {
 }
 
 /* -------- P_Hemisphere ---------------------------------------------------- */
@@ -461,7 +464,7 @@ void P_ObliqueCone::draw() {
   glCallList(disp_list);
 }
 
-void P_ObliqueCone::reshape(int N,float *coss,float *sins) {
+void P_ObliqueCone::reshape(int /*N*/,float */*coss*/,float */*sins*/) {
 }
 
 void P_ObliqueCone::reshape(int N,float *coss,float *sins,float obt) {

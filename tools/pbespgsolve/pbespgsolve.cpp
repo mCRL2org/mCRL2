@@ -71,6 +71,10 @@ protected:
         's');
     desc.add_option("scc", "Use scc decomposition", 'c');
     desc.add_option("verify", "Verify the solution", 'e');
+    desc.add_hidden_option("equation_limit",
+         make_optional_argument("NAME", "-1"),
+         "Set a limit to the number of generated BES equations",
+         'l');
   }
 
   void parse_options(const command_line_parser& parser)
@@ -79,6 +83,11 @@ protected:
     m_options.solver_type = parse_solver_type(parser.option_argument("solver-type"));
     m_options.use_scc_decomposition = (parser.options.count("scc") > 0);
     m_options.verify_solution = (parser.options.count("verify") > 0);
+    if (parser.options.count("equation_limit") > 0)
+    {
+    	int limit = parser.option_argument_as<int>("equation_limit");
+    	pbes_system::detail::set_bes_equation_limit(limit);
+    }
   }
 
 public:
@@ -118,8 +127,16 @@ public:
     }
     set_parity_game_generator_log_level(log_level); 
     pbespgsolve_algorithm algorithm(m_options);
-    bool result = algorithm.run(p);
-    std::clog << "The solution for the initial variable of the pbes is " << (result ? "true" : "false") << "\n";
+    std::string result = "unknown";
+    try
+    {
+      result = algorithm.run(p) ? "true" : "false";
+    }
+    catch (std::out_of_range)
+    {
+    	// value unknown is already set
+    }
+    std::clog << "The solution for the initial variable of the pbes is " << result << "\n";
 
     return true;
   }

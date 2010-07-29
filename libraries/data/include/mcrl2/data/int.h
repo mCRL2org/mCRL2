@@ -23,7 +23,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -58,9 +58,9 @@ namespace mcrl2 {
       inline
       bool is_int(const sort_expression& e)
       {
-        if (e.is_basic_sort())
+        if (is_basic_sort(e))
         {
-          return static_cast< basic_sort >(e) == int_();
+          return basic_sort(e) == int_();
         }
         return false;
       }
@@ -79,7 +79,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cint()
       {
-        static function_symbol cint = data::detail::initialise_static_expression(cint, function_symbol(cint_name(), function_sort(sort_nat::nat(), int_())));
+        static function_symbol cint = data::detail::initialise_static_expression(cint, function_symbol(cint_name(), make_function_sort(sort_nat::nat(), int_())));
         return cint;
       }
 
@@ -103,7 +103,7 @@ namespace mcrl2 {
       inline
       application cint(const data_expression& arg0)
       {
-        return application(cint(),arg0);
+        return cint()(arg0);
       }
 
       /// \brief Recogniser for application of \@cInt
@@ -115,7 +115,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_cint_function_symbol(static_cast< application >(e).head());
+          return is_cint_function_symbol(application(e).head());
         }
         return false;
       }
@@ -134,7 +134,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cneg()
       {
-        static function_symbol cneg = data::detail::initialise_static_expression(cneg, function_symbol(cneg_name(), function_sort(sort_pos::pos(), int_())));
+        static function_symbol cneg = data::detail::initialise_static_expression(cneg, function_symbol(cneg_name(), make_function_sort(sort_pos::pos(), int_())));
         return cneg;
       }
 
@@ -158,7 +158,7 @@ namespace mcrl2 {
       inline
       application cneg(const data_expression& arg0)
       {
-        return application(cneg(),arg0);
+        return cneg()(arg0);
       }
 
       /// \brief Recogniser for application of \@cNeg
@@ -170,7 +170,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_cneg_function_symbol(static_cast< application >(e).head());
+          return is_cneg_function_symbol(application(e).head());
         }
         return false;
       }
@@ -200,7 +200,7 @@ namespace mcrl2 {
       inline
       function_symbol const& nat2int()
       {
-        static function_symbol nat2int = data::detail::initialise_static_expression(nat2int, function_symbol(nat2int_name(), function_sort(sort_nat::nat(), int_())));
+        static function_symbol nat2int = data::detail::initialise_static_expression(nat2int, function_symbol(nat2int_name(), make_function_sort(sort_nat::nat(), int_())));
         return nat2int;
       }
 
@@ -224,7 +224,7 @@ namespace mcrl2 {
       inline
       application nat2int(const data_expression& arg0)
       {
-        return application(nat2int(),arg0);
+        return nat2int()(arg0);
       }
 
       /// \brief Recogniser for application of Nat2Int
@@ -236,7 +236,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_nat2int_function_symbol(static_cast< application >(e).head());
+          return is_nat2int_function_symbol(application(e).head());
         }
         return false;
       }
@@ -255,7 +255,7 @@ namespace mcrl2 {
       inline
       function_symbol const& int2nat()
       {
-        static function_symbol int2nat = data::detail::initialise_static_expression(int2nat, function_symbol(int2nat_name(), function_sort(int_(), sort_nat::nat())));
+        static function_symbol int2nat = data::detail::initialise_static_expression(int2nat, function_symbol(int2nat_name(), make_function_sort(int_(), sort_nat::nat())));
         return int2nat;
       }
 
@@ -279,7 +279,7 @@ namespace mcrl2 {
       inline
       application int2nat(const data_expression& arg0)
       {
-        return application(int2nat(),arg0);
+        return int2nat()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Nat
@@ -291,7 +291,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_int2nat_function_symbol(static_cast< application >(e).head());
+          return is_int2nat_function_symbol(application(e).head());
         }
         return false;
       }
@@ -310,7 +310,7 @@ namespace mcrl2 {
       inline
       function_symbol const& pos2int()
       {
-        static function_symbol pos2int = data::detail::initialise_static_expression(pos2int, function_symbol(pos2int_name(), function_sort(sort_pos::pos(), int_())));
+        static function_symbol pos2int = data::detail::initialise_static_expression(pos2int, function_symbol(pos2int_name(), make_function_sort(sort_pos::pos(), int_())));
         return pos2int;
       }
 
@@ -334,7 +334,7 @@ namespace mcrl2 {
       inline
       application pos2int(const data_expression& arg0)
       {
-        return application(pos2int(),arg0);
+        return pos2int()(arg0);
       }
 
       /// \brief Recogniser for application of Pos2Int
@@ -346,7 +346,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_pos2int_function_symbol(static_cast< application >(e).head());
+          return is_pos2int_function_symbol(application(e).head());
         }
         return false;
       }
@@ -365,7 +365,7 @@ namespace mcrl2 {
       inline
       function_symbol const& int2pos()
       {
-        static function_symbol int2pos = data::detail::initialise_static_expression(int2pos, function_symbol(int2pos_name(), function_sort(int_(), sort_pos::pos())));
+        static function_symbol int2pos = data::detail::initialise_static_expression(int2pos, function_symbol(int2pos_name(), make_function_sort(int_(), sort_pos::pos())));
         return int2pos;
       }
 
@@ -389,7 +389,7 @@ namespace mcrl2 {
       inline
       application int2pos(const data_expression& arg0)
       {
-        return application(int2pos(),arg0);
+        return int2pos()(arg0);
       }
 
       /// \brief Recogniser for application of Int2Pos
@@ -401,7 +401,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_int2pos_function_symbol(static_cast< application >(e).head());
+          return is_int2pos_function_symbol(application(e).head());
         }
         return false;
       }
@@ -461,10 +461,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol maximum(maximum_name(), function_sort(s0, s1, target_sort));
+        function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
         return maximum;
       }
 
@@ -489,7 +489,7 @@ namespace mcrl2 {
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(maximum(arg0.sort(), arg1.sort()),arg0, arg1);
+        return maximum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of max
@@ -501,7 +501,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_maximum_function_symbol(static_cast< application >(e).head());
+          return is_maximum_function_symbol(application(e).head());
         }
         return false;
       }
@@ -537,10 +537,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol minimum(minimum_name(), function_sort(s0, s1, target_sort));
+        function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
         return minimum;
       }
 
@@ -565,7 +565,7 @@ namespace mcrl2 {
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(minimum(arg0.sort(), arg1.sort()),arg0, arg1);
+        return minimum(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of min
@@ -577,7 +577,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_minimum_function_symbol(static_cast< application >(e).head());
+          return is_minimum_function_symbol(application(e).head());
         }
         return false;
       }
@@ -612,10 +612,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts " + s0.to_string());
         }
 
-        function_symbol abs(abs_name(), function_sort(s0, target_sort));
+        function_symbol abs(abs_name(), make_function_sort(s0, target_sort));
         return abs;
       }
 
@@ -639,7 +639,7 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        return application(abs(arg0.sort()),arg0);
+        return abs(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of abs
@@ -651,7 +651,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_abs_function_symbol(static_cast< application >(e).head());
+          return is_abs_function_symbol(application(e).head());
         }
         return false;
       }
@@ -673,7 +673,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(int_());
 
-        function_symbol negate(negate_name(), function_sort(s0, target_sort));
+        function_symbol negate(negate_name(), make_function_sort(s0, target_sort));
         return negate;
       }
 
@@ -697,7 +697,7 @@ namespace mcrl2 {
       inline
       application negate(const data_expression& arg0)
       {
-        return application(negate(arg0.sort()),arg0);
+        return negate(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of -
@@ -709,7 +709,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_negate_function_symbol(static_cast< application >(e).head());
+          return is_negate_function_symbol(application(e).head());
         }
         return false;
       }
@@ -744,10 +744,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + s0.to_string());
         }
 
-        function_symbol succ(succ_name(), function_sort(s0, target_sort));
+        function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
         return succ;
       }
 
@@ -771,7 +771,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        return application(succ(arg0.sort()),arg0);
+        return succ(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of succ
@@ -783,7 +783,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_succ_function_symbol(static_cast< application >(e).head());
+          return is_succ_function_symbol(application(e).head());
         }
         return false;
       }
@@ -818,10 +818,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts" + s0.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + s0.to_string());
         }
 
-        function_symbol pred(pred_name(), function_sort(s0, target_sort));
+        function_symbol pred(pred_name(), make_function_sort(s0, target_sort));
         return pred;
       }
 
@@ -845,7 +845,7 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        return application(pred(arg0.sort()),arg0);
+        return pred(arg0.sort())(arg0);
       }
 
       /// \brief Recogniser for application of pred
@@ -857,7 +857,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_pred_function_symbol(static_cast< application >(e).head());
+          return is_pred_function_symbol(application(e).head());
         }
         return false;
       }
@@ -889,10 +889,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for dub with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for dub with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol dub(dub_name(), function_sort(s0, s1, target_sort));
+        function_symbol dub(dub_name(), make_function_sort(s0, s1, target_sort));
         return dub;
       }
 
@@ -917,7 +917,7 @@ namespace mcrl2 {
       inline
       application dub(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(dub(arg0.sort(), arg1.sort()),arg0, arg1);
+        return dub(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of \@dub
@@ -929,7 +929,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_dub_function_symbol(static_cast< application >(e).head());
+          return is_dub_function_symbol(application(e).head());
         }
         return false;
       }
@@ -973,10 +973,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol plus(plus_name(), function_sort(s0, s1, target_sort));
+        function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
         return plus;
       }
 
@@ -1001,7 +1001,7 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(plus(arg0.sort(), arg1.sort()),arg0, arg1);
+        return plus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of +
@@ -1013,7 +1013,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_plus_function_symbol(static_cast< application >(e).head());
+          return is_plus_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1036,7 +1036,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(int_());
 
-        function_symbol minus(minus_name(), function_sort(s0, s1, target_sort));
+        function_symbol minus(minus_name(), make_function_sort(s0, s1, target_sort));
         return minus;
       }
 
@@ -1061,7 +1061,7 @@ namespace mcrl2 {
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(minus(arg0.sort(), arg1.sort()),arg0, arg1);
+        return minus(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of -
@@ -1073,7 +1073,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_minus_function_symbol(static_cast< application >(e).head());
+          return is_minus_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1109,10 +1109,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol times(times_name(), function_sort(s0, s1, target_sort));
+        function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
         return times;
       }
 
@@ -1137,7 +1137,7 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(times(arg0.sort(), arg1.sort()),arg0, arg1);
+        return times(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of *
@@ -1149,7 +1149,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_times_function_symbol(static_cast< application >(e).head());
+          return is_times_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1185,10 +1185,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for div with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for div with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol div(div_name(), function_sort(s0, s1, target_sort));
+        function_symbol div(div_name(), make_function_sort(s0, s1, target_sort));
         return div;
       }
 
@@ -1213,7 +1213,7 @@ namespace mcrl2 {
       inline
       application div(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(div(arg0.sort(), arg1.sort()),arg0, arg1);
+        return div(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of div
@@ -1225,7 +1225,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_div_function_symbol(static_cast< application >(e).head());
+          return is_div_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1248,7 +1248,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(sort_nat::nat());
 
-        function_symbol mod(mod_name(), function_sort(s0, s1, target_sort));
+        function_symbol mod(mod_name(), make_function_sort(s0, s1, target_sort));
         return mod;
       }
 
@@ -1273,7 +1273,7 @@ namespace mcrl2 {
       inline
       application mod(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(mod(arg0.sort(), arg1.sort()),arg0, arg1);
+        return mod(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of mod
@@ -1285,7 +1285,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_mod_function_symbol(static_cast< application >(e).head());
+          return is_mod_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1321,10 +1321,10 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts" + s0.to_string() + ", " + s1.to_string());
+          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + s0.to_string() + ", " + s1.to_string());
         }
 
-        function_symbol exp(exp_name(), function_sort(s0, s1, target_sort));
+        function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));
         return exp;
       }
 
@@ -1349,7 +1349,7 @@ namespace mcrl2 {
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        return application(exp(arg0.sort(), arg1.sort()),arg0, arg1);
+        return exp(arg0.sort(), arg1.sort())(arg0, arg1);
       }
 
       /// \brief Recogniser for application of exp
@@ -1361,7 +1361,7 @@ namespace mcrl2 {
       {
         if (is_application(e))
         {
-          return is_exp_function_symbol(static_cast< application >(e).head());
+          return is_exp_function_symbol(application(e).head());
         }
         return false;
       }
@@ -1506,68 +1506,68 @@ namespace mcrl2 {
         variable vy("y",int_());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vm, vn), equal_to(cint(vm), cint(vn)), equal_to(vm, vn)));
-        result.push_back(data_equation(make_vector(vn, vp), equal_to(cint(vn), cneg(vp)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vn, vp), equal_to(cneg(vp), cint(vn)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vp, vq), equal_to(cneg(vp), cneg(vq)), equal_to(vp, vq)));
-        result.push_back(data_equation(make_vector(vm, vn), less(cint(vm), cint(vn)), less(vm, vn)));
-        result.push_back(data_equation(make_vector(vn, vp), less(cint(vn), cneg(vp)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vn, vp), less(cneg(vp), cint(vn)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(vp, vq), less(cneg(vp), cneg(vq)), less(vq, vp)));
-        result.push_back(data_equation(make_vector(vm, vn), less_equal(cint(vm), cint(vn)), less_equal(vm, vn)));
-        result.push_back(data_equation(make_vector(vn, vp), less_equal(cint(vn), cneg(vp)), sort_bool::false_()));
-        result.push_back(data_equation(make_vector(vn, vp), less_equal(cneg(vp), cint(vn)), sort_bool::true_()));
-        result.push_back(data_equation(make_vector(vp, vq), less_equal(cneg(vp), cneg(vq)), less_equal(vq, vp)));
-        result.push_back(data_equation(make_vector(vn), nat2int(vn), cint(vn)));
-        result.push_back(data_equation(make_vector(vn), int2nat(cint(vn)), vn));
-        result.push_back(data_equation(make_vector(vp), pos2int(vp), cint(sort_nat::cnat(vp))));
-        result.push_back(data_equation(make_vector(vn), int2pos(cint(vn)), sort_nat::nat2pos(vn)));
-        result.push_back(data_equation(make_vector(vn, vp), maximum(vp, cint(vn)), maximum(vp, vn)));
-        result.push_back(data_equation(make_vector(vp, vq), maximum(vp, cneg(vq)), vp));
-        result.push_back(data_equation(make_vector(vn, vp), maximum(cint(vn), vp), maximum(vn, vp)));
-        result.push_back(data_equation(make_vector(vp, vq), maximum(cneg(vq), vp), vp));
-        result.push_back(data_equation(make_vector(vm, vn), maximum(vm, cint(vn)), if_(less_equal(vm, vn), vn, vm)));
-        result.push_back(data_equation(make_vector(vn, vp), maximum(vn, cneg(vp)), vn));
-        result.push_back(data_equation(make_vector(vm, vn), maximum(cint(vm), vn), if_(less_equal(vm, vn), vn, vm)));
-        result.push_back(data_equation(make_vector(vn, vp), maximum(cneg(vp), vn), vn));
-        result.push_back(data_equation(make_vector(vx, vy), maximum(vx, vy), if_(less_equal(vx, vy), vy, vx)));
-        result.push_back(data_equation(make_vector(vx, vy), minimum(vx, vy), if_(less_equal(vx, vy), vx, vy)));
-        result.push_back(data_equation(make_vector(vn), abs(cint(vn)), vn));
-        result.push_back(data_equation(make_vector(vp), abs(cneg(vp)), sort_nat::cnat(vp)));
-        result.push_back(data_equation(make_vector(vp), negate(vp), cneg(vp)));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), equal_to(cint(vm), cint(vn)), equal_to(vm, vn)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), equal_to(cint(vn), cneg(vp)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), equal_to(cneg(vp), cint(vn)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), equal_to(cneg(vp), cneg(vq)), equal_to(vp, vq)));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), less(cint(vm), cint(vn)), less(vm, vn)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), less(cint(vn), cneg(vp)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), less(cneg(vp), cint(vn)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), less(cneg(vp), cneg(vq)), less(vq, vp)));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), less_equal(cint(vm), cint(vn)), less_equal(vm, vn)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), less_equal(cint(vn), cneg(vp)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), less_equal(cneg(vp), cint(vn)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), less_equal(cneg(vp), cneg(vq)), less_equal(vq, vp)));
+        result.push_back(data_equation(atermpp::make_vector(vn), nat2int(vn), cint(vn)));
+        result.push_back(data_equation(atermpp::make_vector(vn), int2nat(cint(vn)), vn));
+        result.push_back(data_equation(atermpp::make_vector(vp), pos2int(vp), cint(sort_nat::cnat(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vn), int2pos(cint(vn)), sort_nat::nat2pos(vn)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), maximum(vp, cint(vn)), maximum(vp, vn)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), maximum(vp, cneg(vq)), vp));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), maximum(cint(vn), vp), maximum(vn, vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), maximum(cneg(vq), vp), vp));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), maximum(vm, cint(vn)), if_(less_equal(vm, vn), vn, vm)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), maximum(vn, cneg(vp)), vn));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), maximum(cint(vm), vn), if_(less_equal(vm, vn), vn, vm)));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), maximum(cneg(vp), vn), vn));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), maximum(vx, vy), if_(less_equal(vx, vy), vy, vx)));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), minimum(vx, vy), if_(less_equal(vx, vy), vx, vy)));
+        result.push_back(data_equation(atermpp::make_vector(vn), abs(cint(vn)), vn));
+        result.push_back(data_equation(atermpp::make_vector(vp), abs(cneg(vp)), sort_nat::cnat(vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp), negate(vp), cneg(vp)));
         result.push_back(data_equation(variable_list(), negate(sort_nat::c0()), cint(sort_nat::c0())));
-        result.push_back(data_equation(make_vector(vp), negate(sort_nat::cnat(vp)), cneg(vp)));
-        result.push_back(data_equation(make_vector(vn), negate(cint(vn)), negate(vn)));
-        result.push_back(data_equation(make_vector(vp), negate(cneg(vp)), cint(sort_nat::cnat(vp))));
-        result.push_back(data_equation(make_vector(vn), succ(cint(vn)), cint(sort_nat::cnat(succ(vn)))));
-        result.push_back(data_equation(make_vector(vp), succ(cneg(vp)), negate(pred(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vp), negate(sort_nat::cnat(vp)), cneg(vp)));
+        result.push_back(data_equation(atermpp::make_vector(vn), negate(cint(vn)), negate(vn)));
+        result.push_back(data_equation(atermpp::make_vector(vp), negate(cneg(vp)), cint(sort_nat::cnat(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vn), succ(cint(vn)), cint(sort_nat::cnat(succ(vn)))));
+        result.push_back(data_equation(atermpp::make_vector(vp), succ(cneg(vp)), negate(pred(vp))));
         result.push_back(data_equation(variable_list(), pred(sort_nat::c0()), cneg(sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp), pred(sort_nat::cnat(vp)), cint(pred(vp))));
-        result.push_back(data_equation(make_vector(vn), pred(cint(vn)), pred(vn)));
-        result.push_back(data_equation(make_vector(vp), pred(cneg(vp)), cneg(succ(vp))));
-        result.push_back(data_equation(make_vector(vb, vn), dub(vb, cint(vn)), cint(dub(vb, vn))));
-        result.push_back(data_equation(make_vector(vp), dub(sort_bool::false_(), cneg(vp)), cneg(sort_pos::cdub(sort_bool::false_(), vp))));
-        result.push_back(data_equation(make_vector(vp), dub(sort_bool::true_(), cneg(vp)), negate(dub(sort_bool::true_(), pred(vp)))));
-        result.push_back(data_equation(make_vector(vm, vn), plus(cint(vm), cint(vn)), cint(plus(vm, vn))));
-        result.push_back(data_equation(make_vector(vn, vp), plus(cint(vn), cneg(vp)), minus(vn, sort_nat::cnat(vp))));
-        result.push_back(data_equation(make_vector(vn, vp), plus(cneg(vp), cint(vn)), minus(vn, sort_nat::cnat(vp))));
-        result.push_back(data_equation(make_vector(vp, vq), plus(cneg(vp), cneg(vq)), cneg(sort_pos::add_with_carry(sort_bool::false_(), vp, vq))));
-        result.push_back(data_equation(make_vector(vp, vq), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::gtesubtb(sort_bool::false_(), vp, vq))));
-        result.push_back(data_equation(make_vector(vp, vq), less(vp, vq), minus(vp, vq), negate(sort_nat::gtesubtb(sort_bool::false_(), vq, vp))));
-        result.push_back(data_equation(make_vector(vm, vn), less_equal(vn, vm), minus(vm, vn), cint(sort_nat::gtesubt(vm, vn))));
-        result.push_back(data_equation(make_vector(vm, vn), less(vm, vn), minus(vm, vn), negate(sort_nat::gtesubt(vn, vm))));
-        result.push_back(data_equation(make_vector(vx, vy), minus(vx, vy), plus(vx, negate(vy))));
-        result.push_back(data_equation(make_vector(vm, vn), times(cint(vm), cint(vn)), cint(times(vm, vn))));
-        result.push_back(data_equation(make_vector(vn, vp), times(cint(vn), cneg(vp)), negate(times(sort_nat::cnat(vp), vn))));
-        result.push_back(data_equation(make_vector(vn, vp), times(cneg(vp), cint(vn)), negate(times(sort_nat::cnat(vp), vn))));
-        result.push_back(data_equation(make_vector(vp, vq), times(cneg(vp), cneg(vq)), cint(sort_nat::cnat(times(vp, vq)))));
-        result.push_back(data_equation(make_vector(vn, vp), div(cint(vn), vp), cint(div(vn, vp))));
-        result.push_back(data_equation(make_vector(vp, vq), div(cneg(vp), vq), cneg(succ(div(pred(vp), vq)))));
-        result.push_back(data_equation(make_vector(vn, vp), mod(cint(vn), vp), mod(vn, vp)));
-        result.push_back(data_equation(make_vector(vp, vq), mod(cneg(vp), vq), int2nat(minus(vq, succ(mod(pred(vp), vq))))));
-        result.push_back(data_equation(make_vector(vm, vn), exp(cint(vm), vn), cint(exp(vm, vn))));
-        result.push_back(data_equation(make_vector(vn, vp), sort_nat::even(vn), exp(cneg(vp), vn), cint(sort_nat::cnat(exp(vp, vn)))));
-        result.push_back(data_equation(make_vector(vn, vp), sort_bool::not_(sort_nat::even(vn)), exp(cneg(vp), vn), cneg(exp(vp, vn))));
+        result.push_back(data_equation(atermpp::make_vector(vp), pred(sort_nat::cnat(vp)), cint(pred(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vn), pred(cint(vn)), pred(vn)));
+        result.push_back(data_equation(atermpp::make_vector(vp), pred(cneg(vp)), cneg(succ(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vn), dub(vb, cint(vn)), cint(dub(vb, vn))));
+        result.push_back(data_equation(atermpp::make_vector(vp), dub(sort_bool::false_(), cneg(vp)), cneg(sort_pos::cdub(sort_bool::false_(), vp))));
+        result.push_back(data_equation(atermpp::make_vector(vp), dub(sort_bool::true_(), cneg(vp)), negate(dub(sort_bool::true_(), pred(vp)))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), plus(cint(vm), cint(vn)), cint(plus(vm, vn))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), plus(cint(vn), cneg(vp)), minus(vn, sort_nat::cnat(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), plus(cneg(vp), cint(vn)), minus(vn, sort_nat::cnat(vp))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), plus(cneg(vp), cneg(vq)), cneg(sort_pos::add_with_carry(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::gtesubtb(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), less(vp, vq), minus(vp, vq), negate(sort_nat::gtesubtb(sort_bool::false_(), vq, vp))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), less_equal(vn, vm), minus(vm, vn), cint(sort_nat::gtesubt(vm, vn))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), less(vm, vn), minus(vm, vn), negate(sort_nat::gtesubt(vn, vm))));
+        result.push_back(data_equation(atermpp::make_vector(vx, vy), minus(vx, vy), plus(vx, negate(vy))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), times(cint(vm), cint(vn)), cint(times(vm, vn))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), times(cint(vn), cneg(vp)), negate(times(sort_nat::cnat(vp), vn))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), times(cneg(vp), cint(vn)), negate(times(sort_nat::cnat(vp), vn))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cneg(vp), cneg(vq)), cint(sort_nat::cnat(times(vp, vq)))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), div(cint(vn), vp), cint(div(vn, vp))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), div(cneg(vp), vq), cneg(succ(div(pred(vp), vq)))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), mod(cint(vn), vp), mod(vn, vp)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), mod(cneg(vp), vq), int2nat(minus(vq, succ(mod(pred(vp), vq))))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), exp(cint(vm), vn), cint(exp(vm, vn))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), sort_nat::even(vn), exp(cneg(vp), vn), cint(sort_nat::cnat(exp(vp, vn)))));
+        result.push_back(data_equation(atermpp::make_vector(vn, vp), sort_bool::not_(sort_nat::even(vn)), exp(cneg(vp), vn), cneg(exp(vp, vn))));
         return result;
       }
 

@@ -151,9 +151,8 @@ namespace lysa
   {
   public:
     Indices() {};
-    Indices(E_ptr i);
-    //version for splitting every character into a separate index
-    Indices(E_ptr s, bool isShort);
+    //if isShort, then every character is split into a separate index
+    Indices(E_ptr i, bool isShort = false);
     virtual operator string();
     virtual void push_back(string s);
     virtual ~Indices() {};

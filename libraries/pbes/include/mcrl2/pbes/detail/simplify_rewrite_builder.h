@@ -70,7 +70,7 @@ namespace detail {
     /// \param d A data term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
+    term_type visit_data_expression(const term_type& /* x */, const data_term_type& d, SubstitutionFunction& sigma)
     {
       return tr::dataterm2term(rewrite(d, sigma));
     }
@@ -80,7 +80,7 @@ namespace detail {
     /// \param x A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_true(const term_type& x, SubstitutionFunction& sigma)
+    term_type visit_true(const term_type& /* x */, SubstitutionFunction& /* sigma */)
     {
       return tr::true_();
     }
@@ -90,7 +90,7 @@ namespace detail {
     /// \param x A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_false(const term_type& x, SubstitutionFunction& sigma)
+    term_type visit_false(const term_type& /* x */, SubstitutionFunction& /* sigma */)
     {
       return tr::false_();
     }
@@ -101,7 +101,7 @@ namespace detail {
     /// \param n A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_not(const term_type& x, const term_type& n, SubstitutionFunction& sigma)
+    term_type visit_not(const term_type& /* x */, const term_type& n, SubstitutionFunction& /* sigma */)
     {
       if (tr::is_true(n))
       {
@@ -121,7 +121,7 @@ namespace detail {
     /// \param right A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_and(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
+    term_type visit_and(const term_type& /* x */, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
       if (tr::is_true(left))
       {
@@ -153,7 +153,7 @@ namespace detail {
     /// \param right A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_or(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
+    term_type visit_or(const term_type& /* x */, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
       if (tr::is_true(left))
       {
@@ -185,7 +185,7 @@ namespace detail {
     /// \param right A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_imp(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
+    term_type visit_imp(const term_type& /* x */, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
       if (tr::is_true(left))
       {
@@ -217,7 +217,7 @@ namespace detail {
     /// \param phi A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
+    term_type visit_forall(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       typedef typename core::term_traits<data_term_type> tt;
       term_type t = visit(phi, sigma);
@@ -231,7 +231,7 @@ namespace detail {
     /// \param phi A term
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
+    term_type visit_exists(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       typedef typename core::term_traits<data_term_type> tt;
       term_type t = visit(phi, sigma);
@@ -244,7 +244,7 @@ namespace detail {
     /// \param v A propositional variable
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, SubstitutionFunction& sigma)
+    term_type visit_propositional_variable(const term_type& /* x */, const propositional_variable_type& v, SubstitutionFunction& sigma)
     {
       atermpp::vector<data_term_type> d;
       data_term_sequence_type e = tr::param(v);
