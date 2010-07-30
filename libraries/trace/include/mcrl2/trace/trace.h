@@ -640,7 +640,7 @@ namespace mcrl2 {
           } 
           else 
           {
-            os << ATwriteToString((ATerm) actions[i]);
+            os << ATgetName(ATgetAFun(actions[i]));
           }
           os << std::endl;
           if ( os.bad() )
