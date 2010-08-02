@@ -140,7 +140,7 @@ namespace mcrl2 {
           }
 
 		  identifier_assignment operator()(identifier_assignment const& a)
-          {
+          { std::cerr << "HIER " << a << "\n";
             return identifier_assignment(static_cast< Derived& >(*this)(a.lhs()),
                               			 static_cast< Derived& >(*this)(a.rhs()));
           }

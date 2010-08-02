@@ -77,7 +77,8 @@ namespace data {
     }
     data_specification result(spec);
     type_check(result);
-    detail::internal_format_conversion(result); // Translate bag/set enumerations and numbers to internal format.
+    // detail::internal_format_conversion(result); // Translate bag/set enumerations and numbers to internal format.
+                                                   // This is done automatically in the data specification, when it is constructed.
     return result;
   }
 
@@ -286,11 +287,11 @@ namespace data {
     // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
     data_expression t(data_expr);
     type_check(t, begin, end, data_spec);
-    detail::internal_format_conversion_helper converter(data_spec);
+    // detail::internal_format_conversion_helper converter(data_spec);
 
     // replace list/set/bag enumerations, and normalise sort aliases.
-    t = converter(t);
-    return data_spec.normalise_sorts(t);
+    return detail::internal_format_conversion_term(t,data_spec);
+    // return data_spec.normalise_sorts(t);
   }
 
   /// \brief Parses and type checks a data expression.

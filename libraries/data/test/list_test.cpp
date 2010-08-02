@@ -62,6 +62,7 @@ void list_expression_test()
   test_data_expression("rtail(l)", v, is_rtail_application);
 
   data_expression e = parse_data_expression("[10]", v.begin(), v.end());
+  std::cerr << "Wat is dit dan " << e << "\n";
   BOOST_CHECK(is_cons_application(normaliser(e)));
 
 }

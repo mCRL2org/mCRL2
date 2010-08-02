@@ -54,7 +54,7 @@ namespace state_formulas {
 
     // TODO: make find functions for state formulas
     spec.data().add_context_sorts(data::find_sort_expressions(atermpp::aterm_appl(f)));
-    f = data::detail::internal_format_conversion(spec.data(), f);
+    f = data::detail::internal_format_conversion_term(f,spec.data());
     return f;
   }
 

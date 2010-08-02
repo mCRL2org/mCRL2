@@ -42,14 +42,22 @@ namespace mcrl2 {
        * print implementations.
        **/
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
-      { using namespace core::detail;
-
-        return gsMakeDataSpec(
+      { 
+        using namespace core::detail;
+        
+        if (s.m_data_specification_is_type_checked)
+        { 
+          return gsMakeDataSpec(
              gsMakeSortSpec(atermpp::convert< atermpp::aterm_list >(s.m_sorts) +
                             atermpp::convert< atermpp::aterm_list >(data_specification::aliases_const_range(s.m_aliases))),
              gsMakeConsSpec(atermpp::convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_constructors))),
              gsMakeMapSpec(atermpp::convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_mappings))),
              gsMakeDataEqnSpec(atermpp::convert< atermpp::aterm_list >(s.m_equations)));
+        }
+        else
+        { 
+          return s.m_non_typed_checked_data_spec;
+        }
       }
     } // namespace detail
     /// \endcond
@@ -223,6 +231,11 @@ namespace mcrl2 {
     void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
     { 
       assert(core::detail::check_rule_DataSpec(term));
+      assert(m_data_specification_is_type_checked); // It is not allowed to build up the data
+                                                    // structures on the basis of a non type checked
+                                                    // data specification. It may contain undefined types
+                                                    // and non typed identifiers, with which the data
+                                                    // specification cannot deal properly.
 
       // Note backwards compatibility measure: alias is no longer a sort_expression
       atermpp::term_list< atermpp::aterm_appl >  term_sorts(atermpp::list_arg1(atermpp::arg1(term)));
@@ -238,26 +251,30 @@ namespace mcrl2 {
           }
         }
         else 
-        { m_sorts.insert(*i);
+        { add_sort(*i);
         } 
       }
 
       // Store the constructors.
       for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
-      { m_constructors.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+      { 
+        // m_constructors.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+        add_constructor(*i);
       }
 
       // Store the mappings.
       for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
-      { m_mappings.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+      { // m_mappings.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+        add_mapping(*i);
       }
 
       // Store the equations.
       for (atermpp::term_list_iterator< data_equation > i = term_equations.begin(); i != term_equations.end(); ++i)
-      { m_equations.insert(*i);
+      { 
+        add_equation(*i);
       }
 
-      data_is_not_necessarily_normalised_anymore();
+      // data_is_not_necessarily_normalised_anymore();
     }
   } // namespace data
 } // namespace mcrl2

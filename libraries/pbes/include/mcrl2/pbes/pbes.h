@@ -228,10 +228,20 @@ class pbes
     {}
 
     /// \brief Constructor.
-    /// \param t A term
-    pbes(atermpp::aterm_appl t)
+    /// \param t An aterm representing a pbes_specification.
+    /// \param data_specification_is_type_checked A boolean that indicates whether the
+    ///         data specification in the term has been type checked. If so, the internal data specification
+    ///         data structures will be set up. Otherwise, the function 
+    ///         declare_data_specification_to_be_type_checked must be invoked after type checking,
+    ///         before the data specification can be used.
+    
+    pbes(atermpp::aterm_appl t, const bool data_specification_is_type_checked=true)
     {
       init_term(t);
+      if (data_specification_is_type_checked)
+      { 
+        m_data.declare_data_specification_to_be_type_checked();
+      }
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
@@ -337,7 +347,7 @@ class pbes
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a PBES");
       }
       init_term(atermpp::aterm_appl(t));
-
+      m_data.declare_data_specification_to_be_type_checked();
       complete_data_specification(*this); // Add all the sorts that are used in the specification
                                           // to the data specification. This is important for those
                                           // sorts that are built in, because these are not explicitly 
@@ -693,35 +703,12 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
   ATermAppl initial_state = core::detail::gsMakePBInit(p.initial_state());
   atermpp::aterm_appl result;
 
-  /* if (compatible)
-  { assert(0);
-     atermpp::aterm_appl pbes_term(core::detail::gsMakePBES(
-      data::detail::data_specification_to_aterm_data_spec(data::data_specification()),
-      global_variables,
-      equations,
-      initial_state
-      )
-    );
-
-    pbes_term = data::detail::apply_compatibility_renamings(p.data(), pbes_term);
-
-    result = core::detail::gsMakePBES(
-        data::detail::data_specification_to_aterm_data_spec(p.data(), compatible),
-        atermpp::aterm_appl(pbes_term(1)),
-        atermpp::aterm_appl(pbes_term(2)),
-        atermpp::aterm_appl(pbes_term(3))
-    );
-    return result; 
-  }
-  else */
-  {
-    result = core::detail::gsMakePBES(
+  result = core::detail::gsMakePBES(
       data::detail::data_specification_to_aterm_data_spec(p.data()),
       global_variables,
       equations,
-      initial_state
-    );
-  }
+      initial_state);
+  
   return result;
 }
 

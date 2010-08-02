@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_MAP_SUBSTITUTION_H__
 #define MCRL2_DATA_MAP_SUBSTITUTION_H__
 
+#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/substitution.h"
 
 namespace mcrl2 {

@@ -22,7 +22,7 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/data_specification.h"
+// #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/detail/traverser.h"
 
@@ -253,38 +253,38 @@ std::set< data_expression > find_data_expressions(Container const& container)
 /// \param data A data specification
 /// \param s A string
 /// \return The found mapping
-inline
+/* inline
 function_symbol find_mapping(data_specification const& data, std::string const& s)
 {
   data_specification::mappings_const_range r(data.mappings());
 
   data_specification::mappings_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
   return (i == r.end()) ? function_symbol() : *i;
-}
+} */
 
 /// \brief Finds a constructor in a data specification.
 /// \param data A data specification
 /// \param s A string
 /// \return The found constructor
-inline
+/* inline
 function_symbol find_constructor(data_specification const& data, std::string const& s)
 {
   data_specification::constructors_const_range r(data.constructors());
   data_specification::constructors_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
   return (i == r.end()) ? function_symbol() : *i;
-}
+} */
 
 /// \brief Finds a sort in a data specification.
 /// \param data A data specification
 /// \param s A string
 /// \return The found sort
-inline
+/* inline
 sort_expression find_sort(data_specification const& data, std::string const& s)
 {
   data_specification::sorts_const_range r(data.sorts());
   data_specification::sorts_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
   return (i == r.end()) ? sort_expression() : *i;
-}
+} */
 
 /// \brief Gets all equations with a data expression as head
 /// on one of its sides.
@@ -292,7 +292,7 @@ sort_expression find_sort(data_specification const& data, std::string const& s)
 /// \param[in] specification A data specification.
 /// \param[in] d A data expression.
 /// \return All equations with d as head in one of its sides.
-inline
+/* inline
 data_equation_vector find_equations(data_specification const& specification, const data_expression& d)
 {
   data_equation_vector result;
@@ -319,7 +319,7 @@ data_equation_vector find_equations(data_specification const& specification, con
     }
   }
   return result;
-}
+} */
 
 /// \cond INTERNAL_DOCS
 namespace detail {

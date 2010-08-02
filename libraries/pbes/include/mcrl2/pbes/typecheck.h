@@ -35,7 +35,7 @@ namespace pbes_system {
       {
         throw mcrl2::runtime_error("could not type check " + core::pp(t));
       }
-      pbes_spec = pbes<Container>(t);
+      pbes_spec = pbes<Container>(t,true);
     }
 
 } // namespace pbes_system

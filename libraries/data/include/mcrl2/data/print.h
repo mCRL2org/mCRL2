@@ -23,7 +23,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/list.h"
-#include "mcrl2/data/data_specification.h"
+// #include "mcrl2/data/data_specification.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/find.h"
 
@@ -45,10 +45,10 @@ namespace mcrl2 {
 
     /// \brief Pretty prints a data specification
     /// \param[in] specification a data specification
-    inline std::string pp(data_specification const& specification)
+    /* inline std::string pp(data_specification const& specification)
     {
       return core::pp(detail::data_specification_to_aterm_data_spec(specification));
-    }
+    } */
 
     /// \brief Pretty prints the contents of a container
     /// \param[in] c a container with data or sort expressions

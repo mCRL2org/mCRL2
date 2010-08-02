@@ -166,7 +166,8 @@ void test_pbespgsolve(std::string pbes_spec)
                                                                              
     for (unsigned int v = begin; v < end; ++v)                                      
     {                                                                        
-      bool and_op = pgg.get_operation(v) == mcrl2::pbes_system::parity_game_generator::PGAME_AND;
+      // Variable below is not used; So, I removed it to avoid warnings. JFG.
+      // bool and_op = pgg.get_operation(v) == mcrl2::pbes_system::parity_game_generator::PGAME_AND;
       pgg.get_priority(v);                   
     }                                                                        
   }

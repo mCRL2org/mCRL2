@@ -44,12 +44,12 @@ namespace process {
       /// \brief The action specification of the specification
       lps::action_label_list m_action_labels;
 
-      /// \brief The equations of the specification
-      atermpp::vector<process_equation> m_equations;
-      
       /// \brief The set of global variables
       atermpp::set<data::variable> m_global_variables;
 
+      /// \brief The equations of the specification
+      atermpp::vector<process_equation> m_equations;
+      
       /// \brief The initial state of the specification
       process_expression m_initial_process;
       
@@ -66,7 +66,6 @@ namespace process {
         atermpp::aterm_appl init = atermpp::aterm_appl(*i);
         m_initial_process = atermpp::aterm_appl(init(0));
         m_equations       = atermpp::vector<process_equation>(l.begin(), l.end());
-        complete_data_specification(*this);
       }
 
     public:
@@ -76,16 +75,41 @@ namespace process {
 
       /// \brief Constructor.
       /// \param term A term
-      /// \param t A term
-      process_specification(atermpp::aterm_appl t)
+      /// \param t A term containing an aterm representation of a process specification.
+      /// \param data_specification_is_type_checked A boolean that indicates whether the
+      ///         data specification has been type checked. If so, the internal data specification
+      ///         data structures will be set up. Otherwise, the function 
+      ///         declare_data_specification_to_be_type_checked must be invoked after type checking,
+      ///         before the data specification can be used.
+      process_specification(atermpp::aterm_appl t, const bool data_specification_is_type_checked=true)
       {
         assert(core::detail::check_term_ProcSpec(t));
         construct_from_aterm(t);
+        if (data_specification_is_type_checked)
+        { 
+          m_data.declare_data_specification_to_be_type_checked();
+        }
+        complete_data_specification(*this);
       }
 
+      /// \brief Constructor that sets the global variables to empty;
       process_specification(data::data_specification data, lps::action_label_list action_labels, process_equation_list equations, process_expression init)
         : m_data(data),
           m_action_labels(action_labels),
+          m_equations(equations.begin(), equations.end()),
+          m_initial_process(init)
+      {}
+
+      /// \brief Constructor of a process specification.
+      process_specification(
+               data::data_specification data, 
+               lps::action_label_list action_labels, 
+               data::variable_list global_variables,
+               process_equation_list equations, 
+               process_expression init)
+        : m_data(data),
+          m_action_labels(action_labels),
+          m_global_variables(global_variables.begin(),global_variables.end()),
           m_equations(equations.begin(), equations.end()),
           m_initial_process(init)
       {}

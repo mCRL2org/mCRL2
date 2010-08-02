@@ -44,7 +44,11 @@ namespace mcrl2 {
           assert(core::detail::check_rule_WhrDecl(term));
         }
 
-        atermpp::aterm_appl lhs() const
+        assignment_expression(const variable v, const data_expression d)
+         : atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(v,d))
+        {}
+
+        variable lhs() const
         {
           return atermpp::arg1(*this);
         }

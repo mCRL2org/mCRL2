@@ -416,7 +416,11 @@ void test_system_defined()
 
   data_specification copy = specification;
 
-  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy)), specification));
+  // A data specification that is constructed using data_specification_to_aterm_data_spec is assumed not
+  // not be type checked. This must be indicated explicitly.
+  data_specification specification1=data_specification(detail::data_specification_to_aterm_data_spec(copy)); 
+  specification1.declare_data_specification_to_be_type_checked();
+  BOOST_CHECK(compare_for_equality(specification1,specification));
 
   specification = parse_data_specification(
     "sort D = struct d(getBool : Bool)?is_d;"
@@ -434,8 +438,9 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
 
   copy = specification;
-
-  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy)), specification));
+  specification1=data_specification(detail::data_specification_to_aterm_data_spec(copy));
+  specification1.declare_data_specification_to_be_type_checked();
+  BOOST_CHECK(compare_for_equality(specification1, specification));
 
   // Check for the non presence of function sort
   BOOST_CHECK(specification.mappings(make_function_sort(basic_sort("D"), sort_bool::bool_())).empty());

@@ -164,12 +164,13 @@ namespace mcrl2 {
             static_cast< super& >(*this)(e);
           }
 
-          void operator()(data_specification const& e)
+          /* void operator()(data_specification const& e)
           {
             static_cast< Derived& >(*this)(e.sorts());
             // static_cast< Derived& >(*this)(e.aliases());
             static_cast< super& >(*this)(e);
           }
+          */
 
 #ifndef NO_TERM_TRAVERSAL
           // \deprecated
