@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>squadt.app/Contents/MacOS/squadt</string>
+	<string>mcrl2-gui.app/Contents/MacOS/mcrl2-gui</string>
 	<key>CFBundleGetInfoString</key>
 	<string></string>
 	<key>CFBundleIconFile</key>
