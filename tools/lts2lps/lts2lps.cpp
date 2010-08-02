@@ -22,6 +22,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lts/lts_io.h"
 
@@ -42,7 +43,7 @@ class lts2lps_tool : public input_output_tool
   typedef input_output_tool super;
   mcrl2::lts::lts_type        intype;
 
-  private:
+  protected:
 
     t_lts2lps_options m_lps2lts_options;
 
@@ -194,9 +195,19 @@ class lts2lps_tool : public input_output_tool
     }
 };
 
+class lts2lps_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2lps_tool>
+{
+  public:
+	lts2lps_gui_tool()
+    {
+
+      m_gui_options["data"] = create_filepicker_widget();
+    }
+};
+
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
  
-  return lts2lps_tool().execute(argc, argv);
+  return lts2lps_gui_tool().execute(argc, argv);
 }
