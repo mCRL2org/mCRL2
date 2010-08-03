@@ -25,6 +25,7 @@
 #include <gui/configpanel.h>
 #include <iostream>
 #include <mimemanager.h>
+#include <wx/filename.h>
 
 //To store configurations
 #include <wx/config.h>
@@ -164,7 +165,7 @@ public:
         Edit();
 				break;
 			case ID_DETAILS:
-				std::cout << "TODO: implement this" << std::endl;
+				ShowDetails();
 				break;
 			case ID_RENAME:
 				Rename();
@@ -180,6 +181,60 @@ public:
 			}
 		}
 	}
+
+	void
+    ShowDetails()
+    {
+	    wxNotebookPage *wp = new wxNotebookPage( m_notebookpanel, wxID_ANY );
+
+	    wxGridBagSizer *fgs = new wxGridBagSizer(10, 10);
+
+	    int row = 1;
+
+      if (wxFile::Exists(this->GetPath()))
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("File:")) , wxGBPosition(row,1));
+
+      if (wxDir::Exists(this->GetPath()))
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Directory:")) , wxGBPosition(row,1));
+
+      fgs->Add( new wxStaticText(wp, wxID_ANY, this->GetPath().AfterLast(_T('/')) ) , wxGBPosition(row,2));
+
+      ++row;
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Path:")) , wxGBPosition(row,1));
+      fgs->Add( new wxStaticText(wp, wxID_ANY, this->GetPath().BeforeLast(_T('/')) ) , wxGBPosition(row,2));
+
+      ++row;
+
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Readable:")) , wxGBPosition(row,1));
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxFile::Access( this->GetPath() , wxFile::read)?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+
+      ++row;
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Writable:")) , wxGBPosition(row,1));
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxFile::Access( this->GetPath() , wxFile::write)?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+
+      ++row;
+      wxDateTime tm = wxDateTime( wxFileModificationTime( this->GetPath() ) );
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Date modified")) , wxGBPosition(row,1));
+      fgs->Add( new wxStaticText(wp, wxID_ANY, tm.Format() ), wxGBPosition(row,2));
+
+      ++row;
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Size On Disk")) , wxGBPosition(row,1));
+      wxString wxs;
+      if (wxFile::Exists(this->GetPath())){
+        wxs << wxFileName::GetHumanReadableSize(  wxULongLong(wxFile(this->GetPath()).Length()) );
+      }
+
+      if (wxDir::Exists(this->GetPath())){
+        wxs << wxFileName::GetHumanReadableSize(wxDir::GetTotalSize(this->GetPath()));
+      }
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxs ), wxGBPosition(row,2));
+
+      wp->SetSizer(fgs);
+      wp->Layout();
+
+
+      m_notebookpanel->AddPage(wp, this->GetPath().AfterLast(_T('/')), true);
+    }
 
 	void OnRightClick(wxTreeEvent& /*evt*/) {
 		DisplayMenu();
