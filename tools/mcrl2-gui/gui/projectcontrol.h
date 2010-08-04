@@ -430,7 +430,7 @@ public:
 		}
 
 		if (reporting->GetMenuItemCount() != 0) {
-			mnu.AppendSubMenu(reporting, wxT("Reporting"));
+			mnu.AppendSubMenu(reporting, wxT("Analysis"));
 		}
 		if (transformation->GetMenuItemCount() != 0) {
 			mnu.AppendSubMenu(transformation, wxT("Transformation"));

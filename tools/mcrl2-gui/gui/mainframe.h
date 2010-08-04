@@ -65,6 +65,9 @@ enum {
 	Exec_PerspectiveReset,
 	Exec_Preferences,
 
+	Exec_ToggleFileBrowserPanel,
+	Exec_ToggleExecutedCommandsPanel,
+
 	// control ids
 	Exec_Btn_Send = 1000,
 	Exec_Btn_SendFile,
@@ -120,9 +123,23 @@ public:
 		helpMenu->Append(wxID_ABOUT, wxT("&About\tF1"),
 				wxT("Show about dialog"));
 
+
+		m_PanelMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
+		m_PanelMenu->AppendCheckItem( Exec_ToggleFileBrowserPanel, wxT("File Browser"));
+		m_PanelMenu->AppendCheckItem( Exec_ToggleExecutedCommandsPanel, wxT("Executed Commands"));
+
+//	  m_show_executed_commands = true;
+	  //m_show_file_browser_pane_info = true;
+
+	  m_PanelMenu->Check(Exec_ToggleFileBrowserPanel, true);
+		m_PanelMenu->Check(Exec_ToggleExecutedCommandsPanel, true);
+
 		wxMenu *windowMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
-		windowMenu->Append(Exec_ClearLog, wxT("&Clear Output"),
+		windowMenu->Append(Exec_ClearLog, wxT("&Clear Executed Commands Output"),
 				wxT("Clear the log with performed commands"));
+		windowMenu->AppendSeparator();
+		windowMenu->AppendSubMenu(m_PanelMenu, wxT("&Dockable panels"),
+            wxT("Toggle panel visibility"));
 		windowMenu->AppendSeparator();
 		windowMenu->Append(Exec_PerspectiveReset, wxT("&Reset Perspective"),
 				wxT("Reset Perspective"));
@@ -145,27 +162,29 @@ public:
 
 		m_mgr.SetManagedWindow(this);
 
-		// m_lbox needs to be declared before declaring left_panel for output
-		m_lbox = new OutputListBox(this, wxID_ANY, wxPoint(-1, -1), wxSize(-1, -1));
+		// m_ExecutedCommandsPanel needs to be declared before declaring left_panel for output
+		m_ExecutedCommandsPanel = new OutputListBox(this, wxID_ANY, wxPoint(-1, -1), wxSize(-1, -1));
 		m_notebookpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_DEFAULT_STYLE );
 
-		m_left_panel = new GenericDirCtrl(this, m_tool_catalog,
-				m_extention_tool_mapping, m_lbox, this->GetNoteBookToolPanel());
+		m_FileBrowserPanel = new GenericDirCtrl(this, m_tool_catalog,
+				m_extention_tool_mapping, m_ExecutedCommandsPanel, this->GetNoteBookToolPanel());
 
-		m_left_panel->SetSize(250,-1);
-		m_left_panel->Refresh();
+		m_FileBrowserPanel->SetSize(250,-1);
+		m_FileBrowserPanel->Refresh();
 
-		m_mgr.AddPane(m_left_panel, wxLEFT, wxT("File Selector"));
+		m_mgr.AddPane(m_FileBrowserPanel, wxLEFT, wxT("File Browser"));
 
-		m_lbox->SetSize(400,250);
+		m_ExecutedCommandsPanel->SetSize(400,250);
 
-		m_mgr.AddPane(m_lbox, wxBOTTOM, wxT("Output"));
+		m_mgr.AddPane(m_ExecutedCommandsPanel, wxBOTTOM, wxT("Executed Commands"));
 		m_mgr.AddPane(m_notebookpanel, wxCENTER);
 		m_notebookpanel->Layout();
 
 		// tell the manager to "commit" all the changes just made
 		m_mgr.Update();
 		m_default_perspective = m_mgr.SavePerspective();
+
+		//cout << m_mgr.SavePerspective().mb_str(wxConvUTF8) << endl ;
 
 #if wxUSE_STATUSBAR
 		// create a status
@@ -272,34 +291,71 @@ public:
 	}
 	;
 
+	void OnToggleFileBrowserPanel(wxCommandEvent& /*event*/) {
+     if (m_mgr.GetPane(m_FileBrowserPanel).IsShown()){
+     //if( m_show_file_browser_pane_info ){
+       m_mgr.GetPane(m_FileBrowserPanel).Hide();
+     } else{
+       m_mgr.GetPane(m_FileBrowserPanel).Show();
+     }
+     m_mgr.Update();
+     m_PanelMenu->Check(Exec_ToggleFileBrowserPanel, m_mgr.GetPane(m_FileBrowserPanel).IsShown() );
+ 	}
+
+	void OnToggleExecutedCommandsPanel(wxCommandEvent& /*event*/) {
+    if (m_mgr.GetPane(m_ExecutedCommandsPanel).IsShown()){
+    //if( m_show_file_browser_pane_info ){
+      m_mgr.GetPane(m_ExecutedCommandsPanel).Hide();
+    } else{
+      m_mgr.GetPane(m_ExecutedCommandsPanel).Show();
+    }
+    m_mgr.Update();
+    m_PanelMenu->Check(Exec_ToggleExecutedCommandsPanel, m_mgr.GetPane(m_ExecutedCommandsPanel).IsShown() );
+
+	}
+
+	void OnClosePane(wxAuiManagerEvent& event ){
+	  //Closing File Browser Pane
+	  if ( event.pane == &m_mgr.GetPane(m_FileBrowserPanel) )
+	  {
+	    m_PanelMenu->Check(Exec_ToggleFileBrowserPanel, false );
+	  }
+
+	  //Closing Executed Commands Pane
+    if ( event.pane == &m_mgr.GetPane(m_ExecutedCommandsPanel) )
+    {
+      m_PanelMenu->Check(Exec_ToggleExecutedCommandsPanel, false );
+    }
+	}
+
 	void OnClear(wxCommandEvent& /*event*/) {
-		m_lbox->Clear();
+		m_ExecutedCommandsPanel->Clear();
 	}
 	;
 
 	void OnNewFile(wxCommandEvent& /*event*/) {
-		m_left_panel->CreateNewFile();
+		m_FileBrowserPanel->CreateNewFile();
 	}
 	;
 
 	void OnRenameFile(wxCommandEvent& /*event*/) {
-		m_left_panel->Rename();
+		m_FileBrowserPanel->Rename();
 	}
 	;
 
 	void OnRefresh(wxCommandEvent& /*event*/) {
-		m_left_panel->Refresh();
+		m_FileBrowserPanel->Refresh();
 	}
 	;
 
 
 	void OnDeleteFile(wxCommandEvent& /*event*/) {
-		m_left_panel->Delete();
+		m_FileBrowserPanel->Delete();
 	}
 	;
 
 	void OnEditFile(wxCommandEvent& /*event*/) {
-		m_left_panel->Edit();
+		m_FileBrowserPanel->Edit();
 	}
 	;
 
@@ -339,6 +395,8 @@ public:
 
 	void OnResetLayout(wxCommandEvent& /*event*/) {
 		 m_mgr.LoadPerspective(m_default_perspective);
+     m_PanelMenu->Check(Exec_ToggleFileBrowserPanel, m_mgr.GetPane(m_FileBrowserPanel).IsShown() );
+
 	};
 
 	void OnIdle(wxIdleEvent& event) {
@@ -349,15 +407,15 @@ public:
 				event.RequestMore();
 			}
 			// AutoScroll
-			// m_lbox->Select( m_lbox->GetCount() -1);
-			// m_lbox->SetSelection( wxNOT_FOUND );
+			// m_ExecutedCommandsPanel->Select( m_ExecutedCommandsPanel->GetCount() -1);
+			// m_ExecutedCommandsPanel->SetSelection( wxNOT_FOUND );
 		}
 
 	}
 	;
 
 	wxListBox *GetLogListBox() const {
-		return m_lbox;
+		return m_ExecutedCommandsPanel;
 	}
 
 	wxAuiNotebook *GetNoteBookToolPanel() const {
@@ -374,14 +432,21 @@ public:
         p = (wxStringClientData*) evt.GetClientData();
         if (p)
         {
-          m_left_panel->Refresh();
-          m_left_panel->ExpandPath(p->GetData());
+          m_FileBrowserPanel->Refresh();
+          m_FileBrowserPanel->ExpandPath(p->GetData());
         }
       }
 
     }
 
 private:
+
+	wxMenu *m_PanelMenu;
+
+	bool m_show_executed_commands;
+
+	bool m_show_file_browser_pane_info;
+	wxString m_file_browser_pane_info;
 
   std::vector<Tool> m_tool_catalog;
   multimap<string, string> m_extention_tool_mapping;
@@ -392,7 +457,7 @@ private:
 	// last command we executed
 	wxString m_cmdLast;
 
-	OutputListBox *m_lbox;
+	OutputListBox *m_ExecutedCommandsPanel;
 
 	wxAuiManager m_mgr;
 
@@ -400,7 +465,7 @@ private:
 
 	wxAuiNotebook *m_notebookpanel;
 
-	GenericDirCtrl *m_left_panel;
+	GenericDirCtrl *m_FileBrowserPanel;
 
 DECLARE_EVENT_TABLE()
 };
@@ -415,6 +480,10 @@ EVT_MENU(Exec_DeleteFile, MainFrame::OnDeleteFile)
 EVT_MENU(Exec_Refresh, MainFrame::OnRefresh)
 EVT_MENU(Exec_Preferences, MainFrame::OnExecPreferences)
 
+EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
+
+EVT_MENU(Exec_ToggleFileBrowserPanel, MainFrame::OnToggleFileBrowserPanel)
+EVT_MENU(Exec_ToggleExecutedCommandsPanel, MainFrame::OnToggleExecutedCommandsPanel)
 
 EVT_MENU(Exec_ClearLog, MainFrame::OnClear)
 
