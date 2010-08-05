@@ -307,6 +307,36 @@ public:
 		this->GetTreeCtrl()->EditLabel(this->GetTreeCtrl()->GetSelection());
 	}
 
+	 bool
+    rmdir(wxString dir)
+    {
+      wxString path(dir);
+      if (path.Last() != wxFILE_SEP_PATH)
+        path += wxFILE_SEP_PATH;
+
+      wxDir d(path);
+
+      wxString filename;
+      bool cont;
+
+      // first delete all subdirectories
+      cont = d.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
+      while (cont)
+      {
+        rmdir(path + filename);
+        cont = d.GetNext(&filename);
+      }
+      // delete all filles
+      cont = d.GetFirst(&filename, wxEmptyString, wxDIR_FILES | wxDIR_HIDDEN);
+      while (cont)
+      {
+        ::wxRemoveFile(path + filename);
+        cont = d.GetNext(&filename);
+      }
+
+      return ::wxRmdir(dir);
+    }
+
 	void
     Delete()
     {
@@ -340,15 +370,12 @@ public:
             *dial =
                 new wxMessageDialog(
                     NULL,
-                    wxT("This action deletes the directory from disk (if empty).\nAre you sure to continue?"),
+                    wxT("This action recursively deletes the directory from disk.\nAre you sure to continue?"),
                     wxT("Question"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
         if (dial->ShowModal() == wxID_YES)
         {
-          /*wxArrayString  files;
-           wxDir::GetAllFiles(this->GetPath(), &files, wxEmptyString, wxDIR_DEFAULT | wxDIR_DIRS);
 
-           wxLogError( files);*/
-          if (!wxRmdir(this->GetPath()))
+          if (!rmdir(this->GetPath()))
           {
             wxLogError(wxT("Error deleting directory"));
             return;
@@ -383,7 +410,6 @@ public:
         this->GetTreeCtrl()->Delete(item_for_removal);
       }
     }
-
 
 	void DisplayMenu() {
 		wxMenu mnu;
