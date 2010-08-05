@@ -107,7 +107,7 @@ public:
 			ncp->Layout();
 
 			/* Todo: Fix tooltip such that it appears on top the ctrl panels */
-			ncp->SetToolTip( this->GetPath() );
+			ncp->SetToolTip( this->GetPath());
 
 			m_notebookpanel->AddPage(ncp, wxString( m_tool_catalog[evt.GetId()].m_name.c_str(), wxConvUTF8), true);
 
@@ -307,7 +307,7 @@ public:
 		this->GetTreeCtrl()->EditLabel(this->GetTreeCtrl()->GetSelection());
 	}
 
-	 bool
+	bool
     rmdir(wxString dir)
     {
       wxString path(dir);
@@ -319,22 +319,23 @@ public:
       wxString filename;
       bool cont;
 
-      // first delete all subdirectories
+      // first delete sub-directories
       cont = d.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
       while (cont)
       {
         rmdir(path + filename);
         cont = d.GetNext(&filename);
       }
-      // delete all filles
+
+      // delete all files
       cont = d.GetFirst(&filename, wxEmptyString, wxDIR_FILES | wxDIR_HIDDEN);
       while (cont)
       {
-        ::wxRemoveFile(path + filename);
+        wxRemoveFile(path + filename);
         cont = d.GetNext(&filename);
       }
 
-      return ::wxRmdir(dir);
+      return wxRmdir(dir);
     }
 
 	void

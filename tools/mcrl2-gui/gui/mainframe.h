@@ -406,9 +406,6 @@ public:
 			if (running_processes[n]->HasInput()) {
 				event.RequestMore();
 			}
-			// AutoScroll
-			// m_ExecutedCommandsPanel->Select( m_ExecutedCommandsPanel->GetCount() -1);
-			// m_ExecutedCommandsPanel->SetSelection( wxNOT_FOUND );
 		}
 
 	}

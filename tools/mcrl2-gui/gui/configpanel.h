@@ -21,6 +21,8 @@
 #include <wx/gbsizer.h>
 #include <wx/event.h>
 
+enum ToolStatus { STATUS_NONE, STATUS_RUNNING, STATUS_COMPLETE, STATUS_FAILED};
+
 
 #define ID_RUN_TOOL 1000
 #define ID_OUTPUT_FILE 1001
@@ -250,7 +252,38 @@ public:
 	}
 	;
 
+	void UpdateToolTipStatus(ToolStatus s){
+
+	  //enum ToolStatus { STATUS_NONE, STATUS_RUNNING, STATUS_COMPLETE, STATUS_FAILED};
+
+    /* Remove text after last last '[' */
+    wxString toolTipText = m_parent->GetPageText( m_parent->GetPageIndex( this ) );
+
+    if( !toolTipText.BeforeFirst(_T(' ')).empty() ){
+      toolTipText = toolTipText.BeforeFirst(_T(' '));
+    }
+
+	  switch (s){
+	    case STATUS_NONE:
+	      break;
+	    case STATUS_RUNNING:
+	      toolTipText = toolTipText.Append(wxT(" [Running]"));
+	      break;
+      case STATUS_COMPLETE:
+        toolTipText = toolTipText.Append(wxT(" [Done]"));
+        break;
+      case STATUS_FAILED:
+        toolTipText = toolTipText.Append(wxT(" [Failed]"));
+        break;
+	  }
+
+    m_parent->SetPageText(m_parent->GetPageIndex( this ), toolTipText );
+
+	}
+
 	void OnRunClick(wxCommandEvent& /*event*/) {
+
+	  UpdateToolTipStatus(STATUS_RUNNING);
 
 		wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
 
@@ -315,8 +348,8 @@ public:
         {
           wxLogError(wxT("Execution of '%s' failed."), run.c_str());
           m_pid = 0;
-
           delete m_process;
+          UpdateToolTipStatus(STATUS_FAILED);
         }
         else
         {
@@ -411,24 +444,30 @@ private:
       return wxString(file_suggestion.c_str(), wxConvUTF8);
     }
 
-	  void OnProcessEnd(wxCommandEvent& evt){
-	     m_abortbutton->Show(false);
-	     m_runbutton->Enable();
+	  void
+    OnProcessEnd(wxCommandEvent& evt)
+    {
+      m_abortbutton->Show(false);
+      m_runbutton->Enable();
 
-       wxCommandEvent eventCustom(wxEVT_UPDATE_PROJECT_TREE);
-	     /* Notify parents to expand to the created file*/
+      wxCommandEvent eventCustom(wxEVT_UPDATE_PROJECT_TREE);
+      /* Notify parents to expand to the created file*/
 
-       if (!m_fileIO.output_file.empty())
+      if (!m_fileIO.output_file.empty())
       {
         wxStringClientData *scd = new wxStringClientData(wxString(
             m_fileIO.output_file.c_str(), wxConvUTF8));
         eventCustom.SetClientData(scd);
-      } else {
+      }
+      else
+      {
         eventCustom.SetClientData(NULL);
       }
 
       wxPostEvent(m_parent, eventCustom);
-	  }
+
+      UpdateToolTipStatus(STATUS_COMPLETE);
+    }
 
 DECLARE_EVENT_TABLE()
 };
