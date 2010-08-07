@@ -78,14 +78,6 @@ public:
 
 	void OnRightClick(wxMouseEvent& /*event*/){
 
-//#ifndef __WINDOWS__
-		/* Disabled for WIN32 due to invalid cast */
-//		wxMenu mnu;
-//		mnu.Connect(wxEVT_COMMAND_MENU_SELECTED,
-//				(wxObjectEventFunction) &OutputListBox::OnPopupClick, NULL,
-//				this);
-//		PopupMenu(&mnu);
-//#endif
 		OutputListBoxMenu *m = new OutputListBoxMenu(this);
 		PopupMenu(m);
 	}

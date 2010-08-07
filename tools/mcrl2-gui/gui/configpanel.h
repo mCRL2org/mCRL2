@@ -17,6 +17,7 @@
 #include <wx/filepicker.h>
 #include <wx/statline.h>
 #include <gui/outputlistbox.h>
+#include <gui/tooloutputlistbox.h>
 #include <wx/scrolwin.h>
 #include <wx/gbsizer.h>
 #include <wx/event.h>
@@ -43,7 +44,6 @@ DEFINE_EVENT_TYPE(wxEVT_UPDATE_PROJECT_TREE)
         (wxObject *) NULL \
     ),
 
-
 class ConfigPanel: public wxNotebookPage {
 public:
 
@@ -56,8 +56,6 @@ public:
 		m_fileIO = fileIO;
 		m_pid = 0;
 
-
-
 		int row = 0;
 
 		// Top Panel
@@ -65,7 +63,7 @@ public:
 				wxAUI_NB_BOTTOM
 			);
 
-		m_tool_output = new OutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+		m_tool_output = new ToolOutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 		m_wsw = new wxScrolledWindow(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 		/* Define size large enough for top*/
@@ -281,68 +279,67 @@ public:
 
 	}
 
-	void OnRunClick(wxCommandEvent& /*event*/) {
+	void Run(){
+    UpdateToolTipStatus(STATUS_RUNNING);
 
-	  UpdateToolTipStatus(STATUS_RUNNING);
+    wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
 
-		wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
+    wxString run = cmd;
+    for (vector<wxRadioBox*>::iterator i = m_radiobox_ptrs.begin(); i
+        != m_radiobox_ptrs.end(); ++i) {
+      run = run + wxT(" --") + (*i)->GetLabel() + wxT("=")
+          + (*i)->GetStringSelection();
+    }
 
-		wxString run = cmd;
-		for (vector<wxRadioBox*>::iterator i = m_radiobox_ptrs.begin(); i
-				!= m_radiobox_ptrs.end(); ++i) {
-			run = run + wxT(" --") + (*i)->GetLabel() + wxT("=")
-					+ (*i)->GetStringSelection();
-		}
+    for (vector<wxCheckBox*>::iterator i = m_checkbox_ptrs.begin(); i
+        != m_checkbox_ptrs.end(); ++i) {
+      if ((*i)->GetValue())
+        run = run + wxT(" --") + (*i)->GetLabel();
+    }
 
-		for (vector<wxCheckBox*>::iterator i = m_checkbox_ptrs.begin(); i
-				!= m_checkbox_ptrs.end(); ++i) {
-			if ((*i)->GetValue())
-				run = run + wxT(" --") + (*i)->GetLabel();
-		}
+    for (vector<wxTextCtrl*>::iterator i = m_textctrl_ptrs.begin(); i
+        != m_textctrl_ptrs.end(); ++i) {
+      if ((*i)->GetValue() && !(*i)->GetValue().empty() )
+        run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
+    }
 
-		for (vector<wxTextCtrl*>::iterator i = m_textctrl_ptrs.begin(); i
-				!= m_textctrl_ptrs.end(); ++i) {
-			if ((*i)->GetValue() && !(*i)->GetValue().empty() )
-				run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
-		}
-
-		for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin(); i
-				!= m_filepicker_ptrs.end(); ++i) {
-			if ((*i)->GetPath() && !(*i)->GetPath().empty() )
-				run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetPath();
-		}
+    for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin(); i
+        != m_filepicker_ptrs.end(); ++i) {
+      if ((*i)->GetPath() && !(*i)->GetPath().empty() )
+        run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetPath();
+    }
 
 
-		wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
+    wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
 
-		wxString output_file = wxString(m_fileIO.output_file.c_str(),
-				wxConvUTF8);
+    wxString output_file = wxString(m_fileIO.output_file.c_str(),
+        wxConvUTF8);
 
-		run = run + wxT(" ") + input_file + wxT(" ") + output_file;
+    run = run + wxT(" ") + input_file + wxT(" ") + output_file;
 
-		m_listbox_output->Append(run);
+    m_listbox_output->Append(run);
 
-		m_process = new MyPipedProcess(this);
+    m_process = new MyPipedProcess(this);
 
-		// Gui tools should be visible:
-		// Tools redirect the standard input and/or output of the process being launched by calling Redirect. 
-		// For these child processes IO is redirected. For Windows these process windows are not shown by default.
-		// To avoid that GUI tools are not shown a wxEXEC_NOHIDE flag is used to flag that the child process window
-		// are shown normally.
+    // Gui tools should be visible:
+    // Tools redirect the standard input and/or output of the process being launched by calling Redirect.
+    // For these child processes IO is redirected. For Windows these process windows are not shown by default.
+    // To avoid that GUI tools are not shown a wxEXEC_NOHIDE flag is used to flag that the child process window
+    // are shown normally.
 
-		switch (m_tool.m_tool_type){
-		  case shell:
-	      m_pid = wxExecute(run, wxEXEC_ASYNC, m_process);
-	      break;
-		  case gui:
-			m_pid = wxExecute(run, wxEXEC_ASYNC | wxEXEC_NOHIDE , m_process);
-			break;
-		case ishell:
-		  m_pid = wxShell(run);
-		  break;
-		}
+    switch (m_tool.m_tool_type){
+      case shell:
+        m_pid = wxExecute(run, wxEXEC_ASYNC, m_process);
+        break;
+      case gui:
+      m_pid = wxExecute(run, wxEXEC_ASYNC | wxEXEC_NOHIDE , m_process);
+      break;
+    case ishell:
+      m_pid = wxShell(run);
+      break;
+    }
 
-		if ((m_tool.m_tool_type == shell) || (m_tool.m_tool_type == gui))
+    if ((m_tool.m_tool_type == shell) || (m_tool.m_tool_type == gui))
       {
         if (!m_pid)
         {
@@ -362,6 +359,12 @@ public:
           m_configpanel->SetSelection(m_configpanel->GetSelection() + 1);
         };
       }
+
+	};
+
+
+	void OnRunClick(wxCommandEvent& /*event*/) {
+	  Run();
 	}
 	;
 
@@ -395,7 +398,7 @@ public:
 	wxAuiNotebook *m_parent;
 	wxAuiNotebook *m_configpanel;
 	OutputListBox *m_listbox_output;
-	OutputListBox *m_tool_output;
+	ToolOutputListBox *m_tool_output;
 	wxScrolledWindow *m_wsw;
 	wxString m_input_file;
 	Tool m_tool;
@@ -472,11 +475,11 @@ private:
 DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
-		EVT_BUTTON(ID_RUN_TOOL, ConfigPanel::OnRunClick) EVT_BUTTON(ID_ABORT_TOOL, ConfigPanel::OnAbortClick)
-
+		EVT_BUTTON(ID_RUN_TOOL, ConfigPanel::OnRunClick)
+		EVT_BUTTON(ID_ABORT_TOOL, ConfigPanel::OnAbortClick)
 		EVT_FILEPICKER_CHANGED(ID_OUTPUT_FILE, ConfigPanel::OnOutputFileChange)
 		EVT_SIZE(ConfigPanel::OnResize)
 		EVT_MY_PROCESS_END( wxID_ANY, ConfigPanel::OnProcessEnd )
-		END_EVENT_TABLE ()
+END_EVENT_TABLE ()
 
 #endif /* MCRL2_GUI_CONFIGPANEL_H_ */
