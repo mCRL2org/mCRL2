@@ -158,10 +158,10 @@ protected:
 
 	/**
 	     * \brief Creates a filepicker widget for mcrl2-gui
-	     * \param[in] default pathfile for the filepicker.
+	     * \param[in] Filters for file extensions in the filepicker.
 	     * \return struct of a widget_option containing the widget that represents a filepicker
 	     **/
-	widget_option create_filepicker_widget(std::string value = ""){
+	widget_option create_filepicker_widget(std::string value = "*.*"){
 		widget_option wo;
 		wo.widget = "filepicker";
 		if (!value.empty()) {

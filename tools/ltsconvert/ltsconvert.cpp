@@ -662,7 +662,7 @@ public:
 		values.push_back("trace");
 		values.push_back("weak-trace");
 		m_gui_options["equivalence"] = create_radiobox_widget(values);
-		m_gui_options["lps"] = create_filepicker_widget();
+		m_gui_options["lps"] = create_filepicker_widget("LPS files (*.lps)|*.lps|All Files (*.*)|*.*");
 		m_gui_options["no-state"] = create_checkbox_widget();
 		m_gui_options["no-reach"] = create_checkbox_widget();
 		m_gui_options["tau"] = create_textctrl_widget();

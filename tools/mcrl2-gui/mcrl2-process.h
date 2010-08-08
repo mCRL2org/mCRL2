@@ -35,13 +35,28 @@ END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN)
 
-// it may also be convenient to define an event table macro for this event type
 #define EVT_MY_PROCESS_RUN(id, fn) \
     DECLARE_EVENT_TABLE_ENTRY( \
         wxEVT_MY_PROCESS_RUN, id, wxID_ANY, \
         (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
         (wxObject *) NULL \
     ),
+
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_OUTPUT, 7777)
+END_DECLARE_EVENT_TYPES()
+
+DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_OUTPUT)
+
+#define EVT_MY_PROCESS_PRODUCES_OUTPUT(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_MY_PROCESS_PRODUCES_OUTPUT, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
+
+
+
 
 class MyPipedProcess;
 WX_DEFINE_ARRAY_PTR(MyPipedProcess *, MyActiveProcessArray)
@@ -114,14 +129,17 @@ public:
 	virtual bool HasInput() {
 		bool hasInput = false;
 
-		if (IsInputAvailable()) {
-			wxTextInputStream tis(*GetInputStream());
-			wxString m_msg;
-			// assumption output is line buffered
-			// m_msg << m_cmd << wxT(" (stdout): ") << tis.ReadLine();
-			m_msg << tis.ReadLine();
-			if (m_listbox_output != NULL)
+      if (IsInputAvailable())
+      {
+        wxTextInputStream tis(*GetInputStream());
+        wxString m_msg;
+        // assumption output is line buffered
+        // m_msg << m_cmd << wxT(" (stdout): ") << tis.ReadLine();
+        m_msg << tis.ReadLine();
+        if (m_listbox_output != NULL)
         {
+          size_t old = m_listbox_output->GetCount();
+
           m_listbox_output->Append(m_msg);
 
           if (m_listbox_output == wxWindow::FindFocus())
@@ -130,11 +148,17 @@ public:
             m_listbox_output->Select(m_listbox_output->GetCount() - 1);
             m_listbox_output->SetSelection(wxNOT_FOUND);
           }
+
+          if (old < m_listbox_output->GetCount() && (!m_msg.empty()) )
+          {
+            wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
+            wxPostEvent(m_parent, eventCustom);
+          }
+
         }
         m_msg.Clear();
-
-			hasInput = true;
-		}
+        hasInput = true;
+      }
 
 		if (IsErrorAvailable()) {
       wxTextInputStream tis(*GetErrorStream());
@@ -143,6 +167,8 @@ public:
       m_msg << tis.ReadLine();
       if (m_listbox_output != NULL)
       {
+        size_t old = m_listbox_output->GetCount();
+
         m_listbox_output->Append(m_msg);
         if (m_listbox_output == wxWindow::FindFocus())
         {
@@ -150,8 +176,15 @@ public:
           m_listbox_output->Select(m_listbox_output->GetCount() - 1);
           m_listbox_output->SetSelection(wxNOT_FOUND);
         }
+
+        if (old <  m_listbox_output->GetCount() && (!m_msg.empty()) ){
+          wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
+          wxPostEvent(m_parent, eventCustom);
+        }
       }
+
       m_msg.Clear();
+
       hasInput = true;
     }
 

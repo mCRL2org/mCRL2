@@ -52,7 +52,7 @@ class lts2lps_tool : public input_output_tool
       super::add_options(desc);
 
       desc.add_option("data", make_mandatory_argument("FILE"),
-          "use FILE as the data specification from which the input LTS was generated. "
+          "use FILE as the data specification from which the input LTS was generated. \n"
           "Note that FILE must contain the pretty printed version of a data specification.", 'D');
     }
 
@@ -201,7 +201,7 @@ class lts2lps_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2lps_tool>
 	lts2lps_gui_tool()
     {
 
-      m_gui_options["data"] = create_filepicker_widget();
+      m_gui_options["data"] = create_filepicker_widget("Text Files (*.txt)|*.txt|mCRL2 files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
     }
 };
 

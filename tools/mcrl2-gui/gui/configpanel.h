@@ -55,6 +55,7 @@ public:
 		m_listbox_output = listbox_output;
 		m_fileIO = fileIO;
 		m_pid = 0;
+		m_switchOnOutput = false;
 
 		int row = 0;
 
@@ -94,8 +95,10 @@ public:
             wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
 
         fpc->SetPath(filesuggestion);
-        fpc->SetSize(wxSize(350, 25));
         fgs->Add(fpc, wxGBPosition(row, 1), wxGBSpan(1,2));
+
+        fpc->SetMinSize(wxSize(350,25));
+        fpc->SetTextCtrlProportion(6);
 
         m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
 
@@ -203,11 +206,9 @@ public:
 				ws1 = new wxStaticText(top, wxID_ANY, wxString(
 						(*i).m_flag.c_str(), wxConvUTF8));
 
-				// TODO: Set Default values
-
 				/* create text input box */
 				fp = new wxFilePickerCtrl(top, wxID_ANY,  wxT(""),
-						wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
+						wxT("Select a file"), wxString((*i).m_values[0].c_str(), wxConvUTF8), wxDefaultPosition, wxDefaultSize,
 						wxFLP_USE_TEXTCTRL | wxFLP_OPEN );
 
 				fp->SetLabel(wxString(
@@ -215,14 +216,22 @@ public:
 
 				m_filepicker_ptrs.push_back(fp);
 
+				/* Remove trailing empty lines */
+				string str = (*i).m_help;
+				while( str.find_last_of("\n") == (str.size()-1) ){
+				  str = str.substr(0, str.size()-1);
+				}
 				ws2 = new wxStaticText(top, wxID_ANY, wxString(
-						(*i).m_help.c_str(), wxConvUTF8));
+						str.c_str(), wxConvUTF8));
 
 				row++;
         fgs->Add(ws1, wxGBPosition(row,0));
-        fgs->Add(fp,  wxGBPosition(row,1), wxGBSpan(1,2));
-        fp->SetSize(wxSize(350,25));
-        fgs->Add(ws2,  wxGBPosition(row,3));
+        fgs->Add(ws2,  wxGBPosition(row,1));
+
+        row++;
+        fgs->Add(fp,  wxGBPosition(row,1));
+        fp->SetMinSize(wxSize(350,25));
+        fp->SetTextCtrlProportion(6);
 
 				break;
 			}
@@ -361,11 +370,20 @@ public:
 
           m_process->m_ext_pid = m_pid;
 
-          m_configpanel->SetSelection(m_configpanel->GetSelection() + 1);
+          m_switchOnOutput = true;
+
         };
       }
 
 	};
+
+	void SwitchToToolOutputNotebook(){
+
+	  if( m_switchOnOutput ){
+	    m_configpanel->SetSelection(1);
+	    m_switchOnOutput = false;
+	  }
+	}
 
 
 	void OnRunClick(wxCommandEvent& /*event*/) {
@@ -424,6 +442,8 @@ public:
 
 private:
 
+	bool m_switchOnOutput;
+
 	wxString
     GenerateOutputFileSuggestion()
     {
@@ -477,6 +497,10 @@ private:
       UpdateToolTipStatus(STATUS_COMPLETE);
     }
 
+	  void OnToolHasOutput(wxCommandEvent& evt){
+	    SwitchToToolOutputNotebook();
+	  }
+
 DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
@@ -486,6 +510,7 @@ BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
 		EVT_SIZE(ConfigPanel::OnResize)
 		EVT_MY_PROCESS_END( wxID_ANY, ConfigPanel::OnProcessEnd )
 		EVT_MY_PROCESS_RUN( wxID_ANY, ConfigPanel::OnRunClick )
+		EVT_MY_PROCESS_PRODUCES_OUTPUT( wxID_ANY, ConfigPanel::OnToolHasOutput )
 END_EVENT_TABLE ()
 
 #endif /* MCRL2_GUI_CONFIGPANEL_H_ */
