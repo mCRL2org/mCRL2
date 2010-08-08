@@ -29,6 +29,20 @@ DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_END)
         (wxObject *) NULL \
     ),
 
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN, 7777)
+END_DECLARE_EVENT_TYPES()
+
+DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN)
+
+// it may also be convenient to define an event table macro for this event type
+#define EVT_MY_PROCESS_RUN(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_MY_PROCESS_RUN, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
+
 class MyPipedProcess;
 WX_DEFINE_ARRAY_PTR(MyPipedProcess *, MyActiveProcessArray)
 ;

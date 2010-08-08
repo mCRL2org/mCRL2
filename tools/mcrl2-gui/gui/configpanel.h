@@ -64,6 +64,9 @@ public:
 			);
 
 		m_tool_output = new ToolOutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+
+		m_tool_output->SetRunCognizance(this);
+
 		m_wsw = new wxScrolledWindow(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 		/* Define size large enough for top*/
@@ -228,7 +231,6 @@ public:
 		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"));
 
 		m_abortbutton = new wxButton(top, ID_ABORT_TOOL, wxT("Abort"));
-		m_abortbutton->Show(false);
 
 	  ++row;
 	  fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
@@ -239,6 +241,9 @@ public:
     hbox->Add(fgs, 1, wxALL, 15);
     top->SetSizer(hbox);
 		top->Layout();
+
+		/* Hide after layout to prevent widget overlap*/
+    m_abortbutton->Show(false);
 
 		int w, h;
 		top->GetBestSize(&w,&h);
@@ -480,6 +485,7 @@ BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
 		EVT_FILEPICKER_CHANGED(ID_OUTPUT_FILE, ConfigPanel::OnOutputFileChange)
 		EVT_SIZE(ConfigPanel::OnResize)
 		EVT_MY_PROCESS_END( wxID_ANY, ConfigPanel::OnProcessEnd )
+		EVT_MY_PROCESS_RUN( wxID_ANY, ConfigPanel::OnRunClick )
 END_EVENT_TABLE ()
 
 #endif /* MCRL2_GUI_CONFIGPANEL_H_ */

@@ -19,6 +19,21 @@
 #define ID_COPY_LINES_TO_CLIPBOARD 1503
 #define ID_GO_BACK_TO_CONFIGURATION 1504
 #define ID_RUN 1505
+#define ID_RUN_AND_CLEAR 1506
+
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_MY_RUN_PROCESS, 7777)
+END_DECLARE_EVENT_TYPES()
+
+DEFINE_EVENT_TYPE(wxEVT_MY_RUN_PROCESS)
+
+// it may also be convenient to define an event table macro for this event type
+#define EVT_MY_RUN_PROCESS(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_MY_RUN_PROCESS, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
 
 class ToolOutputListBoxBase : public wxListBox
 {
@@ -80,6 +95,19 @@ class ToolOutputListBoxBase : public wxListBox
         }
       }
     }
+
+    void
+    Run()
+    {
+      if(cognizance){
+        wxCommandEvent eventCustom(wxEVT_MY_PROCESS_RUN);
+        wxPostEvent(cognizance, eventCustom);
+      }
+    }
+
+  protected:
+    wxEvtHandler *cognizance;
+
 };
 
 class ToolOutputListBoxMenu : public wxMenu
@@ -90,8 +118,8 @@ class ToolOutputListBoxMenu : public wxMenu
     ToolOutputListBoxMenu(ToolOutputListBoxBase *parent) :
       wxMenu()
     {
-      //this->Append(ID_RUN, wxT("Re-Run"));
-      //this->Append(ID_RUN_LISTBOX, wxT("Re-Run and Clear Output"));
+      this->Append(ID_RUN, wxT("Re-Run"));
+      this->Append(ID_RUN_AND_CLEAR, wxT("Re-Run and Clear Output"));
       this->Append(ID_GO_BACK_TO_CONFIGURATION, wxT("Go Back to Configuration"));
       this->AppendSeparator();
       this->Append(ID_COPY_LINES_TO_CLIPBOARD, wxT("Copy Selection...\tCtrl-C"));
@@ -126,6 +154,20 @@ class ToolOutputListBoxMenu : public wxMenu
       ((wxAuiNotebook *) (p->GetParent()))->SetSelection(0);
     }
 
+    void
+    OnRun(wxCommandEvent &/*event*/)
+    {
+      p->Run();
+    }
+
+    void
+    OnRunAndClear(wxCommandEvent &/*event*/)
+    {
+      p->Clear();
+      p->Run();
+    }
+
+
   DECLARE_EVENT_TABLE()
 };
 
@@ -134,6 +176,8 @@ BEGIN_EVENT_TABLE(ToolOutputListBoxMenu, wxMenu)
   EVT_MENU(ID_SAVE_LISTBOX, ToolOutputListBoxMenu::OnSave )
   EVT_MENU(ID_COPY_LINES_TO_CLIPBOARD, ToolOutputListBoxMenu::OnCopyLine)
   EVT_MENU(ID_GO_BACK_TO_CONFIGURATION, ToolOutputListBoxMenu::OnGoBackToConfiguration)
+  EVT_MENU(ID_RUN, ToolOutputListBoxMenu::OnRun)
+  EVT_MENU(ID_RUN_AND_CLEAR, ToolOutputListBoxMenu::OnRunAndClear)
 END_EVENT_TABLE ()
 
 class ToolOutputListBox : public ToolOutputListBoxBase
@@ -193,6 +237,12 @@ class ToolOutputListBox : public ToolOutputListBoxBase
 
       evt.Skip();
 
+    }
+
+  void
+  SetRunCognizance(wxEvtHandler *dest)
+    {
+      cognizance = dest;
     }
 
   DECLARE_EVENT_TABLE()
