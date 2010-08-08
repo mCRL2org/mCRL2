@@ -16,7 +16,7 @@
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 #include <wx/statline.h>
-#include <gui/outputlistbox.h>
+//#include <gui/outputlistbox.h>
 #include <gui/tooloutputlistbox.h>
 #include <wx/scrolwin.h>
 #include <wx/gbsizer.h>
@@ -48,7 +48,7 @@ class ConfigPanel: public wxNotebookPage {
 public:
 
 	ConfigPanel(wxAuiNotebook *parent, wxWindowID id, Tool& tool,
-			OutputListBox *listbox_output, FileIO& fileIO) :
+	    OutPutListBox *listbox_output, FileIO& fileIO) :
 				wxNotebookPage(parent, id) {
 		m_tool = tool;
 		m_parent = parent;
@@ -420,7 +420,7 @@ public:
 
 	wxAuiNotebook *m_parent;
 	wxAuiNotebook *m_configpanel;
-	OutputListBox *m_listbox_output;
+	OutPutListBox *m_listbox_output;
 	ToolOutputListBox *m_tool_output;
 	wxScrolledWindow *m_wsw;
 	wxString m_input_file;

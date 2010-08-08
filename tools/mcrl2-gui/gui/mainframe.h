@@ -56,11 +56,10 @@ enum {
 	Exec_DeleteFile,
 	Exec_Refresh,
 	Exec_OpenFile,
-	Exec_OpenURL,
-	Exec_DDEExec,
-	Exec_DDERequest,
+	Exec_CopyFile,
 	Exec_Redirect,
-	Exec_Pipe,
+	Exec_Copy2ClipBoard,
+	Exec_Save2File,
 	Exec_About = 300,
 	Exec_PerspectiveReset,
 	Exec_Preferences,
@@ -101,16 +100,30 @@ public:
 		menuFile->AppendSeparator();
 		menuFile->Append(Exec_OpenFile, wxT("&Edit selected file \tCtrl-E"),
 						wxT("Edit selected file"));
+		menuFile->Append(Exec_CopyFile, wxT("&Copy selected file \tF6"),
+		    wxT("Copy selected file on disk"));
 		menuFile->Append(Exec_RenameFile, wxT("&Rename selected file \tF2"),
 				wxT("Rename a file"));
 		menuFile->Append(Exec_DeleteFile, wxT("&Delete selected file"),
 				wxT("Delete a file"));
 		menuFile->AppendSeparator();
-		menuFile->Append(Exec_Refresh, wxT("&Refresh directory content \tF5"),
-						wxT("Delete a file"));
+		menuFile->Append(Exec_Refresh, wxT("&Refresh file browser content \tF5"),
+						wxT("Refresh file browser content"));
 		menuFile->AppendSeparator();
 		menuFile->Append(Exec_Quit, wxT("E&xit\tAlt-X"),
 				wxT("Quit the program"));
+
+		editMenu = new wxMenu;
+
+		editMenu->Append(Exec_Copy2ClipBoard, wxT("Copy focused selection to clipboard \tCtrl-C"), wxT("Copy to clipboard"));
+    editMenu->Append(Exec_Save2File, wxT("Save focused output window to file \tCtrl-S"), wxT("Save output to file"));
+    editMenu->Append(Exec_ClearLog, wxT("&Clear focused output Window"),
+        wxT("Clear the log with performed commands"));
+
+
+    editMenu->Enable(Exec_Copy2ClipBoard, false);
+    editMenu->Enable(Exec_Save2File, false);
+    editMenu->Enable(Exec_ClearLog, false);
 
 		wxMenu *execMenu = new wxMenu;
 		execMenu->Append(Exec_Redirect, wxT("&Run command...\tCtrl-R"),
@@ -123,21 +136,14 @@ public:
 		helpMenu->Append(wxID_ABOUT, wxT("&About\tF1"),
 				wxT("Show about dialog"));
 
-
 		m_PanelMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
 		m_PanelMenu->AppendCheckItem( Exec_ToggleFileBrowserPanel, wxT("File Browser"));
 		m_PanelMenu->AppendCheckItem( Exec_ToggleExecutedCommandsPanel, wxT("Executed Commands"));
-
-//	  m_show_executed_commands = true;
-	  //m_show_file_browser_pane_info = true;
 
 	  m_PanelMenu->Check(Exec_ToggleFileBrowserPanel, true);
 		m_PanelMenu->Check(Exec_ToggleExecutedCommandsPanel, true);
 
 		wxMenu *windowMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
-		windowMenu->Append(Exec_ClearLog, wxT("&Clear Executed Commands Output"),
-				wxT("Clear the log with performed commands"));
-		windowMenu->AppendSeparator();
 		windowMenu->AppendSubMenu(m_PanelMenu, wxT("&Dockable panels"),
             wxT("Toggle panel visibility"));
 		windowMenu->AppendSeparator();
@@ -150,6 +156,7 @@ public:
 		// add menus to the menu bar
 		wxMenuBar *menuBar = new wxMenuBar();
 		menuBar->Append(menuFile, wxT("&File"));
+		menuBar->Append(editMenu, wxT("&Edit"));
 #ifdef DEBUG
 		menuBar->Append(execMenu, wxT("&Process"));
 #endif
@@ -163,7 +170,7 @@ public:
 		m_mgr.SetManagedWindow(this);
 
 		// m_ExecutedCommandsPanel needs to be declared before declaring left_panel for output
-		m_ExecutedCommandsPanel = new OutputListBox(this, wxID_ANY, wxPoint(-1, -1), wxSize(-1, -1));
+		m_ExecutedCommandsPanel = new OutPutListBox(this, wxID_ANY, wxPoint(-1, -1), wxSize(-1, -1));
 		m_notebookpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_DEFAULT_STYLE );
 
 		m_FileBrowserPanel = new GenericDirCtrl(this, m_tool_catalog,
@@ -328,10 +335,40 @@ public:
     }
 	}
 
+	void UpdateFocus(wxCommandEvent& event){
+	  if( event.GetClientData() == NULL){
+	    FocusedOutPutListBox = NULL;
+	    editMenu->Enable(Exec_Copy2ClipBoard, false);
+	    editMenu->Enable(Exec_Save2File, false);
+	    editMenu->Enable(Exec_ClearLog, false);
+	  } else {
+	    FocusedOutPutListBox = (OutPutListBox*) event.GetClientData();
+      editMenu->Enable(Exec_Copy2ClipBoard, true);
+      editMenu->Enable(Exec_Save2File, true);
+      editMenu->Enable(Exec_ClearLog, true);
+	  }
+	}
+
 	void OnClear(wxCommandEvent& /*event*/) {
-		m_ExecutedCommandsPanel->Clear();
+	  if( FocusedOutPutListBox ){
+	    FocusedOutPutListBox->Clear();
+	  }
 	}
 	;
+
+	 void OnCopy2Clipboard(wxCommandEvent& /*event*/) {
+	    if( FocusedOutPutListBox ){
+	      FocusedOutPutListBox->CopyLine();
+	    }
+	  }
+	  ;
+
+	  void OnSave(wxCommandEvent& /*event*/) {
+	    if( FocusedOutPutListBox ){
+	      FocusedOutPutListBox->Save();
+	    }
+	  }
+	  ;
 
 	void OnNewFile(wxCommandEvent& /*event*/) {
 		m_FileBrowserPanel->CreateNewFile();
@@ -348,6 +385,10 @@ public:
 	}
 	;
 
+ void OnCopyFile(wxCommandEvent& /*event*/) {
+	    m_FileBrowserPanel->CopyFile();
+	  }
+	  ;
 
 	void OnDeleteFile(wxCommandEvent& /*event*/) {
 		m_FileBrowserPanel->Delete();
@@ -439,6 +480,7 @@ public:
 private:
 
 	wxMenu *m_PanelMenu;
+  wxMenu *editMenu;
 
 	bool m_show_executed_commands;
 
@@ -454,7 +496,9 @@ private:
 	// last command we executed
 	wxString m_cmdLast;
 
-	OutputListBox *m_ExecutedCommandsPanel;
+	OutPutListBox *m_ExecutedCommandsPanel;
+
+	OutPutListBox *FocusedOutPutListBox;
 
 	wxAuiManager m_mgr;
 
@@ -466,34 +510,30 @@ private:
 
 DECLARE_EVENT_TABLE()
 };
+
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_MENU(Exec_Quit, MainFrame::OnQuit)
 EVT_MENU(Exec_Kill, MainFrame::OnKill)
-
 EVT_MENU(Exec_NewFile, MainFrame::OnNewFile)
 EVT_MENU(Exec_OpenFile, MainFrame::OnEditFile)
 EVT_MENU(Exec_RenameFile, MainFrame::OnRenameFile)
 EVT_MENU(Exec_DeleteFile, MainFrame::OnDeleteFile)
 EVT_MENU(Exec_Refresh, MainFrame::OnRefresh)
+EVT_MENU(Exec_CopyFile, MainFrame::OnCopyFile)
 EVT_MENU(Exec_Preferences, MainFrame::OnExecPreferences)
-
-EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
-
 EVT_MENU(Exec_ToggleFileBrowserPanel, MainFrame::OnToggleFileBrowserPanel)
 EVT_MENU(Exec_ToggleExecutedCommandsPanel, MainFrame::OnToggleExecutedCommandsPanel)
-
 EVT_MENU(Exec_ClearLog, MainFrame::OnClear)
-
 EVT_MENU(Exec_Redirect, MainFrame::OnExecWithRedirect)
-
 EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
+EVT_MENU(Exec_Copy2ClipBoard, MainFrame::OnCopy2Clipboard)
+EVT_MENU(Exec_Save2File, MainFrame::OnSave)
 
 EVT_IDLE(MainFrame::OnIdle)
-
 EVT_TIMER(wxID_ANY, MainFrame::OnTimer)
-
+EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
 EVT_UPDATE_PROJECT_TREE(wxID_ANY, MainFrame::OnUpdateProjectTree)
-
+EVT_UPDATE_FOCUS(wxID_ANY, MainFrame::UpdateFocus)
 END_EVENT_TABLE()
 
 #endif /* MAINFRAME_H_ */

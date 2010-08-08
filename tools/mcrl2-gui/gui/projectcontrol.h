@@ -21,7 +21,7 @@
 #include <wx/dir.h>
 #include <wx/file.h>
 #include <wx/aui/auibook.h>
-#include <gui/outputlistbox.h>
+#include <gui/tooloutputlistbox.h>
 #include <gui/configpanel.h>
 #include <iostream>
 #include <mimemanager.h>
@@ -43,6 +43,7 @@
 #define ID_NEW_DIR 2007
 #define ID_REFRESH 2008
 #define ID_EXPAND 2009
+#define ID_COPY_FILE 2010
 
 using namespace std;
 
@@ -53,7 +54,7 @@ public:
 
 	multimap<string, string> m_extention_tool_mapping;
 
-	OutputListBox *m_listbox_output;
+	OutPutListBox *m_listbox_output;
 
 	wxAuiNotebook *m_notebookpanel;
 
@@ -61,7 +62,7 @@ public:
 	vector<wxCheckBox*> m_checkbox_ptrs;
 
 	GenericDirCtrl(wxWindow *parent, const std::vector<Tool>& tool_catalog,
-			multimap<string, string> extention_tool_mapping, OutputListBox *output,
+			multimap<string, string> extention_tool_mapping, OutPutListBox *output,
 			wxAuiNotebook *notebookpanel) :
 		wxGenericDirCtrl(parent, ID_GDC, wxDirDialogDefaultFolderStr, wxPoint(-1,
 				-1), wxSize(-1, -1), wxDIRCTRL_EDIT_LABELS | wxDIRCTRL_3D_INTERNAL
@@ -178,6 +179,10 @@ public:
 				break;
 			case ID_EXPAND:
 			  this->ExpandPath(this->GetPath());
+			  break;
+			case ID_COPY_FILE:
+			  CopyFile();
+			  break;
 			}
 		}
 	}
@@ -265,6 +270,9 @@ public:
     case WXK_F5:
     	Refresh();
 			break;
+    case WXK_F6:
+      CopyFile();
+      break;
 
 		}
 
@@ -305,6 +313,22 @@ public:
 
 	void Rename() {
 		this->GetTreeCtrl()->EditLabel(this->GetTreeCtrl()->GetSelection());
+	}
+
+	void CopyFile(){
+	  wxFileDialog *fd = new wxFileDialog(this, wxT("Copy file"), ::wxPathOnly(this->GetPath()), ::wxFileNameFromPath(this->GetPath()), wxT("*.*"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
+
+	  if( fd->ShowModal() == wxID_OK ){
+	    if(::wxCopyFile(this->GetPath(), fd->GetPath())){
+	      this->ReCreateTree();
+	      this->SetPath(fd->GetPath());
+	    } else{
+	      wxMessageDialog *dial = new wxMessageDialog(NULL,
+	          wxT("Copy operation failed"), wxT("Exclamation"),
+	          wxOK | wxICON_EXCLAMATION);
+	      dial->ShowModal();
+	    }
+	  }
 	}
 
 	bool
@@ -475,6 +499,7 @@ public:
 		mnu.Append(ID_NEW_FILE, wxT("New File \tCtrl-N"));
 		mnu.Append(ID_NEW_DIR, wxT("New Directory"));
 		mnu.AppendSeparator();
+    mnu.Append(ID_COPY_FILE, wxT("Copy File \tF6"));
 		mnu.Append(ID_RENAME, wxT("Rename \tF2"));
 		mnu.Append(ID_DELETE, wxT("Delete \tDel"));
 		mnu.AppendSeparator();
