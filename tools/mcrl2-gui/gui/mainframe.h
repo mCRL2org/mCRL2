@@ -60,6 +60,8 @@ enum {
 	Exec_Redirect,
 	Exec_Copy2ClipBoard,
 	Exec_Save2File,
+	Exec_SelectAll,
+	Exec_DeselectAll,
 	Exec_About = 300,
 	Exec_PerspectiveReset,
 	Exec_Preferences,
@@ -115,12 +117,17 @@ public:
 
 		editMenu = new wxMenu;
 
-		editMenu->Append(Exec_Copy2ClipBoard, wxT("Copy focused selection to clipboard \tCtrl-C"), wxT("Copy to clipboard"));
-    editMenu->Append(Exec_Save2File, wxT("Save focused output window to file \tCtrl-S"), wxT("Save output to file"));
-    editMenu->Append(Exec_ClearLog, wxT("&Clear focused output Window"),
-        wxT("Clear the log with performed commands"));
+		editMenu->Append(Exec_SelectAll, wxT("Select All \tCtrl-A"), wxT("Select all items tems in focused window"));
+		editMenu->Append(Exec_DeselectAll, wxT("Deselect All \tCtrl-D"), wxT("Deselect all items in focused window"));
+		editMenu->Append(Exec_Copy2ClipBoard, wxT("Copy \tCtrl-C"), wxT("Copy focused selection to clipboard"));
+    editMenu->Append(Exec_Save2File, wxT("Save \tCtrl-S"), wxT("Save focused output window to file"));
+    editMenu->AppendSeparator();
+    editMenu->Append(Exec_ClearLog, wxT("&Clear output"),
+        wxT("Clear output of the focused window"));
 
 
+    editMenu->Enable(Exec_SelectAll, false);
+    editMenu->Enable(Exec_DeselectAll, false);
     editMenu->Enable(Exec_Copy2ClipBoard, false);
     editMenu->Enable(Exec_Save2File, false);
     editMenu->Enable(Exec_ClearLog, false);
@@ -338,11 +345,15 @@ public:
 	void UpdateFocus(wxCommandEvent& event){
 	  if( event.GetClientData() == NULL){
 	    FocusedOutPutListBox = NULL;
+	    editMenu->Enable(Exec_SelectAll, false);
+	    editMenu->Enable(Exec_DeselectAll, false);
 	    editMenu->Enable(Exec_Copy2ClipBoard, false);
 	    editMenu->Enable(Exec_Save2File, false);
 	    editMenu->Enable(Exec_ClearLog, false);
 	  } else {
 	    FocusedOutPutListBox = (OutPutListBox*) event.GetClientData();
+	    editMenu->Enable(Exec_SelectAll, true);
+	    editMenu->Enable(Exec_DeselectAll, true);
       editMenu->Enable(Exec_Copy2ClipBoard, true);
       editMenu->Enable(Exec_Save2File, true);
       editMenu->Enable(Exec_ClearLog, true);
@@ -369,6 +380,20 @@ public:
 	    }
 	  }
 	  ;
+
+	  void OnSelectAll(wxCommandEvent& /*event*/) {
+	    if( FocusedOutPutListBox ){
+	      FocusedOutPutListBox->SelectAll();
+	    }
+	  }
+	  ;
+
+	   void OnDeselectAll(wxCommandEvent& /*event*/) {
+	      if( FocusedOutPutListBox ){
+	        FocusedOutPutListBox->DeselectAll();
+	      }
+	    }
+	    ;
 
 	void OnNewFile(wxCommandEvent& /*event*/) {
 		m_FileBrowserPanel->CreateNewFile();
@@ -528,6 +553,8 @@ EVT_MENU(Exec_Redirect, MainFrame::OnExecWithRedirect)
 EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
 EVT_MENU(Exec_Copy2ClipBoard, MainFrame::OnCopy2Clipboard)
 EVT_MENU(Exec_Save2File, MainFrame::OnSave)
+EVT_MENU(Exec_SelectAll, MainFrame::OnSelectAll)
+EVT_MENU(Exec_DeselectAll, MainFrame::OnDeselectAll)
 
 EVT_IDLE(MainFrame::OnIdle)
 EVT_TIMER(wxID_ANY, MainFrame::OnTimer)

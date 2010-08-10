@@ -20,6 +20,8 @@
 #define ID_GO_BACK_TO_CONFIGURATION 1504
 #define ID_RUN 1505
 #define ID_RUN_AND_CLEAR 1506
+#define ID_SELECT_ALL 1507
+#define ID_SELECT_NONE 1508
 
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_MY_RUN_PROCESS, 7777)
@@ -109,6 +111,24 @@ class OutPutListBoxBase : public wxListBox
     }
   }
 
+  void
+  SelectAll()
+  {
+    for(size_t i = 0; i < this->GetCount(); ++i )
+    {
+      this->Select(i);
+    }
+  }
+
+  void
+  SelectNone()
+  {
+    for(size_t i = 0; i < this->GetCount(); ++i )
+    {
+      this->DoSetSelection(i, false);
+    }
+  }
+
   void OnFocus(wxFocusEvent &/*event*/){
     wxCommandEvent eventCustom(wxEVT_UPDATE_FOCUS);
     /* Send pointer of focused window */
@@ -164,6 +184,8 @@ class TOutputListBoxMenu: public wxMenu
 
     TOutputListBoxMenu(ToolOutputListBoxBase *parent)
     {
+      this->Append(ID_SELECT_ALL, wxT("Select All...\tCtrl-A"));
+      this->Append(ID_SELECT_NONE, wxT("Deselect All...\tCtrl-D"));
       this->Append(ID_COPY_LINES_TO_CLIPBOARD, wxT("Copy Selection...\tCtrl-C"));
       this->Append(ID_SAVE_LISTBOX, wxT("Save...\tCtrl-S"));
       this->AppendSeparator();
@@ -191,6 +213,20 @@ class TOutputListBoxMenu: public wxMenu
     {
       p->Save();
     }
+
+    void
+    OnSelectAll(wxCommandEvent &/*event*/)
+    {
+      p->SelectAll();
+    }
+
+    void
+    OnDeselectAll(wxCommandEvent &/*event*/)
+    {
+      p->DeselectAll();
+    }
+
+
     DECLARE_EVENT_TABLE()
 };
 
@@ -198,6 +234,8 @@ class TOutputListBoxMenu: public wxMenu
     EVT_MENU(ID_CLEAR_LISTBOX, TOutputListBoxMenu::OnClear )
     EVT_MENU(ID_SAVE_LISTBOX, TOutputListBoxMenu::OnSave )
     EVT_MENU(ID_COPY_LINES_TO_CLIPBOARD, TOutputListBoxMenu::OnCopyLine)
+    EVT_MENU(ID_SELECT_ALL, TOutputListBoxMenu::OnSelectAll)
+    EVT_MENU(ID_SELECT_NONE, TOutputListBoxMenu::OnDeselectAll)
   END_EVENT_TABLE ()
 
 class OutPutListBox : public OutPutListBoxBase
@@ -228,12 +266,25 @@ class OutPutListBox : public OutPutListBoxBase
 
         switch (evt.GetKeyCode())
         {
+          case 65: //65 == a or A
+            if (evt.ControlDown())
+            {
+              SelectAll();
+            }
+            break;
           case 67: //67 == c or C
             if (evt.ControlDown())
             {
               CopyLine();
             }
             break;
+          case 68: //68 == d or D
+            if (evt.ControlDown())
+            {
+              DeselectAll();
+            }
+            break;
+
           case 83: //83 == s or S
             if (evt.ControlDown())
             {
@@ -314,48 +365,11 @@ class ToolOutputListBox : public ToolOutputListBoxBase
     }
 
     void
-    OnCopyLine()
-    {
-      this->CopyLine();
-    }
-
-    void
-    OnSave()
-    {
-      this->Save();
-    }
-
-    void
     OnRightClick(wxMouseEvent& /*event*/)
     {
 
       ToolOutputListBoxMenu *m = new ToolOutputListBoxMenu(this);
       PopupMenu(m);
-    }
-
-    void
-    onKeyDown(wxKeyEvent& evt)
-    {
-      //std::cout << "Pressed key {" << evt.GetKeyCode() << "}\n";
-
-      switch (evt.GetKeyCode())
-      {
-        case 67: //67 == c or C
-          if (evt.ControlDown())
-          {
-            OnCopyLine();
-          }
-          break;
-        case 83: //83 == s or S
-          if (evt.ControlDown())
-          {
-            OnSave();
-          }
-          break;
-      }
-
-      evt.Skip();
-
     }
 
   void
@@ -367,7 +381,7 @@ class ToolOutputListBox : public ToolOutputListBoxBase
   DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(ToolOutputListBox, ToolOutputListBoxBase)
-  EVT_KEY_DOWN( ToolOutputListBox::onKeyDown)
+  EVT_KEY_DOWN( OutPutListBox::onKeyDown)
   EVT_RIGHT_DOWN( ToolOutputListBox::OnRightClick )
 END_EVENT_TABLE ()
 
