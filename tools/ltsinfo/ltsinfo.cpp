@@ -297,13 +297,7 @@ class ltsinfo_tool : public ltsinfo_base
 class ltsinfo_gui_tool: public mcrl2_gui_tool<ltsinfo_tool> {
 public:
 	ltsinfo_gui_tool() {
-
-		std::vector<std::string> values;
-
-		m_gui_options["counter-example"] = create_checkbox_widget();
-
 		//-iFORMAT, --in1=FORMAT   use FORMAT as the format for INFILE1 (or stdin)
-
 	}
 };
 

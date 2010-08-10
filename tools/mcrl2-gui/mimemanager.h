@@ -32,7 +32,7 @@ class MimeManager
       {
         ;
         wxString cmd;
-        ft->GetOpenCommand(&cmd,  wxFileType::MessageParameters( wxT("%%s"), wxT("text/plain")));
+        ft->GetOpenCommand(&cmd,  wxFileType::MessageParameters( wxT("%s"), wxT("text/plain")));
 
         if (!cmd.empty())
         {
