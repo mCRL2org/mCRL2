@@ -196,49 +196,71 @@ public:
 
 	    int row = 1;
 
-      if (wxFile::Exists(this->GetPath()))
+	  wxString path; 
+	  wxString name;
+	  wxString ext;
+
+	  wxFileName::SplitPath(this->GetPath(), &path, &name, &ext);
+
+      if (wxFileName::FileExists(this->GetPath()))
         fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("File:")) , wxGBPosition(row,1));
 
-      if (wxDir::Exists(this->GetPath()))
+      if (wxFileName::DirExists(this->GetPath()))
         fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Directory:")) , wxGBPosition(row,1));
 
-      fgs->Add( new wxStaticText(wp, wxID_ANY, this->GetPath().AfterLast(_T('/')) ) , wxGBPosition(row,2));
+	  if (wxFileName::DirExists(this->GetPath()) || wxFileName::FileExists(this->GetPath()))
+	  {
+        fgs->Add( new wxStaticText(wp, wxID_ANY, name + wxT(".") + ext ) , wxGBPosition(row,2));
+	  } else {
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("File or directory does not exists")) , wxGBPosition(row,2));
+	  }
 
       ++row;
       fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Path:")) , wxGBPosition(row,1));
-      fgs->Add( new wxStaticText(wp, wxID_ANY, this->GetPath().BeforeLast(_T('/')) ) , wxGBPosition(row,2));
+      fgs->Add( new wxStaticText(wp, wxID_ANY, path) , wxGBPosition(row,2));
 
-      ++row;
+	  if (wxFileName::FileExists(this->GetPath()))
+	  {
+		++row;
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Readable:")) , wxGBPosition(row,1));
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsFileReadable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
 
-      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Readable:")) , wxGBPosition(row,1));
-      fgs->Add( new wxStaticText(wp, wxID_ANY, wxFile::Access( this->GetPath() , wxFile::read)?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+		++row;
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Writable:")) , wxGBPosition(row,1));
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsFileWritable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
 
-      ++row;
-      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Writable:")) , wxGBPosition(row,1));
-      fgs->Add( new wxStaticText(wp, wxID_ANY, wxFile::Access( this->GetPath() , wxFile::write)?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+		++row;
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Executable:")) , wxGBPosition(row,1));
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsFileExecutable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
 
-      ++row;
-      wxDateTime tm = wxDateTime( wxFileModificationTime( this->GetPath() ) );
-      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Date modified")) , wxGBPosition(row,1));
-      fgs->Add( new wxStaticText(wp, wxID_ANY, tm.Format() ), wxGBPosition(row,2));
+		++row;
+	    wxFileName *wf = new wxFileName( this->GetPath() );
+        wxDateTime tm = wf->GetModificationTime();
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Date modified")) , wxGBPosition(row,1));
+        fgs->Add( new wxStaticText(wp, wxID_ANY, tm.Format() ), wxGBPosition(row,2));
 
-      ++row;
-      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Size On Disk")) , wxGBPosition(row,1));
-      wxString wxs;
-      if (wxFile::Exists(this->GetPath())){
+		++row;
+		wxString wxs;
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Size On Disk")) , wxGBPosition(row,1));
         wxs << wxFileName::GetHumanReadableSize(  wxULongLong(wxFile(this->GetPath()).Length()) );
-      }
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxs ), wxGBPosition(row,2));
+	  }
 
-      if (wxDir::Exists(this->GetPath())){
-        wxs << wxFileName::GetHumanReadableSize(wxDir::GetTotalSize(this->GetPath()));
-      }
-      fgs->Add( new wxStaticText(wp, wxID_ANY, wxs ), wxGBPosition(row,2));
+	  if (wxFileName::DirExists(this->GetPath()))
+	  {
+		++row;
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Readable:")) , wxGBPosition(row,1));
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsDirReadable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+
+		++row;
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Writable:")) , wxGBPosition(row,1));
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsDirWritable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+	  }
 
       wp->SetSizer(fgs);
       wp->Layout();
 
-
-      m_notebookpanel->AddPage(wp, this->GetPath().AfterLast(_T('/')), true);
+      m_notebookpanel->AddPage(wp, this->GetPath(), true);
     }
 
 	void OnRightClick(wxTreeEvent& /*evt*/) {
