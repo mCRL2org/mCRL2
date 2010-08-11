@@ -147,7 +147,7 @@ namespace mcrl2 {
 
         active = m_communicator->activate(ac,av);
 
-#if defined (__APPLE__)
+#if defined (__APPLE__) && !defined(x86_64)
         // Apple Event handler for arguments
         if (!active) {
           static char* argv = 0;
