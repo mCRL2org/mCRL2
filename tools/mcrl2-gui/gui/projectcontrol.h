@@ -603,6 +603,21 @@ public:
 	  }
 	}
 
+	void OnActivity(wxTreeEvent& /*evt*/){
+	  wxString path; 
+	  wxString name;
+	  wxString ext;
+
+	  wxFileName::SplitPath(this->GetPath(), &path, &name, &ext);
+
+	  if(!wxFileName::IsDirWritable( path )){
+	    wxLogStatus(wxT("WARNING: No write permissions in the selected directory!"));
+	  } else {
+		wxLogStatus(wxT(""));
+	  }
+
+	}
+
 	wxTimer *refresh_dir;
 protected:
 	wxWindow *m_parent;
@@ -614,6 +629,7 @@ BEGIN_EVENT_TABLE(GenericDirCtrl, wxGenericDirCtrl)
   EVT_TREE_ITEM_RIGHT_CLICK( wxID_ANY, GenericDirCtrl::OnRightClick )
   EVT_TREE_KEY_DOWN		(wxID_ANY, GenericDirCtrl::onKeyDown)
   EVT_TREE_ITEM_ACTIVATED(wxID_ANY, GenericDirCtrl::OnActivate )
+  EVT_TREE_SEL_CHANGED(wxID_ANY, GenericDirCtrl::OnActivity)
 END_EVENT_TABLE ()
 
 #endif /* PROJECTCONTROL_H_ */
