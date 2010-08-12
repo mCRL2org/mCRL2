@@ -130,10 +130,15 @@ public:
 				pid = this->GetTreeCtrl()->GetItemParent(
 						this->GetTreeCtrl()->GetSelection());
 
-				if (!wxDir::Exists(this->GetPath())) {
-					s = this->GetPath().BeforeLast(_T('/')).Append(_T('/'));
-				} else {
-					s = this->GetPath().Append(_T('/'));
+				if (wxDir::Exists(this->GetPath())) {
+          s = this->GetPath() + wxFileName::GetPathSeparator() ;
+				}
+
+				if (wxFile::Exists(this->GetPath())){
+			    wxString name;
+			    wxString ext;
+		      wxFileName::SplitPath(this->GetPath(), &s, &name, &ext);
+		      s = s + wxFileName::GetPathSeparator();
 				}
 
 				//Generate unique name directory name
@@ -533,64 +538,42 @@ public:
 	}
 
 	void CreateNewFile() {
-		wxTreeItemId id, pid;
-		wxString s;
-		string new_file = "new_file";
-		wxString new_dir = wxT("new_dir");
-		FILE *file;
-		string filepath;
+		wxString new_file = wxT("new_file");
 
-		pid = this->GetTreeCtrl()->GetItemParent(
-				this->GetTreeCtrl()->GetSelection());
+		wxString path;
+    wxString name;
+    wxString ext;
 
-		if (!wxDir::Exists(this->GetPath())) {
-			s = this->GetPath().BeforeLast(_T('/')).Append(_T('/'));
-		} else {
-			s = this->GetPath().Append(_T('/'));
-		}
+    if( wxFileName::DirExists(this->GetPath())){
+      path = this->GetPath() ;
+    }
 
-		filepath = static_cast<string> (s.mb_str(wxConvUTF8)) + new_file;
+    if( wxFileName::FileExists(this->GetPath())){
+      wxFileName::SplitPath(this->GetPath(), &path, &name, &ext);
+    }
+    wxFileName *wf = new wxFileName(path, new_file, wxT(""));
+    wxFile f;
 
-		// Generate new name for file if file exists
-		if (wxFile::Exists(wxString(filepath.c_str(), wxConvUTF8))) {
-			int i = 2;
+    if (!wf->FileExists()){
 
-			while (wxFile::Exists(wxString::Format(wxString(filepath.c_str(),
-					wxConvUTF8) + wxT("(%i)"), i))) {
-				++i;
-			}
-			filepath = wxString::Format(wxString(filepath.c_str(), wxConvUTF8)
-					+ wxT("(%i)"), i).mb_str(wxConvUTF8);
+      f.Create( wf->GetFullPath() , false);
+      //Expand to new created file
+      this->Refresh();
+      this->ExpandPath( wf->GetFullPath());
 
-		}
+    } else {
+      int i = 2;
+      while
+        (wxFile::Exists( wxString::Format( wf->GetFullPath() + wxT("(%i)"), i))){
+        ++i;
+      }
+      f.Create(wxString::Format( wf->GetFullPath() + wxT("(%i)"), i));
 
-		// Try to create file
-		file = fopen(filepath.c_str(), "wt");
+      //Expand to new created file
+      this->Refresh();
+      this->ExpandPath(wxString::Format( wf->GetFullPath() + wxT("(%i)"), i));
+    }
 
-		// If create fails
-		if (!file) {
-			wxLogMessage(wxT("Cannot create the following file: '") + wxString(
-					string(s.mb_str(wxConvUTF8)).append(new_file).c_str(), wxConvUTF8)
-					+ wxT("'."));
-		} else {
-			//If file creation succeeds, create new element in tree, with nice icon
-			id = this->GetTreeCtrl()->AppendItem(pid, wxString(new_file.c_str(),
-					wxConvUTF8), 7);
-
-			//Update Tree (by collapse parent and goto new created file
-			if (!wxDir::Exists(this->GetPath())) {
-				this->GetTreeCtrl()->Collapse(pid);
-			} else {
-				this->GetTreeCtrl()->Collapse(this->GetTreeCtrl()->GetSelection());
-			}
-
-			//Expand to new created file
-			this->ExpandPath(wxString(filepath.c_str(), wxConvUTF8));
-
-			//Possibility to rename file
-			this->GetTreeCtrl()->EditLabel(this->GetTreeCtrl()->GetSelection());
-
-		}
 	}
 	;
 
@@ -608,7 +591,13 @@ public:
 	  wxString name;
 	  wxString ext;
 
-	  wxFileName::SplitPath(this->GetPath(), &path, &name, &ext);
+    if( wxFileName::DirExists(this->GetPath())){
+      path = this->GetPath() ;
+    }
+
+    if( wxFileName::FileExists(this->GetPath())){
+      wxFileName::SplitPath(this->GetPath(), &path, &name, &ext);
+    }
 
 	  if(!wxFileName::IsDirWritable( path )){
 	    wxLogStatus(wxT("WARNING: No write permissions in the selected directory!"));
