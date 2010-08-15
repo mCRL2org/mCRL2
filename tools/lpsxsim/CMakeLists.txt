@@ -31,7 +31,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 add_library(${PROJECT_NAME}
   simulator.cpp
-  simbase.cpp 
+  simbase.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -127,6 +127,11 @@ if (MCRL2_BUILD_GUI_TOOLS)
 
 project(lpsxsim)
 
+IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  SET(SRCS ${SRCS} lpsxsim.rc)
+ENDIF(WIN32)
+
 # ######### General setup ##########
 set(MACOSX_BUNDLE_ICON_FILE lpsxsim.icns)
 
@@ -136,6 +141,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   xsimtrace.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
+  ${SRCS}
 )
 
 IF (APPLE)

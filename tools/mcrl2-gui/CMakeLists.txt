@@ -1,4 +1,4 @@
-# Authors: Frank Stappers 
+# Authors: Frank Stappers
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #
@@ -35,6 +35,7 @@ endif(MCRL2_SINGLE_BUNDLE)
 # ########## mcrl2_tools_mcrl2 executable ##########
 
 IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
   SET(SRCS ${SRCS} mcrl2-gui.rc)
 ENDIF(WIN32)
 

@@ -13,6 +13,11 @@ cmake_minimum_required(VERSION 2.6)
 if ( MCRL2_BUILD_GUI_TOOLS )
 add_definitions(-DTIXML_USE_TICPP)
 
+IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  SET(SRCS ${SRCS} ltsgraph.rc)
+ENDIF(WIN32)
+
 set(MACOSX_BUNDLE_ICON_FILE ltsgraph.icns )
 # ######### General setup ##########
 
@@ -39,6 +44,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   importer.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
+  ${SRCS}
 )
 
 IF (APPLE)

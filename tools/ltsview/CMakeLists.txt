@@ -15,6 +15,11 @@ if ( MCRL2_BUILD_GUI_TOOLS )
 # ######### General setup ##########
 set(MACOSX_BUNDLE_ICON_FILE ltsview.icns )
 
+IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  SET(SRCS ${SRCS} ltsview.rc)
+ENDIF(WIN32)
+
 # Sources:
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   cluster.cpp

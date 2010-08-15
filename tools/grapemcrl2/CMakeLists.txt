@@ -18,6 +18,11 @@ add_definitions(-DTIXML_USE_TICPP)
 
 set(MACOSX_BUNDLE_ICON_FILE grapemcrl2.icns )
 
+IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  SET(SRCS ${SRCS} grapemcrl2.rc)
+ENDIF(WIN32)
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/help/grapehelp.zip" "${CMAKE_CURRENT_BINARY_DIR}/grapehelp.zip" COPYONLY)
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
@@ -111,6 +116,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   mcrl2gen/mcrl2gen_validate.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
+  ${SRCS}
 )
 
 IF (APPLE)
@@ -162,4 +168,3 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 endif ( MCRL2_BUILD_GUI_TOOLS )
-
