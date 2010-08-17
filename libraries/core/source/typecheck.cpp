@@ -486,7 +486,7 @@ namespace mcrl2 {
       return Result;
     }
 
-    void type_check_mult_actions(atermpp::vector<mcrl2::lps::multi_action>& mult_actions, ATermAppl spec)
+    ATermList type_check_mult_actions(ATermList mult_actions, ATermAppl spec)
     {
       if (gsDebug)
       { std::cerr << "type checking multiactions...\n";
@@ -507,6 +507,7 @@ namespace mcrl2 {
       ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
 
       //XXX read-in from spec (not finished)
+      ATermList result=ATempty;
       if(gstcReadInSorts(sorts)
         && gstcReadInConstructors()
         && gstcReadInFuncs(constructors,mappings)
@@ -515,13 +516,12 @@ namespace mcrl2 {
       {
         if (gsDebug) { std::cerr << "type checking of multiactions read-in phase finished\n"; }
 
-        for(atermpp::vector<mcrl2::lps::multi_action>::iterator i=mult_actions.begin(); i!=mult_actions.end() ; ++i)
-        { // ATermAppl mult_act= (ATermAppl)*i;
-          // if(gsIsMultAct(mult_act))
-          // {
+        for(; !ATisEmpty(mult_actions); mult_actions=ATgetNext(mult_actions))
+        { 
           ATermTable Vars=ATtableCreate(63,50);
           ATermList r=ATmakeList0();
-          for(ATermList l=i->actions();!ATisEmpty(l);l=ATgetNext(l))
+          
+          for(ATermList l=(ATermList)ATgetFirst(mult_actions) ;!ATisEmpty(l);l=ATgetNext(l))
           {
             ATermAppl o=ATAgetFirst(l);
             assert(gsIsParamId(o));
@@ -529,7 +529,7 @@ namespace mcrl2 {
             if(!o) goto done;
               r=ATinsert(r,(ATerm)o);
           }
-          *i= mcrl2::lps::multi_action(ATreverse(r));
+          result = ATinsert(result,(ATerm)ATreverse(r));
   
           done:
           ATtableDestroy(Vars);
@@ -540,6 +540,7 @@ namespace mcrl2 {
         throw mcrl2::runtime_error("reading from LPS failed\n");
       }
       gstcDataDestroy();
+      return ATreverse(result);
     }
 
     ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec)

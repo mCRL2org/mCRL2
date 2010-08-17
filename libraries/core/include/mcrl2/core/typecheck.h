@@ -13,7 +13,7 @@
 #define PARSER_TYPECHECK_H
 
 #include <aterm2.h>
-#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/atermpp/vector.h"
 
 namespace mcrl2 {
   namespace core {
@@ -120,9 +120,11 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
  **/
 ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec);
 
+
 /** \brief     Type check a parsed mCRL2 multiaction list with respect to a
  *             type checked mCRL2 specification.
- *  \param[in] mult_actions An ATerm representation of an mCRL2 multiaction vector
+ *  \param[in] mult_actions An ATermList representation of an mCRL2 multiaction list, i.e.
+ *             a list of multi actions,
  *             that adheres to the initial internal ATerm structure.
  *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
  *             to the internal ATerm structure after type checking.
@@ -132,7 +134,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec);
  *             structure after type checking.  If something went wrong,
  *             an exception is raised.
  **/
-void type_check_mult_actions(atermpp::vector<mcrl2::lps::multi_action> &mult_actions, ATermAppl spec);
+ATermList type_check_mult_actions(ATermList mult_actions, ATermAppl spec);
 
 
 /** \brief     Type check a parsed mCRL2 process expression with respect to a

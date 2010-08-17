@@ -157,6 +157,7 @@ class lts2lps_tool : public input_output_tool
           std::cerr << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
         }
         data=l.get_data_specification();
+        data.declare_data_specification_to_be_type_checked(); // TODO: Should be done in the .lts library.
         // Get the action labels encoded in the extra data.  TODO: This is ugly and needs to be cleaned up.
         action_labels=(ATermList)ATgetArgument(ATgetArgument(l.get_extra_data(),2),0); 
       }
@@ -222,7 +223,7 @@ class lts2lps_tool : public input_output_tool
             }
           }
         }
-        std::cerr << "Reading data/action specification succeeded\n";
+        std::cerr << "Ignore errors above. Reading data/action specification succeeded\n";
       }
 
       if (gsVerbose)

@@ -47,11 +47,24 @@ namespace lps {
     void type_check(atermpp::vector<multi_action>& mult_actions, const specification& lps)
     {
       // TODO: replace all this nonsense code by a proper type check implementation
-      core::type_check_mult_actions(mult_actions, specification_to_aterm(lps));
+      // Bleh; do conversions...
+      ATermList l=ATempty;
+      for(atermpp::vector<multi_action>::const_reverse_iterator i=mult_actions.rbegin();
+              i!=mult_actions.rend(); ++i)
+      { 
+        l=ATinsert(l,(ATerm)(ATermList)i->actions());
+      }
+      l=core::type_check_mult_actions(l, specification_to_aterm(lps));
+      // And convert back...
+      mult_actions.clear();
+      for( ; !ATisEmpty(l) ; l=ATgetNext(l))
+      { 
+        mult_actions.push_back(multi_action((action_list)ATgetFirst(l)));
+      }
     }
 
 } // namespace lps
 
-} // naoespace mcrl2
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_TYPECHECK_H

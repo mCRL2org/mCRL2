@@ -166,7 +166,7 @@ namespace atermpp {
       /// \param t A term containing a list.
       term_list<Term>& operator=(ATermList t)
       {
-        assert(t.type() == AT_LIST);
+        assert(ATgetType(t) == AT_LIST);
         m_term = reinterpret_cast<ATerm>(t);
         return *this;
       }
