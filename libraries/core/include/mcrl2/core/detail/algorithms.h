@@ -46,6 +46,10 @@ namespace detail {
     return result;
   }
 
+/* This is not used, and superseded by the function type_check. 
+   My guess is that this function does not belong here, and should be removed.
+   Jan Friso
+
   /// \brief     Type checks a process specification.
   /// \param[in] spec An mCRL2 process specification in the internal ATerm
   ///            format after parsing (before type checking).
@@ -61,6 +65,7 @@ namespace detail {
       throw mcrl2::runtime_error("type check error when checking process specification");
     return result;
   }
+*/
 
   /// \brief     Parses a state formula.
   /// \param[in] sf_stream An input stream from which can be read.

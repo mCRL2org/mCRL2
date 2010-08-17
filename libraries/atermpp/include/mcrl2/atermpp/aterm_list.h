@@ -108,7 +108,8 @@ namespace atermpp {
       /// \param l A list.
       term_list(ATermList l)
         : aterm_base(l)
-      {
+      { 
+        assert(type() == AT_LIST);
       }
 
       /// Construction from aterm_list.
@@ -165,6 +166,7 @@ namespace atermpp {
       /// \param t A term containing a list.
       term_list<Term>& operator=(ATermList t)
       {
+        assert(t.type() == AT_LIST);
         m_term = reinterpret_cast<ATerm>(t);
         return *this;
       }
