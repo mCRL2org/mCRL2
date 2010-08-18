@@ -94,8 +94,9 @@ class bisim_partitioner
      *           counter traces is returned.
      *  \param[in] s A state number.
      *  \param[in] t A state number.
+     *  \param[in] branching_bisimulation A boolean indicating whether the branching bisimulation partitioner has been used.
      *  \return A vector containing counter traces. */
-    std::vector < mcrl2::trace::Trace > counter_traces(const unsigned int s, const unsigned int t);
+    std::set < mcrl2::trace::Trace > counter_traces(const unsigned int s, const unsigned int t, const bool branching_bisimulation);
 
   private:
 
@@ -183,10 +184,19 @@ class bisim_partitioner
                                  std::vector < non_bottom_state > &new_non_bottom_states,
                                  std::set < state_type > &visited);
     void order_on_tau_reachability(std::vector < non_bottom_state > &non_bottom_states);
-    std::vector < mcrl2::trace::Trace > counter_traces_aux(
-                           const unsigned int s,
-                           const unsigned int t,
-                           const mcrl2::lts::outgoing_transitions_per_state_action_t &outgoing_transitions) const;
+    std::set < mcrl2::trace::Trace > counter_traces_aux(
+                           const state_type s,
+                           const state_type t,
+                           const mcrl2::lts::outgoing_transitions_per_state_action_t &outgoing_transitions,
+                           const bool branching_bismulation) const;
+    void reachable_states_in_block_s_via_label_l(
+              const state_type s,
+              const block_index_type block_index_for_bottom_state,
+              const label_type l,
+              const mcrl2::lts::outgoing_transitions_per_state_action_t &outgoing_transitions,
+              std::set < state_type > &result_set,
+              std::set < state_type > &visited,
+              const bool branching_bisimulation) const;
 
 #ifndef NDEBUG
     void check_internal_consistency_of_the_partitioning_data_structure(const bool branching, const bool preserve_divergence) const;

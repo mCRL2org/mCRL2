@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg, Bert Lisser
+// Author(s): Muck van Weerdenburg, Bert Lisser, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -28,6 +28,7 @@ namespace detail
 {
 // Private methods of bisim_partitioner
 
+
   static unsigned int determine_tau_label(const lts &l)
   {
     // Set the tau_label to an existing label, if possible.
@@ -38,8 +39,10 @@ namespace detail
     // anyhow in this case.
     unsigned int tau_label=l.num_labels();
     for(unsigned int i=0; i<l.num_labels(); ++i)
-    { if (l.is_tau(i))
-      { tau_label=i;
+    { 
+      if (l.is_tau(i))
+      { 
+        tau_label=i;
         break;
       }
     }
@@ -64,7 +67,8 @@ namespace detail
   { 
     assert( branching || !preserve_divergence); 
     if (core::gsVerbose)
-    { std::cerr << (preserve_divergence?"Divergence preserving b)":"B") <<
+    { 
+      std::cerr << (preserve_divergence?"Divergence preserving b)":"B") <<
                    (branching?"ranching b":"") << "isimulation partitioner created for " 
                           << l.num_states() << " states and " << 
              l.num_transitions() << " transitions\n";
@@ -85,12 +89,14 @@ namespace detail
     std::set < transition > resulting_transitions;
 
     for(transition_const_range t=aut.get_transitions(); !t.empty(); t.advance_begin(1))
-    { const transition i=t.front();
+    { 
+      const transition i=t.front();
       if (!branching ||
           !aut.is_tau(i.label()) || 
           get_eq_class(i.from())!=get_eq_class(i.to()) || 
           (preserve_divergences && i.from()==i.to()))
-      { resulting_transitions.insert(
+      { 
+        resulting_transitions.insert(
                    transition(
                          get_eq_class(i.from()),
                          i.label(),
@@ -104,22 +110,26 @@ namespace detail
     // currently requires it in that form.
     for(std::set < transition >::const_iterator i=resulting_transitions.begin();
           i!=resulting_transitions.end(); ++i)
-    { aut.add_transition(transition(i->from(),i->label(),i->to()));
+    { 
+      aut.add_transition(transition(i->from(),i->label(),i->to()));
     }
 
   }
 
   unsigned int bisim_partitioner::num_eq_classes() const
-  { return max_state_index;
+  { 
+    return max_state_index;
   }
 
   unsigned int bisim_partitioner::get_eq_class(const unsigned int s) const
-  { assert(s<block_index_of_a_state.size());
+  { 
+    assert(s<block_index_of_a_state.size());
     return blocks[block_index_of_a_state[s]].state_index;
   }
 
   bool bisim_partitioner::in_same_class(const unsigned int s, const unsigned int t) const
-  { return get_eq_class(s)==get_eq_class(t);
+  { 
+    return get_eq_class(s)==get_eq_class(t);
   }
 
 // Private methods of bisim_partitioner
@@ -131,13 +141,17 @@ namespace detail
                                  std::map < state_type, std::vector < state_type > > &inert_transition_map,
                                  std::vector < non_bottom_state > &new_non_bottom_states,
                                  std::set < state_type > &visited)
-  { if (inert_transition_map.count(s)>0) // The state s is a bottom state. We need not to investigate these.
-    { if (visited.count(s)==0)            
-      { visited.insert(s);
+  { 
+    if (inert_transition_map.count(s)>0) // The state s is a bottom state. We need not to investigate these.
+    { 
+      if (visited.count(s)==0)            
+      { 
+        visited.insert(s);
         std::vector < state_type> &inert_transitions=inert_transition_map[s];
         for(std::vector < state_type>::const_iterator j=inert_transitions.begin();
              j!=inert_transitions.end(); j++)
-        { order_recursively_on_tau_reachability(*j,inert_transition_map,new_non_bottom_states,visited);
+        { 
+          order_recursively_on_tau_reachability(*j,inert_transition_map,new_non_bottom_states,visited);
         }
         new_non_bottom_states.push_back(non_bottom_state(s));
         inert_transitions.swap(new_non_bottom_states.back().inert_transitions); 
@@ -146,17 +160,20 @@ namespace detail
   }
 
   void bisim_partitioner::order_on_tau_reachability(std::vector < non_bottom_state > &non_bottom_states)
-  { std::set < state_type > visited;
+  { 
+    std::set < state_type > visited;
     std::map < state_type, std::vector < state_type > > inert_transition_map;
     for(std::vector < non_bottom_state >::iterator i=non_bottom_states.begin();
              i!=non_bottom_states.end(); ++i)
-    { i->inert_transitions.swap(inert_transition_map[i->state]);
+    { 
+      i->inert_transitions.swap(inert_transition_map[i->state]);
     }
     std::vector < non_bottom_state > new_non_bottom_states;
 
     for(std::vector < non_bottom_state >::const_iterator i=non_bottom_states.begin();
              i!=non_bottom_states.end(); ++i)
-    { order_recursively_on_tau_reachability(i->state, inert_transition_map, new_non_bottom_states, visited);
+    { 
+      order_recursively_on_tau_reachability(i->state, inert_transition_map, new_non_bottom_states, visited);
     }
     new_non_bottom_states.swap(non_bottom_states);
   }
@@ -184,31 +201,38 @@ namespace detail
     bool bottom_state=true;
     std::vector < state_type > current_inert_transitions;
     for(transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
-    { const transition t=r.front();
+    { 
+      const transition t=r.front();
 
       if (branching && aut.is_tau(t.label()))
-      { if (preserve_divergences && t.from()==t.to()) 
+      { 
+        if (preserve_divergences && t.from()==t.to()) 
         { 
           initial_partition.non_inert_transitions.push_back(transition(t.from(),tau_label,t.to()));
         } 
         else
-        { current_inert_transitions.push_back(t.to());
+        { 
+          current_inert_transitions.push_back(t.to());
           bottom_state=false;
         }
       }
       transition_const_range next_i=r;
       next_i.advance_begin(1);
       if (next_i.empty() || t.from()!=next_i.front().from())
-      { // store the current from state
+      { 
+        // store the current from state
         for( ; last_non_stored_state_number<t.from(); ++last_non_stored_state_number)
-        { initial_partition.bottom_states.push_back(last_non_stored_state_number);
+        { 
+          initial_partition.bottom_states.push_back(last_non_stored_state_number);
         } 
 
         if (bottom_state)
-        { initial_partition.bottom_states.push_back(t.from());
+        { 
+          initial_partition.bottom_states.push_back(t.from());
         }
         else
-        { initial_partition.non_bottom_states.push_back(non_bottom_state(t.from()));
+        { 
+          initial_partition.non_bottom_states.push_back(non_bottom_state(t.from()));
           current_inert_transitions.swap(initial_partition.non_bottom_states.back().inert_transitions);
           bottom_state=true;
         }
@@ -218,7 +242,8 @@ namespace detail
     }
 
     for( ; last_non_stored_state_number<aut.num_states(); ++last_non_stored_state_number)
-    { initial_partition.bottom_states.push_back(last_non_stored_state_number);
+    { 
+      initial_partition.bottom_states.push_back(last_non_stored_state_number);
     }
 
     // Sort the non-bottom states such that the deepest states occur first.
@@ -232,7 +257,8 @@ namespace detail
     { 
       const transition t=r.front();
       if (!branching || !aut.is_tau(t.label()))
-      { // Note that by sorting the transitions first, the non_inert_transitions are grouped per label.
+      { 
+        // Note that by sorting the transitions first, the non_inert_transitions are grouped per label.
           initial_partition.non_inert_transitions.push_back(transition(t.from(),t.label(),t.to()));
       }
     }
@@ -270,12 +296,15 @@ namespace detail
       
       for(std::vector < state_type >::const_iterator j=i1_bottom_states.begin();
           j!=i1_bottom_states.end(); ++j)
-      { if (state_flags[*j])
-        { // state is flagged. 
+      { 
+        if (state_flags[*j])
+        { 
+          // state is flagged. 
           flagged_states.push_back(*j);
         }
         else
-        { // state is not flagged. It will be moved to a new block.
+        { 
+          // state is not flagged. It will be moved to a new block.
           non_flagged_states.push_back(*j);
           block_index_of_a_state[*j]=blocks.size();
         }
@@ -284,13 +313,16 @@ namespace detail
       block_index_type reset_state_flags_block=*i1;
 
       if (!non_flagged_states.empty())
-      { // There are flagged and non flagged states. So, the block must be split. 
+      { 
+        // There are flagged and non flagged states. So, the block must be split. 
         // Move the unflagged states to the new block.
           
         if (core::gsDebug)
-        { const unsigned int m=pow(10,floor(log10( static_cast<double>( (blocks.size()+1)/2))));
+        { 
+          const unsigned int m=pow(10,floor(log10( static_cast<double>( (blocks.size()+1)/2))));
           if ((blocks.size()+1)/2 % m==0) 
-          { std::cerr << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << "\n";
+          { 
+            std::cerr << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << "\n";
           }
         }
         // Record how block *i1 is split, to use this to generate counter examples.
@@ -356,18 +388,23 @@ namespace detail
         i1_non_bottom_states.swap(blocks[*i1].non_bottom_states);
         for(std::vector < non_bottom_state >::iterator k=i1_non_bottom_states.begin();
                  k!=i1_non_bottom_states.end(); ++k)
-        { const std::vector < state_type > &inert_transitions=k->inert_transitions;
+        { 
+          const std::vector < state_type > &inert_transitions=k->inert_transitions;
           if (!state_flags[k->state])
-          { bool all_transitions_end_in_unflagged_block=true;
+          { 
+            bool all_transitions_end_in_unflagged_block=true;
             for(std::vector < state_type > :: const_iterator l=inert_transitions.begin();
                      all_transitions_end_in_unflagged_block && l!=inert_transitions.end(); ++l)
-            { if (block_index_of_a_state[*l]!= new_block1)
-              { block_index_of_a_state[*l]=new_block2;
+            { 
+              if (block_index_of_a_state[*l]!= new_block1)
+              { 
+                block_index_of_a_state[*l]=new_block2;
                 all_transitions_end_in_unflagged_block=false;
               }
             }
             if (all_transitions_end_in_unflagged_block)
-            { // Move *k to the non flagged block. Swap the inert transitions to avoid copying.
+            { 
+              // Move *k to the non flagged block. Swap the inert transitions to avoid copying.
               non_bottom_state s(k->state);
               s.inert_transitions.swap(k->inert_transitions);
               non_flagged_non_bottom_states.push_back(s);
@@ -380,13 +417,16 @@ namespace detail
           std::vector < state_type > remaining_inert_transitions;
           for(std::vector < state_type > :: const_iterator l=inert_transitions.begin();
                      l!=inert_transitions.end(); ++l)
-          { if (block_index_of_a_state[*l]==new_block1)
-            { // The transition *l (*k,tau_label,*l) becomes a non inert transition in the new
+          { 
+            if (block_index_of_a_state[*l]==new_block1)
+            { 
+              // The transition *l (*k,tau_label,*l) becomes a non inert transition in the new
               // block.
               non_flagged_non_inert_transitions.push_back(transition(k->state,tau_label,*l));
             }
             else
-            { // The transition represented by *l remains an inert transition.
+            { 
+              // The transition represented by *l remains an inert transition.
               block_index_of_a_state[*l]=new_block2;
               remaining_inert_transitions.push_back(*l);
             }
@@ -394,12 +434,14 @@ namespace detail
           if (remaining_inert_transitions.empty()) // The last outgoing inert tau transition just became non inert. 
                                                    // k->state has become a bottom state. Otherwise it remains
                                                    // a non bottom state.
-          { blocks[new_block2].bottom_states.push_back(k->state);
+          { 
+            blocks[new_block2].bottom_states.push_back(k->state);
             block_index_of_a_state[k->state]=new_block2;
             partition_is_unstable=true;
           }
           else
-          { flagged_non_bottom_states.push_back(non_bottom_state(k->state,remaining_inert_transitions));
+          { 
+            flagged_non_bottom_states.push_back(non_bottom_state(k->state,remaining_inert_transitions));
             block_index_of_a_state[k->state]=new_block2;
           }
         }
@@ -414,11 +456,14 @@ namespace detail
         i1_non_inert_transitions.swap(blocks[*i1].non_inert_transitions);
         for(std::vector < transition >::iterator k=i1_non_inert_transitions.begin();
                  k!=i1_non_inert_transitions.end(); ++k )
-        { if (block_index_of_a_state[k->to()]==new_block1)
-          { non_flagged_non_inert_transitions.push_back(*k);
+        { 
+          if (block_index_of_a_state[k->to()]==new_block1)
+          { 
+            non_flagged_non_inert_transitions.push_back(*k);
           }
           else
-          { block_index_of_a_state[k->to()]=new_block2;
+          { 
+            block_index_of_a_state[k->to()]=new_block2;
             flagged_non_inert_transitions.push_back(*k);
           }
         }
@@ -427,20 +472,23 @@ namespace detail
         flagged_non_inert_transitions.swap(blocks[new_block2].non_inert_transitions);
       }
       else
-      { // Nothing changed, so put the bottom states back again.
+      { 
+        // Nothing changed, so put the bottom states back again.
         i1_bottom_states.swap(blocks[*i1].bottom_states);
       }
       // reset the state flags
       std::vector < state_type > &flagged_states_to_be_unflagged=blocks[reset_state_flags_block].bottom_states;
       for(std::vector < state_type >::const_iterator j=flagged_states_to_be_unflagged.begin();
                  j!=flagged_states_to_be_unflagged.end(); ++j)
-      { state_flags[*j]=false;
+      { 
+        state_flags[*j]=false;
       }
     
       std::vector < non_bottom_state > &flagged_states_to_be_unflagged1=blocks[reset_state_flags_block].non_bottom_states;
       for(std::vector < non_bottom_state >::const_iterator j=flagged_states_to_be_unflagged1.begin();
                  j!=flagged_states_to_be_unflagged1.end(); ++j)
-      { state_flags[j->state]=false;
+      { 
+        state_flags[j->state]=false;
       }
     }
     BL.clear();
@@ -462,15 +510,18 @@ namespace detail
       // Avoid checking too often. This is too time consuming, even in debug mode.
       consistency_check_counter++;
       if (consistency_check_counter>=consistency_check_barrier)
-      { consistency_check_counter=0;
+      { 
+        consistency_check_counter=0;
         consistency_check_barrier=consistency_check_barrier*2;
         check_internal_consistency_of_the_partitioning_data_structure(branching, preserve_divergence);
       }
 #endif
       if (to_be_processed.empty() && partition_is_unstable)
-      { // Put all blocks in to_be_processed;
+      { 
+        // Put all blocks in to_be_processed;
         for(block_index_type i=0; i< blocks.size(); ++i)
-        { to_be_processed.push_back(i);
+        { 
+          to_be_processed.push_back(i);
         }
         block_is_in_to_be_processed=std::vector < bool >(blocks.size(),true);
         partition_is_unstable=false;
@@ -487,13 +538,15 @@ namespace detail
       for(std::vector <transition>::const_iterator i=splitter_non_inert_transitions.begin(); 
                   blocks[splitter_index].non_inert_transitions.size()!=0 &&
                   i!=splitter_non_inert_transitions.end(); ++i) 
-      { // The flag of the starting state of *i is raised and its block is added to BL;
+      { 
+        // The flag of the starting state of *i is raised and its block is added to BL;
 
         assert(i->from()<aut.num_states());
         state_flags[i->from()]=true;
         const block_index_type marked_block_index=block_index_of_a_state[i->from()];
         if (block_flags[marked_block_index]==false)
-        { block_flags[marked_block_index]=true;
+        { 
+          block_flags[marked_block_index]=true;
           BL.push_back(marked_block_index);
         }
         
@@ -502,7 +555,8 @@ namespace detail
         i_next++;
         if (i_next==splitter_non_inert_transitions.end() || 
                         i->label()!=i_next->label())
-        { // We consider BL which contains references to all blocks from which a state from splitter
+        { 
+          // We consider BL which contains references to all blocks from which a state from splitter
           // can be reached. If not all flags of the non bottom states in a block in BL are set, the
           // non flagged non bottom states are moved to a new block.
 
@@ -541,7 +595,8 @@ namespace detail
     assert(block_index_of_a_state.size()==aut.num_states());
     for(std::vector < block >::const_iterator i=blocks.begin();
          i!=blocks.end(); ++i)
-    { // Check the block_index.
+    { 
+      // Check the block_index.
       assert(i->block_index<blocks.size());
       assert(block_indices.count(i->block_index)==0);
       block_indices.insert(i->block_index);
@@ -551,7 +606,8 @@ namespace detail
 
       for(std::vector < state_type >::const_iterator j=i_bottom_states.begin();
               j!=i_bottom_states.end(); ++j)
-      { total_number_of_states++;
+      { 
+        total_number_of_states++;
         assert(*j<aut.num_states());
         // Check that the block number of the state is maintained properly.
         assert(block_index_of_a_state[*j]==i->block_index);
@@ -564,19 +620,22 @@ namespace detail
       std::set < state_type > local_bottom_states;
       for(std::vector < non_bottom_state >::const_iterator j=i_non_bottom_states.begin();
               j!=i_non_bottom_states.end(); ++j)
-      { local_bottom_states.insert(j->state);
+      { 
+        local_bottom_states.insert(j->state);
       }
 
       for(std::vector < non_bottom_state >::const_iterator j=i_non_bottom_states.begin();
               j!=i_non_bottom_states.end(); ++j)
-      { total_number_of_states++;
+      { 
+        total_number_of_states++;
         assert(j->state<aut.num_states());
         // Check that the block number of the state is maintained properly.
         assert(block_index_of_a_state[j->state]==i->block_index);
         const std::vector < state_type > &j_inert_transitions=j->inert_transitions;
         for(std::vector < state_type >::const_iterator k=j_inert_transitions.begin();
               k!=j_inert_transitions.end(); k++)
-        { total_number_of_transitions++;
+        { 
+          total_number_of_transitions++;
           assert(*k<aut.num_states());
           // Check that the inert transitions are well ordered.
           assert(visited.count(*k)>0 || local_bottom_states.count(*k)==0); 
@@ -591,7 +650,8 @@ namespace detail
       std::set < label_type > observed_action_labels;
       for(std::vector < transition >::const_iterator j=i_non_inert_transitions.begin();
               j!=i_non_inert_transitions.end(); ++j)
-      { total_number_of_transitions++;
+      { 
+        total_number_of_transitions++;
         assert(j->to()<aut.num_states());
         assert(j->from()<aut.num_states());
         
@@ -599,7 +659,8 @@ namespace detail
         std::vector < transition >::const_iterator j_next=j;
         j_next++;
         if (j_next==i_non_inert_transitions.end() || (j->label()!=j_next->label()))
-        { assert(observed_action_labels.count(j->label())==0);
+        { 
+          assert(observed_action_labels.count(j->label())==0);
           observed_action_labels.insert(j->label());
         }
 
@@ -622,19 +683,22 @@ namespace detail
     assert(block_index_of_a_state.size()==aut.num_states());
     for(std::vector < state_type >::const_iterator i=block_index_of_a_state.begin();
               i!=block_index_of_a_state.end(); ++i)
-    { assert(blocks[*i].block_index== *i);
+    { 
+      assert(blocks[*i].block_index== *i);
     }
 
     // Check block_flags that the block flags are all set to false
     for(std::vector < bool >::const_iterator i=block_flags.begin(); 
                  i!=block_flags.end(); ++i)
-    { assert(!*i);
+    { 
+      assert(!*i);
     }
     
     // Check that state_flags are all false.
     for(std::vector < bool >::const_iterator i=state_flags.begin(); 
                  i!=state_flags.end(); ++i)
-    { assert(!*i);
+    { 
+      assert(!*i);
     }
     
     // Check to_be_processed
@@ -643,7 +707,8 @@ namespace detail
     
     for(std::vector< block_index_type > ::const_iterator i=to_be_processed.begin();
                 i!=to_be_processed.end(); ++i)
-    { temporary_block_is_in_to_be_processed[*i]=true;
+    { 
+      temporary_block_is_in_to_be_processed[*i]=true;
     }
     for(state_type i=0; i<blocks.size(); ++i)
     { 
@@ -661,11 +726,72 @@ namespace detail
 
 #endif // not NDEBUG
 
-  std::vector < mcrl2::trace::Trace > 
+void bisim_partitioner::reachable_states_in_block_s_via_label_l(
+              const state_type s,  
+              const block_index_type block_index_for_bottom_state,
+              const label_type l,
+              const mcrl2::lts::outgoing_transitions_per_state_action_t &outgoing_transitions,
+              std::set < state_type > &result_set,
+              std::set < state_type > &visited,
+              const bool branching_bisimulation) const
+  { 
+    // This function yields a set of states that are reachable via a sequence of tau steps
+    // in block block_index_for_bottom_state, followed by an l step.
+    // The technique used is to search through tau transitions from s, until a bottom state
+    // in the current class is found. From this state all reachable states are put in the result set.
+    if (visited.count(s)>0)
+    { 
+      return;
+    }
+
+    visited.insert(s);
+    // Put all l reachable states in the result set.
+    for(outgoing_transitions_per_state_action_t::const_iterator i1=outgoing_transitions.lower_bound(pair<state_type,label_type>(s,l));
+                 i1!=outgoing_transitions.upper_bound(pair<state_type, label_type>(s,l)); ++i1)
+    { 
+      result_set.insert(to(i1));
+    }
+
+    // Search for tau reachable states that are still in the block with block_index_for_bottom_state.
+    if (branching_bisimulation) 
+    { for(label_type lab=0; lab<aut.num_labels(); ++lab)
+      { 
+        if (aut.is_tau(lab))
+        {
+          for(outgoing_transitions_per_state_action_t::const_iterator i=outgoing_transitions.lower_bound(pair<state_type,label_type>(s,lab));
+                   i!=outgoing_transitions.upper_bound(pair<state_type, label_type>(s,lab)); ++i)
+          { 
+            // Now find out whether the block index of to(i) is part of the block with index block_index_for_bottom_state.
+            block_index_type b=block_index_of_a_state[to(i)];
+            while (b!=block_index_for_bottom_state && blocks[b].parent_block_index!=b)
+            { 
+              assert(blocks[b].parent_block_index!=b);
+              b=blocks[b].parent_block_index;
+            }
+            if (b==block_index_for_bottom_state)
+            { 
+              reachable_states_in_block_s_via_label_l(
+                               to(i),
+                               block_index_for_bottom_state,
+                               l,
+                               outgoing_transitions,
+                               result_set,
+                               visited,
+                               branching_bisimulation);
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  std::set < mcrl2::trace::Trace > 
             bisim_partitioner::counter_traces_aux(
-                           const unsigned int s,
-                           const unsigned int t,
-                           const mcrl2::lts::outgoing_transitions_per_state_action_t &outgoing_transitions) const
+                           const state_type s,
+                           const state_type t,
+                           const mcrl2::lts::outgoing_transitions_per_state_action_t &outgoing_transitions,
+                           const bool branching_bisimulation) const
   {
     // First find the smallest block containing both states s and t.
     // Find all blocks containing s.
@@ -673,7 +799,8 @@ namespace detail
     bisim_partitioner::block_index_type b_s=block_index_of_a_state[s];
     blocks_containing_s.insert(b_s);
     while (blocks[b_s].parent_block_index!=b_s)
-    { b_s=blocks[b_s].parent_block_index;
+    {
+      b_s=blocks[b_s].parent_block_index;
       blocks_containing_s.insert(b_s);
     }
 
@@ -686,15 +813,20 @@ namespace detail
     }
     
     // Now b_C is the smallest block containing both s and t.
+
     const label_type l=blocks[b_C].splitter.first;
     const bisim_partitioner::block_index_type B__=blocks[b_C].splitter.second;
-  
+
+    std::set < state_type > l_reachable_states_for_s;
+    std::set < state_type > visited1;
+    reachable_states_in_block_s_via_label_l(s,b_C,l,outgoing_transitions, l_reachable_states_for_s,visited1,branching_bisimulation);
+
     std::set < state_type> B_s_reacha;
     std::set < state_type> B_s_nonreacha;
-    for(outgoing_transitions_per_state_action_t::const_iterator i=outgoing_transitions.lower_bound(pair<state_type,label_type>(s,l));
-                 i!=outgoing_transitions.upper_bound(pair<state_type,label_type>(s,l)); ++i)
-    { const state_type s_=to(i);
-      block_index_type b=block_index_of_a_state[s_]; 
+    for(std::set < state_type >::const_iterator i=l_reachable_states_for_s.begin(); 
+                 i!=l_reachable_states_for_s.end(); ++i)
+    {
+      block_index_type b=block_index_of_a_state[*i]; 
       bool reached=b==B__;
       do 
       { 
@@ -707,20 +839,24 @@ namespace detail
       
       if (reached)
       { 
-        B_s_reacha.insert(s_);
+        B_s_reacha.insert(*i);
       }
       else
       { 
-        B_s_nonreacha.insert(s_);
+        B_s_nonreacha.insert(*i);
       }
     }
     
+    std::set < state_type > l_reachable_states_for_t;
+    std::set < state_type > visited2;
+    reachable_states_in_block_s_via_label_l(t,b_C,l,outgoing_transitions, l_reachable_states_for_t,visited2,branching_bisimulation);
+
     std::set < state_type> B_t_reacha;
     std::set < state_type> B_t_nonreacha;
-    for(outgoing_transitions_per_state_action_t::const_iterator i=outgoing_transitions.lower_bound(pair<state_type,label_type>(t,l));
-                 i!=outgoing_transitions.upper_bound(pair<state_type,label_type>(t,l)); ++i)
-    { const state_type t_=to(i);
-      block_index_type b=block_index_of_a_state[t_]; 
+    for(std::set < state_type >::const_iterator i=l_reachable_states_for_t.begin(); 
+                 i!=l_reachable_states_for_t.end(); ++i)
+    {
+      block_index_type b=block_index_of_a_state[*i]; 
       bool reached=b==B__;
       do 
       { 
@@ -733,21 +869,22 @@ namespace detail
       
       if (reached)
       { 
-        B_t_reacha.insert(t_);
+        B_t_reacha.insert(*i);
       }
       else
       { 
-        B_t_nonreacha.insert(t_);
+        B_t_nonreacha.insert(*i);
       }
     }
 
     assert((B_s_reacha.empty() && !B_t_reacha.empty()) || 
            (!B_s_reacha.empty() && B_t_reacha.empty()));
 
-    std::vector < mcrl2::trace::Trace > resulting_counter_traces;
+    std::set < mcrl2::trace::Trace > resulting_counter_traces;
 
     if (B_s_reacha.empty())
-    { B_s_reacha.swap(B_t_reacha);
+    { 
+      B_s_reacha.swap(B_t_reacha);
       B_s_nonreacha.swap(B_t_nonreacha);
     }
 
@@ -755,10 +892,11 @@ namespace detail
 
 
     if (B_t_nonreacha.empty())
-    { // The counter trace is simply the label l.
+    { 
+      // The counter trace is simply the label l.
       mcrl2::trace::Trace counter_trace;
       counter_trace.addAction((ATermAppl)aut.label_value(l));
-      resulting_counter_traces.push_back(counter_trace);
+      resulting_counter_traces.insert(counter_trace);
     }
     else
     { 
@@ -768,9 +906,10 @@ namespace detail
         for(std::set < state_type>::const_iterator i_t=B_t_nonreacha.begin();
              i_t!=B_t_nonreacha.end(); ++i_t)
         { 
-          const std::vector < mcrl2::trace::Trace > counter_traces=counter_traces_aux(*i_s,*i_t,outgoing_transitions);
+          const std::set < mcrl2::trace::Trace > counter_traces=
+                    counter_traces_aux(*i_s,*i_t,outgoing_transitions,branching_bisimulation);
           // Add l to these traces and add them to resulting_counter_traces
-          for(std::vector < mcrl2::trace::Trace >::const_iterator j=counter_traces.begin();
+          for(std::set< mcrl2::trace::Trace >::const_iterator j=counter_traces.begin();
                     j!=counter_traces.end(); ++j)
           { 
             mcrl2::trace::Trace new_counter_trace;
@@ -781,7 +920,7 @@ namespace detail
             { 
               new_counter_trace.addAction(old_counter_trace.nextAction());
             }
-            resulting_counter_traces.push_back(new_counter_trace);
+            resulting_counter_traces.insert(new_counter_trace);
           }
         }
       }
@@ -790,21 +929,26 @@ namespace detail
     return resulting_counter_traces; 
   }
     
-  std::vector < mcrl2::trace::Trace > bisim_partitioner::counter_traces(const unsigned int s, const unsigned int t)
+  std::set < mcrl2::trace::Trace > bisim_partitioner::counter_traces(
+                                           const unsigned int s, 
+                                           const unsigned int t,
+                                           const bool branching_bisimulation)
   { 
     if (get_eq_class(s)==get_eq_class(t))
-    { throw mcrl2::runtime_error("Requesting a counter trace for two bisimilar states. Such a trace is not useful.");
+    { 
+      throw mcrl2::runtime_error("Requesting a counter trace for two bisimilar states. Such a trace is not useful.");
     }
     
     const outgoing_transitions_per_state_action_t outgoing_transitions=transitions_per_outgoing_state_action_pair(aut.get_transitions());
-    return counter_traces_aux(s,t,outgoing_transitions);
+    return counter_traces_aux(s,t,outgoing_transitions,branching_bisimulation);
   }
 
 
   void bisimulation_reduce(lts &l,
                            const bool branching /*=false */,
                            const bool preserve_divergences /*=false */)
-  { // First remove tau loops in case of branching bisimulation.
+  { 
+    // First remove tau loops in case of branching bisimulation.
     if (branching)
     { 
       detail::scc_partitioner scc_part(l);
@@ -833,7 +977,8 @@ namespace detail
               const bool branching /* =false*/, 
               const bool preserve_divergences /*=false*/,
               const bool generate_counter_examples /*= false*/ )
-  { lts l1_copy(l1);
+  { 
+    lts l1_copy(l1);
     lts l2_copy(l2);
     return destructive_bisimulation_compare(l1_copy,l2_copy,branching,preserve_divergences,
                                             generate_counter_examples);
@@ -845,13 +990,15 @@ namespace detail
               const bool branching /* =false*/, 
               const bool preserve_divergences /*=false*/,
               const bool generate_counter_examples /* = false */)
-  { unsigned int init_l2 = l2.initial_state() + l1.num_states();
+  { 
+    unsigned int init_l2 = l2.initial_state() + l1.num_states();
     merge(l1,l2);
     l2.clear(); // No use for l2 anymore.
 
     // First remove tau loops in case of branching bisimulation.
     if (branching)
-    { detail::scc_partitioner scc_part(l1);
+    { 
+      detail::scc_partitioner scc_part(l1);
       scc_part.replace_transitions(preserve_divergences);
       l1.set_num_states(scc_part.num_eq_classes());
       l1.set_initial_state(scc_part.get_eq_class(l1.initial_state()));
@@ -860,14 +1007,17 @@ namespace detail
     
     detail::bisim_partitioner bisim_part(l1, branching, preserve_divergences);
     if (generate_counter_examples && !bisim_part.in_same_class(l1.initial_state(),init_l2))
-    { std::vector < mcrl2::trace::Trace > counter_example_traces=bisim_part.counter_traces(l1.initial_state(),init_l2);
+    { 
+      std::set < mcrl2::trace::Trace > counter_example_traces=bisim_part.counter_traces(l1.initial_state(),init_l2,branching);
       unsigned int count=0;
-      for(std::vector < mcrl2::trace::Trace >::iterator i=counter_example_traces.begin();
+      for(std::set < mcrl2::trace::Trace >::const_iterator i=counter_example_traces.begin();
                  i!=counter_example_traces.end(); ++i,++count)
-      { std::stringstream filename_s;
+      { 
+        std::stringstream filename_s;
         filename_s << "Counterexample" << count << ".trc";
         const std::string filename(filename_s.str());
-        i->save(filename,mcrl2::trace::tfPlain);
+        mcrl2::trace::Trace i_trace= *i;
+        i_trace.save(filename,mcrl2::trace::tfPlain);
       }
     }
     return bisim_part.in_same_class(l1.initial_state(),init_l2);

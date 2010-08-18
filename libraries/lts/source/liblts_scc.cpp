@@ -38,6 +38,7 @@ namespace detail
     // Initialise the data structures
     std::vector<bool> visited(aut.num_states(),false);
 
+    // Number the states via a depth first search
     for(state_type i=0; i<aut.num_states(); ++i)
     { dfs_numbering(i,src_tgt,visited);
     }
@@ -60,6 +61,10 @@ namespace detail
         equivalence_class_index++;
       }
     }
+    if (core::gsDebug)
+    {  std::cerr << "Tau loop (SCC) partitioner reduces lts to " << equivalence_class_index << " states.\n";
+    }
+
     dfsn2state.clear();
   }
  
