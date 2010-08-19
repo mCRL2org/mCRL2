@@ -38,30 +38,38 @@ using mcrl2::utilities::tools::input_output_tool;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-struct t_lts2lps_options {
-  std::string datafile;
-  std::string infilename;
-  std::string outfilename;
-};
 
 class lts2lps_tool : public input_output_tool
 {
-
-  typedef input_output_tool super;
-  mcrl2::lts::lts_type        intype;
+  private:
+    typedef input_output_tool super;
 
   protected:
+  
+    typedef enum { none_e, data_e, lps_e, mcrl2_e } data_file_type_t;
 
-    t_lts2lps_options m_lps2lts_options;
+    std::string infilename;
+    std::string outfilename;
+    mcrl2::lts::lts_type intype;
+    data_file_type_t data_file_type;
+    std::string datafile;
+    
 
     void add_options(interface_description &desc)
     {
       super::add_options(desc);
 
       desc.add_option("data", make_mandatory_argument("FILE"),
-          "use FILE as the data and action specification using which the input LTS was generated. \n"
-          "Note that FILE must either be an .lps file, or it must contain a textual description with data types and action declarations "
-          "(e.g. a .mcrl2 file)", 'D');
+          "use FILE as the data and action specification. "
+          "FILE must be a .mcrl2 file which does not contain an init clause. ", 'D');
+    
+      desc.add_option("lps", make_mandatory_argument("FILE"),
+          "use FILE for the data and action specification. "
+          "FILE must be a .lps file. ", 'l');
+    
+      desc.add_option("mcrl2", make_mandatory_argument("FILE"),
+          "use FILE as the data and action specification for the LTS. "
+          "FILE must be a .mcrl2 file. ", 'm');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -69,12 +77,36 @@ class lts2lps_tool : public input_output_tool
       using namespace mcrl2::lts;
       super::parse_options(parser);
 
-      if (parser.options.count("data")) {
-        if (1 < parser.options.count("data")) {
-          std::cerr << "warning: multiple data specification files are specified; can only use one\n";
+      if (parser.options.count("data")) 
+      {
+        if (1 < parser.options.count("data")) 
+        {
+          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
         }
-
-        m_lps2lts_options.datafile = parser.option_argument("data");
+        data_file_type=data_e;
+        datafile = parser.option_argument("data");
+      }  
+ 
+      if (parser.options.count("lps")) 
+      {
+        if (1 < parser.options.count("lps") || data_file_type!=none_e) 
+        {
+          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
+        }
+        
+        data_file_type=lps_e;
+        datafile = parser.option_argument("lps");
+      }  
+ 
+      if (parser.options.count("mcrl2")) 
+      {
+        if (1 < parser.options.count("mcrl2") || data_file_type!=none_e) 
+        {
+          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
+        }
+        
+        data_file_type=mcrl2_e;
+        datafile = parser.option_argument("mcrl2");
       }  
  
       if (parser.options.count("in")) {
@@ -83,15 +115,16 @@ class lts2lps_tool : public input_output_tool
         }
 
         intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
-        if (intype == lts_none || intype == lts_dot)  {
+        if (intype == lts_none || intype == lts_dot)  
+        {
           parser.error("option -i/--in has illegal argument '" +
             parser.option_argument("in") + "'");
         }
       }
 
 
-      m_lps2lts_options.infilename       = input_filename();
-      m_lps2lts_options.outfilename      = output_filename();
+      infilename       = input_filename();
+      outfilename      = output_filename();
     } 
 
   public:
@@ -103,7 +136,7 @@ class lts2lps_tool : public input_output_tool
              "Translates an LTS in INFILE and writes the resulting LPS to "
              "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
              "present, standard input is used."),
-      intype(mcrl2::lts::lts_none)
+      intype(mcrl2::lts::lts_none),data_file_type(none_e)
     {}
 
 
@@ -116,7 +149,7 @@ class lts2lps_tool : public input_output_tool
       /* Read LTS */
       mcrl2::lts::lts l;
 
-      if (m_lps2lts_options.infilename.empty()) 
+      if (infilename.empty()) 
       {
         gsVerboseMsg("reading LTS from stdin...\n");
 
@@ -133,16 +166,16 @@ class lts2lps_tool : public input_output_tool
       }
       else 
       {
-        gsVerboseMsg("reading LTS from '%s'...\n",m_lps2lts_options.infilename.c_str());
+        gsVerboseMsg("reading LTS from '%s'...\n",infilename.c_str());
 
         try 
-        { mcrl2::lts::lts l_temp(m_lps2lts_options.infilename,intype);
+        { mcrl2::lts::lts l_temp(infilename,intype);
           l_temp.swap(l);
         }
         catch (mcrl2::runtime_error &e)
         {
           throw mcrl2::runtime_error(std::string("cannot read LTS from file '") + 
-                                     m_lps2lts_options.infilename +
+                                     infilename +
                                      "'.\nretry with -v/--verbose for more information.\n" +
                                      e.what());
         }
@@ -152,7 +185,8 @@ class lts2lps_tool : public input_output_tool
       action_label_list action_labels;
 
       if (l.has_data_specification())
-      { if (!m_lps2lts_options.datafile.empty())
+      { 
+        if (data_file_type!=none_e)
         { 
           std::cerr << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
         }
@@ -164,66 +198,52 @@ class lts2lps_tool : public input_output_tool
       else
       { 
         /* Read data specification (if any) */ 
-        if (m_lps2lts_options.datafile.empty())
+        if (data_file_type==none_e)
         {
            std::cerr << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
         }
+        else if (data_file_type==lps_e)
+        {
+          // First try to read the provided file as a .lps file.
+          lps::specification spec;
+          spec.load(datafile.c_str());
+          data=spec.data();
+          action_labels=spec.action_labels();
+        }
         else
         { 
-          lps::specification spec;
-          try
+          // data_file_type==data_e or data_file_type==mcrl2_e
+          std::ifstream dfile( datafile.c_str() );
+  
+          if( !dfile )
           {
-            // First try to read the provided file as a .lps file.
-            spec.load(m_lps2lts_options.datafile.c_str());
+            std::cerr << "Cannot read data specification file. Only the standard data types and no action labels can be used." << std::endl;
           }
-          catch (mcrl2::runtime_error &e)
-          { 
-            std::cerr << "Trying to read the data/action file as an .lps file. " << e.what() << "\n";
-            // Try to read the data/action label file as a text file;
-            std::ifstream dfile( m_lps2lts_options.datafile.c_str() );
-    
-            if( !dfile )
+          else 
+          {
+            std::stringstream lps;
+            char ch;
+            while(dfile)
             {
-              std::cerr << "Cannot read data specification file. Only the standard data types and no action labels can be used." << std::endl;
+              dfile.get(ch);
+              if(dfile) lps << ch;
             }
-            else 
-            {
-              std::stringstream lps;
-              char ch;
-              while(dfile)
-              {
-                dfile.get(ch);
-                if(dfile) lps << ch;
-              }
-              dfile.close();
-              lps << std::endl;
+            dfile.close();
+            lps << std::endl;
 
-              using namespace mcrl2::process;
-              try
-              { 
-                // The function below parses and typechecks the process specification.
-                process_specification process_spec = parse_process_specification(lps.str(),false);
-                data=process_spec.data();
-                action_labels=process_spec.action_labels();
-              }
-              catch (mcrl2::runtime_error &e)
-              { 
-                lps <<"init delta;";
-                try
-                {
-                  // The function below parses and typechecks the process specification.
-                  process_specification process_spec = parse_process_specification(lps.str(),false);
-                  data=process_spec.data();
-                  action_labels=process_spec.action_labels();
-                }
-                catch (mcrl2::runtime_error &)
-                { throw mcrl2::runtime_error("Failed to read data/action specification file");
-                }
-              }
+            if (data_file_type==data_e)
+            { 
+              lps <<"init delta;\n";
             }
+
+            using namespace mcrl2::process;
+            // The function below parses and typechecks the process specification.
+            process_specification process_spec = parse_process_specification(lps.str(),false);
+            data=process_spec.data();
+            action_labels=process_spec.action_labels();
+            
           }
         }
-        std::cerr << "Ignore errors above. Reading data/action specification succeeded\n";
       }
 
       if (gsVerbose)

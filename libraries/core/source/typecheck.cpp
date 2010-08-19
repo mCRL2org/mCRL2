@@ -460,10 +460,12 @@ namespace mcrl2 {
       {
         if (gsDebug) { std::cerr << "type checking of multiactions read-in phase finished\n"; }
 
-        if(gsIsMultAct(mult_act)){
+        if(gsIsMultAct(mult_act))
+        {
           ATermTable Vars=ATtableCreate(63,50);
           ATermList r=ATmakeList0();
-          for(ATermList l=ATLgetArgument(mult_act,0);!ATisEmpty(l);l=ATgetNext(l)){
+          for(ATermList l=ATLgetArgument(mult_act,0);!ATisEmpty(l);l=ATgetNext(l))
+          {
             ATermAppl o=ATAgetFirst(l);
             assert(gsIsParamId(o));
             o=gstcTraverseActProcVarConstP(Vars,o);
@@ -475,7 +477,8 @@ namespace mcrl2 {
           done:
           ATtableDestroy(Vars);
         }
-        else {
+        else 
+        {
           gsErrorMsg("type checking of multiactions failed (%T is not a multiaction)\n",mult_act);
         }
       }
@@ -508,11 +511,10 @@ namespace mcrl2 {
 
       //XXX read-in from spec (not finished)
       ATermList result=ATempty;
-      if(gstcReadInSorts(sorts)
-        && gstcReadInConstructors()
-        && gstcReadInFuncs(constructors,mappings)
-        && gstcReadInActs(action_labels)
-        )
+      if (gstcReadInSorts(sorts)
+          && gstcReadInConstructors()
+          && gstcReadInFuncs(constructors,mappings)
+          && gstcReadInActs(action_labels))
       {
         if (gsDebug) { std::cerr << "type checking of multiactions read-in phase finished\n"; }
 
@@ -526,18 +528,19 @@ namespace mcrl2 {
             ATermAppl o=ATAgetFirst(l);
             assert(gsIsParamId(o));
             o=gstcTraverseActProcVarConstP(Vars,o);
-            if(!o) goto done;
-              r=ATinsert(r,(ATerm)o);
+            if (!o) 
+            { 
+              ATtableDestroy(Vars);
+              throw mcrl2::runtime_error("Typechecking action failed: "+ core::pp(ATAgetFirst(l)));
+            }
+            r=ATinsert(r,(ATerm)o);
           }
           result = ATinsert(result,(ATerm)ATreverse(r));
-  
-          done:
-          ATtableDestroy(Vars);
         }
       }
       else 
       {
-        throw mcrl2::runtime_error("reading from LPS failed\n");
+        throw mcrl2::runtime_error("reading data/action specification failed");
       }
       gstcDataDestroy();
       return ATreverse(result);
@@ -2460,12 +2463,13 @@ namespace mcrl2 {
         :gsMakeProcess(gsMakeProcVarId(Name,FormParList),FactParList);
     }
 
-    static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTerm){
+    static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTerm)
+    {
       ATermAppl Result=NULL;
       int n = ATgetArity(ATgetAFun(ProcTerm));
       if(n==0) return ProcTerm;
 
-      //Here the code for shord-hand assignments begins.
+      //Here the code for short-hand assignments begins.
       if(gsIsIdAssignment(ProcTerm)){
         // if (gsDebug) { std::cerr << "typechecking a process call with short-hand assignments %T\n\n", ProcTerm);
         ATermAppl Name=ATAgetArgument(ProcTerm,0);

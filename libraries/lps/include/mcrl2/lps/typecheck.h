@@ -55,6 +55,7 @@ namespace lps {
         l=ATinsert(l,(ATerm)(ATermList)i->actions());
       }
       l=core::type_check_mult_actions(l, specification_to_aterm(lps));
+      
       // And convert back...
       mult_actions.clear();
       for( ; !ATisEmpty(l) ; l=ATgetNext(l))
