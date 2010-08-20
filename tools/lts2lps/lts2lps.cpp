@@ -318,6 +318,9 @@ class lts2lps_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2lps_tool>
     {
 
       m_gui_options["data"] = create_filepicker_widget("Text Files (*.txt)|*.txt|mCRL2 files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
+      m_gui_options["lps"]  = create_filepicker_widget("LPS File (*.lps)|*.lps|All Files (*.*)|*.*");
+      m_gui_options["mcrl2"] = create_filepicker_widget("mCRL2 files (*.mcrl2)|*.mcrl2|Text Files (*.txt)|*.txt|All Files (*.*)|*.*");
+
     }
 };
 
