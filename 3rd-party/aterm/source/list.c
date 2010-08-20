@@ -272,8 +272,10 @@ ATermList ATappend(ATermList list, ATerm el)
 
 ATermList ATconcat(ATermList list1, ATermList list2)
 {
-  ATerm* buffer;
+  // ATerm* buffer;   REMOVED by JFG
   unsigned int i, len = ATgetLength(list1);
+  ATerm buffer[len]; // Use such a dynamic array, instead of a AT_allocate_protected buffer, 
+                     // which can become very slow.
   ATermList result = list2;
 
   if(len == 0)
@@ -281,10 +283,12 @@ ATermList ATconcat(ATermList list1, ATermList list2)
   if(ATisEqual(list2, ATempty))
     return list1;
 
-  buffer = AT_alloc_protected(len);
-  if (!buffer) {
+  /* buffer = AT_alloc_protected(len);
+  if (!buffer) 
+  {
     ATerror("ATconcat: out of memory");
-  }
+  } 
+  */
 
   /* Collect the elements of list1 in buffer */
   for(i=0; i<len; i++) {
@@ -297,7 +301,7 @@ ATermList ATconcat(ATermList list1, ATermList list2)
     result = ATinsert(result, buffer[i-1]);
   }
   
-  AT_free_protected(buffer);
+  // AT_free_protected(buffer);
   
   return result;
 }
