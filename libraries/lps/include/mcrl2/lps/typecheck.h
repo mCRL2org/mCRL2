@@ -49,12 +49,12 @@ namespace lps {
       // TODO: replace all this nonsense code by a proper type check implementation
       // Bleh; do conversions...
       ATermList l=ATempty;
-      for(atermpp::vector<multi_action>::const_reverse_iterator i=mult_actions.rbegin();
-              i!=mult_actions.rend(); ++i)
+      for(atermpp::vector<multi_action>::const_iterator i=mult_actions.begin(); // Using a const_reverse_iterator does not compile on mac.
+              i!=mult_actions.end(); ++i)
       { 
         l=ATinsert(l,(ATerm)(ATermList)i->actions());
       }
-      l=core::type_check_mult_actions(l, specification_to_aterm(lps));
+      l=core::type_check_mult_actions(ATreverse(l), specification_to_aterm(lps));
       
       // And convert back...
       mult_actions.clear();
