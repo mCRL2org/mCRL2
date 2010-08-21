@@ -14,6 +14,19 @@
 
 #define MAGIC_K	1999
 
+// Code below is added by JFG to allow dynamic allocation of space on the stack
+// to more efficiently deal with ATconcat, ATreverse, etc. The solution where a chunk
+// of memory is used on the heap which is maintained by the ATerm library is far too
+// slow.
+
+#if defined(BOOST_WINDOWS) || defined(BOOST_INTEL_WIN) || (defined(BOOST_GCC) && BOOST_WINDOWS)
+#include "malloc.h"
+#define SYSTEM_SPECIFIC_ALLOCA(T, n) (T *)(_alloca(n * sizeof(T)))
+#else
+#define SYSTEM_SPECIFIC_ALLOCA(T, n) (T *)(alloca(n * sizeof(T)))
+#endif
+
+
 /*}}}  */
 /*{{{  variables */
 
@@ -272,36 +285,34 @@ ATermList ATappend(ATermList list, ATerm el)
 
 ATermList ATconcat(ATermList list1, ATermList list2)
 {
-  // ATerm* buffer;   REMOVED by JFG
+  ATerm* buffer; 
   unsigned int i, len = ATgetLength(list1);
-  ATerm buffer[len]; // Use such a dynamic array, instead of a AT_allocate_protected buffer, 
-                     // which can become very slow.
   ATermList result = list2;
 
-  if(len == 0)
-    return list2;
   if(ATisEqual(list2, ATempty))
+  { 
     return list1;
+  }
 
-  /* buffer = AT_alloc_protected(len);
-  if (!buffer) 
-  {
-    ATerror("ATconcat: out of memory");
-  } 
-  */
+  if(len == 0)
+  { 
+    return list2;
+  }
+
+  buffer=SYSTEM_SPECIFIC_ALLOCA(ATerm, len);
 
   /* Collect the elements of list1 in buffer */
-  for(i=0; i<len; i++) {
+  for(i=0; i<len; i++) 
+  {
     buffer[i] = ATgetFirst(list1);
     list1 = ATgetNext(list1);
   }
 
   /* Insert elements at the front of the list */
-  for(i=len; i>0; i--) {
+  for(i=len; i>0; i--) 
+  {
     result = ATinsert(result, buffer[i-1]);
   }
-  
-  // AT_free_protected(buffer);
   
   return result;
 }
