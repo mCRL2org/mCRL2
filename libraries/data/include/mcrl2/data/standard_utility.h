@@ -455,8 +455,9 @@ namespace mcrl2 {
         data_expression                list_expression(nil(s));
         std::vector< data_expression > elements(range.begin(), range.end());
 
-        for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i) {
-          BOOST_ASSERT(is_convertible(i->sort(), s));
+        for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i) 
+        {
+          // BOOST_ASSERT(is_convertible(i->sort(), s)); This is not always true, due to type conversion.
 
           list_expression = sort_list::cons_(s, *i, list_expression);
         }
@@ -667,7 +668,7 @@ namespace mcrl2 {
         // We process the elements in reverse order to have a resulting enumeration
         // in the same order as the input
         for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i) {
-          BOOST_ASSERT(is_convertible(i->sort(), s));
+          // BOOST_ASSERT(is_convertible(i->sort(), s));
 
           fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
         }
@@ -819,7 +820,7 @@ namespace mcrl2 {
         // in the same order as the input
         for (typename Sequence::const_reverse_iterator i = range.rbegin(); i != range.rend(); ++i, ++i)
         {
-          BOOST_ASSERT(is_convertible(boost::next(i, 1)->sort(), s));
+          // BOOST_ASSERT(is_convertible(boost::next(i, 1)->sort(), s));
           fbag_expression = sort_fbag::fbagcinsert(s, *boost::next(i, 1), *i, fbag_expression);
         }
 
