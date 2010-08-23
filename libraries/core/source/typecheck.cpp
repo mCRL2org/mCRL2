@@ -3459,7 +3459,8 @@ namespace mcrl2 {
         bool variable=false;
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
         if (Type)
-        { const sort_expression Type1(Type);
+        { 
+          const sort_expression Type1(gstcUnwindType(Type));  
           if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==(unsigned int)nFactPars):(nFactPars==0))
           { variable=true;
             if(!ATAtableGet(AllowedVars,(ATerm)Name)) 
