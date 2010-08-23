@@ -45,9 +45,9 @@ protected:
 	/// \param desc An interface description
 	void add_options(interface_description& desc) {
 		Tool::add_options(desc);
-		desc.add_option(
+		desc.add_hidden_option(
 				"mcrl2-gui",
-				"outputs information about the visual representation of this option in the mCRL2 GUI");
+				"An option for internal use. Provides the tool options in a format to be used by mcrl2-gui");
 		m_get_long_argument_with_description
 				= desc.get_long_argument_with_description();
 		m_toolname = desc.get_toolname();
