@@ -52,6 +52,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   visualizer.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
+  ${SRCS}
 )
 
 IF (APPLE)
