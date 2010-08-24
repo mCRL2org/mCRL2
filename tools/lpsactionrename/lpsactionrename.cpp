@@ -291,7 +291,7 @@ class action_rename_gui_tool: public mcrl2_gui_tool<action_rename_tool>
   public:
 	action_rename_gui_tool()
     {
-      m_gui_options["renamefile"] = create_filepicker_widget();
+      m_gui_options["renamefile"] = create_filepicker_widget("Text files(*.txt)|*.txt|mCRL2-rename files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
       m_gui_options["no-sumelm"] = create_checkbox_widget();
       m_gui_options["no-rewrite"] = create_checkbox_widget();
 

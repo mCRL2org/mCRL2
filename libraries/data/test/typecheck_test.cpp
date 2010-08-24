@@ -483,13 +483,12 @@ void test_data_specification(const std::string &ds_in,
 
   if (test_type_checker) {
 
-    if (expect_success) {
+    if (expect_success) 
+    {
       data::type_check(ds);
-
-      //ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
-      std::string ds_out = data::pp(ds);
-      //std::clog << "The following data specifications should be the same:" << std::endl << ds_in  << std::endl << "and" << std::endl << ds_out << std::endl;
-      BOOST_CHECK_EQUAL(ds_in, ds_out);
+      //Cannot pretty print a data specification anymore.
+      //std::string ds_out = data::pp(ds);
+      //BOOST_CHECK_EQUAL(ds_in, ds_out);
     }
     else
     {
@@ -710,12 +709,16 @@ void test_data_expression_in_specification_context(const std::string &de_in,
   {
     data::type_check(ds);
 
+    /* This is outcommented, because a data specification cannot be printed
+       anymore from 1/8/2010. This has been disabled to make pretty printing
+       independent of a data specification. Should be re-installed at some time. JFG.
     std::string ds_out = data::pp(ds);
     if(ds_in != ds_out)
     {
       std::clog << "Warning, ds_in != ds_out; [" << ds_in << " != " << ds_out << "]" << std::endl;
     }
     //BOOST_CHECK_EQUAL(ds_in, ds_out);
+    */
   }
 
   data::data_expression de(parse_data_expression(de_in));

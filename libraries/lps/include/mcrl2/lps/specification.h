@@ -97,6 +97,8 @@ class specification
       m_global_variables = atermpp::convert<atermpp::set<data::variable> >(global_variables);
       m_process          = atermpp::aterm_appl(*i++);
       m_initial_process  = atermpp::aterm_appl(*i);
+      m_data.declare_data_specification_to_be_type_checked();
+      complete_data_specification(*this);
     }
 
   public:
@@ -161,7 +163,6 @@ class specification
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
       assert(is_well_typed(*this));
-      complete_data_specification(*this);
     }
 
     /// \brief Writes the specification to file.

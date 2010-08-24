@@ -20,7 +20,8 @@
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/where_clause.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/alias.h"
+// #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/container_sort.h"
@@ -248,7 +249,7 @@ namespace mcrl2 {
           // ENG. Substitutie moet plaatsvinden op interne data structuur. TODO.
           // (JK: 30/6/2010) This assumes that we consider the *normalised*
           // version of the data specification. Is this really what we want?
-          void operator()(data_specification const& e)
+          /* void operator()(data_specification const& e)
           {
             static_cast< Derived& >(*this).enter(e);
 
@@ -258,7 +259,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this)(e.equations());
 
             static_cast< Derived& >(*this).leave(e);
-          }
+          } */
 
 #ifndef NO_TERM_TRAVERSAL
           // \deprecated exists only for backwards compatibility

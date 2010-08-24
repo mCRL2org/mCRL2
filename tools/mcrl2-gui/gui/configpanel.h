@@ -16,10 +16,13 @@
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 #include <wx/statline.h>
-#include <gui/outputlistbox.h>
+//#include <gui/outputlistbox.h>
+#include <gui/tooloutputlistbox.h>
 #include <wx/scrolwin.h>
 #include <wx/gbsizer.h>
 #include <wx/event.h>
+
+enum ToolStatus { STATUS_NONE, STATUS_RUNNING, STATUS_COMPLETE, STATUS_FAILED};
 
 
 #define ID_RUN_TOOL 1000
@@ -41,20 +44,18 @@ DEFINE_EVENT_TYPE(wxEVT_UPDATE_PROJECT_TREE)
         (wxObject *) NULL \
     ),
 
-
 class ConfigPanel: public wxNotebookPage {
 public:
 
 	ConfigPanel(wxAuiNotebook *parent, wxWindowID id, Tool& tool,
-			OutputListBox *listbox_output, FileIO& fileIO) :
+	    OutPutListBox *listbox_output, FileIO& fileIO) :
 				wxNotebookPage(parent, id) {
 		m_tool = tool;
 		m_parent = parent;
 		m_listbox_output = listbox_output;
 		m_fileIO = fileIO;
 		m_pid = 0;
-
-
+		m_switchOnOutput = false;
 
 		int row = 0;
 
@@ -63,7 +64,10 @@ public:
 				wxAUI_NB_BOTTOM
 			);
 
-		m_tool_output = new OutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+		m_tool_output = new ToolOutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+
+		m_tool_output->SetRunCognizance(this);
+
 		m_wsw = new wxScrolledWindow(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 		/* Define size large enough for top*/
@@ -91,8 +95,10 @@ public:
             wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
 
         fpc->SetPath(filesuggestion);
-        fpc->SetSize(wxSize(350, 25));
         fgs->Add(fpc, wxGBPosition(row, 1), wxGBSpan(1,2));
+
+        fpc->SetMinSize(wxSize(350,25));
+        fpc->SetTextCtrlProportion(6);
 
         m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
 
@@ -200,11 +206,9 @@ public:
 				ws1 = new wxStaticText(top, wxID_ANY, wxString(
 						(*i).m_flag.c_str(), wxConvUTF8));
 
-				// TODO: Set Default values
-
 				/* create text input box */
 				fp = new wxFilePickerCtrl(top, wxID_ANY,  wxT(""),
-						wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
+						wxT("Select a file"), wxString((*i).m_values[0].c_str(), wxConvUTF8), wxDefaultPosition, wxDefaultSize,
 						wxFLP_USE_TEXTCTRL | wxFLP_OPEN );
 
 				fp->SetLabel(wxString(
@@ -212,14 +216,22 @@ public:
 
 				m_filepicker_ptrs.push_back(fp);
 
+				/* Remove trailing empty lines */
+				string str = (*i).m_help;
+				while( str.find_last_of("\n") == (str.size()-1) ){
+				  str = str.substr(0, str.size()-1);
+				}
 				ws2 = new wxStaticText(top, wxID_ANY, wxString(
-						(*i).m_help.c_str(), wxConvUTF8));
+						str.c_str(), wxConvUTF8));
 
 				row++;
         fgs->Add(ws1, wxGBPosition(row,0));
-        fgs->Add(fp,  wxGBPosition(row,1), wxGBSpan(1,2));
-        fp->SetSize(wxSize(350,25));
-        fgs->Add(ws2,  wxGBPosition(row,3));
+        fgs->Add(ws2,  wxGBPosition(row,1));
+
+        row++;
+        fgs->Add(fp,  wxGBPosition(row,1));
+        fp->SetMinSize(wxSize(350,25));
+        fp->SetTextCtrlProportion(6);
 
 				break;
 			}
@@ -228,7 +240,6 @@ public:
 		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"));
 
 		m_abortbutton = new wxButton(top, ID_ABORT_TOOL, wxT("Abort"));
-		m_abortbutton->Show(false);
 
 	  ++row;
 	  fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
@@ -240,6 +251,9 @@ public:
     top->SetSizer(hbox);
 		top->Layout();
 
+		/* Hide after layout to prevent widget overlap*/
+    m_abortbutton->Show(false);
+
 		int w, h;
 		top->GetBestSize(&w,&h);
     m_wsw->SetScrollbars( 20, 20, w/20 , h/20 );
@@ -250,73 +264,103 @@ public:
 	}
 	;
 
-	void OnRunClick(wxCommandEvent& /*event*/) {
+	void UpdateToolTipStatus(ToolStatus s){
 
-		wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
+	  //enum ToolStatus { STATUS_NONE, STATUS_RUNNING, STATUS_COMPLETE, STATUS_FAILED};
 
-		wxString run = cmd;
-		for (vector<wxRadioBox*>::iterator i = m_radiobox_ptrs.begin(); i
-				!= m_radiobox_ptrs.end(); ++i) {
-			run = run + wxT(" --") + (*i)->GetLabel() + wxT("=")
-					+ (*i)->GetStringSelection();
-		}
+    /* Remove text after last last '[' */
+    wxString toolTipText = m_parent->GetPageText( m_parent->GetPageIndex( this ) );
 
-		for (vector<wxCheckBox*>::iterator i = m_checkbox_ptrs.begin(); i
-				!= m_checkbox_ptrs.end(); ++i) {
-			if ((*i)->GetValue())
-				run = run + wxT(" --") + (*i)->GetLabel();
-		}
+    if( !toolTipText.BeforeFirst(_T(' ')).empty() ){
+      toolTipText = toolTipText.BeforeFirst(_T(' '));
+    }
 
-		for (vector<wxTextCtrl*>::iterator i = m_textctrl_ptrs.begin(); i
-				!= m_textctrl_ptrs.end(); ++i) {
-			if ((*i)->GetValue() && !(*i)->GetValue().empty() )
-				run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
-		}
-
-		for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin(); i
-				!= m_filepicker_ptrs.end(); ++i) {
-			if ((*i)->GetPath() && !(*i)->GetPath().empty() )
-				run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetPath();
-		}
-
-
-		wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
-
-		wxString output_file = wxString(m_fileIO.output_file.c_str(),
-				wxConvUTF8);
-
-		run = run + wxT(" ") + input_file + wxT(" ") + output_file;
-
-		m_listbox_output->Append(run);
-
-		m_process = new MyPipedProcess(this);
-
-		// Gui tools should be visible:
-		// Tools redirect the standard input and/or output of the process being launched by calling Redirect. 
-		// For these child processes IO is redirected. For Windows these process windows are not shown by default.
-		// To avoid that GUI tools are not shown a wxEXEC_NOHIDE flag is used to flag that the child process window
-		// are shown normally.
-
-		switch (m_tool.m_tool_type){
-		  case shell:
-	      m_pid = wxExecute(run, wxEXEC_ASYNC, m_process);
+	  switch (s){
+	    case STATUS_NONE:
 	      break;
-		  case gui:
-			m_pid = wxExecute(run, wxEXEC_ASYNC | wxEXEC_NOHIDE , m_process);
-			break;
-		case ishell:
-		  m_pid = wxShell(run);
-		  break;
-		}
+	    case STATUS_RUNNING:
+	      toolTipText = toolTipText.Append(wxT(" [Running]"));
+	      break;
+      case STATUS_COMPLETE:
+        toolTipText = toolTipText.Append(wxT(" [Done]"));
+        break;
+      case STATUS_FAILED:
+        toolTipText = toolTipText.Append(wxT(" [Failed]"));
+        break;
+	  }
 
-		if ((m_tool.m_tool_type == shell) || (m_tool.m_tool_type == gui))
+    m_parent->SetPageText(m_parent->GetPageIndex( this ), toolTipText );
+
+	}
+
+	void Run(){
+    UpdateToolTipStatus(STATUS_RUNNING);
+
+    wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
+
+    wxString run = cmd;
+    for (vector<wxRadioBox*>::iterator i = m_radiobox_ptrs.begin(); i
+        != m_radiobox_ptrs.end(); ++i) {
+      run = run + wxT(" --") + (*i)->GetLabel() + wxT("=")
+          + (*i)->GetStringSelection();
+    }
+
+    for (vector<wxCheckBox*>::iterator i = m_checkbox_ptrs.begin(); i
+        != m_checkbox_ptrs.end(); ++i) {
+      if ((*i)->GetValue())
+        run = run + wxT(" --") + (*i)->GetLabel();
+    }
+
+    for (vector<wxTextCtrl*>::iterator i = m_textctrl_ptrs.begin(); i
+        != m_textctrl_ptrs.end(); ++i) {
+      if ((*i)->GetValue() && !(*i)->GetValue().empty() )
+        run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
+    }
+
+    for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin(); i
+        != m_filepicker_ptrs.end(); ++i) {
+      if ((*i)->GetPath() && !(*i)->GetPath().empty() )
+        run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetPath();
+    }
+
+
+    wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
+
+    wxString output_file = wxString(m_fileIO.output_file.c_str(),
+        wxConvUTF8);
+
+    run = run + wxT(" ") + input_file + wxT(" ") + output_file;
+
+    m_listbox_output->Append(run);
+
+    m_process = new MyPipedProcess(this);
+
+    // Gui tools should be visible:
+    // Tools redirect the standard input and/or output of the process being launched by calling Redirect.
+    // For these child processes IO is redirected. For Windows these process windows are not shown by default.
+    // To avoid that GUI tools are not shown a wxEXEC_NOHIDE flag is used to flag that the child process window
+    // are shown normally.
+
+    switch (m_tool.m_tool_type){
+      case shell:
+        m_pid = wxExecute(run, wxEXEC_ASYNC, m_process);
+        break;
+      case gui:
+      m_pid = wxExecute(run, wxEXEC_ASYNC | wxEXEC_NOHIDE , m_process);
+      break;
+    case ishell:
+      m_pid = wxShell(run);
+      break;
+    }
+
+    if ((m_tool.m_tool_type == shell) || (m_tool.m_tool_type == gui))
       {
         if (!m_pid)
         {
           wxLogError(wxT("Execution of '%s' failed."), run.c_str());
           m_pid = 0;
-
           delete m_process;
+          UpdateToolTipStatus(STATUS_FAILED);
         }
         else
         {
@@ -326,9 +370,24 @@ public:
 
           m_process->m_ext_pid = m_pid;
 
-          m_configpanel->SetSelection(m_configpanel->GetSelection() + 1);
+          m_switchOnOutput = true;
+
         };
       }
+
+	};
+
+	void SwitchToToolOutputNotebook(){
+
+	  if( m_switchOnOutput ){
+	    m_configpanel->SetSelection(1);
+	    m_switchOnOutput = false;
+	  }
+	}
+
+
+	void OnRunClick(wxCommandEvent& /*event*/) {
+	  Run();
 	}
 	;
 
@@ -361,8 +420,8 @@ public:
 
 	wxAuiNotebook *m_parent;
 	wxAuiNotebook *m_configpanel;
-	OutputListBox *m_listbox_output;
-	OutputListBox *m_tool_output;
+	OutPutListBox *m_listbox_output;
+	ToolOutputListBox *m_tool_output;
 	wxScrolledWindow *m_wsw;
 	wxString m_input_file;
 	Tool m_tool;
@@ -382,6 +441,8 @@ public:
 	long m_pid;
 
 private:
+
+	bool m_switchOnOutput;
 
 	wxString
     GenerateOutputFileSuggestion()
@@ -411,33 +472,45 @@ private:
       return wxString(file_suggestion.c_str(), wxConvUTF8);
     }
 
-	  void OnProcessEnd(wxCommandEvent& evt){
-	     m_abortbutton->Show(false);
-	     m_runbutton->Enable();
+	  void
+    OnProcessEnd(wxCommandEvent& evt)
+    {
+      m_abortbutton->Show(false);
+      m_runbutton->Enable();
 
-       wxCommandEvent eventCustom(wxEVT_UPDATE_PROJECT_TREE);
-	     /* Notify parents to expand to the created file*/
+      wxCommandEvent eventCustom(wxEVT_UPDATE_PROJECT_TREE);
+      /* Notify parents to expand to the created file*/
 
-       if (!m_fileIO.output_file.empty())
+      if (!m_fileIO.output_file.empty())
       {
         wxStringClientData *scd = new wxStringClientData(wxString(
             m_fileIO.output_file.c_str(), wxConvUTF8));
         eventCustom.SetClientData(scd);
-      } else {
+      }
+      else
+      {
         eventCustom.SetClientData(NULL);
       }
 
       wxPostEvent(m_parent, eventCustom);
+
+      UpdateToolTipStatus(STATUS_COMPLETE);
+    }
+
+	  void OnToolHasOutput(wxCommandEvent& evt){
+	    SwitchToToolOutputNotebook();
 	  }
 
 DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
-		EVT_BUTTON(ID_RUN_TOOL, ConfigPanel::OnRunClick) EVT_BUTTON(ID_ABORT_TOOL, ConfigPanel::OnAbortClick)
-
+		EVT_BUTTON(ID_RUN_TOOL, ConfigPanel::OnRunClick)
+		EVT_BUTTON(ID_ABORT_TOOL, ConfigPanel::OnAbortClick)
 		EVT_FILEPICKER_CHANGED(ID_OUTPUT_FILE, ConfigPanel::OnOutputFileChange)
 		EVT_SIZE(ConfigPanel::OnResize)
 		EVT_MY_PROCESS_END( wxID_ANY, ConfigPanel::OnProcessEnd )
-		END_EVENT_TABLE ()
+		EVT_MY_PROCESS_RUN( wxID_ANY, ConfigPanel::OnRunClick )
+		EVT_MY_PROCESS_PRODUCES_OUTPUT( wxID_ANY, ConfigPanel::OnToolHasOutput )
+END_EVENT_TABLE ()
 
 #endif /* MCRL2_GUI_CONFIGPANEL_H_ */

@@ -31,9 +31,26 @@ namespace process {
   void apply_internal_format_conversion(process_specification& p)
   {
     // TODO: make proper internal_format_conversion function process_specification
-    ATermAppl t = process_specification_to_aterm(p);
-    t = data::detail::internal_format_conversion(t);
-    p = process_specification(t);
+    /* atermpp::aterm_appl t = process_specification_to_aterm(p);
+    t = data::detail::internal_format_conversion(t,p.data());
+    p = process_specification(t,p.data());  */
+
+    using namespace data::detail;
+
+    p = process_specification(
+                p.data(),
+                mcrl2::lps::action_label_list(internal_format_conversion_list(
+                              p.action_labels(),
+                              p.data())),
+                mcrl2::data::variable_list(internal_format_conversion_list(
+                              atermpp::convert<data::variable_list>(p.global_variables()),
+                              p.data())),
+                mcrl2::process::process_equation_list(internal_format_conversion_list(
+                              process_equation_list(p.equations().begin(), p.equations().end()),
+                              p.data())),
+                mcrl2::process::process_expression(
+                              internal_format_conversion_term(p.init(),
+                              p.data())));
   }
 
   /// \brief Parses a process specification from an input stream
@@ -45,7 +62,7 @@ namespace process {
                                   std::istream& spec_stream, 
                                   const bool alpha_reduce=false)
   {
-    process_specification result(core::detail::parse_process_specification(spec_stream));
+    process_specification result(core::detail::parse_process_specification(spec_stream),false);
     type_check(result);
     if (alpha_reduce)
     {

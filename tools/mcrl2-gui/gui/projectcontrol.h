@@ -21,10 +21,11 @@
 #include <wx/dir.h>
 #include <wx/file.h>
 #include <wx/aui/auibook.h>
-#include <gui/outputlistbox.h>
+#include <gui/tooloutputlistbox.h>
 #include <gui/configpanel.h>
 #include <iostream>
 #include <mimemanager.h>
+#include <wx/filename.h>
 
 //To store configurations
 #include <wx/config.h>
@@ -42,6 +43,7 @@
 #define ID_NEW_DIR 2007
 #define ID_REFRESH 2008
 #define ID_EXPAND 2009
+#define ID_COPY_FILE 2010
 
 using namespace std;
 
@@ -52,7 +54,7 @@ public:
 
 	multimap<string, string> m_extention_tool_mapping;
 
-	OutputListBox *m_listbox_output;
+	OutPutListBox *m_listbox_output;
 
 	wxAuiNotebook *m_notebookpanel;
 
@@ -60,7 +62,7 @@ public:
 	vector<wxCheckBox*> m_checkbox_ptrs;
 
 	GenericDirCtrl(wxWindow *parent, const std::vector<Tool>& tool_catalog,
-			multimap<string, string> extention_tool_mapping, OutputListBox *output,
+			multimap<string, string> extention_tool_mapping, OutPutListBox *output,
 			wxAuiNotebook *notebookpanel) :
 		wxGenericDirCtrl(parent, ID_GDC, wxDirDialogDefaultFolderStr, wxPoint(-1,
 				-1), wxSize(-1, -1), wxDIRCTRL_EDIT_LABELS | wxDIRCTRL_3D_INTERNAL
@@ -106,7 +108,7 @@ public:
 			ncp->Layout();
 
 			/* Todo: Fix tooltip such that it appears on top the ctrl panels */
-			ncp->SetToolTip( this->GetPath() );
+			ncp->SetToolTip( this->GetPath());
 
 			m_notebookpanel->AddPage(ncp, wxString( m_tool_catalog[evt.GetId()].m_name.c_str(), wxConvUTF8), true);
 
@@ -128,10 +130,15 @@ public:
 				pid = this->GetTreeCtrl()->GetItemParent(
 						this->GetTreeCtrl()->GetSelection());
 
-				if (!wxDir::Exists(this->GetPath())) {
-					s = this->GetPath().BeforeLast(_T('/')).Append(_T('/'));
-				} else {
-					s = this->GetPath().Append(_T('/'));
+				if (wxDir::Exists(this->GetPath())) {
+          s = this->GetPath() + wxFileName::GetPathSeparator() ;
+				}
+
+				if (wxFile::Exists(this->GetPath())){
+			    wxString name;
+			    wxString ext;
+		      wxFileName::SplitPath(this->GetPath(), &s, &name, &ext);
+		      s = s + wxFileName::GetPathSeparator();
 				}
 
 				//Generate unique name directory name
@@ -164,7 +171,7 @@ public:
         Edit();
 				break;
 			case ID_DETAILS:
-				std::cout << "TODO: implement this" << std::endl;
+				ShowDetails();
 				break;
 			case ID_RENAME:
 				Rename();
@@ -177,9 +184,89 @@ public:
 				break;
 			case ID_EXPAND:
 			  this->ExpandPath(this->GetPath());
+			  break;
+			case ID_COPY_FILE:
+			  CopyFile();
+			  break;
 			}
 		}
 	}
+
+	void
+    ShowDetails()
+    {
+	    wxNotebookPage *wp = new wxNotebookPage( m_notebookpanel, wxID_ANY );
+
+	    wxGridBagSizer *fgs = new wxGridBagSizer(10, 10);
+
+	    int row = 1;
+
+	  wxString path; 
+	  wxString name;
+	  wxString ext;
+
+	  wxFileName::SplitPath(this->GetPath(), &path, &name, &ext);
+
+      if (wxFileName::FileExists(this->GetPath()))
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("File:")) , wxGBPosition(row,1));
+
+      if (wxFileName::DirExists(this->GetPath()))
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Directory:")) , wxGBPosition(row,1));
+
+	  if (wxFileName::DirExists(this->GetPath()) || wxFileName::FileExists(this->GetPath()))
+	  {
+        fgs->Add( new wxStaticText(wp, wxID_ANY, name + wxT(".") + ext ) , wxGBPosition(row,2));
+	  } else {
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("File or directory does not exists")) , wxGBPosition(row,2));
+	  }
+
+      ++row;
+      fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Path:")) , wxGBPosition(row,1));
+      fgs->Add( new wxStaticText(wp, wxID_ANY, path) , wxGBPosition(row,2));
+
+	  if (wxFileName::FileExists(this->GetPath()))
+	  {
+		++row;
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Readable:")) , wxGBPosition(row,1));
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsFileReadable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+
+		++row;
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Writable:")) , wxGBPosition(row,1));
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsFileWritable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+
+		++row;
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Executable:")) , wxGBPosition(row,1));
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsFileExecutable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+
+		++row;
+	    wxFileName *wf = new wxFileName( this->GetPath() );
+        wxDateTime tm = wf->GetModificationTime();
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Date modified")) , wxGBPosition(row,1));
+        fgs->Add( new wxStaticText(wp, wxID_ANY, tm.Format() ), wxGBPosition(row,2));
+
+		++row;
+		wxString wxs;
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Size On Disk")) , wxGBPosition(row,1));
+        wxs << wxFileName::GetHumanReadableSize(  wxULongLong(wxFile(this->GetPath()).Length()) );
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxs ), wxGBPosition(row,2));
+	  }
+
+	  if (wxFileName::DirExists(this->GetPath()))
+	  {
+		++row;
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Readable:")) , wxGBPosition(row,1));
+		fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsDirReadable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+
+		++row;
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxT("Writable:")) , wxGBPosition(row,1));
+        fgs->Add( new wxStaticText(wp, wxID_ANY, wxFileName::IsDirWritable( this->GetPath())?wxT("Yes"):wxT("No") ) , wxGBPosition(row,2));
+	  }
+
+      wp->SetSizer(fgs);
+      wp->Layout();
+
+      m_notebookpanel->AddPage(wp, this->GetPath(), true);
+    }
 
 	void OnRightClick(wxTreeEvent& /*evt*/) {
 		DisplayMenu();
@@ -210,6 +297,9 @@ public:
     case WXK_F5:
     	Refresh();
 			break;
+    case WXK_F6:
+      CopyFile();
+      break;
 
 		}
 
@@ -252,6 +342,53 @@ public:
 		this->GetTreeCtrl()->EditLabel(this->GetTreeCtrl()->GetSelection());
 	}
 
+	void CopyFile(){
+	  wxFileDialog *fd = new wxFileDialog(this, wxT("Copy file"), ::wxPathOnly(this->GetPath()), ::wxFileNameFromPath(this->GetPath()), wxT("*.*"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT );
+
+	  if( fd->ShowModal() == wxID_OK ){
+	    if(::wxCopyFile(this->GetPath(), fd->GetPath())){
+	      this->ReCreateTree();
+	      this->SetPath(fd->GetPath());
+	    } else{
+	      wxMessageDialog *dial = new wxMessageDialog(NULL,
+	          wxT("Copy operation failed"), wxT("Exclamation"),
+	          wxOK | wxICON_EXCLAMATION);
+	      dial->ShowModal();
+	    }
+	  }
+	}
+
+	bool
+    rmdir(wxString dir)
+    {
+      wxString path(dir);
+      if (path.Last() != wxFILE_SEP_PATH)
+        path += wxFILE_SEP_PATH;
+
+      wxDir d(path);
+
+      wxString filename;
+      bool cont;
+
+      // first delete sub-directories
+      cont = d.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
+      while (cont)
+      {
+        rmdir(path + filename);
+        cont = d.GetNext(&filename);
+      }
+
+      // delete all files
+      cont = d.GetFirst(&filename, wxEmptyString, wxDIR_FILES | wxDIR_HIDDEN);
+      while (cont)
+      {
+        wxRemoveFile(path + filename);
+        cont = d.GetNext(&filename);
+      }
+
+      return wxRmdir(dir);
+    }
+
 	void
     Delete()
     {
@@ -285,15 +422,12 @@ public:
             *dial =
                 new wxMessageDialog(
                     NULL,
-                    wxT("This action deletes the directory from disk (if empty).\nAre you sure to continue?"),
+                    wxT("This action recursively deletes the directory from disk.\nAre you sure to continue?"),
                     wxT("Question"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
         if (dial->ShowModal() == wxID_YES)
         {
-          /*wxArrayString  files;
-           wxDir::GetAllFiles(this->GetPath(), &files, wxEmptyString, wxDIR_DEFAULT | wxDIR_DIRS);
 
-           wxLogError( files);*/
-          if (!wxRmdir(this->GetPath()))
+          if (!rmdir(this->GetPath()))
           {
             wxLogError(wxT("Error deleting directory"));
             return;
@@ -328,7 +462,6 @@ public:
         this->GetTreeCtrl()->Delete(item_for_removal);
       }
     }
-
 
 	void DisplayMenu() {
 		wxMenu mnu;
@@ -375,7 +508,7 @@ public:
 		}
 
 		if (reporting->GetMenuItemCount() != 0) {
-			mnu.AppendSubMenu(reporting, wxT("Reporting"));
+			mnu.AppendSubMenu(reporting, wxT("Analysis"));
 		}
 		if (transformation->GetMenuItemCount() != 0) {
 			mnu.AppendSubMenu(transformation, wxT("Transformation"));
@@ -393,6 +526,7 @@ public:
 		mnu.Append(ID_NEW_FILE, wxT("New File \tCtrl-N"));
 		mnu.Append(ID_NEW_DIR, wxT("New Directory"));
 		mnu.AppendSeparator();
+    mnu.Append(ID_COPY_FILE, wxT("Copy File \tF6"));
 		mnu.Append(ID_RENAME, wxT("Rename \tF2"));
 		mnu.Append(ID_DELETE, wxT("Delete \tDel"));
 		mnu.AppendSeparator();
@@ -404,64 +538,42 @@ public:
 	}
 
 	void CreateNewFile() {
-		wxTreeItemId id, pid;
-		wxString s;
-		string new_file = "new_file";
-		wxString new_dir = wxT("new_dir");
-		FILE *file;
-		string filepath;
+		wxString new_file = wxT("new_file");
 
-		pid = this->GetTreeCtrl()->GetItemParent(
-				this->GetTreeCtrl()->GetSelection());
+		wxString path;
+    wxString name;
+    wxString ext;
 
-		if (!wxDir::Exists(this->GetPath())) {
-			s = this->GetPath().BeforeLast(_T('/')).Append(_T('/'));
-		} else {
-			s = this->GetPath().Append(_T('/'));
-		}
+    if( wxFileName::DirExists(this->GetPath())){
+      path = this->GetPath() ;
+    }
 
-		filepath = static_cast<string> (s.mb_str(wxConvUTF8)) + new_file;
+    if( wxFileName::FileExists(this->GetPath())){
+      wxFileName::SplitPath(this->GetPath(), &path, &name, &ext);
+    }
+    wxFileName *wf = new wxFileName(path, new_file, wxT(""));
+    wxFile f;
 
-		// Generate new name for file if file exists
-		if (wxFile::Exists(wxString(filepath.c_str(), wxConvUTF8))) {
-			int i = 2;
+    if (!wf->FileExists()){
 
-			while (wxFile::Exists(wxString::Format(wxString(filepath.c_str(),
-					wxConvUTF8) + wxT("(%i)"), i))) {
-				++i;
-			}
-			filepath = wxString::Format(wxString(filepath.c_str(), wxConvUTF8)
-					+ wxT("(%i)"), i).mb_str(wxConvUTF8);
+      f.Create( wf->GetFullPath() , false);
+      //Expand to new created file
+      this->Refresh();
+      this->ExpandPath( wf->GetFullPath());
 
-		}
+    } else {
+      int i = 2;
+      while
+        (wxFile::Exists( wxString::Format( wf->GetFullPath() + wxT("(%i)"), i))){
+        ++i;
+      }
+      f.Create(wxString::Format( wf->GetFullPath() + wxT("(%i)"), i));
 
-		// Try to create file
-		file = fopen(filepath.c_str(), "wt");
+      //Expand to new created file
+      this->Refresh();
+      this->ExpandPath(wxString::Format( wf->GetFullPath() + wxT("(%i)"), i));
+    }
 
-		// If create fails
-		if (!file) {
-			wxLogMessage(wxT("Cannot create the following file: '") + wxString(
-					string(s.mb_str(wxConvUTF8)).append(new_file).c_str(), wxConvUTF8)
-					+ wxT("'."));
-		} else {
-			//If file creation succeeds, create new element in tree, with nice icon
-			id = this->GetTreeCtrl()->AppendItem(pid, wxString(new_file.c_str(),
-					wxConvUTF8), 7);
-
-			//Update Tree (by collapse parent and goto new created file
-			if (!wxDir::Exists(this->GetPath())) {
-				this->GetTreeCtrl()->Collapse(pid);
-			} else {
-				this->GetTreeCtrl()->Collapse(this->GetTreeCtrl()->GetSelection());
-			}
-
-			//Expand to new created file
-			this->ExpandPath(wxString(filepath.c_str(), wxConvUTF8));
-
-			//Possibility to rename file
-			this->GetTreeCtrl()->EditLabel(this->GetTreeCtrl()->GetSelection());
-
-		}
 	}
 	;
 
@@ -472,6 +584,27 @@ public:
 	  } else{
 	    this->ExpandPath(this->GetPath());
 	  }
+	}
+
+	void OnActivity(wxTreeEvent& /*evt*/){
+	  wxString path; 
+	  wxString name;
+	  wxString ext;
+
+    if( wxFileName::DirExists(this->GetPath())){
+      path = this->GetPath() ;
+    }
+
+    if( wxFileName::FileExists(this->GetPath())){
+      wxFileName::SplitPath(this->GetPath(), &path, &name, &ext);
+    }
+
+	  if(!wxFileName::IsDirWritable( path )){
+	    wxLogStatus(wxT("WARNING: No write permissions in the selected directory!"));
+	  } else {
+		wxLogStatus(wxT(""));
+	  }
+
 	}
 
 	wxTimer *refresh_dir;
@@ -485,6 +618,7 @@ BEGIN_EVENT_TABLE(GenericDirCtrl, wxGenericDirCtrl)
   EVT_TREE_ITEM_RIGHT_CLICK( wxID_ANY, GenericDirCtrl::OnRightClick )
   EVT_TREE_KEY_DOWN		(wxID_ANY, GenericDirCtrl::onKeyDown)
   EVT_TREE_ITEM_ACTIVATED(wxID_ANY, GenericDirCtrl::OnActivate )
+  EVT_TREE_SEL_CHANGED(wxID_ANY, GenericDirCtrl::OnActivity)
 END_EVENT_TABLE ()
 
 #endif /* PROJECTCONTROL_H_ */

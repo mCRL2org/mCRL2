@@ -40,6 +40,8 @@ void parser_test()
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 99);
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
+  std::cerr << "WASDAD  " << data::parse_data_expression("0") << "\n";
+  std::cerr << "WASDAD2 " << data::sort_nat::nat(0) << "\n";
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));
   BOOST_CHECK(data::parse_sort_expression("Nat") == data::sort_nat::nat());
 //  BOOST_CHECK(data::parse_data_expression("-1") == data::sort_int::int_(-1));

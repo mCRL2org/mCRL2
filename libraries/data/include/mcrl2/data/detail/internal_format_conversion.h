@@ -7,29 +7,17 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/detail/internal_format_conversion.h
-/// \brief Conversion to eliminate set/bag comprehension, list enumerations and numbers represented as string
+/// \brief Conversion to normalise sorts and eliminate set/bag comprehension, list enumerations and numbers represented as string
+/// \details The transformation of user functions to internal format is done first by employing the transformation in 
+///            translate_user_notation_to_internal_format.h. After that sort normalisation is applied, and that is the only thing
+///            this module is doing.
 
 #ifndef MCRL2_DATA_DETAIL_INTERNAL_FORMAT_CONVERSION_H__
 #define MCRL2_DATA_DETAIL_INTERNAL_FORMAT_CONVERSION_H__
 
-#include "boost/bind.hpp"
-
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/where_clause.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/bag.h"
-#include "mcrl2/data/lambda.h"
-#include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/application.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/data_equation.h"
+#include "translate_user_notation_to_internal_format.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/manipulator.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 namespace mcrl2 {
 
@@ -58,10 +46,10 @@ namespace mcrl2 {
             return m_data_specification.normalise_sorts(s);
           }
 
-		  identifier operator()(identifier const& i)
-		  {
-			return i;
-		  }
+          identifier operator()(identifier const& i)
+          {
+            return i;
+          }
 
           variable operator()(variable const& v)
           {
@@ -69,7 +57,7 @@ namespace mcrl2 {
           }
 
           data_equation operator()(data_equation const& e)
-          { // std::cerr << "Data equation:: " << e << "\n";
+          { 
             return data_equation((*this)(e.variables()), (*this)(e.condition()), // JK 15/10/2009 removed is_nil check
                        (*this)(e.lhs()), (*this)(e.rhs()));
           }
@@ -79,63 +67,34 @@ namespace mcrl2 {
             std::string name(expression.name());
 
             // expression may represent a number, if so, replace by its internal representation
-            if (is_system_defined(expression.sort()) && (name.find_first_not_of("-/0123456789") == std::string::npos)) // crude but efficient
+            /* if (is_system_defined(expression.sort()) && (name.find_first_not_of("-/0123456789") == std::string::npos)) // crude but efficient
             {
               return number(expression.sort(), name);
-            }
+            } */
 
             return function_symbol(expression.name(), m_data_specification.normalise_sorts(expression.sort()));
+          }
+
+          where_clause operator()(where_clause const& expression)
+          { 
+            return where_clause((*this)(expression.body()),(*this)(expression.declarations()));
           }
 
           /// Translates contained numeric expressions to their internal representations
           /// Eliminates set/bag comprehension and list enumeration
           data_expression operator()(abstraction const& expression)
           {
-            using namespace sort_set;
+            /* using namespace sort_set;
             using namespace sort_bag;
+            */
 
             variable_list bound_variables = atermpp::convert< variable_list >((*this)(expression.variables()));
-
-            if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "SetComp")
-            {
-              sort_expression element_sort((*this)(expression.variables().begin()->sort()));
-              return setconstructor(element_sort, lambda(bound_variables, (*this)(expression.body())),sort_fset::fset_empty(element_sort));
-            }
-            else if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "BagComp")
-            {
-              sort_expression element_sort((*this)(expression.variables().begin()->sort()));
-
-              return bagconstructor(element_sort, lambda(bound_variables, (*this)(expression.body())), sort_fbag::fbag_empty(element_sort));
-            }
 
             return abstraction(expression.binding_operator(), bound_variables, (*this)(expression.body()));
           }
 
           application operator()(application const& expression)
           {
-            if (is_function_symbol(expression.head())) {
-              function_symbol head(expression.head());
-
-              if (head.name() == "@ListEnum")
-              { // convert to snoc list
-                sort_expression element_sort(m_data_specification.normalise_sorts(*function_sort(head.sort()).domain().begin()));
-
-                return m_data_specification.normalise_sorts(sort_list::list(element_sort, (*this)(expression.arguments())));
-              }
-              else if (head.name() == "@SetEnum")
-              { // convert to finite set
-                sort_expression element_sort((*this)(*function_sort(head.sort()).domain().begin()));
-
-                return sort_set::setfset(element_sort, sort_fset::fset(element_sort, (*this)(expression.arguments())));
-              }
-              else if (head.name() == "@BagEnum")
-              { // convert to finite bag
-                using namespace sort_bag;
-                sort_expression element_sort((*this)(*function_sort(head.sort()).domain().begin()));
-                return sort_bag::bagfbag(element_sort, sort_fbag::fbag(element_sort, (*this)(expression.arguments())));
-              }
-            }
-
             return application((*this)(expression.head()), (*this)(expression.arguments()));
           }
 
@@ -150,28 +109,6 @@ namespace mcrl2 {
             return static_cast< super& >(*this)(e);
           }
 
-          /// Translates the numeric expressions to their internal representations
-          void operator()(data_specification& specification)
-          {
-            std::set< data_equation > to_remove;
-            std::set< data_equation > to_insert;
-
-            for (data_specification::equations_const_range r(specification.equations()); !r.empty(); r.advance_begin(1))
-            {
-              data_equation converted_equation((*this)(r.front()));
-
-              if (r.front() != converted_equation)
-              { // assumes that the range is not invalidated by inserts and remove operations
-                // this means that equations cannot be inserted and removed within this loop!
-                to_remove.insert(r.front());
-                to_insert.insert(converted_equation);
-              }
-            }
-
-            std::for_each(to_remove.begin(), to_remove.end(), boost::bind(&data_specification::remove_equation, &specification, _1));
-            std::for_each(to_insert.begin(), to_insert.end(), boost::bind(&data_specification::add_equation, &specification, _1));
-          }
-
           // assume the term represents a (linear) process or pbes
           internal_format_conversion_helper(data_specification const& specification)
             : m_data_specification(specification)
@@ -179,41 +116,46 @@ namespace mcrl2 {
           }
       };
 
+      /// \brief Convenience overload for converting data/sort expressions using with atermpp:: functionality
+      /// \param[in] term sort or data expression
       inline
-      void internal_format_conversion(data_specification& specification)
+      atermpp::aterm_appl internal_format_conversion_term(
+                              const atermpp::aterm_appl term, 
+                              data_specification const& specification)
       { 
+        const atermpp::aterm_appl term1=translate_user_notation_to_internal_format(term);
         internal_format_conversion_helper converter(specification);
 
-        converter(specification);
-      }
-
-      inline
-      data_specification internal_format_conversion(data_specification const& specification)
-      { 
-        data_specification                copy(specification);
-        internal_format_conversion_helper converter(specification);
-
-        converter(copy);
-
-        return copy;
+        return atermpp::replace(term1, converter);
       }
 
       /// \brief Convenience overload for converting data/sort expressions using with atermpp:: functionality
       /// \param[in] term sort or data expression
+      template <typename T>
       inline
-      atermpp::aterm_appl internal_format_conversion(data_specification const& specification, atermpp::aterm_appl term)
+      atermpp::term_list <T> internal_format_conversion_list(
+                                 const atermpp::term_list<T> terms, 
+                                 const data_specification & specification)
       { 
-        internal_format_conversion_helper converter(specification);
+        atermpp::term_list<T> result;
+        for(typename atermpp::term_list<T>::const_iterator i=terms.begin(); 
+                   i!=terms.end(); ++i)
+        { 
+          result=atermpp::push_front(result,T(internal_format_conversion_term(*i,specification)));
+        }
 
-        return atermpp::replace(term, converter);
+        return atermpp::reverse(result); 
       }
 
       /// \brief Convenience overload for use with atermpp:: functionality
       /// \param[in] term process, linear process specification or pbes
       inline
-      atermpp::aterm_appl internal_format_conversion(atermpp::aterm_appl term)
+      atermpp::aterm_appl internal_format_conversion_deprecated(atermpp::aterm_appl term, data_specification const& specification)
       {
-        data_specification                specification(*term.begin());
+        atermpp::aterm_appl deprecated_data_specification=*term.begin(); // Do not use the data specification that
+        assert(deprecated_data_specification==atermpp::aterm_appl());    // is provided as the first argument in the ATerm, but use the type
+                                                                         // checked data specification instead.
+
         internal_format_conversion_helper converter(specification);
 
         atermpp::vector< atermpp::aterm_appl > arguments;
@@ -222,7 +164,8 @@ namespace mcrl2 {
 
         for (atermpp::aterm_appl::iterator i = ++term.begin(); i != term.end(); ++i)
         {
-          arguments.push_back(atermpp::replace(*i, converter));
+          const atermpp::aterm_appl term=translate_user_notation_to_internal_format(*i);
+          arguments.push_back(atermpp::replace(term, converter));
         }
 
         return atermpp::aterm_appl(term.function(), arguments.begin(), arguments.end());

@@ -25,7 +25,11 @@ else(MCRL2_SINGLE_BUNDLE)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/squadt/tool_catalog DESTINATION share/squadt)
 endif(MCRL2_SINGLE_BUNDLE)
 
-# ########## mcrl2_tools_squadt executable ##########
+IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  SET(SRCS ${SRCS} squadt.rc)
+ENDIF(WIN32) # ########## mcrl2_tools_squadt executable
+##########
 
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   build_system.cpp
@@ -52,6 +56,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   gui/dialog/processor_settings.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
+  ${SRCS}
 )
 
 IF (APPLE)

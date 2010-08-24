@@ -17,6 +17,11 @@ SET(MACOSX_BUNDLE_ICON_FILE diagraphica.icns)
 
 # ######### General setup ##########
 
+IF(WIN32)
+  include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
+  SET(SRCS ${SRCS} diagraphica.rc)
+ENDIF(WIN32)
+
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   arcdiagram.cpp
   attrconti.cpp
@@ -55,6 +60,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   visutils.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
+  ${SRCS}
 )
 
 IF (APPLE)

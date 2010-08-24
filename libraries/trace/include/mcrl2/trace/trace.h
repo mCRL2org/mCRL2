@@ -147,6 +147,13 @@ namespace mcrl2 {
         cleanup();
       }
 
+      bool operator <(const Trace &t) const
+      { 
+        return ((states<t.states) ||
+                (states==t.states && (actions<t.actions ||
+                                     (actions==t.actions && times<t.times))));
+      }
+
       /// \brief Set the current position back to the beginning of the trace
       /// \details The trace itself remains unaltered.
       void resetPosition()
@@ -640,7 +647,7 @@ namespace mcrl2 {
           } 
           else 
           {
-            os << ATwriteToString((ATerm) actions[i]);
+            os << ATgetName(ATgetAFun(actions[i]));
           }
           os << std::endl;
           if ( os.bad() )

@@ -58,6 +58,35 @@ namespace lps {
     return result;
   }
 
+  
+  /// \brief Parses a multi_action from an input stream
+  /// \param text An input stream containing a multi_action
+  /// \return The parsed multi_action
+  /// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
+  inline
+  multi_action parse_multi_action(std::stringstream& ma_stream)
+  {
+    atermpp::aterm_appl mact = mcrl2::core::parse_mult_act(ma_stream);
+    if (mact==NULL)
+    {
+      throw mcrl2::runtime_error("Syntax error in multi action " + ma_stream.str());
+    }
+    return mact;
+  }
+  /// \brief Parses a linear process specification from a string
+  /// \brief Parses a multi_action from a string
+  /// \param text An input stream containing a multi_action
+  /// \return The parsed multi_action
+  /// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
+  inline
+  multi_action parse_multi_action(const std::string& text)
+  { 
+    std::stringstream ma_stream(text);
+    return parse_multi_action(ma_stream);
+  }
+
+  
+
 } // namespace lps
 
 } // namespace mcrl2

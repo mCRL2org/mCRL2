@@ -42,9 +42,15 @@ namespace pbes_system {
   void apply_internal_format_conversion(pbes<Container>& p)
   {
     // TODO: make proper internal_format_conversion function for pbes
-    ATermAppl t = pbes_to_aterm(p);
-    t = data::detail::internal_format_conversion(t);
-    p = pbes<Container>(t);
+    using namespace data::detail;
+    Container equations=p.equations();
+    for(typename Container::iterator eqn=equations.begin(); eqn!=equations.end(); ++eqn)
+    { *eqn=pbes_equation(internal_format_conversion_term(pbes_equation_to_aterm(*eqn),p.data()));
+    }
+    p=pbes<Container>(
+             p.data(),
+             equations,
+             internal_format_conversion_term(p.initial_state(),p.data()));
   }
 
   /// \brief Reads a PBES from an input stream.
@@ -67,7 +73,7 @@ namespace pbes_system {
     out << atermpp::aterm_appl(result).to_string() << std::endl;
 #endif
 
-    p = pbes<Container>(result);
+    p = pbes<Container>(result,false);
     type_check(p);
     apply_internal_format_conversion(p);
     complete_data_specification(p);

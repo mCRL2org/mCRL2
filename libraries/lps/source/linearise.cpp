@@ -225,7 +225,10 @@ class specification_basic_type:public boost::noncopyable
                              const data_specification& ds,
                              const atermpp::set < data::variable > &glob_vars,
                              const t_lin_options &opt):
-                     acts(),global_variables(glob_vars),data(ds),options(opt),
+                     acts(),
+                     global_variables(glob_vars),
+                     data(ds),
+                     options(opt),
                      timeIsBeingUsed(false)
     { objectIndexTable=ATindexedSetCreate(1024,75);
       stack_operations_list=NULL;
@@ -7248,8 +7251,6 @@ mcrl2::lps::specification mcrl2::lps::linearise(
           gsWarningMsg(s.c_str());
   }
   data_specification data_spec=type_checked_spec.data();
-  internal_format_conversion(data_spec);
-
   std::set<data::sort_expression> s;
   process::traverse_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));
   process::traverse_sort_expressions(type_checked_spec.equations(), std::inserter(s, s.end()));

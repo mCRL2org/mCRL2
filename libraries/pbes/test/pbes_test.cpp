@@ -224,7 +224,7 @@ void test_global_variables()
   s >> p;
   atermpp::set<variable> freevars = p.global_variables();
   std::cout << freevars.size() << std::endl;
-  BOOST_CHECK(freevars.size() == 3);
+  BOOST_CHECK(freevars.size() == 2);  // The global variable k does not occur in the specification.
   for (atermpp::set< variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
   {
     std::cout << "<var>" << mcrl2::core::pp(*i) << std::endl;

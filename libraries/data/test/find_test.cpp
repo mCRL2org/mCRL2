@@ -15,9 +15,10 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/variable.h"
+#include "mcrl2/data/data_specification.h"
+// #include "mcrl2/data/sort_expression.h"
+// #include "mcrl2/data/data_expression.h"
+// #include "mcrl2/data/variable.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_sort.h"

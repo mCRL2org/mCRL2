@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_FIND_H
 #define MCRL2_DATA_DETAIL_FIND_H
 
-#include "mcrl2/data/data_specification.h"
+// #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/traverser.h"
 #include "mcrl2/data/detail/sort_traverser.h"
 #include "mcrl2/data/detail/binding_aware_traverser.h"

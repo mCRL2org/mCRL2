@@ -18,9 +18,10 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/int.h"
+// #include "mcrl2/data/pos.h"
+// #include "mcrl2/data/int.h"
 #include "mcrl2/process/alphabet_reduction.h"
+#include "mcrl2/data/data_specification.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -165,14 +166,8 @@ namespace mcrl2 {
         return ATLgetArgument(Act,1);
       }
       
-      static inline ATermList untypeMA(ATermList MAct){
-        //returns "untyped multiaction name" of MAct
-      
-        //ATermList r=ATmakeList0();
-        //for(;!ATisEmpty(MAct);MAct=ATgetNext(MAct))
-        // r=ATinsert(r,(ATerm)untypeA(ATAgetFirst(MAct)));
-        //return ATreverse(r);
-      
+      static inline ATermList untypeMA(ATermList MAct)
+      {
         if(ATisEmpty(MAct)) return ATmakeList0();
       
         ATermList r=utGet(MAct);
@@ -184,7 +179,8 @@ namespace mcrl2 {
         return r;
       }
       
-      static inline ATermList typeMA(ATermList MAct){
+      static inline ATermList typeMA(ATermList MAct)
+      {
         //returns "type signature" of MAct
         ATermList r=ATmakeList0();
         for(;!ATisEmpty(MAct);MAct=ATgetNext(MAct))
@@ -192,7 +188,8 @@ namespace mcrl2 {
         return ATreverse(r);
       }
       
-      static inline ATermList add_typeMA(ATermList ma, ATermList s){
+      static inline ATermList add_typeMA(ATermList ma, ATermList s)
+      {
         //adds type s to all actions in ma
         ATermList r=ATmakeList0();
         for(;!ATisEmpty(ma);ma=ATgetNext(ma))
@@ -200,7 +197,8 @@ namespace mcrl2 {
         return gsaATsortList(r);
       }
       
-      static inline ATermList untypeMAL(ATermList LMAct){
+      static inline ATermList untypeMAL(ATermList LMAct)
+      {
         //returns List of "untyped multiaction name" of List(MAct)
         assert(ATisEmpty(ATindexedSetElements(tmpIndexedSet)));
         ATbool b;
@@ -211,11 +209,6 @@ namespace mcrl2 {
         ATindexedSetReset(tmpIndexedSet);
         return LMAct;
       
-        //  ATermList r=ATmakeList0();
-        //for(;!ATisEmpty(LMAct);LMAct=ATgetNext(LMAct)){
-        // r=ATinsert(r,(ATerm)untypeMA(ATLgetFirst(LMAct)));
-        //}
-        //return ATreverse(r);
       }
       
       static inline ATermList typeMAL(ATermList LMAct){
@@ -258,7 +251,7 @@ namespace mcrl2 {
       }
       
       static ATermList merge_list(ATermList l, ATermList m)
-      { // ATfprintf(stderr,"LENGTH %d  %d  ",ATgetLength(l),ATgetLength(m));
+      { 
         ATermIndexedSet r=ATindexedSetCreate(128,50);
         for (; !ATisEmpty(m); m=ATgetNext(m))
         { ATbool isnew;
@@ -272,7 +265,6 @@ namespace mcrl2 {
         }
 
         ATermList result=ATindexedSetElements(r);
-        // ATfprintf(stderr," EQUALS %d\n",ATgetLength(result));
         ATindexedSetDestroy(r);
         return result;
       }
@@ -2023,7 +2015,11 @@ namespace mcrl2 {
        *             specification in the internal format after type checking.
        *  \return    Spec after applying alphabet reductions.
       **/
-      static ATermAppl gsAlpha(ATermAppl Spec)
+      // static ATermAppl gsAlpha(ATermAppl Spec)
+      static void gsAlpha(
+                         const mcrl2::data::data_specification &data_spec,
+                         process_equation_list &equations,
+                         process_expression &init)
       {
         if (gsVerbose) std::cerr << "applying alphabet reductions...\n";
         //create the tables
@@ -2037,14 +2033,16 @@ namespace mcrl2 {
         tmpIndexedSet = ATindexedSetCreate(63,50);
       
         //fill in tables
-        for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
+        // for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
+        for(ATermList pr=equations; !ATisEmpty(pr); pr=ATgetNext(pr)){
           ATermAppl p=ATAgetFirst(pr);
           ATermAppl pn=ATAgetArgument(p,0);
           ATtablePut(procs,(ATerm)pn,(ATerm)ATAgetArgument(p,2));
           ATtablePut(form_pars,(ATerm)pn,(ATerm)ATLgetArgument(p,1));
         }
       
-        ATtablePut(procs,(ATerm)INIT_KEY(),(ATerm)ATAgetArgument(ATAgetArgument(Spec,4),0));
+        // ATtablePut(procs,(ATerm)INIT_KEY(),(ATerm)ATAgetArgument(ATAgetArgument(Spec,4),0));
+        ATtablePut(procs,(ATerm)INIT_KEY(),(ATerm)(ATermAppl)init);
       
         //Calculate the dependencies of the processes.
         //we start from init and iterate on the processes init depends upon init until the system stabilises.
@@ -2267,9 +2265,9 @@ namespace mcrl2 {
       
         ////First make a table of Positive constants
         ATermTable consts=ATtableCreate(10000,80);
-        for(ATermList l=ATLgetArgument(ATAgetArgument(ATAgetArgument(Spec,0),3),0);!ATisEmpty(l);l=ATgetNext(l))
+        for(mcrl2::data::data_specification::equations_const_range r=data_spec.equations();!r.empty(); r.advance_begin(1))
         {
-          ATermAppl eq=ATAgetFirst(l);
+          ATermAppl eq=r.front();
           ATermAppl left=ATAgetArgument(eq,2);
           ATermAppl right=ATAgetArgument(eq,3);
           if(gsIsOpId(left) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(left,1))) &&
@@ -2447,7 +2445,8 @@ namespace mcrl2 {
         //== write out the process equations
         //first the original ones (except deleted)
         ATermList new_pr=ATmakeList0();
-        for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr))
+        // for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr))
+        for(ATermList pr=equations; !ATisEmpty(pr); pr=ATgetNext(pr))
         {
           ATermAppl p=ATAgetFirst(pr);
           ATermAppl pn=ATAgetArgument(p,0);
@@ -2481,8 +2480,10 @@ namespace mcrl2 {
         }
         new_pr=ATreverse(new_pr);
       
-        Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(new_pr),3);
-        Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATAtableGet(procs,(ATerm)INIT_KEY())),4);
+        // Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(new_pr),3);
+        equations=new_pr;
+        // Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATAtableGet(procs,(ATerm)INIT_KEY())),4);
+        init=process_expression(ATAtableGet(procs,(ATerm)INIT_KEY()));
       
         ATindexedSetDestroy(tmpIndexedSet);
         ATtableDestroy(alphas);
@@ -2494,19 +2495,19 @@ namespace mcrl2 {
         ATtableDestroy(subs_alpha_rev);
         ATtableDestroy(syncs);
         ATtableDestroy(untypes);
-        return Spec;
+        // return Spec;
       }
     } // namespace detail
 
     void apply_alphabet_reduction(process_specification& p)
     {
-      ATermAppl proc = process_specification_to_aterm(p);
-      proc = detail::gsAlpha(proc);
-      if (proc == NULL)
-      {
-        throw mcrl2::runtime_error("alphabet reduction error");
-      }
-      p = process_specification(atermpp::aterm_appl(proc));
+      // Must create termlists for all types to feed them back in process specification.
+      lps::action_label_list action_labels(p.action_labels().begin(),p.action_labels().end());
+      data::variable_list global_variables(p.global_variables().begin(),p.global_variables().end());
+      process_equation_list equations(p.equations().begin(),p.equations().end());
+      process_expression init=p.init();
+      detail::gsAlpha(p.data(),equations,init);
+      p=process_specification(p.data(),action_labels,global_variables,equations,init);
     }
 
   } // namespace process

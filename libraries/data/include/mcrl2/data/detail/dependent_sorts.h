@@ -12,6 +12,7 @@
 #include <set>
 
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2 {
 

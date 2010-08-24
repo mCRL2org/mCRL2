@@ -19,6 +19,7 @@
 <tool name="lpssuminst" 	input_format="lps" output_format ="lps"/>
 <tool name="lpsuntime" 		input_format="lps" output_format ="lps"/>
 <tool name="ltsconvert" 	input_format="lts" output_format ="lts"/>
+<tool name="lts2lps" 		input_format="lts" output_format ="lps"/>
 <tool name="ltscompare" 	input_format="lts" />
 <tool name="ltsgraph" 		input_format="lts" 				gui="true" />
 <tool name="ltsinfo" 		input_format="lts" />

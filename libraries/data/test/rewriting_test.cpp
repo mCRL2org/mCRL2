@@ -756,6 +756,8 @@ BOOST_AUTO_TEST_CASE(regression_test_bug_723)
     "    all_false ([]) = true;\n"
     "    all_false (b0 |> bl) = !b0 && all_false(bl);\n"
   );
+
+  std::clog << "List of booleans test, using initial" << std::endl;
   data_specification specification(parse_data_specification(s));
 
   rewrite_strategy_vector strategies(rewrite_strategies());
@@ -764,8 +766,14 @@ BOOST_AUTO_TEST_CASE(regression_test_bug_723)
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
-    data::data_expression e(parse_data_expression("all_false(initial(1))", specification));
+    const data::data_expression e(parse_data_expression("all_false(initial(1))", specification));
     data_rewrite_test(R, e, sort_bool::true_());
+
+    const data::data_expression e1(parse_data_expression("all_false(initial(2))", specification));
+    data_rewrite_test(R, e1, sort_bool::true_());
+
+    const data::data_expression e2(parse_data_expression("all_false(initial(4))", specification));
+    data_rewrite_test(R, e2, sort_bool::true_());
   }
 }
 

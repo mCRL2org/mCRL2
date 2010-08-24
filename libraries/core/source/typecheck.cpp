@@ -456,13 +456,16 @@ namespace mcrl2 {
         && gstcReadInConstructors()
         && gstcReadInFuncs(constructors,mappings)
         && gstcReadInActs(action_labels)
-        ){
+        )
+      {
         if (gsDebug) { std::cerr << "type checking of multiactions read-in phase finished\n"; }
 
-        if(gsIsMultAct(mult_act)){
+        if(gsIsMultAct(mult_act))
+        {
           ATermTable Vars=ATtableCreate(63,50);
           ATermList r=ATmakeList0();
-          for(ATermList l=ATLgetArgument(mult_act,0);!ATisEmpty(l);l=ATgetNext(l)){
+          for(ATermList l=ATLgetArgument(mult_act,0);!ATisEmpty(l);l=ATgetNext(l))
+          {
             ATermAppl o=ATAgetFirst(l);
             assert(gsIsParamId(o));
             o=gstcTraverseActProcVarConstP(Vars,o);
@@ -474,7 +477,8 @@ namespace mcrl2 {
           done:
           ATtableDestroy(Vars);
         }
-        else {
+        else 
+        {
           gsErrorMsg("type checking of multiactions failed (%T is not a multiaction)\n",mult_act);
         }
       }
@@ -483,6 +487,63 @@ namespace mcrl2 {
       }
       gstcDataDestroy();
       return Result;
+    }
+
+    ATermList type_check_mult_actions(ATermList mult_actions, ATermAppl spec)
+    {
+      if (gsDebug)
+      { std::cerr << "type checking multiactions...\n";
+      }
+      //check correctness of the multi-action in mult_act using
+      //the process specification or LPS in spec
+      assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
+
+      if (gsDebug) { std::cerr << "type checking phase started\n"; }
+      gstcDataInit();
+
+      if (gsDebug) { std::cerr << "type checking of multiactions read-in phase started\n"; }
+
+      ATermAppl data_spec = ATAgetArgument(spec, 0);
+      ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
+      ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
+      ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
+      ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
+
+      //XXX read-in from spec (not finished)
+      ATermList result=ATempty;
+      if (gstcReadInSorts(sorts)
+          && gstcReadInConstructors()
+          && gstcReadInFuncs(constructors,mappings)
+          && gstcReadInActs(action_labels))
+      {
+        if (gsDebug) { std::cerr << "type checking of multiactions read-in phase finished\n"; }
+
+        for(; !ATisEmpty(mult_actions); mult_actions=ATgetNext(mult_actions))
+        { 
+          ATermTable Vars=ATtableCreate(63,50);
+          ATermList r=ATmakeList0();
+          
+          for(ATermList l=(ATermList)ATgetFirst(mult_actions) ;!ATisEmpty(l);l=ATgetNext(l))
+          {
+            ATermAppl o=ATAgetFirst(l);
+            assert(gsIsParamId(o));
+            o=gstcTraverseActProcVarConstP(Vars,o);
+            if (!o) 
+            { 
+              ATtableDestroy(Vars);
+              throw mcrl2::runtime_error("Typechecking action failed: "+ core::pp(ATAgetFirst(l)));
+            }
+            r=ATinsert(r,(ATerm)o);
+          }
+          result = ATinsert(result,(ATerm)ATreverse(r));
+        }
+      }
+      else 
+      {
+        throw mcrl2::runtime_error("reading data/action specification failed");
+      }
+      gstcDataDestroy();
+      return ATreverse(result);
     }
 
     ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec)
@@ -1109,6 +1170,7 @@ namespace mcrl2 {
       gstcAddSystemFunction(sort_real::real2pos());
       gstcAddSystemFunction(sort_real::real2nat());
       gstcAddSystemFunction(sort_real::real2int());
+      gstcAddSystemConstant(sort_pos::c1());
       //more
       gstcAddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_pos::pos()));
       gstcAddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_nat::nat()));
@@ -2401,12 +2463,13 @@ namespace mcrl2 {
         :gsMakeProcess(gsMakeProcVarId(Name,FormParList),FactParList);
     }
 
-    static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTerm){
+    static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTerm)
+    {
       ATermAppl Result=NULL;
       int n = ATgetArity(ATgetAFun(ProcTerm));
       if(n==0) return ProcTerm;
 
-      //Here the code for shord-hand assignments begins.
+      //Here the code for short-hand assignments begins.
       if(gsIsIdAssignment(ProcTerm)){
         // if (gsDebug) { std::cerr << "typechecking a process call with short-hand assignments %T\n\n", ProcTerm);
         ATermAppl Name=ATAgetArgument(ProcTerm,0);
@@ -3344,6 +3407,7 @@ namespace mcrl2 {
         if(!ParList)
         {
           gsErrorMsg("unknown operation %P\n",Name);
+          assert(0);
           return NULL;
         }
 
@@ -3395,7 +3459,8 @@ namespace mcrl2 {
         bool variable=false;
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
         if (Type)
-        { const sort_expression Type1(Type);
+        { 
+          const sort_expression Type1(gstcUnwindType(Type));  
           if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==(unsigned int)nFactPars):(nFactPars==0))
           { variable=true;
             if(!ATAtableGet(AllowedVars,(ATerm)Name)) 
@@ -3879,25 +3944,33 @@ namespace mcrl2 {
       }
 
       // Try Upcasting to Real
-      if(gstcTypeMatchA(NeededType,sort_real::real_())){
-        if(gstcTypeMatchA(Type,sort_pos::pos())){
+      if(gstcTypeMatchA(NeededType,sort_real::real_()))
+      {
+        if(gstcTypeMatchA(Type,sort_pos::pos()))
+        { 
           ATermAppl OldPar=*Par;
           *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)gsMakeDataAppl(sort_int::cint(),
                                     ATmakeList1((ATerm)gsMakeDataAppl(sort_nat::cnat(),ATmakeList1((ATerm)*Par)))),
-                                           (ATerm)(ATermAppl)sort_pos::c1()));
+                                           // (ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos()))); 
+                                           (ATerm)(ATermAppl)sort_pos::c1())); 
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Pos2Real to it.\n",OldPar);}
           return sort_real::real_();
         }
-        if(gstcTypeMatchA(Type,sort_nat::nat())){
+        if(gstcTypeMatchA(Type,sort_nat::nat()))
+        {
           ATermAppl OldPar=*Par;
           *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)gsMakeDataAppl(sort_int::cint(),ATmakeList1((ATerm)*Par)),
+                                    // (ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos()))); 
                                     (ATerm)(ATermAppl)(sort_pos::c1())));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Nat2Real to it.",OldPar);}
           return sort_real::real_();
         }
-        if(gstcTypeMatchA(Type,sort_int::int_())){
+        if(gstcTypeMatchA(Type,sort_int::int_()))
+        {
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)*Par,(ATerm)(ATermAppl)data_expression(sort_pos::c1())));
+          *Par=gsMakeDataAppl(sort_real::creal(),ATmakeList2((ATerm)*Par,(ATerm)
+                                    // (ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFun("1",0,ATtrue)),(ATermAppl)sort_pos::pos())));
+                                    (ATermAppl)data_expression(sort_pos::c1())));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Int2Real to it.\n",OldPar);}
           return sort_real::real_();
         }

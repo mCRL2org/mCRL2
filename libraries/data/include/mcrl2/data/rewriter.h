@@ -224,7 +224,6 @@ namespace data {
       static data_specification& default_specification()
       {
         static data_specification specification;
-
         return specification;
       }
 
