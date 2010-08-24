@@ -100,20 +100,20 @@ END_EVENT_TABLE ()
 
 class Preferences: public wxDialog{
   public:
-    Preferences():wxDialog(NULL, wxID_ANY, wxT("Settings"), wxDefaultPosition, wxSize(500, 300))
+    Preferences():wxDialog(NULL, wxID_ANY, wxT("Preferences"), wxDefaultPosition, wxSize(500, 300))
     {
 
       wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
       SetSizer(sizer);
 
       wxStaticBoxSizer* box = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Editors associated to file extensions"));
-      sizer->AddSpacer(30);
+      sizer->AddSpacer(10);
       sizer->Add(box, 1, wxEXPAND|wxLEFT|wxRIGHT, 3);
       sizer->AddSpacer(5);
 
 
       listview = new wxListView(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                            wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
+                            wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES|wxBORDER_SUNKEN);
 
       listview->InsertColumn(0, wxT("Extension"), wxLIST_FORMAT_CENTRE);
       listview->InsertColumn(1, wxT("Command"), wxLIST_FORMAT_LEFT);
@@ -126,8 +126,9 @@ class Preferences: public wxDialog{
         listview->SetItem(distance(b, i), 1, i->second );
       }
 
-      box->AddSpacer(5);
-      box->Add(listview, 1, wxALIGN_LEFT|wxEXPAND, 3);
+      box->AddSpacer(10);
+      box->Add(listview, 1, wxALIGN_LEFT|wxEXPAND, 5);
+      box->AddSpacer(10);
       sizer = new wxBoxSizer(wxVERTICAL);
       box->Add(sizer);
       sizer->Add(new wxButton(this, wxID_NEW), 0, wxTOP, 5);
