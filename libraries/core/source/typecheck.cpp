@@ -3407,7 +3407,6 @@ namespace mcrl2 {
         if(!ParList)
         {
           gsErrorMsg("unknown operation %P\n",Name);
-          assert(0);
           return NULL;
         }
 
