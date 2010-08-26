@@ -742,7 +742,6 @@ enable_profile
 enable_static
 enable_experimental
 enable_deprecated
-enable_squadt_support
 with_aterm
 with_cadp
 with_boost
@@ -1398,9 +1397,6 @@ Optional Features:
   --enable-experimental   also build experimental tools
 
   --enable-deprecated     also build deprecated tools
-
-  --disable-squadt-support
-                          do not compile squadt support in tools
 
 
 Optional Packages:
@@ -5119,17 +5115,6 @@ if test "x$ac_cv_lib_dl_dlopen" = x""yes; then
   DL=dl
 fi
 
-
-
-# Check whether optimization must be suppressed
-# Check whether --enable-squadt_support was given.
-if test "${enable_squadt_support+set}" = set; then
-  enableval=$enable_squadt_support;
-fi
-
-if test "x$enable_squadt_support" = xno; then
-  BUILD_OPTIONS="--disable-squadt-support $BUILD_OPTIONS"
-fi
 
 # Check for ATerm library and header files
 

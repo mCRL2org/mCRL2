@@ -7164,7 +7164,7 @@ class specification_basic_type:public boost::noncopyable
       if (determinewhetherprocessescontaintime(init1) && !(options.add_delta))
       { 
           std::string s;
-          s = "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use SQuADT option `Add delta summands' or command line option `-D' to suppress.\n";
+          s = "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use `Add true->delta summands to each state in each process' or command line option `-D' to suppress.\n";
           gsWarningMsg(s.c_str());
       }
       atermpp::vector <process_identifier> pcrlprocesslist;

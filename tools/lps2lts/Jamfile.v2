@@ -5,5 +5,5 @@ tool lps2lts
          /libraries//data
          /libraries//lps
          /libraries//lts
-       : <squadt-connectivity>implemented
+       : 
        ;

@@ -3,5 +3,5 @@ project lpsuntime ;
 tool lpsuntime
        : lpsuntime.cpp
          /libraries//lps
-       : <squadt-connectivity>implemented
+       : 
        ;

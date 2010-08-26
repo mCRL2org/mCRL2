@@ -6,5 +6,5 @@ tool chi2mcrl2
          chilexer.cpp
          translate.cpp
          /libraries//data
-       : <squadt-connectivity>implemented
+       : 
        ;

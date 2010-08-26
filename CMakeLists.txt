@@ -600,7 +600,6 @@ add_subdirectory ( 3rd-party/ticpp )
   add_subdirectory ( libraries/process )
   add_subdirectory ( libraries/lps )
   add_subdirectory ( libraries/lts )
-  add_subdirectory ( tools/squadt/libraries/tipi )
   if( MCRL2_MONO_LIB )
     add_subdirectory ( libraries/ )
   endif( MCRL2_MONO_LIB)
@@ -642,7 +641,6 @@ add_subdirectory ( 3rd-party/ticpp )
   add_subdirectory ( tools/pbespp )
   add_subdirectory ( tools/pbesrewr )
   add_subdirectory ( tools/pnml2mcrl2 )
-  add_subdirectory ( tools/squadt )
   add_subdirectory ( tools/tbf2lps )
   add_subdirectory ( tools/tracepp )
   add_subdirectory ( tools/txt2pbes )
@@ -827,7 +825,6 @@ if( MCRL2_ENABLE_TEST_TARGETS )
    add_subdirectory( libraries/atermpp/test )
    add_subdirectory( libraries/trace/test )
    add_subdirectory( tools/lpsparunfold/test )
-   add_subdirectory( tools/squadt/libraries/tipi/test )
 endif( MCRL2_ENABLE_TEST_TARGETS )
 
 ##---------------------------------------
@@ -880,12 +877,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
 
   # add_test(grapemcrl2_smoke ${grapemcrl2_BINARY_DIR}/grapemcrl2)
   # set_tests_properties(grapemcrl2_smoke PROPERTIES TIMEOUT 15 )
-
-  #-------------
-  # squadt 
-  #-------------
-  # add_test(squadt_smoke ${squadt_BINARY_DIR}/squadt)
-  # set_tests_properties(squadt_smoke PROPERTIES TIMEOUT 15 )
 
   set_tests_properties(
     mcrl22lps_abp 
@@ -1064,7 +1055,7 @@ SET(CPACK_PACKAGE_VENDOR "TUe")
 
 # Create Desktop link to mcrl2-gui 
 set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
-set(CPACK_PACKAGE_EXECUTABLES "squadt;squadt" "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui")
+set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui")
 
   IF(APPLE AND MCRL2_SINGLE_BUNDLE)
     SET(CPACK_SET_DESTDIR TRUE)

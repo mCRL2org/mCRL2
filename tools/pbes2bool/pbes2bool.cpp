@@ -36,7 +36,6 @@
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 //Data Framework
@@ -67,7 +66,7 @@ using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input_tool> > >
+class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 {
   protected:
     // Tool options.
@@ -81,7 +80,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
     bool opt_data_elm;                         // The data elimination option
     std::string opt_counter_example_file;      // The counter example file name
 
-    typedef squadt_tool< pbes_rewriter_tool<rewriter_tool<input_tool> > > super;
+    typedef pbes_rewriter_tool<rewriter_tool<input_tool> > super;
 
     std::string default_rewriter() const
     { return "quantifier-all";
@@ -398,241 +397,6 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       return true;
     }
 
-// SQuADT protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-
-# define counter_example_file_for_output "counter_example"
-# define option_transformation_strategy  "transformation_strategy"
-# define option_selected_output_format   "selected_output_format"
-// const char* option_precompile            = "precompile";
-# define option_counter                  "counter"
-# define option_hash_table               "hash_table"
-# define option_tree                     "tree"
-# define option_unused_data              "unused_data"
-
-  private:
-
-    enum bes_output_format
-    {
-      none,
-      vasy,
-      cwi,
-      pbes
-    };
-
-    static bool initialise_types()
-    {
-      tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
-
-      transformation_strategy_enumeration.
-        add(lazy, "lazy").
-        add(optimize, "optimize").
-        add(on_the_fly, "on-the-fly").
-        add(on_the_fly_with_fixed_points, "on-the-fly-with-fixed-points");
-
-      tipi::datatype::enumeration< bes_output_format > output_format_enumeration;
-
-      output_format_enumeration.
-        add(none, "none").
-        add(vasy, "vasy").
-        add(cwi, "cwi").
-        add(cwi, "pbes");
-
-      return true;
-    }
-
-  public:
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const
-    {
-      static bool initialised = initialise_types();
-
-      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-
-      c.add_input_configuration("main-input",
-                 tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-      using namespace mcrl2;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      if (c.output_exists("main-output")) {
-        m_output_filename = c.get_output("main-output").location();
-      } 
-      synchronise_with_configuration(c);
-
-      /* if (!c.option_exists(option_precompile)) {
-        c.add_option(option_precompile).set_argument_value< 0 >(false);
-      } */
-      if (!c.option_exists(option_counter)) {
-        c.add_option(option_counter).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_hash_table)) {
-        c.add_option(option_hash_table).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_tree)) {
-        c.add_option(option_tree).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_unused_data)) {
-        c.add_option(option_unused_data).set_argument_value< 0 >(true);
-      }
-      if (!c.option_exists(option_transformation_strategy)) {
-        c.add_option(option_transformation_strategy).set_argument_value< 0 >(lazy);
-      }
-      if (!c.option_exists(option_selected_output_format)) {
-        c.add_option(option_selected_output_format).set_argument_value< 0 >(none);
-      }
-
-      /* Create display */
-      tipi::tool_display d;
-
-      // Helper for format selection
-      mcrl2::utilities::squadt::radio_button_helper < bes_output_format > format_selector(d);
-
-      // Helper for strategy selection
-      mcrl2::utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
-
-      layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
-
-      // checkbox& precompile(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_precompile)));
-      checkbox& counter(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_counter)));
-      checkbox& hash_table(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_hash_table)));
-      checkbox& tree(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_tree)));
-      checkbox& unused_data(d.create< checkbox >().set_status(c.get_option_argument< bool >(option_unused_data)));
-
-      add_rewrite_option(d, m);
-      add_pbes_rewrite_option(d, m);
-
-      m.append(d.create< label >().set_text("Output format : ")).
-        append(d.create< horizontal_box >().
-                    append(format_selector.associate(none, "none")).
-                    append(format_selector.associate(vasy, "vasy")).
-                    append(format_selector.associate(pbes, "pbes")).
-                    append(format_selector.associate(cwi, "cwi")),
-              margins(0,5,0,5)).
-        append(d.create< label >().set_text("Strategy to generate a BES from a PBES: "), margins(8,5,0,5)).
-        append(d.create< vertical_box >().
-            append(strategy_selector.associate(lazy, "0: without optimisation")).
-            append(strategy_selector.associate(optimize, "1: forward substitution of true/false")).
-            append(strategy_selector.associate(on_the_fly, "2: full substitution of true/false")).
-            append(strategy_selector.associate(on_the_fly_with_fixed_points, "3: full substitution and cycle detection")),
-              margins(0,5,8,5)).
-        append(d.create< horizontal_box >().
-            append(d.create< vertical_box >().
-                // append(precompile.set_label("precompile for faster rewriting")).
-                append(counter.set_label("produce a counter example")).
-                append(unused_data.set_label("remove unused data"))).
-            append(d.create< vertical_box >().
-                append(hash_table.set_label("use hash tables and translation to BDDs")).
-                append(tree.set_label("store state in a tree (memory efficiency)"))));
-
-      button& okay_button = d.create< button >().set_label("OK");
-
-      m.append(d.create< label >().set_text(" ")).
-        append(okay_button, layout::right);
-
-      /// Copy values from options specified in the configuration
-      if (c.option_exists(option_transformation_strategy)) {
-        strategy_selector.set_selection(
-            c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0));
-      }
-      if (c.option_exists(option_selected_output_format)) {
-        format_selector.set_selection(
-            c.get_option_argument< bes_output_format >(option_selected_output_format, 0));
-      }
-
-      send_display_layout(d.manager(m));
-
-      /* Wait until the ok button was pressed */
-      okay_button.await_change();
-
-      c.get_option(option_transformation_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
-      c.get_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-
-      if (c.get_option_argument< bes_output_format >(option_selected_output_format) != none)
-      {
-        /* Add output file to the configuration */
-        if (c.output_exists("main-output")) {
-          tipi::configuration::object& output_file = c.get_output("main-output");
-
-          output_file.location(c.get_output_name(".txt"));
-        }
-        else {
-          c.add_output("main-output", tipi::mime_type("txt", tipi::mime_type::application),
-                       c.get_output_name(".txt"));
-        }
-      }
-
-      // c.get_option(option_precompile).set_argument_value< 0, boolean >(precompile.get_status());
-      c.get_option(option_counter).set_argument_value< 0, boolean >(counter.get_status());
-      c.get_option(option_hash_table).set_argument_value< 0, boolean >(hash_table.get_status());
-      c.get_option(option_tree).set_argument_value< 0, boolean >(tree.get_status());
-      c.get_option(option_unused_data).set_argument_value< 0, boolean >(unused_data.get_status());
-
-      send_clear_display();
-
-      if(c.output_exists("main-output"))
-      {
-        m_output_filename = c.get_output("main-output").location();
-      }
-
-      update_configuration(c);
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const
-    {
-      return c.input_exists("main-input") &&
-             c.option_exists(option_transformation_strategy) &&
-             c.option_exists(option_selected_output_format) &&
-            ((c.get_option_argument< bes_output_format >(option_selected_output_format)==none)
-                             || c.output_exists("main-output"));
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c)
-    {
-      // static std::string strategies[] = { "lazy", "fly" };
-      static std::string formats[]    = { "none", "vasy", "cwi", "pbes" };
-
-      // Let squadt_tool update configuration for rewriter and add output file
-      // configuration
-      if (c.output_exists("main-output")) {
-          m_output_filename = c.get_output("main-output").location();
-      }
-
-      synchronise_with_configuration(c);
-
-      opt_construct_counter_example = c.get_option_argument< bool >(option_counter);
-      opt_store_as_tree             = c.get_option_argument< bool >(option_tree);
-      opt_data_elm                  = c.get_option_argument< bool >(option_unused_data);;
-      opt_use_hashtables            = c.get_option_argument< bool >(option_hash_table);;
-
-      if (opt_construct_counter_example && !c.output_exists(counter_example_file_for_output)) {
-        opt_counter_example_file = c.get_output_name(".txt").c_str();
-
-        c.add_output(counter_example_file_for_output, tipi::mime_type("txt", tipi::mime_type::text),
-                     opt_counter_example_file);
-      }
-
-      opt_outputformat = formats[c.get_option_argument< bes_output_format >(option_selected_output_format)];
-
-      opt_strategy = c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0);
-
-      bool result=run();
-
-      send_clear_display();
-
-      return result;
-    }
-#endif
 };
 
 class pbes2bool_gui_tool: public mcrl2_gui_tool<pbes2bool_tool> {

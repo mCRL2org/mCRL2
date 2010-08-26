@@ -47,23 +47,16 @@
 
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
-   mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >, public Mediator
+   mcrl2::utilities::tools::input_tool > , public Mediator
 {
     typedef mcrl2::utilities::wx::tool< DiaGraph,
-       mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
+        mcrl2::utilities::tools::input_tool > super;
 
 public:
         DiaGraph();
-        #ifdef ENABLE_SQUADT_CONNECTIVITY
-            void set_capabilities(tipi::tool::capabilities&) const;
-            void user_interactive_configuration(tipi::configuration&);
-            bool check_configuration(tipi::configuration const&) const;
-            bool perform_task(tipi::configuration&);
-        #endif
 
 	// -- functions inherited from wxApp ----------------------------
         bool run();

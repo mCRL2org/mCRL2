@@ -31,7 +31,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace std;
@@ -42,10 +41,10 @@ using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
 
-class pbesinfo_tool: public squadt_tool<input_tool>
+class pbesinfo_tool: public input_tool
 {
   protected:
-    typedef squadt_tool<input_tool> super;
+    typedef input_tool super;
 
     bool opt_full;
 
@@ -122,67 +121,6 @@ class pbesinfo_tool: public squadt_tool<input_tool>
       return true;
     }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const
-    { c.add_input_configuration("main-input", tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::reporting);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&)
-    {}
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const
-    {
-      return c.input_exists("main-input");
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      pbes<> p;
-      p.load(c.get_input("main-input").location());
-      pbes_system::detail::pbes_property_map info(p);
-
-      /* Create display */
-      tipi::tool_display d;
-
-      layout::horizontal_box& m = d.create< horizontal_box >().set_default_margins(margins(0, 5, 0, 5));
-
-      /* First column */
-      m.append(d.create< vertical_box >().set_default_alignment(layout::left).
-                append(d.create< label >().set_text("Input read from:")).
-                append(d.create< label >().set_text("Closed:")).
-                append(d.create< label >().set_text("Number of equations:")).
-                append(d.create< label >().set_text("Number of mu's:")).
-                append(d.create< label >().set_text("Number of nu's:")).
-                append(d.create< label >().set_text("Block nesting depth:"))
-               );
-
-      /* Second column */
-      m.append(d.create< vertical_box >().set_default_alignment(layout::left).
-                append(d.create< label >().set_text(c.get_input("main-input").location())).
-                append(d.create< label >().set_text(p.is_closed() ? "yes" : "no")).
-                append(d.create< label >().set_text(info["equation_count"])).
-                append(d.create< label >().set_text(info["equation_count"])).
-                append(d.create< label >().set_text(info["mu_equation_count"])).
-                append(d.create< label >().set_text(info["nu_equation_count"])).
-                append(d.create< label >().set_text(info["block_nesting_depth"]))
-               );
-
-      send_display_layout(d.manager(m));
-
-      return true;
-    }
-#endif
 };
 
 class pbesinfo_gui_tool: public mcrl2_gui_tool<pbesinfo_tool>

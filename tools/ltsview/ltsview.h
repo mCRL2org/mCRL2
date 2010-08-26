@@ -17,7 +17,6 @@
 #include <string>
 
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
@@ -33,11 +32,11 @@ class Settings;
 class Visualizer;
 
 class LTSView :
-  public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >,
+  public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::input_tool >,
   public Mediator
 {
     typedef mcrl2::utilities::wx::tool< LTSView,
-       mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
+       mcrl2::utilities::tools::input_tool > super;
 
   private:
     LTS *lts;
@@ -52,12 +51,6 @@ class LTSView :
     void applyMarkStyle();
 
   public:
-    #ifdef ENABLE_SQUADT_CONNECTIVITY
-      void set_capabilities(tipi::tool::capabilities&) const;
-      void user_interactive_configuration(tipi::configuration&);
-      bool check_configuration(tipi::configuration const&) const;
-      bool perform_task(tipi::configuration&);
-    #endif
 
     LTSView();
     ~LTSView();

@@ -3,5 +3,5 @@ project lpsparelm ;
 tool lpsparelm
        : lpsparelm.cpp
          /libraries//lps
-       : <squadt-connectivity>implemented
+       : 
        ;

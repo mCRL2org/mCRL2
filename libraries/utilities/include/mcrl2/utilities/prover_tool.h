@@ -126,8 +126,4 @@ namespace tools {
 
 } // namespace mcrl2
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-# include "mcrl2/utilities/squadt_prover_tool.h"
-#endif
-
 #endif // MCRL2_UTILITIES_PROVER_TOOL_H

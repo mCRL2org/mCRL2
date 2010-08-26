@@ -21,8 +21,7 @@ tool lpsxsim
          sim_shared
          /libraries//lps
 	 /libraries//trace
-       : <squadt-connectivity>implemented
-         <wx>gl
+       : <wx>gl
          <define>PLUGINDIR=\"\\\"$(PLUGIN_ROOT)\\\"\"
          <install-plugin>$(plugins)
          <install-rule>lpsxsim-install

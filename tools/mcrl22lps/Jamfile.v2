@@ -3,5 +3,5 @@ project toolset/mcrl22lps ;
 tool mcrl22lps
        : mcrl22lps.cpp
          /libraries//lps
-       : <squadt-connectivity>implemented
+       : 
        ;

@@ -4,5 +4,4 @@ tool pbesparelm
        : pbesparelm.cpp
          /libraries//pbes
        : <use>/libraries//lps
-         <squadt-connectivity>implemented
        ;

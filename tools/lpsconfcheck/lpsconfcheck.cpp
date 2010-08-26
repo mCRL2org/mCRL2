@@ -21,7 +21,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/prover_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -43,11 +42,11 @@ using namespace mcrl2::utilities::tools;
 /// \brief tau-summands of an LPS are confluent. The tau-actions of all confluent tau-summands can be
 /// \brief renamed to ctau, depending on the flag m_no_marking.
 
-class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_output_tool> > >
+class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 {
   protected:
 
-    typedef squadt_tool< prover_tool< rewriter_tool<input_output_tool> > > super;
+    typedef prover_tool< rewriter_tool<input_output_tool> > super;
 
     /// \brief The name of a file containing an invariant that is used to check confluence.
     /// \brief If this string is 0, the constant true is used as invariant.
@@ -261,179 +260,6 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
     return true;
   }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#define option_generate_invariants "generate_invariants"
-#define option_check_invariant     "check_invariant"
-#define option_mark_tau            "mark_tau"
-#define option_check_combinations  "check_combinations"
-#define option_counter_example     "counter_example"
-#define option_induction_on_lists  "induction_on_lists"
-#define option_invariant           "invariant"
-#define option_time_limit          "time_limit"
-#define option_rewrite_strategy    "rewrite_strategy"
-
-  protected:
-
-  void set_capabilities(tipi::tool::capabilities& c) const
-  {
-    c.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application),
-                                                            tipi::tool::category::transformation);
-  }
-
-
-  void user_interactive_configuration(tipi::configuration& c)
-  {
-    using namespace tipi;
-    using namespace tipi::layout;
-    using namespace tipi::datatype;
-    using namespace tipi::layout::elements;
-
-    synchronise_with_configuration(c);
-
-    std::string infilename = c.get_input("main-input").location();
-
-    // Set defaults for options
-    if (!c.option_exists(option_generate_invariants)) {
-      c.add_option(option_generate_invariants).set_argument_value< 0, tipi::datatype::boolean >(false);
-    }
-    if (!c.option_exists(option_check_invariant)) {
-      c.add_option(option_check_invariant).set_argument_value< 0, tipi::datatype::boolean >(
-          c.option_exists(option_generate_invariants) || c.option_exists(option_invariant));
-    }
-    if (!c.option_exists(option_mark_tau)) {
-      c.add_option(option_mark_tau).set_argument_value< 0, tipi::datatype::boolean >(true);
-    }
-    if (!c.option_exists(option_check_combinations)) {
-      c.add_option(option_check_combinations).set_argument_value< 0, tipi::datatype::boolean >(false);
-    }
-    if (!c.option_exists(option_counter_example)) {
-      c.add_option(option_counter_example).set_argument_value< 0, tipi::datatype::boolean >(false);
-    }
-    if (!c.option_exists(option_induction_on_lists)) {
-      c.add_option(option_induction_on_lists).set_argument_value< 0, tipi::datatype::boolean >(false);
-    }
-
-    /* Create display */
-    tipi::tool_display d;
-
-    layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
-
-    add_solver_option(d, m);
-    add_rewrite_option(d, m);
-
-    checkbox&   generate_invariants = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_generate_invariants));
-    checkbox&   check_invariant     = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_check_invariant));
-    checkbox&   mark_tau            = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_mark_tau));
-    checkbox&   check_combinations  = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_check_combinations));
-    checkbox&   counter_example     = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_counter_example));
-    checkbox&   induction_on_lists  = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_induction_on_lists));
-    text_field& invariant           = d.create< text_field >().set_text("");
-    text_field& time_limit          = d.create< text_field >().set_text("0");
-
-    // two columns to select the linearisation options of the tool
-    m.append(d.create< label >().set_text(" ")).
-      append(d.create< horizontal_box >().
-          append(d.create< vertical_box >().set_default_alignment(layout::right).
-              append(generate_invariants.set_label("Generate invariants")).
-              append(check_invariant.set_label("Check invariant from file")).
-              append(mark_tau.set_label("Mark confluent tau's")).
-              append(check_combinations.set_label("Check all combinations of summands for confluence")).
-              append(counter_example.set_label("Produce counter examples")).
-              append(induction_on_lists.set_label("Add delta summands"))).
-              append(d.create< text_field >().set_text("Time limit for proving a single formula")).
-          append(d.create< vertical_box >().set_default_alignment(layout::left).
-              append(d.create< checkbox >(), layout::hidden).
-              append(invariant).
-              append(d.create< checkbox >(), layout::hidden).
-              append(d.create< checkbox >(), layout::hidden).
-              append(d.create< checkbox >(), layout::hidden).
-              append(d.create< checkbox >(), layout::hidden).
-              append(time_limit)));
-
-    // Set default values for options if the configuration specifies them
-    if (c.option_exists(option_invariant)) {
-      invariant.set_text(c.get_option_argument< std::string >(option_invariant));;
-    }
-    if (c.option_exists(option_time_limit)) {
-      time_limit.set_text(c.get_option_argument< std::string >(option_time_limit));
-    }
-
-    // Add okay button
-    button& okay_button = d.create< button >().set_label("OK");
-
-    m.append(d.create< label >().set_text(" ")).
-      append(okay_button, layout::right);
-
-    send_display_layout(d.manager(m));
-
-    /* Wait for the OK button to be pressed */
-    okay_button.await_change();
-
-    // Update configuration
-    using tipi::datatype::boolean;
-
-    c.get_option(option_generate_invariants).set_argument_value< 0, boolean >(generate_invariants.get_status());
-    c.get_option(option_check_invariant).set_argument_value< 0, boolean >(check_invariant.get_status());
-    c.get_option(option_mark_tau).set_argument_value< 0, boolean >(mark_tau.get_status());
-    c.get_option(option_check_combinations).set_argument_value< 0, boolean >(check_combinations.get_status());
-    c.get_option(option_counter_example).set_argument_value< 0, boolean >(counter_example.get_status());
-    c.get_option(option_induction_on_lists).set_argument_value< 0, boolean >(induction_on_lists.get_status());
-
-    if (!c.output_exists("main-output") && !c.get_option_argument< bool >(option_mark_tau)) {
-      c.add_output("main-output", tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
-    }
-
-    if (invariant.get_text().empty()) {
-      c.remove_option(option_invariant);
-    }
-    else {
-      c.add_option(option_invariant).set_argument_value< 0, tipi::datatype::string >(invariant.get_text());
-    }
-    if (time_limit.get_text().empty()) {
-      c.remove_option(option_time_limit);
-    }
-    else {
-      c.add_option(option_time_limit).set_argument_value< 0 > (time_limit.get_text());
-    }
-
-    // let squadt_tool update configuration for rewriter and input/output files
-    super::update_configuration(c);
-
-    send_clear_display();
-  }
-
-  bool check_configuration(tipi::configuration const& c) const
-  {
-    return c.input_exists("main-input");
-  }
-
-  bool perform_task(tipi::configuration& c)
-  {
-    using namespace boost;
-    using namespace tipi;
-    using namespace tipi::layout;
-    using namespace tipi::datatype;
-    using namespace tipi::layout::elements;
-
-    // Let squadt_tool update configuration for rewriter and add output file configuration
-    synchronise_with_configuration(c);
-
-    m_generate_invariants = c.get_option_argument<bool>(option_generate_invariants);
-    m_no_check = !c.get_option_argument<bool>(option_check_invariant);
-    m_no_marking = !c.get_option_argument<bool>(option_mark_tau);
-    m_check_all = c.get_option_argument<bool>(option_check_combinations);
-    m_counter_example = c.get_option_argument<bool>(option_counter_example);
-    m_time_limit = c.get_option_argument<size_t>(option_time_limit);
-    m_apply_induction = c.get_option_argument<bool>(option_induction_on_lists);
-    m_invariant_filename = c.get_option_argument<std::string>(option_invariant);
-
-    return run();
-
-//    send_display_layout(d);
-
-//    return true;
-  }
-#endif
 };
 
 class lpsconfcheck_gui_tool: public mcrl2_gui_tool<confcheck_tool>

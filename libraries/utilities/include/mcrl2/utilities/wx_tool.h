@@ -30,13 +30,6 @@
 namespace mcrl2 {
   namespace utilities {
 
-    /// \cond INTERNAL_DOCS
-    namespace tools {
-      template < typename Tool >
-      class squadt_tool;
-    }
-    /// \endcond
-
     /**
      * \brief Namespace containing wxWidgets utility functionality
      **/
@@ -81,48 +74,6 @@ namespace mcrl2 {
           std::vector< std::string > m_documenters;
 
         private:
-
-          template < class Tool >
-          class squadt_initialisation_wrapper {
-
-            public:
-              static bool run_method(tool< Derived, ToolBase >& w) {
-                return w.run();
-              }
-
-              static int initialise(wx::tool< Derived, ToolBase >& w, int& argc, char* argv[])
-              {
-                return static_cast< ToolBase& >(w).execute(argc, argv);
-              }
-          };
-
-          template < class Tool >
-          class squadt_initialisation_wrapper< tools::squadt_tool< Tool > > {
-
-            public:
-              static bool run_method(tool< Derived, ToolBase >& w) {
-                return w.squadt_specific_run();
-              }
-
-              static int initialise(wx::tool< Derived, tools::squadt_tool< Tool > >& w, int& argc, char* argv[])
-              {
-                return w.squadt_specific_initialisation(argc, argv);
-              }
-          };
-
-          bool squadt_specific_run()
-          {
-            return (ToolBase::is_active() && ToolBase::try_run()) || static_cast< Derived& >(*this).run();
-          }
-
-          int squadt_specific_initialisation(int& argc, char* argv[])
-          {
-            int result = ToolBase::initialise(argc, argv);
-
-            m_execute = ToolBase::is_active();
-
-            return result;
-          }
 
           static wxString wx_cast(std::string const& source) {
             return wxString(source.c_str(), wxConvLocal);
@@ -175,7 +126,7 @@ namespace mcrl2 {
               converted_arguments[i] = arguments.back().get();
             }
 
-            return squadt_initialisation_wrapper< ToolBase >::initialise(*this, argc, converted_arguments.get());
+            return static_cast< ToolBase& >(*this).execute( argc, converted_arguments.get());
           }
 
           class about_information : public wxAboutDialogInfo {
@@ -270,7 +221,7 @@ namespace mcrl2 {
 
           bool OnInit() {
             if (m_execute) {
-              if (squadt_initialisation_wrapper< ToolBase >::run_method(*this)) {
+              if ( static_cast< Derived& >(*this).run() ){
                 if (!m_parse_error.empty()) {
                   wxMessageDialog(GetTopWindow(), wxString(m_parse_error.c_str(), wxConvLocal),
                                      wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();

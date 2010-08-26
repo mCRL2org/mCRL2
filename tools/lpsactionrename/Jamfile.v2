@@ -3,5 +3,5 @@ project toolset/lpsactionrename ;
 tool lpsactionrename
        : lpsactionrename.cpp
          /libraries//lps
-       : <squadt-connectivity>implemented
+       : 
        ;

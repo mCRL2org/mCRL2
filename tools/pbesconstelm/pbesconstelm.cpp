@@ -18,7 +18,6 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
@@ -34,10 +33,10 @@ using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class pbes_constelm_tool: public squadt_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > >
+class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
 {
   protected:
-    typedef squadt_tool<pbes_rewriter_tool<rewriter_tool<input_output_tool> > > super;
+    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
     bool m_compute_conditions;
     bool m_remove_redundant_equations;
@@ -120,114 +119,6 @@ class pbes_constelm_tool: public squadt_tool<pbes_rewriter_tool<rewriter_tool<in
       return true;
     }
 
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-
-#define option_compute_conditions "compute_conditions"
-#define option_remove_redundant_equations "remove_redundant_equations"
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      c.add_input_configuration("main-input",
-                 tipi::mime_type("pbes", tipi::mime_type::application),
-                                         tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c) {
-
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      if (!c.output_exists("main-output")) {
-        c.add_output("main-output",
-                 tipi::mime_type("pbes", tipi::mime_type::application),
-                                                 c.get_output_name(".pbes"));
-      }
-
-      // Set defaults where the supplied configuration does not have values */
-      if (!c.option_exists(option_compute_conditions))
-      {
-        c.add_option(option_compute_conditions).
-          set_argument_value< 0 >(true, false);
-      }
-      if (!c.option_exists(option_remove_redundant_equations))
-      {
-        c.add_option(option_remove_redundant_equations).
-          set_argument_value< 0 >(true, false);
-      }
-
-      // Create display
-      tipi::tool_display d;
-
-      layout::vertical_box& m = d.create< vertical_box >();
-
-      add_rewrite_option(d, m);
-      add_pbes_rewrite_option(d, m);
-
-      // Prepare user interaction
-      checkbox& compute_conditions = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_compute_conditions));
-      m.append(d.create< label >().set_text(" ")).
-        append(compute_conditions.set_label("Compute conditions"), layout::left);
-      checkbox& remove_redundant_equations = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_remove_redundant_equations));
-      m.append(d.create< label >().set_text(" ")).
-        append(remove_redundant_equations.set_label("Remove redundant equation"), layout::left);
-
-      button& okay_button = d.create< button >().set_label("OK");
-
-      m.append(d.create< label >().set_text(" ")).
-        append(okay_button, layout::right);
-
-      send_display_layout(d.manager(m));
-
-      okay_button.await_change();
-
-      // Let squadt_tool update configuration for rewriter and input/output files
-      update_configuration(c);
-
-      // Update configuration
-      c.get_option(option_compute_conditions).
-        set_argument_value< 0 >(compute_conditions.get_status());
-      c.get_option(option_remove_redundant_equations).
-        set_argument_value< 0 >(remove_redundant_equations.get_status());
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const {
-      return c.input_exists("main-input") && c.output_exists("main-output");
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      m_compute_conditions = c.option_exists(option_compute_conditions);
-      m_remove_redundant_equations = c.option_exists(option_remove_redundant_equations);
-
-      // Create display
-      tipi::tool_display d;
-
-      send_display_layout(d.manager(d.create< vertical_box >().
-        append(d.create< label >().set_text("Constant elimination in progress"), layout::left)));
-
-      // Run
-      bool result = run();
-
-      send_display_layout(d.manager(d.create<vertical_box>().
-                                    append(d.create< label >().set_text(std::string("Constant elimination ") + ((result) ? "succeeded" : "failed")), layout::left)));
-
-      return result;
-    }
-#endif
 };
 
 class pbes_constelm_gui_tool: public mcrl2_gui_tool<pbes_constelm_tool> {

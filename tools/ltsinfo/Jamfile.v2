@@ -3,5 +3,5 @@ project toolset/ltsinfo ;
 tool ltsinfo
        : ltsinfo.cpp
          /libraries//lts
-       : <squadt-connectivity>implemented
+       : 
        ;

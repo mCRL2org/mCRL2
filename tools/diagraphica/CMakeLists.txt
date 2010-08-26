@@ -85,11 +85,6 @@ if( MCRL2_MONO_LIB )
     mcrl2_monolib
   )
 
-  # ######### required for squadt connectivity ##########
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
-  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  # #####################################################
-
 else( MCRL2_MONO_LIB )
   target_link_libraries(${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
@@ -98,9 +93,6 @@ else( MCRL2_MONO_LIB )
     mcrl2_utilities_wx
     ticpp
   )
-
-  #Add Squadt Connectivity when required
-  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
 
 endif( MCRL2_MONO_LIB )
 

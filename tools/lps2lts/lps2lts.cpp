@@ -28,7 +28,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #define __STRINGIFY(x) #x
@@ -85,11 +84,7 @@ ATermAppl *parse_action_list(const std::string& s, int *len)
   return r - *len;
 }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-static bool initialise_types();
-#endif
-
-typedef squadt_tool< rewriter_tool< input_output_tool > > lps2lts_base;
+typedef  rewriter_tool< input_output_tool > lps2lts_base;
 class lps2lts_tool : public lps2lts_base
 {
   private:
@@ -109,11 +104,6 @@ class lps2lts_tool : public lps2lts_base
         +mcrl2::lts::detail::supported_lts_formats_text()
       )
     {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-      static bool initialised = initialise_types();
-
-      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-#endif
     }
 
     bool run()
@@ -314,63 +304,7 @@ class lps2lts_tool : public lps2lts_base
       }
     }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  friend class status_display;
-  friend class storage_configuration;
-
-  public:
-
-    class status_display;
-    class storage_configuration;
-
-  private:
-
-    static const char*  option_lts_type;
-    static const char*  option_out_info;
-
-    static const char*  option_usedummies;
-    static const char*  option_state_format_tree;
-    static const char*  option_removeunused;
-
-    static const char*  option_rewrite_strategy;
-    static const char*  option_exploration_strategy;
-
-    static const char*  option_detect_deadlock;
-    static const char*  option_detect_divergence;
-    static const char*  option_detect_actions;
-    static const char*  option_trace;
-    static const char*  option_max_traces;
-    static const char*  option_error_trace;
-
-    static const char*  option_confluence_reduction;
-    static const char*  option_confluent_tau;
-
-    static const char*  option_max_states;
-
-    static const char*  option_bithashing;
-    static const char*  option_bithashsize;
-
-    static const char*  option_init_tsize;
-
-    static const char* lps_file_for_input;
-    static const char* lts_file_for_output;
-    static const char* trc_file_for_output;
-
-  protected:
-
-    void set_capabilities(tipi::tool::capabilities &capabilities) const;
-
-    void user_interactive_configuration(tipi::configuration &configuration);
-
-    bool check_configuration(tipi::configuration const &configuration) const;
-
-    bool perform_task(tipi::configuration &configuration);
-#endif
 };
-
-#define squadt_interactor lps2lts_tool
-
-#include "squadt_interactor.ipp"
 
 class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 {

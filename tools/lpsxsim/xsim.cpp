@@ -31,7 +31,6 @@
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
@@ -43,9 +42,9 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg);
 //------------------------------------------------------------------------------
 // XSim
 //------------------------------------------------------------------------------
-class XSim: public wx::tool< XSim, squadt_tool< rewriter_tool< input_tool > > >
+class XSim: public wx::tool< XSim, rewriter_tool< input_tool > >
 {
-  typedef wx::tool< XSim, squadt_tool< rewriter_tool< input_tool > > > super;
+  typedef wx::tool< XSim, rewriter_tool< input_tool > > super;
 
 private:
     bool dummies;
@@ -93,39 +92,6 @@ public:
       return true;
     }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    // Special initialisation
-    void initialise() {
-      gsSetCustomMessageHandler(xsim_message_handler);
-    }
-
-    // Configures tool capabilities.
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-      c.add_input_configuration("main-input",
-           tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::simulation);
-    }
-
-    // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(tipi::configuration&) { }
-
-    // Check an existing configuration object to see if it is usable
-    bool check_configuration(tipi::configuration const& c) const {
-      bool valid = c.input_exists("main-input");
-
-      if (!valid) {
-        send_error("Invalid input combination!");
-      }
-
-     return valid;
-   }
-
-   bool perform_task(tipi::configuration& c) {
-     this->m_input_filename = c.get_input("main-input").location();
-
-     return run_and_wait();
-   }
-#endif
 };
 
 XSim* XSim::instance = NULL;

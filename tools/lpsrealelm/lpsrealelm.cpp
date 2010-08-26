@@ -22,7 +22,6 @@
 #include <mcrl2/atermpp/aterm_list.h>
 #include <mcrl2/atermpp/table.h>
 #include <mcrl2/atermpp/algorithm.h>
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 //Tool framework
@@ -34,16 +33,14 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
-using utilities::tools::squadt_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 
-//Squadt connectivity
 
-class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
+class lpsrealelm_tool: public rewriter_tool<input_output_tool >
 {
   protected:
-    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    typedef rewriter_tool<input_output_tool> super;
 
     unsigned int max_iterations;
 
@@ -106,40 +103,6 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
       return true;
     }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    void set_capabilities(tipi::tool::capabilities& capabilities) const
-    {
-      // The tool has only one main input combination
-      capabilities.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
-    }
-
-    void user_interactive_configuration(tipi::configuration& configuration)
-    {
-      if (configuration.fresh()) {
-        if (!configuration.output_exists("main-output")) {
-          configuration.add_output("main-output", tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
-        }
-      }
-    }
-
-    bool check_configuration(tipi::configuration const& configuration) const
-    {
-      return (configuration.input_exists("main-input") &&
-              configuration.output_exists("main-output")
-             );
-    }
-
-    bool perform_task(tipi::configuration& configuration)
-    {
-      synchronise_with_configuration(configuration);
-      max_iterations = DEFAULT_MAX_ITERATIONS;
-
-      const bool result = run();
-      send_clear_display();
-      return result;
-    }
-
-#endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
 int main(int argc, char** argv)

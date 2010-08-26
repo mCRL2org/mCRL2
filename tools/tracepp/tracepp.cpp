@@ -21,7 +21,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/exception.h"
 
@@ -171,10 +170,10 @@ inline void save_trace(Trace& trace, output_type outtype, std::ostream& out) {
   }
 }
 
-class tracepp_tool: public squadt_tool< input_output_tool >
+class tracepp_tool: public input_output_tool
 {
 protected:
-  typedef squadt_tool< input_output_tool > super;
+  typedef input_output_tool super;
 
 public:
   tracepp_tool()
@@ -286,127 +285,6 @@ protected:
     }
   }
 
-//Squadt connectivity
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    protected:
-
-# define option_print_format         "print_format"
-
-      static bool initialise_types()
-      {
-        tipi::datatype::enumeration< output_type > pp_format_enumeration;
-
-        pp_format_enumeration.
-          add(otPlain, "plain").
-          add(otMcrl2, "mcrl2").
-          add(otDot, "dot").
-          add(otAut, "aut").
-          add(otNone, "none").
-          add(otStates, "states");
-
-        return true;
-      }
-
-      /** \brief configures tool capabilities */
-      void set_capabilities(tipi::tool::capabilities& capabilities) const
-      {
-        static bool initialised = initialise_types();
-
-        static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-
-        // The tool has only one main input combination
-        capabilities.add_input_configuration("main-input",
-            tipi::mime_type("trc", tipi::mime_type::application), tipi::tool::category::transformation);
-      }
-
-      /** \brief queries the user via SQuADT if needed to obtain configuration information */
-      void user_interactive_configuration(tipi::configuration& configuration)
-      {
-        using namespace tipi;
-        using namespace tipi::layout;
-        using namespace tipi::layout::elements;
-
-        // Let squadt_tool update configuration for rewriter and add output file configuration
-        synchronise_with_configuration(configuration);
-
-        if (!configuration.option_exists(option_print_format)) {
-          configuration.add_option(option_print_format).set_argument_value< 0 >(otPlain);
-        }
-
-        /* Create display */
-        tipi::tool_display d;
-
-        // Helper for format selection
-        mcrl2::utilities::squadt::radio_button_helper < output_type > format_selector(d);
-        tipi::layout::vertical_box& m = d.create< vertical_box >();
-        m.append(d.create< label >().set_text("Output format : ")).
-          append(d.create< horizontal_box >().
-            append(format_selector.associate(otPlain, "plain")).
-            append(format_selector.associate(otMcrl2, "mcrl2")).
-            append(format_selector.associate(otDot, "dot")).
-            append(format_selector.associate(otAut, "aut")).
-            append(format_selector.associate(otStates, "states")));
-
-        format_selector.set_selection(otPlain);
-
-        button& okay_button = d.create< button >().set_label("OK");
-        m.append(d.create< label >().set_text(" ")).
-          append(okay_button, layout::right);
-
-        send_display_layout(d.manager(m));
-
-        okay_button.await_change();
-
-        configuration.get_option(option_print_format).set_argument_value< 0 >(format_selector.get_selection());
-
-        if(!configuration.output_exists("main-output"))
-        {
-          output_type selected_output = configuration.get_option_argument< output_type >(option_print_format);
-          if(selected_output == otPlain)
-          {
-            configuration.add_output("main-output", tipi::mime_type("txt", tipi::mime_type::text),
-                                   configuration.get_output_name(".txt"));
-          }
-          else if(selected_output == otMcrl2)
-          {
-            configuration.add_output("main-output", tipi::mime_type("lts", tipi::mime_type::application),
-                                               configuration.get_output_name(".lts"));
-          }
-          else if(selected_output == otDot)
-          {
-            configuration.add_output("main-output", tipi::mime_type("dot", tipi::mime_type::text),
-                                                           configuration.get_output_name(".dot"));
-          }
-          else if(selected_output == otAut)
-          {
-            configuration.add_output("main-output", tipi::mime_type("aut", tipi::mime_type::text),
-                                                           configuration.get_output_name(".aut"));
-          }
-        }
-
-        // let squadt_tool update configuration for rewriter and input/output files
-        update_configuration(configuration);
-
-      }
-
-      /** \brief check an existing configuration object to see if it is usable */
-      bool check_configuration(tipi::configuration const& configuration) const
-      {
-        // Check if everything present
-        return configuration.input_exists("main-input") &&
-               configuration.output_exists("main-output") &&
-               configuration.option_exists(option_print_format);
-      }
-
-      /** \brief performs the task specified by a configuration */
-      bool perform_task(tipi::configuration& configuration)
-      {
-        // Let squadt_tool update configuration for rewriter and add output file configuration
-        synchronise_with_configuration(configuration);
-
-        return run();
-      }
-#endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
 class tracepp_gui_tool: public mcrl2_gui_tool<tracepp_tool> {

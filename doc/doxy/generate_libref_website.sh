@@ -50,8 +50,7 @@ LTS:lts:libraries/lts
 PBES:pbes:libraries/pbes
 Process:process:libraries/process
 Trace:trace:libraries/trace
-Utilities:utilities:libraries/utilities
-TIPi:tipi:tools/squadt/libraries/tipi"
+Utilities:utilities:libraries/utilities"
 
 # Doxygen will extract documentation from every file/directory within your
 # library's directory that is listed in the INPUT_LIST variable (if and only if

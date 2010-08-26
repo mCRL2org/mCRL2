@@ -4,5 +4,4 @@ tool pbesconstelm
        : pbesconstelm.cpp
          /libraries//pbes
        : <use>/libraries//lps
-         <squadt-connectivity>implemented
        ;

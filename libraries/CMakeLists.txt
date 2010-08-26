@@ -25,11 +25,8 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include/)
 #The following include directory is required by out-of-source builds for finding setup.h
 include_directories(${CMAKE_BINARY_DIR}/libraries/utilities/include)
-
-add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
 
 if(MINGW)
   target_link_libraries(${PROJECT_NAME}
@@ -53,12 +50,10 @@ endif(MCRL2_BUILD_GUI_TOOLS)
 add_library( ${PROJECT_NAME}
   ${mcrl2_core_src}
   ${mcrl2_data_src}
-  ${mcrl2_utilities_squadt_src}
   ${mcrl2_utilities_wx_src}
   ${mcrl2_lps_src}
   ${mcrl2_lts_src}
   ${mcrl2_process_src}
-  ${squadt_tipi_src}
   ${mcrl2_utilities_command_line_src}
   ${CMAKE_SOURCE_DIR}/tools/lpsxsim/simulator.cpp
   ${CMAKE_SOURCE_DIR}/tools/lpsxsim/simbase.cpp

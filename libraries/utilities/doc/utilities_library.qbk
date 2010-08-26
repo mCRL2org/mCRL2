@@ -29,11 +29,6 @@ The toolset build information consists of a single header file setup.h. It shoul
 
 The command line interfacing sublibrary standardises some more aspects of tool command line interfaces.
 
-The "mCRL2 toolset-specific SQuADT interface" group contains the header files tipi_ext.h and squadt_interface.h. It contains a set of classes and utility functions to make it easier to connect tools of the toolset to SQuADT. It roughly contains the following toolset-specific functionality:
-
-* the custom messaging system used by most tools in the toolset is set up such that it automatically relayes messages to SQuADT
-* support for using wxWidgets in combination with SQuADT connectivity 
-
 Custom wxWidgets controls are found in the header files colorbutton.h and spinctrlfloat.h. They are shared amongst the visualisation tools in the toolset. The color button control is a colour selection button that uses a colour picker dialog and that assumes the selected colour. The spinctrlfloat is a spin control as the one that is present in wxWidgets except for that it works with floating point values.
 
 ext is the BDD implementation (on top of the ATerm library), consisting of bdd2dot.h, bdd_info.h and bdd_manipulator.h.

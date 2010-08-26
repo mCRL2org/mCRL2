@@ -4,5 +4,5 @@ tool lps2pbes
        : lps2pbes.cpp
          /libraries//lps
          /libraries//pbes
-       : <squadt-connectivity>implemented
+       : 
        ;

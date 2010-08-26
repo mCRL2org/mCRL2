@@ -18,7 +18,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -28,9 +27,9 @@ using namespace mcrl2::utilities::tools;
 
 using mcrl2::core::gsVerboseMsg;
 
-class lps2pbes_tool : public squadt_tool<input_output_tool>
+class lps2pbes_tool : public input_output_tool
 {
-  typedef squadt_tool<input_output_tool> super;
+  typedef input_output_tool super;
 
   protected:
     bool timed;
@@ -110,135 +109,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       result.save(output_filename());
       return true;
     }
-
-// Squadt protocol interface and utility pseudo-library
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    enum pbes_output_format {
-      normal,
-      readable
-    };
-
-    static bool initialise_types() {
-      tipi::datatype::enumeration< pbes_output_format > output_format_enumeration;
-
-      output_format_enumeration.
-        add(readable, "readable").
-        add(normal, "normal");
-
-      return true;
-    }
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      static bool initialised = initialise_types();
-
-      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-
-      c.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c) {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      // Set default values for configuration
-      if (!c.option_exists("use_timed_algorithm")) {
-        c.add_option("use_timed_algorithm").set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists("selected_output_format")) {
-        c.add_option("selected_output_format").set_argument_value< 0 >(normal);
-      }
-
-      /* Create display */
-      tipi::tool_display d;
-
-      // Helper for output format selection
-      mcrl2::utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
-
-      layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
-
-      /* Create and add the top layout manager */
-      m.append(d.create< label >().set_text("Phase after which to stop: ")).
-        append(d.create< label >().set_text("Output format : ")).
-        append(d.create< horizontal_box >().
-            append(format_selector.associate(normal, "normal", true)).
-            append(format_selector.associate(readable, "readable")));
-
-      file_control& formula_field  = d.create< file_control >();
-      checkbox&   timed_conversion = d.create< checkbox >().set_status(c.get_option_argument< bool >("use_timed_algorithm"));
-      button&     okay_button      = d.create< button >().set_label("OK");
-
-      m.append(d.create< horizontal_box >().
-            append(d.create< label >().set_text("Formula file name : ")).
-            append(formula_field)).
-        append(timed_conversion.set_label("timed conversion")).
-        append(d.create< label >().set_text(" ")).
-        append(okay_button, layout::right);
-
-      // Set default values if the configuration specifies them
-      format_selector.set_selection(
-          c.get_option_argument< pbes_output_format >("selected_output_format", 0));
-
-      if (c.input_exists("formula_in")) {
-        formula_field.set_text(c.get_input("formula_in").location());
-      }
-
-      send_display_layout(d.manager(m));
-
-      /* Wait until the ok button was pressed */
-      okay_button.await_change();
-
-      if (c.output_exists("formula_in")) {
-        c.get_input("formula_in").location(formula_field.get_text());
-      }
-      else {
-        c.add_input("formula_in", tipi::mime_type("mf", tipi::mime_type::text), formula_field.get_text());
-      }
-
-      /* Add output file to the configuration */
-      if (c.output_exists("main_output")) {
-        tipi::configuration::object& output_file = c.get_output("main-output");
-
-        output_file.location(c.get_output_name(".pbes"));
-      }
-      else {
-          c.add_output("main-output", tipi::mime_type("pbes",
-               (format_selector.get_selection() == normal) ? tipi::mime_type::application : tipi::mime_type::text), c.get_output_name(".pbes"));
-      }
-
-      c.get_option("use_timed_algorithm").set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
-      c.get_option("selected_output_format").set_argument_value< 0 >(format_selector.get_selection());
-
-      send_clear_display();
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      update_configuration(c);
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const {
-      return c.input_exists("main-input") &&
-             c.input_exists("formula_in") &&
-             c.output_exists("main-output") &&
-             c.option_exists("use_timed_algorithm");
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) {
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      timed            = c.get_option_argument< bool >("use_timed_algorithm");
-      formfilename     = c.get_input("formula_in").location();
-      return run();
-    }
-#endif
 
 };
 

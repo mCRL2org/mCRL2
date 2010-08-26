@@ -38,9 +38,6 @@ else( MCRL2_MONO_LIB )
     mcrl2_utilities_command_line
   )
 
-  #Add Squadt Connectivity when required
-  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
-  
 endif( MCRL2_MONO_LIB )
 
 # install target:

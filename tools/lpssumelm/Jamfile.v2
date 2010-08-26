@@ -3,5 +3,5 @@ project lpssumelm ;
 tool lpssumelm
        : lpssumelm.cpp
          /libraries//lps
-       : <squadt-connectivity>implemented
+       : 
        ;

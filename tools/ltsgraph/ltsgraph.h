@@ -28,7 +28,6 @@
 
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #ifndef __glu_h__
@@ -40,10 +39,10 @@
 #endif
 
 class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
-   mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >
+   mcrl2::utilities::tools::input_tool >
 {
     typedef mcrl2::utilities::wx::tool< LTSGraph,
-       mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
+      mcrl2::utilities::tools::input_tool > super;
 
   private:
     Graph *graph; // The labeled transition system (graph) that we work on
@@ -68,13 +67,6 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
 
     void openFile(std::string const &path);
     void display();
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    void set_capabilities(tipi::tool::capabilities&) const;
-    void user_interactive_configuration(tipi::configuration&);
-    bool check_configuration(tipi::configuration const&) const;
-    bool perform_task(tipi::configuration&);
-#endif
 
 	void moveObject(double invect[4]);
 	void moveObject(double x, double y);

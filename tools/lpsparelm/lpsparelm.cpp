@@ -14,18 +14,16 @@
 #include "mcrl2/lps/parelm.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using mcrl2::utilities::tools::input_output_tool;
-using mcrl2::utilities::tools::squadt_tool;
 using namespace mcrl2::utilities;
 
-class lps_parelm_tool : public squadt_tool< input_output_tool >
+class lps_parelm_tool : public input_output_tool 
 {
-  typedef squadt_tool< input_output_tool > super;
+  typedef input_output_tool super;
 
   public:
 
@@ -46,37 +44,6 @@ class lps_parelm_tool : public squadt_tool< input_output_tool >
       return true;
     }
 
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      c.add_input_configuration("main-input",
-                 tipi::mime_type("lps", tipi::mime_type::application),
-                                         tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c) {
-      if (!c.output_exists("main-output")) {
-        c.add_output("main-output",
-                 tipi::mime_type("lps", tipi::mime_type::application),
-                                                 c.get_output_name(".lps"));
-      }
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const {
-      return c.input_exists("main-input") && c.output_exists("main-output");
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) {
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      return run();
-    }
-#endif
 };
 
 class lps_parelm_gui_tool: public mcrl2_gui_tool<lps_parelm_tool>

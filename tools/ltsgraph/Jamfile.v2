@@ -7,6 +7,5 @@ tool ltsgraph
          /libraries//lts
          /libraries//ticpp
        : <wx>gl
-         <squadt-connectivity>implemented
          <toolset>gcc:<linkflags>-lGLU 
        ;

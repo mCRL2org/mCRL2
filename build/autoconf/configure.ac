@@ -280,16 +280,6 @@ fi
 AC_CHECK_LIB([dl], [dlopen], DL=dl, )
 AC_SUBST([DL],[])
 
-# Check whether optimization must be suppressed
-AC_ARG_ENABLE(
-  [squadt_support],
-  AS_HELP_STRING([--disable-squadt-support],[do not compile squadt support in tools
-  ])
-)
-if test "x$enable_squadt_support" = xno; then
-  BUILD_OPTIONS="--disable-squadt-support $BUILD_OPTIONS"
-fi
-
 # Check for ATerm library and header files
 AC_ARG_WITH(
   [aterm],

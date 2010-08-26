@@ -3,5 +3,5 @@ project lpsconstelm ;
 tool lpsconstelm
        : lpsconstelm.cpp
          /libraries//lps
-       : <squadt-connectivity>implemented
+       : 
        ;

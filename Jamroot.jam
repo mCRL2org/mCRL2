@@ -18,8 +18,6 @@
 #
 #    --enable-optimisation          sets: optimization=speed inlining=full
 #
-#    --disable-squadt-support       disables squadt support in tools
-#
 #    --enable-experimental          activates building/installing of tools that are marked experimental
 #
 #    --enable-deprecated            activates building/installing of tools that are marked deprecated

@@ -34,7 +34,6 @@ tool ltsview
         /libraries/utilities//colorbutton
         /libraries//lts
         /site-config//boost_signals
-      : <squadt-connectivity>implemented
-        <wx>gl
+      : <wx>gl
         <toolset>gcc:<linkflags>-lGLU
       ;

@@ -3,5 +3,5 @@ project lpsbinary ;
 tool lpsbinary
        : lpsbinary.cpp
          /libraries//lps
-       : <squadt-connectivity>implemented
+       : 
        ;

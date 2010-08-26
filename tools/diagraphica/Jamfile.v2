@@ -6,7 +6,6 @@ tool diagraphica
         /libraries/utilities//colorbutton
         /libraries//lts
         /libraries//ticpp
-      : <squadt-connectivity>implemented
-        <toolset>gcc:<linkflags>-lGLU
+      : <toolset>gcc:<linkflags>-lGLU
         <wx>gl
       ;

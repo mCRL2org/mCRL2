@@ -45,53 +45,6 @@ if( NOT MCRL2_MONO_LIB )
 endif( NOT MCRL2_MONO_LIB )
 
 # ##############################
-# ##  mcrl2_utilities_squadt  ##
-# ##############################
-
-  
-project(mcrl2_utilities_squadt)
-cmake_minimum_required(VERSION 2.6)
-
-set(mcrl2_utilities_squadt_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/squadt_interface.cpp
-)
-
-set(mcrl2_utilities_squadt_src ${mcrl2_utilities_squadt_src} PARENT_SCOPE)  
-
-if( NOT MCRL2_MONO_LIB )
-
-  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-  
-  add_library(${PROJECT_NAME}
-    ${mcrl2_utilities_squadt_src}
-  )
-  
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
-  
-  target_link_libraries(${PROJECT_NAME}
-    squadt_tipi
-  )
-  
-  if(MINGW)
-    target_link_libraries(${PROJECT_NAME}
-      wsock32
-      ws2_32
-    )
-  endif(MINGW)   
-  
-  if ( APPLE)
-      set(CMAKE_EXE_LINKER_FLAGS "-framework Carbon ${CMAKE_EXE_LINKER_FLAGS}")
-      set(CMAKE_SHARED_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
-      set(CMAKE_MODULE_LINKER_FLAGS "-framework Carbon ${CMAKE_SHARED_LINKER_FLAGS}")
-  endif (APPLE)
-  
-  # add install target:
-  install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
-endif( NOT MCRL2_MONO_LIB )
-
-# ##############################
 # ##    mcrl2_utilities_wx    ##
 # ##############################
 

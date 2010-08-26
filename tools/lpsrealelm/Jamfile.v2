@@ -4,6 +4,5 @@ tool lpsrealelm
        : lpsrealelm.cpp
          realelm.cpp
          /libraries//lps
-       : <squadt-connectivity>implemented
-         <status>experimental
+       : <status>experimental
        ;

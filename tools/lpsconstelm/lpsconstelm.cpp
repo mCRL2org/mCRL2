@@ -16,7 +16,6 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -26,11 +25,11 @@ using namespace mcrl2::data;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
+class lpsconstelm_tool: public rewriter_tool<input_output_tool >
 {
   protected:
 
-    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    typedef rewriter_tool<input_output_tool> super;
     
     bool m_instantiate_free_variables;
     bool m_ignore_conditions;
@@ -121,37 +120,6 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       return true;
     }
 
-// Squadt protocol interface and utility pseudo-library
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      c.add_input_configuration("main-input",
-                 tipi::mime_type("lps", tipi::mime_type::application),
-                                         tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c) {
-      if (!c.output_exists("main-output")) {
-        c.add_output("main-output",
-                 tipi::mime_type("lps", tipi::mime_type::application),
-                                                 c.get_output_name(".lps"));
-      }
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const {
-      return c.input_exists("main-input") && c.output_exists("main-output");
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) {
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      return run();
-    }
-#endif
 };
 
 class lpsconstelm_gui_tool: public mcrl2_gui_tool<lpsconstelm_tool>

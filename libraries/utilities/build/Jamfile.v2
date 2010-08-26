@@ -14,17 +14,6 @@ obj spinctrlfloat.o : source/spinctrlfloat.cpp : $(wx-requirements) <use>/site-c
 obj colorbutton.o   : source/colorbutton.cpp   : $(wx-requirements) <use>/site-config//wx_base ;
 obj font_renderer.o : source/font_renderer.cpp : $(wx-requirements) <use>/site-config//wx_gl ;
 
-# mCRL2 specific tool for SQuADt interface
-obj squadt_interface
-      : source/squadt_interface.cpp
-      : <use>/libraries/tipi//tool
-      :
-      : <library>/libraries/tipi//tool
-        <toolset>darwin:<framework>Carbon
-        <define>ENABLE_SQUADT_CONNECTIVITY
-        <include>../include
-      ;
-
 import notfile ;
 
 rule empty {
@@ -44,7 +33,6 @@ obj command_line_interface
       : <use>/site-config//boost
       :
       : <include>../include
-        <include>../../pbes/include # Temporary measure until squadt_tool class hierarchy is complete
         <library>/libraries/utilities//toolset_revision
       ;
 

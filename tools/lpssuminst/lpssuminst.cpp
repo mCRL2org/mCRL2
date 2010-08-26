@@ -14,7 +14,6 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -23,11 +22,11 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
 
-class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
+class suminst_tool: public rewriter_tool<input_output_tool> 
 {
   protected:
 
-    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    typedef rewriter_tool<input_output_tool> super;
 
     bool m_tau_summands_only;
     bool m_finite_sorts_only;
@@ -73,117 +72,6 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
        return true;
     }
-
-//Squadt connectivity
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  protected:
-
-# define option_tau_only         "tau_only"
-# define option_finite_only      "finite_only"
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& capabilities) const
-    {
-      // The tool has only one main input combination
-      capabilities.add_input_configuration("main-input",
-                 tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& configuration)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(configuration);
-
-      /* Set defaults where the supplied configuration does not have values */
-      if (!configuration.option_exists(option_tau_only)) {
-        configuration.add_option(option_tau_only).
-           set_argument_value< 0 >(true, false);
-      }
-      if (!configuration.option_exists(option_finite_only)) {
-        configuration.add_option(option_finite_only).
-           set_argument_value< 0 >(true, false);
-      }
-      if (!configuration.output_exists("main-output")) {
-        configuration.add_output("main-output",
-           tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
-      }
-
-      /* Create display */
-      tipi::tool_display d;
-
-      layout::vertical_box& m = d.create< vertical_box >();
-
-      add_rewrite_option(d, m);
-
-      /* Prepare user interaction */
-      checkbox& tau_only = d.create< checkbox >().set_status(configuration.get_option_argument< bool >(option_tau_only));
-      m.append(d.create< label >().set_text(" ")).
-        append(tau_only.set_label("Only instantiate tau summands"), layout::left);
-
-      checkbox& finite_only = d.create< checkbox >().set_status(configuration.get_option_argument< bool >(option_finite_only));
-      m.append(d.create< label >().set_text(" ")).
-        append(finite_only.set_label("Only instantiate variables of finite sorts"), layout::left);
-
-      button& okay_button = d.create< button >().set_label("OK");
-
-      m.append(d.create< label >().set_text(" ")).
-        append(okay_button, layout::right);
-
-      send_display_layout(d.manager(m));
-
-      okay_button.await_change();
-
-      // let squadt_tool update configuration for rewriter and input/output files
-      update_configuration(configuration);
-
-      /* Update configuration */
-      configuration.get_option(option_tau_only).
-         set_argument_value< 0 >(tau_only.get_status());
-      configuration.get_option(option_finite_only).
-         set_argument_value< 0 >(finite_only.get_status());
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& configuration) const
-    {
-      return configuration.input_exists("main-input") &&
-             configuration.output_exists("main-output") &&
-             configuration.option_exists("rewrite-strategy");
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& configuration)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(configuration);
-   
-      m_tau_summands_only = configuration.option_exists(option_tau_only);
-      m_finite_sorts_only = configuration.option_exists(option_finite_only);
-
-      /* Create display */
-      tipi::tool_display d;
-
-      send_display_layout(d.manager(d.create< vertical_box >().
-                    append(d.create< label >().set_text("Instantiation of summation variables in progress"), layout::left)));
-
-      //Perform instantiation
-      bool result = run();
-
-      send_display_layout(d.manager(d.create< vertical_box >().
-                    append(d.create< label >().set_text(std::string("Instantiation of summation variables ") + ((result) ? "succeeded" : "failed")), layout::left)));
-
-      return result;
-    }
-#endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
 class suminst_gui_tool: public mcrl2_gui_tool<suminst_tool> {

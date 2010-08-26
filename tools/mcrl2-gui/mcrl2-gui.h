@@ -1,5 +1,5 @@
 /*
- * squadt-lite.h
+ * mcrl2-gui.h
  *
  *  Created on: Jun 4, 2010
  *      Author: fstapper
@@ -44,4 +44,4 @@
 #include "wx/mimetype.h"
 
 
-#endif /* SQUADTLITE_H_ */
+#endif /* MCRL2_GUI_H_ */

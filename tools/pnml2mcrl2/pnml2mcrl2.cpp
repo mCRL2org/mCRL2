@@ -36,7 +36,6 @@
 
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 
@@ -128,10 +127,10 @@ static std::string pn2gsGetText(ticpp::Element* cur);
 
 bool do_pnml2mcrl2(char const* InFileName, std::ostream& output_stream);
 
-class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
+class pnml2mcrl2_tool: public input_output_tool
 {
   protected:
-    typedef squadt_tool< input_output_tool> super;
+    typedef input_output_tool super;
 
   public:
     pnml2mcrl2_tool()
@@ -200,41 +199,6 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
       }
     }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    void set_capabilities(tipi::tool::capabilities& c) const
-    {
-      c.add_input_configuration("main-input", tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
-    }
-
-    void user_interactive_configuration(tipi::configuration& c) {
-      /* set the squadt configuration to be sent back, such
-       * that mcrl22lps can be restarted later with exactly
-       * the same parameters
-       */
-      if (c.fresh()) {
-        if (!c.output_exists("main-output")) {
-          c.add_output("main-output", tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
-        }
-      }
-    }
-
-    bool check_configuration(tipi::configuration const& c) const
-    {
-      return c.input_exists("main-input") ||
-             c.output_exists("main-output");
-    }
-
-    bool perform_task(tipi::configuration& c)
-    { using namespace tipi;
-
-      rec_par=ATfalse;
-
-      m_input_filename  = c.get_input("main-input").location();
-      m_output_filename = c.get_output("main-output").location();
-
-      return run();
-    }
-#endif
 };
 
   //====================================

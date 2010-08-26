@@ -15,7 +15,6 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -25,11 +24,11 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
+class binary_tool: public rewriter_tool<input_output_tool> 
 {
   protected:
 
-    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    typedef rewriter_tool<input_output_tool> super;
 
   public:
 
@@ -56,82 +55,6 @@ class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       return true;
     }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const
-    {
-      c.add_input_configuration("main-input",
-          tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      /* Create display */
-      tipi::tool_display d;
-
-      layout::vertical_box& m = d.create< vertical_box >();
-
-      add_rewrite_option(d, m);
-
-      button& okay_button = d.create< button >().set_label("OK");
-
-      m.append(d.create< label >().set_text(" ")).
-        append(okay_button, layout::right);
-
-      send_display_layout(d.manager(m));
-
-      okay_button.await_change();
-
-      if (!c.output_exists("main-output")) { 
-        c.add_output("main-output", 
-               tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps")); 
-      } 
-
-      // let squadt_tool update configuration for rewriter and input/output files
-      update_configuration(c);
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const
-    {
-      return c.input_exists("main-input") ||
-             c.input_exists("main-output") ||
-             c.option_exists("rewrite-strategy");
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      /* Create display */
-      tipi::tool_display d;
-
-      send_display_layout(d.manager(d.create< vertical_box >().
-                    append(d.create< label >().set_text("Binary in progress"), layout::left)));
-
-      //Perform binary
-      bool result = run();
-
-      send_display_layout(d.manager(d.create< vertical_box >().
-                    append(d.create< label >().set_text(std::string("Binary ") + ((result) ? "succeeded" : "failed")), layout::left)));
-
-      return result;
-    }
-#endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
 class binary_gui_tool: public mcrl2_gui_tool<binary_tool>

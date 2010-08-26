@@ -34,7 +34,6 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-//#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities;
@@ -43,12 +42,10 @@ using namespace mcrl2::data;
 using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
 
-//class parunfold_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 class parunfold_tool: public  rewriter_tool<input_output_tool>
 {
   protected:
 
-    //typedef squadt_tool< rewriter_tool<input_output_tool> > super;
     typedef rewriter_tool<input_output_tool> super;
 
     std::set< int > m_set_index; ///< Options of the algorithm

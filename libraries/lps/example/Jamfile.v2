@@ -10,7 +10,7 @@ project libraries/lps/example
    ;
 
 exe lpsparse        : lpsparse.cpp mcrl2parser.cpp mcrl2lexer.cpp : ;
-exe lpsrewr         : lpsrewr.cpp : <squadt-connectivity>implemented ;
+exe lpsrewr         : lpsrewr.cpp : ;
 
 install dist
    :

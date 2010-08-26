@@ -32,7 +32,6 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -42,13 +41,12 @@ using utilities::interface_description;
 using utilities::make_optional_argument;
 using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
-using utilities::tools::squadt_tool;
 
 /// The pbes2bes tool.
-class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
+class pbes2bes_tool: public rewriter_tool<input_output_tool> 
 {
   protected:
-    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    typedef rewriter_tool<input_output_tool> super;
 
     /// The transformation strategies of the tool.
     enum transformation_strategy {
@@ -270,140 +268,6 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     {
       m_output_filename = filename;
     }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    static bool initialise_types() {
-      tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
-
-      transformation_strategy_enumeration.
-        add(ts_lazy, "lazy").
-        add(ts_finite, "finite");
-
-      tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;
-
-      output_format_enumeration.
-        add(pbes_output_pbes, "pbes").
-        add(pbes_output_internal, "internal").
-        add(pbes_output_cwi, "cwi");
-
-      return true;
-    }
-
-// Names for options
-# define option_transformation_strategy "transformation_strategy"
-# define option_selected_output_format  "selected_output_format"
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const
-    {
-      static bool initialised = initialise_types();
-
-      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-
-      c.add_input_configuration("main-input",
-        tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      /* Create display */
-      tipi::tool_display d;
-
-      // Helper for format selection
-      utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
-
-      // Helper for strategy selection
-      utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
-
-      layout::vertical_box& m = d.create< vertical_box >();
-
-      m.append(d.create< label >().set_text("Output format : ")).
-        append(d.create< horizontal_box >().
-                    append(format_selector.associate(pbes_output_pbes, "pbes")).
-                    append(format_selector.associate(pbes_output_internal, "internal")).
-                    append(format_selector.associate(pbes_output_cwi, "cwi")),
-              margins(0,5,0,5)).
-        append(d.create< label >().set_text("Transformation strategy : ")).
-        append(strategy_selector.associate(ts_lazy, "lazy: only boolean equations reachable from the initial state")).
-        append(strategy_selector.associate(ts_finite, "finite: all possible boolean equations"));
-
-      add_rewrite_option(d, m);
-
-      button& okay_button = d.create< button >().set_label("OK");
-
-      m.append(d.create< label >().set_text(" ")).
-        append(okay_button, layout::right);
-
-      /// Copy values from options specified in the configuration
-      if (c.option_exists(option_transformation_strategy)) {
-        strategy_selector.set_selection(
-            c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0));
-      }
-      if (c.option_exists(option_selected_output_format)) {
-        format_selector.set_selection(
-            c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
-      }
-
-      send_display_layout(d.manager(m));
-
-      /* Wait until the ok button was pressed */
-      okay_button.await_change();
-
-      /* Add output file to the configuration */
-      if (c.output_exists("main-output")) {
-        tipi::configuration::object& output_file = c.get_output("main-output");
-
-        output_file.location(c.get_output_name(".pbes"));
-      }
-      else {
-        c.add_output("main-output", tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
-      }
-
-      c.add_option(option_transformation_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
-      c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-
-      send_clear_display();
-
-      update_configuration(c);
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const
-    {
-      return c.input_exists("main-input") &&
-             c.output_exists("main-output") &&
-             c.option_exists(option_transformation_strategy) &&
-             c.option_exists(option_selected_output_format);
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c)
-    {
-      static std::string strategies[] = { "lazy", "finite" };
-      static std::string formats[]    = { "pbes", "internal", "cwi" };
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      m_input_filename = c.get_input("main-input").location();
-      m_output_filename = c.get_output("main-output").location();
-      set_output_format(formats[c.get_option_argument< size_t >(option_selected_output_format)]);
-      set_transformation_strategy(strategies[c.get_option_argument< size_t >(option_transformation_strategy)]);
-      bool result = run();
-
-      send_clear_display();
-
-      return result;
-    }
-
-#endif // ENABLE_SQUADT_CONNECTIVITY
 };
 
 //Main Program

@@ -495,9 +495,6 @@ feature.feature opengl : yes no : incidental ;
 # Feature for building/installing tools that use wxWidgets
 feature.feature wx : base gl none : incidental ;
 
-# Specifies that squadt connectivity is implemented in a tool
-feature.feature squadt-connectivity : none implemented : incidental composite ;
-
 rule default-configuration ( ) {
   local link-variant = [ get-option link : shared ] ;
 
@@ -548,26 +545,6 @@ rule feature-configuration ( ) {
     feature.set-default wx : none ;
 
     build-notice "Not building tools that depend on wxWidgets!" ;
-  }
-
-  if [ is-option disable-squadt-support : no ] = no {
-    feature.feature squadt-interface : enabled disabled : symmetric optional ;
-
-    feature.compose <squadt-connectivity>implemented
-          : <squadt-interface>enabled
-            <library>/libraries/utilities//squadt_interface
-          ;
-
-    properties += <threading>multi ;
-  }
-  else {
-    feature.feature squadt-interface : disabled enabled : implicit incidental optional ;
-
-    feature.compose <squadt-connectivity>implemented
-          : <squadt-interface>disabled
-          ;
-
-    build-notice "not building squadt support in tools!" ;
   }
 
   return [ property.change [ property.change $(properties) : <link> ] : <toolset> ] ;
