@@ -878,8 +878,22 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   # add_test(grapemcrl2_smoke ${grapemcrl2_BINARY_DIR}/grapemcrl2)
   # set_tests_properties(grapemcrl2_smoke PROPERTIES TIMEOUT 15 )
 
+
+  # Documentation tests
+  if (MCRL2_MAN_PAGES)
+    add_test(mcrl22lps_generate-man-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-man-page)
+    set_tests_properties(
+      mcrl22lps_generate-man-page
+    PROPERTIES 
+      LABELS "${MCRL2_TEST_LABEL}"
+    )
+  endif(MCRL2_MAN_PAGES)  
+    add_test(mcrl22lps_generate-wiki-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-wiki-page)
+
+
   set_tests_properties(
     mcrl22lps_abp 
+    mcrl22lps_generate-wiki-page
     lpsinfo_abp 
     lpsconstelm_abp 
     lpsparelm_abp 

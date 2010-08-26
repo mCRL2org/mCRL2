@@ -8,7 +8,7 @@
 
 # This script generates and installs man-pages documentation.
 
-if (MAN_PAGES)
+if (MCRL2_MAN_PAGES)
   add_custom_command(
     OUTPUT ${PROJECT_NAME}.1
     COMMAND ${PROJECT_NAME} --generate-man-page > ${PROJECT_NAME}.1
@@ -17,4 +17,4 @@ if (MAN_PAGES)
   )
   add_custom_target(${PROJECT_NAME}_man_page ALL DEPENDS ${PROJECT_NAME}.1)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.1 DESTINATION share/man/man1)
-endif (MAN_PAGES)
+endif (MCRL2_MAN_PAGES)
