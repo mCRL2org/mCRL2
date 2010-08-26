@@ -341,21 +341,25 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 ## Determine latest SVN revision
 ##--------------------------------------------------- 
 
-find_program(SVNVERSION
-  svnversion
-  /usr/local/bin
-  /usr/pkg/bin
-  /usr/bin
-)
-
-if(SVNVERSION)
-  execute_process(COMMAND ${SVNVERSION} ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE SVN_REV
-    OUTPUT_STRIP_TRAILING_WHITESPACE
+if( NOT DEFINED MCRL2_SVN_LABEL )
+  find_program(SVNVERSION
+    svnversion
+    /usr/local/bin
+    /usr/pkg/bin
+    /usr/bin
   )
-else(SVNVERSION)
-  set(SVN_REV "Unknown")
-endif(SVNVERSION)
+  
+  if(SVNVERSION)
+    execute_process(COMMAND ${SVNVERSION} ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE SVN_REV
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  else(SVNVERSION)
+    set(SVN_REV "Unknown")
+  endif(SVNVERSION)
+else( NOT DEFINED MCRL2_SVN_LABEL )
+  set( SVN_REV ${MCRL2_SVN_LABEL} )	
+endif( NOT DEFINED MCRL2_SVN_LABEL )
 
 message(STATUS "SVN revision: ${SVN_REV}")
 
