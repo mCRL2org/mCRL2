@@ -857,6 +857,13 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   add_test(ltsinfo_abp_lts ${ltsinfo_BINARY_DIR}/ltsinfo ${testdir}/abp_celm_pelm_sinst.lts )
   add_test(lps2pbes_abp ${lps2pbes_BINARY_DIR}/lps2pbes -v -f${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf ${testdir}/abp_celm_pelm_sinst.lps ${testdir}/abp_celm_pelm_sinst.pbes)
   add_test(pbes2bool_abp ${pbes2bool_BINARY_DIR}/pbes2bool -v ${testdir}/abp_celm_pelm_sinst.pbes)
+  add_test(lysa2mcrl2_test  ${lysa2mcrl2_BINARY_DIR}/lysa2mcrl2 ${lysa2mcrl2_SOURCE_DIR}/wmf_01.tlysa ${testdir}/wmf_01.mcrl2  )
+  add_test(tracepp_test ${tracepp_BINARY_DIR}/tracepp ${CMAKE_SOURCE_DIR}/examples/industrial/garage/movie.trc ${testdir}/movie.txt )
+  add_test(pnml2mcrl2_philcol ${pnml2mcrl2_BINARY_DIR}/pnml2mcrl2 ${CMAKE_SOURCE_DIR}/examples/generated/philcol/philcol.pnml ${testdir}/philcol.mcrl2 )
+  add_test(pnml2mcrl2_desel-esparza-5-2 ${pnml2mcrl2_BINARY_DIR}/pnml2mcrl2 ${pnml2mcrl2_SOURCE_DIR}/test/desel-esparza-5-2.pnml ${testdir}/desel-esparza-5-2.mcrl2)
+  add_test(chi2mcrl2_test ${chi2mcrl2_BINARY_DIR}/chi2mcrl2 ${chi2mcrl2_SOURCE_DIR}/examples/industrialsystem/industrialsystem.chi ${testdir}/industrialsystem.mcrl2) 
+
+
 
   # Simulation tools
   # add_test(lpssim_abp ${lpssim_BINARY_DIR}/lpssim ${testdir}/abp_celm_pelm_sinst.lps )
@@ -889,11 +896,13 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     )
   endif(MCRL2_MAN_PAGES)  
     add_test(mcrl22lps_generate-wiki-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-wiki-page)
+    add_test(mcrl22lps_mcrl2-gui ${mcrl22lps_BINARY_DIR}/mcrl22lps --mcrl2-gui)
 
 
   set_tests_properties(
     mcrl22lps_abp 
     mcrl22lps_generate-wiki-page
+    mcrl22lps_mcrl2-gui
     lpsinfo_abp 
     lpsconstelm_abp 
     lpsparelm_abp 
@@ -902,6 +911,11 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     ltsinfo_abp 
     pbes2bool_abp
     lps2pbes_abp 
+    lysa2mcrl2_test
+    tracepp_test  
+    pnml2mcrl2_philcol  
+    pnml2mcrl2_desel-esparza-5-2   
+    chi2mcrl2_test  
   PROPERTIES 
     LABELS "${MCRL2_TEST_LABEL}"
   )
