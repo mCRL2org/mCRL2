@@ -9,10 +9,6 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
-#ifndef MCRL2_WITH_GARBAGE_COLLECTION
-#define MCRL2_WITH_GARBAGE_COLLECTION
-#endif
-
 #include <iostream>
 #include <sstream>
 #include <boost/test/included/unit_test_framework.hpp>

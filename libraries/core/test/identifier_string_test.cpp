@@ -21,7 +21,7 @@ void test_identifier_string()
 {
   core::identifier_string a("abc");
   const core::identifier_string b = a;
-    
+
   const core::identifier_string_list l;
   for(core::identifier_string_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
