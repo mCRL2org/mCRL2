@@ -331,8 +331,8 @@ public:
         wxConvUTF8);
 
 #ifdef __linux__
-    //input_file.Replace( wxT(" "),wxT("\\ "));
-    //output_file.Replace( wxT(" "),wxT("\\ "));
+    input_file.Replace( wxT(" "),wxT("\\ "));
+    output_file.Replace( wxT(" "),wxT("\\ "));
 #endif
 
 #ifdef _WIN32
