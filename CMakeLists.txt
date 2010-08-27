@@ -862,6 +862,8 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   add_test(pnml2mcrl2_philcol ${pnml2mcrl2_BINARY_DIR}/pnml2mcrl2 ${CMAKE_SOURCE_DIR}/examples/generated/philcol/philcol.pnml ${testdir}/philcol.mcrl2 )
   add_test(pnml2mcrl2_desel-esparza-5-2 ${pnml2mcrl2_BINARY_DIR}/pnml2mcrl2 ${pnml2mcrl2_SOURCE_DIR}/test/desel-esparza-5-2.pnml ${testdir}/desel-esparza-5-2.mcrl2)
   add_test(chi2mcrl2_test ${chi2mcrl2_BINARY_DIR}/chi2mcrl2 ${chi2mcrl2_SOURCE_DIR}/examples/industrialsystem/industrialsystem.chi ${testdir}/industrialsystem.mcrl2) 
+  add_test(lts2lps_test ${lts2lps_BINARY_DIR}/lts2lps ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_lts.mcrl2) 
+  add_test(ltsconvert_bisim_test ${ltsconvert_BINARY_DIR}/ltsconvert -ebisim ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_bisim.aut) 
 
 
 
@@ -915,7 +917,9 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     tracepp_test  
     pnml2mcrl2_philcol  
     pnml2mcrl2_desel-esparza-5-2   
-    chi2mcrl2_test  
+    chi2mcrl2_test 
+    lts2lps_test
+    ltsconvert_bisim_test
   PROPERTIES 
     LABELS "${MCRL2_TEST_LABEL}"
   )
