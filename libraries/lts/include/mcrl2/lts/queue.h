@@ -13,6 +13,7 @@
 #ifndef MCRL2_LTS_QUEUE_H
 #define MCRL2_LTS_QUEUE_H
 
+#include <limits.h>
 #include <aterm2.h>
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/messaging.h"
