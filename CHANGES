@@ -1,4 +1,42 @@
 ===============================================================================
+Changes between toolset releases January 2010 and July 2010:
+===============================================================================
+
+ General:
+   - developed new graphical user interface mcrl2-gui. Use of this tool is
+     recommended above using squadt.
+   - move to CMake build system. The bjam build system is still included, but
+     will be removed in the January 2011 release.
+   - increase the amount of generated code.
+   - more extensive testing
+
+ Tool renamings:
+   - In order to have a more consistent tool naming scheme, some tools have
+     been renamed:
+     * sim -> lpssim
+     * xsim -> lpsxsim
+     * grape -> grapemcrl2
+
+ New functionality:
+   - the language now supports function updates for functions of arity 1. It is
+     now allowed to write f[d -> e] for a function f: D -> E, with d in D and
+     e in E. The meaning is that (f[d -> e])(x) = e if x == d, and f(x)
+     otherwise.
+   - lps2lts has an extra option to detect divergences.
+   - for a number of equivalences, ltscompare can give countertraces in case
+     two processes are not equivalent. This is helpful in finding why two
+     processes are not equivalent.
+
+ Deprecated tools:
+   - squadt is deprecated. It will be removed in the January 2011 release. We
+     recommend using mcrl2-gui instead.
+
+ Known issues:
+   - ltsview and ltsgraph do not work when started from SQuADT in Windows 7 and
+     Windows Vista; if started directly they do function properly. Using
+     mcrl2-gui there are no problems.
+
+===============================================================================
 Changes between toolset releases January 2009 and January 2010:
 ===============================================================================
 
