@@ -330,8 +330,20 @@ public:
     wxString output_file = wxString(m_fileIO.output_file.c_str(),
         wxConvUTF8);
 
-    input_file.Replace( wxT(" "),wxT("\\ "));
-    output_file.Replace( wxT(" "),wxT("\\ "));
+#ifdef __linux__
+    //input_file.Replace( wxT(" "),wxT("\\ "));
+    //output_file.Replace( wxT(" "),wxT("\\ "));
+#endif
+
+#ifdef _WIN32
+	input_file.Prepend(wxT("\"") );
+	input_file.Append(wxT("\"") );
+
+	if (!output_file.empty()){
+		output_file.Prepend(wxT("\"") );
+		output_file.Append(wxT("\"") );
+	}
+#endif
 
     run = run + wxT(" ") + input_file + wxT(" ") + output_file;
 
