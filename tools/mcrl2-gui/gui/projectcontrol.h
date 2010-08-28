@@ -126,19 +126,16 @@ public:
 				CreateNewFile();
 				break;
 			case ID_NEW_DIR:
-				//Parent ID
-				pid = this->GetTreeCtrl()->GetItemParent(
-						this->GetTreeCtrl()->GetSelection());
 
 				if (wxDir::Exists(this->GetPath())) {
-          s = this->GetPath() + wxFileName::GetPathSeparator() ;
+					s = this->GetPath() + wxFileName::GetPathSeparator() ;
 				}
 
 				if (wxFile::Exists(this->GetPath())){
 			    wxString name;
 			    wxString ext;
-		      wxFileName::SplitPath(this->GetPath(), &s, &name, &ext);
-		      s = s + wxFileName::GetPathSeparator();
+				wxFileName::SplitPath(this->GetPath(), &s, &name, &ext);
+				s = s + wxFileName::GetPathSeparator();
 				}
 
 				//Generate unique name directory name
@@ -156,10 +153,8 @@ public:
 					wxLogMessage(wxT("Cannot create the following directory: '") + s
 							+ wxT("'."));
 				} else {
-					//Create Dir, with icon in tree
-					this->GetTreeCtrl()->AppendItem(pid, s, 0);
 					//Collapse tree
-		      this->Refresh();
+		            this->Refresh();
 					//Expand tree to new dir
 					this->ExpandPath(s);
 					//Re-label dir
@@ -526,7 +521,7 @@ public:
 		mnu.Append(ID_NEW_FILE, wxT("New File \tCtrl-N"));
 		mnu.Append(ID_NEW_DIR, wxT("New Directory"));
 		mnu.AppendSeparator();
-    mnu.Append(ID_COPY_FILE, wxT("Copy File \tF6"));
+		mnu.Append(ID_COPY_FILE, wxT("Copy File \tF6"));
 		mnu.Append(ID_RENAME, wxT("Rename \tF2"));
 		mnu.Append(ID_DELETE, wxT("Delete \tDel"));
 		mnu.AppendSeparator();
@@ -541,8 +536,8 @@ public:
 		wxString new_file = wxT("new_file");
 
 		wxString path;
-    wxString name;
-    wxString ext;
+		wxString name;
+		wxString ext;
 
     if( wxFileName::DirExists(this->GetPath())){
       path = this->GetPath() ;
