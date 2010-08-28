@@ -251,7 +251,7 @@ class lpsinvelm_giu_tool: public mcrl2_gui_tool<invelm_tool>
 
       m_gui_options["counter-example"] = create_checkbox_widget();
       m_gui_options["no-elimination"] = create_checkbox_widget();
-      m_gui_options["simplify-all"] = create_filepicker_widget();
+      m_gui_options["simplify-all"] = create_checkbox_widget();
       m_gui_options["no-check"] = create_checkbox_widget();
       m_gui_options["induction"] = create_checkbox_widget();
       m_gui_options["print-dot"] = create_textctrl_widget();

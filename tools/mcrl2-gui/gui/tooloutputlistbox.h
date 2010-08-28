@@ -12,6 +12,7 @@
 #include <wx/listbox.h>
 #include <wx/clipbrd.h>
 #include <wx/dataobj.h>
+#include <wx/textfile.h>
 
 #define ID_CLEAR_LISTBOX  1500
 #define ID_SAVE_LISTBOX   1501
@@ -91,7 +92,7 @@ class OutPutListBoxBase : public wxListBox
   Save()
   {
     wxFileDialog *fd = new wxFileDialog(this, wxT("Choose a file"), wxT(""),
-        wxT(""), wxT("*.*"), wxSAVE | wxOVERWRITE_PROMPT, wxDefaultPosition);
+        wxT(""), wxT("*.*"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
     if (fd->ShowModal() == wxID_OK)
     {
       wxString sfile = fd->GetPath();
@@ -106,8 +107,10 @@ class OutPutListBoxBase : public wxListBox
       for (unsigned int i = 0; i < this->GetCount(); ++i)
       {
         f->Write(this->GetString(i));
-        f->Write(wxT("\n"));
+        f->Write(wxTextFile::GetEOL());
       }
+
+      f->Close();
     }
   }
 
@@ -244,7 +247,7 @@ class OutPutListBox : public OutPutListBoxBase
     OutPutListBox(wxWindow *parent, wxWindowID id, const wxPoint& pos =
         wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0,
         const wxString choices[] = (const wxString *) NULL, long style =
-            wxLB_EXTENDED, const wxValidator& validator = wxDefaultValidator,
+            wxLB_EXTENDED | wxVSCROLL, const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxListBoxNameStr)
     :
       OutPutListBoxBase(parent, id, pos, size, n, choices, style, validator,

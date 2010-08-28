@@ -159,7 +159,7 @@ public:
 					//Create Dir, with icon in tree
 					this->GetTreeCtrl()->AppendItem(pid, s, 0);
 					//Collapse tree
-					this->GetTreeCtrl()->Collapse(pid);
+		      this->Refresh();
 					//Expand tree to new dir
 					this->ExpandPath(s);
 					//Re-label dir
