@@ -297,8 +297,6 @@ public:
     UpdateToolTipStatus(STATUS_RUNNING);
 
     wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
-    wxArrayString run_argv;
-    run_argv.Add( cmd );
 
     wxString run = cmd;
     for (vector<wxRadioBox*>::iterator i = m_radiobox_ptrs.begin(); i
@@ -315,14 +313,27 @@ public:
 
     for (vector<wxTextCtrl*>::iterator i = m_textctrl_ptrs.begin(); i
         != m_textctrl_ptrs.end(); ++i) {
-      if ((*i)->GetValue() && !(*i)->GetValue().empty() )
+      if (!(*i)->GetValue().IsEmpty() )
         run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
     }
 
     for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin(); i
         != m_filepicker_ptrs.end(); ++i) {
-      if ((*i)->GetPath() && !(*i)->GetPath().empty() )
-        run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetPath();
+      if (!(*i)->GetPath().IsEmpty() ){
+
+        wxString arg = (*i)->GetPath();
+
+        #ifdef __linux__
+            arg.Replace( wxT(" "),wxT("\\ "));
+        #endif
+
+        #ifdef _WIN32
+          arg.Prepend(wxT("\"") );
+          arg.Append(wxT("\"") );
+        #endif
+
+        run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") + arg ;
+      }
     }
 
     wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);

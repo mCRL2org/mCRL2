@@ -123,14 +123,31 @@ public:
 
     void            clear()
     {
-        while( !m_test_units.empty() ) {
-            test_unit_store::value_type const& tu = *m_test_units.begin();
+        while( !m_test_units.empty() ) 
+        {
+         test_unit_store::value_type const& tu = *m_test_units.begin();
 
-            // the delete will erase this element from map
+         /* // the delete will erase this element from map
             if( ut_detail::test_id_2_unit_type( tu.second->p_id ) == tut_suite )
                 delete  static_cast<test_suite const*>(tu.second);
             else
                 delete  static_cast<test_case const*>(tu.second);
+         */
+        // Below is a patch, for boost ticket 3432 which causes the test framework to
+        // attempt to remove a pointer which is not valid anymore.
+        // I assume that this error does not exist in newer versions of Boost.
+        // The problem shows itself on MacOsX 6. Jan Friso
+
+        if( ut_detail::test_id_2_unit_type( tu.second->p_id ) == tut_suite ) 
+        { 
+ 	               test_suite const* p = (test_suite const*)tu.second; 
+ 	               delete p; 
+ 	} 
+        else 
+        { 
+ 	                test_case const* p = (test_case const*)tu.second; 
+ 	                delete p; 
+ 	} 
         }
     }
 
