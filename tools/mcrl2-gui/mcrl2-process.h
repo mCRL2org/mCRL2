@@ -93,7 +93,7 @@ public:
 		m_parent = parent;
 	}
 
-	void AddAsyncProcess(wxListBox *output ) {
+	void AddAsyncProcess(wxTextCtrl *output ) {
 		m_listbox_output = output;
 		if (running_processes.IsEmpty()) {
 			// we want to start getting the timer events to ensure that a
@@ -138,22 +138,21 @@ public:
         m_msg << tis.ReadLine();
         if (m_listbox_output != NULL)
         {
-          size_t old = m_listbox_output->GetCount();
+		  int old = m_listbox_output->GetNumberOfLines();
 
-          m_listbox_output->Append(m_msg);
+		  m_listbox_output->AppendText(m_msg + wxT("\n") );
 
           if (m_listbox_output == wxWindow::FindFocus())
           {
             // AutoScroll
-            m_listbox_output->Select(m_listbox_output->GetCount() - 1);
-            m_listbox_output->SetSelection(wxNOT_FOUND);
+            //m_listbox_output->Select(m_listbox_output->GetCount() - 1);
+            //m_listbox_output->SetSelection(wxNOT_FOUND);
           }
 
-          if (old < m_listbox_output->GetCount() && (!m_msg.empty()) )
-          {
-            wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
-            wxPostEvent(m_parent, eventCustom);
-          }
+			if (old <  m_listbox_output->GetNumberOfLines() && (!m_msg.empty()) ){
+			  wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
+			  wxPostEvent(m_parent, eventCustom);
+			}
 
         }
         m_msg.Clear();
@@ -167,17 +166,18 @@ public:
       m_msg << tis.ReadLine();
       if (m_listbox_output != NULL)
       {
-        size_t old = m_listbox_output->GetCount();
 
-        m_listbox_output->Append(m_msg);
+		int old = m_listbox_output->GetNumberOfLines();
+
+        m_listbox_output->AppendText(m_msg + wxT("\n"));
         if (m_listbox_output == wxWindow::FindFocus())
         {
           // AutoScroll
-          m_listbox_output->Select(m_listbox_output->GetCount() - 1);
-          m_listbox_output->SetSelection(wxNOT_FOUND);
+  //        m_listbox_output->Select(m_listbox_output->GetCount() - 1);
+  //        m_listbox_output->SetSelection(wxNOT_FOUND);
         }
 
-        if (old <  m_listbox_output->GetCount() && (!m_msg.empty()) ){
+        if (old <  m_listbox_output->GetNumberOfLines() && (!m_msg.empty()) ){
           wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
           wxPostEvent(m_parent, eventCustom);
         }
@@ -192,7 +192,7 @@ public:
 	}
 	;
 protected:
-	wxListBox *m_listbox_output;
+	wxTextCtrl *m_listbox_output;
 };
 
 #endif /* MCRL2_GUI_PROCESS_H_ */

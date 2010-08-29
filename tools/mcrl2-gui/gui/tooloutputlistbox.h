@@ -9,10 +9,11 @@
 #define MCRL2_TOOLOUTPUTLISTBOX_H_
 
 #include <wx/filedlg.h>
-#include <wx/listbox.h>
 #include <wx/clipbrd.h>
 #include <wx/dataobj.h>
 #include <wx/textfile.h>
+#include <wx/textctrl.h>
+
 
 #define ID_CLEAR_LISTBOX  1500
 #define ID_SAVE_LISTBOX   1501
@@ -53,19 +54,16 @@ DEFINE_EVENT_TYPE(wxEVT_UPDATE_FOCUS)
     ),
 
 
-class OutPutListBoxBase : public wxListBox
+class OutPutListBoxBase : public wxTextCtrl
 {
   public:
   OutPutListBoxBase(wxWindow *parent, wxWindowID id, const wxPoint& pos =
-          wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0,
-          const wxString choices[] = (const wxString *) NULL, long style =
-              wxLB_EXTENDED, const wxValidator& validator = wxDefaultValidator,
-          const wxString& name = wxListBoxNameStr) :
-        wxListBox(parent, id, pos, size, n, choices, style, validator, name)
+          wxDefaultPosition, const wxSize& size = wxDefaultSize) :
+        wxTextCtrl(parent, id, wxEmptyString ,pos, size, wxTE_MULTILINE)
   {
-    wxFont font(wxNORMAL_FONT->GetPointSize(), wxMODERN, wxFONTSTYLE_NORMAL,
+    /*wxFont font(wxNORMAL_FONT->GetPointSize(), wxMODERN, wxFONTSTYLE_NORMAL,
         wxLIGHT, false);
-    this->SetFont(font);
+    this->SetFont(font); */
   }
 
   void
@@ -74,17 +72,7 @@ class OutPutListBoxBase : public wxListBox
     // Write selected items to the clipboard
     if (wxTheClipboard->Open())
     {
-      wxArrayInt selection;
-      this->GetSelections(selection);
-
-      wxString s;
-      for (size_t i = 0; i < selection.Count(); ++i)
-      {
-        s << this->GetString((int) selection.Item(i)) << wxT("\n");
-      }
-
-      wxTheClipboard->SetData(new wxTextDataObject(s));
-      wxTheClipboard->Close();
+	  this->Copy();
     }
   }
 
@@ -102,34 +90,16 @@ class OutPutListBoxBase : public wxListBox
         wxRemoveFile(sfile);
       }
 
-      wxFile *f = new wxFile(sfile, wxFile::write);
+	  this->SaveFile(sfile, wxTEXT_TYPE_ANY);
 
-      for (unsigned int i = 0; i < this->GetCount(); ++i)
-      {
-        f->Write(this->GetString(i));
-        f->Write(wxTextFile::GetEOL());
-      }
-
-      f->Close();
-    }
+    } 
   }
 
   void
   SelectAll()
   {
-    for(size_t i = 0; i < this->GetCount(); ++i )
-    {
-      this->Select(i);
-    }
-  }
-
-  void
-  SelectNone()
-  {
-    for(size_t i = 0; i < this->GetCount(); ++i )
-    {
-      this->DoSetSelection(i, false);
-    }
+	  // If both parameters are equal to -1 all text in the control is selected.
+	  this->SetSelection( -1 , -1 );
   }
 
   void OnFocus(wxFocusEvent &/*event*/){
@@ -149,7 +119,7 @@ class OutPutListBoxBase : public wxListBox
 
   DECLARE_EVENT_TABLE()
 };
-BEGIN_EVENT_TABLE(OutPutListBoxBase, wxListBox)
+BEGIN_EVENT_TABLE(OutPutListBoxBase, wxTextCtrl)
   EVT_SET_FOCUS(OutPutListBoxBase::OnFocus)
   EVT_KILL_FOCUS(OutPutListBoxBase::OnKillFocus)
 END_EVENT_TABLE ()
@@ -159,11 +129,8 @@ class ToolOutputListBoxBase : public OutPutListBoxBase
   public:
 
     ToolOutputListBoxBase(wxWindow *parent, wxWindowID id, const wxPoint& pos =
-        wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0,
-        const wxString choices[] = (const wxString *) NULL, long style =
-            wxLB_EXTENDED, const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxListBoxNameStr) :
-          OutPutListBoxBase(parent, id, pos, size, n, choices, style, validator, name)
+        wxDefaultPosition, const wxSize& size = wxDefaultSize) :
+          OutPutListBoxBase(parent, id, pos, size)
     {}
 
     void
@@ -188,7 +155,6 @@ class TOutputListBoxMenu: public wxMenu
     TOutputListBoxMenu(ToolOutputListBoxBase *parent)
     {
       this->Append(ID_SELECT_ALL, wxT("Select All...\tCtrl-A"));
-      this->Append(ID_SELECT_NONE, wxT("Deselect All...\tCtrl-D"));
       this->Append(ID_COPY_LINES_TO_CLIPBOARD, wxT("Copy Selection...\tCtrl-C"));
       this->Append(ID_SAVE_LISTBOX, wxT("Save...\tCtrl-S"));
       this->AppendSeparator();
@@ -223,13 +189,6 @@ class TOutputListBoxMenu: public wxMenu
       p->SelectAll();
     }
 
-    void
-    OnDeselectAll(wxCommandEvent &/*event*/)
-    {
-      p->DeselectAll();
-    }
-
-
     DECLARE_EVENT_TABLE()
 };
 
@@ -238,20 +197,15 @@ class TOutputListBoxMenu: public wxMenu
     EVT_MENU(ID_SAVE_LISTBOX, TOutputListBoxMenu::OnSave )
     EVT_MENU(ID_COPY_LINES_TO_CLIPBOARD, TOutputListBoxMenu::OnCopyLine)
     EVT_MENU(ID_SELECT_ALL, TOutputListBoxMenu::OnSelectAll)
-    EVT_MENU(ID_SELECT_NONE, TOutputListBoxMenu::OnDeselectAll)
   END_EVENT_TABLE ()
 
 class OutPutListBox : public OutPutListBoxBase
 {
   public:
     OutPutListBox(wxWindow *parent, wxWindowID id, const wxPoint& pos =
-        wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0,
-        const wxString choices[] = (const wxString *) NULL, long style =
-            wxLB_EXTENDED | wxVSCROLL, const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxListBoxNameStr)
+        wxDefaultPosition, const wxSize& size = wxDefaultSize)
     :
-      OutPutListBoxBase(parent, id, pos, size, n, choices, style, validator,
-          name)
+      OutPutListBoxBase(parent, id, pos, size)
     {}
 
       void
@@ -265,6 +219,7 @@ class OutPutListBox : public OutPutListBoxBase
       void
       onKeyDown(wxKeyEvent& evt)
       {
+
         //std::cout << "Pressed key {" << evt.GetKeyCode() << "}\n";
 
         switch (evt.GetKeyCode())
@@ -281,13 +236,6 @@ class OutPutListBox : public OutPutListBoxBase
               CopyLine();
             }
             break;
-          case 68: //68 == d or D
-            if (evt.ControlDown())
-            {
-              DeselectAll();
-            }
-            break;
-
           case 83: //83 == s or S
             if (evt.ControlDown())
             {
@@ -358,12 +306,8 @@ class ToolOutputListBox : public ToolOutputListBoxBase
   public:
 
     ToolOutputListBox(wxWindow *parent, wxWindowID id, const wxPoint& pos =
-        wxDefaultPosition, const wxSize& size = wxDefaultSize, int n = 0,
-        const wxString choices[] = (const wxString *) NULL, long style =
-            wxLB_EXTENDED, const wxValidator& validator = wxDefaultValidator,
-        const wxString& name = wxListBoxNameStr) :
-      ToolOutputListBoxBase(parent, id, pos, size, n, choices, style,
-          validator, name)
+        wxDefaultPosition, const wxSize& size = wxDefaultSize) :
+      ToolOutputListBoxBase(parent, id, pos, size)
     {
     }
 

@@ -16,7 +16,6 @@
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 #include <wx/statline.h>
-//#include <gui/outputlistbox.h>
 #include <gui/tooloutputlistbox.h>
 #include <wx/scrolwin.h>
 #include <wx/gbsizer.h>
@@ -358,7 +357,7 @@ public:
 
     run = run + wxT(" ") + input_file + wxT(" ") + output_file;
 
-    m_listbox_output->Append(run);
+    m_listbox_output->AppendText(run + wxTextFile::GetEOL() );
 
     m_process = new MyPipedProcess(this);
 
@@ -447,7 +446,7 @@ public:
 
 	wxAuiNotebook *m_parent;
 	wxAuiNotebook *m_configpanel;
-	OutPutListBox *m_listbox_output;
+	OutPutListBoxBase *m_listbox_output;
 	ToolOutputListBox *m_tool_output;
 	wxScrolledWindow *m_wsw;
 	wxString m_input_file;
