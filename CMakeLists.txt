@@ -397,7 +397,7 @@ if(MCRL2_USE_BOOST_INTERNAL)
 
 else(MCRL2_USE_BOOST_INTERNAL)
 
-  find_package(Boost COMPONENTS system signals filesystem thread REQUIRED)
+  find_package(Boost COMPONENTS signals filesystem regex REQUIRED)
   if(NOT Boost_FOUND)
     message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.35 or higher." )
     message( FATAL_ERROR "Use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost" )

@@ -15,6 +15,14 @@
 #include <memory>
 #include <locale>
 
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <iterator>
+#include <boost/regex.hpp>
+#include <fstream>
+#include <iostream>
+
 #include "boost/xpressive/xpressive_static.hpp"
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/compare.hpp"
@@ -229,7 +237,17 @@ namespace mcrl2 {
 
       mark_tag option(1);
 
-      description = regex_replace(description, sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), std::string("<tt>$1</tt>"));
+      // Following line:
+      //
+      //   description = regex_replace(description, sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), std::string("<tt>$1</tt>"));
+      //
+      // Should be equal to: 
+      // -- begin --
+      //
+      //
+      boost::regex e( "(--\\w*)|(-\\w*)" );
+      description = boost::regex_replace(description, e, "<tt>$&</tt>" );
+      // -- end --
 
       s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
 

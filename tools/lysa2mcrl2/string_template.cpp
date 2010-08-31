@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/regex.hpp>
 
 using namespace boost;
 using namespace boost::xpressive;
@@ -80,9 +81,28 @@ void StringTemplate::finalise()
     string value(i->second->str());
     this->replace(key, value);
   }
-  //removes dangling commas, right next to a bracket.
-  sregex rex = ((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
-  subject = regex_replace(subject, rex, std::string("$1$2"));
+  // removes dangling commas, right next to a bracket.
+  // sregex rex = ((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
+  // subject = regex_replace(subject, rex, std::string("$1$2"));
+
+      std::ostringstream t(std::ios::out | std::ios::binary);
+      std::ostream_iterator<char, char> oi(t);
+
+      boost::regex e1("\\[\\s*\\,\\s*");
+      subject = regex_replace(subject , e1, "[");
+
+      boost::regex e2("\\(\\s*\\,\\s*");
+      subject = regex_replace(subject , e2, "(");
+
+      boost::regex e3( "\\s*\\,\\s*\\]" );
+      subject = regex_replace(subject , e3, "]");
+
+      boost::regex e4( "\\s*\\,\\s*\\)" );
+      subject = regex_replace(subject , e4, ")");
+
+      boost::regex e5( "\\s*\\,\\s*:" );
+      subject = regex_replace(subject , e5, ":");
+
 }
 
 StringTemplateFile::StringTemplateFile(string filecontent)
@@ -93,15 +113,33 @@ StringTemplateFile::StringTemplateFile(string filecontent)
 	string fmtline;
 	while(getline(f, fmtline))
 	{
+
+
 		//matches <key> = <value> where <key> must be a word and <value> is everything after the '='.
 		//supports comments starting with f.ex. #
-		sregex rex = bos >> *_s >> (s1= +_w) >> *_s >> '=' >> !_s >> (s2= *_) >> !(as_xpr('\r')) >> eos;
+		// Original code:
+		// -- begin --
+		//
+		/* sregex rex = bos >> *_s >> (s1= +_w) >> *_s >> '=' >> !_s >> (s2= *_) >> !(as_xpr('\r')) >> eos;
 		smatch matches;
 
 		if(regex_match(fmtline, matches, rex))
 		{
 			format_strings[matches[1]] = matches[2];
-		}
+		} 
+		// -- end --
+		*/
+
+		boost::regex rex( "\\s*(\\w+)(\\s*)=(\\s*)(.*)"); 
+		boost::cmatch matches;
+
+		if(boost::regex_match(fmtline.c_str(), matches, rex))
+		{
+/*			cout << "s :" << matches[0] << endl; // Returns original string if a match is found
+			cout << "k :" << matches[1] << endl; // Key 
+			cout << "v :" << matches[4] << endl; // Value */
+			format_strings[matches[1]] = matches[4];
+		} 
 	}
 }
 
