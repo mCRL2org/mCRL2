@@ -348,6 +348,33 @@ BOOST_AUTO_TEST_CASE(test_struct)
   check_lps2lts_specification(spec, 2, 1, 1);
 }
 
+BOOST_AUTO_TEST_CASE(test_alias_complex)
+{
+  std::string spec(
+      "sort Bits = struct singleBit(bit: Bool)?isSingleBit | bitVector(bitVec: List(Bool))?isBitVector;\n"
+      "     t_sys_regset_fsm_state = Bits;\n"
+      "     t_timer_counter_fsm_state = Bits;\n"
+      "\n"
+      "map  repeat_rec: Bool # Nat -> List(Bool);\n"
+      "     repeat: Bool # Nat -> Bits;\n"
+      "\n"
+      "var  b: Bool;\n"
+      "     n: Nat;\n"
+      "eqn  repeat(b, n)  =  if(n <= 1, singleBit(b), bitVector(repeat_rec(b, n)));\n"
+      "\n"
+      "act  a: t_sys_regset_fsm_state;\n"
+      "\n"
+      "proc P(s3: Pos) =\n"
+      "       (s3 == 1) ->\n"
+      "         a(repeat(true, 32)) .\n"
+      "         P(s3 = 2)\n"
+      "     + delta;\n"
+      "\n"
+      "init P(1);\n"
+      );
+  check_lps2lts_specification(spec, 2, 1, 1);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

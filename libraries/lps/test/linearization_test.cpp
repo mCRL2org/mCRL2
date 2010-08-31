@@ -1026,6 +1026,26 @@ BOOST_AUTO_TEST_CASE(sort_aliases)
   run_linearisation_test_case(various_sort_aliases);
 }
 
+BOOST_AUTO_TEST_CASE(test_aliases_complex)
+{
+  const std::string spec =
+      "sort\n"
+      "  Bits = struct singleBit (bit: Bool)?isSingleBit | bitVector (bitVec:List(Bool))?isBitVector;\n"
+      "  t_sys_regset_fsm_state = Bits;\n"
+      "  t_timer_counter_fsm_state = Bits;\n"
+      "map\n"
+      "  repeat : Bool # Nat -> Bits;\n"
+      "  repeat_rec : Bool # Nat -> List(Bool);\n"
+      "var\n"
+      "  b:Bool;\n"
+      "  n:Nat;\n"
+      "eqn\n"
+      "  repeat(b,n) = if(n <= 1, singleBit(b), bitVector(repeat_rec(b,n)));\n"
+      "act a:Bits;\n"
+      "init a(repeat(true,32)).delta;\n";
+  run_linearisation_test_case(spec);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   core::gsSetVerboseMsg();
