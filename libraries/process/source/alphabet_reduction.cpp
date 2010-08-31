@@ -1916,40 +1916,45 @@ namespace mcrl2 {
         if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
           return a;
         }
-        else if ( gsIsProcess(a) || gsIsProcessAssignment(a) ){
+        else if ( gsIsProcess(a) || gsIsProcessAssignment(a) )
+        {
           ATermAppl pn=ATAgetArgument(a,0);
           ATermList l=ATLtableGet(subs_npCRL,(ATerm)pn);
           if(!l) return a; //not an npCRL process call.
       
           if ( gsIsProcessAssignment(a) )
           { 
-            gsErrorMsg("n-parallel processes in combination with short-hand assignments are not supported.\n\n",a); 
+            gsErrorMsg("n-parallel processes in combination with short-hand assignments are not supported.\n",a); 
             return NULL; 
           }
       
           //determine the value of the parameter.
           ATermAppl par=ATAgetFirst(ATLgetArgument(a,1));
           ATermAppl k=NULL;
-          if(gsIsDataExprNumber(par) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(par,1)))){
+          if (gsIsDataExprNumber(par) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(par,1))))
+          {
             k=ATAgetArgument(par,0);
           }
-          else
-            if(gsIsOpId(par) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(par,1)))){
-      	k=ATAtableGet(consts,(ATerm)ATAgetArgument(par,0));
-            }
-          if(!k){
-            gsErrorMsg("cannot evaluate the parameter value in process term %T\n as a positive number.\n\n",a);
+          else if (gsIsOpId(par) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(par,1))))
+          {
+      	    k=ATAtableGet(consts,(ATerm)ATAgetArgument(par,0));
+          }
+          if(!k)
+          {
+            gsErrorMsg("the parameter in the process term %P is not a concrete positive number.\n",a);
             return NULL;
           }
       
           //check if we have already seen such a process call (for k):
           {
             ATermList l1=l;
-            for(;!ATisEmpty(l);l=ATgetNext(l)){
-      	ATermAppl pair=ATAgetFirst(l);
-      	if(ATisEqual(ATAgetArgument(pair,0),k)){
-      	  return gsMakeProcess(ATAgetArgument(pair,1),ATgetNext(ATLgetArgument(a,1)));
-      	}
+            for(;!ATisEmpty(l);l=ATgetNext(l))
+            {
+      	      ATermAppl pair=ATAgetFirst(l);
+      	      if(ATisEqual(ATAgetArgument(pair,0),k))
+              {
+      	        return gsMakeProcess(ATAgetArgument(pair,1),ATgetNext(ATLgetArgument(a,1)));
+      	      }
             }
             l=l1;
           }
@@ -1978,7 +1983,18 @@ namespace mcrl2 {
       
           ATermAppl p,q=NULL;
           p = gsaSubstNP(subs_npCRL,consts,ATAgetArgument(a,ia1));
-          if(args==2) q = gsaSubstNP(subs_npCRL,consts,ATAgetArgument(a,ia2));
+          if (p==NULL)
+          { 
+            return NULL;
+          }
+          if(args==2) 
+          { 
+            q = gsaSubstNP(subs_npCRL,consts,ATAgetArgument(a,ia2));
+            if (q==NULL)
+            {
+              return NULL;
+            }
+          }
       
           a=ATsetArgument(a,(ATerm)p,ia1);
           if(args==2) a=ATsetArgument(a,(ATerm)q,ia2);
