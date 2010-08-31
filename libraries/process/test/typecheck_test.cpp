@@ -321,6 +321,20 @@ BOOST_AUTO_TEST_CASE(test_sort_expression_vs_function_symbol)
   );
 }
 
+BOOST_AUTO_TEST_CASE(test_real_zero)
+{
+  test_typechecker_case(
+    "sort T = Real;\n"
+    "map  x: List(T) -> List(T);\n"
+    "var  l: List(T);\n"
+    "     r: T;\n"
+    "eqn  x(r |> l) = (r+0) |> l;\n"
+    "act  a: List(T);\n"
+    "init a(x([0]));\n",
+    true
+  );
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
