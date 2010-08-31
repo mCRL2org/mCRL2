@@ -683,6 +683,19 @@ BOOST_AUTO_TEST_CASE(test_matching_ambiguous_rhs)
   );
 }
 
+BOOST_AUTO_TEST_CASE(test_function_alias)
+{
+  test_data_specification(
+  "sort Array = Nat -> Nat;\n"
+  "map  update: Nat # Nat # Array -> Array;\n"
+  "var  i, n: Nat;\n"
+  "   f: Array;\n"
+  "eqn  update(i,n,f) = lambda j:Nat . if(i==j, n, f(j));\n",
+  true
+  );
+}
+
+
 template <typename VariableIterator>
 void test_data_expression_in_specification_context(const std::string &de_in,
                           const std::string& ds_in,
