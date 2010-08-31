@@ -47,8 +47,6 @@
 #include "mcrl2/atermpp/set.h"
 
 //mCRL2 data
-// #include "mcrl2/data/variable.h"
-// #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard_utility.h"
@@ -57,8 +55,6 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
-// #include "mcrl2/data/replace.h"
-// #include "mcrl2/data/data_specification.h"
 
 //mCRL2 processes
 #include "mcrl2/process/process_expression.h"
