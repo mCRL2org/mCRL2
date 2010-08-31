@@ -15,77 +15,70 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
+using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::lps;
-
-// Garbage collect after each case.
-struct collect_after_test_case {
-  ~collect_after_test_case()
-  {
-    core::garbage_collect();
-  }
-};
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-// Parameter i should be removed
-const std::string case_1(
-  "act a;\n\n"
-  "proc X(i: Nat) = a.X(i);\n\n"
-  "init X(2);\n");
-
-// Parameter j should be removed
-const std::string case_2(
-  "act a: Nat;\n\n"
-  "proc X(i,j: Nat) = a(i). X(i,j);\n\n"
-  "init X(0,1);\n");
-
-// Parameter j should be removed
-const std::string case_3(
-  "act a;\n\n"
-  "proc X(i,j: Nat)   = (i == 5) -> a. X(i,j);\n\n"
-  "init X(0,1);\n");
-
-// Parameter j should be removed
-const std::string case_4(
-  "act a;\n\n"
-  "proc X(i,j: Nat) = a@i.X(i,j);\n\n"
-  "init X(0,4);\n");
-
-// Nothing should be removed
-const std::string case_5(
-  "act a: Nat;\n"
-  "act b;\n\n"
-  "proc X(i,j,k: Nat) =  a(i).X(k,j,k) +\n"
-  "                         b.X(j,j,k);\n\n"
-  "init X(1,2,3);");
-
-// Nothing should be removed
-const std::string case_6(
-  "act act1, act2, act3: Nat;\n\n"
-  "proc X(i: Nat)   = (i <  5) -> act1(i).X(i+1) +\n"
-  "                   (i == 5) -> act3(i).Y(i, i);\n"
-  "     Y(i,j: Nat) = act2(j).Y(i,j+1);\n\n"
-  "init X(0);\n");
-
-const std::string case_7(
-  "act act1, act2, act3: Nat;\n\n"
-  "proc X(i,z,j: Nat)   = (i <  5) -> act1(i)@z.X(i+1,z, j) +\n"
-  "                       (i == 5) -> act3(i).X(i, j, 4);\n\n"
-  "init X(0,5, 1);\n"
-);
-
-const std::string case_8(
-   "act a;\n"
-   "init sum t:Nat. a@t;\n"
-);
-
 BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
 {
+  // Parameter i should be removed
+  const std::string case_1(
+    "act a;\n\n"
+    "proc X(i: Nat) = a.X(i);\n\n"
+    "init X(2);\n");
+
+  // Parameter j should be removed
+  const std::string case_2(
+    "act a: Nat;\n\n"
+    "proc X(i,j: Nat) = a(i). X(i,j);\n\n"
+    "init X(0,1);\n");
+
+  // Parameter j should be removed
+  const std::string case_3(
+    "act a;\n\n"
+    "proc X(i,j: Nat)   = (i == 5) -> a. X(i,j);\n\n"
+    "init X(0,1);\n");
+
+  // Parameter j should be removed
+  const std::string case_4(
+    "act a;\n\n"
+    "proc X(i,j: Nat) = a@i.X(i,j);\n\n"
+    "init X(0,4);\n");
+
+  // Nothing should be removed
+  const std::string case_5(
+    "act a: Nat;\n"
+    "act b;\n\n"
+    "proc X(i,j,k: Nat) =  a(i).X(k,j,k) +\n"
+    "                         b.X(j,j,k);\n\n"
+    "init X(1,2,3);");
+
+  // Nothing should be removed
+  const std::string case_6(
+    "act act1, act2, act3: Nat;\n\n"
+    "proc X(i: Nat)   = (i <  5) -> act1(i).X(i+1) +\n"
+    "                   (i == 5) -> act3(i).Y(i, i);\n"
+    "     Y(i,j: Nat) = act2(j).Y(i,j+1);\n\n"
+    "init X(0);\n");
+
+  const std::string case_7(
+    "act act1, act2, act3: Nat;\n\n"
+    "proc X(i,z,j: Nat)   = (i <  5) -> act1(i)@z.X(i+1,z, j) +\n"
+    "                       (i == 5) -> act3(i).X(i, j, 4);\n\n"
+    "init X(0,5, 1);\n"
+  );
+
+  const std::string case_8(
+     "act a;\n"
+     "init sum t:Nat. a@t;\n"
+  );
+
   specification spec;
   spec = linearise(case_1);
   spec = linearise(case_2);
@@ -97,46 +90,46 @@ BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
   spec = linearise(case_8);
 }
 
-const std::string assignment_case_1
-( "act a,b,c;"
-  "proc X(v:Nat)=a.X(v=3)+Y(1,2);"
-  "Y(v1:Nat, v2:Nat)=a.Y(v1=3)+b.X(5)+c.Y(v2=7);"
-  "init X(3);"
-);
-
-const std::string assignment_case_2
-("act a;"
- "proc X(v:Nat)=a.Y(w=true);"
- "Y(w:Bool)=a.X(v=0);"
- "init X(v=3);"
-);
-
-const std::string assignment_case_3
-("act a;"
- "    b:Nat;"
- "proc X(v:Nat,w:List(Bool))=a.X(w=[])+"
- "                         (v>0) ->b(v).X(v=max(v,0));"
- "init X(v=3,w=[]);"
-
-);
-
-const std::string assignment_case_4
-("act a;"
- "proc X(v:Pos,w:Nat)=sum w:Pos.a.X(v=w)+"  
- "                    sum u:Pos.a.X(v=u);"
- "init X(3,4);"
-
-);
-
-const std::string assignment_case_5
-("act a;"
- "proc X(v:Pos)=sum v:Pos.a@4.X();"   
- "init X(3);"
-);
-
-
 BOOST_AUTO_TEST_CASE(test_process_assignments)
-{ specification spec;
+{
+  const std::string assignment_case_1
+  ( "act a,b,c;"
+    "proc X(v:Nat)=a.X(v=3)+Y(1,2);"
+    "Y(v1:Nat, v2:Nat)=a.Y(v1=3)+b.X(5)+c.Y(v2=7);"
+    "init X(3);"
+  );
+
+  const std::string assignment_case_2
+  ("act a;"
+   "proc X(v:Nat)=a.Y(w=true);"
+   "Y(w:Bool)=a.X(v=0);"
+   "init X(v=3);"
+  );
+
+  const std::string assignment_case_3
+  ("act a;"
+   "    b:Nat;"
+   "proc X(v:Nat,w:List(Bool))=a.X(w=[])+"
+   "                         (v>0) ->b(v).X(v=max(v,0));"
+   "init X(v=3,w=[]);"
+
+  );
+
+  const std::string assignment_case_4
+  ("act a;"
+   "proc X(v:Pos,w:Nat)=sum w:Pos.a.X(v=w)+"
+   "                    sum u:Pos.a.X(v=u);"
+   "init X(3,4);"
+
+  );
+
+  const std::string assignment_case_5
+  ("act a;"
+   "proc X(v:Pos)=sum v:Pos.a@4.X();"
+   "init X(3);"
+  );
+
+  specification spec;
   spec=linearise(assignment_case_1);
   spec=linearise(assignment_case_2);
   spec=linearise(assignment_case_3);
@@ -446,18 +439,6 @@ BOOST_AUTO_TEST_CASE(test_large_specification)
   "  );                                                                                                                                                                                   \n"
   ;
 
-  const std::string REQ1_1 =
-  "nu X . [true] X &&                                                                     \n"
-  "  forall nana:Node .                                                                   \n"
-  "    forall trans:Transaction .                                                         \n"
-  "      [cUQ(nana,trans)](nu Y . [true]Y && [exists nana2:Node . cUQ(nana2,trans)]false) \n"
-  ;
-
-  const std::string REQ1_2 =
-  "nu X . [true]X && forall n:Node . forall t:Transaction . [cUQ(n,t)](mu Y \n"
-  ". [!exists r:Phase . sUR(n,t,r)]Y && <true>true)                         \n"
-  ;
-
   specification model = linearise(MODEL);
 }
 
@@ -475,14 +456,14 @@ BOOST_AUTO_TEST_CASE(test_lambda)
     "  (n in select(lambda x : Nat.x mod 2 == 0, [1, 2, 3])) -> a(n).delta;\n"));
 }
 
-const std::string no_free_variables_case_1(
-  "act a,b:Int;\n"
-  "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
-  "init P;\n"
-);
-
 BOOST_AUTO_TEST_CASE(test_no_free_variables)
 {
+  const std::string no_free_variables_case_1(
+    "act a,b:Int;\n"
+    "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
+    "init P;\n"
+  );
+
   t_lin_options options;
   options.noglobalvars = true;
 
@@ -491,330 +472,329 @@ BOOST_AUTO_TEST_CASE(test_no_free_variables)
   BOOST_CHECK(spec.global_variables().empty());
 }
 
-const std::string various_case_1=
-      "init delta;";
-
-const std::string various_case_2=
-      "act a;"
-      "proc X=a.X;"
-      "init X;";
-
-const std::string various_case_3=
-      "sort D     = struct d1 | d2;"
-      "             Error = struct e;"
-      "act r2: D # Bool;"
-      "    s3: D # Bool;"
-      "    s3: Error;"
-      "    i;"
-      "proc K = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;"
-      "init K;";
-
-const std::string various_case_4=
-      "act a:Nat;"
-      "proc X=sum n:Nat. (n==0)->a(n).X;"
-      "init X;";
-
-const std::string various_case_5=
-      "act a,b,c;"
-      "proc X=a.X;"
-      "     Y=b.Y;"
-      "init X||Y;";
-
-const std::string various_case_6=
-      "act a1,a2,b,c;"
-      "proc X=a1.a2.X;"
-      "     Y=b.Y;"
-      "init comm({a1|b->c},X||Y);";
-
-const std::string various_case_7=
-      "proc X=tau.X;"
-      "init X;";
-
-const std::string various_case_8=
-      "act a,b;"
-      "proc X= (a|b).X;"
-      "init X;";
-
-const std::string various_case_9=
-      "act a;"
-      "init allow({a},a.a.delta);";
-
-const std::string various_case_10=
-      "act a,b,c;"
-      "init comm({a|b->c},(a|b).delta);";
-
-const std::string various_case_11=
-      "act a,b,c:Nat;"
-      "map n:Nat;"
-      "init comm({a|b->c},(a(3)|b(n)));";
-
-const std::string various_case_12=
-      "act c2:Nat#Nat;"
-      "init allow({c2},c2(3,5));";
-
-const std::string various_case_13=
-      "sort D = struct d1 | d2;"
-      "act r1,s4: D;"
-      "proc S(b:Bool)     = sum d:D. r1(d).S(true);"
-      "init S(false);";
-
-const std::string various_case_14=
-      "act r1: Bool;"
-      "proc S(d:Bool) = sum d:Bool. r1(d).S(true);"
-      "init S(false);";
-
-const std::string various_case_15=
-      "act a;"
-      "init (a+a.a+a.a.a+a.a.a.a).delta;";
-
-const std::string various_case_16=
-      "act s6,r6,c6, i;"
-      "proc T = r6.T;"
-      "     K = i.K;"
-      "     L = s6.L;"
-      "init comm({r6|s6->c6},T || K || L);";
-
-const std::string various_case_17=
-      "act s3,r3,c3,s6;"
-      "proc R = r3.R;"
-      "     K = s3.K;"
-      "     L = s6.L;"
-      "init comm({r3|s3->c3}, K || L || R);";
-
-const std::string various_case_18=
-      "act a,b,c,d,e;"
-      "init comm({c|d->b},(a|b|c|d|e).delta);";
-
-const std::string various_case_19=
-      "act a,b,c,d,e;"
-      "init comm({e|d->b},(a|b|c|d|e).delta);";
-
-const std::string various_case_20=
-      "act a:Nat;"
-      "proc X(n:Nat)="
-      "  sum n:Nat.(n>25) -> a(n).X(n)+"
-      "  sum n:Nat.(n>25) -> a(n).X(n)+"
-      "  (n>25) -> a(n).X(n);"
-      "init X(1);";
-
-const std::string various_case_21=
-      "act a,b:Pos;"
-      "proc X(m:Pos)= sum n:Nat. (n<1) -> a(1)|b(1)@1.X(1)+"
-      "               sum n:Nat. (n<2) -> a(2)|b(2)@2.X(2)+"
-      "               sum n:Nat. (n<3) -> a(3)|b(3)@3.X(3)+"
-      "               sum n:Nat. (n<4) -> a(4)|b(4)@4.X(4)+"
-      "               sum n:Nat. (n<5) -> a(5)|b(5)@5.X(5);"
-      "init X(1);";
-
-const std::string various_case_22=
-      "% This test is expected to fail with a proper error message.\n"
-      "act a;\n"
-      "proc P = (a || a) . P;\n"
-      "init P;\n";
-
-const std::string various_case_23=
-      "act a,b;"
-      "init a@1.b@2.delta||tau.tau;";
-
-const std::string various_case_24=
-      "act  a: Pos;"
-      "glob x: Pos;"
-      "proc P = a(x).P;"
-      "init P;";
-
-// The testcase below is designed to test the constant elimination in the lineariser.
-// Typically, x1 and x2 can be eliminated as they are always constant. Care must be
-// taken however that the variable y does not become unbound in the process.
-const std::string various_case_25=
-      "act a:Pos#Pos#Pos;"
-      "    b;"
-      "proc Q(y:Pos)=P(y,1,1)||delta;"
-      "     P(x1,x2,x3:Pos)=a(x1,x2,x3).P(x1,x2,x3+1);"
-      "init Q(2);";
-
-// The following testcase exhibits a problem that occurred in the lineariser in 
-// August 2009. The variable m would only be partly renamed, and show up as an
-// undeclared variable in the resulting LPS. The LPS turned out to be not well
-// typed.
-
-const std::string various_case_26=
-      "act  r,s1,s2:Nat;\n"
-      "proc P=sum m:Nat.r(m).((m==1)->s1(m).P+(m==2)->P+P);\n"
-      "init P;\n";
-
-const std::string various_case_27=
-      "act a:Pos;\n"
-      "proc P(id,n:Pos)=(id<n) -> a(n).P(id,n);\n"
-      "     Q(n:Pos)=P(1,n)||P(2,n)||P(3,n);\n"
-      "init Q(15);\n";
-
-const std::string various_case_28=
-      "sort A=List(Nat->Nat);"
-      "T=struct f(Nat->Nat);"
-      "act b:A;"
-      "proc P(a:A)=b(a).P([]);"
-      "init P([lambda n:Nat.n]);";
-
-const std::string various_case_29=
-      "sort Data = struct x;"
-      "Coloured = struct flow(data : Data) | noflowG | noflowR;"
-      "act A, B : Coloured;"
-      "proc Sync = ( (A(noflowG) | B(noflowR))  + "
-      "     (A(noflowR) | B(noflowR)) + "
-      "     (sum d : Data.(A(flow(d)) | B(flow(d)))) "
-      "  ).Sync;"
-      "init Sync;";
-
-// The test case below is to test whether the elements of a multi-action
-// are dealt with properly when they occur in a subexpression. The linearised
-// process below should have three and not two summand.
-const std::string various_case_30=
-      "act a;"
-      "    b,b':Nat;"
-      "init a.(b(0)|b'(0))+a.(b(0)|b(0));";
-
-
-const std::string various_case_31=
-      "act a:List(List(Nat));"
-      "proc X(x:List(List(Nat)))=a(x).delta;"
-      "init X([[]]);";
-
-
-/* Original name: LR2plus.mcrl2      
- This example can only be parsed unambiguously by an LR(k) parser generator
- for the current grammar, where k > 1. Namely, process expression 'a + tau'
- cannot be parsed unambiguously. After parsing the identifier 'a', it has to
- be determined if 'a' is an action or process reference, or if 'a' is a data
- expression, viz. part of the left hand side of a conditional process
- expression. With a lookahead of 1, we may only use the '+' as extra
- information, which is not enough, because this symbol is also ambiguous.
-*/
-const std::string various_case_LR2plus=
-  "act\n"
-  " a;\n\n"
-  "init\n"
-  " a + tau;";
-
-/* Original name: LR2par.mcrl2
- This example can only be parsed unambiguously by an LR(k) parser generator
- for the current grammar, where k > 1. Namely, process expression '(a)'
- cannot be parsed unambiguously. After parsing the left parenthesis '(', it
- has to be determined if it is part of a process or data expression, viz.
- part of the left hand side of a conditional process expression. With a
- lookahead of 1, we may only use the identifier 'a' as extra information,
- which is not enough, because this symbol is also ambiguous.
-*/
-const std::string various_case_LR2par=
-  "act\n"
-  " a;\n\n"
-  "init\n"
-  " (a);";
-
-
-/* This test case is a simple test to test sort normalisation in the lineariser,
-   added because assertion failures in the domineering example were observed */
-const std::string various_case_32 =
-  "sort Position = struct Full | Empty;\n"
-  "     Row = List(Position);\n"
-  "\n"
-  "proc P(r:Row) = delta;\n"
-  "init P([Empty]);\n"
-  ;
-
-/* This test case is a test to check whether constant elimination in the
-   linearizer goes well. This testcase is inspired by an example by Chilo
-   van Best. The problem is that the constant x:Nat below may not be
-   recorded in the assignment list of process P, and therefore forgotten */
-const std::string various_case_33 =
-  "act  a:Nat; "
-  "proc P(x:Nat,b:Bool,r:Real) = a(x).P(x,!b,r); "
-  "     P(x:Nat) = P(x,true,1); "
-  "init P(1); "
-  ;
-
-/* The test case below checks whether the alphabet conversion does not accidentally
- * reverse the order of hide and sum operators. If this happens the linearizer will
- * not be able to linearize this process */
-
-const std::string various_case_34 =
-  "act a; "
-
-  "proc X = a.X;"
-  "proc Y = sum n:Nat. X;"
-
-  "init hide({a}, sum n:Nat. X);"
-  ;
-
-const std::string various_par =
-  "act a;\n"
-  "init a || a;\n"
-  ;
-
-const std::string various_gpa_10_3 =
-  "act\n"
-  "  c,r_dup, s_dup1, s_dup2, r_inc, s_inc, r_mul1, r_mul2, s_mul: Int;\n"
-  "proc\n"
-  "  Dup = sum x:Int. r_dup(x) | s_dup1(x) | s_dup2(x) . Dup;\n"
-  "  Inc = sum x:Int. r_inc(x) | s_inc(x+1) . Inc;\n"
-  "  Mul = sum x,y:Int. r_mul1(x) | r_mul2(y) | s_mul(x*y) . Mul;\n"
-  "  Dim = allow({r_dup | s_mul},\n"
-  "          hide({c},comm({s_dup1 | r_mul1 -> c , s_dup2 | r_inc -> c, s_inc | r_mul2 ->c},\n"
-  "            Dup || Inc || Mul\n"
-  "          ))\n"
-  "        );\n"
-  "init Dim;\n"
-  ;
-
-const std::string various_philosophers =
-  "map K: Pos;\n"
-  "eqn K = 10;\n"
-  "act get,_get,__get,put,_put,__put: Pos#Pos;\n"
-  "    eat: Pos;\n"
-  "proc\n"
-  "  Phil(n:Pos) = _get(n,n)._get(n,if(n==K,1,n+1)).eat(n)._put(n,n)._put(n,if(n==K,1,n+1)).Phil(n);\n"
-  "  Fork(n:Pos) = sum m:Pos.get(m,n).put(m,n).Fork(n);\n"
-  "  ForkPhil(n:Pos) = Fork(n) || Phil(n);\n"
-  "  KForkPhil(p:Pos) =\n"
-  "    (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);\n"
-  "init allow( { __get, __put, eat },\n"
-  "       comm( { get|_get->__get, put|_put->__put },\n"
-  "         KForkPhil(K)\n"
-  "     ));\n"
-  ;
-
-const std::string various_philosophers_nat =
-  "map K: Nat;\n"
-  "eqn K = 10;\n"
-  "act get,_get,__get,put,_put,__put: Nat#Nat;\n"
-  "    eat: Nat;\n"
-  "proc\n"
-  "  Phil(n:Nat) = _get(n,n)._get(n,if(n==K,1,n+1)).eat(n)._put(n,n)._put(n,if(n==K,1,n+1)).Phil(n);\n"
-  "  Fork(n:Nat) = sum m:Nat.get(m,n).put(m,n).Fork(n);\n"
-  "  ForkPhil(n:Nat) = Fork(n) || Phil(n);\n"
-  "  KForkPhil(p:Nat) =\n"
-  "    (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);\n"
-  "init allow( { __get, __put, eat },\n"
-  "       comm( { get|_get->__get, put|_put->__put },\n"
-  "         KForkPhil(K)\n"
-  "     ));\n"
-  ;
-
-const std::string various_sort_aliases =
-  "sort Bits = struct b0|b1;\n"
-  "     t_sys_regset_fsm_state = Bits;\n"
-  "     t_timer_counter_fsm_state = Bits;\n"
-  "map  timer_counter_fsm_state_idle: t_timer_counter_fsm_state;\n"
-  "act  a:Bits;\n"
-  "proc P(d:Bits)=a(d).delta;\n"
-  "glob globd:Bits;\n"
-  "init P(globd);\n"
-  ;
-
-
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
      debugging the translation of the linearizer to the new data
      library. */
+  const std::string various_case_1=
+        "init delta;";
+
+  const std::string various_case_2=
+        "act a;"
+        "proc X=a.X;"
+        "init X;";
+
+  const std::string various_case_3=
+        "sort D     = struct d1 | d2;"
+        "             Error = struct e;"
+        "act r2: D # Bool;"
+        "    s3: D # Bool;"
+        "    s3: Error;"
+        "    i;"
+        "proc K = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;"
+        "init K;";
+
+  const std::string various_case_4=
+        "act a:Nat;"
+        "proc X=sum n:Nat. (n==0)->a(n).X;"
+        "init X;";
+
+  const std::string various_case_5=
+        "act a,b,c;"
+        "proc X=a.X;"
+        "     Y=b.Y;"
+        "init X||Y;";
+
+  const std::string various_case_6=
+        "act a1,a2,b,c;"
+        "proc X=a1.a2.X;"
+        "     Y=b.Y;"
+        "init comm({a1|b->c},X||Y);";
+
+  const std::string various_case_7=
+        "proc X=tau.X;"
+        "init X;";
+
+  const std::string various_case_8=
+        "act a,b;"
+        "proc X= (a|b).X;"
+        "init X;";
+
+  const std::string various_case_9=
+        "act a;"
+        "init allow({a},a.a.delta);";
+
+  const std::string various_case_10=
+        "act a,b,c;"
+        "init comm({a|b->c},(a|b).delta);";
+
+  const std::string various_case_11=
+        "act a,b,c:Nat;"
+        "map n:Nat;"
+        "init comm({a|b->c},(a(3)|b(n)));";
+
+  const std::string various_case_12=
+        "act c2:Nat#Nat;"
+        "init allow({c2},c2(3,5));";
+
+  const std::string various_case_13=
+        "sort D = struct d1 | d2;"
+        "act r1,s4: D;"
+        "proc S(b:Bool)     = sum d:D. r1(d).S(true);"
+        "init S(false);";
+
+  const std::string various_case_14=
+        "act r1: Bool;"
+        "proc S(d:Bool) = sum d:Bool. r1(d).S(true);"
+        "init S(false);";
+
+  const std::string various_case_15=
+        "act a;"
+        "init (a+a.a+a.a.a+a.a.a.a).delta;";
+
+  const std::string various_case_16=
+        "act s6,r6,c6, i;"
+        "proc T = r6.T;"
+        "     K = i.K;"
+        "     L = s6.L;"
+        "init comm({r6|s6->c6},T || K || L);";
+
+  const std::string various_case_17=
+        "act s3,r3,c3,s6;"
+        "proc R = r3.R;"
+        "     K = s3.K;"
+        "     L = s6.L;"
+        "init comm({r3|s3->c3}, K || L || R);";
+
+  const std::string various_case_18=
+        "act a,b,c,d,e;"
+        "init comm({c|d->b},(a|b|c|d|e).delta);";
+
+  const std::string various_case_19=
+        "act a,b,c,d,e;"
+        "init comm({e|d->b},(a|b|c|d|e).delta);";
+
+  const std::string various_case_20=
+        "act a:Nat;"
+        "proc X(n:Nat)="
+        "  sum n:Nat.(n>25) -> a(n).X(n)+"
+        "  sum n:Nat.(n>25) -> a(n).X(n)+"
+        "  (n>25) -> a(n).X(n);"
+        "init X(1);";
+
+  const std::string various_case_21=
+        "act a,b:Pos;"
+        "proc X(m:Pos)= sum n:Nat. (n<1) -> a(1)|b(1)@1.X(1)+"
+        "               sum n:Nat. (n<2) -> a(2)|b(2)@2.X(2)+"
+        "               sum n:Nat. (n<3) -> a(3)|b(3)@3.X(3)+"
+        "               sum n:Nat. (n<4) -> a(4)|b(4)@4.X(4)+"
+        "               sum n:Nat. (n<5) -> a(5)|b(5)@5.X(5);"
+        "init X(1);";
+
+  const std::string various_case_22=
+        "% This test is expected to fail with a proper error message.\n"
+        "act a;\n"
+        "proc P = (a || a) . P;\n"
+        "init P;\n";
+
+  const std::string various_case_23=
+        "act a,b;"
+        "init a@1.b@2.delta||tau.tau;";
+
+  const std::string various_case_24=
+        "act  a: Pos;"
+        "glob x: Pos;"
+        "proc P = a(x).P;"
+        "init P;";
+
+  // The testcase below is designed to test the constant elimination in the lineariser.
+  // Typically, x1 and x2 can be eliminated as they are always constant. Care must be
+  // taken however that the variable y does not become unbound in the process.
+  const std::string various_case_25=
+        "act a:Pos#Pos#Pos;"
+        "    b;"
+        "proc Q(y:Pos)=P(y,1,1)||delta;"
+        "     P(x1,x2,x3:Pos)=a(x1,x2,x3).P(x1,x2,x3+1);"
+        "init Q(2);";
+
+  // The following testcase exhibits a problem that occurred in the lineariser in
+  // August 2009. The variable m would only be partly renamed, and show up as an
+  // undeclared variable in the resulting LPS. The LPS turned out to be not well
+  // typed.
+
+  const std::string various_case_26=
+        "act  r,s1,s2:Nat;\n"
+        "proc P=sum m:Nat.r(m).((m==1)->s1(m).P+(m==2)->P+P);\n"
+        "init P;\n";
+
+  const std::string various_case_27=
+        "act a:Pos;\n"
+        "proc P(id,n:Pos)=(id<n) -> a(n).P(id,n);\n"
+        "     Q(n:Pos)=P(1,n)||P(2,n)||P(3,n);\n"
+        "init Q(15);\n";
+
+  const std::string various_case_28=
+        "sort A=List(Nat->Nat);"
+        "T=struct f(Nat->Nat);"
+        "act b:A;"
+        "proc P(a:A)=b(a).P([]);"
+        "init P([lambda n:Nat.n]);";
+
+  const std::string various_case_29=
+        "sort Data = struct x;"
+        "Coloured = struct flow(data : Data) | noflowG | noflowR;"
+        "act A, B : Coloured;"
+        "proc Sync = ( (A(noflowG) | B(noflowR))  + "
+        "     (A(noflowR) | B(noflowR)) + "
+        "     (sum d : Data.(A(flow(d)) | B(flow(d)))) "
+        "  ).Sync;"
+        "init Sync;";
+
+  // The test case below is to test whether the elements of a multi-action
+  // are dealt with properly when they occur in a subexpression. The linearised
+  // process below should have three and not two summand.
+  const std::string various_case_30=
+        "act a;"
+        "    b,b':Nat;"
+        "init a.(b(0)|b'(0))+a.(b(0)|b(0));";
+
+
+  const std::string various_case_31=
+        "act a:List(List(Nat));"
+        "proc X(x:List(List(Nat)))=a(x).delta;"
+        "init X([[]]);";
+
+
+  /* Original name: LR2plus.mcrl2
+   This example can only be parsed unambiguously by an LR(k) parser generator
+   for the current grammar, where k > 1. Namely, process expression 'a + tau'
+   cannot be parsed unambiguously. After parsing the identifier 'a', it has to
+   be determined if 'a' is an action or process reference, or if 'a' is a data
+   expression, viz. part of the left hand side of a conditional process
+   expression. With a lookahead of 1, we may only use the '+' as extra
+   information, which is not enough, because this symbol is also ambiguous.
+  */
+  const std::string various_case_LR2plus=
+    "act\n"
+    " a;\n\n"
+    "init\n"
+    " a + tau;";
+
+  /* Original name: LR2par.mcrl2
+   This example can only be parsed unambiguously by an LR(k) parser generator
+   for the current grammar, where k > 1. Namely, process expression '(a)'
+   cannot be parsed unambiguously. After parsing the left parenthesis '(', it
+   has to be determined if it is part of a process or data expression, viz.
+   part of the left hand side of a conditional process expression. With a
+   lookahead of 1, we may only use the identifier 'a' as extra information,
+   which is not enough, because this symbol is also ambiguous.
+  */
+  const std::string various_case_LR2par=
+    "act\n"
+    " a;\n\n"
+    "init\n"
+    " (a);";
+
+
+  /* This test case is a simple test to test sort normalisation in the lineariser,
+     added because assertion failures in the domineering example were observed */
+  const std::string various_case_32 =
+    "sort Position = struct Full | Empty;\n"
+    "     Row = List(Position);\n"
+    "\n"
+    "proc P(r:Row) = delta;\n"
+    "init P([Empty]);\n"
+    ;
+
+  /* This test case is a test to check whether constant elimination in the
+     linearizer goes well. This testcase is inspired by an example by Chilo
+     van Best. The problem is that the constant x:Nat below may not be
+     recorded in the assignment list of process P, and therefore forgotten */
+  const std::string various_case_33 =
+    "act  a:Nat; "
+    "proc P(x:Nat,b:Bool,r:Real) = a(x).P(x,!b,r); "
+    "     P(x:Nat) = P(x,true,1); "
+    "init P(1); "
+    ;
+
+  /* The test case below checks whether the alphabet conversion does not accidentally
+   * reverse the order of hide and sum operators. If this happens the linearizer will
+   * not be able to linearize this process */
+
+  const std::string various_case_34 =
+    "act a; "
+
+    "proc X = a.X;"
+    "proc Y = sum n:Nat. X;"
+
+    "init hide({a}, sum n:Nat. X);"
+    ;
+
+  const std::string various_par =
+    "act a;\n"
+    "init a || a;\n"
+    ;
+
+  const std::string various_gpa_10_3 =
+    "act\n"
+    "  c,r_dup, s_dup1, s_dup2, r_inc, s_inc, r_mul1, r_mul2, s_mul: Int;\n"
+    "proc\n"
+    "  Dup = sum x:Int. r_dup(x) | s_dup1(x) | s_dup2(x) . Dup;\n"
+    "  Inc = sum x:Int. r_inc(x) | s_inc(x+1) . Inc;\n"
+    "  Mul = sum x,y:Int. r_mul1(x) | r_mul2(y) | s_mul(x*y) . Mul;\n"
+    "  Dim = allow({r_dup | s_mul},\n"
+    "          hide({c},comm({s_dup1 | r_mul1 -> c , s_dup2 | r_inc -> c, s_inc | r_mul2 ->c},\n"
+    "            Dup || Inc || Mul\n"
+    "          ))\n"
+    "        );\n"
+    "init Dim;\n"
+    ;
+
+  const std::string various_philosophers =
+    "map K: Pos;\n"
+    "eqn K = 10;\n"
+    "act get,_get,__get,put,_put,__put: Pos#Pos;\n"
+    "    eat: Pos;\n"
+    "proc\n"
+    "  Phil(n:Pos) = _get(n,n)._get(n,if(n==K,1,n+1)).eat(n)._put(n,n)._put(n,if(n==K,1,n+1)).Phil(n);\n"
+    "  Fork(n:Pos) = sum m:Pos.get(m,n).put(m,n).Fork(n);\n"
+    "  ForkPhil(n:Pos) = Fork(n) || Phil(n);\n"
+    "  KForkPhil(p:Pos) =\n"
+    "    (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);\n"
+    "init allow( { __get, __put, eat },\n"
+    "       comm( { get|_get->__get, put|_put->__put },\n"
+    "         KForkPhil(K)\n"
+    "     ));\n"
+    ;
+
+  const std::string various_philosophers_nat =
+    "map K: Nat;\n"
+    "eqn K = 10;\n"
+    "act get,_get,__get,put,_put,__put: Nat#Nat;\n"
+    "    eat: Nat;\n"
+    "proc\n"
+    "  Phil(n:Nat) = _get(n,n)._get(n,if(n==K,1,n+1)).eat(n)._put(n,n)._put(n,if(n==K,1,n+1)).Phil(n);\n"
+    "  Fork(n:Nat) = sum m:Nat.get(m,n).put(m,n).Fork(n);\n"
+    "  ForkPhil(n:Nat) = Fork(n) || Phil(n);\n"
+    "  KForkPhil(p:Nat) =\n"
+    "    (p>1) -> (ForkPhil(p)||KForkPhil(max(p-1,1)))<>ForkPhil(1);\n"
+    "init allow( { __get, __put, eat },\n"
+    "       comm( { get|_get->__get, put|_put->__put },\n"
+    "         KForkPhil(K)\n"
+    "     ));\n"
+    ;
+
+  const std::string various_sort_aliases =
+    "sort Bits = struct b0|b1;\n"
+    "     t_sys_regset_fsm_state = Bits;\n"
+    "     t_timer_counter_fsm_state = Bits;\n"
+    "map  timer_counter_fsm_state_idle: t_timer_counter_fsm_state;\n"
+    "act  a:Bits;\n"
+    "proc P(d:Bits)=a(d).delta;\n"
+    "glob globd:Bits;\n"
+    "init P(globd);\n"
+    ;
+
   specification spec;
   std::cerr << "Testcase 1\n";
   spec = linearise(various_case_1, options);

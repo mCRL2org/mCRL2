@@ -13,16 +13,10 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/test_utilities.h"
 
+using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
-
-// Garbage collect after each case.
-struct collect_after_test_case {
-  ~collect_after_test_case()
-  {
-    core::garbage_collect();
-  }
-};
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 

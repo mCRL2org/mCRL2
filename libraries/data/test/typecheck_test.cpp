@@ -13,22 +13,15 @@
 #include <sstream>
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
-
-// Garbage collect after each case.
-struct collect_after_test_case {
-  ~collect_after_test_case()
-  {
-    core::garbage_collect();
-  }
-};
+using mcrl2::utilities::collect_after_test_case;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
