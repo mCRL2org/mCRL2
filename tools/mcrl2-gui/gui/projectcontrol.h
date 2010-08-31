@@ -54,7 +54,7 @@ public:
 
 	multimap<string, string> m_extention_tool_mapping;
 
-	OutPutListBox *m_listbox_output;
+	OutPutTextCtrl *m_listbox_output;
 
 	wxAuiNotebook *m_notebookpanel;
 
@@ -62,7 +62,7 @@ public:
 	vector<wxCheckBox*> m_checkbox_ptrs;
 
 	GenericDirCtrl(wxWindow *parent, const std::vector<Tool>& tool_catalog,
-			multimap<string, string> extention_tool_mapping, OutPutListBox *output,
+			multimap<string, string> extention_tool_mapping, OutPutTextCtrl *output,
 			wxAuiNotebook *notebookpanel) :
 		wxGenericDirCtrl(parent, ID_GDC, wxDirDialogDefaultFolderStr, wxPoint(-1,
 				-1), wxSize(-1, -1), wxDIRCTRL_EDIT_LABELS | wxDIRCTRL_3D_INTERNAL

@@ -1,12 +1,12 @@
 /*
- * tooloutputlistbox.h
+ * toolOutPutTextCtrl.h
  *
  *  Created on: Jun 18, 2010
  *      Author: fstapper
  */
 
-#ifndef MCRL2_TOOLOUTPUTLISTBOX_H_
-#define MCRL2_TOOLOUTPUTLISTBOX_H_
+#ifndef MCRL2_TOOLOutPutTextCtrl_H_
+#define MCRL2_TOOLOutPutTextCtrl_H_
 
 #include <wx/filedlg.h>
 #include <wx/clipbrd.h>
@@ -15,8 +15,8 @@
 #include <wx/textctrl.h>
 
 
-#define ID_CLEAR_LISTBOX  1500
-#define ID_SAVE_LISTBOX   1501
+#define ID_CLEAR_TEXTCTRL  1500
+#define ID_SAVE_TEXTCTRL   1501
 #define ID_RUN_LISTBOX  1502
 #define ID_COPY_LINES_TO_CLIPBOARD 1503
 #define ID_GO_BACK_TO_CONFIGURATION 1504
@@ -54,10 +54,10 @@ DEFINE_EVENT_TYPE(wxEVT_UPDATE_FOCUS)
     ),
 
 
-class OutPutListBoxBase : public wxTextCtrl
+class OutPutTextCtrlBase : public wxTextCtrl
 {
   public:
-  OutPutListBoxBase(wxWindow *parent, wxWindowID id, const wxPoint& pos =
+  OutPutTextCtrlBase(wxWindow *parent, wxWindowID id, const wxPoint& pos =
           wxDefaultPosition, const wxSize& size = wxDefaultSize) :
         wxTextCtrl(parent, id, wxEmptyString ,pos, size, wxTE_MULTILINE)
   {
@@ -119,18 +119,18 @@ class OutPutListBoxBase : public wxTextCtrl
 
   DECLARE_EVENT_TABLE()
 };
-BEGIN_EVENT_TABLE(OutPutListBoxBase, wxTextCtrl)
-  EVT_SET_FOCUS(OutPutListBoxBase::OnFocus)
-  EVT_KILL_FOCUS(OutPutListBoxBase::OnKillFocus)
+BEGIN_EVENT_TABLE(OutPutTextCtrlBase, wxTextCtrl)
+  EVT_SET_FOCUS(OutPutTextCtrlBase::OnFocus)
+  EVT_KILL_FOCUS(OutPutTextCtrlBase::OnKillFocus)
 END_EVENT_TABLE ()
 
-class ToolOutputListBoxBase : public OutPutListBoxBase
+class ToolOutPutTextCtrlBase : public OutPutTextCtrlBase
 {
   public:
 
-    ToolOutputListBoxBase(wxWindow *parent, wxWindowID id, const wxPoint& pos =
+    ToolOutPutTextCtrlBase(wxWindow *parent, wxWindowID id, const wxPoint& pos =
         wxDefaultPosition, const wxSize& size = wxDefaultSize) :
-          OutPutListBoxBase(parent, id, pos, size)
+          OutPutTextCtrlBase(parent, id, pos, size)
     {}
 
     void
@@ -147,18 +147,18 @@ class ToolOutputListBoxBase : public OutPutListBoxBase
 
 };
 
-class TOutputListBoxMenu: public wxMenu
+class TOutputTextCtrlMenu: public wxMenu
 {
   public:
-    ToolOutputListBoxBase *p;
+    ToolOutPutTextCtrlBase *p;
 
-    TOutputListBoxMenu(ToolOutputListBoxBase *parent)
+    TOutputTextCtrlMenu(ToolOutPutTextCtrlBase *parent)
     {
       this->Append(ID_SELECT_ALL, wxT("Select All...\tCtrl-A"));
       this->Append(ID_COPY_LINES_TO_CLIPBOARD, wxT("Copy Selection...\tCtrl-C"));
-      this->Append(ID_SAVE_LISTBOX, wxT("Save...\tCtrl-S"));
+      this->Append(ID_SAVE_TEXTCTRL, wxT("Save...\tCtrl-S"));
       this->AppendSeparator();
-      this->Append(ID_CLEAR_LISTBOX, wxT("Clear output"));
+      this->Append(ID_CLEAR_TEXTCTRL, wxT("Clear output"));
 
       p = parent;
 
@@ -192,27 +192,27 @@ class TOutputListBoxMenu: public wxMenu
     DECLARE_EVENT_TABLE()
 };
 
-  BEGIN_EVENT_TABLE(TOutputListBoxMenu, wxMenu)
-    EVT_MENU(ID_CLEAR_LISTBOX, TOutputListBoxMenu::OnClear )
-    EVT_MENU(ID_SAVE_LISTBOX, TOutputListBoxMenu::OnSave )
-    EVT_MENU(ID_COPY_LINES_TO_CLIPBOARD, TOutputListBoxMenu::OnCopyLine)
-    EVT_MENU(ID_SELECT_ALL, TOutputListBoxMenu::OnSelectAll)
+  BEGIN_EVENT_TABLE(TOutputTextCtrlMenu, wxMenu)
+    EVT_MENU(ID_CLEAR_TEXTCTRL, TOutputTextCtrlMenu::OnClear )
+    EVT_MENU(ID_SAVE_TEXTCTRL, TOutputTextCtrlMenu::OnSave )
+    EVT_MENU(ID_COPY_LINES_TO_CLIPBOARD, TOutputTextCtrlMenu::OnCopyLine)
+    EVT_MENU(ID_SELECT_ALL, TOutputTextCtrlMenu::OnSelectAll)
   END_EVENT_TABLE ()
 
-class OutPutListBox : public OutPutListBoxBase
+class OutPutTextCtrl : public OutPutTextCtrlBase
 {
   public:
-    OutPutListBox(wxWindow *parent, wxWindowID id, const wxPoint& pos =
+    OutPutTextCtrl(wxWindow *parent, wxWindowID id, const wxPoint& pos =
         wxDefaultPosition, const wxSize& size = wxDefaultSize)
     :
-      OutPutListBoxBase(parent, id, pos, size)
+      OutPutTextCtrlBase(parent, id, pos, size)
     {}
 
       void
       OnRightClick(wxMouseEvent& /*event*/)
       {
 
-        TOutputListBoxMenu *m = new TOutputListBoxMenu( (ToolOutputListBoxBase*) this);
+        TOutputTextCtrlMenu *m = new TOutputTextCtrlMenu( (ToolOutPutTextCtrlBase*) this);
         PopupMenu(m);
       }
 
@@ -252,18 +252,18 @@ class OutPutListBox : public OutPutListBoxBase
       DECLARE_EVENT_TABLE()
 
 };
-BEGIN_EVENT_TABLE(OutPutListBox, OutPutListBoxBase)
-  EVT_KEY_DOWN( OutPutListBox::onKeyDown)
-  EVT_RIGHT_DOWN( OutPutListBox::OnRightClick )
+BEGIN_EVENT_TABLE(OutPutTextCtrl, OutPutTextCtrlBase)
+  EVT_KEY_DOWN( OutPutTextCtrl::onKeyDown)
+  EVT_RIGHT_DOWN( OutPutTextCtrl::OnRightClick )
 END_EVENT_TABLE ()
 
-class ToolOutputListBoxMenu : public TOutputListBoxMenu
+class ToolOutputTextCtrlMenu : public TOutputTextCtrlMenu
 {
   public:
-    ToolOutputListBoxBase *p;
+    ToolOutPutTextCtrlBase *p;
 
-    ToolOutputListBoxMenu(ToolOutputListBoxBase *parent) :
-      TOutputListBoxMenu( parent )
+    ToolOutputTextCtrlMenu(ToolOutPutTextCtrlBase *parent) :
+      TOutputTextCtrlMenu( parent )
     {
       this->PrependSeparator();
       this->Prepend(ID_GO_BACK_TO_CONFIGURATION, wxT("Go Back to Configuration"));
@@ -295,19 +295,19 @@ class ToolOutputListBoxMenu : public TOutputListBoxMenu
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(ToolOutputListBoxMenu, TOutputListBoxMenu)
-  EVT_MENU(ID_GO_BACK_TO_CONFIGURATION, ToolOutputListBoxMenu::OnGoBackToConfiguration)
-  EVT_MENU(ID_RUN, ToolOutputListBoxMenu::OnRun)
-  EVT_MENU(ID_RUN_AND_CLEAR, ToolOutputListBoxMenu::OnRunAndClear)
+BEGIN_EVENT_TABLE(ToolOutputTextCtrlMenu, TOutputTextCtrlMenu)
+  EVT_MENU(ID_GO_BACK_TO_CONFIGURATION, ToolOutputTextCtrlMenu::OnGoBackToConfiguration)
+  EVT_MENU(ID_RUN, ToolOutputTextCtrlMenu::OnRun)
+  EVT_MENU(ID_RUN_AND_CLEAR, ToolOutputTextCtrlMenu::OnRunAndClear)
 END_EVENT_TABLE ()
 
-class ToolOutputListBox : public ToolOutputListBoxBase
+class ToolOutPutTextCtrl : public ToolOutPutTextCtrlBase
 {
   public:
 
-    ToolOutputListBox(wxWindow *parent, wxWindowID id, const wxPoint& pos =
+    ToolOutPutTextCtrl(wxWindow *parent, wxWindowID id, const wxPoint& pos =
         wxDefaultPosition, const wxSize& size = wxDefaultSize) :
-      ToolOutputListBoxBase(parent, id, pos, size)
+      ToolOutPutTextCtrlBase(parent, id, pos, size)
     {
     }
 
@@ -315,7 +315,7 @@ class ToolOutputListBox : public ToolOutputListBoxBase
     OnRightClick(wxMouseEvent& /*event*/)
     {
 
-      ToolOutputListBoxMenu *m = new ToolOutputListBoxMenu(this);
+      ToolOutputTextCtrlMenu *m = new ToolOutputTextCtrlMenu(this);
       PopupMenu(m);
     }
 
@@ -327,9 +327,9 @@ class ToolOutputListBox : public ToolOutputListBoxBase
 
   DECLARE_EVENT_TABLE()
 };
-BEGIN_EVENT_TABLE(ToolOutputListBox, ToolOutputListBoxBase)
-  EVT_KEY_DOWN( OutPutListBox::onKeyDown)
-  EVT_RIGHT_DOWN( ToolOutputListBox::OnRightClick )
+BEGIN_EVENT_TABLE(ToolOutPutTextCtrl, ToolOutPutTextCtrlBase)
+  EVT_KEY_DOWN( OutPutTextCtrl::onKeyDown)
+  EVT_RIGHT_DOWN( ToolOutPutTextCtrl::OnRightClick )
 END_EVENT_TABLE ()
 
-#endif /* TOOLOUTPUTLISTBOX_H_ */
+#endif /* TOOLOutPutTextCtrl_H_ */

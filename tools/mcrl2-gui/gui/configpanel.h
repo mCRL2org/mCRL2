@@ -47,7 +47,7 @@ class ConfigPanel: public wxNotebookPage {
 public:
 
 	ConfigPanel(wxAuiNotebook *parent, wxWindowID id, Tool& tool,
-	    OutPutListBox *listbox_output, FileIO& fileIO) :
+	    OutPutTextCtrl *listbox_output, FileIO& fileIO) :
 				wxNotebookPage(parent, id) {
 		m_tool = tool;
 		m_parent = parent;
@@ -63,7 +63,7 @@ public:
 				wxAUI_NB_BOTTOM
 			);
 
-		m_tool_output = new ToolOutputListBox(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+		m_tool_output = new ToolOutPutTextCtrl(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
 		m_tool_output->SetRunCognizance(this);
 
@@ -446,8 +446,8 @@ public:
 
 	wxAuiNotebook *m_parent;
 	wxAuiNotebook *m_configpanel;
-	OutPutListBoxBase *m_listbox_output;
-	ToolOutputListBox *m_tool_output;
+	OutPutTextCtrlBase *m_listbox_output;
+	ToolOutPutTextCtrl *m_tool_output;
 	wxScrolledWindow *m_wsw;
 	wxString m_input_file;
 	Tool m_tool;

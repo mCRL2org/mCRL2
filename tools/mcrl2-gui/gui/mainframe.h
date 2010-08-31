@@ -174,7 +174,7 @@ public:
 		m_mgr.SetManagedWindow(this);
 
 		// m_ExecutedCommandsPanel needs to be declared before declaring left_panel for output
-		m_ExecutedCommandsPanel = new OutPutListBox(this, wxID_ANY, wxPoint(-1, -1), wxSize(-1, -1));
+		m_ExecutedCommandsPanel = new OutPutTextCtrl(this, wxID_ANY, wxPoint(-1, -1), wxSize(-1, -1));
 		m_notebookpanel = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_DEFAULT_STYLE );
 
 		m_FileBrowserPanel = new GenericDirCtrl(this, m_tool_catalog,
@@ -341,13 +341,13 @@ public:
 
 	void UpdateFocus(wxCommandEvent& event){
 	  if( event.GetClientData() == NULL){
-	    FocusedOutPutListBox = NULL;
+	    FocusedOutPutTextCtrl = NULL;
 	    editMenu->Enable(Exec_SelectAll, false);
 	    editMenu->Enable(Exec_Copy2ClipBoard, false);
 	    editMenu->Enable(Exec_Save2File, false);
 	    editMenu->Enable(Exec_ClearLog, false);
 	  } else {
-	    FocusedOutPutListBox = (OutPutListBox*) event.GetClientData();
+	    FocusedOutPutTextCtrl = (OutPutTextCtrl*) event.GetClientData();
 	    editMenu->Enable(Exec_SelectAll, true);
       editMenu->Enable(Exec_Copy2ClipBoard, true);
       editMenu->Enable(Exec_Save2File, true);
@@ -356,29 +356,29 @@ public:
 	}
 
 	void OnClear(wxCommandEvent& /*event*/) {
-	  if( FocusedOutPutListBox ){
-	    FocusedOutPutListBox->Clear();
+	  if( FocusedOutPutTextCtrl ){
+	    FocusedOutPutTextCtrl->Clear();
 	  }
 	}
 	;
 
 	 void OnCopy2Clipboard(wxCommandEvent& /*event*/) {
-	    if( FocusedOutPutListBox ){
-	      FocusedOutPutListBox->CopyLine();
+	    if( FocusedOutPutTextCtrl ){
+	      FocusedOutPutTextCtrl->CopyLine();
 	    }
 	  }
 	  ;
 
 	  void OnSave(wxCommandEvent& /*event*/) {
-	    if( FocusedOutPutListBox ){
-	      FocusedOutPutListBox->Save();
+	    if( FocusedOutPutTextCtrl ){
+	      FocusedOutPutTextCtrl->Save();
 	    }
 	  }
 	  ;
 
 	  void OnSelectAll(wxCommandEvent& /*event*/) {
-	    if( FocusedOutPutListBox ){
-	      FocusedOutPutListBox->SelectAll();
+	    if( FocusedOutPutTextCtrl ){
+	      FocusedOutPutTextCtrl->SelectAll();
 	    }
 	  }
 	  ;
@@ -509,9 +509,9 @@ private:
 	// last command we executed
 	wxString m_cmdLast;
 
-	OutPutListBox *m_ExecutedCommandsPanel;
+	OutPutTextCtrl *m_ExecutedCommandsPanel;
 
-	OutPutListBox *FocusedOutPutListBox;
+	OutPutTextCtrl *FocusedOutPutTextCtrl;
 
 	wxAuiManager m_mgr;
 
