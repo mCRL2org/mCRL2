@@ -239,7 +239,9 @@ namespace mcrl2 {
 
       // Following line:
       //
-      //   description = regex_replace(description, sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), std::string("<tt>$1</tt>"));
+#ifdef MCRL2_USE_BOOST_INTERNAL  
+         description = regex_replace(description, sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), std::string("<tt>$1</tt>"));
+#else 
       //
       // Should be equal to: 
       // -- begin --
@@ -248,6 +250,7 @@ namespace mcrl2 {
       boost::regex e( "(--\\w*)|(-\\w*)" );
       description = boost::regex_replace(description, e, "<tt>$&</tt>" );
       // -- end --
+#endif
 
       s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
 

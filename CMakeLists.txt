@@ -385,6 +385,7 @@ if(MCRL2_USE_BOOST_INTERNAL)
   add_definitions(-DBOOST_ALL_NO_LIB=1)
   add_definitions(-DBOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1)
   add_definitions(-DBOOST_MULTI_INDEX_DISABLE_SERIALIZATION=1)
+  add_definitions(-DMCRL2_USE_BOOST_INTERNAL)
 
   #Following define cannot be set with MSVC as it yields to a
   #fatal error C1083: Cannot open include file: 'pthread.h': No such file or directory

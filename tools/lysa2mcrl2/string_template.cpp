@@ -82,9 +82,12 @@ void StringTemplate::finalise()
     this->replace(key, value);
   }
   // removes dangling commas, right next to a bracket.
-  // sregex rex = ((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
-  // subject = regex_replace(subject, rex, std::string("$1$2"));
+  //
 
+#ifdef MCRL2_USE_BOOST_INTERNAL  
+     sregex rex = ((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
+     subject = regex_replace(subject, rex, std::string("$1$2"));
+#else
       std::ostringstream t(std::ios::out | std::ios::binary);
       std::ostream_iterator<char, char> oi(t);
 
@@ -102,7 +105,7 @@ void StringTemplate::finalise()
 
       boost::regex e5( "\\s*\\,\\s*:" );
       subject = regex_replace(subject , e5, ":");
-
+#endif
 }
 
 StringTemplateFile::StringTemplateFile(string filecontent)
@@ -120,7 +123,8 @@ StringTemplateFile::StringTemplateFile(string filecontent)
 		// Original code:
 		// -- begin --
 		//
-		/* sregex rex = bos >> *_s >> (s1= +_w) >> *_s >> '=' >> !_s >> (s2= *_) >> !(as_xpr('\r')) >> eos;
+#ifdef MCRL2_USE_BOOST_INTERNAL  
+		sregex rex = bos >> *_s >> (s1= +_w) >> *_s >> '=' >> !_s >> (s2= *_) >> !(as_xpr('\r')) >> eos;
 		smatch matches;
 
 		if(regex_match(fmtline, matches, rex))
@@ -128,7 +132,7 @@ StringTemplateFile::StringTemplateFile(string filecontent)
 			format_strings[matches[1]] = matches[2];
 		} 
 		// -- end --
-		*/
+#else
 
 		boost::regex rex( "\\s*(\\w+)(\\s*)=(\\s*)(.*)"); 
 		boost::cmatch matches;
@@ -139,7 +143,9 @@ StringTemplateFile::StringTemplateFile(string filecontent)
 			cout << "k :" << matches[1] << endl; // Key 
 			cout << "v :" << matches[4] << endl; // Value */
 			format_strings[matches[1]] = matches[4];
-		} 
+		}
+#endif
+
 	}
 }
 
