@@ -3199,7 +3199,11 @@ class specification_basic_type:public boost::noncopyable
                      const data_expression t,
                      const stacklisttype &stack,
                      const variable_list vars)
-    { if (is_function_symbol(t)) return t;
+    { 
+      if (is_function_symbol(t)) 
+      { return t;
+      }
+
       if (is_variable(t))
       { if (std::find(vars.begin(),vars.end(),t)!=vars.end())
         { /* t occurs in vars, so, t does not have to be reconstructed
@@ -3211,12 +3215,44 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_application(t))
       { return application(
-                adapt_term_to_stack(application(t).head(),stack,vars),
-                adapt_termlist_to_stack(application(t).arguments(),stack,vars));
+                 adapt_term_to_stack(application(t).head(),stack,vars),
+                 adapt_termlist_to_stack(application(t).arguments(),stack,vars));
+      }
+
+      if (is_abstraction(t))
+      { 
+        const abstraction abs_t(t);
+        return abstraction(
+                 abs_t.binding_operator(),
+                 abs_t.variables(),
+                 adapt_term_to_stack(abs_t.body(),stack,abs_t.variables() + vars));
+      }
+
+      if (is_where_clause(t))
+      { 
+        const where_clause where_t(t);
+        const assignment_expression_list old_declarations=reverse(where_t.declarations());
+        variable_list new_vars=vars;
+        assignment_expression_list new_declarations;
+        for( assignment_expression_list::const_iterator i=old_declarations.begin();
+                   i!=old_declarations.end(); ++i)
+        { 
+          new_vars=push_front(new_vars,i->lhs());
+          new_declarations=push_front(
+                             new_declarations,
+                             assignment_expression(
+                               i->lhs(),
+                               adapt_term_to_stack(i->rhs(),stack,vars)));
+
+        }
+        return where_clause(
+                 adapt_term_to_stack(where_t,stack,new_vars),
+                 new_declarations);
+
       }
 
       assert(0);  // expected a term;
-      return data_expression();
+      return t;   // in case of non-debug mode, try to return something as decent as possible.
     }
 
     template <typename Container>
@@ -3234,32 +3270,6 @@ class specification_basic_type:public boost::noncopyable
       return result;
     }
 
-
-/*
-    data_expression_list adapt_termlist_to_stack(
-                      application::arguments_range tl,
-                      const stacklisttype &stack,
-                      const variable_list vars)
-    { data_expression_vector result;
-      // TODO. This is not very efficient.
-      for(application::arguments_range::const_iterator i = tl.begin(); i!=tl.end(); ++i)
-      { result.push_back(adapt_term_to_stack(*i,stack,vars));
-      }
-      return atermpp::convert< data_expression_list >(result);
-    }
-
-    data_expression_list adapt_termlist_to_stack(
-                      const data_expression_list tl,
-                      const stacklisttype &stack,
-                      const variable_list vars)
-    { data_expression_vector result;
-      // TODO. This is not very efficient.
-      for(data_expression_list::const_iterator i = tl.begin(); i!=tl.end(); ++i)
-      { result.push_back(adapt_term_to_stack(*i,stack,vars));
-      }
-      return atermpp::convert< data_expression_list >(result);
-    }
-*/
 
     action_list adapt_multiaction_to_stack_rec(
                        const action_list multiAction,
