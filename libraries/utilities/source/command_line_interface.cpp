@@ -19,7 +19,11 @@
 #include <sstream>
 #include <string>
 #include <iterator>
-#include <boost/regex.hpp>
+
+#ifndef MCRL2_USE_BOOST_INTERNAL 
+  #include <boost/regex.hpp>
+#endif
+
 #include <fstream>
 #include <iostream>
 

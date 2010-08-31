@@ -4,7 +4,9 @@
 #include <sstream>
 #include <iostream>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/regex.hpp>
+#ifndef MCRL2_USE_BOOST_INTERNAL
+  #include <boost/regex.hpp>
+#endif
 
 using namespace boost;
 using namespace boost::xpressive;
