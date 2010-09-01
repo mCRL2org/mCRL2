@@ -28,10 +28,7 @@
 #include <iostream>
 
 #include "boost/xpressive/xpressive_static.hpp"
-#include "boost/algorithm/string.hpp"
-#include "boost/algorithm/string/compare.hpp"
-#include "boost/algorithm/string/std/string_traits.hpp"
-#include "boost/date_time/gregorian/gregorian.hpp"
+#include "boost/algorithm/string/replace.hpp"
 
 /// \cond DUMMY
 // dummy necessary for compiling
@@ -169,7 +166,6 @@ namespace mcrl2 {
     }
 
     std::string interface_description::option_descriptor::man_page_description() const {
-      using namespace boost::xpressive;
 
       std::ostringstream s;
 
@@ -199,14 +195,13 @@ namespace mcrl2 {
       }
 
       s << std::endl
-        << regex_replace(word_wrap(m_description, 80),
-			 sregex(as_xpr('\'')), std::string("\\&'")) << std::endl;
+        << boost::xpressive::regex_replace(word_wrap(m_description, 80),
+			 boost::xpressive::sregex(boost::xpressive::as_xpr('\'')), std::string("\\&'")) << std::endl;
 
       return s.str();
     }
 
     std::string interface_description::option_descriptor::wiki_page_description() const {
-      using namespace boost::xpressive;
 
       std::ostringstream s;
 
@@ -239,12 +234,12 @@ namespace mcrl2 {
         boost::replace_all(description, m_argument->get_name(), std::string("''") + m_argument->get_name() + "''");
       }
 
-      mark_tag option(1);
+      boost::xpressive::mark_tag option(1);
 
       // Following line:
       //
 #ifdef MCRL2_USE_BOOST_INTERNAL  
-         description = regex_replace(description, sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), std::string("<tt>$1</tt>"));
+         description = boost::xpressive::regex_replace(description, boost::xpressive::sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), std::string("<tt>$1</tt>"));
 #else 
       //
       // Should be equal to: 
@@ -432,13 +427,23 @@ namespace mcrl2 {
     std::string interface_description::man_page() const {
       std::ostringstream s;
 
-      s.imbue(std::locale(s.getloc(), new boost::gregorian::date_facet("%B %Y")));
+      s.imbue(std::locale(s.getloc()));
 
       s << ".\\\" " << "Manual page for " << m_name << " revision " << revision() << "." << " .\\\"" << std::endl
         << ".\\\" " << "Generated from " << m_name << " --generate-man-page." << " .\\\""<< std::endl;
 
-      s << ".TH " << boost::to_upper_copy(m_name) << " \"1\" \""
-                  << boost::gregorian::day_clock::local_day() << "\" \""
+      // Determine month and year, to prevent using boost date/time
+      time_t rawtime;
+      struct tm * timeinfo;
+      char buffer [80];
+      time ( &rawtime );
+      timeinfo = localtime ( &rawtime );
+      strftime (buffer,80,"%B %Y",timeinfo);
+
+      std::string name_upper = m_name;
+      std::transform(name_upper.begin(), name_upper.end(), name_upper.begin(), ::toupper);
+      s << ".TH " << name_upper << " \"1\" \""
+                  << std::string(buffer) << "\" \""
                   << m_name << " mCRL2 toolset " << version_tag()
         << "\" \"User Commands\"" << std::endl;
 
