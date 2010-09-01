@@ -238,8 +238,16 @@ void read_from_aut(lts &l, istream &is)
   nstate = strtoul(s3,NULL,10);
 
   l.set_num_states(nstate,false);
+
+  unsigned int initial_state=strtoul(s1,NULL,10);
+  if (initial_state>= l.num_states() )
+  {
+    throw mcrl2::runtime_error("cannot parse AUT input (initial state index (" + c(initial_state) +
+              ") is larger or equal to the number of states (" +
+                  c(l.num_states()) + ") given in the header).");
+  }
+
   l.set_initial_state(strtoul(s1,NULL,10));
-  assert(nstate == l.num_states());
 
   ATermIndexedSet labs = ATindexedSetCreate(100,50);
   while ( !is.eof() )
