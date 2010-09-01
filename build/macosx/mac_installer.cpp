@@ -87,7 +87,7 @@ MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint&
     wxString install;
     if(stat(install_prefix.c_str() ,&st) == 0)
     {
-      install = wxT(install_prefix.c_str());
+      install = wxString(install_prefix.c_str(), wxConvUTF8 );
     } else {
       install = wxT("/");
     }
@@ -126,7 +126,8 @@ void MacOSXInstallerFrame::OnExport(wxCommandEvent& WXUNUSED(event))
   string basename_str = basename.get_executable_basename();
 
   //Get target directory for putting symbolic links 
-  string export_path = dpc->GetPath().mb_str(wxConvUTF8);
+  string export_path;
+  export_path = dpc->GetPath().mb_str(wxConvUTF8);
 
   //Test for write access
   if( access( export_path.c_str(), W_OK ) == -1 ){
