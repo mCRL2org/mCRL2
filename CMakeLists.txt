@@ -52,11 +52,11 @@ endif(NOT MCRL2_BUILD_IN_SOURCE)
 #
 # From this, CMake is able to generate correct Makefiles. However, CMake is
 # not able to generate a correct Eclipse CDT4 project.
-# 
+#
 # The solution that is currently employed is by adding compiler definitions
 # that contain quotes using the set_source_files_properties command with the
 # the COMPILE_DEFINITIONS property:
-# 
+#
 #   set_source_files_properties(baz.cpp
 #     PROPERTIES COMPILE_DEFINITIONS FOO="bar"
 #   )
@@ -89,7 +89,7 @@ endif(NOT MCRL2_BUILD_IN_SOURCE)
 #
 
 # Variables required for an additional build type "Maintainer"
- 
+
 set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the C++ compiler during maintainer builds." FORCE)
 set(CMAKE_C_FLAGS_MAINTAINER "-g -O0 -Wall -pedantic -W -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the C compiler during maintainer builds." FORCE)
 set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used for linking binaries during maintainer builds." FORCE)
@@ -102,21 +102,25 @@ mark_as_advanced(
 )
 
 ##---------------------------------------------------
-## Print compiler information 
-##--------------------------------------------------- 
+## Print compiler information
+##---------------------------------------------------
 
-execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version 
+if(NOT MSVC)
+execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
     OUTPUT_VARIABLE CXX_COMPILER_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 STRING(REGEX REPLACE "^([^\n]+).*" "\\1" CXX_COMPILER_VERSION "${CXX_COMPILER_VERSION}" )
+else(NOT MSVC)
+   set(CXX_COMPILER_VERSION "MSVC-${MSVC_VERSION}")
+endif(NOT MSVC)
 
 message(STATUS "CXX COMPILER VERSION: ${CXX_COMPILER_VERSION}")
 
 ##---------------------------------------------------
 ## Determine build type
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -128,23 +132,23 @@ if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
   ##---------------------------------------------------
   ## Set global compiler flags (if available)
-  ##--------------------------------------------------- 
+  ##---------------------------------------------------
 
   include(CheckCXXCompilerFlag)
   check_cxx_compiler_flag(-Wall CXX_ACCEPTS_WALL )
   if( CXX_ACCEPTS_WALL )
-    add_definitions( -Wall ) 
+    add_definitions( -Wall )
   endif( CXX_ACCEPTS_WALL )
 
   check_cxx_compiler_flag(-Wno-inline CXX_ACCEPTS_WNO-INLINE )
   if( CXX_ACCEPTS_WNO-INLINE )
-    add_definitions( -Wno-inline ) 
+    add_definitions( -Wno-inline )
   endif( CXX_ACCEPTS_WNO-INLINE )
 
   if( NOT MINGW )
     check_cxx_compiler_flag(-pthread CXX_ACCEPTS_PTHREAD )
     if( CXX_ACCEPTS_PTHREAD )
-      add_definitions( -pthread ) 
+      add_definitions( -pthread )
     endif( CXX_ACCEPTS_PTHREAD )
   endif( NOT MINGW )
 
@@ -155,7 +159,7 @@ if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
   check_cxx_compiler_flag(-pipe CXX_ACCEPTS_PIPE )
   if( CXX_ACCEPTS_PIPE )
-    add_definitions( -pipe ) 
+    add_definitions( -pipe )
   endif( CXX_ACCEPTS_PIPE )
 
   # Following flag will cause warning on MacOSX, if enabled:
@@ -163,25 +167,25 @@ if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
   if( NOT APPLE)
     check_cxx_compiler_flag(-Wl,-as-needed CXX_ACCEPTS_AS_NEEDED )
     if( CXX_ACCEPTS_AS_NEEDED )
-      add_definitions( -Wl,-as-needed ) 
+      add_definitions( -Wl,-as-needed )
     endif( CXX_ACCEPTS_AS_NEEDED )
   endif( NOT APPLE )
 
   # Display include dependencies
   # check_cxx_compiler_flag(-H CXX_ACCEPTS_H )
   # if( CXX_ACCEPTS_H )
-  #  add_definitions( -H ) 
+  #  add_definitions( -H )
   # endif( CXX_ACCEPTS_H )
 
   # check_cxx_compiler_flag(-Wunreachable-code CXX_ACCEPTS_UNREACHABLE-CODE )
   # if( CXX_ACCEPTS_UNREACHABLE-CODE )
-  #   add_definitions( -Wunreachable-code ) 
+  #   add_definitions( -Wunreachable-code )
   # endif( CXX_ACCEPTS_UNREACHABLE-CODE )
 
 endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
 if(MSVC)
-  add_definitions( "/EHa" ) 
+  add_definitions( "/EHa" )
 endif(MSVC)
 
 ## --------------------------------------------------
@@ -204,8 +208,8 @@ endif (UNIX AND NOT WIN32)
 
 ##---------------------------------------------------
 ## Remove "install_tools"
-## install_tools contains the tools marked for symlink export 
-##--------------------------------------------------- 
+## install_tools contains the tools marked for symlink export
+##---------------------------------------------------
 if(APPLE)
   if(EXISTS "${CMAKE_BINARY_DIR}/install_tools" )
     FILE(REMOVE ${CMAKE_BINARY_DIR}/install_tools )
@@ -215,19 +219,23 @@ endif(APPLE)
 
 ##---------------------------------------------------
 ## Print CMake install prefix (if any)
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 
 ##---------------------------------------------------
-## Print the way how libraries are built 
-##--------------------------------------------------- 
+## Print the way how libraries are built
+##---------------------------------------------------
 
-option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" ON)
+if(MSVC)
+  option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF)
+else(MSVC)
+  option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" ON)
+endif(MSVC)
 
 ## SET mCRL2 Library Directory
-# Unix 
+# Unix
 if(UNIX)
   set(MCRL2_LIB_DIR "lib/mcrl2")
 endif(UNIX)
@@ -246,12 +254,12 @@ endif(APPLE AND MCRL2_SINGLE_BUNDLE)
 
 
 if(BUILD_SHARED_LIBS)
-  if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) 
+  if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     if(NOT MINGW)
       check_cxx_compiler_flag(-fPIC CXX_ACCEPTS_FPIC )
       if( CXX_ACCEPTS_FPIC )
         add_definitions( -fPIC )
-        set(BUILD_SHARED_LIBS_OPTION "-fPIC")  
+        set(BUILD_SHARED_LIBS_OPTION "-fPIC")
       endif( CXX_ACCEPTS_FPIC )
     endif(NOT MINGW)
   endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
@@ -261,7 +269,7 @@ if(BUILD_SHARED_LIBS)
     check_cxx_compiler_flag(-fPIC CXX_ACCEPTS_FPIC )
     if( CXX_ACCEPTS_FPIC )
       add_definitions( -fPIC )
-      set(BUILD_SHARED_LIBS_OPTION "-fPIC")  
+      set(BUILD_SHARED_LIBS_OPTION "-fPIC")
     endif( CXX_ACCEPTS_FPIC )
   endif(CMAKE_CXX_COMPILER MATCHES "icpc")
 
@@ -274,7 +282,7 @@ if(BUILD_SHARED_LIBS)
 	FILES
         ${MINGW_LIB_DIR}/libgcc_s_dw2-1.dll
 	${MINGW_LIB_DIR}/mingwm10.dll
-        DESTINATION ${MCRL2_BIN_DIR} 
+        DESTINATION ${MCRL2_BIN_DIR}
       )
 
       if  (MCRL2_ENABLE_GUI_TOOLS)
@@ -301,7 +309,7 @@ if(BUILD_SHARED_LIBS)
           else(MINGW_wxWidgets_LIB_DIR)
             message( STATUS "wxWidgets DLLs cannot be deterimed for a shared build." )
             message( STATUS "Copy DLLs manually." )
-	      endif(MINGW_wxWidgets_LIB_DIR)  
+	      endif(MINGW_wxWidgets_LIB_DIR)
       endif(MCRL2_ENABLE_GUI_TOOLS )
 
     endif(MINGW OR MSYS)
@@ -314,8 +322,8 @@ message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
 
 ##-----------------------------------------------------
-## Set runtime path variable RPATH for install targets 
-##----------------------------------------------------- 
+## Set runtime path variable RPATH for install targets
+##-----------------------------------------------------
 
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH false)
@@ -339,7 +347,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
 ##---------------------------------------------------
 ## Determine latest SVN revision
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 if( NOT DEFINED MCRL2_SVN_LABEL )
   find_program(SVNVERSION
@@ -348,7 +356,7 @@ if( NOT DEFINED MCRL2_SVN_LABEL )
     /usr/pkg/bin
     /usr/bin
   )
-  
+
   if(SVNVERSION)
     execute_process(COMMAND ${SVNVERSION} ${CMAKE_SOURCE_DIR}
       OUTPUT_VARIABLE SVN_REV
@@ -364,7 +372,7 @@ endif( NOT DEFINED MCRL2_SVN_LABEL )
 message(STATUS "SVN revision: ${SVN_REV}")
 
 ##---------------------------------------------------
-## Detect OpenGL 
+## Detect OpenGL
 ##---------------------------------------------------
 
 include(FindOpenGL)
@@ -376,7 +384,7 @@ message(STATUS "OpenGL: ${OPENGL_FOUND}")
 
 option(MCRL2_USE_BOOST_INTERNAL "Enable/disable the use of internally provided Boost libraries" ON)
 message(STATUS "MCRL2_USE_BOOST_INTERNAL: ${MCRL2_USE_BOOST_INTERNAL}")
- 
+
 option( MCRL2_INSTALL_BOOST_HEADERS "Enable/disable installation of boost headers" OFF)
 message(STATUS "MCRL2_INSTALL_BOOST_HEADERS: ${MCRL2_INSTALL_BOOST_HEADERS}" )
 
@@ -398,7 +406,17 @@ if(MCRL2_USE_BOOST_INTERNAL)
 
 else(MCRL2_USE_BOOST_INTERNAL)
 
-  find_package(Boost COMPONENTS signals filesystem regex REQUIRED)
+  if(MSVC)
+    find_package(Boost COMPONENTS signals filesystem REQUIRED)
+       # Disable boost::regex and use sregex instead.
+       # using MSVC 2010, BoostPro 1.44, results in following link error:
+       # mcrl2_utilities_command_line.lib(command_line_interface.obj) : 
+       # error LNK2019: unresolved external symbol "char __fastcall boost::re_detail::w32_toupper(char,unsigned long)" (?w32_toupper@re_detail@boost@@YIDDK@Z) referenced in function "public: char __thiscall boost::w32_regex_traits<char>::toupper(char)const " (?toupper@?$w32_regex_traits@D@boost@@QBEDD@Z) 
+       add_definitions( -DMCRL2_DISABLE_BOOST_REGEX )
+  else(MSVC)
+    find_package(Boost COMPONENTS signals filesystem regex REQUIRED)
+  endif(MSVC)  
+
   if(NOT Boost_FOUND)
     message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.35 or higher." )
     message( FATAL_ERROR "Use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost" )
@@ -420,15 +438,15 @@ else(MCRL2_USE_BOOST_INTERNAL)
 endif(MCRL2_USE_BOOST_INTERNAL)
 
 ##---------------------------------------------------
-## Determine to compile a mono library 
-##--------------------------------------------------- 
+## Determine to compile a mono library
+##---------------------------------------------------
 
 option(MCRL2_MONO_LIB "Enable/disable creation of a monolithic library" OFF)
 message(STATUS "MCRL2_MONO_LIB: ${MCRL2_MONO_LIB}")
 
 ##---------------------------------------------------
-## Explicity Set NDebug 
-##-------------------------------------------------- 
+## Explicity Set NDebug
+##--------------------------------------------------
 
 option(MCRL2_NDEBUG "Explicity set NDEBUG" OFF)
 message(STATUS "MCRL2_NDEBUG: ${MCRL2_NDEBUG}")
@@ -438,7 +456,7 @@ endif(MCRL2_NDEBUG)
 
 ##---------------------------------------------------
 ## Set wxWidgets configuration
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 
 option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
@@ -456,7 +474,7 @@ if(wxWidgets_FOUND)
   IF( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
     #Find wxWidgets version
     execute_process(COMMAND ${wxWidgets_CONFIG_EXECUTABLE} --version
-      OUTPUT_VARIABLE wxWidgets_VERSION 
+      OUTPUT_VARIABLE wxWidgets_VERSION
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
@@ -467,19 +485,19 @@ if(wxWidgets_FOUND)
       message( STATUS "Current wxWidgets version: ${wxWidgets_VERSION}")
 
     endif( wxWidgets_VERSION LESS 2.8.0 )
-  
-    message(STATUS "wxWidgets version: ${wxWidgets_VERSION}") 
-  else( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )  
-   
+
+    message(STATUS "wxWidgets version: ${wxWidgets_VERSION}")
+  else( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
+
     message( STATUS "Make sure that wxWidgets (version 2.8.0 or higher) is installed and compiled" )
 
-  endif( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND ) 
+  endif( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
 
   set(MCRL2_BUILD_GUI_TOOLS true)
 
   # wxWidgets include directory
   include_directories(${wxWidgets_INCLUDE_DIRS})
-     
+
 else(wxWidgets_FOUND)
 
   message( STATUS "Warning: GUI tools are not built" )
@@ -507,8 +525,8 @@ if(NOT MCRL2_ENABLE_GUI_TOOLS )
 endif(NOT MCRL2_ENABLE_GUI_TOOLS  )
 
 ##---------------------------------------------------
-##  
-##--------------------------------------------------- 
+##
+##---------------------------------------------------
 
 if ( WIN32 )
   if(MSVC)
@@ -542,12 +560,12 @@ if ( APPLE )
     set(CMAKE_EXE_LINKER_FLAGS "-framework OpenGL ${CMAKE_EXE_LINKER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
     set(CMAKE_MODULE_LINKER_FLAGS "-framework OpenGL ${CMAKE_SHARED_LINKER_FLAGS}")
-  endif( OPENGL_FOUND ) 
+  endif( OPENGL_FOUND )
 
 endif (APPLE)
 
 ## Toggle man page generation
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 if (UNIX)
   option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" ON)
@@ -558,8 +576,8 @@ endif (UNIX)
 message(STATUS "MCRL2_MAN_PAGES: ${MCRL2_MAN_PAGES}")
 
 ##---------------------------------------------------
-## Toggle profile build 
-##--------------------------------------------------- 
+## Toggle profile build
+##---------------------------------------------------
 
 if( UNIX )
   option(MCRL2_ENABLE_PROFILING "Enable/disable profiling support" OFF)
@@ -574,13 +592,13 @@ endif( UNIX )
 
 ##---------------------------------------------------
 ## Set properties for build
-##--------------------------------------------------- 
+##---------------------------------------------------
 
-set(MCRL2_TEST_LABEL "rev.${SVN_REV}-${CMAKE_BUILD_TYPE}") 
- 
+set(MCRL2_TEST_LABEL "rev.${SVN_REV}-${CMAKE_BUILD_TYPE}")
+
 ##---------------------------------------------------
 ## 3rd party dependencies
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 add_subdirectory ( 3rd-party/aterm )
 add_subdirectory ( 3rd-party/svc )
@@ -593,7 +611,7 @@ add_subdirectory ( 3rd-party/ticpp )
 
 ##---------------------------------------------------
 ## Library dependencies
-##--------------------------------------------------- 
+##---------------------------------------------------
 
   add_subdirectory ( libraries/data )
   add_subdirectory ( libraries/utilities )
@@ -607,7 +625,7 @@ add_subdirectory ( 3rd-party/ticpp )
 
 ##---------------------------------------------------
 ## Tool dependencies
-##--------------------------------------------------- 
+##---------------------------------------------------
 
   add_subdirectory ( tools/chi2mcrl2 )
   add_subdirectory ( tools/diagraphica )
@@ -654,7 +672,7 @@ add_subdirectory ( 3rd-party/ticpp )
 
 ##---------------------------------------------------
 ## Experimental tool dependencies
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 option(MCRL2_ENABLE_EXPERIMENTAL "Enable/disable creation of experimental tools" OFF)
 message(STATUS "MCRL2_ENABLE_EXPERIMENTAL: ${MCRL2_ENABLE_EXPERIMENTAL}" )
@@ -669,7 +687,7 @@ endif(MCRL2_ENABLE_EXPERIMENTAL)
 
 ##---------------------------------------------------
 ## Deprecated tool dependencies
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 option(MCRL2_ENABLE_DEPRECATED "Enable/disable creation of deprecated tools" OFF)
 message(STATUS "MCRL2_ENABLE_DEPRECATED: ${MCRL2_ENABLE_DEPRECATED}" )
@@ -680,7 +698,7 @@ endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
 ## Experimental tool dependencies
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 option(MCRL2_COMPILE_EXAMPLES "Enable/disable creation of example tools" OFF)
 message(STATUS "MCRL2_COMPILE_EXAMPLES: ${MCRL2_COMPILE_EXAMPLES}" )
@@ -696,7 +714,7 @@ endif(MCRL2_COMPILE_EXAMPLES)
 ##---------------------------------------------------
 ## Create "libraries/utilities/include/mcrl2/setup.h",
 ## required for the compiling rewriters
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 IF( UNIX )
 FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/libraries/utilities/include/mcrl2/setup.h)
@@ -792,11 +810,11 @@ if( MCRL2_INSTALL_BOOST_HEADERS )
         ${Boost_INCLUDE_DIRS}/boost
       DESTINATION include
     )
-  endif( MCRL2_USE_BOOST_INTERNAL ) 
+  endif( MCRL2_USE_BOOST_INTERNAL )
 endif( MCRL2_INSTALL_BOOST_HEADERS )
 
 ##---------------------------------------------------
-## Install examples 
+## Install examples
 ## --------------------------------------------------
 
 install(
@@ -806,8 +824,8 @@ install(
 )
 
 ##---------------------------------------------------
-## Make tests 
-##--------------------------------------------------- 
+## Make tests
+##---------------------------------------------------
 
 option(MCRL2_ENABLE_TEST_TARGETS "Enable/disable creation of test targets" OFF)
 message(STATUS "MCRL2_ENABLE_TEST_TARGETS: ${MCRL2_ENABLE_TEST_TARGETS}" )
@@ -839,7 +857,7 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
 
   # Conversion tools
   set(testdir "${CMAKE_CURRENT_BINARY_DIR}/mcrl2-testoutput")
-  file( REMOVE_RECURSE ${testdir} ) 
+  file( REMOVE_RECURSE ${testdir} )
   file( MAKE_DIRECTORY ${testdir} )
   add_test(mcrl22lps_abp ${mcrl22lps_BINARY_DIR}/mcrl22lps -v -D ${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2 ${testdir}/abp.lps)
   add_test(lpsinfo_abp ${lpsinfo_BINARY_DIR}/lpsinfo ${testdir}/abp.lps)
@@ -862,9 +880,9 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   add_test(tracepp_test ${tracepp_BINARY_DIR}/tracepp ${CMAKE_SOURCE_DIR}/examples/industrial/garage/movie.trc ${testdir}/movie.txt )
   add_test(pnml2mcrl2_philcol ${pnml2mcrl2_BINARY_DIR}/pnml2mcrl2 ${CMAKE_SOURCE_DIR}/examples/generated/philcol/philcol.pnml ${testdir}/philcol.mcrl2 )
   add_test(pnml2mcrl2_desel-esparza-5-2 ${pnml2mcrl2_BINARY_DIR}/pnml2mcrl2 ${pnml2mcrl2_SOURCE_DIR}/test/desel-esparza-5-2.pnml ${testdir}/desel-esparza-5-2.mcrl2)
-  add_test(chi2mcrl2_test ${chi2mcrl2_BINARY_DIR}/chi2mcrl2 ${chi2mcrl2_SOURCE_DIR}/examples/industrialsystem/industrialsystem.chi ${testdir}/industrialsystem.mcrl2) 
-  add_test(lts2lps_test ${lts2lps_BINARY_DIR}/lts2lps ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_lts.mcrl2) 
-  add_test(ltsconvert_bisim_test ${ltsconvert_BINARY_DIR}/ltsconvert -ebisim ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_bisim.aut) 
+  add_test(chi2mcrl2_test ${chi2mcrl2_BINARY_DIR}/chi2mcrl2 ${chi2mcrl2_SOURCE_DIR}/examples/industrialsystem/industrialsystem.chi ${testdir}/industrialsystem.mcrl2)
+  add_test(lts2lps_test ${lts2lps_BINARY_DIR}/lts2lps ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_lts.mcrl2)
+  add_test(ltsconvert_bisim_test ${ltsconvert_BINARY_DIR}/ltsconvert -ebisim ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_bisim.aut)
 
 
 
@@ -894,43 +912,43 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     add_test(mcrl22lps_generate-man-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-man-page)
     set_tests_properties(
       mcrl22lps_generate-man-page
-    PROPERTIES 
+    PROPERTIES
       LABELS "${MCRL2_TEST_LABEL}"
     )
-  endif(MCRL2_MAN_PAGES)  
+  endif(MCRL2_MAN_PAGES)
     add_test(mcrl22lps_generate-wiki-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-wiki-page)
     add_test(mcrl22lps_mcrl2-gui ${mcrl22lps_BINARY_DIR}/mcrl22lps --mcrl2-gui)
 
 
   set_tests_properties(
-    mcrl22lps_abp 
+    mcrl22lps_abp
     mcrl22lps_generate-wiki-page
     mcrl22lps_mcrl2-gui
-    lpsinfo_abp 
-    lpsconstelm_abp 
-    lpsparelm_abp 
-    lpssuminst_abp 
-    lps2lts_abp 
-    ltsinfo_abp 
+    lpsinfo_abp
+    lpsconstelm_abp
+    lpsparelm_abp
+    lpssuminst_abp
+    lps2lts_abp
+    ltsinfo_abp
     pbes2bool_abp
-    lps2pbes_abp 
+    lps2pbes_abp
     lysa2mcrl2_test
-    tracepp_test  
-    pnml2mcrl2_philcol  
-    pnml2mcrl2_desel-esparza-5-2   
-    chi2mcrl2_test 
+    tracepp_test
+    pnml2mcrl2_philcol
+    pnml2mcrl2_desel-esparza-5-2
+    chi2mcrl2_test
     lts2lps_test
     ltsconvert_bisim_test
-  PROPERTIES 
+  PROPERTIES
     LABELS "${MCRL2_TEST_LABEL}"
   )
-  
+
 
 include(CTest)
 
 ##---------------------------------------------------
-## Header tests 
-##--------------------------------------------------- 
+## Header tests
+##---------------------------------------------------
 option(MCRL2_TRYCOMPILE_HEADER_TESTS "Enable/disable try_compile of library headers" OFF)
 message(STATUS "MCRL2_TRYCOMPILE_HEADER_TESTS: ${MCRL2_TRYCOMPILE_HEADER_TESTS}" )
 set(MCRL2_HEADER_TESTS_OUTPUT CACHE FILEPATH "FilePath to store header test results (Empty for stdout)." )
@@ -939,13 +957,13 @@ include( scripts/HeaderTests.cmake )
 
 ##---------------------------------------------------
 ## Additional make targets
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 ##---------------------------------------------------
 ## Target tags (useful editing with Vim)
-##--------------------------------------------------- 
+##---------------------------------------------------
 
-find_program(CTAGS 
+find_program(CTAGS
   ctags
   /usr/local/bin
   /usr/pkg/bin
@@ -960,7 +978,7 @@ endif(CTAGS)
 
 ##---------------------------------------------------
 ## Target doxy
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 if(UNIX)
   add_custom_target(doxy
@@ -970,8 +988,8 @@ if(UNIX)
 endif(UNIX)
 
 ##---------------------------------------------------
-## Target latex documentation 
-##--------------------------------------------------- 
+## Target latex documentation
+##---------------------------------------------------
 
 if(UNIX)
   add_custom_target(tex
@@ -982,7 +1000,7 @@ endif(UNIX)
 
 ##---------------------------------------------------
 ## Target parsers
-##--------------------------------------------------- 
+##---------------------------------------------------
 
 if(UNIX)
 
@@ -993,21 +1011,21 @@ if(UNIX)
     COMMAND sed -i '/isatty/d' mcrl2lexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/core/source
   )
-  
+
   add_custom_target(chiparser
     flex -Pchi -ochilexer.cpp chilexer.ll
     COMMAND bison -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy
     COMMAND sed -i '/isatty/d' chilexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/chi2mcrl2
   )
-  
+
   add_custom_target(lysaparser
     flex -Plysa -olysalexer.cpp lysalexer.ll
     COMMAND bison -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy
     COMMAND sed -i '/isatty/d' lysalexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/lysa2mcrl2
   )
-  
+
   add_custom_target(liblts_fsmparser
     flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll
     COMMAND bison -p fsm --defines=../include/mcrl2/lts/detail/liblts_fsmparser.h -o liblts_fsmparser.cpp liblts_fsmparser.yy
@@ -1015,7 +1033,7 @@ if(UNIX)
     COMMAND sed -i '/isatty/d' liblts_fsmlexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/lts/source
   )
-  
+
   add_custom_target(liblts_dotparser
     flex -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll
     COMMAND bison -p dot --defines=../include/mcrl2/lts/detail/liblts_dotparser.h -o liblts_dotparser.cpp liblts_dotparser.yy
@@ -1023,18 +1041,18 @@ if(UNIX)
     COMMAND sed -i '/isatty/d' liblts_dotlexer.cpp
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/lts/source
   )
-  
+
   add_custom_target(parsers
     cp /usr/include/FlexLexer.h ${CMAKE_SOURCE_DIR}/build/workarounds
   )
-  
+
   add_dependencies(parsers mcrl2parser chiparser lysaparser liblts_fsmparser liblts_dotparser)
 endif(UNIX)
 
 
 ##---------------------------------------------------
-## mCRL2 Sigle Bundle for MacOSX 
-##--------------------------------------------------- 
+## mCRL2 Sigle Bundle for MacOSX
+##---------------------------------------------------
 
 option(MCRL2_SINGLE_BUNDLE "Enable/disable creation of a single mCRL2.app" OFF)
 IF(APPLE AND MCRL2_SINGLE_BUNDLE)
@@ -1043,7 +1061,7 @@ IF(APPLE AND MCRL2_SINGLE_BUNDLE)
   endif(BUILD_SHARED_LIBS)
 
   if(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-    message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This will create an installer, which is non-standard." ) 
+    message( STATUS "CMAKE_INSTALL_PREFIX is not equal to \"/\". This will create an installer, which is non-standard." )
   endif(NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
 
   SET(CMAKE_BUNDLE_NAME "mCRL2")
@@ -1056,13 +1074,13 @@ IF(APPLE AND MCRL2_SINGLE_BUNDLE)
   IF(NOT "${ENDCH}" STREQUAL "/")
     SET(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
   ENDIF(NOT "${ENDCH}" STREQUAL "/")
-  SET(CMAKE_INSTALL_PREFIX 
+  SET(CMAKE_INSTALL_PREFIX
     "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
 
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/build/macosx)
 
   # Install "install_tools" in share/installer
-  # install_tools contains the tools marked for symlink export 
+  # install_tools contains the tools marked for symlink export
   install(FILES ${CMAKE_BINARY_DIR}/install_tools DESTINATION share/installer)
   #Install Info.plist for single application bundle
   install(FILES ${CMAKE_SOURCE_DIR}/build/macosx/Info.plist DESTINATION . )
@@ -1072,8 +1090,8 @@ IF(APPLE AND MCRL2_SINGLE_BUNDLE)
 ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
 
 ##---------------------------------------------------
-## CPack configuration 
-##--------------------------------------------------- 
+## CPack configuration
+##---------------------------------------------------
 
 INCLUDE(InstallRequiredSystemLibraries)
 
@@ -1086,7 +1104,7 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 SET(CPACK_PACKAGE_VENDOR "TUe")
 
-# Create Desktop link to mcrl2-gui 
+# Create Desktop link to mcrl2-gui
 set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
 set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui")
 
@@ -1106,7 +1124,7 @@ SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
 SET(CPACK_NSIS_PACKAGE_NAME "mCRL2")
 SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\doc\\\\images\\\\mcrl2-install-logo.bmp")
 
-#Extend PATH variable with mCRL2_INSTALL_DIR/bin if CPACK_NSIS_MODIFY_PATH = ON 
+#Extend PATH variable with mCRL2_INSTALL_DIR/bin if CPACK_NSIS_MODIFY_PATH = ON
 SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}/${MCRL2_BIN_DIR}")
 SET(CPACK_NSIS_MODIFY_PATH ON)
 
@@ -1124,4 +1142,3 @@ set(CPACK_RPM_PACKAGE_DESCRIPTION ${CMAKE_SOURCE_DIR}/README)
 set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
 
 include(CPack)
-
