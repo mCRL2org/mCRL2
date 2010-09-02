@@ -33,7 +33,7 @@ endif(NOT MCRL2_BUILD_IN_SOURCE)
 #
 #   CMAKE_INSTALL_PREFIX = /usr/local(*) (any path can be used)
 #   CMAKE_BUILD_TYPE     = None | Debug | Release(*) | RelwithDebInfo | MinSizeRel
-#   MCRL2_USE_BOOST_INTERNAL   = ON(*) | OFF
+#   MCRL2_USE_BOOST_INTERNAL   = ON | OFF(*)
 #   BUILD_SHARED_LIBS    = ON    | OFF(*)
 #   MCRL2_ENABLE_EXPERIMENTAL  = ON    | OFF(*)
 #   MCRL2_ENABLE_DEPRECATED    = ON    | OFF(*)
@@ -372,17 +372,10 @@ endif( NOT DEFINED MCRL2_SVN_LABEL )
 message(STATUS "SVN revision: ${SVN_REV}")
 
 ##---------------------------------------------------
-## Detect OpenGL
-##---------------------------------------------------
-
-include(FindOpenGL)
-message(STATUS "OpenGL: ${OPENGL_FOUND}")
-
-##---------------------------------------------------
 ## Set Boost configuration
 ##---------------------------------------------------
 
-option(MCRL2_USE_BOOST_INTERNAL "Enable/disable the use of internally provided Boost libraries" ON)
+option(MCRL2_USE_BOOST_INTERNAL "Enable/disable the use of internally provided Boost libraries" OFF)
 message(STATUS "MCRL2_USE_BOOST_INTERNAL: ${MCRL2_USE_BOOST_INTERNAL}")
 
 option( MCRL2_INSTALL_BOOST_HEADERS "Enable/disable installation of boost headers" OFF)
@@ -418,15 +411,21 @@ else(MCRL2_USE_BOOST_INTERNAL)
   endif(MSVC)  
 
   if(NOT Boost_FOUND)
-    message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.35 or higher." )
-    message( FATAL_ERROR "Use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost" )
+    message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.34 or higher." )
+    message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
+    message( STATUS "instructions on building mCRL2 with an external version of boost.")
+    message( STATUS "As a last resort, you can use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost." )
+    message( FATAL_ERROR "this option may be removed in the near future." )
   endif(NOT Boost_FOUND)
 
-  if( Boost_VERSION LESS 103500 )
-    message( STATUS "Boost version v1.35 or higher required." )
+  if( Boost_VERSION LESS 103400 )
+    message( STATUS "Boost version v1.34 or higher required." )
     message( STATUS "Current Boost version: ${Boost_VERSION}.")
-    message( FATAL_ERROR "Use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost" )
-  endif( Boost_VERSION LESS 103500 )
+    message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
+    message( STATUS "instructions on building mCRL2 with an external version of boost.")
+    message( STATUS "As a last resort, you can use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost." )
+    message( FATAL_ERROR "this option may be removed in the near future." )
+  endif( Boost_VERSION LESS 103400 )
 
   message( STATUS "Boost version: ${Boost_VERSION}" )
   if (Boost_FOUND)
@@ -487,6 +486,18 @@ if(wxWidgets_FOUND)
     endif( wxWidgets_VERSION LESS 2.8.0 )
 
     message(STATUS "wxWidgets version: ${wxWidgets_VERSION}")
+
+    ##---------------------------------------------------
+    ## Detect OpenGL for wxWidgets Version prior to 2.9
+    ##---------------------------------------------------
+    if(wxWidgets_VERSION LESS 2.9.0)
+      include(FindOpenGL)
+      message(STATUS "OpenGL: ${OPENGL_FOUND}")
+      if(NOT OPENGL_FOUND)
+        set(MCRL2_BUILD_GUI_TOOLS false)
+      endif(NOT OPENGL_FOUND)
+    endif(wxWidgets_VERSION LESS 2.9.0)
+
   else( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
 
     message( STATUS "Make sure that wxWidgets (version 2.8.0 or higher) is installed and compiled" )
@@ -502,14 +513,12 @@ else(wxWidgets_FOUND)
 
   message( STATUS "Warning: GUI tools are not built" )
   message( STATUS "The mCRL2 toolset requires the installation of wxWidgets 2.8.0 or higher")
-  set(MCRL2_ENABLE_GUI_TOOLS)
+  set(MCRL2_ENABLE_GUI_TOOLS false)
 
 endif(wxWidgets_FOUND)
 
 if( OPENGL_FOUND AND wxWidgets_FOUND )
   message(STATUS "MCRL2_ENABLE_GUI_TOOLS: ${MCRL2_ENABLE_GUI_TOOLS}")
-else( OPENGL_FOUND AND wxWidgets_FOUND )
-  set(MCRL2_ENABLE_GUI_TOOLS false)
 endif( OPENGL_FOUND AND wxWidgets_FOUND )
 
 if(NOT MCRL2_ENABLE_GUI_TOOLS )
