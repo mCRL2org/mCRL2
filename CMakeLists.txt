@@ -400,15 +400,15 @@ if(MCRL2_USE_BOOST_INTERNAL)
 else(MCRL2_USE_BOOST_INTERNAL)
 
   if(MSVC OR MINGW OR MSYS)
-    find_package(Boost COMPONENTS serialization signals filesystem REQUIRED)
+    find_package(Boost COMPONENTS system serialization signals filesystem REQUIRED)
        # Disable boost::regex and use sregex instead.
        # using MSVC 2010, BoostPro 1.44, results in following link error:
-       # mcrl2_utilities_command_line.lib(command_line_interface.obj) : 
-       # error LNK2019: unresolved external symbol "char __fastcall boost::re_detail::w32_toupper(char,unsigned long)" (?w32_toupper@re_detail@boost@@YIDDK@Z) referenced in function "public: char __thiscall boost::w32_regex_traits<char>::toupper(char)const " (?toupper@?$w32_regex_traits@D@boost@@QBEDD@Z) 
+       # mcrl2_utilities_command_line.lib(command_line_interface.obj) :
+       # error LNK2019: unresolved external symbol "char __fastcall boost::re_detail::w32_toupper(char,unsigned long)" (?w32_toupper@re_detail@boost@@YIDDK@Z) referenced in function "public: char __thiscall boost::w32_regex_traits<char>::toupper(char)const " (?toupper@?$w32_regex_traits@D@boost@@QBEDD@Z)
        add_definitions( -DMCRL2_DISABLE_BOOST_REGEX )
   else(MSVC OR MINGW OR MSYS)
-    find_package(Boost COMPONENTS serialization signals filesystem regex REQUIRED)
-  endif(MSVC OR MINGW OR MSYS)  
+    find_package(Boost COMPONENTS system serialization signals filesystem regex REQUIRED)
+  endif(MSVC OR MINGW OR MSYS)
 
   if(NOT Boost_FOUND)
     message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.34 or higher." )
@@ -540,17 +540,25 @@ endif(NOT MCRL2_ENABLE_GUI_TOOLS  )
 if ( WIN32 )
   if(MSVC)
     include_directories( build/workarounds/msvc )
+
+    option(MCRL2_ENABLE_MULTICORE_COMPILATION "Enable/disable multi-core compilation" ON)
+    if( MCRL2_ENABLE_MULTICORE_COMPILATION )
+      add_definitions( -MP )
+    endif( MCRL2_ENABLE_MULTICORE_COMPILATION )
+
   endif(MSVC)
 
-  add_definitions(-DWIN32)
-  add_definitions(-D__WIN32__)
+
+
+  #add_definitions(-DWIN32)
+  #add_definitions(-D__WIN32__)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
   add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-  add_definitions(-DWIN32_LEAN_AND_MEAN=1 )
-  add_definitions(-D_WIN32_WINNT=0x0501 )
-  add_definitions(-DNO_DYNLOAD)
+  #add_definitions(-DWIN32_LEAN_AND_MEAN=1 )
+  #add_definitions(-D_WIN32_WINNT=0x0501 )
+  #add_definitions(-DNO_DYNLOAD)
 endif ( WIN32)
 
 if ( APPLE )
