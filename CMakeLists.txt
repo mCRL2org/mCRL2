@@ -400,14 +400,14 @@ if(MCRL2_USE_BOOST_INTERNAL)
 else(MCRL2_USE_BOOST_INTERNAL)
 
   if(MSVC OR MINGW OR MSYS)
-    find_package(Boost COMPONENTS signals filesystem REQUIRED)
+    find_package(Boost COMPONENTS serialization signals filesystem REQUIRED)
        # Disable boost::regex and use sregex instead.
        # using MSVC 2010, BoostPro 1.44, results in following link error:
        # mcrl2_utilities_command_line.lib(command_line_interface.obj) : 
        # error LNK2019: unresolved external symbol "char __fastcall boost::re_detail::w32_toupper(char,unsigned long)" (?w32_toupper@re_detail@boost@@YIDDK@Z) referenced in function "public: char __thiscall boost::w32_regex_traits<char>::toupper(char)const " (?toupper@?$w32_regex_traits@D@boost@@QBEDD@Z) 
        add_definitions( -DMCRL2_DISABLE_BOOST_REGEX )
   else(MSVC OR MINGW OR MSYS)
-    find_package(Boost COMPONENTS signals filesystem regex REQUIRED)
+    find_package(Boost COMPONENTS serialization signals filesystem regex REQUIRED)
   endif(MSVC OR MINGW OR MSYS)  
 
   if(NOT Boost_FOUND)
