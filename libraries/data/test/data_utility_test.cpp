@@ -17,6 +17,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/find.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/find.h"
@@ -90,6 +91,21 @@ void test_fresh_variables()
   //BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d1", basic_sort("D"))) != w1.end());
   //BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e1", basic_sort("E"))) != w1.end());
   //BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("f1", basic_sort("F"))) != w1.end());
+  
+  context.clear();
+  context.insert("e3_Sx0");
+  context.insert("e_Sx0");
+  context.insert("n0_Sx0");
+  context.insert("n_S");
+  context.insert("s3_S");
+std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
+  variable_vector yi;
+  yi.push_back(variable("e3_S", basic_sort("A")));
+std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
+  variable_vector y = atermpp::convert<variable_vector>(fresh_variables(yi, context));
+std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
+  BOOST_CHECK(y.size() == 1);
+  BOOST_CHECK(std::string(y.front().name()) != "e3_Sx0");
 }
 
 int test_main(int argc, char** argv)
