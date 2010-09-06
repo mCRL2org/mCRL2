@@ -558,6 +558,7 @@ if ( WIN32 )
   add_definitions(-D_SCL_SECURE_NO_WARNINGS)
   #add_definitions(-DWIN32_LEAN_AND_MEAN=1 )
   #add_definitions(-D_WIN32_WINNT=0x0501 )
+  add_definitions(-DBOOST_ALL_NO_LIB=1)
 
   # The following definition is mCRL2 specific.
   # It prevents code being compiled for the innermost and jitty compiling rewriters
