@@ -105,7 +105,7 @@ std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
   variable_vector y = atermpp::convert<variable_vector>(fresh_variables(yi, context));
 std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
   BOOST_CHECK(y.size() == 1);
-  BOOST_CHECK(std::string(y.front().name()) != "e3_Sx0");
+  BOOST_CHECK(std::string(y.front().name()) != " e3_Sx0");
 }
 
 int test_main(int argc, char** argv)

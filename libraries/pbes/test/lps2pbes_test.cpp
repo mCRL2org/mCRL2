@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/test_utility.h"
+#include "mcrl2/pbes/pbes_solver_test.h"
 #include "test_specifications.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -464,17 +465,45 @@ void test_lps2pbes(std::string lps_spec, std::string mcf_formula)
   core::garbage_collect();
 }
 
+// Submitted by Tim, 2-9-2010
+void test_example()
+{
+  std::string SPEC =
+    "act a,b;                                         \n"
+    "                                                 \n"
+    "proc S = sum n:Nat. (n < 3) -> a.X(n);           \n"
+    "                                                 \n"
+    "proc X(n:Nat) = (n == 0) -> ( (a+b).X(n))        \n"
+    "               +(n > 0 ) -> b.a.X(Int2Nat(n-1)); \n"
+    "                                                 \n"
+    "init S;                                          \n"
+    ;
+
+  std::string FORMULA = "<a>([a]false)";   
+
+  pbes<> p;
+  bool timed = false;
+  p = lps2pbes(SPEC, FORMULA, timed);
+  BOOST_CHECK(p.is_well_typed());
+  std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
+
+  bool result = pbes2_bool_test(p);
+  BOOST_CHECK(result == true);
+
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  test_example();
   test_lps2pbes();
   test_lps2pbes2();
   test_lps2pbes3();
   test_trivial();
   test_formulas();
   test_equal_multi_actions();
-  //test_directory();
 
 #ifdef MCRL2_EXTENDED_TESTS
   test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA1);

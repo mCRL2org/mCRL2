@@ -95,6 +95,35 @@ namespace mcrl2 {
       return typename detail::sort_range< Container >::type(container);
     }
 
+    // TODO: Clean this up, either by repairing fresh_variables_corrupt, or by making a
+    // new implementation. The return type has temporarily been fixed to variable_vector.
+    /// \brief Returns a copy of t, but with a common postfix added to each variable name,
+    /// and such that the new names do not appear in context.
+    /// \param t A sequence of data variables
+    /// \param context A set of strings
+    /// \param postfix_format A string
+    /// \return A sequence of variables with names that do not appear in \p context. The
+    /// string \p postfix_format is used to generate new names. It should contain one
+    /// occurrence of "%d", that will be replaced with an integer.
+    template <typename Container, typename Context>
+    inline
+    variable_vector
+    fresh_variables(Container const& container, const Context& context)
+    {
+      variable_vector result;
+      for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+      {
+        number_postfix_generator generator(std::string(i->name()));
+        std::string name;
+        do
+        {
+          name = generator();
+        } while (context.find(name) != context.end());
+        result.push_back(variable(name, i->sort()));
+      }
+      return result;
+    }
+
     /// \brief Returns a copy of t, but with a common postfix added to each variable name,
     /// and such that the new names do not appear in context.
     /// \param t A sequence of data variables
@@ -106,7 +135,7 @@ namespace mcrl2 {
     template < typename Container, typename Context >
     inline
     typename detail::fresh_variable_range< Container, detail::rename_with_unique_common_suffix >::type
-    fresh_variables(Container const& container, const Context& context, typename boost::enable_if< typename atermpp::detail::is_container< Container, variable >::type >::type* = 0)
+    fresh_variables_corrupt(Container const& container, const Context& context, typename boost::enable_if< typename atermpp::detail::is_container< Container, variable >::type >::type* = 0)
     {
       typedef boost::transform_iterator< detail::rename_with_unique_common_suffix, typename Container::const_iterator > iterator_type;
 
