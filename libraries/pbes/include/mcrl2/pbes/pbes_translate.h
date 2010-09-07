@@ -20,6 +20,7 @@
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/core/find.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
@@ -247,7 +248,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     pbes_expression sat_top(const lps::multi_action& a, action_formulas::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n" << lps2pbes_indent() << "<sat>" << a.to_string() << " " << pp(b) << std::flush;
+std::cerr << "\n" << lps2pbes_indent() << "<sat timed>" << a.to_string() << " " << pp(b) << std::flush;
 lps2pbes_increase_indent();
 #endif
       using namespace action_formulas::act_frm;
@@ -282,13 +283,15 @@ lps2pbes_increase_indent();
         data::variable_list x = var(b);
         assert(x.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b))));
+        std::set<std::string> names = data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b));
+        data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, names, false));
         result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       } else if (is_exists(b)) {
         data::variable_list x = var(b);
         assert(x.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b))));
+        std::set<std::string> names = data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b));
+        data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, names, false));
         result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       } else {
         throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
@@ -315,7 +318,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pp(result) << std::fl
                      std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n" << lps2pbes_indent() << "<RHS>" << pp(f) << std::flush;
+std::cerr << "\n" << lps2pbes_indent() << "<RHS timed>" << pp(f) << std::flush;
 lps2pbes_increase_indent();
 #endif
       using namespace pbes_expr_optimized;
@@ -372,7 +375,7 @@ lps2pbes_increase_indent();
           atermpp::vector<pbes_expression> v;
           action_formulas::action_formula alpha = s::act(f);
           state_formulas::state_formula phi = s::arg(f);
-          const lps::action_summand_vector &asv=lps.action_summands();
+          const lps::action_summand_vector& asv = lps.action_summands();
           for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
           {
             data::data_expression ci(i->condition());
@@ -382,9 +385,10 @@ lps2pbes_increase_indent();
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
-            std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
-            context.insert(rhs_context.begin(), rhs_context.end());
-            data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
+//std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
+            data::variable_list y = atermpp::convert<data::variable_list>(fresh_variables(yi, context));
+//std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
+//std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
             ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
             ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
             gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
@@ -418,8 +422,6 @@ lps2pbes_increase_indent();
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
-            std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
-            context.insert(rhs_context.begin(), rhs_context.end());
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
             ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
             ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
@@ -582,7 +584,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pp(result) << std::fl
                                      data::variable T)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n" << lps2pbes_indent() << "<E>" << pp(f) << std::flush;
+std::cerr << "\n" << lps2pbes_indent() << "<E timed>" << pp(f) << std::flush;
 lps2pbes_increase_indent();
 #endif
       using namespace state_formulas::state_frm;
@@ -779,7 +781,8 @@ lps2pbes_increase_indent();
         action_formulas::action_formula alpha = arg(b);
         if (x.size() > 0)
         {
-          data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b))));
+          std::set<std::string> names = data::detail::find_variable_name_strings(make_list(a.actions(), b));
+          data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, names, false));
           result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
         }
         else
@@ -789,7 +792,8 @@ lps2pbes_increase_indent();
         action_formulas::action_formula alpha = arg(b);
         if (x.size() > 0)
         {
-          data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b))));
+          std::set<std::string> names = data::detail::find_variable_name_strings(make_list(a.actions(), b));
+          data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(x, names, false));
           result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
         }
         else
@@ -869,8 +873,6 @@ lps2pbes_increase_indent();
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, context);
-            std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
-            context.insert(rhs_context.begin(), rhs_context.end());
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
             ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
             ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
@@ -897,8 +899,6 @@ lps2pbes_increase_indent();
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, context);
-            std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
-            context.insert(rhs_context.begin(), rhs_context.end());
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
             ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
             ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));

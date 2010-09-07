@@ -97,18 +97,20 @@ namespace mcrl2 {
 
     // TODO: Clean this up, either by repairing fresh_variables_corrupt, or by making a
     // new implementation. The return type has temporarily been fixed to variable_vector.
+    // This implementation is very inefficient, since it does not maintain any state.
     /// \brief Returns a copy of t, but with a common postfix added to each variable name,
     /// and such that the new names do not appear in context.
-    /// \param t A sequence of data variables
+    /// \param container A sequence of data variables
     /// \param context A set of strings
-    /// \param postfix_format A string
+    /// \param update_context A boolean that indicates if the context should be updated
+    /// with the generated names.
     /// \return A sequence of variables with names that do not appear in \p context. The
     /// string \p postfix_format is used to generate new names. It should contain one
     /// occurrence of "%d", that will be replaced with an integer.
     template <typename Container, typename Context>
     inline
     variable_vector
-    fresh_variables(Container const& container, const Context& context)
+    fresh_variables(Container const& container, Context& context, bool update_context = true)
     {
       variable_vector result;
       for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
@@ -119,6 +121,10 @@ namespace mcrl2 {
         {
           name = generator();
         } while (context.find(name) != context.end());
+        if (update_context)
+        {
+          context.insert(name);
+        }
         result.push_back(variable(name, i->sort()));
       }
       return result;
