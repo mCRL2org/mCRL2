@@ -17,8 +17,6 @@
 #include <iterator>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -39,7 +37,12 @@ using namespace mcrl2::lps::detail;
 using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
+
+#ifdef USE_FILESYSTEM
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 namespace fs = boost::filesystem;
+#endif USE_FILESYSTEM
 
 const std::string ABP_SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
@@ -255,6 +258,7 @@ void test_lps2pbes3()
   core::garbage_collect();
 }
 
+#ifdef USE_FILESYSTEM
 void test_directory(int argc, char** argv)
 {
   BOOST_CHECK(argc > 1);
@@ -313,6 +317,7 @@ void test_directory(int argc, char** argv)
   }
   core::garbage_collect();
 }
+#endif USE_FILESYSTEM
 
 void test_formulas()
 {

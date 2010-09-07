@@ -18,7 +18,6 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/utility.h"
@@ -35,6 +34,10 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/atermpp/aterm_init.h"
+
+#ifdef USE_FILESYSTEM
+#include <boost/filesystem/operations.hpp>
+#endif USE_FILESYSTEM
 
 using namespace mcrl2;
 using atermpp::make_vector;
@@ -198,12 +201,16 @@ void test_pbes()
   }
   catch (mcrl2::runtime_error e)
   {
+#ifdef USE_FILESYSTEM
     boost::filesystem::remove(boost::filesystem::path(filename));
+#endif USE_FILESYSTEM
   }
   filename = "pbes_test_file.pbes";
   p.save(filename);
   p.load(filename);
+#ifdef USE_FILESYSTEM
   boost::filesystem::remove(boost::filesystem::path(filename));
+#endif USE_FILESYSTEM
 }
 
 void test_global_variables()
