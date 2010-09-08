@@ -534,7 +534,7 @@ namespace detail
      
       // Split with the splitter block, unless it is to_be_processed as we have to reconsider it 
       // completely anyhow at some later point.
-      const std::vector <transition> &splitter_non_inert_transitions=blocks[splitter_index].non_inert_transitions;
+      const std::vector <transition> splitter_non_inert_transitions=blocks[splitter_index].non_inert_transitions;
       for(std::vector <transition>::const_iterator i=splitter_non_inert_transitions.begin(); 
                   blocks[splitter_index].non_inert_transitions.size()!=0 &&
                   i!=splitter_non_inert_transitions.end(); ++i) 
@@ -563,7 +563,8 @@ namespace detail
           split_the_blocks_in_BL(partition_is_unstable,i->label(),splitter_index);
     
         }
-      }
+
+	  }
     }
 #ifndef NDEBUG
     check_internal_consistency_of_the_partitioning_data_structure(branching, preserve_divergence);
