@@ -71,16 +71,20 @@ namespace mcrl2 {
 
           for (std::set< data_equation >::size_type n = 0, m = equations.size(); n != m; n = m, m = equations.size())
           {
-            for (std::set< data_equation >::iterator i = equations.begin(), j = equations.begin(); j++ != equations.end(); i = j)
-            {
-              if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
+			for (std::set< data_equation >::iterator i = equations.begin(); i != equations.end(); )
+			{
+			  if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
               {
                 detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
                 detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
 
-                equations.erase(i);
+                equations.erase(i++);
               }
-            }
+			  else
+			  {
+				++i;
+			  }
+			}
           }
         }
 
