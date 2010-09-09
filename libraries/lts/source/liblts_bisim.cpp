@@ -183,13 +183,15 @@ namespace detail
   void bisim_partitioner::create_initial_partition(const bool branching, 
                                                    const bool preserve_divergences)
   { 
-    blocks.reserve(2*aut.num_states()); // Reserving blocks is done to avoid
+    // blocks.reserve(2*aut.num_states()); // Reserving blocks is done to avoid
                                         // messing around with blocks in memory,
                                         // which can be very time consuming, and will
                                         // lead to core dumps if it happens. As the
                                         // blocks have a tree structure, two times
                                         // the maximal number of blocks must be reserved.
-    // block_is_active.reserve(2*aut.num_states());
+                                        // This does not seem to be necessary after a change
+                                        // by Jeroen Keiren on 8/9/2010.
+
     to_be_processed.clear();
     
     block initial_partition;
@@ -534,16 +536,18 @@ namespace detail
      
       // Split with the splitter block, unless it is to_be_processed as we have to reconsider it 
       // completely anyhow at some later point.
-      const std::vector <transition> splitter_non_inert_transitions=blocks[splitter_index].non_inert_transitions;
-      for(std::vector <transition>::const_iterator i=splitter_non_inert_transitions.begin(); 
-                  blocks[splitter_index].non_inert_transitions.size()!=0 &&
-                  i!=splitter_non_inert_transitions.end(); ++i) 
+      
+      // Walk through the non_inert_transitions via a natural number, because
+      // the blocks and the non_inert_transitions can move around in memory. This makes it
+      // unsafe to use interators.
+
+      for(unsigned int i=0; i<blocks[splitter_index].non_inert_transitions.size(); ++i) 
       { 
         // The flag of the starting state of *i is raised and its block is added to BL;
 
-        assert(i->from()<aut.num_states());
-        state_flags[i->from()]=true;
-        const block_index_type marked_block_index=block_index_of_a_state[i->from()];
+        assert(blocks[splitter_index].non_inert_transitions[i].from()<aut.num_states());
+        state_flags[blocks[splitter_index].non_inert_transitions[i].from()]=true;
+        const block_index_type marked_block_index=block_index_of_a_state[blocks[splitter_index].non_inert_transitions[i].from()];
         if (block_flags[marked_block_index]==false)
         { 
           block_flags[marked_block_index]=true;
@@ -551,20 +555,18 @@ namespace detail
         }
         
         // If the label of the next action is different, we must carry out the splitting.
-        std::vector <transition>::const_iterator i_next=i;
-        i_next++;
-        if (i_next==splitter_non_inert_transitions.end() || 
-                        i->label()!=i_next->label())
+        if ((i+1)==blocks[splitter_index].non_inert_transitions.size() ||
+                   blocks[splitter_index].non_inert_transitions[i].label()!=blocks[splitter_index].non_inert_transitions[i+1].label())
         { 
           // We consider BL which contains references to all blocks from which a state from splitter
           // can be reached. If not all flags of the non bottom states in a block in BL are set, the
           // non flagged non bottom states are moved to a new block.
 
-          split_the_blocks_in_BL(partition_is_unstable,i->label(),splitter_index);
+          split_the_blocks_in_BL(partition_is_unstable,blocks[splitter_index].non_inert_transitions[i].label(),splitter_index);
     
         }
 
-	  }
+      }
     }
 #ifndef NDEBUG
     check_internal_consistency_of_the_partitioning_data_structure(branching, preserve_divergence);
