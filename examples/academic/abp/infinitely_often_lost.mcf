@@ -1,0 +1,10 @@
+% There is a path along which a message (after reading through
+% action r1) can be lost infinitely often (through c3).
+%
+% This property is true for the alternating bit protocol, because there is
+% no fairness assumption.
+%
+% Note: e as parameter of c3 means an error is communicated, hence a message
+% was lost.
+
+<true*>(exists d:D .<r1(d)>(nu X. mu Y. (<c3(e)>X || <!c3(e) && !s4(d)>Y)))
