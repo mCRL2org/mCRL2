@@ -400,7 +400,9 @@ if(MCRL2_USE_BOOST_INTERNAL)
 else(MCRL2_USE_BOOST_INTERNAL)
 
   if(MSVC OR MINGW OR MSYS)
-    find_package(Boost COMPONENTS system serialization signals filesystem REQUIRED)
+    SET (Boost_USE_STATIC_LIBS ON)
+	  
+    find_package(Boost COMPONENTS filesystem signals system serialization REQUIRED)
        # Disable boost::regex and use sregex instead.
        # using MSVC 2010, BoostPro 1.44, results in following link error:
        # mcrl2_utilities_command_line.lib(command_line_interface.obj) :
@@ -428,10 +430,10 @@ else(MCRL2_USE_BOOST_INTERNAL)
   endif( Boost_VERSION LESS 103400 )
 
   message( STATUS "Boost version: ${Boost_VERSION}" )
+ 
   if (Boost_FOUND)
      include_directories(${Boost_INCLUDE_DIRS})
      link_directories(${Boost_LIBRARY_DIRS})
-     add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
   endif (Boost_FOUND)
 
 endif(MCRL2_USE_BOOST_INTERNAL)
