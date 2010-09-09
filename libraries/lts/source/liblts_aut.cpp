@@ -8,11 +8,12 @@
 //
 /// \file liblts_aut.cpp
 
-#include <cstring>
+// #include <cstring>
 #include <string>
-#include <cstdlib>
-#include <sstream>
+// #include <cstdlib>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <assert.h>
 #include <aterm2.h>
 #include "mcrl2/lts/lts_io.h"
@@ -47,199 +48,125 @@ void read_from_aut(lts &l, string const& filename)
   is.close();
 }
 
-static void read_aut_header(char *s, char **initial_state, char **transitions, char **states)
+static void read_aut_header(
+              istream &is, 
+              unsigned int &initial_state, 
+              unsigned int &num_transitions, 
+              unsigned int &num_states)
 {
-  while ( *s == ' ' )
-    s++;
+  string s;
+  is.width(3);
+  is >> skipws >> s;
 
-  if ( strncmp(s,"des",3) )
+  if (s!="des")
   {
     throw mcrl2::runtime_error("Expect an .aut file to start with 'des'.");
   }  
-  s += 3;
 
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s != '(' )
+  char ch;
+  is >> skipws >> ch;
+  
+  if (ch != '(')
   {
     throw mcrl2::runtime_error("Expect an opening bracket '(' after 'des' in the first line of a .aut file.");
   }  
-  s++;
 
-  while ( *s == ' ' )
-    s++;
+  is >> skipws >> initial_state;
 
-  *initial_state = s;
-  while ( (*s >= '0') && ( *s <= '9') )
-    s++;
-  char *end_initial_state = s;
-
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s != ',' )
+  is >> skipws >> ch;
+  if (ch != ',')
   {
     throw mcrl2::runtime_error("Expect a comma after the first number in the first line of a .aut file.");
   }  
-  s++;
 
-  while ( *s == ' ' )
-    s++;
+  is >> skipws >> num_transitions;
 
-  *transitions = s;
-  while ( (*s >= '0') && ( *s <= '9') )
-    s++;
-  char *end_transitions = s;
-
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s != ',' )
+  is >> skipws >> ch;
+  if (ch != ',')
   {
     throw mcrl2::runtime_error("Expect a comma after the second number in the first line of a .aut file.");
   }  
-  s++;
 
-  while ( *s == ' ' )
-    s++;
+  is >> skipws >> num_states;
 
-  *states = s;
-  while ( (*s >= '0') && ( *s <= '9') )
-    s++;
-  char *end_states = s;
-
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s != ')' )
+  is >> skipws >> ch;
+  if (ch != ')')
   {
     throw mcrl2::runtime_error("Expect a closing bracket ')' after the third number in the first line of a .aut file.");
   }  
-  s++;
-
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s == '\r' )
-    s++;
-
-  if ( *s != '\0' )
-  {
-    throw mcrl2::runtime_error("Expect a newline after the header des(...,...,...) in a .aut file.");
-  }  
-
-  *end_initial_state = '\0';
-  *end_transitions = '\0';
-  *end_states = '\0';
 }
 
-static void read_aut_transition(char *s, char **from, char **label, char **to, const unsigned int lineno)
+static bool read_aut_transition(
+              istream &is, 
+              unsigned int &from, 
+              string &label, 
+              unsigned int &to,
+              const unsigned int lineno)
 {
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s != '(' )
+  char ch;
+  is >> skipws >> ch;
+  if (is.eof())
+  { return false;
+  }
+  if (ch != '(')
   { throw mcrl2::runtime_error("Expect opening bracket at line " + c(lineno) + ".");
   }  
-  s++;
 
-  while ( *s == ' ' )
-    s++;
+  is >> skipws >> from;
 
-  *from = s;
-  while ( (*s >= '0') && ( *s <= '9') )
-    s++;
-  char *end_from = s;
-
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s != ',' )
+  is >> skipws >> ch;
+  if (ch != ',' )
   { throw mcrl2::runtime_error("Expect that the first number is followed by a comma at line " + c(lineno) + ".");
   }  
-  s++;
 
-  while ( *s == ' ' )
-    s++;
-
-  char *end_label;
-  if ( *s == '"' )
+  is >> skipws >> ch;
+  if (ch == '"')
   {
-    s++;
-    *label = s;
-    while ( (*s != '"') && ( *s != '\0') )
-      s++;
-    end_label = s;
-    if ( *s != '"' )
+    label="";
+    is >> ch;
+    while ( (ch != '"') && !is.eof())
+    { label.push_back(ch);
+      is >> ch;
+    }
+
+    if ( ch != '"' )
     { throw mcrl2::runtime_error("Expect that the second item is a quoted label (using \") at line " + c(lineno) + ".");
     }
-    s++;
+    is >> skipws >> ch;
   } 
   else 
   {
-    *label = s;
-    while ( (*s != ',') && ( *s != '\0') )
-      s++;
-    end_label = s;
+    label = ch;
+    is >> ch;
+    while ( (ch != ',') && !is.eof())
+    { label.push_back(ch);
+      is >> ch;
+    }
   }
 
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s != ',' )
+  if ( ch != ',' )
   { throw mcrl2::runtime_error("Expect a comma after the quoted label at line " + c(lineno) + ".");
   }  
-  s++;
 
-  while ( *s == ' ' )
-    s++;
+  is >> skipws >> to;
 
-  *to = s;
-  while ( (*s >= '0') && ( *s <= '9') )
-    s++;
-  char *end_to = s;
-
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s != ')' )
+  is >> skipws >> ch;
+  if ( ch != ')' )
   { throw mcrl2::runtime_error("Expect a closing bracket at the end of the transition at line " + c(lineno) + ".");
   }  
-  s++;
 
-  while ( *s == ' ' )
-    s++;
-
-  if ( *s == '\r' )
-    s++;
-
-  if ( *s != '\0' )
-  { throw mcrl2::runtime_error("Expect a newline after the transition at line " + c(lineno) + ".");
-  }  
-
-  *end_from = '\0';
-  *end_label = '\0';
-  *end_to = '\0';
-
+  return true;
 }
 
 void read_from_aut(lts &l, istream &is)
 {
-  unsigned int ntrans,nstate;
-  #define READ_FROM_AUT_BUF_SIZE 8196
-  char buf[READ_FROM_AUT_BUF_SIZE];
-  char *s1,*s2,*s3;
   unsigned int line_no = 1;
+  unsigned int initial_state=0, ntrans=0, nstate=0;
 
-  is.getline(buf,READ_FROM_AUT_BUF_SIZE);
-  read_aut_header(buf,&s1,&s2,&s3);
-  ntrans = strtoul(s2,NULL,10);
-  nstate = strtoul(s3,NULL,10);
+  read_aut_header(is,initial_state,ntrans,nstate);
 
   l.set_num_states(nstate,false);
 
-  unsigned int initial_state=strtoul(s1,NULL,10);
   if (initial_state>= l.num_states() )
   {
     throw mcrl2::runtime_error("cannot parse AUT input (initial state index (" + c(initial_state) +
@@ -247,25 +174,20 @@ void read_from_aut(lts &l, istream &is)
                   c(l.num_states()) + ") given in the header).");
   }
 
-  l.set_initial_state(strtoul(s1,NULL,10));
+  l.set_initial_state(initial_state); 
 
   ATermIndexedSet labs = ATindexedSetCreate(100,50);
   while ( !is.eof() )
   {
     unsigned int from,to;
-    const char *s;
+    string s;
 
-    is.getline(buf,READ_FROM_AUT_BUF_SIZE);
     line_no++;
-    if ( is.gcount() == 0 )
-    {
-      break;
+
+    if (!read_aut_transition(is,from,s,to,line_no))
+    { break; // eof encountered
     }
-    read_aut_transition((char *)buf,&s1,&s2,&s3,line_no);
     
-    from = strtoul(s1,NULL,10);
-    s = s2;
-    to = strtoul(s3,NULL,10);
     if ( from >= l.num_states() )
     {
       ATtableDestroy(labs);
@@ -281,12 +203,12 @@ void read_from_aut(lts &l, istream &is)
     }
 
     int label;
-    ATerm t = (ATerm) ATmakeAppl(ATmakeAFun(s,0,ATtrue));
+    ATerm t = (ATerm) ATmakeAppl(ATmakeAFun(s.c_str(),0,ATtrue));
     if ( (label =  ATindexedSetGetIndex(labs,t)) < 0 )
     {
       ATbool b;
       label = ATindexedSetPut(labs,t,&b);
-      l.add_label(t,!strcmp(s,"tau"));
+      l.add_label(t,s=="tau");
     }
 
     l.add_transition(transition(from,(unsigned int) label,to));
