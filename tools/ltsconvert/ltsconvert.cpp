@@ -151,8 +151,7 @@ class t_tool_options
       catch (mcrl2::runtime_error &e)
       {
         throw mcrl2::runtime_error("cannot read LTS from " + source_string() +
-                                   ".\nretry with -v/--verbose for more information.\n" +
-                                   e.what());
+                                   ".\n" + e.what());
       }
 
       if ( check_reach ) {

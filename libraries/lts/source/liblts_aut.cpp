@@ -48,6 +48,36 @@ void read_from_aut(lts &l, string const& filename)
   is.close();
 }
 
+static void read_newline(istream &is,const unsigned int lineno=1)
+{ 
+  char ch;
+  is.get(ch);
+
+  // Skip over spaces
+  while ( ch == ' ' )
+  { 
+    is.get(ch);  
+  }
+
+  // Windows systems typically have a carriage return before a newline.
+  if ( ch == '\r' )
+  {  
+    is.get(ch);
+  }
+
+  if ( ch != '\n' )
+  {
+    if (lineno==1)
+    {
+      throw mcrl2::runtime_error("Expect a newline after the header des(...,...,...).");
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Expect a newline after the transition at line " + c(lineno) + ".");
+    }
+  }
+}
+
 static void read_aut_header(
               istream &is, 
               unsigned int &initial_state, 
@@ -89,11 +119,14 @@ static void read_aut_header(
 
   is >> skipws >> num_states;
 
-  is >> skipws >> ch;
+  is >> ch;
+
   if (ch != ')')
   {
     throw mcrl2::runtime_error("Expect a closing bracket ')' after the third number in the first line of a .aut file.");
   }  
+
+  read_newline(is);
 }
 
 static bool read_aut_transition(
@@ -150,11 +183,12 @@ static bool read_aut_transition(
 
   is >> skipws >> to;
 
-  is >> skipws >> ch;
+  is >> ch;
   if ( ch != ')' )
   { throw mcrl2::runtime_error("Expect a closing bracket at the end of the transition at line " + c(lineno) + ".");
   }  
 
+  read_newline(is,lineno);
   return true;
 }
 
