@@ -855,8 +855,9 @@ message(STATUS "MCRL2_ENABLE_TEST_TARGETS: ${MCRL2_ENABLE_TEST_TARGETS}" )
 ENABLE_TESTING()
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/CTestCustom.cmake" )
 
-if( MCRL2_ENABLE_TEST_TARGETS )
    add_subdirectory( libraries/lps/test)
+
+if( MCRL2_ENABLE_TEST_TARGETS )
    add_subdirectory( libraries/pbes/test)
    add_subdirectory( libraries/lts/test)
    add_subdirectory( libraries/data/test)

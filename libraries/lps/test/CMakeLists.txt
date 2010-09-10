@@ -27,10 +27,9 @@ file(GLOB TERM_OBJS "*.cpp")
 
 foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
-  project( "${PREFIX}_${result}" )
-  add_executable("${PREFIX}_${result}" "${OBJ}"  )
+  add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "time.cpp"  )
   if( MCRL2_MONO_LIB )
-    target_link_libraries(${PREFIX}_${result}
+    target_link_libraries("${PREFIX}_${result}"
       mcrl2_monolib
     )
   else( MCRL2_MONO_LIB )  
@@ -38,6 +37,20 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_lps
   )
   endif( MCRL2_MONO_LIB )
-  add_test("${PREFIX}_${result}" "${lps_tests_BINARY_DIR}/${PREFIX}_${result}" )
+
+  # Add tests 
+  # This method compiles tests when invoked
+  # using the current configuration 
+  ADD_TEST("${PREFIX}_${result}" ${CMAKE_CTEST_COMMAND}
+   --build-and-test
+   "${CMAKE_SOURCE_DIR}"
+   "${CMAKE_BINARY_DIR}"
+   --build-noclean
+   --build-nocmake
+   --build-generator "${CMAKE_GENERATOR}"
+   --build-target "${PREFIX}_${result}"
+   --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
+   --test-command "${CMAKE_CURRENT_BINARY_DIR}/${PREFIX}_${result}"
+  )
   set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-endforeach( OBJ )  
+endforeach( OBJ ) 
