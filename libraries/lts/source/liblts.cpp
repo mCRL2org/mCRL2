@@ -1685,7 +1685,7 @@ std::string supported_lts_formats_text(lts_type default_format, const std::set<l
   std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,type_strings,_1,_2));
 
   string r;
-  for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
+  for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); ++i)
   {
     r += "  '" + type_strings[*i] + "' for the " + type_desc_strings[*i];
 
@@ -1694,11 +1694,12 @@ std::string supported_lts_formats_text(lts_type default_format, const std::set<l
       r += " (default)";
     }
 
-
-    if ( i+2 == types.end() )
+	// Still unsafe if types.size() < 2
+	assert(types.size() >= 2);
+    if ( i == types.end() - 2 )
     {
       r += ", or\n";
-    } else if ( i+1 != types.end() )
+    } else if ( i != types.end() - 1)
     {
       r += ",\n";
     }
