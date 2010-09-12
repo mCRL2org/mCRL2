@@ -36,32 +36,32 @@ namespace mcrl2
   namespace lts
   {
 
-    exploration_strategy str_to_expl_strat(const char *s)
+    exploration_strategy str_to_expl_strat(const string s)
     {
-      if ( !strcmp(s,"b") || !strcmp(s,"breadth") )
+      if ( s=="b" || s=="breadth") 
       {
         return es_breadth;
       }
-      if ( !strcmp(s,"d") || !strcmp(s,"depth") )
+      if ( s=="d" || s=="depth" )
       {
         return es_depth;
       }
-      if ( !strcmp(s,"r") || !strcmp(s,"random") )
+      if ( s=="r" || s=="random")
       {
         return es_random;
       }
-      if ( !strcmp(s,"p") || !strcmp(s,"priority") )
+      if ( s=="p" || s=="priority")
       {
         return es_value_prioritized;
       }
-      if ( !strcmp(s,"q") || !strcmp(s,"rpriority") )
+      if ( s=="q" || s=="rpriority")
       {
         return es_value_random_prioritized;
       }
       return es_none;
     }
 
-    const char * expl_strat_to_str(exploration_strategy es)
+    const string expl_strat_to_str(exploration_strategy es)
     {
       switch ( es )
       {
@@ -90,6 +90,7 @@ namespace mcrl2
       }
 
       gsVerboseMsg("initialising...\n");
+      srand((unsigned)time(NULL)+getpid());
 
       lgopts = opts;
 
@@ -112,13 +113,6 @@ namespace mcrl2
       }
 
       assert( backpointers.empty() );
-      if ( lgopts->trace || lgopts->save_error_trace )
-      {
-        trace_support = true;
-        backpointers.push_back(atermpp::aterm());
-      } else {
-        trace_support = false;
-      }
 
       if (lgopts->removeunused) 
       {
@@ -191,7 +185,9 @@ namespace mcrl2
       if ( lg_error )
       {
         lts.remove_lts();
-      } else {
+      } 
+      else 
+      {
         lts.close_lts(num_states,trans);
       }
 
@@ -273,10 +269,15 @@ namespace mcrl2
       return false;
     }
 
-    bool lps2lts_algorithm::savetrace(std::string const &info, ATerm state, NextState *nstate, ATerm extra_state, ATermAppl extra_transition)
+    bool lps2lts_algorithm::savetrace(
+             std::string const &info, 
+             const state_t state, 
+             NextState *nstate, 
+             const state_t extra_state, 
+             ATermAppl extra_transition)
     {
-      ATerm s = state;
-      ATerm ns;
+      atermpp::aterm s = state;
+      atermpp::map<atermpp::aterm,atermpp::aterm>::iterator ns;
       ATermList tr = ATmakeList0();
       NextStateGenerator *nsgen = NULL;
 
@@ -284,12 +285,13 @@ namespace mcrl2
       {
         tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
       }
-      while ( (ns = backpointers[states.index(s)]) != atermpp::aterm() )
+    
+      while ( (ns = backpointers.find(s)) != backpointers.end() )
       {
         ATermAppl trans;
         ATerm t;
         bool priority;
-        nsgen = nstate->getNextStates(ns,nsgen);
+        nsgen = nstate->getNextStates(ns->second,nsgen);
         try {
         while ( nsgen->next(&trans,&t,&priority) )
         {
@@ -303,7 +305,7 @@ namespace mcrl2
           throw e;
         }
         tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,s));
-        s = ns;
+        s = ns->second;
       }
 
       Trace trace;
@@ -327,12 +329,12 @@ namespace mcrl2
       return true;
     }
 
-    void lps2lts_algorithm::check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewState)
+    void lps2lts_algorithm::check_actiontrace(const state_t OldState, ATermAppl Transition, const state_t NewState)
     {
-      // if ( lgopts->detect_action )
-      for (int j=0; j<lgopts->num_trace_actions; j++)
+      for (atermpp::set < mcrl2::core::identifier_string >::const_iterator j=lgopts->trace_actions.begin();
+                  j!=lgopts->trace_actions.end(); j++)
       {
-        if ( occurs_in(lgopts->trace_actions[j],atermpp::list_arg1(Transition)) )
+        if ( occurs_in(*j,atermpp::list_arg1(Transition)) )
         {
           if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
           {
@@ -340,7 +342,8 @@ namespace mcrl2
             {
             }
             std::ostringstream ss;
-            ss << "act_" << tracecnt << "_" << ATgetName(ATgetAFun(lgopts->trace_actions[j]));
+            //See line below. Bleh. Why cant I get j->string(), or something like that (JFG).
+            ss << "act_" << tracecnt << "_" << ATgetName(ATgetAFun(ATermAppl(atermpp::aterm_appl(*j)))); 
             string sss(ss.str());
             bool saved_ok = savetrace(sss,OldState,nstate,NewState,Transition);
 
@@ -352,16 +355,16 @@ namespace mcrl2
                                Transition,
                                const_cast< char* >(lgopts->trace_prefix.c_str()),
                                tracecnt,
-                               lgopts->trace_actions[j],
+                               ATermAppl(atermpp::aterm_appl(*j)),
                                states.index(OldState));
               }
               else
               {
-                gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
+                gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%s.trc' (state index: %lu).\n",
                                Transition,
                                const_cast< char* >(lgopts->trace_prefix.c_str()),
                                tracecnt,
-                               lgopts->trace_actions[j],
+                               ATermAppl(atermpp::aterm_appl(*j)),
                                states.index(OldState));
               }
             }
@@ -378,7 +381,7 @@ namespace mcrl2
     }
 
 
-    void lps2lts_algorithm::save_error_trace(ATerm state)
+    void lps2lts_algorithm::save_error_trace(const state_t state)
     {
       if ( lgopts->save_error_trace )
       {
@@ -386,7 +389,6 @@ namespace mcrl2
 
         if ( saved_ok )
         {
-          lgopts->error_trace_saved = true;
           if (gsVerbose)
           { cerr << "saved trace to error in '" << lgopts->trace_prefix << "_error.trc'.\n";
           }
@@ -401,7 +403,7 @@ namespace mcrl2
     }
 
 
-    void lps2lts_algorithm::check_deadlocktrace(ATerm state)
+    void lps2lts_algorithm::check_deadlocktrace(const state_t state)
     {
       if ( lgopts->detect_deadlock )
       {
@@ -449,15 +451,10 @@ namespace mcrl2
       apply_confluence_reduction = confluence_reduction;
       if ( confluence_reduction )
       {
-        repr_visited = ATindexedSetCreate(1000,50);
-        repr_number = ATtableCreate(1000,50);
-        repr_low = ATtableCreate(1000,50);
-        repr_next = ATtableCreate(1000,50);
-        repr_back = ATtableCreate(1000,50);
         repr_nsgen = NULL;
       }
       else if ( lgopts->detect_divergence )
-      { repr_visited = ATindexedSetCreate(1000,50);
+      { 
         lgopts->priority_action = "tau";
       }
     }
@@ -467,62 +464,56 @@ namespace mcrl2
       if ( apply_confluence_reduction )
       {
         delete repr_nsgen;
-        ATtableDestroy(repr_back);
-        ATtableDestroy(repr_next);
-        ATtableDestroy(repr_low);
-        ATtableDestroy(repr_number);
-        ATindexedSetDestroy(repr_visited);
       }
     }
 
     bool lps2lts_algorithm::search_divergence_recursively(
-                    const long current_state_index,
-                    set < long > &on_current_depth_first_path)
+                    const state_t current_state,
+                    set < state_t > &on_current_depth_first_path,
+                    atermpp::set< state_t > &repr_visited)
     {
-      ATerm state=ATindexedSetGetElem(repr_visited,current_state_index);
-      on_current_depth_first_path.insert(current_state_index);
-      vector < long > new_states;
-      repr_nsgen = nstate->getNextStates(state,repr_nsgen);
+      on_current_depth_first_path.insert(current_state);
+      vector < state_t > new_states;
+      repr_nsgen = nstate->getNextStates(current_state,repr_nsgen);
       ATermAppl Transition;
       ATerm NewState;
       while ( repr_nsgen->next(&Transition,&NewState))
       {
         if ((ATermList)ATgetArgument(Transition,0)==ATempty) // This is a tau transition.
-        { ATbool b;
-          long n=ATindexedSetPut(repr_visited,NewState,&b);
-          if ( b == ATtrue )
+        { 
+          if (repr_visited.insert(NewState).second) // We did not encounter NewState already.
           {
-            new_states.push_back(n);
+            new_states.push_back(NewState);
           }
           else
-          { if (on_current_depth_first_path.find(n)!=on_current_depth_first_path.end())
-            { // divergence found
+          { if (on_current_depth_first_path.find(NewState)!=on_current_depth_first_path.end())
+            { 
+              // divergence found
               return true;
             }
           }
         }
       }
 
-      for(vector <long>::const_iterator i=new_states.begin();
+      for(vector <state_t>::const_iterator i=new_states.begin();
                 i!=new_states.end(); ++i)
-      { if (search_divergence_recursively(*i,on_current_depth_first_path))
+      { if (search_divergence_recursively(*i,on_current_depth_first_path,repr_visited))
         { return true;
         }
       }
-      on_current_depth_first_path.erase(current_state_index);
+      on_current_depth_first_path.erase(current_state);
       return false;
     }
 
-    void lps2lts_algorithm::check_divergence(ATerm state)
+    void lps2lts_algorithm::check_divergence(const state_t state)
     { 
       if ( lgopts->detect_divergence )
       {
-        ATindexedSetReset(repr_visited);
-        set < long > on_current_depth_first_path;
-        ATbool b;
-        ATindexedSetPut(repr_visited,state,&b);
+        atermpp::set < state_t >repr_visited;
+        set < state_t > on_current_depth_first_path;
+        repr_visited.insert(state);
 
-        if (search_divergence_recursively(0,on_current_depth_first_path))
+        if (search_divergence_recursively(state,on_current_depth_first_path,repr_visited))
         {
           if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
           {
@@ -554,32 +545,31 @@ namespace mcrl2
       }
     }
 
-    ATerm lps2lts_algorithm::get_repr(ATerm state)
+    lps2lts_algorithm::state_t lps2lts_algorithm::get_repr(const state_t state)
     {
       if ( !apply_confluence_reduction )
       {
         return state;
       }
 
-      ATerm v = state;
-      ATindexedSetReset(repr_visited);
-      int num_visited = 0;
-      ATtableReset(repr_number);
-      ATtableReset(repr_low);
-      ATtableReset(repr_next);
-      ATtableReset(repr_back);
+      state_t v = state;
+      atermpp::map<atermpp::aterm,unsigned long> repr_number;
+      atermpp::map<atermpp::aterm,unsigned long> repr_low;
+      atermpp::map<atermpp::aterm,atermpp::aterm_list> repr_next;
+      atermpp::map<atermpp::aterm,atermpp::aterm> repr_back;
       int count;
 
-      ATtablePut(repr_number,v,(ATerm) ATmakeInt(0));
+      repr_number[v]=0;
       count = 0;
       bool notdone = true;
       while ( notdone )
       { 
-        if ( ATgetInt((ATermInt) ATtableGet(repr_number,v)) == 0 )
+        assert(repr_number.count(v)>0); 
+        if ( repr_number[v] == 0 )
         {
           count++;
-          ATtablePut(repr_number,v,(ATerm) ATmakeInt(count));
-          ATtablePut(repr_low,v,(ATerm) ATmakeInt(count));
+          repr_number[v]=count;
+          repr_low[v]=count;
           ATermList nextl = ATmakeList0();
           repr_nsgen = nstate->getNextStates(v,repr_nsgen);
           ATermAppl Transition;
@@ -587,60 +577,59 @@ namespace mcrl2
           bool prioritised_action;
           while ( repr_nsgen->next(&Transition,&NewState,&prioritised_action) && prioritised_action )
           {
-            ATbool b;
-            ATindexedSetPut(repr_visited,NewState,&b);
-            if ( b == ATtrue )
-            {
-              num_visited++;
-            }
             nextl = ATinsert(nextl,NewState);
-            if ( ATtableGet(repr_number,NewState) == NULL ) // This condition was missing in the report
+            if ( repr_number.count(NewState) == 0 ) // This condition was missing in the report
             {
-              ATtablePut(repr_number,NewState,(ATerm) ATmakeInt(0));
+              repr_number[NewState]=0; 
             }
           }
           if ( !notdone )
           {
             break;
           }
-          ATtablePut(repr_next,v,(ATerm) nextl);
+          repr_next[v]=nextl;
         }
-        ATermList nextl = (ATermList) ATtableGet(repr_next,v);
+        ATermList nextl = repr_next[v];
         if ( ATisEmpty(nextl) )
         {
-          if ( ATisEqual(ATtableGet(repr_number,v),ATtableGet(repr_low,v)) )
+          assert(repr_number.count(v)>0);
+          assert(repr_low.count(v)>0);
+          if ( repr_number[v]==repr_low[v] )
           {
             break;
           }
-          ATerm backv = ATtableGet(repr_back,v);
-          int a = ATgetInt((ATermInt) ATtableGet(repr_low,backv));
-          int b = ATgetInt((ATermInt) ATtableGet(repr_low,v));
+          assert(repr_back.count(v)>0);
+          ATerm backv = repr_back[v];
+          const unsigned long a = repr_low[backv];
+          const unsigned long b = repr_low[v];
           if ( a < b )
           {
-            ATtablePut(repr_low,backv,(ATerm) ATmakeInt(a));
-          } else {
-            ATtablePut(repr_low,backv,(ATerm) ATmakeInt(b));
+            repr_low[backv]=a;
+          } 
+          else 
+          {
+            repr_low[backv]=b;
           }
           v = backv;
         }
         else
         {
           ATerm u = ATgetFirst(nextl);
-          ATtablePut(repr_next,v,(ATerm) ATgetNext(nextl));
-          int nu = ATgetInt((ATermInt) ATtableGet(repr_number,u));
+          repr_next[v]=ATgetNext(nextl);
+          const unsigned long nu = repr_number[u]; 
           if ( nu == 0 )
           {
-            ATtablePut(repr_back,u,v);
+            repr_back[u]=v;
             v = u;
           }
           else
           {
-            if ( nu < ATgetInt((ATermInt) ATtableGet(repr_number,v)) )
+            if ( nu < repr_number[v] )   
             {
-              int lv = ATgetInt((ATermInt) ATtableGet(repr_low,v));
+              const unsigned long lv = repr_low[v];
               if ( nu < lv )
               {
-                ATtablePut(repr_low,v,(ATerm) ATmakeInt(nu));
+                repr_low[v]=nu;
               }
             }
           }
@@ -650,11 +639,11 @@ namespace mcrl2
       return v;
     }
 
-    boost::uint64_t lps2lts_algorithm::add_state(ATerm state, bool &is_new)
+    unsigned long lps2lts_algorithm::add_state(const state_t state, bool &is_new)
     {
       if ( lgopts->bithashing )
       {
-        boost::uint64_t i = bithash_table.add_state(state, is_new);
+        unsigned long i = bithash_table.add_state(state, is_new);
         return i;
       }
       else
@@ -665,7 +654,7 @@ namespace mcrl2
       }
     }
 
-    boost::uint64_t lps2lts_algorithm::state_index(ATerm state)
+    unsigned long lps2lts_algorithm::state_index(const state_t state)
     {
       if ( lgopts->bithashing )
       {
@@ -677,21 +666,24 @@ namespace mcrl2
       }
     }
 
-    bool lps2lts_algorithm::add_transition(ATerm from, ATermAppl action, ATerm to)
+    bool lps2lts_algorithm::add_transition(const state_t from, ATermAppl action, const state_t to)
     {
       bool new_state;
-      boost::uint64_t i;
+      unsigned long i;
 
       i = add_state(to, new_state);
 
       if ( new_state )
       {
         num_states++;
-        if ( trace_support )
-        {
-          backpointers.push_back(from);
+        if ( lgopts->trace || lgopts->save_error_trace )
+        { 
+          assert(backpointers.count(to)==0);
+          backpointers[to]=from; 
         }
-      } else {
+      } 
+      else 
+      {
         num_found_same++;
       }
 
@@ -705,7 +697,7 @@ namespace mcrl2
 
     bool lps2lts_algorithm::generate_lts()
     {
-      ATerm state = get_repr(nstate->getInitialState());
+      state_t state = get_repr(nstate->getInitialState());
       lts.save_initial_state(initial_state,state);
 
       bool new_state;
@@ -713,39 +705,50 @@ namespace mcrl2
       current_state = 0;
       ++num_states;
 
-      lgopts->display_status(level,current_state,num_states, static_cast < boost::uint64_t > (0),trans);
-
       if ( lgopts->max_states != 0 )
       {
-        boost::uint64_t endoflevelat = 1;
-        boost::uint64_t prevtrans = 0;
-        boost::uint64_t prevcurrent = 0;
+        unsigned long endoflevelat = 1;
+        unsigned long prevtrans = 0;
+        unsigned long prevcurrent = 0;
         num_found_same = 0;
         tracecnt = 0;
-        gsVerboseMsg("generating state space with '%s' strategy...\n",expl_strat_to_str(lgopts->expl_strat));
+        if (gsVerbose)
+        { 
+          std::cerr << ("generating state space with '" + 
+                          expl_strat_to_str(lgopts->expl_strat) + "' strategy...\n");
+        }
 
         if ( lgopts->expl_strat == es_random )
         {
-          srand((unsigned)time(NULL)+getpid());
           NextStateGenerator *nsgen = NULL;
+          unsigned int number_of_outgoing_transitions=0;
           while (( current_state < lgopts->max_states ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
           {
-            ATermList tmp_trans = ATmakeList0();
-            ATermList tmp_states = ATmakeList0();
             ATermAppl Transition;
-            ATerm NewState;
+            state_t NewState;
 
             check_divergence(state);
 
             try
             { nsgen = nstate->getNextStates(state,nsgen);
               bool priority;
-              while ( nsgen->next(&Transition,&NewState,&priority) )
+              ATermAppl tempTransition;
+              ATerm tempNewState;
+              while ( nsgen->next(&tempTransition,&tempNewState,&priority) )
               {
-                NewState = get_repr(NewState);
                 if ( !priority ) // don't store confluent self loops
-                { tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
-                  tmp_states = ATinsert(tmp_states,NewState);
+                {
+                  number_of_outgoing_transitions++;
+                  // Select this new state with probability 1/number_of_outgoing_transitions.
+                  // This guarantees that one out of all outgoing transitions is chosen
+                  // with equal probability.
+                  
+                  tempNewState=get_repr(tempNewState);
+                  add_transition(state,tempTransition,tempNewState);
+                  if (rand()%number_of_outgoing_transitions==0)
+                  { NewState = tempNewState;
+                    Transition=tempTransition; 
+                  }  
                 }
               }
             }
@@ -756,22 +759,9 @@ namespace mcrl2
               break;
             }
 
-            int len = ATgetLength(tmp_trans);
-            if ( len > 0 )
+            if ( number_of_outgoing_transitions > 0 )
             {
-              int r = rand()%len;
-              ATerm new_state = NULL;
-              for (int i=0; i<len; i++)
-              {
-                add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
-                if ( r == i )
-                {
-                  new_state = ATgetFirst(tmp_states);
-                }
-                tmp_trans = ATgetNext(tmp_trans);
-                tmp_states = ATgetNext(tmp_states);
-              }
-              state = new_state;
+              state = NewState;
             }
             else
             {
@@ -780,9 +770,6 @@ namespace mcrl2
             }
 
             current_state++;
-            if ( (current_state%200) == 0 ) {
-              lgopts->display_status(level,current_state,num_states,num_found_same,trans);
-            }
             if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
             {
               gsVerboseMsg(
@@ -794,16 +781,13 @@ namespace mcrl2
               );
             }
           }
-          lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
           delete nsgen;
         } 
         else if ( lgopts->expl_strat == es_value_prioritized )
         {
           mcrl2::data::rewriter& rewriter=nstate->getRewriter();
           NextStateGenerator *nsgen = NULL;
-          srand((unsigned)time(NULL)+getpid());
           while (( current_state < num_states ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
-          // while ( current_state < lgopts->max_states )
           {
             ATermList tmp_trans = ATmakeList0();
             ATermList tmp_states = ATmakeList0();
@@ -922,7 +906,6 @@ namespace mcrl2
             int len = ATgetLength(tmp_trans);
             if ( len > 0 )
             {
-              // ATerm new_state = NULL;
               for (int i=0; i<len; i++)
               {
                 if (num_states-current_state <= lgopts->todo_max)
@@ -945,9 +928,6 @@ namespace mcrl2
             }
 
             current_state++;
-            if ( (current_state%200) == 0 ) {
-              lgopts->display_status(level,current_state,num_states,num_found_same,trans);
-            }
             if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
             {
               gsVerboseMsg(
@@ -960,12 +940,10 @@ namespace mcrl2
               );
             }
           }
-          lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
           delete nsgen;
         }
         else if ( lgopts->expl_strat == es_value_random_prioritized )
         {
-          srand((unsigned)time(NULL)+getpid());
           mcrl2::data::rewriter& rewriter=nstate->getRewriter();
           NextStateGenerator *nsgen = NULL;
           while (( current_state < lgopts->max_states ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
@@ -1099,7 +1077,7 @@ namespace mcrl2
             int len = ATgetLength(tmp_trans);
             if ( len > 0 )
             {
-              ATerm new_state = NULL;
+              state_t new_state;
               for (int i=0; i<len; i++)
               {
                 add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
@@ -1115,9 +1093,6 @@ namespace mcrl2
             }
 
             current_state++;
-            if ( (current_state%200) == 0 ) {
-              lgopts->display_status(level,current_state,num_states,num_found_same,trans);
-            }
             if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
             {
               gsVerboseMsg(
@@ -1129,7 +1104,6 @@ namespace mcrl2
               );
             }
           }
-          lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
           delete nsgen;
         }
         else if ( lgopts->expl_strat == es_breadth )
@@ -1137,12 +1111,11 @@ namespace mcrl2
           queue state_queue;
 
           NextStateGenerator *nsgen = NULL;
-          boost::uint64_t limit = lgopts->max_states;
+          unsigned long limit = lgopts->max_states;
           if ( lgopts->bithashing )
           {
             lgopts->max_states = ULLONG_MAX;
             state_queue.set_max_size(((limit-1)>lgopts->todo_max)?lgopts->todo_max:limit-1);
-            srand((unsigned)time(NULL)+getpid());
             state_queue.add_to_queue(state);
             state_queue.swap_queues();
           }
@@ -1184,7 +1157,7 @@ namespace mcrl2
                   bool b = add_transition(state,Transition,NewState);
                   if ( lgopts->bithashing && b )
                   {
-                    ATerm removed_state = state_queue.add_to_queue(NewState);
+                    const state_t removed_state = state_queue.add_to_queue(NewState);
                     if ( removed_state != NULL )
                     {
                       bithash_table.remove_state_from_bithash(removed_state);
@@ -1207,9 +1180,6 @@ namespace mcrl2
             }
 
             current_state++;
-            if ( (current_state%200) == 0 ) {
-              lgopts->display_status(level,current_state,num_states,num_found_same,trans);
-            }
             if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
             {
               gsVerboseMsg(
@@ -1229,7 +1199,6 @@ namespace mcrl2
               {
                 state_queue.swap_queues();
               }
-              lgopts->display_status(level,current_state,num_states,num_found_same,trans);
               if ( !lgopts->suppress_progress_messages && gsVerbose )
               {
                 gsVerboseMsg(
@@ -1242,7 +1211,7 @@ namespace mcrl2
                 fflush(stderr);
               }
               level++;
-              boost::uint64_t nextcurrent = endoflevelat;
+              unsigned long nextcurrent = endoflevelat;
               endoflevelat = (limit>num_states)?num_states:limit;
               if ( lgopts->bithashing )
               {
@@ -1256,7 +1225,6 @@ namespace mcrl2
               prevtrans = trans;
             }
           }
-          lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
           delete nsgen;
         }
         else if ( lgopts->expl_strat == es_depth )
@@ -1354,9 +1322,6 @@ namespace mcrl2
             if ( new_state )
             {
               current_state++;
-              if ( (current_state%200) == 0 ) {
-                lgopts->display_status(level,current_state,num_states,num_found_same,trans);
-              }
               if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
               {
                 gsVerboseMsg(
@@ -1370,7 +1335,6 @@ namespace mcrl2
               }
             }
           }
-          lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
 
           for (unsigned long i=0; i<nsgens_size; i++)
           {
@@ -1390,5 +1354,5 @@ namespace mcrl2
       return !lg_error;
     }
 
-  }
-}
+  } // namespace lts
+} // namespace mcrl2

@@ -51,9 +51,25 @@ void premature_termination_handler(int)
   exit(1);
 }
 
-ATermAppl *parse_action_list(const std::string& s, int *len)
+atermpp::set < mcrl2::core::identifier_string > parse_action_list(const std::string& s)
 {
-  *len = s.empty() ? 0 : 1;
+  atermpp::set < mcrl2::core::identifier_string > result;
+  // *len = s.empty() ? 0 : 1;
+
+  for (std::string::size_type p = 0, q(s.find_first_of(",")); true; p = q + 1, q = s.find_first_of(",", q + 1))
+  {
+    result.insert(mcrl2::core::identifier_string(s.substr(p, q - p)));
+    // *r++ = mcrl2::core::identifier_string(s.substr(p, q - p));
+
+    if (q == std::string::npos)
+    {
+       break;
+    }
+  }
+  return result;
+
+  /* 
+
   for (std::string::size_type position(s.find_first_of(",")); position != std::string::npos; position = s.find_first_of(",", position + 1))
   {
     *len = (*len) + 1;
@@ -81,7 +97,7 @@ ATermAppl *parse_action_list(const std::string& s, int *len)
     }
   }
 
-  return r - *len;
+  return r - *len; */
 }
 
 typedef  rewriter_tool< input_output_tool > lps2lts_base;
@@ -241,7 +257,7 @@ class lps2lts_tool : public lps2lts_base
       }
       if (parser.options.count("action")) {
         options.detect_action = true;
-        options.trace_actions = parse_action_list(parser.option_argument("action").c_str(), &options.num_trace_actions);
+        options.trace_actions = parse_action_list(parser.option_argument("action").c_str());
       }
       if (parser.options.count("trace")) {
         options.trace      = true;
@@ -274,9 +290,9 @@ class lps2lts_tool : public lps2lts_base
         options.save_error_trace = true;
       }
 
-      if ( options.bithashing && options.trace ) {
+      /* if ( options.bithashing && options.trace ) {
         parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
-      }
+      } */
 
       if (parser.options.count("suppress") && !gsVerbose)
       { parser.error("option --suppress requires --verbose (of -v)");
