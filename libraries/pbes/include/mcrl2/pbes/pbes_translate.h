@@ -30,6 +30,7 @@
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/pbes/monotonicity.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
@@ -1134,6 +1135,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) <
       propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, data::variable_list(), f));
 
       pbes<> result = pbes<>(spec.data(), e, spec.global_variables(), init);
+      assert(is_monotonous(result));
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());
