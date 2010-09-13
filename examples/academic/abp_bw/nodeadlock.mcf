@@ -1,0 +1,5 @@
+% This formula expresses that there is no deadlock
+% for all reachable states.
+%
+% Expected outcome for abp_bw is true
+[true*]<true>true

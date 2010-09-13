@@ -1,0 +1,5 @@
+% For all messages d, it is possible to infinitely often start
+% sending message d (through action r1).
+%
+% This property holds for abp_bw.
+forall d:D . nu X. mu Y. (<r1(d)>X || <!r1(d)>Y)
