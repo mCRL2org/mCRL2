@@ -57,10 +57,8 @@ namespace detail {
       return super::continue_recursion;
     }
 
-    /// \brief Visit not node
-    /// \param e A term
-    /// \return The result of visiting the node
-    bool visit_not(const term_type& /* e */, const term_type& /* arg */)
+    /// \brief Leave not node
+    bool leave_not()
     {
       pbes_system::pbes_expression b = expression_stack.back();
       expression_stack.pop_back();
