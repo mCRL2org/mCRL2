@@ -38,7 +38,7 @@ namespace pbes_system {
       } else if (is_false(f)) {
         return true;
       } else if (is_not(f)) {
-        return is_monotonous(f, negated_variables);
+        return is_monotonous(arg(f), negated_variables);
       } else if (is_and(f)) {
         return is_monotonous(not_(left(f)), negated_variables) && is_monotonous(not_(right(f)), negated_variables);
       } else if (is_or(f)) {

@@ -92,6 +92,63 @@ BOOST_AUTO_TEST_CASE(test_abp)
   //run_monotonicity_test_case("mu X. nu Y. (X => Y)", lps_spec, false);
 }
 
+// Test case provided by Jeroen Keiren, 10-9-2010
+BOOST_AUTO_TEST_CASE(test_elevator)
+{
+  std::string lps_spec =
+    
+    "% Model of an elevator for n floors.                                                                                           \n"
+    "% Originally described in 'Solving Parity Games in Practice' by Oliver                                                         \n"
+    "% Friedmann and Martin Lange.                                                                                                  \n"
+    "%                                                                                                                              \n"
+    "% This is the version with a first in first out policy                                                                         \n"
+    "                                                                                                                               \n"
+    "sort Floor = Pos;                                                                                                              \n"
+    "     DoorStatus = struct open | closed;                                                                                        \n"
+    "     Requests = List(Floor);                                                                                                   \n"
+    "                                                                                                                               \n"
+    "map maxFloor: Floor;                                                                                                           \n"
+    "eqn maxFloor = 3;                                                                                                              \n"
+    "                                                                                                                               \n"
+    "map addRequest : Requests # Floor -> Requests;                                                                                 \n"
+    "                                                                                                                               \n"
+    "var r: Requests;                                                                                                               \n"
+    "    f,g: Floor;                                                                                                                \n"
+    "    % FIFO behaviour!                                                                                                          \n"
+    "eqn addRequest([], f) = [f];                                                                                                   \n"
+    "    (f == g) -> addRequest(g |> r, f) = g |> r;                                                                                \n"
+    "    (f != g) -> addRequest(g |> r, f) = g |> addRequest(r, f);                                                                 \n"
+    "                                                                                                                               \n"
+    "map removeRequest : Requests -> Requests;                                                                                      \n"
+    "var r: Requests;                                                                                                               \n"
+    "    f: Floor;                                                                                                                  \n"
+    "eqn removeRequest(f |> r) = r;                                                                                                 \n"
+    "                                                                                                                               \n"
+    "map getNext : Requests -> Floor;                                                                                               \n"
+    "var r: Requests;                                                                                                               \n"
+    "    f: Floor;                                                                                                                  \n"
+    "eqn getNext(f |> r) = f;                                                                                                       \n"
+    "                                                                                                                               \n"
+    "act isAt: Floor;                                                                                                               \n"
+    "    request: Floor;                                                                                                            \n"
+    "    close, open, up, down;                                                                                                     \n"
+    "                                                                                                                               \n"
+    "proc Elevator(at: Floor, status: DoorStatus, reqs: Requests, moving: Bool) =                                                   \n"
+    "       isAt(at) . Elevator()                                                                                                   \n"
+    "     + sum f: Floor. (f <= maxFloor) -> request(f) . Elevator(reqs = addRequest(reqs, f))                                      \n"
+    "     + (status == open) -> close . Elevator(status = closed)                                                                   \n"
+    "     + (status == closed && reqs != [] && getNext(reqs) > at) -> up . Elevator(at = at + 1, moving = true)                     \n"
+    "     + (status == closed && reqs != [] && getNext(reqs) < at) -> down . Elevator(at = Int2Pos(at - 1), moving = true)          \n"
+    "     + (status == closed && getNext(reqs) == at) -> open. Elevator(status = open, reqs = removeRequest(reqs), moving = false); \n"
+    "                                                                                                                               \n"
+    "init Elevator(1, open, [], false);                                                                                             \n"
+    ;
+
+  run_monotonicity_test_case("nu U. [true] U && ((mu V . nu W. !([!request(maxFloor)]!W && [request(maxFloor)]!V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lps_spec, true);
+  run_monotonicity_test_case("nu U. [true] U && ((nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) => (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lps_spec, true);
+  run_monotonicity_test_case("nu U. [true] U && (!(nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lps_spec, true);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
