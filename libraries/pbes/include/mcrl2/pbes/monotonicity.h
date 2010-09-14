@@ -45,8 +45,8 @@ namespace pbes_system {
       {
         return false;
       }
-      return true;
     }
+    return true;
   }
 
 } // namespace pbes_system
