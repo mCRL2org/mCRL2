@@ -19,7 +19,7 @@
 
 #ifdef USE_FILESYSTEM
 #include <boost/filesystem/operations.hpp>
-#endif USE_FILESYSTEM
+#endif //USE_FILESYSTEM
 
 using namespace mcrl2;
 
@@ -50,7 +50,7 @@ void test_boolean_expressions()
   BOOST_CHECK(p == q);
 #ifdef USE_FILESYSTEM 
   boost::filesystem::remove(boost::filesystem::path(filename));
-#endif USE_FILESYSTEM
+#endif //USE_FILESYSTEM
   core::garbage_collect();
 }
 
