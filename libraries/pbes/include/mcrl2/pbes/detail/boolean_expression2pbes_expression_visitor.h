@@ -63,7 +63,6 @@ namespace detail {
       pbes_system::pbes_expression b = expression_stack.back();
       expression_stack.pop_back();
       expression_stack.push_back(tr::not_(b));
-      return super::continue_recursion;
     }
 
     /// \brief Leave and node

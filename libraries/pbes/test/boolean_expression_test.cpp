@@ -17,9 +17,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
-#ifdef USE_FILESYSTEM
 #include <boost/filesystem/operations.hpp>
-#endif //USE_FILESYSTEM
 
 using namespace mcrl2;
 
@@ -48,9 +46,7 @@ void test_boolean_expressions()
   boolean_equation_system<> q;
   q.load(filename);
   BOOST_CHECK(p == q);
-#ifdef USE_FILESYSTEM 
   boost::filesystem::remove(boost::filesystem::path(filename));
-#endif //USE_FILESYSTEM
   core::garbage_collect();
 }
 
