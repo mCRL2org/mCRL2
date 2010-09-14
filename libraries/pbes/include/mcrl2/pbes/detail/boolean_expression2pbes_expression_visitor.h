@@ -58,7 +58,7 @@ namespace detail {
     }
 
     /// \brief Leave not node
-    bool leave_not()
+    void leave_not()
     {
       pbes_system::pbes_expression b = expression_stack.back();
       expression_stack.pop_back();
