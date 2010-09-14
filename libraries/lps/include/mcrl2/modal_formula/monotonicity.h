@@ -13,6 +13,7 @@
 #define MCRL2_MODAL_FORMULA_MONOTONICITY_H
 
 #include <set>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
 
 namespace mcrl2 {
@@ -25,6 +26,7 @@ namespace state_formulas {
 inline
 bool is_monotonous(state_formula f, const std::set<core::identifier_string>& negated_variables)
 {
+  //std::cout << "<formula>" << core::pp(f) << "<negated_variables>" << core::detail::print_pp_set(negated_variables) << std::endl;
   using namespace state_frm;
 
   //--- handle negations ---//
@@ -75,7 +77,7 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
       {
         neg.insert(X);
       }
-      return is_monotonous(arg(f), neg);
+      return is_monotonous(not_(arg(f)), neg);
     } else if (is_nu(f)) {
       std::set<core::identifier_string> neg = negated_variables;
       core::identifier_string X = name(f);
@@ -88,7 +90,7 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
       {
         neg.insert(X);
       }
-      return is_monotonous(arg(f), neg);
+      return is_monotonous(not_(arg(f)), neg);
     }
   }
 
