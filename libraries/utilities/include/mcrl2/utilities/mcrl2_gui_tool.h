@@ -176,10 +176,14 @@ protected:
       values.clear();
       values.push_back("jitty");
       values.push_back("jittyp");
+#if !defined(_WIN32)      
       values.push_back("jittyc");
+#endif
       values.push_back("inner");
       values.push_back("innerp");
+#if !defined(_WIN32)      
       values.push_back("innerc");
+#endif
       m_gui_options["rewriter"] = create_radiobox_widget(values);
   }
 
