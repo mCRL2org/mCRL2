@@ -30,6 +30,7 @@
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/pbes/monotonicity.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
@@ -1117,6 +1118,11 @@ std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) <
       using namespace state_formulas::state_frm;
       using atermpp::detail::operator+;
       lps::linear_process lps = spec.process();
+
+      if (!state_formulas::is_monotonous(formula))
+      {
+        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + pp(formula) + " is not monotonous!");
+      }
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
       state_formulas::state_formula f = preprocess_formula(formula, spec);

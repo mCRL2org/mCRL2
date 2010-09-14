@@ -71,8 +71,8 @@ const std::string ABP_SPECIFICATION =
 void run_monotonicity_test_case(const std::string& formula, const std::string& lps_spec, const bool expect_success = true)
 {
   specification spec = linearise(lps_spec);
-  std::clog << std::endl << "Testing" << std::endl;
-  state_formula f = parse_state_formula(formula, spec);   
+  state_formula f = parse_state_formula(formula, spec);
+  BOOST_CHECK(is_monotonous(f) == expect_success);
 }
 
 BOOST_AUTO_TEST_CASE(test_abp)
