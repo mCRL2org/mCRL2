@@ -91,6 +91,13 @@
   fun:ATmakeAFun
 }
 {
+  aterm-ATmakeAFun-value-1
+  Memcheck:Value1
+  fun:__GI__strlen
+  fun:strdup
+  fun:ATmakeAFun
+}
+{
   aterm-AT_malloc-leak-1
   Memcheck:Leak
   fun:malloc
@@ -105,6 +112,13 @@
   fun:ATaddProtectFunction
 }
 {
+  aterm-AT_malloc-leak-3
+  Memcheck:Leak
+  fun:malloc
+  fun:AT_malloc
+  fun:ATindexedSetCreate
+}
+{
   aterm-AT_realloc-leak-1
   Memcheck:Leak
   fun:realloc
@@ -112,6 +126,15 @@
   fun:ATprotectAFun
   fun:AT_initSymbol
   fun:ATinit
+}
+{
+  aterm-ATmake-leak-1
+  Memcheck:Leak
+  fun:malloc
+  fun:strdup
+  fun:AT_getPattern
+  fun:ATvmake
+  fun:ATmake
 }
 
 
