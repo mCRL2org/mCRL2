@@ -107,6 +107,27 @@ void test_boolean_equation()
   BOOST_CHECK(found == expected);
 }
 
+void test_bes()
+{
+  boolean_variable X("X");
+  boolean_variable Y("Y");
+  boolean_variable Z("Z");
+
+  boolean_equation eqX(fixpoint_symbol::nu(), X, tr::and_(X, tr::and_(Y,Z)));
+  boolean_equation eqY(fixpoint_symbol::nu(), Y, tr::and_(X, Y));
+  boolean_equation eqZ(fixpoint_symbol::mu(), Z, tr::or_(Z, X));
+  atermpp::vector<boolean_equation> eqns;
+  eqns.push_back(eqX);
+  eqns.push_back(eqY);
+  eqns.push_back(eqZ);
+
+  boolean_equation_system<> bes(eqns, X);
+  BOOST_CHECK(bes.is_closed());
+
+  atermpp::set<boolean_variable> occurring_variables = bes.occurring_variables();
+  BOOST_CHECK(occurring_variables.size() == 3);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
