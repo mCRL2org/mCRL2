@@ -163,6 +163,47 @@ namespace mcrl2 {
       }
     }
 
+    /// \brief Determines whether a boolean expression is in standard form.
+    /// \param e a boolean expression
+    /// \return true iff e is in standard form.
+    inline
+    bool is_standard_recursive_form(boolean_expression const& e)
+    {
+      typedef core::term_traits<boolean_expression> tr;
+      if(tr::is_and(e))
+      {
+        atermpp::set<boolean_expression> arguments(split_and(e));
+        for(atermpp::set<boolean_expression>::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+        {
+          if(!tr::is_variable(*i))
+          {
+            return false;
+          }
+        }
+        return true;
+      }
+      else if(tr::is_or(e))
+      {
+        atermpp::set<boolean_expression> arguments(split_or(e));
+        for(atermpp::set<boolean_expression>::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+        {
+          if(!tr::is_variable(*i))
+          {
+            return false;
+          }
+        }
+        return true;
+      }
+      else if(tr::is_variable(e))
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+
     /// \brief Determines whether a BES is in standard form
     /// \param bes a boolean equation system.
     /// \return true iff bes is in standard form.
@@ -173,6 +214,23 @@ namespace mcrl2 {
       for(typename Container::const_iterator i = bes.equations().begin(); i != bes.equations().end(); ++i)
       {
         if(!is_standard_form(i->formula()))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /// \brief Determines whether a BES is in standard form
+    /// \param bes a boolean equation system.
+    /// \return true iff bes is in standard form.
+    template <typename Container>
+    inline
+    bool is_standard_recursive_form(boolean_equation_system<Container> const& bes)
+    {
+      for(typename Container::const_iterator i = bes.equations().begin(); i != bes.equations().end(); ++i)
+      {
+        if(!is_standard_recursive_form(i->formula()))
         {
           return false;
         }

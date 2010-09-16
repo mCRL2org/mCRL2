@@ -15,6 +15,8 @@ set(PREFIX "example_pbes")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include )
@@ -48,6 +50,7 @@ foreach( OBJ ${TERM_OBJS} )
   else( MCRL2_MONO_LIB )  
   target_link_libraries(${PROJECT_NAME}
      mcrl2_lps
+     mcrl2_lts
      mcrl2_utilities_command_line
   )
 
