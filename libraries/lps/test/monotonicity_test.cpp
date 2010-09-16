@@ -87,11 +87,13 @@ BOOST_AUTO_TEST_CASE(test_abp)
   run_monotonicity_test_case("forall d:D. nu X. (([!r1(d)]X && [s4(d)]false))", lps_spec, true);
   run_monotonicity_test_case("nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))", lps_spec, true);
 
-  // Can't run these test cases, since the type checker checks for monotonicity as well !?!?
-  //run_monotonicity_test_case("mu X. !X", lps_spec, false);
-  //run_monotonicity_test_case("mu X. nu Y. (X => Y)", lps_spec, false);
-}
+#ifdef MCRL2_DISABLE_MONOTONICITY_CHECKS
+  run_monotonicity_test_case("mu X. !X", lps_spec, false);
+  run_monotonicity_test_case("mu X. nu Y. (X => Y)", lps_spec, false);
+#endif
 
+}
+ 
 // Test case provided by Jeroen Keiren, 10-9-2010
 BOOST_AUTO_TEST_CASE(test_elevator)
 {
@@ -147,6 +149,8 @@ BOOST_AUTO_TEST_CASE(test_elevator)
   run_monotonicity_test_case("nu U. [true] U && ((mu V . nu W. !([!request(maxFloor)]!W && [request(maxFloor)]!V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lps_spec, true);
   run_monotonicity_test_case("nu U. [true] U && ((nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) => (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lps_spec, true);
   run_monotonicity_test_case("nu U. [true] U && (!(nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))", lps_spec, true);
+  run_monotonicity_test_case("(nu X . mu Y. X) => true", lps_spec, true);
+  run_monotonicity_test_case("!(nu X . mu Y. X)", lps_spec, true);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

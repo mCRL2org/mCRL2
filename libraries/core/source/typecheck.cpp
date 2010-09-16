@@ -620,10 +620,12 @@ namespace mcrl2 {
       }
       gstcDataDestroy();
       if (Result != NULL) {
+#ifndef MCRL2_DISABLE_MONOTONICITY_CHECKS
         if (!check_monotonicity(Result)) {
           gsErrorMsg("state formula is not monotonic\n");
           Result = NULL;
         }
+#endif
       }
       return Result;
     }
