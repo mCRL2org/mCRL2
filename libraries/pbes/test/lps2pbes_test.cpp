@@ -494,10 +494,79 @@ void test_example()
   core::garbage_collect();
 }
 
+// Submitted by Jeroen Keiren, 10-09-2010
+// Formula 2 and 3 give normalization errors.
+void test_elevator()
+{
+  std::string SPEC =
+    "% Model of an elevator for n floors.                                                                                           \n"
+    "% Originally described in 'Solving Parity Games in Practice' by Oliver                                                         \n"
+    "% Friedmann and Martin Lange.                                                                                                  \n"
+    "%                                                                                                                              \n"
+    "% This is the version with a first in first out policy                                                                         \n"
+    "                                                                                                                               \n"
+    "sort Floor = Pos;                                                                                                              \n"
+    "     DoorStatus = struct open | closed;                                                                                        \n"
+    "     Requests = List(Floor);                                                                                                   \n"
+    "                                                                                                                               \n"
+    "map maxFloor: Floor;                                                                                                           \n"
+    "eqn maxFloor = 3;                                                                                                              \n"
+    "                                                                                                                               \n"
+    "map addRequest : Requests # Floor -> Requests;                                                                                 \n"
+    "                                                                                                                               \n"
+    "var r: Requests;                                                                                                               \n"
+    "    f,g: Floor;                                                                                                                \n"
+    "    % FIFO behaviour!                                                                                                          \n"
+    "eqn addRequest([], f) = [f];                                                                                                   \n"
+    "    (f == g) -> addRequest(g |> r, f) = g |> r;                                                                                \n"
+    "    (f != g) -> addRequest(g |> r, f) = g |> addRequest(r, f);                                                                 \n"
+    "                                                                                                                               \n"
+    "map removeRequest : Requests -> Requests;                                                                                      \n"
+    "var r: Requests;                                                                                                               \n"
+    "    f: Floor;                                                                                                                  \n"
+    "eqn removeRequest(f |> r) = r;                                                                                                 \n"
+    "                                                                                                                               \n"
+    "map getNext : Requests -> Floor;                                                                                               \n"
+    "var r: Requests;                                                                                                               \n"
+    "    f: Floor;                                                                                                                  \n"
+    "eqn getNext(f |> r) = f;                                                                                                       \n"
+    "                                                                                                                               \n"
+    "act isAt: Floor;                                                                                                               \n"
+    "    request: Floor;                                                                                                            \n"
+    "    close, open, up, down;                                                                                                     \n"
+    "                                                                                                                               \n"
+    "proc Elevator(at: Floor, status: DoorStatus, reqs: Requests, moving: Bool) =                                                   \n"
+    "       isAt(at) . Elevator()                                                                                                   \n"
+    "     + sum f: Floor. (f <= maxFloor) -> request(f) . Elevator(reqs = addRequest(reqs, f))                                      \n"
+    "     + (status == open) -> close . Elevator(status = closed)                                                                   \n"
+    "     + (status == closed && reqs != [] && getNext(reqs) > at) -> up . Elevator(at = at + 1, moving = true)                     \n"
+    "     + (status == closed && reqs != [] && getNext(reqs) < at) -> down . Elevator(at = Int2Pos(at - 1), moving = true)          \n"
+    "     + (status == closed && getNext(reqs) == at) -> open. Elevator(status = open, reqs = removeRequest(reqs), moving = false); \n"
+    "                                                                                                                               \n"
+    "init Elevator(1, open, [], false);                                                                                             \n"
+    ;
+
+  std::string formula1 = "nu U. [true] U && ((mu V . nu W. !([!request(maxFloor)]!W && [request(maxFloor)]!V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))";
+  std::string formula2 = "nu U. [true] U && ((nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) => (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))";
+  std::string formula3 = "nu U. [true] U && (!(nu V . mu W. ([!request(maxFloor)]W && [request(maxFloor)]V)) || (nu X . mu Y. [!isAt(maxFloor)] Y &&  [isAt(maxFloor)]X))";
+  std::string formula4 = "(nu V . mu W. V) => true";
+  std::string formula5 = "!(nu V . mu W. V)";
+
+  pbes<> p;
+  bool timed = false; 
+  p = lps2pbes(SPEC, formula1, timed);
+  p = lps2pbes(SPEC, formula2, timed);
+  p = lps2pbes(SPEC, formula3, timed);
+  p = lps2pbes(SPEC, formula4, timed);
+
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  test_elevator();
   test_example();
   test_lps2pbes();
   test_lps2pbes2();

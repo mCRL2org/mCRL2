@@ -19,7 +19,7 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/test_utilities.h"
-
+ 
 using namespace mcrl2;
 using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::pbes_system;
