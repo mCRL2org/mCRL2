@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
   );
 
   // pretty print the data specification
-  std::cout << pp(data_spec) << "\n";
+//  std::cout << pp(data_spec) << "\n";
 
   return 0;
 }

@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
   try
   {
     data::data_specification d = data::parse_data_specification(text);
-    std::cout << data::pp(d) << std::endl;
+//    std::cout << data::pp(d) << std::endl;
   }
   catch (std::runtime_error e)
   {
