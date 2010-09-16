@@ -13,6 +13,9 @@
 % This example shows the use of sets in mCRL2.
 %
 % Jan Friso Groote & Aad Mathijssen, January 2009
+%
+% Linearisation of this model is quickest using the -lregular2 option of
+% mcrl22lps
 
 sort Item     = struct wolf | goat | cabbage;
      Position = struct left | right;

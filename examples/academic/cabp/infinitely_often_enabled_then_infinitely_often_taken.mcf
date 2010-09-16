@@ -1,0 +1,8 @@
+% If an r1 action is enabled infinitely often, then it is also
+% taken infinitely often, independent of the message d
+% Taken from: "Modal logics and mu-calculi: an introduction",
+% by Bradfield and Stirling.
+%
+% This formula is not true for the concurrent alternating bit protocol,
+% as there is no fairness assumption.
+forall d:DATA . ([true*] nu X. mu Y. nu Z. ([r1(d)]X && ([r1(d)]false || [!r1(d)]Y) && [!r1(d)]Z))

@@ -22,4 +22,9 @@ os.system('pbes2bool -v abp.read_then_eventually_send.pbes')
 os.system('lps2pbes -v -f read_then_eventually_send_if_fair.mcf abp.lps abp.read_then_eventually_send_if_fair.pbes')
 os.system('pbes2bool -v abp.read_then_eventually_send_if_fair.pbes')
 
+os.system('lps2pbes -v -f no_generation_of_messages.mcf abp.lps abp.no_generation_of_messages.pbes')
+os.system('pbes2bool -v abp.no_generation_of_messages.pbes')
+
+os.system('lps2pbes -v -f no_duplication_of_messages.mcf abp.lps abp.no_duplication_of_messages.pbes')
+os.system('pbes2bool -v abp.no_duplication_of_messages.pbes')
 
