@@ -105,12 +105,14 @@ namespace detail {
   inline
   std::string print(const atermpp::vector<pbes_equation>& v)
   {
-    atermpp::vector<atermpp::aterm_appl> l;
+    std::ostringstream out;
+    out << "[";
     for (atermpp::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
     {
-      l.push_back(pbes_equation_to_aterm(*i));
+      out << "\n  " << core::pp(i->symbol()) << " " << core::pp(i->variable()) << " = " << core::pp(i->formula());
     }
-    return core::pp(atermpp::convert<atermpp::aterm_list>(l));
+    out << "\n]";
+    return out.str();
   }
 
 } // namespace detail
