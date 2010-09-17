@@ -140,11 +140,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_data
@@ -152,8 +147,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities_command_line
   mcrl2_utilities_wx
 )
-
-endif( MCRL2_MONO_LIB )
 
 # install grape help file
 install(FILES grapeapp/help/grapehelp.zip DESTINATION share/doc/mcrl2/grape)

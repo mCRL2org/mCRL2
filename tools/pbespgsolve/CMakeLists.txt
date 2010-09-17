@@ -52,16 +52,10 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/tools/pbespgsolve)
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(mcrl2_${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )
 target_link_libraries(mcrl2_${PROJECT_NAME}
   mcrl2_data
   mcrl2_utilities_command_line
 )
-endif( MCRL2_MONO_LIB )
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_${PROJECT_NAME}

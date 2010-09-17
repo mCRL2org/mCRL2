@@ -32,15 +32,9 @@ foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
   project( "${PREFIX}_${result}" )
   add_executable("${PREFIX}_${result}" "${OBJ}" )
-  if( MCRL2_MONO_LIB )
-    target_link_libraries(${PREFIX}_${result}
-      mcrl2_monolib
-    )
-  else( MCRL2_MONO_LIB )  
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_data
   )
-  endif( MCRL2_MONO_LIB )
   add_test("${PREFIX}_${result}" "${data_tests_BINARY_DIR}/${PREFIX}_${result}" )
 
   list(FIND FAILING_TESTS "${PREFIX}_${result}" FIND_ELM ) 

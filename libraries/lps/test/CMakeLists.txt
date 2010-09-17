@@ -28,15 +28,9 @@ file(GLOB TERM_OBJS "*.cpp")
 foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
-  if( MCRL2_MONO_LIB )
-    target_link_libraries("${PREFIX}_${result}"
-      mcrl2_monolib
-    )
-  else( MCRL2_MONO_LIB )  
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_lps
   )
-  endif( MCRL2_MONO_LIB )
 
   # Add tests 
   # This method compiles tests when invoked

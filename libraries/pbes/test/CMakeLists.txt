@@ -35,24 +35,18 @@ foreach( OBJ ${TERM_OBJS} )
   else(NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test" )
 
     add_executable("${PREFIX}_${result}" "${OBJ}"  )
-    if( MCRL2_MONO_LIB )
-      target_link_libraries(${PREFIX}_${result}
-        mcrl2_monolib
-      )
-    else( MCRL2_MONO_LIB )  
-      target_link_libraries("${PREFIX}_${result}"
-       mcrl2_lps
-      )
-      if(MCRL2_USE_BOOST_INTERNAL)
-        target_link_libraries(${PROJECT_NAME}
-          boost
-        ) 
-      else(MCRL2_USE_BOOST_INTERNAL)
-        target_link_libraries(${PROJECT_NAME}
-          ${Boost_LIBRARIES}     
-        ) 
-      endif(MCRL2_USE_BOOST_INTERNAL)
-    endif( MCRL2_MONO_LIB )
+    target_link_libraries("${PREFIX}_${result}"
+     mcrl2_lps
+    )
+    if(MCRL2_USE_BOOST_INTERNAL)
+      target_link_libraries(${PROJECT_NAME}
+        boost
+      ) 
+    else(MCRL2_USE_BOOST_INTERNAL)
+      target_link_libraries(${PROJECT_NAME}
+        ${Boost_LIBRARIES}     
+      ) 
+    endif(MCRL2_USE_BOOST_INTERNAL)
   
     if(MCRL2_ENABLE_EXPERIMENTAL )
       target_link_libraries(${PROJECT_NAME}

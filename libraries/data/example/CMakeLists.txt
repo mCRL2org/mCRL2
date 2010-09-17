@@ -32,16 +32,10 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
 #   ABC_lexer.cpp
 # )
 # 
-# if( MCRL2_MONO_LIB )
-#   target_link_libraries(${PROJECT_NAME}
-#     mcrl2_monolib
-#   )
-# else( MCRL2_MONO_LIB )  
 # target_link_libraries(${PROJECT_NAME}
 #    mcrl2_lps
 #    mcrl2_utilities_command_line
 # )
-# endif( MCRL2_MONO_LIB )
 
 ##---------------------------------------------------
 ## Example enumerator 
@@ -54,16 +48,9 @@ add_executable("${PROJECT_NAME}"
       enumerator.cpp 
 )
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    mcrl2_data
 )
-
-endif( MCRL2_MONO_LIB )
 
 ##---------------------------------------------------
 ## Example example[1..5]
@@ -80,16 +67,10 @@ foreach( OBJ ${TERM_OBJS} )
         ${OBJ} 
   )
   
-  if( MCRL2_MONO_LIB )
-    target_link_libraries(${PROJECT_NAME}
-      mcrl2_monolib
-    )
-  else( MCRL2_MONO_LIB )  
   target_link_libraries(${PROJECT_NAME}
      mcrl2_data
   )
   
-  endif( MCRL2_MONO_LIB )
 endforeach( OBJ )
 
 ##---------------------------------------------------
@@ -103,13 +84,7 @@ add_executable("${PROJECT_NAME}"
       parse_data.cpp 
 )
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    mcrl2_data
 )
 
-endif( MCRL2_MONO_LIB )

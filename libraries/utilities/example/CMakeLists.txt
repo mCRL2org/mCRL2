@@ -29,13 +29,7 @@ add_executable("${PROJECT_NAME}"
       cmdline1.cpp 
 )
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    mcrl2_utilities_command_line
    mcrl2_core
 )
-endif( MCRL2_MONO_LIB )

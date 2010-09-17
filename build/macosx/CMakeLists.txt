@@ -27,16 +27,9 @@ ENDIF (APPLE)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
-if( MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-
-else( MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
 )
-endif( MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

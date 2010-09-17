@@ -43,11 +43,6 @@ foreach( OBJ ${TERM_OBJS} )
         ${OBJ} 
   )
   
-  if( MCRL2_MONO_LIB )
-    target_link_libraries(${PROJECT_NAME}
-      mcrl2_monolib
-    )
-  else( MCRL2_MONO_LIB )  
   target_link_libraries(${PROJECT_NAME}
      mcrl2_lps
      mcrl2_lts
@@ -59,7 +54,5 @@ foreach( OBJ ${TERM_OBJS} )
      boost
   )
   endif(MCRL2_USE_BOOST_INTERNAL)
-  
-  endif( MCRL2_MONO_LIB )
 endforeach( OBJ )
 

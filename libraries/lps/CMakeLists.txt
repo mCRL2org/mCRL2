@@ -27,18 +27,14 @@ set(mcrl2_lps_src
 )
 set(mcrl2_lps_src ${mcrl2_lps_src} PARENT_SCOPE)
 
-if( NOT MCRL2_MONO_LIB )
+add_library(${PROJECT_NAME}
+  ${mcrl2_lps_src}
+)
 
-  add_library(${PROJECT_NAME}
-    ${mcrl2_lps_src}
-  )
+target_link_libraries(${PROJECT_NAME}
+  mcrl2_data
+  mcrl2_process
+)
 
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_data
-    mcrl2_process
-  )
-
-  # add install target:
-  install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-endif( NOT MCRL2_MONO_LIB )
-
+# add install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})

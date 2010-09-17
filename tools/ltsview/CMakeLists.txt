@@ -75,14 +75,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 # actual target:
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-    tr
-    gl2ps
-  )
-
-else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_lts
@@ -91,8 +83,6 @@ target_link_libraries(${PROJECT_NAME}
   tr
   gl2ps
 )
-
-endif( MCRL2_MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

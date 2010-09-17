@@ -439,13 +439,6 @@ else(MCRL2_USE_BOOST_INTERNAL)
 endif(MCRL2_USE_BOOST_INTERNAL)
 
 ##---------------------------------------------------
-## Determine to compile a mono library
-##---------------------------------------------------
-
-option(MCRL2_MONO_LIB "Enable/disable creation of a monolithic library" OFF)
-message(STATUS "MCRL2_MONO_LIB: ${MCRL2_MONO_LIB}")
-
-##---------------------------------------------------
 ## Explicity Set NDebug
 ##--------------------------------------------------
 
@@ -641,9 +634,6 @@ add_subdirectory ( 3rd-party/ticpp )
   add_subdirectory ( libraries/process )
   add_subdirectory ( libraries/lps )
   add_subdirectory ( libraries/lts )
-  if( MCRL2_MONO_LIB )
-    add_subdirectory ( libraries/ )
-  endif( MCRL2_MONO_LIB)
 
 ##---------------------------------------------------
 ## Tool dependencies

@@ -58,11 +58,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   ticpp
@@ -70,7 +65,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities_wx
   mcrl2_core
 )
-endif( MCRL2_MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
