@@ -41,15 +41,16 @@ namespace state_formulas {
   // may cause internal names to change.
   /// \param formula_stream A stream from which can be read
   /// \param spec A linear process specification
+  /// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous
   /// \return The converted modal formula
   inline
-  state_formula parse_state_formula(std::istream& from, lps::specification& spec)
+  state_formula parse_state_formula(std::istream& from, lps::specification& spec, bool check_monotonicity = true)
   {
     ATermAppl result = core::parse_state_frm(from);
     if (result == NULL)
       throw mcrl2::runtime_error("parse error in parse_state_frm()");
     state_formula f = result;   
-    type_check(f, spec);
+    type_check(f, spec, check_monotonicity);
     translate_regular_formula(f);
 
     // TODO: make find functions for state formulas
@@ -65,10 +66,10 @@ namespace state_formulas {
   /// \param spec A linear process specification
   /// \return The converted modal formula
   inline
-  state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec)
+  state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, bool check_monotonicity = true)
   {
     std::stringstream formula_stream(formula_text);
-    return parse_state_formula(formula_stream, spec);
+    return parse_state_formula(formula_stream, spec, check_monotonicity);
   }
 
 } // namespace state_formulas

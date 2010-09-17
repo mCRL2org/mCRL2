@@ -15,6 +15,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/monotonicity.h"
 
 namespace mcrl2 {
 
@@ -26,7 +27,7 @@ namespace state_formulas {
      *  \post      formula is type checked.
      **/
     inline
-    void type_check(state_formula& formula, const lps::specification& lps_spec)
+    void type_check(state_formula& formula, const lps::specification& lps_spec, bool check_monotonicity = true)
     {
       // TODO: replace all this nonsense code by a proper type check implementation
       ATermAppl t = core::type_check_state_frm(formula, specification_to_aterm(lps_spec));
@@ -35,6 +36,10 @@ namespace state_formulas {
         throw mcrl2::runtime_error("could not type check " + core::pp(formula));
       }
       formula = atermpp::aterm_appl(t);
+      if (check_monotonicity && !is_monotonous(formula))
+      {
+        throw mcrl2::runtime_error("state formula is not monotonic: " + core::pp(formula));
+      }
     }
 
 } // namespace state_formulas

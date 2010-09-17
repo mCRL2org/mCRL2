@@ -214,22 +214,6 @@ namespace mcrl2 {
     //     adhere to the internal syntax after type checking
     //Ret: Spec in which the sort specification is replaced by SortSpec
 
-    ///\brief  Checks whether a state formula is monotonic.
-    ///\param[in] state_frm An ATerm representation of a state formula.
-    ///\return Whether the state formula is monotonic.
-    static bool check_monotonicity(ATermAppl state_frm);
-
-    ///\brief  Checks whether a state formula is monotonic with respect to a
-    ///        context of propositional variables and the number of
-    ///        negations under which they occur.
-    ///\param[in] state_frm An ATerm representation of a state formula.
-    ///\param[in] prop_var_negs A mapping from ATerm representations of
-    ///        propositional variable symbols to a boolean indicating
-    ///        whether the symbols occurs under an even number of negations
-    ///\return Whether state_frm is monotonic with respect to the
-    ///        information in prop_var_negs
-    static bool check_monotonicity(ATermAppl state_frm, atermpp::map<atermpp::aterm,bool> prop_var_negs);
-
     ///\brief Increases the value of each key in map
     ///\param[in] m A mapping from an ATerm to a boolean
     ///\return m in which all values are negated
@@ -619,14 +603,6 @@ namespace mcrl2 {
         gsErrorMsg("reading sorts from LPS failed\n");
       }
       gstcDataDestroy();
-      if (Result != NULL) {
-#ifndef MCRL2_DISABLE_MONOTONICITY_CHECKS
-        if (!check_monotonicity(Result)) {
-          gsErrorMsg("state formula is not monotonic\n");
-          Result = NULL;
-        }
-#endif
-      }
       return Result;
     }
 
@@ -1041,87 +1017,6 @@ namespace mcrl2 {
       SortRefs = ATreverse(l);
       if (gsDebug) { std::cerr << "SortRefs, after removing self references:\n" << pp(gsMakeSortSpec(SortRefs)) << "\n"; }
       return SortRefs;
-    }
-
-    bool check_monotonicity(ATermAppl state_frm)
-    {
-      assert(gsIsStateFrm(state_frm));
-      atermpp::map<atermpp::aterm,bool> prop_var_negs;
-      return check_monotonicity(state_frm, prop_var_negs);
-    }
-
-    bool check_monotonicity(ATermAppl state_frm, atermpp::map<atermpp::aterm,bool> prop_var_negs)
-    {
-      assert(gsIsStateFrm(state_frm));
-      if (gsIsDataExpr(state_frm)) {
-        //state_frm is a data expression; return true
-        return true;
-      } else if (gsIsStateTrue(state_frm) || gsIsStateFalse(state_frm)) {
-        //state_frm is true or false; return true
-        return true;
-      } else if (gsIsStateNot(state_frm)) {
-        //state_frm is a negation; check monotonicity of its argument, where the number
-        //of negations in prop_var_negs is incremented
-        return check_monotonicity(
-            ATAgetArgument(state_frm,0), neg_values(prop_var_negs));
-      } else if (gsIsStateAnd(state_frm) || gsIsStateOr(state_frm)) {
-        //state_frm is a conjunction or a disjunction; check monotonicity of both
-        //arguments
-        return
-            check_monotonicity(ATAgetArgument(state_frm,0), prop_var_negs) &&
-            check_monotonicity(ATAgetArgument(state_frm,1), prop_var_negs);
-      } else if (gsIsStateImp(state_frm)) {
-        //state_frm is an implication; check monotonicity of both arguments, where the
-        //number of negations in prop_var_negs is negated for the first argument
-        return
-            check_monotonicity(ATAgetArgument(state_frm,0), neg_values(prop_var_negs)) &&
-            check_monotonicity(ATAgetArgument(state_frm,1), prop_var_negs);
-      } else if (gsIsStateForall(state_frm) || gsIsStateExists(state_frm)) {
-        //state_frm is a boolean quantification; check monotonicity of the body of the
-        //quantification
-        return check_monotonicity(ATAgetArgument(state_frm,1), prop_var_negs);
-      } else if (gsIsStateMust(state_frm) || gsIsStateMay(state_frm)) {
-        //state_frm is a modal operation; check monotonicity of its second argument
-        return check_monotonicity(ATAgetArgument(state_frm,1), prop_var_negs);
-      } else if (gsIsStateYaled(state_frm) || gsIsStateYaledTimed(state_frm) ||
-                 gsIsStateDelay(state_frm) || gsIsStateDelayTimed(state_frm))
-      {
-        //state_frm is a delay or yaled; return true
-        return true;
-      } else if (gsIsStateVar(state_frm)) {
-        //state_frm is a fixed point variable occurrence indicator; return true if the
-        //number of negations of the occurrence is even; return false otherwise
-        ATermAppl fp_var_name = ATAgetArgument(state_frm, 0);
-        ATermList args = ATLgetArgument(state_frm, 1);
-        ATermList fp_var_type = ATmakeList0();
-        while (!ATisEmpty(args)) {
-          fp_var_type = ATinsert(fp_var_type,
-                                 (ATerm) static_cast<ATermAppl>(data_expression(ATAgetFirst(args)).sort())
-                                 );
-          args = ATgetNext(args);
-        }
-        ATerm fp_var = (ATerm) ATmakeList2((ATerm) fp_var_name, (ATerm) ATreverse(fp_var_type));
-        return prop_var_negs[fp_var];
-      } else if (gsIsStateNu(state_frm) || gsIsStateMu(state_frm)) {
-        //state_frm is a fixed point quantification; check monotonicity of the body of
-        //the quantification, where prop_var_negs is extended or updated with the fixed
-        //point variable, depending on if the variable already occurs in it
-        ATermAppl fp_var_name = ATAgetArgument(state_frm, 0);
-        ATermList data_var_id_inits = ATLgetArgument(state_frm, 1);
-        ATermList fp_var_type = ATmakeList0();
-        while (!ATisEmpty(data_var_id_inits)) {
-          fp_var_type = ATinsert(fp_var_type,
-                                 (ATerm) static_cast<ATermAppl>(data_expression(ATAgetArgument(ATAgetFirst(data_var_id_inits), 0)).sort())
-                                 );
-          data_var_id_inits = ATgetNext(data_var_id_inits);
-        }
-        ATerm fp_var = (ATerm) ATmakeList2((ATerm) fp_var_name, (ATerm) ATreverse(fp_var_type));
-        prop_var_negs[fp_var] = true;
-        return check_monotonicity(ATAgetArgument(state_frm,2), prop_var_negs);
-      } else {
-        assert(false);
-        return false;
-      }
     }
 
     // ========= main processing functions
