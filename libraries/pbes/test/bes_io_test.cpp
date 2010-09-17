@@ -14,8 +14,8 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/bes.h"
-#include "mcrl2/pbes/bes_parse.h"
+#include "mcrl2/bes/bes.h"
+#include "mcrl2/bes/bes_parse.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 

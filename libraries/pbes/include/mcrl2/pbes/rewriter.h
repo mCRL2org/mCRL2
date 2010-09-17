@@ -21,7 +21,7 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/mutable_substitution_adapter.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/pbes/detail/boolean_simplify_builder.h"
+#include "mcrl2/bes/detail/boolean_simplify_builder.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"

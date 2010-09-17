@@ -22,7 +22,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/bes_gauss_elimination.h"
+#include "mcrl2/bes/bes_gauss_elimination.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/core/garbage_collection.h"

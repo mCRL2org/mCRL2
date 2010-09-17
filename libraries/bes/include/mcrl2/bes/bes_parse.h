@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/bes_parse.h
+/// \file mcrl2/bes/bes_parse.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_PBES_BES_PARSE_H
 #define MCRL2_PBES_BES_PARSE_H
 
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/bes.h"
+#include "mcrl2/bes/bes.h"
 #include "mcrl2/pbes/detail/pbes_expression2boolean_expression_visitor.h"
 
 namespace mcrl2 {

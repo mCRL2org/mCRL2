@@ -18,7 +18,7 @@
 #include <boost/bind.hpp>
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/pbes/bes.h"
+#include "mcrl2/bes/bes.h"
 #include "mcrl2/core/detail/join.h"
 
 namespace mcrl2 {

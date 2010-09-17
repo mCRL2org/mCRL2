@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/bes_gauss_elimination.h
+/// \file mcrl2/bes/bes_gauss_elimination.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_PBES_BES_GAUSS_ELIMINATION_H
@@ -14,7 +14,7 @@
 
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
-#include "mcrl2/pbes/bes.h"
+#include "mcrl2/bes/bes.h"
 
 namespace mcrl2 {
 

@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME}
   pbesconstelm.cpp
 )
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)

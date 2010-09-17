@@ -13,6 +13,7 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 set(PREFIX "pbes")
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)

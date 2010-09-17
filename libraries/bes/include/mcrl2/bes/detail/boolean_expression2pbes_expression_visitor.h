@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/boolean_expression2pbes_expression_visitor.h
+/// \file mcrl2/bes/detail/boolean_expression2pbes_expression_visitor.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_PBES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_VISITOR_H
 #define MCRL2_PBES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_VISITOR_H
 
 #include <vector>
-#include "mcrl2/pbes/boolean_expression_visitor.h"
+#include "mcrl2/bes/boolean_expression_visitor.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {

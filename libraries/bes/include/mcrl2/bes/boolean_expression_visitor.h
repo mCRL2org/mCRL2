@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/boolean_expression_visitor.h
+/// \file mcrl2/bes/boolean_expression_visitor.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_PBES_BOOLEAN_EXPRESSION_VISITOR_H
@@ -16,7 +16,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/pbes/bes.h"
+#include "mcrl2/bes/bes.h"
 
 namespace mcrl2 {
 

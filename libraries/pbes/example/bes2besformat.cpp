@@ -16,7 +16,7 @@
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/pbes/bes.h"
+#include "mcrl2/bes/bes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/utilities/input_output_tool.h"

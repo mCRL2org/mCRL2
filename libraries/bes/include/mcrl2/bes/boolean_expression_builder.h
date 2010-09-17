@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/boolean_expression_builder.h
+/// \file mcrl2/bes/boolean_expression_builder.h
 /// \brief Visitor class for rebuilding a boolean expression.
 
 #ifndef MCRL2_PBES_BOOLEAN_EXPRESSION_BUILDER_H

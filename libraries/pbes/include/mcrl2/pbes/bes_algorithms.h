@@ -19,7 +19,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/gauss_elimination.h"
-#include "mcrl2/pbes/bes.h"
+#include "mcrl2/bes/bes.h"
 
 namespace mcrl2 {
 
