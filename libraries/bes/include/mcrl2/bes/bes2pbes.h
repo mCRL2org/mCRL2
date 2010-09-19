@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/bes2pbes.h
+/// \file mcrl2/bes/bes2pbes.h
 /// \brief Contains functions to transfrom a BES into a PBES.
 
 #ifndef MCRL2_PBES_BES2PBES_H

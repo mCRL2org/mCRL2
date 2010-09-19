@@ -720,6 +720,7 @@ if(MCRL2_COMPILE_EXAMPLES)
    add_subdirectory( libraries/data/example)
    add_subdirectory( libraries/lps/example)
    add_subdirectory( libraries/utilities/example )
+   add_subdirectory( libraries/bes/example)
    add_subdirectory( libraries/pbes/example)
 endif(MCRL2_COMPILE_EXAMPLES)
 
@@ -800,6 +801,7 @@ install(
     libraries/data/include/
     libraries/lps/include/
     libraries/lts/include/
+    libraries/bes/include/
     libraries/pbes/include/
     libraries/process/include/
     libraries/trace/include/
@@ -848,6 +850,7 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURR
    add_subdirectory( libraries/lps/test)
 
 if( MCRL2_ENABLE_TEST_TARGETS )
+   add_subdirectory( libraries/bes/test)
    add_subdirectory( libraries/pbes/test)
    add_subdirectory( libraries/lts/test)
    add_subdirectory( libraries/data/test)

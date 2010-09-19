@@ -21,7 +21,7 @@
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/bes/bes.h"
 #include "mcrl2/bes/bes_parse.h"
-#include "mcrl2/pbes/bes2pbes.h"
+#include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/atermpp/aterm_init.h"
