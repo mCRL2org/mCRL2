@@ -15,9 +15,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "mcrl2/core/parse.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
-#include "mcrl2/core/detail/algorithms.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/alphabet_reduction.h"
@@ -62,7 +62,12 @@ namespace process {
                                   std::istream& spec_stream, 
                                   const bool alpha_reduce=false)
   {
-    process_specification result(core::detail::parse_process_specification(spec_stream),false);
+    ATermAppl x = core::parse_proc_spec(spec_stream);
+    if (x == NULL)
+    {
+      throw mcrl2::runtime_error("parse error");
+    }
+    process_specification result(x, false);
     type_check(result);
     if (alpha_reduce)
     {

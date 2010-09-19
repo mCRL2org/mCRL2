@@ -55,6 +55,22 @@ ATermAppl parse_process_specification_new(std::istream& ps_stream)
   return result;
 }
 
+/// \brief     Parses a process specification.
+/// \param[in] ps_stream An input stream from which can be read.
+/// \post      The content of ps_stream is parsed as an mCRL2 process
+///            specification.
+/// \return    The parsed mCRL2 process specification in the internal ATerm
+///            format after parsing (before type checking).
+/// \exception mcrl2::runtime_error Parsing failed.
+inline
+ATermAppl parse_process_specification_old(std::istream& ps_stream)
+{
+  ATermAppl result = core::parse_proc_spec(ps_stream);
+  if (result == NULL)
+    throw mcrl2::runtime_error("parse error");
+  return result;
+}
+
 class lps_parse_tool: public input_tool
 {
   protected:
@@ -74,7 +90,7 @@ class lps_parse_tool: public input_tool
     atermpp::aterm_appl parse_old(std::string filename)
     {
     	std::ifstream from(filename.c_str());
-      return core::detail::parse_process_specification(from);
+      return parse_process_specification_old(from);
     }
 
     atermpp::aterm_appl parse_new(std::string filename)
