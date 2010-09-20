@@ -224,7 +224,7 @@ namespace mcrl2
         {
           gsVerboseMsg(
             "done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",
-            level-1,
+            static_cast<unsigned long>(level-1),
             (level==2)?"":"s",
             num_states,
             (num_states==1)?"":"s",
@@ -1203,9 +1203,9 @@ namespace mcrl2
               {
                 gsVerboseMsg(
                   "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
-                  level,current_state-prevcurrent,
+                  level,static_cast<unsigned long>(current_state-prevcurrent),
                   ((current_state-prevcurrent)==1)?"":"s",
-                  trans-prevtrans,
+                  static_cast<unsigned long>(trans-prevtrans),
                   ((trans-prevtrans)==1)?"":"s"
                 );
                 fflush(stderr);
