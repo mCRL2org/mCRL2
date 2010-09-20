@@ -196,7 +196,7 @@ namespace mcrl2
         if ( lgopts->expl_strat == es_random )
         {
           gsVerboseMsg(
-            "done with random walk of %llu transition%s (visited %llu unique state%s).\n",
+            "done with random walk of %lu transition%s (visited %lu unique state%s).\n",
             trans,
             (trans==1)?"":"s",
             num_states,
@@ -205,7 +205,7 @@ namespace mcrl2
         } else if ( lgopts->expl_strat == es_value_prioritized )
         {
           gsVerboseMsg(
-            "done with value prioritized walk of %llu transition%s (visited %llu unique state%s).\n",
+            "done with value prioritized walk of %lu transition%s (visited %lu unique state%s).\n",
             trans,
             (trans==1)?"":"s",
             num_states,
@@ -214,7 +214,7 @@ namespace mcrl2
         } else if ( lgopts->expl_strat == es_value_random_prioritized )
         {
           gsVerboseMsg(
-            "done with random value prioritized walk of %llu transition%s (visited %llu unique state%s).\n",
+            "done with random value prioritized walk of %lu transition%s (visited %lu unique state%s).\n",
             trans,
             (trans==1)?"":"s",
             num_states,
@@ -223,7 +223,7 @@ namespace mcrl2
         } else if ( lgopts->expl_strat == es_breadth )
         {
           gsVerboseMsg(
-            "done with state space generation (%lu level%s, %llu state%s and %llu transition%s).\n",
+            "done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",
             level-1,
             (level==2)?"":"s",
             num_states,
@@ -234,7 +234,7 @@ namespace mcrl2
         } else if ( lgopts->expl_strat == es_depth )
         {
           gsVerboseMsg(
-            "done with state space generation (%llu state%s and %llu transition%s).\n",
+            "done with state space generation (%lu state%s and %lu transition%s).\n",
             num_states,
             (num_states==1)?"":"s",
             trans,
@@ -773,7 +773,7 @@ namespace mcrl2
             if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
             {
               gsVerboseMsg(
-                "monitor: currently explored %llu transition%s and encountered %llu unique state%s.\n",
+                "monitor: currently explored %lu transition%s and encountered %lu unique state%s.\n",
                 trans,
                 (trans==1)?"":"s",
                 num_states,
@@ -931,7 +931,7 @@ namespace mcrl2
             if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
             {
               gsVerboseMsg(
-                "monitor: currently explored %llu transition%s and encountered %llu unique state%s [MAX %d].\n",
+                "monitor: currently explored %lu transition%s and encountered %lu unique state%s [MAX %d].\n",
                 trans,
                 (trans==1)?"":"s",
                 num_states,
@@ -1096,7 +1096,7 @@ namespace mcrl2
             if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
             {
               gsVerboseMsg(
-                "monitor: currently explored %llu transition%s and encountered %llu unique state%s.\n",
+                "monitor: currently explored %lu transition%s and encountered %lu unique state%s.\n",
                 trans,
                 (trans==1)?"":"s",
                 num_states,
@@ -1114,7 +1114,7 @@ namespace mcrl2
           unsigned long limit = lgopts->max_states;
           if ( lgopts->bithashing )
           {
-            lgopts->max_states = ULLONG_MAX;
+            lgopts->max_states = ULONG_MAX;
             state_queue.set_max_size(((limit-1)>lgopts->todo_max)?lgopts->todo_max:limit-1);
             state_queue.add_to_queue(state);
             state_queue.swap_queues();
@@ -1183,7 +1183,7 @@ namespace mcrl2
             if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
             {
               gsVerboseMsg(
-                "monitor: currently at level %lu with %llu state%s and %llu transition%s explored and %llu state%s seen.\n",
+                "monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",
                 level,
                 current_state,
                 (current_state==1)?"":"s",
@@ -1202,7 +1202,7 @@ namespace mcrl2
               if ( !lgopts->suppress_progress_messages && gsVerbose )
               {
                 gsVerboseMsg(
-                  "monitor: level %lu done. (%llu state%s, %llu transition%s)\n",
+                  "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
                   level,current_state-prevcurrent,
                   ((current_state-prevcurrent)==1)?"":"s",
                   trans-prevtrans,
@@ -1325,7 +1325,7 @@ namespace mcrl2
               if ( !lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0) )
               {
                 gsVerboseMsg(
-                  "monitor: currently explored %llu state%s and %llu transition%s (stacksize is %d).\n",
+                  "monitor: currently explored %lu state%s and %lu transition%s (stacksize is %d).\n",
                   current_state,
                   (current_state==1)?"":"s",
                   trans,
