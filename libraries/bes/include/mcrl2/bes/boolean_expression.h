@@ -52,18 +52,6 @@ namespace bes {
       {
         assert(core::detail::check_rule_BooleanExpression(m_term));
       }
-
-      /// \brief Applies a low level substitution function to this term and returns the result.
-      /// \param f A
-      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-      /// \deprecated
-      /// \return The substitution result.
-      template <typename Substitution>
-      boolean_expression substitute(Substitution f) const
-      {
-        return boolean_expression(f(*this));
-      }
   };
 
   /// \brief Read-only singly linked list of boolean expressions
