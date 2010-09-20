@@ -22,6 +22,7 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/term_traits.h"
+#include "mcrl2/bes/boolean_variable.h"
 
 namespace mcrl2 {
 

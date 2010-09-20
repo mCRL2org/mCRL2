@@ -14,7 +14,7 @@
 
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
-#include "mcrl2/bes/bes.h"
+#include "mcrl2/bes/boolean_equation_system.h"
 
 namespace mcrl2 {
 

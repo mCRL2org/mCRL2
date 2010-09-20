@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/bes/bes.h"
+#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"

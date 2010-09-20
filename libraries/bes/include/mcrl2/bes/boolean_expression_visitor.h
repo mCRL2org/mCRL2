@@ -16,7 +16,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/bes/bes.h"
+#include "mcrl2/bes/boolean_expression.h"
 
 namespace mcrl2 {
 

@@ -13,7 +13,7 @@
 #define MCRL2_PBES_BES_PARSE_H
 
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/bes/bes.h"
+#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/pbes/detail/pbes_expression2boolean_expression_visitor.h"
 
 namespace mcrl2 {

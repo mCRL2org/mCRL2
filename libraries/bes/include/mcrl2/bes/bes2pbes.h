@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_BES2PBES_H
 #define MCRL2_PBES_BES2PBES_H
 
-#include "mcrl2/bes/bes.h"
+#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/bes/detail/boolean_expression2pbes_expression_visitor.h"
 
