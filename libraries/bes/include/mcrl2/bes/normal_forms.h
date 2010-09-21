@@ -18,14 +18,11 @@ namespace mcrl2 {
 
 namespace bes {
 
-  void make_standard_recursive_form(boolean_equation_system<>& p)
+  void make_standard_recursive_form(boolean_equation_system<>& eqn)
   {
     detail::standard_recursive_form_visitor visitor;
-    for (atermpp::vector<boolean_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-    {
-      visitor.visit_equation(*i);
-    }
-    p.equations() = visitor.m_equations;
+    visitor.visit_boolean_equation_system(eqn);
+    eqn.equations() = visitor.m_equations;
   }
 
 } // namespace bes

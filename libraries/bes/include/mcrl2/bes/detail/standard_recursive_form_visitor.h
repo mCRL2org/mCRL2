@@ -14,6 +14,7 @@
 
 #include "mcrl2/bes/boolean_expression_visitor.h"
 #include "mcrl2/bes/boolean_equation.h"
+#include "mcrl2/core/identifier_generator.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/map.h"
 
@@ -39,6 +40,18 @@ namespace detail {
 
     /// \brief The fixpoint symbol of the current equation.
     fixpoint_symbol m_symbol;
+
+    /// \brief The name of the variable of the current equation, with a trailing underscore added.
+    std::string m_name;
+
+    /// \brief Is set to true if the value true is encountered in the BES.
+    bool m_has_true;
+
+    /// \brief Is set to true if the value false is encountered in the BES.
+    bool m_has_false;
+
+    /// \brief For generating fresh variables.
+    core::number_postfix_generator m_generator;
 
     /// \brief A stack containing sub-terms.
     std::vector<standard_recursive_form_pair> m_expression_stack;
@@ -70,25 +83,22 @@ namespace detail {
     }
 
     /// \brief Generates a fresh boolean variable.
-    boolean_variable fresh_variable() const
+    boolean_variable fresh_variable(const std::string& hint)
     {
-      // TODO: implement a decent solution for this
-      static int index = 0;
-      std::ostringstream out;
-      out << "FVAR" << index++;
-      return boolean_variable(out.str());
+      core::identifier_string s = m_generator(hint);
+      return boolean_variable(s);
     }
 
     /// \brief Generates an equation var=expr for the expression expr (if it does not exist).
     /// \return The variable var.
-    boolean_variable create_variable(const boolean_expression& expr, standard_recursive_form_type type)
+    boolean_variable create_variable(const boolean_expression& expr, standard_recursive_form_type type, const std::string& hint)
     {
       atermpp::map<boolean_expression, boolean_variable>::iterator i = m_table.find(expr);
       if (i != m_table.end())
       {
         return i->second;
       }
-      boolean_variable var = fresh_variable();
+      boolean_variable var = fresh_variable(hint);
       m_table[expr] = var;
       if (type == standard_recursive_form_and)
       {
@@ -104,11 +114,11 @@ namespace detail {
     /// \brief Constructor.
     /// Adds equations for true and false.
     standard_recursive_form_visitor()
+    : m_has_true(false),
+      m_has_false(false)
     {
-      m_true = fresh_variable();
-      m_false = fresh_variable();
-      m_equations.push_back(boolean_equation(fixpoint_symbol::nu(), m_true, tr::and_(m_true, m_true)));
-      m_equations.push_back(boolean_equation(fixpoint_symbol::mu(), m_false, tr::and_(m_false, m_false)));
+      m_true = fresh_variable("True");
+      m_false = fresh_variable("False");
     }
 
     /// \brief Returns the top element of the expression stack, which is the result of the normalization.
@@ -128,6 +138,7 @@ namespace detail {
     /// \return The result of visiting the node
     bool visit_true(const boolean_expression& /* e */)
     {
+      m_has_true = true;
       push(m_true, standard_recursive_form_both);
       return super::continue_recursion;
     }
@@ -137,6 +148,7 @@ namespace detail {
     /// \return The result of visiting the node
     bool visit_false(const boolean_expression& /* e */)
     {
+      m_has_false = true;
       push(m_false, standard_recursive_form_both);
       return super::continue_recursion;
     }
@@ -164,11 +176,11 @@ namespace detail {
       standard_recursive_form_pair left = pop();
       if (left.second == standard_recursive_form_or)
       {
-        left.first = create_variable(left.first, standard_recursive_form_or);
+        left.first = create_variable(left.first, standard_recursive_form_or, m_name);
       }
       if (right.second == standard_recursive_form_or)
       {
-        right.first = create_variable(right.first, standard_recursive_form_or);
+        right.first = create_variable(right.first, standard_recursive_form_or, m_name);
       }
       push(tr::and_(left.first, right.first), standard_recursive_form_and);
     }
@@ -180,11 +192,11 @@ namespace detail {
       standard_recursive_form_pair left = pop();
       if (left.second == standard_recursive_form_and)
       {
-        left.first = create_variable(left.first, standard_recursive_form_and);
+        left.first = create_variable(left.first, standard_recursive_form_and, m_name);
       }
       if (right.second == standard_recursive_form_and)
       {
-        right.first = create_variable(right.first, standard_recursive_form_and);
+        right.first = create_variable(right.first, standard_recursive_form_and, m_name);
       }
       push(tr::or_(left.first, right.first), standard_recursive_form_or);
     }
@@ -199,10 +211,35 @@ namespace detail {
     void visit_equation(const boolean_equation& eq)
     {
       m_symbol = eq.symbol();
+      m_name = std::string(eq.variable().name()) + '_';
       super::visit(eq.formula());
       standard_recursive_form_pair p = pop();
       m_equations.push_back(boolean_equation(eq.symbol(), eq.variable(), p.first));
       m_table[p.first] = eq.variable();
+    }
+
+    /// \brief Visit a boolean equation system.
+    void visit_boolean_equation_system(const boolean_equation_system<>& eqn)
+    {
+      for (atermpp::vector<boolean_equation>::const_iterator i = eqn.equations().begin(); i != eqn.equations().end(); ++i)
+      {
+        m_generator.add_to_context(std::string(i->variable().name()));
+      }
+
+      for (atermpp::vector<boolean_equation>::const_iterator i = eqn.equations().begin(); i != eqn.equations().end(); ++i)
+      {
+        visit_equation(*i);
+      }
+      
+      // add equations for true and false if needed
+      if (m_has_true)
+      {
+        m_equations.push_back(boolean_equation(fixpoint_symbol::nu(), m_true, m_true));
+      }
+      if (m_has_false)
+      {
+        m_equations.push_back(boolean_equation(fixpoint_symbol::mu(), m_false, m_false));
+      }
     }
   };
 
