@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/bes/detail/standard_recursive_form_visitor.h
-/// \brief add your file description here.
+/// \file mcrl2/bes/detail/standard_form_visitor.h
+/// \brief Visitor for BES transformation into standard (recursive) normal form.
 
-#ifndef MCRL2_BES_DETAIL_STANDARD_RECURSIVE_FORM_VISITOR_H
-#define MCRL2_BES_DETAIL_STANDARD_RECURSIVE_FORM_VISITOR_H
+#ifndef MCRL2_BES_DETAIL_STANDARD_FORM_VISITOR_H
+#define MCRL2_BES_DETAIL_STANDARD_FORM_VISITOR_H
 
 #include "mcrl2/bes/boolean_expression_visitor.h"
 #include "mcrl2/bes/boolean_equation.h"
@@ -24,19 +24,22 @@ namespace bes {
 
 namespace detail {
 
-  enum standard_recursive_form_type
+  enum standard_form_type
   {
-    standard_recursive_form_both,
-    standard_recursive_form_and,
-    standard_recursive_form_or
+    standard_form_both,
+    standard_form_and,
+    standard_form_or
   };
 
-  typedef std::pair<boolean_expression, standard_recursive_form_type> standard_recursive_form_pair;
+  typedef std::pair<boolean_expression, standard_form_type> standard_form_pair;
 
-  struct standard_recursive_form_visitor: public boolean_expression_visitor<void>
+  struct standard_form_visitor: public boolean_expression_visitor<void>
   {
     typedef boolean_expression_visitor<void> super;
     typedef core::term_traits<boolean_expression> tr;
+
+    /// \brief If true, the result will be in standard recursive normal form, otherwise in standard form.
+    bool m_recursive_form;
 
     /// \brief The fixpoint symbol of the current equation.
     fixpoint_symbol m_symbol;
@@ -54,7 +57,7 @@ namespace detail {
     core::number_postfix_generator m_generator;
 
     /// \brief A stack containing sub-terms.
-    std::vector<standard_recursive_form_pair> m_expression_stack;
+    std::vector<standard_form_pair> m_expression_stack;
 
     /// \brief A vector containing generated equations.
     atermpp::vector<boolean_equation> m_equations;
@@ -62,24 +65,24 @@ namespace detail {
     /// \brief Maps right hand sides of equations to their corresponding left hand side.
     atermpp::map<boolean_expression, boolean_variable> m_table;
 
-    /// \brief The variable corresponding to true.
-    boolean_variable m_true;
+    /// \brief The expression corresponding to true.
+    boolean_expression m_true;
 
-    /// \brief The variable corresponding to false.
-    boolean_variable m_false;
+    /// \brief The expression corresponding to false.
+    boolean_expression m_false;
 
     /// \brief Pops the stack and returns the popped element
-    standard_recursive_form_pair pop()
+    standard_form_pair pop()
     {
-      standard_recursive_form_pair result = m_expression_stack.back();
+      standard_form_pair result = m_expression_stack.back();
       m_expression_stack.pop_back();
       return result;
     }
 
     /// \brief Pushes (first, second) on the stack.
-    void push(const boolean_expression& first, standard_recursive_form_type second)
+    void push(const boolean_expression& first, standard_form_type second)
     {     
-      m_expression_stack.push_back(standard_recursive_form_pair(first, second));
+      m_expression_stack.push_back(standard_form_pair(first, second));
     }
 
     /// \brief Generates a fresh boolean variable.
@@ -91,7 +94,7 @@ namespace detail {
 
     /// \brief Generates an equation var=expr for the expression expr (if it does not exist).
     /// \return The variable var.
-    boolean_variable create_variable(const boolean_expression& expr, standard_recursive_form_type type, const std::string& hint)
+    boolean_variable create_variable(const boolean_expression& expr, standard_form_type type, const std::string& hint)
     {
       atermpp::map<boolean_expression, boolean_variable>::iterator i = m_table.find(expr);
       if (i != m_table.end())
@@ -100,7 +103,7 @@ namespace detail {
       }
       boolean_variable var = fresh_variable(hint);
       m_table[expr] = var;
-      if (type == standard_recursive_form_and)
+      if (type == standard_form_and)
       {
         m_equations.push_back(boolean_equation(m_symbol, var, expr));
       }
@@ -112,13 +115,22 @@ namespace detail {
     }
 
     /// \brief Constructor.
-    /// Adds equations for true and false.
-    standard_recursive_form_visitor()
-    : m_has_true(false),
+    /// \param Determines whether or not the result will be in standard recursive normal form.
+    standard_form_visitor(bool recursive_form = false)
+    : m_recursive_form(recursive_form),
+      m_has_true(false),
       m_has_false(false)
     {
-      m_true = fresh_variable("True");
-      m_false = fresh_variable("False");
+      if (m_recursive_form)
+      {
+        m_true = fresh_variable("True");
+        m_false = fresh_variable("False");
+      }
+      else
+      {
+        m_true = tr::true_();
+        m_false = tr::false_();
+      }
     }
 
     /// \brief Returns the top element of the expression stack, which is the result of the normalization.
@@ -139,7 +151,7 @@ namespace detail {
     bool visit_true(const boolean_expression& /* e */)
     {
       m_has_true = true;
-      push(m_true, standard_recursive_form_both);
+      push(m_true, standard_form_both);
       return super::continue_recursion;
     }
 
@@ -149,7 +161,7 @@ namespace detail {
     bool visit_false(const boolean_expression& /* e */)
     {
       m_has_false = true;
-      push(m_false, standard_recursive_form_both);
+      push(m_false, standard_form_both);
       return super::continue_recursion;
     }
 
@@ -159,7 +171,7 @@ namespace detail {
     /// \return The result of visiting the node
     bool visit_var(const boolean_expression& /* e */, const boolean_variable& X)
     {
-      push(X, standard_recursive_form_both);
+      push(X, standard_form_both);
       return super::continue_recursion;
     }
 
@@ -172,33 +184,33 @@ namespace detail {
     /// \brief Leave and node
     void leave_and()
     {
-      standard_recursive_form_pair right = pop();
-      standard_recursive_form_pair left = pop();
-      if (left.second == standard_recursive_form_or)
+      standard_form_pair right = pop();
+      standard_form_pair left = pop();
+      if (left.second == standard_form_or)
       {
-        left.first = create_variable(left.first, standard_recursive_form_or, m_name);
+        left.first = create_variable(left.first, standard_form_or, m_name);
       }
-      if (right.second == standard_recursive_form_or)
+      if (right.second == standard_form_or)
       {
-        right.first = create_variable(right.first, standard_recursive_form_or, m_name);
+        right.first = create_variable(right.first, standard_form_or, m_name);
       }
-      push(tr::and_(left.first, right.first), standard_recursive_form_and);
+      push(tr::and_(left.first, right.first), standard_form_and);
     }
 
     /// \brief Leave or node
     void leave_or()
     {
-      standard_recursive_form_pair right = pop();
-      standard_recursive_form_pair left = pop();
-      if (left.second == standard_recursive_form_and)
+      standard_form_pair right = pop();
+      standard_form_pair left = pop();
+      if (left.second == standard_form_and)
       {
-        left.first = create_variable(left.first, standard_recursive_form_and, m_name);
+        left.first = create_variable(left.first, standard_form_and, m_name);
       }
-      if (right.second == standard_recursive_form_and)
+      if (right.second == standard_form_and)
       {
-        right.first = create_variable(right.first, standard_recursive_form_and, m_name);
+        right.first = create_variable(right.first, standard_form_and, m_name);
       }
-      push(tr::or_(left.first, right.first), standard_recursive_form_or);
+      push(tr::or_(left.first, right.first), standard_form_or);
     }
 
     /// \brief Leave imp node
@@ -213,7 +225,7 @@ namespace detail {
       m_symbol = eq.symbol();
       m_name = std::string(eq.variable().name()) + '_';
       super::visit(eq.formula());
-      standard_recursive_form_pair p = pop();
+      standard_form_pair p = pop();
       m_equations.push_back(boolean_equation(eq.symbol(), eq.variable(), p.first));
       m_table[p.first] = eq.variable();
     }
@@ -232,13 +244,16 @@ namespace detail {
       }
       
       // add equations for true and false if needed
-      if (m_has_true)
+      if (m_recursive_form)
       {
-        m_equations.push_back(boolean_equation(fixpoint_symbol::nu(), m_true, m_true));
-      }
-      if (m_has_false)
-      {
-        m_equations.push_back(boolean_equation(fixpoint_symbol::mu(), m_false, m_false));
+        if (m_has_true)
+        {
+          m_equations.push_back(boolean_equation(fixpoint_symbol::nu(), m_true, m_true));
+        }
+        if (m_has_false)
+        {
+          m_equations.push_back(boolean_equation(fixpoint_symbol::mu(), m_false, m_false));
+        }
       }
     }
   };
@@ -249,4 +264,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_BES_DETAIL_STANDARD_RECURSIVE_FORM_VISITOR_H
+#endif // MCRL2_BES_DETAIL_STANDARD_FORM_VISITOR_H

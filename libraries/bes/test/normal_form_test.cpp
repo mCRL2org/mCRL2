@@ -21,14 +21,14 @@
 using namespace mcrl2;
 using namespace mcrl2::bes;
 
-void test_standard_recursive_form(const std::string& bes_spec)
+void test_standard_recursive_form(const std::string& bes_spec, bool recursive_form = false)
 {
   boolean_equation_system<> b;
   std::stringstream from(bes_spec);
   from >> b;
   std::cout << "before\n" << pp(b) << std::endl;
 
-  make_standard_recursive_form(b);  
+  make_standard_form(b, recursive_form);  
   std::cout << "after\n" << pp(b) << std::endl;
 }
 
@@ -42,7 +42,8 @@ void test_standard_recursive_form()
     "                  \n"
     "init X1;          \n"
     ;
-  test_standard_recursive_form(bes1);
+  test_standard_recursive_form(bes1, false);
+  test_standard_recursive_form(bes1, true);
 
   std::string bes2 =
     "pbes                    \n"
@@ -53,7 +54,9 @@ void test_standard_recursive_form()
     "init X1;                \n"
     ;
 
-  test_standard_recursive_form(bes2);
+  test_standard_recursive_form(bes2, false);
+  test_standard_recursive_form(bes2, true);
+
   core::garbage_collect();
 }
 
