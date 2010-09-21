@@ -38,6 +38,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
+#include "mcrl2/pbes/detail/lps2pbes_indenter.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
@@ -277,7 +278,8 @@ lps2pbes_increase_indent();
         throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<satresult>" << pp(result) << std::flush;
+lps2pbes_decrease_indent();
+std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -545,7 +547,8 @@ lps2pbes_increase_indent();
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
+lps2pbes_decrease_indent();
+std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -661,7 +664,8 @@ lps2pbes_increase_indent();
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
+lps2pbes_decrease_indent();
+std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) << std::flush;
 #endif
       return result;
     }
@@ -729,7 +733,8 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
     pbes_expression sat_top(const lps::multi_action& a, action_formulas::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
+std::cerr << "\n" << lps2pbes_indent() << "<sat>" << a.to_string() << " " << pp(b) << std::flush;
+lps2pbes_increase_indent();
 #endif
       using namespace action_formulas::act_frm;
       using namespace action_formulas::accessors;
@@ -779,7 +784,8 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
         throw mcrl2::runtime_error(std::string("sat_top[untimed] error: unknown lps::action formula ") + b.to_string());
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<satresult>" << pp(result) << std::flush;
+lps2pbes_decrease_indent();
+std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -796,7 +802,8 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
                         std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<RHS>" << pp(f) << std::flush;
+std::cerr << "\n" << lps2pbes_indent() << "<RHS>" << pp(f) << std::flush;
+lps2pbes_increase_indent();
 #endif
       using namespace pbes_expr_optimized;
       using namespace data::detail;
@@ -956,7 +963,8 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
+lps2pbes_decrease_indent();
+std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -972,7 +980,8 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
                  const lps::linear_process &lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<E>" << pp(f) << std::flush;
+std::cerr << "\n" << lps2pbes_indent() << "<E>" << pp(f) << std::flush;
+lps2pbes_increase_indent();
 #endif
       using namespace state_formulas::state_frm;
       using namespace data;
@@ -1070,7 +1079,8 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
+lps2pbes_decrease_indent();
+std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) << std::flush;
 #endif
       return result;
     }

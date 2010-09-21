@@ -16,6 +16,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/pbes/detail/pbes_expression_builder_indenter.h"
 
 // this is only needed because of the data_true <-> pbes_true problems
 #include "mcrl2/data/data_expression.h"
@@ -32,38 +33,6 @@ namespace detail {
   };
 
 }
-
-#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-// use a static variable to store the indentation depth
-/// \cond INTERNAL_DOCS
-  template <class T> // note, T is only a dummy
-  struct pbes_expression_builder_indentation
-  {
-    static unsigned int depth;
-  };
-
-  template <class T>
-  unsigned int pbes_expression_builder_indentation<T>::depth = 0;
-
-  inline
-  std::string pbes_expression_builder_indent()
-  {
-    return std::string(pbes_expression_builder_indentation<int>::depth, ' ');
-  }
-
-  inline
-  void pbes_expression_builder_increase_indent()
-  {
-    pbes_expression_builder_indentation<int>::depth += 2;
-  }
-
-  inline
-  void pbes_expression_builder_decrease_indent()
-  {
-    pbes_expression_builder_indentation<int>::depth -= 2;
-  }
-/// \endcond
-#endif // MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
 /// \brief Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
