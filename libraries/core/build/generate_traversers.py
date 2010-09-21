@@ -33,7 +33,7 @@ def make_traverser_inc_file(filename, class_text, expression_class = None, expre
         ctext = re.sub('QUALIFIED_NODE', f.qualified_name(), ctext)
         ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
         if f.is_template():
-            ctext = 'template <typename ' + ', typename '.join(f.template_arguments()) + '>\n' + ctext
+            ctext = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + ctext
         result.append(ctext)
 
     if expression_class != None:
@@ -66,3 +66,4 @@ if __name__ == "__main__":
     make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES)
     make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
     make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/traverser.inc.h', STATE_FORMULA_CLASSES)
+    make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES)

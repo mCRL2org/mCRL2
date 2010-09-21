@@ -154,6 +154,21 @@ PBESForall        | forall(const data::variable_list& variables, const pbes_expr
 PBESExists        | exists(const data::variable_list& variables, const pbes_expression& body) | The existential quantification operator for pbes expressions
 '''
 
+BOOLEAN_CLASSES = r'''
+BooleanVariable | boolean_variable(const core::identifier_string& name)                                                                | A boolean variable
+BooleanEquation | boolean_equation(const fixpoint_symbol& symbol, const boolean_variable& variable, const boolean_expression& formula) | A boolean equation
+BES             | boolean_equation_system<Container>(const Container& equations, const boolean_expression& initial_state)              | A boolean equation system
+'''
+
+BOOLEAN_EXPRESSION_CLASSES = r'''
+BooleanTrue          | true_()                                                               | The value true for boolean expressions
+BooleanFalse         | false_()                                                              | The value false for boolean expressions
+BooleanNot           | not_(const boolean_expression& operand)                               | The not operator for boolean expressions
+BooleanAnd           | and_(const boolean_expression& left, const boolean_expression& right) | The and operator for boolean expressions
+BooleanOr            | or_(const boolean_expression& left, const boolean_expression& right)  | The or operator for boolean expressions
+BooleanImp           | imp(const boolean_expression& left, const boolean_expression& right)  | The implication operator for boolean expressions
+'''
+
 # removes 'const' and '&' from a type
 def extract_type(text):
     text = re.sub(r'\bconst\b', '', text)

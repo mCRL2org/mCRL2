@@ -57,6 +57,230 @@ namespace bes {
   /// \brief Read-only singly linked list of boolean expressions
   typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
+namespace unused {
+//--- start generated classes ---//
+/// \brief The value true for boolean expressions
+class true_: public boolean_expression
+{
+  public:
+    /// \brief Default constructor.
+    true_()
+      : boolean_expression(core::detail::constructBooleanTrue())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    true_(atermpp::aterm_appl term)
+      : boolean_expression(term)
+    {
+      assert(core::detail::check_term_BooleanTrue(m_term));
+    }
+};
+
+/// \brief The value false for boolean expressions
+class false_: public boolean_expression
+{
+  public:
+    /// \brief Default constructor.
+    false_()
+      : boolean_expression(core::detail::constructBooleanFalse())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    false_(atermpp::aterm_appl term)
+      : boolean_expression(term)
+    {
+      assert(core::detail::check_term_BooleanFalse(m_term));
+    }
+};
+
+/// \brief The not operator for boolean expressions
+class not_: public boolean_expression
+{
+  public:
+    /// \brief Default constructor.
+    not_()
+      : boolean_expression(core::detail::constructBooleanNot())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    not_(atermpp::aterm_appl term)
+      : boolean_expression(term)
+    {
+      assert(core::detail::check_term_BooleanNot(m_term));
+    }
+
+    /// \brief Constructor.
+    not_(const boolean_expression& operand)
+      : boolean_expression(core::detail::gsMakeBooleanNot(operand))
+    {}
+
+    boolean_expression operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+};
+
+/// \brief The and operator for boolean expressions
+class and_: public boolean_expression
+{
+  public:
+    /// \brief Default constructor.
+    and_()
+      : boolean_expression(core::detail::constructBooleanAnd())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    and_(atermpp::aterm_appl term)
+      : boolean_expression(term)
+    {
+      assert(core::detail::check_term_BooleanAnd(m_term));
+    }
+
+    /// \brief Constructor.
+    and_(const boolean_expression& left, const boolean_expression& right)
+      : boolean_expression(core::detail::gsMakeBooleanAnd(left, right))
+    {}
+
+    boolean_expression left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    boolean_expression right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The or operator for boolean expressions
+class or_: public boolean_expression
+{
+  public:
+    /// \brief Default constructor.
+    or_()
+      : boolean_expression(core::detail::constructBooleanOr())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    or_(atermpp::aterm_appl term)
+      : boolean_expression(term)
+    {
+      assert(core::detail::check_term_BooleanOr(m_term));
+    }
+
+    /// \brief Constructor.
+    or_(const boolean_expression& left, const boolean_expression& right)
+      : boolean_expression(core::detail::gsMakeBooleanOr(left, right))
+    {}
+
+    boolean_expression left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    boolean_expression right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The implication operator for boolean expressions
+class imp: public boolean_expression
+{
+  public:
+    /// \brief Default constructor.
+    imp()
+      : boolean_expression(core::detail::constructBooleanImp())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    imp(atermpp::aterm_appl term)
+      : boolean_expression(term)
+    {
+      assert(core::detail::check_term_BooleanImp(m_term));
+    }
+
+    /// \brief Constructor.
+    imp(const boolean_expression& left, const boolean_expression& right)
+      : boolean_expression(core::detail::gsMakeBooleanImp(left, right))
+    {}
+
+    boolean_expression left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    boolean_expression right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+//--- end generated classes ---//
+} // namespace unused
+
+//--- start generated is-functions ---//
+
+    /// \brief Test for a true expression
+    /// \param t A term
+    /// \return True if it is a true expression
+    inline
+    bool is_true(const boolean_expression& t)
+    {
+      return core::detail::gsIsBooleanTrue(t);
+    }
+
+    /// \brief Test for a false expression
+    /// \param t A term
+    /// \return True if it is a false expression
+    inline
+    bool is_false(const boolean_expression& t)
+    {
+      return core::detail::gsIsBooleanFalse(t);
+    }
+
+    /// \brief Test for a not expression
+    /// \param t A term
+    /// \return True if it is a not expression
+    inline
+    bool is_not(const boolean_expression& t)
+    {
+      return core::detail::gsIsBooleanNot(t);
+    }
+
+    /// \brief Test for a and expression
+    /// \param t A term
+    /// \return True if it is a and expression
+    inline
+    bool is_and(const boolean_expression& t)
+    {
+      return core::detail::gsIsBooleanAnd(t);
+    }
+
+    /// \brief Test for a or expression
+    /// \param t A term
+    /// \return True if it is a or expression
+    inline
+    bool is_or(const boolean_expression& t)
+    {
+      return core::detail::gsIsBooleanOr(t);
+    }
+
+    /// \brief Test for a imp expression
+    /// \param t A term
+    /// \return True if it is a imp expression
+    inline
+    bool is_imp(const boolean_expression& t)
+    {
+      return core::detail::gsIsBooleanImp(t);
+    }
+//--- end generated is-functions ---//
+
   /// \brief Returns true if the term t is a boolean expression
   /// \param t A boolean expression
   /// \return True if the term t is a boolean expression
