@@ -17,8 +17,7 @@
 
 #include <sstream>
 #include <algorithm>
-#include "mcrl2/modal_formula/mucalculus.h"
-#include "mcrl2/modal_formula/state_formula_rename.h"
+#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/core/find.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
@@ -27,15 +26,22 @@
 #include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/detail/data_utility.h"
-#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/data/xyz_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/modal_formula/monotonicity.h"
+#include "mcrl2/modal_formula/mucalculus.h"
+#include "mcrl2/modal_formula/state_formula_rename.h"
+#include "mcrl2/modal_formula/detail/state_variable_negator.h"
+#include "mcrl2/pbes/monotonicity.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
+#include "mcrl2/pbes/detail/lps2pbes_indenter.h"
 
 namespace mcrl2 {
 
@@ -73,31 +79,6 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
 
 /// \cond INTERNAL_DOCS
 namespace detail {
-
-  /// \brief Negates a propositional variable
-  struct propositional_variable_negator
-  {
-    const propositional_variable& v_;
-
-    propositional_variable_negator(const propositional_variable& v)
-      : v_(v)
-    {}
-
-    /// \brief Function call operator
-    /// \param t A propositional variable instantiation
-    /// \return The function result
-    pbes_expression operator()(propositional_variable_instantiation t) const
-    {
-      if (t.name() == v_.name())
-      {
-        return pbes_expr::not_(t);
-      }
-      else
-      {
-        return t;
-      }
-    }
-  };
 
   inline
   std::string print(const atermpp::vector<pbes_equation>& v)
@@ -663,11 +644,12 @@ lps2pbes_increase_indent();
           core::identifier_string X = name(f);
           data::variable_list xf = detail::mu_variables(f);
           data::variable_list xp = lps.process_parameters();
-          state_formulas::state_formula g = not_(arg(f));
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::nu() : fixpoint_symbol::mu();
           propositional_variable v(X, T + xf + xp + Par(X, data::variable_list(), f0));
+          state_formulas::state_formula g = not_(arg(f));
+          g = state_formulas::detail::negate_propositional_variable(v.name(), g);
           std::set<std::string> context;
-          pbes_expression expr = replace_propositional_variables(RHS(f0, g, lps, T, context), detail::propositional_variable_negator(v));
+          pbes_expression expr = RHS(f0, g, lps, T, context);
           pbes_equation e(sigma, v, expr);
           result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps, T);
         } else if (is_yaled_timed(f)) {
@@ -1071,11 +1053,12 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           core::identifier_string X = name(f);
           data::variable_list xf = detail::mu_variables(f);
           data::variable_list xp = lps.process_parameters();
-          state_formulas::state_formula g = not_(arg(f));
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::nu() : fixpoint_symbol::mu();
           propositional_variable v(X, xf + xp + Par(X, data::variable_list(), f0));
+          state_formulas::state_formula g = not_(arg(f));
+          g = state_formulas::detail::negate_propositional_variable(v.name(), g);
           std::set<std::string> context;
-          pbes_expression expr = replace_propositional_variables(RHS(f0, g, lps, context), detail::propositional_variable_negator(v));
+          pbes_expression expr = RHS(f0, g, lps, context);
           pbes_equation e(sigma, v, expr);
           result = atermpp::vector<pbes_equation>() + e + E(f0, g, lps);
         } else if (is_yaled_timed(f)) {
@@ -1107,6 +1090,11 @@ std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
       using atermpp::detail::operator+;
       lps::linear_process lps = spec.process();
 
+      if (!state_formulas::is_monotonous(formula))
+      {
+        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + pp(formula) + " is not monotonous!");
+      }
+
       // resolve name conflicts and wrap the formula in a mu or nu if needed
       state_formulas::state_formula f = preprocess_formula(formula, spec);
 
@@ -1124,6 +1112,7 @@ std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
       propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, data::variable_list(), f));
 
       pbes<> result = pbes<>(spec.data(), e, spec.global_variables(), init);
+      assert(is_monotonous(result));
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());

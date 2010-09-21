@@ -195,8 +195,8 @@ def make_expression_visitor(filename, expression, text):
     else_text = ''
 
     for c in classes:
-        (aterm, constructor, description) = c
-        f = FunctionDeclaration(constructor)
+        #(aterm, constructor, description) = c
+        f = c.constructor
 
         node = f.name()
         qualified_node = f.qualified_name()
@@ -263,8 +263,8 @@ def make_expression_builder(filename, expression, text):
     else_text = ''
 
     for c in classes:
-        (aterm, constructor, description) = c
-        f = FunctionDeclaration(constructor)
+        #(aterm, constructor, description) = c
+        f = c.constructor
 
         node = f.name()
         qualified_node = f.qualified_name()
@@ -341,16 +341,17 @@ def make_is_functions(filename, text):
     rtext = ''
     classes = parse_classes(text)
     for c in classes:
-        (aterm, constructor, description) = c
-        f = FunctionDeclaration(constructor)
+        #(aterm, constructor, description) = c
+        f = c.constructor
         name = f.name()
-        rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, aterm)
+        rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, c.aterm)
     insert_text_in_file(filename, rtext, 'generated is-functions')
 
 if __name__ == "__main__":
     make_expression_visitor('../../process/include/mcrl2/process/process_expression_visitor.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
     make_expression_builder('../../process/include/mcrl2/process/process_expression_builder.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
     make_is_functions(      '../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES)
+    make_expression_visitor('../../lps/include/mcrl2/modal_formula/state_formula_visitor.h', 'state_formula', STATE_FORMULA_CLASSES)
     # N.B. This doesn't work, since the pbes expression visitors need to be patched for the value true
     # make_expression_visitor('../../pbes/include/mcrl2/pbes/pbes_expression_visitor.h', 'pbes_expression', PBES_EXPRESSION_CLASSES)
     # make_expression_builder('../../pbes/include/mcrl2/pbes/pbes_expression_builder.h', 'pbes_expression', PBES_EXPRESSION_CLASSES)
