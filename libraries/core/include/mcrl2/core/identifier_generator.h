@@ -90,7 +90,7 @@ namespace core {
       std::string operator()(std::string hint)
       {
         // make sure there are no digits at the end of hint
-		    if (std::isdigit(hint.back()))
+        if (std::isdigit(hint[hint.size() - 1]))
         {
           std::string::size_type i = hint.find_last_not_of("0123456789");
           hint = hint.substr(0, i + 1);

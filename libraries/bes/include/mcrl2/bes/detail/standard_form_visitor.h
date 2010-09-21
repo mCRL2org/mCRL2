@@ -13,7 +13,7 @@
 #define MCRL2_BES_DETAIL_STANDARD_FORM_VISITOR_H
 
 #include "mcrl2/bes/boolean_expression_visitor.h"
-#include "mcrl2/bes/boolean_equation.h"
+#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/core/identifier_generator.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/map.h"
