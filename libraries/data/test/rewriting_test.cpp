@@ -32,21 +32,14 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/utilities/test_utilities.h"
 
+using mcrl2::utilities::collect_after_test_case;
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
-
-// Garbage collect after each case.
-struct collect_after_test_case {
-  ~collect_after_test_case()
-  {
-    mcrl2::core::garbage_collect();
-  }
-};
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 

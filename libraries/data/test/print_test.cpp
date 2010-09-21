@@ -10,7 +10,6 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
@@ -27,18 +26,12 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/detail/sort_traverser.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/test_utilities.h"
 
+using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
 using namespace mcrl2::data::sort_nat;
-
-// Garbage collect after each case.
-struct collect_after_test_case {
-  ~collect_after_test_case()
-  {
-    mcrl2::core::garbage_collect();
-  }
-};
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 

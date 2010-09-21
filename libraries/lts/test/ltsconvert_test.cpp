@@ -18,17 +18,12 @@
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/test_utilities.h"
 
+using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::lts;
 
-struct collect_after_test_case {
-  ~collect_after_test_case()
-  {
-    mcrl2::core::garbage_collect();
-  }
-};
-
-// BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 const std::string test1= 
 "des (0,2,2)\n"
