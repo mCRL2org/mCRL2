@@ -420,14 +420,14 @@ else(MCRL2_USE_BOOST_INTERNAL)
     message( FATAL_ERROR "this option may be removed in the near future." )
   endif(NOT Boost_FOUND)
 
-  if( Boost_VERSION LESS 103400 )
-    message( STATUS "Boost version v1.34 or higher required." )
+  if( Boost_VERSION LESS 103500 )
+    message( STATUS "Boost version v1.35 or higher required." )
     message( STATUS "Current Boost version: ${Boost_VERSION}.")
     message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
     message( STATUS "instructions on building mCRL2 with an external version of boost.")
     message( STATUS "As a last resort, you can use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost." )
     message( FATAL_ERROR "this option may be removed in the near future." )
-  endif( Boost_VERSION LESS 103400 )
+  endif( Boost_VERSION LESS 103500 )
 
   message( STATUS "Boost version: ${Boost_VERSION}" )
  
@@ -690,6 +690,7 @@ option(MCRL2_ENABLE_EXPERIMENTAL "Enable/disable creation of experimental tools"
 message(STATUS "MCRL2_ENABLE_EXPERIMENTAL: ${MCRL2_ENABLE_EXPERIMENTAL}" )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)
+  add_subdirectory ( tools/besconvert )
   add_subdirectory ( tools/lpsrealelm )
   add_subdirectory ( tools/lpsbisim2pbes )
   add_subdirectory ( tools/pbes2bes)

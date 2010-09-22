@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/algorithm.h" // find_if
+#include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -281,6 +282,22 @@ class imp: public boolean_expression
     }
 //--- end generated is-functions ---//
 
+namespace accessors
+{
+  boolean_expression left(boolean_expression const& e)
+  {
+    assert(is_and(e) || is_or(e) || is_imp(e));
+    return atermpp::arg1(e);
+  }
+
+  boolean_expression right(boolean_expression const& e)
+  {
+    assert(is_and(e) || is_or(e) || is_imp(e));
+    return atermpp::arg2(e);
+  }
+
+} // namespace accessors
+
   /// \brief Returns true if the term t is a boolean expression
   /// \param t A boolean expression
   /// \return True if the term t is a boolean expression
@@ -483,6 +500,58 @@ namespace core {
 namespace mcrl2 {
 
 namespace bes {
+
+  /// \brief Returns or applied to the sequence of boolean expressions [first, last)
+  /// \param first Start of a sequence of boolean expressions
+  /// \param last End of a sequence of of boolean expressions
+  /// \return Or applied to the sequence of boolean expressions [first, last)
+  template <typename FwdIt>
+  boolean_expression join_or(FwdIt first, FwdIt last)
+  {
+    typedef core::term_traits<boolean_expression> tr;
+    return core::detail::join(first, last, tr::or_, tr::false_());
+  }
+
+  /// \brief Returns and applied to the sequence of boolean expressions [first, last)
+  /// \param first Start of a sequence of boolean expressions
+  /// \param last End of a sequence of of boolean expressions
+  /// \return And applied to the sequence of boolean expressions [first, last)
+  template <typename FwdIt>
+  boolean_expression join_and(FwdIt first, FwdIt last)
+  {
+    typedef core::term_traits<boolean_expression> tr;
+    return core::detail::join(first, last, tr::and_, tr::true_());
+  }
+
+  /// \brief Splits a disjunction into a sequence of operands
+  /// Given a boolean expression of the form p1 || p2 || .... || pn, this will yield a
+  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
+  /// function symbol.
+  /// \param expr A boolean expression
+  /// \return A sequence of operands
+  inline
+  atermpp::set<boolean_expression> split_or(const boolean_expression& expr)
+  {
+    using namespace accessors;
+    atermpp::set<boolean_expression> result;
+    core::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_or, left, right);
+    return result;
+  }
+
+  /// \brief Splits a conjunction into a sequence of operands
+  /// Given a boolean expression of the form p1 && p2 && .... && pn, this will yield a
+  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
+  /// function symbol.
+  /// \param expr A boolean expression
+  /// \return A sequence of operands
+  inline
+  atermpp::set<boolean_expression> split_and(const boolean_expression& expr)
+  {
+    using namespace accessors;
+    atermpp::set<boolean_expression> result;
+    core::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_and, left, right);
+    return result;
+  }
 
   /// \brief Pretty print function
   /// \param e A boolean expression
