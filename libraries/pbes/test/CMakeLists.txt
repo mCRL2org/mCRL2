@@ -35,7 +35,7 @@ foreach( OBJ ${TERM_OBJS} )
     message(STATUS "skipped pbes_solve_test")
   else(NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test" )
 
-    add_executable("${PREFIX}_${result}" "${OBJ}"  )
+    add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
     target_link_libraries("${PREFIX}_${result}"
      mcrl2_lps
     )

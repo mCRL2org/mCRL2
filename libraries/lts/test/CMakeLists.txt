@@ -33,7 +33,7 @@ file(GLOB TERM_OBJS "*.cpp")
 foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
   project( "${PREFIX}_${result}" )
-  add_executable("${PREFIX}_${result}" "${OBJ}" )
+  add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}" )
     if(MCRL2_USE_BOOST_INTERNAL)
       target_link_libraries("${PREFIX}_${result}"
       boost
