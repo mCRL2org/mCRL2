@@ -6,6 +6,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
+
 # ########## Project setup ##########
 project(lps_tests)
 cmake_minimum_required(VERSION 2.6)
@@ -32,19 +33,6 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_lps
   )
 
-  # Add tests 
-  # This method compiles tests when invoked
-  # using the current configuration 
-  ADD_TEST("${PREFIX}_${result}" ${CMAKE_CTEST_COMMAND}
-   --build-and-test
-   "${CMAKE_CURRENT_SOURCE_DIR}"
-   "${CMAKE_CURRENT_BINARY_DIR}"
-   --build-noclean
-   --build-nocmake
-   --build-generator "${CMAKE_GENERATOR}"
-   --build-target "${PREFIX}_${result}"
-   --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
-   --test-command "${CMAKE_CURRENT_BINARY_DIR}/${PREFIX}_${result}"
-  )
-  set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+  # MACRO is defined in CMakeLists.txt in root of source tree
+  build_and_run_test_target( ${PREFIX}_${result} )
 endforeach( OBJ ) 

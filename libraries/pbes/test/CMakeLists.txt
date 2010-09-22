@@ -54,8 +54,9 @@ foreach( OBJ ${TERM_OBJS} )
         mcrl2_pbespgsolve
       )
     endif(MCRL2_ENABLE_EXPERIMENTAL)
-    add_test("${PREFIX}_${result}" "${pbes_tests_BINARY_DIR}/${PREFIX}_${result}" )
-    set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+
+    # MACRO is defined in CMakeLists.txt in root of source tree
+    build_and_run_test_target( ${PREFIX}_${result} )
 
   endif( NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test")
 

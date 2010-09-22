@@ -45,7 +45,7 @@ foreach( OBJ ${TERM_OBJS} )
     ) 
   endif(MCRL2_USE_BOOST_INTERNAL)
   
-  add_test("${PREFIX}_${result}" "${bes_tests_BINARY_DIR}/${PREFIX}_${result}" )
-  set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+  # MACRO is defined in CMakeLists.txt in root of source tree
+  build_and_run_test_target( ${PREFIX}_${result} )
 
 endforeach( OBJ )  

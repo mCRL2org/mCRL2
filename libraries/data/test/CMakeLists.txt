@@ -35,7 +35,8 @@ foreach( OBJ ${TERM_OBJS} )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_data
   )
-  add_test("${PREFIX}_${result}" "${data_tests_BINARY_DIR}/${PREFIX}_${result}" )
+  # MACRO is defined in CMakeLists.txt in root of source tree
+  build_and_run_test_target( ${PREFIX}_${result} )
 
   list(FIND FAILING_TESTS "${PREFIX}_${result}" FIND_ELM ) 
   if( -1 EQUAL FIND_ELM )

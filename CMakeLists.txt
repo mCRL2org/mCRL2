@@ -847,18 +847,35 @@ message(STATUS "MCRL2_ENABLE_TEST_TARGETS: ${MCRL2_ENABLE_TEST_TARGETS}" )
 ENABLE_TESTING()
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/CTestCustom.cmake" )
 
-   add_subdirectory( libraries/lps/test)
+  # Define macro for build_and_run_test_targets
+  # This method compiles tests when invoked
+  macro( build_and_run_test_target TARGET )
+    ADD_TEST("${TARGET}" ${CMAKE_CTEST_COMMAND}
+     --build-and-test
+     "${CMAKE_CURRENT_SOURCE_DIR}"
+     "${CMAKE_CURRENT_BINARY_DIR}"
+     --build-noclean
+     --build-nocmake
+     --build-generator "${CMAKE_GENERATOR}"
+     --build-target "${TARGET}"
+     --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
+     --test-command "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
+    )
+    set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+  endmacro( build_and_run_test_target TARGET )
+
+  add_subdirectory( libraries/lps/test)
+  add_subdirectory( libraries/bes/test)
+  add_subdirectory( libraries/pbes/test)
+  add_subdirectory( libraries/lts/test)
+  add_subdirectory( libraries/data/test)
+  add_subdirectory( libraries/core/test)
+  add_subdirectory( libraries/utilities/test)
+  add_subdirectory( libraries/process/test )
+  add_subdirectory( libraries/atermpp/test )
+  add_subdirectory( libraries/trace/test )
 
 if( MCRL2_ENABLE_TEST_TARGETS )
-   add_subdirectory( libraries/bes/test)
-   add_subdirectory( libraries/pbes/test)
-   add_subdirectory( libraries/lts/test)
-   add_subdirectory( libraries/data/test)
-   add_subdirectory( libraries/core/test)
-   add_subdirectory( libraries/utilities/test)
-   add_subdirectory( libraries/process/test )
-   add_subdirectory( libraries/atermpp/test )
-   add_subdirectory( libraries/trace/test )
    add_subdirectory( tools/lpsparunfold/test )
 endif( MCRL2_ENABLE_TEST_TARGETS )
 
