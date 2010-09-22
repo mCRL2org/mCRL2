@@ -1,4 +1,19 @@
 ===============================================================================
+Changes between toolset releases July 2010 and September 2010:
+===============================================================================
+ 
+ General:
+   - The September 2010 release is a bugfix release that fixes two serious bugs
+     in the July 2010 release.
+
+ Bugs fixed:
+   - Fresh variables that were introduced in lps2pbes were not always
+     sufficiently fresh. This could cause incorrect verification results if
+     lps2pbes was used.
+   - lps2pbes sometimes incorrectly rejected modal formulas as non-monotonous,
+     whereas in fact they were monotonous.
+
+===============================================================================
 Changes between toolset releases January 2010 and July 2010:
 ===============================================================================
 
