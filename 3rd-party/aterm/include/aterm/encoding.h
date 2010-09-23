@@ -6,21 +6,21 @@
 #define ENCODING_H
 #include "atypes.h"
 
-#ifndef AT_64BIT
-/* Covers gcc, icc, msvc and Solaris cc */
-# if defined(__LP64__) || defined(_LP64) || defined(__lp64) || \
-     defined(_ADDR64) || defined(__arch64__) || defined(_M_X64)
-#  define AT_64BIT
-# endif
-#endif
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif/* __cplusplus */
 
+// The original ATerm library made the (incorrect) assumption that sizeof(long)
+// is always 64 on 64-bit machines. A better check for 64-bit registers is the
+// use of C99 integral types.
 #ifndef SIZEOF_LONG
-#define SIZEOF_LONG (sizeof(long))
+// #define SIZEOF_LONG (sizeof(long))
+#ifdef AT_64BIT
+#  define SIZEOF_LONG 8
+#else
+#  define SIZEOF_LONG sizeof(long)
+#endif
 #endif
 
 /*
@@ -40,7 +40,9 @@ extern "C"
   
 */
 
-typedef unsigned long header_type;
+// Although atypes.h defines MachineWord, it wasn't used here:
+// typedef unsigned long header_type;
+typedef MachineWord header_type;
 
 #define HEADER_BITS      (SIZEOF_LONG*8)
 
@@ -70,7 +72,7 @@ typedef unsigned long header_type;
 
 #define MASK_AGE_MARK    (MASK_AGE|MASK_MARK)
 
-#define MAX_LENGTH       (1 << LENGTH_BITS)
+#define MAX_LENGTH       (((MachineWord)1) << LENGTH_BITS)
 
 #define GET_AGE(h)       ((unsigned int)(((h) & MASK_AGE) >> SHIFT_AGE))
 #define SET_AGE(h, a)    do { h = ((h) & ~MASK_AGE) | (((a) << SHIFT_AGE) & MASK_AGE); } while (0)

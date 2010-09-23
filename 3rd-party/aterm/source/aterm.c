@@ -8,6 +8,7 @@
 
 #ifdef WIN32
 #include <fcntl.h>
+#include <io.h>
 #endif
 
 #include "_aterm.h"

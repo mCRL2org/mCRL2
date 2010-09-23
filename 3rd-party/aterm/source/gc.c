@@ -244,7 +244,7 @@ VOIDCDECL mark_phase()
   ProtEntry *prot;
   ATprotected_block pblock;
 
-#if defined(_MSC_VER) && defined(WIN32)
+#if defined(_MSC_VER) && defined(WIN32) && (_MSC_VER < 1600)
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
     r_esi, r_edi, r_esp, r_ebp;
@@ -370,7 +370,7 @@ VOIDCDECL mark_phase_young()
   ATprotected_block pblock;
 
   unsigned int count=0;
-#if defined(_MSC_VER) && defined(WIN32)
+#if defined(_MSC_VER) && defined(WIN32) && (_MSC_VER < 1600)
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
     r_esi, r_edi, r_esp, r_ebp;
