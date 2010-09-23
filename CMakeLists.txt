@@ -940,7 +940,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   # add_test(grapemcrl2_smoke ${grapemcrl2_BINARY_DIR}/grapemcrl2)
   # set_tests_properties(grapemcrl2_smoke PROPERTIES TIMEOUT 15 )
 
-
   # Documentation tests
   if (MCRL2_MAN_PAGES)
     add_test(mcrl22lps_generate-man-page ${mcrl22lps_BINARY_DIR}/mcrl22lps --generate-man-page)
@@ -983,11 +982,11 @@ include(CTest)
 ##---------------------------------------------------
 ## Header tests
 ##---------------------------------------------------
-option(MCRL2_TRYCOMPILE_HEADER_TESTS "Enable/disable try_compile of library headers" OFF)
-message(STATUS "MCRL2_TRYCOMPILE_HEADER_TESTS: ${MCRL2_TRYCOMPILE_HEADER_TESTS}" )
-set(MCRL2_HEADER_TESTS_OUTPUT CACHE FILEPATH "FilePath to store header test results (Empty for stdout)." )
-message(STATUS "MCRL2_HEADER_TESTS_OUTPUT: ${MCRL2_HEADER_TESTS_OUTPUT}" )
-include( scripts/HeaderTests.cmake )
+option(MCRL2_COMPILE_HEADER_TESTS "Enable/disable compile of library headers" OFF)
+message(STATUS "MCRL2_COMPILE_HEADER_TESTS: ${MCRL2_COMPILE_HEADER_TESTS}" )
+if(MCRL2_COMPILE_HEADER_TESTS)
+  add_subdirectory( build/testing )
+endif( MCRL2_COMPILE_HEADER_TESTS)
 
 ##---------------------------------------------------
 ## Additional make targets
