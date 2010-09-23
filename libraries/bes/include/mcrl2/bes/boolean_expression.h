@@ -58,7 +58,7 @@ namespace bes {
   /// \brief Read-only singly linked list of boolean expressions
   typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
-namespace unused {
+//namespace unused {
 //--- start generated classes ---//
 /// \brief The value true for boolean expressions
 class true_: public boolean_expression
@@ -223,7 +223,7 @@ class imp: public boolean_expression
     }
 };
 //--- end generated classes ---//
-} // namespace unused
+//} // namespace unused
 
 //--- start generated is-functions ---//
 
