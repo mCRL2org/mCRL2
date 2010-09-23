@@ -69,7 +69,8 @@ namespace mcrl2 {
         return false;
       }
     }
-    
+
+/*    
     /// \brief Returns or applied to the sequence of boolean expressions [first, last)
     /// \param first Start of a sequence of boolean expressions
     /// \param last End of a sequence of boolean expressions
@@ -121,7 +122,7 @@ namespace mcrl2 {
       core::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), tr::is_and, tr::left, tr::right);
       return result;
     }
-
+*/
     /// \brief Determines whether a boolean expression is in standard form.
     /// \param e a boolean expression
     /// \return true iff e is in standard form.

@@ -612,7 +612,7 @@ namespace bes {
   {
     typedef core::term_traits<boolean_expression> tr;
 
-    if (tr::is_boolean_variable(e))
+    if (tr::is_variable(e))
     {
       return pp(boolean_variable(e));
     }
