@@ -16,10 +16,8 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/bes_parse.h"
+#include "mcrl2/bes/find.h"
 #include "mcrl2/core/garbage_collection.h"
-
-#include "mcrl2/bes/traverser.h"
-#include "mcrl2/core/detail/find.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -77,11 +75,51 @@ void test_my_find()
   core::garbage_collect();
 }
 
+void test_find()
+{
+  std::string bes1 =
+    "pbes              \n"
+    "                  \n"
+    "nu X1 = X2 && X1; \n"
+    "mu X2 = X1 || X2; \n"
+    "                  \n"
+    "init X1;          \n"
+    ;
+  boolean_equation_system<> b;
+  std::stringstream from(bes1);
+  from >> b;
+
+  std::set<boolean_variable> v;
+
+  //--- find_variables ---//
+  v = find_variables(b);
+  BOOST_CHECK(v.size() == 2);
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+
+  boolean_equation eq = b.equations().front();
+  std::clog << "<eq>" << pp(eq) << std::endl;
+  v = find_variables(eq);
+  BOOST_CHECK(v.size() == 2);
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+
+  boolean_expression x = eq.formula();
+  std::clog << "<x>" << pp(x) << std::endl;
+  v = find_variables(x);
+  BOOST_CHECK(v.size() == 2);
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_my_find();
+  test_find();
 
   return EXIT_SUCCESS;
 }

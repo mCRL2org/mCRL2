@@ -12,16 +12,17 @@
 #ifndef MCRL2_BES_FIND_H
 #define MCRL2_BES_FIND_H
 
+#include <iterator>
 #include "mcrl2/bes/boolean_expression.h"
-#include "mcrl2/bes/detail/traverser.h"
-#include "mcrl2/bes/detail/binding_aware_traverser.h"
+#include "mcrl2/bes/traverser.h"
+//#include "mcrl2/bes/binding_aware_traverser.h"
 #include "mcrl2/core/detail/find.h"
 
 namespace mcrl2 {
 
 namespace bes {
 
-  /// \brief Returns all variables that occur in a range of expressions
+  /// \brief Returns all boolean variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \param[in,out] o an output iterator to which all variables occurring in t
   ///             are added.
@@ -29,7 +30,7 @@ namespace bes {
   template <typename Container, typename OutputIterator>
   void find_variables(Container const& container, OutputIterator o)
   {
-    core::detail::make_find_helper<boolean_variable, bes::detail::traverser, OutputIterator>(o)(container);
+    core::detail::make_find_helper<boolean_variable, bes::traverser, OutputIterator>(o)(container);
   }
 
   /// \brief Returns all variables that occur in a range of expressions
@@ -43,6 +44,7 @@ namespace bes {
     return result;
   }
 
+/*
   /// \brief Returns all variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \param[in,out] o an output iterator to which all variables occurring in t
@@ -92,6 +94,7 @@ namespace bes {
     bes::find_free_variables(container, std::inserter(result, result.end()), bound);
     return result;
   }
+*/
 
 } // namespace bes
 
