@@ -594,6 +594,15 @@ namespace bes {
   }
 
   /// \brief Pretty print function
+  /// \param v A boolean variable
+  /// \return A pretty printed representation of the boolean variable
+  inline
+  std::string pp(const boolean_variable& v)
+  {
+    return std::string(v.name());
+  }
+
+  /// \brief Pretty print function
   /// \param e A boolean expression
   /// \param add_parens If true, parentheses are put around sub-expressions.
   /// \return A pretty printed representation of the boolean expression.
@@ -603,9 +612,9 @@ namespace bes {
   {
     typedef core::term_traits<boolean_expression> tr;
 
-    if (tr::is_variable(e))
+    if (tr::is_boolean_variable(e))
     {
-      return std::string(boolean_variable(e).name());
+      return pp(boolean_variable(e));
     }
     else if (tr::is_true(e))
     {
