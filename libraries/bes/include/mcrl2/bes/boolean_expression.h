@@ -23,7 +23,7 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/term_traits.h"
-#include "mcrl2/bes/boolean_variable.h"
+#include "mcrl2/core/print.h"
 
 namespace mcrl2 {
 
@@ -58,7 +58,6 @@ namespace bes {
   /// \brief Read-only singly linked list of boolean expressions
   typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
-//namespace unused {
 //--- start generated classes ---//
 /// \brief The value true for boolean expressions
 class true_: public boolean_expression
@@ -222,8 +221,40 @@ class imp: public boolean_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief A boolean variable
+class boolean_variable: public boolean_expression
+{
+  public:
+    /// \brief Default constructor.
+    boolean_variable()
+      : boolean_expression(core::detail::constructBooleanVariable())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    boolean_variable(atermpp::aterm_appl term)
+      : boolean_expression(term)
+    {
+      assert(core::detail::check_term_BooleanVariable(m_term));
+    }
+
+    /// \brief Constructor.
+    boolean_variable(const core::identifier_string& name)
+      : boolean_expression(core::detail::gsMakeBooleanVariable(name))
+    {}
+
+    /// \brief Constructor.
+    boolean_variable(const std::string& name)
+      : boolean_expression(core::detail::gsMakeBooleanVariable(core::identifier_string(name)))
+    {}
+
+    core::identifier_string name() const
+    {
+      return atermpp::arg1(*this);
+    }
+};
 //--- end generated classes ---//
-//} // namespace unused
 
 //--- start generated is-functions ---//
 
@@ -279,6 +310,15 @@ class imp: public boolean_expression
     bool is_imp(const boolean_expression& t)
     {
       return core::detail::gsIsBooleanImp(t);
+    }
+
+    /// \brief Test for a boolean_variable expression
+    /// \param t A term
+    /// \return True if it is a boolean_variable expression
+    inline
+    bool is_boolean_variable(const boolean_expression& t)
+    {
+      return core::detail::gsIsBooleanVariable(t);
     }
 //--- end generated is-functions ---//
 
@@ -489,7 +529,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return mcrl2::bes::pp(t);
+      return mcrl2::core::pp(t);
     }
   };
 
@@ -565,7 +605,7 @@ namespace bes {
 
     if (tr::is_variable(e))
     {
-      return pp(tr::term2variable(e));
+      return std::string(boolean_variable(e).name());
     }
     else if (tr::is_true(e))
     {

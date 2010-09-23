@@ -30,6 +30,7 @@ namespace bes {
       // Moreover, this if statement can be replaced by an array lookup.
       void operator()(boolean_expression const& x)
       {
+        static_cast<Derived&>(*this).enter(x);
         if (is_true(x))
         {
           static_cast<Derived&>(*this)(true_(x));
@@ -54,6 +55,11 @@ namespace bes {
         {
           static_cast<Derived&>(*this)(imp(x));
         }
+        else if (is_boolean_variable(x))
+        {
+          static_cast<Derived&>(*this)(boolean_variable(x));
+        }
+        static_cast<Derived&>(*this).leave(x);
       }
 
       void operator()(const core::identifier_string& s)

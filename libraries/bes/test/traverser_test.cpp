@@ -64,11 +64,90 @@ void test_custom_traverser()
   core::garbage_collect();
 }
 
+class traverser1: public traverser<traverser1>
+{
+  public:
+    typedef traverser<traverser1> super;
+      
+    using super::enter;
+    using super::leave;
+
+    unsigned int variable_count;
+    unsigned int equation_count;
+    unsigned int expression_count;
+
+    traverser1()
+    : variable_count(0),
+      equation_count(0),
+      expression_count(0)
+    {}
+
+#if BOOST_MSVC
+      // Workaround for malfunctioning MSVC 2008 overload resolution
+      template <typename Container>
+      void operator()(Container const& a)
+      {
+        super::operator()(a);
+      }
+#endif
+
+    void enter(const boolean_variable& v)
+    {
+      variable_count++;
+    }
+
+    void enter(const boolean_equation& eq)
+    {
+      equation_count++;
+    }
+
+    void enter(const boolean_expression& x)
+    {
+      expression_count++;
+    }
+};
+
+void test_traverser1()
+{
+  traverser1 t1;
+  boolean_expression x = boolean_variable("X");
+  t1(x);
+
+  BOOST_CHECK(t1.variable_count == 1);
+  BOOST_CHECK(t1.expression_count == 1);
+  BOOST_CHECK(t1.equation_count == 0);
+
+  //--------------------------//
+
+  traverser1 t2;
+
+  std::string bes1 =
+    "pbes              \n"
+    "                  \n"
+    "nu X1 = X2 && X1; \n"
+    "mu X2 = X1 || X2; \n"
+    "                  \n"
+    "init X1;          \n"
+    ;
+  boolean_equation_system<> b;
+  std::stringstream from(bes1);
+  from >> b;
+
+  t2(b);
+
+  BOOST_CHECK(t2.variable_count == 7);
+  BOOST_CHECK(t2.expression_count == 7);
+  BOOST_CHECK(t2.equation_count == 2);
+
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_custom_traverser();
+  test_traverser1();
 
   return EXIT_SUCCESS;
 }
