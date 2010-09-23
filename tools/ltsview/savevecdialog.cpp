@@ -162,7 +162,7 @@ void SaveVecDialog::onChoice(wxCommandEvent& event)
 
 void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
 {
-  FILE *fp = fopen(f_name.GetFullPath().fn_str(), "wb");
+  FILE *fp = fopen(f_name.GetFullPath().mb_str(wxConvUTF8), "wb");
   if (fp == NULL)
   {
     wxMessageDialog msgDialog(GetParent(),
@@ -217,7 +217,7 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
   {
     buffsize += 1024*1024;
     begstate =
-      gl2psBeginPage(f_name.GetFullName().fn_str(), "LTSView", NULL,
+      gl2psBeginPage(f_name.GetFullName().mb_str(wxConvUTF8), "LTSView", NULL,
           f_formats[ft_choice->GetSelection()], GL2PS_BSP_SORT, options,
           GL_RGBA, 0, NULL, 0, 0, 0, buffsize, fp, "" );
     if (begstate == GL2PS_ERROR)

@@ -170,7 +170,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
   if (dialog.ShowModal() == wxID_OK)
   {
     wxString path = dialog.GetPath();
-    std::string stPath(path.fn_str());
+    std::string stPath(path.mb_str(wxConvUTF8));
 
     app->getAlgorithm(0)->stop();
     app->openFile(stPath);
@@ -193,7 +193,7 @@ void MainFrame::onImport(wxCommandEvent& /*event*/)
   if (dialog.ShowModal() == wxID_OK)
   {
     wxString path = dialog.GetPath();
-    std::string stPath(path.fn_str());
+    std::string stPath(path.mb_str(wxConvUTF8));
 
     app->getAlgorithm(0)->stop();
     app->openFile(stPath);

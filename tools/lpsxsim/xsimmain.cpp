@@ -107,7 +107,7 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
       bool b = config.GetFirstEntry(s,i);
       while ( b )
       {
-        string t(config.Read(s,wxT("")).fn_str());
+        string t(config.Read(s,wxT("")).mb_str(wxConvUTF8));
         simulator->LoadView(t);
         b = config.GetNextEntry(s,i);
       }
@@ -341,7 +341,7 @@ void XSimMain::LoadFile(const wxString &filename)
 {
     try
     {
-       m_specification.load(std::string(filename.fn_str()));
+       m_specification.load(std::string(filename.mb_str(wxConvUTF8)));
     }
     catch (std::exception const& e)
     {
@@ -366,7 +366,7 @@ void XSimMain::LoadFile(const wxString &filename)
 
 void XSimMain::LoadDLL(const wxString &filename)
 {
-  string s(filename.fn_str());
+  string s(filename.mb_str(wxConvUTF8));
   simulator->LoadView(s);
 }
 
@@ -476,7 +476,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
     wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_CHANGE_DIR);
     if ( dialog.ShowModal() == wxID_OK )
     {
-      string fn(dialog.GetPath().fn_str());
+      string fn(dialog.GetPath().mb_str(wxConvUTF8));
             Stopper_Enter();
             try
       {
@@ -495,7 +495,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
     wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_SAVE|wxFD_CHANGE_DIR);
     if ( dialog.ShowModal() == wxID_OK )
     {
-      string fn(dialog.GetPath().fn_str());
+      string fn(dialog.GetPath().mb_str(wxConvUTF8));
       try
       {
         simulator->SaveTrace(fn);

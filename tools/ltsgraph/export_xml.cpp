@@ -24,7 +24,7 @@ bool ExporterXML::export_to(wxString _filename)
   try
   {
 
-    ticpp::Document xmlDoc(_filename.fn_str());
+    ticpp::Document xmlDoc(_filename.mb_str(wxConvUTF8));
 
     ticpp::Declaration* decl = new ticpp::Declaration("1.0", "", "");
     xmlDoc.LinkEndChild(decl);

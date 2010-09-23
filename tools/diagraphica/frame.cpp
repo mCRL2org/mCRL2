@@ -2690,7 +2690,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
             mediator->openFile(
-                string(filePath.fn_str() ) );
+                string(filePath.mb_str(wxConvUTF8) ) );
         }
 
         delete fileDialog;
@@ -2715,7 +2715,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-	    string s = string( filePath.fn_str() );
+	    string s = string( filePath.mb_str(wxConvUTF8) );
 	    size_t found = s.find(".fsm");
 	    if( found == string::npos)
 	    {
@@ -2746,7 +2746,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-	    string s = string( filePath.fn_str() );
+	    string s = string( filePath.mb_str(wxConvUTF8) );
 	    size_t found = s.find(".fsm");
 	    if( found == string::npos)
 	    {
@@ -2777,7 +2777,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
             mediator->handleLoadAttrConfig(
-                string( string(filePath.fn_str()) ) );
+                string( string(filePath.mb_str(wxConvUTF8)) ) );
         }
 
         delete fileDialog;
@@ -2803,7 +2803,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-	    string s = string( filePath.fn_str() );
+	    string s = string( filePath.mb_str(wxConvUTF8) );
 	    size_t found = s.find(".dgc");
 	    if( found == string::npos)
 	    {
@@ -2834,7 +2834,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
             mediator->handleLoadDiagram(
-               string( filePath.fn_str() ) );
+               string( filePath.mb_str(wxConvUTF8) ) );
         }
 
         delete fileDialog;
@@ -2859,7 +2859,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-	    string s = string( filePath.fn_str() );
+	    string s = string( filePath.mb_str(wxConvUTF8) );
 	    size_t found = s.find(".dgd");
 	    if( found == string::npos)
 	    {
@@ -3761,7 +3761,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
                 wxT("Rename attribute") );
             while ( dlg->ShowModal() == wxID_OK && name.size() <= 0)
             {
-                name = string(dlg->GetValue().fn_str());
+                name = string(dlg->GetValue().mb_str(wxConvUTF8));
 
                 if ( name.size() > 0 )
                 {
@@ -3931,7 +3931,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
                 wxT("Group domain values") );
             while ( dlg->ShowModal() == wxID_OK && name.size() <= 0)
             {
-                name = string(dlg->GetValue().fn_str());
+                name = string(dlg->GetValue().mb_str(wxConvUTF8));
 
                 if ( name.size() > 0 )
                 {
@@ -3998,7 +3998,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
                 wxT("Rename domain value") );
             while ( dlg->ShowModal() == wxID_OK && name.size() <= 0)
             {
-                name = string(dlg->GetValue().fn_str());
+                name = string(dlg->GetValue().mb_str(wxConvUTF8));
 
                 if ( name.size() > 0 )
                 {

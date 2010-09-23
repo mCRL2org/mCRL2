@@ -244,7 +244,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
   dialog.CentreOnParent();
   if (dialog.ShowModal() == wxID_OK) {
     filename.Assign(dialog.GetPath());
-    mediator->openFile(string(filename.GetFullPath().fn_str()));
+    mediator->openFile(string(filename.GetFullPath().mb_str(wxConvUTF8)));
   }
 }
 
@@ -289,7 +289,7 @@ void MainFrame::onSaveText(wxCommandEvent& /*event*/)
     wxT(""),wxT(""),wxT("*.*"),wxFD_SAVE,this);
   if (!new_file.empty())
   {
-    mediator->exportToText(static_cast<std::string>(new_file.fn_str()));
+    mediator->exportToText(static_cast<std::string>(new_file.mb_str(wxConvUTF8)));
   }
 }
 

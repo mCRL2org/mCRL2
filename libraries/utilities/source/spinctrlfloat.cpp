@@ -83,7 +83,7 @@ namespace mcrl2 {
 
       void wxSpinCtrlFloat::OnEnter( wxCommandEvent& event )
       {
-        string str( event.GetString().fn_str() );
+        string str( event.GetString().mb_str(wxConvUTF8) );
 
         float f;
         sscanf( str.c_str(), "%f", &f );

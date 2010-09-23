@@ -119,7 +119,7 @@ bool LTSView::run()
     wxFileName fileName(wxString(input_filename().c_str(), wxConvLocal));
     fileName.Normalize();
     mainFrame->setFileInfo(fileName);
-    openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
+    openFile(static_cast< string >(fileName.GetFullPath().mb_str(wxConvUTF8)));
   }
   return true;
 }

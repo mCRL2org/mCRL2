@@ -114,7 +114,7 @@ namespace mcrl2 {
 
             for (int i = 0; i < argc; ++i)
             {
-              std::string argument(wxString(argv[i], wxConvLocal).fn_str());
+              std::string argument(wxString(argv[i], wxConvLocal).mb_str(wxConvUTF8));
 
               arguments.push_back(boost::shared_array< char >(new char[argument.size() + 1]));
 
@@ -162,10 +162,10 @@ namespace mcrl2 {
                  boost::bind(&about_information::add_documenter, &information, _1));
 
             //set license
-            information.SetLicense(wxT("This is free software.\n"
+            information.SetLicense(wxString("This is free software.\n"
               "You may redistribute copies of it under the terms of the Boost Software License "
               "<http://www.boost.org/LICENSE_1_0.txt>.\n"
-              "There is NO WARRANTY, to the extent permitted by law."));
+              "There is NO WARRANTY, to the extent permitted by law.", wxConvUTF8));
 
             //set website
             information.SetWebSite(wxT("http://www.mcrl2.org"), wxT("mCRL2 home page"));

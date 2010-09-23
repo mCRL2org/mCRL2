@@ -58,10 +58,10 @@ bool DropTarget::OnDropText(
 
     // get src id
     if ( tokens.size() > 0 )
-        srcId = Utils::strToInt( string(tokens[0].fn_str()) );
+        srcId = Utils::strToInt( string(tokens[0].mb_str(wxConvUTF8)) );
     // get remaining data
     for ( size_t i = 1; i < tokens.size(); ++i )
-        data.push_back( Utils::strToInt( string(tokens[i].fn_str()) ));
+        data.push_back( Utils::strToInt( string(tokens[i].mb_str(wxConvUTF8)) ));
 
     mediator->handleDragDrop(
         srcId,

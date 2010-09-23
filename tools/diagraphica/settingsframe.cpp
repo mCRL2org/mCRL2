@@ -836,7 +836,7 @@ void SettingsFrame::updateSettingsGeneral()
     wxColour colClr = buttonColorBG->GetBackgroundColour();
     wxColour colTxt = buttonColorTxt->GetBackgroundColour();
     wxString szeVal = comboBoxSizeTxt->GetValue();
-    int szeTxt      = Utils::strToInt( std::string(szeVal.fn_str()) );
+    int szeTxt      = Utils::strToInt( std::string(szeVal.mb_str(wxConvUTF8)) );
     double spdAnim  = spinCtrlAnimSpd->GetValue();
     mediator->setSettingsGeneral( colClr, colTxt, szeTxt, spdAnim );
 }
