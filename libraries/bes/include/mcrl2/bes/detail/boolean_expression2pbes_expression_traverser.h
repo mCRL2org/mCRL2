@@ -6,15 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/bes/detail/boolean_expression2pbes_expression_visitor.h
+/// \file mcrl2/bes/detail/boolean_expression2pbes_expression_traverser.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_VISITOR_H
-#define MCRL2_PBES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_VISITOR_H
+#ifndef MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
+#define MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
 
 #include <vector>
-#include "mcrl2/bes/boolean_expression_visitor.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/bes/traverser.h"
 
 namespace mcrl2 {
 
@@ -22,14 +22,15 @@ namespace bes {
 
 namespace detail {
 
-  struct boolean_expression2pbes_expression_visitor: public boolean_expression_visitor<void>
+  struct boolean_expression2pbes_expression_traverser: public bes::traverser<boolean_expression2pbes_expression_traverser>
   {
-    typedef boolean_expression_visitor<void> super;
-    typedef boolean_expression term_type;
+    typedef bes::traverser<boolean_expression2pbes_expression_traverser> super;
     typedef core::term_traits<pbes_system::pbes_expression> tr;
-    typedef core::term_traits<boolean_expression> br;
-    typedef br::variable_type variable_type;
 
+    using super::operator();
+    using super::enter;
+    using super::leave;
+    
     /// \brief A stack containing PBES expressions.
     std::vector<pbes_system::pbes_expression> expression_stack;
 
@@ -39,26 +40,20 @@ namespace detail {
       return expression_stack.back();
     }
 
-    /// \brief Visit true node
-    /// \param e A term
-    /// \return The result of visiting the node
-    bool visit_true(const term_type& /* e */)
+    /// \brief Enter true node
+    void enter(const true_& /* x */)
     {
       expression_stack.push_back(tr::true_());
-      return super::continue_recursion;
     }
 
-    /// \brief Visit false node
-    /// \param e A term
-    /// \return The result of visiting the node
-    bool visit_false(const term_type& /* e */)
+    /// \brief Enter false node
+    void enter_false(const false_& /* x */)
     {
       expression_stack.push_back(tr::false_());
-      return super::continue_recursion;
     }
 
     /// \brief Leave not node
-    void leave_not()
+    void leave(const not_& /* x */)
     {
       pbes_system::pbes_expression b = expression_stack.back();
       expression_stack.pop_back();
@@ -66,7 +61,7 @@ namespace detail {
     }
 
     /// \brief Leave and node
-    void leave_and()
+    void leave(const and_& /* x */)
     {
       // join the two expressions on top of the stack
       pbes_system::pbes_expression right = expression_stack.back();
@@ -77,7 +72,7 @@ namespace detail {
     }
 
     /// \brief Leave or node
-    void leave_or()
+    void leave(const or_& /* x */)
     {
       // join the two expressions on top of the stack
       pbes_system::pbes_expression right = expression_stack.back();
@@ -87,10 +82,9 @@ namespace detail {
       expression_stack.push_back(tr::or_(left, right));
     }
 
-    /// \brief Visit imp node
+    /// \brief Enter imp node
     /// \param e A term
-    /// \return The result of visiting the node
-    void leave_imp()
+    void leave(const imp& /* x */)
     {
       // join the two expressions on top of the stack
       pbes_system::pbes_expression right = expression_stack.back();
@@ -100,14 +94,12 @@ namespace detail {
       expression_stack.push_back(tr::imp(left, right));
     }
 
-    /// \brief Visit propositional_variable node
+    /// \brief Enter propositional_variable node
     /// \param e A term
     /// \param X A propositional variable
-    /// \return The result of visiting the node
-    bool visit_var(const term_type& /* e */, const variable_type& X)
+    void enter(const boolean_variable& x)
     {
-      expression_stack.push_back(pbes_system::propositional_variable_instantiation(X.name(), data::data_expression_list()));
-      return super::continue_recursion;
+      expression_stack.push_back(pbes_system::propositional_variable_instantiation(x.name(), data::data_expression_list()));
     }
   };
 
@@ -117,4 +109,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_VISITOR_H
+#endif // MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H

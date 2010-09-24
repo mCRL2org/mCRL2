@@ -14,7 +14,7 @@
 
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/bes/detail/boolean_expression2pbes_expression_visitor.h"
+#include "mcrl2/bes/detail/boolean_expression2pbes_expression_traverser.h"
 
 namespace mcrl2 {
 
@@ -33,9 +33,9 @@ namespace bes {
   inline
   pbes_system::pbes_expression bes2pbes(const boolean_expression& x)
   {
-    bes::detail::boolean_expression2pbes_expression_visitor visitor;
-    visitor.visit(x);
-    return visitor.result();
+    bes::detail::boolean_expression2pbes_expression_traverser t;
+    t(x);
+    return t.result();
   }
 
   /// \brief Converts a boolean equation into a PBES equation

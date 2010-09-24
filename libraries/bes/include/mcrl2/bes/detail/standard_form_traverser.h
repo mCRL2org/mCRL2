@@ -38,12 +38,12 @@ namespace detail {
   {
     public:
       typedef bes::traverser<standard_form_traverser> super;
+      typedef core::term_traits<boolean_expression> tr;
+
       using super::operator();
       using super::enter;
       using super::leave;
-
-      typedef core::term_traits<boolean_expression> tr;
-      
+     
       /// \brief If true, the result will be in standard recursive normal form, otherwise in standard form.
       bool m_recursive_form;
       
