@@ -1846,7 +1846,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), divides(vp, vq), redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq)))));
-        result.push_back(data_equation(atermpp::make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int::cint(vm), sort_int::cint(vn))));
+        result.push_back(data_equation(atermpp::make_vector(vm, vn), not_equal_to(vn, sort_nat::c0()), divides(vm, vn), redfrac(sort_int::cint(vm), sort_int::cint(vn))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
         result.push_back(data_equation(atermpp::make_vector(vn, vp, vx), exp(creal(vx, vp), sort_int::cint(vn)), redfrac(exp(vx, vn), sort_int::cint(sort_nat::cnat(exp(vp, vn))))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq, vx), not_equal_to(vx, sort_int::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int::cneg(vq)), redfrac(sort_int::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
