@@ -36,7 +36,6 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   graph.cpp
   transition.cpp
   export_latex.cpp
-  settingsdialog.cpp
   springlayout.cpp
   mainframe.cpp
   algodialog.cpp

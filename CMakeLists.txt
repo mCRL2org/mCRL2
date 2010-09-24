@@ -349,7 +349,8 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 ## Determine latest SVN revision
 ##---------------------------------------------------
 
-if( NOT DEFINED MCRL2_SVN_LABEL )
+set(MCRL2_SVN_LABEL "" CACHE STRING "Overwrite SVN revision with a custom string" )
+if( MCRL2_SVN_LABEL STREQUAL "" )
   find_program(SVNVERSION
     svnversion
     /usr/local/bin
@@ -365,9 +366,9 @@ if( NOT DEFINED MCRL2_SVN_LABEL )
   else(SVNVERSION)
     set(SVN_REV "Unknown")
   endif(SVNVERSION)
-else( NOT DEFINED MCRL2_SVN_LABEL )
+else( MCRL2_SVN_LABEL STREQUAL "" )
   set( SVN_REV ${MCRL2_SVN_LABEL} )	
-endif( NOT DEFINED MCRL2_SVN_LABEL )
+endif( MCRL2_SVN_LABEL STREQUAL "" )
 
 message(STATUS "SVN revision: ${SVN_REV}")
 
@@ -1148,7 +1149,12 @@ ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
 INCLUDE(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "mcrl2")
-set(CPACK_PACKAGE_VERSION "svn${SVN_REV}")
+if(MCRL2_SVN_LABEL STREQUAL "")
+  set(CPACK_PACKAGE_VERSION "svn${SVN_REV}")
+else(MCRL2_SVN_LABEL STREQUAL "")
+  set(CPACK_PACKAGE_VERSION "${MCRL2_SVN_LABEL}")
+endif(MCRL2_SVN_LABEL STREQUAL "")
+
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Toolset for modelling, validation and verification of concurrent systems and protocols.")
 set(CPACK_PACKAGE_CONTACT "info@mcrl2.org")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will overwrite standard path, which is: mcrl2-${CMAKE_BUILD_TYPE}svn{SVN_REV}

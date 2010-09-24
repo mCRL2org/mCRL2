@@ -43,8 +43,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(myID_TOGGLE_3D, MainFrame::onToggle3D)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
-  EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
-  EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
   EVT_MENU(myID_SELECT, MainFrame::onSelect)
   EVT_MENU(myID_COLOUR, MainFrame::onColour)
   EVT_MENU(myID_ROTATE, MainFrame::onMode)
@@ -66,7 +64,6 @@ MainFrame::MainFrame(LTSGraph* owner)
   app = owner;
 
   algoDlg = new AlgoDialog(app, this);
-  settingsDlg = new SettingsDialog(app, this);
   infoDlg = new InfoDialog(this);
 
   setupMenuBar();
@@ -120,8 +117,6 @@ void MainFrame::setupMenuBar()
   toolsMenu->AppendSeparator();
   toolsMenu->Append(myID_DLG_ALGO, wxT("O&ptimization... \tCTRL-p"),
                     wxT("Display dialog for layout optimization algorithm."));
-  toolsMenu->Append(wxID_PREFERENCES, wxT("Settings..."),
-                   wxT("Display the visualization settings dialog."));
   toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-n"),
                     wxT("Display dialog with information about this LTS."));
 
@@ -333,12 +328,6 @@ void MainFrame::onAlgo(wxCommandEvent& /* event */)
 {
   algoDlg->Show();
 }
-
-void MainFrame::onSettings(wxCommandEvent& /* event */)
-{
-  settingsDlg->Show();
-}
-
 
 void MainFrame::setLTSInfo(int is, int ns, int nt, int nl)
 {

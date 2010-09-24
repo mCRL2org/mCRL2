@@ -13,7 +13,8 @@
 #define ALGO_DIALOG_H
 
 #include <wx/dialog.h>
-
+#include <wx/spinctrl.h>
+#include <wx/clrpicker.h>
 #include "ltsgraph.h"
 
 class AlgoDialog : public wxDialog
@@ -23,7 +24,13 @@ class AlgoDialog : public wxDialog
 
   private:
     LTSGraph* app;
+	void onRadius(wxSpinEvent& evt);
+    void onCurves(wxCommandEvent& evt);
+    void onTransLabels(wxCommandEvent& evt);
+    void onStateLabels(wxCommandEvent& evt);
+    void onColour(wxColourPickerEvent& evt);
 
+	DECLARE_EVENT_TABLE()
 };
 
 #endif //ALGO_DIALOG_H
