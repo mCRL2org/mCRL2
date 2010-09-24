@@ -72,6 +72,20 @@ namespace bes {
 #include "mcrl2/bes/detail/traverser.inc.h"
   };
 
+  template <typename Derived, typename AdaptablePredicate>
+  class selective_data_traverser : public core::selective_traverser<Derived, AdaptablePredicate, bes::traverser>
+  {
+    typedef core::selective_traverser<Derived, AdaptablePredicate, bes::traverser> super;
+
+    public:
+
+      selective_data_traverser()
+      { }
+
+      selective_data_traverser(AdaptablePredicate predicate) : super(predicate)
+      { }
+  };
+
 } // namespace bes
 
 } // namespace mcrl2

@@ -109,6 +109,69 @@ namespace detail {
       }
   };
 
+  /**
+   * \brief Component for searching expressions
+   *
+   * Types:
+   *  \arg Expression the type of sub expressions that is considered
+   *  \arg AdaptablePredicate represents the search test on expressions (of type Expression)
+   *
+   * When m_predicate(e) becomes false traversal of sub-expressions will be
+   * cut-short. The search_traversal_condition represents a condition
+   * that is true initially and becomes false when the search predicate has
+   * become false. It is used to cut-short expression traversal to return a
+   * result.
+   **/
+  template <typename Expression, typename AdaptablePredicate, template <class, class> class SelectiveTraverser>
+  class search_helper : public SelectiveTraverser<search_helper<Expression, AdaptablePredicate, SelectiveTraverser>, search_traversal_condition> {
+
+      typedef SelectiveTraverser<search_helper<Expression, AdaptablePredicate, SelectiveTraverser>, search_traversal_condition> super;
+
+    protected:
+
+      AdaptablePredicate m_predicate;
+
+    public:
+
+      using super::enter;
+      using super::leave;
+
+#if BOOST_MSVC
+      // Workaround for malfunctioning MSVC 2008 overload resolution
+      template <typename Container>
+      void operator()(Container const& a)
+      {
+        super::operator()(a);
+      }
+#endif
+
+      void enter(Expression const& e)
+      {
+        super::m_traverse_condition = super::m_traverse_condition() && !m_predicate(e);
+      }
+
+      template <typename Container>
+      bool apply(Container const& container)
+      {
+        (*this)(container);
+
+        return !super::m_traverse_condition();
+      }
+
+      search_helper()
+      { }
+
+      search_helper(AdaptablePredicate search_predicate) : m_predicate(search_predicate)
+      { }
+  };
+
+  template <typename Expression, template <class, class> class SelectiveTraverser, typename AdaptablePredicate>
+  search_helper<Expression, AdaptablePredicate, SelectiveTraverser>
+  make_search_helper(AdaptablePredicate search_predicate)
+  {
+    return search_helper<Expression, AdaptablePredicate, SelectiveTraverser>(search_predicate);
+  }
+
 } // namespace detail
 
 } // namespace core

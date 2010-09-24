@@ -44,57 +44,35 @@ namespace bes {
     return result;
   }
 
-/*
-  /// \brief Returns all variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \param[in,out] o an output iterator to which all variables occurring in t
-  ///             are added.
-  /// \return All variables that occur in the term t
-  template <typename Container, typename OutputIterator>
-  void find_free_variables(Container const& container, OutputIterator o,
-  		           typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
+  // TODO: this is a temporary solution
+  struct compare_boolean_variable
   {
-    core::detail::make_free_variable_find_helper<bes::detail::binding_aware_traverser>(o)(container);
-  }
+    const boolean_variable& m_variable;
+  
+    compare_boolean_variable(const boolean_variable& t)
+     : m_variable(t)
+    {}
+  
+    /// \brief Function call operator
+    /// \param t A term
+    /// \return The function result
+    template <typename Variable>
+    bool operator()(const Variable& t) const
+    {
+      return m_variable == t;
+    }
+  };
 
-  /// \brief Returns all variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \param[in,out] o an output iterator to which all variables occurring in t
-  ///             are added.
-  /// \param[in] bound a set of variables that should be considered as bound
-  /// \return All variables that occur in the term t
-  /// TODO prevent copy of Sequence
-  template <typename Container, typename OutputIterator, typename Sequence>
-  void find_free_variables(Container const& container, OutputIterator o, Sequence const& bound)
-  {
-    core::detail::make_free_variable_find_helper<bes::detail::binding_aware_traverser>(bound, o)(container);
-  }
-
-  /// \brief Returns all variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \return All variables that occur in the term t
+  /// \brief Returns true if the term has a given boolean variable as subterm.
+  /// \param[in] container an expression or container with expressions
+  /// \param[in] v an expression or container with expressions
+  /// \param d A boolean variable
+  /// \return True if the term has a given boolean variable as subterm.
   template <typename Container>
-  std::set<boolean_variable> find_free_variables(Container const& container)
+  bool search_variable(Container const& container, const boolean_variable& v)
   {
-    std::set<boolean_variable> result;
-    bes::find_free_variables(container, std::inserter(result, result.end()));
-    return result;
+    return core::detail::make_search_helper<boolean_variable, selective_data_traverser>(compare_boolean_variable(v)).apply(container);
   }
-
-  /// \brief Returns all variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \param[in] bound a set of variables that should be considered as bound
-  /// \return All variables that occur in the term t
-  /// TODO prevent copy of Sequence
-  template <typename Container, typename Sequence>
-  std::set<boolean_variable> find_free_variables(Container const& container, Sequence const& bound,
-                                          typename atermpp::detail::enable_if_container<Sequence, boolean_variable>::type* = 0)
-  {
-    std::set<boolean_variable> result;
-    bes::find_free_variables(container, std::inserter(result, result.end()), bound);
-    return result;
-  }
-*/
 
 } // namespace bes
 
