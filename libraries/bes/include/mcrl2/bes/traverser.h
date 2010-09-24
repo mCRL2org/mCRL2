@@ -26,6 +26,8 @@ namespace bes {
     public:
       typedef core::traverser<Derived> super;
       using super::operator();
+      using super::enter;
+      using super::leave;
 
       void operator()(const core::identifier_string& s)
       { }

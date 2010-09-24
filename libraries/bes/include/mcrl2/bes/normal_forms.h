@@ -12,7 +12,8 @@
 #ifndef MCRL2_BES_NORMAL_FORMS_H
 #define MCRL2_BES_NORMAL_FORMS_H
 
-#include "mcrl2/bes/detail/standard_form_visitor.h"
+#include "mcrl2/bes/detail/standard_form_traverser.h"
+//#include "mcrl2/bes/detail/standard_form_visitor.h"
 
 namespace mcrl2 {
 
@@ -23,9 +24,9 @@ namespace bes {
   /// \param recursive_form Determines whether or not the result will be in standard recursive normal form
   void make_standard_form(boolean_equation_system<>& eqn, bool recursive_form = false)
   {
-    detail::standard_form_visitor visitor(recursive_form);
-    visitor.visit_boolean_equation_system(eqn);
-    eqn.equations() = visitor.m_equations;
+    detail::standard_form_traverser t(recursive_form);
+    t(eqn);
+    eqn.equations() = t.m_equations;
   }
 
 } // namespace bes
