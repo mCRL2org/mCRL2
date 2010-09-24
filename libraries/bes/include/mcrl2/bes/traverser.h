@@ -19,6 +19,7 @@ namespace mcrl2 {
 
 namespace bes {
 
+  /// \brief Traversal class for BES data types
   template <typename Derived>
   class traverser: public core::traverser<Derived>
   {
@@ -26,53 +27,17 @@ namespace bes {
       typedef core::traverser<Derived> super;
       using super::operator();
 
-      // TODO: This code should be generated!!
-      // Moreover, this if statement can be replaced by an array lookup.
-      void operator()(boolean_expression const& x)
-      {
-        static_cast<Derived&>(*this).enter(x);
-        if (is_true(x))
-        {
-          static_cast<Derived&>(*this)(true_(x));
-        }
-        else if (is_false(x))
-        {
-          static_cast<Derived&>(*this)(false_(x));
-        }
-        else if (is_not(x))
-        {
-          static_cast<Derived&>(*this)(not_(x));
-        }
-        else if (is_and(x))
-        {
-          static_cast<Derived&>(*this)(and_(x));
-        }
-        else if (is_or(x))
-        {
-          static_cast<Derived&>(*this)(or_(x));
-        }
-        else if (is_imp(x))
-        {
-          static_cast<Derived&>(*this)(imp(x));
-        }
-        else if (is_boolean_variable(x))
-        {
-          static_cast<Derived&>(*this)(boolean_variable(x));
-        }
-        static_cast<Derived&>(*this).leave(x);
-      }
-
       void operator()(const core::identifier_string& s)
-      {  }
+      { }
 
       void operator()(const fixpoint_symbol& s)
-      {  }
+      { }
 
 // Include file with traverse member functions. This is to avoid duplication.
 #include "mcrl2/bes/detail/traverser.inc.h"
   };
 
-  /// \brief Class that attaches the bes traverser to the selective traverser.
+  /// \brief Selective traversal class for BES data types
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, bes::traverser>
   {

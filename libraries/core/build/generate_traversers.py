@@ -43,7 +43,8 @@ def make_traverser_inc_file(filename, class_text, expression_class = None, expre
         visit_functions = []
         for c in classes:
             f = c.constructor
-            visit_functions.append('if (%sis_%s(x)) { static_cast<Derived&>(*this)(%s(x)); }' % (f.qualifier(), f.name(), f.qualified_name()))
+            is_function = re.sub('_$', '', f.name())
+            visit_functions.append('if (%sis_%s(x)) { static_cast<Derived&>(*this)(%s(x)); }' % (f.qualifier(), is_function, f.qualified_name()))
         vtext = '\n  ' + '\n  else '.join(visit_functions)
         ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
         result.append(ctext)
@@ -66,4 +67,4 @@ if __name__ == "__main__":
     make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES)
     make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
     make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/traverser.inc.h', STATE_FORMULA_CLASSES)
-    make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES)
+    make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, 'boolean_expression', BOOLEAN_EXPRESSION_CLASSES)
