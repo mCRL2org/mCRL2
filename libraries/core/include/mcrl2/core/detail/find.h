@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen van der Wulp, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -135,15 +135,6 @@ namespace detail {
 
       using super::enter;
       using super::leave;
-
-#if BOOST_MSVC
-      // Workaround for malfunctioning MSVC 2008 overload resolution
-      template <typename Container>
-      void operator()(Container const& a)
-      {
-        super::operator()(a);
-      }
-#endif
 
       void enter(Expression const& e)
       {
