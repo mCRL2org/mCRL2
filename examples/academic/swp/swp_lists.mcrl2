@@ -17,7 +17,8 @@
 map  n: Pos;
 eqn  n=2;
 
-sort D = Nat;
+sort %D = Nat;
+     D = struct d1 | d2;
      DBuf = List(D);
      BBuf = List(Bool);
 map  empty: BBuf;
@@ -26,7 +27,9 @@ map  empty: BBuf;
      nextempty_mod: Nat#BBuf#Nat#Pos -> Nat;
      q1,q2:DBuf;
 var  d,d':D; i,j,m: Nat; q: DBuf; c,c':Bool; n':Pos; b:BBuf;
-eqn  empty = [false,false];
+eqn  q1 = [d1, d1];
+     q2 = q1;
+     empty = [false,false];
      i == 0 -> insert(d,i,q) = d |> tail(q);
      i > 0 -> insert(d,i, d'|>q) = d' |> insert(d,Int2Nat(i-1),q);
      i == 0 -> insert(c,i,b) = c |> tail(b);

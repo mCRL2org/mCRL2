@@ -1,0 +1,4 @@
+% For all messages d, it is possible to infinitely often start
+% sending message d (through action r1).
+%
+forall d:D . nu X. mu Y. (<ra(d)>X || <!ra(d)>Y)

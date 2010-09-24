@@ -1,0 +1,6 @@
+% Infinitely often enabled means infinitely often taken
+% Formula from "Modal logics and mu-calculi: an introduction", Bradfield and
+% Stirling.
+%
+
+forall i:Nat.([true*] nu X. mu Y. nu Z. ([a(i)]X && ([a(i)]false || [!a(i)]Y) && [!a(i)]Z))

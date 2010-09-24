@@ -1,0 +1,9 @@
+% Formula that expresses that if a message is read through ra, then it is
+% eventually send through sb.
+
+% This property does not hold for the onebit protocol, as it does not
+% assume fairness. This can be shown by the formula "infinitely_often_lost.mcf"
+%
+% The file "read_then_eventually_send_if_fair.mcf" contains a formula that
+% shows that the property holds if fairness is assumed.
+[true*](forall d:D .([ra(d)](nu X. mu Y. ([sb(d)]X && [!sb(d)]Y))))

@@ -1,0 +1,6 @@
+% If an ra action is enabled infinitely often, then it is also
+% taken infinitely often, independent of the message d
+% Taken from: "Modal logics and mu-calculi: an introduction",
+% by Bradfield and Stirling.
+%
+forall d:D . ([true*] nu X. mu Y. nu Z. ([ra(d)]X && ([ra(d)]false || [!ra(d)]Y) && [!ra(d)]Z))
