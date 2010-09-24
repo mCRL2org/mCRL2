@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen van der Wulp, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -72,17 +72,18 @@ namespace bes {
 #include "mcrl2/bes/detail/traverser.inc.h"
   };
 
+  /// \brief Class that attaches the bes traverser to the selective traverser.
   template <typename Derived, typename AdaptablePredicate>
-  class selective_data_traverser : public core::selective_traverser<Derived, AdaptablePredicate, bes::traverser>
+  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, bes::traverser>
   {
     typedef core::selective_traverser<Derived, AdaptablePredicate, bes::traverser> super;
 
     public:
 
-      selective_data_traverser()
+      selective_traverser()
       { }
 
-      selective_data_traverser(AdaptablePredicate predicate) : super(predicate)
+      selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
 

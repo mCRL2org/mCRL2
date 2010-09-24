@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen van der Wulp, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -71,7 +71,7 @@ namespace bes {
   template <typename Container>
   bool search_variable(Container const& container, const boolean_variable& v)
   {
-    return core::detail::make_search_helper<boolean_variable, selective_data_traverser>(compare_boolean_variable(v)).apply(container);
+    return core::detail::make_search_helper<boolean_variable, bes::selective_traverser>(compare_boolean_variable(v)).apply(container);
   }
 
 } // namespace bes

@@ -58,7 +58,7 @@ std::set<boolean_variable> my_find_variables(Container const& container)
 template <typename Container>
 bool my_search_variable(Container const& container, const boolean_variable& v)
 {
-  return core::detail::make_search_helper<boolean_variable, selective_data_traverser>(my_compare_variable(v)).apply(container);
+  return core::detail::make_search_helper<boolean_variable, selective_traverser>(my_compare_variable(v)).apply(container);
 }
 
 void test_my_search()
