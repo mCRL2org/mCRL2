@@ -1840,6 +1840,10 @@ namespace bes
       { Mucks_rewriter.translate(c.front());
       }
       
+      for(data_specification::constructors_const_range c=pbes_spec.data().mappings(); !c.empty() ; c.advance_begin(1))
+      { Mucks_rewriter.translate(c.front());
+      }
+      
       // Variables in which the result is stored
       propositional_variable_instantiation new_initial_state;
 
