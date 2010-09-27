@@ -722,7 +722,6 @@ if(MCRL2_COMPILE_EXAMPLES)
    add_subdirectory( libraries/data/example)
    add_subdirectory( libraries/lps/example)
    add_subdirectory( libraries/utilities/example )
-   add_subdirectory( libraries/bes/example)
    add_subdirectory( libraries/pbes/example)
 endif(MCRL2_COMPILE_EXAMPLES)
 
