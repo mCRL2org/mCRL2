@@ -44,6 +44,7 @@ STYLESHEET=doc/doxy/doxystyle.css
 LIBRARY_LIST="
 ATerm++:atermpp:libraries/atermpp
 Core:core:libraries/core
+BES:bes:libraries/bes
 Data:data:libraries/data
 LPS:lps:libraries/lps
 LTS:lts:libraries/lts
