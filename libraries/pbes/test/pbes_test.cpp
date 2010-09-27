@@ -18,22 +18,23 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/variable.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/lps/linearise.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 #include <boost/filesystem/operations.hpp>
 
@@ -205,6 +206,7 @@ void test_pbes()
   p.save(filename);
   p.load(filename);
   boost::filesystem::remove(boost::filesystem::path(filename));
+  core::garbage_collect();
 }
 
 void test_global_variables()
@@ -230,6 +232,7 @@ void test_global_variables()
   {
     std::cout << "<var>" << mcrl2::core::pp(*i) << std::endl;
   }
+  core::garbage_collect();
 }
 
 // No longer valid due to that the order of and_ and or_ may be changed.
@@ -282,6 +285,7 @@ void test_quantifier_rename_builder()
   std::cout << "q2 = " << mcrl2::core::pp(q2) << std::endl;
 
   // BOOST_CHECK(false);
+  core::garbage_collect();
 }
 
 void test_complement_method_builder()
@@ -298,6 +302,7 @@ void test_complement_method_builder()
   std::cout << "q             = " << mcrl2::core::pp(q) << std::endl;
   std::cout << "complement(p) = " << mcrl2::core::pp(complement(p)) << std::endl;
   BOOST_CHECK(complement(p) == q);
+  core::garbage_collect();
 }
 
 void test_pbes_expression()
@@ -312,6 +317,7 @@ void test_pbes_expression()
   pbes_expression v_expr = propositional_variable_instantiation("v:V");
   propositional_variable_instantiation v1 = v_expr;
   propositional_variable_instantiation v2(v_expr);
+  core::garbage_collect();
 }
 
 void test_trivial()
@@ -321,6 +327,7 @@ void test_trivial()
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
+  core::garbage_collect();
 }
 
 void test_instantiate_global_variables()
@@ -340,6 +347,7 @@ void test_instantiate_global_variables()
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
   p.instantiate_global_variables();
   std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;
+  core::garbage_collect();
 }
 
 void test_traverse_sort_expressions()
@@ -353,30 +361,46 @@ void test_traverse_sort_expressions()
   std::set<sort_expression> s;
   traverse_sort_expressions(p, std::inserter(s, s.end()));
   std::cout << core::detail::print_pp_set(s) << std::endl;
+  core::garbage_collect();
 }
+
+#ifdef MCRL2_ENABLE_IO_TEST
+void test_io()
+{
+  using namespace pbes_system;
+  
+  std::string PBES_SPEC =
+    "pbes nu X1 = X2; \n"
+    "     mu X2 = X2; \n"
+    "                 \n"
+    "init X1;         \n"
+    ;
+  pbes<> p = txt2pbes(PBES_SPEC);
+  save_pbes(p, "pbes_binary.pbes", pbes_output_pbes, false);
+  save_pbes(p, "pbes_ascii.txt",   pbes_output_pbes, true);
+  save_pbes(p, "pbes_binary.bes",  pbes_output_bes,  false);
+  save_pbes(p, "pbes_ascii.bes",   pbes_output_bes,  true);
+  save_pbes(p, "pbes.cwi",         pbes_output_cwi);
+}
+#endif // MCRL2_ENABLE_IO_TEST
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_trivial();
-  core::garbage_collect();
   test_pbes();
-  core::garbage_collect();
   // test_xyz_generator();
-  core::garbage_collect();
   test_global_variables();
-  core::garbage_collect();
   test_quantifier_rename_builder();
-  core::garbage_collect();
   test_complement_method_builder();
-  core::garbage_collect();
   test_pbes_expression();
-  core::garbage_collect();
   test_instantiate_global_variables();
-  core::garbage_collect();
   test_traverse_sort_expressions();
-  core::garbage_collect();
+
+#ifdef MCRL2_ENABLE_IO_TEST
+  test_io();
+#endif // MCRL2_ENABLE_IO_TEST
 
   return 0;
 }

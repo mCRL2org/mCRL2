@@ -57,6 +57,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
     transformation_strategy m_strategy;
     pbes_output_format m_output_format;
     std::string m_finite_parameter_selection;
+    bool m_aterm_ascii;
 
     /// Sets the transformation strategy.
     /// \param s A transformation strategy.
@@ -84,9 +85,9 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       {
         m_output_format = pbes_output_pbes;
       }
-      else if (format == "internal")
+      else if (format == "bes")
       {
-        m_output_format = pbes_output_internal;
+        m_output_format = pbes_output_bes;
       }
       else if (format == "cwi")
       {
@@ -104,7 +105,26 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       super::parse_options(parser);
       try
       {
-        set_output_format(parser.option_argument("output"));
+        if (parser.options.count("output") == 0)
+        {
+          // Use the filename extension to determine the output format
+          if (boost::ends_with(m_output_filename, std::string(".bes")))
+          {
+            set_output_format("bes");
+          }
+          else if (boost::ends_with(m_output_filename, std::string(".cwi")))
+          {
+            set_output_format("cwi");
+          }
+          else
+          {
+            set_output_format("pbes");
+          }
+        }
+        else
+        {
+          set_output_format(parser.option_argument("output"));
+        }
       }
       catch (std::logic_error)
       {
@@ -131,6 +151,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       	int limit = parser.option_argument_as<int>("equation_limit");
       	pbes_system::detail::set_bes_equation_limit(limit);
       }
+      m_aterm_ascii = parser.options.count("aterm-ascii") > 0;
     }
 
     void add_options(interface_description& desc)
@@ -146,9 +167,9 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
         add_option("output",
           make_optional_argument("NAME", "pbes"),
           "store the BES in output format NAME:\n"
-          "  'pbes' for the internal binary format (default),\n"
-          "  'internal' for the internal textual format, or\n"
-          "  'cwi' for the format used by the CWI to solve a BES.",
+          "  'pbes' for the mCRL2 PBES format (default),\n"
+          "  'bes'  for the mCRL2 BES format\n"
+          "  'cwi'  for the CWI BES format",
           'o').
         add_option("select",
           make_optional_argument("NAME", ""),
@@ -156,6 +177,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
           "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
           "            *(*:Bool)\n",
           'f');
+      desc.add_option("aterm-ascii", "store ATerms in ascii format (default: false)", 'a');
       desc.add_hidden_option("equation_limit",
          make_optional_argument("NAME", "-1"),
          "Set a limit to the number of generated BES equations",
@@ -183,13 +205,13 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       {
         return "pbes";
       }
+      else if (m_output_format == pbes_output_bes)
+      {
+        return "bes";
+      }
       else if (m_output_format == pbes_output_cwi)
       {
         return "cwi";
-      }
-      else if (m_output_format == pbes_output_internal)
-      {
-        return "internal";
       }
       return "unknown";
     }
@@ -204,9 +226,15 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
           "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
           "If INFILE is not present, standard input is used. If OUTFILE is not present,   "
           "standard output is used."
+          "The format of OUTFILE is determined by its extension (unless it is specified "
+          "by an option). The supported formats are:\n"
+          "  'pbes' for the mCRL2 PBES format,\n"
+          "  'bes'  for the mCRL2 BES format,\n"
+          "  'cwi'  for the CWI BES format\n"
         ),
         m_strategy(ts_lazy),
-        m_output_format(pbes_output_pbes)
+        m_output_format(pbes_output_pbes),
+        m_aterm_ascii(false)
     {}
 
     /// Runs the algorithm.
@@ -256,8 +284,20 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
         algorithm.run(p, variable_map);
       }
 
+      if (mcrl2::core::gsVerbose)
+      {
+        if (p.is_bes())
+        {
+          core::gsVerboseMsg("The result is a BES.\n");
+        }
+        else
+        {
+          core::gsVerboseMsg("The result is a PBES.\n");
+        }
+      }   
+
       // save the result
-      save_pbes(p, m_output_filename, m_output_format);
+      save_pbes(p, m_output_filename, m_output_format, m_aterm_ascii);
 
       return true;
     }

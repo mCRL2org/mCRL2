@@ -145,7 +145,7 @@ namespace bes {
       /// much more compact than the ascii representation.
       /// \param filename A string
       /// \param binary If true, the file is saved in binary format
-      void save(const std::string& filename, bool binary = true) // const
+      void save(const std::string& filename, bool binary = true) const
       {
         if (!is_well_typed())
         {
@@ -198,17 +198,6 @@ namespace bes {
         atermpp::set<boolean_variable> bnd = binding_variables();
         atermpp::set<boolean_variable> occ = occurring_variables();
         return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(initial_state()) != bnd.end();
-      }
-
-      /// \brief Applies a low level substitution function to this term.
-      /// \param f A
-      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-      /// \deprecated
-      template <typename Substitution>
-      void substitute(Substitution f)
-      {
-        std::transform(equations().begin(), equations().end(), equations().begin(), f);
       }
 
       /// \brief Protects the term from being freed during garbage collection.

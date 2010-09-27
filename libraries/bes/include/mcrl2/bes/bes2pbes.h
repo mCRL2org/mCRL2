@@ -43,7 +43,7 @@ namespace bes {
   inline
   pbes_system::pbes_equation bes2pbes(const boolean_equation& eq)
   {
-	return pbes_system::pbes_equation(eq.symbol(), pbes_system::propositional_variable(eq.variable().name(), data::variable_list()), bes2pbes(eq.formula()));
+    return pbes_system::pbes_equation(eq.symbol(), pbes_system::propositional_variable(eq.variable().name(), data::variable_list()), bes2pbes(eq.formula()));
   }
 
   /// \brief Converts a BES into a PBES
@@ -52,7 +52,7 @@ namespace bes {
   pbes_system::pbes<> bes2pbes(const boolean_equation_system<>& x)
   {
     data::data_specification data_spec;
-	atermpp::vector<pbes_system::pbes_equation> equations;
+    atermpp::vector<pbes_system::pbes_equation> equations;
     for (atermpp::vector<boolean_equation>::const_iterator i = x.equations().begin(); i != x.equations().end(); ++i)
     {
       equations.push_back(bes2pbes(*i));
