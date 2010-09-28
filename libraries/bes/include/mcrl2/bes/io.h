@@ -12,6 +12,7 @@
 #ifndef MCRL2_BES_IO_H
 #define MCRL2_BES_IO_H
 
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <utility>

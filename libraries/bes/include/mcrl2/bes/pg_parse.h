@@ -12,8 +12,9 @@
 #ifndef MCRL2_BES_PG_PARSE_H
 #define MCRL2_BES_PG_PARSE_H
 
-#include <stdio.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cctype>
+#include <map>
 
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/bes/boolean_equation_system.h"
