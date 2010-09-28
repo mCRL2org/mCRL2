@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_ABSTRACT_H
 #define MCRL2_PBES_ABSTRACT_H
 
+#include <algorithm>
 #include <iostream>
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/data/find.h"
@@ -78,6 +79,10 @@ namespace detail {
       std::set<data::variable> FV = data::find_free_variables(d);
       for (std::set<data::variable>::iterator i = FV.begin(); i != FV.end(); ++i)
       {
+        if (std::find(m_selected_variables.begin(), m_selected_variables.end(), *i) == m_selected_variables.end())
+        {
+          continue;
+        }
         if (!is_bound(*i))
         {
           std::clog << "Reducing data expression " << pp(e) << " to false." << std::endl;
