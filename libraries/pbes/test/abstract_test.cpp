@@ -33,6 +33,15 @@ void test_pbesabstract(const std::string& pbes_spec, const std::string& variable
 void test_pbesabstract()
 {
   test_pbesabstract(
+    "pbes nu X(a: Bool, b: Nat) =  \n"
+    "       val(a) || X(a, b + 1); \n"
+    "                              \n"
+    "init X(true, 0);              \n"
+    ,
+    "X(b:Nat)"
+  );
+
+  test_pbesabstract(
     "pbes nu X1(b:Bool) = exists b:Bool.(X2 || val(b)); \n"
     "     mu X2 = X2;                                   \n"
     "                                                   \n"

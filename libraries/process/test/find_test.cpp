@@ -66,7 +66,7 @@ void test_find()
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
 
-  core::garbage_collect();
+  core::garbage_collect(); 
 }
 
 int test_main(int argc, char* argv[])

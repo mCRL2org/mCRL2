@@ -16,6 +16,7 @@
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/new_find.h"
 #include "mcrl2/data/traverser.h"
 
@@ -99,11 +100,47 @@ void test_traverser()
   core::garbage_collect(); 
 }
 
+class my_traverser: public data::traverser<my_traverser>
+{
+public:
+  typedef data::traverser<my_traverser> super;
+
+  using super::enter;
+  using super::leave;
+
+#if BOOST_MSVC
+  // Workaround for malfunctioning MSVC 2008 overload resolution
+  template <typename Container >
+  void operator()(Container const& x)
+  {
+    super::operator()(x);
+  }
+#endif
+};
+  
+void test_my_traverser()
+{
+  my_traverser t;
+
+  data_expression d;
+  t(d);
+
+  data_expression_list dl;
+  t(dl);
+
+  variable v;
+  t(v);
+  
+  data_equation eq;
+  t(eq);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_traverser();
+  test_my_traverser();
 
   return EXIT_SUCCESS;
 }
