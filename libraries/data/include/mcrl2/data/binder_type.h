@@ -144,6 +144,63 @@ class lambda_binder: public binder_type
 };
 //--- end generated classes ---//
 
+//--- start generated is-functions ---//
+
+    /// \brief Test for a set_or_bag_comprehension_binder expression
+    /// \param t A term
+    /// \return True if it is a set_or_bag_comprehension_binder expression
+    inline
+    bool is_set_or_bag_comprehension_binder(const binder_type& t)
+    {
+      return core::detail::gsIsSetBagComp(t);
+    }
+
+    /// \brief Test for a set_comprehension_binder expression
+    /// \param t A term
+    /// \return True if it is a set_comprehension_binder expression
+    inline
+    bool is_set_comprehension_binder(const binder_type& t)
+    {
+      return core::detail::gsIsSetComp(t);
+    }
+
+    /// \brief Test for a bag_comprehension_binder expression
+    /// \param t A term
+    /// \return True if it is a bag_comprehension_binder expression
+    inline
+    bool is_bag_comprehension_binder(const binder_type& t)
+    {
+      return core::detail::gsIsBagComp(t);
+    }
+
+    /// \brief Test for a forall_binder expression
+    /// \param t A term
+    /// \return True if it is a forall_binder expression
+    inline
+    bool is_forall_binder(const binder_type& t)
+    {
+      return core::detail::gsIsForall(t);
+    }
+
+    /// \brief Test for a exists_binder expression
+    /// \param t A term
+    /// \return True if it is a exists_binder expression
+    inline
+    bool is_exists_binder(const binder_type& t)
+    {
+      return core::detail::gsIsExists(t);
+    }
+
+    /// \brief Test for a lambda_binder expression
+    /// \param t A term
+    /// \return True if it is a lambda_binder expression
+    inline
+    bool is_lambda_binder(const binder_type& t)
+    {
+      return core::detail::gsIsLambda(t);
+    }
+//--- end generated is-functions ---//
+
   } // namespace data
 
 } // namespace mcrl2

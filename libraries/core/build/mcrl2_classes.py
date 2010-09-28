@@ -58,6 +58,10 @@ Binder    | abstraction(const binder_type& binding_operator, const variable_list
 Whr   | where_clause(const data_expression& body, const assignment_expression_list& declarations) | A where expression
 '''
 
+DATA_CLASSES = r'''
+DataEqn | data_equation(const variable_list& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs) | A data equation
+'''
+
 STATE_FORMULA_CLASSES = r'''
 StateTrue       | true_()                                                                                                         | The value true for state formulas
 StateFalse      | false_()                                                                                                        | The value false for state formulas

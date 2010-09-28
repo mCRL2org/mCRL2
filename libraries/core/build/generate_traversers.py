@@ -14,7 +14,7 @@ TRAVERSE_FUNCTION = r'''void operator()(const QUALIFIED_NODE& x)
 }
 '''
 
-def make_traverser_inc_file(filename, class_text, expression_class = None, expression_text = None):
+def make_traverser_inc_file(filename, class_text, expression_classes = []):
     result = []
     classes = parse_classes(class_text)
     for c in classes:
@@ -36,7 +36,7 @@ def make_traverser_inc_file(filename, class_text, expression_class = None, expre
             ctext = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + ctext
         result.append(ctext)
 
-    if expression_class != None:
+    for (expression_class, expression_text) in expression_classes:
         ctext = TRAVERSE_FUNCTION
         ctext = re.sub('QUALIFIED_NODE', expression_class, ctext)
         classes = parse_classes(expression_text)
@@ -63,8 +63,9 @@ ActId | lps::action_label(const core::identifier_string& name, const data::sort_
 '''
 
 if __name__ == "__main__":
-    make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, 'process_expression', PROCESS_EXPRESSION_CLASSES)
+    make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, [('process_expression', PROCESS_EXPRESSION_CLASSES)])
     make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES)
     make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
     make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/traverser.inc.h', STATE_FORMULA_CLASSES)
-    make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, 'boolean_expression', BOOLEAN_EXPRESSION_CLASSES)
+    make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, [('boolean_expression', BOOLEAN_EXPRESSION_CLASSES)])
+    make_traverser_inc_file('../../data/include/mcrl2/data/detail/traverser.inc.h', ASSIGNMENT_EXPRESSION_CLASSES + BINDER_TYPES + STRUCTURED_SORT_ELEMENTS + CONTAINER_TYPES + SORT_EXPRESSION_CLASSES + DATA_EXPRESSION_CLASSES + DATA_CLASSES, [('data_expression', DATA_EXPRESSION_CLASSES), ('assignment_expression', ASSIGNMENT_EXPRESSION_CLASSES), ('sort_expression', SORT_EXPRESSION_CLASSES), ('container_type', CONTAINER_TYPES), ('binder_type', BINDER_TYPES)])
