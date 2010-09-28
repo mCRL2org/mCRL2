@@ -16,7 +16,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes_parse.h"
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -53,7 +53,7 @@ void test_bes()
   bes_stream >> b;
 
   std::stringstream out;
-  pbes_system::bes2cwi(b.equations().begin(), b.equations().end(), out);
+  bes::bes2cwi(b.equations().begin(), b.equations().end(), out);
   core::garbage_collect();
 }
 
@@ -64,7 +64,7 @@ void test_pbes()
   bes_stream >> b;
 
   std::stringstream out;
-  pbes_system::bes2cwi(b.equations().begin(), b.equations().end(), out); 
+  bes::bes2cwi(b.equations().begin(), b.equations().end(), out); 
   core::garbage_collect();
 }
 
