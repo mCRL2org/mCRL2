@@ -157,9 +157,9 @@ static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED 
       } 
       else if (AT_isValidSymbol((Symbol)*cur)) 
       {
-          /*fprintf(stderr,"mark_memory: AT_markSymbol(%d)\n",(Symbol)*cur);*/
+        /*fprintf(stderr,"mark_memory: AT_markSymbol(%d)\n",(Symbol)*cur);*/
         AT_markSymbol((Symbol)*cur);
-          /*nb_cell_in_stack++;*/
+        /*nb_cell_in_stack++;*/
       }
     }
   }
@@ -176,7 +176,7 @@ static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED 
 /*}}}  */
 /*{{{  static void mark_memory_young(ATerm *start, ATerm *stop)  */
 
-static void mark_memory_young(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED BY JFG
+static void mark_memory_young(ATerm *start, ATerm *stop, ATbool check_term) // CHANGED BY JFG
 {
   ATerm *cur;
   // fprintf(stderr,"---> mark_memory_young phase [%x,%x]\n",start,stop);
@@ -191,17 +191,17 @@ static void mark_memory_young(ATerm *start, ATerm *stop,ATbool check_term) // CH
           { 
             assert(AT_isValidTerm(real_term));
             AT_markTerm_young(real_term);
-                /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));  */
-                /*nb_cell_in_stack++;*/
+            /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));  */
+            /*nb_cell_in_stack++;*/
           }
         }
       } 
-      else if (AT_isValidSymbol((Symbol)*cur)) 
-      {
-            /*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
-          AT_markSymbol_young((Symbol)*cur);
-            /*nb_cell_in_stack++;*/
-      }
+	  else if (AT_isValidSymbol(*cur)) 
+	  {
+		/*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
+		AT_markSymbol_young((Symbol)*cur);
+		/*nb_cell_in_stack++;*/
+	  }
     }
   }
   else 
@@ -244,8 +244,19 @@ VOIDCDECL mark_phase()
   ProtEntry *prot;
   ATprotected_block pblock;
 
-#if defined(_MSC_VER) && defined(WIN32) && (_MSC_VER < 1600)
 
+#if defined(_MSC_VER) && defined(_M_X64) 
+  /* Time for a little explanation here: The aim of the following three lines is to read
+     relevant registers from the CPU, even if we can't execute inline assembly (as is 
+	 done for _MSC_VER && WIN32). The setjmp routine saves the call environment to a 
+	 buffer, yielding a nicely packaged list of registers. In the AMD64 case, only the
+	 first 12 registers are integer registers, which is the only type of register we 
+	 expect to find ATerms in. */
+  jmp_buf env; // Buffer for registers
+  setjmp(env); // Save registers to buffer
+  // Now check buffer for ATerms and mark them
+  mark_memory((ATerm *)((char *)env), (ATerm *)((char *)env) + 12, ATtrue); 
+#elif defined(_MSC_VER) && defined(WIN32)
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
     r_esi, r_edi, r_esp, r_ebp;
   ATerm reg[8], real_term;
@@ -370,7 +381,13 @@ VOIDCDECL mark_phase_young()
   ATprotected_block pblock;
 
   unsigned int count=0;
-#if defined(_MSC_VER) && defined(WIN32) && (_MSC_VER < 1600)
+#if defined(_MSC_VER) && defined(_M_X64)
+  /* Traverse possible register variables. For a more detailed
+     explanation, see mark_phase(). */
+  jmp_buf env;
+  setjmp(env);
+  mark_memory_young((ATerm *)((char *)env), (ATerm *)((char *)env) + 12, ATtrue);
+#elif defined(_MSC_VER) && defined(WIN32)
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
     r_esi, r_edi, r_esp, r_ebp;
@@ -424,12 +441,12 @@ VOIDCDECL mark_phase_young()
 #else
   jmp_buf env;
 
-    /* Traverse possible register variables */
+  /* Traverse possible register variables */
   setjmp(env);
 
   start = (ATerm *)((char *)env);
   stop  = ((ATerm *)(((char *)env) + sizeof(jmp_buf)));
-  mark_memory_young(start, stop,ATtrue);
+  mark_memory_young(start, stop, ATtrue);
 #endif
 
   stackTop = stack_top();
@@ -440,7 +457,7 @@ VOIDCDECL mark_phase_young()
   STATS(stack_depth, stack_size);
 
   // fprintf(stderr,"Mark memory young 1\n");
-  mark_memory_young(start, stop,ATtrue);
+  mark_memory_young(start, stop, ATtrue);
 
   // fprintf(stderr,"Mark memory young 2\n");
   /* Traverse protected terms */

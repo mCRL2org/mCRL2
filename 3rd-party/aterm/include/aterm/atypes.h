@@ -33,9 +33,9 @@ typedef unsigned long HashNumber;
 #endif
 
 #ifdef AT_64BIT
-#define ADDR_TO_SHORT_HNR(a) ((ShortHashNumber)(((((uintptr_t)(char*)(a)) >> 2)&0xffffffff) ^ (((uintptr_t)(char*)(a)) >> 34)))
+#define ADDR_TO_SHORT_HNR(a) ((ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^ (((MachineWord)(a)) >> 34)))
 #else
-#define ADDR_TO_SHORT_HNR(a) (((ShortHashNumber)(char*)(a)) >> 2)
+#define ADDR_TO_SHORT_HNR(a) (((ShortHashNumber)(a)) >> 2)
 #endif /* AT_64BIT */
 
 #define ADDR_TO_HNR(a) (((HashNumber)(a)) >> 2)

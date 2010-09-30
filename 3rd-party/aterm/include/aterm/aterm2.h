@@ -30,7 +30,7 @@ struct __ATermInt
 {
   header_type header;
   ATerm       next;
-  long        value; /* Only use lower 32 bits */
+  MachineWord value; /* Only use lower 32 bits */ // SJOERD: This screws up negative numbers. Use native int size.
 };
 
 typedef union _ATermInt
