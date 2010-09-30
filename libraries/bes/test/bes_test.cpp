@@ -19,6 +19,40 @@ using namespace mcrl2::bes;
 
 typedef core::term_traits<boolean_expression> tr;
 
+void test_join()
+{
+  boolean_variable X("X"); 
+  boolean_expression Z1 = X;
+  boolean_expression Z2(X);
+  boolean_expression Z3;
+  Z3 = X;
+
+  std::set<boolean_expression> s;
+  s.insert(boolean_variable("X1"));
+  s.insert(boolean_variable("X2"));
+  boolean_expression x = join_or(s.begin(), s.end());
+  std::cout << "x = " << pp(x) << std::endl;
+
+#ifdef MCRL2_JOIN_TEST
+// The gcc compiler gives the following error:
+//
+// D:\mcrl2\libraries\core\include/mcrl2/core/detail/join.h:54:22: error: call
+// of overloaded 'boolean_expression(const mcrl2::bes::boolean_variable&)' is
+// ambiguous
+//
+// This seems to be triggered by an incorrect optimization, in which the return
+// type of the function false_() is discarded.
+//
+  std::set<boolean_variable> sv;
+  sv.insert(boolean_variable("X1"));
+  sv.insert(boolean_variable("X2"));
+  x = join_or(sv.begin(), sv.end());
+  std::cout << "x = " << pp(x) << std::endl;
+#endif
+
+  core::garbage_collect();
+}
+
 void test_expressions()
 {
   boolean_variable X("X");
@@ -113,6 +147,7 @@ void test_boolean_equation()
   found.clear();
   atermpp::find_all_if(e.formula(), is_boolean_variable_(), std::inserter(found, found.end()));
   BOOST_CHECK(found == expected);
+  core::garbage_collect();
 }
 
 void test_bes()
@@ -134,6 +169,7 @@ void test_bes()
 
   atermpp::set<boolean_variable> occurring_variables = bes.occurring_variables();
   BOOST_CHECK(occurring_variables.size() == 3);
+  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
@@ -141,9 +177,8 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_expressions();
-  core::garbage_collect();
   test_boolean_equation();
-  core::garbage_collect();
+  test_join();
 
   return 0;
 }
