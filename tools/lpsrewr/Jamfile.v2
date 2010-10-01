@@ -1,7 +1,0 @@
-project toolset/lpsrewr ;
-
-tool lpsrewr
-       : lpsrewr.cpp
-         /libraries//lps
-       : 
-       ;

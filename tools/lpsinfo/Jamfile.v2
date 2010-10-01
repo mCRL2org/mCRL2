@@ -1,7 +1,0 @@
-project toolset/lpsinfo ;
-
-tool lpsinfo
-       : lpsinfo.cpp
-         /libraries//lps
-       : 
-       ;

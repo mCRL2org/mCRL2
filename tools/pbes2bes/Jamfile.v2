@@ -1,8 +1,0 @@
-project toolset/pbes2bes ;
-
-tool pbes2bes
-       : pbes2bes.cpp
-       : <status>experimental
-         <library>/libraries//pbes
-         <use>/libraries//lps
-       ;

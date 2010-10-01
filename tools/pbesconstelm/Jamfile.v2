@@ -1,7 +1,0 @@
-project toolset/pbesconstelm ;
-
-tool pbesconstelm
-       : pbesconstelm.cpp
-         /libraries//pbes
-       : <use>/libraries//lps
-       ;

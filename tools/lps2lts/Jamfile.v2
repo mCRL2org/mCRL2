@@ -1,9 +1,0 @@
-project lps2lts ;
-
-tool lps2lts
-       : lps2lts.cpp
-         /libraries//data
-         /libraries//lps
-         /libraries//lts
-       : 
-       ;

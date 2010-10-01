@@ -1,7 +1,0 @@
-project lpsconstelm ;
-
-tool lpsconstelm
-       : lpsconstelm.cpp
-         /libraries//lps
-       : 
-       ;

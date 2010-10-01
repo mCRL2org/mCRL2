@@ -1,7 +1,0 @@
-project lpsbinary ;
-
-tool lpsbinary
-       : lpsbinary.cpp
-         /libraries//lps
-       : 
-       ;

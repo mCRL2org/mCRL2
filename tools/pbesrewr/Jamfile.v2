@@ -1,8 +1,0 @@
-project toolset/pbesrewr ;
-
-tool pbesrewr
-       : pbesrewr.cpp
-         /libraries//lps
-         /libraries//pbes
-       : 
-       ;

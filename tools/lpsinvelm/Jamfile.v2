@@ -1,6 +1,0 @@
-project lpsinvelm ;
-
-tool lpsinvelm
-       : lpsinvelm.cpp
-         /libraries//lps
-       ;

@@ -1,6 +1,0 @@
-project toolset/lpspp ;
-
-tool lpspp
-       : lpspp.cpp
-         /libraries//lps
-       ;

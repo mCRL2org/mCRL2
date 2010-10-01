@@ -1,7 +1,0 @@
-project lpssuminst ;
-
-tool lpssuminst
-       : lpssuminst.cpp
-         /libraries//lps
-       : 
-       ;

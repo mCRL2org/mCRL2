@@ -1,7 +1,0 @@
-project pbesparelm ;
-
-tool pbesparelm
-       : pbesparelm.cpp
-         /libraries//pbes
-       : <use>/libraries//lps
-       ;

@@ -1,8 +1,0 @@
-project toolset/pbesabstract ;
-
-tool pbesabstract
-       : pbesabstract.cpp
-         /libraries//pbes
-       : <status>experimental
-         <use>/libraries//lps
-       ;

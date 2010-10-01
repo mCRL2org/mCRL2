@@ -1,7 +1,0 @@
-project ltsconvert ;
-
-tool ltsconvert
-       : ltsconvert.cpp
-         /libraries//lts
-       : 
-       ;

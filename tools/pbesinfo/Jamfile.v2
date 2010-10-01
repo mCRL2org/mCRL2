@@ -1,7 +1,0 @@
-project toolset/pbesinfo ;
-
-tool pbesinfo
-       : pbesinfo.cpp
-         /libraries//lps
-         /libraries//pbes
-       ;

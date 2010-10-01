@@ -1,8 +1,0 @@
-project tools/lpsrealelm ;
-
-tool lpsrealelm
-       : lpsrealelm.cpp
-         realelm.cpp
-         /libraries//lps
-       : <status>experimental
-       ;

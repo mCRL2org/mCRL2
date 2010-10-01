@@ -1,7 +1,0 @@
-project toolset/tbf2lps ;
-
-tool tbf2lps
-       : tbf2lps.cpp
-         lpstrans.cpp
-         /libraries//data
-       ;

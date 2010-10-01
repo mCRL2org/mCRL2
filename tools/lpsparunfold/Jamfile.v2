@@ -1,7 +1,0 @@
-project toolset/lpsparunfold ;
-
-tool lpsparunfold
-       : lpsparunfold.cpp
-         lpsparunfoldlib.cpp
-         /libraries//lps
-       ;

@@ -1,6 +1,0 @@
-project toolset/lps2torx ;
-
-tool lps2torx
-       : lps2torx.cpp
-         /libraries//lps
-       ;

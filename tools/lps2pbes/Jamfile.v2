@@ -1,8 +1,0 @@
-project toolset/lps2pbes ;
-
-tool lps2pbes
-       : lps2pbes.cpp
-         /libraries//lps
-         /libraries//pbes
-       : 
-       ;
