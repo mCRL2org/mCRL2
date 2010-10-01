@@ -50,10 +50,5 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_utilities_command_line
   )
 
-  if(MCRL2_USE_BOOST_INTERNAL)
-  target_link_libraries(${PROJECT_NAME}
-     boost
-  )
-  endif(MCRL2_USE_BOOST_INTERNAL)
 endforeach( OBJ )
 

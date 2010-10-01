@@ -30,15 +30,9 @@ add_library(${PROJECT_NAME}
   ${mcrl2_utilities_command_line_src}
 )
 
-if(MCRL2_USE_BOOST_INTERNAL)
-  target_link_libraries(${PROJECT_NAME}
-    boost
-  ) 
-else(MCRL2_USE_BOOST_INTERNAL)
-  target_link_libraries(${PROJECT_NAME}
-    ${Boost_LIBRARIES}
-  )
-endif(MCRL2_USE_BOOST_INTERNAL)
+target_link_libraries(${PROJECT_NAME}
+  ${Boost_LIBRARIES}
+)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 

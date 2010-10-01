@@ -20,7 +20,7 @@
 #include <string>
 #include <iterator>
 
-#if !defined(MCRL2_USE_BOOST_INTERNAL) && !defined(MCRL2_DISABLE_BOOST_REGEX)
+#if !defined(MCRL2_DISABLE_BOOST_REGEX)
   #include <boost/regex.hpp>
 #endif
 
@@ -238,7 +238,7 @@ namespace mcrl2 {
 
       // Following line:
       //
-#if defined(MCRL2_USE_BOOST_INTERNAL) || defined(MCRL2_DISABLE_BOOST_REGEX)
+#if defined(MCRL2_DISABLE_BOOST_REGEX)
          description = boost::xpressive::regex_replace(description, boost::xpressive::sregex(~boost::xpressive::_w >> (option= '-' >> -*boost::xpressive::as_xpr('-') >> +boost::xpressive::_w)), std::string("<tt>$1</tt>"));
 #else
       //
@@ -249,7 +249,7 @@ namespace mcrl2 {
       boost::regex e( "(--\\w*)|(-\\w*)" );
       description = boost::regex_replace(description, e, "<tt>$&</tt>" );
       // -- end --
-#endif // defined(MCRL2_USE_BOOST_INTERNAL) || defined(MCRL2_DISABLE_BOOST_REGEX)
+#endif // defined(MCRL2_DISABLE_BOOST_REGEX)
 
       s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
 

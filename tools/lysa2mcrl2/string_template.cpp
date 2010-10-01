@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <boost/algorithm/string/replace.hpp>
-#if !defined(MCRL2_USE_BOOST_INTERNAL) && !defined(MCRL2_DISABLE_BOOST_REGEX)
+#if !defined(MCRL2_DISABLE_BOOST_REGEX)
   #include <boost/regex.hpp>
 #endif
 
@@ -86,7 +86,7 @@ void StringTemplate::finalise()
   // removes dangling commas, right next to a bracket.
   //
 
-#if defined(MCRL2_USE_BOOST_INTERNAL) || defined(MCRL2_DISABLE_BOOST_REGEX)
+#if defined(MCRL2_DISABLE_BOOST_REGEX)
      sregex rex = ((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
      subject = regex_replace(subject, rex, std::string("$1$2"));
 #else
@@ -125,7 +125,7 @@ StringTemplateFile::StringTemplateFile(string filecontent)
 		// Original code:
 		// -- begin --
 		//
-#if defined(MCRL2_USE_BOOST_INTERNAL) || defined(MCRL2_DISABLE_BOOST_REGEX)
+#if defined(MCRL2_DISABLE_BOOST_REGEX)
 		sregex rex = bos >> *_s >> (s1= +_w) >> *_s >> '=' >> !_s >> (s2= *_) >> !(as_xpr('\r')) >> eos;
 		smatch matches;
 

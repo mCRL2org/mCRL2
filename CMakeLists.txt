@@ -33,7 +33,6 @@ endif(NOT MCRL2_BUILD_IN_SOURCE)
 #
 #   CMAKE_INSTALL_PREFIX = /usr/local(*) (any path can be used)
 #   CMAKE_BUILD_TYPE     = None | Debug | Release(*) | RelwithDebInfo | MinSizeRel
-#   MCRL2_USE_BOOST_INTERNAL   = ON | OFF(*)
 #   BUILD_SHARED_LIBS    = ON    | OFF(*)
 #   MCRL2_ENABLE_EXPERIMENTAL  = ON    | OFF(*)
 #   MCRL2_ENABLE_DEPRECATED    = ON    | OFF(*)
@@ -376,68 +375,41 @@ message(STATUS "SVN revision: ${SVN_REV}")
 ## Set Boost configuration
 ##---------------------------------------------------
 
-option(MCRL2_USE_BOOST_INTERNAL "Enable/disable the use of internally provided Boost libraries" OFF)
-message(STATUS "MCRL2_USE_BOOST_INTERNAL: ${MCRL2_USE_BOOST_INTERNAL}")
 
-option( MCRL2_INSTALL_BOOST_HEADERS "Enable/disable installation of boost headers" OFF)
-message(STATUS "MCRL2_INSTALL_BOOST_HEADERS: ${MCRL2_INSTALL_BOOST_HEADERS}" )
 
-if(MCRL2_USE_BOOST_INTERNAL)
+if(MSVC OR MINGW OR MSYS)
+  SET (Boost_USE_STATIC_LIBS ON)
+        
+  find_package(Boost COMPONENTS filesystem signals system serialization REQUIRED)
+     # Disable boost::regex and use sregex instead.
+     # using MSVC 2010, BoostPro 1.44, results in following link error:
+     # mcrl2_utilities_command_line.lib(command_line_interface.obj) :
+     # error LNK2019: unresolved external symbol "char __fastcall boost::re_detail::w32_toupper(char,unsigned long)" (?w32_toupper@re_detail@boost@@YIDDK@Z) referenced in function "public: char __thiscall boost::w32_regex_traits<char>::toupper(char)const " (?toupper@?$w32_regex_traits@D@boost@@QBEDD@Z)
+     add_definitions( -DMCRL2_DISABLE_BOOST_REGEX )
+else(MSVC OR MINGW OR MSYS)
+  find_package(Boost COMPONENTS system serialization signals filesystem regex REQUIRED)
+endif(MSVC OR MINGW OR MSYS)
 
-  add_definitions(-DBOOST_ALL_NO_LIB=1)
-  add_definitions(-DBOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1)
-  add_definitions(-DBOOST_MULTI_INDEX_DISABLE_SERIALIZATION=1)
-  add_definitions(-DMCRL2_USE_BOOST_INTERNAL)
+if(NOT Boost_FOUND)
+  message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.35 or higher." )
+  message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
+  message( FATAL_ERROR "instructions on building mCRL2 with an external version of boost.")
+endif(NOT Boost_FOUND)
 
-  #Following define cannot be set with MSVC as it yields to a
-  #fatal error C1083: Cannot open include file: 'pthread.h': No such file or directory
-  if (NOT WIN32 )
-    add_definitions(-DBOOST_THREAD_POSIX)
-  endif (NOT WIN32 )
+if( Boost_VERSION LESS 103500 )
+  message( STATUS "Boost version v1.35 or higher required." )
+  message( STATUS "Current Boost version: ${Boost_VERSION}.")
+  message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
+  message( FATAL_ERROR "instructions on building mCRL2 with an external version of boost.")
+endif( Boost_VERSION LESS 103500 )
 
-  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/boost)
-  add_subdirectory (3rd-party/boost)
+message( STATUS "Boost version: ${Boost_VERSION}" )
 
-else(MCRL2_USE_BOOST_INTERNAL)
+if (Boost_FOUND)
+   include_directories(${Boost_INCLUDE_DIRS})
+   link_directories(${Boost_LIBRARY_DIRS})
+endif (Boost_FOUND)
 
-  if(MSVC OR MINGW OR MSYS)
-    SET (Boost_USE_STATIC_LIBS ON)
-	  
-    find_package(Boost COMPONENTS filesystem signals system serialization REQUIRED)
-       # Disable boost::regex and use sregex instead.
-       # using MSVC 2010, BoostPro 1.44, results in following link error:
-       # mcrl2_utilities_command_line.lib(command_line_interface.obj) :
-       # error LNK2019: unresolved external symbol "char __fastcall boost::re_detail::w32_toupper(char,unsigned long)" (?w32_toupper@re_detail@boost@@YIDDK@Z) referenced in function "public: char __thiscall boost::w32_regex_traits<char>::toupper(char)const " (?toupper@?$w32_regex_traits@D@boost@@QBEDD@Z)
-       add_definitions( -DMCRL2_DISABLE_BOOST_REGEX )
-  else(MSVC OR MINGW OR MSYS)
-    find_package(Boost COMPONENTS system serialization signals filesystem regex REQUIRED)
-  endif(MSVC OR MINGW OR MSYS)
-
-  if(NOT Boost_FOUND)
-    message( STATUS "The mCRL2 toolset requires the installation of Boost version v1.34 or higher." )
-    message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
-    message( STATUS "instructions on building mCRL2 with an external version of boost.")
-    message( STATUS "As a last resort, you can use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost." )
-    message( FATAL_ERROR "this option may be removed in the near future." )
-  endif(NOT Boost_FOUND)
-
-  if( Boost_VERSION LESS 103500 )
-    message( STATUS "Boost version v1.35 or higher required." )
-    message( STATUS "Current Boost version: ${Boost_VERSION}.")
-    message( STATUS "See http://www.mcrl2.org/mcrl2/wiki/index.php/CMake_build_instructions for" )
-    message( STATUS "instructions on building mCRL2 with an external version of boost.")
-    message( STATUS "As a last resort, you can use -DMCRL2_USE_BOOST_INTERNAL=true to use the internal version of boost." )
-    message( FATAL_ERROR "this option may be removed in the near future." )
-  endif( Boost_VERSION LESS 103500 )
-
-  message( STATUS "Boost version: ${Boost_VERSION}" )
- 
-  if (Boost_FOUND)
-     include_directories(${Boost_INCLUDE_DIRS})
-     link_directories(${Boost_LIBRARY_DIRS})
-  endif (Boost_FOUND)
-
-endif(MCRL2_USE_BOOST_INTERNAL)
 
 ##---------------------------------------------------
 ## Explicity Set NDebug
@@ -811,23 +783,6 @@ install(
   DESTINATION include
   PATTERN ".svn" EXCLUDE
 )
-
-if( MCRL2_INSTALL_BOOST_HEADERS )
-  if ( MCRL2_USE_BOOST_INTERNAL )
-    install(
-      DIRECTORY
-        ${CMAKE_SOURCE_DIR}/3rd-party/boost/boost
-      DESTINATION include
-      PATTERN ".svn" EXCLUDE
-    )
-  else ( MCRL2_USE_BOOST_INTERNAL )
-    install(
-      DIRECTORY
-        ${Boost_INCLUDE_DIRS}/boost
-      DESTINATION include
-    )
-  endif( MCRL2_USE_BOOST_INTERNAL )
-endif( MCRL2_INSTALL_BOOST_HEADERS )
 
 ##---------------------------------------------------
 ## Install examples

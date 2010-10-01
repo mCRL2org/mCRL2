@@ -35,15 +35,9 @@ foreach( OBJ ${TERM_OBJS} )
   target_link_libraries("${PREFIX}_${result}"
    mcrl2_lps
   )
-  if(MCRL2_USE_BOOST_INTERNAL)
-    target_link_libraries(${PROJECT_NAME}
-      boost
-    ) 
-  else(MCRL2_USE_BOOST_INTERNAL)
-    target_link_libraries(${PROJECT_NAME}
-      ${Boost_LIBRARIES}     
-    ) 
-  endif(MCRL2_USE_BOOST_INTERNAL)
+  target_link_libraries(${PROJECT_NAME}
+    ${Boost_LIBRARIES}     
+  ) 
   
   # MACRO is defined in CMakeLists.txt in root of source tree
   build_and_run_test_target( ${PREFIX}_${result} )
