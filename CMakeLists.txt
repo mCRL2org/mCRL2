@@ -12,19 +12,6 @@ cmake_minimum_required (VERSION 2.6)
 message(STATUS "CMAKE VERSION: ${CMAKE_VERSION}")
 project (MCRL2)
 
-option(MCRL2_BUILD_IN_SOURCE "Enable/Disable in-soucre tree development" OFF)
-if(NOT MCRL2_BUILD_IN_SOURCE)
-  if(${CMAKE_CURRENT_BINARY_DIR} EQUAL ${CMAKE_SOURCE_DIR})
-    message(STATUS "=================================================================")
-    message(STATUS "== WARNING: Do not upload the \"Makefile\" to the svn repository ==")
-    message(STATUS "=================================================================")
-    message(STATUS "")
-    message(STATUS "To build in-source, set MCRL2_BUILD_IN_SOURCE=ON")
-    message(STATUS "")
-    message(FATAL_ERROR)
-  endif(${CMAKE_CURRENT_BINARY_DIR} EQUAL ${CMAKE_SOURCE_DIR})
-endif(NOT MCRL2_BUILD_IN_SOURCE)
-
 # Commonly used options
 # ---------------------
 #
