@@ -49,13 +49,28 @@ DataVarIdInit | assignment[_base](const variable& lhs, const data_expression& rh
 IdInit    | identifier_assignment[_base](const identifier& lhs, const data_expression& rhs) | Assignment of a data expression to a string
 '''
 
-DATA_EXPRESSION_CLASSES = r'''
+# N.B. The class abstraction is a special case. We want to have user code in terms of classes
+# 'lambda', 'exists' and 'forall', but this does not match very well with the internal ATerm
+# representation.
+ABSTRACTION_CLASS = r'''
+Binder    | abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
+'''
+
+DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION = r'''
 Id    | identifier(const core::identifier_string& name) | An identifier
 DataVarId | variable(const core::identifier_string& name, const sort_expression& sort) | A data variable
 OpId    | function_symbol(const core::identifier_string& name, const sort_expression& sort) | A function symbol
 DataAppl  | application[_base](const data_expression& head, data_expression_list const& arguments) | An application of a data expression to a number of arguments
-Binder    | abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) | An abstraction expression.
 Whr   | where_clause(const data_expression& body, const assignment_expression_list& declarations) | A where expression
+'''
+
+DATA_EXPRESSION_CLASSES = DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION + ABSTRACTION_CLASS
+
+# N.B. This is used only for generation of traversal code.
+ABSTRACTION_EXPRESSIONS = r'''
+None     | forall(const variable_list& variables, const data_expression& body) | Universal quantification
+None     | exists(const variable_list& variables, const data_expression& body) | Existential quantification
+None     | lambda(const variable_list& variables, const data_expression& body) | Lambda abstraction
 '''
 
 DATA_CLASSES = r'''

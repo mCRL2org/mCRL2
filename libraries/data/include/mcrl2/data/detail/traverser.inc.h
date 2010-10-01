@@ -184,20 +184,35 @@ void operator()(const application& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const abstraction& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.binding_operator());
-  static_cast<Derived&>(*this)(x.variables());
-  static_cast<Derived&>(*this)(x.body());
-  static_cast<Derived&>(*this).leave(x);
-}
-
 void operator()(const where_clause& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.body());
   static_cast<Derived&>(*this)(x.declarations());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const forall& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.variables());
+  static_cast<Derived&>(*this)(x.body());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const exists& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.variables());
+  static_cast<Derived&>(*this)(x.body());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const lambda& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.variables());
+  static_cast<Derived&>(*this)(x.body());
   static_cast<Derived&>(*this).leave(x);
 }
 
@@ -218,8 +233,8 @@ void operator()(const data_expression& x)
   else if (is_variable(x)) { static_cast<Derived&>(*this)(variable(x)); }
   else if (is_function_symbol(x)) { static_cast<Derived&>(*this)(function_symbol(x)); }
   else if (is_application(x)) { static_cast<Derived&>(*this)(application(x)); }
-  else if (is_abstraction(x)) { static_cast<Derived&>(*this)(abstraction(x)); }
   else if (is_where_clause(x)) { static_cast<Derived&>(*this)(where_clause(x)); }
+  else if (is_abstraction(x)) { static_cast<Derived&>(*this)(abstraction(x)); }
   static_cast<Derived&>(*this).leave(x);
 }
 
@@ -263,6 +278,15 @@ void operator()(const binder_type& x)
   else if (is_forall_binder(x)) { static_cast<Derived&>(*this)(forall_binder(x)); }
   else if (is_exists_binder(x)) { static_cast<Derived&>(*this)(exists_binder(x)); }
   else if (is_lambda_binder(x)) { static_cast<Derived&>(*this)(lambda_binder(x)); }
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const abstraction& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  if (is_forall(x)) { static_cast<Derived&>(*this)(forall(x)); }
+  else if (is_exists(x)) { static_cast<Derived&>(*this)(exists(x)); }
+  else if (is_lambda(x)) { static_cast<Derived&>(*this)(lambda(x)); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

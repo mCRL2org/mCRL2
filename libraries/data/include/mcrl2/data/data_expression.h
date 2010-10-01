@@ -282,15 +282,6 @@ namespace mcrl2 {
       return core::detail::gsIsDataAppl(t);
     }
 
-    /// \brief Test for a abstraction expression
-    /// \param t A term
-    /// \return True if it is a abstraction expression
-    inline
-    bool is_abstraction(const data_expression& t)
-    {
-      return core::detail::gsIsBinder(t);
-    }
-
     /// \brief Test for a where_clause expression
     /// \param t A term
     /// \return True if it is a where_clause expression
@@ -298,6 +289,15 @@ namespace mcrl2 {
     bool is_where_clause(const data_expression& t)
     {
       return core::detail::gsIsWhr(t);
+    }
+
+    /// \brief Test for a abstraction expression
+    /// \param t A term
+    /// \return True if it is a abstraction expression
+    inline
+    bool is_abstraction(const data_expression& t)
+    {
+      return core::detail::gsIsBinder(t);
     }
 //--- end generated is-functions ---//
     */
