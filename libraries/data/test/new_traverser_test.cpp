@@ -30,9 +30,6 @@ class my_traverser: public data::traverser<my_traverser>
 public:
   typedef data::traverser<my_traverser> super;
 
-  using super::enter;
-  using super::leave;
-
 #if BOOST_MSVC
   // Workaround for malfunctioning MSVC 2008 overload resolution
   template <typename Container>
@@ -65,9 +62,8 @@ class my_binding_aware_traverser: public data::binding_aware_traverser<my_bindin
 public:
   typedef data::binding_aware_traverser<my_binding_aware_traverser> super;
 
+  // This is essential, to make the empty default implementation of enter visible.
   using super::enter;
-  using super::leave;
-  using super::operator();
 
   void enter(const data_expression& x)
   {
@@ -99,16 +95,16 @@ void test_my_binding_aware_traverser(const T& x)
 
 void test_my_binding_aware_traverser()
 {
-  data_expression_list d;
+  data_expression d = variable("n", sort_nat::nat());
   test_my_binding_aware_traverser(d);
   
   data_expression_list dl;
   test_my_binding_aware_traverser(dl);
 
-  variable var;
+  variable var("n", sort_nat::nat());
   test_my_binding_aware_traverser(var);
   
-  data_equation eq;
+  data_equation eq(variable("b", sort_bool::bool_()), variable("b", sort_bool::bool_()), variable("b", sort_bool::bool_()));
   test_my_binding_aware_traverser(eq);
   
   variable_vector v;

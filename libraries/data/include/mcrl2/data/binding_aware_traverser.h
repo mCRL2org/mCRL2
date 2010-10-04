@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen van der Wulp, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -25,8 +25,8 @@ namespace data {
     typedef core::binding_aware_traverser<Derived, variable> super;
 
     using super::operator();
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
+    using super::enter;
+    using super::leave;
 
 // Include file with traverse member functions. This is to avoid duplication.
 #include "mcrl2/data/detail/traverser.inc.h"
@@ -39,6 +39,8 @@ namespace data {
     typedef binding_aware_traverser_helper<Derived> super;
 
     using super::operator();
+    using super::enter;
+    using super::leave;
     using super::increase_bind_count;
     using super::decrease_bind_count;
 
