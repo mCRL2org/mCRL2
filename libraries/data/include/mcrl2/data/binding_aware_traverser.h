@@ -18,7 +18,7 @@ namespace mcrl2 {
 
 namespace data {
 
-  // Adds data traversal functions to the core binding aware traverser.
+  /// \brief Add data traversal functions to the core binding aware traverser.
   template <typename Derived>
   struct binding_aware_traverser_helper: public core::binding_aware_traverser<Derived, variable>
   {
@@ -32,6 +32,7 @@ namespace data {
 #include "mcrl2/data/detail/traverser.inc.h"
   };
 
+  /// \brief Handle binding variables.
   template <typename Derived>
   struct binding_aware_traverser : public binding_aware_traverser_helper<Derived>
   {
@@ -41,27 +42,6 @@ namespace data {
     using super::increase_bind_count;
     using super::decrease_bind_count;
 
-    // TODO: The implementation below is kind of ugly, since it uses copy and paste
-    // of the traversal. Two alternatives come to mind:
-    // 1) Use the enter and leave functions instead of operator().
-    // 2) Add an extra traverse member function like this:
-    //
-    // void operator()(where_clause const& x)
-    // {
-    //   static_cast<Derived&>(*this).enter(x);
-    //   static_cast<Derived&>(*this).traverse(x);
-    //   static_cast<Derived&>(*this).leave(x);
-    // }
-    //
-    // void traverse(where_clause const& x)
-    // {
-    //   static_cast<Derived&>(*this)(x.body());
-    //   static_cast<Derived&>(*this)(x.declarations());
-    // }
-    //
-    // Then the binding aware traverser can be implemented by overriding
-    // operator() function, without the need to copy the traversal code.
-    //
     void operator()(where_clause const& x)
     {
       increase_bind_count(make_assignment_left_hand_side_range(x.declarations()));
