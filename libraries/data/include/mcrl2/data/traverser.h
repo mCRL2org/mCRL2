@@ -31,9 +31,6 @@ namespace data {
       using super::enter;
       using super::leave;
 
-      void operator()(const core::identifier_string& s)
-      { }
-
 // Include file with traverse member functions. This is to avoid duplication.
 #include "mcrl2/data/detail/traverser.inc.h"
   };

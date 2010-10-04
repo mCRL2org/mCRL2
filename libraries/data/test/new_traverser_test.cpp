@@ -10,6 +10,7 @@
 /// \brief Traverser tests.
 
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 #include <boost/test/minimal.hpp>
@@ -19,86 +20,10 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/new_find.h"
 #include "mcrl2/data/traverser.h"
+#include "mcrl2/data/binding_aware_traverser.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
-
-inline
-variable nat(std::string name)
-{
-  return variable(core::identifier_string(name), sort_nat::nat());
-}
-
-inline
-variable pos(std::string name)
-{
-  return variable(core::identifier_string(name), sort_pos::pos());
-}
-
-inline
-variable bool_(std::string name)
-{
-  return variable(core::identifier_string(name), sort_bool::bool_());
-}
-
-void test_traverser()
-{
-  variable n1 = nat("n1");
-  variable n2 = nat("n2");
-  variable n3 = nat("n3");
-  variable n4 = nat("n4");
-
-  variable b1 = bool_("b1");
-  variable b2 = bool_("b2");
-  variable b3 = bool_("b3");
-  variable b4 = bool_("b4");
-
-  variable p1 = pos("p1");
-  variable p2 = pos("p2");
-  variable p3 = pos("p3");
-  variable p4 = pos("p4");
-
-  std::set<variable> S;
-  S.insert(b1);
-  S.insert(p1);
-  S.insert(n1);
-
-  std::vector<variable> V;
-  V.push_back(b1);
-  V.push_back(p1);
-  V.push_back(n1);
-
-  sort_expression_vector domain = atermpp::make_vector< sort_expression >(sort_pos::pos(), sort_bool::bool_());
-  sort_expression sexpr = function_sort(domain, sort_nat::nat());
-  variable q1(core::identifier_string("q1"), sexpr);
-
-  data_expression x = sort_bool::and_(equal_to(n1, n2), not_equal_to(n2, n3));
-  data_expression y = sort_bool::or_(equal_to(p1, p2), sort_bool::and_(x, b2));
-
-  //--- search_variable ---//
-  BOOST_CHECK( new_search_variable(x, n1));
-  BOOST_CHECK( new_search_variable(x, n2));
-  BOOST_CHECK( new_search_variable(x, n3));
-  BOOST_CHECK(!new_search_variable(x, n4));
-  BOOST_CHECK( new_search_variable(S, n1));
-  BOOST_CHECK(!new_search_variable(S, n2));
-  BOOST_CHECK( new_search_variable(V, n1));
-  BOOST_CHECK(!new_search_variable(V, n2));
-
-  core::garbage_collect();
-
-  //--- find_variables ---//
-  std::set<variable> v = find_variables(x);
-  BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
-  BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
-  BOOST_CHECK(std::find(v.begin(), v.end(), n3) != v.end());
-
-  std::set<variable> vS = new_find_variables(S);
-  std::set<variable> vV = new_find_variables(V);
-  BOOST_CHECK(vS == vV);
-
-  core::garbage_collect(); 
-}
 
 class my_traverser: public data::traverser<my_traverser>
 {
@@ -110,7 +35,7 @@ public:
 
 #if BOOST_MSVC
   // Workaround for malfunctioning MSVC 2008 overload resolution
-  template <typename Container >
+  template <typename Container>
   void operator()(Container const& x)
   {
     super::operator()(x);
@@ -135,12 +60,77 @@ void test_my_traverser()
   t(eq);
 }
 
+class my_binding_aware_traverser: public data::binding_aware_traverser<my_binding_aware_traverser>
+{
+public:
+  typedef data::binding_aware_traverser<my_binding_aware_traverser> super;
+
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  void enter(const data_expression& x)
+  {
+    std::cout << "Entering " << pp(x) << " with bound variables ";
+    for (std::multiset<variable_type>::iterator i = m_bound_variables.begin(); i != m_bound_variables.end(); ++i)
+    {
+      std::cout << pp(*i) << " ";
+    }
+    std::cout << std::endl;
+  }
+
+// TODO: It is not exactly clear yet why this overload is necessary
+#if BOOST_MSVC
+  template <typename Container>
+  void operator()(Container const& x)
+  {
+    super::operator()(x);
+  }
+#endif
+
+};
+
+template <typename T>
+void test_my_binding_aware_traverser(const T& x)
+{
+  my_binding_aware_traverser t;
+  t(x);
+}
+
+void test_my_binding_aware_traverser()
+{
+  data_expression_list d;
+  test_my_binding_aware_traverser(d);
+  
+  data_expression_list dl;
+  test_my_binding_aware_traverser(dl);
+
+  variable var;
+  test_my_binding_aware_traverser(var);
+  
+  data_equation eq;
+  test_my_binding_aware_traverser(eq);
+  
+  variable_vector v;
+  v.push_back(variable("x", sort_nat::nat()));
+  v.push_back(variable("y", sort_nat::nat()));
+  data_expression vbody = variable("b", sort_bool::bool_());
+  data_expression z = forall(v, vbody);
+  test_my_binding_aware_traverser(z);
+
+  variable_vector w;
+  w.push_back(variable("z", sort_nat::nat()));
+  data_expression wbody = exists(w, z);
+  z = forall(w, wbody);
+  test_my_binding_aware_traverser(z); 
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
-  test_traverser();
   test_my_traverser();
+  test_my_binding_aware_traverser();
 
   return EXIT_SUCCESS;
 }

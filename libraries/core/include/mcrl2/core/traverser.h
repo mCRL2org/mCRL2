@@ -13,6 +13,7 @@
 #define MCRL2_CORE_TRAVERSER_H
 
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2 {
 
@@ -46,6 +47,10 @@ namespace core {
           static_cast<Derived&>(*this)(*i);
         }
       }
+
+      // TODO: This dependency on identifier_string should be moved elsewhere...
+      void operator()(const core::identifier_string& s)
+      { }
   };
 
   /**
