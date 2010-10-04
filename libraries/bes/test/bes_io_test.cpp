@@ -68,6 +68,19 @@ void test_pbes()
   core::garbage_collect();
 }
 
+void test_pgsolver()
+{
+  boolean_equation_system<> b;
+  std::stringstream bes_stream(bes1);
+  bes_stream >> b;
+
+  std::stringstream out;
+  bes::bes2pgsolver(b.equations().begin(), b.equations().end(), out);
+  core::garbage_collect();
+
+  std::clog << out.str() << std::endl;
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -75,6 +88,7 @@ int test_main(int argc, char* argv[])
   test_parse_bes();
   test_bes();
   test_pbes();
+  test_pgsolver();
 
   return 0;
 }
