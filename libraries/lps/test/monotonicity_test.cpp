@@ -158,6 +158,7 @@ BOOST_AUTO_TEST_CASE(test_elevator)
   run_monotonicity_test_case("!(nu X . X)", lps_spec, true);
   run_monotonicity_test_case("(mu X . X) => true", lps_spec, true);
   run_monotonicity_test_case("(nu X . X) => true", lps_spec, true);
+  run_monotonicity_test_case("!(mu X. (mu X. X))", lps_spec, true);
 #endif
 }
 
