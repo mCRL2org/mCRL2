@@ -659,7 +659,13 @@ void XSimMain::OnTimer( wxTimerEvent& /* event */ )
     case FUNC_RANDOM:
       if ( !ATisEmpty(simulator->GetNextStates()) && !stopped )
       {
+	try{
         simulator->ChooseTransition(rand() % ATgetLength(simulator->GetNextStates()));
+        } catch (std::exception const& e) { 
+          wxMessageDialog(this, wxString(e.what(), wxConvLocal), wxT("Error"), 
+          wxOK | wxICON_ERROR).ShowModal(); 
+         return; 
+        } 
         Update();
         wxYield();
       } else {
@@ -722,7 +728,13 @@ void XSimMain::stateOnListItemSelected( wxListEvent& event )
 
 void XSimMain::transOnListItemActivated( wxListEvent& event )
 {
+  try{
   simulator->ChooseTransition(event.GetData());
+  } catch (std::exception const& e) { 
+    wxMessageDialog(this, wxString(e.what(), wxConvLocal), wxT("Error"), 
+    wxOK | wxICON_ERROR).ShowModal(); 
+    return; 
+  } 
 }
 
 void XSimMain::SetCurrentState(ATerm state, bool showchange)
