@@ -27,7 +27,8 @@ inline
 bool is_monotonous(state_formula f, const std::set<core::identifier_string>& negated_variables)
 {
   //std::cout << "<formula>" << core::pp(f) << "<negated_variables>" << core::detail::print_pp_set(negated_variables) << std::endl;
-  using namespace state_frm;
+
+  using namespace accessors;
 
   //--- handle negations ---//
   if (is_not(f))

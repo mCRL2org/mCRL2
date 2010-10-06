@@ -111,12 +111,12 @@ struct MYEXPRESSION_builder
   /// \\return The visit result
   MYEXPRESSION visit(const MYEXPRESSION& x, Arg& a)
   {
-#ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
+#ifdef MCRL2_UPPERCASE_EXPRESSION_BUILDER_DEBUG
   std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     MYEXPRESSION result;
 %s
-#ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
+#ifdef MCRL2_UPPERCASE_EXPRESSION_BUILDER_DEBUG
   std::cerr << "<visit result>" << pp(result) << std::endl;
 #endif
     return result;
@@ -153,12 +153,12 @@ struct MYEXPRESSION_builder<void>
   /// \param x A term
   MYEXPRESSION visit(const MYEXPRESSION& x)
   {
-#ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
+#ifdef MCRL2_UPPERCASE_EXPRESSION_BUILDER_DEBUG
   std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     MYEXPRESSION result;
 %s
-#ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
+#ifdef MCRL2_UPPERCASE_EXPRESSION_BUILDER_DEBUG
   std::cerr << "<visit result>" << pp(result) << std::endl;
 #endif
     return result;
@@ -275,7 +275,7 @@ def make_expression_builder(filename, expression, text):
         text = EXPRESSION_BUILDER_NODE_TEXT
         text = re.sub('MYEXPRESSION', expression, text)
         text = re.sub('QUALIFIED_NODE', qualified_node, text)
-        text = re.sub('NODE', node, text)
+        text = re.sub('NODE', re.sub('_$', '', node), text)
         vtext = vtext + text
     
         #--- generate code fragments like this
@@ -290,7 +290,7 @@ def make_expression_builder(filename, expression, text):
         #      }
         #    }  
         text = ''
-        text = text + '%sif (is_%s(x))\n' % (else_text, node)
+        text = text + '%sif (is_%s(x))\n' % (else_text, re.sub('_$', '', node))
         if else_text == '':
             else_text = 'else '
         text = text + '{\n'
@@ -299,7 +299,7 @@ def make_expression_builder(filename, expression, text):
         #args = ', '.join(names)
         #if args != '':
         #    args = ', ' + args
-        text = text + '  result = visit_%s(xEXTRA_ARG);\n' % (node)
+        text = text + '  result = visit_%s(xEXTRA_ARG);\n' % (re.sub('_$', '', node))
         text = text + '  if (!is_finished(result))\n'
         text = text + '  {\n'
         stext = ''
@@ -324,15 +324,16 @@ def make_expression_builder(filename, expression, text):
     
     rtext = EXPRESSION_BUILDER_CODE % (vtext2, wtext2, vtext1, wtext1)
     rtext = re.sub('MYEXPRESSION', expression, rtext)
+    rtext = re.sub('UPPERCASE_EXPRESSION', expression.upper(), rtext)
     insert_text_in_file(filename, rtext, 'generated visitor')
 
-def make_is_functions(filename, text):
+def make_is_functions(filename, expression, text):
     TERM_TRAITS_TEXT = r'''
     /// \\brief Test for a %s expression
     /// \\param t A term
     /// \\return True if it is a %s expression
     inline
-    bool is_%s(const process_expression& t)
+    bool is_%s(const %s& t)
     {
       return core::detail::gsIs%s(t);
     }
@@ -344,14 +345,16 @@ def make_is_functions(filename, text):
         #(aterm, constructor, description) = c
         f = c.constructor
         name = f.name()
-        rtext = rtext + TERM_TRAITS_TEXT % (name, name, name, c.aterm)
+        rtext = rtext + TERM_TRAITS_TEXT % (name, name, re.sub('_$', '', name), expression, c.aterm)
     insert_text_in_file(filename, rtext, 'generated is-functions')
 
 if __name__ == "__main__":
     make_expression_visitor('../../process/include/mcrl2/process/process_expression_visitor.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
     make_expression_builder('../../process/include/mcrl2/process/process_expression_builder.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
-    make_is_functions(      '../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES)
+    make_is_functions(      '../../process/include/mcrl2/process/process_expression.h', 'process_expression', PROCESS_EXPRESSION_CLASSES)
     make_expression_visitor('../../lps/include/mcrl2/modal_formula/state_formula_visitor.h', 'state_formula', STATE_FORMULA_CLASSES)
+    make_expression_builder('../../lps/include/mcrl2/modal_formula/state_formula_builder.h', 'state_formula', STATE_FORMULA_CLASSES)
+    make_is_functions(      '../../lps/include/mcrl2/modal_formula/state_formula.h', 'state_formula', STATE_FORMULA_CLASSES)
     # N.B. This doesn't work, since the pbes expression visitors need to be patched for the value true
     # make_expression_visitor('../../pbes/include/mcrl2/pbes/pbes_expression_visitor.h', 'pbes_expression', PBES_EXPRESSION_CLASSES)
     # make_expression_builder('../../pbes/include/mcrl2/pbes/pbes_expression_builder.h', 'pbes_expression', PBES_EXPRESSION_CLASSES)

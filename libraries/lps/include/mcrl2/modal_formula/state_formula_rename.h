@@ -25,7 +25,7 @@ namespace state_formulas {
 /// Visitor that renames predicate variables using the specified identifier generator.
 /// \post In the generated formula, all predicate variables have different names.
 template <typename IdentifierGenerator>
-struct state_formula_predicate_variable_rename_builder: public state_formula_builder
+struct state_formula_predicate_variable_rename_builder: public state_formula_builder<>
 {
   /// \brief An identifier generator
   IdentifierGenerator& generator;
@@ -61,18 +61,18 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param n A
   /// \param l A sequence of data expressions
   /// \return The result of visiting the node
-  state_formula visit_var(const state_formula& /* e */, const core::identifier_string& n, const data::data_expression_list& l)
+  state_formula visit_variable(const variable& x)
   {
-    core::identifier_string new_name = n;
+    core::identifier_string new_name = x.name();
     for (std::deque<std::pair<core::identifier_string, core::identifier_string> >::iterator i = replacements.begin(); i != replacements.end(); ++i)
     {
-      if (i->first == n)
+      if (i->first == x.name())
       {
         new_name = i->second;
         break;
       }
     }
-    return state_frm::variable(new_name, l);
+    return variable(new_name, x.arguments());
   }
 
   /// \brief Visit mu node
@@ -81,12 +81,12 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula visit_mu(const state_formula& /* e */, const core::identifier_string& n, const data::assignment_list& a, const state_formula& f)
+  state_formula visit_mu(const mu& x)
   {
-    core::identifier_string new_name = push(n);
-    state_formula new_formula = visit(f);
+    core::identifier_string new_name = push(x.name());
+    state_formula new_formula = visit(x.operand());
     pop();
-    return state_frm::mu(new_name, a, new_formula);
+    return mu(new_name, x.assignments(), new_formula);
   }
 
   /// \brief Visit nu node
@@ -95,12 +95,12 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula visit_nu(const state_formula& /* e */, const core::identifier_string& n, const data::assignment_list& a, const state_formula& f)
+  state_formula visit_nu(const nu& x)
   {
-    core::identifier_string new_name = push(n);
-    state_formula new_formula = visit(f);
+    core::identifier_string new_name = push(x.name());
+    state_formula new_formula = visit(x.operand());
     pop();
-    return state_frm::nu(new_name, a, new_formula);
+    return nu(new_name, x.assignments(), new_formula);
   }
 };
 

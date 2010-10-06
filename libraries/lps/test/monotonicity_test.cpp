@@ -19,6 +19,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/modal_formula/detail/state_formula_name_clash_checker.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
@@ -73,6 +74,7 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
   specification spec = linearise(lps_spec);
   bool check_monotonicity = false;
   state_formula f = parse_state_formula(formula, spec, check_monotonicity);
+  state_formulas::detail::check_name_clashes(f);
   BOOST_CHECK(is_monotonous(f) == expect_success);
 }
 

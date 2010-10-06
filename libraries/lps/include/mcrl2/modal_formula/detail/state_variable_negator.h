@@ -22,7 +22,7 @@ namespace state_formulas {
 namespace detail {
 
 /// Visitor that negates propositional variable instantiations with a given name.
-struct state_variable_negator: public mcrl2::state_formulas::state_formula_builder
+struct state_variable_negator: public mcrl2::state_formulas::state_formula_builder<>
 {
   core::identifier_string m_name;
 
@@ -33,13 +33,17 @@ struct state_variable_negator: public mcrl2::state_formulas::state_formula_build
   /// \brief Visit propositional_variable node
   /// \param x A term
   /// \return The result of visiting the node
-  state_formula visit_var(const state_formula& e, const core::identifier_string& n, const data::data_expression_list& /* l */)
+  state_formula visit_variable(const variable& x)
   {
-    if (n == m_name)
+    // TODO: why is this cast needed???
+    ATermAppl tmp = x;
+    state_formula tmp1(tmp);
+
+    if (x.name() == m_name)
     {
-      return state_frm::not_(e);
+      return state_formulas::not_(tmp1);
     }
-    return e;
+    return tmp1;
   }
 };
 

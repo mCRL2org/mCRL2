@@ -22,6 +22,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/data/variable.h"
@@ -98,8 +99,16 @@ class state_formula: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of state formulas
 typedef atermpp::term_list<state_formula> state_formula_list;
 
-// TODO: use these classes instead of the functions in the namespace state_frm
-namespace temp {
+/// \brief Returns true if the term t is a state formula
+/// \param t A term
+/// \return True if the term is a state formula
+// TODO: generate this function
+inline
+bool is_state_formula(atermpp::aterm_appl t)
+{
+  return core::detail::gsIsStateFrm(t);
+}
+
 //--- start generated classes ---//
 /// \brief The value true for state formulas
 class true_: public state_formula
@@ -146,13 +155,13 @@ class not_: public state_formula
       : state_formula(core::detail::constructStateNot())
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
-    not_(atermpp::aterm_appl term)
-      : state_formula(term)
-    {
-      assert(core::detail::check_term_StateNot(m_term));
-    }
+//    /// \brief Constructor.
+//    /// \param term A term
+//    not_(atermpp::aterm_appl term)
+//      : state_formula(term)
+//    {
+//      assert(core::detail::check_term_StateNot(m_term));
+//    }
 
     /// \brief Constructor.
     not_(const state_formula& operand)
@@ -612,283 +621,172 @@ class mu: public state_formula
     }
 };
 //--- end generated classes ---//
-} // namespace temp
 
-/// Accessor functions and predicates for state formulas.
-namespace state_frm
-{
-  /// \brief Make the value false
-  /// \return The value \p false
-  inline
-  state_formula false_()
-  {
-    return state_formula(core::detail::gsMakeStateFalse());
-  }
+//--- start generated is-functions ---//
 
-  /// \brief Make the value true
-  /// \return The value \p true
-  inline
-  state_formula true_()
-  {
-    return state_formula(core::detail::gsMakeStateTrue());
-  }
+    /// \brief Test for a true_ expression
+    /// \param t A term
+    /// \return True if it is a true_ expression
+    inline
+    bool is_true(const state_formula& t)
+    {
+      return core::detail::gsIsStateTrue(t);
+    }
 
-  /// \brief Make a negation
-  /// \param p A modal formula
-  /// \return The value <tt>!p</tt>
-  inline
-  state_formula not_(state_formula p)
-  {
-    return state_formula(core::detail::gsMakeStateNot(p));
-  }
+    /// \brief Test for a false_ expression
+    /// \param t A term
+    /// \return True if it is a false_ expression
+    inline
+    bool is_false(const state_formula& t)
+    {
+      return core::detail::gsIsStateFalse(t);
+    }
 
-  /// \brief Make a conjunction
-  /// \param p A modal formula
-  /// \param q A modal formula
-  /// \return The value <tt>p && q</tt>
-  inline
-  state_formula and_(state_formula p, state_formula q)
-  {
-    return state_formula(core::detail::gsMakeStateAnd(p,q));
-  }
+    /// \brief Test for a not_ expression
+    /// \param t A term
+    /// \return True if it is a not_ expression
+    inline
+    bool is_not(const state_formula& t)
+    {
+      return core::detail::gsIsStateNot(t);
+    }
 
-  /// \brief Make a disjunction
-  /// \param p A modal formula
-  /// \param q A modal formula
-  /// \return The value <tt>p || q</tt>
-  inline
-  state_formula or_(state_formula p, state_formula q)
-  {
-    return state_formula(core::detail::gsMakeStateOr(p,q));
-  }
+    /// \brief Test for a and_ expression
+    /// \param t A term
+    /// \return True if it is a and_ expression
+    inline
+    bool is_and(const state_formula& t)
+    {
+      return core::detail::gsIsStateAnd(t);
+    }
 
-  /// \brief Make an implication
-  /// \param p A modal formula
-  /// \param q A modal formula
-  /// \return The value <tt>p => q</tt>
-  inline
-  state_formula imp(state_formula p, state_formula q)
-  {
-    return state_formula(core::detail::gsMakeStateImp(p,q));
-  }
+    /// \brief Test for a or_ expression
+    /// \param t A term
+    /// \return True if it is a or_ expression
+    inline
+    bool is_or(const state_formula& t)
+    {
+      return core::detail::gsIsStateOr(t);
+    }
 
-  /// \brief Make an existential quantification
-  /// \pre l may not be empty
-  /// \param l A sequence of data variables
-  /// \param p A modal formula
-  /// \return The value <tt>exists l.p</tt>
-  inline
-  state_formula exists(data::variable_list l, state_formula p)
-  {
-    assert(!l.empty());
-    return state_formula(core::detail::gsMakeStateExists(atermpp::term_list< data::variable >(l.begin(), l.end()), p));
-  }
+    /// \brief Test for a imp expression
+    /// \param t A term
+    /// \return True if it is a imp expression
+    inline
+    bool is_imp(const state_formula& t)
+    {
+      return core::detail::gsIsStateImp(t);
+    }
 
-  /// \brief Make a universal quantification
-  /// \pre l may not be empty
-  /// \param l A sequence of data variables
-  /// \param p A modal formula
-  /// \return The value <tt>forall l.p</tt>
-  inline
-  state_formula forall(data::variable_list l, state_formula p)
-  {
-    assert(!l.empty());
-    return state_formula(core::detail::gsMakeStateForall(atermpp::term_list< data::variable >(l.begin(), l.end()), p));
-  }
+    /// \brief Test for a forall expression
+    /// \param t A term
+    /// \return True if it is a forall expression
+    inline
+    bool is_forall(const state_formula& t)
+    {
+      return core::detail::gsIsStateForall(t);
+    }
 
-  /// \brief Returns must applied to r and p
-  /// \param r A regular formula
-  /// \param p A modal formula
-  /// \return must applied to r and p
-  inline
-  state_formula must(regular_formulas::regular_formula r, state_formula p)
-  {
-    return state_formula(core::detail::gsMakeStateMust(r, p));
-  }
+    /// \brief Test for a exists expression
+    /// \param t A term
+    /// \return True if it is a exists expression
+    inline
+    bool is_exists(const state_formula& t)
+    {
+      return core::detail::gsIsStateExists(t);
+    }
 
-  /// \brief Returns may applied to r and p
-  /// \param r A regular formula
-  /// \param p A modal formula
-  /// \return may applied to r and p
-  inline
-  state_formula may(regular_formulas::regular_formula r, state_formula p)
-  {
-    return state_formula(core::detail::gsMakeStateMay(r, p));
-  }
+    /// \brief Test for a must expression
+    /// \param t A term
+    /// \return True if it is a must expression
+    inline
+    bool is_must(const state_formula& t)
+    {
+      return core::detail::gsIsStateMust(t);
+    }
 
-  /// \brief Returns yaled
-  /// \return yaled
-  inline
-  state_formula yaled()
-  {
-    return state_formula(core::detail::gsMakeStateYaled());
-  }
+    /// \brief Test for a may expression
+    /// \param t A term
+    /// \return True if it is a may expression
+    inline
+    bool is_may(const state_formula& t)
+    {
+      return core::detail::gsIsStateMay(t);
+    }
 
-  /// \brief Returns yaled(t)
-  /// \param t A data expression
-  /// \return yaled(t)
-  inline
-  state_formula yaled_timed(data::data_expression t)
-  {
-    return state_formula(core::detail::gsMakeStateYaledTimed(t));
-  }
+    /// \brief Test for a yaled expression
+    /// \param t A term
+    /// \return True if it is a yaled expression
+    inline
+    bool is_yaled(const state_formula& t)
+    {
+      return core::detail::gsIsStateYaled(t);
+    }
 
-  /// \brief Returns delay
-  /// \return delay
-  inline
-  state_formula delay()
-  {
-    return state_formula(core::detail::gsMakeStateDelay());
-  }
+    /// \brief Test for a yaled_timed expression
+    /// \param t A term
+    /// \return True if it is a yaled_timed expression
+    inline
+    bool is_yaled_timed(const state_formula& t)
+    {
+      return core::detail::gsIsStateYaledTimed(t);
+    }
 
-  /// \brief Returns delay(t)
-  /// \param t A data expression
-  /// \return delay(t)
-  inline
-  state_formula delay_timed(data::data_expression t)
-  {
-    return state_formula(core::detail::gsMakeStateDelayTimed(t));
-  }
+    /// \brief Test for a delay expression
+    /// \param t A term
+    /// \return True if it is a delay expression
+    inline
+    bool is_delay(const state_formula& t)
+    {
+      return core::detail::gsIsStateDelay(t);
+    }
 
-  /// \brief Returns a variable with the given name and arguments
-  /// \param name A
-  /// \param l A sequence of data expressions
-  /// \return a variable with the given name and arguments
-  inline
-  state_formula variable(core::identifier_string name, data::data_expression_list l)
-  {
-    return state_formula(core::detail::gsMakeStateVar(name, atermpp::term_list< data::data_expression >(l.begin(), l.end())));
-  }
+    /// \brief Test for a delay_timed expression
+    /// \param t A term
+    /// \return True if it is a delay_timed expression
+    inline
+    bool is_delay_timed(const state_formula& t)
+    {
+      return core::detail::gsIsStateDelayTimed(t);
+    }
 
-  /// \brief Returns a mu expression
-  /// \param name A
-  /// \param l A sequence of assignments to data variables
-  /// \param p A modal formula
-  /// \return a mu expression
-  inline
-  state_formula mu(core::identifier_string name, data::assignment_list l, state_formula p)
-  {
-    return state_formula(core::detail::gsMakeStateMu(name, atermpp::term_list< data::assignment >(l.begin(), l.end()), p));
-  }
+    /// \brief Test for a variable expression
+    /// \param t A term
+    /// \return True if it is a variable expression
+    inline
+    bool is_variable(const state_formula& t)
+    {
+      return core::detail::gsIsStateVar(t);
+    }
 
-  /// \brief Returns a nu expression
-  /// \param name A
-  /// \param l A sequence of assignments to data variables
-  /// \param p A modal formula
-  /// \return a nu expression
-  inline
-  state_formula nu(core::identifier_string name, data::assignment_list l, state_formula p)
-  {
-    return state_formula(core::detail::gsMakeStateNu(name, atermpp::term_list< data::assignment >(l.begin(), l.end()), p));
-  }
+    /// \brief Test for a nu expression
+    /// \param t A term
+    /// \return True if it is a nu expression
+    inline
+    bool is_nu(const state_formula& t)
+    {
+      return core::detail::gsIsStateNu(t);
+    }
+
+    /// \brief Test for a mu expression
+    /// \param t A term
+    /// \return True if it is a mu expression
+    inline
+    bool is_mu(const state_formula& t)
+    {
+      return core::detail::gsIsStateMu(t);
+    }
+//--- end generated is-functions ---//
 
   /// \brief Returns true if the term t is a data expression
   /// \param t A term
   /// \return True if the term t is a data expression
   inline bool is_data(atermpp::aterm_appl t)
-  { return core::detail::gsIsDataExpr(t); }
+  {
+    return core::detail::gsIsDataExpr(t);
+  }
 
-  /// \brief Test for the value true
-  /// \param t A term
-  /// \return True if it is the value \p true
-  inline bool is_true(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateTrue(t); }
-
-  /// \brief Test for the value false
-  /// \param t A term
-  /// \return True if it is the value \p false
-  inline bool is_false(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateFalse(t); }
-
-  /// \brief Test for a negation
-  /// \param t A term
-  /// \return True if it is a negation
-  inline bool is_not(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateNot(t); }
-
-  /// \brief Test for a conjunction
-  /// \param t A term
-  /// \return True if it is a conjunction
-  inline bool is_and(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateAnd(t); }
-
-  /// \brief Test for a disjunction
-  /// \param t A term
-  /// \return True if it is a disjunction
-  inline bool is_or(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateOr(t); }
-
-  /// \brief Test for an implication
-  /// \param t A term
-  /// \return True if it is an implication
-  inline bool is_imp(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateImp(t); }
-
-  /// \brief Test for an universal quantification
-  /// \param t A term
-  /// \return True if it is a universal quantification
-  inline bool is_forall(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateForall(t); }
-
-  /// \brief Test for an existential quantification
-  /// \param t A term
-  /// \return True if it is an existential quantification
-  inline bool is_exists(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateExists(t); }
-
-  /// \brief Returns true if the term t is a must expression
-  /// \param t A term
-  /// \return True if the term t is a must expression
-  inline bool is_must(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateMust(t); }
-
-  /// \brief Returns true if the term t is a must expression
-  /// \param t A term
-  /// \return True if the term t is a must expression
-  inline bool is_may(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateMay(t); }
-
-  /// \brief Returns true if the term t is a delay expression
-  /// \param t A term
-  /// \return True if the term t is a delay expression
-  inline bool is_delay(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateDelay(t); }
-
-  /// \brief Returns true if the term t is a timed delay expression
-  /// \param t A term
-  /// \return True if the term t is a timed delay expression
-  inline bool is_delay_timed(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateDelayTimed(t); }
-
-  /// \brief Returns true if the term t is a yaled expression
-  /// \param t A term
-  /// \return True if the term t is a yaled expression
-  inline bool is_yaled(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateYaled(t); }
-
-  /// \brief Returns true if the term t is a timed yaled expression
-  /// \param t A term
-  /// \return True if the term t is a timed yaled expression
-  inline bool is_yaled_timed(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateYaledTimed(t); }
-
-  /// \brief Returns true if the term t is a variable expression
-  /// \param t A term
-  /// \return True if the term t is a variable expression
-  inline bool is_variable(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateVar(t); }
-
-  /// \brief Returns true if the term t is a nu expression
-  /// \param t A term
-  /// \return True if the term t is a nu expression
-  inline bool is_nu(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateNu(t); }
-
-  /// \brief Returns true if the term t is a mu expression
-  /// \param t A term
-  /// \return True if the term t is a mu expression
-  inline bool is_mu(atermpp::aterm_appl t)
-  { return core::detail::gsIsStateMu(t); }
+namespace accessors {
 
   /// \brief Returns the argument of a data expression
   /// \param t A modal formula
@@ -1012,6 +910,8 @@ namespace state_frm
     return atermpp::arg1(t);
   }
 
+} // namespace accessors
+
   /// \cond INTERNAL_DOCS
   //
   /// \brief Function that determines if a state formula is time dependent
@@ -1022,20 +922,19 @@ namespace state_frm
     /// \return The function result
     bool operator()(atermpp::aterm_appl t) const
     {
-      return is_delay_timed(t) || is_yaled_timed(t) || action_formulas::act_frm::is_at(t);
+      return (is_state_formula(t) && (is_delay_timed(t) || is_yaled_timed(t)))
+        || action_formulas::act_frm::is_at(t);
     }
   };
   /// \endcond
 
-} // namespace state_frm
-
-    /// \brief Returns true if the formula is timed.
-    /// \return True if the formula is timed.
-    inline
-    bool state_formula::has_time() const
-    {
-      return atermpp::find_if(*this, state_frm::is_timed_subterm()) != atermpp::aterm();
-    }
+  /// \brief Returns true if the formula is timed.
+  /// \return True if the formula is timed.
+  inline
+  bool state_formula::has_time() const
+  {
+    return atermpp::find_if(*this, is_timed_subterm()) != atermpp::aterm();
+  }
 
 } // namespace state_formulas
 

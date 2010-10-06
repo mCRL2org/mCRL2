@@ -12,7 +12,7 @@
 #ifndef MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 #define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
-#include "mcrl2/modal_formula/state_formula_builder.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
@@ -35,9 +35,9 @@ struct state_variable_negation
   /// \return The result of the function
   atermpp::aterm_appl operator()(atermpp::aterm_appl t) const
   {
-    if (state_frm::is_variable(t) && (state_frm::name(t) == X))
+    if (is_variable(t) && (accessors::name(t) == X))
     {
-      return state_frm::not_(t);
+      return not_(t);
     }
     else
     {
@@ -54,8 +54,8 @@ struct state_variable_negation
 inline
 state_formula normalize(state_formula f)
 {
-  using namespace state_frm;
-
+  using namespace accessors;
+  
   if (is_not(f))
   {
     f = arg(f); // remove the not
@@ -74,9 +74,9 @@ state_formula normalize(state_formula f)
     } else if (is_imp(f)) {
       return and_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_forall(f)) {
-      return state_frm::exists(var(f), normalize(not_(arg(f))));
+      return exists(var(f), normalize(not_(arg(f))));
     } else if (is_exists(f)) {
-      return state_frm::forall(var(f), normalize(not_(arg(f))));
+      return forall(var(f), normalize(not_(arg(f))));
     } else if (is_must(f)) {
       return may(act(f), normalize(not_(arg(f))));
     } else if (is_may(f)) {
@@ -114,9 +114,9 @@ state_formula normalize(state_formula f)
     } else if (is_imp(f)) {
       return or_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_forall(f)) {
-      return state_frm::forall(var(f), normalize(arg(f)));
+      return forall(var(f), normalize(arg(f)));
     } else if (is_exists(f)) {
-      return state_frm::exists(var(f), normalize(arg(f)));
+      return exists(var(f), normalize(arg(f)));
     } else if (is_must(f)) {
       return must(act(f), normalize(arg(f)));
     } else if (is_may(f)) {

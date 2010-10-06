@@ -35,21 +35,6 @@ namespace data {
 #include "mcrl2/data/detail/traverser.inc.h"
   };
 
-  /// \brief Selective traversal class for BES data types
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, data::traverser>
-  {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, data::traverser> super;
-
-    public:
-
-      selective_traverser()
-      { }
-
-      selective_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
-
 } // namespace data
 
 } // namespace mcrl2

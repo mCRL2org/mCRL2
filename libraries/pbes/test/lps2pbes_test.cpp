@@ -12,6 +12,7 @@
 // Test program for timed lps2pbes.
 
 #define MCRL2_PBES_TRANSLATE_DEBUG
+#define MCRL2_STATE_FORMULA_BUILDER_DEBUG
 
 #include <iostream>
 #include <iterator>
@@ -38,9 +39,11 @@ using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
+#ifdef MCRL2_USE_BOOST_FILESYSTEM
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 namespace fs = boost::filesystem;
+#endif
 
 const std::string ABP_SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
@@ -256,6 +259,7 @@ void test_lps2pbes3()
   core::garbage_collect();
 }
 
+#ifdef MCRL2_USE_BOOST_FILESYSTEM
 void test_directory(int argc, char** argv)
 {
   BOOST_CHECK(argc > 1);
@@ -314,6 +318,7 @@ void test_directory(int argc, char** argv)
   }
   core::garbage_collect();
 }
+#endif
 
 void test_formulas()
 {

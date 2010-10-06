@@ -9,6 +9,8 @@
 /// \file rename_test.cpp
 /// \brief Add your file description here.
 
+#define MCRL2_STATE_FORMULA_BUILDER_DEBUG
+
 #include <iostream>
 #include <iterator>
 #include <set>
@@ -346,17 +348,18 @@ void test_rename()
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
   BOOST_CHECK(pp(formula) == "mu X. mu X0. X0");
+  core::garbage_collect();
 }
 
 void test_normalize()
 {
   using mcrl2::core::pp;
-  using namespace state_frm;
+  using namespace accessors;
   std::cerr << "test_normalize\n";
 
-  state_formula x = state_formulas::state_frm::variable(identifier_string("X"), data_expression_list());
-  state_formula y = state_formulas::state_frm::variable(identifier_string("Y"), data_expression_list());
-  state_formula z = state_formulas::state_frm::variable(identifier_string("Z"), data_expression_list());
+  state_formula x = state_formulas::variable(identifier_string("X"), data_expression_list());
+  state_formula y = state_formulas::variable(identifier_string("Y"), data_expression_list());
+  state_formula z = state_formulas::variable(identifier_string("Z"), data_expression_list());
   state_formula f;
   state_formula f1;
   state_formula f2;
@@ -386,11 +389,13 @@ void test_normalize()
   state_formula r1 = normalize(req1_1);
   state_formula r2 = normalize(req1_2);
 */
+
+  core::garbage_collect();
 }
 
 void test_type_checking()
 {
-  using namespace state_frm;
+  using namespace accessors;
   std::cerr << "test_type_checking\n";
 
   specification context = linearise(
@@ -404,6 +409,7 @@ void test_type_checking()
   std::cerr << "Hier\n";
   BOOST_CHECK(is_may(formula));
   BOOST_CHECK(act(formula));
+  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
@@ -411,11 +417,8 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_rename();
-  core::garbage_collect();
   test_normalize();
-  core::garbage_collect();
   test_type_checking();
-  core::garbage_collect();
 
   return 0;
 }

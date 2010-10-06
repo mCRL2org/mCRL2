@@ -137,4 +137,27 @@ void operator()(const mu& x)
   static_cast<Derived&>(*this)(x.operand());
   static_cast<Derived&>(*this).leave(x);
 }
+
+void operator()(const state_formula& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  if (is_true(x)) { static_cast<Derived&>(*this)(true_(x)); }
+  else if (is_false(x)) { static_cast<Derived&>(*this)(false_(x)); }
+  else if (is_not(x)) { static_cast<Derived&>(*this)(not_(x)); }
+  else if (is_and(x)) { static_cast<Derived&>(*this)(and_(x)); }
+  else if (is_or(x)) { static_cast<Derived&>(*this)(or_(x)); }
+  else if (is_imp(x)) { static_cast<Derived&>(*this)(imp(x)); }
+  else if (is_forall(x)) { static_cast<Derived&>(*this)(forall(x)); }
+  else if (is_exists(x)) { static_cast<Derived&>(*this)(exists(x)); }
+  else if (is_must(x)) { static_cast<Derived&>(*this)(must(x)); }
+  else if (is_may(x)) { static_cast<Derived&>(*this)(may(x)); }
+  else if (is_yaled(x)) { static_cast<Derived&>(*this)(yaled(x)); }
+  else if (is_yaled_timed(x)) { static_cast<Derived&>(*this)(yaled_timed(x)); }
+  else if (is_delay(x)) { static_cast<Derived&>(*this)(delay(x)); }
+  else if (is_delay_timed(x)) { static_cast<Derived&>(*this)(delay_timed(x)); }
+  else if (is_variable(x)) { static_cast<Derived&>(*this)(variable(x)); }
+  else if (is_nu(x)) { static_cast<Derived&>(*this)(nu(x)); }
+  else if (is_mu(x)) { static_cast<Derived&>(*this)(mu(x)); }
+  static_cast<Derived&>(*this).leave(x);
+}
 //--- end generated code ---//
