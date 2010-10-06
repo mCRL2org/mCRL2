@@ -115,7 +115,7 @@ void test_bes(std::string bes_spec, bool expected_result)
   {
     case 0: std::cout << "FALSE" << std::endl;
       break;
-    case 1: std::cout << "TRUE" << std::endl;
+    case 1: std::cout << "true" << std::endl;
       break;
     case 2: std::cout << "UNKNOWN" << std::endl;
       break;
@@ -195,7 +195,7 @@ void test_abp()
   {
     case 0: std::cout << "FALSE" << std::endl;
       break;
-    case 1: std::cout << "TRUE" << std::endl;
+    case 1: std::cout << "true" << std::endl;
       break;
     case 2: std::cout << "UNKNOWN" << std::endl;
       break;
@@ -282,7 +282,7 @@ void test_approximate()
   }
   else if (tr::is_true(p.equations().front().formula()))
   {
-    std::cout << "TRUE" << std::endl;
+    std::cout << "true" << std::endl;
   }
   else
   {

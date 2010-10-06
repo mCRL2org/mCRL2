@@ -176,7 +176,7 @@ struct state_formula_builder
   state_formula visit(const state_formula& x, Arg& a)
   {
 #ifdef MCRL2_STATE_FORMULA_BUILDER_DEBUG
-  std::cerr << "<visit>" << pp(x) << std::endl;
+  std::cerr << "<visit>" << core::pp(x) << std::endl;
 #endif
     state_formula result;
     if (is_true(x))
@@ -317,7 +317,7 @@ struct state_formula_builder
     }
     
 #ifdef MCRL2_STATE_FORMULA_BUILDER_DEBUG
-  std::cerr << "<visit result>" << pp(result) << std::endl;
+  std::cerr << "<visit result>" << core::pp(result) << std::endl;
 #endif
     return result;
   }

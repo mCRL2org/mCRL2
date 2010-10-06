@@ -47,42 +47,42 @@ namespace data {
    *
    * \see traverser
    **/
-  template <typename Derived, typename AdaptablePredicate, template <class> class Traverser = core::selective_traverser>
-  class selective_traverser : public Traverser<Derived>
-  {
-    public:
-      typedef Traverser<Derived> super;
-
-    protected:     
-      void forward_call(data_expression const& e)
-      { }
-
-      void forward_call(sort_expression const& e)
-      { }
-
-    public:
-
-      // Default constructor (only works if SelectionPredicate is Default Constructible)
-      selective_traverser()
-      { }
-
-      selective_traverser(AdaptablePredicate predicate) : m_traverse_condition(predicate)
-      { }
-  };
-
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_data_traverser : public selective_traverser<Derived, AdaptablePredicate>
-  {
-    typedef selective_traverser<Derived, AdaptablePredicate> super;
-
-    public:
-
-      selective_data_traverser()
-      { }
-
-      selective_data_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
+//  template <typename Derived, typename AdaptablePredicate, template <class> class Traverser = core::selective_traverser>
+//  class selective_traverser : public Traverser<Derived>
+//  {
+//    public:
+//      typedef Traverser<Derived> super;
+//
+//    protected:     
+//      void forward_call(data_expression const& e)
+//      { }
+//
+//      void forward_call(sort_expression const& e)
+//      { }
+//
+//    public:
+//
+//      // Default constructor (only works if SelectionPredicate is Default Constructible)
+//      selective_traverser()
+//      { }
+//
+//      selective_traverser(AdaptablePredicate predicate) : m_traverse_condition(predicate)
+//      { }
+//  };
+//
+//  template <typename Derived, typename AdaptablePredicate>
+//  class selective_data_traverser : public selective_traverser<Derived, AdaptablePredicate>
+//  {
+//    typedef selective_traverser<Derived, AdaptablePredicate> super;
+//
+//    public:
+//
+//      selective_data_traverser()
+//      { }
+//
+//      selective_data_traverser(AdaptablePredicate predicate) : super(predicate)
+//      { }
+//  };
 
 } // namespace data
 
