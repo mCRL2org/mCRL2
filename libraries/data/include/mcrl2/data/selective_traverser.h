@@ -12,18 +12,57 @@
 #ifndef MCRL2_DATA_SELECTIVE_TRAVERSER_H
 #define MCRL2_DATA_SELECTIVE_TRAVERSER_H
 
+#include "boost/utility/enable_if.hpp"
+#include "boost/type_traits/is_base_of.hpp"
+
 #include "mcrl2/core/selective_traverser.h"
+#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
 
 namespace data {
 
-/*
   /// \brief Selective traversal class for data library data types
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, data::traverser>
   {
     typedef core::selective_traverser<Derived, AdaptablePredicate, data::traverser> super;
+
+    protected:     
+
+      template < typename Expression >
+      void forward_call(Expression const& e, typename boost::disable_if< typename boost::is_base_of< data_expression, Expression >::type >::type* = 0,
+                                             typename boost::disable_if< typename boost::is_base_of< sort_expression, Expression >::type >::type* = 0)
+      {
+        static_cast< super& >(*this)(e);
+      }
+
+      void forward_call(data_expression const& e)
+      {
+        static_cast< super& >(*this)(e);
+      }
+
+      void forward_call(sort_expression const& e)
+      {
+        static_cast< super& >(*this)(e);
+      }
+
+      template < typename Expression >
+      void forward_call(Expression const& e, typename boost::enable_if< typename boost::is_base_of< data_expression, Expression >::type >::type* = 0)
+      {
+        if (m_traverse_condition(e))
+        {
+          static_cast< super& >(*this)(e);
+        }
+      }
+
+      template < typename Expression >
+      void forward_call(Expression const& e, typename boost::enable_if< typename boost::is_base_of< sort_expression, Expression >::type >::type* = 0) {
+        if (m_traverse_condition(e))
+        {
+          static_cast< super& >(*this)(e);
+        }
+      }
 
     public:
       selective_traverser()
@@ -32,57 +71,6 @@ namespace data {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
-*/
-
-  /**
-   * \brief expression traverser that can be used for cases in which parts
-   * of the expression should not be traversed
-   *
-   * Types:
-   *  \arg Derived the type of a derived class, as per CRTP
-   *  \arg AdaptablePredicate is a unary predicate on expressions
-   *
-   * Before a subterm is explored the predicate is applied to see whether
-   * traversal should continue.
-   *
-   * \see traverser
-   **/
-//  template <typename Derived, typename AdaptablePredicate, template <class> class Traverser = core::selective_traverser>
-//  class selective_traverser : public Traverser<Derived>
-//  {
-//    public:
-//      typedef Traverser<Derived> super;
-//
-//    protected:     
-//      void forward_call(data_expression const& e)
-//      { }
-//
-//      void forward_call(sort_expression const& e)
-//      { }
-//
-//    public:
-//
-//      // Default constructor (only works if SelectionPredicate is Default Constructible)
-//      selective_traverser()
-//      { }
-//
-//      selective_traverser(AdaptablePredicate predicate) : m_traverse_condition(predicate)
-//      { }
-//  };
-//
-//  template <typename Derived, typename AdaptablePredicate>
-//  class selective_data_traverser : public selective_traverser<Derived, AdaptablePredicate>
-//  {
-//    typedef selective_traverser<Derived, AdaptablePredicate> super;
-//
-//    public:
-//
-//      selective_data_traverser()
-//      { }
-//
-//      selective_data_traverser(AdaptablePredicate predicate) : super(predicate)
-//      { }
-//  };
 
 } // namespace data
 
