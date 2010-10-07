@@ -37,7 +37,7 @@ struct state_variable_negation
   {
     if (is_variable(t) && (accessors::name(t) == X))
     {
-      return not_(t);
+      return not_(variable(t));
     }
     else
     {

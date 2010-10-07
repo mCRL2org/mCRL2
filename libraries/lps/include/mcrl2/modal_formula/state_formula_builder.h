@@ -200,7 +200,7 @@ struct state_formula_builder
       result = visit_not(x, a);
       if (!is_finished(result))
       {
-        result = not_(visit(not_(x).operand(), a));
+        result = not_(visit(not_::construct(x).operand(), a));
       }
     }
     else if (is_and(x))
@@ -497,8 +497,7 @@ struct state_formula_builder<void>
       result = visit_not(x);
       if (!is_finished(result))
       {
-        // TODO: this is an extremely ugly hack
-        result = not_(visit(atermpp::arg1(x)));
+        result = not_(visit(not_::construct(x).operand()));
       }
     }
     else if (is_and(x))

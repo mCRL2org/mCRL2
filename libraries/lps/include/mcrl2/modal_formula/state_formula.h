@@ -149,19 +149,26 @@ class false_: public state_formula
 /// \brief The not operator for state formulas
 class not_: public state_formula
 {
+  private:
+    /// \brief Constructor.
+    /// \param term A term
+    explicit not_(atermpp::aterm_appl term)
+      : state_formula(term)
+    {
+      assert(core::detail::check_term_StateNot(m_term));
+    }
+ 
   public:
     /// \brief Default constructor.
     not_()
       : state_formula(core::detail::constructStateNot())
     {}
 
-//    /// \brief Constructor.
-//    /// \param term A term
-//    not_(atermpp::aterm_appl term)
-//      : state_formula(term)
-//    {
-//      assert(core::detail::check_term_StateNot(m_term));
-//    }
+    static inline
+    not_ construct(atermpp::aterm_appl term)
+    {
+      return not_(term);
+    }
 
     /// \brief Constructor.
     not_(const state_formula& operand)
