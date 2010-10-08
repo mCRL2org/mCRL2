@@ -20,6 +20,7 @@
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/detail/state_formula_name_clash_checker.h"
+#include "mcrl2/modal_formula/detail/state_formula_name_clash_resolver.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
@@ -77,6 +78,8 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
   if (state_formulas::detail::has_name_clashes(f))
   {
     std::cerr << "Error: " << pp(f) << " has name clashes" << std::endl;
+    f = state_formulas::detail::resolve_name_clashes(f);
+    std::cerr << "resolved to " << pp(f) << std::endl;
   }
   else
   {

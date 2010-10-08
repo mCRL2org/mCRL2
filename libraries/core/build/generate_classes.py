@@ -98,11 +98,19 @@ def make_is_functions(filename, class_text, classname, namespace = 'core'):
     insert_text_in_file(filename, rtext, 'generated is-functions')
 
 if __name__ == "__main__":
-    make_classes('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula')
-    make_classes('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula')
+    make_classes(     '../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula')
+    make_is_functions('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula')
+
+    make_classes(     '../../lps/include/mcrl2/modal_formula/regular_formula.h', REGULAR_FORMULA_CLASSES, 'regular_formula')
+    make_is_functions('../../lps/include/mcrl2/modal_formula/regular_formula.h', REGULAR_FORMULA_CLASSES, 'regular_formula')
+
+    make_classes(     '../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula')
+    make_is_functions('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula')
+
     make_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
-    make_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
     make_is_functions('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
+
+    make_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
     make_classes('../../data/include/mcrl2/data/', DATA_EXPRESSION_CLASSES, 'data_expression', add_constructor_overloads = True)
     make_is_functions('../../data/include/mcrl2/data/data_expression.h', DATA_EXPRESSION_CLASSES, 'data_expression')
     make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression', add_constructor_overloads = True)

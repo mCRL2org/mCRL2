@@ -97,6 +97,14 @@ StateNu         | nu(const core::identifier_string& name, const data::assignment
 StateMu         | mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) | The mu operator for state formulas
 '''
 
+REGULAR_FORMULA_CLASSES = r'''
+RegNil        | nil()                                                          | The value nil for regular formulas
+RegSeq        | seq(const regular_formula& left, const regular_formula& right) | The seq operator for regular formulas
+RegAlt        | alt(const regular_formula& left, const regular_formula& right) | The alt operator for regular formulas
+RegTrans      | trans(const regular_formula& operand)                          | The trans operator for regular formulas
+RegTransOrNil | trans_or_nil(const regular_formula& operand)                   | The 'trans or nil' operator for regular formulas
+'''
+
 ACTION_FORMULA_CLASSES = r'''
 ActTrue   | true_()                                                                     | The value true for action formulas
 ActFalse  | false_()                                                                    | The value false for action formulas
