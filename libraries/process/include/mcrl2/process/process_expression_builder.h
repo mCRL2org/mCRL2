@@ -206,7 +206,7 @@ struct process_expression_builder
       result = visit_action(x, a);
       if (!is_finished(result))
       {
-        result = action(action(x).label(), action(x).arguments());
+        result = action(action(atermpp::aterm_appl(x)).label(), action(atermpp::aterm_appl(x)).arguments());
       }
     }
     else if (is_process_instance(x))
@@ -214,7 +214,7 @@ struct process_expression_builder
       result = visit_process_instance(x, a);
       if (!is_finished(result))
       {
-        result = process_instance(process_instance(x).identifier(), process_instance(x).actual_parameters());
+        result = process_instance(process_instance(atermpp::aterm_appl(x)).identifier(), process_instance(atermpp::aterm_appl(x)).actual_parameters());
       }
     }
     else if (is_process_instance_assignment(x))
@@ -222,7 +222,7 @@ struct process_expression_builder
       result = visit_process_instance_assignment(x, a);
       if (!is_finished(result))
       {
-        result = process_instance_assignment(process_instance_assignment(x).identifier(), process_instance_assignment(x).assignments());
+        result = process_instance_assignment(process_instance_assignment(atermpp::aterm_appl(x)).identifier(), process_instance_assignment(atermpp::aterm_appl(x)).assignments());
       }
     }
     else if (is_delta(x))
@@ -246,7 +246,7 @@ struct process_expression_builder
       result = visit_sum(x, a);
       if (!is_finished(result))
       {
-        result = sum(sum(x).bound_variables(), visit(sum(x).operand(), a));
+        result = sum(sum(atermpp::aterm_appl(x)).bound_variables(), visit(sum(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_block(x))
@@ -254,7 +254,7 @@ struct process_expression_builder
       result = visit_block(x, a);
       if (!is_finished(result))
       {
-        result = block(block(x).block_set(), visit(block(x).operand(), a));
+        result = block(block(atermpp::aterm_appl(x)).block_set(), visit(block(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_hide(x))
@@ -262,7 +262,7 @@ struct process_expression_builder
       result = visit_hide(x, a);
       if (!is_finished(result))
       {
-        result = hide(hide(x).hide_set(), visit(hide(x).operand(), a));
+        result = hide(hide(atermpp::aterm_appl(x)).hide_set(), visit(hide(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_rename(x))
@@ -270,7 +270,7 @@ struct process_expression_builder
       result = visit_rename(x, a);
       if (!is_finished(result))
       {
-        result = rename(rename(x).rename_set(), visit(rename(x).operand(), a));
+        result = rename(rename(atermpp::aterm_appl(x)).rename_set(), visit(rename(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_comm(x))
@@ -278,7 +278,7 @@ struct process_expression_builder
       result = visit_comm(x, a);
       if (!is_finished(result))
       {
-        result = comm(comm(x).comm_set(), visit(comm(x).operand(), a));
+        result = comm(comm(atermpp::aterm_appl(x)).comm_set(), visit(comm(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_allow(x))
@@ -286,7 +286,7 @@ struct process_expression_builder
       result = visit_allow(x, a);
       if (!is_finished(result))
       {
-        result = allow(allow(x).allow_set(), visit(allow(x).operand(), a));
+        result = allow(allow(atermpp::aterm_appl(x)).allow_set(), visit(allow(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_sync(x))
@@ -294,7 +294,7 @@ struct process_expression_builder
       result = visit_sync(x, a);
       if (!is_finished(result))
       {
-        result = sync(visit(sync(x).left(), a), visit(sync(x).right(), a));
+        result = sync(visit(sync(atermpp::aterm_appl(x)).left(), a), visit(sync(atermpp::aterm_appl(x)).right(), a));
       }
     }
     else if (is_at(x))
@@ -302,7 +302,7 @@ struct process_expression_builder
       result = visit_at(x, a);
       if (!is_finished(result))
       {
-        result = at(visit(at(x).operand(), a), at(x).time_stamp());
+        result = at(visit(at(atermpp::aterm_appl(x)).operand(), a), at(atermpp::aterm_appl(x)).time_stamp());
       }
     }
     else if (is_seq(x))
@@ -310,7 +310,7 @@ struct process_expression_builder
       result = visit_seq(x, a);
       if (!is_finished(result))
       {
-        result = seq(visit(seq(x).left(), a), visit(seq(x).right(), a));
+        result = seq(visit(seq(atermpp::aterm_appl(x)).left(), a), visit(seq(atermpp::aterm_appl(x)).right(), a));
       }
     }
     else if (is_if_then(x))
@@ -318,7 +318,7 @@ struct process_expression_builder
       result = visit_if_then(x, a);
       if (!is_finished(result))
       {
-        result = if_then(if_then(x).condition(), visit(if_then(x).then_case(), a));
+        result = if_then(if_then(atermpp::aterm_appl(x)).condition(), visit(if_then(atermpp::aterm_appl(x)).then_case(), a));
       }
     }
     else if (is_if_then_else(x))
@@ -326,7 +326,7 @@ struct process_expression_builder
       result = visit_if_then_else(x, a);
       if (!is_finished(result))
       {
-        result = if_then_else(if_then_else(x).condition(), visit(if_then_else(x).then_case(), a), visit(if_then_else(x).else_case(), a));
+        result = if_then_else(if_then_else(atermpp::aterm_appl(x)).condition(), visit(if_then_else(atermpp::aterm_appl(x)).then_case(), a), visit(if_then_else(atermpp::aterm_appl(x)).else_case(), a));
       }
     }
     else if (is_bounded_init(x))
@@ -334,7 +334,7 @@ struct process_expression_builder
       result = visit_bounded_init(x, a);
       if (!is_finished(result))
       {
-        result = bounded_init(visit(bounded_init(x).left(), a), visit(bounded_init(x).right(), a));
+        result = bounded_init(visit(bounded_init(atermpp::aterm_appl(x)).left(), a), visit(bounded_init(atermpp::aterm_appl(x)).right(), a));
       }
     }
     else if (is_merge(x))
@@ -342,7 +342,7 @@ struct process_expression_builder
       result = visit_merge(x, a);
       if (!is_finished(result))
       {
-        result = merge(visit(merge(x).left(), a), visit(merge(x).right(), a));
+        result = merge(visit(merge(atermpp::aterm_appl(x)).left(), a), visit(merge(atermpp::aterm_appl(x)).right(), a));
       }
     }
     else if (is_left_merge(x))
@@ -350,7 +350,7 @@ struct process_expression_builder
       result = visit_left_merge(x, a);
       if (!is_finished(result))
       {
-        result = left_merge(visit(left_merge(x).left(), a), visit(left_merge(x).right(), a));
+        result = left_merge(visit(left_merge(atermpp::aterm_appl(x)).left(), a), visit(left_merge(atermpp::aterm_appl(x)).right(), a));
       }
     }
     else if (is_choice(x))
@@ -358,7 +358,7 @@ struct process_expression_builder
       result = visit_choice(x, a);
       if (!is_finished(result))
       {
-        result = choice(visit(choice(x).left(), a), visit(choice(x).right(), a));
+        result = choice(visit(choice(atermpp::aterm_appl(x)).left(), a), visit(choice(atermpp::aterm_appl(x)).right(), a));
       }
     }
     
@@ -548,7 +548,7 @@ struct process_expression_builder<void>
       result = visit_action(x);
       if (!is_finished(result))
       {
-        result = action(action(x).label(), action(x).arguments());
+        result = action(action(atermpp::aterm_appl(x)).label(), action(atermpp::aterm_appl(x)).arguments());
       }
     }
     else if (is_process_instance(x))
@@ -556,7 +556,7 @@ struct process_expression_builder<void>
       result = visit_process_instance(x);
       if (!is_finished(result))
       {
-        result = process_instance(process_instance(x).identifier(), process_instance(x).actual_parameters());
+        result = process_instance(process_instance(atermpp::aterm_appl(x)).identifier(), process_instance(atermpp::aterm_appl(x)).actual_parameters());
       }
     }
     else if (is_process_instance_assignment(x))
@@ -564,7 +564,7 @@ struct process_expression_builder<void>
       result = visit_process_instance_assignment(x);
       if (!is_finished(result))
       {
-        result = process_instance_assignment(process_instance_assignment(x).identifier(), process_instance_assignment(x).assignments());
+        result = process_instance_assignment(process_instance_assignment(atermpp::aterm_appl(x)).identifier(), process_instance_assignment(atermpp::aterm_appl(x)).assignments());
       }
     }
     else if (is_delta(x))
@@ -588,7 +588,7 @@ struct process_expression_builder<void>
       result = visit_sum(x);
       if (!is_finished(result))
       {
-        result = sum(sum(x).bound_variables(), visit(sum(x).operand()));
+        result = sum(sum(atermpp::aterm_appl(x)).bound_variables(), visit(sum(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_block(x))
@@ -596,7 +596,7 @@ struct process_expression_builder<void>
       result = visit_block(x);
       if (!is_finished(result))
       {
-        result = block(block(x).block_set(), visit(block(x).operand()));
+        result = block(block(atermpp::aterm_appl(x)).block_set(), visit(block(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_hide(x))
@@ -604,7 +604,7 @@ struct process_expression_builder<void>
       result = visit_hide(x);
       if (!is_finished(result))
       {
-        result = hide(hide(x).hide_set(), visit(hide(x).operand()));
+        result = hide(hide(atermpp::aterm_appl(x)).hide_set(), visit(hide(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_rename(x))
@@ -612,7 +612,7 @@ struct process_expression_builder<void>
       result = visit_rename(x);
       if (!is_finished(result))
       {
-        result = rename(rename(x).rename_set(), visit(rename(x).operand()));
+        result = rename(rename(atermpp::aterm_appl(x)).rename_set(), visit(rename(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_comm(x))
@@ -620,7 +620,7 @@ struct process_expression_builder<void>
       result = visit_comm(x);
       if (!is_finished(result))
       {
-        result = comm(comm(x).comm_set(), visit(comm(x).operand()));
+        result = comm(comm(atermpp::aterm_appl(x)).comm_set(), visit(comm(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_allow(x))
@@ -628,7 +628,7 @@ struct process_expression_builder<void>
       result = visit_allow(x);
       if (!is_finished(result))
       {
-        result = allow(allow(x).allow_set(), visit(allow(x).operand()));
+        result = allow(allow(atermpp::aterm_appl(x)).allow_set(), visit(allow(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_sync(x))
@@ -636,7 +636,7 @@ struct process_expression_builder<void>
       result = visit_sync(x);
       if (!is_finished(result))
       {
-        result = sync(visit(sync(x).left()), visit(sync(x).right()));
+        result = sync(visit(sync(atermpp::aterm_appl(x)).left()), visit(sync(atermpp::aterm_appl(x)).right()));
       }
     }
     else if (is_at(x))
@@ -644,7 +644,7 @@ struct process_expression_builder<void>
       result = visit_at(x);
       if (!is_finished(result))
       {
-        result = at(visit(at(x).operand()), at(x).time_stamp());
+        result = at(visit(at(atermpp::aterm_appl(x)).operand()), at(atermpp::aterm_appl(x)).time_stamp());
       }
     }
     else if (is_seq(x))
@@ -652,7 +652,7 @@ struct process_expression_builder<void>
       result = visit_seq(x);
       if (!is_finished(result))
       {
-        result = seq(visit(seq(x).left()), visit(seq(x).right()));
+        result = seq(visit(seq(atermpp::aterm_appl(x)).left()), visit(seq(atermpp::aterm_appl(x)).right()));
       }
     }
     else if (is_if_then(x))
@@ -660,7 +660,7 @@ struct process_expression_builder<void>
       result = visit_if_then(x);
       if (!is_finished(result))
       {
-        result = if_then(if_then(x).condition(), visit(if_then(x).then_case()));
+        result = if_then(if_then(atermpp::aterm_appl(x)).condition(), visit(if_then(atermpp::aterm_appl(x)).then_case()));
       }
     }
     else if (is_if_then_else(x))
@@ -668,7 +668,7 @@ struct process_expression_builder<void>
       result = visit_if_then_else(x);
       if (!is_finished(result))
       {
-        result = if_then_else(if_then_else(x).condition(), visit(if_then_else(x).then_case()), visit(if_then_else(x).else_case()));
+        result = if_then_else(if_then_else(atermpp::aterm_appl(x)).condition(), visit(if_then_else(atermpp::aterm_appl(x)).then_case()), visit(if_then_else(atermpp::aterm_appl(x)).else_case()));
       }
     }
     else if (is_bounded_init(x))
@@ -676,7 +676,7 @@ struct process_expression_builder<void>
       result = visit_bounded_init(x);
       if (!is_finished(result))
       {
-        result = bounded_init(visit(bounded_init(x).left()), visit(bounded_init(x).right()));
+        result = bounded_init(visit(bounded_init(atermpp::aterm_appl(x)).left()), visit(bounded_init(atermpp::aterm_appl(x)).right()));
       }
     }
     else if (is_merge(x))
@@ -684,7 +684,7 @@ struct process_expression_builder<void>
       result = visit_merge(x);
       if (!is_finished(result))
       {
-        result = merge(visit(merge(x).left()), visit(merge(x).right()));
+        result = merge(visit(merge(atermpp::aterm_appl(x)).left()), visit(merge(atermpp::aterm_appl(x)).right()));
       }
     }
     else if (is_left_merge(x))
@@ -692,7 +692,7 @@ struct process_expression_builder<void>
       result = visit_left_merge(x);
       if (!is_finished(result))
       {
-        result = left_merge(visit(left_merge(x).left()), visit(left_merge(x).right()));
+        result = left_merge(visit(left_merge(atermpp::aterm_appl(x)).left()), visit(left_merge(atermpp::aterm_appl(x)).right()));
       }
     }
     else if (is_choice(x))
@@ -700,7 +700,7 @@ struct process_expression_builder<void>
       result = visit_choice(x);
       if (!is_finished(result))
       {
-        result = choice(visit(choice(x).left()), visit(choice(x).right()));
+        result = choice(visit(choice(atermpp::aterm_appl(x)).left()), visit(choice(atermpp::aterm_appl(x)).right()));
       }
     }
     

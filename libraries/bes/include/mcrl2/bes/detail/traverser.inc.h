@@ -82,13 +82,13 @@ void operator()(const boolean_equation_system<Container>& x)
 void operator()(const boolean_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_true(x)) { static_cast<Derived&>(*this)(true_(x)); }
-  else if (is_false(x)) { static_cast<Derived&>(*this)(false_(x)); }
-  else if (is_not(x)) { static_cast<Derived&>(*this)(not_(x)); }
-  else if (is_and(x)) { static_cast<Derived&>(*this)(and_(x)); }
-  else if (is_or(x)) { static_cast<Derived&>(*this)(or_(x)); }
-  else if (is_imp(x)) { static_cast<Derived&>(*this)(imp(x)); }
-  else if (is_boolean_variable(x)) { static_cast<Derived&>(*this)(boolean_variable(x)); }
+  if (is_true(x)) { static_cast<Derived&>(*this)(true_(atermpp::aterm_appl(x))); }
+  else if (is_false(x)) { static_cast<Derived&>(*this)(false_(atermpp::aterm_appl(x))); }
+  else if (is_not(x)) { static_cast<Derived&>(*this)(not_(atermpp::aterm_appl(x))); }
+  else if (is_and(x)) { static_cast<Derived&>(*this)(and_(atermpp::aterm_appl(x))); }
+  else if (is_or(x)) { static_cast<Derived&>(*this)(or_(atermpp::aterm_appl(x))); }
+  else if (is_imp(x)) { static_cast<Derived&>(*this)(imp(atermpp::aterm_appl(x))); }
+  else if (is_boolean_variable(x)) { static_cast<Derived&>(*this)(boolean_variable(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

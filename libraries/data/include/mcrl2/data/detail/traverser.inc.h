@@ -229,64 +229,64 @@ void operator()(const data_equation& x)
 void operator()(const data_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_identifier(x)) { static_cast<Derived&>(*this)(identifier(x)); }
-  else if (is_variable(x)) { static_cast<Derived&>(*this)(variable(x)); }
-  else if (is_function_symbol(x)) { static_cast<Derived&>(*this)(function_symbol(x)); }
-  else if (is_application(x)) { static_cast<Derived&>(*this)(application(x)); }
-  else if (is_where_clause(x)) { static_cast<Derived&>(*this)(where_clause(x)); }
-  else if (is_abstraction(x)) { static_cast<Derived&>(*this)(abstraction(x)); }
+  if (is_identifier(x)) { static_cast<Derived&>(*this)(identifier(atermpp::aterm_appl(x))); }
+  else if (is_variable(x)) { static_cast<Derived&>(*this)(variable(atermpp::aterm_appl(x))); }
+  else if (is_function_symbol(x)) { static_cast<Derived&>(*this)(function_symbol(atermpp::aterm_appl(x))); }
+  else if (is_application(x)) { static_cast<Derived&>(*this)(application(atermpp::aterm_appl(x))); }
+  else if (is_where_clause(x)) { static_cast<Derived&>(*this)(where_clause(atermpp::aterm_appl(x))); }
+  else if (is_abstraction(x)) { static_cast<Derived&>(*this)(abstraction(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
 void operator()(const assignment_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_assignment(x)) { static_cast<Derived&>(*this)(assignment(x)); }
-  else if (is_identifier_assignment(x)) { static_cast<Derived&>(*this)(identifier_assignment(x)); }
+  if (is_assignment(x)) { static_cast<Derived&>(*this)(assignment(atermpp::aterm_appl(x))); }
+  else if (is_identifier_assignment(x)) { static_cast<Derived&>(*this)(identifier_assignment(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
 void operator()(const sort_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_basic_sort(x)) { static_cast<Derived&>(*this)(basic_sort(x)); }
-  else if (is_container_sort(x)) { static_cast<Derived&>(*this)(container_sort(x)); }
-  else if (is_structured_sort(x)) { static_cast<Derived&>(*this)(structured_sort(x)); }
-  else if (is_function_sort(x)) { static_cast<Derived&>(*this)(function_sort(x)); }
-  else if (is_unknown_sort(x)) { static_cast<Derived&>(*this)(unknown_sort(x)); }
-  else if (is_multiple_possible_sorts(x)) { static_cast<Derived&>(*this)(multiple_possible_sorts(x)); }
+  if (is_basic_sort(x)) { static_cast<Derived&>(*this)(basic_sort(atermpp::aterm_appl(x))); }
+  else if (is_container_sort(x)) { static_cast<Derived&>(*this)(container_sort(atermpp::aterm_appl(x))); }
+  else if (is_structured_sort(x)) { static_cast<Derived&>(*this)(structured_sort(atermpp::aterm_appl(x))); }
+  else if (is_function_sort(x)) { static_cast<Derived&>(*this)(function_sort(atermpp::aterm_appl(x))); }
+  else if (is_unknown_sort(x)) { static_cast<Derived&>(*this)(unknown_sort(atermpp::aterm_appl(x))); }
+  else if (is_multiple_possible_sorts(x)) { static_cast<Derived&>(*this)(multiple_possible_sorts(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
 void operator()(const container_type& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_list_container(x)) { static_cast<Derived&>(*this)(list_container(x)); }
-  else if (is_set_container(x)) { static_cast<Derived&>(*this)(set_container(x)); }
-  else if (is_bag_container(x)) { static_cast<Derived&>(*this)(bag_container(x)); }
-  else if (is_fset_container(x)) { static_cast<Derived&>(*this)(fset_container(x)); }
-  else if (is_fbag_container(x)) { static_cast<Derived&>(*this)(fbag_container(x)); }
+  if (is_list_container(x)) { static_cast<Derived&>(*this)(list_container(atermpp::aterm_appl(x))); }
+  else if (is_set_container(x)) { static_cast<Derived&>(*this)(set_container(atermpp::aterm_appl(x))); }
+  else if (is_bag_container(x)) { static_cast<Derived&>(*this)(bag_container(atermpp::aterm_appl(x))); }
+  else if (is_fset_container(x)) { static_cast<Derived&>(*this)(fset_container(atermpp::aterm_appl(x))); }
+  else if (is_fbag_container(x)) { static_cast<Derived&>(*this)(fbag_container(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
 void operator()(const binder_type& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_set_or_bag_comprehension_binder(x)) { static_cast<Derived&>(*this)(set_or_bag_comprehension_binder(x)); }
-  else if (is_set_comprehension_binder(x)) { static_cast<Derived&>(*this)(set_comprehension_binder(x)); }
-  else if (is_bag_comprehension_binder(x)) { static_cast<Derived&>(*this)(bag_comprehension_binder(x)); }
-  else if (is_forall_binder(x)) { static_cast<Derived&>(*this)(forall_binder(x)); }
-  else if (is_exists_binder(x)) { static_cast<Derived&>(*this)(exists_binder(x)); }
-  else if (is_lambda_binder(x)) { static_cast<Derived&>(*this)(lambda_binder(x)); }
+  if (is_set_or_bag_comprehension_binder(x)) { static_cast<Derived&>(*this)(set_or_bag_comprehension_binder(atermpp::aterm_appl(x))); }
+  else if (is_set_comprehension_binder(x)) { static_cast<Derived&>(*this)(set_comprehension_binder(atermpp::aterm_appl(x))); }
+  else if (is_bag_comprehension_binder(x)) { static_cast<Derived&>(*this)(bag_comprehension_binder(atermpp::aterm_appl(x))); }
+  else if (is_forall_binder(x)) { static_cast<Derived&>(*this)(forall_binder(atermpp::aterm_appl(x))); }
+  else if (is_exists_binder(x)) { static_cast<Derived&>(*this)(exists_binder(atermpp::aterm_appl(x))); }
+  else if (is_lambda_binder(x)) { static_cast<Derived&>(*this)(lambda_binder(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
 void operator()(const abstraction& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_forall(x)) { static_cast<Derived&>(*this)(forall(x)); }
-  else if (is_exists(x)) { static_cast<Derived&>(*this)(exists(x)); }
-  else if (is_lambda(x)) { static_cast<Derived&>(*this)(lambda(x)); }
+  if (is_forall(x)) { static_cast<Derived&>(*this)(forall(atermpp::aterm_appl(x))); }
+  else if (is_exists(x)) { static_cast<Derived&>(*this)(exists(atermpp::aterm_appl(x))); }
+  else if (is_lambda(x)) { static_cast<Derived&>(*this)(lambda(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

@@ -294,11 +294,6 @@ def make_expression_builder(filename, expression, text):
         if else_text == '':
             else_text = 'else '
         text = text + '{\n'
-        #for i in range(len(types)):
-        #    text = text + '  %s %s = %s(x).%s();\n' % (types[i], names[i], node, names[i])
-        #args = ', '.join(names)
-        #if args != '':
-        #    args = ', ' + args
         text = text + '  result = visit_%s(xEXTRA_ARG);\n' % (re.sub('_$', '', node))
         text = text + '  if (!is_finished(result))\n'
         text = text + '  {\n'
@@ -306,7 +301,7 @@ def make_expression_builder(filename, expression, text):
         for i in range(len(types)):
             if stext != '':
                 stext = stext + ', '
-            fcall = '%s(x).%s()' % (node, names[i])
+            fcall = '%s(atermpp::aterm_appl(x)).%s()' % (node, names[i])
             if extract_type(types[i]) == expression:
                 stext = stext + 'visit(%sEXTRA_ARG)' % fcall
             else:

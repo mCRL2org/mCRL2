@@ -228,26 +228,26 @@ void operator()(const action_name_multiset& x)
 void operator()(const process_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (lps::is_action(x)) { static_cast<Derived&>(*this)(lps::action(x)); }
-  else if (is_process_instance(x)) { static_cast<Derived&>(*this)(process_instance(x)); }
-  else if (is_process_instance_assignment(x)) { static_cast<Derived&>(*this)(process_instance_assignment(x)); }
-  else if (is_delta(x)) { static_cast<Derived&>(*this)(delta(x)); }
-  else if (is_tau(x)) { static_cast<Derived&>(*this)(tau(x)); }
-  else if (is_sum(x)) { static_cast<Derived&>(*this)(sum(x)); }
-  else if (is_block(x)) { static_cast<Derived&>(*this)(block(x)); }
-  else if (is_hide(x)) { static_cast<Derived&>(*this)(hide(x)); }
-  else if (is_rename(x)) { static_cast<Derived&>(*this)(rename(x)); }
-  else if (is_comm(x)) { static_cast<Derived&>(*this)(comm(x)); }
-  else if (is_allow(x)) { static_cast<Derived&>(*this)(allow(x)); }
-  else if (is_sync(x)) { static_cast<Derived&>(*this)(sync(x)); }
-  else if (is_at(x)) { static_cast<Derived&>(*this)(at(x)); }
-  else if (is_seq(x)) { static_cast<Derived&>(*this)(seq(x)); }
-  else if (is_if_then(x)) { static_cast<Derived&>(*this)(if_then(x)); }
-  else if (is_if_then_else(x)) { static_cast<Derived&>(*this)(if_then_else(x)); }
-  else if (is_bounded_init(x)) { static_cast<Derived&>(*this)(bounded_init(x)); }
-  else if (is_merge(x)) { static_cast<Derived&>(*this)(merge(x)); }
-  else if (is_left_merge(x)) { static_cast<Derived&>(*this)(left_merge(x)); }
-  else if (is_choice(x)) { static_cast<Derived&>(*this)(choice(x)); }
+  if (lps::is_action(x)) { static_cast<Derived&>(*this)(lps::action(atermpp::aterm_appl(x))); }
+  else if (is_process_instance(x)) { static_cast<Derived&>(*this)(process_instance(atermpp::aterm_appl(x))); }
+  else if (is_process_instance_assignment(x)) { static_cast<Derived&>(*this)(process_instance_assignment(atermpp::aterm_appl(x))); }
+  else if (is_delta(x)) { static_cast<Derived&>(*this)(delta(atermpp::aterm_appl(x))); }
+  else if (is_tau(x)) { static_cast<Derived&>(*this)(tau(atermpp::aterm_appl(x))); }
+  else if (is_sum(x)) { static_cast<Derived&>(*this)(sum(atermpp::aterm_appl(x))); }
+  else if (is_block(x)) { static_cast<Derived&>(*this)(block(atermpp::aterm_appl(x))); }
+  else if (is_hide(x)) { static_cast<Derived&>(*this)(hide(atermpp::aterm_appl(x))); }
+  else if (is_rename(x)) { static_cast<Derived&>(*this)(rename(atermpp::aterm_appl(x))); }
+  else if (is_comm(x)) { static_cast<Derived&>(*this)(comm(atermpp::aterm_appl(x))); }
+  else if (is_allow(x)) { static_cast<Derived&>(*this)(allow(atermpp::aterm_appl(x))); }
+  else if (is_sync(x)) { static_cast<Derived&>(*this)(sync(atermpp::aterm_appl(x))); }
+  else if (is_at(x)) { static_cast<Derived&>(*this)(at(atermpp::aterm_appl(x))); }
+  else if (is_seq(x)) { static_cast<Derived&>(*this)(seq(atermpp::aterm_appl(x))); }
+  else if (is_if_then(x)) { static_cast<Derived&>(*this)(if_then(atermpp::aterm_appl(x))); }
+  else if (is_if_then_else(x)) { static_cast<Derived&>(*this)(if_then_else(atermpp::aterm_appl(x))); }
+  else if (is_bounded_init(x)) { static_cast<Derived&>(*this)(bounded_init(atermpp::aterm_appl(x))); }
+  else if (is_merge(x)) { static_cast<Derived&>(*this)(merge(atermpp::aterm_appl(x))); }
+  else if (is_left_merge(x)) { static_cast<Derived&>(*this)(left_merge(atermpp::aterm_appl(x))); }
+  else if (is_choice(x)) { static_cast<Derived&>(*this)(choice(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

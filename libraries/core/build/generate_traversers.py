@@ -44,7 +44,7 @@ def make_traverser_inc_file(filename, class_text, expression_classes = []):
         for c in classes:
             f = c.constructor
             is_function = re.sub('_$', '', f.name())
-            visit_functions.append('if (%sis_%s(x)) { static_cast<Derived&>(*this)(%s(x)); }' % (f.qualifier(), is_function, f.qualified_name()))
+            visit_functions.append('if (%sis_%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (f.qualifier(), is_function, f.qualified_name()))
         vtext = '\n  ' + '\n  else '.join(visit_functions)
         ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
         result.append(ctext)

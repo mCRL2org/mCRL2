@@ -176,7 +176,7 @@ struct state_formula_builder
   state_formula visit(const state_formula& x, Arg& a)
   {
 #ifdef MCRL2_STATE_FORMULA_BUILDER_DEBUG
-  std::cerr << "<visit>" << core::pp(x) << std::endl;
+  std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     state_formula result;
     if (is_true(x))
@@ -200,7 +200,7 @@ struct state_formula_builder
       result = visit_not(x, a);
       if (!is_finished(result))
       {
-        result = not_(visit(not_::construct(x).operand(), a));
+        result = not_(visit(not_(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_and(x))
@@ -208,7 +208,7 @@ struct state_formula_builder
       result = visit_and(x, a);
       if (!is_finished(result))
       {
-        result = and_(visit(and_(x).left(), a), visit(and_(x).right(), a));
+        result = and_(visit(and_(atermpp::aterm_appl(x)).left(), a), visit(and_(atermpp::aterm_appl(x)).right(), a));
       }
     }
     else if (is_or(x))
@@ -216,7 +216,7 @@ struct state_formula_builder
       result = visit_or(x, a);
       if (!is_finished(result))
       {
-        result = or_(visit(or_(x).left(), a), visit(or_(x).right(), a));
+        result = or_(visit(or_(atermpp::aterm_appl(x)).left(), a), visit(or_(atermpp::aterm_appl(x)).right(), a));
       }
     }
     else if (is_imp(x))
@@ -224,7 +224,7 @@ struct state_formula_builder
       result = visit_imp(x, a);
       if (!is_finished(result))
       {
-        result = imp(visit(imp(x).left(), a), visit(imp(x).right(), a));
+        result = imp(visit(imp(atermpp::aterm_appl(x)).left(), a), visit(imp(atermpp::aterm_appl(x)).right(), a));
       }
     }
     else if (is_forall(x))
@@ -232,7 +232,7 @@ struct state_formula_builder
       result = visit_forall(x, a);
       if (!is_finished(result))
       {
-        result = forall(forall(x).variables(), visit(forall(x).operand(), a));
+        result = forall(forall(atermpp::aterm_appl(x)).variables(), visit(forall(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_exists(x))
@@ -240,7 +240,7 @@ struct state_formula_builder
       result = visit_exists(x, a);
       if (!is_finished(result))
       {
-        result = exists(exists(x).variables(), visit(exists(x).operand(), a));
+        result = exists(exists(atermpp::aterm_appl(x)).variables(), visit(exists(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_must(x))
@@ -248,7 +248,7 @@ struct state_formula_builder
       result = visit_must(x, a);
       if (!is_finished(result))
       {
-        result = must(must(x).formula(), visit(must(x).operand(), a));
+        result = must(must(atermpp::aterm_appl(x)).formula(), visit(must(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_may(x))
@@ -256,7 +256,7 @@ struct state_formula_builder
       result = visit_may(x, a);
       if (!is_finished(result))
       {
-        result = may(may(x).formula(), visit(may(x).operand(), a));
+        result = may(may(atermpp::aterm_appl(x)).formula(), visit(may(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_yaled(x))
@@ -272,7 +272,7 @@ struct state_formula_builder
       result = visit_yaled_timed(x, a);
       if (!is_finished(result))
       {
-        result = yaled_timed(yaled_timed(x).time_stamp());
+        result = yaled_timed(yaled_timed(atermpp::aterm_appl(x)).time_stamp());
       }
     }
     else if (is_delay(x))
@@ -288,7 +288,7 @@ struct state_formula_builder
       result = visit_delay_timed(x, a);
       if (!is_finished(result))
       {
-        result = delay_timed(delay_timed(x).time_stamp());
+        result = delay_timed(delay_timed(atermpp::aterm_appl(x)).time_stamp());
       }
     }
     else if (is_variable(x))
@@ -296,7 +296,7 @@ struct state_formula_builder
       result = visit_variable(x, a);
       if (!is_finished(result))
       {
-        result = variable(variable(x).name(), variable(x).arguments());
+        result = variable(variable(atermpp::aterm_appl(x)).name(), variable(atermpp::aterm_appl(x)).arguments());
       }
     }
     else if (is_nu(x))
@@ -304,7 +304,7 @@ struct state_formula_builder
       result = visit_nu(x, a);
       if (!is_finished(result))
       {
-        result = nu(nu(x).name(), nu(x).assignments(), visit(nu(x).operand(), a));
+        result = nu(nu(atermpp::aterm_appl(x)).name(), nu(atermpp::aterm_appl(x)).assignments(), visit(nu(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     else if (is_mu(x))
@@ -312,12 +312,12 @@ struct state_formula_builder
       result = visit_mu(x, a);
       if (!is_finished(result))
       {
-        result = mu(mu(x).name(), mu(x).assignments(), visit(mu(x).operand(), a));
+        result = mu(mu(atermpp::aterm_appl(x)).name(), mu(atermpp::aterm_appl(x)).assignments(), visit(mu(atermpp::aterm_appl(x)).operand(), a));
       }
     }
     
 #ifdef MCRL2_STATE_FORMULA_BUILDER_DEBUG
-  std::cerr << "<visit result>" << core::pp(result) << std::endl;
+  std::cerr << "<visit result>" << pp(result) << std::endl;
 #endif
     return result;
   }
@@ -473,7 +473,7 @@ struct state_formula_builder<void>
   state_formula visit(const state_formula& x)
   {
 #ifdef MCRL2_STATE_FORMULA_BUILDER_DEBUG
-  std::cerr << "<visit>" << core::pp(x) << std::endl;
+  std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     state_formula result;
     if (is_true(x))
@@ -497,7 +497,7 @@ struct state_formula_builder<void>
       result = visit_not(x);
       if (!is_finished(result))
       {
-        result = not_(visit(not_::construct(x).operand()));
+        result = not_(visit(not_(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_and(x))
@@ -505,7 +505,7 @@ struct state_formula_builder<void>
       result = visit_and(x);
       if (!is_finished(result))
       {
-        result = and_(visit(and_(x).left()), visit(and_(x).right()));
+        result = and_(visit(and_(atermpp::aterm_appl(x)).left()), visit(and_(atermpp::aterm_appl(x)).right()));
       }
     }
     else if (is_or(x))
@@ -513,7 +513,7 @@ struct state_formula_builder<void>
       result = visit_or(x);
       if (!is_finished(result))
       {
-        result = or_(visit(or_(x).left()), visit(or_(x).right()));
+        result = or_(visit(or_(atermpp::aterm_appl(x)).left()), visit(or_(atermpp::aterm_appl(x)).right()));
       }
     }
     else if (is_imp(x))
@@ -521,7 +521,7 @@ struct state_formula_builder<void>
       result = visit_imp(x);
       if (!is_finished(result))
       {
-        result = imp(visit(imp(x).left()), visit(imp(x).right()));
+        result = imp(visit(imp(atermpp::aterm_appl(x)).left()), visit(imp(atermpp::aterm_appl(x)).right()));
       }
     }
     else if (is_forall(x))
@@ -529,7 +529,7 @@ struct state_formula_builder<void>
       result = visit_forall(x);
       if (!is_finished(result))
       {
-        result = forall(forall(x).variables(), visit(forall(x).operand()));
+        result = forall(forall(atermpp::aterm_appl(x)).variables(), visit(forall(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_exists(x))
@@ -537,7 +537,7 @@ struct state_formula_builder<void>
       result = visit_exists(x);
       if (!is_finished(result))
       {
-        result = exists(exists(x).variables(), visit(exists(x).operand()));
+        result = exists(exists(atermpp::aterm_appl(x)).variables(), visit(exists(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_must(x))
@@ -545,7 +545,7 @@ struct state_formula_builder<void>
       result = visit_must(x);
       if (!is_finished(result))
       {
-        result = must(must(x).formula(), visit(must(x).operand()));
+        result = must(must(atermpp::aterm_appl(x)).formula(), visit(must(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_may(x))
@@ -553,7 +553,7 @@ struct state_formula_builder<void>
       result = visit_may(x);
       if (!is_finished(result))
       {
-        result = may(may(x).formula(), visit(may(x).operand()));
+        result = may(may(atermpp::aterm_appl(x)).formula(), visit(may(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_yaled(x))
@@ -569,7 +569,7 @@ struct state_formula_builder<void>
       result = visit_yaled_timed(x);
       if (!is_finished(result))
       {
-        result = yaled_timed(yaled_timed(x).time_stamp());
+        result = yaled_timed(yaled_timed(atermpp::aterm_appl(x)).time_stamp());
       }
     }
     else if (is_delay(x))
@@ -585,7 +585,7 @@ struct state_formula_builder<void>
       result = visit_delay_timed(x);
       if (!is_finished(result))
       {
-        result = delay_timed(delay_timed(x).time_stamp());
+        result = delay_timed(delay_timed(atermpp::aterm_appl(x)).time_stamp());
       }
     }
     else if (is_variable(x))
@@ -593,7 +593,7 @@ struct state_formula_builder<void>
       result = visit_variable(x);
       if (!is_finished(result))
       {
-        result = variable(variable(x).name(), variable(x).arguments());
+        result = variable(variable(atermpp::aterm_appl(x)).name(), variable(atermpp::aterm_appl(x)).arguments());
       }
     }
     else if (is_nu(x))
@@ -601,7 +601,7 @@ struct state_formula_builder<void>
       result = visit_nu(x);
       if (!is_finished(result))
       {
-        result = nu(nu(x).name(), nu(x).assignments(), visit(nu(x).operand()));
+        result = nu(nu(atermpp::aterm_appl(x)).name(), nu(atermpp::aterm_appl(x)).assignments(), visit(nu(atermpp::aterm_appl(x)).operand()));
       }
     }
     else if (is_mu(x))
@@ -609,12 +609,12 @@ struct state_formula_builder<void>
       result = visit_mu(x);
       if (!is_finished(result))
       {
-        result = mu(mu(x).name(), mu(x).assignments(), visit(mu(x).operand()));
+        result = mu(mu(atermpp::aterm_appl(x)).name(), mu(atermpp::aterm_appl(x)).assignments(), visit(mu(atermpp::aterm_appl(x)).operand()));
       }
     }
     
 #ifdef MCRL2_STATE_FORMULA_BUILDER_DEBUG
-  std::cerr << "<visit result>" << core::pp(result) << std::endl;
+  std::cerr << "<visit result>" << pp(result) << std::endl;
 #endif
     return result;
   }
