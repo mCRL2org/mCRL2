@@ -74,8 +74,14 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
   specification spec = linearise(lps_spec);
   bool check_monotonicity = false;
   state_formula f = parse_state_formula(formula, spec, check_monotonicity);
-  state_formulas::detail::check_name_clashes(f);
-  BOOST_CHECK(is_monotonous(f) == expect_success);
+  if (state_formulas::detail::has_name_clashes(f))
+  {
+    std::cerr << "Error: " << pp(f) << " has name clashes" << std::endl;
+  }
+  else
+  {
+    BOOST_CHECK(is_monotonous(f) == expect_success);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_abp)

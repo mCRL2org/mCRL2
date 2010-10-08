@@ -13,7 +13,6 @@
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_CHECKER_H
 
 #include <vector>
-#include "mcrl2/core/identifier_generator.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/exception.h"
 
@@ -28,15 +27,19 @@ namespace detail {
   {
     public:
       typedef state_formulas::traverser<state_formula_name_clash_checker> super;
-      typedef core::term_traits<state_formula> tr;
 
       using super::operator();
       using super::enter;
       using super::leave;
+
+#if BOOST_MSVC
+  template <typename Container>
+  void operator()(Container const& x)
+  {
+    super::operator()(x);
+  }
+#endif
      
-      /// \brief For generating fresh variables.
-      core::number_postfix_generator m_generator;
-      
       /// \brief The stack of names.
       std::vector<core::identifier_string> m_name_stack;
 
@@ -79,10 +82,18 @@ namespace detail {
 
   /// \brief Throws a mcrl2::runtime_exception if the formula contains name clashes
   inline
-  void check_name_clashes(const state_formula& f)
+  bool has_name_clashes(const state_formula& f)
   {
-    state_formula_name_clash_checker checker;
-    //checker(f);
+    try
+    {
+      state_formula_name_clash_checker checker;
+      checker(f);
+    }
+    catch (mcrl2::runtime_error e)
+    {
+      return true;
+    }
+    return false;
   }
 
 } // namespace detail
