@@ -126,19 +126,22 @@ namespace data {
                                    const Variable_iterator end,
                                    const data_specification& data_spec = detail::default_specification())
   { // Parse the variables list.
-    variable_list data_vars = core::parse_data_vars(text);
-    if (data_vars == 0)
+    ATermList temporary_data_vars = core::parse_data_vars(text);
+    if (temporary_data_vars == 0)
       throw mcrl2::runtime_error("Error while parsing data variable declarations.");
+    variable_list data_vars = temporary_data_vars;
 
     // Type check the variable list.
     /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                         mcrl2::data::remove_all_system_defined(data_spec)); */
     atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec);
 
-    data_vars = core::type_check_data_vars(data_vars, d);
+    temporary_data_vars = core::type_check_data_vars(data_vars, d);
 
-    if (data_vars == 0)
+    if (temporary_data_vars == 0)
       throw mcrl2::runtime_error("Error while type checking data variable declarations.");
+    data_vars=temporary_data_vars;
+
     // Undo sort renamings for compatibility with type checker
     // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     data_vars = atermpp::reverse(data_vars);
