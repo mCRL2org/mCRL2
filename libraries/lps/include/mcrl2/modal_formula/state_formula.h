@@ -22,6 +22,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
@@ -934,6 +935,12 @@ namespace accessors {
   bool state_formula::has_time() const
   {
     return atermpp::find_if(*this, is_timed_subterm()) != atermpp::aterm();
+  }
+
+  /// \brief Returns a pretty print representation of f.
+  inline std::string pp(const state_formula& f)
+  {
+    return core::pp(f);
   }
 
 } // namespace state_formulas
