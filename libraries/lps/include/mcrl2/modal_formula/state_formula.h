@@ -625,45 +625,45 @@ class mu: public state_formula
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a true_ expression
+    /// \brief Test for a true expression
     /// \param t A term
-    /// \return True if it is a true_ expression
+    /// \return True if it is a true expression
     inline
     bool is_true(const state_formula& t)
     {
       return core::detail::gsIsStateTrue(t);
     }
 
-    /// \brief Test for a false_ expression
+    /// \brief Test for a false expression
     /// \param t A term
-    /// \return True if it is a false_ expression
+    /// \return True if it is a false expression
     inline
     bool is_false(const state_formula& t)
     {
       return core::detail::gsIsStateFalse(t);
     }
 
-    /// \brief Test for a not_ expression
+    /// \brief Test for a not expression
     /// \param t A term
-    /// \return True if it is a not_ expression
+    /// \return True if it is a not expression
     inline
     bool is_not(const state_formula& t)
     {
       return core::detail::gsIsStateNot(t);
     }
 
-    /// \brief Test for a and_ expression
+    /// \brief Test for a and expression
     /// \param t A term
-    /// \return True if it is a and_ expression
+    /// \return True if it is a and expression
     inline
     bool is_and(const state_formula& t)
     {
       return core::detail::gsIsStateAnd(t);
     }
 
-    /// \brief Test for a or_ expression
+    /// \brief Test for a or expression
     /// \param t A term
-    /// \return True if it is a or_ expression
+    /// \return True if it is a or expression
     inline
     bool is_or(const state_formula& t)
     {

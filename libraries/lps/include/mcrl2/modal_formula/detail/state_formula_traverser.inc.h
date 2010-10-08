@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/modal_formula/detail/traverser.inc
+/// \file mcrl2/modal_formula/detail/state_formula_traverser.inc
 /// \brief The content of this file is included in other header
 /// files, to prevent duplication.
 

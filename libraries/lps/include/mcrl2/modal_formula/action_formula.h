@@ -346,6 +346,90 @@ class at: public action_formula
 };
 //--- end generated classes ---//
 
+//--- start generated is-functions ---//
+
+    /// \brief Test for a true expression
+    /// \param t A term
+    /// \return True if it is a true expression
+    inline
+    bool is_true(const action_formula& t)
+    {
+      return core::detail::gsIsActTrue(t);
+    }
+
+    /// \brief Test for a false expression
+    /// \param t A term
+    /// \return True if it is a false expression
+    inline
+    bool is_false(const action_formula& t)
+    {
+      return core::detail::gsIsActFalse(t);
+    }
+
+    /// \brief Test for a not expression
+    /// \param t A term
+    /// \return True if it is a not expression
+    inline
+    bool is_not(const action_formula& t)
+    {
+      return core::detail::gsIsActNot(t);
+    }
+
+    /// \brief Test for a and expression
+    /// \param t A term
+    /// \return True if it is a and expression
+    inline
+    bool is_and(const action_formula& t)
+    {
+      return core::detail::gsIsActAnd(t);
+    }
+
+    /// \brief Test for a or expression
+    /// \param t A term
+    /// \return True if it is a or expression
+    inline
+    bool is_or(const action_formula& t)
+    {
+      return core::detail::gsIsActOr(t);
+    }
+
+    /// \brief Test for a imp expression
+    /// \param t A term
+    /// \return True if it is a imp expression
+    inline
+    bool is_imp(const action_formula& t)
+    {
+      return core::detail::gsIsActImp(t);
+    }
+
+    /// \brief Test for a forall expression
+    /// \param t A term
+    /// \return True if it is a forall expression
+    inline
+    bool is_forall(const action_formula& t)
+    {
+      return core::detail::gsIsActForall(t);
+    }
+
+    /// \brief Test for a exists expression
+    /// \param t A term
+    /// \return True if it is a exists expression
+    inline
+    bool is_exists(const action_formula& t)
+    {
+      return core::detail::gsIsActExists(t);
+    }
+
+    /// \brief Test for a at expression
+    /// \param t A term
+    /// \return True if it is a at expression
+    inline
+    bool is_at(const action_formula& t)
+    {
+      return core::detail::gsIsActAt(t);
+    }
+//--- end generated is-functions ---//
+
 /// Accessor functions and predicates for action formulas.
 namespace act_frm
 {

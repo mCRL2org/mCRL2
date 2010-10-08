@@ -29,7 +29,7 @@ namespace detail {
       using super::operator();
 
 // Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/modal_formula/detail/traverser.inc.h"
+#include "mcrl2/modal_formula/detail/state_formula_traverser.inc.h"
   };
 
 template<typename Derived, typename AdaptablePredicate>

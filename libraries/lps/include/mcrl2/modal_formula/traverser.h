@@ -12,15 +12,52 @@
 #ifndef MCRL2_MODAL_FORMULA_TRAVERSER_H
 #define MCRL2_MODAL_FORMULA_TRAVERSER_H
 
+#include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/data/traverser.h"
 
 namespace mcrl2 {
 
+namespace action_formulas {
+
+  /// \brief Traversal class for action formula data types
+  template <typename Derived>
+  class traverser: public data::traverser<Derived>
+  {
+    public:
+      typedef data::traverser<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
+
+// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/modal_formula/detail/action_formula_traverser.inc.h"
+  };
+
+} // namespace action_formulas
+
+namespace regular_formulas {
+
+  /// \brief Traversal class for regular formula data types
+  template <typename Derived>
+  class traverser: public data::traverser<Derived>
+  {
+    public:
+      typedef data::traverser<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
+
+// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/modal_formula/detail/regular_formula_traverser.inc.h"
+  };
+
+} // namespace regular_formulas
+
 namespace state_formulas {
 
-  /// \brief Traversal class for process data types
+  /// \brief Traversal class for state formula data types
   template <typename Derived>
   class traverser: public data::traverser<Derived>
   {
@@ -34,7 +71,7 @@ namespace state_formulas {
       {}
 
 // Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/modal_formula/detail/traverser.inc.h"
+#include "mcrl2/modal_formula/detail/state_formula_traverser.inc.h"
   };
 
 } // namespace state_formulas
