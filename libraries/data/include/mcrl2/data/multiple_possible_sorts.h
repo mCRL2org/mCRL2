@@ -30,7 +30,7 @@ class multiple_possible_sorts: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    multiple_possible_sorts(atermpp::aterm_appl term)
+    multiple_possible_sorts(const atermpp::aterm_appl& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortsPossible(m_term));

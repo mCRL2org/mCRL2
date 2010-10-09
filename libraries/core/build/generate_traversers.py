@@ -78,7 +78,7 @@ def make_builder_inc_file(filename, class_text, expression_class):
             if extract_type(p.type()) != expression_class:
                 parameters.append('x.%s()' % p.name())
             else:
-                parameters.append('atermpp::aterm_appl(static_cast<Derived&>(*this)(x.%s()))' % p.name())
+                parameters.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
         vtext = '%s result = %s(%s);' % (expression_class, f.qualified_name(), ', '.join(parameters))
         ctext = BUILDER_FUNCTION
         ctext = re.sub('EXPRESSION', expression_class, ctext)
@@ -123,6 +123,12 @@ if __name__ == "__main__":
     make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', REGULAR_FORMULA_CLASSES, [('regular_formula', REGULAR_FORMULA_CLASSES)])
     make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
     make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, [('process_expression', PROCESS_EXPRESSION_CLASSES)])
+
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h', ACTION_FORMULA_CLASSES, [('action_formula', ACTION_FORMULA_CLASSES)])
+    make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/action_formula_builder.inc.h', ACTION_FORMULA_CLASSES, 'action_formula')
+
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', REGULAR_FORMULA_CLASSES, [('regular_formula', REGULAR_FORMULA_CLASSES)])
+    make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/regular_formula_builder.inc.h', REGULAR_FORMULA_CLASSES, 'regular_formula')
 
     make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/state_formula_traverser.inc.h', STATE_FORMULA_CLASSES, [('state_formula', STATE_FORMULA_CLASSES)])
     make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/state_formula_builder.inc.h', STATE_FORMULA_CLASSES, 'state_formula')

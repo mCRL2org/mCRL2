@@ -505,7 +505,7 @@ class ATermConstructor(Constructor):
     def inline_definition(self):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <CLASSNAME>(atermpp::aterm_appl term)
+    <CLASSNAME>(const atermpp::aterm_appl& term)
       : <SUPERCLASS>(term)
     {
       assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));
@@ -515,13 +515,13 @@ class ATermConstructor(Constructor):
     def declaration(self):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <CLASSNAME>(atermpp::aterm_appl term);'''
+    <CLASSNAME>(const atermpp::aterm_appl& term);'''
         return self.expand_text(text)
 
     def definition(self, inline = False):
         text = r'''    /// \\\\brief Constructor.
     /// \\param term A term
-    <INLINE><CLASSNAME>::<CLASSNAME>(atermpp::aterm_appl term)
+    <INLINE><CLASSNAME>::<CLASSNAME>(const atermpp::aterm_appl& term)
       : <SUPERCLASS>(term)
     {
       assert(<NAMESPACE>::detail::check_term_<ATERM>(m_term));

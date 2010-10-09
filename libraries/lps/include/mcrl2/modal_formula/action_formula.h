@@ -94,7 +94,7 @@ class true_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    true_(atermpp::aterm_appl term)
+    true_(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActTrue(m_term));
@@ -112,7 +112,7 @@ class false_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    false_(atermpp::aterm_appl term)
+    false_(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActFalse(m_term));
@@ -130,7 +130,7 @@ class not_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    not_(atermpp::aterm_appl term)
+    not_(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActNot(m_term));
@@ -158,7 +158,7 @@ class and_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    and_(atermpp::aterm_appl term)
+    and_(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActAnd(m_term));
@@ -191,7 +191,7 @@ class or_: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    or_(atermpp::aterm_appl term)
+    or_(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActOr(m_term));
@@ -224,7 +224,7 @@ class imp: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    imp(atermpp::aterm_appl term)
+    imp(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActImp(m_term));
@@ -257,7 +257,7 @@ class forall: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    forall(atermpp::aterm_appl term)
+    forall(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActForall(m_term));
@@ -290,7 +290,7 @@ class exists: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    exists(atermpp::aterm_appl term)
+    exists(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActExists(m_term));
@@ -323,7 +323,7 @@ class at: public action_formula
 
     /// \brief Constructor.
     /// \param term A term
-    at(atermpp::aterm_appl term)
+    at(const atermpp::aterm_appl& term)
       : action_formula(term)
     {
       assert(core::detail::check_term_ActAt(m_term));

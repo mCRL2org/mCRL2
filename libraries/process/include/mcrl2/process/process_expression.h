@@ -83,7 +83,7 @@ class process_instance: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    process_instance(atermpp::aterm_appl term)
+    process_instance(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Process(m_term));
@@ -116,7 +116,7 @@ class process_instance_assignment: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    process_instance_assignment(atermpp::aterm_appl term)
+    process_instance_assignment(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_ProcessAssignment(m_term));
@@ -149,7 +149,7 @@ class delta: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    delta(atermpp::aterm_appl term)
+    delta(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Delta(m_term));
@@ -167,7 +167,7 @@ class tau: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    tau(atermpp::aterm_appl term)
+    tau(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Tau(m_term));
@@ -185,7 +185,7 @@ class sum: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    sum(atermpp::aterm_appl term)
+    sum(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Sum(m_term));
@@ -218,7 +218,7 @@ class block: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    block(atermpp::aterm_appl term)
+    block(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Block(m_term));
@@ -251,7 +251,7 @@ class hide: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    hide(atermpp::aterm_appl term)
+    hide(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Hide(m_term));
@@ -284,7 +284,7 @@ class rename: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    rename(atermpp::aterm_appl term)
+    rename(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Rename(m_term));
@@ -317,7 +317,7 @@ class comm: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    comm(atermpp::aterm_appl term)
+    comm(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Comm(m_term));
@@ -350,7 +350,7 @@ class allow: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    allow(atermpp::aterm_appl term)
+    allow(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Allow(m_term));
@@ -383,7 +383,7 @@ class sync: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    sync(atermpp::aterm_appl term)
+    sync(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Sync(m_term));
@@ -416,7 +416,7 @@ class at: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    at(atermpp::aterm_appl term)
+    at(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_AtTime(m_term));
@@ -449,7 +449,7 @@ class seq: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    seq(atermpp::aterm_appl term)
+    seq(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Seq(m_term));
@@ -482,7 +482,7 @@ class if_then: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    if_then(atermpp::aterm_appl term)
+    if_then(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_IfThen(m_term));
@@ -515,7 +515,7 @@ class if_then_else: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    if_then_else(atermpp::aterm_appl term)
+    if_then_else(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_IfThenElse(m_term));
@@ -553,7 +553,7 @@ class bounded_init: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    bounded_init(atermpp::aterm_appl term)
+    bounded_init(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_BInit(m_term));
@@ -586,7 +586,7 @@ class merge: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    merge(atermpp::aterm_appl term)
+    merge(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Merge(m_term));
@@ -619,7 +619,7 @@ class left_merge: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    left_merge(atermpp::aterm_appl term)
+    left_merge(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_LMerge(m_term));
@@ -652,7 +652,7 @@ class choice: public process_expression
 
     /// \brief Constructor.
     /// \param term A term
-    choice(atermpp::aterm_appl term)
+    choice(const atermpp::aterm_appl& term)
       : process_expression(term)
     {
       assert(core::detail::check_term_Choice(m_term));

@@ -13,7 +13,7 @@
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_NEGATOR_H
 
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/state_formula_builder.h"
+#include "mcrl2/modal_formula/builder.h"
 
 namespace mcrl2 {
 
@@ -22,8 +22,14 @@ namespace state_formulas {
 namespace detail {
 
 /// Visitor that negates propositional variable instantiations with a given name.
-struct state_variable_negator: public mcrl2::state_formulas::state_formula_builder<>
+struct state_variable_negator: public state_formulas::builder<state_variable_negator>
 {
+	typedef state_formulas::builder<state_variable_negator> super;
+
+  using super::enter;
+  using super::leave;
+  using super::operator();
+	
   core::identifier_string m_name;
 
   state_variable_negator(const core::identifier_string& name)
@@ -33,17 +39,16 @@ struct state_variable_negator: public mcrl2::state_formulas::state_formula_build
   /// \brief Visit propositional_variable node
   /// \param x A term
   /// \return The result of visiting the node
-  state_formula visit_variable(const variable& x)
+  state_formula operator()(const variable& x)
   {
-    // TODO: why is this cast needed???
-    ATermAppl tmp = x;
-    state_formula tmp1(tmp);
-
     if (x.name() == m_name)
     {
-      return state_formulas::not_(tmp1);
+std::cerr << "<apply-not>" << pp(x) << std::endl;
+state_formula result = state_formulas::not_(x);
+std::cerr << "<done>" << std::endl;
+      return state_formulas::not_(x);
     }
-    return tmp1;
+    return x;
   }
 };
 
@@ -53,7 +58,7 @@ inline
 state_formula negate_propositional_variable(const core::identifier_string& name, const state_formula& x)
 {
   state_variable_negator visitor(name);
-  return visitor.visit(x);
+  return visitor(x);
 }
 
 } // namespace detail

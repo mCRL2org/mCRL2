@@ -243,11 +243,11 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_normalize1();
-  test_normalize2();
+  //test_normalize1();
+  //test_normalize2();
   test_normalize3();
-  test_pfnf_visitor();
-  test_normalize_and_or();
+  //test_pfnf_visitor();
+  //test_normalize_and_or();
 
   return 0;
 }

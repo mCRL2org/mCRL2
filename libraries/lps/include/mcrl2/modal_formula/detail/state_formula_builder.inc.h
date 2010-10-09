@@ -30,7 +30,7 @@ state_formula operator()(const false_& x)
 state_formula operator()(const not_& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = not_(atermpp::aterm_appl(static_cast<Derived&>(*this)(x.operand())));
+  state_formula result = not_(static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -38,7 +38,7 @@ state_formula operator()(const not_& x)
 state_formula operator()(const and_& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = and_(atermpp::aterm_appl(static_cast<Derived&>(*this)(x.left())), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.right())));
+  state_formula result = and_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -46,7 +46,7 @@ state_formula operator()(const and_& x)
 state_formula operator()(const or_& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = or_(atermpp::aterm_appl(static_cast<Derived&>(*this)(x.left())), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.right())));
+  state_formula result = or_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -54,7 +54,7 @@ state_formula operator()(const or_& x)
 state_formula operator()(const imp& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = imp(atermpp::aterm_appl(static_cast<Derived&>(*this)(x.left())), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.right())));
+  state_formula result = imp(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -62,7 +62,7 @@ state_formula operator()(const imp& x)
 state_formula operator()(const forall& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = forall(x.variables(), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.operand())));
+  state_formula result = forall(x.variables(), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -70,7 +70,7 @@ state_formula operator()(const forall& x)
 state_formula operator()(const exists& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = exists(x.variables(), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.operand())));
+  state_formula result = exists(x.variables(), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -78,7 +78,7 @@ state_formula operator()(const exists& x)
 state_formula operator()(const must& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = must(x.formula(), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.operand())));
+  state_formula result = must(x.formula(), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -86,7 +86,7 @@ state_formula operator()(const must& x)
 state_formula operator()(const may& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = may(x.formula(), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.operand())));
+  state_formula result = may(x.formula(), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -134,7 +134,7 @@ state_formula operator()(const variable& x)
 state_formula operator()(const nu& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = nu(x.name(), x.assignments(), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.operand())));
+  state_formula result = nu(x.name(), x.assignments(), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -142,7 +142,7 @@ state_formula operator()(const nu& x)
 state_formula operator()(const mu& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  state_formula result = mu(x.name(), x.assignments(), atermpp::aterm_appl(static_cast<Derived&>(*this)(x.operand())));
+  state_formula result = mu(x.name(), x.assignments(), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }

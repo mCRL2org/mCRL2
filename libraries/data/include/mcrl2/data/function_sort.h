@@ -42,7 +42,7 @@ class function_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    function_sort(atermpp::aterm_appl term)
+    function_sort(const atermpp::aterm_appl& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortArrow(m_term));

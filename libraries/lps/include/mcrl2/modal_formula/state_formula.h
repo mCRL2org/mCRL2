@@ -72,7 +72,7 @@ class state_formula: public atermpp::aterm_appl
 
     /// \brief Constructor
     /// \param t A term
-    state_formula(atermpp::aterm_appl t)
+    state_formula(const atermpp::aterm_appl& t)
       : atermpp::aterm_appl(t)
     {
       assert(mcrl2::core::detail::check_rule_StateFrm(m_term));
@@ -122,7 +122,7 @@ class true_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    true_(atermpp::aterm_appl term)
+    true_(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateTrue(m_term));
@@ -140,7 +140,7 @@ class false_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    false_(atermpp::aterm_appl term)
+    false_(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateFalse(m_term));
@@ -158,7 +158,7 @@ class not_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    not_(atermpp::aterm_appl term)
+    not_(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateNot(m_term));
@@ -186,7 +186,7 @@ class and_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    and_(atermpp::aterm_appl term)
+    and_(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateAnd(m_term));
@@ -219,7 +219,7 @@ class or_: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    or_(atermpp::aterm_appl term)
+    or_(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateOr(m_term));
@@ -252,7 +252,7 @@ class imp: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    imp(atermpp::aterm_appl term)
+    imp(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateImp(m_term));
@@ -285,7 +285,7 @@ class forall: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    forall(atermpp::aterm_appl term)
+    forall(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateForall(m_term));
@@ -318,7 +318,7 @@ class exists: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    exists(atermpp::aterm_appl term)
+    exists(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateExists(m_term));
@@ -351,7 +351,7 @@ class must: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    must(atermpp::aterm_appl term)
+    must(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMust(m_term));
@@ -384,7 +384,7 @@ class may: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    may(atermpp::aterm_appl term)
+    may(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMay(m_term));
@@ -417,7 +417,7 @@ class yaled: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    yaled(atermpp::aterm_appl term)
+    yaled(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateYaled(m_term));
@@ -435,7 +435,7 @@ class yaled_timed: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    yaled_timed(atermpp::aterm_appl term)
+    yaled_timed(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateYaledTimed(m_term));
@@ -463,7 +463,7 @@ class delay: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    delay(atermpp::aterm_appl term)
+    delay(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateDelay(m_term));
@@ -481,7 +481,7 @@ class delay_timed: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    delay_timed(atermpp::aterm_appl term)
+    delay_timed(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateDelayTimed(m_term));
@@ -509,7 +509,7 @@ class variable: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    variable(atermpp::aterm_appl term)
+    variable(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateVar(m_term));
@@ -547,7 +547,7 @@ class nu: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    nu(atermpp::aterm_appl term)
+    nu(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateNu(m_term));
@@ -590,7 +590,7 @@ class mu: public state_formula
 
     /// \brief Constructor.
     /// \param term A term
-    mu(atermpp::aterm_appl term)
+    mu(const atermpp::aterm_appl& term)
       : state_formula(term)
     {
       assert(core::detail::check_term_StateMu(m_term));
@@ -793,7 +793,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The argument of a data expression
   inline
-  data::data_expression val(state_formula t)
+  data::data_expression val(const state_formula& t)
   {
     assert(core::detail::gsIsDataExpr(t));
     return t;
@@ -804,7 +804,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The state formula argument of an expression of type
   inline
-  state_formula arg(state_formula t)
+  state_formula arg(const state_formula& t)
   {
     if (core::detail::gsIsStateNot(t))
     {
@@ -826,7 +826,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The left hand side of an expression of type and/or/imp
   inline
-  state_formula left(state_formula t)
+  state_formula left(const state_formula& t)
   {
     assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
     return atermpp::arg1(t);
@@ -836,7 +836,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The right hand side of an expression of type and/or/imp.
   inline
-  state_formula right(state_formula t)
+  state_formula right(const state_formula& t)
   {
     assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
     return atermpp::arg2(t);
@@ -846,7 +846,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The variables of a quantification expression
   inline
-  data::variable_list var(state_formula t)
+  data::variable_list var(const state_formula& t)
   {
     assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
     return data::variable_list(
@@ -858,7 +858,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The time of a delay or yaled expression
   inline
-  data::data_expression time(state_formula t)
+  data::data_expression time(const state_formula& t)
   {
     assert(core::detail::gsIsStateDelayTimed(t) || core::detail::gsIsStateYaledTimed(t));
     return atermpp::arg1(t);
@@ -868,7 +868,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The name of a variable expression
   inline
-  core::identifier_string name(state_formula t)
+  core::identifier_string name(const state_formula& t)
   {
     assert(core::detail::gsIsStateVar(t) ||
            core::detail::gsIsStateMu(t)  ||
@@ -881,7 +881,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The parameters of a variable expression
   inline
-  data::data_expression_list param(state_formula t)
+  data::data_expression_list param(const state_formula& t)
   {
     assert(core::detail::gsIsStateVar(t));
     return data::data_expression_list(
@@ -893,7 +893,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The parameters of a mu or nu expression
   inline
-  data::assignment_list ass(state_formula t)
+  data::assignment_list ass(const state_formula& t)
   {
     assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
     return data::assignment_list(
@@ -905,7 +905,7 @@ namespace accessors {
   /// \param t A modal formula
   /// \return The regular formula of a must or may expression
   inline
-  regular_formulas::regular_formula act(state_formula t)
+  regular_formulas::regular_formula act(const state_formula& t)
   {
     assert(core::detail::gsIsStateMust(t) || core::detail::gsIsStateMay(t));
     return atermpp::arg1(t);
@@ -921,7 +921,7 @@ namespace accessors {
     /// \brief Function call operator
     /// \param t A term
     /// \return The function result
-    bool operator()(atermpp::aterm_appl t) const
+    bool operator()(const atermpp::aterm_appl& t) const
     {
       return (is_state_formula(t) && (is_delay_timed(t) || is_yaled_timed(t)))
         || action_formulas::act_frm::is_at(t);

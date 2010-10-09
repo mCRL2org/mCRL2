@@ -32,7 +32,7 @@ class where_clause: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    where_clause(atermpp::aterm_appl term)
+    where_clause(const atermpp::aterm_appl& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Whr(m_term));

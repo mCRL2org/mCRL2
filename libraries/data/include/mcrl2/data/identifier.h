@@ -19,7 +19,7 @@ class identifier: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    identifier(atermpp::aterm_appl term)
+    identifier(const atermpp::aterm_appl& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Id(m_term));

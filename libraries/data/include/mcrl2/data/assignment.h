@@ -78,7 +78,7 @@ class assignment_base: public assignment_expression
 
     /// \brief Constructor.
     /// \param term A term
-    assignment_base(atermpp::aterm_appl term)
+    assignment_base(const atermpp::aterm_appl& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_DataVarIdInit(m_term));
@@ -111,7 +111,7 @@ class identifier_assignment_base: public assignment_expression
 
     /// \brief Constructor.
     /// \param term A term
-    identifier_assignment_base(atermpp::aterm_appl term)
+    identifier_assignment_base(const atermpp::aterm_appl& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_IdInit(m_term));

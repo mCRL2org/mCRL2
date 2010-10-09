@@ -39,7 +39,7 @@ class structured_sort_constructor_base: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    structured_sort_constructor_base(atermpp::aterm_appl term)
+    structured_sort_constructor_base(const atermpp::aterm_appl& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_StructCons(m_term));

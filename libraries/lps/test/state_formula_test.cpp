@@ -29,7 +29,6 @@ using namespace std;
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::state_formulas;
@@ -335,13 +334,13 @@ void test_rename()
   specification spec    = linearise(SPECIFICATION);
 
   state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
-  set_identifier_generator generator;
+  data::set_identifier_generator generator;
   generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
   formula = rename_predicate_variables(formula, generator);
   BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X0. X0)");
   std::cout << "formula: " << pp(formula) << std::endl;
 
-  generator = set_identifier_generator();
+  generator = data::set_identifier_generator();
   generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
   formula = parse_state_formula("mu X. mu X. X", spec);
   std::cout << "formula: " << pp(formula) << std::endl;
@@ -357,9 +356,9 @@ void test_normalize()
   using namespace accessors;
   std::cerr << "test_normalize\n";
 
-  state_formula x = state_formulas::variable(identifier_string("X"), data_expression_list());
-  state_formula y = state_formulas::variable(identifier_string("Y"), data_expression_list());
-  state_formula z = state_formulas::variable(identifier_string("Z"), data_expression_list());
+  state_formula x = state_formulas::variable(identifier_string("X"), data::data_expression_list());
+  state_formula y = state_formulas::variable(identifier_string("Y"), data::data_expression_list());
+  state_formula z = state_formulas::variable(identifier_string("Z"), data::data_expression_list());
   state_formula f;
   state_formula f1;
   state_formula f2;
@@ -412,6 +411,26 @@ void test_type_checking()
   core::garbage_collect();
 }
 
+state_formula negate_variable(const variable& x)
+{
+  return state_formulas::not_(x);
+}
+
+void test_not()
+{
+  data::data_expression_list args;
+  variable v(core::identifier_string("v"), args);
+  state_formula s = not_(v);
+  BOOST_CHECK(is_not(s));
+
+  state_formula t = negate_variable(v);
+  BOOST_CHECK(s == t);
+
+  // The following is expected to trigger an assertion failure
+  // aterm_appl a = v;
+  // state_formula t = not_(a);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -419,6 +438,7 @@ int test_main(int argc, char* argv[])
   test_rename();
   test_normalize();
   test_type_checking();
+  test_not();
 
   return 0;
 }

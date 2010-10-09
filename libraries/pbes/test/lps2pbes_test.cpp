@@ -371,8 +371,12 @@ action act(std::string name, data_expression_list parameters)
 
 void test_multi_actions(action_list a, action_list b, data_expression expected_result = data_expression())
 {
+	std::cout << "--- test_multi_actions ---" << std::endl;
   data_expression result = equal_multi_actions(a, b);
-  std::cout << mcrl2::core::pp(result) << std::endl;
+  std::cout << "a               = " << core::pp(a) << std::endl;
+  std::cout << "b               = " << core::pp(b) << std::endl;
+  std::cout << "result          = " << core::pp(result) << std::endl;
+  std::cout << "expected_result = " << core::pp(expected_result) << std::endl;
   BOOST_CHECK(expected_result == data_expression() || result == expected_result);
   core::garbage_collect();
 }

@@ -71,7 +71,7 @@ class true_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    true_(atermpp::aterm_appl term)
+    true_(const atermpp::aterm_appl& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanTrue(m_term));
@@ -89,7 +89,7 @@ class false_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    false_(atermpp::aterm_appl term)
+    false_(const atermpp::aterm_appl& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanFalse(m_term));
@@ -107,7 +107,7 @@ class not_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    not_(atermpp::aterm_appl term)
+    not_(const atermpp::aterm_appl& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanNot(m_term));
@@ -135,7 +135,7 @@ class and_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    and_(atermpp::aterm_appl term)
+    and_(const atermpp::aterm_appl& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanAnd(m_term));
@@ -168,7 +168,7 @@ class or_: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    or_(atermpp::aterm_appl term)
+    or_(const atermpp::aterm_appl& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanOr(m_term));
@@ -201,7 +201,7 @@ class imp: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    imp(atermpp::aterm_appl term)
+    imp(const atermpp::aterm_appl& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanImp(m_term));
@@ -234,7 +234,7 @@ class boolean_variable: public boolean_expression
 
     /// \brief Constructor.
     /// \param term A term
-    boolean_variable(atermpp::aterm_appl term)
+    boolean_variable(const atermpp::aterm_appl& term)
       : boolean_expression(term)
     {
       assert(core::detail::check_term_BooleanVariable(m_term));

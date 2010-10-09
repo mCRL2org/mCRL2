@@ -34,7 +34,7 @@ class application_base: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    application_base(atermpp::aterm_appl term)
+    application_base(const atermpp::aterm_appl& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_DataAppl(m_term));

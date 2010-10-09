@@ -35,7 +35,7 @@ class function_symbol: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    function_symbol(atermpp::aterm_appl term)
+    function_symbol(const atermpp::aterm_appl& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_OpId(m_term));

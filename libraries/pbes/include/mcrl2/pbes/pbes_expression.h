@@ -106,7 +106,7 @@ class true_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    true_(atermpp::aterm_appl term)
+    true_(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESTrue(m_term));
@@ -124,7 +124,7 @@ class false_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    false_(atermpp::aterm_appl term)
+    false_(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESFalse(m_term));
@@ -142,7 +142,7 @@ class not_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    not_(atermpp::aterm_appl term)
+    not_(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESNot(m_term));
@@ -170,7 +170,7 @@ class and_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    and_(atermpp::aterm_appl term)
+    and_(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESAnd(m_term));
@@ -203,7 +203,7 @@ class or_: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    or_(atermpp::aterm_appl term)
+    or_(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESOr(m_term));
@@ -236,7 +236,7 @@ class imp: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    imp(atermpp::aterm_appl term)
+    imp(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESImp(m_term));
@@ -269,7 +269,7 @@ class forall: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    forall(atermpp::aterm_appl term)
+    forall(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESForall(m_term));
@@ -302,7 +302,7 @@ class exists: public pbes_expression
 
     /// \brief Constructor.
     /// \param term A term
-    exists(atermpp::aterm_appl term)
+    exists(const atermpp::aterm_appl& term)
       : pbes_expression(term)
     {
       assert(core::detail::check_term_PBESExists(m_term));
