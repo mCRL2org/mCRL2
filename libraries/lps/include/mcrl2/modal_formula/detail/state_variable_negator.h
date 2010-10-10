@@ -21,42 +21,42 @@ namespace state_formulas {
 
 namespace detail {
 
-/// Visitor that negates propositional variable instantiations with a given name.
-struct state_variable_negator: public state_formulas::builder<state_variable_negator>
-{
-	typedef state_formulas::builder<state_variable_negator> super;
-
-  using super::enter;
-  using super::leave;
-  using super::operator();
-	
-  core::identifier_string m_name;
-
-  state_variable_negator(const core::identifier_string& name)
-    : m_name(name)
-  {}
-
-  /// \brief Visit propositional_variable node
-  /// \param x A term
-  /// \return The result of visiting the node
-  state_formula operator()(const variable& x)
+  /// Visitor that negates propositional variable instantiations with a given name.
+  struct state_variable_negator: public state_formulas::builder<state_variable_negator>
   {
-    if (x.name() == m_name)
+  	typedef state_formulas::builder<state_variable_negator> super;
+  
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  	
+    core::identifier_string m_name;
+  
+    state_variable_negator(const core::identifier_string& name)
+      : m_name(name)
+    {}
+  
+    /// \brief Visit variable node
+    /// \param x A term
+    /// \return The result of visiting the node
+    state_formula operator()(const variable& x)
     {
-      return state_formulas::not_(x);
+      if (x.name() == m_name)
+      {
+        return state_formulas::not_(x);
+      }
+      return x;
     }
-    return x;
+  };
+  
+  inline
+  /// \brief Negates propositional variable instantiations in a state formula.
+  /// \param name The name of the variables that should be negated
+  state_formula negate_propositional_variable(const core::identifier_string& name, const state_formula& x)
+  {
+    state_variable_negator visitor(name);
+    return visitor(x);
   }
-};
-
-inline
-/// \brief Negates propositional variable instantiations in a pbes expression.
-/// \param name The name of the variables that should be negated
-state_formula negate_propositional_variable(const core::identifier_string& name, const state_formula& x)
-{
-  state_variable_negator visitor(name);
-  return visitor(x);
-}
 
 } // namespace detail
 

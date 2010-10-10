@@ -13,39 +13,12 @@
 #define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/detail/state_variable_negator.h"
 #include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
 
 namespace state_formulas {
-
-/// \cond INTERNAL_DOCS
-//
-/// \brief Puts a logical not around state variables named X
-struct state_variable_negation
-{
-  core::identifier_string X;
-
-  state_variable_negation(core::identifier_string X_)
-    : X(X_)
-  {}
-
-  /// \brief Function call operator
-  /// \param t A term
-  /// \return The result of the function
-  atermpp::aterm_appl operator()(atermpp::aterm_appl t) const
-  {
-    if (is_variable(t) && (accessors::name(t) == X))
-    {
-      return not_(variable(t));
-    }
-    else
-    {
-      return t;
-    }
-  }
-};
-/// \endcond
 
 /// \brief Brings a state formula into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
@@ -92,9 +65,9 @@ state_formula normalize(state_formula f)
     } else if (is_variable(f)) {
       throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
     } else if (is_mu(f)) {
-      return nu(name(f), ass(f), arg(normalize(not_(f.substitute(state_variable_negation(name(f)))))));
+      return nu(name(f), ass(f), arg(normalize(not_(detail::negate_propositional_variable(name(f), f)))));
     } else if (is_nu(f)) {
-      return mu(name(f), ass(f), arg(normalize(not_(f.substitute(state_variable_negation(name(f)))))));
+      return mu(name(f), ass(f), arg(normalize(not_(detail::negate_propositional_variable(name(f), f)))));
     }
   }
   else // !is_not(f)

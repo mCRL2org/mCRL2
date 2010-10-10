@@ -21,7 +21,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/modal_formula/regular_formula.h"
@@ -81,18 +80,6 @@ class state_formula: public atermpp::aterm_appl
     /// \brief Returns true if the formula is timed.
     /// \return True if the formula is timed.
     bool has_time() const;
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    state_formula substitute(Substitution f) const
-    {
-      return state_formula(f(atermpp::aterm(*this)));
-    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
