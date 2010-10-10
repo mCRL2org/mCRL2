@@ -23,10 +23,12 @@ BUILDER_FUNCTION = r'''EXPRESSION operator()(const QUALIFIED_NODE& x)
 }
 '''
 
-def make_traverser_inc_file(filename, class_text, expression_classes = []):
+def make_traverser_inc_file(filename, class_text, expression_classes = [], namespace = None):
     result = []
     classes = parse_classes(class_text)
     for c in classes:
+        if c.qualifier() != '': # skip classes residing in a different name space
+            continue
         print 'generating traverse functions for class', c.name()
         f = c.constructor
         visit_functions = []       
@@ -39,7 +41,10 @@ def make_traverser_inc_file(filename, class_text, expression_classes = []):
             visit_functions.append('\n  static_cast<Derived&>(*this)(x.%s());' % p.name())
         vtext = ''.join(visit_functions)
         ctext = TRAVERSE_FUNCTION
-        ctext = re.sub('QUALIFIED_NODE', f.qualified_name(), ctext)
+        qualified_node = f.qualified_name()
+        if namespace != None and re.search('::', qualified_node) == None:
+            qualified_node = namespace + '::' + qualified_node
+        ctext = re.sub('QUALIFIED_NODE', qualified_node, ctext)
         ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
         if f.is_template():
             ctext = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + ctext
@@ -47,13 +52,19 @@ def make_traverser_inc_file(filename, class_text, expression_classes = []):
 
     for (expression_class, expression_text) in expression_classes:
         ctext = TRAVERSE_FUNCTION
-        ctext = re.sub('QUALIFIED_NODE', expression_class, ctext)
+        qualified_node = expression_class
+        if namespace != None and re.search('::', qualified_node) == None:
+            qualified_node = namespace + '::' + qualified_node
+        ctext = re.sub('QUALIFIED_NODE', qualified_node, ctext)
         classes = parse_classes(expression_text)
         visit_functions = []
         for c in classes:
             f = c.constructor
             is_function = re.sub('_$', '', f.name())
-            visit_functions.append('if (%sis_%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (f.qualifier(), is_function, f.qualified_name()))
+            nspace = ''
+            if namespace != None and re.search('::', f.qualified_name()) == None:
+                nspace = namespace + '::'
+            visit_functions.append('if (%sis_%s(x)) { static_cast<Derived&>(*this)(%s%s(atermpp::aterm_appl(x))); }' % (f.qualifier(), is_function, nspace, f.qualified_name()))
         vtext = '\n  ' + '\n  else '.join(visit_functions)
         ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
         result.append(ctext)
@@ -116,19 +127,19 @@ ActId | lps::action_label(const core::identifier_string& name, const data::sort_
 '''
 
 if __name__ == "__main__":
-    make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, [('boolean_expression', BOOLEAN_EXPRESSION_CLASSES)])
-    make_traverser_inc_file('../../data/include/mcrl2/data/detail/traverser.inc.h', ASSIGNMENT_EXPRESSION_CLASSES + BINDER_TYPES + STRUCTURED_SORT_ELEMENTS + CONTAINER_TYPES + SORT_EXPRESSION_CLASSES + DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION + ABSTRACTION_EXPRESSIONS + DATA_CLASSES, [('data_expression', DATA_EXPRESSION_CLASSES), ('assignment_expression', ASSIGNMENT_EXPRESSION_CLASSES), ('sort_expression', SORT_EXPRESSION_CLASSES), ('container_type', CONTAINER_TYPES), ('binder_type', BINDER_TYPES), ('abstraction', ABSTRACTION_EXPRESSIONS)])
-    make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES)
-    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h', ACTION_FORMULA_CLASSES, [('action_formula', ACTION_FORMULA_CLASSES)])
-    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', REGULAR_FORMULA_CLASSES, [('regular_formula', REGULAR_FORMULA_CLASSES)])
-    make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES)
-    make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, [('process_expression', PROCESS_EXPRESSION_CLASSES)])
+    make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, [('boolean_expression', BOOLEAN_EXPRESSION_CLASSES)], namespace = 'bes')
+    make_traverser_inc_file('../../data/include/mcrl2/data/detail/traverser.inc.h', ASSIGNMENT_EXPRESSION_CLASSES + BINDER_TYPES + STRUCTURED_SORT_ELEMENTS + CONTAINER_TYPES + SORT_EXPRESSION_CLASSES + DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION + ABSTRACTION_EXPRESSIONS + DATA_CLASSES, [('data_expression', DATA_EXPRESSION_CLASSES), ('assignment_expression', ASSIGNMENT_EXPRESSION_CLASSES), ('sort_expression', SORT_EXPRESSION_CLASSES), ('container_type', CONTAINER_TYPES), ('binder_type', BINDER_TYPES), ('abstraction', ABSTRACTION_EXPRESSIONS)], namespace = 'data')
+    make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES, namespace = 'lps')
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h', ACTION_FORMULA_CLASSES, [('action_formula', ACTION_FORMULA_CLASSES)], namespace = 'action_formulas')
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', REGULAR_FORMULA_CLASSES, [('regular_formula', REGULAR_FORMULA_CLASSES)], namespace = 'regular_formulas')
+    make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES, namespace = 'pbes_system')
+    make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, [('process_expression', PROCESS_EXPRESSION_CLASSES)], namespace = 'process')
 
-    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h', ACTION_FORMULA_CLASSES, [('action_formula', ACTION_FORMULA_CLASSES)])
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h', ACTION_FORMULA_CLASSES, [('action_formula', ACTION_FORMULA_CLASSES)], namespace = 'action_formulas')
     make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/action_formula_builder.inc.h', ACTION_FORMULA_CLASSES, 'action_formula')
 
-    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', REGULAR_FORMULA_CLASSES, [('regular_formula', REGULAR_FORMULA_CLASSES)])
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', REGULAR_FORMULA_CLASSES, [('regular_formula', REGULAR_FORMULA_CLASSES)], namespace = 'regular_formulas')
     make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/regular_formula_builder.inc.h', REGULAR_FORMULA_CLASSES, 'regular_formula')
 
-    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/state_formula_traverser.inc.h', STATE_FORMULA_CLASSES, [('state_formula', STATE_FORMULA_CLASSES)])
+    make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/state_formula_traverser.inc.h', STATE_FORMULA_CLASSES, [('state_formula', STATE_FORMULA_CLASSES)], namespace = 'state_formulas')
     make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/state_formula_builder.inc.h', STATE_FORMULA_CLASSES, 'state_formula')

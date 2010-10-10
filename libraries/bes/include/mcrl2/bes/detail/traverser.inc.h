@@ -11,26 +11,26 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
-void operator()(const true_& x)
+void operator()(const bes::true_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const false_& x)
+void operator()(const bes::false_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const not_& x)
+void operator()(const bes::not_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.operand());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const and_& x)
+void operator()(const bes::and_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -38,7 +38,7 @@ void operator()(const and_& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const or_& x)
+void operator()(const bes::or_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -46,7 +46,7 @@ void operator()(const or_& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const imp& x)
+void operator()(const bes::imp& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -54,14 +54,14 @@ void operator()(const imp& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const boolean_variable& x)
+void operator()(const bes::boolean_variable& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const boolean_equation& x)
+void operator()(const bes::boolean_equation& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.symbol());
@@ -71,7 +71,7 @@ void operator()(const boolean_equation& x)
 }
 
 template <typename Container>
-void operator()(const boolean_equation_system<Container>& x)
+void operator()(const bes::boolean_equation_system<Container>& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.equations());
@@ -79,16 +79,16 @@ void operator()(const boolean_equation_system<Container>& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const boolean_expression& x)
+void operator()(const bes::boolean_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_true(x)) { static_cast<Derived&>(*this)(true_(atermpp::aterm_appl(x))); }
-  else if (is_false(x)) { static_cast<Derived&>(*this)(false_(atermpp::aterm_appl(x))); }
-  else if (is_not(x)) { static_cast<Derived&>(*this)(not_(atermpp::aterm_appl(x))); }
-  else if (is_and(x)) { static_cast<Derived&>(*this)(and_(atermpp::aterm_appl(x))); }
-  else if (is_or(x)) { static_cast<Derived&>(*this)(or_(atermpp::aterm_appl(x))); }
-  else if (is_imp(x)) { static_cast<Derived&>(*this)(imp(atermpp::aterm_appl(x))); }
-  else if (is_boolean_variable(x)) { static_cast<Derived&>(*this)(boolean_variable(atermpp::aterm_appl(x))); }
+  if (is_true(x)) { static_cast<Derived&>(*this)(bes::true_(atermpp::aterm_appl(x))); }
+  else if (is_false(x)) { static_cast<Derived&>(*this)(bes::false_(atermpp::aterm_appl(x))); }
+  else if (is_not(x)) { static_cast<Derived&>(*this)(bes::not_(atermpp::aterm_appl(x))); }
+  else if (is_and(x)) { static_cast<Derived&>(*this)(bes::and_(atermpp::aterm_appl(x))); }
+  else if (is_or(x)) { static_cast<Derived&>(*this)(bes::or_(atermpp::aterm_appl(x))); }
+  else if (is_imp(x)) { static_cast<Derived&>(*this)(bes::imp(atermpp::aterm_appl(x))); }
+  else if (is_boolean_variable(x)) { static_cast<Derived&>(*this)(bes::boolean_variable(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

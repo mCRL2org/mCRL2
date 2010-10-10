@@ -59,16 +59,13 @@ namespace state_formulas {
 
   /// \brief Traversal class for state formula data types
   template <typename Derived>
-  class traverser: public data::traverser<Derived>
+  class traverser: public regular_formulas::traverser<Derived>
   {
     public:
-      typedef data::traverser<Derived> super;
+      typedef regular_formulas::traverser<Derived> super;
       using super::operator();
       using super::enter;
       using super::leave;
-
-      void operator()(const mcrl2::regular_formulas::regular_formula& x)
-      {}
 
 // Include file with traverse member functions. This is to avoid duplication.
 #include "mcrl2/modal_formula/detail/state_formula_traverser.inc.h"

@@ -10,26 +10,26 @@
 /// \brief add your file description here.
 
 //--- start generated code ---//
-void operator()(const true_& x)
+void operator()(const action_formulas::true_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const false_& x)
+void operator()(const action_formulas::false_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const not_& x)
+void operator()(const action_formulas::not_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.operand());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const and_& x)
+void operator()(const action_formulas::and_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -37,7 +37,7 @@ void operator()(const and_& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const or_& x)
+void operator()(const action_formulas::or_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -45,7 +45,7 @@ void operator()(const or_& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const imp& x)
+void operator()(const action_formulas::imp& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -53,7 +53,7 @@ void operator()(const imp& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const forall& x)
+void operator()(const action_formulas::forall& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
@@ -61,7 +61,7 @@ void operator()(const forall& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const exists& x)
+void operator()(const action_formulas::exists& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
@@ -69,7 +69,7 @@ void operator()(const exists& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const at& x)
+void operator()(const action_formulas::at& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.operand());
@@ -77,18 +77,18 @@ void operator()(const at& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const action_formula& x)
+void operator()(const action_formulas::action_formula& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_true(x)) { static_cast<Derived&>(*this)(true_(atermpp::aterm_appl(x))); }
-  else if (is_false(x)) { static_cast<Derived&>(*this)(false_(atermpp::aterm_appl(x))); }
-  else if (is_not(x)) { static_cast<Derived&>(*this)(not_(atermpp::aterm_appl(x))); }
-  else if (is_and(x)) { static_cast<Derived&>(*this)(and_(atermpp::aterm_appl(x))); }
-  else if (is_or(x)) { static_cast<Derived&>(*this)(or_(atermpp::aterm_appl(x))); }
-  else if (is_imp(x)) { static_cast<Derived&>(*this)(imp(atermpp::aterm_appl(x))); }
-  else if (is_forall(x)) { static_cast<Derived&>(*this)(forall(atermpp::aterm_appl(x))); }
-  else if (is_exists(x)) { static_cast<Derived&>(*this)(exists(atermpp::aterm_appl(x))); }
-  else if (is_at(x)) { static_cast<Derived&>(*this)(at(atermpp::aterm_appl(x))); }
+  if (is_true(x)) { static_cast<Derived&>(*this)(action_formulas::true_(atermpp::aterm_appl(x))); }
+  else if (is_false(x)) { static_cast<Derived&>(*this)(action_formulas::false_(atermpp::aterm_appl(x))); }
+  else if (is_not(x)) { static_cast<Derived&>(*this)(action_formulas::not_(atermpp::aterm_appl(x))); }
+  else if (is_and(x)) { static_cast<Derived&>(*this)(action_formulas::and_(atermpp::aterm_appl(x))); }
+  else if (is_or(x)) { static_cast<Derived&>(*this)(action_formulas::or_(atermpp::aterm_appl(x))); }
+  else if (is_imp(x)) { static_cast<Derived&>(*this)(action_formulas::imp(atermpp::aterm_appl(x))); }
+  else if (is_forall(x)) { static_cast<Derived&>(*this)(action_formulas::forall(atermpp::aterm_appl(x))); }
+  else if (is_exists(x)) { static_cast<Derived&>(*this)(action_formulas::exists(atermpp::aterm_appl(x))); }
+  else if (is_at(x)) { static_cast<Derived&>(*this)(action_formulas::at(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

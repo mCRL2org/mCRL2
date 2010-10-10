@@ -11,7 +11,7 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
-void operator()(const action_label& x)
+void operator()(const lps::action_label& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
@@ -19,7 +19,7 @@ void operator()(const action_label& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const action& x)
+void operator()(const lps::action& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.label());
@@ -27,14 +27,14 @@ void operator()(const action& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const deadlock& x)
+void operator()(const lps::deadlock& x)
 {
   static_cast<Derived&>(*this).enter(x);
   if (x.has_time()) static_cast<Derived&>(*this)(x.time());;
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const multi_action& x)
+void operator()(const lps::multi_action& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.actions());
@@ -42,7 +42,7 @@ void operator()(const multi_action& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const deadlock_summand& x)
+void operator()(const lps::deadlock_summand& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.summation_variables());
@@ -51,7 +51,7 @@ void operator()(const deadlock_summand& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const action_summand& x)
+void operator()(const lps::action_summand& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.summation_variables());
@@ -61,14 +61,14 @@ void operator()(const action_summand& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const process_initializer& x)
+void operator()(const lps::process_initializer& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.assignments());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const linear_process& x)
+void operator()(const lps::linear_process& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.process_parameters());
@@ -77,7 +77,7 @@ void operator()(const linear_process& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const specification& x)
+void operator()(const lps::specification& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.action_labels());

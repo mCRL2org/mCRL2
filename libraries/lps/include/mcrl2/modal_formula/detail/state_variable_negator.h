@@ -43,9 +43,6 @@ struct state_variable_negator: public state_formulas::builder<state_variable_neg
   {
     if (x.name() == m_name)
     {
-std::cerr << "<apply-not>" << pp(x) << std::endl;
-state_formula result = state_formulas::not_(x);
-std::cerr << "<done>" << std::endl;
       return state_formulas::not_(x);
     }
     return x;

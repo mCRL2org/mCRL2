@@ -15,6 +15,7 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/core/selective_traverser.h"
 #include "mcrl2/data/traverser.h"
+#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
 
@@ -30,7 +31,7 @@ namespace process {
       using super::enter;
       using super::leave;
 
-// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/lps/detail/traverser.inc.h" // needed for traversal of lps::action
 #include "mcrl2/process/detail/traverser.inc.h"
   };
 

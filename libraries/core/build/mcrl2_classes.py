@@ -78,6 +78,7 @@ DataEqn | data_equation(const variable_list& variables, const data_expression& c
 '''
 
 STATE_FORMULA_CLASSES = r'''
+DataExpr        | data::data_expression()                                                                                         | A data expression
 StateTrue       | true_()                                                                                                         | The value true for state formulas
 StateFalse      | false_()                                                                                                        | The value false for state formulas
 StateNot        | not_(const state_formula& operand)                                                                              | The not operator for state formulas

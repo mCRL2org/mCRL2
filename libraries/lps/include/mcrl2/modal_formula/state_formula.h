@@ -625,6 +625,15 @@ class mu: public state_formula
 
 //--- start generated is-functions ---//
 
+    /// \brief Test for a data_expression expression
+    /// \param t A term
+    /// \return True if it is a data_expression expression
+    inline
+    bool is_data_expression(const state_formula& t)
+    {
+      return core::detail::gsIsDataExpr(t);
+    }
+
     /// \brief Test for a true expression
     /// \param t A term
     /// \return True if it is a true expression

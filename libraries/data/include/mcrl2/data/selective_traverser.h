@@ -24,43 +24,43 @@ namespace data {
 
   /// \brief Selective traversal class for data library data types
   template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, data::traverser>
+  class selective_traverser: public core::selective_traverser<Derived, AdaptablePredicate, data::traverser>
   {
     typedef core::selective_traverser<Derived, AdaptablePredicate, data::traverser> super;
 
     protected:     
 
-      template < typename Expression >
-      void forward_call(Expression const& e, typename boost::disable_if< typename boost::is_base_of< data_expression, Expression >::type >::type* = 0,
-                                             typename boost::disable_if< typename boost::is_base_of< sort_expression, Expression >::type >::type* = 0)
+      template <typename Expression>
+      void forward_call(Expression const& e, typename boost::disable_if<typename boost::is_base_of<data_expression, Expression>::type>::type* = 0,
+                                             typename boost::disable_if<typename boost::is_base_of<sort_expression, Expression>::type>::type* = 0)
       {
-        static_cast< super& >(*this)(e);
+        static_cast<super&>(*this)(e);
       }
 
       void forward_call(data_expression const& e)
       {
-        static_cast< super& >(*this)(e);
+        static_cast<super&>(*this)(e);
       }
 
       void forward_call(sort_expression const& e)
       {
-        static_cast< super& >(*this)(e);
+        static_cast<super&>(*this)(e);
       }
 
-      template < typename Expression >
-      void forward_call(Expression const& e, typename boost::enable_if< typename boost::is_base_of< data_expression, Expression >::type >::type* = 0)
+      template <typename Expression>
+      void forward_call(Expression const& e, typename boost::enable_if<typename boost::is_base_of<data_expression, Expression>::type>::type* = 0)
       {
         if (m_traverse_condition(e))
         {
-          static_cast< super& >(*this)(e);
+          static_cast<super&>(*this)(e);
         }
       }
 
-      template < typename Expression >
-      void forward_call(Expression const& e, typename boost::enable_if< typename boost::is_base_of< sort_expression, Expression >::type >::type* = 0) {
+      template <typename Expression>
+      void forward_call(Expression const& e, typename boost::enable_if<typename boost::is_base_of<sort_expression, Expression>::type>::type* = 0) {
         if (m_traverse_condition(e))
         {
-          static_cast< super& >(*this)(e);
+          static_cast<super&>(*this)(e);
         }
       }
 

@@ -14,6 +14,7 @@
 
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/data/detail/traverser.h"
+#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
 
@@ -28,7 +29,7 @@ namespace detail {
       typedef data::detail::traverser<Derived> super;
       using super::operator();
 
-// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/lps/detail/traverser.inc.h" // needed for traversal of lps::action
 #include "mcrl2/process/detail/traverser.inc.h"
   };
 

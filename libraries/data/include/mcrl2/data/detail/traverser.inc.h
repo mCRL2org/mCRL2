@@ -11,7 +11,7 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
-void operator()(const assignment& x)
+void operator()(const data::assignment& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.lhs());
@@ -19,7 +19,7 @@ void operator()(const assignment& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const identifier_assignment& x)
+void operator()(const data::identifier_assignment& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.lhs());
@@ -27,43 +27,43 @@ void operator()(const identifier_assignment& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const set_or_bag_comprehension_binder& x)
+void operator()(const data::set_or_bag_comprehension_binder& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const set_comprehension_binder& x)
+void operator()(const data::set_comprehension_binder& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const bag_comprehension_binder& x)
+void operator()(const data::bag_comprehension_binder& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const forall_binder& x)
+void operator()(const data::forall_binder& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const exists_binder& x)
+void operator()(const data::exists_binder& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const lambda_binder& x)
+void operator()(const data::lambda_binder& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const structured_sort_constructor_argument& x)
+void operator()(const data::structured_sort_constructor_argument& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
@@ -71,7 +71,7 @@ void operator()(const structured_sort_constructor_argument& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const structured_sort_constructor& x)
+void operator()(const data::structured_sort_constructor& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
@@ -80,44 +80,44 @@ void operator()(const structured_sort_constructor& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const list_container& x)
+void operator()(const data::list_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const set_container& x)
+void operator()(const data::set_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const bag_container& x)
+void operator()(const data::bag_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const fset_container& x)
+void operator()(const data::fset_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const fbag_container& x)
+void operator()(const data::fbag_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const basic_sort& x)
+void operator()(const data::basic_sort& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const container_sort& x)
+void operator()(const data::container_sort& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.container_name());
@@ -125,14 +125,14 @@ void operator()(const container_sort& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const structured_sort& x)
+void operator()(const data::structured_sort& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.constructors());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const function_sort& x)
+void operator()(const data::function_sort& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.domain());
@@ -140,35 +140,27 @@ void operator()(const function_sort& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const unknown_sort& x)
+void operator()(const data::unknown_sort& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const multiple_possible_sorts& x)
+void operator()(const data::multiple_possible_sorts& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.sorts());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const identifier& x)
+void operator()(const data::identifier& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const variable& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this)(x.sort());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const function_symbol& x)
+void operator()(const data::variable& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
@@ -176,7 +168,15 @@ void operator()(const function_symbol& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const application& x)
+void operator()(const data::function_symbol& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.sort());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::application& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.head());
@@ -184,7 +184,7 @@ void operator()(const application& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const where_clause& x)
+void operator()(const data::where_clause& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.body());
@@ -192,7 +192,7 @@ void operator()(const where_clause& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const forall& x)
+void operator()(const data::forall& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
@@ -200,7 +200,7 @@ void operator()(const forall& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const exists& x)
+void operator()(const data::exists& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
@@ -208,7 +208,7 @@ void operator()(const exists& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const lambda& x)
+void operator()(const data::lambda& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
@@ -216,7 +216,7 @@ void operator()(const lambda& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const data_equation& x)
+void operator()(const data::data_equation& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
@@ -226,67 +226,67 @@ void operator()(const data_equation& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const data_expression& x)
+void operator()(const data::data_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_identifier(x)) { static_cast<Derived&>(*this)(identifier(atermpp::aterm_appl(x))); }
-  else if (is_variable(x)) { static_cast<Derived&>(*this)(variable(atermpp::aterm_appl(x))); }
-  else if (is_function_symbol(x)) { static_cast<Derived&>(*this)(function_symbol(atermpp::aterm_appl(x))); }
-  else if (is_application(x)) { static_cast<Derived&>(*this)(application(atermpp::aterm_appl(x))); }
-  else if (is_where_clause(x)) { static_cast<Derived&>(*this)(where_clause(atermpp::aterm_appl(x))); }
-  else if (is_abstraction(x)) { static_cast<Derived&>(*this)(abstraction(atermpp::aterm_appl(x))); }
+  if (is_identifier(x)) { static_cast<Derived&>(*this)(data::identifier(atermpp::aterm_appl(x))); }
+  else if (is_variable(x)) { static_cast<Derived&>(*this)(data::variable(atermpp::aterm_appl(x))); }
+  else if (is_function_symbol(x)) { static_cast<Derived&>(*this)(data::function_symbol(atermpp::aterm_appl(x))); }
+  else if (is_application(x)) { static_cast<Derived&>(*this)(data::application(atermpp::aterm_appl(x))); }
+  else if (is_where_clause(x)) { static_cast<Derived&>(*this)(data::where_clause(atermpp::aterm_appl(x))); }
+  else if (is_abstraction(x)) { static_cast<Derived&>(*this)(data::abstraction(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const assignment_expression& x)
+void operator()(const data::assignment_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_assignment(x)) { static_cast<Derived&>(*this)(assignment(atermpp::aterm_appl(x))); }
-  else if (is_identifier_assignment(x)) { static_cast<Derived&>(*this)(identifier_assignment(atermpp::aterm_appl(x))); }
+  if (is_assignment(x)) { static_cast<Derived&>(*this)(data::assignment(atermpp::aterm_appl(x))); }
+  else if (is_identifier_assignment(x)) { static_cast<Derived&>(*this)(data::identifier_assignment(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const sort_expression& x)
+void operator()(const data::sort_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_basic_sort(x)) { static_cast<Derived&>(*this)(basic_sort(atermpp::aterm_appl(x))); }
-  else if (is_container_sort(x)) { static_cast<Derived&>(*this)(container_sort(atermpp::aterm_appl(x))); }
-  else if (is_structured_sort(x)) { static_cast<Derived&>(*this)(structured_sort(atermpp::aterm_appl(x))); }
-  else if (is_function_sort(x)) { static_cast<Derived&>(*this)(function_sort(atermpp::aterm_appl(x))); }
-  else if (is_unknown_sort(x)) { static_cast<Derived&>(*this)(unknown_sort(atermpp::aterm_appl(x))); }
-  else if (is_multiple_possible_sorts(x)) { static_cast<Derived&>(*this)(multiple_possible_sorts(atermpp::aterm_appl(x))); }
+  if (is_basic_sort(x)) { static_cast<Derived&>(*this)(data::basic_sort(atermpp::aterm_appl(x))); }
+  else if (is_container_sort(x)) { static_cast<Derived&>(*this)(data::container_sort(atermpp::aterm_appl(x))); }
+  else if (is_structured_sort(x)) { static_cast<Derived&>(*this)(data::structured_sort(atermpp::aterm_appl(x))); }
+  else if (is_function_sort(x)) { static_cast<Derived&>(*this)(data::function_sort(atermpp::aterm_appl(x))); }
+  else if (is_unknown_sort(x)) { static_cast<Derived&>(*this)(data::unknown_sort(atermpp::aterm_appl(x))); }
+  else if (is_multiple_possible_sorts(x)) { static_cast<Derived&>(*this)(data::multiple_possible_sorts(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const container_type& x)
+void operator()(const data::container_type& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_list_container(x)) { static_cast<Derived&>(*this)(list_container(atermpp::aterm_appl(x))); }
-  else if (is_set_container(x)) { static_cast<Derived&>(*this)(set_container(atermpp::aterm_appl(x))); }
-  else if (is_bag_container(x)) { static_cast<Derived&>(*this)(bag_container(atermpp::aterm_appl(x))); }
-  else if (is_fset_container(x)) { static_cast<Derived&>(*this)(fset_container(atermpp::aterm_appl(x))); }
-  else if (is_fbag_container(x)) { static_cast<Derived&>(*this)(fbag_container(atermpp::aterm_appl(x))); }
+  if (is_list_container(x)) { static_cast<Derived&>(*this)(data::list_container(atermpp::aterm_appl(x))); }
+  else if (is_set_container(x)) { static_cast<Derived&>(*this)(data::set_container(atermpp::aterm_appl(x))); }
+  else if (is_bag_container(x)) { static_cast<Derived&>(*this)(data::bag_container(atermpp::aterm_appl(x))); }
+  else if (is_fset_container(x)) { static_cast<Derived&>(*this)(data::fset_container(atermpp::aterm_appl(x))); }
+  else if (is_fbag_container(x)) { static_cast<Derived&>(*this)(data::fbag_container(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const binder_type& x)
+void operator()(const data::binder_type& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_set_or_bag_comprehension_binder(x)) { static_cast<Derived&>(*this)(set_or_bag_comprehension_binder(atermpp::aterm_appl(x))); }
-  else if (is_set_comprehension_binder(x)) { static_cast<Derived&>(*this)(set_comprehension_binder(atermpp::aterm_appl(x))); }
-  else if (is_bag_comprehension_binder(x)) { static_cast<Derived&>(*this)(bag_comprehension_binder(atermpp::aterm_appl(x))); }
-  else if (is_forall_binder(x)) { static_cast<Derived&>(*this)(forall_binder(atermpp::aterm_appl(x))); }
-  else if (is_exists_binder(x)) { static_cast<Derived&>(*this)(exists_binder(atermpp::aterm_appl(x))); }
-  else if (is_lambda_binder(x)) { static_cast<Derived&>(*this)(lambda_binder(atermpp::aterm_appl(x))); }
+  if (is_set_or_bag_comprehension_binder(x)) { static_cast<Derived&>(*this)(data::set_or_bag_comprehension_binder(atermpp::aterm_appl(x))); }
+  else if (is_set_comprehension_binder(x)) { static_cast<Derived&>(*this)(data::set_comprehension_binder(atermpp::aterm_appl(x))); }
+  else if (is_bag_comprehension_binder(x)) { static_cast<Derived&>(*this)(data::bag_comprehension_binder(atermpp::aterm_appl(x))); }
+  else if (is_forall_binder(x)) { static_cast<Derived&>(*this)(data::forall_binder(atermpp::aterm_appl(x))); }
+  else if (is_exists_binder(x)) { static_cast<Derived&>(*this)(data::exists_binder(atermpp::aterm_appl(x))); }
+  else if (is_lambda_binder(x)) { static_cast<Derived&>(*this)(data::lambda_binder(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const abstraction& x)
+void operator()(const data::abstraction& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_forall(x)) { static_cast<Derived&>(*this)(forall(atermpp::aterm_appl(x))); }
-  else if (is_exists(x)) { static_cast<Derived&>(*this)(exists(atermpp::aterm_appl(x))); }
-  else if (is_lambda(x)) { static_cast<Derived&>(*this)(lambda(atermpp::aterm_appl(x))); }
+  if (is_forall(x)) { static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x))); }
+  else if (is_exists(x)) { static_cast<Derived&>(*this)(data::exists(atermpp::aterm_appl(x))); }
+  else if (is_lambda(x)) { static_cast<Derived&>(*this)(data::lambda(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

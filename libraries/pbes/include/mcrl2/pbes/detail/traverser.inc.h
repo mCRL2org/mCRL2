@@ -11,26 +11,26 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
-void operator()(const true_& x)
+void operator()(const pbes_system::true_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const false_& x)
+void operator()(const pbes_system::false_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const not_& x)
+void operator()(const pbes_system::not_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.operand());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const and_& x)
+void operator()(const pbes_system::and_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -38,7 +38,7 @@ void operator()(const and_& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const or_& x)
+void operator()(const pbes_system::or_& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -46,7 +46,7 @@ void operator()(const or_& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const imp& x)
+void operator()(const pbes_system::imp& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.left());
@@ -54,7 +54,7 @@ void operator()(const imp& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const forall& x)
+void operator()(const pbes_system::forall& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
@@ -62,7 +62,7 @@ void operator()(const forall& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const exists& x)
+void operator()(const pbes_system::exists& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
@@ -70,21 +70,13 @@ void operator()(const exists& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const fixpoint_symbol& x)
+void operator()(const pbes_system::fixpoint_symbol& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const propositional_variable& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this)(x.parameters());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const propositional_variable_instantiation& x)
+void operator()(const pbes_system::propositional_variable& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
@@ -92,7 +84,15 @@ void operator()(const propositional_variable_instantiation& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const pbes_equation& x)
+void operator()(const pbes_system::propositional_variable_instantiation& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.parameters());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const pbes_system::pbes_equation& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.symbol());
@@ -102,7 +102,7 @@ void operator()(const pbes_equation& x)
 }
 
 template <typename Container>
-void operator()(const pbes<Container>& x)
+void operator()(const pbes_system::pbes<Container>& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.equations());
