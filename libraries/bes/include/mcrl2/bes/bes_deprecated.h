@@ -37,7 +37,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/map_substitution.h"
 
-
+#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
@@ -2631,7 +2631,6 @@ static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expressio
 /// \param string The name of the output file
 /// \param bes_equations The bes equations to bes saved.
 /// \param p A PBES from which the datatypes are taken for the PBES that is saved.
-
 template <class Container>
 static void save_bes_in_pbes_format(
                    const std::string &outfilename,
@@ -2653,10 +2652,10 @@ static void save_bes_in_pbes_format(
          std::stringstream variable_name;
          variable_name << "X" << i;
          eqns.push_back(
-               pbes_equation(
+               mcrl2::pbes_system::pbes_equation(
                   bes_equations.get_fixpoint_symbol(i),
                   propositional_variable(variable_name.str()),
-                  generate_rhs_as_formula(bes_equations.get_rhs(i))));
+                  pbe));
       }
     }
   }
@@ -2664,6 +2663,41 @@ static void save_bes_in_pbes_format(
   pbes<> p1(p.data(),eqns,atermpp::set<mcrl2::data::variable>(),
                              propositional_variable_instantiation("X1"));
   p1.save(outfilename);
+}
+
+//function generate_rhs_as_bes_formula
+//---------------------------
+static mcrl2::bes::boolean_expression generate_rhs_as_bes_formula(bes_expression b)
+{ using namespace mcrl2::pbes_system;
+  if (is_true(b))
+  { return mcrl2::bes::true_();
+  }
+  else if (is_false(b))
+  { return mcrl2::bes::false_();
+  }
+  else if (is_and(b))
+  { return mcrl2::bes::and_(generate_rhs_as_bes_formula(lhs(b)),
+                generate_rhs_as_bes_formula(rhs(b)));
+  }
+  else if (is_or(b))
+  { return mcrl2::bes::or_(generate_rhs_as_bes_formula(lhs(b)),
+               generate_rhs_as_bes_formula(rhs(b)));
+  }
+  else if (is_variable(b))
+  { std::stringstream converter;
+    converter << "X" << get_variable(b);
+    return mcrl2::bes::boolean_variable(converter.str());
+  }
+  else if (is_if(b))
+  { //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
+    return generate_rhs_as_bes_formula(and_optimized(then_branch(b),
+                                   or_optimized(condition(b),else_branch(b))));
+  }
+  else
+  {
+    throw mcrl2::runtime_error("The generated equation system is not a BES. It cannot be saved in CWI-format.\n");
+  }
+  return mcrl2::bes::true_();
 }
 
 //function save_rhs_in_pbes
@@ -2700,6 +2734,49 @@ static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expressio
   }
   return pbes_expr::true_();
 }
+
+
+
+//function save_bes_in_bes_format
+//--------------------------------
+/// \brief Save the bes as a BES
+/// \detail The BES equations are saved as a BES file in ATerm format with name
+///         outfilename.
+/// \param string The name of the output file
+/// \param bes_equations The bes equations to bes saved.
+
+static void save_bes_in_bes_format(
+                   const std::string &outfilename,
+                   boolean_equation_system &bes_equations)
+{ using namespace mcrl2::pbes_system;
+  using namespace mcrl2::bes;
+  if (mcrl2::core::gsVerbose)
+  { std::cerr << "Converting result to BES-format...\n";
+  }
+  // Use an indexed set to keep track of the variables and their bes-representations
+
+  atermpp::vector < boolean_equation > eqns;
+  for(unsigned long r=1 ; r<=bes_equations.max_rank ; ++r)
+  { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; ++i)
+    {
+      if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
+      {  mcrl2::bes::boolean_expression be=generate_rhs_as_bes_formula(bes_equations.get_rhs(i));
+         std::stringstream variable_name;
+         variable_name << "X" << i;
+         eqns.push_back(
+               boolean_equation(
+                  bes_equations.get_fixpoint_symbol(i),
+                  mcrl2::bes::boolean_variable(variable_name.str()),
+                  be));
+      }
+    }
+  }
+
+  mcrl2::bes::boolean_equation_system<> result(eqns,
+                             boolean_variable("X1"));
+  result.save(outfilename);
+}
+
 
 /// From here there are routines to solve a BES.
 

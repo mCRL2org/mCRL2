@@ -166,7 +166,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
       if (parser.options.count("output")) { // Output format
         std::string format = parser.option_argument("output");
 
-        if (!((format == "none") || (format == "vasy") || (format == "cwi") || (format == "pbes"))) {
+        if (!((format == "none") || (format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes"))) {
           parser.error("unknown output format specified (got `" + format + "')");
         }
 
@@ -246,7 +246,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
           " 'none' (default),\n"
           " 'vasy',\n"
           " 'pbes' (save as a PBES in internal format),\n"
-          " 'cwi'",
+          " 'cwi',\n"
+          " 'bes' (save as a BES in internal format)",
           'o').
         add_option("tree",
           "store state in a tree (for memory efficiency)",
@@ -382,6 +383,12 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
         save_bes_in_pbes_format(m_output_filename,bes_equations,p);
         return true;
       }
+      if (opt_outputformat == "bes")
+      {
+        save_bes_in_bes_format(m_output_filename,bes_equations);
+        return true;
+      }
+
 
       assert(opt_outputformat=="none");
       bool result=solve_bes(bes_equations,
