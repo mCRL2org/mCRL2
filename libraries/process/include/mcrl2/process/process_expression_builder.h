@@ -201,7 +201,7 @@ struct process_expression_builder
   std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     process_expression result;
-    if (is_action(x))
+    if (lps::is_action(x))
     {
       result = visit_action(x, a);
       if (!is_finished(result))
@@ -543,7 +543,7 @@ struct process_expression_builder<void>
   std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     process_expression result;
-    if (is_action(x))
+    if (lps::is_action(x))
     {
       result = visit_action(x);
       if (!is_finished(result))

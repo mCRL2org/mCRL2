@@ -6,8 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file find_test.cpp
+/// \file new_find_test.cpp
 /// \brief Test for find functions.
+
+#define MCRL2_NEW_TRAVERSER
 
 #include <algorithm>
 #include <iterator>
@@ -64,17 +66,9 @@ void test_find()
   BOOST_CHECK(v.find(m) != v.end());   
 
   //--- find_sort_expressions ---//
-  try
-  {
-    std::set<data::sort_expression> e = process::find_sort_expressions(x);
-    BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
-    BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
-  }
-  catch (mcrl2::runtime_error e)
-  {
-    // this is expected
-    std::cerr << e.what() << std::endl;
-  }
+  std::set<data::sort_expression> e = process::find_sort_expressions(x);
+  BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
+  BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
 
   core::garbage_collect(); 
 }

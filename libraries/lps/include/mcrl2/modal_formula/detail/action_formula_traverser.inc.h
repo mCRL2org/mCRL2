@@ -80,7 +80,9 @@ void operator()(const action_formulas::at& x)
 void operator()(const action_formulas::action_formula& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_true(x)) { static_cast<Derived&>(*this)(action_formulas::true_(atermpp::aterm_appl(x))); }
+  if (data::is_data_expression(x)) { static_cast<Derived&>(*this)(data::data_expression(atermpp::aterm_appl(x))); }
+  else if (lps::is_multi_action(x)) { static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_appl(x))); }
+  else if (is_true(x)) { static_cast<Derived&>(*this)(action_formulas::true_(atermpp::aterm_appl(x))); }
   else if (is_false(x)) { static_cast<Derived&>(*this)(action_formulas::false_(atermpp::aterm_appl(x))); }
   else if (is_not(x)) { static_cast<Derived&>(*this)(action_formulas::not_(atermpp::aterm_appl(x))); }
   else if (is_and(x)) { static_cast<Derived&>(*this)(action_formulas::and_(atermpp::aterm_appl(x))); }

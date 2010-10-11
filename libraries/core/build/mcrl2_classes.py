@@ -107,6 +107,8 @@ RegTransOrNil | trans_or_nil(const regular_formula& operand)                   |
 '''
 
 ACTION_FORMULA_CLASSES = r'''
+DataExpr  | data::data_expression()                                                     | A data expression
+MultAct   | lps::multi_action()                                                         | A multi action
 ActTrue   | true_()                                                                     | The value true for action formulas
 ActFalse  | false_()                                                                    | The value false for action formulas
 ActNot    | not_(const action_formula& operand)                                         | The not operator for action formulas

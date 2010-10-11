@@ -9,6 +9,8 @@
 /// \file modal_formula_find_test.cpp
 /// \brief Test for find functions.
 
+#define MCRL2_NEW_TRAVERSER
+
 #include <algorithm>
 #include <iterator>
 #include <set>
@@ -19,7 +21,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/modal_formula/new_find.h"
+#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/parse.h"
 
 using namespace mcrl2;
@@ -67,7 +69,7 @@ void test_find()
   BOOST_CHECK(v.find(b) != v.end());   
 
   //--- find_sort_expressions ---//
-  std::set<data::sort_expression> e = lps::find_sort_expressions(f);
+  std::set<data::sort_expression> e = state_formulas::find_sort_expressions(f);
   std::cout << "e.size() = " << e.size() << std::endl;
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_bool::bool_()) != e.end());
 }
@@ -80,7 +82,7 @@ void test_free_variables()
   data::data_expression phi = data::equal_to(b, c);
   data::variable_list v = atermpp::make_list(b);
   state_formula f = forall(v, phi);
-  std::set<data::variable> free_variables = find_free_variables(f);
+  std::set<data::variable> free_variables = state_formulas::find_free_variables(f);
   std::cout << "free variables: " << core::detail::print_pp_set(free_variables) << std::endl;
   BOOST_CHECK(free_variables.find(b) == free_variables.end());
   BOOST_CHECK(free_variables.find(c) != free_variables.end());

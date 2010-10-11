@@ -677,15 +677,6 @@ class choice: public process_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a action expression
-    /// \param t A term
-    /// \return True if it is a action expression
-    inline
-    bool is_action(const process_expression& t)
-    {
-      return core::detail::gsIsAction(t);
-    }
-
     /// \brief Test for a process_instance expression
     /// \param t A term
     /// \return True if it is a process_instance expression

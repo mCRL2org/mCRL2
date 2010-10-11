@@ -13,6 +13,7 @@
 #define MCRL2_CORE_BINDING_AWARE_TRAVERSER_H
 
 #include <set>
+#include "mcrl2/core/traverser.h"
 
 namespace mcrl2 {
 

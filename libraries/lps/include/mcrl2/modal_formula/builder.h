@@ -15,7 +15,7 @@
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/core/builder.h"
+#include "mcrl2/data/builder.h"
 
 namespace mcrl2 {
 
@@ -41,10 +41,10 @@ namespace regular_formulas {
 
   /// \brief Traversal class for regular formula data types
   template <typename Derived>
-  class builder: public core::builder<Derived>
+  class builder: public data::data_expression_builder<Derived>
   {
     public:
-      typedef core::builder<Derived> super;
+      typedef data::data_expression_builder<Derived> super;
       using super::enter;
       using super::leave;
       using super::operator();
@@ -59,10 +59,10 @@ namespace state_formulas {
 
   /// \brief Traversal class for state formula data types
   template <typename Derived>
-  class builder: public core::builder<Derived>
+  class builder: public data::data_expression_builder<Derived>
   {
     public:
-      typedef core::builder<Derived> super;
+      typedef data::data_expression_builder<Derived> super;
       using super::enter;
       using super::leave;
       using super::operator();

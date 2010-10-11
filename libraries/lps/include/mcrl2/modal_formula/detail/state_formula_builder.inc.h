@@ -11,14 +11,6 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
-state_formula operator()(const data::data_expression& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  state_formula result = data::data_expression();
-  static_cast<Derived&>(*this).leave(x);
-  return result;
-}
-
 state_formula operator()(const true_& x)
 {
   static_cast<Derived&>(*this).enter(x);

@@ -170,18 +170,12 @@ namespace lps {
       }
   };
 
-/*
-  /// \brief Returns the set of free variables that appear in the multi-action.
-  /// \param bound_variables A set of bound variables
-  /// \return The set of free variables that appear in the multi-action.
+  /// \brief Returns true if t is a multi action.
   inline
-  std::set<data::variable> find_free_variables(const multi_action& m, const std::set<data::variable>& bound_variables)
+  bool is_multi_action(const atermpp::aterm_appl& t)
   {
-    std::set<data::variable> used_variables;
-    lps::detail::find_all_free_variables(m.actions(), std::inserter(used_variables, used_variables.end()));
-    return mcrl2::data::detail::set_difference(used_variables, bound_variables);
+    return core::detail::gsIsMultAct(t);
   }
-*/
 
 /// \cond INTERNAL_DOCS
 namespace detail {

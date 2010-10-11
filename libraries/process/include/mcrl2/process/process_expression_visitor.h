@@ -273,7 +273,7 @@ struct process_expression_visitor
   /// \param a An additional argument for the recursion
   void visit(const process_expression& x, Arg& a)
   {
-    if (is_action(x))
+    if (lps::is_action(x))
     {
       visit_action(action(x), a);
       leave_action();
@@ -678,7 +678,7 @@ struct process_expression_visitor<void>
   /// \param x A term
   void visit(const process_expression& x)
   {
-    if (is_action(x))
+    if (lps::is_action(x))
     {
       visit_action(action(x));
       leave_action();

@@ -90,6 +90,8 @@ def make_is_functions(filename, class_text, classname, namespace = 'core'):
     rtext = ''
     classes = parse_classes(class_text)
     for c in classes:
+        if c.qualifier() != '': # skip classes residing in a different name space
+            continue       
         name = c.name()
         if name[-1] == '_':
             name = name[:-1]

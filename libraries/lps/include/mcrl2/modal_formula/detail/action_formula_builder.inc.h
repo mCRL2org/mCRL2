@@ -87,7 +87,9 @@ action_formula operator()(const action_formula& x)
 {
   static_cast<Derived&>(*this).enter(x);
   action_formula result;
-  if (is_true(x)) { result = static_cast<Derived&>(*this)(true_(atermpp::aterm_appl(x))); }
+  if (data::is_data_expression(x)) { result = static_cast<Derived&>(*this)(data::data_expression(atermpp::aterm_appl(x))); }
+  else if (lps::is_multi_action(x)) { result = static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_appl(x))); }
+  else if (is_true(x)) { result = static_cast<Derived&>(*this)(true_(atermpp::aterm_appl(x))); }
   else if (is_false(x)) { result = static_cast<Derived&>(*this)(false_(atermpp::aterm_appl(x))); }
   else if (is_not(x)) { result = static_cast<Derived&>(*this)(not_(atermpp::aterm_appl(x))); }
   else if (is_and(x)) { result = static_cast<Derived&>(*this)(and_(atermpp::aterm_appl(x))); }

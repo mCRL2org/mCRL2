@@ -13,6 +13,7 @@
 #define MCRL2_DATA_BINDING_AWARE_TRAVERSER_H
 
 #include "mcrl2/core/binding_aware_traverser.h"
+#include "mcrl2/data/traverser.h"
 
 namespace mcrl2 {
 

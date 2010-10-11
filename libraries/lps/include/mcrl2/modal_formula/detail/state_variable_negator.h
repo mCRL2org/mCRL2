@@ -29,7 +29,7 @@ namespace detail {
     using super::enter;
     using super::leave;
     using super::operator();
-  	
+
     core::identifier_string m_name;
   
     state_variable_negator(const core::identifier_string& name)
