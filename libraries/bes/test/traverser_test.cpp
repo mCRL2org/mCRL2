@@ -30,16 +30,7 @@ class custom_traverser: public traverser<custom_traverser>
       
     using super::enter;
     using super::leave;
-
-#if BOOST_MSVC
-      // Workaround for malfunctioning MSVC 2008 overload resolution
-      template <typename Container>
-      void operator()(Container const& a)
-      {
-        super::operator()(a);
-      }
-#endif
-
+    using super::operator();
 };
 
 void test_custom_traverser()
@@ -71,6 +62,7 @@ class traverser1: public traverser<traverser1>
       
     using super::enter;
     using super::leave;
+    using super::operator();
 
     unsigned int variable_count;
     unsigned int equation_count;
@@ -81,15 +73,6 @@ class traverser1: public traverser<traverser1>
       equation_count(0),
       expression_count(0)
     {}
-
-#if BOOST_MSVC
-      // Workaround for malfunctioning MSVC 2008 overload resolution
-      template <typename Container>
-      void operator()(Container const& a)
-      {
-        super::operator()(a);
-      }
-#endif
 
     void enter(const boolean_variable& v)
     {

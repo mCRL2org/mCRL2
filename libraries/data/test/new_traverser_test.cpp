@@ -29,9 +29,13 @@ class my_traverser: public data::traverser<my_traverser>
 {
 public:
   typedef data::traverser<my_traverser> super;
+  
+  using super::enter;
+  using super::leave;
+  using super::operator();
 
+// TODO: It is not clear yet why this overload is necessary
 #if BOOST_MSVC
-  // Workaround for malfunctioning MSVC 2008 overload resolution
   template <typename Container>
   void operator()(Container const& x)
   {
@@ -62,8 +66,18 @@ class my_binding_aware_traverser: public data::binding_aware_traverser<my_bindin
 public:
   typedef data::binding_aware_traverser<my_binding_aware_traverser> super;
 
-  // This is essential, to make the empty default implementation of enter visible.
-  using super::enter;
+  using super::enter;     
+  using super::leave;     
+  using super::operator();
+
+// TODO: It is not clear yet why this overload is necessary
+#if BOOST_MSVC
+  template <typename Container>
+  void operator()(Container const& x)
+  {
+    super::operator()(x);
+  }
+#endif
 
   void enter(const data_expression& x)
   {
@@ -74,16 +88,6 @@ public:
     }
     std::cout << std::endl;
   }
-
-// TODO: It is not exactly clear yet why this overload is necessary
-#if BOOST_MSVC
-  template <typename Container>
-  void operator()(Container const& x)
-  {
-    super::operator()(x);
-  }
-#endif
-
 };
 
 template <typename T>

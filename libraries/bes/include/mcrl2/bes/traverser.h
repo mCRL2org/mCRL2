@@ -26,9 +26,10 @@ namespace bes {
   {
     public:
       typedef core::traverser<Derived> super;
-      using super::operator();
+
       using super::enter;
       using super::leave;
+      using super::operator();
 
       void operator()(const core::identifier_string& s)
       { }
@@ -44,9 +45,12 @@ namespace bes {
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, bes::traverser>
   {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, bes::traverser> super;
-
     public:
+      typedef core::selective_traverser<Derived, AdaptablePredicate, bes::traverser> super;
+
+      using super::enter;
+      using super::leave;
+      using super::operator();
 
       selective_traverser()
       { }
