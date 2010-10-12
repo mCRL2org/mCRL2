@@ -13,7 +13,7 @@
 #define MCRL2_LPS_PARSE_H
 
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
@@ -36,7 +36,7 @@ namespace lps {
   {
     process::process_specification pspec = mcrl2::process::parse_process_specification(spec_stream);
     assert(process::is_linear(pspec, true));
-    process::detail::linear_process_conversion_visitor visitor;
+    process::detail::linear_process_conversion_traverser visitor;
     specification result = visitor.convert(pspec);
     return result;
   }
@@ -54,7 +54,7 @@ namespace lps {
   {
     process::process_specification pspec = mcrl2::process::parse_process_specification(text);
     assert(process::is_linear(pspec, true));
-    process::detail::linear_process_conversion_visitor visitor;
+    process::detail::linear_process_conversion_traverser visitor;
     specification result = visitor.convert(pspec);
     return result;
   }

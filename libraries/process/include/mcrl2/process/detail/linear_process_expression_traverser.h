@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/detail/linear_process_expression_visitor.h
+/// \file mcrl2/process/detail/linear_process_expression_traverser.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
-#define MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
+#ifndef MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_TRAVERSER_H
+#define MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_TRAVERSER_H
 
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/traverser.h"
@@ -24,9 +24,9 @@ namespace detail {
 
   /// \brief Checks if a process equation is linear.
   /// Use the is_linear() member function for this.
-  struct linear_process_expression_visitor: public traverser<linear_process_expression_visitor>
+  struct linear_process_conversion_traverser: public traverser<linear_process_conversion_traverser>
   {
-    typedef traverser<linear_process_expression_visitor> super;
+    typedef traverser<linear_process_conversion_traverser> super;
     using super::enter;
     using super::leave;
     using super::operator();
@@ -42,7 +42,7 @@ namespace detail {
     /// \brief The process equation that is checked.
     process_equation eqn;
 
-    /// \brief Exception that is thrown by linear_process_expression_visitor.
+    /// \brief Exception that is thrown by linear_process_conversion_traverser.
     struct non_linear_process
     {
       std::string msg;
@@ -377,4 +377,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
+#endif // MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_TRAVERSER_H

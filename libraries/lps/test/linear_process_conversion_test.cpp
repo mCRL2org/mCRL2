@@ -13,7 +13,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
@@ -157,14 +157,14 @@ void test_process(std::string text)
   bool linear = is_linear(pspec, true);
   if (linear)
   {
-    process::detail::linear_process_conversion_visitor visitor;
+    process::detail::linear_process_conversion_traverser visitor;
     specification spec = visitor.convert(pspec);
   }
   else
   {
     try
     {
-      process::detail::linear_process_conversion_visitor visitor;
+      process::detail::linear_process_conversion_traverser visitor;
       specification spec = visitor.convert(pspec);
       BOOST_CHECK(false); // not supposed to arrive here
     }
