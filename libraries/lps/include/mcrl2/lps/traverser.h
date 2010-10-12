@@ -25,7 +25,6 @@ namespace lps {
   {
     public:
       typedef data::traverser<Derived> super;
-
       using super::enter;
       using super::leave;
       using super::operator();
@@ -34,13 +33,13 @@ namespace lps {
   };
 
   template <typename Derived>
-  struct binding_aware_traverser: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser: public data::binding_aware_traverser<Derived>
   {
-    typedef data::binding_aware_traverser<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
+    public:
+      typedef data::binding_aware_traverser<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
 #include "mcrl2/lps/detail/traverser.inc.h"
   };
@@ -51,7 +50,6 @@ namespace lps {
   {
     public:
       typedef core::selective_traverser<Derived, AdaptablePredicate, lps::traverser> super;
-
       using super::enter;
       using super::leave;
       using super::operator();
@@ -62,6 +60,18 @@ namespace lps {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
+
+//  template <typename Derived, typename AdaptablePredicate>
+//  class selective_binding_aware_traverser: public data::detail::selective_traverser<Derived, AdaptablePredicate, lps::binding_aware_traverser>
+//  {
+//    public:
+//      typedef data::detail::selective_traverser<Derived, AdaptablePredicate, lps::binding_aware_traverser> super;     
+//      using super::enter;
+//      using super::leave;
+//      using super::operator();
+//
+//#include "mcrl2/lps/detail/traverser.inc.h"
+//  };
 
 } // namespace lps
 

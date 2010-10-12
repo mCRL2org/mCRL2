@@ -36,50 +36,52 @@ namespace action_formulas {
   };
 
   template <typename Derived>
-  struct binding_aware_traverser_helper: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser_helper: public data::binding_aware_traverser<Derived>
   {
-    typedef data::binding_aware_traverser<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
+    public:
+      typedef data::binding_aware_traverser<Derived> super;     
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
 #include "mcrl2/modal_formula/detail/action_formula_traverser.inc.h"
   };
 
   /// \brief Handle binding variables.
   template <typename Derived>
-  struct binding_aware_traverser : public binding_aware_traverser_helper<Derived>
+  class binding_aware_traverser : public binding_aware_traverser_helper<Derived>
   {
-    typedef binding_aware_traverser_helper<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
-
-    void operator()(exists const& x)
-    {
-      increase_bind_count(x.variables());
-      super::operator()(x);
-      decrease_bind_count(x.variables());
-    }
-
-    void operator()(forall const& x)
-    {
-      increase_bind_count(x.variables());
-      super::operator()(x);
-      decrease_bind_count(x.variables());
-    }
+    public:
+      typedef binding_aware_traverser_helper<Derived> super;      
+      using super::operator();
+      using super::enter;
+      using super::leave;
+      using super::increase_bind_count;
+      using super::decrease_bind_count;
+      
+      void operator()(exists const& x)
+      {
+        increase_bind_count(x.variables());
+        super::operator()(x);
+        decrease_bind_count(x.variables());
+      }
+      
+      void operator()(forall const& x)
+      {
+        increase_bind_count(x.variables());
+        super::operator()(x);
+        decrease_bind_count(x.variables());
+      }
   };
 
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, action_formulas::traverser>
   {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, action_formulas::traverser> super;
-
     public:
+      typedef core::selective_traverser<Derived, AdaptablePredicate, action_formulas::traverser> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
       selective_traverser()
       { }
@@ -87,6 +89,22 @@ namespace action_formulas {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
+
+//  template <typename Derived, typename AdaptablePredicate>
+//  class selective_binding_aware_traverser: public action_formulas::selective_traverser<Derived, AdaptablePredicate, action_formulas::binding_aware_traverser>
+//  {
+//    public:
+//      typedef action_formulas::selective_traverser<Derived, AdaptablePredicate, action_formulas::binding_aware_traverser> super;
+//      using super::enter;
+//      using super::leave;
+//      using super::operator();
+//
+//      selective_binding_aware_traverser()
+//      { }
+//
+//      selective_binding_aware_traverser(AdaptablePredicate predicate): super(predicate)
+//      { }
+//  };
 
 } // namespace action_formulas
 
@@ -107,13 +125,13 @@ namespace regular_formulas {
   };
 
   template <typename Derived>
-  struct binding_aware_traverser: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser: public data::binding_aware_traverser<Derived>
   {
-    typedef data::binding_aware_traverser<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
+    public:
+      typedef data::binding_aware_traverser<Derived> super;     
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
 #include "mcrl2/modal_formula/detail/regular_formula_traverser.inc.h"
   };
@@ -121,9 +139,11 @@ namespace regular_formulas {
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, regular_formulas::traverser>
   {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, regular_formulas::traverser> super;
-
     public:
+      typedef core::selective_traverser<Derived, AdaptablePredicate, regular_formulas::traverser> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
       selective_traverser()
       { }
@@ -131,6 +151,22 @@ namespace regular_formulas {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
+
+//  template <typename Derived, typename AdaptablePredicate>
+//  class selective_binding_aware_traverser: public regular_formulas::selective_traverser<Derived, AdaptablePredicate, regular_formulas::binding_aware_traverser>
+//  {
+//    public:
+//      typedef regular_formulas::selective_traverser<Derived, AdaptablePredicate, regular_formulas::binding_aware_traverser> super;
+//      using super::enter;
+//      using super::leave;
+//      using super::operator();
+//
+//      selective_binding_aware_traverser()
+//      { }
+//
+//      selective_binding_aware_traverser(AdaptablePredicate predicate): super(predicate)
+//      { }
+//  };
 
 } // namespace regular_formulas
 
@@ -151,13 +187,13 @@ namespace state_formulas {
   };
 
   template <typename Derived>
-  struct binding_aware_traverser_helper: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser_helper: public data::binding_aware_traverser<Derived>
   {
-    typedef data::binding_aware_traverser<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
+    public:
+      typedef data::binding_aware_traverser<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
 #include "mcrl2/modal_formula/detail/regular_formula_traverser.inc.h"
 #include "mcrl2/modal_formula/detail/state_formula_traverser.inc.h"
@@ -165,15 +201,15 @@ namespace state_formulas {
 
   /// \brief Handle binding variables.
   template <typename Derived>
-  struct binding_aware_traverser : public binding_aware_traverser_helper<Derived>
+  class binding_aware_traverser : public binding_aware_traverser_helper<Derived>
   {
-    typedef binding_aware_traverser_helper<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
+    public:
+      typedef binding_aware_traverser_helper<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
+      using super::increase_bind_count;
+      using super::decrease_bind_count;
 
     void operator()(exists const& x)
     {
@@ -193,9 +229,11 @@ namespace state_formulas {
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, state_formulas::traverser>
   {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, state_formulas::traverser> super;
-
     public:
+      typedef core::selective_traverser<Derived, AdaptablePredicate, state_formulas::traverser> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
       selective_traverser()
       { }
@@ -203,6 +241,22 @@ namespace state_formulas {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
+
+//  template <typename Derived, typename AdaptablePredicate>
+//  class selective_binding_aware_traverser: public state_formulas::selective_traverser<Derived, AdaptablePredicate, state_formulas::binding_aware_traverser>
+//  {
+//    public:
+//      typedef state_formulas::selective_traverser<Derived, AdaptablePredicate, state_formulas::binding_aware_traverser> super;
+//      using super::enter;
+//      using super::leave;
+//      using super::operator();
+//
+//      selective_binding_aware_traverser()
+//      { }
+//
+//      selective_binding_aware_traverser(AdaptablePredicate predicate): super(predicate)
+//      { }
+//  };
 
 } // namespace state_formulas
 

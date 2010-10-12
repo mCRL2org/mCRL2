@@ -35,13 +35,13 @@ namespace process {
   };
 
   template <typename Derived>
-  struct binding_aware_traverser: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser: public data::binding_aware_traverser<Derived>
   {
-    typedef data::binding_aware_traverser<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
+    public:
+      typedef data::binding_aware_traverser<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
 #include "mcrl2/lps/detail/traverser.inc.h" // needed for traversal of lps::action
 #include "mcrl2/process/detail/traverser.inc.h"
@@ -51,9 +51,11 @@ namespace process {
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, process::traverser>
   {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, process::traverser> super;
-
     public:
+      typedef core::selective_traverser<Derived, AdaptablePredicate, process::traverser> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
       selective_traverser()
       { }
@@ -61,6 +63,22 @@ namespace process {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
+
+//  template <typename Derived, typename AdaptablePredicate>
+//  class selective_binding_aware_traverser: public process::selective_traverser<Derived, AdaptablePredicate, process::binding_aware_traverser>
+//  {
+//    public:
+//      typedef process::selective_traverser<Derived, AdaptablePredicate, process::binding_aware_traverser> super;
+//      using super::enter;
+//      using super::leave;
+//      using super::operator();
+//
+//      selective_binding_aware_traverser()
+//      { }
+//
+//      selective_binding_aware_traverser(AdaptablePredicate predicate): super(predicate)
+//      { }
+//  };
 
 } // namespace process
 

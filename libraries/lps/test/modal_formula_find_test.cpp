@@ -9,8 +9,6 @@
 /// \file modal_formula_find_test.cpp
 /// \brief Test for find functions.
 
-#define MCRL2_NEW_TRAVERSER
-
 #include <algorithm>
 #include <iterator>
 #include <set>

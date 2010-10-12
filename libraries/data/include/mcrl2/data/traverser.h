@@ -39,28 +39,28 @@ namespace data {
 
   /// \brief Add data traversal functions to the core binding aware traverser.
   template <typename Derived>
-  struct binding_aware_traverser_helper: public core::binding_aware_traverser<Derived, variable>
+  class binding_aware_traverser_helper: public core::binding_aware_traverser<Derived, variable>
   {
-    typedef core::binding_aware_traverser<Derived, variable> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
+    public:
+      typedef core::binding_aware_traverser<Derived, variable> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
 #include "mcrl2/data/detail/traverser.inc.h"
   };
 
   /// \brief Handle binding variables.
   template <typename Derived>
-  struct binding_aware_traverser : public binding_aware_traverser_helper<Derived>
+  class binding_aware_traverser : public binding_aware_traverser_helper<Derived>
   {
-    typedef binding_aware_traverser_helper<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
+    public:
+      typedef binding_aware_traverser_helper<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
+      using super::increase_bind_count;
+      using super::decrease_bind_count;
 
     void operator()(where_clause const& x)
     {
@@ -144,6 +144,22 @@ namespace data {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
+
+//  template <typename Derived, typename AdaptablePredicate>
+//  class selective_binding_aware_traverser: public data::selective_traverser<Derived, AdaptablePredicate, data::binding_aware_traverser>
+//  {
+//    public:
+//      typedef data::selective_traverser<Derived, AdaptablePredicate, data::binding_aware_traverser> super;
+//      using super::enter;
+//      using super::leave;
+//      using super::operator();
+//
+//      selective_binding_aware_traverser()
+//      { }
+//
+//      selective_binding_aware_traverser(AdaptablePredicate predicate): super(predicate)
+//      { }
+//  };
 
 } // namespace data
 

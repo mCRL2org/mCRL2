@@ -33,13 +33,13 @@ namespace pbes_system {
   };
 
   template <typename Derived>
-  struct binding_aware_traverser: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser: public data::binding_aware_traverser<Derived>
   {
-    typedef data::binding_aware_traverser<Derived> super;
-
-    using super::operator();
-    using super::enter;
-    using super::leave;
+    public:
+      typedef data::binding_aware_traverser<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
 #include "mcrl2/pbes/detail/traverser.inc.h"
   };
@@ -48,9 +48,11 @@ namespace pbes_system {
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, pbes::traverser>
   {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, pbes::traverser> super;
-
     public:
+      typedef core::selective_traverser<Derived, AdaptablePredicate, pbes::traverser> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
 
       selective_traverser()
       { }
@@ -58,6 +60,22 @@ namespace pbes_system {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
+
+//  template <typename Derived, typename AdaptablePredicate>
+//  class selective_binding_aware_traverser: public pbes_system::selective_traverser<Derived, AdaptablePredicate, pbes_system::binding_aware_traverser>
+//  {
+//    public:
+//      typedef pbes_system::selective_traverser<Derived, AdaptablePredicate, pbes_system::binding_aware_traverser> super;
+//      using super::enter;
+//      using super::leave;
+//      using super::operator();
+//
+//      selective_binding_aware_traverser()
+//      { }
+//
+//      selective_binding_aware_traverser(AdaptablePredicate predicate): super(predicate)
+//      { }
+//  };
 
 } // namespace pbes_system
 
