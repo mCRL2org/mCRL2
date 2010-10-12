@@ -28,6 +28,7 @@ namespace process {
     using super::enter;
     using super::leave;
 
+#include "mcrl2/lps/detail/traverser.inc.h" // needed for traversal of lps::action
 #include "mcrl2/process/detail/traverser.inc.h"
   };
 
