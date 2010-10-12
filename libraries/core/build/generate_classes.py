@@ -103,7 +103,7 @@ def make_is_functions(filename, class_text, classname, namespace = 'core'):
     insert_text_in_file(filename, rtext, 'generated is-functions')
 
 if __name__ == "__main__":
-    make_classes('../../bes/include/mcrl2/bes/boolean_expression.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression', generate_is_functions = True, superclass_aterm = 'BooleanExpression')
+    make_classes('../../bes/include/mcrl2/bes/boolean_expression.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression', generate_is_functions = True)
     make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression', add_constructor_overloads = True, generate_is_functions = True)
     make_classes('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type', add_constructor_overloads = True, generate_is_functions = True)
     make_classes('../../data/include/mcrl2/data/container_type.h', CONTAINER_TYPES, 'container_type', add_constructor_overloads = True, generate_is_functions = True)

@@ -30,7 +30,6 @@ namespace mcrl2 {
 
 namespace bes {
 
-//--- start generated classes ---//
 /// \brief class boolean_expression
 class boolean_expression: public atermpp::aterm_appl
 {
@@ -39,6 +38,14 @@ class boolean_expression: public atermpp::aterm_appl
     boolean_expression()
       : atermpp::aterm_appl(core::detail::constructBooleanExpression())
     {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    boolean_expression(ATermAppl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_BooleanExpression(m_term));
+    }
 
     /// \brief Constructor.
     /// \param term A term
@@ -55,6 +62,7 @@ typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 /// \brief vector of boolean_expressions
 typedef atermpp::vector<boolean_expression>    boolean_expression_vector;
 
+//--- start generated classes ---//
 /// \brief The value true for boolean expressions
 class true_: public boolean_expression
 {
