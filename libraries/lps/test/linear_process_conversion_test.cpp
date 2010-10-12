@@ -14,6 +14,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"

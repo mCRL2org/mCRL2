@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
 
 #include "mcrl2/process/process_specification.h"
-#include "mcrl2/process/process_expression_visitor.h"
+#include "mcrl2/process/traverser.h"
 #include "mcrl2/process/detail/is_linear.h"
 
 namespace mcrl2 {
@@ -24,8 +24,13 @@ namespace detail {
 
   /// \brief Checks if a process equation is linear.
   /// Use the is_linear() member function for this.
-  struct linear_process_expression_visitor: public process_expression_visitor<void>
+  struct linear_process_expression_visitor: public traverser<linear_process_expression_visitor>
   {
+    typedef traverser<linear_process_expression_visitor> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+    
     /// \brief The process equation that is checked.
     process_equation eqn;
 
@@ -37,14 +42,6 @@ namespace detail {
       non_linear_process(const std::string& s)
         : msg(s)
       {}
-    };
-
-    /// \brief These names can be used as return types of the visit functions, to make
-    /// the code more readible.
-    enum return_type
-    {
-      stop_recursion = false,
-      continue_recursion = true
     };
 
     /// \brief Returns true if the argument is a process instance
@@ -139,13 +136,12 @@ namespace detail {
     /// \brief Visit process_instance node
     /// \return The result of visiting the node
     /// \param x A process instance
-    bool visit_process_instance(const process_instance& x)
+    void enter(const process_instance& x)
     {
       if (!detail::check_process_instance(eqn, x))
       {
         throw non_linear_process(core::pp(x) + " is not a valid process instance");
       }
-      return continue_recursion;
     }
 
     /// \brief Visit process_instance_assignment node
@@ -153,13 +149,12 @@ namespace detail {
     /// \param x A process expression
     /// \param pi A process identifier
     /// \param v A sequence of assignments to data variables
-    bool visit_process_instance_assignment(const process_instance_assignment& x)
+    void enter(const process_instance_assignment& x)
     {
       if (!detail::check_process_instance_assignment(eqn, x))
       {
         throw non_linear_process(core::pp(x) + " is not a valid process instance assignment");
       }
-      return continue_recursion;
     }
 
     /// \brief Visit sum node
@@ -167,13 +162,12 @@ namespace detail {
     /// \param x A process expression
     /// \param v A sequence of data variables
     /// \param right A process expression
-    bool visit_sum(const sum& x)
+    void enter(const sum& x)
     {
       if (!is_alternative(x.operand()))
       {
         throw non_linear_process(core::pp(x.operand()) + " is not an alternative expression");
       }
-      return continue_recursion;
     }
 
     /// \brief Visit block node
@@ -181,10 +175,9 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of identifiers
     /// \param right A process expression
-    bool visit_block(const block& x)
+    void enter(const block& x)
     {
       throw non_linear_process("block expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Visit hide node
@@ -192,10 +185,9 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of identifiers
     /// \param right A process expression
-    bool visit_hide(const hide& x)
+    void enter(const hide& x)
     {
       throw non_linear_process("hide expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Visit rename node
@@ -203,10 +195,9 @@ namespace detail {
     /// \param x A process expression
     /// \param r A sequence of rename expressions
     /// \param right A process expression
-    bool visit_rename(const rename& x)
+    void enter(const rename& x)
     {
       throw non_linear_process("rename expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Visit comm node
@@ -214,10 +205,9 @@ namespace detail {
     /// \param x A process expression
     /// \param c A sequence of communication expressions
     /// \param right A process expression
-    bool visit_comm(const comm& x)
+    void enter(const comm& x)
     {
       throw non_linear_process("comm expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Visit allow node
@@ -225,10 +215,9 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of multi-action names
     /// \param right A process expression
-    bool visit_allow(const allow& x)
+    void enter(const allow& x)
     {
       throw non_linear_process("allow expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Visit sync node
@@ -236,7 +225,7 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_sync(const sync& x)
+    void enter(const sync& x)
     {
       if (!is_multiaction(x.left()) || !is_multiaction(x.right()))
       {
@@ -249,7 +238,6 @@ namespace detail {
           throw non_linear_process(core::pp(x.right()) + " is not a multi action");
         }
       }
-      return continue_recursion;
     }
 
     /// \brief Visit at node
@@ -257,13 +245,12 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param d A data expression
-    bool visit_at(const at& x)
+    void enter(const at& x)
     {
       if (!is_multiaction(x.operand()) && !is_delta(x.operand()))
       {
         throw non_linear_process(core::pp(x.operand()) + " is not a multi action and not a deadlock");
       }
-      return continue_recursion;
     }
 
     /// \brief Visit seq node
@@ -271,7 +258,7 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_seq(const seq& x)
+    void enter(const seq& x)
     {
       if (!is_timed_multiaction(x.left()) || !is_process(x.right()))
       {
@@ -298,7 +285,6 @@ namespace detail {
         std::cerr << "seq right hand side: " << core::pp(x.right()) << std::endl;
         throw std::runtime_error("unexpected error in visit_seq");
       }
-      return continue_recursion;
     }
 
     /// \brief Visit if_then node
@@ -306,13 +292,12 @@ namespace detail {
     /// \param x A process expression
     /// \param d A data expression
     /// \param right A process expression
-    bool visit_if_then(const if_then& x)
+    void enter(const if_then& x)
     {
       if (!is_action_prefix(x.then_case()) && !is_timed_deadlock(x.then_case()))
       {
         throw non_linear_process(core::pp(x) + " is not an action prefix and not a timed deadlock");
       }
-      return continue_recursion;
     }
 
     /// \brief Visit if_then_else node
@@ -321,10 +306,9 @@ namespace detail {
     /// \param d A data expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_if_then_else(const if_then_else& x)
+    void enter(const if_then_else& x)
     {
       throw non_linear_process("if then else expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Visit bounded_init node
@@ -332,10 +316,9 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_bounded_init(const bounded_init& x)
+    void enter(const bounded_init& x)
     {
       throw non_linear_process("bounded init expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Visit merge node
@@ -343,10 +326,9 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_merge(const merge& x)
+    void enter(const merge& x)
     {
       throw non_linear_process("merge expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Visit left_merge node
@@ -354,10 +336,9 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_left_merge(const left_merge& x)
+    void enter(const left_merge& x)
     {
       throw non_linear_process("left merge expression " + core::pp(x) + " encountered");
-      return continue_recursion;
     }
 
     /// \brief Returns true if the process equation e is linear.
@@ -368,7 +349,7 @@ namespace detail {
       eqn = e;
       try
       {
-        visit(e.expression());
+        (*this)(e.expression());
       }
       catch(non_linear_process& p)
       {

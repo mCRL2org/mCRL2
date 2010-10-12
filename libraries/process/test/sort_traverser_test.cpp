@@ -16,7 +16,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/process/parse.h"
-#include "mcrl2/process/traverse.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/process_specification.h"
 
 using namespace mcrl2;
@@ -159,7 +159,7 @@ void test_process(std::string text)
 {
   process_specification spec = parse_process_specification(text);
   std::set<data::sort_expression> sorts;     
-  traverse_sort_expressions(spec, std::inserter(sorts, sorts.end()));
+  process::find_sort_expressions(spec, std::inserter(sorts, sorts.end()));
   std::cerr << "sorts: " << core::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;
   core::garbage_collect();                 
 }

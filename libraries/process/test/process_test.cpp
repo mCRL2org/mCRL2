@@ -14,27 +14,14 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
-#include "mcrl2/process/process_expression_visitor.h"
-#include "mcrl2/process/process_expression_builder.h"
 #include "mcrl2/process/detail/linear_process_expression_visitor.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
-
-void visit_process_expression(const process_expression& x)
-{
-  process_expression_visitor<> visitor;
-  visitor.visit(x);
-}
-
-void build_process_expression(const process_expression& x)
-{
-  process_expression_builder<> visitor;
-  visitor.visit(x);
-}
 
 const std::string SPEC1 =
   "act a;                  \n"
@@ -218,18 +205,6 @@ std::string CASE14 =
   "init a;       \n"
   ;
 
-void test_process(std::string text)
-{
-  process_specification spec = parse_process_specification(text);
-
-  for (atermpp::vector<process_equation>::iterator i = spec.equations().begin(); i != spec.equations().end(); ++i)
-  {
-    visit_process_expression(i->expression());
-    build_process_expression(i->expression());
-  }
-  core::garbage_collect();
-}
-
 void test_linear(const std::string& text, bool result = true)
 {
   process_specification p = parse_process_specification(text);
@@ -247,9 +222,6 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_process(SPEC1);
-  test_process(SPEC2);
-  test_process(ABS_SPEC_LINEARIZED);
   test_linear(CASE1);
   test_linear(CASE2);
   test_linear(CASE3);
@@ -268,4 +240,3 @@ int test_main(int argc, char* argv[])
   
   return 0;
 }
-

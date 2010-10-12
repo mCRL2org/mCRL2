@@ -17,6 +17,7 @@
 
 #include "mcrl2/core/selective_traverser.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/traverser.h"
 
 namespace mcrl2 {
 
@@ -26,7 +27,11 @@ namespace data {
   template <typename Derived, typename AdaptablePredicate>
   class selective_traverser: public core::selective_traverser<Derived, AdaptablePredicate, data::traverser>
   {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, data::traverser> super;
+    public:
+      typedef core::selective_traverser<Derived, AdaptablePredicate, data::traverser> super;
+      using super::enter;
+      using super::leave;
+      using super::operator();
 
     protected:     
 

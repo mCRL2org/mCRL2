@@ -7258,9 +7258,9 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   }
   data_specification data_spec=type_checked_spec.data();
   std::set<data::sort_expression> s;
-  process::traverse_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));
-  process::traverse_sort_expressions(type_checked_spec.equations(), std::inserter(s, s.end()));
-  process::traverse_sort_expressions(type_checked_spec.init(), std::inserter(s, s.end()));
+  process::find_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));
+  process::find_sort_expressions(type_checked_spec.equations(), std::inserter(s, s.end()));
+  process::find_sort_expressions(type_checked_spec.init(), std::inserter(s, s.end()));
   s.insert(sort_real::real_());
   data_spec.add_context_sorts(s);
 

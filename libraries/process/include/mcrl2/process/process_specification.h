@@ -19,16 +19,18 @@
 #include "mcrl2/lps/action_label.h"
 #include "mcrl2/process/process_equation.h"
 #include "mcrl2/process/process_expression.h"
-#include "mcrl2/process/detail/linear_process_expression_visitor.h"
 
 namespace mcrl2 {
 
 /// \brief The main namespace for the Process library.
 namespace process {
 
-  template <typename Object, typename OutIter>
-  void traverse_sort_expressions(const Object& o, OutIter dest);
+//  template <typename Object, typename OutIter>
+//  void traverse_sort_expressions(const Object& o, OutIter dest);
 
+  template <typename Container, typename OutputIterator>                  
+  void find_sort_expressions(Container const& container, OutputIterator o);
+ 
   class process_specification;
   ATermAppl process_specification_to_aterm(const process_specification& spec);
   void complete_data_specification(process_specification&);
@@ -193,7 +195,7 @@ namespace process {
   void complete_data_specification(process_specification& spec)
   {
     std::set<data::sort_expression> s;
-    traverse_sort_expressions(spec, std::inserter(s, s.end()));
+    process::find_sort_expressions(spec, std::inserter(s, s.end()));
     spec.data().add_context_sorts(s);
   }
 
@@ -234,44 +236,16 @@ namespace process {
     return !(spec1 == spec2);
   }
 
-  /// \brief Returns true if the process specification is linear.
-  /// \param p A process specification
-  /// \return True if the process specification is linear.
-  inline
-  bool is_linear(const process_specification& p, bool verbose = false)
-  {
-    if (p.equations().size() != 1)
-    {
-      if (verbose)
-      {
-        std::clog << "The number of equations is not equal to 1" << std::endl;
-      }
-      return false;
-    }
-    detail::linear_process_expression_visitor visitor;
-    {
-      if (!visitor.is_linear(*p.equations().begin(), verbose))
-      {
-        return false;
-      }
-      if (!is_process_instance(p.init()) && ! (is_process_instance_assignment(p.init())))
-      {
-        if (verbose)
-        {
-          std::clog << "The initial process " << core::pp(p.init()) << " is not a process instance or a process instance assignment" << std::endl;
-        }
-        return false;
-      }
-    }
-    return true;
-  }
-  
 } // namespace process
 
 } // namespace mcrl2
 
-#ifndef MCRL2_PROCESS_TRAVERSE_H
-#include "mcrl2/process/traverse.h"
+//#ifndef MCRL2_PROCESS_TRAVERSE_H
+//#include "mcrl2/process/traverse.h"
+//#endif
+
+#ifndef MCRL2_PROCESS_FIND_H
+#include "mcrl2/process/find.h"
 #endif
 
 #endif // MCRL2_PROCESS_PROCESS_SPECIFICATION_H
