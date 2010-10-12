@@ -24,9 +24,9 @@ namespace detail {
 
   /// \brief Checks if a process equation is linear.
   /// Use the is_linear() member function for this.
-  struct linear_process_conversion_traverser: public traverser<linear_process_conversion_traverser>
+  struct linear_process_expression_traverser: public traverser<linear_process_expression_traverser>
   {
-    typedef traverser<linear_process_conversion_traverser> super;
+    typedef traverser<linear_process_expression_traverser> super;
     using super::enter;
     using super::leave;
     using super::operator();
@@ -42,7 +42,7 @@ namespace detail {
     /// \brief The process equation that is checked.
     process_equation eqn;
 
-    /// \brief Exception that is thrown by linear_process_conversion_traverser.
+    /// \brief Exception that is thrown by linear_process_expression_traverser.
     struct non_linear_process
     {
       std::string msg;

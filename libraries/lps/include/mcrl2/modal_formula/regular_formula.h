@@ -27,52 +27,41 @@ namespace mcrl2 {
 
 namespace regular_formulas {
 
-///////////////////////////////////////////////////////////////////////////////
-// regular_formula
-/// \brief regular formula expression.
+/// \brief Returns true if the term t is a regular formula
+/// \param t A term
+/// \return True if the term is a regular formula
+// TODO: generate this function
+inline
+bool is_regular_formula(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsRegFrm(t);
+}
+
+//--- start generated classes ---//
+/// \brief class regular_formula
 class regular_formula: public atermpp::aterm_appl
 {
   public:
-    /// \brief Constructor
+    /// \brief Default constructor.
     regular_formula()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructRegFrm())
+      : atermpp::aterm_appl(core::detail::constructRegFrm())
     {}
 
-    /// \brief Constructor
-    /// \param t A term
-    regular_formula(ATermAppl t)
-      : atermpp::aterm_appl(atermpp::aterm_appl(t))
+    /// \brief Constructor.
+    /// \param term A term
+    regular_formula(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
-    }
-
-    /// \brief Constructor
-    /// \param t A term
-    regular_formula(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
-    }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    regular_formula substitute(Substitution f) const
-    {
-      return regular_formula(f(atermpp::aterm(*this)));
+      assert(core::detail::check_rule_RegFrm(m_term));
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// regular_formula_list
-/// \brief Read-only singly linked list of regular expressions
+/// \brief list of regular_formulas
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 
-//--- start generated classes ---//
+/// \brief vector of regular_formulas
+typedef atermpp::vector<regular_formula>    regular_formula_vector;
+
 /// \brief The value nil for regular formulas
 class nil: public regular_formula
 {

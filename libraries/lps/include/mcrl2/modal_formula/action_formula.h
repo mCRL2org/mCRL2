@@ -23,66 +23,41 @@
 
 namespace mcrl2 {
 
-namespace action_formulas {
+/// \brief Returns true if the term t is a action formula
+/// \param t A term
+/// \return True if the term is a action formula
+// TODO: generate this function
+inline
+bool is_action_formula(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsActFrm(t);
+}
 
-///////////////////////////////////////////////////////////////////////////////
-// action_formula
-/// \brief action formula expression.
-//<ActFrm>       ::= <MultAct>
-//                 | <DataExpr>
-//                 | ActTrue
-//                 | ActFalse
-//                 | ActNot(<ActFrm>)
-//                 | ActAnd(<ActFrm>, <ActFrm>)
-//                 | ActOr(<ActFrm>, <ActFrm>)
-//                 | ActImp(<ActFrm>, <ActFrm>)
-//                 | ActForall(<DataVarId>+, <ActFrm>)
-//                 | ActExists(<DataVarId>+, <ActFrm>)
-//                 | ActAt(<ActFrm>, <DataExpr>)
+//--- start generated classes ---//
+/// \brief class action_formula
 class action_formula: public atermpp::aterm_appl
 {
   public:
-
-    /// \brief Constructor
+    /// \brief Default constructor.
     action_formula()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructActFrm())
+      : atermpp::aterm_appl(core::detail::constructActFrm())
     {}
 
-    /// \brief Constructor
-    /// \param t A term
-    action_formula(ATermAppl t)
-      : atermpp::aterm_appl(atermpp::aterm_appl(t))
+    /// \brief Constructor.
+    /// \param term A term
+    action_formula(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
-    }
-
-    /// \brief Constructor
-    /// \param t A term
-    action_formula(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
-    }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    action_formula substitute(Substitution f) const
-    {
-      return action_formula(f(atermpp::aterm(*this)));
+      assert(core::detail::check_rule_ActFrm(m_term));
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// action_formula_list
-/// \brief Read-only singly linked list of data expressions
+/// \brief list of action_formulas
 typedef atermpp::term_list<action_formula> action_formula_list;
 
-//--- start generated classes ---//
+/// \brief vector of action_formulas
+typedef atermpp::vector<action_formula>    action_formula_vector;
+
 /// \brief The value true for action formulas
 class true_: public action_formula
 {

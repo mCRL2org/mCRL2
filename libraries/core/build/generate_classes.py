@@ -13,7 +13,7 @@ from mcrl2_utility import *
 #
 # If superclass is defined, it will be the base class of the generated
 # classes. Otherwise atermpp::aterm_appl will be taken as the base class.
-def make_classes(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, superclass_aterm = None):
+def make_classes(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, superclass_aterm = None, generate_is_functions = False):
     classes = parse_classes(class_text, superclass, use_base_class_name = True)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
@@ -34,6 +34,9 @@ def make_classes(filename, class_text, superclass = None, namespace = 'core', ad
             text = re.sub('check_term', 'check_rule', text)
             ctext = text + ctext
         insert_text_in_file(filename, ctext, 'generated classes')
+
+    if generate_is_functions:
+        make_is_functions(filename, class_text, superclass, namespace)
 
 # Generates class declarations from class_text and inserts them in the file
 # filename.
@@ -100,29 +103,17 @@ def make_is_functions(filename, class_text, classname, namespace = 'core'):
     insert_text_in_file(filename, rtext, 'generated is-functions')
 
 if __name__ == "__main__":
-    make_classes(     '../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula')
-    make_is_functions('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula')
-
-    make_classes(     '../../lps/include/mcrl2/modal_formula/regular_formula.h', REGULAR_FORMULA_CLASSES, 'regular_formula')
-    make_is_functions('../../lps/include/mcrl2/modal_formula/regular_formula.h', REGULAR_FORMULA_CLASSES, 'regular_formula')
-
-    make_classes(     '../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula')
-    make_is_functions('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula')
-
-    make_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
-    make_is_functions('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
-
+    make_classes('../../bes/include/mcrl2/bes/boolean_expression.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression', generate_is_functions = True, superclass_aterm = 'BooleanExpression')
+    make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression', add_constructor_overloads = True, generate_is_functions = True)
+    make_classes('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type', add_constructor_overloads = True, generate_is_functions = True)
+    make_classes('../../data/include/mcrl2/data/container_type.h', CONTAINER_TYPES, 'container_type', add_constructor_overloads = True, generate_is_functions = True)
+    make_classes('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula', generate_is_functions = True, superclass_aterm = 'StateFrm')
+    make_classes('../../lps/include/mcrl2/modal_formula/regular_formula.h', REGULAR_FORMULA_CLASSES, 'regular_formula', generate_is_functions = True, superclass_aterm = 'RegFrm')
+    make_classes('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula', generate_is_functions = True, superclass_aterm = 'ActFrm')
     make_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
-    make_classes('../../data/include/mcrl2/data/', DATA_EXPRESSION_CLASSES, 'data_expression', add_constructor_overloads = True)
-    make_is_functions('../../data/include/mcrl2/data/data_expression.h', DATA_EXPRESSION_CLASSES, 'data_expression')
-    make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression', add_constructor_overloads = True)
-    make_is_functions('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression')
-    make_classes('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type', add_constructor_overloads = True)
-    make_is_functions('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type')
-    make_classes('../../data/include/mcrl2/data/', SORT_EXPRESSION_CLASSES, 'sort_expression', add_constructor_overloads = True)
-    make_is_functions('../../data/include/mcrl2/data/sort_expression.h', SORT_EXPRESSION_CLASSES, 'sort_expression')
-    make_classes('../../data/include/mcrl2/data/container_type.h', CONTAINER_TYPES, 'container_type', add_constructor_overloads = True)
-    make_is_functions('../../data/include/mcrl2/data/container_type.h', CONTAINER_TYPES, 'container_type')
-    make_classes('../../data/include/mcrl2/data/', STRUCTURED_SORT_ELEMENTS, 'atermpp::aterm_appl', add_constructor_overloads = True)
-    make_classes('../../bes/include/mcrl2/bes/boolean_expression.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression')
-    make_is_functions('../../bes/include/mcrl2/bes/boolean_expression.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression')
+    make_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression', generate_is_functions = True, superclass_aterm = 'ProcExpr')
+    
+    # The classes below don't seem to be generated...
+    make_classes('../../data/include/mcrl2/data/data_expression.h', DATA_EXPRESSION_CLASSES, 'data_expression', add_constructor_overloads = True, generate_is_functions = True)
+    make_classes('../../data/include/mcrl2/data/sort_expression.h', SORT_EXPRESSION_CLASSES, 'sort_expression', add_constructor_overloads = True, generate_is_functions = True)
+    make_classes('../../data/include/mcrl2/data/structured_sort.h', STRUCTURED_SORT_ELEMENTS, 'atermpp::aterm_appl', add_constructor_overloads = True)

@@ -30,36 +30,31 @@ namespace mcrl2 {
 
 namespace bes {
 
-  /// \brief boolean expression
-  class boolean_expression: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      boolean_expression()
-        : atermpp::aterm_appl(core::detail::constructBooleanExpression())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      boolean_expression(ATermAppl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_rule_BooleanExpression(m_term));
-      }
-
-      /// \brief Constructor.
-      /// \param term A term
-      boolean_expression(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_rule_BooleanExpression(m_term));
-      }
-  };
-
-  /// \brief Read-only singly linked list of boolean expressions
-  typedef atermpp::term_list<boolean_expression> boolean_expression_list;
-
 //--- start generated classes ---//
+/// \brief class boolean_expression
+class boolean_expression: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    boolean_expression()
+      : atermpp::aterm_appl(core::detail::constructBooleanExpression())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    boolean_expression(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_BooleanExpression(m_term));
+    }
+};
+
+/// \brief list of boolean_expressions
+typedef atermpp::term_list<boolean_expression> boolean_expression_list;
+
+/// \brief vector of boolean_expressions
+typedef atermpp::vector<boolean_expression>    boolean_expression_vector;
+
 /// \brief The value true for boolean expressions
 class true_: public boolean_expression
 {

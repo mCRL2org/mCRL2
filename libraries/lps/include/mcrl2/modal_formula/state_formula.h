@@ -32,72 +32,41 @@ namespace mcrl2 {
 
 namespace state_formulas {
 
-///////////////////////////////////////////////////////////////////////////////
-// state_formula
-/// \brief state formula
-//<StateFrm>     ::= <DataExpr>
-//                 | StateTrue
-//                 | StateFalse
-//                 | StateNot(<StateFrm>)
-//                 | StateAnd(<StateFrm>, <StateFrm>)
-//                 | StateOr(<StateFrm>, <StateFrm>)
-//                 | StateImp(<StateFrm>, <StateFrm>)
-//                 | StateForall(<DataVarId>+, <StateFrm>)
-//                 | StateExists(<DataVarId>+, <StateFrm>)
-//                 | StateMust(<RegFrm>, <StateFrm>)
-//                 | StateMay(<RegFrm>, <StateFrm>)
-//                 | StateYaled
-//                 | StateYaledTimed(<DataExpr>)
-//                 | StateDelay
-//                 | StateDelayTimed(<DataExpr>)
-//                 | StateVar(<String>, <DataExpr>*)
-//                 | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
-//                 | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
-class state_formula: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Constructor
-    state_formula()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructStateFrm())
-    {}
-
-    /// \brief Constructor
-    /// \param t A term
-    state_formula(ATermAppl t)
-      : atermpp::aterm_appl(atermpp::aterm_appl(t))
-    {
-      assert(mcrl2::core::detail::check_rule_StateFrm(m_term));
-    }
-
-    /// \brief Constructor
-    /// \param t A term
-    state_formula(const atermpp::aterm_appl& t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(mcrl2::core::detail::check_rule_StateFrm(m_term));
-    }
-
-    /// \brief Returns true if the formula is timed.
-    /// \return True if the formula is timed.
-    bool has_time() const;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// state_formula_list
-/// \brief Read-only singly linked list of state formulas
-typedef atermpp::term_list<state_formula> state_formula_list;
-
 /// \brief Returns true if the term t is a state formula
 /// \param t A term
 /// \return True if the term is a state formula
 // TODO: generate this function
 inline
-bool is_state_formula(atermpp::aterm_appl t)
+bool is_state_formula(const atermpp::aterm_appl& t)
 {
   return core::detail::gsIsStateFrm(t);
 }
 
 //--- start generated classes ---//
+/// \brief class state_formula
+class state_formula: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    state_formula()
+      : atermpp::aterm_appl(core::detail::constructStateFrm())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    state_formula(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_StateFrm(m_term));
+    }
+};
+
+/// \brief list of state_formulas
+typedef atermpp::term_list<state_formula> state_formula_list;
+
+/// \brief vector of state_formulas
+typedef atermpp::vector<state_formula>    state_formula_vector;
+
 /// \brief The value true for state formulas
 class true_: public state_formula
 {

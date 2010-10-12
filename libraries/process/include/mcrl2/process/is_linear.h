@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_IS_LINEAR_H
 #define MCRL2_PROCESS_IS_LINEAR_H
 
-#include "mcrl2/process/detail/linear_process_expression_visitor.h"
+#include "mcrl2/process/detail/linear_process_expression_traverser.h"
 
 namespace mcrl2 {
 
@@ -32,7 +32,7 @@ namespace process {
       }
       return false;
     }
-    detail::linear_process_expression_visitor visitor;
+    detail::linear_process_expression_traverser visitor;
     {
       if (!visitor.is_linear(*p.equations().begin(), verbose))
       {

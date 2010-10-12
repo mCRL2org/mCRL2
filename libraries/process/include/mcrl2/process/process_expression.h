@@ -30,48 +30,31 @@ namespace process {
 // Make the LPS action visible.
 using lps::action;
 
-//<ProcExpr>     ::= <ParamId>                                             [- tc]
-//                 | IdAssignment(<String>, <IdInit>*)                     [- tc]
-//                 | <Action>                                              [+ tc]
-//                 | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
-//                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)      [+ tc]
-//                 | Delta
-//                 | Tau
-//                 | Sum(<DataVarId>+, <ProcExpr>)
-//                 | Block(<String>*, <ProcExpr>)
-//                 | Hide(<String>*, <ProcExpr>)
-//                 | Rename(<RenameExpr>*, <ProcExpr>)
-//                 | Comm(<CommExpr>*, <ProcExpr>)
-//                 | Allow(<MultActName>*, <ProcExpr>)
-//                 | Sync(<ProcExpr>, <ProcExpr>)
-//                 | AtTime(<ProcExpr>, <DataExpr>)
-//                 | Seq(<ProcExpr>, <ProcExpr>)
-//                 | IfThen(<DataExpr>, <ProcExpr>)
-//                 | IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>)
-//                 | BInit(<ProcExpr>, <ProcExpr>)
-//                 | Merge(<ProcExpr>, <ProcExpr>)
-//                 | LMerge(<ProcExpr>, <ProcExpr>)
-//                 | Choice(<ProcExpr>, <ProcExpr>)
-
-  /// \brief Process expression
-  class process_expression: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      process_expression()
-        : atermpp::aterm_appl(core::detail::constructProcExpr())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      process_expression(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_rule_ProcExpr(m_term));
-      }
-  };
-
 //--- start generated classes ---//
+/// \brief class process_expression
+class process_expression: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Default constructor.
+    process_expression()
+      : atermpp::aterm_appl(core::detail::constructProcExpr())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    process_expression(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_ProcExpr(m_term));
+    }
+};
+
+/// \brief list of process_expressions
+typedef atermpp::term_list<process_expression> process_expression_list;
+
+/// \brief vector of process_expressions
+typedef atermpp::vector<process_expression>    process_expression_vector;
+
 /// \brief A process
 class process_instance: public process_expression
 {
