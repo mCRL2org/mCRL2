@@ -46,6 +46,8 @@
 //Boolean equation systems
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/bes/bes_deprecated.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/pbes/pbesrewr.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -274,7 +276,16 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
-      p.load(m_input_filename);
+      try
+      {
+        p.load(m_input_filename);
+      }
+      catch(mcrl2::runtime_error&)
+      {
+        mcrl2::bes::boolean_equation_system<> b;
+        b.load(m_input_filename);
+        p = mcrl2::bes::bes2pbes(b);
+      }
       p.normalize();
       p.instantiate_global_variables();
       // data rewriter
@@ -420,6 +431,7 @@ public:
 		values.push_back("vasy");
 		values.push_back("pbes");
 		values.push_back("cwi");
+		values.push_back("bes");
 		m_gui_options["output"] = create_radiobox_widget(values);
 
 		values.clear();
