@@ -109,7 +109,7 @@ if __name__ == "__main__":
     make_classes('../../data/include/mcrl2/data/container_type.h', CONTAINER_TYPES, 'container_type', add_constructor_overloads = True, generate_is_functions = True)
     make_classes('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula', generate_is_functions = True)
     make_classes('../../lps/include/mcrl2/modal_formula/regular_formula.h', REGULAR_FORMULA_CLASSES, 'regular_formula', generate_is_functions = True, superclass_aterm = 'RegFrm')
-    make_classes('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula', generate_is_functions = True, superclass_aterm = 'ActFrm')
+    make_classes('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula', generate_is_functions = True)
     make_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
     make_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES, 'process_expression', generate_is_functions = True, superclass_aterm = 'ProcExpr')
     
