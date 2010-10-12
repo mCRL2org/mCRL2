@@ -23,6 +23,8 @@
 
 namespace mcrl2 {
 
+namespace action_formulas {
+
 /// \brief Returns true if the term t is a action formula
 /// \param t A term
 /// \return True if the term is a action formula

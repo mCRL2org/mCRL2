@@ -107,7 +107,7 @@ if __name__ == "__main__":
     make_classes('../../data/include/mcrl2/data/assignment.h', ASSIGNMENT_EXPRESSION_CLASSES, 'assignment_expression', add_constructor_overloads = True, generate_is_functions = True)
     make_classes('../../data/include/mcrl2/data/binder_type.h', BINDER_TYPES, 'binder_type', add_constructor_overloads = True, generate_is_functions = True)
     make_classes('../../data/include/mcrl2/data/container_type.h', CONTAINER_TYPES, 'container_type', add_constructor_overloads = True, generate_is_functions = True)
-    make_classes('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula', generate_is_functions = True, superclass_aterm = 'StateFrm')
+    make_classes('../../lps/include/mcrl2/modal_formula/state_formula.h', STATE_FORMULA_CLASSES, 'state_formula', generate_is_functions = True)
     make_classes('../../lps/include/mcrl2/modal_formula/regular_formula.h', REGULAR_FORMULA_CLASSES, 'regular_formula', generate_is_functions = True, superclass_aterm = 'RegFrm')
     make_classes('../../lps/include/mcrl2/modal_formula/action_formula.h', ACTION_FORMULA_CLASSES, 'action_formula', generate_is_functions = True, superclass_aterm = 'ActFrm')
     make_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
