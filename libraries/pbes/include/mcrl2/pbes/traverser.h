@@ -1,4 +1,4 @@
-// Author(s): Jeroen van der Wulp, Wieger Wesselink
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,21 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/traverser.h
+/// \file mcrl2/pbes/traverser.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PROCESS_TRAVERSER_H
-#define MCRL2_PROCESS_TRAVERSER_H
+#ifndef MCRL2_PBES_TRAVERSER_H
+#define MCRL2_PBES_TRAVERSER_H
 
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/process/process_specification.h"
+#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
 
-namespace process {
+namespace pbes_system {
 
-  /// \brief Traversal class for process data types
+  /// \brief Traversal class for PBES data types
   template <typename Derived>
   class traverser: public data::traverser<Derived>
   {
@@ -30,8 +29,7 @@ namespace process {
       using super::enter;
       using super::leave;
 
-#include "mcrl2/lps/detail/traverser.inc.h" // needed for traversal of lps::action
-#include "mcrl2/process/detail/traverser.inc.h"
+#include "mcrl2/pbes/detail/traverser.inc.h"
   };
 
   template <typename Derived>
@@ -43,15 +41,14 @@ namespace process {
     using super::enter;
     using super::leave;
 
-#include "mcrl2/lps/detail/traverser.inc.h" // needed for traversal of lps::action
-#include "mcrl2/process/detail/traverser.inc.h"
+#include "mcrl2/pbes/detail/traverser.inc.h"
   };
 
-  /// \brief Selective traversal class for process data types
+  /// \brief Selective traversal class for PBES data types
   template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, process::traverser>
+  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, pbes::traverser>
   {
-    typedef core::selective_traverser<Derived, AdaptablePredicate, process::traverser> super;
+    typedef core::selective_traverser<Derived, AdaptablePredicate, pbes::traverser> super;
 
     public:
 
@@ -62,8 +59,8 @@ namespace process {
       { }
   };
 
-} // namespace process
+} // namespace pbes_system
 
 } // namespace mcrl2
 
-#endif // MCRL2_PROCESS_TRAVERSER_H
+#endif // MCRL2_PBES_TRAVERSER_H

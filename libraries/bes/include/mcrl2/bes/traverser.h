@@ -14,7 +14,6 @@
 
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/core/traverser.h"
-#include "mcrl2/core/selective_traverser.h"
 
 namespace mcrl2 {
 

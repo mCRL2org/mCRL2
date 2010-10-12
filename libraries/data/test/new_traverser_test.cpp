@@ -20,7 +20,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/new_find.h"
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/data/binding_aware_traverser.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

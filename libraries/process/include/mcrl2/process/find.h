@@ -17,7 +17,6 @@
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/process/traverser.h"
-#include "mcrl2/process/binding_aware_traverser.h"
 
 namespace mcrl2 {
 

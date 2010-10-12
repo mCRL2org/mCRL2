@@ -15,7 +15,6 @@
 #include <set>
 #include "mcrl2/core/detail/find.h"
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/data/selective_traverser.h"
 #include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
