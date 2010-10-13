@@ -405,7 +405,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& /* specification */,
             variable_type const& variable) :
-                   super(get_shared_context(), make_set(variable), sort_bool::true_(), substitution_type(), get_shared_evaluator())
+                   super(get_shared_context(), super::make_set(variable), sort_bool::true_(), substitution_type(), get_shared_evaluator())
         { 
         }
 

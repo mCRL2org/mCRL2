@@ -140,6 +140,7 @@ namespace detail {
   template <typename Term>
   struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edge_condition<Term> >
   {
+    typedef pbes_expression_visitor<Term, constelm_edge_condition<Term> > super;
     typedef typename core::term_traits<Term>::term_type term_type;
     typedef typename core::term_traits<Term>::variable_type variable_type;
     typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
@@ -209,7 +210,7 @@ namespace detail {
     bool visit_not(const term_type& /* e */, const term_type& arg, edge_condition& ec)
     {
       edge_condition ec_arg;
-      visit(arg, ec_arg);
+      super::visit(arg, ec_arg);
       ec.TC = ec_arg.FC;
       ec.FC = ec_arg.TC;
       ec.condition = ec_arg.condition;
@@ -225,9 +226,9 @@ namespace detail {
     bool visit_and(const term_type& /* e */, const term_type& left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
-      visit(left, ec_left);
+      super::visit(left, ec_left);
       edge_condition ec_right;
-      visit(right, ec_right);
+      super::visit(right, ec_right);
       ec.TC = core::optimized_and(ec_left.TC, ec_right.TC);
       ec.FC = core::optimized_or(ec_left.FC, ec_right.FC);
       merge_conditions(ec_left, ec_right, ec);
@@ -243,9 +244,9 @@ namespace detail {
     bool visit_or(const term_type& /* e */, const term_type&  left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
-      visit(left, ec_left);
+      super::visit(left, ec_left);
       edge_condition ec_right;
-      visit(right, ec_right);
+      super::visit(right, ec_right);
       ec.TC = core::optimized_or(ec_left.TC, ec_right.TC);
       ec.FC = core::optimized_and(ec_left.FC, ec_right.FC);
       merge_conditions(ec_left, ec_right, ec);
@@ -261,9 +262,9 @@ namespace detail {
     bool visit_imp(const term_type& /* e */, const term_type&  left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
-      visit(left, ec_left);
+      super::visit(left, ec_left);
       edge_condition ec_right;
-      visit(right, ec_right);
+      super::visit(right, ec_right);
       ec.TC = core::optimized_or(ec_left.FC, ec_right.TC);
       ec.FC = core::optimized_and(ec_left.TC, ec_right.FC);
       merge_conditions(ec_left, ec_right, ec);
@@ -278,7 +279,7 @@ namespace detail {
     /// \return The result of visiting the node
     bool visit_forall(const term_type& /* e */, const variable_sequence_type& variables, const term_type& expr, edge_condition& ec)
     {
-      visit(expr, ec);
+      super::visit(expr, ec);
       for (typename condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
       {
         i->second.push_back(ec.TCFC());
@@ -295,7 +296,7 @@ namespace detail {
     /// \return The result of visiting the node
     bool visit_exists(const term_type& /* e */, const variable_sequence_type&  variables, const term_type& expr, edge_condition& ec)
     {
-      visit(expr, ec);
+      super::visit(expr, ec);
       for (typename condition_map::iterator i = ec.condition.begin(); i != ec.condition.end(); ++i)
       {
         i->second.push_back(ec.TCFC());

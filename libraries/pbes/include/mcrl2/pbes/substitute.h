@@ -23,7 +23,7 @@ namespace pbes_system {
   // to problems at different locations; why???
   /// \brief Applies a substitution to a PBES data type.
   template <typename Object, typename Substitution>
-  void substitute(Object& o, const Substitution& sigma, bool replace_parameters = false)
+  void substitute(Object& o, const Substitution& sigma, bool replace_parameters)
   {
     pbes_system::detail::pbes_substituter<Substitution> r(sigma, replace_parameters);
     r(o);
@@ -33,10 +33,28 @@ namespace pbes_system {
   // to problems at different locations; why???
   /// \brief Applies a substitution to a PBES data type.
   template <typename Object, typename Substitution>
-  void substitute_gcc_workaround(Object& o, const Substitution& sigma, bool replace_parameters = false)
+  void substitute(Object& o, const Substitution& sigma)
+  {
+    substitute_gcc(o, sigma, false);
+  }
+
+  // TODO: with g++ both 'const Substitution& sigma' nor 'Substitution sigma' leads
+  // to problems at different locations; why???
+  /// \brief Applies a substitution to a PBES data type.
+  template <typename Object, typename Substitution>
+  void substitute_gcc_workaround(Object& o, const Substitution& sigma, bool replace_parameters)
   {
     pbes_system::detail::pbes_substituter<Substitution> r(sigma, replace_parameters);
     r(o);
+  }
+
+  // TODO: with g++ both 'const Substitution& sigma' nor 'Substitution sigma' leads
+  // to problems at different locations; why???
+  /// \brief Applies a substitution to a PBES data type.
+  template <typename Object, typename Substitution>
+  void substitute_gcc_workaround(Object& o, const Substitution& sigma)
+  {
+    substitute_gcc_workaround(o, sigma, false);
   }
 
   /// \brief Applies a propositional variable substitution to a PBES data type.

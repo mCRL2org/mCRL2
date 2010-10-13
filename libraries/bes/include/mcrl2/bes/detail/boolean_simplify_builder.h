@@ -171,7 +171,7 @@ namespace detail {
     term_type operator()(const term_type& x)
     {
       Arg tmp;
-      return visit(x, tmp);
+      return super::visit(x, tmp);
     }
 
     /// \brief Applies this builder to the term x, with argument arg.
@@ -180,7 +180,7 @@ namespace detail {
     /// \return The result of simplifying the term x
     term_type operator()(const term_type& x, Arg& arg)
     {
-      return visit(x, arg);
+      return super::visit(x, arg);
     }
   };
 

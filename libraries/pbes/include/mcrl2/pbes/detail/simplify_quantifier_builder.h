@@ -193,7 +193,7 @@ namespace detail {
     {
       typedef typename core::term_traits<data_term_type> tt;
       term_type result;
-      term_type t = visit(phi, sigma);
+      term_type t = super::visit(phi, sigma);
 
       if (tr::is_not(t))
       {
@@ -244,7 +244,7 @@ namespace detail {
     {
       typedef typename core::term_traits<data_term_type> tt;
       term_type result;
-      term_type t = visit(phi, sigma);
+      term_type t = super::visit(phi, sigma);
 
       if (tr::is_not(t))
       {
@@ -308,7 +308,7 @@ namespace detail {
     term_type operator()(const term_type& x)
     {
       SubstitutionFunction tmp;
-      return visit(x, tmp);
+      return super::visit(x, tmp);
     }
 
     /// \brief Applies this builder to the term x, with substitution sigma.
@@ -317,7 +317,7 @@ namespace detail {
     /// \return The rewrite result
     term_type operator()(const term_type& x, SubstitutionFunction sigma)
     {
-      return visit(x, sigma);
+      return super::visit(x, sigma);
     }
   };
 

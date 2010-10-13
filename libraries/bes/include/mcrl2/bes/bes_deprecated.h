@@ -2632,7 +2632,7 @@ static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expressio
 /// \param bes_equations The bes equations to bes saved.
 /// \param p A PBES from which the datatypes are taken for the PBES that is saved.
 template <class Container>
-static void save_bes_in_pbes_format(
+void save_bes_in_pbes_format(
                    const std::string &outfilename,
                    boolean_equation_system &bes_equations,
                    const typename mcrl2::pbes_system::pbes<Container> &p)

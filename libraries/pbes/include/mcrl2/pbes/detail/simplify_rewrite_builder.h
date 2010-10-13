@@ -220,7 +220,7 @@ namespace detail {
     term_type visit_forall(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       typedef typename core::term_traits<data_term_type> tt;
-      term_type t = visit(phi, sigma);
+      term_type t = super::visit(phi, sigma);
       return core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
     }
 
@@ -234,7 +234,7 @@ namespace detail {
     term_type visit_exists(const term_type& /* x */, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       typedef typename core::term_traits<data_term_type> tt;
-      term_type t = visit(phi, sigma);
+      term_type t = super::visit(phi, sigma);
       return core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
     }
 
@@ -262,7 +262,7 @@ namespace detail {
     term_type operator()(const term_type& x)
     {
       SubstitutionFunction tmp;
-      return visit(x, tmp);
+      return super::visit(x, tmp);
     }
 
     /// \brief Applies this builder to the term x, with substitution sigma.
@@ -271,7 +271,7 @@ namespace detail {
     /// \return The rewrite result
     term_type operator()(const term_type& x, SubstitutionFunction sigma)
     {
-      return visit(x, sigma);
+      return super::visit(x, sigma);
     }
   };
 

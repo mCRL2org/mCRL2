@@ -13,6 +13,7 @@
 #define MCRL2_DATA_DETAIL_TRAVERSER_H
 
 #include <algorithm>
+#include <stdexcept>
 
 #include "boost/utility/enable_if.hpp"
 #include "boost/type_traits/is_base_of.hpp"
@@ -170,7 +171,12 @@ namespace mcrl2 {
           // Default, no traversal of sort expressions
           void operator()(data_expression_with_variables const& e)
           {
+// TODO: This code seems flawed!
+#ifndef BOOST_CLANG
             static_cast< Derived& >(*this)(static_cast< data_expression const& >(e));
+#else
+            throw std::runtime_error("data::detail::traverser::operator(data_expression_with_variables) is not supported!!!");
+#endif
           }
 
           // Default, no traversal of sort expressions

@@ -97,7 +97,7 @@ namespace detail {
     term_type operator()(const term_type& x)
     {
       SubstitutionFunction tmp;
-      return visit(x, tmp);
+      return super::visit(x, tmp);
     }
 
     /// \brief Applies this builder to the term x, with substitution sigma.
@@ -106,7 +106,7 @@ namespace detail {
     /// \return The rewrite result
     term_type operator()(const term_type& x, SubstitutionFunction sigma)
     {
-      return visit(x, sigma);
+      return super::visit(x, sigma);
     }
   };
 

@@ -26,7 +26,7 @@ namespace detail {
   template <typename Stream>
   struct lps_printer
   {
-    mutable Stream& out;
+    Stream& out;
   
     /// \brief Constructor
     lps_printer(Stream& out_)
