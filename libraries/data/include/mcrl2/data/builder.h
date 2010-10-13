@@ -13,7 +13,7 @@
 #define MCRL2_DATA_BUILDER_H
 
 #include "mcrl2/core/builder.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2 {
 

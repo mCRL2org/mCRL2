@@ -198,7 +198,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return data::pp(t);
+      return core::pp(t);
     }
   };
 
@@ -287,6 +287,8 @@ namespace data {
 
 } // namespace mcrl2
 
+#ifndef MCRL2_DATA_FIND_H
 #include "mcrl2/data/find.h"
+#endif
 
 #endif // MCRL2_DATA_TERM_TRAITS_H

@@ -17,7 +17,6 @@
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
 
@@ -260,7 +259,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return term_traits<data::data_expression>::pp(t) + " " + data::pp(t.variables());
+      return term_traits<data::data_expression>::pp(t) + " " + core::pp(t.variables());
     }
   };
 

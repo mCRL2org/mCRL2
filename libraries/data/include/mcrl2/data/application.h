@@ -9,13 +9,17 @@
 /// \file mcrl2/data/application.h
 /// \brief The class application.
 
+// This is to avoid incomplete type errors when including this header standalone
+#ifndef MCRL2_DATA_DATA_EXPRESSION_H
+#include "mcrl2/data/data_expression.h"
+#endif
+
 #ifndef MCRL2_DATA_APPLICATION_H
 #define MCRL2_DATA_APPLICATION_H
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
 

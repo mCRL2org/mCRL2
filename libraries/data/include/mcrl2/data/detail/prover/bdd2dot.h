@@ -14,6 +14,7 @@
 
 #include "aterm2.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 
   /// \brief The class BDD2Dot offers the ability to write binary decision diagrams to dot files.

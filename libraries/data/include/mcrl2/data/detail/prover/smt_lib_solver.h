@@ -17,9 +17,11 @@
 #include "aterm2.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
 #include "mcrl2/data/detail/prover/expression_info.h"
 

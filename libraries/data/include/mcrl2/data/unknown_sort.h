@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_UNKNOWN_SORT_H
 #define MCRL2_DATA_UNKNOWN_SORT_H
 
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2 {
