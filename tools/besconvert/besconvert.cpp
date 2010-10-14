@@ -80,6 +80,11 @@ namespace mcrl2 {
           return m_equivalence_strings[eq];
         }
 
+        const std::set<equivalence_t> &allowed_eqs() const
+        {
+          return m_allowed_equivalences;
+        }
+
       protected:
         void initialise_allowed_eqs() const
         {
@@ -89,11 +94,6 @@ namespace mcrl2 {
           m_equivalence_strings[eq_stut] = "stuttering";
           m_equivalence_strings[eq_oblivious_bisim] = "oblivious";
           m_equivalence_strings[eq_none] = "none";
-        }
-
-        const std::set<equivalence_t> &allowed_eqs() const
-        {
-          return m_allowed_equivalences;
         }
 
         boolean_operand_t get_operand(boolean_expression const& e)
@@ -430,28 +430,29 @@ class bes_bisimulation_tool: public super
 
     void add_options(mcrl2::utilities::interface_description& desc)
     {
+      using namespace mcrl2::utilities::tools;
+      using namespace mcrl2::utilities;
       super::add_options(desc);
-/*
+
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
         "generate an equivalent BES, preserving equivalence NAME:\n"
         "supported equivalences: bisim, stuttering (default bisim)", 'e');
-        */
     }
 
     void parse_options(const mcrl2::utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
 
-      /*
       if (parser.options.count("equivalence")) {
-        equivalence = mcrl2::bes::parse_equivalence(parser.option_argument("equivalence"));
-        if( allowed_eqs().count(equivalence) == 0 )
+        boolean_equation_system<> b; // TODO: build proper solution.
+        mcrl2::bes::bes_reduction_algorithm<> a(b);
+        equivalence = a.parse_equivalence(parser.option_argument("equivalence"));
+        if( a.allowed_eqs().count(equivalence) == 0 )
         {
           parser.error("option -e/--equivalence has illegal argument '" +
             parser.option_argument("equivalence") + "'");
         }
       }
-      */
     }      
 
   public:
