@@ -172,8 +172,8 @@ namespace mcrl2 {
           void operator()(data_expression_with_variables const& e)
           {
 // TODO: This code seems flawed!
-#ifndef BOOST_CLANG
-            static_cast< Derived& >(*this)(static_cast< data_expression const& >(e));
+#if !defined(BOOST_CLANG) && !defined(__clang__)
+            reinterpret_cast< Derived& >(*this)(static_cast< data_expression const& >(e));
 #else
             throw std::runtime_error("data::detail::traverser::operator(data_expression_with_variables) is not supported!!!");
 #endif
