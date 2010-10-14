@@ -115,7 +115,7 @@ class function_sort: public sort_expression
       return function_sort(atermpp::make_list(dom1, dom2, dom3), codomain);
     }
 
-    /// \brief Convenience constructor for function sort with domain size 3
+    /// \brief Convenience constructor for function sort with domain size 4
     ///
     /// \param[in] dom1 The first sort of the domain.
     /// \param[in] dom2 The second sort of the domain.
