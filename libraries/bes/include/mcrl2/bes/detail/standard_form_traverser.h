@@ -244,7 +244,7 @@ namespace detail {
       }
         
       /// \brief Leave a boolean equation system.
-      void leave(const boolean_equation_system<>& eqn)
+      void leave(const boolean_equation_system<>&)
       {
         // add equations for true and false if needed
         if (m_recursive_form)
