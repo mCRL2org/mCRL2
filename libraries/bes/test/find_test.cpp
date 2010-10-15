@@ -201,6 +201,33 @@ void test_find()
   core::garbage_collect();
 }
 
+void test_bnd_occ()
+{
+  std::string bes1 =
+    "pbes              \n"
+    "                  \n"
+    "nu X1 = X2 && X1; \n"
+    "mu X2 = X1 || X2; \n"
+    "                  \n"
+    "init X1;          \n"
+    ;
+  boolean_equation_system<> b;
+  std::stringstream from(bes1);
+  from >> b;
+
+  std::set<boolean_variable> bnd = b.binding_variables();
+  BOOST_CHECK(bnd.size() == 2);
+  BOOST_CHECK(bnd.find(boolean_variable("X1")) != bnd.end());   
+  BOOST_CHECK(bnd.find(boolean_variable("X2")) != bnd.end());   
+
+  std::set<boolean_variable> occ = b.occurring_variables();
+  BOOST_CHECK(occ.size() == 2);
+  BOOST_CHECK(occ.find(boolean_variable("X1")) != occ.end());   
+  BOOST_CHECK(occ.find(boolean_variable("X2")) != occ.end());   
+
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -208,6 +235,7 @@ int test_main(int argc, char* argv[])
   test_my_find();
   test_find();
   test_my_search();
+  test_bnd_occ();
 
   return EXIT_SUCCESS;
 }

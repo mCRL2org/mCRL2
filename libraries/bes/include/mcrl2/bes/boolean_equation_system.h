@@ -19,9 +19,7 @@
 #include <sstream>
 #include <string>
 #include <boost/foreach.hpp>
-#include "mcrl2/atermpp/algorithm.h" // find_all_if
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -34,6 +32,10 @@
 namespace mcrl2 {
 
 namespace bes {
+
+// forward declarations
+template <typename Container, typename OutputIterator>
+void find_variables(Container const& container, OutputIterator o);
 
 /// \brief boolean equation system
   // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
@@ -166,9 +168,9 @@ namespace bes {
       /// \brief Returns the set of binding variables of the boolean_equation_system, i.e. the
       /// variables that occur on the left hand side of an equation.
       /// \return The binding variables of the equation system
-      atermpp::set<boolean_variable> binding_variables() const
+      std::set<boolean_variable> binding_variables() const
       {
-        atermpp::set<boolean_variable> result;
+        std::set<boolean_variable> result;
         for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
         {
           result.insert(i->variable());
@@ -180,14 +182,14 @@ namespace bes {
       /// the variables that occur in the right hand side of an equation or in the
       /// initial state.
       /// \return The occurring variables of the equation system
-      atermpp::set<boolean_variable> occurring_variables() const
+      std::set<boolean_variable> occurring_variables() const
       {
-        atermpp::set<boolean_variable> result;
+        std::set<boolean_variable> result;
         for (typename Container::const_iterator i = m_equations.begin(); i != m_equations.end(); ++i)
         {
-          atermpp::find_all_if(i->formula(), &core::term_traits<boolean_expression>::is_variable, std::inserter(result, result.end()));
+          find_variables(i->formula(), std::inserter(result, result.end()));
         }
-        atermpp::find_all_if(m_initial_state, &core::term_traits<boolean_expression>::is_variable, std::inserter(result, result.end()));
+        find_variables(m_initial_state, std::inserter(result, result.end()));
         return result;
       }
 
@@ -195,8 +197,8 @@ namespace bes {
       /// \return True if the equation system is closed
       bool is_closed() const
       {
-        atermpp::set<boolean_variable> bnd = binding_variables();
-        atermpp::set<boolean_variable> occ = occurring_variables();
+        std::set<boolean_variable> bnd = binding_variables();
+        std::set<boolean_variable> occ = occurring_variables();
         return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && bnd.find(initial_state()) != bnd.end();
       }
 
@@ -255,5 +257,9 @@ struct aterm_traits<mcrl2::bes::boolean_equation_system<Container> >
 };
 }
 /// \endcond
+
+#ifndef MCRL2_BES_FIND_H
+#include "mcrl2/bes/find.h"
+#endif
 
 #endif // MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H

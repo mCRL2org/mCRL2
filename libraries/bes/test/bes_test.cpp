@@ -167,7 +167,7 @@ void test_bes()
   boolean_equation_system<> bes(eqns, X);
   BOOST_CHECK(bes.is_closed());
 
-  atermpp::set<boolean_variable> occurring_variables = bes.occurring_variables();
+  std::set<boolean_variable> occurring_variables = bes.occurring_variables();
   BOOST_CHECK(occurring_variables.size() == 3);
   core::garbage_collect();
 }
