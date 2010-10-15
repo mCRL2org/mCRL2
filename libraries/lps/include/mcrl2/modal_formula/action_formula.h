@@ -525,6 +525,8 @@ namespace act_frm
     return action_formula(core::detail::gsMakeActAt(p,d));
   }
 
+} // namespace act_frm
+
   /// \brief Returns true if the term t is a multi action
   inline bool is_mult_act(atermpp::aterm_appl t) { return core::detail::gsIsMultAct(t); }
 
@@ -557,8 +559,6 @@ namespace act_frm
 
   /// \brief Returns true if the term t is an at expression
   inline bool is_at(atermpp::aterm_appl t) { return core::detail::gsIsActAt(t); }
-
-} // namespace act_frm
 
 namespace accessors
 {

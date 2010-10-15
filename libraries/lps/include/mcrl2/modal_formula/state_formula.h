@@ -911,7 +911,7 @@ namespace accessors {
     bool operator()(const atermpp::aterm_appl& t) const
     {
       return (is_state_formula(t) && (is_delay_timed(t) || is_yaled_timed(t)))
-        || action_formulas::act_frm::is_at(t);
+        || action_formulas::is_at(t);
     }
   };
   /// \endcond

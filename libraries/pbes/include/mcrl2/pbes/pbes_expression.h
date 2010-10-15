@@ -327,7 +327,7 @@ class exists: public pbes_expression
 } // namespace traversal
 
 /// \brief The namespace for predicates on pbes expressions.
-namespace pbes_expr {
+//namespace pbes_expr {
 
   /// \brief Returns true if the term t is equal to true
   /// \param t A PBES expression
@@ -446,7 +446,7 @@ namespace pbes_expr {
   inline bool is_propositional_variable_instantiation(pbes_expression t)
   { return core::detail::gsIsPropVarInst(t); }
 
-} // namespace pbes_expr
+//} // namespace pbes_expr
 
 /// \brief The namespace for accessor functions on pbes expressions.
 namespace accessors {
@@ -468,13 +468,13 @@ namespace accessors {
   inline
   pbes_expression arg(pbes_expression t)
   {
-    if (pbes_expr::is_pbes_not(t))
+    if (is_pbes_not(t))
     {
       return atermpp::arg1(t);
     }
     else
     {
-      assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
+      assert(is_forall(t) || is_exists(t));
       return atermpp::arg2(t);
     }
   }
@@ -485,7 +485,7 @@ namespace accessors {
   inline
   pbes_expression left(pbes_expression t)
   {
-    assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
+    assert(is_and(t) || is_or(t) || is_imp(t));
     return atermpp::arg1(t);
   }
 
@@ -504,7 +504,7 @@ namespace accessors {
   inline
   data::variable_list var(pbes_expression t)
   {
-    assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
+    assert(is_forall(t) || is_exists(t));
     return data::variable_list(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
                                    atermpp::term_list_iterator< data::variable >());
   }
@@ -515,7 +515,7 @@ namespace accessors {
   inline
   core::identifier_string name(pbes_expression t)
   {
-    assert(pbes_expr::is_propositional_variable_instantiation(t));
+    assert(is_propositional_variable_instantiation(t));
     return atermpp::arg1(t);
   }
 
@@ -525,7 +525,7 @@ namespace accessors {
   inline
   data::data_expression_list param(pbes_expression t)
   {
-    assert(pbes_expr::is_propositional_variable_instantiation(t));
+    assert(is_propositional_variable_instantiation(t));
     return data::data_expression_list(atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
                                           atermpp::term_list_iterator< data::data_expression >());
   }
@@ -669,24 +669,6 @@ namespace pbes_expr {
 } // namespace pbes_expr
 
 namespace pbes_expr_optimized {
-  using pbes_expr::is_pbes_true;
-  using pbes_expr::is_pbes_false;
-  using pbes_expr::is_pbes_not;
-  using pbes_expr::is_pbes_and;
-  using pbes_expr::is_pbes_or;
-  using pbes_expr::is_pbes_imp;
-  using pbes_expr::is_pbes_forall;
-  using pbes_expr::is_pbes_exists;
-  using pbes_expr::is_true;
-  using pbes_expr::is_false;
-  using pbes_expr::is_not;
-  using pbes_expr::is_and;
-  using pbes_expr::is_or;
-  using pbes_expr::is_imp;
-  using pbes_expr::is_forall;
-  using pbes_expr::is_exists;
-  using pbes_expr::is_data;
-  using pbes_expr::is_propositional_variable_instantiation;
   using pbes_expr::true_;
   using pbes_expr::false_;
   using pbes_expr::split_and;
@@ -1054,7 +1036,7 @@ namespace core {
     static inline
     bool is_and(term_type t)
     {
-      return pbes_system::pbes_expr::is_and(t);
+      return pbes_system::is_and(t);
     }
 
     /// \brief Test for a disjunction
@@ -1063,7 +1045,7 @@ namespace core {
     static inline
     bool is_or(term_type t)
     {
-      return pbes_system::pbes_expr::is_or(t);
+      return pbes_system::is_or(t);
     }
 
     /// \brief Test for an implication
@@ -1072,7 +1054,7 @@ namespace core {
     static inline
     bool is_imp(term_type t)
     {
-      return pbes_system::pbes_expr::is_imp(t);
+      return pbes_system::is_imp(t);
     }
 
     /// \brief Test for an universal quantification
@@ -1081,7 +1063,7 @@ namespace core {
     static inline
     bool is_forall(term_type t)
     {
-      return pbes_system::pbes_expr::is_forall(t);
+      return pbes_system::is_forall(t);
     }
 
     /// \brief Test for an existential quantification
@@ -1090,7 +1072,7 @@ namespace core {
     static inline
     bool is_exists(term_type t)
     {
-      return pbes_system::pbes_expr::is_exists(t);
+      return pbes_system::is_exists(t);
     }
 
     /// \brief Test for data term

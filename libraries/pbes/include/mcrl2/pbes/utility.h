@@ -257,7 +257,7 @@ inline pbes_expression give_the_instantiated_rhs(
 
 static void distribute_and(const pbes_expression &expr,atermpp::set < pbes_expression> &conjunction_set)
 { /* distribute the conjuncts of expr over the conjunction_set */
-  if (pbes_expr::is_pbes_and(expr))
+  if (is_pbes_and(expr))
   { distribute_and(accessors::left(expr),conjunction_set);
     distribute_and(accessors::right(expr),conjunction_set);
   }
@@ -274,7 +274,7 @@ static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &c
 
   for(atermpp::set < pbes_expression>::const_iterator i=conjunction_set.begin();
           i!=conjunction_set.end() ; i++)
-  { if (pbes_expr::is_pbes_true(t))
+  { if (is_pbes_true(t))
     { t=*i;
     }
     else
@@ -288,7 +288,7 @@ static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &c
 
 static void distribute_or(const pbes_expression &expr,atermpp::set < pbes_expression> &disjunction_set)
 { /* distribute the conjuncts of expr over the conjunction_set */
-  if (pbes_expr::is_pbes_or(expr))
+  if (is_pbes_or(expr))
   { distribute_or(accessors::left(expr),disjunction_set);
     distribute_or(accessors::right(expr),disjunction_set);
   }
@@ -305,7 +305,7 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
   for(atermpp::set < pbes_expression>::const_iterator i=disjunction_set.begin();
           i!=disjunction_set.end() ; i++)
   {
-    if (pbes_expr::is_pbes_false(t))
+    if (is_pbes_false(t))
     { t=*i;
     }
     else
@@ -532,7 +532,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format));
                   r.clearSubstitution(*i);
                   // sigma[*i] = *i; // erase *i
-                  if (pbes_expr::is_pbes_false(rt)) /* the resulting expression is false, so we can terminate */
+                  if (is_pbes_false(rt)) /* the resulting expression is false, so we can terminate */
                   { restore_saved_substitution(saved_substitutions,r,use_internal_rewrite_format);
                     return pbes_expr::false_();
                   }
@@ -664,7 +664,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format));
                   // sigma[*i] = *i; // erase *i
                   r.clearSubstitution(*i);
-                  if (pbes_expr::is_pbes_true(rt)) /* the resulting expression is true, so we can terminate */
+                  if (is_pbes_true(rt)) /* the resulting expression is true, so we can terminate */
                   { restore_saved_substitution(saved_substitutions,r,use_internal_rewrite_format);
                     return pbes_expr::true_();
                   }

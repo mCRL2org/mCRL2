@@ -1720,7 +1720,7 @@ namespace bes
           }
         }
       }
-      else if (mcrl2::pbes_system::pbes_expr::is_and(p))
+      else if (mcrl2::pbes_system::is_and(p))
       { bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                                 accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                                 construct_counter_example,current_variable);
@@ -1746,7 +1746,7 @@ namespace bes
         { return and_(b1,b2);
         }
       }
-      else if (pbes_expr::is_or(p))
+      else if (is_or(p))
       {
         bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                                 accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
@@ -1775,10 +1775,10 @@ namespace bes
         { return or_(b1,b2);
         }
       }
-      else if (pbes_expr::is_true(p))
+      else if (is_true(p))
       { return true_();
       }
-      else if (pbes_expr::is_false(p))
+      else if (is_false(p))
       { return false_();
       }
       
