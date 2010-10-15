@@ -54,6 +54,7 @@ void print(atermpp::set<pbes_expression> q)
 
 void test_accessors()
 {
+  namespace p = mcrl2::pbes_system::pbes_expr;
   using namespace mcrl2::pbes_system::accessors;
 
   std::vector<pbes_expression> expressions = parse_pbes_expressions(EXPRESSIONS).first;
@@ -70,7 +71,6 @@ void test_accessors()
   q.insert(z);
 
   {
-    using namespace pbes_expr;
     using namespace mcrl2::pbes_system::accessors;
 
     pbes_expression a, b, c;
@@ -81,35 +81,35 @@ void test_accessors()
 
     e = val(z);
 
-    a = not_(x);
+    a = p::not_(x);
     b = arg(a);
     BOOST_CHECK(x == b);
 
-    a = and_(x, y);
+    a = p::and_(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = or_(x, y);
+    a = p::or_(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = imp(x, y);
+    a = p::imp(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = pbes_expr::forall(v, x);
+    a = p::forall(v, x);
     w = var(a);
     b = arg(a);
     BOOST_CHECK(v == w);
     BOOST_CHECK(x == b);
 
-    a = pbes_expr::exists(v, x);
+    a = p::exists(v, x);
     w = var(a);
     b = arg(a);
     BOOST_CHECK(v == w);
@@ -124,14 +124,14 @@ void test_accessors()
 
     print(q);
 
-    a = join_or(q.begin(), q.end());
-    q1 = split_or(a);
+    a = p::join_or(q.begin(), q.end());
+    q1 = p::split_or(a);
     BOOST_CHECK(q == q1);
 
     print(q1);
 
-    a = join_and(q.begin(), q.end());
-    q1 = split_and(a);
+    a = p::join_and(q.begin(), q.end());
+    q1 = p::split_and(a);
     BOOST_CHECK(q == q1);
 
     print(q1);
@@ -147,18 +147,18 @@ void test_accessors()
 
     e = val(z);
 
-    a = not_(x);
-    a = and_(x, y);
-    a = or_(x, y);
-    a = imp(x, y);
-    a = pbes_expr::forall(v, x);
-    a = pbes_expr::exists(v, x);
+    a = p::not_(x);
+    a = p::and_(x, y);
+    a = p::or_(x, y);
+    a = p::imp(x, y);
+    a = p::forall(v, x);
+    a = p::exists(v, x);
     s = name(X);
     data_expression_list f = param(X);
-    a = join_or(q.begin(), q.end());
-    a = join_and(q.begin(), q.end());
-    q1 = split_or(a);
-    q1 = split_and(a);
+    a = p::join_or(q.begin(), q.end());
+    a = p::join_and(q.begin(), q.end());
+    q1 = p::split_or(a);
+    q1 = p::split_and(a);
   }
   core::garbage_collect();
 }

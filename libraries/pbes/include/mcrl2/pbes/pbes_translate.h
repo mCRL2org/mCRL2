@@ -302,7 +302,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pp(result) << std::fl
 std::cerr << "\n" << lps2pbes_indent() << "<RHS timed>" << pp(f) << std::flush;
 lps2pbes_increase_indent();
 #endif
-      using namespace pbes_expr_optimized;
+      namespace z = pbes_expr_optimized;
       using namespace pbes_system::accessors;
       using lps::summand_list;
       namespace s = state_formulas;
@@ -320,25 +320,25 @@ lps2pbes_increase_indent();
         } 
         else if (s::is_true(f)) 
         {
-          result = true_();
+          result = z::true_();
         } 
         else if (s::is_false(f)) 
         {
-          result = false_();
+          result = z::false_();
         } 
         else if (s::is_and(f)) 
         {
-          result = and_(RHS(f0, a::left(f), lps, T, context), RHS(f0, a::right(f), lps, T, context));
+          result = z::and_(RHS(f0, a::left(f), lps, T, context), RHS(f0, a::right(f), lps, T, context));
         } 
         else if (s::is_or(f)) 
         {
-          result = or_(RHS(f0, a::left(f), lps, T, context), RHS(f0, a::right(f), lps, T, context));
+          result = z::or_(RHS(f0, a::left(f), lps, T, context), RHS(f0, a::right(f), lps, T, context));
         } 
         else if (s::is_imp(f)) 
         {
           // TODO: generalize
           // result = imp(RHS(f0, a::left(f), lps, T, context), RHS(f0, a::right(f), lps, T, context));
-          result = or_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, a::right(f), lps, T, context));
+          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, a::right(f), lps, T, context));
         } 
         else if (s::is_forall(f)) 
         {
@@ -387,7 +387,7 @@ lps2pbes_increase_indent();
             pbes_expression p = pbes_expr::forall(y, imp(and_(and_(p1, p2), p3), rhs));
             v.push_back(p);
           }
-          result = join_and(v.begin(), v.end());
+          result = z::join_and(v.begin(), v.end());
         } 
         else if (s::is_may(f)) 
         {
@@ -421,7 +421,7 @@ lps2pbes_increase_indent();
             pbes_expression p = pbes_expr::exists(y, and_(and_(and_(p1, p2), p3), rhs));
             v.push_back(p);
           }
-          result = join_or(v.begin(), v.end());
+          result = z::join_or(v.begin(), v.end());
         } 
         else if (s::is_delay_timed(f)) 
         {
@@ -445,7 +445,7 @@ lps2pbes_increase_indent();
             pbes_expression p = pbes_expr::exists(yk, and_(ck, d::less_equal(t, tk)));
             v.push_back(p);
           }
-          result = or_(join_or(v.begin(), v.end()), d::less_equal(t, T));
+          result = z::or_(z::join_or(v.begin(), v.end()), d::less_equal(t, T));
         } 
         else if (s::is_yaled_timed(f)) 
         {
@@ -469,7 +469,7 @@ lps2pbes_increase_indent();
             pbes_expression p = pbes_expr::forall(yk, or_(data::sort_bool::not_(ck), d::greater(t, tk)));
             v.push_back(p);
           }
-          result = and_(join_or(v.begin(), v.end()), d::greater(t, T));
+          result = z::and_(z::join_or(v.begin(), v.end()), d::greater(t, T));
         } 
         else if (s::is_variable(f)) 
         {
@@ -496,17 +496,17 @@ lps2pbes_increase_indent();
         if (s::is_data(f)) {
           result = pbes_expression(data::sort_bool::not_(f));
         } else if (s::is_true(f)) {
-          result = false_();
+          result = z::false_();
         } else if (s::is_false(f)) {
-          result = true_();
+          result = z::true_();
         } else if (s::is_not(f)) {
           result = RHS(f0, a::arg(f), lps, T, context);
         } else if (s::is_and(f)) {
-          result = or_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
+          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
         } else if (s::is_or(f)) {
-          result = and_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
+          result = z::and_(RHS(f0, s::not_(a::left(f)), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
         } else if (s::is_imp(f)) {
-          result = and_(RHS(f0, a::left(f), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
+          result = z::and_(RHS(f0, a::left(f), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
         } else if (s::is_forall(f)) {
           std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
           context.insert(names.begin(), names.end());
@@ -530,7 +530,7 @@ lps2pbes_increase_indent();
           data::data_expression t = a::time(f);
           result = RHS(f0, s::delay_timed(t), lps, T, context);
         } else if (s::is_variable(f)) {
-          result = not_(RHS(f0, f, lps, T, context));
+          result = z::not_(RHS(f0, f, lps, T, context));
         } else if (s::is_mu(f) || (s::is_nu(f))) {
           core::identifier_string X = a::name(f);
           data::assignment_list xf = a::ass(f);
@@ -806,7 +806,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pp(result) << std::fl
 std::cerr << "\n" << lps2pbes_indent() << "<RHS>" << pp(f) << std::flush;
 lps2pbes_increase_indent();
 #endif
-      using namespace pbes_expr_optimized;
+      namespace z = pbes_expr_optimized;
       using namespace data::detail;
       using namespace accessors;
       using lps::summand_list;
@@ -821,16 +821,16 @@ lps2pbes_increase_indent();
         if (s::is_data(f)) {
           result = pbes_expression(f);
         } else if (s::is_true(f)) {
-          result = true_();
+          result = z::true_();
         } else if (s::is_false(f)) {
-          result = false_();
+          result = z::false_();
         } else if (s::is_and(f)) {
-          result = and_(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
+          result = z::and_(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
         } else if (s::is_or(f)) {
-          result = or_(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
+          result = z::or_(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
         } else if (s::is_imp(f)) {
           // DANGEROUS! result = imp(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
-          result = or_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, a::right(f), lps, context));
+          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, a::right(f), lps, context));
         } else if (s::is_forall(f)) {
           std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
           context.insert(names.begin(), names.end());
@@ -868,7 +868,7 @@ lps2pbes_increase_indent();
             pbes_expression p = pbes_expr::forall(y, imp(and_(p1, p2), rhs));
             v.push_back(p);
           }
-          result = join_and(v.begin(), v.end());
+          result = z::join_and(v.begin(), v.end());
         } else if (s::is_may(f)) {
           atermpp::vector<pbes_expression> v;
           action_formulas::action_formula alpha(a::act(f));
@@ -894,7 +894,7 @@ lps2pbes_increase_indent();
             pbes_expression p = pbes_expr::exists(y, and_(and_(p1, p2), rhs));
             v.push_back(p);
           }
-          result = join_or(v.begin(), v.end());
+          result = z::join_or(v.begin(), v.end());
         } else if (s::is_variable(f)) {
           core::identifier_string X = a::name(f);
           data::data_expression_list d = a::param(f);
@@ -915,17 +915,17 @@ lps2pbes_increase_indent();
         if (s::is_data(f)) {
           result = pbes_expression(data::sort_bool::not_(f));
         } else if (s::is_true(f)) {
-          result = false_();
+          result = z::false_();
         } else if (s::is_false(f)) {
-          result = true_();
+          result = z::true_();
         } else if (s::is_not(f)) {
           result = RHS(f0, a::arg(f), lps, context);
         } else if (s::is_and(f)) {
-          result = or_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
+          result = z::or_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
         } else if (s::is_or(f)) {
-          result = and_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
+          result = z::and_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
         } else if (s::is_imp(f)) {
-          result = and_(RHS(f0, a::left(f), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
+          result = z::and_(RHS(f0, a::left(f), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
         } else if (s::is_forall(f)) {
           std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
           context.insert(names.begin(), names.end());
@@ -947,7 +947,7 @@ lps2pbes_increase_indent();
         } else if (s::is_yaled(f)) {
           result = RHS(f0, s::delay(), lps, context);
         } else if (s::is_variable(f)) {
-          result = not_(RHS(f0, f, lps, context));
+          result = z::not_(RHS(f0, f, lps, context));
         } else if (s::is_mu(f) || (s::is_nu(f))) {
           core::identifier_string X = a::name(f);
           data::assignment_list xf = a::ass(f);

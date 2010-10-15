@@ -146,7 +146,7 @@ namespace detail {
       assert(variables.size() == expressions.size());
       if (variables.empty())
       {
-        return true_();
+        return data::sort_bool::true_();
       }
       typename VariableContainer::const_iterator vi = variables.begin();
       typename ExpressionContainer::const_iterator ei = expressions.begin();
@@ -155,7 +155,7 @@ namespace detail {
       ++ei;
       for (; vi != variables.end(); ++vi, ++ei)
       {
-        result = and_(result, equal_to(*vi, *ei));
+        result = data::sort_bool::and_(result, equal_to(*vi, *ei));
       }
       return result;
     } 

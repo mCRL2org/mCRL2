@@ -60,16 +60,14 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   /// \return The result of visiting the node
   pbes_expression visit_true(const pbes_expression& /* e */)
   {
-    using namespace pbes_expr_optimized;
-    return false_();
+    return pbes_expr_optimized::false_();
   }
 
   /// \brief Visit false node
   /// \return The result of visiting the node
   pbes_expression visit_false(const pbes_expression& /* e */)
   {
-    using namespace pbes_expr_optimized;
-    return true_();
+    return pbes_expr_optimized::true_();
   }
 
   /// \brief Visit and node
@@ -78,8 +76,7 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   /// \return The result of visiting the node
   pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    using namespace pbes_expr_optimized;
-    return or_(visit(left), visit(right));
+    return pbes_expr_optimized::or_(visit(left), visit(right));
   }
 
   /// \brief Visit or node
@@ -88,8 +85,7 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   /// \return The result of visiting the node
   pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
-    using namespace pbes_expr_optimized;
-    return and_(visit(left), visit(right));
+    return pbes_expr_optimized::and_(visit(left), visit(right));
   }
 
   /// \brief Visit forall node

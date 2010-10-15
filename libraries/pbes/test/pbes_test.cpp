@@ -257,6 +257,7 @@ void test_quantifier_rename_builder()
 {
   using namespace pbes_system;
   using namespace pbes_system::pbes_expr;
+  namespace z = pbes_system::pbes_expr;
 
   variable mN("m", basic_sort("N"));
   variable nN("n", basic_sort("N"));
@@ -267,7 +268,7 @@ void test_quantifier_rename_builder()
   multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
 
   pbes_expression p1 =
-  and_(
+  z::and_(
     pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), f)),
     pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), g))
   );
@@ -276,7 +277,7 @@ void test_quantifier_rename_builder()
   std::cout << "q1 = " << mcrl2::core::pp(q1) << std::endl;
 
   pbes_expression p2 =
-  and_(
+  z::and_(
     pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), p1)),
     pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), q1))
   );

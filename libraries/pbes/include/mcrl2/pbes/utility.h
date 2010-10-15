@@ -380,14 +380,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
                                data, r,use_internal_rewrite_format);
     if (is_pbes_false(l))
-    { result = false_();
+    { result = pbes_system::pbes_expr::false_();
     }
     else
     { pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
                  data, r,use_internal_rewrite_format);
       //Options for left and right
       if (is_pbes_false(rt))
-      { result = false_();
+      { result = pbes_system::pbes_expr::false_();
       }
       else if (is_pbes_true(l))
       { result = rt;
@@ -395,7 +395,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       else if (is_pbes_true(rt))
       { result = l;
       }
-      else result = and_(l,rt);
+      else result = pbes_system::pbes_expr::and_(l,rt);
     }
   }
   else if (is_pbes_or(p))
@@ -405,13 +405,13 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
                  data, r,use_internal_rewrite_format);
     if (is_pbes_true(l))
-    { result = true_();
+    { result = pbes_system::pbes_expr::true_();
     }
     else
     { pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
                  data, r,use_internal_rewrite_format);
       if (is_pbes_true(rt))
-      { result = true_();
+      { result = pbes_system::pbes_expr::true_();
       }
       else if (is_pbes_false(l))
       { result = rt;
@@ -419,7 +419,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       else if (is_pbes_false(rt))
       { result = l;
       }
-      else result = or_(l,rt);
+      else result = pbes_system::pbes_expr::or_(l,rt);
     }
   }
   else if (is_pbes_true(p))

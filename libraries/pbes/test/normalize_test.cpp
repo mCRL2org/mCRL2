@@ -32,7 +32,7 @@ using namespace mcrl2::pbes_system;
 void test_normalize1()
 {
   using namespace pbes_system;
-  using namespace pbes_system::pbes_expr;
+  namespace p = pbes_system::pbes_expr;
 
   pbes_expression x = propositional_variable_instantiation("x:X");
   pbes_expression y = propositional_variable_instantiation("y:Y");
@@ -41,7 +41,7 @@ void test_normalize1()
   pbes_expression f1;
   pbes_expression f2;
 
-  f = not_(not_(x));
+  f = p::not_(p::not_(x));
   f1 = normalize(f);
   f2 = x;
   std::cout << "f  = " << f  << std::endl;
@@ -57,7 +57,7 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  f  = not_(and_(not_(x), not_(y)));
+  f  = p::not_(p::and_(p::not_(x), p::not_(y)));
   f1 = normalize(f);
   f2 = or_(x, y);
   std::cout << "f  = " << f << std::endl;
@@ -65,9 +65,9 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  f  = imp(and_(not_(x), not_(y)), z);
+  f  = p::imp(p::and_(p::not_(x), p::not_(y)), z);
   f1 = normalize(f);
-  f2 = or_(or_(x, y), z);
+  f2 = p::or_(p::or_(x, y), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -87,14 +87,14 @@ void test_normalize1()
 
   f  = imp(and_(x, y), z);
   f1 = normalize(f);
-  f2 = or_(or_(data::sort_bool::not_(x), data::sort_bool::not_(y)), z);
+  f2 = p::or_(p::or_(data::sort_bool::not_(x), data::sort_bool::not_(y)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  pbes_expression T = true_();
-  pbes_expression F = false_();
+  pbes_expression T = p::true_();
+  pbes_expression F = p::false_();
   x = pbes_expression(mcrl2::core::detail::gsMakePBESImp(T, F));
   y = normalize(x);
   std::cout << "x = " << x << std::endl;
@@ -102,7 +102,7 @@ void test_normalize1()
 
   data::variable_list ab = make_list(data::variable("s", data::basic_sort("S")));
   x = propositional_variable_instantiation("x:X");
-  y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(false_(), false_())), false_()));
+  y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(p::false_(), p::false_())), p::false_()));
   z = normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
@@ -243,11 +243,11 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  //test_normalize1();
-  //test_normalize2();
+  test_normalize1();
+  test_normalize2();
   test_normalize3();
-  //test_pfnf_visitor();
-  //test_normalize_and_or();
+  test_pfnf_visitor();
+  test_normalize_and_or();
 
   return 0;
 }

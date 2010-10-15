@@ -24,14 +24,14 @@ namespace pbes_system {
   inline
   bool is_monotonous(pbes_expression f, const std::set<core::identifier_string>& negated_variables)
   {
-    using namespace pbes_expr;
+    namespace p = pbes_expr;
     using namespace accessors;
   
     //--- handle negations ---//
     if (is_not(f))
     {
       f = arg(f); // remove the not
-      if (is_data(f)) {
+      if (data::is_data_expression(f)) {
         return true;
       } else if (is_true(f)) {
         return true;
@@ -40,22 +40,22 @@ namespace pbes_system {
       } else if (is_not(f)) {
         return is_monotonous(arg(f), negated_variables);
       } else if (is_and(f)) {
-        return is_monotonous(not_(left(f)), negated_variables) && is_monotonous(not_(right(f)), negated_variables);
+        return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
       } else if (is_or(f)) {
-        return is_monotonous(not_(left(f)), negated_variables) && is_monotonous(not_(right(f)), negated_variables);
+        return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
       } else if (is_imp(f)) {
-        return is_monotonous(left(f), negated_variables) && is_monotonous(not_(right(f)), negated_variables);
+        return is_monotonous(left(f), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
       } else if (is_forall(f)) {
-        return is_monotonous(not_(arg(f)), negated_variables);
+        return is_monotonous(p::not_(arg(f)), negated_variables);
       } else if (is_exists(f)) {
-        return is_monotonous(not_(arg(f)), negated_variables);
+        return is_monotonous(p::not_(arg(f)), negated_variables);
       } else if (is_propositional_variable_instantiation(f)) {
         return negated_variables.find(name(f)) != negated_variables.end();
 	  }
     }
   
     //--- handle everything except negations ---//
-    if (is_data(f)) {
+    if (data::is_data_expression(f)) {
       return true;
     } else if (is_true(f)) {
       return true;
@@ -66,7 +66,7 @@ namespace pbes_system {
     } else if (is_or(f)) {
       return is_monotonous(left(f), negated_variables) && is_monotonous(right(f), negated_variables);
     } else if (is_imp(f)) {
-      return is_monotonous(not_(left(f)), negated_variables) && is_monotonous(right(f), negated_variables);
+      return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(right(f), negated_variables);
     } else if (is_forall(f)) {
       return is_monotonous(arg(f), negated_variables);
     } else if (is_exists(f)) {
