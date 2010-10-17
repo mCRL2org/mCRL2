@@ -13,7 +13,7 @@
 #define MCRL2_PBES_NORMALIZE_H
 
 #include "mcrl2/exception.h"
-#include "mcrl2/pbes/pbes_expression_visitor.h"
+#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/data/bool.h"
 
@@ -23,28 +23,29 @@ namespace pbes_system {
 
 /// \cond INTERNAL_DOCS
 // \brief Visitor for checking if a pbes expression is normalized.
-struct is_normalized_visitor : public pbes_expression_visitor<pbes_expression>
+struct is_normalized_traverser: public traverser<is_normalized_traverser>
 {
+  typedef traverser<is_normalized_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  
   bool result;
 
-  is_normalized_visitor()
+  is_normalized_traverser()
     : result(true)
   {}
 
   /// \brief Visit not node
-  /// \return The result of visiting the node
-  bool visit_not(const pbes_expression& /* e */, const pbes_expression& /* arg */)
+  void enter(const not_& /* x */)
   {
     result = false;
-    return stop_recursion;
   }
 
   /// \brief Visit imp node
-  /// \return The result of visiting the node
-  bool visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  void enter(const imp& /* x */)
   {
     result = false;
-    return stop_recursion;
   }
 };
 /// \endcond
@@ -53,11 +54,11 @@ struct is_normalized_visitor : public pbes_expression_visitor<pbes_expression>
 /// \param t A PBES expression
 /// \return True if the pbes expression is normalized
 inline
-bool is_normalized(pbes_expression t)
+bool is_normalized(const pbes_expression& t)
 {
-  is_normalized_visitor visitor;
-  visitor.visit(t);
-  return visitor.result;
+  is_normalized_traverser f;
+  f(t);
+  return f.result;
 }
 
 /// \brief The function normalize brings a pbes expression into positive normal form,

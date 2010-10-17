@@ -38,7 +38,6 @@
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/data/representative_generator.h"
-#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
@@ -68,6 +67,9 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
 
 template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o);
+
+pbes_equation normalize(const pbes_equation& e);
+bool is_normalized(const pbes_expression& t);
 
 /// \cond INTERNAL_DOCS
 
@@ -755,7 +757,7 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
   static void unprotect(mcrl2::pbes_system::pbes<Container> t) { t.unprotect(); }
   static void mark(mcrl2::pbes_system::pbes<Container> t)      { t.mark(); }
   static ATerm term(mcrl2::pbes_system::pbes<Container> t)     { atermpp::aterm x = pbes_to_aterm(t); return x; }
-  static ATerm* ptr(mcrl2::pbes_system::pbes<Container>& t)    { atermpp::aterm x = pbes_to_aterm(t); ATerm y = x; return &y; }
+  // static ATerm* ptr(mcrl2::pbes_system::pbes<Container>& t)    { atermpp::aterm x = pbes_to_aterm(t); ATerm y = x; return &y; }
 };
 }
 /// \endcond
@@ -770,6 +772,10 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 
 #ifndef MCRL2_PBES_FIND_H
 #include "mcrl2/pbes/find.h"
+#endif
+
+#ifndef MCRL2_PBES_NORMALIZE_H
+#include "mcrl2/pbes/normalize.h"
 #endif
 
 #endif // MCRL2_PBES_PBES_H
