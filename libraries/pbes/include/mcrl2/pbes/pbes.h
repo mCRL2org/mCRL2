@@ -66,8 +66,8 @@ std::set<data::variable> find_free_variables(Container const& container);
 template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
 
-template <typename Object, typename OutIter>
-void traverse_sort_expressions(const Object& o, OutIter dest);
+template <typename Container, typename OutputIterator>
+void find_sort_expressions(Container const& container, OutputIterator o);
 
 /// \cond INTERNAL_DOCS
 
@@ -727,7 +727,7 @@ template <typename Container>
 void complete_data_specification(pbes<Container>& p)
 {
   std::set<data::sort_expression> s;
-  pbes_system::traverse_sort_expressions(p, std::inserter(s, s.end()));
+  pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
   p.data().add_context_sorts(s);
 }
 
@@ -766,10 +766,6 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 
 #ifndef MCRL2_PBES_SUBSTITUTE_H
 #include "mcrl2/pbes/substitute.h"
-#endif
-
-#ifndef MCRL2_PBES_TRAVERSE_H
-#include "mcrl2/pbes/traverse.h"
 #endif
 
 #ifndef MCRL2_PBES_FIND_H

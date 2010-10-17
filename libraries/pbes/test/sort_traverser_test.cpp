@@ -15,7 +15,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/traverse.h"
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -164,7 +164,7 @@ void test_pbes(std::string text)
 {
   pbes<> p = txt2pbes(text);
   std::set<data::sort_expression> sorts;     
-  traverse_sort_expressions(p, std::inserter(sorts, sorts.end()));
+  pbes_system::find_sort_expressions(p, std::inserter(sorts, sorts.end()));
   std::cerr << "sorts: " << core::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;
   core::garbage_collect();                 
 }

@@ -360,7 +360,7 @@ void test_traverse_sort_expressions()
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   std::set<sort_expression> s;
-  traverse_sort_expressions(p, std::inserter(s, s.end()));
+  pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
   std::cout << core::detail::print_pp_set(s) << std::endl;
   core::garbage_collect();
 }
