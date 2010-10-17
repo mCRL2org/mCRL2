@@ -10,24 +10,84 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/pbes/find.h"
-//#include "mcrl2/pbes/find1.h"
-#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-template <typename VariableSet>
-void print_variable_set(const VariableSet& s, std::string msg = "variables: ")
+inline
+data::variable nat(std::string name)
 {
-  std::cout << msg;
-  for (typename VariableSet::const_iterator i = s.begin(); i != s.end(); ++i)
-  {
-    std::cout << " " << core::pp(*i);
-  }
-  std::cout << std::endl;
+  return data::variable(core::identifier_string(name), data::sort_nat::nat());
+}
+
+inline
+data::variable pos(std::string name)
+{
+  return data::variable(core::identifier_string(name), data::sort_pos::pos());
+}
+
+inline
+data::variable bool_(std::string name)
+{
+  return data::variable(core::identifier_string(name), data::sort_bool::bool_());
+}
+
+void test_find()
+{
+  const std::string VARSPEC =
+    "datavar         \n"
+    "  m: Nat;       \n"
+    "  n: Nat;       \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Bool, Pos; \n"
+    "  Y: Nat;       \n"
+    ;
+
+  pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1) && Y(m)", VARSPEC);
+
+  //--- find_variables ---//
+  data::variable m = nat("m"); 
+  data::variable n = nat("n"); 
+  std::set<data::variable> v = pbes_system::find_variables(x);
+  BOOST_CHECK(v.find(m) != v.end());   
+  BOOST_CHECK(v.find(n) != v.end());   
+
+  //--- find_sort_expressions ---//
+  std::set<data::sort_expression> e = pbes_system::find_sort_expressions(x);
+  BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
+  BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) != e.end());
+
+  core::garbage_collect(); 
+}
+
+void test_free_variables()
+{
+  using atermpp::make_list;
+
+  const std::string VARSPEC =
+    "datavar         \n"
+    "  n: Nat;       \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Bool, Pos; \n"
+    "  Y: Nat;       \n"
+    ;
+
+  pbes_expression x = parse_pbes_expression("forall m:Nat.(X(true, 2) && Y(n+1) && Y(m))", VARSPEC);
+  data::variable m = nat("m"); 
+  data::variable n = nat("n"); 
+
+  std::set<data::variable> free_variables = pbes_system::find_free_variables(x);
+  std::cout << "free variables: " << core::detail::print_pp_set(free_variables) << std::endl;
+  BOOST_CHECK(free_variables.find(m) == free_variables.end());
+  BOOST_CHECK(free_variables.find(n) != free_variables.end());
 }
 
 void test_find_free_variables()
@@ -44,23 +104,23 @@ void test_find_free_variables()
   pbes<> p = txt2pbes(test1);
 
   std::set<data::variable> v = find_free_variables(p);
-  print_variable_set(v, "v.size() == 0:");
+  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
   BOOST_CHECK(v.size() == 0);
   
   v = find_free_variables(p.equations()[0]);
-  print_variable_set(v, "v.size() == 0: ");
+  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
   BOOST_CHECK(v.size() == 0); 
 
   v = find_free_variables(p.equations()[1]);
-  print_variable_set(v, "v.size() == 0: ");
+  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
   BOOST_CHECK(v.size() == 0); 
 
   v = find_free_variables(p.equations()[0].formula());
-  print_variable_set(v, "v.size() == 2: ");
+  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
   BOOST_CHECK(v.size() == 2); 
 
   v = find_free_variables(p.equations()[1].formula());
-  print_variable_set(v, "v.size() == 2: ");
+  std::cout << "variables: " << core::detail::print_pp_set(v) << std::endl;
   BOOST_CHECK(v.size() == 2);
   
   core::garbage_collect();
@@ -70,6 +130,8 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  test_find();
+  test_free_variables();
   test_find_free_variables();
 
   return 0;

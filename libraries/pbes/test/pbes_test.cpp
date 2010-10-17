@@ -291,7 +291,7 @@ void test_quantifier_rename_builder()
 
 void test_complement_method_builder()
 {
-  using namespace pbes_system::pbes_expr;
+  using namespace pbes_system;
   namespace d = data::sort_bool;
 
   variable X("x", data::sort_bool::bool_());

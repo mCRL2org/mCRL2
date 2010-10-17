@@ -15,78 +15,153 @@
 #include <set>
 #include <iterator>
 #include <functional>
+#include "mcrl2/data/variable.h" 
+#include "mcrl2/data/detail/find.h"     
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/pbes_free_variable_finder.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/traverser.h"
+#include "mcrl2/exception.h"
+                                 
+namespace mcrl2 {                
+                                 
+namespace pbes_system {          
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \return All data variables that occur in the term t
-template <typename Container, typename OutputIterator >
-void find_free_variables(Container const& container, OutputIterator const& o)
-{
-  pbes_system::detail::pbes_free_variable_finder<std::insert_iterator<std::set<data::variable> > > finder(o);
-  finder(container);
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \return All data variables that occur in the term t
-template <typename Container>
-std::set<data::variable> find_free_variables(Container const& container)
-{
-  std::set<data::variable> result;
-  pbes_system::find_free_variables(container, std::inserter(result, result.end()));
-  return result;
-}
-
-namespace detail {
-
-  template <typename OutputIterator>
-  struct find_propositional_variables_visitor: public pbes_expression_visitor<pbes_expression>
+  /// \brief Returns all data variables that occur in a range of expressions
+  /// \param[in] container a container with expressions
+  /// \param[in,out] o an output iterator to which all data variables occurring in t
+  ///             are added.
+  /// \return All data variables that occur in the term t
+  template <typename Container, typename OutputIterator>
+  void find_variables(Container const& container, OutputIterator o)
   {
-    OutputIterator dest;
-    
-    find_propositional_variables_visitor(OutputIterator d)
-      : dest(d)
-    {}
-
-    /// \brief Visit propositional_variable node
-    /// \param e A term
-    /// \return The result of visiting the node
-    bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
-    {
-      *dest++ = v;
-      return true;
-    } 
-  };
-
-  template <typename OutputIterator>
-  find_propositional_variables_visitor<OutputIterator> make_find_propositional_variables_visitor(OutputIterator dest)
-  {
-    return find_propositional_variables_visitor<OutputIterator>(dest);
+    data::detail::make_find_helper<data::variable, pbes_system::traverser, OutputIterator>(o)(container);
   }
 
-} // namespace detail
+  /// \brief Returns all data variables that occur in a range of expressions
+  /// \param[in] container a container with expressions
+  /// \return All data variables that occur in the term t
+  template <typename Container>
+  std::set<data::variable> find_variables(Container const& container)
+  {
+    std::set<data::variable> result;
+    pbes_system::find_variables(container, std::inserter(result, result.end()));
+    return result;
+  }
 
+  /// \brief Returns all data variables that occur in a range of expressions
+  /// \param[in] container a container with expressions
+  /// \param[in,out] o an output iterator to which all data variables occurring in t
+  ///             are added.
+  /// \return All data variables that occur in the term t
+  template <typename Container, typename OutputIterator>
+  void find_free_variables(Container const& container, OutputIterator o,
+  		           typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
+  {
+    data::detail::make_free_variable_find_helper<pbes_system::binding_aware_traverser>(o)(container);
+  }
 
-/// \brief Returns all propositional variable instantiations that occur in the pbes expression t
-/// \param t A term
-/// \return All propositional variable instantiations that occur in the pbes expression t
-inline
-std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(const pbes_expression& t)
-{
-  std::set<propositional_variable_instantiation> variables;
-  detail::make_find_propositional_variables_visitor(std::inserter(variables, variables.end())).visit(t);
-  return variables;
-}
+  /// \brief Returns all data variables that occur in a range of expressions
+  /// \param[in] container a container with expressions
+  /// \param[in,out] o an output iterator to which all data variables occurring in t
+  ///             are added.
+  /// \param[in] bound a set of variables that should be considered as bound
+  /// \return All data variables that occur in the term t
+  /// TODO prevent copy of Sequence
+  template <typename Container, typename OutputIterator, typename Sequence>
+  void find_free_variables(Container const& container, OutputIterator o, Sequence const& bound)
+  {
+    data::detail::make_free_variable_find_helper<pbes_system::binding_aware_traverser>(bound, o)(container);
+  }
 
-} // namespace pbes_system
+  /// \brief Returns all data variables that occur in a range of expressions
+  /// \param[in] container a container with expressions
+  /// \return All data variables that occur in the term t
+  template <typename Container>
+  std::set<data::variable> find_free_variables(Container const& container)
+  {
+    std::set<data::variable> result;
+    pbes_system::find_free_variables(container, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \brief Returns all data variables that occur in a range of expressions
+  /// \param[in] container a container with expressions
+  /// \param[in] bound a set of variables that should be considered as bound
+  /// \return All data variables that occur in the term t
+  /// TODO prevent copy of Sequence
+  template <typename Container, typename Sequence>
+  std::set<data::variable> find_free_variables(Container const& container, Sequence const& bound,
+                                          typename atermpp::detail::enable_if_container<Sequence, data::variable>::type* = 0)
+  {
+    std::set<data::variable> result;
+    pbes_system::find_free_variables(container, std::inserter(result, result.end()), bound);
+    return result;
+  }
+
+  /// \brief Returns all sort expressions that occur in the term t
+  /// \param[in] container an expression or container of expressions
+  /// \param[in] o an output iterator
+  /// \return All sort expressions that occur in the term t
+  template <typename Container, typename OutputIterator>
+  void find_sort_expressions(Container const& container, OutputIterator o)
+  {
+    data::detail::make_find_helper<data::sort_expression, pbes_system::traverser>(o)(container);
+  }
+
+  /// \brief Returns all sort expressions that occur in the term t
+  /// \param[in] container an expression or container of expressions
+  /// \return All sort expressions that occur in the term t
+  template <typename Container>
+  std::set<data::sort_expression> find_sort_expressions(Container const& container)
+  {
+    std::set<data::sort_expression> result;
+    pbes_system::find_sort_expressions(container, std::inserter(result, result.end()));
+    return result;
+  }
+
+  namespace detail {
+  
+    template <typename OutputIterator>
+    struct find_propositional_variables_visitor: public pbes_expression_visitor<pbes_expression>
+    {
+      OutputIterator dest;
+      
+      find_propositional_variables_visitor(OutputIterator d)
+        : dest(d)
+      {}
+  
+      /// \brief Visit propositional_variable node
+      /// \param e A term
+      /// \return The result of visiting the node
+      bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
+      {
+        *dest++ = v;
+        return true;
+      } 
+    };
+  
+    template <typename OutputIterator>
+    find_propositional_variables_visitor<OutputIterator> make_find_propositional_variables_visitor(OutputIterator dest)
+    {
+      return find_propositional_variables_visitor<OutputIterator>(dest);
+    }
+  
+  } // namespace detail
+  
+  /// \brief Returns all propositional variable instantiations that occur in the pbes expression t
+  /// \param t A term
+  /// \return All propositional variable instantiations that occur in the pbes expression t
+  inline
+  std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(const pbes_expression& t)
+  {
+    std::set<propositional_variable_instantiation> variables;
+    detail::make_find_propositional_variables_visitor(std::inserter(variables, variables.end())).visit(t);
+    return variables;
+  }
+  
+  } // namespace pbes_system
 
 } // namespace mcrl2
 

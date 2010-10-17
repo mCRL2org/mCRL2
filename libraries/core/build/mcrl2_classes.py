@@ -168,12 +168,13 @@ Choice            | choice(const process_expression& left, const process_express
 PBES_CLASSES = r'''
 FixPoint    | fixpoint_symbol() | A fixpoint symbol
 PropVarDecl | propositional_variable(const core::identifier_string& name, const data::variable_list& parameters) | A propositional variable declaration
-PropVarInst | propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) | A propositional variable instantiation
 PBEqn       | pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& formula) | A PBES equation
 PBES        | pbes<Container>(const data::data_specification& data, const Container& equations, const atermpp::set<data::variable>& global_variables, const propositional_variable_instantiation& initial_state) | A PBES
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
+DataExpr          | data::data_expression()                                                   | A data expression
+PropVarInst       | propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) | A propositional variable instantiation
 PBESTrue          | true_()                                                                   | The value true for pbes expressions
 PBESFalse         | false_()                                                                  | The value false for pbes expressions
 PBESNot           | not_(const pbes_expression& operand)                                      | The not operator for pbes expressions

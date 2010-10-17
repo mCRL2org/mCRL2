@@ -11,6 +11,14 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
+pbes_expression operator()(const propositional_variable_instantiation& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  pbes_expression result = propositional_variable_instantiation(x.name(), x.parameters());
+  static_cast<Derived&>(*this).leave(x);
+  return result;
+}
+
 pbes_expression operator()(const true_& x)
 {
   static_cast<Derived&>(*this).enter(x);
@@ -79,7 +87,9 @@ pbes_expression operator()(const pbes_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
   pbes_expression result;
-  if (is_true(x)) { result = static_cast<Derived&>(*this)(true_(atermpp::aterm_appl(x))); }
+  if (data::is_data_expression(x)) { result = static_cast<Derived&>(*this)(data::data_expression(atermpp::aterm_appl(x))); }
+  else if (is_propositional_variable_instantiation(x)) { result = static_cast<Derived&>(*this)(propositional_variable_instantiation(atermpp::aterm_appl(x))); }
+  else if (is_true(x)) { result = static_cast<Derived&>(*this)(true_(atermpp::aterm_appl(x))); }
   else if (is_false(x)) { result = static_cast<Derived&>(*this)(false_(atermpp::aterm_appl(x))); }
   else if (is_not(x)) { result = static_cast<Derived&>(*this)(not_(atermpp::aterm_appl(x))); }
   else if (is_and(x)) { result = static_cast<Derived&>(*this)(and_(atermpp::aterm_appl(x))); }

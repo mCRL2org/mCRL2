@@ -33,23 +33,58 @@ namespace pbes_system {
   };
 
   template <typename Derived>
-  class binding_aware_traverser: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser_helper: public data::binding_aware_traverser<Derived>
   {
     public:
       typedef data::binding_aware_traverser<Derived> super;
       using super::operator();
       using super::enter;
       using super::leave;
+      using super::increase_bind_count;
+      using super::decrease_bind_count;
 
 #include "mcrl2/pbes/detail/traverser.inc.h"
   };
 
-  /// \brief Selective traversal class for PBES data types
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, pbes::traverser>
+  template <typename Derived>
+  class binding_aware_traverser: public binding_aware_traverser_helper<Derived>
   {
     public:
-      typedef core::selective_traverser<Derived, AdaptablePredicate, pbes::traverser> super;
+      typedef binding_aware_traverser_helper<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
+      using super::increase_bind_count;
+      using super::decrease_bind_count;
+
+      void operator()(pbes_equation const& x)
+      {
+        increase_bind_count(x.variable().parameters());
+        super::operator()(x);
+        decrease_bind_count(x.variable().parameters());
+      }
+
+      void operator()(exists const& x)
+      {
+        increase_bind_count(x.variables());
+        super::operator()(x);
+        decrease_bind_count(x.variables());
+      }
+
+      void operator()(forall const& x)
+      {
+        increase_bind_count(x.variables());
+        super::operator()(x);
+        decrease_bind_count(x.variables());
+      }
+  };
+
+  /// \brief Selective traversal class for PBES data types
+  template <typename Derived, typename AdaptablePredicate>
+  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, pbes_system::traverser>
+  {
+    public:
+      typedef core::selective_traverser<Derived, AdaptablePredicate, pbes_system::traverser> super;
       using super::operator();
       using super::enter;
       using super::leave;

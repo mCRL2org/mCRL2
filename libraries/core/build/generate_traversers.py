@@ -134,7 +134,7 @@ if __name__ == "__main__":
     make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, [('process_expression', PROCESS_EXPRESSION_CLASSES)], namespace = 'process')
     make_builder_inc_file(  '../../process/include/mcrl2/process/detail/builder.inc.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
 
-    make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES, namespace = 'pbes_system')
+    make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES, [('pbes_expression', PBES_EXPRESSION_CLASSES)], namespace = 'pbes_system')
     make_builder_inc_file(  '../../pbes/include/mcrl2/pbes/detail/builder.inc.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
 
     make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, [('boolean_expression', BOOLEAN_EXPRESSION_CLASSES)], namespace = 'bes')

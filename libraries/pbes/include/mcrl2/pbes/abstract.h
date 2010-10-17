@@ -16,7 +16,7 @@
 #include <iostream>
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
 
 // TODO: isolate pbes2bes_variable_map from pbes2bes_finite
@@ -29,8 +29,13 @@ namespace pbes_system {
 namespace detail {
 
   /// Visitor that ...
-  struct pbes_abstract_builder: public pbes_expression_builder<pbes_expression>
+  struct pbes_abstract_builder: public builder<pbes_abstract_builder>
   {
+    typedef builder<pbes_abstract_builder> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+    
     std::vector<data::variable_list> m_quantifier_stack;
     const std::vector<data::variable> m_selected_variables;
   
@@ -54,27 +59,20 @@ namespace detail {
       return false;
     }
   
-    /// \brief Adds variables to the quantifier stack, and adds replacements for the name clashes to replacements.
-    /// \param variables A sequence of data variables
-    /// \return The number of replacements that were added.
+    /// \brief Adds a sequence of variables to the quantifier stack.
     void push_variables(const data::variable_list& variables)
     {
       m_quantifier_stack.push_back(variables);
     }
   
-    /// \brief Removes the last added variable list from the quantifier stack, and removes
-    /// replacement_count replacements.
-    /// \param replacement_count A positive integer
+    /// \brief Removes the last added sequence of variables from the quantifier stack.
     void pop_variables()
     {
       m_quantifier_stack.pop_back();
     }
   
     /// \brief Visit data_expression node
-    /// \param e A PBES expression
-    /// \param d A data expression
-    /// \return The result of visiting the node
-    pbes_expression visit_data_expression(const pbes_expression& e, const data::data_expression& d)
+    pbes_expression operator()(const data::data_expression& d)
     {
       std::set<data::variable> FV = data::find_free_variables(d);
       for (std::set<data::variable>::iterator i = FV.begin(); i != FV.end(); ++i)
@@ -85,37 +83,29 @@ namespace detail {
         }
         if (!is_bound(*i))
         {
-          std::clog << "Reducing data expression " << pp(e) << " to false." << std::endl;
+          std::clog << "Reducing data expression " << pp(d) << " to false." << std::endl;
           return pbes_expr::false_();
         }
       }
-      return e;
+      return d;
     }
   
     /// \brief Visit forall node
-    /// \param e A PBES expression
-    /// \param variables A sequence of data variables
-    /// \param expression A PBES expression
-    /// \return The result of visiting the node
-    pbes_expression visit_forall(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
+    pbes_expression operator()(const forall& x)
     {
-      push_variables(variables);
-      pbes_expression new_expression = visit(expression);
+      push_variables(x.variables());
+      pbes_expression new_expression = (*this)(x.body());
       pop_variables();
-      return pbes_expr::forall(variables, new_expression);
+      return pbes_expr::forall(x.variables(), new_expression);
     }
   
     /// \brief Visit exists node
-    /// \param e A PBES expression
-    /// \param variables A sequence of data variables
-    /// \param expression A PBES expression
-    /// \return The result of visiting the node
-    pbes_expression visit_exists(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
+    pbes_expression operator()(const exists& x)
     {
-      push_variables(variables);
-      pbes_expression new_expression = visit(expression);
+      push_variables(x.variables());
+      pbes_expression new_expression = (*this)(x.body());
       pop_variables();
-      return pbes_expr::exists(variables, new_expression);
+      return pbes_expr::exists(x.variables(), new_expression);
     }
   };
 
@@ -127,8 +117,6 @@ namespace detail {
   {
     public:
       /// \brief Constructor.
-      /// \param datar A data rewriter
-      /// \param pbesr A PBES rewriter
       pbes_abstract_algorithm(unsigned int log_level = 0)
         : core::algorithm(log_level)
       {}
@@ -146,7 +134,7 @@ namespace detail {
           if (j != variable_map.end())
           {
             detail::pbes_abstract_builder builder(j->second);
-            i->formula() = builder.visit(i->formula());
+            i->formula() = builder(i->formula());
           }
         }
       }
