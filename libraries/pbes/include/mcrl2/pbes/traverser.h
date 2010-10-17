@@ -9,6 +9,11 @@
 /// \file mcrl2/pbes/traverser.h
 /// \brief add your file description here.
 
+// To avoid circular inclusion problems
+#ifndef MCRL2_PBES_H
+#include "mcrl2/pbes/pbes.h"
+#endif
+
 #ifndef MCRL2_PBES_TRAVERSER_H
 #define MCRL2_PBES_TRAVERSER_H
 

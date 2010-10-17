@@ -233,7 +233,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     propositional_variable_instantiation_list newpropvarinst_list;
 
     // Get all propvarinst of the rhs
-    std::set< propositional_variable_instantiation > propvarinst_set = find_all_propositional_variable_instantiations(new_pbes_expression);
+    std::set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(new_pbes_expression);
 
     for (std::set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
     {
@@ -376,7 +376,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
       propositional_variable_instantiation_list newpropvarinst_list;
 
       // Get all propvarinst of the rhs
-      std::set< propositional_variable_instantiation > propvarinst_set = find_all_propositional_variable_instantiations(current_expression);
+      std::set< propositional_variable_instantiation > propvarinst_set = find_propositional_variable_instantiations(current_expression);
 
       for (std::set< propositional_variable_instantiation >::iterator pvi = propvarinst_set.begin(); pvi != propvarinst_set.end(); pvi++)
       {

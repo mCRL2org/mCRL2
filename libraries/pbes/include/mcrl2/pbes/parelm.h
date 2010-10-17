@@ -207,7 +207,7 @@ class pbes_parelm_algorithm
 
         // right hand side (Y)
         pbes_expression phi = i->formula();
-        std::set<propositional_variable_instantiation> propvars = find_all_propositional_variable_instantiations(phi);
+        std::set<propositional_variable_instantiation> propvars = find_propositional_variable_instantiations(phi);
         for (std::set<propositional_variable_instantiation>::iterator j = propvars.begin(); j != propvars.end(); ++j)
         {
           core::identifier_string Y = j->name();

@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PARITY_GAME_GENERATOR_H
 #define MCRL2_PBES_PARITY_GAME_GENERATOR_H
 
+#include <iostream>
 #include <iomanip>
 #include <map>
 #include <set>

@@ -56,6 +56,28 @@ namespace pbes_system {
   ///             are added.
   /// \return All data variables that occur in the term t
   template <typename Container, typename OutputIterator>
+  void find_propositional_variable_instantiations(Container const& container, OutputIterator o)
+  {
+    data::detail::make_find_helper<propositional_variable_instantiation, pbes_system::traverser, OutputIterator>(o)(container);
+  }
+
+  /// \brief Returns all data variables that occur in a range of expressions
+  /// \param[in] container a container with expressions
+  /// \return All data variables that occur in the term t
+  template <typename Container>
+  std::set<propositional_variable_instantiation> find_propositional_variable_instantiations(Container const& container)
+  {
+    std::set<propositional_variable_instantiation> result;
+    pbes_system::find_propositional_variable_instantiations(container, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \brief Returns all data variables that occur in a range of expressions
+  /// \param[in] container a container with expressions
+  /// \param[in,out] o an output iterator to which all data variables occurring in t
+  ///             are added.
+  /// \return All data variables that occur in the term t
+  template <typename Container, typename OutputIterator>
   void find_free_variables(Container const& container, OutputIterator o,
   		           typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
   {
@@ -121,47 +143,7 @@ namespace pbes_system {
     return result;
   }
 
-  namespace detail {
-  
-    template <typename OutputIterator>
-    struct find_propositional_variables_visitor: public pbes_expression_visitor<pbes_expression>
-    {
-      OutputIterator dest;
-      
-      find_propositional_variables_visitor(OutputIterator d)
-        : dest(d)
-      {}
-  
-      /// \brief Visit propositional_variable node
-      /// \param e A term
-      /// \return The result of visiting the node
-      bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
-      {
-        *dest++ = v;
-        return true;
-      } 
-    };
-  
-    template <typename OutputIterator>
-    find_propositional_variables_visitor<OutputIterator> make_find_propositional_variables_visitor(OutputIterator dest)
-    {
-      return find_propositional_variables_visitor<OutputIterator>(dest);
-    }
-  
-  } // namespace detail
-  
-  /// \brief Returns all propositional variable instantiations that occur in the pbes expression t
-  /// \param t A term
-  /// \return All propositional variable instantiations that occur in the pbes expression t
-  inline
-  std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(const pbes_expression& t)
-  {
-    std::set<propositional_variable_instantiation> variables;
-    detail::make_find_propositional_variables_visitor(std::inserter(variables, variables.end())).visit(t);
-    return variables;
-  }
-  
-  } // namespace pbes_system
+} // namespace pbes_system
 
 } // namespace mcrl2
 

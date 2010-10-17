@@ -706,7 +706,7 @@ namespace detail {
           else
           {
             // use find function to compute the edges
-            std::set<propositional_variable_type> inst = find_all_propositional_variable_instantiations(i->formula());
+            std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(i->formula());
             if (!inst.empty())
             {
               std::vector<edge>& edges = m_edges[name];
@@ -721,7 +721,7 @@ namespace detail {
         // initialize the todo list of vertices that need to be processed
         std::deque<propositional_variable_decl_type> todo;
         std::set<propositional_variable_decl_type> visited;
-        std::set<propositional_variable_type> inst = find_all_propositional_variable_instantiations(p.initial_state());
+        std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(p.initial_state());
         for (typename std::set<propositional_variable_type>::iterator i = inst.begin(); i != inst.end(); ++i)
         {
           data_term_sequence_type e = i->parameters();

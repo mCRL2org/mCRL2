@@ -296,7 +296,7 @@ namespace pbes_system {
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           string_type name = i->variable().name();
-          m_edges[name] = find_all_propositional_variable_instantiations(i->formula());
+          m_edges[name] = find_propositional_variable_instantiations(i->formula());
           m_vertices[name] = compute_equivalence_sets(i->variable());
           const variable_sequence_type& param = i->variable().parameters();
           m_parameters[name] = std::vector<variable_type>(param.begin(), param.end());
@@ -309,7 +309,7 @@ namespace pbes_system {
           propositional_variable_type kappa = p.initial_state();
           string_type X = kappa.name();
           data::mutable_map_substitution<> vX = compute_substitution(X);
-          std::set<propositional_variable_type> edges = find_all_propositional_variable_instantiations(kappa);
+          std::set<propositional_variable_type> edges = find_propositional_variable_instantiations(kappa);
           for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
           {
             // propagate the equivalence relations in X over the edge Ye

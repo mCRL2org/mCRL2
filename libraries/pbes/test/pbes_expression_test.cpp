@@ -210,12 +210,12 @@ void test_pbes_expression_with_propositional_variables()
 
   pbes_expression x = parse_pbes_expression("Y(1) && Y(m)", VARSPEC);
   std::set<data::variable> vx = pbes_system::find_free_variables(x);
-  std::set<propositional_variable_instantiation> px = find_all_propositional_variable_instantiations(x);
+  std::set<propositional_variable_instantiation> px = find_propositional_variable_instantiations(x);
   pbes_expression_with_propositional_variables X(x, data::variable_list(vx.begin(), vx.end()), propositional_variable_instantiation_list(px.begin(), px.end()));
 
   pbes_expression y = parse_pbes_expression("Y(n) || Y(4)", VARSPEC);
   std::set<data::variable> vy = pbes_system::find_free_variables(y);
-  std::set<propositional_variable_instantiation> py = find_all_propositional_variable_instantiations(y);
+  std::set<propositional_variable_instantiation> py = find_propositional_variable_instantiations(y);
   pbes_expression_with_propositional_variables Y(y, data::variable_list(vy.begin(), vy.end()), propositional_variable_instantiation_list(py.begin(), py.end()));
 
   typedef core::term_traits<pbes_expression_with_propositional_variables> tr;
