@@ -534,9 +534,18 @@ void ATprotectSymbol(Symbol sym)
 
 void ATunprotectSymbol(Symbol sym)
 {
+  /* It is essential for performance that in this file
+   * the protected_symbols array is traversed from back
+   * to front. This function is only invoked by 
+   * ATdestroyBinaryReader, which stacks symbols at the 
+   * end of protected symbols, and removes them in 
+   * reverse order. */
+
   unsigned int lcv;
 
-  for(lcv = 0; lcv < nr_protected_symbols; ++lcv) {
+  for(lcv = nr_protected_symbols; lcv >0 ; ) 
+  { 
+    --lcv;
     if(protected_symbols[lcv] == sym) {
       protected_symbols[lcv] = protected_symbols[--nr_protected_symbols];
       protected_symbols[nr_protected_symbols] = -1;
