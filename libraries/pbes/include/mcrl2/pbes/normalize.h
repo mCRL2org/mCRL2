@@ -29,6 +29,14 @@ struct is_normalized_traverser: public traverser<is_normalized_traverser>
   using super::enter;
   using super::leave;
   using super::operator();
+
+#if BOOST_MSVC
+    template <typename Container >
+    void operator()(Container const& a)
+    {
+      super::operator()(a);
+    }
+#endif
   
   bool result;
 
