@@ -22,6 +22,7 @@
 #include "mcrl2/bes/bes_parse.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/normal_forms.h"
+#include "mcrl2/bes/find.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
@@ -85,8 +86,18 @@ namespace mcrl2 {
           return m_allowed_equivalences;
         }
 
+        std::string allowed_equivalences()
+        {
+          std::set<std::string> tmp;
+          for(typename std::set<equivalence_t>::const_iterator i = allowed_eqs().begin(); i != allowed_eqs().end(); ++i)
+          {
+            tmp.insert(string_for_equivalence(*i));
+          }
+          return core::string_join(tmp, ", ");
+        }
+
       protected:
-        void initialise_allowed_eqs() const
+        void initialise_allowed_eqs()
         {
           m_allowed_equivalences.insert(eq_bisim);
           m_allowed_equivalences.insert(eq_stut);
@@ -167,6 +178,11 @@ namespace mcrl2 {
         /// Initial state of the lts is the state representing the initial equation of the BES.
         void bes_to_lts()
         {
+          if(core::gsDebug)
+          {
+            std::cerr << "Tranforming BES to LTS" << std::endl;
+          }
+
           if(m_bes.initial_state() != m_bes.equations().begin()->variable())
           {
             throw mcrl2::runtime_error("The first equation is not the variable designated as initial. This situation is not handled by the tool.");
@@ -190,8 +206,7 @@ namespace mcrl2 {
               ++current_block;
             }
 
-            std::set<boolean_variable> occurring_variables;
-            atermpp::find_all_if(i->formula(), &is_boolean_variable, std::inserter(occurring_variables, occurring_variables.end()));
+            std::set<boolean_variable> occurring_variables = bes::find_variables(i->formula());
             occurring_variable_count += occurring_variables.size();
 
             statistics[i->variable()] = std::make_pair(current_block, get_operand(i->formula()));
@@ -232,8 +247,7 @@ namespace mcrl2 {
             }
 
             // Edges to successors
-            std::set<boolean_variable> occurring_variables;
-            atermpp::find_all_if(i->formula(), &is_boolean_variable, std::inserter(occurring_variables, occurring_variables.end()));
+            std::set<boolean_variable> occurring_variables = bes::find_variables(i->formula());
             for(std::set<boolean_variable>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
             {
               std::stringstream label;
@@ -264,6 +278,10 @@ namespace mcrl2 {
 
         void reduce_lts()
         {
+          if(core::gsDebug)
+          {
+            std::cerr << "Reduce LTS" << std::endl;
+          }
           switch(m_equivalence)
           {
             case eq_bisim:
@@ -282,6 +300,10 @@ namespace mcrl2 {
         /// the edges to the deadlock state.
         void lts_to_bes()
         {
+          if(core::gsDebug)
+          {
+            std::cerr << "Transforming reduced LTS to BES." << std::endl;
+          }
           // Find deadlock state
           unsigned int state_count = m_lts.num_states();
           std::map<unsigned int, bool> has_outgoing_transition;
@@ -405,7 +427,16 @@ namespace mcrl2 {
           : m_bes(v_bes),
             m_equivalence(equivalence)
         {
+          initialise_allowed_eqs();
+          if(core::gsDebug)
+          {
+            std::cerr << "Converting BES to standard form" << std::endl;
+          }
           make_standard_form(m_bes, true);
+          if(core::gsDebug)
+          {
+            std::cerr << "BES Reduction algorithm initialised" << std::endl;
+          }
         }
 
         void run()
@@ -436,7 +467,7 @@ class bes_bisimulation_tool: public super
 
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
         "generate an equivalent BES, preserving equivalence NAME:\n"
-        "supported equivalences: bisim, stuttering (default bisim)", 'e');
+        "supported equivalences: bisim, stuttering (default stuttering)", 'e');
     }
 
     void parse_options(const mcrl2::utilities::command_line_parser& parser)
@@ -446,6 +477,7 @@ class bes_bisimulation_tool: public super
       if (parser.options.count("equivalence")) {
         boolean_equation_system<> b; // TODO: build proper solution.
         mcrl2::bes::bes_reduction_algorithm<> a(b);
+        std::cerr << "Allowed eqs: " << a.allowed_equivalences() << std::endl;
         equivalence = a.parse_equivalence(parser.option_argument("equivalence"));
         if( a.allowed_eqs().count(equivalence) == 0 )
         {
@@ -464,7 +496,8 @@ class bes_bisimulation_tool: public super
           "reduce a BES (or PBES) using (variations of) behavioural equivalences",
           "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
           "If INFILE is not "
-          "present, stdin is used. If OUTFILE is not present, stdout is used.")
+          "present, stdin is used. If OUTFILE is not present, stdout is used."),
+        equivalence(bes_reduction_algorithm<>::eq_stut)
     {}
 
     bool run()
@@ -474,7 +507,9 @@ class bes_bisimulation_tool: public super
 
       boolean_equation_system<> b;
 
+      core::gsVerboseMsg("Loading BES from input file... ");
       b.load(m_input_filename);
+      core::gsVerboseMsg("done\n");
       bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b).run();
       b.save(m_output_filename);
       
