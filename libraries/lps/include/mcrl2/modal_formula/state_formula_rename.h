@@ -16,6 +16,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/map_substitution.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 
 namespace mcrl2 {

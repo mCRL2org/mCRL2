@@ -170,6 +170,13 @@ namespace lps {
       }
   };
 
+  /// \brief Returns true if the term t is a multi action
+  inline
+  bool is_multi_action(atermpp::aterm_appl t)
+  {
+    return core::detail::gsIsMultAct(t);
+  }
+
 /// \cond INTERNAL_DOCS
 namespace detail {
     /// \brief Visits all permutations of the arrays, and calls f for each instance.
