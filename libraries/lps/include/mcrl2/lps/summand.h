@@ -708,6 +708,13 @@ class action_summand: public summand_base
 /// \brief Vector of action summands
 typedef atermpp::vector<action_summand> action_summand_vector;
 
+/// \brief Equality operator of action summands
+inline
+bool operator==(const action_summand& x, const action_summand& y)
+{
+  return x.condition() == y.condition() && x.multi_action() == y.multi_action() && x.assignments() == y.assignments();
+}
+
 /// \brief Conversion to ATermAppl.
 /// \return The action summand converted to ATerm format.
 inline

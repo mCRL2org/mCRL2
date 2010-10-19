@@ -158,24 +158,17 @@ namespace lps {
       }
 
       /// \brief Comparison operator
-      bool operator==(const multi_action& other)
+      bool operator==(const multi_action& other) const
       {
         return m_actions == other.m_actions && m_time == other.m_time;
       }
 
       /// \brief Comparison operator
-      bool operator!=(const multi_action& other)
+      bool operator!=(const multi_action& other) const
       {
         return !(*this == other);
       }
   };
-
-  /// \brief Returns true if t is a multi action.
-  inline
-  bool is_multi_action(const atermpp::aterm_appl& t)
-  {
-    return core::detail::gsIsMultAct(t);
-  }
 
 /// \cond INTERNAL_DOCS
 namespace detail {
