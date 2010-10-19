@@ -170,9 +170,9 @@ public:
 
 				ws->Wrap(800);
 
-        row++;
-        fgs->Add(rb, wxGBPosition(row,0));
-        fgs->Add(ws, wxGBPosition(row,1), wxGBSpan(1,2));
+				row++;
+				fgs->Add(rb, wxGBPosition(row,0));
+				fgs->Add(ws, wxGBPosition(row,1), wxGBSpan(1,2));
 
 				break;
 			case textctrl:
@@ -182,7 +182,7 @@ public:
 				/* create text input box */
 				tc = new wxTextCtrl(top, wxID_ANY, wxT(""));
 
-				tc->SetLabel(wxString(
+				tc->SetName(wxString(
 						(*i).m_flag.c_str(), wxConvUTF8));
 
 				tc->SetValue(wxT(""));
@@ -190,13 +190,13 @@ public:
 				m_textctrl_ptrs.push_back(tc);
 
 				row++;
-        fgs->Add( new wxStaticText(top, wxID_ANY, wxString(
-            (*i).m_flag.c_str(), wxConvUTF8)),
-            wxGBPosition(row,0));
-        fgs->Add(tc, wxGBPosition(row,1));
-        fgs->Add(new wxStaticText(top, wxID_ANY, wxString(
-            (*i).m_help.c_str(), wxConvUTF8)),
-            wxGBPosition(row,2));
+				fgs->Add( new wxStaticText(top, wxID_ANY, wxString(
+				(*i).m_flag.c_str(), wxConvUTF8)),
+				 wxGBPosition(row,0));
+				fgs->Add(tc, wxGBPosition(row,1));
+				fgs->Add(new wxStaticText(top, wxID_ANY, wxString(
+				(*i).m_help.c_str(), wxConvUTF8)),
+				wxGBPosition(row,2));
 
 				break;
 
@@ -313,7 +313,7 @@ public:
     for (vector<wxTextCtrl*>::iterator i = m_textctrl_ptrs.begin(); i
         != m_textctrl_ptrs.end(); ++i) {
       if (!(*i)->GetValue().IsEmpty() )
-        run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") +(*i)->GetValue();
+        run = run + wxT(" --") + (*i)->GetName() + wxT("=") +(*i)->GetValue();
     }
 
     for (vector<wxFilePickerCtrl*>::iterator i = m_filepicker_ptrs.begin(); i
