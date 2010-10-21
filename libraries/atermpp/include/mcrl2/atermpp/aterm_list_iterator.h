@@ -36,6 +36,11 @@ class term_list_iterator: public boost::iterator_facade<
     >
 {
  public:
+    typedef typename boost::iterator_facade<term_list_iterator<Value>,
+                                            const Value,
+                                            boost::forward_traversal_tag,
+                                            const Value>::difference_type iterator_type;
+
     /// \brief Constructor.
     term_list_iterator()
       : m_list(ATempty)
