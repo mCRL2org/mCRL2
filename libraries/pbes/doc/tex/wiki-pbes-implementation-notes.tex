@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Friday, October 22, 2010 16:14:08}
+%TCIDATA{LastRevised=Friday, October 22, 2010 23:42:26}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1361,13 +1361,7 @@ and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{N}\rightarrow
 \begin{equation*}
 \left\{ 
 \begin{array}{lll}
-\mathsf{inc}(\alpha ,1) & = & \left\{ 
-\begin{array}{ll}
-\top  & \text{\textsf{if}}\ \alpha _{1}=\beta _{1} \\ 
-\lbrack \alpha _{1}+1,\alpha _{2},\cdots ,\alpha _{d}] & \text{\textsf{%
-otherwise}}%
-\end{array}%
-\right.  \\ 
+\mathsf{inc}(\alpha ,0) & = & \top  \\ 
 &  &  \\ 
 \mathsf{inc}(\alpha ,i+1) & = & \left\{ 
 \begin{array}{ll}
@@ -1386,10 +1380,10 @@ $ is defined as:%
 f(X_{j},m)=\left\{ 
 \begin{array}{ll}
 \lbrack (\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
-_{j})_{m},0,\cdots ,0] & \text{\textsf{if}}\ \mathsf{rank}(X_{i})\text{ is
+_{j})_{m},0,\cdots ,0] & \text{\textsf{if}}\ \mathsf{rank}(X_{j})\text{ is
 even} \\ 
 \mathsf{inc}([(\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
-_{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ \mathsf{rank}(X_{i})\text{
+_{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ \mathsf{rank}(X_{j})\text{
 is odd}%
 \end{array}%
 \right. 
