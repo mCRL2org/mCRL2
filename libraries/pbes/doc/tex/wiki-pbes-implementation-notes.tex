@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Thursday, September 16, 2010 14:45:33}
+%TCIDATA{LastRevised=Friday, October 22, 2010 16:14:08}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -544,7 +544,7 @@ X:=\lnot X]))={\mathbf{RHS}}((\sigma X(x_{f}{:}D_{f}:=d).~\lnot \varphi ))
 %-------------------------------------%
 \begin{equation*}
 \begin{array}{lll}
-{\mathbf{E}}(c) & =_{def} & \epsilon  \\ 
+{\mathbf{E}}(c) & =_{def} & \epsilon \\ 
 {\mathbf{E}}(\varphi \wedge \psi ) & =_{def} & {\mathbf{E}}(\varphi ){%
 \mathbf{E}}(\psi ) \\ 
 {\mathbf{E}}(\varphi \vee \psi ) & =_{def} & {\mathbf{E}}(\varphi ){\mathbf{E%
@@ -556,15 +556,15 @@ X:=\lnot X]))={\mathbf{RHS}}((\sigma X(x_{f}{:}D_{f}:=d).~\lnot \varphi ))
 {\mathbf{E}}([\alpha ]\varphi ) & =_{def} & {\mathbf{E}}(\varphi ) \\ 
 {\mathbf{E}}(\langle \alpha \rangle \varphi ) & =_{def} & {\mathbf{E}}%
 (\varphi ) \\ 
-{\mathbf{E}}(\nabla ) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\nabla (t)) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\Delta ) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\Delta (t)) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(X(d)) & =_{def} & \epsilon  \\ 
+{\mathbf{E}}(\nabla ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\nabla (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\Delta ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\Delta (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(X(d)) & =_{def} & \epsilon \\ 
 {\mathbf{E}}(\sigma X(x_{f}{:}D_{f}:=d).~\varphi )~~~ & =_{def}~~~ & (\sigma 
 \tilde{X}(T:\mathbb{R},x_{f}{:}D_{f},x_{p}{:}D_{p},\mathbf{Par}%
 _{X,[]}(\varphi _{0}))={\mathbf{RHS}}(\varphi )~)~{\mathbf{E}}(\varphi ) \\ 
-{\mathbf{E}}(\lnot c) & =_{def} & \epsilon  \\ 
+{\mathbf{E}}(\lnot c) & =_{def} & \epsilon \\ 
 {\mathbf{E}}(\lnot \lnot \varphi ) & =_{def} & {\mathbf{E}}(\varphi ) \\ 
 {\mathbf{E}}(\lnot (\varphi \wedge \psi )) & =_{def} & {\mathbf{E}}(\lnot
 \varphi ){\mathbf{E}}(\lnot \psi ) \\ 
@@ -580,11 +580,11 @@ _{X,[]}(\varphi _{0}))={\mathbf{RHS}}(\varphi )~)~{\mathbf{E}}(\varphi ) \\
 \varphi ) \\ 
 {\mathbf{E}}(\lnot (\langle \alpha \rangle \varphi )) & =_{def} & {\mathbf{E}%
 }(\lnot \varphi ) \\ 
-{\mathbf{E}}(\lnot \nabla ) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\lnot \nabla (t)) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\lnot \Delta ) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\lnot \Delta (t)) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\lnot X(d)) & =_{def} & \epsilon  \\ 
+{\mathbf{E}}(\lnot \nabla ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot \nabla (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot \Delta ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot \Delta (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\lnot X(d)) & =_{def} & \epsilon \\ 
 {\mathbf{E}}(\lnot \sigma X(x_{f}{:}D_{f}:=d).~\varphi )~~~ & =_{def}~~~ & (%
 \widetilde{\sigma }\tilde{X}(T:\mathbb{R},x_{f}{:}D_{f},x_{p}{:}D_{p},%
 \mathbf{Par}_{X,[]}(\varphi _{0}))={\mathbf{RHS}}(\lnot \varphi ~[X:=\lnot
@@ -1305,6 +1305,128 @@ used to solve it:%
 \text{\textbf{return} \textsc{Simplify}(}\sigma X=\varphi \lbrack \psi
 _{0}/X]\text{)}%
 \end{array}%
+\end{equation*}
+
+\newpage
+
+\section{Small progress measures}
+
+Let $\mathcal{E}=(\sigma _{1}X_{1}=\varphi _{1})\ \cdots \ (\sigma
+_{n}X_{n}=\varphi _{n})$ be a BES in standard recursive form. Let $d$ be the
+number of $\mu $-blocks appearing in $\mathcal{E}$. For each variable $X_{i}$
+we define a corresponding attribute $\alpha _{i}\in \mathbb{N}^{d}$, which
+is called the 'progress measure' of $X_{i}$. We define the algorithm \textsc{%
+SmallProgressMeasures} as follows:
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{SmallProgressMeasures(}}\mathcal{E}\text{\textsc{)}} \\ 
+V:=\{X_{i}\ |\ 1\leq i\leq n\} \\ 
+V_{Even}:=\{X_{i}\in V\ |\ \mathsf{\varphi }_{i}~\text{is a disjunction}\}
+\\ 
+V_{Odd}:=\{X_{i}\in V\ |\ \mathsf{\varphi }_{i}~\text{is not a disjunction}\}
+\\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{\alpha }%
+_{i}:=[0,\cdots ,0] \\ 
+\text{\textbf{while }}\mathsf{liftable\_variables}(V)\neq \emptyset \text{ 
+\textbf{do}} \\ 
+\qquad \text{\textbf{choose }}X_{i}\in \mathsf{liftable\_variables}(V) \\ 
+\qquad \mathcal{\alpha }_{i}:=\left\{ 
+\begin{array}{ll}
+\mathsf{min}\{\gamma \ |\ X_{j}\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge
+\gamma =f(X_{j},\mathsf{rank}(X_{i}))\mathsf{\}} & \text{\textsf{if}}\
+X_{i}\in V_{Even} \\ 
+\mathsf{max}\{\gamma \ |\ X_{j}\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge
+\gamma =f(X_{j},\mathsf{rank}(X_{i}))\mathsf{\}} & \text{\textsf{if}}\
+X_{i}\in V_{Odd}%
+\end{array}%
+\right.  \\ 
+\text{\textbf{return} }(W_{Even},W_{Odd})%
+\end{array}%
+\end{equation*}%
+where $\mathsf{min/max}$ is the minimum/maximum with respect to the
+lexicographical order on $\mathbb{N}^{d}$, and $\beta \in \mathbb{N}^{d}$ is
+defined as%
+\begin{equation*}
+\beta _{i}=\left\{ 
+\begin{array}{ll}
+0 & \mathsf{if}\ i\text{ \textsf{is even}} \\ 
+|\{X_{j}\in V\ |\ \mathsf{rank}(X_{j})=i\}| & \mathsf{if}\ i\text{ \textsf{%
+is odd}}%
+\end{array}%
+\right. 
+\end{equation*}%
+and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{N}\rightarrow 
+\mathbb{N}^{d}$ is defined inductively as%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+\mathsf{inc}(\alpha ,1) & = & \left\{ 
+\begin{array}{ll}
+\top  & \text{\textsf{if}}\ \alpha _{1}=\beta _{1} \\ 
+\lbrack \alpha _{1}+1,\alpha _{2},\cdots ,\alpha _{d}] & \text{\textsf{%
+otherwise}}%
+\end{array}%
+\right.  \\ 
+&  &  \\ 
+\mathsf{inc}(\alpha ,i+1) & = & \left\{ 
+\begin{array}{ll}
+\mathsf{inc}([\alpha _{1},\cdots ,\alpha _{i},0,\alpha _{i+2},\cdots ,\alpha
+_{d}],i) & \text{\textsf{if}}\ \alpha _{i+1}=\beta _{i+1} \\ 
+\lbrack \alpha _{1},\cdots ,\alpha _{i},\alpha _{i+1}+1,\alpha _{i+2},\cdots
+,\alpha _{d}] & \text{\textsf{otherwise}}%
+\end{array}%
+\right. 
+\end{array}%
+\right. 
+\end{equation*}%
+and the function $f:\mathbb{N}^{d}\times \mathbb{N}\rightarrow \mathbb{N}^{d}
+$ is defined as:%
+\begin{equation*}
+f(X_{j},m)=\left\{ 
+\begin{array}{ll}
+\lbrack (\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
+_{j})_{m},0,\cdots ,0] & \text{\textsf{if}}\ \mathsf{rank}(X_{i})\text{ is
+even} \\ 
+\mathsf{inc}([(\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
+_{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ \mathsf{rank}(X_{i})\text{
+is odd}%
+\end{array}%
+\right. 
+\end{equation*}%
+and%
+\begin{equation*}
+\mathsf{liftable\_variables}(V)=\{X_{i}\in V\ |\ \mathsf{min}\{\alpha \ |\
+w\in \mathsf{\mathsf{occ}}(\varphi _{i})\wedge \alpha =f(w)\}\mathsf{<}%
+\mathcal{\alpha }_{i}\}.
+\end{equation*}%
+and $W_{Even}$ and $W_{Odd}$ are defined as%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+W_{Even} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}<\top \} \\ 
+W_{Odd} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}=\top \}%
+\end{array}%
+\right. 
+\end{equation*}%
+and the function $\mathsf{rank}$ is defined inductively as follows:%
+\begin{equation*}
+\left\{ 
+\begin{array}{lll}
+\mathsf{rank}(X_{1}) & = & \left\{ 
+\begin{array}{ll}
+0 & \mathsf{if}\ \sigma _{1}=\nu  \\ 
+1 & \mathsf{if}\ \sigma _{1}=\mu 
+\end{array}%
+\right.  \\ 
+\mathsf{rank}(X_{i+1}) & = & \left\{ 
+\begin{array}{ll}
+\mathsf{rank}(X_{i}) & \mathsf{if}\ \sigma _{i+1}=\sigma _{i} \\ 
+\mathsf{rank}(X_{i})+1 & \mathsf{if}\ \sigma _{i+1}\neq \sigma _{i}%
+\end{array}%
+\right. 
+\end{array}%
+\right. 
 \end{equation*}
 
 \newpage
