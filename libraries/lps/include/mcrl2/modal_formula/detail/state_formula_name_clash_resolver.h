@@ -12,7 +12,8 @@
 #ifndef MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_RESOLVER_H
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_RESOLVER_H
 
-#include <map>
+#include <set>
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/builder.h"
@@ -33,7 +34,7 @@ namespace detail {
       using super::leave;
       using super::operator();
 
-      typedef std::map<core::identifier_string, std::vector<core::identifier_string> > name_map;
+      typedef std::map<core::identifier_string, atermpp::vector<core::identifier_string> > name_map;
 
       /// \brief The stack of names.
       name_map m_names;
@@ -53,7 +54,7 @@ namespace detail {
       void push(const core::identifier_string& name)
       {
         //std::cout << "<push>" << name << std::endl;
-        std::vector<core::identifier_string>& names = m_names[name];
+        atermpp::vector<core::identifier_string>& names = m_names[name];
         if (names.empty())
         {
           names.push_back(name);
