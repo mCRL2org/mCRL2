@@ -24,7 +24,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/pbes/detail/pbes2bes_variable_map_parser.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
@@ -280,8 +280,8 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       else if (m_strategy == ts_finite)
       {
         pbes2bes_finite_algorithm algorithm(rewrite_strategy(), log_level);
-        pbes2bes_variable_map variable_map = detail::parse_variable_map(p, m_finite_parameter_selection);
-        algorithm.run(p, variable_map);
+        detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, m_finite_parameter_selection);
+        algorithm.run(p, parameter_map);
       }
 
       if (mcrl2::core::gsVerbose)

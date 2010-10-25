@@ -18,9 +18,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
-
-// TODO: isolate pbes2bes_variable_map from pbes2bes_finite
-#include "mcrl2/pbes/pbes2bes_finite_algorithm.h" // for pbes2bes_variable_map
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 
 namespace mcrl2 {
 
@@ -125,12 +123,12 @@ namespace detail {
       /// \param p A PBES
       /// \param variable_map A map containing the parameters that should be expanded by the algorithm.
       void run(pbes<>& p,
-               const pbes2bes_variable_map& variable_map
+               const detail::pbes_parameter_map& variable_map
               )
       {
         for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
-          pbes2bes_variable_map::const_iterator j = variable_map.find(i->variable().name());
+          detail::pbes_parameter_map::const_iterator j = variable_map.find(i->variable().name());
           if (j != variable_map.end())
           {
             detail::pbes_abstract_builder builder(j->second);

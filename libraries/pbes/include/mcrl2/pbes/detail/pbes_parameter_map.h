@@ -6,30 +6,31 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/pbes2bes_variable_map_parser.h
+/// \file mcrl2/pbes/detail/pbes_parameter_map.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_PBES2BES_VARIABLE_MAP_PARSER_H
-#define MCRL2_PBES_DETAIL_PBES2BES_VARIABLE_MAP_PARSER_H
+#ifndef MCRL2_PBES_DETAIL_PBES_PARAMETER_MAP_H
+#define MCRL2_PBES_DETAIL_PBES_PARAMETER_MAP_H
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <set>
-
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
-
 #include "mcrl2/exception.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
+#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
 namespace detail {
+
+    /// \brief Data structure for storing the variables that should be expanded by the finite pbes2bes algorithm.
+    typedef atermpp::map<core::identifier_string, std::vector<data::variable> > pbes_parameter_map;
 
     /// \brief Returns true if the declaration text matches with the variable d.
     inline
@@ -83,10 +84,10 @@ namespace detail {
 
     /// \brief Parses parameter selection for finite pbes2bes algorithm
     inline
-    pbes2bes_variable_map parse_variable_map(const pbes<>& p, const std::string& text)
+    pbes_parameter_map parse_pbes_parameter_map(const pbes<>& p, const std::string& text)
     {
       using namespace boost::xpressive;
-      pbes2bes_variable_map result;
+      pbes_parameter_map result;
 
       // maps propositional variable name to the corresponding variable declarations, for example:
       // X(b:Bool,c:C) X(d:*) Y(*:Bool) results in the mapping
@@ -150,4 +151,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_PBES2BES_VARIABLE_MAP_PARSER_H
+#endif // MCRL2_PBES_DETAIL_PBES_PARAMETER_MAP_H

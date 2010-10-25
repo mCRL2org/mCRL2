@@ -28,7 +28,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
-#include "mcrl2/pbes/detail/pbes2bes_variable_map_parser.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -475,7 +475,7 @@ void test_pbes2bes_finite()
   unsigned int log_level = 2;
   pbes<> p1 = txt2pbes(text);
   pbes2bes_finite_algorithm algorithm(data::rewriter::jitty, log_level);
-  pbes2bes_variable_map variable_map = detail::parse_variable_map(p1, "X(*:D)");
+  pbes2bes_variable_map variable_map = detail::parse_pbes_parameter_map(p1, "X(*:D)");
   algorithm.run(p1, variable_map);        
 }
 

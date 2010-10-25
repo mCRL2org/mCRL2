@@ -16,7 +16,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/pbes2bes_variable_map_parser.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -24,9 +24,9 @@ using namespace mcrl2::pbes_system;
 void test_pbesabstract(const std::string& pbes_spec, const std::string& variable_spec)
 {
   pbes<> p = txt2pbes(pbes_spec);
-  pbes2bes_variable_map variable_map = pbes_system::detail::parse_variable_map(p, variable_spec);
+  detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, variable_spec);
   pbes_abstract_algorithm algorithm;
-  algorithm.run(p, variable_map);
+  algorithm.run(p, parameter_map);
   std::cout << "\n-------------------------------\n" << pp(p) << std::endl;
 }
 
