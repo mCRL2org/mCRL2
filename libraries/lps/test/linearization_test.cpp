@@ -1061,6 +1061,34 @@ BOOST_AUTO_TEST_CASE(test_aliases_complex)
   run_linearisation_test_case(spec);
 }
 
+BOOST_AUTO_TEST_CASE(test_bug_775a)
+{
+  const std::string spec =
+     "sort V = struct v( l: Bool  );\n"
+     "act  a:  List( Bool );\n"
+     "sort B = Bool -> List(Bool);\n"
+     "proc X( M: B ) = \n"
+     "  sum v:V.  a( [] ) \n"
+     "+ sum v:V.  a( M(l(v)))\n"
+     ";\n"
+     "init X( lambda i: Bool. [] );\n";
+  run_linearisation_test_case(spec);
+}
+
+BOOST_AUTO_TEST_CASE(test_bug_775b)
+{
+  const std::string spec =
+     "sort V = struct v( l: Bool  );\n"
+     "act  a:  List( Bool );\n"
+     "sort B = Bool -> List(Bool);\n"
+     "proc X( M: B ) = \n"
+     "  sum v:V.  a( M(l(v)))\n"
+     "+ sum v:V.  a( [] ) \n"
+     ";\n"
+     "init X( lambda i: Bool. [] );\n";
+  run_linearisation_test_case(spec);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   core::gsSetVerboseMsg();
