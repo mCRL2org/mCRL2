@@ -30,15 +30,15 @@ def test_pbes_abstract(filename, abstraction_value, equation_count, atom_count =
     os.system('txt2pbes %s %s' % (txtfile, pbesfile))
    
     # get the parameters
-    lines = path(txtfile).lines()
-    parameter_map = []
-    for line in lines:
-      line = re.sub(r'^pbes\s+', '', line)
-      if (not line.startswith('mu ') and not line.startswith(r'nu ')) or not line.endswith(' = '):
-        continue
-      line = re.sub('\s+=\s+$', '', line)
-      parameter_map.append[line]
-    params = ';'.join(parameter_map)
+    #lines = path(txtfile).lines()
+    #parameter_map = []
+    #for line in lines:
+    #  line = re.sub(r'^pbes\s+', '', line)
+    #  m = re.search(r'\s*[mn]u\s+(\w+\(?[\w:]*\)?)\s+=\s+.*', line)
+    #  if m != None:
+    #    parameter_map.append(m.group(1))
+    #params = ';'.join(parameter_map)
+    params = '*(*:*)'
     os.system('pbesabstract --select=%s --abstraction-value=%d %s %s' % (params, abstraction_value, pbesfile, pbesfile2))
 
     # pbes2bool
@@ -51,10 +51,10 @@ def test_pbes_abstract(filename, abstraction_value, equation_count, atom_count =
 
     answer1 = (answer1 == 'true')
     answer2 = (answer2 == 'true')
-    print abstraction_value, answer1, answer2
+    print filename, abstraction_value, answer1, answer2
     
     if abstraction_value != answer1:
         assert(answer1 == answer2)
    
 for i in range(10000):
-    test_pbes_abstract('%02d' % i, i % 2 == 0, 5, 4, 3)
+    test_pbes_abstract('%02d' % i, i % 2 == 0, 4, 3, 2)
