@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/abstract.h"
-#include "mcrl2/pbes/detail/pbes2bes_variable_map_parser.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -90,8 +90,8 @@ class pbes_abstract_tool: public input_output_tool
 
       // run the algorithm
       pbes_abstract_algorithm algorithm(log_level);
-      pbes2bes_variable_map variable_map = pbes_system::detail::parse_variable_map(p, m_parameter_selection);
-      algorithm.run(p, variable_map);
+      pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, m_parameter_selection);
+      algorithm.run(p, parameter_map);
 
       // save the result
       p.save(m_output_filename);
