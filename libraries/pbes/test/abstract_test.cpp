@@ -21,12 +21,12 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-void test_pbesabstract(const std::string& pbes_spec, const std::string& variable_spec)
+void test_pbesabstract(const std::string& pbes_spec, const std::string& variable_spec, bool value_true)
 {
   pbes<> p = txt2pbes(pbes_spec);
   detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, variable_spec);
   pbes_abstract_algorithm algorithm;
-  algorithm.run(p, parameter_map);
+  algorithm.run(p, parameter_map, value_true);
   std::cout << "\n-------------------------------\n" << pp(p) << std::endl;
 }
 
@@ -39,6 +39,8 @@ void test_pbesabstract()
     "init X(true, 0);              \n"
     ,
     "X(b:Nat)"
+    ,
+    true
   );
 
   test_pbesabstract(
@@ -48,6 +50,8 @@ void test_pbesabstract()
     "init X1(true);                                     \n"
     ,
     "X1(b:Bool)"
+    ,
+    true
   );
 
   test_pbesabstract(
@@ -57,6 +61,8 @@ void test_pbesabstract()
     "init X1(true);                     \n"
     ,
     "X1(b:Bool)"
+    ,
+    true
   );
 }
 

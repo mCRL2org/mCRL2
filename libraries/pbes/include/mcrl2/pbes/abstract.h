@@ -26,7 +26,7 @@ namespace pbes_system {
 
 namespace detail {
 
-  /// Visitor that ...
+  /// \brief Visitor that implements the pbes-abstract algorithm.
   struct pbes_abstract_builder: public builder<pbes_abstract_builder>
   {
     typedef builder<pbes_abstract_builder> super;
@@ -36,9 +36,11 @@ namespace detail {
     
     std::vector<data::variable_list> m_quantifier_stack;
     const std::vector<data::variable> m_selected_variables;
+    const data::data_expression m_value;
   
-    pbes_abstract_builder(const std::vector<data::variable>& selected_variables)
-    : m_selected_variables(selected_variables)
+    pbes_abstract_builder(const std::vector<data::variable>& selected_variables, bool value_true)
+    : m_selected_variables(selected_variables),
+      m_value(value_true ? data::sort_bool::true_() : data::sort_bool::false_())
     {}
   
     /// \brief Returns true if the m_quantifier_stack contains a given data variable
@@ -121,17 +123,18 @@ namespace detail {
 
       /// \brief Runs the algorithm.
       /// \param p A PBES
-      /// \param variable_map A map containing the parameters that should be expanded by the algorithm.
+      /// \param parameter_map A map containing the parameters that should be expanded by the algorithm.
       void run(pbes<>& p,
-               const detail::pbes_parameter_map& variable_map
+               const detail::pbes_parameter_map& parameter_map,
+               bool value_true
               )
       {
         for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
-          detail::pbes_parameter_map::const_iterator j = variable_map.find(i->variable().name());
-          if (j != variable_map.end())
+          detail::pbes_parameter_map::const_iterator j = parameter_map.find(i->variable().name());
+          if (j != parameter_map.end())
           {
-            detail::pbes_abstract_builder builder(j->second);
+            detail::pbes_abstract_builder builder(j->second, value_true);
             i->formula() = builder(i->formula());
           }
         }

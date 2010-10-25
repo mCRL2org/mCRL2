@@ -30,6 +30,7 @@ class pbes_abstract_tool: public input_output_tool
     typedef input_output_tool super;
 
     std::string m_parameter_selection;
+    bool m_value_true;
 
     void parse_options(const command_line_parser& parser)
     {
@@ -39,6 +40,7 @@ class pbes_abstract_tool: public input_output_tool
       	m_parameter_selection = parser.option_argument("select");
       	boost::trim(m_parameter_selection);
       }
+      m_value_true = parser.option_argument_as<bool>("abstraction-value");
     }
 
     void add_options(interface_description& desc)
@@ -46,10 +48,17 @@ class pbes_abstract_tool: public input_output_tool
       super::add_options(desc);
       desc.add_option("select",
           make_optional_argument("NAME", ""),
-          "select parameters that need to be expanded\n"
-          "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
-          "            *(*:Bool)\n",
+          "select the PBES parameters that are allowed to be abstracted. Wild cards are allowed\n"
+          "\n"
+          "Examples:\n\n"
+          "          X1(b:Bool,c:Bool);X2(b:Bool)\n"
+          "          X1(*:Bool);X2(*:Bool)\n"
+          "          *(*:Bool)",
           'f');
+        desc.add_option("abstraction-value",
+          make_optional_argument("NAME", "1"),
+          "the abstraction value (true/1 or false/0)",
+          'a');
     }
 
   public:
@@ -57,11 +66,17 @@ class pbes_abstract_tool: public input_output_tool
       : super(
           "pbesabstract",
           "Wieger Wesselink; Tom Haenen and Tim Willemse",
-          "Abstract parameters of a PBES",
-          "Reads a file containing a PBES, and applies the abstract algorithm. "
+          "Tool for abstracting parameters of a PBES",
+          "Reads a file containing a PBES, and applies the pbesabstract algorithm. "
           "If OUTFILE is not present, standard output is used."
           "If INFILE is not present, standard input is used."
-        )
+          "\n\n"
+          "Motivation: if the solution of a PBES after application of pbesabstract with\n"
+          "the value true is false, then the original PBES has solution false. Similarly\n"
+          "if the solution of a PBES after application of pbesabstract with the value\n"
+          "false is true, then the original PBES has solution true."
+        ),
+        m_value_true(true)
     {}
 
     bool run()
@@ -91,7 +106,7 @@ class pbes_abstract_tool: public input_output_tool
       // run the algorithm
       pbes_abstract_algorithm algorithm(log_level);
       pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, m_parameter_selection);
-      algorithm.run(p, parameter_map);
+      algorithm.run(p, parameter_map, m_value_true);
 
       // save the result
       p.save(m_output_filename);
