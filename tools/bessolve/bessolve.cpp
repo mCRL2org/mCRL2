@@ -102,11 +102,21 @@ class bessolve_tool: public input_output_tool
         input_filename().empty()?"standard input":input_filename().c_str(),
         solution_strategy_to_string(strategy).c_str());
 
+      unsigned int log_level = 0;
+      if(core::gsVerbose)
+      {
+        log_level = 1;
+      }
+      if(core::gsDebug)
+      {
+        log_level = 2;
+      }
+
       bool result = false;
       switch(strategy)
       {
         case gauss:
-          result = gauss_elimination(bes);
+          result = gauss_elimination(bes, log_level);
           break;
         default:
           throw mcrl2::runtime_error("unhandled strategy provided");
