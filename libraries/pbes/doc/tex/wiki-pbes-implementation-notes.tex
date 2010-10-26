@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Monday, October 25, 2010 15:06:30}
+%TCIDATA{LastRevised=Tuesday, October 26, 2010 17:14:35}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1215,7 +1215,7 @@ The motivation for this algorithm is that if the solution of $\mathsf{%
 abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],false)$ is $true$, this implies
 that the solution of $\mathcal{E}$ is $true$ as well, and if the solution of 
 $\mathsf{abstract}(\mathcal{E},[V_{1},\cdots ,V_{n}],true)$ is $false$, this
-implies that the solution of $\mathcal{E}$ is $false$.\newpage 
+implies that the solution of $\mathcal{E}$ is $false$.\newpage
 
 \section{ Gau\ss\ Elimination}
 
@@ -1385,7 +1385,7 @@ X_{i}\in V_{Even} \\
 \gamma =f(X_{j},\mathsf{rank}(X_{i}))\mathsf{\}} & \text{\textsf{if}}\
 X_{i}\in V_{Odd}%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 \text{\textbf{return} }(W_{Even},W_{Odd})%
 \end{array}%
 \end{equation*}%
@@ -1399,28 +1399,28 @@ defined as%
 |\{X_{j}\in V\ |\ \mathsf{rank}(X_{j})=i\}| & \mathsf{if}\ i\text{ \textsf{%
 is odd}}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}%
 and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{N}\rightarrow 
 \mathbb{N}^{d}$ is defined inductively as%
 \begin{equation*}
 \left\{ 
 \begin{array}{lll}
-\mathsf{inc}(\alpha ,0) & = & \top \\ 
+\mathsf{inc}(\alpha ,0) & = & \top  \\ 
 &  &  \\ 
 \mathsf{inc}(\alpha ,i+1) & = & \left\{ 
 \begin{array}{ll}
 \mathsf{inc}([\alpha _{1},\cdots ,\alpha _{i},0,\alpha _{i+2},\cdots ,\alpha
-_{d}],i) & \text{\textsf{if}}\ \alpha _{i+1}=\beta _{i+1} \\ 
+_{d}],i) & \text{\textsf{if}}\ \alpha _{i+1}=\beta _{i+1}-1 \\ 
 \lbrack \alpha _{1},\cdots ,\alpha _{i},\alpha _{i+1}+1,\alpha _{i+2},\cdots
 ,\alpha _{d}] & \text{\textsf{otherwise}}%
 \end{array}%
-\right.%
+\right. 
 \end{array}%
-\right.
+\right. 
 \end{equation*}%
-and the function $f:\mathbb{N}^{d}\times \mathbb{N}\rightarrow \mathbb{N}%
-^{d} $ is defined as:%
+and the function $f:\mathbb{N}^{d}\times \mathbb{N}\rightarrow \mathbb{N}^{d}
+$ is defined as:%
 \begin{equation*}
 f(X_{j},m)=\left\{ 
 \begin{array}{ll}
@@ -1431,7 +1431,7 @@ even} \\
 _{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ \mathsf{rank}(X_{j})\text{
 is odd}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}%
 and%
 \begin{equation*}
@@ -1446,7 +1446,7 @@ and $W_{Even}$ and $W_{Odd}$ are defined as%
 W_{Even} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}<\top \} \\ 
 W_{Odd} & = & \{X_{i}\in V\ |\ \mathcal{\alpha }_{i}=\top \}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}%
 and the function $\mathsf{rank}$ is defined inductively as follows:%
 \begin{equation*}
@@ -1454,18 +1454,18 @@ and the function $\mathsf{rank}$ is defined inductively as follows:%
 \begin{array}{lll}
 \mathsf{rank}(X_{1}) & = & \left\{ 
 \begin{array}{ll}
-0 & \mathsf{if}\ \sigma _{1}=\nu \\ 
-1 & \mathsf{if}\ \sigma _{1}=\mu%
+0 & \mathsf{if}\ \sigma _{1}=\nu  \\ 
+1 & \mathsf{if}\ \sigma _{1}=\mu 
 \end{array}%
-\right. \\ 
+\right.  \\ 
 \mathsf{rank}(X_{i+1}) & = & \left\{ 
 \begin{array}{ll}
 \mathsf{rank}(X_{i}) & \mathsf{if}\ \sigma _{i+1}=\sigma _{i} \\ 
 \mathsf{rank}(X_{i})+1 & \mathsf{if}\ \sigma _{i+1}\neq \sigma _{i}%
 \end{array}%
-\right.%
+\right. 
 \end{array}%
-\right.
+\right. 
 \end{equation*}
 
 \newpage
