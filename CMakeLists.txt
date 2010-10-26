@@ -653,6 +653,7 @@ message(STATUS "MCRL2_ENABLE_EXPERIMENTAL: ${MCRL2_ENABLE_EXPERIMENTAL}" )
 
 if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/besconvert )
+  add_subdirectory ( tools/bessolve )
   add_subdirectory ( tools/lpsrealelm )
   add_subdirectory ( tools/lpsbisim2pbes )
   add_subdirectory ( tools/pbesabstract )
