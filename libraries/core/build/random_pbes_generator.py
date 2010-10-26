@@ -292,7 +292,12 @@ def join_terms(terms):
     terms.append(z)
     return terms
 
-def make_pbes(equation_count, atom_count = 5, propvar_count = 3):
+def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers = True):
+    global operators
+    if use_quantifiers:
+      operators = [not_, and_, or_, implies, forall, exists]
+    else:
+      operators = [not_, and_, or_, implies]
     predvars = make_predvars(equation_count)
     equations = []
     for i in range(equation_count):
@@ -320,5 +325,29 @@ def run_program(program, options, redirect = None):
             arg = arg + ' 2> %s 1>&2' % redirect
         else:
             arg = arg + ' >& %s' % redirect
-    print arg
+    #print arg
     os.system(arg)
+
+def timeout_command(command, timeout = -1):
+    """call shell-command and either return its output or kill it
+    if it doesn't normally exit within timeout seconds and return None"""
+    import subprocess, datetime, os, time, signal, platform
+
+    cmd = command.split(" ")
+    start = datetime.datetime.now()
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    while process.poll() is None:
+        time.sleep(0.1)
+        now = datetime.datetime.now()
+        if (now - start).seconds > timeout:
+            if platform.system() == 'Windows':
+                #os.kill(process.pid, signal.CTRL_C_EVENT)
+                #os.kill(process.pid, signal.CTRL_BREAK_EVENT)
+                os.kill(process.pid, signal.SIGABRT)
+            else:
+                os.kill(process.pid, signal.SIGKILL)
+                os.waitpid(-1, os.WNOHANG)
+            return None
+
+    return process.stderr.read()

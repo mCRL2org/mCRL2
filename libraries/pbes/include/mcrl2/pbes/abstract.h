@@ -83,8 +83,8 @@ namespace detail {
         }
         if (!is_bound(*i))
         {
-          std::clog << "Reducing data expression " << pp(d) << " to false." << std::endl;
-          return pbes_expr::false_();
+          //std::clog << "Reducing data expression " << pp(d) << " to " << pp(m_value) << "." << std::endl;
+          return m_value;
         }
       }
       return d;

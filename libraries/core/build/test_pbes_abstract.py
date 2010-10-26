@@ -12,22 +12,15 @@ def last_word(line):
     words = line.strip().split()
     return words[len(words) - 1]
 
-def redirect_command(cmd, filename):
-    if platform.system() == 'Windows':
-         arg = '%s 1> %s 2>&1' % (cmd, filename)
-    else:
-         arg = '%s >& %s' % (cmd, filename)
-    os.system(arg)
-
-def test_pbes_abstract(filename, abstraction_value, equation_count, atom_count = 5, propvar_count = 3):
+# performs the test with pbes   filename + '.txt'
+# returns True if the test succeeds
+def run_test(filename, abstraction_value):
     txtfile = filename + '.txt'
     besfile = filename + '.bes'
     pbesfile = filename + '.pbes'
     pbesfile2 = filename + '_abstract.pbes'
     answerfile = 'temp.answer'
-    p = make_pbes(equation_count, atom_count, propvar_count)
-    path(txtfile).write_text('%s' % p)
-    os.system('txt2pbes %s %s' % (txtfile, pbesfile))
+    run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
    
     # get the parameters
     #lines = path(txtfile).lines()
@@ -39,22 +32,43 @@ def test_pbes_abstract(filename, abstraction_value, equation_count, atom_count =
     #    parameter_map.append(m.group(1))
     #params = ';'.join(parameter_map)
     params = '*(*:*)'
-    os.system('pbesabstract --select=%s --abstraction-value=%d %s %s' % (params, abstraction_value, pbesfile, pbesfile2))
+    run_program('pbesabstract', '--select=%s --abstraction-value=%d %s %s' % (params, abstraction_value, pbesfile, pbesfile2))
 
     # pbes2bool
-    redirect_command('pbes2bool %s' % pbesfile, answerfile)
-    answer1 = last_word(path(answerfile).text())
+    text = timeout_command('pbes2bool %s' % pbesfile, 3)
+    if text == None:
+      print 'ERROR: timeout on %s' % pbesfile
+      return None
+    answer1 = last_word(text)
 
     # pbes2bool
-    redirect_command('pbes2bool %s' % pbesfile2, answerfile)
-    answer2 = last_word(path(answerfile).text())
+    text = timeout_command('pbes2bool %s' % pbesfile2, 3)
+    if text == None:
+      print 'ERROR: timeout on %s' % pbesfile2
+      return None
+    answer2 = last_word(text)
 
     answer1 = (answer1 == 'true')
     answer2 = (answer2 == 'true')
     print filename, abstraction_value, answer1, answer2
     
-    if abstraction_value != answer1:
-        assert(answer1 == answer2)
+    if abstraction_value != answer2:
+      return answer1 == answer2
+    else:
+      return True
+
+def remove_equation(var, p):
+  p = re.sub('[mn]u %s.*' % var, '', p)
+  p = re.sub(r'%s\([^()]*\)' % var, 'val(true)', p)
+  p = re.sub(var, 'val(true)', p)
+  return p
+
+def test_pbes_abstract(filename, abstraction_value, equation_count, atom_count = 5, propvar_count = 3):
+    txtfile = filename + '.txt'
+    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers = True)   
+    path(txtfile).write_text('%s' % p)
+    if run_test(filename, abstraction_value) == False:
+      raise Exception('Test %s.txt failed' % filename)
    
 for i in range(10000):
     test_pbes_abstract('%02d' % i, i % 2 == 0, 4, 3, 2)
