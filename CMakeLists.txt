@@ -599,6 +599,7 @@ add_subdirectory ( 3rd-party/ticpp )
 ## Tool dependencies
 ##---------------------------------------------------
 
+  add_subdirectory ( tools/bespp )
   add_subdirectory ( tools/chi2mcrl2 )
   add_subdirectory ( tools/diagraphica )
   add_subdirectory ( tools/formulacheck )
