@@ -21,28 +21,18 @@ def run_test(filename, abstraction_value):
     pbesfile2 = filename + '_abstract.pbes'
     answerfile = 'temp.answer'
     run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
-   
-    # get the parameters
-    #lines = path(txtfile).lines()
-    #parameter_map = []
-    #for line in lines:
-    #  line = re.sub(r'^pbes\s+', '', line)
-    #  m = re.search(r'\s*[mn]u\s+(\w+\(?[\w:]*\)?)\s+=\s+.*', line)
-    #  if m != None:
-    #    parameter_map.append(m.group(1))
-    #params = ';'.join(parameter_map)
-    params = '*(*:*)'
-    run_program('pbesabstract', '--select=%s --abstraction-value=%d %s %s' % (params, abstraction_value, pbesfile, pbesfile2))
+
+    run_program('pbesabstract', '--select=*\(*:*\) --abstraction-value=%s %s %s' % (abstraction_value, pbesfile, pbesfile2))
 
     # pbes2bool
-    text = timeout_command('pbes2bool %s' % pbesfile, 3)
+    dummy, text = timeout_command('pbes2bool %s' % pbesfile, 3)
     if text == None:
       print 'ERROR: timeout on %s' % pbesfile
       return None
     answer1 = last_word(text)
 
     # pbes2bool
-    text = timeout_command('pbes2bool %s' % pbesfile2, 3)
+    dummy, text = timeout_command('pbes2bool %s' % pbesfile2, 3)
     if text == None:
       print 'ERROR: timeout on %s' % pbesfile2
       return None
@@ -71,4 +61,4 @@ def test_pbes_abstract(filename, abstraction_value, equation_count, atom_count =
       raise Exception('Test %s.txt failed' % filename)
    
 for i in range(10000):
-    test_pbes_abstract('%02d' % i, i % 2 == 0, 4, 3, 2)
+    test_pbes_abstract('%02d' % i, i % 2, 4, 3, 2)

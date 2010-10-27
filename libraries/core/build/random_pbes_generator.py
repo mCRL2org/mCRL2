@@ -350,4 +350,4 @@ def timeout_command(command, timeout = -1):
                 os.waitpid(-1, os.WNOHANG)
             return None
 
-    return process.stderr.read()
+    return (process.stdout.read(), process.stderr.read())
