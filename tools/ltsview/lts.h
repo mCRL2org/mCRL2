@@ -90,7 +90,7 @@ class LTS
 
     unsigned int getNumParameters() const;
     // atermpp::set<ATermAppl> getParameterDomain(unsigned int parindex);
-    std::vector<std::string> LTS::getParameterDomain(unsigned int parindex);
+    std::vector<std::string> getParameterDomain(unsigned int parindex);
     std::string getParameterName(unsigned int parindex) ;
     // ATerm getStateParameterValue(State* state,unsigned int param);
     unsigned int getStateParameterValue(State* state,unsigned int param);

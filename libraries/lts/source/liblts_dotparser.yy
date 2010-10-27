@@ -9,9 +9,9 @@
 %{
 
 #define YYSTYPE std::string
+#include <string>
 #include <vector>
 #include <cstring>
-// #include "aterm2.h"
 #include "liblts_dotparser.h"
 #include "liblts_dotlexer.h"
 

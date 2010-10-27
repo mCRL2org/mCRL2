@@ -8,9 +8,7 @@
 //
 /// \file liblts_aut.cpp
 
-// #include <cstring>
 #include <string>
-// #include <cstdlib>
 #include <sstream>
 #include <assert.h>
 #include <aterm2.h>
@@ -241,31 +239,6 @@ static void read_from_aut(lts_aut_t &l, istream &is)
   }
 }
 
-void lts_aut_t::load(const string &filename)
-{
-  if (filename=="")
-  {
-    read_from_aut(*this,cin);
-  }
-  else
-  {
-    ifstream is(filename.c_str());
-
-    if ( !is.is_open() )
-    {
-      throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for reading.");
-    }
-
-    read_from_aut(*this,is);
-    is.close();
-  }
-} 
-
-void lts_aut_t::load(istream &is)
-{
-  read_from_aut(*this,is);
-} 
-
 static void write_to_aut(const lts_aut_t &l, ostream &os)
 {
   os << "des (0," << l.num_transitions() << "," << l.num_states() << ")" << endl;
@@ -294,8 +267,34 @@ static void write_to_aut(const lts_aut_t &l, ostream &os)
        << detail::pp(l.label_value(t.front().label()))
        << "\"," << to << ")" << endl;
   }
-
 }
+
+} // namespace detail
+
+void lts_aut_t::load(const string &filename)
+{
+  if (filename=="")
+  {
+    read_from_aut(*this,cin);
+  }
+  else
+  {
+    ifstream is(filename.c_str());
+
+    if ( !is.is_open() )
+    {
+      throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for reading.");
+    }
+
+    read_from_aut(*this,is);
+    is.close();
+  }
+} 
+
+void lts_aut_t::load(istream &is)
+{
+  read_from_aut(*this,is);
+} 
 
 void lts_aut_t::save(string const& filename) const
 {
@@ -319,7 +318,5 @@ void lts_aut_t::save(string const& filename) const
 } 
 
 
-
-}
 }
 }

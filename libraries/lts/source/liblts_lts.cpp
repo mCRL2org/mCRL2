@@ -194,19 +194,6 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
   }
 }
 
-void lts_lts_t::load(const std::string &filename)
-{
- if (filename=="")
- { 
-   throw mcrl2::runtime_error("Cannot read svc/lts file " + filename + " from stdin");
- }
- else
- {
-   read_from_lts(*this,filename,detail::detect_type(filename));
- }
-
-}
-
 static void write_to_lts(const lts_lts_t& l, string const& filename, lts_type type)
 {
   if (!l.has_label_info())
@@ -266,6 +253,7 @@ static void write_to_lts(const lts_lts_t& l, string const& filename, lts_type ty
   ATermList act_spec = l.action_labels(); 
   add_extra_mcrl2_lts_data(filename,data_spec,params,act_spec);
 }
+} // namespace detail
 
 void lts_lts_t::save(const std::string &filename) const
 {
@@ -279,6 +267,18 @@ void lts_lts_t::save(const std::string &filename) const
   }
 
 }
+void lts_lts_t::load(const std::string &filename)
+{
+ if (filename=="")
+ { 
+   throw mcrl2::runtime_error("Cannot read svc/lts file " + filename + " from stdin");
+ }
+ else
+ {
+   read_from_lts(*this,filename,detail::detect_type(filename));
+ }
+
 }
+
 }
 }

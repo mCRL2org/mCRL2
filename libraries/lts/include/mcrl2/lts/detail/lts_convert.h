@@ -631,8 +631,7 @@ namespace detail
   {
     if (extra_data_is_defined)
     {
-      std::cerr << "While translating .bcg to .bcg, additional information (data specification, action declarations and process parameters) are ing
-ored.\n";
+      std::cerr << "While translating .bcg to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
     }
     lts_convert(lts_in,lts_out);
   }

@@ -14,10 +14,10 @@
 #include <fstream>
 #include "boost/scoped_array.hpp"
 // #include "aterm2.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/parse.h"
+// #include "mcrl2/core/messaging.h"
+// #include "mcrl2/core/aterm_ext.h"
+// #include "mcrl2/core/detail/struct_core.h"
+// #include "mcrl2/core/parse.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/data_specification.h"
@@ -100,23 +100,6 @@ namespace detail
   ATerm r = (ATerm) ATmakeApplArray(ATmakeAFun("STATE",len,ATfalse),state_args.get());
   return r;
 } */
-
-void mcrl2::lts::lts_fsm_t::load(const std::string &filename)
-{
-  if (filename.empty())
-  { 
-    if (!parse_fsm(std::cin,*this))
-    { throw mcrl2::runtime_error("error parsing .fsm file");
-    }
-  }
-  else 
-  { 
-    std::ifstream is(filename.c_str());
-    if (!parse_fsm(is,*this))
-    { throw mcrl2::runtime_error("error parsing .fsm file");
-    }
-  }
-}
 
 // void read_from_fsm(lts_extra &l, std::istream &is, lts_type type, lps::specification const& spec)
 void read_from_fsm(
@@ -231,6 +214,25 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
   }
 }
 
+} // namespace detail
+
+void mcrl2::lts::lts_fsm_t::load(const std::string &filename)
+{
+  if (filename.empty())
+  { 
+    if (!parse_fsm(std::cin,*this))
+    { throw mcrl2::runtime_error("error parsing .fsm file");
+    }
+  }
+  else 
+  { 
+    std::ifstream is(filename.c_str());
+    if (!parse_fsm(is,*this))
+    { throw mcrl2::runtime_error("error parsing .fsm file");
+    }
+  }
+}
+
 void lts_fsm_t::save(const std::string &filename) const
 {
   if (filename=="")
@@ -244,8 +246,6 @@ void lts_fsm_t::save(const std::string &filename) const
     os.close();
   }
 }
-
-} // namespace detail
 
 
 } // namespace lts

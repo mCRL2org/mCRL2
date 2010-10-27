@@ -7,8 +7,8 @@
 //
 /// \file dotlexer.ll
 
-#define YYSTYPE std::string
 #include <string>
+#define YYSTYPE std::string
 #include <cstdio>
 // #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
