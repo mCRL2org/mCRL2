@@ -660,6 +660,7 @@ if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/pbes2bes )
   add_subdirectory ( tools/pbespareqelm )
   add_subdirectory ( tools/pbespgsolve )
+  add_subdirectory ( tools/txt2bes )
 endif(MCRL2_ENABLE_EXPERIMENTAL)
 
 ##---------------------------------------------------
