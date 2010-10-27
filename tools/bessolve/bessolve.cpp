@@ -85,8 +85,8 @@ class bessolve_tool: public input_output_tool
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      if (parser.options.count("algorithm")) {
-        std::string str_strategy(parser.option_argument("algorithm"));
+      if (parser.options.count("strategy")) {
+        std::string str_strategy(parser.option_argument("strategy"));
         if (str_strategy == "gauss") {
           strategy = gauss;
         }
@@ -146,6 +146,7 @@ public:
 
 		values.clear();
 		values.push_back("gauss");
+		values.push_back("smp");
 		m_gui_options["strategy"] = create_radiobox_widget(values);
 	}
 };
