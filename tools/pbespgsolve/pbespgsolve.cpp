@@ -28,6 +28,8 @@
 //#include "mcrl2/utilities/pbes_rewriter_tool.h"
 
 #include "pbespgsolve.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/bes2pbes.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -115,7 +117,24 @@ public:
     }
 
     pbes<> p;
-    p.load(input_filename());
+    try
+    {
+      p.load(input_filename());
+    }
+    catch(mcrl2::runtime_error& e)
+    {
+      try
+      {
+        mcrl2::bes::boolean_equation_system<> b;
+        b.load(input_filename());
+        p = mcrl2::bes::bes2pbes(b);
+      }
+      catch(mcrl2::runtime_error&)
+      {
+        throw(e);
+      }
+    }
+
     unsigned int log_level = 0;
     if (mcrl2::core::gsVerbose)
     {
