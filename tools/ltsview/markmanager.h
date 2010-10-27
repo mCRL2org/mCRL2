@@ -13,8 +13,10 @@
 #define MARKMANAGER_H
 
 #include <vector>
+#include <set>
+#include <string>
 
-#include "mcrl2/atermpp/set.h"
+// #include "mcrl2/atermpp/set.h"
 
 #include "enums.h"
 
@@ -32,16 +34,17 @@ class MarkManager
     ~MarkManager();
 
     /* Mark rules */
-    int createMarkRule(int param,bool neg,RGB_Color col,
-        atermpp::set<ATerm> vals);
+    // int createMarkRule(int param,bool neg,RGB_Color col, atermpp::set<ATerm> vals);
+    int createMarkRule(int param,bool neg,RGB_Color col, const std::set<std::string> &vals);
     void removeMarkRule(int mr);
     int getMarkRuleParam(int mr);
     bool getMarkRuleActivated(int mr);
     bool getMarkRuleNegated(int mr);
     RGB_Color getMarkRuleColor(int mr);
-    atermpp::set<ATerm> getMarkRuleValues(int mr);
-    void setMarkRuleData(int mr,int param,bool neg,RGB_Color col,
-        atermpp::set<ATerm> vals);
+    // atermpp::set<ATerm> getMarkRuleValues(int mr);
+    std::set<std::string> getMarkRuleValues(int mr);
+    //void setMarkRuleData(int mr,int param,bool neg,RGB_Color col, atermpp::set<ATerm> vals);
+    void setMarkRuleData(int mr,int param,bool neg,RGB_Color col, const std::set<std::string> &vals);
     void setMarkRuleActivated(int mr,bool act);
 
     void setMatchStyle(MatchStyle ms);

@@ -16,6 +16,7 @@ set(PREFIX "lts")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include )

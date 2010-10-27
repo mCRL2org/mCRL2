@@ -109,8 +109,9 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
  *             type checked mCRL2 specification.
  *  \param[in] mult_act An ATerm representation of an mCRL2 multiaction
  *             that adheres to the initial internal ATerm structure.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
- *             to the internal ATerm structure after type checking.
+ *  \param[in] data_spec An ATerm representation of an mCRL2 data_spec that adheres
+ *             to the internal ATerm structure.
+ *  \param[in] action_labels An action declaration list.
  *  \post      mult_act is type checked using the declarations from spec.
  *  \return    If type checking went well, an equivalent version of
  *             mult_act is returned that adheres to the internal ATerm
@@ -118,7 +119,10 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
  *             an appropriate error message is printed and NULL is
  *             returned.
  **/
-ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec);
+ATermAppl type_check_mult_act(
+                    ATermAppl mult_act, 
+                    ATermAppl data_spec,
+                    ATermList action_labels);
 
 
 /** \brief     Type check a parsed mCRL2 multiaction list with respect to a
@@ -126,15 +130,19 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec);
  *  \param[in] mult_actions An ATermList representation of an mCRL2 multiaction list, i.e.
  *             a list of multi actions,
  *             that adheres to the initial internal ATerm structure.
- *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
- *             to the internal ATerm structure after type checking.
+ *  \param[in] data_spec An ATerm representation of an mCRL2 data_spec that adheres
+ *             to the internal ATerm structure.
+ *  \param[in] action_labels An action declaration list.
  *  \post      mult_actions is type checked using the declarations from spec.
  *  \return    If type checking went well, an equivalent version of
  *             mult_action list is returned that adheres to the internal ATerm
  *             structure after type checking.  If something went wrong,
  *             an exception is raised.
  **/
-ATermList type_check_mult_actions(ATermList mult_actions, ATermAppl spec);
+ATermList type_check_mult_actions(
+                    ATermList mult_actions, 
+                    ATermAppl data_spec,
+                    ATermList action_labels);
 
 
 /** \brief     Type check a parsed mCRL2 process expression with respect to a

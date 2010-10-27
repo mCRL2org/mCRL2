@@ -3,15 +3,18 @@
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #define __DOTLEXER_H
 
+#include <aterm1.h>
 #include <aterm2.h>
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_dot.h"
 
 class dot_lexer
 {
   public:
     ATermIndexedSet protect_table;
-
-    mcrl2::lts::lts *dot_lts;
+    std::map < std::string, unsigned int> labelTable;
+    std::map < std::string, unsigned int> stateTable;
+    std::vector < std::string > state_sequence;
+    mcrl2::lts::lts_dot_t *dot_lts;
 };
 
 extern dot_lexer *dot_lexer_obj;

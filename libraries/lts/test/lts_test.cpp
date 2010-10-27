@@ -15,11 +15,12 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lts/lts_algorithm.h"
+#include "mcrl2/lts/lts_aut.h"
 
 using namespace mcrl2;
 
 void test_lts(const std::string& test_description, 
-              const lts::lts &l,
+              const lts::lts_aut_t &l,
               unsigned int expected_label_count,
               unsigned int expected_state_count,
               unsigned int expected_transition_count
@@ -143,9 +144,10 @@ void test_abp()
   unsigned int expected_state_count = 74;
   unsigned int expected_transition_count = 92;
   std::istringstream is(ABP_AUT);
-  lts::lts l_abp(is, lts::lts_aut);
+  lts::lts_aut_t l_abp;
+  l_abp.load(is);
   test_lts("abp test",l_abp, expected_label_count, expected_state_count, expected_transition_count);
-  lts::lts l=l_abp;
+  lts::lts_aut_t l=l_abp;
   reduce(l,lts::lts_eq_none);
   test_lts("abp test eq_none",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_abp;
@@ -188,7 +190,8 @@ void test_reachability()
   unsigned int expected_transition_count = 4;
 
   std::istringstream is(REACH);
-  lts::lts l_reach(is, lts::lts_aut);
+  lts::lts_aut_t l_reach;
+  l_reach.load(is);
   test_lts("reach test",l_reach, expected_label_count, expected_state_count, expected_transition_count);
   BOOST_CHECK(!reachability_check(l_reach,false));
   reachability_check(l_reach,true);

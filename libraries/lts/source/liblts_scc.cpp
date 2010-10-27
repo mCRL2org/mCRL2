@@ -20,7 +20,7 @@ namespace lts
 {
 namespace detail
 {
-  scc_partitioner::scc_partitioner(mcrl2::lts::lts &l) 
+/*   scc_partitioner::scc_partitioner(mcrl2::lts::lts &l) 
              :aut(l)
   { if (core::gsDebug)
     {  std::cerr << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " << 
@@ -154,15 +154,15 @@ namespace detail
     }
     dfsn2state.push_back(t); 
   }
-
+*/
 } // namespace detail
 
-  void scc_reduce(lts &l,const bool preserve_divergence_loops /* = false */)
+/*   void scc_reduce(lts &l,const bool preserve_divergence_loops / * = false * /)
   { 
     detail::scc_partitioner scc_part(l);
   
     // Clear this LTS, but keep the labels
-    l.clear_type();
+    // l.clear_type();
     l.clear_states();
     
     // Set the resulting number of states and transitions.
@@ -171,6 +171,7 @@ namespace detail
 
     scc_part.replace_transitions(preserve_divergence_loops);
   }
+*/
 }
 }
 

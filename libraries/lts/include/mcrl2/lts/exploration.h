@@ -25,7 +25,6 @@
 #include "mcrl2/lts/bithashtable.h"
 #include "mcrl2/lts/queue.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/lts/lts.h"
 
 #include "workarounds.h"
 

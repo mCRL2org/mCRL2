@@ -12,13 +12,13 @@
 #ifndef LTS_IMPORTER_H
 #define LTS_IMPORTER_H
 
-#include "importer.h"
 #include <string>
+#include "importer.h"
 
 class LTSImporter: public Importer
 {
   public:
-    Graph* importFile(std::string fn);
+    Graph* importFile(const std::string &fn);
 
 };
 

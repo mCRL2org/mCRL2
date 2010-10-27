@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -13,14 +13,15 @@
 
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/exception.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/exception.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/detail/lts_convert.h"
+#include "mcrl2/lts/lts_algorithm.h"
 
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
@@ -49,38 +50,11 @@ static inline std::string get_base(std::string const& s) {
   return s.substr(0, s.find_last_of('.'));
 }
 
-static ATermAppl get_lps(std::string const& filename)
-{
-  if (!filename.empty()) {
-    FILE* file = fopen(filename.c_str(),"rb");
-
-    if ( file ) {
-      ATerm t = ATreadFromFile(file);
-      fclose(file);
-
-      if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(mcrl2::core::detail::gsIsLinProcSpec((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
-      {
-        gsErrorMsg("invalid LPS-file '%s'\n",filename.c_str());
-      }
-      else {
-        return (ATermAppl) t;
-      }
-    }
-    else {
-      gsErrorMsg("unable to open LPS-file '%s'\n",filename.c_str());
-    }
-  }
-
-  return 0;
-}
-
 class t_tool_options 
 {
-  private:
+  public:
     std::string     infilename;
     std::string     outfilename;
-
-  public:
     std::string     lpsfile;
     lts_type        intype;
     lts_type        outtype;
@@ -104,112 +78,37 @@ class t_tool_options
                                      std::string("'" + outfilename + "'");
     }
 
-    inline lts_extra get_extra(lts_type type, std::string const &base_name = "") const {
-      if ( type == lts_dot )
-      {
-        lts_dot_options opts;
-        opts.name = new std::string(base_name); // XXX Ugh!
-        opts.print_states = print_dot_state;
-        return lts_extra(opts);
-      } else {
-        if ( !lpsfile.empty() )
-        {
-          ATermAppl spec = get_lps(lpsfile);
-
-          if ( spec != NULL )
-          {
-            if ( mcrl2::core::detail::gsIsLinProcSpec(spec) )
-            {
-              return lts_extra(mcrl2::lps::specification(spec));
-            } else {
-              return lts_extra((ATerm) spec);
-            }
-          }
-        }
-        return lts_extra();
-      }
-    }
-
-    void read_lts(lts& l) const 
+    void set_source(std::string const& filename) 
     {
-      gsVerboseMsg("reading LTS from %s...\n", source_string().c_str());
-
-      lts_extra extra = get_extra(intype);
-
-      try
-      { 
-        if (infilename.empty()) 
-        {
-          lts l_temp(std::cin,intype,extra);
-          l_temp.swap(l);
-        }
-        else 
-        {
-          mcrl2::lts::detail::read_from(l,infilename,intype,extra);
-        }
-      }
-      catch (mcrl2::runtime_error &e)
-      {
-        throw mcrl2::runtime_error("cannot read LTS from " + source_string() +
-                                   ".\n" + e.what());
-      }
-
-      if ( check_reach ) {
-        gsVerboseMsg("checking reachability of input LTS...\n");
-
-        if ( !reachability_check(l,true) ) {
-          gsWarningMsg("not all states of the input LTS are reachable from the initial state; removed unreachable states to ensure correct behaviour in LTS tools (including this one)!\n");
-        }
-      }
-    }
-
-
-    void set_source(std::string const& filename) {
       infilename = filename;
     }
 
-    void set_target(std::string const& filename) {
+    void set_target(std::string const& filename) 
+    {
       outfilename = filename;
 
-      if ( outtype == lts_none ) {
+      if ( outtype == lts_none ) 
+      {
         gsVerboseMsg("trying to detect output format by extension...\n");
 
         outtype = mcrl2::lts::detail::guess_format(outfilename);
 
-        if ( outtype == lts_none ) {
-          if ( !lpsfile.empty() ) {
+        if ( outtype == lts_none ) 
+        {
+          if ( !lpsfile.empty() ) 
+          {
             gsWarningMsg("no output format set; using fsm because --lps was used\n");
             outtype = lts_fsm;
-          } else {
+          } 
+          else 
+          {
             gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
-            outtype = lts_mcrl2;
+            outtype = lts_lts;
           }
         }
       }
     }
 
-    void write_lts(lts& l) const 
-    {
-      gsVerboseMsg("writing LTS to %s...\n", target_string().c_str());
-
-      try
-      {
-        if (outfilename.empty()) 
-        {
-          l.write_to(std::cout,outtype,get_extra(outtype, "stdout"));
-        }
-        else 
-        {
-          l.write_to(outfilename, outtype, get_extra(outtype, get_base(outfilename)));
-        }
-      }
-      catch (mcrl2::runtime_error &e)
-      {
-        throw mcrl2::runtime_error("cannot write LTS to " + target_string() +
-                                        "\nretry with -v/--verbose for more information.\n" + 
-                                        e.what());
-      }
-    }
 };
 
 using namespace std;
@@ -232,19 +131,22 @@ class ltsconvert_tool : public ltsconvert_base
         "The output format is determined by the extension of OUTFILE, whereas the input\n"
         "format is determined by the content of INFILE. Options --in and --out can be\n"
         "used to force the input and output formats. The supported formats are:\n"
-        + mcrl2::lts::detail::supported_lts_formats_text(lts_mcrl2)
+        + mcrl2::lts::detail::supported_lts_formats_text(lts_lts)
       )
     {
     }
 
-    bool run()
-    {
-      lts l;
+  private:
 
-      tool_options.read_lts(l);
-      if (!l.hide_actions(tool_options.tau_actions))
-      { throw mcrl2::runtime_error("Cannot hide actions");
-      }
+    template < class LTS_TYPE >
+    bool load_convert_and_save()
+    { 
+      using namespace mcrl2::lts;
+      using namespace mcrl2::lts::detail;
+
+      LTS_TYPE l;
+      l.load(tool_options.infilename);
+      l.hide_actions(tool_options.tau_actions);
 
       if ( tool_options.equivalence != lts_eq_none )
       {
@@ -262,8 +164,107 @@ class ltsconvert_tool : public ltsconvert_base
         gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       }
 
-      tool_options.write_lts(l);
+      mcrl2::lps::specification spec;
+      
+      if ( !tool_options.lpsfile.empty() )
+      {
+        // No lpsfile is given. Only straightforward translations are possible.
+        spec.load(tool_options.lpsfile);
+      } 
 
+
+      switch (tool_options.outtype)
+      {
+        case lts_lts:
+        {
+          lts_lts_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename); 
+          return true;
+        }
+        case lts_none:
+          std::cerr << "Cannot determine type of output. Assuming .aut.\n";
+        case lts_aut:
+        {
+          lts_aut_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename); 
+          return true;
+        }
+        /* case lts_svc:
+        {
+          lts_svc_t l_out;
+          lts_convert(l,l_out,spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename); 
+          return true;
+        } */
+        case lts_fsm:
+        {
+          lts_fsm_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename); 
+          return true;
+        }
+#ifdef USE_BCG
+        case lts_bcg:
+        {
+          lts_bcg_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename); 
+          return true;
+        }
+#endif
+        case lts_dot:
+        {
+          lts_dot_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename); 
+          return true;
+        }
+      }
+      return true;
+    }
+    
+
+  public:
+    bool run()
+    {
+
+      if (tool_options.intype==lts_none)
+      {
+        tool_options.intype = mcrl2::lts::detail::guess_format(tool_options.infilename);
+      }
+      switch (tool_options.intype)
+      {
+        case lts_lts:
+        { 
+          return load_convert_and_save<lts_lts_t>();
+        }
+        case lts_none:
+          std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+        case lts_aut:
+        { 
+          return load_convert_and_save<lts_aut_t>();
+        }
+        /* case lts_svc:
+        { 
+          return load_convert_and_save<lts_svc_t>();
+        } */
+        case lts_fsm:
+        { 
+          return load_convert_and_save<lts_fsm_t>();
+        }
+#ifdef USE_BCG
+        case lts_bcg:
+        { 
+          return load_convert_and_save<lts_bcg_t>();
+        }
+#endif
+        case lts_dot:
+        { 
+          return load_convert_and_save<lts_dot_t>();
+        }
+      }
       return true;
     }
 
@@ -340,7 +341,8 @@ class ltsconvert_tool : public ltsconvert_base
         }
       }
 
-      if (parser.options.count("equivalence")) {
+      if (parser.options.count("equivalence")) 
+      {
 
         tool_options.equivalence = parse_equivalence(
             parser.option_argument("equivalence"));
@@ -365,28 +367,39 @@ class ltsconvert_tool : public ltsconvert_base
         parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
       }
 
-      if (2 < parser.arguments.size()) {
+      if (2 < parser.arguments.size()) 
+      {
         parser.error("too many file arguments");
       }
-      else {
-        if (0 < parser.arguments.size()) {
+      else 
+      {
+        if (0 < parser.arguments.size()) 
+        {
           tool_options.set_source(parser.arguments[0]);
         }
-        else {
-          if ( tool_options.intype == lts_none ) {
+        else 
+        {
+          if ( tool_options.intype == lts_none ) 
+          {
             gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
             tool_options.intype = lts_aut;
           }
         }
-        if (1 < parser.arguments.size()) {
+        if (1 < parser.arguments.size()) 
+        {
           tool_options.set_target(parser.arguments[1]);
         }
-        else {
-          if ( tool_options.outtype == lts_none ) {
-            if ( !tool_options.lpsfile.empty() ) {
+        else 
+        {
+          if ( tool_options.outtype == lts_none ) 
+          {
+            if ( !tool_options.lpsfile.empty() ) 
+            {
               gsWarningMsg("no output format set; using fsm because --lps was used\n");
               tool_options.outtype = lts_fsm;
-            } else {
+            } 
+            else 
+            {
               gsWarningMsg("no output format set or detected; using default (aut)\n");
               tool_options.outtype = lts_aut;
             }

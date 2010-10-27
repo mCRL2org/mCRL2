@@ -8,24 +8,22 @@
 
 #include <boost/test/minimal.hpp>
 
-#include <aterm2.h>
 #include <mcrl2/atermpp/aterm_init.h>
 #include <mcrl2/lts/lts_algorithm.h>
+#include <mcrl2/lts/lts_aut.h>
 
 using namespace mcrl2::lts;
 
 int test_main(int argc, char **argv)
 {
-  MCRL2_ATERMPP_INIT(argc,argv);
-
-  lts l1;
-  lts l2;
-  lts l3;
-  lts l4;
-  ATerm lab_a = (ATerm) ATmakeAppl0(ATmakeAFun("a",0,ATfalse));
-  ATerm lab_b = (ATerm) ATmakeAppl0(ATmakeAFun("b",0,ATfalse));
-  ATerm lab_c = (ATerm) ATmakeAppl0(ATmakeAFun("c",0,ATfalse));
-  ATerm lab_tau = (ATerm) ATmakeAppl0(ATmakeAFun("tau",0,ATfalse));
+  lts_aut_t l1;
+  lts_aut_t l2;
+  lts_aut_t l3;
+  lts_aut_t l4;
+  const detail::action_label_string lab_a ("a");
+  const detail::action_label_string lab_b ("b");
+  const detail::action_label_string lab_c ("c");
+  const detail::action_label_string lab_tau ("tau");
 
   for (int i=0; i<5; i++)
   {

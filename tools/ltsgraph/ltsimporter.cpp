@@ -9,28 +9,73 @@
 /// \file ltsimporter.cpp
 /// \brief Importer for LTS files
 
-#include "ltsimporter.h"
-#include <mcrl2/lts/lts.h>
 #include <map>
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/detail/lts_convert.h"
+#include "ltsimporter.h"
 
 using namespace mcrl2::lts;
 
-Graph* LTSImporter::importFile(std::string fn)
+template <class LTS_TYPE>
+mcrl2::lts::lts_fsm_t read_lts_as_fsm_file(const std::string &fn)
+{
+  LTS_TYPE l;
+  l.load(fn);
+  mcrl2::lts::lts_fsm_t result_lts;
+  lts_convert(l,result_lts);
+  return result_lts;
+}
+
+Graph* LTSImporter::importFile(const std::string &fn)
 {
   Graph* result = new Graph();
+  mcrl2::lts::lts_fsm_t fileLTS;
 
-  lts fileLTS(fn);
+  const mcrl2::lts::lts_type intype = mcrl2::lts::detail::guess_format(fn);
+  switch (intype)
+  {
+    case lts_lts:
+    {
+      fileLTS=read_lts_as_fsm_file<lts_lts_t>(fn);
+    }
+    case lts_none:
+      std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+    case lts_aut:
+    {
+      fileLTS=read_lts_as_fsm_file<lts_aut_t>(fn);
+    }
+    /* case lts_svc:
+    { 
+      fileLTS=read_lts_as_fsm_file<lts_svc_t>(fn);
+    } */
+    case lts_fsm:
+    {
+      fileLTS=read_lts_as_fsm_file<lts_fsm_t>(fn);
+    }
+#ifdef USE_BCG
+    case lts_bcg:
+    {
+      fileLTS=read_lts_as_fsm_file<lts_bcg_t>(fn);
+    }
+#endif
+    case lts_dot:
+    {
+      fileLTS=read_lts_as_fsm_file<lts_dot_t>(fn);
+    }
+  }
+
+
+  // lts_fsm_t fileLTS(fn,lts_none);
   // if(fileLTS.read_from(fn))
   {
     unsigned int initialState = fileLTS.initial_state();
 
     std::map<unsigned int, State*> numsToStates;
-    bool hasParams = fileLTS.has_state_parameters();
+    // bool hasParams = fileLTS.has_process_parameters();
     std::vector<std::string> parameters;
-    if(hasParams) {
-      for(size_t i = 0; i < fileLTS.num_state_parameters(); ++i) {
-        parameters.push_back(fileLTS.state_parameter_name_str(i));
-      }
+    for(size_t i = 0; i < fileLTS.process_parameters().size(); ++i) 
+    {
+      parameters.push_back(fileLTS.process_parameter(i).first);
     }
 
 
@@ -51,15 +96,14 @@ Graph* LTSImporter::importFile(std::string fn)
         result->setInitialState(s);
       }
 
-      if(hasParams) {
-        for(size_t i = 0; i < parameters.size(); ++i) {
+      for(size_t i = 0; i < parameters.size(); ++i) 
+      {
           std::pair<std::string, std::string> stateValue(
               parameters[i],
-              fileLTS.get_state_parameter_value_str(stNum, i));
+              mcrl2::lts::detail::pp((ATermAppl)fileLTS.state_value(stNum)[i]));
           stateValues.insert(stateValue);
-        }
-        s->setParameters(stateValues);
       }
+      s->setParameters(stateValues);
 
       // Generate a random position (x, y, z) for this state
       int x = static_cast<int> (
@@ -82,8 +126,7 @@ Graph* LTSImporter::importFile(std::string fn)
       unsigned int idFrom, idTo;
       State *stFrom, *stTo;
 
-      std::string label = fileLTS.label_value_str(
-                            ti.label());
+      std::string label = mcrl2::lts::detail::pp(fileLTS.label_value(ti.label()));
       idFrom = ti.from();
       idTo = ti.to();
 

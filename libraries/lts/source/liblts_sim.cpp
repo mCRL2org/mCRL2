@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file liblts_sim.cpp
+/* 
 #include <cstdlib>
 #include "mcrl2/lts/detail/liblts_sim.h"
 #include "mcrl2/core/messaging.h"
@@ -26,7 +27,7 @@ sim_partitioner::~sim_partitioner()
   delete forall;
 }
 
-/* ----------------- PARTITIONING ALGORITHM ------------------------- */
+/ * ----------------- PARTITIONING ALGORITHM ------------------------- * /
 
 void sim_partitioner::partitioning_algorithm()
 {
@@ -50,13 +51,13 @@ void sim_partitioner::partitioning_algorithm()
   {
     change = false;
 
-    /* Set Sigma to Pi and P to Q*/
+    / * Set Sigma to Pi and P to Q* /
     s_Sigma = s_Pi;
-    /* The following statement simultaneously assigns P to Q and Q to P.
+    / * The following statement simultaneously assigns P to Q and Q to P.
      * The assignment of Q to P is safe because Q is not used in
      * refine() and will be freshly computed at the start of update().
      * The advantage of using swap() is that it is executed in constant
-     * time. */
+     * time. * /
     P.swap(Q);
 
     if (gsDebug)
@@ -73,11 +74,11 @@ void sim_partitioner::partitioning_algorithm()
     }
     else
     {
-      /* No blocks were split by refine(), so update() need not be
+      / * No blocks were split by refine(), so update() need not be
        * called. However, we do need to swap P and Q again: Q currently
        * contains the P-relation of the previous iteration (due to the
        * call to swap() prior to the call to refine()) but we want it to
-       * contain that of the current iteration! */
+       * contain that of the current iteration! * /
       P.swap(Q);
     }
     ++i;
@@ -105,7 +106,7 @@ void sim_partitioner::initialise_datastructures()
   state_touched.assign(N,false);
   block_Pi.assign(N,0);
 
-  /* put all states in one block */
+  / * put all states in one block * /
   s_Pi = 1;
   contents_u.push_back(0);
   contents_t.push_back(LIST_END);
@@ -132,7 +133,7 @@ void sim_partitioner::initialise_datastructures()
   block_touched.assign(s_Pi,false);
   s_Sigma = s_Pi;
 
-  /* initialise P and children */
+  / * initialise P and children * /
   std::vector<uint> vi;
   children.assign(s_Sigma,vi);
   std::vector<bool> vb(s_Sigma,false);
@@ -144,7 +145,7 @@ void sim_partitioner::initialise_datastructures()
   }
 }
 
-/* ----------------- INITIALISE ------------------------------------- */
+/ * ----------------- INITIALISE ------------------------------------- * /
 
 void sim_partitioner::initialise_Pi(uint gamma,uint l)
 {
@@ -166,7 +167,7 @@ void sim_partitioner::initialise_Pi(uint gamma,uint l)
   for (ci = contents.begin(); ci != last; ++ci)
   {
     c = *ci;
-    /* iterate over the incoming l-transitions of c */
+    / * iterate over the incoming l-transitions of c * /
     using namespace mcrl2::lts;
     for(outgoing_transitions_per_state_action_t::iterator
           t=trans_index.lower_bound(std::pair < transition::size_type, transition::size_type >(c,l));
@@ -197,12 +198,12 @@ void sim_partitioner::initialise_Sigma(uint gamma,uint l)
   }
 }
 
-/* ----------------- REFINE ----------------------------------------- */
+/ * ----------------- REFINE ----------------------------------------- * /
 
-/* PRE: s_Sigma = s_Pi */
+/ * PRE: s_Sigma = s_Pi * /
 void sim_partitioner::refine(bool &change)
 {
-  /* Initialise the parent and children functions */
+  / * Initialise the parent and children functions * /
   std::vector<uint> v;
   children.assign(s_Pi,v);
   parent.assign(s_Pi,0);
@@ -219,7 +220,7 @@ void sim_partitioner::refine(bool &change)
     print_Sigma_P();
   }
 
-  /* Compute a reverse topological sorting of Sigma w.r.t. P */
+  / * Compute a reverse topological sorting of Sigma w.r.t. P * /
   std::vector<uint> Sort;
   Sort.reserve(s_Sigma);
   reverse_topological_sort(Sort);
@@ -238,7 +239,7 @@ void sim_partitioner::refine(bool &change)
     gsMessage("]\n");
   }
 
-  /* Some local variables */
+  / * Some local variables * /
   std::vector<bool> v_false(s_Sigma,false);
   std::vector<uint>::iterator alphai, last, gammai;
   std::vector< std::vector<bool> >::iterator stable_alpha, P_gamma;
@@ -246,7 +247,7 @@ void sim_partitioner::refine(bool &change)
   uint gamma, delta, l;
   int i;
 
-  /* The main loop */
+  / * The main loop * /
   for (l = 0; l < aut.num_labels(); ++l)
   {
     if (gsDebug)
@@ -255,10 +256,10 @@ void sim_partitioner::refine(bool &change)
       gsMessage("Label = \"%s\"\n", aut.label_value_str(l).c_str());
     }
 
-    /* reset the stable function */
+    / * reset the stable function * /
     stable.assign(s_Pi,v_false);
 
-    /* iterate over the reverse topological sorting */
+    / * iterate over the reverse topological sorting * /
     for (gammai = Sort.begin(); gammai != Sort.end(); ++gammai)
     {
       gamma = *gammai;
@@ -266,13 +267,13 @@ void sim_partitioner::refine(bool &change)
       touched_blocks.clear();
       initialise_Sigma(gamma,l);
 
-      /* iterate over all alpha such that alpha -l->E gamma */
+      / * iterate over all alpha such that alpha -l->E gamma * /
       last = touched_blocks.end();
       for (alphai = touched_blocks.begin(); alphai != last; ++alphai)
       {
         alpha = *alphai;
-        /* compute stable(alpha,gamma); use a local boolean variable for
-         * efficiency */
+        / * compute stable(alpha,gamma); use a local boolean variable for
+         * efficiency * /
         stable_alpha_gamma = false;
         stable_alpha = stable.begin() + alpha;
         P_gamma = P.begin() + gamma;
@@ -286,10 +287,10 @@ void sim_partitioner::refine(bool &change)
         (*stable_alpha)[gamma] = stable_alpha_gamma;
         if (!stable_alpha_gamma)
         {
-          /* if alpha -l->A gamma then alpha cannot be split */
+          / * if alpha -l->A gamma then alpha cannot be split * /
           if (contents_u[alpha] != LIST_END)
           {
-            /* split alpha; new block will be s_Pi */
+            / * split alpha; new block will be s_Pi * /
             change = true;
 
             children[parent[alpha]].push_back(s_Pi);
@@ -298,11 +299,11 @@ void sim_partitioner::refine(bool &change)
             block_touched.push_back(false);
             contents_t.push_back(LIST_END);
 
-            /* assign the untouched contents of alpha to s_Pi */
+            / * assign the untouched contents of alpha to s_Pi * /
             contents_u.push_back(contents_u[alpha]);
             contents_u[alpha] = LIST_END;
 
-            /* update the block information for the moved states */
+            / * update the block information for the moved states * /
             for (i = contents_u[s_Pi]; i != LIST_END;
                 i = state_buckets[i].next)
             {
@@ -370,7 +371,7 @@ void sim_partitioner::touch(uint a,uint alpha)
   contents_t[alpha] = a;
 }
 
-/* PRE: contents_t[alpha] != LIST_END */
+/ * PRE: contents_t[alpha] != LIST_END * /
 void sim_partitioner::untouch(uint alpha)
 {
   // search linearly for the last element of contents_t[alpha];
@@ -396,7 +397,7 @@ void sim_partitioner::untouch(uint alpha)
   block_touched[alpha] = false;
 }
 
-/* ----------------- UPDATE ----------------------------------------- */
+/ * ----------------- UPDATE ----------------------------------------- * /
 
 void sim_partitioner::update()
 {
@@ -412,7 +413,7 @@ void sim_partitioner::update()
 
   initialise_pre_EA();
 
-  /* Compute the pre_exists and pre_forall functions */
+  / * Compute the pre_exists and pre_forall functions * /
   for (l = 0; l < aut.num_labels(); ++l)
   {
     pre_exists[l].reserve(s_Sigma + 1);
@@ -449,13 +450,13 @@ void sim_partitioner::update()
     print_relation(s_Pi,Q);
   }
 
-  /* Apply the first filtering to Q */
+  / * Apply the first filtering to Q * /
   filter(s_Sigma,P,false);
 
 
   initialise_pre_EA();
 
-  /* Compute the pre_exists and pre_forall functions */
+  / * Compute the pre_exists and pre_forall functions * /
   for (l = 0; l < aut.num_labels(); ++l)
   {
     pre_exists[l].reserve(s_Pi + 1);
@@ -491,13 +492,13 @@ void sim_partitioner::update()
     print_relation(s_Pi,Q);
   }
 
-  /* Apply the second filtering to Q */
+  / * Apply the second filtering to Q * /
   filter(s_Pi,Q,true);
 }
 
 void sim_partitioner::initialise_pre_EA()
 {
-  /* Initialise the pre_exists and pre_forall data structures */
+  / * Initialise the pre_exists and pre_forall data structures * /
   exists->clear();
   forall->clear();
   std::vector<uint> v;
@@ -507,7 +508,7 @@ void sim_partitioner::initialise_pre_EA()
 
 void sim_partitioner::induce_P_on_Pi()
 {
-  /* Compute the relation induced on Pi by P, store it in Q */
+  / * Compute the relation induced on Pi by P, store it in Q * /
   std::vector<bool> v(s_Pi,false);
   Q.assign(s_Pi,v);
 
@@ -524,12 +525,12 @@ void sim_partitioner::induce_P_on_Pi()
 }
 
 
-/* ----------------- FILTER ----------------------------------------- */
+/ * ----------------- FILTER ----------------------------------------- * /
 
 void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
     bool B)
 {
-  /* Initialise the match function */
+  / * Initialise the match function * /
   match->clear();
 
   uint alpha,beta,gamma,delta,l;
@@ -554,7 +555,7 @@ void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
   }
 
   hash_table3_iterator atrans(forall);
-  /* The main for loop */
+  / * The main for loop * /
   for (l = 0; l < aut.num_labels(); ++l)
   {
     for (gamma = 0; gamma < S; ++gamma)
@@ -579,7 +580,7 @@ void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
   }
 }
 
-/* ----------------- CLEANUP ---------------------------------------- */
+/ * ----------------- CLEANUP ---------------------------------------- * /
 
 void sim_partitioner::cleanup(uint alpha,uint beta)
 {
@@ -620,7 +621,7 @@ void sim_partitioner::cleanup(uint alpha,uint beta)
   }
 }
 
-/* ----------------- FOR POST-PROCESSING ---------------------------- */
+/ * ----------------- FOR POST-PROCESSING ---------------------------- * /
 
 std::vector < mcrl2::lts::transition> sim_partitioner::get_transitions() const
 {
@@ -691,7 +692,7 @@ bool sim_partitioner::in_same_class(uint s,uint t) const
   return (block_Pi[s] == block_Pi[t]);
 }
 
-/*
+/ *
 // PRE: FORALL and EXISTS structures on Pi are computed
 void sim_partitioner::update_nfa()
 {
@@ -818,9 +819,9 @@ void sim_partitioner::update_nfa()
     }
   }
 }
-*/
+* /
 
-/* ----------------- FOR DEBUGGING ---------------------------------- */
+/ * ----------------- FOR DEBUGGING ---------------------------------- * /
 
 void sim_partitioner::print_Sigma_P()
 {
@@ -903,7 +904,7 @@ void sim_partitioner::print_structure(hash_table3 *struc)
   gsMessage("}");
 }
 
-/* Needed only for reading an initial partition from a file; this is
+/ * Needed only for reading an initial partition from a file; this is
  * probably not needed in the LTS library
 void sim_partitioner::read_partition_from_file(char *fn)
 {

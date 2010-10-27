@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file liblts_svc.cpp
+/// \file liblts_lts.cpp
 
 #include <string>
 #include <sstream>
@@ -22,7 +22,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lts/lts_svc.h"
+#include "mcrl2/lts/lts_lts.h"
 
 
 using namespace mcrl2::core;
@@ -41,7 +41,7 @@ namespace lts
 namespace detail
 {
 
-void read_from_svc(lts_svc_t &l, string const& filename, lts_type type)
+void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
 {
   SVCfile f;
   SVCbool b;
@@ -194,7 +194,7 @@ void read_from_svc(lts_svc_t &l, string const& filename, lts_type type)
   }
 }
 
-void lts_svc_t::load(const std::string &filename)
+void lts_lts_t::load(const std::string &filename)
 {
  if (filename=="")
  { 
@@ -202,12 +202,12 @@ void lts_svc_t::load(const std::string &filename)
  }
  else
  {
-   read_from_svc(*this,filename,detail::detect_type(filename));
+   read_from_lts(*this,filename,detail::detect_type(filename));
  }
 
 }
 
-static void write_to_svc(const lts_svc_t& l, string const& filename, lts_type type)
+static void write_to_lts(const lts_lts_t& l, string const& filename, lts_type type)
 {
   if (!l.has_label_info())
   { 
@@ -264,17 +264,18 @@ static void write_to_svc(const lts_svc_t& l, string const& filename, lts_type ty
   ATermAppl  data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(l.data());
   ATermList params = l.process_parameters(); 
   ATermList act_spec = l.action_labels(); 
+  add_extra_mcrl2_lts_data(filename,data_spec,params,act_spec);
 }
 
-void lts_svc_t::save(const std::string &filename) const
+void lts_lts_t::save(const std::string &filename) const
 {
   if (filename=="")
   { 
-    throw mcrl2::runtime_error("Cannot write svc file " + filename + " to stdout");
+    throw mcrl2::runtime_error("Cannot write svc/lts file " + filename + " to stdout");
   }
   else
   {
-    write_to_svc(*this,filename,detail::guess_format(filename));
+    write_to_lts(*this,filename,detail::guess_format(filename));
   }
 
 }

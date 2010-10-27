@@ -13,17 +13,26 @@
 
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/lts/lts_algorithm.h"
-#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/tool.h"
 #include "mcrl2/exception.h"
 
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/utilities/tool.h"
+
+#include "mcrl2/lts/lts_algorithm.h"
+#include "mcrl2/lts/lts_io.h"
+
+#include "mcrl2/lts/lts_fsm.h"
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_bcg.h"
+#include "mcrl2/lts/lts_dot.h"
+
 
 using namespace std;
 using namespace mcrl2::lts;
+using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -146,59 +155,17 @@ class ltscompare_tool : public ltscompare_base
     {
     }
 
-    bool run()
+  private:
+
+    template <class LTS_TYPE>
+    bool lts_compare(void)
     {
-      check_preconditions();
+      LTS_TYPE l1,l2;
+      l1.load(tool_options.name_for_first);
+      l2.load(tool_options.name_for_second);
 
-      lts l1,l2;
-
-      if ( tool_options.name_for_first.empty() ) 
-      {
-        gsVerboseMsg("reading first LTS from stdin...\n");
-        try
-        {
-           mcrl2::lts::detail::read_from(l1,std::cin, tool_options.format_for_first);
-        }
-        catch (mcrl2::runtime_error &e)
-        {
-          throw mcrl2::runtime_error(std::string("cannot read LTS from stdin\nretry with -v/--verbose for more information.\n")
-                                        + e.what());
-        }
-      } 
-      else 
-      {
-        gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
-
-        try
-        { 
-           mcrl2::lts::detail::read_from(l1,tool_options.name_for_first, tool_options.format_for_first);
-        }
-        catch (mcrl2::runtime_error &e)
-        { 
-          throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + 
-                   "'\nretry with -v/--verbose for more information.\n" + e.what());
-        }
-      }
-
-      gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
-
-      try
-      {
-         mcrl2::lts::detail::read_from(l2,tool_options.name_for_second, tool_options.format_for_second);
-      }
-      catch (mcrl2::runtime_error &e)
-      {
-        throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + 
-                     "'\nretry with -v/--verbose for more information.\n" + e.what());
-      }
-
-      if (!l1.hide_actions(tool_options.tau_actions))
-      { throw mcrl2::runtime_error("Cannot hide actions in first transition system");
-      }
-
-      if (!l2.hide_actions(tool_options.tau_actions))
-      { throw mcrl2::runtime_error("Cannot hide actions in second transition system");
-      }
+      l1.hide_actions(tool_options.tau_actions);
+      l2.hide_actions(tool_options.tau_actions);
 
       bool result = true;
       if ( tool_options.equivalence != lts_eq_none )
@@ -228,6 +195,61 @@ class ltscompare_tool : public ltscompare_base
       }
 
       return result;
+    }
+
+  public:
+    bool run()
+    {
+
+      check_preconditions();
+
+      if (tool_options.format_for_first==lts_none)
+      {
+        tool_options.format_for_first = guess_format(tool_options.name_for_first);
+      }
+
+      if (tool_options.format_for_second==lts_none)
+      {
+        tool_options.format_for_second = guess_format(tool_options.name_for_second);
+      }
+
+      if (tool_options.format_for_first!=tool_options.format_for_second)
+      { 
+        throw mcrl2::runtime_error("The input labelled transition systems have different types");
+      }
+
+      switch (tool_options.format_for_first)
+      {
+        case lts_lts:
+        {
+          return lts_compare<lts_lts_t>();
+        }
+        case lts_none:
+          cerr << "No input format is specified. Assuming .aut format.\n";
+        case lts_aut:
+        {
+          return lts_compare<lts_aut_t>();
+        }
+        /* case lts_svc:
+        {
+          return lts_compare<lts_svc_t>();
+        } */
+        case lts_fsm:
+        {
+          return lts_compare<lts_fsm_t>();
+        }
+#ifdef USE_BCG
+        case lts_bcg:
+        {
+          return lts_compare<lts_bcg_t>();
+        }
+#endif
+        case lts_dot:
+        {
+          return lts_compare<lts_dot_t>();
+        }
+      }
+      return true;
     }
 
   protected:
@@ -379,8 +401,9 @@ class ltscompare_tool : public ltscompare_base
 
 };
 
-class ltscompare_gui_tool: public mcrl2_gui_tool<ltscompare_tool> {
-public:
+class ltscompare_gui_tool: public mcrl2_gui_tool<ltscompare_tool> 
+{
+  public:
 	ltscompare_gui_tool() {
 
 		std::vector<std::string> values;

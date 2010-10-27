@@ -18,7 +18,7 @@
 #include "svc/svc.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_lts.h"
 
 namespace mcrl2
 {
@@ -42,14 +42,14 @@ namespace mcrl2
       SVCfile *svc;
       SVCparameterIndex svcparam;
       std::string lts_filename;
-      lts *generic_lts;
+      lts_lts_t generic_lts;
       ATermTable aterm2state, aterm2label;
 
       public:
         lps2lts_lts():
           svc(&svcf),
-          svcparam(0),
-          generic_lts(NULL)
+          svcparam(0)
+          // generic_lts(NULL)
         {}
 
         ~lps2lts_lts()
@@ -59,7 +59,7 @@ namespace mcrl2
             term_nil.unprotect();
             afun_pair.unprotect();
           }
-          delete generic_lts;
+          // delete generic_lts;
         }
 
         void reset();

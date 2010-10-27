@@ -16,9 +16,7 @@
 #include <vector>
 #include <map>
 
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/lts/lts.h"
-
+#include "mcrl2/lts/lts_fsm.h"
 #include "enums.h"
 
 class LTS;
@@ -79,7 +77,6 @@ class LTS
     void computeClusterInfo();
     void getActionLabels(std::vector<std::string> &ls) const;
     State* getInitialState() const;
-    mcrl2::lts::lts* getmCRL2LTS();
     std::string getLabel(int labindex);
     Cluster_iterator getClusterIterator();
     Reverse_cluster_iterator getReverseClusterIterator();
@@ -92,14 +89,16 @@ class LTS
     int getNumTransitions() const;
 
     unsigned int getNumParameters() const;
-    atermpp::set<ATerm> getParameterDomain(int parindex);
-    std::string getParameterName(int parindex) ;
-    ATerm getStateParameterValue(State* state,unsigned int param);
+    // atermpp::set<ATermAppl> getParameterDomain(unsigned int parindex);
+    std::vector<std::string> LTS::getParameterDomain(unsigned int parindex);
+    std::string getParameterName(unsigned int parindex) ;
+    // ATerm getStateParameterValue(State* state,unsigned int param);
+    unsigned int getStateParameterValue(State* state,unsigned int param);
     std::string getStateParameterValueStr(State* state,
         unsigned int param);
-    atermpp::set<ATerm> getClusterParameterValues(Cluster* c,
-        unsigned int param);
-    std::string prettyPrintParameterValue(ATerm parvalue);
+    // atermpp::set<ATerm> getClusterParameterValues(Cluster* c, unsigned int param);
+    std::set<std::string> getClusterParameterValues(Cluster* c, unsigned int param);
+    // std::string prettyPrintParameterValue(ATerm parvalue);
 
     State* selectStateByID(int id);
     Cluster* selectCluster(const int rank, const int pos);
@@ -108,7 +107,7 @@ class LTS
     void positionStates();
     void rankStates(RankStyle rs);
 
-    bool readFromFile(std::string filename);
+    bool readFromFile(const std::string &filename);
 
     int getZoomLevel() const;
     void setZoomLevel(const int level);
@@ -143,7 +142,7 @@ class LTS
   private:
     Mediator* mediator;
     Simulation* simulation;
-    mcrl2::lts::lts* mcrl2_lts;
+    mcrl2::lts::lts_fsm_t* mcrl2_lts;
 
     bool lastWasAbove;
     int zoomLevel;

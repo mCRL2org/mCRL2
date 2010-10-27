@@ -57,23 +57,23 @@
       #endif // __linux
     
       #ifdef __APPLE__
-        path = "./";
+        /* path = "./";
         ProcessSerialNumber PSN;
         ProcessInfoRec pinfo;
         FSSpec pspec;
         FSRef fsr;
         OSStatus err;
     
-        /* set up process serial number */
+        / * set up process serial number * /
         PSN.highLongOfPSN = 0;
         PSN.lowLongOfPSN = kCurrentProcess;
     
-        /* set up info block */
+        / * set up info block * /
         pinfo.processInfoLength = sizeof(pinfo);
         pinfo.processName = NULL;
         pinfo.processAppSpec = &pspec;
     
-        /* grab the vrefnum and directory */
+        / * grab the vrefnum and directory * /
         err = GetProcessInformation(&PSN, &pinfo);
         if (! err ) {
           char c_path[2048];
@@ -99,7 +99,18 @@
         {
           t = path.find_last_of("/", t-1);
         }
-        path = path.substr(0,t);
+        path = path.substr(0,t); */
+
+        CFBundleRef mainBundle = CFBundleGetMainBundle();
+        CFURLRef resourcesURL = CFBundleCopyBundleURL(mainBundle);
+        CFStringRef str = CFURLCopyFileSystemPath( resourcesURL, kCFURLPOSIXPathStyle );
+        CFRelease(resourcesURL);
+        char cpath[PATH_MAX];
+  
+        CFStringGetCString( str, cpath, FILENAME_MAX, kCFStringEncodingASCII );
+        CFRelease(str);
+        path = cpath;
+
       #endif //__APPLE__
     
       #ifdef _WIN32

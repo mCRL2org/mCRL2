@@ -198,19 +198,19 @@ ATermAppl NextStateStandard::getStateArgument(ATerm state, int index)
 
 ATermAppl NextStateStandard::makeStateVector(ATerm state)
 {
-        if ( !stateAFun_made )
-        {
-                stateAFun_made = true;
-                info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
-                ATprotectAFun(info.stateAFun);
-        }
+  if ( !stateAFun_made )
+  {
+    stateAFun_made = true;
+    info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+    ATprotectAFun(info.stateAFun);
+  }
 
-        // XXX can be done more efficiently in some cases
-        for (int i=0; i<info.statelen; i++)
-        {
-                stateargs[i] = (ATerm) getStateArgument(state,i);
-        }
-        return ATmakeApplArray(info.stateAFun,stateargs);
+  // XXX can be done more efficiently in some cases
+  for (int i=0; i<info.statelen; i++)
+  {
+    stateargs[i] = (ATerm) getStateArgument(state,i);
+  }
+  return ATmakeApplArray(info.stateAFun,stateargs);
 }
 
 //Prototype

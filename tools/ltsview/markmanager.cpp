@@ -26,7 +26,7 @@ struct MarkRule {
   bool is_activated;
   bool is_negated;
   RGB_Color color; // Colour asociated with this mark rule.
-  atermpp::set< ATerm > value_set;
+  std::set< std::string > value_set;
 };
 
 MarkManager::MarkManager() {
@@ -105,8 +105,8 @@ void MarkManager::setLTS(LTS *l,bool need_reset)
   }
 }
 
-int MarkManager::createMarkRule(int param,bool neg,RGB_Color col,
-        atermpp::set<ATerm> vals) {
+int MarkManager::createMarkRule(int param, bool neg, RGB_Color col, const std::set<std::string> &vals) 
+{
   MarkRule *m = new MarkRule;
   m->param_index = param;
   m->is_activated = true;
@@ -155,13 +155,13 @@ RGB_Color MarkManager::getMarkRuleColor(int mr) {
   return mark_rules[mr]->color;
 }
 
-atermpp::set<ATerm> MarkManager::getMarkRuleValues(int mr)
+std::set<std::string> MarkManager::getMarkRuleValues(int mr)
 {
   return mark_rules[mr]->value_set;
 }
 
 void MarkManager::setMarkRuleData(int mr,int param,bool neg,
-    RGB_Color col,atermpp::set<ATerm> vals)
+    RGB_Color col,const std::set<std::string> &vals)
 {
   bool changed = (param != mark_rules[mr]->param_index)
               || (neg != mark_rules[mr]->is_negated)
@@ -366,7 +366,7 @@ void MarkManager::deactivateMarkRule(int mr) {
 bool MarkManager::matchesRule(State *s,int mr)
 {
   MarkRule *rule = mark_rules[mr];
-  bool in_set = rule->value_set.find(lts->getStateParameterValue(s,
+  bool in_set = rule->value_set.find(lts->getStateParameterValueStr(s,
         rule->param_index)) != rule->value_set.end();
   if (rule->is_negated)
   {

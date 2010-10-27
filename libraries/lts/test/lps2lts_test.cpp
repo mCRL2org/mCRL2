@@ -25,7 +25,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lts/exploration.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -67,7 +67,7 @@ std::string nextstate_format_to_string(const NextStateFormat f)
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-lts::lts translate_lps_to_lts(lps::specification const& specification,
+lts::lts_aut_t translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty,
                               NextStateFormat format = GS_STATE_VECTOR,
@@ -94,7 +94,8 @@ lts::lts translate_lps_to_lts(lps::specification const& specification,
   lps2lts.finalise_lts_generation();
   core::garbage_collect();
 
-  lts::lts result(options.lts, options.outformat);
+  lts::lts_aut_t result;
+  result.load(options.lts);
 
   boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
 
@@ -185,7 +186,7 @@ void check_lps2lts_specification(std::string const& specification,
       nextstate_format_vector nsformats(nextstate_formats());
       for(nextstate_format_vector::const_iterator state_format = nsformats.begin(); state_format != nsformats.end(); ++state_format)
       {
-        lts::lts result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+        lts::lts_aut_t result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
         BOOST_CHECK_EQUAL(result.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);

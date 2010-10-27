@@ -20,7 +20,7 @@ class Importer
   public:
     Importer();
     virtual ~Importer();
-    virtual Graph* importFile(std::string file) = 0;
+    virtual Graph* importFile(const std::string &filename) = 0;
 
 };
 

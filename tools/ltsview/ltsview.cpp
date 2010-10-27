@@ -576,12 +576,13 @@ void LTSView::selectCluster(const int rank, const int pos)
     mainFrame->setClusterStateNr(c->getNumStates());
     for (unsigned int i = 0; i < lts->getNumParameters(); ++i)
     {
-      atermpp::set<ATerm> values = lts->getClusterParameterValues(c,i);
-      atermpp::set<ATerm>::iterator val_it;
+      std::set<std::string> values = lts->getClusterParameterValues(c,i);
+      std::set<std::string>::iterator val_it;
       std::vector<std::string> val;
       for (val_it = values.begin(); val_it != values.end(); ++val_it)
       {
-        val.push_back(lts->prettyPrintParameterValue(*val_it));
+        // val.push_back(lts->prettyPrintParameterValue(*val_it));
+        val.push_back(*val_it);
       }
       mainFrame->setParameterValues(i, val);
     }

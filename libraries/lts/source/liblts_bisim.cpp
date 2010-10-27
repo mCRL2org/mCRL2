@@ -8,7 +8,7 @@
 //
 /// \file liblts_bisim.cpp
 
-#include <math.h>
+/* #include <math.h>
 #include <iostream>
 #include <sstream>
 #include "mcrl2/core/messaging.h"
@@ -58,8 +58,9 @@ namespace detail
     }
     return tau_label;
   }
+*/
 
-  bisim_partitioner::bisim_partitioner(
+/*   bisim_partitioner::bisim_partitioner(
                    mcrl2::lts::lts &l,
                    const bool branching,
                    const bool preserve_divergence)
@@ -76,12 +77,14 @@ namespace detail
     create_initial_partition(branching,preserve_divergence);
     refine_partition_until_it_becomes_stable(branching, preserve_divergence);
   }
+*/
 
-  bisim_partitioner::~bisim_partitioner()
+/*   bisim_partitioner::~bisim_partitioner()
   {
   }
+*/
   
-  void bisim_partitioner::replace_transitions(const bool branching, const bool preserve_divergences)
+/*  void bisim_partitioner::replace_transitions(const bool branching, const bool preserve_divergences)
   { 
     // Put all the non inert transitions in a set. Add the transitions that form a self
     // loop. Such transitions only exist in case divergence preserving branching bisimulation is
@@ -115,8 +118,9 @@ namespace detail
     }
 
   }
+*/
 
-  unsigned int bisim_partitioner::num_eq_classes() const
+/*  unsigned int bisim_partitioner::num_eq_classes() const
   { 
     return max_state_index;
   }
@@ -130,13 +134,13 @@ namespace detail
   bool bisim_partitioner::in_same_class(const unsigned int s, const unsigned int t) const
   { 
     return get_eq_class(s)==get_eq_class(t);
-  }
+  } */
 
 // Private methods of bisim_partitioner
 
   // Below there are two routines to order states on tau reachability.
             
-  void bisim_partitioner::order_recursively_on_tau_reachability(
+/*  void bisim_partitioner::order_recursively_on_tau_reachability(
                                  const state_type s,
                                  std::map < state_type, std::vector < state_type > > &inert_transition_map,
                                  std::vector < non_bottom_state > &new_non_bottom_states,
@@ -157,9 +161,9 @@ namespace detail
         inert_transitions.swap(new_non_bottom_states.back().inert_transitions); 
       }
     }
-  }
+  } */
 
-  void bisim_partitioner::order_on_tau_reachability(std::vector < non_bottom_state > &non_bottom_states)
+/*   void bisim_partitioner::order_on_tau_reachability(std::vector < non_bottom_state > &non_bottom_states)
   { 
     std::set < state_type > visited;
     std::map < state_type, std::vector < state_type > > inert_transition_map;
@@ -177,8 +181,9 @@ namespace detail
     }
     new_non_bottom_states.swap(non_bottom_states);
   }
+*/
 
-  // Put the labelled transition system into the basic data structure for the
+/*  // Put the labelled transition system into the basic data structure for the
   // bisimulation algorithm where all states are put in one block.
   void bisim_partitioner::create_initial_partition(const bool branching, 
                                                    const bool preserve_divergences)
@@ -280,9 +285,9 @@ namespace detail
     to_be_processed.clear();
     BL.clear();
   } // end create_initial_partition
+*/
 
-
-  void bisim_partitioner::split_the_blocks_in_BL(bool &partition_is_unstable,
+/*  void bisim_partitioner::split_the_blocks_in_BL(bool &partition_is_unstable,
                                                  const label_type splitter_label,
                                                  const block_index_type splitter_block)
   { 
@@ -898,7 +903,7 @@ void bisim_partitioner::reachable_states_in_block_s_via_label_l(
     { 
       // The counter trace is simply the label l.
       mcrl2::trace::Trace counter_trace;
-      counter_trace.addAction((ATermAppl)aut.label_value(l));
+      counter_trace.addAction((ATermAppl)aut.label_value(l).label());
       resulting_counter_traces.insert(counter_trace);
     }
     else
@@ -916,7 +921,7 @@ void bisim_partitioner::reachable_states_in_block_s_via_label_l(
                     j!=counter_traces.end(); ++j)
           { 
             mcrl2::trace::Trace new_counter_trace;
-            new_counter_trace.addAction((ATermAppl)aut.label_value(l));
+            new_counter_trace.addAction((ATermAppl)aut.label_value(l).label());
             mcrl2::trace::Trace old_counter_trace=*j; 
             old_counter_trace.resetPosition();
             for(unsigned int k=0 ; k< old_counter_trace.getLength(); k++)
@@ -948,8 +953,8 @@ void bisim_partitioner::reachable_states_in_block_s_via_label_l(
 
 
   void bisimulation_reduce(lts &l,
-                           const bool branching /*=false */,
-                           const bool preserve_divergences /*=false */)
+                           const bool branching / *=false * /,
+                           const bool preserve_divergences / *=false * /)
   { 
     // First remove tau loops in case of branching bisimulation.
     if (branching)
@@ -965,7 +970,7 @@ void bisim_partitioner::reachable_states_in_block_s_via_label_l(
     detail::bisim_partitioner bisim_part(l, branching, preserve_divergences);
   
     // Clear LTS l, but keep the labels
-    l.clear_type();
+    // l.clear_type();
     l.clear_states();
     
     // Assign the reduced LTS
@@ -977,9 +982,9 @@ void bisim_partitioner::reachable_states_in_block_s_via_label_l(
   bool bisimulation_compare(
               const lts &l1,
               const lts &l2, 
-              const bool branching /* =false*/, 
-              const bool preserve_divergences /*=false*/,
-              const bool generate_counter_examples /*= false*/ )
+              const bool branching / * =false* /, 
+              const bool preserve_divergences / *=false* /,
+              const bool generate_counter_examples / *= false* / )
   { 
     lts l1_copy(l1);
     lts l2_copy(l2);
@@ -990,12 +995,12 @@ void bisim_partitioner::reachable_states_in_block_s_via_label_l(
   bool destructive_bisimulation_compare(
               lts &l1, 
               lts &l2,
-              const bool branching /* =false*/, 
-              const bool preserve_divergences /*=false*/,
-              const bool generate_counter_examples /* = false */)
+              const bool branching / * =false* /, 
+              const bool preserve_divergences / *=false* /,
+              const bool generate_counter_examples / * = false * /)
   { 
     unsigned int init_l2 = l2.initial_state() + l1.num_states();
-    merge(l1,l2);
+    mcrl2::lts::merge(l1,l2);
     l2.clear(); // No use for l2 anymore.
 
     // First remove tau loops in case of branching bisimulation.
@@ -1025,7 +1030,8 @@ void bisim_partitioner::reachable_states_in_block_s_via_label_l(
     }
     return bisim_part.in_same_class(l1.initial_state(),init_l2);
   }
+*/
 
-} // namespace detail
+/*} // namespace detail
 }
-}
+}*/

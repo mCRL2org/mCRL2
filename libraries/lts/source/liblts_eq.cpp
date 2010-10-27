@@ -8,7 +8,7 @@
 //
 /// \file liblts_eq.cpp
 
-#include <vector>
+/* #include <vector>
 #include <set>
 #include <stack>
 #include <string>
@@ -53,7 +53,7 @@ void reduce(lts &l,lts_equivalence eq)
         sp.partitioning_algorithm();
 
         // Clear this LTS, but keep the labels
-        l.clear_type();
+        // l.clear_type();
         l.clear_states();
         l.clear_transitions();
 
@@ -110,7 +110,7 @@ bool compare(const lts &l1, const lts &l2, const lts_equivalence eq, const bool 
   return false;
 } 
 
-bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const bool generate_counter_examples)
+/ * bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const bool generate_counter_examples)
 {
   // Merge this LTS and l and store the result in this LTS.
   // In the resulting LTS, the initial state i of l will have the
@@ -141,7 +141,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const bool 
         }
         // Run the partitioning algorithm on this merged LTS
         unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        merge(l1,l2);
+        detail::merge(l1,l2);
         l2.clear(); // l is not needed anymore.
         sim_partitioner sp(l1);
         sp.partitioning_algorithm();
@@ -182,7 +182,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_equivalence eq, const bool 
       gsErrorMsg("comparison for this equivalence is not available\n");
       return false;
   }
-}
+} * /
 
 bool compare(const lts &l1, const lts &l2, const lts_preorder pre)
 { 
@@ -202,7 +202,7 @@ bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre)
         // state number i + N where N is the number of states in this
         // LTS (before the merge).
         const unsigned int init_l2 = l2.initial_state() + l1.num_states();
-        merge(l1,l2);
+        detail::merge(l1,l2);
 
         // We no longer need l, so clear it to save memory
         l2.clear();
@@ -254,4 +254,4 @@ bool destructive_compare(lts &l1, lts &l2, const lts_preorder pre)
 }
 
 }
-}
+} */

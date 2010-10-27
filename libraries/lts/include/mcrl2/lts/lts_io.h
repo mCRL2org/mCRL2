@@ -35,11 +35,18 @@
 
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/exception.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_fsm.h"
 
 
 namespace mcrl2
 {
+
+  namespace lps
+  {
+    class specification;
+  } 
+
+
   namespace lts
   {
     namespace detail
@@ -55,45 +62,12 @@ namespace mcrl2
        *                       format (or NULL for none).
        * \pre                  The LTS in filename is a mCRL2 SVC without extra
        *                       information. */
-      void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermList act_spec);
+      void add_extra_mcrl2_lts_data(std::string const &filename, const ATermAppl data_spec, const ATermList params, const ATermList act_spec);
 
       lts_type detect_type(std::string const& filename);
       lts_type detect_type(std::istream &is);
 
-      void read_from_aut(lts &l, std::string const& filename);
-      void read_from_aut(lts &l, std::istream &is);
-      void write_to_aut(const lts &l, std::string const& filename);
-      void write_to_aut(const lts &l, std::ostream& os);
-
       lps::specification const& empty_specification();
-
-      // extern lts_extra lts_no_extra;
-
-      void read_from_svc(lts &l, std::string const& filename, lts_type type);
-      void write_to_svc(const lts &l, std::string const& filename, lts_type type, lps::specification const& spec = empty_specification());
-
-      void read_from_fsm(lts &l, std::string const& filename, lts_type type, lps::specification const& spec = empty_specification());
-      void read_from_fsm(lts &l, std::string const& filename, ATerm lps);
-      void read_from_fsm(lts &l, std::string const& filename, lps::specification const& spec = empty_specification());
-      void read_from_fsm(lts &l, std::istream& is, lts_type type, lps::specification const& spec = empty_specification());
-      void read_from_fsm(lts &l, std::istream& is, ATerm lps);
-      void read_from_fsm(lts &l, std::istream& is, lps::specification const& spec = empty_specification());
-      void write_to_fsm(const lts &l, std::string const& filename, lts_type type, ATermList params);
-      void write_to_fsm(const lts &l, std::string const& filename, ATerm lps);
-      void write_to_fsm(const lts &l, std::string const& filename, lps::specification const& spec = empty_specification());
-      void write_to_fsm(const lts &l, std::ostream& os, lts_type type, ATermList params);
-      void write_to_fsm(const lts &l, std::ostream& os, ATerm lps);
-      void write_to_fsm(const lts &l, std::ostream& os, lps::specification const& spec = empty_specification());
-
-      void read_from_dot(lts &l, std::string const& filename);
-      void read_from_dot(lts &l, std::istream &is);
-      void write_to_dot(const lts &l, std::ostream& os, lts_dot_options opts);
-      void write_to_dot(const lts &l, std::string const& filename, lts_dot_options opts);
-
-    #ifdef USE_BCG
-      void read_from_bcg(lts &l, std::string const& filename);
-      void write_to_bcg(const lts &l, std::string const& filename);
-    #endif
 
 
       /** \brief Determines the LTS format from a filename by its extension.
@@ -101,7 +75,7 @@ namespace mcrl2
        * determined.
        * \return The LTS format based on the extension of \a s.
        * If the extension is \p svc then the mCRL2 SVC format is assumed and
-       * \a lts_mcrl2 is returned.
+       * \a lts_lts is returned.
        * If no supported format can be determined from the extension then \a
        * lts_none is returned.  */
       lts_type guess_format(std::string const& s);
@@ -177,28 +151,6 @@ namespace mcrl2
        *                      formats in \a supported, separated by \a ','.
        *                      E.g. "*.aut,*.lts" */
       std::string lts_extensions_as_string(const std::set<lts_type> &supported);
-
-      /** \brief Reads LTS data from a file.
-       * \details This is not supported for Dot files.
-       * \param[in] filename The name of the file from which data will be read.
-       * \param[in] type The format of the file. If \a lts_none is passed then
-       * an attempt is made to determine the format from the contents of the
-       * file.
-       * \param[in] extra Additional data to be stored with the LTS.
-       * \retval true if the read operation succeeded;
-       * \retval false otherwise.*/
-      void read_from(lts &l, std::string const& filename, lts_type type = lts_none, lts_extra extra = lts_no_extra);
-
-      /** \brief Reads LTS data from an input stream.
-       * \details This is not supported for SVC, Dot, and BCG files.
-       * \param[in] is The input stream from which data will be read.
-       * \param[in] type The format of the file. If \a lts_none is passed then
-       * an attempt is made to determine the format from the contents of the
-       * stream.
-       * \param[in] extra Additional data to be stored with the LTS.
-       * \retval true if the read operation succeeded;
-       * \retval false otherwise.*/
-      void read_from(lts &l,std::istream &is, lts_type type = lts_none, lts_extra extra = lts_no_extra);
 
     }
   }

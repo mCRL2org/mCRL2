@@ -123,15 +123,15 @@ MarkStateRuleDialog::~MarkStateRuleDialog() {
 
 void MarkStateRuleDialog::loadValues(wxString paramName)
 {
-  atermpp::set<ATerm> domain = lts->getParameterDomain(
-      parameterIndices[paramName]);
-  atermpp::set<ATerm>::iterator dom_it;
+  // atermpp::set<ATermAppl> domain = lts->getParameterDomain(parameterIndices[paramName]);
+  // atermpp::set<ATermAppl>::iterator dom_it;
+  std::vector<std::string> domain = lts->getParameterDomain(parameterIndices[paramName]);
+  std::vector<std::string>::iterator dom_it;
   wxArrayString wxvalues;
   values.clear();
   for (dom_it = domain.begin(); dom_it != domain.end(); ++dom_it)
   {
-    wxString str = wxString(
-        lts->prettyPrintParameterValue(*dom_it).c_str(),wxConvLocal);
+    wxString str = wxString(dom_it->c_str(),wxConvLocal);
     wxvalues.Add(str);
     values[str] = *dom_it;
   }
@@ -145,7 +145,7 @@ void MarkStateRuleDialog::onParameterChoice(wxCommandEvent& event)
 }
 
 void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,
-    atermpp::set<ATerm> vals)
+    const std::set<std::string> &vals)
 {
   wxString paramName = wxString(lts->getParameterName(p).c_str(),
       wxConvLocal);
@@ -156,11 +156,10 @@ void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,
 
   relationListBox->SetSelection(neg ? 1 : 0);
 
-  atermpp::set<ATerm>::iterator i;
+  std::set<std::string>::iterator i;
   for (i = vals.begin(); i != vals.end(); ++i)
   {
-    valuesListBox->Check(valuesListBox->FindString(wxString(
-      lts->prettyPrintParameterValue(*i).c_str(),wxConvLocal)),true);
+    valuesListBox->Check(valuesListBox->FindString(wxString(i->c_str(),wxConvLocal)),true);
   }
 }
 
@@ -179,9 +178,9 @@ bool MarkStateRuleDialog::getNegated()
   return (relationListBox->GetSelection() == 1);
 }
 
-atermpp::set<ATerm> MarkStateRuleDialog::getValues()
+std::set<std::string> MarkStateRuleDialog::getValues()
 {
-  atermpp::set<ATerm> vals;
+  std::set<std::string> vals;
   for (unsigned int i = 0; i < valuesListBox->GetCount(); ++i)
   {
     if (valuesListBox->IsChecked(i))

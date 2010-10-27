@@ -8,7 +8,7 @@
 //
 /// \file liblts_tau_star.cpp
 
-#include <cstdlib> // free
+/* #include <cstdlib> // free
 #include "boost/scoped_array.hpp"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
@@ -217,4 +217,4 @@ void tau_star_reduce(lts &l)
 }
 /// \endcond
 }
-}
+} */

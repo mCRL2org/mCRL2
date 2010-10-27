@@ -414,14 +414,17 @@ namespace mcrl2 {
       return Result;
     }
 
-    ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
+    ATermAppl type_check_mult_act(
+                 ATermAppl mult_act, 
+                 ATermAppl data_spec,
+                 ATermList action_labels)
     {
-      if (gsVerbose)
+      if (gsDebug)
       { std::cerr << "type checking multiaction...\n";
       }
       //check correctness of the multi-action in mult_act using
       //the process specification or LPS in spec
-      assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
+      // assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
       ATermAppl Result=NULL;
 
       if (gsDebug) { std::cerr << "type checking phase started\n"; }
@@ -429,11 +432,11 @@ namespace mcrl2 {
 
       if (gsDebug) { std::cerr << "type checking of multiactions read-in phase started\n"; }
 
-      ATermAppl data_spec = ATAgetArgument(spec, 0);
+      // ATermAppl data_spec = ATAgetArgument(spec, 0);
       ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
       ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
       ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
-      ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
+      // ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
 
       //XXX read-in from spec (not finished)
       if(gstcReadInSorts(sorts)
@@ -473,25 +476,28 @@ namespace mcrl2 {
       return Result;
     }
 
-    ATermList type_check_mult_actions(ATermList mult_actions, ATermAppl spec)
+    ATermList type_check_mult_actions(
+                    ATermList mult_actions, 
+                    ATermAppl data_spec,
+                    ATermList action_labels)
     {
       if (gsDebug)
       { std::cerr << "type checking multiactions...\n";
       }
       //check correctness of the multi-action in mult_act using
       //the process specification or LPS in spec
-      assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
+      // assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
 
       if (gsDebug) { std::cerr << "type checking phase started\n"; }
       gstcDataInit();
 
       if (gsDebug) { std::cerr << "type checking of multiactions read-in phase started\n"; }
 
-      ATermAppl data_spec = ATAgetArgument(spec, 0);
+      // ATermAppl data_spec = ATAgetArgument(spec, 0);
       ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
       ATermList constructors = ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
       ATermList mappings = ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
-      ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
+      // ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
 
       //XXX read-in from spec (not finished)
       ATermList result=ATempty;
@@ -1964,7 +1970,8 @@ namespace mcrl2 {
       return ATfalse;
     }
 
-    static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr){
+    static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr)
+    {
       if(gsIsSortId(SortExpr)){
         ATermAppl SortName=ATAgetArgument(SortExpr,0);
         if(!gstcIsSortDeclared(SortName))
@@ -1997,6 +2004,7 @@ namespace mcrl2 {
         return ATtrue;
       }
 
+      assert(0);
       gsErrorMsg("this is not a sort expression %T\n",SortExpr);
       return ATfalse;
     }

@@ -26,10 +26,16 @@ namespace lps {
      *  \post      mult_action is type checked and sorts have been added when necessary.
      **/
    inline
-    void type_check(multi_action& mult_act, const specification& lps)
+    void type_check(
+                multi_action& mult_act, 
+                const data::data_specification& data_spec,
+                const action_label_list &action_decls)
     {
       // TODO: replace all this nonsense code by a proper type check implementation
-      ATermAppl t = core::type_check_mult_act(core::detail::gsMakeMultAct(mult_act.actions()), specification_to_aterm(lps));
+      ATermAppl t = core::type_check_mult_act(
+                            core::detail::gsMakeMultAct(mult_act.actions()), 
+                            data::detail::data_specification_to_aterm_data_spec(data_spec),
+                            (ATermList)action_decls);
       if (!t)
       {
         throw mcrl2::runtime_error("could not type check multi action " + core::pp(core::detail::gsMakeMultAct(mult_act.actions())));
@@ -44,7 +50,10 @@ namespace lps {
      *  \post      mult_action is type checked and sorts have been added when necessary.
      **/
    inline
-    void type_check(atermpp::vector<multi_action>& mult_actions, const specification& lps)
+    void type_check(
+                atermpp::vector<multi_action>& mult_actions, 
+                const data::data_specification& data_spec,
+                const action_label_list &action_decls)
     {
       // TODO: replace all this nonsense code by a proper type check implementation
       // Bleh; do conversions...
@@ -54,8 +63,10 @@ namespace lps {
       { 
         l=ATinsert(l,(ATerm)(ATermList)i->actions());
       }
-      l=core::type_check_mult_actions(ATreverse(l), specification_to_aterm(lps));
-      
+      l=core::type_check_mult_actions(
+                            ATreverse(l), 
+                            data::detail::data_specification_to_aterm_data_spec(data_spec), 
+                            (ATermList)action_decls);
       // And convert back...
       mult_actions.clear();
       for( ; !ATisEmpty(l) ; l=ATgetNext(l))

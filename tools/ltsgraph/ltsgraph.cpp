@@ -30,7 +30,8 @@ LTSGraph::LTSGraph() :
 							"Carst Tankink, Ali Deniz Aladagli")) {
 }
 
-bool LTSGraph::run() {
+bool LTSGraph::run() 
+     {
 	wxApp::SetExitOnFrameDelete(true);
 	colouring = false;
 	brushColour = *wxRED;
@@ -81,7 +82,8 @@ int main(int argc, char **argv) {
 }
 #endif
 
-void LTSGraph::openFile(std::string const &path) {
+void LTSGraph::openFile(std::string const &path) 
+{
 	try {
 		// Set fileName
 		fileName = path;

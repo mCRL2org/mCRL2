@@ -13,14 +13,16 @@
  * \author Muck van Weerdenburg, Jan Friso Groote
  */
 
+
 #ifndef MCRL2_LTS_TRANSITION_H
 #define MCRL2_LTS_TRANSITION_H
+
 
 namespace mcrl2
 {
   namespace lts
   {
-
+ 
     /** \brief Transition sort styles.
      * \details This enumerated type defines sort styles for transitions.
      * They can be used to sort the transitions of an LTS based on various
@@ -124,5 +126,7 @@ namespace mcrl2
 
   }
 }
+
+#include "mcrl2/lts/detail/transition.h"
 
 #endif // MCRL2_LTS_TRANSITION_H

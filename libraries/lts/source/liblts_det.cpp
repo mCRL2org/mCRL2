@@ -8,7 +8,7 @@
 //
 /// \file liblts_det.cpp
 
-#include <algorithm>
+/* #include <algorithm>
 #include <vector>
 #include <boost/scoped_array.hpp>
 #include "mcrl2/core/messaging.h"
@@ -159,4 +159,4 @@ void determinise(lts &l)
   assert(is_deterministic(l));
 }
 }
-}
+} */

@@ -24,7 +24,7 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 
 using namespace mcrl2::bes;
@@ -48,7 +48,7 @@ namespace mcrl2 {
       protected:
         boolean_equation_system<Container>& m_bes;
         equivalence_t m_equivalence;
-        lts::lts m_lts;
+        lts::lts_lts_t m_lts;
 
         std::set<equivalence_t> m_allowed_equivalences;
         std::map<equivalence_t, std::string> m_equivalence_strings;
@@ -241,7 +241,7 @@ namespace mcrl2 {
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
-                m_lts.add_label(t,label.str()=="tau");
+                m_lts.add_label(mcrl2::lts::detail::action_label_mcrl2((ATerm)t),label.str()=="tau");
               }
               m_lts.add_transition(lts::transition(from,label_index,to));
             }
@@ -267,13 +267,13 @@ namespace mcrl2 {
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
-                m_lts.add_label(t,label.str()=="tau");
+                m_lts.add_label(mcrl2::lts::detail::action_label_mcrl2(t),label.str()=="tau");
               }
               m_lts.add_transition(lts::transition(from,label_index,to));
             }
           }
 
-          m_lts.set_type(lts::lts_aut);
+          // m_lts.set_type(lts::lts_aut);
         }
 
         void reduce_lts()
@@ -351,7 +351,7 @@ namespace mcrl2 {
             {
               if(i->to() == deadlock_state)
               {
-                std::string label = m_lts.pretty_print_label_value(m_lts.label_value(i->label()));
+                std::string label = pp(m_lts.label_value(i->label()));
                 size_t comma_pos = label.find(",");
 
                 std::string block_str = label.substr(0,comma_pos);

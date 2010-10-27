@@ -40,6 +40,7 @@ set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_sim.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_aut.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_det.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_lts.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_svc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_bisim.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/sim_hashtable.cpp

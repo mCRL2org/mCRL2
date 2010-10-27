@@ -146,7 +146,26 @@ namespace lps {
       /// \brief Returns a string representation of the multi action
       std::string to_string() const
       {
-        return core::pp(m_actions) + (has_time() ? (" @ " + core::pp(m_time)) : "");
+        std::string result;
+        if (has_time())
+        {
+          result="(";
+        }
+        for(action_list::const_iterator i=m_actions.begin(); i!=m_actions.end(); ++i)
+        { 
+          result = result+core::pp(*i);
+          action_list::const_iterator i_next=i;
+          i_next++;
+          if (i_next!=m_actions.end())
+          { 
+            result=result+"|";
+          }
+        }
+        if (has_time())
+        { 
+          result=result+(")@ " + core::pp(m_time));
+        }
+        return result;
       }
 
       /// \brief Joins the actions of both multi actions.
@@ -167,6 +186,12 @@ namespace lps {
       bool operator!=(const multi_action& other) const
       {
         return !(*this == other);
+      }
+
+      /// \brief Inequality on multi_actions
+      bool operator<(const multi_action& other) const
+      {
+        return m_actions < other.m_actions || (m_actions == other.m_actions && m_time < other.m_time);
       }
   };
 

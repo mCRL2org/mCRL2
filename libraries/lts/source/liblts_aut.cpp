@@ -11,12 +11,11 @@
 // #include <cstring>
 #include <string>
 // #include <cstdlib>
-#include <fstream>
-#include <iostream>
 #include <sstream>
 #include <assert.h>
 #include <aterm2.h>
 #include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/core/messaging.h"
 
 static std::string c(const unsigned int n)  // Awkward trick, should be a better way to do this. Please replace....
@@ -34,19 +33,6 @@ namespace lts
 {
 namespace detail
 {
-
-void read_from_aut(lts &l, string const& filename)
-{
-  ifstream is(filename.c_str());
-
-  if ( !is.is_open() )
-  {
-    throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for reading.");
-  }
-
-  read_from_aut(l,is);
-  is.close();
-}
 
 static void read_newline(istream &is,const unsigned int lineno=1)
 { 
@@ -192,7 +178,7 @@ static bool read_aut_transition(
   return true;
 }
 
-void read_from_aut(lts &l, istream &is)
+static void read_from_aut(lts_aut_t &l, istream &is)
 {
   unsigned int line_no = 1;
   unsigned int initial_state=0, ntrans=0, nstate=0;
@@ -242,7 +228,7 @@ void read_from_aut(lts &l, istream &is)
     {
       ATbool b;
       label = ATindexedSetPut(labs,t,&b);
-      l.add_label(t,s=="tau");
+      l.add_label(string(ATwriteToString(t)),s=="tau");
     }
 
     l.add_transition(transition(from,(unsigned int) label,to));
@@ -253,26 +239,34 @@ void read_from_aut(lts &l, istream &is)
     throw mcrl2::runtime_error("number of transitions read (" + c(l.num_transitions()) + 
               ") does not correspond to the number of transition given in the header (" + c(ntrans) + ").");
   }
-
-  l.set_type(lts_aut);
-
 }
 
-void write_to_aut(const lts &l, string const& filename)
+void lts_aut_t::load(const string &filename)
 {
-  ofstream os(filename.c_str());
-
-  if ( !os.is_open() )
+  if (filename=="")
   {
-    throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for writing.");
-    return;
+    read_from_aut(*this,cin);
   }
+  else
+  {
+    ifstream is(filename.c_str());
 
-  write_to_aut(l,os);
-  os.close();
-}
+    if ( !is.is_open() )
+    {
+      throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for reading.");
+    }
 
-void write_to_aut(const lts &l, ostream &os)
+    read_from_aut(*this,is);
+    is.close();
+  }
+} 
+
+void lts_aut_t::load(istream &is)
+{
+  read_from_aut(*this,is);
+} 
+
+static void write_to_aut(const lts_aut_t &l, ostream &os)
 {
   os << "des (0," << l.num_transitions() << "," << l.num_states() << ")" << endl;
 
@@ -297,11 +291,34 @@ void write_to_aut(const lts &l, ostream &os)
       to = 0;
     }
     os << "(" << from << ",\""
-       << l.label_value_str(t.front().label())
+       << detail::pp(l.label_value(t.front().label()))
        << "\"," << to << ")" << endl;
   }
 
 }
+
+void lts_aut_t::save(string const& filename) const
+{
+  if (filename=="")
+  { 
+    write_to_aut(*this,cout);
+  }
+  else
+  {
+    ofstream os(filename.c_str());
+  
+    if ( !os.is_open() )
+    {
+      throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for writing.");
+      return;
+    }
+
+    write_to_aut(*this,os);
+    os.close();
+  }
+} 
+
+
 
 }
 }

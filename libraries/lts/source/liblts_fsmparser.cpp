@@ -1,23 +1,24 @@
-
-/* A Bison parser, made by GNU Bison 2.4.1.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-   
-   This program is free software: you can redistribute it and/or modify
+
+   This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-   
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -28,7 +29,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -46,7 +47,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.4.1"
+#define YYBISON_VERSION "2.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -54,73 +55,17 @@
 /* Pure parsers.  */
 #define YYPURE 0
 
-/* Push parsers.  */
-#define YYPUSH 0
-
-/* Pull parsers.  */
-#define YYPULL 1
-
 /* Using locations.  */
 #define YYLSP_NEEDED 0
 
 /* Substitute the variable and function names.  */
-#define yyparse         fsmyyparse
-#define yylex           fsmyylex
-#define yyerror         fsmyyerror
-#define yylval          fsmyylval
-#define yychar          fsmyychar
-#define yydebug         fsmyydebug
-#define yynerrs         fsmyynerrs
-
-
-/* Copy the first part of user declarations.  */
-
-/* Line 189 of yacc.c  */
-#line 9 "liblts_fsmparser.yy"
-
-#include <vector>
-#include <sstream>
-#include <cstring>
-#include "mcrl2/lts/lts.h"
-#include "mcrl2/lts/detail/liblts_fsmparser.h"
-#include "liblts_fsmlexer.h"
-
-// Local variables
-std::vector<bool> ignore_par; /* Records which parameters will be ignored */
-unsigned int num_pars;        /* Number of parameters */
-unsigned int par_index;       /* Index of current parameter */
-
-// Function declarations
-
-//external declarations from fsmlexer.ll
-void fsmyyerror(const char *s);
-int fsmyylex(void);
-
-char* intToCString(int i);
-
-#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(fsm_lexer_obj->protect_table, (ATerm) rhs, &b); lhs = rhs; }
-
-
-/* Line 189 of yacc.c  */
-#line 106 "liblts_fsmparser.cpp"
-
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 1
-#endif
-
-/* Enabling the token table.  */
-#ifndef YYTOKEN_TABLE
-# define YYTOKEN_TABLE 0
-#endif
+#define yyparse fsmyyparse
+#define yylex   fsmyylex
+#define yyerror fsmyyerror
+#define yylval  fsmyylval
+#define yychar  fsmyychar
+#define yydebug fsmyydebug
+#define yynerrs fsmyynerrs
 
 
 /* Tokens.  */
@@ -153,35 +98,95 @@ char* intToCString(int i);
      REAL = 279
    };
 #endif
+/* Tokens.  */
+#define EOLN 258
+#define SECSEP 259
+#define LPAR 260
+#define RPAR 261
+#define ARROW 262
+#define HASH 263
+#define QMARK 264
+#define COLON 265
+#define COMMA 266
+#define BAG 267
+#define BAR 268
+#define KWSTRUCT 269
+#define SET 270
+#define LIST 271
+#define NUMBER 272
+#define ID 273
+#define QUOTED 274
+#define BOOL 275
+#define POS 276
+#define NAT 277
+#define INT 278
+#define REAL 279
 
 
+
+
+/* Copy the first part of user declarations.  */
+#line 9 "liblts_fsmparser.yy"
+
+#define YYSTYPE std::string
+
+#include <vector>
+#include <sstream>
+#include <cstring>
+#include "mcrl2/lts/lts.h"
+
+#include "mcrl2/lts/detail/liblts_fsmparser.h"
+#include "liblts_fsmlexer.h"
+
+#include "mcrl2/lts/lts_fsm.h"
+
+// Local variables
+std::vector<bool> ignore_par; /* Records which parameters will be ignored */
+unsigned int num_pars;        /* Number of parameters */
+unsigned int par_index;       /* Index of current parameter */
+
+// Function declarations
+
+//external declarations from fsmlexer.ll
+void fsmyyerror(const char *s);
+int fsmyylex(void);
+
+char* intToCString(int i);
+
+
+
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+
+/* Enabling verbose error messages.  */
+#ifdef YYERROR_VERBOSE
+# undef YYERROR_VERBOSE
+# define YYERROR_VERBOSE 1
+#else
+# define YYERROR_VERBOSE 1
+#endif
+
+/* Enabling the token table.  */
+#ifndef YYTOKEN_TABLE
+# define YYTOKEN_TABLE 0
+#endif
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-{
-
-/* Line 214 of yacc.c  */
-#line 33 "liblts_fsmparser.yy"
-
-  ATermAppl aterm;
-  int number;
-
-
-
-/* Line 214 of yacc.c  */
-#line 173 "liblts_fsmparser.cpp"
-} YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
+typedef int YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
+
 
 
 /* Copy the second part of user declarations.  */
 
 
-/* Line 264 of yacc.c  */
-#line 185 "liblts_fsmparser.cpp"
+/* Line 216 of yacc.c.  */
+#line 190 "liblts_fsmparser.cpp"
 
 #ifdef short
 # undef short
@@ -231,7 +236,7 @@ typedef short int yytype_int16;
 #define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
-# if YYENABLE_NLS
+# if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -256,14 +261,14 @@ typedef short int yytype_int16;
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static int
-YYID (int yyi)
+YYID (int i)
 #else
 static int
-YYID (yyi)
-    int yyi;
+YYID (i)
+    int i;
 #endif
 {
-  return yyi;
+  return i;
 }
 #endif
 
@@ -344,9 +349,9 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss_alloc;
-  YYSTYPE yyvs_alloc;
-};
+  yytype_int16 yyss;
+  YYSTYPE yyvs;
+  };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
 # define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
@@ -380,12 +385,12 @@ union yyalloc
    elements in the stack, and YYPTR gives the new location of the
    stack.  Advance YYPTR to a properly aligned location for the next
    stack.  */
-# define YYSTACK_RELOCATE(Stack_alloc, Stack)				\
+# define YYSTACK_RELOCATE(Stack)					\
     do									\
       {									\
 	YYSIZE_T yynewbytes;						\
-	YYCOPY (&yyptr->Stack_alloc, Stack, yysize);			\
-	Stack = &yyptr->Stack_alloc;					\
+	YYCOPY (&yyptr->Stack, Stack, yysize);				\
+	Stack = &yyptr->Stack;						\
 	yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
 	yyptr += yynewbytes / sizeof (*yyptr);				\
       }									\
@@ -484,12 +489,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    54,    54,    59,    54,    69,    73,    72,    81,    80,
-      88,    96,    95,   119,   127,   131,   141,   149,   153,   163,
-     171,   175,   184,   188,   198,   204,   216,   220,   229,   233,
-     244,   248,   258,   262,   266,   270,   279,   283,   287,   291,
-     295,   303,   308,   313,   320,   323,   327,   340,   344,   348,
-     343,   361,   364,   381,   384,   389,   408,   410
+       0,    61,    61,    67,    61,    77,    81,    80,    89,    88,
+      96,   104,   103,   130,   138,   142,   153,   161,   165,   176,
+     184,   188,   198,   202,   213,   220,   233,   238,   248,   252,
+     263,   267,   278,   282,   286,   290,   300,   305,   310,   315,
+     320,   329,   335,   341,   349,   352,   356,   370,   374,   378,
+     373,   392,   395,   413,   416,   421,   455,   459
 };
 #endif
 
@@ -501,14 +506,14 @@ static const char *const yytname[] =
   "$end", "error", "$undefined", "EOLN", "SECSEP", "LPAR", "RPAR",
   "ARROW", "HASH", "QMARK", "COLON", "COMMA", "BAG", "BAR", "KWSTRUCT",
   "SET", "LIST", "NUMBER", "ID", "QUOTED", "BOOL", "POS", "NAT", "INT",
-  "REAL", "$accept", "fsm_file", "$@1", "$@2", "params", "$@3", "param",
-  "$@4", "cardinality", "type_def", "$@5", "sort_expr", "sort_expr_arrow",
+  "REAL", "$accept", "fsm_file", "@1", "@2", "params", "@3", "param", "@4",
+  "cardinality", "type_def", "@5", "sort_expr", "sort_expr_arrow",
   "domain_no_arrow", "domain_no_arrow_elts_hs", "domain_no_arrow_elt",
   "sort_expr_struct", "struct_constructors_bs", "struct_constructor",
   "recogniser", "struct_projections_cs", "struct_projection",
   "sort_expr_primary", "sort_constant", "sort_constructor", "type_values",
-  "type_value", "states", "$@6", "$@7", "state", "transitions",
-  "transition", "action", 0
+  "type_value", "states", "@6", "@7", "state", "transitions", "transition",
+  "action", 0
 };
 #endif
 
@@ -713,7 +718,7 @@ while (YYID (0))
    we won't break user code: when these are the locations we know.  */
 
 #ifndef YY_LOCATION_PRINT
-# if YYLTYPE_IS_TRIVIAL
+# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
 #  define YY_LOCATION_PRINT(File, Loc)			\
      fprintf (File, "%d.%d-%d.%d",			\
 	      (Loc).first_line, (Loc).first_column,	\
@@ -824,20 +829,17 @@ yy_symbol_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
+yy_stack_print (yytype_int16 *bottom, yytype_int16 *top)
 #else
 static void
-yy_stack_print (yybottom, yytop)
-    yytype_int16 *yybottom;
-    yytype_int16 *yytop;
+yy_stack_print (bottom, top)
+    yytype_int16 *bottom;
+    yytype_int16 *top;
 #endif
 {
   YYFPRINTF (stderr, "Stack now");
-  for (; yybottom <= yytop; yybottom++)
-    {
-      int yybot = *yybottom;
-      YYFPRINTF (stderr, " %d", yybot);
-    }
+  for (; bottom <= top; ++bottom)
+    YYFPRINTF (stderr, " %d", *bottom);
   YYFPRINTF (stderr, "\n");
 }
 
@@ -871,11 +873,11 @@ yy_reduce_print (yyvsp, yyrule)
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
+      fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
 		       		       );
-      YYFPRINTF (stderr, "\n");
+      fprintf (stderr, "\n");
     }
 }
 
@@ -1155,8 +1157,10 @@ yydestruct (yymsg, yytype, yyvaluep)
 	break;
     }
 }
+
 
 /* Prevent warnings from -Wmissing-prototypes.  */
+
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
 int yyparse (void *YYPARSE_PARAM);
@@ -1172,10 +1176,11 @@ int yyparse ();
 #endif /* ! YYPARSE_PARAM */
 
 
-/* The lookahead symbol.  */
+
+/* The look-ahead symbol.  */
 int yychar;
 
-/* The semantic value of the lookahead symbol.  */
+/* The semantic value of the look-ahead symbol.  */
 YYSTYPE yylval;
 
 /* Number of syntax errors so far.  */
@@ -1183,9 +1188,9 @@ int yynerrs;
 
 
 
-/*-------------------------.
-| yyparse or yypush_parse.  |
-`-------------------------*/
+/*----------.
+| yyparse.  |
+`----------*/
 
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -1209,39 +1214,14 @@ yyparse ()
 #endif
 #endif
 {
-
-
-    int yystate;
-    /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
-
-    /* The stacks and their tools:
-       `yyss': related to states.
-       `yyvs': related to semantic values.
-
-       Refer to the stacks thru separate pointers, to allow yyoverflow
-       to reallocate them elsewhere.  */
-
-    /* The state stack.  */
-    yytype_int16 yyssa[YYINITDEPTH];
-    yytype_int16 *yyss;
-    yytype_int16 *yyssp;
-
-    /* The semantic value stack.  */
-    YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
-
-    YYSIZE_T yystacksize;
-
+  
+  int yystate;
   int yyn;
   int yyresult;
-  /* Lookahead token as an internal (translated) token number.  */
-  int yytoken;
-  /* The variables used to return semantic value and location from the
-     action routines.  */
-  YYSTYPE yyval;
-
+  /* Number of tokens to shift before error messages enabled.  */
+  int yyerrstatus;
+  /* Look-ahead token as an internal (translated) token number.  */
+  int yytoken = 0;
 #if YYERROR_VERBOSE
   /* Buffer for error messages, and its allocated size.  */
   char yymsgbuf[128];
@@ -1249,28 +1229,51 @@ yyparse ()
   YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
+  /* Three stacks and their tools:
+     `yyss': related to states,
+     `yyvs': related to semantic values,
+     `yyls': related to locations.
+
+     Refer to the stacks thru separate pointers, to allow yyoverflow
+     to reallocate them elsewhere.  */
+
+  /* The state stack.  */
+  yytype_int16 yyssa[YYINITDEPTH];
+  yytype_int16 *yyss = yyssa;
+  yytype_int16 *yyssp;
+
+  /* The semantic value stack.  */
+  YYSTYPE yyvsa[YYINITDEPTH];
+  YYSTYPE *yyvs = yyvsa;
+  YYSTYPE *yyvsp;
+
+
+
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
+
+  YYSIZE_T yystacksize = YYINITDEPTH;
+
+  /* The variables used to return semantic value and location from the
+     action routines.  */
+  YYSTYPE yyval;
+
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
-
-  yytoken = 0;
-  yyss = yyssa;
-  yyvs = yyvsa;
-  yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yystate = 0;
   yyerrstatus = 0;
   yynerrs = 0;
-  yychar = YYEMPTY; /* Cause a token to be read.  */
+  yychar = YYEMPTY;		/* Cause a token to be read.  */
 
   /* Initialize stack pointers.
      Waste one element of value and location stack
      so that they stay on the same level as the state stack.
      The wasted elements are never initialized.  */
+
   yyssp = yyss;
   yyvsp = yyvs;
 
@@ -1300,6 +1303,7 @@ yyparse ()
 	YYSTYPE *yyvs1 = yyvs;
 	yytype_int16 *yyss1 = yyss;
 
+
 	/* Each stack pointer address is followed by the size of the
 	   data in use in that stack, in bytes.  This used to be a
 	   conditional around just the two extra args, but that might
@@ -1307,6 +1311,7 @@ yyparse ()
 	yyoverflow (YY_("memory exhausted"),
 		    &yyss1, yysize * sizeof (*yyssp),
 		    &yyvs1, yysize * sizeof (*yyvsp),
+
 		    &yystacksize);
 
 	yyss = yyss1;
@@ -1329,8 +1334,9 @@ yyparse ()
 	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
 	  goto yyexhaustedlab;
-	YYSTACK_RELOCATE (yyss_alloc, yyss);
-	YYSTACK_RELOCATE (yyvs_alloc, yyvs);
+	YYSTACK_RELOCATE (yyss);
+	YYSTACK_RELOCATE (yyvs);
+
 #  undef YYSTACK_RELOCATE
 	if (yyss1 != yyssa)
 	  YYSTACK_FREE (yyss1);
@@ -1341,6 +1347,7 @@ yyparse ()
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
+
       YYDPRINTF ((stderr, "Stack size increased to %lu\n",
 		  (unsigned long int) yystacksize));
 
@@ -1350,9 +1357,6 @@ yyparse ()
 
   YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
-  if (yystate == YYFINAL)
-    YYACCEPT;
-
   goto yybackup;
 
 /*-----------.
@@ -1361,16 +1365,16 @@ yyparse ()
 yybackup:
 
   /* Do appropriate processing given the current state.  Read a
-     lookahead token if we need one and don't already have one.  */
+     look-ahead token if we need one and don't already have one.  */
 
-  /* First try to decide what to do without reference to lookahead token.  */
+  /* First try to decide what to do without reference to look-ahead token.  */
   yyn = yypact[yystate];
   if (yyn == YYPACT_NINF)
     goto yydefault;
 
-  /* Not known => get a lookahead token if don't already have one.  */
+  /* Not known => get a look-ahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
+  /* YYCHAR is either YYEMPTY or YYEOF or a valid look-ahead symbol.  */
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
@@ -1402,16 +1406,20 @@ yybackup:
       goto yyreduce;
     }
 
+  if (yyn == YYFINAL)
+    YYACCEPT;
+
   /* Count tokens shifted since error; after three, turn off error
      status.  */
   if (yyerrstatus)
     yyerrstatus--;
 
-  /* Shift the lookahead token.  */
+  /* Shift the look-ahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
 
-  /* Discard the shifted token.  */
-  yychar = YYEMPTY;
+  /* Discard the shifted token unless it is eof.  */
+  if (yychar != YYEOF)
+    yychar = YYEMPTY;
 
   yystate = yyn;
   *++yyvsp = yylval;
@@ -1451,475 +1459,428 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-
-/* Line 1455 of yacc.c  */
-#line 54 "liblts_fsmparser.yy"
+#line 61 "liblts_fsmparser.yy"
     {
       num_pars = 0;
+      fsm_lexer_obj->fsm_lts->clear_process_parameters();
       ignore_par.clear();
     ;}
     break;
 
   case 3:
-
-/* Line 1455 of yacc.c  */
-#line 59 "liblts_fsmparser.yy"
+#line 67 "liblts_fsmparser.yy"
     {
-      fsm_lexer_obj->valueTable = ATreverse( fsm_lexer_obj->valueTable );
+      // fsm_lexer_obj->valueTable = ATreverse( fsm_lexer_obj->valueTable );
     ;}
     break;
 
   case 6:
-
-/* Line 1455 of yacc.c  */
-#line 73 "liblts_fsmparser.yy"
+#line 81 "liblts_fsmparser.yy"
     {
       ++num_pars;
     ;}
     break;
 
   case 8:
-
-/* Line 1455 of yacc.c  */
-#line 81 "liblts_fsmparser.yy"
+#line 89 "liblts_fsmparser.yy"
     {
-      fsm_lexer_obj->typeId = (yyvsp[(1) - (1)].aterm);
+      fsm_lexer_obj->typeId = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 10:
-
-/* Line 1455 of yacc.c  */
-#line 89 "liblts_fsmparser.yy"
+#line 97 "liblts_fsmparser.yy"
     {
-      ignore_par.push_back((yyvsp[(2) - (3)].number) == 0);
+      ignore_par.push_back(atoi((yyvsp[(2) - (3)]).c_str()) == 0);
     ;}
     break;
 
   case 11:
-
-/* Line 1455 of yacc.c  */
-#line 96 "liblts_fsmparser.yy"
+#line 104 "liblts_fsmparser.yy"
     {
       if (!ignore_par[num_pars])
       {
-        fsm_lexer_obj->typeValues = ATempty;
-        fsm_lexer_obj->typeId = ATmakeAppl2(fsm_lexer_obj->const_ATtype,(ATerm) fsm_lexer_obj->typeId,(ATerm) (yyvsp[(1) - (1)].aterm));
+        // fsm_lexer_obj->typeValues = ATempty;
+        // fsm_lexer_obj->fsm_lts->add_process_parameter(ATgetName(ATgetAFun(fsm_lexer_obj->typeId)),ATgetName(ATgetAFun($1)));
+                                               //mcrl2::data::basic_sort(mcrl2::core::identifier_string($1)))));
+        fsm_lexer_obj->fsm_lts->add_process_parameter(fsm_lexer_obj->typeId,(yyvsp[(1) - (1)]));
+        // NODIG?? fsm_lexer_obj->typeId = ATmakeAppl2(fsm_lexer_obj->const_ATtype,(ATerm) fsm_lexer_obj->typeId,(ATerm) $1);
       }
     ;}
     break;
 
   case 12:
-
-/* Line 1455 of yacc.c  */
-#line 104 "liblts_fsmparser.yy"
+#line 115 "liblts_fsmparser.yy"
     {
       if (!ignore_par[num_pars])
       {
-        fsm_lexer_obj->typeValues = ATreverse( fsm_lexer_obj->typeValues );
-        fsm_lexer_obj->valueTable = ATinsert( fsm_lexer_obj->valueTable,
-            (ATerm)fsm_lexer_obj->typeValues );
+        // fsm_lexer_obj->typeValues = ATreverse( fsm_lexer_obj->typeValues );
+        // fsm_lexer_obj->valueTable = ATinsert( fsm_lexer_obj->valueTable,
+        //     (ATerm)fsm_lexer_obj->typeValues );
       }
     ;}
     break;
 
   case 13:
-
-/* Line 1455 of yacc.c  */
-#line 120 "liblts_fsmparser.yy"
+#line 131 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval)=(yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 14:
-
-/* Line 1455 of yacc.c  */
-#line 128 "liblts_fsmparser.yy"
+#line 139 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval)=(yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 15:
-
-/* Line 1455 of yacc.c  */
-#line 132 "liblts_fsmparser.yy"
+#line 143 "liblts_fsmparser.yy"
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (3)].aterm) ) )
-        + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (3)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ))
+      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+      //   + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ))
+      (yyval) = (yyvsp[(1) - (3)]) + "->" + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 16:
-
-/* Line 1455 of yacc.c  */
-#line 142 "liblts_fsmparser.yy"
+#line 154 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval)=(yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 17:
-
-/* Line 1455 of yacc.c  */
-#line 150 "liblts_fsmparser.yy"
+#line 162 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval)=(yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 18:
-
-/* Line 1455 of yacc.c  */
-#line 154 "liblts_fsmparser.yy"
+#line 166 "liblts_fsmparser.yy"
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (3)].aterm) ) )
-        + "#" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (3)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+      //   + "#" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = (yyvsp[(1) - (3)]) + "#" + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 19:
-
-/* Line 1455 of yacc.c  */
-#line 164 "liblts_fsmparser.yy"
+#line 177 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 20:
-
-/* Line 1455 of yacc.c  */
-#line 172 "liblts_fsmparser.yy"
+#line 185 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 21:
-
-/* Line 1455 of yacc.c  */
-#line 176 "liblts_fsmparser.yy"
+#line 189 "liblts_fsmparser.yy"
     {
-      std::string result = "struct " + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(2) - (2)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = "struct " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = "struct " + (yyvsp[(2) - (2)]);
     ;}
     break;
 
   case 22:
-
-/* Line 1455 of yacc.c  */
-#line 185 "liblts_fsmparser.yy"
+#line 199 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 23:
-
-/* Line 1455 of yacc.c  */
-#line 189 "liblts_fsmparser.yy"
+#line 203 "liblts_fsmparser.yy"
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (3)].aterm) ) )
-        + "|" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (3)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+      //  + "|" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = (yyvsp[(1) - (3)]) + "|" + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 24:
-
-/* Line 1455 of yacc.c  */
-#line 199 "liblts_fsmparser.yy"
+#line 214 "liblts_fsmparser.yy"
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (2)].aterm) ) )
-        + " " + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(2) - (2)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+      //  + " " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = (yyvsp[(1) - (2)]) + " " + (yyvsp[(2) - (2)]);   
     ;}
     break;
 
   case 25:
-
-/* Line 1455 of yacc.c  */
-#line 205 "liblts_fsmparser.yy"
+#line 221 "liblts_fsmparser.yy"
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (5)].aterm) ) )
-        + "(" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (5)].aterm) ) ) + ")" +
-              static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(5) - (5)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+      //  + "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")" +
+      //        static_cast<std::string> ( ATwriteToString( (ATerm)$5 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = (yyvsp[(1) - (5)]) + "(" + (yyvsp[(3) - (5)]) + ")" + (yyvsp[(5) - (5)]);
     ;}
     break;
 
   case 26:
-
-/* Line 1455 of yacc.c  */
-#line 216 "liblts_fsmparser.yy"
+#line 233 "liblts_fsmparser.yy"
     {
-      std::string result = static_cast<std::string> ( "");
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = static_cast<std::string> ( "");
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = "";
     ;}
     break;
 
   case 27:
-
-/* Line 1455 of yacc.c  */
-#line 221 "liblts_fsmparser.yy"
+#line 239 "liblts_fsmparser.yy"
     {
-      std::string result = "?" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(2) - (2)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = "?" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = "?" + (yyvsp[(2) - (2)]);
     ;}
     break;
 
   case 28:
-
-/* Line 1455 of yacc.c  */
-#line 230 "liblts_fsmparser.yy"
+#line 249 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 29:
-
-/* Line 1455 of yacc.c  */
-#line 234 "liblts_fsmparser.yy"
+#line 253 "liblts_fsmparser.yy"
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (3)].aterm) ) )
-        + "," + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (3)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-
+      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+      //  + "," + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = (yyvsp[(1) - (3)]) + "," + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 30:
-
-/* Line 1455 of yacc.c  */
-#line 245 "liblts_fsmparser.yy"
+#line 264 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 31:
-
-/* Line 1455 of yacc.c  */
-#line 249 "liblts_fsmparser.yy"
+#line 268 "liblts_fsmparser.yy"
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (3)].aterm) ) )
-        + ":" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (3)].aterm) ) );
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
+      //   + ":" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = (yyvsp[(1) - (3)]) + ":" + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 32:
-
-/* Line 1455 of yacc.c  */
-#line 259 "liblts_fsmparser.yy"
+#line 279 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval) = (yyvsp[(1) - (1)]); 
     ;}
     break;
 
   case 33:
-
-/* Line 1455 of yacc.c  */
-#line 263 "liblts_fsmparser.yy"
+#line 283 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval) = (yyvsp[(1) - (1)]); 
     ;}
     break;
 
   case 34:
-
-/* Line 1455 of yacc.c  */
-#line 267 "liblts_fsmparser.yy"
+#line 287 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm));
+      (yyval) = (yyvsp[(1) - (1)]); 
     ;}
     break;
 
   case 35:
-
-/* Line 1455 of yacc.c  */
-#line 271 "liblts_fsmparser.yy"
+#line 291 "liblts_fsmparser.yy"
     { 
-      std::string result = "(" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(2) - (3)].aterm) ) ) + ")";
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) ) + ")";
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = "(" + (yyvsp[(2) - (3)]) + ")";
     ;}
     break;
 
   case 36:
-
-/* Line 1455 of yacc.c  */
-#line 280 "liblts_fsmparser.yy"
+#line 301 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( "Bool", 0, ATfalse ) ));
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Bool", 0, ATfalse ) ));
+      (yyval) = "Bool"; 
     ;}
     break;
 
   case 37:
-
-/* Line 1455 of yacc.c  */
-#line 284 "liblts_fsmparser.yy"
+#line 306 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( "Pos", 0, ATfalse ) ));
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Pos", 0, ATfalse ) ));
+      (yyval) = "Pos";
     ;}
     break;
 
   case 38:
-
-/* Line 1455 of yacc.c  */
-#line 288 "liblts_fsmparser.yy"
+#line 311 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( "Nat", 0, ATfalse ) ));
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Nat", 0, ATfalse ) ));
+      (yyval) = "Nat";
     ;}
     break;
 
   case 39:
-
-/* Line 1455 of yacc.c  */
-#line 292 "liblts_fsmparser.yy"
+#line 316 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( "Int", 0, ATfalse ) ));
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Int", 0, ATfalse ) ));
+      (yyval) = "Int";
     ;}
     break;
 
   case 40:
-
-/* Line 1455 of yacc.c  */
-#line 296 "liblts_fsmparser.yy"
+#line 321 "liblts_fsmparser.yy"
     {
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( "Real", 0, ATfalse ) ));
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Real", 0, ATfalse ) ));
+      (yyval) = "Real";
     ;}
     break;
 
   case 41:
-
-/* Line 1455 of yacc.c  */
-#line 304 "liblts_fsmparser.yy"
+#line 330 "liblts_fsmparser.yy"
     {
-      std::string result = "List(" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (4)].aterm) ) ) + ")";
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = "List(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = "List(" + (yyvsp[(3) - (4)]) + ")";
     ;}
     break;
 
   case 42:
-
-/* Line 1455 of yacc.c  */
-#line 309 "liblts_fsmparser.yy"
+#line 336 "liblts_fsmparser.yy"
     {
-      std::string result = "Set(" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (4)].aterm) ) ) + ")";
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = "Set(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = "Set(" + (yyvsp[(3) - (4)]) + ")";
     ;}
     break;
 
   case 43:
-
-/* Line 1455 of yacc.c  */
-#line 314 "liblts_fsmparser.yy"
+#line 342 "liblts_fsmparser.yy"
     {
-      std::string result = "Bag(" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (4)].aterm) ) ) + ")";
-      safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      // std::string result = "Bag(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = "Bag(" + (yyvsp[(3) - (4)]) + ")";
     ;}
     break;
 
   case 46:
-
-/* Line 1455 of yacc.c  */
-#line 328 "liblts_fsmparser.yy"
+#line 357 "liblts_fsmparser.yy"
     {
       if (!ignore_par[num_pars])
       {
-        fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues,
-            (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)(yyvsp[(1) - (1)].aterm),
-            (ATerm)fsm_lexer_obj->typeId ) );
+        // fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues,
+        //     (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)$1,
+        //    (ATerm)fsm_lexer_obj->typeId ) );
+        fsm_lexer_obj->fsm_lts->add_state_element_value(num_pars,(yyvsp[(1) - (1)]));
       }
     ;}
     break;
 
   case 48:
-
-/* Line 1455 of yacc.c  */
-#line 344 "liblts_fsmparser.yy"
+#line 374 "liblts_fsmparser.yy"
     {
       par_index = 0;
     ;}
     break;
 
   case 49:
-
-/* Line 1455 of yacc.c  */
-#line 348 "liblts_fsmparser.yy"
+#line 378 "liblts_fsmparser.yy"
     {
-      fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector );
-      unsigned int i = fsm_lexer_obj->fsm_lts->add_state(
-          (ATerm) fsm_lexer_obj->stateVector );
+      // fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector );
+      unsigned int i = fsm_lexer_obj->fsm_lts->add_state(fsm_lexer_obj->stateVector);
+                    // mcrl2::lts::detail::state_label(fsm_lexer_obj->stateVecto))_
       if ( i == 0 )
       {
         fsm_lexer_obj->fsm_lts->set_initial_state( i );
       }
-      fsm_lexer_obj->stateVector = ATempty
+      // fsm_lexer_obj->stateVector = ATempty
+      fsm_lexer_obj->stateVector.clear();
     ;}
     break;
 
   case 52:
-
-/* Line 1455 of yacc.c  */
-#line 365 "liblts_fsmparser.yy"
+#line 396 "liblts_fsmparser.yy"
     {
       if (!ignore_par[par_index])
       {
-        if ( par_index < ATgetLength( fsm_lexer_obj->valueTable ) )
-        {
-          fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector,
-              ATelementAt( (ATermList)ATelementAt( fsm_lexer_obj->valueTable,
-                  par_index ), (yyvsp[(2) - (2)].number) ) );
-        }
+        // if ( par_index < ATgetLength( fsm_lexer_obj->valueTable ) )
+        // {
+          // fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector,
+          //     ATelementAt( (ATermList)ATelementAt( fsm_lexer_obj->valueTable,
+          //         par_index ), $2 ) );
+          fsm_lexer_obj->stateVector.push_back(atoi((yyvsp[(2) - (2)]).c_str()));
+        // }
       }
       ++par_index;
     ;}
     break;
 
   case 55:
-
-/* Line 1455 of yacc.c  */
-#line 390 "liblts_fsmparser.yy"
+#line 422 "liblts_fsmparser.yy"
     {
-      unsigned int frState = (yyvsp[(1) - (3)].number)-1;
-      unsigned int toState = (yyvsp[(2) - (3)].number)-1;
-      ATerm label = ATtableGet(fsm_lexer_obj->labelTable,(ATerm)(yyvsp[(3) - (3)].aterm));
+      using namespace mcrl2::lts;
+      unsigned int frState = atoi((yyvsp[(1) - (3)]).c_str())-1;
+      unsigned int toState = atoi((yyvsp[(2) - (3)]).c_str())-1;
+
+      std::map < std::string, unsigned int>::const_iterator label_index=fsm_lexer_obj->labelTable.find((yyvsp[(3) - (3)]));
+      if (label_index==fsm_lexer_obj->labelTable.end())
+      { // Not found. This label does not occur in the fsm.
+        const lts_fsm_t::labels_size_type n=fsm_lexer_obj->fsm_lts->add_label((yyvsp[(3) - (3)]),(yyvsp[(3) - (3)])=="tau");
+        fsm_lexer_obj->labelTable[(yyvsp[(3) - (3)])]=n;
+        fsm_lexer_obj->fsm_lts->add_transition(transition(frState,n,toState));
+      }
+      else
+      { // The label is found. It already exists.
+        fsm_lexer_obj->fsm_lts->add_transition(transition(frState,label_index->second,toState));
+      }
+
+      /* ATerm label = ATtableGet(fsm_lexer_obj->labelTable,(ATerm)$3);
       if ( label == NULL )
       {
-        unsigned int i = fsm_lexer_obj->fsm_lts->add_label((ATerm)(yyvsp[(3) - (3)].aterm),
-            !strcmp("tau",ATgetName(ATgetAFun((yyvsp[(3) - (3)].aterm)))));
+        const std::string s(ATgetName(ATgetAFun($3)));
+        unsigned int i = fsm_lexer_obj->fsm_lts->add_action(s, s=="tau");
         label = (ATerm) ATmakeInt(i);
-        ATtablePut(fsm_lexer_obj->labelTable,(ATerm)(yyvsp[(3) - (3)].aterm),label);
+        ATtablePut(fsm_lexer_obj->labelTable,(ATerm)$3,label);
       }
       fsm_lexer_obj->fsm_lts->add_transition(mcrl2::lts::transition(frState,
-          ATgetInt((ATermInt)label), toState ));
+          ATgetInt((ATermInt)label), toState )); 
+      */
     ;}
     break;
 
   case 56:
-
-/* Line 1455 of yacc.c  */
-#line 408 "liblts_fsmparser.yy"
-    { safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) ;}
+#line 455 "liblts_fsmparser.yy"
+    { (yyval) = ""; 
+      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) 
+    ;}
     break;
 
   case 57:
-
-/* Line 1455 of yacc.c  */
-#line 411 "liblts_fsmparser.yy"
-    { safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm)) ;}
+#line 460 "liblts_fsmparser.yy"
+    { 
+      (yyval) = (yyvsp[(1) - (1)]);
+    ;}
     break;
 
 
-
-/* Line 1455 of yacc.c  */
-#line 1923 "liblts_fsmparser.cpp"
+/* Line 1267 of yacc.c.  */
+#line 1884 "liblts_fsmparser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1929,6 +1890,7 @@ yyreduce:
   YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
+
 
   /* Now `shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
@@ -1994,7 +1956,7 @@ yyerrlab:
 
   if (yyerrstatus == 3)
     {
-      /* If just tried and failed to reuse lookahead token after an
+      /* If just tried and failed to reuse look-ahead token after an
 	 error, discard it.  */
 
       if (yychar <= YYEOF)
@@ -2011,7 +1973,7 @@ yyerrlab:
 	}
     }
 
-  /* Else will try to reuse lookahead token after shifting the error
+  /* Else will try to reuse look-ahead token after shifting the error
      token.  */
   goto yyerrlab1;
 
@@ -2068,6 +2030,9 @@ yyerrlab1:
       YY_STACK_PRINT (yyss, yyssp);
     }
 
+  if (yyn == YYFINAL)
+    YYACCEPT;
+
   *++yyvsp = yylval;
 
 
@@ -2092,7 +2057,7 @@ yyabortlab:
   yyresult = 1;
   goto yyreturn;
 
-#if !defined(yyoverflow) || YYERROR_VERBOSE
+#ifndef yyoverflow
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
@@ -2103,7 +2068,7 @@ yyexhaustedlab:
 #endif
 
 yyreturn:
-  if (yychar != YYEMPTY)
+  if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
 		 yytoken, &yylval);
   /* Do not reclaim the symbols of the rule which action triggered
@@ -2129,9 +2094,7 @@ yyreturn:
 }
 
 
-
-/* Line 1675 of yacc.c  */
-#line 414 "liblts_fsmparser.yy"
+#line 465 "liblts_fsmparser.yy"
 
 
 char* intToCString( int i )

@@ -16,13 +16,20 @@
 #include <boost/lexical_cast.hpp>
 
 #include "aterm2.h"
-#include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_algorithm.h"
+
+#include "mcrl2/lts/lts_fsm.h"
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_bcg.h"
+#include "mcrl2/lts/lts_dot.h"
+
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -93,45 +100,10 @@ class ltsinfo_tool : public ltsinfo_base
       }
     }
 
-  public:
-
-    bool run() 
+    template < class LTS_TYPE >
+    bool provide_information(LTS_TYPE &l) const
     {
-      using namespace mcrl2::lts;
-      using namespace mcrl2::lts::detail;
-
-      mcrl2::lts::lts l;
-      if (infilename.empty()) 
-      {
-        gsVerboseMsg("reading LTS from stdin...\n");
-
-        try 
-        { mcrl2::lts::lts l_temp(std::cin, intype);
-          l.swap(l_temp);
-        }
-        catch (mcrl2::runtime_error &e)
-        {
-          throw mcrl2::runtime_error(std::string("cannot read LTS from stdin\nretry with -v/--verbose for more information.\n") +
-                                      e.what());
-        }
-      }
-      else 
-      {
-        gsVerboseMsg("reading LTS from '%s'...\n",infilename.c_str());
-
-        try 
-        { mcrl2::lts::lts l_temp(infilename,intype);
-          l.swap(l_temp);
-        }
-        catch (mcrl2::runtime_error &e)
-        {
-          throw mcrl2::runtime_error(std::string("cannot read LTS from file '") + infilename +
-                                             "'\nretry with -v/--verbose for more information.\n" +
-                                             e.what());
-        }
-      }
-
-      std::cout << "LTS format: " << string_for_type(l.get_type()) << std::endl
+      std::cout 
            << "Number of states: " << l.num_states() << std::endl
            << "Number of labels: " << l.num_labels() << std::endl
            << "Number of transitions: " << l.num_transitions() << std::endl;
@@ -139,19 +111,23 @@ class ltsinfo_tool : public ltsinfo_base
       if ( l.has_state_info() )
       {
         std::cout << "Has state information." << std::endl;
-      } else {
+      } 
+      else 
+      {
         std::cout << "Does not have state information." << std::endl;
       }
       if ( l.has_label_info() )
       {
         std::cout << "Has label information." << std::endl;
-      } else {
+      } 
+      else 
+      {
         std::cout << "Does not have label information." << std::endl;
       }
-      if ( l.has_creator() )
+      /* if ( l.has_creator() )
       {
-        std::cout << "Created by: " << l.get_creator() << std::endl;
-      }
+        std::cout << "Created by: " << l.creator() << std::endl;
+      } */
       gsVerboseMsg("checking reachability...\n");
       if ( !reachability_check(l) )
       {
@@ -169,6 +145,65 @@ class ltsinfo_tool : public ltsinfo_base
       return true;
     }
 
+
+
+  public:
+
+    bool run() 
+    {
+      using namespace mcrl2::lts;
+      using namespace mcrl2::lts::detail;
+
+      if (intype==lts_none)
+      { 
+        intype = guess_format(infilename);
+      }
+
+      switch (intype)
+      {
+        case lts_lts:
+        {
+          lts_lts_t l;
+          l.load(infilename);
+          return provide_information(l);
+        }
+        case lts_none:
+          std::cerr << "No input format is specified. Assuming .aut format.\n";
+        case lts_aut:
+        {
+          lts_aut_t l;
+          l.load(infilename);
+          return provide_information(l);
+        }
+        /* case lts_svc:
+        {
+          lts_svc_t l;
+          l.load(infilename);
+          return provide_information(l);
+        } */
+        case lts_fsm:
+        {
+          lts_fsm_t l;
+          l.load(infilename);
+          return provide_information(l);
+        }
+#ifdef USE_BCG
+        case lts_bcg:
+        {
+          lts_bcg_t l;
+          l.load(infilename);
+          return provide_information(l);
+        }
+#endif
+        case lts_dot:
+        {
+          lts_dot_t l;
+          l.load(infilename);
+          return provide_information(l);
+        }
+      }
+      return true;
+    }
 };
 
 class ltsinfo_gui_tool: public mcrl2_gui_tool<ltsinfo_tool> {

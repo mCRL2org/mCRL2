@@ -12,10 +12,12 @@
 
 // #include <iostream>
 #include <string>
+#include <sstream>
 
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/lts/lts_algorithm.h"
+#include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
@@ -24,6 +26,14 @@ using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::lts;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+
+static lts_aut_t parse_aut(const std::string &s)
+{ 
+  std::stringstream is(s);
+  lts_aut_t l;
+  l.load(is);
+  return l;
+}
 
 const std::string test1= 
 "des (0,2,2)\n"
@@ -122,43 +132,43 @@ const std::string test11=
 
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 { std::cerr << "Test1\n";
-  lts t1(test1);
+  lts_aut_t t1=parse_aut(test1);
   reduce(t1,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t1.num_states()==1 && t1.num_transitions()==1);
 
   std::cerr << "Test2\n";
-  lts t2(test2);
+  lts_aut_t t2=parse_aut(test2);
   reduce(t2,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t2.num_states()==2 && t2.num_transitions()==2);
 
   std::cerr << "Test3\n";
-  lts t3(test3);
+  lts_aut_t t3=parse_aut(test3);
   reduce(t3,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t3.num_states()==2 && t3.num_transitions()==3);
   reduce(t3,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t3.num_states()==1 && t3.num_transitions()==1);
 
   //Divergence preserving branching bisimulation reduction
-  lts t3a(test3);
+  lts_aut_t t3a=parse_aut(test3);
   reduce(t3a,lts_eq_divergence_preserving_branching_bisim); 
   BOOST_CHECK(t3a.num_states()==1 && t3a.num_transitions()==2);
 
   std::cerr << "Test4\n";
-  lts t4(test4);
+  lts_aut_t t4=parse_aut(test4);
   reduce(t4,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t4.num_states()==4 && t4.num_transitions()==5);
   reduce(t4,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t4.num_states()==3 && t4.num_transitions()==3);
   
   std::cerr << "Test5\n";
-  lts t5(test5);
+  lts_aut_t t5=parse_aut(test5);
   reduce(t5,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
   reduce(t5,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t5.num_states()==4 && t5.num_transitions()==5);
 
   std::cerr << "Test6\n";
-  lts t6(test6);
+  lts_aut_t t6=parse_aut(test6);
   reduce(t6,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==2);
   std::cerr << "Test6a\n";
@@ -169,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t6.num_states()==2 && t6.num_transitions()==1);
   
   std::cerr << "Test7\n";
-  lts t7(test7);
+  lts_aut_t t7=parse_aut(test7);
   reduce(t7,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t7.num_states()==7 && t7.num_transitions()==7);
   reduce(t7,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving branching bisimulation reduction
@@ -178,7 +188,7 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t7.num_states()==1 && t7.num_transitions()==1);
   
   std::cerr << "Test8\n";
-  lts t8(test8);
+  lts_aut_t t8=parse_aut(test8);
   reduce(t8,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t8.num_states()==3 && t8.num_transitions()==3);
   std::cerr << "Test8a\n";
@@ -189,35 +199,35 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t8.num_states()==1 && t8.num_transitions()==0);
   
   std::cerr << "Test9\n";
-  lts t9(test9);
+  lts_aut_t t9=parse_aut(test9);
   reduce(t9,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t9.num_states()==2 && t9.num_transitions()==2);
-  lts t9a(test9);
+  lts_aut_t t9a=parse_aut(test9);
   reduce(t9a,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t9a.num_states()==2 && t9a.num_transitions()==1);
-  lts t9b(test9);
+  lts_aut_t t9b=parse_aut(test9);
   reduce(t9b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t9b.num_states()==2 && t9b.num_transitions()==2);
   
   std::cerr << "Test10\n";
-  lts t10(test10);
+  lts_aut_t t10=parse_aut(test10);
   reduce(t10,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t10.num_states()==5 && t10.num_transitions()==7);
-  lts t10a(test10);
+  lts_aut_t t10a=parse_aut(test10);
   reduce(t10a,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t10a.num_states()==4 && t10a.num_transitions()==5);
-  lts t10b(test10);
+  lts_aut_t t10b=parse_aut(test10);
   reduce(t10b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t10b.num_states()==4 && t10b.num_transitions()==5);
   
   std::cerr << "Test11\n";
-  lts t11(test11);
+  lts_aut_t t11=parse_aut(test11);
   reduce(t11,lts_eq_bisim); //Strong bisimulation reduction
   BOOST_CHECK(t11.num_states()==4 && t11.num_transitions()==5);
-  lts t11a(test11);
+  lts_aut_t t11a=parse_aut(test11);
   reduce(t11a,lts_eq_branching_bisim); //Branching bisimulation reduction
   BOOST_CHECK(t11a.num_states()==2 && t11a.num_transitions()==2);
-  lts t11b(test11);
+  lts_aut_t t11b=parse_aut(test11);
   reduce(t11b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t11b.num_states()==2 && t11b.num_transitions()==2);
   // BOOST_CHECK_THROW(linearise(various_case_22), mcrl2::runtime_error);

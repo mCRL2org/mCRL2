@@ -26,17 +26,24 @@
 
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
-#include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/typecheck.h"
-
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/typecheck.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/detail/lts_convert.h"
+
+
+
 
 using namespace mcrl2;
 using mcrl2::utilities::tools::input_output_tool;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::lts;
+using namespace mcrl2::lps;
+using namespace mcrl2::data;
+
 
 
 class lts2lps_tool : public input_output_tool
@@ -140,113 +147,80 @@ class lts2lps_tool : public input_output_tool
     {}
 
 
-    bool run()
-    {   
-      using namespace mcrl2::lts;
-      using namespace mcrl2::lps;
-      using namespace mcrl2::data;
+  protected:  
 
-      /* Read LTS */
-      mcrl2::lts::lts l;
-
-      if (infilename.empty()) 
-      {
-        gsVerboseMsg("reading LTS from stdin...\n");
-
-        try 
-        { mcrl2::lts::lts l_temp(std::cin, intype);
-          l_temp.swap(l);
-        } 
-        catch (mcrl2::runtime_error &e)
-        {
-          throw mcrl2::runtime_error(std::string("cannot read LTS from stdin.\n") + 
-                    "retry with -v/--verbose for more information.\n" +
-                    e.what());
-        }
+    void local_transform(lts_lts_t &l1, lts_lts_t &l2)
+    {
+      if (data_file_type!=none_e)
+      { 
+        std::cerr << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
       }
-      else 
-      {
-        gsVerboseMsg("reading LTS from '%s'...\n",infilename.c_str());
+      l1.swap(l2);
+    }
 
-        try 
-        { mcrl2::lts::lts l_temp(infilename,intype);
-          l_temp.swap(l);
-        }
-        catch (mcrl2::runtime_error &e)
-        {
-          throw mcrl2::runtime_error(std::string("cannot read LTS from file '") + 
-                                     infilename +
-                                     "'.\nretry with -v/--verbose for more information.\n" +
-                                     e.what());
-        }
-      }
 
+    template <class LTS_TYPE>
+    void local_transform(LTS_TYPE &l1, lts_lts_t &l2)
+    { /* All other LTS_TYPEs than lts_lts_t require an external
+         datatype.
+      */
       data_specification data;
       action_label_list action_labels;
+      const variable_list process_parameters;  // Process parameters remain empty.
+      bool extra_data_is_defined=false;
 
-      if (l.has_data_specification())
-      { 
-        if (data_file_type!=none_e)
-        { 
-          std::cerr << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
-        }
-        data=l.get_data_specification();
-        data.declare_data_specification_to_be_type_checked(); // TODO: Should be done in the .lts library.
-        // Get the action labels encoded in the extra data.  TODO: This is ugly and needs to be cleaned up.
-        action_labels=(ATermList)ATgetArgument(ATgetArgument(l.get_extra_data(),2),0); 
+      /* Read data specification (if any) */ 
+      if (data_file_type==none_e)
+      {
+         std::cerr << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
+      }
+      else if (data_file_type==lps_e)
+      {
+        // First try to read the provided file as a .lps file.
+        lps::specification spec;
+        spec.load(datafile.c_str());
+        data=spec.data();
+        action_labels=spec.action_labels();
+        extra_data_is_defined=true;
       }
       else
       { 
-        /* Read data specification (if any) */ 
-        if (data_file_type==none_e)
-        {
-           std::cerr << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
-        }
-        else if (data_file_type==lps_e)
-        {
-          // First try to read the provided file as a .lps file.
-          lps::specification spec;
-          spec.load(datafile.c_str());
-          data=spec.data();
-          action_labels=spec.action_labels();
-        }
-        else
-        { 
-          // data_file_type==data_e or data_file_type==mcrl2_e
-          std::ifstream dfile( datafile.c_str() );
-  
-          if( !dfile )
-          {
-            std::cerr << "Cannot read data specification file. Only the standard data types and no action labels can be used." << std::endl;
-          }
-          else 
-          {
-            std::stringstream lps;
-            char ch;
-            while(dfile)
-            {
-              dfile.get(ch);
-              if(dfile) lps << ch;
-            }
-            dfile.close();
-            lps << std::endl;
+        // data_file_type==data_e or data_file_type==mcrl2_e
+        std::ifstream dfile( datafile.c_str() );
 
-            if (data_file_type==data_e)
-            { 
-              lps <<"init delta;\n";
-            }
-
-            using namespace mcrl2::process;
-            // The function below parses and typechecks the process specification.
-            process_specification process_spec = parse_process_specification(lps.str(),false);
-            data=process_spec.data();
-            action_labels=process_spec.action_labels();
-            
+        if( !dfile )
+        {
+          std::cerr << "Cannot read data specification file. Only the standard data types and no action labels can be used." << std::endl;
+        }
+        else 
+        {
+          std::stringstream lps;
+          char ch;
+          while(dfile)
+          {
+            dfile.get(ch);
+            if(dfile) lps << ch;
           }
+          dfile.close();
+          lps << std::endl;
+
+          if (data_file_type==data_e)
+          { 
+            lps <<"init delta;\n";
+          }
+
+          using namespace mcrl2::process;
+          // The function below parses and typechecks the process specification.
+          process_specification process_spec = parse_process_specification(lps.str(),false);
+          data=process_spec.data();
+          action_labels=process_spec.action_labels();
+          extra_data_is_defined=true;
         }
       }
 
-      if (gsVerbose)
+      lts_convert(l1,l2,data,action_labels,process_parameters,extra_data_is_defined);
+
+      /* if (gsVerbose)
       {
         std::cerr << "Start type checking action labels\n";
       }
@@ -270,20 +244,45 @@ class lts2lps_tool : public input_output_tool
       for(mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1))
       { 
         const transition t=r.front();
-        const lps::multi_action actions=parse_multi_action(l.label_value_str(t.label()));
+        const lps::multi_action actions=parse_multi_action(
+                     mcrl2::lts::detail::pretty_print_label_value(l.label_value(t.label())));
         all_multi_actions.push_back(actions);
       }
-      type_check(all_multi_actions,spec);  
+      type_check(all_multi_actions,spec.data(),spec.action_labels());   */
+    }
+    
+    template <class LTS_TYPE>
+    bool transform_lps2lts()
+    {   
+      /* Read LTS */
+      LTS_TYPE l1;
+      l1.load(infilename);
+      lts_lts_t l;
+      local_transform(l1,l);
+
       if (gsVerbose)
       {
         std::cerr << "Start generating linear process\n";
       }
        
-      atermpp::vector <multi_action>::const_iterator multi_action_iterator=all_multi_actions.begin();
-      for(mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1),++multi_action_iterator)
+      action_summand_vector action_summands;
+      const variable process_parameter("x",mcrl2::data::sort_pos::pos());
+      const variable_list process_parameters=push_back(variable_list(),process_parameter);
+      const atermpp::set< data::variable> global_variables;
+      // Add a single delta.
+      const deadlock_summand_vector deadlock_summands(1,deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
+      const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
+      const process_initializer initial_process(push_back(assignment_list(),
+                                                          assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
+      const lps::specification spec(l.data(),l.action_labels(),global_variables,lps,initial_process);
+
+      // atermpp::vector <multi_action>::const_iterator multi_action_iterator=all_multi_actions.begin();
+      // for(mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1),++multi_action_iterator)
+      for(mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1))
       {
         const transition t=r.front();
-        const lps::multi_action actions=lps::multi_action(mcrl2::data::detail::internal_format_conversion_list(multi_action_iterator->actions(),spec.data()));
+        // const lps::multi_action actions=lps::multi_action(mcrl2::data::detail::internal_format_conversion_list(multi_action_iterator->actions(),spec.data()));
+        const lps::multi_action actions=l.label_value(t.label()).label();
         
         assignment_list assignments;
         if (t.from()!=t.to())
@@ -300,13 +299,55 @@ class lts2lps_tool : public input_output_tool
       }
 
       const linear_process lps1(process_parameters,deadlock_summands,action_summands);
-      const lps::specification spec1(data,action_labels,global_variables,lps1,initial_process);
+      const lps::specification spec1(l.data(),l.action_labels(),global_variables,lps1,initial_process);
 
       if (gsVerbose)
       {
         std::cerr << "Start saving the linear process\n";
       }
       spec1.save(output_filename());
+      return true;
+    }
+
+  public:
+    bool run()
+    {
+
+      if (intype==lts_none)
+      {
+        intype = mcrl2::lts::detail::guess_format(infilename);
+      }
+      switch (intype)
+      {
+        case lts_lts:
+        {
+          return transform_lps2lts<lts_lts_t>();
+        }
+        case lts_none:
+          std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+        case lts_aut:
+        {
+          return transform_lps2lts<lts_aut_t>();
+        }
+        /* case lts_svc:
+        { 
+          return transform_lps2lts<lts_svc_t>();
+        } */
+        case lts_fsm:
+        {
+          return transform_lps2lts<lts_fsm_t>();
+        }
+#ifdef USE_BCG
+        case lts_bcg:
+        {
+          return transform_lps2lts<lts_bcg_t>();
+        }
+#endif
+        case lts_dot:
+        {
+          return transform_lps2lts<lts_dot_t>();
+        }
+      }
       return true;
     }
 };

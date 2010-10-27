@@ -7,11 +7,11 @@
 //
 /// \file dotlexer.ll
 
+#define YYSTYPE std::string
 #include <string>
 #include <cstdio>
-#include <aterm2.h>
+// #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/lts/lts.h"
 #include "liblts_dotlexer.h"
 #include "mcrl2/lts/detail/liblts_dotparser.h"
 
@@ -45,7 +45,7 @@ public:
   concrete_dot_lexer(void);               /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
-  bool parse_stream(std::istream &stream, lts &l);
+  bool parse_stream(std::istream &stream, lts_dot_t &l);
 
 protected:
   void processId();
@@ -110,7 +110,8 @@ Number     [-]?((\.[0-9]+)|([0-9]+(\.[0-9]+)?))
 void concrete_dot_lexer::processId()
 {
   posNo += YYLeng();
-  dotyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) );
+  // dotyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) );
+  dotyylval = YYText();
 }
 
 void concrete_dot_lexer::processQuoted()
@@ -118,12 +119,14 @@ void concrete_dot_lexer::processQuoted()
   posNo += YYLeng();
   std::string value = static_cast<std::string>( YYText() );
   value = value.substr( 1, value.length() - 2 );
-  dotyylval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
+  // dotyylval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
+  dotyylval = value;
 }
 
 //Implementation of parse_dot
 
-bool parse_dot(std::istream &stream, lts &l) {
+bool parse_dot(std::istream &stream, lts_dot_t &l) 
+{
   clexer = new concrete_dot_lexer();
   dot_lexer_obj = clexer;
   bool result = clexer->parse_stream(stream,l);
@@ -162,7 +165,7 @@ void concrete_dot_lexer::yyerror(const char *s) {
   );
 }
 
-bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
+bool concrete_dot_lexer::parse_stream(std::istream &stream, lts_dot_t &l)
 {
   switch_streams(&stream, NULL);
 
@@ -172,18 +175,20 @@ bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
   // INITIALISE
   dot_lts = &l;
 
-  protect_table = ATindexedSetCreate(10000,50);
+  // protect_table = ATindexedSetCreate(10000,50);
 
   // PARSE
   bool result;
   if (dotyyparse() != 0) {
     result = false;
-  } else {
+  } 
+  else 
+  {
     result = true;
   }
 
   // CLEAN UP
-  ATindexedSetDestroy( protect_table );
+  // ATindexedSetDestroy( protect_table );
 
   dot_lts = NULL;
 

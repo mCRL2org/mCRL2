@@ -200,8 +200,33 @@ namespace mcrl2 {
           sort_expression result_sort;
 
           if (is_structured_sort(e))
-          { assert(0); // This case cannot occur, as the right hand side of 
-            result_sort=e;
+          { 
+            const structured_sort ss(e);
+            structured_sort_constructor_list constructors=ss.constructors();
+            structured_sort_constructor_list normalised_constructors;
+            for(structured_sort_constructor_list::const_iterator i=constructors.begin(); 
+                       i!=constructors.end(); ++i)
+            {
+              structured_sort_constructor constructor=*i;
+              structured_sort_constructor_argument_list normalised_ssa;
+              structured_sort_constructor_argument_list ssca=constructor.arguments();
+              for(structured_sort_constructor_argument_list::const_iterator j=ssca.begin();
+                     j!=ssca.end(); ++j)
+              {
+                normalised_ssa=push_front(normalised_ssa, 
+                            structured_sort_constructor_argument(
+                                    find_normal_form(j->sort(),map1,map2,sorts_already_seen),j->name()));
+              }
+
+              normalised_constructors=push_front(
+                                        normalised_constructors,
+                                        structured_sort_constructor(
+                                                constructor.name(),
+                                                reverse(normalised_ssa),
+                                                constructor.recogniser()));
+                                                
+            }
+            result_sort=structured_sort(reverse(normalised_constructors));
           }
 
           if (is_basic_sort(e))

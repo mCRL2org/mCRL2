@@ -12,11 +12,12 @@
 #include "mcrl2/lps/specification.h"
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/lps2lts_lts.h"
+#include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
 
-#include "mcrl2/core/messaging.h"
 
 using namespace std;
 using namespace mcrl2::core;
@@ -53,7 +54,7 @@ namespace mcrl2
             exit(1);
           }
           break;
-        case lts_mcrl2:
+        case lts_lts:
           gsVerboseMsg("writing state space in mCRL2 format to '%s'.\n",filename);
           {
             SVCbool b;
@@ -75,7 +76,12 @@ namespace mcrl2
         default:
           gsVerboseMsg("writing state space in %s format to '%s'.\n",
                       mcrl2::lts::detail::string_for_type(lts_opts.outformat).c_str(),filename);
-          generic_lts = new lts();
+          // generic_lts = new lts_extra();
+          generic_lts.set_creator(lts_filename);
+          // generic_lts.set_mcrl2_terms(true);
+          generic_lts.set_data(lts_opts.spec->data());
+          generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
+          generic_lts.set_action_labels(lts_opts.spec->action_labels());
           aterm2state = ATtableCreate(10000,50);
           aterm2label = ATtableCreate(100,50);
           break;
@@ -90,7 +96,7 @@ namespace mcrl2
         case lts_aut:
           aut << "des (0,0,0)                                      " << endl;
           break;
-        case lts_mcrl2:
+        case lts_lts:
           {
             SVCbool b;
             if ( lts_opts.outinfo )
@@ -108,10 +114,10 @@ namespace mcrl2
             ATerm t = ATtableGet(aterm2state,state);
             if ( t == NULL )
             {
-              t = (ATerm) ATmakeInt(generic_lts->add_state((ATerm) lts_opts.nstate->makeStateVector(state)));
+              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_mcrl2(lts_opts.nstate->makeStateVector(state))));
               ATtablePut(aterm2state,state,t);
             }
-            generic_lts->set_initial_state(ATgetInt((ATermInt) t));
+            generic_lts.set_initial_state(ATgetInt((ATermInt) t));
           }
           break;
       }
@@ -131,7 +137,7 @@ namespace mcrl2
           aut << "\"," << idx_to << ")" << endl;
           aut.flush();
           break;
-        case lts_mcrl2:
+        case lts_lts:
           if ( lts_opts.outinfo )
           {
             SVCbool b;
@@ -159,25 +165,25 @@ namespace mcrl2
             ATerm t = ATtableGet(aterm2state,from);
             if ( t == NULL )
             {
-              t = (ATerm) ATmakeInt(generic_lts->add_state((ATerm) lts_opts.nstate->makeStateVector(from)));
+              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_mcrl2(lts_opts.nstate->makeStateVector(from))));
               ATtablePut(aterm2state,from,t);
             }
             from_state = ATgetInt((ATermInt) t);
             t = ATtableGet(aterm2state,to);
             if ( t == NULL )
             {
-              t = (ATerm) ATmakeInt(generic_lts->add_state((ATerm) lts_opts.nstate->makeStateVector(to)));
+              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_mcrl2(lts_opts.nstate->makeStateVector(to))));
               ATtablePut(aterm2state,to,t);
             }
             to_state = ATgetInt((ATermInt) t);
             t = ATtableGet(aterm2label,(ATerm) action);
             if ( t == NULL )
             {
-              t = (ATerm) ATmakeInt(generic_lts->add_label((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue));
+              t = (ATerm) ATmakeInt(generic_lts.add_label((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue));
               ATtablePut(aterm2state,(ATerm) action,t);
             }
             label = ATgetInt((ATermInt) t);
-            generic_lts->add_transition(transition(from_state,label,to_state));
+            generic_lts.add_transition(transition(from_state,label,to_state));
           }
           break;
       }
@@ -192,14 +198,16 @@ namespace mcrl2
           aut << "des (0," << num_trans << "," << num_states << ")";
           aut.close();
           break;
-        case lts_mcrl2:
+        case lts_lts:
           {
             int e = SVCclose(svc);
             if ( e )
             {
               gsErrorMsg("svcerror: %s\n",SVCerror(e));
             }
-            mcrl2::lts::detail::add_extra_mcrl2_svc_data(lts_filename, mcrl2::data::detail::data_specification_to_aterm_data_spec(lts_opts.spec->data()),
+            mcrl2::lts::detail::add_extra_mcrl2_lts_data(
+                         lts_filename,
+                         mcrl2::data::detail::data_specification_to_aterm_data_spec(lts_opts.spec->data()),
                          lts_opts.spec->process().process_parameters(), lts_opts.spec->action_labels());
           }
           break;
@@ -207,28 +215,53 @@ namespace mcrl2
           break;
         default:
           {
-            lts_extra ext;
-            if ( !lts_opts.outinfo )
+            generic_lts.set_creator(lts_filename);
+            generic_lts.set_data(lts_opts.spec->data());
+            generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
+            generic_lts.set_action_labels(lts_opts.spec->action_labels());            
+            switch (lts_opts.outformat)
             {
-              generic_lts->remove_state_values();
+              case lts_none: 
+              {
+                assert(0); break;
+              }
+              case lts_lts:
+              {
+                generic_lts.save(lts_filename); 
+                break;
+              }
+              case lts_aut: 
+              {
+                assert(0); break;
+              }
+              case lts_fsm:
+              {
+                lts_fsm_t l;
+                detail::lts_convert(generic_lts,l);
+                l.save(lts_filename); 
+                break;
+              }
+#ifdef USE_BCG
+              case lts_bcg:
+              {
+                lts_bcg_t l;
+                detail::lts_convert(generic_lts,l);
+                l.save(lts_filename); 
+                break;
+              }
+#endif
+              case lts_dot:
+              {
+                lts_dot_t l;
+                detail::lts_convert(generic_lts,l);
+                l.save(lts_filename); 
+                break;
+              }
+              default: assert(0); // lts_aut and lts_none cannot occur.
             }
-            if ( lts_opts.outformat == lts_fsm )
-            {
-              ext = lts_extra(*lts_opts.spec);
-            } else if ( lts_opts.outformat == lts_dot )
-            {
-              string fn(lts_filename);
-              lts_dot_options extdot;
-              extdot.name = &fn;
-              extdot.print_states = lts_opts.outinfo;
-              ext = lts_extra(extdot);
-            }
-            generic_lts->write_to(lts_filename,lts_opts.outformat,ext);
 
             ATtableDestroy(aterm2label);
             ATtableDestroy(aterm2state);
-            delete generic_lts;
-            generic_lts = NULL;
             break;
           }
       }
@@ -244,7 +277,7 @@ namespace mcrl2
         case lts_aut:
           aut.close();
           break;
-        case lts_mcrl2:
+        case lts_lts:
           {
             int e = SVCclose(svc);
             if ( e )
@@ -258,8 +291,6 @@ namespace mcrl2
         default:
           ATtableDestroy(aterm2label);
           ATtableDestroy(aterm2state);
-          delete generic_lts;
-          generic_lts = NULL;
           break;
       }
       remove(lts_filename.c_str());

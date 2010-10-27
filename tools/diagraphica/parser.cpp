@@ -12,9 +12,10 @@
 
 #include "parser.h"
 
-#include "mcrl2/lts/lts_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_fsm.h"
 
 
 using namespace std;
@@ -81,11 +82,21 @@ int Parser::getFileSize( const string &path )
     return result;
 }
 
+/* static std::set<std::string> get_state_parameter_values(const unsigned int idx, const mcrl2::lts::lts_fsm_t &l)
+{
+  const std::vector < std::string > sevs(l.state_element_values(idx));
+  std::set<std::string> r(sevs.begin(),sevs.end()); */
+
+  /* for (mcrl2::lts::lts_fsm_t::states_size_type i=0; i<l.num_states(); i++)
+  {
+    r.insert(l.state_value(i)[idx]);
+  } */
+  /* return r; 
+} */
+
 
 // -----------------------
-void Parser::parseFSMFile(
-    const string &path,
-    Graph* graph )
+void Parser::parseFSMFile(const string &path, Graph* graph )
 // -----------------------
 // ------------------------------------------------------------------
 // Parse the file identified by 'fileName' by calling:
@@ -96,7 +107,7 @@ void Parser::parseFSMFile(
 // allready read.
 // ------------------------------------------------------------------
 {
-using namespace mcrl2::lts;
+  using namespace mcrl2::lts;
 //using namespace mcrl2::core;
 
     //ifstream file;
@@ -106,25 +117,29 @@ using namespace mcrl2::lts;
     //int byteCnt = 0;
 
       ////////////////////////////////////////////////////
-    mcrl2::lts::lts l;
-    mcrl2::lts::detail::read_from(l,path,lts_none);
+    mcrl2::lts::lts_fsm_t l;
+    l.load(path);
+    // mcrl2::lts::detail::read_from(l,path,lts_none);
 
-    if(l.has_state_parameters ())
-    {
-      for(unsigned int i = 0; i < l.num_state_parameters(); ++i )
-      {
+    // if (l.has_process_parameters ())
+    // {
+      std::vector < std::pair < std::string, std::string > >::const_iterator parameter=l.process_parameters().begin();
+      for(unsigned int i = 0; i < l.process_parameters().size(); ++i, ++parameter)
+      { 
         line.clear();
-        line.append(l.state_parameter_name_str(i));
+        // line.append(l.state_parameter_name_str(i));
+        line.append(parameter->first); // variable name
         line.append("(");
-        line.append(to_string(l.get_state_parameter_values(i).size()));
+        std::vector< string > tmp = l.state_element_values(i);
+        line.append(to_string(tmp.size()));
         line.append(") ");
-        line.append(l.state_parameter_sort_str(i)) ;
+        // line.append(l.state_parameter_sort_str(i)) ;
+        line.append(parameter->second);  // sort of the variable
         //Following line of code is needed to avoid iteration over a changing object.
-        atermpp::set< ATerm > tmp = l.get_state_parameter_values(i);
-        for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+        for (std::vector< std::string >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
         {
           line.append( " \"");
-          string str = l.pretty_print_state_parameter_value(*z);
+          string str = *z;
           if (str.empty())
           {
             str ="-"; 
@@ -132,36 +147,35 @@ using namespace mcrl2::lts;
           line.append(str);
           line.append("\"");
         }
-                        parseStateVarDescr(
-                            line,
-                            graph );
+        parseStateVarDescr(line, graph );
       }
-    }
+    // }
 
     for(unsigned int si= 0; si<l.num_states(); ++si)
     {
       line.clear();
-      if(l.has_state_parameters ())
-      {
-        for(unsigned int i = 0; i < l.num_state_parameters(); ++i )
+      /* if(l.has_process_parameters ())
+      { */
+        for(unsigned int i = 0; i < l.process_parameters().size(); ++i )
         {
           if  (i != 0)
           {
             line.append(" ");
           }
 
-          int c = 0;
-          atermpp::set< ATerm > tmp = l.get_state_parameter_values(i);
-          for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+          /* int c = 0;
+          std::vector< std::string > tmp = l.state_element_values(i);
+          for (std::vector< std::string >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
           {
-            if (*z == l.get_state_parameter_value( si, i ))
+            if (*z == l.state_value(si)[i])
             {
               line.append(to_string(c));
             }
             ++c;
-          }
+          } */
+          line.append(to_string(l.state_value(si)[i]));
         }
-      }
+      // }
       parseStates( line, graph );
     }
 
@@ -173,7 +187,7 @@ using namespace mcrl2::lts;
       line.append(" ");
       line.append(to_string(ti.to()+1));
       line.append(" \"");
-      line.append(l.label_value_str(ti.label() ) );
+      line.append(detail::pp(l.label_value(ti.label() ) ));
       line.append("\"");
                         parseTransitions(
                             line,
@@ -238,7 +252,8 @@ using namespace mcrl2::lts;
             }
         }
 
-        file.close();*/
+        file.close();
+   } */
 }
 
 

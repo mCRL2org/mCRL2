@@ -36,7 +36,9 @@ namespace lts
 namespace detail
 {
 
-void read_from_bcg(lts &l, string const& filename)
+// void read_from_bcg(lts &l, string const& filename)
+
+lts_bcg_t::load(string const& filename)
 {
   string::size_type pos = filename.rfind('.');
   if ( (pos == string::npos) || (filename.substr(pos+1) != "bcg") )
@@ -110,7 +112,7 @@ void write_to_bcg(const lts &l, string const& filename)
  
   for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1))
   { transition t=r.front();
-    string label_str = l.label_value_str(t.label());
+    string label_str = mcrl2::lts::detail::pp(l.label_value_str(t.label()));
     if ( l.is_tau(t.label()) )
     {
       if ( warn_non_i && (label_str != "i") )

@@ -3,25 +3,27 @@
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #define __FSMLEXER_H
 
-#include <aterm2.h>
-#include "mcrl2/lts/lts.h"
+// #include <aterm2.h>
+#include "mcrl2/lts/lts_fsm.h"
+
 
 class fsm_lexer
 {
   public:
-    ATermIndexedSet protect_table;
+    // ATermIndexedSet protect_table;
 
-    ATermList stateVector;
-    ATermList valueTable;
-    ATermList stateId;
-    ATermList typeValues;
-    ATermAppl typeId;
-    ATermTable labelTable;
+    mcrl2::lts::detail::state_label_fsm stateVector;
+    // ATermList valueTable;
+    // ATermList stateId;
+    // ATermList typeValues;
+    std::string typeId;
+    // ATermTable labelTable;
+    std::map < std::string, unsigned int> labelTable;
 
-    AFun const_ATtype;
-    AFun const_ATvalue;
+    // AFun const_ATtype;
+    // AFun const_ATvalue;
 
-    mcrl2::lts::lts *fsm_lts;
+    mcrl2::lts::lts_fsm_t *fsm_lts;
 };
 
 extern fsm_lexer *fsm_lexer_obj;

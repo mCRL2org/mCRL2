@@ -14,7 +14,7 @@
 #include "ticpp.h"
 #include <iostream>
 
-Graph* XMLImporter::importFile(std::string filename)
+Graph* XMLImporter::importFile(const std::string &filename)
 {
   try
   {
