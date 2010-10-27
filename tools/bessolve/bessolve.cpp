@@ -23,13 +23,14 @@
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes_gauss_elimination.h"
+#include "mcrl2/bes/small_progress_measures.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
 
-typedef enum { gauss } solution_strategy_t;
+typedef enum { gauss, smp } solution_strategy_t;
 
 std::string solution_strategy_to_string(const solution_strategy_t s)
 {
@@ -37,6 +38,9 @@ std::string solution_strategy_to_string(const solution_strategy_t s)
   {
     case gauss:
       return "gauss";
+      break;
+    case smp:
+      return "smp";
       break;
     default:
       return "unknown";
@@ -74,7 +78,8 @@ class bessolve_tool: public input_output_tool
       input_output_tool::add_options(desc);
       desc.add_option("strategy", make_mandatory_argument("STRATEGY"),
         "solve the BES using the specified STRATEGY:\n"
-        "  'gauss' for Gauss elimination (default),\n", 's');
+        "  'gauss' for Gauss elimination (default),\n"
+        "  'smp' for Small Progress Measures,\n", 's');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -84,6 +89,9 @@ class bessolve_tool: public input_output_tool
         std::string str_strategy(parser.option_argument("algorithm"));
         if (str_strategy == "gauss") {
           strategy = gauss;
+        }
+        else if (str_strategy == "smp") {
+          strategy = smp;
         }
         else
         {
@@ -117,6 +125,9 @@ class bessolve_tool: public input_output_tool
       {
         case gauss:
           result = gauss_elimination(bes, log_level);
+          break;
+        case smp:
+          result = small_progress_measures(bes, log_level);
           break;
         default:
           throw mcrl2::runtime_error("unhandled strategy provided");
