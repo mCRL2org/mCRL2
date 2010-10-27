@@ -23,6 +23,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
+#include "mcrl2/bes/normal_forms.h"
 
 namespace mcrl2 {
 
@@ -112,7 +113,7 @@ namespace bes {
       
     bool is_top() const
     {
-      return v[0] < 0;
+      return v[0] == -1;
     }
   };
   
@@ -154,14 +155,7 @@ namespace bes {
         rank(rank_),
         alpha(d)
     {}
-   
-//    progress_measures_vertex(std::vector<progress_measures_vertex*>& successors_, bool even_, int rank_, unsigned int d)
-//      : successors(successors_),
-//        even(even_),
-//        rank(rank_),
-//        alpha(d)
-//    {}
-   
+  
     std::vector<progress_measures_vertex*> successors;
     bool even;
     unsigned int rank;
@@ -295,18 +289,18 @@ namespace bes {
           m_bes(b)
       {}
       
-      void run()
+      bool run()
       {
         initialize_vertices();
-        LOG_VERTICES(0, "--- vertices ---\n");
-        LOG(0, "\nbeta = " + core::detail::print_list(m_beta) + "\n");
+        LOG_VERTICES(1, "--- vertices ---\n");
+        LOG(1, "\nbeta = " + core::detail::print_list(m_beta) + "\n");
         for (;;) // forever
         {
           bool changed = false;
           for (vertex_map::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
           {
             vertex& v = i->second;
-            LOG_VERTEX(0, v, "choose vertex ");
+            LOG_VERTEX(2, v, "choose vertex ");
             unsigned int m = v.rank;
             std::vector<progress_measures_vertex*>::const_iterator j;
             if (v.even)
@@ -322,16 +316,16 @@ namespace bes {
             std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m, alpha.begin());
             if (!w.even)
             {
-              LOG(0, "inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
+              LOG(2, "inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
               inc(alpha, m, m_beta);
-              LOG(0, core::detail::print_list(alpha) + "\n");
+              LOG(2, core::detail::print_list(alpha) + "\n");
             }
 
             changed = changed || !std::equal(alpha.begin(), alpha.end(), w.alpha.v.begin());
             if (changed)
             {
               v.alpha.v = alpha;
-              LOG_VERTEX(0, v, "update vertex ");
+              LOG_VERTEX(1, v, "update vertex ");
             }
           }
           if (!changed)
@@ -339,9 +333,18 @@ namespace bes {
             break;
           }
         }
+        return m_vertices[m_bes.equations().front().variable()].alpha.is_top();
       }
            
   };
+
+  inline
+  bool small_progress_measures(boolean_equation_system<>& b, unsigned int loglevel)
+  {
+    make_standard_form(b, true);
+    small_progress_measures_algorithm algorithm(b, loglevel);
+    return algorithm.run();
+  }
 
 } // namespace bes
 
