@@ -237,12 +237,12 @@ void lts_fsm_t::save(const std::string &filename) const
 {
   if (filename=="")
   {
-    write_to_fsm(std::cout,*this);
+	  mcrl2::lts::detail::write_to_fsm(std::cout,*this);
   }
   else
   {
     std::ofstream os(filename.c_str());
-    write_to_fsm(os,*this);
+    mcrl2::lts::detail::write_to_fsm(os,*this);
     os.close();
   }
 }

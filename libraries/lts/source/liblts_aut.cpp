@@ -275,7 +275,7 @@ void lts_aut_t::load(const string &filename)
 {
   if (filename=="")
   {
-    read_from_aut(*this,cin);
+	  mcrl2::lts::detail::read_from_aut(*this,cin);
   }
   else
   {
@@ -286,21 +286,21 @@ void lts_aut_t::load(const string &filename)
       throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for reading.");
     }
 
-    read_from_aut(*this,is);
+    mcrl2::lts::detail::read_from_aut(*this,is);
     is.close();
   }
 } 
 
 void lts_aut_t::load(istream &is)
 {
-  read_from_aut(*this,is);
+  mcrl2::lts::detail::read_from_aut(*this,is);
 } 
 
 void lts_aut_t::save(string const& filename) const
 {
   if (filename=="")
   { 
-    write_to_aut(*this,cout);
+    mcrl2::lts::detail::write_to_aut(*this,cout);
   }
   else
   {
@@ -312,7 +312,7 @@ void lts_aut_t::save(string const& filename) const
       return;
     }
 
-    write_to_aut(*this,os);
+    mcrl2::lts::detail::write_to_aut(*this,os);
     os.close();
   }
 } 

@@ -263,7 +263,7 @@ void lts_lts_t::save(const std::string &filename) const
   }
   else
   {
-    write_to_lts(*this,filename,detail::guess_format(filename));
+	  mcrl2::lts::detail::write_to_lts(*this,filename,detail::guess_format(filename));
   }
 
 }
@@ -275,7 +275,7 @@ void lts_lts_t::load(const std::string &filename)
  }
  else
  {
-   read_from_lts(*this,filename,detail::detect_type(filename));
+	 mcrl2::lts::detail::read_from_lts(*this,filename,detail::detect_type(filename));
  }
 
 }
