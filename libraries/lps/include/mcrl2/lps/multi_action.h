@@ -13,6 +13,7 @@
 #define MCRL2_LPS_MULTI_ACTION_H
 
 #include <iterator>
+#include <sstream>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/detail/struct_core.h" // gsMakeNil
@@ -360,6 +361,30 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
 
 } // namespace detail
     /// \endcond
+
+    /// \brief Returns a string representation of a multi action
+    inline
+    std::string pp(const multi_action& m)
+    {
+      std::ostringstream out;
+      if (m.has_time())
+      {
+        out << "(";
+      }
+      for(action_list::const_iterator i = m.actions().begin(); i != m.actions().end(); ++i)
+      { 
+        if (i != m.actions().begin())
+        {
+          out << "|";
+        }
+        out << core::pp(*i);
+      }
+      if (m.has_time())
+      { 
+        out << ")@ " << core::pp(m.time());
+      }
+      return out.str();
+    }
 
     /// \brief Returns a data expression that expresses under which conditions the
     /// multi actions a and b are equal. The multi actions may contain free variables.
