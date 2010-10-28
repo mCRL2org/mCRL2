@@ -48,9 +48,13 @@ namespace bes {
     while (first1 != last1 && first2 != last2)
     {
       if (*first1 < *first2)
+      {
         return -1;
+      }
       if (*first2 < *first1)
+      {
         return 1;
+      }
       ++first1;
       ++first2;
     }
@@ -102,6 +106,26 @@ namespace bes {
     return result;
   }
 
+  inline
+  unsigned int maximum_rank(const boolean_equation_system<>& b)
+  {
+    unsigned int result = 0;
+    fixpoint_symbol last_symbol;
+    for (atermpp::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+    {
+      if (i == b.equations().begin())
+      {
+        result = i->symbol().is_nu() ? 0 : 1;
+      }
+      else if (i->symbol() != last_symbol)
+      {
+        result++;
+      }
+      last_symbol = i->symbol();
+    }
+    return result;
+  }
+
   struct progress_measure
   {
     progress_measure(std::size_t d)
@@ -120,30 +144,38 @@ namespace bes {
   inline
   std::ostream& operator<<(std::ostream& out, const progress_measure& pm)
   {
-    out << core::detail::print_list(pm.v);
+    if (pm.is_top())
+    {
+      out << "top";
+    }
+    else
+    {
+      out << core::detail::print_list(pm.v);
+    }
     return out;
   }
 
+  // increment position m of vector alpha
   inline
-  void inc(std::vector<int>& v, unsigned int m, const std::vector<int>& beta)
+  void inc(std::vector<int>& alpha, int m, const std::vector<int>& beta)
   {
-    if (v[0] == -1)
+    if (alpha[0] == -1)
     {
       return;
     }
     else if (m == 0)
     {
-      v[0] = -1;
+      alpha[0] = -1;
       return;
     }
-    else if (v[m] == beta[m] - 1)
+    else if (alpha[m-1] == beta[m-1])
     {
-      v[m] = 0;
-      inc(v, m - 1, beta);
+      alpha[m-1] = 0;
+      inc(alpha, m - 1, beta);
     }
     else
     {
-      v[m]++;
+      alpha[m-1]++;
     }
   }
 
@@ -188,6 +220,7 @@ namespace bes {
   inline
   std::ostream& operator<<(std::ostream& out, const progress_measures_vertex& v)
   {
+    out << " alpha = " << v.alpha;
     out << " successors = {";
     for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
     {
@@ -200,7 +233,6 @@ namespace bes {
     out << "}";
     out << " rank = " << v.rank;
     out << " disjunctive = " << std::boolalpha << v.even;
-    out << " alpha = " << v.alpha;
     return out;
   }
 
@@ -214,8 +246,7 @@ namespace bes {
       void initialize_vertices()
       {
         // first build the vertex map without successor information
-        // m_d = mu_block_count(m_bes);
-        m_d = block_count(m_bes);
+        m_d = maximum_rank(m_bes) + 1;
         unsigned int block_size = 0;
         unsigned int last_rank = 0;
         fixpoint_symbol last_symbol = fixpoint_symbol::nu();
@@ -223,18 +254,29 @@ namespace bes {
         {
           if (i->symbol() != last_symbol)
           {
-            if (block_size > 0)
+            if (is_even(m_beta.size()))
+            {
+              m_beta.push_back(0);
+            }
+            else
             {
               m_beta.push_back(block_size);
-              block_size = 0;
             }
+            block_size = 0;
             last_rank++;
             last_symbol = i->symbol();
           }
           block_size++;
           m_vertices[i->variable()] = vertex(is_disjunctive(i->formula()), last_rank, m_d);
         }
-        m_beta.push_back(block_size);
+        if (is_even(m_beta.size()))
+        {
+          m_beta.push_back(0);
+        }
+        else
+        {
+          m_beta.push_back(block_size);
+        }
 
         // add successor information
         for (atermpp::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
@@ -259,14 +301,14 @@ namespace bes {
         if (check_log_level(level))
         {
           std::clog << msg;
-          for (vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+          for (atermpp::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
           {
-            const vertex& v = i->second;
-            std::string name(i->first.name());
-            std::clog << name << " " << v << std::endl;
+            const vertex& v = m_vertices.find(i->variable())->second;
+            std::clog << v.name << " " << v << std::endl;
           }
         }
       }
+
 
       /// \brief Prints a vertex
       void LOG_VERTEX(unsigned int level, const vertex& v, const std::string& msg = "") const
@@ -291,6 +333,7 @@ namespace bes {
       
       bool run()
       {
+        LOG(2, "--- applying small progress measures to ---\n" + pp(m_bes) + "\n\n");
         initialize_vertices();
         LOG_VERTICES(1, "--- vertices ---\n");
         LOG(1, "\nbeta = " + core::detail::print_list(m_beta) + "\n");
@@ -300,7 +343,7 @@ namespace bes {
           for (vertex_map::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
           {
             vertex& v = i->second;
-            LOG_VERTEX(2, v, "choose vertex ");
+            LOG_VERTEX(2, v, "    choose vertex ");
             unsigned int m = v.rank;
             std::vector<progress_measures_vertex*>::const_iterator j;
             if (v.even)
@@ -316,14 +359,14 @@ namespace bes {
             std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m, alpha.begin());
             if (!w.even)
             {
-              LOG(2, "inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
+              LOG(2, "    inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
               inc(alpha, m, m_beta);
               LOG(2, core::detail::print_list(alpha) + "\n");
             }
 
-            changed = changed || !std::equal(alpha.begin(), alpha.end(), w.alpha.v.begin());
-            if (changed)
+            if (!std::equal(alpha.begin(), alpha.end(), v.alpha.v.begin()))
             {
+              changed = true;
               v.alpha.v = alpha;
               LOG_VERTEX(1, v, "update vertex ");
             }
@@ -333,7 +376,8 @@ namespace bes {
             break;
           }
         }
-        return m_vertices[m_bes.equations().front().variable()].alpha.is_top();
+        LOG_VERTICES(2, "--- vertices ---\n");
+        return !m_vertices[m_bes.equations().front().variable()].alpha.is_top();
       }
            
   };
