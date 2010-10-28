@@ -57,7 +57,7 @@ template <class LTS_TYPE>
   else
   {
     // remove state information from this LTS, if any
-    l1.remove_state_values();
+    l1.clear_states();
   }
 
   typename LTS_TYPE::labels_size_type new_nlabels = 0;

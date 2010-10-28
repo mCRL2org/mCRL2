@@ -191,13 +191,6 @@ class ltsconvert_tool : public ltsconvert_base
           l_out.save(tool_options.outfilename); 
           return true;
         }
-        /* case lts_svc:
-        {
-          lts_svc_t l_out;
-          lts_convert(l,l_out,spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
-          l_out.save(tool_options.outfilename); 
-          return true;
-        } */
         case lts_fsm:
         {
           lts_fsm_t l_out;
@@ -221,6 +214,13 @@ class ltsconvert_tool : public ltsconvert_base
           l_out.save(tool_options.outfilename); 
           return true;
         }
+        case lts_svc:
+        {
+          lts_svc_t l_out;
+          lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
+          l_out.save(tool_options.outfilename); 
+          return true;
+        } 
       }
       return true;
     }
@@ -246,10 +246,6 @@ class ltsconvert_tool : public ltsconvert_base
         { 
           return load_convert_and_save<lts_aut_t>();
         }
-        /* case lts_svc:
-        { 
-          return load_convert_and_save<lts_svc_t>();
-        } */
         case lts_fsm:
         { 
           return load_convert_and_save<lts_fsm_t>();
@@ -264,6 +260,10 @@ class ltsconvert_tool : public ltsconvert_base
         { 
           return load_convert_and_save<lts_dot_t>();
         }
+        case lts_svc:
+        { 
+          return load_convert_and_save<lts_svc_t>();
+        } 
       }
       return true;
     }

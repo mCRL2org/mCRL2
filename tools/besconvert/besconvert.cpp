@@ -241,7 +241,7 @@ namespace mcrl2 {
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
-                m_lts.add_label(mcrl2::lts::detail::action_label_mcrl2((ATerm)t),label.str()=="tau");
+                m_lts.add_label(mcrl2::lts::detail::action_label_lts((ATerm)t),label.str()=="tau");
               }
               m_lts.add_transition(lts::transition(from,label_index,to));
             }
@@ -267,7 +267,7 @@ namespace mcrl2 {
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
-                m_lts.add_label(mcrl2::lts::detail::action_label_mcrl2(t),label.str()=="tau");
+                m_lts.add_label(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
               }
               m_lts.add_transition(lts::transition(from,label_index,to));
             }

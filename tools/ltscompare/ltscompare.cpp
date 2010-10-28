@@ -23,11 +23,12 @@
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_io.h"
 
-#include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
+#include "mcrl2/lts/lts_svc.h"
 
 
 using namespace std;
@@ -230,10 +231,6 @@ class ltscompare_tool : public ltscompare_base
         {
           return lts_compare<lts_aut_t>();
         }
-        /* case lts_svc:
-        {
-          return lts_compare<lts_svc_t>();
-        } */
         case lts_fsm:
         {
           return lts_compare<lts_fsm_t>();
@@ -248,6 +245,10 @@ class ltscompare_tool : public ltscompare_base
         {
           return lts_compare<lts_dot_t>();
         }
+        case lts_svc:
+        {
+          return lts_compare<lts_svc_t>();
+        } 
       }
       return true;
     }

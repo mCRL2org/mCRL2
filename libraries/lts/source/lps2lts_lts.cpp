@@ -78,7 +78,7 @@ namespace mcrl2
                       mcrl2::lts::detail::string_for_type(lts_opts.outformat).c_str(),filename);
           // generic_lts = new lts_extra();
           generic_lts.set_creator(lts_filename);
-          // generic_lts.set_mcrl2_terms(true);
+          // generic_lts.set_lts_terms(true);
           generic_lts.set_data(lts_opts.spec->data());
           generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
           generic_lts.set_action_labels(lts_opts.spec->action_labels());
@@ -114,7 +114,7 @@ namespace mcrl2
             ATerm t = ATtableGet(aterm2state,state);
             if ( t == NULL )
             {
-              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_mcrl2(lts_opts.nstate->makeStateVector(state))));
+              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(state))));
               ATtablePut(aterm2state,state,t);
             }
             generic_lts.set_initial_state(ATgetInt((ATermInt) t));
@@ -165,14 +165,14 @@ namespace mcrl2
             ATerm t = ATtableGet(aterm2state,from);
             if ( t == NULL )
             {
-              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_mcrl2(lts_opts.nstate->makeStateVector(from))));
+              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(from))));
               ATtablePut(aterm2state,from,t);
             }
             from_state = ATgetInt((ATermInt) t);
             t = ATtableGet(aterm2state,to);
             if ( t == NULL )
             {
-              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_mcrl2(lts_opts.nstate->makeStateVector(to))));
+              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(to))));
               ATtablePut(aterm2state,to,t);
             }
             to_state = ATgetInt((ATermInt) t);

@@ -85,7 +85,7 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
   assert(SVCgetInitialState(&f)==0);
   if ( svc_file_has_state_info )
   {
-    l.add_state(state_label_mcrl2((ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f))));
+    l.add_state(state_label_lts((ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f))));
   }
   else
   {
@@ -104,7 +104,7 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
     {
       if ( svc_file_has_state_info )
       {
-        l.add_state(state_label_mcrl2((ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) i)));
+        l.add_state(state_label_lts((ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) i)));
       } 
       else 
       {

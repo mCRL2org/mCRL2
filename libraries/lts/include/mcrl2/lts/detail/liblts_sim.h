@@ -18,11 +18,12 @@
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/sim_hashtable.h"
-#include "mcrl2/lts/lts_fsm.h"
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/lts_svc.h"
 
 
 namespace mcrl2
@@ -406,7 +407,7 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
     if (gsDebug)
     {
       gsMessage("---------------------------------------------------\n");
-      gsMessage("Label = \"%s\"\n", detail::pp(aut.label_value(l)).c_str());
+      gsMessage("Label = \"%s\"\n", mcrl2::lts::detail::pp(aut.label_value(l)).c_str());
     }
 
     /* reset the stable function */

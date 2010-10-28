@@ -22,11 +22,12 @@
 #include <sstream>
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
+#include "mcrl2/lts/lts_svc.h"
 
 namespace mcrl2
 {
@@ -129,12 +130,12 @@ namespace detail
       {
       }
 
-      action_label_string translate_label(const action_label_mcrl2 &l) const
+      action_label_string translate_label(const action_label_lts &l) const
       { 
         return mcrl2::lts::detail::pp(l);
       }
 
-      state_label_fsm translate_state(const state_label_mcrl2 &l) 
+      state_label_fsm translate_state(const state_label_lts &l) 
       { 
         std::vector < unsigned int > result;
         for(unsigned int i=0; i<l.size(); ++i)
@@ -193,12 +194,12 @@ namespace detail
   class mcrl2_aut_convertor
   {
     public:
-      action_label_string translate_label(const action_label_mcrl2 &l) const
+      action_label_string translate_label(const action_label_lts &l) const
       { 
         return mcrl2::lts::detail::pp(l);
       }
 
-      state_label_aut translate_state(const state_label_mcrl2 &l) const
+      state_label_aut translate_state(const state_label_lts &l) const
       { 
         return state_label_aut();
       }
@@ -238,12 +239,12 @@ namespace detail
       mcrl2_dot_convertor():m_state_count(0)
       {}
 
-      action_label_string translate_label(const action_label_mcrl2 &l) const
+      action_label_string translate_label(const action_label_lts &l) const
       { 
         return mcrl2::lts::detail::pp(l);
       }
 
-      state_label_dot translate_state(const state_label_mcrl2 &l) 
+      state_label_dot translate_state(const state_label_lts &l) 
       { 
         std::stringstream state_name;
         state_name << "s" << m_state_count;
@@ -289,29 +290,29 @@ namespace detail
 #endif
 
 // ====================== aut -> mcrl2 =============================
-  class aut_mcrl2_convertor
+  class aut_lts_convertor
   {
     protected:
       const mcrl2::data::data_specification &m_data;
       const mcrl2::lps::action_label_list &m_action_labels;
 
     public:
-      aut_mcrl2_convertor(
+      aut_lts_convertor(
                 const mcrl2::data::data_specification &data,
                 const mcrl2::lps::action_label_list &action_labels):
                      m_data(data),
                      m_action_labels(m_action_labels)
       {}
 
-      action_label_mcrl2 translate_label(const action_label_string &l) const
+      action_label_lts translate_label(const action_label_string &l) const
       {
-        return mcrl2::lts::detail::parse_mcrl2_action(l,m_data,m_action_labels);
+        return mcrl2::lts::detail::parse_lts_action(l,m_data,m_action_labels);
       }
 
-      state_label_mcrl2 translate_state(const state_label_aut &l) const
+      state_label_lts translate_state(const state_label_aut &l) const
       {
         // There is no state label. Use the default.
-        return state_label_mcrl2();
+        return state_label_lts();
       }
   };
 
@@ -340,7 +341,7 @@ namespace detail
       lts_out.set_data(data);
       lts_out.set_action_labels(action_labels);
       lts_out.set_process_parameters(process_parameters);
-      aut_mcrl2_convertor c(data,action_labels);
+      aut_lts_convertor c(data,action_labels);
       convert_core_lts(c,lts_in,lts_out);
     }
   }

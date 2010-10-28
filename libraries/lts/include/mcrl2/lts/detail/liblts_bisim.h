@@ -18,11 +18,12 @@
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/trace/trace.h" 
-#include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
+#include "mcrl2/lts/lts_svc.h"
 
 
 namespace mcrl2

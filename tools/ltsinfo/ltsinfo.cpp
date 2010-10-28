@@ -24,11 +24,12 @@
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/lts_algorithm.h"
 
-#include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
+#include "mcrl2/lts/lts_svc.h"
 
 
 using namespace mcrl2::utilities::tools;
@@ -101,8 +102,11 @@ class ltsinfo_tool : public ltsinfo_base
     }
 
     template < class LTS_TYPE >
-    bool provide_information(LTS_TYPE &l) const
+    bool provide_information() const
     {
+      LTS_TYPE l;
+      l.load(infilename);
+
       std::cout 
            << "Number of states: " << l.num_states() << std::endl
            << "Number of labels: " << l.num_labels() << std::endl
@@ -165,42 +169,32 @@ class ltsinfo_tool : public ltsinfo_base
         {
           lts_lts_t l;
           l.load(infilename);
-          return provide_information(l);
+          return provide_information<lts_lts_t>();
         }
         case lts_none:
           std::cerr << "No input format is specified. Assuming .aut format.\n";
         case lts_aut:
         {
-          lts_aut_t l;
-          l.load(infilename);
-          return provide_information(l);
+          return provide_information<lts_aut_t>();
         }
-        /* case lts_svc:
-        {
-          lts_svc_t l;
-          l.load(infilename);
-          return provide_information(l);
-        } */
         case lts_fsm:
         {
-          lts_fsm_t l;
-          l.load(infilename);
-          return provide_information(l);
+          return provide_information<lts_fsm_t>();
         }
 #ifdef USE_BCG
         case lts_bcg:
         {
-          lts_bcg_t l;
-          l.load(infilename);
-          return provide_information(l);
+          return provide_information<lts_bcg_t>();
         }
 #endif
         case lts_dot:
         {
-          lts_dot_t l;
-          l.load(infilename);
-          return provide_information(l);
+          return provide_information<lts_dot_t>();
         }
+        case lts_svc:
+        {
+          return provide_information<lts_svc_t>();
+        } 
       }
       return true;
     }

@@ -358,10 +358,6 @@ bool LTS::readFromFile(const std::string &filename)
     {
       mcrl2_lts = read_lts_from_file<lts_aut_t>(filename);
     }
-    /* case lts_svc:
-    { 
-      mcrl2_lts = read_lts_from_file<lts_svc_t>(filename);
-    } */
     case lts_fsm:
     {
       mcrl2_lts = read_lts_from_file<lts_fsm_t>(filename);
@@ -376,6 +372,10 @@ bool LTS::readFromFile(const std::string &filename)
     {
       mcrl2_lts = read_lts_from_file<lts_dot_t>(filename);
     }
+    case lts_svc:
+    { 
+      mcrl2_lts = read_lts_from_file<lts_svc_t>(filename);
+    } 
   }
 
 

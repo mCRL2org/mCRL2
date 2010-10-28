@@ -50,31 +50,48 @@ namespace mcrl2
 
   /** \brief The main LTS namespace.
    * \details This namespace contains all data structures and members of the LTS
-   * library.
+   * library. 
    */
   namespace lts
   {
     
+    /** \brief The enumerated type lts_type contains an index for every type
+     *   type of labelled transition system that is supported by the system.
+     *   \details Every type has an associated labelled transition format. E.g.
+     *   for lts_lts the type of the lts is lts_lts_t. Similarly, lts_aut_t, 
+     *   lts_svc_t, etc. are available. Files in which the lts's are stored have
+     *   the name file.lts, file.aut, etc.
+     */
     enum lts_type
     {
       lts_none, /**< unknown or no format */
-      lts_lts, /**< mCRL2 SVC format */
-      lts_aut, /**< Ald&eacute;baran format (CADP) */
-      /* lts_svc, / **< SVC format The svc format is outdated. */  
-      lts_fsm, /**< FSM format */
+      lts_lts,  /**< mCRL2 SVC format */
+      lts_aut,  /**< Ald&eacute;baran format (CADP) */
+      lts_fsm,  /**< FSM format */
 #ifdef USE_BCG
-      lts_bcg, /**< BCG format
-       * \note Only available if the LTS library is built with BCG
-       * support.*/
+      lts_bcg,  /**< BCG format
+                  * \note Only available if the LTS library is built with BCG
+                  * support.*/
 #endif
       lts_dot, /**< GraphViz format */
+      lts_svc,  /**< SVC format 
+                  * \note The svc format is outdated. */  
       lts_type_min = lts_none,
-      lts_type_max = lts_dot
+      lts_type_max = lts_svc
     };
 
 
     /** \brief A class that contains a labelled transition system.
-        \details The labels of 
+        \details The state labels and action labels can be any type.
+            Essentially, a labelled transition system consists of a 
+            vector of transitions. Each transition is a triple of
+            three numbers <from, label, to>. For these numbers, there
+            can be associated state labels (for 'from' and 'to'), and 
+            action labels (for 'label'). But it is also possible, that
+            no state or action labels are provided. For all action labels
+            it is maintained whether this action label is an internal
+            'tau' action. This can be indicated for each action label
+            separately.
     */
 
     template < class STATE_LABEL_T, class ACTION_LABEL_T >
@@ -118,24 +135,6 @@ namespace mcrl2
         atermpp::vector<STATE_LABEL_T> state_values;
         atermpp::vector<ACTION_LABEL_T> label_values;
         std::vector<bool> taus; // A vector indicating which labels are to be viewed as tau's.
-
-      public:
-        // The items below are public, to allow restructuring of the code of the lts library.
-
-        void
-        clear_states()
-        { 
-          remove_state_values();
-          nstates = 0;
-        }
-
-        void
-        clear()
-        { 
-          clear_states();
-          clear_labels();
-          clear_transitions();;
-        }
 
       public:
 
@@ -253,10 +252,11 @@ namespace mcrl2
         }
 
         /** \brief Adds a state to this LTS.
+         *  \details It is not checked whether the added state already exists.
          * \param[in] value The value of the state. If value is ommitted, only the state, and
          *                  no state value is added. This is only allowed, if there are no
          *                  state_values.
-         * \return The number of the added state. */
+         * \return The number of the added state label. */
         states_size_type add_state(const STATE_LABEL_T value = STATE_LABEL_T())
         {
           if (value != STATE_LABEL_T())
@@ -267,9 +267,8 @@ namespace mcrl2
           return nstates++;
         }
 
-        
-
-        /** \brief Adds a label to this LTS.
+        /** \brief Adds an action label to this LTS.
+         * \details It is not checked whether this action label already exists.
          * \param[in] value The value of the label.
          * \param[in] is_tau Indicates whether the label is a tau action.
          * \return The number of the added label. */
@@ -353,15 +352,31 @@ namespace mcrl2
         }
 
         /** \brief Clear the labels of an lts.
-         * \details This resets the labels of an lts, but
-         *          leaves the number of labels untouched.
-         *          it also does not change the information
-         *          regarding to what actions are tau */
+         * \details This removes the action labels of an lts.
+         *          It also resets the information
+         *          regarding to what actions labels are tau. */
         void clear_labels()
-        { // std::cerr << "Clear labels\n";
+        { 
           label_values = atermpp::vector<ACTION_LABEL_T>();
           taus = std::vector<bool>();
           nlabels = 0;
+        }
+
+        /** \brief Clear the states of an lts.
+         * \details This removes the state labels of an lts. */
+        void
+        clear_states()
+        { 
+          state_values=atermpp::vector<STATE_LABEL_T>();
+          nstates = 0;
+        }
+
+        void
+        clear()
+        { 
+          clear_states();
+          clear_labels();
+          clear_transitions();;
         }
 
         /** \brief Gets an iterator range to the transitions of this LTS.
@@ -384,7 +399,9 @@ namespace mcrl2
         void add_transition(const transition &t)
         { // std::cerr << "Add transition " << t.from() << "-" << t.label() << "->" << t.to() << "  #S " <<
           //       nstates << "#L " << nlabels << "\n";
-          assert(t.from()<nstates && t.label()<nlabels && t.to()<nstates);
+          assert((nstates==0 || t.from()<nstates) && 
+                 (nlabels==0 || t.label()<nlabels) && 
+                 (nstates==0 || t.to()<nstates));
           transitions.push_back(t);
         }
 
@@ -408,6 +425,8 @@ namespace mcrl2
         }
 
         /** \brief Sets all labels with string that occurs in tau_actions to tau.
+         *  \details After hiding actions, it checks whether action labels became
+         *           equal and merges these action labels.
          *  \param[tau_actions] Vector with strings indicating which labels must be
          *       considered to be equal to tau's */
         void hide_actions(const std::vector<std::string> &tau_actions)
@@ -470,16 +489,9 @@ namespace mcrl2
           return label_values.size() > 0;
         }
 
-        /** \brief Removes the state values from all states. 
-        */
-        void remove_state_values()
-        {
-         state_values=atermpp::vector<STATE_LABEL_T>();
-        }
-
-
         /** \brief Sorts the transitions using a sort style.
-         * \param[in] ts The sort style to use. */
+         * \param[in] ts The sort style to use. 
+         * \note Deprecated */
         inline void sort_transitions(transition_sort_style ts = src_lbl_tgt)
         {
           switch (ts)
@@ -501,7 +513,8 @@ namespace mcrl2
          * \return An array \e A of size \ref num_states()+1 such that
          * for every state <em>s</em>:
          * [ \e A[\e s] .. \e A[<em>s</em>+1] )
-         * are all transitions of which \e s is the source state. */
+         * are all transitions of which \e s is the source state. 
+         * \note Deprecated */
         unsigned int*
         get_transition_indices()
         {

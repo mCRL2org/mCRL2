@@ -50,7 +50,7 @@ namespace lts
 namespace detail
 {
 
-atermpp::vector < ATermAppl > state_label_mcrl2::vector_templates;
+atermpp::vector < ATermAppl > state_label_lts::vector_templates;
 
 lps::specification const& empty_specification() 
 {

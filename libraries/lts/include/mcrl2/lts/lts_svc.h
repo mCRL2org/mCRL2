@@ -16,8 +16,8 @@
  */
 
 
-#ifndef MCRL2_LTS_LTS_MCRL2_H
-#define MCRL2_LTS_LTS_MCRL2_H
+#ifndef MCRL2_LTS_SVC_MCRL2_H
+#define MCRL2_LTS_SVC_MCRL2_H
 
 #include <string>
 #include <vector>
@@ -39,13 +39,13 @@ namespace lts
   namespace detail
   {
 
-  class state_label_mcrl2
+  class state_label_svc
   {
     public:
       typedef ATermAppl element_type;
 
     protected: 
-      ATermAppl m_state_label_mcrl2;
+      ATermAppl m_state_label_svc;
 
       // We store functions symbols with varying arity and string "STATE"
       // in this ATermAppl array, as they are automatically protected.
@@ -73,16 +73,16 @@ namespace lts
 
     public:
  
-      state_label_mcrl2():m_state_label_mcrl2(NULL)
+      state_label_svc():m_state_label_svc(NULL)
       {}
 
-      state_label_mcrl2(ATermAppl a):m_state_label_mcrl2(a)
+      state_label_svc(ATermAppl a):m_state_label_svc(a)
       { 
-        assert(ATgetType(m_state_label_mcrl2)==AT_APPL);
+        assert(ATgetType(m_state_label_svc)==AT_APPL);
       }
 
       template <class ITERATOR>
-      state_label_mcrl2(const ITERATOR begin, const ITERATOR end)
+      state_label_svc(const ITERATOR begin, const ITERATOR end)
       { 
         unsigned int arity=0;
         ATermList l=ATempty;
@@ -94,46 +94,46 @@ namespace lts
         }
         make_vector_template_if_required(arity);
 
-        m_state_label_mcrl2=(ATermAppl)ATmakeApplList(ATgetAFun(vector_templates[arity]),ATreverse(l));
+        m_state_label_svc=(ATermAppl)ATmakeApplList(ATgetAFun(vector_templates[arity]),ATreverse(l));
       }
 
-      state_label_mcrl2(const ATermList l)
+      state_label_svc(const ATermList l)
       {
         const unsigned int arity=ATgetLength(l);
         make_vector_template_if_required(arity);
-        m_state_label_mcrl2=(ATermAppl)ATmakeApplList(ATgetAFun(vector_templates[arity]),l);
+        m_state_label_svc=(ATermAppl)ATmakeApplList(ATgetAFun(vector_templates[arity]),l);
       }
 
       unsigned int size() const
       { 
-        return ATgetArity(ATgetAFun(m_state_label_mcrl2));
+        return ATgetArity(ATgetAFun(m_state_label_svc));
       }
       
       element_type operator [](const unsigned int i) const
       {
         assert(i<size());
-        return element_type(ATgetArgument(m_state_label_mcrl2,i));
+        return element_type(ATgetArgument(m_state_label_svc,i));
       }
 
-      bool operator ==(const state_label_mcrl2 &other) const
+      bool operator ==(const state_label_svc &other) const
       { 
-        return m_state_label_mcrl2==other.m_state_label_mcrl2;
+        return m_state_label_svc==other.m_state_label_svc;
       }
 
-      bool operator !=(const state_label_mcrl2 &other) const
+      bool operator !=(const state_label_svc &other) const
       { 
-        return m_state_label_mcrl2!=other.m_state_label_mcrl2;
+        return m_state_label_svc!=other.m_state_label_svc;
       }
 
       void set_element(const element_type &e, unsigned int i)
       {
         assert(i<size());
-        m_state_label_mcrl2=ATsetArgument(m_state_label_mcrl2,(ATerm)e,i);
+        m_state_label_svc=ATsetArgument(m_state_label_svc,(ATerm)e,i);
       } 
 
       ATermAppl aterm() const
       {
-        return m_state_label_mcrl2;
+        return m_state_label_svc;
       }
   };
 
@@ -142,7 +142,7 @@ namespace lts
    * \return           The pretty-printed representation of value.
    * \pre              value occurs as state value in this LTS. */
 
-  inline std::string pp(const state_label_mcrl2 l)
+  inline std::string pp(const state_label_svc l)
   {
     std::string s;
     s = "(";
@@ -162,7 +162,7 @@ namespace lts
    * \param[in] value  The state parameter value to pretty print.
    * \return           The pretty-printed representation of value.
    * \pre              value occurs as state parameter value in this LTS. */
-  inline std::string pp(const state_label_mcrl2::element_type &value)
+  /* inline std::string pp(const state_label_svc::element_type &value)
   {
     AFun head = ATgetAFun(value);
     if ((ATgetArity(head) == 0) && (ATisQuoted(head) == ATtrue)) // Type of parameter is a string.
@@ -176,64 +176,64 @@ namespace lts
       return s;
     }
     return core::pp(value); //PrintPart_CXX(value,ppDefault);
-  }
+  } */
 
 
-  class action_label_mcrl2;
-  inline std::string pp(const action_label_mcrl2 l);
+  class action_label_svc;
+  inline std::string pp(const action_label_svc l);
   ATerm sort_multi_action(ATerm ma);
 
-  class action_label_mcrl2
+  class action_label_svc
   {
     public:
       typedef mcrl2::lps::multi_action element_type;
 
     protected: 
-      element_type m_action_label_mcrl2;
+      element_type m_action_label_svc;
 
     public:
-      action_label_mcrl2():m_action_label_mcrl2()
+      action_label_svc():m_action_label_svc()
       {}
 
-      action_label_mcrl2(const ATerm a):m_action_label_mcrl2(a)
+      action_label_svc(const ATerm a):m_action_label_svc(a)
       { 
       }
 
       element_type label() const
       { 
-        return m_action_label_mcrl2;
+        return m_action_label_svc;
       }
 
       ATerm aterm() const
       { 
-        assert(!m_action_label_mcrl2.has_time());
-        return (ATerm)mcrl2::core::detail::gsMakeMultAct(m_action_label_mcrl2.actions());
+        assert(!m_action_label_svc.has_time());
+        return (ATerm)mcrl2::core::detail::gsMakeMultAct(m_action_label_svc.actions());
       }
 
-      bool operator ==(const action_label_mcrl2 &other) const
+      bool operator ==(const action_label_svc &other) const
       {
-        return m_action_label_mcrl2==other.m_action_label_mcrl2;
+        return m_action_label_svc==other.m_action_label_svc;
       }
 
-      bool operator !=(const action_label_mcrl2 &other) const
+      bool operator !=(const action_label_svc &other) const
       {
-        return m_action_label_mcrl2!=other.m_action_label_mcrl2;
+        return m_action_label_svc!=other.m_action_label_svc;
       }
 
-      bool operator<(const action_label_mcrl2 &l) const
+      bool operator<(const action_label_svc &l) const
       { 
-        return this->m_action_label_mcrl2<l.m_action_label_mcrl2;
+        return this->m_action_label_svc<l.m_action_label_svc;
       }
 
 
       bool hide_actions(const std::vector<std::string> &tau_actions)
       { 
         using namespace std;
-        std::cerr << "Hide actions in .lts file is not yet re-implemented \n";
+        std::cerr << "Hide actions in .svc file is not yet re-implemented \n";
         return true;
 
-        /* const bool is_string=((ATgetArity(ATgetAFun(m_action_label_mcrl2)) == 0) && (ATisQuoted(ATgetAFun(m_action_label_mcrl2)) == ATtrue));
-        string s=detail::pp(m_action_label_mcrl2);
+        /* const bool is_string=((ATgetArity(ATgetAFun(m_action_label_svc)) == 0) && (ATisQuoted(ATgetAFun(m_action_label_svc)) == ATtrue));
+        string s=detail::pp(m_action_label_svc);
         stringstream ss(s);
         ATermAppl t=mcrl2::core::parse_mult_act(ss);
 
@@ -254,11 +254,11 @@ namespace lts
           }
         }
         const bool is_tau=new_multi_action==ATempty; 
-        m_action_label_mcrl2=sort_multi_action((ATerm)mcrl2::core::detail::gsMakeMultAct(new_multi_action));
+        m_action_label_svc=sort_multi_action((ATerm)mcrl2::core::detail::gsMakeMultAct(new_multi_action));
 
         if (is_string)
         { 
-          m_action_label_mcrl2=(ATerm)ATmakeAppl0(ATmakeAFun(ATwriteToString(m_action_label_mcrl2),0,ATtrue));
+          m_action_label_svc=(ATerm)ATmakeAppl0(ATmakeAFun(ATwriteToString(m_action_label_svc),0,ATtrue));
         }
         
         return is_tau;
@@ -267,7 +267,7 @@ namespace lts
   };
 
 
-  inline std::string pp(const action_label_mcrl2 l)
+  inline std::string pp(const action_label_svc l)
   { 
     return l.label().to_string();
 
@@ -286,7 +286,7 @@ namespace lts
     return PrintPart_CXX((ATerm)l.label(),ppDefault); */
   }
 
-  inline action_label_mcrl2 parse_mcrl2_action(
+  inline action_label_svc parse_svc_action(
                      const std::string &multi_action_string,
                      const data::data_specification &data_spec,
                      const lps::action_list &act_decls)
@@ -302,7 +302,7 @@ namespace lts
     lps::multi_action ma=lps::action_list((ATermList)ATgetArgument(t,0));
     lps::type_check(ma,data_spec,act_decls);
   
-    return action_label_mcrl2((ATerm)mcrl2::core::detail::gsMakeMultAct(ma.actions()));
+    return action_label_svc((ATerm)mcrl2::core::detail::gsMakeMultAct(ma.actions()));
   } 
 
 
@@ -314,7 +314,7 @@ namespace lts
    * LTS. This can be either a muCRL specification, an mCRL2 specificiation, or
    * options for the Dot format. */
 
-  class lts_svc_t : public lts_< detail::state_label_mcrl2, detail::action_label_mcrl2 >
+  class lts_svc_t : public lts_< detail::state_label_svc, detail::action_label_svc >
   {
 
     private:
@@ -349,7 +349,7 @@ namespace lts
       /** \brief Copy constructor */
 
       lts_svc_t(const lts_svc_t &l):
-           lts_< detail::state_label_mcrl2, detail::action_label_mcrl2 >(l),
+           lts_< detail::state_label_svc, detail::action_label_svc >(l),
            // m_type(l.m_type),
            m_creator(l.m_creator),
            m_has_valid_data_spec(l.m_has_valid_data_spec),
@@ -368,7 +368,7 @@ namespace lts
 
       void swap(lts_svc_t &l)
       {
-        lts_< detail::state_label_mcrl2, detail::action_label_mcrl2 >(l).swap(*this);
+        lts_< detail::state_label_svc, detail::action_label_svc >(l).swap(*this);
       
         // { const lts_type aux=m_type; m_type=l.m_type; l.m_type=aux; }
         m_creator.swap(l.m_creator);
