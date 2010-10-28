@@ -218,7 +218,7 @@ class lts2lps_tool : public input_output_tool
         }
       }
 
-      lts_convert(l1,l2,data,action_labels,process_parameters,extra_data_is_defined);
+      mcrl2::lts::detail::lts_convert(l1,l2,data,action_labels,process_parameters,extra_data_is_defined);
 
       /* if (gsVerbose)
       {

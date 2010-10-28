@@ -22,7 +22,7 @@ mcrl2::lts::lts_fsm_t read_lts_as_fsm_file(const std::string &fn)
   LTS_TYPE l;
   l.load(fn);
   mcrl2::lts::lts_fsm_t result_lts;
-  lts_convert(l,result_lts);
+  mcrl2::lts::detail::lts_convert(l,result_lts);
   return result_lts;
 }
 
