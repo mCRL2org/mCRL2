@@ -30,7 +30,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
 
-typedef enum { gauss, smp } solution_strategy_t;
+typedef enum { gauss, spm } solution_strategy_t;
 
 std::string solution_strategy_to_string(const solution_strategy_t s)
 {
@@ -39,8 +39,8 @@ std::string solution_strategy_to_string(const solution_strategy_t s)
     case gauss:
       return "gauss";
       break;
-    case smp:
-      return "smp";
+    case spm:
+      return "spm";
       break;
     default:
       return "unknown";
@@ -79,7 +79,7 @@ class bessolve_tool: public input_output_tool
       desc.add_option("strategy", make_mandatory_argument("STRATEGY"),
         "solve the BES using the specified STRATEGY:\n"
         "  'gauss' for Gauss elimination (default),\n"
-        "  'smp' for Small Progress Measures,\n", 's');
+        "  'spm' for Small Progress Measures,\n", 's');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -90,8 +90,8 @@ class bessolve_tool: public input_output_tool
         if (str_strategy == "gauss") {
           strategy = gauss;
         }
-        else if (str_strategy == "smp") {
-          strategy = smp;
+        else if (str_strategy == "spm") {
+          strategy = spm;
         }
         else
         {
@@ -126,7 +126,7 @@ class bessolve_tool: public input_output_tool
         case gauss:
           result = gauss_elimination(bes, log_level);
           break;
-        case smp:
+        case spm:
           result = small_progress_measures(bes, log_level);
           break;
         default:
@@ -146,7 +146,7 @@ public:
 
 		values.clear();
 		values.push_back("gauss");
-		values.push_back("smp");
+		values.push_back("spm");
 		m_gui_options["strategy"] = create_radiobox_widget(values);
 	}
 };
