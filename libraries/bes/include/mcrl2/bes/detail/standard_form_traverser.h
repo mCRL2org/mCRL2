@@ -12,6 +12,7 @@
 #ifndef MCRL2_BES_DETAIL_STANDARD_FORM_TRAVERSER_H
 #define MCRL2_BES_DETAIL_STANDARD_FORM_TRAVERSER_H
 
+#include <iterator>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/core/identifier_generator.h"
@@ -67,6 +68,9 @@ namespace detail {
       
       /// \brief A vector containing generated equations.
       atermpp::vector<boolean_equation> m_equations;
+
+      /// \brief A vector containing generated equations with new variables.
+      atermpp::vector<boolean_equation> m_equations2;     
       
       /// \brief Maps right hand sides of equations to their corresponding left hand side.
       atermpp::map<boolean_expression, boolean_variable> m_table;
@@ -111,11 +115,11 @@ namespace detail {
         m_table[expr] = var;
         if (type == standard_form_and)
         {
-          m_equations.push_back(boolean_equation(m_symbol, var, expr));
+          m_equations2.push_back(boolean_equation(m_symbol, var, expr));
         }
         else
         {
-          m_equations.push_back(boolean_equation(m_symbol, var, expr));
+          m_equations2.push_back(boolean_equation(m_symbol, var, expr));
         }
         return var;
       }
@@ -147,7 +151,7 @@ namespace detail {
       
       /// \brief Returns the generated equations.
       const atermpp::vector<boolean_equation>& equations() const
-      {
+      {       
         return m_equations;
       }
       
@@ -231,7 +235,7 @@ namespace detail {
       {
         standard_form_pair p = pop();
         m_equations.push_back(boolean_equation(eq.symbol(), eq.variable(), p.first));
-        m_table[p.first] = eq.variable();
+        // m_table[p.first] = eq.variable();
       }
       
       /// \brief Enter a boolean equation system.
@@ -246,6 +250,14 @@ namespace detail {
       /// \brief Leave a boolean equation system.
       void leave(const boolean_equation_system<>&)
       {
+        // set the fixpoint symbol for the added equations m_equations2, and move them to m_equations
+        fixpoint_symbol sigma = m_equations.back().symbol();
+        for (atermpp::vector<boolean_equation>::iterator i = m_equations2.begin(); i != m_equations2.end(); ++i)
+        {
+          i->symbol() = sigma;
+        }
+        std::copy(m_equations2.begin(), m_equations2.end(), std::back_inserter(m_equations));
+        
         // add equations for true and false if needed
         if (m_recursive_form)
         {
