@@ -348,6 +348,6 @@ def timeout_command(command, timeout = -1):
             else:
                 os.kill(process.pid, signal.SIGKILL)
                 os.waitpid(-1, os.WNOHANG)
-            return None
+            return None, None
 
     return (process.stdout.read(), process.stderr.read())

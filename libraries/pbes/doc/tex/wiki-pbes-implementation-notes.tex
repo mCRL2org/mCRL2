@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, October 26, 2010 17:14:35}
+%TCIDATA{LastRevised=Friday, October 29, 2010 14:31:35}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1401,12 +1401,12 @@ is odd}}%
 \end{array}%
 \right. 
 \end{equation*}%
-and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{N}\rightarrow 
+and the function $\mathsf{inc:}$ $\mathbb{N}^{d}\times \mathbb{Z}\rightarrow 
 \mathbb{N}^{d}$ is defined inductively as%
 \begin{equation*}
 \left\{ 
 \begin{array}{lll}
-\mathsf{inc}(\alpha ,0) & = & \top  \\ 
+\mathsf{inc}(\alpha ,-1) & = & \top  \\ 
 &  &  \\ 
 \mathsf{inc}(\alpha ,i+1) & = & \left\{ 
 \begin{array}{ll}
@@ -1425,11 +1425,9 @@ $ is defined as:%
 f(X_{j},m)=\left\{ 
 \begin{array}{ll}
 \lbrack (\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
-_{j})_{m},0,\cdots ,0] & \text{\textsf{if}}\ \mathsf{rank}(X_{j})\text{ is
-even} \\ 
+_{j})_{m},0,\cdots ,0] & \text{\textsf{if}}\ m\text{ is even} \\ 
 \mathsf{inc}([(\mathcal{\alpha }_{j})_{1},\cdots ,(\mathcal{\alpha }%
-_{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ \mathsf{rank}(X_{j})\text{
-is odd}%
+_{j})_{m},0,\cdots ,0],m) & \text{\textsf{if}}\ m\text{ is odd}%
 \end{array}%
 \right. 
 \end{equation*}%

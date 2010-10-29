@@ -11,7 +11,7 @@ def last_word(line):
     words = line.strip().split()
     return words[len(words) - 1]
 
-def test_bes(filename, equation_count, term_size = 3):
+def test_bes(filename, equation_count, term_size = 2, error_file = 'bes_errors.txt'):
     txtfile = filename + '.txt'
     besfile = filename + '.bes'
     answerfile = 'temp.answer'
@@ -20,32 +20,35 @@ def test_bes(filename, equation_count, term_size = 3):
     os.system('txt2bes %s %s' % (txtfile, besfile))
 
     # bessolve gauss
-    text, dummy = timeout_command('bessolve -sgauss %s' % besfile, 3)
+    cmd = 'bessolve -sgauss %s' % besfile
+    text, dummy = timeout_command(cmd, 3)
     if text == None:
-      print 'ERROR: timeout on %s' % besfile
+      print "timeout on command '%s'" % cmd
       return None
     answer1 = last_word(text)
 
     # bessolve spm
-    text, dummy = timeout_command('bessolve -sspm %s' % besfile, 3)
+    cmd = 'bessolve -sspm %s' % besfile
+    text, dummy = timeout_command(cmd, 3)
     if text == None:
-      print 'ERROR: timeout on %s' % besfile
+      print "timeout on command '%s'" % cmd
       return None
     answer2 = last_word(text)
 
     # pbes2bool
-    dummy, text = timeout_command('pbes2bool %s' % besfile, 3)
+    cmd = 'pbes2bool %s' % besfile
+    dummy, text = timeout_command(cmd, 3)
     if text == None:
-      print 'ERROR: timeout on %s' % besfile
+      print "timeout on command '%s'" % cmd
       return None
     answer3 = last_word(text)
 
     print 'FILE', filename, answer1, answer2, answer3
-    #if answer1 != answer2 or (answer3 != 'unknown' and answer1 != answer3):
-    #print 'FILE', filename, answer2, answer3
-    #if answer2 != answer3:
-    #    print 'ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    #    path('error.txt').write_text('error in %s\n' % filename, append=True)
+    if answer1 != answer2 or answer2 != answer3:
+        print 'ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        path(error_file).write_text(filename + ' ' + answer1 + ' ' + answer2 + ' ' + answer3, append = True)
 
+error_file = 'bes_errors.txt'
+path(error_file).write_text('')
 for i in range(10000):
-    test_bes('%02d' % i, 4)
+    test_bes('%02d' % i, 4, 3, error_file)

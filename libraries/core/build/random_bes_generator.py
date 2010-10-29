@@ -111,7 +111,7 @@ def make_bes(equation_count, term_size = 3):
     predvars = [predvar('X%d' % i) for i in range(1, equation_count + 1)]
     equations = []
     for i in range(equation_count):
-        terms = make_terms(predvars, term_size)
+        terms = make_terms(predvars, random.randint(1, term_size))
         while len(terms) > 1:
             terms = join_terms(terms)
         sigma, dummy = pick_element(['mu', 'nu'])

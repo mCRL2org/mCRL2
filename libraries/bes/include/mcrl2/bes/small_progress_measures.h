@@ -163,19 +163,19 @@ namespace bes {
     {
       return;
     }
-    else if (m == 0)
+    else if (m == -1)
     {
       alpha[0] = -1;
       return;
     }
-    else if (alpha[m-1] == beta[m-1])
+    else if (alpha[m] == beta[m])
     {
-      alpha[m-1] = 0;
+      alpha[m] = 0;
       inc(alpha, m - 1, beta);
     }
     else
     {
-      alpha[m-1]++;
+      alpha[m]++;
     }
   }
 
@@ -198,6 +198,7 @@ namespace bes {
 #endif
   };
 
+  // compare the positions with index in [0, ... ,m]
   struct compare_progress_measures_vertex
   {
     unsigned int m;
@@ -208,11 +209,19 @@ namespace bes {
 
     bool operator()(const progress_measures_vertex* x, const progress_measures_vertex* y) const
     {
-      int n = lexicographical_compare_3way(x->alpha.v.begin(), x->alpha.v.begin() + m, y->alpha.v.begin(), y->alpha.v.begin() + m);
-      if (n == 0)
+      if (x->alpha.is_top())
       {
-        return is_even(x->rank) && is_odd(y->rank);
+        return false;
       }
+      else if (y->alpha.is_top())
+      {
+        return true;
+      }
+      int n = lexicographical_compare_3way(x->alpha.v.begin(), x->alpha.v.begin() + m + 1, y->alpha.v.begin(), y->alpha.v.begin() + m + 1);
+      //if (n == 0)
+      //{
+      //  return is_even(x->rank) && is_odd(y->rank);
+      //}
       return n < 0;
     }
   };
@@ -309,14 +318,26 @@ namespace bes {
         }
       }
 
-
       /// \brief Prints a vertex
       void LOG_VERTEX(unsigned int level, const vertex& v, const std::string& msg = "") const
       {
         if (check_log_level(level))
         {
           std::clog << msg;
-          std::clog << v.name << " " << v.alpha << std::endl;
+          std::clog << v.name << " (alpha = " << v.alpha << ", rank = " << v.rank << ")";
+        }
+      }
+
+      /// \brief Prints the neighbors of a vertex
+      void LOG_NEIGHBORS(unsigned int level, const progress_measures_vertex& v, const std::string& msg = "") const
+      {
+        if (check_log_level(level))
+        {
+          std::clog << msg;
+          for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
+          {
+            LOG_VERTEX(level, **i, "\n      ");
+          }
         }
       }
 
@@ -331,7 +352,7 @@ namespace bes {
           m_bes(b)
       {}
       
-      bool run()
+      bool run(const boolean_variable& first_variable)
       {
         LOG(2, "--- applying small progress measures to ---\n" + pp(m_bes) + "\n\n");
         initialize_vertices();
@@ -343,32 +364,35 @@ namespace bes {
           for (vertex_map::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
           {
             vertex& v = i->second;
-            LOG_VERTEX(2, v, "    choose vertex ");
+            LOG_VERTEX(2, v, "\nchoose vertex ");
             unsigned int m = v.rank;
             std::vector<progress_measures_vertex*>::const_iterator j;
+            LOG_NEIGHBORS(2, v, "\n    neighbors:");
             if (v.even)
             {
-              j = std::min_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(v.rank));
+              j = std::min_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(m));
+              LOG_VERTEX(2, **j, "\n    minimum neighbor ");
             }
             else
             {
-              j = std::max_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(v.rank));
+              j = std::max_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(m));
+              LOG_VERTEX(2, **j, "\n    maximum neighbor ");
             }
             std::vector<int> alpha(m_d, 0);
             const progress_measures_vertex& w = **j;
-            std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m, alpha.begin());
-            if (!w.even)
+            std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m + 1, alpha.begin());
+            if (is_odd(m))
             {
-              LOG(2, "    inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
+              LOG(2, "\n    inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
               inc(alpha, m, m_beta);
-              LOG(2, core::detail::print_list(alpha) + "\n");
+              LOG(2, (alpha[0] < 0 ? "top" : core::detail::print_list(alpha)));
             }
 
             if (!std::equal(alpha.begin(), alpha.end(), v.alpha.v.begin()))
             {
               changed = true;
               v.alpha.v = alpha;
-              LOG_VERTEX(1, v, "update vertex ");
+              LOG_VERTEX(1, v, "\nupdate vertex ");
             }
           }
           if (!changed)
@@ -376,8 +400,8 @@ namespace bes {
             break;
           }
         }
-        LOG_VERTICES(2, "--- vertices ---\n");
-        return !m_vertices[m_bes.equations().front().variable()].alpha.is_top();
+        LOG_VERTICES(2, "\n--- vertices ---\n");
+        return !m_vertices[first_variable].alpha.is_top();
       }
            
   };
@@ -385,9 +409,10 @@ namespace bes {
   inline
   bool small_progress_measures(boolean_equation_system<>& b, unsigned int loglevel)
   {
+    boolean_variable first = b.equations().front().variable();
     make_standard_form(b, true);
     small_progress_measures_algorithm algorithm(b, loglevel);
-    return algorithm.run();
+    return algorithm.run(first);
   }
 
 } // namespace bes
