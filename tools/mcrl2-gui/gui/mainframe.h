@@ -1,9 +1,13 @@
-/*
- * mainframe.h
- *
- *  Created on: Jun 3, 2010
- *      Author: fstapper
- */
+// Author(s): Frank Stappers 
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mainframe.h
+
 
 #ifndef MCRL2_GUI_MAINFRAME_H_
 #define MCRL2_GUI_MAINFRAME_H_
@@ -193,7 +197,7 @@ public:
 
 		// tell the manager to "commit" all the changes just made
 		m_mgr.Update();
-		m_default_perspective = m_mgr.SavePerspective();
+		//m_default_perspective = m_mgr.SavePerspective();
 
 		//cout << m_mgr.SavePerspective().mb_str(wxConvUTF8) << endl ;
 

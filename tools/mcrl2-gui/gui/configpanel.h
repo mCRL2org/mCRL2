@@ -1,9 +1,13 @@
-/*
- * configpanel.h
- *
- *  Created on: Jun 9, 2010
- *      Author: fstapper
- */
+// Author(s): Frank Stappers 
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file configpanel.h
+
 
 #ifndef MCRL2_GUI_CONFIGPANEL_H_
 #define MCRL2_GUI_CONFIGPANEL_H_
@@ -104,7 +108,17 @@ public:
       }
 
     ++row;
-    fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
+    //fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
+		/* Display RUN & ABORT button */
+		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"));
+		m_abortbutton = new wxButton(top, ID_ABORT_TOOL, wxT("Abort"));
+
+		++row;
+    fgs->Add(m_runbutton, wxGBPosition(row,0));
+    fgs->Add(m_abortbutton, wxGBPosition(row,1));
+		++row;
+	  fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
+		++row;
 
 		/* Parse and display options */
 		vector<Tool_option> vto = tool.m_tool_options;
@@ -236,15 +250,6 @@ public:
 			}
 		};
 
-		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"));
-
-		m_abortbutton = new wxButton(top, ID_ABORT_TOOL, wxT("Abort"));
-
-	  ++row;
-	  fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
-		++row;
-    fgs->Add(m_runbutton, wxGBPosition(row,0));
-    fgs->Add(m_abortbutton, wxGBPosition(row,1));
 
     hbox->Add(fgs, 1, wxALL, 15);
     top->SetSizer(hbox);

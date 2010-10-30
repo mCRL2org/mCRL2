@@ -1,8 +1,13 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:        mcrl2-gui.cpp
-// Purpose:     prototype
-// Author:      Frank Stappers
-/////////////////////////////////////////////////////////////////////////////
+// Author(s): Frank Stappers 
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2-gui.cpp
+
 
 #include "mcrl2-gui.h"
 #include "mcrl2-process.h"

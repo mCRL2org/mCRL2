@@ -1,9 +1,13 @@
-/*
- * mcrl2-gui.h
- *
- *  Created on: Jun 4, 2010
- *      Author: fstapper
- */
+// Author(s): Frank Stappers 
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2-gui.h
+
 
 #ifndef MCRL2_GUI_H_
 #define MCRL2_GUI_H_
