@@ -10,27 +10,18 @@
 
 #include <string>
 #include <sstream>
-#include <assert.h>
-#include <aterm2.h>
-#include "mcrl2/lts/lts_io.h"
+#include <fstream>
 #include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/core/messaging.h"
 
-static std::string c(const unsigned int n)  // Awkward trick, should be a better way to do this. Please replace....
-{ std::stringstream out;
+
+using namespace mcrl2::lts;
+using namespace std;
+
+static string c(const unsigned int n)  // Awkward trick, should be a better way to do this. Please replace....
+{ stringstream out;
   out << n;
   return out.str();
 }
-
-using namespace mcrl2::core;
-using namespace std;
-
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
-{
 
 static void read_newline(istream &is,const unsigned int lineno=1)
 { 
@@ -194,7 +185,7 @@ static void read_from_aut(lts_aut_t &l, istream &is)
 
   l.set_initial_state(initial_state); 
 
-  ATermIndexedSet labs = ATindexedSetCreate(100,50);
+  map < string, size_t > labs;
   while ( !is.eof() )
   {
     unsigned int from,to;
@@ -208,30 +199,32 @@ static void read_from_aut(lts_aut_t &l, istream &is)
     
     if ( from >= l.num_states() )
     {
-      ATtableDestroy(labs);
       throw mcrl2::runtime_error("cannot parse AUT input (invalid transition at line " + 
               c(line_no) + "; state index (" + c(from) + ") higher than maximum (" +
                   c(l.num_states()) + ") given by header).");
     }
     if ( to >= l.num_states() )
     {
-      ATtableDestroy(labs);
       throw mcrl2::runtime_error("cannot parse AUT input (invalid transition at line " + c(line_no) + 
               "; state index (" + c(to) + ") higher than maximum (" + c(l.num_states()) + ") given by header).");
     }
 
-    int label;
-    ATerm t = (ATerm) ATmakeAppl(ATmakeAFun(s.c_str(),0,ATtrue));
-    if ( (label =  ATindexedSetGetIndex(labs,t)) < 0 )
+    size_t label;
+     
+    const map < string, size_t >::const_iterator i=labs.find(s);
+    if (i==labs.end())
     {
-      ATbool b;
-      label = ATindexedSetPut(labs,t,&b);
-      l.add_label(string(ATwriteToString(t)),s=="tau");
+      label=l.add_label(s,s=="tau");
+      labs[s]=label;
+    }
+    else
+    {
+      label=i->second;
     }
 
-    l.add_transition(transition(from,(unsigned int) label,to));
+    l.add_transition(transition(from,label,to));
   }
-  ATtableDestroy(labs);
+
   if ( ntrans != l.num_transitions() )
   {
     throw mcrl2::runtime_error("number of transitions read (" + c(l.num_transitions()) + 
@@ -269,13 +262,16 @@ static void write_to_aut(const lts_aut_t &l, ostream &os)
   }
 }
 
-} // namespace detail
+namespace mcrl2
+{
+namespace lts
+{
 
 void lts_aut_t::load(const string &filename)
 {
   if (filename=="")
   {
-	  mcrl2::lts::detail::read_from_aut(*this,cin);
+	  read_from_aut(*this,cin);
   }
   else
   {
@@ -286,21 +282,21 @@ void lts_aut_t::load(const string &filename)
       throw mcrl2::runtime_error("cannot open AUT file '" + filename + "' for reading.");
     }
 
-    mcrl2::lts::detail::read_from_aut(*this,is);
+    read_from_aut(*this,is);
     is.close();
   }
 } 
 
 void lts_aut_t::load(istream &is)
 {
-  mcrl2::lts::detail::read_from_aut(*this,is);
+  read_from_aut(*this,is);
 } 
 
 void lts_aut_t::save(string const& filename) const
 {
   if (filename=="")
   { 
-    mcrl2::lts::detail::write_to_aut(*this,cout);
+    write_to_aut(*this,cout);
   }
   else
   {
@@ -312,7 +308,7 @@ void lts_aut_t::save(string const& filename) const
       return;
     }
 
-    mcrl2::lts::detail::write_to_aut(*this,os);
+    write_to_aut(*this,os);
     os.close();
   }
 } 

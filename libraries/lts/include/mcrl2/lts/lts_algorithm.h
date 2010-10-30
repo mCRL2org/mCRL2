@@ -648,19 +648,19 @@ namespace mcrl2
         }
     
         unsigned int new_nlabels = 0;
-        for (unsigned int i=0; i<l.num_labels(); i++)
+        for (unsigned int i=0; i<l.num_action_labels(); i++)
         {
           if (label_map.count(i)>0)   // Label i is used.
           { 
             label_map[i] = new_nlabels;
-            if (l.has_label_info())
-            { 
+            // if (l.has_label_info())
+            // { 
               new_lts.add_label(l.label_value(i),l.is_tau(i));
-            }
-            else
+            // }
+            /* else
             {
               new_lts.add_label(l.is_tau(i));
-            }
+            } */
             new_nlabels++;
           }
         }
@@ -739,7 +739,7 @@ void reduce(LTS_TYPE &l,lts_equivalence eq)
 
         // Clear this LTS, but keep the labels
         // l.clear_type();
-        l.clear_states();
+        l.clear_state_labels();
         l.clear_transitions();
 
         // Assign the reduced LTS
@@ -766,10 +766,15 @@ void reduce(LTS_TYPE &l,lts_equivalence eq)
     case lts_eq_weak_trace:
       { 
         detail::bisimulation_reduce(l,true,false);
+        std::cerr << "AA1 " << l.num_action_labels() << "\n";
         detail::tau_star_reduce(l);
+        std::cerr << "AA2 " << l.num_action_labels() << "\n";
         detail::bisimulation_reduce(l,false);
+        std::cerr << "AA3 " << l.num_action_labels() << "\n";
         determinise(l);
+        std::cerr << "AA4 " << l.num_action_labels() << "\n";
         detail::bisimulation_reduce(l,false);
+        std::cerr << "AA5 " << l.num_action_labels() << "\n";
         return;
       }
     case lts_red_determinisation:
@@ -961,7 +966,7 @@ void determinise(LTS_TYPE&l)
 
     n_t = d_transs.size();
     i = 0;
-    for (lbl = 0; lbl < l.num_labels(); ++lbl) 
+    for (lbl = 0; lbl < l.num_action_labels(); ++lbl) 
     {
       // compute the destination of the transition with label lbl
       while (i < n_t && d_transs[i].label() < lbl) 

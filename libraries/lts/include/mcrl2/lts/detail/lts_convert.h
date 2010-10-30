@@ -116,16 +116,16 @@ namespace detail
 
 // ====================== mcrl2->fsm =============================
 
-  class mcrl2_fsm_convertor
+  class lts_fsm_convertor
   {
     private:
-      std::vector < atermpp::map <ATerm , unsigned int > > state_element_values_sets;
+      std::vector < atermpp::map <mcrl2::data::data_expression , unsigned int > > state_element_values_sets;
       lts_fsm_t &lts_out;
 
     public:
-      mcrl2_fsm_convertor(unsigned int n, lts_fsm_t &l):
-              state_element_values_sets(std::vector < atermpp::map <ATerm , unsigned int > >
-                       (n,atermpp::map <ATerm , unsigned int >())),
+      lts_fsm_convertor(unsigned int n, lts_fsm_t &l):
+              state_element_values_sets(std::vector < atermpp::map <mcrl2::data::data_expression , unsigned int > >
+                       (n,atermpp::map <mcrl2::data::data_expression , unsigned int >())),
               lts_out(l)
       {
       }
@@ -140,8 +140,8 @@ namespace detail
         std::vector < unsigned int > result;
         for(unsigned int i=0; i<l.size(); ++i)
         { 
-          ATerm t=(ATerm)l[i];
-          atermpp::map <ATerm , unsigned int >::const_iterator index=state_element_values_sets[i].find(t);
+          const mcrl2::data::data_expression t=l[i];
+          atermpp::map <mcrl2::data::data_expression , unsigned int >::const_iterator index=state_element_values_sets[i].find(t);
           if (index==state_element_values_sets[i].end())
           {
             const unsigned int element_index=state_element_values_sets[i].size();
@@ -169,7 +169,7 @@ namespace detail
       lts_out.add_process_parameter(core::pp(*i),core::pp(i->sort()));
     }
     
-    mcrl2_fsm_convertor c(lts_in.process_parameters().size(),lts_out);
+    lts_fsm_convertor c(lts_in.process_parameters().size(),lts_out);
     convert_core_lts(c,lts_in,lts_out);
     
   }
@@ -191,7 +191,7 @@ namespace detail
 
 // ====================== mcrl2->aut =============================
 
-  class mcrl2_aut_convertor
+  class lts_aut_convertor
   {
     public:
       action_label_string translate_label(const action_label_lts &l) const
@@ -209,7 +209,7 @@ namespace detail
                 const mcrl2::lts::lts_lts_t &lts_in, 
                 lts_aut_t &lts_out)
   {  
-    mcrl2_aut_convertor c;
+    lts_aut_convertor c;
     convert_core_lts(c,lts_in,lts_out);
   }
 
@@ -230,13 +230,13 @@ namespace detail
 
 // ====================== mcrl2->dot =============================
 
-  class mcrl2_dot_convertor
+  class lts_dot_convertor
   {
     unsigned int m_state_count;
 
     public:
 
-      mcrl2_dot_convertor():m_state_count(0)
+      lts_dot_convertor():m_state_count(0)
       {}
 
       action_label_string translate_label(const action_label_lts &l) const
@@ -258,7 +258,7 @@ namespace detail
                 lts_dot_t &lts_out)
   {  
     lts_out=lts_dot_t();
-    mcrl2_dot_convertor c;
+    lts_dot_convertor c;
     convert_core_lts(c,lts_in,lts_out);
   }
 
@@ -301,12 +301,30 @@ namespace detail
                 const mcrl2::data::data_specification &data,
                 const mcrl2::lps::action_label_list &action_labels):
                      m_data(data),
-                     m_action_labels(m_action_labels)
+                     m_action_labels(action_labels)
       {}
 
-      action_label_lts translate_label(const action_label_string &l) const
+      action_label_lts translate_label(const action_label_string &l1) const
       {
-        return mcrl2::lts::detail::parse_lts_action(l,m_data,m_action_labels);
+        std::string l(l1);  
+        action_label_lts al;
+        // Remove quotes, if present in the action label string.
+        if ((l.size()>=2) && 
+            (l.substr(0,1)=="\"") && 
+            (l.substr(l.size()-1,l.size())=="\""))
+        {
+          l=l.substr(1,l.size()-1);
+        }
+        
+        try
+        { 
+          al=mcrl2::lts::detail::parse_lts_action(l,m_data,m_action_labels);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error("Parse error in action label " + l1 + ".\n" + e.what());
+        }
+        return al;
       }
 
       state_label_lts translate_state(const state_label_aut &l) const
@@ -810,18 +828,19 @@ namespace detail
                                const LTS_IN_TYPE &lts_in,
                                LTS_OUT_TYPE &lts_out)
   {
-    for(unsigned int i=0; i<lts_in.num_states(); ++i)
+    if (lts_in.has_state_info())
     { 
-      if (lts_in.has_state_info())
+      for(unsigned int i=0; i<lts_in.num_state_labels(); ++i)
       { 
         lts_out.add_state(c.translate_state(lts_in.state_value(i)));
       }
-      else
-      {
-        lts_out.add_state();
-      }
     }
-    for(unsigned int i=0; i<lts_in.num_labels(); ++i)
+    else 
+    { 
+      lts_out.set_num_states(lts_in.num_states(),false);
+    }
+
+    for(unsigned int i=0; i<lts_in.num_action_labels(); ++i)
     { 
       lts_out.add_label(c.translate_label(lts_in.label_value(i)));
       if (lts_in.is_tau(i))
@@ -829,6 +848,7 @@ namespace detail
         lts_out.set_tau(i);
       }
     }
+
     for(transition_const_range r=lts_in.get_transitions(); !r.empty(); r.advance_begin(1))
     {
       lts_out.add_transition(r.front());

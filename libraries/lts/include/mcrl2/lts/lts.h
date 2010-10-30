@@ -20,30 +20,12 @@
 
 #include <string>
 #include <vector>
-#include <set>
 #include <map>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <stdio.h>
-#include <stdlib.h>
-
-#include "boost/iterator/transform_iterator.hpp"
-
-#include "mcrl2/core/detail/struct_core.h"
-
-#include "aterm2.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/atermpp/container_utility.h"
-
-#include "mcrl2/core/parse.h"
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/exception.h"
 
-#ifdef USE_BCG
-#include <bcg_user.h>
-#endif
 
 namespace mcrl2
 {
@@ -91,7 +73,8 @@ namespace mcrl2
             no state or action labels are provided. For all action labels
             it is maintained whether this action label is an internal
             'tau' action. This can be indicated for each action label
-            separately.
+            separately. Finally, the number of states is recalled as
+            a separate variable.
     */
 
     template < class STATE_LABEL_T, class ACTION_LABEL_T >
@@ -129,7 +112,6 @@ namespace mcrl2
         // bool state_and_label_values_are_mcrl2_terms; 
 
         states_size_type nstates;
-        labels_size_type nlabels;
         states_size_type init_state;
         std::vector<transition> transitions;
         atermpp::vector<STATE_LABEL_T> state_values;
@@ -140,14 +122,13 @@ namespace mcrl2
 
         /** \brief Creates an empty LTS.
          */
-        lts_():nstates(0),nlabels(0)
+        lts_():nstates(0)
         {};
 
         /** \brief Creates a copy of the supplied LTS.
          * \param[in] l The LTS to copy. */
         lts_(const lts_ &l):
                 nstates(l.nstates),
-                nlabels(l.nlabels),
                 init_state(l.init_state),
                 transitions(l.transitions),
                 state_values(l.state_values),
@@ -166,7 +147,6 @@ namespace mcrl2
         {
           { const states_size_type aux=init_state; init_state=l.init_state;   l.init_state=aux; }
           { const states_size_type aux=nstates;    nstates=l.nstates;         l.nstates=aux; }
-          { const labels_size_type aux=nlabels;    nlabels=l.nlabels;         l.nlabels=aux; }
           transitions.swap(l.transitions);
           state_values.swap(l.state_values);
           taus.swap(l.taus);
@@ -178,6 +158,13 @@ namespace mcrl2
         states_size_type num_states() const
         {
           return nstates;
+        }
+
+        /** \brief Gets the number of state labels of this LTS.
+         * \return The number of state labels of this LTS. */
+        states_size_type num_state_labels() const
+        {
+          return state_values.size();
         }
 
         /** \brief Sets the number of states of this LTS.
@@ -209,30 +196,19 @@ namespace mcrl2
           return transitions.size();
         }
 
-        /** \brief Gets the number of labels of this LTS.
-         * \return The number of labels of this LTS. */
-        labels_size_type num_labels() const
+        /** \brief Sets the number of action labels of this LTS.
+         * \details If space is reserved for new action labels,
+         *          these are set to the default action label. */
+        void set_num_action_labels(const labels_size_type n)
         {
-          return nlabels;
+          label_values.resize(n);
         }
 
-        /** \brief Sets the number of labels of this LTS.
-         *  \param [in] n The new number of labels.
-         *  \param [in] has_label_info An optional boolean indicating whether the lts
-         *              has label values.
-         */
-        void set_num_labels(labels_size_type n, bool has_label_info = true)
+        /** \brief Gets the number of action labels of this LTS.
+         * \return The number of action labels of this LTS. */
+        labels_size_type num_action_labels() const
         {
-          nlabels = n;
-          taus.resize(n, false);
-          if (has_label_info)
-          {
-            label_values.resize(n);
-          }
-          else
-          {
-            label_values = atermpp::vector<ACTION_LABEL_T>();
-          }
+          return label_values.size();
         }
 
         /** \brief Gets the initial state number of this LTS.
@@ -272,30 +248,14 @@ namespace mcrl2
          * \param[in] value The value of the label.
          * \param[in] is_tau Indicates whether the label is a tau action.
          * \return The number of the added label. */
-        labels_size_type add_label(const ACTION_LABEL_T value = ACTION_LABEL_T(), bool is_tau = false)
+        labels_size_type add_label(const ACTION_LABEL_T value, bool is_tau = false)
         {
-          // std::cerr << "nlabels: " << nlabels << "  label_values size " << label_values.size() << "\n";
-          assert(nlabels==taus.size());
+          // std::cerr << "  label_values size " << label_values.size() << "\n";
+          assert(label_values.size()==taus.size());
+          const labels_size_type label_index=label_values.size();
           taus.push_back(is_tau);
-
-          if (value != ACTION_LABEL_T())
-          { 
-            assert(nlabels==label_values.size());
-            label_values.push_back(value);
-          }
-          else
-          {
-            assert(label_values.size()==0);
-          }
-          return nlabels++;
-        }
-
-        /** \brief Adds a label to this LTS.
-         * \param[in] is_tau Indicates whether the label is a tau action.
-         * \return The number of the added label. */
-        labels_size_type add_label(const bool is_tau)
-        {
-          return add_label(ACTION_LABEL_T(), is_tau);
+          label_values.push_back(value);
+          return label_index;
         }
 
         /** \brief Sets the value of a state.
@@ -314,10 +274,9 @@ namespace mcrl2
          * \param[in] is_tau Indicates whether the label is a tau action. */
         void set_label_value(labels_size_type label, ACTION_LABEL_T value, bool is_tau = false)
         { 
-          assert(label<nlabels);
-          assert(nlabels==label_values.size());
+          assert(label<label_values.size());
           label_values[label] = value;
-          assert(nlabels==taus.size());
+          assert(label<taus.size());
           taus[label] = is_tau;
         }
         ;
@@ -338,6 +297,7 @@ namespace mcrl2
         
         ACTION_LABEL_T label_value(const labels_size_type label) const
         { 
+         // std::cerr << "ACT LABEL " << label << "   " << label_values.size() << "\n";
          assert(label < label_values.size());
          return label_values[label];
         }
@@ -354,29 +314,30 @@ namespace mcrl2
         /** \brief Clear the labels of an lts.
          * \details This removes the action labels of an lts.
          *          It also resets the information
-         *          regarding to what actions labels are tau. */
-        void clear_labels()
+         *          regarding to what actions labels are tau. 
+         *          It will not change the number of action labels. */
+        void clear_action_labels()
         { 
           label_values = atermpp::vector<ACTION_LABEL_T>();
           taus = std::vector<bool>();
-          nlabels = 0;
         }
 
-        /** \brief Clear the states of an lts.
-         * \details This removes the state labels of an lts. */
-        void
-        clear_states()
+        /** \brief Clear the labels of an lts.
+         * \details This removes the action labels of an lts.
+         *          It does not change the number of 
+         *          state labels */
+        void clear_state_labels()
         { 
-          state_values=atermpp::vector<STATE_LABEL_T>();
-          nstates = 0;
+          state_values = atermpp::vector<STATE_LABEL_T>();
         }
 
         void
         clear()
         { 
-          clear_states();
-          clear_labels();
+          clear_state_labels();
+          clear_action_labels();
           clear_transitions();;
+          nstates = 0;
         }
 
         /** \brief Gets an iterator range to the transitions of this LTS.
@@ -398,10 +359,11 @@ namespace mcrl2
          */
         void add_transition(const transition &t)
         { // std::cerr << "Add transition " << t.from() << "-" << t.label() << "->" << t.to() << "  #S " <<
-          //       nstates << "#L " << nlabels << "\n";
-          assert((nstates==0 || t.from()<nstates) && 
-                 (nlabels==0 || t.label()<nlabels) && 
-                 (nstates==0 || t.to()<nstates));
+          //         nstates << "#L " << label_values.size() << "\n";
+          // We allow transitions to be added, even if they have not (yet) state and action labels.
+          // assert((nstates==0 || t.from()<nstates) && 
+          //        (t.label()<label_values.size()) && 
+          //        (nstates==0 || t.to()<nstates));
           transitions.push_back(t);
         }
 
@@ -438,7 +400,7 @@ namespace mcrl2
             return;
           }
         
-          for(labels_size_type i=0; i< num_labels(); ++i)
+          for(labels_size_type i=0; i< num_action_labels(); ++i)
           { 
             label_value(i).hide_actions(tau_actions);
           }
@@ -447,7 +409,7 @@ namespace mcrl2
           // did become equal.
         
           map < labels_size_type, labels_size_type> map_multiaction_indices;
-          for(labels_size_type i=0; i<num_labels(); ++i)
+          for(labels_size_type i=0; i<num_action_labels(); ++i)
           { for (labels_size_type j=0; j!=i; ++j)
             { if (label_value(i)==label_value(j))  
               { assert(map_multiaction_indices.count(i)==0);
@@ -478,15 +440,6 @@ namespace mcrl2
         bool has_state_info() const
         {
           return state_values.size() > 0;
-        }
-
-        /** \brief Checks whether this LTS has label values associated with its labels.
-         * \retval true if the LTS has label information;
-         * \retval false otherwise.  
-        */
-        bool has_label_info() const
-        {
-          return label_values.size() > 0;
         }
 
         /** \brief Sorts the transitions using a sort style.

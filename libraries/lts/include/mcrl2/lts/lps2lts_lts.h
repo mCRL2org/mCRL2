@@ -13,7 +13,6 @@
 
 #include <memory>
 #include <fstream>
-#include "boost/cstdint.hpp"
 #include "aterm2.h"
 #include "svc/svc.h"
 #include "mcrl2/lps/nextstate.h"
@@ -36,14 +35,14 @@ namespace mcrl2
       lps2lts_lts_options lts_opts;
       atermpp::aterm_appl term_nil;
       atermpp::function_symbol afun_pair;
-      boost::uint64_t initial_state;
+      size_t initial_state;
       std::ofstream aut;
       SVCfile svcf;
       SVCfile *svc;
       SVCparameterIndex svcparam;
       std::string lts_filename;
       lts_lts_t generic_lts;
-      ATermTable aterm2state, aterm2label;
+      ATermIndexedSet aterm2state, aterm2label;
 
       public:
         lps2lts_lts():
@@ -64,9 +63,9 @@ namespace mcrl2
 
         void reset();
         void open_lts(const char *filename, lps2lts_lts_options &opts);
-        void save_initial_state(boost::uint64_t idx, ATerm state);
-        void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to);
-        void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans);
+        void save_initial_state(size_t idx, ATerm state);
+        void save_transition(size_t idx_from, ATerm from, ATermAppl action, size_t idx_to, ATerm to);
+        void close_lts(size_t num_states, size_t num_trans);
         void remove_lts();
 
     };

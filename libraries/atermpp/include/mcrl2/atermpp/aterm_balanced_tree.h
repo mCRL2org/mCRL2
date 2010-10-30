@@ -23,7 +23,8 @@
 #include "mcrl2/atermpp/function_symbol.h"
 #include "mcrl2/atermpp/vector.h"
 
-namespace atermpp {
+namespace atermpp 
+{
 
   template < typename Value >
   class term_balanced_tree_iterator;
@@ -42,16 +43,16 @@ namespace atermpp {
 
     protected:
 
-      static function_symbol create_and_protect(function_symbol& target, function_symbol const&)
+      static function_symbol create_and_protect(function_symbol& target, function_symbol const& f)
       {
-        target = function_symbol("@node@", 2);
+        target = f;
         target.protect();
         return target;
       }
 
       static function_symbol const& tree_empty()
       {
-        static function_symbol empty = create_and_protect(empty, function_symbol("@empty@", 1));
+        static function_symbol empty = create_and_protect(empty, function_symbol("@empty@", 0));
         return empty;
       }
 
@@ -61,12 +62,12 @@ namespace atermpp {
         return node;
       }
 
-      static bool is_empty(aterm tree)
+      static bool is_empty(const aterm tree) 
       {
         return tree == aterm_appl(tree_empty());
       }
 
-      static bool is_node(aterm tree)
+      static bool is_node(const aterm tree)
       {
         return tree.type() == AT_APPL && (aterm_appl(tree).function() == tree_node());
       }
@@ -81,14 +82,6 @@ namespace atermpp {
       {
         assert(is_node(tree));
         return aterm_appl(tree)(1);
-      }
-
-      static bool is_tree(aterm tree)
-      {
-        size_t left(tree_size(left_branch(tree)));
-        size_t right(tree_size(right_branch(tree)));
-
-        return ((right <= left) && (right - left < 2)) && (is_tree(left_branch(tree)) && is_tree(right_branch(tree)));
       }
 
       static aterm node(aterm left, aterm right)
@@ -116,7 +109,7 @@ namespace atermpp {
         assert(size == tree_size(tree));
         assert(position < size);
 
-        if (1 < size)
+        if (size>1)
         {
           size_t left_size = (size + 1) >> 1;
 
@@ -125,25 +118,44 @@ namespace atermpp {
             element_at(right_branch(tree), size - left_size, position - left_size);
         }
 
-        return tree;
-      }
-
-      static aterm make_tree(atermpp::vector< aterm >::const_iterator p, size_t size)
-      {
-        assert(0 < size);
-
-        size_t left_size = (size + 1) >> 1;
-
-        return (1 < size) ? node(make_tree(p, left_size),
-                                 make_tree(p + left_size, size >> 1)) : *p;
+        return Term(tree);
       }
 
       template < typename ForwardTraversalIterator >
-      aterm make_tree(ForwardTraversalIterator begin, ForwardTraversalIterator end)
+      static size_t get_distance(ForwardTraversalIterator begin, ForwardTraversalIterator end)
       {
-        atermpp::vector< aterm > nodes(begin, end);
+        size_t size=0;
+        for(ForwardTraversalIterator i=begin; i!=end; ++i)
+        { 
+          ++size;
+        }
+        return size;
+      }
+      
 
-        return (nodes.empty()) ? aterm(aterm_appl(tree_empty())) : make_tree(nodes.begin(), nodes.size());
+      template < typename ForwardTraversalIterator >
+      static aterm make_tree(ForwardTraversalIterator &p, const size_t size)
+      {
+        if (size==0)
+        { 
+          return aterm(aterm_appl(tree_empty()));
+        }
+
+        if (size==1)
+        { 
+          const aterm result=*p;
+          ++p;
+          return result;
+        }
+        else 
+        {
+           size_t left_size = (size + 1) >> 1; // size/2 rounded up.
+           const aterm left_tree=make_tree(p, left_size);
+           size_t right_size = size >> 1; // size/2 rounded down.
+           const aterm right_tree=make_tree(p, right_size);
+
+           return node(left_tree,right_tree);
+        }
       }
 
       /// \brief the number of elements in the container
@@ -184,14 +196,16 @@ namespace atermpp {
       term_balanced_tree(aterm tree)
         : aterm_base(tree), m_size(tree_size(tree))
       {
-        assert(is_tree(tree));
       }
 
       /// Construction from ATermList.
       /// \param l A list.
       term_balanced_tree(atermpp::aterm_list l)
-        : aterm_base(make_tree(l.begin(), l.end())), m_size(tree_size(term()))
-      { }
+        : m_size(l.size())
+      { 
+        atermpp::aterm_list::const_iterator first=l.begin();
+        m_term=make_tree(first,m_size);
+      }
 
       /// Construction from a term_balanced_tree.
       /// \param t A term containing a list.
@@ -204,25 +218,37 @@ namespace atermpp {
       /// \param first The start of a range of elements.
       /// \param last The end of a range of elements.
       template < typename ForwardTraversalIterator >
-      term_balanced_tree(ForwardTraversalIterator const& first, ForwardTraversalIterator const& last)
-        : aterm_base(make_tree(first, last))
-      { }
+      term_balanced_tree(ForwardTraversalIterator first, const ForwardTraversalIterator last)
+      {
+        m_size=get_distance(first,last);
+        m_term = make_tree(first,m_size);
+      }
+
+      /// Creates an term_balanced_tree with a copy of a range.
+      /// \param first The start of a range of elements.
+      /// \param size The size of the range of elements.
+      template < typename ForwardTraversalIterator >
+      term_balanced_tree(ForwardTraversalIterator first, const size_t size)
+      {
+        m_size=size;
+        m_term = make_tree(first,m_size);
+      }
 
       /// Assignment operator.
       /// \param t A term containing a list.
       term_balanced_tree<Term>& operator=(ATermList t)
       {
-        m_term = make_tree(t);
-        m_size = tree_size(t);
+        m_size=ATgetLength(t);
+        m_term = make_tree(t,m_size);
         return *this;
       }
 
-      /// Assignment operator.
-      /// \param t A term containing a list.
+      /// Element indexing operator.
+      /// \param position Index in the tree.
       /// This operation behaves logarithmically with respect to container size
       Term operator[](size_t position) const
       {
-        return Term(element_at(position));
+        return element_at(position);
       }
 
       /// \brief Returns a const_iterator pointing to the beginning of the term_balanced_tree.
@@ -285,7 +311,8 @@ namespace atermpp {
           term_balanced_tree_iterator< Value >, // Derived
           const Value,                          // Value
           boost::forward_traversal_tag,         // CategoryOrTraversal
-          Value const&                          // Reference
+  //        const Value &                         // Reference
+          const Value                          // Reference
       >
   {
     private:
@@ -296,9 +323,9 @@ namespace atermpp {
 
       /// \brief Dereference operator
       /// \return The value that the iterator references
-      Value const& dereference() const
-      {
-        return m_trees.top();
+      Value dereference() const
+      { 
+        return Value(m_trees.top());
       }
 
       /// \brief Equality operator
@@ -341,7 +368,6 @@ namespace atermpp {
 
       term_balanced_tree_iterator(aterm tree)
       {
-        assert(term_balanced_tree< Value >::is_tree(tree));
         initialise(tree);
       }
 
@@ -367,14 +393,15 @@ namespace atermpp {
   inline
   term_balanced_tree< Term > apply(term_balanced_tree<Term> l, const Function f)
   {
-    term_list< Term > result;
+    atermpp::vector < Term > result;
 
     for (typename term_balanced_tree< Term >::const_iterator i = l.begin(); i != l.end(); ++i)
     {
-      result = push_front(result, f(*i));
+      // std::cerr << "FUN " << *i << "\n";
+      result.push_back(f(*i));
     }
 
-    return term_balanced_tree< Term >(result);
+    return term_balanced_tree< Term >(result.begin(),result.size());
   }
 
   /// \cond INTERNAL_DOCS
@@ -400,26 +427,6 @@ namespace atermpp {
     return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == ATtrue;
   }
 
-  /// \brief Equality operator.
-  /// \param x A list.
-  /// \param y A list.
-  /// \return True if the arguments are equal.
-  template <typename Term>
-  bool operator==(const term_balanced_tree<Term>& x, ATermList y)
-  {
-    return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), y) == ATtrue;
-  }
-
-  /// \brief Equality operator.
-  /// \param x A list.
-  /// \param y A list.
-  /// \return True if the arguments are equal.
-  template <typename Term>
-  bool operator==(ATermList x, const term_balanced_tree<Term>& y)
-  {
-    return ATisEqual(x, aterm_traits<term_balanced_tree<Term> >::term(y)) == ATtrue;
-  }
-
   /// \brief Inequality operator.
   /// \param x A list.
   /// \param y A list.
@@ -430,26 +437,6 @@ namespace atermpp {
     return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == ATfalse;
   }
 
-  /// \brief Inequality operator.
-  /// \param x A list.
-  /// \param y A list.
-  /// \return True if the arguments are not equal.
-  template <typename Term>
-  bool operator!=(const term_balanced_tree<Term>& x, ATermList y)
-  {
-    return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), y) == ATfalse;
-  }
-
-  /// \brief Inequality operator.
-  /// \param x A list.
-  /// \param y A list.
-  /// \return True if the arguments are not equal.
-  template <typename Term>
-  bool operator!=(ATermList x, const term_balanced_tree<Term>& y)
-  {
-    return ATisEqual(x, aterm_traits<term_balanced_tree<Term> >::term(y)) == ATfalse;
-  }
-
 } // namespace atermpp
 
-#endif // MCRL2_ATERMPP_ATERM_LIST_H
+#endif // MCRL2_ATERMPP_ATERM_BALANCED_TREE_H

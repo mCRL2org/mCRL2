@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
@@ -42,10 +43,10 @@ namespace lts
   class state_label_lts
   {
     public:
-      typedef ATermAppl element_type;
+      typedef mcrl2::data::data_expression element_type;
 
     protected: 
-      ATermAppl m_state_label_lts;
+      atermpp::term_balanced_tree < element_type > m_state_label_lts;
 
       // We store functions symbols with varying arity and string "STATE"
       // in this ATermAppl array, as they are automatically protected.
@@ -73,18 +74,17 @@ namespace lts
 
     public:
  
-      state_label_lts():m_state_label_lts(NULL)
+      state_label_lts()
       {}
 
-      state_label_lts(ATermAppl a):m_state_label_lts(a)
-      { 
-        assert(ATgetType(m_state_label_lts)==AT_APPL);
-      }
+      state_label_lts(const atermpp::term_balanced_tree < element_type > &a):m_state_label_lts(a)
+      {}
 
       template <class ITERATOR>
       state_label_lts(const ITERATOR begin, const ITERATOR end)
       { 
-        unsigned int arity=0;
+        m_state_label_lts=atermpp::term_balanced_tree< mcrl2::data::data_expression>(begin,end);
+        /* unsigned int arity=0;
         ATermList l=ATempty;
         for(ITERATOR i=begin; i!=end; ++i)
         { 
@@ -92,27 +92,40 @@ namespace lts
           ATinsert(l,*i); 
           arity++;
         }
-        make_vector_template_if_required(arity);
+        make_vector_template_if_required(arity); 
 
         m_state_label_lts=(ATermAppl)ATmakeApplList(ATgetAFun(vector_templates[arity]),ATreverse(l));
+        */
       }
 
-      state_label_lts(const ATermList l)
+      state_label_lts(const mcrl2::data::data_expression_list &l)
       {
-        const unsigned int arity=ATgetLength(l);
-        make_vector_template_if_required(arity);
-        m_state_label_lts=(ATermAppl)ATmakeApplList(ATgetAFun(vector_templates[arity]),l);
+        m_state_label_lts=atermpp::term_balanced_tree < element_type >(l.begin(),l.end());
+      }
+
+      state_label_lts(const ATermAppl &a)  // TODO: This function is obsolete, and should be replaced.
+      {
+        const unsigned int arity=ATgetArity(ATgetAFun(a));
+        assert(std::string(ATgetName(ATgetAFun(a)))=="STATE");
+        std::vector < element_type > element_vec;
+        for(unsigned int i=0; i<arity; ++i)
+        { 
+          element_vec.push_back(element_type(ATgetArgument(a,i)));
+        }
+        m_state_label_lts=atermpp::term_balanced_tree < element_type >(element_vec.begin(),element_vec.end());
       }
 
       unsigned int size() const
       { 
-        return ATgetArity(ATgetAFun(m_state_label_lts));
+        return m_state_label_lts.size(); 
+        // return ATgetArity(ATgetAFun(m_state_label_lts));
       }
       
       element_type operator [](const unsigned int i) const
       {
         assert(i<size());
-        return element_type(ATgetArgument(m_state_label_lts,i));
+        return m_state_label_lts[i];
+        // return element_type(ATgetArgument(m_state_label_lts,i));
       }
 
       bool operator ==(const state_label_lts &other) const
@@ -127,13 +140,17 @@ namespace lts
 
       void set_element(const element_type &e, unsigned int i)
       {
-        assert(i<size());
-        m_state_label_lts=ATsetArgument(m_state_label_lts,(ATerm)e,i);
+        std::vector < mcrl2::data::data_expression> expr_vec(m_state_label_lts.begin(),m_state_label_lts.end());
+        assert(i<expr_vec.size());
+        expr_vec[i]=e;
+        m_state_label_lts=atermpp::term_balanced_tree < element_type >(expr_vec.begin(),expr_vec.end());
+        // m_state_label_lts=ATsetArgument(m_state_label_lts,(ATerm)e,i);
       } 
 
-      ATermAppl aterm() const
-      {
-        return m_state_label_lts;
+      ATermAppl aterm() const //TODO Remove??.
+      { 
+        assert(0);
+        // return (ATermAppl)m_state_label_lts;
       }
   };
 

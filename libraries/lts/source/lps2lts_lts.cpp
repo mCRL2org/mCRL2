@@ -82,13 +82,13 @@ namespace mcrl2
           generic_lts.set_data(lts_opts.spec->data());
           generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
           generic_lts.set_action_labels(lts_opts.spec->action_labels());
-          aterm2state = ATtableCreate(10000,50);
-          aterm2label = ATtableCreate(100,50);
+          aterm2state = ATindexedSetCreate(10000,50);
+          aterm2label = ATindexedSetCreate(100,50);
           break;
       }
     }
 
-    void lps2lts_lts::save_initial_state(boost::uint64_t idx, ATerm state)
+    void lps2lts_lts::save_initial_state(size_t idx, ATerm state)
     {
       initial_state = idx;
       switch ( lts_opts.outformat )
@@ -111,19 +111,22 @@ namespace mcrl2
           break;
         default:
           {
-            ATerm t = ATtableGet(aterm2state,state);
-            if ( t == NULL )
+            ATbool is_new;
+            const size_t t = ATindexedSetPut(aterm2state,state,&is_new);
+            if ( is_new )
             {
-              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(state))));
-              ATtablePut(aterm2state,state,t);
+              const size_t u = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(state)));
+              assert(u==t);
             }
-            generic_lts.set_initial_state(ATgetInt((ATermInt) t));
+            assert(t>=0);
+            // generic_lts.set_initial_state(ATgetInt((ATermInt) t));
+            generic_lts.set_initial_state(t);
           }
           break;
       }
     }
 
-    void lps2lts_lts::save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to)
+    void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action, size_t idx_to, ATerm to)
     {
       switch ( lts_opts.outformat )
       {
@@ -159,37 +162,32 @@ namespace mcrl2
           break;
         default:
           {
-            unsigned int from_state;
-            unsigned int to_state;
-            unsigned int label;
-            ATerm t = ATtableGet(aterm2state,from);
-            if ( t == NULL )
+            ATbool is_new;
+            const size_t from_state = ATindexedSetPut(aterm2state,from,&is_new);
+            if ( is_new )
             {
-              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(from))));
-              ATtablePut(aterm2state,from,t);
+              const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(from)));
+              assert(t==from_state);
             }
-            from_state = ATgetInt((ATermInt) t);
-            t = ATtableGet(aterm2state,to);
-            if ( t == NULL )
+            const size_t to_state = ATindexedSetPut(aterm2state,to,&is_new);
+            if ( is_new )
             {
-              t = (ATerm) ATmakeInt(generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(to))));
-              ATtablePut(aterm2state,to,t);
+              const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(to)));
+              assert(t==to_state);
             }
-            to_state = ATgetInt((ATermInt) t);
-            t = ATtableGet(aterm2label,(ATerm) action);
-            if ( t == NULL )
+            const size_t label = ATindexedSetPut(aterm2label,(ATerm) action,&is_new);
+            if ( is_new )
             {
-              t = (ATerm) ATmakeInt(generic_lts.add_label((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue));
-              ATtablePut(aterm2state,(ATerm) action,t);
+              const size_t t = generic_lts.add_label((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue);
+              assert(t==label);
             }
-            label = ATgetInt((ATermInt) t);
             generic_lts.add_transition(transition(from_state,label,to_state));
           }
           break;
       }
     }
 
-    void lps2lts_lts::close_lts(boost::uint64_t num_states, boost::uint64_t num_trans)
+    void lps2lts_lts::close_lts(size_t num_states, size_t num_trans)
     {
       switch ( lts_opts.outformat )
       {
@@ -260,8 +258,8 @@ namespace mcrl2
               default: assert(0); // lts_aut and lts_none cannot occur.
             }
 
-            ATtableDestroy(aterm2label);
-            ATtableDestroy(aterm2state);
+            ATindexedSetDestroy(aterm2label);
+            ATindexedSetDestroy(aterm2state);
             break;
           }
       }
@@ -289,8 +287,8 @@ namespace mcrl2
         case lts_none:
           break;
         default:
-          ATtableDestroy(aterm2label);
-          ATtableDestroy(aterm2state);
+          ATindexedSetDestroy(aterm2label);
+          ATindexedSetDestroy(aterm2state);
           break;
       }
       remove(lts_filename.c_str());

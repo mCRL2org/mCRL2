@@ -57,16 +57,17 @@ template <class LTS_TYPE>
   else
   {
     // remove state information from this LTS, if any
-    l1.clear_states();
+    l1.clear_state_labels();
   }
 
+
   typename LTS_TYPE::labels_size_type new_nlabels = 0;
-  if (l1.has_label_info() && l2.has_label_info())
-  {
+  // if (l1.has_label_info() && l2.has_label_info())
+  // {
     // Before we can set the label data in the realloc'ed transitions
     // array, we first have to collect the labels of both LTSs in a
     // map, of which the second element indicates the index of each action label.
-    // ATermIndexedSet labs = ATindexedSetCreate(l1.num_labels() + l2.num_labels(),75);
+    // ATermIndexedSet labs = ATindexedSetCreate(l1.num_action_labels() + l2.num_action_labels(),75);
     typedef typename LTS_TYPE::action_label_t type1;
     typedef typename LTS_TYPE::labels_size_type type2;
     atermpp::map < type1,type2 > labs;
@@ -74,7 +75,7 @@ template <class LTS_TYPE>
 
     // Add the labels of this LTS and count the number of labels that
     // the resulting LTS will contain
-    for (unsigned int i = 0; i < l1.num_labels(); ++i)
+    for (unsigned int i = 0; i < l1.num_action_labels(); ++i)
     {
       /* ATindexedSetPut(labs,l1.label_value(i).label(),&b);
       if ( b )
@@ -86,7 +87,7 @@ template <class LTS_TYPE>
       } 
     }
     // Same for LTS l2
-    for (unsigned int i=0; i<l2.num_labels(); ++i)
+    for (unsigned int i=0; i<l2.num_action_labels(); ++i)
     {
       /* ATindexedSetPut(labs,l2.label_value(i).label(),&b);
       if ( b ) */
@@ -99,14 +100,14 @@ template <class LTS_TYPE>
 
     // Update the tau-information
     std::vector<bool> new_taus(new_nlabels,false);
-    for (unsigned int i = 0; i < l1.num_labels(); ++i)
+    for (unsigned int i = 0; i < l1.num_action_labels(); ++i)
     { 
       // assert(ATindexedSetGetIndex(labs,l1.label_value(i).label())<(int)new_taus.size());
       // new_taus[ATindexedSetGetIndex(labs,l1.label_value(i).label())] = l1.is_tau(i);
       assert(labs[l1.label_value(i)] < (unsigned int)new_taus.size());
       new_taus[labs[l1.label_value(i)]] = l1.is_tau(i);
     }
-    for (unsigned int i = 0; i < l2.num_labels(); ++i)
+    for (unsigned int i = 0; i < l2.num_action_labels(); ++i)
     { 
       // assert(ATindexedSetGetIndex(labs,l2.label_value(i).label())<(int)new_taus.size());
       // new_taus[ATindexedSetGetIndex(labs,l2.label_value(i).label())] = l2.is_tau(i);
@@ -115,7 +116,7 @@ template <class LTS_TYPE>
     }
     
     // Store the label values contained in the indexed set
-    l1.clear_labels(); 
+    l1.clear_action_labels(); 
 
     for (typename atermpp::map < type1,type2 >::const_iterator i = labs.begin(); i != labs.end(); ++i)
     {
@@ -140,25 +141,25 @@ template <class LTS_TYPE>
                                 labs[l2.label_value(transition_to_add.label())],
                                 transition_to_add.to()+old_nstates));
     }
-  }
-  else
+  //}
+  /* else
   {
     // One of the LTSs does not have label info, so the resulting LTS
     // will not have label info either. Moreover, we consider the sets
     // of labels of the LTSs to be disjoint
-    const unsigned int old_nlabels=l1.num_labels();
+    const unsigned int old_nlabels=l1.num_action_labels();
 
     // Remove label info from this LTS, if any
     if ( l1.has_label_info() )
     {
-      l1.set_num_labels(old_nlabels,false);
+      l1.set_num_action_labels(old_nlabels,false);
     }
     // Now add the source and target states of the transitions of LTS l2.
     // The labels will be added below, depending on whether there is label
     // information in both LTSs.
     
     // Add taus from LTS l2
-    for (unsigned int i = 0; i < l2.num_labels(); ++i)
+    for (unsigned int i = 0; i < l2.num_action_labels(); ++i)
     {
       l1.add_label(l2.is_tau(i));
     }
@@ -170,7 +171,7 @@ template <class LTS_TYPE>
                                    transition_to_add.to()+old_nstates));
     }
 
-  }
+  } */
 
   // Update the fields that have not been updated yet
 }

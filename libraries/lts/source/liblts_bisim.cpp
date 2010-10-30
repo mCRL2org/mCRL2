@@ -35,10 +35,10 @@ namespace detail
     // Preference goes to a label which has name "tau".
     // So first find an arbitrary tau, and then let this tau
     // label be superseded by "tau". If nothing is found the tau
-    // label becomes l.num_labels, but there will not be a tau
+    // label becomes l.num_action_labels, but there will not be a tau
     // anyhow in this case.
-    unsigned int tau_label=l.num_labels();
-    for(unsigned int i=0; i<l.num_labels(); ++i)
+    unsigned int tau_label=l.num_action_labels();
+    for(unsigned int i=0; i<l.num_action_labels(); ++i)
     { 
       if (l.is_tau(i))
       { 
@@ -46,9 +46,9 @@ namespace detail
         break;
       }
     }
-    for(unsigned int i=0; i<l.num_labels(); ++i)
+    for(unsigned int i=0; i<l.num_action_labels(); ++i)
     { 
-      if (l.has_label_info() && 
+      if (// l.has_label_info() && 
           l.is_tau(i) &&
           l.label_value_str(i)==std::string("tau"))
       { 
@@ -729,7 +729,7 @@ namespace detail
     // Check that tau_label is smaller or equal to the number of labels.
     // If no tau label is used, it is equal to the number of labels, which
     // is a number of labels that is not used.
-    assert(tau_label<=aut.num_labels());
+    assert(tau_label<=aut.num_action_labels());
   }
 
 #endif // not NDEBUG
@@ -762,7 +762,7 @@ void bisim_partitioner::reachable_states_in_block_s_via_label_l(
 
     // Search for tau reachable states that are still in the block with block_index_for_bottom_state.
     if (branching_bisimulation) 
-    { for(label_type lab=0; lab<aut.num_labels(); ++lab)
+    { for(label_type lab=0; lab<aut.num_action_labels(); ++lab)
       { 
         if (aut.is_tau(lab))
         {

@@ -27,9 +27,9 @@ void test_lts(const std::string& test_description,
              )
 {
   std::cout << "LPS test: " << test_description << " -----------------------------------------------\n";
-  BOOST_CHECK(l.num_labels() == expected_label_count );
-  if (l.num_labels() != expected_label_count)
-  { std::cout << "Expected # of labels " << expected_label_count << " Actual # " << l.num_labels() << "\n";
+  BOOST_CHECK(l.num_action_labels() == expected_label_count );
+  if (l.num_action_labels() != expected_label_count)
+  { std::cout << "Expected # of labels " << expected_label_count << " Actual # " << l.num_action_labels() << "\n";
   }
   BOOST_CHECK(l.num_states() == expected_state_count );
   if (l.num_states() != expected_state_count)
@@ -83,36 +83,36 @@ void test_abp()
   "(27,\"tau\",30) \n"
   "(28,\"r1(d1)\",31)       \n"
   "(28,\"r1(d2)\",32)       \n"
-  "(29,\"tau\",33) \n"
-  "(30,\"tau\",34)            \n"
-  "(30,\"tau\",35)            \n"
+  "(29,\"tau\",33)\n"
+  "(30,\"tau\",34)\n"
+  "(30,\"tau\",35)\n"
   "(31,\"tau\",36)\n"
   "(32,\"tau\",37)\n"
-  "(33,\"tau\",38)            \n"
-  "(33,\"tau\",39)            \n"
-  "(34,\"tau\",40)        \n"
-  "(35,\"tau\",40) \n"
-  "(36,\"tau\",41)            \n"
-  "(36,\"tau\",42)            \n"
-  "(37,\"tau\",43)            \n"
-  "(37,\"tau\",44)            \n"
-  "(38,\"tau\",45)        \n"
-  "(39,\"tau\",45) \n"
-  "(40,\"tau\",19)     \n"
-  "(41,\"tau\",46)        \n"
+  "(33,\"tau\",38)\n"
+  "(33,\"tau\",39)\n"
+  "(34,\"tau\",40)\n"
+  "(35,\"tau\",40)\n"
+  "(36,\"tau\",41)\n"
+  "(36,\"tau\",42)\n"
+  "(37,\"tau\",43)\n"
+  "(37,\"tau\",44)\n"
+  "(38,\"tau\",45)\n"
+  "(39,\"tau\",45)\n"
+  "(40,\"tau\",19)\n"
+  "(41,\"tau\",46)\n"
   "(42,\"tau\",47)\n"
-  "(43,\"tau\",48)        \n"
+  "(43,\"tau\",48)\n"
   "(44,\"tau\",49)\n"
-  "(45,\"tau\",22)     \n"
-  "(46,\"tau\",50)     \n"
-  "(47,\"s4(d1)\",51)       \n"
-  "(48,\"tau\",52)     \n"
-  "(49,\"s4(d2)\",53)       \n"
-  "(50,\"tau\",54)            \n"
-  "(50,\"tau\",55)            \n"
-  "(51,\"tau\",56)    \n"
-  "(52,\"tau\",57)            \n"
-  "(52,\"tau\",58)            \n"
+  "(45,\"tau\",22)\n"
+  "(46,\"tau\",50)\n"
+  "(47,\"s4(d1)\",51)\n"
+  "(48,\"tau\",52)\n"
+  "(49,\"s4(d2)\",53)\n"
+  "(50,\"tau\",54)\n"
+  "(50,\"tau\",55)\n"
+  "(51,\"tau\",56)\n"
+  "(52,\"tau\",57)\n"
+  "(52,\"tau\",58)\n"
   "(53,\"tau\",59)    \n"
   "(54,\"tau\",31)        \n"
   "(55,\"tau\",31)     \n"
@@ -166,6 +166,7 @@ void test_abp()
   reduce(l,lts::lts_eq_trace);
   test_lts("abp test trace",l,expected_label_count, 19, 24);
   l=l_abp;
+  std::cerr << "ACTION LABELS " << l.num_action_labels() << "\n";
   reduce(l,lts::lts_eq_weak_trace);
   test_lts("abp test weak trace",l,4, 3, 4);
   l=l_abp;

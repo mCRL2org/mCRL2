@@ -109,36 +109,27 @@ class ltsinfo_tool : public ltsinfo_base
 
       std::cout 
            << "Number of states: " << l.num_states() << std::endl
-           << "Number of labels: " << l.num_labels() << std::endl
+           << "Number of state labels: " << l.num_state_labels() << std::endl
+           << "Number of action labels: " << l.num_action_labels() << std::endl
            << "Number of transitions: " << l.num_transitions() << std::endl;
 
       if ( l.has_state_info() )
       {
-        std::cout << "Has state information." << std::endl;
+        std::cout << "Has state labels." << std::endl;
       } 
       else 
       {
-        std::cout << "Does not have state information." << std::endl;
+        std::cout << "Does not have state labels." << std::endl;
       }
-      if ( l.has_label_info() )
-      {
-        std::cout << "Has label information." << std::endl;
-      } 
-      else 
-      {
-        std::cout << "Does not have label information." << std::endl;
-      }
-      /* if ( l.has_creator() )
-      {
-        std::cout << "Created by: " << l.creator() << std::endl;
-      } */
+      std::cout << "Has action labels." << std::endl;
+
       gsVerboseMsg("checking reachability...\n");
       if ( !reachability_check(l) )
       {
         std::cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
       }
 
-      gsVerboseMsg("deterministic check...\n");
+      gsVerboseMsg("check whether lts is deterministic...\n");
       std::cout << "LTS is ";
       if ( !is_deterministic(l) )
       {

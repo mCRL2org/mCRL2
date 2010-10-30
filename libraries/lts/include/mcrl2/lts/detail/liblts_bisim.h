@@ -118,14 +118,12 @@ class bisim_partitioner
       // Remove the old transitions
       aut.clear_transitions();
   
-      // Copy the transitions from the set into a malloced block of memory, as the lts library
-      // currently requires it in that form.
+      // Copy the transitions from the set into the transition system.
       for(std::set < transition >::const_iterator i=resulting_transitions.begin();
             i!=resulting_transitions.end(); ++i)
       { 
         aut.add_transition(transition(i->from(),i->label(),i->to()));
       }
-  
     }
 
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
@@ -350,7 +348,7 @@ class bisim_partitioner
 
 // Refine the partition until the partition has become stable
     void refine_partition_until_it_becomes_stable(const bool branching, const bool preserve_divergence)
-    { 
+    {
 #ifndef NDEBUG
       unsigned int consistency_check_counter=1;
       unsigned int consistency_check_barrier=1;
@@ -864,7 +862,7 @@ class bisim_partitioner
     
         // Search for tau reachable states that are still in the block with block_index_for_bottom_state.
         if (branching_bisimulation) 
-        { for(label_type lab=0; lab<aut.num_labels(); ++lab)
+        { for(label_type lab=0; lab<aut.num_action_labels(); ++lab)
           { 
             if (aut.is_tau(lab))
             {
@@ -1041,7 +1039,7 @@ class bisim_partitioner
       // Check that tau_label is smaller or equal to the number of labels.
       // If no tau label is used, it is equal to the number of labels, which
       // is a number of labels that is not used.
-      assert(tau_label<=aut.num_labels());
+      assert(tau_label<=aut.num_action_labels());
     }
   
 #endif // not NDEBUG
@@ -1123,7 +1121,7 @@ class bisim_partitioner
                            const bool branching /*=false */,
                            const bool preserve_divergences /*=false */)
   { 
-    // First remove tau loops in case of branching bisimulation.
+    // First, remove tau loops in case of branching bisimulation.
     if (branching)
     { 
       detail::scc_partitioner<LTS_TYPE> scc_part(l);
@@ -1132,13 +1130,12 @@ class bisim_partitioner
       l.set_initial_state(scc_part.get_eq_class(l.initial_state()));
     }
 
-    // Second apply the branching bisimulation reduction algorithm. If there are no tau's,
+    // Secondly, apply the branching bisimulation reduction algorithm. If there are no tau's,
     // this will automatically yield strong bisimulation.
     detail::bisim_partitioner<LTS_TYPE> bisim_part(l, branching, preserve_divergences);
   
-    // Clear LTS l, but keep the labels
-    // l.clear_type();
-    l.clear_states();
+    // Clear the state labels of the LTS l
+    l.clear_state_labels();
     
     // Assign the reduced LTS
     l.set_num_states(bisim_part.num_eq_classes());
@@ -1171,6 +1168,7 @@ class bisim_partitioner
     unsigned int init_l2 = l2.initial_state() + l1.num_states();
     mcrl2::lts::detail::merge(l1,l2);
     l2.clear(); // No use for l2 anymore.
+
 
     // First remove tau loops in case of branching bisimulation.
     if (branching)
@@ -1207,10 +1205,10 @@ class bisim_partitioner
     // Preference goes to a label which has name "tau".
     // So first find an arbitrary tau, and then let this tau
     // label be superseded by "tau". If nothing is found the tau
-    // label becomes l.num_labels, but there will not be a tau
+    // label becomes l.num_action_labels, but there will not be a tau
     // anyhow in this case.
-    unsigned int tau_label=l.num_labels();
-    for(unsigned int i=0; i<l.num_labels(); ++i)
+    unsigned int tau_label=l.num_action_labels();
+    for(unsigned int i=0; i<l.num_action_labels(); ++i)
     {
       if (l.is_tau(i))
       {

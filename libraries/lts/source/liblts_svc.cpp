@@ -112,7 +112,7 @@ void read_from_svc(lts_svc_t &l, string const& filename, lts_type type)
       }
     }
 
-    for (unsigned int i=l.num_labels(); i<=((unsigned int) label); i++)
+    for (unsigned int i=l.num_action_labels(); i<=((unsigned int) label); i++)
     {
       if ( type == lts_lts )
       {
@@ -196,10 +196,10 @@ void read_from_svc(lts_svc_t &l, string const& filename, lts_type type)
 
 static void write_to_svc(const lts_svc_t& l, string const& filename, lts_type type)
 {
-  if (!l.has_label_info())
+  /* if (!l.has_label_info())
   { 
     throw mcrl2::runtime_error("Cannot save .lts file, because there are no transition labels");
-  }
+  } */
 
   SVCfile f;
   SVCbool b = l.has_state_info() ? SVCfalse : SVCtrue;
@@ -240,7 +240,8 @@ static void write_to_svc(const lts_svc_t& l, string const& filename, lts_type ty
   for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
     SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_value(t.front().from()).aterm() : (ATerm) ATmakeInt(t.front().from()) ,&b);
-    SVClabelIndex label = SVCnewLabel(&f, l.has_label_info() ? (ATerm)l.label_value(t.front().label()).aterm() : (ATerm) ATmakeInt(t.front().label()) ,&b);
+    // SVClabelIndex label = SVCnewLabel(&f, l.has_label_info() ? (ATerm)l.label_value(t.front().label()).aterm() : (ATerm) ATmakeInt(t.front().label()) ,&b);
+    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.label_value(t.front().label()).aterm(),&b);
     SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_value(t.front().to()).aterm() : (ATerm) ATmakeInt(t.front().to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }

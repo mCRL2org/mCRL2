@@ -31,7 +31,7 @@ enum t_reach { unknown, reached, explored };
 
 template < class STATE_LABEL_T, class ACTION_LABEL_T >
 void tau_star_reduce(lts_<STATE_LABEL_T,ACTION_LABEL_T> &l)
-  // This method assumes there are not tau loops!
+  // This method assumes there are no tau loops!
 {
   using namespace std;
   l.sort_transitions();
@@ -41,10 +41,6 @@ void tau_star_reduce(lts_<STATE_LABEL_T,ACTION_LABEL_T> &l)
 
   const transition_const_range r=l.get_transitions();
   std::vector < transition > local_transitions(r.begin(),r.end());
-  // for(transition_const_range r=get_transitions(); !r.empty(); r.advance_begin(1))
-  // { local_transitions.push_back(r.front());
-  // }
-
 
   unsigned int *trans_lut = l.get_transition_indices();
   boost::scoped_array< unsigned int > new_trans_lut(new unsigned int[l.num_states() + 1]);
@@ -181,20 +177,21 @@ void tau_star_reduce(lts_<STATE_LABEL_T,ACTION_LABEL_T> &l)
     }
   }
 
-  boost::scoped_array< unsigned int > label_map(new unsigned int[l.num_labels()]);
+  boost::scoped_array< unsigned int > label_map(new unsigned int[l.num_action_labels()]);
   unsigned int new_nlabels = 0;
-  for (unsigned int i=0; i < l.num_labels(); i++)
+  for (unsigned int i=0; i < l.num_action_labels(); i++)
   {
     if ( !l.is_tau(i) )
     {
       label_map[i] = new_nlabels;
-      if ( l.has_label_info() )
+      // if ( l.has_label_info() )
       {
         l.set_label_value(new_nlabels,l.label_value(i));
       }
       new_nlabels++;
     }
   }
+  l.set_num_action_labels(new_nlabels);
 
   std::set < transition > new_transitions;
   for (std::vector < transition >::const_iterator i=local_transitions.begin(); i!=local_transitions.end(); ++i)
@@ -212,13 +209,12 @@ void tau_star_reduce(lts_<STATE_LABEL_T,ACTION_LABEL_T> &l)
   { l.add_transition(*i);
   }
 
-  for ( unsigned int i=0; i < l.num_labels(); i++)
+  for ( unsigned int i=0; i < l.num_action_labels(); i++)
   {
     l.set_tau(i,false);
   }
 
   l.set_num_states(new_nstates);
-  l.set_num_labels(new_nlabels);
 }
 
 }

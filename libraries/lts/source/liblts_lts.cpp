@@ -85,7 +85,17 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
   assert(SVCgetInitialState(&f)==0);
   if ( svc_file_has_state_info )
   {
-    l.add_state(state_label_lts((ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f))));
+    using namespace mcrl2::data;
+    using namespace mcrl2::lts::detail;
+    ATermAppl state_label=(ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f));
+    std::vector < data_expression > state_element_vector;
+    const unsigned int arity=ATgetArity(ATgetAFun(state_label));
+    state_element_vector.reserve(arity);
+    for(unsigned int i=0; i<arity; ++i)
+    {
+      state_element_vector.push_back(data_expression(ATgetArgument(state_label,i)));
+    }
+    l.add_state(state_label_lts(state_element_vector.begin(),state_element_vector.end()));
   }
   else
   {
@@ -104,7 +114,17 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
     {
       if ( svc_file_has_state_info )
       {
-        l.add_state(state_label_lts((ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) i)));
+        using namespace mcrl2::data;
+        using namespace mcrl2::lts::detail;
+        ATermAppl state_label=(ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) i);
+        std::vector < data_expression > state_element_vector;
+        const unsigned int arity=ATgetArity(ATgetAFun(state_label));
+        state_element_vector.reserve(arity);
+        for(unsigned int j=0; j<arity; ++j)
+        {
+          state_element_vector.push_back(data_expression(ATgetArgument(state_label,j)));
+        }
+        l.add_state(state_label_lts(state_element_vector.begin(),state_element_vector.end()));
       } 
       else 
       {
@@ -112,7 +132,7 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
       }
     }
 
-    for (unsigned int i=l.num_labels(); i<=((unsigned int) label); i++)
+    for (unsigned int i=l.num_action_labels(); i<=((unsigned int) label); i++)
     {
       if ( type == lts_lts )
       {
@@ -196,10 +216,10 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
 
 static void write_to_lts(const lts_lts_t& l, string const& filename, lts_type type)
 {
-  if (!l.has_label_info())
+  /* if (!l.has_label_info())
   { 
     throw mcrl2::runtime_error("Cannot save .lts file, because there are no transition labels");
-  }
+  } */
 
   SVCfile f;
   SVCbool b = l.has_state_info() ? SVCfalse : SVCtrue;
@@ -240,7 +260,8 @@ static void write_to_lts(const lts_lts_t& l, string const& filename, lts_type ty
   for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
     SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_value(t.front().from()).aterm() : (ATerm) ATmakeInt(t.front().from()) ,&b);
-    SVClabelIndex label = SVCnewLabel(&f, l.has_label_info() ? (ATerm)l.label_value(t.front().label()).aterm() : (ATerm) ATmakeInt(t.front().label()) ,&b);
+    // SVClabelIndex label = SVCnewLabel(&f, l.has_label_info() ? (ATerm)l.label_value(t.front().label()).aterm() : (ATerm) ATmakeInt(t.front().label()) ,&b);
+    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.label_value(t.front().label()).aterm(), &b);
     SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_value(t.front().to()).aterm() : (ATerm) ATmakeInt(t.front().to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }

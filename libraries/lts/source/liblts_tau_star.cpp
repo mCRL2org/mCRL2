@@ -174,14 +174,14 @@ void tau_star_reduce(lts &l)
     }
   }
 
-  boost::scoped_array< unsigned int > label_map(new unsigned int[l.num_labels()]);
+  boost::scoped_array< unsigned int > label_map(new unsigned int[l.num_action_labels()]);
   unsigned int new_nlabels = 0;
-  for (unsigned int i=0; i < l.num_labels(); i++)
+  for (unsigned int i=0; i < l.num__action_labels(); i++)
   {
     if ( !l.is_tau(i) )
     {
       label_map[i] = new_nlabels;
-      if ( l.has_label_info() )
+      // if ( l.has_label_info() )
       {
         l.set_label_value(new_nlabels,l.label_value(i));
       }
@@ -205,13 +205,13 @@ void tau_star_reduce(lts &l)
   { l.add_transition(*i);
   }
 
-  for ( unsigned int i=0; i < l.num_labels(); i++)
+  for ( unsigned int i=0; i < l.num_action_labels(); i++)
   {
     l.set_tau(i,false);
   }
 
   l.set_num_states(new_nstates);
-  l.set_num_labels(new_nlabels);
+  l.set_num_action_labels(new_nlabels);
 }
 
 }

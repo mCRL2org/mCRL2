@@ -32,7 +32,7 @@ struct counter
     : m_sum(sum)
   {}
 
-  void operator()(const aterm& t) const
+  void operator()(const aterm t) const
   {
     m_sum += aterm_int(t).value();
   }
@@ -73,6 +73,13 @@ void test_aterm_balanced_tree()
   {
     BOOST_CHECK(qtree[i] == aterm_int(i));
   }
+
+  /* aterm_list::const_iterator k=q.begin();
+  for(aterm_balanced_tree::const_iterator j=qtree.begin(); j!=qtree.end(); ++j,++k)
+  {
+    ATfprintf(stderr,"QTREE %t %t %d\n%p  %p\n",(ATerm)*j,(ATerm)*k,*j ==*k,(void *)*j,(void *)*k);
+  } */
+ 
 
   BOOST_CHECK(std::equal(qtree.begin(), qtree.end(), q.begin()));
   BOOST_CHECK(std::equal(q.begin(), q.end(), qtree.begin()));

@@ -190,7 +190,7 @@ void check_lps2lts_specification(std::string const& specification,
 
         BOOST_CHECK_EQUAL(result.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
-        BOOST_CHECK_EQUAL(result.num_labels(), expected_labels);
+        BOOST_CHECK_EQUAL(result.num_action_labels(), expected_labels);
       }
     }
   }

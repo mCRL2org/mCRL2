@@ -44,10 +44,6 @@ Graph* LTSImporter::importFile(const std::string &fn)
     {
       fileLTS=read_lts_as_fsm_file<lts_aut_t>(fn);
     }
-    /* case lts_svc:
-    { 
-      fileLTS=read_lts_as_fsm_file<lts_svc_t>(fn);
-    } */
     case lts_fsm:
     {
       fileLTS=read_lts_as_fsm_file<lts_fsm_t>(fn);
@@ -62,6 +58,10 @@ Graph* LTSImporter::importFile(const std::string &fn)
     {
       fileLTS=read_lts_as_fsm_file<lts_dot_t>(fn);
     }
+    case lts_svc:
+    { 
+      fileLTS=read_lts_as_fsm_file<lts_svc_t>(fn);
+    } 
   }
 
 
@@ -98,10 +98,14 @@ Graph* LTSImporter::importFile(const std::string &fn)
 
       for(size_t i = 0; i < parameters.size(); ++i) 
       {
-          std::pair<std::string, std::string> stateValue(
+          /* std::pair<std::string, std::string> stateValue(
               parameters[i],
               mcrl2::lts::detail::pp((ATermAppl)fileLTS.state_value(stNum)[i]));
-          stateValues.insert(stateValue);
+          stateValues.insert(stateValue); */
+          std::pair<std::string, std::string> stateValue(
+              parameters[i],
+              fileLTS.state_element_value(i,stNum));
+          stateValues.insert(stateValue); 
       }
       s->setParameters(stateValues);
 
@@ -149,7 +153,7 @@ Graph* LTSImporter::importFile(const std::string &fn)
     }
 
     int numStates = fileLTS.num_states();
-    int numLabels = fileLTS.num_labels();
+    int numLabels = fileLTS.num_action_labels();
     int numTrans = fileLTS.num_transitions();
 
     result->setInfo(initialState, numStates, numTrans, numLabels);

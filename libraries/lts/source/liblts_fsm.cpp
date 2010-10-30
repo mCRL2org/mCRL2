@@ -113,7 +113,7 @@ void read_from_fsm(
   /* CODE BELOW MUST BE MOVED TO THE PART WHERE EXPLICIT TRANSLATIONS BETWEEN LTS's are made.
   if (l.has_data() && l.has_action_labels())
   {
-    for (unsigned int i=0; i<l.num_labels(); i++)
+    for (unsigned int i=0; i<l.num_action_labels(); i++)
     {
       l.set_label_value(i,action_label(parse_mcrl2_action(l.label_value(i).label(),l.data(),l.action_labels())));
     }

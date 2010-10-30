@@ -75,7 +75,6 @@ int test_main(int argc, char **argv)
   l4.add_transition(transition(0,0,1));
   l4.add_transition(transition(1,1,2));
   l4.add_transition(transition(1,1,3));
-
   BOOST_CHECK( compare(l1,l2,lts_eq_trace) );
   BOOST_CHECK( compare(l2,l1,lts_eq_trace) );
 

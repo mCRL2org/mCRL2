@@ -248,7 +248,7 @@ void sim_partitioner::refine(bool &change)
   int i;
 
   / * The main loop * /
-  for (l = 0; l < aut.num_labels(); ++l)
+  for (l = 0; l < aut.num_action_labels(); ++l)
   {
     if (gsDebug)
     {
@@ -414,7 +414,7 @@ void sim_partitioner::update()
   initialise_pre_EA();
 
   / * Compute the pre_exists and pre_forall functions * /
-  for (l = 0; l < aut.num_labels(); ++l)
+  for (l = 0; l < aut.num_action_labels(); ++l)
   {
     pre_exists[l].reserve(s_Sigma + 1);
     pre_forall[l].reserve(s_Sigma + 1);
@@ -457,7 +457,7 @@ void sim_partitioner::update()
   initialise_pre_EA();
 
   / * Compute the pre_exists and pre_forall functions * /
-  for (l = 0; l < aut.num_labels(); ++l)
+  for (l = 0; l < aut.num_action_labels(); ++l)
   {
     pre_exists[l].reserve(s_Pi + 1);
     pre_forall[l].reserve(s_Pi + 1);
@@ -502,8 +502,8 @@ void sim_partitioner::initialise_pre_EA()
   exists->clear();
   forall->clear();
   std::vector<uint> v;
-  pre_exists.assign(aut.num_labels(),v);
-  pre_forall.assign(aut.num_labels(),v);
+  pre_exists.assign(aut.num_action_labels(),v);
+  pre_forall.assign(aut.num_action_labels(),v);
 }
 
 void sim_partitioner::induce_P_on_Pi()
@@ -535,7 +535,7 @@ void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
 
   uint alpha,beta,gamma,delta,l;
   hash_table3_iterator etrans(exists);
-  for (l = 0; l < aut.num_labels(); ++l)
+  for (l = 0; l < aut.num_action_labels(); ++l)
   {
     for (delta = 0; delta < S; ++delta)
     {
@@ -556,7 +556,7 @@ void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
 
   hash_table3_iterator atrans(forall);
   / * The main for loop * /
-  for (l = 0; l < aut.num_labels(); ++l)
+  for (l = 0; l < aut.num_action_labels(); ++l)
   {
     for (gamma = 0; gamma < S; ++gamma)
     {
@@ -588,7 +588,7 @@ void sim_partitioner::cleanup(uint alpha,uint beta)
   bool match_l_beta1_alpha;
   hash_table3_iterator alpha1i(forall);
   hash_table3_iterator beta1i(exists);
-  for (l = 0; l < aut.num_labels(); ++l)
+  for (l = 0; l < aut.num_action_labels(); ++l)
   {
     alpha1i.set_end(pre_forall[l][alpha+1]);
     beta1i.set_end(pre_exists[l][beta+1]);
@@ -636,7 +636,7 @@ std::vector < mcrl2::lts::transition> sim_partitioner::get_transitions() const
   hash_table3_iterator gammai(forall);
   for (beta = 0; beta < s_Pi; ++beta)
   {
-    for (l = 0; l < aut.num_labels(); ++l)
+    for (l = 0; l < aut.num_action_labels(); ++l)
     {
       // there is an l-transition from alpha to beta iff:
       // - alpha -l->A [beta]
@@ -705,7 +705,7 @@ void sim_partitioner::update_nfa()
   hash_table3_iterator gammai(forall);
   for (beta = 0; beta < s_Pi; ++beta)
   {
-    for (l = 0; l < aut.num_labels(); ++l)
+    for (l = 0; l < aut.num_action_labels(); ++l)
     {
       // there is an l-transition from alpha to beta iff:
       // - alpha -l->A [beta]

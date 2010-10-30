@@ -465,7 +465,7 @@ void LTS::deselect()
 
 int LTS::getNumLabels()
 {
-  return mcrl2_lts->num_labels();
+  return mcrl2_lts->num_action_labels();
 }
 
 unsigned int LTS::getNumParameters() const
@@ -531,7 +531,7 @@ void LTS::addClusterAndBelow(Cluster* cluster)
 void LTS::getActionLabels(vector< string > &ls) const
 {
   ls.clear();
-  for (unsigned int i = 0; i < mcrl2_lts->num_labels(); ++i)
+  for (unsigned int i = 0; i < mcrl2_lts->num_action_labels(); ++i)
   {
     // ls.push_back(mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts->label_value(i)));
     ls.push_back(mcrl2_lts->label_value(i));

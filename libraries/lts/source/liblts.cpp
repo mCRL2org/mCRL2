@@ -58,10 +58,6 @@ lps::specification const& empty_specification()
 
   return dummy;
 }
-}
-
-namespace detail
-{
 
 lts_type detect_type(string const& filename)
 {
@@ -79,7 +75,8 @@ lts_type detect_type(string const& filename)
   return t;
 }
 
-typedef struct {
+typedef struct 
+{
   unsigned int flag;
   unsigned int size;
   unsigned int value;
@@ -414,174 +411,6 @@ lts_type detect_type(istream &is)
   return lts_none;
 }
 
-/* void read_from(lts_extra &l,
-               istream &is, 
-               const lts_type type_a) 
-{
-  lts_type type(type_a);
-  if ( type == lts_none )
-  {
-    type = detect_type(is);
-    if ( type == lts_none )
-    { throw mcrl2::runtime_error("Could not determine type of input stream.");
-    }
-  }
-
-  // l.set_type(type);
-
-  switch ( type )
-  {
-    case lts_aut:
-       read_from_aut(l,is);
-       return; 
-    case lts_lts:
-    / * case lts_svc:
-      throw mcrl2::runtime_error("Cannot read SVC based files from streams");
-    * /
-    case lts_fsm:
-      assert(0);
-      // read_from_fsm(l,is);
-      return; 
-    case lts_dot:
-      assert(0);
-      // read_from_dot(l,is);
-      return; 
-#ifdef USE_BCG
-    case lts_bcg:
-      throw mcrl2::runtime_error("Cannot read BCG files from streams.");
-#endif
-    default:
-      throw mcrl2::runtime_error("Unknown source LTS type.");
-  }
-} */
-
-/* void read_from(lts_extra &l,
-               istream &is, 
-               const lts_type type_a, 
-               const data::data_specification &data_spec,
-               const data::variable_list &parameters,
-               const lps::action_label_list &action_decls)
-{ 
-  l.set_data(data_spec);
-  l.set_process_parameters(parameters);
-  l.set_action_labels(action_decls);
-  read_from(l, is, type_a);
-}
-
-void read_from(lts_extra &l,
-               const string &filename,
-               const lts_type a_type)
-{
-  lts_type type=a_type;
-  if ( type == lts_none )
-  {
-    type = detect_type(filename);
-    if ( type == lts_none && (type = guess_format(filename)) == lts_none )
-    {
-      mcrl2::runtime_error("Could not determine type of input file '" + filename + "'.");
-    }
-  }
-
-  switch ( type )
-  {
-    case lts_aut:
-      break; // read using a stream.
-    case lts_lts:
-      read_from_svc(l,filename,lts_lts);
-      return;
-    / * case lts_svc:
-      read_from_svc(l,filename,lts_svc);
-      return; * /
-    case lts_fsm:
-    case lts_dot:
-      break; // read using a stream.
-#ifdef USE_BCG
-    case lts_bcg:
-      read_from_bcg(l,filename);
-      return;
-#endif
-    default:
-      throw runtime_error ("Unknown source LTS type");
-  }
-
-  // The files that were not read above, are read via streams.
-  std::ifstream is(filename.c_str());
-
-  if ( !is.is_open() )
-  {
-    throw mcrl2::runtime_error("cannot open file '" + filename + "' for reading.");
-    return;
-  }
-
-  read_from(l,is,type);
-}
-
-void read_from(lts_extra &l,
-               const string &filename, 
-               const lts_type type, 
-               const data::data_specification &data_spec,
-               const data::variable_list &parameters,
-               const lps::action_label_list &action_decls)
-{ 
-  l.set_data(data_spec);
-  l.set_process_parameters(parameters);
-  l.set_action_labels(action_decls);
-
-  read_from(l,filename,type);
-} */
-
-} // namespace detail
-
-/* void lts_extra::write_to(ostream &os, lts_type type) const
-{
-  switch ( type )
-  {
-    case lts_aut:
-       detail::write_to_aut(*this,os);
-       return;
-    case lts_lts:
-    / * case lts_svc:
-       throw mcrl2::runtime_error("Cannot write SVC based files to streams."); * /
-    case lts_fsm:
-       assert(0);
-       // detail::write_to_fsm(*this,os);
-       return;
-    case lts_dot:
-       assert(0);
-       // detail::write_to_dot(*this,os);
-      return;
-#ifdef USE_BCG
-    case lts_bcg:
-      throw mcrl2::runtime_error("Cannot write BCG files to streams.");
-#endif
-    default:
-      throw mcrl2::runtime_error("Unknown target LTS type.");
-  }
-}
-
-void lts_extra::write_to(string const& filename,lts_type type) const
-{
-  switch (type)
-  {
-    case lts_lts:
-    / * case lts_svc:
-      detail::write_to_svc(*this,filename,type);
-      return; * /
-    default:;
-  }
-  std::ofstream os(filename.c_str());
-
-  if ( !os.is_open() )
-  {
-    throw mcrl2::runtime_error("cannot open file '" + filename + "' for writing.");
-  }
-
-  write_to(os,type);
-} */
-
-namespace detail
-{
-
 lts_type guess_format(string const& s) 
 {
   string::size_type pos = s.find_last_of('.');
@@ -853,7 +682,7 @@ ATermList sorted_insert(ATermList l,ATermAppl t)
   return ATinsert(sorted_insert(ATgetNext(l),t),ATgetFirst(l));
 }
 
-ATerm detail::sort_multi_action(ATerm ma)
+ATerm sort_multi_action(ATerm ma)
 { ATermList tl=ATLgetArgument((ATermAppl)(ma),0); //get the multi_action_list
   ATermList result=ATempty;
   for( ; tl!=ATempty ; tl=ATgetNext(tl))
@@ -864,5 +693,5 @@ ATerm detail::sort_multi_action(ATerm ma)
 
 
 
-}
-}
+} //lts
+} //data
