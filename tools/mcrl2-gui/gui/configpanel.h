@@ -20,7 +20,7 @@
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
 #include <wx/statline.h>
-#include <gui/tooloutputlistbox.h>
+#include <gui/outputconfigpanel.h>
 #include <wx/scrolwin.h>
 #include <wx/gbsizer.h>
 #include <wx/event.h>
@@ -67,9 +67,9 @@ public:
 				wxAUI_NB_BOTTOM
 			);
 
-		m_tool_output = new ToolOutPutTextCtrl(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+		m_tool_output = new OutputConfigPanel(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
-		m_tool_output->SetRunCognizance(this);
+		m_tool_output->SetRunCognizance(this); 
 
 		m_wsw = new wxScrolledWindow(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
@@ -192,7 +192,6 @@ public:
 			case textctrl:
 				/* display label */
 
-				// TODO: Set Default values
 				/* create text input box */
 				tc = new wxTextCtrl(top, wxID_ANY, wxT(""));
 
@@ -395,7 +394,7 @@ public:
         }
         else
         {
-          m_process->AddAsyncProcess(m_tool_output);
+					m_process->AddAsyncProcess(m_tool_output->GetOutput());
           m_runbutton->Disable();
           m_abortbutton->Show(true);
 
@@ -452,7 +451,7 @@ public:
 	wxAuiNotebook *m_parent;
 	wxAuiNotebook *m_configpanel;
 	OutPutTextCtrlBase *m_listbox_output;
-	ToolOutPutTextCtrl *m_tool_output;
+	OutputConfigPanel *m_tool_output;
 	wxScrolledWindow *m_wsw;
 	wxString m_input_file;
 	Tool m_tool;

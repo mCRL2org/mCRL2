@@ -24,7 +24,7 @@
 #define ID_RUN_LISTBOX  1502
 #define ID_COPY_LINES_TO_CLIPBOARD 1503
 #define ID_GO_BACK_TO_CONFIGURATION 1504
-#define ID_RUN 1505
+#define ID_RUN_AND_NOT_CLEAR 1505
 #define ID_RUN_AND_CLEAR 1506
 #define ID_SELECT_ALL 1507
 #define ID_SELECT_NONE 1508
@@ -271,8 +271,8 @@ class ToolOutputTextCtrlMenu : public TOutputTextCtrlMenu
     {
       this->PrependSeparator();
       this->Prepend(ID_GO_BACK_TO_CONFIGURATION, wxT("Go Back to Configuration"));
-      this->Prepend(ID_RUN_AND_CLEAR, wxT("Re-Run and Clear Output"));
-      this->Prepend(ID_RUN, wxT("Re-Run"));
+      this->Prepend(ID_RUN_AND_NOT_CLEAR, wxT("Re-Run [Keep Output]"));
+      this->Prepend(ID_RUN_AND_CLEAR, wxT("Re-Run"));
 
       p = parent;
     }
@@ -280,7 +280,7 @@ class ToolOutputTextCtrlMenu : public TOutputTextCtrlMenu
     void
     OnGoBackToConfiguration(wxCommandEvent &/*event*/)
     {
-      ((wxAuiNotebook *) (p->GetParent()))->SetSelection(0);
+      ((wxAuiNotebook *) (p->GetParent()->GetParent()))->SetSelection(0);
     }
 
     void
@@ -301,7 +301,7 @@ class ToolOutputTextCtrlMenu : public TOutputTextCtrlMenu
 
 BEGIN_EVENT_TABLE(ToolOutputTextCtrlMenu, TOutputTextCtrlMenu)
   EVT_MENU(ID_GO_BACK_TO_CONFIGURATION, ToolOutputTextCtrlMenu::OnGoBackToConfiguration)
-  EVT_MENU(ID_RUN, ToolOutputTextCtrlMenu::OnRun)
+  EVT_MENU(ID_RUN_AND_NOT_CLEAR, ToolOutputTextCtrlMenu::OnRun)
   EVT_MENU(ID_RUN_AND_CLEAR, ToolOutputTextCtrlMenu::OnRunAndClear)
 END_EVENT_TABLE ()
 
