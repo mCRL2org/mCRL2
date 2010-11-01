@@ -12,8 +12,6 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_BUILD_GUI_TOOLS )
 
-add_definitions(-DTIXML_USE_TICPP)
-
 # ######### General setup ##########
 
 set(MACOSX_BUNDLE_ICON_FILE mcrl2-gui.icns)
@@ -54,13 +52,11 @@ ENDIF (APPLE)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
-  ticpp
   mcrl2_utilities_command_line
   mcrl2_utilities_wx
   mcrl2_core
