@@ -214,7 +214,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
           " 2) In addition to 1, also substitute variables that"
           " are true or false into an already generated right"
           " hand side. This can mean that certain variables"
-          " become unreachable (e.g. X0 in X0 && X1, when X1"
+          " become unreachable (e.g. X0 in X0 and X1, when X1"
           " becomes false, assuming X0 does not occur"
           " elsewhere. It will be maintained which variables"
           " have become unreachable as these do not have to be"
