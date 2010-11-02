@@ -350,9 +350,9 @@ ATerror(const char *format,...)
   else
   {
     ATvfprintf(stderr, format, args);
+    assert(0);
     exit(1);
   }
-
   va_end(args);
 }
 

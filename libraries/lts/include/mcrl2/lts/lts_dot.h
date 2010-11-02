@@ -94,10 +94,15 @@ namespace lts
   } // namespace detail
 
 
-  class lts_dot_t : public lts_< detail::state_label_dot, detail::action_label_string >
+  class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_string >
   {
   
     public:
+
+      lts_type type()
+      {
+        return lts_dot;
+      }
      
       /** \brief Save the labelled transition system to file.
        *  \details If the filename is empty, the result is read from stdout.

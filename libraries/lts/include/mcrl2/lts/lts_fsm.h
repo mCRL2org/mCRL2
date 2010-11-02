@@ -58,7 +58,7 @@ namespace lts
                The integers at position i corresponds to a string, which are maintained
                in a separate vector for memory efficiency.
   */
-  class lts_fsm_t : public lts_< detail::state_label_fsm, detail::action_label_string >
+  class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_string >
   {
     protected:
       /* state_element_values contain the values that can occur at the i-th
@@ -67,6 +67,11 @@ namespace lts
       std::vector < std::pair < std::string, std::string > > m_parameters;
   
     public:
+
+      lts_type type() const
+      {
+        return lts_fsm;
+      }
 
       /** \brief Provides the vector of strings that correspond to the values
                  of the number at position idx in a vector.

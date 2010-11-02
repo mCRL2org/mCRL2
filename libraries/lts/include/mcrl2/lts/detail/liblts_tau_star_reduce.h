@@ -30,7 +30,7 @@ namespace detail
 enum t_reach { unknown, reached, explored };
 
 template < class STATE_LABEL_T, class ACTION_LABEL_T >
-void tau_star_reduce(lts_<STATE_LABEL_T,ACTION_LABEL_T> &l)
+void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   // This method assumes there are no tau loops!
 {
   using namespace std;

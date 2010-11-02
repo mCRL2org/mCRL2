@@ -766,15 +766,10 @@ void reduce(LTS_TYPE &l,lts_equivalence eq)
     case lts_eq_weak_trace:
       { 
         detail::bisimulation_reduce(l,true,false);
-        std::cerr << "AA1 " << l.num_action_labels() << "\n";
         detail::tau_star_reduce(l);
-        std::cerr << "AA2 " << l.num_action_labels() << "\n";
         detail::bisimulation_reduce(l,false);
-        std::cerr << "AA3 " << l.num_action_labels() << "\n";
         determinise(l);
-        std::cerr << "AA4 " << l.num_action_labels() << "\n";
         detail::bisimulation_reduce(l,false);
-        std::cerr << "AA5 " << l.num_action_labels() << "\n";
         return;
       }
     case lts_red_determinisation:

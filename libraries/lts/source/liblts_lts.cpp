@@ -26,6 +26,8 @@
 
 
 using namespace mcrl2::core;
+using namespace mcrl2;
+using namespace mcrl2::lts;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data::detail;
 
@@ -33,15 +35,10 @@ using namespace mcrl2::data::detail;
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 
 using namespace std;
+using namespace mcrl2::lts;
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
-{
 
-void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
+static void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
 {
   SVCfile f;
   SVCbool b;
@@ -88,14 +85,7 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
     using namespace mcrl2::data;
     using namespace mcrl2::lts::detail;
     ATermAppl state_label=(ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f));
-    std::vector < data_expression > state_element_vector;
-    const unsigned int arity=ATgetArity(ATgetAFun(state_label));
-    state_element_vector.reserve(arity);
-    for(unsigned int i=0; i<arity; ++i)
-    {
-      state_element_vector.push_back(data_expression(ATgetArgument(state_label,i)));
-    }
-    l.add_state(state_label_lts(state_element_vector.begin(),state_element_vector.end()));
+    l.add_state(state_label_lts(state_label)); 
   }
   else
   {
@@ -117,14 +107,7 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
         using namespace mcrl2::data;
         using namespace mcrl2::lts::detail;
         ATermAppl state_label=(ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) i);
-        std::vector < data_expression > state_element_vector;
-        const unsigned int arity=ATgetArity(ATgetAFun(state_label));
-        state_element_vector.reserve(arity);
-        for(unsigned int j=0; j<arity; ++j)
-        {
-          state_element_vector.push_back(data_expression(ATgetArgument(state_label,j)));
-        }
-        l.add_state(state_label_lts(state_element_vector.begin(),state_element_vector.end()));
+        l.add_state(state_label_lts(state_label));
       } 
       else 
       {
@@ -214,34 +197,82 @@ void read_from_lts(lts_lts_t &l, string const& filename, lts_type type)
   }
 }
 
-static void write_to_lts(const lts_lts_t& l, string const& filename, lts_type type)
+/* \brief Add an mCRL2 data specification, parameter list and action
+ *         specification to a mCRL2 LTS in SVC format.
+ * \param[in] filename   The file name of the mCRL2 LTS.
+ * \param[in] data_spec  The data specification to add in mCRL2 internal
+ *                       format (or NULL for none).
+ * \param[in] params     The list of state(/process) parameters in mCRL2
+ *                       internal format (or NULL for none).
+ * \param[in] act_spec   The action specification to add in mCRL2 internal
+ *                       format (or NULL for none).
+ * \pre                  The LTS in filename is a mCRL2 SVC without extra
+ *                       information. */
+static void add_extra_mcrl2_lts_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermList act_labels)
 {
-  /* if (!l.has_label_info())
-  { 
-    throw mcrl2::runtime_error("Cannot save .lts file, because there are no transition labels");
-  } */
+  FILE *f = fopen(filename.c_str(),"ab");
+  if ( f == NULL )
+  {
+    throw mcrl2::runtime_error("Could not open file '" + filename + "' to add extra LTS information.");
+    return;
+  }
 
+  ATerm arg1 = (ATerm) ((data_spec == NULL)?gsMakeNil():data_spec);
+  ATerm arg2 = (ATerm) ((params == NULL)?gsMakeNil():ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params));
+  ATerm arg3 = (ATerm) ((ATisEmpty(act_labels))?gsMakeNil():core::detail::gsMakeActSpec(act_labels));
+  ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
+
+  long position;
+  if ( (position = ftell(f)) == -1 )
+  {
+    fclose(f);
+    throw mcrl2::runtime_error("Could not determine file size of '" + filename +
+                          "'; not adding extra information.");
+    return;
+  }
+
+  if ( ATwriteToBinaryFile(data,f) == ATfalse )
+  {
+    fclose(f);
+    throw mcrl2::runtime_error("Error writing extra LTS information to '" + filename +
+               "', file could be corrupted.");
+    return;
+  }
+
+  unsigned char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
+  for (unsigned int i=0; i<8; i++)
+  {
+    buf[i] = position % 0x100;
+    position /= 0x100;
+  }
+  if ( fwrite(buf,1,8+12,f) != 8+12 )
+  {
+    fclose(f);
+    throw mcrl2::runtime_error("error writing extra LTS information to '" + filename +
+                     "', file could be corrupted.");
+    return;
+  }
+
+  fclose(f);
+}
+
+
+static void write_to_lts(const lts_lts_t& l, string const& filename)
+{
   SVCfile f;
   SVCbool b = l.has_state_info() ? SVCfalse : SVCtrue;
   if ( SVCopen(&f,const_cast< char* >(filename.c_str()),SVCwrite,&b) )
   {
-    throw mcrl2::runtime_error("cannot open SVC file '" + filename + "' for writing.");
+    throw mcrl2::runtime_error("cannot open .lts file '" + filename + "' for writing.");
   }
 
-  if ( type == lts_lts )
+  if ( l.has_state_info() )
   {
-    if ( l.has_state_info() )
-    {
-      SVCsetType(&f,const_cast < char* > ("mCRL2+info"));
-    } 
-    else 
-    {
-      SVCsetType(&f,const_cast < char* > ("mCRL2"));
-    }
+    SVCsetType(&f,const_cast < char* > ("mCRL2+info"));
   } 
   else 
   {
-      SVCsetType(&f,const_cast < char* > ("unknown"));
+    SVCsetType(&f,const_cast < char* > ("mCRL2"));
   }
 
   if ( l.creator() == "" )
@@ -253,16 +284,16 @@ static void write_to_lts(const lts_lts_t& l, string const& filename, lts_type ty
     SVCsetCreator(&f, const_cast< char* >(l.creator().c_str()));
   }
 
-  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_value(l.initial_state()).aterm() : (ATerm) ATmakeInt(l.initial_state()) ,&b));
+  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_value(l.initial_state()).aterm() : (ATerm) ATmakeInt(l.initial_state()) ,&b));
 
   SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
   
   for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
-    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_value(t.front().from()).aterm() : (ATerm) ATmakeInt(t.front().from()) ,&b);
+    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_value(t.front().from()).aterm() : (ATerm) ATmakeInt(t.front().from()) ,&b);
     // SVClabelIndex label = SVCnewLabel(&f, l.has_label_info() ? (ATerm)l.label_value(t.front().label()).aterm() : (ATerm) ATmakeInt(t.front().label()) ,&b);
     SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.label_value(t.front().label()).aterm(), &b);
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_value(t.front().to()).aterm() : (ATerm) ATmakeInt(t.front().to()) ,&b);
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_value(t.front().to()).aterm() : (ATerm) ATmakeInt(t.front().to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 
@@ -274,17 +305,22 @@ static void write_to_lts(const lts_lts_t& l, string const& filename, lts_type ty
   ATermList act_spec = l.action_labels(); 
   add_extra_mcrl2_lts_data(filename,data_spec,params,act_spec);
 }
-} // namespace detail
+
+namespace mcrl2
+{
+namespace lts
+{
 
 void lts_lts_t::save(const std::string &filename) const
 {
+
   if (filename=="")
   { 
     throw mcrl2::runtime_error("Cannot write svc/lts file " + filename + " to stdout");
   }
   else
   {
-	  mcrl2::lts::detail::write_to_lts(*this,filename,detail::guess_format(filename));
+    write_to_lts(*this,filename);
   }
 
 }
@@ -296,7 +332,7 @@ void lts_lts_t::load(const std::string &filename)
  }
  else
  {
-	 mcrl2::lts::detail::read_from_lts(*this,filename,detail::detect_type(filename));
+   read_from_lts(*this,filename,detail::detect_type(filename));
  }
 
 }

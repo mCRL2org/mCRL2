@@ -50,9 +50,14 @@ namespace lts
   } // namespace detail
 
 
-  class lts_aut_t : public lts_< detail::state_label_aut, detail::action_label_string >
+  class lts_aut_t : public lts< detail::state_label_aut, detail::action_label_string >
   {
     public:
+
+      lts_type type()
+      {
+        return lts_aut;
+      }
      
       /** \brief Load the labelled transition system from a file.
        *  \details If the filename is empty, the result is read from stdin.

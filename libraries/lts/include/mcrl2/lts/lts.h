@@ -78,7 +78,7 @@ namespace mcrl2
     */
 
     template < class STATE_LABEL_T, class ACTION_LABEL_T >
-    class lts_
+    class lts
     {
       public:
 
@@ -122,12 +122,12 @@ namespace mcrl2
 
         /** \brief Creates an empty LTS.
          */
-        lts_():nstates(0)
+        lts():nstates(0)
         {};
 
         /** \brief Creates a copy of the supplied LTS.
          * \param[in] l The LTS to copy. */
-        lts_(const lts_ &l):
+        lts(const lts &l):
                 nstates(l.nstates),
                 init_state(l.init_state),
                 transitions(l.transitions),
@@ -138,12 +138,13 @@ namespace mcrl2
 
         /** \brief Standard destructor for the class lts.
         */
-        ~lts_()
-        {}
+        ~lts()
+        { 
+        }
 
         /** \brief Swap this lts with the supplied supplied LTS.
          * \param[in] l The LTS to swap. */
-        void swap(lts_ &l)
+        void swap(lts &l)
         {
           { const states_size_type aux=init_state; init_state=l.init_state;   l.init_state=aux; }
           { const states_size_type aux=nstates;    nstates=l.nstates;         l.nstates=aux; }
@@ -152,6 +153,13 @@ namespace mcrl2
           taus.swap(l.taus);
           label_values.swap(l.label_values);
         };
+
+        /** \brief Gets the lts_type of the lts.
+         */
+        lts_type type() const
+        {
+          return lts_none;
+        }
 
         /** \brief Gets the number of states of this LTS.
          * \return The number of states of this LTS. */
@@ -229,17 +237,23 @@ namespace mcrl2
 
         /** \brief Adds a state to this LTS.
          *  \details It is not checked whether the added state already exists.
-         * \param[in] value The value of the state. If value is ommitted, only the state, and
-         *                  no state value is added. This is only allowed, if there are no
-         *                  state_values.
+         * \param[in] value The value of the state. If one state has a state
+         *             label, all states must have state labels.
          * \return The number of the added state label. */
-        states_size_type add_state(const STATE_LABEL_T value = STATE_LABEL_T())
+        states_size_type add_state(const STATE_LABEL_T value)
         {
-          if (value != STATE_LABEL_T())
-          {
-            assert(nstates==state_values.size());
-            state_values.push_back(value);
-          }
+          assert(nstates==state_values.size());
+          state_values.push_back(value);
+          return nstates++;
+        }
+
+        /** \brief Adds a state to this LTS. No state label is set. 
+         *  \details It is not checked whether the added state already exists.
+         *           Furthermore, no other states can have state labels.
+         * \return The number of the added state label. */
+        states_size_type add_state()
+        {
+          assert(state_values.size()==0);
           return nstates++;
         }
 

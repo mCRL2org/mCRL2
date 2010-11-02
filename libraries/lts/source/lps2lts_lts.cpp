@@ -44,6 +44,9 @@ namespace mcrl2
       lts_opts = opts;
       switch ( lts_opts.outformat )
       {
+        case lts_none:
+          gsVerboseMsg("not saving state space.\n");
+          break;
         case lts_aut:
           gsVerboseMsg("writing state space in AUT format to '%s'.\n",filename);
           lts_opts.outinfo = false;
@@ -54,7 +57,7 @@ namespace mcrl2
             exit(1);
           }
           break;
-        case lts_lts:
+        /* case lts_lts:
           gsVerboseMsg("writing state space in mCRL2 format to '%s'.\n",filename);
           {
             SVCbool b;
@@ -70,9 +73,7 @@ namespace mcrl2
             svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
           }
           break;
-        case lts_none:
-          gsVerboseMsg("not saving state space.\n");
-          break;
+        */
         default:
           gsVerboseMsg("writing state space in %s format to '%s'.\n",
                       mcrl2::lts::detail::string_for_type(lts_opts.outformat).c_str(),filename);
@@ -93,10 +94,12 @@ namespace mcrl2
       initial_state = idx;
       switch ( lts_opts.outformat )
       {
+        case lts_none:
+          break;
         case lts_aut:
           aut << "des (0,0,0)                                      " << endl;
           break;
-        case lts_lts:
+        /* case lts_lts:
           {
             SVCbool b;
             if ( lts_opts.outinfo )
@@ -106,16 +109,15 @@ namespace mcrl2
               SVCsetInitialState(svc,SVCnewState(svc,(ATerm) ATmakeInt(initial_state),&b));
             }
           }
-          break;
-        case lts_none:
-          break;
+          break; */
         default:
           {
             ATbool is_new;
             const size_t t = ATindexedSetPut(aterm2state,state,&is_new);
-            if ( is_new )
+            if ( is_new && lts_opts.outinfo)
             {
               const size_t u = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(state)));
+
               assert(u==t);
             }
             assert(t>=0);
@@ -130,6 +132,8 @@ namespace mcrl2
     {
       switch ( lts_opts.outformat )
       {
+        case lts_none:
+          break;
         case lts_aut:
           if ( idx_from == initial_state )
             idx_from = 0;
@@ -140,7 +144,7 @@ namespace mcrl2
           aut << "\"," << idx_to << ")" << endl;
           aut.flush();
           break;
-        case lts_lts:
+        /* case lts_lts:   the lts type is not treated in a special way anymore.
           if ( lts_opts.outinfo )
           {
             SVCbool b;
@@ -157,20 +161,18 @@ namespace mcrl2
               SVCnewState(svc,(ATerm) ATmakeInt(idx_to),&b),
               svcparam);
           }
-          break;
-        case lts_none:
-          break;
+          break; */
         default:
           {
             ATbool is_new;
             const size_t from_state = ATindexedSetPut(aterm2state,from,&is_new);
-            if ( is_new )
+            if ( is_new && lts_opts.outinfo )
             {
               const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(from)));
               assert(t==from_state);
             }
             const size_t to_state = ATindexedSetPut(aterm2state,to,&is_new);
-            if ( is_new )
+            if ( is_new && lts_opts.outinfo )
             {
               const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(to)));
               assert(t==to_state);
@@ -191,26 +193,26 @@ namespace mcrl2
     {
       switch ( lts_opts.outformat )
       {
+        case lts_none:
+          break;
         case lts_aut:
           aut.seekp(0);
           aut << "des (0," << num_trans << "," << num_states << ")";
           aut.close();
           break;
-        case lts_lts:
+        /* case lts_lts:
           {
             int e = SVCclose(svc);
             if ( e )
             {
               gsErrorMsg("svcerror: %s\n",SVCerror(e));
             }
-            mcrl2::lts::detail::add_extra_mcrl2_lts_data(
+            add_extra_mcrl2_lts_data(
                          lts_filename,
                          mcrl2::data::detail::data_specification_to_aterm_data_spec(lts_opts.spec->data()),
                          lts_opts.spec->process().process_parameters(), lts_opts.spec->action_labels());
-          }
-          break;
-        case lts_none:
-          break;
+          } 
+          break; */
         default:
           {
             generic_lts.set_creator(lts_filename);
@@ -275,7 +277,7 @@ namespace mcrl2
         case lts_aut:
           aut.close();
           break;
-        case lts_lts:
+        /* case lts_lts:
           {
             int e = SVCclose(svc);
             if ( e )
@@ -283,7 +285,7 @@ namespace mcrl2
               gsErrorMsg("svcerror: %s\n",SVCerror(e));
             }
           }
-          break;
+          break; */
         case lts_none:
           break;
         default:

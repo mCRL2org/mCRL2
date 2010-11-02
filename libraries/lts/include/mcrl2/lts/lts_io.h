@@ -51,18 +51,6 @@ namespace mcrl2
   {
     namespace detail
     {
-      /** \brief Add an mCRL2 data specification, parameter list and action
-       *         specification to a mCRL2 LTS in SVC format.
-       * \param[in] filename   The file name of the mCRL2 LTS.
-       * \param[in] data_spec  The data specification to add in mCRL2 internal
-       *                       format (or NULL for none).
-       * \param[in] params     The list of state(/process) parameters in mCRL2
-       *                       internal format (or NULL for none).
-       * \param[in] act_spec   The action specification to add in mCRL2 internal
-       *                       format (or NULL for none).
-       * \pre                  The LTS in filename is a mCRL2 SVC without extra
-       *                       information. */
-      void add_extra_mcrl2_lts_data(std::string const &filename, const ATermAppl data_spec, const ATermList params, const ATermList act_spec);
 
       lts_type detect_type(std::string const& filename);
       lts_type detect_type(std::istream &is);

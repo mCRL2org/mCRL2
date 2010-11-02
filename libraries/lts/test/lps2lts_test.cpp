@@ -26,6 +26,11 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lts/exploration.h"
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_fsm.h"
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/lts_svc.h"
+#include "mcrl2/lts/lts_dot.h"
+#include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -67,7 +72,8 @@ std::string nextstate_format_to_string(const NextStateFormat f)
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-lts::lts_aut_t translate_lps_to_lts(lps::specification const& specification,
+template <class LTS_TYPE>
+LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty,
                               NextStateFormat format = GS_STATE_VECTOR,
@@ -83,8 +89,9 @@ lts::lts_aut_t translate_lps_to_lts(lps::specification const& specification,
   options.stateformat = format;
 
   options.lts = temporary_filename("lps2lts_test");
-  options.outformat = lts::lts_aut;
 
+  LTS_TYPE result;
+  options.outformat = result.type();
   lts::lps2lts_algorithm lps2lts;
   core::garbage_collect();
   lps2lts.initialise_lts_generation(&options);
@@ -94,7 +101,6 @@ lts::lts_aut_t translate_lps_to_lts(lps::specification const& specification,
   lps2lts.finalise_lts_generation();
   core::garbage_collect();
 
-  lts::lts_aut_t result;
   result.load(options.lts);
 
   boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
@@ -175,6 +181,7 @@ void check_lps2lts_specification(std::string const& specification,
                                  const unsigned int expected_labels,
                                  std::string priority_action = "")
 {
+  std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
   lps::specification lps = lps::parse_linear_process_specification(specification);
 
   rewrite_strategy_vector rstrategies(rewrite_strategies());
@@ -186,11 +193,49 @@ void check_lps2lts_specification(std::string const& specification,
       nextstate_format_vector nsformats(nextstate_formats());
       for(nextstate_format_vector::const_iterator state_format = nsformats.begin(); state_format != nsformats.end(); ++state_format)
       {
-        lts::lts_aut_t result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+        std::cerr << "AUT FORMAT\n";
+        lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        BOOST_CHECK_EQUAL(result.num_states(), expected_states);
-        BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
-        BOOST_CHECK_EQUAL(result.num_action_labels(), expected_labels);
+        BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);
+
+        std::cerr << "LTS FORMAT\n";
+        lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result2.num_action_labels(), expected_labels);
+
+        std::cerr << "FSM FORMAT\n";
+        lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result3.num_action_labels(), expected_labels);
+
+        std::cerr << "DOT FORMAT\n";
+        lts::lts_dot_t result4 = translate_lps_to_lts<lts::lts_dot_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        BOOST_CHECK_EQUAL(result4.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result4.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result4.num_action_labels(), expected_labels);
+
+        /* lts::lts_svc_t result5 = translate_lps_to_lts<lts::lts_svc_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        std::cerr << "SVC FORMAT\n";
+        BOOST_CHECK_EQUAL(result5.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result5.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result5.num_action_labels(), expected_labels);
+        */
+#ifdef USE_BCG
+        lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        std::cerr << "BCG FORMAT\n";
+        BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result6.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result6.num_action_labels(), expected_labels);
+#endif
       }
     }
   }

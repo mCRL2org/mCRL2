@@ -137,6 +137,7 @@ namespace detail
 
       state_label_fsm translate_state(const state_label_lts &l) 
       { 
+      
         std::vector < unsigned int > result;
         for(unsigned int i=0; i<l.size(); ++i)
         { 

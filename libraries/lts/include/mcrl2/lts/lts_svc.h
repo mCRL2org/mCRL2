@@ -314,7 +314,7 @@ namespace lts
    * LTS. This can be either a muCRL specification, an mCRL2 specificiation, or
    * options for the Dot format. */
 
-  class lts_svc_t : public lts_< detail::state_label_svc, detail::action_label_svc >
+  class lts_svc_t : public lts< detail::state_label_svc, detail::action_label_svc >
   {
 
     private:
@@ -349,7 +349,7 @@ namespace lts
       /** \brief Copy constructor */
 
       lts_svc_t(const lts_svc_t &l):
-           lts_< detail::state_label_svc, detail::action_label_svc >(l),
+           lts< detail::state_label_svc, detail::action_label_svc >(l),
            // m_type(l.m_type),
            m_creator(l.m_creator),
            m_has_valid_data_spec(l.m_has_valid_data_spec),
@@ -368,7 +368,7 @@ namespace lts
 
       void swap(lts_svc_t &l)
       {
-        lts_< detail::state_label_svc, detail::action_label_svc >(l).swap(*this);
+        lts< detail::state_label_svc, detail::action_label_svc >(l).swap(*this);
       
         // { const lts_type aux=m_type; m_type=l.m_type; l.m_type=aux; }
         m_creator.swap(l.m_creator);
@@ -378,6 +378,11 @@ namespace lts
         { const data::variable_list aux=m_parameters; m_parameters=l.m_parameters; l.m_parameters=aux; }
         { const bool aux=m_has_valid_action_decls; m_has_valid_action_decls=l.m_has_valid_action_decls; l.m_has_valid_action_decls=aux; }
         { const lps::action_label_list aux=m_action_decls; m_action_decls=l.m_action_decls; l.m_action_decls=aux; }
+      }
+
+      lts_type type()
+      {
+        return lts_svc;
       }
 
       /** \brief Return the mCRL2 data specification of this LTS.

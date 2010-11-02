@@ -530,55 +530,6 @@ std::string mime_type_for_type(const lts_type type) {
   return (mime_type_strings[type]);
 }
 
-
-void add_extra_mcrl2_lts_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermList act_labels)
-{
-  FILE *f = fopen(filename.c_str(),"ab");
-  if ( f == NULL )
-  {
-    throw mcrl2::runtime_error("Could not open file '" + filename + "' to add extra LTS information.");
-    return;
-  }
-
-  ATerm arg1 = (ATerm) ((data_spec == NULL)?gsMakeNil():data_spec);
-  ATerm arg2 = (ATerm) ((params == NULL)?gsMakeNil():ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params));
-  ATerm arg3 = (ATerm) ((ATisEmpty(act_labels))?gsMakeNil():core::detail::gsMakeActSpec(act_labels));
-  ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
-
-  long position;
-  if ( (position = ftell(f)) == -1 )
-  {
-    fclose(f);
-    throw mcrl2::runtime_error("Could not determine file size of '" + filename + 
-                          "'; not adding extra information.");
-    return;
-  }
-
-  if ( ATwriteToBinaryFile(data,f) == ATfalse )
-  {
-    fclose(f);
-    throw mcrl2::runtime_error("Error writing extra LTS information to '" + filename + 
-               "', file could be corrupted.");
-    return;
-  }
-
-  unsigned char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
-  for (unsigned int i=0; i<8; i++)
-  {
-    buf[i] = position % 0x100;
-    position /= 0x100;
-  }
-  if ( fwrite(buf,1,8+12,f) != 8+12 )
-  {
-    fclose(f);
-    throw mcrl2::runtime_error("error writing extra LTS information to '" + filename + 
-                     "', file could be corrupted.");
-    return;
-  }
-
-  fclose(f);
-}
-
 static const std::set<lts_type> &initialise_supported_lts_formats()
 {
   static std::set<lts_type> s;
