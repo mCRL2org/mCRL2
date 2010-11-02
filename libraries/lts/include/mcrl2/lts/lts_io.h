@@ -35,7 +35,8 @@
 
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/exception.h"
-#include "mcrl2/lts/lts_fsm.h"
+
+#include "mcrl2/lts/detail/lts_convert.h"
 
 
 namespace mcrl2
@@ -141,6 +142,60 @@ namespace mcrl2
       std::string lts_extensions_as_string(const std::set<lts_type> &supported);
 
     }
+
+
+    inline void load_lts_as_fsm_file(const std::string &path, lts_fsm_t &l)
+    {
+      const lts_type intype = mcrl2::lts::detail::guess_format(path);
+      switch (intype)
+      {
+        case lts_lts:
+        {
+          lts_lts_t l1;
+          l1.load(path);
+          detail::lts_convert(l1,l);
+          return;
+        }
+        case lts_none:
+          std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+        case lts_aut:
+        {
+          lts_aut_t l1;
+          l1.load(path);
+          detail::lts_convert(l1,l);
+          return;
+        }
+        case lts_fsm:
+        {
+          l.load(path);
+          return;
+        }
+#ifdef USE_BCG
+        case lts_bcg:
+        {
+          lts_bcg_t l1;
+          l1.load(path);
+          detail::lts_convert(l1,l);
+          return;
+        }
+#endif
+        case lts_dot:
+        {
+          lts_dot_t l1;
+          l1.load(path);
+          detail::lts_convert(l1,l);
+          return;
+        }
+        case lts_svc:
+        {
+          lts_svc_t l1;
+          l1.load(path);
+          detail::lts_convert(l1,l);
+          return;
+        }
+      }
+    }
+
   }
 }
 

@@ -45,7 +45,7 @@ public:
     int getFileSize( const std::string &path );
 
     // fsm files
-    void parseFSMFile(
+    void parseFile(
         const std::string &path,
         Graph* graph );
     void writeFSMFile(

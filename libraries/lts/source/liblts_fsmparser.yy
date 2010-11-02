@@ -64,9 +64,6 @@ fsm_file :
       ignore_par.clear();
     }
   params
-    {
-      // fsm_lexer_obj->valueTable = ATreverse( fsm_lexer_obj->valueTable );
-    }
   SECSEP EOLN
   states
   SECSEP EOLN transitions

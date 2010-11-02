@@ -11,59 +11,16 @@
 
 #include <map>
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/detail/lts_convert.h"
 #include "ltsimporter.h"
 
 using namespace mcrl2::lts;
-
-template <class LTS_TYPE>
-mcrl2::lts::lts_fsm_t read_lts_as_fsm_file(const std::string &fn)
-{
-  LTS_TYPE l;
-  l.load(fn);
-  mcrl2::lts::lts_fsm_t result_lts;
-  mcrl2::lts::detail::lts_convert(l,result_lts);
-  return result_lts;
-}
 
 Graph* LTSImporter::importFile(const std::string &fn)
 {
   Graph* result = new Graph();
   mcrl2::lts::lts_fsm_t fileLTS;
 
-  const mcrl2::lts::lts_type intype = mcrl2::lts::detail::guess_format(fn);
-  switch (intype)
-  {
-    case lts_lts:
-    {
-      fileLTS=read_lts_as_fsm_file<lts_lts_t>(fn);
-    }
-    case lts_none:
-      std::cerr << "Cannot determine type of input. Assuming .aut.\n";
-    case lts_aut:
-    {
-      fileLTS=read_lts_as_fsm_file<lts_aut_t>(fn);
-    }
-    case lts_fsm:
-    {
-      fileLTS=read_lts_as_fsm_file<lts_fsm_t>(fn);
-    }
-#ifdef USE_BCG
-    case lts_bcg:
-    {
-      fileLTS=read_lts_as_fsm_file<lts_bcg_t>(fn);
-    }
-#endif
-    case lts_dot:
-    {
-      fileLTS=read_lts_as_fsm_file<lts_dot_t>(fn);
-    }
-    case lts_svc:
-    { 
-      fileLTS=read_lts_as_fsm_file<lts_svc_t>(fn);
-    } 
-  }
-
+  load_lts_as_fsm_file(fn,fileLTS);
 
   // lts_fsm_t fileLTS(fn,lts_none);
   // if(fileLTS.read_from(fn))
@@ -104,7 +61,7 @@ Graph* LTSImporter::importFile(const std::string &fn)
           stateValues.insert(stateValue); */
           std::pair<std::string, std::string> stateValue(
               parameters[i],
-              fileLTS.state_element_value(i,stNum));
+              fileLTS.state_element_value(i,fileLTS.state_value(stNum)[i]));
           stateValues.insert(stateValue); 
       }
       s->setParameters(stateValues);

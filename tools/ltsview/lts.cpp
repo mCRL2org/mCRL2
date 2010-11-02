@@ -155,7 +155,7 @@ LTS::LTS(Mediator* owner)
   previousLevel = NULL;
   lastWasAbove = false;
   zoomLevel = 0;
-  mcrl2_lts = NULL;
+  // mcrl2_lts = NULL;
 }
 
 LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
@@ -230,11 +230,11 @@ LTS::~LTS()
 
     simulation->stop();
     delete simulation;
-    if (mcrl2_lts != NULL)
+    /* if (mcrl2_lts != NULL)
     {
       delete mcrl2_lts;
       mcrl2_lts = NULL;
-    }
+    } */
   }
   else
   {
@@ -260,70 +260,27 @@ State_iterator LTS::getStateIterator()
 
 string LTS::getParameterName(unsigned int parindex)
 {
-  /* if (!mcrl2_lts->has_process_parameters())
-  {
-    return "";
-  } */
-
-  return mcrl2_lts->process_parameter(parindex).first; // in an .fsm file a parameter is a pair of strings.
+  return mcrl2_lts.process_parameter(parindex).first; // in an .fsm file a parameter is a pair of strings.
 }
 
 std::vector<std::string> LTS::getParameterDomain(unsigned int parindex)
 {
-  return mcrl2_lts->state_element_values(parindex);
-
-  /* if (!mcrl2_lts->has_process_parameters())
-  {
-    atermpp::set<ATermAppl> empty_set;
-    return empty_set;
-  } */
-
-  /* atermpp::set<ATermAppl> r;
-        
-  for (lts_fsm_t::states_size_type i=0; i<mcrl2_lts->num_states(); i++)
-  {
-    r.insert(mcrl2_lts->state_value(i)[parindex]);
-  }
-        
-  return r; */
-  // return mcrl2_lts->get_state_parameter_values(parindex);
+  return mcrl2_lts.state_element_values(parindex);
 }
 
-/* string LTS::prettyPrintParameterValue(ATerm parvalue)
-{
-  return / * mcrl2_lts->* / mcrl2::lts::detail::pretty_print_state_parameter_value((ATermAppl)parvalue);
-} */
-
-// ATerm LTS::getStateParameterValue(State* state,unsigned int param)
 unsigned int LTS::getStateParameterValue(State* state,unsigned int param)
 {
-  /* if (!mcrl2_lts->has_process_parameters())
-  {
-    return NULL;
-  } */
-  return mcrl2_lts->state_value(state->getID())[param];
+  return mcrl2_lts.state_value(state->getID())[param];
 }
 
 std::string LTS::getStateParameterValueStr(State* state, unsigned int param)
-{ using namespace mcrl2::lts::detail;
-  /* if (!mcrl2_lts->has_process_parameters())
-  {
-    return "";
-  } */
-  /* return / * mcrl2_lts->* / pretty_print_state_parameter_value(
-      mcrl2_lts->state_value(state->getID())[param]); */
-  return mcrl2_lts->state_element_value(param,(mcrl2_lts->state_value(state->getID()))[param]);
-
+{ 
+  using namespace mcrl2::lts::detail;
+  return mcrl2_lts.state_element_value(param,(mcrl2_lts.state_value(state->getID()))[param]);
 }
 
-// atermpp::set<ATerm> LTS::getClusterParameterValues(Cluster* cluster, unsigned int param)
 std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, unsigned int param)
 {
-  /* if (!mcrl2_lts->has_process_parameters())
-  {
-    atermpp::set<ATerm> empty_set;
-    return empty_set;
-  } */
   std::set<std::string> result;
   for (int i = 0; i < cluster->getNumStates(); ++i)
   {
@@ -332,68 +289,25 @@ std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, unsigned 
   return result;
 }
 
-template <class LTS_TYPE>
-static lts_fsm_t *read_lts_from_file(const std::string &filename)
-{
-  LTS_TYPE l;
-  l.load(filename);
-  lts_fsm_t *l_fsm=new lts_fsm_t();
-  mcrl2::lts::detail::lts_convert(l,*l_fsm);
-  return l_fsm;
-}
 
 bool LTS::readFromFile(const std::string &filename)
 {
-  const mcrl2::lts::lts_type intype = mcrl2::lts::detail::guess_format(filename);
+  load_lts_as_fsm_file(filename,mcrl2_lts);
   
-  switch (intype)
-  {
-    case lts_lts:
-    {
-      mcrl2_lts = read_lts_from_file<lts_lts_t>(filename);
-    }
-    case lts_none:
-      std::cerr << "Cannot determine type of input. Assuming .aut.\n";
-    case lts_aut:
-    {
-      mcrl2_lts = read_lts_from_file<lts_aut_t>(filename);
-    }
-    case lts_fsm:
-    {
-      mcrl2_lts = read_lts_from_file<lts_fsm_t>(filename);
-    }
-#ifdef USE_BCG
-    case lts_bcg:
-    {
-      mcrl2_lts = read_lts_from_file<lts_bcg_t>(filename);
-    }
-#endif
-    case lts_dot:
-    {
-      mcrl2_lts = read_lts_from_file<lts_dot_t>(filename);
-    }
-    case lts_svc:
-    { 
-      mcrl2_lts = read_lts_from_file<lts_svc_t>(filename);
-    } 
-  }
-
-
   // remove unreachable states
-  
-  reachability_check(*mcrl2_lts,true);
+  reachability_check(mcrl2_lts,true);
 
   states.clear();
-  states.reserve(mcrl2_lts->num_states());
-  for (unsigned int i = 0; i < mcrl2_lts->num_states(); ++i)
+  states.reserve(mcrl2_lts.num_states());
+  for (unsigned int i = 0; i < mcrl2_lts.num_states(); ++i)
   {
     states.push_back(new State(i));
   }
 
-  initialState = states[mcrl2_lts->initial_state()];
+  initialState = states[mcrl2_lts.initial_state()];
   simulation->setInitialState(initialState);
 
-  for (transition_const_range r=mcrl2_lts->get_transitions() ; !r.empty(); r.advance_begin(1))
+  for (transition_const_range r=mcrl2_lts.get_transitions() ; !r.empty(); r.advance_begin(1))
   { const transition ti=r.front();
     State *s1 = states[ti.from()];
     State *s2 = states[ti.to()];
@@ -465,22 +379,22 @@ void LTS::deselect()
 
 int LTS::getNumLabels()
 {
-  return mcrl2_lts->num_action_labels();
+  return mcrl2_lts.num_action_labels();
 }
 
 unsigned int LTS::getNumParameters() const
 {
-  /* if (mcrl2_lts->has_process_parameters())
+  /* if (mcrl2_lts.has_process_parameters())
   { */
-    return mcrl2_lts->process_parameters().size();
+    return mcrl2_lts.process_parameters().size();
   /* }
   return 0; */
 }
 
 string LTS::getLabel(int labindex)
 {
-  // return mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts->label_value(labindex));
-  return mcrl2_lts->label_value(labindex);
+  // return mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts.label_value(labindex));
+  return mcrl2_lts.label_value(labindex);
 }
 
 void LTS::addCluster(Cluster* cluster)
@@ -531,10 +445,10 @@ void LTS::addClusterAndBelow(Cluster* cluster)
 void LTS::getActionLabels(vector< string > &ls) const
 {
   ls.clear();
-  for (unsigned int i = 0; i < mcrl2_lts->num_action_labels(); ++i)
+  for (unsigned int i = 0; i < mcrl2_lts.num_action_labels(); ++i)
   {
-    // ls.push_back(mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts->label_value(i)));
-    ls.push_back(mcrl2_lts->label_value(i));
+    // ls.push_back(mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts.label_value(i)));
+    ls.push_back(mcrl2_lts.label_value(i));
   }
 }
 
@@ -588,12 +502,12 @@ int LTS::getNumDeadlocks()
 
 int LTS::getNumStates() const
 {
-  return mcrl2_lts->num_states();
+  return mcrl2_lts.num_states();
 }
 
 int LTS::getNumTransitions() const
 {
-  return mcrl2_lts->num_transitions();
+  return mcrl2_lts.num_transitions();
 }
 
 void LTS::clearRanksAndClusters()
@@ -1009,8 +923,8 @@ void LTS::loadTrace(std::string const& path)
 
       for(size_t i = 0; i < posTrans.size(); ++i)
       {
-        // if (action == mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts->label_value(posTrans[i]->getLabel())))
-        if (action == mcrl2_lts->label_value(posTrans[i]->getLabel()))
+        // if (action == mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts.label_value(posTrans[i]->getLabel())))
+        if (action == mcrl2_lts.label_value(posTrans[i]->getLabel()))
         {
           ++possibilities;
           toChoose = i;

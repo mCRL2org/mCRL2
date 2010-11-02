@@ -36,19 +36,13 @@ set(mcrl2_lts_src
 #  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmparser.yy
 #  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dotparser.yy
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dotlexer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_scc.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_sim.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_aut.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_det.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_lts.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_svc.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_bisim.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/sim_hashtable.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_eq.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dot.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_bcg.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_tau_star.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tree_set.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsm.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/exploration.cpp

@@ -1,4 +1,4 @@
-// Author(s): A.J. (Hannes) pretorius
+// Author(s): A.J. (Hannes) Pretorius
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -208,7 +208,7 @@ void DiaGraph::openFile( const std::string &path )
             "Opening file",
             "Opening " + fileName,
             fileSize );
-        parser->parseFSMFile(
+        parser->parseFile(
             path,
             graph );
         closeProgress();

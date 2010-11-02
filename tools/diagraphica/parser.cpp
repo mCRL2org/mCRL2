@@ -96,7 +96,7 @@ int Parser::getFileSize( const string &path )
 
 
 // -----------------------
-void Parser::parseFSMFile(const string &path, Graph* graph )
+void Parser::parseFile(const string &path, Graph* graph )
 // -----------------------
 // ------------------------------------------------------------------
 // Parse the file identified by 'fileName' by calling:
@@ -104,7 +104,7 @@ void Parser::parseFSMFile(const string &path, Graph* graph )
 //  - Parser::parseStates()
 //  - Parser::parseTransitions()
 // Also, report to 'mediator' on the current progress: number of bytes
-// allready read.
+// already read.
 // ------------------------------------------------------------------
 {
   using namespace mcrl2::lts;
@@ -117,46 +117,44 @@ void Parser::parseFSMFile(const string &path, Graph* graph )
     //int byteCnt = 0;
 
       ////////////////////////////////////////////////////
-    mcrl2::lts::lts_fsm_t l;
-    l.load(path);
-    // mcrl2::lts::detail::read_from(l,path,lts_none);
 
-    // if (l.has_process_parameters ())
-    // {
-      std::vector < std::pair < std::string, std::string > >::const_iterator parameter=l.process_parameters().begin();
-      for(unsigned int i = 0; i < l.process_parameters().size(); ++i, ++parameter)
-      { 
-        line.clear();
-        // line.append(l.state_parameter_name_str(i));
-        line.append(parameter->first); // variable name
-        line.append("(");
-        std::vector< string > tmp = l.state_element_values(i);
-        line.append(to_string(tmp.size()));
-        line.append(") ");
-        // line.append(l.state_parameter_sort_str(i)) ;
-        line.append(parameter->second);  // sort of the variable
-        //Following line of code is needed to avoid iteration over a changing object.
-        for (std::vector< std::string >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+    mcrl2::lts::lts_fsm_t l;
+    load_lts_as_fsm_file(path,l);
+
+    const std::vector < std::pair < std::string, std::string > > process_parameters=l.process_parameters();
+    std::vector < std::pair < std::string, std::string > >::const_iterator parameter=process_parameters.begin();
+    for(unsigned int i = 0; i < process_parameters.size(); ++i, ++parameter)
+    { 
+      line.clear();
+      // line.append(l.state_parameter_name_str(i));
+      line.append(parameter->first); // variable name
+      line.append("(");
+      std::vector< string > tmp = l.state_element_values(i);
+      line.append(to_string(tmp.size()));
+      line.append(") ");
+      // line.append(l.state_parameter_sort_str(i)) ;
+      line.append(parameter->second);  // sort of the variable
+      //Following line of code is needed to avoid iteration over a changing object.
+      for (std::vector< std::string >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+      {
+        line.append( " \"");
+        string str = *z;
+        if (str.empty())
         {
-          line.append( " \"");
-          string str = *z;
-          if (str.empty())
-          {
-            str ="-"; 
-          }
-          line.append(str);
-          line.append("\"");
+          str ="-"; 
         }
-        parseStateVarDescr(line, graph );
+        line.append(str);
+        line.append("\"");
       }
-    // }
+      parseStateVarDescr(line, graph );
+    }
 
     for(unsigned int si= 0; si<l.num_states(); ++si)
     {
       line.clear();
       /* if(l.has_process_parameters ())
       { */
-        for(unsigned int i = 0; i < l.process_parameters().size(); ++i )
+        for(unsigned int i = 0; i < process_parameters.size(); ++i )
         {
           if  (i != 0)
           {

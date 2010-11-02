@@ -142,7 +142,7 @@ class LTS
   private:
     Mediator* mediator;
     Simulation* simulation;
-    mcrl2::lts::lts_fsm_t* mcrl2_lts;
+    mcrl2::lts::lts_fsm_t mcrl2_lts;
 
     bool lastWasAbove;
     int zoomLevel;

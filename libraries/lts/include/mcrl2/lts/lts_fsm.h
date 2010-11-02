@@ -21,9 +21,8 @@
 
 #include <string>
 #include <vector>
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/print.h"
-// #include "mcrl2/data/variable.h"
+// #include "mcrl2/core/messaging.h"
+// #include "mcrl2/core/print.h"
 #include "mcrl2/lts/action_label_string.h"
 #include "mcrl2/lts/lts.h"
 
@@ -97,6 +96,8 @@ namespace lts
 
       std::string state_element_value(unsigned int parameter_index, unsigned int element_index) const
       { 
+        assert(parameter_index<m_state_element_values.size());
+        assert(element_index<m_state_element_values[parameter_index].size());
         return m_state_element_values[parameter_index][element_index];
       }
 
@@ -128,21 +129,8 @@ namespace lts
       /** \brief Set the state parameters for this LTS.
        * \param[in] params  The state parameters for this lts.
       */
-      // void set_process_parameters(const data::variable_list &params) // TODO Should be removed; a variable list does not exist in fsm's.
-      // {
-      //  for(data::variable_list::const_iterator i=params.begin();
-      //              i!=params.end(); ++i)
-      //  { 
-      //    m_parameters.push_back(std::pair<std::string,std::string>(core::pp(i->name()),core::pp(i->sort())));
-      //  }
-      // }
-  
-      /** \brief Set the state parameters for this LTS.
-       * \param[in] params  The state parameters for this lts.
-      */
-      void add_process_parameter(const std::string name, const std::string sort)
+      void add_process_parameter(const std::string &name, const std::string &sort)
       {
-        // assert(num_state_parameters()==0 || num_state_parameters()==params.size());
         m_parameters.push_back(std::pair<std::string,std::string>(name,sort));
       }
      
