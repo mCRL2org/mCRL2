@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink and Ali Deniz Aladagli
+// Author(s): Carst Tankink, Ali Deniz Aladagli, Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -11,8 +11,8 @@
 
 
 #include "xmlimporter.h"
-#include "ticpp.h"
 #include <iostream>
+#include <wx/xml/xml.h>
 
 Graph* XMLImporter::importFile(const std::string &filename)
 {
@@ -22,84 +22,117 @@ Graph* XMLImporter::importFile(const std::string &filename)
     Graph* g = NULL;
     g = new Graph();
 
-    ticpp::Document doc(filename);
-    doc.LoadFile();
+    wxXmlDocument wx_doc;
+		wx_doc.Load(wxString(filename.c_str(), wxConvUTF8));
 
+		wxXmlNode *node = wx_doc.GetRoot();
 
-    ticpp::Iterator<ticpp::Element> graph("Graph");
+		if (node->GetName() != wxT("Graph")){
+			throw "Expected Graph to be root node";
+		}
 
+		wxXmlNode *graph_child = node->GetChildren();
 
-    for( graph = graph.begin(&doc); graph != graph.end(); ++graph)
-    {
-      // Iterate over all states within the graph
-      ticpp::Iterator<ticpp::Element> state("State");
-      for(state = state.begin(graph.Get()); state!= state.end(); ++state)
-      {
-        size_t value;
-        state->GetAttribute("value", &value);
+		while(graph_child){
+			if( graph_child->GetName() == wxT("State") ){
+				wxString ret_value;
 
-        bool isInitial;
-        state->GetAttribute("isInitial", &isInitial);
+				size_t value;
+				graph_child->GetAttribute( wxT("value"), &ret_value );
+				ret_value.ToULong( &value );
 
-        double x;
-        state->GetAttribute("x", &x);
+				bool isInitial;
+				graph_child->GetAttribute( wxT("isInitial"), &ret_value );
+				isInitial = (ret_value == wxT("1"));
 
-        double y;
-        state->GetAttribute("y", &y);
+				double x;
+				graph_child->GetAttribute( wxT("x"), &ret_value );
+				ret_value.ToDouble( &x );
 
-		double z;
-		state->GetAttribute("z", &z);
+				double y;
+				graph_child->GetAttribute( wxT("y"), &ret_value );
+				ret_value.ToDouble( &y );
 
-        int red;
-        state->GetAttribute("red", &red);
+				double z;
+				graph_child->GetAttribute( wxT("z"), &ret_value );
+				ret_value.ToDouble( &z );
 
-        int green;
-        state->GetAttribute("green", &green);
+				graph_child->GetAttribute( wxT("red"), &ret_value );
+				int red = wxAtoi(ret_value);
 
-        int blue;
-        state->GetAttribute("blue", &blue);
+				graph_child->GetAttribute( wxT("green"), &ret_value );
+				int green = wxAtoi(ret_value);
+
+				graph_child->GetAttribute( wxT("blue"), &ret_value );
+				int blue = wxAtoi(ret_value);
 
         wxColour colour(red, green, blue);
 
         std::map<std::string, std::string> parameters;
 
-        ticpp::Iterator<ticpp::Element> param("Parameter");
-        for(param  = param.begin(state.Get());
-            param != param.end(); ++param)
-        {
-          std::string name;
-          param->GetAttribute("name", &name);
+				wxXmlNode *state_child = graph_child->GetChildren();
+				while (state_child){
+          if (state_child->GetName() == wxT( "Parameter" ) ){
+							wxXmlNode *parameter_child = state_child->GetChildren();
 
-          std::string parValue;
-          param->GetText(&parValue);
-          std::pair<std::string, std::string> p(name, parValue);
-          parameters.insert(p);
-        }
+							while( parameter_child ){
+								wxString name;
+                parameter_child->GetAttribute( wxT("name"), &name );
+                wxString content = parameter_child->GetContent();
 
+
+                std::pair<std::string, std::string> p( std::string(name.mb_str()), std::string(content.mb_str()));
+                parameters.insert(p);
+
+                parameter_child = parameter_child->GetNext();
+							}
+					}
+
+					state_child = state_child->GetNext();
+				}
 
         State* s = new State(value, isInitial);
         s->setX(x);
         s->setY(y);
-		s->setZ(z);
+		    s->setZ(z);
         s->setColour(colour);
         s->setParameters(parameters);
         g->addState(s);
-      }
 
-      // All states have been created, now iterate over the transitions
-      ticpp::Iterator<ticpp::Element> transition("Transition");
-      for(transition  = transition.begin(graph.Get());
-          transition != transition.end(); ++transition)
-      {
-        size_t from, to;
-        transition->GetAttribute("from", &from);
-        transition->GetAttribute("to", &to);
+			}
 
-        std::string label = transition->GetAttribute("label");
-        double x, y, z;
-        transition->GetAttribute("x", &x);
-        transition->GetAttribute("y", &y);
-		transition->GetAttribute("z", &z);
+			graph_child = graph_child->GetNext();
+		}
+
+		graph_child = node->GetChildren();
+
+    // All states have been created, now iterate over the transitions
+		while(graph_child){
+			if( graph_child->GetName() == wxT("Transition") ){
+				wxString ret_value;
+
+				size_t from;
+				graph_child->GetAttribute( wxT("from"), &ret_value );
+				ret_value.ToULong( &from );
+
+				size_t to;
+				graph_child->GetAttribute( wxT("to"), &ret_value );
+				ret_value.ToULong( &to );
+
+				graph_child->GetAttribute( wxT("label"), &ret_value );
+				std::string label = std::string(ret_value.mb_str()) ;
+				
+				double x;
+				graph_child->GetAttribute( wxT("x"), &ret_value );
+				ret_value.ToDouble( &x );
+
+				double y;
+				graph_child->GetAttribute( wxT("y"), &ret_value );
+				ret_value.ToDouble( &y );
+
+				double z;
+				graph_child->GetAttribute( wxT("z"), &ret_value );
+				ret_value.ToDouble( &z );
 
         if(from == to)
         {
@@ -120,12 +153,13 @@ Graph* XMLImporter::importFile(const std::string &filename)
           toState->addInTransition(t);
         }
       }
-    }
+			graph_child = graph_child->GetNext();
+		}
     return g;
   }
-  catch(ticpp::Exception e)
+  catch(std::exception& e)
   {
-    std::cerr << "Exception by ticpp: " << e.what();
+    std::cerr << "Could not load XML file: " << e.what();
     return NULL;
   }
 }

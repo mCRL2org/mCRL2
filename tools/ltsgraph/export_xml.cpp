@@ -10,7 +10,8 @@
 /// \brief Implementation of XML exporter.
 
 #include "export_xml.h"
-#include "ticpp.h"
+#include <iostream>
+#include <wx/xml/xml.h>
 
 ExporterXML::ExporterXML(Graph* g) : Exporter(g)
 {
@@ -24,93 +25,75 @@ bool ExporterXML::export_to(wxString _filename)
   try
   {
 
-    ticpp::Document xmlDoc(_filename.mb_str(wxConvUTF8));
-
-    ticpp::Declaration* decl = new ticpp::Declaration("1.0", "", "");
-    xmlDoc.LinkEndChild(decl);
-
-
-    // Add a graph element to the document
-    ticpp::Element* graphEl = new ticpp::Element("Graph");
-    xmlDoc.LinkEndChild(graphEl);
-
-    // A Graph has two types of children, states and transitions.
-    for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+    wxXmlDocument wx_doc;
+		wx_doc.SetVersion(  wxT("1.0") );
+		wxXmlNode *root = new wxXmlNode( wxXML_ELEMENT_NODE , wxT("Graph"));
+    wx_doc.SetRoot( root );
+    for(size_t i = graph->getNumberOfStates(); i > 0 ; --i)
     {
-      State* s = graph->getState(i);
+		  wxXmlNode *state = new wxXmlNode( root, wxXML_ELEMENT_NODE , wxT("State"));
+      State* s = graph->getState(i-1);
       wxColour c = s->getColour();
-      ticpp::Element* state = new ticpp::Element("State");
 
-      size_t fromVal = s->getValue();
+			size_t fromVal = s->getValue();
+      state->AddAttribute(wxT("value"), wxString::Format(wxT("%i"), fromVal ));
+      state->AddAttribute(wxT("isInitial"), wxString::Format(wxT("%i"), s->isInitialState() ));
+      state->AddAttribute(wxT("x"), wxString::Format(wxT("%f"), s->getX() ));
+      state->AddAttribute(wxT("y"), wxString::Format(wxT("%f"), s->getY() ));
+      state->AddAttribute(wxT("z"), wxString::Format(wxT("%f"), s->getZ() ));
+      state->AddAttribute(wxT("red"), wxString::Format(wxT("%i"), (int)c.Red() ));
+      state->AddAttribute(wxT("green"), wxString::Format(wxT("%i"), (int)c.Green() ));
+      state->AddAttribute(wxT("blue"), wxString::Format(wxT("%i"), (int)c.Blue() ));
 
-      state->SetAttribute("value", fromVal);
-      state->SetAttribute("isInitial", s->isInitialState());
-      state->SetAttribute("x", s->getX());
-      state->SetAttribute("y", s->getY());
-	  state->SetAttribute("z", s->getZ());
-      state->SetAttribute("red", (int)c.Red());
-      state->SetAttribute("green", (int)c.Green());
-      state->SetAttribute("blue", (int)c.Blue());
-
-      std::map<std::string, std::string> params = s->getParameters();
+			std::map<std::string, std::string> params = s->getParameters();
       std::map<std::string, std::string>::iterator it;
 
-      for(it = params.begin(); it != params.end(); ++it) {
-        ticpp::Element* parameter = new ticpp::Element("Parameter");
-        parameter->SetAttribute("name", it->first);
-        parameter->SetText(it->second);
-        state->LinkEndChild(parameter);
+			for(it = params.begin(); it != params.end(); ++it) {
+		    wxXmlNode *parameter = new wxXmlNode( state, wxXML_ELEMENT_NODE , wxT("Parameter"));
+        parameter->AddAttribute(wxT("name"), wxString(it->first.c_str(), wxConvUTF8 ));
+				new wxXmlNode( parameter , wxXML_TEXT_NODE , wxEmptyString, wxString(it->second.c_str(), wxConvUTF8 ) );
       }
-
-
-      graphEl->LinkEndChild(state);
 
       for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
       {
         Transition* t = s->getTransition(j);
-        ticpp::Element* transition = new ticpp::Element("Transition");
+  		  wxXmlNode *transition = new wxXmlNode( root, wxXML_ELEMENT_NODE , wxT("Transition"));
 
         size_t toVal = t->getTo()->getValue();
-
-        transition->SetAttribute("from", fromVal);
-        transition->SetAttribute("to", toVal);
-        transition->SetAttribute("label", t->getLabel());
+        transition->AddAttribute(wxT("from"), wxString::Format(wxT("%i"), fromVal ));
+        transition->AddAttribute(wxT("to"), wxString::Format(wxT("%i"), toVal ));
+        transition->AddAttribute(wxT("label"), wxString( t->getLabel().c_str(), wxConvUTF8));
 
         double x, y, z;
         t->getControl(x, y, z);
-        transition->SetAttribute("x", x);
-        transition->SetAttribute("y", y);
-		transition->SetAttribute("z", z);
+        transition->AddAttribute(wxT("x"), wxString::Format(wxT("%f"), x ));
+        transition->AddAttribute(wxT("y"), wxString::Format(wxT("%f"), y ));
+		    transition->AddAttribute(wxT("z"), wxString::Format(wxT("%f"), z ));
 
-        graphEl->LinkEndChild(transition);
       }
 
       for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
       {
         Transition* t = s->getSelfLoop(j);
-        ticpp::Element* transition = new ticpp::Element("Transition");
+  		  wxXmlNode *transition = new wxXmlNode( root, wxXML_ELEMENT_NODE , wxT("Transition"));
 
-        transition->SetAttribute("from", fromVal);
-        transition->SetAttribute("to", fromVal);
-        transition->SetAttribute("label", t->getLabel());
-
+        transition->AddAttribute(wxT("from"), wxString::Format(wxT("%i"), fromVal ));
+        transition->AddAttribute(wxT("to"), wxString::Format(wxT("%i"), fromVal ));
+        transition->AddAttribute(wxT("label"), wxString( t->getLabel().c_str(), wxConvUTF8));
+ 
         double x, y, z;
         t->getControl(x, y, z);
-        transition->SetAttribute("x", x);
-        transition->SetAttribute("y", y);
-        transition->SetAttribute("z", z);
-
-        graphEl->LinkEndChild(transition);
+        transition->AddAttribute(wxT("x"), wxString::Format(wxT("%f"), x ));
+        transition->AddAttribute(wxT("y"), wxString::Format(wxT("%f"), y ));
+		    transition->AddAttribute(wxT("z"), wxString::Format(wxT("%f"), z ));
       }
-    }
-
-    xmlDoc.SaveFile();
-
+		}
+		wx_doc.Save(  _filename  );
     return true;
   }
-  catch(ticpp::Exception e)
+  catch(std::exception& e)
   {
-    std::cerr << "Exception by ticpp: " << e.what();
+		std::cerr << "Exception when exporting: " << e.what();
     return false;
   }
 

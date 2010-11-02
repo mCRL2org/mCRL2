@@ -11,7 +11,6 @@ project(ltsgraph)
 cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_BUILD_GUI_TOOLS )
-add_definitions(-DTIXML_USE_TICPP)
 
 IF(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
@@ -59,7 +58,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
@@ -68,7 +66,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_lts
   mcrl2_utilities_command_line
   mcrl2_utilities_wx
-  ticpp
 )
 
 # install target:
