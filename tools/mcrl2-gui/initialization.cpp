@@ -322,19 +322,16 @@ vector<Tool> Initialization::Read_tools() {
       location = m_executable_basename + "/"+  tool.m_name;
       #ifdef _WIN32
             location.append(".exe");
-  
-  		  std::string app;
-  		  app = e->GetAttribute("gui");
-            if (!(app.empty() || app.compare( "false" ) == 0) )
+    		    value = child->GetPropVal( wxT("gui"), wxEmptyString );
+            if (!(value.IsEmpty() || (value == wxT("false") ) ) )
             {
               tool.m_tool_type = gui;
             } 
       #endif
   
       #ifdef __APPLE__
-            std::string app;
-            app = e->GetAttribute("gui");
-            if (!(app.empty() || app.compare( "false" ) == 0) )
+    		    value = child->GetPropVal( wxT("gui"), wxEmptyString );
+            if (!(value.IsEmpty() || (value == wxT("false") ) ) )
             {
               //Expand to full path
               location.append(".app/Contents/MacOS/"+ tool.m_name);
