@@ -57,11 +57,11 @@ namespace lts
       // in this ATermAppl array, as they are automatically protected.
       static atermpp::vector < ATermAppl > vector_templates;
 
-      static void make_vector_template_if_required(const unsigned int arity)
+      static AFun get_STATE_function_symbol(const unsigned int arity)
       { 
         if (arity>=vector_templates.size())
         { 
-          vector_templates.resize(arity+1);
+          vector_templates.resize(arity+1,NULL);
         }
         if (vector_templates[arity]==NULL)
         { 
@@ -73,7 +73,7 @@ namespace lts
           }
           vector_templates[arity]=ATmakeApplList(ATmakeAFun("STATE",arity,ATfalse),l);
         }
-
+        return ATgetAFun(vector_templates[arity]);
       }
 
     public:
@@ -85,16 +85,17 @@ namespace lts
       state_label_lts(const ATermAppl &a):atermpp::aterm_appl(a)
       { 
         const unsigned int arity=ATgetArity(ATgetAFun(a));
-        make_vector_template_if_required(arity);
+        get_STATE_function_symbol(arity); // Create the STATE function symbol with the desired arity.
         assert(ATgetAFun(a)==ATgetAFun(vector_templates[arity]));
       }
 
       state_label_lts(const mcrl2::data::data_expression_list &l):
-                  atermpp::aterm_appl(ATmakeApplList(ATgetAFun(vector_templates[l.size()]),l))
-      {
-        const unsigned int arity=l.size();
-        make_vector_template_if_required(arity);
-      } 
+                            atermpp::aterm_appl(get_STATE_function_symbol(l.size()),atermpp::aterm_list(l))
+      {} 
+
+      state_label_lts(const atermpp::vector < element_type > &l):
+                     atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
+      {} 
 
       element_type operator [](const unsigned int i) const
       {

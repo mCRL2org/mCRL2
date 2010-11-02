@@ -21,6 +21,7 @@
 
 #include <sstream>
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
@@ -90,7 +91,7 @@ namespace detail
 // ================================================================
 
 
-// ====================== mcrl2->mcrl2 =============================
+// ======================  lts -> lts  =============================
 
   inline void lts_convert(
                 const lts_lts_t &lts_in, 
@@ -109,12 +110,12 @@ namespace detail
   {
     if (extra_data_is_defined)
     {
-      std::cerr << "While translating .mcrl2 to .mcrl2, additional information (data specification, action declarations and process parameters) are ignored.\n";
+      std::cerr << "While translating .lts to .lts, additional information (data specification, action declarations and process parameters) are ignored.\n";
     }
     lts_convert(lts_in,lts_out);
   }
 
-// ====================== mcrl2->fsm =============================
+// ======================  lts -> fsm =============================
 
   class lts_fsm_convertor
   {
@@ -185,12 +186,12 @@ namespace detail
   {
     if (extra_data_is_defined)
     {
-      std::cerr << "While translating .mcrl2 to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+      std::cerr << "While translating .lts to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
     }
     lts_convert(lts_in,lts_out);
   }
 
-// ====================== mcrl2->aut =============================
+// ======================  lts -> aut =============================
 
   class lts_aut_convertor
   {
@@ -224,12 +225,12 @@ namespace detail
   {
     if (extra_data_is_defined)
     {
-      std::cerr << "While translating .mcrl2 to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+      std::cerr << "While translating .lts to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
     }
     lts_convert(lts_in,lts_out);
   }
 
-// ====================== mcrl2->dot =============================
+// ======================  lts -> dot =============================
 
   class lts_dot_convertor
   {
@@ -273,12 +274,12 @@ namespace detail
   {
     if (extra_data_is_defined)
     {
-      std::cerr << "While translating .mcrl2 to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+      std::cerr << "While translating .lts to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
     }
     lts_convert(lts_in,lts_out);
   }
 
-// ====================== mcrl2->bcg =============================
+// ====================== lts -> bcg =============================
 
 #ifdef USE_BCG
   inline void lts_convert(
@@ -290,7 +291,8 @@ namespace detail
  
 #endif
 
-// ====================== aut -> mcrl2 =============================
+// ====================== aut -> lts  =============================
+
   class aut_lts_convertor
   {
     protected:
@@ -488,7 +490,97 @@ namespace detail
     lts_convert(lts_in,lts_out);
   }
 
-// ====================== fsm -> mcrl2 =============================
+// ====================== fsm -> lts  =============================
+
+  class fsm_lts_convertor
+  {
+    protected:
+      const lts_fsm_t &m_lts_in;
+      const lts_lts_t &m_lts_out;
+
+    public:
+      fsm_lts_convertor(
+                const lts_fsm_t &lts_in,
+                const lts_lts_t &lts_out):
+                     m_lts_in(lts_in),
+                     m_lts_out(lts_out)
+      {}
+
+      action_label_lts translate_label(const action_label_string &l1) const
+      {
+        std::string l(l1);  
+        action_label_lts al;
+        // Remove quotes, if present in the action label string.
+        if ((l.size()>=2) && 
+            (l.substr(0,1)=="\"") && 
+            (l.substr(l.size()-1,l.size())=="\""))
+        {
+          l=l.substr(1,l.size()-1);
+        }
+        
+        try
+        { 
+          al=parse_lts_action(l,m_lts_out.data(),m_lts_out.action_labels());
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error("Parse error in action label " + l1 + ".\n" + e.what());
+        }
+        return al;
+      }
+
+      state_label_lts translate_state(const state_label_fsm &l) const
+      {
+        atermpp::vector < data::data_expression > state_label;
+        unsigned int idx=0;
+        const data::variable_list &parameters=m_lts_out.process_parameters();
+        data::variable_list::const_iterator parameter_iterator=parameters.begin();
+        for(state_label_fsm::const_iterator i=l.begin(); i!=l.end(); ++i, ++parameter_iterator, ++idx)
+        { 
+          assert(parameter_iterator!=parameters.end());
+          const data::data_expression d=data::parse_data_expression(m_lts_in.state_element_value(idx,*i),m_lts_out.data());
+          if (d.sort()!=parameter_iterator->sort())
+          {
+            throw mcrl2::runtime_error("Sort of parameter " + pp(*parameter_iterator) + ":" +
+                                                pp(parameter_iterator->sort()) + " does not match with that of actual value " +
+                                                pp(d) + "."); 
+          }
+          state_label.push_back(d);
+        }
+        assert(parameter_iterator==parameters.end());
+         
+        return state_label_lts(state_label);
+      }
+  };
+
+  inline void lts_convert(
+                const lts_fsm_t &lts_in,
+                lts_lts_t &lts_out)
+  {
+    throw mcrl2::runtime_error("Cannot translate .fsm into .lts format without additional information (data, action declarations and process parameters)");
+  }
+
+  inline void lts_convert(
+                const lts_fsm_t &lts_in,
+                lts_lts_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (!extra_data_is_defined)
+    {
+      lts_convert(lts_in,lts_out);
+    }
+    lts_out=lts_lts_t();
+    lts_out.set_data(data);
+    lts_out.set_action_labels(action_labels);
+    lts_out.set_process_parameters(process_parameters);
+
+    fsm_lts_convertor c(lts_in,lts_out);
+    convert_core_lts(c,lts_in,lts_out);
+
+  }
 
 // ====================== fsm -> aut   =============================
 
@@ -557,6 +649,8 @@ namespace detail
 // ====================== fsm -> bcg    =============================
 #ifdef USE_BCG
 
+// TODO
+
 #endif
 // ====================== fsm -> dot    =============================
 
@@ -619,19 +713,25 @@ namespace detail
     lts_convert(lts_in,lts_out);
   }
 
-// ====================== bcg -> mcrl2 =============================
+// ====================== bcg -> lts =============================
 #ifdef USE_BCG
 
-#endif
-// ====================== bcg -> aut   =============================
-#ifdef USE_BCG
+// TODO
 
 #endif
-// ====================== bcg -> fsm   =============================
+// ====================== bcg -> aut =============================
 #ifdef USE_BCG
 
+// TODO
+
 #endif
-// ====================== bcg -> bcg    =============================
+// ====================== bcg -> fsm =============================
+#ifdef USE_BCG
+
+// TODO
+
+#endif
+// ====================== bcg -> bcg =============================
 #ifdef USE_BCG
 
   inline void lts_convert(
@@ -659,11 +759,88 @@ namespace detail
 
 
 #endif
-// ====================== bcg -> dot    =============================
+// ====================== bcg -> dot =============================
 #ifdef USE_BCG
 
+// TODO
+
 #endif
-// ====================== dot -> mcrl2 =============================
+// ====================== dot -> lts =============================
+
+  class dot_lts_convertor
+  {
+    private:
+      std::vector < atermpp::map <std::string , unsigned int > > state_element_values_sets;
+      const lts_lts_t &lts_out;
+
+    public:
+      dot_lts_convertor(lts_lts_t &l):
+              state_element_values_sets(std::vector < atermpp::map <std::string , unsigned int > >
+                       (2,atermpp::map <std::string , unsigned int >())),
+              lts_out(l)
+      {
+      }
+
+      action_label_lts translate_label(const action_label_string &l1) const
+      {
+        std::string l(l1);  
+        action_label_lts al;
+        // Remove quotes, if present in the action label string.
+        if ((l.size()>=2) && 
+            (l.substr(0,1)=="\"") && 
+            (l.substr(l.size()-1,l.size())=="\""))
+        {
+          l=l.substr(1,l.size()-1);
+        }
+        
+        try
+        { 
+          al=parse_lts_action(l,lts_out.data(),lts_out.action_labels());
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error("Parse error in action label " + l1 + ".\n" + e.what());
+        }
+        return al;
+      }
+
+
+      state_label_lts translate_state(const state_label_dot &l)
+      {
+        return state_label_lts();
+      }
+  };
+
+  inline void lts_convert(
+                const lts_dot_t &lts_in,
+                lts_lts_t &lts_out)
+  {
+    throw mcrl2::runtime_error("Cannot translate .dot into .lts format without additional information (data, action declarations and process parameters)");
+  }
+
+  inline void lts_convert(
+                const lts_dot_t &lts_in,
+                lts_lts_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (!extra_data_is_defined)
+    {
+      lts_convert(lts_in,lts_out);
+    }
+
+    std::cerr << "State labels are lost in the translation from .dot to .lts format\n";
+    lts_out=lts_lts_t();
+    lts_out.set_data(data);
+    lts_out.set_action_labels(action_labels);
+    lts_out.set_process_parameters(process_parameters);
+
+    dot_lts_convertor c(lts_out);
+    convert_core_lts(c,lts_in,lts_out);
+  }
+
 // ====================== dot -> aut   =============================
 
 
@@ -784,15 +961,14 @@ namespace detail
   {
     if (extra_data_is_defined)
     {
-      std::cerr << "While translating .mcrl2 to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n"; }
+      std::cerr << "While translating .dot to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n"; }
     lts_convert(lts_in,lts_out);
   }
 
-
-
-
 // ====================== dot -> bcg   =============================
 #ifdef USE_BCG
+
+// TODO
 
 #endif
 // ====================== dot -> dot   =============================

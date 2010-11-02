@@ -238,22 +238,21 @@ namespace mcrl2
         /** \brief Adds a state to this LTS.
          *  \details It is not checked whether the added state already exists.
          * \param[in] value The value of the state. If one state has a state
-         *             label, all states must have state labels.
+         *             label, all states must have state labels. If
+         *             no state label is given, it must be the case that no
+         *             state has a label.
          * \return The number of the added state label. */
-        states_size_type add_state(const STATE_LABEL_T value)
+        states_size_type add_state(const STATE_LABEL_T value=STATE_LABEL_T())
         {
-          assert(nstates==state_values.size());
-          state_values.push_back(value);
-          return nstates++;
-        }
-
-        /** \brief Adds a state to this LTS. No state label is set. 
-         *  \details It is not checked whether the added state already exists.
-         *           Furthermore, no other states can have state labels.
-         * \return The number of the added state label. */
-        states_size_type add_state()
-        {
-          assert(state_values.size()==0);
+          if (value==STATE_LABEL_T())
+          { 
+            assert(state_values.size()==0);
+          }
+          else
+          {
+            assert(nstates==state_values.size());
+            state_values.push_back(value);
+          }
           return nstates++;
         }
 
