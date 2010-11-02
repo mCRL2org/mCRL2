@@ -690,7 +690,7 @@ namespace detail
   }
 
   inline void lts_convert(
-                const lts::lts_dot_t &lts_in,
+                const lts_dot_t &lts_in,
                 lts_aut_t &lts_out,
                 const data::data_specification &data,
                 const lps::action_label_list &action_labels,
