@@ -37,7 +37,7 @@ Graph* XMLImporter::importFile(const std::string &filename)
 			if( graph_child->GetName() == wxT("State") ){
 				wxString ret_value;
 
-				size_t value;
+				unsigned long value;
 				graph_child->GetAttribute( wxT("value"), &ret_value );
 				ret_value.ToULong( &value );
 
@@ -111,11 +111,11 @@ Graph* XMLImporter::importFile(const std::string &filename)
 			if( graph_child->GetName() == wxT("Transition") ){
 				wxString ret_value;
 
-				size_t from;
+				unsigned long from;
 				graph_child->GetAttribute( wxT("from"), &ret_value );
 				ret_value.ToULong( &from );
 
-				size_t to;
+				unsigned long to;
 				graph_child->GetAttribute( wxT("to"), &ret_value );
 				ret_value.ToULong( &to );
 
