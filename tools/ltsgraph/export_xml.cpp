@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink and Ali Deniz Aladagli
+// Author(s): Carst Tankink, Ali Deniz Aladagli, Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //

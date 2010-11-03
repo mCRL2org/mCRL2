@@ -21,7 +21,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <ticpp.h>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
@@ -33,6 +32,8 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/exception.h"
+#include <wx/xml/xml.h>
+
 
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
@@ -123,7 +124,7 @@ static ATermList pn2gsMakeDataVarIds(ATermList l, ATermAppl Type);
 static ATermAppl pn2gsMakeBagVars(ATermList l);
 static ATermList pn2gsMakeListOfLists(ATermList l);
 
-static std::string pn2gsGetText(ticpp::Element* cur);
+static std::string pn2gsGetText(wxXmlNode* cur);
 
 bool do_pnml2mcrl2(char const* InFileName, std::ostream& output_stream);
 
@@ -319,17 +320,18 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // pn2gsRetrieveTextWithCheck gets the contents of a child <text> element of cur, and checks it to format [a-zA-Z_][a-zA-Z0-9_]*
   //==================================================
-  static ATermAppl pn2gsRetrieveTextWithCheck(ticpp::Element* cur) {
+  static ATermAppl pn2gsRetrieveTextWithCheck(wxXmlNode* cur) {
     // input: a pointer to the current element
     // output: the contents of the first child <text> attribute
     //         of the current element, following format [a-zA-Z_][a-zA-Z0-9_]*
 
     // this function is used for the retrieval of names and ids
-
-    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
-      if (cur->Value() == "text") {
-        return ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(cur->GetText().c_str())));
+    cur = cur->GetChildren();
+    while (cur) {
+      if (cur->GetName() == wxT("text")) {
+        return ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(cur->GetNodeContent().mb_str())));
       }
+			cur = cur->GetNext();
     }
 
     return 0;
@@ -338,16 +340,18 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // pn2gsRetrieveText gets the contents of a child <text> element of cur
   //==================================================
-  static ATermAppl pn2gsRetrieveText(ticpp::Element* cur) {
+  static ATermAppl pn2gsRetrieveText(wxXmlNode* cur) {
     // input: a pointer to the current element
     // output: the contents of the first child <text> attribute
     //         of the current element
 
     // this function is used for the retrieval of types, initial markings, etc.
-    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
-      if (cur->Value() == "text") {
-        return (gsString2ATermAppl(cur->GetText().c_str()));
+		cur = cur->GetChildren();
+    while (cur) {
+      if (cur->GetName() == wxT("text")) {
+        return (gsString2ATermAppl(cur->GetNodeContent().mb_str()));
       }
+			cur = cur ->GetNext();
     }
 
     return 0;
@@ -355,18 +359,18 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // pn2gsGetText gets the contents of a child <text> element of cur
   //==================================================
-  static std::string pn2gsGetText(ticpp::Element* cur) {
+  static std::string pn2gsGetText(wxXmlNode* cur) {
     // input: a pointer to the current element
     // output: the contents of the first <text> attribute
     //         of the current element
 
     // this function is used for the retrieval of types, initial markings, etc.
-    while (cur != 0) {
-      if (cur->Value() == "text") {
-        return cur->GetText(); //const_cast < char* > (cur->GetText().c_str());
+    while (cur) {
+      if (cur->GetName() == wxT("text")) {
+        return std::string(cur->GetNodeContent().mb_str()); //const_cast < char* > (cur->GetText().c_str());
       }
 
-      cur = cur->NextSiblingElement(false);
+      cur = cur->GetNext();
     }
 
     return std::string();
@@ -375,17 +379,19 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // pn2gsGetElement gets the contents of a child name element of cur
   //==================================================
-  static std::string pn2gsGetElement(ticpp::Element* cur, std::string const& name) {
+  static std::string pn2gsGetElement(wxXmlNode* cur, std::string const& name) {
     // input: a pointer to the current element
     // output: the contents of the first child <name> attribute
     //         of the current element
 
     // this function is used for the retrieval of types, initial markings, etc.
 
-    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
-      if (cur->Value() == name) {
-        return (pn2gsGetText(cur->FirstChildElement(false)));
+		cur = cur->GetChildren();
+		while(cur){
+      if (cur->GetName() == wxString(name.c_str(), wxConvUTF8 )) {
+        return (pn2gsGetText(cur->GetChildren()));
       }
+			cur = cur->GetNext();
     }
 
     return std::string();
@@ -394,7 +400,7 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // pn2gsAterm_place converts a pnml-place to a usable ATerm
   //==================================================
-  static ATermAppl pn2gsAterm_place(ticpp::Element* cur) {
+  static ATermAppl pn2gsAterm_place(wxXmlNode* cur) {
     // input: a pointer to the current place
     // output: a usable translation of the place,
     //         if the place needs to be translated
@@ -402,9 +408,11 @@ class pnml2mcrl2_tool: public input_output_tool
     gsDebugMsg("> Start examining a place...  \n");
     // first, we want to retrieve the id of the place
     ATermAppl Aid;
-    if (char const* id = cur->GetAttribute("id", false).c_str()) {
+		wxString id;
+    cur->GetAttribute(wxT("id"), &id);
+    if ( id != wxEmptyString) {
       // the place has an id, put it in Aid
-      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id.mb_str()))));
       gsDebugMsg("    id: '%T'\n", Aid);
     } else {
       // the place has NO id, so translation should be aborted!
@@ -426,12 +434,13 @@ class pnml2mcrl2_tool: public input_output_tool
 
     // this loop goes through all the children of the <place>element
     // these children will be translated or ignored, this depends on the element name
-    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
+		cur = cur->GetChildren();
+    while (cur) {
       // current elements that are conceivable for translation are:
       // <name>  -  <initialMarking>  -  <type>
       // all other elements will be ignored in the translation
 
-      if (cur->Value() == "name") {
+      if (cur->GetName() == wxT("name")) {
   // the place contains a <name> element
   // a <name> element contains a childelement <text> which contains the name of the place
   // the name is retrieved below and assigned to Aname
@@ -440,13 +449,15 @@ class pnml2mcrl2_tool: public input_output_tool
   }
   gsDebugMsg("    name: '%T'\n", Aname);
       }
-      else if (cur->Value() == "initialMarking") {
+      else if (cur->GetName() == wxT("initialMarking")) {
   // the place contains an <initialMarking> element
   // this element contains a childelement <text> which contains the initial marking of the place
   // this marking is retrieved below and assigned to AinitialMarking
-        //for coloured petri nets initialMarking can also contain a toolspecific element
-        for (ticpp::Element* curl = cur->FirstChildElement(false); curl != 0; curl = curl->NextSiblingElement(false)) {
-          if (curl->Value() == "text") {
+  //for coloured petri nets initialMarking can also contain a toolspecific element
+
+				wxXmlNode* curl = cur->GetChildren();
+				while(curl){
+          if (curl->GetName() == wxT("text")) {
       std::string im=pn2gsGetText(curl);
             //if(im){
             std::istringstream iss(im);
@@ -463,7 +474,7 @@ class pnml2mcrl2_tool: public input_output_tool
             //}
             //AinitialMarking=im;
           }
-          else if(with_colors && curl->Value() == "toolspecific") {
+          else if(with_colors && curl->GetName() == wxT("toolspecific")) {
             std::string mcrl2marking=pn2gsGetElement(curl,"mcrl2marking");
             if(mcrl2marking!=""){
               colored=ATtrue;
@@ -476,12 +487,13 @@ class pnml2mcrl2_tool: public input_output_tool
             }
           }
     else {
-            gsWarningMsg("Ignore an element named '%s'.\n", curl->Value().c_str());
+            gsWarningMsg("Ignore an element named '%s'.\n", std::string(curl->GetName().mb_str()).c_str());
           }
+		curl = curl->GetNext();
   }
   gsDebugMsg("    initialMarking: '%T'\n", AinitialMarking);
       }
-      else if (cur->Value() == "type") {
+      else if (cur->GetName() == wxT("type")) {
   // the place contains an <type> element
   // this element contains a childelement <text> which contains the type of the place
 
@@ -496,7 +508,7 @@ class pnml2mcrl2_tool: public input_output_tool
   }
   gsDebugMsg("    type: '%T'\n", Atype);
       }
-      else if (cur->Value() == "toolspecific") {
+      else if (cur->GetName() == wxT("toolspecific")) {
   // the place contains an <toolspecific> element
   // this element contains a childelement <mcrl2sort> which contains
   // a childelement <text> which contains the type of the place
@@ -516,8 +528,9 @@ class pnml2mcrl2_tool: public input_output_tool
   }
       }
       else {
-  gsWarningMsg("Ignore an element named '%s'.\n", cur->Value().c_str());
+  gsWarningMsg("Ignore an element named '%s'.\n", std::string(cur->GetName().mb_str()).c_str());
       }
+			cur = cur->GetNext();
     }
 
     // argument order of returnvalue is id - name - initialMarking - Sort
@@ -527,7 +540,7 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // pn2gsAterm_trans converts a pnml-transition to a usable ATerm
   //==================================================
-  static ATermAppl pn2gsAterm_trans(ticpp::Element* cur) {
+  static ATermAppl pn2gsAterm_trans(wxXmlNode* cur) {
     // input: a pointer to the current transition
     // output: a usable translation of the transition,
     //         if the transition needs to be translated
@@ -535,9 +548,11 @@ class pnml2mcrl2_tool: public input_output_tool
     gsDebugMsg("> Start examining a transition...  \n");
     // first, we want to retrieve the id of the transition
     ATermAppl Aid;
-    if (char const* id = cur->GetAttribute("id", false).c_str()) {
+		wxString id;
+    cur->GetAttribute(wxT("id"), &id);
+    if ( id != wxEmptyString ) {
       // the transition has an id, put it in Aid
-      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id.mb_str()))));
       gsDebugMsg("    id: '%T'\n", Aid);
     } else {
       // the transition has NO id, so translation should be aborted!
@@ -557,12 +572,13 @@ class pnml2mcrl2_tool: public input_output_tool
 
     // this loop goes through all the children of the <transition>element
     // these children will be translated or ignored, this depends on the element name
-    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
+		cur = cur->GetChildren();
+    while (cur) {
       // current elements that are conceivable for translation are:
       // <name>  -  <type>
       // all other elements will be ignored in the translation
 
-      if (cur->Value() == "name") {
+      if (cur->GetName() == wxT("name")) {
   // the transition contains a <name> element
   // a <name> element contains a childelement <text> which contains the name of the transition
   // the name is retrieved below and assigned to Aname
@@ -571,7 +587,7 @@ class pnml2mcrl2_tool: public input_output_tool
   }
   gsDebugMsg("    name: '%T'\n", Aname);
       }
-      else if (with_colors && cur->Value() == "toolspecific") {
+      else if (with_colors && cur->GetName() == wxT("toolspecific")) {
   // the transition contains a <toolspecific> element
   // this element contains a childelement <mcrl2sort> which contains
   // a childelement <text> which contains the type of the place
@@ -590,7 +606,7 @@ class pnml2mcrl2_tool: public input_output_tool
     gsWarningMsg("Ignore an element named 'toolspecific'\n");
   }
       }
-      else if (cur->Value() == "type") {
+      else if (cur->GetName() == wxT("type")) {
   // the transition contains an <type> element
   // this element contains a childelement <text> which contains the type of the transition
   if (!(Atype=pn2gsRetrieveText(cur))) {
@@ -605,8 +621,9 @@ class pnml2mcrl2_tool: public input_output_tool
   gsDebugMsg("    type: '%T'\n", Atype);
       }
       else {
-  gsWarningMsg("Ignore an element named '%s'.\n", cur->Value().c_str());
+  gsWarningMsg("Ignore an element named '%s'.\n",std::string( cur->GetName().mb_str()).c_str());
       }
+			cur = cur->GetNext();
     }
 
     // argument order of returnvalue is id - name
@@ -616,7 +633,7 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // pn2gsAterm_arc converts a pnml-arc to a usable ATerm
   //==================================================
-  static ATermAppl pn2gsAterm_arc(ticpp::Element* cur) {
+  static ATermAppl pn2gsAterm_arc(wxXmlNode* cur) {
     // input: a pointer to the current arc
     // output: a usable translation of the arc,
     //         if the arc needs to be translated
@@ -624,9 +641,11 @@ class pnml2mcrl2_tool: public input_output_tool
     gsDebugMsg("> Start examining an arc...  \n");
     // first, we want to retrieve the id of the arc
     ATermAppl Aid;
-    if (char const* id = cur->GetAttribute("id", false).c_str()) {
+		wxString id;
+		cur->GetAttribute(wxT("id"), &id);
+    if (id != wxEmptyString) {
       // the arc has an id, put it in Aid
-      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id))));
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(id.mb_str()))));
       gsDebugMsg("    id: '%T'\n", Aid);
     } else {
       // the arc has NO id, so translation should be aborted!
@@ -637,8 +656,10 @@ class pnml2mcrl2_tool: public input_output_tool
 
     // second, we want to retrieve the source and the target of the arc
     ATermAppl Asource;
-    if (char const* source = cur->GetAttribute("source", false).c_str()) {
-      Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(source))));
+		wxString source;
+		cur->GetAttribute(wxT("source"), &source);
+    if ( source != wxEmptyString) {
+      Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId(source.mb_str()))));
       gsDebugMsg("    source: '%T'\n", Asource);
     } else {
       // the arc has NO source, so the arc will not be translated!
@@ -647,8 +668,10 @@ class pnml2mcrl2_tool: public input_output_tool
     }
 
     ATermAppl Atarget;
-    if (char const* target = cur->GetAttribute("target", false).c_str()) {
-      Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(target)));
+		wxString target;
+		cur->GetAttribute(wxT("target"), &target);
+    if ( target != wxEmptyString ) {
+      Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId(target.mb_str())));
       gsDebugMsg("    target: '%T'\n", Atarget);
     } else {
       // the arc has NO target, so the arc will not be translated!
@@ -665,12 +688,13 @@ class pnml2mcrl2_tool: public input_output_tool
 
     // this loop goes through all the children of the <arc>element
     // these children will be examined or ignored, this depends on the element name
-    for (cur = cur->FirstChildElement(false); cur != 0; cur = cur->NextSiblingElement(false)) {
+		cur = cur->GetChildren();
+    while (cur) {
       // current elements that are conceivable for examination are:
       // <type>
       // all other elements will be ignored in the translation
 
-      if (cur->Value() == "type") {
+      if (cur->GetName() == wxT("type")) {
   // the arc contains a <type> element
   // this element contains a childelement <text> which contains the type of the transition
   if (!(Atype=pn2gsRetrieveText(cur))) {
@@ -696,10 +720,10 @@ class pnml2mcrl2_tool: public input_output_tool
   }
   gsDebugMsg("    type: '%T'\n", Atype);
       }
-      else if (cur->Value() == "name") {
+      else if (cur->GetName() == wxT("name")) {
   // the arc contains a <name> element
   // this element contains a childelement <text> which contains the type of the transition
-        std::string name=pn2gsGetText(cur->FirstChildElement());
+        std::string name=pn2gsGetText(cur->GetChildren());
         if(!name.empty()){
           colored=ATtrue;
           std::istringstream iss(name);
@@ -718,8 +742,9 @@ class pnml2mcrl2_tool: public input_output_tool
         }
       }
       else {
-  gsWarningMsg("Ignore an element named '%s'.\n", cur->Value().c_str());
+  gsWarningMsg("Ignore an element named '%s'.\n", std::string(cur->GetName().mb_str()).c_str());
       }
+			cur = cur->GetNext();
     }
 
     // argument order of returnvalue is id - source - target
@@ -737,7 +762,7 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // pn2gsAterm converts the pnml-input to a usable ATerm
   //==================================================
-  static ATermAppl pn2gsAterm(ticpp::Document& doc) {
+  static ATermAppl pn2gsAterm(wxXmlDocument& doc) {
     // input: a pointer of the type ticpp::Document which points to the parsed XML-file
     // output: an ATermAppl, translated from the XML-file,
     //         in which only relevant elements/attributes are concluded
@@ -745,24 +770,28 @@ class pnml2mcrl2_tool: public input_output_tool
     //==================================================
     // initializations and initial checks.
     //==================================================
-    ticpp::Element* cur = doc.FirstChildElement(false);
+    wxXmlNode* cur = doc.GetRoot();
 
     // cur should point to the <pnml>element
-    if (cur == 0 || cur->Value() != "pnml") {
+    if (cur->GetName() != wxT("pnml")) {
       gsErrorMsg("File is not a usable PNML file!  \n");
 
       return 0;
     }
 
     // the first <net>element, if any present, is selected by cur
-    try {
-      for (cur = cur->FirstChildElement(); cur->Value() != "net"; cur = cur->NextSiblingElement()) {
-        gsWarningMsg("Element '%s' is not a Petri net and will be ignored (including it's sub-elements).\n", cur->Value().c_str());
-      }
+	  wxXmlNode* curl = cur->GetChildren();
+		cur = NULL;
+    while (curl) {
+		  if( curl->GetName() == wxT("net") ){
+				cur = curl;
+			} else {
+        gsWarningMsg("Element '%s' is not a Petri net and will be ignored (including it's sub-elements).\n", std::string(curl->GetName().mb_str()).c_str());
+			}
+			curl = curl->GetNext();
     }
-    catch (ticpp::Exception&) {
+    if (!cur)  {
       gsErrorMsg("File does not contain a Petri net. \n");
-
       return 0;
     }
 
@@ -774,9 +803,12 @@ class pnml2mcrl2_tool: public input_output_tool
     //==================================================
     // retrieve the ID of the Petri net
     ATermAppl ANetID;
-    if (char const* id = cur->GetAttribute("id", false).c_str()) {
+		wxString id;
+		cur->GetAttribute(wxT("id"), &id );
+
+    if ( id != wxEmptyString ) {
       // the net has an id, put it in ANetID
-      ANetID = ATmakeAppl0(ATprependAFun("Net_",pn2gsCheckAFun(ATmakeAFunId(id))));
+      ANetID = ATmakeAppl0(ATprependAFun("Net_",pn2gsCheckAFun(ATmakeAFunId(id.mb_str()))));
     } else {
       ANetID = ATmakeAppl0(ATmakeAFun("Net_Petri_net", 0, ATtrue));
       gsWarningMsg("NO NET-ID FOUND!\n");
@@ -805,12 +837,13 @@ class pnml2mcrl2_tool: public input_output_tool
 
     // this loop goes through all the children of the <net>element
     // these children will be translated or ignored, this depends on the element name
-    for (cur = cur->FirstChildElement(false); cur != NULL; cur = cur->NextSiblingElement(false)) {
+		cur = cur->GetChildren();
+    while (cur) {
       // current elements that are conceivable for translation are:
       // <place>  -  <transition>  -  <arc>
       // all other elements will be ignored in the translation
 
-      if (cur->Value() == "place") {
+      if (cur->GetName() == wxT("place")) {
   if (!(ACurrentPlace=pn2gsAterm_place(cur))) {
     // pn2gsAterm_place returns NULL, so the place will not be translated.
     if (context.Abort == ATtrue) {
@@ -824,7 +857,7 @@ class pnml2mcrl2_tool: public input_output_tool
     gsDebugMsg("  Translate this place: %T\n", (ATerm)ACurrentPlace);
   }
       }
-      else if (cur->Value() == "transition") {
+      else if (cur->GetName() == wxT("transition")) {
   if(!(ACurrentTransition=pn2gsAterm_trans(cur))) {
     // pn2gsAterm_trans returns NULL, so the transition will not be translated.
     if (context.Abort == ATtrue) {
@@ -838,7 +871,7 @@ class pnml2mcrl2_tool: public input_output_tool
     gsDebugMsg("  Translate this transition: %T\n", (ATerm)ACurrentTransition);
   }
       }
-      else if (cur->Value() == "arc") {
+      else if (cur->GetName() == wxT("arc")) {
   if(!(ACurrentArc=pn2gsAterm_arc(cur))) {
     // pn2gsAterm_arc returns NULL, so the arc will not be translated.
     if (context.Abort == ATtrue) {
@@ -852,7 +885,7 @@ class pnml2mcrl2_tool: public input_output_tool
     gsDebugMsg("  Translate this arc: %T\n", (ATerm)ACurrentArc);
   }
       }
-      else if (with_colors && cur->Value() == "toolspecific") {
+      else if (with_colors && cur->GetName() == wxT("toolspecific")) {
         std::string prelude=pn2gsGetElement(cur,"mcrl2prelude");
 
   if(!prelude.empty()){
@@ -870,8 +903,9 @@ class pnml2mcrl2_tool: public input_output_tool
   }
       }
       else {
-  gsWarningMsg("An element named '%s' will be ignored in the translation (including it's sub-elements).\n", cur->Value().c_str());
+  gsWarningMsg("An element named '%s' will be ignored in the translation (including it's sub-elements).\n", std::string(cur->GetName().mb_str()).c_str());
       };
+			cur = cur->GetNext();
     };
 
     gsDebugMsg("\nConversion of PNML to ATerm succesfully completed. \n");
@@ -2257,21 +2291,8 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ATprotectAppl(&nMaxTokens);
     ATprotectAppl(&ErrorAction);
 
-    ticpp::Document doc(InFileName);
-
-    try {
-      if (std::strcmp(InFileName,"\0") == 0) {
-        std::cin >> doc;
-      }
-      else {
-        doc.LoadFile();
-      }
-    }
-    catch (...) {
-      gsErrorMsg("Document not parsed succesfully. \n");
-
-      return false;
-    }
+    wxXmlDocument doc;
+    doc.Load(wxString(InFileName, wxConvUTF8));
 
 
     Appl0=gsString2ATermAppl("_");

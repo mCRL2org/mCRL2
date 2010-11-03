@@ -10,8 +10,7 @@
 project(pnml2mcrl2)
 cmake_minimum_required(VERSION 2.6)
 
-add_definitions(-DTIXML_USE_TICPP)
-
+if ( MCRL2_BUILD_GUI_TOOLS )
 # ######### General setup ##########
 
 add_executable(${PROJECT_NAME}
@@ -23,15 +22,14 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_data
   mcrl2_core
-  ticpp
   mcrl2_utilities_command_line
+  ${wxWidgets_LIBRARIES}
 )
 
 # install target:
@@ -42,4 +40,6 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
+
+endif ( MCRL2_BUILD_GUI_TOOLS )
 
