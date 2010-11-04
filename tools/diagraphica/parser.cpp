@@ -401,16 +401,15 @@ void Parser::parseAttrConfig(
     map< int, map< int, int  > > &attrOrigToCurDomains )
 // -----------------------------------------------------
 {
-    TiXmlDocument doc( path.c_str() );
-
-    if ( doc.LoadFile() == true )
+    wxXmlDocument doc;
+    if ( doc.Load( wxString( path.c_str(), wxConvUTF8 )) == true )
     {
-        TiXmlElement* curNode    = NULL;
+        wxXmlNode* curNode    = NULL;
 
         try
         {
 
-            curNode = doc.FirstChildElement();
+            curNode = doc.GetRoot();
 
             if ( curNode != NULL )
             {
@@ -448,69 +447,60 @@ void Parser::writeAttrConfig(
     try
 	{
         // new xml document
-        TiXmlDocument     doc;
-        TiXmlDeclaration* decl;
-        TiXmlElement*     conf;
-        TiXmlElement*     file;
-        TiXmlElement*     attr;
-        TiXmlElement*     name;
-        TiXmlElement*     type;
-        TiXmlElement*     card;
-        TiXmlElement*     domn;
-        TiXmlElement*     valu;
-        TiXmlElement*     map;
-        TiXmlElement*     pos;
+        wxXmlDocument  doc;
+        wxXmlNode*     conf;
+        wxXmlNode*     file;
+        wxXmlNode*     attr;
+        wxXmlNode*     name;
+        wxXmlNode*     type;
+        wxXmlNode*     card;
+        wxXmlNode*     domn;
+        wxXmlNode*     valu;
+        wxXmlNode*     map;
+        wxXmlNode*     pos;
 
         // document declaration
-        decl = new TiXmlDeclaration( "1.0", "", "" );
-	    doc.LinkEndChild( decl );
+    		doc.SetVersion(  wxT("1.0") );
 
         // configuration
-	    conf = new TiXmlElement( "Configuration" );
-	    doc.LinkEndChild( conf );
+	      conf = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Configuration") );
+        doc.SetRoot( conf );
 
         // file name
-	    file = new TiXmlElement( "File" );
-	    conf->LinkEndChild( file );
-        file->LinkEndChild( new TiXmlText( graph->getFileName().c_str() ) );
+  	    file = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("File") );
+  	    conf -> AddChild( file );
+				new wxXmlNode( file, wxXML_TEXT_NODE, wxEmptyString, wxString( graph->getFileName().c_str(), wxConvUTF8 )  );
 
         // attributes
         for ( int i = 0; i < graph->getSizeAttributes(); ++i )
         {
-            attr = new TiXmlElement( "Attribute" );
-            conf->LinkEndChild( attr );
+            attr = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
+            conf -> AddChild( attr );
 
             // name
-            name = new TiXmlElement( "Name" );
-            attr->LinkEndChild( name );
-            name->LinkEndChild(
-                new TiXmlText(
-                    graph->getAttribute(i)->getName().c_str() ) );
+            name = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Name") );
+            attr -> AddChild( name );
+						new wxXmlNode( name, wxXML_TEXT_NODE, wxEmptyString, wxString( graph->getAttribute(i)->getName().c_str(), wxConvUTF8 ) );
 
             // type
-            type = new TiXmlElement( "Type" );
-            attr->LinkEndChild( type );
-            type->LinkEndChild(
-                new TiXmlText(
-                    graph->getAttribute(i)->getType().c_str() ) );
+            type = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Type") );
+            attr -> AddChild( type );
+						new wxXmlNode( type , wxXML_TEXT_NODE, wxEmptyString, wxString( graph->getAttribute(i)->getType().c_str(), wxConvUTF8 ) );
 
             // cardinality
-            card = new TiXmlElement( "OriginalCardinality" );
-            attr->LinkEndChild( card );
-            card->LinkEndChild(
-                new TiXmlText(
-                    Utils::intToStr(
-                        graph->getAttribute(i)->getSizeOrigValues() ).c_str() ) );
+            card = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("OriginalCardinality") );
+            attr -> AddChild( card );
+						new wxXmlNode( card , wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::intToStr( graph->getAttribute(i)->getSizeOrigValues() ).c_str(), wxConvUTF8 ) );
 
             /*
             // original domain
-            domn = new TiXmlElement( "OriginalDomain" );
+            domn = new wxXmlNode( "OriginalDomain" );
             attr->LinkEndChild( domn );
             {
             for ( int j = 0; j < graph->getAttribute(i)->getSizeOrigValues(); ++j )
             {
                 // value
-                valu = new TiXmlElement( "Value" );
+                valu = new wxXmlNode( "Value" );
                 domn->LinkEndChild( valu );
                 valu->LinkEndChild(
                     new TiXmlText(
@@ -520,41 +510,35 @@ void Parser::writeAttrConfig(
             */
 
             // current domain
-            domn = new TiXmlElement( "CurrentDomain" );
-            attr->LinkEndChild( domn );
+            domn = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("CurrentDomain") );
+            attr -> AddChild( domn );
             {
             for ( int j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j )
             {
                 // value
-                valu = new TiXmlElement( "Value" );
-                domn->LinkEndChild( valu );
-                valu->LinkEndChild(
-                    new TiXmlText(
-                        graph->getAttribute(i)->getCurValue(j)->getValue().c_str() ) );
+                valu = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
+                domn -> AddChild (valu);
+						    new wxXmlNode( valu , wxXML_TEXT_NODE, wxEmptyString, wxString( graph->getAttribute(i)->getCurValue(j)->getValue().c_str(), wxConvUTF8 ) );
             }
             }
 
             // mapping from original to current domain
             // current domain
-            map = new TiXmlElement( "OriginalToCurrent" );
-            attr->LinkEndChild( map );
+            map = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("OriginalToCurrent") ) ;
+            attr -> AddChild( map );
             {
             for ( int j = 0; j < graph->getAttribute(i)->getSizeOrigValues(); ++j )
             {
                 // value
-                pos = new TiXmlElement( "CurrentPosition" );
-                map->LinkEndChild( pos );
-                pos->LinkEndChild(
-                    new TiXmlText(
-                        Utils::intToStr(
-                            graph->getAttribute(i)->mapToValue(j)->getIndex() ).c_str() ) );
+                pos = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("CurrentPosition") );
+                map -> AddChild( pos );
+						    new wxXmlNode( pos , wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::intToStr(graph->getAttribute(i)->mapToValue(j)->getIndex() ).c_str(), wxConvUTF8 ) );
             }
             }
         }
 
-        doc.SaveFile( path.c_str() );
+        doc.Save( wxString( path.c_str(), wxConvUTF8 ));
 
-        decl = NULL;
         conf = NULL;
         file = NULL;
         attr = NULL;
@@ -582,16 +566,16 @@ void Parser::parseDiagram(
     Diagram* dgrmNew )
 // -----------------------
 {
-    TiXmlDocument doc( path.c_str() );
+    wxXmlDocument doc;
 
-    if ( doc.LoadFile() == true )
+    if ( doc.Load( wxString( path.c_str(), wxConvUTF8 ) ) )
     {
-        TiXmlElement* curNode    = NULL;
+        wxXmlNode* curNode    = NULL;
 
         try
         {
 
-            curNode = doc.FirstChildElement();
+            curNode = doc.GetRoot();
 
             if ( curNode != NULL )
             {
@@ -628,326 +612,258 @@ void Parser::writeDiagram(
     try
 	{
         // new xml document
-        TiXmlDocument     doc;
-        TiXmlDeclaration* decl;
-        TiXmlElement*     dgrm;
-        TiXmlElement*     file;
-        TiXmlElement*     shpe;
-        TiXmlElement*     prop;
-        TiXmlElement*     subp;
+        wxXmlDocument     doc;
+        wxXmlNode*     dgrm;
+        wxXmlNode*     file;
+        wxXmlNode*     shpe;
+        wxXmlNode*     prop;
+        wxXmlNode*     subp;
         ColorRGB col;
         Attribute *       attr;
 
         // document declaration
-        decl = new TiXmlDeclaration( "1.0", "", "" );
-	    doc.LinkEndChild( decl );
+				doc.SetVersion( wxT( "1.0" ) );
 
         // configuration
-	    dgrm = new TiXmlElement( "Diagram" );
-	    doc.LinkEndChild( dgrm );
+	      dgrm = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Diagram") );
+	      doc.SetRoot( dgrm );
 
         // file name
-	    file = new TiXmlElement( "File" );
-	    dgrm->LinkEndChild( file );
-        file->LinkEndChild( new TiXmlText( graph->getFileName().c_str() ) );
+	      file = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("File") );
+	      dgrm -> AddChild( file );
+
+				new wxXmlNode( file, wxXML_TEXT_NODE, wxEmptyString, wxString( graph->getFileName().c_str(), wxConvUTF8 ) );
 
         // shapes
         for ( int i = 0; i < diagram->getSizeShapes(); ++i )
         {
-            shpe = new TiXmlElement( "Shape" );
-            dgrm->LinkEndChild( shpe );
+            shpe = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Shape") );
+            dgrm -> AddChild (shpe);
 
             // coordinates
-            prop = new TiXmlElement( "XCenter" );
-            shpe->LinkEndChild( prop );
-            prop->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr(
-                        diagram->getShape(i)->getXCtr() ).c_str() ) );
+            prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("XCenter") );
+            shpe -> AddChild( prop );
+				    new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getXCtr() ).c_str(), wxConvUTF8 ) );
 
-            prop = new TiXmlElement( "YCenter" );
-            shpe->LinkEndChild( prop );
-            prop->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr(
-                        diagram->getShape(i)->getYCtr() ).c_str() ) );
+            prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("YCenter") );
+            shpe -> AddChild( prop );
+            new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getYCtr() ).c_str(), wxConvUTF8 ) );
 
             // distance from center
-            prop = new TiXmlElement( "XDistanceFromCenter" );
-            shpe->LinkEndChild( prop );
-            prop->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr(
-                        diagram->getShape(i)->getXDFC() ).c_str() ) );
+            prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("XDistanceFromCenter") );
+            shpe -> AddChild( prop );
+            new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getXDFC() ).c_str(), wxConvUTF8 ) );
 
-            prop = new TiXmlElement( "YDistanceFromCenter" );
-            shpe->LinkEndChild( prop );
-            prop->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr(
-                        diagram->getShape(i)->getYDFC() ).c_str() ) );
+            prop = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("YDistanceFromCenter") );
+            shpe -> AddChild( prop );
+            new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getYDFC() ).c_str(), wxConvUTF8 ) );
 
             // hinge
-            prop = new TiXmlElement( "XHinge" );
-            shpe->LinkEndChild( prop );
-            prop->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr(
-                        diagram->getShape(i)->getXHinge() ).c_str() ) );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("XHinge") );
+            shpe -> AddChild( prop );
+				    new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getXHinge() ).c_str(), wxConvUTF8 ) );
 
-            prop = new TiXmlElement( "YHinge" );
-            shpe->LinkEndChild( prop );
-            prop->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr(
-                        diagram->getShape(i)->getYHinge() ).c_str() ) );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("YHinge") );
+            shpe -> AddChild( prop );
+				    new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getYHinge() ).c_str(), wxConvUTF8 ) );
 
             // angle center
-            prop = new TiXmlElement( "AngleCenter" );
-            shpe->LinkEndChild( prop );
-            prop->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr(
-                        diagram->getShape(i)->getAngleCtr() ).c_str() ) );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("AngleCenter") );
+            shpe -> AddChild( prop );
+				    new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getAngleCtr() ).c_str(), wxConvUTF8 ) );
 
             // type
-            prop = new TiXmlElement( "Type" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Type") );
+            shpe -> AddChild( prop );
             if ( diagram->getShape(i)->getType() == Shape::TYPE_LINE )
             {
-                prop->LinkEndChild(
-                    new TiXmlText( "TYPE_LINE" ) );
+				      new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_LINE"));
             }
             else if ( diagram->getShape(i)->getType() == Shape::TYPE_RECT )
             {
-                prop->LinkEndChild(
-                    new TiXmlText( "TYPE_RECT" ) );
+				      new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_RECT"));
             }
             else if ( diagram->getShape(i)->getType() == Shape::TYPE_ELLIPSE )
             {
-                prop->LinkEndChild(
-                    new TiXmlText( "TYPE_ELLIPSE" ) );
+				      new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_ELLIPSE"));
             }
             else if ( diagram->getShape(i)->getType() == Shape::TYPE_ARROW )
             {
-                prop->LinkEndChild(
-                    new TiXmlText( "TYPE_ARROW" ) );
+				      new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_ARROW"));
             }
             else if ( diagram->getShape(i)->getType() == Shape::TYPE_DARROW )
             {
-                prop->LinkEndChild(
-                    new TiXmlText( "TYPE_DARROW" ) );
+				      new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString,  wxT("TYPE_DARROW"));
             }
 
             // line width
-            prop = new TiXmlElement( "LineWidth" );
-            shpe->LinkEndChild( prop );
-            prop->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr(
-                        diagram->getShape(i)->getLineWidth() ).c_str() ) );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("LineWidth") );
+            shpe -> AddChild( prop );
+				    new wxXmlNode( prop, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getLineWidth() ).c_str(), wxConvUTF8 ) );
 
             // color line
-            prop = new TiXmlElement( "LineColor" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("LineColor") );
+            shpe -> AddChild( prop );
 
             diagram->getShape(i)->getLineColor( col );
-            subp = new TiXmlElement( "Red" );
-            prop->LinkEndChild( subp );
-            subp->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr( col.r ).c_str() ) );
-            subp = new TiXmlElement( "Green" );
-            prop->LinkEndChild( subp );
-            subp->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr( col.g ).c_str() ) );
-            subp = new TiXmlElement( "Blue" );
-            prop->LinkEndChild( subp );
-            subp->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr( col.b ).c_str() ) );
-            subp = new TiXmlElement( "Alpha" );
-            prop->LinkEndChild( subp );
-            subp->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr( col.a ).c_str() ) );
+
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Red") );
+            prop -> AddChild( subp );
+				    new wxXmlNode(subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.r ).c_str(), wxConvUTF8 ) );
+
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Green") );
+            prop -> AddChild( subp );
+            new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.g ).c_str(), wxConvUTF8 ) );
+
+						subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Blue") );
+            prop -> AddChild( subp );
+            new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.b ).c_str(), wxConvUTF8 ) );
+
+						subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Alpha") );
+            prop -> AddChild( subp );
+            new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.a ).c_str(), wxConvUTF8 ) );
 
             // color fill
-            prop = new TiXmlElement( "FillColor" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("FillColor") );
+            shpe -> AddChild( prop );
 
             diagram->getShape(i)->getFillColor( col );
-            subp = new TiXmlElement( "Red" );
-            prop->LinkEndChild( subp );
-            subp->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr( col.r ).c_str() ) );
-            subp = new TiXmlElement( "Green" );
-            prop->LinkEndChild( subp );
-            subp->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr( col.g ).c_str() ) );
-            subp = new TiXmlElement( "Blue" );
-            prop->LinkEndChild( subp );
-            subp->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr( col.b ).c_str() ) );
-            subp = new TiXmlElement( "Alpha" );
-            prop->LinkEndChild( subp );
-            subp->LinkEndChild(
-                new TiXmlText(
-                    Utils::dblToStr( col.a ).c_str() ) );
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Red") );
+            prop -> AddChild( subp );
+            new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.r ).c_str(), wxConvUTF8 ) );
+
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Green") );
+            prop -> AddChild( subp );
+            new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.g ).c_str(), wxConvUTF8 ) );
+
+						subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Blue") );
+            prop -> AddChild( subp );
+            new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.b ).c_str(), wxConvUTF8 ) );
+
+						subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Alpha") );
+            prop -> AddChild( subp );
+            new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.a ).c_str(), wxConvUTF8 ) );
 
             // X center DOF
-            prop = new TiXmlElement( "XCenterDOF" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("XCenterDOF") );
+            shpe -> AddChild( prop );
 
-            subp = new TiXmlElement( "Attribute" );
-            prop->LinkEndChild( subp );
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
+            prop -> AddChild( subp );
             attr = diagram->getShape(i)->getDOFXCtr()->getAttribute();
             if ( attr != NULL )
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        attr->getName().c_str() ) );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( col.a ).c_str(), wxConvUTF8 ) );
             attr = NULL;
 
             {
             for ( int j = 0; j < diagram->getShape(i)->getDOFXCtr()->getSizeValues(); ++j )
             {
-                subp = new TiXmlElement( "Value" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            diagram->getShape(i)->getDOFXCtr()->getValue(j) ).c_str() ) );
+                subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
+                prop -> AddChild( subp );
+				        new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getDOFXCtr()->getValue(j) ).c_str(), wxConvUTF8 ) );
             }
             }
 
             // Y center DOF
-            prop = new TiXmlElement( "YCenterDOF" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("YCenterDOF") );
+            shpe -> AddChild( prop );
 
-            subp = new TiXmlElement( "Attribute" );
-            prop->LinkEndChild( subp );
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
+            prop -> AddChild( subp );
+
             attr = diagram->getShape(i)->getDOFYCtr()->getAttribute();
             if ( attr != NULL )
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        attr->getName().c_str() ) );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( attr->getName().c_str(), wxConvUTF8 ) );
             attr = NULL;
 
             {
             for ( int j = 0; j < diagram->getShape(i)->getDOFYCtr()->getSizeValues(); ++j )
             {
-                subp = new TiXmlElement( "Value" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            diagram->getShape(i)->getDOFYCtr()->getValue(j) ).c_str() ) );
+              subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
+              prop -> AddChild( subp );
+              new wxXmlNode( wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr(diagram->getShape(i)->getDOFYCtr()->getValue(j) ).c_str(), wxConvUTF8 ) );
             }
             }
 
             // width DOF
-            prop = new TiXmlElement( "WidthDOF" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("WidthDOF") );
+            shpe -> AddChild( prop );
 
-            subp = new TiXmlElement( "Attribute" );
-            prop->LinkEndChild( subp );
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
+            prop -> AddChild( subp );
             attr = diagram->getShape(i)->getDOFWth()->getAttribute();
             if ( attr != NULL )
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        attr->getName().c_str() ) );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( attr->getName().c_str(), wxConvUTF8 ) );
             attr = NULL;
 
             {
             for ( int j = 0; j < diagram->getShape(i)->getDOFWth()->getSizeValues(); ++j )
             {
-                subp = new TiXmlElement( "Value" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            diagram->getShape(i)->getDOFWth()->getValue(j) ).c_str() ) );
+              subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
+              prop -> AddChild( subp );
+              new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getDOFWth()->getValue(j) ).c_str(), wxConvUTF8 ) );
             }
             }
 
             // height DOF
-            prop = new TiXmlElement( "HeightDOF" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("HeightDOF") );
+            shpe -> AddChild( prop );
 
-            subp = new TiXmlElement( "Attribute" );
-            prop->LinkEndChild( subp );
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
+            prop -> AddChild( subp );
+
             attr = diagram->getShape(i)->getDOFHgt()->getAttribute();
             if ( attr != NULL )
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        attr->getName().c_str() ) );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( attr->getName().c_str(), wxConvUTF8 ) );
             attr = NULL;
 
-            prop->LinkEndChild( subp );
             {
             for ( int j = 0; j < diagram->getShape(i)->getDOFHgt()->getSizeValues(); ++j )
             {
-                subp = new TiXmlElement( "Value" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            diagram->getShape(i)->getDOFHgt()->getValue(j) ).c_str() ) );
+                subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
+                prop -> AddChild( subp );
+				        new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr(diagram->getShape(i)->getDOFHgt()->getValue(j) ).c_str(), wxConvUTF8 ) );
             }
             }
 
             // angle DOF (relative to hinge)
-            prop = new TiXmlElement( "AngleDOF" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("AngleDOF") );
+            shpe -> AddChild( prop );
 
-            subp = new TiXmlElement( "Attribute" );
-            prop->LinkEndChild( subp );
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
+            prop -> AddChild( subp );
+
             attr = diagram->getShape(i)->getDOFAgl()->getAttribute();
             if ( attr != NULL )
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        attr->getName().c_str() ) );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( attr->getName().c_str(), wxConvUTF8 ) );
             attr = NULL;
 
-            prop->LinkEndChild( subp );
             {
             for ( int j = 0; j < diagram->getShape(i)->getDOFAgl()->getSizeValues(); ++j )
             {
-                subp = new TiXmlElement( "Value" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            diagram->getShape(i)->getDOFAgl()->getValue(j) ).c_str() ) );
+              subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
+              prop -> AddChild( subp );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr(diagram->getShape(i)->getDOFAgl()->getValue(j) ).c_str(), wxConvUTF8 ) );
             }
             }
 
             // color DOF
-            prop = new TiXmlElement( "ColorDOF" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("ColorDOF") );
+            shpe -> AddChild( prop );
 
-            subp = new TiXmlElement( "Attribute" );
-            prop->LinkEndChild( subp );
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
+            prop -> AddChild( subp );
             attr = diagram->getShape(i)->getDOFCol()->getAttribute();
             if ( attr != NULL )
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        attr->getName().c_str() ) );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( attr->getName().c_str(), wxConvUTF8 ) );
             attr = NULL;
 
             {
             for ( int j = 0; j < diagram->getShape(i)->getDOFCol()->getSizeValues(); ++j )
             {
-                subp = new TiXmlElement( "Value" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            diagram->getShape(i)->getDOFCol()->getValue(j) ).c_str() ) );
+              subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
+              prop -> AddChild( subp );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr(diagram->getShape(i)->getDOFCol()->getValue(j) ).c_str(), wxConvUTF8 ) );
             }
             }
 
@@ -956,37 +872,30 @@ void Parser::writeDiagram(
             {
             for ( size_t j = 0; j < yValsCol.size(); ++j )
             {
-                subp = new TiXmlElement( "AuxilaryValue" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            yValsCol[j] ).c_str() ) );
+              subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("AuxilaryValue") );
+              prop -> AddChild( subp );
+              new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( yValsCol[j] ).c_str(), wxConvUTF8 ) );
             }
             }
 
             // opacity DOF
-            prop = new TiXmlElement( "OpacityDOF" );
-            shpe->LinkEndChild( prop );
+            prop = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("OpacityDOF") );
+            shpe -> AddChild( prop );
 
-            subp = new TiXmlElement( "Attribute" );
-            prop->LinkEndChild( subp );
+            subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
+            prop -> AddChild( subp );
+
             attr = diagram->getShape(i)->getDOFOpa()->getAttribute();
             if ( attr != NULL )
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        attr->getName().c_str() ) );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( attr->getName().c_str(), wxConvUTF8 ) );
             attr = NULL;
 
             {
             for ( int j = 0; j < diagram->getShape(i)->getDOFOpa()->getSizeValues(); ++j )
             {
-                subp = new TiXmlElement( "Value" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            diagram->getShape(i)->getDOFOpa()->getValue(j) ).c_str() ) );
+              subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
+              prop -> AddChild( subp );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( diagram->getShape(i)->getDOFOpa()->getValue(j) ).c_str(), wxConvUTF8 ) );
             }
             }
 
@@ -995,19 +904,15 @@ void Parser::writeDiagram(
             {
             for ( size_t j = 0; j < yValsOpa.size(); ++j )
             {
-                subp = new TiXmlElement( "AuxilaryValue" );
-                prop->LinkEndChild( subp );
-                subp->LinkEndChild(
-                    new TiXmlText(
-                        Utils::dblToStr(
-                            yValsOpa[j] ).c_str() ) );
+              subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("AuxilaryValue") );
+              prop -> AddChild( subp );
+				      new wxXmlNode( subp, wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::dblToStr( yValsOpa[j] ).c_str(), wxConvUTF8 ) );
             }
             }
         }
 
-        doc.SaveFile( path.c_str() );
+        doc.Save( wxString( path.c_str(), wxConvUTF8 ));
 
-        decl = NULL;
         dgrm = NULL;
         file = NULL;
         shpe = NULL;
@@ -1238,19 +1143,19 @@ void Parser::parseAttrConfig(
     map< int, int > &attrIdxFrTo,
     map< int, vector< string > > &attrCurDomains,
     map< int, map< int, int  > > &attrOrigToCurDomains,
-    TiXmlElement* curNode )
+    wxXmlNode* curNode )
 // ---------------------------------------------------
 {
-    if ( curNode != NULL && curNode->Value() != NULL)
+    if ( curNode != NULL && curNode->GetName() != wxEmptyString )
     {
         // file
-        if ( strcmp( curNode->Value(), "File") == 0 )
+        if ( curNode->GetName() == wxT("File") )
         {
             /*
             // the code below checks for matching file names
-            if ( curNode->FirstChild()->ToText()->Value() != NULL )
+            if ( curNode->GetChildren()->GetName() != NULL )
             {
-                if ( strcmp( curNode->FirstChild()->ToText()->Value(),
+                if ( strcmp( curNode->GetChildren()->GetName(),
                      graph->getFileName().c_str() ) != 0 )
                 {
                     throw mcrl2::runtime_error( "File names do not match." );
@@ -1263,11 +1168,11 @@ void Parser::parseAttrConfig(
             */
 
             // the code below does not check for matching file names
-            if ( curNode->FirstChild()->ToText()->Value() == NULL )
+            if ( curNode->GetNodeContent() == wxEmptyString )
                 throw mcrl2::runtime_error( "No file name specified." );
         }
         // shape
-        else if ( strcmp( curNode->Value(), "Attribute") == 0)
+        else if ( curNode->GetName() == wxT("Attribute") )
         {
             try
             {
@@ -1286,10 +1191,10 @@ void Parser::parseAttrConfig(
         // other
         else
         {
-            TiXmlElement* nxtNode;
-            for ( nxtNode = curNode->FirstChildElement();
+            wxXmlNode* nxtNode;
+            for ( nxtNode = curNode->GetChildren();
                   nxtNode != NULL;
-                  nxtNode = nxtNode->NextSiblingElement() )
+                  nxtNode = nxtNode->GetNext() )
             {
                 parseAttrConfig(
                     graph,
@@ -1310,70 +1215,48 @@ void Parser::parseAttr(
     map< int, int > &attrIdxFrTo,
     map< int, vector< string > > &attrCurDomains,
     map< int, map< int, int  > > &attrOrigToCurDomains,
-    TiXmlElement* curNode )
+    wxXmlNode* curNode )
 // ----------------------------------------------------
 {
-    TiXmlNode* prop = NULL;
-    TiXmlNode* subp = NULL;
-    TiXmlNode* ssbp = NULL;
+    wxXmlNode* prop = NULL;
+    wxXmlNode* subp = NULL;
+    wxXmlNode* ssbp = NULL;
 
     Attribute* attr;
 
     // name
-    prop = curNode->FirstChild();
+    prop = curNode->GetChildren();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "Name" ) == 0 )
+         prop->GetName() == wxT("Name" ) &&
+         prop->GetNodeContent() != wxEmptyString )
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-        {
-            attr = graph->getAttribute( subp->ToText()->Value() );
-            if ( attr == NULL )
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing attribute." );
-            }
-        }
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing attribute." );
-        }
+      attr = graph->getAttribute( std::string( prop->GetNodeContent().mb_str() ) );
+      if ( attr == NULL )
+      {
+        prop = NULL;
+        throw mcrl2::runtime_error( "Missing attribute." );
+      }
     }
     else
     {
-        prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
-        throw mcrl2::runtime_error( "Missing attribute." );
+      prop = NULL;
+      subp = NULL;
+      ssbp = NULL;
+      throw mcrl2::runtime_error( "Missing attribute." );
     }
 
     // type
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "Type" ) == 0 )
-    {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-        {
-            if ( strcmp( subp->ToText()->Value(), attr->getType().c_str() ) != 0 )
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Types do not match." );
-            }
-        }
-        else
+         prop->GetName() == wxT("Type") &&
+         prop->GetNodeContent() != wxEmptyString )
+      {
+        if ( strcmp( prop->GetNodeContent().mb_str(), attr->getType().c_str() ) != 0 )
         {
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing type." );
+            throw mcrl2::runtime_error( "Types do not match." );
         }
     }
     else
@@ -1385,34 +1268,20 @@ void Parser::parseAttr(
     }
 
     // card
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "OriginalCardinality" ) == 0 )
+         prop->GetName() == wxT("OriginalCardinality" ) &&
+         prop->GetNodeContent() != wxEmptyString )
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-        {
-            if ( strcmp( subp->ToText()->Value(), Utils::intToStr( attr->getSizeOrigValues() ).c_str() ) != 0 )
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Cardinalities do not match." );
-            }
-        }
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing cardinality." );
-        }
+      if ( strcmp( prop->GetNodeContent().mb_str(), Utils::intToStr( attr->getSizeOrigValues() ).c_str() ) != 0 )
+      {
+          prop = NULL;
+          throw mcrl2::runtime_error( "Cardinalities do not match." );
+      }
     }
     else
     {
         prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
         throw mcrl2::runtime_error( "Missing cardinality." );
     }
 
@@ -1421,31 +1290,27 @@ void Parser::parseAttr(
 
     // current domain
     vector< string > domain;
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "CurrentDomain" ) == 0 )
+         prop->GetName() == wxT( "CurrentDomain" ) )
     {
-        for ( subp = prop->FirstChild(); subp != NULL; subp = subp->NextSibling() )
+        for ( subp = prop->GetChildren(); subp != NULL; subp = subp->GetNext() )
         {
-            if ( strcmp( subp->Value(), "Value" ) == 0 )
+            if ( subp->GetName() == wxT( "Value" ) )
             {
-                ssbp = subp->FirstChild();
+                wxString s = subp->GetNodeContent();
 
-                if ( ssbp != NULL )
-                    domain.push_back( ssbp->ToText()->Value() );
+                if ( s != wxEmptyString )
+                    domain.push_back( std::string(s.mb_str()) );
                 else
                 {
                     prop = NULL;
-                    subp = NULL;
-                    ssbp = NULL;
                     throw mcrl2::runtime_error( "Missing domain value." );
                 }
             }
             else
             {
                 prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
                 throw mcrl2::runtime_error( "Domain incorrectly specified." );
             }
         }
@@ -1453,8 +1318,6 @@ void Parser::parseAttr(
     else
     {
         prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
         throw mcrl2::runtime_error( "Missing domain." );
     }
 
@@ -1464,28 +1327,27 @@ void Parser::parseAttr(
     // mapping from orig to current domain values
     map< int, int > origToCur;
     int valCnt = 0;
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "OriginalToCurrent" ) == 0 )
+         prop->GetName() == wxT( "OriginalToCurrent" )  )
     {
-        for ( subp = prop->FirstChild(); subp != NULL; subp = subp->NextSibling() )
+        for ( subp = prop->GetChildren(); subp != NULL; subp = subp->GetNext() )
         {
-            if ( strcmp( subp->Value(), "CurrentPosition" ) == 0 )
+            if ( subp->GetName() == wxT( "CurrentPosition" ) )
             {
-                ssbp = subp->FirstChild();
+                wxString s = subp->GetNodeContent();
 
-                if ( ssbp != NULL )
+                if ( s != wxEmptyString )
                 {
                     origToCur.insert(
                         pair< int, int >(
-                        valCnt, Utils::strToInt( ssbp->ToText()->Value() ) ) );
+                        valCnt, Utils::strToInt( std::string(s.mb_str()) ) ) );
                     ++valCnt;
                 }
                 else
                 {
                     prop = NULL;
                     subp = NULL;
-                    ssbp = NULL;
                     throw mcrl2::runtime_error( "Missing mapping from original to current domain." );
                 }
             }
@@ -1493,7 +1355,6 @@ void Parser::parseAttr(
             {
                 prop = NULL;
                 subp = NULL;
-                ssbp = NULL;
                 throw mcrl2::runtime_error( "Mapping from original to current domain incorrectly specified." );
             }
         }
@@ -1502,7 +1363,6 @@ void Parser::parseAttr(
     {
         prop = NULL;
         subp = NULL;
-        ssbp = NULL;
         throw mcrl2::runtime_error( "Missing mapping from original to current domain." );
     }
 
@@ -1518,19 +1378,19 @@ void Parser::parseDiagram(
     Graph* graph,
     Diagram* dgrmOld,
     Diagram* dgrmNew,
-    TiXmlElement* curNode )
+    wxXmlNode* curNode )
 // ------------------------
 {
-    if ( curNode != NULL && curNode->Value() != NULL)
+    if ( curNode != NULL && curNode->GetName() != wxEmptyString)
     {
         // file
-        if ( strcmp( curNode->Value(), "File") == 0 )
+        if ( curNode->GetName() == wxT( "File") )
         {
             /*
             // the code below checks for matching file names
-            if ( curNode->FirstChild()->ToText()->Value() != NULL )
+            if ( curNode->GetChildren()->GetName() != NULL )
             {
-                if ( strcmp( curNode->FirstChild()->ToText()->Value(),
+                if ( strcmp( curNode->GetChildren()->GetName(),
                      graph->getFileName().c_str() ) != 0 )
                 {
                     throw mcrl2::runtime_error( "File names do not match." );
@@ -1543,11 +1403,11 @@ void Parser::parseDiagram(
             */
 
             // the code below does not check for matchin file names
-            if ( curNode->FirstChild()->ToText()->Value() == NULL )
+            if ( curNode->GetChildren()->GetName() == wxEmptyString )
                 throw mcrl2::runtime_error( "No file name specified." );
         }
         // shape
-        else if ( strcmp( curNode->Value(), "Shape") == 0)
+        else if ( curNode->GetName() == wxT("Shape") )
         {
             try
             {
@@ -1561,12 +1421,11 @@ void Parser::parseDiagram(
         // other
         else
         {
-            TiXmlElement* nxtNode;
-            for ( nxtNode = curNode->FirstChildElement();
-                  nxtNode != NULL;
-                  nxtNode = nxtNode->NextSiblingElement() )
+            wxXmlNode* nxtNode = curNode->GetChildren();
+						while( nxtNode )				
             {
                 parseDiagram( graph, dgrmOld, dgrmNew, nxtNode );
+								nxtNode = nxtNode->GetNext();
             }
             nxtNode = NULL;
         }
@@ -1579,12 +1438,12 @@ void Parser::parseShape(
     Graph* graph,
     Diagram* /*dgrmOld*/,
     Diagram* dgrmNew,
-    TiXmlElement* curNode )
+    wxXmlNode* curNode )
 // ------------------------
 {
-    TiXmlNode* prop = NULL;
-    TiXmlNode* subp = NULL;
-    TiXmlNode* ssbp = NULL;
+    wxXmlNode* prop = NULL;
+    wxXmlNode* subp = NULL;
+    wxXmlNode* ssbp = NULL;
 
     double xCtr, yCtr;
     double xDFC, yDFC;
@@ -1596,468 +1455,280 @@ void Parser::parseShape(
     ColorRGB fillCol;
 
     // x center
-    prop = curNode->FirstChild();
+    prop = curNode->GetChildren();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "XCenter" ) == 0 )
+         prop->GetName() == wxT( "XCenter" ) &&
+         prop->GetNodeContent() != wxEmptyString
+    )
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-            xCtr = Utils::strToDbl( subp->ToText()->Value() );
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing x-coordinate." );
-        }
-    }
-    else
-    {
-        prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
-        throw mcrl2::runtime_error( "Missing x-coordinate." );
+       xCtr = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
+    } else{
+       prop = NULL;
+       throw mcrl2::runtime_error( "Missing x-coordinate." );
     }
 
     // y center
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "YCenter" ) == 0 )
+         prop->GetName() == wxT("YCenter" ) &&
+         prop->GetNodeContent() != wxEmptyString
+    )
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-            yCtr = Utils::strToDbl( subp->ToText()->Value() );
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing y-coordinate." );
-        }
-    }
-    else
-    {
-        prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
-        throw mcrl2::runtime_error( "Missing y-coordinate." );
-    }
+      yCtr = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
+    } else{
+      prop = NULL;
+      throw mcrl2::runtime_error( "Missing y-coordinate." );
+   }
 
     // x distance from center
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "XDistanceFromCenter" ) == 0 )
+         prop->GetName() == wxT( "XDistanceFromCenter" ) &&
+         prop->GetNodeContent() != wxEmptyString
+    )
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-             xDFC = Utils::strToDbl( subp->ToText()->Value() );
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing x distance from center." );
-        }
-    }
-    else
-    {
-        prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
-        throw mcrl2::runtime_error( "Missing x distance from center." );
+      xDFC = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
+    } else{
+       prop = NULL;
+       throw mcrl2::runtime_error( "Missing x distance from center." );
     }
 
     // y distance from center
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "YDistanceFromCenter" ) == 0 )
+         prop->GetName() == wxT("YDistanceFromCenter" ) &&
+         prop->GetNodeContent() != wxEmptyString
+    )
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-             yDFC = Utils::strToDbl( subp->ToText()->Value() );
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing y distance from center." );
-        }
-    }
-    else
-    {
-        prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
-        throw mcrl2::runtime_error( "Missing y distance from center." );
+      yDFC = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
+    } else{
+       prop = NULL;
+       throw mcrl2::runtime_error( "Missing y distance from center." );
     }
 
     // x hinge
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "XHinge" ) == 0 )
+         prop->GetName() == wxT( "XHinge" ) &&
+         prop->GetNodeContent() != wxEmptyString)
     {
-        subp = prop->FirstChild();
 // Strange, xHge is not used (Jeroen Keiren 4 June 2009)
 /*
-        if ( subp != NULL )
-             double xHge = Utils::strToDbl( subp->ToText()->Value() );
-          
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing x hinge." );
-        }
+      xHge = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
 */
-        if (subp == NULL)
-        {
-          prop = NULL;
-          subp = NULL;
-          ssbp = NULL;
-          throw mcrl2::runtime_error("Missing x hinge.");
-        }
-    }
-    else
-    {
-        prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
-        throw mcrl2::runtime_error( "Missing x hinge." );
-    }
+   } else{
+      prop = NULL;
+      throw mcrl2::runtime_error( "Missing x hinge." );
+   }
+
 
     // y hinge
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "YHinge" ) == 0 )
+         prop->GetName() == wxT( "YHinge" ) &&
+         prop->GetNodeContent() != wxEmptyString)
     {
-        subp = prop->FirstChild();
 // Strange, yHge is not used (Jeroen Keiren 4 June 2009)
 /*
-        if ( subp != NULL )
-//            double yHge = Utils::strToDbl( subp->ToText()->Value() );
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing y hinge." );
-        }
+        yHge = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
 */
-        if (subp == NULL)
-        {
-          prop = NULL;
-          subp = NULL;
-          ssbp = NULL;
-          throw mcrl2::runtime_error("Missing y hinge.");
-        }
-    }
-    else
-    {
+     } else{
         prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
-        throw mcrl2::runtime_error( "Missing y hinge." );
-    }
-
+        throw mcrl2::runtime_error( "Missing x hinge." );
+     }
     // angle center
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "AngleCenter" ) == 0 )
+         prop->GetName() == wxT( "AngleCenter" ) &&
+         prop->GetNodeContent() != wxEmptyString )
+
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-            aglCtr = Utils::strToDbl( subp->ToText()->Value() );
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing angle." );
-        }
+      aglCtr = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str() ));
     }
     else
     {
         prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
         throw mcrl2::runtime_error( "Missing angle." );
     }
 
     // type
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "Type" ) == 0 )
+         prop->GetName() == wxT( "Type" ) &&
+         prop->GetNodeContent() != wxEmptyString)
+
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-        {
-            if ( strcmp( subp->ToText()->Value(), "TYPE_LINE" ) == 0 )
-                type = Shape::TYPE_LINE;
-            else if ( strcmp( subp->ToText()->Value(), "TYPE_RECT" ) == 0 )
-                type = Shape::TYPE_RECT;
-            else if ( strcmp( subp->ToText()->Value(), "TYPE_ELLIPSE" ) == 0 )
-                type = Shape::TYPE_ELLIPSE;
-            else if ( strcmp( subp->ToText()->Value(), "TYPE_ARROW" ) == 0 )
-                type = Shape::TYPE_ARROW;
-            else if ( strcmp( subp->ToText()->Value(), "TYPE_DARROW" ) == 0 )
-                type = Shape::TYPE_DARROW;
-        }
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing type." );
-        }
+      if ( prop->GetNodeContent() == wxT( "TYPE_LINE" ) )
+          type = Shape::TYPE_LINE;
+      else if ( prop->GetNodeContent() == wxT( "TYPE_RECT" ) )
+          type = Shape::TYPE_RECT;
+      else if ( prop->GetNodeContent() == wxT( "TYPE_ELLIPSE" ) )
+          type = Shape::TYPE_ELLIPSE;
+      else if (  prop->GetNodeContent() == wxT( "TYPE_ARROW" ) )
+          type = Shape::TYPE_ARROW;
+      else if ( prop->GetNodeContent() == wxT( "TYPE_DARROW" ) )
+          type = Shape::TYPE_DARROW;
     }
     else
     {
         prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
         throw mcrl2::runtime_error( "Missing type." );
     }
 
     // line width
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "LineWidth" ) == 0 )
+         prop->GetName() == wxT( "LineWidth" ) &&
+         prop->GetNodeContent() != wxEmptyString)
+
     {
-        subp = prop->FirstChild();
-        if ( subp != NULL )
-            lineWth = Utils::strToDbl( subp->ToText()->Value() );
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing line width." );
-        }
+       lineWth = Utils::strToDbl( std::string(prop->GetNodeContent().mb_str()) );
     }
     else
     {
-        prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
-        throw mcrl2::runtime_error( "Missing line width." );
+      prop = NULL;
+      throw mcrl2::runtime_error( "Missing line width." );
     }
 
     // line color
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "LineColor" ) == 0 )
+         prop->GetName() == wxT( "LineColor" ) )
     {
         // red
-        subp = prop->FirstChild();
+        subp = prop->GetChildren();
         if ( subp != NULL &&
-             strcmp( subp->Value(), "Red" ) == 0 )
+             subp->GetName() == wxT( "Red" ) &&
+             subp->GetNodeContent() != wxEmptyString)
         {
-            ssbp = subp->FirstChild();
-            if ( ssbp != NULL )
-                lineCol.r = Utils::strToDbl( ssbp->ToText()->Value() );
-            else
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing red channel." );
-            }
+            lineCol.r = Utils::strToDbl( std::string(subp->GetNodeContent().mb_str() ) );
         }
         else
         {
             prop = NULL;
             subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing red channel." );
+            throw mcrl2::runtime_error( "LineColor: Missing red channel." );
         }
 
         // green
-        subp = subp->NextSibling();
+        subp = subp->GetNext();
         if ( subp != NULL &&
-             strcmp( subp->Value(), "Green" ) == 0 )
+             subp->GetName() == wxT( "Green" ) &&
+             subp->GetNodeContent() != wxEmptyString)
         {
-            ssbp = subp->FirstChild();
-            if ( ssbp != NULL )
-                lineCol.g = Utils::strToDbl( ssbp->ToText()->Value() );
-            else
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing green channel." );
-            }
+            lineCol.g = Utils::strToDbl( std::string(subp->GetNodeContent().mb_str() ) );
         }
         else
         {
             prop = NULL;
             subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing green color." );
+            throw mcrl2::runtime_error( "LineColor: Missing green channel." );
         }
 
         // blue
-        subp = subp->NextSibling();
+        subp = subp->GetNext();
         if ( subp != NULL &&
-             strcmp( subp->Value(), "Blue" ) == 0 )
+             subp->GetName() == wxT( "Blue" ) &&
+             subp->GetNodeContent() != wxEmptyString)
         {
-            ssbp = subp->FirstChild();
-            if ( ssbp != NULL )
-                lineCol.b = Utils::strToDbl( ssbp->ToText()->Value() );
-            else
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing blue channel." );
-            }
+            lineCol.b = Utils::strToDbl( std::string(subp->GetNodeContent().mb_str() ) );
         }
         else
         {
             prop = NULL;
             subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing blue color." );
+            throw mcrl2::runtime_error( "LineColor: Missing blue channel." );
         }
 
         // alpha
-        subp = subp->NextSibling();
+        subp = subp->GetNext();
         if ( subp != NULL &&
-             strcmp( subp->Value(), "Alpha" ) == 0 )
+             subp->GetName() == wxT( "Alpha" ) &&
+             subp->GetNodeContent() != wxEmptyString)
         {
-            ssbp = subp->FirstChild();
-            if ( ssbp != NULL )
-                lineCol.a = Utils::strToDbl( ssbp->ToText()->Value() );
-            else
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing alpha channel." );
-            }
+            lineCol.a = Utils::strToDbl( std::string(subp->GetNodeContent().mb_str() ) );
         }
         else
         {
             prop = NULL;
             subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing alpha color." );
+            throw mcrl2::runtime_error( "LineColor: Missing alpha channel." );
         }
     }
     else
     {
         prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
         throw mcrl2::runtime_error( "Missing line color." );
     }
 
     // fill color
-    prop = prop->NextSibling();
+    prop = prop->GetNext();
     if ( prop != NULL &&
-         strcmp( prop->Value(), "FillColor" ) == 0 )
+         prop->GetName() == wxT( "FillColor" ) )
     {
-        // red
-        subp = prop->FirstChild();
-        if ( subp != NULL &&
-             strcmp( subp->Value(), "Red" ) == 0 )
-        {
-            ssbp = subp->FirstChild();
-            if ( ssbp != NULL )
-                fillCol.r = Utils::strToDbl( ssbp->ToText()->Value() );
-            else
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing red channel." );
-            }
-        }
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing red channel." );
-        }
+      // red
+      subp = prop->GetChildren();
+      if ( subp != NULL &&
+           subp->GetName() == wxT( "Red" ) &&
+           subp->GetNodeContent() != wxEmptyString)
+      {
+        fillCol.r = Utils::strToDbl( std::string(subp->GetNodeContent().mb_str() ) );
+      }
+      else
+      {
+          prop = NULL;
+          subp = NULL;
+          throw mcrl2::runtime_error( "FillColor: Missing red channel." );
+      }
 
-        // green
-        subp = subp->NextSibling();
-        if ( subp != NULL &&
-             strcmp( subp->Value(), "Green" ) == 0 )
-        {
-            ssbp = subp->FirstChild();
-            if ( ssbp != NULL )
-                fillCol.g = Utils::strToDbl( ssbp->ToText()->Value() );
-            else
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing green channel." );
-            }
-        }
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing green color." );
-        }
+      // green
+      subp = subp->GetNext();
+      if ( subp != NULL &&
+           subp->GetName() == wxT( "Green" ) &&
+           subp->GetNodeContent() != wxEmptyString)
+      {
+        fillCol.g = Utils::strToDbl( std::string(subp->GetNodeContent().mb_str() ) );
+      }
+      else
+      {
+          prop = NULL;
+          subp = NULL;
+          throw mcrl2::runtime_error( "FillColor: Missing green channel." );
+      }
 
-        // blue
-        subp = subp->NextSibling();
-        if ( subp != NULL &&
-             strcmp( subp->Value(), "Blue" ) == 0 )
-        {
-            ssbp = subp->FirstChild();
-            if ( ssbp != NULL )
-                fillCol.b = Utils::strToDbl( ssbp->ToText()->Value() );
-            else
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing blue channel." );
-            }
-        }
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing blue color." );
-        }
+      // blue
+      subp = subp->GetNext();
+      if ( subp != NULL &&
+           subp->GetName() == wxT( "Blue" ) &&
+           subp->GetNodeContent() != wxEmptyString)
+      {
+        fillCol.b = Utils::strToDbl( std::string(subp->GetNodeContent().mb_str() ) );
+      }
+      else
+      {
+          prop = NULL;
+          subp = NULL;
+          throw mcrl2::runtime_error( "FillColor: Missing blue channel." );
+      }
 
-        // alpha
-        subp = subp->NextSibling();
-        if ( subp != NULL &&
-             strcmp( subp->Value(), "Alpha" ) == 0 )
-        {
-            ssbp = subp->FirstChild();
-            if ( ssbp != NULL )
-                fillCol.a = Utils::strToDbl( ssbp->ToText()->Value() );
-            else
-            {
-                prop = NULL;
-                subp = NULL;
-                ssbp = NULL;
-                throw mcrl2::runtime_error( "Missing alpha channel." );
-            }
-        }
-        else
-        {
-            prop = NULL;
-            subp = NULL;
-            ssbp = NULL;
-            throw mcrl2::runtime_error( "Missing alpha channel." );
-        }
+      // alpha
+      subp = subp->GetNext();
+      if ( subp != NULL &&
+           subp->GetName() == wxT( "Alpha" ) &&
+           subp->GetNodeContent() != wxEmptyString)
+      {
+        fillCol.a = Utils::strToDbl( std::string(subp->GetNodeContent().mb_str() ) );
+      }
+      else
+      {
+          prop = NULL;
+          subp = NULL;
+          throw mcrl2::runtime_error( "FillColor:Missing alpha channel." );
+      }
     }
     else
     {
         prop = NULL;
-        subp = NULL;
-        ssbp = NULL;
         throw mcrl2::runtime_error( "Missing fill color." );
     }
 
@@ -2080,122 +1751,102 @@ void Parser::parseShape(
     int  cntAuxCol;
     int  cntAuxOpa;
 
-    for ( prop = prop->NextSibling(); prop != NULL; prop = prop->NextSibling() )
+    prop = prop->GetNext();
+    while ( prop )
     {
-        attr = NULL;
-        dof  = NULL;
+      attr = NULL;
+      dof  = NULL;
 
-        if ( prop != NULL )
-        {
-            // dof
-            if ( strcmp( prop->Value(), "XCenterDOF" ) == 0 )
-                dof = s->getDOFXCtr();
-            else if ( strcmp( prop->Value(), "YCenterDOF" ) == 0 )
-                dof = s->getDOFYCtr();
-            else if ( strcmp( prop->Value(), "WidthDOF" ) == 0 )
-                dof = s->getDOFWth();
-            else if ( strcmp( prop->Value(), "HeightDOF" ) == 0 )
-                dof = s->getDOFHgt();
-            else if ( strcmp( prop->Value(), "AngleDOF" ) == 0 )
-                dof = s->getDOFAgl();
-            else if ( strcmp( prop->Value(), "ColorDOF" ) == 0 )
-                dof = s->getDOFCol();
-            else if ( strcmp( prop->Value(), "OpacityDOF" ) == 0 )
-                dof = s->getDOFOpa();
+      // dof
+      if ( prop->GetName() == wxT( "XCenterDOF" ) )
+          dof = s->getDOFXCtr();
+      else if ( prop->GetName() == wxT( "YCenterDOF" ) )
+          dof = s->getDOFYCtr();
+      else if ( prop->GetName() == wxT( "WidthDOF" ) )
+          dof = s->getDOFWth();
+      else if ( prop->GetName() == wxT( "HeightDOF" ) )
+          dof = s->getDOFHgt();
+      else if ( prop->GetName() == wxT( "AngleDOF" ) )
+          dof = s->getDOFAgl();
+      else if ( prop->GetName() == wxT( "ColorDOF" ) )
+          dof = s->getDOFCol();
+      else if ( prop->GetName() == wxT( "OpacityDOF" ) )
+          dof = s->getDOFOpa();
 
-            if ( dof != NULL )
-            {
-                // attribute
-                subp = prop->FirstChild();
-                if ( subp != NULL &&
-                     strcmp( subp->Value(), "Attribute" ) == 0 )
-                {
-                    ssbp = subp->FirstChild();
-                    if ( ssbp != NULL )
-                    {
-                        attr = graph->getAttribute( ssbp->ToText()->Value() );
-                        if ( attr != NULL )
-                            dof->setAttribute( attr );
-                    }
-                }
+      if ( dof != NULL )
+      {
 
-                // values
-                cntVal    = 0;
-                cntAuxCol = 0;
-                cntAuxOpa = 0;
+        subp = prop->GetChildren();
 
-                for ( subp = prop->FirstChild(); subp != NULL; subp = subp->NextSibling() )
-                {
-                    if ( strcmp( subp->Value(), "Value" ) == 0 )
-                    {
-                        ssbp = subp->FirstChild();
-                        if ( ssbp != NULL )
-                        {
-                            if ( ssbp->ToText()->Value() != NULL )
-                            {
-                                ++cntVal;
+        cntVal    = 0;
+        cntAuxCol = 0;
+        cntAuxOpa = 0;
 
-                                // reset min
-                                if ( cntVal == 1 )
-                                    dof->setMin( Utils::strToDbl( ssbp->ToText()->Value() ) );
-                                // reset max
-                                else if ( cntVal == 2 )
-                                    dof->setMax( Utils::strToDbl( ssbp->ToText()->Value() ) );
-                                // add additional values
-                                else
-                                    dof->addValue( Utils::strToDbl( ssbp->ToText()->Value() ) );
-                            }
-                        }
-                    }
-                    else if ( strcmp( subp->Value(), "AuxilaryValue" ) == 0 &&
-                              strcmp( prop->Value(), "ColorDOF" ) == 0 )
-                    {
-                        ssbp = subp->FirstChild();
-                        if ( ssbp != NULL )
-                        {
-                            if ( ssbp->ToText()->Value() != NULL )
-                            {
-                                ++cntAuxCol;
+        while(subp){
 
-                                // update first value
-                                if ( cntAuxCol == 1 )
-                                    s->setDOFColYValue( 0, Utils::strToDbl( ssbp->ToText()->Value() ) );
-                                // update second value
-                                else if ( cntAuxCol == 2 )
-                                    s->setDOFColYValue( 1, Utils::strToDbl( ssbp->ToText()->Value() ) );
-                                // add additional values
-                                else
-                                    s->addDOFColYValue( Utils::strToDbl( ssbp->ToText()->Value() ) );
-                            }
-                        }
-                    }
-                    else if ( strcmp( subp->Value(), "AuxilaryValue" ) == 0 &&
-                              strcmp( prop->Value(), "OpacityDOF" ) == 0 )
-                    {
-                        ssbp = subp->FirstChild();
-                        if ( ssbp != NULL )
-                        {
-                            if ( ssbp->ToText()->Value() != NULL )
-                            {
-                                ++cntAuxOpa;
+          // Atribute
+          if ( subp->GetName() == wxT("Attribute" ) &&
+               subp->GetNodeContent() != wxEmptyString )
+          {
+              attr = graph->getAttribute( std::string(subp->GetNodeContent().mb_str()) );
+              if ( attr != NULL )
+              {
+                dof->setAttribute( attr );
+              }
+          }
 
-                                // update first value
-                                if ( cntAuxOpa == 1 )
-                                    s->setDOFOpaYValue( 0, Utils::strToDbl( ssbp->ToText()->Value() ) );
-                                // update second value
-                                else if ( cntAuxOpa == 2 )
-                                    s->setDOFOpaYValue( 1, Utils::strToDbl( ssbp->ToText()->Value() ) );
-                                // add additional values
-                                else
-                                    s->addDOFOpaYValue( Utils::strToDbl( ssbp->ToText()->Value() ) );
-                            }
-                        }
-                    }
-                }
+          if ( subp->GetName() == wxT("Value" ) &&
+               subp->GetNodeContent() != wxEmptyString )
+          {
+              ++cntVal;
+              // reset min
+              if ( cntVal == 1 )
+                  dof->setMin( Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+              // reset max
+              else if ( cntVal == 2 )
+                  dof->setMax( Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+              // add additional values
+              else
+                  dof->addValue( Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+          }
 
-            } // dof
-        } // prop
+          if ( subp->GetName() == wxT("AuxilaryValue" ) &&
+               prop->GetName() == wxT( "ColorDOF" ) &&
+               subp->GetNodeContent() != wxEmptyString )
+          {
+              ++cntAuxCol;
+              // reset min
+              if ( cntAuxCol == 1 )
+                  s->setDOFColYValue( 0, Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+              // reset max
+              else if ( cntAuxCol == 2 )
+                  s->setDOFColYValue( 1, Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+              // add additional values
+              else
+                  s->addDOFColYValue( Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+          }
 
+          if ( subp->GetName() == wxT("AuxilaryValue" ) &&
+               prop->GetName() == wxT( "OpacityDOF" ) &&
+               subp->GetNodeContent() != wxEmptyString )
+          {
+              ++cntAuxOpa;
+              // reset min
+              if ( cntAuxOpa == 1 )
+                  s->setDOFOpaYValue( 0, Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+              // reset max
+              else if ( cntAuxOpa == 2 )
+                  s->setDOFOpaYValue( 1, Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+              // add additional values
+              else
+                  s->addDOFOpaYValue( Utils::strToDbl( std::string(subp->GetNodeContent().mb_str()) ) );
+          }
+
+          subp = subp->GetNext();
+        }
+      } // dof
+
+      prop = prop->GetNext();
     }
 
     // add shape

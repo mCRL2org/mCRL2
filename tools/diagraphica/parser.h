@@ -21,7 +21,7 @@
 #include "diagram.h"
 #include "dof.h"
 #include "graph.h"
-#include "tinyxml.h"
+#include <wx/xml/xml.h>
 #include "utils.h"
 
 template <class T>
@@ -93,25 +93,25 @@ private:
         std::map< int, int > &attrIdxFrTo,
         std::map< int, std::vector< std::string > > &attrCurDomains,
         std::map< int, std::map< int, int  > > &attrOrigToCurDomains,
-        TiXmlElement* curNode );
+        wxXmlNode* curNode );
     void parseAttr(
         Graph* graph,
         std::map< int, int > &attrIdxFrTo,
         std::map< int, std::vector< std::string > > &attrCurDomains,
         std::map< int, std::map< int, int  > > &attrOrigToCurDomains,
-        TiXmlElement* curNode );
+        wxXmlNode* curNode );
 
     // dgd files
     void parseDiagram(
         Graph* graph,
         Diagram* dgrmOld,
         Diagram* dgrmNew,
-        TiXmlElement* curNode );
+        wxXmlNode* curNode );
     void parseShape(
         Graph* graph,
         Diagram* dgrmOld,
         Diagram* dgrmNew,
-        TiXmlElement* curNode );
+        wxXmlNode* curNode );
 
     // -- data members ----------------------------------------------
     std::string delims;
