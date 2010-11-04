@@ -2081,7 +2081,7 @@ void Frame::initAboutFrameOld()
         "In this case, image credits would be much appreciated.\n"
         "\n"
         "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and "
-        "uses the TinyXML parser (tinyxml.sourceforge.net). "
+        "uses the wxWidgets XML parser. "
         "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).\n"
         "\n"
         "This version of DiaGraphica is part of the mCRL2 toolset.\n"

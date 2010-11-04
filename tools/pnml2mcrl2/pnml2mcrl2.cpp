@@ -763,7 +763,7 @@ class pnml2mcrl2_tool: public input_output_tool
   // pn2gsAterm converts the pnml-input to a usable ATerm
   //==================================================
   static ATermAppl pn2gsAterm(wxXmlDocument& doc) {
-    // input: a pointer of the type ticpp::Document which points to the parsed XML-file
+    // input: a pointer of the type wxXmlDocument which points to the parsed XML-file
     // output: an ATermAppl, translated from the XML-file,
     //         in which only relevant elements/attributes are concluded
 

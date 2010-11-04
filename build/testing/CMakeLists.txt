@@ -30,7 +30,6 @@ set(MRCL2_HEADERTESTS_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/libraries/utilities/include
   ${CMAKE_SOURCE_DIR}/3rd-party/gl2ps
   ${CMAKE_SOURCE_DIR}/3rd-party/svc
-  ${CMAKE_SOURCE_DIR}/3rd-party/ticpp
   ${CMAKE_SOURCE_DIR}/3rd-party/tr
 )
 

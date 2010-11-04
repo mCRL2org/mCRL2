@@ -38,7 +38,7 @@ DiaGraph::DiaGraph() : super("DiaGraph",
       "In this case, image credits would be much appreciated.\n" 
       "\n" 
       "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and \n" 
-      "uses the TinyXML parser (tinyxml.sourceforge.net). \n" 
+      "uses the wxWidget XML parser. \n" 
       "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
       "Multivariate state visualisation and simulation analysis for labelled "
       "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
