@@ -582,7 +582,6 @@ if(MCRL2_ENABLE_GUI_TOOLS)
 
   add_subdirectory ( 3rd-party/gl2ps )
 endif(MCRL2_ENABLE_GUI_TOOLS)
-add_subdirectory ( 3rd-party/ticpp )
 
 ##---------------------------------------------------
 ## Library dependencies

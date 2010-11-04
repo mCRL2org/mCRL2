@@ -12,8 +12,6 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_BUILD_GUI_TOOLS )
 
-add_definitions(-DTIXML_USE_TICPP)
-
 # ######### General setup ##########
 
 set(MACOSX_BUNDLE_ICON_FILE grapemcrl2.icns )
