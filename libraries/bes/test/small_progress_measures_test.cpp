@@ -38,7 +38,7 @@ void test_smp()
   std::cout << "b = \n" << pp(b) << std::endl;
   
   small_progress_measures_algorithm algorithm(b);
-  algorithm.run();
+  algorithm.run(b.initial_state());
 
   core::garbage_collect();
 }
