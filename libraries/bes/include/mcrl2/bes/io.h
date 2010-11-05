@@ -274,6 +274,7 @@ namespace bes {
           core::gsVerboseMsg("Saving result in ATerm binary format...\n");
           bes_spec.save(outfilename, true);
         }
+        break;
       }
       case bes_output_cwi:
       {

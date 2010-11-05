@@ -79,7 +79,8 @@ namespace bes {
   // There must be whitespace characters between the following pairs of tokens:
   // <identifier> and <priority>, <priority> and <owner>, <owner> and <identifier>
   template <typename Container>
-  std::istream& operator>>(std::istream& from, boolean_equation_system<Container>& b)
+  inline
+  void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b)
   {
     while(!isalnum(from.peek())) from.ignore();
 
@@ -147,7 +148,7 @@ namespace bes {
 
       blocks[i->second.prio].insert(eqn);
     }
-    
+
     atermpp::vector<boolean_equation> eqns;
     for(std::map<priority_t, atermpp::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
     {
@@ -159,7 +160,6 @@ namespace bes {
     init_id << initial_node;
     b.initial_state() = boolean_variable("X" + init_id.str());
 
-    return from;
   }
 
 } // namespace bes

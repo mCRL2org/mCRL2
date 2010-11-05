@@ -77,7 +77,7 @@ namespace mcrl2
           break;
         case bes_output_pgsolver:
           input.open(input_filename.c_str());
-          input >> bes;
+          parse_pgsolver(input, bes);
           break;
         default:
           throw mcrl2::runtime_error("Trying to read BES from unsupported format");
