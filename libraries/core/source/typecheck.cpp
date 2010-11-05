@@ -1828,11 +1828,12 @@ namespace mcrl2 {
       //data terms in equations
       ATermList NewEqns=ATmakeList0();
       bool b = true;
-      for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns)){
+      for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns))
+      {
         ATermAppl Eqn=ATAgetFirst(Eqns);
         ATermList VarList=ATLgetArgument(Eqn,0);
 
-        if(!gstcVarsUnique(VarList)){ b = false; gsErrorMsg("the variables in equation declaration %P are not unique\n",VarList,Eqn); break;}
+        if (!gstcVarsUnique(VarList)){ b = false; gsErrorMsg("the variables in equation declaration %P are not unique\n",VarList,Eqn); break;}
 
         ATermTable NewDeclaredVars=gstcAddVars2Table(DeclaredVars,VarList);
         if(!NewDeclaredVars){ b = false; break; }
@@ -2747,8 +2748,11 @@ namespace mcrl2 {
 
       // gsDebug=true;
 
-      if (gsDebug) { std::cerr << "gstcTraverseVarConsTypeD: DataTerm " << pp(*DataTerm) <<
-                          " with PosType " << pp(PosType) << "\n"; }
+      if (gsDebug) 
+      {  
+        std::cerr << "gstcTraverseVarConsTypeD: DataTerm " << pp(*DataTerm) <<
+                          " with PosType " << pp(PosType) << "\n"; 
+      }
 
       if(gsIsBinder(*DataTerm))
       {
@@ -3200,14 +3204,23 @@ namespace mcrl2 {
           ArgumentTypes=ATreverse(NewArgumentTypes);
         }
 
-        if (gsDebug) { std::cerr << "Arguments after once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " << pp(ArgumentTypes) << "\n"; }
+        if (gsDebug) 
+        { 
+          std::cerr << "Arguments after once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " << pp(ArgumentTypes) << "\n"; 
+        }
 
         *DataTerm=gsMakeDataAppl(Data,Arguments);
 
-        if(gsIsSortArrow(gstcUnwindType(NewType))){
+        if(gsIsSortArrow(gstcUnwindType(NewType)))
+        {
           return ATAgetArgument(gstcUnwindType(NewType),1);
         }
 
+        if (gstcHasUnknown(gstcUnArrowProd(ArgumentTypes,NewType)))
+        { 
+          gsErrorMsg("Fail to properly type %P\n",*DataTerm);
+          return NULL;
+        }
         return gstcUnArrowProd(ArgumentTypes,NewType);
       }
 
@@ -3336,7 +3349,6 @@ namespace mcrl2 {
       //   return ATAgetArgument(*DataTerm,1);
       // }
 
-      assert(0);
       return Result;
     }
 
