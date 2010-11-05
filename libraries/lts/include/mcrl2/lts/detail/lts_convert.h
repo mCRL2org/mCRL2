@@ -165,10 +165,14 @@ namespace detail
                 lts_fsm_t &lts_out)
   {  
     lts_out.clear_process_parameters();
-    for(data::variable_list::const_iterator i=lts_in.process_parameters().begin();
-                 i!=lts_in.process_parameters().end(); ++i)
-    { 
-      lts_out.add_process_parameter(core::pp(*i),core::pp(i->sort()));
+
+    /* Only recall state parameters if state information is available to match with it */
+    if (lts_in.has_state_info())
+    { for(data::variable_list::const_iterator i=lts_in.process_parameters().begin();
+                  i!=lts_in.process_parameters().end(); ++i)
+      { 
+        lts_out.add_process_parameter(core::pp(*i),core::pp(i->sort()));
+      }
     }
     
     lts_fsm_convertor c(lts_in.process_parameters().size(),lts_out);
