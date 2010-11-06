@@ -313,17 +313,20 @@ namespace lts
 
 void lts_lts_t::save(const std::string &filename) const
 {
-
   if (filename=="")
   { 
     throw mcrl2::runtime_error("Cannot write svc/lts file " + filename + " to stdout");
   }
   else
   {
+    if (core::gsVerbose)
+    { 
+      std::cerr << "Starting to save file " << filename << "\n";
+    }
     write_to_lts(*this,filename);
   }
-
 }
+
 void lts_lts_t::load(const std::string &filename)
 {
  if (filename=="")

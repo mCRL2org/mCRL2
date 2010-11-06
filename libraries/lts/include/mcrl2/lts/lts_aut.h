@@ -20,6 +20,7 @@
 #define MCRL2_LTS_LTS_AUT_H
 
 #include <istream>
+#include "mcrl2/lts/state_label_empty.h"
 #include "mcrl2/lts/action_label_string.h"
 #include "mcrl2/lts/lts.h"
 
@@ -28,32 +29,13 @@ namespace mcrl2
 {
 namespace lts
 {
-  namespace detail
-  {
 
-    /* A state label for an .aut file is empty, as .aut files do not have state labels.
-    */
-    class state_label_aut
-    {
-      public:
-        bool operator ==(const state_label_aut &other) const
-        { 
-          return true;
-        }
-
-        bool operator !=(const state_label_aut &other) const
-        { 
-          return !(*this==other);
-        }
-    };
-
-  } // namespace detail
-
-
-  class lts_aut_t : public lts< detail::state_label_aut, detail::action_label_string >
+  class lts_aut_t : public lts< detail::state_label_empty, detail::action_label_string >
   {
     public:
 
+      /** \brief Provides the type of this lts, in casu lts_aut.
+      */
       lts_type type()
       {
         return lts_aut;

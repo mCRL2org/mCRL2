@@ -205,9 +205,9 @@ namespace detail
         return pp(l);
       }
 
-      state_label_aut translate_state(const state_label_lts &l) const
+      state_label_empty translate_state(const state_label_lts &l) const
       { 
-        return state_label_aut();
+        return state_label_empty();
       }
   };
 
@@ -286,13 +286,44 @@ namespace detail
 // ====================== lts -> bcg =============================
 
 #ifdef USE_BCG
+ 
+  class lts_bcg_convertor
+  {
+    public:
+      action_label_string translate_label(const action_label_lts &l) const
+      { 
+        return pp(l);
+      }
+
+      state_label_empty translate_state(const state_label_lts &l) const
+      { 
+        return state_label_empty();
+      }
+  };
+
   inline void lts_convert(
                 const lts_lts_t &lts_in, 
                 lts_bcg_t &lts_out)
   {  
-    lts_out=lts_in;
+    lts_bcg_convertor c;
+    convert_core_lts(c,lts_in,lts_out);
   }
- 
+
+  inline void lts_convert(
+                const lts_lts_t &lts_in,
+                lts_bcg_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (extra_data_is_defined)
+    {
+      std::cerr << "While translating .lts to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    }
+    lts_convert(lts_in,lts_out);
+  }
+
 #endif
 
 // ====================== aut -> lts  =============================
@@ -334,7 +365,7 @@ namespace detail
         return al;
       }
 
-      state_label_lts translate_state(const state_label_aut &l) const
+      state_label_lts translate_state(const state_label_empty &l) const
       {
         // There is no state label. Use the default.
         return state_label_lts();
@@ -406,7 +437,7 @@ namespace detail
         return l;
       }
 
-      state_label_fsm translate_state(const state_label_aut &l) const
+      state_label_fsm translate_state(const state_label_empty &l) const
       {
         return state_label_fsm();
       }
@@ -439,16 +470,52 @@ namespace detail
     lts_convert(lts_in,lts_out);
   }
 
-// ====================== aut -> bcg    =============================
+// ====================== bcg -> dot    =============================
 
 #ifdef USE_BCG
-  inline void lts_convert(
-                const lts_aut_t &lts_in, 
-                lts_bcg_t &lts_out)
-  {  
-    lts_out=lts_in;
-  }
  
+  class bcg_dot_convertor
+  {
+    public:
+
+      action_label_string translate_label(const action_label_string &l) const
+      {        return l;
+      }
+
+      state_label_dot translate_state(const state_label_empty &l) const
+      {
+        return state_label_dot();
+      }
+  };
+
+  inline void lts_convert(
+                const lts_bcg_t &lts_in,
+                lts_dot_t &lts_out)
+  {
+    //Reset lts_out
+    lts_out=lts_dot_t();
+
+    bcg_dot_convertor c;
+    convert_core_lts(c,lts_in,lts_out);
+
+  }
+
+  inline void lts_convert(
+                const lts_bcg_t &lts_in,
+                lts_dot_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (extra_data_is_defined)
+    {
+      std::cerr << "While translating .bcg to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    }
+    lts_convert(lts_in,lts_out);
+  }
+
+
 #endif
 
 // ====================== aut -> dot    =============================
@@ -461,7 +528,7 @@ namespace detail
       {        return l;
       }
 
-      state_label_dot translate_state(const state_label_aut &l) const
+      state_label_dot translate_state(const state_label_empty &l) const
       {
         return state_label_dot();
       }
@@ -596,9 +663,9 @@ namespace detail
         return l;
       }
 
-      state_label_aut translate_state(const state_label_fsm &l) const
+      state_label_empty translate_state(const state_label_fsm &l) const
       {
-        return state_label_aut();
+        return state_label_empty();
       }
   };
 
@@ -650,13 +717,48 @@ namespace detail
     lts_convert(lts_in,lts_out);
   }
 
-// ====================== fsm -> bcg    =============================
+// ====================== fsm -> bcg =============================
 #ifdef USE_BCG
 
-// TODO
+  class fsm_bcg_convertor
+  {
+    public:
+      action_label_string translate_label(const action_label_string &l) const
+      {
+        return l;
+      }
+
+      state_label_empty translate_state(const state_label_fsm &l) const
+      {
+        return state_label_empty();
+      }
+  };
+
+  inline void lts_convert(
+                const lts_fsm_t &lts_in,
+                lts_bcg_t &lts_out)
+  {
+    fsm_bcg_convertor c;
+    convert_core_lts(c,lts_in,lts_out);
+  }
+
+  inline void lts_convert(
+                const lts_fsm_t &lts_in,
+                lts_bcg_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (extra_data_is_defined)
+    {
+      std::cerr << "While translating .fsm to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    }
+    lts_convert(lts_in,lts_out);
+  }
 
 #endif
-// ====================== fsm -> dot    =============================
+// ====================== fsm -> dot =============================
 
   class fsm_dot_convertor
   {
@@ -720,19 +822,167 @@ namespace detail
 // ====================== bcg -> lts =============================
 #ifdef USE_BCG
 
-// TODO
+  class bcg_lts_convertor
+  {
+    protected:
+      const data::data_specification &m_data;
+      const lps::action_label_list &m_action_labels;
+
+    public:
+      bcg_lts_convertor(
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels):
+                     m_data(data),
+                     m_action_labels(action_labels)
+      {}
+
+      action_label_lts translate_label(const action_label_string &l1) const
+      {
+        std::string l(l1);  
+        action_label_lts al;
+        // Remove quotes, if present in the action label string.
+        if ((l.size()>=2) && 
+            (l.substr(0,1)=="\"") && 
+            (l.substr(l.size()-1,l.size())=="\""))
+        {
+          l=l.substr(1,l.size()-1);
+        }
+        
+        try
+        { 
+          al=parse_lts_action(l,m_data,m_action_labels);
+        }
+        catch (mcrl2::runtime_error &e)
+        {
+          throw mcrl2::runtime_error("Parse error in action label " + l1 + ".\n" + e.what());
+        }
+        return al;
+      }
+
+      state_label_lts translate_state(const state_label_empty &l) const
+      {
+        // There is no state label. Use the default.
+        return state_label_lts();
+      }
+  };
+
+  inline void lts_convert(
+                const lts_bcg_t &lts_in,
+                lts_lts_t &lts_out)
+  {
+    throw mcrl2::runtime_error("Cannot translate .bcg into .lts format without additional information (data, action declarations and process parameters)");
+  }
+
+  inline void lts_convert(
+                const lts_bcg_t &lts_in,
+                lts_lts_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (!extra_data_is_defined)
+    {
+      lts_convert(lts_in,lts_out);
+    }
+    else
+    { 
+      lts_out=lts_lts_t();
+      lts_out.set_data(data);
+      lts_out.set_action_labels(action_labels);
+      lts_out.set_process_parameters(process_parameters);
+      bcg_lts_convertor c(data,action_labels);
+      convert_core_lts(c,lts_in,lts_out);
+    }
+  }
 
 #endif
 // ====================== bcg -> aut =============================
 #ifdef USE_BCG
 
-// TODO
+  class bcg_aut_convertor
+  {
+    public:
+      action_label_string translate_label(const action_label_string &l) const
+      {
+        return l;
+      }
+
+      state_label_empty translate_state(const state_label_empty &l) const
+      {
+        return state_label_empty();
+      }
+  };
+
+  inline void lts_convert(
+                const lts_bcg_t &lts_in,
+                lts_aut_t &lts_out)
+  {
+    bcg_aut_convertor c;
+    convert_core_lts(c,lts_in,lts_out);
+  }
+
+  inline void lts_convert(
+                const lts_bcg_t &lts_in,
+                lts_aut_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (extra_data_is_defined)
+    {
+      std::cerr << "While translating .bcg to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    }
+    lts_convert(lts_in,lts_out);
+  }
 
 #endif
 // ====================== bcg -> fsm =============================
 #ifdef USE_BCG
 
-// TODO
+  class bcg_fsm_convertor
+  {
+    public:
+
+      action_label_string translate_label(const action_label_string &l) const
+      {
+        return l;
+      }
+
+      state_label_fsm translate_state(const state_label_empty &l) const
+      {
+        return state_label_fsm();
+      }
+  };
+
+  inline void lts_convert(
+                const lts_bcg_t &lts_in,
+                lts_fsm_t &lts_out)
+  { 
+    //Reset lts_out
+    lts_out=lts_fsm_t();
+   
+    bcg_fsm_convertor c;
+    convert_core_lts(c,lts_in,lts_out);
+
+  }
+
+  inline void lts_convert(
+                const lts_bcg_t &lts_in,
+                lts_fsm_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (extra_data_is_defined)
+    {
+      std::cerr << "While translating .bcg to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    }
+    lts_convert(lts_in,lts_out);
+  }
+
 
 #endif
 // ====================== bcg -> bcg =============================
@@ -763,10 +1013,45 @@ namespace detail
 
 
 #endif
-// ====================== bcg -> dot =============================
+// ====================== aut -> bcg =============================
 #ifdef USE_BCG
 
-// TODO
+  class aut_bcg_convertor
+  {
+    public:
+      action_label_string translate_label(const action_label_string &l) const
+      {
+        return l;
+      }
+
+      state_label_empty translate_state(const state_label_empty &l) const
+      {
+        return state_label_empty();
+      }
+  };
+
+  inline void lts_convert(
+                const lts_aut_t &lts_in,
+                lts_bcg_t &lts_out)
+  {
+    aut_bcg_convertor c;
+    convert_core_lts(c,lts_in,lts_out);
+  }
+
+  inline void lts_convert(
+                const lts_aut_t &lts_in,
+                lts_bcg_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (extra_data_is_defined)
+    {
+      std::cerr << "While translating .aut to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    }
+    lts_convert(lts_in,lts_out);
+  }
 
 #endif
 // ====================== dot -> lts =============================
@@ -856,9 +1141,9 @@ namespace detail
         return l;
       }
 
-      state_label_aut translate_state(const state_label_dot &l) const
+      state_label_empty translate_state(const state_label_dot &l) const
       {
-        return state_label_aut();
+        return state_label_empty();
       }
   };
 
@@ -972,7 +1257,43 @@ namespace detail
 // ====================== dot -> bcg   =============================
 #ifdef USE_BCG
 
-// TODO
+  class dot_bcg_convertor
+  {
+    public:
+      action_label_string translate_label(const action_label_string &l) const
+      {
+        return l;
+      }
+
+      state_label_empty translate_state(const state_label_dot &l) const
+      {
+        return state_label_empty();
+      }
+  };
+
+  inline void lts_convert(
+                const lts_dot_t &lts_in,
+                lts_bcg_t &lts_out)
+  {
+    dot_bcg_convertor c;
+    convert_core_lts(c,lts_in,lts_out);
+  }
+
+  inline void lts_convert(
+                const lts_dot_t &lts_in,
+                lts_bcg_t &lts_out,
+                const data::data_specification &data,
+                const lps::action_label_list &action_labels,
+                const data::variable_list &process_parameters,
+                const bool extra_data_is_defined=true)
+  {
+    if (extra_data_is_defined)
+    {
+      std::cerr << "While translating .dot to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    }
+    lts_convert(lts_in,lts_out);
+  }
+
 
 #endif
 // ====================== dot -> dot   =============================

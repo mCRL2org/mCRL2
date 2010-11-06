@@ -8,37 +8,31 @@
 //
 /// \file liblts_bcg.cpp
 
+#ifdef USE_BCG
+
 #include <string>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/exception.h"
+#include "bcg_user.h"
 
+using namespace mcrl2::lts;
 using namespace mcrl2::core;
+using namespace std;
 
-#ifdef USE_BCG
 
 // BCG library initialisation
-bool initialise() {
+static bool initialise() 
+{
   BCG_INIT();
-
   return true;
 }
 
 static bool initialised = initialise();
 
-using namespace std;
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
-{
-
-// void read_from_bcg(lts &l, string const& filename)
-
-lts_bcg_t::load(string const& filename)
+static void read_from_bcg(lts_bcg_t &l, const string &filename)
 {
   string::size_type pos = filename.rfind('.');
   if ( (pos == string::npos) || (filename.substr(pos+1) != "bcg") )
@@ -73,7 +67,8 @@ lts_bcg_t::load(string const& filename)
   n = BCG_OT_NB_LABELS(bcg_graph);
   for (unsigned int i=0; i<n; i++)
   {
-    l.add_label((ATerm) ATmakeAppl0(ATmakeAFun(BCG_OT_LABEL_STRING(bcg_graph,i),0,ATtrue)),!strcmp(BCG_OT_LABEL_STRING(bcg_graph,i),"i"));
+    const std::string s=BCG_OT_LABEL_STRING(bcg_graph,i);
+    l.add_label(s,s=="i");
   }
 
   unsigned int from,label,to;
@@ -83,19 +78,16 @@ lts_bcg_t::load(string const& filename)
   }
   BCG_OT_END_ITERATE;
 
-  l.set_creator("");
-  l.set_type(lts_bcg);
-
 }
 
-void write_to_bcg(const lts &l, string const& filename)
+static void write_to_bcg(const lts_bcg_t &l, const string &filename)
 {
   BCG_IO_WRITE_BCG_SURVIVE(BCG_TRUE);
   BCG_TYPE_BOOLEAN b = BCG_IO_WRITE_BCG_BEGIN(
       const_cast< char* >(filename.c_str()),
       l.initial_state(),
-      1, // XXX add check to see if this might be 2?
-      (l.get_creator() != "")?const_cast< char* >(l.get_creator().c_str()):NULL,
+      1,     // XXX add check to see if this might be 2?
+      NULL,  // There is no creator.
       0
       );
   BCG_IO_WRITE_BCG_SURVIVE(BCG_FALSE);
@@ -112,7 +104,7 @@ void write_to_bcg(const lts &l, string const& filename)
  
   for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1))
   { transition t=r.front();
-    string label_str = mcrl2::lts::detail::pp(l.label_value_str(t.label()));
+    string label_str = l.label_value(t.label());
     if ( l.is_tau(t.label()) )
     {
       if ( warn_non_i && (label_str != "i") )
@@ -150,7 +142,35 @@ void write_to_bcg(const lts &l, string const& filename)
 
 }
 
+namespace mcrl2
+{
+namespace lts
+{
+
+void lts_bcg_t::load(const string &filename)
+{
+  if (filename=="")
+  {
+    throw mcrl2::runtime_error("Cannot read .bcg file from stdin.");
+  }
+  else
+  {
+    read_from_bcg(*this,filename);
+  }
 }
+
+void lts_bcg_t::save(string const& filename) const
+{
+  if (filename=="")
+  {
+    throw mcrl2::runtime_error("Cannot write .bcg file to stdout.");
+  }
+  else
+  {
+    write_to_bcg(*this,filename);
+  }
+}
+
 }
 }
 

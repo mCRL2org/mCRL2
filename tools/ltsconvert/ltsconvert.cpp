@@ -9,7 +9,7 @@
 /// \file ltsconvert.cpp
 
 #define NAME "ltsconvert"
-#define AUTHOR "Muck van Weerdenburg"
+#define AUTHOR "Muck van Weerdenburg, Jan Friso Groote"
 
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
