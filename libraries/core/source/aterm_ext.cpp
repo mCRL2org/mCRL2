@@ -12,8 +12,8 @@
 #include <cmath>
 #include <cctype>
 
-#include "boost/scoped_array.hpp"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/detail/memory_utility.h"
 
 namespace mcrl2 {
   namespace core {
@@ -52,27 +52,33 @@ namespace mcrl2 {
             //Term is an ATermAppl; distribute substitutions over the arguments
             AFun Head = ATgetAFun((ATermAppl) Term);
             int NrArgs = ATgetArity(Head);
-            if (NrArgs > 0) {
-              boost::scoped_array< ATerm > Args(new ATerm[NrArgs]);
-              for (int i = 0; i < NrArgs; i++) {
-                Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i),
-                  Recursive);
+            if (NrArgs > 0) 
+            {
+              SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
+              for (int i = 0; i < NrArgs; i++) 
+              {
+                Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
               }
-              ATerm a = (ATerm) ATmakeApplArray(Head, Args.get());
+              ATerm a = (ATerm) ATmakeApplArray(Head, Args);
               return a;
-            } else {
+            } 
+            else 
+            {
               return Term;
             }
           } else if (ATgetType(Term) == AT_LIST) {
             //Term is an ATermList; distribute substitutions over the elements
             ATermList Result = ATmakeList0();
-            while (!ATisEmpty((ATermList) Term)) {
+            while (!ATisEmpty((ATermList) Term)) 
+            {
               Result = ATinsert(Result,
                 gsSubstValues(Substs, ATgetFirst((ATermList) Term), Recursive));
               Term = (ATerm) ATgetNext((ATermList) Term);
             }
             return (ATerm) ATreverse(Result);
-          } else {
+          } 
+          else 
+          {
             return Term;
           }
         }
@@ -81,7 +87,8 @@ namespace mcrl2 {
       ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive)
       {
         ATerm Result = ATtableGet(Substs, Term);
-        if ((Result) != NULL) {
+        if ((Result) != NULL) 
+        {
           return Result;
         }
         if (!Recursive) {
@@ -92,15 +99,18 @@ namespace mcrl2 {
             //Term is an ATermAppl; distribute substitutions over the arguments
             AFun Head = ATgetAFun((ATermAppl) Term);
             int NrArgs = ATgetArity(Head);
-            if (NrArgs > 0) {
-              boost::scoped_array< ATerm > Args(new ATerm[NrArgs]);
-              for (int i = 0; i < NrArgs; i++) {
-                Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i),
-                  Recursive);
+            if (NrArgs > 0) 
+            {
+              SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
+              for (int i = 0; i < NrArgs; i++) 
+              {
+                Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
               }
-              ATerm a = (ATerm) ATmakeApplArray(Head, Args.get());
+              ATerm a = (ATerm) ATmakeApplArray(Head, Args);
               return a;
-            } else {
+            } 
+            else 
+            {
               return Term;
             }
           } else if (ATgetType(Term) == AT_LIST) {

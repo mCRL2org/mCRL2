@@ -276,24 +276,32 @@ namespace mcrl2 {
       gstcDataInit();
 
       ATermAppl data_spec = ATAgetArgument(proc_spec, 0);
-      if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+      if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) 
+      {
         // Check sorts for loops
         // Unwind sorts to enable equiv and subtype relations
-        if(gstcReadInConstructors()) {
+        if(gstcReadInConstructors()) 
+        {
           if(gstcReadInFuncs(ATLgetArgument(ATAgetArgument(data_spec,1),0),
-                             ATLgetArgument(ATAgetArgument(data_spec,2),0))) {
+                             ATLgetArgument(ATAgetArgument(data_spec,2),0))) 
+          {
             body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
-            if(gstcReadInActs(ATLgetArgument(ATAgetArgument(proc_spec,1),0))) {
+            if(gstcReadInActs(ATLgetArgument(ATAgetArgument(proc_spec,1),0))) 
+            {
               ATermAppl glob_var_spec = ATAgetArgument(proc_spec,2);
               ATermList glob_vars = ATLgetArgument(glob_var_spec,0);
-              if(gstcAddVars2Table(context.glob_vars, glob_vars)){
+              if(gstcAddVars2Table(context.glob_vars, glob_vars))
+              {
                 if(gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(proc_spec,3),0),
-                                          ATAgetArgument(ATAgetArgument(proc_spec,4),0))) {
+                                          ATAgetArgument(ATAgetArgument(proc_spec,4),0))) 
+                {
                   if (gsDebug) { std::cerr << "type checking read-in phase finished\n"; }
 
                   if (gsDebug) { std::cerr << "type checking transform ActProc+VarConst phase started\n"; }
-                  if(gstcTransformVarConsTypeData()){
-                    if(gstcTransformActProcVarConst()){
+                  if(gstcTransformVarConsTypeData())
+                  {
+                    if(gstcTransformActProcVarConst())
+                    {
                       if (gsDebug) { std::cerr << "type checking transform ActProc+VarConst phase finished\n"; }
 
                       data_spec=ATAgetArgument(proc_spec,0);
@@ -305,7 +313,7 @@ namespace mcrl2 {
                       Result=gstcFoldSortRefs(Result);
 
                       if (gsDebug) { std::cerr << "type checking phase finished\n"; }
-                    }}}}}}}}
+      } } } } } } } }
 
       gstcDataDestroy();
       return Result;
@@ -957,12 +965,14 @@ namespace mcrl2 {
       }
       //(c) perform substitutions until the specification becomes stable
       ATermAppl NewSpec = Spec;
-      do {
+      do 
+      {
         if (gsDebug) { std::cerr << "substituting sort references in specification\n"; }
         Spec = NewSpec;
         NewSpec = (ATermAppl) gsSubstValuesTable(Substs, (ATerm) Spec, true);
       } while (!ATisEqual(NewSpec, Spec));
       ATtableDestroy(Substs);
+
       //add the removed sort references back to Spec
       Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(ATconcat(SortIds, SortRefs)));
       if (gsDebug) { std::cerr << "specification after folding:\n" << pp(Spec) << "\n" ;}
@@ -1785,9 +1795,11 @@ namespace mcrl2 {
       return Result;
     }
 
-    static ATermList gstcWriteProcs(ATermList oldprocs){
+    static ATermList gstcWriteProcs(ATermList oldprocs)
+    {
       ATermList Result=ATmakeList0();
-      for(ATermList l=oldprocs;!ATisEmpty(l);l=ATgetNext(l)){
+      for(ATermList l=oldprocs;!ATisEmpty(l);l=ATgetNext(l))
+      {
         ATermAppl ProcVar=ATAgetArgument(ATAgetFirst(l),0);
         if(ProcVar==INIT_KEY()) continue;
         Result=ATinsert(Result,(ATerm)gsMakeProcEqn(ProcVar,
@@ -1796,7 +1808,8 @@ namespace mcrl2 {
                                                     )
                         );
       }
-      return ATreverse(Result);
+      Result=ATreverse(Result);
+      return Result;
     }
 
     static ATermList gstcWritePBES(ATermList oldPBES){
