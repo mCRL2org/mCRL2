@@ -6348,7 +6348,7 @@ class specification_basic_type:public boost::noncopyable
           }
         }
 
-        if (regular)
+        if (regular && !options.do_not_apply_constelm)
         { // We apply constant elimination on the obtained linear process.
           // In order to do so, we have to create a complete process specification first, as
           // this is what the interface of constelm requires.

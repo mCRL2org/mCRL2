@@ -51,7 +51,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
 
   private:
     t_lin_options m_linearisation_options;
-    bool noalpha;   // indicates whether alpa reduction is needed.
+    bool noalpha;   // indicates whether alpha reduction is needed.
     bool opt_check_only;
 
   protected:
@@ -101,6 +101,9 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
           "these delta's subsume all other conditional timed delta's, "
           "effectively reducing the number of delta summands drastically "
           "in the resulting linear process; speeds up linearisation ", 'D');
+      desc.add_option("no-constelm",
+          "do not try to apply constant elimination when generating a linear "
+          "process.");
       desc.add_option("check-only",
           "check syntax and static semantics; do not linearise", 'e');
     }
@@ -121,6 +124,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.nosumelm                = 0 < parser.options.count("no-sumelm");
       m_linearisation_options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
       m_linearisation_options.add_delta               = 0 < parser.options.count("delta");
+      m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm");
       m_linearisation_options.lin_method = lmRegular;
 
       if (0 < parser.options.count("lin-method")) {

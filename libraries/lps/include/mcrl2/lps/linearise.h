@@ -48,6 +48,7 @@ struct t_lin_options {
   bool nosumelm;
   bool nodeltaelimination;
   bool add_delta;
+  bool do_not_apply_constelm;
   mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
   std::string infilename;
   std::string outfilename;
@@ -64,6 +65,7 @@ struct t_lin_options {
       nosumelm(false),
       nodeltaelimination(false),
       add_delta(false),
+      do_not_apply_constelm(false),
       rewrite_strategy(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty)
   {}
 };
