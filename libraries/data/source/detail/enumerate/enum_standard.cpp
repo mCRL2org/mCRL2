@@ -8,8 +8,8 @@
 
 #include <cstdlib>
 #include <sstream>
-#include <boost/scoped_array.hpp>
 #include "aterm2.h"
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -325,7 +325,7 @@ ATerm EnumeratorSolutionsStandard::build_solution_aux_innerc(ATerm t, ATermList 
       }
     }
 
-    boost::scoped_array< ATerm > args(new ATerm[arity+extra_arity]);
+    SYSTEM_SPECIFIC_ALLOCA(args,ATerm,arity+extra_arity);
     AFun fun = ATgetAFun((ATermAppl) t);
     int k = 1;
 
@@ -346,7 +346,7 @@ ATerm EnumeratorSolutionsStandard::build_solution_aux_innerc(ATerm t, ATermList 
       args[k] = build_solution_aux_innerc(ATgetArgument((ATermAppl) t,i),substs);
     }
 
-    ATerm r = (ATerm) ATmakeApplArray(fun,args.get());
+    ATerm r = (ATerm) ATmakeApplArray(fun,args);
     return r;
   }
 }

@@ -10,7 +10,7 @@
 
 #include <cstdlib>
 #include <vector>
-#include <boost/scoped_array.hpp>
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/exception.h"
@@ -126,7 +126,8 @@ int tree_set_store::create_set(vector<unsigned int> &elems) {
 	if (elems.size() == 0) {
 		return EMPTY_SET;
 	}
-        boost::scoped_array< int > nodes(new int[elems.size()]);
+
+        SYSTEM_SPECIFIC_ALLOCA(nodes,int,elems.size());
 	unsigned int node_size = 0;
 	unsigned int i,j;
 	for (i=0; i < elems.size(); ++i) {

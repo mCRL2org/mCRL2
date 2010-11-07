@@ -10,7 +10,6 @@
 
 #include <string>
 #include <fstream>
-#include "boost/scoped_array.hpp"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/data/typecheck.h"

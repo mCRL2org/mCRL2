@@ -26,8 +26,8 @@
 #include <cassert>
 #include <stdexcept>
 #include <sstream>
-#include "boost/scoped_array.hpp"
 #include "aterm2.h"
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -1008,8 +1008,8 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, unsigned int arity, 
   ATermAppl tree;
   if ( r == NULL )
   {
-    boost::scoped_array< int > a(new int[total_rule_vars]);
-    treevars_usedcnt = a.get();
+    SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
+    treevars_usedcnt = a;
 //		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
     tree = build_tree(init_pars,0);
 //		free(treevars_usedcnt);
@@ -1571,7 +1571,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   ATermInt i;
   int j;
   FILE *f;
-  boost::scoped_array< char > t(new char[100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND)]);
+  SYSTEM_SPECIFIC_ALLOCA(t,char,100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND));
   void *h;
 
   CleanupRewriteSystem();
@@ -2202,26 +2202,26 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   fclose(f);
 
   gsVerboseMsg("compiling rewriter...\n");
-  sprintf(t.get(),INNERC_COMPILE_COMMAND,const_cast< char* >(file_base.str().c_str()));
-  gsVerboseMsg("%s\n",t.get());
-  if ( system(t.get()) != 0 )
+  sprintf(t,INNERC_COMPILE_COMMAND,const_cast< char* >(file_base.str().c_str()));
+  gsVerboseMsg("%s\n",t);
+  if ( system(t) != 0 )
   {
     // unlink(file_c); In case of compile errors the .c file is not removed.
     throw mcrl2::runtime_error("Could not compile rewriter.");
   }
 
   gsVerboseMsg("linking rewriter...\n");
-  sprintf(t.get(),INNERC_LINK_COMMAND,const_cast< char* >(file_base.str().c_str()), const_cast< char* >(file_base.str().c_str()));
-  gsVerboseMsg("%s\n",t.get());
-  if ( system(t.get()) != 0 )
+  sprintf(t,INNERC_LINK_COMMAND,const_cast< char* >(file_base.str().c_str()), const_cast< char* >(file_base.str().c_str()));
+  gsVerboseMsg("%s\n",t);
+  if ( system(t) != 0 )
   {
     unlink(const_cast< char* >(file_o.c_str()));
     // unlink(file_c); In case of link errors the .c file is not removed.
     throw mcrl2::runtime_error("Could not link rewriter.");
   }
 
-  sprintf(t.get(),"./%s.so",const_cast< char* >(file_base.str().c_str()));
-  if ( (h = so_handle = dlopen(t.get(),RTLD_NOW)) == NULL )
+  sprintf(t,"./%s.so",const_cast< char* >(file_base.str().c_str()));
+  if ( (h = so_handle = dlopen(t,RTLD_NOW)) == NULL )
   {
     unlink(const_cast< char* >(file_so.c_str()));
     unlink(const_cast< char* >(file_o.c_str()));

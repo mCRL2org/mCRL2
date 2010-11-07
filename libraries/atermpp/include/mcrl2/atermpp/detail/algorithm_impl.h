@@ -12,11 +12,10 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 #define MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 
-#include <boost/scoped_array.hpp>
-
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/core/detail/memory_utility.h"
 
 namespace atermpp {
 
@@ -67,12 +66,18 @@ namespace detail {
     if (n > 0)
     {
       bool term_changed = false;
-      boost::scoped_array< ATerm > t(new ATerm[n]);
-      for (unsigned int i = 0; i < n; ++i)
+      // Removed scoped array, because it is not
+      // very efficient, compared to alloca.
+      // Alloca assigns on the stack and therefore
+      // does not need explicit protection or initialisation. JFG.
+      
+      // boost::scoped_array< ATerm > t(new ATerm[n]);
+      SYSTEM_SPECIFIC_ALLOCA(t,ATerm,n);
+      /* for (unsigned int i = 0; i < n; ++i)
       {
         t[i] = 0;
       }
-      ATprotectArray(t.get(), n);
+      ATprotectArray(t.get(), n); */
       for (unsigned int i = 0; i < n; i++)
       {
         t[i] = f(a(i));
@@ -84,9 +89,10 @@ namespace detail {
       }
       if (term_changed)
       {
-        a = ATmakeApplArray(a.function(), t.get());
+        // a = ATmakeApplArray(a.function(), t.get());
+        a = ATmakeApplArray(a.function(), t);
       }
-      ATunprotectArray(t.get());
+      // ATunprotectArray(t.get());
     }
     return a;
   }

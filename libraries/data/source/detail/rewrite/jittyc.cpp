@@ -37,9 +37,9 @@
 #include <dlfcn.h>
 #include <cassert>
 #include <sstream>
-#include "boost/scoped_array.hpp"
 #include "aterm2.h"
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
@@ -186,9 +186,6 @@ static void finalise_common()
   }
 }
 
-
-#define DECL_NFS_A(x,y) boost::scoped_array< unsigned int > x(new unsigned int[y]); clear_nfs_array(x.get(),y)
-#define FREE_NFS_A(x)
 
 static void clear_nfs_array(nfs_array a, unsigned int arity)
 {
@@ -1292,8 +1289,8 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
   ATermAppl tree;
   if ( r == NULL )
   {
-    boost::scoped_array< int > a(new int[total_rule_vars]);
-    treevars_usedcnt = a.get();
+    SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
+    treevars_usedcnt = a;
 //		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
     tree = build_tree(init_pars,0);
 //		free(treevars_usedcnt);
@@ -1380,7 +1377,7 @@ static ATermList get_vars(ATerm a)
 static ATermList dep_vars(ATermList eqn)
 {
   unsigned int rule_arity = ATgetArity(ATgetAFun(ATAelementAt(eqn,2)))-1;
-  boost::scoped_array< bool > bs(new bool[rule_arity]);
+  SYSTEM_SPECIFIC_ALLOCA(bs,bool,rule_arity);
 
   ATerm cond = ATelementAt(eqn,1);
   ATermAppl pars = ATAelementAt(eqn,2); // arguments of lhs
@@ -1470,21 +1467,21 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
   //gsfprintf(stderr,"create_strategy: opid %i, arity %i, nfs %i\n",opid,arity,nfs[0]);
 
   // Array to keep note of the used parameters
-  boost::scoped_array< bool > used(new bool[arity]);
+  SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
   for (unsigned int i = 0; i < arity; i++)
   {
     used[i] = get_nfs_array(nfs,i);
   }
 
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
-  boost::scoped_array< int > args(new int[arity]);
+  SYSTEM_SPECIFIC_ALLOCA(args,int,arity);
   for (unsigned int i = 0; i < arity; i++)
   {
     args[i] = -1;
   }
 
   // Process all (applicable) rules
-  boost::scoped_array< bool > bs(new bool[arity]);
+  SYSTEM_SPECIFIC_ALLOCA(bs,bool,arity);
   ATermList dep_list = ATmakeList0();
   for (; !ATisEmpty(rules); rules=ATgetNext(rules))
   {
@@ -1712,10 +1709,9 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
     {
       if ( opid_is_nf((ATermInt) ATgetFirst((ATermList) t),arity) && arity != 0 )
       {
-        DECL_NFS_A(args,arity);
-        calc_nfs_list(args.get(),arity,ATgetNext((ATermList) t),startarg,nnfvars);
-        bool b = is_filled_nfs_array(args.get(),arity);
-        FREE_NFS_A(args);
+        SYSTEM_SPECIFIC_ALLOCA(args,unsigned int,arity);
+        calc_nfs_list(args,arity,ATgetNext((ATermList) t),startarg,nnfvars);
+        bool b = is_filled_nfs_array(args,arity);
         return b;
       } else {
         return false;
@@ -1800,8 +1796,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
           ss << "rewr_" << ATgetInt((ATermInt) ATgetFirst((ATermList) t)) << "_0_0()";
         }
       } else {
-        DECL_NFS_A(args_nfs,arity);
-        calc_nfs_list(args_nfs.get(),arity,ATgetNext((ATermList) t),startarg,nnfvars);
+        SYSTEM_SPECIFIC_ALLOCA(args_nfs,unsigned int,arity);
+        calc_nfs_list(args_nfs,arity,ATgetNext((ATermList) t),startarg,nnfvars);
         if ( b || !rewr )
         {
 #ifndef USE_INT2ATERM_VALUE
@@ -1810,15 +1806,15 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         } else {
           ss << "rewr_";
 #ifdef EXTEND_NFS
-          add_base_nfs(args_nfs.get(),(ATermInt) ATgetFirst((ATermList) t),arity);
-          extend_nfs(args_nfs.get(),(ATermInt) ATgetFirst((ATermList) t),arity);
+          add_base_nfs(args_nfs,(ATermInt) ATgetFirst((ATermList) t),arity);
+          extend_nfs(args_nfs,(ATermInt) ATgetFirst((ATermList) t),arity);
 #endif
         }
         if ( arity > NF_MAX_ARITY )
         {
-          clear_nfs_array(args_nfs.get(),arity);
+          clear_nfs_array(args_nfs,arity);
         }
-        if ( is_clear_nfs_array(args_nfs.get(),arity) || b || rewr || (arity > NF_MAX_ARITY) )
+        if ( is_clear_nfs_array(args_nfs,arity) || b || rewr || (arity > NF_MAX_ARITY) )
         {
 #ifdef USE_INT2ATERM_VALUE
           if ( b || !rewr )
@@ -1829,24 +1825,24 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         } else {
 #ifdef USE_INT2ATERM_VALUE
           if ( b || !rewr )
-            ss << "(ATerm) " << (void *) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+get_nfs_array_value(args_nfs.get(),arity));
+            ss << "(ATerm) " << (void *) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+get_nfs_array_value(args_nfs,arity));
           else
 #endif
-          ss << (ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs.get());
+          ss << (ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs);
         }
-        DECL_NFS_A(args_first,arity);
+        SYSTEM_SPECIFIC_ALLOCA(args_first,unsigned int,arity);
         if ( rewr && b )
         {
-          fill_nfs_array(args_nfs.get(),arity);
+          fill_nfs_array(args_nfs,arity);
         }
-        string args_second = calc_inner_terms(args_first.get(),arity,ATgetNext((ATermList) t),startarg,nnfvars,args_nfs.get());
-        assert( !rewr || b || (arity > NF_MAX_ARITY) || equal_nfs_array(args_first.get(),args_nfs.get(),arity) );
+        string args_second = calc_inner_terms(args_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,args_nfs);
+        assert( !rewr || b || (arity > NF_MAX_ARITY) || equal_nfs_array(args_first,args_nfs,arity) );
         if ( rewr && !b )
         {
           ss << "_" << arity << "_";
           if ( arity <= NF_MAX_ARITY )
           {
-            ss << get_nfs_array_value(args_first.get(),arity);
+            ss << get_nfs_array_value(args_first,arity);
           } else {
             ss << "0";
           }
@@ -1855,11 +1851,10 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
           ss << ",";
         }
         ss << args_second << ")";
-        if ( !is_filled_nfs_array(args_first.get(),arity) )
+        if ( !is_filled_nfs_array(args_first,arity) )
         {
           b = false;
         }
-        FREE_NFS_A(args_nfs);
       }
       b = b || rewr;
 
@@ -1871,8 +1866,8 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       }
       b = rewr;
       pair<bool,string> head = calc_inner_term(ATgetFirst((ATermList) t),startarg,nnfvars,false);
-      DECL_NFS_A(tail_first,arity);
-      string tail_second = calc_inner_terms(tail_first.get(),arity,ATgetNext((ATermList) t),startarg,nnfvars,NULL);
+      SYSTEM_SPECIFIC_ALLOCA(tail_first,unsigned int,arity);
+      string tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,NULL);
       ss << "isAppl(" << head.second << ")?";
       if ( rewr )
       {
@@ -1893,16 +1888,15 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       ss << calc_inner_appl_head(arity) << "(ATerm) " << head.second << ",";
       if ( c )
       {
-        clear_nfs_array(tail_first.get(),arity);
-        DECL_NFS_A(rewrall,arity); fill_nfs_array(rewrall.get(),arity);
-        tail_second = calc_inner_terms(tail_first.get(),arity,ATgetNext((ATermList) t),startarg,nnfvars,rewrall.get());
+        clear_nfs_array(tail_first,arity);
+        SYSTEM_SPECIFIC_ALLOCA(rewrall,unsigned int,arity); fill_nfs_array(rewrall,arity);
+        tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,rewrall);
       }
       ss << tail_second << ")";
       if ( rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != -1) )
       {
         ss << ")";
       }
-      FREE_NFS_A(tail_first);
     }
 
     return pair<bool,string>(b,ss.str());
@@ -2607,7 +2601,7 @@ gsfprintf(IT_DEBUG_FILE "implement_strategy %P (%i)\n",int2term[opid],opid);
 gsfprintf(IT_DEBUG_FILE "implement_strategy: %T\n",strat);
 fflush(f);
 #endif
-        boost::scoped_array< bool > used(new bool[arity]);
+  SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
   for (int i=0; i<arity; i++)
   {
     used[i] = ((nf_args & (1 << i)) != 0);
@@ -2627,14 +2621,14 @@ fflush(f);
       }
     } else {
       fprintf(f,"%s{\n",whitespace(2*d));
-      implement_tree(f,(ATermAppl) ATgetFirst(strat),arity,d+1,opid,used.get());
+      implement_tree(f,(ATermAppl) ATgetFirst(strat),arity,d+1,opid,used);
       fprintf(f,"%s}\n",whitespace(2*d));
     }
 
     strat = ATgetNext(strat);
   }
 
-  finish_function(f,arity,opid,used.get());
+  finish_function(f,arity,opid,used);
 }
 
 ATermAppl RewriterCompilingJitty::build_ar_expr(ATerm expr, ATermAppl var)
@@ -2896,7 +2890,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ATermInt i;
   int j;
   FILE *f;
-  boost::scoped_array< char > t(new char[100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND)]);
+  SYSTEM_SPECIFIC_ALLOCA(t,char,100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND));
   void *h;
 
   CleanupRewriteSystem();
@@ -3339,7 +3333,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
     for (int a=0; a<=arity; a++)
     {
-    DECL_NFS_A(nfs_a,a);
+    SYSTEM_SPECIFIC_ALLOCA(nfs_a,unsigned int,a);
     int b = (a<=NF_MAX_ARITY)?a:0;
     for (unsigned int nfs=0; (nfs >> b) == 0; nfs++)
     {
@@ -3370,22 +3364,23 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       {
         if (0 < a)
         {
-          set_nfs_array_value(nfs_a.get(),a,nfs);
+          set_nfs_array_value(nfs_a,a,nfs);
         }
-        implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a.get(),true_inner),a,1,j,nfs);
-      } else {
-        boost::scoped_array< bool > used(new bool[a]);
-  for (int k=0; k<a; k++)
-  {
-    used[k] = ((nfs & (1 << k)) != 0);
-  }
-  finish_function(f,a,j,used.get());
+        implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs);
+      } 
+      else 
+      {
+        SYSTEM_SPECIFIC_ALLOCA(used,bool,a);
+        for (int k=0; k<a; k++)
+        {
+          used[k] = ((nfs & (1 << k)) != 0);
+        }
+        finish_function(f,a,j,used);
       }
 
 
   fprintf(f,                 "}\n");
     }
-    FREE_NFS_A(nfs_a);
     }
     if ( arity > NF_MAX_ARITY )
       arity = NF_MAX_ARITY;
@@ -3627,9 +3622,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   fclose(f);
   gsVerboseMsg("compiling rewriter...\n");
-  sprintf(t.get(),JITTYC_COMPILE_COMMAND,const_cast< char* >(file_base.str().c_str()));
-  gsVerboseMsg("%s\n",t.get());
-  if ( system(t.get()) != 0 )
+  sprintf(t,JITTYC_COMPILE_COMMAND,const_cast< char* >(file_base.str().c_str()));
+  gsVerboseMsg("%s\n",t);
+  if ( system(t) != 0 )
   {
     // unlink(file_c); In case of compile errors, the .c file is not removed.
     throw mcrl2::runtime_error("Could not compile rewriter.");
@@ -3637,17 +3632,17 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   gsVerboseMsg("linking rewriter...\n");
 
-  sprintf(t.get(),JITTYC_LINK_COMMAND,const_cast< char* >(file_base.str().c_str()),const_cast< char* >(file_base.str().c_str()));
-  gsVerboseMsg("%s\n",t.get());
-  if ( system(t.get()) != 0 )
+  sprintf(t,JITTYC_LINK_COMMAND,const_cast< char* >(file_base.str().c_str()),const_cast< char* >(file_base.str().c_str()));
+  gsVerboseMsg("%s\n",t);
+  if ( system(t) != 0 )
   {
     unlink(const_cast< char* >(file_o.c_str()));
     // unlink(file_c); In case of link errors, the .c file is not removed.
     throw mcrl2::runtime_error("Could not link rewriter.");
   }
 
-  sprintf(t.get(),"./%s.so",const_cast< char* >(file_base.str().c_str()));
-  if ( (h = so_handle = dlopen(t.get(),RTLD_NOW)) == NULL )
+  sprintf(t,"./%s.so",const_cast< char* >(file_base.str().c_str()));
+  if ( (h = so_handle = dlopen(t,RTLD_NOW)) == NULL )
   {
     unlink(const_cast< char* >(file_so.c_str()));
     unlink(const_cast< char* >(file_o.c_str()));

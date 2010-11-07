@@ -13,8 +13,7 @@
 #include <assert.h>
 #include <limits.h>
 
-#include "boost/scoped_array.hpp"
-
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -58,7 +57,8 @@ ATermAppl gsSortMultAct(ATermAppl MultAct)
   assert(gsIsMultAct(MultAct));
   ATermList l = ATLgetArgument(MultAct,0);
   unsigned int len = ATgetLength(l);
-  boost::scoped_array< ATerm > acts(new ATerm[len]);
+  
+  SYSTEM_SPECIFIC_ALLOCA(acts,ATerm,len);
   for (unsigned int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
   {
     acts[i] = ATgetFirst(l);

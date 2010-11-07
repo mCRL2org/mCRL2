@@ -19,8 +19,8 @@
 #include <cassert>
 #include <stdexcept>
 #include <memory.h>
-#include "boost/scoped_array.hpp"
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
@@ -784,8 +784,8 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars, ATerm
   ATermAppl tree;
   if ( r == NULL )
   {
-    boost::scoped_array< int > a(new int[total_rule_vars]);
-    treevars_usedcnt = a.get();
+    SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
+    treevars_usedcnt = a;
 //		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
     tree = build_tree(init_pars,0);
 //		free(treevars_usedcnt);
@@ -941,13 +941,13 @@ ATfprintf(stderr,"no more args\n");
 
 ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 {
-  boost::scoped_array< ATermAppl > vars(new ATermAppl[max_vars]);
-  boost::scoped_array< ATerm > vals(new ATerm[max_vars]);
+  SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl,max_vars);
+  SYSTEM_SPECIFIC_ALLOCA(vals,ATerm,max_vars);
   int len = 0;
 
   while ( isC(tree) )
   {
-    if ( ATisEqual(build(ATgetArgument(tree,0),-1,vars.get(),vals.get(),len),trueint) )
+    if ( ATisEqual(build(ATgetArgument(tree,0),-1,vars,vals,len),trueint) )
     {
       tree = (ATermAppl) ATgetArgument(tree,1); // Was 0????  JFG This was a very odd error.
     } else {
@@ -960,7 +960,7 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
   {
     rargs = ATgetNext((ATermList) t);
   } else {
-    rargs = tree_matcher_aux((ATerm) t,&tree,vars.get(),vals.get(),&len);
+    rargs = tree_matcher_aux((ATerm) t,&tree,vars,vals,&len);
     rargs = ATgetNext(rargs);
   }
 
@@ -984,7 +984,7 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
       }
     }
 
-    ATerm r = build(rslt,rslt_len,vars.get(),vals.get(),len);
+    ATerm r = build(rslt,rslt_len,vars,vals,len);
 
     return r;
   } else {

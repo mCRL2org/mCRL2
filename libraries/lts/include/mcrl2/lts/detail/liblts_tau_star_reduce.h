@@ -12,7 +12,7 @@
 #define _LIBLTS_TAUSTARREDUCE_H
 
 #include <cstdlib> // free
-#include "boost/scoped_array.hpp"
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/lts.h"
@@ -43,7 +43,8 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   std::vector < transition > local_transitions(r.begin(),r.end());
 
   unsigned int *trans_lut = l.get_transition_indices();
-  boost::scoped_array< unsigned int > new_trans_lut(new unsigned int[l.num_states() + 1]);
+  SYSTEM_SPECIFIC_ALLOCA(new_trans_lut,unsigned int,l.num_states() + 1);
+  
 
   new_trans_lut[0] = l.num_transitions();
   for (unsigned int state = 0; state < l.num_states(); state++)
@@ -115,7 +116,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
 
   using namespace mcrl2::lts::detail;
 
-  boost::scoped_array< t_reach > reachable(new t_reach[l.num_states()]);
+  SYSTEM_SPECIFIC_ALLOCA(reachable,t_reach,l.num_states());
   for (unsigned int i=0; i<l.num_states(); i++)
   {
     reachable[i] = unknown;
@@ -162,7 +163,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
 
   free(trans_lut);
 
-  boost::scoped_array< unsigned int > state_map(new unsigned int[l.num_states()]);
+  SYSTEM_SPECIFIC_ALLOCA(state_map,unsigned int,l.num_states());
   unsigned int new_nstates = 0;
   for (unsigned int i=0; i < l.num_states(); i++)
   {
@@ -177,7 +178,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
     }
   }
 
-  boost::scoped_array< unsigned int > label_map(new unsigned int[l.num_action_labels()]);
+  SYSTEM_SPECIFIC_ALLOCA(label_map,unsigned int,l.num_action_labels());
   unsigned int new_nlabels = 0;
   for (unsigned int i=0; i < l.num_action_labels(); i++)
   {

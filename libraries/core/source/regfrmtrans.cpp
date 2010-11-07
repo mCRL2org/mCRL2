@@ -13,9 +13,7 @@
 #include <cassert>
 #include <climits>
 #include <sstream>
-
-#include "boost/scoped_array.hpp"
-
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -161,16 +159,22 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
     //implement expressions in the arguments of part
     AFun head = ATgetAFun(part);
     int nr_args = ATgetArity(head);
-    if (nr_args > 0) {
-      boost::scoped_array< ATerm > args(new ATerm[nr_args]);
-      for (int i = 0; i < nr_args; i++) {
+    if (nr_args > 0) 
+    {
+      SYSTEM_SPECIFIC_ALLOCA(args,ATerm,nr_args);
+      for (int i = 0; i < nr_args; i++) 
+      {
         ATerm arg = ATgetArgument(part, i);
         if (ATgetType(arg) == AT_APPL)
+        { 
           args[i] = (ATerm) translate_reg_frms_appl((ATermAppl) arg);
+        }
         else //ATgetType(arg) == AT_LIST
-          args[i] = (ATerm) translate_reg_frms_list((ATermList) arg);
+        { 
+           args[i] = (ATerm) translate_reg_frms_list((ATermList) arg);
+        }
       }
-      part = ATmakeApplArray(head, args.get());
+      part = ATmakeApplArray(head, args);
     }
   }
   return part;
