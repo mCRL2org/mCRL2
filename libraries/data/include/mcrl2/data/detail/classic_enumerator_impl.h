@@ -150,6 +150,7 @@ namespace mcrl2 {
                 m_evaluator(context->m_evaluator), 
                 m_condition(c), m_substitution(s) 
           { 
+            m_condition.protect();
           }
 
           /// \param[in] v iterator range of the enumeration variables
@@ -172,6 +173,12 @@ namespace mcrl2 {
 
         public:
 
+          // Destructor. Unprotect the condition.
+          ~classic_enumerator_impl()
+          {
+            m_condition.unprotect();
+          }
+
           // Copy constructor; note that copies share share state due to limitations in the underlying implementation
           classic_enumerator_impl(classic_enumerator_impl const& other) :
                                                  m_shared_context(other.m_shared_context),
@@ -180,6 +187,7 @@ namespace mcrl2 {
                                                  m_condition(other.m_condition),
                                                  m_substitution(other.m_substitution) 
           { 
+            m_condition.protect();
           }
 
           bool increment() 
