@@ -14,6 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 set(PREFIX "example_atermpp")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
 
 ##---------------------------------------------------
