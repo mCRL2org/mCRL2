@@ -143,67 +143,79 @@ std::string LTSView::getVersionString()
 
 void LTSView::openFile(string fileName)
 {
-  glCanvas->disableDisplay();
+  try{
+    glCanvas->disableDisplay();
 
-  mainFrame->createProgressDialog("Opening file","Loading file");
-  mainFrame->updateProgressDialog(0,"Loading file");
-  LTS* newlts = new LTS(this);
-  if (!newlts->readFromFile(fileName))
-  {
-    delete newlts;
-    mainFrame->updateProgressDialog(100,"Error loading file");
-    mainFrame->showMessage(
-        "Error loading file",
-        "Could not load file " + fileName);
-    return;
+    mainFrame->createProgressDialog("Opening file","Loading file");
+    mainFrame->updateProgressDialog(0,"Loading file");
+    LTS* newlts = new LTS(this);
+    if (!newlts->readFromFile(fileName))
+    {
+      delete newlts;
+      mainFrame->updateProgressDialog(100,"Error loading file");
+      mainFrame->showMessage(
+          "Error loading file",
+          "Could not load file " + fileName);
+      return;
+    }
+    delete lts;
+    lts = newlts;
+
+    mainFrame->updateProgressDialog(17,"Ranking states");
+    lts->rankStates(rankStyle);
+
+    mainFrame->updateProgressDialog(33,"Clustering states");
+    lts->clusterStates(rankStyle);
+
+    mainFrame->updateProgressDialog(50,"Setting cluster info");
+    lts->computeClusterInfo();
+
+    mainFrame->updateProgressDialog(67,"Positioning clusters");
+    lts->positionClusters(fsmStyle);
+
+    markManager->setLTS(lts,true);
+    visualizer->setLTS(lts,true);
+
+    mainFrame->updateProgressDialog(83,"Positioning states");
+    lts->positionStates();
+
+    mainFrame->updateProgressDialog(100,"Done");
+    visualizer->notifyMarkStyleChanged();
+
+    glCanvas->enableDisplay();
+    glCanvas->resetView();
+
+    mainFrame->loadTitle();
+    mainFrame->setNumberInfo(lts->getNumStates(),
+        lts->getNumTransitions(),lts->getNumClusters(),
+        lts->getNumRanks());
+    mainFrame->resetParameters();
+    for (unsigned int i = 0; i < lts->getNumParameters(); ++i) {
+      mainFrame->addParameter(i,lts->getParameterName(i));
+    }
+    mainFrame->resetMarkRules();
+
+    vector< string > ls;
+    lts->getActionLabels(ls);
+
+    mainFrame->setSim(lts->getSimulation());
+    mainFrame->setActionLabels(ls);
+
+    glCanvas->setSim(lts->getSimulation());
+
+    mainFrame->setMarkedStatesInfo(0);
+    mainFrame->setMarkedTransitionsInfo(0);
+  } catch ( mcrl2::runtime_error e ) {
+
+    ostringstream s; //(captureOutput);
+
+    wxString output;//(s.str(), wxConvUTF8);
+    wxMessageDialog *dial = new wxMessageDialog(NULL,
+        output + wxT("\n") +
+        wxString(e.what(), wxConvUTF8), wxT("Error"),  wxOK | wxICON_ERROR);
+    dial->ShowModal();
+    mainFrame->updateProgressDialog(100,"Done");
   }
-  delete lts;
-  lts = newlts;
-
-  mainFrame->updateProgressDialog(17,"Ranking states");
-  lts->rankStates(rankStyle);
-
-  mainFrame->updateProgressDialog(33,"Clustering states");
-  lts->clusterStates(rankStyle);
-
-  mainFrame->updateProgressDialog(50,"Setting cluster info");
-  lts->computeClusterInfo();
-
-  mainFrame->updateProgressDialog(67,"Positioning clusters");
-  lts->positionClusters(fsmStyle);
-
-  markManager->setLTS(lts,true);
-  visualizer->setLTS(lts,true);
-
-  mainFrame->updateProgressDialog(83,"Positioning states");
-  lts->positionStates();
-
-  mainFrame->updateProgressDialog(100,"Done");
-  visualizer->notifyMarkStyleChanged();
-
-  glCanvas->enableDisplay();
-  glCanvas->resetView();
-
-  mainFrame->loadTitle();
-  mainFrame->setNumberInfo(lts->getNumStates(),
-      lts->getNumTransitions(),lts->getNumClusters(),
-      lts->getNumRanks());
-  mainFrame->resetParameters();
-  for (unsigned int i = 0; i < lts->getNumParameters(); ++i) {
-    mainFrame->addParameter(i,lts->getParameterName(i));
-  }
-  mainFrame->resetMarkRules();
-
-  vector< string > ls;
-  lts->getActionLabels(ls);
-
-  mainFrame->setSim(lts->getSimulation());
-  mainFrame->setActionLabels(ls);
-
-  glCanvas->setSim(lts->getSimulation());
-
-  mainFrame->setMarkedStatesInfo(0);
-  mainFrame->setMarkedTransitionsInfo(0);
 }
 
 void LTSView::setRankStyle(RankStyle rs)
