@@ -1824,7 +1824,7 @@ namespace bes
           internal_opt_store_as_tree(opt_store_as_tree),
 #else
           opt_precompile_pbes(false),
-          internal_opt_store_as_tree(false),
+          internal_opt_store_as_tree(false && opt_store_as_tree), // This avoids an unused variable warning....
 #endif
           max_rank(0)
     { using namespace mcrl2::data;

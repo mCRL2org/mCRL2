@@ -41,7 +41,7 @@ namespace detail
       action_label_string(const std::string &s):std::string(s)
       {}
 
-      void hide_actions(const std::vector<std::string> &tau_actions)
+      void hide_actions(const std::vector<std::string> &)
       {
         throw mcrl2::runtime_error("Cannot hide action labels, as actions are strings without structure");
       }

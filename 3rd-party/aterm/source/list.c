@@ -14,8 +14,8 @@
 
 #define MAGIC_K	1999
 
-//Declare a local array NAME of type TYPE and SIZE elements (where SIZE
-//is not a constant value)
+/* Declare a local array NAME of type TYPE and SIZE elements (where SIZE
+   is not a constant value) */
 #ifdef _MSC_VER
 #include "malloc.h"
 #define SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))

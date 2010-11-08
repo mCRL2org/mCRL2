@@ -226,7 +226,7 @@ namespace lts
       }
 
 
-      bool hide_actions(const std::vector<std::string> &tau_actions)
+      bool hide_actions(const std::vector<std::string> &)
       { 
         using namespace std;
         std::cerr << "Hide actions in .svc file is not yet re-implemented \n";

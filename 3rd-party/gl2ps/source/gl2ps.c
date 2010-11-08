@@ -3305,7 +3305,7 @@ static void gl2psPrintTeXFooter(void)
 
 static void gl2psPrintTeXBeginViewport(GLint viewport[4])
 {
-  // Trick to prevent compiler warnings.
+  /* Trick to prevent compiler warnings.  */
   (void)(viewport[0]);
 
   glRenderMode(GL_FEEDBACK);

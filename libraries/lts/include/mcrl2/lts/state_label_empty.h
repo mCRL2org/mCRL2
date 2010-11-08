@@ -29,7 +29,7 @@ namespace detail
   class state_label_empty
   {
     public:
-      bool operator ==(const state_label_empty &other) const
+      bool operator ==(const state_label_empty &) const
       {
         return true;
       }

@@ -134,7 +134,7 @@ ATerm *stack_top()
 
 /*{{{  static void mark_memory(ATerm *start, ATerm *stop) */
 
-static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED BY JFG
+static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) /* CHANGED BY JFG */
 {
   ATerm *cur;
   // fprintf(stderr,"---> mark_memory phase [%x,%x]\n",start,stop);

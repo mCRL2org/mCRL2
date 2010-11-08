@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-/** \file
+/** \file mcrl2/lts/detail/lts_convert.h
  *
  * \brief This file contains lts_convert routines that translate different lts formats into each other.
  * \details For each pair of lts formats there is a translation of one format into the other,
@@ -50,7 +50,7 @@ namespace detail
               translation is not implemented.
   */
   template < class LTS_IN_TYPE, class LTS_OUT_TYPE >
-  inline void lts_convert(const LTS_IN_TYPE &lts_in, LTS_OUT_TYPE & lts_out)
+  inline void lts_convert(const LTS_IN_TYPE &, LTS_OUT_TYPE &)
   {
     throw mcrl2::runtime_error("Conversion between lts types is not defined (without extra information)");
   }
@@ -67,9 +67,9 @@ namespace detail
   inline void lts_convert(
                  const LTS_IN_TYPE &lts_in, 
                  LTS_OUT_TYPE & lts_out,
-                 const data::data_specification &data,
-                 const lps::action_label_list &action_labels,
-                 const data::variable_list &process_parameters,
+                 const data::data_specification &,
+                 const lps::action_label_list &,
+                 const data::variable_list &,
                  const bool extra_data_is_defined=true)
   {
     if (!extra_data_is_defined)
@@ -103,9 +103,9 @@ namespace detail
   inline void lts_convert(
                 const lts_lts_t &lts_in,
                 lts_lts_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -183,9 +183,9 @@ namespace detail
   inline void lts_convert(
                 const lts_lts_t &lts_in,
                 lts_fsm_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -205,7 +205,7 @@ namespace detail
         return pp(l);
       }
 
-      state_label_empty translate_state(const state_label_lts &l) const
+      state_label_empty translate_state(const state_label_lts &) const
       { 
         return state_label_empty();
       }
@@ -222,9 +222,9 @@ namespace detail
   inline void lts_convert(
                 const lts_lts_t &lts_in,
                 lts_aut_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -271,9 +271,9 @@ namespace detail
   inline void lts_convert(
                 const lts_lts_t &lts_in,
                 lts_dot_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -365,7 +365,7 @@ namespace detail
         return al;
       }
 
-      state_label_lts translate_state(const state_label_empty &l) const
+      state_label_lts translate_state(const state_label_empty &) const
       {
         // There is no state label. Use the default.
         return state_label_lts();
@@ -373,8 +373,8 @@ namespace detail
   };
 
   inline void lts_convert(
-                const lts_aut_t &lts_in,
-                lts_lts_t &lts_out)
+                const lts_aut_t &,
+                lts_lts_t &)
   {
     throw mcrl2::runtime_error("Cannot translate .aut into .lts format without additional information (data, action declarations and process parameters)");
   }
@@ -414,9 +414,9 @@ namespace detail
   inline void lts_convert(
                 const lts_aut_t &lts_in,
                 lts_aut_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -437,7 +437,7 @@ namespace detail
         return l;
       }
 
-      state_label_fsm translate_state(const state_label_empty &l) const
+      state_label_fsm translate_state(const state_label_empty &) const
       {
         return state_label_fsm();
       }
@@ -458,9 +458,9 @@ namespace detail
   inline void lts_convert(
                 const lts_aut_t &lts_in,
                 lts_fsm_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -528,7 +528,7 @@ namespace detail
       {        return l;
       }
 
-      state_label_dot translate_state(const state_label_empty &l) const
+      state_label_dot translate_state(const state_label_empty &) const
       {
         return state_label_dot();
       }
@@ -549,9 +549,9 @@ namespace detail
   inline void lts_convert(
                 const lts_aut_t &lts_in,
                 lts_dot_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -625,8 +625,8 @@ namespace detail
   };
 
   inline void lts_convert(
-                const lts_fsm_t &lts_in,
-                lts_lts_t &lts_out)
+                const lts_fsm_t &,
+                lts_lts_t &)
   {
     throw mcrl2::runtime_error("Cannot translate .fsm into .lts format without additional information (data, action declarations and process parameters)");
   }
@@ -663,7 +663,7 @@ namespace detail
         return l;
       }
 
-      state_label_empty translate_state(const state_label_fsm &l) const
+      state_label_empty translate_state(const state_label_fsm &) const
       {
         return state_label_empty();
       }
@@ -680,9 +680,9 @@ namespace detail
   inline void lts_convert(
                 const lts_fsm_t &lts_in,
                 lts_aut_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -705,9 +705,9 @@ namespace detail
   inline void lts_convert(
                 const lts_fsm_t &lts_in,
                 lts_fsm_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -807,9 +807,9 @@ namespace detail
   inline void lts_convert(
                 const lts_fsm_t &lts_in,
                 lts_dot_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -1094,15 +1094,15 @@ namespace detail
       }
 
 
-      state_label_lts translate_state(const state_label_dot &l)
+      state_label_lts translate_state(const state_label_dot &)
       {
         return state_label_lts();
       }
   };
 
   inline void lts_convert(
-                const lts_dot_t &lts_in,
-                lts_lts_t &lts_out)
+                const lts_dot_t &,
+                lts_lts_t &)
   {
     throw mcrl2::runtime_error("Cannot translate .dot into .lts format without additional information (data, action declarations and process parameters)");
   }
@@ -1141,7 +1141,7 @@ namespace detail
         return l;
       }
 
-      state_label_empty translate_state(const state_label_dot &l) const
+      state_label_empty translate_state(const state_label_dot &) const
       {
         return state_label_empty();
       }
@@ -1158,9 +1158,9 @@ namespace detail
   inline void lts_convert(
                 const lts_dot_t &lts_in,
                 lts_aut_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -1243,9 +1243,9 @@ namespace detail
   inline void lts_convert(
                 const lts_dot_t &lts_in,
                 lts_fsm_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)
@@ -1309,9 +1309,9 @@ namespace detail
   inline void lts_convert(
                 const lts_dot_t &lts_in,
                 lts_dot_t &lts_out,
-                const data::data_specification &data,
-                const lps::action_label_list &action_labels,
-                const data::variable_list &process_parameters,
+                const data::data_specification &,
+                const lps::action_label_list &,
+                const data::variable_list &,
                 const bool extra_data_is_defined=true)
   {
     if (extra_data_is_defined)

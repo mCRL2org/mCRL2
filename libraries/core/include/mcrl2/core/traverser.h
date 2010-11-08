@@ -50,7 +50,7 @@ namespace core {
       }
 
       // TODO: This dependency on identifier_string should be moved elsewhere...
-      void operator()(const core::identifier_string& s)
+      void operator()(const core::identifier_string &)
       { }
   };
 

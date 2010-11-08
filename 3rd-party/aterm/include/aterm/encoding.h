@@ -11,11 +11,11 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-// The original ATerm library made the (incorrect) assumption that sizeof(long)
-// is always 64 on 64-bit machines. A better check for 64-bit registers is the
-// use of C99 integral types.
+/* The original ATerm library made the (incorrect) assumption that sizeof(long)
+   is always 64 on 64-bit machines. A better check for 64-bit registers is the
+   use of C99 integral types. */
 #ifndef SIZEOF_LONG
-// #define SIZEOF_LONG (sizeof(long))
+/*  #define SIZEOF_LONG (sizeof(long))  */
 #ifdef AT_64BIT
 #  define SIZEOF_LONG 8
 #else
@@ -40,8 +40,8 @@ extern "C"
   
 */
 
-// Although atypes.h defines MachineWord, it wasn't used here:
-// typedef unsigned long header_type;
+/* Although atypes.h defines MachineWord, it wasn't used here:
+   typedef unsigned long header_type; */
 typedef MachineWord header_type;
 
 #define HEADER_BITS      (SIZEOF_LONG*8)

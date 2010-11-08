@@ -19,7 +19,7 @@ void free_unused_blocks();
 /* Basic memory management functions mimicing the functionality of malloc, calloc, realloc and free
  */
 
-//static int total_count=0;
+/* static int total_count=0; */
 
 void *AT_malloc(size_t size)
 { //static int count=0;

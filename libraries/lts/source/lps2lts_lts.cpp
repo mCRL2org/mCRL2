@@ -120,7 +120,6 @@ namespace mcrl2
               assert(u==t);
               static_cast <void>(u); // Avoid a warning when compiling in non debug mode.
             }
-            assert(t>=0);
             // generic_lts.set_initial_state(ATgetInt((ATermInt) t));
             generic_lts.set_initial_state(t);
           }

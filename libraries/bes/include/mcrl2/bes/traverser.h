@@ -30,10 +30,10 @@ namespace bes {
       using super::leave;
       using super::operator();
 
-      void operator()(const core::identifier_string& s)
+      void operator()(const core::identifier_string& )
       { }
 
-      void operator()(const fixpoint_symbol& s)
+      void operator()(const fixpoint_symbol& )
       { }
 
 // Include file with traverse member functions. This is to avoid duplication.

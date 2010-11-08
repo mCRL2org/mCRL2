@@ -191,7 +191,7 @@ static void insertKeyValue(ATermIndexedSet s,
   keytable = s->keys[x];
   if (keytable == NULL) { 
     /* create a new key table */
-    // keytable = AT_alloc_protected_minmax(y+1, ELEMENTS_PER_TABLE);  JFG
+    /* keytable = AT_alloc_protected_minmax(y+1, ELEMENTS_PER_TABLE);  JFG */
     keytable = AT_alloc_protected_minmax(ELEMENTS_PER_TABLE, ELEMENTS_PER_TABLE);
     s->keys[x] = keytable;
     if (keytable == NULL) { 
