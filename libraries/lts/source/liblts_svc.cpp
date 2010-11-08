@@ -248,10 +248,6 @@ static void write_to_svc(const lts_svc_t& l, string const& filename, lts_type ty
 
   SVCclose(&f);
 
-
-  ATermAppl  data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(l.data());
-  ATermList params = l.process_parameters(); 
-  ATermList act_spec = l.action_labels(); 
 }
 } // namespace detail
 

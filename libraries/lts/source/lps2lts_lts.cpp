@@ -117,8 +117,8 @@ namespace mcrl2
             if ( is_new && lts_opts.outinfo)
             {
               const size_t u = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(state)));
-
               assert(u==t);
+              static_cast <void>(u); // Avoid a warning when compiling in non debug mode.
             }
             assert(t>=0);
             // generic_lts.set_initial_state(ATgetInt((ATermInt) t));
@@ -170,18 +170,21 @@ namespace mcrl2
             {
               const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(from)));
               assert(t==from_state);
+              static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
             }
             const size_t to_state = ATindexedSetPut(aterm2state,to,&is_new);
             if ( is_new && lts_opts.outinfo )
             {
               const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(to)));
               assert(t==to_state);
+              static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
             }
             const size_t label = ATindexedSetPut(aterm2label,(ATerm) action,&is_new);
             if ( is_new )
             {
               const size_t t = generic_lts.add_label((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue);
               assert(t==label);
+              static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
             }
             generic_lts.add_transition(transition(from_state,label,to_state));
           }
