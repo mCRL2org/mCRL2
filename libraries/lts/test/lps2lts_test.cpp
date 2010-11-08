@@ -196,12 +196,16 @@ void check_lps2lts_specification(std::string const& specification,
         std::cerr << "AUT FORMAT\n";
         lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
+        core::garbage_collect();
+
         BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
         BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);
 
         std::cerr << "LTS FORMAT\n";
         lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
@@ -210,12 +214,16 @@ void check_lps2lts_specification(std::string const& specification,
         std::cerr << "FSM FORMAT\n";
         lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
+        core::garbage_collect();
+
         BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
         BOOST_CHECK_EQUAL(result3.num_action_labels(), expected_labels);
 
         std::cerr << "DOT FORMAT\n";
         lts::lts_dot_t result4 = translate_lps_to_lts<lts::lts_dot_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        core::garbage_collect();
 
         BOOST_CHECK_EQUAL(result4.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result4.num_transitions(), expected_transitions);
@@ -230,6 +238,8 @@ void check_lps2lts_specification(std::string const& specification,
         */
 #ifdef USE_BCG
         lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        core::garbage_collect();
 
         std::cerr << "BCG FORMAT\n";
         BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
