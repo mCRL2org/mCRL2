@@ -241,6 +241,7 @@ namespace detail {
       /// \brief Enter a boolean equation system.
       void enter(const boolean_equation_system<>& eqn)
       {
+        assert(!eqn.equations().empty());
         for (atermpp::vector<boolean_equation>::const_iterator i = eqn.equations().begin(); i != eqn.equations().end(); ++i)
         {
           m_generator.add_to_context(std::string(i->variable().name()));

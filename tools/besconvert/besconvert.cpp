@@ -423,11 +423,15 @@ namespace mcrl2 {
         }
 
       public:
-        bes_reduction_algorithm(boolean_equation_system<>& v_bes, const equivalence_t equivalence=eq_stut)
+        bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut)
           : m_bes(v_bes),
             m_equivalence(equivalence)
         {
           initialise_allowed_eqs();
+        }
+
+        void run()
+        {
           if(core::gsDebug)
           {
             std::cerr << "Converting BES to standard form" << std::endl;
@@ -437,10 +441,7 @@ namespace mcrl2 {
           {
             std::cerr << "BES Reduction algorithm initialised" << std::endl;
           }
-        }
 
-        void run()
-        {
           bes_to_lts();
           reduce_lts();
           lts_to_bes();
