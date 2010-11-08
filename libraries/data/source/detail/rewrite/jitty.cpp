@@ -51,54 +51,6 @@ static unsigned int is_initialised = 0;
 
 #define is_nil(x) (ATisList(x)?false:(ATgetAFun((ATermAppl) x) == nilAFun))
 
-#if defined(BOOST_WINDOWS) || defined(BOOST_INTEL_WIN) || (defined(BOOST_GCC) && BOOST_WINDOWS)
-#include "malloc.h"
-#define SYSTEM_SPECIFIC_ALLOCA(T, n) static_cast< T* >(_alloca(n * sizeof(T))), n
-#else
-#define SYSTEM_SPECIFIC_ALLOCA(T, n) static_cast< T* >(alloca(n * sizeof(T))), n
-#endif
-
-
-// Special purpose minimal dynarray implementation (such as in the proposal for TR2)
-// \deprecated
-// This is only here for historic reasons; this is C99 code that is put in a
-// C++ class and compiled as C++ code. Since C++ does not now VLAs the only
-// option to save performance of the rewriter is to use stack allocation.
-// Proper encapsulating stack allocation is not possible to the best of my
-// knowledge. For the new C++ standard a proposal for dynarray was made. The
-// implementation below is just a poor compromise that only vaguely resembles
-// the dynarray interface, but it represents the same concept.
-template < typename T >
-class dynarray {
-
-  private:
-
-    T* m_elements;
-
-  public:
-
-    typedef size_t size_type;
-
-  public:
-
-    dynarray(T* p, size_t) : m_elements(p)
-    { }
-
-    dynarray(T* p, size_t n, T v) : m_elements(p)
-    {
-      std::fill(m_elements, m_elements + n, v);
-    }
-
-    T& operator[](size_type n)
-    {
-      return m_elements[n];
-    }
-
-    T* data()
-    {
-      return m_elements;
-    }
-};
 
 static void initialise_common()
 {
@@ -299,14 +251,23 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
       max_arity = ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1;
     }
   }
-  dynarray< bool > used(SYSTEM_SPECIFIC_ALLOCA(bool, max_arity), false);
+  SYSTEM_SPECIFIC_ALLOCA(used,bool, max_arity);
+  for(unsigned int i=0; i<max_arity; ++i)
+  {
+    used[i]=false;
+  }
 
   arity = 0;
   while ( !ATisEmpty(rules) )
   {
     ATermList l = ATmakeList0();
     ATermList m = ATmakeList0();
-          dynarray< int > args(SYSTEM_SPECIFIC_ALLOCA(int, arity), -1);
+    
+    SYSTEM_SPECIFIC_ALLOCA(args,int, arity);
+    for(unsigned int i=0; i<max_arity; ++i)
+    {
+      args[i]=-1;
+    }
 //printf("arity = %i\n",arity);
 
     for (; !ATisEmpty(rules); rules=ATgetNext(rules))
@@ -323,7 +284,12 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 //gsfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); gsfprintf(stderr,"\n");
 //gsprintf("pars: %T\n",pars);
 
-                          dynarray< bool > bs(SYSTEM_SPECIFIC_ALLOCA(bool, arity), false);
+        
+        SYSTEM_SPECIFIC_ALLOCA(bs,bool, arity);
+        for (unsigned int i = 0; i < arity; i++)
+        {
+          bs[i]=false;
+        }
 
         for (unsigned int i = 0; i < arity; i++)
         {
@@ -344,7 +310,9 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
             }
             }
             vars = ATappend(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
-          } else {
+          } 
+          else 
+          {
             int j = -1;
             bool b = false;
             for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
@@ -622,13 +590,16 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
     {
       new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
     }
-    dynarray< ATerm > args(SYSTEM_SPECIFIC_ALLOCA(ATerm, new_arity));
+    
+    SYSTEM_SPECIFIC_ALLOCA(args,ATerm, new_arity);
     unsigned int i;
     if ( ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0) )
     {
       args[0] = arg0;
       i = 1;
-    } else {
+    } 
+    else 
+    {
       i = 0;
       unsigned int arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
       while ( i < arg0_arity )
@@ -646,9 +617,9 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 
     if ( arity == new_arity )
     {
-      return (ATerm) ATmakeApplArray(ATgetAFun((ATermAppl) t),args.data());
+      return (ATerm) ATmakeApplArray(ATgetAFun((ATermAppl) t),args);
     } else {
-      return (ATerm) ATmakeApplArray(getAppl(new_arity),args.data());
+      return (ATerm) ATmakeApplArray(getAppl(new_arity),args);
     }
   }
 }
@@ -771,8 +742,8 @@ gsMessage("      return1  %P\n",fromInner((ATermAppl) lookupSubstitution(Term)))
       }
     }
 
-    dynarray< ATerm > rewritten(SYSTEM_SPECIFIC_ALLOCA(ATerm, arity));
-    dynarray< ATermAppl > args(SYSTEM_SPECIFIC_ALLOCA(ATermAppl, arity));
+    SYSTEM_SPECIFIC_ALLOCA(rewritten,ATerm, arity);
+    SYSTEM_SPECIFIC_ALLOCA(args,ATermAppl, arity);
 
     if ( head_arity > 0 )
     {
@@ -808,7 +779,9 @@ gsMessage("        strat action: %T\n",ATgetFirst(strat));
           } else {
             break;
           }
-        } else {
+        } 
+        else 
+        {
           ATermList rule = ATLgetFirst(strat);
           ATermAppl lhs = ATAelementAt(rule,2);
           unsigned int rule_arity = ATgetArity(ATgetAFun(lhs));
@@ -819,14 +792,15 @@ gsMessage("        strat action: %T\n",ATgetFirst(strat));
           }
 
           unsigned int max_len = ATgetLength(ATLgetFirst(rule));
-                            dynarray< ATermAppl > vars(SYSTEM_SPECIFIC_ALLOCA(ATermAppl, max_len));
-                            dynarray< ATerm > vals(SYSTEM_SPECIFIC_ALLOCA(ATerm, max_len));
+          
+          SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl, max_len);
+          SYSTEM_SPECIFIC_ALLOCA(vals,ATerm, max_len);
           unsigned int len = 0;
           bool matches = true;
 
           for (unsigned int i=1; i<rule_arity; i++)
           {
-            if ( !match_jitty((rewritten[i]==NULL)?((ATerm) args[i]):rewritten[i],ATgetArgument(lhs,i),vars.data(),vals.data(),&len) )
+            if ( !match_jitty((rewritten[i]==NULL)?((ATerm) args[i]):rewritten[i],ATgetArgument(lhs,i),vars,vals,&len) )
             {
               matches = false;
               break;
@@ -836,16 +810,16 @@ gsMessage("        strat action: %T\n",ATgetFirst(strat));
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
 if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
 {
-  gsMessage("        %T --> %T (%T)\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true);
+  gsMessage("        %T --> %T (%T)\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true);
 }
 #endif
-          if ( matches && /*(gsIsNil(ATAelementAt(rule,1)) || */ (ATisEqual(ATAelementAt(rule,1),jitty_true) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true))) // JK 15/10/2009 Condition is always a data expression
+          if ( matches && /*(gsIsNil(ATAelementAt(rule,1)) || */ (ATisEqual(ATAelementAt(rule,1),jitty_true) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true))) // JK 15/10/2009 Condition is always a data expression
           {
             ATermAppl rhs = ATAelementAt(rule,3);
 
             if ( arity == rule_arity )
             {
-              return rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,(ATerm) rhs));
+              return rewrite_aux((ATermAppl) subst_values(vars,vals,len,(ATerm) rhs));
             }
 
             unsigned int rhs_arity;
@@ -854,7 +828,7 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
 
             if ( gsIsDataVarId(rhs) )
             {
-              arg0 = subst_values(vars.data(),vals.data(),len,(ATerm) rhs);
+              arg0 = subst_values(vars,vals,len,(ATerm) rhs);
               if ( gsIsDataVarId((ATermAppl) arg0) )
               {
                 rhs_arity = 0;
@@ -866,13 +840,14 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
             } else {
               rhs_arity = ATgetArity(ATgetAFun(rhs));
               new_arity = rhs_arity+arity-rule_arity;
-              arg0 = subst_values(vars.data(),vals.data(),len,ATgetArgument(rhs,0));
+              arg0 = subst_values(vars,vals,len,ATgetArgument(rhs,0));
               if ( !(ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0)))
               {
                 new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
               }
             }
-                                    dynarray< ATerm > newargs(SYSTEM_SPECIFIC_ALLOCA(ATerm, new_arity));
+            
+            SYSTEM_SPECIFIC_ALLOCA(newargs,ATerm, new_arity);
             unsigned int i;
             if ( gsIsDataVarId(rhs) )
             {
@@ -907,7 +882,7 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
 gsMessage("          pre %T\n",ATgetArgument(rhs,i));
 #endif
-                newargs[i] = subst_values(vars.data(),vals.data(),len,ATgetArgument(rhs,j));
+                newargs[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
                 i++;
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
 gsMessage("          post %T\n",args[i]);
@@ -921,7 +896,7 @@ gsMessage("          post %T\n",args[i]);
               i++;
             }
 
-            ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs.data());
+            ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs);
 
             ATermAppl aa = rewrite_aux(a);
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
@@ -947,7 +922,7 @@ gsMessage("      done with strat\n");
       }
     }
 
-    ATermAppl a = ATmakeApplArray(getAppl(arity),rewritten.data());
+    ATermAppl a = ATmakeApplArray(getAppl(arity),rewritten);
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
 gsMessage("      return %T\n",a);
