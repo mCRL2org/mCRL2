@@ -42,7 +42,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(myID_TOGGLE_VECTOR, MainFrame::onToggleVector)
   EVT_MENU(myID_TOGGLE_3D, MainFrame::onToggle3D)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
-  EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
+  EVT_MENU(wxID_PREFERENCES, MainFrame::onAlgo)
   EVT_MENU(myID_SELECT, MainFrame::onSelect)
   EVT_MENU(myID_COLOUR, MainFrame::onColour)
   EVT_MENU(myID_ROTATE, MainFrame::onMode)
@@ -115,7 +115,7 @@ void MainFrame::setupMenuBar()
   toolsMenu->Append(myID_TOGGLE_POSITIONING, wxT("Toggle optimisation... \tCTRL-T"),
                     wxT("Activates or deactivates the layout optimisation algorithm."));
   toolsMenu->AppendSeparator();
-  toolsMenu->Append(myID_DLG_ALGO, wxT("O&ptimization... \tCTRL-p"),
+  toolsMenu->Append(wxID_PREFERENCES, wxT("O&ptimization... \tCTRL-p"),
                     wxT("Display dialog for layout optimization algorithm."));
   toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-n"),
                     wxT("Display dialog with information about this LTS."));
