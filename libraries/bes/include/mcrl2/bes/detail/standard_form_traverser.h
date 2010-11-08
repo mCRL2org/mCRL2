@@ -251,6 +251,7 @@ namespace detail {
       void leave(const boolean_equation_system<>&)
       {
         // set the fixpoint symbol for the added equations m_equations2, and move them to m_equations
+        assert(!m_equations.empty());
         fixpoint_symbol sigma = m_equations.back().symbol();
         for (atermpp::vector<boolean_equation>::iterator i = m_equations2.begin(); i != m_equations2.end(); ++i)
         {
@@ -271,6 +272,7 @@ namespace detail {
           }
         }
       }
+
   };
 
 } // namespace detail
