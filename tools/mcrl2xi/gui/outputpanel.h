@@ -6,7 +6,7 @@
 //
 /// \file outputpanel.h
 //
-// Implements the logpanel class used to display log messages.
+// Implements the output class used to display log messages.
 
 #ifndef MCRL2XI_OUTPUTPANEL_H
 #define MCRL2XI_OUTPUTPANEL_H

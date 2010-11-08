@@ -29,38 +29,34 @@
 
 // IDs for the controls and the menu commands
 enum {
-	// menu items
-	Exec_Quit = 100,
-	Exec_Kill,
-	Exec_ClearLog,
-	Exec_SyncExec = 200,
-	Exec_AsyncExec,
-	Exec_Shell,
-	Exec_POpen,
-	Exec_NewFile,
-	Exec_RenameFile,
-	Exec_DeleteFile,
-	Exec_Refresh,
-	Exec_OpenFile,
-	Exec_CopyFile,
-	Exec_Redirect,
-	Exec_Copy2ClipBoard,
-	Exec_SaveFile,
-	Exec_SaveFileAs,
-	Exec_SelectAll,
-	Exec_About = 300,
-	Exec_PerspectiveReset,
-	Exec_Preferences,
+	Exec_PerspectiveReset = 300,
 
 	Exec_ToggleOutputPanel,
-	Exec_ToggleOptionsPanel,
+	Exec_ToggleOptionsPanel
 
-	// control ids
-	Exec_Btn_Send = 1000,
-	Exec_Btn_SendFile,
-	Exec_Btn_Get,
-	Exec_Btn_Close
 };
+
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_UPDATE_EDITOR_FOCUS, 7777)
+    DECLARE_EVENT_TYPE(wxEVT_SETSTATUSTEXT, 7777)
+END_DECLARE_EVENT_TYPES()
+
+DEFINE_EVENT_TYPE(wxEVT_UPDATE_EDITOR_FOCUS)
+DEFINE_EVENT_TYPE(wxEVT_SETSTATUSTEXT)
+
+#define EVT_UPDATE_EDITOR_FOCUS(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_UPDATE_EDITOR_FOCUS, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
+
+#define EVT_SETSTATUSTEXT(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_SETSTATUSTEXT, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
 
 wxString mcrl2_files(wxT("LPS files (*.lps)|*.lps|mCRL2 files (*.mcrl2)|*.mcrl2|TXT files (*.txt)|*.txt"));
 
@@ -78,23 +74,35 @@ public:
 
 		// create a menu bar
 		wxMenu *menuFile = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
-		menuFile->Append(Exec_OpenFile, wxT("&Open file \tCtrl-O"),
+		menuFile->Append(wxID_OPEN, wxT("&Open file \tCtrl-O"),
 				wxT("Open an existing file"));
-		menuFile->Append(Exec_Quit, wxT("E&xit\tAlt-X"),
-				wxT("Quit the program"));
-		menuFile->Append(Exec_SaveFile, wxT("Save \tCtrl-S"), wxT(""));
-		menuFile->Append(Exec_SaveFileAs, wxT("Save As"), wxT(""));
+		menuFile->Append(wxID_SAVE, wxT("Save \tCtrl-S"), wxT(""));
+		menuFile->Append(wxID_SAVEAS, wxT("Save As"), wxT(""));
+		menuFile->AppendSeparator();
+    menuFile->Append(wxID_CLOSE, wxT("E&xit\tAlt-X"),
+        wxT("Quit the program"));
 
 		editMenu = new wxMenu;
 
-		editMenu->Append(Exec_SelectAll, wxT("Select All \tCtrl-A"), wxT("Select all items tems in focused window"));
-		editMenu->Append(Exec_Copy2ClipBoard, wxT("Copy \tCtrl-C"), wxT("Copy focused selection to clipboard"));
+		editMenu->Append(wxID_UNDO, wxT("&Undo \tCtrl-Z"), wxT("Undo edit step"));
+		editMenu->Append(wxID_REDO, wxT("&Redo \tCtrl-Y"), wxT("Redo edit step"));
+		editMenu->AppendSeparator();
+    editMenu->Append(wxID_CUT, wxT("Cu&t \tCtrl-X"), wxT("Cut selection to clipboard"));
+		editMenu->Append(wxID_COPY, wxT("&Copy \tCtrl-C"), wxT("Copy selection to clipboard"));
+		editMenu->Append(wxID_PASTE, wxT("&Paste \tCtrl-V"), wxT("Paste clipboard to editor"));
+    editMenu->Append(wxID_CLEAR, wxT("&Delete \tDel"), wxT("Delete selection"));
+    editMenu->AppendSeparator();
 
+    editMenu->Append(wxID_SELECTALL, wxT("Select All \tCtrl-A"), wxT("Select all items tems in focused window"));
 
-    editMenu->Enable(Exec_SelectAll, false);
-    editMenu->Enable(Exec_Copy2ClipBoard, false);
-    editMenu->Enable(Exec_SaveFile, false);
-    editMenu->Enable(Exec_ClearLog, false);
+    editMenu->Enable(wxID_SELECTALL, true);
+    editMenu->Enable(wxID_COPY, true);
+    editMenu->Enable(wxID_PASTE, true);
+    editMenu->Enable(wxID_CLEAR, true);
+    editMenu->Enable(wxID_PASTE, true);
+    editMenu->Enable(wxID_UNDO, true);
+    editMenu->Enable(wxID_REDO, true);
+    editMenu->Enable(wxID_CUT, true);
 
 		wxMenu *helpMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
 		helpMenu->Append(wxID_ABOUT, wxT("&About\tF1"),
@@ -218,7 +226,7 @@ public:
      }
      m_mgr.Update();
      m_PanelMenu->Check(Exec_ToggleOutputPanel, m_mgr.GetPane(output).IsShown() );
-  }
+  };
 
   void OnToggleOptionsPanel(wxCommandEvent& /*event*/) {
     if (m_mgr.GetPane(options).IsShown()){
@@ -228,7 +236,7 @@ public:
     }
     m_mgr.Update();
     m_PanelMenu->Check(Exec_ToggleOptionsPanel, m_mgr.GetPane(options).IsShown() );
-  }
+  };
 
   void OnClosePane(wxAuiManagerEvent& event ){
     //Closing File Browser Pane
@@ -242,13 +250,47 @@ public:
     {
       m_PanelMenu->Check(Exec_ToggleOptionsPanel, false );
     }
-  }
+  };
 
   void OnResetLayout(wxCommandEvent& /*event*/) {
      m_mgr.LoadPerspective(m_default_perspective);
      m_PanelMenu->Check(Exec_ToggleOutputPanel, m_mgr.GetPane(output).IsShown() );
      m_PanelMenu->Check(Exec_ToggleOptionsPanel, m_mgr.GetPane(options).IsShown() );
   };
+
+  void OnEdit (wxCommandEvent &event) {
+      if (focussed_editor) focussed_editor->GetEventHandler()->ProcessEvent (event);
+  };
+
+  void UpdateFocus(wxCommandEvent& event){
+    if( event.GetClientData() == NULL){
+      focussed_editor = NULL;
+      editMenu->Enable(wxID_SELECTALL, false);
+      editMenu->Enable(wxID_COPY, false);
+      editMenu->Enable(wxID_PASTE, false);
+      editMenu->Enable(wxID_CLEAR, false);
+      editMenu->Enable(wxID_PASTE, false);
+      editMenu->Enable(wxID_UNDO, false);
+      editMenu->Enable(wxID_REDO, false);
+      editMenu->Enable(wxID_CUT, false);
+    } else {
+      focussed_editor = (xStcEditor*) event.GetClientData();
+      editMenu->Enable(wxID_SELECTALL, true);
+      editMenu->Enable(wxID_COPY, true);
+      editMenu->Enable(wxID_PASTE, true);
+      editMenu->Enable(wxID_CLEAR, true);
+      editMenu->Enable(wxID_PASTE, true);
+      editMenu->Enable(wxID_UNDO, true);
+      editMenu->Enable(wxID_REDO, true);
+      editMenu->Enable(wxID_CUT, true);
+    }
+  };
+
+  void SetStatus(wxCommandEvent& event){
+    wxString *s = (wxString*) event.GetClientData();
+    SetStatusText(*s);
+
+  }
 
 private:
 
@@ -263,17 +305,32 @@ private:
   Options *options;
   wxTextCtrl *output;
 
+  xStcEditor *focussed_editor;
+
 DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-EVT_MENU(Exec_Quit, MainFrame::OnQuit)
-EVT_MENU(Exec_OpenFile, MainFrame::OnOpenFile)
-EVT_MENU(Exec_SaveFile, MainFrame::OnSaveFile)
-EVT_MENU(Exec_SaveFileAs, MainFrame::OnSaveFileAs)
+EVT_MENU(wxID_CLOSE, MainFrame::OnQuit)
+EVT_MENU(wxID_OPEN, MainFrame::OnOpenFile)
 EVT_MENU(Exec_ToggleOutputPanel, MainFrame::OnToggleOutputPanel)
 EVT_MENU(Exec_ToggleOptionsPanel, MainFrame::OnToggleOptionsPanel)
 EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
+
+EVT_MENU(wxID_COPY, MainFrame::OnEdit)
+EVT_MENU(wxID_SELECTALL, MainFrame::OnEdit)
+EVT_MENU(wxID_PASTE, MainFrame::OnEdit)
+EVT_MENU(wxID_CUT, MainFrame::OnEdit)
+EVT_MENU(wxID_UNDO, MainFrame::OnEdit)
+EVT_MENU(wxID_REDO, MainFrame::OnEdit)
+EVT_MENU(wxID_CLEAR, MainFrame::OnEdit)
+
+
+EVT_MENU(wxID_SAVE, MainFrame::OnSaveFile)
+EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveFileAs)
+
+EVT_UPDATE_EDITOR_FOCUS(wxID_ANY, MainFrame::UpdateFocus)
+EVT_SETSTATUSTEXT(wxID_ANY, MainFrame::SetStatus)
 
 EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
 

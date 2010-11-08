@@ -13,6 +13,8 @@
 
 BEGIN_EVENT_TABLE(Options, wxPanel)
 EVT_BUTTON(OPTION_EVAL, Options::OnEval)
+EVT_SIZE(Options::OnSize)
+//EVT_UPDATE_EDITOR_FOCUS(wxID_ANY, Options::UpdateFocus)
 END_EVENT_TABLE()
 
 Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *output, mcrl2::data::rewriter::strategy rewrite_strategy) :
@@ -31,7 +33,7 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *o
 
     fgs->Add( new wxStaticText(this, wxID_ANY, wxT("Data expression:")) , wxGBPosition(row,0));
     row++;
-    EvalExpr = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1));
+    EvalExpr = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, -1));
     fgs->Add( EvalExpr , wxGBPosition(row,0));
     row++;
     fgs->Add( new wxButton(this, OPTION_EVAL, wxT("Evaluate")) , wxGBPosition(row,0));
@@ -40,6 +42,10 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *o
     this->SetSizer(hbox);
     this->Layout();
 
+    int w, h;
+    this->GetSize(&w, &h);
+    EvalExpr->SetSize( wxSize(w -50, -1 ));
+
   };
 
   void Options::OnEval(wxCommandEvent& /*event*/) {
@@ -47,7 +53,7 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *o
     try{
     std::cout << "Evaluate: \"" << EvalExpr->GetValue().mb_str() << "\""<< std::endl;
     std::cout << "Parsing and type checking specification" << std::endl;
-    wxString wx_spec = p_editor->GetStringFromDataEditor() +  p_editor->GetStringFromProcessEditor();
+    wxString wx_spec = p_editor->GetStringFromDataEditor();
     mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification( std::string(wx_spec.mb_str() ));
 
     std::cout << "Parsing data expression:\"" << EvalExpr->GetValue().mb_str() << "\""<< std::endl;
@@ -62,4 +68,15 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *o
       std::cout << e.what() <<std::endl;
     }
   };
+
+  void Options::OnSize(wxSizeEvent& /*event*/){
+    int w, h;
+    this->GetSize(&w, &h);
+    EvalExpr->SetSize( wxSize(w -50, -1 ));
+  };
+
+  void Options::UpdateFocus( wxCommandEvent& event ){
+
+    std::cout << "blaat" << std::endl;
+  }
 

@@ -13,9 +13,26 @@
 #include "wx/tokenzr.h"
 
 BEGIN_EVENT_TABLE(xStcEditor, wxStyledTextCtrl)
-  EVT_STC_UPDATEUI(wxID_ANY, xStcEditor::OnxStcUIUpdate)
+  EVT_STC_UPDATEUI(wxID_ANY,  xStcEditor::OnxStcUIUpdate)
   EVT_STC_CHARADDED(wxID_ANY, xStcEditor::AutoComplete)
+  EVT_MENU (wxID_COPY,        xStcEditor::OnCopy)
+  EVT_MENU (wxID_SELECTALL,   xStcEditor::OnSelectAll)
+  EVT_MENU (wxID_PASTE,       xStcEditor::OnPaste)
+  EVT_MENU (wxID_UNDO,        xStcEditor::OnUndo)
+  EVT_MENU (wxID_REDO,        xStcEditor::OnRedo)
+  EVT_MENU (wxID_CUT,         xStcEditor::OnCut)
+  EVT_MENU (wxID_CLEAR,       xStcEditor::OnDelete)
+
+  EVT_STC_PAINTED(wxID_ANY, xStcEditor::Focus )
+//  EVT_SET_FOCUS(wxStyledTextCtrl::OnGainFocus)
+//  EVT_KILL_FOCUS(xStcEditor::OnLoseFocus)
 END_EVENT_TABLE ()
+
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_UPDATE_EDITOR_FOCUS, 7777)
+    DECLARE_EVENT_TYPE(wxEVT_SETSTATUSTEXT, 7777)
+END_DECLARE_EVENT_TYPES()
+
 
   xStcEditor::xStcEditor(wxWindow *parent, wxWindowID id):
     wxStyledTextCtrl(parent,id)
@@ -63,8 +80,21 @@ END_EVENT_TABLE ()
           StyleSetBold(wxSTC_STYLE_BRACELIGHT, TRUE);
           StyleSetBold(wxSTC_STYLE_BRACEBAD, TRUE);
 
-          AutoCompSetIgnoreCase(true);
-          AutoCompSetAutoHide(true);
+          SetWrapMode(true);
+
+          // set visibility
+          SetVisiblePolicy (wxSTC_VISIBLE_STRICT|wxSTC_VISIBLE_SLOP, 1);
+          SetXCaretPolicy (wxSTC_CARET_EVEN|wxSTC_VISIBLE_STRICT|wxSTC_CARET_SLOP, 1);
+          SetYCaretPolicy (wxSTC_CARET_EVEN|wxSTC_VISIBLE_STRICT|wxSTC_CARET_SLOP, 1);
+
+          SetCaretLineVisible(true);
+          EnsureCaretVisible();
+          SetCaretForeground(wxT("BLACK"));
+          SetCaretLineBackground(wxColour(235,235,235));
+
+          SetCaretWidth(1);
+          SetCaretPeriod(500);
+
   };
 
 void xStcEditor::AutoComplete(wxStyledTextEvent &/*event*/){
@@ -115,5 +145,87 @@ void xStcEditor::OnxStcUIUpdate(wxStyledTextEvent &/*event*/){
   else
       BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
 
+  wxCommandEvent eventCustom(wxEVT_SETSTATUSTEXT);
+
+  if( GetCurrentPos() > 0 ){
+
+  wxString *s = new wxString(
+         wxT("pos: ")
+      +  wxString::Format (wxT("%d"), GetCurrentLine())
+      + wxT(",")
+      + wxString::Format( wxT("%d"), GetColumn( GetCurrentPos()))
+     );
+  eventCustom.SetClientData(s);
+  wxPostEvent(this->GetParent(), eventCustom);
+  }
 };
+
+
+void xStcEditor::OnCopy (wxCommandEvent &/*event*/) {
+   if (GetSelectionEnd()-GetSelectionStart() <= 0) return;
+   Copy();
+};
+
+void xStcEditor::OnSelectAll (wxCommandEvent &/*event*/) {
+      SetSelection (0, GetTextLength ());
+};
+
+void xStcEditor::OnPaste (wxCommandEvent &/*event*/){
+  if (!CanPaste()) return;
+  Paste();
+};
+
+void xStcEditor::OnUndo (wxCommandEvent &/*event*/){
+  Undo();
+};
+
+void xStcEditor::OnRedo (wxCommandEvent &/*event*/){
+  Redo();
+};
+
+void xStcEditor::OnCut (wxCommandEvent &/*event*/){
+  if ( (GetSelectionEnd()-GetSelectionStart() <= 0)) return;
+
+  if (GetReadOnly()){
+    Copy();
+  } else{
+    Cut();
+  }
+  ;
+
+};
+
+void xStcEditor::OnDelete (wxCommandEvent &/*event*/){
+  if (GetReadOnly()) return;
+  Clear();
+};
+
+void  xStcEditor::Focus(wxStyledTextEvent &/* event*/){
+//Sets Focus to current editor.... Ugly workaround
+if ( GetSTCFocus() ){
+    wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
+    /* Send pointer of focused window */
+    eventCustom.SetClientData(this);
+    wxPostEvent(this->GetParent(), eventCustom);
+} else {
+    wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
+    /* Send NO Focus */
+    eventCustom.SetClientData(NULL);
+    wxPostEvent(this->GetParent(), eventCustom);
+}};
+
+//void wxStyledTextCtrl::OnGainFocus( wxFocusEvent &/*event*/ ){
+//  wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
+//  /* Send pointer of focused window */
+//  eventCustom.SetClientData(this);
+//  wxPostEvent(this->GetParent(), eventCustom);
+//};
+//
+//void wxStyledTextCtrl::OnLoseFocus( wxFocusEvent &/*event*/){
+//  wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
+//  /* Send NO Focus */
+//  eventCustom.SetClientData(NULL);
+//  wxPostEvent(this->GetParent(), eventCustom);
+//};
+
 

@@ -17,20 +17,16 @@
 #include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
 
-
 xEditor::xEditor(wxWindow *parent, wxWindowID id, wxTextCtrl *output ) :
   wxAuiNotebook( parent , id )
   {
     p_output = output;
-    p_data_editor = new xStcEditor( this, wxID_ANY );
-    this->AddPage(p_data_editor, wxT("Data editor"));
-
-    p_process_editor = new xStcEditor( this, wxID_ANY );
-    p_process_editor->SetReadOnly(true);
-    this->AddPage(p_process_editor, wxT("Process viewer [Read Only]"));
   };
 
   bool xEditor::LoadFile( const wxString &filename ){
+    p_data_editor = new xStcEditor( this, wxID_ANY );
+    this->AddPage(p_data_editor, wxFileName(filename).GetFullName());
+    p_data_editor->SetFocus();
 
     wxStreamToTextRedirector redirect(p_output);
 
@@ -39,20 +35,19 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, wxTextCtrl *output ) :
 
       // Load datafile from mcrl2 specification
       if(fn.GetExt() == wxT("mcrl2")){
-
-        std::ifstream instream(filename.mb_str(), std::ifstream::in|std::ifstream::binary);
-        if (!instream.is_open()) {
-          throw mcrl2::runtime_error("cannot open input file: " + std::string(filename.mb_str()));
-        }
-        mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(instream, false);
-        mcrl2::process::complete_data_specification (spec);
-
         p_data_editor->Clear();
-        /* TODO: Segfault when a "mcrl2" spec opens  */
-        std::string *p_data_string;
-        *p_data_string = mcrl2::data::pp(mcrl2::data::detail::data_specification_to_aterm_data_spec(spec.data()));
-        p_data_editor->AppendText( wxString( p_data_string->c_str(), wxConvUTF8 ) );
 
+        wxTextFile file(filename);
+
+        file.Open();
+        wxString i;
+        for ( i = file.GetFirstLine(); !file.Eof();
+            i = file.GetNextLine() )
+        {
+          p_data_editor->AppendText( i + wxTextFile::GetEOL() );
+        }
+        file.Close();
+        FileInUse = filename;
         return true;
       };
 
@@ -61,43 +56,12 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, wxTextCtrl *output ) :
         mcrl2::lps::specification spec;
         spec.load(std::string(filename.mb_str(wxConvUTF8)));
         p_data_editor->Clear();
-        p_process_editor->Clear();
-
-        p_data_editor->AppendText( wxString( mcrl2::data::pp(mcrl2::data::detail::data_specification_to_aterm_data_spec(spec.data())).c_str(), wxConvUTF8 ) );
-
-        /* Text can only be appended if ReadOnly is disabled*/
-        p_process_editor->SetReadOnly(false);
-
-        /* Print action declarations */
-        p_process_editor->AppendText(
-            wxString(
-                mcrl2::core::pp(
-                    mcrl2::core::detail::gsMakeActSpec(spec.action_labels())).c_str()
-                , wxConvUTF8) + wxTextFile::GetEOL());
-
-        /* Print global variables */
-        atermpp::set<mcrl2::data::variable> gvs = spec.global_variables();
-        mcrl2::data::variable_list gvl = atermpp::convert<mcrl2::data::variable_list, atermpp::set<mcrl2::data::variable> >(  gvs);
-
-        /* Print global variables */
-        p_process_editor->AppendText(
-              wxString(
-                  mcrl2::core::pp(
-                      mcrl2::core::detail::gsMakeGlobVarSpec( gvl
-                          )
-                    ).c_str()
-                  , wxConvUTF8) + wxTextFile::GetEOL() );
-
-        p_process_editor->AppendText( wxString( mcrl2::lps::pp( spec.process() ).c_str() , wxConvUTF8 ) + wxTextFile::GetEOL()) ;
-        p_process_editor->AppendText( wxString( mcrl2::core::pp( spec.initial_process() ).c_str() , wxConvUTF8 ) + wxTextFile::GetEOL() ) ;
-        p_process_editor->SetReadOnly(true);
-
+        p_data_editor->AppendText( wxString( mcrl2::lps::pp(spec).c_str(), wxConvUTF8 ) );
         FileInUse = filename;
         return true;
       };
 
       return false;
-      //return wxRichTextCtrl::LoadFile( filename ) ;
     }
     catch (mcrl2::runtime_error &e) {
     {
@@ -113,46 +77,47 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, wxTextCtrl *output ) :
     return p_data_editor -> GetText();
   };
 
-  wxString xEditor::GetStringFromProcessEditor(){
-    return p_process_editor -> GetText();
-  };
-
   wxString xEditor::GetFileInUse(){
     return FileInUse;
   };
 
   bool xEditor::SaveFile( const wxString &filename ){
+    wxDateTime now = wxDateTime::Now();
+    p_output->Clear();
     wxStreamToTextRedirector redirect(p_output);
     try{
-    std::cout << "Saving: \"" << filename.mb_str() << "\""<< std::endl;
+    std::cout << now.FormatTime().mb_str() <<" ** Saving: \"" << filename.mb_str() << "\""<< std::endl;
 
     /* Action for saving to lps */
     if(wxFileName(filename).GetExt() == wxT("lps")){
-      std::cout << "Parsing and type checking specification" << std::endl;
-      std::string str_spec = std::string(wxString(GetStringFromDataEditor() +  GetStringFromProcessEditor()).mb_str());
+      std::cout << now.FormatTime().mb_str() <<" ** Parsing and type checking specification" << std::endl;
+      std::string str_spec = std::string(GetStringFromDataEditor().mb_str());
       mcrl2::lps::specification spec = mcrl2::lps::parse_linear_process_specification( str_spec );
       spec.save(std::string(filename.mb_str()));
-      std::cout << "Successfully saved to: "<< filename.mb_str() << std::endl;
+      std::cout << now.FormatTime().mb_str() <<" ** Successfully saved to: "<< filename.mb_str() << std::endl;
+      /* Reassign filename in use */
+      FileInUse = filename;
       return true;
     }
 
     /* Action for saving to mcrl2 or txt */
     if( wxFileName(filename).GetExt() == wxT("mcrl2") ||
         wxFileName(filename).GetExt() == wxT("txt") ){
-      wxString spec = GetStringFromDataEditor() +  GetStringFromProcessEditor();
+      wxString spec = GetStringFromDataEditor();
 
       wxFile f( filename, wxFile::write);
       if(f.Write( spec, wxConvUTF8 )){
-        std::cout << "Successfully saved to: "<< filename.mb_str() << std::endl;
+        std::cout << now.FormatTime().mb_str() <<" ** Successfully saved to: "<< filename.mb_str() << std::endl;
+        /* Reassign filename in use */
+        FileInUse = filename;
       } else {
-        std::cout << "Failed saving to: "<< filename.mb_str() << std::endl;
+        std::cout << now.FormatTime().mb_str() <<" ** Failed saving to: "<< filename.mb_str() << std::endl;
       }
       return true;
     }
 
-
     } catch ( mcrl2::runtime_error e) {
-      std::cout << e.what() <<std::endl;
+      std::cout << now.FormatTime().mb_str() <<" ** " << e.what() <<std::endl;
     }
 
 
