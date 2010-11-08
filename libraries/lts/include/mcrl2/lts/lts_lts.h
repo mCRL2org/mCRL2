@@ -166,6 +166,10 @@ namespace lts
       { 
       }
 
+      action_label_lts(const lps::action a):m_action_label_lts(a)
+      {
+      }
+
       element_type label() const
       { 
         return m_action_label_lts;

@@ -24,6 +24,7 @@
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/lps/action.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 
@@ -235,13 +236,13 @@ namespace mcrl2 {
               std::stringstream label;
               label << "block(" << info.first << "),op(" << info.second << ")";
               unsigned int to = deadlock;
-              atermpp::aterm t = atermpp::aterm_appl(atermpp::function_symbol(label.str(),0,true));
+              lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
               int label_index = labs.index(t);
               if ( label_index < 0 )
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
-                m_lts.add_label(mcrl2::lts::detail::action_label_lts((ATerm)t),label.str()=="tau");
+                m_lts.add_label(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
               }
               m_lts.add_transition(lts::transition(from,label_index,to));
             }
@@ -261,7 +262,7 @@ namespace mcrl2 {
                 label << "block(" << info_target.first << "),op(" << info_target.second << ")";
               }
               unsigned int to = indices[*j];
-              atermpp::aterm t = atermpp::aterm_appl(atermpp::function_symbol(label.str(),0,true));
+              lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
               int label_index = labs.index(t);
               if ( label_index < 0 )
               {
