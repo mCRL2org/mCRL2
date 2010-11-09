@@ -217,6 +217,14 @@ void test_linear(const std::string& text, bool result = true)
   core::garbage_collect();
 }
 
+// Test case supplied by Frank Stappers. A segmentation fault is reported on Suse 64 bit.
+void test_data_spec()
+{
+  process_specification spec = parse_process_specification("sort  X; init tau;", false);
+  data::pp(data::detail::data_specification_to_aterm_data_spec(spec.data()));
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -236,6 +244,8 @@ int test_main(int argc, char* argv[])
   test_linear(CASE13a, false);
   test_linear(CASE13b);
   test_linear(CASE14, false);
+
+  test_data_spec();
   
   return 0;
 }
