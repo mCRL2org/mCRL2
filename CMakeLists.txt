@@ -421,7 +421,12 @@ find_package(wxWidgets)
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
 if(wxWidgets_FOUND)
-  find_package(wxWidgets COMPONENTS base core adv gl xml html aui stc REQUIRED)
+
+	if(UNIX AND NOT APPLE)			
+    find_package(wxWidgets COMPONENTS base core adv gl xml html aui stc REQUIRED)
+	else(UNIX AND NOT APPLE)			
+    find_package(wxWidgets COMPONENTS base core adv gl xml html aui REQUIRED)
+	endif(UNIX AND NOT APPLE)			
 
   INCLUDE(${wxWidgets_USE_FILE})
 
@@ -642,7 +647,9 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( tools/pbesconstelm )
   add_subdirectory ( tools/pbesparelm )
   add_subdirectory ( tools/mcrl2-gui )
-  add_subdirectory ( tools/mcrl2xi )
+	if(UNIX AND NOT APPLE)			
+    add_subdirectory ( tools/mcrl2xi )
+	endif(UNIX AND NOT APPLE)			
 
 ##---------------------------------------------------
 ## Experimental tool dependencies
