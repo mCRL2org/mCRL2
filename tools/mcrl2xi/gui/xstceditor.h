@@ -28,11 +28,32 @@ class xStcEditor: public wxStyledTextCtrl{
     void OnUndo (wxCommandEvent &/*event*/);
     void OnCut (wxCommandEvent &/*event*/);
     void OnDelete(wxCommandEvent &/*event*/);
+    void SetFileInUse(wxString filename);
+    wxString GetFileInUse();
 private:
+    wxString fileInUse;
     //void OnLoseFocus(wxFocusEvent& evt);
     //void OnGainFocus(wxFocusEvent& evt);
 
 DECLARE_EVENT_TABLE()
 };
+
+/* Events that can be send by xStcEditor */
+DECLARE_EVENT_TYPE(wxEVT_UPDATE_EDITOR_FOCUS, 7777)
+DECLARE_EVENT_TYPE(wxEVT_SETSTATUSTEXT, 7777)
+
+#define EVT_UPDATE_EDITOR_FOCUS(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_UPDATE_EDITOR_FOCUS, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
+
+#define EVT_SETSTATUSTEXT(id, fn) \
+    DECLARE_EVENT_TABLE_ENTRY( \
+        wxEVT_SETSTATUSTEXT, id, wxID_ANY, \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+        (wxObject *) NULL \
+    ),
 
 #endif

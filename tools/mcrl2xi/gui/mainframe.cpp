@@ -8,17 +8,49 @@
 //
 /// \file mainframe.cpp
 
+#include "wx/app.h"
+#include "wx/log.h"
+#include "wx/frame.h"
+#include "wx/panel.h"
+
+#include "wx/menu.h"
+#include "wx/msgdlg.h"
+
+#include "wx/textctrl.h"
+#include "wx/sizer.h"
+#include <wx/aui/aui.h>
+
+#include "editor.h"
+#include "options.h"
+#include "outputpanel.h"
 #include "mainframe.h"
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-EVT_MENU(Exec_Quit, MainFrame::OnQuit)
-EVT_MENU(Exec_OpenFile, MainFrame::OnOpenFile)
+EVT_MENU(wxID_CLOSE, MainFrame::OnQuit)
+EVT_MENU(wxID_NEW, MainFrame::OnNewFile)
+EVT_MENU(wxID_OPEN, MainFrame::OnOpenFile)
+EVT_MENU(Exec_ToggleOutputPanel, MainFrame::OnToggleOutputPanel)
+EVT_MENU(Exec_ToggleOptionsPanel, MainFrame::OnToggleOptionsPanel)
+EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
+EVT_MENU(wxID_COPY, MainFrame::OnEdit)
+EVT_MENU(wxID_SELECTALL, MainFrame::OnEdit)
+EVT_MENU(wxID_PASTE, MainFrame::OnEdit)
+EVT_MENU(wxID_CUT, MainFrame::OnEdit)
+EVT_MENU(wxID_UNDO, MainFrame::OnEdit)
+EVT_MENU(wxID_REDO, MainFrame::OnEdit)
+EVT_MENU(wxID_CLEAR, MainFrame::OnEdit)
+EVT_MENU(wxID_SAVE, MainFrame::OnSaveFile)
+EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveFileAs)
+EVT_UPDATE_EDITOR_FOCUS(wxID_ANY, MainFrame::UpdateFocus)
+EVT_SETSTATUSTEXT(wxID_ANY, MainFrame::SetStatus)
+EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
+
 END_EVENT_TABLE()
 
-
-MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size, mcrl2::data::rewriter::strategy rewrite_strategy) :
+    MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size, mcrl2::data::rewriter::strategy rewrite_strategy) :
     wxFrame((wxFrame *) NULL, wxID_ANY, title, pos, size){
 
+  mcrl2_files = wxT("mCRL2 files (*.mcrl2)|*.mcrl2|LPS files (*.lps)|*.lps|TXT files (*.txt)|*.txt");
 #ifdef __WXMAC__
     // required since ABOUT is not the default id of the about menu
     wxApp::s_macAboutMenuItemId = Exec_About;
@@ -26,34 +58,48 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
     // create a menu bar
     wxMenu *menuFile = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
-    menuFile->Append(Exec_OpenFile, wxT("&Open file \tCtrl-O"),
+    menuFile->Append(wxID_NEW, wxT("&New file \tCtrl-N"),
+        wxT("Create a new specification"));
+    menuFile->Append(wxID_OPEN, wxT("&Open file \tCtrl-O"),
         wxT("Open an existing file"));
-    menuFile->Append(Exec_Quit, wxT("E&xit\tAlt-X"),
+    menuFile->Append(wxID_SAVE, wxT("Save \tCtrl-S"), wxT(""));
+    menuFile->Append(wxID_SAVEAS, wxT("Save As"), wxT(""));
+    menuFile->AppendSeparator();
+    menuFile->Append(wxID_CLOSE, wxT("E&xit\tAlt-X"),
         wxT("Quit the program"));
-    menuFile->Append(Exec_Save2File, wxT("Save \tCtrl-S"), wxT(""));
-    menuFile->Append(Exec_Save2FileAs, wxT("Save As"), wxT(""));
 
     editMenu = new wxMenu;
 
-    editMenu->Append(Exec_SelectAll, wxT("Select All \tCtrl-A"), wxT("Select all items tems in focused window"));
-    editMenu->Append(Exec_Copy2ClipBoard, wxT("Copy \tCtrl-C"), wxT("Copy focused selection to clipboard"));
+    editMenu->Append(wxID_UNDO, wxT("&Undo \tCtrl-Z"), wxT("Undo edit step"));
+    editMenu->Append(wxID_REDO, wxT("&Redo \tCtrl-Y"), wxT("Redo edit step"));
+    editMenu->AppendSeparator();
+    editMenu->Append(wxID_CUT, wxT("Cu&t \tCtrl-X"), wxT("Cut selection to clipboard"));
+    editMenu->Append(wxID_COPY, wxT("&Copy \tCtrl-C"), wxT("Copy selection to clipboard"));
+    editMenu->Append(wxID_PASTE, wxT("&Paste \tCtrl-V"), wxT("Paste clipboard to editor"));
+    editMenu->Append(wxID_CLEAR, wxT("&Delete \tDel"), wxT("Delete selection"));
+    editMenu->AppendSeparator();
 
+    editMenu->Append(wxID_SELECTALL, wxT("Select All \tCtrl-A"), wxT("Select all items tems in focused window"));
 
-    editMenu->Enable(Exec_SelectAll, false);
-    editMenu->Enable(Exec_Copy2ClipBoard, false);
-    editMenu->Enable(Exec_Save2File, false);
-    editMenu->Enable(Exec_ClearLog, false);
+    editMenu->Enable(wxID_SELECTALL, true);
+    editMenu->Enable(wxID_COPY, true);
+    editMenu->Enable(wxID_PASTE, true);
+    editMenu->Enable(wxID_CLEAR, true);
+    editMenu->Enable(wxID_PASTE, true);
+    editMenu->Enable(wxID_UNDO, true);
+    editMenu->Enable(wxID_REDO, true);
+    editMenu->Enable(wxID_CUT, true);
 
     wxMenu *helpMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
     helpMenu->Append(wxID_ABOUT, wxT("&About\tF1"),
         wxT("Show about dialog"));
 
     m_PanelMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
-    /*m_PanelMenu->AppendCheckItem( Exec_ToggleFileBrowserPanel, wxT("File Browser"));
-    m_PanelMenu->AppendCheckItem( Exec_ToggleExecutedCommandsPanel, wxT("Executed Commands"));
+    m_PanelMenu->AppendCheckItem( Exec_ToggleOutputPanel, wxT("Output Panel"));
+    m_PanelMenu->AppendCheckItem( Exec_ToggleOptionsPanel, wxT("Options Panel"));
 
-    m_PanelMenu->Check(Exec_ToggleFileBrowserPanel, true);
-    m_PanelMenu->Check(Exec_ToggleExecutedCommandsPanel, true);*/
+    m_PanelMenu->Check(Exec_ToggleOutputPanel, true);
+    m_PanelMenu->Check(Exec_ToggleOptionsPanel, true);
 
     wxMenu *windowMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
     windowMenu->AppendSubMenu(m_PanelMenu, wxT("&Dockable panels"),
@@ -75,7 +121,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
     m_mgr.SetManagedWindow(this);
 
-    output = new outputpanel( this ); //new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, 100), wxTE_MULTILINE);
+    output = new outputpanel( this );
 
     editor = new xEditor(this, wxID_ANY, output );
     options = new Options(this, wxID_ANY, editor, output, rewrite_strategy);
@@ -86,6 +132,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
 
     // tell the manager to "commit" all the changes just made
     m_mgr.Update();
+
+    m_default_perspective = m_mgr.SavePerspective();
 
 #if wxUSE_STATUSBAR
     // create a status
@@ -99,22 +147,141 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
   }
   ;
 
-MainFrame::~MainFrame() {
-  // deinitialize the frame manager
-  m_mgr.UnInit();
-}
-;
+  MainFrame::~MainFrame() {
+    // deinitialize the frame manager
+    m_mgr.UnInit();
+  }
+  ;
 
-void MainFrame::OnQuit(wxCommandEvent& /*event*/) {
+  void MainFrame::OnQuit(wxCommandEvent& /*event*/) {
     Close(true);
   }
   ;
 
-void MainFrame::OnOpenFile(wxCommandEvent& /*event*/) {
-  wxFileDialog * openFileDialog = new wxFileDialog(this, wxT("Choose a file"), wxEmptyString , wxEmptyString, wxT("LPS files (*.lps)|*.lps|TXT and mCRL2 files (*.txt;*.mcrl2)|*.txt;*.mcrl2")
+  void MainFrame::OnOpenFile(wxCommandEvent& /*event*/) {
+    wxFileDialog * openFileDialog = new wxFileDialog(this, wxT("Choose a file"), wxEmptyString , wxEmptyString,
+        mcrl2_files
 );
-  if (openFileDialog->ShowModal() == wxID_OK){
-      wxString fileName = openFileDialog->GetPath();
-      editor->LoadFile(fileName);
+
+    if (openFileDialog->ShowModal() == wxID_OK){
+        wxString fileName = openFileDialog->GetPath();
+        editor->LoadFile(fileName);
+    }
+  };
+
+  void MainFrame::OnNewFile(wxCommandEvent& /*event*/) {
+     editor->AddEmptyPage();
+  };
+
+  void MainFrame::LoadFile(wxString filename){
+    editor->LoadFile(filename);
+  };
+
+  void MainFrame::OnSaveFile(wxCommandEvent& /*event*/){
+    if (editor->GetPageCount() > 0){
+      wxString fileName = editor->GetFileInUse();
+      if ( fileName == wxEmptyString){
+
+        wxFileDialog * saveFileDialog = new wxFileDialog(this, wxT("Save file as"),
+            wxEmptyString,
+            wxEmptyString,
+            mcrl2_files,
+            wxFD_SAVE | wxFD_OVERWRITE_PROMPT
+            );
+        if (saveFileDialog->ShowModal() == wxID_OK){
+           fileName = saveFileDialog->GetPath();
+        }
+      }
+      if( fileName != wxEmptyString ){
+        editor->SaveFile( fileName );
+      }
+    }
+  };
+
+  void MainFrame::OnSaveFileAs(wxCommandEvent& /*event*/){
+    if (editor->GetPageCount() > 0){
+       wxFileDialog * openFileDialog = new wxFileDialog(this, wxT("Save file as"),
+          wxEmptyString,
+          wxEmptyString,
+          mcrl2_files,
+          wxFD_SAVE | wxFD_OVERWRITE_PROMPT
+          );
+      if (openFileDialog->ShowModal() == wxID_OK){
+        editor->SaveFile( openFileDialog->GetPath() );
+      }
+    }
+  };
+
+  void MainFrame::OnToggleOutputPanel(wxCommandEvent& /*event*/) {
+     if (m_mgr.GetPane(output).IsShown()){
+       m_mgr.GetPane(output).Hide();
+     } else{
+       m_mgr.GetPane(output).Show();
+     }
+     m_mgr.Update();
+     m_PanelMenu->Check(Exec_ToggleOutputPanel, m_mgr.GetPane(output).IsShown() );
+  };
+
+  void MainFrame::OnToggleOptionsPanel(wxCommandEvent& /*event*/) {
+    if (m_mgr.GetPane(options).IsShown()){
+      m_mgr.GetPane(options).Hide();
+    } else{
+      m_mgr.GetPane(options).Show();
+    }
+    m_mgr.Update();
+    m_PanelMenu->Check(Exec_ToggleOptionsPanel, m_mgr.GetPane(options).IsShown() );
+  };
+
+  void MainFrame::OnClosePane(wxAuiManagerEvent& event ){
+    //Closing File Browser Pane
+    if ( event.pane == &m_mgr.GetPane(output) )
+    {
+      m_PanelMenu->Check(Exec_ToggleOutputPanel, false );
+    }
+
+    //Closing Executed Commands Pane
+    if ( event.pane == &m_mgr.GetPane(options) )
+    {
+      m_PanelMenu->Check(Exec_ToggleOptionsPanel, false );
+    }
+  };
+
+  void MainFrame::OnResetLayout(wxCommandEvent& /*event*/) {
+     m_mgr.LoadPerspective(m_default_perspective);
+     m_PanelMenu->Check(Exec_ToggleOutputPanel, m_mgr.GetPane(output).IsShown() );
+     m_PanelMenu->Check(Exec_ToggleOptionsPanel, m_mgr.GetPane(options).IsShown() );
+  };
+
+  void MainFrame::OnEdit (wxCommandEvent &event) {
+      if (focussed_editor) focussed_editor->GetEventHandler()->ProcessEvent (event);
+  };
+
+  void MainFrame::UpdateFocus(wxCommandEvent& event){
+    if( event.GetClientData() == NULL){
+      focussed_editor = NULL;
+      editMenu->Enable(wxID_SELECTALL, false);
+      editMenu->Enable(wxID_COPY, false);
+      editMenu->Enable(wxID_PASTE, false);
+      editMenu->Enable(wxID_CLEAR, false);
+      editMenu->Enable(wxID_PASTE, false);
+      editMenu->Enable(wxID_UNDO, false);
+      editMenu->Enable(wxID_REDO, false);
+      editMenu->Enable(wxID_CUT, false);
+    } else {
+      focussed_editor = (xStcEditor*) event.GetClientData();
+      editMenu->Enable(wxID_SELECTALL, true);
+      editMenu->Enable(wxID_COPY, true);
+      editMenu->Enable(wxID_PASTE, true);
+      editMenu->Enable(wxID_CLEAR, true);
+      editMenu->Enable(wxID_PASTE, true);
+      editMenu->Enable(wxID_UNDO, true);
+      editMenu->Enable(wxID_REDO, true);
+      editMenu->Enable(wxID_CUT, true);
+    }
+  };
+
+  void MainFrame::SetStatus(wxCommandEvent& event){
+    wxString *s = (wxString*) event.GetClientData();
+    SetStatusText(*s);
+
   }
-};

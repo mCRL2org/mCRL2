@@ -24,10 +24,11 @@ ENDIF(WIN32)
 
 add_executable(${PROJECT_NAME}
   mcrl2xi.cpp
-	#gui/mainframe.cpp
+  gui/mainframe.cpp
 	gui/editor.cpp
 	gui/options.cpp
 	gui/xstceditor.cpp
+	gui/outputpanel.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
   ${SRCS}

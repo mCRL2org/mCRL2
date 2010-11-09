@@ -10,11 +10,11 @@
 
 #include "options.h"
 #include "mcrl2/process/parse.h"
+#include "mainframe.h"
 
 BEGIN_EVENT_TABLE(Options, wxPanel)
 EVT_BUTTON(OPTION_EVAL, Options::OnEval)
 EVT_SIZE(Options::OnSize)
-//EVT_UPDATE_EDITOR_FOCUS(wxID_ANY, Options::UpdateFocus)
 END_EVENT_TABLE()
 
 Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *output, mcrl2::data::rewriter::strategy rewrite_strategy) :
@@ -51,18 +51,18 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *o
   void Options::OnEval(wxCommandEvent& /*event*/) {
     wxStreamToTextRedirector redirect(p_output);
     try{
-    std::cout << "Evaluate: \"" << EvalExpr->GetValue().mb_str() << "\""<< std::endl;
-    std::cout << "Parsing and type checking specification" << std::endl;
-    wxString wx_spec = p_editor->GetStringFromDataEditor();
-    mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification( std::string(wx_spec.mb_str() ));
+      std::cout << "Evaluate: \"" << EvalExpr->GetValue().mb_str() << "\""<< std::endl;
+      std::cout << "Parsing and type checking specification" << std::endl;
+      wxString wx_spec = p_editor->GetStringFromDataEditor();
+      mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification( std::string(wx_spec.mb_str() ));
 
-    std::cout << "Parsing data expression:\"" << EvalExpr->GetValue().mb_str() << "\""<< std::endl;
-    mcrl2::data::data_expression term = mcrl2::data::parse_data_expression( std::string(EvalExpr->GetValue().mb_str()) ,spec.data() );
+      std::cout << "Parsing data expression:\"" << EvalExpr->GetValue().mb_str() << "\""<< std::endl;
+      mcrl2::data::data_expression term = mcrl2::data::parse_data_expression( std::string(EvalExpr->GetValue().mb_str()) ,spec.data() );
 
-    std::cout << "Rewriting data expression:\"" << EvalExpr->GetValue().mb_str() << "\""<< std::endl;
-    mcrl2::data::rewriter rewr(spec.data(),m_rewrite_strategy);
-    atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > assignments;
-    std::cout << "Result: " << pp(rewr(term,make_map_substitution_adapter(assignments))) << std::endl;
+      std::cout << "Rewriting data expression:\"" << EvalExpr->GetValue().mb_str() << "\""<< std::endl;
+      mcrl2::data::rewriter rewr(spec.data(),m_rewrite_strategy);
+      atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > assignments;
+      std::cout << "Result: " << pp(rewr(term,make_map_substitution_adapter(assignments))) << std::endl;
 
     } catch ( mcrl2::runtime_error e) {
       std::cout << e.what() <<std::endl;
@@ -74,9 +74,4 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *o
     this->GetSize(&w, &h);
     EvalExpr->SetSize( wxSize(w -50, -1 ));
   };
-
-  void Options::UpdateFocus( wxCommandEvent& event ){
-
-    std::cout << "blaat" << std::endl;
-  }
 

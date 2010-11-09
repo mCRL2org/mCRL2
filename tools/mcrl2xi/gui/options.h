@@ -29,7 +29,6 @@ public:
   Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *output, mcrl2::data::rewriter::strategy rewrite_strategy);
 	void OnEval(wxCommandEvent& /*event*/);
 	void OnSize(wxSizeEvent& /*event*/);
-	void UpdateFocus( wxCommandEvent& event );
 private:
   wxTextCtrl *EvalExpr;
 	xEditor *p_editor;

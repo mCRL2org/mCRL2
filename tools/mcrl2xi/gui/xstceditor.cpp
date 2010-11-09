@@ -11,6 +11,10 @@
 #include "settings.h"
 #include "xstceditor.h"
 #include "wx/tokenzr.h"
+#include "wx/wx.h"
+
+DEFINE_EVENT_TYPE( wxEVT_SETSTATUSTEXT)
+DEFINE_EVENT_TYPE( wxEVT_UPDATE_EDITOR_FOCUS )
 
 BEGIN_EVENT_TABLE(xStcEditor, wxStyledTextCtrl)
   EVT_STC_UPDATEUI(wxID_ANY,  xStcEditor::OnxStcUIUpdate)
@@ -24,19 +28,13 @@ BEGIN_EVENT_TABLE(xStcEditor, wxStyledTextCtrl)
   EVT_MENU (wxID_CLEAR,       xStcEditor::OnDelete)
 
   EVT_STC_PAINTED(wxID_ANY, xStcEditor::Focus )
-//  EVT_SET_FOCUS(wxStyledTextCtrl::OnGainFocus)
-//  EVT_KILL_FOCUS(xStcEditor::OnLoseFocus)
 END_EVENT_TABLE ()
-
-BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_UPDATE_EDITOR_FOCUS, 7777)
-    DECLARE_EVENT_TYPE(wxEVT_SETSTATUSTEXT, 7777)
-END_DECLARE_EVENT_TYPES()
-
 
   xStcEditor::xStcEditor(wxWindow *parent, wxWindowID id):
     wxStyledTextCtrl(parent,id)
       {
+          fileInUse = wxEmptyString;
+
           int MARGIN_LINE_NUMBERS=0;
           StyleClearAll();
 
@@ -132,6 +130,9 @@ void xStcEditor::OnxStcUIUpdate(wxStyledTextEvent &/*event*/){
   int c1 = GetCharAt(p);
   int c2 = (p > 1 ? GetCharAt(p-1) : 0);
 
+  /*
+   * Matching for ( with )
+   * */
   if (c2=='(' || c2==')' || c1=='(' || c1==')')
   {
       int sp = (c2=='(' || c2==')') ? p-1 : p;
@@ -145,19 +146,35 @@ void xStcEditor::OnxStcUIUpdate(wxStyledTextEvent &/*event*/){
   else
       BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
 
-  wxCommandEvent eventCustom(wxEVT_SETSTATUSTEXT);
+  /*
+   * Matching for { with }
+   * */
+  if (c2=='{' || c2=='}' || c1=='{' || c1=='}')
+  {
+      int sp = (c2=='{' || c2=='}') ? p-1 : p;
 
-  if( GetCurrentPos() > 0 ){
-
-  wxString *s = new wxString(
-         wxT("pos: ")
-      +  wxString::Format (wxT("%d"), GetCurrentLine())
-      + wxT(",")
-      + wxString::Format( wxT("%d"), GetColumn( GetCurrentPos()))
-     );
-  eventCustom.SetClientData(s);
-  wxPostEvent(this->GetParent(), eventCustom);
+      int q = BraceMatch(sp);
+      if (q == wxSTC_INVALID_POSITION)
+          BraceBadLight(sp);
+      else
+          BraceHighlight(sp, q);
   }
+  else
+      BraceBadLight(wxSTC_INVALID_POSITION);
+
+    wxCommandEvent eventCustom(wxEVT_SETSTATUSTEXT);
+
+    if( GetCurrentPos() > 0 ){
+
+    wxString *s = new wxString(
+           wxT("pos: ")
+        +  wxString::Format (wxT("%d"), GetCurrentLine())
+        + wxT(",")
+        + wxString::Format( wxT("%d"), GetColumn( GetCurrentPos()))
+       );
+    eventCustom.SetClientData(s);
+    wxPostEvent(this->GetParent(), eventCustom);
+    }
 };
 
 
@@ -201,31 +218,26 @@ void xStcEditor::OnDelete (wxCommandEvent &/*event*/){
 };
 
 void  xStcEditor::Focus(wxStyledTextEvent &/* event*/){
-//Sets Focus to current editor.... Ugly workaround
-if ( GetSTCFocus() ){
-    wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
-    /* Send pointer of focused window */
-    eventCustom.SetClientData(this);
-    wxPostEvent(this->GetParent(), eventCustom);
-} else {
-    wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
-    /* Send NO Focus */
-    eventCustom.SetClientData(NULL);
-    wxPostEvent(this->GetParent(), eventCustom);
-}};
+  //Sets Focus to current editor.... Ugly workaround
+  if ( GetSTCFocus() ){
+      wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
+      /* Send pointer of focused window */
+      eventCustom.SetClientData(this);
+      wxPostEvent(this->GetParent(), eventCustom);
+  } else {
+      wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
+      /* Send NO Focus */
+      eventCustom.SetClientData(NULL);
+      wxPostEvent(this->GetParent(), eventCustom);
+  }
+};
 
-//void wxStyledTextCtrl::OnGainFocus( wxFocusEvent &/*event*/ ){
-//  wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
-//  /* Send pointer of focused window */
-//  eventCustom.SetClientData(this);
-//  wxPostEvent(this->GetParent(), eventCustom);
-//};
-//
-//void wxStyledTextCtrl::OnLoseFocus( wxFocusEvent &/*event*/){
-//  wxCommandEvent eventCustom(wxEVT_UPDATE_EDITOR_FOCUS);
-//  /* Send NO Focus */
-//  eventCustom.SetClientData(NULL);
-//  wxPostEvent(this->GetParent(), eventCustom);
-//};
+void xStcEditor::SetFileInUse(wxString filename){
+  fileInUse = filename;
+};
+
+wxString xStcEditor::GetFileInUse(){
+  return fileInUse;
+};
 
 

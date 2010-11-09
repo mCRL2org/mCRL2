@@ -17,12 +17,12 @@
 class xEditor: public wxAuiNotebook {
 public:
 	xEditor(wxWindow *parent, wxWindowID id, wxTextCtrl *output );
+	void AddEmptyPage();
 	bool LoadFile( const wxString &filename );
 	bool SaveFile( const wxString &filename );
 	wxString GetStringFromDataEditor();
 	wxString GetFileInUse();
 private:
-	wxString FileInUse;
 	wxTextCtrl *p_output;
 	xStcEditor *p_data_editor;
 
