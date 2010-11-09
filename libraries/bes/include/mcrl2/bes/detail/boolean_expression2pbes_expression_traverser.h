@@ -13,8 +13,9 @@
 #define MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
 
 #include <vector>
-#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/bes/traverser.h"
+#include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 
@@ -32,7 +33,7 @@ namespace detail {
     using super::leave;
     
     /// \brief A stack containing PBES expressions.
-    std::vector<pbes_system::pbes_expression> expression_stack;
+    atermpp::vector<pbes_system::pbes_expression> expression_stack;
 
     /// \brief Returns the top element of the expression stack, which is the result of the conversion.
     pbes_system::pbes_expression result() const
