@@ -473,6 +473,7 @@ void XSimMain::OnReset( wxCommandEvent& /* event */ )
 
 void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 {
+  try{
     wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxFD_CHANGE_DIR);
     if ( dialog.ShowModal() == wxID_OK )
     {
@@ -488,6 +489,10 @@ void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
             }
       Stopper_Exit();
     }
+  } catch (mcrl2::runtime_error e){
+    wxMessageDialog dialog(this, wxString(e.what(), wxConvUTF8),wxT("Error loading trace"),wxOK|wxICON_ERROR);
+    dialog.ShowModal();
+  }
 }
 
 void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
