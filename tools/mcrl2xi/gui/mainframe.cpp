@@ -24,14 +24,15 @@
 #include "options.h"
 #include "outputpanel.h"
 #include "mainframe.h"
+#include "settings.h"
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_MENU(wxID_CLOSE, MainFrame::OnQuit)
 EVT_MENU(wxID_NEW, MainFrame::OnNewFile)
 EVT_MENU(wxID_OPEN, MainFrame::OnOpenFile)
-EVT_MENU(Exec_ToggleOutputPanel, MainFrame::OnToggleOutputPanel)
-EVT_MENU(Exec_ToggleOptionsPanel, MainFrame::OnToggleOptionsPanel)
-EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
+EVT_MENU(mcrl2xi::Exec_ToggleOutputPanel, MainFrame::OnToggleOutputPanel)
+EVT_MENU(mcrl2xi::Exec_ToggleOptionsPanel, MainFrame::OnToggleOptionsPanel)
+EVT_MENU(mcrl2xi::Exec_PerspectiveReset, MainFrame::OnResetLayout)
 EVT_MENU(wxID_COPY, MainFrame::OnEdit)
 EVT_MENU(wxID_SELECTALL, MainFrame::OnEdit)
 EVT_MENU(wxID_PASTE, MainFrame::OnEdit)
@@ -41,6 +42,10 @@ EVT_MENU(wxID_REDO, MainFrame::OnEdit)
 EVT_MENU(wxID_CLEAR, MainFrame::OnEdit)
 EVT_MENU(wxID_SAVE, MainFrame::OnSaveFile)
 EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveFileAs)
+EVT_MENU(mcrl2xi::myID_EVALEXPR, MainFrame::OnEvaluate)
+EVT_MENU(mcrl2xi::myID_TYPECHECKSPEC, MainFrame::OnTypeCheck)
+EVT_MENU(mcrl2xi::myID_WRAPMODE, MainFrame::OnWrapmode)
+
 EVT_UPDATE_EDITOR_FOCUS(wxID_ANY, MainFrame::UpdateFocus)
 EVT_SETSTATUSTEXT(wxID_ANY, MainFrame::SetStatus)
 EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
@@ -50,7 +55,7 @@ END_EVENT_TABLE()
     MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size, mcrl2::data::rewriter::strategy rewrite_strategy) :
     wxFrame((wxFrame *) NULL, wxID_ANY, title, pos, size){
 
-  mcrl2_files = wxT("mCRL2 files (*.mcrl2)|*.mcrl2|LPS files (*.lps)|*.lps|TXT files (*.txt)|*.txt");
+
 #ifdef __WXMAC__
     // required since ABOUT is not the default id of the about menu
     wxApp::s_macAboutMenuItemId = Exec_About;
@@ -78,8 +83,11 @@ END_EVENT_TABLE()
     editMenu->Append(wxID_PASTE, wxT("&Paste \tCtrl-V"), wxT("Paste clipboard to editor"));
     editMenu->Append(wxID_CLEAR, wxT("&Delete \tDel"), wxT("Delete selection"));
     editMenu->AppendSeparator();
-
     editMenu->Append(wxID_SELECTALL, wxT("Select All \tCtrl-A"), wxT("Select all items tems in focused window"));
+    editMenu->AppendSeparator();
+    editMenu->Append(mcrl2xi::myID_EVALEXPR, wxT("&Evaluate \tCtrl-E"), wxT("Evaluate data expression"));
+    editMenu->Append(mcrl2xi::myID_TYPECHECKSPEC, wxT("&Type check \tCtrl-T"), wxT("Parse and type check specification"));
+
 
     editMenu->Enable(wxID_SELECTALL, true);
     editMenu->Enable(wxID_COPY, true);
@@ -90,28 +98,33 @@ END_EVENT_TABLE()
     editMenu->Enable(wxID_REDO, true);
     editMenu->Enable(wxID_CUT, true);
 
+    viewMenu = new wxMenu;
+    viewMenu->AppendCheckItem(mcrl2xi::myID_WRAPMODE, wxT("&Wrap mode \tCtrl+U"),
+            wxT("Wrap lines in editor"));
+
     wxMenu *helpMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
     helpMenu->Append(wxID_ABOUT, wxT("&About\tF1"),
         wxT("Show about dialog"));
 
     m_PanelMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
-    m_PanelMenu->AppendCheckItem( Exec_ToggleOutputPanel, wxT("Output Panel"));
-    m_PanelMenu->AppendCheckItem( Exec_ToggleOptionsPanel, wxT("Options Panel"));
+    m_PanelMenu->AppendCheckItem( mcrl2xi::Exec_ToggleOutputPanel, wxT("Output Panel"));
+    m_PanelMenu->AppendCheckItem( mcrl2xi::Exec_ToggleOptionsPanel, wxT("Options Panel"));
 
-    m_PanelMenu->Check(Exec_ToggleOutputPanel, true);
-    m_PanelMenu->Check(Exec_ToggleOptionsPanel, true);
+    m_PanelMenu->Check(mcrl2xi::Exec_ToggleOutputPanel, true);
+    m_PanelMenu->Check(mcrl2xi::Exec_ToggleOptionsPanel, true);
 
     wxMenu *windowMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
     windowMenu->AppendSubMenu(m_PanelMenu, wxT("&Dockable panels"),
             wxT("Toggle panel visibility"));
     windowMenu->AppendSeparator();
-    windowMenu->Append(Exec_PerspectiveReset, wxT("&Reset Perspective"),
+    windowMenu->Append(mcrl2xi::Exec_PerspectiveReset, wxT("&Reset Perspective"),
         wxT("Reset Perspective"));
 
     // add menus to the menu bar
     wxMenuBar *menuBar = new wxMenuBar();
     menuBar->Append(menuFile, wxT("&File"));
     menuBar->Append(editMenu, wxT("&Edit"));
+    menuBar->Append(viewMenu, wxT("&View"));
     menuBar->Append(windowMenu, wxT("&Window"));
     menuBar->Append(helpMenu, wxT("&Help"));
 
@@ -160,7 +173,7 @@ END_EVENT_TABLE()
 
   void MainFrame::OnOpenFile(wxCommandEvent& /*event*/) {
     wxFileDialog * openFileDialog = new wxFileDialog(this, wxT("Choose a file"), wxEmptyString , wxEmptyString,
-        mcrl2_files
+        mcrl2xi::mcrl2_files
 );
 
     if (openFileDialog->ShowModal() == wxID_OK){
@@ -185,7 +198,7 @@ END_EVENT_TABLE()
         wxFileDialog * saveFileDialog = new wxFileDialog(this, wxT("Save file as"),
             wxEmptyString,
             wxEmptyString,
-            mcrl2_files,
+            mcrl2xi::mcrl2_files,
             wxFD_SAVE | wxFD_OVERWRITE_PROMPT
             );
         if (saveFileDialog->ShowModal() == wxID_OK){
@@ -203,13 +216,21 @@ END_EVENT_TABLE()
        wxFileDialog * openFileDialog = new wxFileDialog(this, wxT("Save file as"),
           wxEmptyString,
           wxEmptyString,
-          mcrl2_files,
+          mcrl2xi::mcrl2_files,
           wxFD_SAVE | wxFD_OVERWRITE_PROMPT
           );
       if (openFileDialog->ShowModal() == wxID_OK){
         editor->SaveFile( openFileDialog->GetPath() );
       }
     }
+  };
+
+  void MainFrame::OnEvaluate(wxCommandEvent& e){
+    options->OnEval( e );
+  };
+
+  void MainFrame::OnTypeCheck(wxCommandEvent& e){
+    options->OnTypeCheck( e );
   };
 
   void MainFrame::OnToggleOutputPanel(wxCommandEvent& /*event*/) {
@@ -219,7 +240,7 @@ END_EVENT_TABLE()
        m_mgr.GetPane(output).Show();
      }
      m_mgr.Update();
-     m_PanelMenu->Check(Exec_ToggleOutputPanel, m_mgr.GetPane(output).IsShown() );
+     m_PanelMenu->Check(mcrl2xi::Exec_ToggleOutputPanel, m_mgr.GetPane(output).IsShown() );
   };
 
   void MainFrame::OnToggleOptionsPanel(wxCommandEvent& /*event*/) {
@@ -229,27 +250,27 @@ END_EVENT_TABLE()
       m_mgr.GetPane(options).Show();
     }
     m_mgr.Update();
-    m_PanelMenu->Check(Exec_ToggleOptionsPanel, m_mgr.GetPane(options).IsShown() );
+    m_PanelMenu->Check(mcrl2xi::Exec_ToggleOptionsPanel, m_mgr.GetPane(options).IsShown() );
   };
 
   void MainFrame::OnClosePane(wxAuiManagerEvent& event ){
     //Closing File Browser Pane
     if ( event.pane == &m_mgr.GetPane(output) )
     {
-      m_PanelMenu->Check(Exec_ToggleOutputPanel, false );
+      m_PanelMenu->Check(mcrl2xi::Exec_ToggleOutputPanel, false );
     }
 
     //Closing Executed Commands Pane
     if ( event.pane == &m_mgr.GetPane(options) )
     {
-      m_PanelMenu->Check(Exec_ToggleOptionsPanel, false );
+      m_PanelMenu->Check(mcrl2xi::Exec_ToggleOptionsPanel, false );
     }
   };
 
   void MainFrame::OnResetLayout(wxCommandEvent& /*event*/) {
      m_mgr.LoadPerspective(m_default_perspective);
-     m_PanelMenu->Check(Exec_ToggleOutputPanel, m_mgr.GetPane(output).IsShown() );
-     m_PanelMenu->Check(Exec_ToggleOptionsPanel, m_mgr.GetPane(options).IsShown() );
+     m_PanelMenu->Check(mcrl2xi::Exec_ToggleOutputPanel, m_mgr.GetPane(output).IsShown() );
+     m_PanelMenu->Check(mcrl2xi::Exec_ToggleOptionsPanel, m_mgr.GetPane(options).IsShown() );
   };
 
   void MainFrame::OnEdit (wxCommandEvent &event) {
@@ -277,11 +298,18 @@ END_EVENT_TABLE()
       editMenu->Enable(wxID_UNDO, true);
       editMenu->Enable(wxID_REDO, true);
       editMenu->Enable(wxID_CUT, true);
+      m_PanelMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode());
     }
   };
 
   void MainFrame::SetStatus(wxCommandEvent& event){
     wxString *s = (wxString*) event.GetClientData();
     SetStatusText(*s);
+  };
 
-  }
+  void MainFrame::OnWrapmode(wxCommandEvent& /*event*/){
+    if(focussed_editor){
+      focussed_editor->SetWrapMode (focussed_editor->GetWrapMode() == 0? wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
+    }
+  };
+

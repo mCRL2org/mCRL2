@@ -15,24 +15,36 @@
 #include <wx/gbsizer.h>
 #include <wx/textctrl.h>
 #include "editor.h"
+#include "outputpanel.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
+#include "subactions.h"
 
 enum {
-	OPTION_EVAL = 900
+	OPTION_EVAL = 900,
+  OPTION_TC,
+  OPTION_SOLVE
 };
 
 class Options: public wxPanel {
 
 public:
 
-  Options(wxWindow *parent, wxWindowID id, xEditor *editor, wxTextCtrl *output, mcrl2::data::rewriter::strategy rewrite_strategy);
+  Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *output, mcrl2::data::rewriter::strategy rewrite_strategy);
 	void OnEval(wxCommandEvent& /*event*/);
+	void SolveExpr(wxCommandEvent& /*event*/);
+	void OnTypeCheck(wxCommandEvent& /*event*/);
 	void OnSize(wxSizeEvent& /*event*/);
 private:
-  wxTextCtrl *EvalExpr;
+//  wxTextCtrl *EvalExpr;
+//  wxPanel *data_expression_panel;
 	xEditor *p_editor;
-  wxTextCtrl *p_output;
+	outputpanel *p_output;
+
+	typeCheckSpec *tc;
+	evalDataExpr *ev;
+	solveDataExpr *sd;
+
 
   mcrl2::data::rewriter::strategy m_rewrite_strategy;
 

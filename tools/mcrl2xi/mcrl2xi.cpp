@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg; adapted by Jan Friso Groote
+// Author(s): Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2i.cpp
+/// \file mcrl2xi.cpp
 
 
 #include "boost.hpp" // precompiled headers

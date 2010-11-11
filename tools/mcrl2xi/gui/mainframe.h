@@ -28,15 +28,6 @@
 #include "outputpanel.h"
 
 
-// IDs for the controls and the menu commands
-enum {
-	Exec_PerspectiveReset = 300,
-
-	Exec_ToggleOutputPanel,
-	Exec_ToggleOptionsPanel
-
-};
-
 // Define main frame
 class MainFrame: public wxFrame {
 
@@ -56,17 +47,20 @@ public:
   void UpdateFocus(wxCommandEvent& event);
   void SetStatus(wxCommandEvent& event);
   void OnNewFile(wxCommandEvent& /*event*/);
+  void OnEvaluate(wxCommandEvent& e);
+  void OnTypeCheck(wxCommandEvent& e);
+  void OnWrapmode(wxCommandEvent& /*event*/);
 private:
 
 	wxMenu *m_PanelMenu;
   wxMenu *editMenu;
+  wxMenu *viewMenu;
 	wxAuiManager m_mgr;
 	wxString m_default_perspective;
   xEditor *editor;
   Options *options;
   outputpanel *output;
   xStcEditor *focussed_editor;
-  wxString mcrl2_files;
 
   DECLARE_EVENT_TABLE()
 };

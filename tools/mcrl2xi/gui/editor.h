@@ -11,22 +11,22 @@
 #ifndef MCRL2XI_EDITOR_H_
 #define MCRL2XI_EDITOR_H_
 #include "xstceditor.h"
+#include "outputpanel.h"
 #include "wx/textctrl.h"
 #include <wx/aui/auibook.h>
 
+
 class xEditor: public wxAuiNotebook {
 public:
-	xEditor(wxWindow *parent, wxWindowID id, wxTextCtrl *output );
+	xEditor(wxWindow *parent, wxWindowID id, outputpanel *output );
 	void AddEmptyPage();
 	bool LoadFile( const wxString &filename );
 	bool SaveFile( const wxString &filename );
 	wxString GetStringFromDataEditor();
 	wxString GetFileInUse();
 private:
-	wxTextCtrl *p_output;
+	outputpanel *p_output;
 	xStcEditor *p_data_editor;
-
-
 };
 
 

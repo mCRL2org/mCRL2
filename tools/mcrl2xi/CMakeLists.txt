@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
 	gui/options.cpp
 	gui/xstceditor.cpp
 	gui/outputpanel.cpp
+  gui/subactions.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
   ${SRCS}

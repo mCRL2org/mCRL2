@@ -53,24 +53,25 @@ END_EVENT_TABLE ()
 
           /* Abusing Lexer for LUA */
           SetLexer(wxSTC_LEX_LUA);
-          SetKeyWords(0, mcrl2_spec_keywords + mcrl2_proc_keywords );
+          SetKeyWords(0, mcrl2xi::mcrl2_spec_keywords + mcrl2xi::mcrl2_proc_keywords );
           StyleSetForeground (wxSTC_LUA_WORD, wxColour (wxT("FOREST GREEN")));
           StyleSetBold(wxSTC_LUA_WORD,true);
 
-          SetKeyWords(1, mcrl2_sort_keywords );
+          SetKeyWords(1, mcrl2xi::mcrl2_sort_keywords );
           StyleSetForeground (wxSTC_LUA_WORD2, wxColour (wxT("BLUE")));
           StyleSetBold(wxSTC_LUA_WORD2,true);
 
-          SetKeyWords(2, mcrl2_data_keywords );
-          StyleSetForeground (wxSTC_LUA_WORD3, wxColour (wxT("ORCHID")));
+          SetKeyWords(2, mcrl2xi::mcrl2_data_keywords );
+          StyleSetForeground (wxSTC_LUA_WORD3, wxColour (wxT("DARK ORCHID")));
           StyleSetBold(wxSTC_LUA_WORD3,true);
 
-          SetKeyWords(3, mcrl2_operator_keywords );
+          SetKeyWords(3, mcrl2xi::mcrl2_operator_keywords );
           StyleSetForeground (wxSTC_LUA_WORD4, wxColour (wxT("ORANGE")));
           StyleSetBold(wxSTC_LUA_WORD4,true);
 
-          StyleSetForeground (wxSTC_LUA_COMMENT, wxColour (wxT("GRAY")));
-
+          StyleSetForeground (wxSTC_LUA_NUMBER, wxColour (wxT("NAVY")));
+          StyleSetForeground (wxSTC_LUA_OPERATOR, wxColour (wxT("MAROON")));
+          StyleSetBold(wxSTC_LUA_OPERATOR,true);
 
           // setup the colors and bold font
           StyleSetBackground(wxSTC_STYLE_BRACELIGHT, wxColour(0xff, 0xcc, 0x00));        // brace highlight
@@ -88,7 +89,7 @@ END_EVENT_TABLE ()
           SetCaretLineVisible(true);
           EnsureCaretVisible();
           SetCaretForeground(wxT("BLACK"));
-          SetCaretLineBackground(wxColour(235,235,235));
+          SetCaretLineBackground(wxColour(250, 224, 205));
 
           SetCaretWidth(1);
           SetCaretPeriod(500);
@@ -102,8 +103,8 @@ void xStcEditor::AutoComplete(wxStyledTextEvent &/*event*/){
   {
       // GTK version crashes if nothing matches, so this check must be made for GTK
       // For MSW, it doesn't crash but it flashes on the screen (also not very nice)
-      if (HasWord(GetTextRange(start, pos), mcrl2_spec_keywords))
-          AutoCompShow(pos-start, mcrl2_spec_keywords);
+      if (HasWord(GetTextRange(start, pos), mcrl2xi::mcrl2_spec_keywords))
+          AutoCompShow(pos-start, mcrl2xi::mcrl2_spec_keywords);
   }
 }
 
@@ -143,24 +144,23 @@ void xStcEditor::OnxStcUIUpdate(wxStyledTextEvent &/*event*/){
       else
           BraceHighlight(sp, q);
   }
-  else
-      BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
+  else{
+    /*
+     * Matching for { with }
+     * */
+    if (c2=='{' || c2=='}' || c1=='{' || c1=='}')
+    {
+        int sp = (c2=='{' || c2=='}') ? p-1 : p;
 
-  /*
-   * Matching for { with }
-   * */
-  if (c2=='{' || c2=='}' || c1=='{' || c1=='}')
-  {
-      int sp = (c2=='{' || c2=='}') ? p-1 : p;
-
-      int q = BraceMatch(sp);
-      if (q == wxSTC_INVALID_POSITION)
-          BraceBadLight(sp);
-      else
-          BraceHighlight(sp, q);
+        int q = BraceMatch(sp);
+        if (q == wxSTC_INVALID_POSITION)
+            BraceBadLight(sp);
+        else
+            BraceHighlight(sp, q);
+    }
+    else
+        BraceBadLight(wxSTC_INVALID_POSITION);
   }
-  else
-      BraceBadLight(wxSTC_INVALID_POSITION);
 
     wxCommandEvent eventCustom(wxEVT_SETSTATUSTEXT);
 
