@@ -43,7 +43,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   std::vector < transition > local_transitions(r.begin(),r.end());
 
   unsigned int *trans_lut = l.get_transition_indices();
-  SYSTEM_SPECIFIC_ALLOCA(new_trans_lut,unsigned int,l.num_states() + 1);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(new_trans_lut,unsigned int,l.num_states() + 1);
   
 
   new_trans_lut[0] = l.num_transitions();
@@ -116,7 +116,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
 
   using namespace mcrl2::lts::detail;
 
-  SYSTEM_SPECIFIC_ALLOCA(reachable,t_reach,l.num_states());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(reachable,t_reach,l.num_states());
   for (unsigned int i=0; i<l.num_states(); i++)
   {
     reachable[i] = unknown;
@@ -163,7 +163,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
 
   free(trans_lut);
 
-  SYSTEM_SPECIFIC_ALLOCA(state_map,unsigned int,l.num_states());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_map,unsigned int,l.num_states());
   unsigned int new_nstates = 0;
   for (unsigned int i=0; i < l.num_states(); i++)
   {
@@ -178,7 +178,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
     }
   }
 
-  SYSTEM_SPECIFIC_ALLOCA(label_map,unsigned int,l.num_action_labels());
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(label_map,unsigned int,l.num_action_labels());
   unsigned int new_nlabels = 0;
   for (unsigned int i=0; i < l.num_action_labels(); i++)
   {

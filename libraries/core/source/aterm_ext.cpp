@@ -54,7 +54,7 @@ namespace mcrl2 {
             int NrArgs = ATgetArity(Head);
             if (NrArgs > 0) 
             {
-              SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
+              MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
               for (int i = 0; i < NrArgs; i++) 
               {
                 Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
@@ -101,7 +101,7 @@ namespace mcrl2 {
             int NrArgs = ATgetArity(Head);
             if (NrArgs > 0) 
             {
-              SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
+              MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
               for (int i = 0; i < NrArgs; i++) 
               {
                 Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);

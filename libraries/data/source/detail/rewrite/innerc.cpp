@@ -1008,7 +1008,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, unsigned int arity, 
   ATermAppl tree;
   if ( r == NULL )
   {
-    SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
     treevars_usedcnt = a;
 //		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
     tree = build_tree(init_pars,0);
@@ -1571,7 +1571,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   ATermInt i;
   int j;
   FILE *f;
-  SYSTEM_SPECIFIC_ALLOCA(t,char,100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND));
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,char,100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND));
   void *h;
 
   CleanupRewriteSystem();

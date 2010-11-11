@@ -127,7 +127,7 @@ int tree_set_store::create_set(vector<unsigned int> &elems) {
 		return EMPTY_SET;
 	}
 
-        SYSTEM_SPECIFIC_ALLOCA(nodes,int,elems.size());
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(nodes,int,elems.size());
 	unsigned int node_size = 0;
 	unsigned int i,j;
 	for (i=0; i < elems.size(); ++i) {

@@ -784,7 +784,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars, ATerm
   ATermAppl tree;
   if ( r == NULL )
   {
-    SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
     treevars_usedcnt = a;
 //		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
     tree = build_tree(init_pars,0);
@@ -941,8 +941,8 @@ ATfprintf(stderr,"no more args\n");
 
 ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 {
-  SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl,max_vars);
-  SYSTEM_SPECIFIC_ALLOCA(vals,ATerm,max_vars);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl,max_vars);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,ATerm,max_vars);
   int len = 0;
 
   while ( isC(tree) )

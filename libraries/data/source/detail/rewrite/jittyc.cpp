@@ -1289,7 +1289,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
   ATermAppl tree;
   if ( r == NULL )
   {
-    SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
     treevars_usedcnt = a;
 //		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
     tree = build_tree(init_pars,0);
@@ -1377,7 +1377,7 @@ static ATermList get_vars(ATerm a)
 static ATermList dep_vars(ATermList eqn)
 {
   unsigned int rule_arity = ATgetArity(ATgetAFun(ATAelementAt(eqn,2)))-1;
-  SYSTEM_SPECIFIC_ALLOCA(bs,bool,rule_arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,rule_arity);
 
   ATerm cond = ATelementAt(eqn,1);
   ATermAppl pars = ATAelementAt(eqn,2); // arguments of lhs
@@ -1467,21 +1467,21 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
   //gsfprintf(stderr,"create_strategy: opid %i, arity %i, nfs %i\n",opid,arity,nfs[0]);
 
   // Array to keep note of the used parameters
-  SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
   for (unsigned int i = 0; i < arity; i++)
   {
     used[i] = get_nfs_array(nfs,i);
   }
 
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
-  SYSTEM_SPECIFIC_ALLOCA(args,int,arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,int,arity);
   for (unsigned int i = 0; i < arity; i++)
   {
     args[i] = -1;
   }
 
   // Process all (applicable) rules
-  SYSTEM_SPECIFIC_ALLOCA(bs,bool,arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,arity);
   ATermList dep_list = ATmakeList0();
   for (; !ATisEmpty(rules); rules=ATgetNext(rules))
   {
@@ -1709,7 +1709,7 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
     {
       if ( opid_is_nf((ATermInt) ATgetFirst((ATermList) t),arity) && arity != 0 )
       {
-        SYSTEM_SPECIFIC_ALLOCA(args,unsigned int,arity);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,unsigned int,arity);
         calc_nfs_list(args,arity,ATgetNext((ATermList) t),startarg,nnfvars);
         bool b = is_filled_nfs_array(args,arity);
         return b;
@@ -1796,7 +1796,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
           ss << "rewr_" << ATgetInt((ATermInt) ATgetFirst((ATermList) t)) << "_0_0()";
         }
       } else {
-        SYSTEM_SPECIFIC_ALLOCA(args_nfs,unsigned int,arity);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(args_nfs,unsigned int,arity);
         calc_nfs_list(args_nfs,arity,ATgetNext((ATermList) t),startarg,nnfvars);
         if ( b || !rewr )
         {
@@ -1830,7 +1830,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
 #endif
           ss << (ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs);
         }
-        SYSTEM_SPECIFIC_ALLOCA(args_first,unsigned int,arity);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(args_first,unsigned int,arity);
         if ( rewr && b )
         {
           fill_nfs_array(args_nfs,arity);
@@ -1866,7 +1866,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       }
       b = rewr;
       pair<bool,string> head = calc_inner_term(ATgetFirst((ATermList) t),startarg,nnfvars,false);
-      SYSTEM_SPECIFIC_ALLOCA(tail_first,unsigned int,arity);
+      MCRL2_SYSTEM_SPECIFIC_ALLOCA(tail_first,unsigned int,arity);
       string tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,NULL);
       ss << "isAppl(" << head.second << ")?";
       if ( rewr )
@@ -1889,7 +1889,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       if ( c )
       {
         clear_nfs_array(tail_first,arity);
-        SYSTEM_SPECIFIC_ALLOCA(rewrall,unsigned int,arity); fill_nfs_array(rewrall,arity);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewrall,unsigned int,arity); fill_nfs_array(rewrall,arity);
         tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,rewrall);
       }
       ss << tail_second << ")";
@@ -2601,7 +2601,7 @@ gsfprintf(IT_DEBUG_FILE "implement_strategy %P (%i)\n",int2term[opid],opid);
 gsfprintf(IT_DEBUG_FILE "implement_strategy: %T\n",strat);
 fflush(f);
 #endif
-  SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
   for (int i=0; i<arity; i++)
   {
     used[i] = ((nf_args & (1 << i)) != 0);
@@ -2890,7 +2890,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ATermInt i;
   int j;
   FILE *f;
-  SYSTEM_SPECIFIC_ALLOCA(t,char,100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND));
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,char,100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND));
   void *h;
 
   CleanupRewriteSystem();
@@ -3333,7 +3333,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
     for (int a=0; a<=arity; a++)
     {
-    SYSTEM_SPECIFIC_ALLOCA(nfs_a,unsigned int,a);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(nfs_a,unsigned int,a);
     int b = (a<=NF_MAX_ARITY)?a:0;
     for (unsigned int nfs=0; (nfs >> b) == 0; nfs++)
     {
@@ -3370,7 +3370,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       } 
       else 
       {
-        SYSTEM_SPECIFIC_ALLOCA(used,bool,a);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,a);
         for (int k=0; k<a; k++)
         {
           used[k] = ((nfs & (1 << k)) != 0);

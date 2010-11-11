@@ -251,7 +251,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
       max_arity = ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1;
     }
   }
-  SYSTEM_SPECIFIC_ALLOCA(used,bool, max_arity);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool, max_arity);
   for(unsigned int i=0; i<max_arity; ++i)
   {
     used[i]=false;
@@ -263,7 +263,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
     ATermList l = ATmakeList0();
     ATermList m = ATmakeList0();
     
-    SYSTEM_SPECIFIC_ALLOCA(args,int, arity);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,int, arity);
     for(unsigned int i=0; i<arity; ++i)
     {
       args[i]=-1;
@@ -285,7 +285,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 //gsprintf("pars: %T\n",pars);
 
         
-        SYSTEM_SPECIFIC_ALLOCA(bs,bool, arity);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool, arity);
         for (unsigned int i = 0; i < arity; i++)
         {
           bs[i]=false;
@@ -591,7 +591,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
       new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
     }
     
-    SYSTEM_SPECIFIC_ALLOCA(args,ATerm, new_arity);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATerm, new_arity);
     unsigned int i;
     if ( ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0) )
     {
@@ -742,8 +742,8 @@ gsMessage("      return1  %P\n",fromInner((ATermAppl) lookupSubstitution(Term)))
       }
     }
 
-    SYSTEM_SPECIFIC_ALLOCA(rewritten,ATerm, arity);
-    SYSTEM_SPECIFIC_ALLOCA(args,ATermAppl, arity);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,ATerm, arity);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATermAppl, arity);
 
     if ( head_arity > 0 )
     {
@@ -793,8 +793,8 @@ gsMessage("        strat action: %T\n",ATgetFirst(strat));
 
           unsigned int max_len = ATgetLength(ATLgetFirst(rule));
           
-          SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl, max_len);
-          SYSTEM_SPECIFIC_ALLOCA(vals,ATerm, max_len);
+          MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl, max_len);
+          MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,ATerm, max_len);
           unsigned int len = 0;
           bool matches = true;
 
@@ -847,7 +847,7 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
               }
             }
             
-            SYSTEM_SPECIFIC_ALLOCA(newargs,ATerm, new_arity);
+            MCRL2_SYSTEM_SPECIFIC_ALLOCA(newargs,ATerm, new_arity);
             unsigned int i;
             if ( gsIsDataVarId(rhs) )
             {

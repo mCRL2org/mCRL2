@@ -72,7 +72,7 @@ namespace detail {
       // does not need explicit protection or initialisation. JFG.
       
       // boost::scoped_array< ATerm > t(new ATerm[n]);
-      SYSTEM_SPECIFIC_ALLOCA(t,ATerm,n);
+      MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,ATerm,n);
       /* for (unsigned int i = 0; i < n; ++i)
       {
         t[i] = 0;

@@ -58,7 +58,7 @@ ATermAppl gsSortMultAct(ATermAppl MultAct)
   ATermList l = ATLgetArgument(MultAct,0);
   unsigned int len = ATgetLength(l);
   
-  SYSTEM_SPECIFIC_ALLOCA(acts,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(acts,ATerm,len);
   for (unsigned int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
   {
     acts[i] = ATgetFirst(l);

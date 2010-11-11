@@ -325,7 +325,7 @@ ATerm EnumeratorSolutionsStandard::build_solution_aux_innerc(ATerm t, ATermList 
       }
     }
 
-    SYSTEM_SPECIFIC_ALLOCA(args,ATerm,arity+extra_arity);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATerm,arity+extra_arity);
     AFun fun = ATgetAFun((ATermAppl) t);
     int k = 1;
 
@@ -452,9 +452,8 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                 fs_reset();
                 info.rewr_obj->clearSubstitution(var);
                 throw mcrl2::runtime_error(error_message);
-               //       error = true;
-               //       break;
-              } else
+              } 
+              else
               {
                 ss_push(build_solution(enum_vars,fs_top().vals));
               }
