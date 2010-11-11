@@ -264,7 +264,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
     ATermList m = ATmakeList0();
     
     SYSTEM_SPECIFIC_ALLOCA(args,int, arity);
-    for(unsigned int i=0; i<max_arity; ++i)
+    for(unsigned int i=0; i<arity; ++i)
     {
       args[i]=-1;
     }
