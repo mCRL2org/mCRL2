@@ -46,7 +46,7 @@ union _ATerm;
 extern union _ATerm **at_lookup_table_alias;
 extern SymEntry *at_lookup_table;
 
-unsigned long AT_symbolTableSize();
+MachineWord AT_symbolTableSize();
 void AT_initSymbol(int argc, char *argv[]);
 int AT_printSymbol(Symbol sym, FILE *f);
 /* ATbool AT_isValidSymbol(Symbol sym); */

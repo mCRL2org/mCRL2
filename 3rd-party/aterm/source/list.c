@@ -66,16 +66,8 @@ ATermList ATgetTail(ATermList list, int start)
 
 ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
 {
-  unsigned int i, start;
-
-  if (startpos < 0) 
-  {
-    start = ATgetLength(list) + startpos;
-  }
-  else 
-  {
-    start = startpos;
-  }
+  unsigned int i;
+  unsigned int start=(startpos<0 ? (unsigned int)ATgetLength(list)+startpos : (unsigned int)startpos);
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,start); 
 
   for (i=0; i<start; i++) 
@@ -324,23 +316,21 @@ int ATindexOf(ATermList list, ATerm el, int startpos)
 
 int ATlastIndexOf(ATermList list, ATerm el, int startpos)
 {
-  unsigned int i, len, start;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,1+(startpos<0?startpos + ATgetLength(list):startpos)); 
+  unsigned int i, len, start=(startpos<0 ? startpos+ATgetLength(list) : (unsigned int)startpos);
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,1+start); 
 
-  if(startpos < 0)
-    start = startpos + ATgetLength(list);
-  else
-    start = startpos;
-    
   len = start+1;
 
-  for (i=0; i<len; i++) {
+  for (i=0; i<len; i++) 
+  {
     buffer[i] = ATgetFirst(list);
     list = ATgetNext(list);
   }
 
-  for (i=len; i>0; i--) {
-    if (ATisEqual(buffer[i-1], el)) {
+  for (i=len; i>0; i--) 
+  {
+    if (ATisEqual(buffer[i-1], el)) 
+    {
       return i-1;
     }
   }

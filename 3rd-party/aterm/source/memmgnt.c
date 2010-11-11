@@ -168,10 +168,9 @@ ATprotected_block find_free_block(size_t minsize, size_t maxsize)
     /* No existing block matches, create a new block */
     blocksize = new_block_size(0, minsize, maxsize);
 
-    // ATfprintf(stderr,"Allocate a new block of size %d   %d\nmaxsize %d minsize %d\n",blocksize,low_memory,maxsize, minsize);
-    
     block = (ATprotected_block) AT_malloc(malloc_size(blocksize));
-    if ((!block) && (blocksize > maxsize)) {
+    if ((!block) && (blocksize > maxsize)) 
+    {
       /* Out of memory, try again with maximum block size */
       blocksize = maxsize;
       block = (ATprotected_block) AT_malloc(malloc_size(blocksize));
@@ -282,8 +281,8 @@ ATprotected_block resize_block(ATprotected_block block, size_t minsize, size_t m
   /* Calculate new block size */
   size_t blocksize = new_block_size(block->size, minsize, maxsize);
 
-  if (blocksize != block->size) {
-  // ATfprintf(stderr,"Resize a block from %d to size %d   %d\nMaxsize %d Minsize %d\n",block->size,blocksize,low_memory,maxsize,minsize);
+  if (blocksize != block->size) 
+  {
     /* New block size differs from old block, reallocate the block */
     newblock = (ATprotected_block)AT_realloc((void*)block, malloc_size(blocksize));
 

@@ -25,7 +25,7 @@ extern ProtEntry **at_prot_table;
 extern unsigned int at_prot_table_size;
 extern ProtEntry *at_prot_memory;
 extern ATermProtFunc *at_prot_functions;
-extern int at_prot_functions_count;
+extern unsigned int at_prot_functions_count;
 
 void AT_markTerm(ATerm t);
 void AT_markTerm_young(ATerm t);

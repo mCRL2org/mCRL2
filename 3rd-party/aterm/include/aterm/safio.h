@@ -57,8 +57,8 @@ typedef struct _ATermMapping{
 
 typedef struct _BinaryWriter{
 	ATermMapping *stack;
-	int stackSize;
-	int stackPosition;
+	unsigned int stackSize;
+	unsigned int stackPosition;
 	
 	IDMappings sharedTerms;
 	int currentSharedTermKey;
@@ -100,7 +100,7 @@ typedef struct _BinaryReader{
 	
 	ATermConstruct *stack;
 	unsigned int stackSize;
-	int stackPosition;
+	unsigned int stackPosition;
 	
 	ATerm *sharedTerms;
 	unsigned int sharedTermsSize;

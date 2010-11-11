@@ -53,7 +53,7 @@ extern ATprotected_block protected_blocks;
 AFun at_parked_symbol = -1;
 
 int gc_min_number_of_blocks;
-int max_freeblocklist_size;
+unsigned int max_freeblocklist_size;
 int min_nb_minor_since_last_major;
 int good_gc_ratio;
 int small_allocation_rate_ratio;
@@ -194,12 +194,12 @@ static void mark_memory_young(ATerm *start, ATerm *stop, ATbool check_term) /* C
           }
         }
       } 
-	  else if (AT_isValidSymbol(*cur)) 
-	  {
-		/*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
-		AT_markSymbol_young((Symbol)*cur);
-		/*nb_cell_in_stack++;*/
-	  }
+      else if (AT_isValidSymbol(*cur)) 
+      {
+	/*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
+	AT_markSymbol_young((Symbol)*cur);
+	/*nb_cell_in_stack++;*/
+      }
     }
   }
   else 
@@ -1118,9 +1118,11 @@ void minor_sweep_phase_young()
     if(ti->at_freelist) {
       ATerm data;
       /*fprintf(stderr,"minor_sweep_phase_young: ensure empty freelist[%d]\n",size);*/
-      for(data = ti->at_freelist ; data ; data=data->aterm.next) {
-        if(!EQUAL_HEADER(data->header,FREE_HEADER)) {
-          fprintf(stderr,"data = %p header = %x\n",data,(unsigned int) data->header);
+      for(data = ti->at_freelist ; data ; data=data->aterm.next) 
+      {
+        if(!EQUAL_HEADER(data->header,FREE_HEADER)) 
+        {
+          fprintf(stderr,"data = %p header = %x\n",(void *)data,(unsigned int) data->header);
         }
         assert(EQUAL_HEADER(data->header,FREE_HEADER)); 
         assert(ATgetType(data) == AT_FREE);   

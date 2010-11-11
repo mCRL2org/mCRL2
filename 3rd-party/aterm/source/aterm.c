@@ -84,13 +84,13 @@ static int      col = 0;
 static char     error_buf[ERROR_SIZE];
 static int      error_idx = 0;
 
-ProtEntry      *free_prot_entries = NULL;
-ProtEntry     **at_prot_table = NULL;
+ProtEntry       *free_prot_entries = NULL;
+ProtEntry       **at_prot_table = NULL;
 unsigned int    at_prot_table_size = 0;
-ProtEntry      *at_prot_memory = NULL;
-ATermProtFunc  *at_prot_functions = NULL;
-int             at_prot_functions_size = 0;
-int             at_prot_functions_count = 0;
+ProtEntry       *at_prot_memory = NULL;
+ATermProtFunc   *at_prot_functions = NULL;
+unsigned int    at_prot_functions_size = 0;
+unsigned int    at_prot_functions_count = 0;
 
 static ATerm   *mark_stack = NULL;
 static unsigned int mark_stack_size = 0;
@@ -517,7 +517,7 @@ void ATaddProtectFunction(ATermProtFunc f)
 
 void ATremoveProtectFunction(ATermProtFunc f)
 {
-  int i;
+  unsigned int i;
   
   for (i=0; i<at_prot_functions_count; i++)
   {

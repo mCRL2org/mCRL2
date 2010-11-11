@@ -86,7 +86,7 @@ typedef struct _sym_entry
   AFun id;
   int	arity;
 
-  int nr_terms;
+  unsigned int nr_terms;
   trm_bucket *terms;
 
   top_symbols *top_symbols; /* top symbols occuring in this symbol */
@@ -106,10 +106,10 @@ typedef struct
 {
   AFun   sym;
   int    arity;
-  int    nr_terms;
+  unsigned int nr_terms;
   int    term_width;
   ATerm *terms;
-  int   *nr_topsyms;
+  unsigned int   *nr_topsyms;
   int   *sym_width;
   int  **topsyms;
 } sym_read_entry;
@@ -594,7 +594,8 @@ static void gather_top_symbols(sym_entry *cur_entry, int cur_arg,
 
 static void build_arg_tables()
 {
-  int cur_sym, cur_trm;
+  int cur_sym; 
+  unsigned int cur_trm;
   unsigned int cur_arg;
   sym_entry *topsym;
 	
@@ -1269,8 +1270,8 @@ static Symbol read_symbol(byte_reader *reader)
 
 static ATbool read_all_symbols(byte_reader *reader)
 {
-  unsigned int val;
-  int i, j, k, arity;
+  unsigned int k, val;
+  int i, j, arity;
 
   for(i=0; i<nr_unique_symbols; i++) {
     /*{{{  Read the actual symbol */
@@ -1307,7 +1308,7 @@ static ATbool read_all_symbols(byte_reader *reader)
       read_symbols[i].sym_width = NULL;
       read_symbols[i].topsyms = NULL;
     } else {
-      read_symbols[i].nr_topsyms = (int *)AT_calloc(arity, sizeof(int));
+      read_symbols[i].nr_topsyms = (unsigned int *)AT_calloc(arity, sizeof(int));
       if(!read_symbols[i].nr_topsyms)
 	ATerror("read_all_symbols: out of memory trying to allocate "
 		"space for %d arguments.\n", arity);
@@ -1389,7 +1390,7 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
     if(readBits(&val, arg_sym->term_width, reader) < 0)
       return NULL;
     /*		ATfprintf(stderr, "arg term index = %d\n", val);*/
-    if(val >= arg_sym->nr_terms)
+    if (val >= arg_sym->nr_terms)
       return NULL;
     if(!arg_sym->terms[val]) {
       arg_sym->terms[val] = read_term(arg_sym, reader);

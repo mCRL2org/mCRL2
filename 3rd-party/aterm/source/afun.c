@@ -33,7 +33,7 @@
 char afun_id[] = "$Id: afun.c 23071 2007-07-02 10:06:17Z eriks $";
 
 static unsigned int table_class = INITIAL_AFUN_TABLE_CLASS;
-static unsigned long table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
+static MachineWord table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
 static unsigned long table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static SymEntry *hash_table     = NULL;
@@ -61,9 +61,9 @@ extern char *strdup(const char *s);
 
 static void resize_table()
 {
-  unsigned long i;
+  MachineWord i;
   unsigned int new_class = table_class+1;
-  unsigned long new_size  = AT_TABLE_SIZE(new_class);
+  MachineWord new_size  = AT_TABLE_SIZE(new_class);
   unsigned long new_mask  = AT_TABLE_MASK(new_class);
 
   at_lookup_table = (SymEntry *)AT_realloc(at_lookup_table, new_size*sizeof(SymEntry));
@@ -101,7 +101,7 @@ static void resize_table()
 
 /*{{{  unsigned int AT_symbolTableSize() */
 
-unsigned long AT_symbolTableSize()
+MachineWord AT_symbolTableSize()
 {
   return table_size;
 }

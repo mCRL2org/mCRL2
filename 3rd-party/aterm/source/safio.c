@@ -309,7 +309,8 @@ static ATerm getNextTerm(BinaryWriter binaryWriter){
 	/* Make sure the stack remains large enough */
 	ensureWriteStackCapacity(binaryWriter);
 	
-	if(binaryWriter->stackPosition >= 0){
+	/* if(binaryWriter->stackPosition >= 0) */
+        {
 		unsigned int type;
 		ATerm term;
 		ATermMapping *child;
@@ -656,8 +657,10 @@ inline static double readDouble(ByteBuffer byteBuffer){
 /**
  * Ensures that there is enough space left on the stack of the binary reader after the invocation of this function.
  */
-static void ensureReadStackCapacity(BinaryReader binaryReader){
-	if((binaryReader->stackPosition + 1) >= binaryReader->stackSize){
+static void ensureReadStackCapacity(BinaryReader binaryReader)
+{
+	if((binaryReader->stackPosition + 1) >= binaryReader->stackSize)
+        {
 		binaryReader->stack = (ATermConstruct*) AT_realloc(binaryReader->stack, (binaryReader->stackSize += STACKSIZEINCREMENT) * sizeof(struct _ATermConstruct));
 		if(binaryReader->stack == NULL) ATerror("Unable to allocate memory for expanding the binaryReader's stack.\n");
 	}
@@ -1193,7 +1196,7 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE *file){
 	BinaryWriter binaryWriter;
 	ByteBuffer byteBuffer;
 	
-	int bytesWritten = fwrite("?", sizeof(char), 1, file);
+	unsigned int bytesWritten = fwrite("?", sizeof(char), 1, file);
 	if(bytesWritten != 1){
 		ATwarning("Unable to write SAF identifier token to file.\n");
 		return ATfalse;
@@ -1287,7 +1290,7 @@ ATerm ATreadFromSAFFile(FILE *file){
 	byteBuffer = ATcreateByteBuffer(65536);
 	
 	do{
-		int blockSize;
+		unsigned int blockSize;
 		char sizeBytes[2];
 		
 		bytesRead = fread(sizeBytes, sizeof(char), 2, file);

@@ -98,7 +98,8 @@ void AT_printAllTerms(FILE *file);
 void AT_printAllAFunCounts(FILE *file);
 unsigned long AT_getAllocatedCount();
 
-struct _ATprotected_block {
+struct _ATprotected_block 
+{
 	ATerm* term;                     /* Pointer to the allocated block */
 	size_t size;                     /* Size of the allocated block, in bytes */
 	size_t protsize;                 /* Protected size (the actual size that is in use) */
