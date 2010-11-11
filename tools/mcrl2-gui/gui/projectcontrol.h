@@ -158,7 +158,7 @@ public:
 							+ wxT("'."));
 				} else {
 					//Collapse tree
-		            this->Refresh();
+		            this->DoRefresh();
 					//Expand tree to new dir
 					this->ExpandPath(s);
 					//Re-label dir
@@ -179,7 +179,7 @@ public:
 				Delete();
 				break;
 			case ID_REFRESH:
-				Refresh();
+				DoRefresh();
 				break;
 			case ID_EXPAND:
 			  this->ExpandPath(this->GetPath());
@@ -294,7 +294,7 @@ public:
 			CreateNewFile();
 			break;
     case WXK_F5:
-    	Refresh();
+    	DoRefresh();
 			break;
     case WXK_F6:
       CopyFile();
@@ -330,7 +330,7 @@ public:
     }
 	}
 
-	void Refresh(){
+	void DoRefresh(){
 		//std::cout<< "Refresh Tree" << std::	endl;
 		wxString selected_file = this->GetPath();
 		this->ReCreateTree();
@@ -557,7 +557,7 @@ public:
 
       f.Create( wf->GetFullPath() , false);
       //Expand to new created file
-      this->Refresh();
+      this->DoRefresh();
       this->ExpandPath( wf->GetFullPath());
 
     } else {
@@ -569,7 +569,7 @@ public:
       f.Create(wxString::Format( wf->GetFullPath() + wxT("(%i)"), i));
 
       //Expand to new created file
-      this->Refresh();
+      this->DoRefresh();
       this->ExpandPath(wxString::Format( wf->GetFullPath() + wxT("(%i)"), i));
     }
 
