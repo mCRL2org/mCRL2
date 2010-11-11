@@ -137,7 +137,6 @@ ATerm *stack_top()
 static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) /* CHANGED BY JFG */
 {
   ATerm *cur;
-  // fprintf(stderr,"---> mark_memory phase [%x,%x]\n",start,stop);
   /* Traverse the stack */
   if (check_term)
   { ATerm real_term;
@@ -176,10 +175,9 @@ static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) /* CHANGED 
 /*}}}  */
 /*{{{  static void mark_memory_young(ATerm *start, ATerm *stop)  */
 
-static void mark_memory_young(ATerm *start, ATerm *stop, ATbool check_term) // CHANGED BY JFG
+static void mark_memory_young(ATerm *start, ATerm *stop, ATbool check_term) /* CHANGED BY JFG  */
 {
   ATerm *cur;
-  // fprintf(stderr,"---> mark_memory_young phase [%x,%x]\n",start,stop);
 
   if (check_term)
   { ATerm real_term;
@@ -252,9 +250,9 @@ VOIDCDECL mark_phase()
 	 buffer, yielding a nicely packaged list of registers. In the AMD64 case, only the
 	 first 12 registers are integer registers, which is the only type of register we 
 	 expect to find ATerms in. */
-  jmp_buf env; // Buffer for registers
-  setjmp(env); // Save registers to buffer
-  // Now check buffer for ATerms and mark them
+  jmp_buf env; /* Buffer for registers */
+  setjmp(env); /* Save registers to buffer */
+  /* Now check buffer for ATerms and mark them */
   mark_memory((ATerm *)((char *)env), (ATerm *)((char *)env) + 12, ATtrue); 
 #elif defined(_MSC_VER) && defined(WIN32)
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
@@ -325,7 +323,6 @@ VOIDCDECL mark_phase()
   stack_size = stop-start;
   STATS(stack_depth, stack_size);
 
-  // fprintf(stderr,"Mark memory 1\n");
   mark_memory(start, stop,ATtrue);
 
   /* Traverse protected terms */
@@ -340,28 +337,23 @@ VOIDCDECL mark_phase()
     }
   }
 
-  // fprintf(stderr,"Mark memory 2\n");
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
     mark_memory((ATerm *)prot->start, (ATerm *)((prot->start) + prot->size),ATfalse);
   }
   
-  // fprintf(stderr,"Mark memory 3\n");
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
     if (pblock->protsize>0)
       mark_memory(pblock->term, &pblock->term[pblock->protsize],ATfalse);
   }
   
-  // fprintf(stderr,"Mark memory 4\n");
   at_mark_young = ATfalse;
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
   }
 
-  // fprintf(stderr,"Mark memory 5\n");
   AT_markProtectedSymbols();
 
-  // fprintf(stderr,"Mark memory 6\n");
   /* Mark 'parked' symbol */
   if (AT_isValidSymbol(at_parked_symbol)) {
     AT_markSymbol(at_parked_symbol);
@@ -456,10 +448,8 @@ VOIDCDECL mark_phase_young()
   stack_size = stop-start;
   STATS(stack_depth, stack_size);
 
-  // fprintf(stderr,"Mark memory young 1\n");
   mark_memory_young(start, stop, ATtrue);
 
-  // fprintf(stderr,"Mark memory young 2\n");
   /* Traverse protected terms */
   for(i=0; i<at_prot_table_size; i++) {
     ProtEntry *cur = at_prot_table[i];
@@ -472,12 +462,10 @@ VOIDCDECL mark_phase_young()
     }
   }
 
-  // fprintf(stderr,"Mark memory young 3\n");
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
     mark_memory_young((ATerm *)prot->start, (ATerm *)((prot->start) + prot->size),ATfalse);
   }
   
-  // fprintf(stderr,"Mark memory young 4\n");
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
   { if (pblock->protsize>0)
       mark_memory_young(pblock->term, &pblock->term[pblock->protsize], ATfalse);
@@ -486,16 +474,13 @@ VOIDCDECL mark_phase_young()
 
   }
   
-  // fprintf(stderr,"Mark memory young 5 %d\n",count);
   at_mark_young = ATtrue;
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
   }
     
-  // fprintf(stderr,"Mark memory young 6\n");
   AT_markProtectedSymbols_young();
-  // fprintf(stderr,"Mark memory young 7\n");
 
    /* Mark 'parked' symbol */
   if (AT_isValidSymbol(at_parked_symbol)) {
@@ -1272,7 +1257,6 @@ void AT_collect()
 #endif
   FILE *file = gc_f;
   unsigned int size;
-  // fprintf(stderr,"begin AT collect phase\n");
 
   /* snapshot*/
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
@@ -1295,9 +1279,7 @@ void AT_collect()
 
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
-  // fprintf(stderr,"begin mark phase\n");
   mark_phase();
-  // fprintf(stderr,"end mark phase\n");
   
 #ifdef WITH_STATS
   times(&mark);
@@ -1306,7 +1288,6 @@ void AT_collect()
 #endif
 
   sweep_phase();
-  // fprintf(stderr,"end sweep phase\n");
 
 #ifdef WITH_STATS  
   times(&sweep);
@@ -1324,7 +1305,6 @@ void AT_collect()
 
 void AT_collect_minor()
 {
-  // fprintf(stderr,"begin AT collect phase\n");
 #ifdef WITH_STATS
   struct tms start, mark, sweep;
   clock_t user;
@@ -1354,10 +1334,7 @@ void AT_collect_minor()
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
     /*nb_cell_in_stack=0;*/
-  // fprintf(stderr,"begin mark young phase\n");
   mark_phase_young();
-    /*fprintf(stderr,"AT_collect_young: nb_cell_in_stack = %d\n",nb_cell_in_stack++);*/
-  // fprintf(stderr,"end mark young phase\n");
     
 #ifdef WITH_STATS
   times(&mark);
@@ -1368,7 +1345,6 @@ void AT_collect_minor()
   minor_sweep_phase_young();
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
-  // fprintf(stderr,"end sweep young phase\n");
 
 #ifdef WITH_STATS
   times(&sweep);

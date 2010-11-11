@@ -42,12 +42,15 @@ void BLinsert(BList *blockList, struct HFnode *node){
 
    node->frequency=0L;
 
-   if(*blockList==NULL){
+   if(*blockList==NULL)
+   {
      node->previous=NULL;
      node->next=NULL;
      *blockList=(tBlock*)malloc(sizeof(tBlock));
      Binit(*blockList);
-   } else {
+   } 
+   else 
+   {
      node->previous=NULL;
      node->next    =(*blockList)->first;
      (*blockList)->first->previous=node;
@@ -59,25 +62,29 @@ void BLinsert(BList *blockList, struct HFnode *node){
 }
 
 
-void BLdelete(BList *blockList, BLcursor cursor){
+/* void BLdelete(BList *blockList, BLcursor cursor)
+{
    tBlock *tmp;
-
    tmp=cursor;
-/*
+/ *
 
-   if(tmp->previous==NULL){
+   if(tmp->previous==NULL)
+   {
       blockList->first=tmp->next;
-   } else {
+   } 
+   else 
+   {
       tmp->previous->next=tmp->next;
    }
 
-   if(tmp->next!=NULL){
+   if(tmp->next!=NULL)
+   {
       tmp->next->previous=tmp->previous;
    }
-*/
+* /
    free(tmp);
       
-}
+} */
 
 
 
@@ -253,7 +260,7 @@ void Bfree(tBlock *nodeList){
 
 
 
-void BLdeleteNode(BList *blockList, struct HFnode *node){
+/* void BLdeleteNode(BList *blockList, struct HFnode *node){
 
    Bdelete(node->block, node);
    if(node->block->first==NULL){
@@ -261,7 +268,7 @@ void BLdeleteNode(BList *blockList, struct HFnode *node){
       BLdelete(blockList, node->block);
    }
 
-}
+} */
 
 
 void Bdump(FILE *fp, tBlock *block){

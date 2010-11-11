@@ -155,17 +155,20 @@ int LZreadString(BitStream *bs, LZbuffer *buffer, char **string){
    return 1;
 }
 
-int LZreadInt(BitStream *bs, LZbuffer *buffer, long *n){
+int LZreadInt(BitStream *bs, LZbuffer *b, long *n)
+{
    return BSreadInt(bs,n);
 }
 
-int LZwriteInt(BitStream *bs, LZbuffer *buffer, long n){
+int LZwriteInt(BitStream *bs, LZbuffer *b, long n)
+{
    BSwriteInt(bs,n);
    return 1;
 }
 
 
-int LZwriteATerm(BitStream *bs, LZbuffer *buffer, ATerm term){
+int LZwriteATerm(BitStream *bs, LZbuffer *buffer, ATerm term)
+{
    char *buf;
 
    buf=strdup(ATwriteToString(term));
@@ -176,7 +179,8 @@ int LZwriteATerm(BitStream *bs, LZbuffer *buffer, ATerm term){
 }
 
 
-int LZreadATerm(BitStream *bs, LZbuffer *buffer, ATerm *term){
+int LZreadATerm(BitStream *bs, LZbuffer *buffer, ATerm *term)
+{
    char *str;
 
  
@@ -257,9 +261,9 @@ static int decompress(BitStream *bs, LZbuffer *buffer, char **str){
    LZtoken token;
    char c;
 
-   // *str=scratch;
+   /* *str=scratch; */
    last=0;
-count++;
+   count++;
    while(LZreadToken(bs,token)){
 
       LZsplitToken(&c, &offset, &length, token);
@@ -268,13 +272,13 @@ count++;
          buffer->last=(buffer->last+1)%SEARCHBUF_SIZE;
          buffer->search[buffer->last]=c;
          last = add2scratch(last, c);
-         // scratch[last++]=c;
+         /* scratch[last++]=c; */
       } else {
          for(i=0;i<length;i++){
             buffer->last=(buffer->last+1)%SEARCHBUF_SIZE;
             buffer->search[buffer->last]=buffer->search[(buffer->last-offset-1+SEARCHBUF_SIZE)%SEARCHBUF_SIZE];
             last = add2scratch(last,buffer->search[buffer->last]);
-           // scratch[last++]=buffer->search[buffer->last];
+           /* scratch[last++]=buffer->search[buffer->last]; */
          }
       }
       *str=scratch;

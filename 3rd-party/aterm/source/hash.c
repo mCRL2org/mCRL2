@@ -199,7 +199,7 @@ static void insertKeyValue(ATermIndexedSet s,
     }
 
     if (s->values != NULL) { 
-      // valuetable = AT_alloc_protected_minmax(y+1, ELEMENTS_PER_TABLE);
+      /* valuetable = AT_alloc_protected_minmax(y+1, ELEMENTS_PER_TABLE); */
       valuetable = AT_alloc_protected_minmax(ELEMENTS_PER_TABLE, ELEMENTS_PER_TABLE);
       s->values[x] = valuetable;
       if (valuetable == NULL) { 
@@ -412,7 +412,6 @@ static long keyPut(ATermIndexedSet hashset, ATerm key,
 { 
   long n,m;
 
-  // ATfprintf(stderr,"keyPut: %t:= (size: %d)",key,hashset->nr_entries);
   if(hashset->first_free_position == 0) { 
     m = hashset->nr_entries; 
     n = hashPut(hashset,key,m);
@@ -591,10 +590,10 @@ void ATtableReset(ATermTable table)
 
   for(i=0; ((i<table->nr_tables) && 
 	    (table->keys[i]!=NULL)); i++) {
-    // table->keys[i] = AT_realloc_protected_minmax(table->keys[i], 0, ELEMENTS_PER_TABLE);	  JFG
+    /* table->keys[i] = AT_realloc_protected_minmax(table->keys[i], 0, ELEMENTS_PER_TABLE);	  JFG */
     table->keys[i] = AT_realloc_protected_minmax(table->keys[i], ELEMENTS_PER_TABLE, ELEMENTS_PER_TABLE);	 
     if (table->values!=NULL) {
-      // table->values[i] = AT_realloc_protected_minmax(table->values[i], 0, ELEMENTS_PER_TABLE);	 
+      /* table->values[i] = AT_realloc_protected_minmax(table->values[i], 0, ELEMENTS_PER_TABLE);	  */
       table->values[i] = AT_realloc_protected_minmax(table->values[i], ELEMENTS_PER_TABLE, ELEMENTS_PER_TABLE);	 
     }
   }

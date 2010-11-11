@@ -18,9 +18,9 @@
    is not a constant value) */
 #ifdef _MSC_VER
 #include "malloc.h"
-#define SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
+#define ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
 #else
-#define SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE NAME[SIZE]
+#define ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) alloca((SIZE)*sizeof(TYPE))
 #endif
 
 /*}}}  */
@@ -67,7 +67,7 @@ ATermList ATgetTail(ATermList list, int start)
 ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
 {
   unsigned int i, start;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,start); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,start); 
 
   if (startpos < 0) {
     start = ATgetLength(list) + startpos;
@@ -107,7 +107,7 @@ ATermList ATgetPrefix(ATermList list)
 {
   unsigned int i, size = ATgetLength(list);
   ATermList result = ATmakeList0();
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,size); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,size); 
   
   if (size<=1)
      return result;
@@ -159,7 +159,7 @@ ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end)
 {
   unsigned int i, size;
   ATermList result = ATmakeList0();
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,(end<=start?0:end-start)); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,(end<=start?0:end-start)); 
  
   if (end<=start)
     return result;
@@ -193,7 +193,7 @@ ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index)
 {
   unsigned int i;
   ATermList result;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,index); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,index); 
   
   /* First collect the prefix in buffer */
   for(i=0; i<index; i++) {
@@ -223,7 +223,7 @@ ATermList ATappend(ATermList list, ATerm el)
 {
   unsigned int i, len = ATgetLength(list);
   ATermList result;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
   
   /* Collect all elements of list in buffer */
   for(i=0; i<len; i++) {
@@ -251,7 +251,7 @@ ATermList ATappend(ATermList list, ATerm el)
 ATermList ATconcat(ATermList list1, ATermList list2)
 {
   unsigned int i, len = ATgetLength(list1);
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
   ATermList result = list2;
 
   if(ATisEqual(list2, ATempty))
@@ -322,7 +322,7 @@ int ATindexOf(ATermList list, ATerm el, int startpos)
 int ATlastIndexOf(ATermList list, ATerm el, int startpos)
 {
   unsigned int i, len, start;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,1+(startpos<0?startpos + ATgetLength(list):startpos)); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,1+(startpos<0?startpos + ATgetLength(list):startpos)); 
 
   if(startpos < 0)
     start = startpos + ATgetLength(list);
@@ -376,7 +376,7 @@ ATermList ATremoveElement(ATermList list, ATerm t)
   unsigned int i = 0;
   ATerm el = NULL;
   ATermList l = list;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
   
   while(!ATisEmpty(l)) 
   {
@@ -413,7 +413,7 @@ ATermList ATremoveElement(ATermList list, ATerm t)
 ATermList ATremoveElementAt(ATermList list, unsigned int idx)
 {
   unsigned int i;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx); 
   
   for(i=0; i<idx; i++) {
     buffer[i] = ATgetFirst(list);
@@ -442,7 +442,7 @@ ATermList ATremoveAll(ATermList list, ATerm t)
   ATermList l = list;
   ATermList result = ATempty;
   ATbool found = ATfalse;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
 
   while(!ATisEmpty(l)) {
     el = ATgetFirst(l);
@@ -477,7 +477,7 @@ ATermList ATremoveAll(ATermList list, ATerm t)
 ATermList ATreplace(ATermList list, ATerm el, unsigned int idx)
 {
   unsigned int i;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx); 
   
   for(i=0; i<idx; i++) {
     buffer[i] = ATgetFirst(list);
@@ -529,7 +529,7 @@ static int compare_terms(const ATerm *t1, const ATerm *t2)
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 {
   unsigned int idx, len = ATgetLength(list);
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
 
   idx = 0;
   while (!ATisEmpty(list)) {
@@ -573,7 +573,7 @@ ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
 {
   unsigned int i = 0;
   ATermList pair, tmp = (ATermList)dict;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(tmp));
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(tmp));
 
   /* Search for the key */
   while(!ATisEmpty(tmp)) 
@@ -667,7 +667,7 @@ ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm))
   ATermList l = list;
   ATermList result = ATempty;
   ATbool found = ATfalse;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
 
   while(!ATisEmpty(l)) 
   {
@@ -710,7 +710,7 @@ ATermList ATgetArguments(ATermAppl appl)
   Symbol s = ATgetSymbol(appl);
   unsigned int i, len = ATgetArity(s);
   ATermList result = ATempty;
-  SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
 
   for(i=0; i<len; i++)
     buffer[i] = ATgetArgument(appl, i);

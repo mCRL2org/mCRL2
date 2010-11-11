@@ -171,7 +171,7 @@ void HFdumpCodes(struct HFnode *tree){
 /* Return the first node of 'current' in 'tree' in the left-to-right and bottom
    to top ordering  */
 
-static struct HFnode *HFsuccessor(HFtree *tree, struct HFnode *current){
+static struct HFnode *HFsuccessor(HFtree *t, struct HFnode *current){
    tBlock *currentBlock;
    HFcursor last, prelast;
 
