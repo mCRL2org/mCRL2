@@ -33,9 +33,14 @@ namespace mcrl2 {
         bool m_has_reported;
 
       public:
+        timer() :
+          m_start(0),
+          m_finish(0),
+          m_has_reported(false)
+        {}
+
         timer(std::string const& tool_name, std::string const& filename) :
           m_tool_name(tool_name),
-          m_timing_name(""),
           m_filename(filename),
           m_start(0),
           m_finish(0),

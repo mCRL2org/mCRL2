@@ -14,6 +14,7 @@
 #include <boost/bind.hpp>
 
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/timer.h"
 
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
@@ -431,21 +432,33 @@ namespace mcrl2 {
           initialise_allowed_eqs();
         }
 
-        void run()
+        void run(utilities::timer& timing)
         {
           if(core::gsDebug)
           {
             std::cerr << "Converting BES to standard form" << std::endl;
           }
+          timing.start("standard form conversion");
           make_standard_form(m_bes, true);
+          timing.finish();
+          timing.report();
           if(core::gsDebug)
           {
             std::cerr << "BES Reduction algorithm initialised" << std::endl;
           }
 
+          timing.start("conversion to LTS");
           bes_to_lts();
+          timing.finish();
+          timing.report();
+          timing.start("reduction");
           reduce_lts();
+          timing.finish();
+          timing.report();
+          timing.start("conversion to BES");
           lts_to_bes();
+          timing.finish();
+          timing.report();
         }
 
     };
@@ -507,12 +520,14 @@ class bes_bisimulation_tool: public super
       using namespace mcrl2::bes;
       using namespace mcrl2;
 
+      utilities::timer timing(m_name, timing_filename());
+
       boolean_equation_system<> b;
 
       core::gsVerboseMsg("Loading BES from input file... ");
       b.load(m_input_filename);
       core::gsVerboseMsg("done\n");
-      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b).run();
+      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b).run(timing);
       b.save(m_output_filename);
       
       return true;

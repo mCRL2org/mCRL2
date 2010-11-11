@@ -20,6 +20,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/timer.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes_gauss_elimination.h"
@@ -66,7 +67,45 @@ class bessolve_tool: public input_output_tool
 
     bool run()
     {
-      print_specification();
+      timer timing(m_name, timing_filename());
+
+      bes::boolean_equation_system<> bes;
+      bes.load(input_filename());
+
+      gsVerboseMsg("solving BES in %s using %s\n",
+        input_filename().empty()?"standard input":input_filename().c_str(),
+        solution_strategy_to_string(strategy).c_str());
+
+      unsigned int log_level = 0;
+      if(core::gsVerbose)
+      {
+        log_level = 1;
+      }
+      if(core::gsDebug)
+      {
+        log_level = 2;
+      }
+
+      bool result = false;
+
+      timing.start("solving");
+      switch(strategy)
+      {
+        case gauss:
+          result = gauss_elimination(bes, log_level);
+          break;
+        case spm:
+          result = small_progress_measures(bes, log_level);
+          break;
+        default:
+          throw mcrl2::runtime_error("unhandled strategy provided");
+          break;
+      }
+      timing.finish();
+      timing.report();
+
+      std::cout << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
+
       return true;
     }
 
@@ -98,43 +137,6 @@ class bessolve_tool: public input_output_tool
           parser.error("option -s/--strategy has illegal argument '" + str_strategy + "'");
         }
       }
-    }
-
-  private:
-    void print_specification()
-    {
-      bes::boolean_equation_system<> bes;
-      bes.load(input_filename());
-
-      gsVerboseMsg("solving BES in %s using %s\n",
-        input_filename().empty()?"standard input":input_filename().c_str(),
-        solution_strategy_to_string(strategy).c_str());
-
-      unsigned int log_level = 0;
-      if(core::gsVerbose)
-      {
-        log_level = 1;
-      }
-      if(core::gsDebug)
-      {
-        log_level = 2;
-      }
-
-      bool result = false;
-      switch(strategy)
-      {
-        case gauss:
-          result = gauss_elimination(bes, log_level);
-          break;
-        case spm:
-          result = small_progress_measures(bes, log_level);
-          break;
-        default:
-          throw mcrl2::runtime_error("unhandled strategy provided");
-          break;
-      }
-
-      std::cout << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
     }
 };
 

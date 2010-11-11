@@ -17,6 +17,7 @@
 #endif
 
 #include <iostream>
+#include "mcrl2/utilities/timer.h"
 #include "ParityGame.h"
 #include "SmallProgressMeasures.h"
 #include "PredecessorLiftingStrategy.h"
@@ -74,6 +75,7 @@ namespace mcrl2 {
       pbespg_solver_type solver_type;
       bool use_scc_decomposition;
       bool verify_solution;
+      mcrl2::utilities::timer timing;
 
       pbespgsolve_options()
       : solver_type(spm_solver),
@@ -128,6 +130,7 @@ namespace mcrl2 {
       template <typename Container>
       bool run(pbes<Container>& p)
       {
+        m_options.timing.start("initialization");
         // Generate the game from a PBES:
         verti goal_v;
         ParityGame pg;
@@ -135,9 +138,14 @@ namespace mcrl2 {
 
         // Create a solver:
         std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
-
+        m_options.timing.finish();
+        m_options.timing.report();
+        
         // Solve the game:
+        m_options.timing.start("solving");
         ParityGame::Strategy solution = solver->solve();
+        m_options.timing.finish();
+        m_options.timing.report();
         if (solution.empty())
         {
           throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
