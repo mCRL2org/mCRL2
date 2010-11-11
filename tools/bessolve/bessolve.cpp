@@ -20,7 +20,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/timer.h"
+#include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes_gauss_elimination.h"
@@ -67,8 +67,6 @@ class bessolve_tool: public input_output_tool
 
     bool run()
     {
-      timer timing(m_name, timing_filename());
-
       bes::boolean_equation_system<> bes;
       bes.load(input_filename());
 
@@ -88,7 +86,7 @@ class bessolve_tool: public input_output_tool
 
       bool result = false;
 
-      timing.start("solving");
+      timer().start("solving");
       switch(strategy)
       {
         case gauss:
@@ -101,8 +99,7 @@ class bessolve_tool: public input_output_tool
           throw mcrl2::runtime_error("unhandled strategy provided");
           break;
       }
-      timing.finish();
-      timing.report();
+      timer().finish("solving");
 
       std::cout << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
 

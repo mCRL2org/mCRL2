@@ -23,7 +23,7 @@
 #include <cstdio>
 
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/timer.h"
+#include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/atermpp/aterm_init.h"
 //#include "mcrl2/utilities/rewriter_tool.h"
 //#include "mcrl2/utilities/pbes_rewriter_tool.h"
@@ -108,9 +108,6 @@ public:
 
   bool run()
   {
-    // Initialise timer
-    m_options.timing = timer(m_name, timing_filename());
-
     if (mcrl2::core::gsVerbose)
     {
       std::clog << "pbespgsolve parameters:" << std::endl;
@@ -149,7 +146,7 @@ public:
       log_level = 2;
     }
     set_parity_game_generator_log_level(log_level); 
-    pbespgsolve_algorithm algorithm(m_options);
+    pbespgsolve_algorithm algorithm(timer(), m_options);
     std::string result = "unknown";
     try
     {

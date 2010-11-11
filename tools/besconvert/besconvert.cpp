@@ -14,7 +14,7 @@
 #include <boost/bind.hpp>
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/timer.h"
+#include "mcrl2/utilities/execution_timer.h"
 
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
@@ -432,16 +432,17 @@ namespace mcrl2 {
           initialise_allowed_eqs();
         }
 
-        void run(utilities::timer& timing)
+        void run(utilities::execution_timer& timing)
         {
           if(core::gsDebug)
           {
             std::cerr << "Converting BES to standard form" << std::endl;
           }
+
           timing.start("standard form conversion");
           make_standard_form(m_bes, true);
-          timing.finish();
-          timing.report();
+          timing.finish("standard form conversion");
+
           if(core::gsDebug)
           {
             std::cerr << "BES Reduction algorithm initialised" << std::endl;
@@ -449,16 +450,15 @@ namespace mcrl2 {
 
           timing.start("conversion to LTS");
           bes_to_lts();
-          timing.finish();
-          timing.report();
+          timing.finish("conversion to LTS");
+
           timing.start("reduction");
           reduce_lts();
-          timing.finish();
-          timing.report();
+          timing.finish("reduction");
+
           timing.start("conversion to BES");
           lts_to_bes();
-          timing.finish();
-          timing.report();
+          timing.finish("conversion to BES");
         }
 
     };
@@ -520,14 +520,12 @@ class bes_bisimulation_tool: public super
       using namespace mcrl2::bes;
       using namespace mcrl2;
 
-      utilities::timer timing(m_name, timing_filename());
-
       boolean_equation_system<> b;
 
       core::gsVerboseMsg("Loading BES from input file... ");
       b.load(m_input_filename);
       core::gsVerboseMsg("done\n");
-      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b).run(timing);
+      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b).run(timer());
       b.save(m_output_filename);
       
       return true;

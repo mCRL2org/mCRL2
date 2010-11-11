@@ -17,7 +17,7 @@
 #endif
 
 #include <iostream>
-#include "mcrl2/utilities/timer.h"
+#include "mcrl2/utilities/execution_timer.h"
 #include "ParityGame.h"
 #include "SmallProgressMeasures.h"
 #include "PredecessorLiftingStrategy.h"
@@ -75,7 +75,6 @@ namespace mcrl2 {
       pbespg_solver_type solver_type;
       bool use_scc_decomposition;
       bool verify_solution;
-      mcrl2::utilities::timer timing;
 
       pbespgsolve_options()
       : solver_type(spm_solver),
@@ -91,12 +90,14 @@ namespace mcrl2 {
       std::auto_ptr<LiftingStrategyFactory> lift_strat_factory;
       std::auto_ptr<ParityGameSolverFactory> subsolver_factory;
       std::auto_ptr<ParityGameSolverFactory> solver_factory;
+      mcrl2::utilities::execution_timer& m_timer;
       pbespgsolve_options m_options;
 
     public:
 
-      pbespgsolve_algorithm(pbespgsolve_options options = pbespgsolve_options())
-      : m_options(options)
+      pbespgsolve_algorithm(mcrl2::utilities::execution_timer& timing, pbespgsolve_options options = pbespgsolve_options())
+      : m_timer(timing),
+        m_options(options)
       {
         if (options.solver_type == spm_solver)
         {
@@ -130,7 +131,7 @@ namespace mcrl2 {
       template <typename Container>
       bool run(pbes<Container>& p)
       {
-        m_options.timing.start("initialization");
+        m_timer.start("initialization");
         // Generate the game from a PBES:
         verti goal_v;
         ParityGame pg;
@@ -138,14 +139,13 @@ namespace mcrl2 {
 
         // Create a solver:
         std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
-        m_options.timing.finish();
-        m_options.timing.report();
+        m_timer.finish("initialization");
         
         // Solve the game:
-        m_options.timing.start("solving");
+        m_timer.start("solving");
         ParityGame::Strategy solution = solver->solve();
-        m_options.timing.finish();
-        m_options.timing.report();
+        m_timer.finish("solving");
+
         if (solution.empty())
         {
           throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");

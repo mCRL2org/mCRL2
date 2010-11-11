@@ -21,7 +21,7 @@
 #endif
 
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/timer.h"
+#include "mcrl2/utilities/execution_timer.h"
 
 namespace mcrl2 {
 
@@ -52,6 +52,9 @@ namespace tools {
 
       /// The filename to which timings must be written
       std::string m_timing_filename;
+
+      /// The timer which can be used by the tools
+      execution_timer m_timer;
 
       /// \brief Add options to an interface description.
       /// \param desc An interface description
@@ -128,7 +131,8 @@ namespace tools {
           m_author          (author),
           m_what_is         (what_is),
           m_tool_description(tool_description),
-          m_known_issues    (known_issues)
+          m_known_issues    (known_issues),
+          m_timer           (name, "")
       {}
 
       /// \brief Destructor.
@@ -143,6 +147,12 @@ namespace tools {
       const std::string& timing_filename() const
       {
         return m_timing_filename;
+      }
+
+      /// \brief Return reference to the timer that can be used.
+      execution_timer& timer()
+      {
+        return m_timer;
       }
 
       /// \brief Run the tool with the given command line options.
@@ -167,11 +177,11 @@ namespace tools {
             bool result = pre_run();
             if (result)
             {
-              timer timing(m_name, timing_filename());
-              timing.start("total time");
+              m_timer = execution_timer(m_name, timing_filename());
+              timer().start("total");
               result = run();
-              timing.finish();
-              timing.report();
+              timer().finish("total");
+              timer().report();
             }
 
             // Either pre_run or run failed.
