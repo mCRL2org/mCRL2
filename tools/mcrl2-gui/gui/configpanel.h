@@ -503,7 +503,7 @@ private:
     }
 
 	  void
-    OnProcessEnd(wxCommandEvent& evt)
+    OnProcessEnd(wxCommandEvent& /*evt*/)
     {
       m_abortbutton->Show(false);
       m_runbutton->Enable();
@@ -527,7 +527,7 @@ private:
       UpdateToolTipStatus(STATUS_COMPLETE);
     }
 
-	  void OnToolHasOutput(wxCommandEvent& evt){
+	  void OnToolHasOutput(wxCommandEvent& /* evt */){
 	    SwitchToToolOutputNotebook();
 	  }
 

@@ -129,13 +129,6 @@ Initialization::Initialization() {
 			 }
        wxXmlNode *child = wx_doc.GetRoot()->GetChildren();
        while (child) {
-          if( child->GetName() == wxT("name")){
-					/*
-					 * This node is only required for human readability
-					 */
-          std::cout << child->GetNodeContent().mb_str() << std::endl;
-					}
-
           if( child->GetName() == wxT("arguments")){
 					  /*
 					   * Iterate over arguments

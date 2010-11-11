@@ -123,6 +123,11 @@ public:
     wxCommandEvent eventCustom(wxEVT_MY_PROCESS_END);
     wxPostEvent(m_parent, eventCustom);
 
+    if(status){
+      wxMessageDialog *dial = new wxMessageDialog(NULL,
+            wxString::Format(_T("Tool exited with status: %d"), status) , wxT("Error"), wxOK);
+      dial->ShowModal();
+    }
 	}
 	;
 
