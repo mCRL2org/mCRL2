@@ -67,14 +67,16 @@ ATermList ATgetTail(ATermList list, int start)
 ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
 {
   unsigned int i, start;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,start); 
 
-  if (startpos < 0) {
+  if (startpos < 0) 
+  {
     start = ATgetLength(list) + startpos;
   }
-  else {
+  else 
+  {
     start = startpos;
   }
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,start); 
 
   for (i=0; i<start; i++) 
   {
@@ -88,7 +90,8 @@ ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
   }
   
   /* Preserve annotations */
-  if (AT_getAnnotations((ATerm)list) != NULL) {
+  if (AT_getAnnotations((ATerm)list) != NULL) 
+  {
     newtail = (ATermList)AT_setAnnotations((ATerm)newtail,
 					   AT_getAnnotations((ATerm)list));
   }
