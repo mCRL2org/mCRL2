@@ -695,6 +695,16 @@ BOOST_AUTO_TEST_CASE(test_function_alias)
   );
 }
 
+// Test case for bug #787
+BOOST_AUTO_TEST_CASE(test_eqn_set_where)
+{
+  test_data_specification(
+  "map  f_dot: Set(Bool);\n\n"
+  "eqn  f_dot  =  if(true, {}, { o: Bool | true whr z = true end });\n",
+  true
+  );
+}
+
 
 template <typename VariableIterator>
 void test_data_expression_in_specification_context(const std::string &de_in,
