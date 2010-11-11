@@ -56,12 +56,16 @@ namespace tools {
       /// The timer which can be used by the tools
       execution_timer m_timer;
 
+      /// Determines whether timing output should be written
+      bool m_timing_enabled;
+
       /// \brief Add options to an interface description.
       /// \param desc An interface description
       virtual void add_options(interface_description& desc)
       {
-        desc.add_option("timings", make_mandatory_argument<std::string>("FILE", ""),
-          "append timing measurements to FILE");
+        desc.add_option("timings", make_optional_argument<std::string>("FILE", ""),
+          "append timing measurements to FILE. Measurements are written to "
+          "standard error if no FILE is provided");
       }
 
       /// \brief Parse non-standard options
@@ -70,7 +74,11 @@ namespace tools {
       {
         if (parser.options.count("timings") > 0)
         {
-          m_timing_filename = parser.option_argument("timings");
+          m_timing_enabled = true;
+          if (parser.options.count("timings") > 1)
+          {
+            m_timing_filename = parser.option_argument("timings");
+          }
         }
       }
 
@@ -107,7 +115,7 @@ namespace tools {
       }
 
       /// \brief Checks if the number of positional options is OK.
-      /// By default this function handles standart options: -v, -d and -q
+      /// By default this function handles standard options: -v, -d and -q
       /// \param parser A command line parser
       virtual void check_positional_options(const command_line_parser& )
       { }
@@ -132,7 +140,8 @@ namespace tools {
           m_what_is         (what_is),
           m_tool_description(tool_description),
           m_known_issues    (known_issues),
-          m_timer           (name, "")
+          m_timer           (name),
+          m_timing_enabled  (false)
       {}
 
       /// \brief Destructor.
@@ -159,6 +168,7 @@ namespace tools {
       /// \param argc Number of command line arguments
       /// \param argv Command line arguments
       /// \return The execution result
+      /// \post If timing was enabled, timer().report() has been called
       int execute(int argc, char* argv[])
       {
         try
@@ -177,11 +187,18 @@ namespace tools {
             bool result = pre_run();
             if (result)
             {
+              // Create timer, and by default measure running time of run()
+              // method.
               m_timer = execution_timer(m_name, timing_filename());
+
               timer().start("total");
               result = run();
               timer().finish("total");
-              timer().report();
+
+              if(m_timing_enabled)
+              {
+                timer().report();
+              }
             }
 
             // Either pre_run or run failed.
