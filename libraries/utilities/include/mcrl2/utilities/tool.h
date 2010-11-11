@@ -21,6 +21,7 @@
 #endif
 
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/timer.h"
 
 namespace mcrl2 {
 
@@ -49,15 +50,26 @@ namespace tools {
       /// Known issues of the tool
       std::string m_known_issues;
 
+      /// The filename to which timings must be written
+      std::string m_timing_filename;
+
       /// \brief Add options to an interface description.
       /// \param desc An interface description
-      virtual void add_options(interface_description&)
-      {}
+      virtual void add_options(interface_description& desc)
+      {
+        desc.add_option("timings", make_mandatory_argument<std::string>("FILE", ""),
+          "append timing measurements to FILE");
+      }
 
       /// \brief Parse non-standard options
       /// \param parser A command line parser
-      virtual void parse_options(const command_line_parser&)
-      { }
+      virtual void parse_options(const command_line_parser& parser)
+      {
+        if (parser.options.count("timings") > 0)
+        {
+          m_timing_filename = parser.option_argument("timings");
+        }
+      }
 
       /// \brief Executed only if run would be executed and invoked before run.
       /// \return Whether run should still be executed
@@ -127,30 +139,49 @@ namespace tools {
       /// \return True if the tool execution was successful.
       virtual bool run() = 0;
 
+      /// \brief Return the filename in which timings must be saved.
+      const std::string& timing_filename() const
+      {
+        return m_timing_filename;
+      }
+
       /// \brief Run the tool with the given command line options.
       /// \param argc Number of command line arguments
       /// \param argv Command line arguments
       /// \return The execution result
       int execute(int argc, char* argv[])
       {
-        try {
+        try
+        {
           interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description, m_known_issues);
           add_options(clinterface);
           command_line_parser parser(clinterface, argc, argv);
           check_standard_options(parser);
            
-	  if (parser.continue_execution())
-	  {
+          if (parser.continue_execution())
+          {
             check_positional_options(parser);
             parse_options(parser);
 
-            if (!pre_run() || !run())
+            // If pre_run succeeds, then do the actual running.
+            bool result = pre_run();
+            if (result)
+            {
+              timer timing(m_name, timing_filename());
+              timing.start("total time");
+              result = run();
+              timing.finish();
+              timing.report();
+            }
+
+            // Either pre_run or run failed.
+            if (!result)
             {
               return EXIT_FAILURE;
             }
           }
 
-	  return EXIT_SUCCESS;
+          return EXIT_SUCCESS;
         }
         catch (std::exception& e) {
           std::cerr << e.what() << std::endl;

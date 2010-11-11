@@ -37,6 +37,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/utilities/timer.h"
 
 //Data Framework
 #include "mcrl2/data/enumerator.h"
@@ -301,6 +302,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
             data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p)), rewrite_strategy()) :
             data::rewriter(p.data(), rewrite_strategy());
 
+      timer timing(m_name, timing_filename());
+      timing.start("instantiation");
       ::bes::boolean_equation_system bes_equations=
                     ::bes::boolean_equation_system(
                             p,
@@ -309,6 +312,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
                             opt_store_as_tree,
                             opt_construct_counter_example,
                             opt_use_hashtables);
+      timing.finish();
+      timing.report();
 
       
       // pbes rewriter
@@ -409,9 +414,14 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 
 
       assert(opt_outputformat=="none");
+
+      timing.start("solving");
       bool result=solve_bes(bes_equations,
                             opt_use_hashtables,
                             opt_construct_counter_example);
+      timing.finish();
+      timing.report();
+
       core::gsMessage("The solution for the initial variable of the pbes is %s\n",
                        ( result ? "true" : "false"));
 

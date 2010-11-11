@@ -94,7 +94,7 @@ namespace tools {
       std::string& input_filename()
       {
         return m_input_filename;
-      }     
+      }
   };
 
 } // namespace tools
