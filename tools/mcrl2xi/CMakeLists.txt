@@ -12,6 +12,10 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_BUILD_GUI_TOOLS )
 
+if(MCRL2_WITH_WXSTC)			
+ add_definitions( -DMCRL2_WITH_WXSTC )
+endif(MCRL2_WITH_WXSTC)			
+
 # ######### General setup ##########
 IF(APPLE)
   set(MACOSX_BUNDLE_ICON_FILE mcrl2xi.icns)

@@ -412,6 +412,8 @@ endif(MCRL2_NDEBUG)
 ## Set wxWidgets configuration
 ##---------------------------------------------------
 
+option(MCRL2_WITH_WXSTC "Enable/disable compilation of mcrl2xi with wxStyledTextControl support" OFF)
+
 
 option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
 
@@ -422,11 +424,11 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
 
 if(wxWidgets_FOUND)
 
-	if(UNIX AND NOT APPLE)			
+	if(MCRL2_WITH_WXSTC)			
     find_package(wxWidgets COMPONENTS base core adv gl xml html aui stc REQUIRED)
-	else(UNIX AND NOT APPLE)			
+	else(MCRL2_WITH_WXSTC)			
     find_package(wxWidgets COMPONENTS base core adv gl xml html aui REQUIRED)
-	endif(UNIX AND NOT APPLE)			
+	endif(MCRL2_WITH_WXSTC)			
 
   INCLUDE(${wxWidgets_USE_FILE})
 
@@ -647,9 +649,7 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( tools/pbesconstelm )
   add_subdirectory ( tools/pbesparelm )
   add_subdirectory ( tools/mcrl2-gui )
-	if(UNIX AND NOT APPLE)			
-    add_subdirectory ( tools/mcrl2xi )
-	endif(UNIX AND NOT APPLE)			
+  add_subdirectory ( tools/mcrl2xi )
 
 ##---------------------------------------------------
 ## Experimental tool dependencies

@@ -333,7 +333,9 @@ END_EVENT_TABLE()
 
   void MainFrame::OnWrapmode(wxCommandEvent& /*event*/){
     if(focussed_editor){
-      focussed_editor->SetWrapMode (focussed_editor->GetWrapMode() == 0? wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
+      focussed_editor->SetWrapMode (focussed_editor->GetWrapMode() == 0?
+          focussed_editor->getWrapWordCode():
+          focussed_editor->getWrapNoneCode());
     }
   };
 
