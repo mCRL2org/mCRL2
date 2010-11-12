@@ -102,6 +102,8 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
 
   bool xEditor::SaveFile( const wxString &filename ){
 
+    p_data_editor = (xStcEditor*) this->GetPage(this->GetSelection());
+
     p_output->Clear();
     wxStreamToTextRedirector redirect(p_output);
     try{

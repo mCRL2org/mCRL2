@@ -14,6 +14,7 @@
 #include "outputpanel.h"
 #include "wx/textctrl.h"
 #include <wx/aui/auibook.h>
+#include "mytextctrl.h"
 
 class typeCheckSpec: public wxPanel {
 public:
@@ -32,7 +33,7 @@ public:
 private:
     void OnEval(wxCommandEvent& e);
     wxWindow *p_parent;
-    wxTextCtrl *EvalExpr;
+    myTextControl *EvalExpr;
 
     DECLARE_EVENT_TABLE()
 };
@@ -40,15 +41,15 @@ private:
 class solveDataExpr: public wxPanel {
 public:
     solveDataExpr(wxWindow *parent, wxWindowID id);
-    wxTextCtrl* getSolutionWindow();
+    myTextControl* getSolutionWindow();
     wxString getDataExprSolve();
     bool getStopSolving();
 private:
     void OnStopSolve(wxCommandEvent& /*e*/);
     void OnSolve(wxCommandEvent& e);
     wxWindow *p_parent;
-    wxTextCtrl *p_solutions;
-    wxTextCtrl *SolveExpr;
+    myTextControl *p_solutions;
+    myTextControl *SolveExpr;
     wxButton *solveBtn;
     wxButton *solveStopBtn;
     bool StopSolving;

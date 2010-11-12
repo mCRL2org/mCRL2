@@ -26,6 +26,7 @@
 #include "editor.h"
 #include "actions.h"
 #include "outputpanel.h"
+#include "mytextctrl.h"
 
 
 // Define main frame
@@ -44,12 +45,14 @@ public:
   void OnClosePane(wxAuiManagerEvent& event );
   void OnResetLayout(wxCommandEvent& /*event*/);
   void OnEdit (wxCommandEvent &event);
-  void UpdateFocus(wxCommandEvent& event);
+  void UpdateEdtFocus(wxCommandEvent& event);
+  void UpdateTxtFocus(wxCommandEvent& event);
   void SetStatus(wxCommandEvent& event);
   void OnNewFile(wxCommandEvent& /*event*/);
   void OnEvaluate(wxCommandEvent& e);
   void OnTypeCheck(wxCommandEvent& e);
   void OnWrapmode(wxCommandEvent& /*event*/);
+  void UpdateEditMenu();
 private:
 
 	wxMenu *m_PanelMenu;
@@ -61,6 +64,7 @@ private:
   Options *options;
   outputpanel *output;
   xStcEditor *focussed_editor;
+  myTextControl *focussed_txtCtrl;
 
   DECLARE_EVENT_TABLE()
 };

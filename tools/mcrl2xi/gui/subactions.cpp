@@ -10,6 +10,7 @@
 
 #include "subactions.h"
 #include "actions.h"
+#include "mytextctrl.h"
 
 BEGIN_EVENT_TABLE(evalDataExpr, wxPanel)
 EVT_BUTTON(OPTION_EVAL, evalDataExpr::OnEval)
@@ -30,7 +31,7 @@ wxPanel(parent, id, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER)
   p_parent = parent;
   wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Rewrite Data expression:")), 0, wxLEFT|wxALL, 5);
-  EvalExpr = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, -1));
+  EvalExpr = new myTextControl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, -1));
   EvalExpr->SetToolTip(wxT("Rewrite EXPRESSION and print result \n \n Example: 5 < 6 \n \n NOTE: Rewriting an EXPRESSION \n\t only be performed for valid\n\t specifications"));
   sizer->Add(EvalExpr, 0, wxEXPAND| wxALL, 5);
   sizer->Add(new wxButton(this, OPTION_EVAL, wxT("Rewrite")), 0, wxLEFT | wxALL, 5);
@@ -52,7 +53,7 @@ wxPanel(parent, id, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER)
   p_parent = parent;
   wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Solve Data expression:")), 0, wxLEFT|wxALL, 5);
-  SolveExpr = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, -1));
+  SolveExpr = new myTextControl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, -1));
   sizer->Add(SolveExpr, 0, wxEXPAND| wxALL, 5);
   SolveExpr->SetToolTip(wxT("Give all valuations of the variables \n in VARLIST that satisfy EXPRESSION. \n\n Example: s n:Nat;b:Bool. b==false && n < 5"));
 
@@ -68,13 +69,13 @@ wxPanel(parent, id, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER)
 
   //sizer->Add(new wxButton(this, OPTION_SOLVE, wxT("Solve")), 0, wxLEFT | wxALL, 5);
   sizer->Add( new wxStaticText(this, wxID_ANY, wxT("Solutions:")), 0, wxLEFT|wxALL, 5);
-  p_solutions = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, 150), wxTE_READONLY|wxTE_MULTILINE|wxTE_DONTWRAP);
+  p_solutions = new myTextControl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, 150), wxTE_READONLY|wxTE_MULTILINE|wxTE_DONTWRAP);
   sizer->Add(p_solutions, 0, wxEXPAND|wxALL, 5);
   sizer->SetSizeHints(this);
   SetSizer(sizer);
 }
 
-wxTextCtrl* solveDataExpr::getSolutionWindow(){
+myTextControl* solveDataExpr::getSolutionWindow(){
   return p_solutions;
 }
 

@@ -46,9 +46,13 @@ EVT_MENU(mcrl2xi::myID_EVALEXPR, MainFrame::OnEvaluate)
 EVT_MENU(mcrl2xi::myID_TYPECHECKSPEC, MainFrame::OnTypeCheck)
 EVT_MENU(mcrl2xi::myID_WRAPMODE, MainFrame::OnWrapmode)
 
-EVT_UPDATE_EDITOR_FOCUS(wxID_ANY, MainFrame::UpdateFocus)
+EVT_UPDATE_EDITOR_FOCUS(wxID_ANY, MainFrame::UpdateEdtFocus)
+EVT_MYTXTCTRL_FOCUS(wxID_ANY, MainFrame::UpdateTxtFocus)
+
 EVT_SETSTATUSTEXT(wxID_ANY, MainFrame::SetStatus)
 EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
+
+
 
 END_EVENT_TABLE()
 
@@ -107,8 +111,9 @@ END_EVENT_TABLE()
         wxT("Show about dialog"));
 
     m_PanelMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
+    m_PanelMenu->AppendCheckItem( mcrl2xi::Exec_ToggleOptionsPanel, wxT("Actions"));
     m_PanelMenu->AppendCheckItem( mcrl2xi::Exec_ToggleOutputPanel, wxT("Output Panel"));
-    m_PanelMenu->AppendCheckItem( mcrl2xi::Exec_ToggleOptionsPanel, wxT("Options Panel"));
+
 
     m_PanelMenu->Check(mcrl2xi::Exec_ToggleOutputPanel, true);
     m_PanelMenu->Check(mcrl2xi::Exec_ToggleOptionsPanel, true);
@@ -275,21 +280,32 @@ END_EVENT_TABLE()
 
   void MainFrame::OnEdit (wxCommandEvent &event) {
       if (focussed_editor) focussed_editor->GetEventHandler()->ProcessEvent (event);
+      if (focussed_txtCtrl) focussed_txtCtrl->GetEventHandler()->ProcessEvent (event);
   };
 
-  void MainFrame::UpdateFocus(wxCommandEvent& event){
+  void MainFrame::UpdateEdtFocus(wxCommandEvent& event){
     if( event.GetClientData() == NULL){
       focussed_editor = NULL;
-      editMenu->Enable(wxID_SELECTALL, false);
-      editMenu->Enable(wxID_COPY, false);
-      editMenu->Enable(wxID_PASTE, false);
-      editMenu->Enable(wxID_CLEAR, false);
-      editMenu->Enable(wxID_PASTE, false);
-      editMenu->Enable(wxID_UNDO, false);
-      editMenu->Enable(wxID_REDO, false);
-      editMenu->Enable(wxID_CUT, false);
+
     } else {
       focussed_editor = (xStcEditor*) event.GetClientData();
+      m_PanelMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode());
+    }
+    UpdateEditMenu();
+  };
+
+  void MainFrame::UpdateTxtFocus(wxCommandEvent& event){
+    if( event.GetClientData() == NULL){
+      focussed_txtCtrl = NULL;
+    } else {
+      focussed_txtCtrl = (myTextControl*) event.GetClientData();
+    }
+    UpdateEditMenu();
+  };
+
+
+  void MainFrame::UpdateEditMenu(){
+    if (focussed_editor || focussed_txtCtrl){
       editMenu->Enable(wxID_SELECTALL, true);
       editMenu->Enable(wxID_COPY, true);
       editMenu->Enable(wxID_PASTE, true);
@@ -298,9 +314,17 @@ END_EVENT_TABLE()
       editMenu->Enable(wxID_UNDO, true);
       editMenu->Enable(wxID_REDO, true);
       editMenu->Enable(wxID_CUT, true);
-      m_PanelMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode());
+    } else{
+      editMenu->Enable(wxID_SELECTALL, false);
+      editMenu->Enable(wxID_COPY, false);
+      editMenu->Enable(wxID_PASTE, false);
+      editMenu->Enable(wxID_CLEAR, false);
+      editMenu->Enable(wxID_PASTE, false);
+      editMenu->Enable(wxID_UNDO, false);
+      editMenu->Enable(wxID_REDO, false);
+      editMenu->Enable(wxID_CUT, false);
     }
-  };
+  }
 
   void MainFrame::SetStatus(wxCommandEvent& event){
     wxString *s = (wxString*) event.GetClientData();
