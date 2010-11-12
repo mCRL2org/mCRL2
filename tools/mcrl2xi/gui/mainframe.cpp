@@ -21,7 +21,7 @@
 #include <wx/aui/aui.h>
 
 #include "editor.h"
-#include "options.h"
+#include "actions.h"
 #include "outputpanel.h"
 #include "mainframe.h"
 #include "settings.h"
@@ -140,7 +140,7 @@ END_EVENT_TABLE()
     options = new Options(this, wxID_ANY, editor, output, rewrite_strategy);
 
     m_mgr.AddPane(editor , wxCENTER, wxT("Data specification"));
-    m_mgr.AddPane(options , wxRIGHT, wxT("Control"));
+    m_mgr.AddPane(options , wxRIGHT, wxT("Actions"));
     m_mgr.AddPane(output , wxBOTTOM, wxT("Output"));
 
     // tell the manager to "commit" all the changes just made

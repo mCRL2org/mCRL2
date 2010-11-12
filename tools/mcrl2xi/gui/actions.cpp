@@ -8,7 +8,7 @@
 //
 /// \file options.h
 
-#include "options.h"
+#include "actions.h"
 #include "mcrl2/process/parse.h"
 #include "mainframe.h"
 #include <wx/textfile.h>
@@ -93,7 +93,7 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
     }
   };
 
-  void Options::SolveExpr(wxCommandEvent& e) {
+  void Options::SolveExpr(wxCommandEvent& /*e*/) {
     p_output->Clear();
 
     wxString dataexpr = sd->getDataExprSolve();
@@ -141,6 +141,19 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
           }
         }
         std::cout << "] evaluates to "<< pp(rewr(term,*i)) << std::endl;
+
+        wxPaintEvent evt;
+        wxEvtHandler* eh = this->GetEventHandler();
+        if (eh) {
+          eh->ProcessEvent(evt);
+        }
+
+        if( sd->getStopSolving())
+        {
+          p_output->AppendText(wxString( std::string( p_output->PrintTime() + "Abort by user.").c_str()  , wxConvUTF8) +  wxTextFile::GetEOL() );
+          break;
+        }
+        wxYield();
       }
       p_output->AppendText(wxString( std::string( p_output->PrintTime() + "Done solving.").c_str()  , wxConvUTF8) );
 

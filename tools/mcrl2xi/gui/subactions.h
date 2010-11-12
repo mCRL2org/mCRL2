@@ -42,11 +42,17 @@ public:
     solveDataExpr(wxWindow *parent, wxWindowID id);
     wxTextCtrl* getSolutionWindow();
     wxString getDataExprSolve();
+    bool getStopSolving();
 private:
+    void OnStopSolve(wxCommandEvent& /*e*/);
     void OnSolve(wxCommandEvent& e);
     wxWindow *p_parent;
     wxTextCtrl *p_solutions;
     wxTextCtrl *SolveExpr;
+    wxButton *solveBtn;
+    wxButton *solveStopBtn;
+    bool StopSolving;
+
     DECLARE_EVENT_TABLE()
 };
 

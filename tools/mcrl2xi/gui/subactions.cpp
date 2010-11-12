@@ -9,7 +9,7 @@
 /// \file subactions.cpp
 
 #include "subactions.h"
-#include "options.h"
+#include "actions.h"
 
 BEGIN_EVENT_TABLE(evalDataExpr, wxPanel)
 EVT_BUTTON(OPTION_EVAL, evalDataExpr::OnEval)
@@ -21,6 +21,7 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(solveDataExpr, wxPanel)
 EVT_BUTTON(OPTION_SOLVE, solveDataExpr::OnSolve)
+EVT_BUTTON(OPTION_SOLVE_ABORT, solveDataExpr::OnStopSolve)
 END_EVENT_TABLE()
 
 evalDataExpr::evalDataExpr(wxWindow *parent, wxWindowID id):
@@ -54,7 +55,18 @@ wxPanel(parent, id, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER)
   SolveExpr = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, -1));
   sizer->Add(SolveExpr, 0, wxEXPAND| wxALL, 5);
   SolveExpr->SetToolTip(wxT("Give all valuations of the variables \n in VARLIST that satisfy EXPRESSION. \n\n Example: s n:Nat;b:Bool. b==false && n < 5"));
-  sizer->Add(new wxButton(this, OPTION_SOLVE, wxT("Solve")), 0, wxLEFT | wxALL, 5);
+
+  wxBoxSizer *hsizer = new wxBoxSizer(wxHORIZONTAL);
+  solveBtn = new wxButton(this, OPTION_SOLVE, wxT("Solve"));
+  solveStopBtn = new wxButton(this, OPTION_SOLVE_ABORT, wxT("Stop"));
+  solveStopBtn->Disable();
+
+  hsizer->Add( solveBtn, 0, wxLEFT | wxALL, 5);
+  hsizer->Add( solveStopBtn, 0, wxLEFT | wxALL, 5);
+
+  sizer->Add(hsizer, 0, wxLEFT | wxALL, 5);
+
+  //sizer->Add(new wxButton(this, OPTION_SOLVE, wxT("Solve")), 0, wxLEFT | wxALL, 5);
   sizer->Add( new wxStaticText(this, wxID_ANY, wxT("Solutions:")), 0, wxLEFT|wxALL, 5);
   p_solutions = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, 150), wxTE_READONLY|wxTE_MULTILINE|wxTE_DONTWRAP);
   sizer->Add(p_solutions, 0, wxEXPAND|wxALL, 5);
@@ -71,8 +83,22 @@ wxString solveDataExpr::getDataExprSolve(){
 }
 
 void solveDataExpr::OnSolve(wxCommandEvent& e) {
-  //e.SetClientData( p_solutions );
+
+  StopSolving = false;
+  solveBtn->Disable();
+  solveStopBtn->Enable();
   ((Options*) p_parent)-> SolveExpr(e) ;
+  solveBtn->Enable();
+  solveStopBtn->Disable();
+
+}
+
+void solveDataExpr::OnStopSolve(wxCommandEvent& /*e*/) {
+  StopSolving = true;
+}
+
+bool solveDataExpr::getStopSolving(){
+  return StopSolving;
 }
 
 typeCheckSpec::typeCheckSpec(wxWindow *parent, wxWindowID id):

@@ -26,7 +26,7 @@ add_executable(${PROJECT_NAME}
   mcrl2xi.cpp
   gui/mainframe.cpp
 	gui/editor.cpp
-	gui/options.cpp
+	gui/actions.cpp
 	gui/xstceditor.cpp
 	gui/outputpanel.cpp
   gui/subactions.cpp

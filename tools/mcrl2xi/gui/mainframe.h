@@ -24,7 +24,7 @@
 #include <wx/aui/aui.h>
 
 #include "editor.h"
-#include "options.h"
+#include "actions.h"
 #include "outputpanel.h"
 
 

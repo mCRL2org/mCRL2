@@ -23,7 +23,10 @@
 enum {
 	OPTION_EVAL = 900,
   OPTION_TC,
-  OPTION_SOLVE
+  OPTION_SOLVE,
+  OPTION_SOLVE_ABORT,
+  OPTION_SOLVE_CLEAR
+
 };
 
 class Options: public wxPanel {

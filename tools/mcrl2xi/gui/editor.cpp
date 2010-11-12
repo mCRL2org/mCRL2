@@ -115,9 +115,9 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
 
       /* Action for saving to lps */
       if(wxFileName(filename).GetExt() == wxT("lps")){
-        p_output->AppendText( wxT("+++ WARNING +++++++++++++++++++++++++++++++++++"));
-        p_output->AppendText( wxT("+++ Formatting and comments will be removed +++"));
-        p_output->AppendText( wxT("+++++++++++++++++++++++++++++++++++++++++++++++"));
+        p_output->AppendText( wxString("+++ WARNING +++++++++++++++++++++++++++++++++++", wxConvUTF8) + wxTextFile::GetEOL());
+        p_output->AppendText( wxString("+++ Formatting and comments will be removed +++", wxConvUTF8) + wxTextFile::GetEOL());
+        p_output->AppendText( wxString("+++++++++++++++++++++++++++++++++++++++++++++++", wxConvUTF8) + wxTextFile::GetEOL());
 
         std::cout << p_output->PrintTime() <<"Parsing and type checking specification" << std::endl;
 
