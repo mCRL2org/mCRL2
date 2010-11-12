@@ -16,7 +16,7 @@ void free_unused_blocks();
 #define MAX_UNUSED_BLOCKS 16
 #define MIN_BLOCK_SIZE 256
 
-/* Basic memory management functions mimicing the functionality of malloc, calloc, realloc and free
+/* Basic memory management functions mimicking the functionality of malloc, calloc, realloc and free
  */
 
 /* static int total_count=0; */
@@ -24,7 +24,8 @@ void free_unused_blocks();
 void *AT_malloc(size_t size)
 { 
   void* ptr=malloc(size);
-  if (!ptr) {
+  if (!ptr) 
+  {
     free_unused_blocks();
     ptr=malloc(size);
   }
@@ -34,7 +35,8 @@ void *AT_malloc(size_t size)
 void *AT_calloc(size_t nmemb, size_t size)
 { 
   void* ptr=calloc(nmemb, size);
-  if (!ptr) {
+  if (!ptr) 
+  {
     free_unused_blocks();
     ptr=calloc(nmemb, size);
   }
@@ -102,7 +104,8 @@ ATprotected_block find_best_unused_block(size_t minsize, size_t maxsize)
   
   if (maxsize < minsize) maxsize = minsize;
   
-  while ( (block) && (bestsize!=optsize) ) {
+  while ( (block) && (bestsize!=optsize) ) 
+  {
     if (block->size >= minsize) {
       if (!best) {
       	/* Found a first match */
@@ -164,7 +167,8 @@ ATprotected_block find_free_block(size_t minsize, size_t maxsize)
   
   /* Try to find an unused block that fits  */
   block = find_best_unused_block(minsize, maxsize);
-  if (!block) {
+  if (!block) 
+  {
     /* No existing block matches, create a new block */
     blocksize = new_block_size(0, minsize, maxsize);
 
@@ -218,7 +222,8 @@ void free_blocks(ATprotected_block block)
 {
   /* Free given block and all blocks from this block onward */
   ATprotected_block next;
-  while (block) {
+  while (block) 
+  {
     next = block->next;
     AT_free(block);
     block = next;
@@ -249,17 +254,24 @@ void free_block(ATprotected_block block)
     if (block->next)
       block->next->prev = block->prev;
   }
-  else {
-    if (block->protsize >= 0)
+  else 
+  {
+    /* Blocks that are freed should not be part of the unused blocks
+    if (block->protsize >= 0) [This succeeds always....]
+    {  */
       protected_blocks = block->next;
+    /* }
     else
+    { 
       unused_blocks = block->next;
+    } */
       
     if (block->next)
       block->next->prev = NULL;
   }
     
-  if (!low_memory) {
+  if (!low_memory) 
+  {
     /* Don't actually free the block, but move it to the unused blocks chain */
     block->protsize = -1;
     
@@ -269,7 +281,8 @@ void free_block(ATprotected_block block)
     block->prev = NULL;
     unused_blocks = block;
   }
-  else {
+  else 
+  {
     AT_free((void*)block);
   }
 }
@@ -414,7 +427,8 @@ ATerm *AT_grow_protected(ATerm* term, size_t size)
 void AT_free_protected(ATerm* term)
 {
   /* Free a protected block */
-  if (term) {
+  if (term) 
+  {
     ATprotected_block block = find_block(term);
     assert(block);
     free_block(block);
