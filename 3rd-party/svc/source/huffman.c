@@ -171,7 +171,8 @@ void HFdumpCodes(struct HFnode *tree){
 /* Return the first node of 'current' in 'tree' in the left-to-right and bottom
    to top ordering  */
 
-static struct HFnode *HFsuccessor(HFtree *t, struct HFnode *current){
+static struct HFnode *HFsuccessor(HFtree * t, struct HFnode *current){
+
    tBlock *currentBlock;
    HFcursor last, prelast;
 
@@ -183,6 +184,8 @@ ATfprintf(stderr,"Succ'or of %t\n", current->term?current->term:ATmake("nil"));
 Bdump(stderr,current->block);
 HFdump(tree->codes,0);
 */
+
+   t = t; /* Prevent unused parameter warning */
 
    if(last==current){
       return NULL;
