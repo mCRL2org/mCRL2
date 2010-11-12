@@ -445,6 +445,11 @@ if [ ! $OFFLINE ] ; then
 
   # Copy the CSS style sheet to the output directory
   cp $STYLESHEET $OUTPUT_DIR
+
+  # Replace all occurrences of class="header" with class="doxyheader" to prevent
+  # conflicts
+  find $OUTPUT_DIR -type f -name "*.php" | xargs sed -i 's/class="header"/class="doxyheader"/g'
+
 fi
 
 # Clean up

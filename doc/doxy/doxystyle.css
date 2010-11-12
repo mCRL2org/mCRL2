@@ -1,3 +1,20 @@
+/* The following is a hack, introduced to work around a conflict with
+ * Doxygen, starting from version 1.7.0.
+ * Doxygen here uses the class header for some elements, which is in conflict
+ * with the header definition in the stylesheet of the mcrl2 homepage.
+ * The generate_libref_website.sh has been modified to resolve this conflict, by
+ * replacing all instances of class="header" with class="doxyheader"
+ */
+.doxyheader {
+  position: relative;
+  padding: 1em;
+  background: white;
+  color: black;
+  border: 1px solid #aaa;
+  line-height: 1.5em;
+  margin-left: 13em;
+  width: 800px;
+}
 code {
   background: transparent;
 }
@@ -307,7 +324,7 @@ hr { height: 0px;
 
 /* tabs styles */
 
-div.tabs {
+div.tabs, div.tabs2 {
    padding: 0 1em 0 1em;
    white-space: nowrap;
    overflow: visible;
@@ -317,13 +334,13 @@ div.tabs {
    width: 800px;
 }
 
-div.tabs ul {
+div.tabs, div.tabs2 ul {
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-div.tabs li {
+div.tabs, div.tabs2 li {
    display: inline;
    margin: 0 4px 0 0;
    padding: 2px 3px 0px 3px;
@@ -333,18 +350,18 @@ div.tabs li {
    background-color: #eee;
 }
 
-div.tabs li.current {
+div.tabs, div.tabs2 li.current {
   background-color: white;
   font-weight: bold;
 }
 
-div.tabs table {
+div.tabs, div.tabs2 table {
   border: 0;
   display:inline;
   font: x-small;
 }
 
-div.tabs form {
+div.tabs, div.tabs2 form {
   border: 0;
   display: inline;
   position: absolute;
@@ -354,29 +371,29 @@ div.tabs form {
   padding: 0;
 }
 
-div.tabs a {
+div.tabs, div.tabs2 a {
    text-decoration  : none;
 }
 
-div.tabs a:link, div.tabs a:visited,
-div.tabs a:active {
+div.tabs, div.tabs2 a:link, div.tabs, div.tabs2 a:visited,
+div.tabs, div.tabs2 a:active {
   color: #002bb8;
 }
 
-div.tabs a:hover {
+div.tabs, div.tabs2 a:hover {
   color: #ba0000;
 }
 
-div.tabs input {
+div.tabs, div.tabs2 input {
   border: 1px solid #aaa;
 }
 
-div.tabs td {
+div.tabs, div.tabs2 td {
    text-decoration  : none;
 }
 
 /* Commented Backslash Hack hides rule from IE5-Mac \*/
-div.tabs span {float : none;}
+div.tabs, div.tabs2 span {float : none;}
 /* End IE5-Mac hack */
 
 /* Navigation path */
