@@ -170,7 +170,8 @@ void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
 void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& options, bool expected_result)
 {
   pbes<> p = txt2pbes(pbes_spec);
-  pbespgsolve_algorithm algorithm(options);
+  utilities::execution_timer timer("pbes_solve_test");
+  pbespgsolve_algorithm algorithm(timer, options);
   bool result;
   try
   {

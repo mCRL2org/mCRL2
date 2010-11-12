@@ -23,7 +23,7 @@ void test_parse_pg(std::string const& in)
 {
   std::stringstream from(in);
   boolean_equation_system<> bes;
-  from >> bes;
+  parse_pgsolver(from,bes);
   core::garbage_collect();
 }
 
