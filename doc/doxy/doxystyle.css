@@ -324,7 +324,7 @@ hr { height: 0px;
 
 /* tabs styles */
 
-div.tabs, div.tabs2 {
+div.tabs {
    padding: 0 1em 0 1em;
    white-space: nowrap;
    overflow: visible;
@@ -334,13 +334,13 @@ div.tabs, div.tabs2 {
    width: 800px;
 }
 
-div.tabs, div.tabs2 ul {
+div.tabs ul {
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-div.tabs, div.tabs2 li {
+div.tabs li {
    display: inline;
    margin: 0 4px 0 0;
    padding: 2px 3px 0px 3px;
@@ -350,18 +350,18 @@ div.tabs, div.tabs2 li {
    background-color: #eee;
 }
 
-div.tabs, div.tabs2 li.current {
+div.tabs li.current {
   background-color: white;
   font-weight: bold;
 }
 
-div.tabs, div.tabs2 table {
+div.tabs table {
   border: 0;
   display:inline;
   font: x-small;
 }
 
-div.tabs, div.tabs2 form {
+div.tabs form {
   border: 0;
   display: inline;
   position: absolute;
@@ -371,29 +371,101 @@ div.tabs, div.tabs2 form {
   padding: 0;
 }
 
-div.tabs, div.tabs2 a {
+div.tabs a {
    text-decoration  : none;
 }
 
-div.tabs, div.tabs2 a:link, div.tabs, div.tabs2 a:visited,
-div.tabs, div.tabs2 a:active {
+div.tabs a:link, div.tabs a:visited,
+div.tabs a:active {
   color: #002bb8;
 }
 
-div.tabs, div.tabs2 a:hover {
+div.tabs a:hover {
   color: #ba0000;
 }
 
-div.tabs, div.tabs2 input {
+div.tabs input {
   border: 1px solid #aaa;
 }
 
-div.tabs, div.tabs2 td {
+div.tabs td {
    text-decoration  : none;
 }
 
 /* Commented Backslash Hack hides rule from IE5-Mac \*/
-div.tabs, div.tabs2 span {float : none;}
+div.tabs span {float : none;}
+/* End IE5-Mac hack */
+
+div.tabs2 {
+   padding: 0 1em 0 1em;
+   white-space: nowrap;
+   overflow: visible;
+   border-collapse: collapse;
+   text-align: left;
+   margin: 1px 0 0 13em;
+   width: 800px;
+}
+
+div.tabs2 ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+div.tabs2 li {
+   display: inline;
+   margin: 0 4px 0 0;
+   padding: 2px 3px 0px 3px;
+   border: 1px solid #aaa;
+   border-bottom: none;
+   overflow: visible;
+   background-color: #eee;
+}
+
+div.tabs2 li.current {
+  background-color: white;
+  font-weight: bold;
+}
+
+div.tabs2 table {
+  border: 0;
+  display:inline;
+  font: x-small;
+}
+
+div.tabs2 form {
+  border: 0;
+  display: inline;
+  position: absolute;
+  top: 0;
+  right: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+div.tabs2 a {
+   text-decoration  : none;
+}
+
+div.tabs2 a:link, div.tabs2 a:visited,
+div.tabs2 a:active {
+  color: #002bb8;
+}
+
+div.tabs2 a:hover {
+  color: #ba0000;
+}
+
+div.tabs2 input {
+  border: 1px solid #aaa;
+}
+
+div.tabs2 td {
+   text-decoration  : none;
+}
+
+/* Commented Backslash Hack hides rule from IE5-Mac \*/
+div.tabs2 span {float : none;}
 /* End IE5-Mac hack */
 
 /* Navigation path */
