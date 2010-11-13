@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file options.h
+/// \file actions.cpp
 
 #include "actions.h"
 #include "mcrl2/process/parse.h"
@@ -59,38 +59,67 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
 
   void Options::OnEval(wxCommandEvent& /*event*/) {
     p_output->Clear();
-    wxStreamToTextRedirector redirect(p_output);
     try{
-      std::cout << p_output->PrintTime() << "Evaluate: \"" << ev->getDataExprVal().mb_str() << "\""<< std::endl;
-      std::cout << p_output->PrintTime() <<"Parsing and type checking specification" << std::endl;
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Evaluate: \"")
+		       + ev->getDataExprVal()
+			   + wxT("\"")
+			   + wxTextFile::GetEOL());    
+
+       p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Parsing and type checking specification")
+			   + wxTextFile::GetEOL());    
+
       wxString wx_spec = p_editor->GetStringFromDataEditor();
       mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification( std::string(wx_spec.mb_str() ));
 
-      std::cout << p_output->PrintTime() <<"Parsing data expression:\"" << ev->getDataExprVal().mb_str() << "\""<< std::endl;
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Parsing data expression: \"")
+		       + ev->getDataExprVal()
+			   + wxT("\"")
+			   + wxTextFile::GetEOL());    
+
       mcrl2::data::data_expression term = mcrl2::data::parse_data_expression( std::string(ev->getDataExprVal().mb_str()) ,spec.data() );
 
-      std::cout << p_output->PrintTime() <<"Rewriting data expression:\"" << ev->getDataExprVal().mb_str() << "\""<< std::endl;
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Rewriting data expression: \"")
+		       + ev->getDataExprVal()
+			   + wxT("\"")
+			   + wxTextFile::GetEOL());    
+
       mcrl2::data::rewriter rewr(spec.data(),m_rewrite_strategy);
       atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > assignments;
-      std::cout << p_output->PrintTime() <<"Result: " << pp(rewr(term,make_map_substitution_adapter(assignments))) << std::endl;
+
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Result: \"")
+		       + wxString(pp(rewr(term,make_map_substitution_adapter(assignments))).c_str(), wxConvUTF8)
+			   + wxT("\"")
+			   + wxTextFile::GetEOL());    
 
     } catch ( mcrl2::runtime_error e) {
-      std::cout << p_output->PrintTime() << e.what() <<std::endl;
-    }
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxString( e.what(), wxConvUTF8)
+			   + wxTextFile::GetEOL());     
+	}
   };
 
   void Options::OnTypeCheck(wxCommandEvent& /*event*/) {
     p_output->Clear();
-    wxStreamToTextRedirector redirect(p_output);
     try{
-      std::cout << p_output->PrintTime() <<"Parsing and type check current specification" << std::endl;
-      wxString wx_spec = p_editor->GetStringFromDataEditor();
+       p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Parsing and type checking specification")
+			   + wxTextFile::GetEOL());    
+
+	  wxString wx_spec = p_editor->GetStringFromDataEditor();
       mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification( std::string(wx_spec.mb_str() ));
-      std::cout << p_output->PrintTime() <<"Specification is valid" << std::endl;
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Specification is valid")
+			   + wxTextFile::GetEOL());    
 
     } catch ( mcrl2::runtime_error e) {
-      std::cout << p_output->PrintTime() << e.what() <<std::endl;
-    }
+	p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxString( e.what(), wxConvUTF8)
+			   + wxTextFile::GetEOL());         }
   };
 
   void Options::SolveExpr(wxCommandEvent& /*e*/) {
@@ -99,7 +128,6 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
     wxString dataexpr = sd->getDataExprSolve();
 
     wxTextCtrl *p_solutions = sd->getSolutionWindow();
-    wxStreamToTextRedirector redirect(p_solutions);
     p_solutions->Clear();
     try{
       p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8) + wxT( "Solving: \"") + dataexpr + wxT("\"") + wxTextFile::GetEOL() );
@@ -133,14 +161,16 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
            e.make(atermpp::convert < std::set <mcrl2::data::variable > >(vars),rewr,term);
                                                     i != mcrl2::data::classic_enumerator<>() ; ++i)
       {
-        std::cout << "[";
+		*p_solutions << "[";
         for ( atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v )
-        { std::cout << pp(*v) << " := " << pp((*i)(*v));
+        { *p_solutions << pp(*v) << " := " << pp((*i)(*v));
           if ( boost::next(v)!=vars.end() )
-          { std::cout << ", ";
+          { *p_solutions << ", ";
           }
         }
-        std::cout << "] evaluates to "<< pp(rewr(term,*i)) << std::endl;
+        *p_solutions << "] evaluates to " ;
+		*p_solutions << pp(rewr(term,*i)) ;
+		*p_solutions << wxTextFile::GetEOL();
 
         wxPaintEvent evt;
         wxEvtHandler* eh = this->GetEventHandler();
@@ -158,7 +188,9 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
       p_output->AppendText(wxString( std::string( p_output->PrintTime() + "Done solving.").c_str()  , wxConvUTF8) );
 
     } catch ( mcrl2::runtime_error e) {
-      p_output->AppendText(wxString(  std::string(p_output->PrintTime() + e.what()).c_str(), wxConvUTF8 ));
+		  p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxString( e.what(), wxConvUTF8)
+			   + wxTextFile::GetEOL());     
     }
 
   };

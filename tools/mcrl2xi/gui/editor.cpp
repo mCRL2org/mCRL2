@@ -13,6 +13,7 @@
 #include "wx/filename.h"
 #include <wx/textfile.h>
 #include <wx/aui/auibook.h>
+#include <wx/textctrl.h>
 
 #include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
@@ -29,8 +30,9 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
     p_data_editor->SetFocus();
     p_data_editor->SetFileInUse( wxEmptyString );
     p_data_editor->SetSavePoint();
-    wxStreamToTextRedirector redirect(p_output);
-    std::cout << p_output->PrintTime() << "Created new specification" << std::endl;
+    p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Created new specification")
+			   + wxTextFile::GetEOL());
 
   }
 
@@ -38,8 +40,10 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
     p_data_editor = new xStcEditor( this, wxID_ANY );
     this->AddPage(p_data_editor, wxFileName(filename).GetFullName());
     p_data_editor->SetFocus();
-    wxStreamToTextRedirector redirect(p_output);
-    std::cout << p_output->PrintTime() << "Opened file:" << filename.mb_str() << std::endl;
+    p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Opened file:")
+			   + filename
+			   + wxTextFile::GetEOL());
 
     try{
       wxFileName fn = wxFileName(filename);
@@ -78,9 +82,9 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
     }
     catch (mcrl2::runtime_error &e) {
     {
-      wxStreamToTextRedirector redirect(p_output);
-      std::cout << p_output->PrintTime() << e.what() <<std::endl;
-    }
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxString( e.what(), wxConvUTF8)
+			   + wxTextFile::GetEOL());    }
 
     }
     return false;
@@ -105,15 +109,19 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
     p_data_editor = (xStcEditor*) this->GetPage(this->GetSelection());
 
     p_output->Clear();
-    wxStreamToTextRedirector redirect(p_output);
     try{
 
       if (filename == wxEmptyString){
-        std::cout << p_output->PrintTime() << "Saving to empty file" << std::endl;
+		      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Cannot save to empty file")
+			   + wxTextFile::GetEOL());
+
         return false;
       }
-
-      std::cout << p_output->PrintTime() <<"Saving: \"" << filename.mb_str() << "\""<< std::endl;
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Saving:")
+			   + filename
+			   + wxTextFile::GetEOL());
 
       /* Action for saving to lps */
       if(wxFileName(filename).GetExt() == wxT("lps")){
@@ -121,12 +129,20 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
         p_output->AppendText( wxString("+++ Formatting and comments will be removed +++", wxConvUTF8) + wxTextFile::GetEOL());
         p_output->AppendText( wxString("+++++++++++++++++++++++++++++++++++++++++++++++", wxConvUTF8) + wxTextFile::GetEOL());
 
-        std::cout << p_output->PrintTime() <<"Parsing and type checking specification" << std::endl;
+        p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Parsing and type checking specification")
+			   + filename
+			   + wxTextFile::GetEOL());
 
         std::string str_spec = std::string(GetStringFromDataEditor().mb_str());
         mcrl2::lps::specification spec = mcrl2::lps::parse_linear_process_specification( str_spec );
         spec.save(std::string(filename.mb_str()));
-        std::cout << p_output->PrintTime() <<"Successfully saved to: "<< filename.mb_str() << std::endl;
+
+        p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Succesfully saved to: ")
+			   + filename
+			   + wxTextFile::GetEOL());
+
         /* Reassign filename in use */
         p_data_editor->SetFileInUse( filename );
         this->SetPageText( GetSelection(), wxFileName(filename).GetFullName() ) ;
@@ -140,19 +156,29 @@ xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
 
         wxFile f( filename, wxFile::write);
         if(f.Write( spec, wxConvUTF8 )){
-          std::cout << p_output->PrintTime() << "Successfully saved to: " << filename.mb_str() << std::endl;
-          /* Reassign filename in use */
+
+			p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Succesfully saved to: ")
+			   + filename
+			   + wxTextFile::GetEOL());
+
+		  /* Reassign filename in use */
           p_data_editor->SetFileInUse( filename );
           this->SetPageText( GetSelection(), wxFileName(filename).GetFullName() ) ;
         } else {
-          std::cout << p_output->PrintTime() <<"Failed saving to: "<< filename.mb_str() << std::endl;
+			p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxT("Failed to saved to: ")
+			   + filename
+			   + wxTextFile::GetEOL());
         }
         p_data_editor->SetSavePoint();
         return true;
       }
 
     } catch ( mcrl2::runtime_error e) {
-      std::cout << p_output->PrintTime() << e.what() <<std::endl;
+      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
+		       + wxString( e.what(), wxConvUTF8)
+			   + wxTextFile::GetEOL());    
     }
 
 
