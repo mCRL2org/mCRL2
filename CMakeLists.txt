@@ -1119,7 +1119,7 @@ SET(CPACK_PACKAGE_VENDOR "TUe")
 
 # Create Desktop link to mcrl2-gui
 set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
-set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui")
+set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui" "mcrl2xi;mcrl2xi")
 
   IF(APPLE AND MCRL2_SINGLE_BUNDLE)
     SET(CPACK_SET_DESTDIR TRUE)
