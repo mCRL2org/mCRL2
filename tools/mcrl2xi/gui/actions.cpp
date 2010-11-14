@@ -161,24 +161,27 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
            e.make(atermpp::convert < std::set <mcrl2::data::variable > >(vars),rewr,term);
                                                     i != mcrl2::data::classic_enumerator<>() ; ++i)
       {
-	/*  Removed because does not compile....
- *      *p_solutions << "[";
+
+        p_solutions->AppendText(wxT("["));
         for ( atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v )
-        { *p_solutions << pp(*v) << " := " << pp((*i)(*v));
+        { p_solutions->AppendText(   wxString( std::string(pp(*v)).c_str(), wxConvUTF8 )
+                                  +  wxT(" := ")
+                                  +  wxString(std::string(pp((*i)(*v))).c_str(), wxConvUTF8 ));
           if ( boost::next(v)!=vars.end() )
-          { *p_solutions << ", ";
+          {
+            p_solutions->AppendText( wxT(", "));
           }
         }
-        *p_solutions << "] evaluates to " ;
-		*p_solutions << pp(rewr(term,*i)) ;
-		*p_solutions << wxTextFile::GetEOL();
+        p_solutions->AppendText( wxT("] evaluates to ") );
+        p_solutions->AppendText( wxString(std::string(pp(rewr(term,*i))).c_str(),wxConvUTF8 ));
+        p_solutions->AppendText( wxTextFile::GetEOL() );
 
+        /* Repaint */
         wxPaintEvent evt;
         wxEvtHandler* eh = this->GetEventHandler();
         if (eh) {
           eh->ProcessEvent(evt);
         }
-*/
 
         if( sd->getStopSolving())
         {
