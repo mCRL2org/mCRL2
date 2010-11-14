@@ -229,13 +229,13 @@ void check_lps2lts_specification(std::string const& specification,
         BOOST_CHECK_EQUAL(result4.num_transitions(), expected_transitions);
         BOOST_CHECK_EQUAL(result4.num_action_labels(), expected_labels);
 
-        /* lts::lts_svc_t result5 = translate_lps_to_lts<lts::lts_svc_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+        lts::lts_svc_t result5 = translate_lps_to_lts<lts::lts_svc_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
         std::cerr << "SVC FORMAT\n";
         BOOST_CHECK_EQUAL(result5.num_states(), expected_states);
         BOOST_CHECK_EQUAL(result5.num_transitions(), expected_transitions);
         BOOST_CHECK_EQUAL(result5.num_action_labels(), expected_labels);
-        */
+        
 #ifdef USE_BCG
         lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 

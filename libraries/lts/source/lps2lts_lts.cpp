@@ -259,6 +259,13 @@ namespace mcrl2
                 l.save(lts_filename); 
                 break;
               }
+              case lts_svc:
+              {
+                lts_svc_t l;
+                detail::lts_convert(generic_lts,l);
+                l.save(lts_filename); 
+                break;
+              }
               default: assert(0); // lts_aut and lts_none cannot occur.
             }
 

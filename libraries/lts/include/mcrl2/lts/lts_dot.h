@@ -23,7 +23,6 @@
 #include <vector>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/action_label_string.h"
 

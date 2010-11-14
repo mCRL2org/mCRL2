@@ -12,7 +12,7 @@
  * \brief The main header file of the LTS library.
  * \details This is the LTS library's main header file. It declares all publicly
  * accessible data structures that form the interface of the library.
- * \author Muck van Weerdenburg
+ * \author Muck van Weerdenburg, Jan Friso Groote
  */
 
 #ifndef MCRL2_LTS_LTS_H

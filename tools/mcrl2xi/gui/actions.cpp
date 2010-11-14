@@ -161,7 +161,8 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
            e.make(atermpp::convert < std::set <mcrl2::data::variable > >(vars),rewr,term);
                                                     i != mcrl2::data::classic_enumerator<>() ; ++i)
       {
-		*p_solutions << "[";
+	/*  Removed because does not compile....
+ *      *p_solutions << "[";
         for ( atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v )
         { *p_solutions << pp(*v) << " := " << pp((*i)(*v));
           if ( boost::next(v)!=vars.end() )
@@ -177,6 +178,7 @@ Options::Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *
         if (eh) {
           eh->ProcessEvent(evt);
         }
+*/
 
         if( sd->getStopSolving())
         {
