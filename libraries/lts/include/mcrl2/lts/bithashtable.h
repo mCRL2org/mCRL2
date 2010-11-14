@@ -14,9 +14,10 @@
 #define MCRL2_LTS_BITHASHTABLE_H
 
 #include <vector>
-
 #include <aterm2.h>
 #include "mcrl2/exception.h"
+
+/** \cond [ Do not include this class in the documentation ] */
 
 namespace mcrl2
 {
@@ -164,8 +165,11 @@ namespace mcrl2
         }
     };
     
-    #endif // MCRL2_LTS_BITHASHTABLE_H
 
   }
 }
+
+/** \endcond */
+
+#endif // MCRL2_LTS_BITHASHTABLE_H
 

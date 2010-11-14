@@ -1,6 +1,6 @@
 [library LTS Library
     [quickbook 1.4]
-    [authors [Wesselink, Wieger]]
+    [authors [Wesselink, Wieger], [Groote, Jan Friso]]
     [copyright 2005-2010 Technische Universiteit Eindhoven]
     [category string-text]
 ]
@@ -9,140 +9,184 @@
 [def __mcrl2__                 [@http://mcrl2.org mCRL2]]
 [def __mcrl2_primer__          [@http://www.mcrl2.org/wiki/index.php/MCRL2_Primer mCRL2 Primer]]
 [def __lts_library__           [@http://www.mcrl2.org/mcrl2/wiki/index.php/LTS_library LTS Library]]
+[def __lts_reference__         [@http://www.mcrl2.org/libref/lts/ LTS reference manual]]
 
 [section: Introduction]
 The __lts_library__ provides data structures and methods to handle /labelled
-transition systems/ (LTS). Using the library, an LTS can be read from/written
-to file (various file formats are supported), minimised using various
-equivalences, determinised, and analysed.
+transition systems/ (LTS). LTS's can be created, transfered from and to 
+file and transformed by for instance an bisimulation reduction, determinisation
+or the removal of unreachable states.
 
-This manual gives an overview of the library's structure and explains how to
-program with the library. The relevant concepts are introduced and defined
-[@ here].
+Essentially, a labelled transition system consists
+of a collection of transitions, where a transition is a triple of three 
+numbers <start_state,label,end_state> each of type unsigned int. 
+Each labelled transition system contains an initial state. Furthermore, each
+label has an associated value, for instance a string. Optionally, each state index
+has an associated state value. Finally, each label is either internal
+(eg., hidden or a tau action) or externally visible. 
 
-Note that the current implementation of this library is mainly focussed on
-creating LTSs. That is, it is easy to add states, transitions and labels, but
-there is virtually no functionality to change or remove parts of an LTS. 
+A labelled transition system has template parameters for the state and 
+action labels. There are several standard labelled transition systems defined.
+For example, the lts_aut_t is an LTS with strings as transition labels, and no state
+labels. The lts_lts_t has multi actions as state labels, and vectors
+of data expressions as state labels. Furthermore, this latter contains
+a data specification, action declarations and a declaration of process
+parameters. 
 [endsect]
 
 [section: Structure]
 The LTS library resides in the namespace mcrl2::lts. The main class of this
 library is the lts class. This class represents an LTS and contains almost all
-available functionality to work with LTSs. States and labels are identified by
+available functionality to work with LTSs. States and transition labels are identified by
 unsigned ints and transitions are triples (from, label, to) of unsigned ints,
 where from and to are the source and target states, respectively, and label is
-the label of the transition.
+the label of the transition. Each LTS has an initial state and every transition 
+label is either internal or external.
 
-There is a possibility to assign ATerm values to states and labels. This has
-to be specified when creating an lts object or when one resets such an object
-(with the reset() method). In principle these values can be any ATerm, but not
-all LTS formats support this. In practice the following structures typically
-occur:
-* No state information (all formats)
-* μCRL states: ATermLists of μCRL data expressions (μCRL, FSM)
-* mCRL2 states: ATermAppl of mCRL2 data expressions (mCRL2, FSM) 
-* String labels: ATermAppl without arguments; the function symbol name is the
-  label (all formats except mCRL2)
-* mCRL2 multiaction labels: ATermAppl; mCRL2 multiaction in internal format (mCRL2) 
+For each number representing a transition label, there is an associated value and
+for each number representing a state label, there can be an associated value. An 
+LTS has two template parameters that determine the types of these values. The LTS
+class behaves as a standard container, in the sense that any class that can be
+used in a standard C++ container is usable for the values in a labelled transition 
+system. 
 
-Besides the main lts class, there are several auxiliary classes. Three of them
-(state_iterator, transition_iterator and label_iterator) are iterators to
-iterate over states, transitions and labels. The lts class has methods to
-obtain such iterators (e.g. lts::get_transitions()). Their use is illustrated
-in the tutorial below.
+There are six standard template instantiations of labelled transitions systems:
+* lts_lts_t: Multi actions as label values. Vectors of data expressions as state values. Contains
+             a data specification, action declarations and process parameters.
+* lts_aut_t: Strings as label values. No state values. Is stored in the aut file format.
+* lts_fsm_t: Strings as label values. Vectors of strings as state values. Contains the names and
+             sorts of process parameters. Is stored in the fsm file format.
+* lts_bcg_t: Strings as label values. No state values. Is stored in the bcg file format.
+* lts_dot_t: Label values are strings. State values are a pair of a state name, and a state label.
+* lts_svc_t: The values of action labels and states are ATerms.
 
-The other classes, lts_dot_options, lts_eq_options and lts_extra, are used to
-store options for certain operations. 
-[endsect]
-
-[section: Starting up]
-First of all we must include the appropriate header to use the LTS library.
-
-  #include <mcrl2/lts/liblts.h>
-
-Most of the time it is also useful to specify that we are using the namespace
-of the LTS library.
-
-  using namespace mcrl2::lts;
-
-In the rest of the tutorial we assume that this is specified. If one does not
-wish to use this, one will have to prepend mcrl2::lts:: to all references to
-entities in the LTS library.
+Each of these six classes contains at least load and save functionality, as well as as function pp to
+transform state and label values to strings. 
 
 [endsect]
 
-[section: Creating an LTS]
+[section: Creating and accessing an LTS]
 
-Now let us make a function make_blue_lts() that constructs the blue LTS as
-shown above and saves it to a file. We start with some declarations.
+As an example we create a transition system with strings as values for action
+labels and states. We add 2 states, and one transition. The initial state is
+state 1. When the transition system is created, it is shown how
+information is extracted.
 
-  void make_blue_lts()
+  #include <string>
+  #include <mcrl2/lts/lts.h>
+
+  void make_color_lts()
   {
-    unsigned int s[5];
-    unsigned int lab_open,lab_car,lab_flowers;
- 
-    lts l(false,true);
+    using namespace mcrl2::lts;
 
-All states and labels are identified by unsigned integers. We therefore have an
-array s of five unsigned integers to store the identifiers of the (five) states
-as well as an unsigned integer variable for each label. The LTS is created with
-two arguments: the first argument indicates that we do not store state
-information and the second argument indicates that we will use label information
-in this example.
+    // Create the labelled transition system l.
+    lts < std::string, std::string > l;
 
-Before we can add any transitions to the LTS, we must first add the states and
-labels. This is done as follows.
+    // Add states 0 and 1. The state value is optional, but states must either
+    // all have state values, or not have state values at all.
+    l.add_state("Green");
+    l.add_state("Red");
 
-    for (unsigned int i=0; i<5; ++i)
+    // Add an action label with index 0. The second (optional) argument
+    // indicates that this is not an internal label.
+    l.add_label("Become green",true);
+    
+    // Add a transition from state 1 to 0.
+    l.add_transition(transition(1,0,0));
+
+    // Set the initial state (i.e., the red state)
+    l.set_initial_state(1);
+
+    // Get the number of states, state values, action labels and transitions.
+    std::cout << "#states: "        << l.num_states() << "\n" <<
+                 "#state values: "  << l.num_state_values() << "\n" <<
+                 "#action labels: " << l.num_action_labels() << "\n"<<
+                 "#transitions: "   << l.num_transitions() << "\n" <<
+                 "#has state labels" << (l.has_state_info?" yes\n":" no\n");
+
+    // Get the index of the initial state
+    std::cout << "Initial state is " << l.initial_state() << "\n";
+
+    // Traverse and print the state labels.
+    for(unsigned int i=0; i<l.num_state_values(); ++i)
     {
-      s[i] = l.add_state();
+      std::cerr << "State " << i << " has value " << l.state_value(i) << "\n";
     }
- 
-    lab_open = l.add_label((ATerm) ATmakeAppl0(ATmakeAFun("open_door",ATfalse,0)));
-    lab_car = l.add_label((ATerm) ATmakeAppl0(ATmakeAFun("win_car",ATfalse,0)));
-    lab_flowers = l.add_label((ATerm) ATmakeAppl0(ATmakeAFun("win_flowers",ATfalse,0)));
 
-Note that these functions return the identifier of the state or label. With this
-information we can construct the LTS. We specify the initial state:
+    // Traverse and print the values for action labels. Also print whether they are internal.
+    for(unsigned int i=0; i<l.num_action_labels(); ++i)
+    {
+      std::cerr << "Action label " << i << " has value " << l.label_value(i) << 
+                      (l.is_tau(i)?" (is internal)":"(is external)") << "\n";
+    }
 
-  l.set_initial_state(s[0]);
+    // Traverse and print the transitions
+    for(transition_const_range r=get_transitions; !r.empty(); r.advance_begin(1))
+    { 
+      const transition t=r.front();
+      std::cerr << "Transition [" << r.from() << "," << r.label() << "," << r.to() << "]\n";
+    }
 
-And add the transitions:
+    // Finally, clear the transition system. Not really necessary, because this is also done
+    // by the destructor.
+    l.clear();
+  } 
 
-  l.add_transition(s[0],lab_open,s[1]);
-  l.add_transition(s[0],lab_open,s[2]);
-  l.add_transition(s[1],lab_car,s[3]);
-  l.add_transition(s[2],lab_flowers,s[4]);
-
-The LTS is now complete. To save it, we call the write_to() method with a
-filename and the type of the output (lts_aut in this case).
-
-  l.write_to("blue.aut",lts_aut);
-}
+Note that there are no standard load and save methods as these depend on the nature of the state and
+action values. There are however standard functions to make actions internal, based on a set
+of action strings, as well as utility functions to sort the transitions based on various criteria.
+See the __lts_reference__ for this.
 [endsect]
 
-[section: Read and print]
+[section: The standard labelled transition systems]
 
-Now we have created an LTS file, we describe how to read it in again, apply
-some reduction and print its contents. There are two ways to read an LTS from a
-file. The most straightforward method is to use the appropriate constructor:
+There are six standard labelled transition systems. In addition to determining the 
+value types of states and action labels, they can contain additional information. 
+Each of theselabelled transition systems are related to some file format and therefore,
+they all provide load and save functionality. 
 
-  lts l("blue.aut");
+The enumerated type `lts_type` contains for all the formats an element. The default element
+is `lts_none`, not referring to any type.
+Furthermore, each standard
+labelled transition system has its own file extension. The table below shows them.
 
-Note, however, that this method only works when the supplied file contains a
-valid LTS (according to the LTS library). If this is not the case, there is no
-way to detect failure. It is therefore advisable to use the following method.
+[table Standard LTS formats
+  [ [Class] [Element from lts_type] [File extension] [State value type] [Label value type] [Extra information] ]
+  [ [`lts_lts_t`] [`lts_lts`]       [.lts]           [`state_label_lts`][`action_label_lts`][Yes] ]
+  [ [`lts_aut_t`] [`lts_aut`]       [.aut]           [`state_label_empty`][`action_label_string`][No] ]
+  [ [`lts_fsm_t`] [`lts_fsm`]       [.fsm]           [`state_label_fsm`][`action_label_string`][Yes] ]
+  [ [`lts_dot_t`] [`lts_dot`]       [.dot]           [`state_label_dot`][`action_label_string`][No] ]
+  [ [`lts_bcg_t`] [`lts_bcg`]       [.bcg]           [`state_label_empty`][`action_label_string`][No] ]
+  [ [`lts_svc_t`] [`lts_svc`]       [.svc]           [`state_label_svc`][`action_label_lts`][No] ]
+]
 
-  lts l;
-  if ( l.read_from("blue.aut") )
-  {
-    // reading went ok
-  } else {
-    // reading failed
-  }
+[subsection: The lts format]
+This format is 
 
-Now that the LTS has been read from file, our goal is to print the transitions
-of the minimal deterministic trace-equivalent LTS to the screen.
+[endsect]
+
+[subsection: The aut format]
+The class `lts_aut_t` contains labelled transition systems
+that have no state values and strings as action labels. 
+
+[endsect]
+
+[subsection: The fsm format]
+
+[endsect]
+
+[subsection: The dot format]
+
+[endsect]
+
+[subsection: The bcg format]
+
+[endsect]
+
+[subsection: The svc format]
+
+[endsect]
+
 
 For the reduction we simply call the reduce() method with the option
 lts_eq_trace.

@@ -59,358 +59,6 @@ lps::specification const& empty_specification()
   return dummy;
 }
 
-lts_type detect_type(string const& filename)
-{
-  ifstream is(filename.c_str(),ifstream::in|ifstream::binary);
-  if ( !is.is_open() )
-  {
-    throw mcrl2::runtime_error("Cannot open file '" + filename + "' for reading.");
-    return lts_none;
-  }
-
-  lts_type t = detect_type(is);
-
-  is.close();
-
-  return t;
-}
-
-typedef struct 
-{
-  unsigned int flag;
-  unsigned int size;
-  unsigned int value;
-} svc_int;
-
-class svc_buffer
-{
-  private:
-    unsigned char buffer[56];
-    std::streamsize buffer_size;
-    unsigned int pos;
-    unsigned int count;
-    istream *input;
-    bool valid;
-
-  public:
-    svc_buffer(istream *is)
-    {
-      input = is;
-      buffer_size = 0;
-      pos = 0;
-      count = 0;
-      valid = true;
-    }
-
-    svc_buffer(unsigned char *buf, unsigned int size)
-    {
-      input = NULL;
-      set_buffer(buf,size);
-    }
-
-    void set_input(istream *is)
-    {
-      input = is;
-    }
-
-    void set_buffer(unsigned char *buf, unsigned int size)
-    {
-      if ( size > 56 )
-      {
-        size = 56;
-      }
-      memcpy(buffer,buf,size);
-      buffer_size = size;
-      pos = 0;
-      count = 0;
-      valid = true;
-    }
-
-    void reset_buffer()
-    {
-      buffer_size = 0;
-      pos = 0;
-      count = 0;
-      valid = true;
-    }
-
-    unsigned int get_count()
-    {
-      return count;
-    }
-
-    bool is_valid()
-    {
-      return valid;
-    }
-
-    unsigned int get_bit()
-    {
-      if ( static_cast< std::streamsize >(pos/8) == buffer_size )
-      {
-        input->read((char *) buffer,56);
-        if ( input->eof() )
-        {
-          input->clear();
-        }
-        buffer_size = input->gcount();
-        pos = 0;
-      }
-      if ( static_cast< std::streamsize >(pos/8) == buffer_size )
-      {
-        valid = false;
-        return 0;
-      } else {
-        unsigned int r = ( buffer[pos/8] >> (7 - (pos%8)) ) & 1;
-        pos++;
-        count++;
-        return r;
-      }
-    }
-
-    unsigned char get_byte()
-    {
-      unsigned char r = 0;
-      for (unsigned int i=0; i<8; i++)
-      {
-        r = r*2 + get_bit();
-      }
-      return r;
-    }
-
-    char get_char()
-    {
-      char r = 0;
-      for (unsigned int i=0; i<7; i++)
-      {
-        r = r*2 + get_bit();
-      }
-      return r;
-    }
-
-    svc_int get_int()
-    {
-      svc_int r;
-      r.flag = get_bit();
-      r.size = get_bit();
-      r.size = r.size*2 + get_bit();
-      r.value = 0;
-      for (unsigned int i=0; i<=r.size; i++)
-      {
-        r.value = r.value*256 + get_byte();
-      }
-      return r;
-    }
-
-    string get_string()
-    {
-      string s;
-      bool is_valid = false;
-      while ( true )
-      {
-        char c = get_char();
-        if ( c == 0 )
-        {
-          is_valid = true;
-          break;
-        } else if ( (c < ' ') || (c > '~') )
-        {
-          break;
-        } else {
-          s += c;
-        }
-      }
-
-      if (! (valid && is_valid) ) {
-        valid = false;
-
-        s.clear();
-      }
-
-      return s;
-    }
-};
-
-lts_type detect_type(istream &is)
-{
-  if ( is == cin ) // XXX better test to see if is is seekable?
-  {
-    throw mcrl2::runtime_error("Type detection does not work on stdin.");
-    return lts_none;
-  }
-
-  streampos init_pos = is.tellg();
-  char buf[32]; is.read(buf,32);
-  if ( is.eof() ) is.clear();
-  std::streamsize r = is.gcount();
-  is.seekg(init_pos);
-
-  // detect lts_aut
-  if ( r >= 3 )
-  {
-    // we assume that "des" is completely in buf in case this is a aut file
-    int i = 0;
-    // skip any spaces or tabs
-    while ( (i < r) && ((buf[i] == ' ') || (buf[i] == '\t')) )
-    {
-      i++;
-    }
-    // at least need to start with des
-    if ( (i+3 <= r) && !memcmp(buf+i,"des",3) )
-    {
-      i = i + 3;
-      // skip any spaces or tabs
-      while ( (i < r) && ((buf[i] == ' ') || (buf[i] == '\t')) )
-      {
-        i++;
-      }
-      // if we are not at the end of the buffer, then we expect a opening
-      // parenthesis
-      if ( (i >= r) || (buf[i] == '(') )
-      { if (core::gsVerbose)
-        { std::cerr << "detected AUT input file\n";
-        }
-        return lts_aut;
-      }
-    }
-  }
-
-  // detect lts_dot
-  if ( r >= 7 )
-  {
-    // we assume that "digraph" is completely in buf in case this is a dot file
-    int i = 0;
-    // skip any spaces or tabs
-    while ( (i < r) && ((buf[i] == ' ') || (buf[i] == '\t')) )
-    {
-      i++;
-    }
-    // at least need to start with digraph
-    if ( (i+7 <= r) && !memcmp(buf+i,"digraph",7) )
-    {
-      i = i + 7;
-      if (core::gsVerbose)
-      { std::cerr << "Detected DOT input file.\n";
-      }
-      return lts_dot;
-    }
-  }
-
-  // detect lts_svc, lts_mcrl and lts_lts
-  if ( r >= 18 )
-  {
-    svc_buffer sbuf((unsigned char *) buf, static_cast< unsigned int >(r));
-    sbuf.get_bit(); // indexed flag
-    svc_int header_pos = sbuf.get_int(); // header pos
-    if ( header_pos.flag == 0 )
-    {
-      if ( sbuf.get_int().flag == 0 ) // body pos
-      {
-        if ( sbuf.get_int().flag == 0 ) // trailer pos
-        {
-          svc_int version_pos = sbuf.get_int(); // version pos
-          if ( (version_pos.flag == 0) &&
-               (version_pos.value >= (sbuf.get_count()+7)/8) &&
-               (header_pos.value >= (sbuf.get_count()+7)/8) )
-          {
-            is.seekg(init_pos+((streampos) version_pos.value));
-            if ( is.fail() )
-            {
-              is.seekg(init_pos);
-            } else {
-              sbuf.reset_buffer();
-              sbuf.set_input(&is);
-              sbuf.get_string();
-              if ( sbuf.is_valid() )
-              {
-                is.seekg(init_pos+((streampos) header_pos.value));
-                if ( is.fail() )
-                {
-                  is.seekg(init_pos);
-                } else {
-                  sbuf.reset_buffer();
-                  string s;
-                  for (unsigned int i=0; i<4; i++)
-                  {
-                    s = sbuf.get_string();
-                    if ( !sbuf.is_valid() )
-                    {
-                      break;
-                    }
-                  }
-
-                  is.seekg(init_pos);
-                  if ( sbuf.is_valid() )
-                  {
-                    if ( (s == "mCRL2") || (s == "mCRL2+info") )
-                    { if (core::gsVerbose)
-                      { std::cerr << "Detected mCRL2 input file.\n";
-                      }
-                      return lts_lts;
-                    } 
-                    else 
-                    {
-                      if (core::gsVerbose)
-                      { std::cerr << "Detected SVC input file\n";
-                      }
-                      assert(0);
-                      return lts_none; //lts_svc;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-#ifdef USE_BCG
-  // detect lts_bcg
-  if ( r >= 2 )
-  {
-    if ( (buf[0] == 0x01) && (buf[1] == 0x00) )
-    {
-      const unsigned int offsets[] = { 0x3, 0xb, 0x13, 0x1b, 0x23, 0x2b, 0x33, 0x3b, 0x43, 0x4b };
-      const unsigned int num_offsets = 10;
-
-      is.seekg(0,istream::end);
-      streampos size = is.tellg();
-
-      bool valid = true;
-      for (unsigned int i=0; i<num_offsets; i++)
-      {
-        if ( offsets[i] >= size )
-        {
-          valid = false;
-          break;
-        }
-
-        unsigned int pointer = 0; is.read((char *) &pointer,4);
-        if ( pointer >= size )
-        {
-          valid = false;
-          break;
-        }
-      }
-
-      is.seekg(init_pos);
-
-      if ( valid )
-      {
-        if (core::gsVerbose)
-        { std::cerr << "Detected BCG input file.\n";
-        }
-        return lts_bcg;
-      }
-    }
-  }
-#endif
-
-  return lts_none;
-}
-
 lts_type guess_format(string const& s) 
 {
   string::size_type pos = s.find_last_of('.');
@@ -468,21 +116,28 @@ lts_type guess_format(string const& s)
   return lts_none;
 }
 
-static std::string type_strings[] = { "unknown", "lts", "aut", "svc", "fsm", "dot", "bcg" };
+static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "bcg", "dot", "svc" };
 
-static std::string extension_strings[] = { "", "lts", "aut", "svc", "svc", "fsm", "dot", "bcg" };
+static std::string extension_strings[] = { "", "lts", "aut", "fsm", "bcg", "dot", "svc" };
 
 static std::string type_desc_strings[] = { "unknown LTS format",
                                            "mCRL2 LTS format",
                                            "Aldebaran format (CADP)",
-                                           "SVC format",
                                            "Finite State Machine format",
-                                           "GraphViz format",
                                            "Binary Coded Graph format (CADP)" 
+                                           "GraphViz format",
+                                           "SVC format",
                                          };
 
 
-static std::string mime_type_strings[] = { "", "application/lts", "text/aut", "application/svc", "text/fsm", "text/dot", "application/bcg" };
+static std::string mime_type_strings[] = { "", 
+                                           "application/lts", 
+                                           "text/aut", 
+                                           "text/fsm", 
+                                           "application/bcg", 
+                                           "text/dot", 
+                                           "application/svc"
+                                         };
 
 lts_type parse_format(std::string const& s) 
 {
@@ -494,24 +149,24 @@ lts_type parse_format(std::string const& s)
   {
     return lts_aut;
   } 
-  /* else if ( s == "svc" )
-  {
-    return lts_svc;
-  }  */
   else if ( s == "fsm" )
   {
     return lts_fsm;
   } 
-  else if ( s == "dot" )
-  {
-    return lts_dot;
 #ifdef USE_BCG
-  } 
   else if ( s == "bcg" )
   {
     return lts_bcg;
-#endif
   }
+#endif
+  else if ( s == "dot" )
+  {
+    return lts_dot;
+  } 
+  else if ( s == "svc" )
+  {
+    return lts_svc;
+  }  
 
   return lts_none;
 }
@@ -612,37 +267,7 @@ std::string lts_extensions_as_string(const std::set<lts_type> &supported)
 {
   return lts_extensions_as_string(",",supported);
 }
+
 } // namespace detail
-
-ATermList sorted_insert(ATermList l,ATermAppl t)
-{ 
-  if (l==ATempty)
-  { return ATinsert(l,(ATerm)t);
-  }
-
-  if (ATgetName(ATgetAFun(ATgetArgument(t,0)))<
-         ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(l),0))))
-  { return ATinsert(l,(ATerm)t);
-  }
-  if ((ATgetName(ATgetAFun(ATgetArgument(t,0)))==
-         ATgetName(ATgetAFun(ATgetArgument(ATgetFirst(l),0))))
-       &&
-      (ATgetArgument(t,1)< ATgetArgument(ATgetFirst(l),1)))
-  { return ATinsert(l,(ATerm)t);
-  }
-  return ATinsert(sorted_insert(ATgetNext(l),t),ATgetFirst(l));
-}
-
-ATerm sort_multi_action(ATerm ma)
-{ ATermList tl=ATLgetArgument((ATermAppl)(ma),0); //get the multi_action_list
-  ATermList result=ATempty;
-  for( ; tl!=ATempty ; tl=ATgetNext(tl))
-  { result=sorted_insert(result,ATAgetFirst(tl));
-  }
-  return (ATerm)gsMakeMultAct(result);
-}
-
-
-
 } //lts
 } //data

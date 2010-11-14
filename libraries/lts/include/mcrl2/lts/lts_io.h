@@ -41,23 +41,10 @@
 
 namespace mcrl2
 {
-
-  namespace lps
-  {
-    class specification;
-  } 
-
-
   namespace lts
   {
     namespace detail
     {
-
-      lts_type detect_type(std::string const& filename);
-      lts_type detect_type(std::istream &is);
-
-      lps::specification const& empty_specification();
-
 
       /** \brief Determines the LTS format from a filename by its extension.
        * \param[in] s The name of the file of which the format will be
@@ -144,6 +131,12 @@ namespace mcrl2
     }
 
 
+    /** \brief Read a labelled transition system and return it in fsm format.
+     *  \details The file can refer to any file in lts, aut, fsm, bcg, dot or svc 
+     *           format. After reading it is is attempted to translate it into
+     *           fsm format.
+     *  \param[in] path A string with the name of the file.
+     *  \param[out] l The lts in which the transition system is put. */
     inline void load_lts_as_fsm_file(const std::string &path, lts_fsm_t &l)
     {
       const lts_type intype = mcrl2::lts::detail::guess_format(path);

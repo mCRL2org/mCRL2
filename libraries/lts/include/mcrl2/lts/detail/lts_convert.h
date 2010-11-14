@@ -1474,7 +1474,7 @@ namespace detail
   {
     if (lts_in.has_state_info())
     { 
-      for(unsigned int i=0; i<lts_in.num_state_labels(); ++i)
+      for(unsigned int i=0; i<lts_in.num_state_values(); ++i)
       { 
         lts_out.add_state(c.translate_state(lts_in.state_value(i)));
       }

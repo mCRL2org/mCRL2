@@ -148,61 +148,41 @@ namespace lts
 
   class action_label_lts;
   inline std::string pp(const action_label_lts l);
-  ATerm sort_multi_action(ATerm ma);
 
-  class action_label_lts
+  /** \brief A class containing the values for action labels for the .lts format */
+  class action_label_lts:public mcrl2::lps::multi_action
   {
     public:
       typedef mcrl2::lps::multi_action element_type;
 
-    protected: 
-      element_type m_action_label_lts;
-
-    public:
-      action_label_lts():m_action_label_lts()
+      action_label_lts()
       {}
 
-      action_label_lts(const ATerm a):m_action_label_lts(a)
+      action_label_lts(const ATerm a):mcrl2::lps::multi_action(a)
       { 
       }
 
-      action_label_lts(const lps::action a):m_action_label_lts(a)
+      action_label_lts(const lps::action a):mcrl2::lps::multi_action(a)
       {
       }
 
       element_type label() const
       { 
-        return m_action_label_lts;
+        return *this; 
       }
 
       ATerm aterm() const
       { 
-        assert(!m_action_label_lts.has_time());
-        return (ATerm)mcrl2::core::detail::gsMakeMultAct(m_action_label_lts.actions());
+        assert(!this->has_time());
+        return (ATerm)mcrl2::core::detail::gsMakeMultAct(this->actions());
       }
-
-      bool operator ==(const action_label_lts &other) const
-      {
-        return m_action_label_lts==other.m_action_label_lts;
-      }
-
-      bool operator !=(const action_label_lts &other) const
-      {
-        return m_action_label_lts!=other.m_action_label_lts;
-      }
-
-      bool operator<(const action_label_lts &l) const
-      { 
-        return this->m_action_label_lts<l.m_action_label_lts;
-      }
-
 
       bool hide_actions(const std::vector<std::string> &tau_actions)
       { 
         using namespace std;
         using namespace mcrl2::lps;
 
-        const action_list mas = m_action_label_lts.actions(); 
+        const action_list mas = this->actions(); 
         action_list new_action_list;
         for(action_list:: const_iterator i=mas.begin(); i!=mas.end(); ++i)
         { 
@@ -215,8 +195,7 @@ namespace lts
           }
         }
         const bool is_tau=new_action_list.empty(); 
-        // m_action_label_lts=multi_action(sort_multi_action((ATerm)mcrl2::core::detail::gsMakeMultAct(new_multi_action));
-        m_action_label_lts=multi_action(new_action_list);
+        m_actions=new_action_list;
 
         return is_tau;
       }

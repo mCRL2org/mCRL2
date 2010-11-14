@@ -169,8 +169,11 @@ namespace mcrl2
         }
 
         /** \brief Gets the number of state labels of this LTS.
-         * \return The number of state labels of this LTS. */
-        states_size_type num_state_labels() const
+         *  \details As states does not need to have state values,
+         *  the number of state values can differ from the number of
+         *  states.
+         *  \return The number of state labels of this LTS. */
+        states_size_type num_state_values() const
         {
           return state_values.size();
         }
@@ -263,7 +266,6 @@ namespace mcrl2
          * \return The number of the added label. */
         labels_size_type add_label(const ACTION_LABEL_T value, bool is_tau = false)
         {
-          // std::cerr << "  label_values size " << label_values.size() << "\n";
           assert(label_values.size()==taus.size());
           const labels_size_type label_index=label_values.size();
           taus.push_back(is_tau);
@@ -305,18 +307,17 @@ namespace mcrl2
         }
 
         /** \brief Gets the value of a label.
-         * \param[in] label The number of the label.
-         * \return The value of the label. */
+         *  \param[in] label The number of the label.
+         *  \return The value of the label. */
         
         ACTION_LABEL_T label_value(const labels_size_type label) const
         { 
-         // std::cerr << "ACT LABEL " << label << "   " << label_values.size() << "\n";
          assert(label < label_values.size());
          return label_values[label];
         }
 
         /** \brief Clear the transitions of an lts.
-         * \details This resets the transition vector in an lts, but
+         *  \details This resets the transition vector in an lts, but
          *          leaves other related items, such as state or
          *          action labels untouched. */
         void clear_transitions()
@@ -325,10 +326,10 @@ namespace mcrl2
         }
 
         /** \brief Clear the labels of an lts.
-         * \details This removes the action labels of an lts.
-         *          It also resets the information
-         *          regarding to what actions labels are tau. 
-         *          It will not change the number of action labels. */
+         *  \details This removes the action labels of an lts.
+         *           It also resets the information
+         *           regarding to what actions labels are tau. 
+         *           It will not change the number of action labels. */
         void clear_action_labels()
         { 
           label_values = atermpp::vector<ACTION_LABEL_T>();
@@ -336,14 +337,17 @@ namespace mcrl2
         }
 
         /** \brief Clear the labels of an lts.
-         * \details This removes the action labels of an lts.
-         *          It does not change the number of 
-         *          state labels */
+         *  \details This removes the action labels of an lts.
+         *           It does not change the number of 
+         *           state labels */
         void clear_state_labels()
         { 
           state_values = atermpp::vector<STATE_LABEL_T>();
         }
 
+        /** \brief Clear the transitions system.
+         *  \details The state values, action values and transitions are 
+         *  reset. The number of states, labels and transitions are set to 0. */
         void
         clear()
         { 
@@ -371,12 +375,8 @@ namespace mcrl2
         /** \brief Add a transition to the lts.
          */
         void add_transition(const transition &t)
-        { // std::cerr << "Add transition " << t.from() << "-" << t.label() << "->" << t.to() << "  #S " <<
-          //         nstates << "#L " << label_values.size() << "\n";
-          // We allow transitions to be added, even if they have not (yet) state and action labels.
-          // assert((nstates==0 || t.from()<nstates) && 
-          //        (t.label()<label_values.size()) && 
-          //        (nstates==0 || t.to()<nstates));
+        { 
+          // We allow transitions to be added, even if they have not (yet) valid state and action labels.
           transitions.push_back(t);
         }
 

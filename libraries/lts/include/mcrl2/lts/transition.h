@@ -110,6 +110,10 @@ namespace mcrl2
           m_to = to;
         }
 
+        ///\brief Standard lexicographic ordering on transitions.
+        ///\details The ordering is lexicographic from left to right.
+        ///         First t.from are compared, then the label, and 
+        ///         if these do not determine the ordering, to is investigated.
         bool
         operator <(const transition &t) const
         {

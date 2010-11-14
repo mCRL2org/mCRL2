@@ -30,6 +30,10 @@ namespace lts
 namespace detail
 {
 
+  /** \brief This class contains strings to be used as values for action labels in lts's.
+   *  \details These action labels are used in the aut, fsm, bcg and dot format to represent
+   *           values for the action labels in transitions.
+   */
   class action_label_string:
         public std::string
   { 
