@@ -160,30 +160,30 @@ labelled transition system has its own file extension. The table below shows the
   [ [`lts_svc_t`] [`lts_svc`]       [.svc]           [`state_label_svc`][`action_label_lts`][No] ]
 ]
 
-[subsection: The lts format]
+[section: The lts format]
 This format is 
 
 [endsect]
 
-[subsection: The aut format]
+[section: The aut format]
 The class `lts_aut_t` contains labelled transition systems
 that have no state values and strings as action labels. 
 
 [endsect]
 
-[subsection: The fsm format]
+[section: The fsm format]
 
 [endsect]
 
-[subsection: The dot format]
+[section: The dot format]
 
 [endsect]
 
-[subsection: The bcg format]
+[section: The bcg format]
 
 [endsect]
 
-[subsection: The svc format]
+[section: The svc format]
 
 [endsect]
 
