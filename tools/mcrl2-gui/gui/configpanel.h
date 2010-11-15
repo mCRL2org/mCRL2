@@ -84,28 +84,41 @@ public:
     fgs->Add( new wxStaticText(top, wxID_ANY, wxString( m_fileIO.input_file.c_str(), wxConvUTF8 )), wxGBPosition(row,1),
         wxGBSpan(1,2));
 
+    suggested_output_file = NULL;
+
+    ++row;
+
+    wxString filesuggestion =wxEmptyString;
+
+
     if (!m_tool.m_output_type.empty())
-      {
-        ++row;
+    {
+      fgs->Add(new wxStaticText(top, wxID_ANY, wxT("output file:")),
+          wxGBPosition(row, 0));
 
-        fgs->Add(new wxStaticText(top, wxID_ANY, wxT("output file:")),
-            wxGBPosition(row, 0));
+      filesuggestion = GenerateOutputFileSuggestion();
+    } else {
+      fgs->Add(new wxStaticText(top, wxID_ANY, wxT("Output to file")),
+          wxGBPosition(row, 0));
 
-        wxString filesuggestion = GenerateOutputFileSuggestion();
+    }
 
-        wxFilePickerCtrl *fpc = new wxFilePickerCtrl(top, ID_OUTPUT_FILE,
-            wxT(""), wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
-            wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
+    suggested_output_file = new wxFilePickerCtrl(top, ID_OUTPUT_FILE,
+        wxT(""), wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
+        wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
 
-        fpc->SetPath(filesuggestion);
-        fgs->Add(fpc, wxGBPosition(row, 1), wxGBSpan(1,2));
+    if (m_tool.m_output_type.empty()){
+      suggested_output_file->SetToolTip(wxT("Leave blank if the output should be written to screen."))  ;
+    }
 
-        fpc->SetMinSize(wxSize(350,25));
-        fpc->SetTextCtrlProportion(6);
+    suggested_output_file->SetPath(filesuggestion);
+    fgs->Add(suggested_output_file, wxGBPosition(row, 1), wxGBSpan(1,2));
 
-        m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
+    suggested_output_file->SetMinSize(wxSize(350,25));
+    suggested_output_file->SetTextCtrlProportion(6);
 
-      }
+    m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
+
 
     ++row;
     //fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
@@ -299,6 +312,8 @@ public:
 	void Run(){
     UpdateToolTipStatus(STATUS_RUNNING);
 
+    m_tool_output->GetOutput()->Clear();
+
     wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
 
     wxString run = cmd;
@@ -468,6 +483,8 @@ public:
 
 	MyPipedProcess *m_process;
 
+	wxFilePickerCtrl *suggested_output_file;
+
 	long m_pid;
 
 private:
@@ -495,6 +512,19 @@ private:
         intStat = stat(
             (file_suggestion + c + "." + m_tool.m_output_type).c_str(),
             &stFileInfo);
+
+        size_t n = m_parent->GetPageCount();
+        if(intStat != 0){
+          for( size_t i = 0; i < n ; ++i ){
+            if( (( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file != NULL ){
+              string suggestion = file_suggestion + c + "." + m_tool.m_output_type;
+              if((( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath()){
+                cout << (( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath().mb_str() << endl;
+                intStat = suggestion.compare( (( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath().mb_str() );
+              }
+            }
+          }
+        }
         ++cntr;
       }
 
