@@ -197,7 +197,7 @@ public:
 		m_gui_options["debug"] = create_checkbox_widget();
 
     if ( &Tool::timer ){
-      m_gui_options["timings"] = create_filepicker_widget("*.YML File Extension|*.yml");
+      m_gui_options["timings"] = create_checkbox_widget();
     };
 
 	}
