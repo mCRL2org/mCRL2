@@ -77,8 +77,6 @@ public:
 		m_listbox_output = output;
 		m_notebookpanel = notebookpanel;
 		m_extention_tool_mapping = extention_tool_mapping;
-		refresh_dir = new wxTimer(this, ID_TIMER);
-		refresh_dir->Start(500);
 		this->Fit();
 		this->Layout();
 
@@ -606,7 +604,6 @@ public:
 
 	}
 
-	wxTimer *refresh_dir;
 protected:
 	wxWindow *m_parent;
 

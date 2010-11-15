@@ -185,7 +185,7 @@ public:
 				m_extention_tool_mapping, m_ExecutedCommandsPanel, this->GetNoteBookToolPanel());
 
 		m_FileBrowserPanel->SetSize(250,-1);
-		m_FileBrowserPanel->Refresh();
+		m_FileBrowserPanel->DoRefresh();
 
 		m_mgr.AddPane(m_FileBrowserPanel, wxLEFT, wxT("File Browser"));
 
@@ -398,7 +398,7 @@ public:
 	;
 
 	void OnRefresh(wxCommandEvent& /*event*/) {
-		m_FileBrowserPanel->Refresh();
+		m_FileBrowserPanel->DoRefresh();
 	}
 	;
 
@@ -487,7 +487,7 @@ public:
         p = (wxStringClientData*) evt.GetClientData();
         if (p)
         {
-          m_FileBrowserPanel->Refresh();
+          m_FileBrowserPanel->DoRefresh();
           m_FileBrowserPanel->ExpandPath(p->GetData());
         }
       }
