@@ -519,7 +519,6 @@ private:
             if( (( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file != NULL ){
               string suggestion = file_suggestion + c + "." + m_tool.m_output_type;
               if((( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath()){
-                cout << (( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath().mb_str() << endl;
                 intStat = suggestion.compare( (( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath().mb_str() );
               }
             }
