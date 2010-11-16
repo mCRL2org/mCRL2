@@ -68,6 +68,7 @@ enum {
 	Exec_About = 300,
 	Exec_PerspectiveReset,
 	Exec_Preferences,
+	Exec_Close_current_configpanel,
 
 	Exec_ToggleFileBrowserPanel,
 	Exec_ToggleExecutedCommandsPanel,
@@ -152,8 +153,14 @@ public:
 		m_PanelMenu->Check(Exec_ToggleExecutedCommandsPanel, true);
 
 		wxMenu *windowMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
+
 		windowMenu->AppendSubMenu(m_PanelMenu, wxT("&Dockable panels"),
             wxT("Toggle panel visibility"));
+
+		windowMenu->AppendSeparator();
+    windowMenu->Append(Exec_Close_current_configpanel, wxT("&Close configuration panel\tCtrl-W"),
+            wxT("Closes currently opened configuration panel"));
+
 		windowMenu->AppendSeparator();
 		windowMenu->Append(Exec_PerspectiveReset, wxT("&Reset Perspective"),
 				wxT("Reset Perspective"));
@@ -469,6 +476,12 @@ public:
 	}
 	;
 
+	void OnCloseConfigPanelPage(wxCommandEvent& /*event*/){
+	  if (m_notebookpanel->GetSelection() > -1){
+	    m_notebookpanel->DeletePage(m_notebookpanel->GetSelection());
+	  }
+	}
+
 	wxTextCtrl *GetLogListBox() const {
 		return m_ExecutedCommandsPanel;
 	}
@@ -546,6 +559,8 @@ EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
 EVT_MENU(Exec_Copy2ClipBoard, MainFrame::OnCopy2Clipboard)
 EVT_MENU(Exec_Save2File, MainFrame::OnSave)
 EVT_MENU(Exec_SelectAll, MainFrame::OnSelectAll)
+
+EVT_MENU(Exec_Close_current_configpanel, MainFrame::OnCloseConfigPanelPage )
 
 EVT_IDLE(MainFrame::OnIdle)
 EVT_TIMER(wxID_ANY, MainFrame::OnTimer)
