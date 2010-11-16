@@ -54,12 +54,23 @@ void premature_termination_handler(int)
 atermpp::set < mcrl2::core::identifier_string > parse_action_list(const std::string& s)
 {
   atermpp::set < mcrl2::core::identifier_string > result;
-  // *len = s.empty() ? 0 : 1;
 
   for (std::string::size_type p = 0, q(s.find_first_of(",")); true; p = q + 1, q = s.find_first_of(",", q + 1))
   {
-    result.insert(mcrl2::core::identifier_string(s.substr(p, q - p)));
-    // *r++ = mcrl2::core::identifier_string(s.substr(p, q - p));
+    const std::string a=s.substr(p, q - p);
+    // Check that a is a proper string, with syntax: [a-zA-Z\_][a-zA-Z0-9\_']
+    for(unsigned int i=0; i<a.size(); ++i)
+    { 
+      const char c=a[i];
+      if (!(('a'<=c && c<='z')||
+            ('A'<=c && c<='Z')||
+            (c=='_')||
+            (i>0 && (('0'<=c && c<='9') || c=='\''))))
+      {
+        throw mcrl2::runtime_error("The string " + a + " is not a proper action label.");
+      }
+    }
+    result.insert(mcrl2::core::identifier_string(a));
 
     if (q == std::string::npos)
     {
@@ -67,37 +78,6 @@ atermpp::set < mcrl2::core::identifier_string > parse_action_list(const std::str
     }
   }
   return result;
-
-  /* 
-
-  for (std::string::size_type position(s.find_first_of(",")); position != std::string::npos; position = s.find_first_of(",", position + 1))
-  {
-    *len = (*len) + 1;
-  }
-
-  ATermAppl *r = (ATermAppl *) malloc((*len)*sizeof(ATermAppl));
-  if ( r == NULL )
-  {
-    gsErrorMsg("not enough memory to store action list\n");
-    exit(1);
-  }
-  for (int i = 0; i< (*len); ++i)
-  {
-    r[i] = NULL;
-  }
-  ATprotectArray((ATerm *) r,*len);
-
-  for (std::string::size_type p = 0, q(s.find_first_of(",")); true; p = q + 1, q = s.find_first_of(",", q + 1))
-  {
-    *r++ = mcrl2::core::identifier_string(s.substr(p, q - p));
-
-    if (q == std::string::npos)
-    {
-       break;
-    }
-  }
-
-  return r - *len; */
 }
 
 typedef  rewriter_tool< input_output_tool > lps2lts_base;
