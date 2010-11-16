@@ -67,21 +67,21 @@ void lts_dot_t::save(const string &filename) const
   os << "node [ width=0.25, height=0.25, label=\"\" ];" << endl;
   if ( num_states() > 0 )
   {
-    os << state_value(initial_state()).name();
+    os << state_label(initial_state()).name();
 
     os << " [ peripheries=2 ];" << endl;
     if ( has_state_info() )
     {
       for (unsigned int i=0; i<num_states(); i++)
       {
-        os << state_value(i).name() << " [ label=\"" << state_value(i).label() << "\" ];" << endl;
+        os << state_label(i).name() << " [ label=\"" << state_label(i).label() << "\" ];" << endl;
       }
     }
   }
   for (transition_const_range t=get_transitions();  !t.empty(); t.advance_begin(1))
   {
-    os << state_value(t.front().from()).name() << "->" << state_value(t.front().to()).name() << "[label=\"" << 
-            mcrl2::lts::detail::pp(label_value(t.front().label())) << "\"];" << endl;
+    os << state_label(t.front().from()).name() << "->" << state_label(t.front().to()).name() << "[label=\"" << 
+            mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
   }
 
   os << "}" << endl;

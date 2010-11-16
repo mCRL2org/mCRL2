@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-/** \file
+/** \file lts_bcg.h
  *
  * \brief This file contains a class that contains labelled transition systems in bcg format.
  * \details A labelled transition system in bcg format is a transition system 
@@ -28,14 +28,17 @@ namespace mcrl2
 {
 namespace lts
 {
-
+  /* \brief This labelled transition system corresponds to the BCG labelled transition system format
+            used in the Ceasar/Aldebaran toolset developed at INRIA in Grenoble.
+     \detail In this lts format there are no state labels, and action labels are strings.
+  */
   class lts_bcg_t : public lts< detail::state_label_empty, detail::action_label_string >
   {
     public:
  
       /** \brief Provides the type of this lts, in casu lts_bcg.
       */
-      lts_type type()
+      lts_type type() const
       {
         return lts_bcg;
       }
@@ -52,8 +55,6 @@ namespace lts
        */
       void save(const std::string &filename) const;
   };
-
-
 
 } // namespace lts
 } // namespace mcrl2

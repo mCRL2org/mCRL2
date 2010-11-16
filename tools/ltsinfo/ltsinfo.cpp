@@ -109,7 +109,7 @@ class ltsinfo_tool : public ltsinfo_base
 
       std::cout 
            << "Number of states: " << l.num_states() << std::endl
-           << "Number of state labels: " << l.num_state_values() << std::endl
+           << "Number of state labels: " << l.num_state_labels() << std::endl
            << "Number of action labels: " << l.num_action_labels() << std::endl
            << "Number of transitions: " << l.num_transitions() << std::endl;
 

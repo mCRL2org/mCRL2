@@ -14,7 +14,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/lts/lps2lts_lts.h"
+#include "mcrl2/lts/detail/lps2lts_lts.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
 
@@ -132,7 +132,7 @@ namespace mcrl2
             const size_t label = ATindexedSetPut(aterm2label,(ATerm) action,&is_new);
             if ( is_new )
             {
-              const size_t t = generic_lts.add_label((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue);
+              const size_t t = generic_lts.add_action((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue);
               assert(t==label);
               static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
             }

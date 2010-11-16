@@ -40,9 +40,13 @@ namespace lts
           public std::vector < unsigned int >
     {
       public:
+        /* \brief Default constructor. The label becomes an empty vector.
+        */
         state_label_fsm()
         {}
 
+        /* \brief Default constructor. The label is set to the vector v.
+        */
         state_label_fsm(const std::vector < unsigned int >& v):
                                      std::vector < unsigned int >(v)
         {}
@@ -67,6 +71,8 @@ namespace lts
   
     public:
 
+      /* \brief The lts_type of this labelled transition system. In this case lts_fsm.
+      */
       lts_type type() const
       {
         return lts_fsm;
@@ -94,6 +100,9 @@ namespace lts
         return m_state_element_values[idx].size();
       }
 
+      /** \brief Returns the element-index'th element for the parameter with index
+                 parameter_index.
+      */
       std::string state_element_value(unsigned int parameter_index, unsigned int element_index) const
       { 
         assert(parameter_index<m_state_element_values.size());
@@ -102,7 +111,7 @@ namespace lts
       }
 
       /** \brief Return the parameters of the state vectors stored in this LTS.
-      * \return The state parameters stored in this LTS.
+      *   \return The state parameters stored in this LTS.
       */
       std::vector < std::pair < std::string, std::string > > process_parameters() const
       {

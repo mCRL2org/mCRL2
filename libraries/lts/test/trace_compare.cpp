@@ -37,22 +37,22 @@ int test_main(int argc, char **argv)
   l3.set_initial_state(0);
   l4.set_initial_state(0);
 
-  l1.add_label(lab_a);
-  l1.add_label(lab_b);
-  l1.add_label(lab_c);
-  l1.add_label(lab_tau,true);
-  l2.add_label(lab_a);
-  l2.add_label(lab_b);
-  l2.add_label(lab_c);
-  l2.add_label(lab_tau,true);
-  l3.add_label(lab_a);
-  l3.add_label(lab_b);
-  l3.add_label(lab_c);
-  l3.add_label(lab_tau,true);
-  l4.add_label(lab_a);
-  l4.add_label(lab_b);
-  l4.add_label(lab_c);
-  l4.add_label(lab_tau,true);
+  l1.add_action(lab_a);
+  l1.add_action(lab_b);
+  l1.add_action(lab_c);
+  l1.add_action(lab_tau,true);
+  l2.add_action(lab_a);
+  l2.add_action(lab_b);
+  l2.add_action(lab_c);
+  l2.add_action(lab_tau,true);
+  l3.add_action(lab_a);
+  l3.add_action(lab_b);
+  l3.add_action(lab_c);
+  l3.add_action(lab_tau,true);
+  l4.add_action(lab_a);
+  l4.add_action(lab_b);
+  l4.add_action(lab_c);
+  l4.add_action(lab_tau,true);
 
   // a.(b+c)
   l1.add_transition(transition(0,0,1));

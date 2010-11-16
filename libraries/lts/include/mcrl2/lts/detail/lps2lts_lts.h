@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef MCRL2_LTS_LPS2LTS_LTS_H
-#define MCRL2_LTS_LPS2LTS_LTS_H
+#ifndef MCRL2_LTS_DETAIL_LPS2LTS_LTS_H
+#define MCRL2_LTS_DETAIL_LPS2LTS_LTS_H
 
 #include <memory>
 #include <fstream>
@@ -71,4 +71,4 @@ namespace mcrl2
   }
 }
 
-#endif // MCRL2_LTS_LPS2LTS_LTS_H
+#endif // MCRL2_LTS_DETAIL_LPS2LTS_LTS_H

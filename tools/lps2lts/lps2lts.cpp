@@ -20,8 +20,7 @@
 #include "boost/cstdint.hpp"
 #include "boost/lexical_cast.hpp"
 #include "lps2lts.h"
-#include "mcrl2/lts/exploration.h"
-#include "mcrl2/lts/lps2lts_lts.h"
+#include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/lts_io.h"
 
 #include "mcrl2/core/messaging.h"

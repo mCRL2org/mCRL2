@@ -22,8 +22,8 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/trace/trace.h"
-#include "mcrl2/lts/exploration.h"
-#include "mcrl2/lts/lps2lts_lts.h"
+#include "mcrl2/lts/detail/exploration.h"
+#include "mcrl2/lts/detail/lps2lts_lts.h"
 
 
 using namespace std;

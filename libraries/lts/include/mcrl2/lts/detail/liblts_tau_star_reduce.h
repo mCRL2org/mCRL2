@@ -172,7 +172,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
       state_map[i] = new_nstates;
       if ( l.has_state_info() )
       {
-        l.set_state_value(new_nstates,l.state_value(i));
+        l.set_state_label(new_nstates,l.state_label(i));
       }
       new_nstates++;
     }
@@ -187,7 +187,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
       label_map[i] = new_nlabels;
       // if ( l.has_label_info() )
       {
-        l.set_label_value(new_nlabels,l.label_value(i));
+        l.set_action_label(new_nlabels,l.action_label(i));
       }
       new_nlabels++;
     }

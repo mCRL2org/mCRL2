@@ -131,7 +131,7 @@ static void dot_add_transition(unsigned int from, const std::string &label_strin
   if (label_index==dot_lexer_obj->labelTable.end())
   { 
     // Not found. This label does not occur in the dot.
-    const lts_dot_t::labels_size_type n=dot_lexer_obj->dot_lts->add_label(label_string,label_string=="tau");
+    const lts_dot_t::labels_size_type n=dot_lexer_obj->dot_lts->add_action(label_string,label_string=="tau");
     dot_lexer_obj->labelTable[label_string]=n;
     dot_lexer_obj->dot_lts->add_transition(transition(from,n,to));
   }
@@ -173,7 +173,7 @@ static unsigned int dot_state(const std::string &id, const std::string &label)
     idx=state_index->second;
     if (label!="")
     { 
-      dot_lexer_obj->dot_lts->set_state_value(idx, state_label_dot(id,label));
+      dot_lexer_obj->dot_lts->set_state_label(idx, state_label_dot(id,label));
     }
   }
   return idx;

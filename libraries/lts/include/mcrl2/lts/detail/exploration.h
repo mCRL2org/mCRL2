@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef MCRL2_LTS_EXPLORATION_H
-#define MCRL2_LTS_EXPLORATION_H
+#ifndef MCRL2_LTS_DETAIL_EXPLORATION_H
+#define MCRL2_LTS_DETAIL_EXPLORATION_H
 
 #include <string>
 #include <limits>
@@ -19,9 +19,9 @@
 
 #include "aterm2.h"
 #include "mcrl2/atermpp/indexed_set.h"
-#include "mcrl2/lts/lps2lts_lts.h"
-#include "mcrl2/lts/bithashtable.h"
-#include "mcrl2/lts/queue.h"
+#include "mcrl2/lts/detail/lps2lts_lts.h"
+#include "mcrl2/lts/detail/bithashtable.h"
+#include "mcrl2/lts/detail/queue.h"
 #include "mcrl2/lps/nextstate.h"
 
 #include "workarounds.h"
@@ -215,4 +215,4 @@ namespace mcrl2
   }
 }
 
-#endif // MCRL2_LTS_EXPLORATION_H
+#endif // MCRL2_LTS_DETAIL_EXPLORATION_H

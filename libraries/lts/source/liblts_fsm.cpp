@@ -60,7 +60,7 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
       idx = 0;
     }
     
-    const state_label_fsm state_pars=l.state_value(idx);
+    const state_label_fsm state_pars=l.state_label(idx);
 
     for(unsigned int j=0; j<state_pars.size() ; j++)
     {
@@ -98,7 +98,7 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
     }
     // correct state numbering
     os << from+1 << " " << to+1 << " \"";
-    os << mcrl2::lts::detail::pp(l.label_value(t.front().label()));
+    os << mcrl2::lts::detail::pp(l.action_label(t.front().label()));
     os << "\"" << std::endl;
   }
 }

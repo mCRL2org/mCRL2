@@ -34,35 +34,41 @@ namespace detail
    *  \details These action labels are used in the aut, fsm, bcg and dot format to represent
    *           values for the action labels in transitions.
    */
-  class action_label_string:
-        public std::string
+  class action_label_string: public std::string
   { 
     public:
 
+      /* \brief Default constructor. The label will contain the default string.
+       */
       action_label_string()
       {}
 
+      /* \brief A constructor, where the string s is taken to become the action label.
+       */
       action_label_string(const std::string &s):std::string(s)
       {}
 
+      /* \brief An auxiliary function to hide actions. As strings have no structure, hiding of
+       *        actions is not possible, and this method will just throw an exception error. */
       void hide_actions(const std::vector<std::string> &)
       {
         throw mcrl2::runtime_error("Cannot hide action labels, as actions are strings without structure");
       }
       
-     bool operator<(const action_label_string &l) const
-     { 
-       return std::string(*this)<std::string(l);
-     }
+      /* \brief A comparison operator comparing the action_label_strings in the same way as strings.
+      */
+      bool operator<(const action_label_string &l) const
+      { 
+        return std::string(*this)<std::string(l);
+      }
   };
 
+  /* \brief A pretty print operator on action labels, returning it as a string.
+  */
   inline std::string pp(const action_label_string &l)
   {
     return l;
   }
-
-
-
 
 } // namespace detail
 

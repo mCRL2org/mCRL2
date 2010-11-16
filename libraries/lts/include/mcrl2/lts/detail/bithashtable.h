@@ -10,14 +10,12 @@
 
 #include "boost.hpp" // for precompiled headers
 
-#ifndef MCRL2_LTS_BITHASHTABLE_H
-#define MCRL2_LTS_BITHASHTABLE_H
+#ifndef MCRL2_LTS_DETAIL_BITHASHTABLE_H
+#define MCRL2_LTS_DETAIL_BITHASHTABLE_H
 
 #include <vector>
 #include <aterm2.h>
 #include "mcrl2/exception.h"
-
-/** \cond [ Do not include this class in the documentation ] */
 
 namespace mcrl2
 {
@@ -169,7 +167,5 @@ namespace mcrl2
   }
 }
 
-/** \endcond */
-
-#endif // MCRL2_LTS_BITHASHTABLE_H
+#endif // MCRL2_LTS_DETAIL_BITHASHTABLE_H
 

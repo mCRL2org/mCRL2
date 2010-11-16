@@ -51,7 +51,7 @@ template <class LTS_TYPE>
   {
     for (unsigned int i=0; i<l2.num_states(); ++i)
     {
-      l1.add_state(l2.state_value(i));
+      l1.add_state(l2.state_label(i));
     }
   }
   else
@@ -77,11 +77,8 @@ template <class LTS_TYPE>
     // the resulting LTS will contain
     for (unsigned int i = 0; i < l1.num_action_labels(); ++i)
     {
-      /* ATindexedSetPut(labs,l1.label_value(i).label(),&b);
-      if ( b )
-      */
       if (labs.insert(std::pair <typename LTS_TYPE::action_label_t,typename LTS_TYPE::labels_size_type> 
-               (l1.label_value(i),new_nlabels)).second)
+               (l1.action_label(i),new_nlabels)).second)
       {
         ++new_nlabels;
       } 
@@ -89,10 +86,8 @@ template <class LTS_TYPE>
     // Same for LTS l2
     for (unsigned int i=0; i<l2.num_action_labels(); ++i)
     {
-      /* ATindexedSetPut(labs,l2.label_value(i).label(),&b);
-      if ( b ) */
       if (labs.insert(std::pair <type1,type2> 
-               (l2.label_value(i),new_nlabels)).second)
+               (l2.action_label(i),new_nlabels)).second)
       {
         ++new_nlabels;
       }
@@ -102,25 +97,21 @@ template <class LTS_TYPE>
     std::vector<bool> new_taus(new_nlabels,false);
     for (unsigned int i = 0; i < l1.num_action_labels(); ++i)
     { 
-      // assert(ATindexedSetGetIndex(labs,l1.label_value(i).label())<(int)new_taus.size());
-      // new_taus[ATindexedSetGetIndex(labs,l1.label_value(i).label())] = l1.is_tau(i);
-      assert(labs[l1.label_value(i)] < (unsigned int)new_taus.size());
-      new_taus[labs[l1.label_value(i)]] = l1.is_tau(i);
+      assert(labs[l1.action_label(i)] < (unsigned int)new_taus.size());
+      new_taus[labs[l1.action_label(i)]] = l1.is_tau(i);
     }
     for (unsigned int i = 0; i < l2.num_action_labels(); ++i)
     { 
-      // assert(ATindexedSetGetIndex(labs,l2.label_value(i).label())<(int)new_taus.size());
-      // new_taus[ATindexedSetGetIndex(labs,l2.label_value(i).label())] = l2.is_tau(i);
-      assert(labs[l2.label_value(i)] < new_taus.size());
-      new_taus[labs[l2.label_value(i)]] = l2.is_tau(i);
+      assert(labs[l2.action_label(i)] < new_taus.size());
+      new_taus[labs[l2.action_label(i)]] = l2.is_tau(i);
     }
     
     // Store the label values contained in the indexed set
-    l1.clear_action_labels(); 
+    l1.clear_actions(); 
 
     for (typename atermpp::map < type1,type2 >::const_iterator i = labs.begin(); i != labs.end(); ++i)
     {
-      l1.add_label(i->first,new_taus[i->second]);
+      l1.add_action(i->first,new_taus[i->second]);
     }
 
     // Update the label numbers of all transitions of this LTS to
@@ -128,7 +119,7 @@ template <class LTS_TYPE>
     
     for (transition_range r = l1.get_transitions(); !r.empty(); r.advance_begin(1))
     { 
-      r.front().set_label(labs[l1.label_value(r.front().label())]);
+      r.front().set_label(labs[l1.action_label(r.front().label())]);
     }
     // Now add the transition labels of LTS l2
 
@@ -138,7 +129,7 @@ template <class LTS_TYPE>
     for (transition_const_range r = l2.get_transitions(); !r.empty(); r.advance_begin(1))
     { const transition transition_to_add=r.front();
       l1.add_transition(transition(transition_to_add.from()+old_nstates,
-                                labs[l2.label_value(transition_to_add.label())],
+                                labs[l2.action_label(transition_to_add.label())],
                                 transition_to_add.to()+old_nstates));
     }
   //}

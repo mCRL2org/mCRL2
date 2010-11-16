@@ -243,7 +243,7 @@ namespace mcrl2 {
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
-                m_lts.add_label(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
+                m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
               }
               m_lts.add_transition(lts::transition(from,label_index,to));
             }
@@ -269,7 +269,7 @@ namespace mcrl2 {
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
-                m_lts.add_label(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
+                m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
               }
               m_lts.add_transition(lts::transition(from,label_index,to));
             }
@@ -353,7 +353,7 @@ namespace mcrl2 {
             {
               if(i->to() == deadlock_state)
               {
-                std::string label = pp(m_lts.label_value(i->label()));
+                std::string label = pp(m_lts.action_label(i->label()));
                 size_t comma_pos = label.find(",");
 
                 std::string block_str = label.substr(0,comma_pos);

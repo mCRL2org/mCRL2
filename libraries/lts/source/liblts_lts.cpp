@@ -104,7 +104,7 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
     for (unsigned int i=l.num_action_labels(); i<=((unsigned int) label); i++)
     {
       ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
-      l.add_label((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
+      l.add_action((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
     }
 
     l.add_transition(transition((unsigned int) from,
@@ -258,16 +258,16 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
     SVCsetCreator(&f, const_cast< char* >(l.creator().c_str()));
   }
 
-  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_value(l.initial_state()).aterm() : (ATerm) ATmakeInt(l.initial_state()) ,&b));
+  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()).aterm() : (ATerm) ATmakeInt(l.initial_state()) ,&b));
 
   SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
   
   for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
-    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_value(t.front().from()).aterm() : (ATerm) ATmakeInt(t.front().from()) ,&b);
+    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t.front().from()).aterm() : (ATerm) ATmakeInt(t.front().from()) ,&b);
     // SVClabelIndex label = SVCnewLabel(&f, l.has_label_info() ? (ATerm)l.label_value(t.front().label()).aterm() : (ATerm) ATmakeInt(t.front().label()) ,&b);
-    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.label_value(t.front().label()).aterm(), &b);
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_value(t.front().to()).aterm() : (ATerm) ATmakeInt(t.front().to()) ,&b);
+    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t.front().label()).aterm(), &b);
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t.front().to()).aterm() : (ATerm) ATmakeInt(t.front().to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 

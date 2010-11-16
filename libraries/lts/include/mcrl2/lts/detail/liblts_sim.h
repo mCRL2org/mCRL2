@@ -407,7 +407,7 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
     if (gsDebug)
     {
       gsMessage("---------------------------------------------------\n");
-      gsMessage("Label = \"%s\"\n", mcrl2::lts::detail::pp(aut.label_value(l)).c_str());
+      gsMessage("Label = \"%s\"\n", mcrl2::lts::detail::pp(aut.action_label(l)).c_str());
     }
 
     /* reset the stable function */
@@ -1082,72 +1082,11 @@ void sim_partitioner<LTS_TYPE>::print_structure(hash_table3 *struc)
   for ( ; !i.is_end(); ++i)
   {
     gsMessage("(%u,%s,%u),", i.get_x(),
-        mcrl2::lts::detail::pp(aut.label_value(i.get_y())).c_str(), 
+        mcrl2::lts::detail::pp(aut.action_label(i.get_y())).c_str(), 
         i.get_z());
   }
   gsMessage("}");
 }
-
-/* Needed only for reading an initial partition from a file; this is
- * probably not needed in the LTS library
-void sim_partitioner::read_partition_from_file(char *fn)
-{
-  std::ifstream f(fn);
-  if (!f)
-  {
-    throw mcrl2::runtime_error("Cannot open partition file for reading");
-  }
-  char c = 0;
-
-  s_Pi = 0;
-  uint s;
-  int prev;
-  while (f >> c)
-  {
-    if (c != '(')
-    {
-      throw mcrl2::runtime_error("error: '(' expected but '" + c + "' found");
-    }
-    // found another block; read it
-    prev = LIST_END;
-    contents_u.push_back(LIST_END);
-    contents_t.push_back(LIST_END);
-    while (c != ')')
-    {
-      if (!(f >> s))
-      {
-        throw mcrl2::runtime_error("error: could not read state\n"
-                              "while reading block " + s_Sigma + "\n");
-      }
-      // add state s to partition block s_Pi
-      block_Pi[s] = s_Pi;
-      if (prev == LIST_END)
-      {
-        contents_u[s_Pi] = s;
-      }
-      else
-      {
-        state_buckets[prev].next = s;
-      }
-      state_buckets[s].prev = prev;
-      prev = s;
-
-      if (!(f >> c))
-      {
-        throw mcrl2::runtime_error(std::cerr << "error: could not read ',' or ')' \n"
-                                "while reading block " << s_Sigma << std::endl);
-      }
-      if (c != ',' && c != ')')
-      {
-        throw mcrl2::runtime_error("error: ',' or ')' expected but '" << c << "' found");
-      }
-    }
-    ++s_Pi;
-  }
-}
-*/
-
-
 
 } // namespace detail
 } // namespace lts

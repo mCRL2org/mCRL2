@@ -29,7 +29,11 @@ namespace mcrl2
 {
 namespace lts
 {
-
+  /** \brief A simple labelled transition format with only strings as action labels.
+   *  \detail This lts format corresponds to the Ceasar/Aldebaran labelled transition
+   *  system format. There are no state labels, only transition labels which are plain
+   *  strings. 
+   */
   class lts_aut_t : public lts< detail::state_label_empty, detail::action_label_string >
   {
     public:
@@ -49,7 +53,7 @@ namespace lts
       void load(const std::string &filename);
 
       /** \brief Load the labelled transition system from an input stream.
-       *  \details The input stream must be in .aut format.
+       *  \details The input stream must be in .aut format. 
        *  \param[in] is The input stream.
        */
       void load(std::istream &is);

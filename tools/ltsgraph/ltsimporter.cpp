@@ -55,13 +55,9 @@ Graph* LTSImporter::importFile(const std::string &fn)
 
       for(size_t i = 0; i < parameters.size(); ++i) 
       {
-          /* std::pair<std::string, std::string> stateValue(
-              parameters[i],
-              mcrl2::lts::detail::pp((ATermAppl)fileLTS.state_value(stNum)[i]));
-          stateValues.insert(stateValue); */
           std::pair<std::string, std::string> stateValue(
               parameters[i],
-              fileLTS.state_element_value(i,fileLTS.state_value(stNum)[i]));
+              fileLTS.state_element_value(i,fileLTS.state_label(stNum)[i]));
           stateValues.insert(stateValue); 
       }
       s->setParameters(stateValues);
@@ -87,7 +83,7 @@ Graph* LTSImporter::importFile(const std::string &fn)
       unsigned int idFrom, idTo;
       State *stFrom, *stTo;
 
-      std::string label = mcrl2::lts::detail::pp(fileLTS.label_value(ti.label()));
+      std::string label = mcrl2::lts::detail::pp(fileLTS.action_label(ti.label()));
       idFrom = ti.from();
       idTo = ti.to();
 

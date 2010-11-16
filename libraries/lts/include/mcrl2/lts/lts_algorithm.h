@@ -628,7 +628,7 @@ namespace mcrl2
             state_map[i] = new_nstates;
             if (l.has_state_info()) 
             { 
-              new_lts.add_state(l.state_value(i));
+              new_lts.add_state(l.state_label(i));
             }
             else
             { 
@@ -652,14 +652,7 @@ namespace mcrl2
           if (label_map.count(i)>0)   // Label i is used.
           { 
             label_map[i] = new_nlabels;
-            // if (l.has_label_info())
-            // { 
-              new_lts.add_label(l.label_value(i),l.is_tau(i));
-            // }
-            /* else
-            {
-              new_lts.add_label(l.is_tau(i));
-            } */
+            new_lts.add_action(l.action_label(i),l.is_tau(i));
             new_nlabels++;
           }
         }

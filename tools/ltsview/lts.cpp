@@ -270,13 +270,13 @@ std::vector<std::string> LTS::getParameterDomain(unsigned int parindex)
 
 unsigned int LTS::getStateParameterValue(State* state,unsigned int param)
 {
-  return mcrl2_lts.state_value(state->getID())[param];
+  return mcrl2_lts.state_label(state->getID())[param];
 }
 
 std::string LTS::getStateParameterValueStr(State* state, unsigned int param)
 { 
   using namespace mcrl2::lts::detail;
-  return mcrl2_lts.state_element_value(param,(mcrl2_lts.state_value(state->getID()))[param]);
+  return mcrl2_lts.state_element_value(param,(mcrl2_lts.state_label(state->getID()))[param]);
 }
 
 std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, unsigned int param)
@@ -393,8 +393,7 @@ unsigned int LTS::getNumParameters() const
 
 string LTS::getLabel(int labindex)
 {
-  // return mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts.label_value(labindex));
-  return mcrl2_lts.label_value(labindex);
+  return mcrl2_lts.action_label(labindex);
 }
 
 void LTS::addCluster(Cluster* cluster)
@@ -447,8 +446,7 @@ void LTS::getActionLabels(vector< string > &ls) const
   ls.clear();
   for (unsigned int i = 0; i < mcrl2_lts.num_action_labels(); ++i)
   {
-    // ls.push_back(mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts.label_value(i)));
-    ls.push_back(mcrl2_lts.label_value(i));
+    ls.push_back(mcrl2_lts.action_label(i));
   }
 }
 
@@ -923,8 +921,7 @@ void LTS::loadTrace(std::string const& path)
 
       for(size_t i = 0; i < posTrans.size(); ++i)
       {
-        // if (action == mcrl2::lts::detail::pretty_print_label_value(mcrl2_lts.label_value(posTrans[i]->getLabel())))
-        if (action == mcrl2_lts.label_value(posTrans[i]->getLabel()))
+        if (action == mcrl2_lts.action_label(posTrans[i]->getLabel()))
         {
           ++possibilities;
           toChoose = i;

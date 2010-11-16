@@ -1474,9 +1474,9 @@ namespace detail
   {
     if (lts_in.has_state_info())
     { 
-      for(unsigned int i=0; i<lts_in.num_state_values(); ++i)
+      for(unsigned int i=0; i<lts_in.num_states(); ++i)
       { 
-        lts_out.add_state(c.translate_state(lts_in.state_value(i)));
+        lts_out.add_state(c.translate_state(lts_in.state_label(i)));
       }
     }
     else 
@@ -1486,7 +1486,7 @@ namespace detail
 
     for(unsigned int i=0; i<lts_in.num_action_labels(); ++i)
     { 
-      lts_out.add_label(c.translate_label(lts_in.label_value(i)));
+      lts_out.add_action(c.translate_label(lts_in.action_label(i)));
       if (lts_in.is_tau(i))
       {
         lts_out.set_tau(i);

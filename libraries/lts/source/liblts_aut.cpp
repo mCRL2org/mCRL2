@@ -214,7 +214,7 @@ static void read_from_aut(lts_aut_t &l, istream &is)
     const map < string, size_t >::const_iterator i=labs.find(s);
     if (i==labs.end())
     {
-      label=l.add_label(s,s=="tau");
+      label=l.add_action(s,s=="tau");
       labs[s]=label;
     }
     else
@@ -257,7 +257,7 @@ static void write_to_aut(const lts_aut_t &l, ostream &os)
       to = 0;
     }
     os << "(" << from << ",\""
-       << detail::pp(l.label_value(t.front().label()))
+       << detail::pp(l.action_label(t.front().label()))
        << "\"," << to << ")" << endl;
   }
 }

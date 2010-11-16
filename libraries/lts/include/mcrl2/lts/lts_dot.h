@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-/** \file
+/** \file lts_dot.h
  *
  * \brief This file contains a class that contains labelled transition systems in dot format.
  * \details A labelled transition system in dot format is a transition system 
@@ -33,9 +33,8 @@ namespace lts
 {
   namespace detail
   {
-
-    /* A state label is just a vector of integers. Each integer i at position j
-       corresponds with the element m_state_element_values[j][i].
+    /** \brief This class contains labels for states in dot format.
+       \detail A dot state label consists of two strings, the name of a state and a separate label.
     */
     class state_label_dot
     {
@@ -45,47 +44,63 @@ namespace lts
 
       public:
 
+        /** \brief The default constructor.
+        */
         state_label_dot()
         {}
 
+        /** \brief A constructor setting the name and label of this state label to the indicated values.
+        */
         state_label_dot(const std::string &state_name, 
                         const std::string &state_label):m_state_name(state_name),m_state_label(state_label)
         {}
 
-        // state_label_dot(const ATermList s):std::string(ATwriteToString((ATerm)s))
-        // {}
-
+        /** \brief This method sets the name of the state label to the string s.
+        */
         void set_name(const std::string &s)
         {
           m_state_name=s;
         }
  
+        /** \brief This method returns the string in the name field of a state label.
+        */
         std::string name() const
         {
           return m_state_name;
         }
 
+        /** \brief This method sets the label field of the state label to the string s.
+        */
         void set_label(const std::string &s)
         {
           m_state_label=s;
         }
 
+        /** \brief This method returns the label in the name field of a state label.
+        */
         std::string label() const
         {
           return m_state_label;
         }
 
+        /** \brief Standard comparison operator, comparing both the string in the name field, as well
+                  as the one in the label field.
+        */
         bool operator ==(const state_label_dot &l) const
         {
           return m_state_name==l.name() && m_state_label==l.label();
         }
 
+        /** \brief Standard inequality operator. Just the negation of equality
+        */
         bool operator !=(const state_label_dot &l) const
         {
           return !(*this==l); 
         }
     };
 
+    /** \brief Pretty print function for a state_label_dot. Only prints the label field. 
+    */
     inline std::string pp(const state_label_dot &l)
     {
       return l.label();
@@ -93,12 +108,16 @@ namespace lts
   } // namespace detail
 
 
+  /** \brief A class to contain labelled transition systems in graphviz format.
+      \details Action labels are strings, and state labels are pairs with a name field
+               and an action fields. */
   class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_string >
   {
   
     public:
-
-      lts_type type()
+      /** \brief The lts_type of state_label_dot. In this case lts_dot.
+      */
+      lts_type type() const
       {
         return lts_dot;
       }

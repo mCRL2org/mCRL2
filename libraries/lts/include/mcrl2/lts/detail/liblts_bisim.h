@@ -796,8 +796,7 @@ class bisim_partitioner
       { 
         // The counter trace is simply the label l.
         mcrl2::trace::Trace counter_trace;
-        // counter_trace.addAction((ATermAppl)aut.label_value(l).label());
-        counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.label_value(l)).c_str(),0,ATfalse)));
+        counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,ATfalse)));
         resulting_counter_traces.insert(counter_trace);
       }
       else
@@ -815,7 +814,7 @@ class bisim_partitioner
                       j!=counter_traces.end(); ++j)
             { 
               mcrl2::trace::Trace new_counter_trace;
-              new_counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.label_value(l)).c_str(),0,ATfalse)));
+              new_counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,ATfalse)));
               mcrl2::trace::Trace old_counter_trace=*j; 
               old_counter_trace.resetPosition();
               for(unsigned int k=0 ; k< old_counter_trace.getLength(); k++)

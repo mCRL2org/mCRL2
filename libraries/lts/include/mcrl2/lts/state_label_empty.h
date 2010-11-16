@@ -7,11 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-/** \file
+/** \file state_label_empty.h
  *
- * \brief This file contains a class that contains labelled transition systems in aut format.
- * \details A labelled transition system in aut format is a transition system 
- * with as state labels vectors of strings, and as transition labels strings.
+ * \brief This file contains the class with empty state labels.
  * \author Jan Friso Groote
  */
 
@@ -33,11 +31,16 @@ namespace detail
   class state_label_empty
   {
     public:
+
+      /* \brief Equality on empty state labels. Always returns true.
+      */
       bool operator ==(const state_label_empty &) const
       {
         return true;
       }
 
+      /* \brief Non equality on empty state labels. Always returns false.
+      */
       bool operator !=(const state_label_empty &other) const
       {
         return !(*this==other);

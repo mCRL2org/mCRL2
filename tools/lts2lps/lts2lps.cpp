@@ -282,7 +282,7 @@ class lts2lps_tool : public input_output_tool
       {
         const transition t=r.front();
         // const lps::multi_action actions=lps::multi_action(mcrl2::data::detail::internal_format_conversion_list(multi_action_iterator->actions(),spec.data()));
-        const lps::multi_action actions=l.label_value(t.label()).label();
+        const lps::multi_action actions=l.action_label(t.label()).label();
         
         assignment_list assignments;
         if (t.from()!=t.to())

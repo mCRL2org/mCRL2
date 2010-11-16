@@ -82,18 +82,6 @@ int Parser::getFileSize( const string &path )
     return result;
 }
 
-/* static std::set<std::string> get_state_parameter_values(const unsigned int idx, const mcrl2::lts::lts_fsm_t &l)
-{
-  const std::vector < std::string > sevs(l.state_element_values(idx));
-  std::set<std::string> r(sevs.begin(),sevs.end()); */
-
-  /* for (mcrl2::lts::lts_fsm_t::states_size_type i=0; i<l.num_states(); i++)
-  {
-    r.insert(l.state_value(i)[idx]);
-  } */
-  /* return r; 
-} */
-
 
 // -----------------------
 void Parser::parseFile(const string &path, Graph* graph )
@@ -161,17 +149,7 @@ void Parser::parseFile(const string &path, Graph* graph )
             line.append(" ");
           }
 
-          /* int c = 0;
-          std::vector< std::string > tmp = l.state_element_values(i);
-          for (std::vector< std::string >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
-          {
-            if (*z == l.state_value(si)[i])
-            {
-              line.append(to_string(c));
-            }
-            ++c;
-          } */
-          line.append(to_string(l.state_value(si)[i]));
+          line.append(to_string(l.state_label(si)[i]));
         }
       // }
       parseStates( line, graph );
@@ -185,7 +163,7 @@ void Parser::parseFile(const string &path, Graph* graph )
       line.append(" ");
       line.append(to_string(ti.to()+1));
       line.append(" \"");
-      line.append(detail::pp(l.label_value(ti.label() ) ));
+      line.append(detail::pp(l.action_label(ti.label() ) ));
       line.append("\"");
                         parseTransitions(
                             line,
