@@ -1931,19 +1931,31 @@ namespace mcrl2 {
           //determine the value of the parameter.
           ATermAppl par=ATAgetFirst(ATLgetArgument(a,1));
           ATermAppl k=NULL;
+          ATermAppl new_k=NULL;
           if (gsIsDataExprNumber(par) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(par,1))))
           {
-            k=ATAgetArgument(par,0);
+            new_k=ATAgetArgument(par,0);
           }
           else if (gsIsOpId(par) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(par,1))))
           {
-      	    k=ATAtableGet(consts,(ATerm)ATAgetArgument(par,0));
+      	    new_k=ATAtableGet(consts,(ATerm)ATAgetArgument(par,0));
           }
-          if(!k)
+          if(!new_k)
           {
-            gsErrorMsg("the parameter in the process term %P is not a concrete positive number.\n",a);
+            gsErrorMsg("the parameter in the process term %P is not a concrete positive number. As the expansion of n-parallel processes is done"
+                       "by preprocessing, it is not possible to use a variable, and define it using an equation.\n",a);
             return NULL;
           }
+          // Transform k into an aterm with a string representing a value, 
+          // instead of an expression in internal format.
+          new_k=gsMakeOpId(ATmakeAppl0(ATmakeAFun(core::pp(new_k).c_str(),0,ATfalse)),data::sort_pos::pos());
+
+          if (!gsIsDataExprNumber(new_k))
+          {
+            gsErrorMsg("The parameter %P should be a number; it equals %P\n",par,new_k);
+            return NULL;
+          }
+          k=ATAgetArgument(new_k,0);
       
           //check if we have already seen such a process call (for k):
           {
@@ -2286,10 +2298,10 @@ namespace mcrl2 {
           ATermAppl eq=r.front();
           ATermAppl left=ATAgetArgument(eq,2);
           ATermAppl right=ATAgetArgument(eq,3);
-          if(gsIsOpId(left) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(left,1))) &&
-             gsIsDataExprNumber(right) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(right,1))))
+          if(gsIsOpId(left) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(left,1))))  
+             // && gsIsDataExprNumber(right) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(right,1))))
           {
-            ATtablePut(consts,(ATerm)ATAgetArgument(left,0),(ATerm)ATAgetArgument(right,0));
+            ATtablePut(consts,ATgetArgument(left,0),(ATerm)right);
           }
         }
         bool success=true;
