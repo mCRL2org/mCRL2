@@ -466,8 +466,10 @@ public:
 		wxString ext = this->GetPath().AfterLast(_T('.'));
 		std::string sext = (std::string) ext.mb_str(wxConvUTF8);
 
-		wxMenu *reporting = new wxMenu();
-		wxMenu *transformation = new wxMenu();
+//		wxMenu *reporting = new wxMenu();
+//		wxMenu *transformation = new wxMenu();
+
+		std::map<std::string, wxMenu*> menus;
 
 		if (wxFile::Exists(this->GetPath())) {
 			mnu.Append(ID_EDIT, wxT("Edit \tCtrl-E"));
@@ -477,47 +479,48 @@ public:
 				//Compare if extension occurs as input parameter
 				//TODO: take alternative "to-open"-options for extensions into account
 
-				multimap<string, string>::iterator fnd = m_extention_tool_mapping.find(
-						sext);
-				if (fnd != m_extention_tool_mapping.end()) {
-					if (i->m_input_type.compare(fnd->second) == 0) {
+			  if( !(i->m_category).empty() ){
 
-						if (i->m_output_type.empty()) {
-							reporting->Append(distance(m_tool_catalog.begin(), i), wxString(
-									(*i).m_name.c_str(), wxConvUTF8));
-						} else {
-							transformation->Append(distance(m_tool_catalog.begin(), i),
-									wxString((*i).m_name.c_str(), wxConvUTF8));
-						}
-					}
-				}
+			    std::map<std::string, wxMenu*>::iterator it;
+			    it=menus.find(i->m_category);
+
+			    /* Create a menu fresh menu if "category does not exist"*/
+			    if( it == menus.end() ){
+			      menus.insert ( pair<std::string, wxMenu*>(i->m_category,new wxMenu()) );
+			    }
+
+			    /* Find matching extensions */
+		      multimap<string, string>::iterator fnd = m_extention_tool_mapping.find(
+		            sext);
+
+		       /* Only add tool if extension matches */
+		      if (fnd != m_extention_tool_mapping.end() && (i->m_input_type.compare(fnd->second) == 0)) {
+             (menus.find(i->m_category)->second)->Append(distance(m_tool_catalog.begin(), i), wxString(
+               (*i).m_name.c_str(), wxConvUTF8));
+		      }
+			  }
 			}
 		}
+
+		/* Add transformation tools to menu */
+		mnu.AppendSeparator();
+		for( std::map<std::string, wxMenu*>::iterator i = menus.begin(); i != menus.end() ; ++i ){
+		  /* Append menus */
+		  mnu.AppendSubMenu(i->second, wxString(i->first.c_str(), wxConvUTF8));
+
+		  /* Disable menu if no actions can be applied */
+		  mnu.Enable( mnu.FindItem(wxString(i->first.c_str(), wxConvUTF8)), !i->second->GetMenuItems().IsEmpty() );
+
+		  /* Connect menu to event handler */
+		  i->second->Connect(wxEVT_COMMAND_MENU_SELECTED,
+	        (wxObjectEventFunction) &GenericDirCtrl::OnPopupClick, NULL, this);
+		}
+		if (menus.end() != menus.begin())
+		  mnu.AppendSeparator();
 
 		if (wxDir::Exists(this->GetPath())){
 		  mnu.Append(ID_EXPAND, wxT("Expand/Collapse Folder"));
 		  mnu.AppendSeparator();
-		}
-
-		if ((transformation->GetMenuItemCount() != 0)
-				|| (reporting->GetMenuItemCount() != 0)) {
-			mnu.AppendSeparator();
-		}
-
-		if (reporting->GetMenuItemCount() != 0) {
-			mnu.AppendSubMenu(reporting, wxT("Analysis"));
-		}
-		if (transformation->GetMenuItemCount() != 0) {
-			mnu.AppendSubMenu(transformation, wxT("Transformation"));
-		}
-		reporting->Connect(wxEVT_COMMAND_MENU_SELECTED,
-				(wxObjectEventFunction) &GenericDirCtrl::OnPopupClick, NULL, this);
-		transformation->Connect(wxEVT_COMMAND_MENU_SELECTED,
-				(wxObjectEventFunction) &GenericDirCtrl::OnPopupClick, NULL, this);
-
-		if ((transformation->GetMenuItemCount() != 0)
-				|| (reporting->GetMenuItemCount() != 0)) {
-			mnu.AppendSeparator();
 		}
 
 		mnu.Append(ID_NEW_FILE, wxT("New File \tCtrl-N"));

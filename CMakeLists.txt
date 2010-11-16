@@ -413,6 +413,7 @@ endif(MCRL2_NDEBUG)
 ##---------------------------------------------------
 
 option(MCRL2_WITH_WXSTC "Enable/disable compilation of mcrl2xi with wxStyledTextControl support" OFF)
+message(STATUS "MCRL2_WITH_WXSTC: ${MCRL2_WITH_WXSTC}")
 
 
 option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)

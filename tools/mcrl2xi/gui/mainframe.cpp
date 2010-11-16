@@ -62,7 +62,7 @@ END_EVENT_TABLE()
 
 #ifdef __WXMAC__
     // required since ABOUT is not the default id of the about menu
-    wxApp::s_macAboutMenuItemId = Exec_About;
+    wxApp::s_macAboutMenuItemId = wxID_ABOUT;
 #endif
 
     // create a menu bar

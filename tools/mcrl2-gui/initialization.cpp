@@ -338,8 +338,13 @@ vector<Tool> Initialization::Read_tools() {
     if(!wxFile::Exists(wxString(location.c_str(), wxConvUTF8))){
      	cout << "File \"" << location << "\" does not exist" << endl;
     }
+
+    value = child->GetPropVal( wxT("category"), wxEmptyString );
+    tool.m_category = value.mb_str();
+
     tools.push_back(tool);
 		child = child->GetNext();
+
 	}
 
 	return tools;

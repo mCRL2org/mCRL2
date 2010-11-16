@@ -90,34 +90,32 @@ public:
 
     wxString filesuggestion =wxEmptyString;
 
-
     if (!m_tool.m_output_type.empty())
     {
       fgs->Add(new wxStaticText(top, wxID_ANY, wxT("output file:")),
           wxGBPosition(row, 0));
 
-      filesuggestion = GenerateOutputFileSuggestion();
-    } else {
-      fgs->Add(new wxStaticText(top, wxID_ANY, wxT("Output to file")),
-          wxGBPosition(row, 0));
+      if (m_tool.m_output_type.compare("txt") != 0){
+        filesuggestion = GenerateOutputFileSuggestion();
+      }
 
+      suggested_output_file = new wxFilePickerCtrl(top, ID_OUTPUT_FILE,
+          wxT(""), wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
+          wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
+
+      if (m_tool.m_output_type.compare("txt") == 0){
+        suggested_output_file->SetToolTip(wxT("Leave blank if the output should be written to screen."))  ;
+      }
+
+      suggested_output_file->SetPath(filesuggestion);
+      fgs->Add(suggested_output_file, wxGBPosition(row, 1), wxGBSpan(1,2));
+
+      suggested_output_file->SetMinSize(wxSize(350,25));
+      suggested_output_file->SetTextCtrlProportion(6);
+
+      m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
     }
 
-    suggested_output_file = new wxFilePickerCtrl(top, ID_OUTPUT_FILE,
-        wxT(""), wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
-        wxFLP_USE_TEXTCTRL | wxFLP_SAVE | wxFLP_OVERWRITE_PROMPT);
-
-    if (m_tool.m_output_type.empty()){
-      suggested_output_file->SetToolTip(wxT("Leave blank if the output should be written to screen."))  ;
-    }
-
-    suggested_output_file->SetPath(filesuggestion);
-    fgs->Add(suggested_output_file, wxGBPosition(row, 1), wxGBSpan(1,2));
-
-    suggested_output_file->SetMinSize(wxSize(350,25));
-    suggested_output_file->SetTextCtrlProportion(6);
-
-    m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
 
 
     ++row;
