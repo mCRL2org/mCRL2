@@ -104,10 +104,6 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
     for (unsigned int i=l.num_action_labels(); i<=((unsigned int) label); i++)
     {
       ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
-      if ( !gsIsMultAct(lab) )
-      {
-        lab = ATAgetArgument(lab,0);
-      }
       l.add_label((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
     }
 
@@ -315,6 +311,7 @@ void lts_lts_t::load(const std::string &filename)
  {
    read_from_lts(*this,filename);
  }
+
 
 }
 

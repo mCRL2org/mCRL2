@@ -142,16 +142,15 @@ namespace lts
    * \pre              value occurs as state parameter value in this LTS. */
   inline std::string pp(const state_label_lts::element_type &value)
   {
-    return core::pp(value); //PrintPart_CXX(value,ppDefault);
+    return core::pp(value); 
   }
 
-
-  class action_label_lts;
-  inline std::string pp(const action_label_lts l);
 
   /** \brief A class containing the values for action labels for the .lts format */
   class action_label_lts:public mcrl2::lps::multi_action
   {
+    friend struct atermpp::aterm_traits<action_label_lts>;
+
     public:
       typedef mcrl2::lps::multi_action element_type;
 
@@ -204,7 +203,7 @@ namespace lts
 
   inline std::string pp(const action_label_lts l)
   { 
-    return l.label().to_string();
+    return pp(mcrl2::lps::multi_action(l));
   }
 
   inline action_label_lts parse_lts_action(
@@ -439,5 +438,21 @@ namespace lts
   };
 } // namespace lts
 } // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+namespace atermpp {
+template<>
+struct aterm_traits<mcrl2::lts::detail::action_label_lts>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lts::detail::action_label_lts t)   { t.protect(); }
+  static void unprotect(mcrl2::lts::detail::action_label_lts t) { t.unprotect(); }
+  static void mark(mcrl2::lts::detail::action_label_lts t)      { t.mark(); }
+// static ATerm term(mcrl2::lts::detail::action_label_lts t)     { return t.term(); }
+// static ATerm* ptr(mcrl2::lts::detail::action_label_lts& t)    { return &t.term(); }
+  };
+} // namespace atermpp
+/// \endcond
+
 
 #endif
