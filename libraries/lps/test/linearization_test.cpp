@@ -158,6 +158,14 @@ BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
      "init sum t:Nat. a@t;\n"
   );
 
+  // Check that rewriting of non explicitly declared lists 
+  // works properly.
+  const std::string case_9
+  (
+     "act c;\n"
+     "init sum t:List(struct a | b) . c;\n"
+  );
+
   specification spec;
   spec = linearise(case_1);
   spec = linearise(case_2);
@@ -167,6 +175,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
   spec = linearise(case_6);
   spec = linearise(case_7);
   spec = linearise(case_8);
+  spec = linearise(case_9);
 }
 
 BOOST_AUTO_TEST_CASE(test_process_assignments)

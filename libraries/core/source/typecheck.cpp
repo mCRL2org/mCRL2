@@ -1220,7 +1220,8 @@ namespace mcrl2 {
                    const basic_sort &end_search,
                    std::set < basic_sort > &visited,
                    const bool observed_a_sort_constructor)
-    { ATermAppl aterm_reference=(ATermAppl)ATtableGet(context.defined_sorts,
+    {
+      ATermAppl aterm_reference=(ATermAppl)ATtableGet(context.defined_sorts,
                                                (ATerm)static_cast<ATermAppl>(start_search.name())); 
    
       if (aterm_reference==NULL)
@@ -1228,11 +1229,16 @@ namespace mcrl2 {
         return false;
       }
     
+      if (start_search==end_search)
+      { // We found a loop.
+        return observed_a_sort_constructor;
+      }
       if (visited.find(start_search)!=visited.end())
       { // start_search has already been encountered. end_search will not be found via this path.
         return false;
       }
      
+      visited.insert(start_search);
       const sort_expression reference(aterm_reference);
       return gstc_check_for_sort_alias_loop_through_sort_container_via_expression(reference,end_search,visited,observed_a_sort_constructor);
     }
@@ -1244,33 +1250,40 @@ namespace mcrl2 {
                    const bool observed_a_sort_constructor)
     { 
       if (is_basic_sort(sort_expression_start_search))
-      { const basic_sort start_search(sort_expression_start_search);
+      { 
+        const basic_sort start_search(sort_expression_start_search);
         if (end_search==start_search)
-        { return observed_a_sort_constructor;
+        { 
+          return observed_a_sort_constructor;
         }
         else
-        { visited.insert(start_search);
+        { 
           return gstc_check_for_sort_alias_loop_through_sort_container(start_search,end_search,visited,observed_a_sort_constructor);
         }
       }
 
       if (is_container_sort(sort_expression_start_search))
-      { const container_sort start_search_container(sort_expression_start_search);
+      { 
+        const container_sort start_search_container(sort_expression_start_search);
         return gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                            start_search_container.element_sort(),end_search,visited,true);
       }
 
       if (is_function_sort(sort_expression_start_search))
-      { const function_sort f_start_search(sort_expression_start_search);
+      { 
+        const function_sort f_start_search(sort_expression_start_search);
         if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                            f_start_search.codomain(),end_search,visited,true))
-        { return true;
+        { 
+          return true;
         }
         for(sort_expression_list::const_iterator i=f_start_search.domain().begin();
                i!=f_start_search.domain().end(); ++i)
-        { if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+        { 
+          if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                              *i,end_search,visited,true))
-          { return true;
+          { 
+            return true;
           }
         }
         // end_search has not been found, so:
@@ -1278,18 +1291,22 @@ namespace mcrl2 {
       }
 
       if (is_structured_sort(sort_expression_start_search))
-      { const structured_sort struct_start_search(sort_expression_start_search);
+      { 
+        const structured_sort struct_start_search(sort_expression_start_search);
         const function_symbol_vector constructor_functions=struct_start_search.constructor_functions();
         for(function_symbol_vector::const_iterator i=constructor_functions.begin();
                    i!=constructor_functions.end(); ++i)
         { 
           if (is_function_sort(i->sort()))
-          { const sort_expression_list domain_sorts=function_sort(i->sort()).domain();
+          { 
+            const sort_expression_list domain_sorts=function_sort(i->sort()).domain();
             for(sort_expression_list::const_iterator j=domain_sorts.begin();
                  j!=domain_sorts.end(); ++j)
-            { if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+            { 
+              if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
                                *j,end_search,visited,observed_a_sort_constructor))
-              { return true;
+              { 
+                return true;
               }
             }
           }
@@ -1354,9 +1371,14 @@ namespace mcrl2 {
 
       ATermList sort_aliases=ATtableKeys(context.defined_sorts);
       for( ; sort_aliases!=ATempty ; sort_aliases=ATgetNext(sort_aliases))
-      { std::set < basic_sort > visited;
+      { 
+        std::set < basic_sort > visited;
         const basic_sort s(core::identifier_string((ATermAppl)ATgetFirst(sort_aliases)));
-        if (gstc_check_for_sort_alias_loop_through_sort_container(s,s,visited,false))
+        ATermAppl aterm_reference=(ATermAppl)ATtableGet(context.defined_sorts,
+                                               (ATerm)static_cast<ATermAppl>(s.name()));
+        assert(aterm_reference!=NULL);
+        const sort_expression ar(aterm_reference);
+        if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(ar,s,visited,false))
         { gsErrorMsg("sort %P is recursively defined via a function sort, or a list, set or bag type container\n",ATgetFirst(sort_aliases));
           return ATfalse;
         }
