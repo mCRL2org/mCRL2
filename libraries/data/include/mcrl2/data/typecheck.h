@@ -72,10 +72,14 @@ namespace mcrl2 {
       t = core::type_check_data_expr(t, 0, mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
       if (t == 0)
       {
+        data_expr = data_expression();
         throw mcrl2::runtime_error("error type checking data expression");
       }
-      data_expr = data_expression(t);
-      assert(!search_sort_expression(data_expr, unknown_sort()));
+      else
+      {
+        data_expr = data_expression(t);
+        assert(!search_sort_expression(data_expr, unknown_sort()));
+      }
 
       //// ???
       //detail::internal_format_conversion_helper converter(data_spec);

@@ -208,16 +208,24 @@ namespace mcrl2 {
           else if (is_application(*this))
           {
             sort_expression s(data_expression(atermpp::arg1(*this)).sort());
-            assert(is_function_sort(s));
+            if(!is_function_sort(s))
+            {
+              throw mcrl2::runtime_error("Sort " + s.to_string() + " of " + atermpp::arg1(*this).to_string() + " is not a function sort.");
+            }
+
             result = atermpp::arg2(s);
           }
           else if (is_where_clause(*this))
           {
             result = data_expression(atermpp::arg1(*this)).sort();
           }
+          else if (is_identifier(*this))
+          {
+            result = sort_expression();
+          }
           else 
-          { std::cerr << "Failing term " << *this << "\n";
-            assert(false);
+          {
+            throw mcrl2::runtime_error("Unexpected data expression " + this->to_string() + " occurred.");
           }
 
           return result;

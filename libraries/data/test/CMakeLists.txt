@@ -24,9 +24,9 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
 
 file(GLOB TERM_OBJS "*.cpp")
 
-set(FAILING_TESTS
- data_typecheck_test      
-)
+#set(FAILING_TESTS
+# data_typecheck_test      
+#)
 
 foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
