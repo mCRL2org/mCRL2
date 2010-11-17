@@ -1201,7 +1201,7 @@ namespace mcrl2 {
       ATunprotectList(&body.equations);
     }
 
-    static bool gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+    static bool gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
                    const sort_expression &sort_expression_start_search,
                    const basic_sort &end_search,
                    std::set < basic_sort > &visited,
@@ -1215,7 +1215,7 @@ namespace mcrl2 {
     // encountered on the current path. This is only used for loop  checking.
     // The current algorithm is exponential, which is considered not too
     // much of a problem, given that sort expressions are generally small.
-    static bool gstc_check_for_sort_alias_loop_through_sort_container(
+    static bool gstc_check_for_sort_alias_loop_through_function_sort(
                    const basic_sort &start_search,
                    const basic_sort &end_search,
                    std::set < basic_sort > &visited,
@@ -1240,10 +1240,10 @@ namespace mcrl2 {
      
       visited.insert(start_search);
       const sort_expression reference(aterm_reference);
-      return gstc_check_for_sort_alias_loop_through_sort_container_via_expression(reference,end_search,visited,observed_a_sort_constructor);
+      return gstc_check_for_sort_alias_loop_through_function_sort_via_expression(reference,end_search,visited,observed_a_sort_constructor);
     }
 
-    static bool gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+    static bool gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
                    const sort_expression &sort_expression_start_search,
                    const basic_sort &end_search,
                    std::set < basic_sort > &visited,
@@ -1258,21 +1258,24 @@ namespace mcrl2 {
         }
         else
         { 
-          return gstc_check_for_sort_alias_loop_through_sort_container(start_search,end_search,visited,observed_a_sort_constructor);
+          return gstc_check_for_sort_alias_loop_through_function_sort(start_search,end_search,visited,observed_a_sort_constructor);
         }
       }
 
       if (is_container_sort(sort_expression_start_search))
       { 
+        // A loop through a list container is allowed, but a loop through a set or bag container
+        // is problematic.
         const container_sort start_search_container(sort_expression_start_search);
-        return gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
-                           start_search_container.element_sort(),end_search,visited,true);
+        return gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
+                           start_search_container.element_sort(),end_search,visited,
+                           start_search_container.container_name()!=list_container());
       }
 
       if (is_function_sort(sort_expression_start_search))
       { 
         const function_sort f_start_search(sort_expression_start_search);
-        if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+        if (gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
                            f_start_search.codomain(),end_search,visited,true))
         { 
           return true;
@@ -1280,7 +1283,7 @@ namespace mcrl2 {
         for(sort_expression_list::const_iterator i=f_start_search.domain().begin();
                i!=f_start_search.domain().end(); ++i)
         { 
-          if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+          if (gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
                              *i,end_search,visited,true))
           { 
             return true;
@@ -1303,7 +1306,7 @@ namespace mcrl2 {
             for(sort_expression_list::const_iterator j=domain_sorts.begin();
                  j!=domain_sorts.end(); ++j)
             { 
-              if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(
+              if (gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
                                *j,end_search,visited,observed_a_sort_constructor))
               { 
                 return true;
@@ -1378,8 +1381,9 @@ namespace mcrl2 {
                                                (ATerm)static_cast<ATermAppl>(s.name()));
         assert(aterm_reference!=NULL);
         const sort_expression ar(aterm_reference);
-        if (gstc_check_for_sort_alias_loop_through_sort_container_via_expression(ar,s,visited,false))
-        { gsErrorMsg("sort %P is recursively defined via a function sort, or a list, set or bag type container\n",ATgetFirst(sort_aliases));
+        if (gstc_check_for_sort_alias_loop_through_function_sort_via_expression(ar,s,visited,false))
+        { 
+          gsErrorMsg("sort %P is recursively defined via a function sort, or a set or a bag type container\n",ATgetFirst(sort_aliases));
           return ATfalse;
         }
       }
