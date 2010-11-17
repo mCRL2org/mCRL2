@@ -289,7 +289,7 @@ END_EVENT_TABLE()
 
     } else {
       focussed_editor = (xStcEditor*) event.GetClientData();
-      m_PanelMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode());
+      m_PanelMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode() != 0);
     }
     UpdateEditMenu();
   };

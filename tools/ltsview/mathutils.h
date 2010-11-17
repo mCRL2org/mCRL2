@@ -14,7 +14,7 @@
 
 namespace MathUtils
 {
-  const float PI = 3.14159265359;
+  const double PI = 3.14159265359;
   int round_to_int(float f);
   float deg_to_rad(float deg);
   float rad_to_deg(float rad);
