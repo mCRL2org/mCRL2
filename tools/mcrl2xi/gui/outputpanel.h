@@ -11,6 +11,7 @@
 #ifndef MCRL2XI_OUTPUTPANEL_H
 #define MCRL2XI_OUTPUTPANEL_H
 
+#include <string>
 #include <wx/wx.h>
 #include <wx/textctrl.h>
 
