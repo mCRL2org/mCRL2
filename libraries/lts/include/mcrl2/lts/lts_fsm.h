@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-/** \file
+/** \file lts_fsm.h
  *
  * \brief This file contains a class that contains labelled transition systems in fsm format.
  * \details A labelled transition system in fsm format is a transition system 
@@ -32,12 +32,13 @@ namespace lts
 {
   namespace detail
   {
-
-    /* A state label is just a vector of integers. Each integer i at position j
-       corresponds with the element m_state_element_values[j][i].
+    /** \brief This class contains state labels for the fsm format.
+        \details An fsm state label is just a vector of integers. There is an array m_state_element
+                 values that contains strings corresponding to the integers in the vector. 
+                 Each integer i at position j in the vector corresponds with the string
+                 m_state_element_values[j][i].
     */
-    class state_label_fsm:
-          public std::vector < unsigned int >
+    class state_label_fsm: public std::vector < unsigned int >
     {
       public:
         /* \brief Default constructor. The label becomes an empty vector.
@@ -155,8 +156,6 @@ namespace lts
        */
       void save(const std::string &filename) const;
   };
-
-
 
 } // namespace lts
 } // namespace mcrl2
