@@ -75,10 +75,7 @@ namespace tools {
         if (parser.options.count("timings") > 0)
         {
           m_timing_enabled = true;
-          if (parser.options.count("timings") > 1)
-          {
-            m_timing_filename = parser.option_argument("timings");
-          }
+          m_timing_filename = parser.option_argument("timings");
         }
       }
 
@@ -140,6 +137,7 @@ namespace tools {
           m_what_is         (what_is),
           m_tool_description(tool_description),
           m_known_issues    (known_issues),
+          m_timing_filename (""),
           m_timer           (name),
           m_timing_enabled  (false)
       {}
