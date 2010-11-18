@@ -114,9 +114,10 @@ class RewriterCompilingJitty: public Rewriter
 		ATermAppl fromInner(ATerm Term);
 };
 
-#endif
     }
   }
 }
 
-#endif
+#endif // MCRL2_JITTYC_AVAILABLE
+
+#endif // __REWR_JITTYC_H

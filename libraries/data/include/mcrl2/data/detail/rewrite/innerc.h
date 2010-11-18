@@ -90,10 +90,10 @@ class RewriterCompilingInnermost: public Rewriter
 		ATermAppl fromInner(ATerm Term);
 };
 
-#endif
-
     }
   }
 }
 
-#endif
+#endif // MCRL2_INNERC_AVAILABLE
+
+#endif // __REWR_INNERC_H
