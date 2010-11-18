@@ -275,14 +275,14 @@ BOOST_AUTO_TEST_CASE(test_recursive_a)
 }
 
 
-// Tricky test case that should fail, as recursive sorts are are defined through sort containers
-// but in this case it is not that easy to see.
+// Tricky test case that should succeed, as recursive sorts are are defined through the list containers
+// are allowed.
 BOOST_AUTO_TEST_CASE(test_recursive_b)
 {
   test_typechecker_case(
     "sort MyRecType=struct f | g(List(MyRecType));"
     "init delta;",
-    false
+    true
   );
 }
 
