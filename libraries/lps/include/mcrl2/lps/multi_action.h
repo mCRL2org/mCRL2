@@ -149,23 +149,34 @@ namespace lps {
       std::string to_string() const
       {
         std::string result;
-        if (has_time())
+        if (m_actions.size()==0)
         {
-          result="(";
+          result="tau";
         }
-        for(action_list::const_iterator i=m_actions.begin(); i!=m_actions.end(); ++i)
-        { 
-          result = result+core::pp(*i);
-          action_list::const_iterator i_next=i;
-          i_next++;
-          if (i_next!=m_actions.end())
+        else
+        {
+          if (has_time() && m_actions.size()>1)
+          {
+            result="(";
+          }
+          for(action_list::const_iterator i=m_actions.begin(); i!=m_actions.end(); ++i)
           { 
-            result=result+"|";
+            result = result+core::pp(*i);
+            action_list::const_iterator i_next=i;
+            i_next++;
+            if (i_next!=m_actions.end())
+            { 
+              result=result+"|";
+            }
           }
         }
         if (has_time())
         { 
-          result=result+(")@ " + core::pp(m_time));
+          if (m_actions.size()>1)
+          {
+            result=result+")";
+          }
+          result=result+("@ " + core::pp(m_time));
         }
         return result;
       }
@@ -367,24 +378,7 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
     inline
     std::string pp(const multi_action& m)
     {
-      std::ostringstream out;
-      if (m.has_time())
-      {
-        out << "(";
-      }
-      for(action_list::const_iterator i = m.actions().begin(); i != m.actions().end(); ++i)
-      { 
-        if (i != m.actions().begin())
-        {
-          out << "|";
-        }
-        out << core::pp(*i);
-      }
-      if (m.has_time())
-      { 
-        out << ")@ " << core::pp(m.time());
-      }
-      return out.str();
+      return m.to_string();
     }
 
     /// \brief Returns a data expression that expresses under which conditions the
