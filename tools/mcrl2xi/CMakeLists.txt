@@ -26,7 +26,7 @@ IF(WIN32)
   SET(SRCS ${SRCS} mcrl2xi.rc)
 ENDIF(WIN32)
 
-add_executable(${PROJECT_NAME}
+add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   mcrl2xi.cpp
   gui/mainframe.cpp
 	gui/editor.cpp

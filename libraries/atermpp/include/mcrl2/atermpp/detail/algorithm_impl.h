@@ -62,7 +62,7 @@ namespace detail {
   template <typename Term, typename Function>
   aterm_appl appl_apply(term_appl<Term> a, const Function f)
   {
-    unsigned int n = a.size();
+    size_t n = a.size();
     if (n > 0)
     {
       bool term_changed = false;

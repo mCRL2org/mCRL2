@@ -20,11 +20,16 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
+
 
 #define NAME   "mcrl2-gui"
 #define AUTHOR "Frank Stappers"
 
 using namespace mcrl2::core;
+using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::tools;
+
 
 class mCRL2xi: public mcrl2::utilities::wx::tool< mCRL2xi, mcrl2::utilities::tools::rewriter_tool<mcrl2::utilities::tools::input_tool> >
 {
@@ -70,20 +75,34 @@ class mCRL2xi: public mcrl2::utilities::wx::tool< mCRL2xi, mcrl2::utilities::too
   }
 };
 
+class mCRL2xi_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<mCRL2xi>
+{
+  public:
+	mCRL2xi_gui_tool()
+    {
+      //m_gui_options["no-state"] = create_checkbox_widget();
+    }
+};
+
+IMPLEMENT_APP_NO_MAIN( mCRL2xi )
+IMPLEMENT_WX_THEME_SUPPORT
+
 #ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   HINSTANCE hPrevInstance,
                                   wxCmdLineArgType lpCmdLine,
                                   int nCmdShow) {
+
+  MCRL2_ATERMPP_INIT(0, lpCmdLine)
+
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
-#endif
-
-int main(int argc, char** argv)
+#else
+int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
+
   return wxEntry(argc, argv);
 }
-
-IMPLEMENT_APP_NO_MAIN(mCRL2xi)
+#endif
 

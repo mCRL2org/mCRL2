@@ -95,7 +95,7 @@ class linear_process
 
     /// \brief Returns the number of LPS summands.
     /// \return The number of LPS summands.
-    unsigned int summand_count() const
+    size_t summand_count() const
     {
       return m_deadlock_summands.size() + m_action_summands.size();
     }

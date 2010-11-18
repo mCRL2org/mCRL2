@@ -32,7 +32,7 @@ bool sequence_contains_duplicates(Iterator first, Iterator last)
 {
   // TODO: this implementation is not particularly efficient
   std::set<typename std::iterator_traits<Iterator>::value_type> s(first, last);
-  int ssize = s.size();
+  size_t ssize = s.size();
   return ssize < std::distance(first, last);
 }
 
