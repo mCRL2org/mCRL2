@@ -240,17 +240,22 @@ namespace mcrl2 {
 
       if (gsDebug) { std::cerr << "type checking read-in phase started\n"; }
 
-      if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
+      if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) 
+      {
         // Check sorts for loops
         // Unwind sorts to enable equiv and subtype relations
-        if(gstcReadInConstructors()) {
+        if(gstcReadInConstructors()) 
+        {
           if(gstcReadInFuncs(ATLgetArgument(ATAgetArgument(data_spec,1),0),
-                             ATLgetArgument(ATAgetArgument(data_spec,2),0))) {
+                             ATLgetArgument(ATAgetArgument(data_spec,2),0))) 
+          {
             body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
             if (gsDebug) { std::cerr << "type checking read-in phase finished\n"; }
 
             if (gsDebug) { std::cerr << "type checking transform VarConst phase started\n"; }
-            if(gstcTransformVarConsTypeData()){
+
+            if (gstcTransformVarConsTypeData())
+            {
               if (gsDebug) { std::cerr << "type checking transform VarConst phase finished\n"; }
 
               Result = ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
@@ -258,7 +263,7 @@ namespace mcrl2 {
               Result = gstcFoldSortRefs(Result);
 
               if (gsDebug) { std::cerr << "type checking phase finished\n"; }
-            }}}}
+      } } } }
 
       gstcDataDestroy();
       return Result;
@@ -1859,7 +1864,8 @@ namespace mcrl2 {
     }
 
 
-    static ATbool gstcTransformVarConsTypeData(void){
+    static ATbool gstcTransformVarConsTypeData(void)
+    {
       ATbool Result=ATtrue;
       ATermTable DeclaredVars=ATtableCreate(63,50);
       ATermTable FreeVars=ATtableCreate(63,50);
@@ -1884,12 +1890,12 @@ namespace mcrl2 {
         if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
 
         ATermAppl Cond=ATAgetArgument(Eqn,1);
-        if(/*!gsIsNil(Cond) && */!gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,sort_bool::bool_())){ b = false; break; } // JK 15/10/2009 Remove gsIsNil check
+        if(!gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,sort_bool::bool_())){ b = false; break; } 
         ATermAppl Right=ATAgetArgument(Eqn,3);
         ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,NULL,false);
         if(!RightType){ b = false; gsErrorMsg("error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
 
-        //If the types are not uniquly the same now: do once more:
+        //If the types are not uniquely the same now: do once more:
         if(!gstcEqTypesA(LeftType,RightType)){
           // if (gsDebug) { std::cerr << "Doing again for the equation %P, LeftType: %P, RightType: %P\n",Eqn,LeftType,RightType); }
           ATermAppl Type=gstcTypeMatchA(LeftType,RightType);
@@ -2785,8 +2791,6 @@ namespace mcrl2 {
 
       ATermAppl Result=NULL;
 
-      // gsDebug=true;
-
       if (gsDebug) 
       {  
         std::cerr << "gstcTraverseVarConsTypeD: DataTerm " << pp(*DataTerm) <<
@@ -2830,21 +2834,28 @@ namespace mcrl2 {
           ATtableDestroy(CopyDeclaredVars);
 
           if(!ResType) return NULL;
-          if(gstcTypeMatchA(sort_bool::bool_(),ResType)) {
+          if(gstcTypeMatchA(sort_bool::bool_(),ResType)) 
+          {
             NewType=sort_set::set_(sort_expression(NewType));
             *DataTerm = ATsetArgument(*DataTerm, (ATerm)gsMakeSetComp(), 0);
-          } else if(gstcTypeMatchA(sort_nat::nat(),ResType)) {
+          } 
+          else if(gstcTypeMatchA(sort_nat::nat(),ResType)) 
+          {
             NewType=sort_bag::bag(sort_expression(NewType));
             *DataTerm = ATsetArgument(*DataTerm, (ATerm)gsMakeBagComp(), 0);
-          } else return NULL;
+          } 
+          else return NULL;
 
-          if(!(NewType=gstcTypeMatchA(NewType,PosType))){
+          if(!(NewType=gstcTypeMatchA(NewType,PosType)))
+          {
             gsErrorMsg("a set or bag comprehension of type %P does not match possible type %P (while typechecking %P)\n",ATAgetArgument(VarDecl,1),PosType,*DataTerm);
             return NULL;
           }
 
           if(FreeVars)
+          { 
             gstcRemoveVars(FreeVars,VarList);
+          }
           *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,2);
           return NewType;
         }
@@ -2882,7 +2893,12 @@ namespace mcrl2 {
 
           ATermList ArgTypes=gstcGetVarTypes(VarList);
           ATermAppl NewType=gstcUnArrowProd(ArgTypes,PosType);
-          if(!NewType) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); gsErrorMsg("no functions with arguments %P among %P (while typechecking %P)\n", ArgTypes,PosType,*DataTerm);return NULL;}
+          if(!NewType) 
+          { ATtableDestroy(CopyAllowedVars); 
+            ATtableDestroy(CopyDeclaredVars); 
+            gsErrorMsg("no functions with arguments %P among %P (while typechecking %P)\n", ArgTypes,PosType,*DataTerm);
+            return NULL;
+          }
           ATermAppl Data=ATAgetArgument(*DataTerm,2);
 
           NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting);
@@ -2907,12 +2923,22 @@ namespace mcrl2 {
       {
         ATermList WhereVarList=ATmakeList0();
         ATermList NewWhereList=ATmakeList0();
-        for(ATermList WhereList=ATLgetArgument(*DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList)){
+        for(ATermList WhereList=ATLgetArgument(*DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList))
+        {
           ATermAppl WhereElem=ATAgetFirst(WhereList);
           ATermAppl WhereTerm=ATAgetArgument(WhereElem,1);
           ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting);
           if(!WhereType) {return NULL;}
-          ATermAppl NewWhereVar=gsMakeDataVarId(ATAgetArgument(WhereElem,0),WhereType);
+
+          ATermAppl NewWhereVar=NULL;
+          if (gsIsDataVarId(ATAgetArgument(WhereElem,0)))
+          { // The variable in WhereElem is type checked, and a proper variable.
+            NewWhereVar=ATAgetArgument(WhereElem,0);
+          }
+          else
+          { // The variable in WhereElem is just a string and needs to be transformed to a DataVarId.
+            NewWhereVar=gsMakeDataVarId(ATAgetArgument(WhereElem,0),WhereType);
+          }
           WhereVarList=ATinsert(WhereVarList,(ATerm)NewWhereVar);
           NewWhereList=ATinsert(NewWhereList,(ATerm)gsMakeDataVarIdInit(NewWhereVar,WhereTerm));
         }
@@ -4133,7 +4159,7 @@ namespace mcrl2 {
 
     static ATermAppl gstcUnwindType(ATermAppl Type)
     {
-      if (gsDebug) { std::cerr << "gstcUnwindType Type: " << pp(Type) << "\n"; }
+      // if (gsDebug) { std::cerr << "gstcUnwindType Type: " << pp(Type) << "\n"; } Becomes too verbose.
 
       if(gsIsSortCons(Type)) return ATsetArgument(Type,(ATerm)gstcUnwindType(ATAgetArgument(Type,1)),1);
       if(gsIsSortArrow(Type))

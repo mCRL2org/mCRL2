@@ -218,6 +218,7 @@ class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
       m_gui_options["no-deltaelm"] = create_checkbox_widget();
       m_gui_options["check-only"] = create_checkbox_widget();
       m_gui_options["check-only"] = create_checkbox_widget();
+      m_gui_options["no-constelm"] = create_checkbox_widget();
 
       std::vector<std::string> values;
       values.clear();
