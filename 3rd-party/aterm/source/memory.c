@@ -1998,7 +1998,7 @@ ATerm AT_removeAnnotations(ATerm t)
  * Change one argument of an application.
  */
 
-ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
+ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n)
 {
   unsigned int i, arity;
   Symbol sym = ATgetSymbol(appl);
