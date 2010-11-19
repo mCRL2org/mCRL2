@@ -519,15 +519,17 @@ class specification_basic_type:public boost::noncopyable
 
     /************ upperpowerof2 *********************************************/
 
-    int upperpowerof2(size_t i)
+    size_t upperpowerof2(size_t i)
     /* function yields n for the smallest value n such that
        2^n>=i. This constitutes the number of bits necessary
        to represent a number smaller than i. i is assumed to
        be at least 1. */
-    { int n=0;
-      int powerof2=1;
+    { size_t n=0;
+      size_t powerof2=1;
       for( ; powerof2< i ; n++)
-      { powerof2=2*powerof2; }
+      { 
+        powerof2=2*powerof2; 
+      }
       return n;
     }
 
@@ -1077,7 +1079,7 @@ class specification_basic_type:public boost::noncopyable
       { i=freshstringIndices[name];
       }
 
-      for( ; (existsString(strng)) ; i++)
+      for( ; (existsString(strng)) ; ++i)
       { strng = identifier_string(str(boost::format(name + "%d") % i ));
       }
       freshstringIndices[name]=i;
@@ -4459,7 +4461,7 @@ class specification_basic_type:public boost::noncopyable
           // fcnt is the arity of the action with index multiactioncount-1;
           // const action a= *(multiActionList[0].begin()+(multiactioncount-1));
           action_list::const_iterator a=multiActionList[0].begin();
-          for(long i=1 ; i<multiactioncount ; ++i,++a) {}
+          for(size_t i=1 ; i<multiactioncount ; ++i,++a) {}
           // const action a= *((multiActionList[0]).begin()+(multiactioncount-1));
           size_t fcnt=(a->arguments()).size();
           data_expression f;
@@ -4481,9 +4483,9 @@ class specification_basic_type:public boost::noncopyable
               ++auxrename_list_args;
               // f is the fcnt-th argument of the multiactioncount-th action in the list
               action_list::const_iterator a1=multiactionwalker->begin();
-              for(long i=1; i<multiactioncount; ++i, ++a1){};
+              for(size_t i=1; i<multiactioncount; ++i, ++a1){};
               data_expression_list::const_iterator d1=(a1->arguments()).begin();
-              for(long i=1; i<fcnt; ++i, ++d1){};
+              for(size_t i=1; i<fcnt; ++i, ++d1){};
               f= *d1;
               const data_expression auxresult1=substitute_data(auxargs,auxpars,f);
 
@@ -4518,7 +4520,7 @@ class specification_basic_type:public boost::noncopyable
             }
           }
           a=multiActionList[0].begin();
-          for(long i=1 ; i<multiactioncount ; ++i,++a) {}
+          for(size_t i=1 ; i<multiactioncount ; ++i,++a) {}
           resultmultiactionlist=
                 push_front(
                   resultmultiactionlist,
@@ -5254,7 +5256,7 @@ class specification_basic_type:public boost::noncopyable
       else
       { variable var2=pars2.front();
         variable var3=var2;
-        for(int i=0 ; occursin(var3,pars1) ; i++)
+        for(unsigned int i=0 ; occursin(var3,pars1) ; ++i)
         { var3=get_fresh_variable(var2.name(),var2.sort(),(unique?-1:i));
         }
         if (var3!=var2)
@@ -5397,7 +5399,7 @@ class specification_basic_type:public boost::noncopyable
          a communication can take place. If not action_label() is delivered,
          otherwise the resulting action is the result. */
       // first copy the left-hand sides of communications for use
-      for(int i=0; i<comm_table.size(); i++)
+      for(size_t i=0; i<comm_table.size(); ++i)
       {
         comm_table.tmp[i] = comm_table.lhs[i];
         comm_table.match_failed[i]=false;
@@ -5409,7 +5411,7 @@ class specification_basic_type:public boost::noncopyable
 
         // check every lhs for actionname
         bool comm_ok = false;
-        for(int i=0; i<comm_table.size(); i++)
+        for(size_t i=0; i<comm_table.size(); ++i)
         {
           if (comm_table.match_failed[i]) // lhs i does not match
           {
@@ -5436,7 +5438,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       // there is a lhs containing m; find it
-      for (int i=0; i<comm_table.size(); i++)
+      for (size_t i=0; i<comm_table.size(); ++i)
       {
         // lhs i matches only if comm_table[i] is empty
         if ( (!comm_table.match_failed[i]) && comm_table.tmp[i].empty())
@@ -5464,7 +5466,7 @@ class specification_basic_type:public boost::noncopyable
          subbag o of n such that m+o can communicate. */
 
       // first copy the left-hand sides of communications for use
-      for(int i=0; i<comm_table.size(); i++)
+      for(size_t i=0; i<comm_table.size(); ++i)
       { comm_table.match_failed[i]=false;
         comm_table.tmp[i] = comm_table.lhs[i];
       }
@@ -5474,7 +5476,7 @@ class specification_basic_type:public boost::noncopyable
       { const identifier_string actionname=mwalker->label().name();
         // check every lhs for actionname
         bool comm_ok = false;
-        for(int i=0; i<comm_table.size(); i++)
+        for(size_t i=0; i<comm_table.size(); ++i)
         {
           if (comm_table.match_failed[i])
           { continue;
@@ -5527,7 +5529,7 @@ class specification_basic_type:public boost::noncopyable
         std::vector < bool > rest_is_null(comm_table.size(),n_is_null);
 
         // check every lhs
-        for(int i=0; i<comm_table.size(); i++)
+        for(size_t i=0; i<comm_table.size(); ++i)
         {
           if (comm_table.match_failed[i]) // lhs i did not contain m
           { continue;
@@ -5791,7 +5793,7 @@ class specification_basic_type:public boost::noncopyable
 
           assert(multiactionconditionlist.actions.size()==
                  multiactionconditionlist.conditions.size());
-          for(unsigned int i=0 ; i<multiactionconditionlist.actions.size(); i++)
+          for(size_t i=0 ; i<multiactionconditionlist.actions.size(); ++i)
           { const data_expression communicationcondition=
                         RewriteTerm(multiactionconditionlist.conditions[i]);
 
@@ -7129,7 +7131,7 @@ class specification_basic_type:public boost::noncopyable
       }
       variable_list result;
       for(atermpp::set < variable >::reverse_iterator i=vars_result_set.rbegin();
-               i!=vars_result_set.rend() ; i++)
+               i!=vars_result_set.rend() ; ++i)
       { result=push_front(result,*i);
       }
 
@@ -7149,7 +7151,7 @@ class specification_basic_type:public boost::noncopyable
 
       variable_list result;
       for(atermpp::set < variable >::reverse_iterator i=vars_result_set.rbegin();
-               i!=vars_result_set.rend() ; i++)
+               i!=vars_result_set.rend() ; ++i)
       { result=push_front(result,*i);
       }
 
