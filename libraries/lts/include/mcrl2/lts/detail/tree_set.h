@@ -19,37 +19,37 @@ namespace lts
   class tree_set_store {
     private:
       struct bucket {
-        size_t child_l;
-        size_t child_r;
-        size_t tag;
-        size_t next;
+        ptrdiff_t child_l;
+        ptrdiff_t child_r;
+        ptrdiff_t tag;
+        ptrdiff_t next;
       };
       bucket *buckets;
-      size_t buckets_size;
-      size_t buckets_next;
+      ptrdiff_t buckets_size;
+      ptrdiff_t buckets_next;
 
-      size_t *tags;
-      size_t tags_size;
-      size_t tags_next;
+      ptrdiff_t *tags;
+      ptrdiff_t tags_size;
+      ptrdiff_t tags_next;
 
-      size_t *hashtable;
-      size_t hashmask;
+      ptrdiff_t *hashtable;
+      ptrdiff_t hashmask;
 
       void check_tags();
       void check_buckets();
-      size_t find_set(size_t child_l,size_t child_r);
-      size_t build_set(size_t child_l,size_t child_r);
+      ptrdiff_t find_set(ptrdiff_t child_l,ptrdiff_t child_r);
+      ptrdiff_t build_set(ptrdiff_t child_l,ptrdiff_t child_r);
     public:
       tree_set_store();
       ~tree_set_store();
-      size_t create_set(std::vector<size_t> &elems);
-      size_t get_next_tag();
-      size_t get_set(size_t tag);
-      size_t get_set_child_left(size_t set);
-      size_t get_set_child_right(size_t set);
-      size_t get_set_size(size_t set);
-      bool is_set_empty(size_t set);
-      size_t set_set_tag(size_t set);
+      ptrdiff_t create_set(std::vector<ptrdiff_t> &elems);
+      ptrdiff_t get_next_tag();
+      ptrdiff_t get_set(ptrdiff_t tag);
+      ptrdiff_t get_set_child_left(ptrdiff_t set);
+      ptrdiff_t get_set_child_right(ptrdiff_t set);
+      ptrdiff_t get_set_size(ptrdiff_t set);
+      bool is_set_empty(ptrdiff_t set);
+      ptrdiff_t set_set_tag(ptrdiff_t set);
   };
 }
 }

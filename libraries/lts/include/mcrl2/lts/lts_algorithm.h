@@ -926,7 +926,7 @@ void determinise(LTS_TYPE&l)
   tree_set_store *tss = new tree_set_store();
 
   vector<transition> d_transs;
-  vector<size_t> d_states;
+  vector<ptrdiff_t> d_states;
 
   // create the initial state of the DLTS
   d_states.push_back(l.initial_state());

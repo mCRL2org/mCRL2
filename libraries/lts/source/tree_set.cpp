@@ -43,11 +43,11 @@ tree_set_store::tree_set_store() {
   tags_next = 0;
 
   hashmask = (1 << HASH_CLASS) - 1;
-  hashtable = (size_t*)malloc((hashmask+1)*sizeof(size_t));
+  hashtable = (ptrdiff_t*)malloc((hashmask+1)*sizeof(ptrdiff_t));
   if (hashtable == NULL) {
     throw mcrl2::runtime_error("Out of memory.");
   }
-  for (size_t i=0; i<=hashmask; ++i) {
+  for (ptrdiff_t i=0; i<=hashmask; ++i) {
   	hashtable[i] = EMPTY_LIST;
   }
 }
@@ -68,7 +68,7 @@ tree_set_store::~tree_set_store() {
 void tree_set_store::check_tags() {
   if (tags_next >= tags_size) {
     tags_size += TAGS_BLOCK;
-    tags = (size_t*)realloc(tags,tags_size*sizeof(size_t));
+    tags = (ptrdiff_t*)realloc(tags,tags_size*sizeof(ptrdiff_t));
     if (tags == NULL) {
       throw mcrl2::runtime_error("Out of memory.");
     }
@@ -85,11 +85,11 @@ void tree_set_store::check_buckets() {
   }
   if (buckets_next*4 >= hashmask*3) {
     hashmask = hashmask + hashmask + 1;
-    hashtable = (size_t*)realloc(hashtable,(hashmask+1)*sizeof(size_t));
+    hashtable = (ptrdiff_t*)realloc(hashtable,(hashmask+1)*sizeof(ptrdiff_t));
     if (hashtable == NULL) {
       throw mcrl2::runtime_error("Out of memory.");
     }
-    size_t i,hc;
+    ptrdiff_t i,hc;
     for (i=0; i<=hashmask; ++i) {
       hashtable[i] = EMPTY_LIST;
     }
@@ -101,9 +101,9 @@ void tree_set_store::check_buckets() {
   }
 }
 
-size_t tree_set_store::build_set(size_t child_l,size_t child_r) {
+ptrdiff_t tree_set_store::build_set(ptrdiff_t child_l,ptrdiff_t child_r) {
 	check_buckets();
-	size_t hc = hash(child_l,child_r,hashmask);
+	ptrdiff_t hc = hash(child_l,child_r,hashmask);
 	buckets[buckets_next].child_l = child_l;
 	buckets[buckets_next].child_r = child_r;
 	buckets[buckets_next].tag	    = EMPTY_TAG;
@@ -112,9 +112,9 @@ size_t tree_set_store::build_set(size_t child_l,size_t child_r) {
 	return buckets_next++;
 }
 
-size_t tree_set_store::find_set(size_t child_l,size_t child_r) {
-	size_t hc = hash(child_l,child_r,hashmask);
-	for (size_t i=hashtable[hc]; i!=EMPTY_LIST; i=buckets[i].next) {
+ptrdiff_t tree_set_store::find_set(ptrdiff_t child_l,ptrdiff_t child_r) {
+	ptrdiff_t hc = hash(child_l,child_r,hashmask);
+	for (ptrdiff_t i=hashtable[hc]; i!=EMPTY_LIST; i=buckets[i].next) {
 		if (buckets[i].child_l==child_l && buckets[i].child_r==child_r) {
 			return i;
 		}
@@ -122,12 +122,12 @@ size_t tree_set_store::find_set(size_t child_l,size_t child_r) {
 	return build_set(child_l,child_r);
 }
 
-size_t tree_set_store::create_set(vector<size_t> &elems) {
+ptrdiff_t tree_set_store::create_set(vector<ptrdiff_t> &elems) {
 	if (elems.size() == 0) {
 		return EMPTY_SET;
 	}
 
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(nodes,size_t,elems.size());
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(nodes,ptrdiff_t,elems.size());
 	size_t node_size = 0;
 	size_t i,j;
 	for (i=0; i < elems.size(); ++i) {
@@ -147,27 +147,27 @@ size_t tree_set_store::create_set(vector<size_t> &elems) {
 		}
 		node_size = j;
 	}
-	size_t r = nodes[0];
+	ptrdiff_t r = nodes[0];
 	return r;
 }
 
-size_t tree_set_store::get_next_tag() {
+ptrdiff_t tree_set_store::get_next_tag() {
   return tags_next;
 }
 
-size_t tree_set_store::get_set(size_t tag) {
+ptrdiff_t tree_set_store::get_set(ptrdiff_t tag) {
   return tags[tag];
 }
 
-size_t tree_set_store::get_set_child_left(size_t set) {
+ptrdiff_t tree_set_store::get_set_child_left(ptrdiff_t set) {
   return buckets[set].child_l;
 }
 
-size_t tree_set_store::get_set_child_right(size_t set) {
+ptrdiff_t tree_set_store::get_set_child_right(ptrdiff_t set) {
   return buckets[set].child_r;
 }
 
-size_t tree_set_store::get_set_size(size_t set) {
+ptrdiff_t tree_set_store::get_set_size(ptrdiff_t set) {
   if (buckets[set].child_r == EMPTY_SET) {
     return 1;
   }
@@ -175,11 +175,11 @@ size_t tree_set_store::get_set_size(size_t set) {
  				 get_set_size(buckets[set].child_r);
 }
 
-bool tree_set_store::is_set_empty(size_t set) {
+bool tree_set_store::is_set_empty(ptrdiff_t set) {
   return (set == EMPTY_SET);
 }
 
-size_t tree_set_store::set_set_tag(size_t set) {
+ptrdiff_t tree_set_store::set_set_tag(ptrdiff_t set) {
   if (buckets[set].tag != EMPTY_TAG) {
     return buckets[set].tag;
   }
