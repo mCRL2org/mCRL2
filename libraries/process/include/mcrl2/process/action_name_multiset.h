@@ -13,9 +13,11 @@
 #define MCRL2_PROCESS_ACTION_NAME_MULTISET_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2 {
 
