@@ -99,8 +99,8 @@ class sim_partitioner
   private:
     struct state_bucket
     {
-      size_t next;
-      size_t prev;
+      ptrdiff_t next;
+      ptrdiff_t prev;
     };
 
     LTS_TYPE &aut;
@@ -113,8 +113,8 @@ class sim_partitioner
     std::vector<size_t> block_Pi;
     std::vector<size_t> parent;
     std::vector< std::vector<size_t> > children;
-    std::vector<size_t> contents_t;
-    std::vector<size_t> contents_u;
+    std::vector<ptrdiff_t> contents_t;
+    std::vector<ptrdiff_t> contents_u;
     std::vector< std::vector<bool> > stable;
     hash_table3 *exists;
     hash_table3 *forall;
@@ -304,12 +304,12 @@ void sim_partitioner<LTS_TYPE>::initialise_Pi(size_t gamma,size_t l)
   std::vector<size_t>::iterator ci, last;
 
   contents.clear();
-  for (size_t i = contents_u[gamma]; i != LIST_END;
+  for (ptrdiff_t i = contents_u[gamma]; i != LIST_END;
       i = state_buckets[i].next)
   {
     contents.push_back(size_t(i));
   }
-  for (size_t i = contents_t[gamma]; i != LIST_END;
+  for (ptrdiff_t i = contents_t[gamma]; i != LIST_END;
       i = state_buckets[i].next)
   {
     contents.push_back(size_t(i));
@@ -399,7 +399,6 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
   std::vector< std::vector<bool> >::iterator stable_alpha, P_gamma;
   bool stable_alpha_gamma;
   size_t gamma, delta, l;
-  size_t i;
 
   /* The main loop */
   for (l = 0; l < aut.num_action_labels(); ++l)
@@ -458,7 +457,7 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
             contents_u[alpha] = LIST_END;
 
             /* update the block information for the moved states */
-            for (i = contents_u[s_Pi]; i != LIST_END;
+            for (ptrdiff_t i = contents_u[s_Pi]; i != LIST_END;
                 i = state_buckets[i].next)
             {
               block_Pi[i] = s_Pi;
@@ -505,8 +504,8 @@ template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::touch(size_t a,size_t alpha)
 {
   state_touched[a] = true;
-  size_t p = state_buckets[a].prev;
-  size_t n = state_buckets[a].next;
+  ptrdiff_t p = state_buckets[a].prev;
+  ptrdiff_t n = state_buckets[a].next;
   if (p == LIST_END)
   {
     contents_u[alpha] = n;
@@ -534,7 +533,7 @@ void sim_partitioner<LTS_TYPE>::untouch(size_t alpha)
 {
   // search linearly for the last element of contents_t[alpha];
   // untouch every state we encounter along the way
-  size_t i = contents_t[alpha];
+  ptrdiff_t i = contents_t[alpha];
   while (state_buckets[i].next != LIST_END)
   {
     state_touched[i] = false;
@@ -1043,11 +1042,11 @@ template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::print_block(size_t b)
 {
   using namespace mcrl2::core;
-  for (size_t i = contents_u[b]; i != LIST_END; i = state_buckets[i].next)
+  for (ptrdiff_t i = contents_u[b]; i != LIST_END; i = state_buckets[i].next)
   {
     gsMessage("%d,",i);
   }
-  for (size_t i = contents_t[b]; i != LIST_END; i = state_buckets[i].next)
+  for (ptrdiff_t i = contents_t[b]; i != LIST_END; i = state_buckets[i].next)
   {
     gsMessage("%d,",i);
   }

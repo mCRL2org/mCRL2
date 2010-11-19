@@ -930,7 +930,7 @@ void determinise(LTS_TYPE&l)
 
   // create the initial state of the DLTS
   d_states.push_back(l.initial_state());
-  size_t d_id = tss->set_set_tag(tss->create_set(d_states));
+  ptrdiff_t d_id = tss->set_set_tag(tss->create_set(d_states));
   d_states.clear();
 
   std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
