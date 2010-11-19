@@ -16,19 +16,16 @@ if ( MCRL2_BUILD_GUI_TOOLS )
 
 set(MACOSX_BUNDLE_ICON_FILE mcrl2-gui.icns)
 
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
-if(MCRL2_SINGLE_BUNDLE)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml DESTINATION MacOS/share/mcrl2)
-else(MCRL2_SINGLE_BUNDLE)
+if(NOT APPLE)
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png" COPYONLY )
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
-endif(MCRL2_SINGLE_BUNDLE)
-
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png" COPYONLY )
-if(MCRL2_SINGLE_BUNDLE)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png DESTINATION MacOS/share/mcrl2)
-else(MCRL2_SINGLE_BUNDLE)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png DESTINATION share/mcrl2)
-endif(MCRL2_SINGLE_BUNDLE)
+else(NOT APPLE)
+  # Copy directly into application
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY )
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/mcrl2.png" COPYONLY )
+endif(NOT APPLE)
 
 # ########## mcrl2_tools_mcrl2 executable ##########
 

@@ -59,9 +59,13 @@ Initialization::Initialization() {
 
 	mcrl2::utilities::basename basename;
 	m_executable_basename = basename.get_executable_basename();
-
 	m_toolset_basename = basename.get_toolset_basename();
-	std::string file = m_toolset_basename + "/share/mcrl2/mcrl2.png";
+
+  #ifdef __APPLE__                                                                                                             
+	  std::string file = m_executable_basename + "/mcrl2-gui.app/share/mcrl2/mcrl2.png";
+  #else
+	  std::string file = m_toolset_basename + "/share/mcrl2/mcrl2.png";
+  #endif
 
 	/* show splash screen*/
 	wxInitAllImageHandlers();
@@ -266,7 +270,11 @@ vector<Tool> Initialization::Read_tools() {
 	std::string line;
 
 
-	string tool_catalog_file = m_toolset_basename + "/share/mcrl2/tool_catalog.xml" ;
+  #ifdef __APPLE__                                                                                                             
+	  string tool_catalog_file = m_executable_basename + "/mcrl2-gui.app/share/mcrl2/tool_catalog.xml" ;
+  #else
+	  string tool_catalog_file = m_toolset_basename + "/share/mcrl2/tool_catalog.xml" ;
+  #endif
 
   wxXmlDocument wx_doc;
 	wx_doc.Load( wxString( tool_catalog_file.c_str() , wxConvUTF8 ) ); 

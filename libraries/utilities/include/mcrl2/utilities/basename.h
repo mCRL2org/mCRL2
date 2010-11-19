@@ -110,6 +110,12 @@
         CFStringGetCString( str, cpath, FILENAME_MAX, kCFStringEncodingASCII );
         CFRelease(str);
         path = cpath;
+        std::string::size_type t = path.size();
+        //for( int i = 0; i < 3; ++i)
+        {
+          t = path.find_last_of("/", t-1);
+        }
+        path = path.substr(0,t); 
 
       #endif //__APPLE__
     
