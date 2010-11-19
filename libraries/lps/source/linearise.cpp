@@ -463,7 +463,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list::const_iterator e_walker=args.begin();
       for(action_label_list::const_iterator l=actionIds.begin() ; l!=actionIds.end() ; ++l)
       {
-        long arity=l->sorts().size();
+        size_t arity=l->sorts().size();
         data_expression_list temp_args;
         for(unsigned int i=0 ; i< static_cast< unsigned int >(arity); ++i,++e_walker)
         { assert(e_walker!=args.end());
@@ -519,7 +519,7 @@ class specification_basic_type:public boost::noncopyable
 
     /************ upperpowerof2 *********************************************/
 
-    int upperpowerof2(int i)
+    int upperpowerof2(size_t i)
     /* function yields n for the smallest value n such that
        2^n>=i. This constitutes the number of bits necessary
        to represent a number smaller than i. i is assumed to
@@ -2978,7 +2978,7 @@ class specification_basic_type:public boost::noncopyable
         stackoperations *opns;
         variable_list parameters;
         variable stackvar;
-        int no_of_states;
+        size_t no_of_states;
         /* the boolean state variables occur in reverse
            order, i.e. the least significant first, whereas
            in parameter lists, the order is reversed. */
@@ -3031,7 +3031,7 @@ class specification_basic_type:public boost::noncopyable
             if (spec.options.newstate)
             { if (!spec.options.binary)
               { if (!singlecontrolstate)
-                { const unsigned int e=spec.create_enumeratedtype(no_of_states);
+                { const size_t e=spec.create_enumeratedtype(no_of_states);
                   stackvar=variable(spec.fresh_name(s3), spec.enumeratedtypes[e].sortId);
                 }
                 else
@@ -3118,7 +3118,7 @@ class specification_basic_type:public boost::noncopyable
                 first version of the prover */
 
       if (!options.binary)
-      { const unsigned int e=create_enumeratedtype(stack.no_of_states);
+      { const size_t e=create_enumeratedtype(stack.no_of_states);
         function_symbol_list l=enumeratedtypes[e].elementnames;
         for( ; i>0 ; i--){l=pop_front(l);}
         return push_front(t,data_expression(l.front()));
@@ -3823,12 +3823,12 @@ class specification_basic_type:public boost::noncopyable
 
     class enumeratedtype
     { public:
-        unsigned int size;
+        size_t size;
         sort_expression sortId;
         data_expression_list elementnames;
         function_symbol_list functions;
 
-        enumeratedtype(const unsigned int n,
+        enumeratedtype(const size_t n,
                        specification_basic_type &spec)
         { size=n;
           sortId.protect();
@@ -3891,8 +3891,8 @@ class specification_basic_type:public boost::noncopyable
         }
     };
 
-    unsigned int create_enumeratedtype(const unsigned int n)
-    { unsigned int w;
+    size_t create_enumeratedtype(const size_t n)
+    { size_t w;
 
       for(w=0; ((w<enumeratedtypes.size())&&(enumeratedtypes[w].size!=n)); ++w){};
 
@@ -3903,7 +3903,7 @@ class specification_basic_type:public boost::noncopyable
       return w;
     }
 
-    function_symbol find_case_function(unsigned int index, const sort_expression sort)
+    function_symbol find_case_function(size_t index, const sort_expression sort)
     {
       const function_symbol_list functions=enumeratedtypes[index].functions;
       for(function_symbol_list::const_iterator w=functions.begin();
@@ -3921,7 +3921,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void define_equations_for_case_function(
-                    const unsigned int index,
+                    const size_t index,
                     const function_symbol functionname,
                     const sort_expression sort)
     { variable_list vars;
@@ -3930,7 +3930,7 @@ class specification_basic_type:public boost::noncopyable
 
       const sort_expression normalised_sort=sort; // data.normalise_sorts(sort);
       const variable v1=get_fresh_variable("x",normalised_sort);
-      const unsigned int n=enumeratedtypes[index].size;
+      const size_t n=enumeratedtypes[index].size;
       for(unsigned int j=0; (j<n); j++)
       { const variable v=get_fresh_variable("y",normalised_sort);
         vars=push_front(vars,v);
@@ -3964,7 +3964,7 @@ class specification_basic_type:public boost::noncopyable
 
     void create_case_function_on_enumeratedtype(
                        const sort_expression sort,
-                       const unsigned int enumeratedtype_index)
+                       const size_t enumeratedtype_index)
     { assert(enumeratedtype_index<enumeratedtypes.size());
       /* first find out whether the function exists already, in which
          case nothing needs to be done */
@@ -3991,7 +3991,7 @@ class specification_basic_type:public boost::noncopyable
       }
       // else
       sort_expression_list newsortlist;
-      unsigned int n=enumeratedtypes[enumeratedtype_index].size;
+      size_t n=enumeratedtypes[enumeratedtype_index].size;
       for(unsigned int j=0; j<n ; j++)
       { newsortlist=push_front(newsortlist, sort);
       }
@@ -4014,10 +4014,10 @@ class specification_basic_type:public boost::noncopyable
 
     class enumtype : public boost::noncopyable
     { public:
-        unsigned int enumeratedtype_index;
+        size_t enumeratedtype_index;
         variable var;
 
-        enumtype(int n,
+        enumtype(size_t n,
                  const sort_expression_list fsorts,
                  const sort_expression_list gsorts,
                  specification_basic_type &spec)
@@ -4224,7 +4224,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     variable_list make_binary_sums(
-                          int n,
+                          size_t n,
                           const sort_expression enumtypename,
                           data_expression &condition,
                           const variable_list tail)
@@ -4247,7 +4247,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression construct_binary_case_tree_rec(
-                           int n,
+                           size_t n,
                            const variable_list sums,
                            data_expression_list &terms,
                            const sort_expression termsort,
@@ -4278,7 +4278,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression construct_binary_case_tree(
-                            int n,
+                            size_t n,
                             const variable_list sums,
                             data_expression_list terms,
                             const sort_expression termsort,
@@ -4341,7 +4341,7 @@ class specification_basic_type:public boost::noncopyable
 
     summand collect_sum_arg_arg_cond(
                        const enumtype &e,
-                       int n,
+                       size_t n,
                        const summand_list sumlist,
                        const variable_list gsorts)
     { /* This function gets a list of summands, with
@@ -4452,7 +4452,7 @@ class specification_basic_type:public boost::noncopyable
 
       action_list resultmultiactionlist;
       if (!multiActionIsDelta)
-      { long multiactioncount= multiActionList[0].size(); // The number of multi actions.
+      { size_t multiactioncount= multiActionList[0].size(); // The number of multi actions.
         for( ; multiactioncount>0 ; multiactioncount-- )
         {
           data_expression_list resultf;
@@ -4461,7 +4461,7 @@ class specification_basic_type:public boost::noncopyable
           action_list::const_iterator a=multiActionList[0].begin();
           for(long i=1 ; i<multiactioncount ; ++i,++a) {}
           // const action a= *((multiActionList[0]).begin()+(multiactioncount-1));
-          long fcnt=(a->arguments()).size();
+          size_t fcnt=(a->arguments()).size();
           data_expression f;
 
           for( ; fcnt>0 ; fcnt-- )
@@ -4706,7 +4706,7 @@ class specification_basic_type:public boost::noncopyable
         /* In w1 we now find all the summands labelled with
            similar multiactions, actiontime and terminationstatus.
            We must now construct its clustered form. */
-        unsigned int n=w1.size();
+        size_t n=w1.size();
 
         if (n>0)
         { if (n>1)
@@ -5036,7 +5036,7 @@ class specification_basic_type:public boost::noncopyable
       summand_list resultactionsumlist;
       action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
 
-      int sourcesumlist_length=sourcesumlist.size();
+      size_t sourcesumlist_length=sourcesumlist.size();
       if (sourcesumlist_length>2 || is_allow) // This condition prevents this message to be printed
                                               // when performing data elimination. In this case the
                                               // term delta is linearised, to determine which data
@@ -5385,7 +5385,7 @@ class specification_basic_type:public boost::noncopyable
       ~comm_entry()
       {}
 
-      int size() const
+      size_t size() const
       { assert(lhs.size()==rhs.size() && rhs.size()==tmp.size() && tmp.size()==match_failed.size());
         return lhs.size();
       }

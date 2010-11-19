@@ -42,21 +42,21 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   const transition_const_range r=l.get_transitions();
   std::vector < transition > local_transitions(r.begin(),r.end());
 
-  unsigned int *trans_lut = l.get_transition_indices();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(new_trans_lut,unsigned int,l.num_states() + 1);
+  size_t *trans_lut = l.get_transition_indices();
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(new_trans_lut,size_t,l.num_states() + 1);
   
 
   new_trans_lut[0] = l.num_transitions();
-  for (unsigned int state = 0; state < l.num_states(); state++)
+  for (size_t state = 0; state < l.num_states(); state++)
   {
-    unsigned int t = trans_lut[state];
+    size_t t = trans_lut[state];
     while ( t < trans_lut[state+1] )
     {
       if ( l.is_tau(local_transitions[t].label()) &&
           (local_transitions[t].from() != local_transitions[t].to()) )
       {
-        unsigned int to = local_transitions[t].to();
-        unsigned int u = trans_lut[to];
+        size_t to = local_transitions[t].to();
+        size_t u = trans_lut[to];
         while ( u < trans_lut[to+1] )
         {
           if ( !( (to < state) && l.is_tau(local_transitions[u].label()) ) )
@@ -86,8 +86,8 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
       if ( l.is_tau(local_transitions[t].label()) &&
           (local_transitions[t].from() != local_transitions[t].to()) )
       {
-        unsigned int to = local_transitions[t].to();
-        unsigned int u = trans_lut[to];
+        size_t to = local_transitions[t].to();
+        size_t u = trans_lut[to];
         while ( u < trans_lut[to+1] )
         {
           if ( !( (to < state) && l.is_tau(local_transitions[u].label()) ) )
@@ -117,7 +117,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   using namespace mcrl2::lts::detail;
 
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(reachable,t_reach,l.num_states());
-  for (unsigned int i=0; i<l.num_states(); i++)
+  for (size_t i=0; i<l.num_states(); i++)
   {
     reachable[i] = unknown;
   }
@@ -126,11 +126,11 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   while ( notdone )
   {
     notdone = false;
-    for (unsigned int i=0; i<l.num_states(); i++)
+    for (size_t i=0; i<l.num_states(); i++)
     {
       if ( reachable[i] == reached )
       {
-        unsigned int t = trans_lut[i];
+        size_t t = trans_lut[i];
         while ( t < trans_lut[i+1] )
         {
           if ( reachable[local_transitions[t].to()] == unknown )
@@ -163,9 +163,9 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
 
   free(trans_lut);
 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_map,unsigned int,l.num_states());
-  unsigned int new_nstates = 0;
-  for (unsigned int i=0; i < l.num_states(); i++)
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_map,size_t,l.num_states());
+  size_t new_nstates = 0;
+  for (size_t i=0; i < l.num_states(); i++)
   {
     if ( reachable[i] != unknown )
     {
@@ -178,9 +178,9 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
     }
   }
 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(label_map,unsigned int,l.num_action_labels());
-  unsigned int new_nlabels = 0;
-  for (unsigned int i=0; i < l.num_action_labels(); i++)
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(label_map,size_t,l.num_action_labels());
+  size_t new_nlabels = 0;
+  for (size_t i=0; i < l.num_action_labels(); i++)
   {
     if ( !l.is_tau(i) )
     {
@@ -210,7 +210,7 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   { l.add_transition(*i);
   }
 
-  for ( unsigned int i=0; i < l.num_action_labels(); i++)
+  for ( size_t i=0; i < l.num_action_labels(); i++)
   {
     l.set_tau(i,false);
   }

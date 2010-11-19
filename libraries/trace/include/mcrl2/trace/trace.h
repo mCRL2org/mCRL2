@@ -186,7 +186,7 @@ namespace mcrl2 {
 
       /// \brief Get the current length of the trace.
       /// \return A positive number indicating the number of actions in the trace.
-      unsigned int getLength()
+      size_t getLength()
       {
         assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
         return actions.size();
@@ -599,7 +599,7 @@ namespace mcrl2 {
         assert(actions.size()+1 == states.size() && states.size() == times.size());
 
         bool error_shown = false;
-        unsigned int i=actions.size()+1;
+        size_t i=actions.size()+1;
         while ( i > 0 )
         {
           i--;

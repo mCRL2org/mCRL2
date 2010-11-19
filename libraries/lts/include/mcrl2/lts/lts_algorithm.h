@@ -90,7 +90,7 @@ namespace mcrl2
     static const std::set<lts_equivalence> &initialise_supported_lts_equivalences()
     {
       static std::set<lts_equivalence> s;
-      for (unsigned int i = lts_equivalence_min; i<1+(unsigned int)lts_equivalence_max; ++i)
+      for (size_t i = lts_equivalence_min; i<1+(size_t)lts_equivalence_max; ++i)
       {
         if ( lts_eq_none != (lts_equivalence) i )
         {
@@ -111,7 +111,7 @@ namespace mcrl2
     static const std::set<lts_preorder> &initialise_supported_lts_preorders()
     {
       static std::set<lts_preorder> s;
-      for (unsigned int i = lts_preorder_min; i<1+(unsigned int)lts_preorder_max; ++i)
+      for (size_t i = lts_preorder_min; i<1+(size_t)lts_preorder_max; ++i)
       {
         if ( lts_pre_none != (lts_preorder) i )
         {
@@ -468,7 +468,7 @@ namespace mcrl2
               std::cerr << "Warning: cannot generate counter example traces for simulation equivalence\n";
             }
             // Run the partitioning algorithm on this merged LTS
-            unsigned int init_l2 = l2.initial_state() + l1.num_states();
+            size_t init_l2 = l2.initial_state() + l1.num_states();
             detail::merge(l1,l2);
             l2.clear(); // l is not needed anymore.
             detail::sim_partitioner<LTS_TYPE> sp(l1);
@@ -585,12 +585,12 @@ namespace mcrl2
     
       std::vector < bool > visited(l.num_states(),false);
       visited[l.initial_state()]=true;
-      std::stack<unsigned int> todo;
+      std::stack<size_t> todo;
       todo.push(l.initial_state());
     
       while (!todo.empty())
       {
-        unsigned int state_to_consider=todo.top();
+        size_t state_to_consider=todo.top();
         todo.pop();
         for (outgoing_transitions_per_state_t::const_iterator i=out_trans.lower_bound(state_to_consider); 
                    i!=out_trans.upper_bound(state_to_consider); ++i) 
@@ -615,13 +615,13 @@ namespace mcrl2
         // Remove all unreachable states, transitions from such states and labels
         // that are only used in these transitions.
     
-        std::map < unsigned int , unsigned > state_map;
-        std::map < unsigned int , unsigned > label_map;
+        std::map < size_t , size_t > state_map;
+        std::map < size_t , size_t > label_map;
         
         LTS_TYPE new_lts; 
     
-        unsigned int new_nstates = 0;
-        for (unsigned int i=0; i<l.num_states(); i++)
+        size_t new_nstates = 0;
+        for (size_t i=0; i<l.num_states(); i++)
         {
           if ( visited[i] )
           {
@@ -646,8 +646,8 @@ namespace mcrl2
           }
         }
     
-        unsigned int new_nlabels = 0;
-        for (unsigned int i=0; i<l.num_action_labels(); i++)
+        size_t new_nlabels = 0;
+        for (size_t i=0; i<l.num_action_labels(); i++)
         {
           if (label_map.count(i)>0)   // Label i is used.
           { 
@@ -807,7 +807,7 @@ bool destructive_compare(LTS_TYPE &l1, LTS_TYPE &l2, const lts_preorder pre)
         // In the resulting LTS, the initial state i of l will have the
         // state number i + N where N is the number of states in this
         // LTS (before the merge).
-        const unsigned int init_l2 = l2.initial_state() + l1.num_states();
+        const size_t init_l2 = l2.initial_state() + l1.num_states();
         detail::merge(l1,l2);
 
         // We no longer need l, so clear it to save memory
@@ -896,7 +896,7 @@ bool is_deterministic(const LTS_TYPE&l)
 
 static void get_trans(std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > &begin,
                       tree_set_store *tss,
-                      unsigned int d,
+                      size_t d,
                       std::vector<transition> &d_trans) 
 {
   if (!tss->is_set_empty(d)) 
@@ -926,21 +926,21 @@ void determinise(LTS_TYPE&l)
   tree_set_store *tss = new tree_set_store();
 
   vector<transition> d_transs;
-  vector<unsigned int> d_states;
+  vector<size_t> d_states;
 
   // create the initial state of the DLTS
   d_states.push_back(l.initial_state());
-  unsigned int d_id = tss->set_set_tag(tss->create_set(d_states));
+  size_t d_id = tss->set_set_tag(tss->create_set(d_states));
   d_states.clear();
 
   std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
              begin=transitions_per_outgoing_state(l.get_transitions());
   l.clear_transitions();
-  unsigned int d_ntransitions = 0;
+  size_t d_ntransitions = 0;
   std::vector < transition > d_transitions;
 
-  int s;
-  unsigned int i,to,lbl,n_t;
+  size_t s;
+  size_t i,to,lbl,n_t;
 
   while (d_id < tss->get_next_tag()) 
   {

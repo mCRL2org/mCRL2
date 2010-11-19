@@ -210,7 +210,7 @@ LTS::~LTS()
   if (previousLevel == NULL)
   {
     // This LTS is the top level LTS, so delete all its contents.
-    unsigned int i,r;
+    size_t i,r;
     vector< State* >::iterator li;
     for (li = states.begin(); li != states.end(); ++li)
     {
@@ -258,28 +258,28 @@ State_iterator LTS::getStateIterator()
   return State_iterator(this);
 }
 
-string LTS::getParameterName(unsigned int parindex)
+string LTS::getParameterName(size_t parindex)
 {
   return mcrl2_lts.process_parameter(parindex).first; // in an .fsm file a parameter is a pair of strings.
 }
 
-std::vector<std::string> LTS::getParameterDomain(unsigned int parindex)
+std::vector<std::string> LTS::getParameterDomain(size_t parindex)
 {
   return mcrl2_lts.state_element_values(parindex);
 }
 
-unsigned int LTS::getStateParameterValue(State* state,unsigned int param)
+size_t LTS::getStateParameterValue(State* state,size_t param)
 {
   return mcrl2_lts.state_label(state->getID())[param];
 }
 
-std::string LTS::getStateParameterValueStr(State* state, unsigned int param)
+std::string LTS::getStateParameterValueStr(State* state, size_t param)
 { 
   using namespace mcrl2::lts::detail;
   return mcrl2_lts.state_element_value(param,(mcrl2_lts.state_label(state->getID()))[param]);
 }
 
-std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, unsigned int param)
+std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t param)
 {
   std::set<std::string> result;
   for (int i = 0; i < cluster->getNumStates(); ++i)
@@ -299,7 +299,7 @@ bool LTS::readFromFile(const std::string &filename)
 
   states.clear();
   states.reserve(mcrl2_lts.num_states());
-  for (unsigned int i = 0; i < mcrl2_lts.num_states(); ++i)
+  for (size_t i = 0; i < mcrl2_lts.num_states(); ++i)
   {
     states.push_back(new State(i));
   }
@@ -382,7 +382,7 @@ int LTS::getNumLabels()
   return mcrl2_lts.num_action_labels();
 }
 
-unsigned int LTS::getNumParameters() const
+size_t LTS::getNumParameters() const
 {
   /* if (mcrl2_lts.has_process_parameters())
   { */
@@ -398,8 +398,8 @@ string LTS::getLabel(int labindex)
 
 void LTS::addCluster(Cluster* cluster)
 {
-  unsigned int rank = cluster->getRank();
-  unsigned int pos = cluster->getPositionInRank();
+  size_t rank = cluster->getRank();
+  size_t pos = cluster->getPositionInRank();
 
   // Check to see if there is already a rank for this cluster
   if (clustersInRank.size() <= rank)
@@ -417,7 +417,7 @@ void LTS::addCluster(Cluster* cluster)
   for (int i = 0; i < cluster->getNumStates(); ++i)
   {
     State* state = cluster->getState(i);
-    unsigned int state_id = state->getID();
+    size_t state_id = state->getID();
     if (states.size() <= state_id)
     {
       states.resize(state_id + 1);
@@ -444,7 +444,7 @@ void LTS::addClusterAndBelow(Cluster* cluster)
 void LTS::getActionLabels(vector< string > &ls) const
 {
   ls.clear();
-  for (unsigned int i = 0; i < mcrl2_lts.num_action_labels(); ++i)
+  for (size_t i = 0; i < mcrl2_lts.num_action_labels(); ++i)
   {
     ls.push_back(mcrl2_lts.action_label(i));
   }
@@ -615,7 +615,7 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic)
       if (w->getCluster() == NULL && r == v->getRank()+1)
       {
         Cluster *d = new Cluster(r);
-        if ((unsigned int)(r) >= clustersInRank.size())
+        if ((size_t)(r) >= clustersInRank.size())
         {
           vector< Cluster* > cs;
           clustersInRank.push_back(cs);
@@ -656,7 +656,7 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic)
     if (w->getCluster() == NULL && r == v->getRank()+1)
     {
       Cluster *d = new Cluster(r);
-      if ((unsigned int)(r) >= clustersInRank.size())
+      if ((size_t)(r) >= clustersInRank.size())
       {
         vector< Cluster* > cs;
         clustersInRank.push_back(cs);
@@ -898,7 +898,7 @@ void LTS::loadTrace(std::string const& path)
     //
     // Assumption: The ith parameter in currState is equal to the ith parameter
     // in initState.
-    for(unsigned int i = 0; i < ATgetLength(ATgetArguments(currState)); ++i)
+    for(size_t i = 0; i < ATgetLength(ATgetArguments(currState)); ++i)
     {
 
       ATerm currVal = ATgetArgument(currState, i);
@@ -948,7 +948,7 @@ void LTS::loadTrace(std::string const& path)
           State* s = posTrans[j]->getEndState();
           int match = 0;
 
-          for(unsigned int i = 0; i < ATgetLength(ATgetArguments(currState));
+          for(size_t i = 0; i < ATgetLength(ATgetArguments(currState));
               ++i)
           {
 

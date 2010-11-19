@@ -43,11 +43,11 @@ tree_set_store::tree_set_store() {
   tags_next = 0;
 
   hashmask = (1 << HASH_CLASS) - 1;
-  hashtable = (int*)malloc((hashmask+1)*sizeof(int));
+  hashtable = (size_t*)malloc((hashmask+1)*sizeof(size_t));
   if (hashtable == NULL) {
     throw mcrl2::runtime_error("Out of memory.");
   }
-  for (unsigned int i=0; i<=hashmask; ++i) {
+  for (size_t i=0; i<=hashmask; ++i) {
   	hashtable[i] = EMPTY_LIST;
   }
 }
@@ -68,7 +68,7 @@ tree_set_store::~tree_set_store() {
 void tree_set_store::check_tags() {
   if (tags_next >= tags_size) {
     tags_size += TAGS_BLOCK;
-    tags = (int*)realloc(tags,tags_size*sizeof(int));
+    tags = (size_t*)realloc(tags,tags_size*sizeof(size_t));
     if (tags == NULL) {
       throw mcrl2::runtime_error("Out of memory.");
     }
@@ -85,11 +85,11 @@ void tree_set_store::check_buckets() {
   }
   if (buckets_next*4 >= hashmask*3) {
     hashmask = hashmask + hashmask + 1;
-    hashtable = (int*)realloc(hashtable,(hashmask+1)*sizeof(int));
+    hashtable = (size_t*)realloc(hashtable,(hashmask+1)*sizeof(size_t));
     if (hashtable == NULL) {
       throw mcrl2::runtime_error("Out of memory.");
     }
-    unsigned int i,hc;
+    size_t i,hc;
     for (i=0; i<=hashmask; ++i) {
       hashtable[i] = EMPTY_LIST;
     }
@@ -101,9 +101,9 @@ void tree_set_store::check_buckets() {
   }
 }
 
-int tree_set_store::build_set(int child_l,int child_r) {
+size_t tree_set_store::build_set(size_t child_l,size_t child_r) {
 	check_buckets();
-	int hc = hash(child_l,child_r,hashmask);
+	size_t hc = hash(child_l,child_r,hashmask);
 	buckets[buckets_next].child_l = child_l;
 	buckets[buckets_next].child_r = child_r;
 	buckets[buckets_next].tag	    = EMPTY_TAG;
@@ -112,9 +112,9 @@ int tree_set_store::build_set(int child_l,int child_r) {
 	return buckets_next++;
 }
 
-int tree_set_store::find_set(int child_l,int child_r) {
-	int hc = hash(child_l,child_r,hashmask);
-	for (int i=hashtable[hc]; i!=EMPTY_LIST; i=buckets[i].next) {
+size_t tree_set_store::find_set(size_t child_l,size_t child_r) {
+	size_t hc = hash(child_l,child_r,hashmask);
+	for (size_t i=hashtable[hc]; i!=EMPTY_LIST; i=buckets[i].next) {
 		if (buckets[i].child_l==child_l && buckets[i].child_r==child_r) {
 			return i;
 		}
@@ -122,14 +122,14 @@ int tree_set_store::find_set(int child_l,int child_r) {
 	return build_set(child_l,child_r);
 }
 
-int tree_set_store::create_set(vector<unsigned int> &elems) {
+size_t tree_set_store::create_set(vector<size_t> &elems) {
 	if (elems.size() == 0) {
 		return EMPTY_SET;
 	}
 
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(nodes,int,elems.size());
-	unsigned int node_size = 0;
-	unsigned int i,j;
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(nodes,size_t,elems.size());
+	size_t node_size = 0;
+	size_t i,j;
 	for (i=0; i < elems.size(); ++i) {
 		nodes[i] = find_set(elems[i],EMPTY_SET);
 	}
@@ -147,27 +147,27 @@ int tree_set_store::create_set(vector<unsigned int> &elems) {
 		}
 		node_size = j;
 	}
-	unsigned int r = nodes[0];
+	size_t r = nodes[0];
 	return r;
 }
 
-unsigned int tree_set_store::get_next_tag() {
+size_t tree_set_store::get_next_tag() {
   return tags_next;
 }
 
-int tree_set_store::get_set(int tag) {
+size_t tree_set_store::get_set(size_t tag) {
   return tags[tag];
 }
 
-int tree_set_store::get_set_child_left(int set) {
+size_t tree_set_store::get_set_child_left(size_t set) {
   return buckets[set].child_l;
 }
 
-int tree_set_store::get_set_child_right(int set) {
+size_t tree_set_store::get_set_child_right(size_t set) {
   return buckets[set].child_r;
 }
 
-int tree_set_store::get_set_size(int set) {
+size_t tree_set_store::get_set_size(size_t set) {
   if (buckets[set].child_r == EMPTY_SET) {
     return 1;
   }
@@ -175,11 +175,11 @@ int tree_set_store::get_set_size(int set) {
  				 get_set_size(buckets[set].child_r);
 }
 
-bool tree_set_store::is_set_empty(int set) {
+bool tree_set_store::is_set_empty(size_t set) {
   return (set == EMPTY_SET);
 }
 
-int tree_set_store::set_set_tag(int set) {
+size_t tree_set_store::set_set_tag(size_t set) {
   if (buckets[set].tag != EMPTY_TAG) {
     return buckets[set].tag;
   }

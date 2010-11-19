@@ -210,7 +210,7 @@ ATerm     ATdictGet(ATerm dict, ATerm key);
 ATerm     ATdictPut(ATerm dict, ATerm key, ATerm value);
 ATerm     ATdictRemove(ATerm dict, ATerm key);
 
-ATermTable ATtableCreate(long initial_size, int max_load_pct);
+ATermTable ATtableCreate(int64_t initial_size, int max_load_pct);
 void       ATtableDestroy(ATermTable table);
 void       ATtableReset(ATermTable table);
 void       ATtablePut(ATermTable table, ATerm key, ATerm value);

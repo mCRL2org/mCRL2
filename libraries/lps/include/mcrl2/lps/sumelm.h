@@ -30,7 +30,7 @@ namespace mcrl2 {
     {
       protected:
         /// Stores the number of summation variables that has been removed.
-        int m_removed;
+        size_t m_removed;
 
         /// Adds replacement lhs := rhs to the specified map of replacements.
         /// All replacements that have lhs as a right hand side will be changed to
@@ -180,7 +180,7 @@ namespace mcrl2 {
           substitute(s.multi_action(), make_map_substitution_adapter(substitutions));
           s.assignments() = replace_free_variables(s.assignments(), make_map_substitution_adapter(substitutions));
 
-          const int var_count = s.summation_variables().size();
+          const size_t var_count = s.summation_variables().size();
           remove_unused_summand_variables(s);
           m_removed += var_count - s.summation_variables().size();
         }
@@ -197,7 +197,7 @@ namespace mcrl2 {
           s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
           s.deadlock().time() = replace_free_variables(s.deadlock().time(), make_map_substitution_adapter(substitutions));
 
-          const int var_count = s.summation_variables().size();
+          const size_t var_count = s.summation_variables().size();
           remove_unused_summand_variables(s);
           m_removed += var_count - s.summation_variables().size();
         }

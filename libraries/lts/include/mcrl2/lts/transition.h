@@ -42,7 +42,7 @@ namespace mcrl2
     {
       public:
         /// \brief The type of the elements in a transition.
-      typedef unsigned int size_type;
+      typedef size_t size_type;
 
       private:
         size_type m_from;
@@ -55,9 +55,9 @@ namespace mcrl2
         //   {}
 
         /// \brief Constructor (there is no default constructor).
-        transition(const unsigned int f,
-            const unsigned int l,
-            const unsigned int t):m_from(f),m_label(l),m_to(t)
+        transition(const size_t f,
+            const size_t l,
+            const size_t t):m_from(f),m_label(l),m_to(t)
         {}
 
         /// \brief Copy constructor.

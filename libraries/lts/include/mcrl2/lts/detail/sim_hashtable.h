@@ -23,37 +23,37 @@
 #define SIM_HASHTABLE_H
 #include <vector>
 
-typedef unsigned int uint;
+//typedef unsigned int size_t;
 
 struct bucket2
 {
-  uint x,y;
+  size_t x,y;
   int next;
 };
 
 struct bucket3
 {
-  uint x,y,z;
+  size_t x,y,z;
   int next;
 };
 
 class hash_table2
 {
   public:
-    hash_table2(uint initsize);
+    hash_table2(size_t initsize);
     ~hash_table2();
     void clear();
-    void add(uint x,uint y);
-    bool find(uint x,uint y);
-    void remove(uint x,uint y);
+    void add(size_t x,size_t y);
+    bool find(size_t x,size_t y);
+    void remove(size_t x,size_t y);
 
   private:
     std::vector<bucket2> buckets;
     std::vector<int> table;
-    uint mask;
-    uint removed_count;
-    uint hash(uint x,uint y);
-    int hfind(uint h,uint x,uint y);
+    size_t mask;
+    size_t removed_count;
+    size_t hash(size_t x,size_t y);
+    int hfind(size_t h,size_t x,size_t y);
     bool check_table();
 
     friend class hash_table2_iterator;
@@ -65,8 +65,8 @@ class hash_table2_iterator
     hash_table2_iterator(hash_table2 *ht);
     bool is_end() { return (bucket_it == hash_table->buckets.end()); }
     void operator ++();
-    uint get_x() { return bucket_it->x; }
-    uint get_y() { return bucket_it->y; }
+    size_t get_x() { return bucket_it->x; }
+    size_t get_y() { return bucket_it->y; }
   private:
     std::vector<bucket2>::iterator bucket_it;
     hash_table2 *hash_table;
@@ -76,21 +76,21 @@ class hash_table2_iterator
 class hash_table3
 {
   public:
-    hash_table3(uint initsize);
+    hash_table3(size_t initsize);
     ~hash_table3();
     void clear();
-    void add(uint x,uint y,uint z);
-    bool find(uint x,uint y,uint z);
-    void remove(uint x,uint y,uint z);
-    uint get_num_elements() { return buckets.size() - removed_count; }
+    void add(size_t x,size_t y,size_t z);
+    bool find(size_t x,size_t y,size_t z);
+    void remove(size_t x,size_t y,size_t z);
+    size_t get_num_elements() { return buckets.size() - removed_count; }
 
   private:
     std::vector<bucket3> buckets;
     std::vector<int> table;
-    uint mask;
-    uint removed_count;
-    uint hash(uint x,uint y,uint z);
-    int hfind(uint h,uint x,uint y,uint z);
+    size_t mask;
+    size_t removed_count;
+    size_t hash(size_t x,size_t y,size_t z);
+    int hfind(size_t h,size_t x,size_t y,size_t z);
     bool check_table();
 
     friend class hash_table3_iterator;
@@ -102,11 +102,11 @@ class hash_table3_iterator
     hash_table3_iterator(hash_table3 *ht);
     bool is_end() { return (bucket_it == end); }
     void operator ++();
-    uint get_x() { return bucket_it->x; }
-    uint get_y() { return bucket_it->y; }
-    uint get_z() { return bucket_it->z; }
-    void set(uint i) { bucket_it = hash_table->buckets.begin() + i; }
-    void set_end(uint i) { end = hash_table->buckets.begin() + i; }
+    size_t get_x() { return bucket_it->x; }
+    size_t get_y() { return bucket_it->y; }
+    size_t get_z() { return bucket_it->z; }
+    void set(size_t i) { bucket_it = hash_table->buckets.begin() + i; }
+    void set_end(size_t i) { end = hash_table->buckets.begin() + i; }
   private:
     std::vector<bucket3>::iterator bucket_it;
     std::vector<bucket3>::iterator end;

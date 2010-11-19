@@ -19,37 +19,37 @@ namespace lts
   class tree_set_store {
     private:
       struct bucket {
-        int child_l;
-        int child_r;
-        int tag;
-        int next;
+        size_t child_l;
+        size_t child_r;
+        size_t tag;
+        size_t next;
       };
       bucket *buckets;
-      unsigned int buckets_size;
-      unsigned int buckets_next;
+      size_t buckets_size;
+      size_t buckets_next;
 
-      int *tags;
-      unsigned int tags_size;
-      unsigned int tags_next;
+      size_t *tags;
+      size_t tags_size;
+      size_t tags_next;
 
-      int *hashtable;
-      unsigned int hashmask;
+      size_t *hashtable;
+      size_t hashmask;
 
       void check_tags();
       void check_buckets();
-      int find_set(int child_l,int child_r);
-      int build_set(int child_l,int child_r);
+      size_t find_set(size_t child_l,size_t child_r);
+      size_t build_set(size_t child_l,size_t child_r);
     public:
       tree_set_store();
       ~tree_set_store();
-      int create_set(std::vector<unsigned int> &elems);
-      unsigned int get_next_tag();
-      int get_set(int tag);
-      int get_set_child_left(int set);
-      int get_set_child_right(int set);
-      int get_set_size(int set);
-      bool is_set_empty(int set);
-      int set_set_tag(int set);
+      size_t create_set(std::vector<size_t> &elems);
+      size_t get_next_tag();
+      size_t get_set(size_t tag);
+      size_t get_set_child_left(size_t set);
+      size_t get_set_child_right(size_t set);
+      size_t get_set_size(size_t set);
+      bool is_set_empty(size_t set);
+      size_t set_set_tag(size_t set);
   };
 }
 }

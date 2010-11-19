@@ -191,10 +191,10 @@ class lps2lts_tool : public lps2lts_base
     {
       lps2lts_base::parse_options(parser);
       options.removeunused    = parser.options.count("unused-data") == 0;
-      options.detect_deadlock = parser.options.count("deadlock");
-      options.detect_divergence = parser.options.count("divergence");
+      options.detect_deadlock = parser.options.count("deadlock") != 0;
+      options.detect_divergence = parser.options.count("divergence") != 0;
       options.outinfo         = parser.options.count("no-info") == 0;
-      options.suppress_progress_messages = parser.options.count("suppress");
+      options.suppress_progress_messages = parser.options.count("suppress") !=0;
       options.strat           = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
       if (parser.options.count("dummy")) 
@@ -229,10 +229,10 @@ class lps2lts_tool : public lps2lts_base
 
       if (parser.options.count("bit-hash")) {
         options.bithashing  = true;
-        options.bithashsize = parser.option_argument_as< boost::uint64_t > ("bit-hash");
+        options.bithashsize = parser.option_argument_as< unsigned long > ("bit-hash");
       }
       if (parser.options.count("max")) {
-        options.max_states = parser.option_argument_as< boost::uint64_t > ("max");
+        options.max_states = parser.option_argument_as< unsigned long > ("max");
       }
       if (parser.options.count("action")) {
         options.detect_action = true;

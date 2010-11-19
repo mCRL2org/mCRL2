@@ -33,7 +33,7 @@ bool sequence_contains_duplicates(Iterator first, Iterator last)
   // TODO: this implementation is not particularly efficient
   std::set<typename std::iterator_traits<Iterator>::value_type> s(first, last);
   ptrdiff_t ssize = s.size();
-  return ssize < std::distance(first, last);
+  return ssize < (size_t) std::distance(first, last);
 }
 
 /// \brief Returns true if the two sequences [first1, last1) and [first2, last2) have a non empty intersection.

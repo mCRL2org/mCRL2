@@ -34,7 +34,7 @@ namespace detail
 {
 
 
-typedef unsigned int uint;
+//typedef unsigned int size_t;
 
 template <class LTS_TYPE>
 class sim_partitioner
@@ -67,7 +67,7 @@ class sim_partitioner
      * \pre The simulation equivalence classes have been computed.
      * \return The number of simulation equivalence classes of the LTS.
      */
-    uint num_eq_classes() const;
+    size_t num_eq_classes() const;
 
     /** Gives the equivalence class number of a state.
      * The equivalence class numbers range from 0 upto (and excluding)
@@ -76,7 +76,7 @@ class sim_partitioner
      * \param[in] s A state number.
      * \return The number of the equivalence class to which \e s
      * belongs. */
-    uint get_eq_class(uint s) const;
+    size_t get_eq_class(size_t s) const;
 
     /** Returns whether one state is simulated by another state.
      * \pre The simulation preorder has been computed.
@@ -84,7 +84,7 @@ class sim_partitioner
      * \param[in] t A state number.
      * \retval true if \e s is simulated by \e t;
      * \retval false otherwise. */
-    bool in_preorder(uint s,uint t) const;
+    bool in_preorder(size_t s,size_t t) const;
 
     /** Returns whether two states are in the same simulation
      * equivalence class.
@@ -94,39 +94,39 @@ class sim_partitioner
      * \retval true if \e s and \e t are in the same simulation
      * equivalence class;
      * \retval false otherwise. */
-    bool in_same_class(uint s,uint t) const;
+    bool in_same_class(size_t s,size_t t) const;
 
   private:
     struct state_bucket
     {
-      int next;
-      int prev;
+      size_t next;
+      size_t prev;
     };
 
     LTS_TYPE &aut;
     mcrl2::lts::outgoing_transitions_per_state_action_t trans_index;
-    uint s_Sigma;
-    uint s_Pi;
+    size_t s_Sigma;
+    size_t s_Pi;
     std::vector<bool> state_touched;
     std::vector<bool> block_touched;
     std::vector<state_bucket> state_buckets;
-    std::vector<uint> block_Pi;
-    std::vector<uint> parent;
-    std::vector< std::vector<uint> > children;
-    std::vector<int> contents_t;
-    std::vector<int> contents_u;
+    std::vector<size_t> block_Pi;
+    std::vector<size_t> parent;
+    std::vector< std::vector<size_t> > children;
+    std::vector<size_t> contents_t;
+    std::vector<size_t> contents_u;
     std::vector< std::vector<bool> > stable;
     hash_table3 *exists;
     hash_table3 *forall;
-    std::vector< std::vector<uint> > pre_exists;
-    std::vector< std::vector<uint> > pre_forall;
+    std::vector< std::vector<size_t> > pre_exists;
+    std::vector< std::vector<size_t> > pre_forall;
     hash_table3 *match;
     std::vector< std::vector<bool> > P;
     std::vector< std::vector<bool> > Q;
 
     /* auxiliary variables */
-    std::vector<uint> touched_blocks;
-    std::vector<uint> contents;
+    std::vector<size_t> touched_blocks;
+    std::vector<size_t> contents;
 
     void initialise_datastructures();
     //void read_partition_from_file(char *parfile);
@@ -135,17 +135,17 @@ class sim_partitioner
     void update();
     //void update_lts();
 
-    void touch(uint a,uint alpha);
-    void untouch(uint alpha);
+    void touch(size_t a,size_t alpha);
+    void untouch(size_t alpha);
 
-    void reverse_topological_sort(std::vector<uint> &result);
-    void dfs_visit(uint u,std::vector<bool> &visited,
-        std::vector<uint> &result);
+    void reverse_topological_sort(std::vector<size_t> &result);
+    void dfs_visit(size_t u,std::vector<bool> &visited,
+        std::vector<size_t> &result);
 
-    void initialise_Sigma(uint gamma,uint l);
-    void initialise_Pi(uint gamma,uint l);
-    void filter(uint S,std::vector< std::vector<bool> > &R,bool B);
-    void cleanup(uint alpha,uint beta);
+    void initialise_Sigma(size_t gamma,size_t l);
+    void initialise_Pi(size_t gamma,size_t l);
+    void filter(size_t S,std::vector< std::vector<bool> > &R,bool B);
+    void cleanup(size_t alpha,size_t beta);
     void initialise_pre_EA();
     void induce_P_on_Pi();
 
@@ -153,8 +153,8 @@ class sim_partitioner
     void print_Pi_Q();
     void print_Sigma();
     void print_Pi();
-    void print_relation(uint s,std::vector< std::vector<bool> > &R);
-    void print_block(uint b);
+    void print_relation(size_t s,std::vector< std::vector<bool> > &R);
+    void print_block(size_t b);
     void print_structure(hash_table3 *struc);
 };
 
@@ -189,7 +189,7 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
 
   gsVerboseMsg("  initialisation; number of blocks: %u\n",s_Sigma);
   bool change;
-  uint i;
+  size_t i;
 
   refine(change);
   update();
@@ -245,7 +245,7 @@ void sim_partitioner<LTS_TYPE>::initialise_datastructures()
   // trans_index = aut.get_transition_pre_table();
   trans_index=transitions_per_outgoing_state_action_pair_reversed(aut.get_transitions());
 
-  uint N = aut.num_states();
+  size_t N = aut.num_states();
 
   match  = new hash_table3(1000);
   exists = new hash_table3(1000);
@@ -260,7 +260,7 @@ void sim_partitioner<LTS_TYPE>::initialise_datastructures()
   s_Pi = 1;
   contents_u.push_back(0);
   contents_t.push_back(LIST_END);
-  for (uint i = 0; i < N; ++i)
+  for (size_t i = 0; i < N; ++i)
   {
     if (i > 0)
     {
@@ -284,11 +284,11 @@ void sim_partitioner<LTS_TYPE>::initialise_datastructures()
   s_Sigma = s_Pi;
 
   /* initialise P and children */
-  std::vector<uint> vi;
+  std::vector<size_t> vi;
   children.assign(s_Sigma,vi);
   std::vector<bool> vb(s_Sigma,false);
   P.assign(s_Sigma,vb);
-  for (uint i = 0; i < s_Sigma; ++i)
+  for (size_t i = 0; i < s_Sigma; ++i)
   {
     children[i].push_back(i);
     P[i][i] = true;
@@ -298,21 +298,21 @@ void sim_partitioner<LTS_TYPE>::initialise_datastructures()
 /* ----------------- INITIALISE ------------------------------------- */
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::initialise_Pi(uint gamma,uint l)
+void sim_partitioner<LTS_TYPE>::initialise_Pi(size_t gamma,size_t l)
 {
-  uint alpha, a, c;
-  std::vector<uint>::iterator ci, last;
+  size_t alpha, a, c;
+  std::vector<size_t>::iterator ci, last;
 
   contents.clear();
-  for (int i = contents_u[gamma]; i != LIST_END;
+  for (size_t i = contents_u[gamma]; i != LIST_END;
       i = state_buckets[i].next)
   {
-    contents.push_back(uint(i));
+    contents.push_back(size_t(i));
   }
-  for (int i = contents_t[gamma]; i != LIST_END;
+  for (size_t i = contents_t[gamma]; i != LIST_END;
       i = state_buckets[i].next)
   {
-    contents.push_back(uint(i));
+    contents.push_back(size_t(i));
   }
   last = contents.end();
   for (ci = contents.begin(); ci != last; ++ci)
@@ -340,9 +340,9 @@ void sim_partitioner<LTS_TYPE>::initialise_Pi(uint gamma,uint l)
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::initialise_Sigma(uint gamma,uint l)
+void sim_partitioner<LTS_TYPE>::initialise_Sigma(size_t gamma,size_t l)
 {
-  std::vector<uint>::iterator deltai, last;
+  std::vector<size_t>::iterator deltai, last;
   last = children[gamma].end();
   for (deltai = children[gamma].begin(); deltai != last; ++deltai)
   {
@@ -358,10 +358,10 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
 {
   using namespace mcrl2::core;
   /* Initialise the parent and children functions */
-  std::vector<uint> v;
+  std::vector<size_t> v;
   children.assign(s_Pi,v);
   parent.assign(s_Pi,0);
-  uint alpha;
+  size_t alpha;
   for (alpha = 0; alpha < s_Pi; ++alpha)
   {
     children[alpha].push_back(alpha);
@@ -375,14 +375,14 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
   }
 
   /* Compute a reverse topological sorting of Sigma w.r.t. P */
-  std::vector<uint> Sort;
+  std::vector<size_t> Sort;
   Sort.reserve(s_Sigma);
   reverse_topological_sort(Sort);
 
   if (gsDebug)
   {
     gsMessage("reverse topological sort is: [");
-    for (uint i = 0; i < Sort.size(); ++i)
+    for (size_t i = 0; i < Sort.size(); ++i)
     {
       gsMessage("%u",Sort[i]);
       if (i+1 < Sort.size())
@@ -395,11 +395,11 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
 
   /* Some local variables */
   std::vector<bool> v_false(s_Sigma,false);
-  std::vector<uint>::iterator alphai, last, gammai;
+  std::vector<size_t>::iterator alphai, last, gammai;
   std::vector< std::vector<bool> >::iterator stable_alpha, P_gamma;
   bool stable_alpha_gamma;
-  uint gamma, delta, l;
-  int i;
+  size_t gamma, delta, l;
+  size_t i;
 
   /* The main loop */
   for (l = 0; l < aut.num_action_labels(); ++l)
@@ -474,10 +474,10 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::reverse_topological_sort(std::vector<uint> &Sort)
+void sim_partitioner<LTS_TYPE>::reverse_topological_sort(std::vector<size_t> &Sort)
 {
   std::vector<bool> visited(s_Sigma,false);
-  for (uint u = 0; u < s_Sigma; ++u)
+  for (size_t u = 0; u < s_Sigma; ++u)
   {
     if (!visited[u])
     {
@@ -487,11 +487,11 @@ void sim_partitioner<LTS_TYPE>::reverse_topological_sort(std::vector<uint> &Sort
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::dfs_visit(uint u,std::vector<bool> &visited,
-    std::vector<uint> &Sort)
+void sim_partitioner<LTS_TYPE>::dfs_visit(size_t u,std::vector<bool> &visited,
+    std::vector<size_t> &Sort)
 {
   visited[u] = true;
-  for (uint v = 0; v < s_Sigma; ++v)
+  for (size_t v = 0; v < s_Sigma; ++v)
   {
     if (!visited[v] && P[u][v])
     {
@@ -502,11 +502,11 @@ void sim_partitioner<LTS_TYPE>::dfs_visit(uint u,std::vector<bool> &visited,
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::touch(uint a,uint alpha)
+void sim_partitioner<LTS_TYPE>::touch(size_t a,size_t alpha)
 {
   state_touched[a] = true;
-  int p = state_buckets[a].prev;
-  int n = state_buckets[a].next;
+  size_t p = state_buckets[a].prev;
+  size_t n = state_buckets[a].next;
   if (p == LIST_END)
   {
     contents_u[alpha] = n;
@@ -530,11 +530,11 @@ void sim_partitioner<LTS_TYPE>::touch(uint a,uint alpha)
 
 /* PRE: contents_t[alpha] != LIST_END */
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::untouch(uint alpha)
+void sim_partitioner<LTS_TYPE>::untouch(size_t alpha)
 {
   // search linearly for the last element of contents_t[alpha];
   // untouch every state we encounter along the way
-  int i = contents_t[alpha];
+  size_t i = contents_t[alpha];
   while (state_buckets[i].next != LIST_END)
   {
     state_touched[i] = false;
@@ -566,8 +566,8 @@ void sim_partitioner<LTS_TYPE>::update()
     gsMessage("--------------------- Update ---------------------------------------\n");
   }
 
-  uint l,alpha,gamma;
-  std::vector<uint>::iterator alphai, last;
+  size_t l,alpha,gamma;
+  std::vector<size_t>::iterator alphai, last;
 
   induce_P_on_Pi();
 
@@ -662,7 +662,7 @@ void sim_partitioner<LTS_TYPE>::initialise_pre_EA()
   /* Initialise the pre_exists and pre_forall data structures */
   exists->clear();
   forall->clear();
-  std::vector<uint> v;
+  std::vector<size_t> v;
   pre_exists.assign(aut.num_action_labels(),v);
   pre_forall.assign(aut.num_action_labels(),v);
 }
@@ -674,7 +674,7 @@ void sim_partitioner<LTS_TYPE>::induce_P_on_Pi()
   std::vector<bool> v(s_Pi,false);
   Q.assign(s_Pi,v);
 
-  uint alpha,beta;
+  size_t alpha,beta;
   std::vector< std::vector<bool> >::iterator P_parent_alpha;
   for (alpha = 0; alpha < s_Pi; ++alpha)
   {
@@ -690,13 +690,13 @@ void sim_partitioner<LTS_TYPE>::induce_P_on_Pi()
 /* ----------------- FILTER ----------------------------------------- */
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::filter(uint S,std::vector< std::vector<bool> > &R,
+void sim_partitioner<LTS_TYPE>::filter(size_t S,std::vector< std::vector<bool> > &R,
     bool B)
 {
   /* Initialise the match function */
   match->clear();
 
-  uint alpha,beta,gamma,delta,l;
+  size_t alpha,beta,gamma,delta,l;
   hash_table3_iterator etrans(exists);
   for (l = 0; l < aut.num_action_labels(); ++l)
   {
@@ -746,9 +746,9 @@ void sim_partitioner<LTS_TYPE>::filter(uint S,std::vector< std::vector<bool> > &
 /* ----------------- CLEANUP ---------------------------------------- */
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::cleanup(uint alpha,uint beta)
+void sim_partitioner<LTS_TYPE>::cleanup(size_t alpha,size_t beta)
 {
-  uint l,alpha1,beta1,delta;
+  size_t l,alpha1,beta1,delta;
   bool match_l_beta1_alpha;
   hash_table3_iterator alpha1i(forall);
   hash_table3_iterator beta1i(exists);
@@ -838,25 +838,25 @@ std::vector < mcrl2::lts::transition> sim_partitioner<LTS_TYPE>::get_transitions
 }
 
 template <class LTS_TYPE>
-uint sim_partitioner<LTS_TYPE>::num_eq_classes() const
+size_t sim_partitioner<LTS_TYPE>::num_eq_classes() const
 {
   return s_Pi;
 }
 
 template <class LTS_TYPE>
-uint sim_partitioner<LTS_TYPE>::get_eq_class(uint s) const
+size_t sim_partitioner<LTS_TYPE>::get_eq_class(size_t s) const
 {
   return block_Pi[s];
 }
 
 template <class LTS_TYPE>
-bool sim_partitioner<LTS_TYPE>::in_preorder(uint s,uint t) const
+bool sim_partitioner<LTS_TYPE>::in_preorder(size_t s,size_t t) const
 {
   return Q[block_Pi[s]][block_Pi[t]];
 }
 
 template <class LTS_TYPE>
-bool sim_partitioner<LTS_TYPE>::in_same_class(uint s,uint t) const
+bool sim_partitioner<LTS_TYPE>::in_same_class(size_t s,size_t t) const
 {
   return (block_Pi[s] == block_Pi[t]);
 }
@@ -865,11 +865,11 @@ bool sim_partitioner<LTS_TYPE>::in_same_class(uint s,uint t) const
 // PRE: FORALL and EXISTS structures on Pi are computed
 void sim_partitione<LTS_TYPE>r::update_nfa()
 {
-  std::vector< std::vector<uint> > v(s_Pi);
-  std::vector< std::vector< std::vector<uint> > > post_trans(L,v);
+  std::vector< std::vector<size_t> > v(s_Pi);
+  std::vector< std::vector< std::vector<size_t> > > post_trans(L,v);
 
   std::vector<bool> pre_sim;
-  uint l,beta,alpha,gamma;
+  size_t l,beta,alpha,gamma;
   hash_table3_iterator alphai(exists);
   hash_table3_iterator gammai(forall);
   for (beta = 0; beta < s_Pi; ++beta)
@@ -912,13 +912,13 @@ void sim_partitione<LTS_TYPE>r::update_nfa()
 
   // Do a breadth first search over the computed graph to assign ids to
   // the reachable blocks and construct the final transition relation
-  std::vector<uint>::iterator post_it,post_last;
-  std::queue<uint> todo;
-  std::vector<uint> block_id(s_Pi,s_Pi);
+  std::vector<size_t>::iterator post_it,post_last;
+  std::queue<size_t> todo;
+  std::vector<size_t> block_id(s_Pi,s_Pi);
   todo.push(block_Pi[aut.initial_state()]);
   block_id[block_Pi[aut.initial_state()]] = 0;
-  uint n_s = 1;
-  uint n_f = 0;
+  size_t n_s = 1;
+  size_t n_f = 0;
   if (aut.is_final(aut.initial_state()))
   {
     final->push_back(true);
@@ -1014,8 +1014,8 @@ template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::print_Sigma()
 {
   using namespace mcrl2::core;
-  std::vector<uint>::iterator ci, last;
-  for (uint b = 0; b < s_Sigma; ++b)
+  std::vector<size_t>::iterator ci, last;
+  for (size_t b = 0; b < s_Sigma; ++b)
   {
     gsMessage("block %u: {",b);
     last = children[b].end();
@@ -1031,7 +1031,7 @@ template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::print_Pi()
 {
   using namespace mcrl2::core;
-  for (uint b = 0; b < s_Pi; ++b)
+  for (size_t b = 0; b < s_Pi; ++b)
   {
     gsMessage("block %u: {",b);
     print_block(b);
@@ -1040,26 +1040,26 @@ void sim_partitioner<LTS_TYPE>::print_Pi()
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_block(uint b)
+void sim_partitioner<LTS_TYPE>::print_block(size_t b)
 {
   using namespace mcrl2::core;
-  for (int i = contents_u[b]; i != LIST_END; i = state_buckets[i].next)
+  for (size_t i = contents_u[b]; i != LIST_END; i = state_buckets[i].next)
   {
     gsMessage("%d,",i);
   }
-  for (int i = contents_t[b]; i != LIST_END; i = state_buckets[i].next)
+  for (size_t i = contents_t[b]; i != LIST_END; i = state_buckets[i].next)
   {
     gsMessage("%d,",i);
   }
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_relation(uint s,
+void sim_partitioner<LTS_TYPE>::print_relation(size_t s,
     std::vector< std::vector<bool> > &R)
 {
   using namespace mcrl2::core;
   gsMessage("{");
-  uint beta,gamma;
+  size_t beta,gamma;
   for (beta = 0; beta < s; ++beta)
   {
     for (gamma = 0; gamma < s; ++gamma)

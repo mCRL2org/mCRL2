@@ -59,9 +59,9 @@ namespace mcrl2 {
           // Read in rgb-value of texture
           int count = 0;
 
-          for (size_t h = 0; h < CHARHEIGHT; ++h)
+          for (int h = 0; h < CHARHEIGHT; ++h)
           {
-            for (size_t w = 0; w < CHARWIDTH; ++w)
+            for (int w = 0; w < CHARWIDTH; ++w)
             {
               red   = (GLubyte)image.GetRed(w, h);
               green = (GLubyte)image.GetGreen(w, h);

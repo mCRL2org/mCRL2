@@ -33,19 +33,19 @@ namespace mcrl2
         outgoing_transitions_per_state_t;
 
     /// \brief From state of an iterator exploring transitions per outgoing state.
-    inline unsigned int from(const outgoing_transitions_per_state_t::const_iterator &i)
+    inline size_t from(const outgoing_transitions_per_state_t::const_iterator &i)
     {
       return i->first;
     }
 
     /// \brief Label of an iterator exploring transitions per outgoing state.
-    inline unsigned int label(const outgoing_transitions_per_state_t::const_iterator &i)
+    inline size_t label(const outgoing_transitions_per_state_t::const_iterator &i)
     {
       return i->second.first;
     }
 
     /// \brief To state of an iterator exploring transitions per outgoing state.
-    inline unsigned int to(const outgoing_transitions_per_state_t::const_iterator &i)
+    inline size_t to(const outgoing_transitions_per_state_t::const_iterator &i)
     {
       return i->second.second;
     }
@@ -83,19 +83,19 @@ namespace mcrl2
         outgoing_transitions_per_state_action_t;
 
     /// \brief From state of an iterator exploring transitions per outgoing state and action.
-    inline unsigned int from(const outgoing_transitions_per_state_action_t::const_iterator &i)
+    inline size_t from(const outgoing_transitions_per_state_action_t::const_iterator &i)
     {
       return i->first.first;
     }
 
     /// \brief Label of an iterator exploring transitions per outgoing state and action.
-    inline unsigned int label(const outgoing_transitions_per_state_action_t::const_iterator &i)
+    inline size_t label(const outgoing_transitions_per_state_action_t::const_iterator &i)
     {
       return i->first.second;
     }
 
     /// \brief To state of an iterator exploring transitions per outgoing state and action.
-    inline unsigned int to(const outgoing_transitions_per_state_action_t::const_iterator &i)
+    inline size_t to(const outgoing_transitions_per_state_action_t::const_iterator &i)
     {
       return i->second;
     }

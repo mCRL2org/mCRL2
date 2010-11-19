@@ -474,17 +474,17 @@ namespace mcrl2
          * [ \e A[\e s] .. \e A[<em>s</em>+1] )
          * are all transitions of which \e s is the source state. 
          * \note Deprecated */
-        unsigned int*
+        size_t*
         get_transition_indices()
         {
-          unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
+          size_t *A = (size_t*)malloc((nstates+1)*sizeof(size_t));
           if (A == NULL) 
           {
             throw mcrl2::runtime_error("Out of memory.");
           }
-          unsigned int t = 0;
+          size_t t = 0;
           A[0] = 0;
-          for (unsigned int s = 1; s <= nstates; ++s) {
+          for (size_t s = 1; s <= nstates; ++s) {
             while (t < num_transitions() && transitions[t].from() == s-1) {
               ++t;
             }

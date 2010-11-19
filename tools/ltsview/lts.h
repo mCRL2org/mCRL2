@@ -35,7 +35,7 @@ class Cluster_iterator
     virtual bool is_end();
   protected:
     int rank;
-    unsigned int cluster;
+    size_t cluster;
     LTS *lts;
     bool is_valid();
     virtual void next();
@@ -88,16 +88,16 @@ class LTS
     int getNumStates() const;
     int getNumTransitions() const;
 
-    unsigned int getNumParameters() const;
-    // atermpp::set<ATermAppl> getParameterDomain(unsigned int parindex);
-    std::vector<std::string> getParameterDomain(unsigned int parindex);
-    std::string getParameterName(unsigned int parindex) ;
-    // ATerm getStateParameterValue(State* state,unsigned int param);
-    unsigned int getStateParameterValue(State* state,unsigned int param);
+    size_t getNumParameters() const;
+    // atermpp::set<ATermAppl> getParameterDomain(size_t parindex);
+    std::vector<std::string> getParameterDomain(size_t parindex);
+    std::string getParameterName(size_t parindex) ;
+    // ATerm getStateParameterValue(State* state,size_t param);
+    size_t getStateParameterValue(State* state,size_t param);
     std::string getStateParameterValueStr(State* state,
-        unsigned int param);
-    // atermpp::set<ATerm> getClusterParameterValues(Cluster* c, unsigned int param);
-    std::set<std::string> getClusterParameterValues(Cluster* c, unsigned int param);
+        size_t param);
+    // atermpp::set<ATerm> getClusterParameterValues(Cluster* c, size_t param);
+    std::set<std::string> getClusterParameterValues(Cluster* c, size_t param);
     // std::string prettyPrintParameterValue(ATerm parvalue);
 
     State* selectStateByID(int id);

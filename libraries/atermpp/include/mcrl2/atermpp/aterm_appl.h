@@ -208,7 +208,7 @@ namespace atermpp
       /// \param t A term
       /// \param i A positive integer
       /// \return The term with one of its arguments replaced.
-      term_appl<Term> set_argument(Term t, unsigned int i)
+      term_appl<Term> set_argument(Term t, size_t i)
       {
         return ATsetArgument(appl(), t, i);
       }
@@ -217,7 +217,7 @@ namespace atermpp
       /// \deprecated
       /// \param i A positive integer
       /// \return The argument with the given index.
-      aterm argument(unsigned int i) const
+      aterm argument(size_t i) const
       {
         return aterm(ATgetArgument(appl(), i));
       }

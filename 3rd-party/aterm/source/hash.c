@@ -524,7 +524,7 @@ ATerm ATindexedSetGetElem(ATermIndexedSet hashset, long index)
 
 /*{{{  ATermTable ATtableCreate(long initial_size, int max_load_pct) */
 
-ATermTable ATtableCreate(long initial_size, int max_load_pct)
+ATermTable ATtableCreate(int64_t initial_size, int max_load_pct)
 { 
   ATermTable hashtable;
 

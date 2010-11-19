@@ -57,7 +57,7 @@ namespace lts
       // in this ATermAppl array, as they are automatically protected.
       static atermpp::vector < ATermAppl > vector_templates;
 
-      static AFun get_STATE_function_symbol(const unsigned int arity)
+      static AFun get_STATE_function_symbol(const size_t arity)
       { 
         if (arity>=vector_templates.size())
         { 
@@ -67,7 +67,7 @@ namespace lts
         { 
           ATermAppl stub=ATmakeAppl0(ATmakeAFun("STUB",0,ATfalse));
           ATermList l=ATempty;
-          for(unsigned int i=0;i<arity;++i)
+          for(size_t i=0;i<arity;++i)
           { 
             l=ATinsert(l,(ATerm)stub);
           }
@@ -84,7 +84,7 @@ namespace lts
 
       state_label_lts(const ATermAppl &a):atermpp::aterm_appl(a)
       { 
-        const unsigned int arity=ATgetArity(ATgetAFun(a));
+        const size_t arity=ATgetArity(ATgetAFun(a));
         get_STATE_function_symbol(arity); // Create the STATE function symbol with the desired arity.
         assert(ATgetAFun(a)==ATgetAFun(vector_templates[arity]));
       }
@@ -97,13 +97,13 @@ namespace lts
                      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
       {} 
 
-      element_type operator [](const unsigned int i) const
+      element_type operator [](const size_t i) const
       {
         assert(i<size());
         return element_type(this->argument(i));
       }
 
-      void set_element(const element_type &e, unsigned int i)
+      void set_element(const element_type &e, size_t i)
       {
         assert(i<this->size());
         set_argument(e,i);
@@ -124,7 +124,7 @@ namespace lts
   {
     std::string s;
     s = "(";
-    for(unsigned int i=0; i<l.size(); ++i)
+    for(size_t i=0; i<l.size(); ++i)
     { 
       s += core::pp(l[i]);
       if ( i+1<l.size())
@@ -406,7 +406,7 @@ namespace lts
       /** \brief Returns the i-th parameter of the state vectors stored in this LTS.
        * \return The state parameters stored in this LTS.
       */
-      data::variable process_parameter(unsigned int i) const
+      data::variable process_parameter(size_t i) const
       { 
         assert(i<m_parameters.size());
         assert(m_has_valid_parameters);

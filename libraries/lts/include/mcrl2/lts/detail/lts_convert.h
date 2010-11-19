@@ -120,13 +120,13 @@ namespace detail
   class lts_fsm_convertor
   {
     private:
-      std::vector < atermpp::map <data::data_expression , unsigned int > > state_element_values_sets;
+      std::vector < atermpp::map <data::data_expression , size_t > > state_element_values_sets;
       lts_fsm_t &lts_out;
 
     public:
-      lts_fsm_convertor(unsigned int n, lts_fsm_t &l):
-              state_element_values_sets(std::vector < atermpp::map <data::data_expression , unsigned int > >
-                       (n,atermpp::map <data::data_expression , unsigned int >())),
+      lts_fsm_convertor(size_t n, lts_fsm_t &l):
+              state_element_values_sets(std::vector < atermpp::map <data::data_expression , size_t > >
+                       (n,atermpp::map <data::data_expression , size_t >())),
               lts_out(l)
       {
       }
@@ -139,14 +139,14 @@ namespace detail
       state_label_fsm translate_state(const state_label_lts &l) 
       { 
       
-        std::vector < unsigned int > result;
-        for(unsigned int i=0; i<l.size(); ++i)
+        std::vector < size_t > result;
+        for(size_t i=0; i<l.size(); ++i)
         { 
           const data::data_expression t=l[i];
-          atermpp::map <data::data_expression , unsigned int >::const_iterator index=state_element_values_sets[i].find(t);
+          atermpp::map <data::data_expression , size_t >::const_iterator index=state_element_values_sets[i].find(t);
           if (index==state_element_values_sets[i].end())
           {
-            const unsigned int element_index=state_element_values_sets[i].size();
+            const size_t element_index=state_element_values_sets[i].size();
             result.push_back(element_index);
             lts_out.add_state_element_value(i,core::pp(t));
             state_element_values_sets[i][t]=element_index;
@@ -277,7 +277,7 @@ namespace detail
 
   class lts_dot_convertor
   {
-    unsigned int m_state_count;
+    size_t m_state_count;
 
     public:
 
@@ -745,7 +745,7 @@ namespace detail
       state_label_lts translate_state(const state_label_fsm &l) const
       {
         atermpp::vector < data::data_expression > state_label;
-        unsigned int idx=0;
+        size_t idx=0;
         const data::variable_list &parameters=m_lts_out.process_parameters();
         data::variable_list::const_iterator parameter_iterator=parameters.begin();
         for(state_label_fsm::const_iterator i=l.begin(); i!=l.end(); ++i, ++parameter_iterator, ++idx)
@@ -905,7 +905,7 @@ namespace detail
   class fsm_dot_convertor
   {
     private: 
-      unsigned int m_state_count;
+      size_t m_state_count;
       const lts_fsm_t &m_lts_in;
     
     public:
@@ -928,7 +928,7 @@ namespace detail
         if (!l.empty())
         { 
           state_label="(";
-          for(unsigned int i=0; i<l.size(); ++i)
+          for(size_t i=0; i<l.size(); ++i)
           {
             state_label=state_label + m_lts_in.state_element_value(i,l[i])+(i+1==l.size()?")":",");
           }
@@ -1201,13 +1201,13 @@ namespace detail
   class dot_lts_convertor
   {
     private:
-      std::vector < atermpp::map <std::string , unsigned int > > state_element_values_sets;
+      std::vector < atermpp::map <std::string , size_t > > state_element_values_sets;
       const lts_lts_t &lts_out;
 
     public:
       dot_lts_convertor(lts_lts_t &l):
-              state_element_values_sets(std::vector < atermpp::map <std::string , unsigned int > >
-                       (2,atermpp::map <std::string , unsigned int >())),
+              state_element_values_sets(std::vector < atermpp::map <std::string , size_t > >
+                       (2,atermpp::map <std::string , size_t >())),
               lts_out(l)
       {
       }
@@ -1319,13 +1319,13 @@ namespace detail
   class dot_fsm_convertor
   {
     private:
-      std::vector < atermpp::map <std::string , unsigned int > > state_element_values_sets;
+      std::vector < atermpp::map <std::string , size_t > > state_element_values_sets;
       lts_fsm_t &lts_out;
 
     public:
       dot_fsm_convertor(lts_fsm_t &l):
-              state_element_values_sets(std::vector < atermpp::map <std::string , unsigned int > >
-                       (2,atermpp::map <std::string , unsigned int >())),
+              state_element_values_sets(std::vector < atermpp::map <std::string , size_t > >
+                       (2,atermpp::map <std::string , size_t >())),
               lts_out(l)
       {
       }
@@ -1337,12 +1337,12 @@ namespace detail
 
       state_label_fsm translate_state(const state_label_dot &l)
       {
-        std::vector < unsigned int > result;
+        std::vector < size_t > result;
         const std::string state=l.name();
-        atermpp::map <std::string , unsigned int >::const_iterator index=state_element_values_sets[0].find(state);
+        atermpp::map <std::string , size_t >::const_iterator index=state_element_values_sets[0].find(state);
         if (index==state_element_values_sets[0].end())
         {
-          const unsigned int element_index=state_element_values_sets[0].size();
+          const size_t element_index=state_element_values_sets[0].size();
           result.push_back(element_index);
           lts_out.add_state_element_value(0,state);
           state_element_values_sets[0][state]=element_index;
@@ -1355,7 +1355,7 @@ namespace detail
         index=state_element_values_sets[1].find(state);
         if (index==state_element_values_sets[1].end())
         {
-          const unsigned int element_index=state_element_values_sets[1].size();
+          const size_t element_index=state_element_values_sets[1].size();
           result.push_back(element_index);
           lts_out.add_state_element_value(1,state);
           state_element_values_sets[1][label]=element_index;
@@ -1474,7 +1474,7 @@ namespace detail
   {
     if (lts_in.has_state_info())
     { 
-      for(unsigned int i=0; i<lts_in.num_states(); ++i)
+      for(size_t i=0; i<lts_in.num_states(); ++i)
       { 
         lts_out.add_state(c.translate_state(lts_in.state_label(i)));
       }
@@ -1484,7 +1484,7 @@ namespace detail
       lts_out.set_num_states(lts_in.num_states(),false);
     }
 
-    for(unsigned int i=0; i<lts_in.num_action_labels(); ++i)
+    for(size_t i=0; i<lts_in.num_action_labels(); ++i)
     { 
       lts_out.add_action(c.translate_label(lts_in.action_label(i)));
       if (lts_in.is_tau(i))

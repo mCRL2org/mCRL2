@@ -38,7 +38,7 @@ namespace lts
                  Each integer i at position j in the vector corresponds with the string
                  m_state_element_values[j][i].
     */
-    class state_label_fsm: public std::vector < unsigned int >
+    class state_label_fsm:  public std::vector < size_t >
     {
       public:
         /* \brief Default constructor. The label becomes an empty vector.
@@ -48,8 +48,8 @@ namespace lts
 
         /* \brief Default constructor. The label is set to the vector v.
         */
-        state_label_fsm(const std::vector < unsigned int >& v):
-                                     std::vector < unsigned int >(v)
+        state_label_fsm(const std::vector < size_t >& v):
+                                     std::vector < size_t >(v)
         {}
     };
 
@@ -82,7 +82,7 @@ namespace lts
       /** \brief Provides the vector of strings that correspond to the values
                  of the number at position idx in a vector.
       */
-      std::vector < std::string > state_element_values(unsigned int idx) const
+      std::vector < std::string > state_element_values(size_t idx) const
       { 
         assert(idx<m_state_element_values.size());
         return m_state_element_values[idx];
@@ -91,7 +91,7 @@ namespace lts
       /** \brief Adds a string to the state element values for the idx-th 
                  position in a state vector. Returns the number given to this string.
       */
-      unsigned int add_state_element_value(unsigned int idx, const std::string &s) 
+      size_t add_state_element_value(size_t idx, const std::string &s) 
       { 
         if (idx>=m_state_element_values.size())
         { 
@@ -104,7 +104,7 @@ namespace lts
       /** \brief Returns the element-index'th element for the parameter with index
                  parameter_index.
       */
-      std::string state_element_value(unsigned int parameter_index, unsigned int element_index) const
+      std::string state_element_value(size_t parameter_index, size_t element_index) const
       { 
         assert(parameter_index<m_state_element_values.size());
         assert(element_index<m_state_element_values[parameter_index].size());
@@ -122,7 +122,7 @@ namespace lts
       /** \brief Returns the i-th parameter of the state vectors stored in this LTS.
        * \return The state parameters stored in this LTS.
       */
-      std::pair < std::string, std::string > process_parameter(unsigned int i) const
+      std::pair < std::string, std::string > process_parameter(size_t i) const
       {
         assert(i<m_parameters.size());
         return m_parameters[i];

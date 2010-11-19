@@ -129,7 +129,7 @@ class bisim_partitioner
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
      *  \return The number of bisimulation equivalence classes of the LTS.
      */
-    unsigned int num_eq_classes() const
+    size_t num_eq_classes() const
     { 
       return max_state_index;
     }
@@ -138,7 +138,7 @@ class bisim_partitioner
     /** \brief Gives the bisimulation equivalence class number of a state.
      *  \param[in] s A state number.
      *  \return The number of the bisimulation equivalence class to which \e s belongs. */
-    unsigned int get_eq_class(const unsigned int s) const
+    size_t get_eq_class(const size_t s) const
     { 
       assert(s<block_index_of_a_state.size());
       return blocks[block_index_of_a_state[s]].state_index;
@@ -150,7 +150,7 @@ class bisim_partitioner
      *  \param[in] t A state number.
      *  \retval true if \e s and \e t are in the same bisimulation equivalence class;
      *  \retval false otherwise. */
-    bool in_same_class(const unsigned int s, const unsigned int t) const
+    bool in_same_class(const size_t s, const size_t t) const
     { 
       return get_eq_class(s)==get_eq_class(t);
     }
@@ -166,13 +166,13 @@ class bisim_partitioner
      *  \param[in] t A state number.
      *  \param[in] branching_bisimulation A boolean indicating whether the branching bisimulation partitioner has been used.
      *  \return A vector containing counter traces. */
-    std::set < mcrl2::trace::Trace > counter_traces(const unsigned int s, const unsigned int t, const bool branching_bisimulation);
+    std::set < mcrl2::trace::Trace > counter_traces(const size_t s, const size_t t, const bool branching_bisimulation);
 
   private:
 
-    typedef unsigned int block_index_type;
-    typedef unsigned int state_type;
-    typedef unsigned int label_type;
+    typedef size_t block_index_type;
+    typedef size_t state_type;
+    typedef size_t label_type;
 
     state_type max_state_index;
     LTS_TYPE &aut;
@@ -350,8 +350,8 @@ class bisim_partitioner
     void refine_partition_until_it_becomes_stable(const bool branching, const bool preserve_divergence)
     {
 #ifndef NDEBUG
-      unsigned int consistency_check_counter=1;
-      unsigned int consistency_check_barrier=1;
+      size_t consistency_check_counter=1;
+      size_t consistency_check_barrier=1;
 #endif
       bool partition_is_unstable=true; // This boolean indicates that the partition becomes unstable
                                         // because an inert transition becomes non inert.
@@ -390,7 +390,7 @@ class bisim_partitioner
         // the blocks and the non_inert_transitions can move around in memory. This makes it
         // unsafe to use interators.
   
-        for(unsigned int i=0; i<blocks[splitter_index].non_inert_transitions.size(); ++i) 
+        for(size_t i=0; i<blocks[splitter_index].non_inert_transitions.size(); ++i) 
         { 
           // The flag of the starting state of *i is raised and its block is added to BL;
   
@@ -472,7 +472,7 @@ class bisim_partitioner
             
           if (core::gsDebug)
           { 
-            const unsigned int m=pow(10,floor(log10( static_cast<double>( (blocks.size()+1)/2))));
+            const size_t m=pow(10,floor(log10( static_cast<double>( (blocks.size()+1)/2))));
             if ((blocks.size()+1)/2 % m==0) 
             { 
               std::cerr << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << "\n";
@@ -817,7 +817,7 @@ class bisim_partitioner
               new_counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,ATfalse)));
               mcrl2::trace::Trace old_counter_trace=*j; 
               old_counter_trace.resetPosition();
-              for(unsigned int k=0 ; k< old_counter_trace.getLength(); k++)
+              for(size_t k=0 ; k< old_counter_trace.getLength(); k++)
               { 
                 new_counter_trace.addAction(old_counter_trace.nextAction());
               }
@@ -904,7 +904,7 @@ class bisim_partitioner
                               const bool preserve_divergence) const
     { 
       state_type total_number_of_states=0;
-      unsigned int total_number_of_transitions=0;
+      size_t total_number_of_transitions=0;
   
       assert(!blocks.empty());
       std::set < block_index_type > block_indices;
@@ -1101,8 +1101,8 @@ class bisim_partitioner
 
   template < class LTS_TYPE>
   std::set < mcrl2::trace::Trace > bisim_partitioner<LTS_TYPE>::counter_traces(
-                                           const unsigned int s, 
-                                           const unsigned int t,
+                                           const size_t s, 
+                                           const size_t t,
                                            const bool branching_bisimulation)
   { 
     if (get_eq_class(s)==get_eq_class(t))
@@ -1164,7 +1164,7 @@ class bisim_partitioner
               const bool preserve_divergences /*=false*/,
               const bool generate_counter_examples /* = false */)
   { 
-    unsigned int init_l2 = l2.initial_state() + l1.num_states();
+    size_t init_l2 = l2.initial_state() + l1.num_states();
     mcrl2::lts::detail::merge(l1,l2);
     l2.clear(); // No use for l2 anymore.
 
@@ -1183,7 +1183,7 @@ class bisim_partitioner
     if (generate_counter_examples && !bisim_part.in_same_class(l1.initial_state(),init_l2))
     { 
       std::set < mcrl2::trace::Trace > counter_example_traces=bisim_part.counter_traces(l1.initial_state(),init_l2,branching);
-      unsigned int count=0;
+      size_t count=0;
       for(std::set < mcrl2::trace::Trace >::const_iterator i=counter_example_traces.begin();
                  i!=counter_example_traces.end(); ++i,++count)
       { 
@@ -1198,7 +1198,7 @@ class bisim_partitioner
   }
 
   template < class LTS_TYPE>
-  unsigned int determine_tau_label(const LTS_TYPE &l)
+  size_t determine_tau_label(const LTS_TYPE &l)
   {
     // Set the tau_label to an existing label, if possible.
     // Preference goes to a label which has name "tau".
@@ -1206,8 +1206,8 @@ class bisim_partitioner
     // label be superseded by "tau". If nothing is found the tau
     // label becomes l.num_action_labels, but there will not be a tau
     // anyhow in this case.
-    unsigned int tau_label=l.num_action_labels();
-    for(unsigned int i=0; i<l.num_action_labels(); ++i)
+    size_t tau_label=l.num_action_labels();
+    for(size_t i=0; i<l.num_action_labels(); ++i)
     {
       if (l.is_tau(i))
       {
