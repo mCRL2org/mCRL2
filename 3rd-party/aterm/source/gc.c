@@ -1155,7 +1155,7 @@ void AT_collect()
 #endif
 
   FILE *file = gc_f;
-  int size;
+  unsigned int size;
 
       /* snapshop*/
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
@@ -1205,7 +1205,7 @@ void AT_collect_minor()
   clock_t user;
 #endif
   FILE *file = gc_f;
-  int size;
+  unsigned int size;
 
       /* snapshop*/
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
