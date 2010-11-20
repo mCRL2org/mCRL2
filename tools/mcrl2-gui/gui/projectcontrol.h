@@ -265,7 +265,8 @@ public:
       m_notebookpanel->AddPage(wp, this->GetPath(), true);
     }
 
-	void OnRightClick(wxTreeEvent& /*evt*/) {
+	void OnRightClick(wxTreeEvent& evt) {
+	  evt.Skip();
 		DisplayMenu();
 	}
 
