@@ -276,13 +276,10 @@ class lts2lps_tool : public input_output_tool
                                                           assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
       const lps::specification spec(l.data(),l.action_labels(),global_variables,lps,initial_process);
 
-      // atermpp::vector <multi_action>::const_iterator multi_action_iterator=all_multi_actions.begin();
-      // for(mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1),++multi_action_iterator)
       for(mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1))
       {
         const transition t=r.front();
-        // const lps::multi_action actions=lps::multi_action(mcrl2::data::detail::internal_format_conversion_list(multi_action_iterator->actions(),spec.data()));
-        const lps::multi_action actions=l.action_label(t.label()).label();
+        const lps::multi_action actions=l.action_label(t.label());
         
         assignment_list assignments;
         if (t.from()!=t.to())

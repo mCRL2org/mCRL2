@@ -10,33 +10,17 @@
 
 #include <string>
 #include <sstream>
-#include "boost/cstdint.hpp"
-#include "aterm2.h"
 #include "svc/svc.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/core/parse.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/typecheck.h"
-#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lts/lts_lts.h"
 
 
-using namespace mcrl2::core;
+using namespace std;
 using namespace mcrl2;
+using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data::detail;
-
-#define ATisAppl(x) (ATgetType(x) == AT_APPL)
-#define ATisList(x) (ATgetType(x) == AT_LIST)
-
-using namespace std;
-using namespace mcrl2::lts;
-
 
 static void read_from_lts(lts_lts_t &l, string const& filename)
 {
@@ -48,8 +32,6 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
   {
     throw mcrl2::runtime_error("cannot open lts file '" + filename + "' for reading.");
   }
-
-  l.set_creator(SVCgetCreator(&f));
 
   string svc_type = SVCgetType(&f);
   if ( svc_type == "mCRL2" )
@@ -120,7 +102,7 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
                       "does not appear to contain datatypes, action declarations and process parameters.";
   FILE *g = fopen(filename.c_str(),"rb");
   if ( (g == NULL) ||
-       (fseek(g,-(12+sizeof(boost::uint64_t)),SEEK_END) != 0) )
+       (fseek(g,-(12+8),SEEK_END) != 0) )
   {
     throw mcrl2::runtime_error(error_message);
   } 
@@ -136,7 +118,7 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
       if ( !strncmp(((char *) buf)+8,"   1STL2LRCm",12) )
       {
         ATerm data;
-        boost::uint64_t position = 0;
+        unsigned long position = 0;
         for (unsigned int i=0; i<8; i++)
         {
           position = position*0x100 + buf[7-i];
@@ -249,25 +231,17 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
     SVCsetType(&f,const_cast < char* > ("mCRL2"));
   }
 
-  if ( l.creator() == "" )
-  {
-    SVCsetCreator(&f,const_cast < char* > ("liblts (mCRL2)"));
-  } 
-  else 
-  {
-    SVCsetCreator(&f, const_cast< char* >(l.creator().c_str()));
-  }
+  SVCsetCreator(&f,const_cast < char* > ("liblts (mCRL2)"));
 
-  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()).aterm() : (ATerm) ATmakeInt(l.initial_state()) ,&b));
+  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()) : (ATerm) ATmakeInt(l.initial_state()) ,&b));
 
   SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
   
   for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
-    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t.front().from()).aterm() : (ATerm) ATmakeInt(t.front().from()) ,&b);
-    // SVClabelIndex label = SVCnewLabel(&f, l.has_label_info() ? (ATerm)l.label_value(t.front().label()).aterm() : (ATerm) ATmakeInt(t.front().label()) ,&b);
-    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t.front().label()).aterm(), &b);
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t.front().to()).aterm() : (ATerm) ATmakeInt(t.front().to()) ,&b);
+    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t.front().from()) : (ATerm) ATmakeInt(t.front().from()) ,&b);
+    SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t.front().label()).aterm_without_time(), &b);
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(t.front().to()) : (ATerm) ATmakeInt(t.front().to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 

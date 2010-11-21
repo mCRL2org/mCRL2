@@ -21,10 +21,8 @@
 
 #include <string>
 #include <vector>
-// #include "mcrl2/core/messaging.h"
-// #include "mcrl2/core/print.h"
-#include "mcrl2/lts/action_label_string.h"
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/action_label_string.h"
 
 namespace mcrl2
 {
@@ -41,12 +39,12 @@ namespace lts
     class state_label_fsm:  public std::vector < size_t >
     {
       public:
-        /* \brief Default constructor. The label becomes an empty vector.
+        /** \brief Default constructor. The label becomes an empty vector.
         */
         state_label_fsm()
         {}
 
-        /* \brief Default constructor. The label is set to the vector v.
+        /** \brief Default constructor. The label is set to the vector v.
         */
         state_label_fsm(const std::vector < size_t >& v):
                                      std::vector < size_t >(v)
@@ -65,14 +63,19 @@ namespace lts
   class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_string >
   {
     protected:
-      /* state_element_values contain the values that can occur at the i-th
+      /** \brief state_element_values contain the values that can occur at the i-th
          position of a state label */
       std::vector < std::vector < std::string > > m_state_element_values;
+
+      /** \brief m_parameters contain the parameters corresponding to the 
+                 consecutive elements of a state vector. A parameter consists
+                 of two strings: a variable name and a string indicating its sort. */
       std::vector < std::pair < std::string, std::string > > m_parameters;
   
     public:
 
-      /* \brief The lts_type of this labelled transition system. In this case lts_fsm.
+      /** \brief The lts_type of this labelled transition system. In this case lts_fsm.
+          \return Returns lts_fsm as type of this transition system.
       */
       lts_type type() const
       {
@@ -81,6 +84,9 @@ namespace lts
 
       /** \brief Provides the vector of strings that correspond to the values
                  of the number at position idx in a vector.
+          \param[in] idx The index of the parameter.
+          \return A vector containing strings representing the possible values
+                  that this parameter can have.
       */
       std::vector < std::string > state_element_values(size_t idx) const
       { 
@@ -90,6 +96,9 @@ namespace lts
 
       /** \brief Adds a string to the state element values for the idx-th 
                  position in a state vector. Returns the number given to this string.
+          \param[in] idx The parameter index.
+          \param[in] s   String to be added as value for the indicate parameter.
+          \return The index for the added parameter.
       */
       size_t add_state_element_value(size_t idx, const std::string &s) 
       { 
@@ -103,6 +112,9 @@ namespace lts
 
       /** \brief Returns the element-index'th element for the parameter with index
                  parameter_index.
+          \param[in] parameter_index The index for this parameter.
+          \param[in] element_index The index to the value string corresponding to this parameter.
+          \return The string corresponding to the two given indices.
       */
       std::string state_element_value(size_t parameter_index, size_t element_index) const
       { 
@@ -120,7 +132,8 @@ namespace lts
       }
   
       /** \brief Returns the i-th parameter of the state vectors stored in this LTS.
-       * \return The state parameters stored in this LTS.
+          \param[in] i The index of the parameter.
+          \return The variable/sort of the state parameter at index i.
       */
       std::pair < std::string, std::string > process_parameter(size_t i) const
       {
@@ -129,7 +142,6 @@ namespace lts
       }
   
       /** \brief Clear the state parameters for this LTS.
-       * \param[in] params  The state parameters for this lts.
       */
       void clear_process_parameters() 
       {
@@ -137,7 +149,8 @@ namespace lts
       }
   
       /** \brief Set the state parameters for this LTS.
-       * \param[in] params  The state parameters for this lts.
+         \param[in] name  The variable name of the added parameter.
+         \param[in] sort  The sort of the added parameter.
       */
       void add_process_parameter(const std::string &name, const std::string &sort)
       {

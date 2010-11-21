@@ -241,12 +241,12 @@ namespace detail
     public:
       action_label_svc translate_label(const action_label_lts &l) const
       { 
-        return action_label_svc(l.aterm());
+        return action_label_svc(l.aterm_without_time());
       }
 
       state_label_svc translate_state(const state_label_lts &l) const
       { 
-        return state_label_svc(l.aterm());
+        return state_label_svc(l);
       }
   };
 

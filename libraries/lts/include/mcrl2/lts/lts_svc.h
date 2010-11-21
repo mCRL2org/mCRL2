@@ -52,7 +52,7 @@ namespace lts
     // return ATwriteToString(l.aterm());
   } 
 
-  /** \brief An action label for the svc format is an ATerm.
+  /** \brief A class containing an ATerm, which is the action label for the svc format.
   */
   class action_label_svc:public atermpp::aterm
   {
@@ -90,23 +90,21 @@ namespace lts
   } // namespace detail
 
 
-  /** \brief Stores additional LTS information.
-   * \details This class is provided for storing additional information with an
-   * LTS. This can be either a muCRL specification, an mCRL2 specificiation, or
-   * options for the Dot format. */
-
+  /** \brief A transition system for the svc format, where states and action labels are ATerms.
+  */
   class lts_svc_t : public lts< detail::state_label_svc, detail::action_label_svc >
   {
 
     public:
 
-      lts_type type()
+      /** \brief Provides the type of this lts. In this case it is lts_svc. */
+      lts_type type() const
       {
         return lts_svc;
       }
 
       /** \brief Save the labelled transition system to file.
-       *  \details If the filename is empty, the result is read from stdout.
+       *  \details If the filename is empty, the result is read from stdin.
        *  \param[in] filename Name of the file from which this lts is read.
        */
       void load(const std::string &filename);

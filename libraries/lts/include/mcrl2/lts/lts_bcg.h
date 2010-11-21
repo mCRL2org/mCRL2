@@ -28,7 +28,7 @@ namespace mcrl2
 {
 namespace lts
 {
-  /* \brief This labelled transition system corresponds to the BCG labelled transition system format
+  /** \brief This class contains labelled transition systemis corresponding to the BCG labelled transition system format
             used in the Ceasar/Aldebaran toolset developed at INRIA in Grenoble.
      \detail In this lts format there are no state labels, and action labels are strings.
   */
@@ -44,7 +44,7 @@ namespace lts
       }
 
       /** \brief Save the labelled transition system to file.
-       *  \details If the filename is empty, the result is read from stdout.
+       *  \details If the filename is empty, the result is read from stdin.
        *  \param[in] filename Name of the file from which this lts is read.
        */
       void load(const std::string &filename);

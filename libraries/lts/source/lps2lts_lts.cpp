@@ -60,7 +60,6 @@ namespace mcrl2
         default:
           gsVerboseMsg("writing state space in %s format to '%s'.\n",
                       mcrl2::lts::detail::string_for_type(lts_opts.outformat).c_str(),filename);
-          generic_lts.set_creator(lts_filename);
           generic_lts.set_data(lts_opts.spec->data());
           generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
           generic_lts.set_action_labels(lts_opts.spec->action_labels());
@@ -155,7 +154,6 @@ namespace mcrl2
           break;
         default:
           {
-            generic_lts.set_creator(lts_filename);
             generic_lts.set_data(lts_opts.spec->data());
             generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
             generic_lts.set_action_labels(lts_opts.spec->action_labels());            
