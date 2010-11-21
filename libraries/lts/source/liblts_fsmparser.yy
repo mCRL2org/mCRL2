@@ -35,12 +35,6 @@ char* intToCString(int i);
 %}
 
 
-/* %union {
-  // ATermAppl aterm;
-  std::string result_string;
-  int number;
-} */
-
 //more verbose and specific error messages
 %error-verbose
 
@@ -52,8 +46,6 @@ char* intToCString(int i);
 %token EOLN SECSEP LPAR RPAR ARROW HASH QMARK COLON COMMA BAG BAR KWSTRUCT SET LIST
 %token NUMBER
 %token ID QUOTED BOOL POS NAT INT REAL
-/* %type  sort_expr sort_expr_arrow domain_no_arrow sort_expr_struct domain_no_arrow_elts_hs struct_constructors_bs struct_constructor recogniser struct_projections_cs struct_projection sort_expr_primary sort_constant sort_constructor domain_no_arrow_elt action
-*/
 
 %%
 
@@ -97,25 +89,20 @@ cardinality :
   ;
 
 type_def :
+  /* empty; assume type Nat is intended */
+    { 
+      fsm_lexer_obj->fsm_lts->add_process_parameter(fsm_lexer_obj->typeId,"Nat");
+    }
+  |
   sort_expr
     {
       if (!ignore_par[num_pars])
       {
-        // fsm_lexer_obj->typeValues = ATempty;
-        // fsm_lexer_obj->fsm_lts->add_process_parameter(ATgetName(ATgetAFun(fsm_lexer_obj->typeId)),ATgetName(ATgetAFun($1)));
-                                               //mcrl2::data::basic_sort(mcrl2::core::identifier_string($1)))));
         fsm_lexer_obj->fsm_lts->add_process_parameter(fsm_lexer_obj->typeId,$1);
-        // NODIG?? fsm_lexer_obj->typeId = ATmakeAppl2(fsm_lexer_obj->const_ATtype,(ATerm) fsm_lexer_obj->typeId,(ATerm) $1);
       }
     }
   type_values
     {
-      if (!ignore_par[num_pars])
-      {
-        // fsm_lexer_obj->typeValues = ATreverse( fsm_lexer_obj->typeValues );
-        // fsm_lexer_obj->valueTable = ATinsert( fsm_lexer_obj->valueTable,
-        //     (ATerm)fsm_lexer_obj->typeValues );
-      }
     }
   ;
 
@@ -138,9 +125,6 @@ sort_expr_arrow:
     }
   | domain_no_arrow ARROW sort_expr_arrow
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //   + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ))
       $$ = $1 + "->" + $3;
     }
   ;
@@ -161,9 +145,6 @@ domain_no_arrow_elts_hs:
     }
   | domain_no_arrow_elts_hs HASH domain_no_arrow_elt
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //   + "#" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = $1 + "#" + $3;
     }
   ;
@@ -184,8 +165,6 @@ sort_expr_struct:
     }
   | KWSTRUCT struct_constructors_bs
     {
-      // std::string result = "struct " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = "struct " + $2;
     }
   ;
@@ -198,9 +177,6 @@ struct_constructors_bs:
     }
   | struct_constructors_bs BAR struct_constructor
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //  + "|" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = $1 + "|" + $3;
     }
   ;
@@ -209,17 +185,10 @@ struct_constructors_bs:
 struct_constructor:
   ID recogniser
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //  + " " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = $1 + " " + $2;   
     }
   | ID LPAR struct_projections_cs RPAR recogniser
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //  + "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")" +
-      //        static_cast<std::string> ( ATwriteToString( (ATerm)$5 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = $1 + "(" + $3 + ")" + $5;
     }
   ;
@@ -228,14 +197,10 @@ struct_constructor:
 recogniser:
   /* empty */
     {
-      // std::string result = static_cast<std::string> ( "");
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = "";
     }
   | QMARK ID
     {
-      // std::string result = "?" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = "?" + $2;
     }
   ;
@@ -248,9 +213,6 @@ struct_projections_cs:
     }
   | struct_projections_cs COMMA struct_projection
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //  + "," + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = $1 + "," + $3;
     }
   ;
@@ -263,9 +225,6 @@ struct_projection:
     }
   | ID COLON sort_expr
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //   + ":" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = $1 + ":" + $3;
     }
   ;
@@ -286,8 +245,6 @@ sort_expr_primary:
     }
   | LPAR sort_expr RPAR
     { 
-      // std::string result = "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) ) + ")";
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = "(" + $2 + ")";
     }
   ;
@@ -296,27 +253,22 @@ sort_expr_primary:
 sort_constant:
   BOOL
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Bool", 0, ATfalse ) ));
       $$ = "Bool"; 
     }
   | POS
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Pos", 0, ATfalse ) ));
       $$ = "Pos";
     }
   | NAT
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Nat", 0, ATfalse ) ));
       $$ = "Nat";
     }
   | INT
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Int", 0, ATfalse ) ));
       $$ = "Int";
     }
   | REAL
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Real", 0, ATfalse ) ));
       $$ = "Real";
     }
   ;
@@ -325,20 +277,14 @@ sort_constant:
 sort_constructor:
   LIST LPAR sort_expr RPAR
     {
-      // std::string result = "List(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = "List(" + $3 + ")";
     }
   | SET LPAR sort_expr RPAR
     {
-      // std::string result = "Set(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = "Set(" + $3 + ")";
     }
   | BAG LPAR sort_expr RPAR
     {
-      // std::string result = "Bag(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
       $$ = "Bag(" + $3 + ")";
     }
   ;
@@ -354,9 +300,6 @@ type_value :
     {
       if (!ignore_par[num_pars])
       {
-        // fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues,
-        //     (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)$1,
-        //    (ATerm)fsm_lexer_obj->typeId ) );
         fsm_lexer_obj->fsm_lts->add_state_element_value(num_pars,$1);
       }
     }
@@ -373,14 +316,11 @@ states :
     }
   state
     {
-      // fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector );
       unsigned int i = fsm_lexer_obj->fsm_lts->add_state(fsm_lexer_obj->stateVector);
-                    // mcrl2::lts::detail::state_label(fsm_lexer_obj->stateVecto))_
       if ( i == 0 )
       {
         fsm_lexer_obj->fsm_lts->set_initial_state( i );
       }
-      // fsm_lexer_obj->stateVector = ATempty
       fsm_lexer_obj->stateVector.clear();
     }
   EOLN
@@ -393,13 +333,7 @@ state :
     {
       if (!ignore_par[par_index])
       {
-        // if ( par_index < ATgetLength( fsm_lexer_obj->valueTable ) )
-        // {
-          // fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector,
-          //     ATelementAt( (ATermList)ATelementAt( fsm_lexer_obj->valueTable,
-          //         par_index ), $2 ) );
-          fsm_lexer_obj->stateVector.push_back(atoi($2.c_str()));
-        // }
+        fsm_lexer_obj->stateVector.push_back(atoi($2.c_str()));
       }
       ++par_index;
     }
@@ -433,24 +367,12 @@ transition:
         fsm_lexer_obj->fsm_lts->add_transition(transition(frState,label_index->second,toState));
       }
 
-      /* ATerm label = ATtableGet(fsm_lexer_obj->labelTable,(ATerm)$3);
-      if ( label == NULL )
-      {
-        const std::string s(ATgetName(ATgetAFun($3)));
-        unsigned int i = fsm_lexer_obj->fsm_lts->add_action(s, s=="tau");
-        label = (ATerm) ATmakeInt(i);
-        ATtablePut(fsm_lexer_obj->labelTable,(ATerm)$3,label);
-      }
-      fsm_lexer_obj->fsm_lts->add_transition(mcrl2::lts::transition(frState,
-          ATgetInt((ATermInt)label), toState )); 
-      */
     }
   ;
 
 action :
   /* empty */
     { $$ = ""; 
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) 
     }
   |
   QUOTED

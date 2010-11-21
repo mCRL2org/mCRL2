@@ -394,7 +394,7 @@ union yyalloc
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  33
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  56
+#define YYNRULES  57
 /* YYNRULES -- Number of states.  */
 #define YYNSTATES  91
 
@@ -444,11 +444,11 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyprhs[] =
 {
        0,     0,     3,     4,    13,    14,    15,    20,    21,    26,
-      30,    31,    35,    37,    39,    43,    45,    47,    51,    53,
-      55,    58,    60,    64,    67,    73,    74,    77,    79,    83,
-      85,    89,    91,    93,    95,    99,   101,   103,   105,   107,
-     109,   114,   119,   124,   125,   128,   130,   131,   132,   133,
-     139,   140,   143,   144,   148,   152,   153
+      30,    31,    32,    36,    38,    40,    44,    46,    48,    52,
+      54,    56,    59,    61,    65,    68,    74,    75,    78,    80,
+      84,    86,    90,    92,    94,    96,   100,   102,   104,   106,
+     108,   110,   115,   120,   125,   126,   129,   131,   132,   133,
+     134,   140,   141,   144,   145,   149,   153,   154
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
@@ -457,30 +457,30 @@ static const yytype_int8 yyrhs[] =
       26,     0,    -1,    -1,    27,    28,     4,     3,    51,     4,
        3,    55,    -1,    -1,    -1,    28,    30,    29,     3,    -1,
       -1,    18,    31,    32,    33,    -1,     5,    17,     6,    -1,
-      -1,    35,    34,    49,    -1,    36,    -1,    40,    -1,    37,
-       7,    36,    -1,    38,    -1,    39,    -1,    38,     8,    39,
-      -1,    40,    -1,    46,    -1,    14,    41,    -1,    42,    -1,
-      41,    13,    42,    -1,    18,    43,    -1,    18,     5,    44,
-       6,    43,    -1,    -1,     9,    18,    -1,    45,    -1,    44,
-      11,    45,    -1,    35,    -1,    18,    10,    35,    -1,    18,
-      -1,    47,    -1,    48,    -1,     5,    35,     6,    -1,    20,
-      -1,    21,    -1,    22,    -1,    23,    -1,    24,    -1,    16,
-       5,    35,     6,    -1,    15,     5,    35,     6,    -1,    12,
-       5,    35,     6,    -1,    -1,    49,    50,    -1,    19,    -1,
-      -1,    -1,    -1,    51,    52,    54,    53,     3,    -1,    -1,
-      54,    17,    -1,    -1,    55,    56,     3,    -1,    17,    17,
-      57,    -1,    -1,    19,    -1
+      -1,    -1,    35,    34,    49,    -1,    36,    -1,    40,    -1,
+      37,     7,    36,    -1,    38,    -1,    39,    -1,    38,     8,
+      39,    -1,    40,    -1,    46,    -1,    14,    41,    -1,    42,
+      -1,    41,    13,    42,    -1,    18,    43,    -1,    18,     5,
+      44,     6,    43,    -1,    -1,     9,    18,    -1,    45,    -1,
+      44,    11,    45,    -1,    35,    -1,    18,    10,    35,    -1,
+      18,    -1,    47,    -1,    48,    -1,     5,    35,     6,    -1,
+      20,    -1,    21,    -1,    22,    -1,    23,    -1,    24,    -1,
+      16,     5,    35,     6,    -1,    15,     5,    35,     6,    -1,
+      12,     5,    35,     6,    -1,    -1,    49,    50,    -1,    19,
+      -1,    -1,    -1,    -1,    51,    52,    54,    53,     3,    -1,
+      -1,    54,    17,    -1,    -1,    55,    56,     3,    -1,    17,
+      17,    57,    -1,    -1,    19,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    61,    61,    61,    74,    78,    77,    86,    85,    93,
-     101,   100,   127,   135,   139,   150,   158,   162,   173,   181,
-     185,   195,   199,   210,   217,   230,   235,   245,   249,   260,
-     264,   275,   279,   283,   287,   297,   302,   307,   312,   317,
-     326,   332,   338,   346,   349,   353,   367,   371,   375,   370,
-     389,   392,   410,   413,   418,   452,   456
+       0,    53,    53,    53,    66,    70,    69,    78,    77,    85,
+      93,    98,    97,   114,   122,   126,   134,   142,   146,   154,
+     162,   166,   174,   178,   186,   190,   199,   202,   210,   214,
+     222,   226,   234,   238,   242,   246,   254,   258,   262,   266,
+     270,   278,   282,   286,   292,   295,   299,   310,   314,   318,
+     313,   329,   332,   344,   347,   352,   375,   378
 };
 #endif
 
@@ -518,22 +518,22 @@ static const yytype_uint16 yytoknum[] =
 static const yytype_uint8 yyr1[] =
 {
        0,    25,    27,    26,    28,    29,    28,    31,    30,    32,
-      34,    33,    35,    36,    36,    37,    38,    38,    39,    40,
-      40,    41,    41,    42,    42,    43,    43,    44,    44,    45,
-      45,    46,    46,    46,    46,    47,    47,    47,    47,    47,
-      48,    48,    48,    49,    49,    50,    51,    52,    53,    51,
-      54,    54,    55,    55,    56,    57,    57
+      33,    34,    33,    35,    36,    36,    37,    38,    38,    39,
+      40,    40,    41,    41,    42,    42,    43,    43,    44,    44,
+      45,    45,    46,    46,    46,    46,    47,    47,    47,    47,
+      47,    48,    48,    48,    49,    49,    50,    51,    52,    53,
+      51,    54,    54,    55,    55,    56,    57,    57
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     8,     0,     0,     4,     0,     4,     3,
-       0,     3,     1,     1,     3,     1,     1,     3,     1,     1,
-       2,     1,     3,     2,     5,     0,     2,     1,     3,     1,
-       3,     1,     1,     1,     3,     1,     1,     1,     1,     1,
-       4,     4,     4,     0,     2,     1,     0,     0,     0,     5,
-       0,     2,     0,     3,     3,     0,     1
+       0,     0,     3,     1,     1,     3,     1,     1,     3,     1,
+       1,     2,     1,     3,     2,     5,     0,     2,     1,     3,
+       1,     3,     1,     1,     1,     3,     1,     1,     1,     1,
+       1,     4,     4,     4,     0,     2,     1,     0,     0,     0,
+       5,     0,     2,     0,     3,     3,     0,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -541,16 +541,16 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     4,     1,     0,     0,     7,     5,    46,     0,
-       0,    47,     0,     0,     6,     0,    50,     0,     0,     0,
-       0,     0,     0,    31,    35,    36,    37,    38,    39,     8,
-      10,    12,     0,    15,    16,    13,    19,    32,    33,    52,
-      48,     9,     0,     0,    25,    20,    21,     0,     0,    43,
-       0,     0,     3,    51,     0,    34,     0,     0,     0,    23,
-       0,     0,     0,    11,    14,    17,    18,     0,     0,    49,
-      42,    31,    29,     0,    27,    26,    22,    41,    40,    45,
-      44,    55,    53,     0,    25,     0,    56,    54,    30,    24,
-      28
+       2,     0,     4,     1,     0,     0,     7,     5,    47,     0,
+       0,    48,     0,    10,     6,     0,    51,     0,     0,     0,
+       0,     0,     0,    32,    36,    37,    38,    39,    40,     8,
+      11,    13,     0,    16,    17,    14,    20,    33,    34,    53,
+      49,     9,     0,     0,    26,    21,    22,     0,     0,    44,
+       0,     0,     3,    52,     0,    35,     0,     0,     0,    24,
+       0,     0,     0,    12,    15,    18,    19,     0,     0,    50,
+      43,    32,    30,     0,    28,    27,    23,    42,    41,    46,
+      45,    56,    54,     0,    26,     0,    57,    55,    31,    25,
+      29
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -592,12 +592,12 @@ static const yytype_int8 yypgoto[] =
    positive, shift that token.  If negative, reduce the rule which
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -19
+#define YYTABLE_NINF -20
 static const yytype_int8 yytable[] =
 {
       30,    18,    57,     8,    84,    42,    58,     5,    19,    85,
       20,    21,    22,     3,    23,    12,    24,    25,    26,    27,
-      28,     6,   -18,   -18,    14,    17,    15,    44,    39,    18,
+      28,     6,   -19,   -19,    14,    17,    15,    44,    39,    18,
       56,    51,    41,    43,    61,    62,    19,    47,    20,    21,
       22,    48,    71,    55,    24,    25,    26,    27,    28,    50,
       53,    60,    67,    69,    70,    77,    82,    75,    78,    79,
@@ -1444,7 +1444,7 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 61 "liblts_fsmparser.yy"
+#line 53 "liblts_fsmparser.yy"
     {
       num_pars = 0;
       fsm_lexer_obj->fsm_lts->clear_process_parameters();
@@ -1455,7 +1455,7 @@ yyreduce:
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 78 "liblts_fsmparser.yy"
+#line 70 "liblts_fsmparser.yy"
     {
       ++num_pars;
     ;}
@@ -1464,7 +1464,7 @@ yyreduce:
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 86 "liblts_fsmparser.yy"
+#line 78 "liblts_fsmparser.yy"
     {
       fsm_lexer_obj->typeId = (yyvsp[(1) - (1)]);
     ;}
@@ -1473,7 +1473,7 @@ yyreduce:
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 94 "liblts_fsmparser.yy"
+#line 86 "liblts_fsmparser.yy"
     {
       ignore_par.push_back(atoi((yyvsp[(2) - (3)]).c_str()) == 0);
     ;}
@@ -1482,29 +1482,20 @@ yyreduce:
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 101 "liblts_fsmparser.yy"
-    {
-      if (!ignore_par[num_pars])
-      {
-        // fsm_lexer_obj->typeValues = ATempty;
-        // fsm_lexer_obj->fsm_lts->add_process_parameter(ATgetName(ATgetAFun(fsm_lexer_obj->typeId)),ATgetName(ATgetAFun($1)));
-                                               //mcrl2::data::basic_sort(mcrl2::core::identifier_string($1)))));
-        fsm_lexer_obj->fsm_lts->add_process_parameter(fsm_lexer_obj->typeId,(yyvsp[(1) - (1)]));
-        // NODIG?? fsm_lexer_obj->typeId = ATmakeAppl2(fsm_lexer_obj->const_ATtype,(ATerm) fsm_lexer_obj->typeId,(ATerm) $1);
-      }
+#line 93 "liblts_fsmparser.yy"
+    { 
+      fsm_lexer_obj->fsm_lts->add_process_parameter(fsm_lexer_obj->typeId,"Nat");
     ;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 112 "liblts_fsmparser.yy"
+#line 98 "liblts_fsmparser.yy"
     {
       if (!ignore_par[num_pars])
       {
-        // fsm_lexer_obj->typeValues = ATreverse( fsm_lexer_obj->typeValues );
-        // fsm_lexer_obj->valueTable = ATinsert( fsm_lexer_obj->valueTable,
-        //     (ATerm)fsm_lexer_obj->typeValues );
+        fsm_lexer_obj->fsm_lts->add_process_parameter(fsm_lexer_obj->typeId,(yyvsp[(1) - (1)]));
       }
     ;}
     break;
@@ -1512,16 +1503,15 @@ yyreduce:
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 128 "liblts_fsmparser.yy"
+#line 105 "liblts_fsmparser.yy"
     {
-      (yyval)=(yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 136 "liblts_fsmparser.yy"
+#line 115 "liblts_fsmparser.yy"
     {
       (yyval)=(yyvsp[(1) - (1)]);
     ;}
@@ -1530,28 +1520,25 @@ yyreduce:
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 140 "liblts_fsmparser.yy"
+#line 123 "liblts_fsmparser.yy"
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //   + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ))
-      (yyval) = (yyvsp[(1) - (3)]) + "->" + (yyvsp[(3) - (3)]);
+      (yyval)=(yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 151 "liblts_fsmparser.yy"
+#line 127 "liblts_fsmparser.yy"
     {
-      (yyval)=(yyvsp[(1) - (1)]);
+      (yyval) = (yyvsp[(1) - (3)]) + "->" + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 159 "liblts_fsmparser.yy"
+#line 135 "liblts_fsmparser.yy"
     {
       (yyval)=(yyvsp[(1) - (1)]);
     ;}
@@ -1560,28 +1547,25 @@ yyreduce:
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 163 "liblts_fsmparser.yy"
+#line 143 "liblts_fsmparser.yy"
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //   + "#" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = (yyvsp[(1) - (3)]) + "#" + (yyvsp[(3) - (3)]);
+      (yyval)=(yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 174 "liblts_fsmparser.yy"
+#line 147 "liblts_fsmparser.yy"
     {
-      (yyval) = (yyvsp[(1) - (1)]);
+      (yyval) = (yyvsp[(1) - (3)]) + "#" + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 182 "liblts_fsmparser.yy"
+#line 155 "liblts_fsmparser.yy"
     {
       (yyval) = (yyvsp[(1) - (1)]);
     ;}
@@ -1590,137 +1574,115 @@ yyreduce:
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 186 "liblts_fsmparser.yy"
+#line 163 "liblts_fsmparser.yy"
     {
-      // std::string result = "struct " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = "struct " + (yyvsp[(2) - (2)]);
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 196 "liblts_fsmparser.yy"
+#line 167 "liblts_fsmparser.yy"
     {
-      (yyval) = (yyvsp[(1) - (1)]);
+      (yyval) = "struct " + (yyvsp[(2) - (2)]);
     ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 200 "liblts_fsmparser.yy"
+#line 175 "liblts_fsmparser.yy"
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //  + "|" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = (yyvsp[(1) - (3)]) + "|" + (yyvsp[(3) - (3)]);
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 211 "liblts_fsmparser.yy"
+#line 179 "liblts_fsmparser.yy"
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //  + " " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = (yyvsp[(1) - (2)]) + " " + (yyvsp[(2) - (2)]);   
+      (yyval) = (yyvsp[(1) - (3)]) + "|" + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 218 "liblts_fsmparser.yy"
+#line 187 "liblts_fsmparser.yy"
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //  + "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")" +
-      //        static_cast<std::string> ( ATwriteToString( (ATerm)$5 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = (yyvsp[(1) - (5)]) + "(" + (yyvsp[(3) - (5)]) + ")" + (yyvsp[(5) - (5)]);
+      (yyval) = (yyvsp[(1) - (2)]) + " " + (yyvsp[(2) - (2)]);   
     ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 230 "liblts_fsmparser.yy"
+#line 191 "liblts_fsmparser.yy"
     {
-      // std::string result = static_cast<std::string> ( "");
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = "";
+      (yyval) = (yyvsp[(1) - (5)]) + "(" + (yyvsp[(3) - (5)]) + ")" + (yyvsp[(5) - (5)]);
     ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 236 "liblts_fsmparser.yy"
+#line 199 "liblts_fsmparser.yy"
     {
-      // std::string result = "?" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = "?" + (yyvsp[(2) - (2)]);
+      (yyval) = "";
     ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 246 "liblts_fsmparser.yy"
+#line 203 "liblts_fsmparser.yy"
     {
-      (yyval) = (yyvsp[(1) - (1)]);
+      (yyval) = "?" + (yyvsp[(2) - (2)]);
     ;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 250 "liblts_fsmparser.yy"
+#line 211 "liblts_fsmparser.yy"
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //  + "," + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = (yyvsp[(1) - (3)]) + "," + (yyvsp[(3) - (3)]);
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 261 "liblts_fsmparser.yy"
+#line 215 "liblts_fsmparser.yy"
     {
-      (yyval) = (yyvsp[(1) - (1)]);
+      (yyval) = (yyvsp[(1) - (3)]) + "," + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 265 "liblts_fsmparser.yy"
+#line 223 "liblts_fsmparser.yy"
     {
-      // std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-      //   + ":" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = (yyvsp[(1) - (3)]) + ":" + (yyvsp[(3) - (3)]);
+      (yyval) = (yyvsp[(1) - (1)]);
     ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 276 "liblts_fsmparser.yy"
+#line 227 "liblts_fsmparser.yy"
     {
-      (yyval) = (yyvsp[(1) - (1)]); 
+      (yyval) = (yyvsp[(1) - (3)]) + ":" + (yyvsp[(3) - (3)]);
     ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 280 "liblts_fsmparser.yy"
+#line 235 "liblts_fsmparser.yy"
     {
       (yyval) = (yyvsp[(1) - (1)]); 
     ;}
@@ -1729,7 +1691,7 @@ yyreduce:
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 284 "liblts_fsmparser.yy"
+#line 239 "liblts_fsmparser.yy"
     {
       (yyval) = (yyvsp[(1) - (1)]); 
     ;}
@@ -1738,161 +1700,145 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 288 "liblts_fsmparser.yy"
-    { 
-      // std::string result = "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) ) + ")";
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = "(" + (yyvsp[(2) - (3)]) + ")";
+#line 243 "liblts_fsmparser.yy"
+    {
+      (yyval) = (yyvsp[(1) - (1)]); 
     ;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 298 "liblts_fsmparser.yy"
-    {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Bool", 0, ATfalse ) ));
-      (yyval) = "Bool"; 
+#line 247 "liblts_fsmparser.yy"
+    { 
+      (yyval) = "(" + (yyvsp[(2) - (3)]) + ")";
     ;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 303 "liblts_fsmparser.yy"
+#line 255 "liblts_fsmparser.yy"
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Pos", 0, ATfalse ) ));
-      (yyval) = "Pos";
+      (yyval) = "Bool"; 
     ;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 308 "liblts_fsmparser.yy"
+#line 259 "liblts_fsmparser.yy"
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Nat", 0, ATfalse ) ));
-      (yyval) = "Nat";
+      (yyval) = "Pos";
     ;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 313 "liblts_fsmparser.yy"
+#line 263 "liblts_fsmparser.yy"
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Int", 0, ATfalse ) ));
-      (yyval) = "Int";
+      (yyval) = "Nat";
     ;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 318 "liblts_fsmparser.yy"
+#line 267 "liblts_fsmparser.yy"
     {
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "Real", 0, ATfalse ) ));
-      (yyval) = "Real";
+      (yyval) = "Int";
     ;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 327 "liblts_fsmparser.yy"
+#line 271 "liblts_fsmparser.yy"
     {
-      // std::string result = "List(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = "List(" + (yyvsp[(3) - (4)]) + ")";
+      (yyval) = "Real";
     ;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 333 "liblts_fsmparser.yy"
+#line 279 "liblts_fsmparser.yy"
     {
-      // std::string result = "Set(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-      (yyval) = "Set(" + (yyvsp[(3) - (4)]) + ")";
+      (yyval) = "List(" + (yyvsp[(3) - (4)]) + ")";
     ;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 339 "liblts_fsmparser.yy"
+#line 283 "liblts_fsmparser.yy"
     {
-      // std::string result = "Bag(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      (yyval) = "Set(" + (yyvsp[(3) - (4)]) + ")";
+    ;}
+    break;
+
+  case 43:
+
+/* Line 1455 of yacc.c  */
+#line 287 "liblts_fsmparser.yy"
+    {
       (yyval) = "Bag(" + (yyvsp[(3) - (4)]) + ")";
     ;}
     break;
 
-  case 45:
+  case 46:
 
 /* Line 1455 of yacc.c  */
-#line 354 "liblts_fsmparser.yy"
+#line 300 "liblts_fsmparser.yy"
     {
       if (!ignore_par[num_pars])
       {
-        // fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues,
-        //     (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)$1,
-        //    (ATerm)fsm_lexer_obj->typeId ) );
         fsm_lexer_obj->fsm_lts->add_state_element_value(num_pars,(yyvsp[(1) - (1)]));
       }
-    ;}
-    break;
-
-  case 47:
-
-/* Line 1455 of yacc.c  */
-#line 371 "liblts_fsmparser.yy"
-    {
-      par_index = 0;
     ;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 375 "liblts_fsmparser.yy"
+#line 314 "liblts_fsmparser.yy"
     {
-      // fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector );
+      par_index = 0;
+    ;}
+    break;
+
+  case 49:
+
+/* Line 1455 of yacc.c  */
+#line 318 "liblts_fsmparser.yy"
+    {
       unsigned int i = fsm_lexer_obj->fsm_lts->add_state(fsm_lexer_obj->stateVector);
-                    // mcrl2::lts::detail::state_label(fsm_lexer_obj->stateVecto))_
       if ( i == 0 )
       {
         fsm_lexer_obj->fsm_lts->set_initial_state( i );
       }
-      // fsm_lexer_obj->stateVector = ATempty
       fsm_lexer_obj->stateVector.clear();
     ;}
     break;
 
-  case 51:
+  case 52:
 
 /* Line 1455 of yacc.c  */
-#line 393 "liblts_fsmparser.yy"
+#line 333 "liblts_fsmparser.yy"
     {
       if (!ignore_par[par_index])
       {
-        // if ( par_index < ATgetLength( fsm_lexer_obj->valueTable ) )
-        // {
-          // fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector,
-          //     ATelementAt( (ATermList)ATelementAt( fsm_lexer_obj->valueTable,
-          //         par_index ), $2 ) );
-          fsm_lexer_obj->stateVector.push_back(atoi((yyvsp[(2) - (2)]).c_str()));
-        // }
+        fsm_lexer_obj->stateVector.push_back(atoi((yyvsp[(2) - (2)]).c_str()));
       }
       ++par_index;
     ;}
     break;
 
-  case 54:
+  case 55:
 
 /* Line 1455 of yacc.c  */
-#line 419 "liblts_fsmparser.yy"
+#line 353 "liblts_fsmparser.yy"
     {
       using namespace mcrl2::lts;
       unsigned int frState = atoi((yyvsp[(1) - (3)]).c_str())-1;
@@ -1910,33 +1856,21 @@ yyreduce:
         fsm_lexer_obj->fsm_lts->add_transition(transition(frState,label_index->second,toState));
       }
 
-      /* ATerm label = ATtableGet(fsm_lexer_obj->labelTable,(ATerm)$3);
-      if ( label == NULL )
-      {
-        const std::string s(ATgetName(ATgetAFun($3)));
-        unsigned int i = fsm_lexer_obj->fsm_lts->add_action(s, s=="tau");
-        label = (ATerm) ATmakeInt(i);
-        ATtablePut(fsm_lexer_obj->labelTable,(ATerm)$3,label);
-      }
-      fsm_lexer_obj->fsm_lts->add_transition(mcrl2::lts::transition(frState,
-          ATgetInt((ATermInt)label), toState )); 
-      */
-    ;}
-    break;
-
-  case 55:
-
-/* Line 1455 of yacc.c  */
-#line 452 "liblts_fsmparser.yy"
-    { (yyval) = ""; 
-      // safe_assign($$, ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) 
     ;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 457 "liblts_fsmparser.yy"
+#line 375 "liblts_fsmparser.yy"
+    { (yyval) = ""; 
+    ;}
+    break;
+
+  case 57:
+
+/* Line 1455 of yacc.c  */
+#line 379 "liblts_fsmparser.yy"
     { 
       (yyval) = (yyvsp[(1) - (1)]);
     ;}
@@ -1945,7 +1879,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 1949 "liblts_fsmparser.cpp"
+#line 1883 "liblts_fsmparser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2157,7 +2091,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 462 "liblts_fsmparser.yy"
+#line 384 "liblts_fsmparser.yy"
 
 
 char* intToCString( int i )
