@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
@@ -102,16 +103,15 @@ namespace lts
       */
       size_t add_state_element_value(size_t idx, const std::string &s) 
       { 
-        if (idx>=m_state_element_values.size())
-        { 
-          m_state_element_values.resize(idx+1);
-        }
+        assert(idx<m_state_element_values.size());
         m_state_element_values[idx].push_back(s);
         return m_state_element_values[idx].size();
       }
 
       /** \brief Returns the element-index'th element for the parameter with index
                  parameter_index.
+          \details If there are no values for the parameter_index, the element_index
+                   is transformed to a string, and this string is returned. 
           \param[in] parameter_index The index for this parameter.
           \param[in] element_index The index to the value string corresponding to this parameter.
           \return The string corresponding to the two given indices.
@@ -119,6 +119,13 @@ namespace lts
       std::string state_element_value(size_t parameter_index, size_t element_index) const
       { 
         assert(parameter_index<m_state_element_values.size());
+        if (m_state_element_values[parameter_index].size()==0)
+        { 
+          // The domain for this parameter has no string; return the string "i"
+          std::stringstream number_stream;
+          number_stream << element_index;
+          return number_stream.str();
+        }
         assert(element_index<m_state_element_values[parameter_index].size());
         return m_state_element_values[parameter_index][element_index];
       }
@@ -154,7 +161,9 @@ namespace lts
       */
       void add_process_parameter(const std::string &name, const std::string &sort)
       {
+        assert(m_parameters.size()==m_state_element_values.size());
         m_parameters.push_back(std::pair<std::string,std::string>(name,sort));
+        m_state_element_values.push_back(std::vector < std::string >());
       }
      
       /** \brief Save the labelled transition system to file.
