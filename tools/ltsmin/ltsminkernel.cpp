@@ -133,8 +133,9 @@ static ATbool split(INTERVAL *p, INTERVAL *p1, INTERVAL *p2)
      return ATtrue;
      }
 
-static ATbool isParentOf(int parent, int b) {
-     for (;b>0&&b!=parent;b=blok[b].parent);
+static ATbool isParentOf(int parent, int b) 
+{
+     for (;b>0&&b!=parent;b=blok[b].parent){};
      return (b==parent)?ATtrue:ATfalse;
 }
 
@@ -440,7 +441,7 @@ static ATbool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
 	       if (traceLevel) {
 	       ATwarning("Not %s bisimilar. Generation of witness trace.\n",
                branching?"branching":"strongly");
-	       while (PrintNonBisimilarStates((int*) &init1, (int*) &init2));
+	       while (PrintNonBisimilarStates((int*) &init1, (int*) &init2)){};
 	       }
                *different = ATtrue;
                return result;
