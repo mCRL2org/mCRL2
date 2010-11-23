@@ -717,6 +717,57 @@ BOOST_AUTO_TEST_CASE(test_eqn_set_where)
   );
 }
 
+BOOST_AUTO_TEST_CASE(test_recursive_function_sort)
+{
+  test_data_specification(
+  "sort G;\n"
+  "     F = F -> G;\n",
+  false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_recursive_function_sort_reverse)
+{
+  test_data_specification(
+  "sort G;\n"
+  "     F = G -> F;\n",
+  false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_recursive_struct_no_base)
+{
+  test_data_specification(
+  "sort D = struct f(D);\n",
+  false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_recursive_struct_via_function)
+{
+  test_data_specification(
+  "sort G = struct f(Nat -> G);\n",
+  false
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_recursive_struct_list)
+{
+  test_data_specification(
+  "sort P = struct b(x: List(P));\n",
+  true
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_recursive_struct_list_indirect)
+{
+  test_data_specification(
+  "sort LP = List(P);\n"
+  "     P = struct b(x: LP);\n",
+  true
+  );
+}
+
 template <typename VariableIterator>
 void test_data_expression_in_specification_context(const std::string &de_in,
                           const std::string& ds_in,
