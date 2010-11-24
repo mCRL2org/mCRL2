@@ -12,6 +12,9 @@
 #ifndef BDD_PATH_ELIMINATOR_H
 #define BDD_PATH_ELIMINATOR_H
 
+#include <iostream> // For streaming operators
+#include <cstring>
+
 #include "aterm2.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
@@ -25,12 +28,51 @@ namespace mcrl2 {
   namespace data {
     namespace detail {
 
-  /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers.
-enum SMT_Solver_Type {
-  solver_type_ario,
-  solver_type_cvc,
-  solver_type_cvc_fast
-};
+      /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers.
+      enum SMT_Solver_Type {
+        solver_type_ario,
+        solver_type_cvc,
+        solver_type_cvc_fast
+      };
+
+      /// \brief standard conversion from stream to solver type
+      inline
+      std::istream& operator>>(std::istream& is, mcrl2::data::detail::SMT_Solver_Type& s) {
+        char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        using namespace mcrl2::data::detail;
+
+        /// no standard conversion available function, so implement on-the-spot
+        is.readsome(solver_type, 10);
+
+        s = solver_type_cvc;
+
+        if (strncmp(solver_type, "ario", 5) == 0) {
+          s = solver_type_ario;
+        }
+        else if (strncmp(solver_type, "cvc", 3) == 0) {
+          if (solver_type[3] != '\0') {
+            is.setstate(std::ios_base::failbit);
+          }
+        }
+        else {
+          is.setstate(std::ios_base::failbit);
+        }
+
+        return is;
+      }
+
+      /// \brief standard conversion from solvert type to stream
+      inline std::ostream& operator<<(std::ostream& os, mcrl2::data::detail::SMT_Solver_Type s) {
+        static char const* solvers[] = {
+          "ario",
+          "cvc",
+        };
+
+        os << solvers[s];
+
+        return os;
+      }
 
   /** \brief Base class for eliminating inconsistent paths from BDDs.
    *

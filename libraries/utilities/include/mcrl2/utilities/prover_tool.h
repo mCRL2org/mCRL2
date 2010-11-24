@@ -12,53 +12,12 @@
 #ifndef MCRL2_UTILITIES_PROVER_TOOL_H
 #define MCRL2_UTILITIES_PROVER_TOOL_H
 
-#include <iostream>
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
 namespace mcrl2 {
 
 namespace utilities {
-
-  /// standard conversion from stream
-  /// \cond INTERNAL_DOCS
-  inline std::istream& operator>>(std::istream& is, mcrl2::data::detail::SMT_Solver_Type& s) {
-    char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-    using namespace mcrl2::data::detail;
-
-    /// no standard conversion available function, so implement on-the-spot
-    is.readsome(solver_type, 10);
-
-    s = solver_type_cvc;
-
-    if (std::strncmp(solver_type, "ario", 5) == 0) {
-      s = solver_type_ario;
-    }
-    else if (std::strncmp(solver_type, "cvc", 3) == 0) {
-      if (solver_type[3] != '\0') {
-        is.setstate(std::ios_base::failbit);
-      }
-    }
-    else {
-      is.setstate(std::ios_base::failbit);
-    }
-
-    return is;
-  }
-
-  /// standard conversion to stream
-  inline std::ostream& operator<<(std::ostream& os, mcrl2::data::detail::SMT_Solver_Type s) {
-    static char const* solvers[] = {
-      "ario",
-      "cvc",
-    };
-
-    os << solvers[s];
-
-    return os;
-  }
-  // endcond
 
 namespace tools {
 

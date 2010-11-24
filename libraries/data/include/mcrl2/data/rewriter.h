@@ -14,6 +14,7 @@
 
 #include <functional>
 #include <algorithm>
+#include <iostream>
 #include <sstream>
 
 #include "boost/shared_ptr.hpp"
@@ -343,6 +344,53 @@ namespace data {
       return R_(t, sigma_);
     }
   };
+
+  /// \brief standard conversion from stream to rewrite strategy
+  inline std::istream& operator>>(std::istream& is, data::rewriter::strategy& s) {
+    char strategy[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    using namespace mcrl2::data::detail;
+
+    is.readsome(strategy, 9);
+
+    size_t new_s = static_cast< size_t >(RewriteStrategyFromString(strategy));
+
+    s = static_cast< data::rewriter::strategy >(new_s);
+
+    if (static_cast< size_t >(new_s) == static_cast< size_t >(GS_REWR_INVALID)) {
+      is.setstate(std::ios_base::failbit);
+    }
+
+    return is;
+  }
+
+  /// \brief standard conversion from rewrite strategy to stream
+  inline std::ostream& operator<<(std::ostream& os, data::rewriter::strategy& s) {
+    static char const* strategies[] = {
+      "inner",
+#ifdef MCRL2_INNERC_AVAILABLE
+      "innerc",
+#endif
+      "jitty",
+#ifdef MCRL2_JITTYC_AVAILABLE
+      "jittyc",
+#endif
+      "innerp",
+#ifdef MCRL2_JITTYC_AVAILABLE
+      "innerpc",
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
+      "jittyp"
+#else
+      "jittyp",
+      "jittypc"
+#endif
+    };
+
+    os << strategies[s];
+
+    return os;
+  }
 
   /// \brief Pretty prints a rewrite strategy
   /// \param[in] s A rewrite strategy.

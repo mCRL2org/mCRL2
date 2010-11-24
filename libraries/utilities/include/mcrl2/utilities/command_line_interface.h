@@ -37,7 +37,7 @@ namespace mcrl2 {
 
     /** \brief toolset copyright period description */
     inline std::string copyright_period() {
-      return "2010";
+      return "2011";
     }
 
     // \cond INTERNAL
