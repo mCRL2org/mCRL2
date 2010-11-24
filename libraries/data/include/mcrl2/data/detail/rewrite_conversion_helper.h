@@ -15,6 +15,7 @@
 #include "boost/assert.hpp"
 
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/filter_iterator.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/abstraction.h"
@@ -74,29 +75,32 @@ namespace mcrl2 {
             }
           }
 
+          // Implementor has a pointer to a rewrite conversion helper.
+          // This allows the implementor object to remain constant, wheras the
+          // rewrite_conversion_helper can be changed.
           struct implementor {
-            rewrite_conversion_helper& m_owner;
+            rewrite_conversion_helper* m_owner;
 
-            implementor(rewrite_conversion_helper& owner) : m_owner(owner)
+            implementor(rewrite_conversion_helper* owner) : m_owner(owner)
             {}
 
             template < typename Expression >
-            data_expression operator()(Expression const& expression)
+            data_expression operator()(Expression const& expression) const
             {
-              return m_owner.implement(expression);
+              return m_owner->implement(expression);
             }
           };
 
           struct reconstructor {
-            rewrite_conversion_helper& m_owner;
+            rewrite_conversion_helper* m_owner;
 
-            reconstructor(rewrite_conversion_helper& owner) : m_owner(owner)
+            reconstructor(rewrite_conversion_helper* owner) : m_owner(owner)
             {}
 
             template < typename Expression >
-            data_expression operator()(Expression const& expression)
+            data_expression operator()(Expression const& expression) const
             {
-              return m_owner.reconstruct(expression);
+              return m_owner->reconstruct(expression);
             }
           };
 
@@ -221,8 +225,8 @@ namespace mcrl2 {
           {
             typedef atermpp::detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > iterator_type;
 
-            return boost::make_iterator_range(iterator_type(container.begin(), implementor(*this)),
-                                              iterator_type(container.end(), implementor(*this)));
+            return boost::make_iterator_range(iterator_type(container.begin(), implementor(this)),
+                                              iterator_type(container.end(), implementor(this)));
           }
 
           data_expression implement(application const& expression)
@@ -283,8 +287,8 @@ namespace mcrl2 {
           {
             typedef atermpp::detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > iterator_type;
 
-            return boost::make_iterator_range(iterator_type(container.begin(), reconstructor(*this)),
-                                              iterator_type(container.end(), reconstructor(*this)));
+            return boost::make_iterator_range(iterator_type(container.begin(), reconstructor(this)),
+                                              iterator_type(container.end(), reconstructor(this)));
           }
 
           data_expression reconstruct(data_expression const& expression)

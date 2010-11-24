@@ -119,19 +119,19 @@ namespace mcrl2 {
             return e;
           }
 
-		  assignment_expression operator()(assignment_expression const& a)
-		  {
-			if (is_assignment(a))
-			{
-			  return static_cast< Derived& >(*this)(assignment(a));
-			}
-			else if (is_identifier_assignment(a))
-			{
-			  return static_cast< Derived& >(*this)(identifier_assignment(a));
-			}
+          assignment_expression operator()(assignment_expression const& a)
+          {
+            if (is_assignment(a))
+            {
+              return static_cast< Derived& >(*this)(assignment(a));
+            }
+            else if (is_identifier_assignment(a))
+            {
+              return static_cast< Derived& >(*this)(identifier_assignment(a));
+            }
 
-			return a;
-		  }
+            return a;
+          }
 
           assignment operator()(assignment const& a)
           {
@@ -139,8 +139,8 @@ namespace mcrl2 {
                               static_cast< Derived& >(*this)(a.rhs()));
           }
 
-		  identifier_assignment operator()(identifier_assignment const& a)
-          { std::cerr << "HIER " << a << "\n";
+          identifier_assignment operator()(identifier_assignment const& a)
+          {
             return identifier_assignment(static_cast< Derived& >(*this)(a.lhs()),
                               			 static_cast< Derived& >(*this)(a.rhs()));
           }

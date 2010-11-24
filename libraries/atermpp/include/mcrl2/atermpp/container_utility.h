@@ -157,188 +157,7 @@ namespace atermpp {
       struct is_set : public is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
       { };
 
-      // \note the dereference operation returns (re-)evaluates the function
-      template < typename AdaptableUnaryFunction, typename Iterator, typename Value = typename AdaptableUnaryFunction::result_type >
-      class transform_iterator : public boost::iterator_adaptor<
-                 atermpp::detail::transform_iterator< AdaptableUnaryFunction, Iterator, Value >,
-                                                        Iterator, Value, boost::use_default, Value > {
-
-        friend class boost::iterator_core_access;
-
-        private:
-
-          mutable AdaptableUnaryFunction m_transformer;
-
-          Value dereference() const
-          {
-            return m_transformer(*(this->base_reference()));
-          }
-
-        public:
-
-          transform_iterator(Iterator const& iterator) : transform_iterator::iterator_adaptor_(iterator)
-          {}
-
-          transform_iterator(Iterator const& iterator, typename boost::call_traits< AdaptableUnaryFunction >::param_type transformer) :
-                                                         transform_iterator::iterator_adaptor_(iterator), m_transformer(transformer)
-          {}
-      };
-
-      template < typename AdaptableUnaryFunction, typename ForwardTraversalIterator1, typename ForwardTraversalIterator2 >
-      class combine_iterator : public boost::iterator_facade<
-                 atermpp::detail::combine_iterator< AdaptableUnaryFunction, ForwardTraversalIterator1, ForwardTraversalIterator2 >,
-                         typename boost::remove_reference< AdaptableUnaryFunction >::type::result_type, boost::forward_traversal_tag,
-                         typename boost::remove_reference< AdaptableUnaryFunction >::type::result_type > {
-
-        friend class boost::iterator_core_access;
-
-        private:
-
-          AdaptableUnaryFunction     m_transformer;
-          ForwardTraversalIterator1  m_iterator_1;
-          ForwardTraversalIterator2  m_iterator_2;
-
-          typename boost::remove_reference< AdaptableUnaryFunction >::type::result_type dereference() const
-          {
-            return m_transformer(*m_iterator_1, *m_iterator_2);
-          }
-
-          void increment()
-          {
-            ++m_iterator_1;
-            ++m_iterator_2;
-          }
-
-          bool equal(combine_iterator const& other) const
-          {
-            return m_iterator_1 == other.m_iterator_1 && m_iterator_2 == other.m_iterator_2;
-          }
-
-        public:
-
-          combine_iterator(typename boost::call_traits< AdaptableUnaryFunction >::param_type transformer,
-					 ForwardTraversalIterator1 i1, ForwardTraversalIterator2 i2) : m_transformer(transformer), m_iterator_1(i1), m_iterator_2(i2)
-          { }
-      };
-
-      template < typename AdaptableUnaryFunction, typename ForwardTraversalIterator1, typename ForwardTraversalIterator2 >
-      combine_iterator< typename boost::add_reference< AdaptableUnaryFunction >::type, ForwardTraversalIterator1, ForwardTraversalIterator2 >
-      make_combine_iterator(AdaptableUnaryFunction f, ForwardTraversalIterator1 const& i1, ForwardTraversalIterator2 const& i2) {
-        return combine_iterator< typename boost::add_reference< AdaptableUnaryFunction >::type, ForwardTraversalIterator1, ForwardTraversalIterator2 >(f, i1, i2);
-      }
-
-      template < typename Expression, typename Predicate, typename OutputIterator >
-      class filter_insert_iterator {
-
-        public:
-
-          typedef std::output_iterator_tag iterator_category;
-          typedef Expression               value_type;
-          typedef void                     difference_type;
-          typedef void                     pointer;
-          typedef void                     reference;
-
-          struct proxy {
-            Predicate      m_filter;
-            OutputIterator m_sink;
-
-            void operator=(Expression const& p) {
-              if (m_filter(p)) {
-                *m_sink = static_cast< typename OutputIterator::value_type >(p);
-              }
-            }
-
-            proxy(Predicate const& filter, OutputIterator const& sink) : m_filter(filter), m_sink(sink) {
-            }
-          };
-
-        private:
-
-          proxy m_proxy;
-
-        public:
-
-          proxy& operator*() {
-            return m_proxy;
-          }
-
-          filter_insert_iterator& operator++() {
-            return *this;
-          }
-
-          filter_insert_iterator& operator++(int) {
-            return *this;
-          }
-
-          filter_insert_iterator(Predicate const& m_filter, OutputIterator const& sink) : m_proxy(m_filter, sink) {
-          }
-      };
-
-      // factory method
-      // \param[in] predicate is a filter predicate
-      // \parampin] filter is a filter predicate
-      template < typename Container, typename Predicate >
-      inline filter_insert_iterator< typename Container::value_type, Predicate, std::insert_iterator< Container > >
-      make_filter_inserter(Container& c, Predicate const& filter, typename boost::enable_if< typename is_container< Container >::type >::type* = 0) {
-        return filter_insert_iterator< typename Container::value_type, Predicate, std::insert_iterator< Container > >(filter, std::inserter(c, c.end()));
-      }
-
-      // factory method
-      // \param[in] predicate is a filter predicate
-      // \parampin] filter is a filter predicate
-      template < typename Expression, typename Predicate, typename OutputIterator >
-      inline filter_insert_iterator< Expression, Predicate, OutputIterator >
-      make_filter_inserter(Predicate const& filter, OutputIterator& o) {
-        return filter_insert_iterator< Expression, Predicate, OutputIterator >(filter, o);
-      }
-
-      template < typename Iterator, typename AdaptableUnaryPredicate >
-      class filter_iterator : public boost::iterator_adaptor<
-                 atermpp::detail::filter_iterator< Iterator, AdaptableUnaryPredicate >, Iterator > {
-
-        friend class boost::iterator_core_access;
-
-        protected:
-
-          AdaptableUnaryPredicate    m_predicate;
-          Iterator                   m_end;
-
-          void increment()
-          {
-            if (this->base_reference() != m_end)
-            {
-              while (++this->base_reference() != m_end && !m_predicate(*(this->base_reference())))
-              { }
-            }
-          }
-
-        public:
-
-          filter_iterator(AdaptableUnaryPredicate predicate, boost::iterator_range< Iterator > const& range) :
-                 filter_iterator::iterator_adaptor_(range.begin()), m_predicate(predicate), m_end(range.end())
-          {}
-
-          filter_iterator(AdaptableUnaryPredicate predicate, Iterator begin, Iterator end) :
-                 filter_iterator::iterator_adaptor_(begin), m_predicate(predicate), m_end(end)
-          {}
-
-          filter_iterator(AdaptableUnaryPredicate predicate, Iterator end) :
-                 filter_iterator::iterator_adaptor_(end), m_predicate(predicate), m_end(end)
-          {}
-      };
-
-
-      template < typename AdaptableUnaryPredicate, typename Iterator >
-      boost::iterator_range< filter_iterator< Iterator, AdaptableUnaryPredicate > >
-      make_filter_iterator_range(boost::iterator_range< Iterator > const& r, AdaptableUnaryPredicate predicate)
-      {
-        typedef filter_iterator< Iterator, AdaptableUnaryPredicate > iterator_type;
-
-        return boost::iterator_range< iterator_type >(
-                    iterator_type(predicate, r), iterator_type(predicate, r.end()));
-      }
-
-      /// The Boost.pheonix library has a nice implementation that can also be used...
+      /// The Boost.phoenix library has a nice implementation that can also be used...
       /// For our limited purposes this is enough though
       template < typename Result >
       struct construct {
@@ -349,13 +168,14 @@ namespace atermpp {
         {
           return Result(a);
         }
- 
+
         template < typename A, typename A1 >
         Result operator()(A a, A1 a1) const
         {
           return Result(a, a1);
         }
       };
+
     } // namespace detail
 
     /// \brief Constructs a vector with element type T of one argument.

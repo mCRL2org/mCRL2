@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/transform_iterator.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/structured_sort_constructor_argument.h"
 
@@ -123,7 +124,6 @@ class structured_sort_constructor_base: public atermpp::aterm_appl
         typedef boost::iterator_range< arguments_iterator >                                 arguments_range;
         /// \brief iterator range over constant list of structured sort constructors
         typedef boost::iterator_range< arguments_iterator >                                 arguments_const_range;
-
         /// \brief iterator range over list of structured sort constructors
         typedef atermpp::detail::transform_iterator< get_argument_sort, arguments_iterator >         argument_sorts_iterator;
         /// \brief iterator range over list of structured sort constructors
