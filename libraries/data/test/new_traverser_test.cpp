@@ -20,6 +20,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/new_find.h"
 #include "mcrl2/data/traverser.h"
+#include "mcrl2/data/detail/data_expression_with_variables_traits.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

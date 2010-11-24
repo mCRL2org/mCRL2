@@ -23,6 +23,7 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/detail/data_expression_with_variables_traits.h"
 #include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitution.h"

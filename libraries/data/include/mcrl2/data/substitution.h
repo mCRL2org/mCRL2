@@ -20,6 +20,7 @@
 #include "boost/iterator/filter_iterator.hpp"
 
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
   namespace data {

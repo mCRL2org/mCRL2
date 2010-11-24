@@ -31,12 +31,11 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
+#include "mcrl2/data/detail/data_expression_with_variables.h"
 
 namespace mcrl2 {
 
   namespace data {
-
-    class data_expression_with_variables;
 
     /// \cond INTERNAL_DOCS
     namespace detail {
@@ -171,12 +170,7 @@ namespace mcrl2 {
           // Default, no traversal of sort expressions
           void operator()(data_expression_with_variables const& e)
           {
-// TODO: This code seems flawed!
-#if !defined(BOOST_CLANG) && !defined(__clang__)
-            reinterpret_cast< Derived& >(*this)(static_cast< data_expression const& >(e));
-#else
-            throw std::runtime_error("data::detail::traverser::operator(data_expression_with_variables) is not supported!!!");
-#endif
+            static_cast< Derived& >(*this)(static_cast< data_expression const& >(e));
           }
 
           // Default, no traversal of sort expressions

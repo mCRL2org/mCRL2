@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/utility.h
-/// \brief Provides utilities for working with lists.
+/// \file mcrl2/data/print.h
+/// \brief Provides utilities for pretty printing.
 
 #ifndef MCRL2_DATA_PRINT_H
 #define MCRL2_DATA_PRINT_H
