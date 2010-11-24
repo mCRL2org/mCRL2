@@ -468,6 +468,79 @@ div.tabs2 td {
 div.tabs2 span {float : none;}
 /* End IE5-Mac hack */
 
+div.tabs3 {
+   padding: 0 1em 0 1em;
+   white-space: nowrap;
+   overflow: visible;
+   border-collapse: collapse;
+   text-align: left;
+   margin: 1px 0 0 13em;
+   width: 800px;
+}
+
+div.tabs3 ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+div.tabs3 li {
+   display: inline;
+   margin: 0 4px 0 0;
+   padding: 2px 3px 0px 3px;
+   border: 1px solid #aaa;
+   border-bottom: none;
+   overflow: visible;
+   background-color: #eee;
+}
+
+div.tabs3 li.current {
+  background-color: white;
+  font-weight: bold;
+}
+
+div.tabs3 table {
+  border: 0;
+  display:inline;
+  font: x-small;
+}
+
+div.tabs3 form {
+  border: 0;
+  display: inline;
+  position: absolute;
+  top: 0;
+  right: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+div.tabs3 a {
+   text-decoration  : none;
+}
+
+div.tabs3 a:link, div.tabs3 a:visited,
+div.tabs3 a:active {
+  color: #002bb8;
+}
+
+div.tabs3 a:hover {
+  color: #ba0000;
+}
+
+div.tabs3 input {
+  border: 1px solid #aaa;
+}
+
+div.tabs3 td {
+   text-decoration  : none;
+}
+
+/* Commented Backslash Hack hides rule from IE5-Mac \*/
+div.tabs3 span {float : none;}
+/* End IE5-Mac hack */
+
+
 /* Navigation path */
 div.navpath {
   margin: 0 1em 0 13em;
