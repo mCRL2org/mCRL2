@@ -33,6 +33,27 @@ namespace lts
 namespace detail
 {
 
+  template < class LTS_TYPE>
+  size_t determine_tau_label(const LTS_TYPE &l)
+  {
+    // Set the tau_label to an existing label, if possible.
+    // Preference goes to a label which has name "tau".
+    // So first find an arbitrary tau, and then let this tau
+    // label be superseded by "tau". If nothing is found the tau
+    // label becomes l.num_action_labels, but there will not be a tau
+    // anyhow in this case.
+    size_t tau_label=l.num_action_labels();
+    for(size_t i=0; i<l.num_action_labels(); ++i)
+    {
+      if (l.is_tau(i))
+      {
+        tau_label=i;
+        break;
+      }
+    }
+    return tau_label;
+  }
+
 template < class LTS_TYPE>
 class bisim_partitioner
 { 
@@ -1196,29 +1217,6 @@ class bisim_partitioner
     }
     return bisim_part.in_same_class(l1.initial_state(),init_l2);
   }
-
-  template < class LTS_TYPE>
-  size_t determine_tau_label(const LTS_TYPE &l)
-  {
-    // Set the tau_label to an existing label, if possible.
-    // Preference goes to a label which has name "tau".
-    // So first find an arbitrary tau, and then let this tau
-    // label be superseded by "tau". If nothing is found the tau
-    // label becomes l.num_action_labels, but there will not be a tau
-    // anyhow in this case.
-    size_t tau_label=l.num_action_labels();
-    for(size_t i=0; i<l.num_action_labels(); ++i)
-    {
-      if (l.is_tau(i))
-      {
-        tau_label=i;
-        break;
-      }
-    }
-    return tau_label;
-  }
-
-
 
 }
 }
