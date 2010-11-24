@@ -684,8 +684,11 @@ namespace mcrl2
      *  \param[in] preserve_divergence_loops If true leave a self loop on states that resided on a tau
      *            cycle in the original transition system.
      */
+    /*
+     * Is already defined in liblts_scc.h, which is included here.
     template <class LTS_TYPE>
     void scc_reduce(LTS_TYPE &l,const bool preserve_divergence_loops=false);
+     */
 
     /** \brief Merge the second lts into the first lts.
         \param[in/out] l1 The transition system in which l2 is merged.

@@ -254,7 +254,7 @@ class scc_partitioner
 } // namespace detail
 
   template < class LTS_TYPE>
-  void scc_reduce(LTS_TYPE &l,const bool preserve_divergence_loops /* = false */)
+  void scc_reduce(LTS_TYPE &l,const bool preserve_divergence_loops = false)
   { 
     detail::scc_partitioner<LTS_TYPE> scc_part(l);
   
