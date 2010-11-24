@@ -271,40 +271,6 @@ namespace mcrl2
       return preorder_strings[pre];
     }
   
-    /** \brief Options for equivalence checking/reduction algorithms
-     *  \details This class stores options for the algorithms that reduce an LTS
-     *  modulo an equivalence or check the equivalence of two LTSs. */
-    class lts_eq_options
-    {
-      public:
-        /** \brief Constructor.
-         *  \details Creates an object with the options for equivalence checking/reduction
-         *  set to their default values.
-         */
-        lts_eq_options();
-
-        struct
-        {
-          /** \brief Indicates whether to add equivalence class
-           * information to every state.
-           * \details
-           * If \a false, the reduction algorithm reduces the LTS by mapping
-           * equivalent states onto each other.
-           *
-           * If \a true, the LTS is \b not reduced. Instead, the algorithm adds a
-           * parameter to the state vector of every state. The value of this
-           * parameter indicates the equivalence class to which that state belongs.
-           *
-           * This options only works with strong and branching bisimilarity.
-           */
-          bool add_class_to_state;
-
-        } reduce; /**< \brief Contains the options data.*/
-    };
-    /** \brief An empty lts_eq_options object */
-    extern lts_eq_options lts_eq_no_options;
-
-
 
    /** \brief Gives a textual list describing supported equivalences on LTSs.
     * \param[in] default_equivalence The equivalence that should be marked

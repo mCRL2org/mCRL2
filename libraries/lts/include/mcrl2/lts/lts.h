@@ -7,9 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-/** \file
+/** \file lts.h
  *
- * \brief The main header file of the LTS library.
+ * \brief The file containing the core class for transition systems.
  * \details This is the LTS library's main header file. It declares all publicly
  * accessible data structures that form the interface of the library.
  * \author Muck van Weerdenburg, Jan Friso Groote

@@ -279,7 +279,7 @@ void lts_aut_t::load(const string &filename)
 
     if ( !is.is_open() )
     {
-      throw mcrl2::runtime_error("cannot open .aut file '" + filename + "' for reading.");
+      throw mcrl2::runtime_error("cannot open .aut file '" + filename + ".");
     }
 
     read_from_aut(*this,is);
@@ -304,7 +304,7 @@ void lts_aut_t::save(string const& filename) const
   
     if ( !os.is_open() )
     {
-      throw mcrl2::runtime_error("cannot open .aut file '" + filename + "' for writing.");
+      throw mcrl2::runtime_error("cannot create .aut file '" + filename + ".");
       return;
     }
 
