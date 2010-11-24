@@ -407,7 +407,7 @@ namespace bes {
   };
 
   inline
-  bool small_progress_measures(boolean_equation_system<>& b, unsigned int loglevel)
+  bool small_progress_measures(boolean_equation_system<>& b, unsigned int loglevel = 0)
   {
     boolean_variable first = b.equations().front().variable();
     make_standard_form(b, true);
