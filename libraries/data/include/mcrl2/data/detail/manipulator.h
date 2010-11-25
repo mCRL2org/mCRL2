@@ -15,6 +15,9 @@
 #include "boost/type_traits/is_convertible.hpp"
 #include "boost/range/iterator_range.hpp"
 
+#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/atermpp/transform_iterator.h"
+
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/forall.h"
@@ -24,7 +27,6 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
-#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2 {
 
