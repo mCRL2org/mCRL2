@@ -67,6 +67,11 @@
       int getWrapWordCode();
       int getWrapNoneCode();
 
+      int GetSelectionStart();
+      int GetSelectionEnd();
+      int FindText(int begin, int end, wxString s);
+      int GetTextLength();
+
   private:
       wxString fileInUse;
       void OnTextChange(wxCommandEvent& /* ev */);

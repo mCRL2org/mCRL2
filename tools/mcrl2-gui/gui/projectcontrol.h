@@ -38,16 +38,10 @@
 //#include <wx/msw/regconf.h> //(wxRegConfig class)
 
 #define ID_GDC		2000
-#define ID_OPEN    2001
-#define ID_EDIT		2002
 #define ID_RENAME  2003
-#define ID_DETAILS	2004
-#define ID_DELETE	 2005
-#define ID_NEW_FILE 2006
 #define ID_NEW_DIR 2007
-#define ID_REFRESH 2008
 #define ID_EXPAND 2009
-#define ID_COPY_FILE 2010
+
 
 using namespace std;
 
@@ -97,8 +91,11 @@ public:
 
 	void OnPopupClick(wxCommandEvent &evt) {
 
-		if (evt.GetId() < ID_GDC) {
 
+		if (evt.GetId() < ID_GDC) {
+      /* Use position in pop-up menu as identifier.
+       * This may in future endeavors cause problems
+       * */
 			Tool tool = m_tool_catalog[evt.GetId()];
 
 			FileIO fileIO;
@@ -123,7 +120,7 @@ public:
 			string filepath;
 
 			switch (evt.GetId()) {
-			case ID_NEW_FILE:
+			case wxID_NEW:
 				//Parent ID
 				CreateNewFile();
 				break;
@@ -164,25 +161,25 @@ public:
 				}
 
 				break;
-			case ID_EDIT:
+			case wxID_EDIT:
         Edit();
 				break;
-			case ID_DETAILS:
+			case wxID_PROPERTIES:
 				ShowDetails();
 				break;
 			case ID_RENAME:
 				Rename();
 				break;
-			case ID_DELETE:
+			case wxID_DELETE:
 				Delete();
 				break;
-			case ID_REFRESH:
+			case wxID_REFRESH:
 				DoRefresh();
 				break;
 			case ID_EXPAND:
 			  this->ExpandPath(this->GetPath());
 			  break;
-			case ID_COPY_FILE:
+			case wxID_DUPLICATE:
 			  CopyFile();
 			  break;
 			}
@@ -473,7 +470,7 @@ public:
 		std::map<std::string, wxMenu*> menus;
 
 		if (wxFile::Exists(this->GetPath())) {
-			mnu.Append(ID_EDIT, wxT("Edit \tCtrl-E"));
+			mnu.Append(wxID_EDIT, wxT("Edit \tCtrl-E"));
 
 			for (vector<Tool>::iterator i = m_tool_catalog.begin(); i
 					!= m_tool_catalog.end(); ++i) {
@@ -524,15 +521,15 @@ public:
 		  mnu.AppendSeparator();
 		}
 
-		mnu.Append(ID_NEW_FILE, wxT("New File \tCtrl-N"));
+		mnu.Append(wxID_NEW, wxT("New File \tCtrl-N"));
 		mnu.Append(ID_NEW_DIR, wxT("New Directory"));
 		mnu.AppendSeparator();
-		mnu.Append(ID_COPY_FILE, wxT("Copy File \tF6"));
+		mnu.Append(wxID_DUPLICATE, wxT("Copy File \tF6"));
 		mnu.Append(ID_RENAME, wxT("Rename \tF2"));
-		mnu.Append(ID_DELETE, wxT("Delete \tDel"));
+		mnu.Append(wxID_DELETE, wxT("Delete \tDel"));
 		mnu.AppendSeparator();
-		mnu.Append(ID_REFRESH, wxT("Refresh \tF5"));
-		mnu.Append(ID_DETAILS, wxT("Details"));
+		mnu.Append(wxID_REFRESH, wxT("Refresh \tF5"));
+		mnu.Append(wxID_PROPERTIES, wxT("Details"));
 		mnu.Connect(wxEVT_COMMAND_MENU_SELECTED,
 				(wxObjectEventFunction) &GenericDirCtrl::OnPopupClick, NULL, this);
 		PopupMenu(&mnu);

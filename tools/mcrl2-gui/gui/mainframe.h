@@ -17,8 +17,6 @@
 #include "wx/frame.h"
 #include "wx/panel.h"
 
-#include "wx/timer.h"
-
 #include "wx/utils.h"
 #include "wx/menu.h"
 
@@ -433,13 +431,6 @@ public:
 	}
 	;
 
-	// polling output of async processes
-	void OnTimer(wxTimerEvent& /*event*/) {
-		/* Send a system wide idle event */
-		wxWakeUpIdle();
-	}
-	;
-
 	void OnExecPreferences(wxCommandEvent& /*event*/){
 	  Preferences *p = new Preferences();
 	  p->Show(true);
@@ -550,7 +541,6 @@ EVT_MENU(wxID_SELECTALL, MainFrame::OnSelectAll)
 EVT_MENU(wxID_CLEAR, MainFrame::OnCloseConfigPanelPage )
 
 EVT_IDLE(MainFrame::OnIdle)
-EVT_TIMER(wxID_ANY, MainFrame::OnTimer)
 EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
 EVT_UPDATE_PROJECT_TREE(wxID_ANY, MainFrame::OnUpdateProjectTree)
 EVT_UPDATE_FOCUS(wxID_ANY, MainFrame::UpdateFocus)

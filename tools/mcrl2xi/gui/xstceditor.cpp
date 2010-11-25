@@ -288,6 +288,31 @@ DEFINE_EVENT_TYPE( wxEVT_UPDATE_EDITOR_FOCUS )
     wxPostEvent(this->GetParent(), eventCustom);
   }
 
+  int xStcEditor::GetSelectionStart(){
+    long int from, to;
+    GetSelection(&from, &to);
+    return from;
+  };
+
+  int xStcEditor::GetSelectionEnd(){
+    long int from, to;
+    GetSelection(&from, &to);
+    return to;
+  };
+
+  int xStcEditor::FindText(int begin, int end, wxString s){
+    wxString sub = GetValue().substr( begin, end );
+
+    if( sub.Find(s) != wxNOT_FOUND ){
+      return begin + sub.Find(s);
+    }
+    return -1;
+  };
+
+  int xStcEditor::GetTextLength(){
+    return GetLastPosition();
+  };
+
 #endif
 
   /*

@@ -28,6 +28,7 @@
 #include "outputpanel.h"
 #include "mytextctrl.h"
 
+#include <wx/fdrepdlg.h>
 
 // Define main frame
 class MainFrame: public wxFrame {
@@ -52,8 +53,11 @@ public:
   void OnEvaluate(wxCommandEvent& e);
   void OnTypeCheck(wxCommandEvent& e);
   void OnWrapmode(wxCommandEvent& /*event*/);
+  void OnOpenFind(wxCommandEvent& /*event*/);
   void UpdateEditMenu();
 private:
+  void OnFindClose(wxFindDialogEvent& /* event */);
+  void OnFind(wxFindDialogEvent& event);
 
 	wxMenu *m_PanelMenu;
   wxMenu *editMenu;
@@ -65,6 +69,11 @@ private:
   outputpanel *output;
   xStcEditor *focussed_editor;
   myTextControl *focussed_txtCtrl;
+
+  xStcEditor *focussed_editor_for_find;
+
+  wxFindReplaceData findData;
+  wxFindReplaceDialog *m_dlgReplace;
 
   DECLARE_EVENT_TABLE()
 };

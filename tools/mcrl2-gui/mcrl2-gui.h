@@ -22,8 +22,6 @@
 #include "wx/frame.h"
 #include "wx/panel.h"
 
-#include "wx/timer.h"
-
 #include "wx/utils.h"
 #include "wx/menu.h"
 

@@ -26,6 +26,8 @@
 #include "mainframe.h"
 #include "settings.h"
 
+#include <wx/fdrepdlg.h>
+
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_MENU(wxID_CLOSE, MainFrame::OnQuit)
 EVT_MENU(wxID_NEW, MainFrame::OnNewFile)
@@ -45,6 +47,16 @@ EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveFileAs)
 EVT_MENU(mcrl2xi::myID_EVALEXPR, MainFrame::OnEvaluate)
 EVT_MENU(mcrl2xi::myID_TYPECHECKSPEC, MainFrame::OnTypeCheck)
 EVT_MENU(mcrl2xi::myID_WRAPMODE, MainFrame::OnWrapmode)
+
+EVT_MENU(wxID_FIND, MainFrame::OnOpenFind)
+
+//EVT_MENU(wxID_REPLACE, MainFrame::ShowReplaceDialog)
+EVT_FIND(wxID_ANY, MainFrame::OnFind)
+EVT_FIND_NEXT(wxID_ANY, MainFrame::OnFind)
+//EVT_FIND_REPLACE(wxID_ANY, MainFrame::OnReplace)
+//EVT_FIND_REPLACE_ALL(wxID_ANY, MainFrame::OnReplaceAll)
+EVT_FIND_CLOSE(wxID_ANY, MainFrame::OnFindClose)
+
 
 EVT_UPDATE_EDITOR_FOCUS(wxID_ANY, MainFrame::UpdateEdtFocus)
 EVT_MYTXTCTRL_FOCUS(wxID_ANY, MainFrame::UpdateTxtFocus)
@@ -103,6 +115,8 @@ END_EVENT_TABLE()
     editMenu->Enable(wxID_CUT, true);
 
     viewMenu = new wxMenu;
+    viewMenu->Append(wxID_FIND, wxT("&Find \tCtrl-F"), wxT("Find text")) ;
+    viewMenu->AppendSeparator();
     viewMenu->AppendCheckItem(mcrl2xi::myID_WRAPMODE, wxT("&Wrap mode \tCtrl+U"),
             wxT("Wrap lines in editor"));
 
@@ -289,6 +303,7 @@ END_EVENT_TABLE()
 
     } else {
       focussed_editor = (xStcEditor*) event.GetClientData();
+      focussed_editor_for_find = focussed_editor;
       m_PanelMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode() != 0);
     }
     UpdateEditMenu();
@@ -336,6 +351,67 @@ END_EVENT_TABLE()
       focussed_editor->SetWrapMode (focussed_editor->GetWrapMode() == 0?
           focussed_editor->getWrapWordCode():
           focussed_editor->getWrapNoneCode());
+    };
+  };
+
+  void MainFrame::OnOpenFind(wxCommandEvent& /* event */) {
+
+    focussed_editor_for_find = focussed_editor;
+
+    m_dlgReplace = new wxFindReplaceDialog
+                       (
+                        this,
+                        &findData,
+                        wxT("Find and replace dialog"),
+                        0
+#ifndef MCRL2_WITH_WXSTC
+                        | wxFR_NOUPDOWN
+#endif
+                       );
+    m_dlgReplace->Show(true);
+
+  };
+
+  void MainFrame::OnFindClose(wxFindDialogEvent& /* event */)
+  {
+      m_dlgReplace->Destroy();
+      m_dlgReplace = NULL;
+  };
+
+  void MainFrame::OnFind(wxFindDialogEvent& event)
+  {
+    if(focussed_editor_for_find){
+
+      int i;
+
+      if(focussed_editor_for_find->GetSelectionStart () != focussed_editor_for_find->GetSelectionEnd()){
+        i = focussed_editor_for_find->FindText( focussed_editor_for_find->GetSelectionStart (),
+            focussed_editor_for_find->GetSelectionEnd(), event.GetFindString());
+      } else {
+
+        /* fwd */
+        if ( event.GetFlags() == wxFR_DOWN ){
+          i = focussed_editor_for_find->FindText( focussed_editor_for_find->GetSelectionStart (), focussed_editor_for_find->GetTextLength() , event.GetFindString());
+        } else {
+        /* rev */
+          i = focussed_editor_for_find->FindText( focussed_editor_for_find->GetSelectionStart (), 0 , event.GetFindString());
+        }
+      }
+
+      if (i != -1){
+        focussed_editor_for_find->SetSelection(i,i);
+
+        m_dlgReplace->Destroy();
+        m_dlgReplace = NULL;
+      } else {
+        if ( event.GetFlags() == wxFR_DOWN ){
+          wxMessageBox(wxT("No match found downward."));
+        }else{
+          wxMessageBox(wxT("No match found upward."));
+        }
+      }
     }
   };
+
+
 

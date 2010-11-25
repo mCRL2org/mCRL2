@@ -87,11 +87,14 @@ Initialization::Initialization() {
 	for (std::vector<Tool>::iterator i = p_tools.begin(); i != p_tools.end(); ++i) {
 		string cmd = (*i).m_location + " --mcrl2-gui";
 
+//		cout << cmd << endl;
+
 		wxArrayString tool_output;
 		wxArrayString tool_errors;
 
+		wxString wxCmd = wxString( cmd.c_str(), wxConvUTF8 );
+
 		/* Execute tool */
-		wxString wxCmd(cmd.c_str(), wxConvUTF8);
 		if(wxExecute(wxCmd, tool_output, tool_errors, wxEXEC_SYNC) != 0)
 		{
 			std::cerr << "Failed to execute " << cmd << std::endl;
@@ -303,21 +306,21 @@ vector<Tool> Initialization::Read_tools() {
     }
 
 		wxString value;
-		value = child->GetPropVal( wxT("name"), wxEmptyString );
+		value = child->GetAttribute( wxT("name"), wxEmptyString );
 		tool.m_name = value.mb_str();
 
-		value = child->GetPropVal( wxT("shell"), wxEmptyString );
+		value = child->GetAttribute( wxT("shell"), wxEmptyString );
 		if( !( value.IsEmpty() || value == wxT("false") ) ){
       tool.m_tool_type = ishell;
 		}
 
-		value = child->GetPropVal( wxT("input_format"), wxEmptyString );
+		value = child->GetAttribute( wxT("input_format"), wxEmptyString );
 		tool.m_input_type = value.mb_str();
 
-		value = child->GetPropVal( wxT("output_format"), wxEmptyString );
+		value = child->GetAttribute( wxT("output_format"), wxEmptyString );
 		tool.m_output_type = value.mb_str();
 
-		value = child->GetPropVal( wxT("location"), wxEmptyString );
+		value = child->GetAttribute( wxT("location"), wxEmptyString );
 		std::string location = std::string(value.mb_str());
     if (location.empty()){
       location = m_executable_basename + "/"+  tool.m_name;
@@ -347,7 +350,7 @@ vector<Tool> Initialization::Read_tools() {
      	cout << "File \"" << location << "\" does not exist" << endl;
     }
 
-    value = child->GetPropVal( wxT("category"), wxEmptyString );
+    value = child->GetAttribute( wxT("category"), wxEmptyString );
     tool.m_category = value.mb_str();
 
     tools.push_back(tool);

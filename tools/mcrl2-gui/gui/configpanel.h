@@ -31,7 +31,6 @@ enum ToolStatus { STATUS_NONE, STATUS_RUNNING, STATUS_COMPLETE, STATUS_FAILED};
 #define ID_RUN_TOOL 1000
 #define ID_OUTPUT_FILE 1001
 #define ID_ABORT_TOOL 1002
-#define ID_TIMER 1003
 
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_UPDATE_PROJECT_TREE, 7777)
@@ -516,7 +515,7 @@ private:
           for( size_t i = 0; i < n ; ++i ){
             if( (( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file != NULL ){
               string suggestion = file_suggestion + c + "." + m_tool.m_output_type;
-              if((( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath()){
+              if(((( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath()) != wxEmptyString){
                 intStat = suggestion.compare( (( ConfigPanel* ) m_parent->GetPage(i))->suggested_output_file->GetPath().mb_str() );
               }
             }

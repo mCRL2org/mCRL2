@@ -19,7 +19,6 @@
 
 #define ID_BT_GO_BACK 1600
 #define ID_BT_RUN 1601
-#define ID_BT_SAVE 1602
 
 class OutputConfigPanel: public wxPanel {
 public:
@@ -35,7 +34,7 @@ public:
     wxGridBagSizer *fgs = new wxGridBagSizer(5, 5);
 
 		wxButton *bt_run    = new wxButton(this, ID_BT_RUN, wxT("Re-Run"), wxDefaultPosition, wxDefaultSize);
-		wxButton *bt_save = new wxButton(this, ID_BT_SAVE, wxT("Save Output"), wxDefaultPosition, wxDefaultSize);
+		wxButton *bt_save = new wxButton(this, wxID_SAVE, wxT("Save Output"), wxDefaultPosition, wxDefaultSize);
 		wxButton *bt_back = new wxButton(this, ID_BT_GO_BACK, wxT("<<< Back"), wxDefaultPosition, wxDefaultSize);
 
 		fgs->Add( bt_run, wxGBPosition(0,0));
@@ -84,7 +83,7 @@ DECLARE_EVENT_TABLE()
 BEGIN_EVENT_TABLE(OutputConfigPanel, wxPanel)
   EVT_BUTTON(ID_BT_GO_BACK, OutputConfigPanel::OnGoBackToConfiguration)
   EVT_BUTTON(ID_BT_RUN,     OutputConfigPanel::OnRunAndClear)
-  EVT_BUTTON(ID_BT_SAVE,    OutputConfigPanel::OnSave)
+  EVT_BUTTON(wxID_SAVE,    OutputConfigPanel::OnSave)
 END_EVENT_TABLE ()
 
 #endif

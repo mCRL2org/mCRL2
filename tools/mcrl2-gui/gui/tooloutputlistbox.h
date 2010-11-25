@@ -19,14 +19,10 @@
 #include <wx/textctrl.h>
 
 
-#define ID_CLEAR_TEXTCTRL  1500
-#define ID_SAVE_TEXTCTRL   1501
 #define ID_RUN_LISTBOX  1502
-#define ID_COPY_LINES_TO_CLIPBOARD 1503
 #define ID_GO_BACK_TO_CONFIGURATION 1504
 #define ID_RUN_AND_NOT_CLEAR 1505
 #define ID_RUN_AND_CLEAR 1506
-#define ID_SELECT_ALL 1507
 #define ID_SELECT_NONE 1508
 
 BEGIN_DECLARE_EVENT_TYPES()
@@ -158,11 +154,11 @@ class TOutputTextCtrlMenu: public wxMenu
 
     TOutputTextCtrlMenu(ToolOutPutTextCtrlBase *parent)
     {
-      this->Append(ID_SELECT_ALL, wxT("Select All...\tCtrl-A"));
-      this->Append(ID_COPY_LINES_TO_CLIPBOARD, wxT("Copy Selection...\tCtrl-C"));
-      this->Append(ID_SAVE_TEXTCTRL, wxT("Save...\tCtrl-S"));
+      this->Append(wxID_SELECTALL, wxT("Select All...\tCtrl-A"));
+      this->Append(wxID_COPY, wxT("Copy Selection...\tCtrl-C"));
+      this->Append(wxID_SAVE, wxT("Save...\tCtrl-S"));
       this->AppendSeparator();
-      this->Append(ID_CLEAR_TEXTCTRL, wxT("Clear output"));
+      this->Append(wxID_CLEAR, wxT("Clear output"));
 
       p = parent;
 
@@ -197,10 +193,10 @@ class TOutputTextCtrlMenu: public wxMenu
 };
 
   BEGIN_EVENT_TABLE(TOutputTextCtrlMenu, wxMenu)
-    EVT_MENU(ID_CLEAR_TEXTCTRL, TOutputTextCtrlMenu::OnClear )
-    EVT_MENU(ID_SAVE_TEXTCTRL, TOutputTextCtrlMenu::OnSave )
-    EVT_MENU(ID_COPY_LINES_TO_CLIPBOARD, TOutputTextCtrlMenu::OnCopyLine)
-    EVT_MENU(ID_SELECT_ALL, TOutputTextCtrlMenu::OnSelectAll)
+    EVT_MENU(wxID_CLEAR, TOutputTextCtrlMenu::OnClear )
+    EVT_MENU(wxID_SAVE, TOutputTextCtrlMenu::OnSave )
+    EVT_MENU(wxID_COPY, TOutputTextCtrlMenu::OnCopyLine)
+    EVT_MENU(wxID_SELECTALL, TOutputTextCtrlMenu::OnSelectAll)
   END_EVENT_TABLE ()
 
 class OutPutTextCtrl : public OutPutTextCtrlBase
@@ -220,44 +216,10 @@ class OutPutTextCtrl : public OutPutTextCtrlBase
         PopupMenu(m);
       }
 
-      void
-      onKeyDown(wxKeyEvent& evt)
-      {
-
-        //std::cout << "Pressed key {" << evt.GetKeyCode() << "}\n";
-
-        switch (evt.GetKeyCode())
-        {
-          case 65: //65 == a or A
-            if (evt.ControlDown())
-            {
-              SelectAll();
-            }
-            break;
-          case 67: //67 == c or C
-            if (evt.ControlDown())
-            {
-              CopyLine();
-            }
-            break;
-          case 83: //83 == s or S
-            if (evt.ControlDown())
-            {
-              Save();
-            }
-            break;
-        }
-
-        evt.Skip();
-
-      }
-
-
       DECLARE_EVENT_TABLE()
 
 };
 BEGIN_EVENT_TABLE(OutPutTextCtrl, OutPutTextCtrlBase)
-  EVT_KEY_DOWN( OutPutTextCtrl::onKeyDown)
   EVT_RIGHT_DOWN( OutPutTextCtrl::OnRightClick )
 END_EVENT_TABLE ()
 
@@ -332,7 +294,6 @@ class ToolOutPutTextCtrl : public ToolOutPutTextCtrlBase
   DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(ToolOutPutTextCtrl, ToolOutPutTextCtrlBase)
-  EVT_KEY_DOWN( OutPutTextCtrl::onKeyDown)
   EVT_RIGHT_DOWN( ToolOutPutTextCtrl::OnRightClick )
 END_EVENT_TABLE ()
 

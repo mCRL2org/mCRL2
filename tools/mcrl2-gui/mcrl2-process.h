@@ -11,7 +11,6 @@
 #include <wx/process.h>
 #include <wx/txtstrm.h>
 #include "wx/defs.h"
-#include <wx/timer.h>
 #include <wx/thread.h>
 #include <wx/listbox.h>
 
@@ -63,8 +62,6 @@ WX_DEFINE_ARRAY_PTR(MyPipedProcess *, MyActiveProcessArray)
 ;
 MyActiveProcessArray running_processes;
 
-wxTimer m_timerIdleWakeUp;
-
 class MyProcess: public wxProcess {
 public:
 	MyProcess(wxProcess *parent ) :
@@ -95,14 +92,6 @@ public:
 
 	void AddAsyncProcess(wxTextCtrl *output ) {
 		m_listbox_output = output;
-		if (running_processes.IsEmpty()) {
-			// we want to start getting the timer events to ensure that a
-			// steady stream of idle events comes in -- otherwise we
-			// wouldn't be able to poll the child process input
-			m_timerIdleWakeUp.Start(100);
-		}
-		//otherwise timer is already running
-
 		running_processes.Add(this);
 	}
 
@@ -114,11 +103,6 @@ public:
 		running_processes.Remove(this);
 
 		MyProcess::OnTerminate(pid, status);
-
-		if (running_processes.IsEmpty()) {
-			// Stop timer
-			m_timerIdleWakeUp.Stop();
-		}
 
     wxCommandEvent eventCustom(wxEVT_MY_PROCESS_END);
     wxPostEvent(m_parent, eventCustom);
