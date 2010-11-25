@@ -625,7 +625,8 @@ static void build_arg_tables()
 	  if (cur_arg == 0)
 	    arg = term;
 	  else
-	    arg = AT_getAnnotations(term);
+	    /* arg = AT_getAnnotations(term); */
+            assert(0);
 	} else {
 	  switch(ATgetType(term)) {
 	  case AT_LIST:
@@ -690,7 +691,7 @@ static void add_term(sym_entry *entry, ATerm t)
 static void collect_terms(ATerm t)
 {
   AFun sym = -1;
-  ATerm annos;
+  /* ATerm annos; */
   sym_entry *entry;
 
   if (!IS_MARKED(t->header)) {
@@ -743,13 +744,13 @@ static void collect_terms(ATerm t)
     add_term(entry, t);
 		
     /* handle annotation */
-    annos = AT_getAnnotations(t);
+    /* annos = AT_getAnnotations(t);
     if (annos) {
       entry = &sym_entries[at_lookup_table[AS_ANNOTATION]->index];
       assert(entry->id == AS_ANNOTATION);
       collect_terms((ATerm)annos);
       add_term(entry, t);
-    }
+    } */
 
     SET_MARK(t->header);
   }
@@ -888,14 +889,14 @@ static ATbool write_term(ATerm t, byte_writer *writer, ATbool anno_done)
 {
   int arg_idx;
   sym_entry *trm_sym = NULL;
-  ATerm annos;
+  /* ATerm annos;
 
-  annos = AT_getAnnotations(t);
+  annos = AT_getAnnotations(t); */
 
   /*ATfprintf(stderr, "write term: %t (%d)\n", t, anno_done);*/
-  if(!anno_done && annos) {
+  /* if(!anno_done && annos) {
     /*ATfprintf(stderr, "  writing annotated term, term=%t, annos=%t\n",
-      t, annos);*/
+      t, annos);* /
     trm_sym = &sym_entries[at_lookup_table[AS_ANNOTATION]->index];
     if(!write_arg(trm_sym, t, 0, writer, ATtrue)) {
       return ATfalse;
@@ -903,7 +904,8 @@ static ATbool write_term(ATerm t, byte_writer *writer, ATbool anno_done)
     if(!write_arg(trm_sym, annos, 1, writer, ATfalse)) {
       return ATfalse;
     }
-  } else {
+  } else  */
+  {
     switch(ATgetType(t)) {
     case AT_INT:
       /* If ATerm integers are > 32 bits, then this can fail. */
@@ -1466,9 +1468,9 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
   case AS_EMPTY_LIST:
     result = (ATerm)ATempty;
     break;
-  case AS_ANNOTATION:
+  /* case AS_ANNOTATION:
     result = AT_setAnnotations(args[0], args[1]);
-    break;
+    break; */
   default:
     /* Must be a function application */
     result = (ATerm)ATmakeApplArray(sym->sym, args);

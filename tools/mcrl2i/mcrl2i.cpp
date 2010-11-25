@@ -59,7 +59,7 @@ static bool check_whether_variable_string_is_in_use(
                    const atermpp::set < variable > &varset)
 { for(atermpp::set < variable >::const_iterator i=varset.begin();
           i!=varset.end(); ++i)
-  { if (i->name()==s)
+  { if (i->name()==s.c_str())
     { return true;
     }
   }

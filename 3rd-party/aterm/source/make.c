@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include "aterm2.h"
 #include "make.h"
-#include "deprecated.h"
+/*  #include "deprecated.h"  */
 #include "util.h"
 #include "memory.h"
 
@@ -205,7 +205,7 @@ AT_vmakeTerm(ATerm pat)
   ATerm term;
   ATerm type;
   Symbol sym;
-  ATerm annos;
+  /* ATerm annos; */
 
   switch (ATgetType(pat))
   {
@@ -215,21 +215,22 @@ AT_vmakeTerm(ATerm pat)
       return pat;
 
     case AT_APPL:
-      annos = ATgetAnnotations(pat);
+      /* annos = ATgetAnnotations(pat); */
       appl = (ATermAppl) pat;
       sym = ATgetSymbol(appl);
 
-      if (annos) {
+      /* if (annos) {
 	return ATsetAnnotations((ATerm) makeArguments(appl, sym), annos);
-      }
-      else {
+      } 
+      else */
+      {
 	return (ATerm) makeArguments(appl, sym);
       }
 
     case AT_LIST:
       /*{{{  Handle list */
 
-      annos = ATgetAnnotations(pat);
+      /* annos = ATgetAnnotations(pat); */
       list = (ATermList) pat;
 
       if(ATisEmpty(list))
@@ -263,10 +264,11 @@ AT_vmakeTerm(ATerm pat)
 	arglist = ATgetNext(arglist);
       }
 
-      if (annos) {
+      /* if (annos) {
 	return ATsetAnnotations((ATerm) list, annos);
       }
-      else {
+      else  */
+      {
 	return (ATerm) list;
       }
 

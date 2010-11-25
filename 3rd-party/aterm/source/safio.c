@@ -317,19 +317,19 @@ static ATerm getNextTerm(BinaryWriter binaryWriter){
 		
 		ATermMapping *current = &(binaryWriter->stack[binaryWriter->stackPosition]);
 		while(current->subTermIndex == current->nrOfSubTerms){
-			if(HAS_ANNO(current->term->header) && current->annosDone == 0){
+			/* if(HAS_ANNO(current->term->header) && current->annosDone == 0){
 				next = ATgetAnnotations(current->term);
 				
 				child = &(binaryWriter->stack[++(binaryWriter->stackPosition)]);
 				child->term = next;
 				child->nrOfSubTerms = getNrOfSubTerms(next);
-				child->subTermIndex = 0; /* Default value */
-				child->annosDone = 0; /* Default value */
+				child->subTermIndex = 0; /* Default value * /
+				child->annosDone = 0; /* Default value * /
 				
 				current->annosDone = 1;
 				
 				return next;
-			}
+			} */
 			
 			if(binaryWriter->stackPosition-- == 0) return NULL;
 			
@@ -735,8 +735,8 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct *parent){
 			constructedTerm = (ATerm) ATmakeAppl0(fun);
 		}
 		
-		if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos);
-	}else if(type == AT_LIST){
+		/* if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); */
+	}else  if(type == AT_LIST){
 		unsigned int nrOfSubTerms = parent->nrOfSubTerms;
 		ATerm *subTerms = parent->subTerms;
 		
@@ -753,7 +753,7 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct *parent){
 		
 		constructedTerm = (ATerm) list;
 		
-		if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos);
+		/* if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); */
 	}else if(type == AT_PLACEHOLDER){
 		ATerm *subTerms = parent->subTerms;
 		
@@ -761,12 +761,12 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct *parent){
 		
 		releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, 1);
 		
-		if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos);
-	}else if(parent->hasAnnos){
+		/* if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); */
+	}else /* if(parent->hasAnnos){
 		constructedTerm = ATsetAnnotations(parent->tempTerm, parent->annos);
 		
 		releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, NULL, 1);
-	}else{
+	}else */{
 		constructedTerm = NULL; /* This line is purely for shutting up the compiler. */
 		ATerror("Unable to construct term.\n");
 	}

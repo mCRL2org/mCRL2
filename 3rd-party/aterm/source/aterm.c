@@ -108,7 +108,7 @@ extern char *strdup(const char *s);
 
 static ATerm    fparse_term(int *c, FILE * f);
 static ATerm    sparse_term(int *c, char **s);
-static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs);
+// static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs);
 
 /*}}}  */
 
@@ -736,9 +736,9 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	      fprintf(stream, "<sym>(...(%d))",
 		      GET_ARITY(t->header));
 	    }
-	    if (HAS_ANNO(t->header)) {
+	    /* if (HAS_ANNO(t->header)) {
 	      fprintf(stream, "{}");
-	    }
+	    } */
 	    break;
 	  case AT_FREE:
 	    fprintf(stream, "@");
@@ -749,7 +749,7 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	}
 	break;
 
-      case 'h':
+      /* case 'h':
 	{
 	  unsigned char *digest = ATchecksum(va_arg(args, ATerm));
 	  int i;
@@ -759,7 +759,7 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	}
 	break;
 
-
+      */
       default:
 	fputc(*p, stream);
 	break;
@@ -891,7 +891,7 @@ ATbool
 ATwriteToTextFile(ATerm t, FILE * f)
 {
   ATbool result = ATtrue;
-  ATerm annos;
+  /* ATerm annos; */
 
   if (ATgetType(t) == AT_LIST) {
     fputc('[', f);
@@ -904,12 +904,12 @@ ATwriteToTextFile(ATerm t, FILE * f)
     result = writeToTextFile(t, f);
   }
 
-  annos = (ATerm) AT_getAnnotations(t);
+  /* annos = (ATerm) AT_getAnnotations(t);
   if (annos) {
     fputc('{', f);
     result &= writeToTextFile(annos, f);
     fputc('}', f);
-  }
+  } */
 
   return result;
 }
@@ -1173,7 +1173,7 @@ writeToString(ATerm t, char *buf)
 static char    *
 topWriteToString(ATerm t, char *buf)
 {
-  ATerm annos = AT_getAnnotations(t);
+  /* ATerm annos = AT_getAnnotations(t); */
 
   if (ATgetType(t) == AT_LIST) {
     *buf++ = '[';
@@ -1187,11 +1187,11 @@ topWriteToString(ATerm t, char *buf)
     buf = writeToString(t, buf);
   }
 
-  if (annos) {
+  /* if (annos) {
     *buf++ = '{';
     buf = writeToString(annos, buf);
     *buf++ = '}';
-  }
+  } */
 
   return buf;
 }
@@ -1284,17 +1284,17 @@ static unsigned long textSize(ATerm t)
 static unsigned long
 topTextSize(ATerm t)
 {
-  ATerm annos = AT_getAnnotations(t);
+  /* ATerm annos = AT_getAnnotations(t); */
   unsigned long size = textSize(t);
 
   if (ATgetType(t) == AT_LIST || ATgetType(t) == AT_PLACEHOLDER) {
     size += 2; /* For markers on both sides of the term */
   }
 
-  if (annos) {
-    size += 2; /* '{' and '}' */
+  /* if (annos) {
+    size += 2; /* '{' and '}' * /
     size += textSize(annos);
-  }
+  } */
 
   return size;
 }
@@ -1743,11 +1743,11 @@ fparse_term(int *c, FILE * f)
       }
   }
 
-  if(result != NULL) {
+  /* if(result != NULL) {
     fskip_layout(c, f);
 
     if (*c == '{') {
-      /* Term is annotated */
+      /* Term is annotated * /
       fnext_skip_layout(c, f);
       if (*c != '}') {
 	ATerm annos = (ATerm) fparse_terms(c, f);
@@ -1759,7 +1759,7 @@ fparse_term(int *c, FILE * f)
     }
     /*{{{  Parse backwards compatible toolbus anomalies */
 
-    if (*c == ':') {
+    /* if (*c == ':') {
       ATerm type;
       fnext_skip_layout(c, f);
       type = fparse_term(c, f);
@@ -1773,10 +1773,10 @@ fparse_term(int *c, FILE * f)
     if (*c == '?') {
       fnext_skip_layout(c, f);
       result = ATsetAnnotation(result, ATparse("result"), ATparse("true"));
-    }
+    } */
 
-    /*}}}  */
-  }
+    /*}}}  * /
+  } */
 
   return result;
 }
@@ -2239,10 +2239,10 @@ sparse_term(int *c, char **s)
   if(result != NULL) {
     sskip_layout(c, s);
 
-    if (*c == '{') {
-      /*{{{  Parse annotation  */
+    /* if (*c == '{') {
+      /*{{{  Parse annotation  * /
 
-      /* Term is annotated */
+      /* Term is annotated * /
       snext_skip_layout(c, s);
       if (*c != '}') {
 	ATerm annos = (ATerm) sparse_terms(c, s);
@@ -2257,7 +2257,7 @@ sparse_term(int *c, char **s)
 
     /*{{{  Parse backwards compatible toolbus anomalies */
 
-    if (*c == ':') {
+    /* if (*c == ':') {
       ATerm type;
       snext_skip_layout(c, s);
       type = sparse_term(c, s);
@@ -2271,10 +2271,10 @@ sparse_term(int *c, char **s)
     if (*c == '?') {
       snext_skip_layout(c, s);
       result = ATsetAnnotation(result, ATparse("result"), ATparse("true"));
-    }
+    } */
 
-    /*}}}  */
-  }
+    /*}}}  * /
+  } */
 
   return result;
 }
@@ -2376,8 +2376,8 @@ void AT_markTerm(ATerm t)
 
     SET_MARK(t->header);
     
-    if(HAS_ANNO(t->header))
-      *current++ = AT_getAnnotations(t);
+    /* if(HAS_ANNO(t->header))
+      *current++ = AT_getAnnotations(t); */
 
     switch (GET_TYPE(t->header)) {
       case AT_INT:
@@ -2498,8 +2498,8 @@ void AT_markTerm_young(ATerm t)
     SET_MARK(t->header);
       /*fprintf(stderr,"MINOR YOUNG MARK(%x)\n",(unsigned int)t);*/
 
-    if(HAS_ANNO(t->header))
-      *current++ = AT_getAnnotations(t);
+    /* if(HAS_ANNO(t->header))
+      *current++ = AT_getAnnotations(t); */
 
     switch (GET_TYPE(t->header)) {
       case AT_INT:
@@ -2596,8 +2596,8 @@ AT_unmarkTerm(ATerm t)
 
     CLR_MARK(t->header);
     
-    if(HAS_ANNO(t->header))
-      *current++ = AT_getAnnotations(t);
+    /* if(HAS_ANNO(t->header))
+      *current++ = AT_getAnnotations(t); */
 
     switch (GET_TYPE(t->header)) {
       case AT_INT:
@@ -2680,10 +2680,10 @@ void AT_unmarkIfAllMarked(ATerm t)
 	break;
     }		
 
-    if(HAS_ANNO(t->header)) {
-      /*ATfprintf(stderr, "* unmarking annos of %t\n", t);*/
+    /* if(HAS_ANNO(t->header)) {
+      /*ATfprintf(stderr, "* unmarking annos of %t\n", t);* /
       AT_unmarkIfAllMarked(AT_getAnnotations(t));
-    }
+    } */
   }
   else {
     /*ATfprintf(stderr, "* already unmarked %t\n", t);*/
@@ -2780,8 +2780,8 @@ calcCoreSize(ATerm t)
       break;
   }
 
-  if(HAS_ANNO(t->header))
-    size += calcCoreSize(AT_getAnnotations(t));
+  /* if(HAS_ANNO(t->header))
+    size += calcCoreSize(AT_getAnnotations(t)); */
 
   return size;
 }
@@ -2841,8 +2841,9 @@ unsigned long AT_calcSubterms(ATerm t)
       break;
   }
 
-  if(HAS_ANNO(t->header))
+  /* if(HAS_ANNO(t->header))
     nr_subterms += AT_calcSubterms(AT_getAnnotations(t));
+  */
 
   return nr_subterms;
 }
@@ -2896,8 +2897,9 @@ calcUniqueSubterms(ATerm t)
       break;
   }
 
-  if(HAS_ANNO(t->header))
+  /* if(HAS_ANNO(t->header))
     nr_unique += calcUniqueSubterms(AT_getAnnotations(t));
+  */
 
   SET_MARK(t->header);
 
@@ -2992,11 +2994,11 @@ static unsigned long calcUniqueSymbols(ATerm t)
       break;
   }
 
-  if(HAS_ANNO(t->header)) {
+  /* if(HAS_ANNO(t->header)) {
     if (!at_lookup_table[AS_ANNOTATION]->count++)
       nr_unique++;
     nr_unique += calcUniqueSymbols(AT_getAnnotations(t));
-  }
+  } */
 
   SET_MARK(t->header);
 
@@ -3060,8 +3062,9 @@ void AT_assertUnmarked(ATerm t)
       break;
   }
 
-  if(HAS_ANNO(t->header))
+  /* if(HAS_ANNO(t->header))
     AT_assertUnmarked(AT_getAnnotations(t));
+  */
 }
 
 /*}}}  */
@@ -3095,8 +3098,9 @@ void AT_assertMarked(ATerm t)
       break;
   }
 
-  if(HAS_ANNO(t->header))
+  /* if(HAS_ANNO(t->header))
     AT_assertMarked(AT_getAnnotations(t));
+  */
 
 }
 
@@ -3115,8 +3119,8 @@ unsigned long AT_calcTermDepth(ATerm t)
   ATermAppl appl;
   ATermList list;
 
-  if(HAS_ANNO(t->header))
-    maxdepth = AT_calcTermDepth(AT_getAnnotations(t));
+  /* if(HAS_ANNO(t->header))
+    maxdepth = AT_calcTermDepth(AT_getAnnotations(t)); */
 
   switch(ATgetType(t)) {
     case AT_INT:
@@ -3162,7 +3166,7 @@ unsigned long AT_calcTermDepth(ATerm t)
    "RSA Data Security, Inc. MD5 Message-Digest Algorithm" (see RFC1321)
    */
 
-unsigned char *ATchecksum(ATerm t)
+/* unsigned char *ATchecksum(ATerm t)
 {
   MD5_CTX context;
   static unsigned char digest[16];
@@ -3175,13 +3179,13 @@ unsigned char *ATchecksum(ATerm t)
   MD5Final(digest, &context);
 
   return digest;
-}
+} */
 
 /*}}}  */
 
 /*{{{  static ATermList AT_diffList(ATermList l1, ATermList l2, ATermList *diffs) */
 
-static ATermList AT_diffList(ATermList l1, ATermList l2, ATermList *diffs)
+/* static ATermList AT_diffList(ATermList l1, ATermList l2, ATermList *diffs)
 {
   ATermList result = ATempty;
   ATerm el1, el2;
@@ -3209,12 +3213,12 @@ static ATermList AT_diffList(ATermList l1, ATermList l2, ATermList *diffs)
   }
 
   return ATreverse(result);
-}
+} */
 
 /*}}}  */
 /*{{{  static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs) */
 
-static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs) 
+/* static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs) 
 {
   ATerm diff = NULL;
 
@@ -3272,13 +3276,13 @@ static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs)
   }
 
   return diff;
-}
+} */
 
 /*}}}  */
 
 /*{{{  ATerm ATdiff(ATerm t1, ATerm t2) */
 
-ATbool ATdiff(ATerm t1, ATerm t2, ATerm *template, ATerm *diffs)
+/* ATbool ATdiff(ATerm t1, ATerm t2, ATerm *template, ATerm *diffs)
 {
   ATerm templ;
 
@@ -3297,7 +3301,7 @@ ATbool ATdiff(ATerm t1, ATerm t2, ATerm *template, ATerm *diffs)
   }
 
   return !ATisEqual(t1, t2);
-}
+} */
 
 /*}}}  */
 
@@ -3380,7 +3384,7 @@ ATbool AT_isDeepEqual(ATerm t1, ATerm t2)
       ATerror("illegal term type: %d\n", type);
   }
 
-  if(result) {
+  /* if(result) {
     if(HAS_ANNO(t1->header)) {
       if(HAS_ANNO(t2->header)) {
 	result = AT_isDeepEqual(AT_getAnnotations(t1), AT_getAnnotations(t2));
@@ -3390,7 +3394,7 @@ ATbool AT_isDeepEqual(ATerm t1, ATerm t2)
     } else if(HAS_ANNO(t2->header)) {
       result = ATfalse;
     }
-  }
+  } */
 
   return result;
 }
@@ -3472,7 +3476,7 @@ ATbool AT_isEqual(ATerm t1, ATerm t2)
       ATerror("illegal term type: %d\n", type);
   }
 
-  if(result) {
+  /* if(result) {
     if(HAS_ANNO(t1->header)) {
       if(HAS_ANNO(t2->header)) {
 	result = AT_isEqual(AT_getAnnotations(t1), AT_getAnnotations(t2));
@@ -3482,7 +3486,7 @@ ATbool AT_isEqual(ATerm t1, ATerm t2)
     } else if(HAS_ANNO(t2->header)) {
       result = ATfalse;
     }
-  }
+  } */
 
   return result;
 }
@@ -3575,7 +3579,7 @@ ATbool ATisEqualModuloAnnotations(ATerm t1, ATerm t2)
 
 /*{{{  ATerm ATremoveAllAnnotations(ATerm t) */
 
-ATerm ATremoveAllAnnotations(ATerm t)
+/* ATerm ATremoveAllAnnotations(ATerm t)
 {
   switch(ATgetType(t)) {
     case AT_INT:
@@ -3641,7 +3645,7 @@ ATerm ATremoveAllAnnotations(ATerm t)
       ATerror("illegal term type: %d\n", ATgetType(t));
       return NULL;
   }
-}
+} */
 /*}}}  */
 
 /*{{{  static int AT_compareArguments(ATermAppl t1, ATermAppl t2)  */
@@ -3869,7 +3873,7 @@ int ATcompare(ATerm t1, ATerm t2)
       break;
   }
 
-  if (result == 0) {
+  /* if (result == 0) {
     ATerm annos1 = ATgetAnnotations(t1);
     ATerm annos2 = ATgetAnnotations(t2);
     if (annos1 && annos2) {
@@ -3881,7 +3885,7 @@ int ATcompare(ATerm t1, ATerm t2)
     if (annos2) {
       return -1;
     }
-  }
+  } */
 
   return result;
 }

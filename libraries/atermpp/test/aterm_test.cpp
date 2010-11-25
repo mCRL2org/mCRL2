@@ -25,11 +25,13 @@ void test_aterm()
 {
   aterm a = make_term("f(x)");
   aterm label = make_term("label");
+  /* Annotations have been removed.
   aterm annotation = make_term("annotation");
   aterm b = set_annotation(a, label, annotation);
   BOOST_CHECK(a != b);
   aterm c = remove_annotation(b, label);
   BOOST_CHECK(a == c);
+  */
 
   aterm d = aterm_int(10);
   BOOST_CHECK(aterm_int(d).value() == 10);

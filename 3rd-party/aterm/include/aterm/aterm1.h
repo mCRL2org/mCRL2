@@ -87,9 +87,10 @@ extern "C"
 #define AT_BLOB         6L /**< type of a binary large object */
 #define AT_SYMBOL       7L /**< internally used type*/
 
-ATerm  ATsetAnnotation(ATerm t, ATerm label, ATerm anno);
+/* ATerm  ATsetAnnotation(ATerm t, ATerm label, ATerm anno);
 ATerm  ATgetAnnotation(ATerm t, ATerm label);
 ATerm  ATremoveAnnotation(ATerm t, ATerm label);
+*/
 
 /**
  * Create any kind of ATerms. First provide an ATerm pattern in a string
@@ -116,6 +117,7 @@ ATerm  ATremoveAnnotation(ATerm t, ATerm label);
  *  \endcode
  */
 ATerm ATmake(const char *pattern, ...);
+
 
 
 /**

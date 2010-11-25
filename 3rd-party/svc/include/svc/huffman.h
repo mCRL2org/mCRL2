@@ -56,6 +56,7 @@ int HFencodeIndex(BitStream *, HFtree *, long);
 int HFdecodeATerm(BitStream *, HFtree *, ATerm *);
 int HFdecodeIndex(BitStream *, HFtree *, long *);
 
+
 #ifdef __cplusplus
 }
 #endif 

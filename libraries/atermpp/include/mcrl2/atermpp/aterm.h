@@ -323,11 +323,12 @@ namespace atermpp
   /// \param label A label.
   /// \param annotation An annotation.
   /// \return A term with an added annotation.
-  inline
+/*   inline
   aterm set_annotation(aterm t, aterm label, aterm annotation)
   {
     return ATsetAnnotation(t, label, annotation);
   }
+*/
 
   /// \brief Retrieves annotation of t with label label.
   /// This function can be used to retrieve a specific annotation of a term. If t has
@@ -336,11 +337,12 @@ namespace atermpp
   /// \param t A term.
   /// \param label A label.
   /// \return The annotation with the given label.
-  inline
+/*  inline
   aterm get_annotation(aterm t, aterm label)
   {
     return ATgetAnnotation(t, label);
   }
+*/
 
   /// \brief Remove a specific annotation from a term.
   /// This function returns a version of t which has its annotation with label label
@@ -348,11 +350,12 @@ namespace atermpp
   /// \param t A term.
   /// \param label A label.
   /// \return The term with a removed annotation.
-  inline
+/* inline
   aterm remove_annotation(aterm t, aterm label)
   {
     return ATremoveAnnotation(t, label);
   }
+*/
 
   /// \brief Equality operator.
   /// \param x A term.

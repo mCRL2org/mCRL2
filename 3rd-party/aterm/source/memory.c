@@ -1859,7 +1859,7 @@ ATermBlob ATmakeBlob(unsigned int size, void *data)
  * Change the annotations of a term.
  */
 
-ATerm AT_setAnnotations(ATerm t, ATerm annos)
+/* ATerm AT_setAnnotations(ATerm t, ATerm annos)
 {
   HashNumber hnr;
   unsigned int i, size = term_size(t);
@@ -1885,12 +1885,12 @@ ATerm AT_setAnnotations(ATerm t, ATerm annos)
   cur = hashtable[hnr & table_mask];
   found = ATfalse;
 
-  /* Look through the hashtable for an identical term */
+  /* Look through the hashtable for an identical term * /
   while (cur && !found) {
     if ((EQUAL_HEADER(cur->header,header))&&(ATisEqual(cur->subaterm[size], annos))) {
       found = ATtrue;
 
-      /* check if other components are equal */
+      /* check if other components are equal * /
       for (i=ARG_OFFSET; i<size; i++) {
         if (!ATisEqual(cur->subaterm[i], t->subaterm[i])) {
           found = ATfalse;
@@ -1903,9 +1903,9 @@ ATerm AT_setAnnotations(ATerm t, ATerm annos)
   }
 
   if (!found) {
-    /* We need to create a new term */
+    /* We need to create a new term * /
     cur = AT_allocate(size+1);
-    /* Delay masking until after AT_allocate */
+    /* Delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->header = header;
     SET_AGE(cur->header,YOUNG_AGE);
@@ -1922,7 +1922,7 @@ ATerm AT_setAnnotations(ATerm t, ATerm annos)
   }
 
   return cur;
-}
+} */
 
 /*}}}  */
 /*{{{  ATerm AT_removeAnnotations(ATerm t) */
@@ -1931,7 +1931,7 @@ ATerm AT_setAnnotations(ATerm t, ATerm annos)
  * Remove all annotations of a term.
  */
 
-ATerm AT_removeAnnotations(ATerm t)
+/* ATerm AT_removeAnnotations(ATerm t)
 {
   HashNumber hnr;
   unsigned int i, size;
@@ -1953,12 +1953,12 @@ ATerm AT_removeAnnotations(ATerm t)
   cur = hashtable[hnr & table_mask];
   found = ATfalse;
 
-  /* Look through the hashtable for an identical term */
+  /* Look through the hashtable for an identical term * /
   while (cur && !found) {
     if (EQUAL_HEADER(cur->header,header)) {
       found = ATtrue;
 
-      /* check if other components are equal */
+      /* check if other components are equal * /
       for (i=ARG_OFFSET; i<size; i++) {
         if (!ATisEqual(cur->subaterm[i], t->subaterm[i])) {
           found = ATfalse;
@@ -1972,9 +1972,9 @@ ATerm AT_removeAnnotations(ATerm t)
   }
 
   if (!found) {
-    /* We need to create a new term */
+    /* We need to create a new term * /
     cur = AT_allocate(size);
-    /* Delay masking until after AT_allocate */
+    /* Delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->header = header;
     SET_AGE(cur->header,YOUNG_AGE);
@@ -2002,7 +2002,8 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n)
 {
   unsigned int i, arity;
   Symbol sym = ATgetSymbol(appl);
-  ATerm annos = AT_getAnnotations((ATerm)appl);
+  /* ATerm annos = AT_getAnnotations((ATerm)appl); */
+  ATerm annos = NULL;
   ATermAppl cur;
   ATbool found;
   HashNumber hnr;
@@ -2020,15 +2021,16 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n)
       hnr = COMBINE(hnr, (HashNumber)(char*)arg);
   }
   
-  if (annos)
-    hnr = COMBINE(hnr, (HashNumber)(char*)annos);
+  /* if (annos)
+    hnr = COMBINE(hnr, (HashNumber)(char*)annos); */
     
   hnr = FINISH(hnr);
 
   cur = (ATermAppl) hashtable[hnr & table_mask];
   while(cur) {
     if(EQUAL_HEADER(cur->header,appl->header)
-       && (AT_getAnnotations((ATerm)cur) == annos)) {
+       // && (AT_getAnnotations((ATerm)cur) == annos)) {
+       && (NULL == annos)) {
       found = ATtrue;
       for(i=0; i<arity; i++) {
         if (i!=n) {
@@ -2143,20 +2145,20 @@ void ATunregisterBlobDestructor(ATbool (*destructor)(ATermBlob))
  * Retrieve the annotations of a term.
  */
 
-ATerm AT_getAnnotations(ATerm t)
+/* ATerm AT_getAnnotations(ATerm t)
 {
   if(HAS_ANNO(t->header)) {
     int size = term_size(t);
     return ((ATerm *)t)[size-1];
   }
   return NULL;
-}
+} */
 
 /*}}}  */
 
 /*{{{  ATerm ATsetAnnotation(ATerm t, ATerm label, ATerm anno) */
 
-ATerm ATsetAnnotation(ATerm t, ATerm label, ATerm anno)
+/* ATerm ATsetAnnotation(ATerm t, ATerm label, ATerm anno)
 {
   ATerm newannos, oldannos = AT_getAnnotations(t);
 
@@ -2169,7 +2171,7 @@ ATerm ATsetAnnotation(ATerm t, ATerm label, ATerm anno)
     return t;
 
   return AT_setAnnotations(t, newannos);
-}
+} */
 
 /*}}}  */
 /*{{{  ATerm ATgetAnnotation(ATerm t, ATerm label) */
@@ -2178,14 +2180,14 @@ ATerm ATsetAnnotation(ATerm t, ATerm label, ATerm anno)
  * Retrieve an annotation with a specific label.
  */
 
-ATerm ATgetAnnotation(ATerm t, ATerm label)
+/* ATerm ATgetAnnotation(ATerm t, ATerm label)
 {
   ATerm annos = AT_getAnnotations(t);
   if(!annos)
     return NULL;
 
   return ATdictGet(annos, label);
-}
+} */
 
 /*}}}  */
 /*{{{  ATerm ATremoveAnnotation(ATerm t, ATerm label) */
@@ -2194,7 +2196,7 @@ ATerm ATgetAnnotation(ATerm t, ATerm label)
  * Remove an annotation
  */
 
-ATerm ATremoveAnnotation(ATerm t, ATerm label)
+/* ATerm ATremoveAnnotation(ATerm t, ATerm label)
 {
   ATerm newannos, oldannos = AT_getAnnotations(t);
 
@@ -2210,7 +2212,7 @@ ATerm ATremoveAnnotation(ATerm t, ATerm label)
     return AT_removeAnnotations(t);
 
   return AT_setAnnotations(t, newannos);
-}
+} */
 
 /*}}}  */
 /*{{{  ATbool ATisValidTerm(ATerm term) */

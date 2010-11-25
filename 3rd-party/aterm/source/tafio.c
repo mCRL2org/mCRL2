@@ -305,8 +305,8 @@ static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedS
     }
   }
 
-  annos = (ATerm) AT_getAnnotations(t);
-  if (annos) {
+  /* annos = (ATerm) AT_getAnnotations(t);
+  /* if (annos) {
     write_byte('{', writer);
     anno_size = writeToSharedTextFile(annos, writer, abbrevs);
     if (anno_size < 0) {
@@ -314,7 +314,7 @@ static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedS
     }
     write_byte('}', writer);
     size += anno_size + 2;
-  }
+  } */
 
   if (size > abbrev_size(next_abbrev)) {
     ATbool isnew;
@@ -828,8 +828,8 @@ static ATerm rparse_term(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
   if(result != NULL) {
     rskip_layout(c, reader);
 			
-    if (*c == '{') {
-      /* Term is annotated */
+    /* if (*c == '{') {
+      /* Term is annotated * /
       rnext_skip_layout(c, reader);
       if (*c != '}') {
 	ATerm annos = (ATerm) rparse_terms(c, reader, abbrevs);
@@ -839,10 +839,10 @@ static ATerm rparse_term(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
 	result = AT_setAnnotations(result, annos);
       }
       rnext_skip_layout(c, reader);
-    }
+    } */
     /*{{{  Parse backwards compatible toolbus anomalies */
     
-    if (*c == ':') {
+    /* if (*c == ':') {
       ATerm type;
       rnext_skip_layout(c, reader);
       type = rparse_term(c, reader, abbrevs);
@@ -856,7 +856,7 @@ static ATerm rparse_term(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
     if (*c == '?') {
       rnext_skip_layout(c, reader);
       result = ATsetAnnotation(result, ATparse("result"), ATparse("true"));
-    }
+    } */
 
     /*}}}  */
 

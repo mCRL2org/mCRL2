@@ -82,11 +82,11 @@ ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
   }
   
   /* Preserve annotations */
-  if (AT_getAnnotations((ATerm)list) != NULL) 
+  /* if (AT_getAnnotations((ATerm)list) != NULL) 
   {
     newtail = (ATermList)AT_setAnnotations((ATerm)newtail,
 					   AT_getAnnotations((ATerm)list));
-  }
+  } */
 
   return newtail;
 }

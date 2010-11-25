@@ -265,7 +265,7 @@ void    ATunprotectAFun(AFun sym);
 void ATprotectMemory(void *start, unsigned long size);
 void ATunprotectMemory(void *start);
 
-/* convenience macro's for previously private functions */
+/* convenience macro's for previously private functions * /
 #define ATgetAnnotations(t) AT_getAnnotations( (t) )
 #define ATsetAnnotations(t,a) AT_setAnnotations( (t), (a) )
 #define ATremoveAnnotations(t) AT_removeAnnotations( (t) )
@@ -273,9 +273,10 @@ void ATunprotectMemory(void *start);
 ATerm AT_getAnnotations(ATerm t);
 ATerm AT_setAnnotations(ATerm t, ATerm annos);
 ATerm AT_removeAnnotations(ATerm t);
+*/
 
 /* Deep strip */
-ATerm ATremoveAllAnnotations(ATerm t);
+/* ATerm ATremoveAllAnnotations(ATerm t); */
 
 /* Calculate checksum using the
    "RSA Data Security, Inc. MD5 Message-Digest Algorithm" (see RFC1321)

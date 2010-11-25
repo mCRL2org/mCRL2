@@ -14,15 +14,15 @@
 [section: Introduction]
 The __lts_library__ provides data structures and methods to handle /labelled
 transition systems/ (LTS). LTS's can be created, transfered from and to 
-file and transformed by for instance an bisimulation reduction, determinisation
+file and transformed by for instance a bisimulation reduction, determinisation
 or the removal of unreachable states.
 
 Essentially, a labelled transition system consists
 of a collection of transitions, where a transition is a triple of three 
-numbers <start_state,label,end_state> each of type unsigned int. 
+numbers <start_state,action,end_state> each of type size_t (i.e. unsigned machine word). 
 Each labelled transition system contains an initial state. Furthermore, each
-label has an associated value, for instance a string. Optionally, each state index
-has an associated state value. Finally, each label is either internal
+action has an associated label, for instance a string. Optionally, each state index
+has also an associated label. Finally, each label is either internal
 (eg., hidden or a tau action) or externally visible. 
 
 A labelled transition system has template parameters for the state and 
@@ -37,17 +37,16 @@ parameters.
 [section: Structure]
 The LTS library resides in the namespace mcrl2::lts. The main class of this
 library is the lts class. This class represents an LTS and contains almost all
-available functionality to work with LTSs. States and transition labels are identified by
-unsigned ints and transitions are triples (from, label, to) of unsigned ints,
-where from and to are the source and target states, respectively, and label is
-the label of the transition. Each LTS has an initial state and every transition 
+available functionality to work with LTSs. States and actions are identified by unsigned integers of
+the type size_t and transitions are triples (from_state, action, to_state).
+Each LTS has an initial state and every transition 
 label is either internal or external.
 
-For each number representing a transition label, there is an associated value and
-for each number representing a state label, there can be an associated value. An 
-LTS has two template parameters that determine the types of these values. The LTS
+For each number representing an action, there is an associated value and
+for each number representing a state, there can be an associated label. An 
+LTS has two template parameters that determine the types of these labels. The LTS
 class behaves as a standard container, in the sense that any class that can be
-used in a standard C++ container is usable for the values in a labelled transition 
+used in a standard C++ container is usable for the labels in a labelled transition 
 system. 
 
 There are six standard template instantiations of labelled transitions systems:
