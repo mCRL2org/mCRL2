@@ -171,7 +171,7 @@ if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
 if(MSVC)
-  add_definitions( "/EHa" )
+  set (CMAKE_CXX_FLAGS "/EHa ${CMAKE_CXX_FLAGS}")
 endif(MSVC)
 
 ## --------------------------------------------------
