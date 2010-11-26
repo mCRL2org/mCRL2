@@ -485,6 +485,7 @@ class linear_inequality
 //static set < unsigned int > linear_inequality::m_empty_spots_in_rhss;
 //static atermpp::vector < mcrl2::data::data_expression > linear_inequality::m_rhss;
 
+inline
 std::string string(const linear_inequality &l)
 { std::string s=l.lhs_string();
   /* if (l.lhs_begin()==l.lhs_end())
