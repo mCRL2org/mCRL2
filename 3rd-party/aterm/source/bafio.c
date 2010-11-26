@@ -895,7 +895,7 @@ static ATbool write_term(ATerm t, byte_writer *writer, ATbool anno_done)
 
   /*ATfprintf(stderr, "write term: %t (%d)\n", t, anno_done);*/
   /* if(!anno_done && annos) {
-    /*ATfprintf(stderr, "  writing annotated term, term=%t, annos=%t\n",
+    / *ATfprintf(stderr, "  writing annotated term, term=%t, annos=%t\n",
       t, annos);* /
     trm_sym = &sym_entries[at_lookup_table[AS_ANNOTATION]->index];
     if(!write_arg(trm_sym, t, 0, writer, ATtrue)) {

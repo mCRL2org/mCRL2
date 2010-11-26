@@ -323,8 +323,8 @@ static ATerm getNextTerm(BinaryWriter binaryWriter){
 				child = &(binaryWriter->stack[++(binaryWriter->stackPosition)]);
 				child->term = next;
 				child->nrOfSubTerms = getNrOfSubTerms(next);
-				child->subTermIndex = 0; /* Default value * /
-				child->annosDone = 0; /* Default value * /
+				child->subTermIndex = 0; / * Default value * /
+				child->annosDone = 0; / * Default value * /
 				
 				current->annosDone = 1;
 				

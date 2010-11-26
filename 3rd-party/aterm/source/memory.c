@@ -1885,12 +1885,12 @@ ATermBlob ATmakeBlob(unsigned int size, void *data)
   cur = hashtable[hnr & table_mask];
   found = ATfalse;
 
-  /* Look through the hashtable for an identical term * /
+  / * Look through the hashtable for an identical term * /
   while (cur && !found) {
     if ((EQUAL_HEADER(cur->header,header))&&(ATisEqual(cur->subaterm[size], annos))) {
       found = ATtrue;
 
-      /* check if other components are equal * /
+      / * check if other components are equal * /
       for (i=ARG_OFFSET; i<size; i++) {
         if (!ATisEqual(cur->subaterm[i], t->subaterm[i])) {
           found = ATfalse;
@@ -1903,9 +1903,9 @@ ATermBlob ATmakeBlob(unsigned int size, void *data)
   }
 
   if (!found) {
-    /* We need to create a new term * /
+    / * We need to create a new term * /
     cur = AT_allocate(size+1);
-    /* Delay masking until after AT_allocate * /
+    / * Delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->header = header;
     SET_AGE(cur->header,YOUNG_AGE);
@@ -1953,12 +1953,12 @@ ATermBlob ATmakeBlob(unsigned int size, void *data)
   cur = hashtable[hnr & table_mask];
   found = ATfalse;
 
-  /* Look through the hashtable for an identical term * /
+  / * Look through the hashtable for an identical term * /
   while (cur && !found) {
     if (EQUAL_HEADER(cur->header,header)) {
       found = ATtrue;
 
-      /* check if other components are equal * /
+      / * check if other components are equal * /
       for (i=ARG_OFFSET; i<size; i++) {
         if (!ATisEqual(cur->subaterm[i], t->subaterm[i])) {
           found = ATfalse;
@@ -1972,9 +1972,9 @@ ATermBlob ATmakeBlob(unsigned int size, void *data)
   }
 
   if (!found) {
-    /* We need to create a new term * /
+    / * We need to create a new term * /
     cur = AT_allocate(size);
-    /* Delay masking until after AT_allocate * /
+    / * Delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->header = header;
     SET_AGE(cur->header,YOUNG_AGE);
@@ -1990,7 +1990,7 @@ ATermBlob ATmakeBlob(unsigned int size, void *data)
   return cur;
 }
 
-/*}}}  */
+/ *}}}  */
 
 /*{{{  ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n) */
 
@@ -2029,7 +2029,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n)
   cur = (ATermAppl) hashtable[hnr & table_mask];
   while(cur) {
     if(EQUAL_HEADER(cur->header,appl->header)
-       // && (AT_getAnnotations((ATerm)cur) == annos)) {
+       /*  && (AT_getAnnotations((ATerm)cur) == annos)) { */
        && (NULL == annos)) {
       found = ATtrue;
       for(i=0; i<arity; i++) {

@@ -278,8 +278,8 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
 
 static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs)
 {
-  ATerm annos;
-  long abbrev, size = 0, anno_size;
+  /* ATerm annos; long anno_size */
+  long abbrev, size = 0; 
 
   abbrev = ATindexedSetGetIndex(abbrevs, t);
   if (abbrev >= 0) {
@@ -306,7 +306,7 @@ static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedS
   }
 
   /* annos = (ATerm) AT_getAnnotations(t);
-  /* if (annos) {
+  / * if (annos) {
     write_byte('{', writer);
     anno_size = writeToSharedTextFile(annos, writer, abbrevs);
     if (anno_size < 0) {
@@ -829,7 +829,7 @@ static ATerm rparse_term(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
     rskip_layout(c, reader);
 			
     /* if (*c == '{') {
-      /* Term is annotated * /
+      / * Term is annotated * /
       rnext_skip_layout(c, reader);
       if (*c != '}') {
 	ATerm annos = (ATerm) rparse_terms(c, reader, abbrevs);

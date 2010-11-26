@@ -108,7 +108,7 @@ extern char *strdup(const char *s);
 
 static ATerm    fparse_term(int *c, FILE * f);
 static ATerm    sparse_term(int *c, char **s);
-// static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs);
+/* static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs); */
 
 /*}}}  */
 
@@ -1292,7 +1292,7 @@ topTextSize(ATerm t)
   }
 
   /* if (annos) {
-    size += 2; /* '{' and '}' * /
+    size += 2; / * '{' and '}' * /
     size += textSize(annos);
   } */
 
@@ -1747,7 +1747,7 @@ fparse_term(int *c, FILE * f)
     fskip_layout(c, f);
 
     if (*c == '{') {
-      /* Term is annotated * /
+      / * Term is annotated * /
       fnext_skip_layout(c, f);
       if (*c != '}') {
 	ATerm annos = (ATerm) fparse_terms(c, f);
@@ -1757,7 +1757,7 @@ fparse_term(int *c, FILE * f)
       }
       fnext_skip_layout(c, f);
     }
-    /*{{{  Parse backwards compatible toolbus anomalies */
+    / *{{{  Parse backwards compatible toolbus anomalies */
 
     /* if (*c == ':') {
       ATerm type;
@@ -2240,9 +2240,9 @@ sparse_term(int *c, char **s)
     sskip_layout(c, s);
 
     /* if (*c == '{') {
-      /*{{{  Parse annotation  * /
+      / *{{{  Parse annotation  * /
 
-      /* Term is annotated * /
+      / * Term is annotated * /
       snext_skip_layout(c, s);
       if (*c != '}') {
 	ATerm annos = (ATerm) sparse_terms(c, s);
@@ -2252,7 +2252,7 @@ sparse_term(int *c, char **s)
       }
       snext_skip_layout(c, s);
 
-      /*}}}  */
+      / *}}}  */
     }
 
     /*{{{  Parse backwards compatible toolbus anomalies */
@@ -2681,7 +2681,7 @@ void AT_unmarkIfAllMarked(ATerm t)
     }		
 
     /* if(HAS_ANNO(t->header)) {
-      /*ATfprintf(stderr, "* unmarking annos of %t\n", t);* /
+      / *ATfprintf(stderr, "* unmarking annos of %t\n", t);* /
       AT_unmarkIfAllMarked(AT_getAnnotations(t));
     } */
   }
