@@ -506,7 +506,7 @@ if ( WIN32 )
 
     option(MCRL2_ENABLE_MULTICORE_COMPILATION "Enable/disable multi-core compilation" ON)
     if( MCRL2_ENABLE_MULTICORE_COMPILATION )
-      add_definitions( -MP )
+      set(CMAKE_CXX_FLAGS "/MP ${CMAKE_CXX_FLAGS}")
     endif( MCRL2_ENABLE_MULTICORE_COMPILATION )
 
   endif(MSVC)
