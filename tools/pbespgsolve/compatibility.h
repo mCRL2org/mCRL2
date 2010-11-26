@@ -46,12 +46,12 @@ int compat_strcasecmp(const char *s1, const char *s2);
 int compat_strncasecmp(const char *s1, const char *s2, size_t n);
 
 /* Figure out which hashtable implementation to use: */
-#if (__cplusplus > 199711L || __GNUC__ >= 4)  /* C++ TR1 supported (GCC 4) */
+#if ((__cplusplus > 199711L || __GNUC__ >= 4) && !__clang__)  /* C++ TR1 supported (GCC 4) */
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
 #define HASH_SET(k) std::tr1::unordered_set<k>
 #define HASH_MAP(k,v) std::tr1::unordered_map<k, v>
-#elif (__GNUC__ >= 3)  /* GCC 3 hash tables (untested) */
+#elif (__GNUC__ >= 3 && !__clang__)  /* GCC 3 hash tables (untested) */
 #include <ext/hash_set>
 #include <ext/hash_map>
 #define HASH_SET(k) __gnu_cxx::hash_set<k>
