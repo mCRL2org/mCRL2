@@ -13,6 +13,7 @@
 #define MCRL2_MODAL_FORMULA_MONOTONICITY_H
 
 #include <set>
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
 
@@ -24,7 +25,7 @@ namespace state_formulas {
 /// \param f A modal formula
 /// \return True if the state formula is monotonous.
 inline
-bool is_monotonous(state_formula f, const std::set<core::identifier_string>& negated_variables)
+bool is_monotonous(state_formula f, const atermpp::set<core::identifier_string>& negated_variables)
 {
   //std::cout << "<formula>" << core::pp(f) << "<negated_variables>" << core::detail::print_pp_set(negated_variables) << std::endl;
 
@@ -67,9 +68,9 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
     } else if (is_variable(f)) {
       return negated_variables.find(name(f)) != negated_variables.end();
     } else if (is_mu(f)) {
-      std::set<core::identifier_string> neg = negated_variables;
+      atermpp::set<core::identifier_string> neg = negated_variables;
       core::identifier_string X = name(f);
-      std::set<core::identifier_string>::iterator i = neg.find(X);
+      atermpp::set<core::identifier_string>::iterator i = neg.find(X);
       if (i != neg.end())
       {
         neg.erase(i);
@@ -80,9 +81,9 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
       }
       return is_monotonous(not_(arg(f)), neg);
     } else if (is_nu(f)) {
-      std::set<core::identifier_string> neg = negated_variables;
+      atermpp::set<core::identifier_string> neg = negated_variables;
       core::identifier_string X = name(f);
-      std::set<core::identifier_string>::iterator i = neg.find(X);
+      atermpp::set<core::identifier_string>::iterator i = neg.find(X);
       if (i != neg.end())
       {
         neg.erase(i);
@@ -142,7 +143,7 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
 inline
 bool is_monotonous(state_formula f)
 {
-  std::set<core::identifier_string> negated_variables;
+  atermpp::set<core::identifier_string> negated_variables;
   return is_monotonous(f, negated_variables);
 }
 

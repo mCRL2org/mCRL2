@@ -13,6 +13,7 @@
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_NAME_CLASH_RESOLVER_H
 
 #include <set>
+#include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
@@ -34,7 +35,7 @@ namespace detail {
       using super::leave;
       using super::operator();
 
-      typedef std::map<core::identifier_string, atermpp::vector<core::identifier_string> > name_map;
+      typedef atermpp::map<core::identifier_string, atermpp::vector<core::identifier_string> > name_map;
 
       /// \brief The stack of names.
       name_map m_names;
