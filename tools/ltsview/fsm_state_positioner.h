@@ -63,7 +63,7 @@ class ClusterSlotInfo
 
     struct Slot_less
     {
-      bool operator()(const Slot &c1, const Slot &c2)
+      bool operator()(const Slot &c1, const Slot &c2) const
       {
         return (c1.ring == c2.ring) ? c1.slot < c2.slot : c1.ring < c2.ring;
       }

@@ -156,7 +156,7 @@ void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,
 
   relationListBox->SetSelection(neg ? 1 : 0);
 
-  std::set<std::string>::iterator i;
+  std::set<std::string>::const_iterator i;
   for (i = vals.begin(); i != vals.end(); ++i)
   {
     valuesListBox->Check(valuesListBox->FindString(wxString(i->c_str(),wxConvLocal)),true);
