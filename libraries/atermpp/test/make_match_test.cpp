@@ -28,6 +28,7 @@ void test_make_match()
   int i;
   bool x;
 
+  /* match has been removed from the ATerm library. 
   x = match(make_term("f(16)"), "f(<int>)", i);
   BOOST_CHECK(x);
   BOOST_CHECK(i == 16);
@@ -47,6 +48,7 @@ void test_make_match()
   x = match(make_term("PBES(f(x),[1,2,3])"), "PBES(<term>,[<list>])", a, l);
 
   x = match(make_term("PBES(f(0),[1,2,3],g(2),[a,b])"), "PBES(<term>,[<list>],<term>,[<list>])", a, l, b, m);
+  */
 }
 
 int test_main(int argc, char* argv[])

@@ -186,7 +186,7 @@ static HashNumber hash_number(ATerm t, unsigned int size)
   return FINISH(hnr);
 }
 
-static HashNumber hash_number_anno(ATerm t, unsigned int size, ATerm anno)
+/* static HashNumber hash_number_anno(ATerm t, unsigned int size, ATerm anno)
 {
   unsigned int i;
   HashNumber hnr;
@@ -199,7 +199,7 @@ static HashNumber hash_number_anno(ATerm t, unsigned int size, ATerm anno)
   hnr = COMBINE(hnr, anno);
 
   return FINISH(hnr);
-}
+} */
 
 /*}}}  */
 /*{{{  HashNumber AT_hashnumber(ATerm t) */

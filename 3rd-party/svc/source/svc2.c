@@ -258,7 +258,8 @@ int SVCopen(SVCfile *file, char *filename, SVCfileMode mode, SVCbool *indexed){
             if(svcReadVersion(&file->file, &version)==0 &&
                svcReadHeader(&file->file, &file->header)==0) {
               file->file.formatVersion=version;
-              if(SVCnewState(file, ATmake(file->header.initialState), &_new)<0){
+              if(SVCnewState(file, ATreadFromString(file->header.initialState), &_new)<0)
+              {
                  SVCerrno=ENEWSTATE;
                  return -1;
               }
@@ -326,7 +327,7 @@ SVCbool SVCgetIndexFlag(SVCfile *file){
 
 SVCstateIndex SVCgetInitialState(SVCfile *file){
 
-   return SVCaterm2State(file, ATmake(file->header.initialState));
+   return SVCaterm2State(file, ATreadFromString(file->header.initialState));
 }
 
 int SVCsetInitialState(SVCfile *file, SVCstateIndex index){

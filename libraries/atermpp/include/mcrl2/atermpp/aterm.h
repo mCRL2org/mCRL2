@@ -94,9 +94,10 @@ namespace atermpp
 
       /// \brief Constructor.
       /// \param s A string
-      aterm_base(const std::string& s)
+/*      aterm_base(const std::string& s)
         : m_term(ATmake(const_cast<char*>(s.c_str())))
       {}
+*/
 
       /// \brief Protect the aterm.
       /// Protects the aterm from being freed at garbage collection.
@@ -218,10 +219,10 @@ namespace atermpp
 
       /// \brief Constructor.
       /// \param s A string
-      aterm(const std::string& s)
+      /* aterm(const std::string& s)
         : aterm_base(s)
       { }
-
+*/
       /// \brief Conversion operator.
       /// \return The wrapped ATerm pointer
       operator ATerm() const
@@ -267,11 +268,12 @@ namespace atermpp
   /// \param s A string
   /// \param size A positive integer
   /// \return The term read from string.
-  inline
+/*   inline
   aterm read_from_shared_string(const std::string& s, unsigned int size)
   {
     return ATreadFromSharedString(s.c_str(), size);
   }
+*/
 
   /// \brief Read an aterm from named binary or text file.
   /// This function reads an aterm file filename. A test is performed to see if the file
@@ -310,11 +312,12 @@ namespace atermpp
   /// \param t A term.
   /// \param filename A string
   /// \return True if the operation succeeded.
-  inline
+  /* inline
   bool write_to_named_saf_file(aterm t, const std::string& filename)
   {
     return ATwriteToNamedSAFFile(t, filename.c_str()) == ATtrue;
   }
+  */
 
   /// \brief Annotate a term with a labeled annotation.
   /// Creates a version of t that is annotated with annotation and labeled by

@@ -242,7 +242,7 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
   AT_initMemory(argc, argv);
   AT_initSymbol(argc, argv);
   AT_initList(argc, argv);
-  AT_initMake(argc, argv);
+  /* AT_initMake(argc, argv); */
   AT_initGC(argc, argv, bottomOfStack);
   AT_initBafIO(argc, argv);
 

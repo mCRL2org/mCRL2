@@ -44,12 +44,14 @@ namespace atermpp {
   
   /// \brief Make a term with a fixed number of arguments.
   /// \param format A string
+/*  This function is not used. ATmake has been removed from the ATerm library.
+
   template <BOOST_PP_ENUM_PARAMS(n, class T)>
   aterm make_term(const std::string& format, BOOST_PP_ENUM(n, TEXT1, nil))
   {
     return aterm(ATmake(const_cast<char*>(format.c_str()), BOOST_PP_ENUM(n, TEXT3, nil)));
   }
-  
+*/  
   #  undef TEXT1
   #  undef TEXT2
   #  undef TEXT3

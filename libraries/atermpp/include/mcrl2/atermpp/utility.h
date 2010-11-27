@@ -27,6 +27,7 @@ namespace atermpp
     return aterm(ATreadFromString(const_cast<char*>(pattern.c_str())));
   }
 
+
 } // namespace atermpp
 
 #endif // ATERM_UTILITY_H

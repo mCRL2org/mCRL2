@@ -110,21 +110,9 @@ void Binit(tBlock *list){
 
 
 
-void BLswap(BList *blockList, struct HFnode *node1, struct HFnode *node2){
+void BLswap(BList *blockList, struct HFnode *node1, struct HFnode *node2)
+{
    tBlock *newBlock;
-
-/*
-if(node1){
-ATfprintf(stderr, "%t(%p) <-> %t(%p)\n", node1->term?node1->term:ATmake("nil"),
-node1,
-node2&&node2->term?node2->term:ATmake("nil"),
-node2);
-Bdump(stderr, node1->block);
-}
-oldBlock=node1->block;
-fprintf(stderr,"IN %p %p\n", oldBlock->last, oldBlock->last->previous);
-Bdump(stderr, node1->block);
-*/
    if(node2==NULL){
 
       /* Remove node1 from its block */
@@ -276,7 +264,9 @@ void Bdump(FILE *fp, tBlock *block){
    
    fprintf(fp, "Block %ld:\n", block->frequency);
    for(tmp=block->first; tmp!=NULL; tmp=tmp->next){
-      ATfprintf(stderr, "    %t %6d(%p<%p<%p)\n", tmp->term?tmp->term:ATmake("nil"), tmp->frequency, tmp->previous, tmp, tmp->next);
+      ATfprintf(stderr, "    %t %6d(%p<%p<%p)\n", 
+               tmp->term?tmp->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,ATfalse)), 
+               tmp->frequency, tmp->previous, tmp, tmp->next);
       if(tmp==block->last)
         break;
    }

@@ -20,6 +20,7 @@
 
    $Id: huffman.c,v 1.2 2008/09/30 08:22:51 bertl Exp $ */
 
+#include <assert.h>
 #include <limits.h>
 #include <svc/huffman.h>
 
@@ -39,12 +40,12 @@ void HFdumpCode(FILE *, struct HFnode *);
 
 /* Initialise 'tree' by adding one separator code */
 
-int HFinit(HFtree *tree, HTable *terms){
-
+int HFinit(HFtree *tree, HTable *terms)
+{
    /* Protect and assign constants */
 
-   ESCAPE_SEQUENCE=ATmake("<str(<appl>)>","ESC","NEW");
-   NO_ATERM       =ATmake("<str(<appl>)>","ESC","NIL");
+   ESCAPE_SEQUENCE=(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,ATtrue),(ATerm)ATmakeAppl0(ATmakeAFun("NEW",0,ATfalse)));
+   NO_ATERM       =(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,ATtrue),(ATerm)ATmakeAppl0(ATmakeAFun("NIL",0,ATfalse)));
    ATprotect(&ESCAPE_SEQUENCE);
    ATprotect(&NO_ATERM);
 
@@ -156,7 +157,7 @@ void HFdumpCodes(struct HFnode *tree){
 
       if (tree->low==NULL && tree->high==NULL){
 
-         ATfprintf(stderr, "%6d %t: ", tree->frequency, tree->term? tree->term:ATmake("nil"));
+         ATfprintf(stderr, "%6d %t: ", tree->frequency, tree->term? tree->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,ATfalse))); 
          HFdumpCode(stderr, tree);
          fprintf(stderr, "\n");
 
@@ -179,11 +180,6 @@ static struct HFnode *HFsuccessor(HFtree * t, struct HFnode *current){
    currentBlock=current->block;
    last=Blast(currentBlock);
    prelast=Bprevious(last);
-/*
-ATfprintf(stderr,"Succ'or of %t\n", current->term?current->term:ATmake("nil"));
-Bdump(stderr,current->block);
-HFdump(tree->codes,0);
-*/
 
    t = t; /* Prevent unused parameter warning */
 
@@ -219,13 +215,6 @@ HFdump(tree->codes,0);
 
 static void HFswap(struct HFnode **root, struct HFnode *node1, struct HFnode *node2){
    struct HFnode **parent1Ptr, **parent2Ptr, *tmp;
-   
-/*
-   ATfprintf(stderr, "%t(%d) <-> %t(%d)\n", node1->term? node1->term:ATmake("nil"),
-                                    node1->frequency,
-                                    node2->term? node2->term:ATmake("nil"),
-                                    node2->frequency);
-*/
    
    if(*root==node1){
       parent1Ptr=root;

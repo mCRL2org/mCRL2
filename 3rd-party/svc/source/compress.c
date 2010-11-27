@@ -74,9 +74,6 @@ int CSreadIndex(CompressedStream *cs, ATerm *term){
 int CSreadATerm(CompressedStream *cs, ATerm *term){
 
    if(HFdecodeATerm(cs->bs, &cs->tree, term)){
-/*
-ATfprintf(stderr, "Read %t\n", *term?*term:ATmake("nil"));
-*/
 
       if(*term==NULL){
          return 0;
@@ -92,9 +89,6 @@ ATfprintf(stderr, "Read %t\n", *term?*term:ATmake("nil"));
 int CSureadATerm(CompressedStream *cs, ATerm *term){
 
    if (BSreadString(cs->bs,buffer)){
-/*
-      ATfprintf(stderr, "Read ATerm %t\n", ATmake("<appl>", str));
-*/
       *term=ATreadFromString(buffer);
       return 1;
    } else {
@@ -105,9 +99,15 @@ int CSureadATerm(CompressedStream *cs, ATerm *term){
 int CSreadString(CompressedStream *cs, char **str){
    ATerm term;
 
-   if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<str>", str)){
-      return 1;
-   } else {
+   /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<str>", str)){ */
+   if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_APPL &&
+           !ATisQuoted(ATgetAFun(term)))
+   {
+     *str =ATgetName(ATgetAFun(term));
+     return 1;
+   } 
+   else 
+   {
       return 0;
    }
 
@@ -130,9 +130,14 @@ ATfprintf(stderr, "Uread %s\n", buffer);
 int CSreadInt(CompressedStream *cs, long *n){
    ATerm term;
 
-   if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<int>", &n)){
+   /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<int>", &n)) */
+   if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_INT)
+   {
+      *n =ATgetInt((ATermInt)term);
       return 1;
-   } else {
+   } 
+   else 
+   {
       return 0;
    }
 
@@ -182,7 +187,7 @@ int CSuwriteATerm(CompressedStream *cs, ATerm term){
 }
 int CSwriteString(CompressedStream *cs, char *str){
 
-   return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeAppl(ATmakeAFun(str,0,ATtrue)));
+   return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeAppl(ATmakeAFun(str,0,ATfalse)));
 }
 
 int CSuwriteString(CompressedStream *cs, char *str){

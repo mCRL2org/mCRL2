@@ -116,8 +116,8 @@ ATerm  ATremoveAnnotation(ATerm t, ATerm label);
  *  ATmake("<appl(<int>,<int>)>", "add", 0, 1);
  *  \endcode
  */
-ATerm ATmake(const char *pattern, ...);
-
+/* ATerm ATmake(const char *pattern, ...); 
+*/
 
 
 /**
@@ -141,34 +141,36 @@ ATerm ATmake(const char *pattern, ...);
  *  ATmatch(t, "and(<term>,<term>)", &left, &right);
  *  \endcode
  */
-ATbool ATmatch(ATerm t, const char *pattern, ...);
+/* ATbool ATmatch(ATerm t, const char *pattern, ...); */
 
 /**
  * A more efficient form of ATmake(). The pattern is now a pre-constructed
  * ATerm, which is faster since there is no pattern string to parse first.
  */
-ATerm ATmakeTerm(ATerm pat, ...);
+/* ATerm ATmakeTerm(ATerm pat, ...);
+*/
 
 /**
  * A more efficient form of ATmatch(). The pattern is now a pre-constructed
  * ATerm, which is faster since there is no pattern string to parse first.
  */
-ATbool ATmatchTerm(ATerm t, ATerm pat, ...);
+/* ATbool ATmatchTerm(ATerm t, ATerm pat, ...);
+*/
 
 /** \todo internal function? */
-ATerm ATvmake(const char *pat);
+/* ATerm ATvmake(const char *pat); */
 
 /** \todo internal function? */
-ATerm ATvmakeTerm(ATerm pat);
+/* ATerm ATvmakeTerm(ATerm pat); */
 
 /** \todo internal function? */
-void  AT_vmakeSetArgs(va_list *args);
+/* void  AT_vmakeSetArgs(va_list *args); */
 
 /** \todo internal function? */
-ATbool ATvmatch(ATerm t, const char *pat);
+/* ATbool ATvmatch(ATerm t, const char *pat); */
 
 /** \todo internal function? */
-ATbool ATvmatchTerm(ATerm t, ATerm pat);
+/* ATbool ATvmatchTerm(ATerm t, ATerm pat); */
 
 /** \todo does this variability belong in the level 1 interface? */
 extern ATbool AT_isEqual(ATerm t1, ATerm t2);
@@ -191,7 +193,8 @@ extern ATbool AT_isDeepEqual(ATerm t1, ATerm t2);
  * hidden anywhere on any subterm. This operation is in O(n) where n
  * is the amount of subterms.
  */
-ATbool ATisEqualModuloAnnotations(ATerm t1, ATerm t2);
+/* ATbool ATisEqualModuloAnnotations(ATerm t1, ATerm t2);
+*/
 
 /**
  * Serialize a term to file, in readable ATerm format. No sharing is applied
@@ -204,7 +207,8 @@ ATbool ATwriteToTextFile(ATerm t, FILE *file);
  * ATerm in only printed out once, a second occurence is replaced by a 
  * a reference.
  */ 
-long   ATwriteToSharedTextFile(ATerm t, FILE *f);
+/* long   ATwriteToSharedTextFile(ATerm t, FILE *f);
+*/
 
 ATbool ATwriteToBinaryFile(ATerm t, FILE *file);
 
@@ -220,7 +224,8 @@ ATbool ATwriteToNamedTextFile(ATerm t, const char *name);
  * \arg t term to write
  * \arg name name of the file. If the name equals "-", stdout is used.
  */
-ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name);
+/* ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name);
+*/
 
 /**
  * Call ATwriteToBinaryFile() after opening a file.
@@ -244,7 +249,8 @@ char  *ATwriteToString(ATerm t);
  * \arg len result variable that will hold the length of the string
  *
  */
-char *ATwriteToSharedString(ATerm t, int *len);
+/* char *ATwriteToSharedString(ATerm t, int *len);
+*/
 
 /**
  * Serialize an ATerm to a static buffer in binary format. Note that 
@@ -265,7 +271,8 @@ ATerm ATreadFromTextFile(FILE *file);
  * Read a shared textual ATerm (TAF) from a file.
  * \arg file file to read from
  */
-ATerm ATreadFromSharedTextFile(FILE *f);
+/* ATerm ATreadFromSharedTextFile(FILE *f);
+*/
 
 
 /**
@@ -299,7 +306,8 @@ ATerm ATreadFromString(const char *string);
  * \arg s array containing a serialized ATerm in TAF format
  * \arg size length of the array
  */
-ATerm ATreadFromSharedString(const char *s, int size);
+/* ATerm ATreadFromSharedString(const char *s, int size);
+*/
 
 /**
  * Parse a binary ATerm from an array of bytes.

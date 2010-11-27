@@ -840,7 +840,7 @@ static top_symbol *find_top_symbol(top_symbols *syms, AFun sym)
  */
 
 /* forward declaration */
-static ATbool write_term(ATerm, byte_writer *, ATbool);
+static ATbool write_term(ATerm, byte_writer *);
 
 static ATbool write_arg(sym_entry *trm_sym, ATerm arg, int arg_idx, 
 			byte_writer *writer, ATbool anno_done)
@@ -870,7 +870,7 @@ static ATbool write_arg(sym_entry *trm_sym, ATerm arg, int arg_idx,
   /*ATfprintf(stderr, "argument %t at index %d (cur_index of %y = %d)\n",
     arg, arg_trm_idx, arg_sym->id, arg_sym->cur_index);*/
   if (arg_trm_idx >= arg_sym->cur_index && 
-     !write_term(arg, writer, anno_done)) {
+     !write_term(arg, writer)) {
     /*fprintf(stderr, "write_term in write_arg failed\n");*/
     return ATfalse;
   }
@@ -879,13 +879,13 @@ static ATbool write_arg(sym_entry *trm_sym, ATerm arg, int arg_idx,
 }
 
 /*}}}  */
-/*{{{  static ATbool write_term(ATerm t, byte_writer *writer, ATbool anno_done) */
+/*{{{  static ATbool write_term(ATerm t, byte_writer *writer) */
 
 /**
  * Write a term using a writer.
  */
 
-static ATbool write_term(ATerm t, byte_writer *writer, ATbool anno_done)
+static ATbool write_term(ATerm t, byte_writer *writer)
 {
   int arg_idx;
   sym_entry *trm_sym = NULL;
@@ -1146,7 +1146,7 @@ write_baf(ATerm t, byte_writer *writer)
   if(writeInt(get_top_symbol(t, ATfalse)-sym_entries, writer) < 0)
     return ATfalse;
 
-  if (!write_term(t, writer, ATfalse)) {
+  if (!write_term(t, writer)) {
     return ATfalse;
   }
 	
