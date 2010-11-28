@@ -13,51 +13,51 @@
 #include "mathutils.h"
 #include "vectors.h"
 
-Vector2D::Vector2D(float deg)
+void Vector2D::toPolar(float& angle, float& radius) const
 {
-  float r = MathUtils::deg_to_rad(deg);
-  _x = cos(r);
-  _y = sin(r);
-}
-
-float Vector2D::toDegrees()
-{
-  float r = MathUtils::rad_to_deg(atan2(_y, _x));
-  if (r < 0.0f)
+  angle = MathUtils::rad_to_deg(atan2(_y, _x));
+  if (angle < 0.0f)
   {
-    r += 360.0f;
+    angle += 360.0f;
   }
-  return r;
+  radius = length();
 }
 
-float Vector2D::length()
+float Vector2D::length() const
 {
   return sqrt(_x * _x + _y * _y);
 }
 
-Vector2D Vector2D::operator+=(Vector2D v)
+void Vector2D::fromPolar(float angle, float radius)
+{
+  float angle_rad = MathUtils::deg_to_rad(angle);
+  _x = radius * cos(angle_rad);
+  _y = radius * sin(angle_rad);
+}
+
+Vector2D Vector2D::operator+=(const Vector2D& v)
 {
   _x += v.x();
   _y += v.y();
   return *this;
 }
 
-Vector2D Vector2D::operator+(Vector2D v)
+Vector2D Vector2D::operator+(const Vector2D& v) const
 {
   return Vector2D(_x + v.x(), _y + v.y());
 }
 
-Vector2D Vector2D::operator-(Vector2D v)
+Vector2D Vector2D::operator-(const Vector2D& v) const
 {
   return Vector2D(_x - v.x(), _y - v.y());
 }
 
-Vector2D Vector2D::operator*(float s)
+Vector2D Vector2D::operator*(float s) const
 {
   return Vector2D(s * _x, s * _y);
 }
 
-float Vector3D::length()
+float Vector3D::length() const
 {
   return sqrt(_x * _x + _y * _y + _z * _z);
 }
@@ -73,30 +73,38 @@ void Vector3D::normalize()
   }
 }
 
-Vector3D Vector3D::operator+(Vector3D p)
+Vector3D Vector3D::operator+=(const Vector3D& v)
 {
-  return Vector3D(_x + p.x(), _y + p.y(), _z + p.z());
+  _x += v.x();
+  _y += v.y();
+  _z += v.z();
+  return *this;
 }
 
-Vector3D Vector3D::operator-(Vector3D p)
+Vector3D Vector3D::operator+(const Vector3D& w) const
 {
-  return Vector3D(_x - p.x(), _y - p.y(), _z - p.z());
+  return Vector3D(_x + w.x(), _y + w.y(), _z + w.z());
 }
 
-Vector3D Vector3D::operator*(float s)
+Vector3D Vector3D::operator-(const Vector3D& w) const
+{
+  return Vector3D(_x - w.x(), _y - w.y(), _z - w.z());
+}
+
+Vector3D Vector3D::operator*(float s) const
 {
   return Vector3D(s * _x, s * _y, s * _z);
 }
 
-float Vector3D::dot_product(Vector3D p)
+float Vector3D::dot_product(const Vector3D& w) const
 {
-  return _x * p.x() + _y * p.y() + _z * p.z();
+  return _x * w.x() + _y * w.y() + _z * w.z();
 }
 
-Vector3D Vector3D::cross_product(Vector3D p)
+Vector3D Vector3D::cross_product(const Vector3D& w) const
 {
   return Vector3D(
-      _y * p.z() - _z * p.y(),
-      _z * p.x() - _x * p.z(),
-      _x * p.y() - _y * p.x() );
+      _y * w.z() - _z * w.y(),
+      _z * w.x() - _x * w.z(),
+      _x * w.y() - _y * w.x() );
 }

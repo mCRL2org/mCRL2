@@ -5,57 +5,53 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file vectors.h
-/// \brief Header file for Vector classes
 
 #ifndef VECTORS_H
 #define VECTORS_H
 
 class Vector2D
 {
+  public:
+    Vector2D(): _x(0.0f), _y(0.0f) {}
+    Vector2D(float x, float y): _x(x), _y(y) {}
+    ~Vector2D() {}
+    void fromPolar(float angle, float radius);
+    float length() const;
+    Vector2D operator+=(const Vector2D& v);
+    Vector2D operator+(const Vector2D& v) const;
+    Vector2D operator-(const Vector2D& v) const;
+    Vector2D operator*(float s) const;
+    void toPolar(float& angle, float& radius) const;
+    float x() const { return _x; }
+    float y() const { return _y; }
+
   private:
     float _x;
     float _y;
-
-  public:
-    Vector2D() {}
-    Vector2D(float x, float y): _x(x), _y(y) {}
-    Vector2D(float deg);
-    ~Vector2D() {}
-
-    float x() { return _x; }
-    float y() { return _y; }
-    float length();
-    float toDegrees();
-
-    Vector2D operator+=(Vector2D v);
-    Vector2D operator+(Vector2D v);
-    Vector2D operator-(Vector2D v);
-    Vector2D operator*(float s);
 };
 
 class Vector3D
 {
+  public:
+    Vector3D(): _x(0.0f), _y(0.0f), _z(0.0f) {}
+    Vector3D(float x, float y, float z): _x(x), _y(y), _z(z) {}
+    ~Vector3D() {}
+    Vector3D cross_product(const Vector3D& w) const;
+    float dot_product(const Vector3D& w) const;
+    float length() const;
+    void normalize();
+    Vector3D operator+=(const Vector3D& v);
+    Vector3D operator+(const Vector3D& w) const;
+    Vector3D operator-(const Vector3D& w) const;
+    Vector3D operator*(float s) const;
+    float x() const { return _x; }
+    float y() const { return _y; }
+    float z() const { return _z; }
+
   private:
     float _x;
     float _y;
     float _z;
-
-  public:
-    Vector3D() {}
-    Vector3D(float x, float y, float z): _x(x), _y(y), _z(z) {}
-    ~Vector3D() {}
-    float x() { return _x; }
-    float y() { return _y; }
-    float z() { return _z; }
-    float length();
-    void normalize();
-    float dot_product(Vector3D p);
-    Vector3D cross_product(Vector3D p);
-    Vector3D operator+(Vector3D p);
-    Vector3D operator-(Vector3D p);
-    Vector3D operator*(float s);
 };
 
 
