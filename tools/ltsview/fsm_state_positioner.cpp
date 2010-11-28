@@ -96,9 +96,9 @@ Vector2D ClusterSlotInfo::findNearestFreeSlot(const Vector2D& position)
 {
   Vector2D slot_pos = position;
   slot_rtree->findNearestNeighbour(position);
-  if (slot_rtree->nearestNeighbourFound())
+  if (slot_rtree->hasFoundNeighbour())
   {
-    slot_pos = slot_rtree->nearestNeighbour();
+    slot_pos = slot_rtree->foundNeighbour();
   }
   return slot_pos;
 }
@@ -107,9 +107,9 @@ Vector2D ClusterSlotInfo::findFarthestFreeSlot(const Vector2D& position)
 {
   Vector2D slot_pos = position;
   slot_rtree->findFarthestNeighbour(position);
-  if (slot_rtree->farthestNeighbourFound())
+  if (slot_rtree->hasFoundNeighbour())
   {
-    slot_pos = slot_rtree->farthestNeighbour();
+    slot_pos = slot_rtree->foundNeighbour();
   }
   return slot_pos;
 }

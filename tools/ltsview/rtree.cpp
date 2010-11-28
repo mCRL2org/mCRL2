@@ -64,18 +64,6 @@ void Rectangle::ensureMinSideLength(float min_side_length)
   high_corner = Vector2D(hc_x, hc_y);
 }
 
-float Rectangle::minDistanceTo(const Vector2D& point) const
-{
-  if (this->contains(point))
-  {
-    return 0.0f;
-  }
-  Vector2D diff_low = low_corner - point;
-  Vector2D diff_high = high_corner - point;
-  return std::min(diff_low.x() * diff_low.x(), diff_high.x() * diff_high.x()) +
-    std::min(diff_low.y() * diff_low.y(), diff_high.y() * diff_high.y());
-}
-
 
 class RNode
 {
@@ -234,6 +222,114 @@ void RTreeLeaf::computeBoundingBox()
   bounding_box.ensureMinSideLength(MIN_BB_SIDE_LENGTH);
 }
 
+struct QueueElement
+{
+  RNode* node;
+  float distance;
+  QueueElement(RNode* n, float d): node(n), distance(d) { }
+};
+
+class QueueElementLessThan
+{
+  public:
+    bool operator () (const QueueElement& q, const QueueElement& r)
+    {
+      return q.distance < r.distance;
+    }
+};
+
+class QueueElementGreaterThan
+{
+  public:
+    bool operator () (const QueueElement& q, const QueueElement& r)
+    {
+      return q.distance > r.distance;
+    }
+};
+
+class MinRectPointDistance
+{
+  public:
+    float operator () (const Rectangle& rectangle, const Vector2D& point)
+    {
+      if (rectangle.contains(point))
+      {
+        return 0.0f;
+      }
+      Vector2D diff_low = rectangle.low_corner - point;
+      Vector2D diff_high = rectangle.high_corner - point;
+      return std::min(diff_low.x() * diff_low.x(), diff_high.x() * diff_high.x()) +
+        std::min(diff_low.y() * diff_low.y(), diff_high.y() * diff_high.y());
+    }
+};
+
+class MaxRectPointDistance
+{
+  public:
+    float operator () (const Rectangle& rectangle, const Vector2D& point)
+    {
+      Vector2D diff_low = rectangle.low_corner - point;
+      Vector2D diff_high = rectangle.high_corner - point;
+      return std::max(diff_low.x() * diff_low.x(), diff_high.x() * diff_high.x()) +
+        std::max(diff_low.y() * diff_low.y(), diff_high.y() * diff_high.y());
+    }
+};
+
+template< class Distance, class Compare >
+class NeighbourFinder
+{
+  public:
+    typedef std::priority_queue< QueueElement, std::vector< QueueElement>,
+            Compare > PriorityQueue;
+    void startNewSearch(RNode* root, const Vector2D& point)
+    {
+      queue = PriorityQueue();
+      has_found_neighbour = false;
+      query_point = point;
+      queue.push(QueueElement(root, 0.0f));
+    }
+
+    void findNextNeighbour()
+    {
+      has_found_neighbour = false;
+      while (!queue.empty())
+      {
+        RNode* top_node = queue.top().node;
+        queue.pop();
+        RTreeLeaf* leaf = dynamic_cast< RTreeLeaf* > (top_node);
+        if (leaf != NULL)
+        {
+          has_found_neighbour = true;
+          found_neighbour = leaf->point;
+          return;
+        }
+        RTreeNode* node = dynamic_cast< RTreeNode* > (top_node);
+        std::list< RNode* >::iterator ci;
+        for (ci = node->children.begin(); ci != node->children.end(); ++ci)
+        {
+          RNode* child = *ci;
+          queue.push(QueueElement(child, Distance()(child->boundingBox(),
+                  query_point)));
+        }
+      }
+    }
+
+    bool hasFoundNeighbour() const
+    {
+      return has_found_neighbour;
+    }
+
+    Vector2D foundNeighbour() const
+    {
+      return found_neighbour;
+    }
+
+  private:
+    Vector2D found_neighbour;
+    bool has_found_neighbour;
+    Vector2D query_point;
+    PriorityQueue queue;
+};
 
 RTree::~RTree()
 {
@@ -253,54 +349,27 @@ void RTree::deletePoint(const Vector2D& point)
   }
 }
 
-class QueueElement
-{
-  public:
-    QueueElement(RNode* n, float d):
-      node(n), distance(d)
-    { }
-
-    bool operator < (const QueueElement& q) const
-    {
-      return distance < q.distance;
-    }
-
-    RNode* node;
-    float distance;
-};
-
 void RTree::findFarthestNeighbour(const Vector2D& point)
 {
+  NeighbourFinder< MaxRectPointDistance, QueueElementGreaterThan > finder;
+  finder.startNewSearch(root, point);
+  finder.findNextNeighbour();
+  neighbour_found = finder.hasFoundNeighbour();
+  if (neighbour_found)
+  {
+    neighbour = finder.foundNeighbour();
+  }
 }
 
 void RTree::findNearestNeighbour(const Vector2D& point)
 {
-  // This algorithm for finding nearest neighbours in an R-tree using a priority
-  // queue is described in:
-  // "Distance Browsing in Spatial Databases", G.R. Hjaltason and H. Samet, ACM
-  // Transactions on Database Systems, 24:2, pp. 265-318, 1999.
-  nearest_neighbour_found = false;
-  std::priority_queue< QueueElement > queue;
-  queue.push(QueueElement(root, 0.0f));
-  while (!queue.empty())
+  NeighbourFinder< MinRectPointDistance, QueueElementLessThan > finder;
+  finder.startNewSearch(root, point);
+  finder.findNextNeighbour();
+  neighbour_found = finder.hasFoundNeighbour();
+  if (neighbour_found)
   {
-    RNode* top_node = queue.top().node;
-    queue.pop();
-    RTreeLeaf* leaf = dynamic_cast< RTreeLeaf* > (top_node);
-    if (leaf != NULL)
-    {
-      nearest_neighbour_found = true;
-      nearest_neighbour = leaf->point;
-      return;
-    }
-    RTreeNode* node = dynamic_cast< RTreeNode* > (top_node);
-    std::list< RNode* >::iterator ci;
-    for (ci = node->children.begin(); ci != node->children.end(); ++ci)
-    {
-      RNode* child = *ci;
-      queue.push(QueueElement(child,
-            child->boundingBox().minDistanceTo(point)));
-    }
+    neighbour = finder.foundNeighbour();
   }
 }
 

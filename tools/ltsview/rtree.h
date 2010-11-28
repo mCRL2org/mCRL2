@@ -19,14 +19,12 @@ class RTree
   public:
     RTree():
       root(NULL),
-      farthest_neighbour_found(false),
-      nearest_neighbour_found(false)
+      neighbour_found(false)
     { }
 
     RTree(RNode* root_):
       root(root_),
-      farthest_neighbour_found(false),
-      nearest_neighbour_found(false)
+      neighbour_found(false)
     { }
 
     ~RTree();
@@ -34,32 +32,20 @@ class RTree
     void findNearestNeighbour(const Vector2D& point);
     void findFarthestNeighbour(const Vector2D& point);
 
-    bool farthestNeighbourFound() const
+    bool hasFoundNeighbour() const
     {
-      return farthest_neighbour_found;
+      return neighbour_found;
     }
 
-    Vector2D farthestNeighbour() const
+    Vector2D foundNeighbour() const
     {
-      return farthest_neighbour;
-    }
-
-    bool nearestNeighbourFound() const
-    {
-      return nearest_neighbour_found;
-    }
-
-    Vector2D nearestNeighbour() const
-    {
-      return nearest_neighbour;
+      return neighbour;
     }
 
   private:
     RNode* root;
-    bool farthest_neighbour_found;
-    Vector2D farthest_neighbour;
-    bool nearest_neighbour_found;
-    Vector2D nearest_neighbour;
+    bool neighbour_found;
+    Vector2D neighbour;
 };
 
 
