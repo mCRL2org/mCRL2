@@ -30,11 +30,11 @@ class FSMStatePositioner: public StatePositioner
     std::vector< State* > unpositioned_states;
 
     bool allStatesCentered(std::vector< State* > &states);
-    void assignStateToSlot(State* state, int ring, int slot);
+    void assignStateToPosition(State* state, const Vector2D& position);
     void bottomUpPass();
     void getPredecessors(State* state, std::vector< State* >& predecessors);
     void getSuccessors(State* state, std::vector< State* >& successors);
-    void requestStatePosition(State* state, Vector2D &position);
+    void requestStatePosition(State* state, Vector2D& position);
     void resolveUnpositioned();
     Vector2D sumStateVectors(std::vector< State* > &states, float rim_radius);
     void topDownPass();

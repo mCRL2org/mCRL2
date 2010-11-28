@@ -7,21 +7,28 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
-#include <priority_queue>
+#include <queue>
+#include <list>
 #include <vector>
 #include "rtree.h"
 
 class Rectangle
 {
   public:
+    Rectangle() {}
+
     Rectangle(const Vector2D& lowc, const Vector2D& highc):
       low_corner(lowc), high_corner(highc)
     { }
 
     bool contains(const Vector2D& point) const;
 
+    void ensureMinSideLength(float min_side_length);
+
     float minDistanceTo(const Vector2D& point) const;
+
 
     // We assume the following invariant for any rectangle:
     // low_corner.x() <= high_corner.x() && low_corner.y() <= high_corner.y()
@@ -33,6 +40,28 @@ bool Rectangle::contains(const Vector2D& point) const
 {
   return point.x() >= low_corner.x() && high_corner.x() >= point.x() &&
     point.y() >= low_corner.y() && high_corner.y() >= point.y();
+}
+
+void Rectangle::ensureMinSideLength(float min_side_length)
+{
+  float lc_x = low_corner.x();
+  float lc_y = low_corner.y();
+  float hc_x = high_corner.x();
+  float hc_y = high_corner.y();
+  float diff_x = hc_x - lc_x;
+  if (diff_x < min_side_length)
+  {
+    hc_x += 0.5f * (min_side_length - diff_x);
+    lc_x -= 0.5f * (min_side_length - diff_x);
+  }
+  float diff_y = hc_y - lc_y;
+  if (diff_y < min_side_length)
+  {
+    hc_y += 0.5f * (min_side_length - diff_y);
+    lc_y -= 0.5f * (min_side_length - diff_y);
+  }
+  low_corner = Vector2D(lc_x, lc_y);
+  high_corner = Vector2D(hc_x, hc_y);
 }
 
 float Rectangle::minDistanceTo(const Vector2D& point) const
@@ -51,9 +80,6 @@ float Rectangle::minDistanceTo(const Vector2D& point) const
 class RNode
 {
   public:
-    RNode()
-    { }
-
     virtual ~RNode()
     { }
 
@@ -74,44 +100,52 @@ class RNode
           - bounding_box.low_corner.y());
     }
 
-    virtual void computeBoundingBox();
+    virtual void computeBoundingBox()
+    { }
 
-    virtual void deletePoint(const Vector2D& point);
+    virtual void deletePoint(const Vector2D& point)
+    { }
 
-    virtual bool hasChildren() const;
+    virtual bool hasChildren() const
+    {
+      return false;
+    }
 
-  private:
+  protected:
     Rectangle bounding_box;
 
-    static float MIN_BB_SIDE_LENGTH = 1e-6f;
-
-    static void ensureMinBBSize(float& lc_x, float& lc_y, float& hc_x,
-        float& hc_y);
+    static const float MIN_BB_SIDE_LENGTH = 1e-6f;
 };
 
-void RNode::ensureMinBBSize(float& lc_x, float& lc_y, float& hc_x, float& hc_y)
+bool lessThanCenterX(RNode* a, RNode* b)
 {
-  float diff_x = hc_x - lc_x;
-  if (diff_x < MIN_BB_SIDE_LENGTH)
-  {
-    hc_x += 0.5f * (MIN_BB_SIDE_LENGTH - diff_x)
-    lc_x -= 0.5f * (MIN_BB_SIDE_LENGTH - diff_x)
-  }
-  float diff_y = hc_y - lc_y;
-  if (diff_y < MIN_BB_SIDE_LENGTH)
-  {
-    hc_y += 0.5f * (MIN_BB_SIDE_LENGTH - diff_y)
-    lc_y -= 0.5f * (MIN_BB_SIDE_LENGTH - diff_y)
-  }
+  // See cluster.cpp for an explanation on the a != b clause.
+  return a != b && a->centerX() < b->centerX();
+}
+
+bool lessThanCenterY(RNode* a, RNode* b)
+{
+  // See cluster.cpp for an explanation on the a != b clause.
+  return a != b && a->centerY() < b->centerY();
 }
 
 
 class RTreeNode: public RNode
 {
   public:
-    RTreeNode() { }
+    RTreeNode()
+    { }
 
-    ~RTreeNode();
+    ~RTreeNode()
+    {
+      for (std::list< RNode* >::iterator ci = children.begin();
+          ci != children.end(); ++ci)
+      {
+        delete *ci;
+      }
+    }
+
+    void computeBoundingBox();
 
     void deletePoint(const Vector2D& point);
 
@@ -125,10 +159,10 @@ class RTreeNode: public RNode
 
 void RTreeNode::computeBoundingBox()
 {
-  float lc_x = numeric_limits< float >::max();
-  float lc_y = numeric_limits< float >::max();
-  float hc_x = numeric_limits< float >::min();
-  float hc_y = numeric_limits< float >::min();
+  float lc_x = std::numeric_limits< float >::max();
+  float lc_y = std::numeric_limits< float >::max();
+  float hc_x = std::numeric_limits< float >::min();
+  float hc_y = std::numeric_limits< float >::min();
   std::list< RNode* >::iterator ci;
   for (ci = children.begin(); ci != children.end(); ++ci)
   {
@@ -138,14 +172,14 @@ void RTreeNode::computeBoundingBox()
     hc_x = std::max(hc_x, child_bb.high_corner.x());
     hc_y = std::max(hc_y, child_bb.high_corner.y());
   }
-  ensureMinBBSize(lc_x, lc_y, hc_x, hc_y);
   bounding_box = Rectangle(Vector2D(lc_x, lc_y), Vector2D(hc_x, hc_y));
+  bounding_box.ensureMinSideLength(MIN_BB_SIDE_LENGTH);
 }
 
 void RTreeNode::deletePoint(const Vector2D& point)
 {
-  std::list< RNode* >::iterator ci;
-  for (ci = children.begin(); ci != children.end(); ++ci)
+  std::list< RNode* >::iterator ci = children.begin();
+  while (ci != children.end())
   {
     RNode* child = *ci;
     if (child->boundingBox().contains(point))
@@ -157,10 +191,12 @@ void RTreeNode::deletePoint(const Vector2D& point)
       }
       else
       {
-        delete ci->child;
-        children.remove(ci);
+        delete child;
+        ci = children.erase(ci);
+        continue;
       }
     }
+    ++ci;
   }
 }
 
@@ -175,6 +211,8 @@ class RTreeLeaf: public RNode
     ~RTreeLeaf()
     { }
 
+    void computeBoundingBox();
+
     bool hasChildren() const
     {
       return false;
@@ -183,7 +221,6 @@ class RTreeLeaf: public RNode
     void deletePoint(const Vector2D& p)
     { }
 
-  private:
     Vector2D point;
 };
 
@@ -193,10 +230,18 @@ void RTreeLeaf::computeBoundingBox()
   float lc_y = point.y();
   float hc_x = point.x();
   float hc_y = point.y();
-  ensureMinBBSize(lc_x, lc_y, hc_x, hc_y);
   bounding_box = Rectangle(Vector2D(lc_x, lc_y), Vector2D(hc_x, hc_y));
+  bounding_box.ensureMinSideLength(MIN_BB_SIDE_LENGTH);
 }
 
+
+RTree::~RTree()
+{
+  if (root != NULL)
+  {
+    delete root;
+  }
+}
 
 void RTree::deletePoint(const Vector2D& point)
 {
@@ -224,12 +269,17 @@ class QueueElement
     float distance;
 };
 
-Vector2D* RTree::nearestNeighbour(const Vector2D& point)
+void RTree::findFarthestNeighbour(const Vector2D& point)
+{
+}
+
+void RTree::findNearestNeighbour(const Vector2D& point)
 {
   // This algorithm for finding nearest neighbours in an R-tree using a priority
   // queue is described in:
   // "Distance Browsing in Spatial Databases", G.R. Hjaltason and H. Samet, ACM
   // Transactions on Database Systems, 24:2, pp. 265-318, 1999.
+  nearest_neighbour_found = false;
   std::priority_queue< QueueElement > queue;
   queue.push(QueueElement(root, 0.0f));
   while (!queue.empty())
@@ -239,32 +289,22 @@ Vector2D* RTree::nearestNeighbour(const Vector2D& point)
     RTreeLeaf* leaf = dynamic_cast< RTreeLeaf* > (top_node);
     if (leaf != NULL)
     {
-      return leaf->point;
+      nearest_neighbour_found = true;
+      nearest_neighbour = leaf->point;
+      return;
     }
     RTreeNode* node = dynamic_cast< RTreeNode* > (top_node);
     std::list< RNode* >::iterator ci;
     for (ci = node->children.begin(); ci != node->children.end(); ++ci)
     {
       RNode* child = *ci;
-      queue.push(QueueElement(child, child->boundingBox().minDistanceTo(point)))
+      queue.push(QueueElement(child,
+            child->boundingBox().minDistanceTo(point)));
     }
   }
-  return NULL;
 }
 
-bool compareCenterX(RNode* a, RNode* b) const
-{
-  // See cluster.cpp for an explanation on the a != b clause.
-  return a != b && a->centerX() < b->centerX();
-}
-
-bool compareCenterY(RNode* a, RNode* b) const
-{
-  // See cluster.cpp for an explanation on the a != b clause.
-  return a != b && a->centerY() < b->centerY();
-}
-
-RTree PackedRTreeBuilder::buildTree()
+RTree* PackedRTreeBuilder::buildRTree()
 {
   // This algorithm for constructing a packed R-tree from a set of spatial
   // objects (in our case just points), is called Sort-Tile-Recursive and is
@@ -272,11 +312,12 @@ RTree PackedRTreeBuilder::buildTree()
   // "STR: a simple and efficient algorithm for R-tree packing", S.T.
   // Leutenegger, M.A. Lopez and J. Edgington, Technical Report TR-97-14,
   // Institute for Computer Applications in Science and Engineering, 1997.
+  unsigned int max_fanout = points.size();
   std::vector< RNode* > roots;
   std::vector< Vector2D >::iterator pi;
   for (pi = points.begin(); pi != points.end(); ++pi)
   {
-    RTreeLeaf* leaf = new RTreeLeaf(*i);
+    RTreeLeaf* leaf = new RTreeLeaf(*pi);
     leaf->computeBoundingBox();
     roots.push_back(leaf);
   }
@@ -286,7 +327,7 @@ RTree PackedRTreeBuilder::buildTree()
     int slice_size = max_fanout * std::ceil( std::sqrt( std::ceil(
             static_cast< double >(roots.size()) /
             static_cast< double >(max_fanout))));
-    sort(roots.begin(), roots.end(), compareCenterX);
+    sort(roots.begin(), roots.end(), lessThanCenterX);
     std::vector< RNode* >::iterator slice_begin;
     for (slice_begin = roots.begin(); slice_begin < roots.end();
         slice_begin += slice_size)
@@ -296,7 +337,7 @@ RTree PackedRTreeBuilder::buildTree()
       {
         slice_end = roots.end();
       }
-      sort(slice_begin, slice_end, compareCenterY);
+      sort(slice_begin, slice_end, lessThanCenterY);
       std::vector< RNode* >::iterator children_begin;
       for (children_begin = slice_begin; children_begin < slice_end;
           children_begin += max_fanout)
@@ -314,5 +355,5 @@ RTree PackedRTreeBuilder::buildTree()
     }
     roots.swap(new_roots);
   }
-  return RTree(roots[0]);
+  return new RTree(roots[0]);
 }

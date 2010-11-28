@@ -10,32 +10,64 @@
 #define RTREE_H
 
 #include <vector>
-#include "vectors"
+#include "vectors.h"
 
 class RNode;
 
 class RTree
 {
   public:
+    RTree():
+      root(NULL),
+      farthest_neighbour_found(false),
+      nearest_neighbour_found(false)
+    { }
+
     RTree(RNode* root_):
-      root(root_)
+      root(root_),
+      farthest_neighbour_found(false),
+      nearest_neighbour_found(false)
     { }
 
     ~RTree();
     void deletePoint(const Vector2D& point);
-    Vector2D nearestNeighbour(const Vector2D& point);
-    Vector2D farthestNeighbour(const Vector2D& point);
+    void findNearestNeighbour(const Vector2D& point);
+    void findFarthestNeighbour(const Vector2D& point);
+
+    bool farthestNeighbourFound() const
+    {
+      return farthest_neighbour_found;
+    }
+
+    Vector2D farthestNeighbour() const
+    {
+      return farthest_neighbour;
+    }
+
+    bool nearestNeighbourFound() const
+    {
+      return nearest_neighbour_found;
+    }
+
+    Vector2D nearestNeighbour() const
+    {
+      return nearest_neighbour;
+    }
 
   private:
     RNode* root;
+    bool farthest_neighbour_found;
+    Vector2D farthest_neighbour;
+    bool nearest_neighbour_found;
+    Vector2D nearest_neighbour;
 };
 
 
 class PackedRTreeBuilder
 {
   public:
-    PackedRTreeBuilder(unsigned int fanout):
-      max_fanout(fanout)
+    PackedRTreeBuilder():
+      rtree(NULL)
     { }
 
     ~PackedRTreeBuilder()
@@ -46,11 +78,11 @@ class PackedRTreeBuilder
       points.push_back(point);
     }
 
-    RTree buildTree();
+    RTree* buildRTree();
 
   private:
     std::vector< Vector2D > points;
-    unsigned int max_fanout;
+    RTree* rtree;
 };
 
 #endif

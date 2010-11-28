@@ -17,6 +17,7 @@
 #include "fsm_state_positioner.h"
 #include "lts.h"
 #include "mathutils.h"
+#include "rtree.h"
 #include "state.h"
 #include "transition.h"
 #include "vectors.h"
@@ -28,61 +29,26 @@ class ClusterSlotInfo
 {
   public:
     ClusterSlotInfo(Cluster* cluster);
-    ~ClusterSlotInfo() {}
-    void findFarthestFreeSlot(int &ring, int &slot);
-    void findNearestSlot(Vector2D &position, int &ring, int &slot);
-    void findNearestFreeSlot(int &ring, int &slot);
+    ~ClusterSlotInfo();
+    Vector2D findFarthestFreeSlot(const Vector2D& position);
+    Vector2D findNearestFreeSlot(const Vector2D& position);
+    void occupySlot(const Vector2D& position);
 
-    int getNumRings()
+    bool isCenter(float radius)
     {
-      return num_slots.size();
+      return radius < 0.5f * delta_ring;
     }
-
-    int getNumSlots(int ring)
-    {
-      return num_slots[ring];
-    }
-
-    void getPolarCoordinates(int ring, int slot, float &angle, float &radius)
-    {
-      radius = delta_ring * ring;
-      angle = rad_to_deg(2 * PI * slot / num_slots[ring]);
-    }
-
-    void occupySlot(int ring, int slot)
-    {
-      occupied_slots.insert(Slot(ring, slot));
-    }
-
 
   private:
-    struct Slot
-    {
-      Slot(int r, int s): ring(r), slot(s) {}
-      int ring, slot;
-    };
-
-    struct Slot_less
-    {
-      bool operator()(const Slot &c1, const Slot &c2)
-      {
-        return (c1.ring == c2.ring) ? c1.slot < c2.slot : c1.ring < c2.ring;
-      }
-    };
-
-    typedef std::set< Slot, Slot_less > SlotSet;
-
     static const float MIN_DELTA_RING = 0.22f;
     static const float MIN_DELTA_SLOT = 0.22f;
 
     float delta_ring;
-    std::vector< int > num_slots;
-    SlotSet occupied_slots;
-
-    Vector2D getVector(int ring, int slot);
+    RTree* slot_rtree;
 };
 
 ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
+  : slot_rtree(NULL)
 {
   int num_rings = 1 + static_cast<int>(cluster->getTopRadius() /
       MIN_DELTA_RING);
@@ -94,113 +60,58 @@ ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
   {
     delta_ring = 1.0f;
   }
-
+  PackedRTreeBuilder rtree_builder = PackedRTreeBuilder();
   for (int ring = 0; ring < num_rings; ++ring)
   {
-    float circumference = 2 * PI * ring * delta_ring;
+    float radius = ring * delta_ring;
     // max with 1 to ensure that ring 0 also has a slot
-    int slots = max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
-    num_slots.push_back(slots);
+    int num_slots = max(1, static_cast< int >(2.0f * PI * radius /
+          MIN_DELTA_SLOT));
+    float delta_deg = 360.0f / static_cast< float >(num_slots);
+    for (int slot = 0; slot < num_slots; ++slot)
+    {
+      float angle = delta_deg * slot;
+      Vector2D point = Vector2D();
+      point.fromPolar(angle, radius);
+      rtree_builder.addPoint(point);
+    }
   }
+  slot_rtree = rtree_builder.buildRTree();
 }
 
-Vector2D ClusterSlotInfo::getVector(int ring, int slot)
+ClusterSlotInfo::~ClusterSlotInfo()
 {
-  Vector2D result;
-  float angle, radius;
-  getPolarCoordinates(ring, slot, angle, radius);
-  result.fromPolar(angle, radius);
-  return result;
-}
-
-void ClusterSlotInfo::findNearestSlot(Vector2D &position, int &ring, int
-    &slot)
-{
-  float angle, radius;
-  position.toPolar(angle, radius);
-  angle = deg_to_rad(angle);
-  ring = min(round_to_int(radius / delta_ring), getNumRings() - 1);
-  slot = round_to_int(num_slots[ring] * angle / (2 * PI)) % getNumSlots(ring);
-}
-
-void ClusterSlotInfo::findNearestFreeSlot(int &ring, int &slot)
-{
-  SlotSet visited_slots;
-  queue< Slot > to_visit_slots;
-  to_visit_slots.push(Slot(ring, slot));
-  while (! to_visit_slots.empty())
+  if (slot_rtree != NULL)
   {
-    Slot slot_coord = to_visit_slots.front();
-    ring = slot_coord.ring;
-    slot = slot_coord.slot;
-    if (occupied_slots.find(slot_coord) == occupied_slots.end())
-    {
-      return;
-    }
-    for (int s = slot - 1; s < slot + 3; s += 2)
-    {
-      int next_slot = s % getNumSlots(ring);
-      if (s < 0)
-      {
-        next_slot += getNumSlots(ring);
-      }
-      if (visited_slots.find(Slot(ring, next_slot)) == visited_slots.end())
-      {
-        to_visit_slots.push(Slot(ring, next_slot));
-      }
-    }
-    for (int next_ring = ring - 1; next_ring < ring + 3; next_ring += 2)
-    {
-      if (0 <= next_ring && next_ring < getNumRings())
-      {
-        int next_slot = 0;
-        if (next_ring > 0)
-        {
-          next_slot = round_to_int(static_cast<float>(slot) /
-              static_cast<float>(getNumSlots(ring)) * getNumSlots(next_ring)) %
-            getNumSlots(ring);
-        }
-        if (visited_slots.find(Slot(next_ring, next_slot)) == visited_slots.end())
-        {
-          to_visit_slots.push(Slot(next_ring, next_slot));
-        }
-      }
-    }
-    visited_slots.insert(Slot(ring, slot));
-    to_visit_slots.pop();
+    delete slot_rtree;
   }
 }
 
-void ClusterSlotInfo::findFarthestFreeSlot(int &ring, int &slot)
+void ClusterSlotInfo::occupySlot(const Vector2D& position)
 {
-  if (occupied_slots.empty())
+  slot_rtree->deletePoint(position);
+}
+
+Vector2D ClusterSlotInfo::findNearestFreeSlot(const Vector2D& position)
+{
+  Vector2D slot_pos = position;
+  slot_rtree->findNearestNeighbour(position);
+  if (slot_rtree->nearestNeighbourFound())
   {
-    ring = getNumRings() - 1;
-    slot = 0;
-    return;
+    slot_pos = slot_rtree->nearestNeighbour();
   }
-  float max_min_distance = 0.0f;
-  for (int r = 0; r < getNumRings(); ++r)
+  return slot_pos;
+}
+
+Vector2D ClusterSlotInfo::findFarthestFreeSlot(const Vector2D& position)
+{
+  Vector2D slot_pos = position;
+  slot_rtree->findFarthestNeighbour(position);
+  if (slot_rtree->farthestNeighbourFound())
   {
-    for (int s = 0; s < getNumSlots(r); ++s)
-    {
-      Vector2D slot_vector = getVector(r, s);
-      float min_distance = numeric_limits< float >::max();
-      for (SlotSet::iterator occupied_slot = occupied_slots.begin();
-          occupied_slot != occupied_slots.end(); ++occupied_slot)
-      {
-        Vector2D delta_vector = slot_vector - getVector(occupied_slot->ring,
-            occupied_slot->slot);
-        min_distance = min(min_distance, delta_vector.length());
-      }
-      if (min_distance > max_min_distance)
-      {
-        max_min_distance = min_distance;
-        ring = r;
-        slot = s;
-      }
-    }
+    slot_pos = slot_rtree->farthestNeighbour();
   }
+  return slot_pos;
 }
 
 
@@ -328,9 +239,9 @@ void FSMStatePositioner::resolveUnpositioned()
   {
     State* state = *state_it;
     ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
-    int ring, slot;
-    cs_info->findFarthestFreeSlot(ring, slot);
-    assignStateToSlot(state, ring, slot);
+    Vector2D position(0, 0);
+    position = cs_info->findFarthestFreeSlot(position);
+    assignStateToPosition(state, position);
   }
 }
 
@@ -345,7 +256,7 @@ Vector2D FSMStatePositioner::sumStateVectors(vector< State* > &states, float
     State* state = *state_it;
     if (state->getCluster()->isCentered())
     {
-      if ( ! state->isCentered() )
+      if (!state->isCentered())
       {
         state_vector.fromPolar(state->getPositionAngle(),
             state->getPositionRadius());
@@ -356,7 +267,7 @@ Vector2D FSMStatePositioner::sumStateVectors(vector< State* > &states, float
     {
       cluster_vector.fromPolar(state->getCluster()->getPosition(), rim_radius);
       sum_vector += cluster_vector;
-      if ( ! state->isCentered() )
+      if (!state->isCentered())
       {
         state_vector.fromPolar(state->getPositionAngle() +
             state->getCluster()->getPosition(), state->getPositionRadius());
@@ -415,18 +326,19 @@ void FSMStatePositioner::getSuccessors(State* state, vector< State* >&
     << " outgoing transitions and took " << duration << " seconds" << std::endl;
 }
 
-void FSMStatePositioner::assignStateToSlot(State* state, int ring, int slot)
+void FSMStatePositioner::assignStateToPosition(State* state,
+    const Vector2D& position)
 {
   ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
-  cs_info->occupySlot(ring, slot);
-  if (ring == 0)
+  cs_info->occupySlot(position);
+  float angle, radius;
+  position.toPolar(angle, radius);
+  if (cs_info->isCenter(radius))
   {
     state->center();
   }
   else
   {
-    float angle, radius;
-    cs_info->getPolarCoordinates(ring, slot, angle, radius);
     state->setPositionAngle(angle);
     state->setPositionRadius(radius);
   }
@@ -436,10 +348,8 @@ void FSMStatePositioner::requestStatePosition(State* state, Vector2D& position)
 {
   clock_t t_begin = clock();
   ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
-  int ring, slot;
-  cs_info->findNearestSlot(position, ring, slot);
-  cs_info->findNearestFreeSlot(ring, slot);
-  assignStateToSlot(state, ring, slot);
+  position = cs_info->findNearestFreeSlot(position);
+  assignStateToPosition(state, position);
   float duration = static_cast<float>(clock() - t_begin) /
     static_cast<float>(CLOCKS_PER_SEC);
   std::cerr << "requestStatePosition took " << duration << " seconds" <<

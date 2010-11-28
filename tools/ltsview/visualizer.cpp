@@ -287,7 +287,7 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
           }
         }
         else
-        { 
+        {
           float delta = distance_circle_to_poly(
               deg_to_rad(desc->getPosition()+rot),
               root->getBaseRadius());
@@ -1176,10 +1176,12 @@ void Visualizer::applyForces(Cluster* root,int rot) {
         // of the cluster
         if (v.x() != 0.0f || v.y() != 0.0f)
         {
-          float angle = truncate_float(v.toDegrees());
-          // make sure we stay inside the boundary of the cluster
-          float radius = truncate_float(min(v.length(),root->getTopRadius()));
-          new_pos = Vector2D(radius * cos(deg_to_rad(angle)), radius * sin(deg_to_rad(angle)));
+          float angle, radius;
+          v.toPolar(angle, radius);
+          angle = truncate_float(angle);
+          radius = truncate_float(min(radius, root->getTopRadius()));
+          new_pos = Vector2D(radius * cos(deg_to_rad(angle)), radius *
+              sin(deg_to_rad(angle)));
           // compute the new position of s in "world" coordinates (i.e. with the
           // initial state at (0,0,0))
           glPushMatrix();
@@ -1464,7 +1466,7 @@ void Visualizer::drawBackPointer(State* startState, State* endState)
 
   float t,it,b0,b1,b2,b3,x,y,z;
   int N = settings->getInt(Quality);
-  
+
   glBegin(GL_LINE_STRIP);
 
   for (int k = 0; k < N; ++k)
@@ -1492,7 +1494,7 @@ void Visualizer::drawBackPointer(State* startState, State* endState)
         b3 * ctrlPts[3][2];
     glVertex3f(x, y, z);
   }
-  
+
   glEnd();
 }
 
