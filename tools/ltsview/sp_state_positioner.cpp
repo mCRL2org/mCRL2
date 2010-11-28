@@ -127,9 +127,7 @@ void NodeClusterStatePositioner::buildRTree()
     float delta_deg = 360.0f / static_cast<float>(num_slots);
     for (int slot = 0; slot < num_slots; ++slot)
     {
-      Vector2D point;
-      point.fromPolar(delta_deg * slot, radius);
-      rtree_builder.addPoint(point);
+      rtree_builder.addPoint(Vector2D::fromPolar(delta_deg * slot, radius));
     }
   }
   rtree_builder.buildRTree();
@@ -148,25 +146,20 @@ Vector2D NodeClusterStatePositioner::sumSuccessorStateVectors(State* state)
       {
         if (!successor->isCentered())
         {
-          Vector2D v_state;
-          v_state.fromPolar(successor->getPositionAngle(),
+          sum_vector += Vector2D::fromPolar(successor->getPositionAngle(),
               successor->getPositionRadius());
-          sum_vector += v_state;
         }
       }
       else
       {
-        Vector2D v_cluster;
-        v_cluster.fromPolar(successor->getCluster()->getPosition(),
-            cluster->getBaseRadius());
-        Vector2D v_state = Vector2D(0, 0);
+        sum_vector += Vector2D::fromPolar(
+            successor->getCluster()->getPosition(), cluster->getBaseRadius());
         if (!successor->isCentered())
         {
-          v_state.fromPolar(successor->getPositionAngle() +
+          sum_vector += Vector2D::fromPolar(successor->getPositionAngle() +
               successor->getCluster()->getPosition(),
               successor->getPositionRadius());
         }
-        sum_vector += v_cluster + v_state;
       }
     }
   }

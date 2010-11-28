@@ -28,11 +28,10 @@ float Vector2D::length() const
   return sqrt(_x * _x + _y * _y);
 }
 
-void Vector2D::fromPolar(float angle, float radius)
+Vector2D Vector2D::fromPolar(float angle, float radius)
 {
   float angle_rad = MathUtils::deg_to_rad(angle);
-  _x = radius * cos(angle_rad);
-  _y = radius * sin(angle_rad);
+  return Vector2D(radius * cos(angle_rad), radius * sin(angle_rad));
 }
 
 Vector2D Vector2D::operator+=(const Vector2D& v)

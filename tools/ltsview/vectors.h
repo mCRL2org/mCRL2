@@ -15,7 +15,6 @@ class Vector2D
     Vector2D(): _x(0.0f), _y(0.0f) {}
     Vector2D(float x, float y): _x(x), _y(y) {}
     ~Vector2D() {}
-    void fromPolar(float angle, float radius);
     float length() const;
     Vector2D operator+=(const Vector2D& v);
     Vector2D operator+(const Vector2D& v) const;
@@ -24,6 +23,8 @@ class Vector2D
     void toPolar(float& angle, float& radius) const;
     float x() const { return _x; }
     float y() const { return _y; }
+
+    static Vector2D fromPolar(float angle, float radius);
 
   private:
     float _x;
