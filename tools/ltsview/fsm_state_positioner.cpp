@@ -47,6 +47,7 @@ class ClusterSlotInfo
     RTree* slot_rtree;
 };
 
+
 ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
   : slot_rtree(NULL)
 {
@@ -147,6 +148,43 @@ void FSMStatePositioner::positionStates()
   topDownPass();
   std::cerr << "resolve unpositioned pass" << std::endl;
   resolveUnpositioned();
+}
+
+void FSMStatePositioner::bottomUpPassBas()
+{
+  // Process states bottom-up, keeping edges as short as possible.
+  for (Reverse_cluster_iterator ci = lts->getReverseClusterIterator();
+      !ci.is_end(); ++ci)
+  {
+    Cluster* cluster = *ci;
+    if (cluster->getNumStates() == 1)
+    {
+      Vector2D position = Vector2D(0, 0);
+      requestStatePosition(cluster->getState(0), position);
+      continue;
+    }
+    if (cluster->getNumDescendants() == 0)
+    {
+
+    }
+    for (int s = 0; s < cluster->getNumStates(); ++s)
+    {
+      State* state = cluster->getState(s);
+      if (cluster->getNumDescendants() == 0)
+      {
+        state->center();
+        unpositioned_states.push_back(state);
+      }
+      else
+      {
+        vector< State* > successors;
+        getSuccessors(state, successors);
+        Vector2D position = sumStateVectors(successors,
+            cluster->getBaseRadius());
+        requestStatePosition(state, position);
+      }
+    }
+  }
 }
 
 void FSMStatePositioner::bottomUpPass()

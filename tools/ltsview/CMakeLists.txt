@@ -46,6 +46,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   simdialog.cpp
   simreader.cpp
   simulation.cpp
+  sp_state_positioner.cpp
   state.cpp
   transition.cpp
   vectors.cpp

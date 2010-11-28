@@ -21,6 +21,7 @@
 #include "mathutils.h"
 #include "mediator.h"
 #include "simulation.h"
+#include "sp_state_positioner.h"
 #include "state.h"
 #include "transition.h"
 
@@ -274,7 +275,7 @@ size_t LTS::getStateParameterValue(State* state,size_t param)
 }
 
 std::string LTS::getStateParameterValueStr(State* state, size_t param)
-{ 
+{
   using namespace mcrl2::lts::detail;
   return mcrl2_lts.state_element_value(param,(mcrl2_lts.state_label(state->getID()))[param]);
 }
@@ -293,7 +294,7 @@ std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t pa
 bool LTS::readFromFile(const std::string &filename)
 {
   load_lts_as_fsm_file(filename,mcrl2_lts);
-  
+
   // remove unreachable states
   reachability_check(mcrl2_lts,true);
 
@@ -744,7 +745,8 @@ void LTS::clearStatePositions()
 
 void LTS::positionStates()
 {
-  FSMStatePositioner state_positioner(this);
+  //FSMStatePositioner state_positioner(this);
+  SinglePassStatePositioner state_positioner(this);
   state_positioner.positionStates();
 }
 

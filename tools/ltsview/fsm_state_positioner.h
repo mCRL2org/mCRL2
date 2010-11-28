@@ -32,6 +32,7 @@ class FSMStatePositioner: public StatePositioner
     bool allStatesCentered(std::vector< State* > &states);
     void assignStateToPosition(State* state, const Vector2D& position);
     void bottomUpPass();
+    void bottomUpPassBas();
     void getPredecessors(State* state, std::vector< State* >& predecessors);
     void getSuccessors(State* state, std::vector< State* >& successors);
     void requestStatePosition(State* state, Vector2D& position);
