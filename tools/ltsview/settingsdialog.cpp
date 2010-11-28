@@ -92,7 +92,7 @@ SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
   sizer->Add(nb,0,wxEXPAND|wxALL,5);
   SetSizerAndFit(sizer);
   Layout();
-  SetSize(wxSize(350,-1));
+  SetSize(wxSize(400,-1));
 }
 
 void SettingsDialog::setupParametersPanel(wxPanel* panel)
