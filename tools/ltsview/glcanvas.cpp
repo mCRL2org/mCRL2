@@ -708,7 +708,7 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC)
   // * The identifier of the type of object clicked
   // * Up to two numbers indicating the object selected
   GLsizei bufsize = mediator->getNumberOfObjects() * 6;
-  if(GetContext())
+  if (GetContext())
   {
     GLuint *selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
     GLint  hits;
@@ -734,11 +734,11 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC)
     gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),
                    nearPlane, farPlane);
 
-
     glMatrixMode(GL_MODELVIEW); // Switch to Modelview matrix in order to
                                 // calculate rotations etc.
 
     display(false, true);
+    glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glFlush();
 
