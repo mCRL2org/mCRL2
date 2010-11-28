@@ -116,5 +116,18 @@ RTree PackedRTreeBuilder::buildTree()
   // "STR: a simple and efficient algorithm for R-tree packing", S.T.
   // Leutenegger, M.A. Lopez and J. Edgington, Technical Report TR-97-14,
   // Institute for Computer Applications in Science and Engineering, 1997.
-  
+  int max_fanout = 100;
+  std::vector< RNode* > roots;
+  std::vector< std::vector< float >* >::iterator i;
+  for (i = points.begin(); i != points.end(); ++i)
+  {
+    roots.push_back(new RTreeLeaf(*i));
+  }
+  while (roots.size() > 1)
+  {
+    std::vector< RNode* > new_roots;
+    
+    roots.swap(new_roots);
+  }
+  return RTree(roots[0]);
 }
