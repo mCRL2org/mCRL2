@@ -8,12 +8,11 @@
 
 #ifndef FSM_STATE_POSITIONER_H
 #define FSM_STATE_POSITIONER_H
-#include <map>
+#include <set>
 #include <vector>
 #include "state_positioner.h"
 #include "vectors.h"
 
-class Cluster;
 class ClusterSlotInfo;
 class LTS;
 class State;
@@ -30,14 +29,15 @@ class FSMStatePositioner: public StatePositioner
     std::vector< State* > unpositioned_states;
 
     bool allStatesCentered(std::vector< State* > &states);
-    void assignStateToPosition(State* state, const Vector2D& position);
+    void assignStateToSlot(State* state, int ring, int slot);
     void bottomUpPass();
-    void bottomUpPassBas();
     void getPredecessors(State* state, std::vector< State* >& predecessors);
     void getSuccessors(State* state, std::vector< State* >& successors);
-    void requestStatePosition(State* state, Vector2D& position);
+    void requestStatePosition(State* state, Vector2D &position);
     void resolveUnpositioned();
-    Vector2D sumStateVectors(std::vector< State* > &states, float rim_radius);
+    Vector2D sumStateVectorsInMultipleClusters( std::vector< State* > &states,
+        float rim_radius);
+    Vector2D sumStateVectorsInSingleCluster(std::vector< State* > &states);
     void topDownPass();
 };
 
