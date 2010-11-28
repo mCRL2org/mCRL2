@@ -137,7 +137,7 @@ ATermList EnumeratorSolutionsStandard::ss_pop()
 
 bool EnumeratorSolutionsStandard::IsInner3Eq(ATerm a)
 {
-  return ATindexedSetGetIndex(info.eqs,a) >= 0;
+  return ATindexedSetGetIndex(info.eqs,a) != (size_t)(-1);
 }
 
 bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
@@ -185,7 +185,7 @@ bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, AT
 
 bool EnumeratorSolutionsStandard::IsInnerCEq(ATermAppl a)
 {
-  return ATindexedSetGetIndex(info.eqs,ATgetArgument(a,0)) >= 0;
+  return ATindexedSetGetIndex(info.eqs,ATgetArgument(a,0)) !=(size_t)(-1);
 }
 
 static struct { ATermList vars; ATerm *v; ATerm *e; } FindInnerCEquality_struct;

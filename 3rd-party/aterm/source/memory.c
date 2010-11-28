@@ -153,9 +153,9 @@ static int term_size(ATerm t)
     case AT_LIST:
       size = TERM_SIZE_LIST;
       break;
-    case AT_BLOB:
+    /* case AT_BLOB:
       size = TERM_SIZE_BLOB;
-      break;
+      break; */
     case AT_APPL:
       size = TERM_SIZE_APPL(ATgetArity(ATgetSymbol(t)));
       break;
@@ -905,29 +905,26 @@ void AT_freeTerm(unsigned int size, ATerm t)
 {
   HashNumber hnr = hash_number(t, size);
   ATerm prev = NULL, cur;
-  unsigned int i;
+  /* unsigned int i; */
 
   terminfo[size].nb_reclaimed_cells_during_last_gc++;
   
     /*fprintf(stderr,"AT_freeTerm term[%d] = %x\theader = %x\n",size,(unsigned int)t,t->header);*/
   
-    /* The data of a blob needs to be freed!!! */
-  if (ATgetType(t) == AT_BLOB) {
+  /* The data of a blob needs to be freed!!! */
+  /* if (ATgetType(t) == AT_BLOB) 
+  {
     ATbool destructed = ATfalse;
-      /*ATfprintf(stderr, "freeing blob %p (%p): %t\n", t, ATgetBlobData((ATermBlob)t), t);*/
     for (i=0; i<destructor_count; i++) {
-        /*fprintf(stderr,"apply destructors[%d] on (%d)\n",i,t);*/
       if ((destructors[i])((ATermBlob)t)) {
         destructed = ATtrue;
         break;
       }
     }
-      /*printf("destructed = %d\n",destructed);*/
     if (!destructed) {
-        /*printf("free BlobData(%d)\n",ATgetBlobData((ATermBlob)t));*/
       AT_free(ATgetBlobData((ATermBlob)t));
     }
-  }
+  } */
 
     /* Remove the node from the hashtable */
   hnr &= table_mask; 
@@ -1810,17 +1807,17 @@ ATermPlaceholder ATmakePlaceholder(ATerm type)
  * Create a new BLOB (Binary Large OBject)
  */
 
-ATermBlob ATmakeBlob(unsigned int size, void *data)
+/* ATermBlob ATmakeBlob(unsigned int size, void *data)
 {
   ATermBlob cur;
   header_type header = BLOB_HEADER(0);
   HashNumber hnr;
 
-/*
+/ *
   if (low_memory) {
     AT_collect();
   }
-*/
+* /
 
   hnr = START(header);
   hnr = COMBINE(hnr, size);
@@ -1836,7 +1833,7 @@ ATermBlob ATmakeBlob(unsigned int size, void *data)
 
   if (!cur) {
     cur = (ATermBlob) AT_allocate(TERM_SIZE_BLOB);
-    /* Delay masking until after AT_allocate */
+    / * Delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
@@ -1846,10 +1843,8 @@ ATermBlob ATmakeBlob(unsigned int size, void *data)
     hashtable[hnr] = (ATerm) cur;
   }
 
-  /*ATwarning("ATmakeBlob(%d): hnr = %d, t = %t\n", size, (int)hnr, cur);*/
-
   return cur;
-}
+} */
 
 /*}}}  */
 

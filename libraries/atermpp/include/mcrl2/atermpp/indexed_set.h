@@ -72,10 +72,10 @@ namespace atermpp
 
       /// \brief Find the index of elem in set.
       /// The index assigned to elem is returned, except when elem is not in the set, in
-      /// which case the return value is a negative number.
+      /// which case the return value is (size_t)-1, i.e. the largest number in size_t.
       /// \param elem An element of the set.
       /// \return The index of the element.
-      long index(aterm elem)
+      size_t index(aterm elem)
       {
         return ATindexedSetGetIndex(m_set.get(), elem);
       }

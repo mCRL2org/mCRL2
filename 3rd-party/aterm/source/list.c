@@ -549,10 +549,10 @@ ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
  * Create a new dictionary.
  */
 
-ATerm ATdictCreate()
+/* ATerm ATdictCreate()
 {
   return (ATerm)ATempty;
-}
+} */
 
 /*}}}  */
 /*{{{  ATerm ATdictPut(ATerm dict, ATerm key, ATerm value) */
@@ -562,13 +562,13 @@ ATerm ATdictCreate()
  * of [key,value] pairs.
  */
 
-ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
+/* ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
 {
   unsigned int i = 0;
   ATermList pair, tmp = (ATermList)dict;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(tmp));
 
-  /* Search for the key */
+  / * Search for the key * /
   while(!ATisEmpty(tmp)) 
   {
     pair = (ATermList)ATgetFirst(tmp);
@@ -588,10 +588,10 @@ ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
     }
   }
   
-  /* The key is not in the dictionary */
+  / * The key is not in the dictionary * /
   pair = ATmakeList2(key, value);
   return (ATerm)ATinsert((ATermList)dict, (ATerm)pair);
-}
+} */
 
 /*}}}  */
 /*{{{  ATerm ATdictGet(ATerm dict, ATerm key) */
@@ -600,12 +600,12 @@ ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
  * Retrieve a value from a dictionary list.
  */
 
-ATerm ATdictGet(ATerm dict, ATerm key)
+/* ATerm ATdictGet(ATerm dict, ATerm key)
 {
   ATermList pair;
   ATermList tmp = (ATermList)dict;
 
-  /* Search for the key */
+  / * Search for the key * /
   while(!ATisEmpty(tmp)) {
     pair = (ATermList)ATgetFirst(tmp);
 
@@ -615,9 +615,9 @@ ATerm ATdictGet(ATerm dict, ATerm key)
     tmp = ATgetNext(tmp);
   }
 
-  /* The key is not in the dictionary */
+  / * The key is not in the dictionary * /
   return NULL;
-}
+} */
 
 /*}}}  */
 /*{{{  ATerm ATdictRemove(ATerm dict, ATerm key) */
@@ -626,13 +626,13 @@ ATerm ATdictGet(ATerm dict, ATerm key)
  * Remove a [key,value] pair from a dictionary list.
  */
 
-ATerm ATdictRemove(ATerm dict, ATerm key)
+/* ATerm ATdictRemove(ATerm dict, ATerm key)
 {
   unsigned int idx = 0;
   ATermList tmp = (ATermList)dict;
   ATermList pair;
 
-  /* Search for the key */
+  / * Search for the key * /
   while(!ATisEmpty(tmp)) {
     pair = (ATermList)ATgetFirst(tmp);
     if(ATisEqual(ATgetFirst(pair), key))
@@ -642,9 +642,9 @@ ATerm ATdictRemove(ATerm dict, ATerm key)
     idx++;
   }
 
-  /* The key is not in the dictionary */
+  / * The key is not in the dictionary * /
   return dict;
-}
+} */
 
 /*}}}  */
 /*{{{  ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm)) */

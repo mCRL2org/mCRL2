@@ -34,8 +34,8 @@ using namespace mcrl2::core::detail;
 
     void Disjointness_Checker::process_data_expression(int a_summand_number, ATermAppl a_expression) {
       if (gsIsDataVarId(a_expression)) {
-        int v_variable_index = ATindexedSetGetIndex(f_parameter_set, (ATerm) a_expression);
-        if (v_variable_index >= 0) {
+        size_t v_variable_index = ATindexedSetGetIndex(f_parameter_set, (ATerm) a_expression);
+        if (v_variable_index != (size_t)(-1)) {
           f_used_parameters_per_summand[(a_summand_number * f_number_of_parameters) + v_variable_index] = true;
         }
       } else if (!gsIsOpId(a_expression)) {
@@ -88,7 +88,7 @@ using namespace mcrl2::core::detail;
       ATermAppl v_assignment;
       ATermAppl v_variable;
       ATermAppl v_expression;
-      int v_variable_index;
+      size_t v_variable_index;
 
       // variables used in condition
       process_data_expression(a_summand_number, v_condition);
@@ -111,7 +111,7 @@ using namespace mcrl2::core::detail;
 
         // variable changed in assignment
         v_variable_index = ATindexedSetGetIndex(f_parameter_set, (ATerm) v_variable);
-        if (v_variable_index >= 0) {
+        if (v_variable_index != (size_t)(-1)) {
           f_changed_parameters_per_summand[(a_summand_number * f_number_of_parameters) + v_variable_index] = true;
         }
 

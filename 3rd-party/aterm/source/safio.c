@@ -448,7 +448,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 /**
  * Serializes the given ATermBlob.
  */
-static void visitBlob(BinaryWriter binaryWriter, ATermBlob arg, ByteBuffer byteBuffer){
+/* static void visitBlob(BinaryWriter binaryWriter, ATermBlob arg, ByteBuffer byteBuffer){
 	unsigned int remaining;
 	
 	unsigned int size = ATgetBlobSize(arg);
@@ -471,7 +471,7 @@ static void visitBlob(BinaryWriter binaryWriter, ATermBlob arg, ByteBuffer byteB
 	binaryWriter->indexInTerm += bytesToWrite;
 	
 	if(binaryWriter->indexInTerm == size) binaryWriter->indexInTerm = 0;
-}
+} */
 
 /**
  * Serializes the given ATermInt
@@ -529,10 +529,10 @@ BinaryWriter ATcreateBinaryWriter(ATerm term){
 	binaryWriter->stackSize = DEFAULTSTACKSIZE;
 	binaryWriter->stackPosition = 0;
 	
-	binaryWriter->sharedTerms = IMcreateIDMappings(0.75);
+	binaryWriter->sharedTerms = IMcreateIDMappings(75);
 	binaryWriter->currentSharedTermKey = 0;
 	
-	binaryWriter->sharedSymbols = IMcreateIDMappings(0.75);
+	binaryWriter->sharedSymbols = IMcreateIDMappings(75);
 	binaryWriter->currentSharedSymbolKey = 0;
 	
 	binaryWriter->currentTerm = term;
@@ -603,9 +603,9 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 					visitList((ATermList) currentTerm, byteBuffer);
 					binaryWriter->stack[binaryWriter->stackPosition].nextPartOfList = (ATermList) currentTerm; /* <- for ATermList->next optimizaton. */
 					break;
-				case AT_BLOB:
+				/* case AT_BLOB:
 					visitBlob(binaryWriter, (ATermBlob) currentTerm, byteBuffer);
-					break;
+					break; */
 				case AT_PLACEHOLDER:
 					visitPlaceholder((ATermPlaceholder) currentTerm, byteBuffer);
 					break;
@@ -851,14 +851,14 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer){
 			}
 			
 			if(length < TEMPNAMEPAGESIZE) binaryReader->tempBytes = NULL; /* Set to NULL, so we don't free the tempNamePage. */
-		}else if(binaryReader->tempType == AT_BLOB){
+/*		}else if(binaryReader->tempType == AT_BLOB){
 			void* bytes = (void*) binaryReader->tempBytes;
 			
 			ATerm term = (ATerm) ATmakeBlob(binaryReader->tempBytesSize, bytes);
 			
 			ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
 			
-			binaryReader->tempBytes = NULL; /* Don't free, because ATmakeBlob doesn't copy the bytes, but reuses the array. */
+			binaryReader->tempBytes = NULL; / * Don't free, because ATmakeBlob doesn't copy the bytes, but reuses the array. * /
 			
 			if(ac->hasAnnos == 0){
 				shareTerm(binaryReader, ac, term);
@@ -869,7 +869,7 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer){
 				*term_ptr = term;
 				
 				ac->tempTerm = term;
-			}
+			} */ 
 		}else{
 			ATerror("Unsupported chunkified type: %s.\n", binaryReader->tempType);
 		}
@@ -1000,7 +1000,7 @@ static void touchReal(BinaryReader binaryReader, ByteBuffer byteBuffer){
 /**
  * Starts the deserialization of an ATermBlob.
  */
-static void touchBlob(BinaryReader binaryReader, ByteBuffer byteBuffer){
+/* static void touchBlob(BinaryReader binaryReader, ByteBuffer byteBuffer){
 	unsigned int length = readInt(byteBuffer);
 	
 	binaryReader->tempBytesSize = length;
@@ -1010,7 +1010,7 @@ static void touchBlob(BinaryReader binaryReader, ByteBuffer byteBuffer){
 	binaryReader->tempType = AT_BLOB;
 
 	readData(binaryReader, byteBuffer);
-}
+} */
 
 /**
  * Starts the deserialization of a ATermPlaceholder.
@@ -1075,9 +1075,9 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer){
 				case AT_REAL:
 					touchReal(binaryReader, byteBuffer);
 					break;
-				case AT_BLOB:
+	/*			case AT_BLOB:
 					touchBlob(binaryReader, byteBuffer);
-					break;
+					break;  */
 				case AT_PLACEHOLDER:
 					touchPlaceholder(binaryReader);
 					break;

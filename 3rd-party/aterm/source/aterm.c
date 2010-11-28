@@ -715,9 +715,9 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	{
 	  case AT_INT:
 	  case AT_REAL:
-	  case AT_BLOB:
+/*	  case AT_BLOB:
 	    ATwriteToTextFile(t, stream);
-	    break;
+	    break; */
 
 	  case AT_PLACEHOLDER:
 	    fprintf(stream, "<...>");
@@ -798,10 +798,10 @@ writeToTextFile(ATerm t, FILE * f)
 {
   Symbol          sym;
   ATerm           arg;
-  unsigned int    i, arity, size;
+  unsigned int    i, arity; /* size; */
   ATermAppl       appl;
   ATermList       list;
-  ATermBlob       blob;
+  /* ATermBlob       blob; */
   char            *name;
 
   switch (ATgetType(t))
@@ -860,8 +860,8 @@ writeToTextFile(ATerm t, FILE * f)
 
       /*}}}  */
       break;
-    case AT_BLOB:
-      /*{{{  Print blob */
+ /*    case AT_BLOB:
+      / *{{{  Print blob * /
 
       blob = (ATermBlob) t;
       size = ATgetBlobSize(blob);
@@ -869,9 +869,9 @@ writeToTextFile(ATerm t, FILE * f)
       fwrite(ATgetBlobData(blob), ATgetBlobSize(blob), 1, f);
       fputc('"', f);
 
-      /*}}}  */
+      / *}}}  * /
       break;
-
+*/
     case AT_FREE:
       if(AT_inAnyFreeList(t))
 	ATerror("ATwriteToTextFile: printing free term at %p!\n", t);
@@ -948,7 +948,7 @@ ATbool ATwriteToNamedTextFile(ATerm t, const char *name)
  * Write an ATerm to a named plaintext file
  */
 
-ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name)
+/* ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name)
 {  
   FILE  *f;
   ATbool result;
@@ -965,7 +965,7 @@ ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name)
   fclose(f);
 
   return result;
-}
+} */
 
 /*}}}  */
 
@@ -1075,9 +1075,10 @@ writeToString(ATerm t, char *buf)
   ATerm trm;
   ATermList list;
   ATermAppl appl;
-  ATermBlob blob;
+  /* ATermBlob blob; */
   AFun sym;
-  unsigned int i, size, arity;
+  /* unsigned int i, size, arity; */
+  unsigned int i, arity;
   char *name;
 
   switch (ATgetType(t))
@@ -1151,8 +1152,8 @@ writeToString(ATerm t, char *buf)
       /*}}}  */
       break;
 
-    case AT_BLOB:
-      /*{{{  write blob */
+/*    case AT_BLOB:
+      / *{{{  write blob * /
 
       blob = (ATermBlob) t;
       size = ATgetBlobSize(blob);
@@ -1164,8 +1165,9 @@ writeToString(ATerm t, char *buf)
 
       *buf++ = '"';
 
-      /*}}}  */
+      / *}}}  * /
       break;
+*/
   }
   return buf;
 }
@@ -1268,10 +1270,10 @@ static unsigned long textSize(ATerm t)
       size = topTextSize(trm);
       break;
 
-    case AT_BLOB:
+/*    case AT_BLOB:
       size =  LENSPEC + 4 + ATgetBlobSize((ATermBlob) t);
       break;
-
+*/
     default:
       ATerror("textSize: Illegal type %d\n", ATgetType(t));
       return -1;
@@ -1452,7 +1454,7 @@ fparse_terms(int *c, FILE * f)
 /*}}}  */
 /*{{{  static ATerm fparse_blob(int *c, FILE *f) */
 
-static ATerm fparse_blob(int *c, FILE *f)
+/* static ATerm fparse_blob(int *c, FILE *f)
 {
   char lenspec[LENSPEC+2];
   size_t len;
@@ -1486,7 +1488,7 @@ static ATerm fparse_blob(int *c, FILE *f)
   fnext_skip_layout(c, f);
 
   return (ATerm)ATmakeBlob((unsigned int)len, data);
-}
+} */
 
 /*}}}  */
 /*{{{  static ATermAppl fparse_quoted_appl(int *c, FILE *f) */
@@ -1506,9 +1508,10 @@ fparse_quoted_appl(int *c, FILE * f)
   /* First parse the identifier */
   fnext_char(c, f);
 
-  if (*c == STRING_MARK) {
+  /* if (*c == STRING_MARK) {
     return fparse_blob(c, f);
-  }
+  } */
+  assert(*c!=STRING_MARK);
 
   while (*c != '"') {
     switch (*c) {
@@ -1855,9 +1858,9 @@ ATerm ATreadFromFile(FILE *file)
   if(c == 0) {
     /* Might be a BAF file */
     return ATreadFromBinaryFile(file);
-  } else if (c == START_OF_SHARED_TEXT_FILE) {
-    /* Might be a shared text file */
-    return AT_readFromSharedTextFile(&c, file);
+/*  } else if (c == START_OF_SHARED_TEXT_FILE) {
+    / * Might be a shared text file * /
+    return AT_readFromSharedTextFile(&c, file);  */
   } else if (c == SAF_IDENTIFICATION_TOKEN) {
   	int token = ungetc(SAF_IDENTIFICATION_TOKEN, file);
   	if(token != SAF_IDENTIFICATION_TOKEN) ATerror("Unable to unget the SAF identification token.\n");
@@ -1938,7 +1941,7 @@ sparse_terms(int *c, char **s)
 /*}}}  */
 /*{{{  static ATerm sparse_blob(int *c, char **s) */
 
-static ATerm sparse_blob(int *c, char **s)
+/* static ATerm sparse_blob(int *c, char **s)
 {
   char *lenspec;
   size_t len;
@@ -1971,7 +1974,7 @@ static ATerm sparse_blob(int *c, char **s)
   snext_char(c, s);
 
   return (ATerm)blob;
-}
+} */
 
 /*}}}  */
 /*{{{  static ATermAppl sparse_quoted_appl(int *c, char **s) */
@@ -1991,9 +1994,10 @@ sparse_quoted_appl(int *c, char **s)
   /* First parse the identifier */
   snext_char(c, s);
 
-  if (*c == STRING_MARK) {
+  /* if (*c == STRING_MARK) {
     return sparse_blob(c, s);
-  }
+  } */
+  assert(*c != STRING_MARK);
 
   while (*c != '"')
   {
@@ -2382,7 +2386,7 @@ void AT_markTerm(ATerm t)
     switch (GET_TYPE(t->header)) {
       case AT_INT:
       case AT_REAL:
-      case AT_BLOB:
+/*       case AT_BLOB: */
 	break;
 
       case AT_APPL:
@@ -2453,9 +2457,9 @@ void AT_markTerm_young(ATerm t)
 
   while (ATtrue) {
     if (current >= limit) {
-      int current_index;
+      size_t current_index;
 #ifdef WITH_STATS
-      int depth_index   = depth - mark_stack;
+      size_t depth_index   = depth - mark_stack;
 #endif
 
       current_index = current - mark_stack;
@@ -2504,7 +2508,7 @@ void AT_markTerm_young(ATerm t)
     switch (GET_TYPE(t->header)) {
       case AT_INT:
       case AT_REAL:
-      case AT_BLOB:
+  /*    case AT_BLOB: */
 	break;
 
       case AT_APPL:
@@ -2567,7 +2571,7 @@ AT_unmarkTerm(ATerm t)
 
   while (ATtrue) {
     if (current > limit) {
-      int current_index, depth_index;
+      size_t current_index, depth_index;
 
       current_index = current - mark_stack;
       depth_index   = depth - mark_stack;
@@ -2602,7 +2606,7 @@ AT_unmarkTerm(ATerm t)
     switch (GET_TYPE(t->header)) {
       case AT_INT:
       case AT_REAL:
-      case AT_BLOB:
+ /*     case AT_BLOB: */
 	break;
 
       case AT_APPL:
@@ -2640,7 +2644,7 @@ void AT_unmarkIfAllMarked(ATerm t)
     switch(ATgetType(t)) {
       case AT_INT:
       case AT_REAL:
-      case AT_BLOB:
+ /*     case AT_BLOB: */
 	break;
 
       case AT_PLACEHOLDER:
@@ -2730,8 +2734,8 @@ void AT_unmarkAll()
 static unsigned long
 calcCoreSize(ATerm t)
 {
-  unsigned long size = 0;
-  unsigned int i, arity;
+  size_t size = 0;
+  size_t i, arity;
   Symbol          sym;
 
   if (IS_MARKED(t->header))
@@ -2748,9 +2752,10 @@ calcCoreSize(ATerm t)
       size = sizeof(struct __ATermReal);
       break;
 
-    case AT_BLOB:
+/*    case AT_BLOB:
       size = sizeof(struct __ATermBlob);
       break;
+*/
 
     case AT_APPL:
       sym = ATgetSymbol((ATermAppl) t);
@@ -2819,7 +2824,7 @@ unsigned long AT_calcSubterms(ATerm t)
   switch (ATgetType(t)) {
     case AT_INT:
     case AT_REAL:
-    case AT_BLOB:
+/*    case AT_BLOB: */
     case AT_PLACEHOLDER:
       nr_subterms = 1;
       break;
@@ -2870,7 +2875,7 @@ calcUniqueSubterms(ATerm t)
   switch (ATgetType(t)) {
     case AT_INT:
     case AT_REAL:
-    case AT_BLOB:
+/*    case AT_BLOB: */
     case AT_PLACEHOLDER:
       nr_unique = 1;
       break;
@@ -2955,10 +2960,10 @@ static unsigned long calcUniqueSymbols(ATerm t)
       if (!at_lookup_table[AS_REAL]->count++)
 	nr_unique = 1;
       break;
-    case AT_BLOB:
+ /*   case AT_BLOB:
       if (!at_lookup_table[AS_BLOB]->count++)
 	nr_unique = 1;
-      break;
+      break; */
     case AT_PLACEHOLDER:
       if (!at_lookup_table[AS_PLACEHOLDER]->count++)
 	nr_unique = 1;
@@ -3125,9 +3130,9 @@ unsigned long AT_calcTermDepth(ATerm t)
   switch(ATgetType(t)) {
     case AT_INT:
     case AT_REAL:
-    case AT_BLOB:
+ /*   case AT_BLOB:
       return MAX(1, maxdepth);
-
+*/
     case AT_APPL:
       appl = (ATermAppl)t;
       arity = ATgetArity(ATgetSymbol(appl));
@@ -3370,11 +3375,11 @@ ATbool AT_isDeepEqual(ATerm t1, ATerm t2)
       result = ((ATgetReal((ATermReal)t1) == ATgetReal((ATermReal)t2)) ? ATtrue : ATfalse);
       break;
 
-    case AT_BLOB:
+/*    case AT_BLOB:
       result = ((ATgetBlobData((ATermBlob)t1) == ATgetBlobData((ATermBlob)t2)) &&
 		(ATgetBlobSize((ATermBlob)t1) == ATgetBlobSize((ATermBlob)t2))) ? ATtrue : ATfalse;
       break;
-
+*/
     case AT_PLACEHOLDER:
       result = AT_isDeepEqual(ATgetPlaceholder((ATermPlaceholder)t1), 
 			      ATgetPlaceholder((ATermPlaceholder)t1));
@@ -3462,11 +3467,11 @@ ATbool AT_isEqual(ATerm t1, ATerm t2)
       result = ((ATgetReal((ATermReal)t1) == ATgetReal((ATermReal)t2)) ? ATtrue : ATfalse);
       break;
 
-    case AT_BLOB:
+/*    case AT_BLOB:
       result = ((ATgetBlobData((ATermBlob)t1) == ATgetBlobData((ATermBlob)t2)) &&
 		(ATgetBlobSize((ATermBlob)t1) == ATgetBlobSize((ATermBlob)t2))) ? ATtrue : ATfalse;
       break;
-
+*/
     case AT_PLACEHOLDER:
       result = AT_isEqual(ATgetPlaceholder((ATermPlaceholder)t1), 
 			 ATgetPlaceholder((ATermPlaceholder)t1));
@@ -3557,10 +3562,10 @@ ATbool ATisEqualModuloAnnotations(ATerm t1, ATerm t2)
       result = ((ATgetReal((ATermReal)t1) == ATgetReal((ATermReal)t2)) ? ATtrue : ATfalse);
       break;
 
-    case AT_BLOB:
+/*    case AT_BLOB:
       result = ((ATgetBlobData((ATermBlob)t1) == ATgetBlobData((ATermBlob)t2)) &&
 		(ATgetBlobSize((ATermBlob)t1) == ATgetBlobSize((ATermBlob)t2))) ? ATtrue : ATfalse;
-      break;
+      break; */
 
     case AT_PLACEHOLDER:
       result = ATisEqualModuloAnnotations(
@@ -3794,7 +3799,7 @@ static int AT_comparePlaceholders(ATermPlaceholder t1, ATermPlaceholder t2)
 /*}}}  */
 /*{{{  static int AT_compareBlobs(ATermBlob t1, ATermBlob t2)  */
 
-static int AT_compareBlobs(ATermBlob t1, ATermBlob t2) 
+/* static int AT_compareBlobs(ATermBlob t1, ATermBlob t2) 
 {
   char *data1;
   char *data2;
@@ -3823,7 +3828,7 @@ static int AT_compareBlobs(ATermBlob t1, ATermBlob t2)
   }
 
   return result;
-}
+} */
 
 /*}}}  */
 /*{{{  int ATcompare(ATerm t1, ATerm t2) */
@@ -3865,9 +3870,9 @@ int ATcompare(ATerm t1, ATerm t2)
       result = AT_comparePlaceholders((ATermPlaceholder) t1, 
 				    (ATermPlaceholder) t2);
       break;
-    case AT_BLOB:
+    /* case AT_BLOB:
       result = AT_compareBlobs((ATermBlob) t1, (ATermBlob) t2);
-      break;
+      break; */
     default:
       ATabort("Unknown ATerm type %d\n", type1);
       break;

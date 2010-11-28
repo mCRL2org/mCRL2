@@ -70,15 +70,17 @@ long HTinsert (HTable *table, ATerm a, void *ptr) {
 
 
 int HTmember (HTable *table, ATerm a, long *pn)
-{ long index;
-
-
+{ 
+  size_t index;
   index=ATindexedSetGetIndex(table->terms,a);
 
-  if(index>=0){
+  if(index!=(size_t)(-1))
+  {
      *pn=index;
      return 1;
-  } else {
+  } 
+  else 
+  {
      return 0;
   }
 

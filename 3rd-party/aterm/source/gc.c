@@ -779,7 +779,7 @@ void major_sweep_phase_old()
               case AT_APPL:
               case AT_LIST:
               case AT_PLACEHOLDER:
-              case AT_BLOB:
+             /*  case AT_BLOB:  */
                 assert(IS_OLD(t->header));
                 AT_freeTerm(size, t);
                 t->header=FREE_HEADER;
@@ -900,7 +900,7 @@ void major_sweep_phase_young()
               case AT_APPL:
               case AT_LIST:
               case AT_PLACEHOLDER:
-              case AT_BLOB:
+              /* case AT_BLOB:  */
                 AT_freeTerm(size, t);
                 t->header = FREE_HEADER;
                 t->aterm.next  = ti->at_freelist;
@@ -1056,7 +1056,7 @@ void minor_sweep_phase_young()
               case AT_APPL:
               case AT_LIST:
               case AT_PLACEHOLDER:
-              case AT_BLOB:
+              /* case AT_BLOB: */
                 AT_freeTerm(size, t);
                 t->header = FREE_HEADER;
                 t->aterm.next   = ti->at_freelist;

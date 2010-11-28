@@ -224,7 +224,7 @@ namespace mcrl2
         {
           gsVerboseMsg(
             "done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",
-            static_cast<unsigned long>(level-1),
+            static_cast<size_t>(level-1),
             (level==2)?"":"s",
             num_states,
             (num_states==1)?"":"s",
@@ -553,8 +553,8 @@ namespace mcrl2
       }
 
       state_t v = state;
-      atermpp::map<atermpp::aterm,unsigned long> repr_number;
-      atermpp::map<atermpp::aterm,unsigned long> repr_low;
+      atermpp::map<atermpp::aterm,size_t> repr_number;
+      atermpp::map<atermpp::aterm,size_t> repr_low;
       atermpp::map<atermpp::aterm,atermpp::aterm_list> repr_next;
       atermpp::map<atermpp::aterm,atermpp::aterm> repr_back;
       int count;
@@ -600,8 +600,8 @@ namespace mcrl2
           }
           assert(repr_back.count(v)>0);
           ATerm backv = repr_back[v];
-          const unsigned long a = repr_low[backv];
-          const unsigned long b = repr_low[v];
+          const size_t a = repr_low[backv];
+          const size_t b = repr_low[v];
           if ( a < b )
           {
             repr_low[backv]=a;
@@ -616,7 +616,7 @@ namespace mcrl2
         {
           ATerm u = ATgetFirst(nextl);
           repr_next[v]=ATgetNext(nextl);
-          const unsigned long nu = repr_number[u]; 
+          const size_t nu = repr_number[u]; 
           if ( nu == 0 )
           {
             repr_back[u]=v;
@@ -626,7 +626,7 @@ namespace mcrl2
           {
             if ( nu < repr_number[v] )   
             {
-              const unsigned long lv = repr_low[v];
+              const size_t lv = repr_low[v];
               if ( nu < lv )
               {
                 repr_low[v]=nu;
@@ -639,11 +639,11 @@ namespace mcrl2
       return v;
     }
 
-    unsigned long lps2lts_algorithm::add_state(const state_t state, bool &is_new)
+    size_t lps2lts_algorithm::add_state(const state_t state, bool &is_new)
     {
       if ( lgopts->bithashing )
       {
-        unsigned long i = bithash_table.add_state(state, is_new);
+        size_t i = bithash_table.add_state(state, is_new);
         return i;
       }
       else
@@ -654,7 +654,7 @@ namespace mcrl2
       }
     }
 
-    unsigned long lps2lts_algorithm::state_index(const state_t state)
+    size_t lps2lts_algorithm::state_index(const state_t state)
     {
       if ( lgopts->bithashing )
       {
@@ -669,7 +669,7 @@ namespace mcrl2
     bool lps2lts_algorithm::add_transition(const state_t from, ATermAppl action, const state_t to)
     {
       bool new_state;
-      unsigned long i;
+      size_t i;
 
       i = add_state(to, new_state);
 
@@ -707,9 +707,9 @@ namespace mcrl2
 
       if ( lgopts->max_states != 0 )
       {
-        unsigned long endoflevelat = 1;
-        unsigned long prevtrans = 0;
-        unsigned long prevcurrent = 0;
+        size_t endoflevelat = 1;
+        size_t prevtrans = 0;
+        size_t prevcurrent = 0;
         num_found_same = 0;
         tracecnt = 0;
         if (gsVerbose)
@@ -1111,7 +1111,7 @@ namespace mcrl2
           queue state_queue;
 
           NextStateGenerator *nsgen = NULL;
-          unsigned long limit = lgopts->max_states;
+          size_t limit = lgopts->max_states;
           if ( lgopts->bithashing )
           {
             lgopts->max_states = ULONG_MAX;
@@ -1203,15 +1203,15 @@ namespace mcrl2
               {
                 gsVerboseMsg(
                   "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
-                  level,static_cast<unsigned long>(current_state-prevcurrent),
+                  level,static_cast<size_t>(current_state-prevcurrent),
                   ((current_state-prevcurrent)==1)?"":"s",
-                  static_cast<unsigned long>(trans-prevtrans),
+                  static_cast<size_t>(trans-prevtrans),
                   ((trans-prevtrans)==1)?"":"s"
                 );
                 fflush(stderr);
               }
               level++;
-              unsigned long nextcurrent = endoflevelat;
+              size_t nextcurrent = endoflevelat;
               endoflevelat = (limit>num_states)?num_states:limit;
               if ( lgopts->bithashing )
               {
@@ -1229,18 +1229,18 @@ namespace mcrl2
         }
         else if ( lgopts->expl_strat == es_depth )
         {
-          unsigned long nsgens_size = (lgopts->todo_max<128)?lgopts->todo_max:128;
+          size_t nsgens_size = (lgopts->todo_max<128)?lgopts->todo_max:128;
           NextStateGenerator **nsgens = (NextStateGenerator **) malloc(nsgens_size*sizeof(NextStateGenerator *));
           if ( nsgens == NULL )
           {
             throw mcrl2::runtime_error("cannot create state stack");
           }
           nsgens[0] = nstate->getNextStates(state);
-          for (unsigned long i=1; i<nsgens_size; i++)
+          for (size_t i=1; i<nsgens_size; i++)
           {
             nsgens[i] = NULL;
           }
-          unsigned long nsgens_num = 1;
+          size_t nsgens_num = 1;
 
           bool top_trans_seen = false;
           // trans_seen(s) := we have seen a transition from state s
@@ -1284,7 +1284,7 @@ namespace mcrl2
                         {
                           throw mcrl2::runtime_error("cannot enlarge state stack");
                         }
-                        for (unsigned long i=nsgens_num; i<nsgens_size; i++)
+                        for (size_t i=nsgens_num; i<nsgens_size; i++)
                         {
                           nsgens[i] = NULL;
                         }
@@ -1336,7 +1336,7 @@ namespace mcrl2
             }
           }
 
-          for (unsigned long i=0; i<nsgens_size; i++)
+          for (size_t i=0; i<nsgens_size; i++)
           {
             delete nsgens[i];
           }

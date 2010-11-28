@@ -42,47 +42,48 @@
 
 /* in the hashtable we use the following constants to
    indicate designated positions */
-#define EMPTY -1
-#define DELETED -2
+#define EMPTY (size_t)-1
+#define DELETED (size_t)-2
 
 #define a_prime_number 134217689
 
 /* A very simple hashing function. */
 
-#define hashcode(a,sizeMinus1) (((((long) a) >> 2) * a_prime_number ) & sizeMinus1)
+#define hashcode(a,sizeMinus1) (((((size_t) a) >> 2) * a_prime_number ) & sizeMinus1)
 
 /*}}}  */
 /*{{{  types */
 
 struct _ATermTable
 {
-  long sizeMinus1;
-  long nr_entries; /* the number of occupied positions in the hashtable,
+  size_t sizeMinus1;
+  size_t nr_entries; /* the number of occupied positions in the hashtable,
 		      including the elements that are explicitly marked
 		      as deleted */
-  long nr_deletions;
-  int max_load;
-  long max_entries;
-  long *hashtable; long nr_tables;
+  size_t nr_deletions;
+  unsigned int max_load;
+  size_t max_entries;
+  size_t *hashtable; 
+  size_t nr_tables;
   union _ATerm ***keys;
-  long nr_free_tables;
-  long first_free_position;
-  long **free_table;
+  size_t nr_free_tables;
+  size_t first_free_position;
+  size_t **free_table;
   union _ATerm ***values;
 };
 
 /*}}}  */
 
-/*{{{  static long approximatepowerof2(long n) */
+/*{{{  static size_t approximatepowerof2(size_t n) */
 
 /**
  * return smallest 2^m-1 larger or equal than n, where
  * returned size must at least be 127 
  */
 
-static long approximatepowerof2(long n)
+static size_t approximatepowerof2(size_t n)
 {
-  int mask = n;
+  size_t mask = n;
 
   while(mask >>= 1) {
     n |= mask;
@@ -93,41 +94,31 @@ static long approximatepowerof2(long n)
 }
 
 /*}}}  */
-/*{{{  static long calc_long_max() */
-static long calc_long_max()
+/*{{{  static size_t calc_size_t_max() */
+static size_t calc_size_t_max()
 {
-  long try_long_max;
-  long long_max;
-  long delta;
+  size_t try_size_t_max;
+  size_t size_t_max;
 
-  try_long_max = 1;
+  try_size_t_max = 1;
   do {
-    long_max = try_long_max;
-    try_long_max = long_max * 2;
-  } while (try_long_max > 0);
+    size_t_max = try_size_t_max;
+    try_size_t_max = size_t_max * 2+1;
+  } while (try_size_t_max > size_t_max);
 
-  delta = long_max;
-  while (delta > 1) {
-    while (long_max + delta < 0) {
-      delta /= 2;
-    }
-    long_max += delta;
-  }
-
-  return long_max;
-
+  return size_t_max;
 }
 /*}}}  */
-/*{{{  static long calculateNewSize(sizeMinus1, nrdel, nrentries) */
+/*{{{  static size_t calculateNewSize(sizeMinus1, nrdel, nrentries) */
 
-static long calculateNewSize
-(long sizeMinus1, long nr_deletions, long nr_entries)
+static size_t calculateNewSize
+            (size_t sizeMinus1, size_t nr_deletions, size_t nr_entries)
 { 
 
   /* Hack: LONG_MAX (limits.h) is often unreliable, we need to find
    * out the maximum possible value of a signed long dynamically.
    */
-  static long st_long_max = 0;
+  static size_t st_size_t_max = 0;
 
   /* the resulting length has the form 2^k-1 */
 
@@ -135,35 +126,35 @@ static long calculateNewSize
     return sizeMinus1;
   }
 
-  if (st_long_max == 0) {
-    st_long_max = calc_long_max();
+  if (st_size_t_max == 0) 
+  {
+    st_size_t_max = calc_size_t_max();
   }
 
-  if (sizeMinus1 > st_long_max / 2) {
-    return st_long_max-1;
+  if (sizeMinus1 > st_size_t_max / 2) {
+    return st_size_t_max-1;
   }
 
   return (2*sizeMinus1)+1;
 }
 
 /*}}}  */
-/*{{{  static ATerm tableGet(ATerm **tableindex, long n) */
+/*{{{  static ATerm tableGet(ATerm **tableindex, size_t n) */
 
-static ATerm tableGet(ATerm **tableindex, long n)
+static ATerm tableGet(ATerm **tableindex, size_t n)
 { 
-  assert(n>=0);
   return tableindex[divELEMENTS_PER_TABLE(n)][modELEMENTS_PER_TABLE(n)];
 }
 
 /*}}}  */
-/*{{{  static void insertKeyvalue(set, long n, ATerm t, ATerm v) */
+/*{{{  static void insertKeyvalue(set, size_t n, ATerm t, ATerm v) */
 
 static void insertKeyValue(ATermIndexedSet s, 
-			   long n, ATerm t, ATerm v)
+			   size_t n, ATerm t, ATerm v)
 {
-  long x,y;
+  size_t x,y;
   ATerm *keytable, *valuetable;
-  long nr_tables = s->nr_tables;
+  size_t nr_tables = s->nr_tables;
 
   x = divELEMENTS_PER_TABLE(n);
   y = modELEMENTS_PER_TABLE(n);
@@ -232,16 +223,14 @@ static void insertKeyValue(ATermIndexedSet s,
 }
 
 /*}}}  */
-/*{{{  static long hashPut(ATermTable s, ATerm key, long n) */
+/*{{{  static size_t hashPut(ATermTable s, ATerm key, size_t n) */
 
-static long hashPut(ATermTable s, ATerm key, long n)
+static size_t hashPut(ATermTable s, ATerm key, size_t n)
 {  
-  long c,v;
+  size_t c,v;
 
   /* Find a place to insert key, 
      and find whether key already exists */
-
-  assert(n>=0);
 
   c = hashcode(key, s->sizeMinus1);
 
@@ -266,14 +255,14 @@ static long hashPut(ATermTable s, ATerm key, long n)
 
 static void hashResizeSet(ATermIndexedSet s)
 {
-  long i,newsizeMinus1;
+  size_t i,newsizeMinus1;
   ATerm t;
-  long *newhashtable;
+  size_t *newhashtable;
 
   newsizeMinus1 = calculateNewSize(s->sizeMinus1,
 				   s->nr_deletions, s->nr_entries);
 
-  newhashtable = (long *)AT_malloc(sizeof(long) * (newsizeMinus1+1));
+  newhashtable = (size_t *)AT_malloc(sizeof(size_t) * (newsizeMinus1+1));
   
   if (newhashtable!=NULL) 
   { /* the hashtable has properly been resized */
@@ -325,14 +314,14 @@ static void hashResizeSet(ATermIndexedSet s)
 /*}}}  */
 /*{{{  static ATermList tableContent(ATerm **tableidx, entries) */
 
-static ATermList tableContent(ATerm **tableindex,long nr_entries)
+static ATermList tableContent(ATerm **tableindex,size_t nr_entries)
 { 
-  long i;
+  size_t i;
   ATerm t;
   ATermList result = ATempty;
 
-  for (i=nr_entries-1; i>=0; i--) {
-    t = tableGet(tableindex, i);
+  for (i=nr_entries; i>0; i--) {
+    t = tableGet(tableindex, i-1);
     if (t != NULL) { 
       result = ATinsert(result, t);
     }
@@ -344,9 +333,9 @@ static ATermList tableContent(ATerm **tableindex,long nr_entries)
 
 /*{{{  ATermIndexedSet ATindexedSetCreate(init_size, max_load_pct) */
 
-ATermIndexedSet ATindexedSetCreate(long initial_size, int max_load_pct)
+ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pct)
 {
-  long i;
+  size_t i;
   ATermIndexedSet hashset;
 
   hashset = (ATermIndexedSet)AT_malloc(sizeof(struct _ATermTable));
@@ -359,12 +348,13 @@ ATermIndexedSet ATindexedSetCreate(long initial_size, int max_load_pct)
   hashset->max_load = max_load_pct;
   hashset->max_entries = ((hashset->sizeMinus1/100)*hashset->max_load);
   hashset->hashtable=
-    (long *)AT_malloc(sizeof(long)*(1+hashset->sizeMinus1));
+    (size_t *)AT_malloc(sizeof(size_t)*(1+hashset->sizeMinus1));
   if (hashset->hashtable==NULL) { 
     ATerror("ATindexedSetCreate: cannot allocate ATermIndexedSet "
 	    "of %d entries\n", initial_size);
   }
-  for(i=0 ; i<=hashset->sizeMinus1 ; i++ ) { 
+  for(i=0 ; i<=hashset->sizeMinus1 ; i++ ) 
+  { 
     hashset->hashtable[i] = EMPTY; 
   }
 
@@ -377,7 +367,7 @@ ATermIndexedSet ATindexedSetCreate(long initial_size, int max_load_pct)
 
   hashset->nr_free_tables = INITIAL_NR_OF_TABLES;
   hashset->first_free_position = 0;
-  hashset->free_table=AT_calloc(sizeof(long *),
+  hashset->free_table=AT_calloc(sizeof(size_t *),
 			     hashset->nr_free_tables);
   if (hashset->free_table == NULL) { 
     ATerror("ATindexedSetCreate: cannot allocate table to store deleted elements\n");
@@ -405,12 +395,12 @@ void ATindexedSetReset(ATermIndexedSet hashset)
 }
 
 /*}}}  */
-/*{{{  static long keyPut(ATermIndexedSet hashset, key, value, ATbool *isnew)*/
+/*{{{  static size_t keyPut(ATermIndexedSet hashset, key, value, ATbool *isnew)*/
 
-static long keyPut(ATermIndexedSet hashset, ATerm key, 
+static size_t keyPut(ATermIndexedSet hashset, ATerm key, 
 		   ATerm value, ATbool *isnew)
 { 
-  long n,m;
+  size_t n,m;
 
   if(hashset->first_free_position == 0) { 
     m = hashset->nr_entries; 
@@ -458,31 +448,31 @@ static long keyPut(ATermIndexedSet hashset, ATerm key,
 }
 
 /*}}}  */
-/*{{{  long ATindexedSetPut(ATermIndexedSet hashset, elem, *isnew) */
+/*{{{  size_t ATindexedSetPut(ATermIndexedSet hashset, elem, *isnew) */
 
 /**
  * insert entry elem into the hashtable, and deliver
  * an index. If elem is already in the set, deliver 0 
  */
 
-long ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, ATbool *isnew)
+size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, ATbool *isnew)
 {
   return keyPut(hashset, elem, NULL, isnew);
 }
 
 /*}}}  */
-/*{{{  long ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm key) */
+/*{{{  size_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm key) */
 
-long ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
+size_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
 { 
-  long c,start,v;
+  size_t c,start,v;
 
   start = hashcode(elem, hashset->sizeMinus1);
   c = start;
   do {
     v=hashset->hashtable[c];
     if(v == EMPTY) {
-      return -1;
+      return (size_t)(-1);
     }
 
     if(v != DELETED && ATisEqual(elem,tableGet(hashset->keys, v))) {
@@ -492,7 +482,7 @@ long ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
     c = (c+STEP) & hashset->sizeMinus1;
   } while (c != start);
 
-  return -1;
+  return (size_t)(-1);
 }
 
 /*}}}  */
@@ -512,19 +502,19 @@ ATermList ATindexedSetElements(ATermIndexedSet hashset)
 }
 
 /*}}}  */
-/*{{{  ATerm ATindexedSetGetElem(ATermIndexedSet hashset, long index) */
+/*{{{  ATerm ATindexedSetGetElem(ATermIndexedSet hashset, size_t index) */
 
-ATerm ATindexedSetGetElem(ATermIndexedSet hashset, long index)
+ATerm ATindexedSetGetElem(ATermIndexedSet hashset, size_t index)
 { 
-  assert((index>=0) && (hashset->nr_entries>index));
+  assert(hashset->nr_entries>index);
   return tableGet(hashset->keys, index);
 }
 
 /*}}}  */
 
-/*{{{  ATermTable ATtableCreate(long initial_size, int max_load_pct) */
+/*{{{  ATermTable ATtableCreate(size_t initial_size, int max_load_pct) */
 
-ATermTable ATtableCreate(int64_t initial_size, int max_load_pct)
+ATermTable ATtableCreate(size_t initial_size, unsigned int max_load_pct)
 { 
   ATermTable hashtable;
 
@@ -546,7 +536,7 @@ ATermTable ATtableCreate(int64_t initial_size, int max_load_pct)
 
 void ATtableDestroy(ATermTable table)
 { 
-  long i;
+  size_t i;
 
   AT_free(table->hashtable);
   for(i=0; ((i<table->nr_tables) && (table->keys[i]!=NULL)) ; i++) { 
@@ -579,7 +569,7 @@ void ATtableDestroy(ATermTable table)
 
 void ATtableReset(ATermTable table)
 { 
-  long i;
+  size_t i;
 
   table->nr_entries = 0;
   table->nr_deletions = 0;
@@ -625,10 +615,11 @@ void ATtablePut(ATermTable table, ATerm key, ATerm value)
 
 ATerm ATtableGet(ATermTable table, ATerm key)
 { 
-  long v;
+  size_t v;
 
   v = ATindexedSetGetIndex(table, key);
-  if(v<0) {
+  if(v==(size_t)(-1)) 
+  {
     return NULL;
   }
   return tableGet(table->values, v);
@@ -639,8 +630,8 @@ ATerm ATtableGet(ATermTable table, ATerm key)
 
 void ATtableRemove(ATermTable table, ATerm key)
 { 
-  long start,c,v,x,y;
-  long *ltable;
+  size_t start,c,v,x,y;
+  size_t *ltable;
 
   start = hashcode(key,table->sizeMinus1);
   c = start;
@@ -665,8 +656,8 @@ void ATtableRemove(ATermTable table, ATerm key)
 
   x=divELEMENTS_PER_TABLE(table->first_free_position);
   if (x>=table->nr_free_tables) { 
-    table->free_table = (long **)AT_realloc(table->free_table,
-					 sizeof(long)*table->nr_free_tables*2);
+    table->free_table = (size_t **)AT_realloc(table->free_table,
+					 sizeof(size_t)*table->nr_free_tables*2);
     if (table->free_table==NULL) {
       ATerror("ATtableRemove: Cannot allocate memory for free table index\n");
     }
@@ -679,7 +670,7 @@ void ATtableRemove(ATermTable table, ATerm key)
   ltable = table->free_table[x];
   if (ltable == NULL) {
     /* create a new key table */
-    ltable = AT_malloc(sizeof(long)*ELEMENTS_PER_TABLE);
+    ltable = AT_malloc(sizeof(size_t)*ELEMENTS_PER_TABLE);
     table->free_table[x] = ltable;
     if (ltable == NULL) { 
       ATerror("ATtableRemove: Cannot create new free table\n");

@@ -10,7 +10,7 @@ extern "C"
 
 #define START_OF_SHARED_TEXT_FILE '!'
 
-extern ATerm AT_readFromSharedTextFile(int *c, FILE *f);
+/* extern ATerm AT_readFromSharedTextFile(int *c, FILE *f); */
 
 #ifdef __cplusplus
 }

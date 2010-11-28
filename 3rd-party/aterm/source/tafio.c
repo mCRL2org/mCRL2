@@ -24,13 +24,13 @@
 /*{{{  variables */
 
 /* From RFC2045 (Base64 encoding: The Base64 Alphabet) */
-static char tobase64[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+/* static char tobase64[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; */
 
-static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs);
+/* static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs); */
 
 static long next_abbrev = 0;
 
-static char print_buffer[BUFSIZ];
+/* static char print_buffer[BUFSIZ]; */
 
 /* We need a buffer for printing and parsing */
 static int      parse_buffer_size = 0;
@@ -92,7 +92,7 @@ static int abbrev_size(long abbrev)
 /*}}}  */
 /*{{{  static long write_abbrev(long abbrev, byte_writer *writer) */
 
-static long write_abbrev(long abbrev, byte_writer *writer)
+/* static long write_abbrev(long abbrev, byte_writer *writer)
 {
   char *ptr, buf[MAX_ENCODED_SIZE+1] ;
 
@@ -111,7 +111,7 @@ static long write_abbrev(long abbrev, byte_writer *writer)
   }
 
   return write_bytes(ptr, buf-ptr+MAX_ENCODED_SIZE, writer)+1;
-}
+} */
 
 /*}}}  */
 
@@ -121,7 +121,7 @@ static long write_abbrev(long abbrev, byte_writer *writer)
   * Write a term in text format to file.
   */
 
-static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs)
+/* static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs)
 {
   Symbol          sym;
   ATerm           arg;
@@ -136,7 +136,7 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
   switch (ATgetType(t))
     {
     case AT_INT:
-      /*{{{  Print an integer */
+      / *{{{  Print an integer * /
 
       elem_size = sprintf(print_buffer, "%d", ATgetInt(t));
       elem_size = write_bytes(print_buffer, elem_size, writer);
@@ -145,11 +145,11 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
       }
       size += elem_size;
 
-      /*}}}  */
+      / *}}}  * /
       break;
 
     case AT_REAL:
-      /*{{{  Print a real */
+      / *{{{  Print a real * /
 
       elem_size = sprintf(print_buffer, "%.15e", ATgetReal(t));
       elem_size = write_bytes(print_buffer, elem_size, writer);
@@ -158,11 +158,11 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
       }
       size += elem_size;
 
-      /*}}}  */
+      / *}}}  * /
       break;
 
     case AT_APPL:
-      /*{{{  Print application */
+      / *{{{  Print application * /
 
       appl = (ATermAppl) t;
 				
@@ -192,11 +192,11 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
 	size++;
       }
 
-      /*}}}  */
+      / *}}}  * /
       break;
 
     case AT_LIST:
-      /*{{{  Print list */
+      / *{{{  Print list * /
 
       list = (ATermList) t;
       if(!ATisEmpty(list)) {
@@ -218,11 +218,11 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
 	list = ATgetNext(list);
       }
 
-      /*}}}  */
+      / *}}}  * /
       break;
 
     case AT_PLACEHOLDER:
-      /*{{{  Print placeholder */
+      / *{{{  Print placeholder * /
 
       write_byte('<', writer);
       elem_size = topWriteToSharedTextFile(ATgetPlaceholder((ATermPlaceholder) t), writer, abbrevs);
@@ -232,11 +232,11 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
       write_byte('>', writer);
       size += elem_size+2;
 
-      /*}}}  */
+      / *}}}  * /
       break;
 
     case AT_BLOB:
-      /*{{{  Print blob */
+      / *{{{  Print blob * /
 
       blob = (ATermBlob) t;
       blob_size = ATgetBlobSize(blob);
@@ -254,7 +254,7 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
       write_byte('"', writer);
       size++;
 
-      /*}}}  */
+      / *}}}  * /
       break;
 
     case AT_FREE:
@@ -270,15 +270,15 @@ static int writeToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet a
     }
 
   return size;
-}
+} */
 
 /*}}}  */
 
 /*{{{  static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs) */
 
-static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs)
+/* static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs)
 {
-  /* ATerm annos; long anno_size */
+  / * ATerm annos; long anno_size * /
   long abbrev, size = 0; 
 
   abbrev = ATindexedSetGetIndex(abbrevs, t);
@@ -305,7 +305,7 @@ static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedS
     }
   }
 
-  /* annos = (ATerm) AT_getAnnotations(t);
+  / * annos = (ATerm) AT_getAnnotations(t);
   / * if (annos) {
     write_byte('{', writer);
     anno_size = writeToSharedTextFile(annos, writer, abbrevs);
@@ -314,26 +314,25 @@ static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedS
     }
     write_byte('}', writer);
     size += anno_size + 2;
-  } */
+  } * /
 
   if (size > abbrev_size(next_abbrev)) {
     ATbool isnew;
 
     abbrev = ATindexedSetPut(abbrevs, t, &isnew);
-    /*ATfprintf(stderr, "%5d: %t\n", abbrev, t);*/
     assert(isnew);
     assert(abbrev == next_abbrev);
     next_abbrev++;
   } 
 
   return size;
-}
+} */
 
 /*}}}  */
 
 /*{{{  long ATwriteToSharedTextFile(ATerm t, FILE *file) */
 
-long ATwriteToSharedTextFile(ATerm t, FILE *file)
+/* long ATwriteToSharedTextFile(ATerm t, FILE *file)
 {
   byte_writer writer;
   long size;
@@ -355,14 +354,14 @@ long ATwriteToSharedTextFile(ATerm t, FILE *file)
     return -1;
   }
   else {
-    return size + 1; /* +1 because of START_OF_SHARED_TEXT_FILE */
+    return size + 1; / * +1 because of START_OF_SHARED_TEXT_FILE * /
   }
-}
+} */
 
 /*}}}  */
 /*{{{  unsigned char *ATwriteToSharedString(ATerm t, int *len) */
 
-char *ATwriteToSharedString(ATerm t, int *len)
+/* char *ATwriteToSharedString(ATerm t, int *len)
 {
   static byte_writer writer;
   static ATbool initialized = ATfalse;
@@ -389,7 +388,7 @@ char *ATwriteToSharedString(ATerm t, int *len)
     return NULL;
   }
 
-  length++; /* START_OF_SHARED_TEXT_FILE */
+  length++; / * START_OF_SHARED_TEXT_FILE * /
 
   assert(length == writer.u.string_data.cur_size);
 
@@ -402,7 +401,7 @@ char *ATwriteToSharedString(ATerm t, int *len)
   ATindexedSetDestroy(abbrevs);
 
   return (char*)writer.u.string_data.buf;
-}
+} */
 
 /*}}}  */
 
@@ -507,7 +506,7 @@ ATermList rparse_terms(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
 /*}}}  */
 /*{{{  static ATerm rparse_blob(int *c, byte_reader *reader) */
 
-static ATerm rparse_blob(int *c, byte_reader *reader)
+/* static ATerm rparse_blob(int *c, byte_reader *reader)
 {
   char lenspec[LENSPEC+2];
   size_t len;
@@ -541,7 +540,7 @@ static ATerm rparse_blob(int *c, byte_reader *reader)
   rnext_skip_layout(c, reader);
 
   return (ATerm)ATmakeBlob(len, data);
-}
+} */
 
 /*}}}  */
 /*{{{  static ATermAppl rparse_quoted_appl(int *c, byte_reader *reader, ATermIndexedSet abbrevs) */
@@ -560,9 +559,10 @@ static ATerm rparse_quoted_appl(int *c, byte_reader *reader, ATermIndexedSet abb
   /* First parse the identifier */
   rnext_char(c, reader);
 
-  if (*c == STRING_MARK) {
+  /* if (*c == STRING_MARK) {
     return rparse_blob(c, reader);
-  }
+  } */
+  assert(*c!=STRING_MARK);
 
   while (*c != '"') {
     switch (*c) {
@@ -905,7 +905,7 @@ static ATerm readFromSharedText(int *c, byte_reader *reader, ATermIndexedSet abb
 
 /*{{{  ATerm AT_readFromSharedTextFile(int *c, FILE *f) */
 
-ATerm AT_readFromSharedTextFile(int *c, FILE *f)
+/* ATerm AT_readFromSharedTextFile(int *c, FILE *f)
 {
   byte_reader reader;
   ATermIndexedSet abbrevs;
@@ -923,12 +923,12 @@ ATerm AT_readFromSharedTextFile(int *c, FILE *f)
   ATindexedSetDestroy(abbrevs);
 
   return result;
-}
+} */
 
 /*}}}  */
 /*{{{  ATerm ATreadFromSharedTextFile(FILE *f) */
 
-ATerm ATreadFromSharedTextFile(FILE *f)
+/* ATerm ATreadFromSharedTextFile(FILE *f)
 {
   ATerm result;
   int c;
@@ -959,7 +959,7 @@ ATerm ATreadFromSharedTextFile(FILE *f)
   }
 
   return result;
-}
+} */
 
 /*}}}  */
 /*{{{  ATerm ATreadFromSharedString(const unsigned char *s, int size) */

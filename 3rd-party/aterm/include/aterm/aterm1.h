@@ -84,7 +84,7 @@ extern "C"
 #define AT_REAL         3L /**< type of real numbers */
 #define AT_LIST         4L /**< type of lists of terms */
 #define AT_PLACEHOLDER  5L /**< type of a placeholder for a term */
-#define AT_BLOB         6L /**< type of a binary large object */
+/* #define AT_BLOB         6L / **< type of a binary large object */
 #define AT_SYMBOL       7L /**< internally used type*/
 
 /* ATerm  ATsetAnnotation(ATerm t, ATerm label, ATerm anno);

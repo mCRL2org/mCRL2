@@ -11,6 +11,10 @@ extern "C"
 {
 #endif/* __cplusplus */
 
+#ifdef WIN64
+#define strdup _strdup
+#endif
+
 /* The original ATerm library made the (incorrect) assumption that sizeof(long)
    is always 64 on 64-bit machines. A better check for 64-bit registers is the
    use of C99 integral types. */

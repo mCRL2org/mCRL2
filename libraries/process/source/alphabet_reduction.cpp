@@ -408,7 +408,7 @@ namespace mcrl2 {
           ATermAppl ma=gsMakeMultActName(ATLgetFirst(ulp));
           ATermList tulq=ulq;
           for (; !ATisEmpty(ulq); ulq=ATgetNext(ulq)){
-            if(ATindexedSetGetIndex(VV,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))))>=0){
+            if(ATindexedSetGetIndex(VV,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))))!=(size_t)(-1)){
       	m = ATinsert(m,(ATerm)ma);
       	break;
             }

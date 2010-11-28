@@ -500,9 +500,9 @@ static sym_entry *get_top_symbol(ATerm t, ATbool anno_done)
     case AT_REAL:
       sym = AS_REAL;
       break;
-    case AT_BLOB:
+/*    case AT_BLOB:
       sym = AS_BLOB;
-      break;
+      break; */
     case AT_PLACEHOLDER:
       sym = AS_PLACEHOLDER;
       break;
@@ -702,9 +702,9 @@ static void collect_terms(ATerm t)
     case AT_REAL:
       sym = AS_REAL;
       break;
-    case AT_BLOB:
+/*    case AT_BLOB:
       sym = AS_BLOB;
-      break;
+      break; */
     case AT_PLACEHOLDER:
       sym = AS_PLACEHOLDER;
       collect_terms(ATgetPlaceholder((ATermPlaceholder)t));
@@ -931,7 +931,7 @@ static ATbool write_term(ATerm t, byte_writer *writer)
 	trm_sym = &sym_entries[at_lookup_table[AS_REAL]->index];
       }
       break;
-    case AT_BLOB:
+/*    case AT_BLOB:
       {
 	ATermBlob blob = (ATermBlob)t;
 	if (flushBitsToWriter(writer)<0)
@@ -940,7 +940,7 @@ static ATbool write_term(ATerm t, byte_writer *writer)
 	  return ATfalse;
 	trm_sym = &sym_entries[at_lookup_table[AS_BLOB]->index];
       }
-      break;
+      break; */
     case AT_PLACEHOLDER:
       {
 	ATerm type = ATgetPlaceholder((ATermPlaceholder)t);
@@ -1436,8 +1436,8 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
 
     /*}}}  */
     break;
-  case AS_BLOB:
-    /*{{{  Read a blob */
+  /* case AS_BLOB:
+    / *{{{  Read a blob * /
 
     {
       int len;
@@ -1457,8 +1457,8 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
       result = (ATerm)ATmakeBlob(len, data);
     }
 
-    /*}}}  */
-    break;
+    / *}}}  * /
+    break; */
   case AS_PLACEHOLDER:
     result = (ATerm)ATmakePlaceholder(args[0]);
     break;

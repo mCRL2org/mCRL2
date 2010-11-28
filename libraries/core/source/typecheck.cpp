@@ -1355,7 +1355,7 @@ namespace mcrl2 {
           gsErrorMsg("attempt to redeclare sort Real\n");
           return ATfalse;
         }
-        if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0
+        if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)!=(size_t)(-1)
            || ATAtableGet(context.defined_sorts, (ATerm)SortName)){
 
           gsErrorMsg("double declaration of sort %P\n",SortName);
@@ -2011,7 +2011,7 @@ namespace mcrl2 {
       {
         return ATtrue;
       }
-      if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0) return ATtrue;
+      if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)!=(size_t(-1))) return ATtrue;
       if(ATAtableGet(context.defined_sorts,(ATerm)SortName)) return ATtrue;
       return ATfalse;
     }

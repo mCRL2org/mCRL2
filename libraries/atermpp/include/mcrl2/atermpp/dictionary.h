@@ -18,7 +18,7 @@
 namespace atermpp
 {
   /// \brief Dictionary based on ATerms.
-  class dictionary: public aterm, boost::noncopyable
+/*   class dictionary: public aterm, boost::noncopyable
   {
    public:
       /// \brief Constructor.
@@ -53,6 +53,7 @@ namespace atermpp
         m_term = ATdictRemove(*this, key);
       }
   };
+*/
 
 } // namespace atermpp
 

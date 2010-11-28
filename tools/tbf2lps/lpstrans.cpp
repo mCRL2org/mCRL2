@@ -231,7 +231,8 @@ static ATermList get_substs(ATermList ids)
 
     unsigned int i = 0;
     ATermAppl new_id = 0;
-    while ( !is_user_identifier(s) || ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
+    while ( !is_user_identifier(s) || 
+            ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) !=(size_t)-1 )
     {
       sprintf(t,"%i",i);
       i++;

@@ -106,6 +106,7 @@ typedef union _ATermBlob
   struct __ATermBlob  aterm;
 } *ATermBlob;
 
+
 struct _ATermTable;
 
 typedef struct _ATermTable *ATermIndexedSet;
@@ -205,12 +206,13 @@ ATermList ATreplace(ATermList list, ATerm el, unsigned int idx);
 ATermList ATreverse(ATermList list);
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2));
 int       ATcompare(ATerm t1, ATerm t2);
-ATerm     ATdictCreate();
+/* ATerm     ATdictCreate();
 ATerm     ATdictGet(ATerm dict, ATerm key);
 ATerm     ATdictPut(ATerm dict, ATerm key, ATerm value);
 ATerm     ATdictRemove(ATerm dict, ATerm key);
+*/
 
-ATermTable ATtableCreate(int64_t initial_size, int max_load_pct);
+ATermTable ATtableCreate(size_t initial_size, unsigned int max_load_pct);
 void       ATtableDestroy(ATermTable table);
 void       ATtableReset(ATermTable table);
 void       ATtablePut(ATermTable table, ATerm key, ATerm value);
@@ -220,14 +222,14 @@ ATermList  ATtableKeys(ATermTable table);
 ATermList  ATtableValues(ATermTable table);
 
 ATermIndexedSet   
-           ATindexedSetCreate(long initial_size, int max_load_pct);
+           ATindexedSetCreate(size_t initial_size, unsigned int max_load_pct);
 void       ATindexedSetDestroy(ATermIndexedSet set);
 void       ATindexedSetReset(ATermIndexedSet set);
-long       ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool *isnew);
-long       ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem);
+size_t       ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool *isnew);
+size_t       ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem);
 void       ATindexedSetRemove(ATermIndexedSet set, ATerm elem);
 ATermList  ATindexedSetElements(ATermIndexedSet set);
-ATerm      ATindexedSetGetElem(ATermIndexedSet set, long index);
+ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
 
 /* Higher order functions */
 ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm));
@@ -238,15 +240,16 @@ ATermPlaceholder ATmakePlaceholder(ATerm type);
 #define ATgetPlaceholder(ph) (((ATermPlaceholder)ph)->aterm.ph_type)
 
 /* The ATermBlob type */
-ATermBlob ATmakeBlob(unsigned int size, void *data);
+/* ATermBlob ATmakeBlob(unsigned int size, void *data); */
 /*void   *ATgetBlobData(ATermBlob blob);*/
-#define ATgetBlobData(blob) (((ATermBlob)blob)->aterm.data)
+/* #define ATgetBlobData(blob) (((ATermBlob)blob)->aterm.data) */
 
 /*int     ATgetBlobSize(ATermBlob blob);*/
-#define ATgetBlobSize(blob) (((ATermBlob)blob)->aterm.size)
+/* #define ATgetBlobSize(blob) (((ATermBlob)blob)->aterm.size) */
 
-void    ATregisterBlobDestructor(ATbool (*destructor)(ATermBlob));
-void    ATunregisterBlobDestructor(ATbool (*destructor)(ATermBlob));
+/* void    ATregisterBlobDestructor(ATbool (*destructor)(ATermBlob)); */
+/* void    ATunregisterBlobDestructor(ATbool (*destructor)(ATermBlob)); */
+
 
 AFun  ATmakeAFun(const char *name, int arity, ATbool quoted);
 #define ATmakeSymbol ATmakeAFun
@@ -262,7 +265,7 @@ void    ATprotectAFun(AFun sym);
 #define ATprotectSymbol ATprotectAFun
 void    ATunprotectAFun(AFun sym);
 #define ATunprotectSymbol ATunprotectAFun
-void ATprotectMemory(void *start, unsigned long size);
+void ATprotectMemory(void *start, size_t size);
 void ATunprotectMemory(void *start);
 
 /* convenience macro's for previously private functions * /
@@ -301,10 +304,10 @@ ATbool ATgetChecking(void);
 extern int at_gc_count;
 #define ATgetGCCount()    (at_gc_count)
 
-unsigned long  ATcalcUniqueSubterms(ATerm t);
-unsigned long  ATcalcUniqueSymbols(ATerm t);
+size_t  ATcalcUniqueSubterms(ATerm t);
+size_t  ATcalcUniqueSymbols(ATerm t);
 
-unsigned long  ATcalcTextSize(ATerm t);
+size_t  ATcalcTextSize(ATerm t);
 
 void AT_writeToStringBuffer(ATerm t, char *buffer);
 #define ATwriteToStringBuffer(t,b) AT_writeToStringBuffer((t),(b))

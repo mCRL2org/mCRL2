@@ -1,6 +1,7 @@
 #include "idmappings.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #if __STDC_VERSION__ >= 199901L
   /* "inline" is a keyword */
@@ -189,10 +190,12 @@ static void ensureTableCapacity(IDMappings idMappings){
 /**
  * Creates a new ID mappings table.
  */
-IDMappings IMcreateIDMappings(float loadPercentage){
-	unsigned int tableSize = 1 << DEFAULTTABLEBITSIZE;
+IDMappings IMcreateIDMappings(unsigned int loadPercentage)
+{
+	size_t tableSize = 1 << DEFAULTTABLEBITSIZE;
 	
 	IDMappings idMappings = (IDMappings) malloc(sizeof(struct _IDMappings));
+        assert(loadPercentage <= 100);
 	if(idMappings == NULL){
 		printf("Unable to allocate memory for creating a idMapping.\n");
 		exit(1);
@@ -208,7 +211,7 @@ IDMappings IMcreateIDMappings(float loadPercentage){
 	idMappings->tableSize = tableSize;
 	
 	idMappings->hashMask = tableSize - 1;
-	idMappings->threshold = tableSize * loadPercentage;
+	idMappings->threshold = (tableSize * loadPercentage)/100;
 	
 	idMappings->load = 0;
 	
