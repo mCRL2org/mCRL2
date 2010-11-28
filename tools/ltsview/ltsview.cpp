@@ -296,6 +296,7 @@ void LTSView::setStatePosStyle()
     StatePositioningStyle pos_style = static_cast<StatePositioningStyle>(
         settings->getInt(StatePosStyle));
     lts->positionStates(pos_style);
+    visualizer->notifyStatePositionsChanged();
     glCanvas->display();
   }
 }

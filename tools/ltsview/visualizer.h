@@ -34,6 +34,7 @@ class Visualizer: public Subscriber
     void notify(SettingID s);
     void setLTS(LTS *l,bool compute_ratio);
     void notifyMarkStyleChanged();
+    void notifyStatePositionsChanged();
     void notifyVisStyleChanged();
 
     void drawStates(bool simulating);
@@ -76,7 +77,6 @@ class Visualizer: public Subscriber
     void traverseTree(bool co);
     void traverseTreeC(Cluster *root, bool topClosed, int rot);
     void traverseTreeT(Cluster *root, bool topClosed, int rot);
-    float truncate_float(float f); // truncates all digits after the 4th decimal digit of f
     void updateColors();
 };
 

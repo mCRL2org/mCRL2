@@ -73,11 +73,6 @@ Visualizer::~Visualizer() {
   delete primitiveFactory;
 }
 
-float Visualizer::truncate_float(float f)
-{
-  return float(int(f * 1000000.0f)) / 1000000.0f;
-}
-
 float Visualizer::getHalfStructureHeight() const {
   if (lts == NULL) {
     return 0.0f;
@@ -95,6 +90,11 @@ void Visualizer::setLTS(LTS* l,bool compute_ratio) {
   }
   update_abs = true;
   traverseTree(true);
+}
+
+void Visualizer::notifyStatePositionsChanged()
+{
+  update_abs = true;
 }
 
 void Visualizer::notifyMarkStyleChanged()

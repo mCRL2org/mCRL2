@@ -8,9 +8,9 @@
 
 #include "wx.hpp" // precompiled headers
 
-#include "glcanvas.h"
+#include <iostream>
 #include <wx/image.h>
-#include "tr/tr.h"
+#include "glcanvas.h"
 #include "ids.h"
 #include "icons/zoom_cursor.xpm"
 #include "icons/zoom_cursor_mask.xpm"
@@ -20,6 +20,7 @@
 #include "icons/rotate_cursor_mask.xpm"
 #include "mediator.h"
 #include "settings.h"
+#include "tr/tr.h"
 #include "visualizer.h"
 
 using namespace IDs;
@@ -66,7 +67,6 @@ void GLCanvas::initialize()
 {
   SetCurrent();
 
-  glDepthFunc(GL_LEQUAL);
   glLoadIdentity();
 
   GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
@@ -79,6 +79,10 @@ void GLCanvas::initialize()
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glDepthMask(GL_TRUE);
+  glBlendFunc(GL_ONE, GL_ZERO);
+  glDisable(GL_BLEND);
 
   GLfloat light_col[] = { 0.2f,0.2f,0.2f };
   glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
@@ -297,13 +301,14 @@ void GLCanvas::display(bool coll_caller, bool selecting)
 
       // draw the structure
       glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
       glDepthMask(GL_FALSE);
+      glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
       // Identify that we are drawing clusters
       glPushName(CLUSTER);
       visualizer->drawStructure();
       glPopName();
       glDepthMask(GL_TRUE);
+      glBlendFunc(GL_ONE, GL_ZERO);
       glDisable(GL_BLEND);
 
       // do not show the picture in the canvas if we are collecting data
@@ -312,6 +317,12 @@ void GLCanvas::display(bool coll_caller, bool selecting)
         SwapBuffers();
       }
     glPopMatrix();
+
+    GLenum gl_error_code = glGetError();
+    if (gl_error_code != GL_NO_ERROR)
+    {
+      std::cerr << "OpenGL error: " << gluErrorString(gl_error_code) << std::endl;
+    }
 
     if (!collectingData)
     {
@@ -326,12 +337,13 @@ void GLCanvas::reshape()
   if (GetContext())
   {
     int width,height;
-    GetClientSize(&width,&height);
+    GetClientSize(&width, &height);
     SetCurrent();
-    glViewport(0,0,width,height);
+    glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),nearPlane,farPlane);
+    gluPerspective(60.0f, static_cast<GLfloat>(width) /
+        static_cast<GLfloat>(height), nearPlane, farPlane);
     glMatrixMode(GL_MODELVIEW);
   }
 }
