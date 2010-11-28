@@ -279,16 +279,13 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
         }
         else
         {
-          float delta = distance_circle_to_poly(
-              deg_to_rad(desc->getPosition()+rot),
-              root->getBaseRadius());
-          glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-          glTranslatef(root->getBaseRadius() - delta,0.0f,0.0f);
-          glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-          traverseTreeC(desc,true,drot);
-          glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-          glTranslatef(-root->getBaseRadius() + delta,0.0f,0.0f);
-          glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+          glRotatef(-desc->getPosition() - rot, 0.0f, 0.0f, 1.0f);
+          glTranslatef(root->getBaseRadius(), 0.0f, 0.0f);
+          glRotatef(settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+          traverseTreeC(desc, true, drot);
+          glRotatef(-settings->getInt(BranchTilt), 0.0f, 1.0f, 0.0f);
+          glTranslatef(-root->getBaseRadius(), 0.0f, 0.0f);
+          glRotatef(desc->getPosition() + rot, 0.0f, 0.0f, 1.0f);
         }
       }
     }
@@ -503,14 +500,6 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
       glPopMatrix();
     }
   }
-}
-
-float Visualizer::distance_circle_to_poly(float angle,float radius)
-{
-  float alpha = 2.0f * PI / settings->getInt(Quality);
-  float beta = int(angle / alpha) * alpha - angle;
-  return radius * abs(sin(alpha) * (cos(beta) - 1.0f) + sin(beta) *
-      (cos(alpha) - 1.0f)) / sqrt(2.0f - 2.0f * cos(alpha)) ;
 }
 
 float Visualizer::compute_cone_scale_x(float phi,float r,float x) {

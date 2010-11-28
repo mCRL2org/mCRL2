@@ -79,7 +79,6 @@ class Visualizer: public Subscriber
     float truncate_float(float f); // truncates all digits after the 4th decimal digit of f
     void updateColors();
     float compute_cone_scale_x(float phi,float r,float x);
-    float distance_circle_to_poly(float angle,float radius);
 };
 
 #endif
