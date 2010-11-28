@@ -179,7 +179,7 @@ void MainFrame::setupMainArea() {
   mainSizer->AddGrowableRow(0);
 
 
-  int attribList[] = { WX_GL_RGBA,WX_GL_DOUBLEBUFFER,0 };
+  int attribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0 };
   glCanvas = new GLCanvas(mediator,this,settings,wxDefaultSize,attribList);
 
   mainSizer->Add(glCanvas,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
@@ -196,12 +196,6 @@ GLCanvas* MainFrame::getGLCanvas() const {
 void MainFrame::setFileInfo(wxFileName fn) {
   filename.Assign(fn);
 }
-
-/*
-void MainFrame::onIdle(wxIdleEvent &event) {
-  glCanvas->display();
-}
-*/
 
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
