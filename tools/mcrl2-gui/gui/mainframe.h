@@ -538,7 +538,7 @@ EVT_MENU(wxID_COPY, MainFrame::OnCopy2Clipboard)
 EVT_MENU(wxID_SAVE, MainFrame::OnSave)
 EVT_MENU(wxID_SELECTALL, MainFrame::OnSelectAll)
 
-EVT_MENU(wxID_CLEAR, MainFrame::OnCloseConfigPanelPage )
+EVT_MENU(wxID_CLOSE, MainFrame::OnCloseConfigPanelPage )
 
 EVT_IDLE(MainFrame::OnIdle)
 EVT_AUI_PANE_CLOSE(MainFrame::OnClosePane)
