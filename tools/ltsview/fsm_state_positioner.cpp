@@ -71,12 +71,13 @@ ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
     for (int slot = 0; slot < num_slots; ++slot)
     {
       float angle = delta_deg * slot;
-      Vector2D point = Vector2D();
+      Vector2D point;
       point.fromPolar(angle, radius);
       rtree_builder.addPoint(point);
     }
   }
-  slot_rtree = rtree_builder.buildRTree();
+  rtree_builder.buildRTree();
+  slot_rtree = rtree_builder.getRTree();
 }
 
 ClusterSlotInfo::~ClusterSlotInfo()
@@ -155,9 +156,6 @@ void FSMStatePositioner::bottomUpPass()
       !ci.is_end(); ++ci)
   {
     Cluster* cluster = *ci;
-    std::cerr << cluster->getNumStates() << " states in this cluster" << std::endl;
-    std::cerr << "  " << cluster->getRank() << " is cluster rank" << std::endl;
-    std::cerr << "  " << cluster->getNumDescendants() << " is number of descendants" << std::endl;
     if (cluster->getNumStates() == 1)
     {
       Vector2D position = Vector2D(0, 0);
@@ -248,7 +246,6 @@ void FSMStatePositioner::resolveUnpositioned()
 Vector2D FSMStatePositioner::sumStateVectors(vector< State* > &states, float
     rim_radius)
 {
-  clock_t t_begin = clock();
   Vector2D cluster_vector, state_vector, sum_vector = Vector2D(0, 0);
   for (vector< State* >::iterator state_it = states.begin(); state_it !=
       states.end(); ++state_it)
@@ -275,10 +272,6 @@ Vector2D FSMStatePositioner::sumStateVectors(vector< State* > &states, float
       }
     }
   }
-  float duration = static_cast<float>(clock() - t_begin) /
-    static_cast<float>(CLOCKS_PER_SEC);
-  std::cerr << "sumStateVectors called on " << states.size()
-    << " states and took " << duration << " seconds" << std::endl;
   return sum_vector;
 }
 
@@ -311,7 +304,6 @@ void FSMStatePositioner::getPredecessors(State* state, vector< State* >&
 void FSMStatePositioner::getSuccessors(State* state, vector< State* >&
     successors)
 {
-  clock_t t_begin = clock();
   for (int t = 0; t < state->getNumOutTransitions(); ++t)
   {
     State* successor = state->getOutTransition(t)->getEndState();
@@ -320,10 +312,6 @@ void FSMStatePositioner::getSuccessors(State* state, vector< State* >&
       successors.push_back(successor);
     }
   }
-  float duration = static_cast<float>(clock() - t_begin) /
-    static_cast<float>(CLOCKS_PER_SEC);
-  std::cerr << "getSuccessors has considered " << state->getNumOutTransitions()
-    << " outgoing transitions and took " << duration << " seconds" << std::endl;
 }
 
 void FSMStatePositioner::assignStateToPosition(State* state,
@@ -346,12 +334,12 @@ void FSMStatePositioner::assignStateToPosition(State* state,
 
 void FSMStatePositioner::requestStatePosition(State* state, Vector2D& position)
 {
-  clock_t t_begin = clock();
   ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
+  std::cerr << "cluster " << state->getCluster()->getPositionInRank() <<
+    " at rank " << state->getCluster()->getRank() << ": requested position ("
+    << position.x() << ", " << position.y() << ") " << std::endl;
   position = cs_info->findNearestFreeSlot(position);
-  assignStateToPosition(state, position);
-  float duration = static_cast<float>(clock() - t_begin) /
-    static_cast<float>(CLOCKS_PER_SEC);
-  std::cerr << "requestStatePosition took " << duration << " seconds" <<
+  std::cerr << "got (" << position.x() << ", " << position.y() << ") " <<
     std::endl;
+  assignStateToPosition(state, position);
 }

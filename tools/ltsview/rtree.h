@@ -64,11 +64,18 @@ class PackedRTreeBuilder
       points.push_back(point);
     }
 
-    RTree* buildRTree();
+    void buildRTree();
+
+    RTree* getRTree() const
+    {
+      return rtree;
+    }
 
   private:
     std::vector< Vector2D > points;
     RTree* rtree;
+    // The maximum number of children for a node in the RTree
+    static const unsigned int MAX_FANOUT;
 };
 
 #endif

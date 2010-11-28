@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <queue>
 #include <list>
@@ -102,7 +103,7 @@ class RNode
   protected:
     Rectangle bounding_box;
 
-    static const float MIN_BB_SIDE_LENGTH = 1e-6f;
+    static const float MIN_BB_SIDE_LENGTH = 0.001f;
 };
 
 bool lessThanCenterX(RNode* a, RNode* b)
@@ -279,14 +280,16 @@ template< class Distance, class Compare >
 class NeighbourFinder
 {
   public:
-    typedef std::priority_queue< QueueElement, std::vector< QueueElement>,
+    typedef std::priority_queue< QueueElement, std::vector< QueueElement >,
             Compare > PriorityQueue;
+
     void startNewSearch(RNode* root, const Vector2D& point)
     {
       queue = PriorityQueue();
       has_found_neighbour = false;
       query_point = point;
       queue.push(QueueElement(root, 0.0f));
+      printPointDistances(root);
     }
 
     void findNextNeighbour()
@@ -295,12 +298,21 @@ class NeighbourFinder
       while (!queue.empty())
       {
         RNode* top_node = queue.top().node;
+        Rectangle bb =  top_node->boundingBox();
+        std::cerr << "top of queue has distance: " << queue.top().distance << std::endl;
+        std::cerr << "top of queue has bounding box: (" << bb.low_corner.x() <<
+          "," << bb.low_corner.y() << ") -- (" << bb.high_corner.x() << "," <<
+          bb.high_corner.y() << ")" << std::endl;
         queue.pop();
         RTreeLeaf* leaf = dynamic_cast< RTreeLeaf* > (top_node);
         if (leaf != NULL)
         {
           has_found_neighbour = true;
           found_neighbour = leaf->point;
+          Vector2D diff = leaf->point - query_point;
+          std::cerr << "found nearest neighbour (" << leaf->point.x() <<
+            "," << leaf->point.y() << ") with distance: " << diff.length() <<
+            std::endl;
           return;
         }
         RTreeNode* node = dynamic_cast< RTreeNode* > (top_node);
@@ -323,6 +335,31 @@ class NeighbourFinder
     {
       return found_neighbour;
     }
+
+    void printPointDistances(RNode* root)
+    {
+      Rectangle bb =  root->boundingBox();
+      std::cerr << "bounding box is: (" << bb.low_corner.x() << "," <<
+        bb.low_corner.y() << ") -- (" << bb.high_corner.x() << "," <<
+        bb.high_corner.y() << ")" << std::endl;
+      RTreeLeaf* leaf = dynamic_cast<RTreeLeaf*>(root);
+      if (leaf != NULL)
+      {
+        std::cerr << "point (" << leaf->point.x() << "," <<
+          leaf->point.y() << ") ";
+        Vector2D diff = leaf->point - query_point;
+        std::cerr << "distance to query point (" << query_point.x() << "," <<
+          query_point.y() << ") is: " << diff.length() << std::endl;
+        return;
+      }
+      RTreeNode* node = dynamic_cast<RTreeNode*>(root);
+      std::list< RNode* >::iterator ci;
+      for (ci = node->children.begin(); ci != node->children.end(); ++ci)
+      {
+        printPointDistances(*ci);
+      }
+    }
+
 
   private:
     Vector2D found_neighbour;
@@ -351,7 +388,7 @@ void RTree::deletePoint(const Vector2D& point)
 
 void RTree::findFarthestNeighbour(const Vector2D& point)
 {
-  NeighbourFinder< MaxRectPointDistance, QueueElementGreaterThan > finder;
+  NeighbourFinder< MaxRectPointDistance, QueueElementLessThan > finder;
   finder.startNewSearch(root, point);
   finder.findNextNeighbour();
   neighbour_found = finder.hasFoundNeighbour();
@@ -363,7 +400,7 @@ void RTree::findFarthestNeighbour(const Vector2D& point)
 
 void RTree::findNearestNeighbour(const Vector2D& point)
 {
-  NeighbourFinder< MinRectPointDistance, QueueElementLessThan > finder;
+  NeighbourFinder< MinRectPointDistance, QueueElementGreaterThan > finder;
   finder.startNewSearch(root, point);
   finder.findNextNeighbour();
   neighbour_found = finder.hasFoundNeighbour();
@@ -373,7 +410,10 @@ void RTree::findNearestNeighbour(const Vector2D& point)
   }
 }
 
-RTree* PackedRTreeBuilder::buildRTree()
+// The maximum number of children for a node in the RTree
+const unsigned int PackedRTreeBuilder::MAX_FANOUT = 50;
+
+void PackedRTreeBuilder::buildRTree()
 {
   // This algorithm for constructing a packed R-tree from a set of spatial
   // objects (in our case just points), is called Sort-Tile-Recursive and is
@@ -381,8 +421,8 @@ RTree* PackedRTreeBuilder::buildRTree()
   // "STR: a simple and efficient algorithm for R-tree packing", S.T.
   // Leutenegger, M.A. Lopez and J. Edgington, Technical Report TR-97-14,
   // Institute for Computer Applications in Science and Engineering, 1997.
-  unsigned int max_fanout = points.size();
   std::vector< RNode* > roots;
+  roots.reserve(points.size());
   std::vector< Vector2D >::iterator pi;
   for (pi = points.begin(); pi != points.end(); ++pi)
   {
@@ -393,36 +433,28 @@ RTree* PackedRTreeBuilder::buildRTree()
   while (roots.size() > 1)
   {
     std::vector< RNode* > new_roots;
-    int slice_size = max_fanout * std::ceil( std::sqrt( std::ceil(
+    unsigned int slice_size = MAX_FANOUT * std::ceil( std::sqrt( std::ceil(
             static_cast< double >(roots.size()) /
-            static_cast< double >(max_fanout))));
+            static_cast< double >(MAX_FANOUT))));
     sort(roots.begin(), roots.end(), lessThanCenterX);
-    std::vector< RNode* >::iterator slice_begin;
-    for (slice_begin = roots.begin(); slice_begin < roots.end();
-        slice_begin += slice_size)
+    for (unsigned int i = 0; i < roots.size(); i += slice_size)
     {
-      std::vector< RNode* >::iterator slice_end = slice_begin + slice_size;
-      if (slice_end > roots.end())
-      {
-        slice_end = roots.end();
-      }
+      unsigned int this_slice_size = std::min(slice_size,
+          static_cast<unsigned int>(roots.size()) - i);
+      std::vector< RNode* >::iterator slice_begin = roots.begin() + i;
+      std::vector< RNode* >::iterator slice_end = slice_begin + this_slice_size;
       sort(slice_begin, slice_end, lessThanCenterY);
-      std::vector< RNode* >::iterator children_begin;
-      for (children_begin = slice_begin; children_begin < slice_end;
-          children_begin += max_fanout)
+      for (unsigned int j = 0; j < this_slice_size; j += MAX_FANOUT)
       {
-        std::vector< RNode* >::iterator children_end = slice_begin + max_fanout;
-        if (children_end > slice_end)
-        {
-          children_end = slice_end;
-        }
+        unsigned int num_children = std::min(MAX_FANOUT, this_slice_size - j);
+        std::vector< RNode* >::iterator children_begin = slice_begin + j;
         RTreeNode* node = new RTreeNode();
-        node->children.assign(children_begin, children_end);
+        node->children.assign(children_begin, children_begin + num_children);
         node->computeBoundingBox();
         new_roots.push_back(node);
       }
     }
     roots.swap(new_roots);
   }
-  return new RTree(roots[0]);
+  rtree = new RTree(roots[0]);
 }
