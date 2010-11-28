@@ -502,11 +502,6 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
   }
 }
 
-float Visualizer::compute_cone_scale_x(float phi,float r,float x) {
-  float f = r/x * sin(phi);
-  return r * cos(phi) / sqrt(1.0f - f*f);
-}
-
 void Visualizer::updateColors()
 {
   Cluster *cl;

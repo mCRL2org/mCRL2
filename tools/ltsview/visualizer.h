@@ -78,7 +78,6 @@ class Visualizer: public Subscriber
     void traverseTreeT(Cluster *root, bool topClosed, int rot);
     float truncate_float(float f); // truncates all digits after the 4th decimal digit of f
     void updateColors();
-    float compute_cone_scale_x(float phi,float r,float x);
 };
 
 #endif
