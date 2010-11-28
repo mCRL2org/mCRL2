@@ -10,17 +10,21 @@
 #define RTREE_H
 
 #include <vector>
+#include "vectors"
 
 class RNode;
 
 class RTree
 {
   public:
-    RTree(RNode* root_): root(root_) {}
+    RTree(RNode* root_):
+      root(root_)
+    { }
+
     ~RTree();
-    void deleteNode(RNode* node);
-    RNode* findNearestNeighbour(const std::vector< float >& point);
-    RNode* findFarthestNeighbour(const std::vector< float >& point);
+    void deletePoint(const Vector2D& point);
+    Vector2D nearestNeighbour(const Vector2D& point);
+    Vector2D farthestNeighbour(const Vector2D& point);
 
   private:
     RNode* root;
@@ -30,13 +34,23 @@ class RTree
 class PackedRTreeBuilder
 {
   public:
-    PackedRTreeBuilder();
-    ~PackedRTreeBuilder();
-    void addPoint(std::vector< float >* point) { points.push_back(point); }
+    PackedRTreeBuilder(unsigned int fanout):
+      max_fanout(fanout)
+    { }
+
+    ~PackedRTreeBuilder()
+    { }
+
+    void addPoint(const Vector2D& point)
+    {
+      points.push_back(point);
+    }
+
     RTree buildTree();
 
   private:
-    std::vector< std::vector< float >* > points;
+    std::vector< Vector2D > points;
+    unsigned int max_fanout;
 };
 
 #endif
