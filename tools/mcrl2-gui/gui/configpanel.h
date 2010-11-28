@@ -30,7 +30,6 @@ enum ToolStatus { STATUS_NONE, STATUS_RUNNING, STATUS_COMPLETE, STATUS_FAILED};
 
 #define ID_RUN_TOOL 1000
 #define ID_OUTPUT_FILE 1001
-#define ID_ABORT_TOOL 1002
 
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_UPDATE_PROJECT_TREE, 7777)
@@ -121,7 +120,7 @@ public:
     //fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
 		/* Display RUN & ABORT button */
 		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"));
-		m_abortbutton = new wxButton(top, ID_ABORT_TOOL, wxT("Abort"));
+		m_abortbutton = new wxButton(top, wxID_ABORT, wxT("Abort"));
 
 		++row;
     fgs->Add(m_runbutton, wxGBPosition(row,0));
@@ -435,7 +434,7 @@ public:
 
 	void OnAbortClick(wxCommandEvent& /*event*/) {
 		if(wxProcess::Exists(m_pid) && (m_pid != 0) ){
-		  wxProcess::Kill(m_pid);
+		  wxProcess::Kill(m_pid, wxSIGKILL);
 		}
 		m_abortbutton->Show(false);
 		m_runbutton->Enable();
@@ -450,7 +449,7 @@ public:
 	  /* Implement Veto */
 		//Killing m_pid == 0 can terminate application
 		if (wxProcess::Exists(m_pid) && (m_pid != 0)) {
-			wxProcess::Kill(m_pid);
+			wxProcess::Kill(m_pid, wxSIGKILL);
 		}
 		return true;
 	}
@@ -561,7 +560,7 @@ DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
 		EVT_BUTTON(ID_RUN_TOOL, ConfigPanel::OnRunClick)
-		EVT_BUTTON(ID_ABORT_TOOL, ConfigPanel::OnAbortClick)
+		EVT_BUTTON(wxID_ABORT, ConfigPanel::OnAbortClick)
 		EVT_FILEPICKER_CHANGED(ID_OUTPUT_FILE, ConfigPanel::OnOutputFileChange)
 		EVT_SIZE(ConfigPanel::OnResize)
 		EVT_MY_PROCESS_END( wxID_ANY, ConfigPanel::OnProcessEnd )
