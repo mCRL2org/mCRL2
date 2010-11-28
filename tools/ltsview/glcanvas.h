@@ -5,9 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file glcanvas.h
-/// \brief Header file for GLCanvas class
 
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
@@ -48,17 +45,13 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader
     void onMouseDClick(wxMouseEvent& event);
     void onPaint(wxPaintEvent& event);
     void onSize(wxSizeEvent& event);
-    void OnEraseBackground(wxEraseEvent& event);
+    void onEraseBackground(wxEraseEvent& event);
 
     void setCurrent();
 
     // Implemented for simReader interface
     void refresh();
     void selChange();
-
-    void startForceDirected();
-    void stopForceDirected();
-    void resetStatePositions();
 
   private:
     int activeTool;
@@ -77,15 +70,12 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader
     int oldMouseX;
     int oldMouseY;
     Settings *settings;
+    bool simulating;
     Visualizer *visualizer;
     PickState selectedType;
-    bool stop_force_directed;
 
     void determineCurrentTool(wxMouseEvent& event);
     void setMouseCursor();
-
-    // Boolean determining if simulation is on.
-    bool simulating;
 
     // Functions for processing hits
     void processHits(const GLint hits, GLuint *buffer, bool doubleC);

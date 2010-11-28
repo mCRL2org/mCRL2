@@ -47,7 +47,6 @@ class MainFrame : public wxFrame {
     void onSavePic(wxCommandEvent& event);
     void onSaveVec(wxCommandEvent& event);
     void onSaveText(wxCommandEvent& event);
-    void onRankStyle(wxCommandEvent& event);
     void onVisStyle(wxCommandEvent& event);
     void onFSMStyle(wxCommandEvent& event);
     void onResetView(wxCommandEvent& event);

@@ -10,8 +10,6 @@
 #include <limits>
 #include <queue>
 #include <set>
-//TODO(sploeger): remove this include once time measurements are finished.
-#include <time.h>
 #include <vector>
 #include "cluster.h"
 #include "fsm_state_positioner.h"
@@ -140,13 +138,8 @@ void FSMStatePositioner::positionStates()
 {
   // This algorithm has been based on the one by Frank van Ham, and includes
   // several improvements.
-  std::cerr << lts->getNumClusters() << " clusters" << std::endl;
-  std::cerr << lts->getNumRanks() << " ranks" << std::endl;
-  std::cerr << "bottom up pass" << std::endl;
   bottomUpPass();
-  std::cerr << "top down pass" << std::endl;
   topDownPass();
-  std::cerr << "resolve unpositioned pass" << std::endl;
   resolveUnpositioned();
 }
 
@@ -373,11 +366,6 @@ void FSMStatePositioner::assignStateToPosition(State* state,
 void FSMStatePositioner::requestStatePosition(State* state, Vector2D& position)
 {
   ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
-  std::cerr << "cluster " << state->getCluster()->getPositionInRank() <<
-    " at rank " << state->getCluster()->getRank() << ": requested position ("
-    << position.x() << ", " << position.y() << ") " << std::endl;
   position = cs_info->findNearestFreeSlot(position);
-  std::cerr << "got (" << position.x() << ", " << position.y() << ") " <<
-    std::endl;
   assignStateToPosition(state, position);
 }

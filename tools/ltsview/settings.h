@@ -47,9 +47,10 @@ enum SettingID
   SimSelColor,
   SimPosColor,
   BackgroundColor,
-  TransitionAttraction,
-  TransitionLength,
-  StateRepulsion
+  StatePosStyle,
+  StateRankStyle,
+  ClusterVisStyle,
+  FsmStyle
 };
 
 /* abstract base class for subscribers */

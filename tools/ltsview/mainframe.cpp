@@ -58,17 +58,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_ROTATE,MainFrame::onActivateTool)
   EVT_MENU  (myID_SELECT,MainFrame::onActivateTool)
   EVT_MENU  (myID_ZOOM,MainFrame::onActivateTool)
-  EVT_MENU  (myID_ITERATIVE,MainFrame::onRankStyle)
-  EVT_MENU  (myID_CYCLIC,MainFrame::onRankStyle)
-  EVT_MENU  (myID_CONES_STYLE,MainFrame::onVisStyle)
-  EVT_MENU  (myID_TUBES_STYLE,MainFrame::onVisStyle)
-  EVT_MENU  (myID_FSM_STYLE,MainFrame::onFSMStyle)
   EVT_MENU  (myID_ZOOM_IN_ABOVE, MainFrame::onZoomInAbove)
   EVT_MENU  (myID_ZOOM_IN_BELOW, MainFrame::onZoomInBelow)
   EVT_MENU  (myID_ZOOM_OUT, MainFrame::onZoomOut)
-  EVT_MENU  (myID_START_FORCE_DIRECTED, MainFrame::onStartForceDirected)
-  EVT_MENU  (myID_STOP_FORCE_DIRECTED, MainFrame::onStopForceDirected)
-  EVT_MENU  (myID_RESET_STATE_POSITIONS, MainFrame::onResetStatePositions)
 
 //  EVT_IDLE(MainFrame::onIdle)
   EVT_CLOSE(MainFrame::onClose)
@@ -138,11 +130,6 @@ void MainFrame::setupMenuBar() {
   viewMenu->Append(myID_ZOOM_OUT, wxT("Zoom &out\tC"),
       wxT("Zooms out one level"));
   viewMenu->AppendSeparator();
-  viewMenu->AppendRadioItem(myID_ITERATIVE,wxT("Iterative ranking"),
-    wxT("Apply iterative ranking"));
-  viewMenu->AppendRadioItem(myID_CYCLIC,wxT("Cyclic ranking"),
-    wxT("Apply cyclic ranking"));
-  viewMenu->AppendSeparator();
   viewMenu->AppendCheckItem(myID_DISPLAY_STATES, wxT("Display &states\tF3"),
       wxT("Show/hide individual states"));
   viewMenu->AppendCheckItem(myID_DISPLAY_TRANSITIONS,
@@ -151,13 +138,6 @@ void MainFrame::setupMenuBar() {
     wxT("Display &backpointers\tF5"), wxT("Show/hide backpointers"));
   viewMenu->AppendCheckItem(myID_DISPLAY_WIREFRAME,
       wxT("Display &wireframe\tF6"),wxT("Toggle wireframe/surface"));
-  viewMenu->AppendSeparator();
-  viewMenu->AppendRadioItem(myID_CONES_STYLE,wxT("Cones"),
-    wxT("Cones visualization style"));
-  viewMenu->AppendRadioItem(myID_TUBES_STYLE,wxT("Tubes"),
-    wxT("Tubes visualization style"));
-  viewMenu->AppendCheckItem(myID_FSM_STYLE,
-    wxT("FSMView style"), wxT("Toggle FSMView style"));
   viewMenu->AppendSeparator();
   viewMenu->Append(wxID_PREFERENCES,wxT("S&ettings..."),
     wxT("Show the settings panel"));
@@ -180,14 +160,6 @@ void MainFrame::setupMenuBar() {
   toolMenu->Append(myID_SIM, wxT("Sim&ulation...\tCtrl+S"),
       wxT("Show simulation dialog"));
   toolMenu->Append(myID_MARK, wxT("&Mark...\tCtrl+M"), wxT("Show mark dialog"));
-  toolMenu->AppendSeparator();
-  toolMenu->Append(myID_START_FORCE_DIRECTED,wxT("Start &force directed"),
-    wxT("Starts force directed state positioning algorithm"));
-  toolMenu->Append(myID_STOP_FORCE_DIRECTED,wxT("Stop f&orce directed"),
-    wxT("Stops force directed state positioning algorithm"));
-  toolMenu->Append(myID_RESET_STATE_POSITIONS,wxT("R&eset state positions"),
-    wxT("Assign states to their default positions"));
-  toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
 
   helpMenu->Append(wxID_HELP,wxT("&Contents"),wxT("Show help contents"));
   helpMenu->AppendSeparator();
@@ -231,7 +203,7 @@ void MainFrame::onIdle(wxIdleEvent &event) {
 }
 */
 
-void MainFrame::onOpen(wxCommandEvent& /*event*/) 
+void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxString filemask = wxString(("All supported files (" +
         mcrl2::lts::detail::lts_extensions_as_string() +
@@ -318,33 +290,11 @@ void MainFrame::onClose(wxCloseEvent &event)
   infoDialog->Destroy();
   simDialog->Destroy();
   markDialog->Destroy();
-  glCanvas->stopForceDirected();
   event.Skip();
 }
 
 void MainFrame::onActivateTool(wxCommandEvent& event) {
   glCanvas->setActiveTool(event.GetId());
-}
-
-void MainFrame::onRankStyle(wxCommandEvent& event) {
-  mediator->zoomOutTillTop();
-  if (event.GetId() == myID_ITERATIVE) {
-    mediator->setRankStyle(ITERATIVE);
-  } else if (event.GetId() == myID_CYCLIC) {
-    mediator->setRankStyle(CYCLIC);
-  }
-}
-
-void MainFrame::onVisStyle(wxCommandEvent& event){
-  if (event.GetId() == myID_CONES_STYLE) {
-    mediator->setVisStyle(CONES);
-  } else if (event.GetId() == myID_TUBES_STYLE) {
-    mediator->setVisStyle(TUBES);
-  }
-}
-
-void MainFrame::onFSMStyle(wxCommandEvent& event){
-  mediator->setFSMStyle(event.IsChecked());
 }
 
 void MainFrame::onResetView(wxCommandEvent& /*event*/) {
@@ -403,22 +353,6 @@ void MainFrame::onZoomOut(wxCommandEvent& /*event*/)
 {
   mediator->zoomOut();
   glCanvas->display();
-}
-
-void MainFrame::onStartForceDirected(wxCommandEvent& /*event*/) {
-  toolMenu->Enable(myID_START_FORCE_DIRECTED,false);
-  toolMenu->Enable(myID_STOP_FORCE_DIRECTED,true);
-  glCanvas->startForceDirected();
-}
-
-void MainFrame::onStopForceDirected(wxCommandEvent& /*event*/) {
-  glCanvas->stopForceDirected();
-  toolMenu->Enable(myID_START_FORCE_DIRECTED,true);
-  toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
-}
-
-void MainFrame::onResetStatePositions(wxCommandEvent& /*event*/) {
-  glCanvas->resetStatePositions();
 }
 
 void MainFrame::createProgressDialog(const string& title,const string& text) {

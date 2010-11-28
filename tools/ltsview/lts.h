@@ -104,7 +104,7 @@ class LTS
     Cluster* selectCluster(const int rank, const int pos);
     void deselect();
     void positionClusters(bool fsmstyle);
-    void positionStates();
+    void positionStates(StatePositioningStyle s);
     void rankStates(RankStyle rs);
 
     bool readFromFile(const std::string &filename);

@@ -5,17 +5,16 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file settingsdialog.cpp
-/// \brief Implements the settings dialog
 
 #include "wx.hpp" // precompiled headers
 
 #include "settingsdialog.h"
 #include <wx/notebook.h>
+#include <wx/radiobut.h>
 #include <wx/spinctrl.h>
-#include <wx/slider.h>
+#include <wx/statline.h>
 #include "mcrl2/utilities/colorbutton.h"
+#include "enums.h"
 #include "glcanvas.h"
 #include "settings.h"
 #include "mathutils.h"
@@ -53,12 +52,13 @@ BEGIN_EVENT_TABLE(SettingsDialog,wxDialog)
   EVT_CHECKBOX(myID_NAV_SMOOTH_SHADING,SettingsDialog::onNavSmoothShadingCheck)
   EVT_CHECKBOX(myID_NAV_LIGHTING,SettingsDialog::onNavLightingCheck)
   EVT_CHECKBOX(myID_NAV_TRANSPARENCY,SettingsDialog::onNavTransparencyCheck)
-  EVT_COMMAND_SCROLL(myID_TRANSITION_ATTRACTION,
-      SettingsDialog::onTransitionAttractionSlider)
-  EVT_COMMAND_SCROLL(myID_STATE_REPULSION,
-      SettingsDialog::onStateRepulsionSlider)
-  EVT_COMMAND_SCROLL(myID_TRANSITION_LENGTH,
-      SettingsDialog::onTransitionLengthSlider)
+  EVT_RADIOBUTTON(myID_ITERATIVE, SettingsDialog::onIterativeRadio)
+  EVT_RADIOBUTTON(myID_CYCLIC, SettingsDialog::onCyclicRadio)
+  EVT_RADIOBUTTON(myID_CONES_STYLE, SettingsDialog::onConesRadio)
+  EVT_RADIOBUTTON(myID_TUBES_STYLE, SettingsDialog::onTubesRadio)
+  EVT_CHECKBOX(myID_FSM_STYLE,SettingsDialog::onFsmStyleCheck)
+  EVT_RADIOBUTTON(myID_SP_STATEPOS, SettingsDialog::onSinglePassRadio)
+  EVT_RADIOBUTTON(myID_MP_STATEPOS, SettingsDialog::onMultiPassRadio)
 END_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
@@ -75,16 +75,19 @@ SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
   wxPanel* clrPanel = new wxPanel(nb,wxID_ANY);
   wxPanel* simPanel = new wxPanel(nb,wxID_ANY);
   wxPanel* pfmPanel = new wxPanel(nb,wxID_ANY);
+  wxPanel* algPanel = new wxPanel(nb,wxID_ANY);
 
-  setupParPanel(parPanel);
-  setupClrPanel(clrPanel);
-  setupSimPanel(simPanel);
-  setupPfmPanel(pfmPanel);
+  setupParametersPanel(parPanel);
+  setupColourPanel(clrPanel);
+  setupSimulationPanel(simPanel);
+  setupAlgorithmsPanel(algPanel);
+  setupPerformancePanel(pfmPanel);
 
-  nb->AddPage(parPanel,wxT("Parameters"),true);
-  nb->AddPage(clrPanel,wxT("Colours"),false);
+  nb->AddPage(parPanel,wxT("Parameters"), true);
+  nb->AddPage(clrPanel,wxT("Colours"), false);
   nb->AddPage(simPanel,wxT("Simulation"), false);
-  nb->AddPage(pfmPanel,wxT("Performance"),false);
+  nb->AddPage(algPanel,wxT("Algorithms"), false);
+  nb->AddPage(pfmPanel,wxT("Performance"), false);
 
   sizer->Add(nb,0,wxEXPAND|wxALL,5);
   SetSizerAndFit(sizer);
@@ -92,7 +95,7 @@ SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
   SetSize(wxSize(350,-1));
 }
 
-void SettingsDialog::setupParPanel(wxPanel* panel)
+void SettingsDialog::setupParametersPanel(wxPanel* panel)
 {
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
@@ -100,11 +103,10 @@ void SettingsDialog::setupParPanel(wxPanel* panel)
   wxSize spinSize(65,-1);
   wxSize sliderSize(200,-1);
   long spinStyle = wxSP_ARROW_KEYS;
-  long sliderStyle = wxSL_HORIZONTAL|wxSL_AUTOTICKS|wxSL_LABELS;
 
-  wxFlexGridSizer* sizer = new wxFlexGridSizer(9,2,0,0);
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(6,2,0,0);
   sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(8);
+  sizer->AddGrowableRow(5);
 
   wxSpinCtrl *ssSpin = new wxSpinCtrl(panel,myID_STATE_SIZE,wxEmptyString,
       wxDefaultPosition,spinSize,spinStyle,0,1000,
@@ -134,31 +136,12 @@ void SettingsDialog::setupParPanel(wxPanel* panel)
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Accuracy:")),0,lf,bd);
   sizer->Add(qlSpin,0,rf,bd);
 
-  wxSlider *srSlider = new wxSlider(panel,myID_STATE_REPULSION,
-      int(settings->getFloat(StateRepulsion)),0,100,wxDefaultPosition,sliderSize,
-      sliderStyle);
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("State repulsion:")),0,lf,bd);
-  sizer->Add(srSlider,0,rf,bd);
-
-  wxSlider *taSlider = new wxSlider(panel,myID_TRANSITION_ATTRACTION,
-      int(settings->getFloat(TransitionAttraction)),0,100,wxDefaultPosition,
-      sliderSize,sliderStyle);
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition attraction:")),0,
-      lf,bd);
-  sizer->Add(taSlider,0,rf,bd);
-
-  wxSlider *tlSlider = new wxSlider(panel,myID_TRANSITION_LENGTH,
-      int(settings->getFloat(TransitionLength)),0,100,wxDefaultPosition,
-      sliderSize,sliderStyle);
-  sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Transition length:")),0,lf,bd);
-  sizer->Add(tlSlider,0,rf,bd);
-
   panel->SetSizer(sizer);
   panel->Fit();
   panel->Layout();
 }
 
-void SettingsDialog::setupClrPanel(wxPanel* panel)
+void SettingsDialog::setupColourPanel(wxPanel* panel)
 {
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
@@ -235,7 +218,7 @@ void SettingsDialog::setupClrPanel(wxPanel* panel)
   panel->Layout();
 }
 
-void SettingsDialog::setupSimPanel(wxPanel* panel)
+void SettingsDialog::setupSimulationPanel(wxPanel* panel)
 {
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
   int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
@@ -278,7 +261,52 @@ void SettingsDialog::setupSimPanel(wxPanel* panel)
   panel->Layout();
 }
 
-void SettingsDialog::setupPfmPanel(wxPanel* panel)
+void SettingsDialog::setupAlgorithmsPanel(wxPanel* panel)
+{
+  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
+  int bd = 5;
+
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(10,1,0,0);
+  sizer->AddGrowableCol(0);
+  sizer->AddGrowableRow(9);
+
+  wxRadioButton* irsRadio = new wxRadioButton(panel, myID_ITERATIVE,
+      wxT("Iterative state ranking"), wxDefaultPosition, wxDefaultSize,
+      wxRB_GROUP);
+  wxRadioButton* crsRadio = new wxRadioButton(panel, myID_CYCLIC,
+      wxT("Cyclic state ranking"));
+  sizer->Add(irsRadio, 0, lf, bd);
+  sizer->Add(crsRadio, 0, lf, bd);
+
+  sizer->Add(new wxStaticLine(panel), 0, lf, bd);
+
+  wxRadioButton* cvsRadio = new wxRadioButton(panel, myID_CONES_STYLE,
+      wxT("Cones visualization"), wxDefaultPosition, wxDefaultSize,
+      wxRB_GROUP);
+  wxRadioButton* tvsRadio = new wxRadioButton(panel, myID_TUBES_STYLE,
+      wxT("Tubes visualization"));
+  wxCheckBox* fsmCheck = new wxCheckBox(panel, myID_FSM_STYLE,
+      wxT("FSMView style"));
+  sizer->Add(cvsRadio, 0, lf, bd);
+  sizer->Add(tvsRadio, 0, lf, bd);
+  sizer->Add(fsmCheck, 0, lf, bd);
+
+  sizer->Add(new wxStaticLine(panel), 0, lf, bd);
+
+  wxRadioButton* spsRadio = new wxRadioButton(panel, myID_SP_STATEPOS,
+      wxT("Single-pass state positioning"), wxDefaultPosition, wxDefaultSize,
+      wxRB_GROUP);
+  wxRadioButton* mpsRadio = new wxRadioButton(panel, myID_MP_STATEPOS,
+      wxT("Multi-pass state positioning"));
+  sizer->Add(spsRadio, 0, lf, bd);
+  sizer->Add(mpsRadio, 0, lf, bd);
+
+  panel->SetSizer(sizer);
+  panel->Fit();
+  panel->Layout();
+}
+
+void SettingsDialog::setupPerformancePanel(wxPanel* panel)
 {
   int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
   int bd = 5;
@@ -481,21 +509,6 @@ void SettingsDialog::onQualitySpin(wxSpinEvent& event)
   glCanvas->display();
 }
 
-void SettingsDialog::onTransitionAttractionSlider(wxScrollEvent& event)
-{
-  settings->setFloat(TransitionAttraction,float(event.GetPosition()));
-}
-
-void SettingsDialog::onTransitionLengthSlider(wxScrollEvent& event)
-{
-  settings->setFloat(TransitionLength,float(event.GetPosition()));
-}
-
-void SettingsDialog::onStateRepulsionSlider(wxScrollEvent& event)
-{
-  settings->setFloat(StateRepulsion,float(event.GetPosition()));
-}
-
 void SettingsDialog::onTransparencySpin(wxSpinEvent& event)
 {
   settings->setInt(Alpha,
@@ -503,3 +516,37 @@ void SettingsDialog::onTransparencySpin(wxSpinEvent& event)
   glCanvas->display();
 }
 
+void SettingsDialog::onIterativeRadio(wxCommandEvent& event)
+{
+  settings->setInt(StateRankStyle, ITERATIVE);
+}
+
+void SettingsDialog::onCyclicRadio(wxCommandEvent& event)
+{
+  settings->setInt(StateRankStyle, CYCLIC);
+}
+
+void SettingsDialog::onConesRadio(wxCommandEvent& event)
+{
+  settings->setInt(ClusterVisStyle, CONES);
+}
+
+void SettingsDialog::onTubesRadio(wxCommandEvent& event)
+{
+  settings->setInt(ClusterVisStyle, TUBES);
+}
+
+void SettingsDialog::onFsmStyleCheck(wxCommandEvent& event)
+{
+  settings->setBool(FsmStyle, event.IsChecked());
+}
+
+void SettingsDialog::onSinglePassRadio(wxCommandEvent& event)
+{
+  settings->setInt(StatePosStyle, SINGLE_PASS);
+}
+
+void SettingsDialog::onMultiPassRadio(wxCommandEvent& event)
+{
+  settings->setInt(StatePosStyle, MULTI_PASS);
+}

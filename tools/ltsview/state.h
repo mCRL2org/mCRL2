@@ -5,9 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file state.h
-/// \brief Header file for State class
 
 #ifndef STATE_H
 #define STATE_H
@@ -74,13 +71,6 @@ class State
     void setZoomLevel(const int i);
     int getZoomLevel() const;
 
-    void addForce(Vector3D f);
-    Vector3D getForce();
-    void resetForce();
-    Vector2D getVelocity();
-    void resetVelocity();
-    void setVelocity(Vector2D v);
-
   private:
     Cluster* cluster;
     int id;
@@ -99,8 +89,6 @@ class State
     int rank;
     bool simulated;
     bool selected;
-    Vector3D force;
-    Vector2D velocity;
 };
 
 #endif //STATE_H

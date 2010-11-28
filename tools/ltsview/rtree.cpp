@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 #include <limits>
 #include <queue>
 #include <list>
@@ -289,7 +288,6 @@ class NeighbourFinder
       has_found_neighbour = false;
       query_point = point;
       queue.push(QueueElement(root, 0.0f));
-      printPointDistances(root);
     }
 
     void findNextNeighbour()
@@ -299,10 +297,6 @@ class NeighbourFinder
       {
         RNode* top_node = queue.top().node;
         Rectangle bb =  top_node->boundingBox();
-        std::cerr << "top of queue has distance: " << queue.top().distance << std::endl;
-        std::cerr << "top of queue has bounding box: (" << bb.low_corner.x() <<
-          "," << bb.low_corner.y() << ") -- (" << bb.high_corner.x() << "," <<
-          bb.high_corner.y() << ")" << std::endl;
         queue.pop();
         RTreeLeaf* leaf = dynamic_cast< RTreeLeaf* > (top_node);
         if (leaf != NULL)
@@ -310,9 +304,6 @@ class NeighbourFinder
           has_found_neighbour = true;
           found_neighbour = leaf->point;
           Vector2D diff = leaf->point - query_point;
-          std::cerr << "found nearest neighbour (" << leaf->point.x() <<
-            "," << leaf->point.y() << ") with distance: " << diff.length() <<
-            std::endl;
           return;
         }
         RTreeNode* node = dynamic_cast< RTreeNode* > (top_node);
@@ -335,31 +326,6 @@ class NeighbourFinder
     {
       return found_neighbour;
     }
-
-    void printPointDistances(RNode* root)
-    {
-      Rectangle bb =  root->boundingBox();
-      std::cerr << "bounding box is: (" << bb.low_corner.x() << "," <<
-        bb.low_corner.y() << ") -- (" << bb.high_corner.x() << "," <<
-        bb.high_corner.y() << ")" << std::endl;
-      RTreeLeaf* leaf = dynamic_cast<RTreeLeaf*>(root);
-      if (leaf != NULL)
-      {
-        std::cerr << "point (" << leaf->point.x() << "," <<
-          leaf->point.y() << ") ";
-        Vector2D diff = leaf->point - query_point;
-        std::cerr << "distance to query point (" << query_point.x() << "," <<
-          query_point.y() << ") is: " << diff.length() << std::endl;
-        return;
-      }
-      RTreeNode* node = dynamic_cast<RTreeNode*>(root);
-      std::list< RNode* >::iterator ci;
-      for (ci = node->children.begin(); ci != node->children.end(); ++ci)
-      {
-        printPointDistances(*ci);
-      }
-    }
-
 
   private:
     Vector2D found_neighbour;

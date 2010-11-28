@@ -5,9 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file settingsdialog.h
-/// \brief Header file for the settings dialog
 
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
@@ -46,16 +43,21 @@ class SettingsDialog: public wxDialog, public Subscriber
     void onBranchTiltSpin(wxSpinEvent& event);
     void onQualitySpin(wxSpinEvent& event);
     void onTransparencySpin(wxSpinEvent& event);
-    void onTransitionAttractionSlider(wxScrollEvent& event);
-    void onTransitionLengthSlider(wxScrollEvent& event);
-    void onStateRepulsionSlider(wxScrollEvent& event);
+    void onIterativeRadio(wxCommandEvent& event);
+    void onCyclicRadio(wxCommandEvent& event);
+    void onConesRadio(wxCommandEvent& event);
+    void onTubesRadio(wxCommandEvent& event);
+    void onFsmStyleCheck(wxCommandEvent& event);
+    void onSinglePassRadio(wxCommandEvent& event);
+    void onMultiPassRadio(wxCommandEvent& event);
   private:
     GLCanvas* glCanvas;
     Settings* settings;
-    void setupClrPanel(wxPanel* panel);
-    void setupParPanel(wxPanel* panel);
-    void setupSimPanel(wxPanel* panel);
-    void setupPfmPanel(wxPanel* panel);
+    void setupAlgorithmsPanel(wxPanel* panel);
+    void setupColourPanel(wxPanel* panel);
+    void setupParametersPanel(wxPanel* panel);
+    void setupPerformancePanel(wxPanel* panel);
+    void setupSimulationPanel(wxPanel* panel);
     DECLARE_EVENT_TABLE()
 };
 

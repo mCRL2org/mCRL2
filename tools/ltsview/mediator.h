@@ -38,16 +38,12 @@ class Mediator {
     virtual void setMarkStyle(MarkStyle ms) = 0;
     virtual void setMatchStyle(MatchStyle ms) = 0;
     virtual void setMatchStyleClusters(MatchStyle ms) = 0;
-    virtual void setRankStyle(RankStyle rs) = 0;
-    virtual void setVisStyle(VisStyle vs) = 0;
-    virtual void setFSMStyle(bool b) = 0;
     virtual void selectStateByID(const int id) = 0;
     virtual void selectCluster(const int rank, const int pos) = 0;
     virtual void deselect() = 0;
     virtual int getNumberOfObjects() = 0;
     virtual void zoomInBelow() = 0;
     virtual void zoomInAbove() = 0;
-    virtual void zoomOutTillTop() = 0;
     virtual void zoomOut() = 0;
 
     virtual MatchStyle getMatchStyle() = 0;

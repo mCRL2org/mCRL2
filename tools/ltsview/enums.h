@@ -47,4 +47,10 @@ enum VisStyle
   TUBES
 };
 
+enum StatePositioningStyle
+{
+  SINGLE_PASS,
+  MULTI_PASS
+};
+
 #endif

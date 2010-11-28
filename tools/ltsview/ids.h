@@ -51,9 +51,6 @@ namespace IDs
     myID_ZOOM_IN_BELOW,
     myID_ZOOM_OUT,
     myID_OPEN_TRACE,
-    myID_START_FORCE_DIRECTED,
-    myID_STOP_FORCE_DIRECTED,
-    myID_RESET_STATE_POSITIONS,
     // Simulation event identifiers
     myID_SIM_START_BUTTON,
     myID_SIM_RESET_BUTTON,
@@ -61,7 +58,8 @@ namespace IDs
     myID_SIM_TRANSITIONS_VIEW,
     myID_SIM_TRIGGER_BUTTON,
     myID_SIM_UNDO_BUTTON,
-    myID_SIM_STATE_VIEW, myID_SIM_BT_BUTTON,
+    myID_SIM_STATE_VIEW,
+    myID_SIM_BT_BUTTON,
     // Setting controls identifiers
     myID_LONG_INTERPOLATION,
     myID_NAV_SHOW_BACKPOINTERS,
@@ -87,9 +85,8 @@ namespace IDs
     myID_BRANCH_TILT,
     myID_QUALITY,
     myID_TRANSPARENCY,
-    myID_TRANSITION_ATTRACTION,
-    myID_TRANSITION_LENGTH,
-    myID_STATE_REPULSION
+    myID_SP_STATEPOS,
+    myID_MP_STATEPOS
   };
 }
 #endif

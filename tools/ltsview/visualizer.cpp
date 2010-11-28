@@ -5,16 +5,12 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file visualizer.cpp
-/// \brief Implements the visualizer
 
 #include "wx.hpp" // precompiled headers
 
 #include "visualizer.h"
 #include <cmath>
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
 #include "cluster.h"
 #include "color_interpolator.h"
@@ -66,7 +62,6 @@ Visualizer::Visualizer(Mediator* owner,Settings* ss) {
   sin_obt = float(sin(deg_to_rad(settings->getInt(BranchTilt))));
   cos_obt = float(cos(deg_to_rad(settings->getInt(BranchTilt))));
 
-  visStyle = CONES;
   update_matrices = false;
   update_abs = true;
   update_colors = false;
@@ -102,19 +97,14 @@ void Visualizer::setLTS(LTS* l,bool compute_ratio) {
   traverseTree(true);
 }
 
-VisStyle Visualizer::getVisStyle() const {
-  return visStyle;
-}
-
-void Visualizer::notifyMarkStyleChanged() {
+void Visualizer::notifyMarkStyleChanged()
+{
   update_colors = true;
 }
 
-void Visualizer::setVisStyle(VisStyle vs) {
-  if (visStyle != vs) {
-    visStyle = vs;
-    traverseTree(true);
-  }
+void Visualizer::notifyVisStyleChanged()
+{
+  traverseTree(true);
 }
 
 void Visualizer::notify(SettingID s) {
@@ -224,6 +214,7 @@ void Visualizer::traverseTree(bool co) {
   }
   glPushMatrix();
   glLoadIdentity();
+  VisStyle visStyle = static_cast<VisStyle>(settings->getInt(ClusterVisStyle));
   switch (visStyle) {
     case CONES:
       traverseTreeC(lts->getInitialState()->getCluster(), true, 0);
@@ -1016,240 +1007,6 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
       }
     }
   }
-}
-
-// ------------- FORCE DIRECTED ------------------------------------------------
-
-void Visualizer::forceDirectedInit()
-{
-  if (lts == NULL) return;
-  resetVelocities(lts->getInitialState()->getCluster());
-  // assign initial positions to the states
-  // ensure that no two states have the same position
-  forceDirectedInitPos(lts->getInitialState()->getCluster());
-  update_abs = true;
-  computeAbsPos();
-}
-
-void Visualizer::forceDirectedInitPos(Cluster* root)
-{
-  root->positionStatesSpiral();
-  for (int i = 0; i < root->getNumDescendants(); ++i)
-  {
-    if (root->getDescendant(i) != NULL)
-    {
-      forceDirectedInitPos(root->getDescendant(i));
-    }
-  }
-}
-
-void Visualizer::forceDirectedStep()
-{
-  if (lts == NULL) return;
-  // Step 1: set all state forces to 0
-  resetForces(lts->getInitialState()->getCluster());
-  // Step 2: compute resulting force on every state
-  computeForces(lts->getInitialState()->getCluster());
-  // Step 3: move every state according to computed force
-  glPushMatrix();
-  glLoadIdentity();
-  applyForces(lts->getInitialState()->getCluster(),0);
-  glPopMatrix();
-}
-
-void Visualizer::resetForces(Cluster* root)
-{
-  for (int i = 0; i < root->getNumStates(); ++i)
-  {
-    root->getState(i)->resetForce();
-  }
-  // recurse to every descendant
-  for (int i = 0; i < root->getNumDescendants(); ++i)
-  {
-    if (root->getDescendant(i) != NULL)
-    {
-      resetForces(root->getDescendant(i));
-    }
-  }
-}
-
-void Visualizer::resetVelocities(Cluster* root)
-{
-  for (int i = 0; i < root->getNumStates(); ++i)
-  {
-    root->getState(i)->resetVelocity();
-  }
-  // recurse to every descendant
-  for (int i = 0; i < root->getNumDescendants(); ++i)
-  {
-    if (root->getDescendant(i) != NULL)
-    {
-      resetVelocities(root->getDescendant(i));
-    }
-  }
-}
-
-void Visualizer::computeForces(Cluster* root)
-{
-  for (int i = 0; i < root->getNumStates(); ++i)
-  {
-    State *s = root->getState(i);
-    for (int j = 0; j < s->getNumOutTransitions(); ++j)
-    {
-      if (!s->getOutTransition(j)->isBackpointer())
-      {
-        State *v = s->getOutTransition(j)->getEndState();
-        // compute attracting force of s on v (and v.v.) using Hooke's law
-        Vector3D d = s->getPositionAbs() - v->getPositionAbs();
-        float dl = d.length();
-        if (dl > 0.0f) {
-          Vector3D force = d * (0.00001f *
-              settings->getFloat(TransitionAttraction) * (dl -
-                0.4f * settings->getFloat(TransitionLength)) / dl);
-          force = Vector3D(truncate_float(force.x()),
-              truncate_float(force.y()), truncate_float(force.z()));
-          v->addForce(force);
-          s->addForce(force * -1.0f);
-        }
-      }
-    }
-    for (int j = i+1; j < root->getNumStates(); ++j)
-    {
-      State *v = root->getState(j);
-      // compute repulsing force of s on v (and v.v.) using Coulomb's law
-      Vector3D d = s->getPositionAbs() - v->getPositionAbs();
-      float dl = d.length();
-      if (dl > 0.0f)
-      {
-        Vector3D force = d * (0.00001f *
-            settings->getFloat(StateRepulsion) / (dl * dl * dl));
-        force = Vector3D(truncate_float(force.x()),
-            truncate_float(force.y()), truncate_float(force.z()));
-        s->addForce(force);
-        v->addForce(force * -1.0f);
-      }
-    }
-  }
-  // recurse to every descendant
-  for (int i = 0; i < root->getNumDescendants(); ++i)
-  {
-    if (root->getDescendant(i) != NULL)
-    {
-      computeForces(root->getDescendant(i));
-    }
-  }
-}
-
-void Visualizer::applyForces(Cluster* root,int rot) {
-  if (root->getNumStates() > 1) {
-    for (int i = 0; i < root->getNumStates(); ++i) {
-      State *s = root->getState(i);
-      if (s != lts->getInitialState()) {
-        // "localize" the force on s: it has to become a vector in the current
-        // coordinate system; we do this by multiplying it with the current GL
-        // matrix
-        float M[16];
-        glGetFloatv(GL_MODELVIEW_MATRIX,M);
-        Vector3D force = s->getForce();
-        // we're only interested in the (x,y) components, because the state has
-        // to stay in the plane of its cluster
-        // add force vector to s's velocity and get the new velocity vector
-        // s will be translated over this vector
-        Vector2D v = (s->getVelocity() + Vector2D(
-              truncate_float(M[0]*force.x() + M[4]*force.y() +
-                M[8]*force.z()),
-              truncate_float(M[1]*force.x() + M[5]*force.y() +
-                M[9]*force.z()) )) * 0.7f;
-
-        Vector2D old_pos = Vector2D( s->getPositionRadius() *
-            cos(deg_to_rad(s->getPositionAngle())),
-            s->getPositionRadius() *
-            sin(deg_to_rad(s->getPositionAngle())));
-        // add the old position in local Euclidean coordinates if s is not centered
-        if (!s->isCentered())
-        {
-          v = v + old_pos;
-        }
-        Vector2D new_pos = Vector2D(0, 0);
-        // normally, v would now be the new position of s in local Euclidean
-        // coordinates, but we still have to make sure it is within the boundary
-        // of the cluster
-        if (v.x() != 0.0f || v.y() != 0.0f)
-        {
-          float angle, radius;
-          v.toPolar(angle, radius);
-          angle = truncate_float(angle);
-          radius = truncate_float(min(radius, root->getTopRadius()));
-          new_pos = Vector2D(radius * cos(deg_to_rad(angle)), radius *
-              sin(deg_to_rad(angle)));
-          // compute the new position of s in "world" coordinates (i.e. with the
-          // initial state at (0,0,0))
-          glPushMatrix();
-            glRotatef(-angle,0.0f,0.0f,1.0f);
-            glTranslatef(radius,0.0f,0.0f);
-            glGetFloatv(GL_MODELVIEW_MATRIX,M);
-            Vector3D new_pos_abs = Vector3D(truncate_float(M[12]),
-                truncate_float(M[13]), truncate_float(M[14]));
-          glPopMatrix();
-          s->setPositionAngle(angle);
-          s->setPositionRadius(radius);
-          s->setPositionAbs(new_pos_abs);
-        }
-        else
-        {
-          // s is centered
-          s->center();
-          glGetFloatv(GL_MODELVIEW_MATRIX,M);
-          Vector3D new_pos_abs = Vector3D(truncate_float(M[12]),
-            truncate_float(M[13]), truncate_float(M[14]));
-          s->setPositionAbs(new_pos_abs);
-        }
-        // state may have been moved over a vector different from the computed
-        // velocity, so compute the actual velocity and store it
-        v = Vector2D(truncate_float(new_pos.x() - old_pos.x()),
-            truncate_float(new_pos.y() - old_pos.y()));
-        s->setVelocity(v);
-      }
-    }
-  }
-  // recurse into the descendants
-  int drot = rot + settings->getInt(BranchRotation);
-  if (drot >= 360)
-  {
-    drot -= 360;
-  }
-  glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-
-  for (int i = 0; i < root->getNumDescendants(); ++i)
-  {
-    Cluster* desc = root->getDescendant(i);
-    if (desc != NULL)
-    {
-      if (desc->isCentered())
-      {
-        applyForces(desc,(root->getNumDescendants()>1)?drot:rot);
-      }
-      else
-      {
-        glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-        glTranslatef(root->getBaseRadius(),0.0f,0.0f);
-        glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-        applyForces(desc,drot);
-        glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-        glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
-        glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
-      }
-    }
-  }
-
-  glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
-}
-
-void Visualizer::resetStatePositions() {
-  if (lts == NULL) return;
-  lts->clearStatePositions();
-  lts->positionStates();
-  update_abs = true;
 }
 
 // ------------- TRANSITIONS ---------------------------------------------------

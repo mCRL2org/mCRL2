@@ -5,9 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file lts.cpp
-/// \brief Source file of LTS class
 
 #include "wx.hpp" // precompiled headers
 #include "mcrl2/core/print.h"
@@ -743,11 +740,19 @@ void LTS::clearStatePositions()
   }
 }
 
-void LTS::positionStates()
+void LTS::positionStates(StatePositioningStyle s)
 {
-  //FSMStatePositioner state_positioner(this);
-  SinglePassStatePositioner state_positioner(this);
-  state_positioner.positionStates();
+  StatePositioner* state_positioner = NULL;
+  if (s == SINGLE_PASS)
+  {
+    state_positioner = new SinglePassStatePositioner(this);
+  }
+  else if (s == MULTI_PASS)
+  {
+    state_positioner = new FSMStatePositioner(this);
+  }
+  state_positioner->positionStates();
+  delete state_positioner;
 }
 
 LTS* LTS::zoomIntoAbove()

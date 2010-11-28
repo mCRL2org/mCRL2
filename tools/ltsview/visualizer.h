@@ -5,9 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file visualizer.h
-/// \brief Header file for the visualizer
 
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
@@ -28,6 +25,30 @@ class Vector3D;
 
 class Visualizer: public Subscriber
 {
+  public:
+    Visualizer(Mediator* owner,Settings* ss);
+    ~Visualizer();
+
+    void computeBoundsInfo(float &bcw,float &bch);
+    float getHalfStructureHeight() const;
+    void notify(SettingID s);
+    void setLTS(LTS *l,bool compute_ratio);
+    void notifyMarkStyleChanged();
+    void notifyVisStyleChanged();
+
+    void drawStates(bool simulating);
+    void drawSimStates(std::vector<State*> historicStates, State*
+        currState, Transition* chosenTrans);
+
+    void drawTransitions(bool draw_fp,bool draw_bp);
+    void drawSimTransitions(bool draw_fp, bool draw_bp,
+        std::vector<Transition*> historicTrans, std::vector<Transition*>
+        posTrans, Transition* chosenTrans);
+
+    void drawStructure();
+    void sortClusters(Vector3D viewpoint);
+    void exportToText(std::string filename);
+
   private:
     float cos_obt;
     float sin_obt;
@@ -58,41 +79,7 @@ class Visualizer: public Subscriber
     float truncate_float(float f); // truncates all digits after the 4th decimal digit of f
     void updateColors();
     float compute_cone_scale_x(float phi,float r,float x);
-    void computeForces(Cluster* root);
-    void applyForces(Cluster* root, int rot);
-    void resetForces(Cluster* root);
-    void resetVelocities(Cluster* root);
-    void forceDirectedInitPos(Cluster* root);
-
     float distance_circle_to_poly(float angle,float radius);
-
-  public:
-    Visualizer(Mediator* owner,Settings* ss);
-    ~Visualizer();
-
-    void computeBoundsInfo(float &bcw,float &bch);
-    float getHalfStructureHeight() const;
-    VisStyle getVisStyle() const;
-    void notify(SettingID s);
-    void setLTS(LTS *l,bool compute_ratio);
-    void notifyMarkStyleChanged();
-    void setVisStyle(VisStyle vs);
-
-    void drawStates(bool simulating);
-    void drawSimStates(std::vector<State*> historicStates, State*
-        currState, Transition* chosenTrans);
-
-    void drawTransitions(bool draw_fp,bool draw_bp);
-    void drawSimTransitions(bool draw_fp, bool draw_bp,
-        std::vector<Transition*> historicTrans, std::vector<Transition*>
-        posTrans, Transition* chosenTrans);
-
-    void drawStructure();
-    void sortClusters(Vector3D viewpoint);
-    void forceDirectedInit();
-    void forceDirectedStep();
-    void resetStatePositions();
-    void exportToText(std::string filename);
 };
 
 #endif

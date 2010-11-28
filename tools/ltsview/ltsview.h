@@ -1,4 +1,4 @@
-
+// Author(s): Bas Ploeger and Carst Tankink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -22,18 +22,19 @@
 
 #include "enums.h"
 #include "mediator.h"
+#include "settings.h"
 
 class GLCanvas;
 class LTS;
 class MainFrame;
 class MarkManager;
 class RGB_Color;
-class Settings;
 class Visualizer;
 
 class LTSView :
   public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::input_tool >,
-  public Mediator
+  public Mediator,
+  public Subscriber
 {
     typedef mcrl2::utilities::wx::tool< LTSView,
        mcrl2::utilities::tools::input_tool > super;
@@ -46,9 +47,13 @@ class LTSView :
     Settings *settings;
     Visualizer *visualizer;
     MarkManager *markManager;
-    RankStyle rankStyle;
-    bool fsmStyle;
+
     void applyMarkStyle();
+    void setFSMStyle();
+    void setRankStyle();
+    void setStatePosStyle();
+    void setVisStyle();
+    void zoomOutTillTop();
 
   public:
 
@@ -70,15 +75,13 @@ class LTSView :
     std::string getVersionString();
     void notifyRenderingFinished();
     void notifyRenderingStarted();
+    void notify(SettingID s);
     void openFile(std::string fileName);
     void removeMarkRule(int mr);
     void setActionMark(int l,bool b);
     void setMarkStyle(MarkStyle ms);
     void setMatchStyle(MatchStyle ms);
     void setMatchStyleClusters(MatchStyle ms);
-    void setRankStyle(RankStyle rs);
-    void setVisStyle(VisStyle vs);
-    void setFSMStyle(bool b);
     void startSim();
     int getNumberOfParams() const;
     std::string getActionLabel(const int i) const;
@@ -91,7 +94,6 @@ class LTSView :
 
     void zoomInBelow();
     void zoomInAbove();
-    void zoomOutTillTop();
     void zoomOut();
 
     void reportError(std::string const& error);

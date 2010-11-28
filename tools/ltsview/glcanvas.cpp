@@ -5,9 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file glcanvas.cpp
-/// \brief Implements the OpenGL canvas
 
 #include "wx.hpp" // precompiled headers
 
@@ -40,7 +37,7 @@ BEGIN_EVENT_TABLE(GLCanvas,wxGLCanvas)
     EVT_MOUSEWHEEL(GLCanvas::onMouseWheel)
     EVT_PAINT(GLCanvas::onPaint)
     EVT_SIZE(GLCanvas::onSize)
-    EVT_ERASE_BACKGROUND(GLCanvas::OnEraseBackground)
+    EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
 END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
@@ -350,7 +347,7 @@ void GLCanvas::onSize(wxSizeEvent& /*event*/)
   reshape();
 }
 
-void GLCanvas::OnEraseBackground(wxEraseEvent& /*event*/)
+void GLCanvas::onEraseBackground(wxEraseEvent& /*event*/)
 {
 }
 
@@ -738,31 +735,4 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC)
     processHits(hits, selectBuf, doubleC);
     free(selectBuf);
   }
-}
-
-void GLCanvas::startForceDirected()
-{
-  stop_force_directed = false;
-  visualizer->forceDirectedInit();
-  while (!stop_force_directed)
-  {
-    if (GetContext())
-    {
-      SetCurrent();
-    }
-    visualizer->forceDirectedStep();
-    display();
-    wxTheApp->Yield(true);
-  }
-}
-
-void GLCanvas::stopForceDirected()
-{
-  stop_force_directed = true;
-}
-
-void GLCanvas::resetStatePositions()
-{
-  visualizer->resetStatePositions();
-  display();
 }

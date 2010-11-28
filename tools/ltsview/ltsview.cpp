@@ -96,11 +96,13 @@ int main(int argc, char **argv)
 
 bool LTSView::run()
 {
-  rankStyle = ITERATIVE;
-  fsmStyle = false;
   colourCounter = 0;
   settings = new Settings();
   settings->loadDefaults();
+  settings->subscribe(StateRankStyle, this);
+  settings->subscribe(ClusterVisStyle, this);
+  settings->subscribe(FsmStyle, this);
+  settings->subscribe(StatePosStyle, this);
   mainFrame = new MainFrame(this,settings);
   visualizer = new Visualizer(this,settings);
   markManager = new MarkManager();
@@ -161,6 +163,9 @@ void LTSView::openFile(string fileName)
     delete lts;
     lts = newlts;
 
+    RankStyle rankStyle = static_cast<RankStyle>(settings->getInt(
+          StateRankStyle));
+
     mainFrame->updateProgressDialog(17,"Ranking states");
     lts->rankStates(rankStyle);
 
@@ -171,13 +176,15 @@ void LTSView::openFile(string fileName)
     lts->computeClusterInfo();
 
     mainFrame->updateProgressDialog(67,"Positioning clusters");
-    lts->positionClusters(fsmStyle);
+    lts->positionClusters(settings->getBool(FsmStyle));
 
     markManager->setLTS(lts,true);
     visualizer->setLTS(lts,true);
 
     mainFrame->updateProgressDialog(83,"Positioning states");
-    lts->positionStates();
+    StatePositioningStyle pos_style = static_cast<StatePositioningStyle>(
+        settings->getInt(StatePosStyle));
+    lts->positionStates(pos_style);
 
     mainFrame->updateProgressDialog(100,"Done");
     visualizer->notifyMarkStyleChanged();
@@ -218,69 +225,96 @@ void LTSView::openFile(string fileName)
   }
 }
 
-void LTSView::setRankStyle(RankStyle rs)
+void LTSView::notify(SettingID s)
 {
-  if (rankStyle != rs)
+  switch (s)
   {
-    rankStyle = rs;
-    if (lts != NULL)
-    {
-      glCanvas->disableDisplay();
-
-      mainFrame->createProgressDialog("Structuring LTS","Applying ranking");
-
-      mainFrame->updateProgressDialog(17,"Ranking states");
-      lts->rankStates(rankStyle);
-
-      mainFrame->updateProgressDialog(33,"Clustering states");
-      lts->clusterStates(rankStyle);
-
-      mainFrame->updateProgressDialog(40,"Setting cluster info");
-      lts->computeClusterInfo();
-      markManager->markClusters();
-
-      mainFrame->updateProgressDialog(60,"Positioning clusters");
-      lts->positionClusters(fsmStyle);
-
-      visualizer->setLTS(lts,true);
-
-      mainFrame->updateProgressDialog(80,"Positioning states");
-      lts->positionStates();
-
-      mainFrame->updateProgressDialog(100,"Done");
-
-      glCanvas->enableDisplay();
-      glCanvas->resetView();
-
-      mainFrame->setNumberInfo(lts->getNumStates(),
-        lts->getNumTransitions(),lts->getNumClusters(),
-        lts->getNumRanks());
-    }
+    case StateRankStyle:
+      setRankStyle();
+      break;
+    case ClusterVisStyle:
+      setVisStyle();
+      break;
+    case StatePosStyle:
+      setStatePosStyle();
+      break;
+    case FsmStyle:
+      setFSMStyle();
+      break;
+    default:
+      break;
   }
 }
 
-void LTSView::setVisStyle(VisStyle vs)
+void LTSView::setRankStyle()
 {
-  if (visualizer->getVisStyle() != vs)
+  if (lts != NULL)
   {
-    visualizer->setVisStyle(vs);
+    zoomOutTillTop();
+    glCanvas->disableDisplay();
+
+    mainFrame->createProgressDialog("Structuring LTS","Applying ranking");
+
+    RankStyle rankStyle = static_cast<RankStyle>(settings->getInt(
+          StateRankStyle));
+
+    mainFrame->updateProgressDialog(17,"Ranking states");
+    lts->rankStates(rankStyle);
+
+    mainFrame->updateProgressDialog(33,"Clustering states");
+    lts->clusterStates(rankStyle);
+
+    mainFrame->updateProgressDialog(40,"Setting cluster info");
+    lts->computeClusterInfo();
+    markManager->markClusters();
+
+    mainFrame->updateProgressDialog(60,"Positioning clusters");
+    lts->positionClusters(settings->getBool(FsmStyle));
+
+    visualizer->setLTS(lts,true);
+
+    StatePositioningStyle pos_style = static_cast<StatePositioningStyle>(
+        settings->getInt(StatePosStyle));
+    mainFrame->updateProgressDialog(80,"Positioning states");
+    lts->positionStates(pos_style);
+
+    mainFrame->updateProgressDialog(100,"Done");
+
+    glCanvas->enableDisplay();
+    glCanvas->resetView();
+
+    mainFrame->setNumberInfo(lts->getNumStates(),
+      lts->getNumTransitions(),lts->getNumClusters(),
+      lts->getNumRanks());
+  }
+}
+
+void LTSView::setStatePosStyle()
+{
+  if (lts != NULL)
+  {
+    StatePositioningStyle pos_style = static_cast<StatePositioningStyle>(
+        settings->getInt(StatePosStyle));
+    lts->positionStates(pos_style);
     glCanvas->display();
   }
 }
 
-void LTSView::setFSMStyle(bool b)
+void LTSView::setVisStyle()
 {
-  if (b != fsmStyle)
+  visualizer->notifyVisStyleChanged();
+  glCanvas->display();
+}
+
+void LTSView::setFSMStyle()
+{
+  if (lts != NULL)
   {
-    fsmStyle = b;
-    if (lts != NULL)
-    {
-      glCanvas->disableDisplay();
-      lts->positionClusters(fsmStyle);
-      visualizer->setLTS(lts,true);
-      glCanvas->enableDisplay();
-      glCanvas->resetView();
-    }
+    glCanvas->disableDisplay();
+    lts->positionClusters(settings->getBool(FsmStyle));
+    visualizer->setLTS(lts, true);
+    glCanvas->enableDisplay();
+    glCanvas->resetView();
   }
 }
 

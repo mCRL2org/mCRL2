@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <cmath>
-#include <iostream>
 #include <vector>
 #include "cluster.h"
 #include "lts.h"
@@ -28,9 +27,7 @@ class ClusterStatePositioner
     { }
 
     virtual void positionStates()
-    {
-      std::cerr << "In ClusterStatePositioner::positionStates()\n";
-    }
+    { }
 
   protected:
     static const float MIN_DELTA_RING = 0.22f;
@@ -111,7 +108,6 @@ NodeClusterStatePositioner::~NodeClusterStatePositioner()
 
 void NodeClusterStatePositioner::positionStates()
 {
-  std::cerr << "In NodeClusterStatePositioner::positionStates()\n";
   buildRTree();
   for (int s = 0; s < cluster->getNumStates(); ++s)
   {
@@ -180,20 +176,12 @@ Vector2D NodeClusterStatePositioner::sumSuccessorStateVectors(State* state)
 void NodeClusterStatePositioner::assignStateToNearestSlot(State* state,
     const Vector2D& position)
 {
-  std::cerr << "cluster " << cluster->getPositionInRank() << " at rank " <<
-    cluster->getRank() << ": requested position (" << position.x() << ", " <<
-    position.y() << ") " << std::endl;
-
   Vector2D assigned_position = position;
   slot_rtree->findNearestNeighbour(position);
   if (slot_rtree->hasFoundNeighbour())
   {
     assigned_position = slot_rtree->foundNeighbour();
   }
-
-  std::cerr << "got (" << assigned_position.x() << ", " << assigned_position.y()
-    << ") " << std::endl;
-
   float angle, radius;
   assigned_position.toPolar(angle, radius);
   if (radius < 0.5f * delta_ring)
@@ -210,7 +198,6 @@ void NodeClusterStatePositioner::assignStateToNearestSlot(State* state,
 
 void LeafClusterStatePositioner::positionStates()
 {
-  std::cerr << "In LeafClusterStatePositioner::positionStates()\n";
   computeNumRingStates();
   int state_begin = 0;
   if (num_ring_states[0] == 1)
@@ -223,7 +210,7 @@ void LeafClusterStatePositioner::positionStates()
     float radius = delta_ring * ring;
     int num_states = num_ring_states[ring];
     float delta_deg = 360.0f / static_cast<float>(num_states);
-    float angle = (ring % 2 == 0) ? 0.0f : 0.5f * delta_deg;
+    float angle = (ring % 2 == 1) ? 0.0f : 0.5f * delta_deg;
     for (int s = state_begin; s < state_begin + num_states; ++s)
     {
       cluster->getState(s)->setPositionAngle(angle);
@@ -278,7 +265,8 @@ void SinglePassStatePositioner::positionStates()
   {
     Cluster* cluster = *ci;
     ClusterStatePositioner* cs_positioner;
-    if (cluster->getNumDescendants() == 0)
+    if (cluster->getNumDescendants() == 0 || (cluster->getNumDescendants() == 1
+          && cluster->getDescendant(0)->getNumStates() == 1))
     {
       cs_positioner = new LeafClusterStatePositioner(cluster);
     }
