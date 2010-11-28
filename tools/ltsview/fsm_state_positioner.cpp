@@ -32,7 +32,7 @@ class ClusterSlotInfo
     void findFarthestFreeSlot(int &ring, int &slot);
     void findNearestSlot(Vector2D &position, int &ring, int &slot);
     void findNearestFreeSlot(int &ring, int &slot);
-    
+
     int getNumRings()
     {
       return num_slots.size();
@@ -48,7 +48,7 @@ class ClusterSlotInfo
       radius = delta_ring * ring;
       angle = rad_to_deg(2 * PI * slot / num_slots[ring]);
     }
-    
+
     void occupySlot(int ring, int slot)
     {
       occupied_slots.insert(Slot(ring, slot));
@@ -205,12 +205,12 @@ void ClusterSlotInfo::findFarthestFreeSlot(int &ring, int &slot)
 
 
 FSMStatePositioner::FSMStatePositioner(LTS *l)
-  : StatePositioner(l) 
+  : StatePositioner(l)
 {
   for (Cluster_iterator cluster_it = lts->getClusterIterator();
       ! cluster_it.is_end(); ++cluster_it)
   {
-    slot_info[*cluster_it] = new ClusterSlotInfo(*cluster_it);    
+    slot_info[*cluster_it] = new ClusterSlotInfo(*cluster_it);
   }
 }
 
@@ -223,7 +223,7 @@ FSMStatePositioner::~FSMStatePositioner()
   }
 }
 
-void FSMStatePositioner::positionStates() 
+void FSMStatePositioner::positionStates()
 {
   // This algorithm has been based on the one by Frank van Ham, and includes
   // several improvements.
@@ -330,7 +330,7 @@ void FSMStatePositioner::resolveUnpositioned()
     ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
     int ring, slot;
     cs_info->findFarthestFreeSlot(ring, slot);
-    assignStateToSlot(state, ring, slot);    
+    assignStateToSlot(state, ring, slot);
   }
 }
 
@@ -355,7 +355,7 @@ Vector2D FSMStatePositioner::sumStateVectors(vector< State* > &states, float
     else
     {
       cluster_vector.fromPolar(state->getCluster()->getPosition(), rim_radius);
-      sum_vector += cluster_vector;  
+      sum_vector += cluster_vector;
       if ( ! state->isCentered() )
       {
         state_vector.fromPolar(state->getPositionAngle() +

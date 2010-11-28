@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   primitivefactory.cpp
   primitives.cpp
   rgb_color.cpp
+  rtree.cpp
   savepicdialog.cpp
   savevecdialog.cpp
   settings.cpp
