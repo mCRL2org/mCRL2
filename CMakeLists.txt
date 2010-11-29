@@ -192,12 +192,15 @@ if (UNIX AND NOT WIN32)
   endif (CMAKE_SIZEOF_VOID_P MATCHES "4")
 endif (UNIX AND NOT WIN32)
 
-if(CMAKE_CL_64)
-  message( STATUS "Architecture: 64bit Windows" )
-  set (CMAKE_CXX_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
-else(CMAKE_CL_64)
-  message( STATUS "Architecture: 32bit Windows" )
-endif(CMAKE_CL_64)
+if(MSVC)
+  if(CMAKE_CL_64)
+    message( STATUS "Architecture: 64bit Windows" )
+    set (CMAKE_CXX_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
+  else(CMAKE_CL_64)
+    message( STATUS "Architecture: 32bit Windows" )
+  endif(CMAKE_CL_64)
+endif(MSVC)
+
 ##---------------------------------------------------
 ## Remove "install_tools"
 ## install_tools contains the tools marked for symlink export
