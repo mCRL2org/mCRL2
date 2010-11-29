@@ -1341,10 +1341,10 @@ AT_writeToStringBuffer(ATerm t, char *buffer)
 /*}}}  */
 /*{{{  int ATcalcTextSize(ATerm t) */
 
-unsigned long ATcalcTextSize(ATerm t)
+/*unsigned long ATcalcTextSize(ATerm t)
 {
   return AT_calcTextSize(t);
-}
+}*/
 
 /*}}}  */
 
@@ -2928,10 +2928,10 @@ unsigned long AT_calcUniqueSubterms(ATerm t)
 /*}}}  */
 /*{{{  unsigned long ATcalcUniqueSubterms(ATerm t) */
 
-unsigned long ATcalcUniqueSubterms(ATerm t)
+/*unsigned long ATcalcUniqueSubterms(ATerm t)
 {
   return AT_calcUniqueSubterms(t);
-}
+}*/
 
 /*}}}  */
 
@@ -3030,10 +3030,10 @@ unsigned long AT_calcUniqueSymbols(ATerm t)
 
 /*{{{  int ATcalcUniqueSymbols(ATerm t) */
 
-unsigned long ATcalcUniqueSymbols(ATerm t)
+/*unsigned long ATcalcUniqueSymbols(ATerm t)
 {
   return AT_calcUniqueSymbols(t);
-}
+} */
 
 /*}}}  */
 

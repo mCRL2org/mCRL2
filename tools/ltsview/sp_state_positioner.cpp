@@ -30,14 +30,16 @@ class ClusterStatePositioner
     { }
 
   protected:
-    static const float MIN_DELTA_RING = 0.22f;
-    static const float MIN_DELTA_SLOT = 0.22f;
+    static const float MIN_DELTA_RING;
+    static const float MIN_DELTA_SLOT;
 
     Cluster* cluster;
     float delta_ring;
     std::vector< int > num_ring_slots;
 };
 
+const float ClusterStatePositioner::MIN_DELTA_RING = 0.22f;
+const float ClusterStatePositioner::MIN_DELTA_SLOT = 0.22f;
 
 class NodeClusterStatePositioner: public ClusterStatePositioner
 {

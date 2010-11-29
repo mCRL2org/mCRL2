@@ -102,8 +102,10 @@ class RNode
   protected:
     Rectangle bounding_box;
 
-    static const float MIN_BB_SIDE_LENGTH = 0.001f;
+    static const float MIN_BB_SIDE_LENGTH;
 };
+
+const float RNode::MIN_BB_SIDE_LENGTH = 0.001f;
 
 bool lessThanCenterX(RNode* a, RNode* b)
 {
