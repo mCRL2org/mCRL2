@@ -66,7 +66,7 @@ namespace mcrl2
         expl_strat(es_breadth),
         bithashing(false),
         bithashsize(DEFAULT_BITHASHSIZE),
-        todo_max((std::numeric_limits< unsigned long >::max)()),
+        todo_max((std::numeric_limits< size_t >::max)()),
         initial_table_size(DEFAULT_INIT_TSIZE)
       {
         generate_filename_for_trace = boost::bind(&lts_generation_options::generate_trace_file_name, this, _1, _2, _3);
@@ -91,20 +91,20 @@ namespace mcrl2
       mcrl2::lts::lts_type outformat;
       bool outinfo;
       bool suppress_progress_messages;
-      unsigned long max_states;
+      size_t max_states;
       std::string priority_action;
       bool trace;
       atermpp::set < mcrl2::core::identifier_string > trace_actions;
-      unsigned long max_traces;
+      size_t max_traces;
       bool detect_deadlock;
       bool detect_divergence;
       bool detect_action;
       bool save_error_trace;
       exploration_strategy expl_strat;
       bool bithashing;
-      unsigned long bithashsize;
-      unsigned long todo_max;
-      unsigned long initial_table_size;
+      size_t bithashsize;
+      size_t todo_max;
+      size_t initial_table_size;
       std::auto_ptr< mcrl2::data::rewriter > m_rewriter;
       std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > > m_enumerator_factory;
       mcrl2::lps::specification specification;
@@ -128,17 +128,17 @@ namespace mcrl2
         atermpp::indexed_set states;
         lps2lts_lts lts;
 
-        unsigned long num_states;
-        unsigned long trans;
-        unsigned long level;
-        unsigned long num_found_same;
-        unsigned long current_state;
-        unsigned long initial_state;
+        size_t num_states;
+        size_t trans;
+        size_t level;
+        size_t num_found_same;
+        size_t current_state;
+        size_t initial_state;
 
         atermpp::map<atermpp::aterm,atermpp::aterm> backpointers;
         bit_hash_table bithash_table;
 
-        unsigned long tracecnt;
+        size_t tracecnt;
 
         bool lg_error;
 
@@ -205,8 +205,8 @@ namespace mcrl2
         void save_error_trace(const state_t state);
         void check_deadlocktrace(const state_t state);
     
-        unsigned long add_state(const state_t state, bool &is_new);
-        unsigned long state_index(const state_t state);
+        size_t add_state(const state_t state, bool &is_new);
+        size_t state_index(const state_t state);
     
         // Main routine
         bool add_transition(const state_t from, ATermAppl action, const state_t to);
