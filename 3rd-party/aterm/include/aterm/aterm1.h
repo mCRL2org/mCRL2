@@ -50,8 +50,8 @@
  *
  * \section index Start with the following functions
  *    - ATinit() should be called from your main() function
- *    - ATmake() to construct terms
- *    - ATmatch() to deconstruct terms
+ *    - ATmake() to construct terms.  Now deprecated and removed.
+ *    - ATmatch() to deconstruct terms. Deprecated and removed.
  *    - ATwarning() to print terms to stderr (for debugging)
  *    - ATprotect() to protect global variable from the garbage collector
  *    - ATreadFromNamedFile to read terms from disk
@@ -87,114 +87,9 @@ extern "C"
 /* #define AT_BLOB         6L / **< type of a binary large object */
 #define AT_SYMBOL       7L /**< internally used type*/
 
-/* ATerm  ATsetAnnotation(ATerm t, ATerm label, ATerm anno);
-ATerm  ATgetAnnotation(ATerm t, ATerm label);
-ATerm  ATremoveAnnotation(ATerm t, ATerm label);
-*/
 
-/**
- * Create any kind of ATerms. First provide an ATerm pattern in a string
- * format, then provide a list of terms to fill the placeholders in the
- * format. 
- *
- * The following placeholders are allowed:
- *    - <int>  : expect an integer value (type int)
- *    - <real> : expect a real value (type double)
- *    - <term> : expect any ATerm 
- *    - <list> : expect a list ATerm 
- *    - <appl(...)> : expect an AFun and some arguments (first a char* for the name, then as many arguments as there are children of the appl() pattern 
- *    - <blob> : expect a blob (first an int to denote the length, then a void* pointing to the data.
- *
- * Example usages:
- *  \code
- *  ATerm left = ATparse("t");
- *  ATerm right = ATparse("t");
- *  ATmake("<int>", 1);
- *  ATmake("<real>", 0.1);
- *  ATmake("and(<term>,<term>)", left, right);
- *  ATmake("and(or(true,<term>))", right);
- *  ATmake("<appl(<int>,<int>)>", "add", 0, 1);
- *  \endcode
- */
-/* ATerm ATmake(const char *pattern, ...); 
-*/
-
-
-/**
- * Analyze any kind of ATerms by matching it against a pattern. ATmatch() 
- * is the dual of ATmake(). The same pattern language is used. For every
- * placeholder in the pattern, a pointer to a variable that can hold the
- * matched value is expected in the remaining argument list.
- *
- * \arg t the term to match against the |pattern|
- * \arg pattern the pattern to use for matching the term |t|
- * \returns ATtrue if the pattern matches the term, or ATfalse otherwise.
- *
- * Example usages:
- *  \code
- *  int i;
- *  double d;
- *  ATerm left;
- *  ATerm right;
- *  ATmatch(t, "<int>", &i);
- *  ATmatch(t, "<real>", &d);
- *  ATmatch(t, "and(<term>,<term>)", &left, &right);
- *  \endcode
- */
-/* ATbool ATmatch(ATerm t, const char *pattern, ...); */
-
-/**
- * A more efficient form of ATmake(). The pattern is now a pre-constructed
- * ATerm, which is faster since there is no pattern string to parse first.
- */
-/* ATerm ATmakeTerm(ATerm pat, ...);
-*/
-
-/**
- * A more efficient form of ATmatch(). The pattern is now a pre-constructed
- * ATerm, which is faster since there is no pattern string to parse first.
- */
-/* ATbool ATmatchTerm(ATerm t, ATerm pat, ...);
-*/
-
-/** \todo internal function? */
-/* ATerm ATvmake(const char *pat); */
-
-/** \todo internal function? */
-/* ATerm ATvmakeTerm(ATerm pat); */
-
-/** \todo internal function? */
-/* void  AT_vmakeSetArgs(va_list *args); */
-
-/** \todo internal function? */
-/* ATbool ATvmatch(ATerm t, const char *pat); */
-
-/** \todo internal function? */
-/* ATbool ATvmatchTerm(ATerm t, ATerm pat); */
-
-/** \todo does this variability belong in the level 1 interface? */
-extern ATbool AT_isEqual(ATerm t1, ATerm t2);
-extern ATbool AT_isDeepEqual(ATerm t1, ATerm t2);
-#if defined(SEMI_DEEP_EQUALITY)
-#define ATisEqual(t1,t2) (AT_isEqual((ATerm)(t1), (ATerm)(t2)))
-#elif defined(DEEP_EQUALITY)
-#define ATisEqual(t1,t2) (AT_isDeepEqual((ATerm)(t1), (ATerm)(t2)))
-#else
-/**
- * Decide whether two ATerms are equal. This test can be done
- * in constant time, due to maximal subterm sharing.
- */
 #define ATisEqual(t1,t2) ((ATbool)((ATerm)(t1) == (ATerm)(t2)))
-#endif
 #define ATisEqualAFun(f1, f2) ((f1) == (f2))
-
-/**
- * Decide whether two terms are equal, ignoring any possible annotations
- * hidden anywhere on any subterm. This operation is in O(n) where n
- * is the amount of subterms.
- */
-/* ATbool ATisEqualModuloAnnotations(ATerm t1, ATerm t2);
-*/
 
 /**
  * Serialize a term to file, in readable ATerm format. No sharing is applied
@@ -220,14 +115,6 @@ ATbool ATwriteToBinaryFile(ATerm t, FILE *file);
 ATbool ATwriteToNamedTextFile(ATerm t, const char *name);
 
 /**
- * Call ATwriteToSharedTextFile() after opening a file.
- * \arg t term to write
- * \arg name name of the file. If the name equals "-", stdout is used.
- */
-/* ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name);
-*/
-
-/**
  * Call ATwriteToBinaryFile() after opening a file.
  * \arg t term to write
  * \arg name name of the file. If the name equals "-", stdout is used.
@@ -240,17 +127,6 @@ ATbool ATwriteToNamedBinaryFile(ATerm t, const char *name);
  * \arg t term to write
  */
 char  *ATwriteToString(ATerm t);
-
-/**
- * Serialize an ATerm to a static buffer in shared format. Note that 
- * the buffer is
- * shared between calls to ATwriteToString, and should not be freed.
- * \arg t term to write
- * \arg len result variable that will hold the length of the string
- *
- */
-/* char *ATwriteToSharedString(ATerm t, int *len);
-*/
 
 /**
  * Serialize an ATerm to a static buffer in binary format. Note that 
@@ -401,16 +277,12 @@ void ATmarkArray(ATerm *start, int size);
 #define ATprotectTerm(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectList(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectAppl(p) ATprotect((ATerm *)(void *)(p))
-/* #define ATprotectPlaceholder(p) ATprotect((ATerm *)(void *)(p)) */
 #define ATprotectInt(p) ATprotect((ATerm *)(void *)(p))
-/* #define ATprotectReal(p) ATprotect((ATerm *)(void *)(p)) */
 
 #define ATunprotectTerm(p) ATunprotect((ATerm *)(void *)(p))
 #define ATunprotectList(p) ATunprotect((ATerm *)(void *)(p))
 #define ATunprotectAppl(p) ATunprotect((ATerm *)(void *)(p))
-/* #define ATunprotectPlaceholder(p) ATunprotect((ATerm *)(void *)(p)) */
 #define ATunprotectInt(p) ATunprotect((ATerm *)(void *)(p))
-/* #define ATunprotectReal(p) ATunprotect((ATerm *)(void *)(p)) */
 
 /** 
  * Initialize the ATerm library. It is essential to call this function in the 
@@ -428,7 +300,8 @@ void ATinit(int argc, char *argv[], ATerm *bottomOfStack);
 /**
  * \todo I don't know this function.
  */
-void ATinitialize(int argc, char *argv[]);
+/* void ATinitialize(int argc, char *argv[]);
+*/
 
 /**
  * Check whether the ATerm library has been initialized.
