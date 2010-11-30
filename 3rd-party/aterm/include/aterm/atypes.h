@@ -6,6 +6,7 @@
 #else
 #include <inttypes.h>
 #endif
+#include "stddef.h"
 #include "abool.h"
 
 #ifndef AT_64BIT
@@ -23,17 +24,18 @@ extern "C"
 #endif/* __cplusplus */
 
 typedef size_t ShortHashNumber;
-
-/* #ifdef AT_64BIT
-typedef int64_t MachineWord;
-typedef uint64_t HashNumber;
-#else
-typedef long MachineWord;
-typedef unsigned long HashNumber;
-#endif */
-
 typedef size_t MachineWord;
 typedef size_t HashNumber;
+
+/* The largest size_t is used as an indicator that an element does not exist.
+ *    This is used as a replacement of a negative number as an indicator of non
+ *       existence */
+
+#define NON_EXISTING (size_t)(-1)
+
+#if defined(_MSC_VER) || defined(WIN32) || defined(WIN64)
+#define strdup _strdup
+#endif
 
 #ifdef AT_64BIT
 #define ADDR_TO_SHORT_HNR(a) ((ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^ (((MachineWord)(a)) >> 34)))

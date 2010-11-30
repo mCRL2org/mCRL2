@@ -19,9 +19,9 @@
 
 struct Entry{
 	void *key;
-	unsigned int hash;
+	size_t hash;
 	
-	unsigned int value;
+	size_t value;
 	
 	Entry *next;
 };
@@ -135,7 +135,7 @@ inline static void releaseEntry(EntryCache entryCache, Entry *entry){
  * (we don't want too many stuff ending up in the same bucket). This is nessecary because we use a 'order of 2' 
  * instead of a prime number for the table size.
  */
-static unsigned int supplementalHash(unsigned int h){
+static size_t supplementalHash(size_t h){
 	return ((h << 7) - h + (h >> 9) + (h >> 17));
 }
 
@@ -146,12 +146,12 @@ static unsigned int supplementalHash(unsigned int h){
 static void ensureTableCapacity(IDMappings idMappings){
 	Entry **oldTable = idMappings->table;
 	
-	unsigned int currentTableSize = idMappings->tableSize;
+	size_t currentTableSize = idMappings->tableSize;
 	if(idMappings->load >= idMappings->threshold){
-		unsigned int hashMask;
-		int i = currentTableSize - 1;
+		size_t hashMask;
+		size_t i = currentTableSize - 1;
 		
-		unsigned int newTableSize = currentTableSize << 1;
+		size_t newTableSize = currentTableSize << 1;
 		Entry **table = (Entry**) calloc(newTableSize, sizeof(Entry*));
 		if(table == NULL){
 			printf("The idMapping was unable to allocate memory for extending the entry table.\n");
@@ -167,7 +167,7 @@ static void ensureTableCapacity(IDMappings idMappings){
 		do{
 			Entry *e = oldTable[i];
 			while(e != NULL){
-				unsigned int bucketPos = e->hash & hashMask;
+				size_t bucketPos = e->hash & hashMask;
 				
 				Entry *currentEntry = table[bucketPos];
 				
@@ -181,7 +181,7 @@ static void ensureTableCapacity(IDMappings idMappings){
 				e = nextEntry;
 			}
 			i--;
-		}while(i >= 0);
+		}while(i!=NON_EXISTING);
 		
 		free(oldTable);
 	}
@@ -210,6 +210,7 @@ IDMappings IMcreateIDMappings(unsigned int loadPercentage)
 	}
 	idMappings->tableSize = tableSize;
 	
+        assert(tableSize!=0);
 	idMappings->hashMask = tableSize - 1;
 	idMappings->threshold = (tableSize * loadPercentage)/100;
 	
@@ -223,12 +224,12 @@ IDMappings IMcreateIDMappings(unsigned int loadPercentage)
  * If an entry with the same key is already present in the table the ID of that entry will be replaced and returned by this function so the 'exception' can be handled by the caller;
  * otherwise -1 will be returned.
  */
-int IMmakeIDMapping(IDMappings idMappings, void *key, unsigned int h, int value){
-	unsigned int bucketPos;
+size_t IMmakeIDMapping(IDMappings idMappings, void *key, size_t h, size_t value){
+	size_t bucketPos;
 	Entry **table;
 	Entry *currentEntry, *entry;
 	
-	unsigned int hash = supplementalHash(h);
+	size_t hash = supplementalHash(h);
 	
 	ensureTableCapacity(idMappings);
 	
@@ -240,7 +241,7 @@ int IMmakeIDMapping(IDMappings idMappings, void *key, unsigned int h, int value)
 	while(entry != NULL){
 		/* If the key is already present just replace the ID. */
 		if(entry->key == key){
-			unsigned int oldValue = entry->value;
+			size_t oldValue = entry->value;
 			
 			entry->value = value;
 			
@@ -260,33 +261,33 @@ int IMmakeIDMapping(IDMappings idMappings, void *key, unsigned int h, int value)
 	table[bucketPos] = entry;
 	idMappings->load++;
 	
-	return -1;
+	return NON_EXISTING;
 }
 
 /**
  * Retrieves an ID from the table that matches the given key and hashcode.
  * If no matching entry can be found -1 will be returned.
  */
-int IMgetID(IDMappings idMappings, void *key, unsigned int h){
-	unsigned int hash = supplementalHash(h);
+size_t IMgetID(IDMappings idMappings, void *key, size_t h){
+	size_t hash = supplementalHash(h);
 	
-	unsigned int bucketPos = hash & idMappings->hashMask;
+	size_t bucketPos = hash & idMappings->hashMask;
 	Entry *entry = idMappings->table[bucketPos];
 	while(entry != NULL && entry->key != key){
 		entry = entry->next;
 	}
 	
-	if(entry == NULL) return -1;
+	if(entry == NULL) return NON_EXISTING;
 	return entry->value;
 }
 
 /**
  * Removes the entry associated with the given key and hashcode from the table.
  */
-void IMremoveIDMapping(IDMappings idMappings, void *key, unsigned int h){
-	unsigned int hash = supplementalHash(h);
+void IMremoveIDMapping(IDMappings idMappings, void *key, size_t h){
+	size_t hash = supplementalHash(h);
 	
-	unsigned int bucketPos = hash & idMappings->hashMask;
+	size_t bucketPos = hash & idMappings->hashMask;
 	Entry **table = idMappings->table;
 	Entry *entry = table[bucketPos];
 	

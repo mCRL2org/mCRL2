@@ -356,7 +356,7 @@ void AT_initMemory(unsigned int argc, char *argv[])
 
   hashtable = (ATerm *)AT_calloc(table_size, sizeof(ATerm ));
   if(!hashtable) {
-    ATerror("AT_initMemory: cannot allocate term table of size %d\n", 
+    ATerror("AT_initMemory: cannot allocate term table of size %lu\n", 
             table_size);
   }
 

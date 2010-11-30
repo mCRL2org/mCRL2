@@ -23,7 +23,6 @@ extern "C"
 /* The largest size_t is used as an indicator that an element does not exist.
    This is used as a replacement of a negative number as an indicator of non
    existence */
-#define NON_EXISTING (size_t)(-1)
 
 
 /**

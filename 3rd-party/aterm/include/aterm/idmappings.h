@@ -6,15 +6,17 @@ extern "C"
 {
 #endif /* __cplusplus */
 
+#include "atypes.h"
+
 struct Entry;
 typedef struct Entry Entry;
 
 typedef struct _EntryCache{
 	Entry **blocks;
-	unsigned int nrOfBlocks;
+	size_t nrOfBlocks;
 	
 	Entry *nextEntry;
-	unsigned int spaceLeft;
+	size_t spaceLeft;
 	
 	Entry *freeList;
 } *EntryCache;
@@ -23,20 +25,20 @@ typedef struct _IDMappings{
 	EntryCache entryCache;
 	
 	Entry **table;
-	unsigned int tableSize;
-	unsigned int hashMask;
+	size_t tableSize;
+	size_t hashMask;
 	
 	unsigned int load;
-	unsigned int threshold;
+	size_t threshold;
 } *IDMappings;
 
 IDMappings IMcreateIDMappings(unsigned int loadPercentage);
 
-int IMmakeIDMapping(IDMappings idMappings, void *key, unsigned int h, int value);
+size_t IMmakeIDMapping(IDMappings idMappings, void *key, size_t h, size_t value);
 
-int IMgetID(IDMappings idMappings, void *key, unsigned int h);
+size_t IMgetID(IDMappings idMappings, void *key, size_t h);
 
-void IMremoveIDMapping(IDMappings idMappings, void *key, unsigned int h);
+void IMremoveIDMapping(IDMappings idMappings, void *key, size_t h);
 
 unsigned int IMgetSize(IDMappings idMappings);
 

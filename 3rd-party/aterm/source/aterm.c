@@ -15,7 +15,7 @@
 #include "memory.h"
 #include "afun.h"
 #include "list.h"
-#include "make.h"
+/* #include "make.h" */
 #include "gc.h"
 #include "util.h"
 #include "bafio.h"
@@ -23,7 +23,7 @@
 #include "atypes.h"
 #include "tafio.h"
 #include "safio.h" 
-#include "md5.h"
+/* #include "md5.h" */
 
 /*}}}  */
 /*{{{  defines */
@@ -714,15 +714,6 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	switch (ATgetType(t))
 	{
 	  case AT_INT:
-/*	  case AT_REAL: */
-/*	  case AT_BLOB:
-	    ATwriteToTextFile(t, stream);
-	    break; */
-
-/*	  case AT_PLACEHOLDER:
-	    fprintf(stream, "<...>");
-	    break;
-*/
 	  case AT_LIST:
 	    fprintf(stream, "[...(%lu)]", ATgetLength((ATermList) t));
 	    break;
@@ -730,15 +721,12 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	  case AT_APPL:
 	    if (AT_isValidSymbol(ATgetAFun(t))) {
 	      AT_printSymbol(ATgetAFun(t), stream);
-	      fprintf(stream, "(...(%d))",
+	      fprintf(stream, "(...(%lu))",
 		      GET_ARITY(t->header));
 	    } else {
-	      fprintf(stream, "<sym>(...(%d))",
+	      fprintf(stream, "<sym>(...(%lu))",
 		      GET_ARITY(t->header));
 	    }
-	    /* if (HAS_ANNO(t->header)) {
-	      fprintf(stream, "{}");
-	    } */
 	    break;
 	  case AT_FREE:
 	    fprintf(stream, "@");
@@ -749,17 +737,6 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	}
 	break;
 
-      /* case 'h':
-	{
-	  unsigned char *digest = ATchecksum(va_arg(args, ATerm));
-	  int i;
-	  for (i=0; i<16; i++) {
-	    fprintf(stream, "%02x", digest[i]);
-	  }
-	}
-	break;
-
-      */
       default:
 	fputc(*p, stream);
 	break;
@@ -809,9 +786,6 @@ writeToTextFile(ATerm t, FILE * f)
     case AT_INT:
       fprintf(f, "%d", ATgetInt(t));
       break;
-  /*  case AT_REAL:
-      fprintf(f, "%.15e", ATgetReal(t));
-      break; */
     case AT_APPL:
       /*{{{  Print application */
 
@@ -851,27 +825,6 @@ writeToTextFile(ATerm t, FILE * f)
 
       /*}}}  */
       break;
-/*    case AT_PLACEHOLDER:
-      / *{{{  Print placeholder * /
-
-      fputc('<', f);
-      ATwriteToTextFile(ATgetPlaceholder((ATermPlaceholder) t), f);
-      fputc('>', f);
-
-      / *}}}  * /
-      break; */
- /*    case AT_BLOB:
-      / *{{{  Print blob * /
-
-      blob = (ATermBlob) t;
-      size = ATgetBlobSize(blob);
-      fprintf(f, "\"%c%-.*d%c", STRING_MARK, LENSPEC, size, STRING_MARK);
-      fwrite(ATgetBlobData(blob), ATgetBlobSize(blob), 1, f);
-      fputc('"', f);
-
-      / *}}}  * /
-      break;
-*/
     case AT_FREE:
       if(AT_inAnyFreeList(t))
 	ATerror("ATwriteToTextFile: printing free term at %p!\n", t);
@@ -904,13 +857,6 @@ ATwriteToTextFile(ATerm t, FILE * f)
     result = writeToTextFile(t, f);
   }
 
-  /* annos = (ATerm) AT_getAnnotations(t);
-  if (annos) {
-    fputc('{', f);
-    result &= writeToTextFile(annos, f);
-    fputc('}', f);
-  } */
-
   return result;
 }
 
@@ -940,40 +886,6 @@ ATbool ATwriteToNamedTextFile(ATerm t, const char *name)
 
   return result;
 }
-
-/*}}}  */
-/*{{{  ATerm ATwriteToNamedSharedTextFile(char *name) */
-
-/**
- * Write an ATerm to a named plaintext file
- */
-
-/* ATbool ATwriteToNamedSharedTextFile(ATerm t, const char *name)
-{  
-  FILE  *f;
-  ATbool result;
-
-  if(!strcmp(name, "-")) {
-    return ATwriteToSharedTextFile(t, stdout);
-  }
-
-  if(!(f = fopen(name, "wb"))) {
-    return ATfalse;
-  }
-
-  result = ATwriteToSharedTextFile(t, f);
-  fclose(f);
-
-  return result;
-} */
-
-/*}}}  */
-
-/*{{{  char *ATwriteToString(ATerm t) */
-
-/**
- * Write a term to a string buffer.
- */
 
 /*{{{  static int symbolTextSize(Symbol sym) */
 
@@ -1072,12 +984,9 @@ static char    *topWriteToString(ATerm t, char *buf);
 static char *
 writeToString(ATerm t, char *buf)
 {
-  /* ATerm trm; */
   ATermList list;
   ATermAppl appl;
-  /* ATermBlob blob; */
   AFun sym;
-  /* size_t i, size, arity; */
   size_t i, arity;
   char *name;
 
@@ -1091,15 +1000,6 @@ writeToString(ATerm t, char *buf)
 
       /*}}}  */
       break;
-
- /*   case AT_REAL:
-      / *{{{  write real * /
-
-      sprintf(buf, "%.15e", ATgetReal((ATermReal) t));
-      buf += strlen(buf);
-
-      / *}}}  * /
-      break; */
 
     case AT_APPL:
       /*{{{  write appl */
@@ -1143,31 +1043,6 @@ writeToString(ATerm t, char *buf)
       /*}}}  */
       break;
 
-/*    case AT_PLACEHOLDER:
-      / *{{{  write placeholder * /
-
-      trm = ATgetPlaceholder((ATermPlaceholder) t);
-      buf = topWriteToString(trm, buf);
-
-      / *}}}  * /
-      break;
-*/
-/*    case AT_BLOB:
-      / *{{{  write blob * /
-
-      blob = (ATermBlob) t;
-      size = ATgetBlobSize(blob);
-      sprintf(buf, "\"%c%-.*d%c", STRING_MARK, LENSPEC, size, STRING_MARK);
-      buf += 1 + 2 + LENSPEC;
-
-      memcpy(buf, ATgetBlobData(blob), size);
-      buf += size;
-
-      *buf++ = '"';
-
-      / *}}}  * /
-      break;
-*/
   }
   return buf;
 }
@@ -1175,25 +1050,14 @@ writeToString(ATerm t, char *buf)
 static char    *
 topWriteToString(ATerm t, char *buf)
 {
-  /* ATerm annos = AT_getAnnotations(t); */
 
   if (ATgetType(t) == AT_LIST) {
     *buf++ = '[';
     buf = writeToString(t, buf);
     *buf++ = ']';
-/*  } else if (ATgetType(t) == AT_PLACEHOLDER) {
-    *buf++ = '<';
-    buf = writeToString(t, buf);
-    *buf++ = '>';  */
   } else {
     buf = writeToString(t, buf);
   }
-
-  /* if (annos) {
-    *buf++ = '{';
-    buf = writeToString(annos, buf);
-    *buf++ = '}';
-  } */
 
   return buf;
 }
@@ -1224,11 +1088,6 @@ static size_t textSize(ATerm t)
       sprintf(numbuf, "%d", ATgetInt((ATermInt) t));
       size = strlen(numbuf);
       break;
-
-  /*  case AT_REAL:
-      sprintf(numbuf, "%.15e", ATgetReal((ATermReal) t));
-      size = strlen(numbuf);
-      break; */
 
     case AT_APPL:
       appl = (ATermAppl) t;
@@ -1265,15 +1124,6 @@ static size_t textSize(ATerm t)
       }
       break;
 
-/*    case AT_PLACEHOLDER:
-      trm = ATgetPlaceholder((ATermPlaceholder) t);
-      size = topTextSize(trm);
-      break;
-
-    case AT_BLOB:
-      size =  LENSPEC + 4 + ATgetBlobSize((ATermBlob) t);
-      break;
-*/
     default:
       ATerror("textSize: Illegal type %d\n", ATgetType(t));
       return -1;
@@ -1292,11 +1142,6 @@ topTextSize(ATerm t)
   if (ATgetType(t) == AT_LIST /* || ATgetType(t) == AT_PLACEHOLDER */ ) {
     size += 2; /* For markers on both sides of the term */
   }
-
-  /* if (annos) {
-    size += 2; / * '{' and '}' * /
-    size += textSize(annos);
-  } */
 
   return size;
 }
@@ -1450,45 +1295,6 @@ fparse_terms(int *c, FILE * f)
 
   return ATreverse(list);
 }
-
-/*}}}  */
-/*{{{  static ATerm fparse_blob(int *c, FILE *f) */
-
-/* static ATerm fparse_blob(int *c, FILE *f)
-{
-  char lenspec[LENSPEC+2];
-  size_t len;
-  char *data;
-
-  if (fread(lenspec, 1, LENSPEC+1, f) != LENSPEC+1) {
-    return NULL;
-  }
-
-  if (lenspec[LENSPEC] != ((char)STRING_MARK)) {
-    return NULL;
-  }
-
-  lenspec[LENSPEC] = '\0';
-
-  len = (size_t)strtoul(lenspec, (char**)NULL, 10);
-
-  data = (char *)AT_malloc(len);
-  if (!data) {
-    ATerror("out of memory in fparse_blob\n");
-  }
-  if (fread(data, 1, len, f) != len) {
-    return NULL;
-  }
-
-  fnext_char(c, f);
-  if (*c != '"') {
-    return NULL;
-  }
-
-  fnext_skip_layout(c, f);
-
-  return (ATerm)ATmakeBlob((size_t)len, data);
-} */
 
 /*}}}  */
 /*{{{  static ATermAppl fparse_quoted_appl(int *c, FILE *f) */
@@ -1648,41 +1454,7 @@ fparse_num(int *c, FILE * f)
     *ptr++ = *c;
     fnext_char(c, f);
   }
-  /* if (*c == '.' || toupper(*c) == 'E')
-  {
-    / *{{{  A real number * /
-
-    if (*c == '.')
-    {
-      *ptr++ = *c;
-      fnext_char(c, f);
-      while (isdigit(*c) && ptr < numend)
-      {
-	*ptr++ = *c;
-	fnext_char(c, f);
-      }
-    }
-    if (toupper(*c) == 'E' && ptr < numend)
-    {
-      *ptr++ = *c;
-      fnext_char(c, f);
-      if (*c == '-' || *c == '+')
-      {
-	*ptr++ = *c;
-	fnext_char(c, f);
-      }
-      while (ptr < numend && isdigit(*c))
-      {
-	*ptr++ = *c;
-	fnext_char(c, f);
-      }
-    }
-    *ptr = '\0';
-    return (ATerm) ATmakeReal(atof(num));
-
-    / *}}}  * /
-  }
-  else */
+  
   {
     /*{{{  An integer */
 
@@ -1723,15 +1495,6 @@ fparse_term(int *c, FILE * f)
       }
       fnext_skip_layout(c, f);
       break;
-    /* case '<':
-      fnext_skip_layout(c, f);
-      t = fparse_term(c, f);
-      if (t != NULL && *c == '>')
-      {
-	result = (ATerm) ATmakePlaceholder(t);
-	fnext_skip_layout(c, f);
-      }
-      break;  */
     default:
       if (isalpha(*c) || *c == '(') {
 	result = (ATerm) fparse_unquoted_appl(c, f);
@@ -1746,41 +1509,6 @@ fparse_term(int *c, FILE * f)
 	result = NULL;
       }
   }
-
-  /* if(result != NULL) {
-    fskip_layout(c, f);
-
-    if (*c == '{') {
-      / * Term is annotated * /
-      fnext_skip_layout(c, f);
-      if (*c != '}') {
-	ATerm annos = (ATerm) fparse_terms(c, f);
-	if (annos == NULL || *c != '}')
-	  return NULL;
-	result = AT_setAnnotations(result, annos);
-      }
-      fnext_skip_layout(c, f);
-    }
-    / *{{{  Parse backwards compatible toolbus anomalies */
-
-    /* if (*c == ':') {
-      ATerm type;
-      fnext_skip_layout(c, f);
-      type = fparse_term(c, f);
-      if (type != NULL) {
-	result = ATsetAnnotation(result, ATparse("type"), type);
-      } else {
-	return NULL;
-      }
-    }
-
-    if (*c == '?') {
-      fnext_skip_layout(c, f);
-      result = ATsetAnnotation(result, ATparse("result"), ATparse("true"));
-    } */
-
-    /*}}}  * /
-  } */
 
   return result;
 }
@@ -1939,45 +1667,6 @@ sparse_terms(int *c, char **s)
   return ATreverse(list);
 }
 
-/*}}}  */
-/*{{{  static ATerm sparse_blob(int *c, char **s) */
-
-/* static ATerm sparse_blob(int *c, char **s)
-{
-  char *lenspec;
-  size_t len;
-  char *data;
-  ATermBlob blob;
-
-  lenspec = *s;
-  len = (size_t)strtoul(lenspec, (char**)NULL, 10);
-  if (lenspec[LENSPEC] != (char)STRING_MARK) {
-    return NULL;
-  }
-
-  *s += (LENSPEC+1);
-
-  data = AT_malloc(len);
-  if (!data) {
-    ATerror("out of memory in sparse_blob (%d)\n", len);
-  }
-  memcpy(data, *s, len);
-
-  blob = ATmakeBlob((size_t)len, data);
-
-  *s += len;
-
-  snext_char(c, s);
-  if (*c != '"') {
-    return NULL;
-  }
-
-  snext_char(c, s);
-
-  return (ATerm)blob;
-} */
-
-/*}}}  */
 /*{{{  static ATermAppl sparse_quoted_appl(int *c, char **s) */
 
 /**
@@ -2142,41 +1831,6 @@ sparse_num(int *c, char **s)
     *ptr++ = *c;
     snext_char(c, s);
   }
-  /* if (*c == '.' || toupper(*c) == 'E')
-  {
-    / *{{{  A real number * /
-
-    if (*c == '.')
-    {
-      *ptr++ = *c;
-      snext_char(c, s);
-      while (isdigit(*c))
-      {
-	*ptr++ = *c;
-	snext_char(c, s);
-      }
-    }
-    if (toupper(*c) == 'E')
-    {
-      *ptr++ = *c;
-      snext_char(c, s);
-      if (*c == '-' || *c == '+')
-      {
-	*ptr++ = *c;
-	snext_char(c, s);
-      }
-      while (isdigit(*c))
-      {
-	*ptr++ = *c;
-	snext_char(c, s);
-      }
-    }
-    *ptr = '\0';
-    return (ATerm) ATmakeReal(atof(num));
-
-    / *}}}  * /
-  }
-  else */
   {
     /*{{{  An integer */
 
@@ -2218,15 +1872,6 @@ sparse_term(int *c, char **s)
       }
       snext_skip_layout(c, s);
       break;
-    /* case '<':
-      snext_skip_layout(c, s);
-      t = sparse_term(c, s);
-      if (t != NULL && *c == '>')
-      {
-	result = (ATerm) ATmakePlaceholder(t);
-	snext_skip_layout(c, s);
-      }
-      break; */
     default:
       if (isalpha(*c) || *c == '(') {
 	result = (ATerm) sparse_unquoted_appl(c, s);
@@ -2245,42 +1890,8 @@ sparse_term(int *c, char **s)
   if(result != NULL) {
     sskip_layout(c, s);
 
-    /* if (*c == '{') {
-      / *{{{  Parse annotation  * /
-
-      / * Term is annotated * /
-      snext_skip_layout(c, s);
-      if (*c != '}') {
-	ATerm annos = (ATerm) sparse_terms(c, s);
-	if (annos == NULL || *c != '}')
-	  return NULL;
-	result = AT_setAnnotations(result, annos);
-      }
-      snext_skip_layout(c, s);
-
-      / *}}}  */
-    }
-
-    /*{{{  Parse backwards compatible toolbus anomalies */
-
-    /* if (*c == ':') {
-      ATerm type;
-      snext_skip_layout(c, s);
-      type = sparse_term(c, s);
-      if (type != NULL) {
-	result = ATsetAnnotation(result, ATparse("type"), type);
-      } else {
-	return NULL;
-      }
-    }
-
-    if (*c == '?') {
-      snext_skip_layout(c, s);
-      result = ATsetAnnotation(result, ATparse("result"), ATparse("true"));
-    } */
-
-    /*}}}  * /
-  } */
+    /*}}}  */
+  } 
 
   return result;
 }
@@ -2382,13 +1993,8 @@ void AT_markTerm(ATerm t)
 
     SET_MARK(t->header);
     
-    /* if(HAS_ANNO(t->header))
-      *current++ = AT_getAnnotations(t); */
-
     switch (GET_TYPE(t->header)) {
       case AT_INT:
-/*       case AT_REAL: */
-/*       case AT_BLOB: */
 	break;
 
       case AT_APPL:
@@ -2400,16 +2006,6 @@ void AT_markTerm(ATerm t)
         } else {
           continue;
         }
-            /*
-        {
-          SymEntry tmpTerm;
-          tmpTerm = at_lookup_table[(sym)];
-          printf("sym = %d\n",sym);
-          printf("tmpTerm = %x\n",(void*)tmpTerm);
-          printf("tmpTerm->header = %x\n",tmpTerm->header);
-          tmpTerm->header |= MASK_MARK;
-        }
-            */
 	arity = GET_ARITY(t->header);
 	if (arity > MAX_INLINE_ARITY) {
 	  arity = ATgetArity(sym);
@@ -2509,8 +2105,6 @@ void AT_markTerm_young(ATerm t)
 
     switch (GET_TYPE(t->header)) {
       case AT_INT:
-  /*    case AT_REAL:  */
-  /*    case AT_BLOB: */
 	break;
 
       case AT_APPL:
@@ -2540,9 +2134,6 @@ void AT_markTerm_young(ATerm t)
 	}
 	break;
 
-      /* case AT_PLACEHOLDER:
-	*current++ = ATgetPlaceholder((ATermPlaceholder) t);
-	break; */
     }
   }
 #ifdef WITH_STATS
@@ -2607,8 +2198,6 @@ AT_unmarkTerm(ATerm t)
 
     switch (GET_TYPE(t->header)) {
       case AT_INT:
- /*     case AT_REAL: */
- /*     case AT_BLOB: */
 	break;
 
       case AT_APPL:
@@ -2628,9 +2217,6 @@ AT_unmarkTerm(ATerm t)
 	}
 	break;
 
-      /* case AT_PLACEHOLDER:
-	*current++ = ATgetPlaceholder((ATermPlaceholder) t);
-	break;  */
     }
   }
 }
@@ -2645,13 +2231,7 @@ void AT_unmarkIfAllMarked(ATerm t)
     CLR_MARK(t->header);
     switch(ATgetType(t)) {
       case AT_INT:
- /*     case AT_REAL: */
- /*     case AT_BLOB: */
 	break;
-
-      /* case AT_PLACEHOLDER:
-	AT_unmarkIfAllMarked(ATgetPlaceholder((ATermPlaceholder)t));
-	break; */
 
       case AT_LIST:
 	{
@@ -2686,13 +2266,6 @@ void AT_unmarkIfAllMarked(ATerm t)
 	break;
     }		
 
-    /* if(HAS_ANNO(t->header)) {
-      / *ATfprintf(stderr, "* unmarking annos of %t\n", t);* /
-      AT_unmarkIfAllMarked(AT_getAnnotations(t));
-    } */
-  }
-  else {
-    /*ATfprintf(stderr, "* already unmarked %t\n", t);*/
   }
 }
 
@@ -2750,15 +2323,6 @@ calcCoreSize(ATerm t)
       size = sizeof(struct __ATermInt);
       break;
 
-/*    case AT_REAL:
-      size = sizeof(struct __ATermReal);
-      break;
-*/
-/*    case AT_BLOB:
-      size = sizeof(struct __ATermBlob);
-      break;
-*/
-
     case AT_APPL:
       sym = ATgetSymbol((ATermAppl) t);
       arity = ATgetArity(sym);
@@ -2781,14 +2345,7 @@ calcCoreSize(ATerm t)
       }
       break;
 
-    /* case AT_PLACEHOLDER:
-      size = sizeof(struct __ATermPlaceholder);
-      size += calcCoreSize(ATgetPlaceholder((ATermPlaceholder) t));
-      break; */
   }
-
-  /* if(HAS_ANNO(t->header))
-    size += calcCoreSize(AT_getAnnotations(t)); */
 
   return size;
 }
@@ -2825,11 +2382,6 @@ size_t AT_calcSubterms(ATerm t)
 
   switch (ATgetType(t)) {
     case AT_INT:
-  /*  case AT_REAL: */
-/*    case AT_BLOB: */
-    /* case AT_PLACEHOLDER:
-      nr_subterms = 1;
-      break; */
 
     case AT_APPL:
       nr_subterms = 1;
@@ -2847,10 +2399,6 @@ size_t AT_calcSubterms(ATerm t)
       }
       break;
   }
-
-  /* if(HAS_ANNO(t->header))
-    nr_subterms += AT_calcSubterms(AT_getAnnotations(t));
-  */
 
   return nr_subterms;
 }
@@ -2876,11 +2424,6 @@ calcUniqueSubterms(ATerm t)
 
   switch (ATgetType(t)) {
     case AT_INT:
-/*    case AT_REAL: */
-/*    case AT_BLOB: */
-    /* case AT_PLACEHOLDER:
-      nr_unique = 1;
-      break;  */
 
     case AT_APPL:
       nr_unique = 1;
@@ -2904,10 +2447,6 @@ calcUniqueSubterms(ATerm t)
       break;
   }
 
-  /* if(HAS_ANNO(t->header))
-    nr_unique += calcUniqueSubterms(AT_getAnnotations(t));
-  */
-
   SET_MARK(t->header);
 
   return nr_unique;
@@ -2926,14 +2465,6 @@ size_t AT_calcUniqueSubterms(ATerm t)
   AT_unmarkIfAllMarked(t);
   return result;
 }
-
-/*}}}  */
-/*{{{  size_t ATcalcUniqueSubterms(ATerm t) */
-
-/* size_t ATcalcUniqueSubterms(ATerm t)
-{
-  return AT_calcUniqueSubterms(t);
-}*/
 
 /*}}}  */
 
@@ -2958,19 +2489,6 @@ static size_t calcUniqueSymbols(ATerm t)
       if (!at_lookup_table[AS_INT]->count++)
 	nr_unique = 1;
       break;
- /*   case AT_REAL:
-      if (!at_lookup_table[AS_REAL]->count++)
-	nr_unique = 1;
-      break; 
-    case AT_BLOB:
-      if (!at_lookup_table[AS_BLOB]->count++)
-	nr_unique = 1;
-      break; 
-    case AT_PLACEHOLDER:
-      if (!at_lookup_table[AS_PLACEHOLDER]->count++)
-	nr_unique = 1;
-      nr_unique += calcUniqueSymbols(ATgetPlaceholder((ATermPlaceholder)t));
-      break; */
 
     case AT_APPL:
       sym = ATgetSymbol((ATermAppl) t);
@@ -3001,12 +2519,6 @@ static size_t calcUniqueSymbols(ATerm t)
       break;
   }
 
-  /* if(HAS_ANNO(t->header)) {
-    if (!at_lookup_table[AS_ANNOTATION]->count++)
-      nr_unique++;
-    nr_unique += calcUniqueSymbols(AT_getAnnotations(t));
-  } */
-
   SET_MARK(t->header);
 
   return nr_unique;
@@ -3027,15 +2539,6 @@ size_t AT_calcUniqueSymbols(ATerm t)
 
   return result;
 } 
-
-/*}}}  */
-
-/*{{{  int ATcalcUniqueSymbols(ATerm t) */
-
-/* size_t ATcalcUniqueSymbols(ATerm t)
-{
-  return AT_calcUniqueSymbols(t);
-}  */
 
 /*}}}  */
 
@@ -3064,14 +2567,7 @@ void AT_assertUnmarked(ATerm t)
       }
       break;
 
-    /* case AT_PLACEHOLDER:
-      AT_assertUnmarked(ATgetPlaceholder((ATermPlaceholder)t));
-      break; */
   }
-
-  /* if(HAS_ANNO(t->header))
-    AT_assertUnmarked(AT_getAnnotations(t));
-  */
 }
 
 /*}}}  */
@@ -3100,15 +2596,7 @@ void AT_assertMarked(ATerm t)
       }
       break;
 
-    /* case AT_PLACEHOLDER:
-      AT_assertMarked(ATgetPlaceholder((ATermPlaceholder)t));
-      break; */
   }
-
-  /* if(HAS_ANNO(t->header))
-    AT_assertMarked(AT_getAnnotations(t));
-  */
-
 }
 
 /*}}}  */
@@ -3126,15 +2614,9 @@ size_t AT_calcTermDepth(ATerm t)
   ATermAppl appl;
   ATermList list;
 
-  /* if(HAS_ANNO(t->header))
-    maxdepth = AT_calcTermDepth(AT_getAnnotations(t)); */
 
   switch(ATgetType(t)) {
     case AT_INT:
- /*   case AT_REAL: */
- /*   case AT_BLOB:
-      return MAX(1, maxdepth);
-*/
     case AT_APPL:
       appl = (ATermAppl)t;
       arity = ATgetArity(ATgetSymbol(appl));
@@ -3155,10 +2637,6 @@ size_t AT_calcTermDepth(ATerm t)
       }
       return maxdepth+1;
 
-    /* case AT_PLACEHOLDER:
-      return 1+MAX(AT_calcTermDepth(ATgetPlaceholder((ATermPlaceholder)t)),
-		   maxdepth); */
-
     default:
       ATerror("Trying to calculate the depth of a free term.\n");
       return 0;
@@ -3167,150 +2645,6 @@ size_t AT_calcTermDepth(ATerm t)
 
 /*}}}  */
 
-/*{{{  char *ATchecksum(ATerm t) */
-
-/* Calculate checksum using the
-   "RSA Data Security, Inc. MD5 Message-Digest Algorithm" (see RFC1321)
-   */
-
-/* unsigned char *ATchecksum(ATerm t)
-{
-  MD5_CTX context;
-  static unsigned char digest[16];
-  char *buf;
-  int len;
-
-  MD5Init(&context);
-  buf = ATwriteToSharedString(t, &len);
-  MD5Update(&context, buf, len);
-  MD5Final(digest, &context);
-
-  return digest;
-} */
-
-/*}}}  */
-
-/*{{{  static ATermList AT_diffList(ATermList l1, ATermList l2, ATermList *diffs) */
-
-/* static ATermList AT_diffList(ATermList l1, ATermList l2, ATermList *diffs)
-{
-  ATermList result = ATempty;
-  ATerm el1, el2;
-
-  while (!ATisEmpty(l1)) {
-    if (ATisEmpty(l2)) {
-      if (*diffs) {
-	*diffs = ATinsert(*diffs, ATmake("diff(<term>,[])", l1));
-      }
-      return ATreverse(ATinsert(result, ATparse("<diff-lists>")));
-    }
-    el1 = ATgetFirst(l1);
-    el2 = ATgetFirst(l2);
-    result = ATinsert(result, AT_diff(el1, el2, diffs));
-
-    l1 = ATgetNext(l1);
-    l2 = ATgetNext(l2);
-  }
-
-  if (!ATisEmpty(l2)) {
-    if (*diffs) {
-      *diffs = ATinsert(*diffs, ATmake("diff([],<term>)", l2));
-    }
-    return ATreverse(ATinsert(result, ATparse("<diff-lists>")));
-  }
-
-  return ATreverse(result);
-} */
-
-/*}}}  */
-/*{{{  static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs) */
-
-/* static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs) 
-{
-  ATerm diff = NULL;
-
-  if (ATisEqual(t1, t2)) {
-    return t1;
-  }
-
-  if (ATgetType(t1) != ATgetType(t2)) {
-    diff = ATparse("<diff-types>");
-  } else {
-    switch (ATgetType(t1)) {
-      case AT_INT:
-      case AT_REAL:
-      case AT_BLOB:
-	diff = ATparse("<diff-values>");
-	break;
-
-      case AT_PLACEHOLDER:
-	{
-	  ATerm ph1, ph2;
-
-	  ph1 = ATgetPlaceholder((ATermPlaceholder)t1);
-	  ph2 = ATgetPlaceholder((ATermPlaceholder)t2);
-	  return (ATerm)ATmakePlaceholder(AT_diff(ph1, ph2, diffs));
-	}
-	break;
-
-      case AT_APPL:
-	{
-	  ATermAppl appl1, appl2;
-	  AFun afun1, afun2;
-
-	  appl1 = (ATermAppl)t1;
-	  appl2 = (ATermAppl)t2;
-	  afun1 = ATgetAFun(appl1);
-	  afun2 = ATgetAFun(appl2);
-	  if (afun1 == afun2) {
-	    ATermList args1 = ATgetArguments(appl1);
-	    ATermList args2 = ATgetArguments(appl2);
-	    ATermList args = AT_diffList(args1, args2, diffs);
-	    return (ATerm)ATmakeApplList(afun1, args);
-	  } else {
-	    diff = ATparse("<diff-appls>");
-	  }
-	}
-	break;
-
-      case AT_LIST:
-	return (ATerm)AT_diffList((ATermList)t1, (ATermList)t2, diffs);
-    }
-  }
-
-  if (diffs) {
-    *diffs = ATinsert(*diffs, ATmake("diff(<term>,<term>)", t1, t2));
-  }
-
-  return diff;
-} */
-
-/*}}}  */
-
-/*{{{  ATerm ATdiff(ATerm t1, ATerm t2) */
-
-/* ATbool ATdiff(ATerm t1, ATerm t2, ATerm *template, ATerm *diffs)
-{
-  ATerm templ;
-
-  if (diffs) {
-    *diffs = (ATerm)ATempty;
-  }
-
-  templ = AT_diff(t1, t2, (ATermList *)diffs);
-
-  if (template) {
-    *template = templ;
-  }
-
-  if (diffs) {
-    *diffs = (ATerm)ATreverse((ATermList)*diffs);
-  }
-
-  return !ATisEqual(t1, t2);
-} */
-
-/*}}}  */
 
 /*{{{  ATbool AT_isDeepEqual(ATerm t1, ATerm t2) */
 
@@ -3373,35 +2707,9 @@ ATbool AT_isDeepEqual(ATerm t1, ATerm t2)
       result = ((ATgetInt((ATermInt)t1) == ATgetInt((ATermInt)t2)) ? ATtrue : ATfalse);
       break;
 
- /*   case AT_REAL:
-      result = ((ATgetReal((ATermReal)t1) == ATgetReal((ATermReal)t2)) ? ATtrue : ATfalse);
-      break;
-*/
-/*    case AT_BLOB:
-      result = ((ATgetBlobData((ATermBlob)t1) == ATgetBlobData((ATermBlob)t2)) &&
-		(ATgetBlobSize((ATermBlob)t1) == ATgetBlobSize((ATermBlob)t2))) ? ATtrue : ATfalse;
-      break;
-*/
-    /* case AT_PLACEHOLDER:
-      result = AT_isDeepEqual(ATgetPlaceholder((ATermPlaceholder)t1), 
-			      ATgetPlaceholder((ATermPlaceholder)t1));
-      break; */
-
     default:
       ATerror("illegal term type: %d\n", type);
   }
-
-  /* if(result) {
-    if(HAS_ANNO(t1->header)) {
-      if(HAS_ANNO(t2->header)) {
-	result = AT_isDeepEqual(AT_getAnnotations(t1), AT_getAnnotations(t2));
-      } else {
-	result = ATfalse;
-      }
-    } else if(HAS_ANNO(t2->header)) {
-      result = ATfalse;
-    }
-  } */
 
   return result;
 }
@@ -3465,35 +2773,9 @@ ATbool AT_isEqual(ATerm t1, ATerm t2)
       result = ((ATgetInt((ATermInt)t1) == ATgetInt((ATermInt)t2)) ? ATtrue : ATfalse);
       break;
 
-    /*case AT_REAL:
-      result = ((ATgetReal((ATermReal)t1) == ATgetReal((ATermReal)t2)) ? ATtrue : ATfalse);
-      break; */
-
-/*    case AT_BLOB:
-      result = ((ATgetBlobData((ATermBlob)t1) == ATgetBlobData((ATermBlob)t2)) &&
-		(ATgetBlobSize((ATermBlob)t1) == ATgetBlobSize((ATermBlob)t2))) ? ATtrue : ATfalse;
-      break;
-*/
-    /* case AT_PLACEHOLDER:
-      result = AT_isEqual(ATgetPlaceholder((ATermPlaceholder)t1), 
-			 ATgetPlaceholder((ATermPlaceholder)t1));
-      break; */
-
     default:
       ATerror("illegal term type: %d\n", type);
   }
-
-  /* if(result) {
-    if(HAS_ANNO(t1->header)) {
-      if(HAS_ANNO(t2->header)) {
-	result = AT_isEqual(AT_getAnnotations(t1), AT_getAnnotations(t2));
-      } else {
-	result = ATfalse;
-      }
-    } else if(HAS_ANNO(t2->header)) {
-      result = ATfalse;
-    }
-  } */
 
   return result;
 }
@@ -3560,21 +2842,6 @@ ATbool ATisEqualModuloAnnotations(ATerm t1, ATerm t2)
       result = ((ATgetInt((ATermInt)t1) == ATgetInt((ATermInt)t2)) ? ATtrue : ATfalse);
       break;
 
-/*    case AT_REAL:
-      result = ((ATgetReal((ATermReal)t1) == ATgetReal((ATermReal)t2)) ? ATtrue : ATfalse);
-      break;
-*/
-/*    case AT_BLOB:
-      result = ((ATgetBlobData((ATermBlob)t1) == ATgetBlobData((ATermBlob)t2)) &&
-		(ATgetBlobSize((ATermBlob)t1) == ATgetBlobSize((ATermBlob)t2))) ? ATtrue : ATfalse;
-      break; */
-
-    /* case AT_PLACEHOLDER:
-      result = ATisEqualModuloAnnotations(
-			  ATgetPlaceholder((ATermPlaceholder)t1), 
-			  ATgetPlaceholder((ATermPlaceholder)t1));
-      break; */
-
     default:
       ATerror("illegal term type: %d\n", type);
   }
@@ -3584,76 +2851,6 @@ ATbool ATisEqualModuloAnnotations(ATerm t1, ATerm t2)
 
 /*}}}  */
 
-/*{{{  ATerm ATremoveAllAnnotations(ATerm t) */
-
-/* ATerm ATremoveAllAnnotations(ATerm t)
-{
-  switch(ATgetType(t)) {
-    case AT_INT:
-    case AT_REAL:
-    case AT_BLOB:
-      return AT_removeAnnotations(t);
-
-    case AT_LIST:
-      {
-	if(ATisEmpty((ATermList)t)) {
-	  return AT_removeAnnotations(t);
-	} else {
-	  ATermList l = (ATermList)t;
-	  ATerm     new_head, head = ATgetFirst(l);
-	  ATermList new_tail, tail = ATgetNext(l);
-	  new_head = ATremoveAllAnnotations(head);
-	  new_tail = (ATermList)ATremoveAllAnnotations((ATerm)tail);
-	  if (new_head == head && new_tail == tail) {
-	    return AT_removeAnnotations(t);
-	  }
-	  return (ATerm)ATinsert(new_tail, new_head);
-	}
-      }
-
-    case AT_APPL:
-      {
-	ATermAppl appl = (ATermAppl)t;
-	AFun fun = ATgetAFun(appl);
-	size_t arity = ATgetArity(fun);
-	if (arity <= MAX_INLINE_ARITY) {
-	  ATerm arg, args[MAX_INLINE_ARITY];
-	  size_t i;
-	  ATbool changed = ATfalse;
-	  for (i=0; i<arity; i++) {
-	    arg = ATgetArgument(appl, i);
-	    args[i] = ATremoveAllAnnotations(arg);
-	    if (args[i] != arg) {
-	      changed = ATtrue;
-	    }
-	  }
-	  if (changed) {
-	    return (ATerm)ATmakeApplArray(fun, args);
-	  } else {
-	    return AT_removeAnnotations(t);
-	  }
-	} else {
-	  ATermList args = ATgetArguments(appl);
-	  ATermList new_args = (ATermList)ATremoveAllAnnotations((ATerm)args);
-	  if (args == new_args) {
-	    return AT_removeAnnotations(t);
-	  }
-	  return (ATerm)ATmakeApplList(fun, new_args);
-	}
-      }
-
-    case AT_PLACEHOLDER:
-      {
-	ATermPlaceholder ph = (ATermPlaceholder)t;
-	return (ATerm)ATmakePlaceholder(ATremoveAllAnnotations(ATgetPlaceholder(ph)));
-      }
-
-    default:
-      ATerror("illegal term type: %d\n", ATgetType(t));
-      return NULL;
-  }
-} */
-/*}}}  */
 
 /*{{{  static int AT_compareArguments(ATermAppl t1, ATermAppl t2)  */
 
@@ -3732,24 +2929,6 @@ static int AT_compareInts(ATermInt t1, ATermInt t2)
 }
 
 /*}}}  */
-/*{{{  static int AT_compareReals(ATermReal t1, ATermReal t2)  */
-
-/* static int AT_compareReals(ATermReal t1, ATermReal t2) 
-{
-  double r1;
-  double r2;
-  r1 = ATgetReal(t1);
-  r2 = ATgetReal(t2);
-  if (r1 < r2) {
-    return -1;
-  }
-  else if (r1 > r2) {
-    return 1;
-  }
-  return 0;
-} */
-
-/*}}}  */
 /*{{{  static int AT_compareLists(ATermList t1, ATermList t2)  */
 
 static int AT_compareLists(ATermList t1, ATermList t2) 
@@ -3787,52 +2966,6 @@ static int AT_compareLists(ATermList t1, ATermList t2)
 }
 
 /*}}}  */
-/*{{{  static int AT_comparePlaceholders(ATermPlaceholder t1, ATermPlaceholder t2)  */
-
-/* static int AT_comparePlaceholders(ATermPlaceholder t1, ATermPlaceholder t2) 
-{
-  ATerm type1;
-  ATerm type2;
-  type1 = ATgetPlaceholder(t1);
-  type2 = ATgetPlaceholder(t2);
-  return ATcompare(type1,type2);
-} */
-
-/*}}}  */
-/*{{{  static int AT_compareBlobs(ATermBlob t1, ATermBlob t2)  */
-
-/* static int AT_compareBlobs(ATermBlob t1, ATermBlob t2) 
-{
-  char *data1;
-  char *data2;
-  int size1;
-  int size2;
-  int result = 0;
-  data1 = ATgetBlobData(t1);
-  data2 = ATgetBlobData(t2);
-  size1 = ATgetBlobSize(t1);
-  size2 = ATgetBlobSize(t2);
-
-  if (size1 < size2) {
-    result = memcmp(data1, data2, size1);
-    if (result == 0) {
-      return -1;
-    }
-  }
-  else if (size1 > size2) {
-    result = memcmp(data1, data2, size2);
-    if (result == 0) {
-      return 1;
-    }
-  }
-  else {
-    return memcmp(data1, data2, size1);
-  }
-
-  return result;
-} */
-
-/*}}}  */
 /*{{{  int ATcompare(ATerm t1, ATerm t2) */
 
 int ATcompare(ATerm t1, ATerm t2)
@@ -3862,37 +2995,13 @@ int ATcompare(ATerm t1, ATerm t2)
     case AT_INT:
       result = AT_compareInts((ATermInt) t1, (ATermInt) t2);
       break;
- /*   case AT_REAL:
-      result = AT_compareReals((ATermReal) t1, (ATermReal) t2);
-      break; */
     case AT_LIST:
       result = AT_compareLists((ATermList) t1, (ATermList) t2);
       break;
-    /* case AT_PLACEHOLDER:
-      result = AT_comparePlaceholders((ATermPlaceholder) t1, 
-				    (ATermPlaceholder) t2);
-      break; */
-    /* case AT_BLOB:
-      result = AT_compareBlobs((ATermBlob) t1, (ATermBlob) t2);
-      break; */
     default:
       ATabort("Unknown ATerm type %d\n", type1);
       break;
   }
-
-  /* if (result == 0) {
-    ATerm annos1 = ATgetAnnotations(t1);
-    ATerm annos2 = ATgetAnnotations(t2);
-    if (annos1 && annos2) {
-      return ATcompare(annos1,annos2);
-    }
-    if (annos1) {
-      return 1;
-    }
-    if (annos2) {
-      return -1;
-    }
-  } */
 
   return result;
 }
