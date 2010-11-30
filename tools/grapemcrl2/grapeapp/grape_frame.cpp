@@ -264,6 +264,9 @@ grape_frame::~grape_frame( void )
   delete m_statusbar;
   SetMenuBar(0);
   delete m_menubar;
+#if wxCHECK_VERSION(2, 9, 0)
+        this->PopEventHandler(true); 
+#endif
 }
 
 grape_menubar * grape_frame::get_menubar( void )

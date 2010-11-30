@@ -198,14 +198,16 @@ namespace mcrl2 {
           // Needed for successful termination
           int OnRun() {
             if (m_execute) {
-              if (wxWindow* window = GetTopWindow()) {
+              wxWindow* window = GetTopWindow();
+							if ( window ) {
                 wx_handler* handler = new wx_handler(*this);
 
                 // register fallback event handler
+#if !wxCHECK_VERSION(2, 9, 0)
                 wxEvtHandler* original(window->PopEventHandler());
-
-                window->PushEventHandler(handler);
                 window->PushEventHandler(original);
+#endif
+                window->PushEventHandler(handler);
 
                 handler->Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED,
                    wxCommandEventHandler(wx_handler::on_about), 0, handler);

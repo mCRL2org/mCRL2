@@ -50,7 +50,11 @@ Frame::Frame(
 // ------------
 Frame::~Frame()
 // ------------
-{}
+{
+#if wxCHECK_VERSION(2, 9, 0)
+        this->PopEventHandler(true); 
+#endif
+}
 
 
 // -- set functions ---------------------------------------------

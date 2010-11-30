@@ -182,6 +182,9 @@ END_EVENT_TABLE()
   MainFrame::~MainFrame() {
     // deinitialize the frame manager
     m_mgr.UnInit();
+#if wxCHECK_VERSION(2, 9, 0)
+        this->PopEventHandler(true); 
+#endif
   }
   ;
 

@@ -128,7 +128,11 @@ XSimMain::~XSimMain()
   ATunprotectList(&state_varnames);
         ATunprotect(&current_state);
 
-        delete simulator;
+#if wxCHECK_VERSION(2, 9, 0)
+        this->PopEventHandler(true); 
+#endif
+
+				delete simulator;
 }
 
 void XSimMain::CreateMenu()
