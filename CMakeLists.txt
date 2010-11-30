@@ -114,13 +114,13 @@ endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE} " )
 
+include(CheckCXXCompilerFlag)
 if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
   ##---------------------------------------------------
   ## Set global compiler flags (if available)
   ##---------------------------------------------------
 
-  include(CheckCXXCompilerFlag)
   check_cxx_compiler_flag(-Wall CXX_ACCEPTS_WALL )
   if( CXX_ACCEPTS_WALL )
     add_definitions( -Wall )
