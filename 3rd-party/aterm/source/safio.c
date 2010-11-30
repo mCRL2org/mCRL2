@@ -269,10 +269,10 @@ inline static void writeInt(int value, ByteBuffer byteBuffer){
  * Writes the given double to the byte buffer.
  * The encoding will be done in 'byteenconding.c'.
  */
-inline static void writeDouble(double value, ByteBuffer byteBuffer){
+/* inline static void writeDouble(double value, ByteBuffer byteBuffer){
 	BEserializeDouble(value, byteBuffer->currentPos);
 	byteBuffer->currentPos += 8;
-}
+} */
 
 /**
  * Returns the number of subTerms the given term has.
@@ -283,8 +283,8 @@ inline static unsigned int getNrOfSubTerms(ATerm term){
 		return ATgetArity(ATgetAFun((ATermAppl) term));
 	}else if(type == AT_LIST){
 		return ATgetLength((ATermList) term);
-	}else if(type == AT_PLACEHOLDER){
-		return 1;
+	/* }else if(type == AT_PLACEHOLDER){
+		return 1; */
 	}else{
 		return 0;
 	}
@@ -341,19 +341,24 @@ static ATerm getNextTerm(BinaryWriter binaryWriter){
 		
 		child = &(binaryWriter->stack[++(binaryWriter->stackPosition)]);
 		
-		if(type == AT_APPL){
+		if(type == AT_APPL)
+                {
 			next = ATgetArgument((ATermAppl) term, current->subTermIndex++);
-		}else if(type == AT_LIST){
+		}
+                else if(type == AT_LIST)
+                {
 			ATermList nextList = current->nextPartOfList;
 			next = ATgetFirst(nextList);
 			current->nextPartOfList = ATgetNext(nextList);
 			
 			current->subTermIndex++;
-		}else if(type == AT_PLACEHOLDER){
+		/* }else if(type == AT_PLACEHOLDER){
 			next = ATgetPlaceholder(term);
 			
-			current->subTermIndex++;
-		}else{
+			current->subTermIndex++; */
+		}
+                else
+                {
 			ATerror("Could not find next term. Someone broke the above code.\n");
 		}
 		
@@ -496,22 +501,22 @@ static void visitList(ATermList arg, ByteBuffer byteBuffer){
 /**
  * Serializes the given ATermPlaceholder.
  */
-static void visitPlaceholder(ATermPlaceholder arg, ByteBuffer byteBuffer){
+/* static void visitPlaceholder(ATermPlaceholder arg, ByteBuffer byteBuffer){
 	*(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
 	byteBuffer->currentPos++;
 
-	/* Do nothing, writing the header is enough. */
-}
+	/ * Do nothing, writing the header is enough. * /
+} */
 
 /**
  * Serializes the given ATermReal.
  */
-static void visitReal(ATermReal arg, ByteBuffer byteBuffer){
+/* static void visitReal(ATermReal arg, ByteBuffer byteBuffer){
 	*(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
 	byteBuffer->currentPos++;
 	
 	writeDouble(ATgetReal(arg), byteBuffer);
-}
+} */
 
 /**
  * Constructs a binary writer that is responsible for serializing the given ATerm.
@@ -596,19 +601,19 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 				case AT_INT:
 					visitInt((ATermInt) currentTerm, byteBuffer);
 					break;
-				case AT_REAL:
+				/* case AT_REAL:
 					visitReal((ATermReal) currentTerm, byteBuffer);
-					break;
+					break; */
 				case AT_LIST:
 					visitList((ATermList) currentTerm, byteBuffer);
 					binaryWriter->stack[binaryWriter->stackPosition].nextPartOfList = (ATermList) currentTerm; /* <- for ATermList->next optimizaton. */
 					break;
 				/* case AT_BLOB:
 					visitBlob(binaryWriter, (ATermBlob) currentTerm, byteBuffer);
-					break; */
+					break; 
 				case AT_PLACEHOLDER:
 					visitPlaceholder((ATermPlaceholder) currentTerm, byteBuffer);
-					break;
+					break; */
 				default:
 					ATerror("%d is not a valid term type.\n", type);
 			}
@@ -647,12 +652,12 @@ inline static int readInt(ByteBuffer byteBuffer){
  * Reads a double from the given byte buffer.
  * The decoding will be done in 'byteencoding.c'.
  */
-inline static double readDouble(ByteBuffer byteBuffer){
+/* inline static double readDouble(ByteBuffer byteBuffer){
 	double result = BEdeserializeDouble(byteBuffer->currentPos);
 	byteBuffer->currentPos += 8;
 	
 	return result;
-}
+} */
 
 /**
  * Ensures that there is enough space left on the stack of the binary reader after the invocation of this function.
@@ -754,19 +759,19 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct *parent){
 		constructedTerm = (ATerm) list;
 		
 		/* if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); */
-	}else if(type == AT_PLACEHOLDER){
+	/* }else if(type == AT_PLACEHOLDER){
 		ATerm *subTerms = parent->subTerms;
 		
 		constructedTerm = (ATerm) ATmakePlaceholder(subTerms[0]);
 		
 		releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, 1);
 		
-		/* if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); */
-	}else /* if(parent->hasAnnos){
+		/ * if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); * /
+	}else if(parent->hasAnnos){
 		constructedTerm = ATsetAnnotations(parent->tempTerm, parent->annos);
 		
-		releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, NULL, 1);
-	}else */{
+		releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, NULL, 1); */
+	}else {
 		constructedTerm = NULL; /* This line is purely for shutting up the compiler. */
 		ATerror("Unable to construct term.\n");
 	}
@@ -979,7 +984,7 @@ static void touchInt(BinaryReader binaryReader, ByteBuffer byteBuffer){
 /**
  * Starts the deserialization of an ATermReal.
  */
-static void touchReal(BinaryReader binaryReader, ByteBuffer byteBuffer){
+/* static void touchReal(BinaryReader binaryReader, ByteBuffer byteBuffer){
 	double value = readDouble(byteBuffer);
 	ATerm term = (ATerm) ATmakeReal(value);
 	
@@ -995,7 +1000,7 @@ static void touchReal(BinaryReader binaryReader, ByteBuffer byteBuffer){
 		
 		ac->tempTerm = term;
 	}
-}
+} */
 
 /**
  * Starts the deserialization of an ATermBlob.
@@ -1015,14 +1020,14 @@ static void touchReal(BinaryReader binaryReader, ByteBuffer byteBuffer){
 /**
  * Starts the deserialization of a ATermPlaceholder.
  */
-static void touchPlaceholder(BinaryReader binaryReader){
-	/* A placeholder doesn't have content */
+/* static void touchPlaceholder(BinaryReader binaryReader){
+	/ * A placeholder doesn't have content * /
 	
 	ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
 	ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, 1);
 	
 	ac->nrOfSubTerms = 1;
-}
+} */
 
 /**
  * Continues the deserialization process, who's state is described in the binary reader with the data in the byte buffer.
@@ -1072,15 +1077,15 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer){
 				case AT_INT:
 					touchInt(binaryReader, byteBuffer);
 					break;
-				case AT_REAL:
+/*				case AT_REAL:
 					touchReal(binaryReader, byteBuffer);
 					break;
-	/*			case AT_BLOB:
+				case AT_BLOB:
 					touchBlob(binaryReader, byteBuffer);
-					break;  */
+					break;  
 				case AT_PLACEHOLDER:
 					touchPlaceholder(binaryReader);
-					break;
+					break; */
 				default:
 					ATerror("Unknown type id: %d. Current buffer position: %d\n.", type, (byteBuffer->currentPos - byteBuffer->buffer));
 			}

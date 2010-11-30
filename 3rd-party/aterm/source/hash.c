@@ -42,8 +42,8 @@
 
 /* in the hashtable we use the following constants to
    indicate designated positions */
-#define EMPTY (size_t)-1
-#define DELETED (size_t)-2
+#define EMPTY (size_t)(-1)
+#define DELETED (size_t)(-2)
 
 #define a_prime_number 134217689
 
@@ -116,7 +116,7 @@ static size_t calculateNewSize
 { 
 
   /* Hack: LONG_MAX (limits.h) is often unreliable, we need to find
-   * out the maximum possible value of a signed long dynamically.
+   * out the maximum possible value of a size_t dynamically.
    */
   static size_t st_size_t_max = 0;
 
@@ -472,7 +472,7 @@ size_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
   do {
     v=hashset->hashtable[c];
     if(v == EMPTY) {
-      return (size_t)(-1);
+      return NON_EXISTING;
     }
 
     if(v != DELETED && ATisEqual(elem,tableGet(hashset->keys, v))) {
@@ -482,7 +482,7 @@ size_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
     c = (c+STEP) & hashset->sizeMinus1;
   } while (c != start);
 
-  return (size_t)(-1);
+  return NON_EXISTING;
 }
 
 /*}}}  */
@@ -618,7 +618,7 @@ ATerm ATtableGet(ATermTable table, ATerm key)
   size_t v;
 
   v = ATindexedSetGetIndex(table, key);
-  if(v==(size_t)(-1)) 
+  if(v==NON_EXISTING) 
   {
     return NULL;
   }

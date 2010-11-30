@@ -252,7 +252,7 @@ static void term2seq(ATerm t, ATermList *s, int *var_cnt)
   {
     ATerm store = (ATerm) ATmakeAppl2(afunS,(ATerm) t,dummy);
 
-    if ( ATindexOf(*s,store,0) >= 0 )
+    if ( ATindexOf(*s,store,0) != NON_EXISTING)
     {
       *s = ATinsert(*s, (ATerm) ATmakeAppl3(afunM,(ATerm) t,dummy,dummy));
     } else {
@@ -277,7 +277,7 @@ static void get_used_vars_aux(ATerm t, ATermList *vars)
   {
     if ( gsIsDataVarId((ATermAppl) t) )
     {
-      if ( ATindexOf(*vars,t,0) == -1 )
+      if ( ATindexOf(*vars,t,0) == NON_EXISTING )
       {
         *vars = ATinsert(*vars,t);
       }

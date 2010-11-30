@@ -323,7 +323,7 @@ class specification_basic_type:public boost::noncopyable
     long objectIndex(ATermAppl o)
     { // assert(existsObjectIndex(o) >= 0);
       size_t result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
-      assert(result!=(size_t)(-1)); /* object index must always return the index
+      assert(result!=NON_EXISTING); /* object index must always return the index
                             of an existing object, because at the
                             places where objectIndex is used, no
                             checks take place */

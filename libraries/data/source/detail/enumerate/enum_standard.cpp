@@ -137,7 +137,7 @@ ATermList EnumeratorSolutionsStandard::ss_pop()
 
 bool EnumeratorSolutionsStandard::IsInner3Eq(ATerm a)
 {
-  return ATindexedSetGetIndex(info.eqs,a) != (size_t)(-1);
+  return ATindexedSetGetIndex(info.eqs,a) != NON_EXISTING;
 }
 
 bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
@@ -164,13 +164,13 @@ bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, AT
       ATerm a2 = ATgetFirst(ATgetNext(ATgetNext((ATermList) a)));
       if ( !ATisEqual(a1,a2) )
       {
-        if ( ATisAppl(a1) && gsIsDataVarId((ATermAppl) a1) && (ATindexOf(vars, a1,0) >= 0) && !gsOccurs(a1,a2) )
+        if ( ATisAppl(a1) && gsIsDataVarId((ATermAppl) a1) && (ATindexOf(vars, a1,0) != NON_EXISTING) && !gsOccurs(a1,a2) )
         {
           *v = a1;
           *e = a2;
           return true;
         }
-        if ( ATisAppl(a2) && gsIsDataVarId((ATermAppl) a2) && (ATindexOf(vars, a2,0) >= 0) && !gsOccurs(a2,a1) )
+        if ( ATisAppl(a2) && gsIsDataVarId((ATermAppl) a2) && (ATindexOf(vars, a2,0) != NON_EXISTING) && !gsOccurs(a2,a1) )
         {
           *v = a2;
           *e = a1;
@@ -185,7 +185,7 @@ bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, AT
 
 bool EnumeratorSolutionsStandard::IsInnerCEq(ATermAppl a)
 {
-  return ATindexedSetGetIndex(info.eqs,ATgetArgument(a,0)) !=(size_t)(-1);
+  return ATindexedSetGetIndex(info.eqs,ATgetArgument(a,0)) !=NON_EXISTING;
 }
 
 static struct { ATermList vars; ATerm *v; ATerm *e; } FindInnerCEquality_struct;
@@ -213,13 +213,13 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality_aux(ATerm t)
     ATermAppl a2 = (ATermAppl) ATgetArgument((ATermAppl) t,2);
     if ( !ATisEqual(a1,a2) )
     {
-      if ( gsIsDataVarId(a1) && (ATindexOf(FindInnerCEquality_struct.vars,(ATerm) a1,0) >= 0) && !gsOccurs((ATerm) a1,(ATerm) a2) )
+      if ( gsIsDataVarId(a1) && (ATindexOf(FindInnerCEquality_struct.vars,(ATerm) a1,0) != NON_EXISTING) && !gsOccurs((ATerm) a1,(ATerm) a2) )
       {
         *FindInnerCEquality_struct.v = (ATerm) a1;
         *FindInnerCEquality_struct.e = (ATerm) a2;
         return true;
       }
-      if ( gsIsDataVarId(a2) && (ATindexOf(FindInnerCEquality_struct.vars,(ATerm) a2,0) >= 0) && !gsOccurs((ATerm) a2,(ATerm) a1) )
+      if ( gsIsDataVarId(a2) && (ATindexOf(FindInnerCEquality_struct.vars,(ATerm) a2,0) != NON_EXISTING) && !gsOccurs((ATerm) a2,(ATerm) a1) )
       {
         *FindInnerCEquality_struct.v = (ATerm) a2;
         *FindInnerCEquality_struct.e = (ATerm) a1;

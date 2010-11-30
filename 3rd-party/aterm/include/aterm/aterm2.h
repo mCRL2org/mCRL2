@@ -20,6 +20,10 @@ extern "C"
 {
 #endif/* __cplusplus */
 
+/* The largest size_t is used as an indicator that an element does not exist.
+   This is used as a replacement of a negative number as an indicator of non
+   existence */
+#define NON_EXISTING (size_t)(-1)
 
 
 /**
@@ -30,7 +34,7 @@ struct __ATermInt
 {
   header_type header;
   ATerm       next;
-  MachineWord value; /* Only use lower 32 bits  SJOERD: This screws up negative numbers. Use native int size. */
+  int value; /* Only use lower 32 bits */
 };
 
 typedef union _ATermInt
@@ -96,7 +100,7 @@ struct __ATermBlob
 {
   header_type   header;
   ATerm         next;
-  unsigned long size;
+  size_t size;
   void         *data;
 };
 
@@ -125,9 +129,9 @@ ATermInt ATmakeInt(int value);
 #define ATgetInt(t) ((int)(((ATermInt)t)->aterm.value))
 
 /* The ATermReal type */
-ATermReal ATmakeReal(double value);
+/* ATermReal ATmakeReal(double value); */
 /*double    ATgetReal(ATermReal term);*/
-#define ATgetReal(t) (((ATermReal)t)->aterm.value)
+/* #define ATgetReal(t) (((ATermReal)t)->aterm.value) */
 
 /* The ATermAppl type */
 ATermAppl ATmakeAppl(AFun sym, ...);
@@ -146,9 +150,9 @@ ATermAppl ATmakeAppl6(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
 #define ATgetAFun(appl) GET_SYMBOL((appl)->header)
 #define ATgetSymbol ATgetAFun
 
-/* ATerm     ATgetArgument(ATermAppl appl, unsigned int arg); */
+/* ATerm     ATgetArgument(ATermAppl appl, size_t arg); */
 #define ATgetArgument(appl,idx) (((ATermAppl)appl)->aterm.arg[idx])
-ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n);
+ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n);
 
 /* Portability */
 ATermList ATgetArguments(ATermAppl appl);
@@ -158,7 +162,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[]);
 /* The ATermList type */
 extern ATermList ATempty;
 
-ATermList ATmakeList(unsigned int n, ...);
+ATermList ATmakeList(size_t n, ...);
 
 /* ATermList ATmakeList0(); */
 #define ATmakeList0() (ATempty)
@@ -174,8 +178,8 @@ ATermList ATmakeList1(ATerm el0);
 #define ATmakeList6(el0, el1, el2, el3, el4, el5) \
                 ATinsert(ATmakeList5(el1,el2,el3,el4,el5), el0)
 
-/*unsigned int ATgetLength(ATermList list);*/
-unsigned int ATgetLength(ATermList list);
+/*size_t ATgetLength(ATermList list);*/
+size_t ATgetLength(ATermList list);
 
 /* ATerm ATgetFirst(ATermList list);*/
 #define   ATgetFirst(l) (((ATermList)l)->aterm.head)
@@ -191,18 +195,18 @@ ATermList ATgetTail(ATermList list, int start);
 ATermList ATreplaceTail(ATermList list, ATermList newtail, int start);
 ATermList ATgetPrefix(ATermList list);
 ATerm     ATgetLast(ATermList list);
-ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end);
+ATermList ATgetSlice(ATermList list, size_t start, size_t end);
 ATermList ATinsert(ATermList list, ATerm el);
-ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index);
+ATermList ATinsertAt(ATermList list, ATerm el, size_t index);
 ATermList ATappend(ATermList list, ATerm el);
 ATermList ATconcat(ATermList list1, ATermList list2);
-int       ATindexOf(ATermList list, ATerm el, int start);
-int       ATlastIndexOf(ATermList list, ATerm el, int start);
-ATerm     ATelementAt(ATermList list, unsigned int index);
+size_t    ATindexOf(ATermList list, ATerm el, int start);
+size_t    ATlastIndexOf(ATermList list, ATerm el, int start);
+ATerm     ATelementAt(ATermList list, size_t index);
 ATermList ATremoveElement(ATermList list, ATerm el);
-ATermList ATremoveElementAt(ATermList list, unsigned int idx);
+ATermList ATremoveElementAt(ATermList list, size_t idx);
 ATermList ATremoveAll(ATermList list, ATerm el);
-ATermList ATreplace(ATermList list, ATerm el, unsigned int idx);
+ATermList ATreplace(ATermList list, ATerm el, size_t idx);
 ATermList ATreverse(ATermList list);
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2));
 int       ATcompare(ATerm t1, ATerm t2);
@@ -225,8 +229,8 @@ ATermIndexedSet
            ATindexedSetCreate(size_t initial_size, unsigned int max_load_pct);
 void       ATindexedSetDestroy(ATermIndexedSet set);
 void       ATindexedSetReset(ATermIndexedSet set);
-size_t       ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool *isnew);
-size_t       ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem);
+size_t     ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool *isnew);
+size_t     ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem);
 void       ATindexedSetRemove(ATermIndexedSet set, ATerm elem);
 ATermList  ATindexedSetElements(ATermIndexedSet set);
 ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
@@ -235,12 +239,11 @@ ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
 ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm));
 
 /* The ATermPlaceholder type */
-ATermPlaceholder ATmakePlaceholder(ATerm type);
-/*ATerm            ATgetPlaceholder(ATermPlaceholder ph);*/
-#define ATgetPlaceholder(ph) (((ATermPlaceholder)ph)->aterm.ph_type)
+/* ATermPlaceholder ATmakePlaceholder(ATerm type); */
+/* #define ATgetPlaceholder(ph) (((ATermPlaceholder)ph)->aterm.ph_type) */
 
 /* The ATermBlob type */
-/* ATermBlob ATmakeBlob(unsigned int size, void *data); */
+/* ATermBlob ATmakeBlob(size_t size, void *data); */
 /*void   *ATgetBlobData(ATermBlob blob);*/
 /* #define ATgetBlobData(blob) (((ATermBlob)blob)->aterm.data) */
 
@@ -251,13 +254,13 @@ ATermPlaceholder ATmakePlaceholder(ATerm type);
 /* void    ATunregisterBlobDestructor(ATbool (*destructor)(ATermBlob)); */
 
 
-AFun  ATmakeAFun(const char *name, int arity, ATbool quoted);
+AFun  ATmakeAFun(const char *name, size_t arity, ATbool quoted);
 #define ATmakeSymbol ATmakeAFun
 
 /*char   *ATgetName(AFun sym);*/
 #define ATgetName(sym) (at_lookup_table[(sym)]->name)
 /*int     ATgetArity(AFun sym);*/
-#define ATgetArity(sym) ((unsigned int)GET_LENGTH(at_lookup_table_alias[(sym)]->header))
+#define ATgetArity(sym) ((size_t)GET_LENGTH(at_lookup_table_alias[(sym)]->header))
 /*ATbool  ATisQuoted(AFun sym);*/
 #define ATisQuoted(sym) IS_QUOTED(at_lookup_table_alias[(sym)]->header)
 
@@ -304,8 +307,8 @@ ATbool ATgetChecking(void);
 extern int at_gc_count;
 #define ATgetGCCount()    (at_gc_count)
 
-size_t  ATcalcUniqueSubterms(ATerm t);
-size_t  ATcalcUniqueSymbols(ATerm t);
+/* size_t  ATcalcUniqueSubterms(ATerm t);
+size_t  ATcalcUniqueSymbols(ATerm t); */
 
 size_t  ATcalcTextSize(ATerm t);
 

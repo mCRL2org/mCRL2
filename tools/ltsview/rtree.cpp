@@ -91,7 +91,7 @@ class RNode
     virtual void computeBoundingBox()
     { }
 
-    virtual void deletePoint(const Vector2D& point)
+    virtual void deletePoint(const Vector2D& )
     { }
 
     virtual bool hasChildren() const
@@ -208,7 +208,7 @@ class RTreeLeaf: public RNode
       return false;
     }
 
-    void deletePoint(const Vector2D& p)
+    void deletePoint(const Vector2D& )
     { }
 
     Vector2D point;

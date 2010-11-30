@@ -29,8 +29,8 @@
 #define PLAIN_INT         0
 #define ANNO_INT          (PLAIN_INT | 1)
 
-#define PLAIN_REAL        2
-#define ANNO_REAL         (PLAIN_REAL | 1)
+/* #define PLAIN_REAL        2
+#define ANNO_REAL         (PLAIN_REAL | 1) */
 
 #define PLAIN_LIST        4
 #define ANNO_LIST         (PLAIN_LIST | 1)
@@ -38,8 +38,8 @@
 #define PLAIN_PLAC        6
 #define ANNO_PLAC         (PLAIN_PLAC | 1)
 
-#define PLAIN_BLOB        8
-#define ANNO_BLOB         (PLAIN_BLOB | 1)
+/* #define PLAIN_BLOB        8
+#define ANNO_BLOB         (PLAIN_BLOB | 1) */
 
 #define SYMBOL_OFFSET     10
 
@@ -84,9 +84,9 @@ typedef struct
 typedef struct _sym_entry
 {
   AFun id;
-  int	arity;
+  size_t arity;
 
-  unsigned int nr_terms;
+  size_t nr_terms;
   trm_bucket *terms;
 
   top_symbols *top_symbols; /* top symbols occuring in this symbol */
@@ -105,11 +105,11 @@ typedef struct _sym_entry
 typedef struct
 {
   AFun   sym;
-  int    arity;
-  unsigned int nr_terms;
+  size_t arity;
+  size_t nr_terms;
   int    term_width;
   ATerm *terms;
-  unsigned int   *nr_topsyms;
+  size_t   *nr_topsyms;
   int   *sym_width;
   int  **topsyms;
 } sym_read_entry;
@@ -119,13 +119,13 @@ typedef struct
 
 char bafio_id[] = "$Id: bafio.c 23464 2007-08-27 09:22:35Z eriks $";
 
-static int nr_unique_symbols = -1;
+static size_t nr_unique_symbols = 0;
 static sym_read_entry *read_symbols;
 static sym_entry *sym_entries = NULL;
 static sym_entry *first_topsym = NULL;
 
 static char *text_buffer = NULL;
-static unsigned int text_buffer_size = 0;
+static size_t text_buffer_size = 0;
 
 static unsigned char bit_buffer = '\0';
 static int  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
@@ -162,7 +162,7 @@ AT_getBafVersion(int *major, int *minor)
 
 static
 int
-writeIntToBuf(unsigned int val, unsigned char *buf)
+writeIntToBuf(size_t val, unsigned char *buf)
 {
   if (val < (1 << 7))
     {
@@ -204,11 +204,11 @@ writeIntToBuf(unsigned int val, unsigned char *buf)
 
 /*}}}  */
 
-/*{{{  static int writeBits(unsigned int val, int nr_bits, byte_writer *writer) */
+/*{{{  static int writeBits(size_t val, int nr_bits, byte_writer *writer) */
 
 static
 int
-writeBits(unsigned int val, int nr_bits, byte_writer *writer)
+writeBits(size_t val, int nr_bits, byte_writer *writer)
 {
   int cur_bit;
 
@@ -250,11 +250,11 @@ flushBitsToWriter(byte_writer *writer)
 }
 
 /*}}}  */
-/*{{{  static int readBits(unsigned int *val, int nr_bits, byte_reader *reader) */
+/*{{{  static int readBits(size_t *val, int nr_bits, byte_reader *reader) */
 
 static
 int
-readBits(unsigned int *val, int nr_bits, byte_reader *reader)
+readBits(size_t *val, int nr_bits, byte_reader *reader)
 {
   int cur_bit, mask = 1;
 
@@ -280,26 +280,26 @@ readBits(unsigned int *val, int nr_bits, byte_reader *reader)
 /*}}}  */
 /*{{{  static int flushBitsFromReader(byte_reader *reader) */
 
-static
+/* static
 int
 flushBitsFromReader(byte_reader *reader)
 {
-  (void) reader; /* Suppress unused variable warning */
+  (void) reader; / * Suppress unused variable warning * /
   bits_in_buffer = 0;
   return 0;
-}
+} */
 
 /*}}}  */
-/*{{{  static int writeInt(unsigned int val, byte_writer *writer) */
+/*{{{  static int writeInt(size_t val, byte_writer *writer) */
 
 static
 int
-writeInt(unsigned int val, byte_writer *writer)
+writeInt(size_t val, byte_writer *writer)
 {
-  unsigned int nr_items;
+  size_t nr_items;
   unsigned char buf[8];
 
-  nr_items = (unsigned int)writeIntToBuf(val, buf);
+  nr_items = (size_t)writeIntToBuf(val, buf);
   if(write_bytes((char *)buf, nr_items, writer) != nr_items)
     return -1;
 
@@ -308,11 +308,11 @@ writeInt(unsigned int val, byte_writer *writer)
 }
 
 /*}}}  */
-/*{{{  static int readInt(unsigned int *val, byte_reader *reader) */
+/*{{{  static int readInt(size_t *val, byte_reader *reader) */
 
 static
 int
-readInt(unsigned int *val, byte_reader *reader)
+readInt(size_t *val, byte_reader *reader)
 {
   int buf[8];
 
@@ -371,11 +371,11 @@ readInt(unsigned int *val, byte_reader *reader)
 }
 
 /*}}}  */
-/*{{{  static int writeString(const char *str, unsigned int len, byte_writer *writer) */
+/*{{{  static int writeString(const char *str, size_t len, byte_writer *writer) */
 
 static
 int
-writeString(const char *str, unsigned int len, byte_writer *writer)
+writeString(const char *str, size_t len, byte_writer *writer)
 {
   /* Write length. */
   if (writeInt(len, writer) < 0)
@@ -396,7 +396,7 @@ static
 int
 readString(byte_reader *reader)
 {
-  unsigned int len;
+  size_t len;
 
   /* Get length of string */
   if (readInt(&len, reader) < 0)
@@ -448,7 +448,8 @@ static ATbool write_symbol(Symbol sym, byte_writer *writer)
 void
 AT_print_sym_entries()
 {
-  int cur_sym, cur_arg;
+  AFun cur_sym; 
+  size_t cur_arg;
 	
   for(cur_sym=0; cur_sym<nr_unique_symbols; cur_sym++) {
     sym_entry *cur_entry = &sym_entries[cur_sym];
@@ -497,15 +498,15 @@ static sym_entry *get_top_symbol(ATerm t, ATbool anno_done)
     case AT_INT:
       sym = AS_INT;
       break;
-    case AT_REAL:
+/*     case AT_REAL:
       sym = AS_REAL;
-      break;
+      break; */
 /*    case AT_BLOB:
       sym = AS_BLOB;
       break; */
-    case AT_PLACEHOLDER:
+/*    case AT_PLACEHOLDER:
       sym = AS_PLACEHOLDER;
-      break;
+      break; */
     case AT_LIST:
       sym = (ATisEmpty((ATermList)t) ? AS_EMPTY_LIST : AS_LIST);
       break;
@@ -553,7 +554,7 @@ static void gather_top_symbols(sym_entry *cur_entry, int cur_arg,
 			       int total_top_symbols)
 {
   int index;
-  unsigned int hnr;
+  size_t hnr;
   top_symbols *tss;
   sym_entry *top_entry;
 
@@ -594,14 +595,14 @@ static void gather_top_symbols(sym_entry *cur_entry, int cur_arg,
 
 static void build_arg_tables()
 {
-  int cur_sym; 
-  unsigned int cur_trm;
-  unsigned int cur_arg;
+  AFun cur_sym; 
+  size_t cur_trm;
+  size_t cur_arg;
   sym_entry *topsym;
 	
   for(cur_sym=0; cur_sym<nr_unique_symbols; cur_sym++) {
     sym_entry *cur_entry = &sym_entries[cur_sym];
-    unsigned int arity = cur_entry->arity;
+    size_t arity = cur_entry->arity;
 
     assert(arity == ATgetArity(cur_entry->id));
 		
@@ -640,10 +641,10 @@ static void build_arg_tables()
 		arg = (ATerm)ATgetNext(list);
 	    }
 	    break;
-	  case AT_PLACEHOLDER:
+/*	  case AT_PLACEHOLDER:
 	    assert(arity == 1);
 	    arg = ATgetPlaceholder((ATermPlaceholder)term);
-	    break;
+	    break; */
 	  case AT_APPL:
 	    arg = ATgetArgument((ATermAppl)term, cur_arg);
 	    break;
@@ -674,7 +675,7 @@ static void build_arg_tables()
 	*/
 static void add_term(sym_entry *entry, ATerm t)
 {
-  unsigned int hnr = AT_hashnumber(t) % entry->termtable_size;
+  size_t hnr = AT_hashnumber(t) % entry->termtable_size;
   entry->terms[entry->cur_index].t = t;
   entry->terms[entry->cur_index].next = entry->termtable[hnr];
   entry->termtable[hnr] = &entry->terms[entry->cur_index];
@@ -699,16 +700,16 @@ static void collect_terms(ATerm t)
     case AT_INT:
       sym = AS_INT;
       break;
-    case AT_REAL:
+/*    case AT_REAL:
       sym = AS_REAL;
-      break;
+      break; */
 /*    case AT_BLOB:
       sym = AS_BLOB;
       break; */
-    case AT_PLACEHOLDER:
+/*    case AT_PLACEHOLDER:
       sym = AS_PLACEHOLDER;
       collect_terms(ATgetPlaceholder((ATermPlaceholder)t));
-      break;
+      break; */
     case AT_LIST:
       {
 	ATermList list = (ATermList)t;
@@ -765,7 +766,7 @@ static void collect_terms(ATerm t)
 
 static ATbool write_symbols(byte_writer *writer)
 {
-  int sym_idx, arg_idx, top_idx;
+  size_t sym_idx, arg_idx, top_idx;
 	
   for(sym_idx=0; sym_idx<nr_unique_symbols; sym_idx++) {
     sym_entry *cur_sym = &sym_entries[sym_idx];
@@ -775,7 +776,7 @@ static ATbool write_symbols(byte_writer *writer)
       return ATfalse;
 
     for(arg_idx=0; arg_idx<cur_sym->arity; arg_idx++) {
-      int nr_symbols = cur_sym->top_symbols[arg_idx].nr_symbols;
+      size_t nr_symbols = cur_sym->top_symbols[arg_idx].nr_symbols;
       if(writeInt(nr_symbols, writer)<0)
 	return ATfalse;
       for(top_idx=0; top_idx<nr_symbols; top_idx++) {
@@ -799,7 +800,7 @@ static ATbool write_symbols(byte_writer *writer)
 
 static int find_term(sym_entry *entry, ATerm t)
 {
-  unsigned int hnr = AT_hashnumber(t) % entry->termtable_size;
+  size_t hnr = AT_hashnumber(t) % entry->termtable_size;
   trm_bucket *cur = entry->termtable[hnr];
 	
   assert(cur);
@@ -820,7 +821,7 @@ static int find_term(sym_entry *entry, ATerm t)
 
 static top_symbol *find_top_symbol(top_symbols *syms, AFun sym)
 {
-  unsigned int hnr = sym % syms->toptable_size;
+  size_t hnr = sym % syms->toptable_size;
   top_symbol *cur = syms->toptable[hnr];
 	
   assert(cur);
@@ -920,9 +921,9 @@ static ATbool write_term(ATerm t, byte_writer *writer)
 #endif
       trm_sym = &sym_entries[at_lookup_table[AS_INT]->index];
       break;
-    case AT_REAL:
+/*    case AT_REAL:
       {
-	static char buf[64]; /* must be able to hold str-rep of double */
+	static char buf[64]; / * must be able to hold str-rep of double * /
 	sprintf(buf, "%.15e", ATgetReal((ATermReal)t));
 	if (flushBitsToWriter(writer)<0)
 	  return ATfalse;
@@ -930,7 +931,7 @@ static ATbool write_term(ATerm t, byte_writer *writer)
 	  return ATfalse;
 	trm_sym = &sym_entries[at_lookup_table[AS_REAL]->index];
       }
-      break;
+      break; */
 /*    case AT_BLOB:
       {
 	ATermBlob blob = (ATermBlob)t;
@@ -941,14 +942,14 @@ static ATbool write_term(ATerm t, byte_writer *writer)
 	trm_sym = &sym_entries[at_lookup_table[AS_BLOB]->index];
       }
       break; */
-    case AT_PLACEHOLDER:
+/*    case AT_PLACEHOLDER:
       {
 	ATerm type = ATgetPlaceholder((ATermPlaceholder)t);
 	trm_sym = &sym_entries[at_lookup_table[AS_PLACEHOLDER]->index];
 	if(!write_arg(trm_sym, type, 0, writer, ATfalse))
 	  return ATfalse;
       }
-      break;
+      break; */
     case AT_LIST:
       {
 	ATermList list = (ATermList)t;
@@ -1007,7 +1008,7 @@ static ATbool write_term(ATerm t, byte_writer *writer)
 
 static void free_write_space()
 {
-  int i, j;
+  size_t i, j;
 
   for(i=0; i<nr_unique_symbols; i++) {
     sym_entry *entry = &sym_entries[i];
@@ -1046,10 +1047,11 @@ static void free_write_space()
 static ATbool
 write_baf(ATerm t, byte_writer *writer)
 {
-  int nr_unique_terms = 0;
-  int nr_symbols = AT_symbolTableSize();
-  int lcv, cur;
-  int nr_bits;
+  size_t nr_unique_terms = 0;
+  size_t nr_symbols = AT_symbolTableSize();
+  AFun lcv; 
+  size_t cur;
+  size_t nr_bits;
   AFun sym;
 	
   /* Initialize bit buffer */
@@ -1245,7 +1247,7 @@ ATbool ATwriteToNamedBinaryFile(ATerm t, const char *name)
 
 static Symbol read_symbol(byte_reader *reader)
 {
-  unsigned int arity, quoted;
+  size_t arity, quoted;
   int len;
 
   if((len = readString(reader)) < 0)
@@ -1272,14 +1274,14 @@ static Symbol read_symbol(byte_reader *reader)
 
 static ATbool read_all_symbols(byte_reader *reader)
 {
-  unsigned int k, val;
-  int i, j, arity;
+  size_t k, val;
+  size_t i, j, arity;
 
   for(i=0; i<nr_unique_symbols; i++) {
     /*{{{  Read the actual symbol */
 
     Symbol sym = read_symbol(reader);
-    if(sym < 0)
+    if(sym == (Symbol)(-1))
       ATerror("read_symbols: error reading symbol, giving up.\n");
 
     read_symbols[i].sym = sym;
@@ -1310,7 +1312,7 @@ static ATbool read_all_symbols(byte_reader *reader)
       read_symbols[i].sym_width = NULL;
       read_symbols[i].topsyms = NULL;
     } else {
-      read_symbols[i].nr_topsyms = (unsigned int *)AT_calloc(arity, sizeof(int));
+      read_symbols[i].nr_topsyms = (size_t *)AT_calloc(arity, sizeof(size_t));
       if(!read_symbols[i].nr_topsyms)
 	ATerror("read_all_symbols: out of memory trying to allocate "
 		"space for %d arguments.\n", arity);
@@ -1362,7 +1364,7 @@ static ATbool read_all_symbols(byte_reader *reader)
 
 static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
 {
-  unsigned int val;
+  size_t val;
   int i, arity = sym->arity;
   sym_read_entry *arg_sym;
   ATerm stack_args[MAX_STACK_ARGS];
@@ -1416,8 +1418,8 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
 
     /*}}}  */
     break;
-  case AS_REAL:
-    /*{{{  Read a real */
+/*   case AS_REAL:
+    / *{{{  Read a real * /
 
     {
       double real;
@@ -1434,8 +1436,8 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
       result = (ATerm)ATmakeReal(real);
     }
 
-    /*}}}  */
-    break;
+    / *}}}  * /
+    break; */
   /* case AS_BLOB:
     / *{{{  Read a blob * /
 
@@ -1459,9 +1461,9 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
 
     / *}}}  * /
     break; */
-  case AS_PLACEHOLDER:
+  /* case AS_PLACEHOLDER:
     result = (ATerm)ATmakePlaceholder(args[0]);
-    break;
+    break; */
   case AS_LIST:
     result = (ATerm)ATinsert((ATermList)args[1], args[0]);
     break;
@@ -1501,7 +1503,7 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
 
 static void free_read_space()
 {
-  int i, j;
+  size_t i, j;
 
   for(i=0; i<nr_unique_symbols; i++) {
     sym_read_entry *entry = &read_symbols[i];
@@ -1533,7 +1535,7 @@ static void free_read_space()
 
 ATerm read_baf(byte_reader *reader)
 {
-  unsigned int val, nr_unique_terms;
+  size_t val, nr_unique_terms;
   ATerm result = NULL;
 
   /* Initialize bit buffer */
@@ -1575,7 +1577,7 @@ ATerm read_baf(byte_reader *reader)
   }
 
   if (!silent) {
-    fprintf(stderr, "reading %d unique symbols and %d unique terms.\n",
+    fprintf(stderr, "reading %lu unique symbols and %lu unique terms.\n",
 	    nr_unique_symbols, nr_unique_terms);
   }
 

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_blob.h
-/// \brief Term containing a binary object.
+/// \brief Term containing a binary object. Deprecated
 
 #ifndef MCRL2_ATERMPP_ATERM_BLOB_H
 #define MCRL2_ATERMPP_ATERM_BLOB_H
@@ -18,6 +18,7 @@
 namespace atermpp
 {
   /// \brief Term containing a binary object.
+  /* 
   class aterm_blob: public aterm_base
   {
    public:
@@ -94,7 +95,7 @@ namespace atermpp
     static ATerm* ptr(aterm_blob t)     { return &t.term(); }
   };
   /// \endcond
-
+*/
 } // namespace atermpp
 
 #endif // MCRL2_ATERMPP_ATERM_BLOB_H

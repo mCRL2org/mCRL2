@@ -790,7 +790,7 @@ static void term2seq(ATerm t, ATermList *s, int *var_cnt)
     {
       ATerm store = (ATerm) ATmakeAppl2(afunS,(ATerm) t,dummy);
 
-      if ( ATindexOf(*s,store,0) >= 0 )
+      if ( ATindexOf(*s,store,0) != NON_EXISTING )
       {
         *s = ATinsert(*s, (ATerm) ATmakeAppl3(afunM,(ATerm) t,dummy,dummy));
       } else {
@@ -830,7 +830,7 @@ static void get_used_vars_aux(ATerm t, ATermList *vars)
   {
     if ( gsIsDataVarId((ATermAppl) t) )
     {
-      if ( ATindexOf(*vars,t,0) == -1 )
+      if ( ATindexOf(*vars,t,0) == NON_EXISTING )
       {
         *vars = ATinsert(*vars,t);
       }
@@ -1321,7 +1321,7 @@ static ATermList get_doubles(ATerm a, ATermList &vars)
     return ATmakeList0();
   } else if ( ATisAppl(a) && gsIsDataVarId((ATermAppl) a) )
   {
-    if ( ATindexOf(vars,a,0) >= 0 )
+    if ( ATindexOf(vars,a,0) !=NON_EXISTING )
     {
       return ATmakeList1(a);
     } else {
@@ -1412,7 +1412,7 @@ static ATermList dep_vars(ATermList eqn)
         int j=i-1; // ATgetLength(ATgetNext(vars))-1
         for (ATermList o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
         {
-          if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) >= 0 )
+          if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) != NON_EXISTING )
           {
             bs[j] = true;
           }
@@ -1425,7 +1425,7 @@ static ATermList dep_vars(ATermList eqn)
       bool b = false;
       for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
       {
-        if ( ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) >= 0 )
+        if ( ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) != NON_EXISTING )
         {
           // Same variable, mark it
           if ( j >= 0 )
@@ -1522,7 +1522,7 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
           int j=i-1;
           for (ATermList o=vars; !ATisEmpty(ATgetNext(o)); o=ATgetNext(o))
           {
-            if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) >= 0 )
+            if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) != NON_EXISTING )
             {
               bs[j] = true;
             }
@@ -1535,7 +1535,7 @@ static ATermList create_strategy(ATermList rules, int opid, unsigned int arity, 
         bool b = false;
         for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
         {
-          if ( ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) >= 0 )
+          if ( ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) != NON_EXISTING )
           {
             // Same variable, mark it
             if ( j >= 0 )
@@ -1729,10 +1729,10 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
     return opid_is_nf((ATermInt) t,0);
   } else if ( /*ATisAppl(t) && */ gsIsNil((ATermAppl) t) )
   {
-    return (nnfvars == NULL) || (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) == -1);
+    return (nnfvars == NULL) || (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) == NON_EXISTING);
   } else { // ATisAppl(t) && gsIsDataVarId((ATermAppl) t)
     assert(ATisAppl(t) && gsIsDataVarId((ATermAppl) t));
-    return (nnfvars == NULL) || (ATindexOf(nnfvars,t,0) == -1);
+    return (nnfvars == NULL) || (ATindexOf(nnfvars,t,0) == NON_EXISTING);
   }
 }
 
@@ -1880,7 +1880,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       }
       ss << ":";
       bool c = rewr;
-      if ( rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != -1) )
+      if ( rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != NON_EXISTING) )
       {
         ss << "rewrite(";
         c = false;
@@ -1893,7 +1893,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,rewrall);
       }
       ss << tail_second << ")";
-      if ( rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != -1) )
+      if ( rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != NON_EXISTING) )
       {
         ss << ")";
       }
@@ -1923,7 +1923,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
   } else if ( /*ATisAppl(t) && */ gsIsNil((ATermAppl) t) )
   {
     stringstream ss;
-    bool b = (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != -1);
+    bool b = (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != NON_EXISTING);
     if ( rewr && b )
     {
       ss << "rewrite(arg" << startarg << ")";
@@ -1935,7 +1935,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
   } else { // ATisAppl(t) && gsIsDataVarId((ATermAppl) t)
     assert(ATisAppl(t) && gsIsDataVarId((ATermAppl) t));
     stringstream ss;
-    bool b = (nnfvars != NULL) && (ATindexOf(nnfvars,t,0) != -1);
+    bool b = (nnfvars != NULL) && (ATindexOf(nnfvars,t,0) != NON_EXISTING);
     if ( rewr && b )
     {
       ss << "rewrite(" << (ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) t,0)))+1) << ")";
@@ -2011,7 +2011,7 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
         int i = 0;
         for (ATermList m=ATgetNext((ATermList) t); !ATisEmpty(m); m=ATgetNext(m))
         {
-          if ( ATisAppl(ATgetFirst(m)) && (nnfvars != NULL) && ( (gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == -1)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1)) ) )
+          if ( ATisAppl(ATgetFirst(m)) && (nnfvars != NULL) && ( (gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == -1)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == NON_EXISTING)) ) )
           {
             nfs = nfs | (1 << i);
           }
@@ -2055,7 +2055,7 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
               int i = 0;
               for (ATermList m=ATgetNext((ATermList) t); !ATisEmpty(m); m=ATgetNext(m))
               {
-                if ( ATisAppl(ATgetFirst(m)) && (nnfvars != NULL) && ( (gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == -1)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1)) ) )
+                if ( ATisAppl(ATgetFirst(m)) && (nnfvars != NULL) && ( (gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == NON_EXISTING)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == NON_EXISTING)) ) )
                 {
                   nfs = nfs | (1 << i);
                 }
@@ -2102,7 +2102,7 @@ void RewriterCompilingJitty::calcTerm(FILE *f, ATerm t, int startarg, ATermList 
       }
       if ( ATisAppl(ATgetFirst(l)) && gsIsNil(ATAgetFirst(l)) )
       {
-        if ( !((rewr && !b) || !((nfs&(1<<(i-startarg))) == 0)) || (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == -1) )
+        if ( !((rewr && !b) || !((nfs&(1<<(i-startarg))) == 0)) || (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == NON_EXISTING) )
   {
           fprintf(f,"arg%i",i);
   } else {
@@ -2702,7 +2702,7 @@ ATermAppl RewriterCompilingJitty::build_ar_expr_aux(ATermList eqn, unsigned int 
     return make_ar_true();
   }
 
-  if ( ATindexOf(dep_vars(eqn),(ATerm) arg_term,0) >= 0 )
+  if ( ATindexOf(dep_vars(eqn),(ATerm) arg_term,0) != NON_EXISTING )
   {
     return make_ar_true();
   }

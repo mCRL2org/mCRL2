@@ -20,7 +20,7 @@ extern "C"
 #define AS_EMPTY_LIST   5
 #define AS_ANNOTATION   6
 
-typedef MachineWord AFun;
+typedef size_t AFun; 
 
 /* The Symbol type */
 typedef struct _SymEntry
@@ -50,7 +50,7 @@ MachineWord AT_symbolTableSize();
 void AT_initSymbol(int argc, char *argv[]);
 int AT_printSymbol(Symbol sym, FILE *f);
 /* ATbool AT_isValidSymbol(Symbol sym); */
-#define AT_isValidSymbol(sym) (((Symbol)sym >= 0 && (MachineWord)(Symbol)sym < AT_symbolTableSize() \
+#define AT_isValidSymbol(sym) (((Symbol)sym != (Symbol)(-1) && (MachineWord)(Symbol)sym < AT_symbolTableSize() \
                                  && !SYM_IS_FREE(at_lookup_table[(Symbol)sym])) ?  ATtrue : ATfalse)
 
 /* ATbool AT_isMarkedSymbol(Symbol sym); */
@@ -60,8 +60,8 @@ void  AT_freeSymbol(SymEntry sym);
 void AT_markProtectedSymbols();
 void AT_markProtectedSymbols_young();
 
-unsigned int AT_hashSymbol(const char *name, int arity);
-ATbool AT_findSymbol(char *name, int arity, ATbool quoted);
+size_t AT_hashSymbol(const char *name, size_t arity);
+ATbool AT_findSymbol(char *name, size_t arity, ATbool quoted);
 void AT_unmarkAllAFuns();
 
 #ifdef __cplusplus

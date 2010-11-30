@@ -26,9 +26,9 @@
 /* From RFC2045 (Base64 encoding: The Base64 Alphabet) */
 /* static char tobase64[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; */
 
-/* static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs); */
+/* static int topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs); */
 
-static long next_abbrev = 0;
+static size_t next_abbrev = 0;
 
 /* static char print_buffer[BUFSIZ]; */
 
@@ -71,9 +71,9 @@ static void resize_parse_buffer(int n)
 
 /*}}}  */
 
-/*{{{  static long abbrev_size(long abbrev) */
+/*{{{  static int abbrev_size(size_t abbrev) */
 
-static int abbrev_size(long abbrev)
+static int abbrev_size(size_t abbrev)
 {
   int size = 1;
 
@@ -90,9 +90,9 @@ static int abbrev_size(long abbrev)
 }
 
 /*}}}  */
-/*{{{  static long write_abbrev(long abbrev, byte_writer *writer) */
+/*{{{  static int write_abbrev(size_t abbrev, byte_writer *writer) */
 
-/* static long write_abbrev(long abbrev, byte_writer *writer)
+/* static int write_abbrev(size_t abbrev, byte_writer *writer)
 {
   char *ptr, buf[MAX_ENCODED_SIZE+1] ;
 
@@ -126,7 +126,7 @@ static int abbrev_size(long abbrev)
   Symbol          sym;
   ATerm           arg;
   int             i, arity, elem_size, blob_size;
-  long            size;
+  size_t            size;
   ATermAppl       appl;
   ATermList       list;
   ATermBlob       blob;
@@ -274,12 +274,12 @@ static int abbrev_size(long abbrev)
 
 /*}}}  */
 
-/*{{{  static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs) */
+/*{{{  static int topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs) */
 
-/* static long topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs)
+/* static int topWriteToSharedTextFile(ATerm t, byte_writer *writer, ATermIndexedSet abbrevs)
 {
-  / * ATerm annos; long anno_size * /
-  long abbrev, size = 0; 
+  / * ATerm annos; size_t anno_size * /
+  size_t abbrev, size = 0; 
 
   abbrev = ATindexedSetGetIndex(abbrevs, t);
   if (abbrev >= 0) {
@@ -330,12 +330,12 @@ static int abbrev_size(long abbrev)
 
 /*}}}  */
 
-/*{{{  long ATwriteToSharedTextFile(ATerm t, FILE *file) */
+/*{{{  int ATwriteToSharedTextFile(ATerm t, FILE *file) */
 
-/* long ATwriteToSharedTextFile(ATerm t, FILE *file)
+/* int ATwriteToSharedTextFile(ATerm t, FILE *file)
 {
   byte_writer writer;
-  long size;
+  size_t size;
   ATermIndexedSet abbrevs;
   
   writer.type = FILE_WRITER;
@@ -691,8 +691,8 @@ static ATerm rparse_num(int *c, byte_reader *reader)
     *ptr++ = *c;
     rnext_char(c, reader);
   }
-  if (*c == '.' || toupper(*c) == 'E') {
-    /*{{{  A real number */
+  /* if (*c == '.' || toupper(*c) == 'E') {
+    / *{{{  A real number * /
     
     if (*c == '.') {
       *ptr++ = *c;
@@ -717,8 +717,9 @@ static ATerm rparse_num(int *c, byte_reader *reader)
     *ptr = '\0';
     return (ATerm) ATmakeReal(atof(num));
     
-    /*}}}  */
-  } else {
+    / *}}}  * /
+  } else */
+  { 
     /*{{{  An integer */
 
     *ptr = '\0';
@@ -734,7 +735,7 @@ static ATerm rparse_num(int *c, byte_reader *reader)
 static ATerm rparse_abbrev(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
 {
   ATerm result;
-  long abbrev;
+  size_t abbrev;
 
   rnext_char(c, reader);
 
@@ -774,8 +775,9 @@ static ATerm rparse_abbrev(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
 
 static ATerm rparse_term(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
 {
-  ATerm t, result = NULL;
-  long start, end;
+  /* ATerm t, result = NULL; */
+  ATerm result = NULL;
+  size_t start, end;
 
   start = reader->bytes_read;
 
@@ -804,14 +806,14 @@ static ATerm rparse_term(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
       rnext_skip_layout(c, reader);
       break;
 
-    case '<':
+    /* case '<':
       rnext_skip_layout(c, reader);
       t = rparse_term(c, reader, abbrevs);
       if (t != NULL && *c == '>') {
 	result = (ATerm) ATmakePlaceholder(t);
 	rnext_skip_layout(c, reader);
       }
-      break;
+      break; */
 
     default:
       if (isalpha(*c) || *c == '(') {
@@ -862,9 +864,9 @@ static ATerm rparse_term(int *c, byte_reader *reader, ATermIndexedSet abbrevs)
 
     end = reader->bytes_read;
 
-    if (abbrev_size(next_abbrev) < (end-start)) {
+    if (abbrev_size(next_abbrev)+start < end) {
       ATbool isnew;
-      long abbrev;
+      size_t abbrev;
 
       abbrev = ATindexedSetPut(abbrevs, result, &isnew);
       if (isnew) {

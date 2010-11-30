@@ -126,7 +126,7 @@ namespace mcrl2 {
       }
       
       static inline ATermList gsaATinsertUnique(ATermList l, ATerm m){
-        if(ATindexOf(l,m,0)<0)
+        if(ATindexOf(l,m,0)==NON_EXISTING)
           return ATinsert(l,m);
         else
           return l;
@@ -139,7 +139,7 @@ namespace mcrl2 {
       static inline ATermList gsaATintersectList(ATermList l, ATermList m){
         ATermList r=ATmakeList0();
         for(;!ATisEmpty(l);l=ATgetNext(l))
-          if(ATindexOf(m,ATgetFirst(l),0)>=0)
+          if(ATindexOf(m,ATgetFirst(l),0)!=NON_EXISTING)
             r=ATinsert(r,ATgetFirst(l));
         return ATreverse(r);
       }
@@ -272,7 +272,7 @@ namespace mcrl2 {
       static ATermList list_minus(ATermList l, ATermList m){
         ATermList n = ATmakeList0();
         for (; !ATisEmpty(l); l=ATgetNext(l))
-          if ( ATindexOf(m,ATgetFirst(l),0) < 0 )
+          if ( ATindexOf(m,ATgetFirst(l),0) == NON_EXISTING )
             n = ATinsert(n,ATgetFirst(l));
         return ATreverse(n);
       }
@@ -280,7 +280,7 @@ namespace mcrl2 {
       static ATermList list_minus_ignore_type(ATermList l, ATermList m){
         ATermList n = ATmakeList0();
         for(; !ATisEmpty(l); l=ATgetNext(l)){
-          if(ATindexOf(m,(ATerm)ATAgetArgument(ATAgetFirst(l),0),0) < 0){
+          if(ATindexOf(m,(ATerm)ATAgetArgument(ATAgetFirst(l),0),0) == NON_EXISTING){
             n = ATinsert(n,ATgetFirst(l));
           }
         }
@@ -297,7 +297,7 @@ namespace mcrl2 {
           bool b = true;
           ATermList ma=untypeMA(ATLgetFirst(l));
           for (; !ATisEmpty(tH); tH=ATgetNext(tH)){
-            if ( ATindexOf(ma,(ATerm)ATAgetFirst(tH),0) >= 0 ){
+            if ( ATindexOf(ma,(ATerm)ATAgetFirst(tH),0) != NON_EXISTING ){
       	b = false;
       	break;
             }
@@ -315,9 +315,9 @@ namespace mcrl2 {
         for (; !ATisEmpty(l); l=ATgetNext(l)){
           ATermList new_ma=ATmakeList0();
           for(ATermList ma=ATLgetFirst(l);!ATisEmpty(ma); ma=ATgetNext(ma))
-            if(ATindexOf(I,(ATerm)untypeA(ATAgetFirst(ma)),0)<0)
+            if(ATindexOf(I,(ATerm)untypeA(ATAgetFirst(ma)),0)== NON_EXISTING)
       	new_ma=ATinsert(new_ma,ATgetFirst(ma));
-          if(ATgetLength(new_ma) && ATindexOf(m,(ATerm)new_ma,0)<0) m=ATinsert(m,(ATerm)ATreverse(new_ma));
+          if(ATgetLength(new_ma) && ATindexOf(m,(ATerm)new_ma,0)==NON_EXISTING) m=ATinsert(m,(ATerm)ATreverse(new_ma));
         }
         return ATreverse(m);
       }
@@ -326,7 +326,7 @@ namespace mcrl2 {
         //filters l to contain only multiactions matching the untiped multiactions from V
         ATermList m=ATmakeList0();
         for (; !ATisEmpty(l); l=ATgetNext(l)){
-          if(ATindexOf(V,(ATerm)gsMakeMultActName(untypeMA(ATLgetFirst(l))),0) >=0)
+          if(ATindexOf(V,(ATerm)gsMakeMultActName(untypeMA(ATLgetFirst(l))),0) != NON_EXISTING)
             m = ATinsert(m,(ATerm)ATLgetFirst(l));
         }
         return ATreverse(m);
@@ -367,7 +367,7 @@ namespace mcrl2 {
         ATermList m = ATmakeList0();
         for (; !ATisEmpty(V); V=ATgetNext(V)){
           ATermAppl ma=ATAgetFirst(V);
-          if(ATindexOf(ul,(ATerm)ATLgetArgument(ma,0),0) >=0)
+          if(ATindexOf(ul,(ATerm)ATLgetArgument(ma,0),0) != NON_EXISTING)
             m = ATinsert(m,(ATerm)ma);
         }
         return ATreverse(m);
@@ -408,7 +408,7 @@ namespace mcrl2 {
           ATermAppl ma=gsMakeMultActName(ATLgetFirst(ulp));
           ATermList tulq=ulq;
           for (; !ATisEmpty(ulq); ulq=ATgetNext(ulq)){
-            if(ATindexedSetGetIndex(VV,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))))!=(size_t)(-1)){
+            if(ATindexedSetGetIndex(VV,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))))!=NON_EXISTING){
       	m = ATinsert(m,(ATerm)ma);
       	break;
             }
@@ -505,7 +505,7 @@ namespace mcrl2 {
       
         for (; !ATisEmpty(MAct); MAct=ATgetNext(MAct) ){
           ATermAppl Act=ATAgetFirst(MAct);
-          if(ATindexOf(I,(ATerm)Act,0)<0)
+          if(ATindexOf(I,(ATerm)Act,0)== NON_EXISTING)
             r=ATinsert(r,(ATerm)Act);
         }
         return ATreverse(r);
@@ -518,7 +518,7 @@ namespace mcrl2 {
         for (; !ATisEmpty(L); L=ATgetNext(L) ){
           ATermAppl ma=gsMakeMultActName(ATLgetFirst(L));
           ATermAppl maH=gsMakeMultActName(apply_hide(I,ATLgetFirst(L)));
-          if((ATisEqual(maH,gsMakeMultActName(ATmakeList0())) || ATindexOf(V,(ATerm)maH,0)>=0 )&& ATindexOf(r,(ATerm)ma,0)<0)
+          if((ATisEqual(maH,gsMakeMultActName(ATmakeList0())) || ATindexOf(V,(ATerm)maH,0)!=NON_EXISTING )&& ATindexOf(r,(ATerm)ma,0)==NON_EXISTING)
             r=ATinsert(r,(ATerm)ma);
         }
         return ATreverse(r);
@@ -548,7 +548,7 @@ namespace mcrl2 {
         ATermList rhs = comm_rhs(C);
         bool b = true;
         for (; !ATisEmpty(lhs); lhs=ATgetNext(lhs)){
-          if ( ATindexOf(rhs,ATgetFirst(lhs),0) >= 0 ) {
+          if ( ATindexOf(rhs,ATgetFirst(lhs),0) != NON_EXISTING ) {
             b = false;
             break;
           }
@@ -659,7 +659,7 @@ namespace mcrl2 {
           bool applied=false;
           for (ATermList tC=C; !ATisEmpty(tC); tC=ATgetNext(tC)){
             ATermList c = ATLgetArgument(ATAgetArgument(ATAgetFirst(tC),0),0);
-            if ( ATindexOf(c,ATgetArgument(a,0),0) >= 0 ){
+            if ( ATindexOf(c,ATgetArgument(a,0),0) !=NON_EXISTING ){
       	ATermList s = ATLgetArgument(a,1);
       	ATermList tr = r;
       	bool b=true;
@@ -667,7 +667,7 @@ namespace mcrl2 {
       	c = ATremoveElement(c,(ATerm)ATAgetArgument(a,0));
       	for (; !ATisEmpty(c); c=ATgetNext(c)){
       	  ATermAppl act = gsMakeActId(ATAgetFirst(c),s);
-      	  if ( ATindexOf(tr,(ATerm) act,0) >= 0 ){
+      	  if ( ATindexOf(tr,(ATerm) act,0) != NON_EXISTING ){
       	    tr = ATremoveElement(tr,(ATerm) act);
       	  }
       	  else {
@@ -737,7 +737,7 @@ namespace mcrl2 {
       
         for (; !ATisEmpty(l); l=ATgetNext(l) ){
           ATermAppl ma=gsMakeMultActName(untypeMA(ATLgetFirst(l)));
-          if(ATindexOf(r,(ATerm)ma,0)<0){
+          if(ATindexOf(r,(ATerm)ma,0)==NON_EXISTING){
             ATermList mas=untypeMAL(apply_comms(ATLgetFirst(l),C,lhs));
             if(!gsaATisDisjoint(V,mas))
       	r=ATinsert(r,(ATerm)ma);
@@ -846,7 +846,7 @@ namespace mcrl2 {
           return a;
         }
         else if ( gsIsAction(a) ){
-          return (ATindexOf(H,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)>=0)?gsMakeDelta():a;
+          return (ATindexOf(H,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)!=NON_EXISTING)?gsMakeDelta():a;
         }
         else if ( gsIsProcess(a) || gsIsProcessAssignment(a) ){
           ATermList l = ATLtableGet(alphas,(ATerm) a);
@@ -898,7 +898,7 @@ namespace mcrl2 {
           ATermList Hc = ATmakeList0();
       
           for (; !ATisEmpty(H); H=ATgetNext(H)){
-            if ( (ATindexOf(lhs,ATgetFirst(H),0) >= 0) || (ATindexOf(rhs,ATgetFirst(H),0) >= 0) ){
+            if ( (ATindexOf(lhs,ATgetFirst(H),0) != NON_EXISTING) || (ATindexOf(rhs,ATgetFirst(H),0) != NON_EXISTING) ){
       	Ha = ATinsert(Ha,ATgetFirst(H));
             }
             else {
@@ -973,7 +973,7 @@ namespace mcrl2 {
           return a;
         }
         else if ( gsIsAction(a) ){
-          return (ATindexOf(I,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)>=0)?gsMakeTau():a;
+          return (ATindexOf(I,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)!=NON_EXISTING)?gsMakeTau():a;
         }
         else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
           ATermList l = ATLtableGet(alphas,(ATerm) a);
@@ -1066,7 +1066,7 @@ namespace mcrl2 {
           return a;
         }
         else if ( gsIsAction(a) ){
-          if(ATindexOf(V,(ATerm)gsMakeMultActName(ATmakeList1((ATerm)ATAgetArgument(ATAgetArgument(a,0),0))),0)<0)
+          if(ATindexOf(V,(ATerm)gsMakeMultActName(ATmakeList1((ATerm)ATAgetArgument(ATAgetArgument(a,0),0))),0)==NON_EXISTING)
             return gsMakeDelta();
           return gsApplyAlpha(a);
         }
@@ -1893,7 +1893,7 @@ namespace mcrl2 {
         //else if(gsIsMerge(a)||gsIsLMerge(a)) r=mCRL_aterm;
         else if(gsIsSync(a)||gsIsMerge(a)||gsIsLMerge(a)){
           ATermList deps=gsaGetDeps(a);
-          if(ATindexOf(deps,(ATerm)context,0)>=0) r=mCRL_aterm;
+          if(ATindexOf(deps,(ATerm)context,0)!=NON_EXISTING) r=mCRL_aterm;
           else{
             //if any process name in deps is recursive, also r=mCRL_aterm;
             for(ATermList l=deps; !ATisEmpty(l); l=ATgetNext(l)){
@@ -2128,7 +2128,7 @@ namespace mcrl2 {
         for(; !ATisEmpty(todo); todo=ATgetNext(todo)){
           ATermAppl p=ATAgetFirst(todo);
           ATermList dep=ATLtableGet(deps,(ATerm)p);
-          bool rec=(ATindexOf(dep,(ATerm)p,0)>=0);
+          bool rec=(ATindexOf(dep,(ATerm)p,0)!=NON_EXISTING);
           ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)pCRL_aterm,(rec)?(ATerm)rec_aterm:(ATerm)nrec_aterm));
         }
       

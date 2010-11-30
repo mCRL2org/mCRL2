@@ -66,8 +66,8 @@ ATermList ATgetTail(ATermList list, int start)
 
 ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
 {
-  unsigned int i;
-  unsigned int start=(startpos<0 ? (unsigned int)ATgetLength(list)+startpos : (unsigned int)startpos);
+  size_t i;
+  size_t start=(startpos<0 ? (size_t)ATgetLength(list)+startpos : (size_t)startpos);
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,start); 
 
   for (i=0; i<start; i++) 
@@ -100,7 +100,7 @@ ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
 
 ATermList ATgetPrefix(ATermList list)
 {
-  unsigned int i, size = ATgetLength(list);
+  size_t i, size = ATgetLength(list);
   ATermList result = ATmakeList0();
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,size); 
   
@@ -142,7 +142,7 @@ ATerm ATgetLast(ATermList list)
 }
 
 /*}}}  */
-/*{{{  ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end) */
+/*{{{  ATermList ATgetSlice(ATermList list, size_t start, size_t end) */
 
 /**
  * Retrieve a slice of elements from list.
@@ -150,9 +150,9 @@ ATerm ATgetLast(ATermList list)
  * The last element is the element at end-1.
  */
 
-ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end)
+ATermList ATgetSlice(ATermList list, size_t start, size_t end)
 {
-  unsigned int i, size;
+  size_t i, size;
   ATermList result = ATmakeList0();
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,(end<=start?0:end-start)); 
  
@@ -178,15 +178,15 @@ ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end)
 }
 
 /*}}}  */
-/*{{{  ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index) */
+/*{{{  ATermList ATinsertAt(ATermList list, ATerm el, size_t index) */
 
 /**
  * Insert 'el' at position 'index' in 'list'.
  */
 
-ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index)
+ATermList ATinsertAt(ATermList list, ATerm el, size_t index)
 {
-  unsigned int i;
+  size_t i;
   ATermList result;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,index); 
   
@@ -216,7 +216,7 @@ ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index)
 
 ATermList ATappend(ATermList list, ATerm el)
 {
-  unsigned int i, len = ATgetLength(list);
+  size_t i, len = ATgetLength(list);
   ATermList result;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
   
@@ -245,7 +245,7 @@ ATermList ATappend(ATermList list, ATerm el)
 
 ATermList ATconcat(ATermList list1, ATermList list2)
 {
-  unsigned int i, len = ATgetLength(list1);
+  size_t i, len = ATgetLength(list1);
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
   ATermList result = list2;
 
@@ -285,9 +285,9 @@ ATermList ATconcat(ATermList list1, ATermList list2)
  * Note that 'start' must indicate a valid position in 'list'.
  */
 
-int ATindexOf(ATermList list, ATerm el, int startpos)
+size_t ATindexOf(ATermList list, ATerm el, int startpos)
 {
-  unsigned int i, start;
+  size_t i, start;
 
   if(startpos < 0)
     start = startpos + ATgetLength(list) + 1;
@@ -302,7 +302,7 @@ int ATindexOf(ATermList list, ATerm el, int startpos)
     ++i;
   }
 
-  return (ATisEmpty(list) ? -1 : (int)i);
+  return (ATisEmpty(list) ? NON_EXISTING : (size_t)i);
 }
 
 /*}}}  */
@@ -314,9 +314,9 @@ int ATindexOf(ATermList list, ATerm el, int startpos)
  * encountered, or -1 when 'el' is not present before 'start'.
  */
 
-int ATlastIndexOf(ATermList list, ATerm el, int startpos)
+size_t ATlastIndexOf(ATermList list, ATerm el, int startpos)
 {
-  unsigned int i, len, start=(startpos<0 ? startpos+ATgetLength(list) : (unsigned int)startpos);
+  size_t i, len, start=(startpos<0 ? startpos+ATgetLength(list) : (size_t)startpos);
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,1+start); 
 
   len = start+1;
@@ -335,7 +335,7 @@ int ATlastIndexOf(ATermList list, ATerm el, int startpos)
     }
   }
   
-  return -1;
+  return NON_EXISTING;
 }
 
 /*}}}  */
@@ -346,7 +346,7 @@ int ATlastIndexOf(ATermList list, ATerm el, int startpos)
  * Return NULL when index not in list.
  */
 
-ATerm ATelementAt(ATermList list, unsigned int index)
+ATerm ATelementAt(ATermList list, size_t index)
 {
   for(; index > 0 && !ATisEmpty(list); index--)
     list = ATgetNext(list);
@@ -366,7 +366,7 @@ ATerm ATelementAt(ATermList list, unsigned int index)
 
 ATermList ATremoveElement(ATermList list, ATerm t)
 {
-  unsigned int i = 0;
+  size_t i = 0;
   ATerm el = NULL;
   ATermList l = list;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
@@ -403,9 +403,9 @@ ATermList ATremoveElement(ATermList list, ATerm t)
  * Remove an element from a specific position in a list.
  */
 
-ATermList ATremoveElementAt(ATermList list, unsigned int idx)
+ATermList ATremoveElementAt(ATermList list, size_t idx)
 {
-  unsigned int i;
+  size_t i;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx); 
   
   for(i=0; i<idx; i++) {
@@ -430,7 +430,7 @@ ATermList ATremoveElementAt(ATermList list, unsigned int idx)
 
 ATermList ATremoveAll(ATermList list, ATerm t)
 {
-  unsigned int i = 0;
+  size_t i = 0;
   ATerm el = NULL;
   ATermList l = list;
   ATermList result = ATempty;
@@ -467,9 +467,9 @@ ATermList ATremoveAll(ATermList list, ATerm t)
  * Replace one element of a list.
  */
 
-ATermList ATreplace(ATermList list, ATerm el, unsigned int idx)
+ATermList ATreplace(ATermList list, ATerm el, size_t idx)
 {
-  unsigned int i;
+  size_t i;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx); 
   
   for(i=0; i<idx; i++) {
@@ -521,7 +521,7 @@ static int compare_terms(const ATerm *t1, const ATerm *t2)
 
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 {
-  unsigned int idx, len = ATgetLength(list);
+  size_t idx, len = ATgetLength(list);
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
 
   idx = 0;
@@ -564,7 +564,7 @@ ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 
 /* ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
 {
-  unsigned int i = 0;
+  size_t i = 0;
   ATermList pair, tmp = (ATermList)dict;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(tmp));
 
@@ -628,7 +628,7 @@ ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 
 /* ATerm ATdictRemove(ATerm dict, ATerm key)
 {
-  unsigned int idx = 0;
+  size_t idx = 0;
   ATermList tmp = (ATermList)dict;
   ATermList pair;
 
@@ -655,7 +655,7 @@ ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 
 ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm))
 {
-  unsigned int i = 0;
+  size_t i = 0;
   ATerm el = NULL;
   ATermList l = list;
   ATermList result = ATempty;
@@ -701,7 +701,7 @@ ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm))
 ATermList ATgetArguments(ATermAppl appl)
 {
   Symbol s = ATgetSymbol(appl);
-  unsigned int i, len = ATgetArity(s);
+  size_t i, len = ATgetArity(s);
   ATermList result = ATempty;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
 
@@ -717,10 +717,10 @@ ATermList ATgetArguments(ATermAppl appl)
 
 /*}}}  */
 
-/*{{{  unsigned int ATgetLength(ATermList list) */
+/*{{{  size_t ATgetLength(ATermList list) */
 
-unsigned int ATgetLength(ATermList list) {
-  unsigned int length = ((unsigned int)GET_LENGTH((list)->header));
+size_t ATgetLength(ATermList list) {
+  size_t length = ((size_t)GET_LENGTH((list)->header));
   
   if (length < MAX_LENGTH-1)
     return length;
@@ -731,7 +731,7 @@ unsigned int ATgetLength(ATermList list) {
   
   while (1) {
     list = ATgetNext(list);
-    if ((unsigned int)GET_LENGTH((list)->header) < (MAX_LENGTH-1)) break;
+    if ((size_t)GET_LENGTH((list)->header) < (MAX_LENGTH-1)) break;
     length += 1;
   };
   

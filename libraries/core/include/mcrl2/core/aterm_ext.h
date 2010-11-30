@@ -83,7 +83,7 @@ namespace mcrl2 {
  **/
 inline ATermList ATinsertUnique(ATermList list, ATerm el)
 {
-  if (ATindexOf(list, el, 0) == -1) return ATinsert(list, el);
+  if (ATindexOf(list, el, 0) == (size_t)(-1)) return ATinsert(list, el);
   return list;
 }
 

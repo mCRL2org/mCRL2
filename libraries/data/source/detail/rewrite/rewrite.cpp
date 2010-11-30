@@ -278,12 +278,12 @@ static void checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars)
 		checkVars((ATermList) ATLgetArgument(Expr,1),Vars,UsedVars);
 	} else if ( gsIsDataVarId(Expr) )
 	{
-		if ( (UsedVars != NULL) && (ATindexOf(*UsedVars,(ATerm) Expr,0) < 0) )
+		if ( (UsedVars != NULL) && (ATindexOf(*UsedVars,(ATerm) Expr,0) == NON_EXISTING) )
 		{
 			*UsedVars = ATinsert(*UsedVars,(ATerm) Expr);
 		}
 
-		if ( ATindexOf(Vars,(ATerm) Expr,0) == -1 )
+		if ( ATindexOf(Vars,(ATerm) Expr,0) == NON_EXISTING )
 		{
 			throw Expr;
 		}

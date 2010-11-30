@@ -64,17 +64,17 @@
 
 char memory_id[] = "$Id: memory.c 23465 2007-08-27 09:35:50Z eriks $";
 
-unsigned int maxTermSize = INITIAL_MAX_TERM_SIZE;
+size_t maxTermSize = INITIAL_MAX_TERM_SIZE;
 
 TermInfo* terminfo = NULL;
 
 Block *at_freeblocklist = NULL;
-unsigned int at_freeblocklist_size = 0;
+size_t at_freeblocklist_size = 0;
 BlockBucket block_table[BLOCK_TABLE_SIZE] = { { NULL, NULL } };
 
-unsigned long total_nodes = 0;
+size_t total_nodes = 0;
 
-static unsigned int table_class = INITIAL_TERM_TABLE_CLASS;
+static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
 static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
@@ -89,17 +89,12 @@ int old_bytes_in_young_blocks_since_last_major = 0; /* only live cells */
 static int maxload = 80;
 static ATerm *hashtable;
 
-static unsigned int destructor_count = 0;
+static size_t destructor_count = 0;
 static ATbool (*destructors[MAX_DESTRUCTORS])(ATermBlob) = { NULL };
 
 ATermList ATempty;
 
 static int infoflags = 0;
-
-#ifdef WITH_STATS
-static int hash_info_before_gc[MAX_INFO_SIZES][3];
-static int hash_info_after_gc[MAX_INFO_SIZES][3];
-#endif
 
 static ATbool at_check = ATfalse;
 
@@ -136,20 +131,20 @@ ATbool ATgetChecking(void)
  * Calculate the size (in words) of a term.
  */
 
-static int term_size(ATerm t)
+static size_t term_size(ATerm t)
 {
-  unsigned int size = 0;
+  size_t size = 0;
 
   switch(ATgetType(t)) {
     case AT_INT:
       size = TERM_SIZE_INT;
       break;
-    case AT_PLACEHOLDER:
+/*    case AT_PLACEHOLDER:
       size = TERM_SIZE_PLACEHOLDER;
       break;
     case AT_REAL:
       size = TERM_SIZE_REAL;
-      break;
+      break; */
     case AT_LIST:
       size = TERM_SIZE_LIST;
       break;
@@ -172,9 +167,9 @@ static int term_size(ATerm t)
 
 /*{{{  static HashNumber hash_number(ATerm t, int size) */
 
-static HashNumber hash_number(ATerm t, unsigned int size)
+static HashNumber hash_number(ATerm t, size_t size)
 {
-  unsigned int i;
+  size_t i;
   HashNumber hnr;
 
   hnr = START(HIDE_AGE_MARK(t->word[0]));
@@ -186,9 +181,9 @@ static HashNumber hash_number(ATerm t, unsigned int size)
   return FINISH(hnr);
 }
 
-/* static HashNumber hash_number_anno(ATerm t, unsigned int size, ATerm anno)
+/* static HashNumber hash_number_anno(ATerm t, size_t size, ATerm anno)
 {
-  unsigned int i;
+  size_t i;
   HashNumber hnr;
 
   hnr = START(HIDE_AGE_MARK(t->word[0]));
@@ -211,40 +206,6 @@ HashNumber AT_hashnumber(ATerm t)
 
 /*}}}  */
 
-#ifdef WITH_STATS
-/*{{{  static void hash_info(int stats[3][]) */
-
-static void hash_info(int stats[MAX_INFO_SIZES][3]) 
-{
-  unsigned int i, len;
-  static int count[MAX_INFO_SIZES];
-
-  /* Initialize statistics */
-  for(i=0; i<MAX_INFO_SIZES; i++)
-    count[i] = 0;
-
-  /* Gather statistics on the current fill of the hashtable */
-  for(i=0; i<table_size; i++) {
-    ATerm cur = hashtable[i];
-    len = 0;
-    while(cur) {
-      len++;
-      cur = cur->aterm.next; 
-    }
-    if(len >= MAX_INFO_SIZES)
-      len = MAX_INFO_SIZES-1;
-    count[len]++;
-  }
-
-  /* Update global statistic information */
-  for(i=0; i<MAX_INFO_SIZES; i++) {
-    STATS(stats[i], count[i]);
-  }
-}
-
-/*}}}  */
-#endif
-
 /*{{{  static void resize_hashtable() */
 
 /**
@@ -265,7 +226,7 @@ void resize_hashtable()
   table_size = ((HashNumber)1)<<table_class;
   table_mask = table_size-1;
   if (!silent)
-    fprintf(stderr, "resizing hashtable, class = %d\n", table_class);
+    fprintf(stderr, "resizing hashtable, class = %lu\n", table_class);
 
   /*{{{  Create new term table */
   newtable = (ATerm *) AT_realloc(hashtable, table_size * sizeof(ATerm));
@@ -273,7 +234,7 @@ void resize_hashtable()
   if (newtable)
     hashtable = newtable;
   else {
-    fprintf(stderr, "warning: could not resize hashtable to class %d.\n",
+    fprintf(stderr, "warning: could not resize hashtable to class %lu.\n",
             table_class);
     table_class--;
     table_size = ((HashNumber)1)<<table_class;
@@ -369,14 +330,9 @@ void AT_initMemory(unsigned int argc, char *argv[])
         maxTermSize = MIN_TERM_SIZE;
     } else if(strcmp(argv[i], "-at-help") == 0) {
       fprintf(stderr, "    %-20s: initial termtable size " 
-              "(2^size, default=%d)\n",        TERM_HASH_OPT " <size>", table_class);
-#ifdef WITH_STATS
-      fprintf(stderr, "    %-20s: write information to 'hashing.stats'\n",
-              HASH_INFO_OPT);
-#else
+              "(2^size, default=%lu)\n",        TERM_HASH_OPT " <size>", table_class);
       fprintf(stderr, "    %-20s: write information to 'hashing.stats' "
               "(disabled!)\n", HASH_INFO_OPT);
-#endif
 #ifdef NDEBUG
       fprintf(stderr, "    %-20s: check subterm validity at term creation "
               "(disabled!)\n", TERM_CHECK_OPT);
@@ -385,7 +341,7 @@ void AT_initMemory(unsigned int argc, char *argv[])
               TERM_CHECK_OPT);
 #endif
       fprintf(stderr, "    %-20s: initial maximum term size " 
-              "(minimum=%lud, default=%lud)\n", TERM_SIZE_OPT " <size>", (unsigned long) MIN_TERM_SIZE, (unsigned long) maxTermSize);
+              "(minimum=%lud, default=%lud)\n", TERM_SIZE_OPT " <size>", (size_t) MIN_TERM_SIZE, (size_t) maxTermSize);
     } 
   }
 
@@ -425,18 +381,6 @@ void AT_initMemory(unsigned int argc, char *argv[])
   ATprotectList(&ATempty);
 
   /*}}}  */
-#ifdef WITH_STATS
-  /*{{{  Initialize info structures */
-  for(i=0; i<MAX_INFO_SIZES; i++) {
-    hash_info_before_gc[i][IDX_TOTAL] = 0;
-    hash_info_before_gc[i][IDX_MIN] = MYMAXINT;
-    hash_info_before_gc[i][IDX_MAX] = 0;
-    hash_info_after_gc[i][IDX_TOTAL] = 0;
-    hash_info_after_gc[i][IDX_MIN] = MYMAXINT;
-    hash_info_after_gc[i][IDX_MAX] = 0;
-  }
-  /*}}}  */
-#endif
 
   AT_initMemmgnt();
 }
@@ -450,64 +394,6 @@ void AT_initMemory(unsigned int argc, char *argv[])
 
 void AT_cleanupMemory()
 {
-#ifdef WITH_STATS
-  unsigned int i;
-  int info[MAX_INFO_SIZES][3];
-
-  if(infoflags & INFO_HASHING) {
-    unsigned int max = MAX_INFO_SIZES-1;
-    FILE *f = fopen("hashing.stats", "wb");
-
-    if(!f)
-      ATerror("cannot open hashing statisics file: \"hashing.stats\"\n");
-
-    while(hash_info_before_gc[max][IDX_MAX] == 0)
-      max--;
-
-    if(at_gc_count > 0) {
-      fprintf(f, "hash statistics before and after garbage collection:\n");
-      for(i=0; i<=max; i++) {
-        fprintf(f, "%8d %8d %8d   %8d %8d %8d\n", 
-                hash_info_before_gc[i][IDX_MIN],
-                hash_info_before_gc[i][IDX_TOTAL]/at_gc_count,
-                hash_info_before_gc[i][IDX_MAX],
-                hash_info_after_gc[i][IDX_MIN],
-                hash_info_after_gc[i][IDX_TOTAL]/at_gc_count,
-                hash_info_after_gc[i][IDX_MAX]);
-      }
-    }
-
-    for(i=0; i<MAX_INFO_SIZES; i++) {
-      info[i][IDX_MIN] = MYMAXINT;
-      info[i][IDX_TOTAL] = 0;
-      info[i][IDX_MAX] = 0;
-    }
-    hash_info(info);
-    fprintf(f, "hash statistics at end of program:\n");
-    max = MAX_INFO_SIZES-1;
-    while(info[max][IDX_MAX] == 0)
-      max--;
-    for(i=0; i<=max; i++) {
-      fprintf(f, "%8d\n", info[i][IDX_TOTAL]);
-    }
-
-    for(i=0; i<table_size; i++) {
-      int size = 0;
-      ATerm cur = hashtable[i];
-      for(size=0; cur; size++)
-        cur = cur->aterm.next;
-      if(size > 5) {
-        fprintf(f, "bucket %d has length %d\n", i, size);
-        cur = hashtable[i];
-        while(cur) {
-          ATfprintf(f, "%t\n", cur);
-          cur = cur->aterm.next;
-        }
-      }
-    }
-  }
-#endif
-
   AT_free(hashtable);
   AT_free(terminfo);
   AT_free_protected_blocks();
@@ -522,9 +408,9 @@ void AT_cleanupMemory()
 header_type *min_heap_address = (header_type*)(~0);
 header_type *max_heap_address = 0;
 
-/*{{{  static void allocate_block(unsigned int size)  */
+/*{{{  static void allocate_block(size_t size)  */
 
-static void allocate_block(unsigned int size) 
+static void allocate_block(size_t size) 
 {
   int idx;
   Block *newblock;
@@ -576,7 +462,7 @@ static void allocate_block(unsigned int size)
   ti->at_blocks[AT_BLOCK] = newblock;
   ti->top_at_blocks = newblock->data;
   assert(ti->at_blocks[AT_BLOCK] != NULL);
-  assert(((long)ti->top_at_blocks % MAX(sizeof(double), sizeof(void *))) == 0);
+  assert(((size_t)ti->top_at_blocks % MAX(sizeof(double), sizeof(void *))) == 0);
   
     /* [pem: Feb 14 02] TODO: fast allocation */
   assert(ti->at_freelist == NULL);
@@ -613,33 +499,6 @@ static void allocate_block(unsigned int size)
         at = (ATerm)ti->top_at_blocks;\
         ti->top_at_blocks += size;
 
-#ifdef WITH_STATS
-#define GC_MINOR_TEXT\
-          AT_STATISTICS;\
-          nb_minor_since_last_major++;\
-          if(infoflags & INFO_HASHING) {\
-            hash_info(hash_info_before_gc);\
-          }\
-              /*fprintf(stderr,"-> AT_collect_minor\n");*/\
-          AT_collect_minor();\
-          if(infoflags & INFO_HASHING) {\
-            hash_info(hash_info_after_gc);\
-          }\
-          AT_STATISTICS;
-
-#define GC_MAJOR_TEXT\
-        AT_STATISTICS;\
-        nb_minor_since_last_major = 0;\
-        if(infoflags & INFO_HASHING) {\
-          hash_info(hash_info_before_gc);\
-        }\
-            /*fprintf(stderr,"-> AT_collect\n");*/\
-        AT_collect();\
-        if(infoflags & INFO_HASHING) {\
-          hash_info(hash_info_after_gc);\
-        }\
-        AT_STATISTICS;
-#else
 #define GC_MINOR_TEXT\
           AT_STATISTICS;\
           nb_minor_since_last_major++;\
@@ -653,15 +512,14 @@ static void allocate_block(unsigned int size)
             /*fprintf(stderr,"-> AT_collect\n");*/\
         AT_collect();\
         AT_STATISTICS;
-#endif
 
 /*}}}  */
 
-static unsigned long nb_at_allocate=0;
+static size_t nb_at_allocate=0;
 
-/*{{{  unsigned_long AT_getAllocatedCount() */
+/*{{{  size_t AT_getAllocatedCount() */
 
-unsigned long AT_getAllocatedCount()
+size_t AT_getAllocatedCount()
 {
   return nb_at_allocate;
 }
@@ -672,7 +530,7 @@ unsigned long AT_getAllocatedCount()
 
 void AT_statistics() 
 {
-  unsigned int size;
+  size_t size;
   Block *block;
   header_type *cur;
   int old_in_old_heap=0;
@@ -743,10 +601,10 @@ void AT_statistics()
 
 /*}}}  */
 
-void AT_growMaxTermSize(unsigned int neededsize)
+void AT_growMaxTermSize(size_t neededsize)
 {
   TermInfo* newterminfo;
-  unsigned int newsize;
+  size_t newsize;
 
   if (low_memory) {
     newsize = neededsize;
@@ -757,7 +615,7 @@ void AT_growMaxTermSize(unsigned int neededsize)
   }
 
 #ifndef NDEBUG
-  fprintf(stderr, "Growing administrative structures to accomodate terms of size %d\n", newsize);
+  fprintf(stderr, "Growing administrative structures to accomodate terms of size %lu\n", newsize);
 #endif
 
   newterminfo = (TermInfo*)AT_realloc((void*)terminfo, newsize*sizeof(TermInfo));
@@ -777,9 +635,9 @@ void AT_growMaxTermSize(unsigned int neededsize)
   maxTermSize = newsize;
 }
 
-/*{{{  ATerm AT_allocate(unsigned int size)  */
+/*{{{  ATerm AT_allocate(size_t size)  */
 
-ATerm AT_allocate(unsigned int size) 
+ATerm AT_allocate(size_t size) 
 {
   ATerm at;
   TermInfo* ti;
@@ -895,21 +753,21 @@ ATerm AT_allocate(unsigned int size)
 
 /*}}}  */
 
-/*{{{  void AT_freeTerm(unsigned int size, ATerm t) */
+/*{{{  void AT_freeTerm(size_t size, ATerm t) */
 
 /**
  * Free a term of a particular size.
  */
 
-void AT_freeTerm(unsigned int size, ATerm t)
+void AT_freeTerm(size_t size, ATerm t)
 {
   HashNumber hnr = hash_number(t, size);
   ATerm prev = NULL, cur;
-  /* unsigned int i; */
+  /* size_t i; */
 
   terminfo[size].nb_reclaimed_cells_during_last_gc++;
   
-    /*fprintf(stderr,"AT_freeTerm term[%d] = %x\theader = %x\n",size,(unsigned int)t,t->header);*/
+    /*fprintf(stderr,"AT_freeTerm term[%d] = %x\theader = %x\n",size,(size_t)t,t->header);*/
   
   /* The data of a blob needs to be freed!!! */
   /* if (ATgetType(t) == AT_BLOB) 
@@ -933,7 +791,7 @@ void AT_freeTerm(unsigned int size, ATerm t)
   do {
     if(!cur) {
         /*printf("freeterm = %d\n",t);*/
-      /*fprintf(stderr,"### cannot find term %x in hashtable at pos %d header = %x\n", (unsigned int)(intptr_t)t, (int)hnr, (unsigned int)t->header);*/
+      /*fprintf(stderr,"### cannot find term %x in hashtable at pos %d header = %x\n", (size_t)(intptr_t)t, (int)hnr, (size_t)t->header);*/
 
       ATabort("AT_freeTerm: cannot find term %n at %p in hashtable at pos %d"
               ", header = 0x%x\n", t, t, hnr, t->header);
@@ -962,7 +820,7 @@ void AT_freeTerm(unsigned int size, ATerm t)
 ATermAppl ATmakeAppl(Symbol sym, ...)
 {
   ATermAppl cur;
-  unsigned int i, arity = ATgetArity(sym);
+  size_t i, arity = ATgetArity(sym);
   ATbool found;
   header_type header;
   HashNumber hnr;
@@ -1047,7 +905,6 @@ ATermAppl ATmakeAppl0(Symbol sym)
         *hashspot = cur;
       }
 
-        /*fprintf(stderr,"ATmakeAppl0 found = %x\n",(unsigned int)cur);*/
       return cur;
     }
     prev = cur;
@@ -1062,7 +919,6 @@ ATermAppl ATmakeAppl0(Symbol sym)
   cur->aterm.next = hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
-    /*fprintf(stderr,"ATmakeAppl0 alloc = %x\n",(unsigned int)cur);*/
   return cur;
 }
 
@@ -1125,7 +981,6 @@ ATermAppl ATmakeAppl1(Symbol sym, ATerm arg0)
   cur->aterm.next = hashtable[hnr];
   hashtable[hnr] = (ATerm) cur;
 
-    /*fprintf(stderr,"ATmakeAppl1 alloc = %x\tsub = %x\n",(unsigned int)cur,(unsigned int)ATgetArgument(cur, 0));*/
   return cur;  
 }
 
@@ -1450,7 +1305,7 @@ ATermAppl ATmakeApplList(Symbol sym, ATermList args)
 {
   ATermAppl cur;
   ATermList argptr;
-  unsigned int i, arity = ATgetArity(sym);
+  size_t i, arity = ATgetArity(sym);
   ATbool found;
   header_type header = APPL_HEADER(0, arity > MAX_INLINE_ARITY ?
                                    MAX_INLINE_ARITY+1 : arity, sym);
@@ -1522,7 +1377,7 @@ ATermAppl ATmakeApplList(Symbol sym, ATermList args)
 ATermAppl ATmakeApplArray(Symbol sym, ATerm args[])
 {
   ATermAppl cur;
-  unsigned int i, arity = ATgetArity(sym);
+  size_t i, arity = ATgetArity(sym);
   ATbool found;
   HashNumber hnr;
   header_type header = APPL_HEADER(0, arity > MAX_INLINE_ARITY ?
@@ -1600,7 +1455,7 @@ ATermInt ATmakeInt(int val)
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
-    cur->aterm.value = (long)val;
+    cur->aterm.value = (size_t)val;
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
   }
@@ -1617,18 +1472,18 @@ ATermInt ATmakeInt(int val)
  * Create an ATermReal
  */
 
-#define DOUBLEWORDSIZE (sizeof(double)/sizeof(MachineWord))
+/* #define DOUBLEWORDSIZE (sizeof(double)/sizeof(MachineWord))
 union doublewords {
   double      val; 
   MachineWord word[DOUBLEWORDSIZE];
-};
+}; */
 
-ATermReal ATmakeReal(double val)
+/* ATermReal ATmakeReal(double val)
 {
   ATermReal cur;
   header_type header = REAL_HEADER(0);
   HashNumber hnr;
-  unsigned int i;
+  size_t i;
   union doublewords dw;
   
   hnr = START(header);
@@ -1645,7 +1500,7 @@ ATermReal ATmakeReal(double val)
 
   if (!cur) {
     cur = (ATermReal) AT_allocate(TERM_SIZE_REAL);
-    /* Delay masking until after AT_allocate */
+    / * Delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
@@ -1655,7 +1510,7 @@ ATermReal ATmakeReal(double val)
   }
 
   return cur;
-}
+} */
 
 /*}}}  */
 
@@ -1709,8 +1564,8 @@ ATermList ATmakeList1(ATerm el)
 
 ATermList ATinsert(ATermList tail, ATerm el)
 {
-  unsigned int curLength = GET_LENGTH(tail->header);
-  unsigned int newLength;
+  size_t curLength = GET_LENGTH(tail->header);
+  size_t newLength;
   header_type header;
   HashNumber hnr;
   ATermList cur;
@@ -1766,7 +1621,7 @@ ATermList ATinsert(ATermList tail, ATerm el)
  * Create a new placeholder.
  */
 
-ATermPlaceholder ATmakePlaceholder(ATerm type)
+/* ATermPlaceholder ATmakePlaceholder(ATerm type)
 {
   ATermPlaceholder cur;
   header_type header = PLACEHOLDER_HEADER(0);
@@ -1786,7 +1641,7 @@ ATermPlaceholder ATmakePlaceholder(ATerm type)
 
   if (!cur) {
     cur = (ATermPlaceholder) AT_allocate(TERM_SIZE_PLACEHOLDER);
-    /* Delay masking until after AT_allocate */
+    / * Delay masking until after AT_allocate * /
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
@@ -1797,7 +1652,7 @@ ATermPlaceholder ATmakePlaceholder(ATerm type)
 
   return cur;
 
-}
+} */
 
 /*}}}  */
 
@@ -1807,7 +1662,7 @@ ATermPlaceholder ATmakePlaceholder(ATerm type)
  * Create a new BLOB (Binary Large OBject)
  */
 
-/* ATermBlob ATmakeBlob(unsigned int size, void *data)
+/* ATermBlob ATmakeBlob(size_t size, void *data)
 {
   ATermBlob cur;
   header_type header = BLOB_HEADER(0);
@@ -1857,7 +1712,7 @@ ATermPlaceholder ATmakePlaceholder(ATerm type)
 /* ATerm AT_setAnnotations(ATerm t, ATerm annos)
 {
   HashNumber hnr;
-  unsigned int i, size = term_size(t);
+  size_t i, size = term_size(t);
   header_type header;
   ATbool found;
   ATerm cur;
@@ -1929,7 +1784,7 @@ ATermPlaceholder ATmakePlaceholder(ATerm type)
 /* ATerm AT_removeAnnotations(ATerm t)
 {
   HashNumber hnr;
-  unsigned int i, size;
+  size_t i, size;
   header_type header;
   ATbool found;
   ATerm cur;
@@ -1987,15 +1842,15 @@ ATermPlaceholder ATmakePlaceholder(ATerm type)
 
 / *}}}  */
 
-/*{{{  ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n) */
+/*{{{  ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n) */
 
 /**
  * Change one argument of an application.
  */
 
-ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n)
+ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
 {
-  unsigned int i, arity;
+  size_t i, arity;
   Symbol sym = ATgetSymbol(appl);
   /* ATerm annos = AT_getAnnotations((ATerm)appl); */
   ATerm annos = NULL;
@@ -2075,9 +1930,9 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, unsigned int n)
  * Create a list with n arguments.
  */
 
-ATermList ATmakeList(unsigned int n, ...)
+ATermList ATmakeList(size_t n, ...)
 {
-  unsigned int i;
+  size_t i;
   va_list args;
   ATermList l;
   ATerm* elems = AT_alloc_protected(n);
@@ -2121,7 +1976,7 @@ void ATregisterBlobDestructor(ATbool (*destructor)(ATermBlob))
 
 void ATunregisterBlobDestructor(ATbool (*destructor)(ATermBlob))
 {
-  unsigned int i;
+  size_t i;
 
   for(i=0; i<destructor_count; i++) {
     if(destructors[i] == destructor) {
@@ -2351,9 +2206,9 @@ ATerm AT_isInsideValidTerm(ATerm term)
 
 /*}}}  */
 
-/*{{{  void AT_validateFreeList(unsigned int size) */
+/*{{{  void AT_validateFreeList(size_t size) */
 
-void AT_validateFreeList(unsigned int size)
+void AT_validateFreeList(size_t size)
 {
   ATerm cur1, cur2;
 
@@ -2374,7 +2229,7 @@ void AT_validateFreeList(unsigned int size)
 
 int AT_inAnyFreeList(ATerm t)
 {
-  unsigned int i;
+  size_t i;
 
   for(i=MIN_TERM_SIZE; i<maxTermSize; i++) {
     ATerm cur = terminfo[i].at_freelist;
@@ -2394,7 +2249,7 @@ int AT_inAnyFreeList(ATerm t)
 
 void AT_printAllTerms(FILE *file)
 {
-  unsigned int i;
+  size_t i;
 
   for(i=0; i<table_size; i++) {
     ATerm cur = hashtable[i];
@@ -2418,9 +2273,9 @@ static int compare_afuns(const void *l, const void *r)
   left = *((AFun *)l);
   right = *((AFun *)r);
 
-  if(left == -1)
+  if(left == (AFun)(-1))
     return 1;
-  if(right == -1)
+  if(right == (AFun)(-1))
     return -1;
 
   left_count = at_lookup_table[left]->count;
@@ -2437,7 +2292,7 @@ static int compare_afuns(const void *l, const void *r)
 
 void AT_printAllAFunCounts(FILE *file)
 {
-  unsigned int i, nr_syms;
+  size_t i, nr_syms;
   AFun *afuns;
 
   nr_syms = AT_symbolTableSize();
@@ -2472,7 +2327,7 @@ void AT_printAllAFunCounts(FILE *file)
   qsort(afuns, nr_syms, sizeof(AFun), compare_afuns);
 
   for(i=0; i<nr_syms; i++) {
-    if(afuns[i] != -1)
+    if(afuns[i] != (AFun)(-1))
       ATfprintf(file, "%y: %d\n", afuns[i], at_lookup_table[afuns[i]]->count);
   }
 }
@@ -2485,10 +2340,10 @@ void AT_printAllAFunCounts(FILE *file)
  * Calculate all allocated bytes containing ATerms.
  */
 
-unsigned long AT_calcAllocatedSize()
+size_t AT_calcAllocatedSize()
 {
-  unsigned int i;
-  unsigned long total = 0;
+  size_t i;
+  size_t total = 0;
 
   for(i=0; i<maxTermSize; i++)
     total += terminfo[i].at_nrblocks*sizeof(Block);

@@ -32,17 +32,17 @@
 
 char afun_id[] = "$Id: afun.c 23071 2007-07-02 10:06:17Z eriks $";
 
-static unsigned int table_class = INITIAL_AFUN_TABLE_CLASS;
+static size_t table_class = INITIAL_AFUN_TABLE_CLASS;
 static MachineWord table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
-static unsigned long table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
+static size_t table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static SymEntry *hash_table     = NULL;
 
 static Symbol first_free = -1;
 
 static Symbol *protected_symbols = NULL;
-static unsigned int nr_protected_symbols  = 0;
-static unsigned int max_protected_symbols  = 0;
+static size_t nr_protected_symbols  = 0;
+static size_t max_protected_symbols  = 0;
 
 /* Efficiency hack: was static */
 SymEntry *at_lookup_table = NULL;
@@ -62,9 +62,9 @@ extern char *strdup(const char *s);
 static void resize_table()
 {
   MachineWord i;
-  unsigned int new_class = table_class+1;
+  size_t new_class = table_class+1;
   MachineWord new_size  = AT_TABLE_SIZE(new_class);
-  unsigned long new_mask  = AT_TABLE_MASK(new_class);
+  size_t new_mask  = AT_TABLE_MASK(new_class);
 
   at_lookup_table = (SymEntry *)AT_realloc(at_lookup_table, new_size*sizeof(SymEntry));
   at_lookup_table_alias = (ATerm *)at_lookup_table;
@@ -99,7 +99,7 @@ static void resize_table()
 
 /*}}}  */
 
-/*{{{  unsigned int AT_symbolTableSize() */
+/*{{{  size_t AT_symbolTableSize() */
 
 MachineWord AT_symbolTableSize()
 {
@@ -111,10 +111,10 @@ MachineWord AT_symbolTableSize()
 /*{{{  void AT_initSymbol(int argc, char *argv[]) */
 void AT_initSymbol(int argc, char *argv[])
 {
-  unsigned int i;
+  size_t i;
   AFun sym;
 
-  for (i = 1; i < (unsigned int)argc; i++) {
+  for (i = 1; i < (size_t)argc; i++) {
     if (streq(argv[i], SYMBOL_HASH_OPT)) {
       ATerror("Option %s is deprecated, use %s instead!\n"
 	      "Note that %s uses 2^<arg> as the actual table size.\n",
@@ -125,7 +125,7 @@ void AT_initSymbol(int argc, char *argv[])
       table_mask  = AT_TABLE_MASK(table_class);
     } else if(streq(argv[i], "-at-help")) {
       fprintf(stderr, "    %-20s: initial afun table class " 
-	      "(default=%d)\n",	AFUN_TABLE_OPT " <class>", table_class);
+	      "(default=%lu)\n",	AFUN_TABLE_OPT " <class>", table_class);
     }
   }
 
@@ -158,13 +158,15 @@ void AT_initSymbol(int argc, char *argv[])
   assert(sym == AS_INT);
   ATprotectAFun(sym);
 
+  /* Can't remove real and blob below, as the symbols
+     AS_PLACE_HOLDER have predetermined values.... */
   sym = ATmakeAFun("<real>", 0, ATfalse);
   assert(sym == AS_REAL);
   ATprotectAFun(sym);
 
   sym = ATmakeAFun("<blob>", 0, ATfalse);
   assert(sym == AS_BLOB);
-  ATprotectAFun(sym);
+  ATprotectAFun(sym); 
 
   sym = ATmakeAFun("<_>", 1, ATfalse);
   assert(sym == AS_PLACEHOLDER);
@@ -315,10 +317,10 @@ int AT_writeAFun(AFun fun, byte_writer *writer)
   b -= c; b -= a; b ^= (a<<10); \
   c -= a; c -= b; c ^= (b>>15); \
 }
-typedef  unsigned int  ub4;   /* unsigned 4-byte quantities */
+typedef  size_t  ub4;         /* unsigned 4/8-byte quantity, corresponding to a machine word */
 typedef  unsigned char ub1;   /* unsigned 1-byte quantities */
 
-ShortHashNumber AT_hashSymbol(const char *name, int arity) {
+ShortHashNumber AT_hashSymbol(const char *name, size_t arity) {
    register ub4 a,b,c,len;
    ub1 *k=name;
    ub4 length = strlen(name);
@@ -361,7 +363,7 @@ ShortHashNumber AT_hashSymbol(const char *name, int arity) {
    return c;
 }
 #else
-ShortHashNumber AT_hashSymbol(const char *name, int arity)
+ShortHashNumber AT_hashSymbol(const char *name, size_t arity)
 {
   ShortHashNumber hnr;
   const char *walk = name;
@@ -377,7 +379,7 @@ ShortHashNumber AT_hashSymbol(const char *name, int arity)
 
 /*{{{  Symbol ATmakeSymbol(const char *name, int arity, ATbool quoted) */
 
-Symbol ATmakeSymbol(const char *name, int arity, ATbool quoted)
+Symbol ATmakeSymbol(const char *name, size_t arity, ATbool quoted)
 {
   header_type header = SYMBOL_HEADER(arity, quoted);
   ShortHashNumber hnr = AT_hashSymbol(name, arity) & table_mask;
@@ -400,14 +402,14 @@ Symbol ATmakeSymbol(const char *name, int arity, ATbool quoted)
     Symbol free_entry;
 
     free_entry = first_free;
-    if (free_entry == -1) {
+    if (free_entry == (Symbol)(-1)) {
       resize_table();
 
       /* Hashtable size changed, so recalculate hashnumber */
       hnr = AT_hashSymbol(name, arity) & table_mask;
      
       free_entry = first_free;
-      if (free_entry == -1) {
+      if (free_entry == (Symbol)(-1)) {
 	ATerror("AT_initSymbol: out of symbol slots!\n");
       }
     }
@@ -484,7 +486,7 @@ void AT_freeSymbol(SymEntry sym)
  * Check for the existence of a symbol
  */
 
-ATbool AT_findSymbol(char *name, int arity, ATbool quoted)
+ATbool AT_findSymbol(char *name, size_t arity, ATbool quoted)
 {
   header_type header = SYMBOL_HEADER(arity, quoted);
   ShortHashNumber hnr = AT_hashSymbol(name, arity) & table_mask;
@@ -541,7 +543,7 @@ void ATunprotectSymbol(Symbol sym)
    * end of protected symbols, and removes them in 
    * reverse order. */
 
-  unsigned int lcv;
+  size_t lcv;
 
   for(lcv = nr_protected_symbols; lcv >0 ; ) 
   { 
@@ -563,7 +565,7 @@ void ATunprotectSymbol(Symbol sym)
 
 void AT_markProtectedSymbols()
 {
-  unsigned int lcv;
+  size_t lcv;
   for(lcv = 0; lcv < nr_protected_symbols; lcv++) {
     SET_MARK(((ATerm)at_lookup_table[protected_symbols[lcv]])->header);
   }
@@ -571,7 +573,7 @@ void AT_markProtectedSymbols()
 
 /* TODO: Optimisation (Old+Mark in one step)*/
 void AT_markProtectedSymbols_young() {
-  unsigned int lcv;
+  size_t lcv;
 
     /*printf("Warning: AT_markProtectedSymbols_young\n");*/
   for(lcv = 0; lcv < nr_protected_symbols; lcv++) {

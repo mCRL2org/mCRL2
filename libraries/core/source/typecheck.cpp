@@ -52,12 +52,16 @@ namespace mcrl2 {
     } gsSystem;
     static gsSystem gssystem;
 
-    static ATermList list_minus(ATermList l, ATermList m);
-    static ATermList list_minus(ATermList l, ATermList m){
+    static ATermList list_minus(ATermList l, ATermList m)
+    {
       ATermList n = ATmakeList0();
       for (; !ATisEmpty(l); l=ATgetNext(l))
-        if ( ATindexOf(m,ATgetFirst(l),0) < 0 )
+      {
+        if ( ATindexOf(m,ATgetFirst(l),0) == NON_EXISTING )
+        {
           n = ATinsert(n,ATgetFirst(l));
+        }
+      }
       return ATreverse(n);
     }
 
@@ -1355,7 +1359,7 @@ namespace mcrl2 {
           gsErrorMsg("attempt to redeclare sort Real\n");
           return ATfalse;
         }
-        if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)!=(size_t)(-1)
+        if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)!=NON_EXISTING
            || ATAtableGet(context.defined_sorts, (ATerm)SortName)){
 
           gsErrorMsg("double declaration of sort %P\n",SortName);
@@ -2421,7 +2425,8 @@ namespace mcrl2 {
       if(n==0) return ProcTerm;
 
       //Here the code for short-hand assignments begins.
-      if(gsIsIdAssignment(ProcTerm)){
+      if(gsIsIdAssignment(ProcTerm))
+      {
         // if (gsDebug) { std::cerr << "typechecking a process call with short-hand assignments %T\n\n", ProcTerm);
         ATermAppl Name=ATAgetArgument(ProcTerm,0);
         ATermList ParList=ATLtableGet(context.processes,(ATerm)Name);
@@ -2429,7 +2434,8 @@ namespace mcrl2 {
 
         // Put the assignments into a table
         ATermTable As=ATtableCreate(63,50);
-        for(ATermList l=ATLgetArgument(ProcTerm,1);!ATisEmpty(l);l=ATgetNext(l)){
+        for(ATermList l=ATLgetArgument(ProcTerm,1);!ATisEmpty(l);l=ATgetNext(l))
+        {
           ATermAppl a=ATAgetFirst(l);
           ATtablePut(As,(ATerm)ATAgetArgument(a,0),(ATerm)ATAgetArgument(a,1));
         }
@@ -2437,24 +2443,39 @@ namespace mcrl2 {
         {
           // Now filter the ParList to contain only the processes with parameters in this process call with assignments
           ATermList NewParList=ATmakeList0();
-          for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+          for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList))
+          {
             ATermList Par=ATLgetFirst(ParList);
 
             // get the formal parameter names
             ATermList FormalPars=ATLtableGet(body.proc_pars,(ATerm)gsMakeProcVarId(Name,Par));
             // we only need the names of the parameters, not the types
             ATermList FormalParNames=ATmakeList0();
-            for(;!ATisEmpty(FormalPars);FormalPars=ATgetNext(FormalPars)){
+            for(;!ATisEmpty(FormalPars);FormalPars=ATgetNext(FormalPars))
+            {
               FormalParNames=ATinsert(FormalParNames,(ATerm)ATAgetArgument(ATAgetFirst(FormalPars),0));
             }
 
-            if(ATisEmpty(list_minus(ATtableKeys(As),FormalParNames))) NewParList=ATinsert(NewParList,(ATerm)Par);
+            if(ATisEmpty(list_minus(ATtableKeys(As),FormalParNames))) 
+            { 
+              NewParList=ATinsert(NewParList,(ATerm)Par);
+            }
           }
           ParList=ATreverse(NewParList);
         }
 
-        if(ATisEmpty(ParList)) { ATtableDestroy(As); gsErrorMsg("no process %P containing all assignments in %P\n", Name, ProcTerm); return NULL; }
-        if(!ATisEmpty(ATgetNext(ParList))) { ATtableDestroy(As); gsErrorMsg("ambiguous process %P containing all assignments in %P\n", Name, ProcTerm); return NULL; }
+        if(ATisEmpty(ParList)) 
+        { 
+          ATtableDestroy(As); 
+          gsErrorMsg("no process %P containing all assignments in %P\n", Name, ProcTerm); 
+          return NULL; 
+        }
+        if(!ATisEmpty(ATgetNext(ParList))) 
+        { 
+          ATtableDestroy(As); 
+          gsErrorMsg("ambiguous process %P containing all assignments in %P\n", Name, ProcTerm); 
+          return NULL; 
+        }
 
         // get the formal parameter names
         ATermList ActualPars=ATmakeList0();
@@ -2611,12 +2632,12 @@ namespace mcrl2 {
               ATermList Acts=ATmakeList0();
               for(;!ATisEmpty(MActFrom);MActFrom=ATgetNext(MActFrom)){
                 ATermAppl Act=ATAgetFirst(MActFrom);
-                if(ATindexOf(Acts,(ATerm)Act,0)<0)
+                if(ATindexOf(Acts,(ATerm)Act,0)==NON_EXISTING)
                   Acts=ATinsert(Acts,(ATerm)Act);
               }
               for(;!ATisEmpty(Acts);Acts=ATgetNext(Acts)){
                 ATermAppl Act=ATAgetFirst(Acts);
-                if(ATindexOf(ActsFrom,(ATerm)Act,0)>=0)
+                if(ATindexOf(ActsFrom,(ATerm)Act,0)!=NON_EXISTING)
                 {gsErrorMsg("synchronizing action %P in different ways (typechecking %P)\n",Act,ProcTerm);return NULL;}
                 else ActsFrom=ATinsert(ActsFrom,(ATerm)Act);
               }

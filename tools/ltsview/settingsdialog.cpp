@@ -516,22 +516,22 @@ void SettingsDialog::onTransparencySpin(wxSpinEvent& event)
   glCanvas->display();
 }
 
-void SettingsDialog::onIterativeRadio(wxCommandEvent& event)
+void SettingsDialog::onIterativeRadio(wxCommandEvent& )
 {
   settings->setInt(StateRankStyle, ITERATIVE);
 }
 
-void SettingsDialog::onCyclicRadio(wxCommandEvent& event)
+void SettingsDialog::onCyclicRadio(wxCommandEvent& )
 {
   settings->setInt(StateRankStyle, CYCLIC);
 }
 
-void SettingsDialog::onConesRadio(wxCommandEvent& event)
+void SettingsDialog::onConesRadio(wxCommandEvent& )
 {
   settings->setInt(ClusterVisStyle, CONES);
 }
 
-void SettingsDialog::onTubesRadio(wxCommandEvent& event)
+void SettingsDialog::onTubesRadio(wxCommandEvent& )
 {
   settings->setInt(ClusterVisStyle, TUBES);
 }
@@ -541,12 +541,12 @@ void SettingsDialog::onFsmStyleCheck(wxCommandEvent& event)
   settings->setBool(FsmStyle, event.IsChecked());
 }
 
-void SettingsDialog::onSinglePassRadio(wxCommandEvent& event)
+void SettingsDialog::onSinglePassRadio(wxCommandEvent& )
 {
   settings->setInt(StatePosStyle, SINGLE_PASS);
 }
 
-void SettingsDialog::onMultiPassRadio(wxCommandEvent& event)
+void SettingsDialog::onMultiPassRadio(wxCommandEvent& )
 {
   settings->setInt(StatePosStyle, MULTI_PASS);
 }

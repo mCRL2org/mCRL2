@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_real.h
-/// \brief Term containing a real value.
+/// \brief Term containing a real value. Deprecated.
 
 #ifndef MCRL2_ATERMPP_ATERM_REAL_H
 #define MCRL2_ATERMPP_ATERM_REAL_H
@@ -20,7 +20,7 @@ namespace atermpp
   ///////////////////////////////////////////////////////////////////////////////
   // aterm_real
   /// \brief Represents an term containing a real value.
-  class aterm_real: public aterm_base
+  /* class aterm_real: public aterm_base
   {
     public:
       /// \brief Constructor.
@@ -91,6 +91,7 @@ namespace atermpp
     static ATerm* ptr(aterm_real& t)    { return &t.term(); }
   };
   /// \endcond
+*/
 
 } // namespace atermpp
 

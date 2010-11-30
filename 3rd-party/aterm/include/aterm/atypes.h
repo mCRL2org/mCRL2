@@ -22,15 +22,18 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-typedef unsigned int ShortHashNumber;
+typedef size_t ShortHashNumber;
 
-#ifdef AT_64BIT
+/* #ifdef AT_64BIT
 typedef int64_t MachineWord;
 typedef uint64_t HashNumber;
 #else
 typedef long MachineWord;
 typedef unsigned long HashNumber;
-#endif
+#endif */
+
+typedef size_t MachineWord;
+typedef size_t HashNumber;
 
 #ifdef AT_64BIT
 #define ADDR_TO_SHORT_HNR(a) ((ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^ (((MachineWord)(a)) >> 34)))

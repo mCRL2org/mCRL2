@@ -81,9 +81,9 @@ extern "C"
 #define	AT_FREE         0L /**< internally used type */
 #define AT_APPL         1L /**< type of applications of function names to terms */
 #define AT_INT          2L /**< type of integer numbers */
-#define AT_REAL         3L /**< type of real numbers */
+/* #define AT_REAL         3L / **< type of real numbers */
 #define AT_LIST         4L /**< type of lists of terms */
-#define AT_PLACEHOLDER  5L /**< type of a placeholder for a term */
+/* #define AT_PLACEHOLDER  5L / **< type of a placeholder for a term */
 /* #define AT_BLOB         6L / **< type of a binary large object */
 #define AT_SYMBOL       7L /**< internally used type*/
 
@@ -351,7 +351,7 @@ void ATunprotect(ATerm *atp);
  * \arg start array of terms
  * \arg size  length of |start|
  */
-void ATprotectArray(ATerm *start, unsigned int size);
+void ATprotectArray(ATerm *start, size_t size);
 
 /**
  * Efficiently ATunprotect() an array of terms.
@@ -401,16 +401,16 @@ void ATmarkArray(ATerm *start, int size);
 #define ATprotectTerm(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectList(p) ATprotect((ATerm *)(void *)(p))
 #define ATprotectAppl(p) ATprotect((ATerm *)(void *)(p))
-#define ATprotectPlaceholder(p) ATprotect((ATerm *)(void *)(p))
+/* #define ATprotectPlaceholder(p) ATprotect((ATerm *)(void *)(p)) */
 #define ATprotectInt(p) ATprotect((ATerm *)(void *)(p))
-#define ATprotectReal(p) ATprotect((ATerm *)(void *)(p))
+/* #define ATprotectReal(p) ATprotect((ATerm *)(void *)(p)) */
 
 #define ATunprotectTerm(p) ATunprotect((ATerm *)(void *)(p))
 #define ATunprotectList(p) ATunprotect((ATerm *)(void *)(p))
 #define ATunprotectAppl(p) ATunprotect((ATerm *)(void *)(p))
-#define ATunprotectPlaceholder(p) ATunprotect((ATerm *)(void *)(p))
+/* #define ATunprotectPlaceholder(p) ATunprotect((ATerm *)(void *)(p)) */
 #define ATunprotectInt(p) ATunprotect((ATerm *)(void *)(p))
-#define ATunprotectReal(p) ATunprotect((ATerm *)(void *)(p))
+/* #define ATunprotectReal(p) ATunprotect((ATerm *)(void *)(p)) */
 
 /** 
  * Initialize the ATerm library. It is essential to call this function in the 

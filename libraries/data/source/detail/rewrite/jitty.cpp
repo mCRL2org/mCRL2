@@ -302,7 +302,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
             int j=0;
             for (ATermList o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
             {
-              if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) >= 0 )
+              if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) != NON_EXISTING )
               {
                   bs[j] = true;
               }
@@ -317,7 +317,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
             bool b = false;
             for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
             {
-              if ( ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) >= 0 )
+              if ( ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) != NON_EXISTING )
               {
                 if ( j >= 0 )
                   bs[j] = true;

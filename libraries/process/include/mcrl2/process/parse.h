@@ -67,6 +67,7 @@ namespace process {
     {
       throw mcrl2::runtime_error("parse error");
     }
+ATfprintf(stderr,"AAAA %t\n",x);
     process_specification result(x, false);
     type_check(result);
     if (alpha_reduce)

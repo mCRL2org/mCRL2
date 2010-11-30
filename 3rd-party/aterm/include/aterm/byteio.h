@@ -30,7 +30,7 @@ typedef struct
 typedef struct
 {
   int type;
-  long bytes_read;
+  size_t bytes_read;
   union {
     FILE *file_data;
     struct {

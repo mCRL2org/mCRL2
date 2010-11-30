@@ -248,7 +248,7 @@ bool StandardSimulator::ChooseTransition(unsigned int index)
         ATermList trans = ATLgetFirst(l);
         if ( ATisEmpty(ATLgetArgument(ATAgetFirst(trans),0)) )
         {
-          if ( ATindexedSetGetIndex(seen_states,ATgetFirst(ATgetNext(trans))) == (size_t)(-1) )
+          if ( ATindexedSetGetIndex(seen_states,ATgetFirst(ATgetNext(trans))) == NON_EXISTING )
           {
             found = true;
             break;

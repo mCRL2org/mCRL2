@@ -38,7 +38,7 @@ typedef struct Block
   /* We need platform alignment for this data block! */
   header_type data[BLOCK_SIZE];
 
-  unsigned int size;
+  size_t size;
   int frozen; /* this int is used as a boolean */
   struct Block *next_by_size;
   struct Block *next_before;
@@ -69,7 +69,7 @@ typedef struct TermInfo {
 extern TermInfo *terminfo;
   
 extern Block *at_freeblocklist;
-extern unsigned int at_freeblocklist_size;
+extern size_t at_freeblocklist_size;
 #define SIZE_TO_BYTES(size) ((size)*sizeof(header_type))
 
 extern BlockBucket block_table[BLOCK_TABLE_SIZE];
@@ -79,7 +79,7 @@ extern int old_bytes_in_young_blocks_after_last_major;
 extern int old_bytes_in_old_blocks_after_last_major;
 extern int old_bytes_in_young_blocks_since_last_major;
 
-extern unsigned int maxTermSize;
+extern size_t maxTermSize;
 
 extern header_type *min_heap_address;
 extern header_type *max_heap_address;
@@ -88,15 +88,15 @@ extern header_type *max_heap_address;
 void AT_initMemory(unsigned int argc, char *argv[]);
 void AT_cleanupMemory();
 HashNumber AT_hashnumber(ATerm t);
-ATerm AT_allocate(unsigned int size);
-void  AT_freeTerm(unsigned int size, ATerm t);
+ATerm AT_allocate(size_t size);
+void  AT_freeTerm(size_t size, ATerm t);
 ATbool AT_isValidTerm(ATerm term);
 ATerm AT_isInsideValidTerm(ATerm term);
-void  AT_validateFreeList(unsigned int size);
+void  AT_validateFreeList(size_t size);
 int AT_inAnyFreeList(ATerm t);
 void AT_printAllTerms(FILE *file);
 void AT_printAllAFunCounts(FILE *file);
-unsigned long AT_getAllocatedCount();
+size_t AT_getAllocatedCount();
 
 struct _ATprotected_block 
 {

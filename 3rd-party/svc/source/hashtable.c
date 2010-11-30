@@ -74,7 +74,7 @@ int HTmember (HTable *table, ATerm a, long *pn)
   size_t index;
   index=ATindexedSetGetIndex(table->terms,a);
 
-  if(index!=(size_t)(-1))
+  if(index!=NON_EXISTING)
   {
      *pn=index;
      return 1;
