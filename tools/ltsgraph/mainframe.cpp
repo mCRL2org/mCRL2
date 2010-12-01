@@ -77,7 +77,11 @@ MainFrame::MainFrame(LTSGraph* owner)
 }
 
 MainFrame::~MainFrame()
-{}
+{
+#if wxCHECK_VERSION(2, 9, 0)
+	  this->PopEventHandler(true);
+#endif
+}
 
 void MainFrame::setupMenuBar()
 {
