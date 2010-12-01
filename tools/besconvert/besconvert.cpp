@@ -434,6 +434,10 @@ namespace mcrl2 {
 
         void run(utilities::execution_timer& timing)
         {
+          if(core::gsVerbose)
+          {
+            std::cerr << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
+          }
           if(core::gsDebug)
           {
             std::cerr << "Converting BES to standard form" << std::endl;
@@ -525,7 +529,7 @@ class bes_bisimulation_tool: public super
       core::gsVerboseMsg("Loading BES from input file... ");
       b.load(m_input_filename);
       core::gsVerboseMsg("done\n");
-      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b).run(timer());
+      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence).run(timer());
       b.save(m_output_filename);
       
       return true;
