@@ -600,7 +600,7 @@ public:
 	  if(!wxFileName::IsDirWritable( path )){
 	    wxLogStatus(wxT("WARNING: No write permissions in the selected directory!"));
 	  } else {
-		wxLogStatus(wxT(""));
+		wxLogStatus(wxEmptyString);
 	  }
 
 	}
