@@ -69,7 +69,7 @@ void GLCanvas::initialize()
 
   glLoadIdentity();
 
-  GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
+/*  GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
   GLfloat light_pos[] = { 50.0f,50.0f,50.0f,1.0f };
   glLightfv(GL_LIGHT0,GL_AMBIENT,gray);
   glLightfv(GL_LIGHT0,GL_DIFFUSE,gray);
@@ -98,8 +98,8 @@ void GLCanvas::initialize()
       1.0f);
   glClearDepth(1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  SwapBuffers();
-  displayAllowed = true;
+  //SwapBuffers();
+  displayAllowed = true;*/
 }
 
 void GLCanvas::getMaxViewportDims(int *w,int* h)
@@ -160,6 +160,42 @@ void GLCanvas::setActiveTool(int t)
 
 void GLCanvas::display(bool coll_caller, bool selecting)
 {
+ /* SetCurrent();
+
+  glLoadIdentity(); */
+
+  GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
+  GLfloat light_pos[] = { 50.0f,50.0f,50.0f,1.0f };
+  glLightfv(GL_LIGHT0,GL_AMBIENT,gray);
+  glLightfv(GL_LIGHT0,GL_DIFFUSE,gray);
+  glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
+
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glDepthMask(GL_TRUE);
+  glBlendFunc(GL_ONE, GL_ZERO);
+  glDisable(GL_BLEND);
+
+  GLfloat light_col[] = { 0.2f,0.2f,0.2f };
+  glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
+  glMaterialf(GL_FRONT,GL_SHININESS,8.0f);
+  glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
+
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+
+  RGB_Color c = settings->getRGB(BackgroundColor);
+  glClearColor(c.red() / 255.0f, c.green() / 255.0f, c.blue() / 255.0f,
+      1.0f);
+  glClearDepth(1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //SwapBuffers();
+  displayAllowed = true;
+
   // coll_caller indicates whether the caller of display() is the
   // getPictureData() method. While collecting data, only this method is allowed
   // to call display(); else the collected data may be corrupted.
