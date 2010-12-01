@@ -76,6 +76,9 @@ MainFrame::MainFrame(LTSGraph* owner)
   infoDlg->CentreOnParent();
 }
 
+MainFrame::~MainFrame()
+{}
+
 void MainFrame::setupMenuBar()
 {
   wxMenuBar* menuBar = new wxMenuBar;

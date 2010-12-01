@@ -82,24 +82,9 @@ void GLCanvas::initialize()
 {
   SetCurrent();
   glLoadIdentity();
-  if(drawIn3D)
-  {
-    glShadeModel(GL_SMOOTH);
-    glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
-    glClearDepth(1.0);                  
-    glDepthFunc(GL_LESS);               
-    glEnable(GL_DEPTH_TEST);    
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  
-  }
-  else
-  {
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glDisable(GL_DEPTH_TEST);
-  }
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  SwapBuffers();
   displayAllowed = true;
-  visualizer->initFontRenderer();
+	/* Following line really needed?*/
+  //visualizer->initFontRenderer();
 }
 
 void GLCanvas::setVisualizer(Visualizer *vis)
@@ -227,7 +212,6 @@ void GLCanvas::display()
   }
 
     glFinish();
-    SwapBuffers();
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
@@ -239,9 +223,24 @@ void GLCanvas::display()
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/)
 {
-  display();
   wxPaintDC dc(this);
-
+  if(drawIn3D)
+  {
+    glShadeModel(GL_SMOOTH);
+    glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+    glClearDepth(1.0);                  
+    glDepthFunc(GL_LESS);               
+    glEnable(GL_DEPTH_TEST);    
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  
+  }
+  else
+  {
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glDisable(GL_DEPTH_TEST);
+  }
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  display();
+  SwapBuffers();
 }
 
 void GLCanvas::onSize(wxSizeEvent& /*event*/)
