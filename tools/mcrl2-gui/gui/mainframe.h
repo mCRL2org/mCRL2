@@ -209,7 +209,7 @@ public:
 
 		for(size_t i = 0  ; i < running_processes.size(); ++i)
 		{
-			std::cout << "blaat";
+			std::cout << "Kill a running process" << std::endl;
 		}
 
 		Close(true);
@@ -295,6 +295,10 @@ public:
 	~MainFrame() {
 		// deinitialize the frame manager		
 		m_mgr.UnInit();
+#if wxCHECK_VERSION(2, 9, 0)
+	  this->PopEventHandler(true);
+#endif
+
 	}
 	;
 

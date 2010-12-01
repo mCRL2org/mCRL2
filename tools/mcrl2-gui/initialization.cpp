@@ -87,15 +87,18 @@ Initialization::Initialization() {
 	for (std::vector<Tool>::iterator i = p_tools.begin(); i != p_tools.end(); ++i) {
 		string cmd = (*i).m_location + " --mcrl2-gui";
 
-//		cout << cmd << endl;
-
 		wxArrayString tool_output;
 		wxArrayString tool_errors;
 
 		wxString wxCmd = wxString( cmd.c_str(), wxConvUTF8 );
 
 		/* Execute tool */
-		if(wxExecute(wxCmd, tool_output, tool_errors, wxEXEC_SYNC) != 0)
+#if wxCHECK_VERSION(2, 9, 0)
+		int result = wxExecute(wxCmd, tool_output, tool_errors, wxEXEC_SYNC | wxEXEC_NOEVENTS);
+#else
+		int result = wxExecute(wxCmd, tool_output, tool_errors, wxEXEC_SYNC );
+#endif
+		if( result != 0)
 		{
 			std::cerr << "Failed to execute " << cmd << std::endl;
 		}
