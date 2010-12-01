@@ -257,7 +257,7 @@ static void UpdateLabArray(int state, int label) {
      ATerm labno = (ATerm) ATmakeInt(label);
      if (!newval) newval = ATmakeList1(labno);
      else
-     if (ATindexOf(newval, labno,0)<0)
+     if (ATindexOf(newval, labno,0)==NON_EXISTING)
           newval = ATinsert(newval, labno);
      lab[state] = newval;
 }
@@ -267,7 +267,7 @@ static void UpdateParArray(int state, int parameter) {
      ATerm parno = (ATerm) ATmakeInt(parameter);
      if (!newval) newval = ATmakeList1(parno);
      else
-     if (ATindexOf(newval, parno,0)<0)
+     if (ATindexOf(newval, parno,0)==NON_EXISTING)
           newval = ATinsert(newval, parno);
      par[state] = newval;
 }
@@ -449,7 +449,7 @@ static ATermList Union(ATermList t1s, ATermList t2s)
      /* ATwarning("Arguments union %t %t",t1s,t2s); */
      for (;!ATisEmpty(t1s);t1s=ATgetNext(t1s))
           {ATerm t1 = ATgetFirst(t1s);
-          if (ATindexOf(t2s, t1,0)<0) result = ATinsert(result, t1);
+          if (ATindexOf(t2s, t1,0)==NON_EXISTING) result = ATinsert(result, t1);
           }
      return result;
      }
@@ -477,7 +477,7 @@ static ATermList  BlockNumbers(ATermList sources)
           {
           int source = ATgetInt((ATermInt) ATgetFirst(sources));
           ATerm block = BlockCode(blockref[source]);
-          if (ATindexOf(result, block,0)<0) result = ATinsert(result, block);
+          if (ATindexOf(result, block,0)==NON_EXISTING) result = ATinsert(result, block);
           }
      return result;
      }
@@ -530,7 +530,7 @@ static void TransitionsGoingToBlock(SVCint b, ATermList *newlab) {
                   newsources = ATremoveElement(newsources, bb);
              if (!val || !ATisEqual(val, newsources))
                   ATtablePut(lab_src_tgt[label], bb, (ATerm) newsources);
-             if (ATindexOf(newlabels, ATgetFirst(labels),0)<0)
+             if (ATindexOf(newlabels, ATgetFirst(labels),0)==NON_EXISTING)
                   newlabels = ATinsert(newlabels, ATgetFirst(labels));
              }
         if (classes && npar > 1) {
@@ -590,9 +590,11 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
                 ATtablePut(lab_src_tgt[label], ATgetFirst(sources),
                      (ATerm) ATmakeList1(bb));
            else {
-                if (ATindexOf(tgts, ATgetFirst(sources), 0) < 0) tgts =
-                     ATinsert(tgts, ATgetFirst(sources));
-                ATtablePut(lab_src_tgt[label], ATgetFirst(sources),(ATerm) tgts);
+                  if (ATindexOf(tgts, ATgetFirst(sources), 0)==NON_EXISTING) 
+                  { 
+                    tgts = ATinsert(tgts, ATgetFirst(sources));
+                  }
+                  ATtablePut(lab_src_tgt[label], ATgetFirst(sources),(ATerm) tgts);
                 }
            }
            }

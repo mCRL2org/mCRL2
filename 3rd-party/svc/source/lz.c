@@ -28,7 +28,7 @@
 #include <svc/lz.h>
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char *strdup(const char *s);
+extern char *_strdup(const char *s);
 #endif
 
 
@@ -173,7 +173,7 @@ int LZwriteATerm(BitStream *bs, LZbuffer *buffer, ATerm term)
 {
    char *buf;
 
-   buf=strdup(ATwriteToString(term));
+   buf=_strdup(ATwriteToString(term));
    compress(bs,buffer,buf);
    free(buf);
 

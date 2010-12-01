@@ -46,10 +46,16 @@ void AT_initList(int argc, char *argv[])
 /*}}}  */
 /*{{{  ATermList ATgetTail(ATermList list, int start) */
 
-ATermList ATgetTail(ATermList list, int start)
+ATermList ATgetTail(ATermList list, int start0)
 {
-  if (start < 0) {
-    start = ATgetLength(list) + start;
+  size_t start;
+  if (start < 0) 
+  {
+    start = ATgetLength(list) + start0;
+  }
+  else
+  {
+    start=start0;
   }
 
   while (start > 0) {

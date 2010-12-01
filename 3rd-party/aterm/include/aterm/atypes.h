@@ -33,8 +33,11 @@ typedef size_t HashNumber;
 
 #define NON_EXISTING (size_t)(-1)
 
+/* Avoid warnings under windows, by renaming all strdup's into _strdup's, 
+   and renaming the _strdup into strdup under other platforms than windows. */
 #if defined(_MSC_VER) || defined(WIN32) || defined(WIN64)
-#define strdup _strdup
+#else
+#define _strdup strdup
 #endif
 
 #ifdef AT_64BIT

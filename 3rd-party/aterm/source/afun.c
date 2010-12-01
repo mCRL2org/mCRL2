@@ -19,7 +19,9 @@
 #define AFUN_TABLE_OPT		"-at-afuntable"
 
 #define SHIFT_INDEX 1
-#define SYM_GET_NEXT_FREE(sym)    ((MachineWord)(sym) >> SHIFT_INDEX)
+/* Keep the sign of sym below; Therefore ptrdiff_t is used, instead of size_t. This goes wrong when
+ * the number of symbols approaches the size of the machineword/4, but this is unlikely.  */
+#define SYM_GET_NEXT_FREE(sym)    ((ptrdiff_t)(sym) >> SHIFT_INDEX)
 #define SYM_SET_NEXT_FREE(next)   (1 | ((next) << SHIFT_INDEX))
 
 #define INITIAL_PROTECTED_SYMBOLS   1024
@@ -38,7 +40,7 @@ static size_t table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static SymEntry *hash_table     = NULL;
 
-static Symbol first_free = -1;
+static Symbol first_free = (Symbol)-1;
 
 static Symbol *protected_symbols = NULL;
 static size_t nr_protected_symbols  = 0;
@@ -52,7 +54,7 @@ ATerm    *at_lookup_table_alias = NULL;
 /*{{{  function declarations */
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char *strdup(const char *s);
+extern char *_strdup(const char *s);
 #endif
 
 /*}}}  */
@@ -71,7 +73,8 @@ static void resize_table()
   if (!at_lookup_table) {
     ATerror("afun.c:resize_table - could not allocate space for lookup table of %ld afuns\n", new_size);
   }
-  for (i = table_size; i < new_size; i++) {
+  for (i = table_size; i < new_size; i++) 
+  {
     at_lookup_table[i] = (SymEntry) SYM_SET_NEXT_FREE(first_free);
     first_free = i;
   }
@@ -146,7 +149,7 @@ void AT_initSymbol(int argc, char *argv[])
   for (sym = 0; sym < table_size; sym++) {
     at_lookup_table[sym] = (SymEntry) SYM_SET_NEXT_FREE(sym+1);
   }
-  at_lookup_table[table_size-1] = (SymEntry) SYM_SET_NEXT_FREE(-1);		/* Sentinel */
+  at_lookup_table[table_size-1] = (SymEntry) SYM_SET_NEXT_FREE((MachineWord)(-1));		/* Sentinel */
 
   protected_symbols = (Symbol *)AT_calloc(INITIAL_PROTECTED_SYMBOLS, 
 				       sizeof(Symbol));
@@ -402,18 +405,20 @@ Symbol ATmakeSymbol(const char *name, size_t arity, ATbool quoted)
     Symbol free_entry;
 
     free_entry = first_free;
-    if (free_entry == (Symbol)(-1)) {
+    if (free_entry == (Symbol)(-1)) 
+    {
       resize_table();
 
       /* Hashtable size changed, so recalculate hashnumber */
       hnr = AT_hashSymbol(name, arity) & table_mask;
      
       free_entry = first_free;
-      if (free_entry == (Symbol)(-1)) {
+      if (free_entry == (Symbol)(-1)) 
+      {
 	ATerror("AT_initSymbol: out of symbol slots!\n");
       }
     }
-
+fprintf(stderr,"First_free %d %lu\n",SIZEOF_LONG,first_free);
     first_free = SYM_GET_NEXT_FREE(at_lookup_table[first_free]);
 
     cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL);
@@ -424,7 +429,7 @@ Symbol ATmakeSymbol(const char *name, size_t arity, ATbool quoted)
     cur->count = 0;
     cur->index = -1;
 
-    cur->name = strdup(name);
+    cur->name = _strdup(name);
     if (cur->name == NULL) {
       ATerror("ATmakeSymbol: no room for name of length %d\n", strlen(name));
     }

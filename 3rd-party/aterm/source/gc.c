@@ -1,6 +1,5 @@
 /*{{{  includes */
 
-
 #include <stdlib.h>
 #include <time.h>
 #include <limits.h>
@@ -41,11 +40,6 @@ int at_gc_count			   = 0;
 static int     stack_depth[3]      = { 0, MYMAXINT, 0 };
 static int     reclaim_perc[3]     = { 0, MYMAXINT, 0 };
 extern int     mark_stats[3];
-#ifdef WITH_STATS
-static clock_t sweep_time[3]       = { 0, MYMAXINT, 0 };
-static clock_t mark_time[3]        = { 0, MYMAXINT, 0 };
-extern int     nr_marks;
-#endif
 static FILE *gc_f = NULL;
 
 extern ATprotected_block protected_blocks;
@@ -540,9 +534,6 @@ void AT_init_gc_parameters(ATbool low_memory)
     small_allocation_rate_ratio = 75;
     old_increase_rate_ratio = 50;
 
-#ifdef GC_VERBOSE
-    fprintf(stderr,"gc_min_number_of_blocks = %d\n",gc_min_number_of_blocks);
-#endif
   }
 }
 
@@ -564,9 +555,6 @@ static void reclaim_empty_block(size_t blocks, int size, Block *removed_block, B
      *
      */
     
-#ifdef GC_VERBOSE
-  fprintf(stdout,"block %x is empty\n",(size_t)removed_block);
-#endif
   ti->at_nrblocks--;
   removed_block->size = 0;
   if(prev_block == NULL) {
@@ -625,9 +613,6 @@ static void reclaim_empty_block(size_t blocks, int size, Block *removed_block, B
           
     at_freeblocklist_size--;
     at_freeblocklist = at_freeblocklist->next_by_size;
-#ifdef GC_VERBOSE
-    fprintf(stderr,"free block %d\n",(int)removed_block);
-#endif
     AT_free(removed_block);
   }
 }
@@ -639,9 +624,6 @@ static void promote_block_to_old(int size, Block *block, Block *prev_block)
 {
   TermInfo* ti = &terminfo[size];
 
-#ifdef GC_VERBOSE
-  printf("move block %x to old_blocks\n",(size_t)block);
-#endif
   assert(block!=NULL);
   if(prev_block == NULL) {
     ti->at_blocks[AT_BLOCK] = block->next_by_size;
@@ -663,9 +645,6 @@ static void promote_block_to_young(int size, Block *block, Block *prev_block)
 {
   TermInfo* ti = &terminfo[size];
 	
-#ifdef GC_VERBOSE
-  printf("move block %x to young_blocks\n",(size_t)block);
-#endif
   assert(block!=NULL);
   if(prev_block == NULL) {
     ti->at_blocks[AT_OLD_BLOCK] = block->next_by_size;
@@ -708,14 +687,6 @@ void check_unmarked_block(size_t blocks)
       for(cur=block->data ; cur<end ; cur+=size) {
 	ATerm t = (ATerm)cur;
 
-        if(IS_MARKED(t->header)) {
-#ifdef GC_VERBOSE
-          fprintf(stderr,"block = %p\tdata = %p\tblock->end = %p\tend = %p\n",block,block->data,block->end,end);
-          fprintf(stderr,"type = %d\n",GET_TYPE(t->header));
-          fprintf(stderr,"t = %p\n",t);
-#endif
-        }
-
         if(blocks==AT_OLD_BLOCK) {
           assert(GET_TYPE(t->header)==AT_FREE || IS_OLD(t->header));
         }
@@ -739,9 +710,6 @@ void major_sweep_phase_old()
   size_t size;
   int reclaiming = 0;
   int alive = 0;
-#ifdef WITH_STATS
-  int perc;
-#endif
 
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
     Block *prev_block = NULL;
@@ -812,9 +780,6 @@ void major_sweep_phase_old()
           /* DO NOT RESTORE THE FREE LIST: free cells have not been inserted*/
           /* terminfo[size].at_freelist = old_freelist;*/
         assert(terminfo[size].top_at_blocks < block->data || terminfo[size].top_at_blocks > block->end);
-#ifdef GC_VERBOSE
-        fprintf(stderr,"MAJOR OLD: reclaim empty block %p\n",block);
-#endif
         reclaim_empty_block(AT_OLD_BLOCK, size, block, prev_block);
       } else if(0 && 100*alive_in_block/capacity <= TO_YOUNG_RATIO) {
         promote_block_to_young(size, block, prev_block);
@@ -832,12 +797,6 @@ void major_sweep_phase_old()
       reclaiming += dead_in_block;
     }
   }
-#ifdef WITH_STATS
-  if(alive) {
-    perc = (100*reclaiming)/alive;
-    STATS(reclaim_perc, perc);
-  }
-#endif
 }
 
 /*}}}  */
@@ -848,9 +807,6 @@ void major_sweep_phase_young()
   int reclaiming = 0;
   int alive = 0;
   size_t size;
-#ifdef WITH_STATS
-  int perc;
-#endif
 
   old_bytes_in_young_blocks_since_last_major = 0;
   
@@ -932,28 +888,15 @@ void major_sweep_phase_young()
       }
 #endif
 
-#ifdef GC_VERBOSE
-        /*fprintf(stderr,"old_cell_in_young_block ratio = %d\n",100*old_in_block/capacity);*/
-#endif
-       
       if(end==block->end && empty) {
-#ifdef GC_VERBOSE
-        fprintf(stderr,"MAJOR YOUNG: reclaim empty block %p\n",block);
-#endif
         ti->at_freelist = old_freelist;
 	reclaim_empty_block(AT_BLOCK, size, block, prev_block);
       } else if(end==block->end && 100*old_in_block/capacity >= TO_OLD_RATIO) {
         if(young_in_block == 0) {
-#ifdef GC_VERBOSE
-          fprintf(stderr,"MAJOR YOUNG: promote block %p to old\n",block);
-#endif
           ti->at_freelist = old_freelist;
           promote_block_to_old(size, block, prev_block);
           old_bytes_in_old_blocks_after_last_major += (old_in_block*SIZE_TO_BYTES(size));
         } else {
-#ifdef GC_VERBOSE
-          fprintf(stderr,"MAJOR YOUNG: freeze block %p\n",block);
-#endif
           SET_FROZEN(block);
           old_bytes_in_young_blocks_after_last_major += (old_in_block*SIZE_TO_BYTES(size));
           ti->at_freelist = old_freelist;
@@ -984,12 +927,6 @@ void major_sweep_phase_young()
 #endif
     
   }
-#ifdef WITH_STATS
-  if(alive) {
-    perc = (100*reclaiming)/alive;
-    STATS(reclaim_perc, perc);
-  }
-#endif
 }
 
 /*}}}  */
@@ -1000,9 +937,6 @@ void minor_sweep_phase_young()
   size_t size;
   int reclaiming = 0;
   int alive = 0;
-#ifdef WITH_STATS
-  int perc;
-#endif
 
   old_bytes_in_young_blocks_since_last_major = 0;
   
@@ -1131,12 +1065,6 @@ void minor_sweep_phase_young()
 #endif
     
   }
-#ifdef WITH_STATS
-  if(alive) {
-    perc = (100*reclaiming)/alive;
-    STATS(reclaim_perc, perc);
-  }
-#endif
 }
 
 /*}}}  */
@@ -1149,10 +1077,6 @@ void minor_sweep_phase_young()
 
 void AT_collect()
 {
-#ifdef WITH_STATS
-  clock_t start, mark, sweep;
-  clock_t user;
-#endif
 
   FILE *file = gc_f;
   size_t size;
@@ -1172,24 +1096,10 @@ void AT_collect()
     fflush(file);
   }
 
-#ifdef WITH_STATS
-  start = clock();
-#endif
-
   mark_phase();
-#ifdef WITH_STATS
-  mark = clock();
-  user = mark - start;
-  STATS(mark_time, user);
-#endif
 
   sweep_phase();
 
-#ifdef WITH_STATS
-  sweep = clock();
-  user = sweep - mark;
-  STATS(sweep_time, user);
-#endif
 
   if (!silent)
     fprintf(file, "..\n");
@@ -1200,10 +1110,6 @@ void AT_collect()
 
 void AT_collect_minor()
 {
-#ifdef WITH_STATS
-  clock_t start, mark, sweep;
-  clock_t user;
-#endif
   FILE *file = gc_f;
   size_t size;
 
@@ -1222,26 +1128,10 @@ void AT_collect_minor()
     fflush(file);
   }
 
-#ifdef WITH_STATS
-  start = clock();
-#endif
-
   /* was minor_mark_phase_young(); this should be verified! */
   mark_phase_young();
 
-#ifdef WITH_STATS
-  mark = clock();
-  user = mark - start;
-  STATS(mark_time, user);
-#endif
-
   minor_sweep_phase_young();
-
-#ifdef WITH_STATS
-  sweep = clock();
-  user = sweep - mark;
-  STATS(sweep_time, user);
-#endif
 
   if (!silent)
     fprintf(file, "..\n");
@@ -1253,10 +1143,6 @@ void AT_collect_minor()
 
 void AT_collect()
 {
-#ifdef WITH_STATS
-  struct tms start, mark, sweep;
-  clock_t user;
-#endif
   FILE *file = gc_f;
   size_t size;
 
@@ -1275,27 +1161,11 @@ void AT_collect()
     fflush(file);
   }
 
-#ifdef WITH_STATS
-  times(&start);
-#endif
-
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
   mark_phase();
   
-#ifdef WITH_STATS
-  times(&mark);
-  user = mark.tms_utime - start.tms_utime;
-  STATS(mark_time, user);
-#endif
-
   sweep_phase();
-
-#ifdef WITH_STATS  
-  times(&sweep);
-  user = sweep.tms_utime - mark.tms_utime;
-  STATS(sweep_time, user);
-#endif
 
   if (!silent) {
     fprintf(file, "..\n");
@@ -1307,10 +1177,6 @@ void AT_collect()
 
 void AT_collect_minor()
 {
-#ifdef WITH_STATS
-  struct tms start, mark, sweep;
-  clock_t user;
-#endif
   FILE *file = gc_f;
   size_t size;
   
@@ -1329,30 +1195,15 @@ void AT_collect_minor()
     fflush(file);
   }
 
-#ifdef WITH_STATS
-  times(&start);
-#endif
 
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
     /*nb_cell_in_stack=0;*/
   mark_phase_young();
     
-#ifdef WITH_STATS
-  times(&mark);
-  user = mark.tms_utime - start.tms_utime;
-  STATS(mark_time, user);
-#endif
-
   minor_sweep_phase_young();
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
-
-#ifdef WITH_STATS
-  times(&sweep);
-  user = sweep.tms_utime - mark.tms_utime;
-  STATS(sweep_time, user);
-#endif
 
   if (!silent)
     fprintf(file, "..\n");
@@ -1361,8 +1212,6 @@ void AT_collect_minor()
 /*}}}  */
 #endif
 
-#define CLOCK_DIVISOR CLOCKS_PER_SEC
-
 /*{{{  void AT_cleanupGC() */
 
 void AT_cleanupGC()
@@ -1370,30 +1219,6 @@ void AT_cleanupGC()
   FILE *file = gc_f;
   if(flags & PRINT_GC_TIME) {
     fprintf(file, "%d garbage collects,\n", at_gc_count);
-#ifdef WITH_STATS
-    fprintf(file, "(all statistics are printed min/avg/max)\n");
-    if(at_gc_count > 0) {
-      if(nr_marks > 0) {
-	fprintf(file, "  mark stack needed: %d/%d/%d (%d marks)\n", 
-		mark_stats[IDX_MIN],
-                mark_stats[IDX_TOTAL]/nr_marks, 
-		mark_stats[IDX_MAX], nr_marks);
-      }
-      fprintf(file, "  marking  took %.2f/%.2f/%.2f seconds, total: %.2f\n", 
-	      ((double)mark_time[IDX_MIN])/(double)CLOCK_DIVISOR,
-	      (((double)mark_time[IDX_TOTAL])/(double)at_gc_count)/(double)CLOCK_DIVISOR,
-	      ((double)mark_time[IDX_MAX])/(double)CLOCK_DIVISOR,
-	      ((double)mark_time[IDX_TOTAL])/(double)CLOCK_DIVISOR);
-      fprintf(file, "  sweeping took %.2f/%.2f/%.2f seconds, total: %.2f\n", 
-	      ((double)sweep_time[IDX_MIN])/(double)CLOCK_DIVISOR,
-	      (((double)sweep_time[IDX_TOTAL])/(double)at_gc_count)/(double)CLOCK_DIVISOR,
-	      ((double)sweep_time[IDX_MAX])/(double)CLOCK_DIVISOR,
-	      ((double)sweep_time[IDX_TOTAL])/(double)CLOCK_DIVISOR);
-    }
-#ifdef WIN32
-    fprintf(file, "Note: WinNT times are absolute, and might be influenced by other processes.\n");
-#endif
-#endif
   }
   
   if(flags & PRINT_GC_STATS) {

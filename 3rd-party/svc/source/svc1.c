@@ -30,7 +30,7 @@
 #endif
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char *strdup(const char *s);
+extern char *_strdup(const char *s);
 #endif
 
 int svcErrno;
@@ -139,7 +139,7 @@ int svcReadVersion(ltsFile *file, char **version){
    CSseek(file->csStates, file->versionPosition, SEEK_SET);
 
    if (CSureadString(file->csStates, &str)){
-      *version=strdup(str);
+      *version=_strdup(str);
       return 0;
    }
 
@@ -168,31 +168,31 @@ int svcReadHeader(ltsFile *file, struct ltsHeader *header){
       svcErrno=EFILENAME;
       return -1;
    }
-   header->filename=strdup(str);
+   header->filename=_strdup(str);
 
    if (!CSureadString(file->csStates,&str)){
       svcErrno=EDATE;
       return -1;
    }
-   header->date=strdup(str);
+   header->date=_strdup(str);
 
    if (!CSureadString(file->csStates,&str)){
       svcErrno=EVERSION;
       return -1;
    }
-   header->version=strdup(str);
+   header->version=_strdup(str);
 
    if (!CSureadString(file->csStates,&str)){
       svcErrno=EFILETYPE;
       return -1;
    }
-   header->type=strdup(str);
+   header->type=_strdup(str);
 
    if (!CSureadString(file->csStates, &str)){
       svcErrno=ECREATOR;
       return -1;
    }
-   header->creator=strdup(str);
+   header->creator=_strdup(str);
 
 
    if (!CSureadInt(file->csStates, &header->numStates)){
@@ -219,13 +219,13 @@ int svcReadHeader(ltsFile *file, struct ltsHeader *header){
       svcErrno=ECOMMENTS;
       return -1;
    }
-   header->initialState=strdup(str);
+   header->initialState=_strdup(str);
 
    if (!CSureadString(file->csStates, &str)){
       svcErrno=ECOMMENTS;
       return -1;
    }
-   header->comments=strdup(str);
+   header->comments=_strdup(str);
 
 
    return 0;

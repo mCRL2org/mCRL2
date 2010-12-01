@@ -95,15 +95,12 @@ size_t    at_prot_functions_count = 0;
 static ATerm   *mark_stack = NULL;
 static size_t mark_stack_size = 0;
 int             mark_stats[3] = {0, MYMAXINT, 0};
-#ifdef WITH_STATS
-int             nr_marks = 0;
-#endif
 
 /*}}}  */
 /*{{{  function declarations */
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char *strdup(const char *s);
+extern char *_strdup(const char *s);
 #endif
 
 static ATerm    fparse_term(int *c, FILE * f);
@@ -483,7 +480,7 @@ void ATunprotectArray(ATerm *start)
 void ATaddProtectFunction(ATermProtFunc f)
 {
   ATermProtFunc* new_at_prot_functions;
-  int old_at_prot_functions_size = at_prot_functions_size;
+  size_t old_at_prot_functions_size = at_prot_functions_size;
 
   if ( at_prot_functions_count == at_prot_functions_size )
   {
@@ -754,7 +751,7 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
  */
 
 static void
-resize_buffer(int n)
+resize_buffer(size_t n)
 {
   buffer_size = n;
   buffer = (char *) AT_realloc(buffer, buffer_size);
@@ -893,7 +890,7 @@ ATbool ATwriteToNamedTextFile(ATerm t, const char *name)
  * Calculate the size of a symbol in text format.
  */
 
-static int
+static size_t
 symbolTextSize(Symbol sym)
 {
   char           *id = ATgetName(sym);
@@ -1351,7 +1348,7 @@ fparse_quoted_appl(int *c, FILE * f)
 
   store_char('\0', len);
 
-  name = strdup(buffer);
+  name = _strdup(buffer);
   if (!name)
     ATerror("fparse_quoted_appl: symbol too long.");
 
@@ -1400,7 +1397,7 @@ fparse_unquoted_appl(int *c, FILE * f)
       fnext_char(c, f);
     }
     store_char('\0', len++);
-    name = strdup(buffer);
+    name = _strdup(buffer);
     if (!name) {
       ATerror("fparse_unquoted_appl: symbol too long.");
     }
@@ -1728,7 +1725,7 @@ sparse_quoted_appl(int *c, char **s)
 
   store_char('\0', len);
 
-  name = strdup(buffer);
+  name = _strdup(buffer);
   if (!name)
     ATerror("fparse_quoted_appl: symbol too long.");
 
@@ -1778,7 +1775,7 @@ sparse_unquoted_appl(int *c, char **s)
       snext_char(c, s);
     }
     store_char('\0', len);
-    name = strdup(buffer);
+    name = _strdup(buffer);
     if (!name) {
       ATerror("sparse_unquoted_appl: symbol too long.");
     }
@@ -1942,9 +1939,6 @@ void AT_markTerm(ATerm t)
   Symbol          sym;
   ATerm          *current = mark_stack + 1;
   ATerm          *limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-#ifdef WITH_STATS
-  ATerm          *depth = mark_stack;
-#endif
   
   mark_stack[0] = NULL;
   *current++ = t;
@@ -1952,9 +1946,6 @@ void AT_markTerm(ATerm t)
   while (ATtrue) {
     if (current >= limit) {
       int current_index;
-#ifdef WITH_STATS
-      int depth_index = depth - mark_stack;
-#endif
       current_index = current - mark_stack;
 
       /* We need to resize the mark stack */
@@ -1969,16 +1960,8 @@ void AT_markTerm(ATerm t)
       fflush(stderr);
 
       current = mark_stack + current_index;
-#ifdef WITH_STATS
-      depth   = mark_stack + depth_index;
-#endif
     }
 
-#ifdef WITH_STATS
-    if (current > depth)
-      depth = current;
-#endif
-    
     t = *--current;
 
     if (!t) {
@@ -2028,10 +2011,6 @@ void AT_markTerm(ATerm t)
 	break; */
     }
   }
-#ifdef WITH_STATS
-  STATS(mark_stats, depth - mark_stack);
-  nr_marks++;
-#endif
 }
 
 /* Jurgen asks: why is this function not in gc.c ? */
@@ -2041,9 +2020,6 @@ void AT_markTerm_young(ATerm t)
   Symbol          sym;
   ATerm          *current = mark_stack + 1;
   ATerm          *limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-#ifdef WITH_STATS
-  ATerm          *depth = mark_stack;
-#endif
 
   if(IS_MARKED(t->header) || IS_OLD(t->header)) {
       /*fprintf(stderr,"AT_markTerm_young (%p) STOP MARK: age = %d\n",t,GET_AGE(t->header));*/
@@ -2056,9 +2032,6 @@ void AT_markTerm_young(ATerm t)
   while (ATtrue) {
     if (current >= limit) {
       size_t current_index;
-#ifdef WITH_STATS
-      size_t depth_index   = depth - mark_stack;
-#endif
 
       current_index = current - mark_stack;
       /* We need to resize the mark stack */
@@ -2073,16 +2046,8 @@ void AT_markTerm_young(ATerm t)
       fflush(stderr);
 
       current = mark_stack + current_index;
-#ifdef WITH_STATS
-      depth   = mark_stack + depth_index;
-#endif
     }
 
-#ifdef WITH_STATS
-    if (current > depth)
-      depth = current;
-#endif
-    
     t = *--current;
 
     if (!t) {
@@ -2136,10 +2101,6 @@ void AT_markTerm_young(ATerm t)
 
     }
   }
-#ifdef WITH_STATS
-  STATS(mark_stats, depth - mark_stack);
-  nr_marks++;
-#endif
 }
 
 /*}}}  */

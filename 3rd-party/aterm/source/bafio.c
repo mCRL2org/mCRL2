@@ -158,10 +158,10 @@ AT_getBafVersion(int *major, int *minor)
 
 /*}}}  */
 
-/*{{{  static int writeIntToBuf(unsignged int val, unsigned char *buf) */
+/*{{{  static int writeIntToBuf(unsigned int val, unsigned char *buf) */
 
 static
-int
+size_t
 writeIntToBuf(size_t val, unsigned char *buf)
 {
   if (val < (1 << 7))
@@ -172,33 +172,38 @@ writeIntToBuf(size_t val, unsigned char *buf)
 
   if (val < (1 << 14))
     {
-      buf[0] = (val >>  8) | 0x80;
-      buf[1] = (val >>  0) & 0xff;
+      buf[0] = (unsigned char)((val >>  8) | 0x80);
+      buf[1] = (unsigned char)((val >>  0) & 0xff);
       return 2;
     }
 
   if (val < (1 << 21))
     {
-      buf[0] = (val >> 16) | 0xc0;
-      buf[1] = (val >>  8) & 0xff;
-      buf[2] = (val >>  0) & 0xff;
+      buf[0] = (unsigned char)((val >> 16) | 0xc0);
+      buf[1] = (unsigned char)((val >>  8) & 0xff);
+      buf[2] = (unsigned char)((val >>  0) & 0xff);
       return 3;
     }
 
   if (val < (1 << 28))
     {
-      buf[0] = (val >> 24) | 0xe0;
-      buf[1] = (val >> 16) & 0xff;
-      buf[2] = (val >>  8) & 0xff;
-      buf[3] = (val >>  0) & 0xff;
+      buf[0] = (unsigned char)((val >> 24) | 0xe0);
+      buf[1] = (unsigned char)((val >> 16) & 0xff);
+      buf[2] = (unsigned char)((val >>  8) & 0xff);
+      buf[3] = (unsigned char)((val >>  0) & 0xff);
       return 4;
     }
 
+  if (sizeof(size_t)>4 && val>((size_t)1<<32))
+  { 
+    fprintf(stderr,"Warning losing precision of integers when writing to .baf file\n");
+  }
+
   buf[0] = 0xf0;
-  buf[1] = (val >> 24) & 0xff;
-  buf[2] = (val >> 16) & 0xff;
-  buf[3] = (val >>  8) & 0xff;
-  buf[4] = (val >>  0) & 0xff;
+  buf[1] = (unsigned char)((val >> 24) & 0xff);
+  buf[2] = (unsigned char)((val >> 16) & 0xff);
+  buf[3] = (unsigned char)((val >>  8) & 0xff);
+  buf[4] = (unsigned char)((val >>  0) & 0xff);
   return 5;
 }
 
@@ -278,18 +283,6 @@ readBits(size_t *val, int nr_bits, byte_reader *reader)
 }
 
 /*}}}  */
-/*{{{  static int flushBitsFromReader(byte_reader *reader) */
-
-/* static
-int
-flushBitsFromReader(byte_reader *reader)
-{
-  (void) reader; / * Suppress unused variable warning * /
-  bits_in_buffer = 0;
-  return 0;
-} */
-
-/*}}}  */
 /*{{{  static int writeInt(size_t val, byte_writer *writer) */
 
 static
@@ -299,7 +292,7 @@ writeInt(size_t val, byte_writer *writer)
   size_t nr_items;
   unsigned char buf[8];
 
-  nr_items = (size_t)writeIntToBuf(val, buf);
+  nr_items = writeIntToBuf(val, buf);
   if(write_bytes((char *)buf, nr_items, writer) != nr_items)
     return -1;
 

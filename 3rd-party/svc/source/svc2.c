@@ -26,7 +26,7 @@
 #include <svc/svc.h>
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char *strdup(const char *s);
+extern char *_strdup(const char *s);
 #endif
 
 extern int svcErrno;
@@ -232,19 +232,19 @@ int SVCopen(SVCfile *file, char *filename, SVCfileMode mode, SVCbool *indexed){
             (void) time(&now);
             strftime(buffy,256,"%x", localtime(&now) );
 
-            file->header.comments=strdup("");
-            file->header.type=strdup("generic");
-            file->header.version=strdup("0.0");
-            file->header.filename=strdup(filename);
-            file->header.date=strdup(buffy);
-            file->header.creator=strdup("svclib");
-            file->header.initialState=strdup("0");
+            file->header.comments=_strdup("");
+            file->header.type=_strdup("generic");
+            file->header.version=_strdup("0.0");
+            file->header.filename=_strdup(filename);
+            file->header.date=_strdup(buffy);
+            file->header.creator=_strdup("svclib");
+            file->header.initialState=_strdup("0");
             file->header.numStates=0L;
             file->header.numTransitions=0L;
             file->header.numLabels=0L;
             file->header.numParameters=0L;
             file->file.indexFlag=*indexed;
-            file->file.formatVersion=strdup(SVC_VERSION);
+            file->file.formatVersion=_strdup(SVC_VERSION);
             return 0;
 
          } else {
@@ -336,9 +336,9 @@ int SVCsetInitialState(SVCfile *file, SVCstateIndex index){
    free(file->header.initialState);
    if(file->file.indexFlag){
       sprintf(str,"%ld",index);
-      file->header.initialState=strdup(str); 
+      file->header.initialState=_strdup(str); 
    } else {
-      file->header.initialState=strdup(ATwriteToString(SVCstate2ATerm(file,index))); 
+      file->header.initialState=_strdup(ATwriteToString(SVCstate2ATerm(file,index))); 
    }
    return 0;
 }
@@ -352,7 +352,7 @@ char *SVCgetComments(SVCfile *file){
 int   SVCsetComments(SVCfile *file, char *comments){
 
    free(file->header.comments);
-   file->header.comments=strdup(comments);
+   file->header.comments=_strdup(comments);
    return 0;
 }
 char *SVCgetType(SVCfile *file){
@@ -363,7 +363,7 @@ char *SVCgetType(SVCfile *file){
 int   SVCsetType(SVCfile *file, char *type){
 
    free(file->header.type);
-   file->header.type=strdup(type);
+   file->header.type=_strdup(type);
    return 0;
 }
 char *SVCgetVersion(SVCfile *file){
@@ -374,7 +374,7 @@ char *SVCgetVersion(SVCfile *file){
 int   SVCsetVersion(SVCfile *file, char *version){
 
    free(file->header.version);
-   file->header.version=strdup(version);
+   file->header.version=_strdup(version);
    return 0;
 
 }
@@ -386,7 +386,7 @@ char *SVCgetCreator(SVCfile *file){
 int   SVCsetCreator(SVCfile *file, char *creator){
 
    free(file->header.creator);
-   file->header.creator=strdup(creator);
+   file->header.creator=_strdup(creator);
    return 0;
 }
 char *SVCgetDate(SVCfile *file){

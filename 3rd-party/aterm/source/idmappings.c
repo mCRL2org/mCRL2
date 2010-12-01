@@ -66,7 +66,7 @@ static EntryCache createEntryCache(){
  * NOTE: Do NOT invoke this method with the entry cache of a idMapping that is still in use.
  */
 static void destroyEntryCache(EntryCache entryCache){
-	int i = entryCache->nrOfBlocks;
+	size_t i = entryCache->nrOfBlocks;
 	do{
 		free(entryCache->blocks[--i]);
 	}while(i > 0);

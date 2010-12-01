@@ -163,7 +163,7 @@ typedef MachineWord header_type;
 
 #define MAX_HEADER_BITS 64
 
-#define AT_TABLE_SIZE(table_class)  (1<<(table_class))
+#define AT_TABLE_SIZE(table_class)  ((size_t)1<<(table_class))
 #define AT_TABLE_MASK(table_class)  (AT_TABLE_SIZE(table_class)-1)
 
 /* Integers in BAF are always exactly 32 bits.  The size must be fixed so that

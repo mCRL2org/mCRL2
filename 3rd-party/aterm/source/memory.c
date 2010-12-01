@@ -418,17 +418,11 @@ static void allocate_block(size_t size)
   TermInfo* ti;
   
   if(at_freeblocklist != NULL) {
-#ifdef GC_VERBOSE
-    fprintf(stderr,"allocate_block %p from at_freeblocklist\n",at_freeblocklist);
-#endif
     newblock = at_freeblocklist;
     at_freeblocklist = at_freeblocklist->next_by_size;
     at_freeblocklist_size--;
   } else {
     newblock = (Block *)AT_calloc(1, sizeof(Block));
-#ifdef GC_VERBOSE
-    fprintf(stderr,"allocate_block %p with calloc\n",newblock);
-#endif
     if (newblock == NULL) {
       ATerror("allocate_block: out of memory!\n");
     }
@@ -528,7 +522,7 @@ size_t AT_getAllocatedCount()
 
 /*{{{  void AT_statistics()  */
 
-void AT_statistics() 
+/* void AT_statistics() 
 {
   size_t size;
   Block *block;
@@ -537,9 +531,9 @@ void AT_statistics()
   int old_in_young_heap=0;
   int young_in_heap=0;
   int free_in_heap=0;
-    /*
+    / *
      * STATISTICS
-     */
+     * /
   for(size=MIN_TERM_SIZE; size<maxTermSize; size++) {
     
     block = terminfo[size].at_blocks[AT_OLD_BLOCK];
@@ -588,16 +582,16 @@ void AT_statistics()
           nb_at_allocate,
           (young_in_heap+old_in_old_heap+old_in_young_heap)/1024);
 
-    /*
+    / *
   fprintf(stderr,"cumul %d\t%d\t%d\t%d\n",
           nb_at_allocate,
           (old_in_young_heap+old_in_old_heap)/1024,
           (young_in_heap+old_in_old_heap+old_in_young_heap)/1024,
           (young_in_heap+old_in_old_heap+old_in_young_heap+free_in_heap)/1024);
-    */    
+    * /    
 #endif
   
-}
+} */
 
 /*}}}  */
 
@@ -667,14 +661,7 @@ ATerm AT_allocate(size_t size)
 
     } else {
         /* there is no more memory: run the GC or allocate a block */
-#ifdef GC_VERBOSE
-      fprintf(stderr,"AT_allocate(%d)\n",size);
-#endif
-  
       if(ti->at_nrblocks <= gc_min_number_of_blocks) {
-#ifdef GC_VERBOSE
-        fprintf(stderr,"INITIAL PHASE -> ALLOCATE_BLOCK\n");
-#endif
         ALLOCATE_BLOCK_TEXT;
       } else {
         int reclaimed_memory_during_last_gc =
@@ -683,22 +670,10 @@ ATerm AT_allocate(size_t size)
           /* +1 to avoid division by zero */
         int reclaimed_memory_ratio_during_last_gc =
           (100*reclaimed_memory_during_last_gc) / (1+ti->nb_live_blocks_before_last_gc*sizeof(Block));
-#ifdef GC_VERBOSE
-        fprintf(stderr,"reclaimed_memory_during_last_gc = %d\n",reclaimed_memory_during_last_gc);
-        fprintf(stderr,"reclaimed_memory_ratio_during_last_gc = %d\n",reclaimed_memory_ratio_during_last_gc);
-
-        
-#endif
         if(reclaimed_memory_ratio_during_last_gc > good_gc_ratio) {
           if(nb_minor_since_last_major < min_nb_minor_since_last_major) {
-#ifdef GC_VERBOSE
-            fprintf(stderr,"GOOD GC -> GC_MINOR\n");
-#endif
             GC_MINOR_TEXT;
           } else {
-#ifdef GC_VERBOSE
-            fprintf(stderr,"GOOD GC and MANY SUCCESSIVE MINOR -> GC_MAJOR\n");
-#endif
             GC_MAJOR_TEXT;
           }
           
@@ -707,14 +682,8 @@ ATerm AT_allocate(size_t size)
             /* +1 to avoid division by zero */
           int allocation_rate =
             (100*nb_allocated_blocks_since_last_gc)/(1+ti->nb_live_blocks_before_last_gc);
-#ifdef GC_VERBOSE
-          fprintf(stderr,"allocation_rate = %d\n",allocation_rate);
-#endif
           
           if(allocation_rate < small_allocation_rate_ratio) {
-#ifdef GC_VERBOSE
-            fprintf(stderr,"NOT GOOD GC and SMALL ALLOCATION RATE -> ALLOCATE_BLOCK\n");
-#endif
             ALLOCATE_BLOCK_TEXT;
           } else {
               /* +1 to avoid division by zero */
@@ -722,21 +691,9 @@ ATerm AT_allocate(size_t size)
               (100*(old_bytes_in_young_blocks_since_last_major-old_bytes_in_young_blocks_after_last_major)) /
               (1+old_bytes_in_young_blocks_after_last_major+old_bytes_in_old_blocks_after_last_major);
 
-#ifdef GC_VERBOSE
-            fprintf(stderr,"old_bytes_in_young_blocks_since_last_major = %d\n",old_bytes_in_young_blocks_since_last_major);
-            fprintf(stderr,"old_bytes_in_young_blocks_after_last_major = %d\n",old_bytes_in_young_blocks_after_last_major);
-            fprintf(stderr,"old_bytes_in_old_blocks_after_last_major = %d\n",old_bytes_in_old_blocks_after_last_major);
-            fprintf(stderr,"old_increase_rate = %d\n",old_increase_rate);
-#endif
             if(old_increase_rate < old_increase_rate_ratio) {
-#ifdef GC_VERBOSE
-              fprintf(stderr,"NOT GOOD GC and SMALL OLD INCREASE RATE -> GC_MINOR\n");
-#endif
               GC_MINOR_TEXT;
             } else {
-#ifdef GC_VERBOSE
-              fprintf(stderr,"NOT GOOD GC and HIGH OLD INCREASE RATE -> GC_MAJOR\n");
-#endif
               GC_MAJOR_TEXT;
             }
           }

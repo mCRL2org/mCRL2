@@ -43,7 +43,7 @@ static int col;
 /*{{{  function declarations */
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
-extern char *strdup(const char *s);
+extern char *_strdup(const char *s);
 #endif
 
 /*}}}  */
@@ -597,7 +597,7 @@ static ATerm rparse_quoted_appl(int *c, byte_reader *reader, ATermIndexedSet abb
   
   store_char('\0', len);
   
-  name = strdup(parse_buffer);
+  name = _strdup(parse_buffer);
   if (!name) {
     ATerror("fparse_quoted_appl: symbol to long.");
   }
@@ -644,7 +644,7 @@ static ATermAppl rparse_unquoted_appl(int *c, byte_reader *reader, ATermIndexedS
       rnext_char(c, reader);
     }
   store_char('\0', len++);
-  name = strdup(parse_buffer);
+  name = _strdup(parse_buffer);
   if (!name) {
     ATerror("fparse_unquoted_appl: symbol to long.");
   }
