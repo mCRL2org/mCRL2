@@ -45,8 +45,7 @@ namespace core {
       void leave(Expression const&)
       {}
 
-      // Traverse ATerm object
-      // a different interface.
+      // Traverse ATerm object. Since ATerms are read-only, it returns the computed result.
       template <typename Expression>
       Expression operator()(const Expression& x,
                             typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, Expression>::type>::type* = 0
@@ -111,26 +110,6 @@ namespace core {
       using super::enter;
       using super::leave;
       using super::operator();
-
-#if BOOST_MSVC
-      template <typename Container>
-      void operator()(Container& x, typename atermpp::detail::enable_if_container<Container>::type* = 0)
-      {
-        super::operator()(x);
-      }
-
-      template <typename T>
-      atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
-      {
-        return super::operator()(x);
-      }
-
-      template <typename T>
-      void operator()(atermpp::set<T>& x)
-      {
-        super::operator()(x);
-      }
-#endif
   };
 
   // apply a builder with one additional template argument
@@ -143,26 +122,6 @@ namespace core {
       using super::enter;
       using super::leave;
       using super::operator();
-
-#if BOOST_MSVC
-      template <typename Container>
-      void operator()(Container& x, typename atermpp::detail::enable_if_container<Container>::type* = 0)
-      {
-        super::operator()(x);
-      }
-
-      template <typename T>
-      atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
-      {
-        return super::operator()(x);
-      }
-
-      template <typename T>
-      void operator()(atermpp::set<T>& x)
-      {
-        super::operator()(x);
-      }
-#endif
 
       apply_builder_arg1(const Arg1& arg1):
         super(arg1)
