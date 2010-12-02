@@ -139,11 +139,11 @@ class AM_Jitty: public ATerm_Manipulator {
         return v_result;
       }
 
-      Symbol v_symbol;
+      AFun v_symbol;
       ATerm v_function;
       int v_arity;
 
-      v_symbol = ATgetSymbol(a_formula);
+      v_symbol = ATgetAFun(a_formula);
       v_function = ATgetArgument(a_formula, 0);
       v_arity = ATgetArity(v_symbol);
 
@@ -182,11 +182,11 @@ class AM_Jitty: public ATerm_Manipulator {
         return v_result;
       }
 
-      Symbol v_symbol;
+      AFun v_symbol;
       ATerm v_function;
       int v_arity;
 
-      v_symbol = ATgetSymbol(a_formula);
+      v_symbol = ATgetAFun(a_formula);
       v_function = ATgetArgument(a_formula, 0);
       v_arity = ATgetArity(v_symbol);
 
@@ -251,11 +251,11 @@ class AM_Jitty: public ATerm_Manipulator {
         return v_result;
       }
 
-      Symbol v_symbol;
+      AFun v_symbol;
       ATerm v_function;
       int v_arity;
 
-      v_symbol = ATgetSymbol(a_term);
+      v_symbol = ATgetAFun(a_term);
       v_function = ATgetArgument(a_term, 0);
       v_arity = ATgetArity(v_symbol);
 

@@ -15,7 +15,6 @@
 
 #define ISSHAREDFLAG 0x00000080U
 #define TYPEMASK 0x0000000fU
-#define ANNOSFLAG 0x00000010U
 
 #define FUNSHARED 0x00000040U
 #define APPLQUOTED 0x00000020U
@@ -73,7 +72,7 @@ static ProtectedMemoryStack createProtectedMemoryStack(){
 	protectedMemoryStack->currentIndex = block;
 	protectedMemoryStack->spaceLeft = PROTECTEDMEMORYSTACKBLOCKSIZE;
 	
-	protectedMemoryStack->freeBlockSpaces = (unsigned int*) AT_malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(unsigned int));
+	protectedMemoryStack->freeBlockSpaces = (size_t*) AT_malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(size_t));
 	if(protectedMemoryStack->freeBlockSpaces == NULL) ATerror("Unable to allocate array for registering free block spaces of the protected memory stack.\n");
 	
 	return protectedMemoryStack;
@@ -85,7 +84,7 @@ static ProtectedMemoryStack createProtectedMemoryStack(){
  * All references that point to data in this store will be invalid after invoking this method.
  */
 static void destroyProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack){
-	unsigned int i = protectedMemoryStack->nrOfBlocks;
+	size_t i = protectedMemoryStack->nrOfBlocks;
 	ATerm **blocks = protectedMemoryStack->blocks;
 	do{
 		ATerm *block = blocks[--i];
@@ -107,7 +106,7 @@ static void destroyProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStac
 static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack){
 	ATerm *block;
 	
-	unsigned int nrOfBlocks = protectedMemoryStack->nrOfBlocks;
+	size_t nrOfBlocks = protectedMemoryStack->nrOfBlocks;
 	
 	protectedMemoryStack->freeBlockSpaces[protectedMemoryStack->currentBlockNr++] = protectedMemoryStack->spaceLeft;
 	
@@ -116,11 +115,11 @@ static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack
 		if(block == NULL) ATerror("Unable to allocate block for the protected memory stack.\n");
 		
 		if((nrOfBlocks & PROTECTEDMEMORYSTACKBLOCKSINCREMENTMASK) == 0){
-			unsigned int newSize = nrOfBlocks + PROTECTEDMEMORYSTACKBLOCKSINCREMENT;
+			size_t newSize = nrOfBlocks + PROTECTEDMEMORYSTACKBLOCKSINCREMENT;
 			protectedMemoryStack->blocks = (ATerm**) AT_realloc(protectedMemoryStack->blocks, newSize * sizeof(ATerm*));
 			if(protectedMemoryStack->blocks == NULL) ATerror("Unable to allocate blocks array for the protected memory stack.\n");
 			
-			protectedMemoryStack->freeBlockSpaces = (unsigned int*) AT_realloc(protectedMemoryStack->freeBlockSpaces, newSize * sizeof(unsigned int));
+			protectedMemoryStack->freeBlockSpaces = (size_t*) AT_realloc(protectedMemoryStack->freeBlockSpaces, newSize * sizeof(size_t));
 			if(protectedMemoryStack->freeBlockSpaces == NULL) ATerror("Unable to allocate array for registering free block spaces of the protected memory stack.\n");
 		}
 		
@@ -137,7 +136,7 @@ static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack
  * Returns an array of ATerms from the given protected memory stack.
  * NOTE: If we request a ATerm array that is larger then PROTECTEDMEMORYSTACKBLOCKSIZE, fall back to using malloc.
  */
-static ATerm* getProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack, unsigned int size){
+static ATerm* getProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack, size_t size){
 	ATerm *memoryBlock;
 	
 	if(size <= PROTECTEDMEMORYSTACKBLOCKSIZE){
@@ -161,14 +160,14 @@ static ATerm* getProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack,
  * This is intended by design and will never cause a problem.
  * NOTE2: If we want to release an ATerm array that is larger then PROTECTEDMEMORYSTACKBLOCKSIZE, it was allocated using malloc and WILL be freed.
  */
-static void releaseProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack, ATerm *ptr, unsigned int size){
+static void releaseProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack, ATerm *ptr, size_t size){
 	if(size <= PROTECTEDMEMORYSTACKBLOCKSIZE){		
 		if(protectedMemoryStack->spaceLeft < PROTECTEDMEMORYSTACKBLOCKSIZE){
 			protectedMemoryStack->spaceLeft += size;
 			protectedMemoryStack->currentIndex -= size;
 		}else{
-			unsigned int currentBlockNr = --(protectedMemoryStack->currentBlockNr);
-			unsigned int freeBlockSpace = protectedMemoryStack->freeBlockSpaces[currentBlockNr] + size;
+			size_t currentBlockNr = --(protectedMemoryStack->currentBlockNr);
+			size_t freeBlockSpace = protectedMemoryStack->freeBlockSpaces[currentBlockNr] + size;
 			protectedMemoryStack->spaceLeft = freeBlockSpace;
 			protectedMemoryStack->currentIndex = protectedMemoryStack->blocks[currentBlockNr] + PROTECTEDMEMORYSTACKBLOCKSIZE - freeBlockSpace;
 		}
@@ -183,7 +182,7 @@ static void releaseProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStac
 /**
  * Creates a byte buffer, with the given capacity.
  */
-ByteBuffer ATcreateByteBuffer(unsigned int capacity){
+ByteBuffer ATcreateByteBuffer(size_t capacity){
 	char *buffer;
 	
 	ByteBuffer byteBuffer = (ByteBuffer) AT_malloc(sizeof(struct _ByteBuffer));
@@ -206,7 +205,7 @@ ByteBuffer ATcreateByteBuffer(unsigned int capacity){
  * NOTE: The given string MUST have been allocated using malloc, so it can be passed to free() when destroying this bytebuffer.
  * Alternatively you could set the buffer field to NULL, before passing this buffer to the ATdestroyByteBuffer function and handle the freeing of the buffer manually.
  */
-ByteBuffer ATwrapBuffer(char *buffer, unsigned int capacity){
+ByteBuffer ATwrapBuffer(char *buffer, size_t capacity){
 	ByteBuffer byteBuffer = (ByteBuffer) AT_malloc(sizeof(struct _ByteBuffer));
 	if(byteBuffer == NULL) ATerror("Failed to allocate byte buffer.\n");
 	
@@ -222,8 +221,8 @@ ByteBuffer ATwrapBuffer(char *buffer, unsigned int capacity){
 /**
  * Returns the amount of space left in the given byte buffer.
  */
-inline unsigned int ATgetRemainingBufferSpace(ByteBuffer byteBuffer){
-	return (unsigned int) (byteBuffer->limit - (byteBuffer->currentPos - byteBuffer->buffer));
+inline size_t ATgetRemainingBufferSpace(ByteBuffer byteBuffer){
+	return (size_t) (byteBuffer->limit - (byteBuffer->currentPos - byteBuffer->buffer));
 }
 
 /**
@@ -231,7 +230,7 @@ inline unsigned int ATgetRemainingBufferSpace(ByteBuffer byteBuffer){
  * Setting the limit to the amount of bytes that are currently present in the buffer and setting the current position to the start of the buffer.
  */
 inline void ATflipByteBuffer(ByteBuffer byteBuffer){
-	byteBuffer->limit = (unsigned int) (byteBuffer->currentPos - byteBuffer->buffer);
+	byteBuffer->limit = (size_t) (byteBuffer->currentPos - byteBuffer->buffer);
 	byteBuffer->currentPos = byteBuffer->buffer;
 }
 
@@ -277,8 +276,8 @@ inline static void writeInt(int value, ByteBuffer byteBuffer){
 /**
  * Returns the number of subTerms the given term has.
  */
-inline static unsigned int getNrOfSubTerms(ATerm term){
-	unsigned int type = ATgetType(term);
+inline static size_t getNrOfSubTerms(ATerm term){
+	size_t type = ATgetType(term);
 	if(type == AT_APPL){
 		return ATgetArity(ATgetAFun((ATermAppl) term));
 	}else if(type == AT_LIST){
@@ -311,25 +310,12 @@ static ATerm getNextTerm(BinaryWriter binaryWriter){
 	
 	/* if(binaryWriter->stackPosition >= 0) */
         {
-		unsigned int type;
+		size_t type;
 		ATerm term;
 		ATermMapping *child;
 		
 		ATermMapping *current = &(binaryWriter->stack[binaryWriter->stackPosition]);
 		while(current->subTermIndex == current->nrOfSubTerms){
-			/* if(HAS_ANNO(current->term->header) && current->annosDone == 0){
-				next = ATgetAnnotations(current->term);
-				
-				child = &(binaryWriter->stack[++(binaryWriter->stackPosition)]);
-				child->term = next;
-				child->nrOfSubTerms = getNrOfSubTerms(next);
-				child->subTermIndex = 0; / * Default value * /
-				child->annosDone = 0; / * Default value * /
-				
-				current->annosDone = 1;
-				
-				return next;
-			} */
 			
 			if(binaryWriter->stackPosition-- == 0) return NULL;
 			
@@ -365,7 +351,6 @@ static ATerm getNextTerm(BinaryWriter binaryWriter){
 		child->term = next;
 		child->nrOfSubTerms = getNrOfSubTerms(next);
 		child->subTermIndex = 0; /* Default value */
-		child->annosDone = 0; /* Default value */
 	}
 	
 	return next;
@@ -374,9 +359,8 @@ static ATerm getNextTerm(BinaryWriter binaryWriter){
 /**
  * Constructs the header for the given ATerm.
  */
-inline static unsigned int getHeader(ATerm aTerm){
-	unsigned int header = ATgetType(aTerm);
-	if(HAS_ANNO(aTerm->header)) header |= ANNOSFLAG;
+inline static size_t getHeader(ATerm aTerm){
+	size_t header = ATgetType(aTerm);
 
 	return header;
 }
@@ -389,28 +373,28 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 	
 	if(binaryWriter->indexInTerm == 0){
 		SymEntry symEntry = at_lookup_table[fun];
-		unsigned int funHash = (unsigned int)((unsigned long) symEntry);
+		size_t funHash = (size_t)((unsigned long) symEntry);
 		
-		IDMappings sharedSymbols = binaryWriter->sharedSymbols;
-		int id = IMgetID(sharedSymbols, symEntry, funHash);
+		IDMappings sharedAFuns = binaryWriter->sharedAFuns;
+		size_t id = IMgetID(sharedAFuns, symEntry, funHash);
 		
-		unsigned int header = getHeader((ATerm) arg);
+		size_t header = getHeader((ATerm) arg);
 		
-		if(id != -1){
+		if(id != NON_EXISTING){
 			header |= FUNSHARED;
 			*(byteBuffer->currentPos) = (char) header;
 			byteBuffer->currentPos++;
 			
 			writeInt(id, byteBuffer);
 		}else{
-			unsigned int remaining;
+			size_t remaining;
 			
 			char* name = ATgetName(fun);
-			unsigned int isQuoted = ATisQuoted(fun);
-			unsigned int arity = ATgetArity(fun);
-			unsigned int nameLength = strlen(name);
+			size_t isQuoted = ATisQuoted(fun);
+			size_t arity = ATgetArity(fun);
+			size_t nameLength = strlen(name);
 			
-			unsigned int bytesToWrite = nameLength;
+			size_t bytesToWrite = nameLength;
 			
 			if(isQuoted) header |= APPLQUOTED;
 			*(byteBuffer->currentPos) = (char) header;
@@ -430,16 +414,16 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 			memcpy(byteBuffer->currentPos, name, bytesToWrite);
 			byteBuffer->currentPos += bytesToWrite;
 			
-			id = binaryWriter->currentSharedSymbolKey++;
+			id = binaryWriter->currentSharedAFunKey++;
 			
-			IMmakeIDMapping(sharedSymbols, symEntry, funHash, id);
+			IMmakeIDMapping(sharedAFuns, symEntry, funHash, id);
 		}
 	}else{
 		char* name = ATgetName(fun);
-		unsigned int length = binaryWriter->totalBytesInTerm;
+		size_t length = binaryWriter->totalBytesInTerm;
 		
-		unsigned int bytesToWrite = length - binaryWriter->indexInTerm;
-		unsigned int remaining = ATgetRemainingBufferSpace(byteBuffer);
+		size_t bytesToWrite = length - binaryWriter->indexInTerm;
+		size_t remaining = ATgetRemainingBufferSpace(byteBuffer);
 		if(remaining < bytesToWrite) bytesToWrite = remaining;
 		
 		memcpy(byteBuffer->currentPos, (name + binaryWriter->indexInTerm), bytesToWrite);
@@ -449,34 +433,6 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 		if(binaryWriter->indexInTerm == length) binaryWriter->indexInTerm = 0;
 	}
 }
-
-/**
- * Serializes the given ATermBlob.
- */
-/* static void visitBlob(BinaryWriter binaryWriter, ATermBlob arg, ByteBuffer byteBuffer){
-	unsigned int remaining;
-	
-	unsigned int size = ATgetBlobSize(arg);
-	char *blobBytes = ATgetBlobData(arg);
-	
-	unsigned int bytesToWrite = size - binaryWriter->indexInTerm;
-	
-	if(binaryWriter->indexInTerm == 0){
-		*(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
-		byteBuffer->currentPos++;
-		
-		writeInt(size, byteBuffer);
-	}
-	
-	remaining = ATgetRemainingBufferSpace(byteBuffer);
-	if(remaining < bytesToWrite) bytesToWrite = remaining;
-	
-	memcpy(byteBuffer->currentPos, (blobBytes + binaryWriter->indexInTerm), bytesToWrite);
-	byteBuffer->currentPos += bytesToWrite;
-	binaryWriter->indexInTerm += bytesToWrite;
-	
-	if(binaryWriter->indexInTerm == size) binaryWriter->indexInTerm = 0;
-} */
 
 /**
  * Serializes the given ATermInt
@@ -499,26 +455,6 @@ static void visitList(ATermList arg, ByteBuffer byteBuffer){
 }
 
 /**
- * Serializes the given ATermPlaceholder.
- */
-/* static void visitPlaceholder(ATermPlaceholder arg, ByteBuffer byteBuffer){
-	*(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
-	byteBuffer->currentPos++;
-
-	/ * Do nothing, writing the header is enough. * /
-} */
-
-/**
- * Serializes the given ATermReal.
- */
-/* static void visitReal(ATermReal arg, ByteBuffer byteBuffer){
-	*(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
-	byteBuffer->currentPos++;
-	
-	writeDouble(ATgetReal(arg), byteBuffer);
-} */
-
-/**
  * Constructs a binary writer that is responsible for serializing the given ATerm.
  */
 BinaryWriter ATcreateBinaryWriter(ATerm term){
@@ -537,8 +473,8 @@ BinaryWriter ATcreateBinaryWriter(ATerm term){
 	binaryWriter->sharedTerms = IMcreateIDMappings(75);
 	binaryWriter->currentSharedTermKey = 0;
 	
-	binaryWriter->sharedSymbols = IMcreateIDMappings(75);
-	binaryWriter->currentSharedSymbolKey = 0;
+	binaryWriter->sharedAFuns = IMcreateIDMappings(75);
+	binaryWriter->currentSharedAFunKey = 0;
 	
 	binaryWriter->currentTerm = term;
 	binaryWriter->indexInTerm = 0;
@@ -547,7 +483,6 @@ BinaryWriter ATcreateBinaryWriter(ATerm term){
 	tm->term = term;
 	tm->nrOfSubTerms = getNrOfSubTerms(term);
 	tm->subTermIndex = 0; /* Default value */
-	tm->annosDone = 0; /* Default value */
 	
 	return binaryWriter;
 }
@@ -571,7 +506,7 @@ void ATdestroyBinaryWriter(BinaryWriter binaryWriter){
 	
 	IMdestroyIDMappings(binaryWriter->sharedTerms);
 	
-	IMdestroyIDMappings(binaryWriter->sharedSymbols);
+	IMdestroyIDMappings(binaryWriter->sharedAFuns);
 	
 	AT_free(binaryWriter);
 }
@@ -584,16 +519,16 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 	ATerm currentTerm = binaryWriter->currentTerm;
 	
 	while(currentTerm != NULL && ATgetRemainingBufferSpace(byteBuffer) >= MINIMUMFREEBUFFERSPACE){
-		unsigned int termHash = (unsigned int)((unsigned long) currentTerm);
-		int id = IMgetID(binaryWriter->sharedTerms, currentTerm, termHash);
-		if(id != -1){
+		size_t termHash = (size_t)(currentTerm);
+		size_t id = IMgetID(binaryWriter->sharedTerms, currentTerm, termHash);
+		if(id != NON_EXISTING){
 			*(byteBuffer->currentPos) = (char) ISSHAREDFLAG;
 			byteBuffer->currentPos++;
 			writeInt(id, byteBuffer);
 			
 			binaryWriter->stackPosition--; /* Pop the term from the stack, since it's subtree is shared. */
 		}else{
-			unsigned int type = ATgetType(currentTerm);
+			size_t type = ATgetType(currentTerm);
 			switch(type){
 				case AT_APPL:
 					visitAppl(binaryWriter, (ATermAppl) currentTerm, byteBuffer);
@@ -601,19 +536,10 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 				case AT_INT:
 					visitInt((ATermInt) currentTerm, byteBuffer);
 					break;
-				/* case AT_REAL:
-					visitReal((ATermReal) currentTerm, byteBuffer);
-					break; */
 				case AT_LIST:
 					visitList((ATermList) currentTerm, byteBuffer);
 					binaryWriter->stack[binaryWriter->stackPosition].nextPartOfList = (ATermList) currentTerm; /* <- for ATermList->next optimizaton. */
 					break;
-				/* case AT_BLOB:
-					visitBlob(binaryWriter, (ATermBlob) currentTerm, byteBuffer);
-					break; 
-				case AT_PLACEHOLDER:
-					visitPlaceholder((ATermPlaceholder) currentTerm, byteBuffer);
-					break; */
 				default:
 					ATerror("%d is not a valid term type.\n", type);
 			}
@@ -641,7 +567,7 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
  * The decoding will be done in 'byteencoding.c'.
  */
 inline static int readInt(ByteBuffer byteBuffer){
-	unsigned int count;
+	size_t count;
 	int result = BEdeserializeMultiByteInt(byteBuffer->currentPos, &count);
 	byteBuffer->currentPos += count;
 
@@ -684,10 +610,10 @@ static void ensureReadSharedTermCapacity(BinaryReader binaryReader){
 /**
  * Ensures that there is enough space left in the shared signatures array of the binary reader after teh invocation of this function.
  */
-static void ensureReadSharedSymbolCapacity(BinaryReader binaryReader){
-	if((binaryReader->sharedSymbolsIndex + 1) >= binaryReader->sharedSymbolsSize){
-		binaryReader->sharedSymbols = (SymEntry*) AT_realloc(binaryReader->sharedSymbols, (binaryReader->sharedSymbolsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(SymEntry));
-		if(binaryReader->sharedSymbols == NULL) ATerror("Unable to allocate memory for expanding the binaryReader's shared signatures array.\n");
+static void ensureReadSharedAFunCapacity(BinaryReader binaryReader){
+	if((binaryReader->sharedAFunsIndex + 1) >= binaryReader->sharedAFunsSize){
+		binaryReader->sharedAFuns = (SymEntry*) AT_realloc(binaryReader->sharedAFuns, (binaryReader->sharedAFunsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(SymEntry));
+		if(binaryReader->sharedAFuns == NULL) ATerror("Unable to allocate memory for expanding the binaryReader's shared signatures array.\n");
 	}
 }
 
@@ -722,10 +648,10 @@ inline static void shareTerm(BinaryReader binaryReader, ATermConstruct *ac, ATer
  */
 static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct *parent){
 	ATerm constructedTerm;
-	unsigned int type = parent->type;
+	size_t type = parent->type;
 	
 	if(type == AT_APPL){
-		unsigned int nrOfSubTerms = parent->nrOfSubTerms;
+		size_t nrOfSubTerms = parent->nrOfSubTerms;
 		ATerm *subTerms = parent->subTerms;
 		
 		SymEntry symEntry = (SymEntry) parent->tempTerm;
@@ -740,15 +666,14 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct *parent){
 			constructedTerm = (ATerm) ATmakeAppl0(fun);
 		}
 		
-		/* if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); */
 	}else  if(type == AT_LIST){
-		unsigned int nrOfSubTerms = parent->nrOfSubTerms;
+		size_t nrOfSubTerms = parent->nrOfSubTerms;
 		ATerm *subTerms = parent->subTerms;
 		
 		ATermList list = ATmakeList0();
 		
 		if(nrOfSubTerms > 0){
-			unsigned int i = nrOfSubTerms;
+			size_t i = nrOfSubTerms;
 			do{
 				list = ATinsert(list, subTerms[--i]);
 			}while(i > 0);
@@ -758,19 +683,6 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct *parent){
 		
 		constructedTerm = (ATerm) list;
 		
-		/* if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); */
-	/* }else if(type == AT_PLACEHOLDER){
-		ATerm *subTerms = parent->subTerms;
-		
-		constructedTerm = (ATerm) ATmakePlaceholder(subTerms[0]);
-		
-		releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, subTerms, 1);
-		
-		/ * if(parent->hasAnnos) constructedTerm = ATsetAnnotations(constructedTerm, parent->annos); * /
-	}else if(parent->hasAnnos){
-		constructedTerm = ATsetAnnotations(parent->tempTerm, parent->annos);
-		
-		releaseProtectedMemoryBlock(binaryReader->protectedMemoryStack, NULL, 1); */
 	}else {
 		constructedTerm = NULL; /* This line is purely for shutting up the compiler. */
 		ATerror("Unable to construct term.\n");
@@ -788,13 +700,11 @@ static void linkTerm(BinaryReader binaryReader, ATerm aTerm){
 	while(binaryReader->stackPosition != 0){
 		ATermConstruct *parent = &(binaryReader->stack[--(binaryReader->stackPosition)]);
 		
-		unsigned int nrOfSubTerms = parent->nrOfSubTerms;
+		size_t nrOfSubTerms = parent->nrOfSubTerms;
 		if(nrOfSubTerms > parent->subTermIndex){
 			parent->subTerms[parent->subTermIndex++] = term;
 			
-			if(nrOfSubTerms != parent->subTermIndex || parent->hasAnnos) return; /* This is the 'normal' return point of this function. */
-		}else if((parent->hasAnnos) && (ATgetType(term) == AT_LIST)){
-			parent->annos = term;
+			if(nrOfSubTerms != parent->subTermIndex ) return; /* This is the 'normal' return point of this function. */
 		}else{
 			ATerror("Encountered a term that didn't fit anywhere. Type: %d.\n", ATgetType(term));
 		}
@@ -817,9 +727,9 @@ static void linkTerm(BinaryReader binaryReader, ATerm aTerm){
  * Reads bytes from the byte buffer until we either run out of data or the name of the function symbol or BLOB we are reconstructing is complete.
  */
 static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer){
-	unsigned int length = binaryReader->tempBytesSize;
-	unsigned int bytesToRead = (length - binaryReader->tempBytesIndex);
-	unsigned int remaining = ATgetRemainingBufferSpace(byteBuffer);
+	size_t length = binaryReader->tempBytesSize;
+	size_t bytesToRead = (length - binaryReader->tempBytesIndex);
+	size_t remaining = ATgetRemainingBufferSpace(byteBuffer);
 	if(remaining < bytesToRead) bytesToRead = remaining;
 	
 	memcpy(binaryReader->tempBytes + binaryReader->tempBytesIndex, byteBuffer->currentPos, bytesToRead);
@@ -830,7 +740,7 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer){
 		if(binaryReader->tempType == AT_APPL){
 			ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
 			
-			unsigned int arity = binaryReader->tempArity;
+			size_t arity = binaryReader->tempArity;
 			ATbool isQuoted = binaryReader->tempIsQuoted;
 			char *name = binaryReader->tempBytes;
 			
@@ -838,43 +748,23 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer){
 			SymEntry symEntry = at_lookup_table[fun];
 			ATprotectAFun(fun);
 			
-			ensureReadSharedSymbolCapacity(binaryReader); /* Make sure we have enough space in the array */
-			binaryReader->sharedSymbols[binaryReader->sharedSymbolsIndex++] = symEntry;
+			ensureReadSharedAFunCapacity(binaryReader); /* Make sure we have enough space in the array */
+			binaryReader->sharedAFuns[binaryReader->sharedAFunsIndex++] = symEntry;
 			
 			if(arity > 0){
 				ac->tempTerm = (ATerm) symEntry;
 				
 				ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, arity);
-			}else if(ac->hasAnnos == 0){
+			}else{
 				ATerm term = (ATerm) ATmakeAppl0(fun);
 				
 				shareTerm(binaryReader, ac, term);
 				
 				linkTerm(binaryReader, term);
-			}else{
-				ac->tempTerm = (ATerm) symEntry;
 			}
 			
-			if(length < TEMPNAMEPAGESIZE) binaryReader->tempBytes = NULL; /* Set to NULL, so we don't free the tempNamePage. */
-/*		}else if(binaryReader->tempType == AT_BLOB){
-			void* bytes = (void*) binaryReader->tempBytes;
-			
-			ATerm term = (ATerm) ATmakeBlob(binaryReader->tempBytesSize, bytes);
-			
-			ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
-			
-			binaryReader->tempBytes = NULL; / * Don't free, because ATmakeBlob doesn't copy the bytes, but reuses the array. * /
-			
-			if(ac->hasAnnos == 0){
-				shareTerm(binaryReader, ac, term);
-				
-				linkTerm(binaryReader, term);
-			}else{
-				ATerm *term_ptr = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, 1);
-				*term_ptr = term;
-				
-				ac->tempTerm = term;
-			} */ 
+			if(length < TEMPNAMEPAGESIZE) 
+                             binaryReader->tempBytes = NULL; /* Set to NULL, so we don't free the tempNamePage. */
 		}else{
 			ATerror("Unsupported chunkified type: %s.\n", binaryReader->tempType);
 		}
@@ -886,36 +776,34 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer){
 /**
  * Starts the deserialization of an ATermAppl
  */
-static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, unsigned int header){
+static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, size_t header){
 	if((header & FUNSHARED) == FUNSHARED){
-		unsigned int key = readInt(byteBuffer);
+		size_t key = readInt(byteBuffer);
 		
-		SymEntry symEntry = binaryReader->sharedSymbols[key];
+		SymEntry symEntry = binaryReader->sharedAFuns[key];
 		ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
 		
 		AFun fun = symEntry->id;
-		unsigned int arity = ATgetArity(fun);
+		size_t arity = ATgetArity(fun);
 		
 		if(arity > 0){
 			ac->tempTerm = (ATerm) symEntry;
 			
 			ac->nrOfSubTerms = arity;
 			ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, arity);
-		}else if(ac->hasAnnos == 0){
+		}else{
 			ATerm term = (ATerm) ATmakeAppl0(fun);
 			
 			shareTerm(binaryReader, ac, term);
 			
 			linkTerm(binaryReader, term);
-		}else{
-			ac->tempTerm = (ATerm) symEntry;
 		}
 	}else{
 		/* Read arity */
-		unsigned int arity = readInt(byteBuffer);
+		size_t arity = readInt(byteBuffer);
 		
 		/* Read name length */
-		unsigned int nameLength = readInt(byteBuffer);
+		size_t nameLength = readInt(byteBuffer);
 		
 		ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
 		ac->nrOfSubTerms = arity;
@@ -944,14 +832,14 @@ static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, unsigned
  * Starts the deserialization of a ATermList.
  */
 static void touchList(BinaryReader binaryReader, ByteBuffer byteBuffer){
-	unsigned int size = readInt(byteBuffer);
+	size_t size = readInt(byteBuffer);
 	
 	ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
 	
 	if(size > 0){
 		ac->nrOfSubTerms = size;
 		ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, size);
-	}else if(ac->hasAnnos == 0){
+	}else {
 		ATerm term = (ATerm) ATmakeList0();
 		
 		shareTerm(binaryReader, ac, term);
@@ -969,65 +857,10 @@ static void touchInt(BinaryReader binaryReader, ByteBuffer byteBuffer){
 	
 	ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
 	
-	if(ac->hasAnnos == 0){
 		shareTerm(binaryReader, ac, term);
 		
 		linkTerm(binaryReader, term);
-	}else{
-		ATerm *term_ptr = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, 1);
-		*term_ptr = term;
-		
-		ac->tempTerm = term;
-	}
 }
-
-/**
- * Starts the deserialization of an ATermReal.
- */
-/* static void touchReal(BinaryReader binaryReader, ByteBuffer byteBuffer){
-	double value = readDouble(byteBuffer);
-	ATerm term = (ATerm) ATmakeReal(value);
-	
-	ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
-	
-	if(ac->hasAnnos == 0){
-		shareTerm(binaryReader, ac, term);
-		
-		linkTerm(binaryReader, term);
-	}else{
-		ATerm *term_ptr = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, 1);
-		*term_ptr = term;
-		
-		ac->tempTerm = term;
-	}
-} */
-
-/**
- * Starts the deserialization of an ATermBlob.
- */
-/* static void touchBlob(BinaryReader binaryReader, ByteBuffer byteBuffer){
-	unsigned int length = readInt(byteBuffer);
-	
-	binaryReader->tempBytesSize = length;
-	binaryReader->tempBytes = (char*) AT_malloc(length);
-	if(binaryReader->tempBytes == NULL) ATerror("The binary reader was unable to allocate memory for temporary blob data.\n");
-	binaryReader->tempBytesIndex = 0;
-	binaryReader->tempType = AT_BLOB;
-
-	readData(binaryReader, byteBuffer);
-} */
-
-/**
- * Starts the deserialization of a ATermPlaceholder.
- */
-/* static void touchPlaceholder(BinaryReader binaryReader){
-	/ * A placeholder doesn't have content * /
-	
-	ATermConstruct *ac = &(binaryReader->stack[binaryReader->stackPosition]);
-	ac->subTerms = getProtectedMemoryBlock(binaryReader->protectedMemoryStack, 1);
-	
-	ac->nrOfSubTerms = 1;
-} */
 
 /**
  * Continues the deserialization process, who's state is described in the binary reader with the data in the byte buffer.
@@ -1039,11 +872,11 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer){
 	
 	endOfBuffer = byteBuffer->buffer + byteBuffer->limit; /* Cache the end of buffer pointer, so we don't have to recalculate it every iteration. */
 	while(byteBuffer->currentPos < endOfBuffer){
-		unsigned int header = (unsigned char) *(byteBuffer->currentPos);
+		size_t header = (unsigned char) *(byteBuffer->currentPos);
 		byteBuffer->currentPos++;
 		
 		if((header & ISSHAREDFLAG) == ISSHAREDFLAG){
-			unsigned int termKey = readInt(byteBuffer);
+			size_t termKey = readInt(byteBuffer);
 			
 			ATerm term = binaryReader->sharedTerms[termKey];
 			
@@ -1051,7 +884,7 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer){
 			
 			linkTerm(binaryReader, term);
 		}else{
-			unsigned int type = (header & TYPEMASK);
+			size_t type = (header & TYPEMASK);
 			
 			ATermConstruct *ac = &(binaryReader->stack[++(binaryReader->stackPosition)]);
 			
@@ -1064,9 +897,6 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer){
 			ac->nrOfSubTerms = 0; /* Default value */
 			ac->subTermIndex = 0; /* Default value */
 			
-			ac->hasAnnos = 0; /* Default value */
-			if((header & ANNOSFLAG) == ANNOSFLAG) ac->hasAnnos = 1;
-			
 			switch(type){
 				case AT_APPL:
 					touchAppl(binaryReader, byteBuffer, header);
@@ -1077,15 +907,6 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer){
 				case AT_INT:
 					touchInt(binaryReader, byteBuffer);
 					break;
-/*				case AT_REAL:
-					touchReal(binaryReader, byteBuffer);
-					break;
-				case AT_BLOB:
-					touchBlob(binaryReader, byteBuffer);
-					break;  
-				case AT_PLACEHOLDER:
-					touchPlaceholder(binaryReader);
-					break; */
 				default:
 					ATerror("Unknown type id: %d. Current buffer position: %d\n.", type, (byteBuffer->currentPos - byteBuffer->buffer));
 			}
@@ -1102,7 +923,7 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer){
 BinaryReader ATcreateBinaryReader(){
 	ATermConstruct *stack;
 	ATerm *sharedTerms;
-	SymEntry *sharedSymbols;
+	SymEntry *sharedAFuns;
 	
 	BinaryReader binaryReader = (BinaryReader) AT_malloc(sizeof(struct _BinaryReader));
 	if(binaryReader == NULL) ATerror("Unable to allocate memory for the binary reader.\n");
@@ -1121,11 +942,11 @@ BinaryReader ATcreateBinaryReader(){
 	binaryReader->sharedTermsSize = DEFAULTSHAREDTERMARRAYSIZE;
 	binaryReader->sharedTermsIndex = 0;
 	
-	sharedSymbols = (SymEntry*) AT_malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(SymEntry));
-	if(sharedSymbols == NULL) ATerror("Unable to allocate memory for the binaryReader's shared symbols array.\n");
-	binaryReader->sharedSymbols = sharedSymbols;
-	binaryReader->sharedSymbolsSize = DEFAULTSHAREDSYMBOLARRAYSIZE;
-	binaryReader->sharedSymbolsIndex = 0;
+	sharedAFuns = (SymEntry*) AT_malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(SymEntry));
+	if(sharedAFuns == NULL) ATerror("Unable to allocate memory for the binaryReader's shared symbols array.\n");
+	binaryReader->sharedAFuns = sharedAFuns;
+	binaryReader->sharedAFunsSize = DEFAULTSHAREDSYMBOLARRAYSIZE;
+	binaryReader->sharedAFunsIndex = 0;
 	
 	binaryReader->tempNamePage = (char*) AT_malloc(TEMPNAMEPAGESIZE * sizeof(char));
 	if(binaryReader->tempNamePage == NULL) ATerror("Unable to allocate temporary name page.\n");
@@ -1168,8 +989,8 @@ ATerm ATgetRoot(BinaryReader binaryReader){
  * NOTE: Calling this function with a binary reader that has started, but not completed, a deserialization process as argument has undefined behavior (protected zones will not be unprotected or freed).
  */
 void ATdestroyBinaryReader(BinaryReader binaryReader){
-	SymEntry *sharedSymbols = binaryReader->sharedSymbols;
-	int sharedSymbolsIndex = binaryReader->sharedSymbolsIndex;
+	SymEntry *sharedAFuns = binaryReader->sharedAFuns;
+	int sharedAFunsIndex = binaryReader->sharedAFunsIndex;
 	
 	destroyProtectedMemoryStack(binaryReader->protectedMemoryStack);
 	
@@ -1178,10 +999,10 @@ void ATdestroyBinaryReader(BinaryReader binaryReader){
 	
 	AT_free(binaryReader->stack);
 	
-	while(--sharedSymbolsIndex >= 0){
-		ATunprotectAFun(sharedSymbols[sharedSymbolsIndex]->id);
+	while(--sharedAFunsIndex >= 0){
+		ATunprotectAFun(sharedAFuns[sharedAFunsIndex]->id);
 	}
-	AT_free(binaryReader->sharedSymbols);
+	AT_free(binaryReader->sharedAFuns);
 	
 	AT_free(binaryReader->tempNamePage);
 	
@@ -1201,7 +1022,7 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE *file){
 	BinaryWriter binaryWriter;
 	ByteBuffer byteBuffer;
 	
-	unsigned int bytesWritten = fwrite("?", sizeof(char), 1, file);
+	size_t bytesWritten = fwrite("?", sizeof(char), 1, file);
 	if(bytesWritten != 1){
 		ATwarning("Unable to write SAF identifier token to file.\n");
 		return ATfalse;
@@ -1283,7 +1104,7 @@ ATerm ATreadFromSAFFile(FILE *file){
 	ByteBuffer byteBuffer;
 	
 	char buffer[1];
-	unsigned int bytesRead = fread(buffer, sizeof(char), 1, file); /* Consume the first character in the stream. */
+	size_t bytesRead = fread(buffer, sizeof(char), 1, file); /* Consume the first character in the stream. */
 	if(bytesRead <= 0){
 		ATwarning("Unable to read SAF id token from file.\n");
 		return NULL;
@@ -1295,7 +1116,7 @@ ATerm ATreadFromSAFFile(FILE *file){
 	byteBuffer = ATcreateByteBuffer(65536);
 	
 	do{
-		unsigned int blockSize;
+		size_t blockSize;
 		char sizeBytes[2];
 		
 		bytesRead = fread(sizeBytes, sizeof(char), 2, file);

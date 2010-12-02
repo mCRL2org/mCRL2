@@ -148,10 +148,10 @@ static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) /* CHANGED 
           }
         }
       } 
-      else if (AT_isValidSymbol((Symbol)*cur)) 
+      else if (AT_isValidAFun((AFun)*cur)) 
       {
-        /*fprintf(stderr,"mark_memory: AT_markSymbol(%d)\n",(Symbol)*cur);*/
-        AT_markSymbol((Symbol)*cur);
+        /*fprintf(stderr,"mark_memory: AT_markAFun(%d)\n",(AFun)*cur);*/
+        AT_markAFun((AFun)*cur);
         /*nb_cell_in_stack++;*/
       }
     }
@@ -188,10 +188,10 @@ static void mark_memory_young(ATerm *start, ATerm *stop, ATbool check_term) /* C
           }
         }
       } 
-      else if (AT_isValidSymbol(*cur)) 
+      else if (AT_isValidAFun(*cur)) 
       {
-	/*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
-	AT_markSymbol_young((Symbol)*cur);
+	/*fprintf(stderr,"mark_memory_young: AT_markAFun_young(%d)\n",(AFun)*cur);*/
+	AT_markAFun_young((AFun)*cur);
 	/*nb_cell_in_stack++;*/
       }
     }
@@ -280,8 +280,8 @@ VOIDCDECL mark_phase()
     if (real_term != NULL) {
       AT_markTerm(real_term);
     }
-    if (AT_isValidSymbol((Symbol)reg[i])) {
-      AT_markSymbol((Symbol)reg[i]);
+    if (AT_isValidAFun((AFun)reg[i])) {
+      AT_markAFun((AFun)reg[i]);
     }
   }
 
@@ -346,11 +346,11 @@ VOIDCDECL mark_phase()
     at_prot_functions[i]();
   }
 
-  AT_markProtectedSymbols();
+  AT_markProtectedAFuns();
 
   /* Mark 'parked' symbol */
-  if (AT_isValidSymbol(at_parked_symbol)) {
-    AT_markSymbol(at_parked_symbol);
+  if (AT_isValidAFun(at_parked_symbol)) {
+    AT_markAFun(at_parked_symbol);
   }
 }
 
@@ -406,8 +406,8 @@ VOIDCDECL mark_phase_young()
     if (real_term != NULL) {
       AT_markTerm_young(real_term);
     }
-    if (AT_isValidSymbol((Symbol)reg[i])) {
-       AT_markSymbol_young((Symbol)reg[i]);
+    if (AT_isValidAFun((AFun)reg[i])) {
+       AT_markAFun_young((AFun)reg[i]);
     }
   }
 
@@ -474,12 +474,12 @@ VOIDCDECL mark_phase_young()
     at_prot_functions[i]();
   }
     
-  AT_markProtectedSymbols_young();
+  AT_markProtectedAFuns_young();
 
    /* Mark 'parked' symbol */
-  if (AT_isValidSymbol(at_parked_symbol)) {
-      /*fprintf(stderr,"mark_phase_young: AT_markSymbol_young(%d)\n",at_parked_symbol);*/
-     AT_markSymbol_young(at_parked_symbol);
+  if (AT_isValidAFun(at_parked_symbol)) {
+      /*fprintf(stderr,"mark_phase_young: AT_markAFun_young(%d)\n",at_parked_symbol);*/
+     AT_markAFun_young(at_parked_symbol);
   }
 }
 
@@ -755,7 +755,7 @@ void major_sweep_phase_old()
                 break;
               case AT_SYMBOL:
                 assert(IS_OLD(t->header));
-                AT_freeSymbol((SymEntry)t);
+                AT_freeAFun((SymEntry)t);
                 t->header=FREE_HEADER;
                 dead_in_block++;
                 break;
@@ -864,7 +864,7 @@ void major_sweep_phase_young()
                 dead_in_block++;
                 break;
               case AT_SYMBOL:
-                AT_freeSymbol((SymEntry)t);
+                AT_freeAFun((SymEntry)t);
                 t->header = FREE_HEADER;
                 t->aterm.next = ti->at_freelist;
                 ti->at_freelist = t;
@@ -999,7 +999,7 @@ void minor_sweep_phase_young()
                 dead_in_block++;
                 break;
               case AT_SYMBOL:
-                AT_freeSymbol((SymEntry)t);
+                AT_freeAFun((SymEntry)t);
                 t->header = FREE_HEADER;
                 t->aterm.next   = ti->at_freelist;
                 ti->at_freelist = t;

@@ -1,6 +1,6 @@
 #include "byteencoding.h"
 
-union DoubleEncoding{
+/* union DoubleEncoding{
 	double d;
 
 	struct{
@@ -23,7 +23,7 @@ union DoubleEncoding{
 	# endif
 	#endif
 	} EncodedDouble;
-};
+}; */
 
 #if __STDC_VERSION__ >= 199901L
   /* "inline" is a keyword */
@@ -108,7 +108,7 @@ int BEserializeMultiByteInt(int i, char *c){
 /**
  * Serializes a double value using IEEE 754 encoding.
  */
-void BEserializeDouble(double d, char *c){
+/* void BEserializeDouble(double d, char *c){
 	unsigned int negative, exponent, mantissa0, mantissa1;
 	union DoubleEncoding de;
 	
@@ -128,14 +128,14 @@ void BEserializeDouble(double d, char *c){
 	c[5] = (mantissa0 & 0x0000ff00U) >> 8;
 	c[6] = ((mantissa0 & 0x000f0000U) >> 16) | ((exponent & 0x0000000fU) << 4);
 	c[7] = ((exponent & 0x00007f0U) >> 4) | (negative & 0x00000001U) << 7;
-}
+} */
 
 
 /**
  * Deserializes a 'multi-byte' encoded integer from a sequence of bytes.
  * When this function returns the parameter 'unsigned int *count' will hold how many bytes where read during the decoding process.
  */
-int BEdeserializeMultiByteInt(char *c, unsigned int *count){
+int BEdeserializeMultiByteInt(char *c, size_t *count){
 	unsigned char part = (unsigned char) c[0];
 	unsigned int result = (part & SEVENBITS);
 	
@@ -174,7 +174,7 @@ int BEdeserializeMultiByteInt(char *c, unsigned int *count){
 /**
  * Deserializes a double in IEEE 754 encoding from the given sequence of bytes.
  */
-double BEdeserializeDouble(char *c){
+/* double BEdeserializeDouble(char *c){
 	union DoubleEncoding de;
 	
 	unsigned int mantissa1 = 	(c[0] & 0x000000ffU) |
@@ -197,4 +197,4 @@ double BEdeserializeDouble(char *c){
 	de.EncodedDouble.mantissa1 = mantissa1;
 	
 	return de.d;
-}
+} */

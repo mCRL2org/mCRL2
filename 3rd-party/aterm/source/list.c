@@ -49,7 +49,7 @@ void AT_initList(int argc, char *argv[])
 ATermList ATgetTail(ATermList list, int start0)
 {
   size_t start;
-  if (start < 0) 
+  if (start0 < 0) 
   {
     start = ATgetLength(list) + start0;
   }
@@ -65,86 +65,6 @@ ATermList ATgetTail(ATermList list, int start0)
   }
 
   return list;
-}
-
-/*}}}  */
-/*{{{  ATermList ATreplaceTail(ATermList list, ATermList newtail, int start) */
-
-ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
-{
-  size_t i;
-  size_t start=(startpos<0 ? (size_t)ATgetLength(list)+startpos : (size_t)startpos);
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,start); 
-
-  for (i=0; i<start; i++) 
-  {
-    buffer[i] = ATgetFirst(list);
-    list = ATgetNext(list);
-  }
-
-  for (i=start; i>0; i--) 
-  {
-    newtail = ATinsert(newtail, buffer[i-1]);
-  }
-  
-  /* Preserve annotations */
-  /* if (AT_getAnnotations((ATerm)list) != NULL) 
-  {
-    newtail = (ATermList)AT_setAnnotations((ATerm)newtail,
-					   AT_getAnnotations((ATerm)list));
-  } */
-
-  return newtail;
-}
-
-/*}}}  */
-/*{{{  ATermList ATgetPrefix(ATermList list) */
-
-/**
- * Build a new list containing all elements of list, except the last one.
- */
-
-ATermList ATgetPrefix(ATermList list)
-{
-  size_t i, size = ATgetLength(list);
-  ATermList result = ATmakeList0();
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,size); 
-  
-  if (size<=1)
-     return result;
-     
-  size -= 1;
-  
-  for(i=0; i<size; i++) 
-  {
-    buffer[i] = ATgetFirst(list);
-    list = ATgetNext(list);
-  }
-
-  for(i=size; i>0; i--) {
-    result = ATinsert(result, buffer[i-1]);
-  }
-  
-  return result;
-}
-
-/*}}}  */
-/*{{{  ATerm ATgetLast(ATermList list) */
-
-/**
- * Retrieve the last element of 'list'.
- * When 'list' is the empty list, NULL is returned.
- */
-
-ATerm ATgetLast(ATermList list)
-{
-  ATermList old = ATempty;
-
-  while(!ATisEmpty(list)) {
-    old = list;
-    list = ATgetNext(list);
-  }
-  return ATgetFirst(old);
 }
 
 /*}}}  */
@@ -177,36 +97,6 @@ ATermList ATgetSlice(ATermList list, size_t start, size_t end)
   }
 
   for(i=size; i>0; i--) {
-    result = ATinsert(result, buffer[i-1]);
-  }
-  
-  return result;
-}
-
-/*}}}  */
-/*{{{  ATermList ATinsertAt(ATermList list, ATerm el, size_t index) */
-
-/**
- * Insert 'el' at position 'index' in 'list'.
- */
-
-ATermList ATinsertAt(ATermList list, ATerm el, size_t index)
-{
-  size_t i;
-  ATermList result;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,index); 
-  
-  /* First collect the prefix in buffer */
-  for(i=0; i<index; i++) {
-    buffer[i] = ATgetFirst(list);
-    list = ATgetNext(list);
-  }
-
-  /* Build a list consisting of 'el' and the postfix of the list */
-  result = ATinsert(list, el);
-
-  /* Insert elements before 'index' */
-  for(i=index; i>0; i--) {
     result = ATinsert(result, buffer[i-1]);
   }
   
@@ -312,39 +202,6 @@ size_t ATindexOf(ATermList list, ATerm el, int startpos)
 }
 
 /*}}}  */
-/*{{{  int ATlastIndexOf(ATermList list, ATerm el, int start) */
-
-/**
- * Search backwards for 'el' in 'list'. Start searching at
- * index 'start'. Return the index of the first occurence of 'l'
- * encountered, or -1 when 'el' is not present before 'start'.
- */
-
-size_t ATlastIndexOf(ATermList list, ATerm el, int startpos)
-{
-  size_t i, len, start=(startpos<0 ? startpos+ATgetLength(list) : (size_t)startpos);
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,1+start); 
-
-  len = start+1;
-
-  for (i=0; i<len; i++) 
-  {
-    buffer[i] = ATgetFirst(list);
-    list = ATgetNext(list);
-  }
-
-  for (i=len; i>0; i--) 
-  {
-    if (ATisEqual(buffer[i-1], el)) 
-    {
-      return i-1;
-    }
-  }
-  
-  return NON_EXISTING;
-}
-
-/*}}}  */
 /*{{{  ATerm ATelementAt(ATermList list, int index) */
 
 /**
@@ -355,9 +212,11 @@ size_t ATlastIndexOf(ATermList list, ATerm el, int startpos)
 ATerm ATelementAt(ATermList list, size_t index)
 {
   for(; index > 0 && !ATisEmpty(list); index--)
+  { 
     list = ATgetNext(list);
+  }
 
-  if(ATisEmpty(list))
+  if (ATisEmpty(list))
     return NULL;
 
   return ATgetFirst(list);
@@ -425,45 +284,6 @@ ATermList ATremoveElementAt(ATermList list, size_t idx)
   }
   
   return list;
-}
-
-/*}}}  */
-/*{{{  ATermList ATremoveAll(ATermList list, ATerm t) */
-
-/**
- * Remove all occurences of an element from a list
- */
-
-ATermList ATremoveAll(ATermList list, ATerm t)
-{
-  size_t i = 0;
-  ATerm el = NULL;
-  ATermList l = list;
-  ATermList result = ATempty;
-  ATbool found = ATfalse;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
-
-  while(!ATisEmpty(l)) {
-    el = ATgetFirst(l);
-    l = ATgetNext(l);
-    if(!ATisEqual(el, t)) 
-    {
-      buffer[i++] = el;
-    } else
-      found = ATtrue;
-  }
-
-  if(!found) {
-    return list;
-  }
-
-  /* Add all elements prior to this one to the tail of the list. */
-  while (i>0) {
-    result = ATinsert(result, buffer[i-1]);
-    i--;
-  }
-
-  return result;
 }
 
 /*}}}  */
@@ -549,153 +369,6 @@ ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 }
 
 /*}}}  */
-/*{{{  ATerm ATdictCreate() */
-
-/**
- * Create a new dictionary.
- */
-
-/* ATerm ATdictCreate()
-{
-  return (ATerm)ATempty;
-} */
-
-/*}}}  */
-/*{{{  ATerm ATdictPut(ATerm dict, ATerm key, ATerm value) */
-
-/**
- * Set an element of a 'dictionary list'. This is a list consisting
- * of [key,value] pairs.
- */
-
-/* ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
-{
-  size_t i = 0;
-  ATermList pair, tmp = (ATermList)dict;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(tmp));
-
-  / * Search for the key * /
-  while(!ATisEmpty(tmp)) 
-  {
-    pair = (ATermList)ATgetFirst(tmp);
-    tmp = ATgetNext(tmp);
-    if(ATisEqual(ATgetFirst(pair), key)) {
-      pair = ATmakeList2(key, value);
-      tmp = ATinsert(tmp, (ATerm)pair);
-      while (i>0) {
-	tmp = ATinsert(tmp, buffer[i-1]);
-        i--;
-      }
-      return (ATerm)tmp;
-    } 
-    else 
-    {
-      buffer[i++] = (ATerm)pair;
-    }
-  }
-  
-  / * The key is not in the dictionary * /
-  pair = ATmakeList2(key, value);
-  return (ATerm)ATinsert((ATermList)dict, (ATerm)pair);
-} */
-
-/*}}}  */
-/*{{{  ATerm ATdictGet(ATerm dict, ATerm key) */
-
-/**
- * Retrieve a value from a dictionary list.
- */
-
-/* ATerm ATdictGet(ATerm dict, ATerm key)
-{
-  ATermList pair;
-  ATermList tmp = (ATermList)dict;
-
-  / * Search for the key * /
-  while(!ATisEmpty(tmp)) {
-    pair = (ATermList)ATgetFirst(tmp);
-
-    if(ATisEqual(ATgetFirst(pair), key))
-      return ATgetFirst(ATgetNext(pair));
-
-    tmp = ATgetNext(tmp);
-  }
-
-  / * The key is not in the dictionary * /
-  return NULL;
-} */
-
-/*}}}  */
-/*{{{  ATerm ATdictRemove(ATerm dict, ATerm key) */
-
-/**
- * Remove a [key,value] pair from a dictionary list.
- */
-
-/* ATerm ATdictRemove(ATerm dict, ATerm key)
-{
-  size_t idx = 0;
-  ATermList tmp = (ATermList)dict;
-  ATermList pair;
-
-  / * Search for the key * /
-  while(!ATisEmpty(tmp)) {
-    pair = (ATermList)ATgetFirst(tmp);
-    if(ATisEqual(ATgetFirst(pair), key))
-      return (ATerm)ATremoveElementAt((ATermList)dict, idx);
-
-    tmp = ATgetNext(tmp);
-    idx++;
-  }
-
-  / * The key is not in the dictionary * /
-  return dict;
-} */
-
-/*}}}  */
-/*{{{  ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm)) */
-
-/**
- * Filter elements from a list.
- */
-
-ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm))
-{
-  size_t i = 0;
-  ATerm el = NULL;
-  ATermList l = list;
-  ATermList result = ATempty;
-  ATbool found = ATfalse;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
-
-  while(!ATisEmpty(l)) 
-  {
-    el = ATgetFirst(l);
-    l = ATgetNext(l);
-    if(predicate(el)) 
-    {
-      buffer[i++] = el;
-    } 
-    else 
-    {
-      found = ATtrue;
-    }
-  }
-
-  if(!found) {
-    return list;
-  }
-
-  /* Add all elements prior to this one to the tail of the list. */
-  while (i>0) {
-    result = ATinsert(result, buffer[i-1]);
-    i--;
-  }
-
-  return result;
-}
-
-/*}}}  */
 
 /*{{{  ATermList ATgetArguments(ATermAppl appl) */
 
@@ -706,7 +379,7 @@ ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm))
 
 ATermList ATgetArguments(ATermAppl appl)
 {
-  Symbol s = ATgetSymbol(appl);
+  AFun s = ATgetAFun(appl);
   size_t i, len = ATgetArity(s);
   ATermList result = ATempty;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
@@ -725,7 +398,8 @@ ATermList ATgetArguments(ATermAppl appl)
 
 /*{{{  size_t ATgetLength(ATermList list) */
 
-size_t ATgetLength(ATermList list) {
+size_t ATgetLength(ATermList list) 
+{
   size_t length = ((size_t)GET_LENGTH((list)->header));
   
   if (length < MAX_LENGTH-1)
@@ -743,11 +417,5 @@ size_t ATgetLength(ATermList list) {
   
   return length;
 }
-
-/*
-int     ATgetBlobSize(ATermBlob blob) {
-  return ((int)GET_LENGTH((blob)->header));
-}
-*/
 
 /*}}}  */

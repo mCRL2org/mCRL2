@@ -21,7 +21,7 @@
 #include "bafio.h"
 #include "version.h"
 #include "atypes.h"
-#include "tafio.h"
+/* #include "tafio.h" */
 #include "safio.h" 
 /* #include "md5.h" */
 
@@ -124,23 +124,6 @@ AT_cleanup(void)
 
 /*}}}  */
 
-/*{{{  void ATinitialize(int argc, char *argv[]) */
-
-/**
- * Initialize ATerm library without supplying bottom of stack.
- * the stackbottom is determined in this function.
- * This variant might work better with some compilers (gcc)
- * that optimize local variables in 'main' into global variables.
- */ 
-
-/* void ATinitialize(int argc, char *argv[])
-{
-  ATerm bottom;
-
-  ATinit(argc, argv, &bottom);
-} */
-
-/*}}}  */
 /*{{{  void ATinit(int argc, char *argv[], ATerm *bottomOfStack) */
 
 /**
@@ -237,7 +220,7 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
 
   /* Initialize other components */
   AT_initMemory(argc, argv);
-  AT_initSymbol(argc, argv);
+  AT_initAFun(argc, argv);
   AT_initList(argc, argv);
   /* AT_initMake(argc, argv); */
   AT_initGC(argc, argv, bottomOfStack);
@@ -681,7 +664,7 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 
 	/*
 	 * ATerm specifics start here: "%t" to print an ATerm; "%l" to
-	 * print a list; "%y" to print a Symbol; "%n" to print a single
+	 * print a list; "%y" to print a AFun; "%n" to print a single
 	 * ATerm node
 	 */
       case 't':
@@ -704,7 +687,7 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	break;
       case 'a':
       case 'y':
-	AT_printSymbol(va_arg(args, Symbol), stream);
+	AT_printAFun(va_arg(args, AFun), stream);
 	break;
       case 'n':
 	t = va_arg(args, ATerm);
@@ -716,8 +699,8 @@ ATvfprintf(FILE * stream, const char *format, va_list args)
 	    break;
 
 	  case AT_APPL:
-	    if (AT_isValidSymbol(ATgetAFun(t))) {
-	      AT_printSymbol(ATgetAFun(t), stream);
+	    if (AT_isValidAFun(ATgetAFun(t))) {
+	      AT_printAFun(ATgetAFun(t), stream);
 	      fprintf(stream, "(...(%lu))",
 		      GET_ARITY(t->header));
 	    } else {
@@ -770,7 +753,7 @@ resize_buffer(size_t n)
 ATbool
 writeToTextFile(ATerm t, FILE * f)
 {
-  Symbol          sym;
+  AFun          sym;
   ATerm           arg;
   size_t    i, arity; /* size; */
   ATermAppl       appl;
@@ -788,8 +771,8 @@ writeToTextFile(ATerm t, FILE * f)
 
       appl = (ATermAppl) t;
 
-      sym = ATgetSymbol(appl);
-      AT_printSymbol(sym, f);
+      sym = ATgetAFun(appl);
+      AT_printAFun(sym, f);
       arity = ATgetArity(sym);
       name = ATgetName(sym);
       if (arity > 0 || (!ATisQuoted(sym) && *name == '\0')) {
@@ -841,7 +824,6 @@ ATbool
 ATwriteToTextFile(ATerm t, FILE * f)
 {
   ATbool result = ATtrue;
-  /* ATerm annos; */
 
   if (ATgetType(t) == AT_LIST) {
     fputc('[', f);
@@ -884,14 +866,14 @@ ATbool ATwriteToNamedTextFile(ATerm t, const char *name)
   return result;
 }
 
-/*{{{  static int symbolTextSize(Symbol sym) */
+/*{{{  static int symbolTextSize(AFun sym) */
 
 /**
  * Calculate the size of a symbol in text format.
  */
 
 static size_t
-symbolTextSize(Symbol sym)
+symbolTextSize(AFun sym)
 {
   char           *id = ATgetName(sym);
 
@@ -922,14 +904,14 @@ symbolTextSize(Symbol sym)
 }
 
 /*}}}  */
-/*{{{  static char *writeSymbolToString(Symbol sym, char *buf) */
+/*{{{  static char *writeAFunToString(AFun sym, char *buf) */
 
 /**
  * Write a symbol in a string buffer.
  */
 
 static char    *
-writeSymbolToString(Symbol sym, char *buf)
+writeAFunToString(AFun sym, char *buf)
 {
   char           *id = ATgetName(sym);
 
@@ -1002,10 +984,10 @@ writeToString(ATerm t, char *buf)
       /*{{{  write appl */
 
       appl = (ATermAppl) t;
-      sym = ATgetSymbol(appl);
+      sym = ATgetAFun(appl);
       arity = ATgetArity(sym);
       name = ATgetName(sym);
-      buf = writeSymbolToString(sym, buf);
+      buf = writeAFunToString(sym, buf);
       if (arity > 0 || (!ATisQuoted(sym) && *name == '\0')) {
 	*buf++ = '(';
 	if (arity > 0) {
@@ -1074,7 +1056,7 @@ static size_t textSize(ATerm t)
   /* ATerm trm; */
   ATermList list;
   ATermAppl appl;
-  Symbol sym;
+  AFun sym;
   size_t size;
   size_t i, arity;
   char *name;
@@ -1088,7 +1070,7 @@ static size_t textSize(ATerm t)
 
     case AT_APPL:
       appl = (ATermAppl) t;
-      sym = ATgetSymbol(appl);
+      sym = ATgetAFun(appl);
       arity = ATgetArity(sym);
       name = ATgetName(sym);
       size = symbolTextSize(sym);
@@ -1133,22 +1115,21 @@ static size_t textSize(ATerm t)
 static size_t
 topTextSize(ATerm t)
 {
-  /* ATerm annos = AT_getAnnotations(t); */
   size_t size = textSize(t);
 
-  if (ATgetType(t) == AT_LIST /* || ATgetType(t) == AT_PLACEHOLDER */ ) {
+  if (ATgetType(t) == AT_LIST ) {
     size += 2; /* For markers on both sides of the term */
   }
 
   return size;
 }
 
-size_t
+/* size_t
 AT_calcTextSize(ATerm t)
 {
   return topTextSize(t);
-}
-
+} */
+ 
 /**
  * Write a term into its text representation.
  */
@@ -1178,14 +1159,6 @@ void
 AT_writeToStringBuffer(ATerm t, char *buffer)
 {
   topWriteToString(t, buffer);
-}
-
-/*}}}  */
-/*{{{  int ATcalcTextSize(ATerm t) */
-
-size_t ATcalcTextSize(ATerm t)
-{
-  return AT_calcTextSize(t);
 }
 
 /*}}}  */
@@ -1305,7 +1278,7 @@ fparse_quoted_appl(int *c, FILE * f)
 {
   int             len = 0;
   ATermList       args = ATempty;
-  Symbol          sym;
+  AFun          sym;
   char           *name;
 
   /* First parse the identifier */
@@ -1368,7 +1341,7 @@ fparse_quoted_appl(int *c, FILE * f)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeSymbol(name, ATgetLength(args), ATtrue);
+  sym = ATmakeAFun(name, ATgetLength(args), ATtrue);
   AT_free(name);
   return (ATerm)ATmakeApplList(sym, args);
 }
@@ -1384,7 +1357,7 @@ static ATermAppl
 fparse_unquoted_appl(int *c, FILE * f)
 {
   int len = 0;
-  Symbol sym;
+  AFun sym;
   ATermList args = ATempty;
   char *name = NULL;
 
@@ -1420,7 +1393,7 @@ fparse_unquoted_appl(int *c, FILE * f)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeSymbol(name ? name : "", ATgetLength(args), ATfalse);
+  sym = ATmakeAFun(name ? name : "", ATgetLength(args), ATfalse);
   if (name != NULL) {
     AT_free(name);
   }
@@ -1675,15 +1648,12 @@ sparse_quoted_appl(int *c, char **s)
 {
   int             len = 0;
   ATermList       args = ATempty;
-  Symbol          sym;
+  AFun          sym;
   char           *name;
 
   /* First parse the identifier */
   snext_char(c, s);
 
-  /* if (*c == STRING_MARK) {
-    return sparse_blob(c, s);
-  } */
   assert(*c != STRING_MARK);
 
   while (*c != '"')
@@ -1746,7 +1716,7 @@ sparse_quoted_appl(int *c, char **s)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeSymbol(name, ATgetLength(args), ATtrue);
+  sym = ATmakeAFun(name, ATgetLength(args), ATtrue);
   AT_free(name);
   return (ATerm)ATmakeApplList(sym, args);
 }
@@ -1762,7 +1732,7 @@ static ATermAppl
 sparse_unquoted_appl(int *c, char **s)
 {
   int len = 0;
-  Symbol sym;
+  AFun sym;
   ATermList args = ATempty;
   char *name = NULL;
 
@@ -1797,7 +1767,7 @@ sparse_unquoted_appl(int *c, char **s)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeSymbol(name ? name : "", ATgetLength(args), ATfalse);
+  sym = ATmakeAFun(name ? name : "", ATgetLength(args), ATfalse);
   if (name != NULL) {
     AT_free(name);
   }
@@ -1936,7 +1906,7 @@ ATreadFromString(const char *string)
 void AT_markTerm(ATerm t)
 {
   size_t    i, arity;
-  Symbol          sym;
+  AFun          sym;
   ATerm          *current = mark_stack + 1;
   ATerm          *limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
   
@@ -1981,11 +1951,10 @@ void AT_markTerm(ATerm t)
 	break;
 
       case AT_APPL:
-	sym = ATgetSymbol((ATermAppl) t);
+	sym = ATgetAFun((ATermAppl) t);
 
-          /*fprintf(stderr,"AT_markTerm: AT_markSymbol(adr = %d, id = %d)\n",at_lookup_table[(sym)],sym);*/
-        if(AT_isValidSymbol(sym)) {
-          AT_markSymbol(sym);
+        if(AT_isValidAFun(sym)) {
+          AT_markAFun(sym);
         } else {
           continue;
         }
@@ -2006,18 +1975,14 @@ void AT_markTerm(ATerm t)
 	}
 	break;
 
-      /* case AT_PLACEHOLDER:
-	*current++ = ATgetPlaceholder((ATermPlaceholder) t);
-	break; */
     }
   }
 }
 
-/* Jurgen asks: why is this function not in gc.c ? */
 void AT_markTerm_young(ATerm t) 
 {
   size_t    i, arity;
-  Symbol          sym;
+  AFun          sym;
   ATerm          *current = mark_stack + 1;
   ATerm          *limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
 
@@ -2058,25 +2023,20 @@ void AT_markTerm_young(ATerm t)
     }
       /* TODO: optimize*/
     if(IS_MARKED(t->header) || IS_OLD(t->header)) {
-        /*fprintf(stderr,"AT_markTerm_young (%p) STOP MARK: age = %d\n",t,GET_AGE(t->header));*/
       continue;
     }
 
     SET_MARK(t->header);
-      /*fprintf(stderr,"MINOR YOUNG MARK(%x)\n",(size_t)t);*/
-
-    /* if(HAS_ANNO(t->header))
-      *current++ = AT_getAnnotations(t); */
 
     switch (GET_TYPE(t->header)) {
       case AT_INT:
 	break;
 
       case AT_APPL:
-	sym = ATgetSymbol((ATermAppl) t);
-          /*fprintf(stderr,"AT_markTerm_young: AT_markSymbol_young(%d)\n",sym);*/
-        if(AT_isValidSymbol(sym)) {
-          AT_markSymbol_young(sym);
+	sym = ATgetAFun((ATermAppl) t);
+          /*fprintf(stderr,"AT_markTerm_young: AT_markAFun_young(%d)\n",sym);*/
+        if(AT_isValidAFun(sym)) {
+          AT_markAFun_young(sym);
         } else {
           continue;
         }
@@ -2090,85 +2050,6 @@ void AT_markTerm_young(ATerm t)
 	  *current++ = arg;
 	}
         
-	break;
-
-      case AT_LIST:
-	if (!ATisEmpty((ATermList) t)) {
-	  *current++ = (ATerm) ATgetNext((ATermList) t);
-	  *current++ = ATgetFirst((ATermList) t);
-	}
-	break;
-
-    }
-  }
-}
-
-/*}}}  */
-/*{{{  void AT_unmarkTerm(ATerm t) */
-
-/**
- * Unmark a term and all of its children.
- * pre: the whole term must be marked.
- */
-
-void
-AT_unmarkTerm(ATerm t)
-{
-  size_t    i, arity;
-  Symbol          sym;
-  ATerm          *current = mark_stack + 1;
-  ATerm          *limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-  ATerm          *depth = mark_stack;
-
-  mark_stack[0] = NULL;
-  *current++ = t;
-
-  while (ATtrue) {
-    if (current > limit) {
-      size_t current_index, depth_index;
-
-      current_index = current - mark_stack;
-      depth_index   = depth - mark_stack;
-
-      /* We need to resize the mark stack */
-      mark_stack_size = mark_stack_size * 2;
-      mark_stack = (ATerm *) AT_realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
-      if (!mark_stack)
-	ATerror("cannot realloc mark stack to %lu entries.\n", mark_stack_size);
-      limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-      if(!silent) {
-	fprintf(stderr, "resized mark stack to %lu entries\n", mark_stack_size);
-      }
-
-      current = mark_stack + current_index;
-      depth   = mark_stack + depth_index;
-    }
-
-    if (current > depth)
-      depth = current;
-
-    t = *--current;
-
-    if (!t)
-      break;
-
-    CLR_MARK(t->header);
-    
-    /* if(HAS_ANNO(t->header))
-      *current++ = AT_getAnnotations(t); */
-
-    switch (GET_TYPE(t->header)) {
-      case AT_INT:
-	break;
-
-      case AT_APPL:
-	sym = ATgetSymbol((ATermAppl) t);
-	AT_unmarkSymbol(sym);
-	arity = GET_ARITY(t->header);
-	if (arity > MAX_INLINE_ARITY)
-	  arity = ATgetArity(sym);
-	for (i = 0; i < arity; i++)
-	  *current++ = ATgetArgument((ATermAppl) t, i);
 	break;
 
       case AT_LIST:
@@ -2215,7 +2096,7 @@ void AT_unmarkIfAllMarked(ATerm t)
 	  AFun sym;
 
 	  sym = ATgetAFun(appl);
-	  AT_unmarkSymbol(sym);
+	  AT_unmarkAFun(sym);
 	  cur_arity = ATgetArity(sym);
 	  for(cur_arg=0; cur_arg<cur_arity; cur_arg++) {
 	    AT_unmarkIfAllMarked(ATgetArgument(appl, cur_arg));
@@ -2231,215 +2112,18 @@ void AT_unmarkIfAllMarked(ATerm t)
 }
 
 /*}}}  */
-/*{{{  void AT_unmarkAll() */
-
-void AT_unmarkAll()
-{
-  size_t size;
-  size_t blocktype;
-  Block* block;
-
-  for (size=1; size<AT_getMaxTermSize(); size++) {
-    size_t last = BLOCK_SIZE - (BLOCK_SIZE % size) - size;
-    
-    for (blocktype = AT_BLOCK; blocktype <= AT_OLD_BLOCK; blocktype++) {
-      block = terminfo[size].at_blocks[blocktype];
-    
-      while (block) {
-        size_t idx;
-        ATerm data = (ATerm)block->data;
-        for (idx=0; idx <= last; idx += size) {
-          CLR_MARK(((ATerm)(((header_type *)data)+idx))->header);
-        }
-        block = block->next_by_size;
-      }
-    }
-  }
-
-  AT_unmarkAllAFuns();
-}
-
-/*}}}  */
-
-/*{{{  static int calcCoreSize(ATerm t) */
-
-/**
- * Calculate the term size in bytes.
- */
-
-static size_t
-calcCoreSize(ATerm t)
-{
-  size_t size = 0;
-  size_t i, arity;
-  Symbol          sym;
-
-  if (IS_MARKED(t->header))
-    return size;
-
-  SET_MARK(t->header);
-
-  switch (ATgetType(t)) {
-    case AT_INT:
-      size = sizeof(struct __ATermInt);
-      break;
-
-    case AT_APPL:
-      sym = ATgetSymbol((ATermAppl) t);
-      arity = ATgetArity(sym);
-      size = sizeof(struct __ATerm) + arity * sizeof(ATerm);
-      if (!AT_isMarkedSymbol(sym)) {
-	size += strlen(ATgetName(sym)) + 1;
-	size += sizeof(struct _SymEntry);
-	AT_markSymbol(sym);
-      }
-      for (i = 0; i < arity; i++)
-	size += calcCoreSize(ATgetArgument((ATermAppl) t, i));
-      break;
-
-    case AT_LIST:
-      size = sizeof(struct __ATermList);
-      while (!ATisEmpty((ATermList) t)) {
-	size += sizeof(struct __ATermList);
-	size += calcCoreSize(ATgetFirst((ATermList) t));
-	t = (ATerm)ATgetNext((ATermList)t);
-      }
-      break;
-
-  }
-
-  return size;
-}
-
-/*}}}  */
-/*{{{  int AT_calcCoreSize(ATerm t) */
-
-/**
- * Calculate the term size in bytes.
- */
-
-size_t
-AT_calcCoreSize(ATerm t)
-{
-  size_t result = calcCoreSize(t);
-  AT_unmarkTerm(t);
-  return result;
-}
-
-
-/*}}}  */
-/**
- * Calculate the number of subterms of a term.
- */
-
-/*{{{  size_t AT_calcSubterms(ATerm t) */
-
-size_t AT_calcSubterms(ATerm t)
-{
-  size_t nr_subterms = 0;
-  size_t  i, arity;
-  Symbol sym;
-  ATermList list;
-
-  switch (ATgetType(t)) {
-    case AT_INT:
-
-    case AT_APPL:
-      nr_subterms = 1;
-      sym = ATgetSymbol((ATermAppl) t);
-      arity = ATgetArity(sym);
-      for (i = 0; i < arity; i++)
-	nr_subterms += AT_calcSubterms(ATgetArgument((ATermAppl)t, i));
-      break;
-
-    case AT_LIST:
-      list = (ATermList)t;
-      while(!ATisEmpty(list)) {
-	nr_subterms += AT_calcSubterms(ATgetFirst(list)) + 1;
-	list = ATgetNext(list);
-      }
-      break;
-  }
-
-  return nr_subterms;
-}
-
-/*}}}  */
-
-/**
- * Calculate the number of unique subterms.
- */
-
-/*{{{  calcUniqueSubterms(ATerm t) */
-
-static size_t
-calcUniqueSubterms(ATerm t)
-{
-  size_t nr_unique = 0;
-  size_t  i, arity;
-  Symbol sym;
-  ATermList list;
-
-  if (IS_MARKED(t->header))
-    return 0;
-
-  switch (ATgetType(t)) {
-    case AT_INT:
-
-    case AT_APPL:
-      nr_unique = 1;
-      sym = ATgetSymbol((ATermAppl) t);
-      arity = ATgetArity(sym);
-      for (i = 0; i < arity; i++)
-	nr_unique += calcUniqueSubterms(ATgetArgument((ATermAppl)t, i));
-      break;
-
-    case AT_LIST:
-      list = (ATermList)t;
-      while(!ATisEmpty(list) && !IS_MARKED(list->header)) {
-	nr_unique += calcUniqueSubterms(ATgetFirst(list)) + 1;
-	SET_MARK(list->header);
-	list = ATgetNext(list);
-      }
-      if (ATisEmpty(list) && !IS_MARKED(list->header)) {
-	SET_MARK(list->header);
-	nr_unique++;
-      }
-      break;
-  }
-
-  SET_MARK(t->header);
-
-  return nr_unique;
-}
-
-/*}}}  */
-/**
- * Calculate the number of unique subterms.
- */
-
-/*{{{  size_t AT_calcUniqueSubterms(ATerm t) */
-
-size_t AT_calcUniqueSubterms(ATerm t)
-{
-  size_t result = calcUniqueSubterms(t);
-  AT_unmarkIfAllMarked(t);
-  return result;
-}
-
-/*}}}  */
 
 /**
  * Calculate the number of unique symbols.
  */
 
-/*{{{  static size_t calcUniqueSymbols(ATerm t) */
+/*{{{  static size_t calcUniqueAFuns(ATerm t) */
 
-static size_t calcUniqueSymbols(ATerm t)
+static size_t calcUniqueAFuns(ATerm t)
 {
   size_t nr_unique = 0;
   size_t  i, arity;
-  Symbol sym;
+  AFun sym;
   ATermList list;
 
   if (IS_MARKED(t->header))
@@ -2452,14 +2136,14 @@ static size_t calcUniqueSymbols(ATerm t)
       break;
 
     case AT_APPL:
-      sym = ATgetSymbol((ATermAppl) t);
-      nr_unique = AT_isMarkedSymbol(sym) ? 0 : 1;
+      sym = ATgetAFun((ATermAppl) t);
+      nr_unique = AT_isMarkedAFun(sym) ? 0 : 1;
       assert(at_lookup_table[sym]);
       at_lookup_table[sym]->count++;
-      AT_markSymbol(sym);
+      AT_markAFun(sym);
       arity = ATgetArity(sym);
       for (i = 0; i < arity; i++) {
-	nr_unique += calcUniqueSymbols(ATgetArgument((ATermAppl)t, i));
+	nr_unique += calcUniqueAFuns(ATgetArgument((ATermAppl)t, i));
       }
       break;
 
@@ -2469,7 +2153,7 @@ static size_t calcUniqueSymbols(ATerm t)
 	SET_MARK(list->header);
 	if (!at_lookup_table[AS_LIST]->count++)
 	  nr_unique++;
-	nr_unique += calcUniqueSymbols(ATgetFirst(list));
+	nr_unique += calcUniqueAFuns(ATgetFirst(list));
 	list = ATgetNext(list);
       }
       if(ATisEmpty(list) && !IS_MARKED(list->header)) {
@@ -2490,119 +2174,15 @@ static size_t calcUniqueSymbols(ATerm t)
  * Calculate the number of unique symbols
  */
 
-/*{{{  size_t AT_calcUniqueSymbols(ATerm t) */
+/*{{{  size_t AT_calcUniqueAFuns(ATerm t) */
 
-size_t AT_calcUniqueSymbols(ATerm t)
+size_t AT_calcUniqueAFuns(ATerm t)
 {
-  size_t result = calcUniqueSymbols(t);
+  size_t result = calcUniqueAFuns(t);
   AT_unmarkIfAllMarked(t);
-  /*AT_assertUnmarked(t);*/
 
   return result;
 } 
-
-/*}}}  */
-
-/*{{{  void AT_assertUnmarked(ATerm t) */
-
-void AT_assertUnmarked(ATerm t)
-{
-  ATermAppl appl;
-  Symbol sym;
-  size_t i;
-
-  assert(!IS_MARKED(t->header));
-  switch(ATgetType(t)) {
-    case AT_APPL:
-      appl = (ATermAppl)t;
-      sym = ATgetSymbol(appl);
-      assert(!AT_isMarkedSymbol(sym));
-      for(i=0; i<ATgetArity(sym); i++)
-	AT_assertUnmarked(ATgetArgument(appl, i));
-      break;
-
-    case AT_LIST:
-      if((ATermList)t != ATempty) {
-	AT_assertUnmarked(ATgetFirst((ATermList)t));
-	AT_assertUnmarked((ATerm)ATgetNext((ATermList)t));
-      }
-      break;
-
-  }
-}
-
-/*}}}  */
-/*{{{  void AT_assertMarked(ATerm t) */
-
-void AT_assertMarked(ATerm t)
-{
-  ATermAppl appl;
-  Symbol sym;
-  size_t i;
-
-  assert(IS_MARKED(t->header));
-  switch(ATgetType(t)) {
-    case AT_APPL:
-      appl = (ATermAppl)t;
-      sym = ATgetSymbol(appl);
-      assert(AT_isMarkedSymbol(sym));
-      for(i=0; i<ATgetArity(sym); i++)
-	AT_assertMarked(ATgetArgument(appl, i));
-      break;
-
-    case AT_LIST:
-      if((ATermList)t != ATempty) {
-	AT_assertMarked(ATgetFirst((ATermList)t));
-	AT_assertMarked((ATerm)ATgetNext((ATermList)t));
-      }
-      break;
-
-  }
-}
-
-/*}}}  */
-
-/**
- * Calculate the maximum depth of a term.
- */
-
-/*{{{  size_t AT_calcTermDepth(ATerm t) */
-
-size_t AT_calcTermDepth(ATerm t)
-{
-  size_t depth = 0, maxdepth = 0;
-  size_t  arity, i;
-  ATermAppl appl;
-  ATermList list;
-
-
-  switch(ATgetType(t)) {
-    case AT_INT:
-    case AT_APPL:
-      appl = (ATermAppl)t;
-      arity = ATgetArity(ATgetSymbol(appl));
-      for(i=0; i<arity; i++) {
-	depth = AT_calcTermDepth(ATgetArgument(appl, i));
-	if(depth > maxdepth)
-	  maxdepth = depth;
-      }
-      return maxdepth+1;
-
-    case AT_LIST:
-      list = (ATermList)t;
-      while(!ATisEmpty(list)) {
-	depth = AT_calcTermDepth(ATgetFirst(list));
-	if(depth > maxdepth)
-	  maxdepth = depth;
-	list = ATgetNext(list);
-      }
-      return maxdepth+1;
-
-    default:
-      ATerror("Trying to calculate the depth of a free term.\n");
-      return 0;
-  }
-}
 
 /*}}}  */
 
@@ -2636,7 +2216,7 @@ static int AT_compareArguments(ATermAppl t1, ATermAppl t2)
 
   return result;
 
-}
+} 
 
 /*}}}  */
 /*{{{  static int AT_compareAppls(ATermAppl t0, ATermAppl t2) */
@@ -2662,7 +2242,7 @@ static int AT_compareAppls(ATermAppl t1, ATermAppl t2)
 
   return AT_compareArguments(t1,t2);
 
-}
+} 
 
 /*}}}  */
 /*{{{  static int AT_compareInts(ATermInt t1, ATermInt t2)  */
@@ -2680,7 +2260,7 @@ static int AT_compareInts(ATermInt t1, ATermInt t2)
     return 1;
   }
   return 0;
-}
+} 
 
 /*}}}  */
 /*{{{  static int AT_compareLists(ATermList t1, ATermList t2)  */
@@ -2717,7 +2297,7 @@ static int AT_compareLists(ATermList t1, ATermList t2)
     return 1;
   }
   return 0;
-}
+} 
 
 /*}}}  */
 /*{{{  int ATcompare(ATerm t1, ATerm t2) */
@@ -2758,6 +2338,6 @@ int ATcompare(ATerm t1, ATerm t2)
   }
 
   return result;
-}
+} 
 
 /*}}}  */

@@ -15,28 +15,28 @@ extern "C"
 /* Stores */
 typedef struct _ProtectedMemoryStack{
 	ATerm **blocks;
-	unsigned int *freeBlockSpaces;
-	unsigned int nrOfBlocks;
+	size_t *freeBlockSpaces;
+	size_t nrOfBlocks;
 	
-	unsigned int currentBlockNr;
+	size_t currentBlockNr;
 	ATerm *currentIndex;
-	unsigned int spaceLeft;
+	size_t spaceLeft;
 } *ProtectedMemoryStack;
 
 /* Buffer */
 typedef struct _ByteBuffer{
 	char *buffer;
-	unsigned int capacity;
+	size_t capacity;
 	
 	char *currentPos;
-	unsigned int limit;
+	size_t limit;
 } *ByteBuffer;
 
-ByteBuffer ATcreateByteBuffer(unsigned int size);
+ByteBuffer ATcreateByteBuffer(size_t size);
 
-ByteBuffer ATwrapBuffer(char *buffer, unsigned int capacity);
+ByteBuffer ATwrapBuffer(char *buffer, size_t capacity);
 
-unsigned int ATgetRemainingBufferSpace(ByteBuffer byteBuffer);
+size_t ATgetRemainingBufferSpace(ByteBuffer byteBuffer);
 
 void ATflipByteBuffer(ByteBuffer byteBuffer);
 
@@ -48,27 +48,25 @@ void ATdestroyByteBuffer(ByteBuffer byteBuffer);
 /* For writing */
 typedef struct _ATermMapping{
 	ATerm term;
-	unsigned int subTermIndex;
-	unsigned int nrOfSubTerms;
-	unsigned int annosDone;
-	
-	ATermList nextPartOfList; /* This is for a ATermList 'nextTerm' optimalization only. */
+	size_t subTermIndex;
+	size_t nrOfSubTerms;
+ATermList nextPartOfList; /* This is for a ATermList 'nextTerm' optimalization only. */
 } ATermMapping;
 
 typedef struct _BinaryWriter{
 	ATermMapping *stack;
-	unsigned int stackSize;
-	unsigned int stackPosition;
+	size_t stackSize;
+	size_t stackPosition;
 	
 	IDMappings sharedTerms;
 	int currentSharedTermKey;
 	
-	IDMappings sharedSymbols;
-	int currentSharedSymbolKey;
+	IDMappings sharedAFuns;
+	int currentSharedAFunKey;
 	
 	ATerm currentTerm;
-	unsigned int indexInTerm;
-	unsigned int totalBytesInTerm;
+	size_t indexInTerm;
+	size_t totalBytesInTerm;
 } *BinaryWriter;
 
 BinaryWriter ATcreateBinaryWriter(ATerm term);
@@ -82,44 +80,42 @@ void ATdestroyBinaryWriter(BinaryWriter binaryWriter);
 
 /* For reading */
 typedef struct _ATermConstruct{
-	unsigned int type;
+	size_t type;
 	
 	ATerm tempTerm;
-	unsigned int termKey;
+	size_t termKey;
 	
-	unsigned int nrOfSubTerms;
-	unsigned int subTermIndex;
+	size_t nrOfSubTerms;
+	size_t subTermIndex;
 	ATerm *subTerms;
 	
-	unsigned int hasAnnos;
-	ATerm annos;
 } ATermConstruct;
 
 typedef struct _BinaryReader{
 	ProtectedMemoryStack protectedMemoryStack;
 	
 	ATermConstruct *stack;
-	unsigned int stackSize;
-	unsigned int stackPosition;
+	size_t stackSize;
+	size_t stackPosition;
 	
 	ATerm *sharedTerms;
-	unsigned int sharedTermsSize;
-	unsigned int sharedTermsIndex;
+	size_t sharedTermsSize;
+	size_t sharedTermsIndex;
 	
-	SymEntry *sharedSymbols;
-	unsigned int sharedSymbolsSize;
-	unsigned int sharedSymbolsIndex;
+	SymEntry *sharedAFuns;
+	size_t sharedAFunsSize;
+	size_t sharedAFunsIndex;
 	
 	char *tempNamePage;
 	
-	unsigned int tempType;
+	size_t tempType;
 	char *tempBytes;
-	unsigned int tempBytesSize;
-	unsigned int tempBytesIndex;
-	unsigned int tempArity;
+	size_t tempBytesSize;
+	size_t tempBytesIndex;
+	size_t tempArity;
 	ATbool tempIsQuoted;
 	
-	unsigned int isDone;
+	size_t isDone;
 } *BinaryReader;
 
 BinaryReader ATcreateBinaryReader();

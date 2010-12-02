@@ -26,7 +26,7 @@ add_library(${PROJECT_NAME}
   source/byteio.c
   source/gc.c
 #  source/md5c.c
-  source/tafio.c
+#  source/tafio.c
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)

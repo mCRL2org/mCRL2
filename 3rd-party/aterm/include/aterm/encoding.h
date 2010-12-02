@@ -66,7 +66,6 @@ typedef MachineWord header_type;
 #define MASK_AGE         ((1<<0) | (1<<1))
 #define MASK_MARK        (1<<2)
 #define	MASK_QUOTED      (1<<3)
-#define	MASK_ANNO        MASK_QUOTED
 #define MASK_TYPE        (((1 << TYPE_BITS)-1) << SHIFT_TYPE)
 #define MASK_ARITY       (((1 << ARITY_BITS)-1) << SHIFT_ARITY)
 
@@ -107,17 +106,13 @@ typedef MachineWord header_type;
 
 #define IS_MARKED(h)          ((h) & MASK_MARK)
 #define GET_TYPE(h)           ((size_t)(((h) & MASK_TYPE) >> SHIFT_TYPE))
-#define HAS_ANNO(h)           (((h) & MASK_ANNO) ? ATtrue : ATfalse)
 #define GET_ARITY(h)	      ((size_t)(((h) & MASK_ARITY) >> SHIFT_ARITY))
-#define GET_SYMBOL(h)	      ((Symbol)((h) >> SHIFT_SYMBOL))
+#define GET_SYMBOL(h)	      ((AFun)((h) >> SHIFT_SYMBOL))
 #define GET_LENGTH(h)         ((unsigned long)((h) >> SHIFT_LENGTH))
 #define IS_QUOTED(h)          (((h) & MASK_QUOTED) ? ATtrue : ATfalse)
 
 #define SET_MARK(h)           do { (h) |= MASK_MARK; } while (0)
-#define SET_ANNO(h)           do { (h) |= MASK_ANNO; } while (0)
-/* #define SET_ARITY(h, ar) ((h) = (((h) & ~MASK_ARITY) | \
-									((ar) << SHIFT_ARITY)))
-*/
+
 #define SET_SYMBOL(h, sym)    do { (h) = ((h) & ~MASK_SYMBOL) \
                                      | (((header_type)(sym)) << SHIFT_SYMBOL); \
                               } while (0)
@@ -127,7 +122,6 @@ typedef MachineWord header_type;
 #define SET_QUOTED(h)         do { (h) |= MASK_QUOTED; } while (0)
 
 #define CLR_MARK(h)           do { (h) &= ~MASK_MARK; } while (0)
-#define CLR_ANNO(h)           do { (h) &= ~MASK_ANNO; } while (0)
 #define CLR_QUOTED(h)         do { (h) &= ~MASK_QUOTED; } while (0)
 
 #define APPL_HEADER(anno,ari,sym) ((anno) | ((ari) << SHIFT_ARITY) | \

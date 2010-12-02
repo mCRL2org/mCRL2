@@ -97,14 +97,6 @@ extern "C"
  */
 ATbool ATwriteToTextFile(ATerm t, FILE *file);
 
-/**
- * Serialize a term to file, in a readable shared format (TAF). Every unique 
- * ATerm in only printed out once, a second occurence is replaced by a 
- * a reference.
- */ 
-/* long   ATwriteToSharedTextFile(ATerm t, FILE *f);
-*/
-
 ATbool ATwriteToBinaryFile(ATerm t, FILE *file);
 
 /**
@@ -144,14 +136,6 @@ unsigned char *ATwriteToBinaryString(ATerm t, int *len);
 ATerm ATreadFromTextFile(FILE *file);
 
 /**
- * Read a shared textual ATerm (TAF) from a file.
- * \arg file file to read from
- */
-/* ATerm ATreadFromSharedTextFile(FILE *f);
-*/
-
-
-/**
  * Read a binary ATerm (BAF) from a file.
  * \arg file file to read from
  */
@@ -176,14 +160,6 @@ ATerm ATreadFromNamedFile(const char *name);
  * \arg string string containing a readable ATerm
  */
 ATerm ATreadFromString(const char *string);
-
-/**
- * Parse a shared ATerm (TAF) from a string.
- * \arg s array containing a serialized ATerm in TAF format
- * \arg size length of the array
- */
-/* ATerm ATreadFromSharedString(const char *s, int size);
-*/
 
 /**
  * Parse a binary ATerm from an array of bytes.

@@ -147,7 +147,6 @@ ATermAppl ATmakeAppl6(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
 
 /*AFun    ATgetAFun(ATermAppl appl);*/
 #define ATgetAFun(appl) GET_SYMBOL((appl)->header)
-#define ATgetSymbol ATgetAFun
 
 /* ATerm     ATgetArgument(ATermAppl appl, size_t arg); */
 #define ATgetArgument(appl,idx) (((ATermAppl)appl)->aterm.arg[idx])
@@ -191,29 +190,17 @@ size_t ATgetLength(ATermList list);
 				 && ((ATermList)list)->aterm.tail == NULL))
 
 ATermList ATgetTail(ATermList list, int start);
-ATermList ATreplaceTail(ATermList list, ATermList newtail, int start);
-ATermList ATgetPrefix(ATermList list);
-ATerm     ATgetLast(ATermList list);
 ATermList ATgetSlice(ATermList list, size_t start, size_t end);
 ATermList ATinsert(ATermList list, ATerm el);
-ATermList ATinsertAt(ATermList list, ATerm el, size_t index);
 ATermList ATappend(ATermList list, ATerm el);
 ATermList ATconcat(ATermList list1, ATermList list2);
 size_t    ATindexOf(ATermList list, ATerm el, int start);
-size_t    ATlastIndexOf(ATermList list, ATerm el, int start);
 ATerm     ATelementAt(ATermList list, size_t index);
 ATermList ATremoveElement(ATermList list, ATerm el);
 ATermList ATremoveElementAt(ATermList list, size_t idx);
-ATermList ATremoveAll(ATermList list, ATerm el);
 ATermList ATreplace(ATermList list, ATerm el, size_t idx);
 ATermList ATreverse(ATermList list);
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2));
-int       ATcompare(ATerm t1, ATerm t2);
-/* ATerm     ATdictCreate();
-ATerm     ATdictGet(ATerm dict, ATerm key);
-ATerm     ATdictPut(ATerm dict, ATerm key, ATerm value);
-ATerm     ATdictRemove(ATerm dict, ATerm key);
-*/
 
 ATermTable ATtableCreate(size_t initial_size, unsigned int max_load_pct);
 void       ATtableDestroy(ATermTable table);
@@ -234,27 +221,7 @@ void       ATindexedSetRemove(ATermIndexedSet set, ATerm elem);
 ATermList  ATindexedSetElements(ATermIndexedSet set);
 ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
 
-/* Higher order functions */
-ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm));
-
-/* The ATermPlaceholder type */
-/* ATermPlaceholder ATmakePlaceholder(ATerm type); */
-/* #define ATgetPlaceholder(ph) (((ATermPlaceholder)ph)->aterm.ph_type) */
-
-/* The ATermBlob type */
-/* ATermBlob ATmakeBlob(size_t size, void *data); */
-/*void   *ATgetBlobData(ATermBlob blob);*/
-/* #define ATgetBlobData(blob) (((ATermBlob)blob)->aterm.data) */
-
-/*int     ATgetBlobSize(ATermBlob blob);*/
-/* #define ATgetBlobSize(blob) (((ATermBlob)blob)->aterm.size) */
-
-/* void    ATregisterBlobDestructor(ATbool (*destructor)(ATermBlob)); */
-/* void    ATunregisterBlobDestructor(ATbool (*destructor)(ATermBlob)); */
-
-
 AFun  ATmakeAFun(const char *name, size_t arity, ATbool quoted);
-#define ATmakeSymbol ATmakeAFun
 
 /*char   *ATgetName(AFun sym);*/
 #define ATgetName(sym) (at_lookup_table[(sym)]->name)
@@ -264,24 +231,9 @@ AFun  ATmakeAFun(const char *name, size_t arity, ATbool quoted);
 #define ATisQuoted(sym) IS_QUOTED(at_lookup_table_alias[(sym)]->header)
 
 void    ATprotectAFun(AFun sym);
-#define ATprotectSymbol ATprotectAFun
 void    ATunprotectAFun(AFun sym);
-#define ATunprotectSymbol ATunprotectAFun
 void ATprotectMemory(void *start, size_t size);
 void ATunprotectMemory(void *start);
-
-/* convenience macro's for previously private functions * /
-#define ATgetAnnotations(t) AT_getAnnotations( (t) )
-#define ATsetAnnotations(t,a) AT_setAnnotations( (t), (a) )
-#define ATremoveAnnotations(t) AT_removeAnnotations( (t) )
-
-ATerm AT_getAnnotations(ATerm t);
-ATerm AT_setAnnotations(ATerm t, ATerm annos);
-ATerm AT_removeAnnotations(ATerm t);
-*/
-
-/* Deep strip */
-/* ATerm ATremoveAllAnnotations(ATerm t); */
 
 /* Calculate checksum using the
    "RSA Data Security, Inc. MD5 Message-Digest Algorithm" (see RFC1321)
@@ -297,17 +249,13 @@ ATbool ATdiff(ATerm t1, ATerm t2, ATerm *templ, ATerm *diffs);
  * If the types of the terms are different the integer value of ATgetType
  * is used.
  */
-int ATcompare(ATerm t1, ATerm t2);
+int ATcompare(ATerm t1, ATerm t2); 
 
 void ATsetChecking(ATbool on);
 ATbool ATgetChecking(void);
 
-/*int ATgetGCCount();*/
 extern int at_gc_count;
 #define ATgetGCCount()    (at_gc_count)
-
-/* size_t  ATcalcUniqueSubterms(ATerm t);
-size_t  ATcalcUniqueSymbols(ATerm t); */
 
 size_t  ATcalcTextSize(ATerm t);
 

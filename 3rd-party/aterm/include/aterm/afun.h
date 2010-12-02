@@ -10,24 +10,22 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-#define Symbol AFun
-
 #define AS_INT          0
 #define AS_REAL         1
 #define AS_BLOB         2
 #define AS_PLACEHOLDER  3
 #define AS_LIST         4
 #define AS_EMPTY_LIST   5
-#define AS_ANNOTATION   6
+
 
 typedef size_t AFun; 
 
-/* The Symbol type */
+/* The AFun type */
 typedef struct _SymEntry
 {
   header_type header;
   struct _SymEntry *next;
-  Symbol  id;
+  AFun  id;
   char   *name;
   int     count;  /* used in bafio.c */
   int     index;  /* used in bafio.c */
@@ -36,32 +34,32 @@ typedef struct _SymEntry
 /* defined on SymEntry */
 #define SYM_IS_FREE(sym)          (((MachineWord)(sym) & 1) == 1)
 
-#define AT_markSymbol(s)       (at_lookup_table[(s)]->header |= MASK_AGE_MARK)
-#define AT_markSymbol_young(s) if(!IS_OLD(at_lookup_table[(s)]->header)) AT_markSymbol(s)
+#define AT_markAFun(s)       (at_lookup_table[(s)]->header |= MASK_AGE_MARK)
+#define AT_markAFun_young(s) if(!IS_OLD(at_lookup_table[(s)]->header)) AT_markAFun(s)
 
-/* void AT_unmarkSymbol(Symbol sym); */
-#define AT_unmarkSymbol(s) (at_lookup_table[(s)]->header &= ~MASK_MARK)
+
+#define AT_unmarkAFun(s) (at_lookup_table[(s)]->header &= ~MASK_MARK)
 
 union _ATerm;
 extern union _ATerm **at_lookup_table_alias;
 extern SymEntry *at_lookup_table;
 
 MachineWord AT_symbolTableSize();
-void AT_initSymbol(int argc, char *argv[]);
-int AT_printSymbol(Symbol sym, FILE *f);
-/* ATbool AT_isValidSymbol(Symbol sym); */
-#define AT_isValidSymbol(sym) (((Symbol)sym != (Symbol)(-1) && (MachineWord)(Symbol)sym < AT_symbolTableSize() \
-                                 && !SYM_IS_FREE(at_lookup_table[(Symbol)sym])) ?  ATtrue : ATfalse)
+void AT_initAFun(int argc, char *argv[]);
+size_t AT_printAFun(AFun sym, FILE *f);
 
-/* ATbool AT_isMarkedSymbol(Symbol sym); */
-#define AT_isMarkedSymbol(sym) IS_MARKED(at_lookup_table[(Symbol)sym]->header)
+#define AT_isValidAFun(sym) (((AFun)sym != (AFun)(-1) && (MachineWord)(AFun)sym < AT_symbolTableSize() \
+                                 && !SYM_IS_FREE(at_lookup_table[(AFun)sym])) ?  ATtrue : ATfalse)
 
-void  AT_freeSymbol(SymEntry sym);
-void AT_markProtectedSymbols();
-void AT_markProtectedSymbols_young();
 
-size_t AT_hashSymbol(const char *name, size_t arity);
-ATbool AT_findSymbol(char *name, size_t arity, ATbool quoted);
+#define AT_isMarkedAFun(sym) IS_MARKED(at_lookup_table[(AFun)sym]->header)
+
+void  AT_freeAFun(SymEntry sym);
+void AT_markProtectedAFuns();
+void AT_markProtectedAFuns_young();
+
+size_t AT_hashAFun(const char *name, size_t arity);
+ATbool AT_findAFun(char *name, size_t arity, ATbool quoted);
 void AT_unmarkAllAFuns();
 
 #ifdef __cplusplus

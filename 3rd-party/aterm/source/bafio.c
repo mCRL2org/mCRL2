@@ -26,27 +26,10 @@
 
 #define BAF_LIST_BATCH_SIZE 64
 
-#define PLAIN_INT         0
-#define ANNO_INT          (PLAIN_INT | 1)
-
-/* #define PLAIN_REAL        2
-#define ANNO_REAL         (PLAIN_REAL | 1) */
-
-#define PLAIN_LIST        4
-#define ANNO_LIST         (PLAIN_LIST | 1)
-
-#define PLAIN_PLAC        6
-#define ANNO_PLAC         (PLAIN_PLAC | 1)
-
-/* #define PLAIN_BLOB        8
-#define ANNO_BLOB         (PLAIN_BLOB | 1) */
-
 #define SYMBOL_OFFSET     10
 
-#define IS_ANNOTATED(n)   ((n) & 1 ? ATtrue : ATfalse)
 #define SYM_INDEX(n)      (((n)-SYMBOL_OFFSET)/2)
 #define SYM_COMMAND(n)    ((n)*2 + SYMBOL_OFFSET)
-#define PLAIN_CMD(n)      ((n) & ~1)
 
 /* Maximum # of arguments to reserve space for on the stack in read_term */
 #define MAX_STACK_ARGS    4
@@ -65,19 +48,19 @@ typedef struct _top_symbol
   struct _top_symbol *next;
   AFun s;
 
-  int index;
-  int count;
+  size_t index;
+  size_t count;
 	
-  int code_width;
-  int code;
+  size_t code_width;
+  size_t code;
 } top_symbol;
 
 typedef struct
 {
-  int         nr_symbols;
+  size_t         nr_symbols;
   top_symbol *symbols;
 	
-  int toptable_size;
+  size_t toptable_size;
   top_symbol **toptable;
 } top_symbols;
 
@@ -91,13 +74,13 @@ typedef struct _sym_entry
 
   top_symbols *top_symbols; /* top symbols occuring in this symbol */
 	
-  int termtable_size;
+  size_t termtable_size;
   trm_bucket **termtable;
 
-  int term_width;
+  size_t term_width;
 
-  int cur_index;
-  int nr_times_top; /* # occurences of this symbol as topsymbol */
+  size_t cur_index;
+  size_t nr_times_top; /* # occurences of this symbol as topsymbol */
 
   struct _sym_entry *next_topsym;
 } sym_entry;
@@ -107,11 +90,11 @@ typedef struct
   AFun   sym;
   size_t arity;
   size_t nr_terms;
-  int    term_width;
+  size_t    term_width;
   ATerm *terms;
   size_t   *nr_topsyms;
-  int   *sym_width;
-  int  **topsyms;
+  size_t   *sym_width;
+  size_t  **topsyms;
 } sym_read_entry;
 
 /*}}}  */
@@ -128,7 +111,7 @@ static char *text_buffer = NULL;
 static size_t text_buffer_size = 0;
 
 static unsigned char bit_buffer = '\0';
-static int  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
+static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 /*}}}  */
 
@@ -211,9 +194,7 @@ writeIntToBuf(size_t val, unsigned char *buf)
 
 /*{{{  static int writeBits(size_t val, int nr_bits, byte_writer *writer) */
 
-static
-int
-writeBits(size_t val, int nr_bits, byte_writer *writer)
+static int writeBits(size_t val, int nr_bits, byte_writer *writer)
 {
   int cur_bit;
 
@@ -285,27 +266,23 @@ readBits(size_t *val, int nr_bits, byte_reader *reader)
 /*}}}  */
 /*{{{  static int writeInt(size_t val, byte_writer *writer) */
 
-static
-int
-writeInt(size_t val, byte_writer *writer)
+static ATbool writeInt(size_t val, byte_writer *writer)
 {
   size_t nr_items;
   unsigned char buf[8];
 
   nr_items = writeIntToBuf(val, buf);
   if(write_bytes((char *)buf, nr_items, writer) != nr_items)
-    return -1;
+    return ATfalse;
 
   /* Ok */
-  return 0;
+  return ATtrue;
 }
 
 /*}}}  */
 /*{{{  static int readInt(size_t *val, byte_reader *reader) */
 
-static
-int
-readInt(size_t *val, byte_reader *reader)
+static int readInt(size_t *val, byte_reader *reader)
 {
   int buf[8];
 
@@ -366,34 +343,30 @@ readInt(size_t *val, byte_reader *reader)
 /*}}}  */
 /*{{{  static int writeString(const char *str, size_t len, byte_writer *writer) */
 
-static
-int
-writeString(const char *str, size_t len, byte_writer *writer)
+static ATbool writeString(const char *str, size_t len, byte_writer *writer)
 {
   /* Write length. */
-  if (writeInt(len, writer) < 0)
-    return -1;
+  if (!writeInt(len, writer))
+    return ATfalse;
 
   /* Write actual string. */
   if (write_bytes(str, len, writer) != len)
-    return -1;
+    return ATfalse;
 
   /* Ok */
-  return 0;
+  return ATtrue;
 }
 
 /*}}}  */
 /*{{{  static int readString(byte_reader *reader) */
 
-static
-int
-readString(byte_reader *reader)
+static size_t readString(byte_reader *reader)
 {
   size_t len;
 
   /* Get length of string */
   if (readInt(&len, reader) < 0)
-    return -1;
+    return NON_EXISTING;
 
   /* Assure buffer can hold the string */
   if (text_buffer_size < (len+1))
@@ -406,7 +379,7 @@ readString(byte_reader *reader)
 
   /* Read the actual string */
   if (read_bytes(text_buffer, len, reader) != len)
-    return -1;
+    return NON_EXISTING;
 
   /* Ok, return length of string */
   return len;
@@ -414,22 +387,22 @@ readString(byte_reader *reader)
 
 /*}}}  */
 
-/*{{{  static ATbool write_symbol(Symbol sym, byte_writer *writer) */
+/*{{{  static ATbool write_symbol(AFun sym, byte_writer *writer) */
 
 /**
  * Write a symbol to file.
  */
 
-static ATbool write_symbol(Symbol sym, byte_writer *writer)
+static ATbool write_symbol(AFun sym, byte_writer *writer)
 {
   char *name = ATgetName(sym);
-  if(writeString(name, strlen(name), writer) < 0)
+  if(!writeString(name, strlen(name), writer))
     return ATfalse;
 
-  if(writeInt(ATgetArity(sym), writer) < 0)
+  if(!writeInt(ATgetArity(sym), writer))
     return ATfalse;
 
-  if(writeInt(ATisQuoted(sym), writer) < 0)
+  if(!writeInt(ATisQuoted(sym), writer))
     return ATfalse;
 
   return ATtrue;
@@ -448,18 +421,11 @@ AT_print_sym_entries()
     sym_entry *cur_entry = &sym_entries[cur_sym];
     ATfprintf(stderr, "symbol %y: #=%d, width: %d\n",
 	      cur_entry->id, cur_entry->nr_terms, cur_entry->term_width);
-#if 0
-    {
-      int cur_trm;
-      for(cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++)
-	ATfprintf(stderr, "%t, ", cur_entry->terms[cur_trm].t);
-      ATfprintf(stderr, "\n");
-    }
-#endif
 		
     ATfprintf(stderr, "  arity: %d\n", cur_entry->arity);
-    for (cur_arg=0; cur_arg<cur_entry->arity; cur_arg++) {
-      int sym;
+    for (cur_arg=0; cur_arg<cur_entry->arity; cur_arg++) 
+    {
+      size_t sym;
       top_symbols *tss = &cur_entry->top_symbols[cur_arg];
       ATfprintf(stderr, "    %d symbols: ", tss->nr_symbols);
       for (sym=0; sym<tss->nr_symbols; sym++) {
@@ -477,29 +443,18 @@ AT_print_sym_entries()
 
 /**
  * Retrieve the top symbol of a term. Could be a special symbol
- * (AS_INT, AS_REAL, etc) when the term is not an AT_APPL.
+ * (AS_INT, etc) when the term is not an AT_APPL.
  */
 
-static sym_entry *get_top_symbol(ATerm t, ATbool anno_done)
+static sym_entry *get_top_symbol(ATerm t)
 {
-  Symbol sym;
+  AFun sym;
 
-  if (HAS_ANNO(t->header) && !anno_done)
-    sym = AS_ANNOTATION;
-  else { 
-    switch (ATgetType(t)) {
+  switch (ATgetType(t)) 
+  {
     case AT_INT:
       sym = AS_INT;
       break;
-/*     case AT_REAL:
-      sym = AS_REAL;
-      break; */
-/*    case AT_BLOB:
-      sym = AS_BLOB;
-      break; */
-/*    case AT_PLACEHOLDER:
-      sym = AS_PLACEHOLDER;
-      break; */
     case AT_LIST:
       sym = (ATisEmpty((ATermList)t) ? AS_EMPTY_LIST : AS_LIST);
       break;
@@ -510,7 +465,6 @@ static sym_entry *get_top_symbol(ATerm t, ATbool anno_done)
       ATabort("get_top_symbol: illegal term (%n)\n", t);
       sym = -1;
       break;
-    }
   }
 	
   return &sym_entries[at_lookup_table[sym]->index];
@@ -520,9 +474,9 @@ static sym_entry *get_top_symbol(ATerm t, ATbool anno_done)
 /*{{{  static int bit_width(int val) */
 
 /* How many bits are needed to represent <val> */
-static int bit_width(int val)
+static size_t bit_width(int val)
 {
-  int nr_bits = 0;
+  size_t nr_bits = 0;
 	
   if (val <= 1)
     return 0;
@@ -543,10 +497,11 @@ static int bit_width(int val)
   * terms have been sorted by symbol.
 	*/
 
-static void gather_top_symbols(sym_entry *cur_entry, int cur_arg, 
-			       int total_top_symbols)
+static void gather_top_symbols(sym_entry *cur_entry, 
+                               size_t cur_arg, 
+			       size_t total_top_symbols)
 {
-  int index;
+  size_t index;
   size_t hnr;
   top_symbols *tss;
   sym_entry *top_entry;
@@ -566,9 +521,8 @@ static void gather_top_symbols(sym_entry *cur_entry, int cur_arg,
 	    tss->toptable_size);
 	
   index = 0;
-  for(top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym) {
-    /*for(lcv=index=0; lcv<nr_unique_symbols; lcv++) {
-      if (sym_entries[lcv].nr_times_top > 0) {*/
+  for(top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym) 
+  {
     top_symbol *ts;
     ts = &cur_entry->top_symbols[cur_arg].symbols[index];
     ts->index = top_entry-sym_entries;
@@ -608,21 +562,16 @@ static void build_arg_tables()
 	ATerror("build_arg_tables: out of memory (arity: %d)\n", arity);
     }
 
-    for(cur_arg=0; cur_arg<arity; cur_arg++) {
-      int total_top_symbols = 0;
+    for(cur_arg=0; cur_arg<arity; cur_arg++) 
+    {
+      size_t total_top_symbols = 0;
       first_topsym = NULL;
-      for(cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++) {
+      for(cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++) 
+      {
 	ATerm term = cur_entry->terms[cur_trm].t;
 	ATerm arg = NULL;
-	if (sym_entries[cur_sym].id == AS_ANNOTATION) {
-	  assert(arity == 2);
-	  if (cur_arg == 0)
-	    arg = term;
-	  else
-	    /* arg = AT_getAnnotations(term); */
-            assert(0);
-	} else {
-	  switch(ATgetType(term)) {
+	switch(ATgetType(term)) 
+        {
 	  case AT_LIST:
 	    {
 	      ATermList list = (ATermList)term;
@@ -634,20 +583,14 @@ static void build_arg_tables()
 		arg = (ATerm)ATgetNext(list);
 	    }
 	    break;
-/*	  case AT_PLACEHOLDER:
-	    assert(arity == 1);
-	    arg = ATgetPlaceholder((ATermPlaceholder)term);
-	    break; */
 	  case AT_APPL:
 	    arg = ATgetArgument((ATermAppl)term, cur_arg);
 	    break;
 	  default:
 	    ATerror("build_arg_tables: illegal term\n");
 	    break;
-	  }
 	}
-	topsym = get_top_symbol(arg, sym_entries[cur_sym].id == 
-				AS_ANNOTATION ? ATtrue : ATfalse);
+	topsym = get_top_symbol(arg);
 	if (!topsym->nr_times_top++) {
 	  total_top_symbols++;
 	  topsym->next_topsym = first_topsym;
@@ -693,16 +636,6 @@ static void collect_terms(ATerm t)
     case AT_INT:
       sym = AS_INT;
       break;
-/*    case AT_REAL:
-      sym = AS_REAL;
-      break; */
-/*    case AT_BLOB:
-      sym = AS_BLOB;
-      break; */
-/*    case AT_PLACEHOLDER:
-      sym = AS_PLACEHOLDER;
-      collect_terms(ATgetPlaceholder((ATermPlaceholder)t));
-      break; */
     case AT_LIST:
       {
 	ATermList list = (ATermList)t;
@@ -737,15 +670,6 @@ static void collect_terms(ATerm t)
     assert(entry->id == sym);
     add_term(entry, t);
 		
-    /* handle annotation */
-    /* annos = AT_getAnnotations(t);
-    if (annos) {
-      entry = &sym_entries[at_lookup_table[AS_ANNOTATION]->index];
-      assert(entry->id == AS_ANNOTATION);
-      collect_terms((ATerm)annos);
-      add_term(entry, t);
-    } */
-
     SET_MARK(t->header);
   }
 }
@@ -765,16 +689,16 @@ static ATbool write_symbols(byte_writer *writer)
     sym_entry *cur_sym = &sym_entries[sym_idx];
     if (!write_symbol(cur_sym->id, writer))
       return ATfalse;
-    if (writeInt(cur_sym->nr_terms, writer) < 0)
+    if (!writeInt(cur_sym->nr_terms, writer))
       return ATfalse;
 
     for(arg_idx=0; arg_idx<cur_sym->arity; arg_idx++) {
       size_t nr_symbols = cur_sym->top_symbols[arg_idx].nr_symbols;
-      if(writeInt(nr_symbols, writer)<0)
+      if(!writeInt(nr_symbols, writer))
 	return ATfalse;
       for(top_idx=0; top_idx<nr_symbols; top_idx++) {
 	top_symbol *ts = &cur_sym->top_symbols[arg_idx].symbols[top_idx];
-	if (writeInt(ts->index, writer)<0) {
+	if (!writeInt(ts->index, writer)) {
 	  return ATfalse;
 	}
       }
@@ -837,35 +761,29 @@ static top_symbol *find_top_symbol(top_symbols *syms, AFun sym)
 static ATbool write_term(ATerm, byte_writer *);
 
 static ATbool write_arg(sym_entry *trm_sym, ATerm arg, int arg_idx, 
-			byte_writer *writer, ATbool anno_done)
+			byte_writer *writer)
 {
   top_symbol *ts;
   sym_entry *arg_sym;
-  int arg_trm_idx;
+  size_t arg_trm_idx;
   AFun sym;
 	
-  sym = get_top_symbol(arg, anno_done)->id;
+  sym = get_top_symbol(arg)->id;
   ts = find_top_symbol(&trm_sym->top_symbols[arg_idx], sym);
 
-  /*ATfprintf(stderr, "writing topsymbol index of %y = %d\n", ts->s, ts->code);*/
   if(writeBits(ts->code, ts->code_width, writer)<0)
     return ATfalse;
 	
   arg_sym = &sym_entries[ts->index];
 	
   arg_trm_idx = find_term(arg_sym, arg);
-  /*	ATfprintf(stderr, "writing arg term index of %t = %d\n",
-	arg, arg_trm_idx);*/
   if (writeBits(arg_trm_idx, arg_sym->term_width, writer)<0) {
-    /*ATfprintf(stderr, "writeBits in write_arg failed for %t\n", arg);*/
     return ATfalse;
   }
 
-  /*ATfprintf(stderr, "argument %t at index %d (cur_index of %y = %d)\n",
-    arg, arg_trm_idx, arg_sym->id, arg_sym->cur_index);*/
   if (arg_trm_idx >= arg_sym->cur_index && 
-     !write_term(arg, writer)) {
-    /*fprintf(stderr, "write_term in write_arg failed\n");*/
+     !write_term(arg, writer)) 
+  {
     return ATfalse;
   }
 	
@@ -881,24 +799,8 @@ static ATbool write_arg(sym_entry *trm_sym, ATerm arg, int arg_idx,
 
 static ATbool write_term(ATerm t, byte_writer *writer)
 {
-  int arg_idx;
+  size_t arg_idx;
   sym_entry *trm_sym = NULL;
-  /* ATerm annos;
-
-  annos = AT_getAnnotations(t); */
-
-  /*ATfprintf(stderr, "write term: %t (%d)\n", t, anno_done);*/
-  /* if(!anno_done && annos) {
-    / *ATfprintf(stderr, "  writing annotated term, term=%t, annos=%t\n",
-      t, annos);* /
-    trm_sym = &sym_entries[at_lookup_table[AS_ANNOTATION]->index];
-    if(!write_arg(trm_sym, t, 0, writer, ATtrue)) {
-      return ATfalse;
-    }
-    if(!write_arg(trm_sym, annos, 1, writer, ATfalse)) {
-      return ATfalse;
-    }
-  } else  */
   {
     switch(ATgetType(t)) {
     case AT_INT:
@@ -906,43 +808,8 @@ static ATbool write_term(ATerm t, byte_writer *writer)
       if(writeBits(ATgetInt((ATermInt)t), INT_SIZE_IN_BAF, writer) < 0) {
 	return ATfalse;
       }
-#if 0
-      if (flushBitsToWriter(writer)<0)
-	return ATfalse;
-      if (writeInt(ATgetInt((ATermInt)t), writer)<0)
-	return ATfalse;
-#endif
       trm_sym = &sym_entries[at_lookup_table[AS_INT]->index];
       break;
-/*    case AT_REAL:
-      {
-	static char buf[64]; / * must be able to hold str-rep of double * /
-	sprintf(buf, "%.15e", ATgetReal((ATermReal)t));
-	if (flushBitsToWriter(writer)<0)
-	  return ATfalse;
-	if (writeString(buf, strlen(buf), writer) < 0)
-	  return ATfalse;
-	trm_sym = &sym_entries[at_lookup_table[AS_REAL]->index];
-      }
-      break; */
-/*    case AT_BLOB:
-      {
-	ATermBlob blob = (ATermBlob)t;
-	if (flushBitsToWriter(writer)<0)
-	  return ATfalse;
-	if (writeString(ATgetBlobData(blob), ATgetBlobSize(blob), writer)<0)
-	  return ATfalse;
-	trm_sym = &sym_entries[at_lookup_table[AS_BLOB]->index];
-      }
-      break; */
-/*    case AT_PLACEHOLDER:
-      {
-	ATerm type = ATgetPlaceholder((ATermPlaceholder)t);
-	trm_sym = &sym_entries[at_lookup_table[AS_PLACEHOLDER]->index];
-	if(!write_arg(trm_sym, type, 0, writer, ATfalse))
-	  return ATfalse;
-      }
-      break; */
     case AT_LIST:
       {
 	ATermList list = (ATermList)t;
@@ -950,10 +817,10 @@ static ATbool write_term(ATerm t, byte_writer *writer)
 	  trm_sym = &sym_entries[at_lookup_table[AS_EMPTY_LIST]->index];
 	else {
 	  trm_sym = &sym_entries[at_lookup_table[AS_LIST]->index];
-	  if(!write_arg(trm_sym, ATgetFirst(list), 0, writer, ATfalse)) {
+	  if(!write_arg(trm_sym, ATgetFirst(list), 0, writer)) {
 	    return ATfalse;
           }
-	  if(!write_arg(trm_sym, (ATerm)ATgetNext(list), 1, writer, ATfalse)) {
+	  if(!write_arg(trm_sym, (ATerm)ATgetNext(list), 1, writer)) {
 	    return ATfalse;
           }
 	}
@@ -961,14 +828,14 @@ static ATbool write_term(ATerm t, byte_writer *writer)
       break;
     case AT_APPL:
       {
-	int arity;
+	size_t arity;
 	AFun sym = ATgetAFun(t);
 	trm_sym = &sym_entries[at_lookup_table[sym]->index];
 	assert(sym == trm_sym->id);
 	arity = ATgetArity(sym);
 	for (arg_idx=0; arg_idx<arity; arg_idx++) {
 	  ATerm cur_arg = ATgetArgument((ATermAppl)t, arg_idx);
-	  if(!write_arg(trm_sym, cur_arg, arg_idx, writer, ATfalse)) {
+	  if(!write_arg(trm_sym, cur_arg, arg_idx, writer)) {
 	    return ATfalse;
           }
 	}
@@ -985,8 +852,6 @@ static ATbool write_term(ATerm t, byte_writer *writer)
 	    trm_sym->id, trm_sym->terms[trm_sym->cur_index].t, t);
   }
   trm_sym->cur_index++;
-  /*ATfprintf(stderr, "term=%t, trm_sym=%y, cur_index=%d\n", t, trm_sym->id,
-    trm_sym->cur_index);*/
 	
   return ATtrue;
 }
@@ -1055,7 +920,7 @@ write_baf(ATerm t, byte_writer *writer)
     if(!SYM_IS_FREE(at_lookup_table[lcv]))
       at_lookup_table[lcv]->count = 0;
   }
-  nr_unique_symbols = AT_calcUniqueSymbols(t);
+  nr_unique_symbols = AT_calcUniqueAFuns(t);
 
   sym_entries = (sym_entry *) AT_calloc(nr_unique_symbols, sizeof(sym_entry));
   if(!sym_entries)
@@ -1115,19 +980,19 @@ write_baf(ATerm t, byte_writer *writer)
 	
   /*{{{  write header */
 
-  if(writeInt(0, writer) < 0)
+  if(!writeInt(0, writer))
     return ATfalse;
 
-  if(writeInt(BAF_MAGIC, writer) < 0)
+  if(!writeInt(BAF_MAGIC, writer))
     return ATfalse;
 
-  if(writeInt(BAF_VERSION, writer) < 0)
+  if(!writeInt(BAF_VERSION, writer))
     return ATfalse;
 
-  if(writeInt(nr_unique_symbols, writer) < 0)
+  if(!writeInt(nr_unique_symbols, writer))
     return ATfalse;
 
-  if(writeInt(nr_unique_terms, writer) < 0)
+  if(!writeInt(nr_unique_terms, writer))
     return ATfalse;
 
   /*}}}  */
@@ -1137,8 +1002,8 @@ write_baf(ATerm t, byte_writer *writer)
   }
 
   /* Write the top symbol */
-  sym = get_top_symbol(t, ATfalse)->id;
-  if(writeInt(get_top_symbol(t, ATfalse)-sym_entries, writer) < 0)
+  sym = get_top_symbol(t)->id;
+  if(!writeInt(get_top_symbol(t)-sym_entries, writer))
     return ATfalse;
 
   if (!write_term(t, writer)) {
@@ -1232,29 +1097,29 @@ ATbool ATwriteToNamedBinaryFile(ATerm t, const char *name)
 
 /*}}}  */
 
-/*{{{  Symbol read_symbol(byte_reader *reader) */
+/*{{{  AFun read_symbol(byte_reader *reader) */
 
 /**
 	* Read a single symbol from file.
 	*/
 
-static Symbol read_symbol(byte_reader *reader)
+static AFun read_symbol(byte_reader *reader)
 {
   size_t arity, quoted;
-  int len;
+  size_t len;
 
-  if((len = readString(reader)) < 0)
-    return -1;
+  if((len = readString(reader)) == NON_EXISTING)
+    return NON_EXISTING;
 
   text_buffer[len] = '\0';
 
   if(readInt(&arity, reader) < 0)
-    return -1;
+    return NON_EXISTING;
 
   if(readInt(&quoted, reader) < 0)
-    return -1;
+    return NON_EXISTING;
 
-  return ATmakeSymbol(text_buffer, arity, quoted ? ATtrue : ATfalse);
+  return ATmakeAFun(text_buffer, arity, quoted ? ATtrue : ATfalse);
 }
 
 /*}}}  */
@@ -1270,15 +1135,16 @@ static ATbool read_all_symbols(byte_reader *reader)
   size_t k, val;
   size_t i, j, arity;
 
-  for(i=0; i<nr_unique_symbols; i++) {
+  for(i=0; i<nr_unique_symbols; i++) 
+  {
     /*{{{  Read the actual symbol */
 
-    Symbol sym = read_symbol(reader);
-    if(sym == (Symbol)(-1))
+    AFun sym = read_symbol(reader);
+    if(sym == (AFun)(-1))
       ATerror("read_symbols: error reading symbol, giving up.\n");
 
     read_symbols[i].sym = sym;
-    ATprotectSymbol(sym);
+    ATprotectAFun(sym);
     arity = ATgetArity(sym);
     read_symbols[i].arity = arity;
 
@@ -1310,12 +1176,12 @@ static ATbool read_all_symbols(byte_reader *reader)
 	ATerror("read_all_symbols: out of memory trying to allocate "
 		"space for %d arguments.\n", arity);
 
-      read_symbols[i].sym_width = (int *)AT_calloc(arity, sizeof(int));
+      read_symbols[i].sym_width = (size_t *)AT_calloc(arity, sizeof(size_t));
       if(!read_symbols[i].sym_width)
 	ATerror("read_all_symbols: out of memory trying to allocate "
 		"space for %d arguments .\n", arity);
 
-      read_symbols[i].topsyms = (int **)AT_calloc(arity, sizeof(int *));
+      read_symbols[i].topsyms = (size_t **)AT_calloc(arity, sizeof(size_t *));
       if(!read_symbols[i].topsyms)
 	ATerror("read_all_symbols: out of memory trying to allocate "
 		"space for %d arguments.\n", arity);
@@ -1329,7 +1195,7 @@ static ATbool read_all_symbols(byte_reader *reader)
 
       read_symbols[i].nr_topsyms[j] = val;
       read_symbols[i].sym_width[j] = bit_width(val);
-      read_symbols[i].topsyms[j] = (int *)AT_calloc(val, sizeof(int));
+      read_symbols[i].topsyms[j] = (size_t *)AT_calloc(val, sizeof(size_t));
       if(!read_symbols[i].topsyms[j])
 	ATerror("read_symbols: could not allocate space for %d top symbols.\n",
 		val);
@@ -1341,12 +1207,6 @@ static ATbool read_all_symbols(byte_reader *reader)
       }
     }
 
-    /*		ATfprintf(stderr, "symbol %y read, with %d terms and top symbol counts: ",
-		sym, read_symbols[i].nr_terms);
-		for(j=0; j<arity; j++)
-		ATfprintf(stderr, "%d, ", read_symbols[i].nr_topsyms[j]);
-		ATfprintf(stderr, "\n");
-    */
   }
 
   return ATtrue;
@@ -1358,7 +1218,7 @@ static ATbool read_all_symbols(byte_reader *reader)
 static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
 {
   size_t val;
-  int i, arity = sym->arity;
+  size_t i, arity = sym->arity;
   sym_read_entry *arg_sym;
   ATerm stack_args[MAX_STACK_ARGS];
   ATerm *args = stack_args;
@@ -1411,72 +1271,16 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
 
     /*}}}  */
     break;
-/*   case AS_REAL:
-    / *{{{  Read a real * /
-
-    {
-      double real;
-      int len;
-
-      if(flushBitsFromReader(reader) < 0)
-	return NULL;
-      if((len = readString(reader)) < 0)
-	return NULL;
-
-      text_buffer[len] = '\0';
-
-      sscanf(text_buffer, "%lf", &real);
-      result = (ATerm)ATmakeReal(real);
-    }
-
-    / *}}}  * /
-    break; */
-  /* case AS_BLOB:
-    / *{{{  Read a blob * /
-
-    {
-      int len;
-      char *data;
-
-      if(flushBitsFromReader(reader) < 0)
-	return NULL;
-      if((len = readString(reader)) < 0)
-	return NULL;
-
-      data = AT_malloc(len);
-      if(!data)
-	ATerror("could not allocate space for blob of size %d\n", len);
-
-      memcpy(data,text_buffer,len);
-
-      result = (ATerm)ATmakeBlob(len, data);
-    }
-
-    / *}}}  * /
-    break; */
-  /* case AS_PLACEHOLDER:
-    result = (ATerm)ATmakePlaceholder(args[0]);
-    break; */
   case AS_LIST:
     result = (ATerm)ATinsert((ATermList)args[1], args[0]);
     break;
   case AS_EMPTY_LIST:
     result = (ATerm)ATempty;
     break;
-  /* case AS_ANNOTATION:
-    result = AT_setAnnotations(args[0], args[1]);
-    break; */
   default:
     /* Must be a function application */
     result = (ATerm)ATmakeApplArray(sym->sym, args);
 
-    /*
-      ATfprintf(stderr, "building application from the arguments:\n");
-      for(i=0; i<arity; i++)
-      ATfprintf(stderr, "  %d = %t\n", i, args[i]);
-
-      ATfprintf(stderr, "result = %t\n", result);
-    */
   }
 
   if(arity > MAX_STACK_ARGS) {
@@ -1513,7 +1317,7 @@ static void free_read_space()
     if(entry->topsyms)
       AT_free(entry->topsyms);
     
-    ATunprotectSymbol(entry->sym);
+    ATunprotectAFun(entry->sym);
   }
   AT_free(read_symbols);
 }
