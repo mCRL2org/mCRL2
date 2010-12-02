@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/builder.inc.h
+/// \file mcrl2/pbes/detail/pbes_expression_builder.inc.h
 /// \brief The content of this file is included in other header
 /// files, to prevent duplication.
 
@@ -101,3 +101,21 @@ pbes_expression operator()(const pbes_expression& x)
   return result;
 }
 //--- end generated code ---//
+
+propositional_variable operator()(const propositional_variable& x)
+{
+  return x;
+}
+
+void operator()(pbes_equation& x)
+{
+  x.variable() = static_cast<Derived&>(*this)(x.variable());
+  x.formula() = static_cast<Derived&>(*this)(x.formula());
+}
+
+template <typename Container>
+void operator()(pbes<Container>& x)
+{
+  static_cast<Derived&>(*this)(x.equations());
+  x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+}     

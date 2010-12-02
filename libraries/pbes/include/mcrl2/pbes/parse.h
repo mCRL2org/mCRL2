@@ -27,6 +27,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
+#include "mcrl2/pbes/detail/sort_normalization_builder.h"
+#include "mcrl2/pbes/detail/translate_user_notation_builder.h"
 
 //#define MCRL2_LOG_PARSER_OUTPUT
 #ifdef MCRL2_LOG_PARSER_OUTPUT
@@ -41,7 +43,7 @@ namespace pbes_system {
   template <typename Container>
   void apply_internal_format_conversion(pbes<Container>& p)
   {
-    // TODO: make proper internal_format_conversion function for pbes
+#ifndef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
     using namespace data::detail;
     Container equations=p.equations();
     for(typename Container::iterator eqn=equations.begin(); eqn!=equations.end(); ++eqn)
@@ -51,6 +53,10 @@ namespace pbes_system {
              p.data(),
              equations,
              internal_format_conversion_term(p.initial_state(),p.data()));
+#else             
+    detail::normalize_sorts(p);
+    detail::translate_user_notation(p);
+#endif
   }
 
   /// \brief Reads a PBES from an input stream.
