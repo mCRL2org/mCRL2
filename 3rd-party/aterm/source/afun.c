@@ -355,7 +355,7 @@ AFun ATmakeAFun(const char *name, size_t arity, ATbool quoted)
 	ATerror("AT_initAFun: out of symbol slots!\n");
       }
     }
-fprintf(stderr,"First_free %d %lu\n",SIZEOF_LONG,first_free);
+/* fprintf(stderr,"First_free %d %lu\n",SIZEOF_LONG,first_free); */
     first_free = SYM_GET_NEXT_FREE(at_lookup_table[first_free]);
 
     cur = (SymEntry) AT_allocate(TERM_SIZE_SYMBOL);
