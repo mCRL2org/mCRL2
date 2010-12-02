@@ -21,6 +21,8 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/alphabet_reduction.h"
+#include "mcrl2/process/detail/sort_normalization_builder.h"
+#include "mcrl2/process/detail/translate_user_notation_builder.h"
 
 namespace mcrl2 {
 
@@ -37,6 +39,33 @@ namespace process {
 
     using namespace data::detail;
 
+//#ifdef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
+//    process_specification q = p;
+//    std::cout << "--- q0 ---\n" << pp(q) << std::endl;
+//    detail::normalize_sorts(q);
+//    std::cout << "--- q1 ---\n" << pp(q) << std::endl;
+//    detail::translate_user_notation(q);
+//    std::cout << "--- q2 ---\n" << pp(q) << std::endl;
+//#endif
+//    p = process_specification(
+//                p.data(),
+//                mcrl2::lps::action_label_list(internal_format_conversion_list(
+//                              p.action_labels(),
+//                              p.data())),
+//                mcrl2::data::variable_list(internal_format_conversion_list(
+//                              atermpp::convert<data::variable_list>(p.global_variables()),
+//                              p.data())),
+//                mcrl2::process::process_equation_list(internal_format_conversion_list(
+//                              process_equation_list(p.equations().begin(), p.equations().end()),
+//                              p.data())),
+//                mcrl2::process::process_expression(
+//                              internal_format_conversion_term(p.init(),
+//                              p.data())));
+//#ifdef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
+//    std::cout << "--- p ---\n" << pp(p) << std::endl;
+//#endif
+
+#ifndef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
     p = process_specification(
                 p.data(),
                 mcrl2::lps::action_label_list(internal_format_conversion_list(
@@ -51,6 +80,10 @@ namespace process {
                 mcrl2::process::process_expression(
                               internal_format_conversion_term(p.init(),
                               p.data())));
+#else
+    detail::normalize_sorts(p);
+    detail::translate_user_notation(p);
+#endif
   }
 
   /// \brief Parses a process specification from an input stream

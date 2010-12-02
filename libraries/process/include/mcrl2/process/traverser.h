@@ -9,6 +9,11 @@
 /// \file mcrl2/process/traverser.h
 /// \brief add your file description here.
 
+// To avoid circular inclusion problems
+#ifndef MCRL2_PROCESS_SPECIFICATION_H
+#include "mcrl2/process/process_specification.h"
+#endif
+
 #ifndef MCRL2_PROCESS_TRAVERSER_H
 #define MCRL2_PROCESS_TRAVERSER_H
 

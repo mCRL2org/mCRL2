@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/detail/builder.inc.h
+/// \file mcrl2/process/detail/process_expression_builder.inc.h
 /// \brief The content of this file is included in other header
 /// files, to prevent duplication.
 
@@ -191,3 +191,26 @@ process_expression operator()(const process_expression& x)
   return result;
 }
 //--- end generated code ---//
+
+void operator()(process_equation& x)
+{
+  x = process_equation(x.identifier(),
+                       x.formal_parameters(),
+                       static_cast<Derived&>(*this)(x.expression())
+                      );
+}
+
+void operator()(process_specification& x)
+{
+  static_cast<Derived&>(*this)(x.equations());
+}     
+
+process_identifier operator()(const process_identifier& x)
+{
+  return x;
+}
+
+process_expression operator()(const lps::action& x)
+{
+  return x;
+}     

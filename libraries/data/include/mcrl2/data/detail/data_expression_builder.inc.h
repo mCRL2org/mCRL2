@@ -91,3 +91,23 @@ data_expression operator()(const data_expression& x)
   return result;
 }
 //--- end generated code ---//
+
+assignment operator()(const assignment& x)
+{
+  return assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+}
+
+identifier_assignment operator()(const identifier_assignment& x)
+{
+  return identifier_assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+}
+            
+data_equation operator()(const data_equation& x)
+{
+  return data_equation(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.condition()), static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+}
+
+assignment_expression operator()(const assignment_expression& x)
+{
+  return assignment_expression(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+}     
