@@ -9,6 +9,8 @@
 /// \file identifier_string_test.cpp
 /// \brief Add your file description here.
 
+#define MCRL2_PRINT_DEBUG
+
 #include <sstream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/garbage_collection.h"

@@ -19,77 +19,13 @@
 #include <ostream>
 #include <string>
 #include <sstream>
+#include <vector>
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/traverser.h"
 
 namespace mcrl2 {
   namespace core {
-
-    namespace detail {
-      
-      template <typename Derived>
-      class print_traverser: public traverser<Derived>
-      {
-        protected:
-          std::ostream& out;
-
-        public:
-          typedef traverser<Derived> super;
-      
-          using super::enter;
-          using super::leave;
-          using super::operator();
-
-          print_traverser(std::ostream& o)
-            : out(o)
-          {}
-
-          void print(const std::string& s)
-          {
-            out << s;
-          }
-            
-          void operator()(const core::identifier_string& x)
-          {
-            print(std::string(x));
-          }
-      };
-
-      // apply a traverser with one additional template argument
-      template <template <class> class Traverser, class OutputStream>
-      class apply_print_traverser: public Traverser<apply_print_traverser<Traverser, OutputStream> >
-      {
-        typedef Traverser<apply_print_traverser<Traverser, OutputStream> > super;
-        
-        public:
-          using super::enter;
-          using super::leave;
-          using super::operator();
-      
-          apply_print_traverser(std::ostream& out):
-            super(out)
-          {}
-      };
-
-    } // namespace detail
-
-    /// \brief Prints the object t to a stream.
-    template <typename T>
-    void print(const T& t, std::ostream& out)
-    {
-      detail::apply_print_traverser<detail::print_traverser, std::ostringstream> printer(out);
-      printer(t);
-    }
-
-    /// \brief Returns a string representation of the object t.
-    template <typename T>
-    std::string print(const T& t)
-    {
-      std::ostringstream out;
-      print(t, out);
-      return out.str();
-    }
 
 /// \brief t_pp_format represents the available pretty print formats
 typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
@@ -185,6 +121,110 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
 {
   return PrintPart_CXX(atermpp::aterm_traits<Term>::term(part), pp_format);
 }
+
+    namespace detail {
+      
+      template <typename Derived>
+      class print_traverser: public traverser<Derived>
+      {
+        protected:
+          std::ostream& out;
+
+#ifdef MCRL2_PRINT_DEBUG
+          std::ostringstream debug;
+          std::vector<std::string> debug_strings;
+          std::vector<std::size_t> debug_positions;
+#endif
+        public:
+          typedef traverser<Derived> super;
+      
+#ifndef MCRL2_PRINT_DEBUG
+          using super::enter;
+          using super::leave;
+#endif
+          using super::operator();
+
+          print_traverser(std::ostream& o)
+            : out(o)
+          {}
+
+          void print(const std::string& s)
+          {
+            out << s;
+#ifdef MCRL2_PRINT_DEBUG
+            debug << s;
+#endif
+          }
+            
+          void operator()(const core::identifier_string& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            print(std::string(x));
+            static_cast<Derived&>(*this).leave(x);
+          }
+
+#ifdef MCRL2_PRINT_DEBUG
+          // Enter object
+          template <typename Expression>
+          void enter(const Expression& x)
+          {
+            debug_strings.push_back(pp(x));
+            debug_positions.push_back(debug.str().size());
+          }
+          
+          // Leave object
+          template <typename Expression>
+          void leave(const Expression& x)
+          {
+            std::string expected = debug_strings.back();
+            debug_strings.pop_back();
+            std::size_t begin_pos = debug_positions.back();
+            debug_positions.pop_back();
+            std::string result = debug.str().substr(begin_pos);
+            if (expected != result) {
+              std::cerr << "--- Error in print ---\n"
+                        << "  expected: " << expected << "\n"
+                        << "       got: " << result << std::endl;
+              BOOST_CHECK(expected == result);
+            }
+          }
+#endif
+      };
+
+      // apply a traverser with one additional template argument
+      template <template <class> class Traverser, class OutputStream>
+      class apply_print_traverser: public Traverser<apply_print_traverser<Traverser, OutputStream> >
+      {
+        typedef Traverser<apply_print_traverser<Traverser, OutputStream> > super;
+        
+        public:
+          using super::enter;
+          using super::leave;
+          using super::operator();
+      
+          apply_print_traverser(std::ostream& out):
+            super(out)
+          {}
+      };
+
+    } // namespace detail
+
+    /// \brief Prints the object t to a stream.
+    template <typename T>
+    void print(const T& t, std::ostream& out)
+    {
+      detail::apply_print_traverser<detail::print_traverser, std::ostringstream> printer(out);
+      printer(t);
+    }
+
+    /// \brief Returns a string representation of the object t.
+    template <typename T>
+    std::string print(const T& t)
+    {
+      std::ostringstream out;
+      print(t, out);
+      return out.str();
+    }
 
   }
 }
