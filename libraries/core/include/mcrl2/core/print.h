@@ -12,17 +12,84 @@
 #ifndef MCRL2_PRINT_H
 #define MCRL2_PRINT_H
 
-#include <stdio.h>
-#include <ctype.h>
-#include <assert.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cctype>
+#include <cassert>
+#include <cstdlib>
 #include <ostream>
 #include <string>
+#include <sstream>
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/core/traverser.h"
 
 namespace mcrl2 {
   namespace core {
+
+    namespace detail {
+      
+      template <typename Derived>
+      class print_traverser: public traverser<Derived>
+      {
+        protected:
+          std::ostream& out;
+
+        public:
+          typedef traverser<Derived> super;
+      
+          using super::enter;
+          using super::leave;
+          using super::operator();
+
+          print_traverser(std::ostream& o)
+            : out(o)
+          {}
+
+          void print(const std::string& s)
+          {
+            out << s;
+          }
+            
+          void operator()(const core::identifier_string& x)
+          {
+            print(std::string(x));
+          }
+      };
+
+      // apply a traverser with one additional template argument
+      template <template <class> class Traverser, class OutputStream>
+      class apply_print_traverser: public Traverser<apply_print_traverser<Traverser, OutputStream> >
+      {
+        typedef Traverser<apply_print_traverser<Traverser, OutputStream> > super;
+        
+        public:
+          using super::enter;
+          using super::leave;
+          using super::operator();
+      
+          apply_print_traverser(std::ostream& out):
+            super(out)
+          {}
+      };
+
+    } // namespace detail
+
+    /// \brief Prints the object t to a stream.
+    template <typename T>
+    void print(const T& t, std::ostream& out)
+    {
+      detail::apply_print_traverser<detail::print_traverser, std::ostringstream> printer(out);
+      printer(t);
+    }
+
+    /// \brief Returns a string representation of the object t.
+    template <typename T>
+    std::string print(const T& t)
+    {
+      std::ostringstream out;
+      print(t, out);
+      return out.str();
+    }
 
 /// \brief t_pp_format represents the available pretty print formats
 typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
