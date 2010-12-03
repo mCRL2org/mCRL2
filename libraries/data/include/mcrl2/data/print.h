@@ -26,6 +26,8 @@
 // #include "mcrl2/data/data_specification.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/multiple_possible_sorts.h"
+#include "mcrl2/data/unknown_sort.h"
 
 namespace atermpp {
   namespace detail {
@@ -83,6 +85,284 @@ namespace mcrl2 {
     inline std::string pp(atermpp::term_list< Expression > const& c)
     {
       return core::pp(c);
+    }
+
+    namespace detail {
+
+      template <typename Derived>
+      class print_traverser_base: public core::detail::print_traverser<Derived>
+      {
+        public:
+          typedef core::detail::print_traverser<Derived> super;
+
+          using super::enter;
+          using super::leave;
+          using super::operator();
+
+          print_traverser_base(std::ostream& o)
+            : super(o)
+          {}
+#include "mcrl2/data/detail/traverser.inc.h"
+      };
+
+      template <typename Derived>
+      class print_traverser: public print_traverser_base<Derived>
+      {
+        public:
+          typedef print_traverser_base<Derived> super;
+
+          using super::enter;
+          using super::leave;
+          using super::operator();
+
+          print_traverser(std::ostream& o)
+            : super(o)
+          {}
+          
+          void operator()(const data::assignment& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.lhs());
+            super::print(":=");
+            static_cast<Derived&>(*this)(x.rhs());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::identifier_assignment& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.lhs());
+            super::print(":=");
+            static_cast<Derived&>(*this)(x.rhs());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::set_or_bag_comprehension_binder& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::set_comprehension_binder& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::bag_comprehension_binder& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::forall_binder& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::exists_binder& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::lambda_binder& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::structured_sort_constructor_argument& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.name());
+            static_cast<Derived&>(*this)(x.sort());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::structured_sort_constructor& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.name());
+            static_cast<Derived&>(*this)(x.arguments());
+            static_cast<Derived&>(*this)(x.recogniser());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::list_container& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::set_container& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::bag_container& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::fset_container& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::fbag_container& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::basic_sort& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.name());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::container_sort& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.container_name());
+            static_cast<Derived&>(*this)(x.element_sort());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::structured_sort& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.constructors());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::function_sort& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.domain());
+            super::print(" -> ");
+            static_cast<Derived&>(*this)(x.codomain());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::unknown_sort& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::multiple_possible_sorts& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.sorts());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::identifier& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.name());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::variable& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.name());
+            static_cast<Derived&>(*this)(x.sort());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::function_symbol& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.name());
+            // static_cast<Derived&>(*this)(x.sort());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::application& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.head());
+            static_cast<Derived&>(*this)(x.arguments());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::where_clause& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.body());
+            static_cast<Derived&>(*this)(x.declarations());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::forall& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.variables());
+            static_cast<Derived&>(*this)(x.body());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::exists& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.variables());
+            static_cast<Derived&>(*this)(x.body());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::lambda& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.variables());
+            static_cast<Derived&>(*this)(x.body());
+            static_cast<Derived&>(*this).leave(x);
+          }
+          
+          void operator()(const data::data_equation& x)
+          {
+            static_cast<Derived&>(*this).enter(x);
+            static_cast<Derived&>(*this)(x.variables());
+            static_cast<Derived&>(*this)(x.condition());
+            static_cast<Derived&>(*this)(x.lhs());
+            static_cast<Derived&>(*this)(x.rhs());
+            static_cast<Derived&>(*this).leave(x);
+          }         
+
+#ifdef MCRL2_PRINT_DEBUG
+          template <typename T>
+          std::string print_debug(const T& t)
+          {
+            return pp(t);
+          }
+#endif
+      };
+
+    } // namespace detail
+
+    /// \brief Prints the object t to a stream.
+    template <typename T>
+    void print(const T& t, std::ostream& out)
+    {
+      core::detail::apply_print_traverser<detail::print_traverser, std::ostringstream> printer(out);
+      printer(t);
+    }
+
+    /// \brief Returns a string representation of the object t.
+    template <typename T>
+    std::string print(const T& t)
+    {
+      std::ostringstream out;
+      print(t, out);
+      return out.str();
     }
 
   } // namespace data

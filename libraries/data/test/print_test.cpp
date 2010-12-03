@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#define MCRL2_PRINT_DEBUG
+
 #include <sstream>
 
 #include <boost/test/included/unit_test_framework.hpp>
@@ -261,6 +263,11 @@ BOOST_AUTO_TEST_CASE(test_rewrite_rule_fbag_print)
 BOOST_AUTO_TEST_CASE(test_rewrite_rule_bag_print)
 {
   BOOST_CHECK(print_container_check(sort_bag::bag_generate_equations_code(sort_bool::bool_())));
+}
+
+BOOST_AUTO_TEST_CASE(test_new_printer) {
+  function_symbol f("f", make_function_sort(bool_(), bool_()));
+  print(f);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

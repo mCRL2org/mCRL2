@@ -164,11 +164,17 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
           }
 
 #ifdef MCRL2_PRINT_DEBUG
+          template <typename T>
+          std::string print_debug(const T& t)
+          {
+            return pp(t);
+          }
+
           // Enter object
           template <typename Expression>
           void enter(const Expression& x)
           {
-            debug_strings.push_back(pp(x));
+            debug_strings.push_back(static_cast<Derived&>(*this).print_debug(x));
             debug_positions.push_back(debug.str().size());
           }
           
@@ -201,6 +207,14 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
           using super::enter;
           using super::leave;
           using super::operator();
+
+#if BOOST_MSVC
+    template <typename T>
+    void operator()(const T& x)
+    {
+      super::operator()(x);
+    }
+#endif
       
           apply_print_traverser(std::ostream& out):
             super(out)
