@@ -260,7 +260,7 @@ void ATdestroyByteBuffer(ByteBuffer byteBuffer){
  * Writes the given integer to the byte buffer.
  * The encoding will be done in 'byteenconding.c'.
  */
-inline static void writeInt(int value, ByteBuffer byteBuffer){
+inline static void writeInt(size_t value, ByteBuffer byteBuffer){
 	byteBuffer->currentPos += BEserializeMultiByteInt(value, byteBuffer->currentPos);
 }
 
@@ -990,7 +990,7 @@ ATerm ATgetRoot(BinaryReader binaryReader){
  */
 void ATdestroyBinaryReader(BinaryReader binaryReader){
 	SymEntry *sharedAFuns = binaryReader->sharedAFuns;
-	int sharedAFunsIndex = binaryReader->sharedAFunsIndex;
+	ptrdiff_t sharedAFunsIndex = binaryReader->sharedAFunsIndex;
 	
 	destroyProtectedMemoryStack(binaryReader->protectedMemoryStack);
 	
@@ -1032,7 +1032,7 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE *file){
 	byteBuffer = ATcreateByteBuffer(65536);
 	
 	do{
-		int blockSize;
+		size_t blockSize;
 		char sizeBytes[2];
 		
 		ATresetByteBuffer(byteBuffer);
@@ -1197,8 +1197,8 @@ typedef struct _BufferNode{
  */
 char* ATwriteToSAFString(ATerm aTerm, int *length){
 	char *result;
-	int totalBytesWritten = 0;
-	int position = 0;
+	size_t totalBytesWritten = 0;
+	size_t position = 0;
 	
 	BinaryWriter binaryWriter = ATcreateBinaryWriter(aTerm);
 	
@@ -1234,7 +1234,7 @@ char* ATwriteToSAFString(ATerm aTerm, int *length){
 	do{
 		BufferNode *nextBufferNode;
 		ByteBuffer currentByteBuffer = currentBufferNode->byteBuffer;
-		int blockSize = currentByteBuffer->limit;
+		size_t blockSize = currentByteBuffer->limit;
 		
 		result[position++] = blockSize & 0x000000ffU;
 		result[position++] = (blockSize >> 8) & 0x000000ffU;

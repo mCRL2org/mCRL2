@@ -254,7 +254,7 @@ int ATcompare(ATerm t1, ATerm t2);
 void ATsetChecking(ATbool on);
 ATbool ATgetChecking(void);
 
-extern int at_gc_count;
+extern size_t at_gc_count;
 #define ATgetGCCount()    (at_gc_count)
 
 size_t  ATcalcTextSize(ATerm t);

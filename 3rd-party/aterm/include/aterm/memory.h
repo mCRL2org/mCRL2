@@ -59,11 +59,11 @@ typedef struct BlockBucket
 typedef struct TermInfo {
   Block*       at_blocks[2];
   header_type* top_at_blocks;
-  int          at_nrblocks;
+  size_t       at_nrblocks;
   ATerm        at_freelist;
-  int          nb_live_blocks_before_last_gc;
-  int          nb_reclaimed_blocks_during_last_gc;
-  int          nb_reclaimed_cells_during_last_gc;
+  size_t       nb_live_blocks_before_last_gc;
+  size_t       nb_reclaimed_blocks_during_last_gc;
+  size_t       nb_reclaimed_cells_during_last_gc;
 } TermInfo;
 
 extern TermInfo *terminfo;
@@ -74,10 +74,10 @@ extern size_t at_freeblocklist_size;
 
 extern BlockBucket block_table[BLOCK_TABLE_SIZE];
 
-extern int nb_minor_since_last_major;
-extern int old_bytes_in_young_blocks_after_last_major;
-extern int old_bytes_in_old_blocks_after_last_major;
-extern int old_bytes_in_young_blocks_since_last_major;
+extern size_t nb_minor_since_last_major;
+extern size_t old_bytes_in_young_blocks_after_last_major;
+extern size_t old_bytes_in_old_blocks_after_last_major;
+extern size_t old_bytes_in_young_blocks_since_last_major;
 
 extern size_t maxTermSize;
 
@@ -93,7 +93,7 @@ void  AT_freeTerm(size_t size, ATerm t);
 ATbool AT_isValidTerm(ATerm term);
 ATerm AT_isInsideValidTerm(ATerm term);
 void  AT_validateFreeList(size_t size);
-int AT_inAnyFreeList(ATerm t);
+size_t AT_inAnyFreeList(ATerm t);
 void AT_printAllTerms(FILE *file);
 void AT_printAllAFunCounts(FILE *file);
 size_t AT_getAllocatedCount();

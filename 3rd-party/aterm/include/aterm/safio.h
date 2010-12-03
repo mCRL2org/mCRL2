@@ -115,7 +115,7 @@ typedef struct _BinaryReader{
 	size_t tempArity;
 	ATbool tempIsQuoted;
 	
-	size_t isDone;
+        int isDone;
 } *BinaryReader;
 
 BinaryReader ATcreateBinaryReader();

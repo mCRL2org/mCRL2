@@ -81,10 +81,10 @@ static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 /*
  * For GC tuning
  */
-int nb_minor_since_last_major = 0;
-int old_bytes_in_young_blocks_after_last_major = 0; /* only live old cells in young blocks */
-int old_bytes_in_old_blocks_after_last_major = 0; /* only live old cells in old blocks */
-int old_bytes_in_young_blocks_since_last_major = 0; /* only live cells */
+size_t nb_minor_since_last_major = 0;
+size_t old_bytes_in_young_blocks_after_last_major = 0; /* only live old cells in young blocks */
+size_t old_bytes_in_old_blocks_after_last_major = 0; /* only live old cells in old blocks */
+size_t old_bytes_in_young_blocks_since_last_major = 0; /* only live cells */
 
 static int maxload = 80;
 static ATerm *hashtable;
@@ -559,7 +559,7 @@ ATerm AT_allocate(size_t size)
       if(ti->at_nrblocks <= gc_min_number_of_blocks) {
         ALLOCATE_BLOCK_TEXT;
       } else {
-        int reclaimed_memory_during_last_gc =
+        size_t reclaimed_memory_during_last_gc =
             /*(ti->nb_reclaimed_blocks_during_last_gc*sizeof(Block)) +*/
           (ti->nb_reclaimed_cells_during_last_gc*SIZE_TO_BYTES(size));
           /* +1 to avoid division by zero */
@@ -1557,7 +1557,7 @@ ATbool AT_isValidTerm(ATerm term)
   ATbool inblock = ATfalse;
   int idx = ADDR_TO_BLOCK_IDX(term);
   int type;
-  int offset = 0;
+  ptrdiff_t offset = 0;
 
   assert(block_table[idx].first_after == block_table[(idx+1)%BLOCK_TABLE_SIZE].first_before);
   
@@ -1566,7 +1566,7 @@ ATbool AT_isValidTerm(ATerm term)
     if(cur->size) {
       assert(cur->next_before == cur->next_after);
       offset  = ((char *)term) - ((char *)&cur->data);
-      if (offset >= 0        && offset < (int)(BLOCK_SIZE * sizeof(header_type))) {
+      if (offset >= 0 && offset < (ptrdiff_t)(BLOCK_SIZE * sizeof(header_type))) {
         inblock = ATtrue;
         break;
       }
@@ -1580,7 +1580,7 @@ ATbool AT_isValidTerm(ATerm term)
       if(cur->size) {
         assert(cur->next_before == cur->next_after);
         offset  = ((char *)term) - ((char *)&cur->data);
-        if (offset >= 0 && offset < (int)(BLOCK_SIZE * sizeof(header_type))) {
+        if (offset >= 0 && offset < (ptrdiff_t)(BLOCK_SIZE * sizeof(header_type))) {
           inblock = ATtrue;
           break;
         }
@@ -1706,7 +1706,7 @@ void AT_validateFreeList(size_t size)
  * Check if a term is in any free list.
  */
 
-int AT_inAnyFreeList(ATerm t)
+size_t AT_inAnyFreeList(ATerm t)
 {
   size_t i;
 

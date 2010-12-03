@@ -36,19 +36,19 @@ static ATerm *stackBot = NULL;
 
 static int     flags               = 0;
 
-int at_gc_count			   = 0;
-static int     stack_depth[3]      = { 0, MYMAXINT, 0 };
-static int     reclaim_perc[3]     = { 0, MYMAXINT, 0 };
-extern int     mark_stats[3];
+size_t at_gc_count			   = 0;
+static size_t     stack_depth[3]      = { 0, MYMAXINT, 0 };
+static size_t     reclaim_perc[3]     = { 0, MYMAXINT, 0 };
+extern size_t     mark_stats[3];
 static FILE *gc_f = NULL;
 
 extern ATprotected_block protected_blocks;
 
 AFun at_parked_symbol = -1;
 
-int gc_min_number_of_blocks;
+size_t gc_min_number_of_blocks;
 size_t max_freeblocklist_size;
-int min_nb_minor_since_last_major;
+size_t min_nb_minor_since_last_major;
 int good_gc_ratio;
 int small_allocation_rate_ratio;
 int old_increase_rate_ratio;
@@ -541,7 +541,7 @@ void AT_init_gc_parameters(ATbool low_memory)
 
 /*{{{  static void reclaim_empty_block(Block **blocks, int size, Block *removed_block, Block *prev_block)  */
 
-static void reclaim_empty_block(size_t blocks, int size, Block *removed_block, Block *prev_block) 
+static void reclaim_empty_block(size_t blocks, size_t size, Block *removed_block, Block *prev_block) 
 { 
   TermInfo* ti = &terminfo[size];
 
@@ -557,14 +557,15 @@ static void reclaim_empty_block(size_t blocks, int size, Block *removed_block, B
     
   ti->at_nrblocks--;
   removed_block->size = 0;
-  if(prev_block == NULL) {
-      /*fprintf(stderr,"restore_block: remove first\n");*/
+  if(prev_block == NULL) 
+  {
     ti->at_blocks[blocks] = removed_block->next_by_size;
     if(blocks==AT_BLOCK && ti->at_blocks[AT_BLOCK]) {
       ti->top_at_blocks = ti->at_blocks[AT_BLOCK]->end;
     }
-  } else {
-      /*fprintf(stderr,"restore_block: remove middle\n");*/
+  } 
+  else 
+  {
     prev_block->next_by_size = removed_block->next_by_size;
   }
 
@@ -684,13 +685,13 @@ void check_unmarked_block(size_t blocks)
     
     while(block) {
       header_type *cur;
-      for(cur=block->data ; cur<end ; cur+=size) {
+      for(cur=block->data ; cur<end ; cur+=size) 
+      {
 	ATerm t = (ATerm)cur;
-
-        if(blocks==AT_OLD_BLOCK) {
+        if(blocks==AT_OLD_BLOCK) 
+        {
           assert(GET_TYPE(t->header)==AT_FREE || IS_OLD(t->header));
         }
-        
         assert(!IS_MARKED(t->header));
       }
       block = block->next_by_size;
@@ -720,10 +721,10 @@ void major_sweep_phase_old()
     while(block) {
       /* set empty = 0 to avoid recycling*/
       int empty = 1;
-      int alive_in_block = 0;
-      int dead_in_block  = 0;
-      int free_in_block  = 0;
-      int capacity = ((block->end)-(block->data))/size;
+      size_t alive_in_block = 0;
+      size_t dead_in_block  = 0;
+      size_t free_in_block  = 0;
+      size_t capacity = ((block->end)-(block->data))/size;
       header_type *cur;
 
       assert(block->size == size);
@@ -743,11 +744,8 @@ void major_sweep_phase_old()
                 free_in_block++;
                 break;
               case AT_INT:
-              /* case AT_REAL: */
               case AT_APPL:
               case AT_LIST:
-              /* case AT_PLACEHOLDER:
-              case AT_BLOB:  */
                 assert(IS_OLD(t->header));
                 AT_freeTerm(size, t);
                 t->header=FREE_HEADER;
@@ -804,8 +802,8 @@ void major_sweep_phase_old()
 
 void major_sweep_phase_young() 
 {
-  int reclaiming = 0;
-  int alive = 0;
+  size_t reclaiming = 0;
+  size_t alive = 0;
   size_t size;
 
   old_bytes_in_young_blocks_since_last_major = 0;
@@ -821,12 +819,12 @@ void major_sweep_phase_young()
 
     while(block) {
       int empty = 1;
-      int alive_in_block = 0;
-      int dead_in_block  = 0;
-      int free_in_block  = 0;
-      int old_in_block   = 0;
-      int young_in_block = 0;
-      int capacity = (end-(block->data))/size;
+      size_t alive_in_block = 0;
+      size_t dead_in_block  = 0;
+      size_t free_in_block  = 0;
+      size_t old_in_block   = 0;
+      size_t young_in_block = 0;
+      size_t capacity = (end-(block->data))/size;
       header_type *cur;
       
       assert(block->size == size);
@@ -852,11 +850,8 @@ void major_sweep_phase_young()
                 free_in_block++;
                 break;
               case AT_INT:
-              /* case AT_REAL: */
               case AT_APPL:
               case AT_LIST:
-              /* case AT_PLACEHOLDER:
-              case AT_BLOB:  */
                 AT_freeTerm(size, t);
                 t->header = FREE_HEADER;
                 t->aterm.next  = ti->at_freelist;
@@ -935,8 +930,8 @@ void major_sweep_phase_young()
 void minor_sweep_phase_young() 
 {
   size_t size;
-  int reclaiming = 0;
-  int alive = 0;
+  size_t reclaiming = 0;
+  size_t alive = 0;
 
   old_bytes_in_young_blocks_since_last_major = 0;
   
@@ -955,11 +950,11 @@ void minor_sweep_phase_young()
     while(block) {
         /* set empty = 0 to avoid recycling*/
       int empty = 1;
-      int alive_in_block = 0;
-      int dead_in_block  = 0;
-      int free_in_block  = 0;
-      int old_in_block  = 0;
-      int capacity = (end-(block->data))/size;
+      size_t alive_in_block = 0;
+      size_t dead_in_block  = 0;
+      size_t free_in_block  = 0;
+      size_t old_in_block  = 0;
+      size_t capacity = (end-(block->data))/size;
       header_type *cur;
       
       assert(block->size == size);
@@ -986,11 +981,8 @@ void minor_sweep_phase_young()
                 free_in_block++;
                 break;
               case AT_INT:
-              /* case AT_REAL: */
               case AT_APPL:
               case AT_LIST:
-              /* case AT_PLACEHOLDER:
-              case AT_BLOB: */
                 AT_freeTerm(size, t);
                 t->header = FREE_HEADER;
                 t->aterm.next   = ti->at_freelist;
@@ -1157,7 +1149,7 @@ void AT_collect()
   at_gc_count++;
   if (!silent)
   {
-    fprintf(file, "collecting garbage..(%d)",at_gc_count);
+    fprintf(file, "collecting garbage..(%lu)",at_gc_count);
     fflush(file);
   }
 
@@ -1191,7 +1183,7 @@ void AT_collect_minor()
   at_gc_count++;
   if (!silent)
   {
-    fprintf(file, "young collecting garbage..(%d)",at_gc_count);
+    fprintf(file, "young collecting garbage..(%lu)",at_gc_count);
     fflush(file);
   }
 
@@ -1218,16 +1210,16 @@ void AT_cleanupGC()
 {
   FILE *file = gc_f;
   if(flags & PRINT_GC_TIME) {
-    fprintf(file, "%d garbage collects,\n", at_gc_count);
+    fprintf(file, "%lu garbage collects,\n", at_gc_count);
   }
   
   if(flags & PRINT_GC_STATS) {
     if(at_gc_count > 0) {
-      fprintf(file, "\n  stack depth: %d/%d/%d words\n", 
+      fprintf(file, "\n  stack depth: %lu/%lu/%lu words\n", 
 	      stack_depth[IDX_MIN],  
 	      stack_depth[IDX_TOTAL]/at_gc_count,
 	      stack_depth[IDX_MAX]);
-      fprintf(file, "\n  reclamation percentage: %d/%d/%d\n",
+      fprintf(file, "\n  reclamation percentage: %lu/%lu/%lu\n",
 	      reclaim_perc[IDX_MIN],
 	      reclaim_perc[IDX_TOTAL]/at_gc_count,
 	      reclaim_perc[IDX_MAX]);

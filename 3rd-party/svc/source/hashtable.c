@@ -58,9 +58,9 @@ void HTfree(HTable *table){
   PTfree(&table->pointers);
 }
 
-long HTinsert (HTable *table, ATerm a, void *ptr) {
+size_t HTinsert (HTable *table, ATerm a, void *ptr) {
   ATbool _new;
-  long ret;
+  size_t ret;
 
   ret= ATindexedSetPut(table->terms, a, &_new);
   PTput(&table->pointers,ret,ptr);

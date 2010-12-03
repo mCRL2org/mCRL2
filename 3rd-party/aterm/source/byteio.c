@@ -9,9 +9,9 @@
 
 /*{{{  static void resize_buffer(byte_writer *writer, int delta) */
 
-static void resize_buffer(byte_writer *writer, int delta)
+static void resize_buffer(byte_writer *writer, size_t delta)
 {
-  int size_needed, new_size;
+  size_t size_needed, new_size;
 
   assert(writer->type == STRING_WRITER);
 
@@ -105,7 +105,7 @@ int read_byte(byte_reader *reader)
 size_t read_bytes(char *buf, size_t count, byte_reader *reader)
 {
   size_t index, size, left;
-  int result;
+  size_t result;
 
   result = 0;
   switch (reader->type) {

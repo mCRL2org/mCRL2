@@ -194,9 +194,9 @@ writeIntToBuf(size_t val, unsigned char *buf)
 
 /*{{{  static int writeBits(size_t val, int nr_bits, byte_writer *writer) */
 
-static int writeBits(size_t val, int nr_bits, byte_writer *writer)
+static int writeBits(size_t val, size_t nr_bits, byte_writer *writer)
 {
-  int cur_bit;
+  size_t cur_bit;
 
   for (cur_bit=0; cur_bit<nr_bits; cur_bit++) {
     bit_buffer <<= 1;
@@ -225,7 +225,7 @@ flushBitsToWriter(byte_writer *writer)
 {
   int result = 0;
   if(bits_in_buffer > 0) {
-    int left = 8-bits_in_buffer;
+    size_t left = 8-bits_in_buffer;
     bit_buffer <<= left;
     result = (write_byte((int)bit_buffer, writer) == EOF) ? -1 : 0;
     bits_in_buffer = 0;
@@ -474,7 +474,7 @@ static sym_entry *get_top_symbol(ATerm t)
 /*{{{  static int bit_width(int val) */
 
 /* How many bits are needed to represent <val> */
-static size_t bit_width(int val)
+static size_t bit_width(size_t val)
 {
   size_t nr_bits = 0;
 	
@@ -715,7 +715,7 @@ static ATbool write_symbols(byte_writer *writer)
 	* Find a term in a sym_entry.
 	*/
 
-static int find_term(sym_entry *entry, ATerm t)
+static size_t find_term(sym_entry *entry, ATerm t)
 {
   size_t hnr = AT_hashnumber(t) % entry->termtable_size;
   trm_bucket *cur = entry->termtable[hnr];
@@ -760,7 +760,7 @@ static top_symbol *find_top_symbol(top_symbols *syms, AFun sym)
 /* forward declaration */
 static ATbool write_term(ATerm, byte_writer *);
 
-static ATbool write_arg(sym_entry *trm_sym, ATerm arg, int arg_idx, 
+static ATbool write_arg(sym_entry *trm_sym, ATerm arg, size_t arg_idx, 
 			byte_writer *writer)
 {
   top_symbol *ts;

@@ -1915,7 +1915,7 @@ void AT_markTerm(ATerm t)
 
   while (ATtrue) {
     if (current >= limit) {
-      int current_index;
+      ptrdiff_t current_index;
       current_index = current - mark_stack;
 
       /* We need to resize the mark stack */
@@ -2267,8 +2267,8 @@ static int AT_compareInts(ATermInt t1, ATermInt t2)
 
 static int AT_compareLists(ATermList t1, ATermList t2) 
 {
-  int length1;
-  int length2;
+  size_t length1;
+  size_t length2;
   ATerm elt1;
   ATerm elt2;
   int result = 0;

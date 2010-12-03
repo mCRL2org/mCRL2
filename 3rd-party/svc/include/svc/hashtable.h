@@ -37,7 +37,7 @@ typedef struct {
 
 int HTinit (HTable *);
 void HTfree(HTable *);
-long HTinsert (HTable *, ATerm, void *);
+size_t HTinsert (HTable *, ATerm, void *);
 int HTmember (HTable *, ATerm, long*);
 ATerm HTgetTerm(HTable *, long);
 void *HTgetPtr(HTable *, long);

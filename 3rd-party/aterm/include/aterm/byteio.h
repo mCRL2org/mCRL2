@@ -21,8 +21,8 @@ typedef struct
     FILE *file_data;
     struct {
       unsigned char *buf;
-      int   max_size;
-      int   cur_size;
+      size_t   max_size;
+      size_t   cur_size;
     } string_data;
   } u;
 } byte_writer;
