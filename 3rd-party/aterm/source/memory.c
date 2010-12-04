@@ -108,18 +108,13 @@ static HashNumber hash_number(ATerm t, size_t size)
   size_t i;
   HashNumber hnr;
 
-/* fprintf(stderr,"Hashnumber1 %lu  %p\n",size,t); */
-
   hnr = START(HIDE_AGE_MARK(t->word[0]));
-/* fprintf(stderr,"Hashnumber2 %lu  \n",hnr); */
   
   for (i=ARG_OFFSET; i<size; i++) 
   {
     hnr = COMBINE(hnr, t->word[i]);
-/* fprintf(stderr,"Hashnumber3 %lu  %lu    %lu\n",hnr,t->word[i],((ATermInt)t)->aterm.value); */
   }
 
-/* fprintf(stderr,"Hashnumber4 %lu\n",FINISH(hnr) & 131071); */
   return FINISH(hnr);
 }
 
@@ -235,6 +230,10 @@ void AT_initMemory(unsigned int argc, char *argv[])
 {
   unsigned int i;
   HashNumber hnr;
+
+  /* Suppress unused variable warning */
+  (void)argc;
+  (void)argv;
 
   /*{{{  Initialize blocks */
   
@@ -373,12 +372,10 @@ static void allocate_block(size_t size)
 
 #define GC_MINOR_TEXT\
           nb_minor_since_last_major++;\
-              /*fprintf(stderr,"-> AT_collect_minor\n");*/\
           AT_collect_minor();
 
 #define GC_MAJOR_TEXT\
         nb_minor_since_last_major = 0;\
-            /*fprintf(stderr,"-> AT_collect\n");*/\
         AT_collect();
 
 /*}}}  */
@@ -502,7 +499,6 @@ ATerm AT_allocate(size_t size)
   }
 
   total_nodes++;
-    /*fprintf(stderr,"AT_allocate term[%ld] = %p\n",size,at);*/
     
   return at;
 }
@@ -519,9 +515,7 @@ void AT_freeTerm(size_t size, ATerm t)
 {
   HashNumber hnr = hash_number(t, size);
   ATerm prev = NULL, cur;
-  /* size_t i; */
 
-  // ATfprintf(stderr,"Free term %p  %x \n",t,t->header);
   terminfo[size].nb_reclaimed_cells_during_last_gc++;
   
     /* Remove the node from the hashtable */
@@ -1172,11 +1166,8 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
 
 ATermInt ATmakeInt(int val)
 {
-  /* fprintf(stderr,"ATmakeInt %d\n",val); */
   ATermInt cur;
-  // size_t long_val = ((size_t)val) & 0xFFFFFFFF;
   const size_t long_val = val;
-/* fprintf(stderr,"LONG VAL %lu\n",long_val); */
   header_type header = INT_HEADER(0);
   HashNumber hnr;
 
@@ -1188,7 +1179,7 @@ ATermInt ATmakeInt(int val)
   while (cur && (!EQUAL_HEADER(cur->header,header) || (cur->aterm.value != long_val))) {
     cur = (ATermInt) cur->aterm.next;
   }
-/* fprintf(stderr,"Hier1 %lu %lu  %lu\n",sizeof(int),sizeof(size_t),TERM_SIZE_INT); */
+
   if (!cur) 
   {
     cur = (ATermInt)AT_allocate(TERM_SIZE_INT);
@@ -1200,11 +1191,8 @@ ATermInt ATmakeInt(int val)
 
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
-/* fprintf(stderr,"Hier2i %lu\n", cur->aterm.value); */
   }
 
-/* fprintf(stderr,"Hier3i %lu\n", cur->aterm.value);
-  fprintf(stderr,"AAAA %lu   %lu\n%lu    %lu\n", hnr & table_mask, hash_number((ATerm)cur, TERM_SIZE_INT) & table_mask,table_mask,hnr); */
   assert((hnr & table_mask) == (hash_number((ATerm)cur, TERM_SIZE_INT) & table_mask));
 
   return cur;  
@@ -1549,7 +1537,6 @@ ATerm AT_isInsideValidTerm(ATerm term)
   }
   
   if(!inblock) {
-      /*fprintf(stderr, "not in block: %p\n", term);*/
     return NULL;
   }
 
@@ -1613,7 +1600,6 @@ void AT_printAllTerms(FILE *file)
     ATerm cur = hashtable[i];
     while(cur) {
       ATfprintf(file, "%t\n", cur);
-        /*fprintf(file, "sym = %s\n",ATgetName(ATgetAFun(cur)));*/
       
       cur = cur->aterm.next;
     }

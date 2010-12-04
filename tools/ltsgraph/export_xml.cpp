@@ -35,7 +35,7 @@ bool ExporterXML::export_to(wxString _filename)
       State* s = graph->getState(i-1);
       wxColour c = s->getColour();
 
-			size_t fromVal = s->getValue();
+      size_t fromVal = s->getValue();
       state->AddAttribute(wxT("value"), wxString::Format(wxT("%i"), fromVal ));
       state->AddAttribute(wxT("isInitial"), wxString::Format(wxT("%i"), s->isInitialState() ));
       state->AddAttribute(wxT("x"), wxString::Format(wxT("%f"), s->getX() ));

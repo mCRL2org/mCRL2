@@ -64,6 +64,10 @@ void check_unmarked_block(size_t blocks);
 
 void AT_initGC(int argc, char *argv[], ATerm *bottomOfStack)
 {
+  /* Suppress unused variable warning */
+  (void)argc;
+  (void)argv;
+
   stackBot = bottomOfStack;
 }
 
@@ -114,17 +118,12 @@ static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) /* CHANGED 
           {
             assert(AT_isValidTerm(real_term));
             AT_markTerm(real_term);
-              /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));
- *   */
-              /*nb_cell_in_stack++;*/
           }
         }
       } 
       else if (AT_isValidAFun((AFun)*cur)) 
       {
-        /*fprintf(stderr,"mark_memory: AT_markAFun(%d)\n",(AFun)*cur);*/
         AT_markAFun((AFun)*cur);
-        /*nb_cell_in_stack++;*/
       }
     }
   }
@@ -155,16 +154,12 @@ static void mark_memory_young(ATerm *start, ATerm *stop, ATbool check_term) /* C
           { 
             assert(AT_isValidTerm(real_term));
             AT_markTerm_young(real_term);
-            /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));  */
-            /*nb_cell_in_stack++;*/
           }
         }
       } 
       else if (AT_isValidAFun(*cur)) 
       {
-	/*fprintf(stderr,"mark_memory_young: AT_markAFun_young(%d)\n",(AFun)*cur);*/
 	AT_markAFun_young((AFun)*cur);
-	/*nb_cell_in_stack++;*/
       }
     }
   }
@@ -447,8 +442,8 @@ VOIDCDECL mark_phase_young()
   AT_markProtectedAFuns_young();
 
    /* Mark 'parked' symbol */
-  if (AT_isValidAFun(at_parked_symbol)) {
-      /*fprintf(stderr,"mark_phase_young: AT_markAFun_young(%d)\n",at_parked_symbol);*/
+  if (AT_isValidAFun(at_parked_symbol)) 
+  {
      AT_markAFun_young(at_parked_symbol);
   }
 }
@@ -1015,7 +1010,6 @@ void minor_sweep_phase_young()
 #ifndef NDEBUG
     if(ti->at_freelist) {
       ATerm data;
-      /*fprintf(stderr,"minor_sweep_phase_young: ensure empty freelist[%d]\n",size);*/
       for(data = ti->at_freelist ; data ; data=data->aterm.next) 
       {
         if(!EQUAL_HEADER(data->header,FREE_HEADER)) 
