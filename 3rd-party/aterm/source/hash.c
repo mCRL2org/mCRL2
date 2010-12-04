@@ -271,14 +271,6 @@ static void hashResizeSet(ATermIndexedSet s)
     s->hashtable = newhashtable;
     s->sizeMinus1=newsizeMinus1;
     s->max_entries = ((s->sizeMinus1/100)*s->max_load);
-#ifndef NDEBUG
-    if(!silent) 
-    { 
-      fprintf(stderr,"Hashtable of indexed set has \
-                            been resized to %ld with %ld entries.\n",
-	      s->sizeMinus1+1,s->nr_entries);
-    }
-#endif
   }
   else
   { /* resizing the hashtable failed and s->hashtable still

@@ -15,21 +15,15 @@
 #include "memory.h"
 #include "afun.h"
 #include "list.h"
-/* #include "make.h" */
 #include "gc.h"
 #include "util.h"
 #include "bafio.h"
 #include "version.h"
 #include "atypes.h"
-/* #include "tafio.h" */
 #include "safio.h" 
-/* #include "md5.h" */
 
 /*}}}  */
 /*{{{  defines */
-
-#define SILENT_FLAG  "-at-silent"
-#define VERBOSE_FLAG "-at-verbose"
 
 #define LOW_MEMORY_FLAG "-at-low-memory"
 
@@ -47,8 +41,8 @@
 #define PROTECT_EXPAND_SIZE 100000
 
 /* The same for the protected arrays */
-#define PROTECT_ARRAY_INITIAL_SIZE 128
-#define PROTECT_ARRAY_EXPAND_SIZE  256
+/* #define PROTECT_ARRAY_INITIAL_SIZE 128
+#define PROTECT_ARRAY_EXPAND_SIZE  256 */
 
 /* The same for protection function */
 #define PROTECT_FUNC_INITIAL_SIZE 32
@@ -60,7 +54,6 @@
 char            aterm_id[] = "$Id: aterm.c 24415 2007-12-12 14:20:55Z eriks $";
 
 /* Flag to tell whether to keep quiet or not. */
-ATbool silent	  = ATtrue;
 ATbool low_memory = ATfalse;
 
 /* warning_handler is called when a recoverable error is detected */
@@ -94,7 +87,6 @@ size_t    at_prot_functions_count = 0;
 
 static ATerm   *mark_stack = NULL;
 static size_t mark_stack_size = 0;
-int             mark_stats[3] = {0, MYMAXINT, 0};
 
 /*}}}  */
 /*{{{  function declarations */
@@ -118,7 +110,6 @@ static ATerm    sparse_term(int *c, char **s);
 void
 AT_cleanup(void)
 {
-  AT_cleanupGC();
   AT_cleanupMemory();
 }
 
@@ -133,46 +124,12 @@ AT_cleanup(void)
 void
 ATinit(int argc, char *argv[], ATerm * bottomOfStack)
 {
-  int lcv;
-  ATbool help = ATfalse;
-
   if (initialized)
     return;
 
-  /*{{{  Handle arguments */
-
-  for (lcv=1; lcv < argc; lcv++) {
-    if (streq(argv[lcv], SILENT_FLAG)) {
-      silent = ATtrue;
-    } else if(streq(argv[lcv], VERBOSE_FLAG)) {
-      silent = ATfalse;
-    } else if(0 || streq(argv[lcv], LOW_MEMORY_FLAG)) {
-      low_memory              = ATtrue;
-    } else if(streq(argv[lcv], "-at-help")) {
-      help = ATtrue;
-    }
-  }
-
-  /*}}}  */
   /*{{{  Optionally print some information */
 
   AT_init_gc_parameters(low_memory);
-
-  
-  if (!silent) {
-    ATfprintf(stderr, "  ATerm Library, version %s, built: %s\n",
-	      at_version, at_date);
-  }
-
-  if(help) {
-    fprintf(stderr, "    %-20s: print this help info\n", "-at-help");
-    fprintf(stderr, "    %-20s: generate runtime gc information.\n",
-	    "-at-verbose");
-    fprintf(stderr, "    %-20s: suppress runtime gc information.\n",
-	    "-at-silent");
-    fprintf(stderr, "    %-20s: try to minimize the memory usage.\n",
-	    "-at-low-memory");
-  }
 
   /*}}}  */
   /*{{{  Perform some sanity checks */
@@ -243,11 +200,6 @@ ATinit(int argc, char *argv[], ATerm * bottomOfStack)
   initialized = ATtrue;
 
   atexit(AT_cleanup);
-
-  if(help) {
-    fprintf(stderr, "\n");
-    exit(0);
-  }
 }
 
 ATbool ATisInitialized() {
@@ -1924,10 +1876,6 @@ void AT_markTerm(ATerm t)
       if (!mark_stack)
 	ATerror("cannot realloc mark stack to %lu entries.\n", mark_stack_size);
       limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-      if(!silent) {
-	fprintf(stderr, "resized mark stack to %lu entries\n", mark_stack_size);
-      }
-      fflush(stderr);
 
       current = mark_stack + current_index;
     }
@@ -2005,9 +1953,6 @@ void AT_markTerm_young(ATerm t)
       if (!mark_stack)
 	ATerror("cannot realloc mark stack to %lu entries.\n", mark_stack_size);
       limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-      if(!silent) {
-	fprintf(stderr, "resized mark stack to %lu entries\n", mark_stack_size);
-      }
       fflush(stderr);
 
       current = mark_stack + current_index;

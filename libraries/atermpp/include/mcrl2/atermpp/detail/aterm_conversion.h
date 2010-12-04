@@ -86,45 +86,46 @@ namespace { // unnamed namespace
   /// \brief Conversion function
   /// \param t A pointer
   /// \return The pointer converted to an ATermReal
-  inline
+  /* inline
   ATermReal void2real(void* t)
   { return reinterpret_cast<ATermReal>(t); }
+  */
 
   /// \brief Conversion function
   /// \param t A pointer
   /// \return The pointer converted to an ATermReal
-  inline
+  /* inline
   ATermReal void2real(const void* t)
-  { return reinterpret_cast<ATermReal>(const_cast<void*>(t)); }
+  { return reinterpret_cast<ATermReal>(const_cast<void*>(t)); } */
 
   /// \brief Conversion function
   /// \param l A real-valued term
   /// \return The ATermReal converted to a void pointer
-  inline
+  /* inline
   void* real2void(ATermReal l)
-  { return reinterpret_cast<void*>(l); }
+  { return reinterpret_cast<void*>(l); } */
 
   // --- blob ---
   /// \brief Conversion function
   /// \param t A pointer
   /// \return The pointer converted to an ATermBlob
-  inline
+  /* inline
   ATermBlob void2blob(void* t)
-  { return reinterpret_cast<ATermBlob>(t); }
+  { return reinterpret_cast<ATermBlob>(t); } */
 
   /// \brief Conversion function
   /// \param t A pointer
   /// \return The pointer converted to an ATermBlob
-  inline
+  /* inline
   ATermBlob void2blob(const void* t)
-  { return reinterpret_cast<ATermBlob>(const_cast<void*>(t)); }
+  { return reinterpret_cast<ATermBlob>(const_cast<void*>(t)); } */
 
   /// \brief Conversion function
   /// \param l A term containing binary data
   /// \return The ATermBlob converted to a void pointer
-  inline
+  /* inline
   void* blob2void(ATermBlob l)
-  { return reinterpret_cast<void*>(l); }
+  { return reinterpret_cast<void*>(l); } */
 
   // --- int  ---
   /// \brief Conversion function
@@ -152,9 +153,9 @@ namespace { // unnamed namespace
   /// \brief Conversion function
   /// \param t A pointer
   /// \return The pointer converted to an ATermPlaceholder
-  inline
+  /* inline
   ATermPlaceholder void2place_holder(void* t)
-  { return reinterpret_cast<ATermPlaceholder>(t); }
+  { return reinterpret_cast<ATermPlaceholder>(t); } */
 
 } // unnamed namespace
 

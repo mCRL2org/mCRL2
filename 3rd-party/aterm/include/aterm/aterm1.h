@@ -127,7 +127,7 @@ char  *ATwriteToString(ATerm t);
  * \arg t term to write
  * \arg len result variable that will hold the length of the string
  */
-unsigned char *ATwriteToBinaryString(ATerm t, int *len);
+unsigned char *ATwriteToBinaryString(ATerm t, size_t *len);
 
 /**
  * Read a textual ATerm from a file.
@@ -166,7 +166,7 @@ ATerm ATreadFromString(const char *string);
  * \arg s array containing a serialized ATerm in binary format
  * \arg size length of the array
  */
-ATerm ATreadFromBinaryString(const unsigned char *s, int size);
+ATerm ATreadFromBinaryString(const unsigned char *s, size_t size);
 
 
 /* SAF I/O stuff */
@@ -178,9 +178,9 @@ ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char *filename);
 
 ATerm ATreadFromNamedSAFFile(const char *filename);
 
-char* ATwriteToSAFString(ATerm aTerm, int *length);
+char* ATwriteToSAFString(ATerm aTerm, size_t *length);
 
-ATerm ATreadFromSAFString(char *data, int length);
+ATerm ATreadFromSAFString(char *data, size_t length);
 
 
 /** A short hand for ATreadFromString() */
@@ -244,7 +244,7 @@ void ATmarkTerm(ATerm t);
  * using ATaddProtectFunction(). Otherwise, you WILL get bus errors and
  * core dumps.
  */
-void ATmarkArray(ATerm *start, int size);
+void ATmarkArray(ATerm *start, size_t size);
 
 /* Convenience macro's to circumvent gcc's (correct) warning:
  *   "dereferencing type-punned pointer will break strict-aliasing rules"

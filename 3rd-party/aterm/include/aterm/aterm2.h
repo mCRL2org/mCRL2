@@ -33,7 +33,9 @@ struct __ATermInt
 {
   header_type header;
   ATerm       next;
-  int value; /* Only use lower 32 bits */
+  MachineWord value; /* Only use lower 32 bits as int, but using "int" here may lead to non
+                        initialisation of the other 32 bits; It is conceivable to replace this
+                        int by a 64 bit integer */
 };
 
 typedef union _ATermInt
@@ -42,7 +44,7 @@ typedef union _ATermInt
   struct __ATermInt  aterm;
 } *ATermInt;
 
-struct __ATermReal
+/* struct __ATermReal
 {
   header_type header;
   ATerm       next;
@@ -53,7 +55,7 @@ typedef union _ATermReal
 {
   header_type         header;
   struct __ATermReal  aterm;
-} *ATermReal;
+} *ATermReal; */
 
 struct __ATermAppl
 {
@@ -82,7 +84,7 @@ typedef union _ATermList
   struct __ATermList  aterm;
 } *ATermList;
 
-struct __ATermPlaceholder
+/* struct __ATermPlaceholder
 {
   header_type header;
   ATerm       next;
@@ -107,7 +109,7 @@ typedef union _ATermBlob
 {
   header_type         header;
   struct __ATermBlob  aterm;
-} *ATermBlob;
+} *ATermBlob;  */
 
 
 struct _ATermTable;

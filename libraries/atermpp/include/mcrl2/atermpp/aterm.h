@@ -73,17 +73,17 @@ namespace atermpp
 
       /// \brief Constructor.
       /// \param term A real-valued term
-      aterm_base(ATermReal term)
+      /* aterm_base(ATermReal term)
         : m_term(reinterpret_cast<ATerm>(term))
       { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
-      }
+      } */
 
       /// \brief Constructor.
       /// \param term A term containing binary data
-      aterm_base(ATermBlob term)
+      /* aterm_base(ATermBlob term)
         : m_term(reinterpret_cast<ATerm>(term))
       { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
-      }
+      } */
 
       /// \brief Constructor.
       /// \param term A term
@@ -201,15 +201,15 @@ namespace atermpp
 
       /// \brief Constructor.
       /// \param term A real-valued term
-      aterm(ATermReal term)
+      /* aterm(ATermReal term)
         : aterm_base(term)
-      { }
+      { } */
 
       /// \brief Constructor.
       /// \param term A term containing binary data
-      aterm(ATermBlob term)
+      /* aterm(ATermBlob term)
         : aterm_base(term)
-      { }
+      { } */
 
       /// \brief Constructor.
       /// \param term A term

@@ -628,7 +628,7 @@ namespace mcrl2 {
         }
 
         // write trace
-        int len;
+        size_t len;
         const char *bs = (const char *) ATwriteToBinaryString((ATerm) trace,&len); //XXX no error handling?
         os.write(bs,len);
         if ( os.bad() )

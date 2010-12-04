@@ -1022,7 +1022,7 @@ write_baf(ATerm t, byte_writer *writer)
 
 /*{{{  char *ATwriteToBinaryString(ATerm t, int *len) */
 
-unsigned char *ATwriteToBinaryString(ATerm t, int *len)
+unsigned char *ATwriteToBinaryString(ATerm t, size_t *len)
 {
   static byte_writer writer;
   static ATbool initialized = ATfalse;
@@ -1373,11 +1373,6 @@ ATerm read_baf(byte_reader *reader)
     return NULL;
   }
 
-  if (!silent) {
-    fprintf(stderr, "reading %lu unique symbols and %lu unique terms.\n",
-	    nr_unique_symbols, nr_unique_terms);
-  }
-
   /*}}}  */
   /*{{{  Allocate symbol space */
 
@@ -1409,7 +1404,7 @@ ATerm read_baf(byte_reader *reader)
 
 /*{{{  ATerm ATreadFromBinaryString(const unsigned char *s, int size) */
 
-ATerm ATreadFromBinaryString(const unsigned char *s, int size)
+ATerm ATreadFromBinaryString(const unsigned char *s, size_t size)
 {
   byte_reader reader;
 

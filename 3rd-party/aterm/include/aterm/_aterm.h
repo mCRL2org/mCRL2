@@ -18,7 +18,6 @@ typedef struct ProtEntry
 #define STRING_MARK 0xFF /* marker for binary strings */
 #define LENSPEC 12
 
-extern ATbool silent;
 extern ATbool low_memory;
 
 extern ProtEntry **at_prot_table;

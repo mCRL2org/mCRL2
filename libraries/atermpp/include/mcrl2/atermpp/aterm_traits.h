@@ -97,7 +97,7 @@ struct aterm_traits<ATermAppl>
   static ATerm* ptr(ATermAppl& t)     { return reinterpret_cast<ATerm*>(&t); }
 };
 
-template <>
+/* template <>
 struct aterm_traits<ATermBlob>
 {
   typedef ATermBlob aterm_type;
@@ -117,7 +117,7 @@ struct aterm_traits<ATermReal>
   static void mark(ATermReal t)       { aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t)); }
   static ATerm term(ATermReal t)      { return reinterpret_cast<ATerm>(t); }
   static ATerm* ptr(ATermReal& t)     { return reinterpret_cast<ATerm*>(&t); }
-};
+}; */
 
 template <>
 struct aterm_traits<ATermInt>

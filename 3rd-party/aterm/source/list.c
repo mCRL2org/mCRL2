@@ -7,7 +7,6 @@
 #include "memory.h"
 #include "list.h"
 #include "aterm2.h"
-#include "debug.h"
 
 /*}}}  */
 /*{{{  defines */

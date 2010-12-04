@@ -20,14 +20,6 @@ extern "C"
 #  define MAX(a,b)	((a) > (b) ? (a) : (b))
 #endif
 
-#define IDX_TOTAL               0
-#define IDX_MIN                 1
-#define IDX_MAX                 2
-
-#define STATS(array, value)
-
-#define MYMAXINT 0x7FFFFFFF
-
 #ifdef __cplusplus
 }
 #endif/* __cplusplus */ 

@@ -18,7 +18,6 @@
 #include "memory.h"
 #include "util.h"
 #include "gc.h"
-#include "debug.h"
 
 /*}}}  */
 
@@ -28,19 +27,8 @@ char gc_id[] = "$Id: gc.c 23071 2007-07-02 10:06:17Z eriks $";
 
 static ATerm *stackBot = NULL;
 
-#define PRINT_GC_TIME           1
-#define PRINT_GC_STATS          2
-
 #define TO_OLD_RATIO   65
 #define TO_YOUNG_RATIO 25
-
-static int     flags               = 0;
-
-size_t at_gc_count			   = 0;
-static size_t     stack_depth[3]      = { 0, MYMAXINT, 0 };
-static size_t     reclaim_perc[3]     = { 0, MYMAXINT, 0 };
-extern size_t     mark_stats[3];
-static FILE *gc_f = NULL;
 
 extern ATprotected_block protected_blocks;
 
@@ -76,23 +64,7 @@ void check_unmarked_block(size_t blocks);
 
 void AT_initGC(int argc, char *argv[], ATerm *bottomOfStack)
 {
-  int i;
-
   stackBot = bottomOfStack;
-  gc_f = stderr;
-  
-  for(i=1; i<argc; i++) {
-    if(streq(argv[i], "-at-print-gc-time"))
-      flags |= PRINT_GC_TIME;
-    else if(streq(argv[i], "-at-print-gc-info"))
-      flags |= (PRINT_GC_TIME | PRINT_GC_STATS);
-    else if(strcmp(argv[i], "-at-help") == 0) {
-      fprintf(stderr, "    %-20s: print non-intrusive gc information "
-	      "after execution\n", "-at-print-gc-time");
-      fprintf(stderr, "    %-20s: print elaborate gc information "
-	      "after execution\n", "-at-print-gc-info");
-    }
-  }
 }
 
 /*}}}  */
@@ -214,7 +186,7 @@ void ATmarkTerm(ATerm t)
   ATmarkArray(&t,1);
 }
 
-void ATmarkArray(ATerm *start, int size)
+void ATmarkArray(ATerm *start, size_t size)
 {
   if ( at_mark_young == ATtrue )
   {
@@ -315,7 +287,6 @@ VOIDCDECL mark_phase()
   stop  = MAX(stackTop, stackBot);
 
   stack_size = stop-start;
-  STATS(stack_depth, stack_size);
 
   mark_memory(start, stop,ATtrue);
 
@@ -440,7 +411,6 @@ VOIDCDECL mark_phase_young()
   stop  = MAX(stackTop, stackBot);
 
   stack_size = stop-start;
-  STATS(stack_depth, stack_size);
 
   mark_memory_young(start, stop, ATtrue);
 
@@ -808,7 +778,8 @@ void major_sweep_phase_young()
 
   old_bytes_in_young_blocks_since_last_major = 0;
   
-  for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
+  for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) 
+  {
     Block *prev_block = NULL;
     Block *next_block;
     ATerm old_freelist;
@@ -830,7 +801,8 @@ void major_sweep_phase_young()
       assert(block->size == size);
 
       old_freelist = ti->at_freelist;
-      for(cur=block->data ; cur<end ; cur+=size) {
+      for(cur=block->data ; cur<end ; cur+=size) 
+      {
 	ATerm t = (ATerm)cur;
 	if(IS_MARKED(t->header)) {
 	  CLR_MARK(t->header);
@@ -1070,7 +1042,6 @@ void minor_sweep_phase_young()
 void AT_collect()
 {
 
-  FILE *file = gc_f;
   size_t size;
 
       /* snapshop*/
@@ -1081,20 +1052,9 @@ void AT_collect()
     ti->nb_reclaimed_cells_during_last_gc=0;
   }
 
-  at_gc_count++;
-  if (!silent)
-  {
-    fprintf(file, "collecting garbage..(%d)",at_gc_count);
-    fflush(file);
-  }
-
   mark_phase();
 
   sweep_phase();
-
-
-  if (!silent)
-    fprintf(file, "..\n");
 }
 
 /*}}}  */
@@ -1102,7 +1062,6 @@ void AT_collect()
 
 void AT_collect_minor()
 {
-  FILE *file = gc_f;
   size_t size;
 
       /* snapshop*/
@@ -1113,20 +1072,11 @@ void AT_collect_minor()
     ti->nb_reclaimed_cells_during_last_gc=0;
   }
 
-  at_gc_count++;
-  if (!silent)
-  {
-    fprintf(file, "young collecting garbage..(%d)yy",at_gc_count);
-    fflush(file);
-  }
-
   /* was minor_mark_phase_young(); this should be verified! */
   mark_phase_young();
 
   minor_sweep_phase_young();
 
-  if (!silent)
-    fprintf(file, "..\n");
 }
 
 /*}}}  */
@@ -1135,7 +1085,6 @@ void AT_collect_minor()
 
 void AT_collect()
 {
-  FILE *file = gc_f;
   size_t size;
 
   /* snapshot*/
@@ -1146,22 +1095,12 @@ void AT_collect()
     ti->nb_reclaimed_cells_during_last_gc=0;
   }
   
-  at_gc_count++;
-  if (!silent)
-  {
-    fprintf(file, "collecting garbage..(%lu)",at_gc_count);
-    fflush(file);
-  }
-
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
   mark_phase();
   
   sweep_phase();
 
-  if (!silent) {
-    fprintf(file, "..\n");
-  }
 }
 
 /*}}}  */
@@ -1169,7 +1108,6 @@ void AT_collect()
 
 void AT_collect_minor()
 {
-  FILE *file = gc_f;
   size_t size;
   
     /* snapshop*/
@@ -1180,14 +1118,6 @@ void AT_collect_minor()
     ti->nb_reclaimed_cells_during_last_gc=0;
   }
   
-  at_gc_count++;
-  if (!silent)
-  {
-    fprintf(file, "young collecting garbage..(%lu)",at_gc_count);
-    fflush(file);
-  }
-
-
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
     /*nb_cell_in_stack=0;*/
@@ -1197,35 +1127,8 @@ void AT_collect_minor()
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
 
-  if (!silent)
-    fprintf(file, "..\n");
 }
 
 /*}}}  */
 #endif
-
-/*{{{  void AT_cleanupGC() */
-
-void AT_cleanupGC()
-{
-  FILE *file = gc_f;
-  if(flags & PRINT_GC_TIME) {
-    fprintf(file, "%lu garbage collects,\n", at_gc_count);
-  }
-  
-  if(flags & PRINT_GC_STATS) {
-    if(at_gc_count > 0) {
-      fprintf(file, "\n  stack depth: %lu/%lu/%lu words\n", 
-	      stack_depth[IDX_MIN],  
-	      stack_depth[IDX_TOTAL]/at_gc_count,
-	      stack_depth[IDX_MAX]);
-      fprintf(file, "\n  reclamation percentage: %lu/%lu/%lu\n",
-	      reclaim_perc[IDX_MIN],
-	      reclaim_perc[IDX_TOTAL]/at_gc_count,
-	      reclaim_perc[IDX_MAX]);
-    }
-  }
-}
-
-/*}}}  */
 

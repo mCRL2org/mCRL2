@@ -1195,7 +1195,7 @@ typedef struct _BufferNode{
  * Since the string will contain \0 bytes, the value the length parameter has after this function returns will specify the number of bytes that were written.
  * Note that the resulting string has been malloced and will need to be freed by the user.
  */
-char* ATwriteToSAFString(ATerm aTerm, int *length){
+char* ATwriteToSAFString(ATerm aTerm, size_t *length){
 	char *result;
 	size_t totalBytesWritten = 0;
 	size_t position = 0;
@@ -1255,10 +1255,11 @@ char* ATwriteToSAFString(ATerm aTerm, int *length){
 /**
  * Interprets the given string in SAF format and returns the constructed ATerm.
  */
-ATerm ATreadFromSAFString(char *data, int length){
+ATerm ATreadFromSAFString(char *data, size_t length)
+{
 	ATerm term;
 	
-	int position = 0;
+	size_t position = 0;
 	
 	BinaryReader binaryReader = ATcreateBinaryReader();
 	

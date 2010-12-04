@@ -14,14 +14,14 @@ extern "C"
 /* The original ATerm library made the (incorrect) assumption that sizeof(long)
    is always 64 on 64-bit machines. A better check for 64-bit registers is the
    use of C99 integral types. */
-#ifndef SIZEOF_LONG
-/*  #define SIZEOF_LONG (sizeof(long))  */
-#ifdef AT_64BIT
-#  define SIZEOF_LONG 8
-#else
-#  define SIZEOF_LONG sizeof(long)
-#endif
-#endif
+#ifndef SIZEOF_SIZE_T
+/*  #define SIZEOF_SIZE_T (sizeof(long))  */
+/* #ifdef AT_64BIT
+#  define SIZEOF_SIZE_T 8
+#else */
+#  define SIZEOF_SIZE_T sizeof(size_t)
+/* #endif */
+#endif 
 
 /*
  32-bit:
@@ -44,7 +44,7 @@ extern "C"
    typedef unsigned long header_type; */
 typedef MachineWord header_type;
 
-#define HEADER_BITS      (SIZEOF_LONG*8)
+#define HEADER_BITS      (SIZEOF_SIZE_T*8)
 
 #ifdef AT_64BIT
 #define SHIFT_LENGTH     34
@@ -83,7 +83,7 @@ typedef MachineWord header_type;
 #define IS_YOUNG(h)      (!(IS_OLD(h)))
 
 /* TODO: Optimize */
-#define INCREMENT_AGE(h) do { int age = GET_AGE(h); \
+#define INCREMENT_AGE(h) do { size_t age = GET_AGE(h); \
 	                      if (age<OLD_AGE) { \
 	                        SET_AGE((h), age+1); \
                               } \
@@ -96,19 +96,16 @@ typedef MachineWord header_type;
 #define SHIFT_SYMBOL  SHIFT_LENGTH
 #define SHIFT_SYM_ARITY SHIFT_LENGTH
 
-#define TERM_SIZE_APPL(arity) ((sizeof(struct __ATerm)/SIZEOF_LONG)+arity)
-#define TERM_SIZE_INT         (sizeof(struct __ATermInt)/SIZEOF_LONG)
-#define TERM_SIZE_REAL        (sizeof(struct __ATermReal)/SIZEOF_LONG)
-#define TERM_SIZE_BLOB        (sizeof(struct __ATermBlob)/SIZEOF_LONG)
-#define TERM_SIZE_LIST        (sizeof(struct __ATermList)/SIZEOF_LONG)
-#define TERM_SIZE_PLACEHOLDER (sizeof(struct __ATermPlaceholder)/SIZEOF_LONG)
-#define TERM_SIZE_SYMBOL      (sizeof(struct _SymEntry)/SIZEOF_LONG)
+#define TERM_SIZE_APPL(arity) ((sizeof(struct __ATerm)/SIZEOF_SIZE_T)+arity)
+#define TERM_SIZE_INT         (sizeof(struct __ATermInt)/SIZEOF_SIZE_T)
+#define TERM_SIZE_LIST        (sizeof(struct __ATermList)/SIZEOF_SIZE_T)
+#define TERM_SIZE_SYMBOL      (sizeof(struct _SymEntry)/SIZEOF_SIZE_T)
 
 #define IS_MARKED(h)          ((h) & MASK_MARK)
 #define GET_TYPE(h)           ((size_t)(((h) & MASK_TYPE) >> SHIFT_TYPE))
 #define GET_ARITY(h)	      ((size_t)(((h) & MASK_ARITY) >> SHIFT_ARITY))
 #define GET_SYMBOL(h)	      ((AFun)((h) >> SHIFT_SYMBOL))
-#define GET_LENGTH(h)         ((unsigned long)((h) >> SHIFT_LENGTH))
+#define GET_LENGTH(h)         ((size_t)((h) >> SHIFT_LENGTH))
 #define IS_QUOTED(h)          (((h) & MASK_QUOTED) ? ATtrue : ATfalse)
 
 #define SET_MARK(h)           do { (h) |= MASK_MARK; } while (0)
@@ -128,21 +125,10 @@ typedef MachineWord header_type;
 				   (AT_APPL << SHIFT_TYPE) | \
 				   ((header_type)(sym) << SHIFT_SYMBOL))
 #define INT_HEADER(anno)          ((anno) | AT_INT << SHIFT_TYPE)
-#define REAL_HEADER(anno)         ((anno) | AT_REAL << SHIFT_TYPE)
 #define EMPTY_HEADER(anno)        ((anno) | AT_LIST << SHIFT_TYPE)
 
 #define LIST_HEADER(anno,len)     ((anno) | (AT_LIST << SHIFT_TYPE) | \
 				   ((MachineWord)(len) << SHIFT_LENGTH) | (2 << SHIFT_ARITY))
-
-#define PLACEHOLDER_HEADER(anno)  ((anno) | (AT_PLACEHOLDER << SHIFT_TYPE) | \
-           1 << SHIFT_ARITY)
-
-/*
-#define BLOB_HEADER(anno,len)     ((anno) | (AT_BLOB << SHIFT_TYPE) | \
-				   ((MachineWord)(len) << SHIFT_LENGTH))
-				   */
-#define BLOB_HEADER(anno)	  ((anno) | (AT_BLOB << SHIFT_TYPE) | \
-				   (2 << SHIFT_ARITY))
 
 #define SYMBOL_HEADER(arity,quoted) \
 	(((header_type)(arity) << SHIFT_SYM_ARITY) | \
