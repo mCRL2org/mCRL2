@@ -18,9 +18,9 @@ extern void AT_init_gc_parameters(ATbool low_memory);
 extern size_t gc_min_number_of_blocks;
 extern size_t max_freeblocklist_size;
 extern size_t min_nb_minor_since_last_major;
-extern int good_gc_ratio;
-extern int small_allocation_rate_ratio;
-extern int old_increase_rate_ratio;
+extern size_t good_gc_ratio;
+extern size_t small_allocation_rate_ratio;
+extern size_t old_increase_rate_ratio;
 
 void AT_collect();
 

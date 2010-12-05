@@ -357,8 +357,8 @@ class AM_Inner: public ATerm_Manipulator {
           v_parts[i] = set_true_auxiliary(ATelementAt((ATermList) a_formula, i), a_guard);
         }
         v_result = (ATerm) ATmakeList0();
-        for (i = v_length - 1; i >= 0; i--) {
-          v_result = (ATerm) ATinsert((ATermList) v_result, v_parts[i]);
+        for (i = v_length ; i > 0; i--) {
+          v_result = (ATerm) ATinsert((ATermList) v_result, v_parts[i-1]);
         }
         ATtablePut(f_set_true, a_formula, v_result);
         delete[] v_parts;
@@ -404,8 +404,8 @@ class AM_Inner: public ATerm_Manipulator {
           v_parts[i] = set_false_auxiliary(ATelementAt((ATermList) a_formula, i), a_guard);
         }
         v_result = (ATerm) ATmakeList0();
-        for (i = v_length - 1; i >= 0; i--) {
-          v_result = (ATerm) ATinsert((ATermList) v_result, v_parts[i]);
+        for (i = v_length; i > 0; i--) {
+          v_result = (ATerm) ATinsert((ATermList) v_result, v_parts[i-1]);
         }
         ATtablePut(f_set_false, a_formula, v_result);
         delete[] v_parts;
@@ -476,8 +476,8 @@ class AM_Inner: public ATerm_Manipulator {
           v_parts[i] = orient(ATelementAt((ATermList) a_term, i));
         }
         v_result = (ATerm) ATmakeList0();
-        for (i = v_length - 1; i >= 0; i--) {
-          v_result = (ATerm) ATinsert((ATermList) v_result, v_parts[i]);
+        for (i = v_length; i > 0; i--) {
+          v_result = (ATerm) ATinsert((ATermList) v_result, v_parts[i-1]);
         }
         delete[] v_parts;
         v_parts = 0;

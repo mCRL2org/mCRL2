@@ -73,7 +73,8 @@ size_t write_bytes(const char *buf, size_t count, byte_writer *writer)
 
 int read_byte(byte_reader *reader)
 {
-  int index, c;
+  size_t index;
+  int c;
 
   c = EOF;
   switch (reader->type) {

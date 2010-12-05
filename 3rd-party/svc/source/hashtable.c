@@ -71,8 +71,8 @@ unsigned int HTinsert (HTable *table, ATerm a, void *ptr) {
 
 int HTmember (HTable *table, ATerm a, long *pn)
 { 
-  unsigned int index;
-  index=(unsigned int)ATindexedSetGetIndex(table->terms,a);
+  int index;
+  index=(int)ATindexedSetGetIndex(table->terms,a);
 
   if (index!=-1)
   {

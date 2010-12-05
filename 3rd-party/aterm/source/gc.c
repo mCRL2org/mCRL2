@@ -37,9 +37,9 @@ AFun at_parked_symbol = -1;
 size_t gc_min_number_of_blocks;
 size_t max_freeblocklist_size;
 size_t min_nb_minor_since_last_major;
-int good_gc_ratio;
-int small_allocation_rate_ratio;
-int old_increase_rate_ratio;
+size_t good_gc_ratio;
+size_t small_allocation_rate_ratio;
+size_t old_increase_rate_ratio;
 
 ATbool at_mark_young;
 
