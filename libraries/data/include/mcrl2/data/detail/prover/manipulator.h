@@ -343,13 +343,13 @@ class AM_Inner: public ATerm_Manipulator {
 
       if (ATgetType(a_formula) == AT_LIST) {
         ATerm v_function;
-        int v_length;
+        size_t v_length;
 
         v_function = ATelementAt((ATermList) a_formula, 0);
         v_length = ATgetLength((ATermList) a_formula);
 
         ATerm* v_parts;
-        int i;
+        size_t i;
 
         v_parts = new ATerm[v_length];
         v_parts[0] = v_function;
@@ -390,13 +390,13 @@ class AM_Inner: public ATerm_Manipulator {
 
       if (ATgetType(a_formula) == AT_LIST) {
         ATerm v_function;
-        int v_length;
+        size_t v_length;
 
         v_function = ATelementAt((ATermList) a_formula, 0);
         v_length = ATgetLength((ATermList) a_formula);
 
         ATerm* v_parts;
-        int i;
+        size_t i;
 
         v_parts = new ATerm[v_length];
         v_parts[0] = v_function;
@@ -462,13 +462,13 @@ class AM_Inner: public ATerm_Manipulator {
 
       if (ATgetType(a_term) == AT_LIST) {
         ATerm v_function;
-        int v_length;
+        size_t v_length;
 
         v_function = ATelementAt((ATermList) a_term, 0);
         v_length = ATgetLength((ATermList) a_term);
 
         ATerm* v_parts;
-        int i;
+        size_t i;
 
         v_parts = new ATerm[v_length];
         v_parts[0] = v_function;

@@ -227,7 +227,8 @@ void ATaddProtectFunction(ATermProtFunc f);
 /**
  * unregister a previously registered marking function. See ATaddProtectFunction().
  */ 
-void ATremoveProtectFunction(ATermProtFunc f);
+/* void ATremoveProtectFunction(ATermProtFunc f);
+*/
 
 /**
  * Mark a term to prevent it from being garbage collected. CAVEAT EMPTOR. 

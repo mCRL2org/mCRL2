@@ -1,0 +1,42 @@
+This directory contains four libraries that are used by the
+mCRL2 toolset. The four libraries are:
+
+aterm    gl2ps     svc    tr
+
+Below these libraries have a compact additional explanation.
+
+aterm
+-----
+The aterm library was made by de group SEN1 at CWI in Amsterdam.
+It contains routines to store and manipulate term structures. Most
+of the term sorts in the mCRL2 are directly mapped onto the terms.
+The terms are stored in a shared fashion, which if used properly can
+reduce the term footprint in memory substantially. Furthermore, the
+library contains its own term garbage mechanism, which requires 
+to carefully protect and unprotect some terms. 
+
+M.G.J. van den Brand, H.A. de Jong, P. Klint, P.A. Olivier. 
+Efficient annotated terms Seriesr. 
+Technical report. CWI. Software Engineering [SEN], Nr. R0003, 2000, ISSN: 1386-369X.
+See www.cwi.nl.
+
+gl2ps
+-----
+???
+
+svc
+---
+The system validation center (svc) format is a format to store labelled
+transition systems compactly with state and label information. It was 
+written by Izak van Langevelde. The labels of the transitions are ATerms.
+
+I.A. van Langevelde. 
+A compact file format for labeled transition systems. 
+Technical report. CWI. Software Engineering [SEN], Nr. R 0102, 2001, ISSN: 1386-369X.
+See www.cwi.nl.
+
+tr
+--
+???
+
+

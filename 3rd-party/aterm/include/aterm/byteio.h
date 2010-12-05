@@ -35,8 +35,8 @@ typedef struct
     FILE *file_data;
     struct {
       const unsigned char *buf;
-      int   index;
-      int   size;
+      size_t   index;
+      size_t   size;
     } string_data;
   } u;
 } byte_reader;
@@ -46,7 +46,7 @@ size_t write_bytes(const char *buf, size_t count, byte_writer *writer);
 int read_byte(byte_reader *reader);
 size_t read_bytes(char *buf, size_t count, byte_reader *reader);
 void init_file_reader(byte_reader *reader, FILE *file);
-void init_string_reader(byte_reader *reader, const unsigned char *buf, int max_size);
+void init_string_reader(byte_reader *reader, const unsigned char *buf, size_t max_size);
 
 #ifdef __cplusplus
 }

@@ -1,30 +1,5 @@
 #include "byteencoding.h"
 
-/* union DoubleEncoding{
-	double d;
-
-	struct{
-	#ifdef WORDS_BIGENDIAN
-		unsigned int negative:1;
-		unsigned int exponent:11;
-		unsigned int mantissa0:20;
-		unsigned int mantissa1:32;
-	#else
-	# ifdef FLOAT_WORDS_BIGENDIAN
-		unsigned int mantissa0:20;
-		unsigned int exponent:11;
-		unsigned int negative:1;
-		unsigned int mantissa1:32;
-	# else
-		unsigned int mantissa1:32;
-		unsigned int mantissa0:20;
-		unsigned int exponent:11;
-		unsigned int negative:1;
-	# endif
-	#endif
-	} EncodedDouble;
-}; */
-
 #if __STDC_VERSION__ >= 199901L
   /* "inline" is a keyword */
 #else
@@ -74,7 +49,7 @@ inline static int unsignedToSignedInt(unsigned int unsignedInt){
  * This will save space when encoding small values (which are most frequent);
  * the down side is that encoding large and negative values will require one extra byte.
  */
-int BEserializeMultiByteInt(int i, char *c){
+size_t BEserializeMultiByteInt(int i, char *c){
 	unsigned int ui = signedToUnsignedInt(i);
 	
 	if((ui & 0xffffff80U) == 0){
@@ -106,36 +81,10 @@ int BEserializeMultiByteInt(int i, char *c){
 }
 
 /**
- * Serializes a double value using IEEE 754 encoding.
- */
-/* void BEserializeDouble(double d, char *c){
-	unsigned int negative, exponent, mantissa0, mantissa1;
-	union DoubleEncoding de;
-	
-	de.d = d;
-	
-	negative = de.EncodedDouble.negative;
-	exponent = de.EncodedDouble.exponent;
-	mantissa0 = de.EncodedDouble.mantissa0;
-	mantissa1 = de.EncodedDouble.mantissa1;
-	
-	c[0] = mantissa1 & 0x000000ffU;
-	c[1] = (mantissa1 & 0x0000ff00U) >> 8;
-	c[2] = (mantissa1 & 0x00ff0000U) >> 16;
-	c[3] = (mantissa1 & 0xff000000U) >> 24;
-	
-	c[4] = mantissa0 & 0x000000ffU;
-	c[5] = (mantissa0 & 0x0000ff00U) >> 8;
-	c[6] = ((mantissa0 & 0x000f0000U) >> 16) | ((exponent & 0x0000000fU) << 4);
-	c[7] = ((exponent & 0x00007f0U) >> 4) | (negative & 0x00000001U) << 7;
-} */
-
-
-/**
  * Deserializes a 'multi-byte' encoded integer from a sequence of bytes.
  * When this function returns the parameter 'unsigned int *count' will hold how many bytes where read during the decoding process.
  */
-int BEdeserializeMultiByteInt(char *c, size_t *count){
+size_t BEdeserializeMultiByteInt(char *c, size_t *count){
 	unsigned char part = (unsigned char) c[0];
 	unsigned int result = (part & SEVENBITS);
 	
@@ -171,30 +120,3 @@ int BEdeserializeMultiByteInt(char *c, size_t *count){
 	return unsignedToSignedInt(result);
 }
 
-/**
- * Deserializes a double in IEEE 754 encoding from the given sequence of bytes.
- */
-/* double BEdeserializeDouble(char *c){
-	union DoubleEncoding de;
-	
-	unsigned int mantissa1 = 	(c[0] & 0x000000ffU) |
-								(c[1] & 0x000000ffU) << 8 |
-								(c[2] & 0x000000ffU) << 16 |
-								(c[3] & 0x000000ffU) << 24;
-	
-	unsigned int mantissa0 = 	(c[4] & 0x000000ffU) |
-								(c[5] & 0x000000ffU) << 8 |
-								(c[6] & 0x0000000fU) << 16;
-	
-	unsigned int exponent = 	(c[6] & 0x000000f0U) >> 4 |
-								(c[7] & 0x0000007fU) << 4;
-	
-	unsigned int negative = (c[7] & 0x00000080U) >> 7;
-	
-	de.EncodedDouble.negative = negative;
-	de.EncodedDouble.exponent = exponent;
-	de.EncodedDouble.mantissa0 = mantissa0;
-	de.EncodedDouble.mantissa1 = mantissa1;
-	
-	return de.d;
-} */

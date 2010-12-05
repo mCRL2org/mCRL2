@@ -464,9 +464,9 @@ ATerm AT_allocate(size_t size)
             /*(ti->nb_reclaimed_blocks_during_last_gc*sizeof(Block)) +*/
           (ti->nb_reclaimed_cells_during_last_gc*SIZE_TO_BYTES(size));
           /* +1 to avoid division by zero */
-        int reclaimed_memory_ratio_during_last_gc =
+        size_t reclaimed_memory_ratio_during_last_gc =
           (100*reclaimed_memory_during_last_gc) / (1+ti->nb_live_blocks_before_last_gc*sizeof(Block));
-        if(reclaimed_memory_ratio_during_last_gc > good_gc_ratio) {
+        if (reclaimed_memory_ratio_during_last_gc > good_gc_ratio) {
           if(nb_minor_since_last_major < min_nb_minor_since_last_major) {
             GC_MINOR_TEXT;
           } else {
@@ -474,16 +474,16 @@ ATerm AT_allocate(size_t size)
           }
           
         } else {
-          int nb_allocated_blocks_since_last_gc = ti->at_nrblocks-ti->nb_live_blocks_before_last_gc;
+          size_t nb_allocated_blocks_since_last_gc = ti->at_nrblocks-ti->nb_live_blocks_before_last_gc;
             /* +1 to avoid division by zero */
-          int allocation_rate =
+          size_t allocation_rate =
             (100*nb_allocated_blocks_since_last_gc)/(1+ti->nb_live_blocks_before_last_gc);
           
           if(allocation_rate < small_allocation_rate_ratio) {
             ALLOCATE_BLOCK_TEXT;
           } else {
               /* +1 to avoid division by zero */
-            int old_increase_rate =
+            size_t old_increase_rate =
               (100*(old_bytes_in_young_blocks_since_last_major-old_bytes_in_young_blocks_after_last_major)) /
               (1+old_bytes_in_young_blocks_after_last_major+old_bytes_in_old_blocks_after_last_major);
 

@@ -717,7 +717,7 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, int len, in
     return ATmakeAppl2(afunS,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),ATinsert(stored,ATgetArgument(tree,0)),len+1,max));
   } else if ( isM(tree) )
   {
-    return ATmakeAppl3(afunM,(ATerm) ATmakeInt(len-ATindexOf(stored,ATgetArgument(tree,0),0)),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
+    return ATmakeAppl3(afunM,(ATerm) ATmakeInt(len-(int)ATindexOf(stored,ATgetArgument(tree,0),0)),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
   } else if ( isF(tree) )
   {
     return ATmakeAppl3(afunF,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
@@ -968,7 +968,7 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
   {
 
     ATerm rslt = ATgetArgument(tree,0);
-    int rslt_len;
+    size_t rslt_len;
     if ( ATisList(rslt) )
     {
       rslt_len = ATgetLength((ATermList) rslt)-1;
@@ -1335,8 +1335,6 @@ ATermList RewriterInnermost::build_args(ATermList args, int buildargs, ATermAppl
 
 ATerm RewriterInnermost::build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len)
 {
-//gsfprintf(stderr,"build(%T,%i)\n\n",Term,buildargs);
-
   if ( ATisList(Term) )
   {
     ATerm head = ATgetFirst((ATermList) Term);

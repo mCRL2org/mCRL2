@@ -429,10 +429,10 @@ static void PRINT_FUNC(IndentedATerm)(PRINT_OUTTYPE OutStream, const ATerm term,
     ATermAppl appl = (ATermAppl) term;
     AFun fun = ATgetAFun(appl);
     PRINT_FUNC(AFun)(OutStream, fun);
-    unsigned int arity = ATgetArity(fun);
+    size_t arity = ATgetArity(fun);
     if (arity > 0) {
       PRINT_FUNC(fprints)(OutStream, "(\n");
-      for (unsigned int i = 0; i < arity; i++) {
+      for (size_t i = 0; i < arity; i++) {
         PRINT_FUNC(IndentedATerm)(OutStream, ATgetArgument(appl, i), nesting+1);
         if (i+1 < arity) {
           PRINT_FUNC(fprints)(OutStream, ",\n");
@@ -555,7 +555,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print multiaction
     PRINT_FUNC(dbg_prints)("printing multiaction\n");
     ATermList Actions = ATLgetArgument(Part, 0);
-    int ActionsLength = ATgetLength(Actions);
+    size_t ActionsLength = ATgetLength(Actions);
     if (ActionsLength == 0) {
       PRINT_FUNC(fprints)(OutStream, "tau");
     } else {
@@ -747,7 +747,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing linear process\n");
     //print process name and variable declarations
     ATermList VarDecls = ATLgetArgument(Part, 0);
-    int VarDeclsLength = ATgetLength(VarDecls);
+    size_t VarDeclsLength = ATgetLength(VarDecls);
     PRINT_FUNC(fprints)(OutStream, "proc P");
     if (VarDeclsLength > 0) {
       PRINT_FUNC(fprints)(OutStream, "(");
@@ -757,7 +757,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(fprints)(OutStream, " =");
     //print summations
     ATermList Summands = ATLgetArgument(Part, 1);
-    int SummandsLength = ATgetLength(Summands);
+    size_t SummandsLength = ATgetLength(Summands);
     if (SummandsLength == 0) {
       PRINT_FUNC(fprints)(OutStream, " delta@0;\n");
     } else {
@@ -1021,7 +1021,7 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
       }
     }
   } else { //pp_format == ppDefault
-    int EqnsLength = ATgetLength(Eqns);
+    size_t EqnsLength = ATgetLength(Eqns);
     if (EqnsLength > 0) {
       int StartPrefix = 0;
       ATermTable VarDeclTable = ATtableCreate(63, 50);
@@ -1029,7 +1029,7 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
       //the name of each variable declaration is used a key.
       //Note that the hash table will be increased if at least 32 values are added,
       //This can be avoided by increasing the initial size.
-      int i = 0;
+      size_t i = 0;
       while (i < EqnsLength) {
         //StartPrefix represents the start index of the maximum consistent prefix
         //of variable declarations in Eqns to which Eqns(i) belongs
@@ -1042,8 +1042,8 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
         if (Consistent) {
           //add new variables from Eqns(i) to VarDeclTable
           ATermList VarDecls = ATLgetArgument(Eqn, 0);
-          int VarDeclsLength = ATgetLength(VarDecls);
-          for (int j = 0; j < VarDeclsLength; j++) {
+          size_t VarDeclsLength = ATgetLength(VarDecls);
+          for (size_t j = 0; j < VarDeclsLength; j++) {
             ATermAppl VarDecl = ATAelementAt(VarDecls, j);
             ATermAppl VarDeclName = ATAgetArgument(VarDecl, 0);
             if (ATtableGet(VarDeclTable, (ATerm) VarDeclName) == NULL) {
@@ -1631,7 +1631,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         Head = ATAgetArgument(DataExpr, 0);
         Args = ATLgetArgument(DataExpr, 1);
       }
-      int ArgsLength = ATgetLength(Args);
+      size_t ArgsLength = ATgetLength(Args);
       if (gsIsBinder(Head) && Args == ATmakeList0()) {
         // A binder could be introduced by reconstructing a container expression
         // just print recursively.
@@ -2380,8 +2380,8 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
   if (gsIsDataEqn(Part) || gsIsProcEqn(Part)) {
     //check consistency of DataVarDecls with the variable declarations
     ATermList VarDecls = ATLgetArgument(Part, 0);
-    int n = ATgetLength(VarDecls);
-    for (int i = 0; i < n && Result; i++) {
+    size_t n = ATgetLength(VarDecls);
+    for (size_t i = 0; i < n && Result; i++) {
       //check consistency of variable VarDecls(j) with VarDeclTable
       ATermAppl VarDecl = ATAelementAt(VarDecls, i);
       ATermAppl CorVarDecl =
@@ -2399,8 +2399,8 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
   //check consistency in the arguments of Part
   if (Result) {
     AFun Head = ATgetAFun(Part);
-    int NrArgs = ATgetArity(Head);
-    for (int i = 0; i < NrArgs && Result; i++) {
+    size_t NrArgs = ATgetArity(Head);
+    for (size_t i = 0; i < NrArgs && Result; i++) {
       ATerm Arg = ATgetArgument(Part, i);
       if (ATgetType(Arg) == AT_APPL)
         Result = gsHasConsistentContext(DataVarDecls, (ATermAppl) Arg);

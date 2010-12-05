@@ -56,18 +56,18 @@ ATermAppl gsSortMultAct(ATermAppl MultAct)
 {
   assert(gsIsMultAct(MultAct));
   ATermList l = ATLgetArgument(MultAct,0);
-  unsigned int len = ATgetLength(l);
+  size_t len = ATgetLength(l);
   
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(acts,ATerm,len);
-  for (unsigned int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
+  for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
   {
     acts[i] = ATgetFirst(l);
   }
   //l is empty
 
-  for (unsigned int i=1; i<len; i++)
+  for (size_t i=1; i<len; i++)
   {
-    unsigned int j = i;
+    size_t j = i;
     // XXX comparison is fast but does not define a unique result (i.e. the
     // result is dependent on the specific run of a program)
     while ( acts[j] < acts[j-1] )
@@ -79,7 +79,7 @@ ATermAppl gsSortMultAct(ATermAppl MultAct)
   }
 
   //l is empty
-  for (unsigned int i=0; i<len; i++)
+  for (size_t i=0; i<len; i++)
   {
     l = ATinsert(l,acts[len-i-1]);
   }

@@ -71,7 +71,7 @@ class ATerm_Info {
       return compare_result_equal;
     }
 
-    bool alpha1(ATerm a_term1, ATerm a_term2, int a_number){
+    bool alpha1(ATerm a_term1, ATerm a_term2, size_t a_number){
       if (get_number_of_arguments(a_term1) == a_number) {
         return false;
       } else {
@@ -100,7 +100,7 @@ class ATerm_Info {
       return core::gsOccurs(a_term2, a_term1);
     }
 
-    bool majo1(ATerm a_term1, ATerm a_term2, int a_number){
+    bool majo1(ATerm a_term1, ATerm a_term2, size_t a_number){
       if (get_number_of_arguments(a_term2) == a_number) {
         return true;
       } else {
@@ -109,7 +109,7 @@ class ATerm_Info {
       }
     }
 
-    bool lex1(ATerm a_term1, ATerm a_term2, int a_number){
+    bool lex1(ATerm a_term1, ATerm a_term2, size_t a_number){
       if (get_number_of_arguments(a_term1) == a_number) {
         return false;
       } else {
@@ -254,7 +254,7 @@ class ATerm_Info {
     virtual bool has_type_bool(ATerm a_term) = 0;
 
     /// \brief Returns the number of arguments of the main operator of a term.
-    virtual int get_number_of_arguments(ATerm a_term) = 0;
+    virtual size_t get_number_of_arguments(ATerm a_term) = 0;
 
     /// \brief Returns the main operator of the term \c a_term;
     virtual ATerm get_operator(ATerm a_term) = 0;
@@ -306,7 +306,7 @@ class AI_Jitty: public ATerm_Info {
         return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
       }
 
-      int v_number_of_arguments;
+      size_t v_number_of_arguments;
 
       v_number_of_arguments = get_number_of_arguments(a_term);
       if (v_number_of_arguments == 0) {
@@ -345,7 +345,7 @@ class AI_Jitty: public ATerm_Info {
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
     /// \return 0, if \c aterm is a constant or a variable.
     ///         The number of arguments of the main operator, otherwise.
-    virtual int get_number_of_arguments(ATerm a_term){
+    virtual size_t get_number_of_arguments(ATerm a_term){
       if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term)) {
         return ATgetArity(ATgetAFun(a_term)) - 1;
       } else {
@@ -436,7 +436,7 @@ class AI_Inner: public ATerm_Info {
         return (v_term == (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
       }
 
-      int v_number_of_arguments;
+      size_t v_number_of_arguments;
 
       v_number_of_arguments = get_number_of_arguments(a_term);
       if (v_number_of_arguments == 0) {
@@ -472,7 +472,7 @@ class AI_Inner: public ATerm_Info {
     /// \param a_term An expression in the internal format of the rewriter with the innermost strategy.
     /// \return 0, if \c aterm is a constant or a variable.
     ///         The number of arguments of the main operator, otherwise.
-    virtual int get_number_of_arguments(ATerm a_term){
+    virtual size_t get_number_of_arguments(ATerm a_term){
       if (ATgetType(a_term) == AT_LIST) {
         return ATgetLength((ATermList) a_term) - 1;
       } else {

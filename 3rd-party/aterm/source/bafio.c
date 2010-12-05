@@ -240,9 +240,9 @@ flushBitsToWriter(byte_writer *writer)
 
 static
 int
-readBits(size_t *val, int nr_bits, byte_reader *reader)
+readBits(size_t *val, size_t nr_bits, byte_reader *reader)
 {
-  int cur_bit, mask = 1;
+  size_t cur_bit, mask = 1;
 
   *val = 0;
   for (cur_bit=0; cur_bit<nr_bits; cur_bit++) {
@@ -411,7 +411,7 @@ static ATbool write_symbol(AFun sym, byte_writer *writer)
 /*}}}  */
 /*{{{  static void print_sym_entries() */
 
-void
+/* void
 AT_print_sym_entries()
 {
   AFun cur_sym; 
@@ -436,7 +436,7 @@ AT_print_sym_entries()
       ATfprintf(stderr, "\n");
     }
   }
-}
+} */
 
 /*}}}  */
 /*{{{  static sym_entry *get_top_symbol(ATerm t) */
@@ -664,8 +664,6 @@ static void collect_terms(ATerm t)
       break;
     }
     entry = &sym_entries[at_lookup_table[sym]->index];
-    /*if(entry->id != sym)
-      ATfprintf(stderr, "sym=%y, entry->id = %y\n", sym, entry->id);*/
 
     assert(entry->id == sym);
     add_term(entry, t);
@@ -965,9 +963,6 @@ write_baf(ATerm t, byte_writer *writer)
 
   /*}}}  */
 	
-  /*ATfprintf(stderr, "writing %d symbols, %d terms.\n",
-    nr_unique_symbols, nr_unique_terms);*/
-	
   collect_terms(t);
   AT_unmarkIfAllMarked(t);
 	
@@ -1231,30 +1226,24 @@ static ATerm read_term(sym_read_entry *sym, byte_reader *reader)
     /* !!! leaks memory on the "return NULL" paths */
   }
 
-  /*ATfprintf(stderr, "reading term over symbol %y\n", sym->sym);*/
-  for(i=0; i<arity; i++) {
-    /*ATfprintf(stderr, "  reading argument %d (%d)", i, sym->sym_width[i]);*/
+  for(i=0; i<arity; i++) 
+  {
     if(readBits(&val, sym->sym_width[i], reader) < 0)
       return NULL;
     if(val >= sym->nr_topsyms[i])
       return NULL;
     arg_sym = &read_symbols[sym->topsyms[i][val]];
-    /*		ATfprintf(stderr, "argument %d, symbol index = %d, symbol = %y\n", 
-		i, val, arg_sym->sym);*/
 
-    /*ATfprintf(stderr, "  argsym = %y (term width = %d)\n",
-      arg_sym->sym, arg_sym->term_width);*/
     if(readBits(&val, arg_sym->term_width, reader) < 0)
       return NULL;
-    /*		ATfprintf(stderr, "arg term index = %d\n", val);*/
+
     if (val >= arg_sym->nr_terms)
       return NULL;
-    if(!arg_sym->terms[val]) {
+    if(!arg_sym->terms[val]) 
+    {
       arg_sym->terms[val] = read_term(arg_sym, reader);
       if(!arg_sym->terms[val])
 	return NULL;
-      /*ATfprintf(stderr, "sym=%y, index=%d, t=%t\n", arg_sym->sym, 
-	val, arg_sym->terms[val]);				*/
     }
 
     args[i] = arg_sym->terms[val];

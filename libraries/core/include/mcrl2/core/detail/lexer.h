@@ -55,8 +55,8 @@ ATermAppl gsDataSpecEltsToSpec(ATermList SpecElts)
   ATermList ConsDecls = ATmakeList0();
   ATermList MapDecls = ATmakeList0();
   ATermList DataEqnDecls = ATmakeList0();
-  int n = ATgetLength(SpecElts);
-  for (int i = 0; i < n; i++) {
+  size_t n = ATgetLength(SpecElts);
+  for (size_t i = 0; i < n; i++) {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
     ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
     if (gsIsSortSpec(SpecElt)) {
@@ -95,8 +95,8 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
   ATermList ActDecls = ATmakeList0();
   ATermList ProcEqnDecls = ATmakeList0();
   ATermAppl ProcInit = NULL;
-  int n = ATgetLength(SpecElts);
-  for (int i = 0; i < n; i++) {
+  size_t n = ATgetLength(SpecElts);
+  for (size_t i = 0; i < n; i++) {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
     if (gsIsProcessInit(SpecElt)) {
       if (ProcInit == NULL) {
@@ -161,8 +161,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
   ATermList GlobVars = ATmakeList0();
   ATermAppl PBEqnSpec = NULL;
   ATermAppl PBInit = NULL;
-  int n = ATgetLength(SpecElts);
-  for (int i = 0; i < n; i++) {
+  size_t n = ATgetLength(SpecElts);
+  for (size_t i = 0; i < n; i++) {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
     if (gsIsPBEqnSpec(SpecElt)) {
       if (PBEqnSpec == NULL) {
@@ -229,8 +229,8 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList ActionRenameElts)
   ATermList DataEqnDecls = ATmakeList0();
   ATermList ActDecls = ATmakeList0();
   ATermList ActionRenameRules = ATmakeList0();
-  int n = ATgetLength(ActionRenameElts);
-  for (int i = 0; i < n; i++) {
+  size_t n = ATgetLength(ActionRenameElts);
+  for (size_t i = 0; i < n; i++) {
     ATermAppl ActionRenameElt = ATAelementAt(ActionRenameElts, i);
     ATermList ActionRenameEltArg0 = ATLgetArgument(ActionRenameElt, 0);
     if (gsIsSortSpec(ActionRenameElt)) {

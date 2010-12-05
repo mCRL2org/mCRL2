@@ -127,9 +127,9 @@ class SMT_LIB_Solver: public SMT_Solver {
               } else if (sort_real::is_real(v_sort_domain_elt)) {
                 f_operators_extrafuns = f_operators_extrafuns + " Real";
               } else {
-                int v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort_domain_elt), 0);
+                size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort_domain_elt), 0);
                 char* v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
-                sprintf(v_sort_string, "sort%d", v_sort_number);
+                sprintf(v_sort_string, "sort%lu", v_sort_number);
                 f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
                 free(v_sort_string);
                 v_sort_string = 0;

@@ -50,7 +50,7 @@ namespace {
   /// \param l A sequence of terms
   /// \return The result of calling ATgetLength
   inline
-  int aterm_get_length(ATermList l)
+  size_t aterm_get_length(ATermList l)
   {
     return ATgetLength(l);
   }

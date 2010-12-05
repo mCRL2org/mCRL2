@@ -586,7 +586,7 @@ static void reclaim_empty_block(size_t blocks, size_t size, Block *removed_block
 /*}}}  */
 /*{{{  static void promote_block_to_old(int size, Block *block, Block *prev_block)  */
 
-static void promote_block_to_old(int size, Block *block, Block *prev_block) 
+static void promote_block_to_old(size_t size, Block *block, Block *prev_block) 
 {
   TermInfo* ti = &terminfo[size];
 
@@ -607,7 +607,7 @@ static void promote_block_to_old(int size, Block *block, Block *prev_block)
 /*}}}  */
 /*{{{  static void promote_block_to_young(int size, Block *block, Block *prev_block)  */
 
-static void promote_block_to_young(int size, Block *block, Block *prev_block) 
+static void promote_block_to_young(size_t size, Block *block, Block *prev_block) 
 {
   TermInfo* ti = &terminfo[size];
 	
@@ -674,8 +674,8 @@ void check_unmarked_block(size_t blocks)
 void major_sweep_phase_old() 
 {
   size_t size;
-  int reclaiming = 0;
-  int alive = 0;
+  size_t reclaiming = 0;
+  size_t alive = 0;
 
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
     Block *prev_block = NULL;

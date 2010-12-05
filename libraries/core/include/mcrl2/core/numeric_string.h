@@ -27,7 +27,7 @@ namespace mcrl2 {
      * \return the number of characters of the decimal representation of n
      **/
     inline
-    int NrOfChars(const int n)
+    size_t NrOfChars(const ptrdiff_t n)
     {
       if (n > 0)
         return (int) floor(log10((double) n)) + 1;

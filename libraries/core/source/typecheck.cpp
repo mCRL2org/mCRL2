@@ -993,14 +993,14 @@ namespace mcrl2 {
       //fold sort references in SortRefs by means of repeated forward and backward
       //substitution
       ATermList NewSortRefs = SortRefs;
-      int n = ATgetLength(SortRefs);
+      size_t n = ATgetLength(SortRefs);
       //perform substitutions until the list of sort references becomes stable
       do {
         SortRefs = NewSortRefs;
         if (gsDebug) { std::cerr << "SortRefs contains the following sort references:\n" << pp( gsMakeSortSpec(SortRefs)) << "\n"; }
         //perform substitutions implied by sort references in NewSortRefs to the
         //other elements in NewSortRefs
-        for (int i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++) {
           ATermAppl SortRef = ATAelementAt(NewSortRefs, i);
           //turn SortRef into a substitution
           ATermAppl LHS = gsMakeSortId(ATAgetArgument(SortRef, 0));
@@ -1016,7 +1016,7 @@ namespace mcrl2 {
           if (gsDebug) { std::cerr << "performing substition " << pp(ATgetArgument(Subst, 0)) << " := " << pp(ATgetArgument(Subst, 1)) << "\n"; }
           //perform Subst on all elements of NewSortRefs except for the i'th
           ATermList Substs = ATmakeList1((ATerm) Subst);
-          for (int j = 0; j < n; j++) {
+          for (size_t j = 0; j < n; j++) {
             if (i != j) {
               ATermAppl OldSortRef = ATAelementAt(NewSortRefs, j);
               ATermAppl NewSortRef = gsSubstValues_Appl(Substs, OldSortRef, true);
@@ -1607,7 +1607,7 @@ namespace mcrl2 {
       if (gsDebug) { std::cerr << "Start Read-in Func\n"; }
       ATbool Result=ATtrue;
 
-      unsigned constr_number=ATgetLength(Cons);
+      size_t constr_number=ATgetLength(Cons);
       for(ATermList Funcs=ATconcat(Cons,Maps);!ATisEmpty(Funcs);Funcs=ATgetNext(Funcs))
       {
         ATermAppl Func=ATAgetFirst(Funcs);
@@ -2320,7 +2320,7 @@ namespace mcrl2 {
       }
       assert(!ATisEmpty(ParList));
 
-      unsigned int nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
+      size_t nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
       const char *msg=(is_pbes)?"propositional variable":((action)?"action":"process");
 
 
@@ -2993,7 +2993,7 @@ namespace mcrl2 {
       { 
         //arguments
         ATermList Arguments=ATLgetArgument(*DataTerm,1);
-        unsigned int nArguments=ATgetLength(Arguments);
+        size_t nArguments=ATgetLength(Arguments);
 
         //The following is needed to check enumerations
         ATermAppl Arg0 = ATAgetArgument(*DataTerm,0);
@@ -3872,18 +3872,18 @@ namespace mcrl2 {
       //0..nFormPars-1
 
       ATermList Result=ATmakeList0();
-      int nFormPars=ATgetLength((ATermList)ATgetFirst(TypeListList));
+      size_t nFormPars=ATgetLength((ATermList)ATgetFirst(TypeListList));
       ATermList *Pars = NULL;
       if ( nFormPars > 0 )
         Pars = (ATermList *) malloc(nFormPars*sizeof(ATermList));
       //DECLA(ATermList,Pars,nFormPars);
-      for(int i=0;i<nFormPars;i++){
+      for(size_t i=0;i<nFormPars;i++){
         Pars[i]=ATmakeList0();
       }
 
       for(;!ATisEmpty(TypeListList);TypeListList=ATgetNext(TypeListList)){
         ATermList TypeList=ATLgetFirst(TypeListList);
-        for(int i=0;i<nFormPars;TypeList=ATgetNext(TypeList),i++){
+        for(size_t i=0;i<nFormPars;TypeList=ATgetNext(TypeList),i++){
           Pars[i]=gstcInsertType(Pars[i],ATAgetFirst(TypeList));
         }
       }

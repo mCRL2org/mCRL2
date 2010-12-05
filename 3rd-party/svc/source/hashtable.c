@@ -58,11 +58,11 @@ void HTfree(HTable *table){
   PTfree(&table->pointers);
 }
 
-size_t HTinsert (HTable *table, ATerm a, void *ptr) {
+unsigned int HTinsert (HTable *table, ATerm a, void *ptr) {
   ATbool _new;
-  size_t ret;
+  unsigned int ret;
 
-  ret= ATindexedSetPut(table->terms, a, &_new);
+  ret= (unsigned int)ATindexedSetPut(table->terms, a, &_new); 
   PTput(&table->pointers,ret,ptr);
 
   return ret;
@@ -71,10 +71,10 @@ size_t HTinsert (HTable *table, ATerm a, void *ptr) {
 
 int HTmember (HTable *table, ATerm a, long *pn)
 { 
-  size_t index;
-  index=ATindexedSetGetIndex(table->terms,a);
+  unsigned int index;
+  index=(unsigned int)ATindexedSetGetIndex(table->terms,a);
 
-  if(index!=NON_EXISTING)
+  if (index!=-1)
   {
      *pn=index;
      return 1;

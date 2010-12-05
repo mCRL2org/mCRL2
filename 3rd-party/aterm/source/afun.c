@@ -426,7 +426,7 @@ void AT_freeAFun(SymEntry sym)
  * Check for the existence of a symbol
  */
 
-ATbool AT_findAFun(char *name, size_t arity, ATbool quoted)
+/* ATbool AT_findAFun(char *name, size_t arity, ATbool quoted)
 {
   header_type header = SYMBOL_HEADER(arity, quoted);
   ShortHashNumber hnr = AT_hashAFun(name, arity) & table_mask;
@@ -436,13 +436,13 @@ ATbool AT_findAFun(char *name, size_t arity, ATbool quoted)
     ATabort("cannot handle symbols with arity %d (max=%d)\n",
 	    arity, MAX_ARITY);
 
-  /* Find symbol in table */
+  / * Find symbol in table * /
   cur = hash_table[hnr];
   while (cur && (!EQUAL_HEADER(cur->header,header) || !streq(cur->name, name)))
     cur = cur->next;
   
   return (cur == NULL) ? ATfalse : ATtrue;
-}
+} */
 
 /*}}}  */
 
@@ -525,7 +525,7 @@ void AT_markProtectedAFuns_young() {
 /*}}}  */
 /*{{{  void AT_unmarkAllAFuns() */
 
-void AT_unmarkAllAFuns()
+/* void AT_unmarkAllAFuns()
 {
   AFun s;
 
@@ -534,7 +534,7 @@ void AT_unmarkAllAFuns()
       AT_unmarkAFun(s);
     }
   }
-}
+} */
 
 /*}}}  */
 

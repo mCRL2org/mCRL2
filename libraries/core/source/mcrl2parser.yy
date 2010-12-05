@@ -539,8 +539,8 @@ data_vars_decl:
   ids_cs COLON sort_expr
     {
       safe_assign($$, ATmakeList0());
-      int n = ATgetLength($1);
-      for (int i = 0; i < n; i++) {
+      size_t n = ATgetLength($1);
+      for (size_t i = 0; i < n; i++) {
         safe_assign($$, ATinsert($$, (ATerm) gsMakeDataVarId(ATAelementAt($1, i), $3)));
       }
       gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
@@ -1077,8 +1077,8 @@ sorts_decl:
   ids_cs
     {
       safe_assign($$, ATmakeList0());
-      int n = ATgetLength($1);
-      for (int i = 0; i < n; i++) {
+      size_t n = ATgetLength($1);
+      for (size_t i = 0; i < n; i++) {
         safe_assign($$, ATinsert($$, (ATerm) gsMakeSortId(ATAelementAt($1, i))));
       }
       gsDebugMsg("parsed standard sort declarations\n  %T\n", $$);
@@ -1156,8 +1156,8 @@ ops_decl:
   ids_cs COLON sort_expr
     {
       safe_assign($$, ATmakeList0());
-      int n = ATgetLength($1);
-      for (int i = 0; i < n; i++) {
+      size_t n = ATgetLength($1);
+      for (size_t i = 0; i < n; i++) {
         safe_assign($$, ATinsert($$, (ATerm) gsMakeOpId(ATAelementAt($1, i), $3)));
       }
       gsDebugMsg("parsed operation declarations\n  %T\n", $$);
@@ -1183,8 +1183,8 @@ data_eqn_sect:
   | KWVAR data_vars_decls_scs KWEQN data_eqn_decls_scs
     {
       safe_assign($$, ATmakeList0());
-      int n = ATgetLength($4);
-      for (int i = 0; i < n; i++) {
+      size_t n = ATgetLength($4);
+      for (size_t i = 0; i < n; i++) {
         ATermAppl DataEqn = ATAelementAt($4, i);
         safe_assign($$,
           ATinsert($$, (ATerm) gsMakeDataEqn($2, ATAgetArgument(DataEqn, 1),
@@ -1882,8 +1882,8 @@ acts_decl:
   ids_cs
     {
       safe_assign($$, ATmakeList0());
-      int n = ATgetLength($1);
-      for (int i = 0; i < n; i++) {
+      size_t n = ATgetLength($1);
+      for (size_t i = 0; i < n; i++) {
         safe_assign($$,
           ATinsert($$, (ATerm) gsMakeActId(ATAelementAt($1, i), ATmakeList0())));
       }
@@ -1892,8 +1892,8 @@ acts_decl:
   | ids_cs COLON domain
     {
       safe_assign($$, ATmakeList0());
-      int n = ATgetLength($1);
-      for (int i = 0; i < n; i++) {
+      size_t n = ATgetLength($1);
+      for (size_t i = 0; i < n; i++) {
         safe_assign($$, ATinsert($$, (ATerm) gsMakeActId(ATAelementAt($1, i), $3)));
       }
       gsDebugMsg("parsed action declarations\n  %T\n", $$);
@@ -1943,8 +1943,8 @@ proc_eqn_decl:
   | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
     {
       ATermList SortExprs = ATmakeList0();
-      int n = ATgetLength($3);
-      for (int i = 0; i < n; i++) {
+      size_t n = ATgetLength($3);
+      for (size_t i = 0; i < n; i++) {
         SortExprs = ATinsert(SortExprs, ATgetArgument(ATAelementAt($3, i), 1));
       }
       safe_assign($$, gsMakeProcEqn(
@@ -2589,8 +2589,8 @@ action_rename_rule_sect:
   | KWVAR data_vars_decls_scs RENAME action_rename_rules_scs
     {
       safe_assign($$, ATmakeList0());
-      int n = ATgetLength($4);
-      for (int i = 0; i < n; i++) {
+      size_t n = ATgetLength($4);
+      for (size_t i = 0; i < n; i++) {
         ATermAppl ActionRenameRule = ATAelementAt($4, i);
   safe_assign($$, ATinsert($$,
           (ATerm) gsMakeActionRenameRule($2,

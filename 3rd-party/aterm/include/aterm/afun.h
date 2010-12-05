@@ -27,8 +27,8 @@ typedef struct _SymEntry
   struct _SymEntry *next;
   AFun  id;
   char   *name;
-  int     count;  /* used in bafio.c */
-  int     index;  /* used in bafio.c */
+  size_t count;  /* used in bafio.c */
+  size_t index;  /* used in bafio.c */
 } *SymEntry;
 
 /* defined on SymEntry */

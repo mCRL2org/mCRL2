@@ -128,7 +128,7 @@ namespace mcrl2 {
         }
       }
 
-      ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs)
+      /* ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs)
       {
         //add Subst to Substs in which Subst is performed on the RHS's
         ATermList Result = ATmakeList0();
@@ -140,7 +140,7 @@ namespace mcrl2 {
           Substs = ATgetNext(Substs);
         }
         return ATinsert(ATreverse(Result), (ATerm) Subst);
-      }
+      } */
 
       //Occurrences of ATerm's
       //----------------------
@@ -169,7 +169,7 @@ namespace mcrl2 {
         return Result;
       }
 
-      int gsCount(ATerm Elt, ATerm Term)
+/*      int gsCount(ATerm Elt, ATerm Term)
       {
         int Result = 0;
         if (ATisEqual(Elt, Term)) {
@@ -213,7 +213,7 @@ namespace mcrl2 {
           }
         }
         return result;
-      }
+      } */
   }
 }
 

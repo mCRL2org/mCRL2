@@ -447,7 +447,7 @@ void ATaddProtectFunction(ATermProtFunc f)
   at_prot_functions[at_prot_functions_count++] = f;
 }
 
-void ATremoveProtectFunction(ATermProtFunc f)
+/* void ATremoveProtectFunction(ATermProtFunc f)
 {
   size_t i;
   
@@ -460,11 +460,11 @@ void ATremoveProtectFunction(ATermProtFunc f)
       break;
     }
   }
-}
+} */
 
 /*{{{  void AT_printAllProtectedTerms(FILE *file) */
 
-void AT_printAllProtectedTerms(FILE *file)
+/* void AT_printAllProtectedTerms(FILE *file)
 {
   size_t i, j;
 
@@ -480,12 +480,12 @@ void AT_printAllProtectedTerms(FILE *file)
       }
     }
   }
-}
+} */
 
 /*}}}  */
 /*{{{  void ATprotectMemory(void *start, int size) */
 
-void ATprotectMemory(void *start, size_t size)
+/* void ATprotectMemory(void *start, size_t size)
 {
   ProtEntry *entry = (ProtEntry *)AT_malloc(sizeof(ProtEntry));
   if (entry == NULL) {
@@ -495,12 +495,12 @@ void ATprotectMemory(void *start, size_t size)
   entry->size  = size;
   entry->next  = at_prot_memory;
   at_prot_memory = entry;
-}
+} */
 
 /*}}}  */
 /*{{{  void ATunprotectMemory(void *start) */
 
-void ATunprotectMemory(void *start)
+/* void ATunprotectMemory(void *start)
 {
   ProtEntry *entry, *prev;
 
@@ -517,7 +517,7 @@ void ATunprotectMemory(void *start)
     }
     prev = entry;
   }
-}
+} */
 
 /*}}}  */
 
@@ -1236,9 +1236,6 @@ fparse_quoted_appl(int *c, FILE * f)
   /* First parse the identifier */
   fnext_char(c, f);
 
-  /* if (*c == STRING_MARK) {
-    return fparse_blob(c, f);
-  } */
   assert(*c!=STRING_MARK);
 
   while (*c != '"') {
@@ -1296,7 +1293,7 @@ fparse_quoted_appl(int *c, FILE * f)
   sym = ATmakeAFun(name, ATgetLength(args), ATtrue);
   AT_free(name);
   return (ATerm)ATmakeApplList(sym, args);
-}
+} 
 
 /*}}}  */
 /*{{{  static ATermAppl fparse_unquoted_appl(int *c, FILE *f) */
