@@ -132,7 +132,7 @@ namespace mcrl2 {
     static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
     static ATermAppl gstcTraversePBESVarConstPB(ATermTable, ATermAppl);
     static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *, ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, bool warn_upcasting=false);
-    static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, int nPars = -1, bool warn_upcasting=false);
+    static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, size_t nPars = NON_EXISTING, bool warn_upcasting=false);
 
     static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 
@@ -3445,10 +3445,10 @@ namespace mcrl2 {
                      ATermAppl PosType, 
                      ATermTable FreeVars, 
                      const bool strict_ambiguous, 
-                     const int nFactPars, 
+                     const size_t nFactPars, 
                      const bool warn_upcasting)
     { 
-      // -1 for nFactPars means the number of arguments is not known.
+      // NON_EXISTING for nFactPars means the number of arguments is not known.
       if (gsDebug) 
       { 
         std::cerr << "gstcTraverseVarConsTypeDN: DataTerm ";
@@ -3463,7 +3463,7 @@ namespace mcrl2 {
         if (Type)
         { 
           const sort_expression Type1(gstcUnwindType(Type));  
-          if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==(unsigned int)nFactPars):(nFactPars==0))
+          if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==nFactPars):(nFactPars==0))
           { variable=true;
             if(!ATAtableGet(AllowedVars,(ATerm)Name)) 
             {
@@ -3534,7 +3534,7 @@ namespace mcrl2 {
 
         if(!ParList) 
         {
-          if(nFactPars>=0) gsErrorMsg("unknown operation %P with %d parameter%s\n",Name, nFactPars, (nFactPars != 1)?"s":"");
+          if(nFactPars!=NON_EXISTING) gsErrorMsg("unknown operation %P with %d parameter%s\n",Name, nFactPars, (nFactPars != 1)?"s":"");
           else gsErrorMsg("unknown operation %P\n",Name);
           return NULL;
         }
@@ -3547,14 +3547,14 @@ namespace mcrl2 {
 
         { // filter ParList keeping only functions A_0#...#A_nFactPars->A
           ATermList NewParList;
-          if(nFactPars>=0)
+          if(nFactPars!=NON_EXISTING)
           {
             NewParList=ATmakeList0();
             for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList))
             {
               ATermAppl Par=ATAgetFirst(ParList);
               if(!gsIsSortArrow(Par)) continue;
-              if ((ATgetLength(ATLgetArgument(Par,0))!=(unsigned int)nFactPars)) continue;
+              if ((ATgetLength(ATLgetArgument(Par,0))!=nFactPars)) continue;
               NewParList=ATinsert(NewParList,(ATerm)Par);
             }
             ParList=ATreverse(NewParList);
@@ -3629,7 +3629,7 @@ namespace mcrl2 {
           ATermAppl Sort;
           if(ATgetLength(CandidateParList)==1) Sort=ATAgetFirst(CandidateParList); else Sort=multiple_possible_sorts(atermpp::aterm_list(CandidateParList));
           *DataTerm=gsMakeOpId(Name,Sort);
-          if(nFactPars>=0) gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
+          if(nFactPars!=NON_EXISTING) gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
                                       Name, nFactPars, (nFactPars != 1)?"s":"", PosType);
           else
             gsErrorMsg("unknown operation/variable %P that matches type %P\n",Name,PosType);
@@ -3841,7 +3841,7 @@ namespace mcrl2 {
           if(strict_ambiguous)
           {
             if (gsDebug) { std::cerr << "ambiguous operation " << pp(Name) << " (ParList " << pp(ParList) << ")\n"; }
-            if(nFactPars>=0) gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":"");
+            if(nFactPars!=NON_EXISTING) gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":"");
             else gsErrorMsg("ambiguous operation %P\n", Name);
             return NULL;
           }

@@ -1386,7 +1386,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
  * Create a list with n arguments.
  */
 
-ATermList ATmakeList(size_t n, ...)
+/* ATermList ATmakeList(size_t n, ...)
 {
   size_t i;
   va_list args;
@@ -1407,7 +1407,7 @@ ATermList ATmakeList(size_t n, ...)
   AT_free_protected(elems);
 
   return l;
-}
+} */
 
 /*}}}  */
 
@@ -1553,7 +1553,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
 
 /*{{{  void AT_validateFreeList(size_t size) */
 
-void AT_validateFreeList(size_t size)
+/* void AT_validateFreeList(size_t size)
 {
   ATerm cur1, cur2;
 
@@ -1563,7 +1563,7 @@ void AT_validateFreeList(size_t size)
     assert(ATgetType(cur1) == AT_FREE);
   }
 
-}
+} */
 
 /*}}}  */
 /*{{{  int AT_inAnyFreeList(ATerm t) */
@@ -1586,13 +1586,13 @@ size_t AT_inAnyFreeList(ATerm t)
     }
   }
   return 0;
-}
+} 
 
 /*}}}  */
 
 /*{{{  void AT_printAllTerms(FILE *file) */
 
-void AT_printAllTerms(FILE *file)
+/* void AT_printAllTerms(FILE *file)
 {
   size_t i;
 
@@ -1604,12 +1604,12 @@ void AT_printAllTerms(FILE *file)
       cur = cur->aterm.next;
     }
   }
-}
+} */
 
 /*}}}  */
 /*{{{  void AT_printAllAFunCounts(FILE *file) */
 
-static int compare_afuns(const void *l, const void *r)
+/* static int compare_afuns(const void *l, const void *r)
 {
   AFun left, right;
   size_t left_count, right_count;
@@ -1632,9 +1632,9 @@ static int compare_afuns(const void *l, const void *r)
     return -1;
 
   return 0;
-}
+} */
 
-void AT_printAllAFunCounts(FILE *file)
+/* void AT_printAllAFunCounts(FILE *file)
 {
   size_t i, nr_syms;
   AFun *afuns;
@@ -1674,7 +1674,7 @@ void AT_printAllAFunCounts(FILE *file)
     if(afuns[i] != (AFun)(-1))
       ATfprintf(file, "%y: %d\n", afuns[i], at_lookup_table[afuns[i]]->count);
   }
-}
+} */
 
 /*}}}  */
 

@@ -110,7 +110,7 @@ inline bool ATisListOrNull(ATerm t)
 /**
  * \brief Gets an ATermAppl at a specified position in a list
  **/
-inline ATermAppl ATAelementAt(ATermList List, int Index) {
+inline ATermAppl ATAelementAt(ATermList List, size_t Index) {
   ATerm Result = ATelementAt(List, Index);
   assert(ATisApplOrNull(Result));
   return (ATermAppl) Result;
@@ -119,7 +119,7 @@ inline ATermAppl ATAelementAt(ATermList List, int Index) {
 /**
  * \brief Gets an ATermList at a specified position in a list
  **/
-inline ATermList ATLelementAt(ATermList List, int Index)
+inline ATermList ATLelementAt(ATermList List, size_t Index)
 {
   ATerm Result = ATelementAt(List, Index);
   assert(ATisListOrNull(Result));
@@ -129,7 +129,7 @@ inline ATermList ATLelementAt(ATermList List, int Index)
 /**
  * \brief Gets the argument as ATermAppl at the specified position
  **/
-inline ATermAppl ATAgetArgument(ATermAppl Appl, int Nr)
+inline ATermAppl ATAgetArgument(ATermAppl Appl, size_t Nr)
 {
   ATerm Result = ATgetArgument(Appl, Nr);
   assert(ATisApplOrNull(Result));
@@ -139,7 +139,7 @@ inline ATermAppl ATAgetArgument(ATermAppl Appl, int Nr)
 /**
  * \brief Gets the argument as ATermList at the specified position
  **/
-inline ATermList ATLgetArgument(ATermAppl Appl, int Nr)
+inline ATermList ATLgetArgument(ATermAppl Appl, size_t Nr)
 {
   ATerm Result = ATgetArgument(Appl, Nr);
   assert(ATisListOrNull(Result));

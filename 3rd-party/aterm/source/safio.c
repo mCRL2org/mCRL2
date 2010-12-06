@@ -1,9 +1,10 @@
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 #include "safio.h"
 #include "byteencoding.h"
 #include "memory.h"
 #include "encoding.h"
-#include <string.h>
-#include <stdlib.h>
 
 #if __STDC_VERSION__ >= 199901L
   /* "inline" is a keyword */
@@ -40,6 +41,7 @@
 #define PROTECTEDMEMORYSTACKBLOCKSINCREMENT 16
 #define PROTECTEDMEMORYSTACKBLOCKSINCREMENTMASK 0x0000000fU
 #define PROTECTEDMEMORYSTACKBLOCKSIZE 1024
+
 
 /* COMMON STUFF */
 
@@ -368,7 +370,8 @@ inline static size_t getHeader(ATerm aTerm){
 /**
  * Serializes the given ATermAppl.
  */
-static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteBuffer){
+static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteBuffer)
+{
 	AFun fun = ATgetAFun(arg);
 	
 	if(binaryWriter->indexInTerm == 0){
@@ -376,11 +379,11 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 		size_t funHash = (size_t)((unsigned long) symEntry);
 		
 		IDMappings sharedAFuns = binaryWriter->sharedAFuns;
-		size_t id = IMgetID(sharedAFuns, symEntry, funHash);
+		int id = IMgetID(sharedAFuns, symEntry, funHash);
 		
 		size_t header = getHeader((ATerm) arg);
 		
-		if(id != NON_EXISTING){
+		if(id != -1){
 			header |= FUNSHARED;
 			*(byteBuffer->currentPos) = (char) header;
 			byteBuffer->currentPos++;
@@ -399,10 +402,11 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 			if(isQuoted) header |= APPLQUOTED;
 			*(byteBuffer->currentPos) = (char) header;
 			byteBuffer->currentPos++;
+			assert(arity< (((size_t)1)<<(8*sizeof(int)-1))); /* arity must fit in an int */
+			writeInt((int)arity, byteBuffer);
 			
-			writeInt(arity, byteBuffer);
-			
-			writeInt(nameLength, byteBuffer);
+			assert(nameLength< (((size_t)1)<<(8*sizeof(int)-1))); /* nameLength must fit in an int */
+			writeInt((int)nameLength, byteBuffer);
 			
 			remaining = ATgetRemainingBufferSpace(byteBuffer);
 			if(remaining < bytesToWrite){
@@ -447,11 +451,14 @@ static void visitInt(ATermInt arg, ByteBuffer byteBuffer){
 /**
  * Serializes the given ATermList.
  */
-static void visitList(ATermList arg, ByteBuffer byteBuffer){
-	*(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
-	byteBuffer->currentPos++;
+static void visitList(ATermList arg, ByteBuffer byteBuffer)
+{
+  const size_t n=ATgetLength(arg);
+  *(byteBuffer->currentPos) = (char) getHeader((ATerm) arg);
+  byteBuffer->currentPos++;
 	
-	writeInt(ATgetLength(arg), byteBuffer);
+  assert(n< (((size_t)1)<<(8*sizeof(int)-1))); /* n must fit in an int */
+  writeInt(n, byteBuffer);
 }
 
 /**
@@ -524,6 +531,7 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 		if(id != NON_EXISTING){
 			*(byteBuffer->currentPos) = (char) ISSHAREDFLAG;
 			byteBuffer->currentPos++;
+                        assert(id< (((size_t)1)<<(8*sizeof(int)-1))); /* id must fit in an int */
 			writeInt(id, byteBuffer);
 			
 			binaryWriter->stackPosition--; /* Pop the term from the stack, since it's subtree is shared. */
