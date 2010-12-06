@@ -90,7 +90,8 @@ namespace mcrl2 {
             try {
               bool result = execute(argc, argv) == 0;
 
-              m_execute = (m_execute || !result) && wxApp::Initialize(argc, argv);
+              m_execute = wxApp::Initialize(argc, argv) && (m_execute || !result);
+
             }
             catch (std::exception& e) {
               if (wxApp::Initialize(argc, argv)) {
