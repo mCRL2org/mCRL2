@@ -1612,7 +1612,7 @@ void AT_printAllTerms(FILE *file)
 static int compare_afuns(const void *l, const void *r)
 {
   AFun left, right;
-  int left_count, right_count;
+  size_t left_count, right_count;
 
   left = *((AFun *)l);
   right = *((AFun *)r);

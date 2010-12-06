@@ -84,7 +84,7 @@ size_t BEserializeMultiByteInt(int i, char *c){
  * Deserializes a 'multi-byte' encoded integer from a sequence of bytes.
  * When this function returns the parameter 'unsigned int *count' will hold how many bytes where read during the decoding process.
  */
-size_t BEdeserializeMultiByteInt(char *c, size_t *count){
+int BEdeserializeMultiByteInt(char *c, size_t *count){
 	unsigned char part = (unsigned char) c[0];
 	unsigned int result = (part & SEVENBITS);
 	

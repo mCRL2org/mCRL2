@@ -22,7 +22,9 @@ See www.cwi.nl.
 
 gl2ps
 -----
-???
+This is a package that translates openGL commands into postscript. This is
+only used to make high definition pictures of the objects representing
+statespaces in ltsview.
 
 svc
 ---
@@ -37,6 +39,7 @@ See www.cwi.nl.
 
 tr
 --
-???
+This is a tile redering package that is used to render pictures in ltsview.
+
 
 

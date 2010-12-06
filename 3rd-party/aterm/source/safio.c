@@ -260,7 +260,7 @@ void ATdestroyByteBuffer(ByteBuffer byteBuffer){
  * Writes the given integer to the byte buffer.
  * The encoding will be done in 'byteenconding.c'.
  */
-inline static void writeInt(size_t value, ByteBuffer byteBuffer){
+inline static void writeInt(int value, ByteBuffer byteBuffer){
 	byteBuffer->currentPos += BEserializeMultiByteInt(value, byteBuffer->currentPos);
 }
 

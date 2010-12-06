@@ -30,11 +30,11 @@ namespace mcrl2 {
     size_t NrOfChars(const ptrdiff_t n)
     {
       if (n > 0)
-        return (int) floor(log10((double) n)) + 1;
+        return (size_t) floor(log10((double) n)) + 1;
       else if (n == 0)
         return 1;
       else //n < 0
-        return (int) floor(log10((double) abs(n))) + 2;
+        return (size_t) floor(log10((double)-n)) + 2;
     }
   }
 }
