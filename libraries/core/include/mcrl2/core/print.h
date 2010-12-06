@@ -129,6 +129,9 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
       {
         protected:
           std::ostream& out;
+          std::string m_sequence_separator;
+          std::string m_sequence_open_bracket;
+          std::string m_sequence_close_bracket;
 
 #ifdef MCRL2_PRINT_DEBUG
           std::ostringstream debug;
@@ -145,7 +148,10 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
           using super::operator();
 
           print_traverser(std::ostream& o)
-            : out(o)
+            : out(o),
+              m_sequence_separator(", "),
+              m_sequence_open_bracket("("),
+              m_sequence_close_bracket(")")
           {}
 
           void print(const std::string& s)
@@ -155,7 +161,49 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
             debug << s;
 #endif
           }
-            
+
+          /// \brief Returns the separator for printing sequences
+          const std::string& sequence_separator() const
+          {
+            return m_sequence_separator;
+          }
+
+          /// \brief Returns the separator for printing sequences
+          std::string& sequence_separator()
+          {
+            return m_sequence_separator;
+          }
+
+          void set_sequence_separator(const std::string& separator, const std::string& open_bracket = "(", const std::string& close_bracket = ")")
+          {
+            m_sequence_separator = separator;
+            m_sequence_open_bracket = open_bracket;
+            m_sequence_close_bracket = close_bracket;
+          }
+
+          // override printing of containers
+          template <typename Container>
+          void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+          {
+            out << "!!!";
+            if (container.size() > 0)
+            {
+              print(m_sequence_open_bracket);
+            }
+            for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+            {
+              if (i != container.end())
+              {
+                out << m_sequence_separator;
+              }
+              static_cast<Derived&>(*this)(*i);
+            }
+            if (container.size() > 0)
+            {
+              print(m_sequence_close_bracket);
+            }
+          }
+
           void operator()(const core::identifier_string& x)
           {
             static_cast<Derived&>(*this).enter(x);
@@ -208,13 +256,18 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
           using super::leave;
           using super::operator();
 
-#if BOOST_MSVC
-    template <typename T>
-    void operator()(const T& x)
-    {
-      super::operator()(x);
-    }
-#endif
+//#if BOOST_MSVC
+//    template <typename Container>
+//    void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+//    {
+//      super::operator()(container);
+//    }
+//    template <typename T>
+//    void operator()(const T& x)
+//    {
+//      super::operator()(x);
+//    }
+//#endif
       
           apply_print_traverser(std::ostream& out):
             super(out)

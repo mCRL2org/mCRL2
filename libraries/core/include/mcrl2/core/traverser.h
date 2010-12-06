@@ -40,6 +40,14 @@ namespace core {
       void leave(Expression const&)
       {}
 
+      // traverse non-containers
+      template <typename T>
+      void operator()(const T&, typename atermpp::detail::disable_if_container<T>::type* = 0)
+      {
+        // skip
+      }
+
+      // traverse containers
       template <typename Container>
       void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
       {
@@ -50,8 +58,11 @@ namespace core {
       }
 
       // TODO: This dependency on identifier_string should be moved elsewhere...
-      void operator()(const core::identifier_string &)
-      { }
+      void operator()(const core::identifier_string& x)
+      {
+        static_cast<Derived&>(*this).enter(x);
+        static_cast<Derived&>(*this).leave(x);
+      }
   };
 
   /// \brief Traverser that defines functions for maintaining bound variables.
