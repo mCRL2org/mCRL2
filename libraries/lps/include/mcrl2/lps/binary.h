@@ -70,8 +70,8 @@ namespace mcrl2 {
           }
           else
           {
-            int n = enumerated_elements.size();
-            int m = static_cast< int >(pow( static_cast< double >(2), static_cast< int >(new_parameters.size()) - 1));
+            size_t n = enumerated_elements.size();
+            size_t m = static_cast< size_t >(pow( static_cast< double >(2), static_cast< int >(new_parameters.size()) - 1));
 
             //m == 2^(new_parameters.size() - 1)
 

@@ -66,7 +66,7 @@ namespace atermpp
       std::pair<long, bool> put(aterm elem)
       {
         ATbool b;
-        long l = ATindexedSetPut(m_set.get(), elem, &b);
+        size_t l = ATindexedSetPut(m_set.get(), elem, &b);
         return std::make_pair(l, b == ATtrue);
       }
 

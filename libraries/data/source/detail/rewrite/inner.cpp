@@ -527,9 +527,8 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
     for (; !ATisEmpty(pars.Slist); pars.Slist=ATgetNext(pars.Slist))
     {
       ATermList e = ATLgetFirst(pars.Slist);
-
-      e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0),(ATerm) v,(ATerm) ATmakeInt(k),ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)));
-//			e = gsSubstValues_List(ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)),e,true);
+       assert(k<1<<(8*sizeof(int)-1));
+      e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0),(ATerm) v,(ATerm) ATmakeInt((int)k),ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)));
 
       l = ATinsert(l,ATgetFirst(e));
       m = ATinsert(m,(ATerm) ATgetNext(e));
@@ -727,7 +726,6 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, size_t len,
   } else if ( isD(tree) )
   {
     return optimise_tree_aux(ATAgetArgument(tree,0),stored,len,max);
-    //return ATmakeAppl1(afunD,(ATerm) optimise_tree_aux(ATAgetArgument(tree,0),stored,len));
   } else if ( isC(tree) )
   {
     return ATmakeAppl3(afunC,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));

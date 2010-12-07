@@ -937,8 +937,6 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     lps2pbes_abp
     lysa2mcrl2_test
     tracepp_test
-    pnml2mcrl2_philcol
-    pnml2mcrl2_desel-esparza-5-2
     chi2mcrl2_test
     lts2lps_test
     ltsconvert_bisim_test

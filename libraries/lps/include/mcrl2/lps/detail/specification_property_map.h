@@ -190,7 +190,7 @@ namespace detail {
       {
         unsigned int                           summand_count           = spec.process().summand_count();
         unsigned int                           tau_summand_count       = compute_tau_summand_count(spec);
-        unsigned int                           delta_summand_count     = spec.process().deadlock_summands().size();
+        size_t                                 delta_summand_count     = spec.process().deadlock_summands().size();
         std::set<data::variable>               declared_free_variables = spec.global_variables();
         std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);
         std::set<data::variable>               process_parameters      = atermpp::convert<std::set<data::variable> >(spec.process().process_parameters());

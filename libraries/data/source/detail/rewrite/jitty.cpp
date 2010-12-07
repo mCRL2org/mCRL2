@@ -338,7 +338,8 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
         {
           if ( bs[i] && !used[i] )
           {
-            deps = ATinsert(deps,(ATerm) ATmakeInt(i));
+            assert(i<1<<(8*sizeof(int)-1));
+            deps = ATinsert(deps,(ATerm) ATmakeInt((int)i));
             args[i] += 1;
 //fprintf(stderr,"dep of arg %i\n",i);
           }
@@ -377,9 +378,10 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 
       for (size_t i = 0; i < arity; i++)
       {
+        assert(i<1<<(8*sizeof(int)-1));
         if ( args[i] > max )
         {
-          maxidx = i;
+          maxidx = (int)i;
           max = args[i];
         }
       }
@@ -567,14 +569,14 @@ bool RewriterJitty::removeRewriteRule(ATermAppl Rule)
   return true;
 }
 
-static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
+static ATerm subst_values(ATermAppl *vars, ATerm *vals, size_t len, ATerm t)
 {
   if ( ATisInt(t) )
   {
     return t;
   } else if ( gsIsDataVarId((ATermAppl) t) )
   {
-    for (int i=0; i<len; i++)
+    for (size_t i=0; i<len; i++)
     {
       if ( ATisEqual(t,vars[i]) )
       {
@@ -813,7 +815,7 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
   gsMessage("        %T --> %T (%T)\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true);
 }
 #endif
-          if ( matches && /*(gsIsNil(ATAelementAt(rule,1)) || */ (ATisEqual(ATAelementAt(rule,1),jitty_true) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true))) // JK 15/10/2009 Condition is always a data expression
+          if ( matches && (ATisEqual(ATAelementAt(rule,1),jitty_true) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true))) 
           {
             ATermAppl rhs = ATAelementAt(rule,3);
 
