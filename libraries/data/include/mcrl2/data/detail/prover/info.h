@@ -260,7 +260,7 @@ class ATerm_Info {
     virtual ATerm get_operator(ATerm a_term) = 0;
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    virtual ATerm get_argument(ATerm a_term, int a_number) = 0;
+    virtual ATerm get_argument(ATerm a_term, size_t a_number) = 0;
 
     /// \brief Indicates whether or not a term is equal to \c true.
     virtual bool is_true(ATerm a_term) = 0;
@@ -359,7 +359,7 @@ class AI_Jitty: public ATerm_Info {
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    virtual ATerm get_argument(ATerm a_term, int a_number){
+    virtual ATerm get_argument(ATerm a_term, size_t a_number){
       return ATgetArgument(a_term, a_number + 1);
     }
 
@@ -486,7 +486,7 @@ class AI_Inner: public ATerm_Info {
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    virtual ATerm get_argument(ATerm a_term, int a_number){
+    virtual ATerm get_argument(ATerm a_term, size_t a_number){
       return ATelementAt((ATermList) a_term, a_number + 1);
     }
 

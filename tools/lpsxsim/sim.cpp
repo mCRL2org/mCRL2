@@ -48,7 +48,7 @@ class sim_tool : public rewriter_tool< input_tool > {
   private:
     static void PrintState(ATerm state, NextState *ns)
     {
-      for (int i=0; i<ns->getStateLength(); i++)
+      for (size_t i=0; i<ns->getStateLength(); i++)
       {
         if ( i > 0 )
         {

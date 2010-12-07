@@ -287,16 +287,16 @@ struct ns_info
   boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
   legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
 
-  unsigned int num_summands;
+  size_t num_summands;
   ATermAppl *summands;
-  unsigned int num_prioritised;
+  size_t num_prioritised;
   ATermList procvars;
   int stateformat;
   ATermAppl nil;
   AFun pairAFun;
-  int statelen;
+  size_t statelen;
   AFun stateAFun;
-  unsigned int *current_id;
+  size_t *current_id;
 
   enumerator_type get_sols(ATermList v, ATerm c) 
   { 
@@ -330,24 +330,24 @@ struct ns_info
 class NextStateGeneratorStandard : public NextStateGenerator
 {
   public:
-    NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand = false, int SingleSummandIndex = 0);
+    NextStateGeneratorStandard(ATerm State, ns_info &Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
     ~NextStateGeneratorStandard();
 
     bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
 
     // bool errorOccurred();
 
-    void reset(ATerm State, unsigned int SummandIndex = 0);
+    void reset(ATerm State, size_t SummandIndex = 0);
 
     ATerm get_state() const;
 
   private:
     ns_info info;
-    unsigned int id;
+    size_t id;
 
     bool single_summand;
 
-    unsigned int sum_idx;
+    size_t sum_idx;
 
     ATerm cur_state;
     ATerm cur_act;
@@ -377,13 +377,13 @@ class NextStateStandard : public NextState
 
     ATerm getInitialState();
     NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);
-    NextStateGenerator *getNextStates(ATerm state, unsigned int group, NextStateGenerator *old = NULL);
+    NextStateGenerator *getNextStates(ATerm state, size_t group, NextStateGenerator *old = NULL);
 
                 void gatherGroupInformation();
 
-    int getGroupCount() const;
-    int getStateLength();
-    ATermAppl getStateArgument(ATerm state, int index);
+    size_t getGroupCount() const;
+    size_t getStateLength();
+    ATermAppl getStateArgument(ATerm state, size_t index);
     ATermAppl makeStateVector(ATerm state);
     ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
                 mcrl2::data::rewriter& getRewriter() { // Deprecated. Do not use.
@@ -392,8 +392,8 @@ class NextStateStandard : public NextState
 
   private:
     ns_info info;
-    unsigned int next_id;
-    unsigned int current_id;
+    size_t next_id;
+    size_t current_id;
 
     bool stateAFun_made;
 
@@ -407,7 +407,7 @@ class NextStateStandard : public NextState
     ATerm initial_state;
 
     ATerm buildTree(ATerm *args);
-    ATerm getTreeElement(ATerm tree, int index);
+    ATerm getTreeElement(ATerm tree, size_t index);
 
     ATerm SetVars(ATerm a, ATermList free_vars);
     ATermList ListToFormat(ATermList l,ATermList free_vars);

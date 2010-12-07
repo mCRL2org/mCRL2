@@ -295,8 +295,8 @@ class BDD_Prover: public Prover {
         return v_result;
       }
 
-      int i;
-      int v_length;
+      size_t i;
+      size_t v_length;
       ATerm v_small;
 
       v_length = f_info->get_number_of_arguments(a_formula);

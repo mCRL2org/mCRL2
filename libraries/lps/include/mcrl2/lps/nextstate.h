@@ -182,7 +182,7 @@ class NextState
 		 **/
 		virtual NextStateGenerator *getNextStates(
 					ATerm state,
-          unsigned int index,
+          size_t index,
 					NextStateGenerator *old = NULL
 					) = 0;
 
@@ -190,7 +190,7 @@ class NextState
 		 * \brief Get number of state parameters.
 		 * \return Number of state parameters.
 		 **/
-		virtual int getStateLength() = 0;
+		virtual size_t getStateLength() = 0;
 
 		/**
 		 * \brief Get an argument from a state.
@@ -199,7 +199,7 @@ class NextState
 		 *              0).
 		 * \return Argument index of state.
 		 **/
-		virtual ATermAppl getStateArgument(ATerm state, int index) = 0;
+		virtual ATermAppl getStateArgument(ATerm state, size_t index) = 0;
 		/**
 		 * \brief Make a mCRL2 LTS state vector from a state.
 		 * \param state A state.

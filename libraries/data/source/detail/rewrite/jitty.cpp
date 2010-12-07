@@ -98,12 +98,12 @@ ATerm RewriterJitty::OpId2Int(ATermAppl Term, bool add_opids)
 
 
 static AFun *apples;
-static unsigned int num_apples = 0;
+static size_t num_apples = 0;
 
 #define getAppl(x) ((x < num_apples)?apples[x]:getAppl2(x))
-static AFun getAppl2(unsigned int arity)
+static AFun getAppl2(size_t arity)
 {
-  unsigned int old_apples = num_apples;
+  size_t old_apples = num_apples;
 
   if ( old_apples == 0 )
   {
@@ -123,7 +123,7 @@ static AFun getAppl2(unsigned int arity)
     apples = (AFun *) realloc(apples,num_apples*sizeof(AFun));
   }
 
-  for (unsigned int i=old_apples; i<num_apples; i++)
+  for (size_t i=old_apples; i<num_apples; i++)
   {
     apples[i] = ATmakeAFun("@REWR@",i,ATfalse);
     ATprotectAFun(apples[i]);
@@ -240,10 +240,10 @@ static ATermList get_vars(ATerm a)
 static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 {
   ATermList strat = ATmakeList0();
-  unsigned int arity;
+  size_t arity;
 
 //gsMessage("rules: %T\n\n",rules);
-  unsigned int max_arity = 0;
+  size_t max_arity = 0;
   for (ATermList l=rules; !ATisEmpty(l); l=ATgetNext(l))
   {
     if ( ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2))) > max_arity + 1 )
@@ -252,7 +252,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
     }
   }
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool, max_arity);
-  for(unsigned int i=0; i<max_arity; ++i)
+  for(size_t i=0; i<max_arity; ++i)
   {
     used[i]=false;
   }
@@ -264,7 +264,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
     ATermList m = ATmakeList0();
     
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,int, arity);
-    for(unsigned int i=0; i<arity; ++i)
+    for(size_t i=0; i<arity; ++i)
     {
       args[i]=-1;
     }
@@ -286,12 +286,12 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 
         
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool, arity);
-        for (unsigned int i = 0; i < arity; i++)
+        for (size_t i = 0; i < arity; i++)
         {
           bs[i]=false;
         }
 
-        for (unsigned int i = 0; i < arity; i++)
+        for (size_t i = 0; i < arity; i++)
         {
           if ( !gsIsDataVarId(ATAgetArgument(pars,i+1)) )
           {
@@ -334,7 +334,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
         }
 
         ATermList deps = ATmakeList0();
-        for (unsigned int i = 0; i < arity; i++)
+        for (size_t i = 0; i < arity; i++)
         {
           if ( bs[i] && !used[i] )
           {
@@ -375,7 +375,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
       int max = -1;
       int maxidx = -1;
 
-      for (unsigned int i = 0; i < arity; i++)
+      for (size_t i = 0; i < arity; i++)
       {
         if ( args[i] > max )
         {
@@ -583,8 +583,8 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
     }
     throw mcrl2::runtime_error(NAME + ": variable not assigned.");
   } else {
-    unsigned int arity = ATgetArity(ATgetAFun((ATermAppl) t));
-    unsigned int new_arity = arity;
+    size_t arity = ATgetArity(ATgetAFun((ATermAppl) t));
+    size_t new_arity = arity;
     ATerm arg0 = subst_values(vars,vals,len,ATgetArgument((ATermAppl) t,0));
     if ( !(ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0)) )
     {
@@ -592,7 +592,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
     }
     
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATerm, new_arity);
-    unsigned int i;
+    size_t i;
     if ( ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0) )
     {
       args[0] = arg0;
@@ -601,7 +601,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
     else 
     {
       i = 0;
-      unsigned int arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
+      size_t arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
       while ( i < arg0_arity )
       {
         args[i] = ATgetArgument((ATermAppl) arg0,i);
@@ -609,7 +609,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
       }
     }
 
-    for (unsigned int j=1; j<arity; j++)
+    for (size_t j=1; j<arity; j++)
     {
       args[i] = subst_values(vars,vals,len,ATgetArgument((ATermAppl) t,j));
       i++;
@@ -624,7 +624,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
   }
 }
 
-static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, unsigned int *len)
+static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, size_t *len)
 {
 //gsfprintf(stderr,"match_jitty(  %T  ,  %T  ,  %T   )\n\n",t,p,*vars);
         if ( ATisInt(p) )
@@ -633,7 +633,7 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, unsigned
   } else if ( gsIsDataVarId((ATermAppl) p) )
   {
 //		t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
-    for (unsigned int i=0; i<*len; i++)
+    for (size_t i=0; i<*len; i++)
     {
       if ( ATisEqual(p,vars[i]) )
       {
@@ -725,8 +725,8 @@ gsMessage("      return1  %P\n",fromInner((ATermAppl) lookupSubstitution(Term)))
     ATerm op = ATgetArgument(Term,0);
     ATerm head = NULL;
     ATermList strat;
-    unsigned int head_arity = 0;
-    unsigned int arity = ATgetArity(ATgetAFun(Term));
+    size_t head_arity = 0;
+    size_t arity = ATgetArity(ATgetAFun(Term));
 
     if ( !ATisInt(op) )
     {
@@ -749,7 +749,7 @@ gsMessage("      return1  %P\n",fromInner((ATermAppl) lookupSubstitution(Term)))
     {
       head_arity--;
     }
-    for (unsigned int i=1; i<arity; i++)
+    for (size_t i=1; i<arity; i++)
     {
       rewritten[i] = NULL;
       if ( i < head_arity+1 )
@@ -772,7 +772,7 @@ gsMessage("        strat action: %T\n",ATgetFirst(strat));
 #endif
         if ( ATisInt(ATgetFirst(strat)) )
         {
-          unsigned int i = ATgetInt((ATermInt) ATgetFirst(strat))+1;
+          size_t i = ATgetInt((ATermInt) ATgetFirst(strat))+1;
           if ( i < arity )
           {
             rewritten[i] = (ATerm) rewrite_aux(args[i]);
@@ -784,21 +784,21 @@ gsMessage("        strat action: %T\n",ATgetFirst(strat));
         {
           ATermList rule = ATLgetFirst(strat);
           ATermAppl lhs = ATAelementAt(rule,2);
-          unsigned int rule_arity = ATgetArity(ATgetAFun(lhs));
+          size_t rule_arity = ATgetArity(ATgetAFun(lhs));
 
           if ( rule_arity > arity )
           {
             break;
           }
 
-          unsigned int max_len = ATgetLength(ATLgetFirst(rule));
+          size_t max_len = ATgetLength(ATLgetFirst(rule));
           
           MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl, max_len);
           MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,ATerm, max_len);
-          unsigned int len = 0;
+          size_t len = 0;
           bool matches = true;
 
-          for (unsigned int i=1; i<rule_arity; i++)
+          for (size_t i=1; i<rule_arity; i++)
           {
             if ( !match_jitty((rewritten[i]==NULL)?((ATerm) args[i]):rewritten[i],ATgetArgument(lhs,i),vars,vals,&len) )
             {
@@ -822,8 +822,8 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
               return rewrite_aux((ATermAppl) subst_values(vars,vals,len,(ATerm) rhs));
             }
 
-            unsigned int rhs_arity;
-            unsigned int new_arity;
+            size_t rhs_arity;
+            size_t new_arity;
             ATerm arg0;
 
             if ( gsIsDataVarId(rhs) )
@@ -848,7 +848,7 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
             }
             
             MCRL2_SYSTEM_SPECIFIC_ALLOCA(newargs,ATerm, new_arity);
-            unsigned int i;
+            size_t i;
             if ( gsIsDataVarId(rhs) )
             {
               if ( gsIsDataVarId((ATermAppl) arg0) )
@@ -870,14 +870,14 @@ if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
                 i = 1;
               } else {
                 i = 0;
-                unsigned int arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
+                size_t arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
                 while ( i < arg0_arity )
                 {
                   newargs[i] = ATgetArgument((ATermAppl) arg0,i);
                   i++;
                 }
               }
-              for (unsigned int j=1; j<rhs_arity; j++)
+              for (size_t j=1; j<rhs_arity; j++)
               {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
 gsMessage("          pre %T\n",ATgetArgument(rhs,i));
@@ -890,7 +890,7 @@ gsMessage("          post %T\n",args[i]);
               }
             }
 
-            for (unsigned int j=0; j<arity-rule_arity; j++)
+            for (size_t j=0; j<arity-rule_arity; j++)
             {
               newargs[i] = (ATerm) args[rule_arity+j];
               i++;
@@ -914,7 +914,7 @@ gsMessage("      done with strat\n");
 #endif
 
     rewritten[0] = op;
-    for (unsigned int i=1; i<arity; i++)
+    for (size_t i=1; i<arity; i++)
     {
       if ( rewritten[i] == NULL )
       {
@@ -934,23 +934,23 @@ gsMessage("      return3  %P\n",fromInner(a));
 
 ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
 {
-  unsigned int old_opids = num_opids;
+  size_t old_opids = num_opids;
   ATermAppl a = toInner((ATermAppl) Term,true);
   if ( old_opids < num_opids )
   {
     ATunprotectArray((ATerm *) int2term);
     int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
-    for (unsigned int k = old_opids; k < num_opids; k++) int2term[k] = NULL;
+    for (size_t k = old_opids; k < num_opids; k++) int2term[k] = NULL;
     ATprotectArray((ATerm *) int2term,num_opids);
     ATunprotectArray((ATerm *) jitty_strat);
     jitty_strat = (ATermList *) realloc(jitty_strat,num_opids*sizeof(ATermList));
-    for (unsigned int k = old_opids; k < num_opids; k++) jitty_strat[k] = NULL;
+    for (size_t k = old_opids; k < num_opids; k++) jitty_strat[k] = NULL;
     ATprotectArray((ATerm *) jitty_strat,num_opids);
     ATermList l = ATtableKeys(term2int);
     for (; !ATisEmpty(l); l=ATgetNext(l))
     {
       ATermInt i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-      if ( ((unsigned int) ATgetInt(i)) >= old_opids )
+      if ( ((size_t) ATgetInt(i)) >= old_opids )
       {
         int2term[ATgetInt(i)] = ATAgetFirst(l);
         jitty_strat[ATgetInt(i)] = NULL;

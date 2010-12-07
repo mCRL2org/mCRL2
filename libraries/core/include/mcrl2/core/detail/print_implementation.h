@@ -295,7 +295,7 @@ static void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
        which ShowSorts is taken into account
 */
 
-static void PRINT_FUNC(IndentedATerm)(PRINT_OUTTYPE OutStream, const ATerm Term, unsigned int Nesting = 0);
+static void PRINT_FUNC(IndentedATerm)(PRINT_OUTTYPE OutStream, const ATerm Term, size_t Nesting = 0);
 //Pre:  Term is an ATerm containing applications and lists only
 //      Nesting indicates the nesting depth of Term in its context
 //Post: A string representation of the ATerm is written to OutStream,
@@ -354,10 +354,10 @@ static bool gsIsIdBagEnum(ATermAppl DataExpr);
 static bool gsIsIdFuncUpdate(ATermAppl DataExpr);
 //Ret: DataExpr is a function update identifier
 
-static bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength);
+static bool gsIsIdPrefix(ATermAppl DataExpr, size_t ArgsLength);
 //Ret: DataExpr is a prefix identifier and ArgsLength == 1
 
-static bool gsIsIdInfix(ATermAppl DataExpr, int ArgsLength);
+static bool gsIsIdInfix(ATermAppl DataExpr, size_t ArgsLength);
 //Ret: DataExpr is an infix identifier and ArgsLength == 2
 
 static int gsPrecIdPrefix();
@@ -421,7 +421,7 @@ static void PRINT_FUNC(AFun)(PRINT_OUTTYPE OutStream, const AFun fun)
   }
 }
 
-static void PRINT_FUNC(IndentedATerm)(PRINT_OUTTYPE OutStream, const ATerm term, unsigned int nesting)
+static void PRINT_FUNC(IndentedATerm)(PRINT_OUTTYPE OutStream, const ATerm term, size_t nesting)
 {
   std::string prefix(2*nesting, ' ');
   if (ATgetType(term) == AT_APPL) {
@@ -1023,7 +1023,7 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
   } else { //pp_format == ppDefault
     size_t EqnsLength = ATgetLength(Eqns);
     if (EqnsLength > 0) {
-      int StartPrefix = 0;
+      size_t StartPrefix = 0;
       ATermTable VarDeclTable = ATtableCreate(63, 50);
       //VarDeclTable is a hash table with variable declarations as values, where
       //the name of each variable declaration is used a key.
@@ -2470,7 +2470,7 @@ bool gsIsIdFuncUpdate(ATermAppl DataExpr)
   return ATAgetArgument(DataExpr, 0) == data::function_update_name();
 }
 
-bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength)
+bool gsIsIdPrefix(ATermAppl DataExpr, size_t ArgsLength)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
@@ -2486,7 +2486,7 @@ bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength)
      (IdName == data::sort_set::setcomplement_name());
 }
 
-bool gsIsIdInfix(ATermAppl DataExpr, int ArgsLength)
+bool gsIsIdInfix(ATermAppl DataExpr, size_t ArgsLength)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;

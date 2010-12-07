@@ -139,18 +139,18 @@ static void finalise_common()
 
 
 #ifdef _INNER_STORE_TREES
-int RewriterInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
+size_t RewriterInnermost::write_tree(FILE *f, ATermAppl tree, size_t *num_states)
 {
   if ( isS(tree) )
   {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
+    size_t n = write_tree(f,ATAgetArgument(tree,1),num_states);
     fprintf(f,"n%i [label=\"S(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
     fprintf(f,"n%i -> n%i\n",*num_states,n);
     return (*num_states)++;
   } else if ( isM(tree) )
   {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
+    size_t n = write_tree(f,ATAgetArgument(tree,1),num_states);
+    size_t m = write_tree(f,ATAgetArgument(tree,2),num_states);
     if ( ATisInt(ATgetArgument(tree,0)) )
     {
       fprintf(f,"n%i [label=\"M(%i)\"]\n",*num_states,ATgetInt((ATermInt) ATgetArgument(tree,0)));
@@ -162,8 +162,8 @@ int RewriterInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
     return (*num_states)++;
   } else if ( isF(tree) )
   {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
+    size_t n = write_tree(f,ATAgetArgument(tree,1),num_states);
+    size_t m = write_tree(f,ATAgetArgument(tree,2),num_states);
     if ( ATisInt(ATgetArgument(tree,0)) )
     {
       fprintf(f,"n%i [label=\"F(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(int2term[ATgetInt((ATermInt) ATgetArgument(tree,0))],0))));
@@ -175,20 +175,20 @@ int RewriterInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
     return (*num_states)++;
   } else if ( isD(tree) )
   {
-    int n = write_tree(f,ATAgetArgument(tree,0),num_states);
+    size_t n = write_tree(f,ATAgetArgument(tree,0),num_states);
     fprintf(f,"n%i [label=\"D\"]\n",*num_states);
     fprintf(f,"n%i -> n%i\n",*num_states,n);
     return (*num_states)++;
   } else if ( isN(tree) )
   {
-    int n = write_tree(f,ATAgetArgument(tree,0),num_states);
+    size_t n = write_tree(f,ATAgetArgument(tree,0),num_states);
     fprintf(f,"n%i [label=\"N\"]\n",*num_states);
     fprintf(f,"n%i -> n%i\n",*num_states,n);
     return (*num_states)++;
   } else if ( isC(tree) )
   {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
+    size_t n = write_tree(f,ATAgetArgument(tree,1),num_states);
+    size_t m = write_tree(f,ATAgetArgument(tree,2),num_states);
     gsfprintf(f,"n%i [label=\"C(%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)));
     fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
     fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);
@@ -209,7 +209,7 @@ int RewriterInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
 void RewriterInnermost::tree2dot(ATermAppl tree, char *name, char *filename)
 {
   FILE *f;
-  int num_states = 0;
+  size_t num_states = 0;
 
   if ( (f = fopen(filename,"w")) == NULL )
   {
@@ -225,7 +225,7 @@ void RewriterInnermost::tree2dot(ATermAppl tree, char *name, char *filename)
 }
 #endif
 
-static void term2seq(ATerm t, ATermList *s, int *var_cnt)
+static void term2seq(ATerm t, ATermList *s, size_t *var_cnt)
 {
   if ( ATisList(t) )
   {
@@ -282,8 +282,8 @@ static void get_used_vars_aux(ATerm t, ATermList *vars)
         *vars = ATinsert(*vars,t);
       }
     } else {
-      int a = ATgetArity(ATgetAFun((ATermAppl) t));
-      for (int i=0; i<a; i++)
+      size_t a = ATgetArity(ATgetAFun((ATermAppl) t));
+      for (size_t i=0; i<a; i++)
       {
         get_used_vars_aux(ATgetArgument((ATermAppl) t,i),vars);
       }
@@ -300,7 +300,7 @@ static ATermList get_used_vars(ATerm t)
   return l;
 }
 
-static ATermList create_sequence(ATermAppl rule, int *var_cnt, ATermInt trueint)
+static ATermList create_sequence(ATermAppl rule, size_t *var_cnt, ATermInt trueint)
 {
   ATermAppl pat = (ATermAppl) ATgetArgument(rule,2);
   ATerm cond = ATgetArgument(rule,1);
@@ -425,9 +425,9 @@ static void add_to_build_pars(build_pars *pars,ATermList seqs, ATermAppl *r, ATe
 }
 
 static char tree_var_str[20];
-static ATermAppl createFreshVar(ATermAppl sort,int *i)
+static ATermAppl createFreshVar(ATermAppl sort,size_t *i)
 {
-  sprintf(tree_var_str,"var-%i",(*i)++);
+  sprintf(tree_var_str,"var-%lu",(*i)++);
   return gsMakeDataVarId(gsString2ATermAppl(tree_var_str),sort);
 }
 
@@ -497,8 +497,8 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATerm new_term, ATerm num
 #else
 #define print_return(x,y) return y;
 #endif
-//static int max_tree_vars;
-static int *treevars_usedcnt;
+//static size_t max_tree_vars;
+static size_t *treevars_usedcnt;
 
 static void inc_usedcnt(ATermList l)
 {
@@ -508,7 +508,7 @@ static void inc_usedcnt(ATermList l)
   }
 }
 
-static ATermAppl build_tree(build_pars pars, int i)
+static ATermAppl build_tree(build_pars pars, size_t i)
 {
 #ifdef BT_DEBUG
 ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",pars.Flist,pars.Slist,pars.Mlist,pars.stack,pars.upstack,i);
@@ -518,7 +518,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
   {
     ATermList l,m;
 
-    int k = i;
+    size_t k = i;
     ATermAppl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(pars.Slist)),0),1),&i);
     treevars_usedcnt[k] = 0;
 
@@ -706,7 +706,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
   }
 }
 
-static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, int len, int *max)
+static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, size_t len, size_t *max)
 {
   if ( isS(tree) )
   {
@@ -717,7 +717,7 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, int len, in
     return ATmakeAppl2(afunS,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),ATinsert(stored,ATgetArgument(tree,0)),len+1,max));
   } else if ( isM(tree) )
   {
-    return ATmakeAppl3(afunM,(ATerm) ATmakeInt(len-(int)ATindexOf(stored,ATgetArgument(tree,0),0)),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
+    return ATmakeAppl3(afunM,(ATerm) ATmakeInt(len-ATindexOf(stored,ATgetArgument(tree,0),0)),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
   } else if ( isF(tree) )
   {
     return ATmakeAppl3(afunF,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
@@ -740,15 +740,15 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, int len, in
   }
 }
 
-static ATermAppl optimise_tree(ATermAppl tree,int *max)
+static ATermAppl optimise_tree(ATermAppl tree,size_t *max)
 {
   return optimise_tree_aux(tree,ATmakeList0(),-1,max);
 }
 
 #ifdef _INNER_STORE_TREES
-ATermAppl RewriterInnermost::create_tree(ATermList rules, int opid, int *max_vars, ATermInt trueint)
+ATermAppl RewriterInnermost::create_tree(ATermList rules, size_t opid, size_t *max_vars, ATermInt trueint)
 #else
-static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars, ATermInt trueint)
+static ATermAppl create_tree(ATermList rules, size_t /*opid*/, size_t *max_vars, ATermInt trueint)
 #endif
   // Create a match tree for OpId int2term[opid] and update the value of
   // *max_vars accordingly.
@@ -767,7 +767,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars, ATerm
   // (The total number of variables in all sequences should be an upper
   // bound for the number of variable in the final tree.)
   ATermList rule_seqs = ATmakeList0();
-  int total_rule_vars = 0;
+  size_t total_rule_vars = 0;
   for (; !ATisEmpty(rules); rules=ATgetNext(rules))
   {
     rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermAppl) ATgetFirst(rules),&total_rule_vars, trueint));
@@ -784,9 +784,9 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars, ATerm
   ATermAppl tree;
   if ( r == NULL )
   {
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,size_t,total_rule_vars);
     treevars_usedcnt = a;
-//		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
+//		treevars_usedcnt = (size_t *) malloc(total_rule_vars*sizeof(size_t));
     tree = build_tree(init_pars,0);
 //		free(treevars_usedcnt);
     for (; !ATisEmpty(readies); readies=ATgetNext(readies))
@@ -800,7 +800,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars, ATerm
 
   finalise_build_pars(&init_pars);
 
-  int max_tree_vars = 0;
+  size_t max_tree_vars = 0;
   tree = optimise_tree(tree,&max_tree_vars);
   if ( max_tree_vars > *max_vars )
   {
@@ -818,7 +818,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars, ATerm
 }
 
 //#define TMA_DEBUG
-ATermList RewriterInnermost::tree_matcher_aux(ATerm t, ATermAppl *tree, ATermAppl *vars, ATerm *vals, int *len)
+ATermList RewriterInnermost::tree_matcher_aux(ATerm t, ATermAppl *tree, ATermAppl *vars, ATerm *vals, size_t *len)
 {
   ATermList args;
 
@@ -943,7 +943,7 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 {
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,ATermAppl,max_vars);
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(vals,ATerm,max_vars);
-  int len = 0;
+  size_t len = 0;
 
   while ( isC(tree) )
   {
@@ -1168,7 +1168,7 @@ RewriterInnermost::RewriterInnermost(const data_specification &DataSpec)
   int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
   inner_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
   inner_trees = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
-  for (int i=0; i < num_opids; i++)
+  for (size_t i=0; i < num_opids; i++)
   {
     int2term[i] = NULL;
     inner_eqns[i] = NULL;
@@ -1228,7 +1228,7 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
     return false;
   }
 
-  int old_num = num_opids;
+  size_t old_num = num_opids;
 
   ATermAppl a = ATAgetArgument(Rule,2);
   if ( gsIsOpId(a) )
@@ -1250,7 +1250,7 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
     int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
     inner_eqns = (ATermList *) realloc(inner_eqns,num_opids*sizeof(ATermList));
     inner_trees = (ATermAppl *) realloc(inner_trees,num_opids*sizeof(ATermAppl));
-    for (int k=old_num; k < num_opids; k++)
+    for (size_t k=old_num; k < num_opids; k++)
     {
       int2term[k] = NULL;
       inner_eqns[k] = NULL;
@@ -1264,7 +1264,7 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
     for (; !ATisEmpty(l); l=ATgetNext(l))
     {
       ATermInt i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-      if ( ATgetInt(i) >= old_num )
+      if ( (size_t)ATgetInt(i) >= old_num )
       {
         int2term[ATgetInt(i)] = ATAgetFirst(l);
       }
@@ -1323,7 +1323,7 @@ bool RewriterInnermost::removeRewriteRule(ATermAppl Rule)
   return true;
 }
 
-ATermList RewriterInnermost::build_args(ATermList args, int buildargs, ATermAppl *vars, ATerm *vals, int len)
+ATermList RewriterInnermost::build_args(ATermList args, size_t buildargs, ATermAppl *vars, ATerm *vals, size_t len)
 {
   if ( (buildargs == 0) || ATisEmpty(args) )
   {
@@ -1333,24 +1333,24 @@ ATermList RewriterInnermost::build_args(ATermList args, int buildargs, ATermAppl
   }
 }
 
-ATerm RewriterInnermost::build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len)
+ATerm RewriterInnermost::build(ATerm Term, size_t buildargs, ATermAppl *vars, ATerm *vals, size_t len)
 {
   if ( ATisList(Term) )
   {
     ATerm head = ATgetFirst((ATermList) Term);
     ATermList args = ATgetNext((ATermList) Term);
 
-    if ( buildargs == -1 )
+    if ( buildargs == NON_EXISTING )
     {
       buildargs = ATgetLength(args);
     }
 
     args = build_args(args,buildargs,vars,vals,len);
 
-    int b = 1;
+    size_t b = 1;
     while ( !ATisInt(head) && b )
     {
-      for (int i=0; i<len; i++)
+      for (size_t i=0; i<len; i++)
       {
         if ( ATisEqual(head,vars[i]) )
         {
@@ -1375,7 +1375,7 @@ ATerm RewriterInnermost::build(ATerm Term, int buildargs, ATermAppl *vars, ATerm
   } else if ( ATisInt(Term) ) {
     return rewrite_func((ATermInt) Term, ATmakeList0());
   } else {
-    for (int i=0; i<len; i++)
+    for (size_t i=0; i<len; i++)
     {
       if ( ATisEqual(Term,vars[i]) )
       {
@@ -1432,7 +1432,7 @@ ATerm RewriterInnermost::rewrite_aux(ATerm Term)
     // rewrite arguments
     l = rewrite_listelts(l);
 
-    // head is should be a int or a var
+    // head is should be a size_t or a var
     // if it's a var, see if it needs to be substituted
     if ( !ATisInt(head) )
     {
@@ -1455,10 +1455,10 @@ ATerm RewriterInnermost::rewrite_aux(ATerm Term)
       }
     }
 
-    // head is should be a int or a var
+    // head is should be a size_t or a var
     if ( ATisInt(head) )
     {
-      // head is a int, thus we can try to rewrite further
+      // head is a size_t, thus we can try to rewrite further
       Term = rewrite_func((ATermInt) head, l);
     } else {
       // head is a var, so there is nothing left to do but to
@@ -1479,7 +1479,7 @@ ATerm RewriterInnermost::rewriteInternal(ATerm Term)
 {
   if ( need_rebuild )
   {
-    for (int i=0; i < num_opids; i++)
+    for (size_t i=0; i < num_opids; i++)
     {
       if ( (inner_trees[i] == NULL) && (inner_eqns[i] != NULL) )
       {

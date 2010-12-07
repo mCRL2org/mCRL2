@@ -163,9 +163,9 @@ class SMT_LIB_Solver: public SMT_Solver {
           } else if (sort_pos::is_pos(v_sort)) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
           } else {
-            int v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort), 0);
+            size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort), 0);
             char* v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
-            sprintf(v_sort_string, "sort%d", v_sort_number);
+            sprintf(v_sort_string, "sort%lu", v_sort_number);
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
             free(v_sort_string);
             v_sort_string = 0;
@@ -550,7 +550,7 @@ class SMT_LIB_Solver: public SMT_Solver {
     //void translate_c_real(ATermAppl a_clause);
 
     void translate_unknown_operator(ATermAppl a_clause) {
-      int v_operator_number;
+      size_t v_operator_number;
       ATermAppl v_operator;
       char* v_operator_string;
 
@@ -558,7 +558,7 @@ class SMT_LIB_Solver: public SMT_Solver {
       v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
 
       v_operator_string = (char*) malloc((core::NrOfChars(v_operator_number) + 3) * sizeof(char));
-      sprintf(v_operator_string, "op%d", v_operator_number);
+      sprintf(v_operator_string, "op%lu", v_operator_number);
       f_formula = f_formula + "(" + v_operator_string;
       free(v_operator_string);
       v_operator_string = 0;
@@ -632,7 +632,7 @@ class SMT_LIB_Solver: public SMT_Solver {
     }
 
     void translate_constant(ATermAppl a_clause) {
-      int v_operator_number;
+      size_t v_operator_number;
       ATermAppl v_operator;
       char* v_operator_string;
 
@@ -640,7 +640,7 @@ class SMT_LIB_Solver: public SMT_Solver {
       v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
 
       v_operator_string = (char*) malloc((core::NrOfChars(v_operator_number) + 3) * sizeof(char));
-      sprintf(v_operator_string, "op%d", v_operator_number);
+      sprintf(v_operator_string, "op%lu", v_operator_number);
       f_formula = f_formula + v_operator_string;
       free(v_operator_string);
       v_operator_string = 0;

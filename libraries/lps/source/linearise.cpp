@@ -312,7 +312,7 @@ class specification_basic_type:public boost::noncopyable
 
     long addObject(ATermAppl o, bool &b)
     { ATbool isnew=ATfalse;
-      unsigned int result=ATindexedSetPut(objectIndexTable,(ATerm)o,&isnew);
+      size_t result=ATindexedSetPut(objectIndexTable,(ATerm)o,&isnew);
       if (objectdata.size()<=result)
       { objectdata.resize(result+1);
       }
@@ -320,7 +320,7 @@ class specification_basic_type:public boost::noncopyable
       return result;
     }
 
-    long objectIndex(ATermAppl o)
+    size_t objectIndex(ATermAppl o)
     { // assert(existsObjectIndex(o) >= 0);
       size_t result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
       assert(result!=NON_EXISTING); /* object index must always return the index
@@ -3020,7 +3020,7 @@ class specification_basic_type:public boost::noncopyable
           process_identifier last=pCRLprocs.back();
           const std::string s3((spec.options.statenames)?std::string(last.name()):std::string("s3"));
           if ((spec.options.binary) && (spec.options.newstate))
-          { int i=spec.upperpowerof2(no_of_states);
+          { size_t i=spec.upperpowerof2(no_of_states);
             for( ; i>0 ; i--)
             { variable name(spec.fresh_name("bst"),sort_bool::bool_());
               spec.insertvariable(name,true);
@@ -3128,7 +3128,7 @@ class specification_basic_type:public boost::noncopyable
       /* else a sequence of boolean values needs to be generated,
          representing the value i, when there are l->n elements */
       {
-        int k=upperpowerof2(stack.no_of_states);
+        size_t k=upperpowerof2(stack.no_of_states);
         for( ; k>0 ; k--)
         { if ((i % 2)==0)
           { t=push_front(t,data_expression(sort_bool::false_()));

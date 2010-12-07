@@ -3888,9 +3888,16 @@ namespace mcrl2 {
         }
       }
 
-      for(int i=nFormPars-1;i>=0;i--){
+      for(size_t i=nFormPars;i>0;i--){
         ATermAppl Sort;
-        if(ATgetLength(Pars[i])==1) Sort=ATAgetFirst(Pars[i]); else Sort=multiple_possible_sorts(atermpp::aterm_list(ATreverse(Pars[i])));
+        if(ATgetLength(Pars[i-1])==1) 
+        {
+          Sort=ATAgetFirst(Pars[i-1]); 
+        } 
+        else 
+        {
+          Sort=multiple_possible_sorts(atermpp::aterm_list(ATreverse(Pars[i-1])));
+        }
         Result=ATinsert(Result,(ATerm)Sort);
       }
       free(Pars);

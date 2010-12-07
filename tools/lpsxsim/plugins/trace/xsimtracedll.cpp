@@ -46,7 +46,7 @@ END_EVENT_TABLE()
 
 static void PrintState(stringstream &ss, ATerm state, NextState *ns)
 {
-        for (int i=0; i<ns->getStateLength(); i++)
+        for (size_t i=0; i<ns->getStateLength(); i++)
         {
                 if ( i > 0 )
                 {

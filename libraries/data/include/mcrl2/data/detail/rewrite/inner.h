@@ -38,8 +38,8 @@ class RewriterInnermost: public Rewriter
 		bool removeRewriteRule(ATermAppl Rule);
 
 	private:
-		int num_opids;
-		int max_vars;
+		size_t num_opids;
+		size_t max_vars;
 
 		ATermInt trueint;
 
@@ -50,19 +50,19 @@ class RewriterInnermost: public Rewriter
 
 		bool need_rebuild;
 
-		ATermList build_args(ATermList args, int buildargs, ATermAppl *vars, ATerm *vals, int len);
-		ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len);
+		ATermList build_args(ATermList args, size_t buildargs, ATermAppl *vars, ATerm *vals, size_t len);
+		ATerm build(ATerm Term, size_t buildargs, ATermAppl *vars, ATerm *vals, size_t len);
 		ATerm rewrite_func(ATermInt op, ATermList args);
 		ATerm rewrite_aux(ATerm Term);
 		ATermList rewrite_listelts(ATermList l);
 
 #ifdef _INNER_STORE_TREES
-		int write_tree(FILE *f, ATermAppl tree, int *num_states);
+		size_t write_tree(FILE *f, ATermAppl tree, size_t *num_states);
 		void tree2dot(ATermAppl tree, char *name, char *filename);
-		ATermAppl create_tree(ATermList rules, int opid, int *max_vars, ATermAppl true_internal);
+		ATermAppl create_tree(ATermList rules, size_t opid, size_t *max_vars, ATermAppl true_internal);
 #endif
 
-		ATermList tree_matcher_aux(ATerm t, ATermAppl *tree, ATermAppl *vars, ATerm *vals, int *len);
+		ATermList tree_matcher_aux(ATerm t, ATermAppl *tree, ATermAppl *vars, ATerm *vals, size_t *len);
 		ATerm tree_matcher(ATermList t, ATermAppl tree);
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);

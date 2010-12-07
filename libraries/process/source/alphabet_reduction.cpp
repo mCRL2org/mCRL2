@@ -83,7 +83,7 @@ namespace mcrl2 {
           return Res;
         }
       
-        static AFun ATmakeAFunInt(int name, int arity, ATbool quoted) {
+        static AFun ATmakeAFunInt(size_t name, size_t arity, ATbool quoted) {
           // input: an integer value (name), it's arity and whether it is quoted or not
           // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
       
@@ -97,7 +97,7 @@ namespace mcrl2 {
         //==================================================
         // ATmakeAFunInt0 functions as ATmakeAFunInt(name,0,ATtrue)
         //==================================================
-        static inline AFun ATmakeAFunInt0(int name){
+        static inline AFun ATmakeAFunInt0(size_t name){
           return ATmakeAFunInt(name, 0, ATtrue);
         }
       
@@ -356,7 +356,7 @@ namespace mcrl2 {
         for (; !ATisEmpty(C); C=ATgetNext(C)){
           ATermAppl c=ATAgetFirst(C);
           if(gsIsNil(ATAgetArgument(c,1))) return 0;
-          unsigned l=ATgetLength(ATLgetArgument(ATAgetArgument(c,0),0));
+          size_t l=ATgetLength(ATLgetArgument(ATAgetArgument(c,0),0));
           if(l>m) m=l;
         }
         return m;
@@ -425,8 +425,8 @@ namespace mcrl2 {
         // returns true if l is a sub-multiaction of m
         if(ATisEqual(l,m)) return true;
         for (; !ATisEmpty(l); l=ATgetNext(l)){
-          int index=ATindexOf(m,ATgetFirst(l),0);
-          if (index < 0) return false;
+          size_t index=ATindexOf(m,ATgetFirst(l),0);
+          if (index == NON_EXISTING) return false;
           m=ATremoveElementAt(m,index);
         }
         return true;
@@ -2194,7 +2194,7 @@ namespace mcrl2 {
               //get the name of the first formal parameter on nP (should be Pos)
               ATermList FormParsNP=ATLtableGet(form_pars,(ATerm)p);
               if(ATisEmpty(FormParsNP)) goto nP_checked;
-              int nParsNP=ATgetLength(FormParsNP);
+              size_t nParsNP=ATgetLength(FormParsNP);
       
               ATermAppl FormPar1=ATAgetFirst(FormParsNP);
       	if(!data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(FormPar1,1)))) goto nP_checked;
@@ -2204,7 +2204,7 @@ namespace mcrl2 {
       	if(!gsIsDataAppl(Cond)) goto nP_checked;
       
               ATermList FormParsp=ATLtableGet(form_pars,(ATerm)P);
-              int nParsP=ATgetLength(FormParsp);
+              size_t nParsP=ATgetLength(FormParsp);
               if(!(nParsP==nParsNP || nParsP+1==nParsNP)) goto nP_checked;
       
               //condition expression
@@ -2344,8 +2344,8 @@ namespace mcrl2 {
             ATermAppl pair=ATAgetFirst(l);
             ATermAppl name=ATAgetArgument(pair,1);
       
-            int n=ATgetLength(ATLgetArgument(nP,1)); //number of parameters of nP
-            int m=ATgetLength(ATLgetArgument(P,1));  //number of parameters of P
+            size_t n=ATgetLength(ATLgetArgument(nP,1)); //number of parameters of nP
+            size_t m=ATgetLength(ATLgetArgument(P,1));  //number of parameters of P
       
             ATtablePut(procs,(ATerm)name,(ATerm)gsaGenNInst(ATAgetArgument(pair,0),P,n==m,(n==m)?ATgetNext(ParamsP):ParamsP));
             ATtablePut(form_pars,(ATerm)name,(ATerm)((n==m)?ATgetNext(ParamsP):ParamsP));

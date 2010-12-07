@@ -379,16 +379,17 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 		size_t funHash = (size_t)((unsigned long) symEntry);
 		
 		IDMappings sharedAFuns = binaryWriter->sharedAFuns;
-		int id = IMgetID(sharedAFuns, symEntry, funHash);
+		size_t id = IMgetID(sharedAFuns, symEntry, funHash);
 		
 		size_t header = getHeader((ATerm) arg);
 		
-		if(id != -1){
+		if(id != NON_EXISTING){
 			header |= FUNSHARED;
 			*(byteBuffer->currentPos) = (char) header;
 			byteBuffer->currentPos++;
 			
-			writeInt(id, byteBuffer);
+			assert(id< (((size_t)1)<<(8*sizeof(int)-1))); /* id must fit in an int */
+			writeInt((int)id, byteBuffer);
 		}else{
 			size_t remaining;
 			
@@ -458,7 +459,7 @@ static void visitList(ATermList arg, ByteBuffer byteBuffer)
   byteBuffer->currentPos++;
 	
   assert(n< (((size_t)1)<<(8*sizeof(int)-1))); /* n must fit in an int */
-  writeInt(n, byteBuffer);
+  writeInt((int)n, byteBuffer);
 }
 
 /**
@@ -532,7 +533,7 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 			*(byteBuffer->currentPos) = (char) ISSHAREDFLAG;
 			byteBuffer->currentPos++;
                         assert(id< (((size_t)1)<<(8*sizeof(int)-1))); /* id must fit in an int */
-			writeInt(id, byteBuffer);
+			writeInt((int)id, byteBuffer);
 			
 			binaryWriter->stackPosition--; /* Pop the term from the stack, since it's subtree is shared. */
 		}else{

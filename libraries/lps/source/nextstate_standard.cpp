@@ -39,7 +39,7 @@ using namespace mcrl2::core::detail;
 static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
 {
   std::string result("state(");
-  int index = 0;
+  size_t index = 0;
   for(atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
   {
     if(index++ != 0) { result.append(", "); }
@@ -93,7 +93,7 @@ static std::string print_assignments(atermpp::aterm_list a, ns_info const& info)
  * determine which elements should be true by recursively "dividing" the
  * array in two parts using /2.
  */
-static void fill_tree_init(bool *init, int n, int l)
+static void fill_tree_init(bool *init, size_t n, size_t l)
 {
         if ( l == 0 )
                 return;
@@ -108,7 +108,7 @@ static void fill_tree_init(bool *init, int n, int l)
 }
 ATerm NextStateStandard::buildTree(ATerm *args)
 {
-        int n,m;
+        size_t n,m;
 
         if ( info.statelen == 0 )
                 return (ATerm) info.nil;
@@ -116,7 +116,7 @@ ATerm NextStateStandard::buildTree(ATerm *args)
         if ( tree_init == NULL )
         {
                 tree_init = (bool *) malloc(info.statelen*sizeof(bool));
-                for (int i=0; i<info.statelen; i++)
+                for (size_t i=0; i<info.statelen; i++)
                         tree_init[i] = false;
                 n = 1;
                 while ( n <= info.statelen )
@@ -144,7 +144,7 @@ ATerm NextStateStandard::buildTree(ATerm *args)
         n = m;
         while ( n > 1 )
         {
-                for (int i=0; i<n; i+=2)
+                for (size_t i=0; i<n; i+=2)
                 {
                         args[i/2] = (ATerm) ATmakeAppl2(info.pairAFun,args[i],args[i+1]);
                 }
@@ -155,13 +155,13 @@ ATerm NextStateStandard::buildTree(ATerm *args)
         return args[0];
 }
 
-ATerm NextStateStandard::getTreeElement(ATerm tree, int index)
+ATerm NextStateStandard::getTreeElement(ATerm tree, size_t index)
 {
-        int n = info.statelen;
-        int m = 0;
+        size_t n = info.statelen;
+        size_t m = 0;
         while ( m+1 != n )
         {
-                int t = (m+n)/2;
+                size_t t = (m+n)/2;
 
                 assert( (ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun) );
 
@@ -178,12 +178,12 @@ ATerm NextStateStandard::getTreeElement(ATerm tree, int index)
         return tree;
 }
 
-int NextStateStandard::getStateLength()
+size_t NextStateStandard::getStateLength()
 {
         return info.statelen;
 }
 
-ATermAppl NextStateStandard::getStateArgument(ATerm state, int index)
+ATermAppl NextStateStandard::getStateArgument(ATerm state, size_t index)
 {
         switch ( info.stateformat )
         {
@@ -206,7 +206,7 @@ ATermAppl NextStateStandard::makeStateVector(ATerm state)
   }
 
   // XXX can be done more efficiently in some cases
-  for (int i=0; i<info.statelen; i++)
+  for (size_t i=0; i<info.statelen; i++)
   {
     stateargs[i] = (ATerm) getStateArgument(state,i);
   }
@@ -288,7 +288,7 @@ ATerm NextStateStandard::parseStateVector(ATermAppl state, ATerm match)
         {
                 bool valid = true;
                 ATermList l = info.procvars;
-                for (int i=0; i<info.statelen; i++)
+                for (size_t i=0; i<info.statelen; i++)
                 {
                         stateargs[i] = ATgetArgument(state,i);
                         if ( mcrl2::data::data_expression((ATermAppl) stateargs[i]).sort() != mcrl2::data::data_expression(ATAgetFirst(l)).sort())
@@ -415,7 +415,7 @@ ATermList NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList
                      "  (human readable assigns): " << pp(atermpp::aterm_list(assigns)) << std::endl <<
                      "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
-        int i = 0;
+        size_t i = 0;
         for (ATermList l=pars; !ATisEmpty(l); l=ATgetNext(l),i++)
         {
                 bool set = false;
@@ -502,7 +502,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         ATprotectList(&info.procvars);
 
         stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
-        for (int i=0; i<info.statelen; i++)
+        for (size_t i=0; i<info.statelen; i++)
         {
           stateargs[i] = NULL;
         }
@@ -528,12 +528,12 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         info.num_summands = ATgetLength(sums);
         info.num_prioritised = 0;
         info.summands = (ATermAppl *) malloc(info.num_summands*sizeof(ATermAppl));
-        for (unsigned int i=0; i<info.num_summands; i++)
+        for (size_t i=0; i<info.num_summands; i++)
         {
                 info.summands[i] = NULL;
         }
         ATprotectArray((ATerm *) info.summands,info.num_summands);
-        for (int i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
+        for (size_t i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
         {
           info.summands[i] = 
              ATmakeAppl4(
@@ -547,7 +547,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         l = pars;
         m = spec.initial_process().assignments();
 
-        for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
+        for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
         {
           n = m;
           bool set = false;
@@ -571,7 +571,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
 
         // Rewrite the state arguments en block, as otherwise the generation of new symbols in the 
         // rewriter is intermingled with rewriting, causing the rewriter to rewrite too often.
-        for (int i=0; i<info.statelen; i++)
+        for (size_t i=0; i<info.statelen; i++)
         {
           stateargs[i] = info.m_rewriter(stateargs[i]);
         }
@@ -648,8 +648,8 @@ void NextStateStandard::prioritise(const char *action)
         // XXX this function invalidates currently used generators!
         // perhaps
         bool is_tau = !strcmp(action,"tau");
-        unsigned int pos = 0;
-        unsigned int rest = 0;
+        size_t pos = 0;
+        size_t rest = 0;
 
         while ( pos < info.num_summands )
         {
@@ -701,7 +701,7 @@ class NextStateGeneratorSummand : public NextStateGeneratorStandard {
 
   public:
 
-    NextStateGeneratorSummand(unsigned int summand, ATerm state, ns_info& info, unsigned int identifier)
+    NextStateGeneratorSummand(size_t summand, ATerm state, ns_info& info, size_t identifier)
                           : NextStateGeneratorStandard(state, info, identifier, true, summand) {
 
 #ifdef MCRL2_NEXTSTATE_DEBUG
@@ -715,7 +715,7 @@ class NextStateGeneratorSummand : public NextStateGeneratorStandard {
     }
 };
 
-NextStateGenerator *NextStateStandard::getNextStates(ATerm state, unsigned int index, NextStateGenerator *old)
+NextStateGenerator *NextStateStandard::getNextStates(ATerm state, size_t index, NextStateGenerator *old)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
         std::clog << "NextStateStandard::getNextStates(state, index, old) called, with " <<
@@ -751,7 +751,7 @@ ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
         }
 
         l = info.procvars;
-        for (int i=0; i<info.statelen; i++)
+        for (size_t i=0; i<info.statelen; i++)
         {
                 ATerm a = ATgetFirst(assigns);
                 assigns = ATgetNext(assigns);
@@ -841,7 +841,7 @@ void NextStateGeneratorStandard::SetTreeStateVars(ATerm tree, ATermList *vars)
         *vars = ATgetNext(*vars);
 }
 
-NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand, int SingleSummandIndex) : info(Info)
+NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info, size_t identifier, bool SingleSummand, size_t SingleSummandIndex) : info(Info)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
         std::clog << "NextStateGeneratorStandard::NextStateGeneratorStandard(State, Info, identifier, SingleSummand) called, with " << std::endl <<
@@ -863,7 +863,7 @@ NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Inf
         ATprotectList(&cur_nextstate);
 
         stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
-        for (int i=0; i<info.statelen; i++)
+        for (size_t i=0; i<info.statelen; i++)
         {
                 stateargs[i] = NULL;
         }
@@ -895,7 +895,7 @@ void NextStateGeneratorStandard::set_substitutions()
         switch ( info.stateformat )
         {
                 case GS_STATE_VECTOR:
-                        for (int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
+                        for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
                         {
                                 ATerm a = ATgetArgument((ATermAppl) cur_state,i);
                                 if ( !ATisEqual(a,info.nil) )
@@ -916,7 +916,7 @@ void NextStateGeneratorStandard::set_substitutions()
         *info.current_id = id;
 }
 
-void NextStateGeneratorStandard::reset(ATerm State, unsigned int SummandIndex)
+void NextStateGeneratorStandard::reset(ATerm State, size_t SummandIndex)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
         std::clog << "NextStateGeneratorStandard::reset(State, SummandIndex) called with:" << std::endl <<
