@@ -216,8 +216,7 @@ namespace mcrl2 {
           }
 
           unsigned int transitioncount = occurring_variable_count + m_bes.equations().size();
-          unsigned int statecount = m_bes.equations().size() + 1;
-          unsigned int deadlock = m_bes.equations().size(); // deadlock state
+          unsigned int statecount = m_bes.equations().size();// + 1;
           unsigned int initial_state = 0;
           std::stringstream aut;
           aut << "des(0," << transitioncount << "," << statecount << ")" << std::endl;
@@ -231,21 +230,21 @@ namespace mcrl2 {
           {
             std::pair<unsigned int, boolean_operand_t> info = statistics[i->variable()];
             unsigned int from = indices[i->variable()];
-
-            // Edge to deadlock state
+            
+            // Create selfloop self:block(...),op(...)
+            // recording block and operand.
             {
               std::stringstream label;
-              label << "block(" << info.first << "),op(" << info.second << ")";
-              unsigned int to = deadlock;
+              label << "self:block(" << info.first << "),op(" << info.second << ")";
               lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
               int label_index = labs.index(t);
               if ( label_index < 0 )
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
-                m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
+                m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),false);
               }
-              m_lts.add_transition(lts::transition(from,label_index,to));
+              m_lts.add_transition(lts::transition(from,label_index,from));
             }
 
             // Edges to successors
@@ -275,7 +274,6 @@ namespace mcrl2 {
             }
           }
 
-          // m_lts.set_type(lts::lts_aut);
         }
 
         void reduce_lts()
@@ -299,45 +297,18 @@ namespace mcrl2 {
 
         /// \brief Transform LTS back to BES.
         /// Reverse of tranlation LTS to BES. Unicity of labels was guaranteed by
-        /// the edges to the deadlock state.
+        /// the self-loops.
         void lts_to_bes()
         {
           if(core::gsDebug)
           {
             std::cerr << "Transforming reduced LTS to BES." << std::endl;
           }
-          // Find deadlock state
-          unsigned int state_count = m_lts.num_states();
-          std::map<unsigned int, bool> has_outgoing_transition;
-          for(unsigned int i = 0; i < state_count; ++i)
-          {
-            has_outgoing_transition[i] = false;
-          }
-
-          m_lts.sort_transitions(lts::src_lbl_tgt);
-          lts::transition_const_range transitions(m_lts.get_transitions());
-          for(lts::transition_const_range::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
-          {
-            has_outgoing_transition[i->from()] = true;
-          }
-
-          unsigned int deadlock_state = 0;
-          bool deadlock_found = false;
-          do
-          {  
-            assert(has_outgoing_transition.find(deadlock_state) != has_outgoing_transition.end());
-            deadlock_found = !has_outgoing_transition[deadlock_state];
-            if(!deadlock_found)
-            {
-              ++deadlock_state;
-            }
-          }
-          while (!deadlock_found && deadlock_state < state_count);
-          assert(deadlock_found); // Deadlock state must be present, otherwise
-                                  // something has severely gone wrong in reduction.
 
           // Build formulas
           unsigned int cur_state = 0;
+          m_lts.sort_transitions(lts::src_lbl_tgt);
+          lts::transition_const_range transitions(m_lts.get_transitions());
           lts::transition_const_range::const_iterator i = transitions.begin();
 
           atermpp::map<unsigned int, atermpp::vector<boolean_equation> > blocks;
@@ -351,9 +322,14 @@ namespace mcrl2 {
 
             while(i->from() == cur_state && i != transitions.end())
             {
-              if(i->to() == deadlock_state)
+              std::string label = pp(m_lts.action_label(i->label()));
+              size_t index = label.find(":");
+              if(index != std::string::npos)
               {
-                std::string label = pp(m_lts.action_label(i->label()));
+                // Self-loop recording info detected,
+                // determine block and operand
+                // first remove self: from label
+                label = label.substr(index+1, label.size());
                 size_t comma_pos = label.find(",");
 
                 std::string block_str = label.substr(0,comma_pos);
@@ -369,6 +345,7 @@ namespace mcrl2 {
               }
               else
               {
+                // Construct part of formula
                 std::stringstream name;
                 name << "X" << i->to();
                 variables.push_back(boolean_variable(name.str()));
