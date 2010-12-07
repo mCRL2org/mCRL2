@@ -40,12 +40,12 @@ namespace core {
       void leave(Expression const&)
       {}
 
-      // traverse non-containers
-      template <typename T>
-      void operator()(const T&, typename atermpp::detail::disable_if_container<T>::type* = 0)
-      {
-        // skip
-      }
+//      // traverse non-containers
+//      template <typename T>
+//      void operator()(const T&, typename atermpp::detail::disable_if_container<T>::type* = 0)
+//      {
+//        // skip
+//      }
 
       // traverse containers
       template <typename Container>
