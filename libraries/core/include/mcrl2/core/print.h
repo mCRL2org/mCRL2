@@ -129,9 +129,11 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
       {
         protected:
           std::ostream& out;
-          std::string m_sequence_separator;
-          std::string m_sequence_open_bracket;
-          std::string m_sequence_close_bracket;
+          bool m_print_sorts;
+
+          enum precedence_type {
+            max_precedence = 10000000
+          };
 
 #ifdef MCRL2_PRINT_DEBUG
           std::ostringstream debug;
@@ -149,9 +151,7 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
 
           print_traverser(std::ostream& o)
             : out(o),
-              m_sequence_separator(", "),
-              m_sequence_open_bracket("("),
-              m_sequence_close_bracket(")")
+              m_print_sorts(false)
           {}
 
           void print(const std::string& s)
@@ -162,45 +162,36 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
 #endif
           }
 
-          /// \brief Returns the separator for printing sequences
-          const std::string& sequence_separator() const
+          template <typename T>
+          int precedence(const T& t)
           {
-            return m_sequence_separator;
+            return max_precedence;
           }
 
-          /// \brief Returns the separator for printing sequences
-          std::string& sequence_separator()
-          {
-            return m_sequence_separator;
-          }
-
-          void set_sequence_separator(const std::string& separator, const std::string& open_bracket = "(", const std::string& close_bracket = ")")
-          {
-            m_sequence_separator = separator;
-            m_sequence_open_bracket = open_bracket;
-            m_sequence_close_bracket = close_bracket;
-          }
-
-          // override printing of containers
           template <typename Container>
-          void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+          void print_container(const Container& container,
+                               int container_precedence = -1,
+                               const std::string& separator = ", ",
+                               const std::string& open_bracket = "(",
+                               const std::string& close_bracket = ")"
+                              )
           {
-            out << "!!!";
-            if (container.size() > 0)
-            {
-              print(m_sequence_open_bracket);
-            }
             for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
             {
-              if (i != container.end())
+              if (i != container.begin())
               {
-                out << m_sequence_separator;
+                print(separator);
+              }
+              bool print_brackets = (precedence(*i) < container_precedence);
+              if (print_brackets)
+              {
+                print(open_bracket);
               }
               static_cast<Derived&>(*this)(*i);
-            }
-            if (container.size() > 0)
-            {
-              print(m_sequence_close_bracket);
+              if (print_brackets)
+              {
+                print(close_bracket);
+              }
             }
           }
 
