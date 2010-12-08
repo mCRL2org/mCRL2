@@ -716,7 +716,9 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, size_t len,
     return ATmakeAppl2(afunS,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),ATinsert(stored,ATgetArgument(tree,0)),len+1,max));
   } else if ( isM(tree) )
   {
-    return ATmakeAppl3(afunM,(ATerm) ATmakeInt(len-ATindexOf(stored,ATgetArgument(tree,0),0)),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
+    size_t n=len-ATindexOf(stored,ATgetArgument(tree,0),0);
+    assert(n < ((size_t)1)<<(sizeof(int)*8-1));
+    return ATmakeAppl3(afunM,(ATerm) ATmakeInt((int)n),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
   } else if ( isF(tree) )
   {
     return ATmakeAppl3(afunF,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
@@ -1000,7 +1002,8 @@ ATerm RewriterInnermost::OpId2Int(ATermAppl Term, bool add_opids)
     {
       return (ATerm) Term;
     }
-    i = ATmakeInt(num_opids);
+    assert(num_opids<((size_t)1)<<(sizeof(int)*8-1));
+    i = ATmakeInt((int)num_opids);
     ATtablePut(term2int,(ATerm) Term,(ATerm) i);
     num_opids++;
   }

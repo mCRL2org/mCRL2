@@ -17,13 +17,13 @@
 using namespace mcrl2::lts;
 using namespace std;
 
-static string c(const unsigned int n)  // Awkward trick, should be a better way to do this. Please replace....
+static string c(const size_t n)  // Awkward trick, should be a better way to do this. Please replace....
 { stringstream out;
   out << n;
   return out.str();
 }
 
-static void read_newline(istream &is,const unsigned int lineno=1)
+static void read_newline(istream &is,const size_t lineno=1)
 { 
   char ch;
   is.get(ch);
@@ -55,9 +55,9 @@ static void read_newline(istream &is,const unsigned int lineno=1)
 
 static void read_aut_header(
               istream &is, 
-              unsigned int &initial_state, 
-              unsigned int &num_transitions, 
-              unsigned int &num_states)
+              size_t &initial_state, 
+              size_t &num_transitions, 
+              size_t &num_states)
 {
   string s;
   is.width(3);
@@ -106,10 +106,10 @@ static void read_aut_header(
 
 static bool read_aut_transition(
               istream &is, 
-              unsigned int &from, 
+              size_t &from, 
               string &label, 
-              unsigned int &to,
-              const unsigned int lineno)
+              size_t &to,
+              const size_t lineno)
 {
   char ch;
   is >> skipws >> ch;
@@ -169,8 +169,8 @@ static bool read_aut_transition(
 
 static void read_from_aut(lts_aut_t &l, istream &is)
 {
-  unsigned int line_no = 1;
-  unsigned int initial_state=0, ntrans=0, nstate=0;
+  size_t line_no = 1;
+  size_t initial_state=0, ntrans=0, nstate=0;
 
   read_aut_header(is,initial_state,ntrans,nstate);
 
@@ -188,7 +188,7 @@ static void read_from_aut(lts_aut_t &l, istream &is)
   map < string, size_t > labs;
   while ( !is.eof() )
   {
-    unsigned int from,to;
+    size_t from,to;
     string s;
 
     line_no++;

@@ -310,7 +310,7 @@ class specification_basic_type:public boost::noncopyable
 
     /*****************  store and retrieve basic objects  ******************/
 
-    long addObject(ATermAppl o, bool &b)
+    size_t addObject(ATermAppl o, bool &b)
     { ATbool isnew=ATfalse;
       size_t result=ATindexedSetPut(objectIndexTable,(ATerm)o,&isnew);
       if (objectdata.size()<=result)
@@ -924,8 +924,7 @@ class specification_basic_type:public boost::noncopyable
                        const process_identifier procDecl,
                        const processstatustype status)
     { processstatustype s;
-      int n=objectIndex(procDecl);
-      assert(n>=0); /* if this fails, the process does not exist */
+      size_t n=objectIndex(procDecl);
       s=objectdata[n].processstatus;
 
       if (s==unknown)
@@ -1050,8 +1049,7 @@ class specification_basic_type:public boost::noncopyable
                        atermpp::set <process_identifier>  &visited)
     { if (visited.count(procDecl)==0)
       { visited.insert(procDecl);
-        int n=objectIndex(procDecl);
-        assert(n>=0); /* if this fails, the process does not exist */
+        size_t n=objectIndex(procDecl);
         if (objectdata[n].processstatus==pCRL)
         { pcrlprocesses.push_back(procDecl);
         }
@@ -1546,7 +1544,7 @@ class specification_basic_type:public boost::noncopyable
     // that the process is defined in objectnames.
 
     process_instance transform_process_assignment_to_process(const process_instance_assignment procId)
-    { long n=objectIndex(procId.identifier());
+    { size_t n=objectIndex(procId.identifier());
       variable_list variables;
       data_expression_list terms;
 
@@ -2085,7 +2083,7 @@ class specification_basic_type:public boost::noncopyable
     void procstovarheadGNF(const atermpp::vector < process_identifier> &procs)
     { /* transform the processes in procs into newprocs */
       for(atermpp::vector < process_identifier >::const_iterator i=procs.begin(); i!=procs.end(); ++i)
-      { long n=objectIndex(*i);
+      { size_t n=objectIndex(*i);
 
         // The intermediate variable result is needed here
         // because objectdata can be realloced as a side
@@ -2300,7 +2298,7 @@ class specification_basic_type:public boost::noncopyable
       { const process_expression first=seq(sequence).left();
         if (is_process_instance(first))
         { result.push_back(first);
-          long n=objectIndex(process_instance(first).identifier());
+          size_t n=objectIndex(process_instance(first).identifier());
           if (objectdata[n].canterminate)
           { extract_names(seq(sequence).right(),result);
           }
@@ -2324,7 +2322,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_seq(oldbody))
       { const process_expression first=seq(oldbody).left();
         if (is_process_instance(first))
-        { long n=objectIndex(process_instance(first).identifier());
+        { size_t n=objectIndex(process_instance(first).identifier());
           if (objectdata[n].canterminate)
           { const process_identifier procId=process_instance(first).identifier();
             const variable_list pars=parscollect(seq(oldbody).right(),newbody);
@@ -2354,7 +2352,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_seq(t))
       { const process_instance firstproc=seq(t).left();
-        long n=objectIndex(firstproc.identifier());
+        size_t n=objectIndex(firstproc.identifier());
         if (objectdata[n].canterminate)
         { return firstproc.actual_parameters() + argscollect(seq(t).right());
         }
@@ -2371,7 +2369,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_seq(t))
       { const process_expression firstproc=seq(t).left();
-        long n=objectIndex(process_instance(firstproc).identifier());
+        size_t n=objectIndex(process_instance(firstproc).identifier());
         if (objectdata[n].canterminate)
         { return seq(firstproc,cut_off_unreachable_tail(seq(t).right()));
         }
@@ -2635,7 +2633,7 @@ class specification_basic_type:public boost::noncopyable
           return body;
         }
 
-        const long n=objectIndex(t);
+        const size_t n=objectIndex(t);
         if (objectdata[n].processstatus==mCRL)
         { todo.push_back(t);
           return process_expression();
@@ -2715,7 +2713,7 @@ class specification_basic_type:public boost::noncopyable
        be labelled with GNF to indicate that they are in
        Greibach Normal Form. */
 
-    { long n=objectIndex(procIdDecl);
+    { size_t n=objectIndex(procIdDecl);
 
       if (objectdata[n].processstatus==pCRL)
       {
@@ -2888,7 +2886,7 @@ class specification_basic_type:public boost::noncopyable
     { variable_list parameters;
       for (atermpp::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
                    walker!=pCRLprocs.end(); ++walker)
-        { long n=objectIndex(*walker);
+        { size_t n=objectIndex(*walker);
           parameters=joinparameters(parameters,objectdata[n].parameters,n);
         }
       return parameters;
@@ -4747,7 +4745,7 @@ class specification_basic_type:public boost::noncopyable
     /* A pair of initial state and linear process must be extracted
        from the underlying GNF */
     { bool singlecontrolstate=false;
-      int n=objectIndex(procId);
+      size_t n=objectIndex(procId);
 
       atermpp::vector < process_identifier > pCRLprocs;
       pCRLprocs.push_back(procId);
@@ -6331,7 +6329,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance(t))
       {
         summand_list t3=generateLPEmCRL(process_instance(t).identifier(),/*canterminate,*/regular,pars,init);
-        long n=objectIndex(process_instance(t).identifier());
+        size_t n=objectIndex(process_instance(t).identifier());
         data_expression_list args=process_instance(t).actual_parameters();
         init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
 
@@ -6473,7 +6471,7 @@ class specification_basic_type:public boost::noncopyable
     { /* If regular=1, then a regular version of the pCRL processes
          must be generated */
 
-      long n=objectIndex(procIdDecl);
+      size_t n=objectIndex(procIdDecl);
 
       if ((objectdata[n].processstatus==GNF)||
           (objectdata[n].processstatus==pCRL)||
@@ -6611,7 +6609,7 @@ class specification_basic_type:public boost::noncopyable
 
     void alphaconversion(const process_identifier procId, const variable_list parameters)
     {
-      long n=objectIndex(procId);
+      size_t n=objectIndex(procId);
 
       if ((objectdata[n].processstatus==GNF)||
           (objectdata[n].processstatus==multiAction))
@@ -6746,7 +6744,7 @@ class specification_basic_type:public boost::noncopyable
                   atermpp::set < process_identifier > &visited,
                   bool &contains_if_then,
                   const bool print_info)
-    { long n=objectIndex(procId);
+    { size_t n=objectIndex(procId);
 
       if (visited.count(procId)==0)
       { visited.insert(procId);
@@ -6902,7 +6900,7 @@ class specification_basic_type:public boost::noncopyable
                   const process_identifier procId,
                   bool &stable,
                   atermpp::set < process_identifier > &visited)
-    { long n=objectIndex(procId);
+    { size_t n=objectIndex(procId);
 
       if (visited.count(procId)==0)
       { visited.insert(procId);
@@ -6941,7 +6939,7 @@ class specification_basic_type:public boost::noncopyable
       { return visited_id[procId];
       }
 
-      long n=objectIndex(procId);
+      size_t n=objectIndex(procId);
 
       if ((objectdata[n].processstatus!=mCRL)&&
              (objectdata[n].canterminate==0))

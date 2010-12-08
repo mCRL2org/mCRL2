@@ -11,8 +11,8 @@ class dot_lexer
 {
   public:
     ATermIndexedSet protect_table;
-    std::map < std::string, unsigned int> labelTable;
-    std::map < std::string, unsigned int> stateTable;
+    std::map < std::string, unsigned size_t> labelTable;
+    std::map < std::string, unsigned size_t> stateTable;
     std::vector < std::string > state_sequence;
     mcrl2::lts::lts_dot_t *dot_lts;
 };

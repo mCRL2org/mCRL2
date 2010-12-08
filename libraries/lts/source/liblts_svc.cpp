@@ -55,7 +55,7 @@ static void read_from_svc(lts_svc_t &l, string const& filename)
   {
     l.add_state();
   }
-  l.set_initial_state((unsigned int) SVCgetInitialState(&f));
+  l.set_initial_state((size_t) SVCgetInitialState(&f));
 
 
   SVCstateIndex from, to;
@@ -63,8 +63,8 @@ static void read_from_svc(lts_svc_t &l, string const& filename)
   SVCparameterIndex param;
   while ( SVCgetNextTransition(&f,&from,&label,&to,&param) )
   {
-    unsigned int max = (unsigned int) ((from > to)?from:to);
-    for (unsigned int i=l.num_states(); i<=max; i++)
+    size_t max = (size_t) ((from > to)?from:to);
+    for (size_t i=l.num_states(); i<=max; i++)
     {
       if ( svc_file_has_state_info )
       {
@@ -76,20 +76,20 @@ static void read_from_svc(lts_svc_t &l, string const& filename)
       }
     }
 
-    for (unsigned int i=l.num_action_labels(); i<=((unsigned int) label); i++)
+    for (size_t i=l.num_action_labels(); i<=(size_t)label; i++)
     {
       l.add_action(SVClabel2ATerm(&f,(SVClabelIndex) i));
     }
 
-    l.add_transition(transition((unsigned int) from,
-                                (unsigned int) label,
-                                (unsigned int) to));
+    l.add_transition(transition((size_t)from,
+                                (size_t)label,
+                                (size_t)to));
   }
 
   SVCclose(&f);
 }
 
-static void write_to_svc(const lts_svc_t& l, string const& filename)
+static void write_to_svc(const lts_svc_t& l, const string& filename)
 {
   SVCfile f;
   SVCbool b = l.has_state_info() ? SVCfalse : SVCtrue;
@@ -109,17 +109,21 @@ static void write_to_svc(const lts_svc_t& l, string const& filename)
 
   SVCsetCreator(&f,const_cast < char* > ("liblts (mCRL2)"));
 
+  assert(l.initial_state()< ((size_t)1 << (sizeof(int)*8-1)));
   SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? 
-              (ATerm)l.state_label(l.initial_state()) : (ATerm) ATmakeInt(l.initial_state()) ,&b));
+              (ATerm)l.state_label(l.initial_state()) : (ATerm) ATmakeInt((int)l.initial_state()) ,&b));
 
   SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
   
   for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
+    assert(t.front().from() < ((size_t)1 << (sizeof(int)*8-1)));
     SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? 
-                (ATerm)l.state_label(t.front().from()) : (ATerm) ATmakeInt(t.front().from()) ,&b);
+                (ATerm)l.state_label(t.front().from()) : (ATerm) ATmakeInt((int)t.front().from()) ,&b);
     SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t.front().label()),&b);
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_label(t.front().to()) : (ATerm) ATmakeInt(t.front().to()) ,&b);
+    assert(t.front().to() < ((size_t)1 << (sizeof(int)*8-1)));
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_label(t.front().to()) : 
+                        (ATerm) ATmakeInt((int)t.front().to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 

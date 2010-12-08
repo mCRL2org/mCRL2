@@ -16,9 +16,9 @@
 #include "liblts_dotlexer.h"
 
 // Function declarations
-static void dot_add_transition(unsigned int from, const std::string &label_string, unsigned int to);
+static void dot_add_transition(size_t from, const std::string &label_string, size_t to);
 static void dot_add_transitions(const std::vector <std::string> &states, const std::string &label);
-static unsigned int dot_state(const std::string &id, const std::string &label);
+static size_t dot_state(const std::string &id, const std::string &label);
 
 //external declarations from dotlexer.ll
 void dotyyerror(const char *s);
@@ -123,11 +123,11 @@ node_id : ID                         { $$=$1; }
 
 %%
 
-static void dot_add_transition(unsigned int from, const std::string &label_string, unsigned int to)
+static void dot_add_transition(size_t from, const std::string &label_string, size_t to)
 {
   using namespace mcrl2::lts;
 
-  std::map < std::string, unsigned int>::const_iterator label_index=dot_lexer_obj->labelTable.find(label_string);
+  std::map < std::string, size_t>::const_iterator label_index=dot_lexer_obj->labelTable.find(label_string);
   if (label_index==dot_lexer_obj->labelTable.end())
   { 
     // Not found. This label does not occur in the dot.
@@ -155,12 +155,12 @@ static void dot_add_transitions(const std::vector <std::string> &state_sequence,
   }
 }
 
-static unsigned int dot_state(const std::string &id, const std::string &label)
+static size_t dot_state(const std::string &id, const std::string &label)
 {
   using namespace mcrl2::lts::detail;
-  unsigned int idx;
+  size_t idx;
 
-  std::map < std::string, unsigned int>::const_iterator state_index=dot_lexer_obj->stateTable.find(id);
+  std::map < std::string, size_t>::const_iterator state_index=dot_lexer_obj->stateTable.find(id);
   if (state_index==dot_lexer_obj->stateTable.end())
   { 
     // Not found. This state does not occur in the dot.

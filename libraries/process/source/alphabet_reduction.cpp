@@ -340,17 +340,18 @@ namespace mcrl2 {
         return ATreverse(m);
       }
       
-      static unsigned get_max_allowed_length(ATermList V){
+      static size_t get_max_allowed_length(ATermList V){
         //returns the length of the longest allowed multiaction (min 1).
-        unsigned m = 1;
-        for (; !ATisEmpty(V); V=ATgetNext(V)){
-          unsigned c=ATgetLength(ATLgetArgument(ATAgetFirst(V),0));
+        size_t m = 1;
+        for (; !ATisEmpty(V); V=ATgetNext(V))
+        {
+          size_t c=ATgetLength(ATLgetArgument(ATAgetFirst(V),0));
           if(c>m) m=c;
         }
         return m;
       }
       
-      static unsigned get_max_comm_length(ATermList C){
+      static size_t get_max_comm_length(ATermList C){
         //returns the length of the longest allowed multiaction (0 if unbounded).
         unsigned m = 1;
         for (; !ATisEmpty(C); C=ATgetNext(C)){

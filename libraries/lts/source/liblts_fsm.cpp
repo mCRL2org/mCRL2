@@ -26,12 +26,12 @@ using namespace mcrl2::lts::detail;
 static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
 {
   // determine number of state parameters
-  unsigned int num_params;
+  size_t num_params;
   num_params=l.process_parameters().size();
 
   // print parameters with used values
   gsVerboseMsg("writing parameter table...\n");
-  for(unsigned int i=0; i<num_params; i++)
+  for(size_t i=0; i<num_params; i++)
   {
 
     const std::vector < std::string > vals = l.state_element_values(i); 
@@ -47,9 +47,9 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
   // print states
   gsVerboseMsg("writing states...\n");
   os << "---" << std::endl;
-  for(unsigned int i=0; i<l.num_states(); i++)
+  for(size_t i=0; i<l.num_states(); i++)
   {
-    unsigned int idx = i;
+    size_t idx = i;
     // make sure that the initial state is first
     if (i == 0)
     {
@@ -62,7 +62,7 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
     
     const state_label_fsm state_pars=l.state_label(idx);
 
-    for(unsigned int j=0; j<state_pars.size() ; j++)
+    for(size_t j=0; j<state_pars.size() ; j++)
     {
       if (j > 0) 
       {

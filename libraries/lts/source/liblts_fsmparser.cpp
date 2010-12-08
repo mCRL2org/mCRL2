@@ -92,8 +92,8 @@
 
 // Local variables
 std::vector<bool> ignore_par; /* Records which parameters will be ignored */
-unsigned int num_pars;        /* Number of parameters */
-unsigned int par_index;       /* Index of current parameter */
+size_t num_pars;        /* Number of parameters */
+size_t par_index;       /* Index of current parameter */
 
 // Function declarations
 
@@ -101,7 +101,7 @@ unsigned int par_index;       /* Index of current parameter */
 void fsmyyerror(const char *s);
 int fsmyylex(void);
 
-char* intToCString(int i);
+char* intToCString(size_t i);
 
 
 
@@ -1813,7 +1813,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 318 "liblts_fsmparser.yy"
     {
-      unsigned int i = fsm_lexer_obj->fsm_lts->add_state(fsm_lexer_obj->stateVector);
+      size_t i = fsm_lexer_obj->fsm_lts->add_state(fsm_lexer_obj->stateVector);
       if ( i == 0 )
       {
         fsm_lexer_obj->fsm_lts->set_initial_state( i );
@@ -1841,10 +1841,10 @@ yyreduce:
 #line 353 "liblts_fsmparser.yy"
     {
       using namespace mcrl2::lts;
-      unsigned int frState = atoi((yyvsp[(1) - (3)]).c_str())-1;
-      unsigned int toState = atoi((yyvsp[(2) - (3)]).c_str())-1;
+      size_t frState = atoi((yyvsp[(1) - (3)]).c_str())-1;
+      size_t toState = atoi((yyvsp[(2) - (3)]).c_str())-1;
 
-      std::map < std::string, unsigned int>::const_iterator label_index=fsm_lexer_obj->labelTable.find((yyvsp[(3) - (3)]));
+      std::map < std::string, size_t>::const_iterator label_index=fsm_lexer_obj->labelTable.find((yyvsp[(3) - (3)]));
       if (label_index==fsm_lexer_obj->labelTable.end())
       { // Not found. This label does not occur in the fsm.
         const lts_fsm_t::labels_size_type n=fsm_lexer_obj->fsm_lts->add_action((yyvsp[(3) - (3)]),(yyvsp[(3) - (3)])=="tau");
@@ -2094,7 +2094,7 @@ yyreturn:
 #line 384 "liblts_fsmparser.yy"
 
 
-char* intToCString( int i )
+char* intToCString( size_t i )
 {
     std::ostringstream oss;
     oss << i;

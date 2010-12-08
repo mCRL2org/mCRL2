@@ -23,18 +23,16 @@
 #define SIM_HASHTABLE_H
 #include <vector>
 
-//typedef unsigned int size_t;
-
 struct bucket2
 {
   size_t x,y;
-  int next;
+  size_t next;
 };
 
 struct bucket3
 {
   size_t x,y,z;
-  int next;
+  size_t next;
 };
 
 class hash_table2
@@ -49,11 +47,11 @@ class hash_table2
 
   private:
     std::vector<bucket2> buckets;
-    std::vector<int> table;
+    std::vector<size_t> table;
     size_t mask;
     size_t removed_count;
     size_t hash(size_t x,size_t y);
-    int hfind(size_t h,size_t x,size_t y);
+    size_t hfind(size_t h,size_t x,size_t y);
     bool check_table();
 
     friend class hash_table2_iterator;
@@ -86,11 +84,11 @@ class hash_table3
 
   private:
     std::vector<bucket3> buckets;
-    std::vector<int> table;
+    std::vector<size_t> table;
     size_t mask;
     size_t removed_count;
     size_t hash(size_t x,size_t y,size_t z);
-    int hfind(size_t h,size_t x,size_t y,size_t z);
+    size_t hfind(size_t h,size_t x,size_t y,size_t z);
     bool check_table();
 
     friend class hash_table3_iterator;

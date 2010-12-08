@@ -9,9 +9,9 @@
 /// \file sim_hashtable.cpp
 #include "mcrl2/lts/detail/sim_hashtable.h"
 
-#define NOT_FOUND   (-1)
-#define END_OF_LIST (-1)
-#define REMOVED     (-2)
+#define NOT_FOUND   (size_t)(-1)
+#define END_OF_LIST (size_t)(-1)
+#define REMOVED     (size_t)(-2)
 
 /* ---------------- hash_table_iterator ----------------------------- */
 
@@ -111,7 +111,7 @@ bool hash_table2::find(size_t x,size_t y)
 void hash_table2::remove(size_t x,size_t y)
 {
   bucket2 b;
-  int i, prev_i;
+  size_t i, prev_i;
   size_t h = hash(x,y);
   i = table[h];
   if (i != END_OF_LIST)
@@ -142,9 +142,9 @@ void hash_table2::remove(size_t x,size_t y)
   }
 }
 
-int hash_table2::hfind(size_t h,size_t x,size_t y)
+size_t hash_table2::hfind(size_t h,size_t x,size_t y)
 {
-  int i = table[h];
+  size_t i = table[h];
   bucket2 b;
   while (i != END_OF_LIST)
   {
@@ -233,7 +233,7 @@ bool hash_table3::find(size_t x,size_t y,size_t z)
 void hash_table3::remove(size_t x,size_t y,size_t z)
 {
   bucket3 b;
-  int i, prev_i;
+  size_t i, prev_i;
   size_t h = hash(x,y,z);
   i = table[h];
   if (i != END_OF_LIST)
@@ -264,9 +264,9 @@ void hash_table3::remove(size_t x,size_t y,size_t z)
   }
 }
 
-int hash_table3::hfind(size_t h,size_t x,size_t y,size_t z)
+size_t hash_table3::hfind(size_t h,size_t x,size_t y,size_t z)
 {
-  int i = table[h];
+  size_t i = table[h];
   bucket3 b;
   while (i != END_OF_LIST)
   {

@@ -59,7 +59,7 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
   {
     l.add_state();
   }
-  l.set_initial_state((unsigned int) SVCgetInitialState(&f));
+  l.set_initial_state((size_t) SVCgetInitialState(&f));
 
 
   SVCstateIndex from, to;
@@ -67,8 +67,8 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
   SVCparameterIndex param;
   while ( SVCgetNextTransition(&f,&from,&label,&to,&param) )
   {
-    unsigned int max = (unsigned int) ((from > to)?from:to);
-    for (unsigned int i=l.num_states(); i<=max; i++)
+    size_t max = (from > to)?from:to;
+    for (size_t i=l.num_states(); i<=max; i++)
     {
       if ( svc_file_has_state_info )
       {
@@ -83,15 +83,15 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
       }
     }
 
-    for (unsigned int i=l.num_action_labels(); i<=((unsigned int) label); i++)
+    for (size_t i=l.num_action_labels(); i<=label; i++)
     {
       ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
       l.add_action((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
     }
 
-    l.add_transition(transition((unsigned int) from,
-                                (unsigned int) label,
-                                (unsigned int) to));
+    l.add_transition(transition((size_t) from,
+                                (size_t) label,
+                                (size_t) to));
   }
 
   SVCclose(&f);
@@ -119,7 +119,7 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
       {
         ATerm data;
         unsigned long position = 0;
-        for (unsigned int i=0; i<8; i++)
+        for (size_t i=0; i<8; i++)
         {
           position = position*0x100 + buf[7-i];
         }
@@ -196,7 +196,7 @@ static void add_extra_mcrl2_lts_data(std::string const &filename, ATermAppl data
   }
 
   unsigned char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
-  for (unsigned int i=0; i<8; i++)
+  for (size_t i=0; i<8; i++)
   {
     buf[i] = position % 0x100;
     position /= 0x100;

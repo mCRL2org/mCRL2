@@ -557,7 +557,7 @@ namespace mcrl2
       atermpp::map<atermpp::aterm,size_t> repr_low;
       atermpp::map<atermpp::aterm,atermpp::aterm_list> repr_next;
       atermpp::map<atermpp::aterm,atermpp::aterm> repr_back;
-      int count;
+      size_t count;
 
       repr_number[v]=0;
       count = 0;
@@ -721,7 +721,7 @@ namespace mcrl2
         if ( lgopts->expl_strat == es_random )
         {
           NextStateGenerator *nsgen = NULL;
-          unsigned int number_of_outgoing_transitions=0;
+          size_t number_of_outgoing_transitions=0;
           while (( current_state < lgopts->max_states ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
           {
             ATermAppl Transition;
@@ -903,10 +903,10 @@ namespace mcrl2
               break;
             }
 
-            int len = ATgetLength(tmp_trans);
+            size_t len = ATgetLength(tmp_trans);
             if ( len > 0 )
             {
-              for (int i=0; i<len; i++)
+              for (size_t i=0; i<len; i++)
               {
                 if (num_states-current_state <= lgopts->todo_max)
                 { add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
@@ -1058,7 +1058,7 @@ namespace mcrl2
 
               // Randomly select one element from the list for experiments.
               if (ATgetLength(new_tmp_trans)>0)
-              { int r = rand()%ATgetLength(new_tmp_trans);
+              { size_t r = rand()%ATgetLength(new_tmp_trans);
                 tmp_trans=ATgetSlice(new_tmp_trans,r,r+1);
                 tmp_states=ATgetSlice(new_tmp_states,r,r+1);
               }
@@ -1074,11 +1074,11 @@ namespace mcrl2
               break;
             }
 
-            int len = ATgetLength(tmp_trans);
+            size_t len = ATgetLength(tmp_trans);
             if ( len > 0 )
             {
               state_t new_state;
-              for (int i=0; i<len; i++)
+              for (size_t i=0; i<len; i++)
               {
                 add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
                 new_state = ATgetFirst(tmp_states);

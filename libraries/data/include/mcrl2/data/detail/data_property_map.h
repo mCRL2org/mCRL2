@@ -77,13 +77,6 @@ namespace detail {
         return out.str();
       }
 
-      std::string print(unsigned int n) const
-      {
-        std::ostringstream out;
-        out << n;
-        return out.str();
-      }
-
       std::string print(std::string s) const
       {
         return s;

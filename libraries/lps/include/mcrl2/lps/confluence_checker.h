@@ -161,22 +161,22 @@ class Confluence_Checker {
     bool f_generate_invariants;
 
     /// \brief The number of summands of the current LPS.
-    int f_number_of_summands;
+    size_t f_number_of_summands;
 
     /// \brief An integer array, storing intermediate results per summand.
-    int* f_intermediate;
+    size_t* f_intermediate;
 
     /// \brief Writes a dot file of the BDD created when checking the confluence of summands a_summand_number_1 and a_summand_number_2.
-    void save_dot_file(int a_summand_number_1, int a_summand_number_2);
+    void save_dot_file(size_t a_summand_number_1, size_t a_summand_number_2);
 
     /// \brief Outputs a path in the BDD corresponding to the condition at hand that leads to a node labelled false.
     void print_counter_example();
 
     /// \brief Checks the confluence of summand a_summand_1 and a_summand_2
-    bool check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, int a_summand_number_1, ATermAppl a_summand_2, int a_summand_number_2);
+    bool check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, size_t a_summand_number_1, ATermAppl a_summand_2, size_t a_summand_number_2);
 
     /// \brief Checks the confluence of summand a_summand concerning all other tau-summands.
-    ATermAppl check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked);
+    ATermAppl check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, size_t a_summand_number, bool& a_is_marked);
   public:
     /// \brief Constructor that initializes Confluence_Checker::f_lps, Confluence_Checker::f_bdd_prover,
     /// \brief Confluence_Checker::f_generate_invariants and Confluence_Checker::f_dot_file_name.
@@ -204,7 +204,7 @@ class Confluence_Checker {
     /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
     /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
     /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is checked.
-    ATermAppl check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number);
+    ATermAppl check_confluence_and_mark(ATermAppl a_invariant, size_t a_summand_number);
 };
 
 #endif

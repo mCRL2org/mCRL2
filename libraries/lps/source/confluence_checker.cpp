@@ -251,7 +251,7 @@ using namespace mcrl2::core::detail;
 // Class Confluence_Checker -----------------------------------------------------------------------
   // Class Confluence_Checker - Functions declared private ----------------------------------------
 
-    void Confluence_Checker::save_dot_file(int a_summand_number_1, int a_summand_number_2) {
+    void Confluence_Checker::save_dot_file(size_t a_summand_number_1, size_t a_summand_number_2) {
       if (!f_dot_file_name.empty()) 
       {
         std::ostringstream v_file_name(f_dot_file_name);
@@ -282,7 +282,7 @@ using namespace mcrl2::core::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    bool Confluence_Checker::check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, int a_summand_number_1, ATermAppl a_summand_2, int a_summand_number_2) {
+    bool Confluence_Checker::check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, size_t a_summand_number_1, ATermAppl a_summand_2, size_t a_summand_number_2) {
       assert(is_tau_summand(a_summand_1));
       ATermList v_variables = ATLgetArgument(ATAgetArgument(specification_to_aterm(f_lps), 3), 0);
       bool v_is_confluent = true;
@@ -333,11 +333,11 @@ using namespace mcrl2::core::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    ATermAppl Confluence_Checker::check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked) {
+    ATermAppl Confluence_Checker::check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, size_t a_summand_number, bool& a_is_marked) {
       assert(is_tau_summand(a_summand));
       ATermList v_summands = ATLgetArgument(ATAgetArgument(specification_to_aterm(f_lps), 3), 1);
       ATermAppl v_summand, v_marked_summand;
-      int v_summand_number = 1;
+      size_t v_summand_number = 1;
       bool v_is_confluent = true;
       bool v_current_summands_are_confluent;
 
@@ -436,7 +436,7 @@ using namespace mcrl2::core::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    ATermAppl Confluence_Checker::check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number) {
+    ATermAppl Confluence_Checker::check_confluence_and_mark(ATermAppl a_invariant, size_t a_summand_number) {
       ATermAppl v_process_equation = linear_process_to_aterm(f_lps.process()); //ATAgetArgument(f_lps, 3);
       ATermList v_summands = ATLgetArgument(v_process_equation, 1);
       ATermAppl v_summand;
@@ -445,10 +445,10 @@ using namespace mcrl2::core::detail;
       ATermAppl v_multi_actions_or_delta;
       ATermList v_multi_actions;
       bool v_is_marked = false;
-      int v_summand_number = 1;
+      size_t v_summand_number = 1;
 
       f_number_of_summands = ATgetLength(v_summands);
-      f_intermediate = (int*) calloc(f_number_of_summands + 2, sizeof(int));
+      f_intermediate = (size_t*) calloc(f_number_of_summands + 2, sizeof(size_t));
       if (f_intermediate == 0) {
         gsErrorMsg("Insufficient memory.\n");
       }
