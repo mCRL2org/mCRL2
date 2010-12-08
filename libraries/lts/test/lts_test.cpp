@@ -21,9 +21,9 @@ using namespace mcrl2;
 
 void test_lts(const std::string& test_description, 
               const lts::lts_aut_t &l,
-              unsigned int expected_label_count,
-              unsigned int expected_state_count,
-              unsigned int expected_transition_count
+              size_t expected_label_count,
+              size_t expected_state_count,
+              size_t expected_transition_count
              )
 {
   std::cout << "LPS test: " << test_description << " -----------------------------------------------\n";
@@ -140,9 +140,9 @@ void test_abp()
   "(73,\"tau\",59)    \n"
   ;
 
-  unsigned int expected_label_count = 5;
-  unsigned int expected_state_count = 74;
-  unsigned int expected_transition_count = 92;
+  size_t expected_label_count = 5;
+  size_t expected_state_count = 74;
+  size_t expected_transition_count = 92;
   std::istringstream is(ABP_AUT);
   lts::lts_aut_t l_abp;
   l_abp.load(is);
@@ -186,9 +186,9 @@ void test_reachability()
   "(4,\"unreachable\",0)\n"
   ;
 
-  unsigned int expected_label_count = 4;
-  unsigned int expected_state_count = 5;
-  unsigned int expected_transition_count = 4;
+  size_t expected_label_count = 4;
+  size_t expected_state_count = 5;
+  size_t expected_transition_count = 4;
 
   std::istringstream is(REACH);
   lts::lts_aut_t l_reach;

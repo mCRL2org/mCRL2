@@ -176,9 +176,9 @@ nextstate_format_vector nextstate_formats()
 }
 
 void check_lps2lts_specification(std::string const& specification,
-                                 const unsigned int expected_states,
-                                 const unsigned int expected_transitions,
-                                 const unsigned int expected_labels,
+                                 const size_t expected_states,
+                                 const size_t expected_transitions,
+                                 const size_t expected_labels,
                                  std::string priority_action = "")
 {
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";

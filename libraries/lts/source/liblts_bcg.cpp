@@ -55,23 +55,23 @@ static void read_from_bcg(lts_bcg_t &l, const string &filename)
     throw mcrl2::runtime_error("could not open BCG file '" + filename + "' for reading");
   }
 
-  unsigned int n;
+  size_t n;
 
   n = BCG_OT_NB_STATES(bcg_graph);
-  for (unsigned int i=0; i<n; i++)
+  for (size_t i=0; i<n; i++)
   {
     l.add_state();
   }
   l.set_initial_state(BCG_OT_INITIAL_STATE(bcg_graph));
 
   n = BCG_OT_NB_LABELS(bcg_graph);
-  for (unsigned int i=0; i<n; i++)
+  for (size_t i=0; i<n; i++)
   {
     const std::string s=BCG_OT_LABEL_STRING(bcg_graph,i);
     l.add_label(s,s=="i");
   }
 
-  unsigned int from,label,to;
+  size_t from,label,to;
   BCG_OT_ITERATE_PLN(bcg_graph,from,label,to)
   {
    l.add_transition(transition(from,label,to));
@@ -98,7 +98,7 @@ static void write_to_bcg(const lts_bcg_t &l, const string &filename)
   }
 
   char *buf = NULL;
-  unsigned int buf_size = 0;
+  size_t buf_size = 0;
   bool warn_non_i = true;
   bool warn_i = true;
  

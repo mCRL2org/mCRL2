@@ -33,9 +33,6 @@ namespace lts
 namespace detail
 {
 
-
-//typedef unsigned int size_t;
-
 template <class LTS_TYPE>
 class sim_partitioner
 {

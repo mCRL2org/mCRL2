@@ -72,7 +72,7 @@ void lts_dot_t::save(const string &filename) const
     os << " [ peripheries=2 ];" << endl;
     if ( has_state_info() )
     {
-      for (unsigned int i=0; i<num_states(); i++)
+      for (size_t i=0; i<num_states(); i++)
       {
         os << state_label(i).name() << " [ label=\"" << state_label(i).label() << "\" ];" << endl;
       }

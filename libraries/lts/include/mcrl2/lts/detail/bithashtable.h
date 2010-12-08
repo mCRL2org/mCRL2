@@ -60,7 +60,7 @@ namespace mcrl2
                            size_t &sh_a,
                            size_t &sh_b,
                            size_t &sh_c,
-                           unsigned int &sh_i)
+                           size_t &sh_i)
         {
           switch ( sh_i )
           {
@@ -84,15 +84,15 @@ namespace mcrl2
                              size_t &sh_a,
                              size_t &sh_b,
                              size_t &sh_c,
-                             unsigned int &sh_i)
+                             size_t &sh_i)
         {
           switch ( ATgetType(t) )
           {
             case AT_APPL:
               calc_hash_add(0x13ad3780,sh_a,sh_b,sh_c,sh_i);
               {
-                unsigned int len = ATgetArity(ATgetAFun((ATermAppl) t));
-                for (unsigned int i=0; i<len; i++)
+                size_t len = ATgetArity(ATgetAFun((ATermAppl) t));
+                for (size_t i=0; i<len; i++)
                 {
                   calc_hash_aterm(ATgetArgument((ATermAppl) t, i),sh_a,sh_b,sh_c,sh_i);
                 }
@@ -117,7 +117,7 @@ namespace mcrl2
         size_t calc_hash_finish(size_t &sh_a,
                                 size_t &sh_b,
                                 size_t &sh_c,
-                                unsigned int &sh_i)
+                                size_t &sh_i)
         {
           while ( sh_i != 0 )
           {
@@ -135,7 +135,7 @@ namespace mcrl2
           size_t sh_a = 0x9e3779b9;
           size_t sh_b = 0x65e3083a;
           size_t sh_c = 0xa45f7582;
-          unsigned int sh_i = 0;
+          size_t sh_i = 0;
 
           calc_hash_aterm(state,sh_a,sh_b,sh_c,sh_i);
           return calc_hash_finish(sh_a,sh_b,sh_c,sh_i) % m_bit_hash_table.size();

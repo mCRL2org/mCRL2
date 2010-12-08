@@ -41,7 +41,7 @@ namespace detail
 template <class LTS_TYPE>
     void merge(LTS_TYPE &l1, const LTS_TYPE &l2)
 { 
-  const unsigned int old_nstates=l1.num_states();
+  const size_t old_nstates=l1.num_states();
   l1.set_num_states(l1.num_states() + l2.num_states());
   
 
@@ -49,7 +49,7 @@ template <class LTS_TYPE>
   // currently have state information.
   if ( l1.has_state_info() && l2.has_state_info() )
   {
-    for (unsigned int i=0; i<l2.num_states(); ++i)
+    for (size_t i=0; i<l2.num_states(); ++i)
     {
       l1.add_state(l2.state_label(i));
     }
@@ -75,7 +75,7 @@ template <class LTS_TYPE>
 
     // Add the labels of this LTS and count the number of labels that
     // the resulting LTS will contain
-    for (unsigned int i = 0; i < l1.num_action_labels(); ++i)
+    for (size_t i = 0; i < l1.num_action_labels(); ++i)
     {
       if (labs.insert(std::pair <typename LTS_TYPE::action_label_t,typename LTS_TYPE::labels_size_type> 
                (l1.action_label(i),new_nlabels)).second)
@@ -84,7 +84,7 @@ template <class LTS_TYPE>
       } 
     }
     // Same for LTS l2
-    for (unsigned int i=0; i<l2.num_action_labels(); ++i)
+    for (size_t i=0; i<l2.num_action_labels(); ++i)
     {
       if (labs.insert(std::pair <type1,type2> 
                (l2.action_label(i),new_nlabels)).second)
@@ -95,12 +95,12 @@ template <class LTS_TYPE>
 
     // Update the tau-information
     std::vector<bool> new_taus(new_nlabels,false);
-    for (unsigned int i = 0; i < l1.num_action_labels(); ++i)
+    for (size_t i = 0; i < l1.num_action_labels(); ++i)
     { 
-      assert(labs[l1.action_label(i)] < (unsigned int)new_taus.size());
+      assert(labs[l1.action_label(i)] < (size_t)new_taus.size());
       new_taus[labs[l1.action_label(i)]] = l1.is_tau(i);
     }
-    for (unsigned int i = 0; i < l2.num_action_labels(); ++i)
+    for (size_t i = 0; i < l2.num_action_labels(); ++i)
     { 
       assert(labs[l2.action_label(i)] < new_taus.size());
       new_taus[labs[l2.action_label(i)]] = l2.is_tau(i);
@@ -138,7 +138,7 @@ template <class LTS_TYPE>
     // One of the LTSs does not have label info, so the resulting LTS
     // will not have label info either. Moreover, we consider the sets
     // of labels of the LTSs to be disjoint
-    const unsigned int old_nlabels=l1.num_action_labels();
+    const size_t old_nlabels=l1.num_action_labels();
 
     // Remove label info from this LTS, if any
     if ( l1.has_label_info() )
@@ -150,7 +150,7 @@ template <class LTS_TYPE>
     // information in both LTSs.
     
     // Add taus from LTS l2
-    for (unsigned int i = 0; i < l2.num_action_labels(); ++i)
+    for (size_t i = 0; i < l2.num_action_labels(); ++i)
     {
       l1.add_label(l2.is_tau(i));
     }
