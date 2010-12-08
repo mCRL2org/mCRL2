@@ -34,7 +34,7 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
 
   // create grid
   m_grid = new wxGrid( panel, GRAPE_GRID_PARAM, wxDefaultPosition, wxSize(400, 300));
-  m_grid->CreateGrid( p_parameter_declarations.GetCount(), 2 );
+  m_grid->CreateGrid( (unsigned int) p_parameter_declarations.GetCount(), 2 );
   for ( unsigned int i = 0; i < p_parameter_declarations.GetCount(); ++i )
   {
     // fill cells

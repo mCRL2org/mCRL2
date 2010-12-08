@@ -284,13 +284,13 @@ namespace grape
          * Visual object count function.
          * @return Returns the number of visual objects on the canvas.
          */
-        unsigned int count_visual_object( void );
+        size_t count_visual_object( void );
 
         /**
          * Visual object retrieval function.
          * @return Returns the visual object at the specified index in the list of visual objects.
          */
-        visual_object* get_visual_object( int p_i );
+        visual_object* get_visual_object( size_t p_i );
 
         /**
          * Finds the visual object representing an object.

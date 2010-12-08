@@ -47,7 +47,7 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble, bool p_edit_
   
   // create grid
   m_parameter_grid = new wxGrid( this, GRAPE_PARAMETER_GRID_TEXT, wxDefaultPosition, parameter_grid_size );
-  m_parameter_grid->CreateGrid( p_preamble->get_parameter_declarations_list().GetCount()+1, 2 );
+  m_parameter_grid->CreateGrid( (unsigned int) p_preamble->get_parameter_declarations_list().GetCount()+1, 2 );
   for ( unsigned int i = 0; i < p_preamble->get_parameter_declarations_list().GetCount(); ++i )
   {
     //fill cells
@@ -72,7 +72,7 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble, bool p_edit_
 
   // create grid
   m_localvar_grid = new wxGrid( this, GRAPE_LOCALVAR_GRID_TEXT, wxDefaultPosition, localvar_grid_size );
-  m_localvar_grid->CreateGrid( p_preamble->get_local_variable_declarations_list().GetCount()+1, 3 );
+  m_localvar_grid->CreateGrid( (unsigned int) p_preamble->get_local_variable_declarations_list().GetCount()+1, 3 );
   for ( unsigned int i = 0; i < p_preamble->get_local_variable_declarations_list().GetCount(); ++i )
   {
     //fill cells

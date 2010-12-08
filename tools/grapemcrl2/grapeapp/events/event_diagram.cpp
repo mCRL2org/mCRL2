@@ -778,10 +778,10 @@ bool grape_event_export_current_diagram_image::Do( void )
     }
 
     //calculate max (x,y) position of objects
-    unsigned int count = m_main_frame->get_glcanvas()->count_visual_object();
+    size_t count = m_main_frame->get_glcanvas()->count_visual_object();
     int maxx = 0;
     int maxy = 0;
-    for ( unsigned int i = 0; i < count; ++i )
+    for ( size_t i = 0; i < count; ++i )
     {
       visual_object* vis_obj = m_main_frame->get_glcanvas()->get_visual_object(i);
       if (vis_obj != 0)

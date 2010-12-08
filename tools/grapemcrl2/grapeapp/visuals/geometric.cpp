@@ -1165,8 +1165,8 @@ grape_direction grape::grapeapp::grab_bounding_box( const coordinate &p_center, 
 
 float grape::grapeapp::get_width_hint( const wxString &p_string )
 {
-  int length = p_string.Length();
-  int num_chars = length < 20 ? length : 20;
+  size_t length = p_string.Length();
+  size_t num_chars = length < 20 ? length : 20;
   wxString truncated = p_string.Left( num_chars );
   return CHARWIDTH * 0.0030f * num_chars;
 }

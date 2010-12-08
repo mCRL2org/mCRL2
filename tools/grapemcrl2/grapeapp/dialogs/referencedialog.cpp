@@ -126,7 +126,7 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
 
   // create grid
   m_grid = new wxGrid( panel, GRAPE_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
-  m_grid->CreateGrid( p_list_of_varupdate.GetCount(), 2 );
+  m_grid->CreateGrid( (unsigned int) p_list_of_varupdate.GetCount(), 2 );
   for ( unsigned int i = 0; i < p_list_of_varupdate.GetCount(); ++i )
   {
     // fill cells
@@ -246,7 +246,11 @@ void grape_reference_dialog::change_combobox()
     list_of_decl parameter_declarations = diagram_ptr->get_preamble()->get_parameter_declarations_list();
     
     // fill grid with parameters
-    int param_count = parameter_declarations.GetCount();
+		if (parameter_declarations.GetCount() > std::numeric_limits<int>::max()){
+			wxMessageBox( wxT("parameter_declarations count exceeds max int value"), wxT("Warning"), wxICON_INFORMATION);
+		}
+    int param_count = (int) parameter_declarations.GetCount();
+
     while ( m_grid->GetNumberRows() < param_count) m_grid->AppendRows();
     if (diagram_ptr != 0)
     {  
@@ -256,7 +260,7 @@ void grape_reference_dialog::change_combobox()
         m_grid->SetReadOnly(i, 0);
         m_grid->SetCellValue(i, 1, _T(""));
       }
-      start_index = parameter_declarations.GetCount();
+      start_index = (int) parameter_declarations.GetCount();
     }
    
     // fill grid with empty values

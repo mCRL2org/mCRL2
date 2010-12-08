@@ -632,20 +632,20 @@ void grape_glcanvas::set_canvas_state( const canvas_state &p_canvas_state )
   m_canvas_state = p_canvas_state;
 }
 
-unsigned int grape_glcanvas::count_visual_object( void )
+size_t grape_glcanvas::count_visual_object( void )
 {
   return m_visual_objects.GetCount();
 }
 
-visual_object* grape_glcanvas::get_visual_object( int p_i )
+visual_object* grape_glcanvas::get_visual_object( size_t p_i )
 {
   return m_visual_objects.Item( p_i );
 }
 
 visual_object *grape_glcanvas::get_visual_object( object *p_obj )
 {
-  unsigned int count = m_visual_objects.GetCount();
-  for ( unsigned int i = 0; i < count; ++i )
+  size_t count = m_visual_objects.GetCount();
+  for ( size_t i = 0; i < count; ++i )
   {
     visual_object* vis_obj = m_visual_objects.Item( i );
     if ( vis_obj->get_selectable_object() == p_obj )
@@ -660,15 +660,17 @@ visual_object *grape_glcanvas::get_visual_object( object *p_obj )
 visual_object* grape_glcanvas::get_selectable_visual_object( coordinate &p_coord )
 {
   visual_object* result = 0;
-  int count = m_visual_objects.GetCount();
-  for ( int i = count - 1; i >= 0; --i )
-  {
-    visual_object* vis_obj_ptr = m_visual_objects.Item( i );
-    if ( vis_obj_ptr->is_inside( p_coord ) )
+  size_t count = m_visual_objects.GetCount();
+	if (count > 0){
+    for ( size_t i = count - 1; i >= 0; --i )
     {
-      return vis_obj_ptr;
+      visual_object* vis_obj_ptr = m_visual_objects.Item( i );
+      if ( vis_obj_ptr->is_inside( p_coord ) )
+      {
+        return vis_obj_ptr;
+      }
     }
-  }
+	}
   return result;
 }
 
@@ -680,8 +682,8 @@ void grape_glcanvas::add_visual_object( visual_object* p_obj )
 
 void grape_glcanvas::clear_visual_objects( void )
 {
-  unsigned int count = m_visual_objects.GetCount();
-  for ( unsigned int i = 0; i < count; ++i )
+  size_t count = m_visual_objects.GetCount();
+  for ( size_t i = 0; i < count; ++i )
   {
     visual_object* del_obj = m_visual_objects.Item( i );
     delete del_obj;
@@ -692,7 +694,7 @@ void grape_glcanvas::clear_visual_objects( void )
 int grape_glcanvas::count_selected_objects( void )
 {
   int result = 0;
-  for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i)
+  for ( size_t i = 0; i < m_visual_objects.GetCount(); ++i)
   {
     visual_object* count_obj = m_visual_objects.Item( i );
     result += count_obj->get_selected() ? 1 : 0;
