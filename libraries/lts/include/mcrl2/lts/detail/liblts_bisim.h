@@ -515,8 +515,7 @@ class bisim_partitioner
           max_state_index++;
           blocks.back().block_index=new_block1;
           blocks.back().parent_block_index=*i1;
-          // Reserve enough space for transitions to be copied.
-          blocks.back().non_inert_transitions.reserve(blocks[*i1].non_inert_transitions.size());
+          
           non_flagged_states.swap(blocks.back().bottom_states);
           // Put the indices of first split block to to_be_processed.
           to_be_processed.push_back(blocks.back().block_index);
@@ -530,8 +529,6 @@ class bisim_partitioner
           blocks.back().block_index=new_block2;
           reset_state_flags_block=new_block2;
           blocks.back().parent_block_index=*i1;
-          // Reserve enough space for transitions to be copied.
-          blocks.back().non_inert_transitions.reserve(blocks[*i1].non_inert_transitions.size());
          
           // Move the flagged states to the second block, and let the block index of these states refer to this block.
           flagged_states.swap(blocks.back().bottom_states);
@@ -561,6 +558,11 @@ class bisim_partitioner
           
           std::vector < transition > flagged_non_inert_transitions;
           std::vector < transition > non_flagged_non_inert_transitions;
+          // Reserve enough space for transitions to be copied. Otherwise, resizing may lead to
+          // lot of unneccesary copying...
+          flagged_non_inert_transitions.reserve(blocks[*i1].non_inert_transitions.size());
+          non_flagged_non_inert_transitions.reserve(blocks[*i1].non_inert_transitions.size());
+
           // Next we scan the non-bottom states of *i1. If for some non-bottom state the flag is not raised
           // and if none of the outgoing P-inert transitions leads to a state in the old block then this 
           // state becomes a non bottom state of B2. 
