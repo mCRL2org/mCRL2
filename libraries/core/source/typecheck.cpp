@@ -3427,7 +3427,7 @@ namespace mcrl2 {
         }
         else
         {
-          return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, -1, warn_upcasting);
+          return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, NON_EXISTING, warn_upcasting);
         }
       }
 

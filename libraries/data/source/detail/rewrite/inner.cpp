@@ -527,7 +527,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
     for (; !ATisEmpty(pars.Slist); pars.Slist=ATgetNext(pars.Slist))
     {
       ATermList e = ATLgetFirst(pars.Slist);
-       assert(k<1<<(8*sizeof(int)-1));
+       assert(k<((size_t)1)<<(8*sizeof(int)-1));
       e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0),(ATerm) v,(ATerm) ATmakeInt((int)k),ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)));
 
       l = ATinsert(l,ATgetFirst(e));
@@ -740,7 +740,7 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, size_t len,
 
 static ATermAppl optimise_tree(ATermAppl tree,size_t *max)
 {
-  return optimise_tree_aux(tree,ATmakeList0(),-1,max);
+  return optimise_tree_aux(tree,ATmakeList0(),NON_EXISTING,max);
 }
 
 #ifdef _INNER_STORE_TREES
@@ -912,7 +912,7 @@ ATfprintf(stderr,"X\n");
 #ifdef TMA_DEBUG
 ATfprintf(stderr,"C\n");
 #endif
-      if ( ATisEqual(build(ATgetArgument(*tree,0),-1,vars,vals,*len),trueint) )
+      if ( ATisEqual(build(ATgetArgument(*tree,0),NON_EXISTING,vars,vals,*len),trueint) )
       {
 #ifdef TMA_DEBUG
 ATfprintf(stderr,"true (c)\n");
@@ -945,7 +945,7 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 
   while ( isC(tree) )
   {
-    if ( ATisEqual(build(ATgetArgument(tree,0),-1,vars,vals,len),trueint) )
+    if ( ATisEqual(build(ATgetArgument(tree,0),NON_EXISTING,vars,vals,len),trueint) )
     {
       tree = (ATermAppl) ATgetArgument(tree,1); // Was 0????  JFG This was a very odd error.
     } else {
@@ -1327,7 +1327,7 @@ ATermList RewriterInnermost::build_args(ATermList args, size_t buildargs, ATermA
   {
     return args;
   } else {
-    return ATinsert(build_args(ATgetNext(args),buildargs-1,vars,vals,len),build(ATgetFirst(args),-1,vars,vals,len));
+    return ATinsert(build_args(ATgetNext(args),buildargs-1,vars,vals,len),build(ATgetFirst(args),NON_EXISTING,vars,vals,len));
   }
 }
 

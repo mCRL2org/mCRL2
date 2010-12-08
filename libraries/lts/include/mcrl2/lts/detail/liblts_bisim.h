@@ -143,7 +143,7 @@ class bisim_partitioner
       for(std::set < transition >::const_iterator i=resulting_transitions.begin();
             i!=resulting_transitions.end(); ++i)
       { 
-        aut.add_transition(transition(i->from(),i->label(),i->to()));
+        aut.add_transition(*i);
       }
     }
 
@@ -288,6 +288,11 @@ class bisim_partitioner
       state_type last_non_stored_state_number=0;
       bool bottom_state=true;
       std::vector < state_type > current_inert_transitions;
+      
+      // Reserve enough space, such that no reallocations of the vector are required when adding transitions.
+      current_inert_transitions.reserve(aut.num_transitions());
+      initial_partition.non_inert_transitions.reserve(aut.num_transitions()); 
+
       for(transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
       { 
         const transition t=r.front();
@@ -347,7 +352,7 @@ class bisim_partitioner
         if (!branching || !aut.is_tau(t.label()))
         { 
           // Note that by sorting the transitions first, the non_inert_transitions are grouped per label.
-            initial_partition.non_inert_transitions.push_back(transition(t.from(),t.label(),t.to()));
+            initial_partition.non_inert_transitions.push_back(t);
         }
       }
       
@@ -510,6 +515,8 @@ class bisim_partitioner
           max_state_index++;
           blocks.back().block_index=new_block1;
           blocks.back().parent_block_index=*i1;
+          // Reserve enough space for transitions to be copied.
+          blocks.back().non_inert_transitions.reserve(blocks[*i1].non_inert_transitions.size());
           non_flagged_states.swap(blocks.back().bottom_states);
           // Put the indices of first split block to to_be_processed.
           to_be_processed.push_back(blocks.back().block_index);
@@ -523,6 +530,8 @@ class bisim_partitioner
           blocks.back().block_index=new_block2;
           reset_state_flags_block=new_block2;
           blocks.back().parent_block_index=*i1;
+          // Reserve enough space for transitions to be copied.
+          blocks.back().non_inert_transitions.reserve(blocks[*i1].non_inert_transitions.size());
          
           // Move the flagged states to the second block, and let the block index of these states refer to this block.
           flagged_states.swap(blocks.back().bottom_states);

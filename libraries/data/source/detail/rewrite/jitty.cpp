@@ -338,7 +338,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
         {
           if ( bs[i] && !used[i] )
           {
-            assert(i<1<<(8*sizeof(int)-1));
+            assert(i<((size_t)1)<<(8*sizeof(int)-1));  // Check whether i can safely be translated into an int.
             deps = ATinsert(deps,(ATerm) ATmakeInt((int)i));
             args[i] += 1;
 //fprintf(stderr,"dep of arg %i\n",i);
@@ -378,7 +378,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 
       for (size_t i = 0; i < arity; i++)
       {
-        assert(i<1<<(8*sizeof(int)-1));
+        assert(i<((size_t)1)<<(8*sizeof(int)-1));
         if ( args[i] > max )
         {
           maxidx = (int)i;

@@ -99,19 +99,19 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
   // Check to see if there is extra data at the end
 
   const std::string error_message="The .lts file " + filename + 
-                      "does not appear to contain datatypes, action declarations and process parameters.";
+                      " does not appear to contain datatypes, action declarations and process parameters";
   FILE *g = fopen(filename.c_str(),"rb");
   if ( (g == NULL) ||
        (fseek(g,-(12+8),SEEK_END) != 0) )
   {
-    throw mcrl2::runtime_error(error_message);
+    throw mcrl2::runtime_error(error_message + " (cannot reopen file)");
   } 
   else 
   {
     unsigned char buf[8+12];
     if ( fread(&buf,1,8+12,g) != 8+12 )
     {
-      throw mcrl2::runtime_error(error_message);
+      throw mcrl2::runtime_error(error_message + " (file does not contain control information)");
     } 
     else 
     {
@@ -126,7 +126,7 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
         if ( (fseek(g,position,SEEK_SET) != 0 ) ||
              ((data = ATreadFromFile(g)) == NULL) )
         {
-          throw mcrl2::runtime_error(error_message);
+          throw mcrl2::runtime_error(error_message + " (control information is incorrect)");
         } 
         else 
         {
