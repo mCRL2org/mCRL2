@@ -38,7 +38,7 @@ sort_expression operator()(const structured_sort& x)
 sort_expression operator()(const function_sort& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  sort_expression result = function_sort(x.domain(), static_cast<Derived&>(*this)(x.codomain()));
+  sort_expression result = function_sort(static_cast<Derived&>(*this)(x.domain()), static_cast<Derived&>(*this)(x.codomain()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -54,7 +54,7 @@ sort_expression operator()(const unknown_sort& x)
 sort_expression operator()(const multiple_possible_sorts& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  sort_expression result = multiple_possible_sorts(x.sorts());
+  sort_expression result = multiple_possible_sorts(static_cast<Derived&>(*this)(x.sorts()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }

@@ -81,8 +81,8 @@ namespace process {
                               internal_format_conversion_term(p.init(),
                               p.data())));
 #else
-    detail::normalize_sorts(p);
     detail::translate_user_notation(p);
+    detail::normalize_sorts(p);
 #endif
   }
 

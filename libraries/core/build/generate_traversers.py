@@ -84,11 +84,11 @@ def make_builder_inc_file(filename, class_text, expression_class):
     for c in classes:
         if c.qualifier() != '': # skip classes residing in a different name space
             continue
-        print 'generating traverse functions for class', c.name()
+        print 'generating builder functions for class', c.name()
         f = c.constructor
         parameters = []       
         for p in f.parameters():
-            if extract_type(p.type()) != expression_class:
+            if extract_type(p.type()) not in [expression_class, expression_class + '_list']:
                 parameters.append('x.%s()' % p.name())
             else:
                 parameters.append('static_cast<Derived&>(*this)(x.%s())' % p.name())

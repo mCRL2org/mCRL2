@@ -38,7 +38,7 @@ data_expression operator()(const function_symbol& x)
 data_expression operator()(const application& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  data_expression result = application(static_cast<Derived&>(*this)(x.head()), x.arguments());
+  data_expression result = application(static_cast<Derived&>(*this)(x.head()), static_cast<Derived&>(*this)(x.arguments()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -46,7 +46,7 @@ data_expression operator()(const application& x)
 data_expression operator()(const where_clause& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  data_expression result = where_clause(static_cast<Derived&>(*this)(x.body()), x.declarations());
+  data_expression result = where_clause(static_cast<Derived&>(*this)(x.body()), static_cast<Derived&>(*this)(x.declarations()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
