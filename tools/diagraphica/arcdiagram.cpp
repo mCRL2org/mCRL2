@@ -528,7 +528,7 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
             double orient = orientBundles[i];
             double wth    = widthBundles[i];
 
-            glPushName( i );
+            glPushName((GLuint) i );
             if ( orient < 0 )
             {
                 VisUtils::fillArc( x, y, 180.0, 0.0, wth, 0.0, rad, segs );
@@ -653,7 +653,7 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
             double x = posLeaves[i].x;
             double y = posLeaves[i].y;
 
-            glPushName( i );
+            glPushName((GLuint) i );
             VisUtils::fillEllipse( x, y, radLeaves, radLeaves, 24 );
             glPopName();
         }
@@ -747,14 +747,14 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
         glPushName( ID_TREE_NODE );
         for ( size_t i = 0; i < posTreeTopLft.size()-1; ++i )
         {
-            glPushName( i );
+            glPushName(GLuint) i );
             for ( size_t j = 0; j < posTreeTopLft[i].size(); ++j )
             {
                 double xLft = posTreeTopLft[i][j].x;
                 double xRgt = posTreeBotRgt[i][j].x;
                 double yTop = posTreeTopLft[i][j].y;
 
-                glPushName( j );
+                glPushName((GLuint) j );
                 VisUtils::fillEllipse( 0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, 24 );
                 glPopName();
             }
@@ -922,7 +922,7 @@ void ArcDiagram::drawBarTree( const bool &inSelectMode )
             glPushName( ID_BAR_TREE );
             for ( size_t i = 0; i < posBarTreeTopLft.size(); ++i )
             {
-                glPushName( i );
+                glPushName((GLuint) i );
                 for ( size_t j = 0; j < posBarTreeTopLft[i].size(); ++j )
                 {
                     double xLft = posBarTreeTopLft[i][j].x;
@@ -930,7 +930,7 @@ void ArcDiagram::drawBarTree( const bool &inSelectMode )
                     double yTop = posBarTreeTopLft[i][j].y;
                     double yBot = posBarTreeBotRgt[i][j].y;
 
-                    glPushName( j );
+                    glPushName((GLuint) j );
                     VisUtils::fillRect( xLft, xRgt, yTop, yBot );
                     glPopName();
                 }
@@ -1041,7 +1041,7 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
                 double x   = posDgrm[i].x;
                 double y   = posDgrm[i].y;
 
-                glPushName( i );
+                glPushName((GLuint) i );
                 glPushMatrix();
                 glTranslatef( x, y, 0.0 );
                 glScalef( 0.2f, 0.2f, 0.2f );
@@ -1334,7 +1334,7 @@ void ArcDiagram::drawMarkedLeaves( const bool &inSelectMode )
             for ( size_t i = 0; i < posLeaves.size(); ++i )
             {
                 map< int, vector< ColorRGB > >::iterator it;
-                it = markLeaves.find( i );
+                it = markLeaves.find((int) i );
 
                 if ( it != markLeaves.end() )
                 {
@@ -1737,7 +1737,7 @@ void ArcDiagram::calcSettingsTree()
         clearSettingsTree();
 
         // calc max depth of clustering tree
-        int maxLvl = 0;
+        size_t maxLvl = 0;
         /*
         {
         for ( int i = 0; i < graph->getSizeLeaves(); ++i )
@@ -1751,7 +1751,7 @@ void ArcDiagram::calcSettingsTree()
 
         // init positions
         {
-        for ( int i = 0; i < maxLvl; ++i )
+        for ( size_t i = 0; i < maxLvl; ++i )
         {
             vector< Position2D > p;
             posTreeTopLft.push_back( p );
@@ -2304,12 +2304,12 @@ void ArcDiagram::handleHits( const vector< int > &ids )
 
 // ---------------------------------
 void ArcDiagram::handleHoverCluster(
-    const int &i,
-    const int &j )
+    const size_t &i,
+    const size_t &j )
 // ---------------------------------
 {
-    if ( ( 0 <= i && static_cast <size_t> (i)  < mapPosToClust.size()    ) &&
-         ( 0 <= j && static_cast <size_t> (j) < mapPosToClust[i].size() ) )
+    if ( ( 0 <= i && i < mapPosToClust.size()    ) &&
+         ( 0 <= j && j < mapPosToClust[i].size() ) )
     {
         string msg;
 

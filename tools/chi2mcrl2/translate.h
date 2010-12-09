@@ -60,24 +60,24 @@ typedef struct
 
 typedef struct
    {
-     int state;
+     size_t state;
      int holdsForState;
    } RecStreams;
 
 typedef struct
    {
      int stream;
-     int position;
+     size_t position;
    } RecStreamPos;
 
 //Information per parenthesis
 typedef struct
    {
-     std::set<int> endstates;
+     std::set<size_t> endstates;
      bool looped;
      bool guardedloop;
-     int  begin_state;
-     int  end_state;
+     size_t  begin_state;
+     size_t  end_state;
      std::set<int>  streams;
      bool parallel;
      bool alternative;
@@ -87,7 +87,7 @@ typedef struct
 //Information per transition
 typedef struct
   {
-    int state;
+    size_t state;
     int stream;
     int originates_from_stream;
     bool terminate;
@@ -98,7 +98,7 @@ typedef struct
     std::string action;
     std::map<std::string, std::string> vectorUpdate; // First:  Identifier Variable
                                                      // Second: Expression
-    int nextstate;
+    size_t nextstate;
   } RecActionTransition;
 
 typedef struct
@@ -106,7 +106,7 @@ typedef struct
     std::vector<RPV> DeclarationVariables;
     std::vector<RPV> SpecificationVariables;
     std::vector<RPC> DeclarationChannels;
-    int NumberOfStreams;
+    size_t NumberOfStreams;
   } RecProcessVectors;
 
 typedef struct
@@ -136,8 +136,8 @@ class CAsttransform
     CAsttransform()
       : parenthesis_level(0),
         terminate(true),
-        state(-1),
-        next_state(-1),
+        state(NON_EXISTING),
+        next_state(NON_EXISTING),
         loop(false),
         guardedloop(false),
         guardedStarBeginState(0),
@@ -156,7 +156,7 @@ class CAsttransform
     std::string mcrl2_result;
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix; //prefix stores the name of the process globally
-    int parenthesis_level;
+    size_t parenthesis_level;
     std::pair<std:: vector<RVT>, std::vector<RPC> > manipulateDeclaredProcessDefinition(ATermAppl input);
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
 
@@ -182,23 +182,23 @@ class CAsttransform
     std::vector<RAT> transitionSystem;
 
     bool terminate;  //terminate per parenthesis level
-    int state;
-    int next_state;
+    size_t state;
+    size_t next_state;
 
     //Begin_state: used to deterime the beginstates per parenthesis level
-    std::map<int, int> begin_state; //first:  parenthesis level
-                                    //second: begin state
-    std::map<int, int> end_state;   //first:  parenthesis level
-                                    //second: end state
+    std::map<size_t, size_t> begin_state; //first:  parenthesis level
+                                          //second: begin state
+    std::map<size_t, size_t> end_state;   //first:  parenthesis level
+                                          //second: end state
 
-    std::map<int, std::set<int> > endstates_per_parenthesis_level;
-    std::map<int, std::vector<RPI>  > info_per_parenthesis_level_per_parenthesis;
+    std::map<size_t, std::set<size_t> > endstates_per_parenthesis_level;
+    std::map<size_t, std::vector<RPI>  > info_per_parenthesis_level_per_parenthesis;
 
-    int determineEndState(std::set<int> org_set, int lvl);
+    size_t determineEndState(std::set<size_t> org_set, size_t lvl);
     bool loop;  //Variable to indicate if a parenthesis_level is looped
     bool guardedloop; //Variable to indicatie if a parenthesis_level is a guarded loop
     std::string guardedStarExpression; //Variable that contains the guard of *>
-    int guardedStarBeginState; //Variable to indicatie the state where the *> starts
+    size_t guardedStarBeginState; //Variable to indicatie the state where the *> starts
     bool transitionexists(RAT transition, std::vector<RAT> transitionvector);
 
     int stream_number; //Variable used for indicate the current stream ( Parallel )

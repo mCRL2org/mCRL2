@@ -26,8 +26,8 @@ namespace mcrl2
       private:
         atermpp::deque <ATerm> queue_get;
         atermpp::deque <ATerm> queue_put;
-        unsigned long queue_size_max;        // This is the maximal allowed size of a queue
-        unsigned long queue_put_count_extra; // This represents the number of elements that
+        size_t queue_size_max;        // This is the maximal allowed size of a queue
+        size_t queue_put_count_extra; // This represents the number of elements that
                                              // did not fit in the queue.
         bool queue_size_fixed;
 
@@ -68,7 +68,7 @@ namespace mcrl2
           queue_put_count_extra++;
           if ((rand() % (queue_put.size() + queue_put_count_extra)) < queue_put.size())
           {
-            unsigned long pos = rand() % queue_put.size();
+            size_t pos = rand() % queue_put.size();
             ATerm old_state = queue_put[pos];
             queue_put[pos] = state;
             return old_state;
@@ -89,12 +89,12 @@ namespace mcrl2
         {
         }
 
-        unsigned long max_size() const
+        size_t max_size() const
         {
           return queue_size_max;
         }
 
-        void set_max_size(unsigned long max_size)
+        void set_max_size(size_t max_size)
         {
           queue_size_max = max_size;
           queue_size_fixed=true;

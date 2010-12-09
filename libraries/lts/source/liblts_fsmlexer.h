@@ -18,7 +18,7 @@ class fsm_lexer
     // ATermList typeValues;
     std::string typeId;
     // ATermTable labelTable;
-    std::map < std::string, unsigned size_t> labelTable;
+    std::map < std::string, size_t> labelTable;
 
     // AFun const_ATtype;
     // AFun const_ATvalue;

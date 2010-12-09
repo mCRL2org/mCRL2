@@ -344,7 +344,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_basic_sort(sortterm))
       {
-        long n=0;
+        size_t n=0;
         const basic_sort sort(sortterm);
         bool isnew=false;
         // const std::string str=sort.name();
@@ -476,9 +476,9 @@ class specification_basic_type:public boost::noncopyable
       return reverse(result);
     }
 
-    long addMultiAction(const process_expression multiAction, bool &isnew)
+    size_t addMultiAction(const process_expression multiAction, bool &isnew)
     { const action_label_list actionnames=getnames(multiAction);
-      long n=addObject((ATermAppl)(ATermList)actionnames,isnew);
+      size_t n=addObject((ATermAppl)(ATermList)actionnames,isnew);
 
       if (isnew)
       { // tempvar is needed as objectdata can change during a call
@@ -502,7 +502,7 @@ class specification_basic_type:public boost::noncopyable
       addString(var.name());
 
       bool isnew=false;
-      long n=addObject(var.name(),isnew);
+      size_t n=addObject(var.name(),isnew);
 
       if ((!isnew)&&(mustbenew))
       { throw mcrl2::runtime_error("variable " + pp(var) + " already exists");
@@ -610,9 +610,9 @@ class specification_basic_type:public boost::noncopyable
 
     /************ storeact ****************************************************/
 
-    long insertAction(const action_label& actionId)
+    size_t insertAction(const action_label& actionId)
     { bool isnew=false;
-      long n=addObject(actionId,isnew);
+      size_t n=addObject(actionId,isnew);
 
       if (isnew==0)
       { throw mcrl2::runtime_error("Action " + pp(actionId) + " is added twice\n");
@@ -634,7 +634,7 @@ class specification_basic_type:public boost::noncopyable
 
     /************ storeprocs *************************************************/
 
-    long insertProcDeclaration(
+    size_t insertProcDeclaration(
                       const process_identifier procId,
                       const variable_list parameters,
                       const process_expression body,
@@ -646,7 +646,7 @@ class specification_basic_type:public boost::noncopyable
       addString(str);
 
       bool isnew=false;
-      long n=addObject(procId,isnew);
+      size_t n=addObject(procId,isnew);
 
       if (isnew==0)
       { throw mcrl2::runtime_error("Process " + pp(procId) + " is added twice\n");
@@ -1596,7 +1596,7 @@ class specification_basic_type:public boost::noncopyable
                         processstatustype ps,
                         const bool canterminate,
                         const bool containstime)
-    { unsigned long numberOfNewProcesses=0, warningNumber=1000;
+    { size_t numberOfNewProcesses=0, warningNumber=1000;
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       {
@@ -1985,7 +1985,7 @@ class specification_basic_type:public boost::noncopyable
         }
 
         bool isnew=false;
-        long n=addMultiAction(action(body),isnew);
+        size_t n=addMultiAction(action(body),isnew);
 
         if (objectdata[n].process_representing_action==process_identifier())
         { /* this action does not yet have a corresponding process, which
@@ -2016,7 +2016,7 @@ class specification_basic_type:public boost::noncopyable
         { return mp;
         }
 
-        long n=addMultiAction(mp,isnew);
+        size_t n=addMultiAction(mp,isnew);
 
         if (objectdata[n].process_representing_action==process_identifier())
         { /* this action does not yet have a corresponding process, which
@@ -2826,7 +2826,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** Collectparameterlist ******************************/
 
-    bool alreadypresent(variable &var,const variable_list vl, const long n)
+    bool alreadypresent(variable &var,const variable_list vl, const size_t n)
     { /* Note: variables can be different, although they have the
          same string, due to different types. If they have the
          same string, but different types, the conflict must
@@ -2869,7 +2869,7 @@ class specification_basic_type:public boost::noncopyable
 
     variable_list joinparameters(const variable_list par1,
                                         const variable_list par2,
-                                        const long n)
+                                        const size_t n)
     { if (par2.empty()) return par1;
 
       variable var2=par2.front();
@@ -4599,7 +4599,7 @@ class specification_basic_type:public boost::noncopyable
       }
       /* now we construct the arguments of the invoked
          process, i.e. the new function g */
-      long fcnt=0;
+      size_t fcnt=0;
       data_expression_list resultnextstate;
 
 

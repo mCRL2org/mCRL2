@@ -59,14 +59,14 @@ public:
     virtual ATerm GetState();
     virtual ATermList GetNextStates();
     virtual NextState *GetNextState();
-    virtual bool ChooseTransition(unsigned int index);
-    virtual int GetTraceLength();
-    virtual int GetTracePos();
-    virtual bool SetTracePos(unsigned int pos);
+    virtual bool ChooseTransition(size_t index);
+    virtual size_t GetTraceLength();
+    virtual size_t GetTracePos();
+    virtual bool SetTracePos(size_t pos);
     virtual ATermList GetTrace();
     virtual ATerm GetNextStateFromTrace();
     virtual ATermAppl GetNextTransitionFromTrace();
-    virtual bool SetTrace(ATermList Trace, unsigned int From);
+    virtual bool SetTrace(ATermList Trace, size_t From);
     virtual void InitialiseViews();
 
 private:

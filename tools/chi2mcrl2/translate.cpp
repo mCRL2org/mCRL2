@@ -378,7 +378,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   while(again)
   {
     again = false;
-    for(std::map<int, std::vector<RPI > >::iterator itMapRPI = info_per_parenthesis_level_per_parenthesis.begin();
+    for(std::map<size_t, std::vector<RPI > >::iterator itMapRPI = info_per_parenthesis_level_per_parenthesis.begin();
       itMapRPI != info_per_parenthesis_level_per_parenthesis.end();
       ++itMapRPI)
       {
@@ -387,7 +387,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
             ++itRPI)
         {
           gsDebugMsg("begin_state:%d\t end_state:%d\t  looped parenthesis:%d\n", itRPI->begin_state,itRPI->end_state, itRPI->looped);
-          for(std::map<int, std::vector<RPI > >::iterator itMapRPI2 = info_per_parenthesis_level_per_parenthesis.begin();
+          for(std::map<size_t, std::vector<RPI > >::iterator itMapRPI2 = info_per_parenthesis_level_per_parenthesis.begin();
               itMapRPI2 != info_per_parenthesis_level_per_parenthesis.end();
               ++itMapRPI2)
              {
@@ -417,7 +417,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     *
     **/
   gsDebugMsg("Creating edges for terminating branches inside a parenthesis\n");
-  for(std::map<int, std::vector<RPI > >::iterator itIntVecSet = info_per_parenthesis_level_per_parenthesis.begin();
+  for(std::map<size_t, std::vector<RPI > >::iterator itIntVecSet = info_per_parenthesis_level_per_parenthesis.begin();
       itIntVecSet != info_per_parenthesis_level_per_parenthesis.end();
       ++itIntVecSet){
         gsDebugMsg("parenthesis_lvl: %d\n", itIntVecSet->first);
@@ -437,7 +437,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
              if (itVecSet->looped)
              {
                //The parenthesis is looped: Point the end of the branch back to the beginning of the parenthesis
-               for(std::set<int>::iterator itSet= (*itVecSet).endstates.begin(); itSet != (*itVecSet).endstates.end(); ++itSet )
+               for(std::set<size_t>::iterator itSet= (*itVecSet).endstates.begin(); itSet != (*itVecSet).endstates.end(); ++itSet )
                {
                  if(itVecSet->guardedloop)
                  {
@@ -449,8 +449,8 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
              } else
              {
                //The parenthesis is not looped: Point the end of the branch to the end of the parenthesis
-               int last_state = determineEndState((*itVecSet).endstates, itIntVecSet->first);
-               for(std::set<int>::iterator itSet= (*itVecSet).endstates.begin(); itSet != (*itVecSet).endstates.end(); ++itSet )
+               size_t last_state = determineEndState((*itVecSet).endstates, itIntVecSet->first);
+               for(std::set<size_t>::iterator itSet= (*itVecSet).endstates.begin(); itSet != (*itVecSet).endstates.end(); ++itSet )
                {
                  transitionSystem.at(*itSet-1).nextstate = last_state;
                }
@@ -494,11 +494,11 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   }
   gsDebugMsg("Processing parenthesis levels for *>\n");
   //Create transistions for parenthesis levels
-  for(std::map<int, std::vector<RPI > >::iterator itIntVecSet = info_per_parenthesis_level_per_parenthesis.begin();
+  for(std::map<size_t, std::vector<RPI > >::iterator itIntVecSet = info_per_parenthesis_level_per_parenthesis.begin();
       itIntVecSet != info_per_parenthesis_level_per_parenthesis.end();
       ++itIntVecSet){
         gsDebugMsg("parenthesis_lvl: %d\n", itIntVecSet->first);
-        int i = 0;
+        size_t i = 0;
         for(std::vector<RPI>::iterator itVecSet = itIntVecSet->second.begin();
             itVecSet != itIntVecSet->second.end();
             ++itVecSet)
@@ -602,7 +602,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     * Write the transitionSystem into an LPS with summands
     *
     **/
-  int index = 0;
+  size_t index = 0;
   for( multimap<int,vector<RAT>::iterator>::iterator itOrdRAT = OrderTransistionSystem.begin();
        itOrdRAT != OrderTransistionSystem.end();
        itOrdRAT++ )
@@ -635,7 +635,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
         *
         **/
       std::set<int> collect_streams;
-      for(std::map<int, std::vector<RPI> >::iterator itMapRPI = info_per_parenthesis_level_per_parenthesis.begin();
+      for(std::map<size_t, std::vector<RPI> >::iterator itMapRPI = info_per_parenthesis_level_per_parenthesis.begin();
         itMapRPI != info_per_parenthesis_level_per_parenthesis.end();
         ++itMapRPI)
       {
@@ -2425,7 +2425,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
         terminate = false;
       } else {
         terminate = true;
-        next_state = -1 ;
+        next_state = NON_EXISTING ;
       }
       state = transitionSystem.size();
       originates_from_stream = stream_number;
@@ -2434,7 +2434,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
     }
   if ( StrcmpIsFun( "AltStat", input ) )
     {
-      next_state = -1;
+      next_state = NON_EXISTING;
       terminate = true;
       alternative = true;
       originates_from_stream = stream_number;
@@ -2588,11 +2588,11 @@ std::string CAsttransform::getResult()
   * for a given parenthesis level
   *
   **/
-int CAsttransform::determineEndState(std::set<int> org_set, int lvl)
+size_t CAsttransform::determineEndState(std::set<size_t> org_set, size_t lvl)
 {
-  std::set<int> ResultSet;
-  std::insert_iterator<std::set<int> > InsertIter( ResultSet, ResultSet.begin() );
-  int last_state = 0;
+  std::set<size_t> ResultSet;
+  std::insert_iterator<std::set<size_t> > InsertIter( ResultSet, ResultSet.begin() );
+  size_t last_state = 0;
 
   if(lvl > 0){
     --lvl;
@@ -2615,7 +2615,7 @@ int CAsttransform::determineEndState(std::set<int> org_set, int lvl)
       }
     }
   }
-  for(std::set<int>::iterator itSet= org_set.begin(); itSet != org_set.end(); ++itSet )
+  for(std::set<size_t>::iterator itSet= org_set.begin(); itSet != org_set.end(); ++itSet )
   {
       last_state = max(last_state, *itSet);
   }

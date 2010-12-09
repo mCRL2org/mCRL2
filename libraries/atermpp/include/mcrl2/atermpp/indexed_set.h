@@ -41,7 +41,7 @@ namespace atermpp
       /// Create a new indexed_set.
       /// \param initial_size The initial capacity of the set.
       /// \param max_load_pct The maximum load percentage.
-      indexed_set(unsigned int initial_size = 100, unsigned int max_load_pct = 75)
+      indexed_set(size_t initial_size = 100, unsigned int max_load_pct = 75)
         : m_set(ATindexedSetCreate(initial_size, max_load_pct), indexed_set_deleter())
       {}
 
@@ -63,7 +63,7 @@ namespace atermpp
       /// \param elem A term.
       /// \return A pair denoting the index of the element in the set, and a boolean denoting whether the term
       /// was already contained in the set.
-      std::pair<long, bool> put(aterm elem)
+      std::pair<size_t, bool> put(aterm elem)
       {
         ATbool b;
         size_t l = ATindexedSetPut(m_set.get(), elem, &b);
@@ -85,7 +85,7 @@ namespace atermpp
       /// to this index. If it is invoked with an invalid index, effects are not predictable.
       /// \param index A positive number.
       /// \return The element in the set with the given index.
-      aterm get(long index)
+      aterm get(size_t index)
       {
         return ATindexedSetGetElem(m_set.get(), index);
       }

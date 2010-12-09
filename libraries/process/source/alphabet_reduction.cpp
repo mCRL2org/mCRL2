@@ -31,8 +31,8 @@ namespace mcrl2 {
     namespace detail {
 
       static ATermAppl gsApplyAlpha(ATermAppl a);
-      static ATermList gsaGetAlpha(ATermAppl a, unsigned length=0, ATermList allowed=ATmakeList0(), ATermList ignore=ATmakeList0());
-      static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length=0, ATermList allowed=ATmakeList0(), ATermList ignore=ATmakeList0());
+      static ATermList gsaGetAlpha(ATermAppl a, size_t length=0, ATermList allowed=ATmakeList0(), ATermList ignore=ATmakeList0());
+      static ATermList gsaGetSyncAlpha(ATermAppl a, size_t length=0, ATermList allowed=ATmakeList0(), ATermList ignore=ATmakeList0());
       
       static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
       
@@ -353,7 +353,7 @@ namespace mcrl2 {
       
       static size_t get_max_comm_length(ATermList C){
         //returns the length of the longest allowed multiaction (0 if unbounded).
-        unsigned m = 1;
+        size_t m = 1;
         for (; !ATisEmpty(C); C=ATgetNext(C)){
           ATermAppl c=ATAgetFirst(C);
           if(gsIsNil(ATAgetArgument(c,1))) return 0;
@@ -447,7 +447,7 @@ namespace mcrl2 {
         return true;
       }
       
-      static ATermList sync_list(ATermList l, ATermList m, unsigned length=0, ATermList allowed=ATmakeList0())
+      static ATermList sync_list(ATermList l, ATermList m, size_t length=0, ATermList allowed=ATmakeList0())
       {
         // gsWarningMsg("sync_list: l: %T, m: %T,length: %d, allowed: %T\n\n",l,m,length,allowed);
         ATermIndexedSet n=ATindexedSetCreate(128,50);
@@ -459,7 +459,7 @@ namespace mcrl2 {
           {
             ATermList oo=ATLgetFirst(o);
             ATermList ma=sync_mact(ll,oo);
-            if(!length || unsigned(ATgetLength(ma))<=length)
+            if(!length || ATgetLength(ma)<=length)
             {
               ATermList ma=sync_mact(ll,oo);
               if(ATisEqual(allowed,ATmakeList0()) || sub_multiaction_list(untypeMA(ma),allowed))
@@ -480,14 +480,14 @@ namespace mcrl2 {
         return result;
       }
       
-      static void sync_list_ht(ATermIndexedSet m, ATermList l1, ATermList l2, unsigned length=0){
+      static void sync_list_ht(ATermIndexedSet m, ATermList l1, ATermList l2, size_t length=0){
         //put the synchronization of l1 and l2 into m (if length, then not longet than length)
         ATbool b;
         for (; !ATisEmpty(l1); l1=ATgetNext(l1)){
           ATermList ll=ATLgetFirst(l1);
           for (ATermList o=l2; !ATisEmpty(o); o=ATgetNext(o)){
             ATermList oo=ATLgetFirst(o);
-            if(!length || unsigned(ATgetLength(ll))+unsigned(ATgetLength(oo))<=length)
+            if(!length || ATgetLength(ll)+ATgetLength(oo)<=length)
       	ATindexedSetPut(m,(ATerm)sync_mact(ll,oo),&b);
           }
         }
@@ -1076,7 +1076,7 @@ namespace mcrl2 {
           ATbool full_alpha_know=ATtrue;
           ATermList l = ATLtableGet(alphas,(ATerm)pn);
           if(!l){
-            unsigned max_len=get_max_allowed_length(V);
+            size_t max_len=get_max_allowed_length(V);
             //l = ATLtableGet(alphas,(ATerm)Pair((ATerm)ATmakeAppl0(ATmakeAFunInt0(max_len)),(ATerm)pn));
             //if(!l)
             l = gsaGetAlpha(a,max_len,get_allow_list(V));
@@ -1251,7 +1251,7 @@ namespace mcrl2 {
               ATermList lp=ATLtableGet(alphas,(ATerm) p);
               ATermList lq=ATLtableGet(alphas,(ATerm) q);
       
-              unsigned max_len=get_max_allowed_length(V);
+              size_t max_len=get_max_allowed_length(V);
               ATermList allowed=get_allow_list(V);
       
               if(!lp) lp=gsaGetAlpha(p,max_len,allowed);
@@ -1523,7 +1523,7 @@ namespace mcrl2 {
         return NULL; //to suppress warnings
       }
       
-      static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, ATermList ignore){
+      static ATermList gsaGetAlpha(ATermAppl a, size_t length, ATermList allowed, ATermList ignore){
         // calculate the alphabeth of a up to the length, ignoring the submultiactions from ignore (list of untyped multiactions) IF
         // they have a common type (if !length, then the length is unlimited and ignore is not used)
         // updates the global hash table alphas (in case length==0 and ignore=ATmakeList0() writes the alphabet of a into alphas).
@@ -1596,7 +1596,7 @@ namespace mcrl2 {
         else if ( gsIsAllow(a) ){
           ATermAppl p = ATAgetArgument(a,1);
           ATermList V=sort_multiactions_allow(ATLgetArgument(a,0));
-          unsigned max_len = get_max_allowed_length(V);
+          size_t max_len = get_max_allowed_length(V);
           if(length && max_len > length)
             max_len=length;
       
@@ -1681,7 +1681,7 @@ namespace mcrl2 {
         return l;
       }
       
-      static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList allowed, ATermList /* ignore */){
+      static ATermList gsaGetSyncAlpha(ATermAppl a, size_t length, ATermList allowed, ATermList /* ignore */){
         // calculate the alphabeth only of it is a single multiaction.
         ATermList l=NULL; //result
       
@@ -2020,8 +2020,8 @@ namespace mcrl2 {
       static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true, ATermList ExtraParams=NULL)
       {
         //return a || composition of n processes P
-        unsigned long n=atol(ATgetName(ATgetAFun(number)));
-        unsigned long i=1;
+        size_t n=atol(ATgetName(ATgetAFun(number)));
+        size_t i=1;
         ATermAppl r=NULL;
         ExtraParams=(ExtraParams)?ExtraParams:ATmakeList0();
       

@@ -11,18 +11,6 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-/* The original ATerm library made the (incorrect) assumption that sizeof(long)
-   is always 64 on 64-bit machines. A better check for 64-bit registers is the
-   use of C99 integral types. */
-#ifndef SIZEOF_SIZE_T
-/*  #define SIZEOF_SIZE_T (sizeof(long))  */
-/* #ifdef AT_64BIT
-#  define SIZEOF_SIZE_T 8
-#else */
-#  define SIZEOF_SIZE_T sizeof(size_t)
-/* #endif */
-#endif 
-
 /*
  32-bit:
   
@@ -44,7 +32,7 @@ extern "C"
    typedef unsigned long header_type; */
 typedef MachineWord header_type;
 
-#define HEADER_BITS      (SIZEOF_SIZE_T*8)
+#define HEADER_BITS      (sizeof(size_t)*8)
 
 #ifdef AT_64BIT
 #define SHIFT_LENGTH     34
@@ -96,10 +84,10 @@ typedef MachineWord header_type;
 #define SHIFT_SYMBOL  SHIFT_LENGTH
 #define SHIFT_SYM_ARITY SHIFT_LENGTH
 
-#define TERM_SIZE_APPL(arity) ((sizeof(struct __ATerm)/SIZEOF_SIZE_T)+arity)
-#define TERM_SIZE_INT         (sizeof(struct __ATermInt)/SIZEOF_SIZE_T)
-#define TERM_SIZE_LIST        (sizeof(struct __ATermList)/SIZEOF_SIZE_T)
-#define TERM_SIZE_SYMBOL      (sizeof(struct _SymEntry)/SIZEOF_SIZE_T)
+#define TERM_SIZE_APPL(arity) ((sizeof(struct __ATerm)/sizeof(size_t))+arity)
+#define TERM_SIZE_INT         (sizeof(struct __ATermInt)/sizeof(size_t))
+#define TERM_SIZE_LIST        (sizeof(struct __ATermList)/sizeof(size_t))
+#define TERM_SIZE_SYMBOL      (sizeof(struct _SymEntry)/sizeof(size_t))
 
 #define IS_MARKED(h)          ((h) & MASK_MARK)
 #define GET_TYPE(h)           ((size_t)(((h) & MASK_TYPE) >> SHIFT_TYPE))

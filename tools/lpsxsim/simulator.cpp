@@ -218,7 +218,7 @@ NextState *StandardSimulator::GetNextState()
   return nextstate;
 }
 
-bool StandardSimulator::ChooseTransition(unsigned int index)
+bool StandardSimulator::ChooseTransition(size_t index)
 {
   if ( !ATisEmpty(next_states) && (index < ATgetLength(next_states)) )
   {
@@ -242,7 +242,7 @@ bool StandardSimulator::ChooseTransition(unsigned int index)
       ATindexedSetPut(seen_states,current_state,&b);
 
       bool found = false;
-      unsigned int i=0;
+      size_t i=0;
       for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l),i++)
       {
         ATermList trans = ATLgetFirst(l);
@@ -268,24 +268,24 @@ bool StandardSimulator::ChooseTransition(unsigned int index)
   }
 }
 
-int StandardSimulator::GetTraceLength()
+size_t StandardSimulator::GetTraceLength()
 {
   return ATgetLength(trace)+ATgetLength(ecart);
 }
 
-int StandardSimulator::GetTracePos()
+size_t StandardSimulator::GetTracePos()
 {
   return ATgetLength(trace)-1;
 }
 
-bool StandardSimulator::SetTracePos(unsigned int pos)
+bool StandardSimulator::SetTracePos(size_t pos)
 {
   if ( ATgetLength(trace) == 0 )
   {
     return false;
   }
 
-  unsigned int l = ATgetLength(trace)-1;
+  size_t l = ATgetLength(trace)-1;
 
   if ( pos <= l+ATgetLength(ecart) )
   {
@@ -353,7 +353,7 @@ ATermAppl StandardSimulator::GetNextTransitionFromTrace()
   return ATAgetFirst(ATLgetFirst(ecart));
 }
 
-bool StandardSimulator::SetTrace(ATermList /* Trace */, unsigned int /* From */)
+bool StandardSimulator::SetTrace(ATermList /* Trace */, size_t /* From */)
 {
   // XXX
   return false;
@@ -418,7 +418,7 @@ void StandardSimulator::LoadTrace(const std::string &filename)
   }
 
   ATermAppl act;
-  unsigned int idx = 0;
+  size_t idx = 0;
   while ( (act = tr.nextAction()) != NULL )
   {
     idx++;

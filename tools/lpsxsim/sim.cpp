@@ -113,7 +113,7 @@ class sim_tool : public rewriter_tool< input_tool > {
       { ATermList next_states=ATempty;
         try
         { next_states = simulator.GetNextStates();
-          int i = 0;
+          size_t i = 0;
           for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l) )
           {
             ATermAppl Transition = ATAgetFirst(ATLgetFirst(l));
@@ -166,9 +166,9 @@ class sim_tool : public rewriter_tool< input_tool > {
              "   q/quit           quit\n";
           } 
           else if ( isdigit(s[0]) ) 
-          { unsigned int idx;
+          { size_t idx;
             sscanf(s.c_str(),"%u",&idx);
-            if (idx < (unsigned int)ATgetLength(next_states))
+            if (idx < ATgetLength(next_states))
             {
               gsMessage("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(next_states,idx)));
               simulator.ChooseTransition(idx);
@@ -220,9 +220,9 @@ class sim_tool : public rewriter_tool< input_tool > {
           } else if ( (s.substr(0,2) == "g ") || (s.substr(0,5) == "goto ") )
           {
             std::istringstream sin(((s[1] == ' ') ? s.substr(2) : s.substr(5)));
-            int idx;
+            size_t idx;
             sin >> idx;
-            if ( idx >= 0 && idx < simulator.GetTraceLength() )
+            if ( idx < simulator.GetTraceLength() )
             {
               simulator.SetTracePos(idx);
               gsMessage("\ncurrent state: [ ");
@@ -236,8 +236,8 @@ class sim_tool : public rewriter_tool< input_tool > {
           {
             gsMessage("\ncurrent trace:\n\n");
             ATermList trace = simulator.GetTrace();
-            int pos = simulator.GetTracePos();
-            for (int i=0; !ATisEmpty(trace); trace=ATgetNext(trace), ++i)
+            size_t pos = simulator.GetTracePos();
+            for (size_t i=0; !ATisEmpty(trace); trace=ATgetNext(trace), ++i)
             {
               ATermAppl Transition = ATAgetFirst(ATLgetFirst(trace));
               ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(trace)));
