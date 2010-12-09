@@ -132,7 +132,6 @@ namespace detail {
                 return sort_bag::bagfbag(element_sort, sort_fbag::fbag(element_sort, static_cast<Derived&>(*this)(x.arguments())));
               }
             }
-
             data_expression result = application(static_cast<Derived&>(*this)(x.head()), static_cast<Derived&>(*this)(x.arguments()));
             static_cast<Derived&>(*this).leave(x);
             return result;

@@ -41,10 +41,10 @@ namespace process {
 
 //#ifdef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
 //    process_specification q = p;
-//    std::cout << "--- q0 ---\n" << pp(q) << std::endl;
-//    detail::normalize_sorts(q);
 //    std::cout << "--- q1 ---\n" << pp(q) << std::endl;
 //    detail::translate_user_notation(q);
+//    std::cout << "--- q0 ---\n" << pp(q) << std::endl;
+//    detail::normalize_sorts(q);
 //    std::cout << "--- q2 ---\n" << pp(q) << std::endl;
 //#endif
 //    p = process_specification(
@@ -65,7 +65,8 @@ namespace process {
 //    std::cout << "--- p ---\n" << pp(p) << std::endl;
 //#endif
 
-#ifndef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
+#define MCRL2_NEW_INTERNAL_FORMAT_CONVERSION_PROCESS
+#ifndef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION_PROCESS
     p = process_specification(
                 p.data(),
                 mcrl2::lps::action_label_list(internal_format_conversion_list(

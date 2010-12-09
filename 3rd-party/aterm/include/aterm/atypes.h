@@ -32,6 +32,7 @@ typedef size_t HashNumber;
  *       existence */
 
 #define NON_EXISTING (size_t)(-1)
+static const size_t ATERM_NON_EXISTING_POSITION=(size_t)(-1);
 
 /* Avoid warnings under windows, by renaming all strdup's into _strdup's, 
    and renaming the _strdup into strdup under other platforms than windows. */

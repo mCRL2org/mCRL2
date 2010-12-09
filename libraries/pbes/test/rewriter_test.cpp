@@ -70,17 +70,30 @@ std::string ppp(Term t)
 }
 
 template <typename Rewriter1, typename Rewriter2>
-void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2, std::string var_decl = VARIABLE_SPECIFICATION, std::string substitutions = "", std::string data_spec = "")
+void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2, std::string expr3 = "", 
+         std::string var_decl = VARIABLE_SPECIFICATION, std::string substitutions = "", std::string data_spec = "")
 {
   std::cout << "--- test case --- " << expr1 << " -> " << expr2 << " with substitution " << substitutions << std::endl;
+  if (expr3!="") 
+  {
+    std::cout << "The expression " << expr1 << " can also be equal to " << expr3 << std::endl;
+  }
   pbes_expression d1 = pbes_system::parse_pbes_expression(expr1, var_decl, data_spec);
   pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl, data_spec);
+  pbes_expression d3;
+  if (expr3 == "")
+  { d3=d2;
+  }
+  else
+  { 
+    d3 = pbes_system::parse_pbes_expression(expr3, var_decl, data_spec);
+  }
 
   if (substitutions == "")
   {   
-    if (R1(d1) != R2(d2))
+    if (R1(d1) != R2(d2) && R1(d1) != R2(d3))
     {
-      BOOST_CHECK(R1(d1) == R2(d2));
+      BOOST_CHECK(R1(d1) == R2(d2) || R1(d1) == R2(d3));
       std::cout << "--- TEST FAILED --- " << std::endl;
     }
     else
@@ -89,16 +102,18 @@ void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string
     }
     std::cout << "expr1    " << core::pp(d1) << std::endl;
     std::cout << "expr2    " << core::pp(d2) << std::endl;
+    std::cout << "expr3    " << core::pp(d3) << std::endl;
     std::cout << "R(expr1) " << ppp(R1(d1)) << std::endl;
     std::cout << "R(expr2) " << ppp(R2(d2)) << std::endl << std::endl;
+    std::cout << "R(expr3) " << ppp(R2(d3)) << std::endl << std::endl;
   }
   else
   {
     data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
     data::detail::parse_substitutions(substitutions, sigma);
-    if (R1(d1, sigma) != R2(d2))
+    if (R1(d1, sigma) != R2(d2) || R1(d1, sigma) != R2(d3))
     {
-      BOOST_CHECK(R1(d1, sigma) == R2(d2));
+      BOOST_CHECK(R1(d1, sigma) == R2(d2)||R1(d1, sigma) == R2(d3));
       std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
     }
     else
@@ -107,17 +122,19 @@ void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string
     }
     std::cout << "d1            " << core::pp(d1) << std::endl;
     std::cout << "d2            " << core::pp(d2) << std::endl;
+    std::cout << "d3            " << core::pp(d3) << std::endl;
     std::cout << "sigma         " << substitutions << std::endl;
     std::cout << "R1(d1, sigma) " << ppp(R1(d1, sigma)) << std::endl;
     std::cout << "R2(d2)        " << ppp(R2(d2)) << std::endl << std::endl;
+    std::cout << "R2(d3)        " << ppp(R2(d3)) << std::endl << std::endl;
   }
   core::garbage_collect();
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string var_decl = VARIABLE_SPECIFICATION, std::string substitutions = "", std::string data_spec = "")
+void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string expr3, std::string var_decl = VARIABLE_SPECIFICATION, std::string substitutions = "", std::string data_spec = "")
 {
-  test_expressions(R, expr1, R, expr2, var_decl, substitutions, data_spec);
+  test_expressions(R, expr1, R, expr2, expr3, var_decl, substitutions, data_spec);
 }
 
 void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, std::string var_decl, std::string sigma, std::string data_spec)
@@ -130,7 +147,7 @@ void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, s
   data::data_enumerator<data::number_postfix_generator> datae(dspec, datar, generator);
   data::rewriter_with_variables datarv(dspec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
-  test_expressions(R, expr1, expr2, var_decl, sigma, data_spec);
+  test_expressions(R, expr1, expr2, "", var_decl, sigma, data_spec);
 }
 
 void test_enumerate_quantifiers_rewriter2()
@@ -200,7 +217,7 @@ void test_enumerate_quantifiers_rewriter_finite()
   expr1 = "forall k: Nat. val(!(k < m)) || X(m, q, q . (k mod 4))";
   expr2 = "forall k: Nat. val(!(k < m)) || X(m, q, q . (k mod 4))";
   sigma = "";
-  test_expressions(R, expr1, S, expr2, var_decl, sigma);
+  test_expressions(R, expr1, S, expr2, "", var_decl, sigma);
 }
 
 void test_substitutions1()
@@ -254,6 +271,7 @@ void test_substitutions2()
   std::string sigma;
   std::string expr1;
   std::string expr2;
+  std::string expr3;
 
   //------------------------//
   var_decl =
@@ -266,7 +284,7 @@ void test_substitutions2()
   expr1 = "X(m+n)";
   expr2 = "X(7)";
   sigma = "m: Pos := 3; n: Pos := 4";
-  test_expressions(R, expr1, expr2, var_decl, sigma);
+  test_expressions(R, expr1, expr2, expr3, var_decl, sigma);
 
   //------------------------//
   var_decl =
@@ -277,9 +295,10 @@ void test_substitutions2()
     "  X: Bool, Nat; \n"
     ;
   expr1 = "forall c: Bool. X(c, n)";
-  expr2 = "X(true, 0) && X(false, 0)";
-  sigma = "b: Bool := true; n: Nat := 0";
-  test_expressions(R, expr1, expr2, var_decl, sigma);
+  expr2 = "X(false, 0) && X(true, 0)"; // The enumerator has a tendency to swap true en false, therefore,
+  expr3 = "X(true, 0) && X(false, 0)"; // there are two possible correct answers.
+  sigma = "b: Bool := false; n: Nat := 0";
+  test_expressions(R, expr1, expr2, expr3, var_decl, sigma);
 
   //------------------------//
   var_decl =
@@ -289,8 +308,9 @@ void test_substitutions2()
     ;
   expr1 = "exists b: Bool, c: Bool. val(b && c)";
   expr2 = "val(true)";
+  expr3 = "";
   sigma = "";
-  test_expressions(R, expr1, expr2, var_decl, sigma);
+  test_expressions(R, expr1, expr2, expr3, var_decl, sigma);
 
   //------------------------//
   var_decl =
@@ -301,7 +321,7 @@ void test_substitutions2()
   expr1 = "exists b: Bool.exists c:Bool. val(b && c)";
   expr2 = "val(true)";
   sigma = "";
-  test_expressions(R, expr1, expr2, var_decl, sigma);
+  test_expressions(R, expr1, expr2, expr3, var_decl, sigma);
 
   //------------------------//
   var_decl =
@@ -313,7 +333,7 @@ void test_substitutions2()
   expr1 = "!!val(!!b)";
   expr2 = "val(true)";
   sigma = "b:Bool := true";
-  test_expressions(R, expr1, expr2, var_decl, sigma);
+  test_expressions(R, expr1, expr2, expr3, var_decl, sigma);
 
   test_map_substitution_adapter(R);
 }

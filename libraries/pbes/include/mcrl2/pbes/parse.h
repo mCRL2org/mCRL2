@@ -43,7 +43,8 @@ namespace pbes_system {
   template <typename Container>
   void apply_internal_format_conversion(pbes<Container>& p)
   {
-#ifndef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
+#define MCRL2_NEW_INTERNAL_FORMAT_CONVERSION_PBES
+#ifndef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION_PBES
     using namespace data::detail;
     Container equations=p.equations();
     for(typename Container::iterator eqn=equations.begin(); eqn!=equations.end(); ++eqn)
@@ -54,8 +55,8 @@ namespace pbes_system {
              equations,
              internal_format_conversion_term(p.initial_state(),p.data()));
 #else             
-    detail::normalize_sorts(p);
     detail::translate_user_notation(p);
+    detail::normalize_sorts(p);
 #endif
   }
 

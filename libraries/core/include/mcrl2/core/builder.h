@@ -81,7 +81,7 @@ namespace core {
         atermpp::vector<T> result;
         for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
         {
-          result.push_back((*this)(*i));
+          result.push_back(static_cast<Derived&>(*this)(*i));
         }
         return atermpp::convert<atermpp::term_list<T> >(result);
       }
@@ -93,7 +93,7 @@ namespace core {
         atermpp::set<T> result;
         for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
         {
-          result.insert((*this)(*i));
+          result.insert(static_cast<Derived&>(*this)(*i));
         }
         std::swap(x, result);
       }
