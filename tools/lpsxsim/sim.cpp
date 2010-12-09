@@ -167,7 +167,7 @@ class sim_tool : public rewriter_tool< input_tool > {
           } 
           else if ( isdigit(s[0]) ) 
           { size_t idx;
-            sscanf(s.c_str(),"%u",&idx);
+            sscanf(s.c_str(),"%lu",&idx);
             if (idx < ATgetLength(next_states))
             {
               gsMessage("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(next_states,idx)));

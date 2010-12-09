@@ -157,8 +157,8 @@ protected:
     void handleHits( const std::vector< int > &ids );
 
     void handleHoverCluster(
-        const int &i,
-        const int &j );
+        const size_t &i,
+        const size_t &j );
     void handleHoverBundle( const int &bndlIdx );
     void handleHoverBarTree(
         const int &i,

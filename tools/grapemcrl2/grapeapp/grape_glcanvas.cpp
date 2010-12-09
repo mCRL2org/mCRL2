@@ -661,16 +661,17 @@ visual_object* grape_glcanvas::get_selectable_visual_object( coordinate &p_coord
 {
   visual_object* result = 0;
   size_t count = m_visual_objects.GetCount();
-	if (count > 0){
-    for ( size_t i = count - 1; i >= 0; --i )
+  if (count > 0)
+  {
+    for ( size_t i = count; i > 0; --i )
     {
-      visual_object* vis_obj_ptr = m_visual_objects.Item( i );
+      visual_object* vis_obj_ptr = m_visual_objects.Item( i-1 );
       if ( vis_obj_ptr->is_inside( p_coord ) )
       {
         return vis_obj_ptr;
       }
     }
-	}
+  }
   return result;
 }
 

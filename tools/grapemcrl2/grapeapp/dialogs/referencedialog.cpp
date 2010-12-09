@@ -246,7 +246,7 @@ void grape_reference_dialog::change_combobox()
     list_of_decl parameter_declarations = diagram_ptr->get_preamble()->get_parameter_declarations_list();
     
     // fill grid with parameters
-		if (parameter_declarations.GetCount() > std::numeric_limits<int>::max()){
+		if (parameter_declarations.GetCount() > static_cast<size_t>(std::numeric_limits<int>::max())){
 			wxMessageBox( wxT("parameter_declarations count exceeds max int value"), wxT("Warning"), wxICON_INFORMATION);
 		}
     int param_count = (int) parameter_declarations.GetCount();

@@ -36,10 +36,10 @@ public:
     virtual void Initialise(ATermList Pars);
     virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates);
     virtual void Reset(ATerm State);
-    virtual void Undo(unsigned int Count);
-    virtual void Redo(unsigned int Count);
-    virtual void TraceChanged(ATermList Trace, unsigned int From);
-    virtual void TracePosChanged(ATermAppl Transition, ATerm State, unsigned int Index);
+    virtual void Undo(size_t Count);
+    virtual void Redo(size_t Count);
+    virtual void TraceChanged(ATermList Trace, size_t From);
+    virtual void TracePosChanged(ATermAppl Transition, ATerm State, size_t Index);
 
 private:
     // WDR: method declarations for XSimMain
@@ -52,7 +52,7 @@ private:
     // WDR: member variable declarations for XSimMain
     wxListView *traceview;
     SimulatorInterface *simulator;
-    unsigned int current_pos;
+    size_t current_pos;
 
 private:
     // WDR: handler declarations for XSimMain

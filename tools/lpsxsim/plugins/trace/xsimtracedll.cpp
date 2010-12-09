@@ -164,7 +164,7 @@ void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList /* 
 {
   if ( Transition != NULL )
   {
-    unsigned int l = traceview->GetItemCount()-1;
+    size_t l = traceview->GetItemCount()-1;
 
     while ( l > current_pos )
     {
@@ -182,7 +182,7 @@ void XSimTraceDLL::Reset(ATerm State)
   _update();
 }
 
-void XSimTraceDLL::Undo(unsigned int Count)
+void XSimTraceDLL::Undo(size_t Count)
 {
   while ( Count > 0 )
   {
@@ -194,7 +194,7 @@ void XSimTraceDLL::Undo(unsigned int Count)
   _update();
 }
 
-void XSimTraceDLL::Redo(unsigned int Count)
+void XSimTraceDLL::Redo(size_t Count)
 {
   while ( Count > 0 )
   {
@@ -206,9 +206,9 @@ void XSimTraceDLL::Redo(unsigned int Count)
   _update();
 }
 
-void XSimTraceDLL::TraceChanged(ATermList Trace, unsigned int From)
+void XSimTraceDLL::TraceChanged(ATermList Trace, size_t From)
 {
-  unsigned int l = traceview->GetItemCount();
+  size_t l = traceview->GetItemCount();
 
   while ( l > From )
   {
@@ -229,7 +229,7 @@ void XSimTraceDLL::TraceChanged(ATermList Trace, unsigned int From)
   _update();
 }
 
-void XSimTraceDLL::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */, unsigned int Index)
+void XSimTraceDLL::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */, size_t Index)
 {
   if ( current_pos > Index )
   {

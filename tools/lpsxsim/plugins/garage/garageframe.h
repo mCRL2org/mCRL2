@@ -53,10 +53,10 @@ public:
   void Initialise(ATermList Pars);
   void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates);
   void Reset(ATerm State);
-  void Undo(unsigned int Count);
-  void Redo(unsigned int Count);
-  void TraceChanged(ATermList Trace, unsigned int From);
-  void TracePosChanged(ATermAppl Transition, ATerm State, unsigned int Index);
+  void Undo(size_t Count);
+  void Redo(size_t Count);
+  void TraceChanged(ATermList Trace, size_t From);
+  void TracePosChanged(ATermAppl Transition, ATerm State, size_t Index);
   void Registered(SimulatorInterface *Simulator);
   void Unregistered();
 

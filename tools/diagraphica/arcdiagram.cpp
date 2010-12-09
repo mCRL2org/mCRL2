@@ -747,7 +747,7 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
         glPushName( ID_TREE_NODE );
         for ( size_t i = 0; i < posTreeTopLft.size()-1; ++i )
         {
-            glPushName(GLuint) i );
+            glPushName((GLuint) i );
             for ( size_t j = 0; j < posTreeTopLft[i].size(); ++j )
             {
                 double xLft = posTreeTopLft[i][j].x;
@@ -2308,8 +2308,8 @@ void ArcDiagram::handleHoverCluster(
     const size_t &j )
 // ---------------------------------
 {
-    if ( ( 0 <= i && i < mapPosToClust.size()    ) &&
-         ( 0 <= j && j < mapPosToClust[i].size() ) )
+    if ( ( i < mapPosToClust.size()    ) &&
+         ( j < mapPosToClust[i].size() ) )
     {
         string msg;
 

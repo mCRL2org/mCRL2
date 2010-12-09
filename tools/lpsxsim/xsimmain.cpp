@@ -428,19 +428,19 @@ void XSimMain::Reset(ATerm /*State*/)
 {
 }
 
-void XSimMain::Undo(unsigned int /* Count */)
+void XSimMain::Undo(size_t /* Count */)
 {
 }
 
-void XSimMain::Redo(unsigned int /* Count */)
+void XSimMain::Redo(size_t /* Count */)
 {
 }
 
-void XSimMain::TracePosChanged(ATermAppl /*Transition*/, ATerm /*State*/, unsigned int /* Index */)
+void XSimMain::TracePosChanged(ATermAppl /*Transition*/, ATerm /*State*/, size_t /* Index */)
 {
 }
 
-void XSimMain::TraceChanged(ATermList /* Trace */, unsigned int /* From */)
+void XSimMain::TraceChanged(ATermList /* Trace */, size_t /* From */)
 {
 }
 
@@ -759,7 +759,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
   current_state = state;
 
         NextState *nextstate = simulator->GetNextState();
-  for (unsigned int i=0; i<ATgetLength(state_varnames); i++)
+  for (size_t i=0; i<ATgetLength(state_varnames); i++)
   {
     ATermAppl oldval = nextstate->getStateArgument(old,i);
     ATermAppl newval = nextstate->getStateArgument(state,i);
@@ -893,7 +893,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
     ATerm n = ATgetFirst(ATgetNext(ATLgetFirst(l)));
     ATermList o = state_varnames;
     bool comma = false;
-    for (unsigned int i=0; i<ATgetLength(state_varnames); i++)
+    for (size_t i=0; i<ATgetLength(state_varnames); i++)
     {
       ATermAppl oldval = nextstate->getStateArgument(m,i);
       ATermAppl newval = nextstate->getStateArgument(n,i);
@@ -923,8 +923,8 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
   }
 
   sort_transitions(actions,statechanges,indices);
-  int next = -1;
-  for (unsigned int i=0; i<indices.GetCount(); i++)
+  ssize_t next = -1;
+  for (size_t i=0; i<indices.GetCount(); i++)
   {
     transview->InsertItem(i,actions[i]);
     transview->SetItem(i,1,statechanges[i]);
