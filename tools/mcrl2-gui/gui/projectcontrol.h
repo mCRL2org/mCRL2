@@ -528,7 +528,7 @@ public:
 		mnu.Append(ID_RENAME, wxT("Rename \tF2"));
 		mnu.Append(wxID_DELETE, wxT("Delete \tDel"));
 		mnu.AppendSeparator();
-		mnu.Append(wxID_REFRESH, wxT("Refresh \tF5"));
+		mnu.Append(wxID_REFRESH, wxT("Refresh Browser \tF5"));
 		mnu.Append(wxID_PROPERTIES, wxT("Details"));
 		mnu.Connect(wxEVT_COMMAND_MENU_SELECTED,
 				(wxObjectEventFunction) &GenericDirCtrl::OnPopupClick, NULL, this);

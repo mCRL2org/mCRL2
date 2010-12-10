@@ -84,7 +84,7 @@ void GLCanvas::initialize()
   glLoadIdentity();
   displayAllowed = true;
 	/* Following line really needed?*/
-  //visualizer->initFontRenderer();
+  visualizer->initFontRenderer();
 }
 
 void GLCanvas::setVisualizer(Visualizer *vis)

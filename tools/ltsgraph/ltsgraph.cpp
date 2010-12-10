@@ -48,15 +48,16 @@ bool LTSGraph::run()
 	glCanvas = mainFrame->getGLCanvas();
 	glCanvas->setVisualizer(visualizer);
 
+	SetTopWindow(mainFrame);
+	mainFrame->Show();
+	glCanvas->initialize();
+	mainFrame->Layout();
+
 	// Load a provided file.
 	if (!m_input_filename.empty()) {
 		openFile(m_input_filename);
 	}
 
-	SetTopWindow(mainFrame);
-	mainFrame->Show();
-	glCanvas->initialize();
-	mainFrame->Layout();
 
 	return true;
 }
