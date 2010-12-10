@@ -84,7 +84,8 @@ def add_namespace(p, namespace):
         return '%s::%s' % (namespace, p)
     return p
 
-def print_dependencies(dependencies):
+def print_dependencies(dependencies, message):
+    print message
     for type in sorted(dependencies):
         print type, dependencies[type]
 
@@ -96,15 +97,15 @@ def update_dependencies(class_map, dependencies, expression_dependencies):
         namespace = re.sub('\\:.*', '', classname)
         c = class_map[classname]
         
-        # check superclass dependency
-        if c.superclass() != None:
-            superclass = add_namespace(c.superclass(), namespace)
-            if dependencies[superclass] == True:
-                changed = True
-                dependencies[classname] = True
-                dependencies[classname + '_list'] = True
-                dependencies[classname + '_vector'] = True
-                continue
+        ## check superclass dependency
+        #if c.superclass() != None:
+        #    superclass = add_namespace(c.superclass(), namespace)
+        #    if dependencies[superclass] == True:
+        #        changed = True
+        #        dependencies[classname] = True
+        #        dependencies[classname + '_list'] = True
+        #        dependencies[classname + '_vector'] = True
+        #        continue
                 
         # check parameter dependencies
         for p in c.constructor.parameters():
@@ -134,14 +135,18 @@ def find_dependencies(class_text_list, expression_class, expression_class_namesp
     dependencies = {}            # maps class names to True/False
     expression_dependencies = {} # maps expression classes to derivatives
 
-    # Create parameter map
+    # Create class map
     for item in class_text_list:
         class_text, namespace, superclass = item
         if superclass == 'None':
             superclass = None
-        classes = parse_classes(class_text, superclass, namespace = expression_class_namespace)
+        if superclass != None:
+            dependencies[namespace + '::' + superclass] = False
+        classes = parse_classes(class_text, superclass, namespace = namespace)
         for c in classes:
-            class_name = add_namespace(c.classname(), namespace)
+            if c.namespace() != namespace:
+                continue
+            class_name = c.namespace() + '::' + c.classname()
             class_map[class_name] = c
             f = c.constructor
             dependencies[class_name] = False
@@ -159,12 +164,12 @@ def find_dependencies(class_text_list, expression_class, expression_class_namesp
     dependencies[type] = True
     dependencies[type + '_list'] = True
     dependencies[type + '_vector'] = True
-    
+
     while update_dependencies(class_map, dependencies, expression_dependencies):
         pass
-    print_dependencies(dependencies)
-    
-def make_builder_inc_file(filename, class_text, expression_class, verbose = False):
+    return dependencies
+
+def make_builder_inc_file(filename, class_text, dependencies, expression_class, namespace, verbose = False):
     result = []
     classes = parse_classes(class_text)
     for c in classes:
@@ -175,7 +180,8 @@ def make_builder_inc_file(filename, class_text, expression_class, verbose = Fals
         f = c.constructor
         parameters = []       
         for p in f.parameters():
-            if extract_type(p.type()) not in [expression_class, expression_class + '_list']:
+            #if extract_type(p.type()) not in [expression_class, expression_class + '_list']:
+            if dependencies[add_namespace(extract_type(p.type()), namespace)] == False:
                 parameters.append('x.%s()' % p.name())
             else:
                 parameters.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
@@ -216,15 +222,15 @@ ActId | lps::action_label(const core::identifier_string& name, const data::sort_
 '''
 
 if __name__ == "__main__":
-    find_dependencies(
-        [ (CONTAINER_TYPES                              , 'data', None),
+    class_list = [
+          (CONTAINER_TYPES                              , 'data', None),
           (STRUCTURED_SORT_ELEMENTS                     , 'data', None),
-          (SORT_EXPRESSION_CLASSES                      , 'data', None),
+          (SORT_EXPRESSION_CLASSES                      , 'data', 'sort_expression'),
           (BINDER_TYPES                                 , 'data', None),
-          (ASSIGNMENT_EXPRESSION_CLASSES                , 'data', None),
+          (ASSIGNMENT_EXPRESSION_CLASSES                , 'data', 'assignment_expression'),
           (ABSTRACTION_CLASS                            , 'data', None),
-          (DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION  , 'data', None),
-          (ABSTRACTION_EXPRESSIONS                      , 'data', None),
+          (DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION  , 'data', 'data_expression'),
+          (ABSTRACTION_EXPRESSIONS                      , 'data', 'data_expression'),
           (DATA_CLASSES                                 , 'data', None),
           (STATE_FORMULA_CLASSES                        , 'state_formulas', 'state_formula'),
           (REGULAR_FORMULA_CLASSES                      , 'regular_formulas', 'regular_formula'),
@@ -236,30 +242,39 @@ if __name__ == "__main__":
           (PBES_EXPRESSION_CLASSES                      , 'pbes_system', 'pbes_expression'),
           (BOOLEAN_CLASSES                              , 'bes', None),
           (BOOLEAN_EXPRESSION_CLASSES                   , 'bes', 'boolean_expression')
-        ],
-        'data_expression',
-        'data')
+        ]
+
+    boolean_expression_dependencies = find_dependencies(class_list, 'boolean_expression', 'bes')
+    data_expression_dependencies    = find_dependencies(class_list, 'data_expression', 'data')
+    pbes_expression_dependencies    = find_dependencies(class_list, 'pbes_expression', 'pbes_system')
+    process_expression_dependencies = find_dependencies(class_list, 'process_expression', 'process')
+    sort_expression_dependencies    = find_dependencies(class_list, 'sort_expression', 'data')
+    action_formula_dependencies     = find_dependencies(class_list, 'action_formula', 'action_formulas')
+    regular_formula_dependencies    = find_dependencies(class_list, 'regular_formula', 'regular_formulas')
+    state_formula_dependencies      = find_dependencies(class_list, 'state_formula', 'state_formulas')
+
+    #print_dependencies(data_expression_dependencies, '--- data_expression_dependencies ---')
 
     make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES, namespace = 'lps')
 
     make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, [('process_expression', PROCESS_EXPRESSION_CLASSES)], namespace = 'process')
-    make_builder_inc_file(  '../../process/include/mcrl2/process/detail/process_expression_builder.inc.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
+    make_builder_inc_file(  '../../process/include/mcrl2/process/detail/process_expression_builder.inc.h', PROCESS_EXPRESSION_CLASSES, process_expression_dependencies, 'process_expression', namespace = 'process')
 
     make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES, [('pbes_expression', PBES_EXPRESSION_CLASSES)], namespace = 'pbes_system')
-    make_builder_inc_file(  '../../pbes/include/mcrl2/pbes/detail/pbes_expression_builder.inc.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
+    make_builder_inc_file(  '../../pbes/include/mcrl2/pbes/detail/pbes_expression_builder.inc.h', PBES_EXPRESSION_CLASSES, pbes_expression_dependencies, 'pbes_expression', namespace = 'pbes_system')
 
     make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, [('boolean_expression', BOOLEAN_EXPRESSION_CLASSES)], namespace = 'bes')
-    make_builder_inc_file(  '../../bes/include/mcrl2/bes/detail/builder.inc.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression')
+    make_builder_inc_file(  '../../bes/include/mcrl2/bes/detail/builder.inc.h', BOOLEAN_EXPRESSION_CLASSES, boolean_expression_dependencies, 'boolean_expression', namespace = 'bes')
 
     make_traverser_inc_file('../../data/include/mcrl2/data/detail/traverser.inc.h', ASSIGNMENT_EXPRESSION_CLASSES + BINDER_TYPES + STRUCTURED_SORT_ELEMENTS + CONTAINER_TYPES + SORT_EXPRESSION_CLASSES + DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION + ABSTRACTION_EXPRESSIONS + DATA_CLASSES, [('data_expression', DATA_EXPRESSION_CLASSES), ('assignment_expression', ASSIGNMENT_EXPRESSION_CLASSES), ('sort_expression', SORT_EXPRESSION_CLASSES), ('container_type', CONTAINER_TYPES), ('binder_type', BINDER_TYPES), ('abstraction', ABSTRACTION_EXPRESSIONS)], namespace = 'data')
-    make_builder_inc_file  ('../../data/include/mcrl2/data/detail/data_expression_builder.inc.h', DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION + ABSTRACTION_EXPRESSIONS, 'data_expression')
-    make_builder_inc_file  ('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', SORT_EXPRESSION_CLASSES, 'sort_expression')
+    make_builder_inc_file  ('../../data/include/mcrl2/data/detail/data_expression_builder.inc.h', DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION + ABSTRACTION_EXPRESSIONS, data_expression_dependencies, 'data_expression', namespace = 'data')
+    make_builder_inc_file  ('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', SORT_EXPRESSION_CLASSES, sort_expression_dependencies, 'sort_expression', namespace = 'data')
 
     make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h', ACTION_FORMULA_CLASSES, [('action_formula', ACTION_FORMULA_CLASSES)], namespace = 'action_formulas')
-    make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/action_formula_builder.inc.h', ACTION_FORMULA_CLASSES, 'action_formula')
+    make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/action_formula_builder.inc.h', ACTION_FORMULA_CLASSES, action_formula_dependencies, 'action_formula', namespace = 'action_formulas')
 
     make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', REGULAR_FORMULA_CLASSES, [('regular_formula', REGULAR_FORMULA_CLASSES)], namespace = 'regular_formulas')
-    make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/regular_formula_builder.inc.h', REGULAR_FORMULA_CLASSES, 'regular_formula')
+    make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/regular_formula_builder.inc.h', REGULAR_FORMULA_CLASSES, regular_formula_dependencies, 'regular_formula', namespace = 'regular_formulas')
 
     make_traverser_inc_file('../../lps/include/mcrl2/modal_formula/detail/state_formula_traverser.inc.h', STATE_FORMULA_CLASSES, [('state_formula', STATE_FORMULA_CLASSES)], namespace = 'state_formulas')
-    make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/state_formula_builder.inc.h', STATE_FORMULA_CLASSES, 'state_formula')
+    make_builder_inc_file(  '../../lps/include/mcrl2/modal_formula/detail/state_formula_builder.inc.h', STATE_FORMULA_CLASSES, state_formula_dependencies, 'state_formula', namespace = 'state_formulas')

@@ -546,7 +546,7 @@ class ATermConstructor(Constructor):
 # self.constructor: the constructor of the class
 # self.description: a string description of the class
 class Class:
-    def __init__(self, aterm, constructor, description, superclass = None, use_base_class_name = False):
+    def __init__(self, aterm, constructor, description, superclass = None, use_base_class_name = False, namespace = None):
         self.aterm = aterm
         self.description = description
         name = re.sub('\(.*', '', constructor)
@@ -557,6 +557,12 @@ class Class:
         self.base_class_constructor = FunctionDeclaration(self.base_classname_ + arguments)
         self.use_base_class_name_ = use_base_class_name
         self.superclass_ = superclass
+        self.namespace_ = namespace
+
+    # Returns the namespace of the class
+    #
+    def namespace(self):
+        return self.namespace_
 
     # Returns the name of the class
     #
@@ -783,6 +789,10 @@ def parse_classes(text, superclass = None, use_base_class_name = False, namespac
         constructor_namespace = extract_namespace(constructor)
         if superclass != None and constructor_namespace != None and constructor_namespace != namespace:
             superclass = None
-
-        result.append(Class(aterm, constructor, description, superclass, use_base_class_name))
+        
+        if constructor_namespace != None:
+            class_namespace = constructor_namespace
+        else:
+            class_namespace = namespace
+        result.append(Class(aterm, constructor, description, superclass, use_base_class_name, namespace = class_namespace))
     return result

@@ -30,7 +30,7 @@ sort_expression operator()(const container_sort& x)
 sort_expression operator()(const structured_sort& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  sort_expression result = structured_sort(x.constructors());
+  sort_expression result = structured_sort(static_cast<Derived&>(*this)(x.constructors()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
