@@ -529,6 +529,9 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
       event.Skip();
     }
   }
+
+	wxPaintEvent e;
+	onPaint( e );
 }
 
 
