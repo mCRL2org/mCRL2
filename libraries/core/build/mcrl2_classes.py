@@ -747,6 +747,14 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         text = self.expand_text(text, ptext, ctext, mtext, namespace)
         return text + '\n'
 
+def extract_namespace(constructor):
+    constructor = re.sub('\(.*', '', constructor)
+    pos = constructor.find(':')
+    if pos >= 0:
+        return constructor[:pos]
+    else:
+        return None
+
 # parses lines that contain entries separated by '|'
 # empty lines are removed
 #
@@ -760,7 +768,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 #
 # If the name of a function contains a postfix between brackets (like variable[_base]),
 # then the parameter use_base_class determines whether it is used or not.
-def parse_classes(text, superclass = None, use_base_class_name = False):
+def parse_classes(text, superclass = None, use_base_class_name = False, namespace = None):
     result = []
     lines = text.rsplit('\n')
     for line in lines:
@@ -770,5 +778,11 @@ def parse_classes(text, superclass = None, use_base_class_name = False):
         if len(words) < 3:
             continue
         aterm, constructor, description = words
+        
+        # A superclass must have the specified namespace, otherwise set it to None
+        constructor_namespace = extract_namespace(constructor)
+        if superclass != None and constructor_namespace != None and constructor_namespace != namespace:
+            superclass = None
+
         result.append(Class(aterm, constructor, description, superclass, use_base_class_name))
     return result

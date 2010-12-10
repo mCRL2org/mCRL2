@@ -23,13 +23,14 @@ BUILDER_FUNCTION = r'''EXPRESSION operator()(const QUALIFIED_NODE& x)
 }
 '''
 
-def make_traverser_inc_file(filename, class_text, expression_classes = [], namespace = None):
+def make_traverser_inc_file(filename, class_text, expression_classes = [], namespace = None, verbose = False):
     result = []
     classes = parse_classes(class_text)
     for c in classes:
         if c.qualifier() != '': # skip classes residing in a different name space
             continue
-        print 'generating traverse functions for class', c.name()
+        if verbose:
+            print 'generating traverse functions for class', c.name()
         f = c.constructor
         visit_functions = []       
         for p in f.parameters():
@@ -78,13 +79,99 @@ def make_traverser_inc_file(filename, class_text, expression_classes = [], names
 
     insert_text_in_file(filename, ctext, 'generated code')
 
-def make_builder_inc_file(filename, class_text, expression_class):
+def add_namespace(p, namespace):
+    if p.find(':') == -1:
+        return '%s::%s' % (namespace, p)
+    return p
+
+def print_dependencies(dependencies):
+    for type in sorted(dependencies):
+        print type, dependencies[type]
+
+def update_dependencies(class_map, dependencies, expression_dependencies):
+    changed = False
+    for classname in class_map:
+        if dependencies[classname] == True:
+            continue
+        namespace = re.sub('\\:.*', '', classname)
+        c = class_map[classname]
+        
+        # check superclass dependency
+        if c.superclass() != None:
+            superclass = add_namespace(c.superclass(), namespace)
+            if dependencies[superclass] == True:
+                changed = True
+                dependencies[classname] = True
+                dependencies[classname + '_list'] = True
+                dependencies[classname + '_vector'] = True
+                continue
+                
+        # check parameter dependencies
+        for p in c.constructor.parameters():
+            type = add_namespace(extract_type(p.type()), namespace)
+            if dependencies[type] == True:
+                changed = True
+                dependencies[classname] = True
+                dependencies[classname + '_list'] = True
+                dependencies[classname + '_vector'] = True
+                break
+
+    # check expression class dependencies
+    for classname in expression_dependencies:
+        if dependencies[classname] == True:
+            continue
+        for d in expression_dependencies[classname]:
+            if dependencies[d] == True:
+                changed = True
+                dependencies[classname] = True
+                dependencies[classname + '_list'] = True
+                dependencies[classname + '_vector'] = True
+
+    return changed
+
+def find_dependencies(class_text_list, expression_class, expression_class_namespace):
+    class_map = {}               # maps class names to classes
+    dependencies = {}            # maps class names to True/False
+    expression_dependencies = {} # maps expression classes to derivatives
+
+    # Create parameter map
+    for item in class_text_list:
+        class_text, namespace, superclass = item
+        if superclass == 'None':
+            superclass = None
+        classes = parse_classes(class_text, superclass, namespace = expression_class_namespace)
+        for c in classes:
+            class_name = add_namespace(c.classname(), namespace)
+            class_map[class_name] = c
+            f = c.constructor
+            dependencies[class_name] = False
+            for p in f.parameters():
+                type = add_namespace(extract_type(p.type()), namespace)
+                dependencies[type] = False
+            if superclass != None:
+                sname = add_namespace(superclass, namespace)
+                if not sname in expression_dependencies:
+                    expression_dependencies[sname] = []
+                expression_dependencies[sname].append(class_name)
+
+    # Initial dependency: the expression class depends on itself
+    type = add_namespace(expression_class, expression_class_namespace)
+    dependencies[type] = True
+    dependencies[type + '_list'] = True
+    dependencies[type + '_vector'] = True
+    
+    while update_dependencies(class_map, dependencies, expression_dependencies):
+        pass
+    print_dependencies(dependencies)
+    
+def make_builder_inc_file(filename, class_text, expression_class, verbose = False):
     result = []
     classes = parse_classes(class_text)
     for c in classes:
         if c.qualifier() != '': # skip classes residing in a different name space
             continue
-        print 'generating builder functions for class', c.name()
+        if verbose:
+            print 'generating builder functions for class', c.name()
         f = c.constructor
         parameters = []       
         for p in f.parameters():
@@ -129,13 +216,37 @@ ActId | lps::action_label(const core::identifier_string& name, const data::sort_
 '''
 
 if __name__ == "__main__":
+    find_dependencies(
+        [ (CONTAINER_TYPES                              , 'data', None),
+          (STRUCTURED_SORT_ELEMENTS                     , 'data', None),
+          (SORT_EXPRESSION_CLASSES                      , 'data', None),
+          (BINDER_TYPES                                 , 'data', None),
+          (ASSIGNMENT_EXPRESSION_CLASSES                , 'data', None),
+          (ABSTRACTION_CLASS                            , 'data', None),
+          (DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION  , 'data', None),
+          (ABSTRACTION_EXPRESSIONS                      , 'data', None),
+          (DATA_CLASSES                                 , 'data', None),
+          (STATE_FORMULA_CLASSES                        , 'state_formulas', 'state_formula'),
+          (REGULAR_FORMULA_CLASSES                      , 'regular_formulas', 'regular_formula'),
+          (ACTION_FORMULA_CLASSES                       , 'action_formulas', 'action_formula'),
+          (LPS_CLASSES                                  , 'lps', None),
+          (PROCESS_CLASSES                              , 'process', None),
+          (PROCESS_EXPRESSION_CLASSES                   , 'process', 'process_expression'),
+          (PBES_CLASSES                                 , 'pbes_system', None),
+          (PBES_EXPRESSION_CLASSES                      , 'pbes_system', 'pbes_expression'),
+          (BOOLEAN_CLASSES                              , 'bes', None),
+          (BOOLEAN_EXPRESSION_CLASSES                   , 'bes', 'boolean_expression')
+        ],
+        'data_expression',
+        'data')
+
     make_traverser_inc_file('../../lps/include/mcrl2/lps/detail/traverser.inc.h', LPS_CLASSES, namespace = 'lps')
 
     make_traverser_inc_file('../../process/include/mcrl2/process/detail/traverser.inc.h', PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, [('process_expression', PROCESS_EXPRESSION_CLASSES)], namespace = 'process')
-    make_builder_inc_file(  '../../process/include/mcrl2/process/detail/builder.inc.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
+    make_builder_inc_file(  '../../process/include/mcrl2/process/detail/process_expression_builder.inc.h', PROCESS_EXPRESSION_CLASSES, 'process_expression')
 
     make_traverser_inc_file('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h', PBES_EXPRESSION_CLASSES + PBES_CLASSES, [('pbes_expression', PBES_EXPRESSION_CLASSES)], namespace = 'pbes_system')
-    make_builder_inc_file(  '../../pbes/include/mcrl2/pbes/detail/builder.inc.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
+    make_builder_inc_file(  '../../pbes/include/mcrl2/pbes/detail/pbes_expression_builder.inc.h', PBES_EXPRESSION_CLASSES, 'pbes_expression')
 
     make_traverser_inc_file('../../bes/include/mcrl2/bes/detail/traverser.inc.h', BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, [('boolean_expression', BOOLEAN_EXPRESSION_CLASSES)], namespace = 'bes')
     make_builder_inc_file(  '../../bes/include/mcrl2/bes/detail/builder.inc.h', BOOLEAN_EXPRESSION_CLASSES, 'boolean_expression')
