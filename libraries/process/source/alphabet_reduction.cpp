@@ -409,8 +409,8 @@ namespace mcrl2 {
           ATermAppl ma=gsMakeMultActName(ATLgetFirst(ulp));
           ATermList tulq=ulq;
           for (; !ATisEmpty(ulq); ulq=ATgetNext(ulq)){
-            if(ATindexedSetGetIndex(VV,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))))!=ATERM_NON_EXISTING_POSITION){
-      	m = ATinsert(m,(ATerm)ma);
+            if (ATindexedSetGetIndex(VV,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))))>=0){
+      	       m = ATinsert(m,(ATerm)ma);
       	break;
             }
           }

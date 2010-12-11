@@ -466,7 +466,7 @@ ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
     v=hashset->hashtable[c];
     if (v == EMPTY) 
     {
-      return -1; // Not found.
+      return -1; /* Not found. */
     }
 
     if (v != DELETED && ATisEqual(elem,tableGet(hashset->keys, v))) 
@@ -477,7 +477,7 @@ ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
     c = (c+STEP) & hashset->sizeMinus1;
   } while (c != start);
 
-  return -1; // Not found.
+  return -1; /* Not found. */
 }
 
 /*}}}  */

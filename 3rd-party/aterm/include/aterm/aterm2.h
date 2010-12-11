@@ -219,7 +219,7 @@ ATermIndexedSet
 void       ATindexedSetDestroy(ATermIndexedSet set);
 void       ATindexedSetReset(ATermIndexedSet set);
 size_t     ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool *isnew);
-ssize_t     ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem); // A negative value represents non existence.
+ssize_t     ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem); /* A negative value represents non existence. */
 void       ATindexedSetRemove(ATermIndexedSet set, ATerm elem);
 ATermList  ATindexedSetElements(ATermIndexedSet set);
 ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
