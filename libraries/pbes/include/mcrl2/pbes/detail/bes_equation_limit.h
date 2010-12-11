@@ -15,6 +15,7 @@
 #ifndef MCRL2_PBES_DETAIL_BES_EQUATION_LIMIT_H
 #define MCRL2_PBES_DETAIL_BES_EQUATION_LIMIT_H
 
+#include <limits>
 #include <stdexcept>
 
 namespace mcrl2 {
@@ -26,23 +27,23 @@ namespace detail {
   template <class T> // note, T is only a dummy
   struct bes_equation_limit
   {
-  	// -1 means unlimited
-    static int max_bes_equations;
+  	// -1 means unlimited; Ugly. Better take maximum value.
+    static size_t max_bes_equations;
   };
 
   template <class T>
-  int bes_equation_limit<T>::max_bes_equations = -1;
+  size_t bes_equation_limit<T>::max_bes_equations = std::numeric_limits<size_t>::max(); 
 
   inline
-  void set_bes_equation_limit(int size)
+  void set_bes_equation_limit(size_t size)
   {
-    bes_equation_limit<int>::max_bes_equations = size;
+    bes_equation_limit<size_t>::max_bes_equations = size;
   }
 
   inline
-  void check_bes_equation_limit(int size)
+  void check_bes_equation_limit(size_t size)
   {
-  	if (bes_equation_limit<int>::max_bes_equations >= 0 && bes_equation_limit<int>::max_bes_equations <= size)
+  	if (/* bes_equation_limit<size_t>::max_bes_equations >= 0 && */ size>=bes_equation_limit<size_t>::max_bes_equations )
     {
     	throw std::out_of_range("Error: number of BES equations has exceeded the limit");
     }

@@ -18,7 +18,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <stdint.h>
+// #include <stdint.h>
 #include <unistd.h>
 #include <cerrno>
 #include <string.h>
@@ -526,7 +526,7 @@ static void term2seq(ATerm t, ATermList *s, int *var_cnt)
   {
     ATerm store = (ATerm) ATmakeAppl2(afunS,(ATerm) t,dummy);
 
-    if ( ATindexOf(*s,store,0) != NON_EXISTING )
+    if ( ATindexOf(*s,store,0) != ATERM_NON_EXISTING_POSITION )
     {
       *s = ATinsert(*s, (ATerm) ATmakeAppl3(afunM,(ATerm) t,dummy,dummy));
     } else {
@@ -551,7 +551,7 @@ static void get_used_vars_aux(ATerm t, ATermList *vars)
   {
     if ( gsIsDataVarId((ATermAppl) t) )
     {
-      if ( ATindexOf(*vars,t,0) == NON_EXISTING )
+      if ( ATindexOf(*vars,t,0) == ATERM_NON_EXISTING_POSITION )
       {
         *vars = ATinsert(*vars,t);
       }

@@ -455,26 +455,29 @@ size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, ATbool *isnew)
 /*}}}  */
 /*{{{  size_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm key) */
 
-size_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
+ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
 { 
   size_t c,start,v;
 
   start = hashcode(elem, hashset->sizeMinus1);
   c = start;
-  do {
+  do 
+  {
     v=hashset->hashtable[c];
-    if(v == EMPTY) {
-      return NON_EXISTING;
+    if (v == EMPTY) 
+    {
+      return -1; // Not found.
     }
 
-    if(v != DELETED && ATisEqual(elem,tableGet(hashset->keys, v))) {
-      return v;
+    if (v != DELETED && ATisEqual(elem,tableGet(hashset->keys, v))) 
+    {
+      return (ssize_t)v;
     }
 
     c = (c+STEP) & hashset->sizeMinus1;
   } while (c != start);
 
-  return NON_EXISTING;
+  return -1; // Not found.
 }
 
 /*}}}  */
@@ -610,7 +613,7 @@ ATerm ATtableGet(ATermTable table, ATerm key)
   size_t v;
 
   v = ATindexedSetGetIndex(table, key);
-  if(v==NON_EXISTING) 
+  if(v==ATERM_NON_EXISTING_POSITION) 
   {
     return NULL;
   }

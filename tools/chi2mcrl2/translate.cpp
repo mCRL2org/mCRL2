@@ -2425,7 +2425,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
         terminate = false;
       } else {
         terminate = true;
-        next_state = NON_EXISTING ;
+        next_state = ATERM_NON_EXISTING_POSITION ;
       }
       state = transitionSystem.size();
       originates_from_stream = stream_number;
@@ -2434,7 +2434,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
     }
   if ( StrcmpIsFun( "AltStat", input ) )
     {
-      next_state = NON_EXISTING;
+      next_state = ATERM_NON_EXISTING_POSITION;
       terminate = true;
       alternative = true;
       originates_from_stream = stream_number;

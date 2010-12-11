@@ -383,7 +383,7 @@ static void visitAppl(BinaryWriter binaryWriter, ATermAppl arg, ByteBuffer byteB
 		
 		size_t header = getHeader((ATerm) arg);
 		
-		if(id != NON_EXISTING){
+		if(id != ATERM_NON_EXISTING_POSITION){
 			header |= FUNSHARED;
 			*(byteBuffer->currentPos) = (char) header;
 			byteBuffer->currentPos++;
@@ -529,7 +529,7 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer){
 	while(currentTerm != NULL && ATgetRemainingBufferSpace(byteBuffer) >= MINIMUMFREEBUFFERSPACE){
 		size_t termHash = (size_t)(currentTerm);
 		size_t id = IMgetID(binaryWriter->sharedTerms, currentTerm, termHash);
-		if(id != NON_EXISTING){
+		if(id != ATERM_NON_EXISTING_POSITION){
 			*(byteBuffer->currentPos) = (char) ISSHAREDFLAG;
 			byteBuffer->currentPos++;
                         assert(id< (((size_t)1)<<(8*sizeof(int)-1))); /* id must fit in an int */

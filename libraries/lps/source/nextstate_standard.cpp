@@ -343,7 +343,7 @@ ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
                 return (ATerm) ATreverse(m);
         } else if ( gsIsDataVarId((ATermAppl) a) )
         {
-                if ( ATindexOf(free_vars,a,0) != NON_EXISTING )
+                if ( ATindexOf(free_vars,a,0) != ATERM_NON_EXISTING_POSITION )
                 {
                         return reinterpret_cast< ATerm >(static_cast< ATermAppl >(
                                 generator(mcrl2::data::sort_expression(ATAgetArgument((ATermAppl) a,1)))));

@@ -366,7 +366,7 @@ static size_t readString(byte_reader *reader)
 
   /* Get length of string */
   if (readInt(&len, reader) < 0)
-    return NON_EXISTING;
+    return ATERM_NON_EXISTING_POSITION;
 
   /* Assure buffer can hold the string */
   if (text_buffer_size < (len+1))
@@ -379,7 +379,7 @@ static size_t readString(byte_reader *reader)
 
   /* Read the actual string */
   if (read_bytes(text_buffer, len, reader) != len)
-    return NON_EXISTING;
+    return ATERM_NON_EXISTING_POSITION;
 
   /* Ok, return length of string */
   return len;
@@ -1103,16 +1103,16 @@ static AFun read_symbol(byte_reader *reader)
   size_t arity, quoted;
   size_t len;
 
-  if((len = readString(reader)) == NON_EXISTING)
-    return NON_EXISTING;
+  if((len = readString(reader)) == ATERM_NON_EXISTING_POSITION)
+    return ATERM_NON_EXISTING_POSITION;
 
   text_buffer[len] = '\0';
 
   if(readInt(&arity, reader) < 0)
-    return NON_EXISTING;
+    return ATERM_NON_EXISTING_POSITION;
 
   if(readInt(&quoted, reader) < 0)
-    return NON_EXISTING;
+    return ATERM_NON_EXISTING_POSITION;
 
   return ATmakeAFun(text_buffer, arity, quoted ? ATtrue : ATfalse);
 }

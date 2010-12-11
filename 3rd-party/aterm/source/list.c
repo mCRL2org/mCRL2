@@ -197,7 +197,7 @@ size_t ATindexOf(ATermList list, ATerm el, int startpos)
     ++i;
   }
 
-  return (ATisEmpty(list) ? NON_EXISTING : (size_t)i);
+  return (ATisEmpty(list) ? ATERM_NON_EXISTING_POSITION : i);
 }
 
 /*}}}  */

@@ -363,7 +363,7 @@ static int InsideSplitter(ATermList tgt, int splitter) {
 
 static void PrintTransition(ATerm p, ATbool tp, int action, ATerm q, ATbool tq)  {
      static char buf[80];
-     int pt = 0;
+     size_t pt = 0;
      strncpy(buf, ATwriteToString(p),24);
      strcat(buf, (tp?"!":" "));
      pt = strlen(buf);

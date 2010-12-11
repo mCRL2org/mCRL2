@@ -252,7 +252,7 @@ static void term2seq(ATerm t, ATermList *s, size_t *var_cnt)
   {
     ATerm store = (ATerm) ATmakeAppl2(afunS,(ATerm) t,dummy);
 
-    if ( ATindexOf(*s,store,0) != NON_EXISTING)
+    if ( ATindexOf(*s,store,0) != ATERM_NON_EXISTING_POSITION)
     {
       *s = ATinsert(*s, (ATerm) ATmakeAppl3(afunM,(ATerm) t,dummy,dummy));
     } else {
@@ -277,7 +277,7 @@ static void get_used_vars_aux(ATerm t, ATermList *vars)
   {
     if ( gsIsDataVarId((ATermAppl) t) )
     {
-      if ( ATindexOf(*vars,t,0) == NON_EXISTING )
+      if ( ATindexOf(*vars,t,0) == ATERM_NON_EXISTING_POSITION )
       {
         *vars = ATinsert(*vars,t);
       }
@@ -742,7 +742,7 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, size_t len,
 
 static ATermAppl optimise_tree(ATermAppl tree,size_t *max)
 {
-  return optimise_tree_aux(tree,ATmakeList0(),NON_EXISTING,max);
+  return optimise_tree_aux(tree,ATmakeList0(),ATERM_NON_EXISTING_POSITION,max);
 }
 
 #ifdef _INNER_STORE_TREES
@@ -914,7 +914,7 @@ ATfprintf(stderr,"X\n");
 #ifdef TMA_DEBUG
 ATfprintf(stderr,"C\n");
 #endif
-      if ( ATisEqual(build(ATgetArgument(*tree,0),NON_EXISTING,vars,vals,*len),trueint) )
+      if ( ATisEqual(build(ATgetArgument(*tree,0),ATERM_NON_EXISTING_POSITION,vars,vals,*len),trueint) )
       {
 #ifdef TMA_DEBUG
 ATfprintf(stderr,"true (c)\n");
@@ -947,7 +947,7 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 
   while ( isC(tree) )
   {
-    if ( ATisEqual(build(ATgetArgument(tree,0),NON_EXISTING,vars,vals,len),trueint) )
+    if ( ATisEqual(build(ATgetArgument(tree,0),ATERM_NON_EXISTING_POSITION,vars,vals,len),trueint) )
     {
       tree = (ATermAppl) ATgetArgument(tree,1); // Was 0????  JFG This was a very odd error.
     } else {
@@ -1330,7 +1330,7 @@ ATermList RewriterInnermost::build_args(ATermList args, size_t buildargs, ATermA
   {
     return args;
   } else {
-    return ATinsert(build_args(ATgetNext(args),buildargs-1,vars,vals,len),build(ATgetFirst(args),NON_EXISTING,vars,vals,len));
+    return ATinsert(build_args(ATgetNext(args),buildargs-1,vars,vals,len),build(ATgetFirst(args),ATERM_NON_EXISTING_POSITION,vars,vals,len));
   }
 }
 
@@ -1341,7 +1341,7 @@ ATerm RewriterInnermost::build(ATerm Term, size_t buildargs, ATermAppl *vars, AT
     ATerm head = ATgetFirst((ATermList) Term);
     ATermList args = ATgetNext((ATermList) Term);
 
-    if ( buildargs == NON_EXISTING )
+    if ( buildargs == ATERM_NON_EXISTING_POSITION )
     {
       buildargs = ATgetLength(args);
     }

@@ -136,8 +136,8 @@ class CAsttransform
     CAsttransform()
       : parenthesis_level(0),
         terminate(true),
-        state(NON_EXISTING),
-        next_state(NON_EXISTING),
+        state(ATERM_NON_EXISTING_POSITION),
+        next_state(ATERM_NON_EXISTING_POSITION),
         loop(false),
         guardedloop(false),
         guardedStarBeginState(0),

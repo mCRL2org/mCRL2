@@ -35,24 +35,24 @@ namespace detail {
   {
     protected:
       /// The vertices of the parity game graph.
-      std::set<unsigned int> V;
+      std::set<size_t> V;
 
       /// The edges of the parity game graph.
-      std::set<std::pair<unsigned int, unsigned int> > E;
+      std::set<std::pair<size_t, size_t> > E;
 
       /// The vertex priorities of the parity game graph.
-      std::map<unsigned int, unsigned int> priorities;
+      std::map<size_t, size_t> priorities;
 
       /// The even vertices of the parity game graph.
-      std::set<unsigned int> even_vertices;
+      std::set<size_t> even_vertices;
 
       /// The odd vertices of the parity game graph.
-      std::set<unsigned int> odd_vertices;
+      std::set<size_t> odd_vertices;
 
       /// \brief Returns the quoted name of the vertex, for example "X1"
       /// \param i A positive integer
       /// \return The quoted name of the vertex, for example "X1"
-      std::string vertex(unsigned int i) const
+      std::string vertex(size_t i) const
       {
         return "\"X" + boost::lexical_cast<std::string>(i+1) + "\"";
       }
@@ -60,7 +60,7 @@ namespace detail {
       /// \brief Returns a tuple representing an edge, for example ("X1", "X2")
       /// \param e An edge
       /// \return A tuple representing an edge, for example ("X1", "X2")
-      std::string edge(std::pair<unsigned int, unsigned int> e) const
+      std::string edge(std::pair<size_t, size_t> e) const
       {
         return "(" + vertex(e.first) + ", " + vertex(e.second) + ")";
       }
@@ -68,7 +68,7 @@ namespace detail {
       /// \brief Returns a string representing a priority, for example "X1":0
       /// \param p A pair of integers
       /// \return A string representing a priority, for example "X1":0
-      std::string priority(std::pair<unsigned int, unsigned int> p) const
+      std::string priority(std::pair<size_t, size_t> p) const
       {
         return vertex(p.first) + ":" + boost::lexical_cast<std::string>(p.second);
       }
@@ -115,10 +115,10 @@ namespace detail {
       /// \brief Prints the todo list
       /// \param name A string
       /// \param todo A todo list
-      void print_set(std::string name, const std::set<unsigned int>& todo) const
+      void print_set(std::string name, const std::set<size_t>& todo) const
       {
         std::cerr << name << " = {";
-        for (std::set<unsigned int>::const_iterator i = todo.begin(); i != todo.end(); ++i)
+        for (std::set<size_t>::const_iterator i = todo.begin(); i != todo.end(); ++i)
         {
           std::cerr << (i == todo.begin() ? "" : ", ") << *i;
         }
@@ -161,15 +161,15 @@ namespace detail {
       std::string pgsolver_graph()
       {
         std::vector<std::string> lines(V.size());
-        for (std::set<unsigned int>::const_iterator i = V.begin(); i != V.end(); ++i)
+        for (std::set<size_t>::const_iterator i = V.begin(); i != V.end(); ++i)
         {
-          unsigned int k = *i;
+          size_t k = *i;
           lines[k] = boost::lexical_cast<std::string>(k) + " " + boost::lexical_cast<std::string>(priorities[k]) + " " + (odd_vertices.find(*i) == odd_vertices.end() ? "0 " : "1 ");
         }
-        for (std::set<std::pair<unsigned int, unsigned int> >::const_iterator i = E.begin(); i != E.end(); ++i)
+        for (std::set<std::pair<size_t, size_t> >::const_iterator i = E.begin(); i != E.end(); ++i)
         {
-          unsigned int k = i->first;
-          unsigned int m = i->second;
+          size_t k = i->first;
+          size_t m = i->second;
           std::string& line = lines[k];
           line += ((line[line.size()-1] == ' ' ? "" : ", ") + boost::lexical_cast<std::string>(m));
         }
@@ -179,25 +179,25 @@ namespace detail {
       /// \brief Generates the parity game graph
       void run()
       {
-        std::set<unsigned int> todo = get_initial_values();
-        std::set<unsigned int> done;
+        std::set<size_t> todo = get_initial_values();
+        std::set<size_t> done;
         while (!todo.empty())
         {
           // handle vertex i
-          unsigned int i = *todo.begin();
+          size_t i = *todo.begin();
           todo.erase(i);
           done.insert(i);
           V.insert(i);
-          unsigned int p = get_priority(i);
+          size_t p = get_priority(i);
           priorities[i] = p;
-          std::set<unsigned int> dep_i = get_dependencies(i);
+          std::set<size_t> dep_i = get_dependencies(i);
           switch (get_operation(i)) {
              case PGAME_AND: odd_vertices.insert(i); break;
              case PGAME_OR:  even_vertices.insert(i); break;
              default: assert(false);
           }
 
-          for (std::set<unsigned int>::iterator j = dep_i.begin(); j != dep_i.end(); ++j)
+          for (std::set<size_t>::iterator j = dep_i.begin(); j != dep_i.end(); ++j)
           {
             // handle edge (i, *j)
             E.insert(std::make_pair(i, *j));

@@ -38,7 +38,7 @@ static size_t table_mask  = AT_TABLE_MASK(INITIAL_AFUN_TABLE_CLASS);
 
 static SymEntry *hash_table     = NULL;
 
-static AFun first_free = NON_EXISTING;
+static AFun first_free = (size_t)(-1);
 
 static AFun *protected_symbols = NULL;
 static size_t nr_protected_symbols  = 0;

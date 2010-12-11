@@ -11,6 +11,7 @@
   * of the level 1 interface.
   */
 
+#include <unistd.h>
 #include "aterm1.h"
 #include "afun.h"
 #include "abool.h"
@@ -218,7 +219,7 @@ ATermIndexedSet
 void       ATindexedSetDestroy(ATermIndexedSet set);
 void       ATindexedSetReset(ATermIndexedSet set);
 size_t     ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool *isnew);
-size_t     ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem);
+ssize_t     ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem); // A negative value represents non existence.
 void       ATindexedSetRemove(ATermIndexedSet set, ATerm elem);
 ATermList  ATindexedSetElements(ATermIndexedSet set);
 ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);

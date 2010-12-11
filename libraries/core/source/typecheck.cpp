@@ -57,7 +57,7 @@ namespace mcrl2 {
       ATermList n = ATmakeList0();
       for (; !ATisEmpty(l); l=ATgetNext(l))
       {
-        if ( ATindexOf(m,ATgetFirst(l),0) == NON_EXISTING )
+        if ( ATindexOf(m,ATgetFirst(l),0) == ATERM_NON_EXISTING_POSITION )
         {
           n = ATinsert(n,ATgetFirst(l));
         }
@@ -132,7 +132,7 @@ namespace mcrl2 {
     static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
     static ATermAppl gstcTraversePBESVarConstPB(ATermTable, ATermAppl);
     static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *, ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, bool warn_upcasting=false);
-    static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, size_t nPars = NON_EXISTING, bool warn_upcasting=false);
+    static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl* , ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, size_t nPars = ATERM_NON_EXISTING_POSITION, bool warn_upcasting=false);
 
     static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 
@@ -1359,8 +1359,9 @@ namespace mcrl2 {
           gsErrorMsg("attempt to redeclare sort Real\n");
           return ATfalse;
         }
-        if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)!=NON_EXISTING
-           || ATAtableGet(context.defined_sorts, (ATerm)SortName)){
+        if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0
+           || ATAtableGet(context.defined_sorts, (ATerm)SortName))
+        {
 
           gsErrorMsg("double declaration of sort %P\n",SortName);
           return ATfalse;
@@ -2015,7 +2016,7 @@ namespace mcrl2 {
       {
         return ATtrue;
       }
-      if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)!=(size_t(-1))) return ATtrue;
+      if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0) return ATtrue;
       if(ATAtableGet(context.defined_sorts,(ATerm)SortName)) return ATtrue;
       return ATfalse;
     }
@@ -2632,12 +2633,12 @@ namespace mcrl2 {
               ATermList Acts=ATmakeList0();
               for(;!ATisEmpty(MActFrom);MActFrom=ATgetNext(MActFrom)){
                 ATermAppl Act=ATAgetFirst(MActFrom);
-                if(ATindexOf(Acts,(ATerm)Act,0)==NON_EXISTING)
+                if(ATindexOf(Acts,(ATerm)Act,0)==ATERM_NON_EXISTING_POSITION)
                   Acts=ATinsert(Acts,(ATerm)Act);
               }
               for(;!ATisEmpty(Acts);Acts=ATgetNext(Acts)){
                 ATermAppl Act=ATAgetFirst(Acts);
-                if(ATindexOf(ActsFrom,(ATerm)Act,0)!=NON_EXISTING)
+                if(ATindexOf(ActsFrom,(ATerm)Act,0)!=ATERM_NON_EXISTING_POSITION)
                 {gsErrorMsg("synchronizing action %P in different ways (typechecking %P)\n",Act,ProcTerm);return NULL;}
                 else ActsFrom=ATinsert(ActsFrom,(ATerm)Act);
               }
@@ -3427,7 +3428,7 @@ namespace mcrl2 {
         }
         else
         {
-          return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, NON_EXISTING, warn_upcasting);
+          return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, ATERM_NON_EXISTING_POSITION, warn_upcasting);
         }
       }
 
@@ -3448,7 +3449,7 @@ namespace mcrl2 {
                      const size_t nFactPars, 
                      const bool warn_upcasting)
     { 
-      // NON_EXISTING for nFactPars means the number of arguments is not known.
+      // ATERM_NON_EXISTING_POSITION for nFactPars means the number of arguments is not known.
       if (gsDebug) 
       { 
         std::cerr << "gstcTraverseVarConsTypeDN: DataTerm ";
@@ -3534,7 +3535,7 @@ namespace mcrl2 {
 
         if(!ParList) 
         {
-          if(nFactPars!=NON_EXISTING) gsErrorMsg("unknown operation %P with %d parameter%s\n",Name, nFactPars, (nFactPars != 1)?"s":"");
+          if(nFactPars!=ATERM_NON_EXISTING_POSITION) gsErrorMsg("unknown operation %P with %d parameter%s\n",Name, nFactPars, (nFactPars != 1)?"s":"");
           else gsErrorMsg("unknown operation %P\n",Name);
           return NULL;
         }
@@ -3547,7 +3548,7 @@ namespace mcrl2 {
 
         { // filter ParList keeping only functions A_0#...#A_nFactPars->A
           ATermList NewParList;
-          if(nFactPars!=NON_EXISTING)
+          if(nFactPars!=ATERM_NON_EXISTING_POSITION)
           {
             NewParList=ATmakeList0();
             for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList))
@@ -3629,7 +3630,7 @@ namespace mcrl2 {
           ATermAppl Sort;
           if(ATgetLength(CandidateParList)==1) Sort=ATAgetFirst(CandidateParList); else Sort=multiple_possible_sorts(atermpp::aterm_list(CandidateParList));
           *DataTerm=gsMakeOpId(Name,Sort);
-          if(nFactPars!=NON_EXISTING) gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
+          if(nFactPars!=ATERM_NON_EXISTING_POSITION) gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
                                       Name, nFactPars, (nFactPars != 1)?"s":"", PosType);
           else
             gsErrorMsg("unknown operation/variable %P that matches type %P\n",Name,PosType);
@@ -3841,7 +3842,7 @@ namespace mcrl2 {
           if(strict_ambiguous)
           {
             if (gsDebug) { std::cerr << "ambiguous operation " << pp(Name) << " (ParList " << pp(ParList) << ")\n"; }
-            if(nFactPars!=NON_EXISTING) gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":"");
+            if(nFactPars!=ATERM_NON_EXISTING_POSITION) gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":"");
             else gsErrorMsg("ambiguous operation %P\n", Name);
             return NULL;
           }

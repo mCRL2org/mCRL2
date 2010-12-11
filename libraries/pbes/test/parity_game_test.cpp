@@ -142,14 +142,14 @@ void test_pbespgsolve(std::string pbes_spec)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::parity_game_generator pgg(p, true, true);
-  unsigned int begin = 0;
-  unsigned int end = 3;
-  for (unsigned int v = begin; v < end; ++v)
+  size_t begin = 0;
+  size_t end = 3;
+  for (size_t v = begin; v < end; ++v)
   {
-    std::set<unsigned> deps = pgg.get_dependencies(v);
-    for (std::set<unsigned>::const_iterator it = deps.begin(); it != deps.end(); ++it )
+    std::set<size_t> deps = pgg.get_dependencies(v);
+    for (std::set<size_t>::const_iterator it = deps.begin(); it != deps.end(); ++it )
     {
-      unsigned int w = *it;
+      size_t w = *it;
       assert(w >= begin);
       if (w >= end)
       {
@@ -159,12 +159,12 @@ void test_pbespgsolve(std::string pbes_spec)
     }
 
     int max_prio = 0;                                                        
-    for (unsigned int v = begin; v < end; ++v)                                      
+    for (size_t v = begin; v < end; ++v)                                      
     {                                                                        
       max_prio = (std::max)(max_prio, (int)pgg.get_priority(v));             
     }                                                                        
                                                                              
-    for (unsigned int v = begin; v < end; ++v)                                      
+    for (size_t v = begin; v < end; ++v)                                      
     {                                                                        
       // Variable below is not used; So, I removed it to avoid warnings. JFG.
       // bool and_op = pgg.get_operation(v) == mcrl2::pbes_system::parity_game_generator::PGAME_AND;
@@ -319,26 +319,26 @@ void test_abp()
   mcrl2::pbes_system::parity_game_generator pgg(pbes, true, true);
 
   // Build the edge list
-  unsigned int num_vertices = 1 + *pgg.get_initial_values().rbegin();
-  for (unsigned int v = 0; v < num_vertices; ++v)
+  size_t num_vertices = 1 + *pgg.get_initial_values().rbegin();
+  for (size_t v = 0; v < num_vertices; ++v)
   {
-      std::set<unsigned> deps = pgg.get_dependencies(v);
-      for ( std::set<unsigned>::const_iterator it = deps.begin();
+      std::set<size_t> deps = pgg.get_dependencies(v);
+      for ( std::set<size_t>::const_iterator it = deps.begin();
             it != deps.end(); ++it )
       {
-          unsigned int w = (unsigned int)*it;
+          size_t w = (size_t)*it;
           if (w >= num_vertices) num_vertices = w + 1;
-          printf("%6d -> %6d\n", v, w);
+          printf("%6lu -> %6lu\n", v, w);
       }
   }
 
   // Find vertex properties
-  for (unsigned int v = 0; v < num_vertices; ++v)
+  for (size_t v = 0; v < num_vertices; ++v)
   {
       bool and_op = pgg.get_operation(v) ==
                     mcrl2::pbes_system::parity_game_generator::PGAME_AND;
       int priority = pgg.get_priority(v);
-      printf("%6d: player=%d priority=%d\n", v, and_op, priority);
+      printf("%6lu: player=%d priority=%d\n", v, and_op, priority);
   }
   core::garbage_collect();
 }

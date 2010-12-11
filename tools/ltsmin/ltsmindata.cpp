@@ -37,7 +37,7 @@ ATermTable *lab_src_tgt, *lab_tgt_src, graph, graph_i;
 ATerm *label_name, *par_name;
 /* End data definition */
 
-static int n_transitions = 0, n_states = 0;
+static size_t n_transitions = 0, n_states = 0;
 static ATbool omitTauLoops;
 
 int label_tau = -1;
@@ -257,7 +257,7 @@ static void UpdateLabArray(int state, int label) {
      ATerm labno = (ATerm) ATmakeInt(label);
      if (!newval) newval = ATmakeList1(labno);
      else
-     if (ATindexOf(newval, labno,0)==NON_EXISTING)
+     if (ATindexOf(newval, labno,0)==ATERM_NON_EXISTING_POSITION)
           newval = ATinsert(newval, labno);
      lab[state] = newval;
 }
@@ -267,7 +267,7 @@ static void UpdateParArray(int state, int parameter) {
      ATerm parno = (ATerm) ATmakeInt(parameter);
      if (!newval) newval = ATmakeList1(parno);
      else
-     if (ATindexOf(newval, parno,0)==NON_EXISTING)
+     if (ATindexOf(newval, parno,0)==ATERM_NON_EXISTING_POSITION)
           newval = ATinsert(newval, parno);
      par[state] = newval;
 }
@@ -384,12 +384,10 @@ static int Recode(int label) {
      if (newlabel[label]>=0) return newlabel[label];
      name = SVClabel2ATerm(inFile+1,label);
      if (ATisEqual(label_name[label] , name)) return label;
-     /* ATwarning("Collision %t <-> %t\n", label_name[label], name); */
      for (i=0;i<m;i++) {
         if (ATisEqual(label_name[i],name)) break;
         }
      if (i< m) {newlabel[label]=i; return i;}
-     /* ATwarning("New label\n"); */
      newlabel[label] = pt; return pt++;
      }
 
@@ -449,25 +447,23 @@ static ATermList Union(ATermList t1s, ATermList t2s)
      /* ATwarning("Arguments union %t %t",t1s,t2s); */
      for (;!ATisEmpty(t1s);t1s=ATgetNext(t1s))
           {ATerm t1 = ATgetFirst(t1s);
-          if (ATindexOf(t2s, t1,0)==NON_EXISTING) result = ATinsert(result, t1);
+          if (ATindexOf(t2s, t1,0)==ATERM_NON_EXISTING_POSITION) result = ATinsert(result, t1);
           }
      return result;
      }
 
 static ATerm BlockCode(int b) {
      static ATermIndexedSet indeks = NULL;
-     int d = -1;
+     size_t d;
      ATbool nnew;
      if (b< 0) {
-     /* ATwarning("ATindexedSetDestroy\n"); */
      ATindexedSetDestroy(indeks);indeks = NULL;return NULL;}
      if (!indeks) {
-          /* ATwarning("ATindexedSetCreate\n"); */
           indeks = ATindexedSetCreate(INITSIZE, MAX_LOAD_PCT);
           }
-    /*  ATwarning("ATindexedSetPut %d %d\n",indeks, b); */
      d = ATindexedSetPut(indeks, (ATerm) ATmakeInt(b), &nnew);
-     return (ATerm) ATmakeInt(d);
+     assert(d< (size_t)1<<(sizeof(int)*8-1));
+     return (ATerm) ATmakeInt((int)d);
 }
 
 static ATermList  BlockNumbers(ATermList sources)
@@ -477,7 +473,7 @@ static ATermList  BlockNumbers(ATermList sources)
           {
           int source = ATgetInt((ATermInt) ATgetFirst(sources));
           ATerm block = BlockCode(blockref[source]);
-          if (ATindexOf(result, block,0)==NON_EXISTING) result = ATinsert(result, block);
+          if (ATindexOf(result, block,0)==ATERM_NON_EXISTING_POSITION) result = ATinsert(result, block);
           }
      return result;
      }
@@ -530,7 +526,7 @@ static void TransitionsGoingToBlock(SVCint b, ATermList *newlab) {
                   newsources = ATremoveElement(newsources, bb);
              if (!val || !ATisEqual(val, newsources))
                   ATtablePut(lab_src_tgt[label], bb, (ATerm) newsources);
-             if (ATindexOf(newlabels, ATgetFirst(labels),0)==NON_EXISTING)
+             if (ATindexOf(newlabels, ATgetFirst(labels),0)==ATERM_NON_EXISTING_POSITION)
                   newlabels = ATinsert(newlabels, ATgetFirst(labels));
              }
         if (classes && npar > 1) {
@@ -575,10 +571,10 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
      ATunprotectArray((ATerm*) lab);
      free(lab);
      lab = newlab;
-     for (i=0;i<n_states;i++)
-         {
-         ATerm bb = (ATerm) ATmakeInt(i);
-         ATermList labels = lab[i];
+     for (i=0;i<(ssize_t)n_states;i++)
+     {
+       ATerm bb = (ATerm) ATmakeInt((int)i);
+       ATermList labels = lab[i];
 
          for (;!ATisEmpty(labels);labels=ATgetNext(labels))
            {int label = ATgetInt((ATermInt) ATgetFirst(labels));
@@ -590,7 +586,7 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
                 ATtablePut(lab_src_tgt[label], ATgetFirst(sources),
                      (ATerm) ATmakeList1(bb));
            else {
-                  if (ATindexOf(tgts, ATgetFirst(sources), 0)==NON_EXISTING) 
+                  if (ATindexOf(tgts, ATgetFirst(sources), 0)==ATERM_NON_EXISTING_POSITION) 
                   { 
                     tgts = ATinsert(tgts, ATgetFirst(sources));
                   }

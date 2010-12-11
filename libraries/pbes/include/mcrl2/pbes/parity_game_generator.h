@@ -32,14 +32,14 @@
 namespace atermpp {
   /// \cond INTERNAL_DOCS
   template<>
-  struct aterm_traits<std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> >
+  struct aterm_traits<std::pair<mcrl2::pbes_system::pbes_expression, size_t> >
   {
     typedef ATermAppl aterm_type;
-    static void protect(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> t)   { t.first.protect(); }
-    static void unprotect(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> t) { t.first.unprotect(); }
-    static void mark(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> t)      { t.first.mark(); }
-    // static ATerm term(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> t)     { return t.first.term(); }
-    // static ATerm* ptr(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int>& t)    { return &t.first.term(); }
+    static void protect(std::pair<mcrl2::pbes_system::pbes_expression, size_t> t)   { t.first.protect(); }
+    static void unprotect(std::pair<mcrl2::pbes_system::pbes_expression, size_t> t) { t.first.unprotect(); }
+    static void mark(std::pair<mcrl2::pbes_system::pbes_expression, size_t> t)      { t.first.mark(); }
+    // static ATerm term(std::pair<mcrl2::pbes_system::pbes_expression, size_t> t)     { return t.first.term(); }
+    // static ATerm* ptr(std::pair<mcrl2::pbes_system::pbes_expression, size_t>& t)    { return &t.first.term(); }
   };
 } // namespace atermpp
 
@@ -50,22 +50,22 @@ namespace pbes_system {
   template <class T> // note, T is only a dummy
   struct parity_game_generator_log_level
   {
-    static unsigned int log_level;
+    static size_t log_level;
   };
 
   template <class T>
-  unsigned int parity_game_generator_log_level<T>::log_level = 0;
+  size_t parity_game_generator_log_level<T>::log_level = 0;
 
   inline
-  void set_parity_game_generator_log_level(unsigned int level)
+  void set_parity_game_generator_log_level(size_t level)
   {
-    parity_game_generator_log_level<int>::log_level = level;
+    parity_game_generator_log_level<size_t>::log_level = level;
   }
 
   inline
-  unsigned int get_parity_game_generator_log_level()
+  size_t get_parity_game_generator_log_level()
   {
-    return parity_game_generator_log_level<int>::log_level;
+    return parity_game_generator_log_level<size_t>::log_level;
   }
 
   /// \brief Class for generating a BES from a PBES. This BES can be interpreted as
@@ -107,16 +107,16 @@ namespace pbes_system {
       std::map<core::identifier_string, atermpp::vector<pbes_equation>::const_iterator > m_pbes_equation_index;
 
       /// \brief Maps propositional variables to corresponding priorities.
-      std::map<core::identifier_string, unsigned int> m_priorities;
+      std::map<core::identifier_string, size_t> m_priorities;
 
       /// \brief Maps PBES closed expressions to corresponding BES variables.
-      atermpp::map<pbes_expression, unsigned int> m_pbes_expression_index;
+      atermpp::map<pbes_expression, size_t> m_pbes_expression_index;
 
       /// \brief Contains intermediate results of the BES that is being generated.
       /// m_bes[i] represents a BES equation corresponding to BES variable i.
       /// m_bes[i].first is the right hand side of the BES equation
       /// m_bes[i].second is the block nesting depth of the corresponding PBES variable
-      atermpp::vector<std::pair<pbes_expression, unsigned int> > m_bes;
+      atermpp::vector<std::pair<pbes_expression, size_t> > m_bes;
 
       /// \brief Determines what kind of BES equations are generated for true and false.
       bool m_true_false_dependencies;
@@ -125,7 +125,7 @@ namespace pbes_system {
       bool m_is_min_parity;
 
       /// \brief Prints a log message for every 1000-th equation
-      void LOG_EQUATION_COUNT(unsigned int level, unsigned int size) const
+      void LOG_EQUATION_COUNT(size_t level, size_t size) const
       {
         if (check_log_level(level))
         {
@@ -141,17 +141,17 @@ namespace pbes_system {
       /// \param priority A positive integer
       /// \return The index of a BES equation corresponding to the given PBES expression.
       /// If no equation exists for the expression, a new one is added.
-      unsigned int add_bes_equation(pbes_expression t, unsigned int priority)
+      size_t add_bes_equation(pbes_expression t, size_t priority)
       {
         // TODO: can this insertion be done more efficiently?
-        atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.find(t);
+        atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(t);
         if (i != m_pbes_expression_index.end())
         {
           return i->second;
         }
         else
         {
-          unsigned int p = m_pbes_expression_index.size();
+          size_t p = m_pbes_expression_index.size();
           m_pbes_expression_index[t] = p;
           if (tr::is_prop_var(t))
           {
@@ -182,15 +182,15 @@ namespace pbes_system {
       }
 
       // prints the BES equation with left hand side 'index' and right hand side 'rhs'
-      void LOG_BES_EQUATION(unsigned int level, unsigned int index, const std::set<unsigned int>& rhs) const
+      void LOG_BES_EQUATION(size_t level, size_t index, const std::set<size_t>& rhs) const
       {
         if (check_log_level(level))
         {
-          const std::pair<pbes_expression, unsigned int>& eqn = m_bes[index];
-          const unsigned int priority = eqn.second;
+          const std::pair<pbes_expression, size_t>& eqn = m_bes[index];
+          const size_t priority = eqn.second;
           std::clog << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
           std::string op =  (get_operation(index) == PGAME_AND ? " && " : " || ");
-          for (std::set<unsigned int>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
+          for (std::set<size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
           {
             std::clog << (i == rhs.begin() ? "" : op) << "Y" << *i;
           }
@@ -206,7 +206,7 @@ namespace pbes_system {
       /// \param p A PBES
       /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
       /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-      parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, unsigned int log_level = 0)
+      parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, size_t log_level = 0)
         : 
           core::algorithm(log_level),
           m_pbes(p),
@@ -241,7 +241,7 @@ namespace pbes_system {
 
         // Compute priorities of PBES propositional variables.
         fixpoint_symbol sigma = fixpoint_symbol::nu();
-        unsigned int priority = 0;
+        size_t priority = 0;
         for (atermpp::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
         {
           if (i->symbol() == sigma)
@@ -258,12 +258,12 @@ namespace pbes_system {
         if (!m_is_min_parity)
         {
           // Choose an even upperbound max_priority
-          unsigned int max_priority = (priority % 2 == 0 ? priority : priority + 1);
+          size_t max_priority = (priority % 2 == 0 ? priority : priority + 1);
           if (max_priority == 0)
           {
             max_priority = 2;
           }
-          for (std::map<core::identifier_string, unsigned int>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
+          for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
           {
             i->second = max_priority - i->second;
           }
@@ -287,7 +287,7 @@ namespace pbes_system {
       /// \param index A positive integer
       /// \return PGAME_AND if the corresponding BES equation is a conjunction,
       /// PGAME_OR if it is a disjunction.
-      operation_type get_operation(unsigned int index) const
+      operation_type get_operation(size_t index) const
       {
         assert(index < m_bes.size());
         const pbes_expression& phi = m_bes[index].first;
@@ -319,7 +319,7 @@ namespace pbes_system {
       /// and 1 if it is a minimal fixpoint.
       /// \param index A positive integer
       /// \return The block nesting depth of the variable in the BES.
-      unsigned int get_priority(unsigned int index) const
+      size_t get_priority(size_t index) const
       {
         assert(index < m_bes.size());
         return m_bes[index].second;
@@ -329,9 +329,9 @@ namespace pbes_system {
       /// By default a set containing the values 0, 1 and 2 is returned, corresponding
       /// to the expressions true, false and the initial state of the PBES.
       /// \return A set of indices corresponding to proposition variables of the generated BES.
-      std::set<unsigned int> get_initial_values()
+      std::set<size_t> get_initial_values()
       {
-        std::set<unsigned int> result;
+        std::set<size_t> result;
         if (!m_pbes.equations().empty())
         {
           result.insert(0); // equation 0 corresponds with the value true
@@ -345,15 +345,15 @@ namespace pbes_system {
       /// \param index A positive integer
       /// \return The indices of the proposition variables that appear in the
       /// right hand side of the BES equation of the given index.
-      std::set<unsigned int> get_dependencies(unsigned int index)
+      std::set<size_t> get_dependencies(size_t index)
       {
         assert(index < m_bes.size());
 
-        std::set<unsigned int> result;
+        std::set<size_t> result;
 
-        std::pair<pbes_expression, unsigned int>& eqn = m_bes[index];
+        std::pair<pbes_expression, size_t>& eqn = m_bes[index];
         pbes_expression& psi = eqn.first;
-        const unsigned int priority = eqn.second;
+        const size_t priority = eqn.second;
 
         LOG(2, "\nGenerating equation for expression " + tr::pp(psi) + "\n");
 
@@ -392,7 +392,7 @@ namespace pbes_system {
         {
           if (m_true_false_dependencies)
           {
-            atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.find(tr::true_());
+            atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(tr::true_());
             assert(i != m_pbes_expression_index.end());
             result.insert(i->second);
           }
@@ -401,7 +401,7 @@ namespace pbes_system {
         {
           if (m_true_false_dependencies)
           {
-            atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.find(tr::false_());
+            atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(tr::false_());
             assert(i != m_pbes_expression_index.end());
             result.insert(i->second);
           }
@@ -419,17 +419,17 @@ namespace pbes_system {
       void print_variable_mapping()
       {
         std::cerr << "--- variable mapping ---" << std::endl;
-        std::map<unsigned int, pbes_expression> m;
-        for (atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
+        std::map<size_t, pbes_expression> m;
+        for (atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
         {
           m[i->second] = i->first;
         }
-        for (std::map<unsigned int, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
+        for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
         {
           std::cerr << std::setw(4) << i->first << " " << core::pp(i->second) << std::endl;
         }
         std::cerr << "--- priorities ---" << std::endl;
-        for (std::map<core::identifier_string, unsigned int>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
+        for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
         {
           std::cerr << core::pp(i->first) << " " << i->second << std::endl;
         }
