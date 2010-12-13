@@ -3001,7 +3001,8 @@ namespace mcrl2 {
         if(gsIsOpId(Arg0) || gsIsId(Arg0)) 
         {
           ATermAppl Name = ATAgetArgument(Arg0,0);
-          if(Name == sort_list::list_enumeration_name()) {
+          if(Name == sort_list::list_enumeration_name()) 
+          {
             ATermAppl Type=gstcUnList(PosType);
             if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "list", PosType,Arguments);  return NULL;}
 
@@ -3009,23 +3010,32 @@ namespace mcrl2 {
 
             //First time to determine the common type only!
             ATermList NewArguments=ATmakeList0();
-            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
+            bool Type_is_stable=true;
+            bool first_time=true;
+            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
+            {
               ATermAppl Argument=ATAgetFirst(Arguments);
               ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
               if(!Type0) return NULL;
               NewArguments=ATinsert(NewArguments,(ATerm)Argument);
+              Type_is_stable=first_time||(Type==Type0);
+              first_time=false;
               Type=Type0;
             }
-            Arguments=OldArguments;
+            Arguments=OldArguments; 
 
-            //Second time to do the real work.
-            NewArguments=ATmakeList0();
-            for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
-              ATermAppl Argument=ATAgetFirst(Arguments);
-              ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
-              if(!Type0) return NULL;
-              NewArguments=ATinsert(NewArguments,(ATerm)Argument);
-              Type=Type0;
+            //Second time to do the real work, but only if the elements in the list have different types.
+            if (!Type_is_stable)
+            {
+              NewArguments=ATmakeList0();
+              for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments))
+              {
+                ATermAppl Argument=ATAgetFirst(Arguments);
+                ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
+                if (!Type0) return NULL;
+                NewArguments=ATinsert(NewArguments,(ATerm)Argument);
+                Type=Type0;
+              }
             }
             Arguments=ATreverse(NewArguments);
 
