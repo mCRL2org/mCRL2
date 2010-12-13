@@ -38,10 +38,13 @@ static const size_t ATERM_NON_EXISTING_POSITION=(size_t)(-1);
    and renaming the _strdup into strdup under other platforms than windows. 
    Furthermore, ssize_t is not defined on windows. */
 #if defined(_MSC_VER) || defined(WIN32) || defined(WIN64)
+#if defined(ssize_t)
+#else
 #ifdef WIN64
 typedef __int64 ssize_t;
 #else
 typedef int ssize_t;
+#endif
 #endif
 #else
 #define _strdup strdup
