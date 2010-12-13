@@ -43,8 +43,6 @@ class GLCanvas : public wxGLCanvas
 
     void onPaint(wxPaintEvent& event);
     void onSize(wxSizeEvent& event);
-    void onEraseBackground(wxEraseEvent& event);
-    void reshape();
 
     // Mouse event handlers
     void onMouseEnter(wxMouseEvent& event);

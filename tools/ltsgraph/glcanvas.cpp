@@ -32,7 +32,6 @@ using namespace IDS;
 BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_PAINT(GLCanvas::onPaint)
   EVT_SIZE(GLCanvas::onSize)
-  EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
 
   EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
   EVT_KILL_FOCUS(GLCanvas::onMouseLeave)
@@ -57,7 +56,6 @@ GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
                wxEmptyString, attribList)
 {
   owner = app;
-  displayAllowed = false;
   dispSystem = false;
   currentTool = myID_ZOOM;
   usingTool = false;
@@ -82,9 +80,11 @@ void GLCanvas::initialize()
 {
   SetCurrent();
   glLoadIdentity();
-  displayAllowed = true;
-	/* Following line really needed?*/
-  visualizer->initFontRenderer();
+	/* Following line causes segfault in wxWidgets >= 2.9 */
+#if wxCHECK_VERSION(2, 9, 0) 	
+#else
+	visualizer->initFontRenderer();
+#endif	
 }
 
 void GLCanvas::setVisualizer(Visualizer *vis)
@@ -94,7 +94,26 @@ void GLCanvas::setVisualizer(Visualizer *vis)
 
 void GLCanvas::display()
 {
-  if (GetContext())
+
+  wxPaintDC dc(this);
+
+	if(drawIn3D)
+  {
+    glShadeModel(GL_SMOOTH);
+    glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+    glClearDepth(1.0);                  
+    glDepthFunc(GL_LESS);               
+    glEnable(GL_DEPTH_TEST);    
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  
+  }
+  else
+  {
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glDisable(GL_DEPTH_TEST);
+  }
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (GetContext())
   {
     int width, height;
 
@@ -105,7 +124,7 @@ void GLCanvas::display()
     // Cast to GLdouble for smooth transitions
     GLdouble aspect = (GLdouble)width / (GLdouble)height;
 
-  double wwidth, wheight, wdepth;
+    double wwidth, wheight, wdepth;
 
     getSize(wwidth, wheight, wdepth);
 
@@ -134,11 +153,12 @@ void GLCanvas::display()
       gluOrtho2D(-1.0, 1.0, (1/aspect)*(-1), (1/aspect));
     }
   }
+  if(drawIn3D)
+  {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glViewport(0, 0, width, height);
-  if(drawIn3D)
-  {
+		
     if(calcRot)
     {
       double dumtrx[16];
@@ -218,55 +238,21 @@ void GLCanvas::display()
     {
       std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
     }
+
+	  SwapBuffers();
   }
 }
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/)
 {
-  wxPaintDC dc(this);
-  if(drawIn3D)
-  {
-    glShadeModel(GL_SMOOTH);
-    glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
-    glClearDepth(1.0);                  
-    glDepthFunc(GL_LESS);               
-    glEnable(GL_DEPTH_TEST);    
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  
-  }
-  else
-  {
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glDisable(GL_DEPTH_TEST);
-  }
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   display();
-  SwapBuffers();
 }
 
-void GLCanvas::onSize(wxSizeEvent& /*event*/)
+void GLCanvas::onSize(wxSizeEvent& event)
 {
-  reshape();
+  display();
+	event.Skip();
 }
-
-void GLCanvas::reshape()
-{
-  if(GetContext())
-  {
-    int width, height;
-    SetCurrent();
-
-    GetClientSize(&width, &height);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glViewport(0,0, width, height);
-  }
-}
-
-void GLCanvas::onEraseBackground(wxEraseEvent& /*event*/)
-{
-}
-
 
 void GLCanvas::getSize(
   double &width,
@@ -365,13 +351,15 @@ void GLCanvas::onMouseLftDown(wxMouseEvent& event)
     }
     else
       usingTool = true;
+
+      /* Added display here to avoid GL_STACK_UNDERFLOW/OVERFLOW */
+	    display();
   }
   else
   {
     pickObjects(oldX, oldY, event);
     owner->dragObject();
   }
-  display();
 }
 
 void GLCanvas::onMouseLftUp(wxMouseEvent& /* evt */)
@@ -379,7 +367,6 @@ void GLCanvas::onMouseLftUp(wxMouseEvent& /* evt */)
   usingTool = false;
   setMouseCursor(myID_NONE);
   owner->stopDrag();
-  display();
 }
 
 void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
@@ -402,8 +389,6 @@ void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
     pickObjects(oldX, oldY, event);
     owner->lockObject();
   }
-
-  display();
 }
 
 void GLCanvas::onMouseRgtUp(wxMouseEvent& /*evt */)
@@ -420,7 +405,6 @@ void GLCanvas::onMouseWhl(wxMouseEvent& event)
   if(drawIn3D)
   {
     lookZ -= double(event.GetWheelRotation())/(2400.0f);
-    display();
   }
 }
 void GLCanvas::onMouseMidDown(wxMouseEvent& event)
@@ -429,7 +413,6 @@ void GLCanvas::onMouseMidDown(wxMouseEvent& event)
   {
     oldX = event.GetX();
     oldY = event.GetY();
-    display();
   }
 }
 void GLCanvas::onMouseMidUp(wxMouseEvent& /*evt */)
@@ -437,7 +420,6 @@ void GLCanvas::onMouseMidUp(wxMouseEvent& /*evt */)
   if(drawIn3D)
   {
     setMouseCursor(myID_NONE);
-    display();
   }
 }
 
@@ -529,9 +511,6 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
       event.Skip();
     }
   }
-
-	wxPaintEvent e;
-	onPaint( e );
 }
 
 
@@ -594,8 +573,6 @@ bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
     hits = glRenderMode(GL_RENDER);
 
     processHits(hits, selectBuf, e);
-    reshape();
-    display();
   return hits > 0;
   }
   return false;
@@ -664,8 +641,6 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
     hits = glRenderMode(GL_RENDER);
 
     processHits(hits, selectBuf, e);
-    reshape();
-    display();
   }
 }
 
@@ -889,7 +864,6 @@ void GLCanvas::changeDrawMode()
 {
   drawIn3D = !drawIn3D;
   initialize();
-  display();
 }
 
 bool GLCanvas::get3D()
