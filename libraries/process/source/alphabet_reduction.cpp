@@ -49,7 +49,7 @@ namespace mcrl2 {
       static ATermIndexedSet tmpIndexedSet;
       
       static AFun  props_afun;
-      static ATermAppl pCRL_aterm, npCRL_aterm, mCRL_aterm, rec_aterm, nrec_aterm;
+      static ATermAppl pCRL_aterm=NULL, npCRL_aterm=NULL, mCRL_aterm=NULL, rec_aterm=NULL, nrec_aterm=NULL;
       static ATermTable props;
       static ATermTable deps;
       
@@ -2062,7 +2062,7 @@ namespace mcrl2 {
         tmpIndexedSet = ATindexedSetCreate(63,50);
       
         //fill in tables
-        // for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
+        // for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr))
         for(ATermList pr=equations; !ATisEmpty(pr); pr=ATgetNext(pr)){
           ATermAppl p=ATAgetFirst(pr);
           ATermAppl pn=ATAgetArgument(p,0);
@@ -2109,18 +2109,19 @@ namespace mcrl2 {
         //(mCRL processes cannot recursively depend on itself for the *current* linearizer to work)
         //n-parallel pCRL processes always recursively depend on themselves
         props_afun=ATmakeAFun("props",2,ATfalse);
+        pCRL_aterm=NULL, npCRL_aterm=NULL, mCRL_aterm=NULL, rec_aterm=NULL, nrec_aterm=NULL;
         ATprotectAFun(props_afun);
+        ATprotectAppl(&pCRL_aterm);
+        ATprotectAppl(&npCRL_aterm);
+        ATprotectAppl(&mCRL_aterm);
+        ATprotectAppl(&rec_aterm);
+        ATprotectAppl(&nrec_aterm);
         pCRL_aterm=gsString2ATermAppl("pCRL");
         npCRL_aterm=gsString2ATermAppl("npCRL");
         mCRL_aterm=gsString2ATermAppl("mCRL");
         rec_aterm=gsString2ATermAppl("rec");
         nrec_aterm=gsString2ATermAppl("nrec");
         props=ATtableCreate(10000,80); //process properties
-        //ATprotectAppl(pCRL_aterm);
-        //ATprotectAppl(npCRL_aterm);
-        //ATprotectAppl(mCRL_aterm);
-        //ATprotectAppl(rec_aterm);
-        //ATprotectAppl(nrec_aterm);
       
         //recursive or not?
         ATermList todo=ATLtableGet(deps,(ATerm)INIT_KEY());
@@ -2514,6 +2515,11 @@ namespace mcrl2 {
         // Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATAtableGet(procs,(ATerm)INIT_KEY())),4);
         init=process_expression(ATAtableGet(procs,(ATerm)INIT_KEY()));
       
+        ATunprotectAppl(&pCRL_aterm);
+        ATunprotectAppl(&npCRL_aterm);
+        ATunprotectAppl(&mCRL_aterm);
+        ATunprotectAppl(&rec_aterm);
+        ATunprotectAppl(&nrec_aterm);
         ATindexedSetDestroy(tmpIndexedSet);
         ATtableDestroy(alphas);
         ATtableDestroy(procs);
