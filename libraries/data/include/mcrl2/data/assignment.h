@@ -68,7 +68,7 @@ namespace mcrl2 {
     namespace detail {
 
 //--- start generated classes ---//
-/// \brief Assignment of a data expression to a variable)
+/// \brief Assignment of a data expression to a variable
 class assignment_base: public assignment_expression
 {
   public:

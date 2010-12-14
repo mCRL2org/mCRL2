@@ -57,18 +57,18 @@ class pbes_expression: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    pbes_expression(atermpp::aterm_appl term)
+    pbes_expression(const atermpp::aterm_appl& term)
       : atermpp::aterm_appl(term)
     { assert(core::detail::check_rule_PBExpr(m_term));
     }
 
-    /// \brief Constructor.
-    /// \param term A term
-    pbes_expression(ATermAppl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_rule_PBExpr(m_term));
-    }
+    ///// \brief Constructor.
+    ///// \param term A term
+    //pbes_expression(ATermAppl term)
+    //  : atermpp::aterm_appl(term)
+    //{
+    //  assert(core::detail::check_rule_PBExpr(m_term));
+    //}
 
     /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
@@ -94,6 +94,65 @@ class pbes_expression: public atermpp::aterm_appl
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
 //--- start generated classes ---//
+/// \brief A propositional variable instantiation
+class propositional_variable_instantiation: public pbes_expression
+{
+  public:
+    /// \brief Default constructor.
+    propositional_variable_instantiation()
+      : pbes_expression(core::detail::constructPropVarInst())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    propositional_variable_instantiation(const atermpp::aterm_appl& term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PropVarInst(m_term));
+    }
+
+    /// \brief Constructor.
+    propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters)
+      : pbes_expression(core::detail::gsMakePropVarInst(name, parameters))
+    {}
+
+    /// \brief Constructor.
+    propositional_variable_instantiation(const std::string& name, const data::data_expression_list& parameters)
+      : pbes_expression(core::detail::gsMakePropVarInst(core::identifier_string(name), parameters))
+    {}
+
+    core::identifier_string name() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    data::data_expression_list parameters() const
+    {
+      return atermpp::list_arg2(*this);
+    }
+//--- start user section propositional_variable_instantiation ---//
+    /// \brief Type of the parameters.
+    typedef data::data_expression parameter_type;
+    
+    /// \brief Constructor.
+    /// \param s A string
+    propositional_variable_instantiation(std::string const& s)
+    {
+      std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
+      core::identifier_string name(p.first);
+      data::variable_list parameters = atermpp::convert<data::variable_list>(p.second);
+      m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarInst(name, parameters));
+    }
+//--- end user section propositional_variable_instantiation ---//
+};
+
+/// \brief list of propositional_variable_instantiations
+typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
+
+/// \brief vector of propositional_variable_instantiations
+typedef atermpp::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
+
+
 /// \brief The value true for pbes expressions
 class true_: public pbes_expression
 {
@@ -859,7 +918,7 @@ namespace core {
     static inline
     term_type true_()
     {
-      return core::detail::gsMakePBESTrue();
+      return atermpp::aterm_appl(core::detail::gsMakePBESTrue());
     }
 
     /// \brief Make the value false
@@ -867,7 +926,7 @@ namespace core {
     static inline
     term_type false_()
     {
-      return core::detail::gsMakePBESFalse();
+      return atermpp::aterm_appl(core::detail::gsMakePBESFalse());
     }
 
     /// \brief Make a negation
@@ -876,7 +935,7 @@ namespace core {
     static inline
     term_type not_(term_type p)
     {
-      return core::detail::gsMakePBESNot(p);
+      return atermpp::aterm_appl(core::detail::gsMakePBESNot(p));
     }
 
     static inline
@@ -908,7 +967,7 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-      return core::detail::gsMakePBESAnd(p,q);
+      return atermpp::aterm_appl(core::detail::gsMakePBESAnd(p,q));
     }
 
     /// \brief Make a disjunction
@@ -918,7 +977,7 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q)
     {
-      return core::detail::gsMakePBESOr(p,q);
+      return atermpp::aterm_appl(core::detail::gsMakePBESOr(p,q));
     }
 
     /// \brief Make a sorted conjunction
@@ -933,7 +992,7 @@ namespace core {
 #else
       bool sorted = p < q;
 #endif
-      return sorted ? core::detail::gsMakePBESAnd(p,q) : core::detail::gsMakePBESAnd(q,p);
+      return sorted ? atermpp::aterm_appl(core::detail::gsMakePBESAnd(p,q)) : atermpp::aterm_appl(core::detail::gsMakePBESAnd(q,p));
     }
 
     /// \brief Make a sorted disjunction
@@ -948,7 +1007,7 @@ namespace core {
 #else
       bool sorted = p < q;
 #endif
-      return sorted ? core::detail::gsMakePBESOr(p,q) : core::detail::gsMakePBESOr(q,p);
+      return sorted ? atermpp::aterm_appl(core::detail::gsMakePBESOr(p,q)) : atermpp::aterm_appl(core::detail::gsMakePBESOr(q,p));
     }
 
     /// \brief Make an implication
@@ -958,7 +1017,7 @@ namespace core {
     static inline
     term_type imp(term_type p, term_type q)
     {
-      return core::detail::gsMakePBESImp(p,q);
+      return atermpp::aterm_appl(core::detail::gsMakePBESImp(p,q));
     }
 
     /// \brief Make a universal quantification
@@ -972,7 +1031,7 @@ namespace core {
       {
         return p;
       }
-      return core::detail::gsMakePBESForall(l, p);
+      return atermpp::aterm_appl(core::detail::gsMakePBESForall(l, p));
     }
 
     /// \brief Make an existential quantification
@@ -986,7 +1045,7 @@ namespace core {
       {
         return p;
       }
-      return core::detail::gsMakePBESExists(l, p);
+      return atermpp::aterm_appl(core::detail::gsMakePBESExists(l, p));
     }
 
     /// \brief Propositional variable instantiation
@@ -1005,7 +1064,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is the value \p true
     static inline
-    bool is_true(term_type t)
+    bool is_true(const term_type& t)
     {
       return core::detail::gsIsPBESTrue(t) || data::sort_bool::is_true_function_symbol(t);
     }
@@ -1014,7 +1073,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is the value \p false
     static inline
-    bool is_false(term_type t)
+    bool is_false(const term_type& t)
     {
       return core::detail::gsIsPBESFalse(t) || data::sort_bool::is_false_function_symbol(t);
     }
@@ -1023,7 +1082,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is a negation
     static inline
-    bool is_not(term_type t)
+    bool is_not(const term_type& t)
     {
       return core::detail::gsIsPBESNot(t);
     }
@@ -1032,7 +1091,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is a conjunction
     static inline
-    bool is_and(term_type t)
+    bool is_and(const term_type& t)
     {
       return pbes_system::is_and(t);
     }
@@ -1041,7 +1100,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is a disjunction
     static inline
-    bool is_or(term_type t)
+    bool is_or(const term_type& t)
     {
       return pbes_system::is_or(t);
     }
@@ -1050,7 +1109,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is an implication
     static inline
-    bool is_imp(term_type t)
+    bool is_imp(const term_type& t)
     {
       return pbes_system::is_imp(t);
     }
@@ -1059,7 +1118,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is a universal quantification
     static inline
-    bool is_forall(term_type t)
+    bool is_forall(const term_type& t)
     {
       return pbes_system::is_forall(t);
     }
@@ -1068,7 +1127,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is an existential quantification
     static inline
-    bool is_exists(term_type t)
+    bool is_exists(const term_type& t)
     {
       return pbes_system::is_exists(t);
     }
@@ -1077,7 +1136,7 @@ namespace core {
     /// \param t A term
     /// \return True if the term is a data term
     static inline
-    bool is_data(term_type t)
+    bool is_data(const term_type& t)
     {
       return data::is_data_expression(t);
     }
@@ -1086,7 +1145,7 @@ namespace core {
     /// \param t A term
     /// \return True if the term is a propositional variable instantiation
     static inline
-    bool is_prop_var(term_type t)
+    bool is_prop_var(const term_type& t)
     {
       return core::detail::gsIsPropVarInst(t);
     }
@@ -1095,7 +1154,7 @@ namespace core {
     /// \param t A term
     /// \return The requested argument. Partially works for data terms
     static inline
-    term_type arg(term_type t)
+    term_type arg(const term_type& t)
     {
       return pbes_system::accessors::arg(t);
     }
@@ -1104,7 +1163,7 @@ namespace core {
     /// \param t A term
     /// \return The left argument of the term. Also works for data terms
     static inline
-    term_type left(term_type t)
+    term_type left(const term_type& t)
     {
       return pbes_system::accessors::left(t);
     }
@@ -1113,7 +1172,7 @@ namespace core {
     /// \param t A term
     /// \return The right argument of the term. Also works for data terms
     static inline
-    term_type right(term_type t)
+    term_type right(const term_type& t)
     {
       return pbes_system::accessors::right(t);
     }
@@ -1122,7 +1181,7 @@ namespace core {
     /// \param t A term
     /// \return The requested argument. Doesn't work for data terms
     static inline
-    variable_sequence_type var(term_type t)
+    variable_sequence_type var(const term_type& t)
     {
       // Forall and exists are not fully supported by the data library
       assert(!data::is_data_expression(t) || (!data::is_abstraction(t)
@@ -1136,7 +1195,7 @@ namespace core {
     /// \param t A term
     /// \return The name of the propositional variable instantiation
     static inline
-    string_type name(term_type t)
+    string_type name(const term_type& t)
     {
       assert(is_prop_var(t));
       return atermpp::arg1(t);
@@ -1146,7 +1205,7 @@ namespace core {
     /// \param t A term
     /// \return The parameter list of the propositional variable instantiation
     static inline
-    data_term_sequence_type param(term_type t)
+    data_term_sequence_type param(const term_type& t)
     {
       assert(is_prop_var(t));
       return variable_sequence_type(atermpp::list_arg2(t));
@@ -1156,7 +1215,7 @@ namespace core {
     /// \param v A variable
     /// \return The converted variable
     static inline
-    term_type variable2term(variable_type v)
+    term_type variable2term(const variable_type& v)
     {
       return v;
     }
@@ -1165,7 +1224,7 @@ namespace core {
     /// \param t A term
     /// \return True if the term is a variable
     static inline
-    bool is_variable(term_type t)
+    bool is_variable(const term_type& t)
     {
       return data::is_variable(t);
     }
@@ -1174,7 +1233,7 @@ namespace core {
     /// \param t A term
     /// \return The free variables of a term
     static inline
-    variable_sequence_type free_variables(term_type t)
+    variable_sequence_type free_variables(const term_type& t)
     {
       pbes_system::detail::free_variable_visitor<term_type> visitor;
       visitor.visit(t);
@@ -1194,7 +1253,7 @@ namespace core {
     /// \param t A term
     /// \return The converted term
     static inline
-    data_term_type term2dataterm(term_type t)
+    data_term_type term2dataterm(const term_type& t)
     {
       return t;
     }
@@ -1209,7 +1268,7 @@ namespace core {
     /// \param t A term
     /// \return Returns a pretty print representation of the term
     static inline
-    std::string pp(term_type t)
+    std::string pp(const term_type& t)
     {
       return core::pp(t);
     }
