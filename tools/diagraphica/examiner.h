@@ -43,7 +43,7 @@ public:
     static ColorRGB getColorBdl();
 
     ColorRGB getColorSel();
-    int getIdxClstSel();
+    size_t getIdxClstSel();
 
     // -- set functions ---------------------------------------------
     static void setColorClr( const ColorRGB &col );
@@ -65,7 +65,7 @@ public:
         const std::vector< Attribute* > &attrs );
     void clrFrameHist();
     void clrFrameHistCur();
-    int getSizeFramesHist();
+    size_t getSizeFramesHist();
 
     void clearData();
 

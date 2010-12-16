@@ -56,9 +56,9 @@ public:
     void parseAttrConfig(
         const std::string &path,
         Graph* graph,
-        std::map< int, int > &attrIdxFrTo,
-        std::map< int, std::vector< std::string > > &attrCurDomains,
-        std::map< int, std::map< int, int  > > &attrOrigToCurDomains );
+        std::map< size_t, size_t > &attrIdxFrTo,
+        std::map< size_t, std::vector< std::string > > &attrCurDomains,
+        std::map< size_t, std::map< int, int  > > &attrOrigToCurDomains );
     void writeAttrConfig(
         const std::string &path,
         Graph* graph );
@@ -90,15 +90,15 @@ private:
     // dgc files
     void parseAttrConfig(
         Graph* graph,
-        std::map< int, int > &attrIdxFrTo,
-        std::map< int, std::vector< std::string > > &attrCurDomains,
-        std::map< int, std::map< int, int  > > &attrOrigToCurDomains,
+        std::map< size_t, size_t > &attrIdxFrTo,
+        std::map< size_t, std::vector< std::string > > &attrCurDomains,
+        std::map< size_t, std::map< int, int  > > &attrOrigToCurDomains,
         wxXmlNode* curNode );
     void parseAttr(
         Graph* graph,
-        std::map< int, int > &attrIdxFrTo,
-        std::map< int, std::vector< std::string > > &attrCurDomains,
-        std::map< int, std::map< int, int  > > &attrOrigToCurDomains,
+        std::map< size_t, size_t > &attrIdxFrTo,
+        std::map< size_t , std::vector< std::string > > &attrCurDomains,
+        std::map< size_t, std::map< int, int  > > &attrOrigToCurDomains,
         wxXmlNode* curNode );
 
     // dgd files

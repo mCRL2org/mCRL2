@@ -33,7 +33,7 @@ ColorChooser::ColorChooser(
     hdlSize  = hdlSzeHnt;
 
     active  = false;
-    dragIdx = -1;
+    dragIdx = NON_EXISTING;
 }
 
 
@@ -128,7 +128,7 @@ void ColorChooser::handleMouseLftDownEvent(
         // normal mode
         visualize( false );
 
-        if ( dragIdx == -1 )
+        if ( dragIdx == NON_EXISTING )
         {
             double w, h;
             double xLft, xRgt;
@@ -170,7 +170,7 @@ void ColorChooser::handleMouseLftUpEvent(
     if ( active == true )
     {
         Visualizer::handleMouseLftUpEvent( x, y );
-        dragIdx = -1;
+        dragIdx = NON_EXISTING;
     }
 }
 
@@ -324,7 +324,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
     double xLft, xRgt;
     double yBot, yTop;
     double pix;
-    int    size;
+    size_t    size;
     double hdlDOF;
 
     // get size of sides
@@ -358,7 +358,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
 
         if ( size == 1 )
         {
-            glPushName( size-1 );
+            glPushName( (GLuint) size-1 );
             VisUtils::fillRect(
                 positionsX[size-1]*xRgt-5.0*pix, positionsX[size-1]*xRgt+5.0*pix,
                 positionsY[size-1]*yTop+5.0*pix, positionsY[size-1]*yTop-5.0*pix );
@@ -378,7 +378,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
                 0.0 );
             glRotatef( 90.0+agl, 0.0, 0.0, 1.0 );
 
-                glPushName( size-1 );
+                glPushName( (GLuint) size-1 );
                 VisUtils::fillTriangle(
                    -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,

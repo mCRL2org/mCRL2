@@ -121,10 +121,10 @@ ColorRGB Examiner::getColorSel()
 
 
 // --------------------------
-int Examiner::getIdxClstSel()
+size_t Examiner::getIdxClstSel()
 // --------------------------
 {
-    size_t result = -1;
+    size_t result = NON_EXISTING;
     if ( focusFrameIdx < framesHist.size() )
         result = framesHist[focusFrameIdx]->getNode(0)->getCluster()->getIndex();
     return result;
@@ -281,7 +281,7 @@ void Examiner::clrFrameHistCur()
 
 
 // ------------------------------
-int Examiner::getSizeFramesHist()
+size_t Examiner::getSizeFramesHist()
 // ------------------------------
 {
     return framesHist.size();
@@ -1013,7 +1013,7 @@ void Examiner::drawFramesHist( const bool &inSelectMode )
             glTranslatef( posFramesHist[i].x, posFramesHist[i].y, 0.0 );
             glScalef( scaleFramesHist, scaleFramesHist, scaleFramesHist );
 
-            glPushName( i );
+            glPushName( (GLuint) i );
             VisUtils::fillRect(
                 -1.0,  1.0,
                  1.0, -1.0 );

@@ -33,9 +33,9 @@ public:
 
     // -- set data functions ----------------------------------------
     void setValues(
-        const std::vector< int > &attrIndcs,
-        std::vector< std::vector< int > > &combs,
-        std::vector< int > &number );
+        const std::vector< size_t > &attrIndcs,
+        std::vector< std::vector< size_t > > &combs,
+        std::vector< size_t > &number );
     void clearValues();
 
   	void setDiagram( Diagram* dgrm );
@@ -94,11 +94,11 @@ protected:
 
     // data
     std::vector< std::string >        attributeLabels;
-    std::vector< int >           attributeIndcs;
-    int                     maxAttrCard;
-    std::vector< std::vector< int > > combinations;
-    std::vector< int >           numberPerComb;
-    int                     maxNumberPerComb;
+    std::vector< size_t >           attributeIndcs;
+    size_t                     maxAttrCard;
+    std::vector< std::vector< size_t > > combinations;
+    std::vector< size_t >           numberPerComb;
+    size_t                     maxNumberPerComb;
 
     // bar chart
     int    minHgtHintPixBC;     // bar height cannot be less

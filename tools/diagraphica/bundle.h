@@ -25,12 +25,12 @@ class Bundle
 public:
 	// -- constructors and destructors ------------------------------
     Bundle();
-    Bundle( const int &idx );
+    Bundle( const size_t &idx );
     Bundle( const Bundle &bdl );
     virtual ~Bundle();
 
     // -- set functions ---------------------------------------------
-    void setIndex( const int &idx );
+    void setIndex( const size_t &idx );
     void setParent( Bundle* p );
     void addChild( Bundle* c );
     void setInCluster( Cluster* in );
@@ -42,13 +42,13 @@ public:
         const std::string &status );
 
     // -- get functions ---------------------------------------------
-    int getIndex();
+    size_t getIndex();
     Bundle* getParent();
-    int getSizeChildren();
+    size_t getSizeChildren();
     Bundle* getChild( const size_t &idx );
     Cluster* getInCluster();
     Cluster* getOutCluster();
-    int getSizeEdges();
+    size_t getSizeEdges();
     Edge* getEdge( const size_t &idx );
     void getLabels( std::vector< std::string > &lbls );
     void getLabels(
@@ -67,7 +67,7 @@ public:
 
 protected:
     // -- data members ----------------------------------------------
-	int index;
+	size_t index;
     Bundle* parent;
     std::vector< Bundle* > children; // association
     Cluster* inCluster;         // association

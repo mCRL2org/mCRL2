@@ -32,8 +32,8 @@ public:
 
     // -- set data functions ----------------------------------------
     void setValues(
-        const int &idx1,
-        const int &idx2,
+        const size_t &idx1,
+        const size_t &idx2,
         const std::vector< std::vector< int > > &mapXY,
         const std::vector< std::vector< int > > &num );
     void clearValues();
@@ -83,8 +83,8 @@ protected:
     // -- data members ----------------------------------------------
 
     // data
-    int attrIdx1;
-    int attrIdx2;
+    size_t attrIdx1;
+    size_t attrIdx2;
     std::string xLabel;
     std::string yLabel;
     std::vector< std::vector< int > > mapXToY; // for each x idx, 1 or more y indices
@@ -106,8 +106,8 @@ protected:
     double     scaleDgrm;       // scale factor for diagram
     Position2D posDgrm;         // positions of diagram
     bool       showDgrm;        // show or hide diagram
-    int        attrValIdx1Dgrm; // value idx of 1st attribute associated with diagram
-    int        attrValIdx2Dgrm; // value idx of 2nd attribute associated with diagram
+    size_t        attrValIdx1Dgrm; // value idx of 1st attribute associated with diagram
+    size_t        attrValIdx2Dgrm; // value idx of 2nd attribute associated with diagram
     std::string     msgDgrm;        // message to show with diagram
 };
 

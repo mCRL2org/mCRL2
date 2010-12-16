@@ -33,10 +33,10 @@ public:
     void setMax( const double &m );
     void setMinMax( const double &mn, const double &mx );
     void setValue(
-        const int &idx,
+        const size_t &idx,
         const double &val );
     void addValue( const double &val );
-    void clearValue( const int &idx );
+    void clearValue( const size_t &idx );
     void setDir( const int &dr );
     void setAttribute( Attribute* a );
     void setTextStatus( const int &status );
@@ -46,8 +46,8 @@ public:
     std::string getLabel();
     double getMin();
     double getMax();
-    int getSizeValues();
-    double getValue( const int &idx );
+    size_t getSizeValues();
+    double getValue( const size_t &idx );
     void getValues( std::vector< double > &vals );
     int getDir();
     Attribute* getAttribute();

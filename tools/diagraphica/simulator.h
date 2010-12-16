@@ -46,7 +46,7 @@ public:
     static int getBlendType();
 
     ColorRGB getColorSel();
-    int getIdxClstSel();
+    size_t getIdxClstSel();
 
     // -- set functions ---------------------------------------------
     static void setColorClr( const ColorRGB &col );
@@ -132,8 +132,8 @@ protected:
     // -- utility drawing functions ---------------------------------
     void clear();
     void calcColor(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &col );
 
     void drawFrameCurr( const bool &inSelectMode );

@@ -36,7 +36,7 @@ public:
     void setSnapGrid( const bool &flag );
 
     // -- get functions ---------------------------------------------
-    int getSizeShapes();
+    size_t getSizeShapes();
     Shape* getShape( const size_t &idx );
 
     bool getSnapGrid();

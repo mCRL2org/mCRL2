@@ -130,10 +130,10 @@ ColorRGB Simulator::getColorSel()
 
 
 // ---------------------------
-int Simulator::getIdxClstSel()
+size_t Simulator::getIdxClstSel()
 // ---------------------------
 {
-    int result = -1;
+    size_t result = NON_EXISTING;
 
     if ( focusDepthIdx == ID_FRAME_PREV )
     {
@@ -868,7 +868,7 @@ void Simulator::sortFramesPrevNext()
         int key = 0;
         for ( int j = 0; j < framesPrev[i]->getSizeOutBundles(); ++j )
         {
-            key += (int)pow( 10.0, framesPrev[i]->getOutBundle(j)->getParent()->getIndex() );
+            key += (int)pow( 10.0, (int) framesPrev[i]->getOutBundle(j)->getParent()->getIndex() );
         }
 
         sorted.insert( pair< int, Cluster* >( key, framesPrev[i] ) );
@@ -887,7 +887,7 @@ void Simulator::sortFramesPrevNext()
         int key = 0;
         for ( int j = 0; j < framesNext[i]->getSizeInBundles(); ++j )
         {
-            key += (int)pow( 10.0, framesNext[i]->getInBundle(j)->getParent()->getIndex() );
+            key += (int)pow( 10.0, (int) framesNext[i]->getInBundle(j)->getParent()->getIndex() );
         }
 
         sorted.insert( pair< int, Cluster* >( key, framesNext[i] ) );
@@ -1687,8 +1687,8 @@ void Simulator::clear()
 
 // -----------------------
 void Simulator::calcColor(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &col )
 // -----------------------
 {
@@ -1872,7 +1872,7 @@ void Simulator::drawFramesPrev( const bool &inSelectMode )
             else
                 glScalef( scaleDgrmVert, scaleDgrmVert, scaleDgrmVert );
 
-            glPushName( i );
+            glPushName( (GLuint) i );
             VisUtils::fillRect(
                 -1.0,  1.0,
                  1.0, -1.0 );
@@ -2039,7 +2039,7 @@ void Simulator::drawFramesNext( const bool &inSelectMode )
             else
                 glScalef( scaleDgrmVert, scaleDgrmVert, scaleDgrmVert );
 
-            glPushName( i );
+            glPushName( (GLuint) i );
             VisUtils::fillRect( -1.0, 1.0, 1.0, -1.0 );
 
             if ( focusDepthIdx == ID_FRAME_NEXT &&  static_cast <size_t> (focusFrameIdx) == i )
@@ -2199,7 +2199,7 @@ void Simulator::drawBdlLblGridPrev( const bool &inSelectMode )
         {
             lbl = bundlesPrevByLbl[i]->getChild(0)->getEdge(0)->getLabel();
 
-            glPushName( bundlesPrevByLbl[i]->getParent()->getIndex() );
+            glPushName( (GLuint) bundlesPrevByLbl[i]->getParent()->getIndex() );
 
             glPushMatrix();
             glTranslatef(
@@ -2241,7 +2241,7 @@ void Simulator::drawBdlLblGridPrev( const bool &inSelectMode )
     {
         ColorRGB colLne;
         double pix = canvas->getPixelSize();
-        int idxHiLite = -1;
+        size_t idxHiLite = NON_EXISTING;
 
         VisUtils::mapColorLtGray( colLne );
 
@@ -2298,7 +2298,7 @@ void Simulator::drawBdlLblGridPrev( const bool &inSelectMode )
             }
         }
 
-        if ( 0 <= idxHiLite &&  static_cast <size_t> (idxHiLite) < posBdlLblGridPrevTopLft.size() )
+        if ( idxHiLite != NON_EXISTING &&  static_cast <size_t> (idxHiLite) < posBdlLblGridPrevTopLft.size() )
         {
             string lbl = bundlesPrevByLbl[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
@@ -2390,7 +2390,7 @@ void Simulator::drawBdlLblGridNext( const bool &inSelectMode )
         {
             string lbl = bundlesNextByLbl[i]->getChild(0)->getEdge(0)->getLabel();
 
-            glPushName( bundlesNextByLbl[i]->getParent()->getIndex() );
+            glPushName( (GLuint) bundlesNextByLbl[i]->getParent()->getIndex() );
 
             glPushMatrix();
             glTranslatef(
@@ -2432,7 +2432,7 @@ void Simulator::drawBdlLblGridNext( const bool &inSelectMode )
     {
         ColorRGB colLne;
         double pix = canvas->getPixelSize();;
-        int idxHiLite = -1;
+        size_t idxHiLite = NON_EXISTING;
 
         VisUtils::mapColorLtGray( colLne );
 
@@ -2581,7 +2581,7 @@ void Simulator::drawBundlesPrev( const bool &inSelectMode )
         {
             for ( size_t j = 0; j < posBundlesPrevBotRgt[i].size(); ++j )
             {
-                glPushName( framesPrev[i]->getOutBundle(j)->getParent()->getParent()->getIndex()  );
+                glPushName( (GLuint) framesPrev[i]->getOutBundle(j)->getParent()->getParent()->getIndex()  );
                 // arrow interval
                 double arrowItv = 3;
 
@@ -2601,7 +2601,7 @@ void Simulator::drawBundlesPrev( const bool &inSelectMode )
         double pix = canvas->getPixelSize();
         ColorRGB colFill, colFade;
         ColorRGB colBrdrFill, colBrdrFade;
-        int idxHiLite = -1;
+        size_t idxHiLite = NON_EXISTING;
 
         VisUtils::setColorLtGray();
         VisUtils::enableLineAntiAlias();
@@ -2699,7 +2699,7 @@ void Simulator::drawBundlesNext( const bool &inSelectMode )
         {
             for ( size_t j = 0; j < posBundlesNextBotRgt[i].size(); ++j )
             {
-                glPushName( framesNext[i]->getInBundle(j)->getParent()->getParent()->getIndex()  );
+                glPushName( (GLuint) framesNext[i]->getInBundle(j)->getParent()->getParent()->getIndex()  );
                 // arrow interval
                 arrowItv = 3;
 
@@ -2719,7 +2719,7 @@ void Simulator::drawBundlesNext( const bool &inSelectMode )
         double pix = canvas->getPixelSize();
         ColorRGB colFill, colFade;
         ColorRGB colBrdrFill, colBrdrFade;
-        int idxHiLite = -1;
+        size_t idxHiLite = NON_EXISTING;
 
         VisUtils::setColorLtGray();
         VisUtils::enableLineAntiAlias();

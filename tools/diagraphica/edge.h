@@ -22,7 +22,7 @@ class Edge
 public:
 	// -- constructors and destructor -------------------------------
     Edge(
-        const int &idx,
+        const size_t &idx,
         const std::string &lbl );
 	virtual ~Edge();
 
@@ -32,7 +32,7 @@ public:
     void setBundle( Bundle* b );
 
     // -- get functions ---------------------------------------------
-    int getIndex();
+    size_t getIndex();
     std::string getLabel();
     Node* getInNode();
     Node* getOutNode();
@@ -45,7 +45,7 @@ public:
 
 protected:
     // -- data members ----------------------------------------------
-	int index;      // index in list of graph edges
+	size_t index;      // index in list of graph edges
     std::string label;   // "action label"
     Node* inNode;   // association
 	Node* outNode;  // association

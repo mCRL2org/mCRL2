@@ -62,25 +62,25 @@ public:
         const double &hue,
         const double &y );
     void handleDOFColUpdate(
-        const int &idx,
+        const size_t &idx,
         const double &hue,
         const double &y );
     void handleDOFColClear(
-        const int &idx );
+        const size_t &idx );
     void handleDOFOpaAdd(
         const double &opa,
         const double &y );
     void handleDOFOpaUpdate(
-        const int &idx,
+        const size_t &idx,
         const double &opa,
         const double &y );
     void handleDOFOpaClear(
-        const int &idx );
+        const size_t &idx );
     void setLinkDOFAttr(
-        const int &DOFIdx,
-        const int &attrIdx );
-    void clearLinkDOFAttr( const int &DOFIdx );
-    void clearLinkAttrDOF( const int &attrIdx );
+        const size_t &DOFIdx,
+        const size_t &attrIdx );
+    void clearLinkDOFAttr( const size_t &DOFIdx );
+    void clearLinkAttrDOF( const size_t &attrIdx );
 
     // -- helper functions ------------------------------------------
     virtual void printMouseVariables();
@@ -129,10 +129,10 @@ public:
         const vector< int > &data );
     */
     void handleShowVariable( const std::string &variable, const int &variableId );
-    void handleShowNote( const std::string &variable, const int &shapeId );
-    void handleAddText( std::string &variable, int &shapeId );
-    void handleTextSize( int &textSize, int &shapeId );
-    void handleSetTextSize( int &textSize, int &shapeId );
+    void handleShowNote( const std::string &variable, const size_t &shapeId );
+    void handleAddText( std::string &variable, size_t &shapeId );
+    void handleTextSize( size_t &textSize, size_t &shapeId );
+    void handleSetTextSize( size_t &textSize, size_t &shapeId );
     void handleCut();
     void handleCopy();
     void clearClipBoard();
@@ -145,7 +145,7 @@ public:
     void handleSendBackward();
     void handleEditDOF();
     void handleSetDOF( const int &attrIdx );
-    void handleCheckedVariable( const int &idDOF, const int &variableId );
+    void handleCheckedVariable( const size_t &idDOF, const int &variableId );
 
     // -- public utility functions ----------------------------------
     void deselectAll();
@@ -202,7 +202,7 @@ protected:
     int editMode;
     int drgBegIdx1;
     int drgBegIdx2;
-    int lastSelectedShapeId;
+    size_t lastSelectedShapeId;
     bool selection;
 
     double xDrgDist;

@@ -30,8 +30,8 @@ CorrlPlot::CorrlPlot(
 
     diagram         = NULL;
     showDgrm        = false;
-    attrValIdx1Dgrm = -1;
-    attrValIdx2Dgrm = -1;
+    attrValIdx1Dgrm = NON_EXISTING;
+    attrValIdx2Dgrm = NON_EXISTING;
 }
 
 
@@ -49,8 +49,8 @@ CorrlPlot::~CorrlPlot()
 
 // -------------------------------------
 void CorrlPlot::setValues(
-    const int &idx1,
-    const int &idx2,
+    const size_t &idx1,
+    const size_t &idx2,
     const vector< vector< int > > &mapXY,
     const vector< vector< int > > &num )
 // -------------------------------------
@@ -70,8 +70,8 @@ void CorrlPlot::setValues(
 void CorrlPlot::clearValues()
 // --------------------------
 {
-    attrIdx1  = -1;
-    attrIdx2  = -1;
+    attrIdx1  = NON_EXISTING;
+    attrIdx2  = NON_EXISTING;
     maxNumber = 0;
     maxNumX.clear();
     sumMaxNumX = 0;
@@ -219,14 +219,14 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
     {
         for ( size_t i = 0; i < positions.size(); ++i )
         {
-            glPushName( i );
+            glPushName( (GLuint) i );
             for ( size_t j = 0; j < positions[i].size(); ++j )
             {
                 double x   = positions[i][j].x;
                 double y   = positions[i][j].y;
                 double rad = radii[i][j];
 
-                glPushName( j );
+                glPushName( (GLuint) j );
                 //VisUtils::fillCirc( x, y, rad, 21);
                 VisUtils::fillEllipse( x, y, rad, rad, 21);
                 glPopName();
@@ -377,10 +377,10 @@ void CorrlPlot::calcMaxNumber()
     maxNumber  = 0;
 
     // init max row & col numbers
-    if ( attrIdx1 >= 0 && attrIdx2 >= 0 )
+    if ( attrIdx1 != NON_EXISTING && attrIdx2 != NON_EXISTING )
     {
-        int sizeX = graph->getAttribute( attrIdx1 )->getSizeCurValues();
-        int sizeY = graph->getAttribute( attrIdx2 )->getSizeCurValues();
+        size_t sizeX = graph->getAttribute( attrIdx1 )->getSizeCurValues();
+        size_t sizeY = graph->getAttribute( attrIdx2 )->getSizeCurValues();
         {
         for ( int i = 0; i < sizeX; ++i )
             maxNumX.push_back( 0 );
@@ -471,7 +471,7 @@ void CorrlPlot::displTooltip(
     msgDgrm.append( " nodes; " );
     // percentage
     msgDgrm.append( Utils::dblToStr(
-            Utils::perc( number[xIdx][ yIdx ], graph->getSizeNodes() ) ) );
+            Utils::perc( (double) number[xIdx][ yIdx ], (double) graph->getSizeNodes() ) ) );
     msgDgrm.append( "%" );
 
     if ( diagram == NULL )

@@ -37,23 +37,23 @@ public:
 
     // -- get functions ---------------------------------------------
     static bool getUseShading();
-    void getIdcsClstMarked( std::set< int > &idcs );
+    void getIdcsClstMarked( std::set< size_t > &idcs );
     void getIdcsClstMarked(
-        std::set< int > &idcs ,
+        std::set< size_t > &idcs ,
         ColorRGB &col );
     void getIdxMseOver(
-        int &idxLeaf,
-        std::set< int > &idcsBndl,
+        size_t &idxLeaf,
+        std::set< size_t > &idcsBndl,
         ColorRGB &colLeaf );
     void getCurrIdxDgrm(
-        int &idxLeaf,
-        std::set< int > &idcsBndl,
+        size_t &idxLeaf,
+        std::set< size_t > &idcsBndl,
         ColorRGB &colLeaf );
     void getAnimIdxDgrm(
-        int &idxLeaf,
-        std::set< int > &idcsBndl,
+        size_t &idxLeaf,
+        std::set< size_t > &idcsBndl,
         ColorRGB &colLeaf );
-    void getAttrIdcs( std::vector< int > &idcs );
+    void getAttrIdcs( std::vector< size_t > &idcs );
 
     // -- set functions ---------------------------------------------
     static void setUseShading( const bool &useShd );
@@ -62,7 +62,7 @@ public:
     static void setSizeTxt( const int &sze );
 
     void setDiagram( Diagram *dgrm );
-    void initAttributes( const std::vector< int > attrIdcs );
+    void initAttributes( const std::vector< size_t > attrIdcs );
     void clearData();
 
     void markItems( Cluster* frame );
@@ -195,9 +195,9 @@ protected:
     double minPixPerNode;      // min number of pixels per item
     double actPixPerNode;      // actual number of pixels per item
 
-    int    nodesWdwScale;
+    size_t    nodesWdwScale;
     double itvWdwPerNode;
-    int    wdwStartIdx;
+    size_t    wdwStartIdx;
     int    nodesItvScale;      // number of nodes per marked interval
 
     std::vector< Position2D > posAxesTopLft;
@@ -210,20 +210,20 @@ protected:
     double dragDistNodes;
 
     // selection
-    std::set< int > itemsMarked;
+    std::set< size_t > itemsMarked;
     int  shiftStartIdx;
     int  dragStartIdx;
     int  dragDir;
 
     // mouse overs
-    int mouseOverIdx;
+    size_t mouseOverIdx;
 
     // diagrams
     double scaleDgrm;
-    std::map< int, Position2D > showDgrm;
+    std::map< size_t, Position2D > showDgrm;
     int dragIdxDgrm; // diagram currently being dragged
-    int currIdxDgrm; // currently selected diagram
-    int animIdxDgrm; // diagram being animated
+    size_t currIdxDgrm; // currently selected diagram
+    size_t animIdxDgrm; // diagram being animated
 
     double ySpacePxl;
     bool critSect;
@@ -231,7 +231,7 @@ protected:
     // animation
     wxTimer* timerAnim;
     static int itvAnim;
-    std::set< int >::iterator animFrame;
+    std::set< size_t >::iterator animFrame;
 
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()

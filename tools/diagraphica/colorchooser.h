@@ -81,7 +81,7 @@ protected:
 
     std::vector< double > positionsX;
     std::vector< double > positionsY;
-    int dragIdx;
+    size_t dragIdx;
 
     // vis settings
     double hdlSize;

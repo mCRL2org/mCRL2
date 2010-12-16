@@ -330,7 +330,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
     double xLft, xRgt;
     double yBot, yTop;
     double pix;
-    int size;
+    size_t size;
     double hdlDOF;
 
     // get size of sides
@@ -364,7 +364,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
 
         if ( size == 1 )
         {
-            glPushName( size-1 );
+            glPushName( (GLuint) size-1 );
             VisUtils::fillRect(
                 positionsX[size-1]*xRgt-5.0*pix, positionsX[size-1]*xRgt+5.0*pix,
                 positionsY[size-1]*yTop+5.0*pix, positionsY[size-1]*yTop-5.0*pix );
@@ -384,7 +384,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
                 0.0 );
             glRotatef( 90.0+agl, 0.0, 0.0, 1.0 );
 
-                glPushName( size-1 );
+                glPushName( (GLuint) size-1 );
                 VisUtils::fillTriangle(
                    -hdlDOF, 2.0*hdlDOF, 
                     0.0,    0.0,

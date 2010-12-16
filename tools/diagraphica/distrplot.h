@@ -33,8 +33,8 @@ public:
 
     // -- set data functions ----------------------------------------
     void setValues(
-        const int &idx,
-        const std::vector< int > &num );
+        const size_t &idx,
+        const std::vector< size_t > &num );
     void clearValues();
 
 	void setDiagram( Diagram* dgrm );
@@ -75,9 +75,9 @@ protected:
 
     // -- data members ----------------------------------------------
     // data
-    int              attrIdx;
-    std::vector< int >    number;
-    int              maxNumber;
+    size_t              attrIdx;
+    std::vector< size_t >    number;
+    size_t              maxNumber;
     // vis settings
     int    minHgtHintPx; // height cannot be smaller than this
     int    maxWthHintPx; // width cannot be greater than this
@@ -88,7 +88,7 @@ protected:
     double     scaleDgrm;      // scale factor for diagram
     Position2D posDgrm;        // positions of diagram
     bool       showDgrm;       // show or hide diagram
-    int        attrValIdxDgrm; // value idx of attribute associated with diagram
+    size_t        attrValIdxDgrm; // value idx of attribute associated with diagram
     std::string     msgDgrm;        // message to show with diagram
 };
 

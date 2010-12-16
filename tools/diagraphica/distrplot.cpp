@@ -48,8 +48,8 @@ DistrPlot::~DistrPlot()
 
 // ---------------------------
 void DistrPlot::setValues(
-    const int &idx,
-    const vector< int > &num )
+    const size_t &idx,
+    const vector< size_t > &num )
 // ---------------------------
 {
     clearValues();
@@ -189,7 +189,7 @@ void DistrPlot::drawLabels( const bool &/*inSelectMode*/ )
         y = -0.5*h+9*pix;
         VisUtils::drawLabelCenter( texCharId, x, y, scaling, xLabel );
 
-        string max = Utils::intToStr( maxNumber );
+        string max = Utils::size_tToStr( maxNumber );
         x = -0.5*w+13*pix;
         y =  0.5*h-10*pix;
         VisUtils::drawLabelVertBelow( texCharId, x, y, scaling, max );
@@ -208,7 +208,7 @@ void DistrPlot::drawPlot( const bool &inSelectMode )
 
     double hCanv = canvas->getHeight();
     double pix = canvas->getPixelSize();
-    int sizePositions = positions.size();
+    size_t sizePositions = positions.size();
 
     double yBot = -0.5*hCanv + 20*pix;
     // selection mode
@@ -389,10 +389,10 @@ void DistrPlot::displTooltip( const size_t &posIdx )
         msgDgrm.append( "\n" );
         */
         // y-axis label
-        msgDgrm.append( Utils::intToStr( number[posIdx] ) );
+        msgDgrm.append( Utils::size_tToStr( number[posIdx] ) );
         msgDgrm.append( " nodes; " );
         msgDgrm.append( Utils::dblToStr(
-            Utils::perc( number[posIdx], graph->getSizeNodes() ) ) );
+            Utils::perc( (int) number[posIdx], (int) graph->getSizeNodes() ) ) );
         msgDgrm.append( "%" );
 
         if ( diagram == NULL )

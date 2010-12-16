@@ -43,7 +43,7 @@ Frame::Frame(
 	clustMenu = NULL;
 	frameNote = NULL;
 	frameTextSize = NULL;
-	currentShapeId = -1;
+	currentShapeId = NON_EXISTING;
 }
 
 
@@ -161,7 +161,7 @@ void Frame::setDOFOpacitySelected( )
 
 
 // ----------------------------------------
-void Frame::handleNote( const int &shapeId, const string &msg )
+void Frame::handleNote( const size_t &shapeId, const string &msg )
 // ----------------------------------------
 {
 	currentShapeId = shapeId;
@@ -171,7 +171,7 @@ void Frame::handleNote( const int &shapeId, const string &msg )
 
 
 // ----------------------------------------
-void Frame::handleTextSize( const int &shapeId, const int &textSize )
+void Frame::handleTextSize( const size_t &shapeId, const size_t &textSize )
 // ----------------------------------------
 {
 	currentShapeId = shapeId;
@@ -181,29 +181,29 @@ void Frame::handleTextSize( const int &shapeId, const int &textSize )
 
 
 // ----------------------------------------
-void Frame::displNumNodes( const int &val )
+void Frame::displNumNodes( const size_t &val )
 // ----------------------------------------
 {
-    string lbl = Utils::intToStr( val );
+    string lbl = Utils::size_tToStr( val );
     lblNumNodes->SetLabel( wxString( lbl.c_str(), wxConvUTF8 ) );
 }
 
 
 // ----------------------------------------
-void Frame::displNumEdges( const int &val )
+void Frame::displNumEdges( const size_t &val )
 // ----------------------------------------
 {
-    string lbl = Utils::intToStr( val );
+    string lbl = Utils::size_tToStr( val );
     lblNumEdges->SetLabel( wxString( lbl.c_str(), wxConvUTF8 ) );
 }
 
 
 // ---------------------------------
 void Frame::displAttrInfo(
-    const vector< int > &indices,
+    const vector< size_t > &indices,
     const vector< string > &names,
     const vector< string > &types,
-    const vector< int > &cards,
+    const vector< size_t > &cards,
     const vector< string > &range )
 // ---------------------------------
 {
@@ -211,20 +211,26 @@ void Frame::displAttrInfo(
     listCtrlAttr->DeleteAllItems();
 
     // display new items
-    for ( size_t i = 0; i < names.size(); ++i )
+	if (std::numeric_limits<long>::max() < names.size()){
+		wxMessageBox( wxT("Size of names exceeds max value of long"), wxT("Size of names exceeds max value of long"), wxOK|wxICON_INFORMATION, this );
+	}
+
+	long l_names_size = (long) names.size();
+
+    for ( long i = 0; i < l_names_size; ++i )
     {
         // add row
         listCtrlAttr->InsertItem( i, wxString( wxT("") ) );
 
         // associate index with item
-        listCtrlAttr->SetItemData( indices[i], i );
+        listCtrlAttr->SetItemData( (long) indices[i], i );
 
         // column 0, do nothing
         // column 1
         listCtrlAttr->SetItem(
             i,
             1,
-            wxString( Utils::intToStr( indices[i] ).c_str(), wxConvUTF8 ) );
+            wxString( Utils::size_tToStr( indices[i] ).c_str(), wxConvUTF8 ) );
         // column 2
         listCtrlAttr->SetItem( i, 2, wxString( names[i].c_str(), wxConvUTF8 ) );
         // column 3
@@ -233,7 +239,7 @@ void Frame::displAttrInfo(
         listCtrlAttr->SetItem(
             i,
             4,
-			wxString( Utils::intToStr( cards[i] ).c_str(), wxConvUTF8 ) );
+			wxString( Utils::size_tToStr( cards[i] ).c_str(), wxConvUTF8 ) );
         // column 5
         listCtrlAttr->SetItem(
             i, 5, wxString( range[i].c_str(), wxConvUTF8 ) );
@@ -253,11 +259,11 @@ void Frame::displAttrInfo(
 
 // ------------------------------------
 void Frame::displAttrInfo(
-        const int &selectIdx,
-        const vector< int > &indices,
+        const size_t &selectIdx,
+        const vector< size_t > &indices,
         const vector< string > &names,
         const vector< string > &types,
-        const vector< int > &cards,
+        const vector< size_t > &cards,
         const vector< string > &range )
 // ------------------------------------
 {
@@ -278,37 +284,42 @@ void Frame::displAttrInfo(
 
 // ---------------------------------
 void Frame::displDomainInfo(
-    const vector< int > &indices,
+    const vector< size_t > &indices,
     const vector< string > &values,
-    const vector< int > &number,
+    const vector< size_t > &number,
     const vector< double > &perc )
 // ---------------------------------
 {
     // clear domain list
     listCtrlDomain->DeleteAllItems();
 
+	if (std::numeric_limits<long>::max() < values.size() ){
+		wxMessageBox( wxT("Size of values exceeds max value of long"), wxT("Size of values exceeds max value of long"), wxOK|wxICON_INFORMATION, this );
+	}
+	long l_values_size = (long) values.size();
+
     // display new items
-    for ( size_t i = 0; i < values.size(); ++i )
+    for ( long i = 0; i < l_values_size ; ++i )
     {
         // add row
-        listCtrlDomain->InsertItem( indices[i], wxString( wxT("") ) );
+        listCtrlDomain->InsertItem( (long) indices[i], wxString( wxT("") ) );
 
         // associate index with item
-        listCtrlDomain->SetItemData( indices[i], i );
+        listCtrlDomain->SetItemData( (long) indices[i], i );
 
         // column 0, do nothing
         // column 1
         listCtrlDomain->SetItem(
             i,
             1,
-            wxString( Utils::intToStr( indices[i] ).c_str(), wxConvUTF8 ) );
+            wxString( Utils::intToStr( (const int) indices[i] ).c_str(), wxConvUTF8 ) );
         // column 2
         listCtrlDomain->SetItem( i, 2, wxString( values[i].c_str(), wxConvUTF8 ) );
         // column 3
         listCtrlDomain->SetItem(
             i,
             3,
-            wxString( Utils::intToStr( number[i] ).c_str(), wxConvUTF8 ));
+            wxString( Utils::size_tToStr( number[i] ).c_str(), wxConvUTF8 ));
         // column 4
         listCtrlDomain->SetItem(
             i,
@@ -336,10 +347,10 @@ void Frame::clearDomainInfo()
 
 // ----------------------------------------
 void Frame::displDOFInfo(
-    const vector< int > &degsOfFrdmIndcs,
+    const vector< size_t > &degsOfFrdmIndcs,
     const vector< string > &degsOfFrdm,
     const vector< string > &attrNames,
-    const int &selIdx )
+    const size_t &selIdx )
 // ----------------------------------------
 {
     // make sure frame exists
@@ -349,14 +360,20 @@ void Frame::displDOFInfo(
     // clear all previous items
     listCtrlDOF->DeleteAllItems();
 
+	if (std::numeric_limits<long>::max() < degsOfFrdmIndcs.size()){
+		wxMessageBox( wxT("Size of degsOfFrdmIndcs exceeds max value of long"), wxT("Size of degsOfFrdmIndcs exceeds max value of long"), wxOK|wxICON_INFORMATION, this );
+	}
+	
+	long l_degsOfFrdmIndcs_size = (long) degsOfFrdmIndcs.size();
+
     // display items
-    for ( size_t i = 0; i < degsOfFrdmIndcs.size(); ++i )
+    for ( long i = 0; i < l_degsOfFrdmIndcs_size; ++i )
     {
         // add row
         listCtrlDOF->InsertItem( i, wxString( wxT("") ) );
 
         // associate index with item
-        listCtrlDOF->SetItemData( i, degsOfFrdmIndcs[i] );
+        listCtrlDOF->SetItemData( i, (long) degsOfFrdmIndcs[i] );
 
         // column 0, do nothing
         // column 1
@@ -676,7 +693,7 @@ void Frame::displClustMenu()
 
 // ---------------------------------
 void Frame::displAttrInfoClust(
-    const vector< int > &indices,
+    const vector< size_t > &indices,
     const vector< string > &names )
 // ---------------------------------
 {
@@ -689,19 +706,19 @@ void Frame::displAttrInfoClust(
         for ( size_t i = 0; i < indices.size(); ++i )
         {
             // add row
-            listCtrlClust->InsertItem( indices[i], wxString( wxT("") ) );
+            listCtrlClust->InsertItem( (long) indices[i], wxString( wxT("") ) );
 
             // associate index with item
-            listCtrlClust->SetItemData( indices[i], i );
+            listCtrlClust->SetItemData( (long) indices[i], (long) i );
 
             // column 0, do nothing
             // column 1
             listCtrlClust->SetItem(
-                i,
+                (long) i,
                 1,
-                wxString( Utils::intToStr( indices[i] ).c_str(), wxConvUTF8 ));
+                wxString( Utils::size_tToStr( indices[i] ).c_str(), wxConvUTF8 ));
             // column 2
-            listCtrlClust->SetItem( i, 2, wxString( names[i].c_str(), wxConvUTF8 ) );
+            listCtrlClust->SetItem( (long) i, 2, wxString( names[i].c_str(), wxConvUTF8 ) );
         }
     }
 }
@@ -710,9 +727,9 @@ void Frame::displAttrInfoClust(
 // ---------------------------
 void Frame::displAttrInfoPart(
     string attrName,
-    int minParts,
-    int maxParts,
-    int curParts )
+    size_t minParts,
+    size_t maxParts,
+    size_t curParts )
 // ---------------------------
 {
     if ( framePartition != NULL )
@@ -785,10 +802,10 @@ void Frame::displExnrFrameMenu( const bool &clear )
 
 
 // ------------------------------------------
-void Frame::selectAttribute( const int &idx )
+void Frame::selectAttribute( const size_t &idx )
 // ------------------------------------------
 {
-    if ( 0 <= idx && idx < listCtrlAttr->GetItemCount() )
+    if ( idx != NON_EXISTING && idx < listCtrlAttr->GetItemCount() )
     {
         // select idx'th item
         long item = -1;
@@ -807,10 +824,10 @@ void Frame::selectAttribute( const int &idx )
 
 
 // ------------------------------------------
-void Frame::selectDomainVal( const int &idx )
+void Frame::selectDomainVal( const size_t &idx )
 // ------------------------------------------
 {
-    if ( 0 <= idx && idx < listCtrlDomain->GetItemCount() )
+    if ( idx != NON_EXISTING && idx < listCtrlDomain->GetItemCount() )
     {
         // select idx'th item
         long item = -1;
@@ -868,7 +885,7 @@ void Frame::handleDragDrop(
     {
         int idxAttr = -1;
         int idxDOF  = -1;
-        int idDOF   = -1;
+        size_t idDOF   = NON_EXISTING;
         int flag = wxLIST_HITTEST_ONITEM;
 
         idxAttr = data[0];
@@ -1100,7 +1117,7 @@ void Frame::initFrame()
 // --------------------
 {
     wxSize maximum_size = wxGetClientDisplayRect().GetSize();
-    size_t hCur;
+    int hCur;
 
     // set min and max size
     SetSizeHints(
@@ -2143,9 +2160,9 @@ void Frame::initFrameSettings()
 // ----------------------------
 void Frame::initFramePartition(
     wxString attrName,
-    int minParts,
-    int maxParts,
-    int curParts )
+    size_t minParts,
+    size_t maxParts,
+    size_t curParts )
 // ----------------------------
 {
     // init frame
@@ -3311,7 +3328,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
         else if ( mediator->getClustMode() == Mediator::CLUST_CORRL_PLOT )
         {
             // get idx of last selected item
-            int attrIdx2 = -1;
+            size_t attrIdx2 = NON_EXISTING;
 
             // deselect all but second last item & get its idx
             int  selCount = listCtrlClust->GetSelectedItemCount();
@@ -3662,7 +3679,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         initFramePlot();
 
         // get idx of last selected item
-        int attrIdx = -1;
+        size_t attrIdx = NON_EXISTING;
         long item   = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
@@ -3679,8 +3696,8 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         initFramePlot();
 
         // get idx of 2 selected items
-        int attrIdx1 = -1;
-        int attrIdx2 = -1;
+        size_t attrIdx1 = NON_EXISTING;
+        size_t attrIdx2 = NON_EXISTING;
 
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
@@ -3704,7 +3721,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         initFramePlot();
 
         // get idcs of selected (multiple) items
-        vector< int > indcs;
+        vector< size_t > indcs;
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
@@ -3725,7 +3742,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     else if ( e.GetId() == ID_MENU_ITEM_ATTR_DUPL )
     {
         // get idcs of selected (multiple) items
-        vector< int > indcs;
+        vector< size_t > indcs;
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
@@ -3783,7 +3800,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     else if ( e.GetId() == ID_MENU_ITEM_ATTR_DELETE )
     {
         // get idcs of selected (multiple) items
-        vector< int > indcs;
+        vector< size_t > indcs;
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
@@ -3825,7 +3842,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     else if ( e.GetId() == ID_MENU_ITEM_ATTR_CLUST )
     {
         // get idcs of selected (multiple) items
-        vector< int > indcs;
+        vector< size_t > indcs;
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
@@ -3846,7 +3863,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     else if ( e.GetId() == ID_MENU_ITEM_ATTR_TRACE )
     {
         // get idcs of selected (multiple) items
-        vector< int > indcs;
+        vector< size_t > indcs;
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
@@ -4021,7 +4038,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     else if ( e.GetId() == ID_MENU_ITEM_DOF_UNLINK )
     {
         long item   = -1;
-        int  idDOF  = -1;
+        size_t  idDOF  = NON_EXISTING;
 
         item = listCtrlDOF->GetNextItem(
             item,
@@ -4139,20 +4156,20 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     }
     else if ( e.GetId() == ID_MENU_ITEM_SHOW_NOTE )
     {
-    	int shapeId;
+    	size_t shapeId;
     	string msg;
     	mediator->handleAddText( msg, shapeId );
-    	if( shapeId > -1 )
+    	if( shapeId != NON_EXISTING )
     	{
     		handleNote( shapeId, msg );
     	}
     }
     else if ( e.GetId() == ID_MENU_ITEM_TEXT_SIZE )
     {
-    	int shapeId;
-    	int textSize;
+    	size_t shapeId;
+    	size_t textSize;
     	mediator->handleTextSize( textSize, shapeId );
-    	if( shapeId > -1 )
+    	if( shapeId != NON_EXISTING )
     	{
     		handleTextSize( shapeId, textSize );
     	}
@@ -4160,7 +4177,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     else
     {
     	long item   = -1;
-        int  idDOF  = -1;
+        size_t  idDOF  = NON_EXISTING;
         int idxAttr = -1;
 
         if(addAttributeMenu != NULL)
@@ -4232,12 +4249,12 @@ void Frame::onClusterMenu( wxCommandEvent &e )
 {
 	if( clustMenu != NULL )
 	{
-		int i;
-		int itemCount = clustMenu->GetMenuItemCount();
+		size_t i;
+		size_t itemCount = clustMenu->GetMenuItemCount();
 		if ( e.GetId() == ID_MENU_ITEM_CLUSTER )
 		{
 			// get idcs of selected (multiple) items
-        		vector< int > indcs;
+        		vector< size_t > indcs;
 			for( i = 0; i < itemCount; i++ )
 			{
 				wxMenuItem* item = clustMenu->FindItemByPosition( i );
@@ -4328,7 +4345,7 @@ void Frame::onButton( wxCommandEvent &e )
     if ( e.GetId() == ID_BUTTON_CLUST_ATTR )
     {
         // get idcs of selected (multiple) items
-        vector< int > indcs;
+        vector< size_t > indcs;
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
@@ -4349,7 +4366,7 @@ void Frame::onButton( wxCommandEvent &e )
     if ( e.GetId() == ID_BUTTON_TRACE_ATTR )
     {
         // get idcs of selected (multiple) items
-        vector< int > indcs;
+        vector< size_t > indcs;
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
@@ -4439,7 +4456,7 @@ void Frame::onButton( wxCommandEvent &e )
             initFramePlot();
 
             // get idcs of selected (multiple) items
-            vector< int > indcs;
+            vector< size_t > indcs;
             long item = -1;
             item = listCtrlClust->GetNextItem( item,
                 wxLIST_NEXT_ALL,
@@ -4487,7 +4504,7 @@ void Frame::onButton( wxCommandEvent &e )
 	{
 		double size;
 		textSizeBox->GetValue().ToDouble( &size );
-		int textSize = (int) size;
+		size_t textSize = (size_t) size;
 		if( textSize < 8 ) // Font size can be between 8 and 40
 		{
 			wxMessageBox(wxT("Entered value should be an integer bigger than or equal to 8"),wxT("Font size is too small"), wxOK | wxICON_INFORMATION, this);

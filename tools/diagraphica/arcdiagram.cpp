@@ -59,7 +59,7 @@ ArcDiagram::ArcDiagram(
     : Visualizer( m, g, c )
 // ------------------------
 {
-    idxInitStLeaves    = -1;
+    idxInitStLeaves    = NON_EXISTING;
 
     diagram = NULL;
 
@@ -188,7 +188,7 @@ double ArcDiagram::getTrspBundles()
 
 
 // -------------------------------------------------
-void ArcDiagram::getAttrsTree( vector< int > &idcs )
+void ArcDiagram::getAttrsTree( vector< size_t > &idcs )
 // -------------------------------------------------
 {
     idcs.clear();
@@ -304,7 +304,7 @@ void ArcDiagram::setTrspBundles( const double &trsp )
 
 
 // ------------------------------------------------------
-void ArcDiagram::setAttrsTree( const vector< int > idcs )
+void ArcDiagram::setAttrsTree( const vector< size_t > idcs )
 // ------------------------------------------------------
 {
     attrsTree.clear();
@@ -339,11 +339,11 @@ void ArcDiagram::hideAllDiagrams()
 
 // -----------------------
 void ArcDiagram::markLeaf(
-    const int &leafIdx,
+    const size_t &leafIdx,
     ColorRGB &col )
 // -----------------------
 {
-    map< int, vector< ColorRGB > >::iterator it;
+    map< size_t, vector< ColorRGB > >::iterator it;
     it = markLeaves.find( leafIdx );
     if ( it != markLeaves.end() )
         it->second.push_back( col );
@@ -351,7 +351,7 @@ void ArcDiagram::markLeaf(
     {
         vector< ColorRGB > v;
         v.push_back( col );
-        markLeaves.insert( pair< int, vector< ColorRGB > >( leafIdx, v ) );
+        markLeaves.insert( pair< size_t, vector< ColorRGB > >( leafIdx, v ) );
     }
 }
 
@@ -1333,8 +1333,8 @@ void ArcDiagram::drawMarkedLeaves( const bool &inSelectMode )
 
             for ( size_t i = 0; i < posLeaves.size(); ++i )
             {
-                map< int, vector< ColorRGB > >::iterator it;
-                it = markLeaves.find((int) i );
+                map< size_t, vector< ColorRGB > >::iterator it;
+                it = markLeaves.find( i );
 
                 if ( it != markLeaves.end() )
                 {
@@ -1407,7 +1407,7 @@ void ArcDiagram::handleMouseLftUpEvent(
     // redraw in render mode
     visualize( false );
 
-    dragIdxDgrm = -1;
+    dragIdxDgrm = NON_EXISTING;
 }
 
 
@@ -1512,8 +1512,8 @@ void ArcDiagram::clear()
 
 // ------------------------
 void ArcDiagram::calcColor(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &col )
 // ------------------------
 {
@@ -1636,9 +1636,9 @@ void ArcDiagram::calcSettingsLeaves()
         idxInitStLeaves = graph->getNode(0)->getCluster()->getIndex();
     }
 
-    prevFrameIdxClust = -1;
-    currFrameIdxClust = -1;
-    nextFrameIdxClust = -1;
+    prevFrameIdxClust = NON_EXISTING;
+    currFrameIdxClust = NON_EXISTING;
+    nextFrameIdxClust = NON_EXISTING;
 }
 
 
@@ -1667,8 +1667,8 @@ void ArcDiagram::calcSettingsBundles()
         {
         for ( int i = 0; i < graph->getSizeBundles(); ++i )
         {
-            int idxFr = graph->getBundle(i)->getInCluster()->getIndex();
-            int idxTo = graph->getBundle(i)->getOutCluster()->getIndex();
+            size_t idxFr = graph->getBundle(i)->getInCluster()->getIndex();
+            size_t idxTo = graph->getBundle(i)->getOutCluster()->getIndex();
             Position2D pos;
 
             // position
@@ -1771,23 +1771,23 @@ void ArcDiagram::calcSettingsTree()
 // --------------------------------
 void ArcDiagram::calcPositionsTree(
     Cluster* c,
-    const int &maxLvl,
+    const size_t &maxLvl,
     const double &itvHgt )
 // --------------------------------
 {
-    for ( int i = 0; i < c->getSizeChildren(); ++i )
+    for ( size_t i = 0; i < c->getSizeChildren(); ++i )
         calcPositionsTree( c->getChild(i), maxLvl, itvHgt );
 
     Position2D topLft;
     Position2D botRgt;
-    int        lvl = c->getSizeCoord()-1;
+    ssize_t        lvl = c->getSizeCoord()-1;
 
-    vector< int > v;
+    vector< size_t > v;
     c->getCoord( v );
 
     if ( c->getSizeChildren() != 0 )
     {
-        int    numChildren = c->getSizeChildren();
+        size_t    numChildren = c->getSizeChildren();
 
         topLft.x = 0.5*( posTreeTopLft[lvl+1][posTreeTopLft[lvl+1].size()-numChildren].x
                       +  posTreeBotRgt[lvl+1][posTreeBotRgt[lvl+1].size()-numChildren].x );
@@ -1848,7 +1848,7 @@ void ArcDiagram::calcSettingsBarTree()
         clearSettingsBarTree();
 
         // calc max depth of clustering tree
-        int maxLvl = 0;
+        size_t maxLvl = 0;
         {
         for ( int i = 0; i < graph->getSizeLeaves(); ++i )
         {
@@ -1886,11 +1886,11 @@ void ArcDiagram::calcPositionsBarTree(
 
     Position2D topLft;
     Position2D botRgt;
-    int        lvl = c->getSizeCoord()-1;
+    ssize_t        lvl = c->getSizeCoord()-1;
 
     if ( c->getSizeChildren() != 0 )
     {
-        int    numChildren = c->getSizeChildren();
+        size_t    numChildren = c->getSizeChildren();
 
         topLft.x = 0.5*( posBarTreeTopLft[lvl+1][posBarTreeTopLft[lvl+1].size()-numChildren].x
                       +  posBarTreeBotRgt[lvl+1][posBarTreeBotRgt[lvl+1].size()-numChildren].x );
@@ -1939,9 +1939,9 @@ void ArcDiagram::calcSettingsDiagram()
         p.y = 0;
         posDgrm.push_back( p );
     }
-    dragIdxDgrm      = -1;
-    animIdxDgrm      = -1;
-    currIdxDgrm      = -1;
+    dragIdxDgrm      = NON_EXISTING;
+    animIdxDgrm      = NON_EXISTING;
+    currIdxDgrm      = NON_EXISTING;
 }
 
 
@@ -2014,7 +2014,7 @@ void ArcDiagram::clearSettingsLeaves()
 // -----------------------------------
 {
     posLeaves.clear();
-    idxInitStLeaves = -1;
+    idxInitStLeaves = NON_EXISTING;
 }
 
 
@@ -2134,7 +2134,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
     	{
         	if ( currIdxDgrm != std::numeric_limits< size_t >::max() )
         	{
-			currIdxDgrm = -1;
+			currIdxDgrm = NON_EXISTING;
             		updateMarkBundles();
             		mediator->handleUnshowFrame();
         	}
@@ -2145,13 +2145,13 @@ void ArcDiagram::handleHits( const vector< int > &ids )
         	// interact with bundles
         	if ( ids[1] == ID_BUNDLES )
         	{
-            		currIdxDgrm = -1;
+            		currIdxDgrm = NON_EXISTING;
            		handleHoverBundle( ids[2] );
         	}
         	// interact with tree nodes
         	else if ( ids[1] == ID_TREE_NODE )
         	{
-            		currIdxDgrm = -1;
+            		currIdxDgrm = NON_EXISTING;
             		updateMarkBundles();
             		mediator->handleUnshowFrame();
 
@@ -2206,7 +2206,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
 			}
             		else
             		{
-                		currIdxDgrm = -1;
+                		currIdxDgrm = NON_EXISTING;
                 		updateMarkBundles();
                 		mediator->handleUnshowFrame();
 
@@ -2216,7 +2216,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
         	// interact with bar tree
         	else if ( ids[1] == ID_BAR_TREE )
         	{
-			currIdxDgrm = -1;
+			currIdxDgrm = NON_EXISTING;
 			updateMarkBundles();
 			mediator->handleUnshowFrame();
 
@@ -2248,7 +2248,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
 						showMenu = true;
 
 						// no mouseup event is generated reset manually
-						dragIdxDgrm = -1;
+						dragIdxDgrm = NON_EXISTING;
 						mouseButton = MSE_BUTTON_UP;
 						mouseSide   = MSE_SIDE_LFT;
 						mouseClick  = MSE_CLICK_SINGLE;
@@ -2277,7 +2277,7 @@ void ArcDiagram::handleHits( const vector< int > &ids )
 				showMenu = true;
 
 				// no mouseup event is generated reset manually
-				dragIdxDgrm = -1;
+				dragIdxDgrm = NON_EXISTING;
 				mouseButton = MSE_BUTTON_UP;
 				mouseSide   = MSE_SIDE_RGT;
 				mouseClick  = MSE_CLICK_SINGLE;
@@ -2367,7 +2367,7 @@ void ArcDiagram::handleHoverBarTree(
         Cluster* clust;
 
         clust = mapPosToClust[i][j];
-        msg = Utils::intToStr( clust->getSizeDescNodes() );
+        msg = Utils::intToStr( (int) clust->getSizeDescNodes() );
         canvas->showToolTip( msg );
 
         clust = NULL;
@@ -2376,7 +2376,7 @@ void ArcDiagram::handleHoverBarTree(
 
 
 // -----------------------------------------------------
-void ArcDiagram::handleShowDiagram( const int &dgrmIdx )
+void ArcDiagram::handleShowDiagram( const size_t &dgrmIdx )
 // -----------------------------------------------------
 {
 	// diagram doesn't exist, add it
@@ -2389,7 +2389,7 @@ void ArcDiagram::handleShowDiagram( const int &dgrmIdx )
 	// diagram exists, remove it
 	{
         	hideDiagram( dgrmIdx );
-        	currIdxDgrm = -1;
+        	currIdxDgrm = NON_EXISTING;
         	updateMarkBundles();
         	mediator->handleUnshowFrame();
 	}
@@ -2529,7 +2529,7 @@ void ArcDiagram::handleNextDiagram( const size_t &dgrmIdx )
 
 
 // -----------------------------------------------
-void ArcDiagram::showDiagram( const int &dgrmIdx )
+void ArcDiagram::showDiagram( const size_t &dgrmIdx )
 // -----------------------------------------------
 {
     Cluster* clust = graph->getLeaf( dgrmIdx );
@@ -2642,7 +2642,7 @@ void ArcDiagram::hideDiagram( const size_t &dgrmIdx )
         {
             if ( timerAnim->IsRunning() )
                 timerAnim->Stop();
-            animIdxDgrm      = -1;
+            animIdxDgrm      = NON_EXISTING;
         }
 
         // clear position

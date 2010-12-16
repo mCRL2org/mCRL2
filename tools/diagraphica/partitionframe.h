@@ -29,9 +29,9 @@ public:
         wxPoint position,
         wxSize size,
         wxString attrName,
-        int minParts,
-        int maxParts,
-        int curParts );
+        size_t minParts,
+        size_t maxParts,
+        size_t curParts );
     virtual ~PartitionFrame();
 
     // -- set functions ---------------------------------------------
@@ -51,14 +51,14 @@ private:
     // -- GUI initialization ----------------------------------------
     void initFrame(
         wxString attrName,
-        int minParts,
-        int maxParts,
-        int curParts );
+        size_t minParts,
+        size_t maxParts,
+        size_t curParts );
     void initWidgets(
         wxString attrName,
-        int minParts,
-        int maxParts,
-        int curParts );
+        size_t minParts,
+        size_t maxParts,
+        size_t curParts );
     void initCanvas();
     void initButtons();
 

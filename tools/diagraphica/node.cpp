@@ -20,7 +20,7 @@
 using namespace std;
 
 // -------------------------
-Node::Node( const int &idx )
+Node::Node( const size_t &idx )
 // -------------------------
 {
     index   = idx;
@@ -30,7 +30,7 @@ Node::Node( const int &idx )
 
 // ---------------------------
 Node::Node(
-    const int &idx,
+    const size_t &idx,
     const vector< double > &tpl )
 // ---------------------------
 {
@@ -105,7 +105,7 @@ void Node::moveTupleVal(
 
 
 // --------------------------------------------------
-void Node::moveTupleVals( map< int, int > &idcsFrTo )
+void Node::moveTupleVals( map< size_t , size_t > &idcsFrTo )
 // --------------------------------------------------
 {
     if ( idcsFrTo.size() == tuple.size() )
@@ -143,7 +143,7 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
 
 // --------------------
 void Node::addTupleVal(
-    const int &idx,
+    const size_t &idx,
     const double &val )
 // --------------------
 {
@@ -154,7 +154,7 @@ void Node::addTupleVal(
 
 
 // -------------------------------------
-void Node::delTupleVal( const int &idx )
+void Node::delTupleVal( const size_t &idx )
 // -------------------------------------
 {
     tuple.erase( tuple.begin() + idx );
@@ -207,7 +207,7 @@ void Node::setCluster( Cluster* c )
 
 
 // -----------------
-int Node::getIndex()
+size_t Node::getIndex()
 // -----------------
 {
     return index;
@@ -215,7 +215,7 @@ int Node::getIndex()
 
 
 // ---------------------
-int Node::getSizeTuple()
+size_t Node::getSizeTuple()
 // ---------------------
 {
     return tuple.size();
@@ -234,7 +234,7 @@ double Node::getTupleVal( const size_t &idx )
 
 
 // -----------------------
-int Node::getSizeInEdges()
+size_t Node::getSizeInEdges()
 // -----------------------
 {
 	return inEdges.size();
@@ -253,7 +253,7 @@ Edge* Node::getInEdge( const size_t &idx )
 
 
 // ------------------------
-int Node::getSizeOutEdges()
+size_t Node::getSizeOutEdges()
 // ------------------------
 {
 	return outEdges.size();

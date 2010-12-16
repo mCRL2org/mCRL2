@@ -74,32 +74,33 @@ public:
 	void initProgress(
 	const std::string &title,
 	const std::string &msg,
-	const int &max );
-	void updateProgress( const int &val );
+	const size_t &max );
+	void updateProgress( const size_t &val );
 	void closeProgress();
 
 	void setOutputText( const std::string &msg );
 	void setOutputText( const int &msg );
 	void appOutputText( const std::string &msg );
 	void appOutputText( const int &msg );
+	void appOutputText( const size_t &msg );
 
 	void getColor( ColorRGB &col );
 	void handleCloseFrame( PopupFrame* f );
 
 	// -- interaction with attributes & domains ---------------------
-	void handleAttributeSel( const int &idx );
+	void handleAttributeSel( const size_t &idx );
 	void handleMoveAttr(
-	const int &idxFr,
-	const int &idxTo );
-	void handleAttributeDuplicate( const std::vector< int > &indcs );
+	const size_t &idxFr,
+	const size_t &idxTo );
+	void handleAttributeDuplicate( const std::vector< size_t > &indcs );
 	/*
 	void handleAttributeDelete( const std::vector< int > &indcs );
 	*/
-	void handleAttributeDelete( const int &idx );
+	void handleAttributeDelete( const size_t &idx );
 	void handleAttributeRename(
-	const int &idx,
+	const size_t &idx,
 	const std::string &name );
-	void handleAttributeCluster( const std::vector< int > &indcs );
+	void handleAttributeCluster( const std::vector< size_t > &indcs );
 
 	// -*- //
 	void handleAttrPartition( const int &attrIdx );
@@ -110,10 +111,10 @@ public:
 	void handleAttrPartitionCloseFrame();
 
 	void getAttrValues(
-	const int &attrIdx,
+	const size_t &attrIdx,
 	std::vector< double > &vals );
 	void getAttrValues(
-	const int &attrIdx,
+	const size_t &attrIdx,
 	std::set< double > &vals );
 	// -*- //
 
@@ -128,17 +129,17 @@ public:
 	void handleDomainUngroup( const int &attrIdx );
 
 	void getAttributeNames(
-	const std::vector< int > &indcs,
+	const std::vector< size_t > &indcs,
 	std::vector< wxString > &names );
-	int getAttributeType( const int &idx );
-	int getAttrSizeCurDomain( const int &idx );
+	size_t getAttributeType( const size_t &idx );
+	size_t getAttrSizeCurDomain( const size_t &idx );
 
 	// -- attribute plots -------------------------------------------
-	void handleAttributePlot( const int &idx );
+	void handleAttributePlot( const size_t &idx );
 	void handleAttributePlot(
-	const int &idx1,
-	const int &idx2 );
-	void handleAttributePlot( const std::vector< int > &indcs );
+	const size_t &idx1,
+	const size_t &idx2 );
+	void handleAttributePlot( const std::vector< size_t > &indcs );
 	void handlePlotFrameDestroy();
 
 	void handleEditClust( Cluster* c );
@@ -147,7 +148,7 @@ public:
 	void handleClustPlotFrameDisplay(
 	const int &idx1,
 	const int &idx2 );
-	void handleClustPlotFrameDisplay( const std::vector< int > &indcs );
+	void handleClustPlotFrameDisplay( const std::vector< size_t > &indcs );
 	void setClustMode( const int &m );
 	int getClustMode();
 
@@ -163,7 +164,7 @@ public:
 	// -- diagram editor --------------------------------------------
 
 	void* getGraph();
-	void handleNote( const int &shapeId, const std::string &msg );
+	void handleNote( const size_t &shapeId, const std::string &msg );
 	void handleEditModeSelect();
 	void handleEditModeNote();
 	void handleEditModeDOF( Colleague* c );
@@ -189,10 +190,10 @@ public:
 	const bool &editDOF,
 	const int  &checkedItem );
 	void handleShowVariable( const std::string &variable, const int &variableId );
-	void handleShowNote( const std::string &variable, const int &shapeId );
-	void handleAddText( std::string &variable, int &shapeId );
-	void handleTextSize( int &textSize, int &shapeId );
-	void handleSetTextSize( int &textSize, int &shapeId );
+	void handleShowNote( const std::string &variable, const size_t &shapeId );
+	void handleAddText( std::string &variable, size_t &shapeId );
+	void handleTextSize( size_t &textSize, size_t &shapeId );
+	void handleSetTextSize( size_t &textSize, size_t &shapeId );
 	void handleCutShape();
 	void handleCopyShape();
 	void handlePasteShape();
@@ -203,13 +204,13 @@ public:
 	void handleSendBackwardShape();
 	void handleEditDOFShape();
 	void handleSetDOF( const int &attrIdx );
-	void handleCheckedVariable( const int &idDOF, const int &variableId );
+	void handleCheckedVariable( const size_t &idDOF, const int &variableId );
 
 	void handleEditDOF(
-	const std::vector< int > &degsOfFrdmIds,
+	const std::vector< size_t > &degsOfFrdmIds,
 	const std::vector< std::string > &degsOfFrdm,
-	const std::vector< int > &attrIndcs,
-	const int &selIdx );
+	const std::vector< size_t > &attrIndcs,
+	const size_t &selIdx );
 	void handleDOFSel( const int &DOFIdx );
 
 	void setDOFColorSelected();
@@ -218,7 +219,7 @@ public:
 	void handleSetDOFTextStatus(
 	const int &DOFIdx,
 	const int &status );
-	int handleGetDOFTextStatus( const int &DOFIdx );
+	size_t handleGetDOFTextStatus( const int &DOFIdx );
 
 	void handleDOFColActivate();
 	void handleDOFColDeactivate();
@@ -226,7 +227,7 @@ public:
 	const double &hue,
 	const double &y );
 	void handleDOFColUpdate(
-	const int &idx,
+	const size_t &idx,
 	const double &hue,
 	const double &y );
 	void handleDOFColClear(
@@ -251,9 +252,9 @@ public:
 	const std::vector< double > &y );
 
 	void handleLinkDOFAttr(
-	const int DOFIdx,
+	const size_t DOFIdx,
 	const int attrIdx );
-	void handleUnlinkDOFAttr( const int DOFIdx );
+	void handleUnlinkDOFAttr( const size_t DOFIdx );
 	void handleDOFFrameDestroy();
 	void handleDOFDeselect();
 
@@ -262,7 +263,7 @@ public:
 	Cluster* currFrame,
 	const std::vector< Attribute* > &attrs );
 
-	void initTimeSeries( const std::vector< int > attrIdcs );
+	void initTimeSeries( const std::vector< size_t > attrIdcs );
 	void markTimeSeries(
 	Colleague* sender,
 	Cluster* currFrame );
@@ -413,6 +414,7 @@ public:
 	// -- overloaded operators --------------------------------------
 	void operator<<( const std::string &msg );
 	void operator<<( const int &msg );
+	void operator<<( const size_t &msg );
 
 protected:
     // -- protected functions inhereted from Mediator ---------------
@@ -421,8 +423,8 @@ protected:
     void clearColleagues();
 
     void displAttributes();
-    void displAttributes( const int &selAttrIdx );
-    void displAttrDomain( const int &attrIdx );
+    void displAttributes( const size_t &selAttrIdx );
+    void displAttrDomain( const size_t &attrIdx );
     void clearAttrDomain();
 
 private:

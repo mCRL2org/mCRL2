@@ -25,9 +25,9 @@ PartitionFrame::PartitionFrame(
     wxPoint position,
     wxSize size,
     wxString attrName,
-    int minParts,
-    int maxParts,
-    int curParts )
+    size_t minParts,
+    size_t maxParts,
+    size_t curParts )
     : PopupFrame(
         m,
         parent,
@@ -116,9 +116,9 @@ void PartitionFrame::onSpinCtrlText( wxCommandEvent &e )
 // ----------------------------
 void PartitionFrame::initFrame(
     wxString attrName,
-    int minParts,
-    int maxParts,
-    int curParts )
+    size_t minParts,
+    size_t maxParts,
+    size_t curParts )
 // ----------------------------
 {
     sizerFrame = new wxBoxSizer( wxVERTICAL );
@@ -146,9 +146,9 @@ void PartitionFrame::initFrame(
 // ------------------------------
 void PartitionFrame::initWidgets(
     wxString attrName,
-    int minParts,
-    int maxParts,
-    int curParts )
+    size_t minParts,
+    size_t maxParts,
+    size_t curParts )
 // ------------------------------
 {
     // init static box
@@ -189,13 +189,13 @@ void PartitionFrame::initWidgets(
     spinCtrlNumber = new wxSpinCtrl(
         panelFrame,
         ID_SPIN_CTRL_NUMBER,
-        wxString( Utils::intToStr( curParts ).c_str(), wxConvUTF8 ),
+        wxString( Utils::intToStr( (int) curParts ).c_str(), wxConvUTF8 ),
         wxDefaultPosition,
         wxDefaultSize,
         wxSP_ARROW_KEYS,
-        minParts,
-        maxParts,
-        curParts );
+        (int) minParts,
+        (int) maxParts,
+        (int) curParts );
     lblSizer->Add( spinCtrlNumber, 0, wxALL, 5 );
 
     // method

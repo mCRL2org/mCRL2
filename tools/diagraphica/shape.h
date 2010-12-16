@@ -26,12 +26,12 @@ class Shape : public Colleague
 public:
     // -- constructors and destructor -------------------------------
     Shape(
-        Mediator* m,      const int &idx,
+        Mediator* m,      const size_t &idx,
         const double &xC, const double &yC,
         const double &xD, const double &yD,
         const double &aC, const int    &typ);
     Shape(
-        Mediator* m,      const int &idx,
+        Mediator* m,      const size_t &idx,
         const double &xC, const double &yC,
         const double &xD, const double &yD,
         const double &xBegin, const double &yBegin,
@@ -41,12 +41,12 @@ public:
     virtual ~Shape();
 
     // -- set functions ---------------------------------------------
-    void setIndex( const int &idx );
+    void setIndex( const size_t &idx );
     void setVariable( const std::string &msg );
     void setVariableName( const std::string &msg );
     void setCheckedId( const int &id );
     void setNote( const std::string &msg );
-    void setTextSize( const int &size );
+    void setTextSize( const size_t &size );
 
     void setCenter( const double &xC, const double &yC );
     void setDFC( const double &xD, const double &yD );
@@ -54,12 +54,12 @@ public:
 
     void setHinge( const double &xH, const double &yH );
     void addDOFColYValue( const double &y );
-    void setDOFColYValue( const int &idx, const double &y );
-    void clearDOFColYValue( const int &idx );
+    void setDOFColYValue( const size_t &idx, const double &y );
+    void clearDOFColYValue( const size_t &idx );
     void clearDOFColYValues();
     void addDOFOpaYValue( const double &y );
-    void setDOFOpaYValue( const int &idx, const double &y );
-    void clearDOFOpaYValue( const int &idx );
+    void setDOFOpaYValue( const size_t &idx, const double &y );
+    void clearDOFOpaYValue( const size_t &idx );
     void clearDOFOpaYValues();
 
     void setType( const int &typ );
@@ -102,12 +102,12 @@ public:
     void setTextures( const bool &generated);
 
     // -- get functions ---------------------------------------------
-    int getIndex();
+    size_t getIndex();
     int getCheckedId();
     std::string getNote();
     std::string getVariable();
     std::string getVariableName();
-    int getTextSize();
+    size_t getTextSize();
 
     void getCenter( double &x, double &y );
     double getXCtr();
@@ -264,7 +264,7 @@ protected:
 
     // -- data members ----------------------------------------------
 
-    int index;
+    size_t index;
 
     // geometry
     double xCtr,   yCtr;   // center,             [-1,1]
@@ -274,7 +274,7 @@ protected:
     // properties
     int      type;      // type of shape
     int      mode;      // drawing mode
-    int	     szeTxt;	// font size
+    size_t   szeTxt;	// font size
     double   linWth;    // line width,      pix
     ColorRGB colLin;    // line color
     ColorRGB colFil;    // fill color

@@ -39,7 +39,7 @@ ColorRGB Shape::colTxt = { 0.0, 0.0, 0.0, 1.0 };
 
 // -------------------------------------
 Shape::Shape(
-    Mediator* m,      const int &idx,
+    Mediator* m,      const size_t &idx,
     const double &xC, const double &yC,
     const double &xD, const double &yD,
     const double &aC, const int &typ)
@@ -137,7 +137,7 @@ Shape::~Shape()
 
 
 // -----------------------------------
-void Shape::setIndex( const int &idx )
+void Shape::setIndex( const size_t &idx )
 // -----------------------------------
 {
     index = idx;
@@ -184,7 +184,7 @@ void Shape::setNote( const string &msg )
 
 
 // ------------------------------------------
-void Shape::setTextSize( const int &size )
+void Shape::setTextSize( const size_t &size )
 // ------------------------------------------
 {
     szeTxt = size;
@@ -252,19 +252,19 @@ void Shape::addDOFColYValue( const double &y )
 
 
 // -----------------------------------------------------------
-void Shape::setDOFColYValue( const int &idx, const double &y )
+void Shape::setDOFColYValue( const size_t &idx, const double &y )
 // -----------------------------------------------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < colYValues.size() )
+    if ( idx != NON_EXISTING && static_cast <size_t> (idx) < colYValues.size() )
         colYValues[idx] = y;
 }
 
 
 // --------------------------------------------
-void Shape::clearDOFColYValue( const int &idx )
+void Shape::clearDOFColYValue( const size_t &idx )
 // --------------------------------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < colYValues.size() )
+    if ( idx != NON_EXISTING && static_cast <size_t> (idx) < colYValues.size() )
         colYValues.erase( colYValues.begin() + idx );
 }
 
@@ -278,19 +278,19 @@ void Shape::addDOFOpaYValue( const double &y )
 
 
 // -----------------------------------------------------------
-void Shape::setDOFOpaYValue( const int &idx, const double &y )
+void Shape::setDOFOpaYValue( const size_t &idx, const double &y )
 // -----------------------------------------------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < opaYValues.size() )
+    if ( idx != NON_EXISTING && static_cast <size_t> (idx) < opaYValues.size() )
         opaYValues[idx] = y;
 }
 
 
 // --------------------------------------------
-void Shape::clearDOFOpaYValue( const int &idx )
+void Shape::clearDOFOpaYValue( const size_t &idx )
 // --------------------------------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < opaYValues.size() )
+    if ( idx != NON_EXISTING && static_cast <size_t> (idx) < opaYValues.size() )
         opaYValues.erase( opaYValues.begin() + idx );
 }
 
@@ -559,7 +559,7 @@ void Shape::setTextures( const bool &generated)
 
 
 // ------------------
-int Shape::getIndex()
+size_t Shape::getIndex()
 // ------------------
 {
     return index;
@@ -599,7 +599,7 @@ string Shape::getVariableName()
 
 
 // ------------------
-int Shape::getTextSize()
+size_t Shape::getTextSize()
 // ------------------
 {
     return szeTxt;

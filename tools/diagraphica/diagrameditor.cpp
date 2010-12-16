@@ -43,7 +43,7 @@ DiagramEditor::DiagramEditor(
     selectedY1 = -1;
     selectedY2 = -1;
     selection = false;
-    lastSelectedShapeId = -1;
+    lastSelectedShapeId = NON_EXISTING;
 
     initMouse();
 
@@ -191,8 +191,8 @@ void DiagramEditor::setFillCol()
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT )
         {
@@ -222,8 +222,8 @@ void DiagramEditor::setLineCol()
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT )
         {
@@ -251,11 +251,11 @@ void DiagramEditor::setLineCol()
 void DiagramEditor::handleIntersection( )
 // --------------------------------------------------
 {
-	int shapeCount = diagram->getSizeShapes();
+	size_t shapeCount = diagram->getSizeShapes();
 	Shape* s = NULL;
 	if( !isAnyShapeSelected() ) // If not dragging shape, look for intersections
 	{
-		for( int i = 0; i < shapeCount; i++ )
+		for( size_t i = 0; i < shapeCount; i++ )
 		{
 			s = diagram->getShape( i );
 			double sX1 = s->getXCtr() - s->getXDFC();
@@ -312,8 +312,8 @@ bool DiagramEditor::isAnyShapeSelected()
 {
 	if(diagram != NULL)
 	{
-		int sizeShapes = diagram->getSizeShapes();
-		for ( int i = 0; i < sizeShapes; ++i )
+		size_t sizeShapes = diagram->getSizeShapes();
+		for ( size_t i = 0; i < sizeShapes; ++i )
 		{
 			if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT )
 			{
@@ -332,8 +332,8 @@ void DiagramEditor::handleDOFSel( const int &DOFIdx )
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT ||
 	     diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR ||
@@ -413,8 +413,8 @@ void DiagramEditor::handleDOFSetTextStatus(
 // ----------------------------------------
 {
     Shape* s = NULL;
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT ||
 	     diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR ||
@@ -461,8 +461,8 @@ int DiagramEditor::handleDOFGetTextStatus( const int &DOFIdx )
     int result = -1;
 
     Shape* s = NULL;
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT ||
 	     diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR ||
@@ -511,8 +511,8 @@ void DiagramEditor::handleDOFColAdd(
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT ||
 	     diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR ||
@@ -544,15 +544,15 @@ void DiagramEditor::handleDOFColAdd(
 
 // ------------------------------------
 void DiagramEditor::handleDOFColUpdate(
-    const int &idx,
+    const size_t &idx,
     const double &hue,
     const double &y )
 // ------------------------------------
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_COL )
         {
@@ -573,13 +573,13 @@ void DiagramEditor::handleDOFColUpdate(
 
 // -----------------------------------
 void DiagramEditor::handleDOFColClear(
-    const int &idx )
+    const size_t &idx )
 // -----------------------------------
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_COL )
         {
@@ -617,8 +617,8 @@ void DiagramEditor::handleDOFOpaAdd(
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT ||
 	     diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR ||
@@ -650,15 +650,15 @@ void DiagramEditor::handleDOFOpaAdd(
 
 // ------------------------------------
 void DiagramEditor::handleDOFOpaUpdate(
-    const int &idx,
+    const size_t &idx,
     const double &opa,
     const double &y )
 // ------------------------------------
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_OPA )
         {
@@ -679,13 +679,13 @@ void DiagramEditor::handleDOFOpaUpdate(
 
 // -----------------------------------
 void DiagramEditor::handleDOFOpaClear(
-    const int &idx )
+    const size_t &idx )
 // -----------------------------------
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_OPA )
         {
@@ -717,14 +717,14 @@ void DiagramEditor::handleDOFOpaClear(
 
 // --------------------------------
 void DiagramEditor::setLinkDOFAttr(
-    const int &DOFIdx,
-    const int &attrIdx )
+    const size_t &DOFIdx,
+    const size_t &attrIdx )
 // --------------------------------
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT ||
 	     diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR ||
@@ -790,13 +790,13 @@ void DiagramEditor::setLinkDOFAttr(
 
 
 // ------------------------------------------------------
-void DiagramEditor::clearLinkDOFAttr( const int &DOFIdx )
+void DiagramEditor::clearLinkDOFAttr( const size_t &DOFIdx )
 // ------------------------------------------------------
 {
     Shape* s = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         if ( diagram->getShape( i )->getMode() == Shape::MODE_EDIT ||
 	     diagram->getShape( i )->getMode() == Shape::MODE_EDT_DOF_XCTR ||
@@ -852,15 +852,15 @@ void DiagramEditor::clearLinkDOFAttr( const int &DOFIdx )
 
 
 // -------------------------------------------------------
-void DiagramEditor::clearLinkAttrDOF( const int &attrIdx )
+void DiagramEditor::clearLinkAttrDOF( const size_t &attrIdx )
 // -------------------------------------------------------
 {
     Shape* s        = NULL;
     DOF* dof        = NULL;
     Attribute* attr = NULL;
 
-    int sizeShapes = diagram->getSizeShapes();
-    for ( int i = 0; i < sizeShapes; ++i )
+    size_t sizeShapes = diagram->getSizeShapes();
+    for ( size_t i = 0; i < sizeShapes; ++i )
     {
         s = diagram->getShape( i );
 
@@ -1042,8 +1042,8 @@ void DiagramEditor::reGenText()
 {
 	Shape* s        = NULL;
 
-	int sizeShapes = diagram->getSizeShapes();
-	for ( int i = 0; i < sizeShapes; ++i )
+	size_t sizeShapes = diagram->getSizeShapes();
+	for ( size_t i = 0; i < sizeShapes; ++i )
 	{
 		s = diagram->getShape( i );
 		s->setTextures( false );
@@ -1277,7 +1277,7 @@ void DiagramEditor::handleHits( const vector< int > &ids )
     // only diagram was hit
     if ( ids.size() == 1 )
     {
-	lastSelectedShapeId = -1;
+	lastSelectedShapeId = NON_EXISTING;
         handleHitDiagramOnly();
     }
     // shape was hit
@@ -1354,7 +1354,7 @@ void DiagramEditor::handleHitDiagramOnly()
 void DiagramEditor::handleHitShape( const int &shapeIdx )
 // ------------------------------------------------------
 {
-    int sizeShapes = 0;
+    size_t sizeShapes = 0;
     if ( diagram != NULL )
         sizeShapes = diagram->getSizeShapes();
 
@@ -1450,7 +1450,7 @@ void DiagramEditor::handleHitShapeHandle(
     const int &handleId )
 // --------------------------------------
 {
-    int sizeShapes = 0;
+    size_t sizeShapes = 0;
     if ( diagram != NULL )
         sizeShapes = diagram->getSizeShapes();
 
@@ -1541,7 +1541,7 @@ void DiagramEditor::handleHitShapeHandle(
 void DiagramEditor::handleDrag()
 // -----------------------------
 {
-    int sizeShapes = 0;
+    size_t sizeShapes = 0;
     if ( diagram != NULL )
         sizeShapes = diagram->getSizeShapes();
 
@@ -1656,12 +1656,12 @@ void DiagramEditor::handleShowVariable( const string &variable, const int &varia
 // ----------------------------
 {
 	Shape* selectedShape = NULL;
-	if( lastSelectedShapeId > -1 )
+	if( lastSelectedShapeId != NON_EXISTING )
 	{
 		selectedShape = diagram->getShape( lastSelectedShapeId );
 		selectedShape->setCheckedId( variableId );
 		string variableName = variable;
-		int i = variable.find(":",0); // for getting variable's name
+		size_t i = variable.find(":",0); // for getting variable's name
 		variableName = variable.substr( 0, i );
 		i++;
 		string variableValue = variable;
@@ -1677,7 +1677,7 @@ void DiagramEditor::handleShowVariable( const string &variable, const int &varia
 
 
 // ----------------------------
-void DiagramEditor::handleShowNote( const string &variable, const int &shapeId )
+void DiagramEditor::handleShowNote( const string &variable, const size_t &shapeId )
 // ----------------------------
 {
 	Shape* selectedShape = NULL;
@@ -1694,7 +1694,7 @@ void DiagramEditor::handleShowNote( const string &variable, const int &shapeId )
 
 
 // ----------------------------
-void DiagramEditor::handleAddText( string &variable, int &shapeId )
+void DiagramEditor::handleAddText( string &variable, size_t &shapeId )
 // ----------------------------
 {
 	Shape* selectedShape = NULL;
@@ -1706,7 +1706,7 @@ void DiagramEditor::handleAddText( string &variable, int &shapeId )
 
 
 // ----------------------------
-void DiagramEditor::handleTextSize( int &textSize, int &shapeId )
+void DiagramEditor::handleTextSize( size_t &textSize, size_t &shapeId )
 // ----------------------------
 {
 	Shape* selectedShape = NULL;
@@ -1721,7 +1721,7 @@ void DiagramEditor::handleTextSize( int &textSize, int &shapeId )
 
 
 // ----------------------------
-void DiagramEditor::handleSetTextSize( int &textSize, int &shapeId )
+void DiagramEditor::handleSetTextSize( size_t &textSize, size_t &shapeId )
 // ----------------------------
 {
 
@@ -1800,8 +1800,8 @@ void DiagramEditor::handleCopy()
 void DiagramEditor::clearClipBoard()
 // ------------------------------
 {
-	int size = clipBoardList.size();
-	for(int i = 0; i < size; i++)
+	size_t size = clipBoardList.size();
+	for(size_t i = 0; i < size; i++)
 	{
 		clipBoardList[i] = NULL;
 	}
@@ -1820,7 +1820,7 @@ void DiagramEditor::handlePaste()
 		if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
 			diagram->getShape(i)->setModeNormal();
 
-	int size = clipBoardList.size();
+	size_t size = clipBoardList.size();
 	double xC, yC, xCFirst, yCFirst;
 	clipBoardList[0]->getCenter( xCFirst, yCFirst );
 	for(int i = 0; i < size; i++)
@@ -1973,7 +1973,7 @@ void DiagramEditor::handleEditDOF()
 // --------------------------------
 {
     Shape* s = NULL;
-    if( lastSelectedShapeId > -1)
+    if( lastSelectedShapeId != NON_EXISTING )
     {
     	s = diagram->getShape(lastSelectedShapeId);
     }
@@ -1998,7 +1998,7 @@ void DiagramEditor::handleSetDOF( const int &attrIdx ) // Link Attribute to the 
 {
 	Shape* s = NULL;
 
-	if( lastSelectedShapeId > -1 )
+	if( lastSelectedShapeId != NON_EXISTING )
 	{
 		s = diagram->getShape( lastSelectedShapeId );
 	}
@@ -2025,7 +2025,7 @@ void DiagramEditor::handleSetDOF( const int &attrIdx ) // Link Attribute to the 
 
 
 // --------------------------------
-void DiagramEditor::handleCheckedVariable( const int &idDOF, const int &variableId )
+void DiagramEditor::handleCheckedVariable( const size_t &idDOF, const int &variableId )
 // --------------------------------
 {
 	Shape* selectedShape = NULL;
@@ -2050,11 +2050,11 @@ void DiagramEditor::handleCheckedVariable( const int &idDOF, const int &variable
 void DiagramEditor::deselectAll()
 // ------------------------------
 {
-    int sizeShapes = 0;
+    size_t sizeShapes = 0;
     if ( diagram != NULL )
         sizeShapes = diagram->getSizeShapes();
 
-    for ( int i = 0; i < sizeShapes; ++i )
+    for ( size_t i = 0; i < sizeShapes; ++i )
         diagram->getShape(i)->setModeNormal();
 
     drgBegIdx1 = -1;
@@ -2105,15 +2105,15 @@ void DiagramEditor::displDOFInfo( Shape* s )
 {
     if ( s != NULL )
     {
-        vector< int > indcs;
+        vector< size_t > indcs;
         vector< string > dofs;
-        vector< int > attrIdcs;
-        int selIdx = -1;
+        vector< size_t > attrIdcs;
+        size_t selIdx = NON_EXISTING;
 
         indcs.push_back( s->getDOFXCtr()->getIndex() );
         dofs.push_back(  s->getDOFXCtr()->getLabel() );
         if ( s->getDOFXCtr()->getAttribute() == NULL )
-            attrIdcs.push_back( -1 );
+            attrIdcs.push_back( NON_EXISTING );
         else
             attrIdcs.push_back( s->getDOFXCtr()->getAttribute()->getIndex() );
         if ( s->getMode() == Shape::MODE_EDT_DOF_XCTR )

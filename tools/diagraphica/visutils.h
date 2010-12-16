@@ -140,56 +140,56 @@ public:
         ColorRGB &colRGB );
 
     static void mapColorQualPast1(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorQualPast2(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorQualSet1(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorQualSet2(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorQualSet3(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorQualPair(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorQualDark(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorQualAccent(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
 
     static void mapColorSeqOrRd(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorSeqGnBu(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorSeqGreen(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorSeqGreen(
         const double &alpha,
         ColorRGB &colRGB );
     static void mapColorSeqRed(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &colRGB );
     static void mapColorSeqRed(
         const double &alpha,

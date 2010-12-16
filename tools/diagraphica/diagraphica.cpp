@@ -324,9 +324,9 @@ void DiaGraph::handleLoadAttrConfig( const std::string &path )
     // do parsing
     try
     {
-        map< int, int > attrIdxFrTo;
-        map< int, vector< std::string > > attrCurDomains;
-        map< int, map< int, int  > > attrOrigToCurDomains;
+        map< size_t , size_t > attrIdxFrTo;
+        map< size_t , vector< std::string > > attrCurDomains;
+        map< size_t , map< int, int  > > attrOrigToCurDomains;
 
         parser->parseAttrConfig(
             path,
@@ -477,7 +477,7 @@ void DiaGraph::handleSaveDiagram( const std::string &path )
 void DiaGraph::initProgress(
     const std::string &title,
     const std::string &msg,
-    const int &max )
+    const size_t &max )
 // -------------------------
 {
     if ( progressDialog != NULL )
@@ -490,7 +490,7 @@ void DiaGraph::initProgress(
     progressDialog = new wxProgressDialog(
             wxString( title.c_str(), wxConvUTF8 ),
             wxString( msg.c_str(), wxConvUTF8 ),
-            max,
+            (int) max,
             frame );
     // set status message
     frame->setStatusText( msg );
@@ -498,11 +498,11 @@ void DiaGraph::initProgress(
 
 
 // --------------------------------------------
-void DiaGraph::updateProgress( const int &val )
+void DiaGraph::updateProgress( const size_t &val )
 // --------------------------------------------
 {
     if ( progressDialog != NULL )
-        progressDialog->Update( val );
+        progressDialog->Update( (int) val );
 }
 
 
@@ -565,6 +565,17 @@ void DiaGraph::appOutputText( const int &val )
     frame->appOutputText( msg );
 }
 
+// -------------------------------------------
+void DiaGraph::appOutputText( const size_t &val )
+// -------------------------------------------
+// ------------------------------------------------------------------
+// Append 'val' to the current text output without clearing it first.
+// ------------------------------------------------------------------
+{
+  std::string msg = Utils::size_tToStr( val );
+    frame->appOutputText( msg );
+}
+
 // -------------------------------------
 void DiaGraph::getColor( ColorRGB &col )
 // -------------------------------------
@@ -596,7 +607,7 @@ void DiaGraph::handleCloseFrame( PopupFrame* f )
 
 
 // ------------------------------------------------
-void DiaGraph::handleAttributeSel( const int &idx )
+void DiaGraph::handleAttributeSel( const size_t &idx )
 // ------------------------------------------------
 {
     // display domain
@@ -606,12 +617,12 @@ void DiaGraph::handleAttributeSel( const int &idx )
 
 // ---------------------------
 void DiaGraph::handleMoveAttr(
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // ---------------------------
 {
-    if ( 0 <= idxFr && idxFr < graph->getSizeAttributes() &&
-         0 <= idxTo && idxTo < graph->getSizeAttributes() )
+    if ( idxFr != NON_EXISTING && idxFr < graph->getSizeAttributes() &&
+         idxTo != NON_EXISTING && idxTo < graph->getSizeAttributes() )
     {
         graph->moveAttribute( idxFr, idxTo );
         displAttributes();
@@ -621,7 +632,7 @@ void DiaGraph::handleMoveAttr(
 
 
 // ------------------------------------------------------------------
-void DiaGraph::handleAttributeDuplicate( const vector< int > &indcs )
+void DiaGraph::handleAttributeDuplicate( const vector< size_t > &indcs )
 // ------------------------------------------------------------------
 {
     // duplicate attributes
@@ -678,7 +689,7 @@ void DiaGraph::handleAttributeDelete( const vector< int > &indcs )
 */
 
 // ---------------------------------------------------
-void DiaGraph::handleAttributeDelete( const int &idx )
+void DiaGraph::handleAttributeDelete( const size_t &idx )
 // ---------------------------------------------------
 {
     // reset simulator, timeSeries & examiner
@@ -712,8 +723,8 @@ void DiaGraph::handleAttributeDelete( const int &idx )
     // update cluster and time series if necessary
     Attribute* attr = graph->getAttribute( idx );
     // get attributes currently clustered on
-    int posFoundClust = -1;
-    vector< int > attrsClust;
+    size_t posFoundClust = NON_EXISTING;
+    vector< size_t > attrsClust;
     arcDgrm->getAttrsTree( attrsClust );
     for ( size_t i = 0; i < attrsClust.size(); ++i )
     {
@@ -725,15 +736,15 @@ void DiaGraph::handleAttributeDelete( const int &idx )
     }
 
     // recluster if necessary
-    if ( posFoundClust >= 0 )
+    if ( posFoundClust != NON_EXISTING )
     {
         attrsClust.erase( attrsClust.begin() + posFoundClust );
         handleAttributeCluster( attrsClust );
     }
 
     // get attributes currently in time series
-    int posFoundTimeSeries = -1;
-    vector< int > attrsTimeSeries;
+    size_t posFoundTimeSeries = NON_EXISTING;
+    vector< size_t > attrsTimeSeries;
     timeSeries->getAttrIdcs( attrsTimeSeries );
     for ( size_t i = 0; i < attrsTimeSeries.size(); ++i )
     {
@@ -745,7 +756,7 @@ void DiaGraph::handleAttributeDelete( const int &idx )
     }
 
     // re-initiate time series if necessary
-    if ( posFoundTimeSeries >= 0 )
+    if ( posFoundTimeSeries != NON_EXISTING )
     {
         attrsTimeSeries.erase( attrsTimeSeries.begin() + posFoundTimeSeries );
         initTimeSeries( attrsTimeSeries );
@@ -768,11 +779,11 @@ void DiaGraph::handleAttributeDelete( const int &idx )
 
 // ----------------------------------
 void DiaGraph::handleAttributeRename(
-        const int &idx,
+        const size_t &idx,
         const std::string &name )
 // ----------------------------------
 {
-    if ( 0 <= idx && idx < graph->getSizeAttributes() )
+    if ( idx != NON_EXISTING && idx < graph->getSizeAttributes() )
     {
         graph->getAttribute( idx )->setName( name );
         displAttributes();
@@ -781,7 +792,7 @@ void DiaGraph::handleAttributeRename(
 
 
 // ----------------------------------------------------------------
-void DiaGraph::handleAttributeCluster( const vector< int > &indcs )
+void DiaGraph::handleAttributeCluster( const vector< size_t > &indcs )
 // ----------------------------------------------------------------
 {
     bool zeroCard = false;
@@ -818,13 +829,13 @@ void DiaGraph::handleAttributeCluster( const vector< int > &indcs )
     }
     else
     {
-        vector< int > coord;
+        vector< size_t > coord;
         coord.push_back( 0 );
 
         critSect = true;
 
         graph->clearSubClusters( coord );
-        vector< int > empty;
+        vector< size_t > empty;
         arcDgrm->setAttrsTree( empty );
         arcDgrm->setDataChanged( true );
 
@@ -869,10 +880,9 @@ void DiaGraph::handleAttrPartition(
         if ( tempAttr->getAttrType() == Attribute::ATTR_TYPE_CONTI )
         {
             // get attributes currently clustered on
-            int posFound;
-            vector< int > attrsClust;
+            vector< size_t > attrsClust;
 
-            posFound = -1;
+            size_t posFound = NON_EXISTING;
             arcDgrm->getAttrsTree( attrsClust );
             for ( size_t i = 0; i < attrsClust.size(); ++i )
             {
@@ -884,7 +894,7 @@ void DiaGraph::handleAttrPartition(
             }
 
             // get attributes currently in time series
-            vector< int > attrsTimeSeries;
+            vector< size_t > attrsTimeSeries;
             timeSeries->getAttrIdcs( attrsTimeSeries );
 
             // perform partitioning
@@ -896,7 +906,7 @@ void DiaGraph::handleAttrPartition(
                 tempAttr->classifyMeanStandardDeviation( numParts );
 
             // recluster if necessary
-            if ( posFound >= 0 )
+            if ( posFound != NON_EXISTING )
             {
                 if ( tempAttr->getSizeCurValues() == 0 )
                     attrsClust.erase( attrsClust.begin() + posFound );
@@ -926,10 +936,9 @@ void DiaGraph::handleAttrDepartition( const int &attrIdx )
         if ( attr->getAttrType() == Attribute::ATTR_TYPE_CONTI )
         {
             // get attributes currently clustered on
-            int posFound;
-            vector< int > attrsClust;
+            vector< size_t > attrsClust;
 
-            posFound = -1;
+            size_t posFound = NON_EXISTING;
             arcDgrm->getAttrsTree( attrsClust );
             for ( size_t i = 0; i < attrsClust.size(); ++i )
             {
@@ -941,14 +950,14 @@ void DiaGraph::handleAttrDepartition( const int &attrIdx )
             }
 
             // get attributes currently in time series
-            vector< int > attrsTimeSeries;
+            vector< size_t > attrsTimeSeries;
             timeSeries->getAttrIdcs( attrsTimeSeries );
 
             // perform departitioning
             attr->removeClassification();
 
             // recluster if necessary
-            if ( posFound >= 0 )
+            if ( posFound != NON_EXISTING )
             {
                 attrsClust.erase( attrsClust.begin() + posFound );
                 handleAttributeCluster( attrsClust );
@@ -976,11 +985,11 @@ void DiaGraph::handleAttrPartitionCloseFrame()
 
 // --------------------------
 void DiaGraph::getAttrValues(
-    const int &attrIdx,
+    const size_t &attrIdx,
     vector< double > &vals )
 // --------------------------
 {
-    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    if ( 0 != NON_EXISTING && attrIdx < graph->getSizeAttributes() )
     {
         vals.clear();
         Node* node;
@@ -996,11 +1005,11 @@ void DiaGraph::getAttrValues(
 
 // --------------------------
 void DiaGraph::getAttrValues(
-    const int &attrIdx,
+    const size_t &attrIdx,
     set< double > &vals )
 // --------------------------
 {
-    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    if ( attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes() )
     {
         vals.clear();
         Node* node;
@@ -1099,7 +1108,7 @@ void DiaGraph::handleDomainUngroup( const int &attrIdx )
 
 // ------------------------------
 void DiaGraph::getAttributeNames(
-    const vector< int > &indcs,
+    const vector< size_t > &indcs,
     vector< wxString > &names )
 // ------------------------------
 {
@@ -1116,22 +1125,22 @@ void DiaGraph::getAttributeNames(
 
 
 // ---------------------------------------------
-int DiaGraph::getAttributeType( const int &idx )
+size_t DiaGraph::getAttributeType( const size_t &idx )
 // ---------------------------------------------
 {
-    int result = -1;
-    if ( 0 <= idx && idx < graph->getSizeAttributes() )
+    size_t result = NON_EXISTING;
+    if ( idx != NON_EXISTING && idx < graph->getSizeAttributes() )
         result = graph->getAttribute( idx )->getAttrType();
     return result;
 }
 
 
 // -------------------------------------------------
-int DiaGraph::getAttrSizeCurDomain( const int &idx )
+size_t DiaGraph::getAttrSizeCurDomain( const size_t &idx )
 // -------------------------------------------------
 {
-    int result = 0;
-    if ( 0 <= idx && idx < graph->getSizeAttributes() )
+    size_t result = 0;
+    if ( idx != NON_EXISTING && idx < graph->getSizeAttributes() )
         result = graph->getAttribute( idx )->getSizeCurValues();
     return result;
 }
@@ -1141,7 +1150,7 @@ int DiaGraph::getAttrSizeCurDomain( const int &idx )
 
 
 // -------------------------------------------------
-void DiaGraph::handleAttributePlot( const int &idx )
+void DiaGraph::handleAttributePlot( const size_t &idx )
 // -------------------------------------------------
 {
     if ( canvasDistr == NULL )
@@ -1154,7 +1163,7 @@ void DiaGraph::handleAttributePlot( const int &idx )
         distrPlot->setDiagram( editor->getDiagram() );
     }
 
-    vector< int > number;
+    vector< size_t > number;
 
     // display domain
     displAttrDomain( idx );
@@ -1170,8 +1179,8 @@ void DiaGraph::handleAttributePlot( const int &idx )
 
 // --------------------------------
 void DiaGraph::handleAttributePlot(
-    const int &idx1,
-    const int &idx2 )
+    const size_t &idx1,
+    const size_t &idx2 )
 // --------------------------------
 {
     if ( canvasCorrl == NULL )
@@ -1205,7 +1214,7 @@ void DiaGraph::handleAttributePlot(
 
 
 // -------------------------------------------------------------
-void DiaGraph::handleAttributePlot( const vector< int > &indcs )
+void DiaGraph::handleAttributePlot( const vector< size_t > &indcs )
 // -------------------------------------------------------------
 {
    if ( canvasCombn == NULL )
@@ -1235,8 +1244,8 @@ void DiaGraph::handleAttributePlot( const vector< int > &indcs )
     if ( combinations < 2048 )
     {
     */
-        vector< vector< int > > combs;
-        vector< int > number;
+        vector< vector< size_t > > combs;
+        vector< size_t > number;
 
         if ( indcs.size() > 0 )
         {
@@ -1307,10 +1316,10 @@ void DiaGraph::handleEditClust( Cluster* c )
 void DiaGraph::handleClustFrameDisplay()
 // -------------------------------------
 {
-    vector< int >    attrIdcs;
+    vector< size_t >    attrIdcs;
     vector< std::string > attrNames;
 
-    for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+    for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
     {
         attrIdcs.push_back( graph->getAttribute(i)->getIndex() );
         attrNames.push_back( graph->getAttribute(i)->getName() );
@@ -1385,7 +1394,7 @@ void DiaGraph::handleClustPlotFrameDisplay(
 
 
 // ---------------------------------------------------------------------
-void DiaGraph::handleClustPlotFrameDisplay( const vector< int > &indcs )
+void DiaGraph::handleClustPlotFrameDisplay( const vector< size_t > &indcs )
 // ---------------------------------------------------------------------
 {
     if ( canvasCombn == NULL )
@@ -1397,8 +1406,8 @@ void DiaGraph::handleClustPlotFrameDisplay( const vector< int > &indcs )
             canvasCombn );
     }
 
-    vector< vector< int > > combs;
-    vector< int > number;
+    vector< vector< size_t > > combs;
+    vector< size_t > number;
 
     if ( indcs.size() > 0 )
     {
@@ -1540,7 +1549,7 @@ void* DiaGraph::getGraph()
 
 
 // ----------------------------------
-void DiaGraph::handleNote( const int &shapeId, const std::string &msg )
+void DiaGraph::handleNote( const size_t &shapeId, const std::string &msg )
 // ----------------------------------
 {
     frame->handleNote( shapeId, msg );
@@ -1716,7 +1725,7 @@ void DiaGraph::handleShowVariable(
 
 
 // ----------------------------
-void DiaGraph::handleShowNote( const std::string &variable, const int &shapeId)
+void DiaGraph::handleShowNote( const std::string &variable, const size_t &shapeId)
 // ----------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -1725,7 +1734,7 @@ void DiaGraph::handleShowNote( const std::string &variable, const int &shapeId)
 
 
 // ----------------------------
-void DiaGraph::handleAddText( std::string &variable, int &shapeId)
+void DiaGraph::handleAddText( std::string &variable, size_t &shapeId)
 // ----------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -1734,7 +1743,7 @@ void DiaGraph::handleAddText( std::string &variable, int &shapeId)
 
 
 // ----------------------------
-void DiaGraph::handleTextSize( int &textSize, int &shapeId )
+void DiaGraph::handleTextSize( size_t &textSize, size_t &shapeId )
 // ----------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -1743,7 +1752,7 @@ void DiaGraph::handleTextSize( int &textSize, int &shapeId )
 
 
 // ----------------------------
-void DiaGraph::handleSetTextSize( int &textSize, int &shapeId )
+void DiaGraph::handleSetTextSize( size_t &textSize, size_t &shapeId )
 // ----------------------------
 {
 	if ( mode == MODE_EDIT && editor != NULL )
@@ -1846,7 +1855,7 @@ void DiaGraph::handleSetDOF( const int &attrIdx )
 
 
 // --------------------------------
-void DiaGraph::handleCheckedVariable( const int &idDOF, const int &variableId )
+void DiaGraph::handleCheckedVariable( const size_t &idDOF, const int &variableId )
 // --------------------------------
 {
 	if ( mode == MODE_EDIT && editor != NULL )
@@ -1857,10 +1866,10 @@ void DiaGraph::handleCheckedVariable( const int &idDOF, const int &variableId )
 
 // ------------------------------------
 void DiaGraph::handleEditDOF(
-    const vector< int > &degsOfFrdmIds,
+    const vector< size_t > &degsOfFrdmIds,
     const vector< std::string > &degsOfFrdm,
-    const vector< int > &attrIndcs,
-    const int &selIdx )
+    const vector< size_t > &attrIndcs,
+    const size_t &selIdx )
 // ------------------------------------
 {
     // init attrIndcs
@@ -1952,10 +1961,10 @@ void DiaGraph::handleSetDOFTextStatus(
 
 
 // ------------------------------------------------------
-int DiaGraph::handleGetDOFTextStatus( const int &DOFIdx )
+size_t DiaGraph::handleGetDOFTextStatus( const int &DOFIdx )
 // ------------------------------------------------------
 {
-    int result = -1;
+    size_t result = NON_EXISTING;
     if ( mode == MODE_EDIT && editor != NULL )
         result = editor->handleDOFGetTextStatus( DOFIdx );
     return result;
@@ -2003,7 +2012,7 @@ void DiaGraph::handleDOFColAdd(
 
 // -------------------------------
 void DiaGraph::handleDOFColUpdate(
-    const int &idx,
+    const size_t &idx,
     const double &hue,
     const double &y )
 // -------------------------------
@@ -2112,7 +2121,7 @@ void DiaGraph::handleDOFOpaSetValuesEdt(
 
 // ------------------------------
 void DiaGraph::handleLinkDOFAttr(
-    const int DOFIdx,
+    const size_t DOFIdx,
     const int attrIdx )
 // ------------------------------
 {
@@ -2130,7 +2139,7 @@ void DiaGraph::handleLinkDOFAttr(
 
 
 // ---------------------------------------------------
-void DiaGraph::handleUnlinkDOFAttr( const int DOFIdx )
+void DiaGraph::handleUnlinkDOFAttr( const size_t DOFIdx )
 // ---------------------------------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -2211,7 +2220,7 @@ void DiaGraph::initSimulator(
 
 
 // ----------------------------------------------------------
-void DiaGraph::initTimeSeries( const vector< int > attrIdcs )
+void DiaGraph::initTimeSeries( const vector< size_t > attrIdcs )
 // ----------------------------------------------------------
 {
     if ( timeSeries != NULL )
@@ -2480,15 +2489,15 @@ void DiaGraph::handleAnimFrameClust( Colleague* sender )
         arcDgrm->unmarkLeaves();
         if ( sender == timeSeries )
         {
-            int idx;
-            set< int > idcs;
+            size_t idx;
+            set< size_t > idcs;
             ColorRGB col;
 
             timeSeries->getAnimIdxDgrm( idx, idcs, col );
 
             arcDgrm->unmarkBundles();
             arcDgrm->unmarkLeaves();
-            for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+            for ( set< size_t >::iterator it = idcs.begin(); it != idcs.end(); ++it )
                 arcDgrm->markBundle( *it );
             arcDgrm->markLeaf( idx, col );
 
@@ -2508,22 +2517,22 @@ void DiaGraph::handleMarkFrameClust( Colleague* sender  )
         if ( sender == simulator )
         {
             ColorRGB col = simulator->getColorSel();
-            int      idx = simulator->getIdxClstSel();
+            size_t      idx = simulator->getIdxClstSel();
 
             arcDgrm->markLeaf( idx, col );
         }
         else if ( sender == timeSeries )
         {
             ColorRGB col;
-            set< int > idcs;
-            int idx;
+            set< size_t > idcs;
+            size_t idx;
 
             // clear bundles
             arcDgrm->unmarkBundles();
 
             // marked nodes
             timeSeries->getIdcsClstMarked( idcs, col );
-            for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+            for ( set< size_t >::iterator it = idcs.begin(); it != idcs.end(); ++it )
                 arcDgrm->markLeaf( *it, col );
 
             // mouse over
@@ -2531,7 +2540,7 @@ void DiaGraph::handleMarkFrameClust( Colleague* sender  )
             if ( idx >= 0 )
             {
                 arcDgrm->markLeaf( idx, col );
-                for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                for ( set< size_t >::iterator it = idcs.begin(); it != idcs.end(); ++it )
                     arcDgrm->markBundle( *it );
             }
 
@@ -2540,7 +2549,7 @@ void DiaGraph::handleMarkFrameClust( Colleague* sender  )
             if ( idx >= 0 )
             {
                 arcDgrm->markLeaf( idx, col );
-                for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                for ( set< size_t >::iterator it = idcs.begin(); it != idcs.end(); ++it )
                     arcDgrm->markBundle( *it );
             }
 
@@ -2556,14 +2565,14 @@ void DiaGraph::handleMarkFrameClust( Colleague* sender  )
         else if ( sender == examiner )
         {
             ColorRGB col;
-            int      idx;
+            size_t      idx;
 
             // trace view
             if ( view == VIEW_TRACE )
             {
-                set< int > idcs;
+                set< size_t > idcs;
                 timeSeries->getIdcsClstMarked( idcs, col );
-                for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                for ( set< size_t >::iterator it = idcs.begin(); it != idcs.end(); ++it )
                     arcDgrm->markLeaf( *it, col );
             }
 
@@ -2586,7 +2595,7 @@ void DiaGraph::handleUnmarkFrameClusts( Colleague* sender )
         if ( sender == simulator )
         {
             ColorRGB col = examiner->getColorSel();
-            int      idx = examiner->getIdxClstSel();
+            size_t      idx = examiner->getIdxClstSel();
 
             arcDgrm->markLeaf( idx, col );
         }
@@ -2596,10 +2605,10 @@ void DiaGraph::handleUnmarkFrameClusts( Colleague* sender )
             if ( view == VIEW_TRACE )
             {
                 ColorRGB col;
-                set< int > idcs;
+                set< size_t > idcs;
                 timeSeries->getIdcsClstMarked( idcs, col );
 
-                for ( set< int >::iterator it = idcs.begin(); it != idcs.end(); ++it )
+                for ( set< size_t >::iterator it = idcs.begin(); it != idcs.end(); ++it )
                     arcDgrm->markLeaf( *it, col );
             }
         }
@@ -3362,6 +3371,12 @@ void DiaGraph::operator<<( const int &msg )
     this->appOutputText( msg );
 }
 
+// ----------------------------------------
+void DiaGraph::operator<<( const size_t &msg )
+// ----------------------------------------
+{
+    this->appOutputText( msg );
+}
 
 // -- protected functions inhereted from Mediator -------------------
 
@@ -3517,12 +3532,12 @@ void DiaGraph::displAttributes()
 // -----------------------------
 {
     Attribute*       attr;
-    vector< int >    indcs;
+    vector< size_t >    indcs;
     vector< std::string > names;
     vector< std::string > types;
-    vector< int >    cards;
+    vector< size_t >    cards;
     vector< std::string > range;
-    for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+    for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
     {
         attr = graph->getAttribute( i );
 
@@ -3564,16 +3579,16 @@ void DiaGraph::displAttributes()
 
 
 // ----------------------------------------------------
-void DiaGraph::displAttributes( const int &selAttrIdx )
+void DiaGraph::displAttributes( const size_t &selAttrIdx )
 // ----------------------------------------------------
 {
     Attribute*       attr;
-    vector< int >    indcs;
+    vector< size_t >    indcs;
     vector< std::string > names;
     vector< std::string > types;
-    vector< int >    cards;
+    vector< size_t >    cards;
     vector< std::string > range;
-    for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+    for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
     {
         attr = graph->getAttribute( i );
 
@@ -3615,15 +3630,15 @@ void DiaGraph::displAttributes( const int &selAttrIdx )
 
 
 // -------------------------------------------------
-void DiaGraph::displAttrDomain( const int &attrIdx )
+void DiaGraph::displAttrDomain( const size_t &attrIdx )
 // -------------------------------------------------
 {
     Attribute* attribute;
-    int        numValues;
-    int        numNodes;
-    vector< int >    indices;
+    size_t        numValues;
+    size_t        numNodes;
+    vector< size_t >    indices;
     vector< std::string > values;
-    vector< int >    number;
+    vector< size_t >    number;
     vector< double>  perc;
 
     attribute = graph->getAttribute( attrIdx );
@@ -3631,7 +3646,7 @@ void DiaGraph::displAttrDomain( const int &attrIdx )
     numNodes  = graph->getSizeNodes();
 
     // update indices and values
-    for ( int i = 0; i < numValues; ++i )
+    for ( size_t i = 0; i < numValues; ++i )
     {
          indices.push_back( attribute->getCurValue(i)->getIndex() );
          values.push_back( attribute->getCurValue(i)->getValue() );
@@ -3645,7 +3660,7 @@ void DiaGraph::displAttrDomain( const int &attrIdx )
     // calc perc
     {
     for ( int i = 0; i < numValues; ++i )
-        perc.push_back( Utils::perc( number[i], numNodes ) );
+        perc.push_back( Utils::perc( (double) number[i], (double) numNodes ) );
     }
 
     // display domain

@@ -27,12 +27,12 @@ public:
         Mediator* m,
         const std::string &nam,
         const std::string &typ,
-        const int &idx );
+        const size_t &idx );
     Attribute( const Attribute &attr );
     virtual ~Attribute();
 
     // -- set functions ---------------------------------------------
-    void setIndex( const int &idx );
+    void setIndex( const size_t &idx );
     void setName( const std::string &nme );
     void setType( const std::string &typ );
 
@@ -55,15 +55,15 @@ public:
     virtual void removeClassification();
 
     // -- get functions ---------------------------------------------
-    int getIndex();
+    size_t getIndex();
     std::string getName();
     std::string getType();
     virtual int getAttrType() = 0;
 
     // functions overridden by AttrDiscr
-    virtual int getSizeOrigValues();
-    virtual Value* getOrigValue( int idx );
-    virtual Value* getCurValue( int idx );
+    virtual size_t getSizeOrigValues();
+    virtual Value* getOrigValue( size_t idx );
+    virtual Value* getCurValue( size_t idx );
 
     // functions overridden by AttrConti
     virtual double getLowerBound();
@@ -72,7 +72,7 @@ public:
         double &lwrBnd,
         double &uprBnd );
 
-    virtual int getSizeCurValues() = 0;
+    virtual size_t getSizeCurValues() = 0;
     virtual Value* mapToValue( double key ) = 0;
 
     // -- clear functions -------------------------------------------
@@ -94,7 +94,7 @@ protected:
     virtual void deleteCurMap() = 0;
 
     // -- data members ----------------------------------------------
-    int    index;
+    size_t    index;
     std::string name;
     std::string type;
 };

@@ -52,7 +52,7 @@ public:
     static ColorRGB getColorBundles();
     static double getTrspBundles();
 
-    void getAttrsTree( std::vector< int > &idcs );
+    void getAttrsTree( std::vector< size_t > &idcs );
 
     // -- set functions ---------------------------------------------
     static void setColorClr( const ColorRGB &col );
@@ -69,13 +69,13 @@ public:
     static void setColorBundles( const ColorRGB &col );
     static void setTrspBundles( const double &trsp );
 
-    void setAttrsTree( const std::vector< int > idcs );
+    void setAttrsTree( const std::vector< size_t > idcs );
 
     void setDiagram( Diagram *dgrm );
     void hideAllDiagrams();
 
     void markLeaf(
-        const int &leafIdx,
+        const size_t &leafIdx,
         ColorRGB &col );
     void unmarkLeaves();
     void markBundle( const size_t &idx );
@@ -123,8 +123,8 @@ protected:
     // -- utility drawing functions ---------------------------------
     void clear();
     void calcColor(
-        const int &iter,
-        const int &numr,
+        const size_t &iter,
+        const size_t &numr,
         ColorRGB &col );
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
@@ -134,7 +134,7 @@ protected:
     void calcSettingsTree();
     void calcPositionsTree(
         Cluster* c,
-        const int &maxLvl,
+        const size_t &maxLvl,
         const double &itvHgt );
     void calcSettingsBarTree();
     void calcPositionsBarTree(
@@ -164,7 +164,7 @@ protected:
         const int &i,
         const int &j );
 
-    void handleShowDiagram( const int &dgrmIdx );
+    void handleShowDiagram( const size_t &dgrmIdx );
     void handleDragDiagram();
     void handleDragDiagram( const int &dgrmIdx );
     void handleRwndDiagram( const size_t &dgrmIdx );
@@ -172,7 +172,7 @@ protected:
     void handlePlayDiagram( const size_t &dgrmIdx );
     void handleNextDiagram( const size_t &dgrmIdx );
 
-    void showDiagram( const int &dgrmIdx );
+    void showDiagram( const size_t &dgrmIdx );
     void hideDiagram( const size_t &dgrmIdx );
 
     // -- hit detection ---------------------------------------------
@@ -210,7 +210,7 @@ protected:
     // vis settings leaves
     std::vector< Position2D > posLeaves;
     double               radLeaves;
-    int                  idxInitStLeaves;
+    size_t                  idxInitStLeaves;
 
     // vis settings hierarchy
     std::vector< Attribute* >           attrsTree;
@@ -227,17 +227,17 @@ protected:
     std::vector< bool >                 showDgrm;        // show/hide diagram for every leaf node
     std::vector< std::vector< Attribute* > > attrsDgrm;       // association, attributes linked to shown diagrams
     std::vector< std::vector< Cluster* > >   framesDgrm;      // composition, clusters of identical states for shown diagrams
-    std::vector< int >                  frameIdxDgrm;    // current index into framesDgrm
+    std::vector< size_t >                  frameIdxDgrm;    // current index into framesDgrm
     std::vector< Position2D >           posDgrm;         // positions of diagrams
-    int                            dragIdxDgrm;     // diagram currently being dragged
+    size_t                         dragIdxDgrm;     // diagram currently being dragged
     size_t                         animIdxDgrm;     // diagram currently being animated
     size_t                         currIdxDgrm;
 
     // simulator
-    int prevFrameIdxClust;
-    int currFrameIdxClust;
-    int nextFrameIdxClust;
-    std::map< int, std::vector< ColorRGB > > markLeaves;
+    size_t prevFrameIdxClust;
+    size_t currFrameIdxClust;
+    size_t nextFrameIdxClust;
+    std::map< size_t, std::vector< ColorRGB > > markLeaves;
 
     // animation
     wxTimer* timerAnim;

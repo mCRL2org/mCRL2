@@ -47,6 +47,18 @@ string Utils::intToStr( const int &i )
     return result;
 }
 
+// -----------------------------------
+string Utils::size_tToStr( const size_t &i )
+// -----------------------------------
+{
+    ostringstream oss;
+    string result;
+
+    oss << i;
+    result = oss.str();
+
+    return result;
+}
 
 // --------------------------------------
 double Utils::strToDbl( const string &s )
@@ -252,7 +264,6 @@ double Utils::perc(
         (double)denm );
 }
 
-
 // ---------------------
 double Utils::perc(
     const double &numr,
@@ -381,15 +392,15 @@ void Utils::classEqualIntervals(
         }
 
         // calc mapping of values to classes
-        int idx;
+        size_t idx;
         for ( size_t i = 0; i < values.size(); ++i )
         {
             if ( values[i] == high )
                 idx = numClasses-1;
             else
-                idx = (int)floor( (values[i]-low)/itv );
+                idx = (size_t)floor( (values[i]-low)/itv );
 
-            valuesToClasses.insert( pair< double, int >( values[i], idx ) );
+            valuesToClasses.insert( pair< double, size_t >( values[i], idx ) );
         }
     }
 }
@@ -460,7 +471,7 @@ void Utils::classifyQuantiles(
             else if ( *it > max )
                 max = *it;
 
-            valuesToClasses.insert( pair< double, int >( *it, idx ) );
+            valuesToClasses.insert( pair< double, size_t >( *it, idx ) );
             ++ctr;
         }
     }

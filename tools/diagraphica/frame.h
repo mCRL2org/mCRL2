@@ -57,27 +57,27 @@ public:
 	void setDOFOpacitySelected();
 
     // -- display functions -----------------------------------------
-    void handleNote( const int &shapeId, const std::string &msg );
-    void handleTextSize( const int &shapeId, const int &textSize );
-    void displNumNodes( const int &val );
-    void displNumEdges( const int &val );
+    void handleNote( const size_t &shapeId, const std::string &msg );
+    void handleTextSize( const size_t &shapeId, const size_t &textSize );
+    void displNumNodes( const size_t &val );
+    void displNumEdges( const size_t &val );
     void displAttrInfo(
-        const std::vector< int > &indices,
+        const std::vector< size_t > &indices,
         const std::vector< std::string > &names,
         const std::vector< std::string > &types,
-        const std::vector< int > &cards,
+        const std::vector< size_t > &cards,
         const std::vector< std::string > &range );
     void displAttrInfo(
-        const int &selectIdx,
-        const std::vector< int > &indices,
+        const size_t &selectIdx,
+        const std::vector< size_t > &indices,
         const std::vector< std::string > &names,
         const std::vector< std::string > &types,
-        const std::vector< int > &cards,
+        const std::vector< size_t > &cards,
         const std::vector< std::string > &range );
     void displDomainInfo(
-        const std::vector< int > &indices,
+        const std::vector< size_t > &indices,
         const std::vector< std::string > &values,
-        const std::vector< int > &number,
+        const std::vector< size_t > &number,
         const std::vector< double > &perc );
     void clearDomainInfo();
 
@@ -101,29 +101,29 @@ public:
         const bool &sentSetToExnr );
 
     void displDOFInfo(
-        const std::vector< int > &degsOfFrdmIndcs,
+        const std::vector< size_t > &degsOfFrdmIndcs,
         const std::vector< std::string > &degsOfFrdm,
         const std::vector< std::string > &attrNames,
-        const int &selIdx );
+        const size_t &selIdx );
     void clearDOFInfo();
 
     void displClustMenu();
     void displAttrInfoClust(
-        const std::vector< int > &indices,
+        const std::vector< size_t > &indices,
         const std::vector< std::string > &names );
 
     void displAttrInfoPart(
         std::string attrName,
-        int minParts,
-        int maxParts,
-        int curParts );
+        size_t minParts,
+        size_t maxParts,
+        size_t curParts );
 
     void displSimClearDlg();
     void displExnrClearDlg();
     void displExnrFrameMenu( const bool &clear );
 
-    void selectAttribute( const int &idx );
-    void selectDomainVal( const int &idx );
+    void selectAttribute( const size_t &idx );
+    void selectDomainVal( const size_t &idx );
 
     void handleDragDrop(
         const int &srcId,
@@ -194,9 +194,9 @@ private:
     void initFrameSettings();
     void initFramePartition(
         wxString attrName,
-        int minParts,
-        int maxParts,
-        int curParts );
+        size_t minParts,
+        size_t maxParts,
+        size_t curParts );
 
     void initFrameDOF();
     void initFrameNote();
@@ -245,9 +245,9 @@ private:
     wxSplitterWindow* splitterFrame;
 
     // -- note -----------------------------------------------------
-    int			  	  currentShapeId;
+    size_t			  	  currentShapeId;
     std::string			  currentShapeNote;
-    int				  currentTextSize;
+    size_t				  currentTextSize;
 
     // -- left panel ------------------------------------------------
     wxSplitterWindow* splitterLft;

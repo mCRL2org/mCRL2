@@ -31,7 +31,7 @@ CombnPlot::CombnPlot(
     maxWthHintPixBC = 10;
 
     mouseInside   = false;
-    mouseCombnIdx = -1;
+    mouseCombnIdx = NON_EXISTING;
 
     diagram        = NULL;
     showDgrm       = false;
@@ -62,9 +62,9 @@ void CombnPlot::setDiagram( Diagram *dgrm )
 
 // --------------------------------
 void CombnPlot::setValues(
-    const vector< int > &attrIndcs,
-    vector< vector< int > > &combs,
-    vector< int > &number )
+    const vector< size_t > &attrIndcs,
+    vector< vector< size_t > > &combs,
+    vector< size_t > &number )
 // --------------------------------
 {
     attributeIndcs = attrIndcs;
@@ -160,7 +160,7 @@ void CombnPlot::drawAxesBC( const bool &inSelectMode )
     // get size of 1 pixel
     double pix = canvas->getPixelSize();
     // get num attributes
-    int numAttr = attributeIndcs.size();
+    size_t numAttr = attributeIndcs.size();
 
     // calc size of bounding box
     double xLft = -0.5*w+25*pix;
@@ -198,7 +198,7 @@ void CombnPlot::drawAxesCP( const bool &inSelectMode )
     // get size of 1 pixel
     double pix = canvas->getPixelSize();
     // get num attributes
-    int numAttr = attributeIndcs.size();
+    size_t numAttr = attributeIndcs.size();
 
     // calc size of bounding box
     double xLft = -0.5*w+25*pix;
@@ -263,7 +263,7 @@ void CombnPlot::drawLabelsBC( const bool& /*inSelectMode*/ )
     // calc scaling to use
     double scaling = ( 12*pix )/(double)CHARHEIGHT;
     // number attributes
-    int numAttr = attributeIndcs.size();
+    size_t numAttr = attributeIndcs.size();
 
     // color
     VisUtils::setColorBlack();
@@ -287,7 +287,7 @@ void CombnPlot::drawLabelsBC( const bool& /*inSelectMode*/ )
     if ( combinations.size() > 0 )
     {
         // max number
-        string max = Utils::intToStr( maxNumberPerComb );
+        string max = Utils::intToStr( (int) maxNumberPerComb );
         double x   = -0.5*w+13*pix;
         double y   =  0.5*h-10*pix;
         VisUtils::drawLabelVertBelow( texCharId, x, y, scaling, max );
@@ -367,8 +367,8 @@ void CombnPlot::drawPlotBC( const bool &inSelectMode )
 {
     double hCanv = canvas->getHeight();
     double pix = canvas->getPixelSize();
-    int sizePositions = posBC.size();
-    int numAttr = attributeIndcs.size();
+    size_t sizePositions = posBC.size();
+    size_t numAttr = attributeIndcs.size();
 
     double yBot;
     if ( sizePositions > 0 )
@@ -430,7 +430,7 @@ void CombnPlot::drawPlotCP( const bool &inSelectMode )
         for ( size_t i = 0; i < posLftTop.size(); ++i )
         {
             // name per collumn
-            glPushName( i );
+            glPushName( (GLuint) i );
 
             double xLft = posLftTop[i][0].x;
             double xRgt = posRgtBot[i][0].x;
@@ -682,7 +682,7 @@ void CombnPlot::displTooltip( const size_t &posIdx )
         msgDgrm.append( "nodes; " );
         // percentage
         msgDgrm.append( Utils::dblToStr(
-                Utils::perc( numberPerComb[posIdx], graph->getSizeNodes() ) ) );
+                Utils::perc( (double) numberPerComb[posIdx], (double) graph->getSizeNodes() ) ) );
         msgDgrm.append( "%" );
 
         if ( diagram == NULL )
@@ -808,7 +808,7 @@ void CombnPlot::calcPosCP()
     double w, h;
     canvas->getSize( w, h );
     double pix = canvas->getPixelSize();
-    int numAttr = attributeIndcs.size();
+    size_t numAttr = attributeIndcs.size();
 
     double xLft = -0.5*w+25*pix;
     double xRgt =  0.5*w-10*pix;
@@ -845,7 +845,7 @@ void CombnPlot::calcPosCP()
         {
             // calc ratio
             attribute = graph->getAttribute( attributeIndcs[j] );
-            int card  = attribute->getSizeCurValues();
+            size_t card  = attribute->getSizeCurValues();
             if ( card > 0 )
             {
                 double ratio = 1.0; //(double)(idx+1)/(double)(card+1);
@@ -925,7 +925,7 @@ void CombnPlot::processHits(
     }
     else
     {
-        mouseCombnIdx = -1;
+        mouseCombnIdx = NON_EXISTING;
         canvas->clearToolTip();
         showDgrm = false;
     }

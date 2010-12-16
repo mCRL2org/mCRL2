@@ -21,7 +21,7 @@ using namespace std;
 Bundle::Bundle()
 // -------------
 {
-    index = -1;
+    index = NON_EXISTING;
     parent = NULL;
     inCluster = NULL;
     outCluster = NULL;
@@ -29,7 +29,7 @@ Bundle::Bundle()
 
 
 // -----------------------------
-Bundle::Bundle( const int &idx )
+Bundle::Bundle( const size_t &idx )
 // -----------------------------
 {
     index      = idx;
@@ -69,7 +69,7 @@ Bundle::~Bundle()
 
 
 // ------------------------------------
-void Bundle::setIndex( const int &idx )
+void Bundle::setIndex( const size_t &idx )
 // ------------------------------------
 {
     index = idx;
@@ -145,7 +145,7 @@ void Bundle::updateLabel(
 
 
 // -------------------
-int Bundle::getIndex()
+size_t Bundle::getIndex()
 // -------------------
 {
     return index;
@@ -161,7 +161,7 @@ Bundle* Bundle::getParent()
 
 
 // --------------------------
-int Bundle::getSizeChildren()
+size_t Bundle::getSizeChildren()
 // --------------------------
 {
     return children.size();
@@ -196,7 +196,7 @@ Cluster* Bundle::getOutCluster()
 
 
 // -----------------------
-int Bundle::getSizeEdges()
+size_t Bundle::getSizeEdges()
 // -----------------------
 {
     return edges.size();
@@ -257,7 +257,7 @@ void Bundle::getLabels(
 {
     lbls = "";
 
-    int size  = labels.size();
+    size_t size  = labels.size();
     int count = 0;
 
     map< string, string >::iterator it;

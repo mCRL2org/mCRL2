@@ -247,7 +247,7 @@ void Parser::writeFSMFile(
     string line = "";
 
     int lineCnt = 0;
-    int lineTot = 0;
+    size_t lineTot = 0;
 
     file.open( path.c_str() );
     if ( !file.is_open() )
@@ -279,7 +279,7 @@ void Parser::writeFSMFile(
         line  = "";
         line.append( graph->getAttribute( i )->getName() );
         line.append( "(" );
-        line.append( Utils::intToStr( graph->getAttribute( i )->getSizeOrigValues() ) );
+        line.append( Utils::intToStr( (int) graph->getAttribute( i )->getSizeOrigValues() ) );
         line.append( ") " );
         line.append( graph->getAttribute( i )->getType() );
         line.append( " " );
@@ -343,13 +343,13 @@ void Parser::writeFSMFile(
     line = "---\n";
     file << line;
 
-    for ( int i = 0; i < graph->getSizeEdges(); ++i )
+    for ( size_t i = 0; i < graph->getSizeEdges(); ++i )
     {
         line = "";
 
-        line.append( Utils::intToStr( graph->getEdge(i)->getInNode()->getIndex()+1 ) );
+        line.append( Utils::size_tToStr( graph->getEdge(i)->getInNode()->getIndex()+1 ) );
         line.append( " " );
-        line.append( Utils::intToStr( graph->getEdge(i)->getOutNode()->getIndex()+1 ) );
+        line.append( Utils::size_tToStr( graph->getEdge(i)->getOutNode()->getIndex()+1 ) );
         line.append( " \"" );
         line.append( graph->getEdge(i)->getLabel() );
         line.append( "\"" );
@@ -374,9 +374,9 @@ void Parser::writeFSMFile(
 void Parser::parseAttrConfig(
     const string &path,
     Graph* graph,
-    map< int, int > &attrIdxFrTo,
-    map< int, vector< string > > &attrCurDomains,
-    map< int, map< int, int  > > &attrOrigToCurDomains )
+    map< size_t, size_t > &attrIdxFrTo,
+    map< size_t, vector< string > > &attrCurDomains,
+    map< size_t, map< int, int  > > &attrOrigToCurDomains )
 // -----------------------------------------------------
 {
     wxXmlDocument doc;
@@ -468,7 +468,7 @@ void Parser::writeAttrConfig(
             // cardinality
             card = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("OriginalCardinality") );
             attr -> AddChild( card );
-						new wxXmlNode( card , wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::intToStr( graph->getAttribute(i)->getSizeOrigValues() ).c_str(), wxConvUTF8 ) );
+						new wxXmlNode( card , wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::intToStr( (int) graph->getAttribute(i)->getSizeOrigValues() ).c_str(), wxConvUTF8 ) );
 
             /*
             // original domain
@@ -510,7 +510,7 @@ void Parser::writeAttrConfig(
                 // value
                 pos = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("CurrentPosition") );
                 map -> AddChild( pos );
-						    new wxXmlNode( pos , wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::intToStr(graph->getAttribute(i)->mapToValue(j)->getIndex() ).c_str(), wxConvUTF8 ) );
+						    new wxXmlNode( pos , wxXML_TEXT_NODE, wxEmptyString, wxString( Utils::intToStr( (int) graph->getAttribute(i)->mapToValue(j)->getIndex() ).c_str(), wxConvUTF8 ) );
             }
             }
         }
@@ -1118,9 +1118,9 @@ void Parser::parseTransitions(
 // ---------------------------------------------------
 void Parser::parseAttrConfig(
     Graph* graph,
-    map< int, int > &attrIdxFrTo,
-    map< int, vector< string > > &attrCurDomains,
-    map< int, map< int, int  > > &attrOrigToCurDomains,
+    map< size_t , size_t > &attrIdxFrTo,
+    map< size_t, vector< string > > &attrCurDomains,
+    map< size_t, map< int, int  > > &attrOrigToCurDomains,
     wxXmlNode* curNode )
 // ---------------------------------------------------
 {
@@ -1190,9 +1190,9 @@ void Parser::parseAttrConfig(
 // ----------------------------------------------------
 void Parser::parseAttr(
     Graph* graph,
-    map< int, int > &attrIdxFrTo,
-    map< int, vector< string > > &attrCurDomains,
-    map< int, map< int, int  > > &attrOrigToCurDomains,
+    map< size_t , size_t > &attrIdxFrTo,
+    map< size_t, vector< string > > &attrCurDomains,
+    map< size_t, map< int, int  > > &attrOrigToCurDomains,
     wxXmlNode* curNode )
 // ----------------------------------------------------
 {
@@ -1251,7 +1251,7 @@ void Parser::parseAttr(
          prop->GetName() == wxT("OriginalCardinality" ) &&
          prop->GetNodeContent() != wxEmptyString )
     {
-      if ( strcmp( prop->GetNodeContent().mb_str(), Utils::intToStr( attr->getSizeOrigValues() ).c_str() ) != 0 )
+      if ( strcmp( prop->GetNodeContent().mb_str(), Utils::size_tToStr( attr->getSizeOrigValues() ).c_str() ) != 0 )
       {
           prop = NULL;
           throw mcrl2::runtime_error( "Cardinalities do not match." );
@@ -1264,7 +1264,7 @@ void Parser::parseAttr(
     }
 
     // update attribute mapping
-    attrIdxFrTo.insert( pair< int, int >( attr->getIndex(), attrIdxFrTo.size() ) );
+    attrIdxFrTo.insert( pair< size_t, size_t >( attr->getIndex(), attrIdxFrTo.size() ) );
 
     // current domain
     vector< string > domain;
@@ -1300,7 +1300,7 @@ void Parser::parseAttr(
     }
 
     // update domain
-    attrCurDomains.insert( pair< int, vector< string > >( attr->getIndex(), domain ) );
+    attrCurDomains.insert( pair< size_t, vector< string > >( attr->getIndex(), domain ) );
 
     // mapping from orig to current domain values
     map< int, int > origToCur;
@@ -1345,7 +1345,7 @@ void Parser::parseAttr(
     }
 
     // update mapping
-    attrOrigToCurDomains.insert( pair< int, map< int, int > >( attr->getIndex(), origToCur ) );
+    attrOrigToCurDomains.insert( pair< size_t , map< int, int > >( attr->getIndex(), origToCur ) );
 
     attr = NULL;
 }

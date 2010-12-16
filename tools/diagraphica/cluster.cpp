@@ -21,22 +21,22 @@ using namespace std;
 Cluster::Cluster()
 // ---------------
 {
-    index      = -1;
+    index      = NON_EXISTING;
     parent     = NULL;
     attribute  = NULL;
-    attrValIdx = -1;
+    attrValIdx = NON_EXISTING;
 }
 
 
 // -----------------------------------------
-Cluster::Cluster( const vector< int > &crd )
+Cluster::Cluster( const vector< size_t > &crd )
 // -----------------------------------------
 {
     coord      = crd;
-    index      = -1;
+    index      = NON_EXISTING;
     parent     = NULL;
     attribute  = NULL;
-    attrValIdx = -1;
+    attrValIdx = NON_EXISTING;
 }
 
 
@@ -73,7 +73,7 @@ Cluster::~Cluster()
 
 
 // ----------------------------------------------
-void Cluster::setCoord( const vector< int> &crd )
+void Cluster::setCoord( const vector< size_t > &crd )
 // ----------------------------------------------
 {
     coord = crd;
@@ -81,7 +81,7 @@ void Cluster::setCoord( const vector< int> &crd )
 
 
 // -------------------------------------
-void Cluster::setIndex( const int &idx )
+void Cluster::setIndex( const size_t &idx )
 // -------------------------------------
 {
     index = idx;
@@ -139,7 +139,7 @@ void Cluster::setAttribute( Attribute* attr )
 
 
 // ------------------------------------------
-void Cluster::setAttrValIdx( const int &idx )
+void Cluster::setAttrValIdx( const size_t &idx )
 // ------------------------------------------
 {
     attrValIdx = idx;
@@ -184,7 +184,7 @@ void Cluster::setOutBundles( const vector< Bundle* > b )
 
 
 // ------------------------
-int Cluster::getSizeCoord()
+size_t Cluster::getSizeCoord()
 // ------------------------
 {
     return coord.size();
@@ -192,18 +192,18 @@ int Cluster::getSizeCoord()
 
 
 // ------------------------------------
-int Cluster::getCoord( const int &idx )
+size_t Cluster::getCoord( const size_t &idx )
 // ------------------------------------
 {
-    int result = -1;
-    if ( 0 <= idx && static_cast <size_t> (idx) < coord.size() )
+    size_t result = NON_EXISTING;
+    if ( idx != NON_EXISTING && static_cast <size_t> (idx) < coord.size() )
         result = coord[idx];
     return result;
 }
 
 
 // -----------------------------------------
-void Cluster::getCoord( vector< int > &crd )
+void Cluster::getCoord( vector< size_t > &crd )
 // -----------------------------------------
 {
     crd = coord;
@@ -211,7 +211,7 @@ void Cluster::getCoord( vector< int > &crd )
 
 
 // --------------------
-int Cluster::getIndex()
+size_t Cluster::getIndex()
 // --------------------
 {
     return index;
@@ -227,7 +227,7 @@ Cluster* Cluster::getParent()
 
 
 // ---------------------------
-int Cluster::getSizeChildren()
+size_t Cluster::getSizeChildren()
 // ---------------------------
 {
     return children.size();
@@ -235,10 +235,10 @@ int Cluster::getSizeChildren()
 
 
 // -----------------------------------------
-Cluster* Cluster::getChild( const int &idx )
+Cluster* Cluster::getChild( const size_t &idx )
 // -----------------------------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < children.size() )
+    if ( idx != NON_EXISTING && static_cast <size_t> (idx) < children.size() )
         return children[idx];
     else
         throw mcrl2::runtime_error( "Error retrieving cluster child." );
@@ -246,7 +246,7 @@ Cluster* Cluster::getChild( const int &idx )
 
 
 // ------------------------
-int Cluster::getSizeNodes()
+size_t Cluster::getSizeNodes()
 // ------------------------
 {
     if (this != NULL)
@@ -257,10 +257,10 @@ int Cluster::getSizeNodes()
 
 
 // -------------------------------------
-Node* Cluster::getNode( const int &idx )
+Node* Cluster::getNode( const size_t &idx )
 // -------------------------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < nodes.size() )
+    if ( idx != NON_EXISTING && static_cast <size_t> (idx) < nodes.size() )
         return nodes[idx];
     else
         throw mcrl2::runtime_error( "Error retrieving cluster node." );
@@ -268,10 +268,10 @@ Node* Cluster::getNode( const int &idx )
 
 
 // ----------------------------
-int Cluster::getSizeDescNodes()
+size_t Cluster::getSizeDescNodes()
 // ----------------------------
 {
-    int sum = 0;
+    size_t sum = 0;
     getSizeDescNodes( this, sum );
     return sum;
 }
@@ -286,7 +286,7 @@ Attribute* Cluster::getAttribute()
 
 
 // -------------------------
-int Cluster::getAttrValIdx()
+size_t Cluster::getAttrValIdx()
 // -------------------------
 {
     return attrValIdx;
@@ -294,7 +294,7 @@ int Cluster::getAttrValIdx()
 
 
 // ----------------------------
-int Cluster::getSizeInBundles()
+size_t Cluster::getSizeInBundles()
 // ----------------------------
 {
     return inBundles.size();
@@ -302,10 +302,10 @@ int Cluster::getSizeInBundles()
 
 
 // -------------------------------------------
-Bundle* Cluster::getInBundle( const int &idx )
+Bundle* Cluster::getInBundle( const size_t &idx )
 // -------------------------------------------
 {
-	if ( 0 <= idx && static_cast <size_t> (idx) < inBundles.size() )
+	if ( idx != NON_EXISTING && static_cast <size_t> (idx) < inBundles.size() )
 		return inBundles[idx];
 	else
         throw mcrl2::runtime_error( "Error retrieving cluster incoming bundle." );
@@ -313,7 +313,7 @@ Bundle* Cluster::getInBundle( const int &idx )
 
 
 // -----------------------------
-int Cluster::getSizeOutBundles()
+size_t Cluster::getSizeOutBundles()
 // -----------------------------
 {
     return outBundles.size();
@@ -321,10 +321,10 @@ int Cluster::getSizeOutBundles()
 
 
 // --------------------------------------------
-Bundle* Cluster::getOutBundle( const int &idx )
+Bundle* Cluster::getOutBundle( const size_t &idx )
 // --------------------------------------------
 {
-	if ( 0 <= idx && static_cast <size_t> (idx) < outBundles.size() )
+	if ( idx != NON_EXISTING && static_cast <size_t> (idx) < outBundles.size() )
 		return outBundles[idx];
 	else
         throw mcrl2::runtime_error( "Error retrieving cluster outgoing bundle." );
@@ -367,7 +367,7 @@ void Cluster::clearAttribute()
 // ---------------------------
 {
     attribute  = NULL;
-    attrValIdx = -1;
+    attrValIdx = NON_EXISTING;
 }
 
 
@@ -397,7 +397,7 @@ void Cluster::clearOutBundles()
 // ----------------------------
 void Cluster::getSizeDescNodes(
     Cluster* curClst,
-    int &sum )
+    size_t &sum )
 // ----------------------------
 {
     if ( curClst->getSizeChildren() == 0 )

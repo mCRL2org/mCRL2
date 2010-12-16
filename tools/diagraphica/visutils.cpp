@@ -509,8 +509,8 @@ void VisUtils::mapColorSpectral(
 
 // ------------------------------
 void VisUtils::mapColorQualPast1(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // ------------------------------
 // ------------------------------------------------------------------
@@ -551,8 +551,8 @@ void VisUtils::mapColorQualPast1(
 
 // ------------------------------
 void VisUtils::mapColorQualPast2(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // ------------------------------
 // ------------------------------------------------------------------
@@ -594,8 +594,8 @@ void VisUtils::mapColorQualPast2(
 
 // -----------------------------
 void VisUtils::mapColorQualSet1(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // -----------------------------
 // ------------------------------------------------------------------
@@ -637,8 +637,8 @@ void VisUtils::mapColorQualSet1(
 
 // -----------------------------
 void VisUtils::mapColorQualSet2(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // -----------------------------
 // ------------------------------------------------------------------
@@ -680,8 +680,8 @@ void VisUtils::mapColorQualSet2(
 
 // -----------------------------
 void VisUtils::mapColorQualSet3(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // -----------------------------
 // ------------------------------------------------------------------
@@ -722,8 +722,8 @@ void VisUtils::mapColorQualSet3(
 
 // -----------------------------
 void VisUtils::mapColorQualPair(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // -----------------------------
 // ------------------------------------------------------------------
@@ -764,8 +764,8 @@ void VisUtils::mapColorQualPair(
 
 // -----------------------------
 void VisUtils::mapColorQualDark(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // -----------------------------
 // ------------------------------------------------------------------
@@ -806,8 +806,8 @@ void VisUtils::mapColorQualDark(
 
 // -------------------------------
 void VisUtils::mapColorQualAccent(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // -------------------------------
 // ------------------------------------------------------------------
@@ -848,8 +848,8 @@ void VisUtils::mapColorQualAccent(
 
 // ----------------------------
 void VisUtils::mapColorSeqOrRd(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // ----------------------------
 // ------------------------------------------------------------------
@@ -890,8 +890,8 @@ void VisUtils::mapColorSeqOrRd(
 
 // ----------------------------
 void VisUtils::mapColorSeqGnBu(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // ----------------------------
 // ------------------------------------------------------------------
@@ -932,8 +932,8 @@ void VisUtils::mapColorSeqGnBu(
 
 // -----------------------------
 void VisUtils::mapColorSeqGreen(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // -----------------------------
 // ------------------------------------------------------------------
@@ -1005,8 +1005,8 @@ void VisUtils::mapColorSeqGreen(
 
 // ---------------------------
 void VisUtils::mapColorSeqRed(
-    const int &iter,
-    const int &numr,
+    const size_t &iter,
+    const size_t &numr,
     ColorRGB &colRGB )
 // ---------------------------
 // ------------------------------------------------------------------
@@ -3355,7 +3355,7 @@ void VisUtils::drawLabelInBoundBox(
         int numToCrop = (int)ceil( ( lblLength-w )/charWidth );
         if ( 0 < numToCrop && static_cast <size_t> (numToCrop) < cropLbl.size() )
         {
-	    int eraseSize = cropLbl.size() - numToCrop;
+	    ssize_t eraseSize = cropLbl.size() - numToCrop;
 	    if(eraseSize > 0)
 	    {
             	cropLbl.erase( eraseSize );
@@ -3375,7 +3375,7 @@ void VisUtils::drawLabelInBoundBox(
         int numToCrop = (int)ceil( ( lblLength-h )/charWidth );
         if ( 0 < numToCrop && static_cast  <size_t> (numToCrop) < cropLbl.size() )
         {
-            int eraseSize = cropLbl.size() - numToCrop - 2;
+            ssize_t eraseSize = cropLbl.size() - numToCrop - 2;
 	    if(eraseSize > 2)
 	    {
             	cropLbl.erase( eraseSize );

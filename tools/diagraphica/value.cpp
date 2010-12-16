@@ -19,7 +19,7 @@ using namespace std;
 
 // --------------------
 Value::Value(
-    const int &idx,
+    const size_t &idx,
     const string &val )
 // --------------------
 {
@@ -47,7 +47,7 @@ Value::~Value()
 
 
 // -----------------------------------
-void Value::setIndex( const int &idx )
+void Value::setIndex( const size_t &idx )
 // -----------------------------------
 {
     index = idx;
@@ -66,7 +66,7 @@ void Value::setValue( const string &val )
 
 
 // ------------------
-int Value::getIndex()
+size_t Value::getIndex()
 // ------------------
 {
     return index;

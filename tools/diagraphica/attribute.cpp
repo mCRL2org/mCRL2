@@ -21,7 +21,7 @@ Attribute::Attribute(
     Mediator* m,
     const string &nam,
     const string &typ,
-    const int &idx )
+    const size_t &idx )
     : Colleague( m )
 // ------------------
 {
@@ -52,7 +52,7 @@ Attribute::~Attribute()
 
 
 // ---------------------------------------
-void Attribute::setIndex( const int &idx )
+void Attribute::setIndex( const size_t &idx )
 // ---------------------------------------
 {
     index = idx;
@@ -127,7 +127,7 @@ void Attribute::removeClassification()
 
 
 // ----------------------
-int Attribute::getIndex()
+size_t Attribute::getIndex()
 // ----------------------
 {
     return index;
@@ -151,7 +151,7 @@ string Attribute::getType()
 
 
 // -------------------------------
-int Attribute::getSizeOrigValues()
+size_t Attribute::getSizeOrigValues()
 // -------------------------------
 {
     return 0;
@@ -159,7 +159,7 @@ int Attribute::getSizeOrigValues()
 
 
 // --------------------------------------
-Value* Attribute::getOrigValue( int /*idx*/ )
+Value* Attribute::getOrigValue( size_t /*idx*/ )
 // --------------------------------------
 {
     return NULL;
@@ -167,7 +167,7 @@ Value* Attribute::getOrigValue( int /*idx*/ )
 
 
 // -------------------------------------
-Value* Attribute::getCurValue( int /*idx*/ )
+Value* Attribute::getCurValue( size_t /*idx*/ )
 // -------------------------------------
 {
     return NULL;

@@ -153,7 +153,7 @@ void Diagram::setSnapGrid( const bool &flag )
 
 
 // -------------------------
-int Diagram::getSizeShapes()
+size_t Diagram::getSizeShapes()
 // -------------------------
 {
     return shapes.size();
@@ -525,7 +525,7 @@ void Diagram::drawShapes(
     {
         for ( size_t i = 0; i < shapes.size(); ++i )
         {
-            glPushName( i );
+            glPushName( (GLuint) i );
             shapes[i]->visualize( inSelectMode, canvas );
             glPopName();
         }

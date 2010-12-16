@@ -21,7 +21,7 @@ AttrConti::AttrConti(
     Mediator* m,
     const string &nam,
     const string &typ,
-    const int &idx,
+    const size_t &idx,
     const double &lwrBnd,
     const double &uprBnd )
     : Attribute(
@@ -45,7 +45,7 @@ AttrConti::AttrConti( const AttrConti &attr )
         curValues.push_back( new Value( *attr.curValues[i] ) );
 
     map< double, Value* >::const_iterator it;
-    int idx;
+    size_t idx;
     Value* val;
     for ( it = attr.curMap.begin(); it != attr.curMap.end(); ++it )
     {
@@ -134,7 +134,7 @@ void AttrConti::clusterValues(
         }
         }
         {
-        for ( int i = static_cast<int>(toRemove.size()); i > 0; --i )
+        for ( size_t i = toRemove.size(); i > 0; --i )
         {
             // remove ptr from current domain
             curValues.erase( toRemove[i-1] );
@@ -427,7 +427,7 @@ void AttrConti::getRangeOrigValues(
 
 
 // ------------------------------
-int AttrConti::getSizeCurValues()
+size_t AttrConti::getSizeCurValues()
 // ------------------------------
 {
     return curValues.size();
@@ -435,18 +435,18 @@ int AttrConti::getSizeCurValues()
 
 
 // -------------------------------------
-Value* AttrConti::getCurValue( int idx )
+Value* AttrConti::getCurValue( size_t idx )
 // -------------------------------------
 {
     Value* result = NULL;
-    if ( 0 <= idx && idx < (int) curValues.size() )
+    if ( idx != NON_EXISTING && idx < curValues.size() )
         result = curValues[idx];
     return result;
 }
 
 
 // ------------------------
-int AttrConti::getSizeMap()
+size_t AttrConti::getSizeMap()
 // ------------------------
 {
     return curMap.size();

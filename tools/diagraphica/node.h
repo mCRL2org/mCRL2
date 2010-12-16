@@ -22,9 +22,9 @@ class Node
 {
 public:
 	// -- constructors and destructors ------------------------------
-    Node( const int &idx );
+    Node( const size_t &idx );
     Node(
-        const int &idx,
+        const size_t &idx,
         const std::vector< double > &tpl );
 	virtual ~Node();
 
@@ -35,11 +35,11 @@ public:
     void moveTupleVal(
         const size_t &idxFr,
         const size_t &idxTo );
-    void moveTupleVals( std::map< int, int > &idcsFrTo );
+    void moveTupleVals( std::map< size_t , size_t > &idcsFrTo );
     void addTupleVal(
-        const int &idx,
+        const size_t &idx,
         const double &val );
-    void delTupleVal( const int &idx );
+    void delTupleVal( const size_t &idx );
     void addInEdge( Edge* e );
     void setInEdges( const std::vector< Edge* > e );
     void addOutEdge( Edge* e );
@@ -47,12 +47,12 @@ public:
     void setCluster( Cluster* c );
 
     // -- get functions ---------------------------------------------
-    int getIndex();
-    int getSizeTuple();
+    size_t getIndex();
+    size_t getSizeTuple();
     double getTupleVal( const size_t &idx );
-    int getSizeInEdges();
+    size_t getSizeInEdges();
     Edge* getInEdge( const size_t &idx );
-    int getSizeOutEdges();
+    size_t getSizeOutEdges();
     Edge* getOutEdge( const size_t &idx );
 	Cluster* getCluster();
 
@@ -63,7 +63,7 @@ public:
 
 protected:
     // -- data members ----------------------------------------------
-    int index; // index in list of graph nodes
+    size_t index; // index in list of graph nodes
     std::vector< double >   tuple;
     std::vector< Edge* > inEdges;  // association
 	std::vector< Edge* > outEdges; // association

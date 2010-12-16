@@ -26,6 +26,10 @@
 #include <wx/wx.h>
 #include "visutils.h"
 
+#ifndef NON_EXISTING
+	#define NON_EXISTING (size_t)(-1)
+#endif
+
 class Attribute;
 class Cluster;
 class Colleague;
@@ -51,8 +55,8 @@ public:
 	virtual void initProgress(
 		const std::string &title,
 		const std::string &msg,
-		const int &max ) = 0;
-	virtual void updateProgress( const int &val ) = 0;
+		const size_t &max ) = 0;
+	virtual void updateProgress( const size_t &val ) = 0;
 	virtual void closeProgress() = 0;
 
 	virtual void setOutputText( const std::string &msg ) = 0;
@@ -64,19 +68,19 @@ public:
 	virtual void handleCloseFrame( PopupFrame* f ) = 0;
 
 	// -- interaction with attributes & domains ---------------------
-	virtual void handleAttributeSel( const int &idx ) = 0;
+	virtual void handleAttributeSel( const size_t &idx ) = 0;
 	virtual void handleMoveAttr(
-		const int &idxFr,
-		const int &idxTo ) = 0;
-	virtual void handleAttributeDuplicate( const std::vector< int > &indcs ) = 0;
+		const size_t &idxFr,
+		const size_t &idxTo ) = 0;
+	virtual void handleAttributeDuplicate( const std::vector< size_t > &indcs ) = 0;
 	/*
 	virtual void handleAttributeDelete( const std::vector< int > &indcs ) = 0;
 	*/
-	virtual void handleAttributeDelete( const int &idx ) = 0;
+	virtual void handleAttributeDelete( const size_t &idx ) = 0;
 	virtual void handleAttributeRename(
-		const int &idx,
+		const size_t &idx,
 		const std::string &name ) = 0;
-	virtual void handleAttributeCluster( const std::vector< int > &indcs ) = 0;
+	virtual void handleAttributeCluster( const std::vector< size_t > &indcs ) = 0;
 
 	// -*- //
 	virtual void handleAttrPartition( const int &attrIdx ) = 0;
@@ -87,10 +91,10 @@ public:
 	virtual void handleAttrPartitionCloseFrame() = 0;
 
 	virtual void getAttrValues(
-		const int &attrIdx,
+		const size_t &attrIdx,
 		std::vector< double > &vals ) = 0;
 	virtual void getAttrValues(
-		const int &attrIdx,
+		const size_t &attrIdx,
 		std::set< double > &vals ) = 0;
 
 	// -*- //
@@ -106,17 +110,17 @@ public:
 	virtual void handleDomainUngroup( const int &attrIdx ) = 0;
 
 	virtual void getAttributeNames(
-		const std::vector< int > &indcs,
+		const std::vector< size_t > &indcs,
 		std::vector< wxString > &names ) = 0;
-	virtual int getAttributeType( const int &idx ) = 0;
-	virtual int getAttrSizeCurDomain( const int &idx ) = 0;
+	virtual size_t getAttributeType( const size_t &idx ) = 0;
+	virtual size_t getAttrSizeCurDomain( const size_t &idx ) = 0;
 
 	// -- attribute plots -------------------------------------------
-	virtual void handleAttributePlot( const int &idx ) = 0;
+	virtual void handleAttributePlot( const size_t &idx ) = 0;
 	virtual void handleAttributePlot(
-		const int &idx1,
-		const int &idx2 ) = 0;
-	virtual void handleAttributePlot( const std::vector< int > &indcs ) = 0;
+		const size_t &idx1,
+		const size_t &idx2 ) = 0;
+	virtual void handleAttributePlot( const std::vector< size_t > &indcs ) = 0;
 	virtual void handlePlotFrameDestroy() = 0;
 
 	virtual void handleEditClust( Cluster* c ) = 0;
@@ -125,7 +129,7 @@ public:
 	virtual void handleClustPlotFrameDisplay(
 		const int &idx1,
 		const int &idx2 ) = 0;
-	virtual void handleClustPlotFrameDisplay( const std::vector< int > &indcs ) = 0;
+	virtual void handleClustPlotFrameDisplay( const std::vector< size_t > &indcs ) = 0;
 	virtual void setClustMode( const int &m ) = 0;
 	virtual int getClustMode() = 0;
 
@@ -140,7 +144,7 @@ public:
 
 	// -- diagram editor --------------------------------------------
 	virtual void* getGraph() = 0;
-	virtual void handleNote( const int &shapeId, const std::string &msg ) = 0;
+	virtual void handleNote( const size_t &shapeId, const std::string &msg ) = 0;
 	virtual void handleEditModeSelect() = 0;
 	virtual void handleEditModeNote() = 0;
 	virtual void handleEditModeDOF( Colleague* c ) = 0;
@@ -166,10 +170,10 @@ public:
 		const bool &editDOF,
 		const int  &checkedItem ) = 0;
 	virtual void handleShowVariable( const std::string &variable, const int &variableId ) = 0;
-	virtual void handleShowNote( const std::string &variable, const int &shapeId ) = 0;
-	virtual void handleAddText( std::string &variable, int &shapeId ) = 0;
-	virtual void handleTextSize( int &textSize, int &shapeId ) = 0;
-	virtual void handleSetTextSize( int &textSize, int &shapeId ) = 0;
+	virtual void handleShowNote( const std::string &variable, const size_t &shapeId ) = 0;
+	virtual void handleAddText( std::string &variable, size_t &shapeId ) = 0;
+	virtual void handleTextSize( size_t &textSize, size_t &shapeId ) = 0;
+	virtual void handleSetTextSize( size_t &textSize, size_t &shapeId ) = 0;
 	virtual void handleCutShape() = 0;
 	virtual void handleCopyShape() = 0;
 	virtual void handlePasteShape() = 0;
@@ -180,13 +184,13 @@ public:
 	virtual void handleSendBackwardShape() = 0;
 	virtual void handleEditDOFShape() = 0;
 	virtual void handleSetDOF( const int &attrIdx ) = 0;
-	virtual void handleCheckedVariable( const int &idDOF, const int &variableId ) = 0;
+	virtual void handleCheckedVariable( const size_t &idDOF, const int &variableId ) = 0;
 
 	virtual void handleEditDOF(
-		const std::vector< int > &degsOfFrdmIds,
+		const std::vector< size_t > &degsOfFrdmIds,
 		const std::vector< std::string > &degsOfFrdm,
-		const std::vector< int > &attrIndcs,
-		const int &selIdx ) = 0;
+		const std::vector< size_t > &attrIndcs,
+		const size_t &selIdx ) = 0;
 	virtual void handleDOFSel( const int &DOFIdx ) = 0;
 
 	virtual void setDOFColorSelected() = 0;
@@ -195,7 +199,7 @@ public:
 	virtual void handleSetDOFTextStatus(
 		const int &DOFIdx,
 		const int &status ) = 0;
-	virtual int handleGetDOFTextStatus( const int &DOFIdx ) = 0;
+	virtual size_t handleGetDOFTextStatus( const int &DOFIdx ) = 0;
 
 	virtual void handleDOFColActivate() = 0;
 	virtual void handleDOFColDeactivate() = 0;
@@ -203,7 +207,7 @@ public:
 		const double &hue,
 		const double &y ) = 0;
 	virtual void handleDOFColUpdate(
-		const int &idx,
+		const size_t &idx,
 		const double &hue,
 		const double &y ) = 0;
 	virtual void handleDOFColClear(
@@ -228,9 +232,9 @@ public:
 		const std::vector< double > &y ) = 0;
 
 	virtual void handleLinkDOFAttr(
-		const int DOFIdx,
+		const size_t DOFIdx,
 		const int attrIdx ) = 0;
-	virtual void handleUnlinkDOFAttr( const int DOFIdx ) = 0;
+	virtual void handleUnlinkDOFAttr( const size_t DOFIdx ) = 0;
 	virtual void handleDOFFrameDestroy() = 0;
 	virtual void handleDOFDeselect() = 0;
 
@@ -239,7 +243,7 @@ public:
 		Cluster* currFrame,
 		const std::vector< Attribute* > &attrs ) = 0;
 
-	virtual void initTimeSeries( const std::vector< int > attrIdcs ) = 0;
+	virtual void initTimeSeries( const std::vector< size_t > attrIdcs ) = 0;
 	virtual void markTimeSeries(
 		Colleague* sender,
 		Cluster* currFrame ) = 0;
@@ -390,6 +394,7 @@ public:
 	// -- overloaded operators --------------------------------------
 	virtual void operator<<( const std::string &msg ) = 0;
 	virtual void operator<<( const int& msg ) = 0;
+	virtual void operator<<( const size_t& msg ) = 0;
 
 	// -- public constants ------------------------------------------
 	enum

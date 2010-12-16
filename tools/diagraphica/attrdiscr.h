@@ -27,7 +27,7 @@ public:
         Mediator* m,
         const std::string &nam,
         const std::string &typ,
-        const int &idx,
+        const size_t &idx,
         const std::vector< std::string > &vals );
     AttrDiscr( const AttrDiscr &attr );
     virtual ~AttrDiscr();
@@ -41,16 +41,16 @@ public:
         const size_t &idxTo );
     void configValues(
         const std::vector< std::string > &curDomain,
-        std::map< int, int  > &origToCurDomain );
+        std::map< size_t, int  > &origToCurDomain );
 
     // -- get functions ---------------------------------------------
     int getAttrType();
 
-    int getSizeOrigValues();
-    Value* getOrigValue( int idx );
-    int getSizeCurValues();
-    Value* getCurValue( int idx );
-    int getSizeMap();
+    size_t getSizeOrigValues();
+    Value* getOrigValue( size_t idx );
+    size_t getSizeCurValues();
+    Value* getCurValue( size_t idx );
+    size_t getSizeMap();
     Value* mapToValue( double key );
 
     // -- clear functions -------------------------------------------

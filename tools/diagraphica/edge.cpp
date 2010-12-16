@@ -19,7 +19,7 @@ using namespace std;
 
 // --------------------
 Edge::Edge(
-    const int &idx,
+    const size_t &idx,
     const string &lbl )
 // --------------------
 {
@@ -72,7 +72,7 @@ void Edge::setBundle( Bundle* b )
 
 
 // -----------------
-int Edge::getIndex()
+size_t Edge::getIndex()
 // -----------------
 {
     return index;

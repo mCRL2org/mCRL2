@@ -27,7 +27,7 @@ public:
         Mediator* m,
         const std::string &nam,
         const std::string &typ,
-        const int &idx,
+        const size_t &idx,
         const double &lwrBnd,
         const double &uprBnd );
     AttrConti( const AttrConti &attr );
@@ -59,9 +59,9 @@ public:
         double &lwrBnd,
         double &uprBnd );
 
-    int getSizeCurValues();
-    Value* getCurValue( int idx );
-    int getSizeMap();
+    size_t getSizeCurValues();
+    Value* getCurValue( size_t idx );
+    size_t getSizeMap();
     Value* mapToValue( double key );
 
     // -- clear functions -------------------------------------------

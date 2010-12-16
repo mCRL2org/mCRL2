@@ -22,7 +22,7 @@ AttrDiscr::AttrDiscr(
     Mediator* m,
     const string &nam,
     const string &typ,
-    const int &idx,
+    const size_t &idx,
     const vector< string > &vals )
     : Attribute(
         m,
@@ -129,7 +129,7 @@ void AttrDiscr::clusterValues(
         }
         }
         {
-        for ( int i = toRemove.size(); i > 0; --i )
+        for ( size_t i = toRemove.size(); i > 0; --i )
         {
             // remove ptr from current domain
             curValues.erase( toRemove[i-1] );
@@ -205,7 +205,7 @@ void AttrDiscr::moveValue(
 // ------------------------------------
 void AttrDiscr::configValues(
     const vector< string > &curDomain,
-    map< int, int  > &origToCurDomain )
+    map< size_t , int  > &origToCurDomain )
 // ------------------------------------
 {
     try
@@ -260,7 +260,7 @@ int AttrDiscr::getAttrType()
 
 
 // -------------------------------
-int AttrDiscr::getSizeOrigValues()
+size_t AttrDiscr::getSizeOrigValues()
 // -------------------------------
 {
     return origValues.size();
@@ -268,10 +268,10 @@ int AttrDiscr::getSizeOrigValues()
 
 
 // --------------------------------------
-Value* AttrDiscr::getOrigValue( int idx )
+Value* AttrDiscr::getOrigValue( size_t idx )
 // --------------------------------------
 {
-    if ( 0 <= idx && idx < (int)origValues.size() )
+    if ( idx != NON_EXISTING && idx < origValues.size() )
         return origValues[idx];
     else
         throw mcrl2::runtime_error(
@@ -280,7 +280,7 @@ Value* AttrDiscr::getOrigValue( int idx )
 
 
 // ------------------------------
-int AttrDiscr::getSizeCurValues()
+size_t AttrDiscr::getSizeCurValues()
 // ------------------------------
 {
     return curValues.size();
@@ -288,10 +288,10 @@ int AttrDiscr::getSizeCurValues()
 
 
 // -------------------------------------
-Value* AttrDiscr::getCurValue( int idx )
+Value* AttrDiscr::getCurValue( size_t idx )
 // -------------------------------------
 {
-    if ( 0 <= idx && idx < (int)curValues.size() )
+    if (idx != NON_EXISTING && idx < curValues.size() )
         return curValues[idx];
     else
         throw mcrl2::runtime_error(
@@ -300,7 +300,7 @@ Value* AttrDiscr::getCurValue( int idx )
 
 
 // ------------------------
-int AttrDiscr::getSizeMap()
+size_t AttrDiscr::getSizeMap()
 // ------------------------
 {
     return curMap.size();

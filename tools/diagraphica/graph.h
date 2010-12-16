@@ -51,12 +51,12 @@ public:
     void addAttrDiscr(
         const std::string &name,
         const std::string &type,
-        const int &idx,
+        const size_t &idx,
         const std::vector< std::string > &vals );
     void addAttrConti(
         const std::string &name,
         const std::string &type,
-        const int &idx,
+        const size_t &idx,
         const double &lwrBnd,
         const double &uprBnd );
 
@@ -67,48 +67,48 @@ public:
         const size_t &idxFr,
         const size_t &idxTo );
     void configAttributes(
-        std::map< int, int > &idcsFrTo,
-        std::map< int, std::vector< std::string > > &attrCurDomains,
-        std::map< int, std::map< int, int  > > &attrOrigToCurDomains );
-    void duplAttributes( const std::vector< int > &idcs );
-    void deleteAttribute( const int &idx );
+        std::map< size_t , size_t > &idcsFrTo,
+        std::map< size_t, std::vector< std::string > > &attrCurDomains,
+        std::map< size_t, std::map< int, int  > > &attrOrigToCurDomains );
+    void duplAttributes( const std::vector< size_t > &idcs );
+    void deleteAttribute( const size_t &idx );
 
     void addNode( const std::vector< double > &tpl );
     void addEdge(
         const std::string &lbl,
-        const int &inNodeIdx,
-        const int &outNodeIdx );
+        const size_t &inNodeIdx,
+        const size_t &outNodeIdx );
 
     void initGraph();
 
     // -- get functions  --------------------------------------------
     std::string getFileName();
-    int getSizeAttributes();
+    size_t getSizeAttributes();
     Attribute* getAttribute( const size_t &idx );
     Attribute* getAttribute( const std::string &name );
-    int getSizeNodes();
+    size_t getSizeNodes();
     Node* getNode( const size_t &idx );
-    int getSizeEdges();
+    size_t getSizeEdges();
     Edge* getEdge( const size_t &idx );
     Cluster* getRoot();
-    Cluster* getCluster( const std::vector< int > coord );
+    Cluster* getCluster( const std::vector< size_t > coord );
     Cluster* getLeaf( const size_t &idx );
-    int getSizeLeaves();
+    size_t getSizeLeaves();
     Bundle* getBundle( const size_t &idx );
-    int getSizeBundles();
+    size_t getSizeBundles();
 
     // -- calculation functions -------------------------------------
     void calcAttrDistr(
-        const int &attrIdx,
-        std::vector< int > &distr );
+        const size_t &attrIdx,
+        std::vector< size_t > &distr );
     void calcAttrDistr(
         Cluster* clust,
-        const int &attrIdx,
-        std::vector< int > &distr );
+        const size_t &attrIdx,
+        std::vector< size_t > &distr );
 
     void calcAttrCorrl(
-        const int &attrIdx1,
-        const int &attrIdx2,
+        const size_t &attrIdx1,
+        const size_t &attrIdx2,
         std::vector< std::vector< int > > &corrlMap,
         std::vector< std::vector< int > > &number );
     void calcAttrCorrl(
@@ -119,24 +119,24 @@ public:
         std::vector< std::vector< int > > &number );
 
     void calcAttrCombn(
-        const std::vector< int > &attrIndcs,
-        std::vector< std::vector< int > > &combs,
-        std::vector< int > &number );
+        const std::vector< size_t > &attrIndcs,
+        std::vector< std::vector< size_t > > &combs,
+        std::vector< size_t > &number );
     void calcAttrCombn(
         Cluster* clust,
-        const std::vector< int > &attrIndcs,
-        std::vector< std::vector< int > > &combs,
-        std::vector< int > &number );
+        const std::vector< size_t > &attrIndcs,
+        std::vector< std::vector< size_t > > &combs,
+        std::vector< size_t > &number );
     void calcAttrCombn(
-        const std::vector< int > &attrIndcs,
-        std::vector< std::vector< int > > &combs );
-    void calcAttrCombn(
-        Cluster* clust,
-        const std::vector< int > &attrIndcs,
-        std::vector< std::vector< int > > &combs );
+        const std::vector< size_t > &attrIndcs,
+        std::vector< std::vector< size_t > > &combs );
     void calcAttrCombn(
         Cluster* clust,
-        const std::vector< int > &attrIndcs,
+        const std::vector< size_t > &attrIndcs,
+        std::vector< std::vector< size_t > > &combs );
+    void calcAttrCombn(
+        Cluster* clust,
+        const std::vector< size_t > &attrIndcs,
         std::vector< std::vector< Node* > > &combs );
     void calcAttrCombn(
         Cluster* clust,
@@ -148,20 +148,20 @@ public:
         const std::vector< int > &attrIndcs );
 
     // -- cluster & bundle functions --------------------------------
-    void clustNodesOnAttr( const std::vector< int > &attrIdcs );
-    void clearSubClusters( const std::vector< int > &coord );
+    void clustNodesOnAttr( const std::vector< size_t > &attrIdcs );
+    void clearSubClusters( const std::vector< size_t > &coord );
 
-    int sumNodesInCluster( const std::vector< int > &coord );
+    size_t sumNodesInCluster( const std::vector< size_t > &coord );
     void sumNodesInCluster(
         Cluster* clust,
-        int &total );
+        size_t &total );
     void getDescNodesInCluster(
-        const std::vector< int > &coord,
+        const std::vector< size_t > &coord,
         std::vector< Node* > &nodes );
     void getDescNodesInCluster(
         Cluster* clust,
         std::vector< Node* > &nodes );
-    int calcMaxNumCombns( const std::vector< int > &attrIdcs );
+    size_t calcMaxNumCombns( const std::vector< size_t > &attrIdcs );
 
 protected:
     // -- private utility functions ---------------------------------
@@ -175,14 +175,14 @@ protected:
 
     void clustNodesOnAttr(
         Cluster* clust,
-        std::vector< int > attrIdcs,
-        int &progress );
+        std::vector< size_t > attrIdcs,
+        size_t &progress );
     void clustClusterOnAttr(
-        const std::vector< int > coord,
-        const int &attrIdx );
+        const std::vector< size_t > coord,
+        const size_t &attrIdx );
     void clustClusterOnAttr(
         Cluster* clust,
-        const int &attrIdx );
+        const size_t &attrIdx );
     void clearSubClusters( Cluster* clust );
 
     void updateLeaves();
@@ -194,7 +194,7 @@ protected:
     void printClusters();
     void printClusters( std::vector< Cluster* > &clusts );
 
-    void updateBundles( int &progress );
+    void updateBundles( size_t &progress );
     void updateBundles();
     void deleteBundles();
     void printBundles();

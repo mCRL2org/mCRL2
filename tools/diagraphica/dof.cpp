@@ -118,7 +118,7 @@ void DOF::setMinMax( const double &mn, const double &mx )
 
 // --------------------
 void DOF::setValue(
-    const int &idx,
+    const size_t &idx,
     const double &val )
 // --------------------
 {
@@ -136,11 +136,11 @@ void DOF::addValue( const double &val )
 
 
 // -----------------------------------
-void DOF::clearValue( const int &idx )
+void DOF::clearValue( const size_t &idx )
 // -----------------------------------
 {
     if ( values.size() > 2 &&
-         ( 0 <= idx && static_cast <size_t> (idx) < values.size() ) )
+         ( idx != NON_EXISTING && static_cast <size_t> (idx) < values.size() ) )
     {
         values.erase( values.begin() + idx );
     }
@@ -215,7 +215,7 @@ double DOF::getMax()
 
 
 // ---------------------
-int DOF::getSizeValues()
+size_t DOF::getSizeValues()
 // ---------------------
 {
     return values.size();
@@ -223,11 +223,11 @@ int DOF::getSizeValues()
 
 
 // -----------------------------------
-double DOF::getValue( const int &idx )
+double DOF::getValue( const size_t &idx )
 // -----------------------------------
 {
     double result = -1;
-    if ( 0 <= idx && static_cast <size_t> (idx) < values.size() )
+    if ( idx != NON_EXISTING && static_cast <size_t> (idx) < values.size() )
         result = values[idx];
     return result;
 }

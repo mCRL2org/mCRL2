@@ -99,7 +99,7 @@ void Graph::addAttribute(
 void Graph::addAttrDiscr(
     const string &name,
     const string &type,
-    const int &idx,
+    const size_t &idx,
     const vector< string > &vals )
 // -------------------------------
 {
@@ -118,7 +118,7 @@ void Graph::addAttrDiscr(
 void Graph::addAttrConti(
     const string &name,
     const string &type,
-    const int &idx,
+    const size_t &idx,
     const double &lwrBnd,
     const double &uprBnd )
 // ----------------------
@@ -213,9 +213,9 @@ void Graph::moveAttribute(
 
 // -----------------------------------------------------
 void Graph::configAttributes(
-    map< int, int > &idcsFrTo,
-    map< int, vector< string > > &attrCurDomains,
-    map< int, map< int, int  > > &attrOrigToCurDomains )
+    map< size_t, size_t > &idcsFrTo,
+    map< size_t, vector< string > > &attrCurDomains,
+    map< size_t, map< int , int  > > &attrOrigToCurDomains )
 // -----------------------------------------------------
 {
     size_t sizeAttrs = attributes.size();
@@ -275,10 +275,10 @@ void Graph::configAttributes(
 
 
 // ----------------------------------------------------
-void Graph::duplAttributes( const vector< int > &idcs )
+void Graph::duplAttributes( const vector< size_t > &idcs )
 // ----------------------------------------------------
 {
-    int insIdx = 0;
+    size_t insIdx = 0;
     vector< Attribute* > newAttrs;
 
     // get insertion index
@@ -331,12 +331,12 @@ void Graph::duplAttributes( const vector< int > &idcs )
 
 
 // ------------------------------------------
-void Graph::deleteAttribute( const int &idx )
+void Graph::deleteAttribute( const size_t &idx )
 // ------------------------------------------
 {
     Cluster* clst;
-    vector< int > idcsCurClust;
-    vector< int > idcsNewClust;
+    vector< size_t > idcsCurClust;
+    vector< size_t > idcsNewClust;
 
     // get indcs of attributes used in current clustering
     clst = root;
@@ -393,8 +393,8 @@ void Graph::addNode( const vector< double > &tpl )
 // ------------------------
 void Graph::addEdge(
     const string &lbl,
-    const int &inNodeIdx,
-    const int &outNodeIdx )
+    const size_t &inNodeIdx,
+    const size_t &outNodeIdx )
 // ------------------------
 {
     Edge* e = new Edge(
@@ -442,7 +442,7 @@ string Graph::getFileName()
 
 
 // ---------------------------
-int Graph::getSizeAttributes()
+size_t Graph::getSizeAttributes()
 // ---------------------------
 {
     return attributes.size();
@@ -477,7 +477,7 @@ Attribute* Graph::getAttribute( const string &name )
 
 
 // ----------------------
-int Graph::getSizeNodes()
+size_t Graph::getSizeNodes()
 // ----------------------
 {
     return nodes.size();
@@ -496,7 +496,7 @@ Node* Graph::getNode( const size_t &idx )
 
 
 // ----------------------
-int Graph::getSizeEdges()
+size_t Graph::getSizeEdges()
 // ----------------------
 {
     return edges.size();
@@ -523,7 +523,7 @@ Cluster* Graph::getRoot()
 
 
 // ----------------------------------------------------
-Cluster* Graph::getCluster( const vector< int > coord )
+Cluster* Graph::getCluster( const vector< size_t > coord )
 // ----------------------------------------------------
 {
     Cluster* result = NULL;
@@ -565,7 +565,7 @@ Cluster* Graph::getLeaf( const size_t &idx )
 
 
 // -----------------------
-int Graph::getSizeLeaves()
+size_t Graph::getSizeLeaves()
 // -----------------------
 {
     return leaves.size();
@@ -584,7 +584,7 @@ Bundle* Graph::getBundle( const size_t &idx )
 
 
 // ------------------------
-int Graph::getSizeBundles()
+size_t Graph::getSizeBundles()
 // ------------------------
 {
     return bundles.size();
@@ -596,14 +596,14 @@ int Graph::getSizeBundles()
 
 // ------------------------
 void Graph::calcAttrDistr(
-    const int &attrIdx,
-    vector< int > &distr )
+    const size_t &attrIdx,
+    vector< size_t > &distr )
 // ------------------------
 {
     // vars
     Attribute* attribute = NULL;
-    int sizeDomain       = 0;
-    int sizeNodes        = 0;
+    size_t sizeDomain       = 0;
+    size_t sizeNodes        = 0;
 
     // init vars
     attribute  = getAttribute( attrIdx );
@@ -633,15 +633,15 @@ void Graph::calcAttrDistr(
 // -----------------------
 void Graph::calcAttrDistr(
     Cluster* clust,
-    const int &attrIdx,
-    vector< int > &distr )
+    const size_t &attrIdx,
+    vector< size_t > &distr )
 // -----------------------
 {
     // vars
     Attribute* attribute = NULL;
-    int sizeDomain       = 0;
+    size_t sizeDomain       = 0;
     vector< Node* > clustNodes;
-    int sizeNodes        = 0;
+    size_t sizeNodes        = 0;
 
     // init vars
     attribute  = getAttribute( attrIdx );
@@ -674,8 +674,8 @@ void Graph::calcAttrDistr(
 
 // -----------------------------------
 void Graph::calcAttrCorrl(
-    const int &attrIdx1,
-    const int &attrIdx2,
+    const size_t &attrIdx1,
+    const size_t &attrIdx2,
     vector< vector< int > > &corrlMap,
     vector< vector< int > > &number )
 // -----------------------------------
@@ -684,12 +684,12 @@ void Graph::calcAttrCorrl(
     Attribute* attr1 = NULL;
     Attribute* attr2 = NULL;
     Node*      node  = NULL;
-    int sizeDomain1  = 0;
-    int sizeDomain2  = 0;
-    int numCombns    = 0;
-    int sizeNodes    = 0;
-    int domIdx1      = 0;
-    int domIdx2      = 0;
+    size_t sizeDomain1  = 0;
+    size_t sizeDomain2  = 0;
+    size_t numCombns    = 0;
+    size_t sizeNodes    = 0;
+    size_t domIdx1      = 0;
+    size_t domIdx2      = 0;
     vector< int >::iterator it;
     vector< int > toErase;
 
@@ -800,13 +800,13 @@ void Graph::calcAttrCorrl(
     Attribute* attr1 = NULL;
     Attribute* attr2 = NULL;
     Node*      node  = NULL;
-    int sizeDomain1  = 0;
-    int sizeDomain2  = 0;
-    int numCombns    = 0;
+    size_t sizeDomain1  = 0;
+    size_t sizeDomain2  = 0;
+    size_t numCombns    = 0;
     vector< Node* > clustNodes;
-    int sizeNodes    = 0;
-    int domIdx1      = 0;
-    int domIdx2      = 0;
+    size_t sizeNodes    = 0;
+    size_t domIdx1      = 0;
+    size_t domIdx2      = 0;
     int count        = 0;
     vector< int >::iterator it;
     vector< int > toErase;
@@ -905,9 +905,9 @@ void Graph::calcAttrCorrl(
 
 // --------------------------------
 void Graph::calcAttrCombn(
-    const vector< int > &attrIndcs,
-    vector< vector< int > > &combs,
-    vector< int > &number )
+    const vector< size_t > &attrIndcs,
+    vector< vector< size_t > > &combs,
+    vector< size_t > &number )
 // --------------------------------
 {
     if ( root != NULL )
@@ -918,19 +918,19 @@ void Graph::calcAttrCombn(
 // --------------------------------
 void Graph::calcAttrCombn(
     Cluster* clust,
-    const vector< int > &attrIndcs,
-    vector< vector< int > > &combs,
-    vector< int > &number )
+    const vector< size_t > &attrIndcs,
+    vector< vector< size_t > > &combs,
+    vector< size_t > &number )
 // --------------------------------
 {
-    int summand     = 0;
-    int key         = 0;
-    int card        = 0;
+    size_t summand     = 0;
+    size_t key         = 0;
+    size_t card        = 0;
     Node*      node = NULL;
     Attribute* attr = NULL;
     vector< Node* >           nodesInClst;
-    map< int, vector< int > > keyToCombn;
-    map< int, int >           keyToNumber;
+    map< size_t , vector< size_t > > keyToCombn;
+    map< size_t , size_t >           keyToNumber;
 
     // do initialization
     getDescNodesInCluster( clust, nodesInClst );
@@ -971,7 +971,7 @@ void Graph::calcAttrCombn(
         // insert combn 1st time it occurs
         if ( keyToCombn.find( key ) == keyToCombn.end() )
         {
-            vector< int > v;
+            vector< size_t > v;
             for ( size_t j = 0; j < attrIndcs.size(); ++j )
             {
                 attr = getAttribute( attrIndcs[j] );
@@ -986,8 +986,8 @@ void Graph::calcAttrCombn(
                         node->getTupleVal( attrIndcs[j] ) )->getIndex() );
             }
 
-            keyToCombn.insert( pair< int, vector< int > >( key, v ) );
-            keyToNumber.insert( pair< int, int >( key, 1 ) );
+            keyToCombn.insert( pair< size_t, vector< size_t > >( key, v ) );
+            keyToNumber.insert( pair< size_t, size_t >( key, 1 ) );
         }
         // increment number if combn exists
         else
@@ -998,7 +998,7 @@ void Graph::calcAttrCombn(
     // update combs
     combs.clear();
 
-    map< int, vector< int > >::iterator it;
+    map< size_t , vector< size_t > >::iterator it;
     for ( it = keyToCombn.begin(); it != keyToCombn.end(); ++it )
     {
         combs.push_back( (*it).second );
@@ -1014,8 +1014,8 @@ void Graph::calcAttrCombn(
 
 // ---------------------------------
 void Graph::calcAttrCombn(
-    const vector< int > &attrIndcs,
-    vector< vector< int > > &combs )
+    const vector< size_t > &attrIndcs,
+    vector< vector< size_t > > &combs )
 // ---------------------------------
 {
     if ( root != NULL )
@@ -1027,17 +1027,17 @@ void Graph::calcAttrCombn(
 // ---------------------------------
 void Graph::calcAttrCombn(
     Cluster* clust,
-    const vector< int > &attrIndcs,
-    vector< vector< int > > &combs )
+    const vector< size_t > &attrIndcs,
+    vector< vector< size_t > > &combs )
 // ---------------------------------
 {
-    int summand     = 0;
-    int key         = 0;
-    int card        = 0;
+    size_t summand     = 0;
+    size_t key         = 0;
+    size_t card        = 0;
     Node*      node = NULL;
     Attribute* attr = NULL;
     vector< Node* >           nodesInClst;
-    map< int, vector< int > > keyToCombn;
+    map< size_t , vector< size_t > > keyToCombn;
 
     // do initialization
     getDescNodesInCluster( clust, nodesInClst );
@@ -1078,7 +1078,7 @@ void Graph::calcAttrCombn(
         // insert combn 1st time it occurs
         if ( keyToCombn.find( key ) == keyToCombn.end() )
         {
-            vector< int > v;
+            vector< size_t > v;
             for ( size_t j = 0; j < attrIndcs.size(); ++j )
             {
                 attr = getAttribute( attrIndcs[j] );
@@ -1093,7 +1093,7 @@ void Graph::calcAttrCombn(
                         node->getTupleVal( attrIndcs[j] ) )->getIndex() );
             }
 
-            keyToCombn.insert( pair< int, vector< int > >(
+            keyToCombn.insert( pair< size_t, vector< size_t > >(
                 key,
                 v ) );
         }
@@ -1102,7 +1102,7 @@ void Graph::calcAttrCombn(
     // update combs
     combs.clear();
 
-    map< int, vector< int > >::iterator it;
+    map< size_t, vector< size_t > >::iterator it;
     for ( it = keyToCombn.begin(); it != keyToCombn.end(); ++it )
         combs.push_back( (*it).second );
 
@@ -1116,17 +1116,17 @@ void Graph::calcAttrCombn(
 // -----------------------------------
 void Graph::calcAttrCombn(
     Cluster* clust,
-    const vector< int > &attrIndcs,
+    const vector< size_t > &attrIndcs,
     vector< vector< Node* > > &combs )
 // -----------------------------------
 {
-    int summand     = 0;
-    int key         = 0;
-    int card        = 0;
+    size_t summand     = 0;
+    size_t key         = 0;
+    size_t card        = 0;
     Node*      node = NULL;
     Attribute* attr = NULL;
     vector< Node* >           nodesInClst;
-    map< int, vector< Node* > > keyToCombn;
+    map< size_t , vector< Node* > > keyToCombn;
 
     // do initialization
     getDescNodesInCluster( clust, nodesInClst );
@@ -1164,14 +1164,14 @@ void Graph::calcAttrCombn(
             key += summand;
         } // for j
 
-        map< int, vector< Node* > >::iterator pos;
+        map< size_t, vector< Node* > >::iterator pos;
         pos = keyToCombn.find( key );
         // insert combn 1st time it occurs
         if ( pos == keyToCombn.end() )
         {
             vector< Node* > v;
             v.push_back( node );
-            keyToCombn.insert( pair< int, vector< Node* > >( key, v ) );
+            keyToCombn.insert( pair< size_t , vector< Node* > >( key, v ) );
         }
         // insert state if it occurs again
         else
@@ -1182,7 +1182,7 @@ void Graph::calcAttrCombn(
 
     // update combs
     combs.clear();
-    map< int, vector< Node* > >::iterator it;
+    map< size_t, vector< Node* > >::iterator it;
     for ( it = keyToCombn.begin(); it != keyToCombn.end(); ++it )
         combs.push_back( (*it).second );
 
@@ -1200,13 +1200,13 @@ void Graph::calcAttrCombn(
     vector< Cluster* > &combs )
 // -----------------------------------
 {
-    int summand     = 0;
-    int key         = 0;
-    int card        = 0;
+    size_t summand     = 0;
+    size_t key         = 0;
+    size_t card        = 0;
     Node*      node = NULL;
     Attribute* attr = NULL;
     vector< Node* >      nodesInClst;
-    map< int, Cluster* > keyToCombn;
+    map< size_t, Cluster* > keyToCombn;
 
     // do initialization
     getDescNodesInCluster( clust, nodesInClst );
@@ -1244,14 +1244,14 @@ void Graph::calcAttrCombn(
             key += summand;
         } // for j
 
-        map< int, Cluster* >::iterator pos;
+        map< size_t, Cluster* >::iterator pos;
         pos = keyToCombn.find( key );
         // insert combn 1st time it occurs
         if ( pos == keyToCombn.end() )
         {
             Cluster* clst = new Cluster();
             clst->addNode( node );
-            keyToCombn.insert( pair< int, Cluster* >( key, clst ) );
+            keyToCombn.insert( pair< size_t, Cluster* >( key, clst ) );
             clst = NULL;
         }
         // insert state if it occurs again
@@ -1263,7 +1263,7 @@ void Graph::calcAttrCombn(
 
     // update combs
     combs.clear();
-    map< int, Cluster* >::iterator it;
+    map< size_t, Cluster* >::iterator it;
     for ( it = keyToCombn.begin(); it != keyToCombn.end(); ++it )
         combs.push_back( it->second );
 
@@ -1285,12 +1285,12 @@ bool Graph::hasMultAttrCombns(
 // ------------------------------------------------------------------
 {
     bool result = false;
-    int  numAttrs  = 0;
-    int  cardAttr  = 0;
-    int  sizeNodes = 0;
-    int  mapFirst  = 0;
-    int  map       = 0;
-    int  summand   = 0;
+    size_t  numAttrs  = 0;
+    size_t  cardAttr  = 0;
+    size_t  sizeNodes = 0;
+    size_t  mapFirst  = 0;
+    size_t  map       = 0;
+    size_t  summand   = 0;
     Node*      node      = NULL;
     Attribute* attribute = NULL;
     vector< Node* > clustNodes;
@@ -1353,12 +1353,12 @@ bool Graph::hasMultAttrCombns(
 
 
 // ----------------------------------------------------------
-void Graph::clustNodesOnAttr( const vector< int > &attrIdcs )
+void Graph::clustNodesOnAttr( const vector< size_t > &attrIdcs )
 // ----------------------------------------------------------
 {
-    int combinations   = 0;
-    int progress       = 0;
-    vector< int > idcs = attrIdcs;
+    size_t combinations   = 0;
+    size_t progress       = 0;
+    vector< size_t > idcs = attrIdcs;
 
     // cluster nodes
     combinations = calcMaxNumCombns( attrIdcs );
@@ -1387,7 +1387,7 @@ void Graph::clustNodesOnAttr( const vector< int > &attrIdcs )
 
 
 // -------------------------------------------------------
-void Graph::clearSubClusters( const vector< int > &coord )
+void Graph::clearSubClusters( const vector< size_t > &coord )
 // -------------------------------------------------------
 {
     Cluster* clst = NULL;
@@ -1406,10 +1406,10 @@ void Graph::clearSubClusters( const vector< int > &coord )
 
 
 // -------------------------------------------------------
-int Graph::sumNodesInCluster( const vector< int > &coord )
+size_t Graph::sumNodesInCluster( const vector< size_t > &coord )
 // -------------------------------------------------------
 {
-    int      sum  = 0;
+    size_t      sum  = 0;
     Cluster* clst = NULL;
 
     // get cluster
@@ -1426,7 +1426,7 @@ int Graph::sumNodesInCluster( const vector< int > &coord )
 // ---------------------------
 void Graph::sumNodesInCluster(
     Cluster* clust,
-    int &total )
+    size_t &total )
 // ---------------------------
 {
     for ( int i = 0; i < clust->getSizeChildren(); ++i )
@@ -1441,7 +1441,7 @@ void Graph::sumNodesInCluster(
 
 // -------------------------------
 void Graph::getDescNodesInCluster(
-    const vector< int > &coord,
+    const vector< size_t > &coord,
     vector< Node* > &nodes )
 // -------------------------------
 {
@@ -1484,12 +1484,12 @@ void Graph::getDescNodesInCluster(
 
 
 // ---------------------------------------------------------
-int Graph::calcMaxNumCombns( const vector< int > &attrIdcs )
+size_t Graph::calcMaxNumCombns( const vector< size_t > &attrIdcs )
 // ---------------------------------------------------------
 {
-    int combinations     = 1;
+    size_t combinations     = 1;
     Attribute* attribute = NULL;
-    int cardinality      = 0;
+    size_t cardinality      = 0;
 
     for ( size_t i = 0; i < attrIdcs.size(); ++i )
     {
@@ -1569,7 +1569,7 @@ void Graph::deleteEdges()
 void Graph::initRoot()
 // -------------------
 {
-    vector< int > rootCoord;
+    vector< size_t > rootCoord;
     rootCoord.push_back( 0 );
 
     root = new Cluster( rootCoord );
@@ -1583,8 +1583,8 @@ void Graph::initRoot()
 // --------------------------
 void Graph::clustNodesOnAttr(
     Cluster* clust,
-    vector< int > attrIdcs,
-    int &progress )
+    vector< size_t > attrIdcs,
+    size_t &progress )
 // --------------------------
 {
     if ( attrIdcs.size() > 0 )
@@ -1618,8 +1618,8 @@ void Graph::clustNodesOnAttr(
 
 // ----------------------------
 void Graph::clustClusterOnAttr(
-    const vector< int > coord,
-    const int &attrIdx )
+    const vector< size_t > coord,
+    const size_t &attrIdx )
 // ----------------------------
 {
     Cluster* clst = NULL;
@@ -1642,13 +1642,13 @@ void Graph::clustClusterOnAttr(
 // ----------------------------
 void Graph::clustClusterOnAttr(
     Cluster* clust,
-    const int &attrIdx )
+    const size_t &attrIdx )
 // ----------------------------
 {
     Attribute*         attr;
     Node*              node;
     vector< Cluster* > clstTmp;
-    vector< int >      clstCoordNew;
+    vector< size_t >      clstCoordNew;
 
     // delete descendants & move up nodes
     clearSubClusters( clust );
@@ -1672,7 +1672,7 @@ void Graph::clustClusterOnAttr(
         clstIdxTmp = attr->mapToValue(
             (int)node->getTupleVal(attrIdx) )->getIndex();
         */
-        int clstIdxTmp = attr->mapToValue(
+        size_t clstIdxTmp = attr->mapToValue(
             node->getTupleVal(attrIdx) )->getIndex();
 
         clstTmp[clstIdxTmp]->addNode( node );
@@ -1858,7 +1858,7 @@ void Graph::printClusters()
     // leaves
     Cluster* clst = NULL;
     *mediator << "Leaves:\n";
-    vector< int > coord;
+    vector< size_t > coord;
     {
     for ( size_t i = 0; i < leaves.size(); ++i )
     {
@@ -1901,7 +1901,7 @@ void Graph::printClusters( vector< Cluster* > &clusts )
         *mediator << ") ";
 
         // print coords
-        vector< int > coord;
+        vector< size_t > coord;
         c->getCoord( coord );
         *mediator << "[";
         {
@@ -1914,7 +1914,7 @@ void Graph::printClusters( vector< Cluster* > &clusts )
         *mediator << "]";
 
         // print number nodes
-        int sum = 0;
+        size_t sum = 0;
         sumNodesInCluster(
             c,
             sum );
@@ -1946,7 +1946,7 @@ void Graph::printClusters( vector< Cluster* > &clusts )
 
 
 // ---------------------------------------
-void Graph::updateBundles( int &progress )
+void Graph::updateBundles( size_t &progress )
 // ---------------------------------------
 {
     vector< vector< Bundle* > > temp;
@@ -1970,8 +1970,8 @@ void Graph::updateBundles( int &progress )
     {
     for ( size_t i = 0; i < edges.size(); ++i )
     {
-        int idxFr = edges[i]->getInNode()->getCluster()->getIndex();
-        int idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
+        size_t idxFr = edges[i]->getInNode()->getCluster()->getIndex();
+        size_t idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
 
         if ( temp[idxFr][idxTo] == NULL )
         {
@@ -2089,8 +2089,8 @@ void Graph::updateBundles()
     {
     for ( size_t i = 0; i < edges.size(); ++i )
     {
-        int idxFr = edges[i]->getInNode()->getCluster()->getIndex();
-        int idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
+        size_t idxFr = edges[i]->getInNode()->getCluster()->getIndex();
+        size_t idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
 
         if ( temp[idxFr][idxTo] == NULL )
         {
