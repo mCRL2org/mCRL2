@@ -10,7 +10,7 @@
 
 #include <string>
 #include <sstream>
-#include "boost/cstdint.hpp"
+// #include "boost/cstdint.hpp"
 #include "aterm2.h"
 #include "svc/svc.h"
 #include "mcrl2/core/aterm_ext.h"

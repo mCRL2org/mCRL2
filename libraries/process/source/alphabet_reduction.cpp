@@ -1545,8 +1545,10 @@ namespace mcrl2 {
           l=ATLtableGet(alphas,(ATerm) p);
           if(l) return l;
       
-          if(length){
-            l=ATLtableGet(alphas,(ATerm)ATmakeList4((ATerm)p,(ATerm)ATmakeInt(length),(ATerm)allowed,(ATerm)ignore));
+          if(length)
+          {
+            assert(length<(size_t)1 << (sizeof(int)*8-1));
+            l=ATLtableGet(alphas,(ATerm)ATmakeList4((ATerm)p,(ATerm)ATmakeInt(static_cast<int>(length)),(ATerm)allowed,(ATerm)ignore));
             if(l) return l;
           }
         }
@@ -1672,7 +1674,10 @@ namespace mcrl2 {
         if(all_stable){
           if(!length){
             ATtablePut(alphas,(ATerm) a,(ATerm) l);
-          } else {
+          } 
+          else 
+          {
+            assert(length<(size_t)1 << (sizeof(int)*8-1));
             ATtablePut(alphas,(ATerm)ATmakeList4((ATerm)a,(ATerm)ATmakeInt(length),(ATerm)allowed,(ATerm)ignore),(ATerm) l);
           }
         }

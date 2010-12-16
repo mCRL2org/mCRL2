@@ -115,7 +115,7 @@ class chi2mcrl2_tool: public input_output_tool
 
       fclose(OutStream);
 
-      return result;
+      return true;
     }
 
 };

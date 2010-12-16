@@ -498,7 +498,7 @@ class bisim_partitioner
             
           if (core::gsDebug)
           { 
-            const size_t m=pow(10,floor(log10( static_cast<double>( (blocks.size()+1)/2))));
+            const size_t m=static_cast<size_t>(pow(10,floor(log10( static_cast<double>( (blocks.size()+1)/2)))));
             if ((blocks.size()+1)/2 % m==0) 
             { 
               std::cerr << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << "\n";

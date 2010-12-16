@@ -118,7 +118,7 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
       if ( !strncmp(((char *) buf)+8,"   1STL2LRCm",12) )
       {
         ATerm data;
-        unsigned long position = 0;
+        size_t position = 0;
         for (size_t i=0; i<8; i++)
         {
           position = position*0x100 + buf[7-i];

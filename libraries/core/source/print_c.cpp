@@ -8,7 +8,7 @@
 //
 /// \file print_c.cpp
 
-#include <boost/cstdint.hpp>
+// #include <boost/cstdint.hpp>
 #include <cstddef>
 #include "mcrl2/core/print.h"
 
@@ -16,7 +16,7 @@
 #include "mcrl2/core/detail/print_implementation.h"
 
 using namespace mcrl2::core::detail;
-using boost::intmax_t;
+// using boost::intmax_t;
 
 namespace mcrl2 {
   namespace core {
@@ -134,9 +134,10 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
         if ( islong )
           fprintf(stream, fmt, va_arg(args, long int));
         else if ( islonglong )
-          fprintf(stream, fmt, va_arg(args, boost::int64_t));
-        else if ( isintmax )
-          fprintf(stream, fmt, va_arg(args, intmax_t));
+          // fprintf(stream, fmt, va_arg(args, boost::int64_t));
+          fprintf(stream, fmt, va_arg(args, long long));
+        /* else if ( isintmax )
+          fprintf(stream, fmt, va_arg(args, intmax_t)); */
         else if ( issize )
           fprintf(stream, fmt, va_arg(args, size_t));
         else if ( isptrdiff )

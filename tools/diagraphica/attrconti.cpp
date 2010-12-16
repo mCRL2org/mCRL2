@@ -134,7 +134,7 @@ void AttrConti::clusterValues(
         }
         }
         {
-        for ( int i = toRemove.size(); i > 0; --i )
+        for ( int i = static_cast<int>(toRemove.size()); i > 0; --i )
         {
             // remove ptr from current domain
             curValues.erase( toRemove[i-1] );
@@ -148,7 +148,7 @@ void AttrConti::clusterValues(
 
         // update value indices after new one
         {
-        for ( size_t i = sorted[0]; i < curValues.size(); ++i )
+        for ( int i = sorted[0]; i < static_cast<int>(curValues.size()); ++i )
             curValues[i]->setIndex( i );
         }
 
@@ -172,19 +172,19 @@ void AttrConti::moveValue(
         if ( idxFr < idxTo )
         {
             // move all values after idxFr 1 pos up
-            for ( size_t i = idxFr; i < idxTo; ++i )
+            for ( int i = idxFr; i < static_cast<int>(idxTo); ++i )
             {
                 curValues[i] = curValues[i+1];
                 curValues[i]->setIndex( i );
             }
             // update idxTo
             curValues[idxTo] = temp;
-            curValues[idxTo]->setIndex( idxTo );
+            curValues[idxTo]->setIndex( static_cast<int>(idxTo) );
         }
         else if ( idxTo < idxFr )
         {
             // move all values before idxFr 1 pos down
-            for ( size_t i = idxFr; i > idxTo; --i )
+            for ( int i = idxFr; i > static_cast<int>(idxTo); --i )
             {
                 curValues[i] = curValues[i-1];
                 curValues[i]->setIndex( i );

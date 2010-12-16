@@ -2462,7 +2462,7 @@ void ArcDiagram::handlePrevDiagram( const size_t &dgrmIdx )
 
     frameIdxDgrm[dgrmIdx] -= 1;
     if ( frameIdxDgrm[dgrmIdx] < 0 )
-        frameIdxDgrm[dgrmIdx] = framesDgrm[dgrmIdx].size()-1;
+        frameIdxDgrm[dgrmIdx] = static_cast<int>(framesDgrm[dgrmIdx].size()-1);
 
     ColorRGB col;
     VisUtils::mapColorCoolBlue( col );

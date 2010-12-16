@@ -592,10 +592,10 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     * orden transistionSystem
     *
     **/
-  multimap<int,vector<RAT>::iterator> OrderTransistionSystem;
+  multimap<size_t,vector<RAT>::iterator> OrderTransistionSystem;
   for( itRAT = transitionSystem.begin(); itRAT != transitionSystem.end(); itRAT++ )
     {
-       OrderTransistionSystem.insert( pair<int, vector<RAT>::iterator>(itRAT->state, itRAT) );
+       OrderTransistionSystem.insert( pair<size_t, vector<RAT>::iterator>(itRAT->state, itRAT) );
     }
 
   /**
@@ -603,7 +603,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     *
     **/
   size_t index = 0;
-  for( multimap<int,vector<RAT>::iterator>::iterator itOrdRAT = OrderTransistionSystem.begin();
+  for( multimap<size_t,vector<RAT>::iterator>::iterator itOrdRAT = OrderTransistionSystem.begin();
        itOrdRAT != OrderTransistionSystem.end();
        itOrdRAT++ )
     {
@@ -842,7 +842,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
             result.append(");");
           }
 
-          /*multimap<int,vector<RAT>::iterator>::iterator tmp_mlt = itOrdRAT;
+          /*multimap<size_t,vector<RAT>::iterator>::iterator tmp_mlt = itOrdRAT;
           ++tmp_mlt;
           if(tmp_mlt->first != itOrdRAT->first)
           {

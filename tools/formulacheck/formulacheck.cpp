@@ -62,7 +62,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
     std::string f_dot_file_name;
 
     /// \brief The maximal number of seconds spent on proving a single confluence condition.
-    size_t f_time_limit;
+    int f_time_limit;
 
     /// \brief The flag indicating whether or not a path eliminator is used.
     bool f_path_eliminator;
@@ -87,7 +87,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
         f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
       }
       if (parser.options.count("time-limit")) {
-        f_time_limit = parser.option_argument_as< size_t >("time-limit");
+        f_time_limit = parser.option_argument_as< int >("time-limit");
       }
       if (parser.options.count("smt-solver")) {
         f_path_eliminator = true;

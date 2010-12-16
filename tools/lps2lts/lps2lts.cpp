@@ -17,7 +17,7 @@
 #include <cassert>
 #include <signal.h>
 #include "aterm2.h"
-#include "boost/cstdint.hpp"
+// #include "boost/cstdint.hpp"
 #include "boost/lexical_cast.hpp"
 #include "lps2lts.h"
 #include "mcrl2/lts/detail/exploration.h"
