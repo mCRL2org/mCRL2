@@ -43,7 +43,7 @@ static const size_t ATERM_NON_EXISTING_POSITION=(size_t)(-1);
 #ifndef HAVE_SSIZE_T
     #if defined(WIN64) ||  defined(_WIN64) ||  defined(__WIN64__)
 				/* int64 is not supported by all GCC */
-        typedef int64_t ssize_t;
+        typedef __int64 ssize_t;
     #else
         typedef int ssize_t;
     #endif

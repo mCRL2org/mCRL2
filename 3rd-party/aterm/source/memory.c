@@ -11,7 +11,7 @@
 #include "gc.h"
 
 #ifndef NDEBUG
-#include <stdint.h>
+//#include <stdint.h>
 #endif
 
 #ifdef DMALLOC
