@@ -103,11 +103,11 @@ public:
 	void handleAttributeCluster( const std::vector< size_t > &indcs );
 
 	// -*- //
-	void handleAttrPartition( const int &attrIdx );
+	void handleAttrPartition( const size_t &attrIdx );
 	void handleAttrPartition(
-	const int &numParts,
-	const int &method );
-	void handleAttrDepartition( const int &attrIdx );
+	const size_t &numParts,
+	const size_t &method );
+	void handleAttrDepartition( const size_t &attrIdx );
 	void handleAttrPartitionCloseFrame();
 
 	void getAttrValues(
@@ -119,14 +119,14 @@ public:
 	// -*- //
 
 	void handleMoveDomVal(
-	const int &idxAttr,
-	const int &idxFr,
-	const int &idxTo );
+	const size_t &idxAttr,
+	const size_t &idxFr,
+	const size_t &idxTo );
 	void handleDomainGroup(
-	const int &attrIdx,
+	const size_t &attrIdx,
 	const std::vector< int > domIndcs,
 	const std::string &newValue );
-	void handleDomainUngroup( const int &attrIdx );
+	void handleDomainUngroup( const size_t &attrIdx );
 
 	void getAttributeNames(
 	const std::vector< size_t > &indcs,
@@ -144,13 +144,13 @@ public:
 
 	void handleEditClust( Cluster* c );
 	void handleClustFrameDisplay();
-	void handleClustPlotFrameDisplay( const int &idx );
+	void handleClustPlotFrameDisplay( const size_t &idx );
 	void handleClustPlotFrameDisplay(
-	const int &idx1,
-	const int &idx2 );
+	const size_t &idx1,
+	const size_t &idx2 );
 	void handleClustPlotFrameDisplay( const std::vector< size_t > &indcs );
 	void setClustMode( const int &m );
-	int getClustMode();
+	size_t getClustMode();
 
 	// -- global mode changes ---------------------------------------
 	void handleSetModeAnalysis();
@@ -203,7 +203,7 @@ public:
 	void handleBringForwardShape();
 	void handleSendBackwardShape();
 	void handleEditDOFShape();
-	void handleSetDOF( const int &attrIdx );
+	void handleSetDOF( const size_t &attrIdx );
 	void handleCheckedVariable( const size_t &idDOF, const int &variableId );
 
 	void handleEditDOF(
@@ -211,15 +211,15 @@ public:
 	const std::vector< std::string > &degsOfFrdm,
 	const std::vector< size_t > &attrIndcs,
 	const size_t &selIdx );
-	void handleDOFSel( const int &DOFIdx );
+	void handleDOFSel( const size_t &DOFIdx );
 
 	void setDOFColorSelected();
 	void setDOFOpacitySelected();
 
 	void handleSetDOFTextStatus(
-	const int &DOFIdx,
+	const size_t &DOFIdx,
 	const int &status );
-	size_t handleGetDOFTextStatus( const int &DOFIdx );
+	size_t handleGetDOFTextStatus( const size_t &DOFIdx );
 
 	void handleDOFColActivate();
 	void handleDOFColDeactivate();
@@ -231,7 +231,7 @@ public:
 	const double &hue,
 	const double &y );
 	void handleDOFColClear(
-	const int &idx );
+	const size_t &idx );
 	void handleDOFColSetValuesEdt(
 	const std::vector< double > &hue,
 	const std::vector< double > &y );
@@ -242,18 +242,18 @@ public:
 	const double &opa,
 	const double &y );
 	void handleDOFOpaUpdate(
-	const int &idx,
+	const size_t &idx,
 	const double &opa,
 	const double &y );
 	void handleDOFOpaClear(
-	const int &idx );
+	const size_t &idx );
 	void handleDOFOpaSetValuesEdt(
 	const std::vector< double > &opa,
 	const std::vector< double > &y );
 
 	void handleLinkDOFAttr(
 	const size_t DOFIdx,
-	const int attrIdx );
+	const size_t attrIdx );
 	void handleUnlinkDOFAttr( const size_t DOFIdx );
 	void handleDOFFrameDestroy();
 	void handleDOFDeselect();

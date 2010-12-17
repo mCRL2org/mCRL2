@@ -594,19 +594,19 @@ void Simulator::initFramesPrevNext()
     Cluster*     nodesNext;
 
     // get nodes leading to & from current frame
-    for ( int i = 0; i < frameCurr->getSizeNodes(); ++i )
+    for ( size_t i = 0; i < frameCurr->getSizeNodes(); ++i )
     {
         temp = frameCurr->getNode( i );
 
         // incoming nodes
         {
-        for ( int j = 0; j < temp->getSizeInEdges(); ++j )
+        for ( size_t j = 0; j < temp->getSizeInEdges(); ++j )
             tempPrev.insert( temp->getInEdge(j)->getInNode() );
         }
 
         // outgoing nodes
         {
-        for ( int j = 0; j < temp->getSizeOutEdges(); ++j )
+        for ( size_t j = 0; j < temp->getSizeOutEdges(); ++j )
             tempNext.insert( temp->getOutEdge(j)->getOutNode() );
         }
     }
@@ -660,7 +660,7 @@ void Simulator::initBundles()
 
     // get nodes in current frame
     {
-    for ( int i = 0; i < frameCurr->getSizeNodes(); ++i )
+    for ( size_t i = 0; i < frameCurr->getSizeNodes(); ++i )
         currNodes.insert( frameCurr->getNode( i ) );
     }
 
@@ -672,10 +672,10 @@ void Simulator::initBundles()
         bdls.clear();
 
         clst = framesPrev[i];
-        for ( int j = 0; j < clst->getSizeNodes(); ++j )
+        for ( size_t j = 0; j < clst->getSizeNodes(); ++j )
         {
             node = clst->getNode( j );
-            for ( int k = 0; k < node->getSizeOutEdges(); ++k )
+            for ( size_t k = 0; k < node->getSizeOutEdges(); ++k )
             {
                 edge = node->getOutEdge( k );
 
@@ -735,10 +735,10 @@ void Simulator::initBundles()
     {
         bdls.clear();
         clst = framesNext[i];
-        for ( int j = 0; j < clst->getSizeNodes(); ++j )
+        for ( size_t j = 0; j < clst->getSizeNodes(); ++j )
         {
             node = clst->getNode( j );
-            for ( int k = 0; k < node->getSizeInEdges(); ++k )
+            for ( size_t k = 0; k < node->getSizeInEdges(); ++k )
             {
                 edge = node->getInEdge( k );
 
@@ -866,7 +866,7 @@ void Simulator::sortFramesPrevNext()
     for ( size_t i = 0; i < framesPrev.size(); ++i )
     {
         int key = 0;
-        for ( int j = 0; j < framesPrev[i]->getSizeOutBundles(); ++j )
+        for ( size_t j = 0; j < framesPrev[i]->getSizeOutBundles(); ++j )
         {
             key += (int)pow( 10.0, (int) framesPrev[i]->getOutBundle(j)->getParent()->getIndex() );
         }
@@ -885,7 +885,7 @@ void Simulator::sortFramesPrevNext()
     for ( size_t i = 0; i < framesNext.size(); ++i )
     {
         int key = 0;
-        for ( int j = 0; j < framesNext[i]->getSizeInBundles(); ++j )
+        for ( size_t j = 0; j < framesNext[i]->getSizeInBundles(); ++j )
         {
             key += (int)pow( 10.0, (int) framesNext[i]->getInBundle(j)->getParent()->getIndex() );
         }
@@ -1036,7 +1036,7 @@ void Simulator::calcPosBundles()
             // incoming bundles
             double itv = 2.0/bundlesPrevByLbl.size();
             {
-            for ( int j = 0; j < framesPrev[i]->getSizeOutBundles(); ++j )
+            for ( size_t j = 0; j < framesPrev[i]->getSizeOutBundles(); ++j )
             {
                 ///*
                 posTopLft.x = posFramesPrev[i].x + 1.0*scaleDgrmVert + 3.0*pix;
@@ -1108,7 +1108,7 @@ void Simulator::calcPosBundles()
             // outgoing bundles
             double itv = 2.0/bundlesNextByLbl.size();
             {
-            for ( int j = 0; j < framesNext[i]->getSizeInBundles(); ++j )
+            for ( size_t j = 0; j < framesNext[i]->getSizeInBundles(); ++j )
             {
                 posTopLft.x = posBdlLblGridNextTopLft[ framesNext[i]->getInBundle(j)->getParent()->getIndex() ].x + 1.0*pix;
                 posTopLft.y = posBotRgt.y = posFramesNext[i].y

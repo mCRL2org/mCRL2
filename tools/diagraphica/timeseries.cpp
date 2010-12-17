@@ -120,7 +120,7 @@ void TimeSeries::getIdxMseOver(
     {
         Node* node = graph->getNode( mouseOverIdx );
         idxLeaf = node->getCluster()->getIndex();
-        for ( int i = 0; i < node->getSizeInEdges(); ++i )
+        for ( size_t i = 0; i < node->getSizeInEdges(); ++i )
             idcsBndl.insert( node->getInEdge(i)->getBundle()->getIndex() );
         node = NULL;
     }
@@ -141,7 +141,7 @@ void TimeSeries::getCurrIdxDgrm(
     {
         Node* node = graph->getNode( currIdxDgrm );
         idxLeaf = node->getCluster()->getIndex();
-        for ( int i = 0; i < node->getSizeInEdges(); ++i )
+        for ( size_t i = 0; i < node->getSizeInEdges(); ++i )
             idcsBndl.insert( node->getInEdge(i)->getBundle()->getIndex() );
         node = NULL;
     }
@@ -176,7 +176,7 @@ void TimeSeries::getAnimIdxDgrm(
             nodeFr = graph->getNode( *(--it) );
 
             idxLeaf = nodeTo->getCluster()->getIndex();
-            for ( int i = 0; i < nodeTo->getSizeInEdges(); ++i )
+            for ( size_t i = 0; i < nodeTo->getSizeInEdges(); ++i )
             {
                 edgeIn = nodeTo->getInEdge( i );
                 if ( edgeIn->getInNode() == nodeFr )
@@ -318,7 +318,7 @@ void TimeSeries::markItems( const vector< Cluster* > frames )
         if ( i == 0 && frame->getSizeNodes() > 0 )
             itemsMarked.clear();
 
-        for ( int j = 0; j < frame->getSizeNodes(); ++j )
+        for ( size_t j = 0; j < frame->getSizeNodes(); ++j )
             itemsMarked.insert( frame->getNode(j)->getIndex() );
     }
     frame = NULL;
@@ -339,7 +339,7 @@ void TimeSeries::handleSendDgrmSglToExnr()
 
     frame = new Cluster();
     frame->addNode( graph->getNode( currIdxDgrm ) );
-    for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+    for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
     {
         if ( graph->getAttribute( i )->getSizeCurValues() > 0 )
             attrs.push_back( graph->getAttribute( i ) );
@@ -852,7 +852,7 @@ void TimeSeries::calcPositions()
             else
                 rge = attr->getUpperBound() - attr->getLowerBound();
 
-            for ( int j = 0; j< graph->getSizeNodes(); ++j )
+            for ( size_t j = 0; j< graph->getSizeNodes(); ++j )
             {
                 node = graph->getNode( j );
                 double alphaHgt;
@@ -869,7 +869,7 @@ void TimeSeries::calcPositions()
         }
         else
         {
-            for ( int j = 0; j< graph->getSizeNodes(); ++j )
+            for ( size_t j = 0; j< graph->getSizeNodes(); ++j )
             {
                 node = graph->getNode( j );
 
@@ -1002,7 +1002,7 @@ void TimeSeries::handlePrevDiagram( const int &/*dgrmIdx*/ )
 
 
 // -----------------------------------------------------
-void TimeSeries::handlePlayDiagram( const int &dgrmIdx )
+void TimeSeries::handlePlayDiagram( const size_t &dgrmIdx )
 // -----------------------------------------------------
 {
     if ( dgrmIdx == animIdxDgrm )
@@ -1153,7 +1153,7 @@ void TimeSeries::handleHits( const vector< int > &ids )
                     VisUtils::mapColorCoolBlue( col );
                     frame->addNode( graph->getNode( currIdxDgrm ) );
 
-                    for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+                    for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
                     {
                         //if ( graph->getAttribute( i )->getSizeCurValues() > 0 )
                             attrs.push_back( graph->getAttribute( i ) );
@@ -1216,15 +1216,15 @@ void TimeSeries::handleHits( const vector< int > &ids )
             }
             else
             {
-                if ( currIdxDgrm != -1 )
+                if ( currIdxDgrm != NON_EXISTING )
                 {
                     currIdxDgrm = -1;
                     mediator->handleUnshowFrame();
                     mediator->handleMarkFrameClust( this );
                 }
 
-                if ( mouseOverIdx != -1 )
-                    mouseOverIdx = -1;
+                if ( mouseOverIdx != NON_EXISTING )
+                    mouseOverIdx = NON_EXISTING;
 
                 mediator->handleMarkFrameClust( this );
                 mediator->handleUnshowFrame();
@@ -1575,7 +1575,7 @@ void TimeSeries::drawMarkedItems( const bool &inSelectMode )
         double pix = canvas->getPixelSize();
 
         glPushName( ID_ITEMS );
-        for ( int i = 0; i < nodesWdwScale; ++i )
+        for ( size_t i = 0; i < nodesWdwScale; ++i )
         {
             glPushName( (GLuint) wdwStartIdx + i );
             VisUtils::fillRect(
@@ -1660,7 +1660,7 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
                 else
                     zero = posAxesBotRgt[i].y;
 
-                for ( int j = 0; j < nodesWdwScale; ++j )
+                for ( size_t j = 0; j < nodesWdwScale; ++j )
                 {
                     double value = graph->getNode( wdwStartIdx+j )->getTupleVal( attributes[i]->getIndex() );
                     if ( value >= 0 )
@@ -1744,7 +1744,7 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
             else
             // clustered attribute
             {
-                for ( int j = 0; j < nodesWdwScale; ++j )
+                for ( size_t j = 0; j < nodesWdwScale; ++j )
                 {
                     if ( useShading == true )
                     {
@@ -1787,7 +1787,7 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
         for ( size_t i = 0; i < posValues.size(); ++i )
         {
             glBegin( GL_LINE_STRIP );
-            for ( int j = 0; j < nodesWdwScale; ++j )
+            for ( size_t j = 0; j < nodesWdwScale; ++j )
             {
                 iter = graph->getNode( wdwStartIdx+j )->getTupleVal( attributes[i]->getIndex() );
                 VisUtils::mapColorMdGray( colFill );
@@ -1954,7 +1954,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                  1.0 - 4.0*pix/scaleDgrm,
                 -1.0 - 4.0*pix/scaleDgrm );
             // diagram
-            for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+            for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
             {
                 Attribute* attr = graph->getAttribute( i );
                 Node* node = graph->getNode( *animFrame );
@@ -2055,7 +2055,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                 // diagram
                 Attribute* attr;
                 Node* node;
-                for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+                for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
                 {
                     attr = graph->getAttribute( i );
                     node = graph->getNode( it->first );
@@ -2132,7 +2132,7 @@ void TimeSeries::drawMouseOver( const bool &inSelectMode )
 {
     if ( inSelectMode != true )
     {
-        if ( mouseOverIdx != -1 && attributes.size() > 0 )
+        if ( mouseOverIdx != NON_EXISTING && attributes.size() > 0 )
         {
             double pix = canvas->getPixelSize();
             Position2D pos1, pos2;

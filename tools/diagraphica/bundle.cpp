@@ -258,7 +258,7 @@ void Bundle::getLabels(
     lbls = "";
 
     size_t size  = labels.size();
-    int count = 0;
+    size_t count = 0;
 
     map< string, string >::iterator it;
     for( it = labels.begin(); it != labels.end(); ++it )

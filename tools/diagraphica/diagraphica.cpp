@@ -848,10 +848,10 @@ void DiaGraph::handleAttributeCluster( const vector< size_t > &indcs )
 
 
 // -----------------------------------------------------
-void DiaGraph::handleAttrPartition( const int &attrIdx )
+void DiaGraph::handleAttrPartition( const size_t &attrIdx )
 // -----------------------------------------------------
 {
-    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    if ( attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes() )
     {
         Attribute* attr  = graph->getAttribute( attrIdx );
         if ( attr != NULL )
@@ -871,8 +871,8 @@ void DiaGraph::handleAttrPartition( const int &attrIdx )
 
 // --------------------------------
 void DiaGraph::handleAttrPartition(
-    const int &numParts,
-    const int &method )
+    const size_t &numParts,
+    const size_t &method )
 // --------------------------------
 {
     if ( tempAttr != NULL )
@@ -927,10 +927,10 @@ void DiaGraph::handleAttrPartition(
 
 
 // -------------------------------------------------------
-void DiaGraph::handleAttrDepartition( const int &attrIdx )
+void DiaGraph::handleAttrDepartition( const size_t &attrIdx )
 // -------------------------------------------------------
 {
-    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    if ( attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes() )
     {
         Attribute* attr = graph->getAttribute( attrIdx );
         if ( attr->getAttrType() == Attribute::ATTR_TYPE_CONTI )
@@ -993,7 +993,7 @@ void DiaGraph::getAttrValues(
     {
         vals.clear();
         Node* node;
-        for ( int i = 0; i < graph->getSizeNodes(); ++i )
+        for ( size_t i = 0; i < graph->getSizeNodes(); ++i )
         {
             node = graph->getNode( i );
             vals.push_back( node->getTupleVal( attrIdx ) );
@@ -1013,7 +1013,7 @@ void DiaGraph::getAttrValues(
     {
         vals.clear();
         Node* node;
-        for ( int i = 0; i < graph->getSizeNodes(); ++i )
+        for ( size_t i = 0; i < graph->getSizeNodes(); ++i )
         {
             node = graph->getNode( i );
             vals.insert( node->getTupleVal( attrIdx ) );
@@ -1025,19 +1025,19 @@ void DiaGraph::getAttrValues(
 
 // -----------------------------
 void DiaGraph::handleMoveDomVal(
-    const int &idxAttr,
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxAttr,
+    const size_t &idxFr,
+    const size_t &idxTo )
 // -----------------------------
 {
-    if ( 0 <= idxAttr && idxAttr < graph->getSizeAttributes() )
+    if ( idxAttr != NON_EXISTING && idxAttr < graph->getSizeAttributes() )
     {
         Attribute* attr = graph->getAttribute( idxAttr );
 
         if ( attr->getAttrType() == Attribute::ATTR_TYPE_DISCR )
         {
-            if ( 0 <= idxFr && idxFr < attr->getSizeCurValues() &&
-                 0 <= idxTo && idxTo < attr->getSizeCurValues() )
+            if ( idxFr != NON_EXISTING && idxFr < attr->getSizeCurValues() &&
+                 idxTo != NON_EXISTING && idxTo < attr->getSizeCurValues() )
             {
                 attr->moveValue( idxFr, idxTo );
                 displAttrDomain( idxAttr );
@@ -1048,8 +1048,8 @@ void DiaGraph::handleMoveDomVal(
         {
             if ( attr->getSizeCurValues() > 0 )
             {
-                if ( 0 <= idxFr && idxFr < attr->getSizeCurValues() &&
-                     0 <= idxTo && idxTo < attr->getSizeCurValues() )
+                if ( idxFr != NON_EXISTING && idxFr < attr->getSizeCurValues() &&
+                     idxTo != NON_EXISTING && idxTo < attr->getSizeCurValues() )
                 {
                     attr->moveValue( idxFr, idxTo );
                     displAttrDomain( idxAttr );
@@ -1065,14 +1065,14 @@ void DiaGraph::handleMoveDomVal(
 
 // ------------------------------
 void DiaGraph::handleDomainGroup(
-    const int &attrIdx,
+    const size_t &attrIdx,
     const vector< int > domIndcs,
     const std::string &newValue )
 // ------------------------------
 {
     Attribute *attr;
 
-    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    if ( attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes() )
     {
         attr = graph->getAttribute( attrIdx );
         attr->clusterValues( domIndcs, newValue );
@@ -1087,12 +1087,12 @@ void DiaGraph::handleDomainGroup(
 
 
 // -----------------------------------------------------
-void DiaGraph::handleDomainUngroup( const int &attrIdx )
+void DiaGraph::handleDomainUngroup( const size_t &attrIdx )
 // -----------------------------------------------------
 {
     Attribute *attr;
 
-    if ( 0 <= attrIdx && attrIdx < graph->getSizeAttributes() )
+    if ( attrIdx != NON_EXISTING && attrIdx < graph->getSizeAttributes() )
     {
         attr = graph->getAttribute( attrIdx );
         attr->clearClusters();
@@ -1332,7 +1332,7 @@ void DiaGraph::handleClustFrameDisplay()
 
 
 // ---------------------------------------------------------
-void DiaGraph::handleClustPlotFrameDisplay( const int &/*idx*/ )
+void DiaGraph::handleClustPlotFrameDisplay( const size_t &/*idx*/ )
 // ---------------------------------------------------------
 {
     if ( canvasDistr == NULL )
@@ -1358,8 +1358,8 @@ void DiaGraph::handleClustPlotFrameDisplay( const int &/*idx*/ )
 
 // ----------------------------------------
 void DiaGraph::handleClustPlotFrameDisplay(
-    const int &idx1,
-    const int &idx2 )
+    const size_t &idx1,
+    const size_t &idx2 )
 // ----------------------------------------
 {
     if ( canvasCorrl == NULL )
@@ -1435,7 +1435,7 @@ void DiaGraph::setClustMode( const int &m )
 
 
 // -------------------------
-int DiaGraph::getClustMode()
+size_t DiaGraph::getClustMode()
 // -------------------------
 {
     return clustMode;
@@ -1844,7 +1844,7 @@ void DiaGraph::handleEditDOFShape()
 
 
 // --------------------------------
-void DiaGraph::handleSetDOF( const int &attrIdx )
+void DiaGraph::handleSetDOF( const size_t &attrIdx )
 // --------------------------------
 {
 	if ( mode == MODE_EDIT && editor != NULL )
@@ -1941,7 +1941,7 @@ void DiaGraph::setDOFOpacitySelected( )
 
 
 // ---------------------------------------------
-void DiaGraph::handleDOFSel( const int &DOFIdx )
+void DiaGraph::handleDOFSel( const size_t &DOFIdx )
 // ---------------------------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -1951,7 +1951,7 @@ void DiaGraph::handleDOFSel( const int &DOFIdx )
 
 // -----------------------------------
 void DiaGraph::handleSetDOFTextStatus(
-    const int &DOFIdx,
+    const size_t &DOFIdx,
     const int &status )
 // -----------------------------------
 {
@@ -1961,7 +1961,7 @@ void DiaGraph::handleSetDOFTextStatus(
 
 
 // ------------------------------------------------------
-size_t DiaGraph::handleGetDOFTextStatus( const int &DOFIdx )
+size_t DiaGraph::handleGetDOFTextStatus( const size_t &DOFIdx )
 // ------------------------------------------------------
 {
     size_t result = NON_EXISTING;
@@ -2024,7 +2024,7 @@ void DiaGraph::handleDOFColUpdate(
 
 // ------------------------------
 void DiaGraph::handleDOFColClear(
-    const int &idx )
+    const size_t &idx )
 // ------------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -2086,7 +2086,7 @@ void DiaGraph::handleDOFOpaAdd(
 
 // -------------------------------
 void DiaGraph::handleDOFOpaUpdate(
-    const int &idx,
+    const size_t &idx,
     const double &opa,
     const double &y )
 // -------------------------------
@@ -2098,7 +2098,7 @@ void DiaGraph::handleDOFOpaUpdate(
 
 // ------------------------------
 void DiaGraph::handleDOFOpaClear(
-    const int &idx )
+    const size_t &idx )
 // ------------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -2122,7 +2122,7 @@ void DiaGraph::handleDOFOpaSetValuesEdt(
 // ------------------------------
 void DiaGraph::handleLinkDOFAttr(
     const size_t DOFIdx,
-    const int attrIdx )
+    const size_t attrIdx )
 // ------------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -3659,7 +3659,7 @@ void DiaGraph::displAttrDomain( const size_t &attrIdx )
 
     // calc perc
     {
-    for ( int i = 0; i < numValues; ++i )
+    for ( size_t i = 0; i < numValues; ++i )
         perc.push_back( Utils::perc( (double) number[i], (double) numNodes ) );
     }
 

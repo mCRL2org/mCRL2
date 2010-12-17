@@ -382,12 +382,12 @@ void CorrlPlot::calcMaxNumber()
         size_t sizeX = graph->getAttribute( attrIdx1 )->getSizeCurValues();
         size_t sizeY = graph->getAttribute( attrIdx2 )->getSizeCurValues();
         {
-        for ( int i = 0; i < sizeX; ++i )
+        for ( size_t i = 0; i < sizeX; ++i )
             maxNumX.push_back( 0 );
         }
 
         {
-        for ( int i = 0; i < sizeY; ++i )
+        for ( size_t i = 0; i < sizeY; ++i )
             maxNumY.push_back( 0 );
         }
     }

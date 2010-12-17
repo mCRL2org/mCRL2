@@ -115,7 +115,7 @@ protected:
     void onTimer( wxTimerEvent &e );
     void handleRwndDiagram( const int &dgrmIdx );
     void handlePrevDiagram( const int &dgrmIdx );
-    void handlePlayDiagram( const int &dgrmIdx );
+    void handlePlayDiagram( const size_t &dgrmIdx );
     void handleNextDiagram( const int &dgrmIdx );
 
     // -- hit detection ---------------------------------------------

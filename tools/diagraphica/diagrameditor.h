@@ -53,11 +53,11 @@ public:
     void handleIntersection();
     void translatePoints( double &x1, double &y1, double &x2, double &y2, double givenX1, double givenY1, double givenX2, double givenY2 );
     bool isAnyShapeSelected();
-    void handleDOFSel( const int &DOFIdx );
+    void handleDOFSel( const size_t &DOFIdx );
     void handleDOFSetTextStatus(
-        const int &DOFIdx,
+        const size_t &DOFIdx,
         const int &status );
-    int handleDOFGetTextStatus( const int &DOFIdx );
+    int handleDOFGetTextStatus( const size_t &DOFIdx );
     void handleDOFColAdd(
         const double &hue,
         const double &y );
@@ -116,10 +116,10 @@ public:
 
     void handleHits( const std::vector< int > &ids );
     void handleHitDiagramOnly();
-    void handleHitShape( const int &shapeIdx );
+    void handleHitShape( const size_t &shapeIdx );
     void handleHitShapeHandle(
-        const int &shapeIdx,
-        const int &handleId );
+        const size_t &shapeIdx,
+        const size_t &handleId );
 
     void handleDrag();
     /*
@@ -200,7 +200,7 @@ protected:
     // -- data members ----------------------------------------------
     Diagram* diagram; // composition
     int editMode;
-    int drgBegIdx1;
+    size_t drgBegIdx1;
     int drgBegIdx2;
     size_t lastSelectedShapeId;
     bool selection;

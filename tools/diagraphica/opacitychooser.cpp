@@ -353,7 +353,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
     // selection mode
     if ( inSelectMode == true )
     {
-        for ( int i = 0; i < size-1; ++i )
+        for ( size_t i = 0; i < size-1; ++i )
         {
             glPushName( i );
             VisUtils::fillRect(
@@ -398,7 +398,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
     else
     {
         VisUtils::enableLineAntiAlias();
-        for ( int i = 0; i < size-1; ++i )
+        for ( size_t i = 0; i < size-1; ++i )
         {
             VisUtils::setColorBlack();
             VisUtils::drawLine(

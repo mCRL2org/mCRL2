@@ -215,13 +215,13 @@ void DistrPlot::drawPlot( const bool &inSelectMode )
     if ( inSelectMode == true )
     {
 
-        for( int i = 0; i < sizePositions; ++i )
+        for( size_t i = 0; i < sizePositions; ++i )
         {
             double xLft = positions[i].x - 0.5*width;
             double xRgt = positions[i].x + 0.5*width;
             double yTop = positions[i].y;
 
-            glPushName( i );
+            glPushName( (GLuint) i );
             VisUtils::fillRect( xLft, xRgt, yTop, yBot );
             glPopName();
         }
@@ -229,7 +229,7 @@ void DistrPlot::drawPlot( const bool &inSelectMode )
     // rendering mode
     else
     {
-        for( int i = 0; i < sizePositions; ++i )
+        for( size_t i = 0; i < sizePositions; ++i )
         {
             double xLft = positions[i].x - 0.5*width;
             double xRgt = positions[i].x + 0.5*width;

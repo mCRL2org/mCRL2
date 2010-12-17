@@ -379,7 +379,7 @@ void CombnPlot::drawPlotBC( const bool &inSelectMode )
     // selection mode
     if ( inSelectMode == true )
     {
-        for( int i = 0; i < sizePositions; ++i )
+        for( size_t i = 0; i < sizePositions; ++i )
         {
             double xLft = posBC[i].x - 0.5*widthBC;
             double xRgt = posBC[i].x + 0.5*widthBC;
@@ -397,7 +397,7 @@ void CombnPlot::drawPlotBC( const bool &inSelectMode )
         VisUtils::mapColorCoolGreen( col );
         col.a = 0.7;
 
-        for( int i = 0; i < sizePositions; ++i )
+        for( size_t i = 0; i < sizePositions; ++i )
         {
             double xLft = posBC[i].x - 0.5*widthBC;
             double xRgt = posBC[i].x + 0.5*widthBC;

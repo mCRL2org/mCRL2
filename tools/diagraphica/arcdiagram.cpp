@@ -1658,14 +1658,14 @@ void ArcDiagram::calcSettingsBundles()
         // max size
         double maxSize = 0;
         {
-        for ( int i = 0; i < graph->getSizeBundles(); ++i )
+        for ( size_t i = 0; i < graph->getSizeBundles(); ++i )
             if ( graph->getBundle(i)->getSizeEdges() > maxSize )
                 maxSize = graph->getBundle(i)->getSizeEdges();
         }
 
         // calc new settings
         {
-        for ( int i = 0; i < graph->getSizeBundles(); ++i )
+        for ( size_t i = 0; i < graph->getSizeBundles(); ++i )
         {
             size_t idxFr = graph->getBundle(i)->getInCluster()->getIndex();
             size_t idxTo = graph->getBundle(i)->getOutCluster()->getIndex();
@@ -1850,7 +1850,7 @@ void ArcDiagram::calcSettingsBarTree()
         // calc max depth of clustering tree
         size_t maxLvl = 0;
         {
-        for ( int i = 0; i < graph->getSizeLeaves(); ++i )
+        for ( size_t i = 0; i < graph->getSizeLeaves(); ++i )
         {
             if ( graph->getLeaf(i)->getSizeCoord() > maxLvl )
                 maxLvl = graph->getLeaf(i)->getSizeCoord();
@@ -1859,7 +1859,7 @@ void ArcDiagram::calcSettingsBarTree()
 
         // init positions
         {
-        for ( int i = 0; i < maxLvl; ++i )
+        for ( size_t i = 0; i < maxLvl; ++i )
         {
             vector< Position2D > p;
             posBarTreeTopLft.push_back( p );
@@ -1881,7 +1881,7 @@ void ArcDiagram::calcPositionsBarTree(
     const double &height )
 // -----------------------------------
 {
-    for ( int i = 0; i < c->getSizeChildren(); ++i )
+    for ( size_t i = 0; i < c->getSizeChildren(); ++i )
         calcPositionsBarTree( c->getChild(i), yBot, height );
 
     Position2D topLft;
@@ -1959,16 +1959,16 @@ void ArcDiagram::updateMarkBundles()
         Edge* edge = NULL;
 
         clst = framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]];
-        for ( int j = 0; j < clst->getSizeNodes(); ++j )
+        for ( size_t j = 0; j < clst->getSizeNodes(); ++j )
         {
             node = clst->getNode( j );
             {
-            for ( int k = 0; k < node->getSizeInEdges(); ++k )
+            for ( size_t k = 0; k < node->getSizeInEdges(); ++k )
             {
                 edge = node->getInEdge( k );
 				if( edge != NULL &&
-					0 <= edge->getBundle()->getIndex() &&
-					static_cast<int>(markBundles.size()) > edge->getBundle()->getIndex() )
+					edge->getBundle()->getIndex() != NON_EXISTING &&
+					markBundles.size() > edge->getBundle()->getIndex() )
 				{
 					markBundles[edge->getBundle()->getIndex()] = true;
 				}
@@ -1976,12 +1976,12 @@ void ArcDiagram::updateMarkBundles()
 
             }
             {
-            for ( int k = 0; k < node->getSizeOutEdges(); ++k )
+            for ( size_t k = 0; k < node->getSizeOutEdges(); ++k )
             {
                 edge = node->getOutEdge( k );
 				if( edge != NULL &&
-					0 <= edge->getBundle()->getIndex() &&
-					static_cast<int>(markBundles.size()) > edge->getBundle()->getIndex() )
+					edge->getBundle()->getIndex() != NON_EXISTING &&
+					markBundles.size() > edge->getBundle()->getIndex() )
 				{
 					markBundles[edge->getBundle()->getIndex()] = true;
 				}
@@ -2339,10 +2339,10 @@ void ArcDiagram::handleHoverCluster(
 
 
 // -----------------------------------------------------
-void ArcDiagram::handleHoverBundle( const int &bndlIdx )
+void ArcDiagram::handleHoverBundle( const size_t &bndlIdx )
 // -----------------------------------------------------
 {
-    if ( 0 <= bndlIdx && bndlIdx < graph->getSizeBundles()  )
+    if ( bndlIdx != NON_EXISTING && bndlIdx < graph->getSizeBundles()  )
     {
         string  sepr  = "; ";
         string  lbls = "";
@@ -2367,7 +2367,7 @@ void ArcDiagram::handleHoverBarTree(
         Cluster* clust;
 
         clust = mapPosToClust[i][j];
-        msg = Utils::intToStr( (int) clust->getSizeDescNodes() );
+        msg = Utils::size_tToStr( clust->getSizeDescNodes() );
         canvas->showToolTip( msg );
 
         clust = NULL;
@@ -2543,7 +2543,7 @@ void ArcDiagram::showDiagram( const size_t &dgrmIdx )
         showDgrm[dgrmIdx] = true;
 
         // find attributes linked to DOF's in diagram
-        for ( int i = 0; i < diagram->getSizeShapes(); ++i )
+        for ( size_t i = 0; i < diagram->getSizeShapes(); ++i )
         {
             // get result
             attr   = diagram->getShape(i)->getDOFXCtr()->getAttribute();

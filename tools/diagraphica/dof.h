@@ -42,7 +42,7 @@ public:
     void setTextStatus( const int &status );
 
     // -- get functions ---------------------------------------------
-    int getIndex();
+    size_t getIndex();
     std::string getLabel();
     double getMin();
     double getMax();
@@ -64,7 +64,7 @@ public:
 
 protected:
     // -- data members ----------------------------------------------
-	int    index;    // index in attribute
+	size_t    index;    // index in attribute
     std::string label;
     /*
     double min;

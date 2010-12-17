@@ -347,9 +347,9 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
     // selection mode
     if ( inSelectMode == true )
     {
-        for ( int i = 0; i < size-1; ++i )
+        for ( size_t i = 0; i < size-1; ++i )
         {
-            glPushName( i );
+            glPushName( (GLuint) i );
             VisUtils::fillRect(
                 positionsX[i]*xRgt-5.0*pix, positionsX[i]*xRgt+5.0*pix,
                 positionsY[i]*yTop+5.0*pix, positionsY[i]*yTop-5.0*pix );
@@ -392,7 +392,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
     else
     {
         VisUtils::enableLineAntiAlias();
-        for ( int i = 0; i < size-1; ++i )
+        for ( size_t i = 0; i < size-1; ++i )
         {
             VisUtils::setColorBlack();
             VisUtils::drawLine(

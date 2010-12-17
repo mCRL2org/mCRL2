@@ -211,7 +211,7 @@ void Frame::displAttrInfo(
     listCtrlAttr->DeleteAllItems();
 
     // display new items
-	if (std::numeric_limits<long>::max() < names.size()){
+	if ( ((size_t) std::numeric_limits<long>::max()) < names.size()){
 		wxMessageBox( wxT("Size of names exceeds max value of long"), wxT("Size of names exceeds max value of long"), wxOK|wxICON_INFORMATION, this );
 	}
 
@@ -293,7 +293,7 @@ void Frame::displDomainInfo(
     // clear domain list
     listCtrlDomain->DeleteAllItems();
 
-	if (std::numeric_limits<long>::max() < values.size() ){
+	if ( ((size_t) std::numeric_limits<long>::max()) < values.size() ){
 		wxMessageBox( wxT("Size of values exceeds max value of long"), wxT("Size of values exceeds max value of long"), wxOK|wxICON_INFORMATION, this );
 	}
 	long l_values_size = (long) values.size();
@@ -360,7 +360,7 @@ void Frame::displDOFInfo(
     // clear all previous items
     listCtrlDOF->DeleteAllItems();
 
-	if (std::numeric_limits<long>::max() < degsOfFrdmIndcs.size()){
+	if ( ((size_t) std::numeric_limits<long>::max()) < degsOfFrdmIndcs.size()){
 		wxMessageBox( wxT("Size of degsOfFrdmIndcs exceeds max value of long"), wxT("Size of degsOfFrdmIndcs exceeds max value of long"), wxOK|wxICON_INFORMATION, this );
 	}
 	
@@ -805,7 +805,7 @@ void Frame::displExnrFrameMenu( const bool &clear )
 void Frame::selectAttribute( const size_t &idx )
 // ------------------------------------------
 {
-    if ( idx != NON_EXISTING && idx < listCtrlAttr->GetItemCount() )
+    if ( idx != NON_EXISTING && idx < ((size_t) listCtrlAttr->GetItemCount()) )
     {
         // select idx'th item
         long item = -1;
@@ -827,7 +827,7 @@ void Frame::selectAttribute( const size_t &idx )
 void Frame::selectDomainVal( const size_t &idx )
 // ------------------------------------------
 {
-    if ( idx != NON_EXISTING && idx < listCtrlDomain->GetItemCount() )
+    if ( idx != NON_EXISTING && idx < ((size_t) listCtrlDomain->GetItemCount()) )
     {
         // select idx'th item
         long item = -1;

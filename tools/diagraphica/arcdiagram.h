@@ -159,7 +159,7 @@ protected:
     void handleHoverCluster(
         const size_t &i,
         const size_t &j );
-    void handleHoverBundle( const int &bndlIdx );
+    void handleHoverBundle( const size_t &bndlIdx );
     void handleHoverBarTree(
         const int &i,
         const int &j );

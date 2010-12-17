@@ -201,8 +201,8 @@ protected:
     int focusFrameIdxPrevLast;
     int focusFrameIdxNextLast;
 
-    int fcsLblPrevIdx;
-    int fcsLblNextIdx;
+    size_t fcsLblPrevIdx;
+    size_t fcsLblNextIdx;
 
     Position2D posFrameCurr;
     std::vector< Position2D > posFramesPrev;

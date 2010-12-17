@@ -87,7 +87,7 @@ void DiagramEditor::setEditModeSelect()
 {
     editMode = EDIT_MODE_SELECT;
 
-    for ( int i = 0; i < diagram->getSizeShapes(); ++i )
+    for ( size_t i = 0; i < diagram->getSizeShapes(); ++i )
     {
         if ( diagram->getShape( i )->getMode() != Shape::MODE_NORMAL )
             diagram->getShape( i )->setModeEdit();
@@ -327,7 +327,7 @@ bool DiagramEditor::isAnyShapeSelected()
 
 
 // --------------------------------------------------
-void DiagramEditor::handleDOFSel( const int &DOFIdx )
+void DiagramEditor::handleDOFSel( const size_t &DOFIdx )
 // --------------------------------------------------
 {
     Shape* s = NULL;
@@ -408,7 +408,7 @@ void DiagramEditor::handleDOFSel( const int &DOFIdx )
 
 // ----------------------------------------
 void DiagramEditor::handleDOFSetTextStatus(
-    const int &DOFIdx,
+    const size_t &DOFIdx,
     const int &status )
 // ----------------------------------------
 {
@@ -455,7 +455,7 @@ void DiagramEditor::handleDOFSetTextStatus(
 
 
 // -----------------------------------------------------------
-int DiagramEditor::handleDOFGetTextStatus( const int &DOFIdx )
+int DiagramEditor::handleDOFGetTextStatus( const size_t &DOFIdx )
 // -----------------------------------------------------------
 {
     int result = -1;
@@ -1327,7 +1327,7 @@ void DiagramEditor::handleHitDiagramOnly()
 
         Shape* selectedShape = NULL;
 	//find the selected shape
-	for ( int i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i )
+	for ( size_t i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i )
 	{
 		if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
 		{
@@ -1351,14 +1351,14 @@ void DiagramEditor::handleHitDiagramOnly()
 }
 
 // ------------------------------------------------------
-void DiagramEditor::handleHitShape( const int &shapeIdx )
+void DiagramEditor::handleHitShape( const size_t &shapeIdx )
 // ------------------------------------------------------
 {
     size_t sizeShapes = 0;
     if ( diagram != NULL )
         sizeShapes = diagram->getSizeShapes();
 
-    if ( 0 <= shapeIdx && shapeIdx < sizeShapes )
+    if ( shapeIdx != NON_EXISTING && shapeIdx < sizeShapes )
     {
         Shape* s = diagram->getShape( shapeIdx );
 
@@ -1384,7 +1384,7 @@ void DiagramEditor::handleHitShape( const int &shapeIdx )
                         else
                             s->setModeEdit();
 
-                        for ( int i = 0; i < sizeShapes; ++i )
+                        for ( size_t i = 0; i < sizeShapes; ++i )
                             if ( i != shapeIdx )
                                 diagram->getShape(i)->setModeNormal();
                     }
@@ -1403,7 +1403,7 @@ void DiagramEditor::handleHitShape( const int &shapeIdx )
                         displDOFInfo( s );
 
 
-                        for ( int i = 0; i < sizeShapes; ++i )
+                        for ( size_t i = 0; i < sizeShapes; ++i )
                             if ( i != shapeIdx )
                                 diagram->getShape(i)->setModeNormal();
                     }
@@ -1419,7 +1419,7 @@ void DiagramEditor::handleHitShape( const int &shapeIdx )
                         xMouseCur, yMouseCur,
                         xPaste,    yPaste );
 		    int countSelectedShapes = 0;
-		    for( int i = 0; i < sizeShapes; i++ )
+		    for( size_t i = 0; i < sizeShapes; i++ )
 		    {
 			if( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL)
 				countSelectedShapes++;
@@ -1446,15 +1446,15 @@ void DiagramEditor::handleHitShape( const int &shapeIdx )
 
 // --------------------------------------
 void DiagramEditor::handleHitShapeHandle(
-    const int &shapeIdx,
-    const int &handleId )
+    const size_t &shapeIdx,
+    const size_t &handleId )
 // --------------------------------------
 {
     size_t sizeShapes = 0;
     if ( diagram != NULL )
         sizeShapes = diagram->getSizeShapes();
 
-    if ( 0 <= shapeIdx && shapeIdx < sizeShapes )
+    if ( shapeIdx != NON_EXISTING && shapeIdx < sizeShapes )
     {
 	Shape* s = diagram->getShape( shapeIdx );
 
@@ -1526,7 +1526,7 @@ void DiagramEditor::handleHitShapeHandle(
                     	editMode = EDIT_MODE_DOF;
                     	mediator->handleEditModeDOF( this );
 		    }
-                    for ( int i = 0; i < sizeShapes; ++i )
+                    for ( size_t i = 0; i < sizeShapes; ++i )
                         if ( i != shapeIdx )
                             diagram->getShape(i)->setModeNormal();
                 }
@@ -1545,7 +1545,7 @@ void DiagramEditor::handleDrag()
     if ( diagram != NULL )
         sizeShapes = diagram->getSizeShapes();
 
-    if ( 0 <= drgBegIdx1 && drgBegIdx1 < sizeShapes )
+    if ( drgBegIdx1 != NON_EXISTING && drgBegIdx1 < sizeShapes )
     {
         // do transl & scale here
         Shape* s = diagram->getShape( drgBegIdx1 );
@@ -1556,7 +1556,7 @@ void DiagramEditor::handleDrag()
 		{
 			double xDrag, yDrag;
 			handleDragCtr( s, xDrag, yDrag );
-			int i;
+			size_t i;
 			for( i = 0; i < sizeShapes; i++ )
 			{
 				Shape* otherSelectedShape = diagram->getShape(i);
@@ -1740,7 +1740,7 @@ void DiagramEditor::handleCut()
     bool shapeSelected = false;
 
     // find & copy selected shape
-    for ( int i = 0; i < diagram->getSizeShapes(); ++i )
+    for ( size_t i = 0; i < diagram->getSizeShapes(); ++i )
     {
         if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
         {
@@ -1774,7 +1774,7 @@ void DiagramEditor::handleCopy()
     bool shapeSelected = false;
 
     // find & copy selected shape
-    for ( int i = 0; i < diagram->getSizeShapes(); ++i )
+    for ( size_t i = 0; i < diagram->getSizeShapes(); ++i )
     {
         if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
         {
@@ -1816,14 +1816,14 @@ void DiagramEditor::handlePaste()
     if ( clipBoardList.size() > 0 )
     {
 	// deselect all other shapes
-	for ( int i = 0; i < diagram->getSizeShapes(); ++i )
+	for ( size_t i = 0; i < diagram->getSizeShapes(); ++i )
 		if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
 			diagram->getShape(i)->setModeNormal();
 
 	size_t size = clipBoardList.size();
 	double xC, yC, xCFirst, yCFirst;
 	clipBoardList[0]->getCenter( xCFirst, yCFirst );
-	for(int i = 0; i < size; i++)
+	for(size_t i = 0; i < size; i++)
 	{
 		// update index of clipboard shape
 		clipBoardList[i]->setIndex( diagram->getSizeShapes() );
@@ -1874,7 +1874,7 @@ void DiagramEditor::handleDelete()
     vector< int > toDelete;
     // get indices to delete
     {
-	for ( int i = 0; i < diagram->getSizeShapes() ; ++i )
+	for ( size_t i = 0; i < diagram->getSizeShapes() ; ++i )
 	{
 		/*
 		if ( diagram->getShape(i)->getMode() == Shape::MODE_EDT_CTR_DFC ||
@@ -1897,7 +1897,7 @@ void DiagramEditor::handleDelete()
 void DiagramEditor::handleSelectAll()
 // -------------------------------
 {
-    for ( int i = 0; i < diagram->getSizeShapes() ; ++i )
+    for ( size_t i = 0; i < diagram->getSizeShapes() ; ++i )
     {
         diagram->getShape(i)->setMode( Shape::MODE_EDIT );
     }
@@ -1909,7 +1909,7 @@ void DiagramEditor::handleBringToFront()
 // -------------------------------------
 {
     Shape* s = NULL;
-    for ( int i = 0; i < diagram->getSizeShapes() && s == NULL; ++i )
+    for ( size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i )
         if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
             s = diagram->getShape(i);
 
@@ -1925,7 +1925,7 @@ void DiagramEditor::handleSendToBack()
 // -----------------------------------
 {
     Shape* s = NULL;
-    for ( int i = 0; i < diagram->getSizeShapes() && s == NULL; ++i )
+    for ( size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i )
         if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
             s = diagram->getShape(i);
 
@@ -1941,7 +1941,7 @@ void DiagramEditor::handleBringForward()
 // -------------------------------------
 {
     Shape* s = NULL;
-    for ( int i = 0; i < diagram->getSizeShapes() && s == NULL; ++i )
+    for ( size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i )
         if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
             s = diagram->getShape(i);
 
@@ -1957,7 +1957,7 @@ void DiagramEditor::handleSendBackward()
 // -------------------------------------
 {
     Shape* s = NULL;
-    for ( int i = 0; i < diagram->getSizeShapes() && s == NULL; ++i )
+    for ( size_t i = 0; i < diagram->getSizeShapes() && s == NULL; ++i )
         if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
             s = diagram->getShape(i);
 
@@ -1984,7 +1984,7 @@ void DiagramEditor::handleEditDOF()
         editMode = EDIT_MODE_DOF;
         mediator->
         handleEditModeDOF( this );
-        for ( int i = 0; i < diagram->getSizeShapes(); ++i )
+        for ( size_t i = 0; i < diagram->getSizeShapes(); ++i )
             if ( i != s->getIndex() )
                 diagram->getShape(i)->setModeNormal();
         s = NULL;
@@ -2031,7 +2031,7 @@ void DiagramEditor::handleCheckedVariable( const size_t &idDOF, const int &varia
 	Shape* selectedShape = NULL;
 
 	//find the selected shape
-	for ( int i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i )
+	for ( size_t i = 0; i < diagram->getSizeShapes() && selectedShape == NULL; ++i )
 	{
 		if ( diagram->getShape(i)->getMode() != Shape::MODE_NORMAL )
 		{

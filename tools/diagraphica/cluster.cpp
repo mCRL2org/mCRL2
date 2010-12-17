@@ -404,7 +404,7 @@ void Cluster::getSizeDescNodes(
         sum += curClst->getSizeNodes();
     else
     {
-        for ( int i = 0; i < curClst->getSizeChildren(); ++i )
+        for ( size_t i = 0; i < curClst->getSizeChildren(); ++i )
             getSizeDescNodes( curClst->getChild( i ), sum );
     }
 }

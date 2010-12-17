@@ -614,14 +614,14 @@ void Graph::calcAttrDistr(
     distr.clear();
     if ( sizeDomain > 0  )
     {
-        for ( int i = 0; i < sizeDomain; ++i )
+        for ( size_t i = 0; i < sizeDomain; ++i )
             distr.push_back( 0 );
     }
 
     // calc results
     if ( sizeDomain > 0  )
     {
-        for ( int i = 0; i < sizeNodes; ++i )
+        for ( size_t i = 0; i < sizeNodes; ++i )
             distr[ attribute->mapToValue( nodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;
     }
 
@@ -654,14 +654,14 @@ void Graph::calcAttrDistr(
     distr.clear();
     if ( sizeDomain > 0  )
     {
-        for ( int i = 0; i < sizeDomain; ++i )
+        for ( size_t i = 0; i < sizeDomain; ++i )
             distr.push_back( 0 );
     }
 
     // calc results
     if ( sizeDomain > 0  )
     {
-        for ( int i = 0; i < sizeNodes; ++i )
+        for ( size_t i = 0; i < sizeNodes; ++i )
             /*distr[ attribute->mapToValue( (int)clustNodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;*/
             distr[ attribute->mapToValue( clustNodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;
     }
@@ -706,10 +706,10 @@ void Graph::calcAttrCorrl(
     number.clear();
     if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
     {
-        for ( int i = 0; i < sizeDomain1; ++i )
+        for ( size_t i = 0; i < sizeDomain1; ++i )
         {
             vector< int > tempNumVec;
-            for ( int j = 0; j < sizeDomain2; ++j )
+            for ( size_t j = 0; j < sizeDomain2; ++j )
                 tempNumVec.push_back( 0 );
             number.push_back( tempNumVec );
 
@@ -721,7 +721,7 @@ void Graph::calcAttrCorrl(
     // calc prelim results
     if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
     {
-        for ( int i = 0; i < sizeNodes; ++i )
+        for ( size_t i = 0; i < sizeNodes; ++i )
         {
             node    = nodes[i];
             /*
@@ -746,9 +746,9 @@ void Graph::calcAttrCorrl(
     // update correlation map
     if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
     {
-        for ( int i = 0; i < sizeDomain1; ++i )
+        for ( size_t i = 0; i < sizeDomain1; ++i )
         {
-            for ( int j = 0; j < sizeDomain2; ++j )
+            for ( size_t j = 0; j < sizeDomain2; ++j )
             {
                 if ( number[i][j] > 0 )
                     corrlMap[i].push_back( j );
@@ -759,11 +759,11 @@ void Graph::calcAttrCorrl(
     // remove zero entries from number
 	if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
     {
-        for ( int i = 0; i < sizeDomain1; ++i )
+        for ( size_t i = 0; i < sizeDomain1; ++i )
         {
             toErase.clear();
             {
-            for ( int j = 0; j < sizeDomain2; ++j )
+            for ( size_t j = 0; j < sizeDomain2; ++j )
             {
                 if ( number[i][j] < 1 )
                     toErase.push_back( j );
@@ -825,10 +825,10 @@ void Graph::calcAttrCorrl(
     number.clear();
     if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
     {
-        for ( int i = 0; i < sizeDomain1; ++i )
+        for ( size_t i = 0; i < sizeDomain1; ++i )
         {
             vector< int > tempNumVec;
-            for ( int j = 0; j < sizeDomain2; ++j )
+            for ( size_t j = 0; j < sizeDomain2; ++j )
                 tempNumVec.push_back( 0 );
             number.push_back( tempNumVec );
 
@@ -840,7 +840,7 @@ void Graph::calcAttrCorrl(
     // calc prelim results
     if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
     {
-        for ( int i = 0; i < sizeNodes; ++i )
+        for ( size_t i = 0; i < sizeNodes; ++i )
         {
             node    = clustNodes[i];
             /*
@@ -866,9 +866,9 @@ void Graph::calcAttrCorrl(
     // update correlation map
     if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
     {
-        for ( int i = 0; i < sizeDomain1; ++i )
+        for ( size_t i = 0; i < sizeDomain1; ++i )
         {
-            for ( int j = 0; j < sizeDomain2; ++j )
+            for ( size_t j = 0; j < sizeDomain2; ++j )
             {
                 if ( number[i][j] > 0 )
                     corrlMap[i].push_back( j );
@@ -879,7 +879,7 @@ void Graph::calcAttrCorrl(
     // remove zero entries from number
     if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
     {
-        for ( int i = 0; i < sizeDomain1; ++i )
+        for ( size_t i = 0; i < sizeDomain1; ++i )
         {
             toErase.clear();
             count = 0;
@@ -1301,13 +1301,13 @@ bool Graph::hasMultAttrCombns(
 
     // calc results
     {
-    for ( int i = 0; i < sizeNodes && result == false; ++i )
+    for ( size_t i = 0; i < sizeNodes && result == false; ++i )
     {
         map  = 0;
         node = clustNodes[i];
 
         // calc map
-        for ( int j = 0; j < numAttrs && result == false; ++j )
+        for ( size_t j = 0; j < numAttrs && result == false; ++j )
         {
             attribute = getAttribute( attrIndcs[j] );
             cardAttr  = attribute->getSizeCurValues();
@@ -1323,7 +1323,7 @@ bool Graph::hasMultAttrCombns(
             else
                 summand = 0;
 
-            for ( int k = j+1; k < numAttrs; ++k )
+            for ( size_t k = j+1; k < numAttrs; ++k )
             {
                 attribute = getAttribute( attrIndcs[k] );
                 cardAttr  = attribute->getSizeCurValues();
@@ -1429,7 +1429,7 @@ void Graph::sumNodesInCluster(
     size_t &total )
 // ---------------------------
 {
-    for ( int i = 0; i < clust->getSizeChildren(); ++i )
+    for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
     {
         sumNodesInCluster(
             clust->getChild(i),
@@ -1467,7 +1467,7 @@ void Graph::getDescNodesInCluster(
 {
     // call recursively on all child clusters
     {
-    for ( int i = 0; i < clust->getSizeChildren(); ++i )
+    for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
     {
         getDescNodesInCluster(
             clust->getChild(i),
@@ -1477,7 +1477,7 @@ void Graph::getDescNodesInCluster(
 
     // add nodes
     {
-    for ( int i = 0; i < clust->getSizeNodes(); ++i )
+    for ( size_t i = 0; i < clust->getSizeNodes(); ++i )
         nodes.push_back( clust->getNode( i ) );
     }
 }
@@ -1605,7 +1605,7 @@ void Graph::clustNodesOnAttr(
         attrIdcs.erase( attrIdcs.begin() );
 
         // repeat recursively on children
-        for ( int i = 0; i < clust->getSizeChildren(); ++i )
+        for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
         {
             clustNodesOnAttr(
                 clust->getChild( i ),
@@ -1658,13 +1658,13 @@ void Graph::clustClusterOnAttr(
 
     // init temporary clusters
     {
-    for ( int i = 0; i < attr->getSizeCurValues(); ++i )
+    for ( size_t i = 0; i < attr->getSizeCurValues(); ++i )
         clstTmp.push_back( new Cluster() );
     }
 
     // do clustering & move nodes to new cluster
     {
-    for ( int i = 0; i < clust->getSizeNodes(); ++i )
+    for ( size_t i = 0; i < clust->getSizeNodes(); ++i )
     {
         node = clust->getNode( i );
 
@@ -1718,7 +1718,7 @@ void Graph::clearSubClusters( Cluster* clust )
 {
     if ( clust != NULL )
     {
-        for ( int i = 0; i < clust->getSizeChildren(); ++i )
+        for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
         {
             Cluster* child = clust->getChild(i);
 
@@ -1726,7 +1726,7 @@ void Graph::clearSubClusters( Cluster* clust )
             clearSubClusters( child );
 
             // move up nodes
-            for ( int j = 0; j < child->getSizeNodes(); ++j )
+            for ( size_t j = 0; j < child->getSizeNodes(); ++j )
             {
                 clust->addNode( child->getNode(j) );
                 child->getNode(j)->setCluster( clust );
@@ -1776,7 +1776,7 @@ void Graph::updateLeaves( Cluster* clust )
         clust->setIndex( -1 );
 
         // update clusts
-        for ( int i = 0; i < clust->getSizeChildren(); ++i )
+        for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
             updateLeaves( clust->getChild( i ) );
     }
 }
@@ -1892,7 +1892,7 @@ void Graph::printClusters( vector< Cluster* > &clusts )
         // update clusts
         clusts.erase( clusts.begin() );
         {
-        for ( int i = 0; i < c->getSizeChildren(); ++i )
+        for ( size_t i = 0; i < c->getSizeChildren(); ++i )
             clusts.push_back( c->getChild(i) );
         }
 
@@ -2031,12 +2031,12 @@ void Graph::updateBundles( size_t &progress )
         for ( size_t j = 0; j < labels.size(); ++j )
         {
             bool must = true;
-            for ( int k = 0; k < inClust->getSizeNodes() && must == true; ++k )
+            for ( size_t k = 0; k < inClust->getSizeNodes() && must == true; ++k )
             {
                 node = inClust->getNode( k );
                 bool hasLbl = false;
 
-                for ( int m = 0; m < node->getSizeOutEdges() && hasLbl != true; ++m )
+                for ( size_t m = 0; m < node->getSizeOutEdges() && hasLbl != true; ++m )
                 {
                     if ( node->getOutEdge( m )->getLabel() == labels[j] &&
                          node->getOutEdge( m )->getOutNode()->getCluster() == outClust )

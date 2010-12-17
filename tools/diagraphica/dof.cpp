@@ -181,7 +181,7 @@ void DOF::setTextStatus( const int &status )
 
 
 // ----------------
-int DOF::getIndex()
+size_t DOF::getIndex()
 // ----------------
 {
     return index;

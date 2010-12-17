@@ -274,7 +274,7 @@ void Parser::writeFSMFile(
 
 
     // write state variable description
-    for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+    for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
     {
         line  = "";
         line.append( graph->getAttribute( i )->getName() );
@@ -286,7 +286,7 @@ void Parser::writeFSMFile(
 
         if ( graph->getAttribute(i)->getSizeOrigValues() != 0 )
         {
-            for ( int j = 0; j < graph->getAttribute( i )->getSizeCurValues(); ++j )
+            for ( size_t j = 0; j < graph->getAttribute( i )->getSizeCurValues(); ++j )
             {
                 line.append( "\"" );
                 line.append( graph->getAttribute( i )->getCurValue( j )->getValue() );
@@ -318,11 +318,11 @@ void Parser::writeFSMFile(
     line = "---\n";
     file << line;
 
-    for ( int i = 0; i < graph->getSizeNodes(); ++i )
+    for ( size_t i = 0; i < graph->getSizeNodes(); ++i )
     {
         line = "";
 
-        for ( int j = 0; j < graph->getNode(i)->getSizeTuple(); ++j )
+        for ( size_t j = 0; j < graph->getNode(i)->getSizeTuple(); ++j )
         {
             line.append( Utils::dblToStr( graph->getNode(i)->getTupleVal(j) ) );
 
@@ -450,7 +450,7 @@ void Parser::writeAttrConfig(
 				new wxXmlNode( file, wxXML_TEXT_NODE, wxEmptyString, wxString( graph->getFileName().c_str(), wxConvUTF8 )  );
 
         // attributes
-        for ( int i = 0; i < graph->getSizeAttributes(); ++i )
+        for ( size_t i = 0; i < graph->getSizeAttributes(); ++i )
         {
             attr = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Attribute") );
             conf -> AddChild( attr );
@@ -491,7 +491,7 @@ void Parser::writeAttrConfig(
             domn = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("CurrentDomain") );
             attr -> AddChild( domn );
             {
-            for ( int j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j )
+            for ( size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j )
             {
                 // value
                 valu = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
@@ -505,7 +505,7 @@ void Parser::writeAttrConfig(
             map = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("OriginalToCurrent") ) ;
             attr -> AddChild( map );
             {
-            for ( int j = 0; j < graph->getAttribute(i)->getSizeOrigValues(); ++j )
+            for ( size_t j = 0; j < graph->getAttribute(i)->getSizeOrigValues(); ++j )
             {
                 // value
                 pos = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("CurrentPosition") );
@@ -613,7 +613,7 @@ void Parser::writeDiagram(
 				new wxXmlNode( file, wxXML_TEXT_NODE, wxEmptyString, wxString( graph->getFileName().c_str(), wxConvUTF8 ) );
 
         // shapes
-        for ( int i = 0; i < diagram->getSizeShapes(); ++i )
+        for ( size_t i = 0; i < diagram->getSizeShapes(); ++i )
         {
             shpe = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("Shape") );
             dgrm -> AddChild (shpe);
@@ -734,7 +734,7 @@ void Parser::writeDiagram(
             attr = NULL;
 
             {
-            for ( int j = 0; j < diagram->getShape(i)->getDOFXCtr()->getSizeValues(); ++j )
+            for ( size_t j = 0; j < diagram->getShape(i)->getDOFXCtr()->getSizeValues(); ++j )
             {
                 subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
                 prop -> AddChild( subp );
@@ -755,7 +755,7 @@ void Parser::writeDiagram(
             attr = NULL;
 
             {
-            for ( int j = 0; j < diagram->getShape(i)->getDOFYCtr()->getSizeValues(); ++j )
+            for ( size_t j = 0; j < diagram->getShape(i)->getDOFYCtr()->getSizeValues(); ++j )
             {
               subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
               prop -> AddChild( subp );
@@ -775,7 +775,7 @@ void Parser::writeDiagram(
             attr = NULL;
 
             {
-            for ( int j = 0; j < diagram->getShape(i)->getDOFWth()->getSizeValues(); ++j )
+            for ( size_t j = 0; j < diagram->getShape(i)->getDOFWth()->getSizeValues(); ++j )
             {
               subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
               prop -> AddChild( subp );
@@ -796,7 +796,7 @@ void Parser::writeDiagram(
             attr = NULL;
 
             {
-            for ( int j = 0; j < diagram->getShape(i)->getDOFHgt()->getSizeValues(); ++j )
+            for ( size_t j = 0; j < diagram->getShape(i)->getDOFHgt()->getSizeValues(); ++j )
             {
                 subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
                 prop -> AddChild( subp );
@@ -817,7 +817,7 @@ void Parser::writeDiagram(
             attr = NULL;
 
             {
-            for ( int j = 0; j < diagram->getShape(i)->getDOFAgl()->getSizeValues(); ++j )
+            for ( size_t j = 0; j < diagram->getShape(i)->getDOFAgl()->getSizeValues(); ++j )
             {
               subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
               prop -> AddChild( subp );
@@ -837,7 +837,7 @@ void Parser::writeDiagram(
             attr = NULL;
 
             {
-            for ( int j = 0; j < diagram->getShape(i)->getDOFCol()->getSizeValues(); ++j )
+            for ( size_t j = 0; j < diagram->getShape(i)->getDOFCol()->getSizeValues(); ++j )
             {
               subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
               prop -> AddChild( subp );
@@ -869,7 +869,7 @@ void Parser::writeDiagram(
             attr = NULL;
 
             {
-            for ( int j = 0; j < diagram->getShape(i)->getDOFOpa()->getSizeValues(); ++j )
+            for ( size_t j = 0; j < diagram->getShape(i)->getDOFOpa()->getSizeValues(); ++j )
             {
               subp = new wxXmlNode( wxXML_ELEMENT_NODE, wxT("Value") );
               prop -> AddChild( subp );
