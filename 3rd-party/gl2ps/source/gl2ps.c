@@ -234,9 +234,9 @@ typedef struct {
   GL2PSprimitive *primitivetoadd;
   
   /* PDF-specific */
-  int streamlength;
+  size_t streamlength;
   GL2PSlist *pdfprimlist, *pdfgrouplist;
-  int *xreflist;
+  size_t *xreflist;
   int objects_stack; /* available objects */
   int extgs_stack; /* graphics state object number */
   int font_stack; /* font object number */
@@ -3198,7 +3198,7 @@ static void gl2psPrintTeXHeader(void)
 {
   char name[256];
   time_t now;
-  int i;
+  size_t i;
 
   if(gl2ps->filename && strlen(gl2ps->filename) < 256){
     for(i = strlen(gl2ps->filename)-1; i >= 0; i--){
@@ -3411,7 +3411,7 @@ static void gl2psPutPDFText(GL2PSstring *text, int cnt, GLfloat x, GLfloat y)
        cnt, text->fontsize, x, y, text->str);
   }
   else{
-    rad = M_PI * text->angle / 180.0F;
+    rad = (GLfloat)M_PI * text->angle / 180.0F;
     srad = (GLfloat)sin(rad);
     crad = (GLfloat)cos(rad);
     gl2ps->streamlength += gl2psPrintf
@@ -4021,7 +4021,7 @@ static void gl2psPrintPDFHeader(void)
   gl2ps->pdfprimlist = gl2psListCreate(500, 500, sizeof(GL2PSprimitive*));
   gl2psPDFstacksInit();
 
-  gl2ps->xreflist = (int*)gl2psMalloc(sizeof(int) * gl2ps->objects_stack); 
+  gl2ps->xreflist = (size_t*)gl2psMalloc(sizeof(size_t) * gl2ps->objects_stack); 
 
 #if defined(GL2PS_HAVE_ZLIB)
   if(gl2ps->options & GL2PS_COMPRESS){
@@ -4086,7 +4086,7 @@ static int gl2psClosePDFDataStream(void)
 
 /* ... write the now known length object */
 
-static int gl2psPrintPDFDataStreamLength(int val)
+static int gl2psPrintPDFDataStreamLength(size_t val)
 {
   return fprintf(gl2ps->stream,
                  "5 0 obj\n"
@@ -4171,13 +4171,13 @@ static int gl2psPrintPDFGSObject(void)
 
 /* Put vertex' edge flag (8bit) and coordinates (32bit) in shader stream */
 
-static int gl2psPrintPDFShaderStreamDataCoord(GL2PSvertex *vertex, 
+static size_t gl2psPrintPDFShaderStreamDataCoord(GL2PSvertex *vertex, 
                                               size_t (*action)(unsigned long data, 
                                                                size_t size), 
                                               GLfloat dx, GLfloat dy, 
                                               GLfloat xmin, GLfloat ymin)
 {
-  int offs = 0;
+  size_t offs = 0;
   unsigned long imap;
   GLfloat diff;
   double dmax = ~1UL;
@@ -4218,11 +4218,11 @@ static int gl2psPrintPDFShaderStreamDataCoord(GL2PSvertex *vertex,
 
 /* Put vertex' rgb value (8bit for every component) in shader stream */
 
-static int gl2psPrintPDFShaderStreamDataRGB(GL2PSvertex *vertex,
+static size_t gl2psPrintPDFShaderStreamDataRGB(GL2PSvertex *vertex,
                                             size_t (*action)(unsigned long data, 
                                                              size_t size))
 {
-  int offs = 0;
+  size_t offs = 0;
   unsigned long imap;
   double dmax = ~1UL;
 
@@ -4243,12 +4243,12 @@ static int gl2psPrintPDFShaderStreamDataRGB(GL2PSvertex *vertex,
 
 /* Put vertex' alpha (8/16bit) in shader stream */
 
-static int gl2psPrintPDFShaderStreamDataAlpha(GL2PSvertex *vertex, 
+static size_t gl2psPrintPDFShaderStreamDataAlpha(GL2PSvertex *vertex, 
                                               size_t (*action)(unsigned long data, 
                                                                size_t size),
                                               int sigbyte)
 {
-  int offs = 0;
+  size_t offs = 0;
   unsigned long imap;
   double dmax = ~1UL;
 
@@ -4269,14 +4269,15 @@ static int gl2psPrintPDFShaderStreamDataAlpha(GL2PSvertex *vertex,
 
 /* Put a triangles raw data in shader stream */
 
-static int gl2psPrintPDFShaderStreamData(GL2PStriangle *triangle, 
+static size_t gl2psPrintPDFShaderStreamData(GL2PStriangle *triangle, 
                                          GLfloat dx, GLfloat dy, 
                                          GLfloat xmin, GLfloat ymin,
                                          size_t (*action)(unsigned long data, 
                                                           size_t size),
                                          int gray)
 {
-  int i, offs = 0;
+  int i;
+  size_t offs = 0;
   GL2PSvertex v;
   
   if(gray && gray != 8 && gray != 16)
@@ -4327,10 +4328,12 @@ static void gl2psPDFRectHull(GLfloat *xmin, GLfloat *xmax,
    gray == 8             8bit-grayscale (for alpha masks)
    gray == 16            16bit-grayscale (for alpha masks) */
 
-static int gl2psPrintPDFShader(int obj, GL2PStriangle *triangles, 
+static size_t gl2psPrintPDFShader(int obj, GL2PStriangle *triangles, 
                                int size, int gray)
 {
-  int i, offs = 0, vertexbytes, done = 0;
+  int i, vertexbytes, done = 0;
+  size_t offs = 0;
+
   GLfloat xmin, xmax, ymin, ymax;
         
   switch(gray){
@@ -4416,7 +4419,8 @@ static int gl2psPrintPDFShader(int obj, GL2PStriangle *triangles,
 
 static int gl2psPrintPDFShaderMask(int obj, int childobj)
 {
-  int offs = 0, len;
+  int offs = 0;
+  size_t len;
   
   offs += fprintf(gl2ps->stream,
                   "%d 0 obj\n"
@@ -4617,12 +4621,12 @@ static int gl2psPrintPDFText(int obj, GL2PSstring *s, int fontnumber)
 
 /* Write the physical objects */
 
-static int gl2psPDFgroupListWriteObjects(int entryoffs)
+static size_t gl2psPDFgroupListWriteObjects(size_t entryoffs)
 {
   int i,j;
   GL2PSprimitive *p = NULL;
   GL2PSpdfgroup *gro;
-  int offs = entryoffs;
+  size_t offs = entryoffs;
   GL2PStriangle *triangles;
   int size = 0;
 
@@ -4695,7 +4699,8 @@ static int gl2psPDFgroupListWriteObjects(int entryoffs)
 
 static void gl2psPrintPDFFooter(void)
 {
-  int i, offs;  
+  int i; 
+  size_t offs;  
 
   gl2psPDFgroupListInit();
   gl2psPDFgroupListWriteMainStream();
@@ -4710,8 +4715,8 @@ static void gl2psPrintPDFFooter(void)
   
   offs += gl2psPrintPDFOpenPage();
   offs += gl2psPDFgroupListWriteVariableResources();
-  gl2ps->xreflist = (int*)gl2psRealloc(gl2ps->xreflist,
-                                       sizeof(int) * (gl2ps->objects_stack + 1));
+  gl2ps->xreflist = (size_t*)gl2psRealloc(gl2ps->xreflist,
+                                       sizeof(size_t) * (gl2ps->objects_stack + 1));
   gl2ps->xreflist[7] = offs;
   
   offs += gl2psPrintPDFGSObject();

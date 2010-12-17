@@ -63,9 +63,9 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
   // choices
   int selected = wxNOT_FOUND;
   wxString selected_name = wxEmptyString;
-  unsigned int count = p_spec->count_architecture_diagram();
+  size_t count = p_spec->count_architecture_diagram();
   wxArrayString choices;
-  for ( unsigned int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     architecture_diagram *diagram = p_spec->get_architecture_diagram( i );
     choices.Add( diagram->get_name() );
@@ -105,9 +105,9 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
   // choices
   int selected = wxNOT_FOUND;
   wxString selected_name = wxEmptyString;
-  unsigned int count = p_spec->count_process_diagram();
+  size_t count = p_spec->count_process_diagram();
   wxArrayString choices;
-  for ( unsigned int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     process_diagram *diagram = p_spec->get_process_diagram( i );
     choices.Add( diagram->get_name() );

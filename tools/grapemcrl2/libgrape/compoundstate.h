@@ -86,13 +86,13 @@ namespace grape
          * @param p_index An index.
          * @return A pointer to the transition at the specified index in the list of transitions that begin in this state.
          */
-        transition* get_transition_beginstate( int p_index );
+        transition* get_transition_beginstate( size_t p_index );
 
         /**
          * Transition count function
          * @return The length of the list of transitions that begin in this state.
          */
-        unsigned int count_transition_beginstate( void );
+        size_t count_transition_beginstate( void );
 
         /**
          * Beginstate dissociation function.
@@ -111,13 +111,13 @@ namespace grape
          * @param p_index An index.
          * @return A pointer to the transition at the specified index in the list of transitions that end in this state.
          */
-        nonterminating_transition* get_transition_endstate( int p_index );
+        nonterminating_transition* get_transition_endstate( size_t p_index );
 
         /**
          * Transition count function
          * @return The length of the list of transitions that end in this state.
          */
-        unsigned int count_transition_endstate( void );
+        size_t count_transition_endstate( void );
 
         /**
          * Endstate dissociation function.
@@ -136,13 +136,13 @@ namespace grape
          * @param p_index An index.
          * @return A pointer to the initial designator in the list of initial designators that designate this state
          */
-        initial_designator* get_initial_designator( int p_index );
+        initial_designator* get_initial_designator( size_t p_index );
 
         /**
          * Initial designator count function
          * @return The length of the list of initial designators that designate this state.
          */
-        unsigned int count_initial_designator( void );
+        size_t count_initial_designator( void );
 
         /**
          * Endstate dissociation function.

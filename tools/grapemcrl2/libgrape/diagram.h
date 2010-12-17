@@ -102,14 +102,14 @@ namespace grape
          * Comment count function.
          * @return Returns the number of comments in the diagram.
          */
-        unsigned int count_comment( void );
+        size_t count_comment( void );
 
         /**
          * Comment retrieval function.
          * @param p_i The index of the to be retrieved comment.
          * @return Returns a pointer to the comment at index p_i in the list of comments.
          */
-        comment* get_comment( int p_i );
+        comment* get_comment( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -174,13 +174,13 @@ namespace grape
          * Selected object count function.
          * @return Returns the number of selected objects in the diagram.
          */
-        unsigned int count_selected_objects( void );
+        size_t count_selected_objects( void );
 
         /**
          * Selected object retrieval function.
          * @return Returns a pointer to the object in the list of selected objects.
          */
-        object* get_selected_object( int p_index );
+        object* get_selected_object( size_t p_index );
     };
 
   } // namespace libgrape

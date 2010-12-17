@@ -100,12 +100,12 @@ void diagram::remove_comment( comment* p_comment )
 
 }
 
-unsigned int diagram::count_comment( void )
+size_t diagram::count_comment( void )
 {
   return m_comments.GetCount();
 }
 
-comment* diagram::get_comment( int p_i )
+comment* diagram::get_comment( size_t p_i )
 {
   return &( m_comments.Item( p_i ) );
 }
@@ -167,12 +167,12 @@ void diagram::deselect_object( object* p_object )
   }
 }
 
-unsigned int diagram::count_selected_objects( void )
+size_t diagram::count_selected_objects( void )
 {
   return m_selected_objects.GetCount();
 }
 
-object* diagram::get_selected_object( int p_index )
+object* diagram::get_selected_object( size_t p_index )
 {
   return m_selected_objects.Item( p_index );
 }

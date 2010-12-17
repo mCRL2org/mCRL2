@@ -134,7 +134,7 @@ void object::detach_comment( comment *p_comment )
   m_comments.Remove( p_comment );
 }
 
-unsigned int object::count_comment( void )
+size_t object::count_comment( void )
 {
   return m_comments.GetCount();
 }

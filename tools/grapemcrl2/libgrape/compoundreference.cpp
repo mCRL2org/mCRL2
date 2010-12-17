@@ -77,12 +77,12 @@ void compound_reference::detach_channel( channel* p_channel )
 
 }
 
-channel* compound_reference::get_channel( int i )
+channel* compound_reference::get_channel( size_t i )
 {
   return m_has_channel.Item( i );
 }
 
-unsigned int compound_reference::count_channel( void )
+size_t compound_reference::count_channel( void )
 {
   return m_has_channel.GetCount();
 }

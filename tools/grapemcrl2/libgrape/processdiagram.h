@@ -97,14 +97,14 @@ namespace grape
          * State count function.
          * @return Returns the number of states in the process diagram.
          */
-        unsigned int count_state( void );
+        size_t count_state( void );
 
         /**
          * State retrieval function.
          * @param p_i The index of the to be retrieved state.
          * @return Returns a pointer to the state at index p_i in the list of states.
          */
-        state* get_state( int p_i );
+        state* get_state( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -134,14 +134,14 @@ namespace grape
          * Reference state count function.
          * @return Returns the number of reference states in the process diagram.
          */
-        unsigned int count_reference_state( void );
+        size_t count_reference_state( void );
 
         /**
          * Reference state retrieval function.
          * @param p_i The index of the to be retrieved reference state.
          * @return Returns a pointer to the reference state at index p_i in the list of reference states.
          */
-        reference_state* get_reference_state( int p_i );
+        reference_state* get_reference_state( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -171,14 +171,14 @@ namespace grape
          * Nonterminating transition count function.
          * @return Returns the number of nonterminating transitions in the process diagram.
          */
-        unsigned int count_nonterminating_transition( void );
+        size_t count_nonterminating_transition( void );
 
         /**
          * Nonerminating transition retrieval function.
          * @param p_i The index of the to be retrieved nonterminating transition.
          * @return Returns a pointer to the nonterminating transition at index p_i in the list of nonterminating transitions.
          */
-        nonterminating_transition* get_nonterminating_transition( int p_i );
+        nonterminating_transition* get_nonterminating_transition( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -208,14 +208,14 @@ namespace grape
          * Terminating transition count function.
          * @return Returns the number of terminating transitions in the process diagram.
          */
-        unsigned int count_terminating_transition( void );
+        size_t count_terminating_transition( void );
 
         /**
          * Terminating transition retrieval function.
          * @param p_i The index of the to be retrieved terminating transition.
          * @return Returns a pointer to the terminating transition at index p_i in the list of terminating transitions.
          */
-        terminating_transition* get_terminating_transition( int p_i );
+        terminating_transition* get_terminating_transition( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -281,14 +281,14 @@ namespace grape
          * Initial designator count function.
          * @return Returns the number of intial designators in the process diagram.
          */
-        unsigned int count_initial_designator( void );
+        size_t count_initial_designator( void );
 
         /**
          * Initial designator retrieval function.
          * @param p_i The index of the to be retrieved initial designator.
          * @return Returns a pointer to the initial designator at index p_i in the list of initial designators.
          */
-        initial_designator* get_initial_designator( int p_i );
+        initial_designator* get_initial_designator( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -348,7 +348,7 @@ namespace grape
          * @param p_index The index appearing in the state's name.
          * @return Returns whether a state with the specified name exists.
          */
-        bool exists_state( const wxString &p_name, int p_index );
+        bool exists_state( const wxString &p_name, size_t p_index );
     };
 
     /**

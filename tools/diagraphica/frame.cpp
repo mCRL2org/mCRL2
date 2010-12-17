@@ -3115,9 +3115,12 @@ void Frame::onMenuBar( wxCommandEvent &e )
         Close();
     }
 
+	// Following lines cause stange resize behaviour when opening a file in Windows
+#ifndef WIN32
 	// fit everything after handling the request
 	Fit();
 	Layout();
+#endif
 }
 
 

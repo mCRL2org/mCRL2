@@ -251,7 +251,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   vector<RAT>::iterator itRAT;
   vector<int>::iterator itint;
   string result;
-  set<int> collection_of_used_counters;
+  set<size_t> collection_of_used_counters;
 
   //Clear global variables that are exclusivly thoughout this process
   begin_state.clear(); //first:  parenthesis level

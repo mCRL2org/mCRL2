@@ -80,14 +80,14 @@ namespace grape
          * Architecture reference count function.
          * @return Returns the number of architecture references in the architecture diagram.
          */
-        unsigned int count_architecture_reference( void );
+        size_t count_architecture_reference( void );
 
         /**
          * Architecture reference retrieval function.
          * @param p_i The index of the to be retrieved architecture reference.
          * @return Returns a pointer to the architecture reference at index p_i in the list of architecture reference.
          */
-        architecture_reference* get_architecture_reference( int p_i );
+        architecture_reference* get_architecture_reference( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -118,14 +118,14 @@ namespace grape
          * Process reference count function.
          * @return Returns the number of process references in the architecture diagram.
          */
-        unsigned int count_process_reference( void );
+        size_t count_process_reference( void );
 
         /**
          * Process reference retrieval function.
          * @param p_i The index of the to be retrieved process reference.
          * @return Returns a pointer to the process reference at index p_i in the list of process reference.
          */
-        process_reference* get_process_reference( int p_i );
+        process_reference* get_process_reference( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -157,14 +157,14 @@ namespace grape
          * Channel count function.
          * @return Returns the number of channels in the architecture diagram.
          */
-        unsigned int count_channel( void );
+        size_t count_channel( void );
 
         /**
          * Channel retrieval function.
          * @param p_i The index of the to be retrieved channel.
          * @return Returns a pointer to the channel at index p_i in the list of channels.
          */
-        channel* get_channel( int p_i );
+        channel* get_channel( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.
@@ -195,14 +195,14 @@ namespace grape
          * Channel communication count function.
          * @return Returns the number of channel communication in the architecture diagram.
          */
-        unsigned int count_channel_communication( void );
+        size_t count_channel_communication( void );
 
         /**
          * Blocked retrieval function.
          * @param p_i The index of the to be retrieved blocked.
          * @return Returns a pointer to the blocked at index p_i in the list of blocked
          */
-        channel_communication* get_channel_communication( int p_i );
+        channel_communication* get_channel_communication( size_t p_i );
 
         /**
          * To be used exclusively during XML-conversion.

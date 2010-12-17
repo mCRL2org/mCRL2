@@ -48,7 +48,7 @@ list_of_dataexpression datatype_specification::get_declaration_list( void ) cons
   return m_dataexpression_list;
 }
 
-unsigned int datatype_specification::get_count_dataexpression( void )
+size_t datatype_specification::get_count_dataexpression( void )
 {
   return m_dataexpression_list.GetCount();
 }

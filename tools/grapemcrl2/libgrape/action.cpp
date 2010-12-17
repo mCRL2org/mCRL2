@@ -39,11 +39,11 @@ wxString action::get_text( void )
 {
   wxString result = wxEmptyString;
   result += m_name;
-  int count = m_parameters.GetCount();
+  size_t count = m_parameters.GetCount();
   if ( count > 0 )
   {
     result += _T( "(" );
-    for ( int j = 0; j < count; ++j )
+    for ( size_t j = 0; j < count; ++j )
     {
       result += m_parameters.Item( j ).get_expression();
       if ( j < count - 1 )

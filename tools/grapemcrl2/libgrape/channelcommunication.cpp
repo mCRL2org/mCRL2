@@ -94,8 +94,8 @@ void channel_communication::attach_channel( channel* p_channel )
 void channel_communication::detach_channel( channel* p_channel )
 {
   // for-loop declarations
-  int count = m_communication.GetCount();
-  for ( int i = 0; i < count; ++i )
+  size_t count = m_communication.GetCount();
+  for ( size_t i = 0; i < count; ++i )
   {
     communication &comm = m_communication.Item( i );
     if ( &comm != 0 && comm.get_channel() == p_channel )
@@ -107,7 +107,7 @@ void channel_communication::detach_channel( channel* p_channel )
   } // end for
 }
 
-unsigned int channel_communication::count_channel( void )
+size_t channel_communication::count_channel( void )
 {
   return m_communication.GetCount();
 }

@@ -95,8 +95,8 @@ grape_event_remove_state::grape_event_remove_state( grape_frame *p_main_frame, s
   if ( p_normal )
   {
     // Create remove event for transitions that have the state as beginstate.
-    int count = p_state->count_transition_beginstate();
-    for (int i = 0; i < count; ++i)
+    size_t count = p_state->count_transition_beginstate();
+    for (size_t i = 0; i < count; ++i)
     {
       transition* trans_ptr = p_state->get_transition_beginstate( i );
       nonterminating_transition* ntt_ptr = dynamic_cast<nonterminating_transition*> ( trans_ptr );
@@ -116,7 +116,7 @@ grape_event_remove_state::grape_event_remove_state( grape_frame *p_main_frame, s
 
     // Create remove event for nonterminating transitions that have the state as endstate.
     count = p_state->count_transition_endstate();
-    for ( int i = 0; i < count; ++i )
+    for ( size_t i = 0; i < count; ++i )
     {
       nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( i );
       grape_event_remove_nonterminating_transition* event = new grape_event_remove_nonterminating_transition( m_main_frame, ntt_ptr, p_proc_dia_ptr );
@@ -125,7 +125,7 @@ grape_event_remove_state::grape_event_remove_state( grape_frame *p_main_frame, s
 
     // Backup initial designators that designate this state.
     count = p_state->count_initial_designator();
-    for ( int i = 0; i < count; ++i )
+    for ( size_t i = 0; i < count; ++i )
     {
       initial_designator* init_ptr = p_state->get_initial_designator( i );
       grape_event_remove_initial_designator* event = new grape_event_remove_initial_designator( m_main_frame, init_ptr, p_proc_dia_ptr );

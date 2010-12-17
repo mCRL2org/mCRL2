@@ -48,8 +48,8 @@ compound_state::~compound_state(void)
   // Remove all references from initial designators to this state.
 
   // for-loop declarations
-  int count = m_designates.GetCount();
-  for (int i = 0; i < count; ++i)
+  size_t count = m_designates.GetCount();
+  for (size_t i = 0; i < count; ++i)
   {
     initial_designator* init_ptr = m_designates.Item( i );
     init_ptr->detach();
@@ -59,7 +59,7 @@ compound_state::~compound_state(void)
 
   // for-loop declarations
   count = m_beginstate.GetCount();
-  for (int i = 0; i < count; ++i)
+  for (size_t i = 0; i < count; ++i)
   {
     transition* trans_ptr = m_beginstate.Item( i );
     trans_ptr->detach_beginstate();
@@ -69,7 +69,7 @@ compound_state::~compound_state(void)
 
   // for-loop declarations
   count = m_endstate.GetCount();
-  for (int i = 0; i < count; ++i)
+  for (size_t i = 0; i < count; ++i)
   {
     nonterminating_transition* trans_ptr = m_endstate.Item( i );
     trans_ptr->detach_endstate();
@@ -98,12 +98,12 @@ void compound_state::attach_transition_beginstate( transition* p_transition )
   m_beginstate.Add( p_transition );
 }
 
-transition* compound_state::get_transition_beginstate( int p_index )
+transition* compound_state::get_transition_beginstate( size_t p_index )
 {
   return m_beginstate.Item( p_index );
 }
 
-unsigned int compound_state::count_transition_beginstate( void )
+size_t compound_state::count_transition_beginstate( void )
 {
   return m_beginstate.GetCount();
 }
@@ -123,12 +123,12 @@ void compound_state::attach_transition_endstate( nonterminating_transition* p_no
   m_endstate.Add( p_nonterminating_transition );
 }
 
-nonterminating_transition* compound_state::get_transition_endstate( int p_index )
+nonterminating_transition* compound_state::get_transition_endstate( size_t p_index )
 {
   return m_endstate.Item( p_index );
 }
 
-unsigned int compound_state::count_transition_endstate( void )
+size_t compound_state::count_transition_endstate( void )
 {
   return m_endstate.GetCount();
 }
@@ -158,12 +158,12 @@ void compound_state::detach_initial_designator( initial_designator* p_init )
   }
 }
 
-initial_designator* compound_state::get_initial_designator( int p_index )
+initial_designator* compound_state::get_initial_designator( size_t p_index )
 {
   return m_designates.Item( p_index );
 }
 
-unsigned int compound_state::count_initial_designator( void )
+size_t compound_state::count_initial_designator( void )
 {
   return m_designates.GetCount();
 }

@@ -121,19 +121,19 @@ void grape_specification::remove_architecture_diagram( architecture_diagram* p_a
   }
 }
 
-unsigned int grape_specification::count_architecture_diagram( void )
+size_t grape_specification::count_architecture_diagram( void )
 {
   return m_architecture_diagrams.GetCount();
 }
 
-architecture_diagram* grape_specification::get_architecture_diagram( int p_index )
+architecture_diagram* grape_specification::get_architecture_diagram( size_t p_index )
 {
   return &( m_architecture_diagrams.Item( p_index ) );
 }
 
-process_diagram* grape_specification::add_process_diagram( unsigned int p_id, const wxString &p_name, int p_index )
+process_diagram* grape_specification::add_process_diagram( unsigned int p_id, const wxString &p_name, size_t p_index )
 {
-  int index = p_index;
+  size_t index = p_index;
   while ( exists_diagram( p_name, index ) )
   {
     ++index;
@@ -196,22 +196,22 @@ void grape_specification::remove_process_diagram( process_diagram* p_proc_dia )
   }
 }
 
-unsigned int grape_specification::count_process_diagram( void )
+size_t grape_specification::count_process_diagram( void )
 {
   return m_process_diagrams.GetCount();
 }
 
-process_diagram* grape_specification::get_process_diagram( int p_index )
+process_diagram* grape_specification::get_process_diagram( size_t p_index )
 {
   return &( m_process_diagrams.Item( p_index ) );
 }
 
 // private
 
-bool grape_specification::exists_architecture_diagram( const wxString &p_name, int p_index )
+bool grape_specification::exists_architecture_diagram( const wxString &p_name, size_t p_index )
 {
-  int count = m_architecture_diagrams.GetCount();
-  for ( int j = 0; j < count; ++j )
+  size_t count = m_architecture_diagrams.GetCount();
+  for ( size_t j = 0; j < count; ++j )
   {
     architecture_diagram* arch_dia = &( m_architecture_diagrams.Item( j ) );
     wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
@@ -223,10 +223,10 @@ bool grape_specification::exists_architecture_diagram( const wxString &p_name, i
   return false;
 }
 
-bool grape_specification::exists_process_diagram( const wxString &p_name, int p_index )
+bool grape_specification::exists_process_diagram( const wxString &p_name, size_t p_index )
 {
-  int count = m_process_diagrams.GetCount();
-  for ( int j = 0; j < count; ++j )
+  size_t count = m_process_diagrams.GetCount();
+  for ( size_t j = 0; j < count; ++j )
   {
     process_diagram* proc_dia = & ( m_process_diagrams.Item( j ) );
     wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
@@ -238,7 +238,7 @@ bool grape_specification::exists_process_diagram( const wxString &p_name, int p_
   return false;
 }
 
-bool grape_specification::exists_diagram( const wxString &p_name, int p_index )
+bool grape_specification::exists_diagram( const wxString &p_name, size_t p_index )
 {
   return ( ( exists_process_diagram( p_name, p_index ) ) || ( exists_architecture_diagram( p_name, p_index ) ) );
 }
@@ -246,14 +246,14 @@ bool grape_specification::exists_diagram( const wxString &p_name, int p_index )
 object* grape_specification::find_object( grape_specification *p_spec, unsigned int p_id, object_type p_type )
 {
   object *result = 0;
-  unsigned int count = p_spec->count_process_diagram();
-  for ( unsigned int i = 0; !result && i < count; ++i )
+  size_t count = p_spec->count_process_diagram();
+  for ( size_t i = 0; !result && i < count; ++i )
   {
     result = process_diagram::find_object( p_spec->get_process_diagram(i), p_id, p_type );
   }
 
   count = p_spec->count_architecture_diagram();
-  for ( unsigned int i = 0; !result && i < count; ++i )
+  for ( size_t i = 0; !result && i < count; ++i )
   {
     result = architecture_diagram::find_object( p_spec->get_architecture_diagram(i), p_id, p_type );
   }

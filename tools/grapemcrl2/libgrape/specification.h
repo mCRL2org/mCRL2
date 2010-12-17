@@ -93,13 +93,13 @@ namespace grape
          * Architecture diagram count function.
          * @return Returns the number of architecture diagrams in the specification.
          */
-        unsigned int count_architecture_diagram( void );
+        size_t count_architecture_diagram( void );
 
         /**
          * Architecture diagram retrieval function.
          * @return Returns the architecture diagram at position p_index in the list of architecture diagrams.
          */
-        architecture_diagram* get_architecture_diagram( int p_index );
+        architecture_diagram* get_architecture_diagram( size_t p_index );
 
           /**
          * Process diagram addition function.
@@ -109,7 +109,7 @@ namespace grape
          * @param p_index The index used to eventually make a new unique name if the current suggested name exists already.
          * @return Returns a pointer to the newly created process diagram.
          */
-        process_diagram* add_process_diagram( unsigned int p_id, const wxString &p_name = _T("P"), int p_index = 0 );
+        process_diagram* add_process_diagram( unsigned int p_id, const wxString &p_name = _T("P"), size_t p_index = 0 );
 
         /**
          * Process diagram removal function.
@@ -122,13 +122,13 @@ namespace grape
          * Process diagram count function.
          * @return Returns the number of process diagrams in the specification.
          */
-        unsigned int count_process_diagram( void );
+        size_t count_process_diagram( void );
 
         /**
          * Process diagram retrieval function.
          * @return Returns the process diagram at position p_index in the list of process diagrams.
          */
-        process_diagram* get_process_diagram( int p_index );
+        process_diagram* get_process_diagram( size_t p_index );
 
         /**
          * Object retrieval function through all diagrams in the specification.
@@ -160,7 +160,7 @@ namespace grape
          * @param p_index The index appearing in the architecture diagram's name.
          * @return Returns whether an architecture diagram with the specified name exists.
          */
-        bool exists_architecture_diagram( const wxString &p_name, int p_index );
+        bool exists_architecture_diagram( const wxString &p_name, size_t p_index );
 
         /**
          * Process diagram existance function.
@@ -168,7 +168,7 @@ namespace grape
          * @param p_index The index appearing in the architecture diagram's name.
          * @return Returns whether a process diagram with the specified name exists.
          */
-        bool exists_process_diagram( const wxString &p_name, int p_index );
+        bool exists_process_diagram( const wxString &p_name, size_t p_index );
 
         /**
          * Diagram existance function.
@@ -176,7 +176,7 @@ namespace grape
          * @param p_index The index appearing in the diagram's name.
          * @return Returns whether a diagram with the specified name exists.
          */
-        bool exists_diagram( const wxString &p_name, int p_index );
+        bool exists_diagram( const wxString &p_name, size_t p_index );
     };
 
   } // namespace libgrape

@@ -90,13 +90,13 @@ namespace grape
          * Channel retrieval function.
          * @return Returns a pointer to the channel at position i in the list of channels.
          */
-        channel* get_channel( int i );
+        channel* get_channel( size_t i );
 
         /**
          * Channel count function.
          * @return Returns the number of channels associated with the reference.
          */
-        unsigned int count_channel( void );
+        size_t count_channel( void );
     };
 
   } // namespace libgrape

@@ -125,12 +125,12 @@ void process_diagram::remove_state( state* p_state )
   }
 }
 
-unsigned int process_diagram::count_state( void )
+size_t process_diagram::count_state( void )
 {
   return m_states.GetCount();
 }
 
-state* process_diagram::get_state( int p_i )
+state* process_diagram::get_state( size_t p_i )
 {
   return &( m_states.Item( p_i ) );
 }
@@ -140,10 +140,10 @@ arr_state* process_diagram::get_state_list( void )
   return &m_states;
 }
 
-bool process_diagram::exists_state( const wxString &p_name, int p_index )
+bool process_diagram::exists_state( const wxString &p_name, size_t p_index )
 {
-  int count = m_states.GetCount();
-  for ( int j = 0; j < count; ++j )
+  size_t count = m_states.GetCount();
+  for ( size_t j = 0; j < count; ++j )
   {
     state* state_ptr = & ( m_states.Item( j ) );
     wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
@@ -217,12 +217,12 @@ void process_diagram::remove_reference_state( reference_state* p_state )
   }
 }
 
-unsigned int process_diagram::count_reference_state( void )
+size_t process_diagram::count_reference_state( void )
 {
   return m_reference_states.GetCount();
 }
 
-reference_state* process_diagram::get_reference_state( int p_i )
+reference_state* process_diagram::get_reference_state( size_t p_i )
 {
   return &( m_reference_states.Item( p_i ) );
 }
@@ -287,12 +287,12 @@ void process_diagram::remove_nonterminating_transition( nonterminating_transitio
   }
 }
 
-unsigned int process_diagram::count_nonterminating_transition( void )
+size_t process_diagram::count_nonterminating_transition( void )
 {
   return m_nonterminating_transitions.GetCount();
 }
 
-nonterminating_transition* process_diagram::get_nonterminating_transition( int p_i )
+nonterminating_transition* process_diagram::get_nonterminating_transition( size_t p_i )
 {
   return &( m_nonterminating_transitions.Item( p_i ) );
 }
@@ -352,12 +352,12 @@ void process_diagram::remove_terminating_transition( terminating_transition* p_t
   }
 }
 
-unsigned int process_diagram::count_terminating_transition( void )
+size_t process_diagram::count_terminating_transition( void )
 {
   return m_terminating_transitions.GetCount();
 }
 
-terminating_transition* process_diagram::get_terminating_transition( int p_i )
+terminating_transition* process_diagram::get_terminating_transition( size_t p_i )
 {
   return &( m_terminating_transitions.Item( p_i ));
 }
@@ -455,12 +455,12 @@ void process_diagram::remove_initial_designator( initial_designator* p_init )
   }
 }
 
-unsigned int process_diagram::count_initial_designator( void )
+size_t process_diagram::count_initial_designator( void )
 {
   return m_initial_designators.GetCount();
 }
 
-initial_designator* process_diagram::get_initial_designator( int p_i )
+initial_designator* process_diagram::get_initial_designator( size_t p_i )
 {
   return &( m_initial_designators.Item( p_i ) );
 }
@@ -501,38 +501,38 @@ void process_diagram::detach_initial_designator( initial_designator* p_init, coo
 void process_diagram::select_all_objects( void )
 {
   deselect_all_objects();
-  int count_comment = m_comments.GetCount();
-  for ( int i = 0; i < count_comment; ++i )
+  size_t count_comment = m_comments.GetCount();
+  for ( size_t i = 0; i < count_comment; ++i )
   {
     comment* comm_ptr = &( m_comments.Item( i ) );
     plus_select_object( comm_ptr );
   }
-  int count_init = m_initial_designators.GetCount();
-  for ( int i = 0; i < count_init; ++i )
+  size_t count_init = m_initial_designators.GetCount();
+  for ( size_t i = 0; i < count_init; ++i )
   {
     initial_designator* init_ptr = &( m_initial_designators.Item( i ) );
     plus_select_object( init_ptr );
   }
-  int count_state = m_states.GetCount();
-  for ( int i = 0; i < count_state; ++i )
+  size_t count_state = m_states.GetCount();
+  for ( size_t i = 0; i < count_state; ++i )
   {
     state* state_ptr = &( m_states.Item( i ) );
     plus_select_object( state_ptr );
   }
-  int count_ref_state = m_reference_states.GetCount();
-  for ( int i = 0; i < count_ref_state; ++i )
+  size_t count_ref_state = m_reference_states.GetCount();
+  for ( size_t i = 0; i < count_ref_state; ++i )
   {
     reference_state* ref_state_ptr = &( m_reference_states.Item( i ) );
     plus_select_object( ref_state_ptr );
   }
-  int count_tt = m_terminating_transitions.GetCount();
-  for ( int i = 0; i < count_tt; ++i )
+  size_t count_tt = m_terminating_transitions.GetCount();
+  for ( size_t i = 0; i < count_tt; ++i )
   {
     terminating_transition* tt_ptr = &( m_terminating_transitions.Item( i ) );
     plus_select_object( tt_ptr );
   }
-  int count_ntt = m_nonterminating_transitions.GetCount();
-  for ( int i = 0; i < count_ntt; ++i )
+  size_t count_ntt = m_nonterminating_transitions.GetCount();
+  for ( size_t i = 0; i < count_ntt; ++i )
   {
     nonterminating_transition* ntt_ptr = &( m_nonterminating_transitions.Item( i ) );
     plus_select_object( ntt_ptr );
@@ -541,38 +541,38 @@ void process_diagram::select_all_objects( void )
 
 void process_diagram::deselect_all_objects( void )
 {
-  int count_comment = m_comments.GetCount();
-  for ( int i = 0; i < count_comment; ++i )
+  size_t count_comment = m_comments.GetCount();
+  for ( size_t i = 0; i < count_comment; ++i )
   {
     comment* comm_ptr = &( m_comments.Item( i ) );
     deselect_object( comm_ptr );
   }
-  int count_init = m_initial_designators.GetCount();
-  for ( int i = 0; i < count_init; ++i )
+  size_t count_init = m_initial_designators.GetCount();
+  for ( size_t i = 0; i < count_init; ++i )
   {
     initial_designator* init_ptr = &( m_initial_designators.Item( i ) );
     deselect_object( init_ptr );
   }
-  int count_state = m_states.GetCount();
-  for ( int i = 0; i < count_state; ++i )
+  size_t count_state = m_states.GetCount();
+  for ( size_t i = 0; i < count_state; ++i )
   {
     state* state_ptr = &( m_states.Item( i ) );
     deselect_object( state_ptr );
   }
-  int count_ref_state = m_reference_states.GetCount();
-  for ( int i = 0; i < count_ref_state; ++i )
+  size_t count_ref_state = m_reference_states.GetCount();
+  for ( size_t i = 0; i < count_ref_state; ++i )
   {
     reference_state* ref_state_ptr = &( m_reference_states.Item( i ) );
     deselect_object( ref_state_ptr );
   }
-  int count_tt = m_terminating_transitions.GetCount();
-  for ( int i = 0; i < count_tt; ++i )
+  size_t count_tt = m_terminating_transitions.GetCount();
+  for ( size_t i = 0; i < count_tt; ++i )
   {
     terminating_transition* tt_ptr = &( m_terminating_transitions.Item( i ) );
     deselect_object( tt_ptr );
   }
-  int count_ntt = m_nonterminating_transitions.GetCount();
-  for ( int i = 0; i < count_ntt; ++i )
+  size_t count_ntt = m_nonterminating_transitions.GetCount();
+  for ( size_t i = 0; i < count_ntt; ++i )
   {
     nonterminating_transition* ntt_ptr = &( m_nonterminating_transitions.Item( i ) );
     deselect_object( ntt_ptr );

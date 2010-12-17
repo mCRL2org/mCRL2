@@ -91,7 +91,7 @@ typedef struct
     int stream;
     int originates_from_stream;
     bool terminate;
-    int parenthesis_level;
+    size_t parenthesis_level;
     bool looped_state;
     bool guardedloop;
     std::string guard;

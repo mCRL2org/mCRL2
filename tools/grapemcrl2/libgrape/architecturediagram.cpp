@@ -82,7 +82,7 @@ void architecture_diagram::remove_architecture_reference( architecture_reference
         c_comm_ptr->detach_channel( channel_ptr );
 
         // If the channel communication consists of less than two channels, remove it.
-        int count = c_comm_ptr->count_channel();
+        size_t count = c_comm_ptr->count_channel();
         if ( count < 2 )
         {
           int n = m_channel_communications.Index( *c_comm_ptr );
@@ -113,12 +113,12 @@ void architecture_diagram::remove_architecture_reference( architecture_reference
   }
 }
 
-unsigned int architecture_diagram::count_architecture_reference( void )
+size_t architecture_diagram::count_architecture_reference( void )
 {
   return m_architecture_references.GetCount();
 }
 
-architecture_reference* architecture_diagram::get_architecture_reference( int p_i )
+architecture_reference* architecture_diagram::get_architecture_reference( size_t p_i )
 {
   return &( m_architecture_references.Item( p_i ) );
 }
@@ -198,12 +198,12 @@ void architecture_diagram::remove_process_reference( process_reference* p_proc_r
   }
 }
 
-unsigned int architecture_diagram::count_process_reference( void )
+size_t architecture_diagram::count_process_reference( void )
 {
   return m_process_references.GetCount();
 }
 
-process_reference* architecture_diagram::get_process_reference( int p_i )
+process_reference* architecture_diagram::get_process_reference( size_t p_i )
 {
   return &( m_process_references.Item( p_i ) );
 }
@@ -258,7 +258,7 @@ void architecture_diagram::remove_channel( channel* p_channel )
       c_comm_ptr->detach_channel( p_channel );
 
       // If the channel communication consists of less than two channels, remove it.
-      int count = c_comm_ptr->count_channel();
+      size_t count = c_comm_ptr->count_channel();
       if ( count < 2 )
       {
         int n = m_channel_communications.Index( *c_comm_ptr );
@@ -280,12 +280,12 @@ void architecture_diagram::remove_channel( channel* p_channel )
   }
 }
 
-unsigned int architecture_diagram::count_channel( void )
+size_t architecture_diagram::count_channel( void )
 {
   return m_channels.GetCount();
 }
 
-channel* architecture_diagram::get_channel( int p_i )
+channel* architecture_diagram::get_channel( size_t p_i )
 {
   return &( m_channels.Item( p_i ) );
 }
@@ -297,8 +297,8 @@ arr_channel* architecture_diagram::get_channel_list( void )
 
 bool architecture_diagram::exists_channel( const wxString &p_name, int p_index )
 {
-  int count = m_channels.GetCount();
-  for ( int j = 0; j < count; ++j )
+  size_t count = m_channels.GetCount();
+  for ( size_t j = 0; j < count; ++j )
   {
     channel* channel_ptr = & ( m_channels.Item( j ) );
     wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
@@ -343,12 +343,12 @@ void architecture_diagram::remove_channel_communication( channel_communication* 
   }
 }
 
-unsigned int architecture_diagram::count_channel_communication( void )
+size_t architecture_diagram::count_channel_communication( void )
 {
   return m_channel_communications.GetCount();
 }
 
-channel_communication* architecture_diagram::get_channel_communication( int p_i )
+channel_communication* architecture_diagram::get_channel_communication( size_t p_i )
 {
   return &( m_channel_communications.Item( p_i ) );
 }
@@ -376,32 +376,32 @@ void architecture_diagram::detach_channel_from_channel_communication( channel* p
 void architecture_diagram::select_all_objects( void )
 {
   deselect_all_objects();
-  int count = m_comments.GetCount();
-  for ( int i = 0; i < count; ++i )
+  size_t count = m_comments.GetCount();
+  for ( size_t i = 0; i < count; ++i )
   {
     comment* comment_ptr = &( m_comments.Item( i ) );
     plus_select_object( comment_ptr );
   }
   count = m_channel_communications.GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     channel_communication* comm_ptr = &( m_channel_communications.Item( i ) );
     plus_select_object( comm_ptr );
   }
   count = m_channels.GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     channel* chan_ptr = &( m_channels.Item( i ) );
     plus_select_object( chan_ptr );
   }
   count = m_architecture_references.GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     architecture_reference* arch_ref_ptr = &( m_architecture_references.Item( i ) );
     plus_select_object( arch_ref_ptr );
   }
   count = m_process_references.GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     process_reference* proc_ref_ptr = &( m_process_references.Item( i ) );
     plus_select_object( proc_ref_ptr );
@@ -410,32 +410,32 @@ void architecture_diagram::select_all_objects( void )
 
 void architecture_diagram::deselect_all_objects( void )
 {
-  int count = m_comments.GetCount();
-  for ( int i = 0; i < count; ++i )
+  size_t count = m_comments.GetCount();
+  for ( size_t i = 0; i < count; ++i )
   {
     comment* comment_ptr = &( m_comments.Item( i ) );
     deselect_object( comment_ptr );
   }
   count = m_channel_communications.GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     channel_communication* comm_ptr = &( m_channel_communications.Item( i ) );
     deselect_object( comm_ptr );
   }
   count = m_channels.GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     channel* chan_ptr = &( m_channels.Item( i ) );
     deselect_object( chan_ptr );
   }
   count = m_architecture_references.GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     architecture_reference* arch_ref_ptr = &( m_architecture_references.Item( i ) );
     deselect_object( arch_ref_ptr );
   }
   count = m_process_references.GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( size_t i = 0; i < count; ++i )
   {
     process_reference* proc_ref_ptr = &( m_process_references.Item( i ) );
     deselect_object( proc_ref_ptr );

@@ -73,7 +73,7 @@ namespace grape
          * @pre The string containing all dataexpressions is a valid list of dataexpressions.
          * @return Returns the number of dataexpressions in the datatypespecification.
          */
-        unsigned int get_count_dataexpression( void );
+        size_t get_count_dataexpression( void );
     };
 
     /**

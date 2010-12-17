@@ -97,8 +97,8 @@ void label::set_actions_text( const wxString &p_actions )
 wxString label::get_actions_text( void ) const
 {
   wxString result = wxEmptyString;
-  int count = m_actions.GetCount();
-  for ( int i = 0; i < count; ++i )
+  size_t count = m_actions.GetCount();
+  for ( size_t i = 0; i < count; ++i )
   {
     action action = m_actions.Item( i );
     result += action.get_text();
@@ -118,8 +118,8 @@ list_of_decl &label::get_declarations( void )
 wxString label::get_declarations_text( void ) const
 {
   wxString result = wxEmptyString;
-  int count = m_declarations.GetCount();
-  for ( int i = 0; i < count; ++i )
+  size_t count = m_declarations.GetCount();
+  for ( size_t i = 0; i < count; ++i )
   {
     decl declaration = m_declarations.Item( i );
     result += declaration.get_name() + _T( ":" ) + declaration.get_type();
@@ -144,10 +144,10 @@ list_of_varupdate &label::get_variable_updates( void )
 wxString label::get_variable_updates_text( void ) const
 {
   wxString result = wxEmptyString;
-  int count = m_variable_updates.GetCount();
+  size_t count = m_variable_updates.GetCount();
   if ( count > 0 )
   {
-    for ( int i = 0; i < count; ++i )
+    for ( size_t i = 0; i < count; ++i )
     {
       result += m_variable_updates.Item( i ).get_varupdate();
       if ( i < count - 1 ) result += _T( "," );
@@ -191,8 +191,8 @@ void label::set_variable_updates_text(wxString p_variable_updates )
   wxString text = p_variable_updates;
   text.Trim(true); text.Trim(false);
   wxString lhs, rhs, rlhs, delimiter;
-  int index = -1, index2 = -1;
-  int loop = 0;
+  ssize_t index = -1, index2 = -1;
+  ssize_t loop = 0;
   // loop until we parsed all variable updates
   m_variable_updates.Clear();
   while (!text.IsEmpty())
@@ -241,7 +241,7 @@ void label::set_declarations_text( wxString p_declarations )
   wxString text = p_declarations;
   text.Trim(true); text.Trim(false);
   wxString sub_text;
-  int index = -1;
+  ssize_t index = -1;
 
   // loop until we parsed all declarations
   m_declarations.Clear();

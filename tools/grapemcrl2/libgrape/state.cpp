@@ -34,8 +34,8 @@ state::~state( void )
   // Remove all references from initial designators to this state.
 
   // for-loop declarations
-  int count = m_designates.GetCount();
-  for (int i = 0; i < count; ++i)
+  size_t count = m_designates.GetCount();
+  for (size_t i = 0; i < count; ++i)
   {
     initial_designator* init_ptr = m_designates.Item( i );
     init_ptr->detach();
@@ -45,7 +45,7 @@ state::~state( void )
 
   // for-loop declarations
   count = m_beginstate.GetCount();
-  for (int i = 0; i < count; ++i)
+  for (size_t i = 0; i < count; ++i)
   {
     transition* trans_ptr = m_beginstate.Item( i );
     trans_ptr->detach_beginstate();
@@ -55,7 +55,7 @@ state::~state( void )
 
   // for-loop declarations
   count = m_endstate.GetCount();
-  for (int i = 0; i < count; ++i)
+  for (size_t i = 0; i < count; ++i)
   {
     nonterminating_transition* trans_ptr = m_endstate.Item( i );
     trans_ptr->detach_endstate();

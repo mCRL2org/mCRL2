@@ -379,7 +379,7 @@ arr_channel_id grape::mcrl2gen::get_reference_renamed_actions(arr_channel_id &p_
   return new_ren;
 }
 
-arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode */*p_doc_root*/, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms)
+arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode* /* p_doc_root */ , wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms)
 {
   // initialize variables
   arr_channel_comm comms;
@@ -440,7 +440,7 @@ arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode */*p_doc_root*/, 
   return comms;
 }
 
-arr_renamed grape::mcrl2gen::get_communication_channel_renamed(wxXmlNode */*p_doc_root*/, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_communications)
+arr_renamed grape::mcrl2gen::get_communication_channel_renamed(wxXmlNode* /* p_doc_root */, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_communications)
 {
   // initialize variables
   arr_renamed ren;
@@ -796,12 +796,12 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       specification += _T(";\n");
     }
     specification += _T("\n");
-    for (int i=internal_specs.GetCount()-1; i>-1; --i)
+    for (size_t i=internal_specs.GetCount()-1; i>-1; --i)
     {
       specification += internal_specs[i] + _T("\n");
       specification += proc_specs[i] + _T("\n\n");
     }
-    for (int i=arch_specs.GetCount()-1; i>-1; --i)
+    for (size_t i=arch_specs.GetCount()-1; i>-1; --i)
     {
       specification += arch_specs[i] + _T("\n\n");
     }
@@ -985,7 +985,7 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
       specification += _T(";\n");
     }
     specification += _T("\n");
-    for(int i=internal_specs.GetCount()-1; i>-1; --i)
+    for(size_t i=internal_specs.GetCount()-1; i>-1; --i)
     {
       specification += internal_specs[i] + _T("\n");
       specification += specs[i] + _T("\n\n");
@@ -2081,7 +2081,7 @@ wxString grape::mcrl2gen::initial_designator_mcrl2(wxXmlNode *p_process_diagram)
   return des_name;
 }
 
-wxString grape::mcrl2gen::process_diagram_mcrl2_init(wxXmlNode */*p_doc_root*/,
+wxString grape::mcrl2gen::process_diagram_mcrl2_init(wxXmlNode* /* p_doc_root */,
     wxString &p_diagram_name,
     list_of_decl_init &p_parameter_init)
 {

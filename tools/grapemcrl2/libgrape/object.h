@@ -199,7 +199,7 @@ namespace grape
          * Comment count function.
          * @return Returns the number of comments attached to the object.
          */
-        unsigned int count_comment( void );
+        size_t count_comment( void );
 
         /**
          * Comment retrieval function.
