@@ -676,7 +676,7 @@ void Graph::calcAttrDistr(
 void Graph::calcAttrCorrl(
     const size_t &attrIdx1,
     const size_t &attrIdx2,
-    vector< vector< int > > &corrlMap,
+    vector< vector< size_t > > &corrlMap,
     vector< vector< int > > &number )
 // -----------------------------------
 {
@@ -691,7 +691,7 @@ void Graph::calcAttrCorrl(
     size_t domIdx1      = 0;
     size_t domIdx2      = 0;
     vector< int >::iterator it;
-    vector< int > toErase;
+    vector< size_t > toErase;
 
     // init vars
     attr1       = getAttribute( attrIdx1 );
@@ -713,7 +713,7 @@ void Graph::calcAttrCorrl(
                 tempNumVec.push_back( 0 );
             number.push_back( tempNumVec );
 
-            vector< int > tempMapVec;
+            vector< size_t > tempMapVec;
             corrlMap.push_back( tempMapVec );
         }
     }
@@ -790,9 +790,9 @@ void Graph::calcAttrCorrl(
 // -----------------------------------
 void Graph::calcAttrCorrl(
     Cluster* clust,
-    const int &attrIdx1,
-    const int &attrIdx2,
-    vector< vector< int > > &corrlMap,
+    const size_t &attrIdx1,
+    const size_t &attrIdx2,
+    vector< vector< size_t > > &corrlMap,
     vector< vector< int > > &number )
 // -----------------------------------
 {
@@ -832,7 +832,7 @@ void Graph::calcAttrCorrl(
                 tempNumVec.push_back( 0 );
             number.push_back( tempNumVec );
 
-            vector< int > tempMapVec;
+            vector< size_t > tempMapVec;
             corrlMap.push_back( tempMapVec );
         }
     }

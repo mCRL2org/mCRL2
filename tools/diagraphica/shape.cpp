@@ -1569,7 +1569,7 @@ void Shape::clrTransf()
 
 
 // ---------------------------------------
-void Shape::handleHit( const int &hdlIdx )
+void Shape::handleHit( const size_t &hdlIdx )
 // ---------------------------------------
 {
     if ( mode == MODE_EDT_DOF_AGL )
@@ -1662,7 +1662,7 @@ void Shape::clearDOF()
 
 
 // ------------------------------------------------
-void Shape::handleHitEdtDOFAgl( const int &hdlIdx )
+void Shape::handleHitEdtDOFAgl( const size_t &hdlIdx )
 // ------------------------------------------------
 {
     if ( hdlIdx == ID_HDL_DIR )

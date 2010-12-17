@@ -172,19 +172,19 @@ void AttrConti::moveValue(
         if ( idxFr < idxTo )
         {
             // move all values after idxFr 1 pos up
-            for ( int i = idxFr; i < static_cast<int>(idxTo); ++i )
+            for ( size_t i = idxFr; i < idxTo; ++i )
             {
                 curValues[i] = curValues[i+1];
                 curValues[i]->setIndex( i );
             }
             // update idxTo
             curValues[idxTo] = temp;
-            curValues[idxTo]->setIndex( static_cast<int>(idxTo) );
+            curValues[idxTo]->setIndex( idxTo );
         }
         else if ( idxTo < idxFr )
         {
             // move all values before idxFr 1 pos down
-            for ( int i = idxFr; i > static_cast<int>(idxTo); --i )
+            for ( size_t i = idxFr; i > idxTo; --i )
             {
                 curValues[i] = curValues[i-1];
                 curValues[i]->setIndex( i );
@@ -213,7 +213,7 @@ void AttrConti::classifyEqualIntervals( const int &number )
     {
         vector< double > values;
         vector< string > legend;
-        map< double, int > valuesToLegend;
+        map< double, size_t > valuesToLegend;
 
         // calc classification
         mediator->getAttrValues( this->getIndex(), values );
@@ -237,7 +237,7 @@ void AttrConti::classifyEqualIntervals( const int &number )
         value = NULL;
 
         // init new mapping
-        map< double, int >::iterator it;
+        map< double, size_t >::iterator it;
         for ( it = valuesToLegend.begin(); it != valuesToLegend.end(); ++it )
             curMap.insert( pair< double, Value* >( it->first, curValues[it->second] ) );
     }
@@ -259,7 +259,7 @@ void AttrConti::classifyQuantiles( const int &number )
         //vector< double > values;
         set< double > values;
         vector< string > legend;
-        map< double, int > valuesToLegend;
+        map< double, size_t > valuesToLegend;
 
         // calc classification
         mediator->getAttrValues( this->getIndex(), values );
@@ -283,7 +283,7 @@ void AttrConti::classifyQuantiles( const int &number )
         value = NULL;
 
         // init new mapping
-        map< double, int >::iterator it;
+        map< double, size_t >::iterator it;
         for ( it = valuesToLegend.begin(); it != valuesToLegend.end(); ++it )
             curMap.insert( pair< double, Value* >( it->first, curValues[it->second] ) );
     }
@@ -304,7 +304,7 @@ void AttrConti::classifyMeanStandardDeviation( const int &number )
     {
         vector< double > values;
         vector< string > legend;
-        map< double, int > valuesToLegend;
+        map< double, size_t > valuesToLegend;
 
         // calc classification
         mediator->getAttrValues( this->getIndex(), values );
@@ -328,7 +328,7 @@ void AttrConti::classifyMeanStandardDeviation( const int &number )
         value = NULL;
 
         // init new mapping
-        map< double, int >::iterator it;
+        map< double, size_t >::iterator it;
         for ( it = valuesToLegend.begin(); it != valuesToLegend.end(); ++it )
             curMap.insert( pair< double, Value* >( it->first, curValues[it->second] ) );
 /*

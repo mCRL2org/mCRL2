@@ -49,9 +49,9 @@ public:
         std::map< size_t, size_t  > &origToCurDomain );
 
     // functions overridden by AttrConti
-    virtual void classifyEqualIntervals( const int &number );
-    virtual void classifyQuantiles( const int &number );
-    virtual void classifyMeanStandardDeviation( const int &number );
+    virtual void classifyEqualIntervals( const size_t &number );
+    virtual void classifyQuantiles( const size_t &number );
+    virtual void classifyMeanStandardDeviation( const size_t &number );
     virtual void removeClassification();
 
     // -- get functions ---------------------------------------------

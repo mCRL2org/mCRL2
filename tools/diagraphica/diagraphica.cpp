@@ -1195,7 +1195,7 @@ void DiaGraph::handleAttributePlot(
 
     vector< int > indices;
     vector< std::string > vals1;
-    vector< vector< int > > corrlMap;
+    vector< vector< size_t > > corrlMap;
     vector< vector< int > > number;
 
     // display correlation between 2 attr's
@@ -1373,7 +1373,7 @@ void DiaGraph::handleClustPlotFrameDisplay(
 
     vector< int > indices;
     vector< std::string > vals1;
-    vector< vector< int > > corrlMap;
+    vector< vector< size_t > > corrlMap;
     vector< vector< int > > number;
 
     // display correlation between 2 attr's

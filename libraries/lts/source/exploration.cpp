@@ -648,7 +648,7 @@ namespace mcrl2
       }
       else
       {
-        std::pair<long, bool> result = states.put(state);
+        std::pair<size_t, bool> result = states.put(state);
         is_new = result.second;
         return result.first;
       }

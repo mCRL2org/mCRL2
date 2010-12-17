@@ -51,7 +51,7 @@ CorrlPlot::~CorrlPlot()
 void CorrlPlot::setValues(
     const size_t &idx1,
     const size_t &idx2,
-    const vector< vector< int > > &mapXY,
+    const vector< vector< size_t > > &mapXY,
     const vector< vector< int > > &num )
 // -------------------------------------
 {

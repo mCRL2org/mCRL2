@@ -82,17 +82,17 @@ public:
         const size_t &numClasses,
         const std::vector< double > &values,
         std::vector< std::string > &legendClasses,
-        std::map< double, int > &valuesToClasses );
+        std::map< double, size_t > &valuesToClasses );
     static void classifyQuantiles(
         const size_t &numClasses,
         std::set< double > &values,
         std::vector< std::string > &legendClasses,
-        std::map< double, int > &valuesToClasses );
+        std::map< double, size_t > &valuesToClasses );
     static void classifyMeanStandardDeviation(
         const size_t &numClasses,
         const std::vector< double > &values,
         std::vector< std::string > &legendClasses,
-        std::map< double, int > &valuesToClasses );
+        std::map< double, size_t > &valuesToClasses );
     /*
     static void classifyOptimal(
         const int &numClasses,

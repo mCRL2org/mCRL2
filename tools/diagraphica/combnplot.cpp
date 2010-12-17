@@ -385,7 +385,7 @@ void CombnPlot::drawPlotBC( const bool &inSelectMode )
             double xRgt = posBC[i].x + 0.5*widthBC;
             double yTop = posBC[i].y;
 
-            glPushName( i );
+            glPushName( (GLuint) i );
             VisUtils::fillRect( xLft, xRgt, yTop, yBot );
             glPopName();
         }

@@ -347,7 +347,7 @@ void Utils::classEqualIntervals(
     const size_t &numClasses,
     const vector< double > &values,
     vector< string > &legendClasses,
-    map< double, int > &valuesToClasses )
+    map< double, size_t > &valuesToClasses )
 // --------------------------------------
 {
     if ( ( 0 < values.size() ) &&
@@ -411,7 +411,7 @@ void Utils::classifyQuantiles(
     const size_t &numClasses,
     set< double > &values,
     vector< string > &legendClasses,
-    map< double, int > &valuesToClasses )
+    map< double, size_t > &valuesToClasses )
 // --------------------------------------
 {
     if ( ( 0 < values.size() ) &&
@@ -483,7 +483,7 @@ void Utils::classifyMeanStandardDeviation(
     const size_t &numClasses,
     const vector< double > &values,
     vector< string > &legendClasses,
-    map< double, int > &valuesToClasses )
+    map< double, size_t > &valuesToClasses )
 // ---------------------------------------
 {
     if ( ( 0 < values.size() ) &&
@@ -509,7 +509,7 @@ void Utils::classifyMeanStandardDeviation(
               idx = numClasses-1;
             }
 
-            valuesToClasses.insert( pair< double, int >( values[i], idx ) );
+            valuesToClasses.insert( pair< double, size_t >( values[i], idx ) );
         }
 
         // init legend

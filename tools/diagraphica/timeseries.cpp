@@ -1577,7 +1577,7 @@ void TimeSeries::drawMarkedItems( const bool &inSelectMode )
         glPushName( ID_ITEMS );
         for ( size_t i = 0; i < nodesWdwScale; ++i )
         {
-            glPushName( (GLuint) wdwStartIdx + i );
+            glPushName( (GLuint) (wdwStartIdx + i) );
             VisUtils::fillRect(
                 posScaleTopLft.x + i*itvWdwPerNode,
                 posScaleTopLft.x + (i+1)*itvWdwPerNode,

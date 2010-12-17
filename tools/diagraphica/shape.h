@@ -167,7 +167,7 @@ public:
     void clrTransf();
 
     // -- event handlers --------------------------------------------
-    void handleHit( const int &hdlIdx );
+    void handleHit( const size_t &hdlIdx );
 
     // -- public constants ------------------------------------------
     enum
@@ -217,7 +217,7 @@ protected:
     void initDOF();
     void clearDOF();
 
-    void handleHitEdtDOFAgl( const int &hdlIdx );
+    void handleHitEdtDOFAgl( const size_t &hdlIdx );
 
     // -- private visualization functions ---------------------------
     void drawNormal(

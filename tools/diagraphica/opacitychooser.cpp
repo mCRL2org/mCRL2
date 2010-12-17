@@ -355,7 +355,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
     {
         for ( size_t i = 0; i < size-1; ++i )
         {
-            glPushName( i );
+            glPushName( (GLuint) i );
             VisUtils::fillRect(
                 positionsX[i]*xRgt-5.0*pix, positionsX[i]*xRgt+5.0*pix,
                 positionsY[i]*yTop+5.0*pix, positionsY[i]*yTop-5.0*pix );

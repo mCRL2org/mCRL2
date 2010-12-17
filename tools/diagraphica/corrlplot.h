@@ -34,7 +34,7 @@ public:
     void setValues(
         const size_t &idx1,
         const size_t &idx2,
-        const std::vector< std::vector< int > > &mapXY,
+        const std::vector< std::vector< size_t > > &mapXY,
         const std::vector< std::vector< int > > &num );
     void clearValues();
 
@@ -87,7 +87,7 @@ protected:
     size_t attrIdx2;
     std::string xLabel;
     std::string yLabel;
-    std::vector< std::vector< int > > mapXToY; // for each x idx, 1 or more y indices
+    std::vector< std::vector< size_t > > mapXToY; // for each x idx, 1 or more y indices
     std::vector< std::vector< int > > number;  // number associated with every entry in mapXToY
     std::vector< int > maxNumX;   // for every column, the largest number
     int sumMaxNumX;          // sum of entries in maxNumX

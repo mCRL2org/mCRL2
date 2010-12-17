@@ -1498,8 +1498,8 @@ void DiagramEditor::handleHitShapeHandle(
             }
             else if ( mouseButton == MSE_BUTTON_UP )
             {
-                drgBegIdx1 = -1;
-                drgBegIdx2 = -1;
+                drgBegIdx1 = NON_EXISTING;
+                drgBegIdx2 = NON_EXISTING;
 
                 s->handleHit( handleId );
             }
@@ -1871,7 +1871,7 @@ void DiagramEditor::handlePaste()
 void DiagramEditor::handleDelete()
 // -------------------------------
 {
-    vector< int > toDelete;
+    vector< size_t > toDelete;
     // get indices to delete
     {
 	for ( size_t i = 0; i < diagram->getSizeShapes() ; ++i )
@@ -1993,7 +1993,7 @@ void DiagramEditor::handleEditDOF()
 
 
 // --------------------------------
-void DiagramEditor::handleSetDOF( const int &attrIdx ) // Link Attribute to the Text DOF of the selected Shape
+void DiagramEditor::handleSetDOF( const size_t &attrIdx ) // Link Attribute to the Text DOF of the selected Shape
 // --------------------------------
 {
 	Shape* s = NULL;

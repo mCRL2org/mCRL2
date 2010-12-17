@@ -109,13 +109,13 @@ public:
     void calcAttrCorrl(
         const size_t &attrIdx1,
         const size_t &attrIdx2,
-        std::vector< std::vector< int > > &corrlMap,
+        std::vector< std::vector< size_t > > &corrlMap,
         std::vector< std::vector< int > > &number );
     void calcAttrCorrl(
         Cluster* clust,
-        const int &attrIdx1,
-        const int &attrIdx2,
-        std::vector< std::vector< int > > &corrlMap,
+        const size_t &attrIdx1,
+        const size_t &attrIdx2,
+        std::vector< std::vector< size_t > > &corrlMap,
         std::vector< std::vector< int > > &number );
 
     void calcAttrCombn(

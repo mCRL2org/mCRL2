@@ -144,7 +144,7 @@ public:
     void handleBringForward();
     void handleSendBackward();
     void handleEditDOF();
-    void handleSetDOF( const int &attrIdx );
+    void handleSetDOF( const size_t &attrIdx );
     void handleCheckedVariable( const size_t &idDOF, const int &variableId );
 
     // -- public utility functions ----------------------------------

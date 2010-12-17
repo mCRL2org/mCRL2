@@ -100,19 +100,19 @@ void Attribute::configValues(
 
 
 // --------------------------------------------------------
-void Attribute::classifyEqualIntervals( const int &/*number*/ )
+void Attribute::classifyEqualIntervals( const size_t &/*number*/ )
 // --------------------------------------------------------
 {}
 
 
 // ---------------------------------------------------
-void Attribute::classifyQuantiles( const int &/*number*/ )
+void Attribute::classifyQuantiles( const size_t &/*number*/ )
 // ---------------------------------------------------
 {}
 
 
 // ---------------------------------------------------------------
-void Attribute::classifyMeanStandardDeviation( const int &/*number*/ )
+void Attribute::classifyMeanStandardDeviation( const size_t &/*number*/ )
 // ---------------------------------------------------------------
 {}
 
