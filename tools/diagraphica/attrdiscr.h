@@ -41,7 +41,7 @@ public:
         const size_t &idxTo );
     void configValues(
         const std::vector< std::string > &curDomain,
-        std::map< size_t, int  > &origToCurDomain );
+        std::map< size_t, size_t  > &origToCurDomain );
 
     // -- get functions ---------------------------------------------
     int getAttrType();

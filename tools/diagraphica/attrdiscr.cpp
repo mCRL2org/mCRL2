@@ -205,7 +205,7 @@ void AttrDiscr::moveValue(
 // ------------------------------------
 void AttrDiscr::configValues(
     const vector< string > &curDomain,
-    map< size_t , int  > &origToCurDomain )
+    map< size_t , size_t  > &origToCurDomain )
 // ------------------------------------
 {
     try

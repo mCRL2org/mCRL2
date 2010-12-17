@@ -1210,7 +1210,7 @@ void DiagramEditor::handleMouseMotionEvent(
     if ( ( editMode  == EDIT_MODE_SELECT || editMode  == EDIT_MODE_DOF ) &&
           mouseDrag == MSE_DRAG_TRUE )
     {
-        if ( drgBegIdx1 < 0 && drgBegIdx2 < 0 )
+        if ( drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING )
         {
 	    selection = true;
             visualize( true );    // select mode

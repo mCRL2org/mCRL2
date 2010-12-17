@@ -1115,7 +1115,7 @@ void DiaGraph::getAttributeNames(
     names.clear();
     for ( size_t i = 0; i < indcs.size(); ++i )
     {
-        if ( 0 <= indcs[i] && indcs[i] < graph->getSizeAttributes() )
+        if ( NON_EXISTING != indcs[i] && indcs[i] < graph->getSizeAttributes() )
             names.push_back(
 				wxString(
 					graph->getAttribute( indcs[i] )->getName().c_str(),
