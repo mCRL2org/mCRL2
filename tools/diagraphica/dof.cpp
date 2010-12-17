@@ -122,7 +122,7 @@ void DOF::setValue(
     const double &val )
 // --------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < values.size() )
+    if ( idx != NON_EXISTING && idx < values.size() )
         values[idx] = val;
 }
 

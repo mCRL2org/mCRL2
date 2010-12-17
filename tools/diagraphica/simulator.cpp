@@ -2489,7 +2489,7 @@ void Simulator::drawBdlLblGridNext( const bool &inSelectMode )
             }
         }
 
-        if ( 0 <= idxHiLite &&  static_cast <size_t> (idxHiLite) < posBdlLblGridNextTopLft.size() )
+        if ( idxHiLite != NON_EXISTING &&  static_cast <size_t> (idxHiLite) < posBdlLblGridNextTopLft.size() )
         {
             string lbl = bundlesNextByLbl[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
@@ -2647,7 +2647,7 @@ void Simulator::drawBundlesPrev( const bool &inSelectMode )
                 }
             }
 
-            if ( 0 <= idxHiLite &&  static_cast <size_t> (idxHiLite) < posBundlesPrevBotRgt[i].size() )
+            if ( idxHiLite != NON_EXISTING &&  static_cast <size_t> (idxHiLite) < posBundlesPrevBotRgt[i].size() )
             {
                 // fill color
                 calcColor(
@@ -2769,7 +2769,7 @@ void Simulator::drawBundlesNext( const bool &inSelectMode )
                 }
             }
 
-            if ( 0 <= idxHiLite &&  static_cast <size_t> (idxHiLite) < posBundlesNextBotRgt[i].size() )
+            if ( idxHiLite != NON_EXISTING &&  static_cast <size_t> (idxHiLite) < posBundlesNextBotRgt[i].size() )
             {
                 // fill color
                 calcColor(

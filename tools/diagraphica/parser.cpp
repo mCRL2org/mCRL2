@@ -376,7 +376,7 @@ void Parser::parseAttrConfig(
     Graph* graph,
     map< size_t, size_t > &attrIdxFrTo,
     map< size_t, vector< string > > &attrCurDomains,
-    map< size_t, map< int, int  > > &attrOrigToCurDomains )
+    map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains )
 // -----------------------------------------------------
 {
     wxXmlDocument doc;
@@ -1120,7 +1120,7 @@ void Parser::parseAttrConfig(
     Graph* graph,
     map< size_t , size_t > &attrIdxFrTo,
     map< size_t, vector< string > > &attrCurDomains,
-    map< size_t, map< int, int  > > &attrOrigToCurDomains,
+    map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
     wxXmlNode* curNode )
 // ---------------------------------------------------
 {
@@ -1192,7 +1192,7 @@ void Parser::parseAttr(
     Graph* graph,
     map< size_t , size_t > &attrIdxFrTo,
     map< size_t, vector< string > > &attrCurDomains,
-    map< size_t, map< int, int  > > &attrOrigToCurDomains,
+    map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
     wxXmlNode* curNode )
 // ----------------------------------------------------
 {
@@ -1303,7 +1303,7 @@ void Parser::parseAttr(
     attrCurDomains.insert( pair< size_t, vector< string > >( attr->getIndex(), domain ) );
 
     // mapping from orig to current domain values
-    map< int, int > origToCur;
+    map< size_t, size_t > origToCur;
     int valCnt = 0;
     prop = prop->GetNext();
     if ( prop != NULL &&
@@ -1345,7 +1345,7 @@ void Parser::parseAttr(
     }
 
     // update mapping
-    attrOrigToCurDomains.insert( pair< size_t , map< int, int > >( attr->getIndex(), origToCur ) );
+    attrOrigToCurDomains.insert( pair< size_t , map< size_t, size_t > >( attr->getIndex(), origToCur ) );
 
     attr = NULL;
 }

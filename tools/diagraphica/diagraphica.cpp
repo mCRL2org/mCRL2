@@ -326,7 +326,7 @@ void DiaGraph::handleLoadAttrConfig( const std::string &path )
     {
         map< size_t , size_t > attrIdxFrTo;
         map< size_t , vector< std::string > > attrCurDomains;
-        map< size_t , map< int, int  > > attrOrigToCurDomains;
+        map< size_t , map< size_t, size_t  > > attrOrigToCurDomains;
 
         parser->parseAttrConfig(
             path,
@@ -1877,7 +1877,7 @@ void DiaGraph::handleEditDOF(
     {
     for ( size_t i = 0; i < attrIndcs.size(); ++i )
     {
-        if ( attrIndcs[i] < 0 )
+        if ( attrIndcs[i] == NON_EXISTING )
             attributes.push_back( "" );
         else
             attributes.push_back(
@@ -2537,7 +2537,7 @@ void DiaGraph::handleMarkFrameClust( Colleague* sender  )
 
             // mouse over
             timeSeries->getIdxMseOver( idx, idcs, col );
-            if ( idx >= 0 )
+            if ( idx != NON_EXISTING )
             {
                 arcDgrm->markLeaf( idx, col );
                 for ( set< size_t >::iterator it = idcs.begin(); it != idcs.end(); ++it )
@@ -2546,7 +2546,7 @@ void DiaGraph::handleMarkFrameClust( Colleague* sender  )
 
             // current diagram
             timeSeries->getCurrIdxDgrm( idx, idcs, col );
-            if ( idx >= 0 )
+            if ( idx != NON_EXISTING )
             {
                 arcDgrm->markLeaf( idx, col );
                 for ( set< size_t >::iterator it = idcs.begin(); it != idcs.end(); ++it )
@@ -2555,7 +2555,7 @@ void DiaGraph::handleMarkFrameClust( Colleague* sender  )
 
             // examiner view
             idx = examiner->getIdxClstSel();
-            if ( idx >= 0 )
+            if ( idx != NON_EXISTING )
             {
                 col = examiner->getColorSel();
                 arcDgrm->markLeaf( idx, col );

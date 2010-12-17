@@ -1298,15 +1298,15 @@ void DiagramEditor::handleHits( const vector< int > &ids )
 void DiagramEditor::handleHitDiagramOnly()
 // ---------------------------------------
 {
-    if ( drgBegIdx1 < 0 && drgBegIdx2 < 0 )
+    if ( drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING )
     {
         deselectAll();
         mediator->handleDOFDeselect();
     }
     else
     {
-        drgBegIdx1 = -1;
-        drgBegIdx2 = -1;
+        drgBegIdx1 = NON_EXISTING;
+        drgBegIdx2 = NON_EXISTING;
     }
 
     if ( mouseSide == MSE_SIDE_RGT )
@@ -1372,13 +1372,13 @@ void DiagramEditor::handleHitShape( const size_t &shapeIdx )
                     {
                         if ( s->getMode() == Shape::MODE_EDIT )
                         {
-                            if ( drgBegIdx1 < 0 && drgBegIdx2 < 0 )
+                            if ( drgBegIdx1 == NON_EXISTING && drgBegIdx2 == NON_EXISTING )
                                 s->setModeNormal();
                             else
                             {
                                 s->setModeEdit();
-                                drgBegIdx1 = -1;
-                                drgBegIdx2 = -1;
+                                drgBegIdx1 = NON_EXISTING;
+                                drgBegIdx2 = NON_EXISTING;
                             }
                         }
                         else

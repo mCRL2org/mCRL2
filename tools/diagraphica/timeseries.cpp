@@ -162,10 +162,10 @@ void TimeSeries::getAnimIdxDgrm(
         Node* nodeTo;
         Edge* edgeIn;
 
-        idxLeaf = -1;
+        idxLeaf = NON_EXISTING;
         idcsBndl.clear();
 
-        if ( 0 <= *animFrame && *animFrame < graph->getSizeNodes() )
+        if ( *animFrame != NON_EXISTING && *animFrame < graph->getSizeNodes() )
         {
             nodeTo = graph->getNode( *animFrame );
             set< size_t >::iterator it = itemsMarked.begin();
@@ -587,7 +587,7 @@ void TimeSeries::handleMouseWheelDecEvent(
             wdwStartIdx -= (int)(0.5*nodesItvSlider);
             if ( wdwStartIdx + nodesWdwScale+nodesItvSlider > graph->getSizeNodes()-1)
                 wdwStartIdx = (graph->getSizeNodes()-1) - (nodesWdwScale+nodesItvSlider);
-            if ( wdwStartIdx < 0 )
+            if ( wdwStartIdx == NON_EXISTING )
                 wdwStartIdx = 0;
         }
 
@@ -631,9 +631,9 @@ void TimeSeries::handleKeyDownEvent( const int &keyCode )
     else if ( keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD_LEFT )
     {
         // move to left
-        if ( (wdwStartIdx + 1) < 0 )
+        if ( (wdwStartIdx + 1) == NON_EXISTING )
             wdwStartIdx = 0;
-        else if ( (wdwStartIdx - 1) >= 0 )
+        else if ( (wdwStartIdx - 1) != NON_EXISTING )
             wdwStartIdx -= 1;
     }
     else if ( keyCodeDown == WXK_HOME || keyCodeDown == WXK_NUMPAD_HOME )
@@ -649,7 +649,7 @@ void TimeSeries::handleKeyDownEvent( const int &keyCode )
     else if ( keyCodeDown == WXK_PAGEUP || keyCodeDown == WXK_NUMPAD_PAGEUP || keyCodeDown == WXK_NUMPAD9 )
     {
         // move one window toward beginning
-        if ( wdwStartIdx - nodesWdwScale < 0 )
+        if ( wdwStartIdx < nodesWdwScale )
             wdwStartIdx = 0;
         else
             wdwStartIdx -= nodesWdwScale;
@@ -1141,10 +1141,10 @@ void TimeSeries::handleHits( const vector< int > &ids )
                 else
                 	dragStatus = DRAG_STATUS_DGRM;
 
-                mouseOverIdx = -1;
+                mouseOverIdx = NON_EXISTING;
                 currIdxDgrm = ids[2];
 
-                if ( currIdxDgrm >= 0 && timerAnim->IsRunning() != true )
+                if ( currIdxDgrm != NON_EXISTING && timerAnim->IsRunning() != true )
                 {
                     ColorRGB col;
                     Cluster* frame = new Cluster();
@@ -1814,7 +1814,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
     if ( inSelectMode == true )
     {
         glPushName( ID_DIAGRAM );
-        if ( timerAnim->IsRunning() == true && animIdxDgrm >= 0 )
+        if ( timerAnim->IsRunning() == true && animIdxDgrm != NON_EXISTING )
         {
             Position2D posDgrm;
             map< size_t, Position2D >::iterator it;
@@ -1907,7 +1907,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
     {
         double     pix = canvas->getPixelSize();
 
-        if ( timerAnim->IsRunning() == true && animIdxDgrm >= 0 )
+        if ( timerAnim->IsRunning() == true && animIdxDgrm != NON_EXISTING )
         {
             Position2D posPvot, posDgrm;
             map< size_t, Position2D >::iterator it;
@@ -2309,10 +2309,10 @@ void TimeSeries::handleHitSlider()
     if ( distWorld < 0 )
     {
         // move to left
-        if ( (wdwStartIdx + (int)dragDistNodes) < 0 )
+        if ( ((double)wdwStartIdx + dragDistNodes) < 0 )
             wdwStartIdx   = 0;
-        else if ( (wdwStartIdx + (int)dragDistNodes) >= 0 )
-            wdwStartIdx += (int)dragDistNodes;
+        else if ( ((double)wdwStartIdx + dragDistNodes) >= 0 )
+            wdwStartIdx += (size_t)dragDistNodes;
     }
     else if ( distWorld > 0 )
     {
@@ -2345,15 +2345,15 @@ void TimeSeries::handleDragSliderHdl()
     if ( dragDistNodes < -1 )
     {
         // move to left
-        if ( (wdwStartIdx + (int)dragDistNodes) < 0 )
+        if ( ((double)wdwStartIdx + dragDistNodes) < 0 )
         {
             wdwStartIdx   = 0;
             dragDistNodes = 0.0;
         }
-        else if ( (wdwStartIdx + (int)dragDistNodes) >= 0 )
+        else if ( ((double)wdwStartIdx + dragDistNodes) >= 0 )
         {
-            wdwStartIdx += (int)dragDistNodes;
-            dragDistNodes -= (int)dragDistNodes;
+            wdwStartIdx += (size_t)dragDistNodes;
+            dragDistNodes -= (size_t)dragDistNodes;
         }
     }
     else if ( dragDistNodes > 1 )

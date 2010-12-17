@@ -46,7 +46,7 @@ public:
     // functions overridden by AttrDiscr
     virtual void configValues(
         const std::vector< std::string > &curDomain,
-        std::map< int, int  > &origToCurDomain );
+        std::map< size_t, size_t  > &origToCurDomain );
 
     // functions overridden by AttrConti
     virtual void classifyEqualIntervals( const int &number );

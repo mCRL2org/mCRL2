@@ -94,7 +94,7 @@ void Attribute::moveValue(
 // ------------------------------------
 void Attribute::configValues(
     const vector< string > &/*curDomain*/,
-    map< int, int  > &/*origToCurDomain*/ )
+    map< size_t, size_t  > &/*origToCurDomain*/ )
 // ------------------------------------
 {}
 

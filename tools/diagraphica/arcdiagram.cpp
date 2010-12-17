@@ -701,7 +701,7 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
             }
 
             // mark cluster with initial state
-            if ( idxInitStLeaves >= 0 )
+            if ( idxInitStLeaves != NON_EXISTING )
             {
                 double x = posLeaves[idxInitStLeaves].x;
                 double y = posLeaves[idxInitStLeaves].y;
@@ -2400,7 +2400,7 @@ void ArcDiagram::handleShowDiagram( const size_t &dgrmIdx )
 void ArcDiagram::handleDragDiagram()
 // ---------------------------------
 {
-    if ( 0 <= dragIdxDgrm && static_cast <size_t> (dragIdxDgrm) < posDgrm.size() )
+    if ( dragIdxDgrm != NON_EXISTING && static_cast <size_t> (dragIdxDgrm) < posDgrm.size() )
     {
         double x1, y1;
         double x2, y2;
@@ -2461,7 +2461,7 @@ void ArcDiagram::handlePrevDiagram( const size_t &dgrmIdx )
         animIdxDgrm = dgrmIdx;
 
     frameIdxDgrm[dgrmIdx] -= 1;
-    if ( frameIdxDgrm[dgrmIdx] < 0 )
+    if ( frameIdxDgrm[dgrmIdx] == NON_EXISTING )
         frameIdxDgrm[dgrmIdx] = static_cast<int>(framesDgrm[dgrmIdx].size()-1);
 
     ColorRGB col;

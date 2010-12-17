@@ -201,7 +201,7 @@ protected:
     Diagram* diagram; // composition
     int editMode;
     size_t drgBegIdx1;
-    int drgBegIdx2;
+    size_t drgBegIdx2;
     size_t lastSelectedShapeId;
     bool selection;
 

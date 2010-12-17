@@ -69,7 +69,7 @@ public:
     void configAttributes(
         std::map< size_t , size_t > &idcsFrTo,
         std::map< size_t, std::vector< std::string > > &attrCurDomains,
-        std::map< size_t, std::map< int, int  > > &attrOrigToCurDomains );
+        std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains );
     void duplAttributes( const std::vector< size_t > &idcs );
     void deleteAttribute( const size_t &idx );
 

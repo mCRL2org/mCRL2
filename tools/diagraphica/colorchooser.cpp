@@ -527,7 +527,7 @@ void ColorChooser::handleHits( const vector< int > &ids )
 void ColorChooser::handleDrag()
 // ----------------------------
 {
-    if ( 0 <= dragIdx && static_cast <size_t> (dragIdx) < positionsX.size() )
+    if ( dragIdx != NON_EXISTING && static_cast <size_t> (dragIdx) < positionsX.size() )
     {
         double w, h;
         double xLft, xRgt;

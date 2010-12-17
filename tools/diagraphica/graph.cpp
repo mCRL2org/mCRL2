@@ -215,7 +215,7 @@ void Graph::moveAttribute(
 void Graph::configAttributes(
     map< size_t, size_t > &idcsFrTo,
     map< size_t, vector< string > > &attrCurDomains,
-    map< size_t, map< int , int  > > &attrOrigToCurDomains )
+    map< size_t, map< size_t , size_t  > > &attrOrigToCurDomains )
 // -----------------------------------------------------
 {
     size_t sizeAttrs = attributes.size();
@@ -534,7 +534,7 @@ Cluster* Graph::getCluster( const vector< size_t > coord )
 
         for ( size_t i = 1; i < coord.size(); ++i )
         {
-            if ( 0 <= coord[i] && coord[i] < temp->getSizeChildren() )
+            if ( coord[i] != NON_EXISTING  && coord[i] < temp->getSizeChildren() )
                 temp = temp->getChild( coord[i] );
             else
             {

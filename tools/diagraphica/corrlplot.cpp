@@ -354,7 +354,7 @@ void CorrlPlot::handleMouseLeaveEvent()
 void CorrlPlot::initLabels()
 // -------------------------
 {
-    if ( attrIdx1 >= 0 && attrIdx2 >= 0 )
+    if ( attrIdx1 != NON_EXISTING && attrIdx2 != NON_EXISTING )
     {
         xLabel = graph->getAttribute( attrIdx1 )->getName();
         yLabel = graph->getAttribute( attrIdx2 )->getName();
