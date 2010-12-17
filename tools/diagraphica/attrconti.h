@@ -42,9 +42,9 @@ public:
         const size_t &idxFr,
         const size_t &idxTo );
 
-    void classifyEqualIntervals( const int &number );
-    void classifyQuantiles( const int &number );
-    void classifyMeanStandardDeviation( const int &number );
+    void classifyEqualIntervals( const size_t &number );
+    void classifyQuantiles( const size_t &number );
+    void classifyMeanStandardDeviation( const size_t &number );
     void removeClassification();
 
     void setLowerBound( const double &lwrBnd );

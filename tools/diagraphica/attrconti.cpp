@@ -200,7 +200,7 @@ void AttrConti::moveValue(
 
 
 // --------------------------------------------------------
-void AttrConti::classifyEqualIntervals( const int &number )
+void AttrConti::classifyEqualIntervals( const size_t &number )
 // --------------------------------------------------------
 {
     if ( number == 0 )
@@ -245,7 +245,7 @@ void AttrConti::classifyEqualIntervals( const int &number )
 
 
 // ---------------------------------------------------
-void AttrConti::classifyQuantiles( const int &number )
+void AttrConti::classifyQuantiles( const size_t &number )
 // ---------------------------------------------------
 {
     if ( number == 0 )
@@ -291,7 +291,7 @@ void AttrConti::classifyQuantiles( const int &number )
 
 
 // ---------------------------------------------------------------
-void AttrConti::classifyMeanStandardDeviation( const int &number )
+void AttrConti::classifyMeanStandardDeviation( const size_t &number )
 // ---------------------------------------------------------------
 {
     if ( number == 0 )
