@@ -118,10 +118,10 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
       if ( !strncmp(((char *) buf)+8,"   1STL2LRCm",12) )
       {
         ATerm data;
-        size_t position = 0;
-        for (size_t i=0; i<8; i++)
+        long position = 0;
+        for (unsigned char i=0; i<8; i++)
         {
-          position = position*0x100 + buf[7-i];
+          position = (position << 8) + buf[7-i];
         }
         if ( (fseek(g,position,SEEK_SET) != 0 ) ||
              ((data = ATreadFromFile(g)) == NULL) )
@@ -172,14 +172,32 @@ static void add_extra_mcrl2_lts_data(std::string const &filename, ATermAppl data
     throw mcrl2::runtime_error("Could not open file '" + filename + "' to add extra LTS information.");
     return;
   }
-
+  
   ATerm arg1 = (ATerm) ((data_spec == NULL)?gsMakeNil():data_spec);
   ATerm arg2 = (ATerm) ((params == NULL)?gsMakeNil():ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params));
   ATerm arg3 = (ATerm) ((ATisEmpty(act_labels))?gsMakeNil():core::detail::gsMakeActSpec(act_labels));
   ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
 
-  long position;
-  if ( (position = ftell(f)) == -1 )
+  /* From the remarks on MSDN:
+   *
+   *   "Note that when a file is opened for appending data, the current file position is determined 
+   *    by the last I/O operation, not by where the next write would occur. For example, if a file 
+   *    is opened for an append and the last operation was a read, the file position is the point 
+   *    where the next read operation would start, not where the next write would start. (When a 
+   *    file is opened for appending, the file position is moved to end of file before any write 
+   *    operation.) If no I/O operation has yet occurred on a file opened for appending, the file 
+   *    position is the beginning of the file."
+   *
+   * In practice, this means that the Microsoft implementation of ftell() returns 0 at this point
+   * in our code. Simply trying to read one byte past the end of the file (the read will fail) seems 
+   * to resolve this issue.
+   */
+  char c;
+  fseek(f,0,SEEK_END);
+  fread(&c,1,1,f);
+
+  long position = ftell(f);  
+  if ( position == -1 )
   {
     fclose(f);
     throw mcrl2::runtime_error("Could not determine file size of '" + filename +
@@ -199,7 +217,7 @@ static void add_extra_mcrl2_lts_data(std::string const &filename, ATermAppl data
   for (size_t i=0; i<8; i++)
   {
     buf[i] = position % 0x100;
-    position /= 0x100;
+    position >>= 8;
   }
   if ( fwrite(buf,1,8+12,f) != 8+12 )
   {
