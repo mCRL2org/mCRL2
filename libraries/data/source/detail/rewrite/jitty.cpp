@@ -179,46 +179,43 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
 {
   ATermAppl a;
 
-// gsMessage("in: %T\n\n",Term);
   if ( gsIsDataVarId(Term) )
   {
-// gsMessage("out: %T\n\n",Term);
     return Term;
   }
 
-  int arity = ATgetArity(ATgetAFun(Term));
+  size_t arity = ATgetArity(ATgetAFun(Term));
   ATerm t = ATgetArgument(Term,0);
   if ( ATisInt(t) )
   {
     a = int2term[ATgetInt((ATermInt) t)];
-  } else {
+  } 
+  else 
+  {
     a = (ATermAppl) t;
   }
 
-        if(gsIsOpId(a) || gsIsDataVarId(a))
-        {
-                int i = 1;
-                ATermAppl sort = ATAgetArgument(a, 1);
-                while(is_function_sort(sort_expression(sort)) && (i < arity))
-                {
-                        ATermList sort_dom = ATLgetArgument(sort, 0);
-                        ATermList list = ATmakeList0();
-                        while(!ATisEmpty(sort_dom))
-                        {
-                                assert(i < arity);
-                                list = ATinsert(list, (ATerm) fromInner(ATAgetArgument(Term,i)));
-                                sort_dom = ATgetNext(sort_dom);
-                                ++i;
-                        }
-                        list = ATreverse(list);
-                        a = gsMakeDataAppl(a, list);
-                        sort = ATAgetArgument(sort, 1);
-                }
-        }
-
-// gsMessage("to_out: %T\n\n",a);
-
-        return a;
+  if (gsIsOpId(a) || gsIsDataVarId(a))
+  {
+    size_t i = 1;
+    ATermAppl sort = ATAgetArgument(a, 1);
+    while(is_function_sort(sort_expression(sort)) && (i < arity))
+    {
+      ATermList sort_dom = ATLgetArgument(sort, 0);
+      ATermList list = ATmakeList0();
+      while(!ATisEmpty(sort_dom))
+      {
+        assert(i < arity);
+        list = ATinsert(list, (ATerm) fromInner(ATAgetArgument(Term,i)));
+        sort_dom = ATgetNext(sort_dom);
+        ++i;
+      }
+      list = ATreverse(list);
+      a = gsMakeDataAppl(a, list);
+      sort = ATAgetArgument(sort, 1);
+    }
+  }
+  return a;
 }
 
 static ATermList get_vars(ATerm a)
@@ -226,7 +223,9 @@ static ATermList get_vars(ATerm a)
   if ( gsIsDataVarId((ATermAppl) a) )
   {
     return ATmakeList1(a);
-  } else {
+  } 
+  else 
+  {
     ATermList l = ATmakeList0();
     ATermList m = ATgetArguments((ATermAppl) a);
     for (;!ATisEmpty(m); m=ATgetNext(m))
@@ -242,7 +241,6 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
   ATermList strat = ATmakeList0();
   size_t arity;
 
-//gsMessage("rules: %T\n\n",rules);
   size_t max_arity = 0;
   for (ATermList l=rules; !ATisEmpty(l); l=ATgetNext(l))
   {
@@ -268,23 +266,15 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
     {
       args[i]=-1;
     }
-//printf("arity = %i\n",arity);
 
     for (; !ATisEmpty(rules); rules=ATgetNext(rules))
     {
       if ( ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2))) == arity + 1 )
       {
         ATermAppl cond = ATAelementAt(ATLgetFirst(rules),1);
-        /*ATermList vars = gsIsNil(cond)?ATmakeList1((ATerm) ATmakeList0()):ATmakeList1((ATerm) get_vars((ATerm) cond));*/
-        ATermList vars = (ATisEqual(cond,jitty_true))?ATmakeList1((ATerm) ATmakeList0()):ATmakeList1((ATerm) get_vars((ATerm) cond)); // JK 15/10/2009 condition is always a data expression
+        ATermList vars = (ATisEqual(cond,jitty_true))?ATmakeList1((ATerm) ATmakeList0()):ATmakeList1((ATerm) get_vars((ATerm) cond)); 
         ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2);
 
-//gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
-//gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATgetFirst(rules),2));
-//gsfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); gsfprintf(stderr,"\n");
-//gsprintf("pars: %T\n",pars);
-
-        
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool, arity);
         for (size_t i = 0; i < arity; i++)
         {
@@ -341,13 +331,11 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
             assert(i<((size_t)1)<<(8*sizeof(int)-1));  // Check whether i can safely be translated into an int.
             deps = ATinsert(deps,(ATerm) ATmakeInt((int)i));
             args[i] += 1;
-//fprintf(stderr,"dep of arg %i\n",i);
           }
         }
         deps = ATreverse(deps);
 
         m = ATinsert(m,(ATerm) ATmakeList2((ATerm) deps,ATgetFirst(rules)));
-//gsfprintf(stderr,"\n");
       } else {
         l = ATinsert(l,ATgetFirst(rules));
       }
@@ -360,7 +348,6 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
       {
         if ( ATisEmpty(ATLgetFirst(ATLgetFirst(m))) )
         {
-//gsprintf("add: %T\n",ATgetFirst(ATgetNext(ATLgetFirst(m))));
           strat = ATinsert(strat, ATgetFirst(ATgetNext(ATLgetFirst(m))));
         } else {
           m2 = ATinsert(m2,ATgetFirst(m));
@@ -392,7 +379,6 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
         used[maxidx] = true;
 
         ATermInt k = ATmakeInt(maxidx);
-//gsprintf("add: %T\n",k);
         strat = ATinsert(strat,(ATerm) k);
         m2 = ATmakeList0();
         for (; !ATisEmpty(m); m=ATgetNext(m))

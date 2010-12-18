@@ -811,6 +811,7 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
 
   data_specification specification(parse_data_specification(s));
 
+  std::cerr << "othello test\n";
   rewrite_strategy_vector strategies(rewrite_strategies());
   for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
@@ -821,6 +822,59 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
     data_rewrite_test(R, e, sort_bool::true_());
   }
 }
+
+BOOST_AUTO_TEST_CASE(test_lambda_expression)
+{
+  std::string s(
+    "map  n: Pos;\n"
+    "eqn  n=2;\n"
+    "sort D = struct d1 | d2;\n"
+    "     Buf = Nat -> struct data(getdata:D) | empty;\n"
+    "map  emptyBuf: Buf;\n"
+    "     insert: D#Nat#Buf -> Buf;\n"
+    "     remove: Nat#Buf -> Buf;\n"
+    "     release: Nat#Nat#Buf -> Buf;\n"
+    "     nextempty: Nat#Buf -> Nat;\n"
+    "     nextempty_rec: Nat#Buf#Nat -> Nat;\n"
+    "     inWindow: Nat#Nat#Nat -> Bool;\n"
+    "var  i,j,k: Nat; d: D; q: Buf;\n"
+    "eqn  emptyBuf = lambda j:Nat.empty;\n"
+    "     insert(d,i,q) = lambda j:Nat.if(i==j,data(d),q(j));\n"
+    "     remove(i,q) = lambda j:Nat.if(i==j,empty,q(j));\n"
+    "     i mod 2*n==j mod 2*n -> release(i,j,q) = q;\n"
+    "     i mod 2*n!=j mod 2*n ->\n"
+    "          release(i,j,q) = release((i+1) mod 2*n,j,remove(i,q));\n"
+    "     k<n -> nextempty_rec(i,q,k) =\n"
+    "               if(q(i)==empty,i,nextempty_rec((i+1) mod n,q,k+1));\n"
+    "     k==n -> nextempty_rec(i,q,k)=i;\n"
+    "     nextempty(i,q) = nextempty_rec(i,q,0);\n"
+    "     inWindow(i,j,k) = (i<=j && j<k) || (k<i && i<=j) || (j<k && k<i);\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "lambda_rewrite_test\n";
+  rewrite_strategy_vector strategies(rewrite_strategies());
+  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("insert(d2,2,insert(d1,1,emptyBuf))", specification));
+    data_rewrite_test(R, e, R(e));  // Check that the lambda expressions are properly translated to and from internal format.
+    e=parse_data_expression("insert(d1,1,emptyBuf)(1)==data(d1)", specification);
+    data_rewrite_test(R, e, sort_bool::true_());  
+    e=parse_data_expression("insert(d1,1,emptyBuf)(1)==empty", specification);
+    data_rewrite_test(R, e, sort_bool::false_());  
+    e=parse_data_expression("remove(1,emptyBuf)(1)==data(d1)", specification);
+    data_rewrite_test(R, e, sort_bool::false_());  
+    e=parse_data_expression("remove(1,emptyBuf)(1)==empty", specification);
+    data_rewrite_test(R, e, sort_bool::true_());  
+    e=parse_data_expression("remove(1,insert(d1,1,emptyBuf))(1)==insert(d1,1,emptyBuf)(1)", specification);
+    data_rewrite_test(R, e, sort_bool::false_());  
+  }
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

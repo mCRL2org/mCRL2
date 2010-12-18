@@ -140,44 +140,63 @@ namespace mcrl2 {
 
             static number_postfix_generator symbol_generator("lambda@");
 
-            atermpp::map< data_expression, data_expression >::const_iterator i = m_implementation_context.find(expression);
+            const atermpp::map< data_expression, data_expression >::const_iterator i = m_implementation_context.find(expression);
 
             if (i == m_implementation_context.end())
-            { // implementation with previously generated function
-              atermpp::term_list< variable > bound_variables = atermpp::convert< atermpp::term_list< variable > >(implement(expression.variables()));
+            { 
+              const atermpp::term_list< variable > bound_variables = atermpp::convert< atermpp::term_list< variable > >(implement(expression.variables()));
 
               if (!bound_variables.empty())
-              { // function with non-empty domain
-                data_expression body(implement(expression.body()));
-                atermpp::term_list< variable > free_variables = atermpp::convert< atermpp::term_list< variable > >(implement(find_free_variables(expression, bound_variables)));
+              { 
+                // We encounter an expression of the form
+                //     lambda x1...xn.body(y1,...,ym,x1,...,xn) where xi are the bound variables, and yj are free variables in body.
+                // This expression is replaced by a new function symbol lambda@ and a new rewrite rule as follows:
+                //
+                //     lambda x1...xn.body(y1,...,ym,x1,...,xn) --> lambda@(y1,...,yn)
+                //
+                // The new rewrite rule is
+                //
+                //     lamba@(y1,...,ym)(x1,...xn)=body(y1,...,ym,x1,...xn).
+                //
+                // When an expression must be translated back, an occurrence of lamba@ is translated into
+                //
+                //     lambda@ --> lambda y1...ym.lambda.x1...xn.body(y1,...,ym,x1,...xn)
+                //
+                // Below the variables x1...xn are the bound_variables and y1...ym are the free_variables.
 
-                function_sort   new_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
+                const data_expression body(implement(expression.body()));
+                const atermpp::term_list< variable > free_variables = atermpp::convert< atermpp::term_list< variable > >
+                                                        (implement(find_free_variables(expression, bound_variables)));
 
-                data_expression new_function(function_symbol(symbol_generator(),
-                        (free_variables.empty()) ? new_function_sort :
-                                      function_sort(make_sort_range(free_variables), new_function_sort)));
-
-                // lambda f : type_of(free_variables). lambda b. type_of(bound_variables) = body
-                if (free_variables.empty())
+                function_sort lambdaAt_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
+                if (!free_variables.empty())
                 {
-                  m_rewriter->addRewriteRule(data_equation(bound_variables, application(new_function, bound_variables), body));
+                  lambdaAt_function_sort=function_sort(make_sort_range(free_variables), lambdaAt_function_sort);
                 }
-                else
-                {
-                  new_function = application(new_function, free_variables);
+                
+                const data_expression lambdaAt_function(function_symbol(symbol_generator(), lambdaAt_function_sort));
 
-                  m_rewriter->addRewriteRule(data_equation(free_variables + bound_variables, application(new_function, bound_variables), body));
-                }
+                m_rewriter->addRewriteRule(data_equation(free_variables + bound_variables,
+                            (free_variables.empty()?
+                                 application(lambdaAt_function, bound_variables):
+                                 application(application(lambdaAt_function, free_variables),bound_variables)), body));
 
-                m_implementation_context[expression]   = new_function;
-                m_reconstruction_context[new_function] = expression;
+                m_reconstruction_context[lambdaAt_function] = 
+                            (free_variables.empty()?
+                                 lambda(bound_variables,body):
+                                 lambda(free_variables,lambda(bound_variables,body)));
+                assert(lambdaAt_function.sort()==m_reconstruction_context[lambdaAt_function].sort());
 
-                return new_function;
+                const data_expression result( free_variables.empty() ? lambdaAt_function : application(lambdaAt_function,free_variables));
+                m_implementation_context[expression]   = result;
+                assert(expression.sort()==result.sort());
+                return result;
               }
 
               return implement(expression.body());
             }
 
+            // implementation with previously generated function.
             return i->second;
           }
 
@@ -278,7 +297,7 @@ namespace mcrl2 {
               } 
             } 
 
-            return application(reconstruct(expression.head()), reconstruct(expression.arguments()));
+            return application(reconstruct(data_expression(expression.head())), reconstruct(expression.arguments()));
           }
 
           template < typename Container >
