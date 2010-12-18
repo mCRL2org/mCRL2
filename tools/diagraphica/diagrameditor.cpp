@@ -2005,7 +2005,7 @@ void DiagramEditor::handleSetDOF( const size_t &attrIdx ) // Link Attribute to t
 	if ( s != NULL )
 	{
 		DOF* dof = NULL;
-		if( attrIdx == -1) // -1 Indicates, removing attribute from the Text DOF of the selected shape
+		if( attrIdx == NON_EXISTING) // NON_EXISTING Indicates, removing attribute from the Text DOF of the selected shape
 		{
 			dof = s->getDOFText();
 			s->setVariable( "" );

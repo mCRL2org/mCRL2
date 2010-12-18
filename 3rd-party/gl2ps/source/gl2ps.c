@@ -3205,7 +3205,6 @@ static void gl2psPrintTeXHeader(void)
       if(gl2ps->filename[i-1] == '.'){
         strncpy(name, gl2ps->filename, i-1);
         name[i-1] = '\0';
-        b = 1;
         break;
       }
     }
