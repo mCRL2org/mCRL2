@@ -107,7 +107,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   libgrape/transition.cpp
   libgrape/var.cpp
   libgrape/varupdate.cpp
-  libgrape/xml.cpp
+	libgrape/xml.cpp
   libgrape/xmlopen.cpp
 
   mcrl2gen/mcrl2gen.cpp

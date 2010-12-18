@@ -3201,14 +3201,15 @@ static void gl2psPrintTeXHeader(void)
   size_t i;
 
   if(gl2ps->filename && strlen(gl2ps->filename) < 256){
-    for(i = strlen(gl2ps->filename)-1; i >= 0; i--){
-      if(gl2ps->filename[i] == '.'){
-        strncpy(name, gl2ps->filename, i);
-        name[i] = '\0';
+    for(i = strlen(gl2ps->filename); i > 0; i--){
+      if(gl2ps->filename[i-1] == '.'){
+        strncpy(name, gl2ps->filename, i-1);
+        name[i-1] = '\0';
+        b = 1;
         break;
       }
     }
-    if(i <= 0) strcpy(name, gl2ps->filename);
+    if( i == 0 ) strcpy(name, gl2ps->filename);
   }
   else{
     strcpy(name, "untitled");
@@ -4090,7 +4091,7 @@ static int gl2psPrintPDFDataStreamLength(size_t val)
 {
   return fprintf(gl2ps->stream,
                  "5 0 obj\n"
-                 "%d\n"
+                 "%lu\n"
                  "endobj\n", val);
 }
 
@@ -4439,7 +4440,7 @@ static int gl2psPrintPDFShaderMask(int obj, int childobj)
     : strlen("/TrSh0 sh\n"); 
   
   offs += fprintf(gl2ps->stream,
-                  "/Length %d\n"
+                  "/Length %lu\n"
                   ">>\n"
                   "stream\n",
                   len);
@@ -4733,7 +4734,7 @@ static void gl2psPrintPDFFooter(void)
           "%010d 65535 f \n", gl2ps->objects_stack, 0);
   
   for(i = 1; i < gl2ps->objects_stack; ++i)
-    fprintf(gl2ps->stream, "%010d 00000 n \n", gl2ps->xreflist[i]);
+    fprintf(gl2ps->stream, "%010lu 00000 n \n", gl2ps->xreflist[i]);
   
   fprintf(gl2ps->stream,
           "trailer\n"
@@ -4742,7 +4743,7 @@ static void gl2psPrintPDFFooter(void)
           "/Info 1 0 R\n"
           "/Root 2 0 R\n"
           ">>\n"
-          "startxref\n%d\n"
+          "startxref\n%lu\n"
           "%%%%EOF\n",
           gl2ps->objects_stack, gl2ps->xreflist[gl2ps->objects_stack]);
   

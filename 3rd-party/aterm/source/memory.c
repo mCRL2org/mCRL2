@@ -10,10 +10,6 @@
 #include "util.h"
 #include "gc.h"
 
-#ifndef NDEBUG
-//#include <stdint.h>
-#endif
-
 #ifdef DMALLOC
 #include <dmalloc.h>
 #endif

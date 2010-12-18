@@ -796,14 +796,14 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       specification += _T(";\n");
     }
     specification += _T("\n");
-    for (size_t i=internal_specs.GetCount()-1; i>-1; --i)
+    for (size_t i=internal_specs.GetCount(); i>0; --i)
     {
-      specification += internal_specs[i] + _T("\n");
-      specification += proc_specs[i] + _T("\n\n");
+      specification += internal_specs[i-1] + _T("\n");
+      specification += proc_specs[i-1] + _T("\n\n");
     }
-    for (size_t i=arch_specs.GetCount()-1; i>-1; --i)
+    for (size_t i=arch_specs.GetCount(); i>0; --i)
     {
-      specification += arch_specs[i] + _T("\n\n");
+      specification += arch_specs[i-1] + _T("\n\n");
     }
     specification += init_spec;
 
@@ -985,10 +985,10 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
       specification += _T(";\n");
     }
     specification += _T("\n");
-    for(size_t i=internal_specs.GetCount()-1; i>-1; --i)
+    for(size_t i=internal_specs.GetCount(); i>0; --i)
     {
-      specification += internal_specs[i] + _T("\n");
-      specification += specs[i] + _T("\n\n");
+      specification += internal_specs[i-1] + _T("\n");
+      specification += specs[i-1] + _T("\n\n");
     }
     specification += init_spec;
 
