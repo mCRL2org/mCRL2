@@ -65,12 +65,14 @@ class variable: public data_expression
       return atermpp::arg2(*this);
     }
 };
-//--- end generated class variable ---//
 
-    /// \brief list of variables
-    typedef atermpp::term_list< variable >                         variable_list;
-    /// \brief list of variables
-    typedef atermpp::vector< variable >                            variable_vector;
+/// \brief list of variables
+typedef atermpp::term_list<variable> variable_list;
+
+/// \brief vector of variables
+typedef atermpp::vector<variable>    variable_vector;
+
+//--- end generated class variable ---//
 
     /// \brief Converts an container with variables to a variable_list
     /// \param r A range of variables.

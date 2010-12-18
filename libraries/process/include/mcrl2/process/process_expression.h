@@ -31,7 +31,7 @@ namespace process {
 using lps::action;
 
 //--- start generated classes ---//
-/// \brief class process_expression
+/// \brief A process expression
 class process_expression: public atermpp::aterm_appl
 {
   public:
@@ -54,6 +54,17 @@ typedef atermpp::term_list<process_expression> process_expression_list;
 
 /// \brief vector of process_expressions
 typedef atermpp::vector<process_expression>    process_expression_vector;
+
+
+/// \brief Test for a process_expression expression
+/// \param t A term
+/// \return True if it is a process_expression expression
+inline
+bool is_process_expression(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsProcExpr(t);
+}
+
 
 /// \brief A process
 class process_instance: public process_expression
@@ -88,6 +99,16 @@ class process_instance: public process_expression
     }
 };
 
+/// \brief Test for a process_instance expression
+/// \param t A term
+/// \return True if it is a process_instance expression
+inline
+bool is_process_instance(const process_expression& t)
+{
+  return core::detail::gsIsProcess(t);
+}
+
+
 /// \brief A process assignment
 class process_instance_assignment: public process_expression
 {
@@ -121,6 +142,16 @@ class process_instance_assignment: public process_expression
     }
 };
 
+/// \brief Test for a process_instance_assignment expression
+/// \param t A term
+/// \return True if it is a process_instance_assignment expression
+inline
+bool is_process_instance_assignment(const process_expression& t)
+{
+  return core::detail::gsIsProcessAssignment(t);
+}
+
+
 /// \brief The value delta
 class delta: public process_expression
 {
@@ -139,6 +170,16 @@ class delta: public process_expression
     }
 };
 
+/// \brief Test for a delta expression
+/// \param t A term
+/// \return True if it is a delta expression
+inline
+bool is_delta(const process_expression& t)
+{
+  return core::detail::gsIsDelta(t);
+}
+
+
 /// \brief The value tau
 class tau: public process_expression
 {
@@ -156,6 +197,16 @@ class tau: public process_expression
       assert(core::detail::check_term_Tau(m_term));
     }
 };
+
+/// \brief Test for a tau expression
+/// \param t A term
+/// \return True if it is a tau expression
+inline
+bool is_tau(const process_expression& t)
+{
+  return core::detail::gsIsTau(t);
+}
+
 
 /// \brief The sum operator
 class sum: public process_expression
@@ -190,6 +241,16 @@ class sum: public process_expression
     }
 };
 
+/// \brief Test for a sum expression
+/// \param t A term
+/// \return True if it is a sum expression
+inline
+bool is_sum(const process_expression& t)
+{
+  return core::detail::gsIsSum(t);
+}
+
+
 /// \brief The block operator
 class block: public process_expression
 {
@@ -222,6 +283,16 @@ class block: public process_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a block expression
+/// \param t A term
+/// \return True if it is a block expression
+inline
+bool is_block(const process_expression& t)
+{
+  return core::detail::gsIsBlock(t);
+}
+
 
 /// \brief The hide operator
 class hide: public process_expression
@@ -256,6 +327,16 @@ class hide: public process_expression
     }
 };
 
+/// \brief Test for a hide expression
+/// \param t A term
+/// \return True if it is a hide expression
+inline
+bool is_hide(const process_expression& t)
+{
+  return core::detail::gsIsHide(t);
+}
+
+
 /// \brief The rename operator
 class rename: public process_expression
 {
@@ -288,6 +369,16 @@ class rename: public process_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a rename expression
+/// \param t A term
+/// \return True if it is a rename expression
+inline
+bool is_rename(const process_expression& t)
+{
+  return core::detail::gsIsRename(t);
+}
+
 
 /// \brief The communication operator
 class comm: public process_expression
@@ -322,6 +413,16 @@ class comm: public process_expression
     }
 };
 
+/// \brief Test for a comm expression
+/// \param t A term
+/// \return True if it is a comm expression
+inline
+bool is_comm(const process_expression& t)
+{
+  return core::detail::gsIsComm(t);
+}
+
+
 /// \brief The allow operator
 class allow: public process_expression
 {
@@ -354,6 +455,16 @@ class allow: public process_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a allow expression
+/// \param t A term
+/// \return True if it is a allow expression
+inline
+bool is_allow(const process_expression& t)
+{
+  return core::detail::gsIsAllow(t);
+}
+
 
 /// \brief The synchronization operator
 class sync: public process_expression
@@ -388,6 +499,16 @@ class sync: public process_expression
     }
 };
 
+/// \brief Test for a sync expression
+/// \param t A term
+/// \return True if it is a sync expression
+inline
+bool is_sync(const process_expression& t)
+{
+  return core::detail::gsIsSync(t);
+}
+
+
 /// \brief The at operator
 class at: public process_expression
 {
@@ -420,6 +541,16 @@ class at: public process_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a at expression
+/// \param t A term
+/// \return True if it is a at expression
+inline
+bool is_at(const process_expression& t)
+{
+  return core::detail::gsIsAtTime(t);
+}
+
 
 /// \brief The sequential composition
 class seq: public process_expression
@@ -454,6 +585,16 @@ class seq: public process_expression
     }
 };
 
+/// \brief Test for a seq expression
+/// \param t A term
+/// \return True if it is a seq expression
+inline
+bool is_seq(const process_expression& t)
+{
+  return core::detail::gsIsSeq(t);
+}
+
+
 /// \brief The if-then operator
 class if_then: public process_expression
 {
@@ -486,6 +627,16 @@ class if_then: public process_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a if_then expression
+/// \param t A term
+/// \return True if it is a if_then expression
+inline
+bool is_if_then(const process_expression& t)
+{
+  return core::detail::gsIsIfThen(t);
+}
+
 
 /// \brief The if-then-else operator
 class if_then_else: public process_expression
@@ -525,6 +676,16 @@ class if_then_else: public process_expression
     }
 };
 
+/// \brief Test for a if_then_else expression
+/// \param t A term
+/// \return True if it is a if_then_else expression
+inline
+bool is_if_then_else(const process_expression& t)
+{
+  return core::detail::gsIsIfThenElse(t);
+}
+
+
 /// \brief The bounded initialization
 class bounded_init: public process_expression
 {
@@ -557,6 +718,16 @@ class bounded_init: public process_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a bounded_init expression
+/// \param t A term
+/// \return True if it is a bounded_init expression
+inline
+bool is_bounded_init(const process_expression& t)
+{
+  return core::detail::gsIsBInit(t);
+}
+
 
 /// \brief The merge operator
 class merge: public process_expression
@@ -591,6 +762,16 @@ class merge: public process_expression
     }
 };
 
+/// \brief Test for a merge expression
+/// \param t A term
+/// \return True if it is a merge expression
+inline
+bool is_merge(const process_expression& t)
+{
+  return core::detail::gsIsMerge(t);
+}
+
+
 /// \brief The left merge operator
 class left_merge: public process_expression
 {
@@ -624,6 +805,16 @@ class left_merge: public process_expression
     }
 };
 
+/// \brief Test for a left_merge expression
+/// \param t A term
+/// \return True if it is a left_merge expression
+inline
+bool is_left_merge(const process_expression& t)
+{
+  return core::detail::gsIsLMerge(t);
+}
+
+
 /// \brief The choice operator
 class choice: public process_expression
 {
@@ -656,181 +847,17 @@ class choice: public process_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a choice expression
+/// \param t A term
+/// \return True if it is a choice expression
+inline
+bool is_choice(const process_expression& t)
+{
+  return core::detail::gsIsChoice(t);
+}
+
 //--- end generated classes ---//
-
-//--- start generated is-functions ---//
-
-    /// \brief Test for a process_instance expression
-    /// \param t A term
-    /// \return True if it is a process_instance expression
-    inline
-    bool is_process_instance(const process_expression& t)
-    {
-      return core::detail::gsIsProcess(t);
-    }
-
-    /// \brief Test for a process_instance_assignment expression
-    /// \param t A term
-    /// \return True if it is a process_instance_assignment expression
-    inline
-    bool is_process_instance_assignment(const process_expression& t)
-    {
-      return core::detail::gsIsProcessAssignment(t);
-    }
-
-    /// \brief Test for a delta expression
-    /// \param t A term
-    /// \return True if it is a delta expression
-    inline
-    bool is_delta(const process_expression& t)
-    {
-      return core::detail::gsIsDelta(t);
-    }
-
-    /// \brief Test for a tau expression
-    /// \param t A term
-    /// \return True if it is a tau expression
-    inline
-    bool is_tau(const process_expression& t)
-    {
-      return core::detail::gsIsTau(t);
-    }
-
-    /// \brief Test for a sum expression
-    /// \param t A term
-    /// \return True if it is a sum expression
-    inline
-    bool is_sum(const process_expression& t)
-    {
-      return core::detail::gsIsSum(t);
-    }
-
-    /// \brief Test for a block expression
-    /// \param t A term
-    /// \return True if it is a block expression
-    inline
-    bool is_block(const process_expression& t)
-    {
-      return core::detail::gsIsBlock(t);
-    }
-
-    /// \brief Test for a hide expression
-    /// \param t A term
-    /// \return True if it is a hide expression
-    inline
-    bool is_hide(const process_expression& t)
-    {
-      return core::detail::gsIsHide(t);
-    }
-
-    /// \brief Test for a rename expression
-    /// \param t A term
-    /// \return True if it is a rename expression
-    inline
-    bool is_rename(const process_expression& t)
-    {
-      return core::detail::gsIsRename(t);
-    }
-
-    /// \brief Test for a comm expression
-    /// \param t A term
-    /// \return True if it is a comm expression
-    inline
-    bool is_comm(const process_expression& t)
-    {
-      return core::detail::gsIsComm(t);
-    }
-
-    /// \brief Test for a allow expression
-    /// \param t A term
-    /// \return True if it is a allow expression
-    inline
-    bool is_allow(const process_expression& t)
-    {
-      return core::detail::gsIsAllow(t);
-    }
-
-    /// \brief Test for a sync expression
-    /// \param t A term
-    /// \return True if it is a sync expression
-    inline
-    bool is_sync(const process_expression& t)
-    {
-      return core::detail::gsIsSync(t);
-    }
-
-    /// \brief Test for a at expression
-    /// \param t A term
-    /// \return True if it is a at expression
-    inline
-    bool is_at(const process_expression& t)
-    {
-      return core::detail::gsIsAtTime(t);
-    }
-
-    /// \brief Test for a seq expression
-    /// \param t A term
-    /// \return True if it is a seq expression
-    inline
-    bool is_seq(const process_expression& t)
-    {
-      return core::detail::gsIsSeq(t);
-    }
-
-    /// \brief Test for a if_then expression
-    /// \param t A term
-    /// \return True if it is a if_then expression
-    inline
-    bool is_if_then(const process_expression& t)
-    {
-      return core::detail::gsIsIfThen(t);
-    }
-
-    /// \brief Test for a if_then_else expression
-    /// \param t A term
-    /// \return True if it is a if_then_else expression
-    inline
-    bool is_if_then_else(const process_expression& t)
-    {
-      return core::detail::gsIsIfThenElse(t);
-    }
-
-    /// \brief Test for a bounded_init expression
-    /// \param t A term
-    /// \return True if it is a bounded_init expression
-    inline
-    bool is_bounded_init(const process_expression& t)
-    {
-      return core::detail::gsIsBInit(t);
-    }
-
-    /// \brief Test for a merge expression
-    /// \param t A term
-    /// \return True if it is a merge expression
-    inline
-    bool is_merge(const process_expression& t)
-    {
-      return core::detail::gsIsMerge(t);
-    }
-
-    /// \brief Test for a left_merge expression
-    /// \param t A term
-    /// \return True if it is a left_merge expression
-    inline
-    bool is_left_merge(const process_expression& t)
-    {
-      return core::detail::gsIsLMerge(t);
-    }
-
-    /// \brief Test for a choice expression
-    /// \param t A term
-    /// \return True if it is a choice expression
-    inline
-    bool is_choice(const process_expression& t)
-    {
-      return core::detail::gsIsChoice(t);
-    }
-//--- end generated is-functions ---//
 
 } // namespace process
 

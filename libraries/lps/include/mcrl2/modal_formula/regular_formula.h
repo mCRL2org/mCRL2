@@ -27,18 +27,8 @@ namespace mcrl2 {
 
 namespace regular_formulas {
 
-/// \brief Returns true if the term t is a regular formula
-/// \param t A term
-/// \return True if the term is a regular formula
-// TODO: generate this function
-inline
-bool is_regular_formula(const atermpp::aterm_appl& t)
-{
-  return core::detail::gsIsRegFrm(t);
-}
-
 //--- start generated classes ---//
-/// \brief class regular_formula
+/// \brief A regular formula
 class regular_formula: public atermpp::aterm_appl
 {
   public:
@@ -62,6 +52,17 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 /// \brief vector of regular_formulas
 typedef atermpp::vector<regular_formula>    regular_formula_vector;
 
+
+/// \brief Test for a regular_formula expression
+/// \param t A term
+/// \return True if it is a regular_formula expression
+inline
+bool is_regular_formula(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsRegFrm(t);
+}
+
+
 /// \brief The value nil for regular formulas
 class nil: public regular_formula
 {
@@ -79,6 +80,16 @@ class nil: public regular_formula
       assert(core::detail::check_term_RegNil(m_term));
     }
 };
+
+/// \brief Test for a nil expression
+/// \param t A term
+/// \return True if it is a nil expression
+inline
+bool is_nil(const regular_formula& t)
+{
+  return core::detail::gsIsRegNil(t);
+}
+
 
 /// \brief The seq operator for regular formulas
 class seq: public regular_formula
@@ -113,6 +124,16 @@ class seq: public regular_formula
     }
 };
 
+/// \brief Test for a seq expression
+/// \param t A term
+/// \return True if it is a seq expression
+inline
+bool is_seq(const regular_formula& t)
+{
+  return core::detail::gsIsRegSeq(t);
+}
+
+
 /// \brief The alt operator for regular formulas
 class alt: public regular_formula
 {
@@ -146,6 +167,16 @@ class alt: public regular_formula
     }
 };
 
+/// \brief Test for a alt expression
+/// \param t A term
+/// \return True if it is a alt expression
+inline
+bool is_alt(const regular_formula& t)
+{
+  return core::detail::gsIsRegAlt(t);
+}
+
+
 /// \brief The trans operator for regular formulas
 class trans: public regular_formula
 {
@@ -174,6 +205,16 @@ class trans: public regular_formula
     }
 };
 
+/// \brief Test for a trans expression
+/// \param t A term
+/// \return True if it is a trans expression
+inline
+bool is_trans(const regular_formula& t)
+{
+  return core::detail::gsIsRegTrans(t);
+}
+
+
 /// \brief The 'trans or nil' operator for regular formulas
 class trans_or_nil: public regular_formula
 {
@@ -201,55 +242,17 @@ class trans_or_nil: public regular_formula
       return atermpp::arg1(*this);
     }
 };
+
+/// \brief Test for a trans_or_nil expression
+/// \param t A term
+/// \return True if it is a trans_or_nil expression
+inline
+bool is_trans_or_nil(const regular_formula& t)
+{
+  return core::detail::gsIsRegTransOrNil(t);
+}
+
 //--- end generated classes ---//
-
-//--- start generated is-functions ---//
-
-    /// \brief Test for a nil expression
-    /// \param t A term
-    /// \return True if it is a nil expression
-    inline
-    bool is_nil(const regular_formula& t)
-    {
-      return core::detail::gsIsRegNil(t);
-    }
-
-    /// \brief Test for a seq expression
-    /// \param t A term
-    /// \return True if it is a seq expression
-    inline
-    bool is_seq(const regular_formula& t)
-    {
-      return core::detail::gsIsRegSeq(t);
-    }
-
-    /// \brief Test for a alt expression
-    /// \param t A term
-    /// \return True if it is a alt expression
-    inline
-    bool is_alt(const regular_formula& t)
-    {
-      return core::detail::gsIsRegAlt(t);
-    }
-
-    /// \brief Test for a trans expression
-    /// \param t A term
-    /// \return True if it is a trans expression
-    inline
-    bool is_trans(const regular_formula& t)
-    {
-      return core::detail::gsIsRegTrans(t);
-    }
-
-    /// \brief Test for a trans_or_nil expression
-    /// \param t A term
-    /// \return True if it is a trans_or_nil expression
-    inline
-    bool is_trans_or_nil(const regular_formula& t)
-    {
-      return core::detail::gsIsRegTransOrNil(t);
-    }
-//--- end generated is-functions ---//
 
 } // namespace regular_formulas
 

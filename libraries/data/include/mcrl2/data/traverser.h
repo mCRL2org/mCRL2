@@ -16,6 +16,7 @@
 #include "boost/type_traits/is_base_of.hpp"
 
 #include "mcrl2/core/traverser.h"
+#include "mcrl2/data/assignment.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/multiple_possible_sorts.h"
 #include "mcrl2/data/unknown_sort.h"

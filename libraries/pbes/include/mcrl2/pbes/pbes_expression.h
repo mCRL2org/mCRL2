@@ -36,21 +36,12 @@ namespace pbes_system {
 inline
 bool is_bes(atermpp::aterm_appl t);
 
-/// \brief pbes expression
-// <PBExpr>       ::= <DataExpr>
-//                  | PBESTrue
-//                  | PBESFalse
-//                  | PBESNot(<PBExpr>)
-//                  | PBESAnd(<PBExpr>, <PBExpr>)
-//                  | PBESOr(<PBExpr>, <PBExpr>)
-//                  | PBESImp(<PBExpr>, <PBExpr>)
-//                  | PBESForall(<DataVarId>+, <PBExpr>)
-//                  | PBESExists(<DataVarId>+, <PBExpr>)
-//                  | <PropVarInst>
+//--- start generated classes ---//
+/// \brief A pbes expression
 class pbes_expression: public atermpp::aterm_appl
 {
   public:
-    /// \brief Constructor.
+    /// \brief Default constructor.
     pbes_expression()
       : atermpp::aterm_appl(core::detail::constructPBExpr())
     {}
@@ -59,17 +50,10 @@ class pbes_expression: public atermpp::aterm_appl
     /// \param term A term
     pbes_expression(const atermpp::aterm_appl& term)
       : atermpp::aterm_appl(term)
-    { assert(core::detail::check_rule_PBExpr(m_term));
+    {
+      assert(core::detail::check_rule_PBExpr(m_term));
     }
-
-    ///// \brief Constructor.
-    ///// \param term A term
-    //pbes_expression(ATermAppl term)
-    //  : atermpp::aterm_appl(term)
-    //{
-    //  assert(core::detail::check_rule_PBExpr(m_term));
-    //}
-
+//--- start user section pbes_expression ---//
     /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
     /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
@@ -88,12 +72,16 @@ class pbes_expression: public atermpp::aterm_appl
     {
       return mcrl2::pbes_system::is_bes(*this);
     }
+//--- end user section pbes_expression ---//
 };
 
-/// \brief Read-only singly linked list of data expressions
+/// \brief list of pbes_expressions
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
-//--- start generated classes ---//
+/// \brief vector of pbes_expressions
+typedef atermpp::vector<pbes_expression>    pbes_expression_vector;
+
+
 /// \brief A propositional variable instantiation
 class propositional_variable_instantiation: public pbes_expression
 {
@@ -383,9 +371,6 @@ class exists: public pbes_expression
 };
 //--- end generated classes ---//
 
-/// \brief The namespace for predicates on pbes expressions.
-//namespace pbes_expr {
-
   /// \brief Returns true if the term t is equal to true
   /// \param t A PBES expression
   /// \return True if the term t is equal to true
@@ -438,13 +423,13 @@ class exists: public pbes_expression
   /// \brief Test for the value true
   /// \param t A PBES expression
   /// \return True if it is the value \p true
-  inline bool is_true(pbes_expression t)
+  inline bool is_true(const pbes_expression& t)
   { return is_pbes_true(t) || data::sort_bool::is_true_function_symbol(t); }
 
   /// \brief Test for the value false
   /// \param t A PBES expression
   /// \return True if it is the value \p false
-  inline bool is_false(pbes_expression t)
+  inline bool is_false(const pbes_expression& t)
   { return is_pbes_false(t) || data::sort_bool::is_false_function_symbol(t); }
 
   /// \brief Test for a negation
@@ -494,16 +479,14 @@ class exists: public pbes_expression
   /// \brief Returns true if the term t is a data expression
   /// \param t A PBES expression
   /// \return True if the term t is a data expression
-  inline bool is_data(pbes_expression t)
+  inline bool is_data(const pbes_expression& t)
   { return data::is_data_expression(t); }
 
   /// \brief Returns true if the term t is a propositional variable expression
   /// \param t A PBES expression
   /// \return True if the term t is a propositional variable expression
-  inline bool is_propositional_variable_instantiation(pbes_expression t)
+  inline bool is_propositional_variable_instantiation(const pbes_expression& t)
   { return core::detail::gsIsPropVarInst(t); }
-
-//} // namespace pbes_expr
 
 /// \brief The namespace for accessor functions on pbes expressions.
 namespace accessors {

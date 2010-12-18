@@ -25,45 +25,24 @@ namespace mcrl2 {
 
 namespace action_formulas {
 
-///////////////////////////////////////////////////////////////////////////////
-// action_formula
-/// \brief action formula expression.
-//<ActFrm>       ::= <MultAct>
-//                 | <DataExpr>
-//                 | ActTrue
-//                 | ActFalse
-//                 | ActNot(<ActFrm>)
-//                 | ActAnd(<ActFrm>, <ActFrm>)
-//                 | ActOr(<ActFrm>, <ActFrm>)
-//                 | ActImp(<ActFrm>, <ActFrm>)
-//                 | ActForall(<DataVarId>+, <ActFrm>)
-//                 | ActExists(<DataVarId>+, <ActFrm>)
-//                 | ActAt(<ActFrm>, <DataExpr>)
+//--- start generated classes ---//
+/// \brief An action formula
 class action_formula: public atermpp::aterm_appl
 {
   public:
-
-    /// \brief Constructor
+    /// \brief Default constructor.
     action_formula()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructActFrm())
+      : atermpp::aterm_appl(core::detail::constructActFrm())
     {}
 
-    /// \brief Constructor
-    /// \param t A term
-    action_formula(ATermAppl t)
-      : atermpp::aterm_appl(atermpp::aterm_appl(t))
+    /// \brief Constructor.
+    /// \param term A term
+    action_formula(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
+      assert(core::detail::check_rule_ActFrm(m_term));
     }
-
-    /// \brief Constructor
-    /// \param t A term
-    action_formula(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
-    }
-
+//--- start user section action_formula ---//
     /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
     /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
@@ -75,14 +54,26 @@ class action_formula: public atermpp::aterm_appl
     {
       return action_formula(f(atermpp::aterm(*this)));
     }
+//--- end user section action_formula ---//
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// action_formula_list
-/// \brief Read-only singly linked list of data expressions
+/// \brief list of action_formulas
 typedef atermpp::term_list<action_formula> action_formula_list;
 
-//--- start generated classes ---//
+/// \brief vector of action_formulas
+typedef atermpp::vector<action_formula>    action_formula_vector;
+
+
+/// \brief Test for a action_formula expression
+/// \param t A term
+/// \return True if it is a action_formula expression
+inline
+bool is_action_formula(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsActFrm(t);
+}
+
+
 /// \brief The value true for action formulas
 class true_: public action_formula
 {
@@ -101,6 +92,16 @@ class true_: public action_formula
     }
 };
 
+/// \brief Test for a true expression
+/// \param t A term
+/// \return True if it is a true expression
+inline
+bool is_true(const action_formula& t)
+{
+  return core::detail::gsIsActTrue(t);
+}
+
+
 /// \brief The value false for action formulas
 class false_: public action_formula
 {
@@ -118,6 +119,16 @@ class false_: public action_formula
       assert(core::detail::check_term_ActFalse(m_term));
     }
 };
+
+/// \brief Test for a false expression
+/// \param t A term
+/// \return True if it is a false expression
+inline
+bool is_false(const action_formula& t)
+{
+  return core::detail::gsIsActFalse(t);
+}
+
 
 /// \brief The not operator for action formulas
 class not_: public action_formula
@@ -146,6 +157,16 @@ class not_: public action_formula
       return atermpp::arg1(*this);
     }
 };
+
+/// \brief Test for a not expression
+/// \param t A term
+/// \return True if it is a not expression
+inline
+bool is_not(const action_formula& t)
+{
+  return core::detail::gsIsActNot(t);
+}
+
 
 /// \brief The and operator for action formulas
 class and_: public action_formula
@@ -180,6 +201,16 @@ class and_: public action_formula
     }
 };
 
+/// \brief Test for a and expression
+/// \param t A term
+/// \return True if it is a and expression
+inline
+bool is_and(const action_formula& t)
+{
+  return core::detail::gsIsActAnd(t);
+}
+
+
 /// \brief The or operator for action formulas
 class or_: public action_formula
 {
@@ -212,6 +243,16 @@ class or_: public action_formula
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a or expression
+/// \param t A term
+/// \return True if it is a or expression
+inline
+bool is_or(const action_formula& t)
+{
+  return core::detail::gsIsActOr(t);
+}
+
 
 /// \brief The implication operator for action formulas
 class imp: public action_formula
@@ -246,6 +287,16 @@ class imp: public action_formula
     }
 };
 
+/// \brief Test for a imp expression
+/// \param t A term
+/// \return True if it is a imp expression
+inline
+bool is_imp(const action_formula& t)
+{
+  return core::detail::gsIsActImp(t);
+}
+
+
 /// \brief The universal quantification operator for action formulas
 class forall: public action_formula
 {
@@ -278,6 +329,16 @@ class forall: public action_formula
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a forall expression
+/// \param t A term
+/// \return True if it is a forall expression
+inline
+bool is_forall(const action_formula& t)
+{
+  return core::detail::gsIsActForall(t);
+}
+
 
 /// \brief The existential quantification operator for action formulas
 class exists: public action_formula
@@ -312,6 +373,16 @@ class exists: public action_formula
     }
 };
 
+/// \brief Test for a exists expression
+/// \param t A term
+/// \return True if it is a exists expression
+inline
+bool is_exists(const action_formula& t)
+{
+  return core::detail::gsIsActExists(t);
+}
+
+
 /// \brief The at operator for action formulas
 class at: public action_formula
 {
@@ -344,91 +415,17 @@ class at: public action_formula
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a at expression
+/// \param t A term
+/// \return True if it is a at expression
+inline
+bool is_at(const action_formula& t)
+{
+  return core::detail::gsIsActAt(t);
+}
+
 //--- end generated classes ---//
-
-//--- start generated is-functions ---//
-
-    /// \brief Test for a true expression
-    /// \param t A term
-    /// \return True if it is a true expression
-    inline
-    bool is_true(const action_formula& t)
-    {
-      return core::detail::gsIsActTrue(t);
-    }
-
-    /// \brief Test for a false expression
-    /// \param t A term
-    /// \return True if it is a false expression
-    inline
-    bool is_false(const action_formula& t)
-    {
-      return core::detail::gsIsActFalse(t);
-    }
-
-    /// \brief Test for a not expression
-    /// \param t A term
-    /// \return True if it is a not expression
-    inline
-    bool is_not(const action_formula& t)
-    {
-      return core::detail::gsIsActNot(t);
-    }
-
-    /// \brief Test for a and expression
-    /// \param t A term
-    /// \return True if it is a and expression
-    inline
-    bool is_and(const action_formula& t)
-    {
-      return core::detail::gsIsActAnd(t);
-    }
-
-    /// \brief Test for a or expression
-    /// \param t A term
-    /// \return True if it is a or expression
-    inline
-    bool is_or(const action_formula& t)
-    {
-      return core::detail::gsIsActOr(t);
-    }
-
-    /// \brief Test for a imp expression
-    /// \param t A term
-    /// \return True if it is a imp expression
-    inline
-    bool is_imp(const action_formula& t)
-    {
-      return core::detail::gsIsActImp(t);
-    }
-
-    /// \brief Test for a forall expression
-    /// \param t A term
-    /// \return True if it is a forall expression
-    inline
-    bool is_forall(const action_formula& t)
-    {
-      return core::detail::gsIsActForall(t);
-    }
-
-    /// \brief Test for a exists expression
-    /// \param t A term
-    /// \return True if it is a exists expression
-    inline
-    bool is_exists(const action_formula& t)
-    {
-      return core::detail::gsIsActExists(t);
-    }
-
-    /// \brief Test for a at expression
-    /// \param t A term
-    /// \return True if it is a at expression
-    inline
-    bool is_at(const action_formula& t)
-    {
-      return core::detail::gsIsActAt(t);
-    }
-//--- end generated is-functions ---//
 
 /// Accessor functions and predicates for action formulas.
 namespace act_frm

@@ -30,6 +30,10 @@ namespace mcrl2 {
 
   namespace data {
 
+    // forward declaration for application operation of assignment
+    template <typename Container, typename Substitution >
+    Container replace_free_variables(Container const& container, Substitution replace_function);
+
     class assignment_expression: public atermpp::aterm_appl,
                                  public core::substitution_function<variable, data_expression>
     {
@@ -65,28 +69,62 @@ namespace mcrl2 {
     /// \brief vector of assignment expressions
     typedef atermpp::vector<assignment_expression>    assignment_expression_vector;
 
-    namespace detail {
+//    class assignment_expression: public atermpp::aterm_appl,
+//                                 public core::substitution_function<variable, data_expression>
+//    {
+//      public:
+//
+//        assignment_expression()
+//         : atermpp::aterm_appl(core::detail::constructWhrDecl())
+//        {}
+//
+//        assignment_expression(atermpp::aterm_appl term)
+//         : atermpp::aterm_appl(term)
+//        {
+//          assert(core::detail::check_rule_WhrDecl(term));
+//        }
+//
+//        assignment_expression(const variable v, const data_expression d)
+//         : atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(v,d))
+//        {}
+//
+//        variable lhs() const
+//        {
+//          return atermpp::arg1(*this);
+//        }
+//
+//        data_expression rhs() const
+//        {
+//          return atermpp::arg2(*this);
+//        }
+//    };
+//
+//    /// \brief list of assignment expressions
+//    typedef atermpp::term_list<assignment_expression> assignment_expression_list;
+//    /// \brief vector of assignment expressions
+//    typedef atermpp::vector<assignment_expression>    assignment_expression_vector;
 
 //--- start generated classes ---//
+
 /// \brief Assignment of a data expression to a variable
-class assignment_base: public assignment_expression
+class assignment: public assignment_expression
 {
   public:
     /// \brief Default constructor.
-    assignment_base()
+    assignment()
       : assignment_expression(core::detail::constructDataVarIdInit())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    assignment_base(const atermpp::aterm_appl& term)
+    assignment(const atermpp::aterm_appl& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_DataVarIdInit(m_term));
     }
 
     /// \brief Constructor.
-    assignment_base(const variable& lhs, const data_expression& rhs)
+    assignment(const variable& lhs, const data_expression& rhs)
       : assignment_expression(core::detail::gsMakeDataVarIdInit(lhs, rhs))
     {}
 
@@ -99,27 +137,62 @@ class assignment_base: public assignment_expression
     {
       return atermpp::arg2(*this);
     }
+//--- start user section assignment ---//
+    /// \brief Applies the assignment to a variable
+    /// \param[in] x A variable
+    /// \return The value <tt>x[lhs() := rhs()]</tt>.
+    data_expression operator()(const variable& x) const
+    {
+      return x == lhs() ? rhs() : data_expression(x);
+    }
+
+    /// \brief Applies the assignment to a term
+    /// \param[in] x A term
+    /// \return The value <tt>x[lhs() := rhs()]</tt>.
+    template < typename Expression >
+    data_expression operator()(const Expression& x) const
+    {
+      return data::replace_free_variables< Expression, assignment const& >(x, *this);
+    }
+//--- end user section assignment ---//
 };
 
+/// \brief list of assignments
+typedef atermpp::term_list<assignment> assignment_list;
+
+/// \brief vector of assignments
+typedef atermpp::vector<assignment>    assignment_vector;
+
+
+/// \brief Test for a assignment expression
+/// \param t A term
+/// \return True if it is a assignment expression
+inline
+bool is_assignment(const assignment_expression& t)
+{
+  return core::detail::gsIsDataVarIdInit(t);
+}
+
+
 /// \brief Assignment of a data expression to a string
-class identifier_assignment_base: public assignment_expression
+class identifier_assignment: public assignment_expression
 {
   public:
     /// \brief Default constructor.
-    identifier_assignment_base()
+    identifier_assignment()
       : assignment_expression(core::detail::constructIdInit())
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    identifier_assignment_base(const atermpp::aterm_appl& term)
+    identifier_assignment(const atermpp::aterm_appl& term)
       : assignment_expression(term)
     {
       assert(core::detail::check_term_IdInit(m_term));
     }
 
     /// \brief Constructor.
-    identifier_assignment_base(const identifier& lhs, const data_expression& rhs)
+    identifier_assignment(const identifier& lhs, const data_expression& rhs)
       : assignment_expression(core::detail::gsMakeIdInit(lhs, rhs))
     {}
 
@@ -132,107 +205,129 @@ class identifier_assignment_base: public assignment_expression
     {
       return atermpp::arg2(*this);
     }
+//--- start user section identifier_assignment ---//
+    /// \brief Applies the assignment to a variable
+    /// \param[in] x An identifier string
+    /// \return The value <tt>x[lhs() := rhs()]</tt>.
+    data_expression operator()(const identifier& x) const
+    {
+      return x == lhs() ? rhs() : data_expression(x);
+    }
+
+    /// \brief Applies the assignment to a term
+    /// \param[in] x A term
+    /// \return The value <tt>x[lhs() := rhs()]</tt>.
+    template < typename Expression >
+    data_expression operator()(const Expression& x) const
+    {
+      return data::replace_free_variables< Expression, assignment const& >(x, *this);
+    }
+//--- end user section identifier_assignment ---//
 };
+
+/// \brief Test for a identifier_assignment expression
+/// \param t A term
+/// \return True if it is a identifier_assignment expression
+inline
+bool is_identifier_assignment(const assignment_expression& t)
+{
+  return core::detail::gsIsIdInit(t);
+}
+
 //--- end generated classes ---//
 
-    } // namespace detail
+//    /// \brief assignment.
+//    ///
+//    /// An example of an assignment is x := e, where x is a variable and e an
+//    /// expression.
+//    class assignment: public detail::assignment_base
+//    {
+//      public:
+//
+//        /// \brief Default constructor. Note that this does not entail a valid
+//        ///        assignment.
+//        ///
+//        assignment()
+//          : detail::assignment_base(core::detail::constructDataVarIdInit())
+//        {}
+//
+//        /// \overload
+//        assignment(atermpp::aterm_appl term)
+//          : assignment_base(term)
+//        {}
+//
+//        /// \overload
+//        assignment(const variable& lhs, const data_expression& rhs)
+//          : assignment_base(lhs, rhs)
+//        {}
+//
+//        /// \brief Applies the assignment to a variable
+//        /// \param[in] x A variable
+//        /// \return The value <tt>x[lhs() := rhs()]</tt>.
+//        data_expression operator()(const variable& x) const
+//        {
+//          return x == lhs() ? rhs() : data_expression(x);
+//        }
+//
+//        /// \brief Applies the assignment to a term
+//        /// \param[in] x A term
+//        /// \return The value <tt>x[lhs() := rhs()]</tt>.
+//        template < typename Expression >
+//        data_expression operator()(const Expression& x) const
+//        {
+//          return data::replace_free_variables< Expression, assignment const& >(x, *this);
+//        }
+//
+//    }; // class assignment
 
-    // forward declaration for application operation of assignment
-    template <typename Container, typename Substitution >
-    Container replace_free_variables(Container const& container, Substitution replace_function);
-
-    /// \brief assignment.
-    ///
-    /// An example of an assignment is x := e, where x is a variable and e an
-    /// expression.
-    class assignment: public detail::assignment_base
-    {
-      public:
-
-        /// \brief Default constructor. Note that this does not entail a valid
-        ///        assignment.
-        ///
-        assignment()
-          : detail::assignment_base(core::detail::constructDataVarIdInit())
-        {}
-
-        /// \overload
-        assignment(atermpp::aterm_appl term)
-          : assignment_base(term)
-        {}
-
-        /// \overload
-        assignment(const variable& lhs, const data_expression& rhs)
-          : assignment_base(lhs, rhs)
-        {}
-
-        /// \brief Applies the assignment to a variable
-        /// \param[in] x A variable
-        /// \return The value <tt>x[lhs() := rhs()]</tt>.
-        data_expression operator()(const variable& x) const
-        {
-          return x == lhs() ? rhs() : data_expression(x);
-        }
-
-        /// \brief Applies the assignment to a term
-        /// \param[in] x A term
-        /// \return The value <tt>x[lhs() := rhs()]</tt>.
-        template < typename Expression >
-        data_expression operator()(const Expression& x) const
-        {
-          return data::replace_free_variables< Expression, assignment const& >(x, *this);
-        }
-
-    }; // class assignment
-
-    /// \brief identifier_assignment.
-    ///
-    /// An example of an identifier_assignment is x := e, where x is a string and e an
-    /// expression.
-    class identifier_assignment: public detail::identifier_assignment_base
-    {
-      public:
-
-        /// \brief Default constructor. Note that this does not entail a valid
-        ///        identifier_assignment.
-        ///
-        identifier_assignment()
-          : detail::identifier_assignment_base(core::detail::constructIdInit())
-        {}
-
-        /// \overload
-        identifier_assignment(atermpp::aterm_appl term)
-          : detail::identifier_assignment_base(term)
-        {}
-
-        /// \overload
-        identifier_assignment(const identifier& lhs, const data_expression& rhs)
-          : detail::identifier_assignment_base(lhs, rhs)
-        {}
-
-        /// \brief Applies the assignment to a variable
-        /// \param[in] x An identifier string
-        /// \return The value <tt>x[lhs() := rhs()]</tt>.
-        data_expression operator()(const identifier& x) const
-        {
-          return x == lhs() ? rhs() : data_expression(x);
-        }
-
-        /// \brief Applies the assignment to a term
-        /// \param[in] x A term
-        /// \return The value <tt>x[lhs() := rhs()]</tt>.
-        template < typename Expression >
-        data_expression operator()(const Expression& x) const
-        {
-          return data::replace_free_variables< Expression, assignment const& >(x, *this);
-        }
-
-    }; // class assignment
-
-    /// \brief list of assignments
-    typedef atermpp::term_list<assignment> assignment_list;
-    /// \brief vector of assignments
-    typedef atermpp::vector<assignment>    assignment_vector;
+//    /// \brief identifier_assignment.
+//    ///
+//    /// An example of an identifier_assignment is x := e, where x is a string and e an
+//    /// expression.
+//    class identifier_assignment: public detail::identifier_assignment_base
+//    {
+//      public:
+//
+//        /// \brief Default constructor. Note that this does not entail a valid
+//        ///        identifier_assignment.
+//        ///
+//        identifier_assignment()
+//          : detail::identifier_assignment_base(core::detail::constructIdInit())
+//        {}
+//
+//        /// \overload
+//        identifier_assignment(atermpp::aterm_appl term)
+//          : detail::identifier_assignment_base(term)
+//        {}
+//
+//        /// \overload
+//        identifier_assignment(const identifier& lhs, const data_expression& rhs)
+//          : detail::identifier_assignment_base(lhs, rhs)
+//        {}
+//
+//        /// \brief Applies the assignment to a variable
+//        /// \param[in] x An identifier string
+//        /// \return The value <tt>x[lhs() := rhs()]</tt>.
+//        data_expression operator()(const identifier& x) const
+//        {
+//          return x == lhs() ? rhs() : data_expression(x);
+//        }
+//
+//        /// \brief Applies the assignment to a term
+//        /// \param[in] x A term
+//        /// \return The value <tt>x[lhs() := rhs()]</tt>.
+//        template < typename Expression >
+//        data_expression operator()(const Expression& x) const
+//        {
+//          return data::replace_free_variables< Expression, assignment const& >(x, *this);
+//        }
+//
+//    }; // class assignment
+//
+//    /// \brief list of assignments
+//    typedef atermpp::term_list<assignment> assignment_list;
+//    /// \brief vector of assignments
+//    typedef atermpp::vector<assignment>    assignment_vector;
 
     /// \brief Selects the right-hand side of an assignment
     struct left_hand_side : public std::unary_function< const assignment, variable >
@@ -323,26 +418,26 @@ class identifier_assignment_base: public assignment_expression
       return atermpp::convert< assignment_vector >(container);
     }
 
-//--- start generated is-functions ---//
-
-    /// \brief Test for a assignment expression
-    /// \param t A term
-    /// \return True if it is a assignment expression
-    inline
-    bool is_assignment(const assignment_expression& t)
-    {
-      return core::detail::gsIsDataVarIdInit(t);
-    }
-
-    /// \brief Test for a identifier_assignment expression
-    /// \param t A term
-    /// \return True if it is a identifier_assignment expression
-    inline
-    bool is_identifier_assignment(const assignment_expression& t)
-    {
-      return core::detail::gsIsIdInit(t);
-    }
-//--- end generated is-functions ---//
+////--- start generated is-functions ---//
+//
+//    /// \brief Test for a assignment expression
+//    /// \param t A term
+//    /// \return True if it is a assignment expression
+//    inline
+//    bool is_assignment(const assignment_expression& t)
+//    {
+//      return core::detail::gsIsDataVarIdInit(t);
+//    }
+//
+//    /// \brief Test for a identifier_assignment expression
+//    /// \param t A term
+//    /// \return True if it is a identifier_assignment expression
+//    inline
+//    bool is_identifier_assignment(const assignment_expression& t)
+//    {
+//      return core::detail::gsIsIdInit(t);
+//    }
+////--- end generated is-functions ---//
 
   } // namespace data
 

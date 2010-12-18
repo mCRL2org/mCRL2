@@ -31,7 +31,8 @@ namespace mcrl2 {
 
 namespace bes {
 
-/// \brief class boolean_expression
+//--- start generated classes ---//
+/// \brief A boolean expression
 class boolean_expression: public atermpp::aterm_appl
 {
   public:
@@ -39,14 +40,6 @@ class boolean_expression: public atermpp::aterm_appl
     boolean_expression()
       : atermpp::aterm_appl(core::detail::constructBooleanExpression())
     {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    boolean_expression(ATermAppl term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_rule_BooleanExpression(m_term));
-    }
 
     /// \brief Constructor.
     /// \param term A term
@@ -63,7 +56,7 @@ typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 /// \brief vector of boolean_expressions
 typedef atermpp::vector<boolean_expression>    boolean_expression_vector;
 
-//--- start generated classes ---//
+
 /// \brief The value true for boolean expressions
 class true_: public boolean_expression
 {
@@ -82,6 +75,16 @@ class true_: public boolean_expression
     }
 };
 
+/// \brief Test for a true expression
+/// \param t A term
+/// \return True if it is a true expression
+inline
+bool is_true(const boolean_expression& t)
+{
+  return core::detail::gsIsBooleanTrue(t);
+}
+
+
 /// \brief The value false for boolean expressions
 class false_: public boolean_expression
 {
@@ -99,6 +102,16 @@ class false_: public boolean_expression
       assert(core::detail::check_term_BooleanFalse(m_term));
     }
 };
+
+/// \brief Test for a false expression
+/// \param t A term
+/// \return True if it is a false expression
+inline
+bool is_false(const boolean_expression& t)
+{
+  return core::detail::gsIsBooleanFalse(t);
+}
+
 
 /// \brief The not operator for boolean expressions
 class not_: public boolean_expression
@@ -127,6 +140,16 @@ class not_: public boolean_expression
       return atermpp::arg1(*this);
     }
 };
+
+/// \brief Test for a not expression
+/// \param t A term
+/// \return True if it is a not expression
+inline
+bool is_not(const boolean_expression& t)
+{
+  return core::detail::gsIsBooleanNot(t);
+}
+
 
 /// \brief The and operator for boolean expressions
 class and_: public boolean_expression
@@ -161,6 +184,16 @@ class and_: public boolean_expression
     }
 };
 
+/// \brief Test for a and expression
+/// \param t A term
+/// \return True if it is a and expression
+inline
+bool is_and(const boolean_expression& t)
+{
+  return core::detail::gsIsBooleanAnd(t);
+}
+
+
 /// \brief The or operator for boolean expressions
 class or_: public boolean_expression
 {
@@ -193,6 +226,16 @@ class or_: public boolean_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief Test for a or expression
+/// \param t A term
+/// \return True if it is a or expression
+inline
+bool is_or(const boolean_expression& t)
+{
+  return core::detail::gsIsBooleanOr(t);
+}
+
 
 /// \brief The implication operator for boolean expressions
 class imp: public boolean_expression
@@ -227,6 +270,16 @@ class imp: public boolean_expression
     }
 };
 
+/// \brief Test for a imp expression
+/// \param t A term
+/// \return True if it is a imp expression
+inline
+bool is_imp(const boolean_expression& t)
+{
+  return core::detail::gsIsBooleanImp(t);
+}
+
+
 /// \brief A boolean variable
 class boolean_variable: public boolean_expression
 {
@@ -259,73 +312,17 @@ class boolean_variable: public boolean_expression
       return atermpp::arg1(*this);
     }
 };
+
+/// \brief Test for a boolean_variable expression
+/// \param t A term
+/// \return True if it is a boolean_variable expression
+inline
+bool is_boolean_variable(const boolean_expression& t)
+{
+  return core::detail::gsIsBooleanVariable(t);
+}
+
 //--- end generated classes ---//
-
-//--- start generated is-functions ---//
-
-    /// \brief Test for a true expression
-    /// \param t A term
-    /// \return True if it is a true expression
-    inline
-    bool is_true(const boolean_expression& t)
-    {
-      return core::detail::gsIsBooleanTrue(t);
-    }
-
-    /// \brief Test for a false expression
-    /// \param t A term
-    /// \return True if it is a false expression
-    inline
-    bool is_false(const boolean_expression& t)
-    {
-      return core::detail::gsIsBooleanFalse(t);
-    }
-
-    /// \brief Test for a not expression
-    /// \param t A term
-    /// \return True if it is a not expression
-    inline
-    bool is_not(const boolean_expression& t)
-    {
-      return core::detail::gsIsBooleanNot(t);
-    }
-
-    /// \brief Test for a and expression
-    /// \param t A term
-    /// \return True if it is a and expression
-    inline
-    bool is_and(const boolean_expression& t)
-    {
-      return core::detail::gsIsBooleanAnd(t);
-    }
-
-    /// \brief Test for a or expression
-    /// \param t A term
-    /// \return True if it is a or expression
-    inline
-    bool is_or(const boolean_expression& t)
-    {
-      return core::detail::gsIsBooleanOr(t);
-    }
-
-    /// \brief Test for a imp expression
-    /// \param t A term
-    /// \return True if it is a imp expression
-    inline
-    bool is_imp(const boolean_expression& t)
-    {
-      return core::detail::gsIsBooleanImp(t);
-    }
-
-    /// \brief Test for a boolean_variable expression
-    /// \param t A term
-    /// \return True if it is a boolean_variable expression
-    inline
-    bool is_boolean_variable(const boolean_expression& t)
-    {
-      return core::detail::gsIsBooleanVariable(t);
-    }
-//--- end generated is-functions ---//
 
 namespace accessors
 {
