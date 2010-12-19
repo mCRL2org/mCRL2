@@ -69,17 +69,7 @@
 #define TR_H
 
 
-#ifdef __APPLE__
-# include <OpenGL/gl.h>
-# include <OpenGL/glu.h>
-#else
-# if defined(_WIN32_) || defined(_MSC_VER)
-#  include <windows.h>
-# endif
-# include <GL/gl.h>
-# include <GL/glu.h>
-#endif
-
+#include <GL/gl.h>
 
 
 #ifdef __cplusplus
