@@ -382,39 +382,39 @@ namespace core {
     /// \brief The value true
     /// \return The value true
     static inline
-    term_type true_() { return static_cast<term_type>(core::detail::gsMakeBooleanTrue()); }
+    term_type true_() { return atermpp::aterm_appl(core::detail::gsMakeBooleanTrue()); }
 
     /// \brief The value false
     /// \return The value false
     static inline
-    term_type false_() { return static_cast<term_type>(core::detail::gsMakeBooleanFalse()); }
+    term_type false_() { return atermpp::aterm_appl(core::detail::gsMakeBooleanFalse()); }
 
     /// \brief Operator not
     /// \param p A term
     /// \return Operator not applied to p
     static inline
-    term_type not_(term_type p) { return static_cast<term_type>(core::detail::gsMakeBooleanNot(p)); }
+    term_type not_(term_type p) { return atermpp::aterm_appl(core::detail::gsMakeBooleanNot(p)); }
 
     /// \brief Operator and
     /// \param p A term
     /// \param q A term
     /// \return Operator and applied to p and q
     static inline
-    term_type and_(term_type p, term_type q) { return static_cast<term_type>(core::detail::gsMakeBooleanAnd(p, q)); }
+    term_type and_(term_type p, term_type q) { return atermpp::aterm_appl(core::detail::gsMakeBooleanAnd(p, q)); }
 
     /// \brief Operator or
     /// \param p A term
     /// \param q A term
     /// \return Operator or applied to p and q
     static inline
-    term_type or_(term_type p, term_type q) { return static_cast<term_type>(core::detail::gsMakeBooleanOr(p, q)); }
+    term_type or_(term_type p, term_type q) { return atermpp::aterm_appl(core::detail::gsMakeBooleanOr(p, q)); }
 
     /// \brief Implication
     /// \param p A term
     /// \param q A term
     /// \return Implication applied to p and q
     static inline
-    term_type imp(term_type p, term_type q) { return static_cast<term_type>(core::detail::gsMakeBooleanImp(p, q)); }
+    term_type imp(term_type p, term_type q) { return atermpp::aterm_appl(core::detail::gsMakeBooleanImp(p, q)); }
 
     /// \brief Test for value true
     /// \param t A term
