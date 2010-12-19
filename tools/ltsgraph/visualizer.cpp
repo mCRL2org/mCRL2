@@ -195,7 +195,7 @@ void Visualizer::drawState(State* s)
 	  glEnable(GL_LIGHT0);
 	  glEnable(GL_LIGHTING);
 	  glPushName(IDS::STATE);
-	  glPushName(s->getValue());
+	  glPushName( (GLuint) s->getValue());
 	  
 	  glPushMatrix();
 	  glTranslatef(x, y, z);
@@ -236,7 +236,7 @@ void Visualizer::drawState(State* s)
 
 
 	  glPushName(IDS::STATE);
-	  glPushName(s->getValue());
+	  glPushName( (GLuint) s->getValue());
 
 
 	  glBegin(GL_TRIANGLE_FAN);
@@ -411,8 +411,8 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
   if(showHandles)
   {
     glPushName(IDS::TRANSITION);
-    glPushName(from->getValue());
-    glPushName(trid);
+    glPushName( (GLuint) from->getValue());
+    glPushName( (GLuint) trid);
 
 	glColor3ub(255,255,255);
 	if(draw3d)
@@ -577,8 +577,8 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
 
 		  if(selecting) {
 			  glPushName(IDS::LABEL);
-			  glPushName(from->getValue());
-			  glPushName(trid);
+			  glPushName( (GLuint) from->getValue());
+			  glPushName( (GLuint) trid);
 			  fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
 				  8 * pixelSize / 20.0f,
 				  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
@@ -771,8 +771,8 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   if(showHandles)
   {
 	glPushName(IDS::SELF_LOOP);
-    glPushName(s->getValue());
-    glPushName(j);
+    glPushName( (GLuint) s->getValue());
+    glPushName( (GLuint) j);
 
 	glColor3ub(255,255,255);
 	if(draw3d)
@@ -925,8 +925,8 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
 
 		if(selecting) {
 		  glPushName(IDS::SELF_LABEL);
-		  glPushName(s->getValue());
-		  glPushName(j);
+		  glPushName( (GLuint) s->getValue());
+		  glPushName( (GLuint) j);
 
 		  fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
 					  8 * pixelSize / 20.0f,
@@ -994,8 +994,8 @@ void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 		  glPushName(IDS::SELF_LABEL);
 	  else
 		  glPushName(IDS::LABEL);
-      glPushName(from->getValue());
-      glPushName(trid);
+      glPushName( (GLuint) from->getValue());
+      glPushName( (GLuint) trid);
       fr->draw_bounding_box(tr->getLabel(), 0, .025, 0,
 				  8 * pixelSize / 20.0f,
                   mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);

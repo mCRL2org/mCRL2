@@ -105,10 +105,10 @@ void LTSGraph::openFile(std::string const &path)
 
 		graph = imp->importFile(path);
 
-		int is = graph->getInitial();
-		int ns = graph->getNumStates();
-		int nt = graph->getNumTrans();
-		int nl = graph->getNumLabels();
+		size_t is = graph->getInitial();
+		size_t ns = graph->getNumStates();
+		size_t nt = graph->getNumTrans();
+		size_t nl = graph->getNumLabels();
 
 		mainFrame->setLTSInfo(is, ns, nt, nl);
 

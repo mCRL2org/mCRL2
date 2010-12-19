@@ -43,7 +43,7 @@ InfoDialog::InfoDialog(wxWindow* parent) :
   Layout();
 }
 
-void InfoDialog::setLTSInfo(int is, int ns, int nt, int nl)
+void InfoDialog::setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl)
 {
 
   lts_info->SetItem(0, 1, wxString::Format(wxT("%d"), is));

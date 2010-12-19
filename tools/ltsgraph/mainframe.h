@@ -43,7 +43,7 @@ class MainFrame : public wxFrame
 
     GLCanvas* getGLCanvas();
 
-    void setLTSInfo(int is, int ns, int nt, int nl);
+    void setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl);
 
   private:
     LTSGraph *app;

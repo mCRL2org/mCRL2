@@ -336,7 +336,7 @@ void MainFrame::onAlgo(wxCommandEvent& /* event */)
   algoDlg->Show();
 }
 
-void MainFrame::setLTSInfo(int is, int ns, int nt, int nl)
+void MainFrame::setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl)
 {
   infoDlg->setLTSInfo(is, ns, nt, nl);
 

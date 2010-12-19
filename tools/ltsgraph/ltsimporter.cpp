@@ -25,9 +25,9 @@ Graph* LTSImporter::importFile(const std::string &fn)
   // lts_fsm_t fileLTS(fn,lts_none);
   // if(fileLTS.read_from(fn))
   {
-    unsigned int initialState = fileLTS.initial_state();
+    size_t initialState = fileLTS.initial_state();
 
-    std::map<unsigned int, State*> numsToStates;
+    std::map<size_t, State*> numsToStates;
     // bool hasParams = fileLTS.has_process_parameters();
     std::vector<std::string> parameters;
     for(size_t i = 0; i < fileLTS.process_parameters().size(); ++i) 
@@ -80,7 +80,7 @@ Graph* LTSImporter::importFile(const std::string &fn)
 
     for(mcrl2::lts::transition_const_range r = fileLTS.get_transitions(); !r.empty(); r.advance_begin(1))
     { const transition ti=r.front();
-      unsigned int idFrom, idTo;
+      size_t idFrom, idTo;
       State *stFrom, *stTo;
 
       std::string label = mcrl2::lts::detail::pp(fileLTS.action_label(ti.label()));
@@ -105,9 +105,9 @@ Graph* LTSImporter::importFile(const std::string &fn)
       }
     }
 
-    int numStates = fileLTS.num_states();
-    int numLabels = fileLTS.num_action_labels();
-    int numTrans = fileLTS.num_transitions();
+    size_t numStates = fileLTS.num_states();
+    size_t numLabels = fileLTS.num_action_labels();
+    size_t numTrans = fileLTS.num_transitions();
 
     result->setInfo(initialState, numStates, numTrans, numLabels);
   }

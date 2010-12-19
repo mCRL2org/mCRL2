@@ -19,10 +19,10 @@
 class InfoDialog: public wxDialog {
   public:
     InfoDialog(wxWindow* parent);
-    void setLTSInfo(int is, // Initial state
-                    int ns, // Number of states
-                    int nt, // Number of transitions
-                    int nl // Number of labels/actions
+    void setLTSInfo(size_t is, // Initial state
+                    size_t ns, // Number of states
+                    size_t nt, // Number of transitions
+                    size_t nl // Number of labels/actions
                     );
 
   private:
