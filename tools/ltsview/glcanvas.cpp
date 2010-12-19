@@ -22,6 +22,7 @@
 #include "settings.h"
 #include "tr/tr.h"
 #include "visualizer.h"
+#include <GL/glu.h>
 
 using namespace IDs;
 
