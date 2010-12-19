@@ -483,6 +483,7 @@ BOOST_AUTO_TEST_CASE(bag_rewrite_test)
   specification.add_context_sort(bag(nat()));
   specification.add_context_sort(bag(pos()));
 
+  std::cerr << "bag rewrite test\n";
   rewrite_strategy_vector strategies(rewrite_strategies());
   for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
@@ -619,6 +620,7 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
   specification.add_context_sort(set_(bool_()));
   specification.add_context_sort(fset(bool_()));
 
+  std::cerr << "set bool rewrite test\n";
   data_expression e(not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_()))))));
   e = specification.normalise_sorts(e);
   rewrite_strategy_vector strategies(rewrite_strategies());
@@ -853,7 +855,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_expression)
 
   data_specification specification(parse_data_specification(s));
 
-  std::cerr << "lambda_rewrite_test\n";
+  std::cerr << "lambda rewrite test\n";
   rewrite_strategy_vector strategies(rewrite_strategies());
   for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
@@ -873,6 +875,29 @@ BOOST_AUTO_TEST_CASE(test_lambda_expression)
     e=parse_data_expression("remove(1,insert(d1,1,emptyBuf))(1)==insert(d1,1,emptyBuf)(1)", specification);
     data_rewrite_test(R, e, sort_bool::false_());  
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_whether_lists_can_be_put_in_sets)
+{
+  std::string s(
+   "sort T = struct s( List(T) ) | c;\n"
+   "map func: Bool;\n"
+   "eqn func = s( [c] ) in { s( [] ) };\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "list in set teste\n";
+  rewrite_strategy_vector strategies(rewrite_strategies());
+  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("func", specification));
+    data_rewrite_test(R, e, sort_bool::false_());
+  }
+
 }
 
 

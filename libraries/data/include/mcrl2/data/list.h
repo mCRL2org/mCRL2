@@ -835,6 +835,12 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(nil(s), cons_(s, vd, vs)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(cons_(s, vd, vs), nil(s)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(nil(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(cons_(s, vd, vs), nil(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less(vs, vt)), less(vd, ve))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(nil(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(cons_(s, vd, vs), nil(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::or_(sort_bool::and_(equal_to(vd, ve), less_equal(vs, vt)), less(vd, ve))));
         result.push_back(data_equation(atermpp::make_vector(vd), in(s, vd, nil(s)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
         result.push_back(data_equation(variable_list(), count(s, nil(s)), sort_nat::c0()));

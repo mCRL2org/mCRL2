@@ -49,7 +49,7 @@ namespace state_formulas {
     ATermAppl result = core::parse_state_frm(from);
     if (result == NULL)
       throw mcrl2::runtime_error("parse error in parse_state_frm()");
-    state_formula f = result;   
+    state_formula f = static_cast<state_formula>(result);   
     type_check(f, spec, check_monotonicity);
     translate_regular_formula(f);
 

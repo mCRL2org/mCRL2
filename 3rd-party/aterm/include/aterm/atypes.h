@@ -1,11 +1,11 @@
 #ifndef ATYPES_H
 #define ATYPES_H
 
-#ifdef _MSC_VER
+/* #ifdef _MSC_VER
 #include <stdint.h>
 #else
 #include <inttypes.h>
-#endif
+#endif */
 #include "stddef.h"
 #include "abool.h"
 
