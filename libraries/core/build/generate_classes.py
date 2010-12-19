@@ -14,19 +14,20 @@ from mcrl2_utility import *
 # If superclass is defined, it will be the base class of the generated
 # classes. Otherwise atermpp::aterm_appl will be taken as the base class.
 def make_classes(filename, class_text, namespace, add_constructor_overloads = False):
-    classes = parse_classes(class_text, use_base_class_name = True, namespace = namespace)
+    classes = parse_classes(class_text, namespace = namespace)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
     classes = [c for c in classes if c.qualifier() == '']
 
-    class_definitions = [c.class_inline_definition() for c in classes]
- 
     if path(filename).isdir():
-        for i in range(len(class_definitions)):
-            fname = path(filename).normcase() / ('%s.h' % classes[i].name())
-            text = class_definitions[i]
-            insert_text_in_file(fname, text, 'generated class %s' % classes[i].name(), handle_user_sections = True)
+        for c in classes:
+            if 'S' in c.modifiers():
+                continue
+            fname = path(filename).normcase() / ('%s.h' % c.name())
+            text = c.class_inline_definition()
+            insert_text_in_file(fname, text, 'generated class %s' % c.name(), handle_user_sections = True)
     else:
+        class_definitions = [c.class_inline_definition() for c in classes]
         ctext = '\n'.join(class_definitions)
         insert_text_in_file(filename, ctext, 'generated classes', handle_user_sections = True)
 
@@ -81,5 +82,5 @@ if __name__ == "__main__":
     make_classes('../../pbes/include/mcrl2/pbes/pbes_expression.h',          PBES_EXPRESSION_CLASSES      , namespace = 'pbes_system'     )
     make_classes('../../process/include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_CLASSES   , namespace = 'process'         )
     make_classes('../../data/include/mcrl2/data',                            DATA_EXPRESSION_CLASSES      , namespace = 'data'            )
-    # make_classes('../../data/include/mcrl2/data/sort_expression.h', SORT_EXPRESSION_CLASSES, 'sort_expression', add_constructor_overloads = True, generate_is_functions = True)
-    # make_classes('../../data/include/mcrl2/data/structured_sort.h', STRUCTURED_SORT_ELEMENTS, 'atermpp::aterm_appl', add_constructor_overloads = True)
+    make_classes('../../data/include/mcrl2/data',                            SORT_EXPRESSION_CLASSES      , namespace = 'data'            )
+    make_classes('../../data/include/mcrl2/data',                            STRUCTURED_SORT_ELEMENTS     , namespace = 'data'            )

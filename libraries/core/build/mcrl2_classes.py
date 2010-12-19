@@ -5,10 +5,7 @@
 # This file contains tables that are used to generate classes and traversal functions
 # for these classes. A prerequisite is that each class has a corresponding ATerm
 # representation (the first column of each table). The second column contains the
-# constructor of the classes. If the name of the class has a postfix between brackets
-# like variable[_base] then the generated class will be called variable_base, but the
-# traversal will use variable. This is done to enable the user of the class to add
-# additional behavior to the base class.
+# constructor of the classes.
 
 import re
 import string
@@ -37,18 +34,18 @@ fbag_container() : public data::container_type | EIO | SortFBag     | Container 
 '''
 
 STRUCTURED_SORT_ELEMENTS = r'''
-structured_sort_constructor_argument[_base](const core::identifier_string& name, const sort_expression& sort)                                                            : public atermpp::aterm_appl | IC | StructProj | An argument of a constructor of a structured sort
-structured_sort_constructor[_base](const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) : public atermpp::aterm_appl | IC | StructCons | A constructor for a structured sort
+structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)                                                            : public atermpp::aterm_appl | SICU | StructProj | An argument of a constructor of a structured sort
+structured_sort_constructor(const core::identifier_string& name, const structured_sort_constructor_argument_list& arguments, core::identifier_string& recogniser) : public atermpp::aterm_appl | SICU | StructCons | A constructor for a structured sort
 '''
 
 SORT_EXPRESSION_CLASSES = r'''
-sort_expression()                                                                         : public atermpp::aterm_appl   | XIC | SortExpr      | A sort expression
-basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EI  | SortId        | A basic sort
-container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EI  | SortCons      | A container sort
-structured_sort[_base](const structured_sort_constructor_list& constructors)              : public data::sort_expression | EI  | SortStruct    | A structured sort
-function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EI  | SortArrow     | A function sort
-unknown_sort()                                                                            : public data::sort_expression | EI  | SortUnknown   | Unknown sort expression
-multiple_possible_sorts(const sort_expression_list& sorts)                                : public data::sort_expression | EI  | SortsPossible | Multiple possible sorts
+sort_expression()                                                                         : public atermpp::aterm_appl   | SXIOCU | SortExpr      | A sort expression
+basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO     | SortId        | A basic sort
+container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO     | SortCons      | A container sort
+structured_sort(const structured_sort_constructor_list& constructors)              : public data::sort_expression        | SEOU   | SortStruct    | A structured sort
+function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO     | SortArrow     | A function sort
+unknown_sort()                                                                            : public data::sort_expression | EO     | SortUnknown   | Unknown sort expression
+multiple_possible_sorts(const sort_expression_list& sorts)                                : public data::sort_expression | EO     | SortsPossible | Multiple possible sorts
 '''
 
 BINDER_TYPES = r'''
@@ -79,7 +76,7 @@ data_expression()                                                               
 identifier(const core::identifier_string& name)                                           : public data::data_expression | EO  | Id        | An identifier
 variable(const core::identifier_string& name, const sort_expression& sort)                : public data::data_expression | EOC | DataVarId | A data variable
 function_symbol(const core::identifier_string& name, const sort_expression& sort)         : public data::data_expression | EO  | OpId      | A function symbol
-application[_base](const data_expression& head, data_expression_list const& arguments)    : public data::data_expression | EO  | DataAppl  | An application of a data expression to a number of arguments
+application(const data_expression& head, data_expression_list const& arguments)           : public data::data_expression | SEO | DataAppl  | An application of a data expression to a number of arguments
 where_clause(const data_expression& body, const assignment_expression_list& declarations) : public data::data_expression | EO  | Whr       | A where expression
 '''
 
@@ -593,16 +590,13 @@ class ATermConstructor(Constructor):
 # self.constructor: the constructor of the class
 # self.description: a string description of the class
 class Class:
-    def __init__(self, aterm, constructor, description, superclass = None, use_base_class_name = False, namespace = None, modifiers = ''):
+    def __init__(self, aterm, constructor, description, superclass = None, namespace = None, modifiers = ''):
         self.aterm = aterm
         self.description = description
         name = re.sub('\(.*', '', constructor)
         arguments = re.sub('.*\(', '(', constructor)
         self.classname_ = re.sub('\[[^]]*\]', '', name)
-        self.base_classname_ = re.sub('\[|\]', '', name)
         self.constructor = FunctionDeclaration(self.classname_ + arguments, namespace)
-        self.base_class_constructor = FunctionDeclaration(self.base_classname_ + arguments, namespace)
-        self.use_base_class_name_ = use_base_class_name
         self.superclass_ = remove_namespace(superclass)
         self.superclass_namespace_ = extract_namespace(superclass)
         self.namespace_ = namespace
@@ -633,10 +627,7 @@ class Class:
     # Returns the name of the class
     #
     def classname(self, include_namespace = False):
-        if self.use_base_class_name_:
-            result = self.base_classname_
-        else:
-            result = self.classname_
+        result = self.classname_
         if include_namespace:
             if result.find('::') == -1:
                 result = '%s::%s' % (self.namespace(), result)
@@ -644,11 +635,8 @@ class Class:
 
     # Returns the name of the class without namespace qualification
     #
-    def name(self, use_base_class_name = False):
-        if use_base_class_name:
-            return self.base_class_constructor.name()
-        else:
-            return self.constructor.name()
+    def name(self):
+        return self.constructor.name()
 
     # Returns the superclass of the class, or None if no superclass exists
     #
@@ -779,8 +767,7 @@ class Class:
         return text
 
     # Returns typedefs for term lists and term vectors.
-    def container_typedefs(self, use_base_class_name = False):
-        self.use_base_class_name_ = use_base_class_name
+    def container_typedefs(self):
         text = r'''/// \\brief list of <CLASSNAME>s
 typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
 
@@ -788,8 +775,6 @@ typedef atermpp::term_list<<CLASSNAME>> <CLASSNAME>_list;
 typedef atermpp::vector<<CLASSNAME>>    <CLASSNAME>_vector;
 '''
         text = re.sub('<CLASSNAME>', self.classname(), text)
-        if self.classname_ != self.base_classname_:
-            text = 'class %s;\n\n' % self.classname() + text
         return text
 
     # Returns an is_<classname> function
@@ -904,10 +889,7 @@ def remove_namespace(text):
 #
 # Each line is split w.r.t. the '|' character; the words of the line
 # are put in a tuple, and the sequence of tuples is returned
-#
-# If the name of a function contains a postfix between brackets (like variable[_base]),
-# then the parameter use_base_class determines whether it is used or not.
-def parse_classes(text, use_base_class_name = False, namespace = None):
+def parse_classes(text, namespace = None):
     result = []
     lines = text.rsplit('\n')
     superclass = None
@@ -925,7 +907,7 @@ def parse_classes(text, use_base_class_name = False, namespace = None):
             superclass = m.group(1)
             constructor = re.sub(r'\:\s*public\s*.*', '', constructor).strip()
 
-        result.append(Class(aterm, constructor, description, superclass, use_base_class_name, namespace, modifiers))
+        result.append(Class(aterm, constructor, description, superclass, namespace, modifiers))
     return result
 
 def parse_class_list(class_list):

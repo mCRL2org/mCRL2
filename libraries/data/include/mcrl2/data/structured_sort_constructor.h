@@ -30,6 +30,8 @@ namespace mcrl2 {
     namespace detail {
 
 //--- start generated class structured_sort_constructor ---//
+//--- end generated class structured_sort_constructor ---//
+
 /// \brief A constructor for a structured sort
 class structured_sort_constructor_base: public atermpp::aterm_appl
 {
@@ -73,7 +75,6 @@ class structured_sort_constructor_base: public atermpp::aterm_appl
       return atermpp::arg3(*this);
     }
 };
-//--- end generated class structured_sort_constructor ---//
 
     } // namespace detail
 
