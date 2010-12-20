@@ -81,16 +81,16 @@ void operator()(const action_formulas::action_formula& x)
 {
   static_cast<Derived&>(*this).enter(x);
   if (data::is_data_expression(x)) { static_cast<Derived&>(*this)(data::data_expression(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_true(x)) { static_cast<Derived&>(*this)(action_formulas::true_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_false(x)) { static_cast<Derived&>(*this)(action_formulas::false_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_not(x)) { static_cast<Derived&>(*this)(action_formulas::not_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_and(x)) { static_cast<Derived&>(*this)(action_formulas::and_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_or(x)) { static_cast<Derived&>(*this)(action_formulas::or_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_imp(x)) { static_cast<Derived&>(*this)(action_formulas::imp(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_forall(x)) { static_cast<Derived&>(*this)(action_formulas::forall(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_exists(x)) { static_cast<Derived&>(*this)(action_formulas::exists(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_at(x)) { static_cast<Derived&>(*this)(action_formulas::at(atermpp::aterm_appl(x))); }
   else if (lps::is_multi_action(x)) { static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_appl(x))); }
-  else if (is_true(x)) { static_cast<Derived&>(*this)(action_formulas::true_(atermpp::aterm_appl(x))); }
-  else if (is_false(x)) { static_cast<Derived&>(*this)(action_formulas::false_(atermpp::aterm_appl(x))); }
-  else if (is_not(x)) { static_cast<Derived&>(*this)(action_formulas::not_(atermpp::aterm_appl(x))); }
-  else if (is_and(x)) { static_cast<Derived&>(*this)(action_formulas::and_(atermpp::aterm_appl(x))); }
-  else if (is_or(x)) { static_cast<Derived&>(*this)(action_formulas::or_(atermpp::aterm_appl(x))); }
-  else if (is_imp(x)) { static_cast<Derived&>(*this)(action_formulas::imp(atermpp::aterm_appl(x))); }
-  else if (is_forall(x)) { static_cast<Derived&>(*this)(action_formulas::forall(atermpp::aterm_appl(x))); }
-  else if (is_exists(x)) { static_cast<Derived&>(*this)(action_formulas::exists(atermpp::aterm_appl(x))); }
-  else if (is_at(x)) { static_cast<Derived&>(*this)(action_formulas::at(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

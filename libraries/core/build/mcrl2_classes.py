@@ -42,7 +42,7 @@ SORT_EXPRESSION_CLASSES = r'''
 sort_expression()                                                                         : public atermpp::aterm_appl   | SXIOCU | SortExpr      | A sort expression
 basic_sort(const core::identifier_string& name)                                           : public data::sort_expression | EO     | SortId        | A basic sort
 container_sort(const container_type& container_name, const sort_expression& element_sort) : public data::sort_expression | EO     | SortCons      | A container sort
-structured_sort(const structured_sort_constructor_list& constructors)              : public data::sort_expression        | SEOU   | SortStruct    | A structured sort
+structured_sort(const structured_sort_constructor_list& constructors)                     : public data::sort_expression | SEOU   | SortStruct    | A structured sort
 function_sort(const sort_expression_list& domain, const sort_expression& codomain)        : public data::sort_expression | EO     | SortArrow     | A function sort
 unknown_sort()                                                                            : public data::sort_expression | EO     | SortUnknown   | Unknown sort expression
 multiple_possible_sorts(const sort_expression_list& sorts)                                : public data::sort_expression | EO     | SortsPossible | Multiple possible sorts
@@ -64,29 +64,21 @@ assignment(const variable& lhs, const data_expression& rhs)              : publi
 identifier_assignment(const identifier& lhs, const data_expression& rhs) : public data::assignment_expression | EIOU  | IdInit        | Assignment of a data expression to a string
 '''
 
-# N.B. The class abstraction is a special case. We want to have user code in terms of classes
-# 'lambda', 'exists' and 'forall', but this does not match very well with the internal ATerm
-# representation.
-ABSTRACTION_CLASS = r'''
-abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO | Binder | An abstraction expression.
+DATA_EXPRESSION_CLASSES = r'''
+data_expression()                                                                                             : public atermpp::aterm_appl   | SXC | DataExpr  | A data expression
+identifier(const core::identifier_string& name)                                                               : public data::data_expression | EO  | Id        | An identifier
+variable(const core::identifier_string& name, const sort_expression& sort)                                    : public data::data_expression | EOC | DataVarId | A data variable
+function_symbol(const core::identifier_string& name, const sort_expression& sort)                             : public data::data_expression | EO  | OpId      | A function symbol
+application(const data_expression& head, data_expression_list const& arguments)                               : public data::data_expression | SEO | DataAppl  | An application of a data expression to a number of arguments
+where_clause(const data_expression& body, const assignment_expression_list& declarations)                     : public data::data_expression | EO  | Whr       | A where expression
+abstraction(const binder_type& binding_operator, const variable_list& variables, const data_expression& body) : public data::data_expression | EO  | Binder    | An abstraction expression.
 '''
 
-DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION = r'''
-data_expression()                                                                         : public atermpp::aterm_appl   | SC  | DataExpr  | A data expression
-identifier(const core::identifier_string& name)                                           : public data::data_expression | EO  | Id        | An identifier
-variable(const core::identifier_string& name, const sort_expression& sort)                : public data::data_expression | EOC | DataVarId | A data variable
-function_symbol(const core::identifier_string& name, const sort_expression& sort)         : public data::data_expression | EO  | OpId      | A function symbol
-application(const data_expression& head, data_expression_list const& arguments)           : public data::data_expression | SEO | DataAppl  | An application of a data expression to a number of arguments
-where_clause(const data_expression& body, const assignment_expression_list& declarations) : public data::data_expression | EO  | Whr       | A where expression
-'''
-
-DATA_EXPRESSION_CLASSES = DATA_EXPRESSION_CLASSES_WITHOUT_ABSTRACTION + ABSTRACTION_CLASS
-
-# N.B. This is used only for generation of traversal code.
-ABSTRACTION_EXPRESSIONS = r'''
-forall(const variable_list& variables, const data_expression& body) : public data::data_expression | E | None | Universal quantification
-exists(const variable_list& variables, const data_expression& body) : public data::data_expression | E | None | Existential quantification
-lambda(const variable_list& variables, const data_expression& body) : public data::data_expression | E | None | Lambda abstraction
+ABSTRACTION_EXPRESSION_CLASSES = r'''
+abstraction()                                                       : public data::data_expression | XE | None | Abstraction
+forall(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Universal quantification
+exists(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Existential quantification
+lambda(const variable_list& variables, const data_expression& body) : public data::abstraction     | E  | None | Lambda abstraction
 '''
 
 DATA_CLASSES = r'''
@@ -795,6 +787,15 @@ bool is_%s(const %s& t)
         text = text % (name, name, name, self.superclass(), 'core', aterm)
         return text
 
+    def is_function_name(self, include_namespace = True):
+        name = self.name()
+        if name[-1] == '_':
+            name = name[:-1]
+        result = 'is_' + name
+        if include_namespace:
+            result = self.namespace() + '::' + result
+        return result
+
     # Returns the class definition
     def class_inline_definition(self):
         if 'S' in self.modifiers():
@@ -860,6 +861,45 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = re.sub('check_term', 'check_rule', text)
         return text + '\n'
 
+    def traverse_function(self, all_classes):
+        text = r'''void operator()(const QUALIFIED_NODE& x)
+{
+  static_cast<Derived&>(*this).enter(x);VISIT_FUNCTIONS
+  static_cast<Derived&>(*this).leave(x);
+}
+'''
+        if 'X' in self.modifiers():
+            qualified_node = self.classname(include_namespace = True)
+            text = re.sub('QUALIFIED_NODE', qualified_node, text)
+            classes = [all_classes[name] for name in self.expression_classes()]
+            classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
+            visit_functions = []
+            for c in classes:
+                classname = c.classname(True)
+                is_function = c.is_function_name(True)
+                namespace = c.namespace()
+                visit_functions.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, classname))
+            vtext = '\n  ' + '\n  else '.join(visit_functions)
+            text = re.sub('VISIT_FUNCTIONS', vtext, text)
+            return text
+        else:
+            f = self.constructor
+            visit_functions = []       
+            for p in f.parameters():
+                #----------------------------------------------------------------------------------------#
+                # N.B. The data traverser skips data_specification, so it needs to be done here too!
+                # TODO: investigate why it is skipped
+                if p.type().find('data_specification') != -1:
+                    continue
+                visit_functions.append('\n  static_cast<Derived&>(*this)(x.%s());' % p.name())
+            vtext = ''.join(visit_functions)
+            qualified_node = self.classname(include_namespace = True)
+            text = re.sub('QUALIFIED_NODE', qualified_node, text)
+            text = re.sub('VISIT_FUNCTIONS', vtext, text)
+            if f.is_template():
+                text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
+            return text           
+
 def extract_namespace(text):
     if text == None:
         return None
@@ -912,9 +952,12 @@ def parse_classes(text, namespace = None):
 
 def parse_class_list(class_list):
     result = {}
+    index = 0 # give each class an index, used for sorting
     for (class_text, namespace) in class_list:
         classes = parse_classes(class_text, namespace = namespace)
         for c in classes:
+            c.index = index
+            index = index + 1
             classname = c.classname(include_namespace = True)
             result[classname] = c
 
@@ -927,6 +970,8 @@ def parse_class_list(class_list):
         if 'X' in c.modifiers() and classname in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES:
             for name in ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES[classname]:
                 result[classname].expression_classes().append(name)
+        if 'X' in c.modifiers():
+            c.expression_classes().sort(cmp = lambda x, y: cmp(result[x].index, result[y].index))
     return result
 
 def parse_classnames(text, namespace):
@@ -942,5 +987,8 @@ def parse_classnames(text, namespace):
         constructor, modifiers, aterm, description = words
         classname = re.sub(r'\(.*', '', constructor)
         classname = '%s::%s' % (namespace, classname)
-        result.append(classname)
+        
+        # duplicates are not allowed
+        if not classname in result:
+            result.append(classname)
     return result

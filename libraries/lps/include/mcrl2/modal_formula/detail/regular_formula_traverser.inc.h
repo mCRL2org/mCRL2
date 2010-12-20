@@ -49,11 +49,11 @@ void operator()(const regular_formulas::trans_or_nil& x)
 void operator()(const regular_formulas::regular_formula& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (is_nil(x)) { static_cast<Derived&>(*this)(regular_formulas::nil(atermpp::aterm_appl(x))); }
-  else if (is_seq(x)) { static_cast<Derived&>(*this)(regular_formulas::seq(atermpp::aterm_appl(x))); }
-  else if (is_alt(x)) { static_cast<Derived&>(*this)(regular_formulas::alt(atermpp::aterm_appl(x))); }
-  else if (is_trans(x)) { static_cast<Derived&>(*this)(regular_formulas::trans(atermpp::aterm_appl(x))); }
-  else if (is_trans_or_nil(x)) { static_cast<Derived&>(*this)(regular_formulas::trans_or_nil(atermpp::aterm_appl(x))); }
+  if (regular_formulas::is_nil(x)) { static_cast<Derived&>(*this)(regular_formulas::nil(atermpp::aterm_appl(x))); }
+  else if (regular_formulas::is_seq(x)) { static_cast<Derived&>(*this)(regular_formulas::seq(atermpp::aterm_appl(x))); }
+  else if (regular_formulas::is_alt(x)) { static_cast<Derived&>(*this)(regular_formulas::alt(atermpp::aterm_appl(x))); }
+  else if (regular_formulas::is_trans(x)) { static_cast<Derived&>(*this)(regular_formulas::trans(atermpp::aterm_appl(x))); }
+  else if (regular_formulas::is_trans_or_nil(x)) { static_cast<Derived&>(*this)(regular_formulas::trans_or_nil(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

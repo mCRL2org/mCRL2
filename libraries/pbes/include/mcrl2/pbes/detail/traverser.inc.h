@@ -115,15 +115,15 @@ void operator()(const pbes_system::pbes_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
   if (data::is_data_expression(x)) { static_cast<Derived&>(*this)(data::data_expression(atermpp::aterm_appl(x))); }
-  else if (is_propositional_variable_instantiation(x)) { static_cast<Derived&>(*this)(pbes_system::propositional_variable_instantiation(atermpp::aterm_appl(x))); }
-  else if (is_true(x)) { static_cast<Derived&>(*this)(pbes_system::true_(atermpp::aterm_appl(x))); }
-  else if (is_false(x)) { static_cast<Derived&>(*this)(pbes_system::false_(atermpp::aterm_appl(x))); }
-  else if (is_not(x)) { static_cast<Derived&>(*this)(pbes_system::not_(atermpp::aterm_appl(x))); }
-  else if (is_and(x)) { static_cast<Derived&>(*this)(pbes_system::and_(atermpp::aterm_appl(x))); }
-  else if (is_or(x)) { static_cast<Derived&>(*this)(pbes_system::or_(atermpp::aterm_appl(x))); }
-  else if (is_imp(x)) { static_cast<Derived&>(*this)(pbes_system::imp(atermpp::aterm_appl(x))); }
-  else if (is_forall(x)) { static_cast<Derived&>(*this)(pbes_system::forall(atermpp::aterm_appl(x))); }
-  else if (is_exists(x)) { static_cast<Derived&>(*this)(pbes_system::exists(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_propositional_variable_instantiation(x)) { static_cast<Derived&>(*this)(pbes_system::propositional_variable_instantiation(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_true(x)) { static_cast<Derived&>(*this)(pbes_system::true_(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_false(x)) { static_cast<Derived&>(*this)(pbes_system::false_(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_not(x)) { static_cast<Derived&>(*this)(pbes_system::not_(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_and(x)) { static_cast<Derived&>(*this)(pbes_system::and_(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_or(x)) { static_cast<Derived&>(*this)(pbes_system::or_(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_imp(x)) { static_cast<Derived&>(*this)(pbes_system::imp(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_forall(x)) { static_cast<Derived&>(*this)(pbes_system::forall(atermpp::aterm_appl(x))); }
+  else if (pbes_system::is_exists(x)) { static_cast<Derived&>(*this)(pbes_system::exists(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//
