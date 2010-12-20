@@ -27,6 +27,7 @@
 #include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitution.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/detail/algorithm.h"
@@ -260,8 +261,8 @@ public:
       // collect the variables appearing in p and q and put store them in an identifier generator
       data::set_identifier_generator generator;
       std::set<data::variable> pqvars;
-      lps::traverse_variables(p, std::inserter(pqvars, pqvars.end()));
-      lps::traverse_variables(q, std::inserter(pqvars, pqvars.end()));
+      lps::find_variables(p, std::inserter(pqvars, pqvars.end()));
+      lps::find_variables(q, std::inserter(pqvars, pqvars.end()));
       for (std::set<data::variable>::iterator i = pqvars.begin(); i != pqvars.end(); ++i)
       {
         generator.add_identifier(i->name());

@@ -18,7 +18,7 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"

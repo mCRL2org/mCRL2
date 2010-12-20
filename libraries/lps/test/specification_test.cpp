@@ -64,11 +64,11 @@ const std::string ABP_SPEC=
   "  );                                                                       \n"
   ;
 
-void test_traverse_sort_expressions()
+void test_find_sort_expressions()
 {
   specification spec = linearise(ABP_SPEC);
   std::set<sort_expression> s;
-  traverse_sort_expressions(spec, std::inserter(s, s.end()));
+  lps::find_sort_expressions(spec, std::inserter(s, s.end()));
   std::cout << core::detail::print_pp_set(s) << std::endl;
   // BOOST_CHECK(false);
 }
@@ -97,7 +97,7 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_traverse_sort_expressions();
+  test_find_sort_expressions();
   core::garbage_collect();
 
   test_system_defined_sorts();

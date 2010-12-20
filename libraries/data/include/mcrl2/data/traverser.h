@@ -146,22 +146,6 @@ namespace data {
       { }
   };
 
-//  template <typename Derived, typename AdaptablePredicate>
-//  class selective_binding_aware_traverser: public data::selective_traverser<Derived, AdaptablePredicate, data::binding_aware_traverser>
-//  {
-//    public:
-//      typedef data::selective_traverser<Derived, AdaptablePredicate, data::binding_aware_traverser> super;
-//      using super::enter;
-//      using super::leave;
-//      using super::operator();
-//
-//      selective_binding_aware_traverser()
-//      { }
-//
-//      selective_binding_aware_traverser(AdaptablePredicate predicate): super(predicate)
-//      { }
-//  };
-
 } // namespace data
 
 } // namespace mcrl2

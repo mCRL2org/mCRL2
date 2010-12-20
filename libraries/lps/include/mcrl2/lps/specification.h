@@ -40,8 +40,8 @@ namespace lps {
 template <typename Object, typename SetContainer>
 void remove_parameters(Object& o, const SetContainer& to_be_removed);
 
-template <typename Object, typename OutIter>
-void traverse_sort_expressions(const Object& o, OutIter dest);
+template <typename Container, typename OutputIterator>
+void find_sort_expressions(Container const& container, OutputIterator o);
 
 template <typename Object>
 bool is_well_typed(const Object& o);
@@ -281,8 +281,9 @@ class specification
 /// \param l A linear process specification
 inline
 void complete_data_specification(lps::specification& spec)
-{ std::set<data::sort_expression> s;
-  lps::traverse_sort_expressions(spec, std::inserter(s, s.end()));
+{
+  std::set<data::sort_expression> s;
+  lps::find_sort_expressions(spec, std::inserter(s, s.end()));
   spec.data().add_context_sorts(s);
 }
 
@@ -331,10 +332,6 @@ bool operator!=(const specification& spec1, const specification& spec2)
 
 #ifndef MCRL2_LPS_SUBSTITUTE_H
 #include "mcrl2/lps/substitute.h"
-#endif
-
-#ifndef MCRL2_LPS_TRAVERSE_H
-#include "mcrl2/lps/traverse.h"
 #endif
 
 #ifndef MCRL2_LPS_WELL_TYPED_H

@@ -18,6 +18,7 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/core/detail/print_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -91,6 +92,9 @@ void test_free_variables()
     "init X(true);\n"
   );
   free_variables = find_free_variables(specification.process());
+  std::cerr << "--- lps ---\n" << pp(specification) << std::endl;
+  std::cerr << core::detail::print_pp_set(free_variables, "free variables") << std::endl;
+  
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
@@ -106,8 +110,7 @@ void test_search()
     "init X;\n"
   ));
   data::variable d("x", data::sort_nat::nat());
-  lps::summand_list container = spec.process().summands();
-  lps::search_free_variable(container, d);
+  lps::search_free_variable(spec.process().action_summands(), d);
 }
 
 int test_main(int argc, char* argv[])

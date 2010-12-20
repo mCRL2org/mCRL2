@@ -13,10 +13,11 @@
 #define MCRL2_LPS_FIND_H
 
 #include "mcrl2/data/variable.h"
+#include "mcrl2/exception.h"
+
 #include "mcrl2/data/find.h"
-#include "mcrl2/lps/detail/traverser.h"
-#include "mcrl2/lps/detail/sort_traverser.h"
-#include "mcrl2/lps/detail/binding_aware_traverser.h"
+#include "mcrl2/lps/traverser.h"
+#include "mcrl2/core/detail/print_utility.h"
 
 namespace mcrl2 {
 
@@ -30,7 +31,7 @@ namespace lps {
   template <typename Container, typename OutputIterator>
   void find_variables(Container const& container, OutputIterator o)
   {
-    data::detail::make_find_helper<data::variable, lps::detail::traverser, OutputIterator>(o)(container);
+    data::detail::make_find_helper<data::variable, lps::traverser, OutputIterator>(o)(container);
   }
 
   /// \brief Returns all data variables that occur in a range of expressions
@@ -53,7 +54,7 @@ namespace lps {
   void find_free_variables(Container const& container, OutputIterator o,
   		           typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
   {
-    data::detail::make_free_variable_find_helper<lps::detail::binding_aware_traverser>(o)(container);
+    data::detail::make_free_variable_find_helper<lps::binding_aware_traverser>(o)(container);
   }
 
   /// \brief Returns all data variables that occur in a range of expressions
@@ -66,7 +67,7 @@ namespace lps {
   template <typename Container, typename OutputIterator, typename Sequence>
   void find_free_variables(Container const& container, OutputIterator o, Sequence const& bound)
   {
-   // data::detail::make_free_variable_find_helper<lps::detail::binding_aware_traverser>(bound, o)(container);
+    data::detail::make_free_variable_find_helper<lps::binding_aware_traverser>(bound, o)(container);
   }
 
   /// \brief Returns all data variables that occur in a range of expressions
@@ -101,7 +102,7 @@ namespace lps {
   template <typename Container, typename OutputIterator>
   void find_sort_expressions(Container const& container, OutputIterator o)
   {
-    data::detail::make_find_helper<data::sort_expression, lps::detail::sort_traverser>(o)(container);
+    data::detail::make_find_helper<data::sort_expression, lps::traverser>(o)(container);
   }
 
   /// \brief Returns all sort expressions that occur in the term t
@@ -115,46 +116,42 @@ namespace lps {
     return result;
   }
 
-//  /// \brief Returns true if the term has a given variable as subterm.
-//  /// \param[in] container an expression or container with expressions
-//  /// \param[in] v an expression or container with expressions
-//  /// \param d A variable
-//  /// \return True if the term has a given variable as subterm.
-//  template <typename Container>
-//  bool search_variable(Container const& container, const data::variable& v)
-//  {
-//    return data::detail::make_search_helper<data::variable, lps::detail::selective_data_traverser>(data::detail::compare_variable(v)).apply(container);
-//  }
+  inline
+  std::string pp(const action_summand_vector& v)
+  {
+    std::ostringstream out;
+    for (action_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+      out << core::pp(action_summand_to_aterm(*i)) << std::endl;
+    }
+    return out.str();
+  }
+
+  inline
+  std::string pp(const deadlock_summand_vector& v)
+  {
+    std::ostringstream out;
+    for (deadlock_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+      out << core::pp(deadlock_summand_to_aterm(*i)) << std::endl;
+    }
+    return out.str();
+  }
 
   /// \brief Returns true if the term has a given variable as subterm.
   /// \param[in] container an expression or container with expressions
   /// \param d A data variable
   /// \return True if the term has a given variable as subterm.
   template <typename Container>
-  bool search_free_variable(Container container, const data::variable& d)
+  bool search_free_variable(const Container& container, const data::variable& d)
   {
-    return data::detail::make_free_variable_search_helper<lps::detail::selective_binding_aware_traverser>(data::detail::compare_variable(d)).apply(container);
+    // TODO: replace this by a more efficient implementation
+std::cerr << "<search_free_variable>" << std::endl;
+std::cerr << pp(container) << std::endl;
+    std::set<data::variable> variables = lps::find_free_variables(container);
+std::cerr << core::detail::print_pp_set(variables) << std::endl;
+    return variables.find(d) != variables.end();
   }
-  
-//  /// \brief Returns true if the term has a given sort expression as subterm.
-//  /// \param[in] container an expression or container of expressions
-//  /// \param[in] s A sort expression
-//  /// \return True if the term has a given sort expression as subterm.
-//  template <typename Container>
-//  bool search_sort_expression(Container const& container, const data::sort_expression& s)
-//  {
-//    return data::detail::make_search_helper<data::sort_expression, lps::detail::selective_sort_traverser>(data::detail::compare_sort(s)).apply(container);
-//  } 
-//
-//  /// \brief Returns true if the term has a given data expression as subterm.
-//  /// \param[in] container an expression or container of expressions
-//  /// \param[in] s A data expression
-//  /// \return True if the term has a given data expression as subterm.
-//  template <typename Container>
-//  bool search_data_expression(Container const& container, const data::data_expression& s)
-//  {
-//    return data::detail::make_search_helper<data::data_expression, lps::detail::selective_data_traverser>(data::detail::compare_term<data::data_expression>(s)).apply(container);
-//  }  
 
 } // namespace lps
 

@@ -35,19 +35,19 @@ namespace data {
 /// \param[in,out] o an output iterator to which all data variables occurring in t
 ///             are added.
 /// \return All data variables that occur in the term t
-template < typename Container, typename OutputIterator >
+template <typename Container, typename OutputIterator>
 void find_variables(Container const& container, OutputIterator o)
 {
-  detail::make_find_helper< variable, detail::traverser >(o)(container);
+  detail::make_find_helper<variable, detail::traverser>(o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
 /// \param[in] container a container with expressions
 /// \return All data variables that occur in the term t
-template < typename Container >
-std::set< variable > find_variables(Container const& container)
+template <typename Container>
+std::set<variable> find_variables(Container const& container)
 {
-  std::set< variable > result;
+  std::set<variable> result;
   find_variables(container, std::inserter(result, result.end()));
   return result;
 }
@@ -57,10 +57,10 @@ std::set< variable > find_variables(Container const& container)
 /// \param[in] v an expression or container with expressions
 /// \param d A variable
 /// \return True if the term has a given variable as subterm.
-template < typename Container >
+template <typename Container>
 bool search_variable(Container const& container, const variable& v)
 {
-  return detail::make_search_helper< variable, detail::selective_data_traverser >(detail::compare_variable(v)).apply(container);
+  return detail::make_search_helper<variable, detail::selective_data_traverser>(detail::compare_variable(v)).apply(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -68,11 +68,11 @@ bool search_variable(Container const& container, const variable& v)
 /// \param[in,out] o an output iterator to which all data variables occurring in t
 ///             are added.
 /// \return All data variables that occur in the term t
-template < typename Container, typename OutputIterator >
+template <typename Container, typename OutputIterator>
 void find_free_variables(Container const& container, OutputIterator o,
-		           typename atermpp::detail::disable_if_container< OutputIterator >::type* = 0)
+		           typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
 {
-  detail::make_free_variable_find_helper< detail::binding_aware_traverser >(o)(container);
+  detail::make_free_variable_find_helper<detail::binding_aware_traverser>(o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -82,19 +82,19 @@ void find_free_variables(Container const& container, OutputIterator o,
 /// \param[in] bound a set of variables that should be considered as bound
 /// \return All data variables that occur in the term t
 /// TODO prevent copy of Sequence
-template < typename Container, typename OutputIterator, typename Sequence >
+template <typename Container, typename OutputIterator, typename Sequence>
 void find_free_variables(Container const& container, OutputIterator o, Sequence const& bound)
 {
-  detail::make_free_variable_find_helper< detail::binding_aware_traverser >(bound, o)(container);
+  detail::make_free_variable_find_helper<detail::binding_aware_traverser>(bound, o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
 /// \param[in] container a container with expressions
 /// \return All data variables that occur in the term t
-template < typename Container >
-std::set< variable > find_free_variables(Container const& container)
+template <typename Container>
+std::set<variable> find_free_variables(Container const& container)
 {
-  std::set< variable > result;
+  std::set<variable> result;
   find_free_variables(container, std::inserter(result, result.end()));
   return result;
 }
@@ -104,11 +104,11 @@ std::set< variable > find_free_variables(Container const& container)
 /// \param[in] bound a set of variables that should be considered as bound
 /// \return All data variables that occur in the term t
 /// TODO prevent copy of Sequence
-template < typename Container, typename Sequence >
-std::set< variable > find_free_variables(Container const& container, Sequence const& bound,
-                                        typename atermpp::detail::enable_if_container< Sequence, variable >::type* = 0)
+template <typename Container, typename Sequence>
+std::set<variable> find_free_variables(Container const& container, Sequence const& bound,
+                                        typename atermpp::detail::enable_if_container<Sequence, variable>::type* = 0)
 {
-  std::set< variable > result;
+  std::set<variable> result;
   find_free_variables(container, std::inserter(result, result.end()), bound);
   return result;
 }
@@ -117,10 +117,10 @@ std::set< variable > find_free_variables(Container const& container, Sequence co
 /// \param[in] container an expression or container with expressions
 /// \param d A data variable
 /// \return True if the term has a given variable as subterm.
-template < typename Container >
+template <typename Container>
 bool search_free_variable(Container container, const variable& d)
 {
-  return detail::make_free_variable_search_helper< detail::selective_binding_aware_traverser >(detail::compare_variable(d)).apply(container);
+  return detail::make_free_variable_search_helper<detail::selective_binding_aware_traverser>(detail::compare_variable(d)).apply(container);
 }
 
 
@@ -128,26 +128,26 @@ bool search_free_variable(Container container, const variable& d)
 /// \param[in] container an expression or container of expressions
 /// \param[in] s A sort expression
 /// \return True if the term has a given sort expression as subterm.
-template < typename Container >
+template <typename Container>
 bool search_sort_expression(Container const& container, const sort_expression& s)
 {
-  return detail::make_search_helper< sort_expression, detail::selective_sort_traverser >(detail::compare_sort(s)).apply(container);
+  return detail::make_search_helper<sort_expression, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
 /// \param[in] container an expression or container of expressions
 /// \param[in] o an output iterator
 /// \return All sort expressions that occur in the term t
-template < typename Container, typename OutputIterator >
+template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o)
 {
-  detail::make_find_helper< sort_expression, detail::sort_traverser >(o)(container);
+  detail::make_find_helper<sort_expression, detail::sort_traverser>(o)(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
 /// \param[in] container an expression or container of expressions
 /// \return All sort expressions that occur in the term t
-template < typename Container >
+template <typename Container>
 std::set<sort_expression> find_sort_expressions(Container const& container)
 {
   std::set<sort_expression> result;
@@ -159,27 +159,27 @@ std::set<sort_expression> find_sort_expressions(Container const& container)
 /// \param[in] container an expression or container of expressions
 /// \param[in] s A sort identifier
 /// \return True if the term has a given sort identifier as subterm.
-template < typename Container >
+template <typename Container>
 bool search_basic_sort(Container const& container, const basic_sort& s)
 {
-  return detail::make_search_helper< basic_sort, detail::selective_sort_traverser >(detail::compare_sort(s)).apply(container);
+  return detail::make_search_helper<basic_sort, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
 }
 
 /// \brief Returns all sort identifiers that occur in the term t
 /// \param[in] container an expression or container of expressions
 /// \param[out] o an output iterator
 /// \return All sort identifiers that occur in the term t
-template < typename Container, typename OutputIterator >
+template <typename Container, typename OutputIterator>
 void find_basic_sorts(Container const& container, OutputIterator o)
 {
-  return detail::make_find_helper< basic_sort, detail::sort_traverser >(o)(container);
+  return detail::make_find_helper<basic_sort, detail::sort_traverser>(o)(container);
 }
 
 /// \brief Returns all basic sorts that occur in the term t
 /// \param[in] container an expression or container of expressions
 /// \param[in] o an output iterator
 /// \return All sort expressions that occur in the term t
-template < typename Container >
+template <typename Container>
 std::set<basic_sort> find_basic_sorts(Container const& container)
 {
   std::set<basic_sort> result;
@@ -191,30 +191,30 @@ std::set<basic_sort> find_basic_sorts(Container const& container)
 /// \param[in] container an expression or container of expressions
 /// \param[in] s An identifier
 /// \return True if the term has a given sort identifier as subterm.
-template < typename Container >
+template <typename Container>
 bool search_identifiers(Container const& container, const core::identifier_string& s)
 {
-  return detail::make_search_helper< core::identifier_string, detail::selective_sort_traverser >(boost::bind(std::equal_to< core::identifier_string >(), s, _1)).apply(container);
+  return detail::make_search_helper<core::identifier_string, detail::selective_sort_traverser>(boost::bind(std::equal_to<core::identifier_string>(), s, _1)).apply(container);
 }
 
 /// \brief Returns all identifiers that occur in the term t
 /// \param[in] container an expression or container of expressions
 /// \param[out] o an output iterator
 /// \return All sort identifiers that occur in the term t
-template < typename Container, typename OutputIterator >
+template <typename Container, typename OutputIterator>
 void find_identifiers(Container const& container, OutputIterator o)
 {
-  return detail::make_find_helper< core::identifier_string, detail::sort_traverser >(o)(container);
+  return detail::make_find_helper<core::identifier_string, detail::sort_traverser>(o)(container);
 }
 
 /// \brief Returns all basic sorts that occur in the term t
 /// \param[in] container an expression or container of expressions
 /// \param[in] o an output iterator
 /// \return All sort expressions that occur in the term t
-template < typename Container >
-std::set< core::identifier_string > find_identifiers(Container const& container)
+template <typename Container>
+std::set<core::identifier_string> find_identifiers(Container const& container)
 {
-  std::set< core::identifier_string > result;
+  std::set<core::identifier_string> result;
   find_identifiers(container, std::inserter(result, result.end()));
   return result;
 }
@@ -223,26 +223,26 @@ std::set< core::identifier_string > find_identifiers(Container const& container)
 /// \param[in] container an expression or container of expressions
 /// \param[in] s A data expression
 /// \return True if the term has a given data expression as subterm.
-template <typename Container >
+template <typename Container>
 bool search_data_expression(Container const& container, const data_expression& s)
 {
-  return detail::make_search_helper< data_expression, detail::selective_data_traverser >(detail::compare_term< data_expression >(s)).apply(container);
+  return detail::make_search_helper<data_expression, detail::selective_data_traverser>(detail::compare_term<data_expression>(s)).apply(container);
 }
 
 /// \brief Returns all data expressions that occur in the term t
 /// \param[in] container an expression or container of expressions
 /// \return All data expressions that occur in the term t
-template < typename Container, typename OutputIterator >
+template <typename Container, typename OutputIterator>
 void find_data_expressions(Container const& container, OutputIterator o)
 {
-  detail::make_find_helper< data_expression, detail::traverser >(o)(container);
+  detail::make_find_helper<data_expression, detail::traverser>(o)(container);
 }
 
 /// \brief Returns all data expressions that occur in the term t
 /// \param[in] container an expression or container of expressions
 /// \return All data expressions that occur in the term t
-template < typename Container >
-std::set< data_expression > find_data_expressions(Container const& container)
+template <typename Container>
+std::set<data_expression> find_data_expressions(Container const& container)
 {
   std::set<data_expression> result;
   find_data_expressions(container, std::inserter(result, result.end()));

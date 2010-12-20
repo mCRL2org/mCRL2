@@ -25,9 +25,6 @@ namespace mcrl2 {
 /// \brief The main namespace for the Process library.
 namespace process {
 
-//  template <typename Object, typename OutIter>
-//  void traverse_sort_expressions(const Object& o, OutIter dest);
-
   template <typename Container, typename OutputIterator>                  
   void find_sort_expressions(Container const& container, OutputIterator o);
  
@@ -239,10 +236,6 @@ namespace process {
 } // namespace process
 
 } // namespace mcrl2
-
-//#ifndef MCRL2_PROCESS_TRAVERSE_H
-//#include "mcrl2/process/traverse.h"
-//#endif
 
 #ifndef MCRL2_PROCESS_FIND_H
 #include "mcrl2/process/find.h"

@@ -18,7 +18,7 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/multi_action.h"
 
 namespace mcrl2 {

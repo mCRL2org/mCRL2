@@ -102,6 +102,7 @@ class linear_process
 
     /// \brief Returns the sequence of LPS summands.
     /// \return The sequence of LPS summands.
+    /// \deprecated
     summand_list summands() const
     {
       summand_list result;

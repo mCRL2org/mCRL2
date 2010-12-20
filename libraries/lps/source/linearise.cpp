@@ -6378,7 +6378,9 @@ class specification_basic_type:public boost::noncopyable
                  i!=variable_list.end(); ++i)
           { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars,
                 global_variables.find(*i)==global_variables.end() && // it is neither a glabal variable
-                lps::search_free_variable(temporary_spec.process().summands(),*i)
+// N.B. linear_process::summands() is deprecated                
+//                lps::search_free_variable(temporary_spec.process().summands(),*i)
+                ( lps::search_free_variable(temporary_spec.process().action_summands(),*i) || lps::search_free_variable(temporary_spec.process().deadlock_summands(),*i))
                )          // and it occurs in the summands.
             { pars=push_front(pars,*i);
             }

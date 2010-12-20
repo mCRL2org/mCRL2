@@ -9,11 +9,15 @@
 /// \file mcrl2/lps/traverser.h
 /// \brief add your file description here.
 
+// To avoid circular inclusion problems
+#ifndef MCRL2_LPS_SPECIFICATION_H
+#include "mcrl2/lps/specification.h"
+#endif
+
 #ifndef MCRL2_LPS_TRAVERSER_H
 #define MCRL2_LPS_TRAVERSER_H
 
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
 
@@ -33,15 +37,50 @@ namespace lps {
   };
 
   template <typename Derived>
-  class binding_aware_traverser: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser_base: public data::binding_aware_traverser<Derived>
   {
     public:
       typedef data::binding_aware_traverser<Derived> super;
       using super::operator();
       using super::enter;
       using super::leave;
+      using super::increase_bind_count;
+      using super::decrease_bind_count;
 
 #include "mcrl2/lps/detail/traverser.inc.h"
+  };
+
+  template <typename Derived>
+  class binding_aware_traverser: public binding_aware_traverser_base<Derived>
+  {
+    public:
+      typedef binding_aware_traverser_base<Derived> super;
+      using super::operator();
+      using super::enter;
+      using super::leave;
+      using super::increase_bind_count;
+      using super::decrease_bind_count;
+
+      void operator()(const action_summand& x)
+      {
+        increase_bind_count(x.summation_variables());
+        super::operator()(x);
+        decrease_bind_count(x.summation_variables());
+      }
+
+      void operator()(const deadlock_summand& x)
+      {
+        increase_bind_count(x.summation_variables());
+        super::operator()(x);
+        decrease_bind_count(x.summation_variables());
+      }
+
+      void operator()(const linear_process& x)
+      {
+        increase_bind_count(x.process_parameters());
+        super::operator()(x);
+        decrease_bind_count(x.process_parameters());
+      }
   };
 
   /// \brief Selective traversal class for BES data types
@@ -60,18 +99,6 @@ namespace lps {
       selective_traverser(AdaptablePredicate predicate) : super(predicate)
       { }
   };
-
-//  template <typename Derived, typename AdaptablePredicate>
-//  class selective_binding_aware_traverser: public data::detail::selective_traverser<Derived, AdaptablePredicate, lps::binding_aware_traverser>
-//  {
-//    public:
-//      typedef data::detail::selective_traverser<Derived, AdaptablePredicate, lps::binding_aware_traverser> super;     
-//      using super::enter;
-//      using super::leave;
-//      using super::operator();
-//
-//#include "mcrl2/lps/detail/traverser.inc.h"
-//  };
 
 } // namespace lps
 

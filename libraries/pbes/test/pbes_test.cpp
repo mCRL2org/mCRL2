@@ -351,7 +351,7 @@ void test_instantiate_global_variables()
   core::garbage_collect();
 }
 
-void test_traverse_sort_expressions()
+void test_find_sort_expressions()
 {
   using data::sort_expression;
 
@@ -397,7 +397,7 @@ int test_main(int argc, char** argv)
   test_complement_method_builder();
   test_pbes_expression();
   test_instantiate_global_variables();
-  test_traverse_sort_expressions();
+  test_find_sort_expressions();
 
 #ifdef MCRL2_ENABLE_IO_TEST
   test_io();
