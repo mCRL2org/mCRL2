@@ -34,7 +34,7 @@
 
 /*
  * Tiled Rendering library
- * Version 1.1
+ * Version 1.3
  * Copyright (C) Brian Paul
  */
 
@@ -46,8 +46,13 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
-#include <GL/gl.h>
-#include <GL/glu.h>
+#ifdef __APPLE__
+  #include <OpenGL/gu.h>
+  #include <OpenGL/glu.h>
+#else
+  #include <GL/gl.h>
+  #include <GL/glu.h>
+#endif
 #include "tr.h"
 
 
