@@ -163,6 +163,7 @@ void operator()(const process::choice& x)
 void operator()(const process::process_specification& x)
 {
   static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.data());
   static_cast<Derived&>(*this)(x.action_labels());
   static_cast<Derived&>(*this)(x.equations());
   static_cast<Derived&>(*this)(x.init());

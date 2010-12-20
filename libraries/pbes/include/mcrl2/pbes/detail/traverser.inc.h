@@ -105,6 +105,7 @@ template <typename Container>
 void operator()(const pbes_system::pbes<Container>& x)
 {
   static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.data());
   static_cast<Derived&>(*this)(x.equations());
   static_cast<Derived&>(*this)(x.global_variables());
   static_cast<Derived&>(*this)(x.initial_state());

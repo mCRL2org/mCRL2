@@ -40,83 +40,6 @@ def make_traverser(filename, classnames, all_classes):
 
     insert_text_in_file(filename, text, 'generated code')
 
-def add_namespace(p, namespace):
-    if p.find(':') == -1:
-        return '%s::%s' % (namespace, p)
-    return p
-
-def print_dependencies(dependencies, message):
-    print message
-    for type in sorted(dependencies):
-        print type, dependencies[type]
-
-def is_dependent_type(dependencies, type):
-    if type in dependencies:
-        return dependencies[type]
-    # TODO: handle template parameters
-    elif type == 'Container':
-        return True
-    m = re.search('<(\w+)>', type)
-    if m != None:
-        return dependencies[m.group(1)]
-    return False
-
-def update_dependency(classname, all_classes, dependencies, value = True):
-    dependencies[classname] = value
-    if 'C' in all_classes[classname].modifiers():
-        dependencies[classname + '_list'] = value
-        dependencies[classname + '_vector'] = value
-
-def update_dependencies(all_classes, dependencies):
-    changed = False
-    for classname in all_classes:
-        c = all_classes[classname]
-
-        # check expression class dependencies
-        if dependencies[classname] == True:
-            if 'X' in c.modifiers(): # c is an expression super class:
-                for expr in c.expression_classes():
-                    if dependencies[expr] == False:
-                        update_dependency(expr, all_classes, dependencies)
-                        changed = True
-            continue
-
-        # check parameter dependencies
-        for p in c.constructor.parameters():
-            type = p.type(include_modifiers = False, include_namespace = True)
-            if is_dependent_type(dependencies, type):
-                update_dependency(classname, all_classes, dependencies)
-                changed = True
-
-    return changed
-
-def find_dependencies(all_classes, type):
-    dependencies = {} # maps class names to True/False
-
-    # initially set all dependencies to False
-    for classname in all_classes:
-        update_dependency(classname, all_classes, dependencies, value = False)
-
-    # initial dependency: the expression class depends on itself
-    update_dependency(type, all_classes, dependencies, value = True)
-
-    while update_dependencies(all_classes, dependencies):
-        pass
-    return dependencies
-
-# Computes a mapping m, such that m[<type>] returns true if <type> is a type that can be modified in place.
-def make_modifiability_map(class_list):
-    result = {}
-    for item in class_list:
-        class_text, namespace = item
-        classes = parse_classes(class_text, namespace = namespace)
-        for c in classes:
-            if c.namespace() != namespace:
-                continue
-            class_name = c.namespace() + '::' + c.classname()
-            result[class_name] = (c.aterm == None) or ('M' in c.modifiers())
-    return result
-
 def make_builder_expression_functions(filename, class_text, dependencies, expression_class, namespace, verbose = False):
     result = []
     classes = parse_classes(class_text)
@@ -284,10 +207,6 @@ def test_builder_functions(class_list, dependencies, modifiability_map):
         for c in classes:
             print make_builder_function(c, dependencies, modifiability_map)
 
-PROCESS_ADDITIONAL_CLASSES = '''
-ActId | lps::action_label(const core::identifier_string& name, const data::sort_expression_list& sorts) | An action label
-'''
-
 if __name__ == "__main__":
     class_list = [
           (CORE_CLASSES                               , 'core'            ),
@@ -313,6 +232,15 @@ if __name__ == "__main__":
 
     all_classes = parse_class_list(class_list)
 
+    make_traverser('../../bes/include/mcrl2/bes/detail/traverser.inc.h'                          , parse_classnames(BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, 'bes'), all_classes)
+    make_traverser('../../lps/include/mcrl2/lps/detail/traverser.inc.h'                          , parse_classnames(LPS_CLASSES, 'lps'), all_classes)
+    make_traverser('../../process/include/mcrl2/process/detail/traverser.inc.h'                  , parse_classnames(PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, 'process'), all_classes)
+    make_traverser('../../data/include/mcrl2/data/detail/traverser.inc.h'                        , parse_classnames(ASSIGNMENT_EXPRESSION_CLASSES + BINDER_TYPES + STRUCTURED_SORT_ELEMENTS + CONTAINER_TYPES + SORT_EXPRESSION_CLASSES + DATA_EXPRESSION_CLASSES + ABSTRACTION_EXPRESSION_CLASSES + DATA_CLASSES, 'data'), all_classes)
+    make_traverser('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h'                        , parse_classnames(PBES_EXPRESSION_CLASSES + PBES_CLASSES, 'pbes_system'), all_classes)
+    make_traverser('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h' , parse_classnames(ACTION_FORMULA_CLASSES, 'action_formulas'), all_classes)
+    make_traverser('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', parse_classnames(REGULAR_FORMULA_CLASSES, 'regular_formulas'), all_classes)
+    make_traverser('../../lps/include/mcrl2/modal_formula/detail/state_formula_traverser.inc.h'  , parse_classnames(STATE_FORMULA_CLASSES, 'state_formulas'), all_classes)
+
     boolean_expression_dependencies = find_dependencies(all_classes, 'bes::boolean_expression')
     data_expression_dependencies    = find_dependencies(all_classes, 'data::data_expression')
     pbes_expression_dependencies    = find_dependencies(all_classes, 'pbes_system::pbes_expression')
@@ -322,22 +250,14 @@ if __name__ == "__main__":
     regular_formula_dependencies    = find_dependencies(all_classes, 'regular_formulas::regular_formula')
     state_formula_dependencies      = find_dependencies(all_classes, 'state_formulas::state_formula')
 
+    modifiability_map = make_modifiability_map(class_list)
+
     #print_dependencies(data_expression_dependencies, '--- data_expression_dependencies ---')
 
-    modifiability_map = make_modifiability_map(class_list)
     #test_builder_functions(class_list, data_expression_dependencies, modifiability_map)
 
     #for t in sorted(modifiability_map):
     #    print t, '->', modifiability_map[t]
-
-    make_traverser('../../bes/include/mcrl2/bes/detail/traverser.inc.h'                          , parse_classnames(BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, 'bes'), all_classes)
-    make_traverser('../../lps/include/mcrl2/lps/detail/traverser.inc.h'                          , parse_classnames(LPS_CLASSES, 'lps'), all_classes)
-    make_traverser('../../process/include/mcrl2/process/detail/traverser.inc.h'                  , parse_classnames(PROCESS_ADDITIONAL_CLASSES + PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, 'process'), all_classes)
-    make_traverser('../../data/include/mcrl2/data/detail/traverser.inc.h'                        , parse_classnames(ASSIGNMENT_EXPRESSION_CLASSES + BINDER_TYPES + STRUCTURED_SORT_ELEMENTS + CONTAINER_TYPES + SORT_EXPRESSION_CLASSES + DATA_EXPRESSION_CLASSES + ABSTRACTION_EXPRESSION_CLASSES + DATA_CLASSES, 'data'), all_classes)
-    make_traverser('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h'                        , parse_classnames(PBES_EXPRESSION_CLASSES + PBES_CLASSES, 'pbes_system'), all_classes)
-    make_traverser('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h' , parse_classnames(ACTION_FORMULA_CLASSES, 'action_formulas'), all_classes)
-    make_traverser('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', parse_classnames(REGULAR_FORMULA_CLASSES, 'regular_formulas'), all_classes)
-    make_traverser('../../lps/include/mcrl2/modal_formula/detail/state_formula_traverser.inc.h'  , parse_classnames(STATE_FORMULA_CLASSES, 'state_formulas'), all_classes)
 
     #make_builder_expression_functions(  '../../process/include/mcrl2/process/detail/process_expression_builder.inc.h', PROCESS_EXPRESSION_CLASSES, process_expression_dependencies, 'process_expression', namespace = 'process')
     #make_builder_expression_functions(  '../../pbes/include/mcrl2/pbes/detail/data_expression_builder.inc.h', PBES_CLASSES + PBES_EXPRESSION_CLASSES, data_expression_dependencies, 'data_expression', namespace = 'pbes_system')

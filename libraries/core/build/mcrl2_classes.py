@@ -886,11 +886,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             f = self.constructor
             visit_functions = []       
             for p in f.parameters():
-                #----------------------------------------------------------------------------------------#
-                # N.B. The data traverser skips data_specification, so it needs to be done here too!
-                # TODO: investigate why it is skipped
-                if p.type().find('data_specification') != -1:
-                    continue
                 visit_functions.append('\n  static_cast<Derived&>(*this)(x.%s());' % p.name())
             vtext = ''.join(visit_functions)
             qualified_node = self.classname(include_namespace = True)
@@ -948,6 +943,78 @@ def parse_classes(text, namespace = None):
             constructor = re.sub(r'\:\s*public\s*.*', '', constructor).strip()
 
         result.append(Class(aterm, constructor, description, superclass, namespace, modifiers))
+    return result
+
+def print_dependencies(dependencies, message):
+    print message
+    for type in sorted(dependencies):
+        print type, dependencies[type]
+
+def is_dependent_type(dependencies, type):
+    if type in dependencies:
+        return dependencies[type]
+    # TODO: handle template parameters
+    elif type == 'Container':
+        return True
+    m = re.search('<(\w+)>', type)
+    if m != None:
+        return dependencies[m.group(1)]
+    return False
+
+def update_dependency(classname, all_classes, dependencies, value = True):
+    dependencies[classname] = value
+    if 'C' in all_classes[classname].modifiers():
+        dependencies[classname + '_list'] = value
+        dependencies[classname + '_vector'] = value
+
+def update_dependencies(all_classes, dependencies):
+    changed = False
+    for classname in all_classes:
+        c = all_classes[classname]
+
+        # check expression class dependencies
+        if dependencies[classname] == True:
+            if 'X' in c.modifiers(): # c is an expression super class:
+                for expr in c.expression_classes():
+                    if dependencies[expr] == False:
+                        update_dependency(expr, all_classes, dependencies)
+                        changed = True
+            continue
+
+        # check parameter dependencies
+        for p in c.constructor.parameters():
+            type = p.type(include_modifiers = False, include_namespace = True)
+            if is_dependent_type(dependencies, type):
+                update_dependency(classname, all_classes, dependencies)
+                changed = True
+
+    return changed
+
+def find_dependencies(all_classes, type):
+    dependencies = {} # maps class names to True/False
+
+    # initially set all dependencies to False
+    for classname in all_classes:
+        update_dependency(classname, all_classes, dependencies, value = False)
+
+    # initial dependency: the expression class depends on itself
+    update_dependency(type, all_classes, dependencies, value = True)
+
+    while update_dependencies(all_classes, dependencies):
+        pass
+    return dependencies
+
+# Computes a mapping m, such that m[<type>] returns true if <type> is a type that can be modified in place.
+def make_modifiability_map(class_list):
+    result = {}
+    for item in class_list:
+        class_text, namespace = item
+        classes = parse_classes(class_text, namespace = namespace)
+        for c in classes:
+            if c.namespace() != namespace:
+                continue
+            class_name = c.namespace() + '::' + c.classname()
+            result[class_name] = (c.aterm == None) or ('M' in c.modifiers())
     return result
 
 def parse_class_list(class_list):
