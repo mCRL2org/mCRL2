@@ -23,7 +23,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/list.h"
-// #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/multiple_possible_sorts.h"
@@ -137,6 +137,24 @@ namespace mcrl2 {
           }
 #endif
 
+          bool is_cons_list(data_expression x) const
+          {
+            while (sort_list::is_cons_application(x))
+            {
+              x = sort_list::tail(x);
+            }           
+            return sort_list::is_nil_function_symbol(x);
+          }
+
+          bool is_snoc_list(data_expression x) const
+          {
+            while (sort_list::is_snoc_application(x))
+            {
+              x = sort_list::rtail(x);
+            }           
+            return sort_list::is_nil_function_symbol(x);
+          }
+
           int precedence(const data_expression& x) const
           {
             if (is_application(x))
@@ -168,11 +186,11 @@ namespace mcrl2 {
               }
               else if (sort_list::is_cons_application(x))
               {
-                return 6;
+                return is_cons_list(x) ? super::max_precedence : 6;
               }
               else if (sort_list::is_snoc_application(x))
               {
-                return 7;
+                return is_snoc_list(x) ? super::max_precedence : 7;
               }
               else if (sort_list::is_concat_application(x))
               {
@@ -225,6 +243,88 @@ namespace mcrl2 {
                 || data::sort_pos::is_cdub_application(x)  
                 || data::sort_nat::is_cnat_application(x)
               ;
+          }
+
+          bool is_empty_list(const data_expression& x)
+          {
+            return sort_list::is_nil_function_symbol(x);
+          }
+
+          bool is_list(const application& x)
+          {
+            return sort_list::is_cons_application(x)
+                || sort_list::is_snoc_application(x)
+                || is_empty_list(x)
+                ;
+          }
+
+
+          bool print_cons_list(data_expression x)
+          {
+            data_expression_vector arguments;
+            while (sort_list::is_cons_application(x))
+            {
+              arguments.push_back(sort_list::head(x));
+              x = sort_list::tail(x);
+            }           
+
+            if (sort_list::is_nil_function_symbol(x))
+            {
+              super::print("[");
+              super::print_container(arguments, 6);
+              super::print("]");
+              return true;
+            }
+            return false; // did not print the list
+          }
+
+          bool print_snoc_list(data_expression x)
+          {
+            data_expression_vector arguments;
+            while (sort_list::is_snoc_application(x))
+            {
+              arguments.insert(arguments.begin(), sort_list::rhead(x));
+              x = sort_list::rtail(x);
+            }
+            
+            if (sort_list::is_nil_function_symbol(x))
+            {
+              super::print("[");
+              super::print_container(arguments, 7);
+              super::print("]");
+              return true;
+            }
+            return false; // did not print the list
+          }
+
+          template <typename Container>
+          void print_list_container(const Container& container,
+                                    int container_precedence = -1,
+                                    const std::string& separator = ", ",
+                                    const std::string& open_bracket = "(",
+                                    const std::string& close_bracket = ")"
+                                   )
+          {
+            for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+            {
+              if (i != container.begin())
+              {
+                super::print(separator);
+              }
+              int p = precedence(*i);
+              bool print_brackets = (p < container_precedence)
+                                  || (p != container_precedence && (p == 6 || p == 7 || p == 8))
+                                    ;
+              if (print_brackets)
+              {
+                super::print(open_bracket);
+              }
+              static_cast<Derived&>(*this)(*i);
+              if (print_brackets)
+              {
+                super::print(close_bracket);
+              }
+            }
           }
 
           void print_abstraction(const abstraction& x, const std::string& op)
@@ -456,11 +556,29 @@ namespace mcrl2 {
             }
             else if (sort_list::is_cons_application(x))
             {
-              super::print_container(x.arguments(), precedence(x), " |> ");
+              if (is_cons_list(x))
+              {
+                super::print("[");
+                super::print_container(x.arguments());
+                super::print("]");
+              }
+              else
+              {
+                print_container(x.arguments(), super::max_precedence, " |> ");
+              }
             }
             else if (sort_list::is_snoc_application(x))
             {
-              super::print_container(x.arguments(), precedence(x), " <| ");
+              if (is_snoc_list(x))
+              {
+                super::print("[");
+                super::print_container(x.arguments());
+                super::print("]");
+              }
+              else
+              {
+                print_container(x.arguments(), super::max_precedence, " <| ");
+              }
             }
             else if (sort_list::is_concat_application(x))
             {
@@ -508,7 +626,7 @@ namespace mcrl2 {
             }
             else if (sort_list::is_element_at_application(x))
             {
-              super::print_container(x.arguments(), precedence(x), " element_at ");
+              super::print_container(x.arguments(), precedence(x), " . ");
             }
             else if (sort_set::is_setintersection_application(x))
             {
@@ -527,14 +645,6 @@ namespace mcrl2 {
             {
               // TODO: fall back on old pretty printer, since it is unknown how to print numeric constants
               super::print(core::pp(x));
-            }
-            else if (sort_set::is_emptyset_function_symbol(x.head()))
-            {
-              super::print("{}");
-            }
-            else if (sort_bag::is_emptybag_function_symbol(x.head()))
-            {
-              super::print("{}");
             }
             else
             {
