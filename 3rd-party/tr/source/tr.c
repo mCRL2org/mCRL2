@@ -47,7 +47,7 @@
 #include <windows.h>
 #endif
 #ifdef __APPLE__
-  #include <OpenGL/gu.h>
+  #include <OpenGL/gl.h>
   #include <OpenGL/glu.h>
 #else
   #include <GL/gl.h>
