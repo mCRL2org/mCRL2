@@ -375,7 +375,7 @@ void XSimMain::LoadDLL(const wxString &filename)
 }
 
 
-void XSimMain::Registered(SimulatorInterface */*Simulator*/)
+void XSimMain::Registered(SimulatorInterface* /*Simulator*/)
 {
 }
 

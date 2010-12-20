@@ -14,7 +14,9 @@
 #include <wx/wx.h>
 #include "simbase.h"
 
-class SimulatorInterfaceGUI : virtual public SimulatorInterface
+class SimulatorInterface;
+
+class SimulatorInterfaceGUI 
 {
 public:
 	virtual wxWindow *MainWindow() = 0;
