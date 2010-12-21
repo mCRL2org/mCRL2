@@ -1005,23 +1005,24 @@ def find_dependencies(all_classes, type):
     return dependencies
 
 # Computes a mapping m, such that m[<type>] returns true if <type> is a type that can be modified in place.
-def make_modifiability_map(class_list):
+def make_modifiability_map(class_map):
     result = {}
-    for item in class_list:
-        class_text, namespace = item
-        classes = parse_classes(class_text, namespace = namespace)
+    for namespace in class_map:
+        class_text = class_map[namespace]
+        classes = parse_classes(class_text, namespace)
         for c in classes:
             if c.namespace() != namespace:
                 continue
-            class_name = c.namespace() + '::' + c.classname()
+            class_name = c.classname(include_namespace = True)
             result[class_name] = (c.aterm == None) or ('M' in c.modifiers())
     return result
 
-def parse_class_list(class_list):
+def parse_class_map(class_map):
     result = {}
     index = 0 # give each class an index, used for sorting
-    for (class_text, namespace) in class_list:
-        classes = parse_classes(class_text, namespace = namespace)
+    for namespace in class_map:
+        class_text = class_map[namespace]
+        classes = parse_classes(class_text, namespace)
         for c in classes:
             c.index = index
             index = index + 1

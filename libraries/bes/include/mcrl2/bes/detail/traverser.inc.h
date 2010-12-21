@@ -11,6 +11,24 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
+void operator()(const bes::boolean_equation& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.symbol());
+  static_cast<Derived&>(*this)(x.variable());
+  static_cast<Derived&>(*this)(x.formula());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+template <typename Container>
+void operator()(const bes::boolean_equation_system<Container>& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.equations());
+  static_cast<Derived&>(*this)(x.initial_state());
+  static_cast<Derived&>(*this).leave(x);
+}
+
 void operator()(const bes::true_& x)
 {
   static_cast<Derived&>(*this).enter(x);
@@ -58,24 +76,6 @@ void operator()(const bes::boolean_variable& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const bes::boolean_equation& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.symbol());
-  static_cast<Derived&>(*this)(x.variable());
-  static_cast<Derived&>(*this)(x.formula());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-template <typename Container>
-void operator()(const bes::boolean_equation_system<Container>& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.equations());
-  static_cast<Derived&>(*this)(x.initial_state());
   static_cast<Derived&>(*this).leave(x);
 }
 

@@ -11,6 +11,56 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
+void operator()(const process::process_specification& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.data());
+  static_cast<Derived&>(*this)(x.action_labels());
+  static_cast<Derived&>(*this)(x.equations());
+  static_cast<Derived&>(*this)(x.init());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const process::process_identifier& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.sorts());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const process::process_equation& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.identifier());
+  static_cast<Derived&>(*this)(x.formal_parameters());
+  static_cast<Derived&>(*this)(x.expression());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const process::rename_expression& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.source());
+  static_cast<Derived&>(*this)(x.target());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const process::communication_expression& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.action_name());
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const process::action_name_multiset& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.names());
+  static_cast<Derived&>(*this).leave(x);
+}
+
 void operator()(const process::process_instance& x)
 {
   static_cast<Derived&>(*this).enter(x);
@@ -160,61 +210,10 @@ void operator()(const process::choice& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const process::process_specification& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.data());
-  static_cast<Derived&>(*this)(x.action_labels());
-  static_cast<Derived&>(*this)(x.equations());
-  static_cast<Derived&>(*this)(x.init());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const process::process_identifier& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this)(x.sorts());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const process::process_equation& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.identifier());
-  static_cast<Derived&>(*this)(x.formal_parameters());
-  static_cast<Derived&>(*this)(x.expression());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const process::rename_expression& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.source());
-  static_cast<Derived&>(*this)(x.target());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const process::communication_expression& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.action_name());
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const process::action_name_multiset& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.names());
-  static_cast<Derived&>(*this).leave(x);
-}
-
 void operator()(const process::process_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (lps::is_action(x)) { static_cast<Derived&>(*this)(lps::action(atermpp::aterm_appl(x))); }
-  else if (process::is_process_instance(x)) { static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_appl(x))); }
+  if (process::is_process_instance(x)) { static_cast<Derived&>(*this)(process::process_instance(atermpp::aterm_appl(x))); }
   else if (process::is_process_instance_assignment(x)) { static_cast<Derived&>(*this)(process::process_instance_assignment(atermpp::aterm_appl(x))); }
   else if (process::is_delta(x)) { static_cast<Derived&>(*this)(process::delta(atermpp::aterm_appl(x))); }
   else if (process::is_tau(x)) { static_cast<Derived&>(*this)(process::tau(atermpp::aterm_appl(x))); }
@@ -233,6 +232,7 @@ void operator()(const process::process_expression& x)
   else if (process::is_merge(x)) { static_cast<Derived&>(*this)(process::merge(atermpp::aterm_appl(x))); }
   else if (process::is_left_merge(x)) { static_cast<Derived&>(*this)(process::left_merge(atermpp::aterm_appl(x))); }
   else if (process::is_choice(x)) { static_cast<Derived&>(*this)(process::choice(atermpp::aterm_appl(x))); }
+  else if (lps::is_action(x)) { static_cast<Derived&>(*this)(lps::action(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 //--- end generated code ---//

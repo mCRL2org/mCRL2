@@ -11,6 +11,45 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
+void operator()(const data::identifier& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::variable& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.sort());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::function_symbol& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.sort());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::application& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.head());
+  static_cast<Derived&>(*this)(x.arguments());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::where_clause& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.body());
+  static_cast<Derived&>(*this)(x.declarations());
+  static_cast<Derived&>(*this).leave(x);
+}
+
 void operator()(const data::assignment& x)
 {
   static_cast<Derived&>(*this).enter(x);
@@ -24,89 +63,6 @@ void operator()(const data::identifier_assignment& x)
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.lhs());
   static_cast<Derived&>(*this)(x.rhs());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::set_or_bag_comprehension_binder& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::set_comprehension_binder& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::bag_comprehension_binder& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::forall_binder& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::exists_binder& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::lambda_binder& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::structured_sort_constructor_argument& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this)(x.sort());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::structured_sort_constructor& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this)(x.arguments());
-  static_cast<Derived&>(*this)(x.recogniser());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::list_container& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::set_container& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::bag_container& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::fset_container& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const data::fbag_container& x)
-{
-  static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
@@ -153,42 +109,69 @@ void operator()(const data::multiple_possible_sorts& x)
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const data::identifier& x)
+void operator()(const data::list_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const data::variable& x)
+void operator()(const data::set_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this)(x.sort());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const data::function_symbol& x)
+void operator()(const data::bag_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this)(x.sort());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const data::application& x)
+void operator()(const data::fset_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.head());
-  static_cast<Derived&>(*this)(x.arguments());
   static_cast<Derived&>(*this).leave(x);
 }
 
-void operator()(const data::where_clause& x)
+void operator()(const data::fbag_container& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.body());
-  static_cast<Derived&>(*this)(x.declarations());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::set_or_bag_comprehension_binder& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::set_comprehension_binder& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::bag_comprehension_binder& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::forall_binder& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::exists_binder& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::lambda_binder& x)
+{
+  static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this).leave(x);
 }
 
@@ -213,6 +196,23 @@ void operator()(const data::lambda& x)
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
   static_cast<Derived&>(*this)(x.body());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::structured_sort_constructor_argument& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.sort());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const data::structured_sort_constructor& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.arguments());
+  static_cast<Derived&>(*this)(x.recogniser());
   static_cast<Derived&>(*this).leave(x);
 }
 

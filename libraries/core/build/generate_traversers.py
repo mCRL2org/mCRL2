@@ -200,46 +200,36 @@ def make_builder_function(c, dependencies, modifiability_map):
         text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
     return text
 
-def test_builder_functions(class_list, dependencies, modifiability_map):
-    for item in class_list:
-        class_text, namespace = item
-        classes = parse_classes(class_text, namespace = namespace)
-        for c in classes:
-            print make_builder_function(c, dependencies, modifiability_map)
+#def test_builder_functions(class_list, dependencies, modifiability_map):
+#    for item in class_list:
+#        class_text, namespace = item
+#        classes = parse_classes(class_text, namespace = namespace)
+#        for c in classes:
+#            print make_builder_function(c, dependencies, modifiability_map)
 
 if __name__ == "__main__":
-    class_list = [
-          (CORE_CLASSES                               , 'core'            ),
-          (DATA_EXPRESSION_CLASSES                    , 'data'            ),
-          (ASSIGNMENT_EXPRESSION_CLASSES              , 'data'            ),
-          (SORT_EXPRESSION_CLASSES                    , 'data'            ),
-          (CONTAINER_TYPES                            , 'data'            ),
-          (BINDER_TYPES                               , 'data'            ),
-          (ABSTRACTION_EXPRESSION_CLASSES             , 'data'            ),
-          (STRUCTURED_SORT_ELEMENTS                   , 'data'            ),
-          (DATA_CLASSES                               , 'data'            ),
-          (STATE_FORMULA_CLASSES                      , 'state_formulas'  ),
-          (REGULAR_FORMULA_CLASSES                    , 'regular_formulas'),
-          (ACTION_FORMULA_CLASSES                     , 'action_formulas' ),
-          (LPS_CLASSES                                , 'lps'             ),
-          (PROCESS_CLASSES                            , 'process'         ),
-          (PROCESS_EXPRESSION_CLASSES                 , 'process'         ),
-          (PBES_CLASSES                               , 'pbes_system'     ),
-          (PBES_EXPRESSION_CLASSES                    , 'pbes_system'     ),
-          (BOOLEAN_CLASSES                            , 'bes'             ),
-          (BOOLEAN_EXPRESSION_CLASSES                 , 'bes'             ),
-        ]
+    class_map = {
+          'core'             : CORE_CLASSES,
+          'data'             : DATA_EXPRESSION_CLASSES + ASSIGNMENT_EXPRESSION_CLASSES + SORT_EXPRESSION_CLASSES + CONTAINER_TYPES + BINDER_TYPES + ABSTRACTION_EXPRESSION_CLASSES + STRUCTURED_SORT_ELEMENTS + DATA_CLASSES,
+          'state_formulas'   : STATE_FORMULA_CLASSES,
+          'regular_formulas' : REGULAR_FORMULA_CLASSES,
+          'action_formulas'  : ACTION_FORMULA_CLASSES,
+          'lps'              : LPS_CLASSES,
+          'process'          : PROCESS_CLASSES + PROCESS_EXPRESSION_CLASSES,
+          'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
+          'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES
+        }
 
-    all_classes = parse_class_list(class_list)
+    all_classes = parse_class_map(class_map)
 
-    make_traverser('../../bes/include/mcrl2/bes/detail/traverser.inc.h'                          , parse_classnames(BOOLEAN_EXPRESSION_CLASSES + BOOLEAN_CLASSES, 'bes'), all_classes)
-    make_traverser('../../lps/include/mcrl2/lps/detail/traverser.inc.h'                          , parse_classnames(LPS_CLASSES, 'lps'), all_classes)
-    make_traverser('../../process/include/mcrl2/process/detail/traverser.inc.h'                  , parse_classnames(PROCESS_EXPRESSION_CLASSES + PROCESS_CLASSES, 'process'), all_classes)
-    make_traverser('../../data/include/mcrl2/data/detail/traverser.inc.h'                        , parse_classnames(ASSIGNMENT_EXPRESSION_CLASSES + BINDER_TYPES + STRUCTURED_SORT_ELEMENTS + CONTAINER_TYPES + SORT_EXPRESSION_CLASSES + DATA_EXPRESSION_CLASSES + ABSTRACTION_EXPRESSION_CLASSES + DATA_CLASSES, 'data'), all_classes)
-    make_traverser('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h'                        , parse_classnames(PBES_EXPRESSION_CLASSES + PBES_CLASSES, 'pbes_system'), all_classes)
-    make_traverser('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h' , parse_classnames(ACTION_FORMULA_CLASSES, 'action_formulas'), all_classes)
-    make_traverser('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', parse_classnames(REGULAR_FORMULA_CLASSES, 'regular_formulas'), all_classes)
-    make_traverser('../../lps/include/mcrl2/modal_formula/detail/state_formula_traverser.inc.h'  , parse_classnames(STATE_FORMULA_CLASSES, 'state_formulas'), all_classes)
+    make_traverser('../../bes/include/mcrl2/bes/detail/traverser.inc.h'                          , parse_classnames(class_map['bes'], 'bes'), all_classes)
+    make_traverser('../../lps/include/mcrl2/lps/detail/traverser.inc.h'                          , parse_classnames(class_map['lps'], 'lps'), all_classes)
+    make_traverser('../../process/include/mcrl2/process/detail/traverser.inc.h'                  , parse_classnames(class_map['process'], 'process'), all_classes)
+    make_traverser('../../data/include/mcrl2/data/detail/traverser.inc.h'                        , parse_classnames(class_map['data'], 'data'), all_classes)
+    make_traverser('../../pbes/include/mcrl2/pbes/detail/traverser.inc.h'                        , parse_classnames(class_map['pbes_system'], 'pbes_system'), all_classes)
+    make_traverser('../../lps/include/mcrl2/modal_formula/detail/action_formula_traverser.inc.h' , parse_classnames(class_map['action_formulas'], 'action_formulas'), all_classes)
+    make_traverser('../../lps/include/mcrl2/modal_formula/detail/regular_formula_traverser.inc.h', parse_classnames(class_map['regular_formulas'], 'regular_formulas'), all_classes)
+    make_traverser('../../lps/include/mcrl2/modal_formula/detail/state_formula_traverser.inc.h'  , parse_classnames(class_map['state_formulas'], 'state_formulas'), all_classes)
 
     boolean_expression_dependencies = find_dependencies(all_classes, 'bes::boolean_expression')
     data_expression_dependencies    = find_dependencies(all_classes, 'data::data_expression')
@@ -250,7 +240,10 @@ if __name__ == "__main__":
     regular_formula_dependencies    = find_dependencies(all_classes, 'regular_formulas::regular_formula')
     state_formula_dependencies      = find_dependencies(all_classes, 'state_formulas::state_formula')
 
-    modifiability_map = make_modifiability_map(class_list)
+    modifiability_map = make_modifiability_map(class_map)
+
+    #make_builder('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', parse_classnames(SORT_EXPRESSION_CLASSES, sort_expression_dependencies, 'sort_expression', namespace = 'data')
+
 
     #print_dependencies(data_expression_dependencies, '--- data_expression_dependencies ---')
 
