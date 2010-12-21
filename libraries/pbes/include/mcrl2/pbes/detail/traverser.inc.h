@@ -11,6 +11,40 @@
 /// files, to prevent duplication.
 
 //--- start generated code ---//
+void operator()(const pbes_system::fixpoint_symbol& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const pbes_system::propositional_variable& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.name());
+  static_cast<Derived&>(*this)(x.parameters());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+void operator()(const pbes_system::pbes_equation& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.symbol());
+  static_cast<Derived&>(*this)(x.variable());
+  static_cast<Derived&>(*this)(x.formula());
+  static_cast<Derived&>(*this).leave(x);
+}
+
+template <typename Container>
+void operator()(const pbes_system::pbes<Container>& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  static_cast<Derived&>(*this)(x.data());
+  static_cast<Derived&>(*this)(x.equations());
+  static_cast<Derived&>(*this)(x.global_variables());
+  static_cast<Derived&>(*this)(x.initial_state());
+  static_cast<Derived&>(*this).leave(x);
+}
+
 void operator()(const pbes_system::propositional_variable_instantiation& x)
 {
   static_cast<Derived&>(*this).enter(x);
@@ -75,40 +109,6 @@ void operator()(const pbes_system::exists& x)
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.variables());
   static_cast<Derived&>(*this)(x.body());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const pbes_system::fixpoint_symbol& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const pbes_system::propositional_variable& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.name());
-  static_cast<Derived&>(*this)(x.parameters());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-void operator()(const pbes_system::pbes_equation& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.symbol());
-  static_cast<Derived&>(*this)(x.variable());
-  static_cast<Derived&>(*this)(x.formula());
-  static_cast<Derived&>(*this).leave(x);
-}
-
-template <typename Container>
-void operator()(const pbes_system::pbes<Container>& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  static_cast<Derived&>(*this)(x.data());
-  static_cast<Derived&>(*this)(x.equations());
-  static_cast<Derived&>(*this)(x.global_variables());
-  static_cast<Derived&>(*this)(x.initial_state());
   static_cast<Derived&>(*this).leave(x);
 }
 

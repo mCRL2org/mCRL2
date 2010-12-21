@@ -235,12 +235,12 @@ void operator()(const data::data_specification& x)
 void operator()(const data::data_expression& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (data::is_identifier(x)) { static_cast<Derived&>(*this)(data::identifier(atermpp::aterm_appl(x))); }
+  if (data::is_abstraction(x)) { static_cast<Derived&>(*this)(data::abstraction(atermpp::aterm_appl(x))); }
+  else if (data::is_identifier(x)) { static_cast<Derived&>(*this)(data::identifier(atermpp::aterm_appl(x))); }
   else if (data::is_variable(x)) { static_cast<Derived&>(*this)(data::variable(atermpp::aterm_appl(x))); }
   else if (data::is_function_symbol(x)) { static_cast<Derived&>(*this)(data::function_symbol(atermpp::aterm_appl(x))); }
   else if (data::is_application(x)) { static_cast<Derived&>(*this)(data::application(atermpp::aterm_appl(x))); }
   else if (data::is_where_clause(x)) { static_cast<Derived&>(*this)(data::where_clause(atermpp::aterm_appl(x))); }
-  else if (data::is_abstraction(x)) { static_cast<Derived&>(*this)(data::abstraction(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
 }
 

@@ -873,6 +873,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = re.sub('QUALIFIED_NODE', qualified_node, text)
             classes = [all_classes[name] for name in self.expression_classes()]
             classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
+            classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
             visit_functions = []
             for c in classes:
                 classname = c.classname(True)
@@ -894,6 +895,88 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             if f.is_template():
                 text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
             return text           
+
+    def builder_function(self, all_classes, dependencies, modifiability_map):
+        print '<BUILDER>', self.classname(True)
+        text = r'''RETURN_TYPE operator()(const CLASS_NAME& x)
+{
+  static_cast<Derived&>(*this).enter(x);
+  VISIT_TEXT
+  static_cast<Derived&>(*this).leave(x);
+  RETURN_STATEMENT
+}
+'''
+        classname = self.classname(True)
+        visit_text = ''
+        dependent = False
+        if modifiability_map[classname]:
+            return_type = 'void'
+            return_statement = ''
+    
+            updates = []
+            f = self.constructor
+            for p in f.parameters():
+                ptype = p.type(include_modifiers = False, include_namespace = True)
+                if is_dependent_type(dependencies, ptype):
+                    dependent = True
+                    if modifiability_map[ptype]:
+                        updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
+                    else:
+                        updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s())' % (p.name(), p.name()))
+                else:
+                    continue
+            if dependent:
+                visit_text = '\n'.join(updates)
+            else:
+                visit_text = '// skip'
+        else:
+            if 'X' in self.modifiers():
+                return_type = classname
+                visit_text = '<aap>'
+                return_statement = 'return <aap>'
+                classes = [all_classes[name] for name in self.expression_classes()]
+
+                updates = []          
+                for c in classes:
+                    if not is_dependent_type(dependencies, c.classname(True)):
+                        continue
+                    is_function = c.is_function_name(True)                   
+                    updates.append('if (%s(x)) { result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, c.classname(True)))
+                if len(updates) == 0:
+                    visit_text = '// skip'
+                    return_statement = 'return x;'
+                else:
+                    visit_text = '\n  ' + '\n  else '.join(updates)
+                    return_statement = 'return x;'
+            else:
+                if 'E' in self.modifiers():
+                    return_type = self.superclass(include_namespace = True)
+                else:
+                    return_type = classname
+
+                updates = []          
+                f = self.constructor
+                for p in f.parameters():
+                    ptype = p.type(include_modifiers = False, include_namespace = True)
+                    if is_dependent_type(dependencies, ptype):
+                        updates.append('x.%s()' % p.name())
+                    else:
+                        dependent = True
+                        updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
+                if dependent:
+                    visit_text = '%s result = %s(%s);' % (return_type, f.qualified_name(), ', '.join(updates))
+                    return_statement = 'return result;'
+                else:
+                    visit_text = '// skip'
+                    return_statement = 'return x;'
+    
+        text = re.sub('RETURN_TYPE', return_type, text)
+        text = re.sub('CLASS_NAME', classname, text)
+        text = re.sub('VISIT_TEXT', visit_text, text)
+        text = re.sub('RETURN_STATEMENT', return_statement, text)
+        if self.constructor.is_template():
+            text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
+        return text
 
 def extract_namespace(text):
     if text == None:

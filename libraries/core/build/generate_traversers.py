@@ -40,6 +40,19 @@ def make_traverser(filename, classnames, all_classes):
 
     insert_text_in_file(filename, text, 'generated code')
 
+def make_builder(filename, classnames, all_classes, expression, dependencies, modifiability_map):
+    result = []
+    classes = [all_classes[name] for name in classnames]   
+
+    # preserve the same order as old generation
+    classes.sort(compare_classes)
+
+    for c in classes:
+        result.append(c.builder_function(all_classes, dependencies, modifiability_map))
+    text = '\n'.join(result)
+
+    insert_text_in_file(filename, text, 'generated code')
+
 def make_builder_expression_functions(filename, class_text, dependencies, expression_class, namespace, verbose = False):
     result = []
     classes = parse_classes(class_text)
@@ -242,10 +255,9 @@ if __name__ == "__main__":
 
     modifiability_map = make_modifiability_map(class_map)
 
-    #make_builder('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', parse_classnames(SORT_EXPRESSION_CLASSES, sort_expression_dependencies, 'sort_expression', namespace = 'data')
+    #make_builder('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', parse_classnames(class_map['data'], 'data'), all_classes, 'data::sort_expression', sort_expression_dependencies, modifiability_map)
 
-
-    #print_dependencies(data_expression_dependencies, '--- data_expression_dependencies ---')
+    #print_dependencies(sort_expression_dependencies, '--- sort_expression_dependencies ---')
 
     #test_builder_functions(class_list, data_expression_dependencies, modifiability_map)
 
