@@ -158,9 +158,9 @@ namespace detail {
         return result;
       }
 
-      unsigned int compute_tau_summand_count(const specification& spec) const
+      size_t compute_tau_summand_count(const specification& spec) const
       {
-        unsigned int result = 0;
+        size_t result = 0;
         summand_list summands = spec.process().summands();
         for(summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
         {
@@ -188,8 +188,8 @@ namespace detail {
       /// Initializes the specification_property_map with a linear process specification
       specification_property_map(const specification& spec)
       {
-        unsigned int                           summand_count           = spec.process().summand_count();
-        unsigned int                           tau_summand_count       = compute_tau_summand_count(spec);
+        size_t                                 summand_count           = spec.process().summand_count();
+        size_t                                 tau_summand_count       = compute_tau_summand_count(spec);
         size_t                                 delta_summand_count     = spec.process().deadlock_summands().size();
         std::set<data::variable>               declared_free_variables = spec.global_variables();
         std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);

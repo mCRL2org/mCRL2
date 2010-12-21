@@ -472,7 +472,7 @@ void test_pbes2bes_finite()
     "                                                                \n"
     "init X(d1);                                                     \n"
     ;
-  unsigned int log_level = 2;
+  size_t log_level = 2;
   pbes<> p1 = txt2pbes(text);
   pbes2bes_finite_algorithm algorithm(data::rewriter::jitty, log_level);
   pbes2bes_variable_map variable_map = detail::parse_pbes_parameter_map(p1, "X(*:D)");

@@ -95,7 +95,7 @@ namespace pbes_system {
       bool m_print_equations;
 
       /// \brief Prints a log message for every 1000-th equation
-      void LOG_EQUATION_COUNT(unsigned int level, unsigned int size) const
+      void LOG_EQUATION_COUNT(size_t level, size_t size) const
       {
         if (check_log_level(level))
         {
@@ -117,7 +117,7 @@ namespace pbes_system {
                          data::rewriter::strategy rewriter_strategy = data::rewriter::jitty,
                          bool print_equations = false,
                          bool print_rewriter_output = false,
-                         unsigned int log_level = 0)
+                         size_t log_level = 0)
         : core::algorithm(log_level),
         	R(data_spec, rewriter_strategy, print_rewriter_output),
         	m_equation_count(0),

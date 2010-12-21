@@ -93,10 +93,10 @@ namespace detail {
       //--------------------------------------------//     
       /// \brief Computes the number of mu and nu equations and returns them as a pair
       template <typename Container>
-      std::pair<unsigned int, unsigned int> compute_equation_counts(const pbes<Container>& p) const
+      std::pair<size_t, size_t> compute_equation_counts(const pbes<Container>& p) const
       {
-        unsigned int mu_count = 0;
-        unsigned int nu_count = 0;
+        size_t mu_count = 0;
+        size_t nu_count = 0;
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           if (i->symbol().is_mu()) {
@@ -112,9 +112,9 @@ namespace detail {
 
       // number of changes from mu to nu or vice versa
       template <typename Container>
-      unsigned int compute_block_nesting_depth(const pbes<Container>& p) const
+      size_t compute_block_nesting_depth(const pbes<Container>& p) const
       {
-        unsigned int block_nesting_depth = 0;
+        size_t block_nesting_depth = 0;
         bool last_symbol_is_mu = false;
         
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -143,8 +143,8 @@ namespace detail {
       template <typename Container>
       pbes_property_map(const pbes<Container>& p)
       {
-        std::pair<unsigned int, unsigned int>  equation_counts              = compute_equation_counts(p);
-        unsigned int block_nesting_depth                                    = compute_block_nesting_depth(p);
+        std::pair<size_t, size_t>  equation_counts              = compute_equation_counts(p);
+        size_t block_nesting_depth                                    = compute_block_nesting_depth(p);
         atermpp::set<data::variable>           declared_free_variables      = p.global_variables();
         std::set<data::variable>               used_free_variables          = find_free_variables(p);
         std::set<propositional_variable>       binding_variables            = p.binding_variables();

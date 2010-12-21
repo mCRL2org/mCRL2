@@ -20,7 +20,7 @@ using namespace boost;
 
 namespace lysa
 {
-	vector<int> Context::get_domain(string set_name, E_ptr iset_ptr)
+	vector<size_t> Context::get_domain(string set_name, E_ptr iset_ptr)
 	{
 		domain dm;
 		if(set_name!="")
@@ -38,7 +38,7 @@ namespace lysa
 			domain dm_iset(iset->to_domain());
 			dm.insert(dm_iset.begin(), dm_iset.end());
 		}
-		vector<int> d(dm.begin(), dm.end());
+		vector<size_t> d(dm.begin(), dm.end());
 		return d;
 	}
 
@@ -79,7 +79,7 @@ namespace lysa
 		proc_def += " = " + process;
 		return proc_def;
 	}
-	void stream_cartesian_product_args(ostringstream& process, vector<vector<int> >& ds, string name, string add_args, string separator=" || ")
+	void stream_cartesian_product_args(ostringstream& process, vector<vector<size_t> >& ds, string name, string add_args, string separator=" || ")
 	{
 		if(ds.empty())
 		{
@@ -89,7 +89,7 @@ namespace lysa
 		else
 		{
 			//make a list of indices, one index per domain, and initialise to zero.
-			vector<int> d_is;
+			vector<size_t> d_is;
 			d_is.resize(ds.size());
 
 			//compute cartesian product of all domains and turn into parallel proc calls.
@@ -104,7 +104,7 @@ namespace lysa
 					process << name << "(";
 
 					//draw indices
-					for(unsigned int i=0; i!=d_is.size(); i++)
+					for(size_t i=0; i!=d_is.size(); i++)
 					{
 						if(i) process << ", ";
 						process << ds[i][d_is[i]];
@@ -116,11 +116,11 @@ namespace lysa
 				//update indices; we increment each index linearly, looping back and incrementing the next
 				//upon overflow. much like how digital clocks and sports set/point counters work. or numbers, if
 				//all domains would have 10 elements.
-				for(unsigned int i=0;;)
+				for(size_t i=0;;)
 				{
 					d_is[i]++;
 					//overflow? then increase the next index instead.
-					if(d_is[i] == (int) ds[i].size())
+					if(d_is[i] == ds[i].size())
 					{
 						d_is[i] = 0;
 						i++;
@@ -174,11 +174,11 @@ namespace lysa
 		ostringstream process;
 		{
 			//make a vector of vectors containing the domains to iterate over
-			vector<vector<int> > ds;
+			vector<vector<size_t> > ds;
 			BOOST_FOREACH(shared_ptr<IndexDef> idef, *ipar.index_defs)
 			{
 				string mv_set = context.mvars[idef->index];
-				vector<int> d(context.get_domain(mv_set, idef->iset));
+				vector<size_t> d(context.get_domain(mv_set, idef->iset));
 				ds.push_back(d);
 			}
 
@@ -323,11 +323,11 @@ namespace lysa
 		BOOST_FOREACH(n, context.names)
 		{
 			//make a vector of vectors containing the domains to iterate over
-			vector<vector<int> > ds;
+			vector<vector<size_t> > ds;
 			BOOST_FOREACH(string n_set, n.second)
 			{
 				shared_ptr<Iset> empty_iset;
-				vector<int> d(context.get_domain(n_set, empty_iset));
+				vector<size_t> d(context.get_domain(n_set, empty_iset));
 				ds.push_back(d);
 			}
 
@@ -712,7 +712,7 @@ namespace lysa
 		//save in list of all cryptopoints
 		if(cryptopoints.count(cp.name))
 		{
-			if(cryptopoints[cp.name]!= (int) cp.indices->size())
+			if(cryptopoints[cp.name]!= cp.indices->size())
 			{
 				throw "crypto-point '" + (string)cp + "' redefined with wrong amount of indices";
 			}
@@ -730,14 +730,14 @@ namespace lysa
 			return cp.name + "(" + is + ")";
 	}
 
-	void stream_sort_def(ostringstream& structs, map<string, int>& m)
+	void stream_sort_def(ostringstream& structs, map<string, size_t>& m)
 	{
-		pair<string, int> p;
+		pair<string, size_t> p;
 		//find max length of identifier
-		int maxlen = 0;
+		size_t maxlen = 0;
 		BOOST_FOREACH(p, m)
 		{
-			maxlen = max(maxlen, (int)p.first.size());
+			maxlen = max(maxlen, p.first.size());
 		}
 
 		bool b = false;
@@ -748,11 +748,11 @@ namespace lysa
 			structs << p.first;
 			if(p.second>0)
 			{
-				int padlen = maxlen - p.first.size();
-				for(int i=0;i!=padlen;i++) structs << " ";
+				size_t padlen = maxlen - p.first.size();
+				for(size_t i=0;i!=padlen;i++) structs << " ";
 
 				structs << "(";
-				for(int i=0;i!=p.second;i++)
+				for(size_t i=0;i!=p.second;i++)
 				{
 					if(i) structs << ", ";
 					structs << "Nat";

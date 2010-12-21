@@ -117,7 +117,7 @@ namespace detail {
   {
     public:
       /// \brief Constructor.
-      pbes_abstract_algorithm(unsigned int log_level = 0)
+      pbes_abstract_algorithm(size_t log_level = 0)
         : core::algorithm(log_level)
       {}
 

@@ -460,15 +460,13 @@ if(wxWidgets_FOUND)
     message(STATUS "wxWidgets version: ${wxWidgets_VERSION}")
 
     ##---------------------------------------------------
-    ## Detect OpenGL for wxWidgets Version prior to 2.9
+    ## Detect OpenGL 
     ##---------------------------------------------------
-    if(wxWidgets_VERSION LESS 2.9.0)
-      include(FindOpenGL)
-      message(STATUS "OpenGL: ${OPENGL_FOUND}")
-      if(NOT OPENGL_FOUND)
-        set(MCRL2_BUILD_GUI_TOOLS false)
-      endif(NOT OPENGL_FOUND)
-    endif(wxWidgets_VERSION LESS 2.9.0)
+    include(FindOpenGL)
+    message(STATUS "OpenGL: ${OPENGL_FOUND}")
+    if(NOT OPENGL_FOUND)
+      set(MCRL2_BUILD_GUI_TOOLS false)
+    endif(NOT OPENGL_FOUND)
 
   else( NOT ${wxWidgets_CONFIG_EXECUTABLE} MATCHES wxWidgets_wxrc_EXECUTABLE-NOTFOUND )
 

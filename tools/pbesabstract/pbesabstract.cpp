@@ -93,7 +93,7 @@ class pbes_abstract_tool: public input_output_tool
         std::cerr << "  parameters:         " << m_parameter_selection << std::endl;
       }
 
-      unsigned int log_level = 0;
+      size_t log_level = 0;
       if (mcrl2::core::gsVerbose)
       {
         log_level = 1;

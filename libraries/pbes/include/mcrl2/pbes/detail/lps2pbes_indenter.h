@@ -25,11 +25,11 @@ namespace pbes_system {
   struct lps2pbes_indenter
   {
     // The amount of indentation
-    static unsigned int depth;
+    static size_t depth;
   };
 
   template <class T>
-  unsigned int lps2pbes_indenter<T>::depth = 0;
+  size_t lps2pbes_indenter<T>::depth = 0;
 
   inline
   std::string lps2pbes_indent()

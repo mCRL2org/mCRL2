@@ -48,9 +48,9 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
     typedef rewriter_tool<input_output_tool> super;
 
-    std::set< int > m_set_index; ///< Options of the algorithm
+    std::set< size_t > m_set_index; ///< Options of the algorithm
     std::string m_unfoldsort;    
-    int m_repeat_unfold;
+    size_t m_repeat_unfold;
     bool m_add_distribution_laws;
 
     void add_options(interface_description& desc)
@@ -118,7 +118,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
       m_repeat_unfold = 1;
       if (0 < parser.options.count("repeat"))
       {
-        m_repeat_unfold = parser.option_argument_as< int  >("repeat");
+        m_repeat_unfold = parser.option_argument_as< size_t  >("repeat");
       } 
 
       m_add_distribution_laws = false;
@@ -156,7 +156,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       lps_specification.load(m_input_filename);
 
-      for(int i =0; i != m_repeat_unfold; ++i )
+      for(size_t i =0; i != m_repeat_unfold; ++i )
       {
         mcrl2::core::gsVerboseMsg("Pass: %d of %d\n", i+1, m_repeat_unfold );
 
@@ -211,11 +211,11 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
         }
 
         //Unfold process parameters for calculated indices
-        std::set< int > h_set_index = m_set_index;
+        std::set< size_t > h_set_index = m_set_index;
         while (!h_set_index.empty())
           {
             lpsparunfold lpsparunfold( lps_specification, m_add_distribution_laws );
-            int index = *(max_element( h_set_index.begin(), h_set_index.end() ) );
+            size_t index = *(max_element( h_set_index.begin(), h_set_index.end() ) );
             lps_specification = lpsparunfold.algorithm( index );
             h_set_index.erase( index );
           }

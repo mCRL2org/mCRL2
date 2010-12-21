@@ -192,13 +192,13 @@ namespace mcrl2 {
 
 
           // Collect block indices and operands of all equations
-          std::map<boolean_variable, std::pair<unsigned int, boolean_operand_t> > statistics;
-          std::map<boolean_variable, unsigned int> indices;
+          std::map<boolean_variable, std::pair<size_t, boolean_operand_t> > statistics;
+          std::map<boolean_variable, size_t> indices;
 
-          unsigned int occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
+          size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
 
-          unsigned int current_block = 0;
-          unsigned int index = 0;
+          size_t current_block = 0;
+          size_t index = 0;
           fixpoint_symbol sigma = fixpoint_symbol::nu();
           for(typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
           {
@@ -215,9 +215,9 @@ namespace mcrl2 {
             indices[i->variable()] = index++;
           }
 
-          unsigned int transitioncount = occurring_variable_count + m_bes.equations().size();
-          unsigned int statecount = m_bes.equations().size();// + 1;
-          unsigned int initial_state = 0;
+          size_t transitioncount = occurring_variable_count + m_bes.equations().size();
+          size_t statecount = m_bes.equations().size();// + 1;
+          size_t initial_state = 0;
           std::stringstream aut;
           aut << "des(0," << transitioncount << "," << statecount << ")" << std::endl;
 
@@ -228,8 +228,8 @@ namespace mcrl2 {
 
           for(typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
           {
-            std::pair<unsigned int, boolean_operand_t> info = statistics[i->variable()];
-            unsigned int from = indices[i->variable()];
+            std::pair<size_t, boolean_operand_t> info = statistics[i->variable()];
+            size_t from = indices[i->variable()];
             
             // Create selfloop self:block(...),op(...)
             // recording block and operand.
@@ -252,7 +252,7 @@ namespace mcrl2 {
             for(std::set<boolean_variable>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
             {
               std::stringstream label;
-              std::pair<unsigned int, boolean_operand_t> info_target = statistics[*j];
+              std::pair<size_t, boolean_operand_t> info_target = statistics[*j];
               if(info == info_target)
               {
                 label << "tau";
@@ -261,7 +261,7 @@ namespace mcrl2 {
               {
                 label << "block(" << info_target.first << "),op(" << info_target.second << ")";
               }
-              unsigned int to = indices[*j];
+              size_t to = indices[*j];
               lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
               int label_index = labs.index(t);
               if ( label_index < 0 )
@@ -306,17 +306,17 @@ namespace mcrl2 {
           }
 
           // Build formulas
-          unsigned int cur_state = 0;
+          size_t cur_state = 0;
           m_lts.sort_transitions(lts::src_lbl_tgt);
           lts::transition_const_range transitions(m_lts.get_transitions());
           lts::transition_const_range::const_iterator i = transitions.begin();
 
-          atermpp::map<unsigned int, atermpp::vector<boolean_equation> > blocks;
+          atermpp::map<size_t, atermpp::vector<boolean_equation> > blocks;
 
           while(i != transitions.end())
           {
             atermpp::vector<boolean_variable> variables;
-            unsigned int block = 0;
+            size_t block = 0;
             boolean_operand_t op = BOOL_VAR;
             cur_state = i->from();
 
@@ -386,9 +386,9 @@ namespace mcrl2 {
           }
 
           atermpp::vector<boolean_equation> eqns;
-          for(unsigned int i = 0; i <= blocks.size(); ++i)
+          for(size_t i = 0; i <= blocks.size(); ++i)
           {
-            atermpp::map<unsigned int, atermpp::vector<boolean_equation> >::const_iterator j = blocks.find(i);
+            atermpp::map<size_t, atermpp::vector<boolean_equation> >::const_iterator j = blocks.find(i);
             if(j != blocks.end())
             {
               eqns.insert(eqns.end(), j->second.begin(), j->second.end());

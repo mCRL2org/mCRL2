@@ -66,9 +66,9 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \brief Adds variables to the quantifier stack, and adds replacements for the name clashes to replacements.
   /// \param variables A sequence of data variables
   /// \return The number of replacements that were added.
-  unsigned int push(const data::variable_list& variables)
+  size_t push(const data::variable_list& variables)
   {
-    unsigned int replacement_count = 0;
+    size_t replacement_count = 0;
 
     // check for new name clashes
     for (data::variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
@@ -91,10 +91,10 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \brief Removes the last added variable list from the quantifier stack, and removes
   /// replacement_count replacements.
   /// \param replacement_count A positive integer
-  void pop(unsigned int replacement_count)
+  void pop(size_t replacement_count)
   {
     generator.remove_from_context(quantifier_stack.back());
-    for (unsigned int i = 0; i < replacement_count; i++)
+    for (size_t i = 0; i < replacement_count; i++)
     {
       generator.remove_identifier(replacements.front().second.name());
       replacements.pop_front();
@@ -118,7 +118,7 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \return The result of visiting the node
   pbes_expression visit_forall(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
   {
-    unsigned int replacement_count = push(variables);
+    size_t replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
     data::variable_list new_variables = replacement_count > 0 ? data::replace_variables(variables, data::make_sequence_substitution_adaptor(replacements)) : variables;
     pop(replacement_count);
@@ -132,7 +132,7 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \return The result of visiting the node
   pbes_expression visit_exists(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
   {
-    unsigned int replacement_count = push(variables);
+    size_t replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
     data::variable_list new_variables = replacement_count > 0 ? data::replace_variables(variables, data::make_sequence_substitution_adaptor(replacements)) : variables;
     pop(replacement_count);

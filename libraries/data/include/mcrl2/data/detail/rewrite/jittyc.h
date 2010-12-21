@@ -24,7 +24,7 @@ namespace mcrl2 {
   namespace data {
     namespace detail {
 
-typedef unsigned int* nfs_array;
+typedef size_t* nfs_array;
 
 class RewriterCompilingJitty: public Rewriter
 {
@@ -65,12 +65,12 @@ class RewriterCompilingJitty: public Rewriter
 		ATermList *jittyc_eqns;
 
 		ATermTable int2ar_idx;
-		unsigned int ar_size;
+		size_t ar_size;
 		ATermAppl *ar;
 		ATermAppl build_ar_expr(ATerm expr, ATermAppl var);
-		ATermAppl build_ar_expr_aux(ATermList eqn, unsigned int arg, unsigned int arity);
-		ATermAppl build_ar_expr(ATermList eqns, unsigned int arg, unsigned int arity);
-		bool always_rewrite_argument(ATermInt opid, unsigned int arity, unsigned int arg);
+		ATermAppl build_ar_expr_aux(ATermList eqn, size_t arg, size_t arity);
+		ATermAppl build_ar_expr(ATermList eqns, size_t arg, size_t arity);
+		bool always_rewrite_argument(ATermInt opid, size_t arity, size_t arg);
 		bool calc_ar(ATermAppl expr);
 		void fill_always_rewrite_array();
 
@@ -91,20 +91,20 @@ class RewriterCompilingJitty: public Rewriter
 		int write_tree(FILE *f, ATermAppl tree, int *num_states);
 		void tree2dot(ATermAppl tree, char *name, char *filename);
 		ATermAppl create_tree(ATermList rules, int opid, int arity, ATermInt true_inner_);
-		ATermList create_strategy(ATermList rules, int opid, unsigned int arity, nfs_array nfs, ATermInt true_inner_);
+		ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array nfs, ATermInt true_inner_);
 #endif
 
-		void add_base_nfs(nfs_array a, ATermInt opid, unsigned int arity);
-		void extend_nfs(nfs_array a, ATermInt opid, unsigned int arity);
-		bool opid_is_nf(ATermInt opid, unsigned int num_args);
-		void calc_nfs_list(nfs_array a, unsigned int arity, ATermList args, int startarg, ATermList nnfvars);
+		void add_base_nfs(nfs_array a, ATermInt opid, size_t arity);
+		void extend_nfs(nfs_array a, ATermInt opid, size_t arity);
+		bool opid_is_nf(ATermInt opid, size_t num_args);
+		void calc_nfs_list(nfs_array a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
 		bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
-		std::string calc_inner_terms(nfs_array nfs, unsigned int arity,ATermList args, int startarg, ATermList nnfvars, nfs_array rewr);
+		std::string calc_inner_terms(nfs_array nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array rewr);
 		std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void calcTerm(FILE *f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
-		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, unsigned int nf_args);
+		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, size_t nf_args);
 		void CompileRewriteSystem(const data_specification &DataSpec);
 		void CleanupRewriteSystem();
 		void BuildRewriteSystem();

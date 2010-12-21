@@ -482,7 +482,7 @@ class linear_inequality
 };
 
 
-//static set < unsigned int > linear_inequality::m_empty_spots_in_rhss;
+//static set < size_t > linear_inequality::m_empty_spots_in_rhss;
 //static atermpp::vector < mcrl2::data::data_expression > linear_inequality::m_rhss;
 
 inline
@@ -676,8 +676,8 @@ bool is_inconsistent(
 // Count the occurrences of variables that occur in inequalities.
 static void count_occurrences(
                  const std::vector < linear_inequality > &inequalities,
-                 std::map < variable, unsigned int> &nr_positive_occurrences,
-                 std::map < variable, unsigned int> &nr_negative_occurrences,
+                 std::map < variable, size_t> &nr_positive_occurrences,
+                 std::map < variable, size_t> &nr_negative_occurrences,
                  const rewriter &r)
 {
   for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
@@ -750,16 +750,16 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   // occurrences of each variable, and create a new system.
   for(atermpp::set < variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
   {
-    std::map < variable, unsigned int> nr_positive_occurrences;
-    std::map < variable, unsigned int> nr_negative_occurrences;
+    std::map < variable, size_t> nr_positive_occurrences;
+    std::map < variable, size_t> nr_negative_occurrences;
     count_occurrences(inequalities,nr_positive_occurrences,nr_negative_occurrences,r);
 
     bool found=false;
-    unsigned int best_choice=0;
+    size_t best_choice=0;
     variable best_variable;
     for(atermpp::set < variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
-    { const unsigned int p=nr_positive_occurrences[*k];
-      const unsigned int n=nr_negative_occurrences[*k];
+    { const size_t p=nr_positive_occurrences[*k];
+      const size_t n=nr_negative_occurrences[*k];
       if ((p!=0) || (n!=0))
       { if (found)
         { if (n*p<best_choice)
@@ -950,7 +950,7 @@ inline void remove_redundant_inequalities(
   }
 
   resulting_inequalities=inequalities;
-  for(unsigned int i=0; i<resulting_inequalities.size(); )
+  for(size_t i=0; i<resulting_inequalities.size(); )
   { // Check whether the inequalities, with the i-th equality with a reversed comparison operator is inconsistent.
     // If yes, the i-th inequality is redundant.
     if (resulting_inequalities[i].comparison()==linear_inequality::equal)
@@ -1497,7 +1497,7 @@ atermpp::set < variable >  gauss_elimination(
   // Now find out whether there are variables that occur in an equality, so
   // that we can perform gauss elimination.
   for(Variable_iterator i = variables_begin; i != variables_end; ++i)
-  { unsigned int j;
+  { size_t j;
     for(j=0; j<resulting_equalities.size(); ++j)
     {
       bool check_equalities_for_redundant_inequalities(false);
@@ -1508,7 +1508,7 @@ atermpp::set < variable >  gauss_elimination(
         // Equality *j contains data variable *i.
         // Perform gauss elimination, and break the loop.
 
-        for(unsigned int k = 0; k < resulting_inequalities.size(); )
+        for(size_t k = 0; k < resulting_inequalities.size(); )
         { resulting_inequalities[k].subtract(resulting_equalities[j],
                       resulting_inequalities[k].get_factor_for_a_variable(*i),
                       resulting_equalities[j].get_factor_for_a_variable(*i),
@@ -1531,7 +1531,7 @@ atermpp::set < variable >  gauss_elimination(
           else ++k;
         }
 
-        for(unsigned int k = 0; k<resulting_equalities.size(); )
+        for(size_t k = 0; k<resulting_equalities.size(); )
         { if (k==j)
           { ++k;
           }
@@ -1578,7 +1578,7 @@ atermpp::set < variable >  gauss_elimination(
 
         // If there are unremoved resulting equalities, remove them now.
         if (check_equalities_for_redundant_inequalities)
-        { for(unsigned int k = 0; k<resulting_equalities.size(); )
+        { for(size_t k = 0; k<resulting_equalities.size(); )
           { if (resulting_equalities[k].is_true(r))
             { // Equality k is redundant, and can be removed.
               if ((k+1)<resulting_equalities.size())

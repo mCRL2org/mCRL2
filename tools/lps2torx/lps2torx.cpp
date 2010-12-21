@@ -59,8 +59,8 @@ void print_torx_action(ostream &os, ATermAppl mact)
 }
 
 typedef struct {
-  int action;
-  int state;
+  size_t action;
+  size_t state;
 } index_pair;
 
 class torx_data
@@ -69,7 +69,7 @@ class torx_data
     ATermIndexedSet stateactions;
     ATermTable state_indices;
     AFun fun_trip;
-    unsigned int num_indices;
+    size_t num_indices;
 
     ATerm triple(ATerm one, ATerm two, ATerm three)
     {
@@ -82,7 +82,7 @@ class torx_data
     }
 
   public:
-    torx_data(unsigned int initial_size)
+    torx_data(size_t initial_size)
     {
       stateactions = ATindexedSetCreate(initial_size,50);
       state_indices = ATtableCreate(initial_size,50);
@@ -121,7 +121,7 @@ class torx_data
       return p;
     }
 
-    ATerm get_state(unsigned int index)
+    ATerm get_state(size_t index)
     {
       if ( index < num_indices )
       {

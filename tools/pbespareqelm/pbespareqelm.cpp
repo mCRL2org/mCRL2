@@ -75,7 +75,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
         std::cerr << "  output file:        " << m_output_filename << std::endl;
       }
 
-      unsigned int log_level = 0;
+      size_t log_level = 0;
       if (mcrl2::core::gsVerbose)
       {
         log_level = 1;

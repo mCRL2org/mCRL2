@@ -53,14 +53,14 @@ namespace lysa
 		map<string, string> vars;         //Phi
 		map<string, list<string> > names; //N
 		sloppy_ordered_map<string, string> mvars;        //Upsilon
-		int indent;
-		string newline(int incr=0)
+		size_t indent;
+		string newline(size_t incr=0)
 		{
 			indent += incr;
 			string s(indent,' ');
 			return "\n" + s;
 		}
-		vector<int> get_domain(string set, E_ptr iset);
+		vector<size_t> get_domain(string set, E_ptr iset);
 		Context() : indent(0) {};
 	};
 
@@ -69,15 +69,15 @@ namespace lysa
 	protected:
 		StringTemplateFile templates;
 		ostringstream proc_defs;
-		map<string, int> names;
-		map<string, int> cryptopoints;
+		map<string, size_t> names;
+		map<string, size_t> cryptopoints;
 		bool contains_attacker;
-		int proc_count;
+		size_t proc_count;
     lysa_options& options;
 
 		string next_proc_name()
 		{
-			int c = proc_count++; 
+			size_t c = proc_count++; 
 			string r;
 			do
 			{

@@ -109,7 +109,7 @@ std::string BES10 =
 void test_bes(std::string bes_spec, bool expected_result)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
-  unsigned int log_level = 2;
+  size_t log_level = 2;
   int result = pbes_system::gauss_elimination(p, log_level);
   switch (result)
   {
@@ -209,7 +209,7 @@ void test_bes()
   using namespace bes;
 
   typedef core::term_traits<boolean_expression> tr;
-  unsigned int log_level = 2;
+  size_t log_level = 2;
 
   boolean_variable X("X");
   boolean_variable Y("Y");

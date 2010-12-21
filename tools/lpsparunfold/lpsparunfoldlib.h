@@ -53,7 +53,7 @@ class lpsparunfold
       * \post   The process parameter at index parameter_at_index is unfolded in the mCRL process specification.
       * \return The process specification in which the process parameter at parameter_at_index is unfolded. 
     **/
-    mcrl2::lps::specification algorithm(int parameter_at_index);
+    mcrl2::lps::specification algorithm(size_t parameter_at_index);
 
   private:
     
@@ -120,7 +120,7 @@ class lpsparunfold
       * \return A function that returns the corresponding constructor given the
       *         case selector and constructors. 
     **/
-    mcrl2::data::function_symbol create_case_function(int k);
+    mcrl2::data::function_symbol create_case_function(size_t k);
 
     /** \brief  Creates the determine function.
       * \return A function that maps a constructor to the fresh basic sort 
@@ -176,7 +176,7 @@ class lpsparunfold
       * \param  parameters that are already in use
       * \return the sort of the process parameter at given index. 
     **/
-    mcrl2::data::sort_expression sort_at_process_parameter_index(int parameter_at_index);
+    mcrl2::data::sort_expression sort_at_process_parameter_index(size_t parameter_at_index);
 
     /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
       * \return substitute function for replacing process parameters with unfolded process parameters functions. 
@@ -210,7 +210,7 @@ class lpsparunfold
         mcrl2::data::function_symbol case_function, 
         mcrl2::data::function_symbol_vector k, 
         mcrl2::data::function_symbol determine_function, 
-        int parameter_at_index, 
+        size_t parameter_at_index, 
         mcrl2::data::function_symbol_vector pi);
 
     /** \brief substitute unfold process parameter in the initialization of the linear process
@@ -221,7 +221,7 @@ class lpsparunfold
     **/
     mcrl2::lps::process_initializer update_linear_process_initialization(
         mcrl2::data::function_symbol determine_function, 
-        int parameter_at_index, 
+        size_t parameter_at_index, 
         mcrl2::data::function_symbol_vector pi);
 
     /** \brief Create distribution rules for distribution_functions over case_functions

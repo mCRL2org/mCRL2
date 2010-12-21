@@ -80,7 +80,7 @@ namespace mcrl2 {
       atermpp::vector < ATermAppl> states;
       atermpp::vector < ATermAppl> actions;
       atermpp::vector < ATermAppl> times;
-      unsigned int pos; // Invariant: pos <= actions.size().
+      size_t pos; // Invariant: pos <= actions.size().
 
       AFun trace_pair;
       int trace_pair_set;
@@ -166,7 +166,7 @@ namespace mcrl2 {
       /// \details The initial position corresponds to pos=0. If pos is larger than
       /// the length of the trace, no new position is set.
       /// \param[in] pos The new position in the trace.
-      void setPosition(unsigned int pos)
+      void setPosition(size_t pos)
       {
         if ( pos <= actions.size() )
         {
@@ -178,7 +178,7 @@ namespace mcrl2 {
       /// \details The current position of the trace is a non negative number
       /// smaller than the length of the trace.
       /// \return The current position of the trace.
-      unsigned int getPosition()
+      size_t getPosition()
       {
         assert(actions.size()+1 == states.size() && states.size() == times.size() && pos <=actions.size());
         return pos;
@@ -487,7 +487,7 @@ namespace mcrl2 {
       ATerm readATerm(std::istream &is)
       {
       #define RAT_INIT_BUF_SIZE (64*1024)
-        unsigned int buf_size = RAT_INIT_BUF_SIZE;
+        size_t buf_size = RAT_INIT_BUF_SIZE;
         char *buf = NULL;
         std::streamsize len = 0;
 
@@ -639,7 +639,7 @@ namespace mcrl2 {
 
       void savePlain(std::ostream &os)
       {
-        for (unsigned int i=0; i<actions.size(); i++)
+        for (size_t i=0; i<actions.size(); i++)
         {
           if ( core::detail::gsIsMultAct(actions[i]) )
           {

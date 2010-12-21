@@ -591,7 +591,7 @@ void determine_real_inequalities(
 /// \post All inequalities in l are in the context
 /// \ret true iff a variable has been added to the context
 static void add_postponed_inequalities_to_context(
-                const std::vector < unsigned int > &inequalities_to_add_lhs_size,
+                const std::vector < size_t > &inequalities_to_add_lhs_size,
                 const atermpp::vector < data_expression > &inequalities_to_add_lhs,
                 const atermpp::vector < data_expression > &inequalities_to_add_rhs,
                 std::vector < summand_information > &summand_info,
@@ -604,11 +604,11 @@ static void add_postponed_inequalities_to_context(
                inequalities_to_add_lhs.size() ==inequalities_to_add_rhs.size());
   
   // We add new next state arguments with increasing sizes of their lhs's.
-  std::set <unsigned int> sorted_lhs_sizes(inequalities_to_add_lhs_size.begin(),inequalities_to_add_lhs_size.end());
+  std::set <size_t> sorted_lhs_sizes(inequalities_to_add_lhs_size.begin(),inequalities_to_add_lhs_size.end());
 
-  for(std::set <unsigned int>::const_iterator current_size=sorted_lhs_sizes.begin();
+  for(std::set <size_t>::const_iterator current_size=sorted_lhs_sizes.begin();
                   current_size!=sorted_lhs_sizes.end(); ++current_size)
-  { for(unsigned int i=0; i<inequalities_to_add_lhs.size(); ++i)
+  { for(size_t i=0; i<inequalities_to_add_lhs.size(); ++i)
     { if (inequalities_to_add_lhs_size[i]== *current_size)
       { variable xi(variable_generator("xi"), c.sort());
         context.push_back(real_representing_variable(xi,inequalities_to_add_lhs[i], inequalities_to_add_rhs[i]));
@@ -633,7 +633,7 @@ static void add_postponed_inequalities_to_context(
 /// \post All inequalities in l are in the context
 /// \ret true iff a variable has been added to the context
 static void add_inequalities_to_context_postponed(
-                std::vector < unsigned int > &inequalities_to_add_lhs_size,
+                std::vector < size_t > &inequalities_to_add_lhs_size,
                 atermpp::vector < data_expression > &inequalities_to_add_lhs,
                 atermpp::vector < data_expression > &inequalities_to_add_rhs,
                 std::vector < linear_inequality > &l,
@@ -657,7 +657,7 @@ static void add_inequalities_to_context_postponed(
         }
       }
       if (pair_is_new)
-      { for(unsigned int j=0; j<inequalities_to_add_lhs.size(); ++j)
+      { for(size_t j=0; j<inequalities_to_add_lhs.size(); ++j)
         { if ((inequalities_to_add_lhs[j]==left) && (inequalities_to_add_rhs[j]==right))
           { pair_is_new=false;
             ++i;
@@ -980,7 +980,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
 
   context_type context; // Contains introduced variables
 
-  std::vector < unsigned int > new_inequalities_sizes; 
+  std::vector < size_t > new_inequalities_sizes; 
   atermpp::vector < data_expression > new_inequalities_lhss; 
   atermpp::vector < data_expression > new_inequalities_rhss; 
   int iteration = 0;

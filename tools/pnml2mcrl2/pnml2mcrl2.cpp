@@ -209,7 +209,7 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // ATmakeAFunInt functions as ATmakeAFun, except that the name is an int and not a (char *)
   //==================================================
-  static AFun ATmakeAFunInt(int name, int arity, ATbool quoted) {
+  static AFun ATmakeAFunInt(size_t name, size_t arity, ATbool quoted) {
     // input: an integer value (name), it's arity and whether it is quoted or not
     // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
     std::ostringstream s;
@@ -222,7 +222,7 @@ class pnml2mcrl2_tool: public input_output_tool
   //==================================================
   // ATmakeAFunInt0 functions as ATmakeAFunInt(name,0,ATtrue)
   //==================================================
-  static inline AFun ATmakeAFunInt0(int name){
+  static inline AFun ATmakeAFunInt0(size_t name){
     return ATmakeAFunInt(name, 0, ATtrue);
   }
 
@@ -1252,7 +1252,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     //==================================================
     // retrieve the maximum concurrency
     //==================================================
-    int MaxConcIn_int;
+    size_t MaxConcIn_int;
     if (!(ATtableGet(context.place_in, PlaceID))) {
       MaxConcIn_int = 0;
     } else {
@@ -1266,7 +1266,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       gsDebugMsg("Parameter %T is not a Number\n", MaxConcIn);
     }
 
-    int MaxConcOut_int;
+    size_t MaxConcOut_int;
     if (!(ATtableGet(context.place_out, PlaceID))) {
       MaxConcOut_int = 0;
     } else {
@@ -2422,7 +2422,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
 // Added by Yarick: alternative generation of Places:
 //  static ATermAppl pn2gsGenerateP_pi_a(ATermList InActionLists, ATermList OutActionLists, ATermList ResetActionLists);
-static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList);
+static ATermList pn2gsGetActionLists(size_t n, ATermList ActList);
 static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList=NULL);
 static ATermList pn2gsMakeSendActions(ATermList ReadActions);
 
@@ -2439,21 +2439,21 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
   //==================================================
   ATermList ActsIn=ATLtableGet(context.place_in, PlaceID);
   if(!ActsIn) ActsIn=ATmakeList0();
-  int n=ATgetLength(ActsIn);
+  size_t n=ATgetLength(ActsIn);
 
   ATermList ActsOut=ATLtableGet(context.place_out, PlaceID);
   if(!ActsOut) ActsOut=ATmakeList0();
   else ActsOut=pn2gsMakeSendActions(ActsOut);
-  int m=ATgetLength(ActsOut);
+  size_t m=ATgetLength(ActsOut);
 
   ATermList ActsInhibit=ATLtableGet(context.place_inhibit, PlaceID);
   if(!ActsInhibit) ActsInhibit=ATmakeList0();
   else ActsInhibit=pn2gsMakeSendActions(ActsInhibit);
-  int k=ATgetLength(ActsInhibit);
+  size_t k=ATgetLength(ActsInhibit);
 
   ATermList ActsReset=ATLtableGet(context.place_reset, PlaceID);
   if(!ActsReset) ActsReset=ATmakeList0();
-  int l=ATgetLength(ActsReset);
+  size_t l=ATgetLength(ActsReset);
 
   gsDebugMsg("Place %T has maximum concurrency in: '%d', out: '%d', inhibit: '%d', and reset: '%d'\n", PlaceID, n,m,k,l);
 
@@ -2561,7 +2561,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
       if(!ATisEqual(ATAgetArgument(Arc,0),TransID)) continue;
       mult_c=ATinsert(mult_c,(ATerm)ArcID);
     }
-    int nIn=ATgetLength(mult_c); //the number of tokens that adds/removes
+    size_t nIn=ATgetLength(mult_c); //the number of tokens that adds/removes
     ATermList mult=ATreverse(mult_c); //the resulting list of actions (in,_out,inhibit,_reset)
 
     mult_c=ATmakeList0();
@@ -2572,7 +2572,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
       if(!ATisEqual(ATAgetArgument(Arc,1),TransID)) continue;
       mult_c=ATinsert(mult_c,(ATerm)ArcID);
     }
-    int nOut=ATgetLength(mult_c);
+    size_t nOut=ATgetLength(mult_c);
     mult=ATconcat(mult,pn2gsMakeSendActions(ATreverse(mult_c)));
 
     mult_c=ATmakeList0();
@@ -2619,7 +2619,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     //colored (make variables list)
     ATermList VarNames=ATmakeList0();
     if(Type){
-      for(int i=0; i<nIn+nOut; i++){
+      for(size_t i=0; i<nIn+nOut; i++){
   ATermAppl Name=ATmakeAppl0(ATappendAFun(ATappendAFun(ATprependAFun("vp_",ATgetAFun(PlaceID)),"_"),ATgetName(ATmakeAFunInt0(i))));
   VarNames=ATinsert(VarNames,(ATerm)Name);
       }
@@ -2628,7 +2628,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 
     ATermAppl Left=gsMakeParamId(LeftName,pn2gsMakeIds(VarNames)); //make name P_pi_ar_i_j
     ATermAppl RightExpr=IdX;  //x;
-    int d=nIn-nOut;
+    size_t d=nIn-nOut;
     if(!reset) {
       if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=x+d;
       else if(d<0) RightExpr=gsMakeDataAppl(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=Int2Nat(x-d);
@@ -2695,7 +2695,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     ATermList LeftType=ATmakeList0();
     if(Type && nIn+nOut>0) {
       // all input and output parameters (not reset and inhibitor)
-      for(int i=0; i<nIn+nOut; i++)
+      for(size_t i=0; i<nIn+nOut; i++)
   LeftType=ATinsert(LeftType,(ATerm)Type);
     }
 
@@ -2715,7 +2715,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 
 //     //calculate the reset multiactions (if any)
 //     ATermList ResetActionLists=ATmakeList0();
-//     for(int i=1; i<=l; i++)
+//     for(size_t i=1; i<=l; i++)
 //       ResetActionLists=ATconcat(ResetActionLists,pn2gsGetActionLists(i,ActsReset));
 
 
@@ -2939,7 +2939,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 //   return Body;
 // }
 
-static ATermList pn2gsGetActionLists(unsigned int n, ATermList ActList){
+static ATermList pn2gsGetActionLists(size_t n, ATermList ActList){
     //returns all sublists (not necessarily consecutive) of length n
 
     //cannot
@@ -3049,7 +3049,7 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
     //1) add parameters to actions (variables)
     ATermList ParamList=ATmakeList0();
     ATermList SumList=ATmakeList0();
-    int n=0;
+    size_t n=0;
     for(ATermList l=Arcs;!ATisEmpty(l);l=ATgetNext(l)){
       ATermAppl Arc=ATAgetFirst(l);
       ATermAppl Type=ATAtableGet(context.arc_type_mcrl2,(ATerm)Arc);

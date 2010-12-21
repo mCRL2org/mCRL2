@@ -23,30 +23,30 @@ namespace mcrl2 {
     class algorithm
     {
     protected:
-      unsigned int m_verbose_level;
+      size_t m_verbose_level;
 
       /// \brief Returns a reference to the verbosity level.
       /// The higher this number, the more output that will be written to clog.
       /// Verbosity level 0 means no output.
-      unsigned int& verbose_level()
+      size_t& verbose_level()
       {
         return m_verbose_level;
       }
 
       /// \brief Returns the verbosity level.
-      unsigned int verbose_level() const
+      size_t verbose_level() const
       {
         return m_verbose_level;
       }
       
       /// \brief Returns true if a message with the given level should be printed.
-      bool check_log_level(unsigned int level) const
+      bool check_log_level(size_t level) const
       {
         return m_verbose_level >= level;
       }
       
       /// \brief Very simplistic log function
-      void LOG(unsigned int level, const std::string& s) const
+      void LOG(size_t level, const std::string& s) const
       {
         if (check_log_level(level))
         {
@@ -56,7 +56,7 @@ namespace mcrl2 {
 
     public:
       /// \brief Constructor
-      algorithm(unsigned int verbose_level = 0)
+      algorithm(size_t verbose_level = 0)
       : m_verbose_level(verbose_level)
       {
       }

@@ -65,7 +65,7 @@ void test_pbes(const std::string& pbes_spec,
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  unsigned int log_level = 2;
+  size_t log_level = 2;
   pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
 
   // run the algorithm

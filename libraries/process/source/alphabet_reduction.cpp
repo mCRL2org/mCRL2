@@ -1678,7 +1678,7 @@ namespace mcrl2 {
           else 
           {
             assert(length<(size_t)1 << (sizeof(int)*8-1));
-            ATtablePut(alphas,(ATerm)ATmakeList4((ATerm)a,(ATerm)ATmakeInt(length),(ATerm)allowed,(ATerm)ignore),(ATerm) l);
+            ATtablePut(alphas,(ATerm)ATmakeList4((ATerm)a,(ATerm)ATmakeInt((int)length),(ATerm)allowed,(ATerm)ignore),(ATerm) l);
           }
         }
       

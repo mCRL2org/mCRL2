@@ -209,8 +209,8 @@ class summand_information
     { return residual_inequalities.end();
     } */
 
-    static bool power_of_2(const unsigned int i)
-    { unsigned int k=2;
+    static bool power_of_2(const size_t i)
+    { size_t k=2;
       for( ; k<i ; k=k<<1)
       {}
       return k==i;
@@ -285,7 +285,7 @@ class summand_information
         else */
 
         vec_lin_eq.swap(*i);
-        unsigned int old_size=vec_lin_eq.size();
+        size_t old_size=vec_lin_eq.size();
         
         // Note that at this point, vec_lin_eq is consistent.
         assert(!is_inconsistent(vec_lin_eq,r));

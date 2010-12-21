@@ -139,7 +139,7 @@ namespace lps {
           /// \brief Constructor.
           iterator(const specification& lps_spec,
                    mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
-                   unsigned int summand_index
+                   size_t summand_index
                   )
             : m_next_state(createNextState(lps_spec, enumerator, false)),
               m_generator(m_next_state->getNextStates(m_next_state->getInitialState(), summand_index)),
@@ -155,7 +155,7 @@ namespace lps {
           iterator(const specification& lps_spec,
                    mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
                    const atermpp::aterm& state,
-                   unsigned int summand_index
+                   size_t summand_index
                   )
             : m_next_state(createNextState(lps_spec, enumerator, false)),
               m_generator(m_next_state->getNextStates(state, summand_index))
@@ -226,7 +226,7 @@ namespace lps {
       /// \brief Returns an iterator for generating the successors of the initial state.
       /// Only the successors with respect to the summand with the given index are
       /// generated.
-      iterator begin(unsigned int summand_index)
+      iterator begin(size_t summand_index)
       {
         return iterator(m_specification, m_enumerator, summand_index);
       }
@@ -234,7 +234,7 @@ namespace lps {
       /// \brief Returns an iterator for generating the successors of the given state.
       /// Only the successors with respect to the summand with the given index are
       /// generated.
-      iterator begin(const atermpp::aterm& state, unsigned int summand_index)
+      iterator begin(const atermpp::aterm& state, size_t summand_index)
       {
         return iterator(m_specification, m_enumerator, state, summand_index);
       }

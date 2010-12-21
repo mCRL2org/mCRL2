@@ -30,7 +30,7 @@ namespace mcrl2 {
 namespace pbes_system {
 
   /// \brief Data structure for storing the indices of the variables that should be expanded by the finite pbes2bes algorithm.
-  typedef atermpp::map<core::identifier_string, std::vector<unsigned int> > pbes2bes_index_map;
+  typedef atermpp::map<core::identifier_string, std::vector<size_t> > pbes2bes_index_map;
 
   /// \brief Data structure for storing the variables that should be expanded by the finite pbes2bes algorithm.
   typedef atermpp::map<core::identifier_string, std::vector<data::variable> > pbes2bes_variable_map;
@@ -95,10 +95,10 @@ namespace detail {
     typedef typename PropositionalVariable::parameter_type parameter_type;
     pbes2bes_index_map::const_iterator pi = index_map.find(X.name());
     assert(pi != index_map.end());
-    const std::vector<unsigned int>& v = pi->second;
+    const std::vector<size_t>& v = pi->second;
     typename atermpp::term_list<parameter_type>::const_iterator i = X.parameters().begin();
-    unsigned int index = 0;
-    std::vector<unsigned int>::const_iterator j = v.begin();
+    size_t index = 0;
+    std::vector<size_t>::const_iterator j = v.begin();
     for (; i != X.parameters().end(); ++i, ++index)
     {
       if (j != v.end() && index == *j)
@@ -256,11 +256,11 @@ namespace detail {
           core::identifier_string name = i->variable().name();
           data::variable_list parameters = i->variable().parameters();
 
-          std::vector<unsigned int> v;
+          std::vector<size_t> v;
           pbes2bes_variable_map::const_iterator j = variable_map.find(name);
           if (j != variable_map.end())
           {
-            unsigned int index = 0;
+            size_t index = 0;
             for (data::variable_list::const_iterator k = parameters.begin(); k != parameters.end(); ++k, ++index)
             {
               if (has_element(j->second, *k))
@@ -274,7 +274,7 @@ namespace detail {
       }
 
       /// \brief Prints a log message for every 1000-th equation
-      void LOG_EQUATION_COUNT(unsigned int level, unsigned int size) const
+      void LOG_EQUATION_COUNT(size_t level, size_t size) const
       {
         if (check_log_level(level))
         {
@@ -291,7 +291,7 @@ namespace detail {
       /// \param print_equations If true, the generated equations are printed
       /// \param print_rewriter_output If true, invocations of the rewriter are printed
       pbes2bes_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::rewriter::jitty,
-                                unsigned int log_level = 0
+                                size_t log_level = 0
                                )
         : core::algorithm(log_level),
           m_rewriter_strategy(rewriter_strategy)

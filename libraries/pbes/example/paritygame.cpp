@@ -26,19 +26,19 @@ using namespace mcrl2::pbes_system;
 void run1(pbes<>& p, bool min_parity_game)
 {
   parity_game_generator pgg(p, min_parity_game);
-  std::set<unsigned int> todo = pgg.get_initial_values();
-  std::set<unsigned int> done;
+  std::set<size_t> todo = pgg.get_initial_values();
+  std::set<size_t> done;
   while (!todo.empty())
   {
-    unsigned int i = *todo.begin();
+    size_t i = *todo.begin();
     todo.erase(i);
     done.insert(i);
 
     parity_game_generator::operation_type t = pgg.get_operation(i);
-    unsigned int p = pgg.get_priority(i);
-    std::set<unsigned int> v = pgg.get_dependencies(i);
+    size_t p = pgg.get_priority(i);
+    std::set<size_t> v = pgg.get_dependencies(i);
     std::cout << "adding equation " << i << ", dependencies = [";
-    for (std::set<unsigned int>::iterator j = v.begin(); j != v.end(); ++j)
+    for (std::set<size_t>::iterator j = v.begin(); j != v.end(); ++j)
     {
       if (done.find(*j) == done.end())
       {

@@ -461,7 +461,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
       
       data::fresh_variable_generator<> variable_generator(expr, "internally_generated_variable_for_forall");
-      unsigned int no_variables=0;
+      size_t no_variables=0;
       data::variable_list new_data_vars;
       atermpp::set < pbes_expression > conjunction_set;
       distribute_and(expr,conjunction_set);
@@ -598,7 +598,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
 
       data::fresh_variable_generator<> variable_generator(expr, "internally_generated_variable_for_exists");
-      unsigned int no_variables=0;
+      size_t no_variables=0;
       data::variable_list new_data_vars;
       atermpp::set < pbes_expression > disjunction_set;
       distribute_or(expr,disjunction_set);

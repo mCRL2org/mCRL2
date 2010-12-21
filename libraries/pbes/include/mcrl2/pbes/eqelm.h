@@ -108,7 +108,7 @@ namespace pbes_system {
       }
 
       /// \brief Prints the vertices of the dependency graph.
-      void LOG_VERTICES(unsigned int level, const std::string& msg = "") const
+      void LOG_VERTICES(size_t level, const std::string& msg = "") const
       {
         if (check_log_level(level))
         {
@@ -131,7 +131,7 @@ namespace pbes_system {
       }
 
       /// \brief Prints the edges of the dependency graph.
-      void LOG_EDGES(unsigned int level, const std::string& msg = "") const
+      void LOG_EDGES(size_t level, const std::string& msg = "") const
       {
         if (check_log_level(level))
         {
@@ -144,7 +144,7 @@ namespace pbes_system {
       }
 
       /// \brief Prints the equivalence classes
-      void LOG_EQUIVALENCE_CLASSES(unsigned int level, const std::string& msg = "") const
+      void LOG_EQUIVALENCE_CLASSES(size_t level, const std::string& msg = "") const
       {       
         if (check_log_level(level))
         {
@@ -162,7 +162,7 @@ namespace pbes_system {
       }
 
       /// \brief Prints the todo list
-      void LOG_TODO_LIST(unsigned int level, const std::set<string_type>& todo, const std::string& msg = "") const
+      void LOG_TODO_LIST(size_t level, const std::set<string_type>& todo, const std::string& msg = "") const
       {       
         if (check_log_level(level))
         {
@@ -179,9 +179,9 @@ namespace pbes_system {
 
       /// \brief Returns the index of the element x in the sequence v
       template <typename VariableContainer>
-      unsigned int index_of(const variable_type& x, const VariableContainer& v)
+      size_t index_of(const variable_type& x, const VariableContainer& v)
       {
-        return std::find(v.begin(), v.end(), x) - v.begin();
+        return static_cast<size_t>(std::find(v.begin(), v.end(), x) - v.begin());
       }
 
       /// \brief Propagate the equivalence relations in vertex X over the edge Ye.
@@ -203,7 +203,7 @@ namespace pbes_system {
           atermpp::map<data_term_type, equivalence_class> w;
           for (typename equivalence_class::iterator k = equiv.begin(); k != equiv.end(); ++k)
           {
-            unsigned int p = index_of(*k, m_parameters[Y]);
+            size_t p = index_of(*k, m_parameters[Y]);
             pbes_system::data_rewriter<Term, DataRewriter> rewr(m_data_rewriter);
             w[rewr(e[p], vX)].insert(*k);
           }
@@ -276,7 +276,7 @@ namespace pbes_system {
       /// \brief Constructor.
       /// \param datar A data rewriter
       /// \param pbesr A PBES rewriter
-      pbes_eqelm_algorithm(DataRewriter datar, PbesRewriter pbesr, unsigned int log_level = 0)
+      pbes_eqelm_algorithm(DataRewriter datar, PbesRewriter pbesr, size_t log_level = 0)
         : core::algorithm(log_level),
           m_data_rewriter(datar),
           m_pbes_rewriter(pbesr)

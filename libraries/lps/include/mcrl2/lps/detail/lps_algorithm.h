@@ -81,7 +81,7 @@ namespace detail {
       {}
 
       /// \brief Constructor
-      lps_algorithm(specification& spec, unsigned int loglevel)
+      lps_algorithm(specification& spec, size_t loglevel)
         : 
           core::algorithm(loglevel),
           m_spec(spec)

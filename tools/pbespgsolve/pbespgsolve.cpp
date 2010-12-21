@@ -136,7 +136,7 @@ public:
       }
     }
 
-    unsigned int log_level = 0;
+    size_t log_level = 0;
     if (mcrl2::core::gsVerbose)
     {
       log_level = 1;

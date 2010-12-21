@@ -59,7 +59,7 @@ class identity_sort_traverser: public mcrl2::data::detail::sort_traverser<identi
 class my_traverser: public mcrl2::data::detail::traverser<my_traverser>
 {
   protected:
-    unsigned int m_sort_count;
+    size_t m_sort_count;
 
   public:
     typedef mcrl2::data::detail::traverser<my_traverser> super;
@@ -83,7 +83,7 @@ class my_traverser: public mcrl2::data::detail::traverser<my_traverser>
       m_sort_count++;
     }
     
-    unsigned int sort_count() const
+    size_t sort_count() const
     {
       return m_sort_count;
     }
@@ -92,7 +92,7 @@ class my_traverser: public mcrl2::data::detail::traverser<my_traverser>
 class my_sort_traverser: public mcrl2::data::detail::sort_traverser<my_sort_traverser>
 {
   protected:
-    unsigned int m_sort_count;
+    size_t m_sort_count;
 
   public:
     typedef mcrl2::data::detail::sort_traverser<my_sort_traverser> super;
@@ -116,7 +116,7 @@ class my_sort_traverser: public mcrl2::data::detail::sort_traverser<my_sort_trav
       m_sort_count++;
     }
     
-    unsigned int sort_count() const
+    size_t sort_count() const
     {
       return m_sort_count;
     }
@@ -261,7 +261,7 @@ class custom_sort_traverser : public mcrl2::data::detail::traverser<Derived>
 class custom_sort_traverser1: public custom_sort_traverser<custom_sort_traverser1>
 {
   protected:
-    unsigned int m_sort_count;
+    size_t m_sort_count;
 
   public:
     typedef custom_sort_traverser<custom_sort_traverser1> super;

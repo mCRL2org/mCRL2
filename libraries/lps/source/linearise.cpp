@@ -210,7 +210,7 @@ class specification_basic_type:public boost::noncopyable
 
     ATermIndexedSet objectIndexTable;
     atermpp::set < identifier_string > stringTable;
-    std::map < identifier_string,unsigned int> freshstringIndices;
+    std::map < identifier_string,size_t> freshstringIndices;
     std::vector < enumeratedtype > enumeratedtypes;
     stackoperations *stack_operations_list;
 
@@ -465,7 +465,7 @@ class specification_basic_type:public boost::noncopyable
       {
         size_t arity=l->sorts().size();
         data_expression_list temp_args;
-        for(unsigned int i=0 ; i< static_cast< unsigned int >(arity); ++i,++e_walker)
+        for(size_t i=0 ; i< arity; ++i,++e_walker)
         { assert(e_walker!=args.end());
           temp_args=push_front(temp_args,*e_walker);
         }
@@ -1071,7 +1071,7 @@ class specification_basic_type:public boost::noncopyable
     { /* it still has to be checked whether a name is already being used
          in that case a new name has to be generated. */
       identifier_string strng(name);
-      unsigned int i=0;
+      size_t i=0;
       // strng=new_string(name);
       if (freshstringIndices.count(name)>0)
       { i=freshstringIndices[name];
@@ -3846,7 +3846,7 @@ class specification_basic_type:public boost::noncopyable
             //create structured sort
             //  Enumi = struct en_i | ... | e0_i;
             structured_sort_constructor_list struct_conss;
-            for(unsigned int j=0 ; (j<n) ; j++)
+            for(size_t j=0 ; (j<n) ; j++)
             { //create constructor declaration of the structured sort
               const identifier_string s=spec.fresh_name(str(boost::format("e%d_%d") % j % n));
               const structured_sort_constructor struct_cons(s,"");
@@ -3931,7 +3931,7 @@ class specification_basic_type:public boost::noncopyable
       const sort_expression normalised_sort=sort; // data.normalise_sorts(sort);
       const variable v1=get_fresh_variable("x",normalised_sort);
       const size_t n=enumeratedtypes[index].size;
-      for(unsigned int j=0; (j<n); j++)
+      for(size_t j=0; (j<n); j++)
       { const variable v=get_fresh_variable("y",normalised_sort);
         vars=push_front(vars,v);
         args=push_front(args,data_expression(v));
@@ -3992,7 +3992,7 @@ class specification_basic_type:public boost::noncopyable
       // else
       sort_expression_list newsortlist;
       size_t n=enumeratedtypes[enumeratedtype_index].size;
-      for(unsigned int j=0; j<n ; j++)
+      for(size_t j=0; j<n ; j++)
       { newsortlist=push_front(newsortlist, sort);
       }
       sort_expression sid=enumeratedtypes[enumeratedtype_index].sortId;
@@ -5254,7 +5254,7 @@ class specification_basic_type:public boost::noncopyable
       else
       { variable var2=pars2.front();
         variable var3=var2;
-        for(unsigned int i=0 ; occursin(var3,pars1) ; ++i)
+        for(size_t i=0 ; occursin(var3,pars1) ; ++i)
         { var3=get_fresh_variable(var2.name(),var2.sort(),(unique?-1:i));
         }
         if (var3!=var2)
@@ -5352,7 +5352,7 @@ class specification_basic_type:public boost::noncopyable
     { /* if firstaction==action(), it should not be added */
       assert(condition!=sort_bool::false_()); // It makes no sense to add an action with condition false,
                                               // as it cannot happen anyhow.
-      for(unsigned int i=0; i<L.actions.size(); ++i)
+      for(size_t i=0; i<L.actions.size(); ++i)
       { S.actions.push_back((firstaction!=action())?
                    linInsertActionInMultiActionList(firstaction,L.actions[i]):
                    L.actions[i]);

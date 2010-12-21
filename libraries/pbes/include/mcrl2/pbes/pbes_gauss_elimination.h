@@ -143,7 +143,7 @@ namespace pbes_system {
   /// \param p A pbes
   /// \return 0 if the solution is false, 1 if the solution is true, 2 if the solution is unknown
   template <typename Container>
-  int gauss_elimination(pbes<Container>& p, unsigned int log_level = 0)
+  int gauss_elimination(pbes<Container>& p, size_t log_level = 0)
   {
     typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
     typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;

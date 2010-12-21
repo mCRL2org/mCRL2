@@ -274,7 +274,7 @@ namespace detail {
       /// \param Di A sequence of data terms
       /// \param i A positive integer
       /// \return A string representation of D[i]
-      std::string print_D_element(const atermpp::vector<data_term_type>& Di, unsigned int i) const
+      std::string print_D_element(const atermpp::vector<data_term_type>& Di, size_t i) const
       {
         std::ostringstream out;
         out << "D[" << i << "] = " << print_term_container(Di) << std::endl;
@@ -285,7 +285,7 @@ namespace detail {
       /// \param D The sequence D of the algorithm
       void print_D(const std::vector<atermpp::vector<data_term_type> >& D) const
       {
-        for (unsigned int i = 0; i < D.size(); i++)
+        for (size_t i = 0; i < D.size(); i++)
         {
           std::cerr << "  " << print_D_element(D[i], i);
         }
@@ -294,20 +294,20 @@ namespace detail {
       /// \brief Returns a string representation of a todo list element
       /// \param e A todo list element
       /// \return A string representation of a todo list element
-      std::string print_todo_list_element(const boost::tuple<variable_type, data_term_type, unsigned int>& e) const
+      std::string print_todo_list_element(const boost::tuple<variable_type, data_term_type, size_t>& e) const
       {
         // const variable_type& xk = boost::get<0>(e);
         const data_term_type& y = boost::get<1>(e);
-        unsigned int k          = boost::get<2>(e);
+        size_t k          = boost::get<2>(e);
         return "(" + core::pp(y) + ", " + boost::lexical_cast<std::string>(k) + ")";
       }
 
       /// \brief Prints a todo list to standard error
       /// \param todo A todo list
-      void print_todo_list(const std::deque<boost::tuple<variable_type, data_term_type, unsigned int> >& todo) const
+      void print_todo_list(const std::deque<boost::tuple<variable_type, data_term_type, size_t> >& todo) const
       {
         std::cerr << "  todo = [";
-        for (typename std::deque<boost::tuple<variable_type, data_term_type, unsigned int> >::const_iterator i = todo.begin(); i != todo.end(); ++i)
+        for (typename std::deque<boost::tuple<variable_type, data_term_type, size_t> >::const_iterator i = todo.begin(); i != todo.end(); ++i)
         {
           std::cerr << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
         }
@@ -364,10 +364,10 @@ namespace detail {
 
         // For an element (v, t, k) of todo, we have the invariant v == x[k].
         // The variable v is stored for efficiency reasons, it avoids the lookup x[k].
-        std::deque<boost::tuple<variable_type, data_term_type, unsigned int> > todo;
+        std::deque<boost::tuple<variable_type, data_term_type, size_t> > todo;
 
         // initialize D and todo
-        unsigned int j = 0;
+        size_t j = 0;
         for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
         {
           data_term_type t = core::term_traits<data_term_type>::variable2term(*i);
@@ -380,7 +380,7 @@ namespace detail {
         {
           while (!todo.empty())
           {
-            boost::tuple<variable_type, data_term_type, unsigned int> front = todo.front();
+            boost::tuple<variable_type, data_term_type, size_t> front = todo.front();
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   print_D(D);
   print_todo_list(todo);
@@ -389,7 +389,7 @@ namespace detail {
             todo.pop_front();
             const variable_type& xk = boost::get<0>(front);
             const data_term_type& y = boost::get<1>(front);
-            unsigned int k          = boost::get<2>(front);
+            size_t k          = boost::get<2>(front);
             bool is_constant = true;
 
             D[k].erase(std::find(D[k].begin(), D[k].end(), y));

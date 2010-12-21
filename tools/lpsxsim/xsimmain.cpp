@@ -300,7 +300,7 @@ void XSimMain::OnResize(wxSizeEvent& event)
 
 void XSimMain::SetInteractiveness(bool interactive)
 {
-  int s = editmenu->GetMenuItemCount();
+  size_t s = editmenu->GetMenuItemCount();
   wxMenuItemList edits = editmenu->GetMenuItems();
 
   if ( interactive )
@@ -308,7 +308,7 @@ void XSimMain::SetInteractiveness(bool interactive)
     openitem->Enable(true);
     ldtrcitem->Enable(true);
     svtrcitem->Enable(true);
-    for (int i=0; i<s; i++)
+    for (size_t i=0; i<s; i++)
     {
       edits[i]->Enable(true);
     }
@@ -328,7 +328,7 @@ void XSimMain::SetInteractiveness(bool interactive)
     openitem->Enable(false);
     ldtrcitem->Enable(false);
     svtrcitem->Enable(false);
-    for (int i=0; i<s; i++)
+    for (size_t i=0; i<s; i++)
     {
       edits[i]->Enable(false);
     }
@@ -387,7 +387,7 @@ void XSimMain::Initialise(ATermList Pars)
 {
     state_varnames = ATmakeList0();
     stateview->DeleteAllItems();
-    for (int i=0; !ATisEmpty(Pars); Pars=ATgetNext(Pars), i++)
+    for (size_t i=0; !ATisEmpty(Pars); Pars=ATgetNext(Pars), i++)
     {
       wxString s(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(Pars),0)))
 #ifdef wxUSE_UNICODE
@@ -785,10 +785,10 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 
 static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges, wxArrayInt &indices)
 {
-  int len = indices.GetCount();
-  int end = len;
+  size_t len = indices.GetCount();
+  size_t end = len;
 
-  for (int i=0; i<end; i++)
+  for (size_t i=0; i<end; i++)
   {
     if ( actions[i] == wxT("tau") )
     {
@@ -810,7 +810,7 @@ static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges
       end--;
       i--;
     } else {
-      int j = i;
+      size_t j = i;
       while ( (j > 0) && ( (actions[j] < actions[j-1]) || ((actions[j] == actions[j-1]) && (statechanges[j] < statechanges[j-1])) ) )
       {
         wxString s;
@@ -832,9 +832,9 @@ static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges
       }
     }
   }
-  for (int i=end+1; i<len; i++)
+  for (size_t i=end+1; i<len; i++)
   {
-    int j = i;
+    size_t j = i;
     while ( (j > end) && ( (actions[j] < actions[j-1]) || ((actions[j] == actions[j-1]) && (statechanges[j] < statechanges[j-1])) ) )
     {
       wxString s;
@@ -874,7 +874,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
   ATermAppl trace_next_state = ToStateVector(simulator->GetNextStateFromTrace(),nextstate);
 
   transview->DeleteAllItems();
-  int i = 0;
+  size_t i = 0;
   for (ATermList l=nextstates; !ATisEmpty(l); l=ATgetNext(l), i++)
   {
     actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppDefault).c_str()));

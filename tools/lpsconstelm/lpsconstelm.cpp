@@ -85,7 +85,7 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
-      unsigned int loglevel = 0;
+      size_t loglevel = 0;
       if (mcrl2::core::gsVerbose)
       {
         loglevel = 1;

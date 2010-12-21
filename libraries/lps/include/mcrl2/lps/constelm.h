@@ -74,12 +74,12 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     bool m_ignore_conditions;
 
     /// \brief Maps process parameters to their index.
-    std::map<data::variable, unsigned int> m_index_of;
+    std::map<data::variable, size_t> m_index_of;
 
     /// \brief The rewriter used by the constelm algorithm.
     const DataRewriter& R;
 
-    void LOG_CONSTANT_PARAMETERS(unsigned int level,
+    void LOG_CONSTANT_PARAMETERS(size_t level,
                                  const data::mutable_map_substitution<>& sigma,
                                  const std::string& msg = "")
     {
@@ -93,7 +93,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       }
     }
 
-    void LOG_PARAMETER_CHANGE(unsigned int level,
+    void LOG_PARAMETER_CHANGE(size_t level,
                               const data::data_expression& d_j,
                               const data::data_expression& Rd_j,
                               const data::data_expression& Rg_ij,
@@ -111,7 +111,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       }
     }
 
-    void LOG_CONDITION(unsigned int level,
+    void LOG_CONDITION(size_t level,
                        const data::data_expression& cond,
                        const data::data_expression& c_i,
                        const data::mutable_map_substitution<>& sigma,
@@ -141,7 +141,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     {}
 
     /// \brief Constructor
-    constelm_algorithm(specification& spec, const DataRewriter& R_, unsigned int loglevel)
+    constelm_algorithm(specification& spec, const DataRewriter& R_, size_t loglevel)
       : 
         lps::detail::lps_algorithm(spec, loglevel),
         m_instantiate_global_variables(false),
@@ -205,7 +205,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
               {
                 continue;
               }
-              unsigned int index_j = m_index_of[*j];
+              size_t index_j = m_index_of[*j];
               const data::variable& d_j = *j;
               data::data_expression g_ij = next_state(s, d_j);
 

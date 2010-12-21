@@ -79,7 +79,7 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
     std::string m_dot_file_name;
 
     /// \brief The maximal number of seconds spent on proving a single confluence condition.
-    size_t m_time_limit;
+    int m_time_limit;
 
     /// \brief The flag indicating whether or not a path eliminator is used.
     bool m_path_eliminator;

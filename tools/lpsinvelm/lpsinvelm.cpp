@@ -78,7 +78,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
 
     /// \brief The maximal number of seconds spent on proving the conjunction of the invariant
     /// \brief and a summands' condition
-    size_t m_time_limit;
+    int m_time_limit;
 
     /// \brief The flag indicating whether or not a path eliminator is used.
     bool m_path_eliminator;

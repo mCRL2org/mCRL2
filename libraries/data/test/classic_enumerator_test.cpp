@@ -175,7 +175,7 @@ void empty_test() {
 
   std::set< variable > variables;
 
-  unsigned int count = 0;
+  size_t count = 0;
 
   // explicit with condition evaluator and condition
   for (enumerator_type i(specification, variables, evaluator); i != enumerator_type(); ++i, ++count) {

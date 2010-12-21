@@ -33,7 +33,7 @@ namespace mcrl2 {
 
     protected:
 
-      void LOG_EQUATION(unsigned int level, std::string message, const equation_type& eq) const
+      void LOG_EQUATION(size_t level, std::string message, const equation_type& eq) const
       {
         if (check_log_level(level))
         {
@@ -47,7 +47,7 @@ namespace mcrl2 {
       /// \param last End of a range of equations
 
       template <typename Iter>
-      void LOG_EQUATIONS(unsigned int level, std::string message, Iter first, Iter last) const
+      void LOG_EQUATIONS(size_t level, std::string message, Iter first, Iter last) const
       {
         if (check_log_level(level))
         {
@@ -62,7 +62,7 @@ namespace mcrl2 {
     public:
       /// \brief Constructor
 
-      gauss_elimination_algorithm(unsigned int verbose_level = 0)
+      gauss_elimination_algorithm(size_t verbose_level = 0)
       : algorithm(verbose_level)
       {
       }

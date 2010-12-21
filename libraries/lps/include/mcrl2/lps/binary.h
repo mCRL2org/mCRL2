@@ -199,7 +199,7 @@ namespace mcrl2 {
                 std::cerr << "Found " << new_parameters.size() << " new parameter(s) for parameter " << pp(i->lhs()) << std::endl;
               }
 
-              for(unsigned int j = 0; j < new_parameters.size(); ++j)
+              for(size_t j = 0; j < new_parameters.size(); ++j)
               {
                 data::data_expression_vector disjuncts;
 
