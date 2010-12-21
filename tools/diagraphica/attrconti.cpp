@@ -102,7 +102,7 @@ void AttrConti::clusterValues(
     if ( valid == true )
     {
         // ptr to new value
-        value = new Value( -1, newValue );
+        value = new Value( NON_EXISTING , newValue );
 
         // update current map
         map< double, Value* >::iterator it;

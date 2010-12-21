@@ -2122,7 +2122,7 @@ void DiagramEditor::displDOFInfo( Shape* s )
         indcs.push_back( s->getDOFYCtr()->getIndex() );
         dofs.push_back(  s->getDOFYCtr()->getLabel() );
         if ( s->getDOFYCtr()->getAttribute() == NULL )
-            attrIdcs.push_back( -1 );
+            attrIdcs.push_back( NON_EXISTING );
         else
             attrIdcs.push_back( s->getDOFYCtr()->getAttribute()->getIndex() );
         if ( s->getMode() == Shape::MODE_EDT_DOF_YCTR )
@@ -2131,7 +2131,7 @@ void DiagramEditor::displDOFInfo( Shape* s )
         indcs.push_back( s->getDOFWth()->getIndex() );
         dofs.push_back(  s->getDOFWth()->getLabel() );
         if ( s->getDOFWth()->getAttribute() == NULL )
-            attrIdcs.push_back( -1 );
+            attrIdcs.push_back( NON_EXISTING );
         else
             attrIdcs.push_back( s->getDOFWth()->getAttribute()->getIndex() );
         if ( s->getMode() == Shape::MODE_EDT_DOF_WTH )
@@ -2140,7 +2140,7 @@ void DiagramEditor::displDOFInfo( Shape* s )
         indcs.push_back( s->getDOFHgt()->getIndex() );
         dofs.push_back(  s->getDOFHgt()->getLabel() );
         if ( s->getDOFHgt()->getAttribute() == NULL )
-            attrIdcs.push_back( -1 );
+            attrIdcs.push_back( NON_EXISTING );
         else
             attrIdcs.push_back( s->getDOFHgt()->getAttribute()->getIndex() );
         if ( s->getMode() == Shape::MODE_EDT_DOF_HGT )
@@ -2149,7 +2149,7 @@ void DiagramEditor::displDOFInfo( Shape* s )
         indcs.push_back( s->getDOFAgl()->getIndex() );
         dofs.push_back(  s->getDOFAgl()->getLabel() );
         if ( s->getDOFAgl()->getAttribute() == NULL )
-            attrIdcs.push_back( -1 );
+            attrIdcs.push_back( NON_EXISTING );
         else
             attrIdcs.push_back( s->getDOFAgl()->getAttribute()->getIndex() );
         if ( s->getMode() == Shape::MODE_EDT_DOF_AGL )
@@ -2158,7 +2158,7 @@ void DiagramEditor::displDOFInfo( Shape* s )
         indcs.push_back( s->getDOFCol()->getIndex() );
         dofs.push_back(  s->getDOFCol()->getLabel() );
         if ( s->getDOFCol()->getAttribute() == NULL )
-            attrIdcs.push_back( -1 );
+            attrIdcs.push_back( NON_EXISTING );
         else
             attrIdcs.push_back( s->getDOFCol()->getAttribute()->getIndex() );
         if ( s->getMode() == Shape::MODE_EDT_DOF_COL )
@@ -2167,7 +2167,7 @@ void DiagramEditor::displDOFInfo( Shape* s )
         indcs.push_back( s->getDOFOpa()->getIndex() );
         dofs.push_back(  s->getDOFOpa()->getLabel() );
         if ( s->getDOFOpa()->getAttribute() == NULL )
-            attrIdcs.push_back( -1 );
+            attrIdcs.push_back( NON_EXISTING );
         else
             attrIdcs.push_back( s->getDOFOpa()->getAttribute()->getIndex() );
         if ( s->getMode() == Shape::MODE_EDT_DOF_OPA )
@@ -2176,7 +2176,7 @@ void DiagramEditor::displDOFInfo( Shape* s )
         indcs.push_back( s->getDOFText()->getIndex() );
         dofs.push_back(  s->getDOFText()->getLabel() );
         if ( s->getDOFText()->getAttribute() == NULL )
-            attrIdcs.push_back( -1 );
+            attrIdcs.push_back( NON_EXISTING );
         else
             attrIdcs.push_back( s->getDOFText()->getAttribute()->getIndex() );
         if ( s->getMode() == Shape::MODE_EDT_DOF_TEXT )

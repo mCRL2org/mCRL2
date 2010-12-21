@@ -4216,7 +4216,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
 		    		if( !x->IsChecked())
 		    		{
 		    			x->Check( false );
-					mediator->handleSetDOF( -1 ); //UnLink the variable from DOFText, -1 indicates Unlink Operation
+					mediator->handleSetDOF( NON_EXISTING ); //UnLink the variable from DOFText, -1 indicates Unlink Operation
 		    		}
 		    		else
 		    		{

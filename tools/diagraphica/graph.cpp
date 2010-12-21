@@ -1773,7 +1773,7 @@ void Graph::updateLeaves( Cluster* clust )
     else
     {
         // reset index
-        clust->setIndex( -1 );
+        clust->setIndex( NON_EXISTING );
 
         // update clusts
         for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
