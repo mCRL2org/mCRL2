@@ -58,6 +58,12 @@ def insert_text_in_file(filename, text, label, handle_user_sections = False):
     except IOError, e:
         print 'Error: unable to open file ' + filename + ' ', e
 
+def indent_text(text, indent):
+    lines = []
+    for line in string.split(text, '\n'):
+        lines.append(indent + line)
+    return string.join(lines, '\n')
+
 if __name__ == "__main__":
     text = '''
     data::data_expression_list parameters() const

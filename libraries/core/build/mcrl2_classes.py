@@ -897,12 +897,10 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             return text           
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
-        text = r'''RETURN_TYPE operator()(const CLASS_NAME& x)
+        text = r'''RETURN_TYPE operator()(<CONST>CLASS_NAME& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  VISIT_TEXT
-  static_cast<Derived&>(*this).leave(x);
-  RETURN_STATEMENT
+  static_cast<Derived&>(*this).enter(x);VISIT_TEXT
+  static_cast<Derived&>(*this).leave(x);RETURN_STATEMENT
 }
 '''
         classname = self.classname(True)
@@ -921,7 +919,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     if modifiability_map[ptype]:
                         updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
                     else:
-                        updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s())' % (p.name(), p.name()))
+                        updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s());' % (p.name(), p.name()))
                 else:
                     continue
             if dependent:
@@ -943,8 +941,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     visit_text = '// skip'
                     return_statement = 'return x;'
                 else:
-                    visit_text = '\n  ' + '\n  else '.join(updates)
-                    return_statement = 'return x;'
+                    visit_text = '%s result;\n' % classname + '\nelse '.join(updates)
+                    return_statement = 'return result;'
             else:
                 if 'E' in self.modifiers():
                     return_type = self.superclass(include_namespace = True)
@@ -967,7 +965,19 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     visit_text = '// skip'
                     return_statement = 'return x;'
     
+        if return_type == 'void':
+            const = ''
+        else:
+            const = 'const '
+
+        # layout
+        if return_statement != '':
+            return_statement = '\n  ' + return_statement
+        if visit_text != '':
+            visit_text = indent_text('\n' + visit_text, '  ')       
+
         text = re.sub('RETURN_TYPE', return_type, text)
+        text = re.sub('<CONST>', const, text)
         text = re.sub('CLASS_NAME', classname, text)
         text = re.sub('VISIT_TEXT', visit_text, text)
         text = re.sub('RETURN_STATEMENT', return_statement, text)
@@ -1086,16 +1096,15 @@ def find_dependencies(all_classes, type):
     return dependencies
 
 # Computes a mapping m, such that m[<type>] returns true if <type> is a type that can be modified in place.
-def make_modifiability_map(class_map):
+def make_modifiability_map(all_classes):
     result = {}
-    for namespace in class_map:
-        class_text = class_map[namespace]
-        classes = parse_classes(class_text, namespace)
-        for c in classes:
-            if c.namespace() != namespace:
-                continue
-            class_name = c.classname(include_namespace = True)
-            result[class_name] = (c.aterm == None) or ('M' in c.modifiers())
+    for classname in all_classes:
+        c = all_classes[classname]
+        value = (c.aterm == None) or ('M' in c.modifiers())
+        result[classname] = value
+        if 'C' in c.modifiers():
+            result[classname + '_list'] = value
+            result[classname + '_vector'] = value
     return result
 
 def parse_class_map(class_map):

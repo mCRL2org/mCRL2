@@ -40,7 +40,31 @@ def make_traverser(filename, classnames, all_classes):
 
     insert_text_in_file(filename, text, 'generated code')
 
-def make_builder(filename, classnames, all_classes, expression, dependencies, modifiability_map):
+def create_builder_file(filename, namespace):
+    text = '''// Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \\file FILENAME
+/// \\brief The content of this file is included in other header
+/// files, to prevent duplication.
+
+//--- start generated code ---//
+//--- end generated code ---//
+'''
+    if not path(filename).exists():
+        name = re.sub(r'\.\./\.\.', 'mcrl2', filename)
+        text = re.sub('FILENAME', name, text)
+        path(filename).write_text(text)
+
+def make_builder(filename, class_map, all_classes, namespace, expression, dependencies, modifiability_map):
+    classnames = parse_classnames(class_map[namespace], namespace)
+    create_builder_file(filename, namespace)
+
     result = []
     classes = [all_classes[name] for name in classnames]   
 
@@ -53,173 +77,6 @@ def make_builder(filename, classnames, all_classes, expression, dependencies, mo
     text = '\n'.join(result)
 
     insert_text_in_file(filename, text, 'generated code')
-
-def make_builder_expression_functions(filename, class_text, dependencies, expression_class, namespace, verbose = False):
-    result = []
-    classes = parse_classes(class_text)
-    for c in classes:
-        if c.qualifier() != '': # skip classes residing in a different name space
-            continue
-        if 'X' in c.modifiers():
-            continue
-        if verbose:
-            print 'generating builder functions for class', c.name()
-        f = c.constructor
-        parameters = []
-        for p in f.parameters():
-            ptype = p.type(include_modifiers = False, include_namespace = True)
-            if is_dependent_type(dependencies, ptype):
-                parameters.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
-            else:
-                parameters.append('x.%s()' % p.name())
-        vtext = '%s result = %s(%s);' % (expression_class, f.qualified_name(), ', '.join(parameters))
-        ctext = BUILDER_FUNCTION
-        ctext = re.sub('EXPRESSION', expression_class, ctext)
-        ctext = re.sub('QUALIFIED_NODE', f.qualified_name(), ctext)
-        ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
-        if f.is_template():
-            ctext = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + ctext
-        result.append(ctext)
-
-    ctext = BUILDER_FUNCTION
-    ctext = re.sub('QUALIFIED_NODE', expression_class, ctext)
-    classes = parse_classes(class_text)
-    visit_functions = []
-    for c in classes:
-        f = c.constructor
-        is_function = re.sub('_$', '', f.name())
-        visit_functions.append('if (%sis_%s(x)) { result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (f.qualifier(), is_function, f.qualified_name()))
-    vtext = '%s result;\n  ' % expression_class
-    vtext = vtext + '\n  else '.join(visit_functions)
-    ctext = re.sub('EXPRESSION', expression_class, ctext)
-    ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
-    result.append(ctext)
-    ctext = '\n'.join(result)
-
-    #----------------------------------------------------------------------------------------#
-    # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
-    # TODO: investigate if the time interface can be improved
-    ctext = re.sub(r'static_cast<Derived&>\(\*this\)\(x.time\(\)\)', 'if (x.has_time()) static_cast<Derived&>(*this)(x.time());', ctext)
-    #----------------------------------------------------------------------------------------#
-
-    insert_text_in_file(filename, ctext, 'generated %s_builder code' % expression_class)
-
-def make_builder_class_functions(filename, class_text, dependencies, expression_class, namespace, verbose = False):
-    result = []
-    classes = parse_classes(class_text)
-    for c in classes:
-        if c.qualifier() != '': # skip classes residing in a different name space
-            continue
-        if verbose:
-            print 'generating builder functions for class', c.name()
-        f = c.constructor
-        parameters = []
-        for p in f.parameters():
-            ptype = p.type(include_modifiers = False, include_namespace = True)
-            if is_dependent_type(dependencies, ptype):
-                parameters.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
-            else:
-                parameters.append('x.%s()' % p.name())
-        vtext = '%s result = %s(%s);' % (expression_class, f.qualified_name(), ', '.join(parameters))
-        ctext = BUILDER_FUNCTION
-        ctext = re.sub('EXPRESSION', expression_class, ctext)
-        ctext = re.sub('QUALIFIED_NODE', f.qualified_name(), ctext)
-        ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
-        if f.is_template():
-            ctext = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + ctext
-        result.append(ctext)
-
-    ctext = BUILDER_FUNCTION
-    ctext = re.sub('QUALIFIED_NODE', expression_class, ctext)
-    classes = parse_classes(class_text)
-    visit_functions = []
-    for c in classes:
-        f = c.constructor
-        is_function = re.sub('_$', '', f.name())
-        visit_functions.append('if (%sis_%s(x)) { result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (f.qualifier(), is_function, f.qualified_name()))
-    vtext = '%s result;\n  ' % expression_class
-    vtext = vtext + '\n  else '.join(visit_functions)
-    ctext = re.sub('EXPRESSION', expression_class, ctext)
-    ctext = re.sub('VISIT_FUNCTIONS', vtext, ctext)
-    result.append(ctext)
-    ctext = '\n'.join(result)
-
-    #----------------------------------------------------------------------------------------#
-    # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
-    # TODO: investigate if the time interface can be improved
-    ctext = re.sub(r'static_cast<Derived&>\(\*this\)\(x.time\(\)\)', 'if (x.has_time()) static_cast<Derived&>(*this)(x.time());', ctext)
-    #----------------------------------------------------------------------------------------#
-
-    insert_text_in_file(filename, ctext, 'generated %s_builder code' % expression_class)
-
-# c: Class
-def make_builder_function(c, dependencies, modifiability_map):
-    text = r'''RETURN_TYPE operator()(const CLASS_NAME& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  VISIT_TEXT
-  static_cast<Derived&>(*this).leave(x);
-  RETURN_STATEMENT
-}
-'''
-    class_name = c.namespace() + '::' + c.classname()
-    visit_text = ''
-    dependent = False
-    if modifiability_map[class_name]:
-        return_type = 'void'
-        return_statement = ''
-
-        updates = []
-        f = c.constructor
-        for p in f.parameters():
-            ptype = p.type(include_modifiers = False, include_namespace = True)
-            if is_dependent_type(dependencies, ptype):
-                dependent = True
-                if modifiability_map[ptype]:
-                    updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
-                else:
-                    updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s())' % (p.name(), p.name()))
-            else:
-                continue
-        if dependent:
-            visit_text = '\n'.join(updates)
-        else:
-            visit_text = '// skip'
-    else:
-        if 'E' in c.modifiers():
-            return_type = '%s::%s' % (c.superclass_namespace(), c.superclass())
-        else:
-            return_type = class_name
-        updates = []
-        f = c.constructor
-        for p in f.parameters():
-            ptype = p.type(include_modifiers = False, include_namespace = True)
-            if is_dependent_type(dependencies, ptype):
-                updates.append('x.%s()' % p.name())
-            else:
-                dependent = True
-                updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
-        if dependent:
-            visit_text = '%s result = %s(%s);' % (return_type, f.qualified_name(), ', '.join(updates))
-            return_statement = 'return result;'
-        else:
-            visit_text = '// skip'
-            return_statement = 'return x;'
-
-    text = re.sub('RETURN_TYPE', return_type, text)
-    text = re.sub('CLASS_NAME', class_name, text)
-    text = re.sub('VISIT_TEXT', visit_text, text)
-    text = re.sub('RETURN_STATEMENT', return_statement, text)
-    if f.is_template():
-        text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
-    return text
-
-#def test_builder_functions(class_list, dependencies, modifiability_map):
-#    for item in class_list:
-#        class_text, namespace = item
-#        classes = parse_classes(class_text, namespace = namespace)
-#        for c in classes:
-#            print make_builder_function(c, dependencies, modifiability_map)
 
 if __name__ == "__main__":
     class_map = {
@@ -254,16 +111,20 @@ if __name__ == "__main__":
     regular_formula_dependencies    = find_dependencies(all_classes, 'regular_formulas::regular_formula')
     state_formula_dependencies      = find_dependencies(all_classes, 'state_formulas::state_formula')
 
-    modifiability_map = make_modifiability_map(class_map)
-
-    make_builder('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', parse_classnames(class_map['data'], 'data'), all_classes, 'data::sort_expression', sort_expression_dependencies, modifiability_map)
-
-    #print_dependencies(sort_expression_dependencies, '--- sort_expression_dependencies ---')
-
-    #test_builder_functions(class_list, data_expression_dependencies, modifiability_map)
+    modifiability_map = make_modifiability_map(all_classes)
 
     #for t in sorted(modifiability_map):
     #    print t, '->', modifiability_map[t]
+
+    make_builder('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', class_map, all_classes, 'data', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/lps/detail/sort_expression_builder.inc.h', class_map, all_classes, 'lps', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../process/include/mcrl2/process/detail/sort_expression_builder.inc.h', class_map, all_classes, 'process', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../pbes/include/mcrl2/pbes/detail/sort_expression_builder.inc.h', class_map, all_classes, 'pbes_system', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/detail/action_formula_sort_expression_builder.inc.h', class_map, all_classes, 'action_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/detail/regular_formula_sort_expression_builder.inc.h', class_map, all_classes, 'regular_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/detail/state_formula_sort_expression_builder.inc.h', class_map, all_classes, 'state_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+
+    #print_dependencies(sort_expression_dependencies, '--- sort_expression_dependencies ---')
 
     #make_builder_expression_functions(  '../../process/include/mcrl2/process/detail/process_expression_builder.inc.h', PROCESS_EXPRESSION_CLASSES, process_expression_dependencies, 'process_expression', namespace = 'process')
     #make_builder_expression_functions(  '../../pbes/include/mcrl2/pbes/detail/data_expression_builder.inc.h', PBES_CLASSES + PBES_EXPRESSION_CLASSES, data_expression_dependencies, 'data_expression', namespace = 'pbes_system')
