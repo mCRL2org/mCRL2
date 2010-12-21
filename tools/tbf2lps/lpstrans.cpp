@@ -234,7 +234,7 @@ static ATermList get_substs(ATermList ids)
     while ( !is_user_identifier(s) || 
             ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >=0)
     {
-      sprintf(t,"%i",i);
+      sprintf(t,"%lu",i);
       i++;
     }
 

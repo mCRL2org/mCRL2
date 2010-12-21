@@ -706,7 +706,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
   gsDebugMsg( "- Number of parameters in LPS: %d\n", lps_proc_pars.size() );
   gsVerboseMsg("Unfolding process parameter at index: %d\n", parameter_at_index );
-  if(    (lps_proc_pars.size() <= parameter_at_index) || parameter_at_index < 0  )
+  if (lps_proc_pars.size() <= parameter_at_index)
   {
     cerr << "Given index out of bounds. Index value needs to be in the range [0," << lps_proc_pars.size() <<")." << endl;
     abort();

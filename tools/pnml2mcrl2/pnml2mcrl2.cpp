@@ -2628,7 +2628,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 
     ATermAppl Left=gsMakeParamId(LeftName,pn2gsMakeIds(VarNames)); //make name P_pi_ar_i_j
     ATermAppl RightExpr=IdX;  //x;
-    size_t d=nIn-nOut;
+    ssize_t d=nIn-nOut;
     if(!reset) {
       if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(d))));//RightExpr=x+d;
       else if(d<0) RightExpr=gsMakeDataAppl(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(-d))))));//RightExpr=Int2Nat(x-d);
