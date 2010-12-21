@@ -15,8 +15,9 @@
 #include <set>
 #include <iterator>
 #include <functional>
+#include "mcrl2/core/detail/find_impl.h"     
+#include "mcrl2/data/detail/find_impl.h"     
 #include "mcrl2/data/variable.h" 
-#include "mcrl2/data/detail/find.h"     
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/pbes_free_variable_finder.h"
@@ -36,7 +37,7 @@ namespace pbes_system {
   template <typename Container, typename OutputIterator>
   void find_variables(Container const& container, OutputIterator o)
   {
-    data::detail::make_find_helper<data::variable, pbes_system::traverser, OutputIterator>(o)(container);
+    core::detail::make_find_helper<data::variable, pbes_system::traverser, OutputIterator>(o)(container);
   }
 
   /// \brief Returns all data variables that occur in a range of expressions
@@ -58,7 +59,7 @@ namespace pbes_system {
   template <typename Container, typename OutputIterator>
   void find_propositional_variable_instantiations(Container const& container, OutputIterator o)
   {
-    data::detail::make_find_helper<propositional_variable_instantiation, pbes_system::traverser, OutputIterator>(o)(container);
+    core::detail::make_find_helper<propositional_variable_instantiation, pbes_system::traverser, OutputIterator>(o)(container);
   }
 
   /// \brief Returns all data variables that occur in a range of expressions
@@ -129,7 +130,7 @@ namespace pbes_system {
   template <typename Container, typename OutputIterator>
   void find_sort_expressions(Container const& container, OutputIterator o)
   {
-    data::detail::make_find_helper<data::sort_expression, pbes_system::traverser>(o)(container);
+    core::detail::make_find_helper<data::sort_expression, pbes_system::traverser>(o)(container);
   }
 
   /// \brief Returns all sort expressions that occur in the term t

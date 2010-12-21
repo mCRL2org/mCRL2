@@ -12,7 +12,8 @@
 #ifndef MCRL2_MODAL_FORMULA_FIND_H
 #define MCRL2_MODAL_FORMULA_FIND_H
 
-#include "mcrl2/core/detail/find.h"
+#include "mcrl2/core/detail/find_impl.h"
+#include "mcrl2/data/detail/find_impl.h"
 #include "mcrl2/data/variable.h"                         
 #include "mcrl2/modal_formula/traverser.h"              
 #include "mcrl2/exception.h"
@@ -29,7 +30,7 @@ namespace state_formulas {
   template <typename Container, typename OutputIterator>
   void find_variables(Container const& container, OutputIterator o)
   {
-    data::detail::make_find_helper<data::variable, state_formulas::traverser, OutputIterator>(o)(container);
+    core::detail::make_find_helper<data::variable, state_formulas::traverser, OutputIterator>(o)(container);
   }
 
   /// \brief Returns all data variables that occur in a range of expressions
@@ -100,7 +101,7 @@ namespace state_formulas {
   template <typename Container, typename OutputIterator>
   void find_sort_expressions(Container const& container, OutputIterator o)
   {
-    data::detail::make_find_helper<data::sort_expression, state_formulas::traverser>(o)(container);
+    core::detail::make_find_helper<data::sort_expression, state_formulas::traverser>(o)(container);
   }
 
   /// \brief Returns all sort expressions that occur in the term t

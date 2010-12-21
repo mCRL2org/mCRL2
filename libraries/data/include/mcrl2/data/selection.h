@@ -14,6 +14,7 @@
 
 #include <algorithm>
 
+#include "mcrl2/core/detail/find_impl.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
@@ -64,7 +65,7 @@ namespace mcrl2 {
           {
              std::set< function_symbol > used_symbols;
 
-             detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
+             core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
 
              symbols_for_equation[*i].swap(used_symbols);
           }
@@ -75,8 +76,8 @@ namespace mcrl2 {
 			{
 			  if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
               {
-                detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
-                detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
+                core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
+                core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
 
                 equations.erase(i++);
               }
@@ -104,7 +105,7 @@ namespace mcrl2 {
           
           std::set< function_symbol > used_symbols;
 
-          detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
+          core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
 
           /* for(std::set< function_symbol >::const_iterator i=used_symbols.begin();
                  i!=used_symbols.end(); ++i)
@@ -161,7 +162,7 @@ namespace mcrl2 {
           // Trick, traverse all but the data specification
           for (atermpp::aterm_appl::const_iterator i = ++start; i != context.end(); ++i)
           {
-            detail::make_find_helper< function_symbol, detail::traverser >
+            core::detail::make_find_helper< function_symbol, detail::traverser >
                    (std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
           }
 

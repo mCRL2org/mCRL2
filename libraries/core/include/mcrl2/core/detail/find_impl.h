@@ -1,4 +1,4 @@
-// Author(s): Jeroen van der Wulp, Wieger Wesselink
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/detail/find.h
+/// \file mcrl2/core/detail/find_impl.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_CORE_DETAIL_FIND_H
-#define MCRL2_CORE_DETAIL_FIND_H
+#ifndef MCRL2_CORE_DETAIL_FIND_IMPL_H
+#define MCRL2_CORE_DETAIL_FIND_IMPL_H
 
 #include <iostream>
 #include "mcrl2/core/traverser.h"
@@ -169,4 +169,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_DETAIL_FIND_H
+#endif // MCRL2_CORE_DETAIL_FIND_IMPL_H

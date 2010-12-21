@@ -26,7 +26,6 @@
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
-#include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
 
 namespace mcrl2 {

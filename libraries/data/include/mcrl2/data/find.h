@@ -23,8 +23,11 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/variable.h"
 // #include "mcrl2/data/data_specification.h"
+#include "mcrl2/core/detail/find_impl.h"
+#include "mcrl2/data/detail/find_impl.h"
 #include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/detail/traverser.h"
+#include "mcrl2/data/traverser.h"
 
 namespace mcrl2 {
 
@@ -38,7 +41,7 @@ namespace data {
 template <typename Container, typename OutputIterator>
 void find_variables(Container const& container, OutputIterator o)
 {
-  detail::make_find_helper<variable, detail::traverser>(o)(container);
+  core::detail::make_find_helper<variable, detail::traverser>(o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -60,7 +63,7 @@ std::set<variable> find_variables(Container const& container)
 template <typename Container>
 bool search_variable(Container const& container, const variable& v)
 {
-  return detail::make_search_helper<variable, detail::selective_data_traverser>(detail::compare_variable(v)).apply(container);
+  return core::detail::make_search_helper<variable, detail::selective_data_traverser>(detail::compare_variable(v)).apply(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -131,7 +134,7 @@ bool search_free_variable(Container container, const variable& d)
 template <typename Container>
 bool search_sort_expression(Container const& container, const sort_expression& s)
 {
-  return detail::make_search_helper<sort_expression, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
+  return core::detail::make_search_helper<sort_expression, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
@@ -141,7 +144,7 @@ bool search_sort_expression(Container const& container, const sort_expression& s
 template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o)
 {
-  detail::make_find_helper<sort_expression, detail::sort_traverser>(o)(container);
+  core::detail::make_find_helper<sort_expression, detail::sort_traverser>(o)(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
@@ -162,7 +165,7 @@ std::set<sort_expression> find_sort_expressions(Container const& container)
 template <typename Container>
 bool search_basic_sort(Container const& container, const basic_sort& s)
 {
-  return detail::make_search_helper<basic_sort, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
+  return core::detail::make_search_helper<basic_sort, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
 }
 
 /// \brief Returns all sort identifiers that occur in the term t
@@ -172,7 +175,7 @@ bool search_basic_sort(Container const& container, const basic_sort& s)
 template <typename Container, typename OutputIterator>
 void find_basic_sorts(Container const& container, OutputIterator o)
 {
-  return detail::make_find_helper<basic_sort, detail::sort_traverser>(o)(container);
+  return core::detail::make_find_helper<basic_sort, detail::sort_traverser>(o)(container);
 }
 
 /// \brief Returns all basic sorts that occur in the term t
@@ -194,7 +197,7 @@ std::set<basic_sort> find_basic_sorts(Container const& container)
 template <typename Container>
 bool search_identifiers(Container const& container, const core::identifier_string& s)
 {
-  return detail::make_search_helper<core::identifier_string, detail::selective_sort_traverser>(boost::bind(std::equal_to<core::identifier_string>(), s, _1)).apply(container);
+  return core::detail::make_search_helper<core::identifier_string, detail::selective_sort_traverser>(boost::bind(std::equal_to<core::identifier_string>(), s, _1)).apply(container);
 }
 
 /// \brief Returns all identifiers that occur in the term t
@@ -204,7 +207,7 @@ bool search_identifiers(Container const& container, const core::identifier_strin
 template <typename Container, typename OutputIterator>
 void find_identifiers(Container const& container, OutputIterator o)
 {
-  return detail::make_find_helper<core::identifier_string, detail::sort_traverser>(o)(container);
+  return core::detail::make_find_helper<core::identifier_string, detail::sort_traverser>(o)(container);
 }
 
 /// \brief Returns all basic sorts that occur in the term t
@@ -226,7 +229,7 @@ std::set<core::identifier_string> find_identifiers(Container const& container)
 template <typename Container>
 bool search_data_expression(Container const& container, const data_expression& s)
 {
-  return detail::make_search_helper<data_expression, detail::selective_data_traverser>(detail::compare_term<data_expression>(s)).apply(container);
+  return core::detail::make_search_helper<data_expression, detail::selective_data_traverser>(detail::compare_term<data_expression>(s)).apply(container);
 }
 
 /// \brief Returns all data expressions that occur in the term t
@@ -235,7 +238,7 @@ bool search_data_expression(Container const& container, const data_expression& s
 template <typename Container, typename OutputIterator>
 void find_data_expressions(Container const& container, OutputIterator o)
 {
-  detail::make_find_helper<data_expression, detail::traverser>(o)(container);
+  core::detail::make_find_helper<data_expression, detail::traverser>(o)(container);
 }
 
 /// \brief Returns all data expressions that occur in the term t

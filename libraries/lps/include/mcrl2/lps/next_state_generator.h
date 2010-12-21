@@ -17,8 +17,11 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "mcrl2/core/detail/find_impl.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/traverser.h"
+#include "mcrl2/data/detail/traverser.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/lps/nextstate/standard.h"
@@ -63,7 +66,7 @@ namespace lps {
         // Trick, traverse all but the data specification
         for (atermpp::aterm_appl::const_iterator i = ++start; i != context.end(); ++i)
         {
-          data::detail::make_find_helper<data::function_symbol, data::detail::traverser>
+          core::detail::make_find_helper<data::function_symbol, data::detail::traverser>
                  (std::inserter(result, result.end()))(*i);
         }
         return result;

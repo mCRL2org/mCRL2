@@ -44,9 +44,21 @@ namespace data {
   {
     public:
       typedef core::binding_aware_traverser<Derived, variable> super;
+      typedef typename super::variable_type variable_type;
       using super::operator();
       using super::enter;
       using super::leave;
+
+      /// \brief Constructor
+      binding_aware_traverser_helper()
+      {}
+
+      /// \brief Constructor
+      template <typename Container>
+      binding_aware_traverser_helper(Container const& bound_variables,
+                              typename atermpp::detail::enable_if_container<Container, variable_type>::type* = 0)
+        : super(bound_variables)
+      {}
 
 #include "mcrl2/data/detail/traverser.inc.h"
   };
@@ -57,39 +69,51 @@ namespace data {
   {
     public:
       typedef binding_aware_traverser_helper<Derived> super;
+      typedef typename super::variable_type variable_type;
       using super::operator();
       using super::enter;
       using super::leave;
       using super::increase_bind_count;
       using super::decrease_bind_count;
 
-    void operator()(where_clause const& x)
-    {
-      increase_bind_count(make_assignment_left_hand_side_range(x.declarations()));
-      super::operator()(x);
-      decrease_bind_count(make_assignment_left_hand_side_range(x.declarations()));
-    }
+      /// \brief Constructor
+      binding_aware_traverser()
+      {}
 
-    void operator()(lambda const& x)
-    {
-      increase_bind_count(x.variables());
-      super::operator()(x);
-      decrease_bind_count(x.variables());
-    }
+      /// \brief Constructor
+      template <typename Container>
+      binding_aware_traverser(Container const& bound_variables,
+                              typename atermpp::detail::enable_if_container<Container, variable_type>::type* = 0)
+        : super(bound_variables)
+      {}
 
-    void operator()(exists const& x)
-    {
-      increase_bind_count(x.variables());
-      super::operator()(x);
-      decrease_bind_count(x.variables());
-    }
-
-    void operator()(forall const& x)
-    {
-      increase_bind_count(x.variables());
-      super::operator()(x);
-      decrease_bind_count(x.variables());
-    }
+      void operator()(where_clause const& x)
+      {
+        increase_bind_count(make_assignment_left_hand_side_range(x.declarations()));
+        super::operator()(x);
+        decrease_bind_count(make_assignment_left_hand_side_range(x.declarations()));
+      }
+      
+      void operator()(lambda const& x)
+      {
+        increase_bind_count(x.variables());
+        super::operator()(x);
+        decrease_bind_count(x.variables());
+      }
+      
+      void operator()(exists const& x)
+      {
+        increase_bind_count(x.variables());
+        super::operator()(x);
+        decrease_bind_count(x.variables());
+      }
+      
+      void operator()(forall const& x)
+      {
+        increase_bind_count(x.variables());
+        super::operator()(x);
+        decrease_bind_count(x.variables());
+      }
   };
 
   /// \brief Selective traversal class for data library data types

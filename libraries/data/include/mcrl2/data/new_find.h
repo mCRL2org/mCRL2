@@ -13,7 +13,7 @@
 #define MCRL2_DATA_NEW_FIND_H
 
 #include <set>
-#include "mcrl2/core/detail/find.h"
+#include "mcrl2/core/detail/find_impl.h"
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/data/variable.h"
 

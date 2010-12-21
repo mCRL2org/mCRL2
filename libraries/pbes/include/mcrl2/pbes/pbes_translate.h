@@ -24,7 +24,6 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/sequence_substitution.h"
-#include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/data/set_identifier_generator.h"

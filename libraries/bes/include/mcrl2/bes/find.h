@@ -15,7 +15,7 @@
 #include <iterator>
 #include "mcrl2/bes/boolean_expression.h"
 #include "mcrl2/bes/traverser.h"
-#include "mcrl2/core/detail/find.h"
+#include "mcrl2/core/detail/find_impl.h"
 
 namespace mcrl2 {
 
