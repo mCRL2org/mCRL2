@@ -897,7 +897,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             return text           
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
-        print '<BUILDER>', self.classname(True)
         text = r'''RETURN_TYPE operator()(const CLASS_NAME& x)
 {
   static_cast<Derived&>(*this).enter(x);
@@ -932,8 +931,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         else:
             if 'X' in self.modifiers():
                 return_type = classname
-                visit_text = '<aap>'
-                return_statement = 'return <aap>'
                 classes = [all_classes[name] for name in self.expression_classes()]
 
                 updates = []          
@@ -959,10 +956,10 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 for p in f.parameters():
                     ptype = p.type(include_modifiers = False, include_namespace = True)
                     if is_dependent_type(dependencies, ptype):
-                        updates.append('x.%s()' % p.name())
-                    else:
                         dependent = True
                         updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
+                    else:
+                        updates.append('x.%s()' % p.name())
                 if dependent:
                     visit_text = '%s result = %s(%s);' % (return_type, f.qualified_name(), ', '.join(updates))
                     return_statement = 'return result;'
@@ -1054,15 +1051,16 @@ def update_dependencies(all_classes, dependencies):
     changed = False
     for classname in all_classes:
         c = all_classes[classname]
+        if dependencies[classname] == True:
+            continue
 
         # check expression class dependencies
-        if dependencies[classname] == True:
-            if 'X' in c.modifiers(): # c is an expression super class:
-                for expr in c.expression_classes():
-                    if dependencies[expr] == False:
-                        update_dependency(expr, all_classes, dependencies)
-                        changed = True
-            continue
+        if 'X' in c.modifiers():
+            for expr in c.expression_classes():
+                if dependencies[expr] == True:
+                    update_dependency(classname, all_classes, dependencies)
+                    changed = True
+                    break
 
         # check parameter dependencies
         for p in c.constructor.parameters():

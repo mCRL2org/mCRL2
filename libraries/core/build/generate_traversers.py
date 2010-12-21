@@ -48,7 +48,8 @@ def make_builder(filename, classnames, all_classes, expression, dependencies, mo
     classes.sort(compare_classes)
 
     for c in classes:
-        result.append(c.builder_function(all_classes, dependencies, modifiability_map))
+        if is_dependent_type(dependencies, c.classname(True)):
+            result.append(c.builder_function(all_classes, dependencies, modifiability_map))
     text = '\n'.join(result)
 
     insert_text_in_file(filename, text, 'generated code')
@@ -255,7 +256,7 @@ if __name__ == "__main__":
 
     modifiability_map = make_modifiability_map(class_map)
 
-    #make_builder('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', parse_classnames(class_map['data'], 'data'), all_classes, 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', parse_classnames(class_map['data'], 'data'), all_classes, 'data::sort_expression', sort_expression_dependencies, modifiability_map)
 
     #print_dependencies(sort_expression_dependencies, '--- sort_expression_dependencies ---')
 
