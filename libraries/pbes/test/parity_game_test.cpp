@@ -19,6 +19,7 @@
 
 #include <fstream>
 #include <string>
+#include <iomanip>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
@@ -328,7 +329,7 @@ void test_abp()
       {
           size_t w = (size_t)*it;
           if (w >= num_vertices) num_vertices = w + 1;
-          printf("%6lu -> %6lu\n", v, w);
+          std::cout << std::setw(6) << v << " -> " << w << "\n";
       }
   }
 
@@ -338,7 +339,7 @@ void test_abp()
       bool and_op = pgg.get_operation(v) ==
                     mcrl2::pbes_system::parity_game_generator::PGAME_AND;
       int priority = pgg.get_priority(v);
-      printf("%6lu: player=%d priority=%d\n", v, and_op, priority);
+      std::cout << std::setw(6) << v << ": player=" << and_op << " priority = " << priority << "\n";
   }
   core::garbage_collect();
 }
