@@ -12,8 +12,11 @@
 #ifndef MCRL2_CORE_BUILDER_H
 #define MCRL2_CORE_BUILDER_H
 
+#include <stdexcept>
+
 #include "boost/utility/enable_if.hpp"
 #include "boost/type_traits/is_base_of.hpp"
+
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/atermpp/vector.h"
@@ -64,7 +67,7 @@ namespace core {
         // skip
       }
 
-      // Traverse object that is a container
+      // Traverse non-constant container
       template <typename Container>
       void operator()(Container& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
       {
@@ -74,7 +77,27 @@ namespace core {
         }
       }
 
-      // Traverse aterm list
+      // Traverse constant container
+      template <typename Container>
+      Container operator()(const Container& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+      {
+        throw std::runtime_error("Please supply an overload for traversing this container");
+        return container;
+      }
+
+      // Traverse non-constant aterm list
+      template <typename T>
+      atermpp::term_list<T> operator()(atermpp::term_list<T>& x)
+      {
+        atermpp::vector<T> result;
+        for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+        {
+          result.push_back(static_cast<Derived&>(*this)(*i));
+        }
+        return atermpp::convert<atermpp::term_list<T> >(result);
+      }
+
+      // Traverse constant aterm list
       template <typename T>
       atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
       {
