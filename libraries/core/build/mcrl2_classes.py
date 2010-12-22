@@ -143,7 +143,7 @@ specification(const data::data_specification& data, const action_label_list& act
 '''
 
 PROCESS_CLASSES = r'''
-process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const process_equation_list& equations, const process_expression& init)                       | M | ProcSpec    | A process specification
+process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const atermpp::vector<process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
 process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : atermpp::aterm_appl | C | ProcVarId   | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : atermpp::aterm_appl | C | ProcEqn     | A process equation
 rename_expression(core::identifier_string source, core::identifier_string target)                                                                                                : atermpp::aterm_appl | C | RenameExpr  | A rename expression
@@ -259,8 +259,13 @@ class Parameter:
     # Returns the type of the parameter
     #
     # 'const core::identifier_string&'
-    def type(self, include_modifiers = True, include_namespace = False):
+    def type(self, include_modifiers = True, include_namespace = False, remove_templates = False):
         type1 = self.type_
+        if remove_templates:
+            pos1 = type1.find('<')
+            pos2 = type1.rfind('>')
+            if pos1 != -1 and pos2 > pos1:
+                type1 = type1[pos1+1:pos2]
         if include_namespace and extract_namespace(type1) == None:
             type1 = '%s::%s' % (self.namespace(), type1)
         if include_modifiers:
@@ -826,8 +831,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
     # Returns the class declaration
     def class_declaration(self, namespace = 'core'):
-        #print 'generating class', self.classname()
-
         ptext = ', '.join([p.name() for p in self.constructor.parameters()])
         ctext = '\n\n'.join([x.declaration() for x in self.constructors(namespace)])
         mtext = ''.join(['\n\n' + x.declaration() for x in self.member_functions()])
@@ -897,27 +900,28 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             return text           
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
-        text = r'''RETURN_TYPE operator()(<CONST>CLASS_NAME& x)
+        text = r'''<RETURN_TYPE> operator()(<CONST><CLASS_NAME>& x)
 {
-  static_cast<Derived&>(*this).enter(x);VISIT_TEXT
-  static_cast<Derived&>(*this).leave(x);RETURN_STATEMENT
+  static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
+  static_cast<Derived&>(*this).leave(x);<RETURN_STATEMENT>
 }
 '''
         classname = self.classname(True)
         visit_text = ''
         dependent = False
-        if modifiability_map[classname]:
+        if is_modifiable_type(classname, modifiability_map):
             return_type = 'void'
             return_statement = ''
     
             updates = []
             f = self.constructor
             for p in f.parameters():
-                ptype = p.type(include_modifiers = False, include_namespace = True)
+                ptype = p.type(include_modifiers = False, include_namespace = True, remove_templates = True)
+                qtype = p.type(include_modifiers = False, include_namespace = True)
                 if is_dependent_type(dependencies, ptype):
                     dependent = True
-                    if modifiability_map[ptype]:
-                        updates.append('static_cast<Derived&>(*this)(x.%s())' % p.name())
+                    if is_modifiable_type(qtype, modifiability_map):
+                        updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
                     else:
                         updates.append('x.%s() = static_cast<Derived&>(*this)(x.%s());' % (p.name(), p.name()))
                 else:
@@ -930,6 +934,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             if 'X' in self.modifiers():
                 return_type = classname
                 classes = [all_classes[name] for name in self.expression_classes()]
+                classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
+                classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
 
                 updates = []          
                 for c in classes:
@@ -970,17 +976,17 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         else:
             const = 'const '
 
-        # layout
+        # fix the layout
         if return_statement != '':
             return_statement = '\n  ' + return_statement
         if visit_text != '':
             visit_text = indent_text('\n' + visit_text, '  ')       
 
-        text = re.sub('RETURN_TYPE', return_type, text)
+        text = re.sub('<RETURN_TYPE>', return_type, text)
         text = re.sub('<CONST>', const, text)
-        text = re.sub('CLASS_NAME', classname, text)
-        text = re.sub('VISIT_TEXT', visit_text, text)
-        text = re.sub('RETURN_STATEMENT', return_statement, text)
+        text = re.sub('<CLASS_NAME>', classname, text)
+        text = re.sub('<VISIT_TEXT>', visit_text, text)
+        text = re.sub('<RETURN_STATEMENT>', return_statement, text)
         if self.constructor.is_template():
             text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
         return text
@@ -1074,7 +1080,7 @@ def update_dependencies(all_classes, dependencies):
 
         # check parameter dependencies
         for p in c.constructor.parameters():
-            type = p.type(include_modifiers = False, include_namespace = True)
+            type = p.type(include_modifiers = False, include_namespace = True, remove_templates = True)
             if is_dependent_type(dependencies, type):
                 update_dependency(classname, all_classes, dependencies)
                 changed = True
@@ -1106,6 +1112,16 @@ def make_modifiability_map(all_classes):
             result[classname + '_list'] = value
             result[classname + '_vector'] = value
     return result
+
+def is_modifiable_type(type, modifiability_map):
+    if type in modifiability_map:
+        return modifiability_map[type]
+    elif type.startswith('atermpp::vector<'):
+        return True
+    elif type.startswith('atermpp::set<'):
+        return True
+    else:
+        raise Exception('is_modifiable_type(' + type + ') is unknown')
 
 def parse_class_map(class_map):
     result = {}
