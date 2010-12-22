@@ -21,6 +21,7 @@ class SimulatorInterfaceGUI
 public:
 	virtual wxWindow *MainWindow() = 0;
 	/* Returns the main window of the simulator. */
+	virtual ~SimulatorInterfaceGUI(){};
 };
 
 inline wxWindow *GetMainWindow(SimulatorInterface *Simulator)
