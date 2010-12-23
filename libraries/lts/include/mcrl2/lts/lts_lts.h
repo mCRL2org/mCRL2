@@ -300,7 +300,7 @@ namespace lts
       /** \brief Swap function for this lts. */
       void swap(lts_lts_t &l)
       {
-        lts< detail::state_label_lts, detail::action_label_lts >(l).swap(*this);
+        lts< detail::state_label_lts, detail::action_label_lts >::swap(l);
       
         { const bool aux=m_has_valid_data_spec; m_has_valid_data_spec=l.m_has_valid_data_spec; l.m_has_valid_data_spec=aux; }
         { const data::data_specification aux=m_data_spec; m_data_spec=l.m_data_spec; l.m_data_spec=aux; }

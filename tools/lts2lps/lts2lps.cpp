@@ -219,36 +219,6 @@ class lts2lps_tool : public input_output_tool
       }
 
       mcrl2::lts::detail::lts_convert(l1,l2,data,action_labels,process_parameters,extra_data_is_defined);
-
-      /* if (gsVerbose)
-      {
-        std::cerr << "Start type checking action labels\n";
-      }
-      action_summand_vector action_summands;
-      const variable process_parameter("x",mcrl2::data::sort_pos::pos());
-      const variable_list process_parameters=push_back(variable_list(),process_parameter);
-      const atermpp::set< data::variable> global_variables;
-      // Add a single delta.
-      const deadlock_summand_vector deadlock_summands(1,deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
-      const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
-      const process_initializer initial_process(push_back(assignment_list(),
-                                                          assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
-
-      const lps::specification spec(data,action_labels,global_variables,lps,initial_process);
-      
-      // First collect all the multi actions to allow them to be type checked as a whole, which
-      // is much more efficient than type checking them individually (because this requires the
-      // data specification to be transformed in the type checker each time.
-      
-      atermpp::vector <multi_action> all_multi_actions;
-      for(mcrl2::lts::transition_const_range r = l.get_transitions(); !r.empty(); r.advance_begin(1))
-      { 
-        const transition t=r.front();
-        const lps::multi_action actions=parse_multi_action(
-                     mcrl2::lts::detail::pretty_print_label_value(l.label_value(t.label())));
-        all_multi_actions.push_back(actions);
-      }
-      type_check(all_multi_actions,spec.data(),spec.action_labels());   */
     }
     
     template <class LTS_TYPE>
@@ -264,7 +234,7 @@ class lts2lps_tool : public input_output_tool
       {
         std::cerr << "Start generating linear process\n";
       }
-       
+
       action_summand_vector action_summands;
       const variable process_parameter("x",mcrl2::data::sort_pos::pos());
       const variable_list process_parameters=push_back(variable_list(),process_parameter);
