@@ -64,7 +64,7 @@ using namespace mcrl2;
       atermpp::vector<T> result;
       for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
       {
-        result.push_back(update(*i));
+        result.push_back(static_cast<Derived&>(*this)(*i));
       }
       return atermpp::convert<atermpp::term_list<T> >(result);
     }
@@ -122,6 +122,20 @@ using namespace mcrl2;
       apply_builder_arg1(const Arg1& arg1):
         super(arg1)
       {}
+
+#ifdef BOOST_MSVC
+      // ATerm list traversal
+      template <typename T>
+      atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
+      {
+        atermpp::vector<T> result;
+        for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+        {
+          result.push_back(super::operator()(*i));
+        }
+        return atermpp::convert<atermpp::term_list<T> >(result);
+      }
+#endif
   };
 
   template <typename Derived>
