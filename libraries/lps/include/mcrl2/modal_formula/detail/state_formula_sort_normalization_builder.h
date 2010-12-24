@@ -6,18 +6,18 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/sort_normalization_builder.h
+/// \file mcrl2/modal_formula/detail/state_formula_sort_normalization_builder.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_SORT_NORMALIZATION_BUILDER_H
-#define MCRL2_PBES_DETAIL_SORT_NORMALIZATION_BUILDER_H
+#ifndef MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_SORT_NORMALIZATION_BUILDER_H
+#define MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_SORT_NORMALIZATION_BUILDER_H
 
 #include "mcrl2/data/detail/sort_normalization_builder.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/modal_formula/state_formula.h"
 
 namespace mcrl2 {
 
-namespace pbes_system {
+namespace state_formulas {
 
 namespace detail {
 
@@ -35,23 +35,20 @@ namespace detail {
         : super(data_spec)
       {}
 
-#include "mcrl2/pbes/detail/sort_expression_builder.inc.h"
+#include "mcrl2/modal_formula/detail/state_formula_data_expression_builder.inc.h"
   };
 
-  /**
-   * Applies sort normalization to a pbes specification.
-   **/
-  template <typename Container>
-  void normalize_sorts(pbes<Container>& x)
+  inline
+  state_formula normalize_sorts(const state_formula& x, const data::data_specification& data_spec)
   {
-    core::apply_builder_arg1<sort_normalization_builder, data::data_specification> builder(x.data());
-    builder(x);
+    core::apply_builder_arg1<sort_normalization_builder, data::data_specification> builder(data_spec);
+    return builder(x);
   }
 
 } // namespace detail
 
-} // namespace pbes_system
+} // namespace state_formulas
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_SORT_NORMALIZATION_BUILDER_H
+#endif // MCRL2_MODAL_FORMULA_DETAIL_STATE_FORMULA_SORT_NORMALIZATION_BUILDER_H

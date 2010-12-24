@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_DETAIL_TRANSLATE_USER_NOTATION_BUILDER_H
 #define MCRL2_PROCESS_DETAIL_TRANSLATE_USER_NOTATION_BUILDER_H
 
-#include "mcrl2/data/detail/translate_user_notation_builder.h"
+#include "mcrl2/lps/detail/translate_user_notation_builder.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/process_specification.h"
 
@@ -22,26 +22,11 @@ namespace process {
 
 namespace detail {
 
-  // add process expression traversal
   template <typename Derived>
-  class translate_user_notation_builder_base: public data::detail::translate_user_notation_builder<Derived>
+  class translate_user_notation_builder: public lps::detail::translate_user_notation_builder<Derived>
   {
     public:
-      typedef data::detail::translate_user_notation_builder<Derived> super;
-  
-      using super::enter;
-      using super::leave;
-      using super::operator();
-
-#include "mcrl2/process/detail/process_expression_builder.inc.h"
-  };
-
-  // add data expression traversal
-  template <typename Derived>
-  class translate_user_notation_builder: public translate_user_notation_builder_base<Derived>
-  {
-    public:
-      typedef translate_user_notation_builder_base<Derived> super;
+      typedef lps::detail::translate_user_notation_builder<Derived> super;
   
       using super::enter;
       using super::leave;

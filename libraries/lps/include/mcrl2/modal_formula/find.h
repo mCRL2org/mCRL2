@@ -115,6 +115,23 @@ namespace state_formulas {
     return result;
   }
 
+  /// \brief Returns all names of data variables that occur in the term t
+  /// \param t A term
+  /// \return All names of data variables that occur in the term t
+  template <typename Term>
+  std::set<core::identifier_string> find_variable_names(Term t)
+  {
+    // find all data variables in t
+    std::set<data::variable> variables = state_formulas::find_variables(t);
+
+    std::set<core::identifier_string> result;
+    for (std::set<data::variable>::iterator j = variables.begin(); j != variables.end(); ++j)
+    {
+      result.insert(j->name());
+    }
+    return result;
+  }
+
 } // namespace state_formulas
 
 } // namespace mcrl2

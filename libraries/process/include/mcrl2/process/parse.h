@@ -28,65 +28,6 @@ namespace mcrl2 {
 
 namespace process {
 
-  /// \brief Applies internal format conversion to a process specification
-  inline
-  void apply_internal_format_conversion(process_specification& p)
-  {
-    // TODO: make proper internal_format_conversion function process_specification
-    /* atermpp::aterm_appl t = process_specification_to_aterm(p);
-    t = data::detail::internal_format_conversion(t,p.data());
-    p = process_specification(t,p.data());  */
-
-    using namespace data::detail;
-
-//#ifdef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
-//    process_specification q = p;
-//    std::cout << "--- q1 ---\n" << pp(q) << std::endl;
-//    detail::translate_user_notation(q);
-//    std::cout << "--- q0 ---\n" << pp(q) << std::endl;
-//    detail::normalize_sorts(q);
-//    std::cout << "--- q2 ---\n" << pp(q) << std::endl;
-//#endif
-//    p = process_specification(
-//                p.data(),
-//                mcrl2::lps::action_label_list(internal_format_conversion_list(
-//                              p.action_labels(),
-//                              p.data())),
-//                mcrl2::data::variable_list(internal_format_conversion_list(
-//                              atermpp::convert<data::variable_list>(p.global_variables()),
-//                              p.data())),
-//                mcrl2::process::process_equation_list(internal_format_conversion_list(
-//                              process_equation_list(p.equations().begin(), p.equations().end()),
-//                              p.data())),
-//                mcrl2::process::process_expression(
-//                              internal_format_conversion_term(p.init(),
-//                              p.data())));
-//#ifdef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION
-//    std::cout << "--- p ---\n" << pp(p) << std::endl;
-//#endif
-
-#define MCRL2_NEW_INTERNAL_FORMAT_CONVERSION_PROCESS
-#ifndef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION_PROCESS
-    p = process_specification(
-                p.data(),
-                mcrl2::lps::action_label_list(internal_format_conversion_list(
-                              p.action_labels(),
-                              p.data())),
-                mcrl2::data::variable_list(internal_format_conversion_list(
-                              atermpp::convert<data::variable_list>(p.global_variables()),
-                              p.data())),
-                mcrl2::process::process_equation_list(internal_format_conversion_list(
-                              process_equation_list(p.equations().begin(), p.equations().end()),
-                              p.data())),
-                mcrl2::process::process_expression(
-                              internal_format_conversion_term(p.init(),
-                              p.data())));
-#else
-    detail::translate_user_notation(p);
-    detail::normalize_sorts(p);
-#endif
-  }
-
   /// \brief Parses a process specification from an input stream
   /// \param spec_stream An input stream
   /// \param alpha_reduce Indicates whether alphabet reductions need to be performed
@@ -108,7 +49,9 @@ namespace process {
     {
       apply_alphabet_reduction(result);
     }
-    apply_internal_format_conversion(result);
+    detail::translate_user_notation(result);
+    detail::normalize_sorts(result);
+
     return result;
   }
 
@@ -138,7 +81,6 @@ namespace process {
     std::string proc_text = core::regex_replace(";", " = delta;", proc_decl);
     std::string init_text = "init\n     " + text + ";\n";
     std::string spec_text = data_decl + "\n" + proc_text + "\n" + init_text;
-    std::cout << spec_text << std::endl;
     process_specification spec = parse_process_specification(spec_text);
     return spec.init();
   }

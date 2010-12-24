@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_SORT_NORMALIZATION_BUILDER_H
 #define MCRL2_DATA_DETAIL_SORT_NORMALIZATION_BUILDER_H
 
-#include "mcrl2/core/builder.h"
+#include "mcrl2/data/detail/sort_expression_builder.h"
 #include "mcrl2/data/data_specification.h"
 
 namespace mcrl2 {
@@ -23,13 +23,13 @@ namespace detail {
 
   // TODO: move the code from data_specification to this class
   template <typename Derived>
-  class sort_normalization_builder: public core::builder<Derived>
+  class sort_normalization_builder: public data::detail::sort_expression_builder<Derived>
   {
     protected:
       const data_specification& m_data_spec;
 
     public:
-      typedef core::builder<Derived> super;
+      typedef data::detail::sort_expression_builder<Derived> super;
   
       using super::enter;
       using super::leave;
@@ -40,21 +40,6 @@ namespace detail {
       {}
 
       sort_expression operator()(const sort_expression& x)
-      {
-        return m_data_spec.normalise_sorts(x);
-      }
-
-      variable operator()(const variable& x)
-      {
-        return m_data_spec.normalise_sorts(x);
-      }
-      
-      data_expression operator()(const data_expression& x)
-      {
-        return m_data_spec.normalise_sorts(x);
-      }
-
-      assignment operator()(const assignment& x)
       {
         return m_data_spec.normalise_sorts(x);
       }

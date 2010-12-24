@@ -143,7 +143,7 @@ specification(const data::data_specification& data, const action_label_list& act
 '''
 
 PROCESS_CLASSES = r'''
-process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const atermpp::vector<process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
+process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const atermpp::set<data::variable>& global_variables, const atermpp::vector<process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
 process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : atermpp::aterm_appl | C | ProcVarId   | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : atermpp::aterm_appl | C | ProcEqn     | A process equation
 rename_expression(core::identifier_string source, core::identifier_string target)                                                                                                : atermpp::aterm_appl | C | RenameExpr  | A rename expression
@@ -918,6 +918,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             for p in f.parameters():
                 ptype = p.type(include_modifiers = False, include_namespace = True, remove_templates = True)
                 qtype = p.type(include_modifiers = False, include_namespace = True)
+                if classname == 'process::process_specification':
+                    print ptype, is_dependent_type(dependencies, ptype)
                 if is_dependent_type(dependencies, ptype):
                     dependent = True
                     if is_modifiable_type(qtype, modifiability_map):
@@ -965,7 +967,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     else:
                         updates.append('x.%s()' % p.name())
                 if dependent:
-                    visit_text = '%s result = %s(%s);' % (return_type, f.qualified_name(), ', '.join(updates))
+                    visit_text = '%s result = %s(%s);' % (return_type, classname, ', '.join(updates))
                     return_statement = 'return result;'
                 else:
                     visit_text = '// skip'
@@ -1050,7 +1052,7 @@ def is_dependent_type(dependencies, type):
     if type in dependencies:
         return dependencies[type]
     # TODO: handle template parameters
-    elif type == 'Container':
+    elif type.endswith('Container'):
         return True
     m = re.search('<(\w+)>', type)
     if m != None:
@@ -1068,6 +1070,11 @@ def update_dependencies(all_classes, dependencies):
     for classname in all_classes:
         c = all_classes[classname]
         if dependencies[classname] == True:
+
+            # this is needed because of poor choices in the internal format
+            if 'X' in c.modifiers():
+               for expr in all_classes[classname].expression_classes():
+                   update_dependency(expr, all_classes, dependencies, value = True)
             continue
 
         # check expression class dependencies
@@ -1094,8 +1101,12 @@ def find_dependencies(all_classes, type):
     for classname in all_classes:
         update_dependency(classname, all_classes, dependencies, value = False)
 
-    # initial dependency: the expression class depends on itself
+    # initial dependency: the expression class depends on itself, and all derivatives too
     update_dependency(type, all_classes, dependencies, value = True)
+
+    #for expr in all_classes[type].expression_classes():
+    #    update_dependency(expr, all_classes, dependencies, value = True)
+    #    print expr, dependencies[expr]
 
     while update_dependencies(all_classes, dependencies):
         pass
@@ -1119,6 +1130,8 @@ def is_modifiable_type(type, modifiability_map):
     elif type.startswith('atermpp::vector<'):
         return True
     elif type.startswith('atermpp::set<'):
+        return True
+    elif type.endswith('Container'): # TODO: handle containers properly
         return True
     else:
         raise Exception('is_modifiable_type(' + type + ') is unknown')

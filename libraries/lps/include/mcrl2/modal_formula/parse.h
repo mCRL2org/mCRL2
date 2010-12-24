@@ -16,8 +16,11 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
+#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/detail/state_formula_translate_user_notation_builder.h"
+#include "mcrl2/modal_formula/detail/state_formula_sort_normalization_builder.h"
 
 namespace mcrl2 {
 
@@ -53,9 +56,10 @@ namespace state_formulas {
     type_check(f, spec, check_monotonicity);
     translate_regular_formula(f);
 
-    // TODO: make find functions for state formulas
-    spec.data().add_context_sorts(data::find_sort_expressions(atermpp::aterm_appl(f)));
-    f = data::detail::internal_format_conversion_term(f,spec.data());
+    spec.data().add_context_sorts(state_formulas::find_sort_expressions((f)));
+    f = detail::translate_user_notation(f);
+    f = detail::normalize_sorts(f, spec.data());
+      
     return f;
   }
 

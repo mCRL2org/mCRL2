@@ -16,6 +16,7 @@ void operator()(const process::process_specification& x)
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.data());
   static_cast<Derived&>(*this)(x.action_labels());
+  static_cast<Derived&>(*this)(x.global_variables());
   static_cast<Derived&>(*this)(x.equations());
   static_cast<Derived&>(*this)(x.init());
   static_cast<Derived&>(*this).leave(x);

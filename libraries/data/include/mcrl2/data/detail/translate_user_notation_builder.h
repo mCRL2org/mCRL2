@@ -79,30 +79,7 @@ namespace detail {
               result = number(x.sort(), name);
             }
             static_cast<Derived&>(*this).leave(x);
-            return result;
-          }
 
-          data_expression operator()(const forall& x)
-          {
-            static_cast<Derived&>(*this).enter(x);
-            data_expression result = f(x);
-            static_cast<Derived&>(*this).leave(x);
-            return result;
-          }
-          
-          data_expression operator()(const exists& x)
-          {
-            static_cast<Derived&>(*this).enter(x);
-            data_expression result = f(x);
-            static_cast<Derived&>(*this).leave(x);
-            return result;
-          }
-          
-          data_expression operator()(const lambda& x)
-          {
-            static_cast<Derived&>(*this).enter(x);
-            data_expression result = f(x);
-            static_cast<Derived&>(*this).leave(x);
             return result;
           }
 

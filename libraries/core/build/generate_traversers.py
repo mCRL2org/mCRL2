@@ -124,7 +124,16 @@ if __name__ == "__main__":
     make_builder('../../lps/include/mcrl2/modal_formula/detail/regular_formula_sort_expression_builder.inc.h', class_map, all_classes, 'regular_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
     make_builder('../../lps/include/mcrl2/modal_formula/detail/state_formula_sort_expression_builder.inc.h', class_map, all_classes, 'state_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
 
+    make_builder('../../data/include/mcrl2/data/detail/data_expression_builder.inc.h', class_map, all_classes, 'data', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/lps/detail/data_expression_builder.inc.h', class_map, all_classes, 'lps', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../process/include/mcrl2/process/detail/data_expression_builder.inc.h', class_map, all_classes, 'process', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../pbes/include/mcrl2/pbes/detail/data_expression_builder.inc.h', class_map, all_classes, 'pbes_system', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/detail/action_formula_data_expression_builder.inc.h', class_map, all_classes, 'action_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    #make_builder('../../lps/include/mcrl2/modal_formula/detail/regular_formula_data_expression_builder.inc.h', class_map, all_classes, 'regular_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/detail/state_formula_data_expression_builder.inc.h', class_map, all_classes, 'state_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
+
     #print_dependencies(sort_expression_dependencies, '--- sort_expression_dependencies ---')
+    #print_dependencies(data_expression_dependencies, '--- data_expression_dependencies ---')
 
     #make_builder_expression_functions(  '../../process/include/mcrl2/process/detail/process_expression_builder.inc.h', PROCESS_EXPRESSION_CLASSES, process_expression_dependencies, 'process_expression', namespace = 'process')
     #make_builder_expression_functions(  '../../pbes/include/mcrl2/pbes/detail/data_expression_builder.inc.h', PBES_CLASSES + PBES_EXPRESSION_CLASSES, data_expression_dependencies, 'data_expression', namespace = 'pbes_system')
