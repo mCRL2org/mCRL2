@@ -17,8 +17,8 @@
 
 #include "compatibility.h"
 
-typedef compat_uint32_t verti;    //!< type used to number vertices
-typedef compat_uint32_t edgei;    //!< type used to number edges
+typedef size_t verti;    //!< type used to number vertices
+typedef size_t edgei;    //!< type used to number edges
 
 #define NO_VERTEX ((verti)-1)
 
@@ -116,7 +116,8 @@ public:
     }
 
     /*! Returns the indegree for vertex `v'. */
-    edgei indegree(verti v) const {
+    edgei indegree(verti v) const 
+    {
         return pred_end(v) - pred_begin(v);
     }
 

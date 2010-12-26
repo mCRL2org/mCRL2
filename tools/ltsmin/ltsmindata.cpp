@@ -596,7 +596,7 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
            }
          }
      result = ATgetInt((ATermInt) BlockCode(blockref[initState]));
-     nstate = n_states;
+     nstate = static_cast<SVCint>(n_states);
      /* Pi_pt = 0;
      n_partitions = 0; */
      for (i=0;i<nstate;i++) {

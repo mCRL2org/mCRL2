@@ -177,7 +177,7 @@ writeIntToBuf(size_t val, unsigned char *buf)
       return 4;
     }
 
-  if (sizeof(size_t)>4 && val>((size_t)1<<32))
+  if (sizeof(size_t)>4 && val>((size_t)1<<4*sizeof(size_t)))
   { 
     fprintf(stderr,"Warning losing precision of integers when writing to .baf file\n");
   }

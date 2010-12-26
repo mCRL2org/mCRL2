@@ -127,7 +127,7 @@ int ConeDB::find_obucket(int k1,int k2,bool b) {
 }
 
 int ConeDB::compute_key(float r) {
-  return MathUtils::round_to_int(r * 100.0);
+  return MathUtils::round_to_int(static_cast<float>(r * 100.0));
 }
 
 unsigned char ConeDB::combine_top_bot(bool t,bool b) {

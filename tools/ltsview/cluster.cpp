@@ -155,7 +155,7 @@ float Cluster::getBCHeight() const {
 }
 
 float Cluster::getBCVolume() const {
-  return bc_radius * bc_radius * PI * bc_height;
+  return bc_radius * bc_radius * static_cast<float>(PI) * bc_height;
 }
 
 float Cluster::getPosition() const {
@@ -220,7 +220,7 @@ void Cluster::computeSizeAndPositions_FSM() {
    * So: N * pi * 0.1^2 = 0.25 * pi * r^2
    * Hence: r = sqrt( N * 0.04 )
    */
-  topRadius = states.size()/(2*PI);
+  topRadius = states.size()/(2*static_cast<float>(PI));
 
   if (descendants.size() == 0) {
     baseRadius = topRadius;

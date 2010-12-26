@@ -81,8 +81,7 @@ class LeafClusterStatePositioner: public ClusterStatePositioner
 ClusterStatePositioner::ClusterStatePositioner(Cluster* c):
   cluster(c)
 {
-  int num_rings = 1 + std::floor(cluster->getTopRadius() /
-      MIN_DELTA_RING);
+  int num_rings = static_cast<int>(1 + std::floor(cluster->getTopRadius() / MIN_DELTA_RING));
   if (num_rings > 1)
   {
     delta_ring = cluster->getTopRadius() / static_cast<float>(num_rings - 1);
@@ -94,8 +93,8 @@ ClusterStatePositioner::ClusterStatePositioner(Cluster* c):
   num_ring_slots.assign(num_rings, 0);
   for (int ring = 0; ring < num_rings; ++ring)
   {
-    int num_slots = std::floor(2.0f * MathUtils::PI * ring * delta_ring /
-        MIN_DELTA_SLOT);
+    int num_slots = static_cast<int>(std::floor(2.0f * MathUtils::PI * ring * delta_ring /
+        MIN_DELTA_SLOT));
     num_ring_slots[ring] = (num_slots > 1) ? num_slots : 1;
   }
 }

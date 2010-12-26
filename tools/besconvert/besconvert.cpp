@@ -237,8 +237,8 @@ namespace mcrl2 {
               std::stringstream label;
               label << "self:block(" << info.first << "),op(" << info.second << ")";
               lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
-              int label_index = labs.index(t);
-              if ( label_index < 0 )
+              size_t label_index = labs.index(t);
+              if ( label_index == ATERM_NON_EXISTING_POSITION )
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;
@@ -263,8 +263,8 @@ namespace mcrl2 {
               }
               size_t to = indices[*j];
               lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
-              int label_index = labs.index(t);
-              if ( label_index < 0 )
+              size_t label_index = labs.index(t);
+              if ( label_index == ATERM_NON_EXISTING_POSITION )
               {
                 std::pair<int, bool> put_result = labs.put(t);
                 label_index = put_result.first;

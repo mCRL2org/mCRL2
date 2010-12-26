@@ -401,9 +401,9 @@ void PackedRTreeBuilder::buildRTree()
   while (roots.size() > 1)
   {
     std::vector< RNode* > new_roots;
-    unsigned int slice_size = MAX_FANOUT * std::ceil( std::sqrt( std::ceil(
+    unsigned int slice_size = static_cast<unsigned int>(MAX_FANOUT * std::ceil( std::sqrt( std::ceil(
             static_cast< double >(roots.size()) /
-            static_cast< double >(MAX_FANOUT))));
+            static_cast< double >(MAX_FANOUT)))));
     sort(roots.begin(), roots.end(), lessThanCenterX);
     for (unsigned int i = 0; i < roots.size(); i += slice_size)
     {

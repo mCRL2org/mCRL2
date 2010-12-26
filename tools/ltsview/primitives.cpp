@@ -180,7 +180,8 @@ P_SimpleSphere::P_SimpleSphere() {
   glEndList();
 }
 
-P_SimpleSphere::~P_SimpleSphere() {
+P_SimpleSphere::~P_SimpleSphere() 
+{
   glDeleteLists(disp_list,1);
 }
 
@@ -188,8 +189,8 @@ void P_SimpleSphere::draw() {
   glCallList(disp_list);
 }
 
-void P_SimpleSphere::reshape(int /*N*/,float */*coss*/,float */*sins*/) {
-}
+void P_SimpleSphere::reshape(int /*N*/,float * /* coss */,float * /* sins */) 
+{}
 
 /* -------- P_Hemisphere ---------------------------------------------------- */
 
@@ -464,11 +465,11 @@ void P_ObliqueCone::draw() {
   glCallList(disp_list);
 }
 
-void P_ObliqueCone::reshape(int /*N*/,float */*coss*/,float */*sins*/) {
+void P_ObliqueCone::reshape(int /*N*/,float * /*coss*/,float * /*sins*/) {
 }
 
 void P_ObliqueCone::reshape(int N,float *coss,float *sins,float obt) {
-  float a = 0.5f*PI - alpha - sign*obt;
+  float a = 0.5f*static_cast<float>(PI) - alpha - sign*obt;
   float sin_a = -sign*sin(a);
   float cos_a = cos(a);
   int i,j,k;

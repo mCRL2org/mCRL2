@@ -272,7 +272,7 @@ ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
 
   for (int ring = 0; ring < num_rings; ++ring)
   {
-    float circumference = 2 * PI * ring * delta_ring;
+    float circumference = 2 * static_cast<float>(PI) * ring * delta_ring;
     // max with 1 to ensure that ring 0 also has a slot
     int slots = max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
     num_slots.push_back(slots);
@@ -298,7 +298,7 @@ void ClusterSlotInfo::getPolarCoordinates(int ring, int slot, float &angle,
     float &radius)
 {
   radius = delta_ring * ring;
-  angle = rad_to_deg(2 * PI * slot / num_slots[ring]);
+  angle = rad_to_deg(2 * static_cast<float>(PI) * slot / num_slots[ring]);
 }
 
 Vector2D ClusterSlotInfo::getVector(int ring, int slot)
@@ -314,7 +314,7 @@ void ClusterSlotInfo::findNearestSlot(Vector2D &position, int &ring, int
   float angle, radius;
   position.toPolar(angle, radius);
   ring = min(round_to_int(radius / delta_ring), getNumRings() - 1);
-  slot = round_to_int(num_slots[ring] * deg_to_rad(angle) / (2 * PI)) %
+  slot = round_to_int(num_slots[ring] * deg_to_rad(angle) / (2 * static_cast<float>(PI))) %
     getNumSlots(ring);
 }
 

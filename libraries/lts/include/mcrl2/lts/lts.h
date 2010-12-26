@@ -408,7 +408,9 @@ namespace mcrl2
         
           for(labels_size_type i=0; i< num_action_labels(); ++i)
           { 
-            action_label(i).hide_actions(tau_actions);
+            ACTION_LABEL_T a=action_label(i);
+            a.hide_actions(tau_actions);
+            set_action_label(i,a);
           }
         
           // Now the actions have been adapted to the hiding operator. Check now whether actions

@@ -232,7 +232,7 @@ void SmallProgressMeasures::debug_print()
     printf("M =");
     for (int p = 0; p < game_.d(); ++p)
     {
-        printf(" %d", (p%2 == 0) ? 0 : M_[p/2]);
+        printf(" %lu", (p%2 == 0) ? 0 : M_[p/2]);
     }
     printf("\n");
 
@@ -249,7 +249,7 @@ void SmallProgressMeasures::debug_print()
         {
             for (int p = 0; p < game_.d(); ++p)
             {
-                printf(" %d", p%2 == 0 ? 0 : vec(v)[p/2]);
+                printf(" %lu", p%2 == 0 ? 0 : vec(v)[p/2]);
             }
         }
         printf("\n");
@@ -302,7 +302,7 @@ bool SmallProgressMeasures::verify_solution()
 
         if (!(player_even ? one_ok : all_ok))
         {
-            printf( "order constraint not satisfied for vertex %d with "
+            printf( "order constraint not satisfied for vertex %lu with "
                     "priority %d and player %s!\n", v, game_.priority(v),
                     player_even ? "even" : "odd" );
             return false;

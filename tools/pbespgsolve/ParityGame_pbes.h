@@ -31,10 +31,10 @@ void ParityGame::assign_pbes( mcrl2::pbes_system::pbes<Container> &pbes,
     }
 
     // Determine maximum prioirity
-    int max_prio = 0;
+    size_t max_prio = 0;
     for (verti v = begin; v < end; ++v)
     {
-        max_prio = std::max(max_prio, (int)pgg.get_priority(v));
+        max_prio = std::max(max_prio, pgg.get_priority(v));
     }
 
     // Assign vertex info and recount cardinalities

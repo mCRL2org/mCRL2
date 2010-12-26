@@ -133,7 +133,7 @@ void PrimitiveFactory::update_geom_tables() {
   cos_theta = (float*)realloc(cos_theta,2*qlt*sizeof(float));
   sin_theta = (float*)realloc(sin_theta,2*qlt*sizeof(float));
 
-  float d_theta = PI / qlt;
+  float d_theta = static_cast<float>(PI) / qlt;
   float theta = 0.0f;
   for (int i = 0; i < 2*qlt; ++i) {
     cos_theta[i] = cos(theta);
