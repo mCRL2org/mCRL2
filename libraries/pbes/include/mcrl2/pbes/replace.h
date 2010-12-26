@@ -182,14 +182,14 @@ struct substitute_propositional_variable_helper
 /// \endcond
 
   template <typename Derived>
-  class propositional_variable_substitution_builder: public pbes_system::detail::pbes_expression_builder<Derived>
+  class propositional_variable_substitution_builder: public pbes_system::pbes_expression_builder<Derived>
   {
     protected:
       const propositional_variable& m_X;
       const pbes_expression& m_phi;
 
     public:
-      typedef pbes_system::detail::pbes_expression_builder<Derived> super;
+      typedef pbes_system::pbes_expression_builder<Derived> super;
   
       using super::enter;
       using super::leave;
