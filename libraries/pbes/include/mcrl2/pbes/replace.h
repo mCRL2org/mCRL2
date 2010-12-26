@@ -17,6 +17,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/builder.h"
 
 namespace mcrl2 {
 
@@ -179,6 +180,35 @@ struct substitute_propositional_variable_helper
   }
 };
 /// \endcond
+
+  template <typename Derived>
+  class propositional_variable_substitution_builder: public pbes_system::detail::pbes_expression_builder<Derived>
+  {
+    protected:
+      const propositional_variable& m_X;
+      const pbes_expression& m_phi;
+
+    public:
+      typedef pbes_system::detail::pbes_expression_builder<Derived> super;
+  
+      using super::enter;
+      using super::leave;
+      using super::operator();
+
+      pbes_system::pbes_expression operator()(const pbes_system::propositional_variable_instantiation& x)
+      {
+        pbes_system::pbes_expression result = x;
+        if (m_X.name() == x.name())
+        {
+          result = data::replace_variables(m_phi, data::make_double_sequence_substitution_adaptor(m_X.parameters(), x.parameters()));
+        }
+        return result;
+      }
+
+      propositional_variable_substitution_builder(const propositional_variable& X, const pbes_expression& phi)
+        : m_X(X), m_phi(phi)
+      {}
+  };
 
 /// \brief Applies the substitution \p X := \p phi to the pbes expression \p t.
 /// \param t A pbes expression
