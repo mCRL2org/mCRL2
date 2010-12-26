@@ -26,6 +26,16 @@ namespace mcrl2 {
 
 namespace core {
 
+#ifdef MCRL2_DEBUG_EXPRESSION_BUILDER
+  inline void msg(const std::string& s)
+  {
+    std::cout << "--- " << s << " ---" << std::endl;
+  }
+#else
+  inline void msg(const std::string&)
+  {}
+#endif
+
   /**
    * \brief expression builder that visits all sub expressions
    *
@@ -45,194 +55,165 @@ namespace core {
     template <typename T>
     void leave(const T&)
     {}   
-    
-    // default update
+
+    // aterm update
     template <typename T>
-    T& update_copy(T& x,
-              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-             )
+    void update(T& x,
+                typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+               )
     {
+      msg("aterm update");
+      x = static_cast<Derived&>(*this)(x);
+    } 
+
+    // non-aterm update
+    template <typename T>
+    void update(T& x,
+                typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+               )
+    {
+      msg("non-aterm update");
       static_cast<Derived&>(*this)(x);
-      return x;
-    }
-  
-    // ATerm update
+    } 
+
+    // aterm update copy
     template <typename T>
     T update_copy(const T& x,
-             typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-            )
+                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                 )
     {
+      msg("aterm update copy");
       return static_cast<Derived&>(*this)(x);
-    }
+    } 
 
-    // default update
+    // non-aterm update copy
     template <typename T>
-    void update_inplace(T& x,
-              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-             )
+    T& update_copy(T& x,
+                   typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                  )
     {
+      msg("non-aterm update copy");
       static_cast<Derived&>(*this)(x);
-    }
-  
-    // ATerm update
+      return x;
+    } 
+
+    // non-container visit
     template <typename T>
-    void update_inplace(T& x,
-             typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-            )
+    void visit(T& x,
+                typename atermpp::detail::disable_if_container<T>::type* = 0
+               )
     {
-      x = static_cast<Derived&>(*this)(x);
+      msg("non-container visit");
     }
 
+    // container visit
+    template <typename T>
+    void visit(T& x,
+               typename atermpp::detail::enable_if_container<T>::type* = 0
+              )
+    {
+      msg("container visit");
+      for (typename T::iterator i = x.begin(); i != x.end(); ++i)
+      {
+        update(*i);
+      }
+    }
+
+    // aterm set visit
+    template <typename T>
+    void visit(atermpp::set<T>& x)
+    {
+      msg("aterm set visit");
+      atermpp::set<T> result;
+      for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+      {
+        result.insert(update_copy(*i));
+      }
+      std::swap(x, result);
+    }
+
+    // non-container visit_copy
+    template <typename T>
+    T visit_copy(const T& x)
+    {
+      msg("non-container visit_copy");
+      return x;
+    }
+
+    // term_list visit copy
+    template <typename T>
+    atermpp::term_list<T> visit_copy(const atermpp::term_list<T>& x)
+    {
+      msg("term_list visit_copy");
+      atermpp::vector<T> result;
+      for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+      {
+        result.push_back(static_cast<Derived&>(*this)(*i));
+      }
+      return atermpp::convert<atermpp::term_list<T> >(result);
+    }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#else
     // ATerm traversal
     template <typename T>
     T operator()(const T& x,
                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                 )
     {
-      return x;
-    }  
-  
-    // ATerm list traversal
-    template <typename T>
-    atermpp::term_list<T> operator()(const atermpp::term_list<T>& x,
-                                     typename atermpp::detail::enable_if_container<T>::type* = 0  // why is this needed???
-                                    )
-    {
-      atermpp::vector<T> result;
-      for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
-      {
-        result.push_back(update_copy(*i));
-      }
-      return atermpp::convert<atermpp::term_list<T> >(result);
+      msg("aterm traversal");
+      return visit_copy(x);
     }
-  
-    // Container traversal
+
+    // non-ATerm traversal
     template <typename T>
     void operator()(T& x,
-                    typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0,
-                    typename atermpp::detail::enable_if_container<T>::type* = 0
-                   )
+                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                )
     {
-      for (typename T::iterator i = x.begin(); i != x.end(); ++i)
-      {
-        update_inplace(*i);
-      }
-    }
-  
-    // ATerm set traversal
-    template <typename T>
-    void operator()(atermpp::set<T>& x)
-    {
-      atermpp::set<T> result;
-      for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
-      {
-        result.insert(update_copy(*i));
-      }
-      std::swap(x, result);
-    }
+      msg("non aterm traversal");
+      visit(x);
+    }  
+#endif
   };
+
 
   // apply a builder without additional template arguments
   template <template <class> class Builder>
-  struct apply_builder: public Builder<apply_builder<Builder> >
+  class apply_builder: public Builder<apply_builder<Builder> >
   {
     typedef Builder<apply_builder<Builder> > super;
 
-    using super::enter;
-    using super::leave;
-    using super::operator();
+    public:
 
-//#ifdef BOOST_MSVC
-    // ATerm list traversal
-    template <typename T>
-    atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
-    {
-      atermpp::vector<T> result;
-      for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
-      {
-        result.push_back(update_copy(*i));
-      }
-      return atermpp::convert<atermpp::term_list<T> >(result);
-    }
+      using super::enter;
+      using super::leave;
+      using super::operator();
 
-    // Container traversal
-    template <typename T>
-    void operator()(T& x,
-                    typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0,
-                    typename atermpp::detail::enable_if_container<T>::type* = 0
-                   )
-    {
-      for (typename T::iterator i = x.begin(); i != x.end(); ++i)
-      {
-        update_inplace(*i);
-      }
-    }
-
-    // ATerm set traversal
-    template <typename T>
-    void operator()(atermpp::set<T>& x)
-    {
-      atermpp::set<T> result;
-      for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
-      {
-        result.insert(update_copy(*i));
-      }
-      std::swap(x, result);
-    }
-//#endif
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
   };
 
   // apply a builder with one additional template argument
   template <template <class> class Builder, class Arg1>
-  struct apply_builder_arg1: public Builder<apply_builder_arg1<Builder, Arg1> >
+  class apply_builder_arg1: public Builder<apply_builder_arg1<Builder, Arg1> >
   {
-    typedef Builder<apply_builder_arg1<Builder, Arg1> > super;   
-    using super::enter;
-    using super::leave;
-    using super::operator();
+    typedef Builder<apply_builder_arg1<Builder, Arg1> > super;
+    
+    public:
+      using super::enter;
+      using super::leave;
+      using super::operator();
 
-    apply_builder_arg1(const Arg1& arg1):
-      super(arg1)
-    {}
-  
-//#ifdef BOOST_MSVC
-    // ATerm list traversal
-    template <typename T>
-    atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
-    {
-      atermpp::vector<T> result;
-      for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
-      {
-        result.push_back(update_copy(*i));
-      }
-      return atermpp::convert<atermpp::term_list<T> >(result);
-    }
+      apply_builder_arg1(const Arg1& arg1):
+        super(arg1)
+      {}
 
-    // Container traversal
-    template <typename T>
-    void operator()(T& x,
-                    typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0,
-                    typename atermpp::detail::enable_if_container<T>::type* = 0
-                   )
-    {
-      for (typename T::iterator i = x.begin(); i != x.end(); ++i)
-      {
-        update_inplace(*i);
-      }
-    }
-
-    // ATerm set traversal
-    template <typename T>
-    void operator()(atermpp::set<T>& x)
-    {
-      atermpp::set<T> result;
-      for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
-      {
-        result.insert(update_copy(*i));
-      }
-      std::swap(x, result);
-    }
-//#endif
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
   };
 
 } // namespace core

@@ -12,6 +12,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/process/process_specification.h"
+#include "mcrl2/pbes/pbes.h"
 
 using namespace mcrl2;
 
@@ -185,6 +186,13 @@ using namespace mcrl2;
       {
         x.action_labels() = static_cast<Derived&>(*this)(x.action_labels());
       }
+
+      
+      template <typename Container>
+      void operator()(pbes_system::pbes<Container>& x)
+      {
+        std::cout << "<PBES>" << std::endl;  
+      }     
   };          
 
 void test_normalize_sorts()
@@ -192,6 +200,9 @@ void test_normalize_sorts()
   process::process_specification x;
   apply_builder_arg1<process_sort_normalization_builder, data::data_specification> builder(x.data());
   builder(x);
+
+  pbes_system::pbes<> y;
+  builder(y);
 }
 
 int test_main(int argc, char* argv[])

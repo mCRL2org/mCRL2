@@ -9,6 +9,8 @@
 /// \file parse_test.cpp
 /// \brief Regression test for parsing process expressions
 
+#define MCRL2_DEBUG_EXPRESSION_BUILDER
+
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
