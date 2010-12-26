@@ -19,7 +19,7 @@
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/sequence_substitution.h"
@@ -34,7 +34,7 @@ namespace detail {
 /// variable, no other quantifier variables or free variables with the same name occur.
 /// The identifier generator that is supplied via the constructor is used to choose new names.
 template <typename IdentifierGenerator>
-struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression>
+struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
 {
   IdentifierGenerator& generator;
   std::vector<data::variable_list> quantifier_stack;

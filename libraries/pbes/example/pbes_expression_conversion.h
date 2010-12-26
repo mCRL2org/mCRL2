@@ -1,7 +1,7 @@
 /// WARNING: This header file can only be used when the soundness checks are disabled
 /// using the MCRL2_NO_SOUNDNESS_CHECKS flag!
 
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/data/detail/optimized_rewriter.h"
 
 namespace lps {

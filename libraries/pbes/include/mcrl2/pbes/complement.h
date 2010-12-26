@@ -27,7 +27,7 @@
 #define MCRL2_PBES_COMPLEMENT_H
 
 #include <stdexcept>
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 
 #include <algorithm>
 #include <deque>
@@ -46,7 +46,7 @@ namespace pbes_system {
 /// \cond INTERNAL_DOCS
 // \brief Visitor that pushes a negation in a PBES expression as far as possible
 // inwards towards a data expression.
-struct complement_builder: public pbes_expression_builder<pbes_expression>
+struct complement_builder: public pbes_expr_builder<pbes_expression>
 {
   /// \brief Visit data_expression node
   /// \param d A data expression

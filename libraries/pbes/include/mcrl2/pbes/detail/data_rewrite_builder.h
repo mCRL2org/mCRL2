@@ -15,7 +15,7 @@
 #include <set>
 #include <utility>
 #include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 
 namespace mcrl2 {
 
@@ -25,9 +25,9 @@ namespace detail {
 
   // Simplifying PBES rewriter.
   template <typename Term, typename DataRewriter, typename SubstitutionFunction = no_substitution>
-  struct data_rewrite_builder: public pbes_expression_builder<Term, SubstitutionFunction>
+  struct data_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunction>
   {
-    typedef pbes_expression_builder<Term, SubstitutionFunction>                super;
+    typedef pbes_expr_builder<Term, SubstitutionFunction>                super;
     typedef SubstitutionFunction                                               argument_type;
     typedef typename super::term_type                                          term_type;
     typedef typename core::term_traits<term_type>::data_term_type              data_term_type;

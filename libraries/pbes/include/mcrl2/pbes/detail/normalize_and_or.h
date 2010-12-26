@@ -15,7 +15,7 @@
 #include <set>
 #include <utility>
 #include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
@@ -25,9 +25,9 @@ namespace pbes_system {
 namespace detail {
 
   // Simplifying PBES rewriter.
-  struct normalize_and_or_builder: public pbes_expression_builder<pbes_expression>
+  struct normalize_and_or_builder: public pbes_expr_builder<pbes_expression>
   {
-    typedef pbes_expression_builder<pbes_expression>                  super;
+    typedef pbes_expr_builder<pbes_expression>                  super;
     typedef super::term_type                                          term_type;
     typedef core::term_traits<term_type>::data_term_type              data_term_type;
     typedef core::term_traits<term_type>::data_term_sequence_type     data_term_sequence_type;

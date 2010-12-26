@@ -17,7 +17,7 @@
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 
 namespace mcrl2 {
 
@@ -105,7 +105,7 @@ propositional_variable_instantiation remove_parameters(propositional_variable_in
 
 /// \cond INTERNAL_DOCS
 namespace detail {
-struct pbes_remove_parameters_builder: public pbes_expression_builder<pbes_expression>
+struct pbes_remove_parameters_builder: public pbes_expr_builder<pbes_expression>
 {
   const std::map<core::identifier_string, std::vector<int> >& to_be_removed_;
 

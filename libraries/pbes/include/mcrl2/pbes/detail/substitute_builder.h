@@ -14,7 +14,7 @@
 
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 
 namespace mcrl2 {
 
@@ -24,7 +24,7 @@ namespace detail {
 
 /// Visitor that applies a data substitution to a pbes expression.
 template <typename Substitution>
-struct substitute_builder: public pbes_expression_builder<pbes_expression>
+struct substitute_builder: public pbes_expr_builder<pbes_expression>
 {
   const Substitution& sigma;
   

@@ -16,7 +16,7 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 
 namespace mcrl2 {
 
@@ -26,7 +26,7 @@ namespace detail {
 
 /// Visitor that applies a propositional variable substitution to a pbes expression.
 template <typename DataRewriter, typename RenameFunction, typename Substitution>
-struct pbes2bes_finite_builder: public pbes_expression_builder<pbes_expression, Substitution>
+struct pbes2bes_finite_builder: public pbes_expr_builder<pbes_expression, Substitution>
 {
   typedef core::term_traits<pbes_expression> tr;
   

@@ -20,10 +20,9 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  // TODO: resolve name clash with pbes_expression_builder
   /// \brief Traversal class for pbes expressions
   template <typename Derived>
-  class pbes_expression_builder_new: public core::builder<Derived>
+  class pbes_expression_builder: public core::builder<Derived>
   {
     public:
       typedef core::builder<Derived> super;
@@ -36,60 +35,23 @@ namespace pbes_system {
 
   /// \brief Traversal class for data expressions
   template <typename Derived>
-  class data_expression_builder_base: public data::data_expression_builder<Derived>
+  class data_expression_builder: public data::data_expression_builder<Derived>
   {
     public:
       typedef data::data_expression_builder<Derived> super;
       using super::enter;
       using super::leave;
       using super::operator();
-#include "mcrl2/pbes/detail/pbes_expression_builder.inc.h"
+
+#include "mcrl2/pbes/detail/data_expression_builder.inc.h"
   };
 
   /// \brief Traversal class for data expressions
   template <typename Derived>
-  class data_expression_builder: public data_expression_builder_base<Derived>
-  {
-    public:
-      typedef data_expression_builder_base<Derived> super;
-      using super::enter;
-      using super::leave;
-      using super::operator();
-#include "mcrl2/pbes/detail/data_expression_builder.inc.h"
-  };
-
-  /// \brief Traversal class for sort expressions
-  template <typename Derived>
-  class sort_expression_builder_base1: public data::sort_expression_builder<Derived>
+  class sort_expression_builder: public data::sort_expression_builder<Derived>
   {
     public:
       typedef data::sort_expression_builder<Derived> super;
-      using super::enter;
-      using super::leave;
-      using super::operator();
-
-#include "mcrl2/pbes/detail/pbes_expression_builder.inc.h"
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  class sort_expression_builder_base2: public sort_expression_builder_base1<Derived>
-  {
-    public:
-      typedef sort_expression_builder_base1<Derived> super;
-      using super::enter;
-      using super::leave;
-      using super::operator();
-
-#include "mcrl2/pbes/detail/data_expression_builder.inc.h"
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  class sort_expression_builder: public sort_expression_builder_base2<Derived>
-  {
-    public:
-      typedef sort_expression_builder_base2<Derived> super;
       using super::enter;
       using super::leave;
       using super::operator();

@@ -29,7 +29,7 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
@@ -50,7 +50,7 @@ using lps::linearise;
 using lps::specification;
 using pbes_system::pbes;
 using pbes_system::pbes_expression;
-using pbes_system::pbes_expression_builder;
+using pbes_system::pbes_expr_builder;
 using pbes_system::pbes_equation;
 using pbes_system::lps2pbes;
 using pbes_system::propositional_variable_instantiation;
@@ -247,7 +247,7 @@ void test_global_variables()
 //   for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
 //   {
 //     const pbes_expression& q = i->formula();
-//     pbes_expression_builder<pbes_expression> builder;
+//     pbes_expr_builder<pbes_expression> builder;
 //     pbes_expression q1 = builder.visit(q);
 //     BOOST_CHECK(q == q1);
 //   }

@@ -27,9 +27,9 @@ namespace pbes_system {
 namespace detail {
 
   /// \brief Visitor that implements the pbes-abstract algorithm.
-  struct pbes_abstract_builder: public pbes_expression_builder_new<pbes_abstract_builder>
+  struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_builder>
   {
-    typedef pbes_expression_builder_new<pbes_abstract_builder> super;
+    typedef pbes_expression_builder<pbes_abstract_builder> super;
     using super::enter;
     using super::leave;
     using super::operator();
