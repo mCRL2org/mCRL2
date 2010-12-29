@@ -176,6 +176,9 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 
     app->getAlgorithm(0)->stop();
     app->openFile(stPath);
+    wxPaintEvent ev = wxPaintEvent();
+    glCanvas->GetEventHandler()->ProcessEvent( ev );
+
   }
 }
 void MainFrame::onSelect(wxCommandEvent& /*event*/) {
@@ -199,6 +202,10 @@ void MainFrame::onImport(wxCommandEvent& /*event*/)
 
     app->getAlgorithm(0)->stop();
     app->openFile(stPath);
+
+    wxPaintEvent ev = wxPaintEvent();
+    glCanvas->GetEventHandler()->ProcessEvent( ev );
+
   }
 }
 
@@ -316,6 +323,19 @@ GLCanvas* MainFrame::getGLCanvas()
   return glCanvas;
 }
 
+GLContext* MainFrame::getGLContext( wxGLCanvas *canvas )
+{
+  /* Context is created upon first paint
+   * This ensures that a drawing GLcanvas is declared, instantiated and shown.
+   *  */
+  if (glContext == NULL){
+    glContext = new GLContext( canvas );
+  }
+
+  return glContext;
+}
+
+
 void MainFrame::onTogglePositioning(wxCommandEvent&)
 {
   app->getAlgorithm(0)->toggle();
@@ -348,31 +368,37 @@ void MainFrame::setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl)
 void MainFrame::onResetAll(wxCommandEvent& /*evt*/)
 {
 	glCanvas->ResetAll();
-	glCanvas->display();
+    wxPaintEvent ev = wxPaintEvent();
+    glCanvas->GetEventHandler()->ProcessEvent( ev );
+
 }
 
 void MainFrame::onResetRot(wxCommandEvent& /*evt*/)
 {
 	glCanvas->ResetRot();
-	glCanvas->display();
+    wxPaintEvent ev = wxPaintEvent();
+    glCanvas->GetEventHandler()->ProcessEvent( ev );
 }
 
 void MainFrame::onResetPan(wxCommandEvent& /*evt*/)
 {
 	glCanvas->ResetPan();
-	glCanvas->display();
+    wxPaintEvent ev = wxPaintEvent();
+    glCanvas->GetEventHandler()->ProcessEvent( ev );
 }
 
 void MainFrame::onMode(wxCommandEvent& event)
 {
 	glCanvas->setMode(event.GetId());
-	glCanvas->display();
+    wxPaintEvent ev = wxPaintEvent();
+    glCanvas->GetEventHandler()->ProcessEvent( ev );
 }
 
 void MainFrame::onShowSystem(wxCommandEvent& /*evt*/)
 {
 	glCanvas->showSystem();
-	glCanvas->display();
+    wxPaintEvent ev = wxPaintEvent();
+    glCanvas->GetEventHandler()->ProcessEvent( ev );
 }
 
 void MainFrame::onToggle3D(wxCommandEvent& /*evt*/)
@@ -380,5 +406,7 @@ void MainFrame::onToggle3D(wxCommandEvent& /*evt*/)
 	if(glCanvas->get3D())
 	app->forceWalls();
 	glCanvas->changeDrawMode();
-	glCanvas->display();
+    wxPaintEvent ev = wxPaintEvent();
+    glCanvas->GetEventHandler()->ProcessEvent( ev );
+
 }

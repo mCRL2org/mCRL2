@@ -64,12 +64,16 @@ class GLCanvas : public wxGLCanvas
 	void setMode(int tool);
 	void changeDrawMode();
 	void showSystem();
+	void recalcPixelSize();
+	void recalcAspectRatio();
 	double getPixelSize();
-    double getAspectRatio() const;
+    double getAspectRatio();
 	double getMaxDepth() const;
 	void getMdlvwMtrx(double * mtrx);
 	void getCamPos(double & x, double & y, double & z);
 	bool get3D();
+	void render2D();
+	void render3D();
 
   private:
     LTSGraph* owner;
@@ -85,6 +89,8 @@ class GLCanvas : public wxGLCanvas
 	int currentTool;
 	bool calcRot;
 	bool drawIn3D;
+	double pixelSize;
+	double aspectRatio;
 
 	void normalizeMatrix();
     bool pickObjects3d(int x, int y, wxMouseEvent const&);

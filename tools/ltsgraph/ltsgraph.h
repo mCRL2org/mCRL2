@@ -66,7 +66,7 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
     bool run();
 
     void openFile(std::string const &path);
-    void display();
+    //void display();
 
 	void moveObject(double invect[4]);
 	void moveObject(double x, double y);
@@ -104,6 +104,7 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
 	void getCanvasCamPos(double & x, double & y, double & z);
 	void forceWalls();
 	bool get3dMode();
+	MainFrame* getMainFrame();
 };
 
 class LTSGraph_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<LTSGraph>

@@ -46,10 +46,10 @@ InfoDialog::InfoDialog(wxWindow* parent) :
 void InfoDialog::setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl)
 {
 
-  lts_info->SetItem(0, 1, wxString::Format(wxT("%d"), is));
-  lts_info->SetItem(1, 1, wxString::Format(wxT("%d"), ns));
-  lts_info->SetItem(2, 1, wxString::Format(wxT("%d"), nt));
-  lts_info->SetItem(3, 1, wxString::Format(wxT("%d"), nl));
+  lts_info->SetItem(0, 1, wxString::Format(wxT("%lu"), is));
+  lts_info->SetItem(1, 1, wxString::Format(wxT("%lu"), ns));
+  lts_info->SetItem(2, 1, wxString::Format(wxT("%lu"), nt));
+  lts_info->SetItem(3, 1, wxString::Format(wxT("%lu"), nl));
   lts_info->SetColumnWidth(1, wxLIST_AUTOSIZE);
 
   Fit();

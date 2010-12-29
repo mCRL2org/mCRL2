@@ -113,11 +113,11 @@ void Visualizer::drawStates(bool inSelectMode)
 		  State* s = graph->getState(i);
 
 
-		  //glPushMatrix();
+		  glPushMatrix();
 
 		  drawState(s);
 
-		  //glPopMatrix();
+		  glPopMatrix();
 		}
 	  }
   }
