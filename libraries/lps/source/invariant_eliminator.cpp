@@ -27,7 +27,7 @@ using namespace mcrl2::lps;
           const summand a_summand,
           const data_expression a_invariant,
           const bool a_no_elimination,
-          const int a_summand_number)
+          const size_t a_summand_number)
     { 
       const data_expression v_condition = a_summand.condition();
       const data_expression v_formula = lazy::and_(a_invariant, v_condition);
@@ -88,11 +88,11 @@ using namespace mcrl2::lps;
     specification Invariant_Eliminator::simplify(
               const mcrl2::data::data_expression a_invariant,
               const bool a_no_elimination,
-              const int a_summand_number)
+              const size_t a_summand_number)
     {
       const summand_list v_summands = f_lps.process().summands();
       summand_list v_simplified_summands;
-      int v_summand_number = 1;
+      size_t v_summand_number = 1;
 
       for(summand_list::const_iterator i=v_summands.begin();
              i!=v_summands.end(); ++i) 

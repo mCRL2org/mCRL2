@@ -5254,7 +5254,7 @@ class specification_basic_type:public boost::noncopyable
       else
       { variable var2=pars2.front();
         variable var3=var2;
-        for(size_t i=0 ; occursin(var3,pars1) ; ++i)
+        for(int i=0 ; occursin(var3,pars1) ; ++i)
         { var3=get_fresh_variable(var2.name(),var2.sort(),(unique?-1:i));
         }
         if (var3!=var2)

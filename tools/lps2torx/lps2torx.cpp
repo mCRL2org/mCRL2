@@ -112,7 +112,8 @@ class torx_data
       ATerm i;
       if ( (i = ATtableGet(state_indices,to)) == NULL )
       {
-        ATtablePut(state_indices,to,(ATerm) ATmakeInt(p.action));
+        assert(p.action<(size_t)1<<(sizeof(int)*8-1));
+        ATtablePut(state_indices,to,(ATerm) ATmakeInt(static_cast<int>(p.action)));
         p.state = p.action;
       } else {
         p.state = ATgetInt((ATermInt) i);

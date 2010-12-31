@@ -31,11 +31,11 @@ namespace detail {
   /// \param to_be_removed A sequence of integers
   /// \return The removal result
   template <typename Term>
-  atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::vector<int>& to_be_removed)
+  atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::vector<size_t>& to_be_removed)
   {
-    int index = 0;
+    size_t index = 0;
     atermpp::vector<Term> result;
-    std::vector<int>::const_iterator j = to_be_removed.begin();
+    std::vector<size_t>::const_iterator j = to_be_removed.begin();
     for (typename atermpp::term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++index)
     {
       if (j != to_be_removed.end() && index == *j)
@@ -58,7 +58,7 @@ namespace detail {
 /// \param to_be_removed A set of indices
 /// \return The variable \p v without the parameters that have an index in \p to_be_removed
 inline
-propositional_variable remove_parameters(propositional_variable v, const std::vector<int>& to_be_removed)
+propositional_variable remove_parameters(propositional_variable v, const std::vector<size_t>& to_be_removed)
 {
   return propositional_variable(v.name(), detail::remove_elements(v.parameters(), to_be_removed));
 }
@@ -68,9 +68,9 @@ propositional_variable remove_parameters(propositional_variable v, const std::ve
 /// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
 /// \return The variable \p v without the parameters that have an index in \code to_be_removed(v.name()) \endcode
 inline
-propositional_variable remove_parameters(propositional_variable v, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
+propositional_variable remove_parameters(propositional_variable v, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
 {
-  std::map<core::identifier_string, std::vector<int> >::const_iterator i = to_be_removed.find(v.name());
+  std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(v.name());
   if (i == to_be_removed.end())
   {
     return v;
@@ -83,7 +83,7 @@ propositional_variable remove_parameters(propositional_variable v, const std::ma
 /// \param to_be_removed A set of indices
 /// \return The variable \p v without the parameters that have an index in \p to_be_removed
 inline
-propositional_variable_instantiation remove_parameters(propositional_variable_instantiation v, const std::vector<int>& to_be_removed)
+propositional_variable_instantiation remove_parameters(propositional_variable_instantiation v, const std::vector<size_t>& to_be_removed)
 {
   return propositional_variable_instantiation(v.name(), detail::remove_elements(v.parameters(), to_be_removed));
 }
@@ -93,9 +93,9 @@ propositional_variable_instantiation remove_parameters(propositional_variable_in
 /// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
 /// \return The variable \p v without the parameters that have an index in \code to_be_removed(v.name()) \endcode
 inline
-propositional_variable_instantiation remove_parameters(propositional_variable_instantiation v, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
+propositional_variable_instantiation remove_parameters(propositional_variable_instantiation v, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
 {
-  std::map<core::identifier_string, std::vector<int> >::const_iterator i = to_be_removed.find(v.name());
+  std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(v.name());
   if (i == to_be_removed.end())
   {
     return v;
@@ -107,9 +107,9 @@ propositional_variable_instantiation remove_parameters(propositional_variable_in
 namespace detail {
 struct pbes_remove_parameters_builder: public pbes_expr_builder<pbes_expression>
 {
-  const std::map<core::identifier_string, std::vector<int> >& to_be_removed_;
+  const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed_;
 
-  pbes_remove_parameters_builder(const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
+  pbes_remove_parameters_builder(const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
     : to_be_removed_(to_be_removed)
   {}
 
@@ -119,7 +119,7 @@ struct pbes_remove_parameters_builder: public pbes_expr_builder<pbes_expression>
   /// \return The result of visiting the node
   pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v)
   {
-    std::map<core::identifier_string, std::vector<int> >::const_iterator i = to_be_removed_.find(v.name());
+    std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed_.find(v.name());
     if (i == to_be_removed_.end())
     {
       return x;
@@ -138,7 +138,7 @@ struct pbes_remove_parameters_builder: public pbes_expr_builder<pbes_expression>
 /// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
 /// \return The expression \p p with parameters removed according to the mapping \p to_be_removed
 inline
-pbes_expression remove_parameters(pbes_expression p, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
+pbes_expression remove_parameters(pbes_expression p, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
 {
   return detail::pbes_remove_parameters_builder(to_be_removed).visit(p);
 }
@@ -148,7 +148,7 @@ pbes_expression remove_parameters(pbes_expression p, const std::map<core::identi
 /// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
 /// \return The equation \p e with parameters removed according to the mapping \p to_be_removed
 inline
-pbes_equation remove_parameters(pbes_equation e, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
+pbes_equation remove_parameters(pbes_equation e, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
 {
   return pbes_equation(e.symbol(),
                        remove_parameters(e.variable(), to_be_removed),
@@ -161,9 +161,9 @@ pbes_equation remove_parameters(pbes_equation e, const std::map<core::identifier
 /// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
 /// \return The pbes \p p with parameters removed according to the mapping \p to_be_removed
 template <typename Container>
-void remove_parameters(pbes<Container>& p, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
+void remove_parameters(pbes<Container>& p, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
 {
-  typedef pbes_equation (*f)(pbes_equation, const std::map<core::identifier_string, std::vector<int> >&);
+  typedef pbes_equation (*f)(pbes_equation, const std::map<core::identifier_string, std::vector<size_t> >&);
   std::transform(p.equations().begin(),
                  p.equations().end(),
                  p.equations().begin(),

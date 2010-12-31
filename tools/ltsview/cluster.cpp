@@ -98,7 +98,7 @@ State* Cluster::getState(int i) const {
 }
 
 int Cluster::getNumStates() const {
-  return states.size();
+  return static_cast<int>(states.size());
 }
 
 Cluster* Cluster::getAncestor() const {
@@ -106,7 +106,7 @@ Cluster* Cluster::getAncestor() const {
 }
 
 int Cluster::getNumDescendants() const {
-  return descendants.size();
+  return static_cast<int>(descendants.size());
 }
 
 Cluster* Cluster::getDescendant(int i) const {
@@ -326,7 +326,7 @@ void Cluster::computeSizeAndPositions() {
    * So: N * pi * 0.1^2 = 0.25 * pi * r^2
    * Hence: r = sqrt( N * 0.04 )
    */
-  topRadius = sqrt(states.size()*0.04);
+  topRadius = sqrt(states.size()*0.04f);
 
   if (descendants.size() == 0) {
     baseRadius = topRadius;

@@ -387,7 +387,7 @@ void XSimMain::Initialise(ATermList Pars)
 {
     state_varnames = ATmakeList0();
     stateview->DeleteAllItems();
-    for (size_t i=0; !ATisEmpty(Pars); Pars=ATgetNext(Pars), i++)
+    for (long i=0; !ATisEmpty(Pars); Pars=ATgetNext(Pars), i++)
     {
       wxString s(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(Pars),0)))
 #ifdef wxUSE_UNICODE
@@ -759,7 +759,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
   current_state = state;
 
         NextState *nextstate = simulator->GetNextState();
-  for (size_t i=0; i<ATgetLength(state_varnames); i++)
+  for (long i=0; static_cast<size_t>(i)<ATgetLength(state_varnames); i++)
   {
     ATermAppl oldval = nextstate->getStateArgument(old,i);
     ATermAppl newval = nextstate->getStateArgument(state,i);
@@ -874,7 +874,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
   ATermAppl trace_next_state = ToStateVector(simulator->GetNextStateFromTrace(),nextstate);
 
   transview->DeleteAllItems();
-  size_t i = 0;
+  long i = 0;
   for (ATermList l=nextstates; !ATisEmpty(l); l=ATgetNext(l), i++)
   {
     actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppDefault).c_str()));
@@ -924,7 +924,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
 
   sort_transitions(actions,statechanges,indices);
   ssize_t next = -1;
-  for (size_t i=0; i<indices.GetCount(); i++)
+  for (long i=0; static_cast<size_t>(i)<indices.GetCount(); i++)
   {
     transview->InsertItem(i,actions[i]);
     transview->SetItem(i,1,statechanges[i]);

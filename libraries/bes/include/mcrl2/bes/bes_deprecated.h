@@ -51,9 +51,9 @@
 namespace bes
 {
 
-// a bes variable_type is an unsigned long.
+// a bes variable_type is an size_t.
 
-  typedef unsigned long variable_type; /* valid values start at 1 */
+  typedef size_t variable_type; /* valid values start at 1 */
 
   typedef enum reason { UNKNOWN,
                         MU_CYCLE,
@@ -986,7 +986,7 @@ namespace bes
       // bits indicate the rank+1 of this equation.
       // The value 0 for control_info indicates a wrong value.
 
-      std::vector<unsigned long> control_info;
+      std::vector<size_t> control_info;
       atermpp::vector<bes_expression> right_hand_sides;
       bool variable_occurrences_are_stored;
       std::vector< std::set <variable_type> > variable_occurrence_sets;
@@ -1014,9 +1014,9 @@ namespace bes
       }
 
     public:
-      unsigned long max_rank;
+      size_t max_rank;
 
-      inline unsigned long nr_of_variables() const
+      inline size_t nr_of_variables() const
       { return control_info.size()-1; /* there is no equation at position 0 */
       }
 
@@ -1030,7 +1030,7 @@ namespace bes
       }
 
 
-      inline unsigned long get_rank(variable_type v)
+      inline size_t get_rank(variable_type v)
       {
         assert(v>0);
         check_vector_sizes(v);
@@ -1040,7 +1040,7 @@ namespace bes
 
       void add_equation(variable_type v,
                         mcrl2::pbes_system::fixpoint_symbol sigma,
-                        unsigned long rank,
+                        size_t rank,
                         bes_expression rhs,
                         std::deque <variable_type> &todo=bes_global_variables<size_t>::TODO_NULL_QUEUE)
       { assert(rank>0);  // rank must be positive.
@@ -1262,7 +1262,7 @@ namespace bes
 
       void reset_variable_relevance(void)
       {
-        for(std::vector <unsigned long>::iterator v=control_info.begin() ;
+        for(std::vector <size_t>::iterator v=control_info.begin() ;
                  v!=control_info.end() ;
                  v++)
         { *v =(*v)& ~RELEVANCE_MASK;  // reset the relevance bit to 0
@@ -1338,7 +1338,7 @@ namespace bes
           { // We add the variables to the todo queue separately,
             // to guarantee that lower numbered variables occur earlier in
             // the queue. This guarantees shorter counter examples.
-            for(unsigned long v=1; v<=nr_of_variables(); v++)
+            for(size_t v=1; v<=nr_of_variables(); v++)
             { if ((get_rhs(v)==dummy()) && is_relevant(v))
               { todo.push_back(v);
               }
@@ -1398,7 +1398,7 @@ namespace bes
       bool find_mu_nu_loop_rec(
              bes_expression b,
              variable_type v,
-             unsigned long rankv, // rank of v may not have been stored yet.
+             size_t rankv, // rank of v may not have been stored yet.
              std::map < variable_type,bool > &visited_variables,
              bool is_mu)
       {
@@ -1471,7 +1471,7 @@ namespace bes
       bool find_mu_loop(
              bes_expression b,
              variable_type v,
-             unsigned long rankv)
+             size_t rankv)
       { std::map < variable_type, bool > visited_variables;
         bool result=find_mu_nu_loop_rec(b,v,rankv,visited_variables,true);
         return result;
@@ -1480,7 +1480,7 @@ namespace bes
       bool find_nu_loop(
              bes_expression b,
              variable_type v,
-             unsigned long rankv)
+             size_t rankv)
       { std::map < variable_type, bool > visited_variables;
         return find_mu_nu_loop_rec(b,v,rankv,visited_variables,false);
       }
@@ -1671,7 +1671,7 @@ namespace bes
     bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
                        const mcrl2::pbes_system::pbes_expression p,
                        atermpp::indexed_set &variable_index,
-                       unsigned long &nr_of_generated_variables,
+                       size_t &nr_of_generated_variables,
                        const bool to_bdd,
                        const transformation_strategy strategy,
                        const bool construct_counter_example,
@@ -1679,7 +1679,7 @@ namespace bes
     { using namespace mcrl2::pbes_system;
       if (is_propositional_variable_instantiation(p))
       {
-        std::pair<unsigned long,bool> pr=variable_index.put((internal_opt_store_as_tree)?
+        std::pair<size_t,bool> pr=variable_index.put((internal_opt_store_as_tree)?
                                mcrl2::pbes_system::pbes_expression(store_as_tree(p)):p);
 
         if (pr.second) /* p is added to the indexed set, so it is a new variable */
@@ -1901,7 +1901,7 @@ namespace bes
       assert(eqsys.size()>0); // There should be at least one equation
       fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
 
-      unsigned long rank=1;
+      size_t rank=1;
 
       for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
       {
@@ -1925,8 +1925,8 @@ namespace bes
         variable_rank.put(eqi->variable().name(),atermpp::aterm_int(rank));
       }
 
-      unsigned long relevance_counter=0;
-      unsigned long relevance_counter_limit=100;
+      size_t relevance_counter=0;
+      size_t relevance_counter_limit=100;
       #define RELEVANCE_DIVIDE_FACTOR 100
 
       if (mcrl2::core::gsVerbose)
@@ -1940,8 +1940,8 @@ namespace bes
                     variable(2));
 
       // Variables used in whole function
-      unsigned long nr_of_processed_variables = 1;
-      unsigned long nr_of_generated_variables = 2;
+      size_t nr_of_processed_variables = 1;
+      size_t nr_of_generated_variables = 2;
 
       // As long as there are states to be explored
       while ((opt_strategy>=on_the_fly)
@@ -2124,7 +2124,7 @@ namespace bes
                 // Take the lowest element for substitution, to generate
                 // short counterexample.
 
-                // gsVerboseMsg("------------------ %d\n",(unsigned long)w);
+                // gsVerboseMsg("------------------ %d\n",(size_t)w);
                 to_set_to_true_or_false.erase(w);
                 for( std::set <variable_type>::iterator
                           v=variable_occurrence_set_begin(w);
@@ -2318,8 +2318,8 @@ static void save_rhs_in_cwi_form(std::ostream &outputfile,
 
 static void save_rhs_in_vasy_form(std::ostream &outputfile,
                                      bes_expression p,
-                                     std::vector<unsigned long> &variable_index,
-                                     const unsigned long current_rank,
+                                     std::vector<size_t> &variable_index,
+                                     const size_t current_rank,
                                      boolean_equation_system &bes_equations);
 
 
@@ -2328,7 +2328,7 @@ static void save_rhs_in_vasy_form(std::ostream &outputfile,
 
 typedef enum { both, and_form, or_form} expression_sort;
 
-static bes_expression translate_equation_for_vasy(const unsigned long i,
+static bes_expression translate_equation_for_vasy(const size_t i,
                                         const bes_expression b,
                                         const expression_sort s,
                                         boolean_equation_system &bes_equations)
@@ -2427,17 +2427,17 @@ void save_bes_in_vasy_format(const std::string &outfilename,bes::boolean_equatio
      equations are added during the translation process in "translate_equation_for_vasy"
      that must also be translated. */
 
-  for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
+  for(size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
   {
     bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both,bes_equations));
   }
 
   /* Second give a consecutive index to each variable of a particular rank */
 
-  std::vector<unsigned long> variable_index(bes_equations.nr_of_variables()+1);
-  for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
-  { unsigned long index=0;
-    for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
+  std::vector<size_t> variable_index(bes_equations.nr_of_variables()+1);
+  for(size_t r=1 ; r<=bes_equations.max_rank ; r++)
+  { size_t index=0;
+    for(size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
     { if (bes_equations.get_rank(i)==r)
       {
         variable_index[i]=index;
@@ -2456,9 +2456,9 @@ void save_bes_in_vasy_format(const std::string &outfilename,bes::boolean_equatio
     }
   }
 
-  for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
+  for(size_t r=1 ; r<=bes_equations.max_rank ; r++)
   { bool first=true;
-    for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
+    for(size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
     { if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r))
       { if (first)
         { ((outfilename=="")?std::cout:outputfile) <<
@@ -2487,8 +2487,8 @@ void save_bes_in_vasy_format(const std::string &outfilename,bes::boolean_equatio
 //---------------------------
 static void save_rhs_in_vasy_form(std::ostream &outputfile,
                                      bes_expression b,
-                                     std::vector<unsigned long> &variable_index,
-                                     const unsigned long current_rank,
+                                     std::vector<size_t> &variable_index,
+                                     const size_t current_rank,
                                      bes::boolean_equation_system &bes_equations)
 {
   if (is_true(b))
@@ -2559,8 +2559,8 @@ void save_bes_in_cwi_format(const std::string &outfilename,boolean_equation_syst
     }
   }
 
-  for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
-  { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
+  for(size_t r=1 ; r<=bes_equations.max_rank ; r++)
+  { for(size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
     {
       if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
       { ((outfilename=="")?std::cout:outputfile) <<
@@ -2644,8 +2644,8 @@ void save_bes_in_pbes_format(
   // Use an indexed set to keep track of the variables and their pbes-representations
 
   atermpp::vector < pbes_equation > eqns;
-  for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
-  { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
+  for(size_t r=1 ; r<=bes_equations.max_rank ; r++)
+  { for(size_t i=1; i<=bes_equations.nr_of_variables() ; i++)
     {
       if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
       {  pbes_expression pbe=generate_rhs_as_formula(bes_equations.get_rhs(i));
@@ -2756,8 +2756,8 @@ static void save_bes_in_bes_format(
   // Use an indexed set to keep track of the variables and their bes-representations
 
   atermpp::vector < boolean_equation > eqns;
-  for(unsigned long r=1 ; r<=bes_equations.max_rank ; ++r)
-  { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; ++i)
+  for(size_t r=1 ; r<=bes_equations.max_rank ; ++r)
+  { for(size_t i=1; i<=bes_equations.nr_of_variables() ; ++i)
     {
       if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
       {  mcrl2::bes::boolean_expression be=generate_rhs_as_bes_formula(bes_equations.get_rhs(i));
@@ -2783,7 +2783,7 @@ static void save_bes_in_bes_format(
 /* substitute boolean equation expression */
 static bes_expression substitute_rank(
                 bes_expression b,
-                const unsigned long current_rank,
+                const size_t current_rank,
                 const atermpp::vector<bes_expression> &approximation,
                 bes::boolean_equation_system &bes_equations,
                 const bool use_hashtable,
@@ -2934,7 +2934,7 @@ static bes_expression substitute_rank(
 static bes_expression evaluate_bex(
                 bes_expression b,
                 const atermpp::vector<bes_expression> &approximation,
-                const unsigned long rank,
+                const size_t rank,
                 bes::boolean_equation_system &bes_equations,
                 const bool use_hashtable,
                 atermpp::table &hashtable,
@@ -3092,7 +3092,7 @@ bool solve_bes(bes::boolean_equation_system &bes_equations,
 
   bes_equations.store_variable_occurrences();
 
-  for(unsigned long current_rank=bes_equations.max_rank;
+  for(size_t current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
   {
     if (gsVerbose)

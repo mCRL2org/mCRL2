@@ -134,7 +134,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       std::set<data::variable> process_parameters = atermpp::convert<std::set<data::variable> >(m_spec.process().process_parameters());
     
       // create a mapping m from process parameters to integers
-      std::map<data::variable, int> m;
+      std::map<data::variable, size_t> m;
       int index = 0;
       for (std::set<data::variable>::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {
@@ -146,7 +146,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
     
       // compute the initial set v of significant variables
       std::set<data::variable> significant_variables = transition_variables();
-      std::vector<int> v;
+      std::vector<size_t> v;
       for (std::set<data::variable>::iterator i = significant_variables.begin(); i != significant_variables.end(); ++i)
       {
         v.push_back(m[*i]);
@@ -177,7 +177,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
   std::clog << "initial significant variables: ";
-  for (std::vector<int>::iterator k = v.begin(); k != v.end(); ++k)
+  for (std::vector<size_t>::iterator k = v.begin(); k != v.end(); ++k)
   {
     std::clog << *k << " ";
   }
@@ -185,16 +185,16 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #endif   
     
       // compute the reachable nodes (i.e. the significant parameters)
-      std::vector<int> r1 = mcrl2::core::reachable_nodes(G, v.begin(), v.end());
+      std::vector<size_t> r1 = mcrl2::core::reachable_nodes(G, v.begin(), v.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
   std::clog << "reachable nodes: ";
-  for (std::vector<int>::iterator k = r1.begin(); k != r1.end(); ++k)
+  for (std::vector<size_t>::iterator k = r1.begin(); k != r1.end(); ++k)
   {
     std::clog << *k << " ";
   }
   std::clog << std::endl;
 #endif
-      std::set<int> r2(r1.begin(), r1.end());
+      std::set<size_t> r2(r1.begin(), r1.end());
       std::set<data::variable> to_be_removed;
       for (std::set<data::variable>::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {

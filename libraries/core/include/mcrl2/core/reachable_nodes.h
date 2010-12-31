@@ -29,9 +29,9 @@ namespace detail {
   struct reachable_nodes_recorder: public boost::default_dfs_visitor
   {
     typedef typename Graph::vertex_descriptor vertex_descriptor;
-    std::vector<int>& m_result;
+    std::vector<size_t>& m_result;
   
-    reachable_nodes_recorder(std::vector<int>& result)
+    reachable_nodes_recorder(std::vector<size_t>& result)
       : m_result(result)
     {}
   
@@ -53,13 +53,13 @@ namespace detail {
   /// \return The indices of the nodes that are reachable from the nodes
   /// given by the range of vertex descriptors [first, last].
   template <typename Graph, typename Iter>
-  std::vector<int> reachable_nodes(const Graph& g, Iter first, Iter last)
+  std::vector<size_t> reachable_nodes(const Graph& g, Iter first, Iter last)
   {
     typedef boost::color_traits<boost::default_color_type> Color;
     typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
     typedef typename boost::graph_traits<Graph>::edge_descriptor edge_descriptor;
 
-    std::vector<int> result;
+    std::vector<size_t> result;
     detail::reachable_nodes_recorder<Graph> recorder(result);
     std::vector<boost::default_color_type> colormap(boost::num_vertices(g), Color::white());
 

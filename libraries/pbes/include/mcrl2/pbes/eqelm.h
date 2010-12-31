@@ -256,7 +256,7 @@ namespace pbes_system {
         }
 
         // then remove parameters
-        std::map<string_type, std::vector<int> > to_be_removed;
+        std::map<string_type, std::vector<size_t> > to_be_removed;
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           string_type X = i->variable().name();

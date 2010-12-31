@@ -126,7 +126,7 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       }
       if (parser.options.count("time-limit"))
       {
-        m_time_limit = parser.option_argument_as< size_t >("time-limit");
+        m_time_limit = parser.option_argument_as< int >("time-limit");
       }
 
       if (parser.options.count("smt-solver"))

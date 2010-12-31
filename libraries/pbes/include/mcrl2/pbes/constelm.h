@@ -504,9 +504,9 @@ namespace detail {
 
         /// \brief Returns the indices of the constant parameters of this vertex.
         /// \return The indices of the constant parameters of this vertex.
-        std::vector<int> constant_parameter_indices() const
+        std::vector<size_t> constant_parameter_indices() const
         {
-          std::vector<int> result;
+          std::vector<size_t> result;
           int index = 0;
           variable_sequence_type parameters(variable.parameters());
           for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i, index++)
@@ -598,7 +598,7 @@ namespace detail {
       edge_map m_edges;
 
       /// \brief The redundant parameters.
-      std::map<string_type, std::vector<int> > m_redundant_parameters;
+      std::map<string_type, std::vector<size_t> > m_redundant_parameters;
 
       /// \brief The redundant propositional variables.
       std::set<propositional_variable_decl_type> m_redundant_equations;
@@ -638,16 +638,16 @@ namespace detail {
       std::map<propositional_variable_decl_type, std::vector<variable_type> > redundant_parameters() const
       {
         std::map<propositional_variable_decl_type, std::vector<variable_type> > result;
-        for (typename std::map<string_type, std::vector<int> >::const_iterator i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
+        for (typename std::map<string_type, std::vector<size_t> >::const_iterator i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
         {
           const vertex& v = m_vertices.find(i->first)->second;
           std::vector<variable_type>& variables = result[v.variable];
-          for (std::vector<int>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+          for (std::vector<size_t>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
             // std::advance doesn't work for aterm lists :-(
             variable_sequence_type parameters(v.variable.parameters());
             typename variable_sequence_type::iterator k = parameters.begin();
-            for (int i = 0; i < *j; i++)
+            for (size_t i = 0; i < *j; i++)
             {
               ++k;
             }
@@ -809,7 +809,7 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
           }
           else
           {
-            std::vector<int> r = v.constant_parameter_indices();
+            std::vector<size_t> r = v.constant_parameter_indices();
             if (!r.empty())
             {
               m_redundant_parameters[name] = r;

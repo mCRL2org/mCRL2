@@ -79,7 +79,7 @@ class Invariant_Eliminator {
           const mcrl2::lps::summand a_summand, 
           const mcrl2::data::data_expression a_invariant, 
           const bool a_no_elimination, 
-          const int a_summand_number);
+          const size_t a_summand_number);
   public:
     /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
@@ -103,7 +103,7 @@ class Invariant_Eliminator {
     mcrl2::lps::specification simplify(
               const mcrl2::data::data_expression a_invariant, 
               const bool a_no_elimination, 
-              const int a_summand_number);
+              const size_t a_summand_number);
 };
 
 #endif

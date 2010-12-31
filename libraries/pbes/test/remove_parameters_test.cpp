@@ -31,7 +31,7 @@ void test_propositional_variable()
 {
   variable_list d = make_list(nat("n"), pos("p"), bool_("b"), bool_("c"));
   propositional_variable X = propvar("X", d);
-  std::vector<int> v;
+  std::vector<size_t> v;
   v.push_back(1);
   v.push_back(3);
   propositional_variable X1 = remove_parameters(X, v);
@@ -43,7 +43,7 @@ void test_propositional_variable_instantiation()
 {
   data_expression_list d = make_list< data_expression >(nat("n"), pos("p"), bool_("b"), bool_("c"));
   propositional_variable_instantiation X = propvarinst("X", d);
-  std::vector<int> v;
+  std::vector<size_t> v;
   v.push_back(1);
   v.push_back(3);
   propositional_variable_instantiation X1 = remove_parameters(X, v);
@@ -65,11 +65,11 @@ void test_pbes_expression()
 
   pbes_expression p = pbes_expr::and_(X1, X2);
 
-  std::map<identifier_string, std::vector<int> > to_be_removed;
-  std::vector<int> v1;
+  std::map<identifier_string, std::vector<size_t> > to_be_removed;
+  std::vector<size_t> v1;
   v1.push_back(1);
   to_be_removed[X1.name()] = v1;
-  std::vector<int> v2;
+  std::vector<size_t> v2;
   v2.push_back(0);
   v2.push_back(2);
   to_be_removed[X2.name()] = v2;
