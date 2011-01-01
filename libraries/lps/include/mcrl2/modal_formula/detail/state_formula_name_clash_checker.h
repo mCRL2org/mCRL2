@@ -65,7 +65,7 @@ namespace detail {
         push(x.name());
       }
 
-      void leave(const mu& x)
+      void leave(const mu& )
       {
         pop();
       }
@@ -75,7 +75,7 @@ namespace detail {
         push(x.name());
       }
 
-      void leave(const nu& x)
+      void leave(const nu& )
       {
         pop();
       }

@@ -2290,6 +2290,8 @@ int mcrl2_lexer::yywrap(void) {
 void mcrl2_lexer::process_string(void) {
   col_nr += YYLeng();
   mcrl2yylval.appl = gsString2ATermAppl(YYText());
+  ATbool dummy;
+  ATindexedSetPut(mcrl2_parser_protect_table,(ATerm)mcrl2yylval.appl,&dummy);
 }
 
 ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
@@ -2308,9 +2310,12 @@ ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   cur_index = 0;
   cur_streams = &streams;
   switch_streams((*cur_streams)[0], NULL);
-  if (mcrl2yyparse() != 0) {
+  if (mcrl2yyparse() != 0) 
+  {
     result = NULL;
-  } else {
+  } 
+  else 
+  {
     //mcrl2_spec_tree contains the parsed specification
     result = mcrl2_spec_tree;
     mcrl2_spec_tree = NULL;

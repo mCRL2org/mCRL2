@@ -25,6 +25,13 @@
 
 #define CHECK_ARITY(ari1,ari2) (assert((ari1) == (ari2)))
 
+/* Uncomment the second line, to do a garbage collection before a term
+ * is constructed. This can be used to find subtle garbage collection problems.
+ * Note that this is very time consuming... The first line below expresses that
+ * no agressive checking is done, which is the default. */
+#define AGGRESSIVE_GARBAGE_COLLECT_CHECK
+/* #define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect() */
+
 
 #define HN(i)          ((HashNumber)(i))
 /* #define IDX(w)         HN(((w>>2) ^ (w>>10)) & 0xFF) */
@@ -555,6 +562,7 @@ ATermAppl ATmakeAppl(AFun sym, ...)
   ATerm arg;
   ATerm* buffer;
   
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   header = APPL_HEADER(0, arity > MAX_INLINE_ARITY ?
                        MAX_INLINE_ARITY+1 : arity, sym);
 
@@ -613,6 +621,7 @@ ATermAppl ATmakeAppl0(AFun sym)
   header_type header = APPL_HEADER(0, 0, sym);
   HashNumber hnr;
   
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
   
   CHECK_ARITY(ATgetArity(sym), 0);
@@ -668,6 +677,7 @@ ATermAppl ATmakeAppl1(AFun sym, ATerm arg0)
   header_type header = APPL_HEADER(0, 1, sym);
   HashNumber hnr;
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
   CHECK_TERM(arg0);
@@ -723,6 +733,7 @@ ATermAppl ATmakeAppl2(AFun sym, ATerm arg0, ATerm arg1)
   header_type header = APPL_HEADER(0, 2, sym);
   HashNumber hnr;
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
   CHECK_TERM(arg0);
@@ -784,7 +795,8 @@ ATermAppl ATmakeAppl3(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2)
   ATermAppl cur;
   header_type header = APPL_HEADER(0, 3, sym);
   HashNumber hnr;
-
+  
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
   CHECK_TERM(arg0);
@@ -839,6 +851,7 @@ ATermAppl ATmakeAppl4(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2, ATerm arg3)
   header_type header;
   HashNumber hnr;
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
   header = APPL_HEADER(0, 4, sym);
@@ -900,6 +913,7 @@ ATermAppl ATmakeAppl5(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
   header_type header = APPL_HEADER(0, 5, sym);
   HashNumber hnr;
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
   CHECK_TERM(arg0);
@@ -965,6 +979,7 @@ ATermAppl ATmakeAppl6(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
   header_type header = APPL_HEADER(0, 6, sym);
   HashNumber hnr;
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
   CHECK_TERM(arg0);
@@ -1037,6 +1052,7 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
                                    MAX_INLINE_ARITY+1 : arity, sym);
   HashNumber hnr;
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
   CHECK_TERM((ATerm)args);
@@ -1109,6 +1125,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
   header_type header = APPL_HEADER(0, arity > MAX_INLINE_ARITY ?
                                    MAX_INLINE_ARITY+1 : arity, sym);
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
   
   hnr = START(header);
@@ -1167,6 +1184,7 @@ ATermInt ATmakeInt(int val)
   header_type header = INT_HEADER(0);
   HashNumber hnr;
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   hnr = START(header);
   hnr = COMBINE(hnr, HN(long_val));
   hnr = FINISH(hnr);
@@ -1208,6 +1226,7 @@ ATermList ATmakeList1(ATerm el)
   header_type header = LIST_HEADER(0, 1);
   HashNumber hnr;
 
+  AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   CHECK_TERM(el);
 
   hnr = START(header);
@@ -1374,36 +1393,6 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
 
   return cur;
 }
-
-/*}}}  */
-/*{{{  ATermList ATmakeList(int n, ...) */
-
-/**
- * Create a list with n arguments.
- */
-
-/* ATermList ATmakeList(size_t n, ...)
-{
-  size_t i;
-  va_list args;
-  ATermList l;
-  ATerm* elems = AT_alloc_protected(n);
-
-  va_start(args, n);
-  for (i=0; i<n; i++) {
-    elems[i] = va_arg(args, ATerm);
-  }
-  va_end(args);
-
-  l = ATempty;
-  for (i=n; i>0; i--) {
-    l = ATinsert(l, elems[i-1]);
-  }
-  
-  AT_free_protected(elems);
-
-  return l;
-} */
 
 /*}}}  */
 
