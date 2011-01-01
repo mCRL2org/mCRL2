@@ -918,8 +918,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             for p in f.parameters():
                 ptype = p.type(include_modifiers = False, include_namespace = True, remove_templates = True)
                 qtype = p.type(include_modifiers = False, include_namespace = True)
-                if classname == 'process::process_specification':
-                    print ptype, is_dependent_type(dependencies, ptype)
                 if is_dependent_type(dependencies, ptype):
                     dependent = True
                     if is_modifiable_type(qtype, modifiability_map):

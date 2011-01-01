@@ -26,9 +26,9 @@ namespace state_formulas {
 /// Visitor that renames predicate variables using the specified identifier generator.
 /// \post In the generated formula, all predicate variables have different names.
 template <typename IdentifierGenerator>
-struct state_formula_predicate_variable_rename_builder: public state_formulas::builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> >
+struct state_formula_predicate_variable_rename_builder: public state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> >
 {
-	typedef state_formulas::builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> > super;
+	typedef state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> > super;
 		
 	using super::enter;
 	using super::leave;
@@ -109,6 +109,10 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::b
     pop();
     return nu(new_name, x.assignments(), new_formula);
   }
+  
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif 
 };
 
 /// \brief Utility function for creating a state_formula_predicate_variable_rename_builder.

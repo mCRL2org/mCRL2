@@ -12,6 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_NEGATOR_H
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_NEGATOR_H
 
+#include "mcrl2/core/builder.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 
@@ -22,9 +23,10 @@ namespace state_formulas {
 namespace detail {
 
   /// Visitor that negates propositional variable instantiations with a given name.
-  struct state_variable_negator: public state_formulas::builder<state_variable_negator>
+  template <typename Derived>
+  struct state_variable_negator: public state_formulas::state_formula_builder<Derived>
   {
-  	typedef state_formulas::builder<state_variable_negator> super;
+  	typedef state_formulas::state_formula_builder<Derived> super;
   
     using super::enter;
     using super::leave;
@@ -54,8 +56,8 @@ namespace detail {
   /// \param name The name of the variables that should be negated
   state_formula negate_propositional_variable(const core::identifier_string& name, const state_formula& x)
   {
-    state_variable_negator visitor(name);
-    return visitor(x);
+    core::apply_builder_arg1<state_variable_negator, core::identifier_string> builder(name);
+    return builder(x);
   }
 
 } // namespace detail

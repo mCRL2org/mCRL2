@@ -26,10 +26,11 @@ namespace state_formulas {
 
 namespace detail {
 
-  class state_formula_name_clash_resolver: public state_formulas::builder<state_formula_name_clash_resolver>
+  template <typename Derived>
+  class state_formula_name_clash_resolver: public state_formulas::state_formula_builder<Derived>
   {
     public:
-      typedef state_formulas::builder<state_formula_name_clash_resolver> super;
+      typedef state_formulas::state_formula_builder<Derived> super;
   
       using super::enter;
       using super::leave;
@@ -116,8 +117,8 @@ namespace detail {
   inline
   state_formula resolve_name_clashes(const state_formula& f)
   {
-    state_formula_name_clash_resolver resolver;
-    return resolver(f);
+    core::apply_builder<state_formula_name_clash_resolver> builder;
+    return builder(f);
   }
 
 } // namespace detail

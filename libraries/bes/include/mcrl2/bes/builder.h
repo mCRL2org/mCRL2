@@ -19,9 +19,9 @@ namespace mcrl2 {
 
 namespace bes {
 
-  /// \brief Traversal class for action formula data types
+  /// \brief Traversal class for boolean expressions
   template <typename Derived>
-  class builder: public core::builder<Derived>
+  class boolean_expression_builder: public core::builder<Derived>
   {
     public:
       typedef core::builder<Derived> super;
@@ -29,8 +29,7 @@ namespace bes {
       using super::leave;
       using super::operator();
 
-// Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/bes/detail/builder.inc.h"
+#include "mcrl2/boolean/detail/boolean_expression_builder.inc.h"
   };
 
 } // namespace bes

@@ -21,9 +21,9 @@ namespace mcrl2 {
 
 namespace action_formulas {
 
-  /// \brief Traversal class for action formula data types
+  /// \brief Traversal class for action formulas
   template <typename Derived>
-  class builder: public core::builder<Derived>
+  class action_formula_builder: public core::builder<Derived>
   {
     public:
       typedef core::builder<Derived> super;
@@ -35,16 +35,44 @@ namespace action_formulas {
 #include "mcrl2/modal_formula/detail/action_formula_builder.inc.h"
   };
 
+  /// \brief Traversal class for data expressions
+  template <typename Derived>
+  class data_expression_builder: public data::data_expression_builder<Derived>
+  {
+    public:
+      typedef data::data_expression_builder<Derived> super;
+      using super::enter;
+      using super::leave;
+      using super::operator();
+
+// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/modal_formula/detail/action_formula_data_expression_builder.inc.h"
+  };
+
+  /// \brief Traversal class for sort expressions
+  template <typename Derived>
+  class sort_expression_builder: public data::sort_expression_builder<Derived>
+  {
+    public:
+      typedef data::sort_expression_builder<Derived> super;
+      using super::enter;
+      using super::leave;
+      using super::operator();
+
+// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/modal_formula/detail/action_formula_sort_expression_builder.inc.h"
+  };
+
 } // namespace action_formulas
 
 namespace regular_formulas {
 
-  /// \brief Traversal class for regular formula data types
+  /// \brief Traversal class for regular formulas
   template <typename Derived>
-  class builder: public data::data_expression_builder<Derived>
+  class regular_formula_builder: public core::builder<Derived>
   {
     public:
-      typedef data::data_expression_builder<Derived> super;
+      typedef core::builder<Derived> super;
       using super::enter;
       using super::leave;
       using super::operator();
@@ -53,13 +81,42 @@ namespace regular_formulas {
 #include "mcrl2/modal_formula/detail/regular_formula_builder.inc.h"
   };
 
+  /// \brief Traversal class for sort expressions
+  template <typename Derived>
+  class sort_expression_builder: public data::sort_expression_builder<Derived>
+  {
+    public:
+      typedef data::sort_expression_builder<Derived> super;
+      using super::enter;
+      using super::leave;
+      using super::operator();
+
+// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/modal_formula/detail/regular_formula_sort_expression_builder.inc.h"
+  };
+
 } // namespace regular_formulas
 
 namespace state_formulas {
 
-  /// \brief Traversal class for state formula data types
+
+  /// \brief Traversal class for state formulas
   template <typename Derived>
-  class builder: public data::data_expression_builder<Derived>
+  class state_formula_builder: public core::builder<Derived>
+  {
+    public:
+      typedef core::builder<Derived> super;
+      using super::enter;
+      using super::leave;
+      using super::operator();
+
+// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/modal_formula/detail/state_formula_builder.inc.h"
+  };
+
+  /// \brief Traversal class for data expressions
+  template <typename Derived>
+  class data_expression_builder: public data::data_expression_builder<Derived>
   {
     public:
       typedef data::data_expression_builder<Derived> super;
@@ -68,7 +125,21 @@ namespace state_formulas {
       using super::operator();
 
 // Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/modal_formula/detail/state_formula_builder.inc.h"
+#include "mcrl2/modal_formula/detail/state_formula_data_expression_builder.inc.h"
+  };
+
+  /// \brief Traversal class for sort expressions
+  template <typename Derived>
+  class sort_expression_builder: public data::sort_expression_builder<Derived>
+  {
+    public:
+      typedef data::sort_expression_builder<Derived> super;
+      using super::enter;
+      using super::leave;
+      using super::operator();
+
+// Include file with traverse member functions. This is to avoid duplication.
+#include "mcrl2/modal_formula/detail/state_formula_sort_expression_builder.inc.h"
   };
 
 } // namespace state_formulas

@@ -6,98 +6,98 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/modal_formula/detail/action_formula_builder.inc
+/// \file mcrl2/lps/include/mcrl2/modal_formula/detail/action_formula_builder.inc.h
 /// \brief The content of this file is included in other header
 /// files, to prevent duplication.
 
 //--- start generated code ---//
-action_formula operator()(const true_& x)
+action_formulas::action_formula operator()(const action_formulas::true_& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = true_();
+  static_cast<Derived&>(*this).enter(x);  
+  // skip
+  static_cast<Derived&>(*this).leave(x);
+  return x;
+}
+
+action_formulas::action_formula operator()(const action_formulas::false_& x)
+{
+  static_cast<Derived&>(*this).enter(x);  
+  // skip
+  static_cast<Derived&>(*this).leave(x);
+  return x;
+}
+
+action_formulas::action_formula operator()(const action_formulas::not_& x)
+{
+  static_cast<Derived&>(*this).enter(x);  
+  action_formulas::action_formula result = action_formulas::not_(static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
 
-action_formula operator()(const false_& x)
+action_formulas::action_formula operator()(const action_formulas::and_& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = false_();
+  static_cast<Derived&>(*this).enter(x);  
+  action_formulas::action_formula result = action_formulas::and_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
 
-action_formula operator()(const not_& x)
+action_formulas::action_formula operator()(const action_formulas::or_& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = not_(static_cast<Derived&>(*this)(x.operand()));
+  static_cast<Derived&>(*this).enter(x);  
+  action_formulas::action_formula result = action_formulas::or_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
 
-action_formula operator()(const and_& x)
+action_formulas::action_formula operator()(const action_formulas::imp& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = and_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
+  static_cast<Derived&>(*this).enter(x);  
+  action_formulas::action_formula result = action_formulas::imp(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
 
-action_formula operator()(const or_& x)
+action_formulas::action_formula operator()(const action_formulas::forall& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = or_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
+  static_cast<Derived&>(*this).enter(x);  
+  action_formulas::action_formula result = action_formulas::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
 
-action_formula operator()(const imp& x)
+action_formulas::action_formula operator()(const action_formulas::exists& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = imp(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
+  static_cast<Derived&>(*this).enter(x);  
+  action_formulas::action_formula result = action_formulas::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
 
-action_formula operator()(const forall& x)
+action_formulas::action_formula operator()(const action_formulas::at& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = forall(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+  static_cast<Derived&>(*this).enter(x);  
+  action_formulas::action_formula result = action_formulas::at(static_cast<Derived&>(*this)(x.operand()), static_cast<Derived&>(*this)(x.time_stamp()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
 
-action_formula operator()(const exists& x)
+action_formulas::action_formula operator()(const action_formulas::action_formula& x)
 {
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = exists(x.variables(), static_cast<Derived&>(*this)(x.operand()));
-  static_cast<Derived&>(*this).leave(x);
-  return result;
-}
-
-action_formula operator()(const at& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result = at(static_cast<Derived&>(*this)(x.operand()), x.time_stamp());
-  static_cast<Derived&>(*this).leave(x);
-  return result;
-}
-
-action_formula operator()(const action_formula& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  action_formula result;
+  static_cast<Derived&>(*this).enter(x);  
+  action_formulas::action_formula result;
   if (data::is_data_expression(x)) { result = static_cast<Derived&>(*this)(data::data_expression(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_true(x)) { result = static_cast<Derived&>(*this)(action_formulas::true_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_false(x)) { result = static_cast<Derived&>(*this)(action_formulas::false_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_not(x)) { result = static_cast<Derived&>(*this)(action_formulas::not_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_and(x)) { result = static_cast<Derived&>(*this)(action_formulas::and_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_or(x)) { result = static_cast<Derived&>(*this)(action_formulas::or_(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_imp(x)) { result = static_cast<Derived&>(*this)(action_formulas::imp(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_forall(x)) { result = static_cast<Derived&>(*this)(action_formulas::forall(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_exists(x)) { result = static_cast<Derived&>(*this)(action_formulas::exists(atermpp::aterm_appl(x))); }
+  else if (action_formulas::is_at(x)) { result = static_cast<Derived&>(*this)(action_formulas::at(atermpp::aterm_appl(x))); }
   else if (lps::is_multi_action(x)) { result = static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_appl(x))); }
-  else if (is_true(x)) { result = static_cast<Derived&>(*this)(true_(atermpp::aterm_appl(x))); }
-  else if (is_false(x)) { result = static_cast<Derived&>(*this)(false_(atermpp::aterm_appl(x))); }
-  else if (is_not(x)) { result = static_cast<Derived&>(*this)(not_(atermpp::aterm_appl(x))); }
-  else if (is_and(x)) { result = static_cast<Derived&>(*this)(and_(atermpp::aterm_appl(x))); }
-  else if (is_or(x)) { result = static_cast<Derived&>(*this)(or_(atermpp::aterm_appl(x))); }
-  else if (is_imp(x)) { result = static_cast<Derived&>(*this)(imp(atermpp::aterm_appl(x))); }
-  else if (is_forall(x)) { result = static_cast<Derived&>(*this)(forall(atermpp::aterm_appl(x))); }
-  else if (is_exists(x)) { result = static_cast<Derived&>(*this)(exists(atermpp::aterm_appl(x))); }
-  else if (is_at(x)) { result = static_cast<Derived&>(*this)(at(atermpp::aterm_appl(x))); }
   static_cast<Derived&>(*this).leave(x);
   return result;
 }

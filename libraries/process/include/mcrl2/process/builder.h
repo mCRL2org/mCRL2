@@ -35,60 +35,23 @@ namespace process {
 
   /// \brief Traversal class for data expressions
   template <typename Derived>
-  class data_expression_builder_base: public data::data_expression_builder<Derived>
+  class data_expression_builder: public data::data_expression_builder<Derived>
   {
     public:
       typedef data::data_expression_builder<Derived> super;
       using super::enter;
       using super::leave;
       using super::operator();
-#include "mcrl2/process/detail/process_expression_builder.inc.h"
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  class data_expression_builder: public data_expression_builder_base<Derived>
-  {
-    public:
-      typedef data_expression_builder_base<Derived> super;
-      using super::enter;
-      using super::leave;
-      using super::operator();
+        
 #include "mcrl2/process/detail/data_expression_builder.inc.h"
   };
 
   /// \brief Traversal class for sort expressions
   template <typename Derived>
-  class sort_expression_builder_base1: public data::sort_expression_builder<Derived>
+  class sort_expression_builder: public data::sort_expression_builder<Derived>
   {
     public:
       typedef data::sort_expression_builder<Derived> super;
-      using super::enter;
-      using super::leave;
-      using super::operator();
-
-#include "mcrl2/process/detail/process_expression_builder.inc.h"
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  class sort_expression_builder_base2: public sort_expression_builder_base1<Derived>
-  {
-    public:
-      typedef sort_expression_builder_base1<Derived> super;
-      using super::enter;
-      using super::leave;
-      using super::operator();
-
-#include "mcrl2/process/detail/data_expression_builder.inc.h"
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  class sort_expression_builder: public sort_expression_builder_base2<Derived>
-  {
-    public:
-      typedef sort_expression_builder_base2<Derived> super;
       using super::enter;
       using super::leave;
       using super::operator();

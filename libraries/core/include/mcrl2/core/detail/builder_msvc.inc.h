@@ -15,7 +15,7 @@ T operator()(const T& x,
              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
             )
 {
-  msg("aterm traversal");
+  core::msg("aterm traversal");
   return x;
 }  
 
@@ -23,7 +23,7 @@ T operator()(const T& x,
 template <typename T>
 atermpp::term_list<T> operator()(const atermpp::term_list<T>& x)
 {
-  msg("aterm list traversal");
+  core::msg("aterm list traversal");
   atermpp::vector<T> result;
   for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
   {
@@ -39,7 +39,7 @@ void operator()(T& x,
                 typename atermpp::detail::enable_if_container<T>::type* = 0
                )
 {
-  msg("container traversal");
+  core::msg("container traversal");
   for (typename T::iterator i = x.begin(); i != x.end(); ++i)
   {
     update(*i);
@@ -50,7 +50,7 @@ void operator()(T& x,
 template <typename T>
 void operator()(atermpp::set<T>& x)
 {
-  msg("aterm set traversal");
+  core::msg("aterm set traversal");
   atermpp::set<T> result;
   for (typename atermpp::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
   {
