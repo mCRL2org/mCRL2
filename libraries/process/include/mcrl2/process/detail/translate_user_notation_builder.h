@@ -42,8 +42,7 @@ namespace detail {
   inline
   void translate_user_notation(process_specification& x)
   {
-    core::apply_builder<translate_user_notation_builder> builder;
-    builder(x);
+    return core::make_apply_builder<translate_user_notation_builder>()(x);
   }
 
 } // namespace detail

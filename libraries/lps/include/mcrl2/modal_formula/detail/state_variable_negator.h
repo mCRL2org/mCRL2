@@ -56,8 +56,7 @@ namespace detail {
   /// \param name The name of the variables that should be negated
   state_formula negate_propositional_variable(const core::identifier_string& name, const state_formula& x)
   {
-    core::apply_builder_arg1<state_variable_negator, core::identifier_string> builder(name);
-    return builder(x);
+    return core::make_apply_builder_arg1<state_variable_negator>(name)(x);
   }
 
 } // namespace detail

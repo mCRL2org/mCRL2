@@ -41,8 +41,7 @@ namespace detail {
   inline
   state_formula normalize_sorts(const state_formula& x, const data::data_specification& data_spec)
   {
-    core::apply_builder_arg1<sort_normalization_builder, data::data_specification> builder(data_spec);
-    return builder(x);
+    return core::make_apply_builder_arg1<sort_normalization_builder>(data_spec)(x);
   }
 
 } // namespace detail

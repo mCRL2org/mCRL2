@@ -122,8 +122,7 @@ namespace detail {
   inline
   data_expression translate_user_notation(const data_expression& x)
   {
-    core::apply_builder<translate_user_notation_builder> builder;
-    return builder(x);
+    return core::make_apply_builder<translate_user_notation_builder>()(x);
   }
 
 } // namespace detail

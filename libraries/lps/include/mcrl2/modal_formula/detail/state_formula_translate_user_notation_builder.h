@@ -37,8 +37,7 @@ namespace detail {
   inline
   state_formula translate_user_notation(const state_formula& x)
   {
-    core::apply_builder<translate_user_notation_builder> builder;
-    return builder(x);
+    return core::make_apply_builder<translate_user_notation_builder>()(x);
   }
 
 } // namespace detail

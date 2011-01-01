@@ -117,8 +117,7 @@ namespace detail {
   inline
   state_formula resolve_name_clashes(const state_formula& f)
   {
-    core::apply_builder<state_formula_name_clash_resolver> builder;
-    return builder(f);
+    return core::make_apply_builder<state_formula_name_clash_resolver>()(x);
   }
 
 } // namespace detail

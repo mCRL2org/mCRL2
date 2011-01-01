@@ -44,8 +44,7 @@ namespace detail {
   inline
   void normalize_sorts(process_specification& x)
   {
-    core::apply_builder_arg1<sort_normalization_builder, data::data_specification> builder(x.data());
-    builder(x);
+    return core::make_apply_builder_arg1<sort_normalization_builder>(x.data())(x);
   }
 
 } // namespace detail
