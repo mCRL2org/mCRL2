@@ -115,7 +115,7 @@ namespace detail {
 
   /// \brief Resolves name clashes in state formula f
   inline
-  state_formula resolve_name_clashes(const state_formula& f)
+  state_formula resolve_name_clashes(const state_formula& x)
   {
     return core::make_apply_builder<state_formula_name_clash_resolver>()(x);
   }
