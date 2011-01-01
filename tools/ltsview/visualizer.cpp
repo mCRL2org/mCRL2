@@ -910,7 +910,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
             vector< int > state_rules;
             s->getMatchedRules(state_rules);
 
-            int n_colours = 1;
+            size_t n_colours = 1;
             size_t n_rules = state_rules.size();
 
             while (n_colours < n_rules)
@@ -922,9 +922,9 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
             GLubyte *texture = (GLubyte*)malloc(4 * n_colours *
                 sizeof(GLubyte));
 
-            for(unsigned int i = 0; i < n_colours; ++i)
+            for(size_t i = 0; i < n_colours; ++i)
             {
-              int j = i % n_rules;
+              size_t j = i % n_rules;
 
               RGB_Color c1 = mediator->getMarkRuleColor(state_rules[j]);
               texture[4*i]   = (GLubyte) c1.red();
@@ -943,7 +943,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
             glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-            glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, n_colours, 0,
+            glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, static_cast<int>(n_colours), 0,
                          GL_RGBA, GL_UNSIGNED_BYTE, texture);
 
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
