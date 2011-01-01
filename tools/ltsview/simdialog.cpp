@@ -221,7 +221,7 @@ void SimDialog::refresh() {
         int labelId = posTrans[i]->getLabel();
         string label = mediator->getActionLabel(labelId);
 
-        simTransView->InsertItem(i, wxString(label.c_str(), wxConvLocal));
+        simTransView->InsertItem(static_cast<int>(i), wxString(label.c_str(), wxConvLocal));
 
         // Determine the state change this action will effectuate.
         State* nextState = posTrans[i]->getEndState();
@@ -243,7 +243,7 @@ void SimDialog::refresh() {
           stateChange.RemoveLast();
         }
         // Add stateChange value to the list
-        simTransView->SetItem(i, 1, stateChange);
+        simTransView->SetItem(static_cast<int>(i), 1, stateChange);
       }
 
       // Display selected transition

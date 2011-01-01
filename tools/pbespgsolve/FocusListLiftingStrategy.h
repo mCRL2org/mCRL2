@@ -42,8 +42,8 @@ public:
                               bool backward, size_t max_size );
     verti next(verti prev_vertex, bool prev_lifted);
     size_t memory_use() const;
-    bool backward() const { return lls_.backward(); }
-    bool max_size() const { return max_size_; }
+    bool backward() const { return lls_.backward()!=0; }
+    bool max_size() const { return max_size_!=0; }
 
 protected:
     verti pass1(verti prev_vertex, bool prev_lifted);

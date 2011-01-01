@@ -37,7 +37,7 @@ void ConeDB::addTruncatedCone(float r,bool t,bool b,int c) {
     check_thashtable();
     i = thash(k,tb,(thashtable.size()-1));
     tcone_bucket cb = { k, c, thashtable[i], tb };
-    thashtable[i] = tbuckets.size();
+    thashtable[i] = static_cast<int>(tbuckets.size());
     tbuckets.push_back(cb);
   }
 }
@@ -88,7 +88,7 @@ void ConeDB::addObliqueCone(float a,float r,float s,int c) {
     check_ohashtable();
     i = ohash(k1,k2,b,(ohashtable.size()-1));
     ocone_bucket cb = { k1, k2, b, c, ohashtable[i] };
-    ohashtable[i] = obuckets.size();
+    ohashtable[i] = static_cast<int>(obuckets.size());
     obuckets.push_back(cb);
   }
 }

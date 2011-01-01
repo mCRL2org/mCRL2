@@ -36,7 +36,7 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
   mediator = owner;
   lts = alts;
 
-  int numParams = lts->getNumParameters();
+  int numParams = static_cast<int>(lts->getNumParameters());
   wxArrayString paramChoices;
   wxString str;
   paramChoices.Alloc(numParams);

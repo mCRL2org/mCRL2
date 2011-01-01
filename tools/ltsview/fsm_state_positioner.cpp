@@ -286,7 +286,7 @@ inline void ClusterSlotInfo::occupySlot(int ring, int slot)
 
 inline int ClusterSlotInfo::getNumRings()
 {
-  return num_slots.size();
+  return static_cast<int>(num_slots.size());
 }
 
 inline int ClusterSlotInfo::getNumSlots(int ring)

@@ -910,7 +910,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
             vector< int > state_rules;
             s->getMatchedRules(state_rules);
 
-            size_t n_colours = 1;
+            int n_colours = 1;
             size_t n_rules = state_rules.size();
 
             while (n_colours < n_rules)

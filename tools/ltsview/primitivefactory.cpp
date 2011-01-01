@@ -71,7 +71,7 @@ int PrimitiveFactory::makeTruncatedCone(float r,bool topClosed,bool bottomClosed
       make_disc();
       P_TruncatedCone *p = new P_TruncatedCone(ring,
           dynamic_cast<P_Disc*>(primitives[disc]),topClosed,bottomClosed);
-      result = primitives.size();
+      result = static_cast<int>(primitives.size());
       coneDB->addTruncatedCone(r,topClosed,bottomClosed,result);
       primitives.push_back(p);
     }
@@ -85,7 +85,7 @@ int PrimitiveFactory::makeObliqueCone(float a,float r,float s) {
     P_ObliqueCone *p = new P_ObliqueCone(a,r,s);
     p->reshape(settings->getInt(Quality),cos_theta,sin_theta,
                deg_to_rad(float(settings->getInt(BranchTilt))));
-    result = primitives.size();
+    result = static_cast<int>(primitives.size());
     primitives.push_back(p);
     oblq_cones.push_back(p);
     coneDB->addObliqueCone(a,r,s,result);
@@ -97,7 +97,7 @@ int PrimitiveFactory::makeHemisphere() {
   if (hemisphere == -1) {
     P_Hemisphere *p = new P_Hemisphere();
     p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
-    hemisphere = primitives.size();
+    hemisphere = static_cast<int>(primitives.size());
     primitives.push_back(p);
   }
   return hemisphere;
@@ -107,7 +107,7 @@ int PrimitiveFactory::makeSphere() {
   if (sphere == -1) {
     P_Sphere *p = new P_Sphere();
     p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
-    sphere = primitives.size();
+    sphere = static_cast<int>(primitives.size());
     primitives.push_back(p);
   }
   return sphere;
@@ -162,7 +162,7 @@ int PrimitiveFactory::make_ring(float r) {
   if (result == -1) {
     P_Ring *p = new P_Ring(r);
     p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
-    result = primitives.size();
+    result = static_cast<int>(primitives.size());
     primitives.push_back(p);
     coneDB->addTruncatedCone(r,false,false,result);
   }
@@ -173,7 +173,7 @@ void PrimitiveFactory::make_disc() {
   if (disc == -1) {
     P_Disc *p = new P_Disc();
     p->reshape(settings->getInt(Quality),cos_theta,sin_theta);
-    disc = primitives.size();
+    disc = static_cast<int>(primitives.size());
     primitives.push_back(p);
   }
 }
@@ -181,7 +181,7 @@ void PrimitiveFactory::make_disc() {
 void PrimitiveFactory::make_simple_sphere() {
   if (simple_sphere == -1) {
     P_SimpleSphere *p = new P_SimpleSphere();
-    simple_sphere = primitives.size();
+    simple_sphere = static_cast<int>(primitives.size());
     primitives.push_back(p);
   }
 }

@@ -70,7 +70,7 @@ void State::getMatchedRules(std::vector< int > &mrs)
 
 int State::getNumMatchedRules()
 {
-  return matchedRules.size();
+  return static_cast<int>(matchedRules.size());
 }
 
 bool State::isDeadlock() const
@@ -211,7 +211,7 @@ Transition* State::getInTransition(int i) const
 
 int State::getNumInTransitions() const
 {
-  return inTransitions.size();
+  return static_cast<int>(inTransitions.size());
 }
 
 Transition* State::getOutTransition(int i) const
@@ -221,7 +221,7 @@ Transition* State::getOutTransition(int i) const
 
 int State::getNumOutTransitions() const
 {
-  return outTransitions.size();
+  return static_cast<int>(outTransitions.size());
 }
 
 Transition* State::getLoop(int i) const
@@ -231,7 +231,7 @@ Transition* State::getLoop(int i) const
 
 int State::getNumLoops() const
 {
-  return loops.size();
+  return static_cast<int>(loops.size());
 }
 
 void State::setSimulated(bool simulated)

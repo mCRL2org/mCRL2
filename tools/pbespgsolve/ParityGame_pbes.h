@@ -38,13 +38,13 @@ void ParityGame::assign_pbes( mcrl2::pbes_system::pbes<Container> &pbes,
     }
 
     // Assign vertex info and recount cardinalities
-    reset(end - begin, max_prio + 1);
+    reset(end - begin, static_cast<int>(max_prio + 1));
     for (verti v = begin; v < end; ++v)
     {
         bool and_op = pgg.get_operation(v) ==
                         mcrl2::pbes_system::parity_game_generator::PGAME_AND;
         vertex_[v - begin].player = and_op ? PLAYER_ODD : PLAYER_EVEN;
-        vertex_[v - begin].priority = pgg.get_priority(v);
+        vertex_[v - begin].priority = static_cast<int>(pgg.get_priority(v));
     }
     recalculate_cardinalities(end - begin);
 

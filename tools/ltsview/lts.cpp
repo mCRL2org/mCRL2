@@ -299,7 +299,7 @@ bool LTS::readFromFile(const std::string &filename)
   states.reserve(mcrl2_lts.num_states());
   for (size_t i = 0; i < mcrl2_lts.num_states(); ++i)
   {
-    states.push_back(new State(i));
+    states.push_back(new State(static_cast<int>(i)));
   }
 
   initialState = states[mcrl2_lts.initial_state()];
@@ -309,7 +309,7 @@ bool LTS::readFromFile(const std::string &filename)
   { const transition ti=r.front();
     State *s1 = states[ti.from()];
     State *s2 = states[ti.to()];
-    Transition* t = new Transition(s1,s2,ti.label());
+    Transition* t = new Transition(s1,s2,static_cast<int>(ti.label()));
     if (s1 != s2)
     {
       s1->addOutTransition(t);
@@ -341,7 +341,7 @@ State* LTS::selectStateByID(int id)
       {
         if (posTrans[i]->getEndState()->getID() == selectedState->getID())
         {
-          simulation->chooseTrans(i);
+          simulation->chooseTrans(static_cast<int>(i));
         }
       }
     }
@@ -377,7 +377,7 @@ void LTS::deselect()
 
 int LTS::getNumLabels()
 {
-  return mcrl2_lts.num_action_labels();
+  return static_cast<int>(mcrl2_lts.num_action_labels());
 }
 
 size_t LTS::getNumParameters() const
@@ -460,12 +460,12 @@ int LTS::getNumRanks() const
   {
     ++offset;
   }
-  return clustersInRank.size() - offset;
+  return static_cast<int>(clustersInRank.size()) - offset;
 }
 
 int LTS::getMaxRanks() const
 {
-  return clustersInRank.size();
+  return static_cast<int>(clustersInRank.size());
 }
 
 int LTS::getNumClusters() const
@@ -473,7 +473,7 @@ int LTS::getNumClusters() const
   int result = 0;
   for (size_t i = 0; i < clustersInRank.size(); ++i)
   {
-    result += clustersInRank[i].size();
+    result += static_cast<int>(clustersInRank[i].size());
   }
   return result;
 }
@@ -498,12 +498,12 @@ int LTS::getNumDeadlocks()
 
 int LTS::getNumStates() const
 {
-  return mcrl2_lts.num_states();
+  return static_cast<int>(mcrl2_lts.num_states());
 }
 
 int LTS::getNumTransitions() const
 {
-  return mcrl2_lts.num_transitions();
+  return static_cast<int>(mcrl2_lts.num_transitions());
 }
 
 void LTS::clearRanksAndClusters()
@@ -618,7 +618,7 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic)
           vector< Cluster* > cs;
           clustersInRank.push_back(cs);
         }
-        d->setPositionInRank(clustersInRank[r].size());
+        d->setPositionInRank(static_cast<int>(clustersInRank[r].size()));
         clustersInRank[r].push_back(d);
         d->setAncestor(c);
         c->addDescendant(d);
@@ -659,7 +659,7 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic)
         vector< Cluster* > cs;
         clustersInRank.push_back(cs);
       }
-      d->setPositionInRank(clustersInRank[r].size());
+      d->setPositionInRank(static_cast<int>(clustersInRank[r].size()));
       clustersInRank[r].push_back(d);
       d->setAncestor(c);
       c->addDescendant(d);
@@ -931,7 +931,7 @@ void LTS::loadTrace(std::string const& path)
         if (action == mcrl2_lts.action_label(posTrans[i]->getLabel()))
         {
           ++possibilities;
-          toChoose = i;
+          toChoose = static_cast<int>(i);
         }
       }
 
@@ -974,7 +974,7 @@ void LTS::loadTrace(std::string const& path)
           if (match > maxmatch)
           {
             maxmatch = match;
-            toChoose = j;
+            toChoose = static_cast<int>(j);
           }
         }
       }

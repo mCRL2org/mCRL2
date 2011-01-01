@@ -541,7 +541,7 @@ namespace bes
   }
 
   inline bes_expression variable(const variable_type &n)
-  { return bes_expression((atermpp::aterm)atermpp::aterm_int(n));
+  { return bes_expression((atermpp::aterm)atermpp::aterm_int(static_cast<int>(n)));
   }
 
   inline bool is_false(const bes_expression &b)
@@ -1887,7 +1887,7 @@ namespace bes
 
       // Needed hashtables
       Container eqsys = pbes_spec.equations();
-      atermpp::table pbes_equations(2*eqsys.size(), 50);   // (propvarname, pbes_equation)
+      atermpp::table pbes_equations(2*static_cast<int>(eqsys.size()), 50);   // (propvarname, pbes_equation)
 
       // Vector with the order of the variable names used for sorting the result
 
@@ -1922,7 +1922,7 @@ namespace bes
         { current_fixpoint_symbol=eqi->symbol();
           rank=rank+1;
         }
-        variable_rank.put(eqi->variable().name(),atermpp::aterm_int(rank));
+        variable_rank.put(eqi->variable().name(),atermpp::aterm_int(static_cast<int>(rank)));
       }
 
       size_t relevance_counter=0;

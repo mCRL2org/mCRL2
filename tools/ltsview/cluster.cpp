@@ -251,7 +251,7 @@ void Cluster::computeSizeAndPositions_FSM() {
 
     // invariant: descendants in range [x,y) have not been assigned a position
     int x = 0;
-    int y = descendants.size();
+    int y = static_cast<int>(descendants.size());
     float bcr_center = 0.0f;  // BC radius of largest descendant in center
     float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
     if (uniqueLargest) {
@@ -358,7 +358,7 @@ void Cluster::computeSizeAndPositions() {
 
     // invariant: descendants in range [x,y) have not been assigned a position
     int x = 0;
-    int y = descendants.size();
+    int y = static_cast<int>(descendants.size());
 
     float bcr_center = 0.0f;  // BC radius of largest descendant in center
     float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
@@ -485,7 +485,7 @@ int Cluster::getBranchVisObject(int i) const {
 }
 
 int Cluster::getNumBranchVisObjects() const {
-  return branchVisObjects.size();
+  return static_cast<int>(branchVisObjects.size());
 }
 
 void Cluster::addBranchVisObject(int vo) {

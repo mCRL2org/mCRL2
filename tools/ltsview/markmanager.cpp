@@ -115,7 +115,7 @@ int MarkManager::createMarkRule(int param, bool neg, RGB_Color col, const std::s
   m->value_set = vals;
   int retval;
   if (first_free_mark_rule == mark_rules.end()) {
-    retval = mark_rules.size();
+    retval = static_cast<int>(mark_rules.size());
     mark_rules.push_back(m);
     first_free_mark_rule = mark_rules.end();
   } else {

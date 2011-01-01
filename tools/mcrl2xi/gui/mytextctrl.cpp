@@ -60,7 +60,7 @@ void myTextControl::OnPaste (wxCommandEvent &/*event*/){
 };
 
 void myTextControl::OnSelectAll (wxCommandEvent &/*event*/){
-  SetSelection (0, GetValue().Length() );
+  SetSelection (0, static_cast<long>(GetValue().Length() ));
 };
 
 void myTextControl::OnRedo (wxCommandEvent &/*event*/){

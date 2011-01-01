@@ -90,7 +90,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
 
       if (extension == wxT("png"))
       {
-        png_id = f_exts.Count();
+        png_id = static_cast<int>(f_exts.Count());
       }
 
       f_exts.Add(extension);

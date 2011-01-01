@@ -223,7 +223,7 @@ void GLCanvas::onPaint(wxPaintEvent& /*event*/)
   display();
 }
 
-void GLCanvas::onSize(wxSizeEvent& event)
+void GLCanvas::onSize(wxSizeEvent& )
 {
 	recalcPixelSize();
 	recalcAspectRatio();

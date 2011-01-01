@@ -262,7 +262,7 @@ int VisObjectFactory::makeObject(int primitive, vector<int> &ids)
 
   objects.push_back(vo);
   objects_sorted.push_back(vo);
-  return objects.size()-1;
+  return static_cast<int>(objects.size())-1;
 }
 
 void VisObjectFactory::updateObjectMatrix(int obj)

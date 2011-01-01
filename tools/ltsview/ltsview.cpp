@@ -557,7 +557,7 @@ int LTSView::getNumberOfParams() const
 {
   if (lts != NULL)
   {
-    return lts->getNumParameters();
+    return static_cast<int>(lts->getNumParameters());
   }
   else
   {

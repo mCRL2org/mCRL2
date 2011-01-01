@@ -2643,10 +2643,10 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
   if(nIn)
     RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,pn2gsMakeBagVars(pn2gsMakeIds(ATgetSlice(VarNames,0,nIn))));//RightExpr+={|in|};
   if(nOut)
-    RightExpr=pn2gsMakeDataApplProd2(OpSubt,RightExpr,pn2gsMakeBagVars(pn2gsMakeIds(ATgetTail(VarNames,nIn))));//RightExpr-={|out|};
+    RightExpr=pn2gsMakeDataApplProd2(OpSubt,RightExpr,pn2gsMakeBagVars(pn2gsMakeIds(ATgetTail(VarNames,static_cast<int>(nIn)))));//RightExpr-={|out|};
       }
       else
-  RightExpr=pn2gsMakeBagVars(ATgetTail(VarNames,nIn));//RightExpr={|in|};
+  RightExpr=pn2gsMakeBagVars(ATgetTail(VarNames,static_cast<int>(nIn)));//RightExpr={|in|};
     }
 
     ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
@@ -2667,7 +2667,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
     if(Type){
       Cond=NULL;
       if(nOut>0){
-  Cond=pn2gsMakeDataApplProd2(OpLTE,pn2gsMakeBagVars(pn2gsMakeIds(ATgetTail(VarNames,nIn))),IdX);//subbag
+  Cond=pn2gsMakeDataApplProd2(OpLTE,pn2gsMakeBagVars(pn2gsMakeIds(ATgetTail(VarNames,static_cast<int>(nIn)))),IdX);//subbag
       }
       if(inhib){
   ATermAppl Cond1=pn2gsMakeDataApplProd2(OpEq,IdX,EmptyBag);//make x=={}

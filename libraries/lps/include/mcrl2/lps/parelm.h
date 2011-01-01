@@ -161,12 +161,12 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         data::assignment_list assignments(i->assignments());
         for (data::assignment_list::iterator j = assignments.begin(); j != assignments.end(); ++j)
         {
-          int j0 = m[j->lhs()];
+          size_t j0 = m[j->lhs()];
           std::set<data::variable> vars;
           data::find_variables(j->rhs(), std::inserter(vars, vars.end()));
           for (std::set<data::variable>::iterator k = vars.begin(); k != vars.end(); ++k)
           {
-            int k0 = m[*k];
+            size_t k0 = m[*k];
 #ifdef MCRL2_LPS_PARELM_DEBUG
   std::clog << "edge " << j0 << " -> " << k0 << std::endl;
 #endif
