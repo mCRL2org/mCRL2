@@ -210,17 +210,37 @@ struct substitute_propositional_variable_helper
       {}
   };
 
+struct prop_var_substitution: public std::unary_function<propositional_variable_instantiation, pbes_expression>
+{
+  const propositional_variable& X;
+  const pbes_expression& phi;
+
+  prop_var_substitution(const propositional_variable& X_, const pbes_expression& phi_)
+    : X(X_), phi(phi_)
+  {}
+
+  pbes_expression operator()(const propositional_variable_instantiation& x)
+  {
+    if (x.name() != X.name())
+    {
+      return x;
+    }
+    return data::replace_variables(phi, data::make_double_sequence_substitution_adaptor(X.parameters(), x.parameters()));
+  }
+};
+
 /// \brief Applies the substitution \p X := \p phi to the pbes expression \p t.
 /// \param t A pbes expression
 /// \param X A propositional variable
 /// \param phi A pbes expression
 /// \return The result of the substitution.
 inline
-pbes_expression substitute_propositional_variable(pbes_expression t,
+pbes_expression substitute_propositional_variable(const pbes_expression& x,
                                                   const propositional_variable& X,
                                                   const pbes_expression& phi)
 {
-  return replace_propositional_variables(t, substitute_propositional_variable_helper(X, phi));
+//  return replace_propositional_variables(t, substitute_propositional_variable_helper(X, phi));
+  return core::make_update_apply_builder<pbes_expression_builder>(prop_var_substitution(X, phi))(x);
 }
 
 } // namespace pbes_system
