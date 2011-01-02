@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   color_interpolator.cpp
   conedb.cpp
   fsm_state_positioner.cpp
+  glcontext.cpp
   glcanvas.cpp
   infodialog.cpp
   lts.cpp

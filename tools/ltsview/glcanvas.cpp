@@ -11,6 +11,7 @@
 #include <iostream>
 #include <wx/image.h>
 #include "glcanvas.h"
+#include "glcontext.h"
 #include "ids.h"
 #include "icons/zoom_cursor.xpm"
 #include "icons/zoom_cursor_mask.xpm"
@@ -48,8 +49,14 @@ END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
     const wxSize &size,int* attribList)
-  : wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
-         wxT(""),attribList), simReader(NULL)
+#if wxCHECK_VERSION(2, 9, 0)
+	: wxGLCanvas(parent, wxID_ANY, NULL /* attribs */,
+             wxDefaultPosition, wxDefaultSize,
+             wxFULL_REPAINT_ON_RESIZE | wxSUNKEN_BORDER), simReader(NULL)
+# else
+	: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, size, wxSUNKEN_BORDER  | wxFULL_REPAINT_ON_RESIZE,
+               wxEmptyString, attribList), simReader(NULL)
+#endif
 {
   mediator = owner;
   settings = ss;
@@ -66,45 +73,6 @@ GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
   simulating = false;
   setActiveTool(myID_SELECT);
   selectedType = PICKNONE;
-}
-
-void GLCanvas::initialize()
-{
-  SetCurrent();
-
-  glLoadIdentity();
-
-/*  GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
-  GLfloat light_pos[] = { 50.0f,50.0f,50.0f,1.0f };
-  glLightfv(GL_LIGHT0,GL_AMBIENT,gray);
-  glLightfv(GL_LIGHT0,GL_DIFFUSE,gray);
-  glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
-
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glDepthMask(GL_TRUE);
-  glBlendFunc(GL_ONE, GL_ZERO);
-  glDisable(GL_BLEND);
-
-  GLfloat light_col[] = { 0.2f,0.2f,0.2f };
-  glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
-  glMaterialf(GL_FRONT,GL_SHININESS,8.0f);
-  glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_COLOR_MATERIAL);
-
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-
-  RGB_Color c = settings->getRGB(BackgroundColor);
-  glClearColor(c.red() / 255.0f, c.green() / 255.0f, c.blue() / 255.0f,
-      1.0f);
-  glClearDepth(1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //SwapBuffers();
-  displayAllowed = true;*/
 }
 
 void GLCanvas::getMaxViewportDims(int *w,int* h)
@@ -165,40 +133,7 @@ void GLCanvas::setActiveTool(int t)
 
 void GLCanvas::display(bool coll_caller, bool selecting)
 {
- /* SetCurrent();
 
-  glLoadIdentity(); */
-
-  GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
-  GLfloat light_pos[] = { 50.0f,50.0f,50.0f,1.0f };
-  glLightfv(GL_LIGHT0,GL_AMBIENT,gray);
-  glLightfv(GL_LIGHT0,GL_DIFFUSE,gray);
-  glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
-
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glDepthMask(GL_TRUE);
-  glBlendFunc(GL_ONE, GL_ZERO);
-  glDisable(GL_BLEND);
-
-  GLfloat light_col[] = { 0.2f,0.2f,0.2f };
-  glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
-  glMaterialf(GL_FRONT,GL_SHININESS,8.0f);
-  glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_COLOR_MATERIAL);
-
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-
-  RGB_Color c = settings->getRGB(BackgroundColor);
-  glClearColor(c.red() / 255.0f, c.green() / 255.0f, c.blue() / 255.0f,
-      1.0f);
-  glClearDepth(1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //SwapBuffers();
   displayAllowed = true;
 
   // coll_caller indicates whether the caller of display() is the
@@ -221,7 +156,7 @@ void GLCanvas::display(bool coll_caller, bool selecting)
 
     if (!selecting)
     {
-      SetCurrent();
+      getGLContext( this );
     }
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -377,11 +312,10 @@ void GLCanvas::display(bool coll_caller, bool selecting)
 
 void GLCanvas::reshape()
 {
-  if (GetContext())
+  if( glContext )
   {
     int width,height;
     GetClientSize(&width, &height);
-    SetCurrent();
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -393,8 +327,11 @@ void GLCanvas::reshape()
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/)
 {
-  wxPaintDC dc(this);
-  display();
+  glContext = getGLContext( this );
+  if( glContext ){
+    wxPaintDC dc(this);
+    display();
+  }
 }
 
 void GLCanvas::onSize(wxSizeEvent& /*event*/)
@@ -749,7 +686,8 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC)
   // * The identifier of the type of object clicked
   // * Up to two numbers indicating the object selected
   GLsizei bufsize = mediator->getNumberOfObjects() * 6;
-  if (GetContext())
+
+  if ( glContext )
   {
     GLuint *selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
     GLint  hits;
@@ -790,4 +728,16 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC)
     processHits(hits, selectBuf, doubleC);
     free(selectBuf);
   }
+}
+
+GLContext* GLCanvas::getGLContext( wxGLCanvas *canvas )
+{
+  /* Context is created upon first paint
+   * This ensures that a drawing GLcanvas is declared, instantiated and shown.
+   *  */
+  if (glContext == NULL){
+    glContext = new GLContext( canvas, settings );
+  }
+
+  return glContext;
 }
