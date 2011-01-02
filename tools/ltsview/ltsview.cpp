@@ -33,25 +33,7 @@
 #include "settings.h"
 #include "state.h"
 #include "visualizer.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/frame.h"
-    #include "wx/button.h"
-    #include "wx/stattext.h"
-    #include "wx/sizer.h"
-    #include "wx/event.h"
-    #include "wx/gauge.h"
-    #include "wx/intl.h"
-    #include "wx/dcclient.h"
-    #include "wx/timer.h"
-    #include "wx/settings.h"
-    #include "wx/app.h"
-#endif
-
-#include "wx/progdlg.h"
 #include "wx/evtloop.h"
-
 
 using namespace std;
 
@@ -133,6 +115,12 @@ bool LTSView::run()
   mainFrame->Layout();
 
   wxInitAllImageHandlers();
+
+  /* Ensure that the wxEvenLoop is running,
+   * otherwise assertions are shown when opening files passed
+   * from command-line (Detected when compiled with wxWidgets 2.9.1)
+   * */
+  wxEventLoopGuarantor ensureEventLoop;
 
   if (!input_filename().empty())
   {
