@@ -1891,7 +1891,7 @@ namespace bes
 
       // Vector with the order of the variable names used for sorting the result
 
-      atermpp::table variable_rank(2*eqsys.size(),50);
+      atermpp::table variable_rank(2*static_cast<int>(eqsys.size()),50);
 
       // Fill the pbes_equations table
       if (mcrl2::core::gsVerbose)

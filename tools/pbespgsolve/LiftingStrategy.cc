@@ -40,7 +40,7 @@ LiftingStrategyFactory *
     if (strcasecmp(parts[0].c_str(), "linear") == 0)
     {
         int backward = (parts.size() > 1 ? atoi(parts[1].c_str()) : 0);
-        return new LinearLiftingStrategyFactory(backward);
+        return new LinearLiftingStrategyFactory(backward!=0);
     }
     else
     if ( strcasecmp(parts[0].c_str(), "predecessor") == 0 ||
