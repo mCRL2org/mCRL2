@@ -47,15 +47,12 @@ namespace detail {
       /// \brief Pops the name of the stack
       void pop(const core::identifier_string& name)
       {
-        //std::cout << "<pop>" << name << std::endl;
-        //std::cout << "<m_names[" << name << "] =" << core::detail::print_list(m_names[name]) << std::endl;
         m_names[name].pop_back();
       }
       
       /// \brief Pushes name on the stack.
       void push(const core::identifier_string& name)
       {
-        //std::cout << "<push>" << name << std::endl;
         atermpp::vector<core::identifier_string>& names = m_names[name];
         if (names.empty())
         {
@@ -65,7 +62,6 @@ namespace detail {
         {
           names.push_back(m_generator(std::string(name) + "_"));
         }
-        //std::cout << "<m_names[" << name << "] =" << core::detail::print_list(m_names[name]) << std::endl;
       }    
 
       void enter(const mu& x)
@@ -92,7 +88,11 @@ namespace detail {
       state_formula operator()(const mu& x)
       {
         enter(x);
-        state_formula result = mu(m_names[x.name()].back(), x.assignments(), (*this)(x.operand()));
+        // N.B. If the two lines below are replace by
+        //   state_formula result = mu(m_names[x.name()].back(), x.assignments(), (*this)(x.operand()));
+        // a memory error occurs with the clang and intel compilers!
+        core::identifier_string name = m_names[x.name()].back();
+        state_formula result = mu(name, x.assignments(), (*this)(x.operand()));
         leave(x);
         return result;
       }
@@ -101,7 +101,11 @@ namespace detail {
       state_formula operator()(const nu& x)
       {
         enter(x);
-        state_formula result = nu(m_names[x.name()].back(), x.assignments(), (*this)(x.operand()));
+        // N.B. If the two lines below are replace by
+        //   state_formula result = nu(m_names[x.name()].back(), x.assignments(), (*this)(x.operand()));
+        // a memory error occurs with the clang and intel compilers!
+        core::identifier_string name = m_names[x.name()].back();
+        state_formula result = nu(name, x.assignments(), (*this)(x.operand()));
         leave(x);
         return result;
       }
@@ -110,6 +114,7 @@ namespace detail {
       state_formula operator()(const variable& x)
       {
         return variable(m_names[x.name()].back(), x.arguments());
+        return x;
       } 
   };
 
