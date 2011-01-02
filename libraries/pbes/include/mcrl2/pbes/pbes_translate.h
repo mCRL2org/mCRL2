@@ -181,8 +181,7 @@ std::cerr << "\n<Par>(" << core::pp(x) << ", " << core::pp(l) << ", " << core::p
       // does not occur in spec, but does occur in specification_to_aterm(spec) did cause problems. JFG 2/1/2011.
       const atermpp::aterm_appl temporary_spec=specification_to_aterm(spec);
       std::set<core::identifier_string> spec_variable_names = data::detail::find_variable_names(temporary_spec);
-
-      std::set<core::identifier_string> spec_names = core::find_identifiers(specification_to_aterm(spec));
+      std::set<core::identifier_string> spec_names = core::find_identifiers(temporary_spec);
 
       // rename data variables in f, to prevent name clashes with data variables in spec
       data::set_identifier_generator generator;
@@ -198,7 +197,7 @@ std::cerr << "\n<Par>(" << core::pp(x) << ", " << core::pp(l) << ", " << core::p
       // wrap the formula inside a 'nu' if needed
       if (!s::is_mu(f) && !s::is_nu(f))
       {
-        atermpp::aterm_list context = make_list(f, specification_to_aterm(spec));
+        atermpp::aterm_list context = make_list(f, temporary_spec);
         core::identifier_string X = data::fresh_identifier(context, std::string("X"));
         f = s::nu(X, data::assignment_list(), f);
       }
