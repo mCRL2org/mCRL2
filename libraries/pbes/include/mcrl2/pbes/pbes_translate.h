@@ -175,7 +175,13 @@ std::cerr << "\n<Par>(" << core::pp(x) << ", " << core::pp(l) << ", " << core::p
 
       state_formulas::state_formula f = formula;
       std::set<core::identifier_string> formula_variable_names = state_formulas::find_variable_names(formula);
-      std::set<core::identifier_string> spec_variable_names = data::detail::find_variable_names(specification_to_aterm(spec));
+      // The spec is assigned to a temporary_spec, to guarantee that this term and esp. the symbols in it are
+      // protected from garbage collection. Below a std::set<core::identifier_string> is used, which means that if temporary_spec does
+      // not exist anymore, the identifier_strings in this set can be garbage collected. Esp. the symbol Delta, which
+      // does not occur in spec, but does occur in specification_to_aterm(spec) did cause problems. JFG 2/1/2011.
+      const atermpp::aterm_appl temporary_spec=specification_to_aterm(spec);
+      std::set<core::identifier_string> spec_variable_names = data::detail::find_variable_names(temporary_spec);
+
       std::set<core::identifier_string> spec_names = core::find_identifiers(specification_to_aterm(spec));
 
       // rename data variables in f, to prevent name clashes with data variables in spec

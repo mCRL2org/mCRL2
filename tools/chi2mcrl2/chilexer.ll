@@ -259,6 +259,9 @@ void chi_lexer::getposition()
 void chi_lexer::process_string(void) {
   col_nr += YYLeng();
   chiyylval.appl = gsString2ATermAppl(YYText());
+  // Storing chiyylval.appl in the chi_parser_protect table is necessary
+  // as otherwise this term can be garbage collected. JFG 2/1/2011.
+  ATbool b; ATindexedSetPut(chi_parser_protect_table, (ATerm)chiyylval.appl, &b);
 }
 
 ATermAppl chi_lexer::parse_stream (std::istream &stream ) {
