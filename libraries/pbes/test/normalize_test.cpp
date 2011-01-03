@@ -216,6 +216,12 @@ std::string print(const pbes_expression& x)
 	return core::pp(x);
 }
 
+inline
+pbes_expression normalize(const pbes_expression& x)
+{
+  return detail::normalize_and_or(x);
+}    
+
 void test_normalize_and_or_equality(std::string expr1, std::string expr2)
 {
   core::detail::test_operation(
@@ -224,9 +230,9 @@ void test_normalize_and_or_equality(std::string expr1, std::string expr2)
     parse,
     print,
 	  std::equal_to<pbes_expression>(),
-	  detail::normalize_and_or,
+	  normalize,
     "normalize_and_or",
-	  detail::normalize_and_or,
+	  normalize,
     "normalize_and_or"
   );
 }
