@@ -208,7 +208,7 @@ namespace detail {
       : to_be_removed(to_be_removed_)
     {}
 
-    void operator()(atermpp::set<data::variable>& x) const
+    void remove_parameters(atermpp::set<data::variable>& x) const
     {
       for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
       {
@@ -252,7 +252,7 @@ namespace detail {
     {
       static_cast<Derived&>(*this)(x.equations());
       x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
-      (*this)(x.global_variables());
+      remove_parameters(x.global_variables());
     }
   };
 } // namespace detail
