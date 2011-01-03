@@ -8,11 +8,8 @@ from mcrl2_classes import *
 from mcrl2_utility import *
 
 # Generates classes from class_text and inserts them in the file
-# filename. If filename is a directory, then each of the # classes is
+# filename. If filename is a directory, then each of the classes is
 # inserted in a separate file.
-#
-# If superclass is defined, it will be the base class of the generated
-# classes. Otherwise atermpp::aterm_appl will be taken as the base class.
 def make_classes(filename, class_text, namespace, add_constructor_overloads = False):
     classes = parse_classes(class_text, namespace = namespace)
 
@@ -30,46 +27,6 @@ def make_classes(filename, class_text, namespace, add_constructor_overloads = Fa
         class_definitions = [c.class_inline_definition() for c in classes]
         ctext = '\n'.join(class_definitions)
         insert_text_in_file(filename, ctext, 'generated classes', handle_user_sections = True)
-
-## Generates class declarations from class_text and inserts them in the file
-## filename.
-##
-## If superclass is defined, it will be the base class of the generated
-## classes. Otherwise atermpp::aterm_appl will be taken as the base class.
-#def make_class_declarations(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, superclass_aterm = None, label = ''):
-#    classes = parse_classes(class_text, use_base_class_name = True)
-#
-#    # skip the classes with a namespace qualifier (they are defined elsewhere)
-#    classes = [c for c in classes if c.qualifier() == '']
-#
-#    class_declarations = [c.class_declaration(namespace, True, add_constructor_overloads) for c in classes]
-#    ctext = '\n'.join(class_declarations)
-#
-#    if superclass != None and superclass_aterm != None:
-#        text = Class(superclass_aterm, '%s()' % superclass, 'class %s' % superclass, superclass = None, use_base_class_name = False).class_inline_definition(add_constructor_overloads = add_constructor_overloads)
-#        # TODO: this code should be generated in a cleaner way
-#        text = re.sub('check_term', 'check_rule', text)
-#        ctext = text + ctext
-#    if label != '':
-#        label = label + ' '
-#    insert_text_in_file(filename, ctext, 'generated %sclass declarations' % label)
-#
-## Generates class member function definitions from class_text and inserts them in the file
-## filename.
-##
-## If superclass is defined, it will be the base class of the generated
-## classes. Otherwise atermpp::aterm_appl will be taken as the base class.
-#def make_class_definitions(filename, class_text, superclass = None, namespace = 'core', add_constructor_overloads = False, label = ''):
-#    classes = parse_classes(class_text, use_base_class_name = True)
-#
-#    # skip the classes with a namespace qualifier (they are defined elsewhere)
-#    classes = [c for c in classes if c.qualifier() == '']
-#
-#    class_definitions = [c.class_member_function_definitions(namespace, True, add_constructor_overloads) for c in classes]
-#    ctext = '\n'.join(class_definitions)
-#    if label != '':
-#        label = label + ' '
-#    insert_text_in_file(filename, ctext, 'generated %sclass definitions' % label)
 
 if __name__ == "__main__":
     make_classes('../../bes/include/mcrl2/bes/boolean_expression.h',         BOOLEAN_EXPRESSION_CLASSES   , namespace = 'bes'             )

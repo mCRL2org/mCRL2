@@ -32,6 +32,7 @@
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/detail/state_variable_negator.h"
+#include "mcrl2/modal_formula/detail/action_formula_accessors.h"
 #include "mcrl2/pbes/monotonicity.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
@@ -184,57 +185,56 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     /// \param a A timed multi-action
     /// \param b An action formula
     /// \return The function result
-    pbes_expression sat_top(const lps::multi_action& x, action_formulas::action_formula y)
+    pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n" << lps2pbes_indent() << "<sat timed>" << x.to_string() << " " << pp(y) << std::flush;
+std::cerr << "\n" << lps2pbes_indent() << "<sat timed>" << x.to_string() << " " << pp(b) << std::flush;
 lps2pbes_increase_indent();
 #endif
-      using namespace action_formulas::act_frm;
-      using namespace action_formulas::accessors;
+      using namespace action_formulas::detail::accessors;
       namespace d = data;
       namespace z = pbes_expr_optimized;
       namespace a = action_formulas;
 
       pbes_expression result;
 
-      if (a::is_mult_act(y)) {
-        result = lps::equal_multi_actions(x, lps::multi_action(mult_params(y)));
-      } else if (a::is_true(y)) {
+      if (lps::is_multi_action(b)) {
+        result = lps::equal_multi_actions(x, lps::multi_action(mult_params(b)));
+      } else if (a::is_true(b)) {
         result = z::true_();
-      } else if (a::is_false(y)) {
+      } else if (a::is_false(b)) {
         result = z::false_();
-      } else if (d::is_data_expression(y)) {
-        result = y;
-      } else if (a::is_at(y)) {
+      } else if (data::is_data_expression(b)) {
+        result = b;
+      } else if (a::is_at(b)) {
         data::data_expression t = x.time();
-        action_formulas::action_formula alpha = arg(y);
-        data::data_expression t1 = time(y);
+        action_formulas::action_formula alpha = arg(b);
+        data::data_expression t1 = time(b);
         result = z::and_(sat_top(x, alpha), d::equal_to(t, t1));
-      } else if (a::is_not(y)) {
-        result = z::not_(sat_top(x, arg(y)));
-      } else if (a::is_and(y)) {
-        result = z::and_(sat_top(x, left(y)), sat_top(x, right(y)));
-      } else if (a::is_or(y)) {
-        result = z::or_(sat_top(x, left(y)), sat_top(x, right(y)));
-      } else if (a::is_imp(y)) {
-        result = z::imp(sat_top(x, left(y)), sat_top(x, right(y)));
-      } else if (a::is_forall(y)) {
-        data::variable_list v = var(y);
+      } else if (a::is_not(b)) {
+        result = z::not_(sat_top(x, arg(b)));
+      } else if (a::is_and(b)) {
+        result = z::and_(sat_top(x, left(b)), sat_top(x, right(b)));
+      } else if (a::is_or(b)) {
+        result = z::or_(sat_top(x, left(b)), sat_top(x, right(b)));
+      } else if (a::is_imp(b)) {
+        result = z::imp(sat_top(x, left(b)), sat_top(x, right(b)));
+      } else if (a::is_forall(b)) {
+        data::variable_list v = var(b);
         assert(v.size() > 0);
-        action_formulas::action_formula alpha = arg(y);
-        std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), x.time(), y));
-        data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
-        result = z::forall(y, sat_top(x, alpha.substitute(make_list_substitution(v, y))));
-      } else if (a::is_exists(y)) {
-        data::variable_list v = var(y);
+        action_formulas::action_formula alpha = arg(b);
+        std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), x.time(), b));
+        data::variable_list b = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
+        result = z::forall(b, sat_top(x, alpha.substitute(make_list_substitution(v, b))));
+      } else if (a::is_exists(b)) {
+        data::variable_list v = var(b);
         assert(v.size() > 0);
-        action_formulas::action_formula alpha = arg(y);
-        std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), x.time(), y));
-        data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
-        result = z::exists(y, sat_top(x, alpha.substitute(make_list_substitution(v, y))));
+        action_formulas::action_formula alpha = arg(b);
+        std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), x.time(), b));
+        data::variable_list b = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
+        result = z::exists(b, sat_top(x, alpha.substitute(make_list_substitution(v, b))));
       } else {
-        throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + y.to_string());
+        throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 lps2pbes_decrease_indent();
@@ -690,25 +690,25 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
     /// \param x A sequence of actions
     /// \param b An action formula
     /// \return The function result
-    pbes_expression sat_top(const lps::multi_action& x, action_formulas::action_formula b)
+    pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n" << lps2pbes_indent() << "<sat>" << x.to_string() << " " << pp(b) << std::flush;
 lps2pbes_increase_indent();
 #endif
-      using namespace action_formulas::accessors;
+      using namespace action_formulas::detail::accessors;
       namespace p = pbes_expr_optimized;
       namespace a = action_formulas;
 
       pbes_expression result;
 
-      if (a::is_mult_act(b)) {
+      if (lps::is_multi_action(b)) {
         result = lps::equal_multi_actions(x, lps::multi_action(mult_params(b)));
       } else if (a::is_true(b)) {
         result = p::true_();
       } else if (a::is_false(b)) {
         result = p::false_();
-      } else if (a::is_data(b)) {
+      } else if (data::is_data_expression(b)) {
         result = b;
       } else if (a::is_not(b)) {
         result = p::not_(sat_top(x, arg(b)));

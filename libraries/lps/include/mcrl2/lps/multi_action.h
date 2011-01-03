@@ -210,7 +210,7 @@ namespace lps {
 
   /// \brief Returns true if the term t is a multi action
   inline
-  bool is_multi_action(atermpp::aterm_appl t)
+  bool is_multi_action(const atermpp::aterm_appl& t)
   {
     return core::detail::gsIsMultAct(t);
   }
