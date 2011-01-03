@@ -21,18 +21,16 @@
 #include "mcrl2/core/find.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/detail/data_utility.h"
-#include "mcrl2/data/xyz_identifier_generator.h"
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
+#include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/detail/state_variable_negator.h"
 #include "mcrl2/pbes/monotonicity.h"
 #include "mcrl2/pbes/pbes.h"
@@ -159,50 +157,6 @@ class pbes_translate_algorithm
 std::cerr << "\n<Par>(" << core::pp(x) << ", " << core::pp(l) << ", " << core::pp(f) << ") = " << core::pp(result) << std::endl;
 #endif
       return result;
-    }
-
-    /// \brief Renames data variables and predicate variables in the formula \p f, and
-    /// wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
-    /// step for the algorithm.
-    /// \param formula A modal formula
-    /// \param spec A linear process specification
-    /// \return The preprocessed formula
-    state_formulas::state_formula preprocess_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
-    {
-      using namespace detail;
-      using namespace state_formulas::accessors;
-      namespace s = state_formulas;
-
-      state_formulas::state_formula f = formula;
-      std::set<core::identifier_string> formula_variable_names = state_formulas::find_variable_names(formula);
-      // The spec is assigned to a temporary_spec, to guarantee that this term and esp. the symbols in it are
-      // protected from garbage collection. Below a std::set<core::identifier_string> is used, which means that if temporary_spec does
-      // not exist anymore, the identifier_strings in this set can be garbage collected. Esp. the symbol Delta, which
-      // does not occur in spec, but does occur in specification_to_aterm(spec) did cause problems. JFG 2/1/2011.
-      const atermpp::aterm_appl temporary_spec=specification_to_aterm(spec);
-      std::set<core::identifier_string> spec_variable_names = data::detail::find_variable_names(temporary_spec);
-      std::set<core::identifier_string> spec_names = core::find_identifiers(temporary_spec);
-
-      // rename data variables in f, to prevent name clashes with data variables in spec
-      data::set_identifier_generator generator;
-      generator.add_identifiers(spec_variable_names);
-      f = state_formulas::rename_variables(f, generator);
-
-      // rename predicate variables in f, to prevent name clashes
-      data::xyz_identifier_generator xyz_generator;
-      xyz_generator.add_identifiers(spec_names);
-      xyz_generator.add_identifiers(formula_variable_names);
-      f = rename_predicate_variables(f, xyz_generator);
-
-      // wrap the formula inside a 'nu' if needed
-      if (!s::is_mu(f) && !s::is_nu(f))
-      {
-        atermpp::aterm_list context = make_list(f, temporary_spec);
-        core::identifier_string X = data::fresh_identifier(context, std::string("X"));
-        f = s::nu(X, data::assignment_list(), f);
-      }
-
-      return f;
     }
 
   public:
@@ -694,7 +648,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) <
       lps::linear_process lps = spec.process();
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
-      state_formulas::state_formula f = preprocess_formula(formula, spec);
+      state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
 
       // make sure the lps is timed
       data::variable T = fresh_variable(make_list(f, lps::linear_process_to_aterm(lps)), data::sort_real::real_(), "T");
@@ -1114,7 +1068,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) <
       }
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
-      state_formulas::state_formula f = preprocess_formula(formula, spec);
+      state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
 
       // compute the equations
       atermpp::vector<pbes_equation> e = E(f, f, lps);
