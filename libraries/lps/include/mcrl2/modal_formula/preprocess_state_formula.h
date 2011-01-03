@@ -21,6 +21,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/find.h"
+#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 
 namespace mcrl2 {
 
@@ -34,7 +35,7 @@ namespace state_formulas {
     /// \return The preprocessed formula
     state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
     {
-      using namespace state_formulas::accessors;
+      using namespace state_formulas::detail::accessors;
       namespace s = state_formulas;
 
       state_formulas::state_formula f = formula;

@@ -26,6 +26,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/modal_formula/mucalculus.h"
+#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/lps/specification.h"
@@ -96,7 +97,7 @@ inline
 data::variable_list mu_variables(state_formulas::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::assignment_list l = state_formulas::accessors::ass(f);
+  data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::variable_list result;
   for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
@@ -112,7 +113,7 @@ inline
 data::data_expression_list mu_expressions(state_formulas::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::assignment_list l = state_formulas::accessors::ass(f);
+  data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::data_expression_list result;
   for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {

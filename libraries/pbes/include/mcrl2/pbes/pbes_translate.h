@@ -33,6 +33,7 @@
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/detail/state_variable_negator.h"
 #include "mcrl2/modal_formula/detail/action_formula_accessors.h"
+#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/monotonicity.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
@@ -103,14 +104,14 @@ class pbes_translate_algorithm
     /// \return The function result
     data::variable_list Par(core::identifier_string x, data::variable_list l, state_formulas::state_formula f)
     {
-      using namespace state_formulas::accessors;
+      using namespace state_formulas::detail::accessors;
       namespace p = pbes_system;
       namespace s = state_formulas;
       using atermpp::detail::operator+;
         
       data::variable_list result;
         
-      if (s::is_data(f)) {
+      if (data::is_data_expression(f)) {
         // result = data::variable_list();
       } else if (s::is_true(f)) {
         // result = data::variable_list();
@@ -265,7 +266,7 @@ lps2pbes_increase_indent();
       using namespace pbes_system::accessors;
       using lps::summand_list;
       namespace s = state_formulas;
-      namespace a = state_formulas::accessors;
+      namespace a = state_formulas::detail::accessors;
       namespace d = data;
       using atermpp::detail::operator+;
 
@@ -273,7 +274,7 @@ lps2pbes_increase_indent();
 
       if (!s::is_not(f))
       {
-        if (s::is_data(f)) 
+        if (data::is_data_expression(f)) 
         {
           result = pbes_expression(f);
         } 
@@ -452,7 +453,7 @@ lps2pbes_increase_indent();
       else // the formula is a negation
       {
         f = a::arg(f);
-        if (s::is_data(f)) {
+        if (data::is_data_expression(f)) {
           result = pbes_expression(data::sort_bool::not_(f));
         } else if (s::is_true(f)) {
           result = z::false_();
@@ -528,14 +529,14 @@ std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pp(result) << std::fl
 std::cerr << "\n" << lps2pbes_indent() << "<E timed>" << pp(f) << std::flush;
 lps2pbes_increase_indent();
 #endif
-      using namespace state_formulas::accessors;
+      using namespace state_formulas::detail::accessors;
       namespace s = state_formulas;
       using namespace data;
       atermpp::vector<pbes_equation> result;
 
       if (!s::is_not(f))
       {
-        if (s::is_data(f)) {
+        if (data::is_data_expression(f)) {
           // do nothing
         } else if (s::is_true(f)) {
           // do nothing
@@ -579,7 +580,7 @@ lps2pbes_increase_indent();
       else // the formula is a negation
       {
         f = arg(f);
-        if (s::is_data(f)) {
+        if (data::is_data_expression(f)) {
           // do nothing
         } else if (s::is_true(f)) {
           // do nothing
@@ -641,7 +642,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) <
     /// \return The result of the translation
     pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec)
     {
-      using namespace state_formulas::accessors;
+      using namespace state_formulas::detail::accessors;
       using atermpp::detail::operator+;
       namespace s = state_formulas;
 
@@ -771,13 +772,13 @@ lps2pbes_increase_indent();
       using lps::summand_list;
       using atermpp::detail::operator+;
       namespace s = state_formulas;
-      namespace a = state_formulas::accessors;
+      namespace a = state_formulas::detail::accessors;
 
       pbes_expression result;
 
       if (!s::is_not(f))
       {
-        if (s::is_data(f)) {
+        if (data::is_data_expression(f)) {
           result = pbes_expression(f);
         } else if (s::is_true(f)) {
           result = z::true_();
@@ -871,7 +872,7 @@ lps2pbes_increase_indent();
       else // the formula is a negation
       {
         f = a::arg(f);
-        if (s::is_data(f)) {
+        if (data::is_data_expression(f)) {
           result = pbes_expression(data::sort_bool::not_(f));
         } else if (s::is_true(f)) {
           result = z::false_();
@@ -944,7 +945,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pp(result) << std::fl
 std::cerr << "\n" << lps2pbes_indent() << "<E>" << pp(f) << std::flush;
 lps2pbes_increase_indent();
 #endif
-      using namespace state_formulas::accessors;
+      using namespace state_formulas::detail::accessors;
       namespace s = state_formulas;
       using namespace data;
       //using state_formulas::is_variable;
@@ -952,7 +953,7 @@ lps2pbes_increase_indent();
 
       if (!s::is_not(f))
       {
-        if (s::is_data(f)) {
+        if (data::is_data_expression(f)) {
           // do nothing
         } else if (s::is_true(f)) {
           // do nothing
@@ -996,7 +997,7 @@ lps2pbes_increase_indent();
       else // the formula is a negation
       {
         f = arg(f);
-        if (s::is_data(f)) {
+        if (data::is_data_expression(f)) {
           // do nothing
         } else if (s::is_true(f)) {
           // do nothing
@@ -1058,7 +1059,7 @@ std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) <
     /// \return The result of the translation
     pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec)
     {
-      using namespace state_formulas::accessors;
+      using namespace state_formulas::detail::accessors;
       using atermpp::detail::operator+;
       lps::linear_process lps = spec.process();
 

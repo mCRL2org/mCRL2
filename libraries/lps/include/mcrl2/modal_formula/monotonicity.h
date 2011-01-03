@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 
 namespace mcrl2 {
 
@@ -29,13 +30,13 @@ bool is_monotonous(state_formula f, const atermpp::set<core::identifier_string>&
 {
   //std::cout << "<formula>" << core::pp(f) << "<negated_variables>" << core::detail::print_pp_set(negated_variables) << std::endl;
 
-  using namespace accessors;
+  using namespace state_formulas::detail::accessors;
 
   //--- handle negations ---//
   if (is_not(f))
   {
     f = arg(f); // remove the not
-    if (is_data(f)) {
+    if (data::is_data_expression(f)) {
       return true;
     } else if (is_true(f)) {
       return true;
@@ -97,7 +98,7 @@ bool is_monotonous(state_formula f, const atermpp::set<core::identifier_string>&
   }
 
   //--- handle everything except negations ---//
-  if (is_data(f)) {
+  if (data::is_data_expression(f)) {
     return true;
   } else if (is_true(f)) {
     return true;

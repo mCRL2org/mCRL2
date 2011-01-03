@@ -32,7 +32,7 @@ state_formula normalize(state_formula f)
   if (is_not(f))
   {
     f = arg(f); // remove the not
-    if (is_data(f)) {
+    if (data::is_data_expression(f)) {
       return data::sort_bool::not_(f);
     } else if (is_true(f)) {
       return false_();
@@ -72,7 +72,7 @@ state_formula normalize(state_formula f)
   }
   else // !is_not(f)
   {
-    if (is_data(f)) {
+    if (data::is_data_expression(f)) {
       return f;
     } else if (is_true(f)) {
       return f;
