@@ -14,6 +14,7 @@
 
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/state_variable_negator.h"
+#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
@@ -27,7 +28,7 @@ namespace state_formulas {
 inline
 state_formula normalize(state_formula f)
 {
-  using namespace accessors;
+  using namespace state_formulas::detail::accessors;
   
   if (is_not(f))
   {

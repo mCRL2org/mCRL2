@@ -17,6 +17,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
+#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
@@ -353,7 +354,7 @@ void test_rename()
 void test_normalize()
 {
   using mcrl2::core::pp;
-  using namespace accessors;
+  using namespace state_formulas::detail::accessors;
   std::cerr << "test_normalize\n";
 
   state_formula x = state_formulas::variable(identifier_string("X"), data::data_expression_list());
@@ -394,7 +395,7 @@ void test_normalize()
 
 void test_type_checking()
 {
-  using namespace accessors;
+  using namespace state_formulas::detail::accessors;
   std::cerr << "test_type_checking\n";
 
   specification context = linearise(
