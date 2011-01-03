@@ -5,7 +5,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file remove_parameters.cpp
+/// \file remove_parameters_test.cpp
 /// \brief Tests for removing parameters..
 
 #include <iostream>
@@ -34,7 +34,7 @@ void test_propositional_variable()
   std::vector<size_t> v;
   v.push_back(1);
   v.push_back(3);
-  propositional_variable X1 = remove_parameters(X, v);
+  propositional_variable X1 = pbes_system::remove_parameters(X, v);
   variable_list d1 = make_list(nat("n"), bool_("b"));
   BOOST_CHECK(X1 = propvar("X", d1));
 }
@@ -46,7 +46,7 @@ void test_propositional_variable_instantiation()
   std::vector<size_t> v;
   v.push_back(1);
   v.push_back(3);
-  propositional_variable_instantiation X1 = remove_parameters(X, v);
+  propositional_variable_instantiation X1 = pbes_system::remove_parameters(X, v);
   data_expression_list d1 = make_list< data_expression >(nat("n"), bool_("b"));
   BOOST_CHECK(X1 = propvarinst("X", d1));
 }
@@ -74,7 +74,7 @@ void test_pbes_expression()
   v2.push_back(2);
   to_be_removed[X2.name()] = v2;
 
-  pbes_expression q = remove_parameters(p, to_be_removed);
+  pbes_expression q = pbes_system::remove_parameters(p, to_be_removed);
 
   pbes_expression r;
   {

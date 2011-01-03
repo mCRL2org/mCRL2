@@ -347,7 +347,7 @@ void test_instantiate_global_variables()
   std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
   p.instantiate_global_variables();
-  std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;
+  std::cout << "<after>" << pp(p) << std::endl;
   core::garbage_collect();
 }
 

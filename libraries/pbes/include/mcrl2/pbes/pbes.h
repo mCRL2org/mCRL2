@@ -53,8 +53,10 @@ using mcrl2::core::pp;
 template <typename Container> class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
-template <typename Object, typename SetContainer>
-void remove_parameters(Object& o, const SetContainer& to_be_removed);
+template <typename Container>
+void remove_pbes_parameters(pbes<Container>& x,
+                            const std::set<data::variable>& to_be_removed
+                           );
 
 template <typename Object, typename Substitution>
 void substitute(Object& o, const Substitution& sigma, bool replace_parameters);
@@ -402,7 +404,7 @@ class pbes
         to_be_removed.insert(*i);
       }
       pbes_system::substitute(*this, sigma, false);
-      pbes_system::remove_parameters(*this, to_be_removed);
+      pbes_system::remove_pbes_parameters(*this, to_be_removed);
       assert(global_variables().empty());
     }
 
@@ -762,8 +764,8 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 }
 /// \endcond
 
-#ifndef MCRL2_PBES_REMOVE_H
-#include "mcrl2/pbes/remove.h"
+#ifndef MCRL2_PBES_REMOVE_PARAMETERS_H
+#include "mcrl2/pbes/remove_parameters.h"
 #endif
 
 #ifndef MCRL2_PBES_SUBSTITUTE_H
