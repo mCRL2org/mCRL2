@@ -17,7 +17,7 @@
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_expr_builder.h"
+#include "mcrl2/pbes/builder.h"
 
 namespace mcrl2 {
 
@@ -105,7 +105,9 @@ propositional_variable_instantiation remove_parameters(propositional_variable_in
 
 /// \cond INTERNAL_DOCS
 namespace detail {
-struct pbes_remove_parameters_builder: public pbes_expr_builder<pbes_expression>
+
+template <typename Derived>
+struct pbes_remove_parameters_builder: public pbes_expression_builder<Derived>
 {
   const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed_;
 
@@ -117,16 +119,16 @@ struct pbes_remove_parameters_builder: public pbes_expr_builder<pbes_expression>
   /// \param x A PBES expression
   /// \param v A propositional variable instantiation
   /// \return The result of visiting the node
-  pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v)
+  pbes_expression operator()(const propositional_variable_instantiation& x)
   {
-    std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed_.find(v.name());
+    std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed_.find(x.name());
     if (i == to_be_removed_.end())
     {
       return x;
     }
     else
     {
-      return remove_parameters(v, i->second);
+      return remove_parameters(x, i->second);
     }
   }
 };
@@ -140,7 +142,7 @@ struct pbes_remove_parameters_builder: public pbes_expr_builder<pbes_expression>
 inline
 pbes_expression remove_parameters(pbes_expression p, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
 {
-  return detail::pbes_remove_parameters_builder(to_be_removed).visit(p);
+  return core::make_apply_builder_arg1<detail::pbes_remove_parameters_builder>(to_be_removed)(p);
 }
 
 /// \brief Removes parameters from propositional variables in a pbes equation
