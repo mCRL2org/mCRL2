@@ -40,26 +40,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  template <typename Container>
-  void apply_internal_format_conversion(pbes<Container>& p)
-  {
-#define MCRL2_NEW_INTERNAL_FORMAT_CONVERSION_PBES
-#ifndef MCRL2_NEW_INTERNAL_FORMAT_CONVERSION_PBES
-    using namespace data::detail;
-    Container equations=p.equations();
-    for(typename Container::iterator eqn=equations.begin(); eqn!=equations.end(); ++eqn)
-    { *eqn=pbes_equation(internal_format_conversion_term(pbes_equation_to_aterm(*eqn),p.data()));
-    }
-    p=pbes<Container>(
-             p.data(),
-             equations,
-             internal_format_conversion_term(p.initial_state(),p.data()));
-#else             
-    detail::translate_user_notation(p);
-    detail::normalize_sorts(p);
-#endif
-  }
-
   /// \brief Reads a PBES from an input stream.
   /// \param from An input stream
   /// \param p A PBES
@@ -82,7 +62,8 @@ namespace pbes_system {
 
     p = pbes<Container>(result,false);
     type_check(p);
-    apply_internal_format_conversion(p);
+    detail::translate_user_notation(p);
+    detail::normalize_sorts(p);
     complete_data_specification(p);
     return from;
   }
@@ -260,8 +241,6 @@ namespace pbes_system {
       {
         continue;
       }
-      // std::string spec = core::pp(data_spec);
-      std::cerr << "WWWW" << words[0] << "\n";
       data::variable v = data::parse_variable(words[0], data_spec);
       data::data_expression e = data::parse_data_expression(words[1], "", data_spec);
       sigma[v] = e;
@@ -311,10 +290,6 @@ namespace pbes_system {
     // add an initialization section to the pbes
     pbesspec = pbesspec + "\ninit dummy2;";
 
-std::cout << "--------------------------------------------------------------------\n"
-          << pbesspec
-          << "--------------------------------------------------------------------"
-          << std::endl;
     std::stringstream in(pbesspec);
     try
     {
