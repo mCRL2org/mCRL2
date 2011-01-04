@@ -44,10 +44,12 @@ int HFinit(HFtree *tree, HTable *terms)
 {
    /* Protect and assign constants */
 
-   ESCAPE_SEQUENCE=(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,ATtrue),(ATerm)ATmakeAppl0(ATmakeAFun("NEW",0,ATfalse)));
-   NO_ATERM       =(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,ATtrue),(ATerm)ATmakeAppl0(ATmakeAFun("NIL",0,ATfalse)));
+   ESCAPE_SEQUENCE=NULL;
+   NO_ATERM=NULL;
    ATprotect(&ESCAPE_SEQUENCE);
    ATprotect(&NO_ATERM);
+   ESCAPE_SEQUENCE=(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,ATtrue),(ATerm)ATmakeAppl0(ATmakeAFun("NEW",0,ATfalse)));
+   NO_ATERM       =(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,ATtrue),(ATerm)ATmakeAppl0(ATmakeAFun("NIL",0,ATfalse)));
 
    /* Init LZ buffer */
 
