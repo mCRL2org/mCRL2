@@ -173,7 +173,7 @@ namespace mcrl2 {
         {
           using namespace data;
 
-          std::map<variable, data_expression> substitutions;
+          atermpp::map<variable, data_expression> substitutions;
           data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
 
           s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
