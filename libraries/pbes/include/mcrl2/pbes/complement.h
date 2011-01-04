@@ -26,18 +26,8 @@
 #ifndef MCRL2_PBES_COMPLEMENT_H
 #define MCRL2_PBES_COMPLEMENT_H
 
-#include <stdexcept>
-#include "mcrl2/pbes/pbes_expr_builder.h"
-
-#include <algorithm>
-#include <deque>
-#include <iostream>
-#include <utility>
-#include <vector>
-#include <boost/iterator/transform_iterator.hpp>
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/exception.h"
+#include "mcrl2/pbes/builder.h"
 
 namespace mcrl2 {
 
@@ -46,72 +36,32 @@ namespace pbes_system {
 /// \cond INTERNAL_DOCS
 // \brief Visitor that pushes a negation in a PBES expression as far as possible
 // inwards towards a data expression.
-struct complement_builder: public pbes_expr_builder<pbes_expression>
+template <typename Derived>
+struct complement_builder: public pbes_expression_builder<Derived>
 {
-  /// \brief Visit data_expression node
-  /// \param d A data expression
-  /// \return The result of visiting the node
-  pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
+  typedef pbes_expression_builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  pbes_expression operator()(const data::data_expression& x)
   {
-    return data::sort_bool::not_(d);
+    return data::sort_bool::not_(x);
   }
 
-  /// \brief Visit true node
-  /// \return The result of visiting the node
-  pbes_expression visit_true(const pbes_expression& /* e */)
+  pbes_expression operator()(const and_& x)
   {
-    return pbes_expr_optimized::false_();
+    return pbes_expr_optimized::or_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
   }
 
-  /// \brief Visit false node
-  /// \return The result of visiting the node
-  pbes_expression visit_false(const pbes_expression& /* e */)
+  pbes_expression operator()(const or_& x)
   {
-    return pbes_expr_optimized::true_();
+    return pbes_expr_optimized::and_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
   }
 
-  /// \brief Visit and node
-  /// \param left A PBES expression
-  /// \param right A PBES expression
-  /// \return The result of visiting the node
-  pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
+  pbes_expression operator()(const propositional_variable_instantiation& x)
   {
-    return pbes_expr_optimized::or_(visit(left), visit(right));
-  }
-
-  /// \brief Visit or node
-  /// \param left A PBES expression
-  /// \param right A PBES expression
-  /// \return The result of visiting the node
-  pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
-  {
-    return pbes_expr_optimized::and_(visit(left), visit(right));
-  }
-
-  /// \brief Visit forall node
-  /// \param variables A sequence of data variables
-  /// \param expression A PBES expression
-  /// \return The result of visiting the node
-  pbes_expression visit_forall(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
-  {
-    return pbes_expr_optimized::exists(variables, visit(expression));
-  }
-
-  /// \brief Visit exists node
-  /// \param variables A sequence of data variables
-  /// \param expression A PBES expression
-  /// \return The result of visiting the node
-  pbes_expression visit_exists(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
-  {
-    return pbes_expr_optimized::forall(variables, visit(expression));
-  }
-
-  /// \brief Visit propositional_variable node
-  /// \param v A propositional variable instantiation
-  /// \return The result of visiting the node
-  pbes_expression visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
-  {
-    throw mcrl2::runtime_error(std::string("complement_builder error: unexpected propositional variable encountered ") + mcrl2::core::pp(v));
+    throw mcrl2::runtime_error(std::string("complement_builder error: unexpected propositional variable encountered ") + mcrl2::core::pp(x));
     return pbes_expression();
   }
 };
@@ -122,9 +72,9 @@ struct complement_builder: public pbes_expr_builder<pbes_expression>
 /// \return The expression obtained by pushing the negations in the pbes
 /// expression as far as possible inwards towards a data expression.
 inline
-pbes_expression complement(const pbes_expression p)
+pbes_expression complement(const pbes_expression& x)
 {
-  return complement_builder().visit(p);
+  return core::make_apply_builder<complement_builder>()(x);
 }
 
 } // namespace pbes_system
