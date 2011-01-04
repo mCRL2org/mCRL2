@@ -80,15 +80,6 @@ GLCanvas::~GLCanvas()
 {
 }
 
-void GLCanvas::initialize()
-{
-	/* Following line causes segfault in wxWidgets >= 2.9 */
-#if wxCHECK_VERSION(2, 9, 0) 	
-#else
-	visualizer->initFontRenderer();
-#endif	
-}
-
 void GLCanvas::setVisualizer(Visualizer *vis)
 {
   visualizer = vis;
@@ -193,6 +184,8 @@ void GLCanvas::display()
 
   wxPaintDC dc(this);
   GLContext *glcontext = owner->getMainFrame()->getGLContext( this );
+
+  visualizer->initFontRenderer();
 
   if(!drawIn3D){
 	  glcontext->set2DContext();
@@ -840,7 +833,6 @@ void GLCanvas::setMouseCursor(int theTool)
 void GLCanvas::changeDrawMode()
 {
   drawIn3D = !drawIn3D;
-  initialize();
 }
 
 bool GLCanvas::get3D()

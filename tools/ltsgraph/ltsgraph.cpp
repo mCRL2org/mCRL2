@@ -50,7 +50,6 @@ bool LTSGraph::run()
 
 	SetTopWindow(mainFrame);
 	mainFrame->Show();
-	glCanvas->initialize();
 	mainFrame->Layout();
 
 	// Load a provided file.

@@ -38,7 +38,6 @@ class GLCanvas : public wxGLCanvas
     ~GLCanvas();
 
     void display();
-    void initialize();
     void setVisualizer(Visualizer *vis);
 
     void onPaint(wxPaintEvent& event);
