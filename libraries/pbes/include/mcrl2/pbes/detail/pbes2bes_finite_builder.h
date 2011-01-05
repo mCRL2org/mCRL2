@@ -110,16 +110,13 @@ struct pbes2bes_finite_builder: public pbes_expr_builder<pbes_expression, Substi
 
     const std::vector<data::variable>& finite_variables = m_finite_variables[v.name()];
     data::data_expression condition = make_condition(finite_variables, finite_expressions);
-std::cerr << "<condition>" << core::pp(condition) << std::endl;
 
     atermpp::set<pbes_expression> result;
     for (data::classic_enumerator<> i(m_dataspec, finite_variables, m_rewriter, condition); i != data::classic_enumerator<>(); ++i)
     {
       data::data_expression c = (*i)(condition);
-std::cerr << "<c>" << core::pp(c) << std::endl;
       data::data_expression_list e_finite = rewrite(finite_expressions, *i);
       core::identifier_string Y = m_rename(v.name(), e_finite);
-std::cerr << "<Y>" << core::pp(Y) << std::endl;
       data::data_expression_list e_infinite = rewrite(infinite_expressions, *i);
       result.insert(tr::and_(c, propositional_variable_instantiation(Y, e_infinite)));
     }

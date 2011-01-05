@@ -49,7 +49,8 @@ void operator()(const regular_formulas::trans_or_nil& x)
 void operator()(const regular_formulas::regular_formula& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (regular_formulas::is_nil(x)) { static_cast<Derived&>(*this)(regular_formulas::nil(atermpp::aterm_appl(x))); }
+  if (action_formulas::is_action_formula(x)) { static_cast<Derived&>(*this)(action_formulas::action_formula(atermpp::aterm_appl(x))); }
+  else if (regular_formulas::is_nil(x)) { static_cast<Derived&>(*this)(regular_formulas::nil(atermpp::aterm_appl(x))); }
   else if (regular_formulas::is_seq(x)) { static_cast<Derived&>(*this)(regular_formulas::seq(atermpp::aterm_appl(x))); }
   else if (regular_formulas::is_alt(x)) { static_cast<Derived&>(*this)(regular_formulas::alt(atermpp::aterm_appl(x))); }
   else if (regular_formulas::is_trans(x)) { static_cast<Derived&>(*this)(regular_formulas::trans(atermpp::aterm_appl(x))); }

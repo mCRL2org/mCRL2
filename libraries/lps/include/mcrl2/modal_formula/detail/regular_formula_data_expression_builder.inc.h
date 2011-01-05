@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/include/mcrl2/modal_formula/detail/regular_formula_sort_expression_builder.inc.h
+/// \file mcrl2/lps/include/mcrl2/modal_formula/detail/regular_formula_data_expression_builder.inc.h
 /// \brief The content of this file is included in other header
 /// files, to prevent duplication.
 

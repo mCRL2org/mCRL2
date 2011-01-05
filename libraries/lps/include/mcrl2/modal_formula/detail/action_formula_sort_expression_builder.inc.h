@@ -97,7 +97,7 @@ action_formulas::action_formula operator()(const action_formulas::action_formula
   else if (action_formulas::is_forall(x)) { result = static_cast<Derived&>(*this)(action_formulas::forall(atermpp::aterm_appl(x))); }
   else if (action_formulas::is_exists(x)) { result = static_cast<Derived&>(*this)(action_formulas::exists(atermpp::aterm_appl(x))); }
   else if (action_formulas::is_at(x)) { result = static_cast<Derived&>(*this)(action_formulas::at(atermpp::aterm_appl(x))); }
-  else if (lps::is_multi_action(x)) { result = static_cast<Derived&>(*this)(lps::multi_action(atermpp::aterm_appl(x))); }
+  else if (lps::is_multi_action(x)) { lps::multi_action y = x; static_cast<Derived&>(*this)(y); result = y; }
   static_cast<Derived&>(*this).leave(x);
   return result;
 }

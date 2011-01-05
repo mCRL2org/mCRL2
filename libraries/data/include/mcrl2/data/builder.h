@@ -37,10 +37,10 @@ namespace data {
 
   /// \brief Traversal class for sort expressions
   template <typename Derived>
-  class sort_expression_builder: public data_expression_builder<Derived>
+  class sort_expression_builder: public core::builder<Derived>
   {
     public:
-      typedef data_expression_builder<Derived> super;
+      typedef core::builder<Derived> super;
       using super::enter;
       using super::leave;
       using super::operator();

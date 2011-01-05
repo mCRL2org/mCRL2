@@ -432,6 +432,23 @@ void test_not()
   // state_formula t = not_(a);
 }
 
+// test case supplied by Jan Friso, 4-1-2011
+void test_parse()
+{
+  std::string spec_text = 
+    "act a:Nat; \n"
+    "init a(1); \n"
+    ;
+
+  std::string formula_text = "<a(1)>true";
+  lps::specification spec = lps::linearise(spec_text);
+  state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
+  std::cerr << "--- f ---\n" << core::pp(f) << "\n\n" << f << std::endl;
+  std::set<core::identifier_string> ids = core::find_identifiers(f);
+  BOOST_CHECK(ids.find(core::identifier_string("1")) == ids.end());
+  BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -440,6 +457,7 @@ int test_main(int argc, char* argv[])
   test_normalize();
   test_type_checking();
   test_not();
+  test_parse();
 
   return 0;
 }

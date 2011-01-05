@@ -27,8 +27,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
-#include "mcrl2/pbes/detail/sort_normalization_builder.h"
-#include "mcrl2/pbes/detail/translate_user_notation_builder.h"
+#include "mcrl2/pbes/normalize_sorts.h"
+#include "mcrl2/pbes/translate_user_notation.h"
 
 //#define MCRL2_LOG_PARSER_OUTPUT
 #ifdef MCRL2_LOG_PARSER_OUTPUT
@@ -62,8 +62,8 @@ namespace pbes_system {
 
     p = pbes<Container>(result,false);
     type_check(p);
-    detail::translate_user_notation(p);
-    detail::normalize_sorts(p);
+    pbes_system::translate_user_notation(p);
+    pbes_system::normalize_sorts(p, p.data());
     complete_data_specification(p);
     return from;
   }

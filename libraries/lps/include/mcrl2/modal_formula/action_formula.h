@@ -54,6 +54,16 @@ class action_formula: public atermpp::aterm_appl
     {
       return action_formula(f(atermpp::aterm(*this)));
     }
+
+    /// \brief Constructor.
+    /// \param term A term
+    // TODO: Note that this conversion loses the time of the multi action.
+    // This happens because the internal format is flawed.
+    action_formula(const lps::multi_action& m)
+      : atermpp::aterm_appl(core::detail::gsMakeMultAct(m.actions()))
+    {
+      assert(core::detail::check_rule_ActFrm(m_term));
+    }
 //--- end user section action_formula ---//
 };
 

@@ -30,7 +30,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/typecheck.h"
-#include "mcrl2/lps/detail/sort_normalization_builder.h"
+#include "mcrl2/lps/normalize_sorts.h"
+#include "mcrl2/lps/translate_user_notation.h"
 #include "mcrl2/lts/lts.h"
 
 
@@ -240,8 +241,10 @@ namespace lts
     
     lps::multi_action ma=lps::action_list((ATermList)ATgetArgument(t,0));
     lps::type_check(ma,data_spec,act_decls);
-    core::apply_builder_arg1<mcrl2::lps::detail::sort_normalization_builder, mcrl2::data::data_specification> f(data_spec);
-    f(ma);
+    lps::normalize_sorts(ma, data_spec);
+    lps::translate_user_notation(ma);
+    //core::apply_builder_arg1<mcrl2::lps::detail::sort_normalization_builder, mcrl2::data::data_specification> f(data_spec);
+    //f(ma);
     // ma=translate_user_notation(ma);  TODO!
     return action_label_lts((ATerm)mcrl2::core::detail::gsMakeMultAct(ma.actions()));
   } 

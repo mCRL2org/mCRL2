@@ -15,6 +15,7 @@ import string
 # C = generate container typedefs (vector + list)
 # E = it is an expression derived class
 # I = generate is-function
+# M = the class is modifiable
 # O = generate constructor overloads
 # S = skip class generation
 # U = generate user section
@@ -211,10 +212,11 @@ boolean_variable(const core::identifier_string& name)                 : public b
 '''
 
 ADDITIONAL_EXPRESSION_CLASS_DEPENDENCIES = {
-  'state_formulas::state_formula'   : [ 'data::data_expression' ],
-  'action_formulas::action_formula' : [ 'data::data_expression', 'lps::multi_action' ],
-  'process::process_expression'     : [ 'lps::action' ],
-  'pbes_system::pbes_expression'    : [ 'data::data_expression' ],
+  'state_formulas::state_formula'     : [ 'data::data_expression' ],
+  'action_formulas::action_formula'   : [ 'data::data_expression', 'lps::multi_action' ],
+  'regular_formulas::regular_formula' : [ 'action_formulas::action_formula' ],
+  'process::process_expression'       : [ 'lps::action' ],
+  'pbes_system::pbes_expression'      : [ 'data::data_expression' ],
 }
 
 # removes 'const' and '&' from a type
@@ -941,8 +943,12 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 for c in classes:
                     if not is_dependent_type(dependencies, c.classname(True)):
                         continue
-                    is_function = c.is_function_name(True)                   
-                    updates.append('if (%s(x)) { result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, c.classname(True)))
+                    is_function = c.is_function_name(True)
+                    if is_modifiable_type(c.classname(True), modifiability_map):
+                      # this one applies to action_formula <-> multi_action, for which the conversion is problematic
+                      updates.append('if (%s(x)) { %s y = x; static_cast<Derived&>(*this)(y); result = y; }' % (is_function, c.classname(True)))
+                    else:
+                      updates.append('if (%s(x)) { result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, c.classname(True)))
                 if len(updates) == 0:
                     visit_text = '// skip'
                     return_statement = 'return x;'

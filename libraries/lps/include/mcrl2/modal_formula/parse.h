@@ -19,8 +19,8 @@
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/detail/state_formula_translate_user_notation_builder.h"
-#include "mcrl2/modal_formula/detail/state_formula_sort_normalization_builder.h"
+#include "mcrl2/modal_formula/translate_user_notation.h"
+#include "mcrl2/modal_formula/normalize_sorts.h"
 
 namespace mcrl2 {
 
@@ -57,8 +57,8 @@ namespace state_formulas {
     translate_regular_formula(f);
 
     spec.data().add_context_sorts(state_formulas::find_sort_expressions((f)));
-    f = detail::translate_user_notation(f);
-    f = detail::normalize_sorts(f, spec.data());
+    f = state_formulas::translate_user_notation(f);
+    f = state_formulas::normalize_sorts(f, spec.data());
       
     return f;
   }

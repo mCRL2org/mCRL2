@@ -15,7 +15,7 @@
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/data/traverser.h"
+#include "mcrl2/lps/traverser.h"
 
 namespace mcrl2 {
 
@@ -23,10 +23,10 @@ namespace action_formulas {
 
   /// \brief Traversal class for action formula data types
   template <typename Derived>
-  class traverser: public data::traverser<Derived>
+  class traverser: public lps::traverser<Derived>
   {
     public:
-      typedef data::traverser<Derived> super;
+      typedef lps::traverser<Derived> super;
       using super::operator();
       using super::enter;
       using super::leave;
@@ -36,10 +36,10 @@ namespace action_formulas {
   };
 
   template <typename Derived>
-  class binding_aware_traverser_helper: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser_helper: public lps::binding_aware_traverser<Derived>
   {
     public:
-      typedef data::binding_aware_traverser<Derived> super;     
+      typedef lps::binding_aware_traverser<Derived> super;     
       using super::operator();
       using super::enter;
       using super::leave;
@@ -112,10 +112,10 @@ namespace regular_formulas {
 
   /// \brief Traversal class for regular formula data types
   template <typename Derived>
-  class traverser: public data::traverser<Derived>
+  class traverser: public action_formulas::traverser<Derived>
   {
     public:
-      typedef data::traverser<Derived> super;
+      typedef action_formulas::traverser<Derived> super;
       using super::operator();
       using super::enter;
       using super::leave;
@@ -125,10 +125,10 @@ namespace regular_formulas {
   };
 
   template <typename Derived>
-  class binding_aware_traverser: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser: public action_formulas::binding_aware_traverser<Derived>
   {
     public:
-      typedef data::binding_aware_traverser<Derived> super;     
+      typedef action_formulas::binding_aware_traverser<Derived> super;     
       using super::operator();
       using super::enter;
       using super::leave;
@@ -187,15 +187,14 @@ namespace state_formulas {
   };
 
   template <typename Derived>
-  class binding_aware_traverser_helper: public data::binding_aware_traverser<Derived>
+  class binding_aware_traverser_helper: public regular_formulas::binding_aware_traverser<Derived>
   {
     public:
-      typedef data::binding_aware_traverser<Derived> super;
+      typedef regular_formulas::binding_aware_traverser<Derived> super;
       using super::operator();
       using super::enter;
       using super::leave;
 
-#include "mcrl2/modal_formula/detail/regular_formula_traverser.inc.h"
 #include "mcrl2/modal_formula/detail/state_formula_traverser.inc.h"
   };
 

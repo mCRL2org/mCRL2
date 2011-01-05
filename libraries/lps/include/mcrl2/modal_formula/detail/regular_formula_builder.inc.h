@@ -55,7 +55,8 @@ regular_formulas::regular_formula operator()(const regular_formulas::regular_for
 {
   static_cast<Derived&>(*this).enter(x);  
   regular_formulas::regular_formula result;
-  if (regular_formulas::is_nil(x)) { result = static_cast<Derived&>(*this)(regular_formulas::nil(atermpp::aterm_appl(x))); }
+  if (action_formulas::is_action_formula(x)) { result = static_cast<Derived&>(*this)(action_formulas::action_formula(atermpp::aterm_appl(x))); }
+  else if (regular_formulas::is_nil(x)) { result = static_cast<Derived&>(*this)(regular_formulas::nil(atermpp::aterm_appl(x))); }
   else if (regular_formulas::is_seq(x)) { result = static_cast<Derived&>(*this)(regular_formulas::seq(atermpp::aterm_appl(x))); }
   else if (regular_formulas::is_alt(x)) { result = static_cast<Derived&>(*this)(regular_formulas::alt(atermpp::aterm_appl(x))); }
   else if (regular_formulas::is_trans(x)) { result = static_cast<Derived&>(*this)(regular_formulas::trans(atermpp::aterm_appl(x))); }

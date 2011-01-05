@@ -6,14 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/translate_user_notation_builder.h
+/// \file mcrl2/lps/translate_user_notation.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_TRANSLATE_USER_NOTATION_BUILDER_H
-#define MCRL2_LPS_DETAIL_TRANSLATE_USER_NOTATION_BUILDER_H
+#ifndef MCRL2_LPS_TRANSLATE_USER_NOTATION_H
+#define MCRL2_LPS_TRANSLATE_USER_NOTATION_H
 
-#include "mcrl2/core/builder.h"
-#include "mcrl2/data/detail/translate_user_notation_builder.h"
+#include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
@@ -37,8 +36,24 @@ namespace detail {
 
 } // namespace detail
 
+  template <typename T>
+  void translate_user_notation(T& x,
+                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+  )
+  {
+    core::make_apply_builder<detail::translate_user_notation_builder>()(x);
+  }
+
+  template <typename T>
+  T translate_user_notation(const T& x,
+                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+  )
+  {
+    return core::make_apply_builder<detail::translate_user_notation_builder>()(x);
+  }
+
 } // namespace lps
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_DETAIL_TRANSLATE_USER_NOTATION_BUILDER_H
+#endif // MCRL2_LPS_TRANSLATE_USER_NOTATION_H

@@ -20,6 +20,7 @@
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 

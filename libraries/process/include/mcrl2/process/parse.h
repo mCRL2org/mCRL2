@@ -21,8 +21,8 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/alphabet_reduction.h"
-#include "mcrl2/process/detail/sort_normalization_builder.h"
-#include "mcrl2/process/detail/translate_user_notation_builder.h"
+#include "mcrl2/process/normalize_sorts.h"
+#include "mcrl2/process/translate_user_notation.h"
 
 namespace mcrl2 {
 
@@ -49,8 +49,8 @@ namespace process {
     {
       apply_alphabet_reduction(result);
     }
-    detail::translate_user_notation(result);
-    detail::normalize_sorts(result);
+    process::translate_user_notation(result);
+    process::normalize_sorts(result, result.data());
 
     return result;
   }

@@ -133,6 +133,7 @@ if __name__ == "__main__":
     make_builder('../../process/include/mcrl2/process/detail/data_expression_builder.inc.h', class_map, all_classes, 'process', 'data::data_expression', data_expression_dependencies, modifiability_map)
     make_builder('../../pbes/include/mcrl2/pbes/detail/data_expression_builder.inc.h', class_map, all_classes, 'pbes_system', 'data::data_expression', data_expression_dependencies, modifiability_map)
     make_builder('../../lps/include/mcrl2/modal_formula/detail/action_formula_data_expression_builder.inc.h', class_map, all_classes, 'action_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/detail/regular_formula_data_expression_builder.inc.h', class_map, all_classes, 'regular_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
     make_builder('../../lps/include/mcrl2/modal_formula/detail/state_formula_data_expression_builder.inc.h', class_map, all_classes, 'state_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
 
     # pbes_expression_builder

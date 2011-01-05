@@ -78,7 +78,7 @@ state_formulas::state_formula operator()(const state_formulas::exists& x)
 state_formulas::state_formula operator()(const state_formulas::must& x)
 {
   static_cast<Derived&>(*this).enter(x);  
-  state_formulas::state_formula result = state_formulas::must(x.formula(), static_cast<Derived&>(*this)(x.operand()));
+  state_formulas::state_formula result = state_formulas::must(static_cast<Derived&>(*this)(x.formula()), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
@@ -86,7 +86,7 @@ state_formulas::state_formula operator()(const state_formulas::must& x)
 state_formulas::state_formula operator()(const state_formulas::may& x)
 {
   static_cast<Derived&>(*this).enter(x);  
-  state_formulas::state_formula result = state_formulas::may(x.formula(), static_cast<Derived&>(*this)(x.operand()));
+  state_formulas::state_formula result = state_formulas::may(static_cast<Derived&>(*this)(x.formula()), static_cast<Derived&>(*this)(x.operand()));
   static_cast<Derived&>(*this).leave(x);
   return result;
 }
