@@ -183,15 +183,15 @@ void GLCanvas::display()
 {
 
   wxPaintDC dc(this);
-  GLContext *glcontext = owner->getMainFrame()->getGLContext( this );
+  getGLContext( this );
 
   visualizer->initFontRenderer();
 
   if(!drawIn3D){
-	  glcontext->set2DContext();
+	  glContext->set2DContext();
 	  render2D();
   } else {
-	  glcontext->set3DContext();
+	  glContext->set3DContext();
 	  render3D();
   }
 
@@ -213,13 +213,17 @@ void GLCanvas::display()
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/)
 {
-  display();
+	recalcPixelSize();
+	recalcAspectRatio();
+	display();
 }
 
 void GLCanvas::onSize(wxSizeEvent& )
 {
-	recalcPixelSize();
-	recalcAspectRatio();
+	if( glContext ){
+      wxPaintEvent ev = wxPaintEvent();
+      GetEventHandler()->ProcessEvent( ev );
+	}
 }
 
 void GLCanvas::getSize(
@@ -482,9 +486,7 @@ bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
 {
   owner->deselect();
 
-  GLContext *glcontext = owner->getMainFrame()->getGLContext( this );
-
-  if(glcontext)
+  if(glContext)
   {
     GLuint selectBuf[512];
     GLint  hits = 0;
@@ -546,9 +548,7 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 {
   owner->deselect();
 
-  GLContext *glcontext = owner->getMainFrame()->getGLContext( this );
-
-  if(glcontext)
+  if(glContext)
   {
     GLuint selectBuf[512];
     GLint  hits = 0;
@@ -838,4 +838,16 @@ void GLCanvas::changeDrawMode()
 bool GLCanvas::get3D()
 {
   return drawIn3D;
+}
+
+GLContext* GLCanvas::getGLContext( wxGLCanvas *canvas )
+{
+  /* Context is created upon first paint
+   * This ensures that a drawing GLcanvas is declared, instantiated and shown.
+   *  */
+  if (glContext == NULL){
+    glContext = new GLContext( canvas );
+  }
+
+  return glContext;
 }

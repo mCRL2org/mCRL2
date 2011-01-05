@@ -323,19 +323,6 @@ GLCanvas* MainFrame::getGLCanvas()
   return glCanvas;
 }
 
-GLContext* MainFrame::getGLContext( wxGLCanvas *canvas )
-{
-  /* Context is created upon first paint
-   * This ensures that a drawing GLcanvas is declared, instantiated and shown.
-   *  */
-  if (glContext == NULL){
-    glContext = new GLContext( canvas );
-  }
-
-  return glContext;
-}
-
-
 void MainFrame::onTogglePositioning(wxCommandEvent&)
 {
   app->getAlgorithm(0)->toggle();

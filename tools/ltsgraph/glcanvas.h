@@ -13,6 +13,7 @@
 #define GLCANVAS_H
 
 #include <wx/glcanvas.h>
+#include "glcontext.h"
 
 #ifndef LTSGRAPH3D_H
   #include "ltsgraph.h"
@@ -96,6 +97,10 @@ class GLCanvas : public wxGLCanvas
 	void pickObjects(int x, int y, wxMouseEvent const&);
     void processHits(const GLint hits, GLuint * buffer, wxMouseEvent const&);
 	void setMouseCursor(int theTool);
+
+	GLContext* getGLContext( wxGLCanvas *canvas );
+	GLContext* glContext;
+
 
   DECLARE_EVENT_TABLE()
 };

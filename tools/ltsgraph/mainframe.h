@@ -43,14 +43,14 @@ class MainFrame : public wxFrame
 		~MainFrame();
 
     GLCanvas* getGLCanvas();
-    GLContext* getGLContext( wxGLCanvas *canvas );
+    //GLContext* getGLContext( wxGLCanvas *canvas );
 
     void setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl);
 
   private:
     LTSGraph *app;
     GLCanvas *glCanvas;
-    GLContext *glContext;
+    //GLContext *glContext;
 
     AlgoDialog *algoDlg;
     InfoDialog *infoDlg;
