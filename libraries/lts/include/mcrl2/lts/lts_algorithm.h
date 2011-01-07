@@ -301,12 +301,16 @@ namespace mcrl2
          }
 
 
-         if ( i+2 == types.end() )
-         {
-           r += ", or\n";
-         } else if ( i+1 != types.end() )
-         {
-           r += ",\n";
+		 if (i+1 != types.end() )
+		 {
+		   if (i+2 == types.end() )
+		   {
+		     r += ", or\n";
+		   }
+		   else
+		   {
+             r += ",\n";
+		   }
          }
        }
 
@@ -353,13 +357,16 @@ namespace mcrl2
            r += " (default)";
          }
 
-
-         if ( i+2 == types.end() )
-         {
-           r += ", or\n";
-         } else if ( i+1 == types.end() )
-         {
-           r += ",\n";
+		 if (i+1 != types.end() )
+		 {
+		   if (i+2 == types.end() )
+		   {
+		     r += ", or\n";
+		   }
+		   else
+		   {
+             r += ",\n";
+		   }
          }
        }
 
