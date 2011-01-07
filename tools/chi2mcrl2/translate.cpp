@@ -371,7 +371,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
 
 
   /**
-    * Propegate repetition over parenthesis if different parenthesis_levels have the same begin and end state
+    * Propagate repetition over parenthesis if different parenthesis_levels have the same begin and end state
     *
     **/
   bool again = true;
@@ -396,7 +396,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                      ++itRPI2)
                  {
                    gsDebugMsg("+----begin_state:%d\t end_state:%d\t  looped parenthesis:%d\n", itRPI2->begin_state,itRPI2->end_state, itRPI2->looped);
-                   if(itRPI2->begin_state == itRPI->begin_state && itRPI2->end_state == itRPI->end_state && itRPI !=itRPI2)
+                   if(itRPI2->begin_state == itRPI->begin_state && itRPI2->end_state == itRPI->end_state /* && (itRPI != itRPI2) */)
                    {
                      gsDebugMsg("Found Match\n");
                      if(itRPI2->looped != itRPI->looped)
