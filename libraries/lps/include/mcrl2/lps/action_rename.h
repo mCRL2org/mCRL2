@@ -506,8 +506,9 @@ lps::specification action_rename(
                            lps_new_sum_vars(1,lps_old_summand.summation_variables());
       atermpp::vector < data_expression >
                          lps_new_condition(1,lps_old_summand.condition());
-      atermpp::vector < std::pair <bool, action_list > >
-                           lps_new_actions(1,std::make_pair(lps_old_summand.is_delta(),action_list()));
+      atermpp::vector < action_list > 
+                           lps_new_actions(1,action_list());
+      std::vector < bool > lps_new_actions_is_delta(1,lps_old_summand.is_delta());
 
       if (gsDebug)
       { std::cerr << "Actions in summand found: " << lps_old_actions.size() << "\n";
@@ -578,27 +579,40 @@ lps::specification action_rename(
           if (renamed_rule_condition==sort_bool::true_())
           {
             if (to_delta)
-            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator
+            { 
+              std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+              for(atermpp::vector < action_list > :: iterator
                       i=lps_new_actions.begin() ;
-                      i!=lps_new_actions.end() ; i++ )
-              { *i=std::make_pair(true,action_list()); /* the action becomes delta */
+                      i!=lps_new_actions.end() ; ++i,++i_is_delta )
+              { 
+                *i=action_list(); /* the action becomes delta */
+                *i_is_delta=true;
               }
             }
             else if (!to_tau)
-            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
-                        i!=lps_new_actions.end() ; i++ )
-              { if (!((*i).first)) // the action is not delta
-                { *i=std::make_pair(false,push_front((*i).second,renamed_rule_new_action));
+            { 
+              std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+              for(atermpp::vector < action_list > :: iterator i=lps_new_actions.begin() ;
+                        i!=lps_new_actions.end() ; ++i,++i_is_delta  )
+              { 
+                if (!*i_is_delta) // the action is not delta
+                { 
+                  *i=push_front(*i,renamed_rule_new_action);
+                  *i_is_delta=false;
                 }
               }
             }
           }
           else if (renamed_rule_condition==sort_bool::false_())
           {
-            for(atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
-                        i!=lps_new_actions.end() ; i++ )
-            { if (!((*i).first)) // The action does not equal delta.
-              { *i=std::make_pair(false,push_front((*i).second,lps_old_action));
+            std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+            for(atermpp::vector < action_list > :: iterator i=lps_new_actions.begin() ;
+                        i!=lps_new_actions.end() ; ++i,++i_is_delta )
+            { 
+              if (!*i_is_delta) // The action does not equal delta.
+              { 
+                *i=push_front(*i,lps_old_action);
+                *i_is_delta=false;
               }
             }
 
@@ -607,32 +621,46 @@ lps::specification action_rename(
           { /* Duplicate summands, one where the renaming is applied, and one where it is not
                applied. */
 
-            atermpp::vector < std::pair <bool, action_list > > lps_new_actions_temp(lps_new_actions);
+            atermpp::vector < action_list > lps_new_actions_temp(lps_new_actions);
+            std::vector < bool > lps_new_actions_is_delta_temp(lps_new_actions_is_delta);
 
             if (!to_tau) // if the new element is tau, we do not insert it in the multi-action.
-            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator
+            { 
+              std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+              for(atermpp::vector < action_list > :: iterator
                         i=lps_new_actions.begin() ;
-                        i!=lps_new_actions.end() ; i++ )
-              { if (to_delta)
-                { *i=std::make_pair(true,action_list());
+                        i!=lps_new_actions.end() ; ++i,++i_is_delta )
+              { 
+                if (to_delta)
+                { 
+                  *i=action_list();
+                  *i_is_delta=true;
                 }
                 else
-                { *i=std::make_pair(false,push_front(i->second,renamed_rule_new_action));
+                { 
+                  *i=push_front(*i,renamed_rule_new_action);
+                  *i_is_delta=false;
                 }
               }
             }
 
-            for(atermpp::vector < std::pair <bool, action_list > > :: iterator
+            std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta_temp.begin();
+            for(atermpp::vector < action_list > :: iterator
                         i=lps_new_actions_temp.begin() ;
-                        i!=lps_new_actions_temp.end() ; i++ )
-            { if (!(i->first)) // The element is not equal to delta
-              { *i=std::make_pair(false,push_front(i->second,lps_old_action));
+                        i!=lps_new_actions_temp.end() ; ++i,++i_is_delta )
+            { if (!*i_is_delta) // The element is not equal to delta
+              { 
+                *i=push_front(*i,lps_old_action);
+                *i_is_delta=false;
               }
             }
 
             lps_new_actions.insert(lps_new_actions.end(),
                                    lps_new_actions_temp.begin(),
                                    lps_new_actions_temp.end());
+            lps_new_actions_is_delta.insert(lps_new_actions_is_delta.end(),
+                                            lps_new_actions_is_delta_temp.begin(),
+                                            lps_new_actions_is_delta_temp.end());
 
 
             /* lps_new_condition_temp will contain the conditions in conjunction with
@@ -663,9 +691,11 @@ lps::specification action_rename(
 
         }//end if(equal_signatures(...))
         else
-        { for ( atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
-                i!=lps_new_actions.end() ; i++ )
-          { *i = std::make_pair((*i).first,push_front((*i).second, lps_old_action));
+        { 
+          std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+          for ( atermpp::vector < action_list > :: iterator i=lps_new_actions.begin() ;
+                i!=lps_new_actions.end() ; ++i,++i_is_delta )
+          { *i = push_front(*i, lps_old_action);
           }
         }
         if (gsDebug)
@@ -676,15 +706,16 @@ lps::specification action_rename(
 
       /* Add the summands to lps_new_summands */
 
-      atermpp::vector < std::pair <bool, action_list > > :: iterator i_act=lps_new_actions.begin();
+      atermpp::vector < action_list > :: iterator i_act=lps_new_actions.begin();
+      std::vector < bool > :: iterator i_act_is_delta=lps_new_actions_is_delta.begin();
       atermpp::vector < variable_list > :: iterator i_sumvars=lps_new_sum_vars.begin();
       for( atermpp::vector < data_expression > :: iterator i_cond=lps_new_condition.begin() ;
            i_cond!=lps_new_condition.end() ; i_cond++)
       { //create a summand for the new lps
         summand lps_new_summand = summand( *i_sumvars,
                                            *i_cond,
-                                           (*i_act).first,
-                                           reverse((*i_act).second),
+                                           *i_act_is_delta,
+                                           reverse(*i_act),
                                            lps_old_summand.time(),
                                            lps_old_summand.assignments());
         lps_new_summands = push_front(lps_new_summands, lps_new_summand);
