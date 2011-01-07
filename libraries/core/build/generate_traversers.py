@@ -66,7 +66,18 @@ def create_builder_file(filename, namespace):
         path(filename).write_text(text)
     #os.system('svn add %s' % filename)
 
-def make_builder(filename, class_map, all_classes, namespace, expression, dependencies, modifiability_map):
+def make_builder(filename, builder_name, class_map, all_classes, namespace, expression, dependencies, modifiability_map):
+    BUILDER = '''  template <template <class> class Builder, class Derived>
+  struct <BUILDER_NAME>: public Builder<Derived>
+  {
+    typedef Builder<Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+
+<VISIT_TEXT>
+  };
+'''
     classnames = parse_classnames(class_map[namespace], namespace)
     create_builder_file(filename, namespace)
 
@@ -79,9 +90,11 @@ def make_builder(filename, class_map, all_classes, namespace, expression, depend
     for c in classes:
         if is_dependent_type(dependencies, c.classname(True)):
             result.append(c.builder_function(all_classes, dependencies, modifiability_map))
-    text = '\n'.join(result)
-
-    insert_text_in_file(filename, text, 'generated code')
+    visit_text = indent_text('\n'.join(result), '    ')
+    text = BUILDER
+    text = re.sub('<BUILDER_NAME>', builder_name, text)
+    text = re.sub('<VISIT_TEXT>', visit_text, text)
+    insert_text_in_file(filename, text, 'generated %s code' % builder_name)
 
 if __name__ == "__main__":
     class_map = {
@@ -119,37 +132,37 @@ if __name__ == "__main__":
     modifiability_map = make_modifiability_map(all_classes)
 
     # sort_expression_builder
-    make_builder('../../data/include/mcrl2/data/detail/sort_expression_builder.inc.h', class_map, all_classes, 'data', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
-    make_builder('../../lps/include/mcrl2/lps/detail/sort_expression_builder.inc.h', class_map, all_classes, 'lps', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
-    make_builder('../../process/include/mcrl2/process/detail/sort_expression_builder.inc.h', class_map, all_classes, 'process', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
-    make_builder('../../pbes/include/mcrl2/pbes/detail/sort_expression_builder.inc.h', class_map, all_classes, 'pbes_system', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/action_formula_sort_expression_builder.inc.h', class_map, all_classes, 'action_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/regular_formula_sort_expression_builder.inc.h', class_map, all_classes, 'regular_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/state_formula_sort_expression_builder.inc.h', class_map, all_classes, 'state_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../data/include/mcrl2/data/builder.h'        , 'add_sort_expressions'                , class_map, all_classes, 'data', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/lps/builder.h'          , 'add_sort_expressions'                , class_map, all_classes, 'lps', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../process/include/mcrl2/process/builder.h'  , 'add_sort_expressions'                , class_map, all_classes, 'process', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../pbes/include/mcrl2/pbes/builder.h'        , 'add_sort_expressions'                , class_map, all_classes, 'pbes_system', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_action_formula_sort_expressions' , class_map, all_classes, 'action_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_regular_formula_sort_expressions', class_map, all_classes, 'regular_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_state_formula_sort_expressions'  , class_map, all_classes, 'state_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
 
     # data_expression_builder
-    make_builder('../../data/include/mcrl2/data/detail/data_expression_builder.inc.h', class_map, all_classes, 'data', 'data::data_expression', data_expression_dependencies, modifiability_map)
-    make_builder('../../lps/include/mcrl2/lps/detail/data_expression_builder.inc.h', class_map, all_classes, 'lps', 'data::data_expression', data_expression_dependencies, modifiability_map)
-    make_builder('../../process/include/mcrl2/process/detail/data_expression_builder.inc.h', class_map, all_classes, 'process', 'data::data_expression', data_expression_dependencies, modifiability_map)
-    make_builder('../../pbes/include/mcrl2/pbes/detail/data_expression_builder.inc.h', class_map, all_classes, 'pbes_system', 'data::data_expression', data_expression_dependencies, modifiability_map)
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/action_formula_data_expression_builder.inc.h', class_map, all_classes, 'action_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/regular_formula_data_expression_builder.inc.h', class_map, all_classes, 'regular_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/state_formula_data_expression_builder.inc.h', class_map, all_classes, 'state_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../data/include/mcrl2/data/builder.h'        , 'add_data_expressions'                , class_map, all_classes, 'data', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/lps/builder.h'          , 'add_data_expressions'                , class_map, all_classes, 'lps', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../process/include/mcrl2/process/builder.h'  , 'add_data_expressions'                , class_map, all_classes, 'process', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../pbes/include/mcrl2/pbes/builder.h'        , 'add_data_expressions'                , class_map, all_classes, 'pbes_system', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_action_formula_data_expressions' , class_map, all_classes, 'action_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_regular_formula_data_expressions', class_map, all_classes, 'regular_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_state_formula_data_expressions'  , class_map, all_classes, 'state_formulas', 'data::data_expression', data_expression_dependencies, modifiability_map)
 
     # pbes_expression_builder
-    make_builder('../../pbes/include/mcrl2/pbes/detail/pbes_expression_builder.inc.h', class_map, all_classes, 'pbes_system', 'pbes_system::pbes_expression', pbes_expression_dependencies, modifiability_map)
+    make_builder('../../pbes/include/mcrl2/pbes/builder.h', 'add_pbes_expressions', class_map, all_classes, 'pbes_system', 'pbes_system::pbes_expression', pbes_expression_dependencies, modifiability_map)
 
     # boolean_expression_builder
-    make_builder('../../bes/include/mcrl2/bes/detail/boolean_expression_builder.inc.h', class_map, all_classes, 'bes', 'bes::boolean_expression', boolean_expression_dependencies, modifiability_map)
+    make_builder('../../bes/include/mcrl2/bes/builder.h', 'add_boolean_expressions', class_map, all_classes, 'bes', 'bes::boolean_expression', boolean_expression_dependencies, modifiability_map)
 
     # process_expression_builder
-    make_builder('../../process/include/mcrl2/process/detail/process_expression_builder.inc.h', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies, modifiability_map)
+    make_builder('../../process/include/mcrl2/process/builder.h', 'add_process_expressions', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies, modifiability_map)
 
     # state_formula_builder
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/state_formula_builder.inc.h', class_map, all_classes, 'state_formulas', 'state_formulas::state_formula', state_formula_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_state_formula_expressions', class_map, all_classes, 'state_formulas', 'state_formulas::state_formula', state_formula_dependencies, modifiability_map)
 
     # action_formula_builder
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/action_formula_builder.inc.h', class_map, all_classes, 'action_formulas', 'action_formulas::action_formula', action_formula_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_action_formula_expressions', class_map, all_classes, 'action_formulas', 'action_formulas::action_formula', action_formula_dependencies, modifiability_map)
 
     # regular_formula_builder
-    make_builder('../../lps/include/mcrl2/modal_formula/detail/regular_formula_builder.inc.h', class_map, all_classes, 'regular_formulas', 'regular_formulas::regular_formula', regular_formula_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'add_regular_formula_expressions', class_map, all_classes, 'regular_formulas', 'regular_formulas::regular_formula', regular_formula_dependencies, modifiability_map)

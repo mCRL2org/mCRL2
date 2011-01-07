@@ -19,17 +19,114 @@ namespace mcrl2 {
 
 namespace bes {
 
+//--- start generated add_boolean_expressions code ---//
+  template <template <class> class Builder, class Derived>
+  struct add_boolean_expressions: public Builder<Derived>
+  {
+    typedef Builder<Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+
+    bes::boolean_equation operator()(const bes::boolean_equation& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      bes::boolean_equation result = bes::boolean_equation(x.symbol(), static_cast<Derived&>(*this)(x.variable()), static_cast<Derived&>(*this)(x.formula()));
+      static_cast<Derived&>(*this).leave(x);
+      return result;
+    }
+    
+    template <typename Container>
+    void operator()(bes::boolean_equation_system<Container>& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      static_cast<Derived&>(*this)(x.equations());
+      x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+      static_cast<Derived&>(*this).leave(x);
+    }
+    
+    bes::boolean_expression operator()(const bes::true_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    bes::boolean_expression operator()(const bes::false_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    bes::boolean_expression operator()(const bes::not_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      bes::boolean_expression result = bes::not_(static_cast<Derived&>(*this)(x.operand()));
+      static_cast<Derived&>(*this).leave(x);
+      return result;
+    }
+    
+    bes::boolean_expression operator()(const bes::and_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      bes::boolean_expression result = bes::and_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
+      static_cast<Derived&>(*this).leave(x);
+      return result;
+    }
+    
+    bes::boolean_expression operator()(const bes::or_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      bes::boolean_expression result = bes::or_(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
+      static_cast<Derived&>(*this).leave(x);
+      return result;
+    }
+    
+    bes::boolean_expression operator()(const bes::imp& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      bes::boolean_expression result = bes::imp(static_cast<Derived&>(*this)(x.left()), static_cast<Derived&>(*this)(x.right()));
+      static_cast<Derived&>(*this).leave(x);
+      return result;
+    }
+    
+    bes::boolean_expression operator()(const bes::boolean_variable& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    bes::boolean_expression operator()(const bes::boolean_expression& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      bes::boolean_expression result;
+      if (bes::is_true(x)) { result = static_cast<Derived&>(*this)(bes::true_(atermpp::aterm_appl(x))); }
+      else if (bes::is_false(x)) { result = static_cast<Derived&>(*this)(bes::false_(atermpp::aterm_appl(x))); }
+      else if (bes::is_not(x)) { result = static_cast<Derived&>(*this)(bes::not_(atermpp::aterm_appl(x))); }
+      else if (bes::is_and(x)) { result = static_cast<Derived&>(*this)(bes::and_(atermpp::aterm_appl(x))); }
+      else if (bes::is_or(x)) { result = static_cast<Derived&>(*this)(bes::or_(atermpp::aterm_appl(x))); }
+      else if (bes::is_imp(x)) { result = static_cast<Derived&>(*this)(bes::imp(atermpp::aterm_appl(x))); }
+      else if (bes::is_boolean_variable(x)) { result = static_cast<Derived&>(*this)(bes::boolean_variable(atermpp::aterm_appl(x))); }
+      static_cast<Derived&>(*this).leave(x);
+      return result;
+    }
+    
+  };
+//--- end generated add_boolean_expressions code ---//
+
   /// \brief Traversal class for boolean expressions
   template <typename Derived>
-  class boolean_expression_builder: public core::builder<Derived>
+  struct boolean_expression_builder: public add_boolean_expressions<core::builder, Derived>
   {
-    public:
-      typedef core::builder<Derived> super;
-      using super::enter;
-      using super::leave;
-      using super::operator();
-
-#include "mcrl2/boolean/detail/boolean_expression_builder.inc.h"
+    typedef add_boolean_expressions<core::builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
   };
 
 } // namespace bes

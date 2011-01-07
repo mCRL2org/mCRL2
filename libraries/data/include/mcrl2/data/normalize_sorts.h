@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_NORMALIZE_SORTS_H
 #define MCRL2_DATA_NORMALIZE_SORTS_H
 
+#include <functional>
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/data_specification.h"
 
@@ -20,29 +21,20 @@ namespace mcrl2 {
 namespace data {
 
 namespace detail {
-
-  // TODO: move the code from data_specification to this class
-  template <typename Derived>
-  class sort_normalization_builder: public data::sort_expression_builder<Derived>
+  
+  struct normalize_sorts_function: public std::unary_function<data::sort_expression, data::sort_expression>
   {
-    protected:
-      const data_specification& m_data_spec;
+    const data_specification& m_data_spec;
+    
+    normalize_sorts_function(const data_specification& data_spec)
+      : m_data_spec(data_spec)
+    {}
 
-    public:
-      typedef data::sort_expression_builder<Derived> super; 
-      using super::enter;
-      using super::leave;
-      using super::operator();
-        
-      sort_normalization_builder(const data_specification& data_spec)
-        : m_data_spec(data_spec)
-      {}
-
-      sort_expression operator()(const sort_expression& x)
-      {
-        return m_data_spec.normalise_sorts(x);
-      }
-  };          
+    sort_expression operator()(const sort_expression& x)
+    {
+      return m_data_spec.normalise_sorts(x);
+    }
+  };
 
 } // namespace detail
 
@@ -52,7 +44,7 @@ namespace detail {
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
   {
-    core::make_apply_builder_arg1<detail::sort_normalization_builder>(data_spec)(x);
+    core::make_update_apply_builder<data::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
   }
 
   template <typename T>
@@ -61,7 +53,7 @@ namespace detail {
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
   {
-    return core::make_apply_builder_arg1<detail::sort_normalization_builder>(data_spec)(x);
+    return core::make_update_apply_builder<data::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
   }
 
 } // namespace data

@@ -14,40 +14,26 @@
 
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/builder.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-namespace detail {
-
-  template <typename Derived>
-  struct translate_user_notation_builder: public data::detail::translate_user_notation_builder<Derived>
-  {
-    typedef data::detail::translate_user_notation_builder<Derived> super;  
-    using super::enter;
-    using super::leave;
-    using super::operator();
-
-#include "mcrl2/pbes/detail/data_expression_builder.inc.h"
-  };
-
-} // namespace detail
-
   template <typename T>
   void translate_user_notation(T& x,
                                typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-  )
+                              )
   {
-    core::make_apply_builder<detail::translate_user_notation_builder>()(x);
+    core::make_update_apply_builder<pbes_system::data_expression_builder>(data::detail::translate_user_notation_function())(x);
   }
 
   template <typename T>
   T translate_user_notation(const T& x,
                             typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-  )
+                           )
   {
-    return core::make_apply_builder<detail::translate_user_notation_builder>()(x);
+    return core::make_update_apply_builder<pbes_system::data_expression_builder>(data::detail::translate_user_notation_function())(x);
   }
 
 } // namespace pbes_system
