@@ -74,7 +74,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       desc.add_option("end-phase", make_mandatory_argument("PHASE"),
                 "stop conversion and output the action rename specification after phase PHASE: "
                 "'pa' (parsing), "
-                "'tc' (type checking), or "
+                "'tc' (type checking) "
                 , 'p');
       desc.add_option("pretty",
                 "return a pretty printed version of the output", 'P');
