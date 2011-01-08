@@ -67,21 +67,40 @@ void lts_dot_t::save(const string &filename) const
   os << "node [ width=0.25, height=0.25, label=\"\" ];" << endl;
   if ( num_states() > 0 )
   {
-    os << state_label(initial_state()).name();
+    if ( has_state_info() )
+    { 
+      os << state_label(initial_state()).name();
+    }
+    else
+    { 
+      os << "S" << initial_state();
+    }
 
     os << " [ peripheries=2 ];" << endl;
-    if ( has_state_info() )
+    for (size_t i=0; i<num_states(); i++)
     {
-      for (size_t i=0; i<num_states(); i++)
+      if ( has_state_info() )
       {
         os << state_label(i).name() << " [ label=\"" << state_label(i).label() << "\" ];" << endl;
+      }
+      else
+      {
+        os << "S" << i << endl;
       }
     }
   }
   for (transition_const_range t=get_transitions();  !t.empty(); t.advance_begin(1))
   {
-    os << state_label(t.front().from()).name() << "->" << state_label(t.front().to()).name() << "[label=\"" << 
+    if (has_state_info())
+    { 
+      os << state_label(t.front().from()).name() << "->" << state_label(t.front().to()).name() << "[label=\"" << 
             mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
+    }
+    else
+    {
+      os << "S" << t.front().from() << " -> " << "S" << t.front().to() << "[label=\"" << 
+            mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
+    }
   }
 
   os << "}" << endl;

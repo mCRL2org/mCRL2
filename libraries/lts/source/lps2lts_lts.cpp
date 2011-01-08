@@ -49,7 +49,7 @@ namespace mcrl2
           break;
         case lts_aut:
           gsVerboseMsg("writing state space in AUT format to '%s'.\n",filename);
-          lts_opts.outinfo = false;
+          /* lts_opts.outinfo = false; */
           aut.open(filename);
           if ( !aut.is_open() )
           {
@@ -83,7 +83,7 @@ namespace mcrl2
           {
             ATbool is_new;
             const size_t t = ATindexedSetPut(aterm2state,state,&is_new);
-            if ( is_new && lts_opts.outinfo)
+            if ( is_new /* && lts_opts.outinfo */ )
             {
               const size_t u = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(state)));
               assert(u==t);
@@ -115,14 +115,14 @@ namespace mcrl2
           {
             ATbool is_new;
             const size_t from_state = ATindexedSetPut(aterm2state,from,&is_new);
-            if ( is_new && lts_opts.outinfo )
+            if ( is_new /* && lts_opts.outinfo */ )
             {
               const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(from)));
               assert(t==from_state);
               static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
             }
             const size_t to_state = ATindexedSetPut(aterm2state,to,&is_new);
-            if ( is_new && lts_opts.outinfo )
+            if ( is_new /* && lts_opts.outinfo */ )
             {
               const size_t t = generic_lts.add_state(state_label_lts(lts_opts.nstate->makeStateVector(to)));
               assert(t==to_state);
@@ -157,6 +157,10 @@ namespace mcrl2
             generic_lts.set_data(lts_opts.spec->data());
             generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
             generic_lts.set_action_labels(lts_opts.spec->action_labels());            
+            if (!lts_opts.outinfo)
+            { /* State labels should not be stored, so remove them */
+              generic_lts.clear_state_labels();
+            }
             switch (lts_opts.outformat)
             {
               case lts_none: 
