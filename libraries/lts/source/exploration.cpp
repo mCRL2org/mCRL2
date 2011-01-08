@@ -721,11 +721,11 @@ namespace mcrl2
         if ( lgopts->expl_strat == es_random )
         {
           NextStateGenerator *nsgen = NULL;
-          size_t number_of_outgoing_transitions=0;
           while (( current_state < lgopts->max_states ) && ( !lgopts->trace || (tracecnt < lgopts->max_traces) ))
           {
             ATermAppl Transition;
             state_t NewState;
+            size_t number_of_outgoing_transitions=0;
 
             check_divergence(state);
 
