@@ -81,10 +81,12 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   /// \param[in] s substitution to apply to expression
   /// \return an expression equivalent to m_rewriter(s(e))
   template < typename Substitution >
-  atermpp::aterm operator()(atermpp::aterm const& e, Substitution const& s) const {
+  atermpp::aterm operator()(atermpp::aterm const& e, Substitution const& s) const 
+  {
     mcrl2::data::detail::Rewriter& local_rewriter(*m_rewriter);
 
-    for (typename Substitution::const_iterator i(s.begin()); i != s.end(); ++i) {
+    for (typename Substitution::const_iterator i(s.begin()); i != s.end(); ++i) 
+    {
       local_rewriter.setSubstitutionInternal(static_cast< ATermAppl >(i->first),
           static_cast< ATerm >(i->second));
     }
@@ -92,7 +94,8 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     ATerm result = local_rewriter.rewriteInternal(static_cast< ATerm >(e));
 
     // Subtle removal as NextStateGenerator requires substitutions for other variables
-    for (typename Substitution::const_iterator i(s.begin()); i != s.end(); ++i) {
+    for (typename Substitution::const_iterator i(s.begin()); i != s.end(); ++i) 
+    {
       local_rewriter.clearSubstitution(static_cast< ATermAppl >(i->first));
     }
 
@@ -213,7 +216,7 @@ namespace mcrl2 {
       // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
       template < >
       inline
-      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
                   legacy_rewriter, legacy_selector >::increment() 
       {
         ATermList assignment_list;
@@ -238,7 +241,7 @@ namespace mcrl2 {
       // Specialisation of classic_enumerator_impl to circumvent data implementation trick
       template < >
       template < typename Container >
-      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
                   legacy_rewriter, legacy_selector >::initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type*) 
       { 
         m_shared_context->m_enumerator.findSolutions(atermpp::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
@@ -278,7 +281,7 @@ struct ns_info
 
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator<
-      mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
+      mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
                                              legacy_rewriter, legacy_selector > enumerator_type;
 
   typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
