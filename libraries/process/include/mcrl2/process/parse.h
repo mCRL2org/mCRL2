@@ -17,7 +17,6 @@
 #include <sstream>
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/alphabet_reduction.h"

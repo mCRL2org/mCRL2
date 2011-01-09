@@ -15,7 +15,6 @@
 #include <iostream>
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/regfrmtrans.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"

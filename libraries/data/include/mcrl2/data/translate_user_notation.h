@@ -46,7 +46,7 @@ namespace detail {
       using super::leave;
       using super::operator();
 
-      data_expression f(const abstraction& x)
+      data_expression operator()(const abstraction& x)
       {
         using namespace sort_set;
         using namespace sort_bag;

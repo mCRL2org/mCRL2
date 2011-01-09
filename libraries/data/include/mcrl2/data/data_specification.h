@@ -29,7 +29,7 @@
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_utility.h"
-#include "mcrl2/data/detail/translate_user_notation_to_internal_format.h"
+#include "mcrl2/data/translate_user_notation.h"
 
 // data expressions
 #include "mcrl2/data/data_expression.h"
@@ -922,7 +922,7 @@ namespace mcrl2 {
       void add_equation(const data_equation& e)
       { 
         assert(m_data_specification_is_type_checked);
-        m_equations.insert(detail::translate_user_notation_to_internal_format(e));
+        m_equations.insert(data::translate_user_notation(e));
         data_is_not_necessarily_normalised_anymore();
       }
 
@@ -1495,7 +1495,7 @@ namespace mcrl2 {
       void remove_equation(const data_equation& e)
       { 
         assert(m_data_specification_is_type_checked);
-        const data_equation e1=detail::translate_user_notation_to_internal_format(e);
+        const data_equation e1=data::translate_user_notation(e);
         m_equations.erase(e1);
         m_normalised_equations.erase(normalise_sorts(e1));
       }

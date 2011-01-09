@@ -16,6 +16,9 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/multiple_possible_sorts.h"
 #include "mcrl2/data/unknown_sort.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/forall.h"
+#include "mcrl2/data/lambda.h"
 
 namespace mcrl2 {
 

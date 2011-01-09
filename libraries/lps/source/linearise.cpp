@@ -54,7 +54,6 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/map_substitution.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
 
 //mCRL2 processes
 #include "mcrl2/process/process_expression.h"

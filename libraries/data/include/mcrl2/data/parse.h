@@ -30,7 +30,7 @@
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
+#include "mcrl2/data/normalize_sorts.h"
 
 namespace mcrl2 {
 
@@ -77,8 +77,8 @@ namespace data {
     }
     data_specification result(spec);
     type_check(result);
-    // detail::internal_format_conversion(result); // Translate bag/set enumerations and numbers to internal format.
-                                                   // This is done automatically in the data specification, when it is constructed.
+    // N.B. Translate bag/set enumerations and numbers to internal format:
+    // This is done automatically in the data specification, when it is constructed.
     return result;
   }
 
@@ -278,23 +278,14 @@ namespace data {
     atermpp::aterm_appl data_expr = core::parse_data_expr(text);
     if (data_expr == 0)
       throw mcrl2::runtime_error("error parsing data expression");
-    //create ATerm table from begin and end
-    atermpp::table variables;
-    for(Variable_iterator v=begin; v!=end; ++v)
-    { // The application of atermpp::aterm_string is necessary to take care that
-      // the name of the variable is quoted, which is what the typechecker expects.
-      variables.put(atermpp::aterm_string(v->name()),v->sort());
-    }
 
     // The typechecker replaces untyped identifiers by typed identifiers (when typechecking 
     // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
     data_expression t(data_expr);
     type_check(t, begin, end, data_spec);
-    // detail::internal_format_conversion_helper converter(data_spec);
-
-    // replace list/set/bag enumerations, and normalise sort aliases.
-    return detail::internal_format_conversion_term(t,data_spec);
-    // return data_spec.normalise_sorts(t);
+    t = data::translate_user_notation(t);
+    t = data::normalize_sorts(t, data_spec);
+    return t;
   }
 
   /// \brief Parses and type checks a data expression.

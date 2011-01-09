@@ -24,7 +24,6 @@
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/data/detail/dependent_sorts.h"
 
 namespace mcrl2 {

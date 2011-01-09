@@ -17,7 +17,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
 
 namespace mcrl2 {
 
@@ -80,14 +79,6 @@ namespace mcrl2 {
         data_expr = data_expression(t);
         assert(!search_sort_expression(data_expr, unknown_sort()));
       }
-
-      //// ???
-      //detail::internal_format_conversion_helper converter(data_spec);
-      //
-      //// replace list/set/bag enumerations, and number denotations.
-      //data_expr = data_expression(converter(data_expression(t)));
-      
-
     }
 
     /** \brief     Type check a data expression.
