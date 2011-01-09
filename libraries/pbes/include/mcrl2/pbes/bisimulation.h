@@ -329,7 +329,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression match(const linear_process& p, const linear_process& q) const
     {
       namespace z = pbes_expr_optimized;
-      std::vector<pbes_expression> result;
+      atermpp::vector<pbes_expression> result;
       for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
         data_expression    ci = i->condition();
@@ -354,7 +354,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       data_expression_list gi = i->next_state(p.process_parameters());
       if (i->is_tau())
       {
-        std::vector<pbes_expression> v;
+        atermpp::vector<pbes_expression> v;
         for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
           if (!j->is_tau())
@@ -371,7 +371,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       }
       else
       {
-        std::vector<pbes_expression> v;
+        atermpp::vector<pbes_expression> v;
         for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
           data_expression      cj = j->condition();
@@ -394,7 +394,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression close(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       namespace z = pbes_expr_optimized;
-      std::vector<pbes_expression> v;
+      atermpp::vector<pbes_expression> v;
       const variable_list& d  = p.process_parameters();
       const variable_list& d1 = q.process_parameters();
       variable_list e  = i->summation_variables();
@@ -481,7 +481,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression match(const linear_process& p, const linear_process& q) const
     {
       namespace z = pbes_expr_optimized;
-      std::vector<pbes_expression> result;
+      atermpp::vector<pbes_expression> result;
       for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
         data_expression  ci = i->condition();
@@ -502,7 +502,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       namespace z = pbes_expr_optimized;
       data_expression_list gi = i->next_state(p.process_parameters());
 
-      std::vector<pbes_expression> result;
+      atermpp::vector<pbes_expression> result;
       for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         data_expression       cj = j->condition();
@@ -567,7 +567,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression match(const linear_process& p, const linear_process& q) const
     {
       namespace z = pbes_expr_optimized;
-      std::vector<pbes_expression> result;
+      atermpp::vector<pbes_expression> result;
       for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
         data_expression    ci = i->condition();
@@ -597,7 +597,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       }
       else
       {
-        std::vector<pbes_expression> v;
+        atermpp::vector<pbes_expression> v;
         for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
           data_expression      cj = j->condition();
@@ -619,7 +619,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     pbes_expression close1(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       namespace z = pbes_expr_optimized;
-      std::vector<pbes_expression> v;
+      atermpp::vector<pbes_expression> v;
       variable_list e = i->summation_variables();
       const variable_list& d = p.process_parameters();
       const variable_list& d1 = q.process_parameters();
@@ -653,7 +653,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       //const variable_list& d1 = q.process_parameters();
       data_expression_list        gi = i->next_state(p.process_parameters());
       action_list                 ai = i->multi_action().actions();
-      std::vector<pbes_expression> v;
+      atermpp::vector<pbes_expression> v;
       for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         if (!j->is_tau())
