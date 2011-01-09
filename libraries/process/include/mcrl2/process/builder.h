@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_BUILDER_H
 
 #include "mcrl2/core/builder.h"
-#include "mcrl2/data/builder.h"
+#include "mcrl2/lps/builder.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {
@@ -661,9 +661,9 @@ namespace process {
 
   /// \brief Traversal class for sort expressions
   template <typename Derived>
-  struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
+  struct sort_expression_builder: public add_sort_expressions<lps::sort_expression_builder, Derived>
   {
-    typedef add_sort_expressions<data::sort_expression_builder, Derived> super;
+    typedef add_sort_expressions<lps::sort_expression_builder, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();
@@ -671,9 +671,9 @@ namespace process {
 
   /// \brief Traversal class for data expressions
   template <typename Derived>
-  struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
+  struct data_expression_builder: public add_data_expressions<lps::data_expression_builder, Derived>
   {
-    typedef add_data_expressions<data::data_expression_builder, Derived> super;
+    typedef add_data_expressions<lps::data_expression_builder, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();
