@@ -35,7 +35,7 @@ namespace detail {
     typedef core::term_traits<bes::boolean_expression> br;
 
     /// \brief A stack containing boolean expressions.
-    std::vector<bes::boolean_expression> expression_stack;
+    atermpp::vector<bes::boolean_expression> expression_stack;
 
     /// \brief Returns the top element of the expression stack, which is the result of the conversion.
     bes::boolean_expression result() const
