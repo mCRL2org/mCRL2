@@ -45,7 +45,7 @@ namespace bes {
   // Prefix is added to each of the identifiers in v.
   boolean_expression formula(std::set<identifier_t> const& v, priority_t p, std::string prefix = "X")
   {
-    std::set<boolean_expression> v_prefixed;
+    atermpp::set<boolean_expression> v_prefixed;
     for(std::set<identifier_t>::const_iterator i = v.begin(); i != v.end(); ++i)
     {
       std::stringstream id;
