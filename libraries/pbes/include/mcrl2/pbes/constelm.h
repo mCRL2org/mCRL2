@@ -412,7 +412,7 @@ namespace detail {
 
     protected:
       /// \brief A map with constraints on the vertices of the graph
-      typedef std::map<variable_type, data_term_type> constraint_map;
+      typedef atermpp::map<variable_type, data_term_type> constraint_map;
 
       /// \brief Compares data expressions for equality.
       DataRewriter m_data_rewriter;
@@ -424,163 +424,198 @@ namespace detail {
       /// implicitly using the 'right' parameter. The condition determines under
       /// what circumstances the influence of the edge is propagated to its target
       /// vertex.
-      struct edge
+      class edge
       {
-        /// \brief The propositional variable at the source of the edge
-        propositional_variable_decl_type source;
+        protected:
+          /// \brief The propositional variable at the source of the edge
+          propositional_variable_decl_type m_source;
+          
+          /// \brief The propositional variable instantiation that determines the target of the edge
+          propositional_variable_type m_target;
+          
+          /// \brief The condition of the edge
+          term_type m_condition;
 
-        /// \brief The propositional variable instantiation that determines the target of the edge
-        propositional_variable_type target;
+        public:
+          /// \brief Constructor
+          edge()
+          {}
+        
+          /// \brief Constructor
+          /// \param l A propositional variable declaration
+          /// \param r A propositional variable
+          /// \param c A term
+          edge(propositional_variable_decl_type src, propositional_variable_type tgt, term_type c = pbes_expr::true_())
+           : m_source(src), m_target(tgt), m_condition(c)
+          {}
 
-        /// \brief The condition of the edge
-        term_type condition;
-
-        /// \brief Constructor
-        edge()
-        {}
-
-        /// \brief Constructor
-        /// \param l A propositional variable declaration
-        /// \param r A propositional variable
-        /// \param c A term
-        edge(propositional_variable_decl_type src, propositional_variable_type tgt, term_type c = pbes_expr::true_())
-         : source(src), target(tgt), condition(c)
-        {}
-
-        /// \brief Returns a string representation of the edge.
-        /// \return A string representation of the edge.
-        std::string to_string() const
-        {
-          std::ostringstream out;
-          out << "(" << mcrl2::core::pp(source.name()) << ", " << mcrl2::core::pp(target.name()) << ")  label = " << mcrl2::core::pp(target) << "  condition = " << mcrl2::core::pp(condition);
-          return out.str();
-        }
+          /// \brief Returns a string representation of the edge.
+          /// \return A string representation of the edge.
+          std::string to_string() const
+          {
+            std::ostringstream out;
+            out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << mcrl2::core::pp(m_target) << "  condition = " << mcrl2::core::pp(m_condition);
+            return out.str();
+          }
+        
+          /// \brief The propositional variable at the source of the edge
+          const propositional_variable_decl_type& source() const
+          {
+            return m_source;
+          }
+          
+          /// \brief The propositional variable instantiation that determines the target of the edge
+          const propositional_variable_type& target() const
+          {
+            return m_target;
+          }
+          
+          /// \brief The condition of the edge
+          const term_type& condition() const
+          {
+            return m_condition;
+          }
       };
 
       /// \brief Represents a vertex of the dependency graph.
-      struct vertex
+      class vertex
       {
-        /// \brief The propositional variable that corresponds to the vertex
-        propositional_variable_decl_type variable;
+        protected:
+          /// \brief The propositional variable that corresponds to the vertex
+          propositional_variable_decl_type m_variable;
+          
+          /// \brief Maps data variables to data expressions. If the right hand side is a data
+          /// variable, it means that it represents NaC ("not a constant").
+          constraint_map m_constraints;
+        
+        public:
+          /// \brief Constructor
+          vertex()
+          {}
+          
+          /// \brief Constructor
+          /// \param v A propositional variable declaration
+          vertex(propositional_variable_decl_type x)
+            : m_variable(x)
+          {}
 
-        /// \brief Maps data variables to data expressions. If the right hand side is a data
-        /// variable, it means that it represents NaC ("not a constant").
-        constraint_map constraints;
-
-        /// \brief Constructor
-        vertex()
-        {}
-
-        /// \brief Constructor
-        /// \param v A propositional variable declaration
-        vertex(propositional_variable_decl_type x)
-          : variable(x)
-        {}
-
-        /// \brief Returns true if the data variable v has been assigned a constant expression.
-        /// \param v A variable
-        /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant(variable_type v) const
-        {
-          typename constraint_map::const_iterator i = constraints.find(v);
-          return i != constraints.end() && !core::term_traits<data_term_type>::is_variable(i->second);
-        }
-
-        /// \brief Returns the constant parameters of this vertex.
-        /// \return The constant parameters of this vertex.
-        std::vector<variable_type> constant_parameters() const
-        {
-          std::vector<variable_type> result;
-          variable_sequence_type parameters(variable.parameters());
-          for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i)
+          /// \brief The propositional variable that corresponds to the vertex
+          const propositional_variable_decl_type& variable() const
           {
-            if (is_constant(*i))
-            {
-              result.push_back(*i);
-            }
+            return m_variable;
           }
-          return result;
-        }
-
-        /// \brief Returns the indices of the constant parameters of this vertex.
-        /// \return The indices of the constant parameters of this vertex.
-        std::vector<size_t> constant_parameter_indices() const
-        {
-          std::vector<size_t> result;
-          int index = 0;
-          variable_sequence_type parameters(variable.parameters());
-          for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i, index++)
+          
+          /// \brief Maps data variables to data expressions. If the right hand side is a data
+          /// variable, it means that it represents NaC ("not a constant").
+          const constraint_map& constraints() const
           {
-            if (is_constant(*i))
-            {
-              result.push_back(index);
-            }
+            return m_constraints;
           }
-          return result;
-        }
 
-        /// \brief Returns a string representation of the vertex.
-        /// \return A string representation of the vertex.
-        std::string to_string() const
-        {
-          std::ostringstream out;
-          out << mcrl2::core::pp(variable) << "  assertions = ";
-          for (typename constraint_map::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
+          /// \brief Returns true if the data variable v has been assigned a constant expression.
+          /// \param v A variable
+          /// \return True if the data variable v has been assigned a constant expression.
+          bool is_constant(variable_type v) const
           {
-            std::string lhs = mcrl2::core::pp(i->first);
-            std::string rhs = mcrl2::core::pp(i->second);
-            out << "{" << lhs << " := " << rhs << "} ";
+            typename constraint_map::const_iterator i = m_constraints.find(v);
+            return i != m_constraints.end() && !core::term_traits<data_term_type>::is_variable(i->second);
           }
-          return out.str();
-        }
-
-        /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
-        /// The new values have a number of constraints.
-        bool update(data_term_sequence_type e, const constraint_map& e_constraints, DataRewriter datar)
-        {
-          bool changed = false;
-
-          typename data_term_sequence_type::iterator i;
-          typename variable_sequence_type::iterator j;
-          variable_sequence_type params = variable.parameters();
-
-          if (constraints.empty())
+          
+          /// \brief Returns the constant parameters of this vertex.
+          /// \return The constant parameters of this vertex.
+          std::vector<variable_type> constant_parameters() const
           {
-            for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
+            std::vector<variable_type> result;
+            variable_sequence_type parameters(m_variable.parameters());
+            for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i)
             {
-              data_term_type e1 = datar(data::make_map_substitution_adapter(e_constraints)(*i));
-              if (core::term_traits<data_term_type>::is_constant(e1))
+              if (is_constant(*i))
               {
-                constraints[*j] = e1;
-              }
-              else
-              {
-              	constraints[*j] = *j;
+                result.push_back(*i);
               }
             }
-            changed = true;
+            return result;
           }
-          else
+          
+          /// \brief Returns the indices of the constant parameters of this vertex.
+          /// \return The indices of the constant parameters of this vertex.
+          std::vector<size_t> constant_parameter_indices() const
           {
-            for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
+            std::vector<size_t> result;
+            int index = 0;
+            variable_sequence_type parameters(m_variable.parameters());
+            for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i, index++)
             {
-              typename constraint_map::iterator k = constraints.find(*j);
-              assert(k != constraints.end());
-              data_term_type& ci = k->second;
-              if (ci == *j)
+              if (is_constant(*i))
               {
-                continue;
-              }
-              data_term_type ei = datar(data::make_map_substitution_adapter(e_constraints)(*i));
-              if (ci != ei)
-              {
-                ci = *j;
-                changed = true;
+                result.push_back(index);
               }
             }
+            return result;
           }
-          return changed;
-        }
+          
+          /// \brief Returns a string representation of the vertex.
+          /// \return A string representation of the vertex.
+          std::string to_string() const
+          {
+            std::ostringstream out;
+            out << mcrl2::core::pp(m_variable) << "  assertions = ";
+            for (typename constraint_map::const_iterator i = m_constraints.begin(); i != m_constraints.end(); ++i)
+            {
+              std::string lhs = mcrl2::core::pp(i->first);
+              std::string rhs = mcrl2::core::pp(i->second);
+              out << "{" << lhs << " := " << rhs << "} ";
+            }
+            return out.str();
+          }
+          
+          /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
+          /// The new values have a number of constraints.
+          bool update(data_term_sequence_type e, const constraint_map& e_constraints, DataRewriter datar)
+          {
+            bool changed = false;
+          
+            typename data_term_sequence_type::iterator i;
+            typename variable_sequence_type::iterator j;
+            variable_sequence_type params = m_variable.parameters();
+          
+            if (m_constraints.empty())
+            {
+              for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
+              {
+                data_term_type e1 = datar(data::make_map_substitution_adapter(e_constraints)(*i));
+                if (core::term_traits<data_term_type>::is_constant(e1))
+                {
+                  m_constraints[*j] = e1;
+                }
+                else
+                {
+                	m_constraints[*j] = *j;
+                }
+              }
+              changed = true;
+            }
+            else
+            {
+              for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
+              {
+                typename constraint_map::iterator k = m_constraints.find(*j);
+                assert(k != m_constraints.end());
+                data_term_type& ci = k->second;
+                if (ci == *j)
+                {
+                  continue;
+                }
+                data_term_type ei = datar(data::make_map_substitution_adapter(e_constraints)(*i));
+                if (ci != ei)
+                {
+                  ci = *j;
+                  changed = true;
+                }
+              }
+            }
+            return changed;
+          }
       };
 
       /// \brief The storage type for vertices
@@ -641,11 +676,11 @@ namespace detail {
         for (typename std::map<string_type, std::vector<size_t> >::const_iterator i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
         {
           const vertex& v = m_vertices.find(i->first)->second;
-          std::vector<variable_type>& variables = result[v.variable];
+          std::vector<variable_type>& variables = result[v.variable()];
           for (std::vector<size_t>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
             // std::advance doesn't work for aterm lists :-(
-            variable_sequence_type parameters(v.variable.parameters());
+            variable_sequence_type parameters(v.variable().parameters());
             typename variable_sequence_type::iterator k = parameters.begin();
             for (size_t i = 0; i < *j; i++)
             {
@@ -727,8 +762,8 @@ namespace detail {
           data_term_sequence_type e = i->parameters();
           vertex& u = m_vertices[i->name()];
           u.update(e, constraint_map(), m_data_rewriter);
-          todo.push_back(u.variable);
-          visited.insert(u.variable);
+          todo.push_back(u.variable());
+          visited.insert(u.variable());
         }
 
         if (mcrl2::core::gsDebug)
@@ -752,35 +787,35 @@ std::cerr << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(
 
           const vertex& u = m_vertices[var.name()];
           std::vector<edge>& u_edges = m_edges[var.name()];
-          variable_sequence_type Xparams = u.variable.parameters();
+          variable_sequence_type Xparams = u.variable().parameters();
 
           for (typename std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
           {
             const edge& e = *ei;
-            vertex& v = m_vertices[e.target.name()];
+            vertex& v = m_vertices[e.target().name()];
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
 std::cerr << "\n<updating edge>" << e.to_string() << std::endl;
 std::cerr << "  <source vertex       >" << u.to_string() << std::endl;
 std::cerr << "  <target vertex before>" << v.to_string() << std::endl;
 #endif
 
-            term_type value = m_pbes_rewriter(data::make_map_substitution_adapter(u.constraints)(e.condition));
+            term_type value = m_pbes_rewriter(data::make_map_substitution_adapter(u.constraints())(e.condition()));
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "\nEvaluated condition " << core::pp(data::make_map_substitution_adapter(u.constraints)(e.condition)) << " to " << core::pp(value) << std::endl;
+std::cerr << "\nEvaluated condition " << core::pp(data::make_map_substitution_adapter(u.constraints())(e.condition)) << " to " << core::pp(value) << std::endl;
 #endif
             if (!tr::is_false(value) && !tr::is_true(value))
             {
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "\nCould not evaluate condition " << core::pp(data::make_map_substitution_adapter(u.constraints)(e.condition)) << " to true or false";
+std::cerr << "\nCould not evaluate condition " << core::pp(data::make_map_substitution_adapter(u.constraints())(e.condition)) << " to true or false";
 #endif
             }
             if (!tr::is_false(value))
             {
-              bool changed = v.update(e.target.parameters(), u.constraints, m_data_rewriter);
+              bool changed = v.update(e.target().parameters(), u.constraints(), m_data_rewriter);
               if (changed)
               {
-                todo.push_back(v.variable);
-                visited.insert(v.variable);
+                todo.push_back(v.variable());
+                visited.insert(v.variable());
               }
             }
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
@@ -800,7 +835,7 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
         {
           string_type name = i->variable().name();
           vertex& v = m_vertices[name];
-          if (v.constraints.empty())
+          if (v.constraints().empty())
           {
             if (visited.find(i->variable()) == visited.end())
             {
@@ -823,12 +858,12 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
           string_type name = i->variable().name();
           vertex& v = m_vertices[name];
 
-          if (!v.constraints.empty())
+          if (!v.constraints().empty())
           {
             *i = pbes_equation(
               i->symbol(),
               i->variable(),
-              data::make_map_substitution_adapter(v.constraints)(i->formula())
+              data::make_map_substitution_adapter(v.constraints())(i->formula())
             );
           }
         }
