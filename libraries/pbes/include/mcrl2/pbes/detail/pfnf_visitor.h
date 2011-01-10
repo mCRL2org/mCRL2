@@ -55,14 +55,26 @@ namespace detail {
     typedef std::pair<bool, variable_sequence_type> quantifier;
 
     /// \brief Represents the implication g => ( X0(e0) \/ ... \/ Xk(ek) )
-    typedef std::pair<term_type, std::vector<propositional_variable_type> > implication;
+    struct implication: public term_type
+    {
+      std::vector<propositional_variable_type> rhs;
+        
+      implication(const atermpp::aterm_appl& x, const std::vector<propositional_variable_type>& rhs_)
+        : term_type(x),
+          rhs(rhs_)
+      {}
+
+      implication(const atermpp::aterm_appl& x)
+        : term_type(x)
+      {}
+    };
 
     struct expression: public term_type
     {
       std::vector<quantifier> quantifiers;
-      std::vector<implication> implications;
+      atermpp::vector<implication> implications;
         
-      expression(const atermpp::aterm_appl& x, const std::vector<quantifier>& quantifiers_, const std::vector<implication>& implications_)
+      expression(const atermpp::aterm_appl& x, const std::vector<quantifier>& quantifiers_, const atermpp::vector<implication>& implications_)
         : term_type(x),
           quantifiers(quantifiers_),
           implications(implications_)
@@ -102,12 +114,13 @@ namespace detail {
       const expression& expr = expression_stack.back();
       const std::vector<quantifier>& q = expr.quantifiers;
       pbes_expression h = expr;
-      const std::vector<implication>& g = expr.implications;
+      const atermpp::vector<implication>& g = expr.implications;
       pbes_expression result = h;
-      for (typename std::vector<implication>::const_iterator i = g.begin(); i != g.end(); ++i)
+      for (typename atermpp::vector<implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
-        pbes_expression x = std::accumulate(i->second.begin(), i->second.end(), tr::false_(), &core::optimized_or<Term>);
-        result = core::optimized_and(result, core::optimized_imp(i->first, x));
+        pbes_expression x = std::accumulate(i->rhs.begin(), i->rhs.end(), tr::false_(), &core::optimized_or<Term>);
+        pbes_expression y = *i;
+        result = core::optimized_and(result, core::optimized_imp(y, x));
       }
       for (typename std::vector<quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
       {
@@ -122,25 +135,25 @@ namespace detail {
     {
       const std::vector<quantifier>& q = expr.quantifiers;
       pbes_expression h = expr;
-      const std::vector<implication>& g = expr.implications;
+      const atermpp::vector<implication>& g = expr.implications;
       for (typename std::vector<quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
       {
         std::cout << (i->first ? "forall " : "exists ") << core::pp(i->second) << " ";
       }
       std::cout << (q.empty() ? "" : " . ") << core::pp(h) << "\n";
-      for (typename std::vector<implication>::const_iterator i = g.begin(); i != g.end(); ++i)
+      for (typename atermpp::vector<implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
-        std::cout << " /\\ " << core::pp(i->first) << " => ";
-        if (i->second.empty())
+        std::cout << " /\\ " << core::pp(*i) << " => ";
+        if (i->rhs.empty())
         {
           std::cout << "true";
         }
         else
         {
           std::cout << "( ";
-          for (typename std::vector<propositional_variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+          for (typename std::vector<propositional_variable_type>::const_iterator j = i->rhs.begin(); j != i->rhs.end(); ++j)
           {
-            if (j != i->second.begin())
+            if (j != i->rhs.begin())
             {
               std::cout << " \\/ ";
             }
@@ -211,7 +224,7 @@ namespace detail {
       expression_stack.pop_back();
       std::vector<quantifier> q = concat(left.quantifiers, right.quantifiers);
       pbes_expression h = and_(left, right);
-      std::vector<implication> g = concat(left.implications, right.implications);
+      atermpp::vector<implication> g = concat(left.implications, right.implications);
       expression_stack.push_back(expression(h, q, g));
     }
 
@@ -233,29 +246,29 @@ namespace detail {
       pbes_expression not_h_phi = not_(left);
       pbes_expression not_h_psi = not_(right);
 
-      const std::vector<implication>& q_phi = left.implications;
-      const std::vector<implication>& q_psi = right.implications;
+      const atermpp::vector<implication>& q_phi = left.implications;
+      const atermpp::vector<implication>& q_psi = right.implications;
 
-      std::vector<implication> g;
+      atermpp::vector<implication> g;
 
       // first conjunction
-      for (typename std::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
+      for (typename atermpp::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
       {
-        g.push_back(implication(and_(not_h_psi, i->first), i->second));
+        g.push_back(implication(and_(not_h_psi, *i), i->rhs));
       }
 
       // second conjunction
-      for (typename std::vector<implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
+      for (typename atermpp::vector<implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
       {
-        g.push_back(implication(and_(not_h_phi, i->first), i->second));
+        g.push_back(implication(and_(not_h_phi, *i), i->rhs));
       }
 
       // third conjunction
-      for (typename std::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
+      for (typename atermpp::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
       {
-        for (typename std::vector<implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
+        for (typename atermpp::vector<implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
         {
-          g.push_back(implication(and_(i->first, k->first), concat(i->second, k->second)));
+          g.push_back(implication(and_(*i, *k), concat(i->rhs, k->rhs)));
         }
       }
       expression_stack.push_back(expression(h, q, g));
@@ -315,7 +328,7 @@ namespace detail {
       // push the propositional variable on the expression stack
       std::vector<quantifier> q;
       pbes_expression h = tr::true_();
-      std::vector<implication> g(1, implication(tr::true_(), std::vector<propositional_variable_type>(1, X)));
+      atermpp::vector<implication> g(1, implication(tr::true_(), std::vector<propositional_variable_type>(1, X)));
       expression_stack.push_back(expression(h, q, g));
       return super::continue_recursion;
     }
