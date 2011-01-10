@@ -31,17 +31,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// \cond INTERNAL_DOCS
 namespace detail {
-  /// \brief Compares two terms
-  /// \param v A term
-  /// \param w A term
-  /// \return True if v is less than w
-  inline
-  bool less_term(atermpp::aterm_appl v, atermpp::aterm_appl w)
-  {
-    return ATermAppl(v) < ATermAppl(w);
-  }
 
   template <typename Term>
   struct true_false_pair
@@ -60,6 +50,40 @@ namespace detail {
       : TC(t), FC(f)
     {}
   };
+
+} // namespace detail
+
+} // namespace mcrl2
+
+} // namespace pbes_system
+
+namespace atermpp {
+  /// \cond INTERNAL_DOCS
+  template<typename Term>
+  struct aterm_traits<mcrl2::pbes_system::detail::true_false_pair<Term> >
+  {
+    typedef ATermAppl aterm_type;
+    static void protect(mcrl2::pbes_system::detail::true_false_pair<Term> t)   { t.TC.protect();   t.FC.protect();   }
+    static void unprotect(mcrl2::pbes_system::detail::true_false_pair<Term> t) { t.TC.unprotect(); t.FC.unprotect(); }
+    static void mark(mcrl2::pbes_system::detail::true_false_pair<Term> t)      { t.TC.mark();      t.FC.mark();      }
+  };
+} // namespace atermpp
+
+namespace mcrl2 {
+
+namespace pbes_system {
+
+/// \cond INTERNAL_DOCS
+namespace detail {
+  /// \brief Compares two terms
+  /// \param v A term
+  /// \param w A term
+  /// \return True if v is less than w
+  inline
+  bool less_term(atermpp::aterm_appl v, atermpp::aterm_appl w)
+  {
+    return ATermAppl(v) < ATermAppl(w);
+  }
 
   template <typename Term>
   struct apply_exists
@@ -109,7 +133,7 @@ namespace detail {
     typedef typename core::term_traits<Term>::term_type term_type;
     typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
     typedef typename core::term_traits<Term> tr;
-    typedef std::multimap<propositional_variable_type, std::vector<true_false_pair<Term> > > condition_map;
+    typedef std::multimap<propositional_variable_type, atermpp::vector<true_false_pair<Term> > > condition_map;
 
     term_type TC;
     term_type FC;
@@ -125,10 +149,10 @@ namespace detail {
     /// \brief Returns the condition
     /// \param c A sequence of true-false pairs
     /// \return The condition
-    term_type compute_condition(const std::vector<true_false_pair<Term> >& c) const
+    term_type compute_condition(const atermpp::vector<true_false_pair<Term> >& c) const
     {
       term_type result = tr::true_();
-      for (typename std::vector<true_false_pair<Term> >::const_iterator i = c.begin(); i != c.end(); ++i)
+      for (typename atermpp::vector<true_false_pair<Term> >::const_iterator i = c.begin(); i != c.end(); ++i)
       {
         result = core::optimized_and(result, core::optimized_not(i->TC));
         result = core::optimized_and(result, core::optimized_not(i->FC));
@@ -314,7 +338,7 @@ namespace detail {
     {
       ec.TC = tr::false_();
       ec.FC = tr::false_();
-      std::vector<true_false_pair<Term> > c;
+      atermpp::vector<true_false_pair<Term> > c;
       c.push_back(true_false_pair<Term>(tr::false_(), tr::false_()));
       ec.condition.insert(std::make_pair(v, c));
       return this->stop_recursion;
@@ -424,7 +448,12 @@ namespace detail {
       /// implicitly using the 'right' parameter. The condition determines under
       /// what circumstances the influence of the edge is propagated to its target
       /// vertex.
-      class edge
+      //
+      // N.B. The attribute condition "term_type condition;" needs to be protected.
+      // This is achieved by deriving from term_type. This is very ugly, but AFAIK
+      // this is the least destructive solution to garbage collection problems.
+      // Note that source and target are protected elsewhere.
+      class edge: public term_type
       {
         protected:
           /// \brief The propositional variable at the source of the edge
@@ -432,9 +461,6 @@ namespace detail {
           
           /// \brief The propositional variable instantiation that determines the target of the edge
           propositional_variable_type m_target;
-          
-          /// \brief The condition of the edge
-          term_type m_condition;
 
         public:
           /// \brief Constructor
@@ -446,7 +472,7 @@ namespace detail {
           /// \param r A propositional variable
           /// \param c A term
           edge(propositional_variable_decl_type src, propositional_variable_type tgt, term_type c = pbes_expr::true_())
-           : m_source(src), m_target(tgt), m_condition(c)
+           : term_type(c), m_source(src), m_target(tgt)
           {}
 
           /// \brief Returns a string representation of the edge.
@@ -454,7 +480,7 @@ namespace detail {
           std::string to_string() const
           {
             std::ostringstream out;
-            out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << mcrl2::core::pp(m_target) << "  condition = " << mcrl2::core::pp(m_condition);
+            out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << mcrl2::core::pp(m_target) << "  condition = " << mcrl2::core::pp(condition());
             return out.str();
           }
         
@@ -473,7 +499,7 @@ namespace detail {
           /// \brief The condition of the edge
           const term_type& condition() const
           {
-            return m_condition;
+            return *this;
           }
       };
 
@@ -622,7 +648,7 @@ namespace detail {
       typedef std::map<string_type, vertex> vertex_map;
 
       /// \brief The storage type for edges
-      typedef std::map<string_type, std::vector<edge> > edge_map;
+      typedef std::map<string_type, atermpp::vector<edge> > edge_map;
 
       /// \brief The vertices of the dependency graph. They are stored in a map, to
       /// support searching for a vertex.
@@ -652,7 +678,7 @@ namespace detail {
       {
         for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
         {
-          for (typename std::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+          for (typename atermpp::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
             std::cerr << j->to_string() << std::endl;
           }
@@ -729,7 +755,7 @@ namespace detail {
             visitor.visit(i->formula(), ec);
             if (!ec.condition.empty())
             {
-              std::vector<edge>& edges = m_edges[name];
+              atermpp::vector<edge>& edges = m_edges[name];
               for (typename condition_map::iterator j = ec.condition.begin(); j != ec.condition.end(); ++j)
               {
                 propositional_variable_type X = j->first;
@@ -744,7 +770,7 @@ namespace detail {
             std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(i->formula());
             if (!inst.empty())
             {
-              std::vector<edge>& edges = m_edges[name];
+              atermpp::vector<edge>& edges = m_edges[name];
               for (typename std::set<propositional_variable_type>::iterator k = inst.begin(); k != inst.end(); ++k)
               {
                 edges.push_back(edge(i->variable(), *k));
@@ -786,10 +812,10 @@ std::cerr << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(
           todo.erase(std::remove(todo.begin(), todo.end(), var), todo.end());
 
           const vertex& u = m_vertices[var.name()];
-          std::vector<edge>& u_edges = m_edges[var.name()];
+          atermpp::vector<edge>& u_edges = m_edges[var.name()];
           variable_sequence_type Xparams = u.variable().parameters();
 
-          for (typename std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
+          for (typename atermpp::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
           {
             const edge& e = *ei;
             vertex& v = m_vertices[e.target().name()];
