@@ -228,30 +228,8 @@ void test_global_variables()
   atermpp::set<variable> freevars = p.global_variables();
   BOOST_CHECK(freevars.size() == 3);  // The global variable k does not occur in the specification,
                                       // but occurs in the global variables list.
-  /* for (atermpp::set< variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
-  {
-    std::cout << "<var>" << mcrl2::core::pp(*i) << std::endl;
-  } */
   core::garbage_collect();
 }
-
-// No longer valid due to that the order of and_ and or_ may be changed.
-//
-// void test_pbes_expression_builder()
-// {
-//   specification mpsu_spec = linearise(MPSU_SPECIFICATION);
-//   state_formula mpsu_formula = state_formulas::parse_state_formula(MPSU_FORMULA, mpsu_spec);
-//   bool timed = false;
-//   pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
-//
-//   for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-//   {
-//     const pbes_expression& q = i->formula();
-//     pbes_expr_builder<pbes_expression> builder;
-//     pbes_expression q1 = builder.visit(q);
-//     BOOST_CHECK(q == q1);
-//   }
-// }
 
 void test_quantifier_rename_builder()
 {
@@ -391,7 +369,6 @@ int test_main(int argc, char** argv)
 
   test_trivial();
   test_pbes();
-  // test_xyz_generator();
   test_global_variables();
   test_quantifier_rename_builder();
   test_complement_method_builder();

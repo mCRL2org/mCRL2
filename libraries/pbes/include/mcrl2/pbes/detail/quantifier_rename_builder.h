@@ -13,16 +13,28 @@
 #define MCRL2_PBES_DETAIL_QUANTIFIER_RENAME_BUILDER_H
 
 #include <algorithm>
-#include <deque>
 #include <iostream>
 #include <utility>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
+#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/sequence_substitution.h"
+
+namespace atermpp {
+  /// \cond INTERNAL_DOCS
+  template<>
+  struct aterm_traits<std::pair<mcrl2::data::variable, mcrl2::data::variable> >
+  {
+    typedef ATermAppl aterm_type;
+    static void protect(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)   { t.first.protect();   t.second.protect();   }
+    static void unprotect(std::pair<mcrl2::data::variable, mcrl2::data::variable> t) { t.first.unprotect(); t.second.unprotect(); }
+    static void mark(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)      { t.first.mark();      t.second.mark();      }
+  };
+} // namespace atermpp
 
 namespace mcrl2 {
 
@@ -38,7 +50,7 @@ struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
 {
   IdentifierGenerator& generator;
   std::vector<data::variable_list> quantifier_stack;
-  std::deque<std::pair<data::variable, data::variable> > replacements;
+  atermpp::deque<std::pair<data::variable, data::variable> > replacements;
 
   quantifier_rename_builder(IdentifierGenerator& generator)
     : generator(generator)
