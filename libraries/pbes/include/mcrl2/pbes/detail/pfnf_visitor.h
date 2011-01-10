@@ -16,7 +16,6 @@
 #include <utility>
 #include <vector>
 #include <stdexcept>
-#include <boost/tuple/tuple.hpp>
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
@@ -43,6 +42,7 @@ namespace detail {
   template <typename Term>
   struct pfnf_visitor: public pbes_expression_visitor<Term>
   {
+    typedef pfnf_visitor<Term> self;
     typedef pbes_expression_visitor<Term> super;
     typedef Term term_type;
     typedef core::term_traits<Term> tr;
@@ -57,11 +57,39 @@ namespace detail {
     /// \brief Represents the implication g => ( X0(e0) \/ ... \/ Xk(ek) )
     typedef std::pair<term_type, std::vector<propositional_variable_type> > implication;
 
-    /// \brief Represents an expression in PFNF format.
-    typedef boost::tuple<std::vector<quantifier>, pbes_expression, std::vector<implication> > expression;
+    struct expression: public term_type
+    {
+      std::vector<quantifier> quantifiers;
+      std::vector<implication> implications;
+        
+      expression(const atermpp::aterm_appl& x, const std::vector<quantifier>& quantifiers_, const std::vector<implication>& implications_)
+        : term_type(x),
+          quantifiers(quantifiers_),
+          implications(implications_)
+      {}
+
+      expression(const atermpp::aterm_appl& x)
+        : term_type(x)
+      {}
+    };
+    
+    pbes_expression and_(const expression& left, const expression& right) const
+    {
+      return core::optimized_and(static_cast<const pbes_expression&>(left), static_cast<const pbes_expression&>(right));
+    }
+
+    pbes_expression or_(const expression& left, const expression& right) const
+    {
+      return core::optimized_or(static_cast<const pbes_expression&>(left), static_cast<const pbes_expression&>(right));
+    }
+
+    pbes_expression not_(const expression& x) const
+    {
+      return core::optimized_not(static_cast<const pbes_expression&>(x));
+    }
 
     /// \brief A stack containing expressions in PFNF format.
-    std::vector<expression> expression_stack;
+    atermpp::vector<expression> expression_stack;
 
     /// \brief A stack containing quantifier variables.
     std::vector<data::variable_list> quantifier_stack;
@@ -72,16 +100,16 @@ namespace detail {
     {
       assert(!expression_stack.empty());
       const expression& expr = expression_stack.back();
-      std::vector<quantifier> q = boost::get<0>(expr);
-      pbes_expression h = boost::get<1>(expr);
-      std::vector<implication> g = boost::get<2>(expr);
+      const std::vector<quantifier>& q = expr.quantifiers;
+      pbes_expression h = expr;
+      const std::vector<implication>& g = expr.implications;
       pbes_expression result = h;
-      for (typename std::vector<implication>::iterator i = g.begin(); i != g.end(); ++i)
+      for (typename std::vector<implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
         pbes_expression x = std::accumulate(i->second.begin(), i->second.end(), tr::false_(), &core::optimized_or<Term>);
         result = core::optimized_and(result, core::optimized_imp(i->first, x));
       }
-      for (typename std::vector<quantifier>::iterator i = q.begin(); i != q.end(); ++i)
+      for (typename std::vector<quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
       {
         result = i->first ? tr::forall(i->second, result) : tr::exists(i->second, result);
       }
@@ -92,15 +120,15 @@ namespace detail {
     /// \param expr An expression
     void print_expression(const expression& expr) const
     {
-      std::vector<quantifier> q = boost::get<0>(expr);
-      pbes_expression h = boost::get<1>(expr);
-      std::vector<implication> g = boost::get<2>(expr);
-      for (typename std::vector<quantifier>::iterator i = q.begin(); i != q.end(); ++i)
+      const std::vector<quantifier>& q = expr.quantifiers;
+      pbes_expression h = expr;
+      const std::vector<implication>& g = expr.implications;
+      for (typename std::vector<quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
       {
         std::cout << (i->first ? "forall " : "exists ") << core::pp(i->second) << " ";
       }
       std::cout << (q.empty() ? "" : " . ") << core::pp(h) << "\n";
-      for (typename std::vector<implication>::iterator i = g.begin(); i != g.end(); ++i)
+      for (typename std::vector<implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
         std::cout << " /\\ " << core::pp(i->first) << " => ";
         if (i->second.empty())
@@ -110,7 +138,7 @@ namespace detail {
         else
         {
           std::cout << "( ";
-          for (typename std::vector<propositional_variable_type>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+          for (typename std::vector<propositional_variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
             if (j != i->second.begin())
             {
@@ -130,7 +158,7 @@ namespace detail {
     void print(std::string msg = "") const
     {
       std::cout << "--- " << msg << std::endl;
-      for (typename std::vector<expression>::const_iterator i = expression_stack.begin(); i != expression_stack.end(); ++i)
+      for (typename atermpp::vector<expression>::const_iterator i = expression_stack.begin(); i != expression_stack.end(); ++i)
       {
         print_expression(*i);
       }
@@ -142,7 +170,7 @@ namespace detail {
     /// \return The result of visiting the node
     bool visit_data_expression(const term_type& e, const data_term_type& /* d */)
     {
-      expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
+      expression_stack.push_back(expression(e));
       return super::continue_recursion;
     }
 
@@ -151,7 +179,7 @@ namespace detail {
     /// \return The result of visiting the node
     bool visit_true(const term_type& e)
     {
-      expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
+      expression_stack.push_back(expression(e));
       return super::continue_recursion;
     }
 
@@ -160,7 +188,7 @@ namespace detail {
     /// \return The result of visiting the node
     bool visit_false(const term_type& e)
     {
-      expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
+      expression_stack.push_back(expression(e));
       return super::continue_recursion;
     }
 
@@ -181,10 +209,10 @@ namespace detail {
       expression_stack.pop_back();
       expression left  = expression_stack.back();
       expression_stack.pop_back();
-      std::vector<quantifier> q = concat(boost::get<0>(left), boost::get<0>(right));
-      pbes_expression h = core::optimized_and(boost::get<1>(left), boost::get<1>(right));
-      std::vector<implication> g = concat(boost::get<2>(left), boost::get<2>(right));
-      expression_stack.push_back(boost::make_tuple(q, h, g));
+      std::vector<quantifier> q = concat(left.quantifiers, right.quantifiers);
+      pbes_expression h = and_(left, right);
+      std::vector<implication> g = concat(left.implications, right.implications);
+      expression_stack.push_back(expression(h, q, g));
     }
 
     /// \brief Leave or node
@@ -196,31 +224,30 @@ namespace detail {
       expression left  = expression_stack.back();
       expression_stack.pop_back();
 
-      std::vector<quantifier> q = concat(boost::get<0>(left), boost::get<0>(right));
+      std::vector<quantifier> q = concat(left.quantifiers, right.quantifiers);
 
-      pbes_expression h_phi = boost::get<1>(left);
-      pbes_expression h_psi = boost::get<1>(right);
+      pbes_expression h_phi = left;
+      pbes_expression h_psi = right;
+      pbes_expression h = or_(h_phi, h_psi);
 
-      pbes_expression h = core::optimized_or(h_phi, h_psi);
+      pbes_expression not_h_phi = not_(left);
+      pbes_expression not_h_psi = not_(right);
 
-      pbes_expression not_h_phi = core::optimized_not(boost::get<1>(left));
-      pbes_expression not_h_psi = core::optimized_not(boost::get<1>(right));
-
-      const std::vector<implication>& q_phi = boost::get<2>(left);
-      const std::vector<implication>& q_psi = boost::get<2>(right);
+      const std::vector<implication>& q_phi = left.implications;
+      const std::vector<implication>& q_psi = right.implications;
 
       std::vector<implication> g;
 
       // first conjunction
       for (typename std::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
       {
-        g.push_back(implication(core::optimized_and(not_h_psi, i->first), i->second));
+        g.push_back(implication(and_(not_h_psi, i->first), i->second));
       }
 
       // second conjunction
       for (typename std::vector<implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
       {
-        g.push_back(implication(core::optimized_and(not_h_phi, i->first), i->second));
+        g.push_back(implication(and_(not_h_phi, i->first), i->second));
       }
 
       // third conjunction
@@ -228,11 +255,10 @@ namespace detail {
       {
         for (typename std::vector<implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
         {
-          g.push_back(implication(core::optimized_and(i->first, k->first), concat(i->second, k->second)));
+          g.push_back(implication(and_(i->first, k->first), concat(i->second, k->second)));
         }
       }
-
-      expression_stack.push_back(boost::make_tuple(q, h, g));
+      expression_stack.push_back(expression(h, q, g));
     }
 
     /// \brief Visit imp node
@@ -258,7 +284,7 @@ namespace detail {
     void leave_forall()
     {
       // push the quantifier on the expression stack
-      boost::get<0>(expression_stack.back()).push_back(std::make_pair(true, quantifier_stack.back()));
+      expression_stack.back().quantifiers.push_back(std::make_pair(true, quantifier_stack.back()));
       quantifier_stack.pop_back();
     }
 
@@ -276,7 +302,7 @@ namespace detail {
     void leave_exists()
     {
       // push the quantifier on the expression stack
-      boost::get<0>(expression_stack.back()).push_back(std::make_pair(false, quantifier_stack.back()));
+      expression_stack.back().quantifiers.push_back(std::make_pair(false, quantifier_stack.back()));
       quantifier_stack.pop_back();
     }
 
@@ -290,7 +316,7 @@ namespace detail {
       std::vector<quantifier> q;
       pbes_expression h = tr::true_();
       std::vector<implication> g(1, implication(tr::true_(), std::vector<propositional_variable_type>(1, X)));
-      expression_stack.push_back(boost::make_tuple(q, h, g));
+      expression_stack.push_back(expression(h, q, g));
       return super::continue_recursion;
     }
   };
