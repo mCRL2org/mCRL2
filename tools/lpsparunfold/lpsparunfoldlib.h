@@ -82,13 +82,13 @@ class lpsparunfold
     mcrl2::data::basic_sort fresh_basic_sort;
 
     /// \brief The set of sort names occurring in the process specification.
-    std::set<mcrl2::core::identifier_string> sort_names;
+    atermpp::set<mcrl2::core::identifier_string> sort_names;
 
     /// \brief The set of constructor and mapping names occurring in the process specification.
-    std::set<mcrl2::core::identifier_string> mapping_and_constructor_names;
+    atermpp::set<mcrl2::core::identifier_string> mapping_and_constructor_names;
 
     /// \brief Mapping of the unfold process parameter to a vector process parameters.
-    std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
+    atermpp::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
 
     /// \brief Boolean to indicate if additional distribution laws need to be generated.
     bool m_add_distribution_laws;
@@ -169,7 +169,7 @@ class lpsparunfold
       *         with respect to the set of process parameters (process_parameter_names). 
       * \return A fresh process parameter name. 
     **/
-    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str, std::set<mcrl2::core::identifier_string>& process_parameter_names );
+    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str, atermpp::set<mcrl2::core::identifier_string>& process_parameter_names );
 
     /** \brief  Get the sort of the process parameter at given index
       * \param  str denotes the prefered parameter_at_index name for index value.
@@ -181,8 +181,8 @@ class lpsparunfold
     /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
       * \return substitute function for replacing process parameters with unfolded process parameters functions. 
     **/
-    std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parameter_substitution(
-        std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, 
+    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parameter_substitution(
+        atermpp::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, 
         mcrl2::data::function_symbol_vector AffectedConstructors, 
         mcrl2::data::function_symbol case_function );
 
