@@ -714,7 +714,7 @@ namespace detail {
         if (check_log_level(level))
         {
           std::clog << "\n<todo list> [";
-          for (std::deque<propositional_variable_decl_type>::const_iterator i = todo.begin(); i != todo.end(); ++i)
+          for (typename std::deque<propositional_variable_decl_type>::const_iterator i = todo.begin(); i != todo.end(); ++i)
           {
             if (i != todo.begin())
             {
