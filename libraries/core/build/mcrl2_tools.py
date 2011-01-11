@@ -59,4 +59,10 @@ def run_pbesabstract(pbesfile1, pbesfile2, abstraction_value, selection = '*(*:*
 
 def run_pbesconstelm(pbesfile1, pbesfile2, rewriter = 'quantifier-all', timeout = 10):
     timeout_command('pbesconstelm -p%s %s %s' % (rewriter, pbesfile1, pbesfile2), timeout)
+
+def run_pbesparelm(pbesfile1, pbesfile2, timeout = 10):
+    timeout_command('pbesparelm %s %s' % (pbesfile1, pbesfile2), timeout)
+
+def run_pbespareqelm(pbesfile1, pbesfile2, timeout = 10):
+    timeout_command('pbespareqelm %s %s' % (pbesfile1, pbesfile2), timeout)
   
