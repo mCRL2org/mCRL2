@@ -20,6 +20,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include "mcrl2/core/algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/map_substitution.h"
 #include "mcrl2/pbes/pbes.h"
@@ -395,7 +396,7 @@ namespace detail {
 
   /// \brief Algorithm class for the constelm algorithm
   template <typename Term, typename DataRewriter, typename PbesRewriter>
-  class pbes_constelm_algorithm
+  class pbes_constelm_algorithm: public core::algorithm
   {
     public:
       /// \brief The term type
@@ -599,6 +600,11 @@ namespace detail {
           /// The new values have a number of constraints.
           bool update(data_term_sequence_type e, const constraint_map& e_constraints, DataRewriter datar)
           {
+            if (e.empty())
+            {
+              return false;
+            }
+            
             bool changed = false;
           
             typename data_term_sequence_type::iterator i;
@@ -685,13 +691,74 @@ namespace detail {
         }
       }
 
+      void LOG_VERTICES(size_t level, const std::string& msg)
+      {
+        if (check_log_level(level))
+        {
+          std::clog << msg;
+          print_vertices();
+        }
+      }
+      
+      void LOG_EDGES(size_t level, const std::string& msg)
+      {
+        if (check_log_level(level))
+        {
+          std::clog << msg;
+          print_edges();
+        }
+      }
+
+      void LOG_TODO_LIST(size_t level, const std::deque<propositional_variable_decl_type>& todo)
+      {
+        if (check_log_level(level))
+        {
+          std::clog << "\n<todo list> [";
+          for (std::deque<propositional_variable_decl_type>::const_iterator i = todo.begin(); i != todo.end(); ++i)
+          {
+            if (i != todo.begin())
+            {
+              std::clog << ", ";
+            }
+            std::clog << core::pp(i->name());
+          }
+          std::clog << "]" << std::endl;
+        }
+      }
+
+      void LOG_EDGE_UPDATE(size_t level, const edge& e, const vertex& u, const vertex& v)
+      {
+        if (check_log_level(level))
+        {
+          std::clog << "\n<updating edge>" << e.to_string() << std::endl;
+          std::clog << "  <source vertex       >" << u.to_string() << std::endl;
+          std::clog << "  <target vertex before>" << v.to_string() << std::endl;
+        }
+      }     
+
+      void LOG_CONDITION(size_t level, const edge& e, const vertex& u, const term_type& value)
+      {
+        if (check_log_level(level))
+        {
+          std::clog << "\nEvaluated condition " << core::pp(data::make_map_substitution_adapter(u.constraints())(e.condition())) << " to " << core::pp(value) << std::endl;
+        }
+      }
+
+      void LOG_EVALUATION_FAILURE(size_t level, const edge& e, const vertex& u)
+      {
+        if (check_log_level(level))
+        {
+          std::clog << "\nCould not evaluate condition " << core::pp(data::make_map_substitution_adapter(u.constraints())(e.condition())) << " to true or false";
+        }
+      }
+
     public:
 
       /// \brief Constructor.
       /// \param datar A data rewriter
       /// \param pbesr A PBES rewriter
-      pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
-        : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
+      pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr, size_t log_level = 0)
+        : core::algorithm(log_level), m_data_rewriter(datar), m_pbes_rewriter(pbesr)
       {}
 
       /// \brief Returns the parameters that have been removed by the constelm algorithm
@@ -792,20 +859,13 @@ namespace detail {
           visited.insert(u.variable());
         }
 
-        if (mcrl2::core::gsDebug)
-        {
-          std::cerr << "\n--- initial vertices ---" << std::endl;
-          print_vertices();
-          std::cerr << "\n--- edges ---" << std::endl;
-          print_edges();
-        }
+        LOG_VERTICES(2, "\n--- initial vertices ---\n");
+        LOG_EDGES(2, "\n--- edges ---\n");
 
         // propagate constraints over the edges until the todo list is empty
         while (!todo.empty())
         {
-#ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(), todo.end())) << std::endl;
-#endif
+          LOG_TODO_LIST(2, todo);
           propositional_variable_decl_type var = todo.front();
 
           // remove all occurrences of var from todo
@@ -819,21 +879,14 @@ std::cerr << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(
           {
             const edge& e = *ei;
             vertex& v = m_vertices[e.target().name()];
-#ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "\n<updating edge>" << e.to_string() << std::endl;
-std::cerr << "  <source vertex       >" << u.to_string() << std::endl;
-std::cerr << "  <target vertex before>" << v.to_string() << std::endl;
-#endif
+            LOG_EDGE_UPDATE(2, e, u, v);
 
             term_type value = m_pbes_rewriter(data::make_map_substitution_adapter(u.constraints())(e.condition()));
-#ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "\nEvaluated condition " << core::pp(data::make_map_substitution_adapter(u.constraints())(e.condition)) << " to " << core::pp(value) << std::endl;
-#endif
+            LOG_CONDITION(2, e, u, value);
+
             if (!tr::is_false(value) && !tr::is_true(value))
             {
-#ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "\nCould not evaluate condition " << core::pp(data::make_map_substitution_adapter(u.constraints())(e.condition)) << " to true or false";
-#endif
+              LOG_EVALUATION_FAILURE(2, e, u);
             }
             if (!tr::is_false(value))
             {
@@ -841,20 +894,14 @@ std::cerr << "\nCould not evaluate condition " << core::pp(data::make_map_substi
               if (changed)
               {
                 todo.push_back(v.variable());
-                visited.insert(v.variable());
               }
+              visited.insert(v.variable());
             }
-#ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
-#endif
+            LOG(2, "  <target vertex after >" + v.to_string() + "\n");
           }
         }
 
-        if (mcrl2::core::gsDebug)
-        {
-          std::cerr << "\n--- final vertices ---" << std::endl;
-          print_vertices();
-        }
+        LOG_VERTICES(2, "\n--- final vertices ---\n");
 
         // compute the redundant parameters and the redundant equations
         for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)

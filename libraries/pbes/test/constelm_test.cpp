@@ -180,6 +180,15 @@ std::string t14 =
 ;
 std::string x14 = "binding_variables = X(m: Nat)";
 
+std::string t15 =
+"pbes                 \n"
+"nu X0(n:Nat) = X1;   \n"
+"mu X1 = X0(0) || X1; \n"
+"                     \n"
+"init X0(0);          \n"
+;
+std::string x15 = "binding_variables = X0, X1";
+
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
@@ -194,7 +203,7 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+  pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, 2);
 
   // run the algorithm
   algorithm.run(q, compute_conditions, remove_equations);
@@ -235,6 +244,7 @@ int test_main(int argc, char** argv)
   test_pbes(t12, x12, false);
   test_pbes(t13, x13, false);
   test_pbes(t14, x14, false);
+  test_pbes(t15, x15, false);
 
   return 0;
 }
