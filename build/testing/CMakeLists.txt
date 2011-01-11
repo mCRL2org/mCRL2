@@ -16,6 +16,7 @@ cmake_minimum_required(VERSION 2.6)
 set(MRCL2_HEADERTESTS_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/
   ${CMAKE_SOURCE_DIR}/libraries/lps/include
+  ${CMAKE_SOURCE_DIR}/libraries/bes/include
   ${CMAKE_SOURCE_DIR}/libraries/pbes/include
   ${CMAKE_SOURCE_DIR}/libraries/data/include
   ${CMAKE_SOURCE_DIR}/libraries/core/include/ 
