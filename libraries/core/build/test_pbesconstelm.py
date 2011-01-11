@@ -9,14 +9,25 @@ from path import *
 from random_pbes_generator import *
 from mcrl2_tools import *
 
-def test_pfnf_rewriter(filename, equation_count, atom_count = 5, propvar_count = 3):
+def run_test(filename):
     txtfile = filename + '.txt'
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers = True)   
-    path(txtfile).write_text('%s' % p)
     pbesfile1 = filename + 'a.pbes'
     pbesfile2 = filename + 'b.pbes'
     run_program('txt2pbes', '%s %s' % (txtfile, pbesfile1))
-    run_program('pbesrewr', '-ppfnf %s %s' % (pbesfile, pbesfile2))
+    run_program('pbesconstelm', '%s %s' % (pbesfile1, pbesfile2))
+    answer1 = run_pbes2bool(pbesfile1)
+    answer2 = run_pbes2bool(pbesfile2)
+    print filename, answer1, answer2   
+    return answer1 == None or answer2 == None or answer1 == answer2
+
+def test_pbes_constelm(filename, equation_count, atom_count = 5, propvar_count = 3, use_quantifiers = True):
+    txtfile = filename + '.txt'
+    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
+    path(txtfile).write_text('%s' % p)
+    pbesfile1 = filename + 'a.pbes'
+    pbesfile2 = filename + 'b.pbes'
+    run_txt2pbes(txtfile, pbesfile1)
+    run_pbesconstelm(pbesfile1, pbesfile2)
     answer1 = run_pbes2bool(pbesfile1)
     answer2 = run_pbes2bool(pbesfile2)
     print filename, answer1, answer2   
@@ -28,5 +39,6 @@ def test_pfnf_rewriter(filename, equation_count, atom_count = 5, propvar_count =
 equation_count = 2
 atom_count = 2
 propvar_count = 2
+use_quantifiers = True
 for i in range(10000):
-    test_pfnf_rewriter('%02d' % i, equation_count, atom_count, propvar_count)
+    test_pbes_constelm('%02d' % i, equation_count, atom_count, propvar_count, use_quantifiers)

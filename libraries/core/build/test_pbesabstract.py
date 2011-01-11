@@ -9,24 +9,21 @@ from path import *
 from random_pbes_generator import *
 from mcrl2_tools import *
 
-def test_pfnf_rewriter(filename, equation_count, atom_count = 5, propvar_count = 3):
+def test_pbes_abstract(filename, abstraction_value, equation_count, atom_count = 5, propvar_count = 3):
     txtfile = filename + '.txt'
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers = True)   
     path(txtfile).write_text('%s' % p)
     pbesfile1 = filename + 'a.pbes'
     pbesfile2 = filename + 'b.pbes'
-    run_program('txt2pbes', '%s %s' % (txtfile, pbesfile1))
-    run_program('pbesrewr', '-ppfnf %s %s' % (pbesfile, pbesfile2))
+    run_txt2pbes(txtfile, pbesfile1)
+    run_pbesabstract(pbesfile1, pbesfile2, abstraction_value)
     answer1 = run_pbes2bool(pbesfile1)
     answer2 = run_pbes2bool(pbesfile2)
-    print filename, answer1, answer2   
+    print filename, abstraction_value, answer1, answer2
     if answer1 == None or answer2 == None:
       return
-    if answer1 != answer2:
+    if abstraction_value != answer2 and answer1 == answer2:
       raise Exception('Test %s.txt failed' % filename)
-
-equation_count = 2
-atom_count = 2
-propvar_count = 2
+   
 for i in range(10000):
-    test_pfnf_rewriter('%02d' % i, equation_count, atom_count, propvar_count)
+    test_pbes_abstract('%02d' % i, i % 2, 4, 3, 2)
