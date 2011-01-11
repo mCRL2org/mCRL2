@@ -13,21 +13,6 @@
 #define MCRL2_DATA_TRANSLATE_USER_NOTATION_H
 
 #include <functional>
-
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/where_clause.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/bag.h"
-#include "mcrl2/data/lambda.h"
-#include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/application.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/builder.h"
 
 namespace mcrl2 {
@@ -141,6 +126,15 @@ namespace detail {
     T result = core::make_update_apply_builder<data::data_expression_builder>(detail::translate_user_notation_function())(x);
     return result;
   }
+
+namespace detail {
+  // added to avoid circular header problems in data_specification.h
+  inline
+  data_equation translate_user_notation_data_equation(const data_equation& x)
+  {
+    return translate_user_notation(x);
+  }
+} // namespace detail
 
 } // namespace data
 

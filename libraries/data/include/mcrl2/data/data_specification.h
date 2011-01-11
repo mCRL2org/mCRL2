@@ -60,6 +60,10 @@ namespace mcrl2 {
 
   namespace data {
 
+    namespace detail {
+      data_equation translate_user_notation_data_equation(const data_equation& x);
+    }
+
     // prototype
     class data_specification;
 
@@ -922,7 +926,7 @@ namespace mcrl2 {
       void add_equation(const data_equation& e)
       { 
         assert(m_data_specification_is_type_checked);
-        m_equations.insert(data::translate_user_notation(e));
+        m_equations.insert(detail::translate_user_notation_data_equation(e));
         data_is_not_necessarily_normalised_anymore();
       }
 
@@ -1495,7 +1499,7 @@ namespace mcrl2 {
       void remove_equation(const data_equation& e)
       { 
         assert(m_data_specification_is_type_checked);
-        const data_equation e1=data::translate_user_notation(e);
+        const data_equation e1=data::detail::translate_user_notation_data_equation(e);
         m_equations.erase(e1);
         m_normalised_equations.erase(normalise_sorts(e1));
       }
@@ -1666,6 +1670,10 @@ namespace mcrl2 {
 
 #ifndef MCRL2_DATA_FIND_H
 #include "mcrl2/data/find.h"
+#endif
+
+#ifndef MCRL2_DATA_TRANSLATE_USER_NOTATION_H
+#include "mcrl2/data/translate_user_notation.h"
 #endif
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H

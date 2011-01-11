@@ -12,7 +12,7 @@
 #ifndef MCRL2_BES_BUILDER_H
 #define MCRL2_BES_BUILDER_H
 
-#include "mcrl2/bes/boolean_expression.h"
+#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/core/builder.h"
 
 namespace mcrl2 {

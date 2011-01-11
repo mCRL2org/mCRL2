@@ -13,12 +13,27 @@
 #define MCRL2_DATA_BUILDER_H
 
 #include "mcrl2/core/builder.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/multiple_possible_sorts.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/identifier.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/where_clause.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/abstraction.h"
+#include "mcrl2/data/application.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/data_equation.h"
+
 
 namespace mcrl2 {
 
