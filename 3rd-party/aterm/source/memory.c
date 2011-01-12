@@ -29,8 +29,13 @@
  * is constructed. This can be used to find subtle garbage collection problems.
  * Note that this is very time consuming... The first line below expresses that
  * no agressive checking is done, which is the default. */
-#define AGGRESSIVE_GARBAGE_COLLECT_CHECK
-/* #define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect() */
+/* #define DO_AGGRESSIVE_GARBAGE_COLLECT */
+
+#ifdef DO_AGGRESSIVE_GARBAGE_COLLECT
+#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect() 
+#else
+#define AGGRESSIVE_GARBAGE_COLLECT_CHECK 
+#endif
 
 
 #define HN(i)          ((HashNumber)(i))
@@ -77,7 +82,7 @@ extern void AT_initMemmgnt();
 
 ATermList ATempty;
 
-/*{{{  static int term_size(ATerm t) */
+/*{{{  static size_t term_size(ATerm t) */
 
 /**
  * Calculate the size (in words) of a term.
@@ -104,7 +109,7 @@ static size_t term_size(ATerm t)
 
 /*}}}  */
 
-/*{{{  static HashNumber hash_number(ATerm t, int size) */
+/*{{{  static HashNumber hash_number(ATerm t, size_t size) */
 
 static HashNumber hash_number(ATerm t, size_t size)
 {
@@ -231,7 +236,7 @@ void resize_hashtable()
 
 void AT_initMemory(unsigned int argc, char *argv[])
 {
-  unsigned int i;
+  size_t i;
   HashNumber hnr;
 
   /* Suppress unused variable warning */
@@ -303,7 +308,7 @@ header_type *max_heap_address = 0;
 
 static void allocate_block(size_t size) 
 {
-  int idx;
+  size_t idx;
   Block *newblock;
   int init = 0;
   TermInfo* ti;
@@ -1407,12 +1412,12 @@ ATbool AT_isValidTerm(ATerm term)
   Block *cur;
   header_type header;
   ATbool inblock = ATfalse;
-  int idx = ADDR_TO_BLOCK_IDX(term);
+  size_t idx = ADDR_TO_BLOCK_IDX(term);
   int type;
   ptrdiff_t offset = 0;
 
   assert(block_table[idx].first_after == block_table[(idx+1)%BLOCK_TABLE_SIZE].first_before);
-  
+
   for(cur=block_table[idx].first_after; cur; cur=cur->next_after) 
   {
     if(cur->size) {
@@ -1472,7 +1477,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
   Block *cur;
   TermInfo* ti;
   ATbool inblock = ATfalse;
-  int idx = ADDR_TO_BLOCK_IDX(term);
+  size_t idx = ADDR_TO_BLOCK_IDX(term);
   int type;
   
   assert(block_table[idx].first_after == block_table[(idx+1)%BLOCK_TABLE_SIZE].first_before);
@@ -1536,22 +1541,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
 
 /*}}}  */
 
-/*{{{  void AT_validateFreeList(size_t size) */
-
-/* void AT_validateFreeList(size_t size)
-{
-  ATerm cur1, cur2;
-
-  for(cur1=terminfo[size].at_freelist; cur1; cur1=cur1->aterm.next) {
-    for(cur2=cur1->aterm.next; cur2; cur2=cur2->aterm.next)
-      assert(cur1 != cur2);
-    assert(ATgetType(cur1) == AT_FREE);
-  }
-
-} */
-
-/*}}}  */
-/*{{{  int AT_inAnyFreeList(ATerm t) */
+/*{{{  size_t AT_inAnyFreeList(ATerm t) */
 
 /**
  * Check if a term is in any free list.
@@ -1575,91 +1565,4 @@ size_t AT_inAnyFreeList(ATerm t)
 
 /*}}}  */
 
-/*{{{  void AT_printAllTerms(FILE *file) */
-
-/* void AT_printAllTerms(FILE *file)
-{
-  size_t i;
-
-  for(i=0; i<table_size; i++) {
-    ATerm cur = hashtable[i];
-    while(cur) {
-      ATfprintf(file, "%t\n", cur);
-      
-      cur = cur->aterm.next;
-    }
-  }
-} */
-
-/*}}}  */
-/*{{{  void AT_printAllAFunCounts(FILE *file) */
-
-/* static int compare_afuns(const void *l, const void *r)
-{
-  AFun left, right;
-  size_t left_count, right_count;
-
-  left = *((AFun *)l);
-  right = *((AFun *)r);
-
-  if(left == (AFun)(-1))
-    return 1;
-  if(right == (AFun)(-1))
-    return -1;
-
-  left_count = at_lookup_table[left]->count;
-  right_count = at_lookup_table[right]->count;
-
-  if(left_count < right_count)
-    return 1;
-
-  if(left_count > right_count)
-    return -1;
-
-  return 0;
-} */
-
-/* void AT_printAllAFunCounts(FILE *file)
-{
-  size_t i, nr_syms;
-  AFun *afuns;
-
-  nr_syms = AT_symbolTableSize();
-
-  for(i=0; i<nr_syms; i++) {
-    if(!SYM_IS_FREE(at_lookup_table[i]))
-      at_lookup_table[i]->count = 0;
-  }
-
-  for(i=0; i<table_size; i++) {
-    ATerm cur = hashtable[i];
-    while(cur) {
-      if(ATgetType(cur) == AT_APPL) {
-        ATermAppl appl = (ATermAppl)cur;
-        AFun fun = ATgetAFun(appl);
-        at_lookup_table[fun]->count++;
-      }
-      cur = cur->aterm.next;
-    }
-  }
-
-  afuns = (AFun *)AT_calloc(nr_syms, sizeof(AFun));
-  assert(afuns);
-
-  for(i=0; i<nr_syms; i++) {
-    if(SYM_IS_FREE(at_lookup_table[i]))
-      afuns[i] = -1;
-    else
-      afuns[i] = i;
-  }
-
-  qsort(afuns, nr_syms, sizeof(AFun), compare_afuns);
-
-  for(i=0; i<nr_syms; i++) {
-    if(afuns[i] != (AFun)(-1))
-      ATfprintf(file, "%y: %d\n", afuns[i], at_lookup_table[afuns[i]]->count);
-  }
-} */
-
-/*}}}  */
 
