@@ -32,6 +32,7 @@ using namespace IDS;
 BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_PAINT(GLCanvas::onPaint)
   EVT_SIZE(GLCanvas::onSize)
+  EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
 
   EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
   EVT_KILL_FOCUS(GLCanvas::onMouseLeave)
@@ -45,21 +46,18 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_MOUSEWHEEL(GLCanvas::onMouseWhl)
   EVT_LEFT_DCLICK(GLCanvas::onMouseDblClck)
 
+
+
+
 END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
                    const wxSize &size, int* attribList)
-/* Deviation required to eliminate flickering of states */
-#if wxCHECK_VERSION(2, 9, 0)
-	: wxGLCanvas(parent, wxID_ANY, NULL /* attribs */,
-             wxDefaultPosition, wxDefaultSize,
-             wxFULL_REPAINT_ON_RESIZE | wxSUNKEN_BORDER)
-# else
-	: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, size, wxSUNKEN_BORDER  | wxFULL_REPAINT_ON_RESIZE,
+  : wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, size, wxSUNKEN_BORDER,
                wxEmptyString, attribList)
-#endif
 {
   owner = app;
+  displayAllowed = false;
   dispSystem = false;
   currentTool = myID_ZOOM;
   usingTool = false;
@@ -80,28 +78,51 @@ GLCanvas::~GLCanvas()
 {
 }
 
+void GLCanvas::initialize()
+{
+  SetCurrent();
+  glLoadIdentity();
+  displayAllowed = true;
+	/* Following line really needed?*/
+  //visualizer->initFontRenderer();
+}
+
 void GLCanvas::setVisualizer(Visualizer *vis)
 {
   visualizer = vis;
 }
 
-void GLCanvas::render2D()
+void GLCanvas::display()
 {
+  if (GetContext())
+  {
+    int width, height;
 
-    // Reset User perspective
-	glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+    GetClientSize( &width, &height);
+    // This is current context
+    SetCurrent();
 
-    double wwidth, wheight, wdepth;
+    // Cast to GLdouble for smooth transitions
+    GLdouble aspect = (GLdouble)width / (GLdouble)height;
+
+  double wwidth, wheight, wdepth;
+
     getSize(wwidth, wheight, wdepth);
 
-    int width, height;
-    GetClientSize( &width, &height);
-    // Cast to GLdouble for smooth transitions
-    GLdouble aspect = (GLdouble)getAspectRatio();
+    // Set up viewing volume
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
 
-    glViewport(0, 0, width, height);
-    //  Define the 2D orthographic projection matrix
+  if(drawIn3D)
+  {
+    double rad = visualizer->getRadius() * getPixelSize() ;
+
+    maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
+
+    gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
+  }
+  else
+  {
     if (aspect > 1)
     {
       // width > height
@@ -112,119 +133,140 @@ void GLCanvas::render2D()
       // height >= width
       gluOrtho2D(-1.0, 1.0, (1/aspect)*(-1), (1/aspect));
     }
+  }
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glViewport(0, 0, width, height);
+  if(drawIn3D)
+  {
+    if(calcRot)
+    {
+      double dumtrx[16];
+      double rotAngle = sqrt(rotX * rotX + rotY * rotY);
 
-    // Draw
+      Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
+      double dumtrx2[16];
+      Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
+      for ( int i = 0; i < 12; i++)
+        currentModelviewMatrix[i] = dumtrx2[i];
+      calcRot = false;
+      normalizeMatrix();
+      rotX = 0;
+      rotY = 0;
+    }
+    currentModelviewMatrix[12] = -lookX;
+    currentModelviewMatrix[13] = -lookY;
+    currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
+    currentModelviewMatrix[15] = 1;
+    double xl, yl, zl;
+    xl = 0;
+    yl = 0;
+    zl = lookZ + 100;
+    GLfloat LightAmbient[]=   { 0.2f, 0.2f, 0.2f, 0.2f };
+    GLfloat LightDiffuse[]=   { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat LightPosition[]=  { xl, yl, zl, 0.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient); 
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse); 
+    glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
+    
+    glColorMaterial(GL_FRONT,GL_AMBIENT);
+    glEnable(GL_COLOR_MATERIAL);
+
+    glLoadMatrixd(currentModelviewMatrix);
+    glFinish();
+    double pS = getPixelSize();
+
     if (visualizer)
     {
-      visualizer->visualize(wwidth, wheight, getPixelSize(), false, false);
+      // Draw
+      visualizer->visualize(wwidth, wheight, pS, false, true);
     }
-}
 
-
-void GLCanvas::render3D()
-{
-
-    // Set up viewing volume
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    double wwidth, wheight, wdepth;
-    getSize(wwidth, wheight, wdepth);
-
-    int width, height;
-    GetClientSize( &width, &height);
-	glViewport(0, 0, width, height);
-
-    // Cast to GLdouble for smooth transitions
-    GLdouble aspect = (GLdouble)getAspectRatio();
-
-	double rad = visualizer->getRadius() * getPixelSize() ;
-	maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
-	gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	if(calcRot)
-	{
-	  double dumtrx[16];
-	  double rotAngle = sqrt(rotX * rotX + rotY * rotY);
-
-	  Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
-	  double dumtrx2[16];
-	  Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
-	  for ( int i = 0; i < 12; i++)
-		currentModelviewMatrix[i] = dumtrx2[i];
-	  calcRot = false;
-	  normalizeMatrix();
-	  rotX = 0;
-	  rotY = 0;
-	}
-	currentModelviewMatrix[12] = -lookX;
-	currentModelviewMatrix[13] = -lookY;
-	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
-	currentModelviewMatrix[15] = 1;
-	glLoadMatrixd(currentModelviewMatrix);
-
-	if (visualizer)
-	{
-	  // Draw
-	  visualizer->visualize(wwidth, wheight, getPixelSize(), false, true);\
-
-	  // Draw coordinate system (if enabled)
-	  if(dispSystem){
-	    glViewport(0, 0, std::max(height, width) / 6, std::max(height, width) / 6);
-	    visualizer->drawCoorSystem();
-	  }
-	}
-};
-
-void GLCanvas::display()
-{
-
-  wxPaintDC dc(this);
-  getGLContext( this );
-
-  visualizer->initFontRenderer();
-
-  if(!drawIn3D){
-	  glContext->set2DContext();
-	  render2D();
-  } else {
-	  glContext->set3DContext();
-	  render3D();
+    if (visualizer && dispSystem)
+    {
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadIdentity();
+      gluPerspective(45.0f, 1, 0.1f, 10.0f);
+      glMatrixMode( GL_MODELVIEW);
+      glPushMatrix();
+      glLoadIdentity();
+      glViewport(0, 0, std::max(height, width) / 6, std::max(height, width) / 6);
+      visualizer->drawCoorSystem();
+      glPopMatrix();
+      glViewport(0, 0, width, height);
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
+    }
   }
-
-  /* Ensure all GL commands are processed */
-  glFinish();
-
-  /* Display if any errors have occurred */
-  GLenum error = glGetError();
-  if (error != GL_NO_ERROR)
+  else
   {
-    std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
+    double pS = getPixelSize();
+
+    if (visualizer)
+    {
+      // Draw
+      visualizer->visualize(wwidth, wheight, pS, false, false);
+    }
   }
 
-  /* Swap render buffer */
-  SwapBuffers();
+    glFinish();
 
-  return;
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR)
+    {
+      std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
+    }
+  }
 }
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/)
 {
-	recalcPixelSize();
-	recalcAspectRatio();
-	display();
+  wxPaintDC dc(this);
+  if(drawIn3D)
+  {
+    glShadeModel(GL_SMOOTH);
+    glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+    glClearDepth(1.0);                  
+    glDepthFunc(GL_LESS);               
+    glEnable(GL_DEPTH_TEST);    
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  
+  }
+  else
+  {
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glDisable(GL_DEPTH_TEST);
+  }
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  display();
+  SwapBuffers();
 }
 
-void GLCanvas::onSize(wxSizeEvent& )
+void GLCanvas::onSize(wxSizeEvent& /*event*/)
 {
-	if( glContext ){
-      wxPaintEvent ev = wxPaintEvent();
-      GetEventHandler()->ProcessEvent( ev );
-	}
+  reshape();
 }
+
+void GLCanvas::reshape()
+{
+  if(GetContext())
+  {
+    int width, height;
+    SetCurrent();
+
+    GetClientSize(&width, &height);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glViewport(0,0, width, height);
+  }
+}
+
+void GLCanvas::onEraseBackground(wxEraseEvent& /*event*/)
+{
+}
+
 
 void GLCanvas::getSize(
   double &width,
@@ -252,32 +294,41 @@ void GLCanvas::getSize(
  *     world height     = ( aspect*2 ) / scaleFactor
  * Depth is just added for ease of use in 3D spaces.
  */
+
 {
-  if (getAspectRatio() > 1)
+  int widthViewPort;
+  int heightViewPort;
+  double aspect;
+
+  // get pixel (device) sizes
+  GetClientSize(
+    &widthViewPort,
+    &heightViewPort);
+  aspect = (double) widthViewPort /  (double) heightViewPort;
+
+  if (aspect > 1)
   {
     // width > height, so starting height was 2
-    width = (getAspectRatio() * 2.0) / (double) scaleFactor;
+    width = (aspect * 2.0) / (double) scaleFactor;
     height = 2.0 / (double) scaleFactor;
   }
   else
   {
     // height >= width, so starting width was 2
     width = 2.0 / (double) scaleFactor;
-    height = ((1/getAspectRatio()) * 2.0) / (double) scaleFactor;
+    height = ((1/aspect) * 2.0) / (double) scaleFactor;
   }
   depth = (width + height) / 2;
 }
 
-void GLCanvas::recalcPixelSize()
+double GLCanvas::getPixelSize()
 // TODO: Comment
 {
   double result = 0.0;
 
   int widthPixels;
   int heightPixels;
-
-  /* Get size of current canvas*/
-  this->GetSize(
+  GetClientSize(
     &widthPixels,
     &heightPixels);
 
@@ -288,13 +339,7 @@ void GLCanvas::recalcPixelSize()
   getSize(widthWorld, heightWorld, depthWorld);
 
   result = widthWorld * (1 / static_cast<double>(widthPixels));
-
-  pixelSize = result;
-}
-
-double GLCanvas::getPixelSize()
-{
-	return pixelSize;
+  return result;
 }
 
 void GLCanvas::onMouseEnter(wxMouseEvent& /* event */)
@@ -326,6 +371,7 @@ void GLCanvas::onMouseLftDown(wxMouseEvent& event)
     pickObjects(oldX, oldY, event);
     owner->dragObject();
   }
+  display();
 }
 
 void GLCanvas::onMouseLftUp(wxMouseEvent& /* evt */)
@@ -333,6 +379,7 @@ void GLCanvas::onMouseLftUp(wxMouseEvent& /* evt */)
   usingTool = false;
   setMouseCursor(myID_NONE);
   owner->stopDrag();
+  display();
 }
 
 void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
@@ -355,6 +402,8 @@ void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
     pickObjects(oldX, oldY, event);
     owner->lockObject();
   }
+
+  display();
 }
 
 void GLCanvas::onMouseRgtUp(wxMouseEvent& /*evt */)
@@ -371,9 +420,8 @@ void GLCanvas::onMouseWhl(wxMouseEvent& event)
   if(drawIn3D)
   {
     lookZ -= double(event.GetWheelRotation())/(2400.0f);
+    display();
   }
-  wxPaintEvent evt = wxPaintEvent();
-  this->GetEventHandler()->ProcessEvent(evt);
 }
 void GLCanvas::onMouseMidDown(wxMouseEvent& event)
 {
@@ -381,6 +429,7 @@ void GLCanvas::onMouseMidDown(wxMouseEvent& event)
   {
     oldX = event.GetX();
     oldY = event.GetY();
+    display();
   }
 }
 void GLCanvas::onMouseMidUp(wxMouseEvent& /*evt */)
@@ -388,6 +437,7 @@ void GLCanvas::onMouseMidUp(wxMouseEvent& /*evt */)
   if(drawIn3D)
   {
     setMouseCursor(myID_NONE);
+    display();
   }
 }
 
@@ -445,9 +495,10 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
     if ((y < newY) && (newY < y + height)) {
       oldY = newY;
     }
-
-    wxPaintEvent ev = wxPaintEvent();
-    GetEventHandler()->ProcessEvent( ev );
+    display();
+    }
+    else {
+    event.Skip();
     }
   }
   else
@@ -473,10 +524,9 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
       }
 
       owner->moveObject(diffX, diffY);
-
-      wxPaintEvent ev = wxPaintEvent();
-      this->GetEventHandler()->ProcessEvent( ev );
-
+      display();
+    } else {
+      event.Skip();
     }
   }
 }
@@ -486,7 +536,8 @@ bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
 {
   owner->deselect();
 
-  if(glContext)
+
+  if(GetContext())
   {
     GLuint selectBuf[512];
     GLint  hits = 0;
@@ -515,9 +566,9 @@ bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
     // Get current size of canvas
     int width,height,depth;
     GetClientSize(&width,&height);
-    depth = (width + height) / 2;
+  depth = (width + height) / 2;
 
-    GLdouble aspect = (GLdouble)getAspectRatio();
+    GLdouble aspect = (GLdouble)width / (GLdouble)height;
 
     double wwidth, wheight, wdepth;
     getSize(wwidth, wheight, wdepth);
@@ -530,7 +581,8 @@ bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
 
     glMatrixMode( GL_MODELVIEW);
 
-    visualizer->visualize(wwidth, wheight, getPixelSize(), true, true);
+    double pS = getPixelSize();
+    visualizer->visualize(wwidth, wheight, pS, true, true);
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -539,6 +591,8 @@ bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
     hits = glRenderMode(GL_RENDER);
 
     processHits(hits, selectBuf, e);
+    reshape();
+    display();
   return hits > 0;
   }
   return false;
@@ -548,7 +602,8 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 {
   owner->deselect();
 
-  if(glContext)
+
+  if(GetContext())
   {
     GLuint selectBuf[512];
     GLint  hits = 0;
@@ -595,8 +650,9 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
     glMatrixMode( GL_MODELVIEW);
     double wwidth, wheight, wdepth;
     getSize(wwidth, wheight, wdepth);
+    double pS = getPixelSize();
 
-    visualizer->visualize(wwidth, wheight, getPixelSize(), true, false);
+    visualizer->visualize(wwidth, wheight, pS, true, false);
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -605,6 +661,8 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
     hits = glRenderMode(GL_RENDER);
 
     processHits(hits, selectBuf, e);
+    reshape();
+    display();
   }
 }
 
@@ -687,20 +745,14 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, wxMouseEvent const&
   buffer = NULL;
 }
 
-void GLCanvas::recalcAspectRatio()
+
+double GLCanvas::getAspectRatio() const 
 {
   int width, height;
 
   GetClientSize(&width, &height);
 
-  aspectRatio = static_cast<double>(width) / static_cast<double>(height);
-}
-
-
-
-double GLCanvas::getAspectRatio()
-{
-  return aspectRatio;
+  return static_cast<double>(width) / static_cast<double>(height);
 }
 
 double GLCanvas::getMaxDepth() const
@@ -833,21 +885,11 @@ void GLCanvas::setMouseCursor(int theTool)
 void GLCanvas::changeDrawMode()
 {
   drawIn3D = !drawIn3D;
+  initialize();
+  display();
 }
 
 bool GLCanvas::get3D()
 {
   return drawIn3D;
-}
-
-GLContext* GLCanvas::getGLContext( wxGLCanvas *canvas )
-{
-  /* Context is created upon first paint
-   * This ensures that a drawing GLcanvas is declared, instantiated and shown.
-   *  */
-  if (glContext == NULL){
-    glContext = new GLContext( canvas );
-  }
-
-  return glContext;
 }

@@ -24,7 +24,6 @@ set(MACOSX_BUNDLE_ICON_FILE ltsgraph.icns )
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   visualizer.cpp
   glcanvas.cpp
-  glcontext.cpp
   ltsgraph.cpp
   ltsimporter.cpp
   state.cpp

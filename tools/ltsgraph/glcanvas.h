@@ -13,7 +13,6 @@
 #define GLCANVAS_H
 
 #include <wx/glcanvas.h>
-#include "glcontext.h"
 
 #ifndef LTSGRAPH3D_H
   #include "ltsgraph.h"
@@ -39,10 +38,13 @@ class GLCanvas : public wxGLCanvas
     ~GLCanvas();
 
     void display();
+    void initialize();
     void setVisualizer(Visualizer *vis);
 
     void onPaint(wxPaintEvent& event);
     void onSize(wxSizeEvent& event);
+    void onEraseBackground(wxEraseEvent& event);
+    void reshape();
 
     // Mouse event handlers
     void onMouseEnter(wxMouseEvent& event);
@@ -64,16 +66,12 @@ class GLCanvas : public wxGLCanvas
 	void setMode(int tool);
 	void changeDrawMode();
 	void showSystem();
-	void recalcPixelSize();
-	void recalcAspectRatio();
 	double getPixelSize();
-    double getAspectRatio();
+    double getAspectRatio() const;
 	double getMaxDepth() const;
 	void getMdlvwMtrx(double * mtrx);
 	void getCamPos(double & x, double & y, double & z);
 	bool get3D();
-	void render2D();
-	void render3D();
 
   private:
     LTSGraph* owner;
@@ -89,18 +87,12 @@ class GLCanvas : public wxGLCanvas
 	int currentTool;
 	bool calcRot;
 	bool drawIn3D;
-	double pixelSize;
-	double aspectRatio;
 
 	void normalizeMatrix();
     bool pickObjects3d(int x, int y, wxMouseEvent const&);
 	void pickObjects(int x, int y, wxMouseEvent const&);
     void processHits(const GLint hits, GLuint * buffer, wxMouseEvent const&);
 	void setMouseCursor(int theTool);
-
-	GLContext* getGLContext( wxGLCanvas *canvas );
-	GLContext* glContext;
-
 
   DECLARE_EVENT_TABLE()
 };

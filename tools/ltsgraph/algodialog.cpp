@@ -126,12 +126,6 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
   Layout();
 }
 
-AlgoDialog::~AlgoDialog(){
-#if wxCHECK_VERSION(2, 9, 0)
-    this -> PopEventHandler(true);
-#endif
-}
-
 void AlgoDialog::onRadius(wxSpinEvent& evt)
 {
   app->setRadius(evt.GetPosition());

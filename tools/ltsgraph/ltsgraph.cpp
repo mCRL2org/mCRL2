@@ -48,15 +48,15 @@ bool LTSGraph::run()
 	glCanvas = mainFrame->getGLCanvas();
 	glCanvas->setVisualizer(visualizer);
 
-	SetTopWindow(mainFrame);
-	mainFrame->Show();
-	mainFrame->Layout();
-
 	// Load a provided file.
 	if (!m_input_filename.empty()) {
 		openFile(m_input_filename);
 	}
 
+	SetTopWindow(mainFrame);
+	mainFrame->Show();
+	glCanvas->initialize();
+	mainFrame->Layout();
 
 	return true;
 }
@@ -113,7 +113,7 @@ void LTSGraph::openFile(std::string const &path)
 
 		// Call the display routines. This is necessary to make sure the graph is
 		// rendered on the Mac
-		//display();
+		display();
 	} catch (const std::exception& e) {
 		//wxE e.what() << std::endl;
 		   wxMessageDialog *dial = new wxMessageDialog(NULL,
@@ -136,24 +136,24 @@ LayoutAlgorithm* LTSGraph::getAlgorithm(size_t i) const {
 	return algorithms[i];
 }
 
-//void LTSGraph::display() {
-//	if (glCanvas) {
-//		// Create display event
-//		wxPaintEvent evt;
-//
-//		wxEvtHandler* eh = glCanvas->GetEventHandler();
-//
-//		if (eh) {
-//			eh->ProcessEvent(evt);
-//		}
-//	}
-//}
+void LTSGraph::display() {
+	if (glCanvas) {
+		// Create display event
+		wxPaintEvent evt;
+
+		wxEvtHandler* eh = glCanvas->GetEventHandler();
+
+		if (eh) {
+			eh->ProcessEvent(evt);
+		}
+	}
+}
 
 void LTSGraph::toggleVectorSelected() {
 	if (selectedState != NULL) {
 		selectedState->setShowStateVector(!selectedState->getShowStateVector());
 	}
-//	display();
+	display();
 }
 
 void LTSGraph::moveObject(double invect[4]) {
@@ -296,7 +296,7 @@ void LTSGraph::deselect() {
 	selectedState = NULL;
 	selectedTransition = NULL;
 	selectedLabel = NULL;
-	//display();
+	display();
 }
 
 void LTSGraph::uncolourState(size_t selectedObject) {
@@ -335,7 +335,7 @@ void LTSGraph::selectSelfLabel(size_t state, size_t transition) {
 
 void LTSGraph::setRadius(int radius) {
 	visualizer->setRadius(radius);
-	//display();
+	display();
 }
 
 int LTSGraph::getRadius() const {
@@ -344,17 +344,17 @@ int LTSGraph::getRadius() const {
 
 void LTSGraph::setTransLabels(bool value) {
 	visualizer->setTransLabels(value);
-	//display();
+	display();
 }
 
 void LTSGraph::setStateLabels(bool value) {
 	visualizer->setStateLabels(value);
-	//display();
+	display();
 }
 
 void LTSGraph::setCurves(bool value) {
 	visualizer->setCurves(value);
-	//display();
+	display();
 }
 
 std::string LTSGraph::getFileName() const {
@@ -385,11 +385,6 @@ bool LTSGraph::get3dMode() {
 	return glCanvas->get3D();
 }
 
-MainFrame* LTSGraph::getMainFrame(){
-	return mainFrame;
-}
-
-
 void LTSGraph::forceWalls() {
 	if (graph) {
 		for (size_t i = 0; i < graph->getNumberOfStates(); ++i) {
@@ -416,6 +411,6 @@ void LTSGraph::forceWalls() {
 			s->setX(newX);
 			s->setY(newY);
 		}
-		//glCanvas->display();
+		glCanvas->display();
 	}
 }

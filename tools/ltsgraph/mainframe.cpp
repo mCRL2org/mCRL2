@@ -77,11 +77,7 @@ MainFrame::MainFrame(LTSGraph* owner)
 }
 
 MainFrame::~MainFrame()
-{
-#if wxCHECK_VERSION(2, 9, 0)
-	  this->PopEventHandler(true);
-#endif
-}
+{}
 
 void MainFrame::setupMenuBar()
 {
@@ -176,9 +172,6 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 
     app->getAlgorithm(0)->stop();
     app->openFile(stPath);
-    wxPaintEvent ev = wxPaintEvent();
-    glCanvas->GetEventHandler()->ProcessEvent( ev );
-
   }
 }
 void MainFrame::onSelect(wxCommandEvent& /*event*/) {
@@ -202,10 +195,6 @@ void MainFrame::onImport(wxCommandEvent& /*event*/)
 
     app->getAlgorithm(0)->stop();
     app->openFile(stPath);
-
-    wxPaintEvent ev = wxPaintEvent();
-    glCanvas->GetEventHandler()->ProcessEvent( ev );
-
   }
 }
 
@@ -355,37 +344,31 @@ void MainFrame::setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl)
 void MainFrame::onResetAll(wxCommandEvent& /*evt*/)
 {
 	glCanvas->ResetAll();
-    wxPaintEvent ev = wxPaintEvent();
-    glCanvas->GetEventHandler()->ProcessEvent( ev );
-
+	glCanvas->display();
 }
 
 void MainFrame::onResetRot(wxCommandEvent& /*evt*/)
 {
 	glCanvas->ResetRot();
-    wxPaintEvent ev = wxPaintEvent();
-    glCanvas->GetEventHandler()->ProcessEvent( ev );
+	glCanvas->display();
 }
 
 void MainFrame::onResetPan(wxCommandEvent& /*evt*/)
 {
 	glCanvas->ResetPan();
-    wxPaintEvent ev = wxPaintEvent();
-    glCanvas->GetEventHandler()->ProcessEvent( ev );
+	glCanvas->display();
 }
 
 void MainFrame::onMode(wxCommandEvent& event)
 {
 	glCanvas->setMode(event.GetId());
-    wxPaintEvent ev = wxPaintEvent();
-    glCanvas->GetEventHandler()->ProcessEvent( ev );
+	glCanvas->display();
 }
 
 void MainFrame::onShowSystem(wxCommandEvent& /*evt*/)
 {
 	glCanvas->showSystem();
-    wxPaintEvent ev = wxPaintEvent();
-    glCanvas->GetEventHandler()->ProcessEvent( ev );
+	glCanvas->display();
 }
 
 void MainFrame::onToggle3D(wxCommandEvent& /*evt*/)
@@ -393,7 +376,5 @@ void MainFrame::onToggle3D(wxCommandEvent& /*evt*/)
 	if(glCanvas->get3D())
 	app->forceWalls();
 	glCanvas->changeDrawMode();
-    wxPaintEvent ev = wxPaintEvent();
-    glCanvas->GetEventHandler()->ProcessEvent( ev );
-
+	glCanvas->display();
 }

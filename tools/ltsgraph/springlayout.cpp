@@ -410,8 +410,7 @@ void SpringLayout::start()
 
       if(app)
       {
-    	    wxPaintEvent ev = wxPaintEvent();
-    	    app->getMainFrame()->getGLCanvas()->GetEventHandler()->ProcessEvent( ev );
+        app->display();
       }
 
       wxYield();
