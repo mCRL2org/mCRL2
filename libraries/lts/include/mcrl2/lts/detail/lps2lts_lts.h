@@ -45,6 +45,7 @@ namespace mcrl2
 
       public:
         lps2lts_lts():
+          initial_state(0),
           svc(&svcf),
           svcparam(0)
           // generic_lts(NULL)

@@ -698,10 +698,10 @@ namespace mcrl2
     bool lps2lts_algorithm::generate_lts()
     {
       state_t state = get_repr(nstate->getInitialState());
-      lts.save_initial_state(initial_state,state);
 
       bool new_state;
       initial_state = add_state(state,new_state);
+      lts.save_initial_state(initial_state,state);
       current_state = 0;
       ++num_states;
 
