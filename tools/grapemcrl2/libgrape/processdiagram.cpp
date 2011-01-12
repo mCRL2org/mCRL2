@@ -146,7 +146,7 @@ bool process_diagram::exists_state( const wxString &p_name, size_t p_index )
   for ( size_t j = 0; j < count; ++j )
   {
     state* state_ptr = & ( m_states.Item( j ) );
-    wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
+    wxString concat_name = p_name + wxString::Format( _T( "%lu" ), p_index );
     if ( state_ptr->get_name() == concat_name )
     {
       return true;

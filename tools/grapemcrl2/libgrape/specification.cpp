@@ -141,7 +141,7 @@ process_diagram* grape_specification::add_process_diagram( unsigned int p_id, co
 
   // if no diagram with that name exists yet
   process_diagram* new_proc = new process_diagram;
-  new_proc->set_name( p_name + wxString::Format( _T( "%d" ), index ) );
+  new_proc->set_name( p_name + wxString::Format( _T( "%lu" ), index ) );
   new_proc->set_id( p_id );
   m_process_diagrams.Add( new_proc );
   return new_proc;
@@ -214,7 +214,7 @@ bool grape_specification::exists_architecture_diagram( const wxString &p_name, s
   for ( size_t j = 0; j < count; ++j )
   {
     architecture_diagram* arch_dia = &( m_architecture_diagrams.Item( j ) );
-    wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
+    wxString concat_name = p_name + wxString::Format( _T( "%lu" ), p_index );
     if ( arch_dia->get_name() == concat_name )
     {
       return true;
@@ -229,7 +229,7 @@ bool grape_specification::exists_process_diagram( const wxString &p_name, size_t
   for ( size_t j = 0; j < count; ++j )
   {
     process_diagram* proc_dia = & ( m_process_diagrams.Item( j ) );
-    wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
+    wxString concat_name = p_name + wxString::Format( _T( "%lu" ), p_index );
     if ( proc_dia->get_name() == concat_name )
     {
       return true;

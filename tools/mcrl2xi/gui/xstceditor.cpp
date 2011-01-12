@@ -266,9 +266,9 @@ DEFINE_EVENT_TYPE( wxEVT_UPDATE_EDITOR_FOCUS )
 
     wxString *s = new wxString(
            wxT("pos: ")
-        +  wxString::Format (wxT("%d"), x)
+        +  wxString::Format (wxT("%lu"), x)
         + wxT(",")
-        + wxString::Format( wxT("%d"), y)
+        + wxString::Format( wxT("%lu"), y)
        );
     eventCustom.SetClientData(s);
     wxPostEvent(this->GetParent(), eventCustom);

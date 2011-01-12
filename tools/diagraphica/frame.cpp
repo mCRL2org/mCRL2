@@ -2287,7 +2287,7 @@ void Frame::initFrameTextSize()
 			initials[i] = wxString::Format(_T("%d"), (8 + 2*i));
 		}
 		// create textbox
-		wxString currentSize = wxString::Format(_T("%d"), currentTextSize );
+		wxString currentSize = wxString::Format(_T("%lu"), currentTextSize );
 		textSizeBox = new wxComboBox( frameTextSize, -1, currentSize, wxPoint(-1, -1), wxSize(40, 40), 7, initials );
 		sizerTextSize->Add ( textSizeBox, 0, wxEXPAND | wxALL, 5 );
 		wxButton* okButton = new wxButton( frameTextSize, ID_OK_BUTTON_TEXT_SIZE, wxT("Ok"));

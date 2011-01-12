@@ -682,7 +682,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   //draw bezier
   coordinate pre_pnt;
   coordinate pnt = p_begin;
-  float angle_middle;
+  float angle_middle = 0.0f;
   for(unsigned int i=1;i<=40;++i)
   {
     pre_pnt = pnt;
