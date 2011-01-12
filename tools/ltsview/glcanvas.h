@@ -11,7 +11,6 @@
 
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
-#include "glcontext.h"
 #include "enums.h"
 #include "settings.h"
 #include "simreader.h"
@@ -31,6 +30,7 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader
     void disableDisplay();
     void getMaxViewportDims(int *w,int *h);
     unsigned char* getPictureData(int res_x,int res_y);
+    void initialize();
     void notify(SettingID s);
     void resetView();
     void reshape();
@@ -53,8 +53,6 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader
     void refresh();
     void selChange();
 
-    GLContext* getGLContext( wxGLCanvas *canvas );
-
   private:
     int activeTool;
     float angleX;
@@ -75,7 +73,6 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader
     bool simulating;
     Visualizer *visualizer;
     PickState selectedType;
-    GLContext *glContext;
 
     void determineCurrentTool(wxMouseEvent& event);
     void setMouseCursor();

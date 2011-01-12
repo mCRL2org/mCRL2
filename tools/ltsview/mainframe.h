@@ -33,7 +33,6 @@ class Simulation;
 class MainFrame : public wxFrame {
   public:
     MainFrame(Mediator* owner,Settings* ss);
-    ~MainFrame();
     void addMarkRule(wxString str,int mr);
     void createProgressDialog(const std::string& title,const std::string& text);
     GLCanvas* getGLCanvas() const;

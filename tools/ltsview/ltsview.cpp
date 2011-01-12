@@ -33,7 +33,6 @@
 #include "settings.h"
 #include "state.h"
 #include "visualizer.h"
-#include "wx/evtloop.h"
 
 using namespace std;
 
@@ -112,15 +111,10 @@ bool LTSView::run()
 
   SetTopWindow(mainFrame);
   mainFrame->Show(true);
+  glCanvas->initialize();
   mainFrame->Layout();
 
   wxInitAllImageHandlers();
-
-  /* Ensure that the wxEvenLoop is running,
-   * otherwise assertions are shown when opening files passed
-   * from command-line (Detected when compiled with wxWidgets 2.9.1)
-   * */
-  wxEventLoopGuarantor ensureEventLoop;
 
   if (!input_filename().empty())
   {
