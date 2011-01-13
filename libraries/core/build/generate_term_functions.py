@@ -88,6 +88,7 @@ def generate_libstruct_functions(rules, filename, ignored_phases = []):
             'arguments'  : comma + calls[name]
         }
     text = string.strip(text + mtext)
+    text = text + '\n'
     insert_text_in_file(filename, text, 'generated code')
 
 CHECK_RULE = '''template <typename Term>
@@ -186,14 +187,16 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
         ptext = ptext + 'template <typename Term> bool %s(Term t);\n' % f.check_name()
 
     text = string.strip(ptext + '\n' + text)
+    text = text + '\n'
     insert_text_in_file(filename, text, 'generated code')
 
 CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
 ATermAppl initConstruct%(name)s(ATermAppl& t)
 {
-  t = ATmakeAppl%(arity)d(gsAFun%(name)s()%(arguments)s);
+  t = 0;
   ATprotect(reinterpret_cast<ATerm*>(&t));
+  t = ATmakeAppl%(arity)d(gsAFun%(name)s()%(arguments)s);
   return t;
 }
 
@@ -344,6 +347,26 @@ def postprocess_libstruct(filename):
 '''
     dest = '''ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 {
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  // Check whether lengths of process type and its arguments match.
+  // Could be replaced by at test for equal types.
+
+  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
   // Check whether lengths of process type and its arguments match.
   // Could be replaced by at test for equal types.
 
