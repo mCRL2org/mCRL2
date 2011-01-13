@@ -2054,10 +2054,12 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   fprintf(f,  "\n");
   for (int i=0; i < num_opids; i++)
   {
-  fprintf(f,  "  int2ATerm%i = (ATerm) ATmakeInt(%i);\n",i,i);
+  fprintf(f,  "  int2ATerm%i=NULL;\n",i);
   fprintf(f,  "  ATprotect(&int2ATerm%i);\n",i);
-  fprintf(f,  "  rewrAppl%i = ATmakeAppl(appl0,int2ATerm%i);\n",i,i);
+  fprintf(f,  "  int2ATerm%i = (ATerm) ATmakeInt(%i);\n",i,i);
+  fprintf(f,  "  rewrAppl%i=NULL;\n",i);
   fprintf(f,  "  ATprotectAppl(&rewrAppl%i);\n",i);
+  fprintf(f,  "  rewrAppl%i = ATmakeAppl(appl0,int2ATerm%i);\n",i,i);
   }
 /*      "  int2ATerm = (ATerm *) malloc(%i*sizeof(ATerm));\n"
 //      "  memset(int2ATerm,0,%i*sizeof(ATerm));\n"

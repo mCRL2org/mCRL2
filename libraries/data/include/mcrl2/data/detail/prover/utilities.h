@@ -32,6 +32,7 @@ inline const char* bool_to_char_string(bool b) {
 inline
 ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
 {
+  f=NULL;
   ATprotectAppl(&f);
   return v;
 }

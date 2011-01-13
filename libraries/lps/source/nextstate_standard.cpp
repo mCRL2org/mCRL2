@@ -469,8 +469,9 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         info.pairAFun = ATmakeAFun("@STATE_PAIR@",2,ATfalse);
         ATprotectAFun(info.pairAFun);
 
-        info.nil = gsMakeNil();
+        info.nil = NULL;
         ATprotectAppl(&info.nil);
+        info.nil = gsMakeNil();
 
         // Declare all constructors to the rewriter to prevent unnecessary compilation.
         // This can be removed if the jittyc or innerc compilers are not in use anymore.
@@ -485,8 +486,9 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         
         free_vars = atermpp::convert< mcrl2::data::variable_list >(spec.global_variables());
 
-        pars = spec.process().process_parameters();
+        pars = NULL;
         ATprotectList(&pars);
+        pars = spec.process().process_parameters();
 
         info.statelen = ATgetLength(pars);
         if ( info.stateformat == GS_STATE_VECTOR )
@@ -498,8 +500,9 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
                 stateAFun_made = false;
         }
 
-        info.procvars = spec.process().process_parameters();
+        info.procvars = NULL;
         ATprotectList(&info.procvars);
+        info.procvars = spec.process().process_parameters();
 
         stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
         for (size_t i=0; i<info.statelen; i++)
@@ -576,6 +579,8 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
           stateargs[i] = info.m_rewriter(stateargs[i]);
         }
 
+        initial_state = NULL;
+        ATprotect(&initial_state);
         switch ( info.stateformat )
         {
                 case GS_STATE_VECTOR:
@@ -585,10 +590,8 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
                         initial_state = (ATerm) buildTree(stateargs);
                         break;
                 default:
-                        initial_state = NULL;
                         break;
         }
-        ATprotect(&initial_state);
 }
 
 NextStateStandard::~NextStateStandard()

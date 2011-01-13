@@ -1058,8 +1058,9 @@ namespace mcrl2 {
       context.glob_vars=ATtableCreate(63,50);
       body.proc_pars=ATtableCreate(63,50);
       body.proc_bodies=ATtableCreate(63,50);
-      body.equations = ATmakeList0();
+      body.equations=NULL;
       ATprotectList(&body.equations);
+      body.equations = ATmakeList0();
 
       //Creation of operation identifiers for system defined operations.
       //Bool

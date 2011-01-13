@@ -566,6 +566,8 @@ EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(EnumeratorSolutionsStan
 
   ATprotectArray((ATerm *) ss_stack,ss_stack_size);
 
+  enum_vars = NULL;
+  enum_expr = NULL;
   ATprotectList(&enum_vars);
   ATprotect(&enum_expr);
 }
@@ -629,10 +631,12 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
   max_vars = MAX_VARS_INIT;
   info.max_vars = &max_vars;
 
-  info.rewr_true = info.rewr_obj->toRewriteFormat(sort_bool::true_());
+  info.rewr_true=NULL;
   ATprotect(&info.rewr_true);
-  info.rewr_false = info.rewr_obj->toRewriteFormat(sort_bool::false_());
+  info.rewr_true = info.rewr_obj->toRewriteFormat(sort_bool::true_());
+  info.rewr_false=NULL;
   ATprotect(&info.rewr_false);
+  info.rewr_false = info.rewr_obj->toRewriteFormat(sort_bool::false_());
 
   info.eqs = ATindexedSetCreate(100,50);
 
@@ -640,8 +644,9 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
   {
     info.FindEquality = &EnumeratorSolutionsStandard::FindInner3Equality;
     info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_inner3;
-    info.opidAnd = info.rewr_obj->toRewriteFormat(sort_bool::and_());
+    info.opidAnd = NULL;
     ATprotect(&info.opidAnd);
+    info.opidAnd = info.rewr_obj->toRewriteFormat(sort_bool::and_());
 
     for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
     {
@@ -654,8 +659,9 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
   } else {
     info.FindEquality = &EnumeratorSolutionsStandard::FindInnerCEquality;
     info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_innerc;
-    info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(sort_bool::and_()),0);
+    info.opidAnd = NULL;
     ATprotect(&info.opidAnd);
+    info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(sort_bool::and_()),0);
 
     for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
     {
@@ -667,8 +673,9 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     }
   }
 
-  info.tupAFun = ATmakeAFun("@tup@",2,ATfalse);
+  info.tupAFun = NULL;
   ATprotectAFun(info.tupAFun);
+  info.tupAFun = ATmakeAFun("@tup@",2,ATfalse);
 
   info.constructors = ATtableCreate(boost::distance(data_spec.sorts()),50);
   for (data_specification::sorts_const_range r(data_spec.sorts()); !r.empty(); r.advance_begin(1))

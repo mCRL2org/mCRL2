@@ -103,8 +103,9 @@ static void initialise_common()
     ATprotectAFun(afunCRe);
     afunMe = ATmakeAFun("@@Me",2,ATfalse); // Match term ( match_variable, variable_index )
     ATprotectAFun(afunMe);
-    dummy = (ATerm) gsMakeNil();
+    dummy = NULL;
     ATprotect(&dummy);
+    dummy = (ATerm) gsMakeNil();
   }
 
   is_initialised++;
@@ -1118,8 +1119,9 @@ RewriterInnermost::RewriterInnermost(const data_specification &DataSpec)
   tmp_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
   term2int = ATtableCreate(100,50);
 
-  trueint = (ATermInt) OpId2Int(sort_bool::true_(),true);
+  trueint = NULL;
   ATprotectInt(&trueint);
+  trueint = (ATermInt) OpId2Int(sort_bool::true_(),true);
 
   /*l = opid_eqns;
   for (; !ATisEmpty(l); l=ATgetNext(l))

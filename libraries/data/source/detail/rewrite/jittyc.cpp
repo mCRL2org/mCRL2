@@ -130,8 +130,9 @@ static void initialise_common()
     afunMe = ATmakeAFun("@@Me",2,ATfalse); // Match term ( match_variable, variable_index )
     ATprotectAFun(afunMe);
 
-    dummy = (ATerm) gsMakeNil();
+    dummy=NULL;
     ATprotect(&dummy);
+    dummy = (ATerm) gsMakeNil();
 
     afunARtrue = ATmakeAFun("@@true",0,ATfalse);
     ATprotectAFun(afunARtrue);
@@ -143,10 +144,12 @@ static void initialise_common()
     ATprotectAFun(afunARor);
     afunARvar = ATmakeAFun("@@var",1,ATfalse);
     ATprotectAFun(afunARvar);
-                ar_true = ATmakeAppl0(afunARtrue);
-                ATprotectAppl(&ar_true);
-                ar_false = ATmakeAppl0(afunARfalse);
-                ATprotectAppl(&ar_false);
+    ar_true = NULL;
+    ATprotectAppl(&ar_true);
+    ar_true = ATmakeAppl0(afunARtrue);
+    ar_false = NULL;
+    ATprotectAppl(&ar_false);
+    ar_false = ATmakeAppl0(afunARfalse);
   }
 
   is_initialised++;
@@ -3407,10 +3410,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   for (int i=0; i < num_opids; i++)
   {
 #ifndef USE_INT2ATERM_VALUE
-  fprintf(f,  "  int2ATerm%i = (ATerm) ATmakeInt(%i);\n",i,i);
+  fprintf(f,  "  int2ATerm%i=NULL;\n",i);
   fprintf(f,  "  ATprotect(&int2ATerm%i);\n",i);
+  fprintf(f,  "  int2ATerm%i = (ATerm) ATmakeInt(%i);\n",i,i);
 #endif
 #ifndef USE_REWRAPPL_VALUE
+  fprintf(f,  "  rewrAppl%i=NULL;\n",i);
+  fprintf(f,  "  ATprotectAppl(&rewrAppl%i);\n",i);
   #ifdef USE_APPL_VALUE
     #ifdef USE_INT2ATERM_VALUE
   fprintf(f,  "  rewrAppl%i = ATmakeAppl(%li,(ATerm) %p);\n",i,get_appl_afun_value(0),get_int2aterm_value(i));
@@ -3424,7 +3430,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,  "  rewrAppl%i = ATmakeAppl(appl0,int2ATerm%i);\n",i,i);
     #endif
   #endif
-  fprintf(f,  "  ATprotectAppl(&rewrAppl%i);\n",i);
 #endif
   }
 /*      "  int2ATerm = (ATerm *) malloc(%i*sizeof(ATerm));\n"

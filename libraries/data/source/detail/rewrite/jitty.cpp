@@ -414,8 +414,9 @@ RewriterJitty::RewriterJitty(const data_specification &DataSpec)
   max_vars = 0;
         need_rebuild = false;
 
-  jitty_true = toInner(sort_bool::true_(),true);
+  jitty_true=NULL;
   ATprotectAppl(&jitty_true);
+  jitty_true = toInner(sort_bool::true_(),true);
 
 /*	l = opid_eqns;
   for (; !ATisEmpty(l); l=ATgetNext(l))
