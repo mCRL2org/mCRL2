@@ -34,6 +34,8 @@ def insert_user_sections(text, labels, user_sections):
     return text
 
 def insert_text_in_file(filename, text, label, handle_user_sections = False):
+    if text[-1] != '\n':
+        text = text + '\n'
     """
     Replaces the text between the strings '//--- start %s ---//' % label and '//--- end %s ---//' % label
     with text in the file named filename.
@@ -53,8 +55,8 @@ def insert_text_in_file(filename, text, label, handle_user_sections = False):
             else:
                 print 'Warning: nothing has changed in file %s' % filename
         else:
-                path(filename).write_text(new_text)
-                print 'Updated file %s' % filename
+            path(filename).write_text(new_text)
+            print 'Updated file %s' % filename
     except IOError, e:
         print 'Error: unable to open file ' + filename + ' ', e
 

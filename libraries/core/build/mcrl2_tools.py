@@ -1,4 +1,4 @@
-#~ Copyright 2010 Wieger Wesselink.
+#~ Copyright 2011 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
@@ -65,4 +65,7 @@ def run_pbesparelm(pbesfile1, pbesfile2, timeout = 10):
 
 def run_pbespareqelm(pbesfile1, pbesfile2, timeout = 10):
     timeout_command('pbespareqelm %s %s' % (pbesfile1, pbesfile2), timeout)
-  
+
+def run_pbespp(pbesfile, timeout = 10):
+    text, dummy = timeout_command('pbespp %s' % pbesfile, timeout)
+    return text

@@ -5,6 +5,7 @@
 import os
 import random
 from path import *
+from mcrl2_tools import *
 
 # As a convention we use that k, m, n are always natural numbers and
 # b, c, d are always booleans.
@@ -31,6 +32,24 @@ class bool:
         if self.value == None:
             self.value = make_boolean(freevars, add_val)
 
+    # returns True if it has the value 'true' or 'false'
+    def is_minimal(self):
+        result = self.value in ['false', 'true']
+        print '<M>', result, self, self.__class__
+        return result
+
+    # loops over minimizes
+    def minimize(self, call_back, level):
+        if level == 0 and not is_boolean_constant(self):
+            value = self.value
+            self.value = 'false'
+            print '<CHANGE>', value, '->', self.value
+            call_back()
+            self.value = 'true'
+            print '<CHANGE>', value, '->', self.value
+            call_back()
+            self.value = value
+
 class nat:
     def __init__(self, value = None):
         self.value = value
@@ -44,6 +63,24 @@ class nat:
     def finish(self, freevars, negated, add_val = True):
         if self.value == None:
             self.value = make_natural(freevars, add_val)
+
+    # returns True if it has the value '0' or '1'
+    def is_minimal(self):
+        result = self.value in ['0', '1']
+        print '<M>', result, self, self.__class__
+        return result
+
+    # loops over minimizes
+    def minimize(self, call_back, level):
+        if level == 0 and not is_natural_constant(self):
+            value = self.value
+            self.value = '0'
+            print '<CHANGE>', value, '->', self.value
+            call_back()
+            self.value = '1'
+            print '<CHANGE>', value, '->', self.value
+            call_back()
+            self.value = value
 
 class propvar:
     def __init__(self, name, args):
@@ -62,6 +99,21 @@ class propvar:
         add_val = False
         for a in self.args:
             a.finish(freevars, negated, add_val)
+
+    # returns True if all arguments are minimal
+    def is_minimal(self):
+        result = True
+        for a in self.args:
+            if not a.is_minimal():
+                result = False
+                break
+        print '<M>', result, self, self.__class__
+        return result
+
+    def minimize(self, call_back, level):
+        if level > 0:
+            for a in self.args:
+                a.minimize(call_back, level - 1)
 
 class predvar:
     def __init__(self, name, args):
@@ -91,6 +143,23 @@ class equation:
         negated = False
         self.formula.finish(freevars, negated)
 
+    # returns True if the right hand side is minimal
+    def is_minimal(self):
+        result = is_boolean_constant(self.formula)
+        print '<M>', result, self, self.__class__
+        return result
+
+    def minimize(self, call_back, level):
+        if level == 0:
+            if not is_boolean_constant(self.formula):
+                formula = self.formula
+                self.formula = bool('true')
+                print '<CHANGE>', formula, '->', self.formula
+                call_back()
+                self.formula = formula
+        else:
+            self.formula.minimize(call_back, level - 1)
+
 class pbes:
     def __init__(self, equations, init):
         self.equations = equations
@@ -102,6 +171,20 @@ class pbes:
     def finish(self):
         for e in self.equations:
             e.finish()
+
+    # returns True if all equations are minimal
+    def is_minimal(self):
+        result = True
+        for e in self.equations:
+            if not e.is_minimal():
+                result = False
+                break
+        print '<M>', result, self, self.__class__
+        return result
+
+    def minimize(self, call_back, level):
+        for e in self.equations:
+            e.minimize(call_back, level - 1)
 
 class unary_operator:
     def __init__(self, op, x):
@@ -117,6 +200,24 @@ class unary_operator:
         if self.op == '!':
             negated = not negated
         self.x.finish(freevars, negated)
+
+    # returns True if the argument is minimal
+    def is_minimal(self):
+        result = self.x.is_minimal() and isinstance(self.x, bool)
+        print '<M>', result, self, self.__class__
+        return result
+
+    # minimizes the argument
+    def minimize(self, call_back, level):
+        if level == 0:
+            if not is_boolean_constant(self.x):
+                x = self.x
+                self.x = bool('true')
+                print '<CHANGE>', x, '->', self.x
+                call_back()
+                self.x = x
+        else:
+            self.x.minimize(call_back, level - 1)
 
 class binary_operator:
     def __init__(self, op, x, y):
@@ -137,6 +238,31 @@ class binary_operator:
             self.x.finish(freevars, negated)
         self.y.finish(freevars, negated)
 
+    # returns True if both arguments are minimal
+    def is_minimal(self):
+        result = self.x.is_minimal() and isinstance(self.x, bool) and self.y.is_minimal() and isinstance(self.y, bool)
+        print '<M>', result, self, self.__class__
+        return result
+
+    # randomly minimizes one of the arguments
+    def minimize(self, call_back, level):
+        if level == 0:
+            if not is_boolean_constant(self.x):
+                x = self.x
+                self.x = bool('true')
+                print '<CHANGE>', x, '->', self.x
+                call_back()
+                self.x = x
+            if not is_boolean_constant(self.y):
+                y = self.y
+                self.y = bool('true')
+                print '<CHANGE>', y, '->', self.y
+                call_back()
+                self.y = y
+        else:
+            self.x.minimize(call_back, level - 1)
+            self.y.minimize(call_back, level - 1)
+
 class quantifier:
     def __init__(self, quantor, x, y):
         self.quantor = quantor
@@ -154,6 +280,24 @@ class quantifier:
             self.y.finish(freevars, negated)
         else:
             self.y.finish(freevars + [self.x], negated)
+
+    # returns True if the formula is minimal
+    def is_minimal(self):
+        result = self.y.is_minimal() and isinstance(self.y, bool)
+        print '<M>', result, self, self.__class__
+        return result
+
+    # minimizes the formula
+    def minimize(self, call_back, level):
+        if level == 0:
+            if not is_boolean_constant(self.y):
+                y = self.y
+                self.y = bool('true')
+                print '<CHANGE>', y, '->', self.y
+                call_back()
+                self.y = y
+        else:
+            self.y.minimize(call_back, level - 1)
 
 def not_(x):
     return unary_operator('!', x)
@@ -185,6 +329,12 @@ def not_equal_to(x, y):
 
 #operators = [not_, forall, exists, and_, or_, implies, equal_to, not_equal_to]
 operators = [not_, and_, or_, implies, forall, exists]
+
+def is_boolean_constant(x):
+    return isinstance(x, bool) and x.value in ['false', 'true']
+
+def is_natural_constant(x):
+    return isinstance(x, nat) and x.value in ['0', '1']
 
 def is_unary(op):
     return op in [not_, forall, exists]
@@ -317,3 +467,39 @@ def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers
     p = pbes(equations, init)
     p.finish()
     return p
+
+class CounterExampleMinimizer:
+    def __init__(self, pbes, solver, name):
+        self.pbes = pbes
+        self.solver = solver
+        self.name = name
+        self.counter = 0
+
+    def save_counter_example(self):
+        txtfile = '%s_counter_example_%d.txt' % (self.name, self.counter)
+        pbesfile = '%s_counter_example_%d.pbes' % (self.name, self.counter)
+        path(txtfile).write_text(str(self.pbes))
+        run_txt2pbes(txtfile, pbesfile)
+        text = run_pbespp(pbesfile)
+        path(txtfile).write_text(text)       
+        print '--- %s counter example ---' % self.name
+        print text
+        self.counter = self.counter + 1
+
+    def callback(self):
+        if not self.solver(self.pbes):
+            raise Exception('test failed')
+    
+    def minimize(self):
+        self.save_counter_example()
+        stop = False
+        while not stop:
+            stop = True
+            for level in range(1, 7):
+                print '--- LEVEL %d ---' % level
+                try:
+                    self.pbes.minimize(self.callback, level)
+                except Exception:
+                    self.save_counter_example()
+                    stop = False
+                    continue

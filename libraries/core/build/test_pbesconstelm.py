@@ -1,17 +1,13 @@
-#~ Copyright 2010 Wieger Wesselink.
+#~ Copyright 2011 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import os
-import platform
-import re
 from path import *
 from random_pbes_generator import *
 from mcrl2_tools import *
 
-def test_pbes_constelm(filename, equation_count, atom_count = 5, propvar_count = 3, use_quantifiers = True):
+def test_pbesconstelm(p, filename):
     txtfile = filename + '.txt'
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     path(txtfile).write_text('%s' % p)
     pbesfile1 = filename + 'a.pbes'
     pbesfile2 = filename + 'b.pbes'
@@ -21,13 +17,18 @@ def test_pbes_constelm(filename, equation_count, atom_count = 5, propvar_count =
     answer2 = run_pbes2bool(pbesfile2)
     print filename, answer1, answer2   
     if answer1 == None or answer2 == None:
-      return
-    if answer1 != answer2:
-      raise Exception('Test %s.txt failed' % filename)
+      return True
+    return answer1 == answer2
 
 equation_count = 2
 atom_count = 2
 propvar_count = 2
 use_quantifiers = True
+
 for i in range(10000):
-    test_pbes_constelm('%02d' % i, equation_count, atom_count, propvar_count, use_quantifiers)
+    filename = 'pbes_constelm'
+    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
+    if not test_pbesconstelm(p, filename):
+        m = CounterExampleMinimizer(p, lambda x: test_pbesconstelm(x, filename + '_minimize'), 'pbesconstelm')
+        m.minimize()
+        raise Exception('Test %s.txt failed' % filename)
