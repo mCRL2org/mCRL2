@@ -14,7 +14,7 @@ from mcrl2_tools import *
 def add_type(var):
     if var in ['b', 'c', 'd']:
         return '%s:Bool' % var
-    elif var in ['k', 'm', 'n']:
+    elif var in ['u', 'v', 'm', 'n']:
         return '%s:Nat' % var
     return None
 
@@ -312,12 +312,12 @@ def implies(x, y):
     return binary_operator('=>', x, y)
 
 def forall(x):
-    var, dummy = pick_element(['k', 'm', 'n'])
+    var, dummy = pick_element(['u', 'v'])
     phi = and_(bool('val(%s < 3)' % var), x)
     return quantifier('forall', var, phi)
 
 def exists(x):
-    var, dummy = pick_element(['k', 'm', 'n'])
+    var, dummy = pick_element(['u', 'v'])
     phi = or_(bool('val(%s < 3)' % var), x)
     return quantifier('exists', var, phi)
 
@@ -375,7 +375,7 @@ def make_predvars(n):
 # Creates elementary random boolean terms, with free variables
 # from the set freevars.
 def make_atoms(freevars, add_val = True):
-    naturals = set(freevars).intersection(set(['k', 'm', 'n']))
+    naturals = set(freevars).intersection(set(['u', 'v', 'm', 'n']))
     booleans = set(freevars).intersection(set(['b', 'c', 'd']))
     result = []
     for m in naturals:
@@ -399,7 +399,7 @@ def make_boolean(freevars, add_val = True):
     return x
 
 def make_natural(freevars, add_val = True):
-    naturals = set(freevars).intersection(set(['k', 'm', 'n']))
+    naturals = set(freevars).intersection(set(['u', 'v', 'm', 'n']))
     result = []
     result.append('0')   
     result.append('1')
@@ -416,7 +416,7 @@ def make_predvar_instantiations(predvars):
         for a in X.args:
             if a in ['b', 'c', 'd']:
                 args.append(bool())
-            elif a in ['k', 'm', 'n']:
+            elif a in ['u', 'v', 'm', 'n']:
                 args.append(nat())
         result.append(propvar(X.name, args))
     return result
@@ -461,7 +461,7 @@ def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers
     for a in X.args:
         if a in ['b', 'c', 'd']:
             args.append('true')
-        elif a in ['k', 'm', 'n']:
+        elif a in ['u', 'v', 'm', 'n']:
             args.append('0')
     init = propvar(X.name, args)
     p = pbes(equations, init)
