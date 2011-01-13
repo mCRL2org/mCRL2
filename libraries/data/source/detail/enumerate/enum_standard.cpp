@@ -566,8 +566,6 @@ EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(EnumeratorSolutionsStan
 
   ATprotectArray((ATerm *) ss_stack,ss_stack_size);
 
-  enum_vars = NULL;
-  enum_expr = NULL;
   ATprotectList(&enum_vars);
   ATprotect(&enum_expr);
 }
