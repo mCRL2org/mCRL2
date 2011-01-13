@@ -342,35 +342,21 @@ def parse_ebnf(filename):
 #                          postprocess_libstruct
 #---------------------------------------------------------------#
 def postprocess_libstruct(filename):
-    src = '''ATermAppl gsMakeProcess\(ATermAppl ProcVarId_0, ATermList DataExpr_1\)
+    src = '''inline
+ATermAppl gsMakeProcess\(ATermAppl ProcVarId_0, ATermList DataExpr_1\)
 \{
+  return ATmakeAppl2\(gsAFunProcess\(\), \(ATerm\) ProcVarId_0, \(ATerm\) DataExpr_1\);
+\}
 '''
-    dest = '''ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
+    dest = '''inline
+ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 {
   // Check whether lengths of process type and its arguments match.
   // Could be replaced by at test for equal types.
 
   assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  // Check whether lengths of process type and its arguments match.
-  // Could be replaced by at test for equal types.
-
-  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  // Check whether lengths of process type and its arguments match.
-  // Could be replaced by at test for equal types.
-
-  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  // Check whether lengths of process type and its arguments match.
-  // Could be replaced by at test for equal types.
-
-  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  // Check whether lengths of process type and its arguments match.
-  // Could be replaced by at test for equal types.
-
-  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
-  // Check whether lengths of process type and its arguments match.
-  // Could be replaced by at test for equal types.
-
-  assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+}
 '''
     text = path(filename).text()
     text = re.sub(re.compile(src, re.M), dest, text)
