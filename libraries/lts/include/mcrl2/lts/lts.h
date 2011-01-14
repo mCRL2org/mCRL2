@@ -366,10 +366,11 @@ namespace mcrl2
         }
 
         /** \brief Add a transition to the lts.
+            \details The transition can be added, even if there are not (yet) valid state and
+                     action labels for it. 
          */
         void add_transition(const transition &t)
         { 
-          // We allow transitions to be added, even if they have not (yet) valid state and action labels.
           transitions.push_back(t);
         }
 

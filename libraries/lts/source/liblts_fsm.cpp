@@ -60,18 +60,21 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
       idx = 0;
     }
     
-    const state_label_fsm state_pars=l.state_label(idx);
+    if (l.has_state_info())
+    { 
+      const state_label_fsm state_pars=l.state_label(idx);
 
-    for(size_t j=0; j<state_pars.size() ; j++)
-    {
-      if (j > 0) 
+      for(size_t j=0; j<state_pars.size() ; j++)
       {
-        os << " ";
+        if (j > 0) 
+        {
+          os << " ";
+        }
+        os << state_pars[j];
+  
       }
-      os << state_pars[j];
-
+      os << std::endl;
     }
-    os << std::endl;
   }
 
   // print transitions
@@ -126,6 +129,7 @@ void mcrl2::lts::lts_fsm_t::load(const std::string &filename)
     }
     is.close();
   }
+  set_initial_state(0);
 }
 
 void mcrl2::lts::lts_fsm_t::save(const std::string &filename) const

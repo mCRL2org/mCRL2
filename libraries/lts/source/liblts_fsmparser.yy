@@ -355,9 +355,18 @@ transition:
       size_t frState = atoi($1.c_str())-1;
       size_t toState = atoi($2.c_str())-1;
 
+      // If the fsm has no state labels, the number of states is 0;
+      // It should be increased to contain the actual number of states.
+      size_t no_states=fsm_lexer_obj->fsm_lts->num_states();
+      size_t max=(frState>toState?frState:toState);
+      if (no_states<=max)
+      { 
+        fsm_lexer_obj->fsm_lts->set_num_states(max+1,fsm_lexer_obj->fsm_lts->has_state_info());
+      }
       std::map < std::string, size_t>::const_iterator label_index=fsm_lexer_obj->labelTable.find($3);
       if (label_index==fsm_lexer_obj->labelTable.end())
-      { // Not found. This label does not occur in the fsm.
+      { 
+        // Not found. This label does not occur in the fsm.
         const lts_fsm_t::labels_size_type n=fsm_lexer_obj->fsm_lts->add_action($3,$3=="tau");
         fsm_lexer_obj->labelTable[$3]=n;
         fsm_lexer_obj->fsm_lts->add_transition(transition(frState,n,toState));

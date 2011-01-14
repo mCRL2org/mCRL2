@@ -480,7 +480,7 @@ static const yytype_uint16 yyrline[] =
      162,   166,   174,   178,   186,   190,   199,   202,   210,   214,
      222,   226,   234,   238,   242,   246,   254,   258,   262,   266,
      270,   278,   282,   286,   292,   295,   299,   310,   314,   318,
-     313,   329,   332,   344,   347,   352,   375,   378
+     313,   329,   332,   344,   347,   352,   384,   387
 };
 #endif
 
@@ -1844,9 +1844,18 @@ yyreduce:
       size_t frState = atoi((yyvsp[(1) - (3)]).c_str())-1;
       size_t toState = atoi((yyvsp[(2) - (3)]).c_str())-1;
 
+      // If the fsm has no state labels, the number of states is 0;
+      // It should be increased to contain the actual number of states.
+      size_t no_states=fsm_lexer_obj->fsm_lts->num_states();
+      size_t max=(frState>toState?frState:toState);
+      if (no_states<=max)
+      { 
+        fsm_lexer_obj->fsm_lts->set_num_states(max+1,fsm_lexer_obj->fsm_lts->has_state_info());
+      }
       std::map < std::string, size_t>::const_iterator label_index=fsm_lexer_obj->labelTable.find((yyvsp[(3) - (3)]));
       if (label_index==fsm_lexer_obj->labelTable.end())
-      { // Not found. This label does not occur in the fsm.
+      { 
+        // Not found. This label does not occur in the fsm.
         const lts_fsm_t::labels_size_type n=fsm_lexer_obj->fsm_lts->add_action((yyvsp[(3) - (3)]),(yyvsp[(3) - (3)])=="tau");
         fsm_lexer_obj->labelTable[(yyvsp[(3) - (3)])]=n;
         fsm_lexer_obj->fsm_lts->add_transition(transition(frState,n,toState));
@@ -1862,7 +1871,7 @@ yyreduce:
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 375 "liblts_fsmparser.yy"
+#line 384 "liblts_fsmparser.yy"
     { (yyval) = ""; 
     ;}
     break;
@@ -1870,7 +1879,7 @@ yyreduce:
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 379 "liblts_fsmparser.yy"
+#line 388 "liblts_fsmparser.yy"
     { 
       (yyval) = (yyvsp[(1) - (1)]);
     ;}
@@ -1879,7 +1888,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 1883 "liblts_fsmparser.cpp"
+#line 1892 "liblts_fsmparser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2091,7 +2100,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 384 "liblts_fsmparser.yy"
+#line 393 "liblts_fsmparser.yy"
 
 
 char* intToCString( size_t i )

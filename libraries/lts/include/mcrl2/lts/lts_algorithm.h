@@ -911,7 +911,9 @@ void determinise(LTS_TYPE&l)
 
   std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
              begin=transitions_per_outgoing_state(l.get_transitions());
+
   l.clear_transitions();
+  l.clear_state_labels();
   size_t d_ntransitions = 0;
   std::vector < transition > d_transitions;
 
@@ -968,7 +970,6 @@ void determinise(LTS_TYPE&l)
   
   l.set_num_states(d_id,false); // remove the state values, and reset the number of states.
   l.set_initial_state(0);
-  l.clear_transitions();
 
   for(std::vector < transition > :: const_iterator i=d_transitions.begin(); i!=d_transitions.end(); ++i )
   { 
