@@ -13,7 +13,8 @@
 #  run_release_tests( ${files} )
 
 function( run_release_tests SET_OF_MCRL2_FILES )
-set(testdir "${CMAKE_SOURCE_DIR}/mcrl2-testoutput")
+set(testdir "${CMAKE_BINARY_DIR}/mcrl2-testoutput")
+message( STATUS  "Preparing release tool tests" )
 
 # Set lts different lts output formats
 set(LTS_EXTS "lts;aut;svc;dot;fsm;bcg" )
@@ -25,6 +26,71 @@ set(SET_OF_LTS_FILES "" )
 set(SET_OF_LTSCONVERT_TESTS "" )
 set(SET_OF_TXTLPS_FILES "" )
 set(SET_OF_TXTPBES_FILES "" )
+
+FOREACH( i ${SET_OF_MCRL2_FILES} )
+	get_filename_component( rname ${i} NAME_WE )
+	#message( STATUS  "+ Generating rename file: ${rname}_rename.txt" )
+
+	 file(STRINGS ${i} output NEWLINE_CONSUME )
+
+
+	 #message( ${output} )
+
+   # remove comment from files
+	 string(REGEX REPLACE "%[^\n]*" "" output "${output}" )
+	 string(REGEX REPLACE "\n" " " output "${output}" )
+
+
+  	# Take line that matches "act" keyword
+    string(REGEX MATCH "act[ ]+([^\;]+)" output "${output}" )
+
+  	# Take first action
+    string(REGEX REPLACE "act +(.*)" "\\1" fst_act "${output}")
+    string(REGEX MATCH "^[^,:\;]+" fst_act "${fst_act}")
+  	# Find corresponding sorts
+
+		#message( "${fst_act}" )
+
+  	if( "${output}" MATCHES ":" )
+
+    string(REGEX REPLACE ".*:(.*)" "\\1" fst_act_sorts "${output}")
+
+  	#Create a list: replace # by ; and trim spaces
+  	string(REGEX REPLACE "#" ";" fst_act_sorts "${fst_act_sorts}")
+  	string(REGEX REPLACE " " "" fst_act_sorts "${fst_act_sorts}")
+    #Convert string to list
+  	set(fst_act_sorts ${fst_act_sorts} )
+
+  	set(lpsactionrename_vardecl "")
+  	set(lpsactionrename_varlist "")
+  	foreach(j ${fst_act_sorts}  )
+      set(lpsactionrename_vardecl "${lpsactionrename_vardecl}\n  v${cnt}: ${j};" )
+  		set(lpsactionrename_varlist "${lpsactionrename_varlist},v${cnt}") 
+      set(cnt "${cnt}'")
+    endforeach()
+
+    string( REGEX REPLACE "^," "(" lpsactionrename_varlist ${lpsactionrename_varlist} )
+  	set( lpsactionrename_varlist "${lpsactionrename_varlist})" )
+  	#    message( ${lpsactionrename_varlist} )
+    else( "${output}" MATCHES ":" )
+
+  	endif( "${output}" MATCHES ":" )
+
+  	# Generate random post_fix
+  	string(RANDOM 
+  					 LENGTH 4 
+  					 ALPHABET abcdefghijklmnopgrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWZ 
+  					 lpsactionrename_postfix )
+
+		 #message("act ${fst_act}${lpsactionrename_postfix};\nvar${lpsactionrename_vardecl}\nrename\n  ${fst_act}${lpsactionrename_varlist} => ${fst_act}${lpsactionrename_postfix};" )
+
+    write_file(${testdir}/${rname}_rename.txt "act ${fst_act}${lpsactionrename_postfix};\nvar${lpsactionrename_vardecl}\nrename\n  ${fst_act}${lpsactionrename_varlist} => ${fst_act}${lpsactionrename_postfix};" )
+endforeach()
+
+
+# input files for lpsconfcheck and lpsinvelm
+write_file(${testdir}/true.txt "true" )
+write_file(${testdir}/false.txt "false" )
 
 ##################### 
 ## Macro mcrl22lps ## 
@@ -53,7 +119,6 @@ endmacro( add_mcrl22lps_release_test INPUT ARGS)
 
 macro( gen_mcrl22lps_release_tests )
   FOREACH( i ${SET_OF_MCRL2_FILES} )
-
 	get_filename_component(save ${i} NAME_WE )
 	# message( ${save} )
 
@@ -347,26 +412,27 @@ macro( add_lpsactionrename_release_test INPUT ARGS)
 	set_tests_properties("lpsactionrename_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
   set_tests_properties("lpsactionrename_${POST_FIX_TEST}" PROPERTIES DEPENDS "${SET_OF_MCRL22LPS_TESTS}" )
 endmacro( add_lpsactionrename_release_test INPUT ARGS)
- 
-write_file(${testdir}/rename.txt "rename tau => delta;" )
+
+#write_file(${testdir}/rename.txt "rename tau => delta;" )
 
 macro( gen_lpsactionrename_release_tests )
+
   FOREACH( i ${SET_OF_LPS_FILES} )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-m" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-o" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-ppa" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-ptc" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-pdi" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-P" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-rjitty" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-rjittyp" )
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-rinner" )
+					get_filename_component( j ${i} NAME_WE )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-m" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-o" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-ppa" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-ptc" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-P" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-rjitty" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-rjittyp" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-rinner" )
 					if( NOT WIN32)
-					  add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-rjittyc" )
-					  add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-rinnerc" )
+					  add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-rjittyc" )
+					  add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-rinnerc" )
 					endif( NOT WIN32)
-					add_lpsactionrename_release_test( "${i}" "-f${testdir}/rename.txt;-rinnerp" )
+					add_lpsactionrename_release_test( "${i}" "-f${testdir}/${j}_rename.txt;-rinnerp" )
 	ENDFOREACH( )
 endmacro( gen_lpsactionrename_release_tests )
 
@@ -407,8 +473,6 @@ macro( add_lpsinvelm_release_test INPUT ARGS)
 	ENDFOREACH( )
 	set( POST_FIX_TEST "${POST_FIX_TEST}-ARGS${TRIMMED_ARGS}" )
 
-  write_file(${testdir}/true.txt "true" )
-  write_file(${testdir}/false.txt "false" )
 
   ADD_TEST("lpsinvelm_${POST_FIX_TEST}" ${lpsinvelm_BINARY_DIR}/lpsinvelm ${ARGS} ${testdir}/${INPUT}  ${testdir}/dummy.lps )
 	set_tests_properties("lpsinvelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
@@ -451,9 +515,6 @@ macro( add_lpsconfcheck_release_test INPUT ARGS)
     set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
 	ENDFOREACH( )
 	set( POST_FIX_TEST "${POST_FIX_TEST}-ARGS${TRIMMED_ARGS}" )
-
-	write_file(${testdir}/true.txt "true" )
-  write_file(${testdir}/false.txt "false" )
 
   ADD_TEST("lpsconfcheck_${POST_FIX_TEST}" ${lpsconfcheck_BINARY_DIR}/lpsconfcheck ${ARGS} ${testdir}/${INPUT}  ${testdir}/dummy.lps )
 	set_tests_properties("lpsconfcheck_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
@@ -1064,39 +1125,3 @@ gen_txt2lps_release_tests()
 gen_txt2pbes_release_tests()
 
 endfunction()
-# examples/academic/cabp/cabp.mcrl2
-# examples/academic/goback/goback.mcrl2
-# examples/academic/dining/dining3.mcrl2
-# examples/academic/dining/dining3_schedule_seq.mcrl2
-# examples/academic/dining/dining3_seq.mcrl2
-# examples/academic/dining/dining8.mcrl2
-# examples/academic/dining/dining_10000.mcrl2
-# examples/academic/dining/dining3_cs_seq.mcrl2
-# examples/academic/dining/dining3_cs.mcrl2
-# examples/academic/dining/dining_1000.mcrl2
-# examples/academic/dining/dining3_ns.mcrl2
-# examples/academic/dining/dining_100.mcrl2
-# examples/academic/dining/dining3_ns_seq.mcrl2
-# examples/academic/dining/dining_10.mcrl2
-# examples/academic/dining/dining3_schedule.mcrl2
-# examples/academic/commprot/commprot.mcrl2
-# examples/academic/bke/bke.mcrl2
-# examples/academic/mpsu/mpsu.mcrl2
-# examples/academic/abp_bw/abp_bw.mcrl2
-# examples/academic/abp/abp.mcrl2
-# examples/academic/bakery/bakery.mcrl2
-# examples/academic/parallel/parallel.mcrl2
-# examples/academic/producer_consumer/producer_consumer.mcrl2
-# examples/academic/scheduler/scheduler.mcrl2
-# examples/academic/tree/tree.mcrl2
-# examples/academic/onebit/onebit.mcrl2
-# examples/academic/block/block.mcrl2
-# examples/academic/cellular_automata/cellular_automata.mcrl2
-# examples/academic/allow/allow.mcrl2
-# examples/academic/swp/swp_with_tanenbaums_bug.mcrl2
-# examples/academic/swp/swp_fgpbp.mcrl2
-# examples/academic/swp/swp_lists.mcrl2
-# examples/academic/swp/swp_func.mcrl2
-# examples/academic/trains/trains.mcrl2
-# examples/academic/leader/leader.mcrl2
-
