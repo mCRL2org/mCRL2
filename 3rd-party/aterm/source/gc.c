@@ -145,12 +145,16 @@ static void mark_memory_young(ATerm *start, ATerm *stop, ATbool check_term) /* C
   ATerm *cur;
 
   if (check_term)
-  { ATerm real_term;
+  { 
+    ATerm real_term;
     for(cur=start; cur<stop; cur++) 
-    { if(AT_isPotentialTerm(*cur)) 
-      { real_term = AT_isInsideValidTerm(*cur);
+    { 
+      if (AT_isPotentialTerm(*cur)) 
+      { 
+        real_term = AT_isInsideValidTerm(*cur);
         if (real_term != NULL) 
-        { if(!IS_MARKED(real_term->header)) 
+        { 
+          if(!IS_MARKED(real_term->header)) 
           { 
             assert(AT_isValidTerm(real_term));
             AT_markTerm_young(real_term);
@@ -167,7 +171,8 @@ static void mark_memory_young(ATerm *start, ATerm *stop, ATbool check_term) /* C
   { 
     for(cur=start; cur<stop; cur++) 
     { if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
-      { assert(AT_isValidTerm(*cur));
+      { 
+        assert(AT_isValidTerm(*cur));
         AT_markTerm_young(*cur);
       }
     }
@@ -242,12 +247,16 @@ VOIDCDECL mark_phase()
   reg[6] = (ATerm) r_esp;
   reg[7] = (ATerm) r_ebp;
 
-  for(i=0; i<8; i++) {
+  for(i=0; i<8; i++) 
+  {
     real_term = AT_isInsideValidTerm(reg[i]);
-    if (real_term != NULL) {
+    if (real_term != NULL) 
+    {
+      assert(AT_isValidTerm(real_term));
       AT_markTerm(real_term);
     }
-    if (AT_isValidAFun((AFun)reg[i])) {
+    if (AT_isValidAFun((AFun)reg[i])) 
+    {
       AT_markAFun((AFun)reg[i]);
     }
   }
@@ -291,7 +300,10 @@ VOIDCDECL mark_phase()
     while(cur) {
       for(j=0; j<cur->size; j++) {
 	if(cur->start[j])
+        { 
+          assert(AT_isValidTerm(cur->start[j]));
 	  AT_markTerm(cur->start[j]);
+        }
       }
       cur = cur->next;
     }
